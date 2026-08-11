@@ -216,16 +216,31 @@ test.describe('Historia 2.1 — armazón y tratamiento visual', () => {
     await expect(page.locator('blockquote a')).toHaveCount(0);
   });
 
-  test('la serif solo se aplica a texto de Cita y nombre de Autor', async ({ page }) => {
+  test('la serif solo se aplica a texto de Cita y a nombres de Tema', async ({ page }) => {
     await page.goto(CORTA);
-    const conSerif = await page.evaluate(() =>
-      [...document.querySelectorAll('body *')]
+
+    /*
+     * La regla de DESIGN.md es sobre qué es cada cosa, no sobre cuántas hay: la serif se
+     * aplica al texto de una Cita, al nombre de un Autor y al nombre de un Tema, y a
+     * nada más. En esta página eso son el texto citado, los fragmentos de las Citas
+     * hermanas y los chips de Tema. Comprobarlo con una lista de etiquetas hacía que
+     * añadir rutas de salida rompiera la prueba sin que nada estuviera mal.
+     */
+    const PERMITIDOS = ['.texto', '.hermanas a', '.chip'];
+
+    const intrusos = await page.evaluate((permitidos) => {
+      return [...document.querySelectorAll('body *')]
         .filter((n) => n.children.length === 0 && (n.textContent ?? '').trim() !== '')
         .filter((n) => getComputedStyle(n).fontFamily.includes('Source Serif'))
-        .map((n) => `${n.tagName}.${n.className}`),
-    );
-    // En una Página de Cita, lo único en serif es el texto citado.
-    expect(conSerif).toEqual(['H1.texto']);
+        .filter((n) => !permitidos.some((sel) => n.closest(sel) !== null))
+        .map((n) => `${n.tagName.toLowerCase()}.${n.className}`);
+    }, PERMITIDOS);
+
+    expect(intrusos).toEqual([]);
+    // Y la serif está de verdad aplicada donde debe: la prueba no pasa por vacío.
+    expect(
+      await page.locator('.texto').evaluate((n) => getComputedStyle(n).fontFamily),
+    ).toContain('Source Serif');
   });
 });
 

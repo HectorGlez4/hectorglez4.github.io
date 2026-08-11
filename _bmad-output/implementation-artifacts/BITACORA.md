@@ -384,3 +384,33 @@ lugar de por inspección del código.
 aplica aquí: `temasPublicados` no devuelve el Tema, la ruta no se genera, y el 404 sale
 solo. La única diferencia con el listado de Autor es que cada tarjeta lleva el nombre del
 Autor, porque un Tema agrupa a varios y sin el nombre no se sabe de quién es cada frase.
+
+---
+
+## 2.6 — Rutas de salida desde cada Cita
+
+**Verificado.** 14 funcionales. Hasta cuatro Citas del mismo Autor, nunca la propia; chips
+solo de Temas publicados —se comprueba con una Cita que pertenece además a «La adversidad»,
+por debajo del umbral, cuyo chip no se renderiza—; y dos pruebas que recorren **las 38
+Páginas de Cita del sitemap**: ninguna queda sin enlaces salientes internos y ninguno de
+los destinos devuelve algo distinto de 200. Dos cargas seguidas dan el mismo orden: no hay
+motor de recomendación.
+
+**El caso que obligó a pensar.** Un Autor con una sola Cita cuyos Temas están todos bajo el
+umbral no tiene hermanas ni chips, y FR-12 no admite excepciones. El respaldo son los
+Temas publicados del sitio; y si ni eso existiera —un corpus recién nacido—, la ficha del
+Autor. Sigue siendo navegación por Autor y Tema, que es lo único que FR-12 permite.
+
+**Decidido — el orden deriva de Autor y Tema, no de un motor.** Entre las Citas del mismo
+Autor van primero las que comparten Tema con la que se está leyendo. No es recomendar: es
+preferir la más estrecha de las dos vecindades que ya existen en el modelo.
+
+**Defecto visto en el navegador.** El enlace «Ver la ficha de Antonio Machado» ponía el
+siena en tres sitios de la misma pantalla —búsqueda, botón de copiar y ese enlace— cuando
+DESIGN.md lo acota a dos. Además duplicaba el enlace que la atribución ya ofrece. Retirado.
+
+**Prueba corregida, no debilitada.** La de la serif comparaba contra una lista de
+etiquetas, así que añadir rutas de salida la rompía sin que nada estuviera mal. Ahora
+comprueba lo que dice la regla —que todo lo que va en serif sea texto de Cita, nombre de
+Autor o nombre de Tema— y además exige que la serif esté aplicada de verdad, para que no
+pase por vacío.

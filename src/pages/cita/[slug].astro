@@ -13,20 +13,34 @@
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
-import { conjuntoPublicable } from '../../lib/publicado.ts';
+import RutasDeSalida from '../../components/RutasDeSalida.astro';
+import {
+  citasRelacionadas,
+  conjuntoPublicable,
+  temasDeLaCita,
+  temasPublicados,
+} from '../../lib/publicado.ts';
+import { MAX_CITAS_RELACIONADAS } from '../../lib/umbrales.ts';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+  const publicados = temasPublicados(conjunto.temas, conjunto.citas);
 
   return conjunto.citas.map((cita) => ({
     params: { slug: cita.slug },
-    props: { cita, autor: autores.get(cita.autor)! },
+    props: {
+      cita,
+      autor: autores.get(cita.autor)!,
+      relacionadas: citasRelacionadas(conjunto.citas, cita, MAX_CITAS_RELACIONADAS),
+      chips: temasDeLaCita(cita, publicados),
+      temasDelSitio: publicados,
+    },
   }));
 }) satisfies GetStaticPaths;
 
-const { cita, autor } = Astro.props;
+const { cita, autor, relacionadas, chips, temasDelSitio } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -41,6 +55,12 @@ const titulo = `«${recorte}» — ${autor.nombre} | Sabiduría Diaria`;
   <article class="pagina contenedor">
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
     <CopiarCita cita={cita} autor={autor} />
+    <RutasDeSalida
+      autor={autor}
+      relacionadas={relacionadas}
+      chips={chips}
+      temasDelSitio={temasDelSitio}
+    />
   </article>
 </Armazon>
 

@@ -97,6 +97,21 @@ export function temasDeLaCita(cita: Cita, publicados: Tema[]): Tema[] {
   return cita.temas.map((s) => porSlug.get(s)).filter((t): t is Tema => t !== undefined);
 }
 
+/**
+ * Otras Citas del mismo Autor — FR-12, UX-DR17.
+ *
+ * Se deriva de Autor y de Tema, sin motor de recomendación: primero las del mismo Autor
+ * que además comparten algún Tema con esta, y después el resto de las suyas. Ordenar así
+ * no es «recomendar»; es preferir la vecindad más estrecha de las dos que ya existen.
+ */
+export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Cita[] {
+  const suyas = citasDeAutor(citas, cita.autor).filter((c) => c.slug !== cita.slug);
+  const temas = new Set(cita.temas);
+  const comparteTema = (c: Cita) => c.temas.some((t) => temas.has(t));
+
+  return [...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))].slice(0, maximo);
+}
+
 /** Todas las rutas publicadas del sitio. El sitemap y la comprobación de enlaces la usan. */
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [

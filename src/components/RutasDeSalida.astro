@@ -1,0 +1,168 @@
+---
+/**
+ * Rutas de salida — FR-12, UX-DR17.
+ *
+ * Hasta cuatro Citas del mismo Autor y los chips de los Temas publicados a los que
+ * pertenece. **Nunca vacío**: una visita de un segundo se convierte en sesión o se pierde
+ * aquí, y una hoja sin salida es tráfico que entra por un buscador y se va por donde vino.
+ *
+ * El caso que obliga a pensar: un Autor con una sola Cita cuyos Temas están todos por
+ * debajo del umbral. No hay Citas hermanas y no hay chips. El respaldo son los Temas
+ * publicados del sitio — sigue siendo navegación por Tema, no un motor de recomendación.
+ *
+ * No hay enlace «Ver la ficha del Autor»: la atribución de arriba ya lleva a su página,
+ * y repetirlo ponía el siena en tres sitios de la misma pantalla. DESIGN.md lo acota a
+ * dos, y con razón: el acento deja de señalar en cuanto se reparte.
+ */
+import type { Cita, Autor, Tema } from '../lib/publicado.ts';
+
+interface Props {
+  autor: Autor;
+  relacionadas: Cita[];
+  /** Temas publicados de esta Cita. Los que no llegan al umbral no se renderizan. */
+  chips: Tema[];
+  /** Respaldo cuando no hay ni hermanas ni chips. */
+  temasDelSitio: Tema[];
+}
+
+const { autor, relacionadas, chips, temasDelSitio } = Astro.props;
+
+const sinSalidaPropia = relacionadas.length === 0 && chips.length === 0;
+const temasAMostrar = sinSalidaPropia ? temasDelSitio.slice(0, 6) : chips;
+
+const fragmento = (texto: string) =>
+  texto.length > 90 ? `${texto.slice(0, 89).trimEnd()}…` : texto;
+---
+
+<nav class="salidas" aria-label="Seguir leyendo">
+  {
+    relacionadas.length > 0 && (
+      <section>
+        <h2>Más de {autor.nombre}</h2>
+        <ul class="hermanas">
+          {relacionadas.map((otra) => (
+            <li>
+              <a href={`/cita/${otra.slug}`}>«{fragmento(otra.texto)}»</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    temasAMostrar.length > 0 && (
+      <section>
+        <h2>{sinSalidaPropia ? 'Explorar por tema' : 'Temas'}</h2>
+        <ul class="chips">
+          {temasAMostrar.map((tema) => (
+            <li>
+              <a class="chip" href={`/tema/${tema.slug}`}>
+                {tema.nombre}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    /*
+     * Último recurso: si el sitio todavía no tiene ningún Tema publicado, la ficha del
+     * Autor sigue siendo una salida. Con el corpus actual no se alcanza, pero un corpus
+     * pequeño en los primeros días sí lo alcanzaría, y FR-12 no admite excepciones.
+     */
+    sinSalidaPropia && temasAMostrar.length === 0 && (
+      <section>
+        <h2>Seguir leyendo</h2>
+        <ul class="chips">
+          <li>
+            <a class="chip" href={`/autor/${autor.slug}`}>
+              Sobre {autor.nombre}
+            </a>
+          </li>
+        </ul>
+      </section>
+    )
+  }
+
+</nav>
+
+<style>
+  .salidas {
+    margin-top: calc(var(--respiracion) * 1.5);
+    padding-top: calc(var(--unidad) * 3);
+    border-top: var(--grosor-filete) solid var(--filete);
+    max-width: var(--medida-prosa);
+  }
+
+  section + section {
+    margin-top: calc(var(--unidad) * 4);
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .hermanas {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  .hermanas li + li {
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .hermanas a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-block: var(--unidad);
+    font-family: var(--serif);
+    font-size: var(--cuerpo-lg);
+    color: var(--tinta);
+    text-decoration: none;
+    text-wrap: pretty;
+  }
+
+  .hermanas a:hover {
+    text-decoration: underline;
+  }
+
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    /* UX-DR22 — 8px de separación entre zonas de toque. */
+    gap: var(--unidad);
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  /* UX-DR12 — fondo `surface-container`, radio 6px, nunca en siena. */
+  .chip {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    background: var(--contenedor);
+    border-radius: var(--radio-tarjeta);
+    font-family: var(--serif);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: none;
+    transition: background-color 150ms;
+  }
+
+  .chip:hover {
+    background: var(--contenedor-alto);
+  }
+</style>
