@@ -15,6 +15,7 @@
  * siendo seleccionables — que es exactamente lo que hace el respaldo de abajo.
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
+import { EVENTOS } from '../lib/medicion.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
 
 interface Props {
@@ -38,7 +39,7 @@ const carga = textoParaCopiar(cita, autor);
   </p>
 </div>
 
-<script is:inline>
+<script is:inline define:vars={{ EVENTO_COPIADO: EVENTOS.copiado }}>
   (() => {
     const boton = document.querySelector('[data-copiar]');
     if (!boton) return;
@@ -55,6 +56,11 @@ const carga = textoParaCopiar(cita, autor);
         // un caso real, no teórico: pasa en http:// y en algunos navegadores incrustados.
         await navigator.clipboard.writeText(carga);
 
+        // AD-13 — la isla no habla con el proveedor. Llama a lo que instala
+        // `medicion.ts`, y el nombre del evento viene del vocabulario cerrado, no de
+        // una cadena escrita aquí. Si no hay medición configurada, no hay nada que
+        // llamar y el copiado funciona igual.
+        window.__medir && window.__medir(EVENTO_COPIADO);
         etiqueta.textContent = 'Copiado.';
         boton.setAttribute('data-estado', 'copiado');
         clearTimeout(temporizador);

@@ -469,3 +469,42 @@ el orden visual del de foco, que es un incumplimiento de WCAG 2.4.3: arreglaría
 de un criterio rompiendo el de al lado, en la misma historia. Leído como el orden **dentro
 de la Página de Cita** —Cita, luego copiar, luego salidas— es coherente y es lo que está
 construido. Se prueba así, y la cabecera la resuelve el enlace de salto.
+
+---
+
+## 2.9 — Medición desde la primera página publicada
+
+**Verificado.** 32 unitarias. El vocabulario es exactamente los cuatro eventos con nombre
+y el guion **descarta en cliente** cualquier otro, así que una isla que invente un nombre
+no consigue emitirlo: añadir uno exige modificar el módulo, que es lo que AD-13 quiere que
+cueste. Una prueba recorre todo `src/` y falla si algún fichero que no sea `medicion.ts`
+menciona `sendBeacon`, el punto final o el nombre de un proveedor.
+
+**Decidido — baliza propia en vez del guion de un proveedor.** AD-13 fija propiedades, no
+producto, y avisa de la divergencia peor: adoptar un proveedor que exija banner y
+incumplir NFR-10 sin que nadie lo decida. Con un `sendBeacon` propio contra un punto final
+configurable, «sin cookies y sin identificar al visitante» queda garantizado por
+construcción y no por la casilla de configuración de un tercero. Hay pruebas de que el
+guion no toca `document.cookie` ni almacenamiento, no genera identificadores y solo
+transporta el evento y la ruta — ni referente, ni agente de usuario, ni pantalla, ni zona
+horaria.
+
+**Sin configurar, el sitio no envía nada.** Sin `MEDICION_ENDPOINT` no se inserta el
+instalador, y hay prueba de build que lo comprueba sobre el HTML generado. El guardia
+`window.__medir && …` de las islas sí está siempre, y debe estarlo: es lo que hace que
+copiar funcione igual con la medición apagada.
+
+**Qué queda para el despliegue.** Contratar el destino y apuntar `MEDICION_ENDPOINT`. Las
+propiedades que debe cumplir están cerradas en el módulo, no en el contrato.
+
+**Prueba afinada.** El tope de 2 KB al JavaScript en línea contaba también el `ld+json`
+de los datos estructurados, que no es JavaScript ejecutable. Excluido: el código real de
+las islas son 1 678 bytes.
+
+---
+
+## Cierre de la Épica 2
+
+Las nueve historias cerradas. **206 unitarias y 162 funcionales en verde**, `astro check`
+sin errores, y axe-core sin una sola violación WCAG 2.1 AA en las cuatro superficies.
+UJ-1 está completo de principio a fin y UJ-3 entero.

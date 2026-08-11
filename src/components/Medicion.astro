@@ -1,0 +1,31 @@
+---
+/**
+ * Instalación de la medición — AD-13.
+ *
+ * Si no hay punto final configurado no se renderiza nada: el sitio no envía un solo byte
+ * de telemetría en desarrollo ni en las pruebas, y la Página de Cita sigue sin descargar
+ * ningún fichero de script.
+ */
+import { EVENTOS, guionDeMedicion, puntoFinal, emitir } from '../lib/medicion.ts';
+
+interface Props {
+  /** Se emite `vista-de-cita` solo desde la Página de Cita. */
+  vistaDeCita?: boolean;
+}
+
+const { vistaDeCita = false } = Astro.props;
+// Se lee de `process.env` y no de `import.meta.env`: Astro solo expone en esta última
+// las variables con prefijo público, y el punto final no debe serlo. El frontmatter se
+// evalúa en Node durante el build, así que `process.env` es el sitio correcto.
+const url = puntoFinal(process.env);
+const guion = url === null ? null : guionDeMedicion(url);
+---
+
+{
+  guion !== null && (
+    <script
+      is:inline
+      set:html={vistaDeCita ? `${guion}\n${emitir(EVENTOS.vistaDeCita)}` : guion}
+    />
+  )
+}

@@ -138,7 +138,11 @@ test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
     // Y lo que hay en línea es la isla, no un armazón: se mide para que no crezca sin
     // que nadie lo note.
     const bytes = await page.evaluate(() =>
-      [...document.querySelectorAll('script')].reduce((n, s) => n + s.textContent!.length, 0),
+      [...document.querySelectorAll('script')]
+        // El `ld+json` de los datos estructurados no es JavaScript ejecutable: el
+        // navegador no lo interpreta. Cuenta para el peso de la página, no para esto.
+        .filter((s) => s.type !== 'application/ld+json')
+        .reduce((n, s) => n + s.textContent!.length, 0),
     );
     expect(bytes).toBeLessThan(2048);
   });

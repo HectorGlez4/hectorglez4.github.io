@@ -9,10 +9,13 @@
  * NFR-2 — el contenido llega en el HTML inicial. AD-6 — la página no envía JavaScript.
  */
 import { Font } from 'astro:assets';
+import Medicion from './Medicion.astro';
 import '../styles/tokens.css';
 
 interface Props {
   titulo: string;
+  /** La Página de Cita emite además el evento de vista (AD-13, SM-2). */
+  vistaDeCita?: boolean;
   descripcion: string;
   /** Ruta de la página, sin dominio. Compone la canónica de NFR-1. */
   ruta: string;
@@ -20,7 +23,7 @@ interface Props {
   noIndexar?: boolean;
 }
 
-const { titulo, descripcion, ruta, noIndexar = false } = Astro.props;
+const { titulo, descripcion, ruta, noIndexar = false, vistaDeCita = false } = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
 ---
 
@@ -38,6 +41,7 @@ const canonica = new URL(ruta, Astro.site).href;
     <Font cssVariable="--fuente-serif" preload />
     <Font cssVariable="--fuente-sans" preload />
     <slot name="cabeza" />
+    <Medicion vistaDeCita={vistaDeCita} />
   </head>
   <body>
     <a class="saltar" href="#contenido">Saltar al contenido.</a>

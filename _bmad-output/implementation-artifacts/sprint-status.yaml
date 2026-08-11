@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-11-2026 05:58
+last_updated: 08-11-2026 06:01
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -46,7 +46,7 @@ development_status:
   1-8-auditoría-de-salud-del-corpus: done
   epic-1-retrospective: optional
 
-  epic-2: in-progress
+  epic-2: done
   2-1-página-de-cita: done
   2-2-copiado-con-atribución: done
   2-3-página-de-autor: done
@@ -55,7 +55,7 @@ development_status:
   2-6-rutas-de-salida-desde-cada-cita: done
   2-7-fundamentos-de-seo: done
   2-8-accesibilidad-y-comportamiento-responsive: done
-  2-9-medición-desde-la-primera-página-publicada: backlog
+  2-9-medición-desde-la-primera-página-publicada: done
   epic-2-retrospective: optional
 
   epic-3: backlog

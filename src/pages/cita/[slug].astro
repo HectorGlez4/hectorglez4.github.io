@@ -53,7 +53,7 @@ const titulo = `«${recorte}» — ${autor.nombre} | Sabiduría Diaria`;
 const canonica = new URL(`/cita/${cita.slug}`, Astro.site).href;
 ---
 
-<Armazon titulo={titulo} descripcion={`${cita.texto} — ${autor.nombre}.`} ruta={`/cita/${cita.slug}`}>
+<Armazon titulo={titulo} descripcion={`${cita.texto} — ${autor.nombre}.`} ruta={`/cita/${cita.slug}`} vistaDeCita>
   <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />
   <article class="pagina contenedor">
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
