@@ -25,9 +25,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4321',
+    // `astro preview` se demoniza en Astro 7 y deja el servidor de fondo, así que
+    // Playwright acababa hablando con un demonio huérfano que servía un `dist/` viejo.
+    // `tests/servidor.mjs` se queda en primer plano y sirve igual que el alojamiento.
+    command: 'npm run build && node tests/servidor.mjs',
     url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 180_000,
+    stdout: 'ignore',
   },
 });

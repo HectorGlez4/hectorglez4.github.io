@@ -1,0 +1,54 @@
+---
+/**
+ * Página de Cita — FR-1, FR-2. La superficie principal y la unidad atómica de tráfico.
+ *
+ * El grueso del tráfico entra aquí desde un buscador, en móvil, sin haber visto la
+ * portada. Por eso la Cita es lo primero visible sin desplazar en 360×640 y todo lo demás
+ * viene después.
+ *
+ * AD-11 — las rutas salen del dueño del conjunto publicable, nunca de `getCollection`
+ * directamente. Una Cita en `corpus/_revision/` no está en ese conjunto, así que no se
+ * genera su página y visitarla da 404 sin necesidad de comprobar nada.
+ */
+import Armazon from '../../components/Armazon.astro';
+import BloqueDeCita from '../../components/BloqueDeCita.astro';
+import { conjuntoPublicable } from '../../lib/publicado.ts';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const conjunto = await conjuntoPublicable();
+  const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+
+  return conjunto.citas.map((cita) => ({
+    params: { slug: cita.slug },
+    props: { cita, autor: autores.get(cita.autor)! },
+  }));
+}) satisfies GetStaticPaths;
+
+const { cita, autor } = Astro.props;
+
+/**
+ * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
+ * desde un buscador decide si entrar leyendo esto, así que recortarlo con puntos
+ * suspensivos donde no hace falta cuesta clics.
+ */
+const recorte = cita.texto.length > 110 ? `${cita.texto.slice(0, 109)}…` : cita.texto;
+const titulo = `«${recorte}» — ${autor.nombre} | Sabiduría Diaria`;
+---
+
+<Armazon titulo={titulo} descripcion={`${cita.texto} — ${autor.nombre}.`} ruta={`/cita/${cita.slug}`}>
+  <article class="pagina contenedor">
+    <BloqueDeCita cita={cita} autor={autor} comoTitulo />
+  </article>
+</Armazon>
+
+<style>
+  .pagina {
+    /*
+     * La respiración por encima del bloque es lo que comunica que esto es una antología
+     * y no un listado. En móvil se queda en 40px: más aire empujaría la Cita fuera de la
+     * primera pantalla de 360×640, que es justo lo que FR-1 prohíbe.
+     */
+    padding-block: var(--respiracion);
+  }
+</style>

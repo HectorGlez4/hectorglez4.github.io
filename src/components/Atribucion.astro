@@ -1,0 +1,73 @@
+---
+/**
+ * Atribución — UX-DR8, FR-2.
+ *
+ * El nombre del Autor va en el token `author` (Inter, versalitas por letter-spacing) y
+ * enlazado **en tinta, no en siena**: el nombre no es una llamada a la acción, es
+ * información. La Procedencia va debajo en `caption` y tinta apagada.
+ *
+ * La regla que no se puede negociar: cuando falta la obra, se dice «Sin obra
+ * documentada». El bloque nunca se omite en silencio, y nunca se muestra una procedencia
+ * inferida o aproximada. Presencia de la ausencia.
+ */
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+}
+
+const { cita, autor } = Astro.props;
+const { obra, año, referencia } = cita.procedencia;
+
+/**
+ * La línea de procedencia. Se compone con lo que consta y solo con lo que consta.
+ * El esquema garantiza que algo hay —una Cita sin nada documentado no se publica—, pero
+ * la obra puede faltar, y entonces se declara que falta.
+ */
+const partes: string[] = [];
+if (obra !== undefined) partes.push(año !== undefined ? `${obra}, ${año}` : obra);
+else if (año !== undefined) partes.push(`Sin obra documentada. Año ${año}.`);
+else partes.push('Sin obra documentada.');
+
+if (obra !== undefined && año === undefined) partes.push('Sin año documentado.');
+if (referencia !== undefined) partes.push(referencia);
+
+const procedencia = partes.join(' · ');
+---
+
+<p class="autor">
+  <a href={`/autor/${autor.slug}`}>{autor.nombre}</a>
+</p>
+<p class="procedencia">{procedencia}</p>
+
+<style>
+  .autor {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .autor a {
+    /* En tinta, no en siena: el nombre es información, no una acción. */
+    color: var(--tinta);
+    text-decoration: none;
+  }
+
+  .autor a:hover {
+    text-decoration: underline;
+  }
+
+  .procedencia {
+    margin: var(--unidad) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--tinta-apagada);
+  }
+</style>

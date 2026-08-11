@@ -1,0 +1,132 @@
+---
+/**
+ * Bloque de Cita — UX-DR7, el componente central.
+ *
+ * Comillas angulares, filete corto de 48px debajo, sin recuadro ni fondo propio: la Cita
+ * flota sobre el papel. No es interactivo — la Cita no es un enlace.
+ *
+ * UX-DR25 — se marca como cita con su atribución asociada: `<figure>` + `<blockquote>` +
+ * `<figcaption>`. Es lo que permite a un lector de pantalla anunciar de quién es la frase
+ * sin que el visitante tenga que deducirlo del orden visual.
+ */
+import { tramoDe } from '../lib/tramos.ts';
+import Atribucion from './Atribucion.astro';
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+  /** En la Página de Cita el texto es el `h1`; en un listado, no. */
+  comoTitulo?: boolean;
+}
+
+const { cita, autor, comoTitulo = false } = Astro.props;
+const tramo = tramoDe(cita.texto);
+---
+
+<figure class="bloque">
+  <blockquote class="cita" data-tramo={tramo.nombre} cite={`/autor/${autor.slug}`}>
+    {
+      /*
+       * El texto va envuelto en comillas angulares por marcado y no por `::before`
+       * de CSS: UX-DR26 exige que todo lo que se ve esté disponible como texto
+       * copiable, y el contenido generado por CSS no se copia ni se lee siempre.
+       */
+    }
+    {
+      comoTitulo ? (
+        <h1 class="texto">«{cita.texto}»</h1>
+      ) : (
+        <p class="texto">«{cita.texto}»</p>
+      )
+    }
+  </blockquote>
+
+  <figcaption>
+    <Atribucion cita={cita} autor={autor} />
+  </figcaption>
+</figure>
+
+<style>
+  .bloque {
+    margin: 0;
+    /* UX-DR6 — sistema plano: cero sombras, cero elevación tonal. */
+    max-width: var(--medida-cita);
+  }
+
+  .cita {
+    margin: 0;
+    /* La Cita no vive dentro de una tarjeta dentro de una sección: sin anidamiento. */
+    border: 0;
+    padding: 0;
+  }
+
+  .texto {
+    font-family: var(--serif);
+    font-weight: 400;
+    color: var(--tinta);
+    margin: 0;
+    /* El tamaño lo fija el tramo; la tabla vive en src/lib/tramos.ts (AD-8). */
+    font-size: var(--cita-sm);
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+
+  .cita[data-tramo='xl'] .texto {
+    font-size: var(--cita-lg);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .cita[data-tramo='lg'] .texto {
+    font-size: var(--cita-md);
+    line-height: 1.35;
+  }
+
+  .cita[data-tramo='md'] .texto {
+    font-size: var(--cita-sm);
+    line-height: 1.4;
+  }
+
+  /*
+   * UX-DR19 — en móvil cada tramo baja un escalón y el suelo de 23px no se cruza. Por eso
+   * las reglas de arriba son las de móvil (xl→36, lg→28, md→23, sm→23) y estas de aquí
+   * restituyen el tamaño pleno a partir de 600px. Escrito al revés —escritorio primero—
+   * el suelo habría que repetirlo en cada tramo.
+   */
+  @media (min-width: 600px) {
+    .cita[data-tramo='xl'] .texto {
+      font-size: var(--cita-xl);
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+    }
+
+    .cita[data-tramo='lg'] .texto {
+      font-size: var(--cita-lg);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .cita[data-tramo='md'] .texto {
+      font-size: var(--cita-md);
+      line-height: 1.35;
+    }
+  }
+
+  /* UX-DR7 — filete corto de 48px bajo la Cita, antes de la atribución. */
+  figcaption {
+    margin-top: calc(var(--unidad) * 3);
+    padding-top: calc(var(--unidad) * 3);
+    position: relative;
+  }
+
+  figcaption::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 48px;
+    height: var(--grosor-filete);
+    background: var(--filete);
+  }
+</style>

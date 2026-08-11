@@ -243,3 +243,39 @@ ahí para que se vea.
 
 `corpus/semilla/` se conserva en el repositorio como registro auditable de qué entró y con
 qué datos. Vive fuera de `corpus/{citas,autores,temas}/`, así que ninguna colección lo carga.
+
+---
+
+## 2.1 — Página de Cita
+
+**Verificado.** 146 unitarias, 40 funcionales en móvil y escritorio, y revisión visual en
+Chrome a 1920 y en emulación móvil a 375. La Cita es el primer elemento visible sin
+desplazar en 360×640; comillas angulares; Autor enlazado; obra y año cuando constan;
+«Sin obra documentada» y «Sin año documentado» cuando no; tramo anunciado en `data-tramo`;
+44px en escritorio y 36px en móvil para el tramo xl; suelo de 23px nunca cruzado; **cero
+peticiones de script**; texto, Autor y procedencia en el HTML inicial; cabecera con solo
+marca y búsqueda; ningún elemento con sombra; un solo `h1`; `figure`+`blockquote`+
+`figcaption`; la serif solo en el texto citado.
+
+**Dos defectos que solo se vieron mirando.**
+
+1. **Tres columnas distintas.** Cabecera, contenido y pie calculaban cada uno su
+   contenedor, y los bordes izquierdos caían en 651px, 595 y 737. Todas las pruebas
+   funcionales seguían en verde porque todas sus afirmaciones sobre el contenido eran
+   ciertas. Se ve de un vistazo y no lo ve ninguna aserción sobre texto.
+2. **La causa de fondo era `ch`.** El `.contenedor` compartido usaba `max-width: 68ch`, y
+   `ch` es relativa a la fuente del elemento: los mismos 68ch daban 841px en la cabecera
+   (Inter a 17px) y 670px en el pie (13px). Para medir texto —que es para lo que sirve—
+   `ch` es lo correcto y `--medida-prosa` sigue en `ch`; para fijar una columna de página
+   no lo es. Se añade `--ancho-pagina: 45rem`. Hay prueba de regresión que exige un único
+   borde izquierdo entre las cuatro regiones.
+
+**Corregido en el arnés.** `astro preview` se demoniza en Astro 7: la orden vuelve
+enseguida y deja el servidor de fondo, así que Playwright acababa hablando con un demonio
+huérfano de una ejecución anterior que servía un `dist/` viejo —28 pruebas en rojo por una
+causa que no se parecía en nada al síntoma—. Se sustituye por `tests/servidor.mjs`, que se
+queda en primer plano y sirve como el alojamiento real, incluido el 404 con su estado.
+
+**Cerrado el hueco de la 1.2.** `publicado.ts` verifica la integridad referencial y rompe
+el build nombrando la Cita culpable y la entidad que falta. Era el sitio natural: por
+AD-11 es el dueño del conjunto publicable.

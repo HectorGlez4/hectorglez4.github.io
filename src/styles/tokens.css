@@ -1,0 +1,163 @@
+/*
+ * Tokens de DESIGN.md — «Papel y Tinta».
+ *
+ * UX-DR1 y UX-DR2: se declaran una sola vez, aquí. Ningún componente lleva un valor
+ * literal de color ni de tipografía. Si un componente necesita un color que no está en
+ * esta lista, el error está en el componente.
+ */
+
+:root {
+  /* ── Color ────────────────────────────────────────────────────────────── */
+  --papel: #faf7f0;
+  --papel-tenue: #efe9dd;
+  --papel-claro: #fffdf8;
+
+  --contenedor-minimo: #ffffff;
+  --contenedor-bajo: #f6f2ea;
+  --contenedor: #f1ece2;
+  --contenedor-alto: #eae4d8;
+  --contenedor-maximo: #e3dccf;
+
+  --tinta: #1f1b16;
+  --tinta-apagada: #5a5147;
+
+  --contorno: #8a7f72;
+  --filete: #ddd5c7;
+
+  /* El único acento. Si aparece en más de dos sitios de una pantalla, algo está mal. */
+  --siena: #8c4a2f;
+  --sobre-siena: #ffffff;
+
+  /* ── Tipografía ───────────────────────────────────────────────────────── */
+  /* Las define la Fonts API de Astro; aquí solo se les da el nombre del proyecto. */
+  --serif: var(--fuente-serif), Georgia, 'Times New Roman', serif;
+  --sans: var(--fuente-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Tramos de Cita — UX-DR19. Qué tramo toca lo decide src/lib/tramos.ts. */
+  --cita-xl: 44px;
+  --cita-lg: 36px;
+  --cita-md: 28px;
+  --cita-sm: 23px;
+
+  --titular-md: 30px;
+  --titular-sm: 21px;
+  --cuerpo-lg: 17px;
+  --cuerpo-md: 15px;
+  --autor: 13px;
+  --pie: 13px;
+
+  /* ── Espacio ──────────────────────────────────────────────────────────── */
+  --unidad: 8px;
+  --canal: 24px;
+  --margen: 20px;
+  --respiracion: 40px;
+
+  /* ── Forma ────────────────────────────────────────────────────────────── */
+  --radio: 3px;
+  --radio-tarjeta: 6px;
+  --grosor-filete: 1px;
+
+  /* ── Medida ───────────────────────────────────────────────────────────── */
+  --medida-cita: 34ch;
+  --medida-prosa: 68ch;
+
+  /*
+   * El ancho de la columna, en unidades absolutas y no en `ch`, a propósito.
+   *
+   * `ch` es relativa a la fuente del elemento que la usa: el mismo `68ch` daba 841px en
+   * la cabecera (Inter a 17px) y 670px en el pie (13px), así que un `.contenedor`
+   * compartido producía columnas de anchos distintos. Para medir texto —que es para lo
+   * que sirve— `ch` es exactamente lo correcto y `--medida-prosa` sigue en `ch`. Para
+   * fijar una columna de página no lo es.
+   *
+   * 45rem son 720px, la anchura que daban esos 68ch a la escala del cuerpo.
+   */
+  --ancho-pagina: 45rem;
+  --zona-de-toque: 44px;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --margen: var(--canal);
+    --respiracion: 64px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --margen: 56px;
+  }
+}
+
+/*
+ * Reinicio mínimo. No se usa un reinicio de terceros: la interfaz es pequeña y sus
+ * suposiciones costarían más de lo que ahorran.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--sans);
+  font-size: var(--cuerpo-lg);
+  line-height: 1.65;
+  /* NFR-8: el contenido se enmarca, nunca sangra al borde de la pantalla. */
+  -webkit-text-size-adjust: 100%;
+}
+
+/*
+ * UX-DR23 — El foco es visible siempre, anillo de 2px en siena separado 2px. No se
+ * suprime en ningún elemento; no existe una sola regla `outline: none` en el proyecto.
+ */
+:focus-visible {
+  outline: 2px solid var(--siena);
+  outline-offset: 2px;
+  border-radius: var(--radio);
+}
+
+/*
+ * UX-DR22 — Movimiento máximo 150 ms y solo en opacidad y color. `prefers-reduced-motion`
+ * lo elimina por completo, no lo acorta.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * El contenedor del sitio. Una sola definición para cabecera, contenido y pie.
+ *
+ * Estaba repartido —cada región con su `max-width` y su `padding`, y `main` con el suyo
+ * encima— y el resultado eran tres bordes izquierdos distintos: la marca en 651px, la
+ * Cita en 595 y el pie en 737. Ninguna prueba funcional lo veía, porque todas las
+ * afirmaciones sobre el contenido seguían siendo ciertas; se ve mirando la página.
+ *
+ * El padding va dentro del ancho máximo para que el margen lateral no reste medida al
+ * texto: la medida de prosa son 68ch de texto, no 68ch menos los márgenes.
+ */
+.contenedor {
+  max-width: calc(var(--ancho-pagina) + var(--margen) * 2);
+  margin-inline: auto;
+  padding-inline: var(--margen);
+}
+
+a {
+  color: var(--siena);
+  text-underline-offset: 0.2em;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
