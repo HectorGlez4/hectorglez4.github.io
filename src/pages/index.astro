@@ -1,16 +1,149 @@
 ---
-// Portada provisional. La Cita del Día llega en la Historia 4.1; hasta entonces
-// esta página existe solo para que el build produzca un sitemap con una entrada.
+/**
+ * Portada.
+ *
+ * De momento es la puerta de entrada al descubrimiento: desde aquí se alcanzan todos los
+ * Temas publicados y todos los Autores, y desde ellos toda Página de Cita. Eso es lo que
+ * sostiene NFR-5 —ninguna página huérfana— y lo que la Historia 2.7 comprueba recorriendo
+ * enlaces de verdad.
+ *
+ * La Cita del Día llega en la Historia 4.1 y ocupará la parte de arriba. El descubrimiento
+ * de abajo se queda: sin él, la portada tendría una sola salida y el sitio dejaría de ser
+ * recorrible desde ella.
+ */
+import Armazon from '../components/Armazon.astro';
+import {
+  autoresPublicados,
+  conjuntoPublicable,
+  temasPublicados,
+} from '../lib/publicado.ts';
+
+const conjunto = await conjuntoPublicable();
+const temas = temasPublicados(conjunto.temas, conjunto.citas);
+const autores = autoresPublicados(conjunto.autores, conjunto.citas);
 ---
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sabiduría Diaria</title>
-  </head>
-  <body>
+<Armazon
+  titulo="Sabiduría Diaria — citas en español con su procedencia"
+  descripcion="Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta."
+  ruta="/"
+>
+  <div class="pagina contenedor">
     <h1>Sabiduría Diaria</h1>
-  </body>
-</html>
+    <p class="entrada">
+      Citas en español, cada una en su página, con el autor y la obra de la que procede.
+      Solo se publica lo que se puede documentar.
+    </p>
+
+    {
+      temas.length > 0 && (
+        <section>
+          <h2>Temas</h2>
+          <ul class="chips">
+            {temas.map((tema) => (
+              <li>
+                <a class="chip" href={`/tema/${tema.slug}`}>
+                  {tema.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section>
+      <h2>Autores</h2>
+      <ul class="autores">
+        {
+          autores.map((autor) => (
+            <li>
+              <a href={`/autor/${autor.slug}`}>{autor.nombre}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .entrada {
+    margin: calc(var(--unidad) * 2) 0 0;
+    max-width: var(--medida-prosa);
+  }
+
+  section {
+    margin-top: calc(var(--unidad) * 6);
+  }
+
+  h2 {
+    margin: 0 0 calc(var(--unidad) * 2);
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    margin: 0;
+    padding: 0;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    background: var(--contenedor);
+    border-radius: var(--radio-tarjeta);
+    font-family: var(--serif);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: none;
+  }
+
+  .autores {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+    max-width: var(--medida-prosa);
+  }
+
+  .autores li {
+    border-bottom: var(--grosor-filete) solid var(--filete);
+  }
+
+  .autores a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    color: var(--tinta);
+    text-decoration: none;
+  }
+
+  .autores a:hover {
+    text-decoration: underline;
+  }
+</style>

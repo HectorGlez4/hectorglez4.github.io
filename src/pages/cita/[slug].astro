@@ -14,6 +14,7 @@ import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
+import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import {
   citasRelacionadas,
   conjuntoPublicable,
@@ -49,9 +50,11 @@ const { cita, autor, relacionadas, chips, temasDelSitio } = Astro.props;
  */
 const recorte = cita.texto.length > 110 ? `${cita.texto.slice(0, 109)}…` : cita.texto;
 const titulo = `«${recorte}» — ${autor.nombre} | Sabiduría Diaria`;
+const canonica = new URL(`/cita/${cita.slug}`, Astro.site).href;
 ---
 
 <Armazon titulo={titulo} descripcion={`${cita.texto} — ${autor.nombre}.`} ruta={`/cita/${cita.slug}`}>
+  <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />
   <article class="pagina contenedor">
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
     <CopiarCita cita={cita} autor={autor} />

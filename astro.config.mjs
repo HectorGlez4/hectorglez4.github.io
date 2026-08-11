@@ -11,7 +11,14 @@ export default defineConfig({
   site: SITIO,
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // FR-5 — las páginas 2+ de un listado son `noindex, follow`. Incluirlas en el
+      // sitemap sería pedirle al buscador que indexe justo lo que se le pide que no
+      // indexe. Las Citas que contienen ya están en el sitemap por su cuenta.
+      filter: (pagina) => !/\/(?:autor|tema)\/[^/]+\/\d+$/.test(pagina),
+    }),
+  ],
 
   // UX-DR3 — las dos familias de DESIGN.md por la Fonts API, con `latin-ext` para que
   // los diacríticos españoles y las comillas angulares « » tengan cobertura completa.

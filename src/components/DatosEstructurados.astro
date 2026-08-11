@@ -1,0 +1,49 @@
+---
+/**
+ * Datos estructurados de la Página de Cita — NFR-3.
+ *
+ * `Quotation` con su `creator`, que es el tipo que schema.org define exactamente para
+ * esto. Se emite como `application/ld+json`, que no es JavaScript ejecutable: no lo
+ * descarga ni lo ejecuta el navegador, así que no toca AD-6.
+ *
+ * Solo se declara lo que consta. Una `Quotation` con `isPartOf` apuntando a una obra
+ * inventada sería exactamente la procedencia inferida que FR-2 prohíbe, con el agravante
+ * de que un buscador se la creería.
+ */
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+  canonica: string;
+}
+
+const { cita, autor, canonica } = Astro.props;
+const { obra, año } = cita.procedencia;
+
+const datos: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Quotation',
+  '@id': canonica,
+  url: canonica,
+  text: cita.texto,
+  inLanguage: 'es',
+  creator: {
+    '@type': 'Person',
+    name: autor.nombre,
+    url: new URL(`/autor/${autor.slug}`, canonica).href,
+    ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
+    deathDate: String(autor.añoFallecimiento),
+  },
+};
+
+if (obra !== undefined) {
+  datos.isPartOf = {
+    '@type': 'CreativeWork',
+    name: obra,
+    ...(año !== undefined ? { datePublished: String(año) } : {}),
+  };
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(datos)} is:inline />

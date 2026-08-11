@@ -414,3 +414,30 @@ etiquetas, así que añadir rutas de salida la rompía sin que nada estuviera ma
 comprueba lo que dice la regla —que todo lo que va en serif sea texto de Cita, nombre de
 Autor o nombre de Tema— y además exige que la serif esté aplicada de verdad, para que no
 pase por vacío.
+
+---
+
+## 2.7 — Fundamentos de SEO
+
+**Verificado.** 10 funcionales. El sitemap contiene las 38 Páginas de Cita, los 12 Autores
+y los 2 Temas publicados; **todo lo que anuncia devuelve 200**; no contiene el Tema bajo
+umbral ni las páginas 2+ de un listado; y ninguna de las URL que anuncia se declara
+`noindex` —la contradicción de pedirle al buscador que indexe justo lo que se le pide que
+no indexe—. Cada página declara su canónica con su propia ruta y `lang="es"` sin variante
+regional. La Página de Cita expone `Quotation` con su `creator`, y **no** declara
+`isPartOf` cuando la obra no consta: una obra inventada en datos estructurados es la
+procedencia inferida que FR-2 prohíbe, con el agravante de que el buscador se la cree.
+
+**La prueba que de verdad cierra NFR-5.** Un recorrido en anchura desde la portada
+siguiendo enlaces reales, con tope de tres saltos, y comparación contra el sitemap: cero
+páginas inalcanzables. No es una inspección del código, es el recorrido que haría un
+rastreador.
+
+**La portada deja de ser un marcador de posición.** NFR-5 no se puede cumplir con una
+portada que no enlaza a nada, así que ya lleva los Temas publicados y todos los Autores.
+La Cita del Día de la Historia 4.1 se pondrá encima; el descubrimiento de abajo se queda,
+porque sin él la portada tendría una sola salida.
+
+**Nota sobre los datos estructurados y AD-6.** El `ld+json` es un `<script>` en el marcado
+pero no es JavaScript ejecutable: el navegador no lo descarga ni lo ejecuta. Hay prueba de
+que la página sigue sin pedir ningún fichero de script.
