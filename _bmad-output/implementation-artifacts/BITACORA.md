@@ -542,3 +542,33 @@ consulta como texto y sin nada que identifique al visitante. La prueba espía el
 **Defecto de coherencia encontrado por una prueba de la 2.7.** `/buscar` se declara
 `noindex` pero entraba en el sitemap. Lo cazó la prueba que exige que nada de lo que el
 sitemap anuncia se declare no indexable — escrita dos historias antes para otro caso.
+
+---
+
+## 4.1 — Portada con Cita del Día
+
+**Verificado.** 14 unitarias sobre la selección y 6 funcionales sobre la portada. Dos
+contextos de navegador independientes —sin estado compartido— ven la misma Cita, que es lo
+que distingue una selección hecha en el build de una hecha en el cliente. La Cita
+destacada se contrasta contra el corpus en disco, no contra una lista repetida en la
+prueba. Cero scripts descargados y el texto viaja en el HTML inicial.
+
+**La rotación, y por qué no necesita memoria.** El índice es el número de días desde la
+época módulo el tamaño del conjunto apto. Recorre **todas** antes de repetir ninguna —hay
+prueba con conjuntos de 1, 2, 7 y 38 elementos— sin recordar cuáles ya salieron, lo cual
+exigiría un estado que AD-10 no permite tener. El conjunto se ordena por slug para que no
+dependa del orden en que el build leyó el disco.
+
+**La jornada, y el push a media tarde.** `jornadaDelBuild` devuelve la **fecha**, no el
+instante: es la misma a las nueve de la mañana y a las once de la noche, así que dos
+builds del mismo día dan la misma Cita y un despliegue a media jornada la conserva. Que
+cambie al día siguiente sin publicar nada depende del disparador programado, que es la
+4.2 — y conviene decirlo claro: **sin ese disparador esto sigue siendo correcto y la
+portada se congela igual**. Es el fallo silencioso del que avisa AD-12.
+
+**Decidido.** Una fijación manual que apunta a una Cita que ya no está apta se ignora y
+la rotación sigue. Dejar la portada en blanco por una fijación obsoleta sería peor que
+desobedecerla.
+
+**Corregido en el arnés.** El harness de build no creaba `corpus/portada.json`, así que
+seis pruebas de otras historias fallaron por una causa ajena a lo que medían.

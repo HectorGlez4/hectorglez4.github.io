@@ -60,6 +60,14 @@ export async function construirConCorpus(
     await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
   }
 
+  // La portada importa las fijaciones de la Cita del Día. Sin el fichero, el build falla
+  // por una razón que no tiene nada que ver con lo que la prueba mide.
+  await writeFile(
+    join(proyecto, 'corpus', 'portada.json'),
+    JSON.stringify({ fijaciones: {} }, null, 2),
+    'utf8',
+  );
+
   for (const [ruta, contenido] of Object.entries(corpus)) {
     const destino = join(proyecto, 'corpus', ruta);
     await mkdir(dirname(destino), { recursive: true });

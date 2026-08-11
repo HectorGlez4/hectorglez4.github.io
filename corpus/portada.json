@@ -1,0 +1,4 @@
+{
+  "_comentario": "Fijaciones manuales de la Cita del Día: jornada ISO -> slug de la Cita. Tiene prioridad sobre la rotación automática (FR-9). Este fichero no lo carga ninguna colección: vive en la raíz de corpus/, fuera de citas/, autores/ y temas/.",
+  "fijaciones": {}
+}

@@ -12,6 +12,9 @@
  * recorrible desde ella.
  */
 import Armazon from '../components/Armazon.astro';
+import BloqueDeCita from '../components/BloqueDeCita.astro';
+import portada from '../../corpus/portada.json';
+import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
@@ -21,6 +24,12 @@ import {
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
 const autores = autoresPublicados(conjunto.autores, conjunto.citas);
+
+const jornada = jornadaDelBuild(process.env, new Date());
+const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.fijaciones);
+const autorDelDia = seleccion
+  ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
+  : undefined;
 ---
 
 <Armazon
@@ -29,11 +38,24 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas);
   ruta="/"
 >
   <div class="pagina contenedor">
-    <h1>Sabiduría Diaria</h1>
-    <p class="entrada">
-      Citas en español, cada una en su página, con el autor y la obra de la que procede.
-      Solo se publica lo que se puede documentar.
-    </p>
+    <h1 class="marca-portada">Sabiduría Diaria</h1>
+
+    {
+      seleccion && autorDelDia ? (
+        <section class="del-dia">
+          <h2>La cita de hoy</h2>
+          <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
+          <p class="ir">
+            <a href={`/cita/${seleccion.cita.slug}`}>Ver esta cita</a>
+          </p>
+        </section>
+      ) : (
+        <p class="entrada">
+          Citas en español, cada una en su página, con el autor y la obra de la que
+          procede. Solo se publica lo que se puede documentar.
+        </p>
+      )
+    }
 
     {
       temas.length > 0 && (
@@ -72,12 +94,28 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas);
     padding-block: var(--respiracion);
   }
 
-  h1 {
+  .marca-portada {
     font-family: var(--sans);
-    font-size: var(--titular-md);
+    font-size: var(--autor);
     font-weight: 600;
-    line-height: 1.2;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+    line-height: 1.4;
     margin: 0;
+  }
+
+  .del-dia {
+    margin-top: calc(var(--unidad) * 4);
+  }
+
+  .del-dia h2 {
+    margin-bottom: calc(var(--unidad) * 3);
+  }
+
+  .ir {
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-size: var(--cuerpo-md);
   }
 
   .entrada {
