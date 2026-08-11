@@ -1,0 +1,130 @@
+import { execFile } from 'node:child_process';
+import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { promisify } from 'node:util';
+
+const ejecutar = promisify(execFile);
+
+export const RAIZ = resolve(import.meta.dirname, '../../..');
+
+/**
+ * Un corpus de prueba: rutas relativas a `corpus/` con su contenido literal.
+ * Ej. `{ 'citas/seneca--el-tiempo.md': '---\ntexto: ...\n---\n' }`
+ */
+export type CorpusDePrueba = Record<string, string>;
+
+export interface ResultadoBuild {
+  codigo: number;
+  salida: string;
+  /** Ruta del proyecto temporal, por si la prueba necesita inspeccionar `dist/`. */
+  proyecto: string;
+}
+
+/**
+ * Construye el proyecto en una copia aislada con el corpus indicado.
+ *
+ * Se copia el proyecto en lugar de mutar `corpus/` porque estas pruebas escriben
+ * ficheros inválidos a propósito: hacerlo sobre el corpus real dejaría basura si la
+ * prueba se interrumpe, y AGENTS.md es explícito en que git es el único almacén del
+ * contenido. `node_modules` se enlaza en vez de copiarse — copiarlo tardaría más que
+ * el build que se quiere medir.
+ *
+ * Quien llama es responsable de limpiar con `limpiar(resultado.proyecto)`, salvo que
+ * pase `conservar: false`.
+ */
+export async function construirConCorpus(
+  corpus: CorpusDePrueba,
+  opciones: { conservar?: boolean } = {},
+): Promise<ResultadoBuild> {
+  const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
+
+  await symlink(join(RAIZ, 'node_modules'), join(proyecto, 'node_modules'), 'dir');
+  for (const fichero of ['package.json', 'astro.config.mjs', 'tsconfig.json']) {
+    await cp(join(RAIZ, fichero), join(proyecto, fichero));
+  }
+  await cp(join(RAIZ, 'src'), join(proyecto, 'src'), { recursive: true });
+  await cp(join(RAIZ, 'public'), join(proyecto, 'public'), { recursive: true });
+
+  // Las cuatro carpetas siempre existen: una colección cuya base no existe emite un
+  // aviso que enturbiaría la lectura del fallo que sí importa.
+  for (const dir of ['citas', 'autores', 'temas', '_revision']) {
+    await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
+  }
+
+  for (const [ruta, contenido] of Object.entries(corpus)) {
+    const destino = join(proyecto, 'corpus', ruta);
+    await mkdir(dirname(destino), { recursive: true });
+    await writeFile(destino, contenido, 'utf8');
+  }
+
+  let codigo = 0;
+  let salida = '';
+  try {
+    const { stdout, stderr } = await ejecutar(
+      'node',
+      [join(RAIZ, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build'],
+      { cwd: proyecto, env: { ...process.env, FORCE_COLOR: '0', ASTRO_TELEMETRY_DISABLED: '1' } },
+    );
+    salida = `${stdout}\n${stderr}`;
+  } catch (error) {
+    const e = error as { code?: number; stdout?: string; stderr?: string };
+    codigo = e.code ?? 1;
+    salida = `${e.stdout ?? ''}\n${e.stderr ?? ''}`;
+  }
+
+  if (opciones.conservar === false) await limpiar(proyecto);
+  return { codigo, salida, proyecto };
+}
+
+export async function limpiar(proyecto: string): Promise<void> {
+  await rm(proyecto, { recursive: true, force: true });
+}
+
+// ─── Piezas de corpus válidas, para partir de algo que sí construye ──────────
+
+export const AUTOR_VALIDO = `nombre: Séneca
+añoNacimiento: -4
+añoFallecimiento: 65
+semblanza: Filósofo estoico hispanorromano, tutor y después consejero de Nerón.
+`;
+
+export const TEMA_VALIDO = `nombre: El tiempo
+`;
+
+export function citaValida(campos: Partial<Record<string, unknown>> = {}): string {
+  const base: Record<string, unknown> = {
+    texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
+    autor: 'seneca',
+    temas: ['el-tiempo'],
+    slug: 'seneca-no-es-que-tengamos-poco-tiempo',
+    procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
+    estadoDerechos: 'dominio-público',
+  };
+  const fusion = { ...base, ...campos };
+  for (const [clave, valor] of Object.entries(fusion)) {
+    if (valor === undefined) delete fusion[clave];
+  }
+  return `---\n${aYaml(fusion)}---\n`;
+}
+
+/** Serializador YAML mínimo, suficiente para el frontmatter de estas pruebas. */
+function aYaml(objeto: Record<string, unknown>, sangria = ''): string {
+  let salida = '';
+  for (const [clave, valor] of Object.entries(objeto)) {
+    if (Array.isArray(valor)) {
+      salida += `${sangria}${clave}:\n`;
+      for (const elemento of valor) salida += `${sangria}  - ${JSON.stringify(elemento)}\n`;
+    } else if (valor !== null && typeof valor === 'object') {
+      const anidado = aYaml(valor as Record<string, unknown>, `${sangria}  `);
+      // Un objeto sin claves debe emitirse como `{}`. Emitir `clave:` a secas produce
+      // `null` al parsear, que es un caso distinto y se prueba por separado.
+      salida += anidado
+        ? `${sangria}${clave}:\n${anidado}`
+        : `${sangria}${clave}: {}\n`;
+    } else {
+      salida += `${sangria}${clave}: ${JSON.stringify(valor)}\n`;
+    }
+  }
+  return salida;
+}

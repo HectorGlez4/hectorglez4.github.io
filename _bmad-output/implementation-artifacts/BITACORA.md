@@ -23,3 +23,34 @@ contratado; vive solo en `astro.config.mjs`, así que cambiarlo es una línea. S
 «no hay `package.json` todavía»; a partir de esta historia es falso. No se edita a mano
 porque lo regenera `bmad-project-context`. Conviene volver a ejecutar esa skill al
 cerrar la Épica 1.
+
+---
+
+## 1.2 — La puerta de admisión vive en el esquema
+
+**Verificado.** Nueve pruebas construyen un proyecto aislado con un corpus fabricado y
+comprueban el código de salida y el mensaje: una Cita válida construye; sin procedencia,
+con procedencia que no documenta nada, sin texto, con `estadoDerechos` distinto de
+`dominio-público` y con un Autor sin `añoFallecimiento` rompen el build. El mensaje trae
+la ruta del fichero y la regla incumplida.
+
+**Resuelto en el camino — dos hallazgos reales.**
+
+1. El PRD §265 zanja la aparente contradicción entre «procedencia obligatoria» (1.2) y
+   «Cita sin procedencia documentada» (2.1): *una Cita sin Procedencia no pasa a
+   publicada, queda en revisión*. Así que el campo es obligatorio y debe documentar algo
+   —obra, año o referencia—; «ausente» no es un estado que `corpus/citas/` admita. La
+   distinción completa/parcial que audita la 1.8 es la presencia de `obra` **y** `año`.
+2. `procedencia:` sin nada debajo —la forma natural de escribir «esto no lo tengo»— la
+   lee YAML como `null`, y Astro lo reportaba como ``Expected type `object`, received
+   `object` `` porque `typeof null` es `"object"`. El build fallaba, sí, pero con un
+   mensaje inservible, incumpliendo el criterio de que indique la regla. Se preprocesa el
+   nulo a objeto vacío para que responda el refinamiento con el texto de la regla.
+
+**Decidido.** El `texto` de la Cita vive en el frontmatter y no en el cuerpo del markdown:
+el procesador aplica SmartyPants y reescribiría comillas y guiones, lo que NFR-12 prohíbe.
+
+**Hueco abierto.** Una Cita que referencia un Autor inexistente **no** rompe el build hoy:
+Astro valida las referencias de forma perezosa y ninguna página consulta todavía las
+colecciones. Queda anotado para cerrarlo en `publicado.ts`, que por AD-11 es el dueño del
+conjunto publicable y el sitio natural de la integridad referencial.
