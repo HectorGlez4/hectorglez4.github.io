@@ -15,12 +15,21 @@
 
 import { z } from 'astro/zod';
 
-/** Un año como entero. Ni fechas completas ni cadenas: el modelo dice entero. */
-export const año = z
-  .number({ message: 'El año debe ser un número entero.' })
-  .int('El año debe ser un número entero, no un decimal.')
-  .min(-800, 'El año queda fuera del rango que admite el corpus.')
-  .max(new Date().getFullYear(), 'El año no puede ser futuro.');
+/**
+ * Un año como entero. Ni fechas completas ni cadenas: el modelo dice entero.
+ *
+ * El mensaje es parámetro porque el que sirve cuando el valor es de otro tipo no sirve
+ * cuando el campo falta. «El año debe ser un número entero» ante un campo ausente deja al
+ * editor buscando un año mal escrito que no existe, en lugar de decirle que lo añada.
+ */
+export const añoEntero = (mensaje = 'El año debe ser un número entero.') =>
+  z
+    .number({ message: mensaje })
+    .int('El año debe ser un número entero, no un decimal.')
+    .min(-800, 'El año queda fuera del rango que admite el corpus.')
+    .max(new Date().getFullYear(), 'El año no puede ser futuro.');
+
+export const año = añoEntero();
 
 export const MENSAJE_PROCEDENCIA_VACIA =
   'Regla incumplida: la Procedencia no documenta nada. Declare al menos obra, año o ' +
@@ -105,7 +114,10 @@ export const nombre = (entidad: string) =>
 
 /** AD-1 — sin año de fallecimiento no hay forma de sostener que la obra es de dominio
  * público. Es obligatorio y su ausencia rompe el build (FR-13, FR-15). */
-export const añoFallecimiento = año;
+export const añoFallecimiento = añoEntero(
+  'Regla incumplida: falta el año de fallecimiento del Autor. Es obligatorio porque es ' +
+    'lo que sostiene que su obra está en dominio público.',
+);
 
 export const semblanza = z
   .string({ message: 'Regla incumplida: falta la semblanza del Autor.' })

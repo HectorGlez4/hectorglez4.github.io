@@ -165,3 +165,30 @@ lo ya publicado, lo que está en revisión y la repetición dentro del propio lo
 exactamente el caso que describe la historia —incorporar un lote de un autor recién
 entrado en dominio público— y detectarlo solo mañana, en el siguiente lote, sería llegar
 tarde.
+
+---
+
+## 1.7 — Gestión de Autores y Temas
+
+**Verificado.** 15 pruebas más una pasada real de las tres órdenes. Crear un Autor sin año
+de fallecimiento se rechaza y **no deja un Autor a medias** en el corpus. Un Tema con
+Citas publicadas no se elimina y el rechazo dice cuántas lo usan y cuáles. El marcado de
+portada queda escrito en el fichero de la Cita, y al desmarcar el campo se omite en lugar
+de escribirse como `false`. Una prueba compara el fichero antes y después de marcar y
+exige que lo único que cambie sea esa línea: NFR-12 prohíbe que el sistema altere el texto
+de una Cita publicada.
+
+**Decidido.** Editar un Autor no renombra su fichero aunque cambie el nombre. El slug es
+su URL pública y recalcularlo rompería los enlaces entrantes — el mismo razonamiento de
+AD-4 aplicado al Autor, que la espina no dice explícitamente pero que NFR-4 exige igual.
+
+**Corregido al pasar el CLI.** Omitir `añoFallecimiento` respondía «El año debe ser un
+número entero», que ante un campo ausente deja al editor buscando un año mal escrito que
+no existe. `añoEntero(mensaje)` pasa a ser una fábrica para que el mensaje del campo
+obligatorio diga que falta y por qué importa.
+
+**Añadido.** `src/lib/umbrales.ts` con los tres umbrales de AD-9 más el de Citas
+relacionadas de UX-DR17, y una prueba que recorre `src/` y falla si alguien vuelve a
+escribir 15, 300 o 50 como literal. `tools/tema.ts listar` muestra cuántas Citas tiene
+cada Tema y cuántas le faltan para publicarse, que es la pregunta que se hace el editor
+al mirar la lista.
