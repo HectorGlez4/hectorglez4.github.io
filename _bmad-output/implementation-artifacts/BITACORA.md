@@ -112,3 +112,33 @@ encontraría. Hay prueba que lo fija.
 **Decidido — `slugDeCita` no admite Temas en su firma.** AD-4 prohíbe que el Tema
 participe en la ruta de una Cita. Dejarlo fuera de la firma hace que lo prohibido no
 pueda ni escribirse, en lugar de confiar en que nadie lo pase.
+
+---
+
+## 1.5 — Alta de Citas por lote
+
+**Verificado.** 10 pruebas sobre corpus temporales en disco, más una pasada real del CLI:
+las completas van a `corpus/citas/` con su slug generado y el nombre de fichero
+`{slug-autor}--{fragmento}.md`; las incompletas a `corpus/_revision/`; el informe da una
+frase por regla incumplida; un Autor inexistente se señala y **no** se crea; dos Citas del
+mismo Autor que empiezan igual reciben slugs distintos sin tocar el de la que ya estaba;
+`--seco` calcula el informe sin escribir nada.
+
+**Estructural.** Las reglas de admisión se extraen a `src/lib/admision.ts`.
+`content.config.ts` las cablea a las colecciones —ahí siguen siendo la puerta de AD-1— y
+la herramienta importa **las mismas**. El motivo es concreto: una copia de las reglas en
+`tools/` podría aceptar una Cita que el build rechaza después, y el editor descubriría el
+desacuerdo al construir en lugar de al dar de alta. Hay prueba que fija que ninguna
+herramienta redeclare el estado de derechos.
+
+**Dos correcciones al pasar el CLI de verdad.** Omitir `procedencia` entera daba «expected
+object, received undefined» —correcto y en inglés, pero no dice qué hacer—; ahora responde
+con la regla. Y el registro que se escribe al fichero se construye explícitamente en lugar
+de volcar la salida de `safeParse`: al validar, Zod rellena los campos con valor por
+defecto y toda Cita habría salido con `aptaParaPortada: false` y `temas: []`, contra la
+convención de omitir lo que no tiene valor, y además invitando a leer ese `false` como una
+decisión tomada cuando es la ausencia de decisión.
+
+**Aplazado a propósito.** El corpus real no se siembra todavía. Sembrarlo con las
+herramientas —y no a mano— es la demostración honesta de que funcionan, así que se hace al
+cerrar la 1.7, cuando exista también la gestión de Autores y Temas.

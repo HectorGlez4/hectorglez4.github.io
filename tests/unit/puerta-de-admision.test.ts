@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   AUTOR_VALIDO,
@@ -103,11 +103,33 @@ describe('Historia 1.2 — el criterio de admisión rompe el build', () => {
 });
 
 describe('Historia 1.2 — la puerta no vive en tools/', () => {
-  it('el esquema declara las tres reglas de admisión', () => {
+  it('las tres reglas se declaran en src/lib/admision.ts', () => {
+    const reglas = readFileSync(resolve(RAIZ, 'src/lib/admision.ts'), 'utf8');
+    expect(reglas).toMatch(/procedencia/);
+    expect(reglas).toMatch(/añoFallecimiento/);
+    expect(reglas).toMatch(/dominio-público/);
+  });
+
+  it('el esquema de contenido las cablea a las colecciones', () => {
+    // Declararlas no basta: la puerta existe porque las colecciones las aplican.
     const esquema = readFileSync(resolve(RAIZ, 'src/content.config.ts'), 'utf8');
-    expect(esquema).toMatch(/procedencia/);
-    expect(esquema).toMatch(/añoFallecimiento/);
-    expect(esquema).toMatch(/dominio-público/);
+    expect(esquema).toMatch(/from '\.\/lib\/admision\.js'/);
+    for (const regla of ['procedencia', 'añoFallecimiento', 'estadoDerechos']) {
+      expect(esquema, `el esquema no aplica ${regla}`).toMatch(new RegExp(regla));
+    }
+  });
+
+  it('ninguna herramienta redefine las reglas por su cuenta', () => {
+    // Una copia de las reglas en `tools/` podría aceptar una Cita que el build luego
+    // rechaza, y el editor descubriría el desacuerdo al construir en vez de al dar
+    // de alta. Las herramientas importan; no redeclaran.
+    for (const herramienta of readdirSync(resolve(RAIZ, 'tools'))) {
+      if (!/\.(ts|mjs)$/.test(herramienta)) continue;
+      const codigo = readFileSync(resolve(RAIZ, 'tools', herramienta), 'utf8');
+      expect(codigo, `${herramienta} redeclara el estado de derechos`).not.toMatch(
+        /z\.literal\(\s*['"]dominio-público/,
+      );
+    }
   });
 
   it('el fallo de validación es un fallo de build y no se degrada a aviso', () => {

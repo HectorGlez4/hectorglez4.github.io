@@ -1,0 +1,248 @@
+/**
+ * Alta de Citas, individual o por lote — FR-13.
+ *
+ * Es comodidad, no puerta: la puerta vive en el esquema (AD-1) y esta herramienta
+ * importa **las mismas** reglas desde `src/lib/admision.ts` en lugar de reimplementarlas,
+ * para que no pueda aceptar una Cita que el build luego rechaza.
+ *
+ * Lo que aporta sobre editar ficheros a mano es el reparto: las Citas completas van a
+ * `corpus/citas/` con su slug generado, las incompletas a `corpus/_revision/` —donde no
+ * las carga ninguna colección (AD-2)— y el informe dice, por cada una que no se publica,
+ * qué regla incumplió. Sin eso, incorporar un lote de cincuenta obliga a revisarlas todas.
+ *
+ * Uso:
+ *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco]
+ */
+
+import { readFile } from 'node:fs/promises';
+import { parse as parsearYaml } from 'yaml';
+import { citaAdmisible, gradoDeProcedencia, type CitaAdmisible } from '../src/lib/admision.ts';
+import { normalizar } from '../src/lib/normalizar.ts';
+import { slugDeAutor, slugDeCita, slugDeTema, slugLibre } from '../src/lib/slug.ts';
+import {
+  escribirCita,
+  leerAutores,
+  leerCitas,
+  leerTemas,
+  nombreDeFicheroDeCita,
+  rutasDelCorpus,
+  type Rutas,
+} from './lib/corpus.ts';
+
+/** Una entrada del lote, tal como la escribe el editor. Sin slug: lo genera el alta. */
+export interface EntradaDeLote {
+  texto?: string;
+  autor?: string;
+  temas?: string[];
+  procedencia?: { obra?: string; año?: number; referencia?: string };
+  aptaParaPortada?: boolean;
+}
+
+export interface CitaPublicada {
+  slug: string;
+  ruta: string;
+  texto: string;
+  grado: 'completa' | 'parcial';
+}
+
+export interface CitaRechazada {
+  texto: string;
+  ruta: string | null;
+  /** Una línea por regla incumplida. Es lo que el editor lee para saber qué completar. */
+  motivos: string[];
+}
+
+export interface InformeDeAlta {
+  publicadas: CitaPublicada[];
+  enRevision: CitaRechazada[];
+  /** Autores citados en el lote que no existen en el corpus. No se crean (FR-15). */
+  autoresDesconocidos: string[];
+}
+
+/**
+ * Da de alta un lote.
+ *
+ * `--seco` (opción `seco`) calcula el informe sin escribir nada, para poder ver qué haría
+ * antes de tocar el corpus.
+ */
+export async function darDeAltaLote(
+  lote: EntradaDeLote[],
+  rutas: Rutas,
+  opciones: { seco?: boolean } = {},
+): Promise<InformeDeAlta> {
+  const autores = await leerAutores(rutas);
+  const temas = await leerTemas(rutas);
+  const yaPublicadas = await leerCitas(rutas.citas);
+
+  const slugsDeAutor = new Set(autores.map((a) => a.slug));
+  const slugsDeTema = new Set(temas.map((t) => t.slug));
+  const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
+
+  const informe: InformeDeAlta = { publicadas: [], enRevision: [], autoresDesconocidos: [] };
+
+  for (const entrada of lote) {
+    const texto = entrada.texto ?? '';
+    const motivos: string[] = [];
+
+    // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
+    const referenciaAutor = entrada.autor ?? '';
+    const slugAutor = slugsDeAutor.has(referenciaAutor)
+      ? referenciaAutor
+      : slugDeAutor(referenciaAutor);
+
+    if (referenciaAutor === '') {
+      motivos.push('Regla incumplida: falta el Autor de la Cita.');
+    } else if (!slugsDeAutor.has(slugAutor)) {
+      // FR-15 — se señala, no se crea. Un Autor creado aquí saldría sin año de
+      // fallecimiento, y ese hueco bloquearía después la publicación de todas sus
+      // Citas sin que nadie recuerde de dónde salió.
+      motivos.push(
+        `El Autor «${referenciaAutor}» no existe en el corpus. Créelo antes con ` +
+          `«npx tsx tools/autor.ts crear», con su año de fallecimiento. El alta no lo ` +
+          'crea por su cuenta para no dejar un Autor incompleto.',
+      );
+      if (!informe.autoresDesconocidos.includes(referenciaAutor)) {
+        informe.autoresDesconocidos.push(referenciaAutor);
+      }
+    }
+
+    // ── Temas: se avisa de los desconocidos, pero no impiden publicar ──
+    const temasResueltos = (entrada.temas ?? []).map((t) =>
+      slugsDeTema.has(t) ? t : slugDeTema(t),
+    );
+    const temasDesconocidos = temasResueltos.filter((t) => !slugsDeTema.has(t));
+    if (temasDesconocidos.length > 0) {
+      motivos.push(
+        `Tema desconocido: ${temasDesconocidos.map((t) => `«${t}»`).join(', ')}. ` +
+          'Créelo antes o retírelo de la Cita.',
+      );
+    }
+
+    // ── Las reglas de admisión, las mismas que aplica el build ──
+    const slugBase = slugDeCita(slugAutor, texto);
+    const candidata = {
+      texto,
+      autor: slugAutor,
+      temas: temasResueltos,
+      slug: slugLibre(slugBase, slugsOcupados),
+      procedencia: entrada.procedencia,
+      estadoDerechos: 'dominio-público' as const,
+      // Solo se registra el sí. El esquema ya da `false` por defecto, así que escribir
+      // `aptaParaPortada: false` en cada Cita del corpus sería ruido que además invita
+      // a leerlo como una decisión tomada, cuando es la ausencia de decisión.
+      ...(entrada.aptaParaPortada === true ? { aptaParaPortada: true } : {}),
+    };
+
+    const validada = citaAdmisible.safeParse(candidata);
+    if (!validada.success) {
+      for (const issue of validada.error.issues) {
+        const campo = issue.path.join('.');
+        motivos.push(campo ? `${campo}: ${issue.message}` : issue.message);
+      }
+    }
+
+    const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
+
+    if (motivos.length > 0 || !validada.success) {
+      // A revisión con lo que se sepa. El fichero conserva el trabajo hecho para que
+      // completarlo sea rellenar un campo, no volver a teclear la Cita.
+      const ruta = opciones.seco
+        ? null
+        : await escribirCita(rutas.revision, nombreFichero, candidata);
+      informe.enRevision.push({ texto, ruta, motivos });
+      continue;
+    }
+
+    const ruta = opciones.seco
+      ? ''
+      : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
+    slugsOcupados.add(candidata.slug);
+    informe.publicadas.push({
+      slug: candidata.slug,
+      ruta,
+      texto,
+      grado: gradoDeProcedencia(validada.data.procedencia) === 'completa' ? 'completa' : 'parcial',
+    });
+  }
+
+  return informe;
+}
+
+/**
+ * El registro que se escribe al fichero.
+ *
+ * No se escribe la salida de `safeParse` tal cual: al validar, Zod rellena los campos con
+ * valor por defecto, de modo que toda Cita saldría con `aptaParaPortada: false` y
+ * `temas: []`. Eso contradice la convención —un campo sin valor se omite— y además
+ * invita a leer el `false` como una decisión tomada cuando es la ausencia de decisión.
+ */
+function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
+  return {
+    texto: datos.texto,
+    autor: datos.autor,
+    ...(datos.temas.length > 0 ? { temas: datos.temas } : {}),
+    slug: datos.slug,
+    procedencia: datos.procedencia,
+    estadoDerechos: datos.estadoDerechos,
+    ...(datos.aptaParaPortada ? { aptaParaPortada: true } : {}),
+  };
+}
+
+/** Informe legible en terminal. Sin colores: se lee igual en un registro de CI. */
+export function formatearInforme(informe: InformeDeAlta): string {
+  const lineas: string[] = [];
+
+  lineas.push(`Publicadas: ${informe.publicadas.length}`);
+  for (const c of informe.publicadas) {
+    lineas.push(`  ✓ ${c.slug}  (procedencia ${c.grado})`);
+  }
+
+  lineas.push('', `En revisión: ${informe.enRevision.length}`);
+  for (const c of informe.enRevision) {
+    lineas.push(`  · «${recortar(c.texto)}»`);
+    for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
+  }
+
+  if (informe.autoresDesconocidos.length > 0) {
+    lineas.push('', 'Autores que no existen en el corpus:');
+    for (const a of informe.autoresDesconocidos) lineas.push(`  · ${a}`);
+  }
+
+  return lineas.join('\n');
+}
+
+function recortar(texto: string, maximo = 60): string {
+  const limpio = texto.trim();
+  return limpio.length <= maximo ? limpio : `${limpio.slice(0, maximo - 1)}…`;
+}
+
+/** Índice de textos ya presentes en forma canónica. Lo consume la Historia 1.6. */
+export async function textosCanonicosDelCorpus(rutas: Rutas): Promise<Map<string, string>> {
+  const citas = await leerCitas(rutas.citas);
+  return new Map(citas.map((c) => [normalizar(c.texto), c.slug]));
+}
+
+// ─── CLI ─────────────────────────────────────────────────────────────────────
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const argumentos = process.argv.slice(2);
+  const fichero = argumentos.find((a) => !a.startsWith('--'));
+  const seco = argumentos.includes('--seco');
+  const indiceCorpus = argumentos.indexOf('--corpus');
+  const raizCorpus = indiceCorpus === -1 ? 'corpus' : argumentos[indiceCorpus + 1];
+
+  if (!fichero) {
+    process.stderr.write('Uso: npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco]\n');
+    process.exit(2);
+  }
+
+  const lote = parsearYaml(await readFile(fichero, 'utf8')) as EntradaDeLote[];
+  if (!Array.isArray(lote)) {
+    process.stderr.write('El lote debe ser una lista de Citas.\n');
+    process.exit(2);
+  }
+
+  const informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco });
+  process.stdout.write(`${formatearInforme(informe)}\n`);
+  if (seco) process.stdout.write('\n(Ejecución en seco: no se ha escrito nada.)\n');
+}
