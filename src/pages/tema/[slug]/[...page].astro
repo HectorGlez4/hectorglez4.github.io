@@ -1,0 +1,84 @@
+---
+/**
+ * Página de Tema — FR-6.
+ *
+ * Un Tema por debajo de `MIN_CITAS_POR_TEMA` no se publica. Como en la Página de Autor,
+ * aquí no hay ninguna comprobación de umbral: `temasPublicados` no devuelve el Tema, la
+ * ruta no se genera y su URL da 404. El umbral se aplica en un solo sitio (AD-11) y todas
+ * las superficies —rutas, sitemap, chips— heredan la misma respuesta.
+ *
+ * A diferencia de la Página de Autor, aquí cada tarjeta lleva el nombre del Autor: el
+ * Tema agrupa a varios y sin el nombre el listado no dice de quién es cada frase.
+ */
+import Armazon from '../../../components/Armazon.astro';
+import Paginacion from '../../../components/Paginacion.astro';
+import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
+import {
+  citasDeTema,
+  conjuntoPublicable,
+  temasPublicados,
+  type Autor,
+  type Cita,
+} from '../../../lib/publicado.ts';
+import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const conjunto = await conjuntoPublicable();
+  const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+
+  return temasPublicados(conjunto.temas, conjunto.citas).flatMap((tema) =>
+    paginate(citasDeTema(conjunto.citas, tema.slug), {
+      params: { slug: tema.slug },
+      props: { tema, autores },
+      pageSize: CITAS_POR_PAGINA,
+    }),
+  );
+}) satisfies GetStaticPaths;
+
+const { tema, autores } = Astro.props as { tema: { slug: string; nombre: string }; autores: Map<string, Autor> };
+const pagina = Astro.props.page as import('astro').Page<Cita>;
+
+const rutaBase = `/tema/${tema.slug}`;
+const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
+const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
+---
+
+<Armazon
+  titulo={`${tema.nombre}${sufijo} | Sabiduría Diaria`}
+  descripcion={`Citas sobre ${tema.nombre.toLocaleLowerCase('es')}, de varios autores, con su procedencia documentada.`}
+  ruta={ruta}
+  noIndexar={pagina.currentPage > 1}
+>
+  <div class="pagina contenedor">
+    <h1>{tema.nombre}</h1>
+
+    <ul class="listado">
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} />)}
+    </ul>
+
+    <Paginacion pagina={pagina} />
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  h1 {
+    /* La serif se aplica al nombre de Tema: es la tercera de las tres excepciones. */
+    font-family: var(--serif);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .listado {
+    list-style: none;
+    margin: calc(var(--unidad) * 4) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+</style>

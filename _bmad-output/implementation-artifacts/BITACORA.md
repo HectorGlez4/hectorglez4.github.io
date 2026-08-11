@@ -363,3 +363,24 @@ seguidos. La paginación pierde el suyo y se separa con aire. Hay prueba de regr
 `clave:` a secas, que YAML lee como `null`, y el esquema respondía «Expected array,
 received object» — `typeof null` otra vez. Y un `afterAll` que limpiaba sin comprobar
 reventaba con un `TypeError` cuando el build había fallado, tapando el error de verdad.
+
+---
+
+## 2.5 — Página de Tema con umbral de publicación
+
+**Verificado en los dos sentidos contra el corpus real.** «La vida» (17 Citas) y «El
+saber» (15) se publican; los otros seis Temas se quedan por debajo. 14 funcionales: la
+página publicada muestra Citas de varios Autores —se comprueba que hay más de un nombre
+distinto—, cada enlace del listado devuelve 200, el nombre del Tema es el `h1` y va en
+serif, y está en el sitemap. Un Tema por debajo del umbral da 404 y no aparece en el
+sitemap.
+
+**La prueba que cierra AD-11.** Se recorre el sitemap, se extrae cada `/tema/…` y se pide
+cada uno: todos deben devolver 200. Es la divergencia concreta que AD-11 existe para
+impedir —una superficie publica un Tema que otra no— comprobada de extremo a extremo en
+lugar de por inspección del código.
+
+**Sin comprobación de umbral en la página.** Como en la Página de Autor, el umbral no se
+aplica aquí: `temasPublicados` no devuelve el Tema, la ruta no se genera, y el 404 sale
+solo. La única diferencia con el listado de Autor es que cada tarjeta lleva el nombre del
+Autor, porque un Tema agrupa a varios y sin el nombre no se sabe de quién es cada frase.
