@@ -441,3 +441,31 @@ porque sin él la portada tendría una sola salida.
 **Nota sobre los datos estructurados y AD-6.** El `ld+json` es un `<script>` en el marcado
 pero no es JavaScript ejecutable: el navegador no lo descarga ni lo ejecuta. Hay prueba de
 que la página sigue sin pedir ningún fichero de script.
+
+---
+
+## 2.8 — Accesibilidad y comportamiento responsive
+
+**Verificado.** 19 pruebas × 2 viewports. **axe-core con las reglas wcag2a, wcag2aa,
+wcag21a y wcag21aa: cero violaciones en las cuatro superficies** (portada, Cita, Autor,
+Tema). Anillo de foco de 2px con 2px de separación, comprobado sobre el estilo calculado;
+ningún elemento enfocable con el indicador suprimido; el enlace de salto es lo primero que
+recibe foco; 360px sin desplazamiento horizontal; zoom al 200 % sin pérdida de contenido;
+el ancho extra de escritorio da exactamente los mismos elementos que en tablet —ni una
+columna lateral—; ninguna superficie muestra modal, aviso ni nada fijo que tape el
+contenido; con `prefers-reduced-motion` no queda ni una transición viva, y sin él ninguna
+pasa de 150 ms.
+
+**Defecto encontrado y corregido.** El enlace del nombre del Autor en la atribución medía
+unos 18px de alto —el tamaño de su caja de texto a 13px—, muy por debajo de los 44px de
+UX-DR22, y es precisamente el enlace que abre la ruta de salida principal desde una
+Página de Cita en móvil. Se agranda el área sensible con relleno y se devuelve el ritmo
+vertical con margen negativo, así que la maquetación no se mueve un píxel.
+
+**Contradicción del spec, resuelta y anotada.** EXPERIENCE.md pide «contenido primero,
+acciones después, navegación al final». Leído como orden de toda la página, obligaría a
+poner la cabecera detrás del `main` en el marcado y recolocarla con CSS — y eso desalinea
+el orden visual del de foco, que es un incumplimiento de WCAG 2.4.3: arreglaría la letra
+de un criterio rompiendo el de al lado, en la misma historia. Leído como el orden **dentro
+de la Página de Cita** —Cita, luego copiar, luego salidas— es coherente y es lo que está
+construido. Se prueba así, y la cabecera la resuelve el enlace de salto.

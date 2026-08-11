@@ -64,6 +64,17 @@ const procedencia = frases.map((f) => (/[.?!]$/.test(f) ? f : `${f}.`)).join(' '
     /* En tinta, no en siena: el nombre es información, no una acción. */
     color: var(--tinta);
     text-decoration: none;
+
+    /*
+     * UX-DR22 — zona de toque de 44px. El nombre se compone a 13px, así que su caja de
+     * texto mide unos 18: en móvil es un blanco difícil justo para el enlace que abre
+     * la ruta de salida principal. El relleno crece el área sensible y el margen
+     * negativo lo devuelve todo a su sitio, de modo que el ritmo vertical de 8px no se
+     * mueve ni un píxel.
+     */
+    display: inline-block;
+    padding-block: 13px;
+    margin-block: -13px;
   }
 
   .autor a:hover {
