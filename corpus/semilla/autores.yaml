@@ -1,0 +1,93 @@
+# Autores de la siembra inicial. Todos fallecidos hace más de ochenta años, así que su
+# obra está en dominio público en el ámbito panhispánico.
+#
+# Este fichero se conserva en el repositorio a propósito: es el registro auditable de
+# qué entró al corpus y con qué datos. No lo lee ninguna colección — vive fuera de
+# corpus/{citas,autores,temas}/ y por tanto fuera del alcance del build.
+
+- nombre: Séneca
+  nacimiento: -4
+  fallecimiento: 65
+  semblanza: >-
+    Filósofo estoico nacido en Córdoba, tutor y después consejero de Nerón. Su obra moral,
+    escrita casi toda en forma de carta o de diálogo, trata de cómo vivir con lo que no se
+    puede cambiar.
+
+- nombre: Miguel de Cervantes
+  nacimiento: 1547
+  fallecimiento: 1616
+  semblanza: >-
+    Soldado en Lepanto, cautivo en Argel y recaudador de impuestos antes que novelista.
+    Publicó la primera parte del Quijote a los cincuenta y siete años.
+
+- nombre: Baltasar Gracián
+  nacimiento: 1601
+  fallecimiento: 1658
+  semblanza: >-
+    Jesuita aragonés y escritor de una prosa comprimida hasta el hueso. Su Oráculo manual
+    reúne trescientas máximas sobre cómo conducirse entre los demás.
+
+- nombre: Sor Juana Inés de la Cruz
+  nacimiento: 1648
+  fallecimiento: 1695
+  semblanza: >-
+    Monja jerónima novohispana, poeta y erudita. Defendió por escrito el derecho de las
+    mujeres al estudio en una época que se lo negaba.
+
+- nombre: Teresa de Jesús
+  nacimiento: 1515
+  fallecimiento: 1582
+  semblanza: >-
+    Religiosa y escritora abulense, reformadora del Carmelo. Escribió sobre la vida
+    interior en una prosa deliberadamente llana.
+
+- nombre: Francisco de Quevedo
+  nacimiento: 1580
+  fallecimiento: 1645
+  semblanza: >-
+    Poeta y prosista del Siglo de Oro, capaz del insulto más afilado y del soneto amoroso
+    más grave sin cambiar de registro.
+
+- nombre: Concepción Arenal
+  nacimiento: 1820
+  fallecimiento: 1893
+  semblanza: >-
+    Jurista y reformadora social gallega. Asistió de oyente a las clases de Derecho
+    vestida de hombre porque no se admitía a mujeres, y dedicó su obra a las cárceles y a
+    la beneficencia.
+
+- nombre: Rosalía de Castro
+  nacimiento: 1837
+  fallecimiento: 1885
+  semblanza: >-
+    Poeta gallega, figura central del Rexurdimento. Escribió en gallego y en castellano
+    sobre la emigración, la pérdida y la tierra.
+
+- nombre: José Martí
+  nacimiento: 1853
+  fallecimiento: 1895
+  semblanza: >-
+    Poeta, periodista y organizador de la independencia cubana. Murió en combate a los
+    cuarenta y dos años.
+
+- nombre: Santiago Ramón y Cajal
+  nacimiento: 1852
+  fallecimiento: 1934
+  semblanza: >-
+    Histólogo aragonés, premio Nobel por describir la neurona como unidad independiente.
+    Escribió también sobre el oficio de investigar y sobre la voluntad.
+
+- nombre: Miguel de Unamuno
+  nacimiento: 1864
+  fallecimiento: 1936
+  semblanza: >-
+    Filósofo y novelista vasco, rector de Salamanca en tres ocasiones y destituido otras
+    tantas. Escribió sobre la contradicción entre lo que la razón admite y lo que el
+    hombre necesita.
+
+- nombre: Antonio Machado
+  nacimiento: 1875
+  fallecimiento: 1939
+  semblanza: >-
+    Poeta sevillano y profesor de francés. Murió en Colliure semanas después de cruzar la
+    frontera a pie con su madre.

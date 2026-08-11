@@ -192,3 +192,54 @@ relacionadas de UX-DR17, y una prueba que recorre `src/` y falla si alguien vuel
 escribir 15, 300 o 50 como literal. `tools/tema.ts listar` muestra cuántas Citas tiene
 cada Tema y cuántas le faltan para publicarse, que es la pregunta que se hace el editor
 al mirar la lista.
+
+---
+
+## 1.8 — Auditoría de salud del Corpus
+
+**Verificado.** 13 pruebas sobre la función pura más una pasada real contra el corpus
+sembrado: 38 Citas publicadas, 52,6 % con procedencia completa, desglose por Autor
+ordenado de peor a mejor salud. Una procedencia parcial cuenta como no completa y el
+informe la separa de la ausente en lugar de agruparlas bajo un «sin verificar» común.
+
+**Dos decisiones que el criterio no fijaba.**
+
+1. **Un corpus vacío está al 100 %, no al 0 %.** No hay ninguna Cita sin verificar.
+   Reportar 0 % haría saltar la alarma el día que se arranca el proyecto, cuando no hay
+   nada que arreglar.
+2. **El desglose se ordena de peor a mejor salud**, y a igual porcentaje va primero quien
+   más Citas tiene. Ordenar por nombre obligaría a leer la lista entera para encontrar
+   dónde actuar; así el orden de lectura es ya el orden de trabajo.
+
+El informe explica además por qué el recuento de «sin procedencia» es cero: no es suerte
+ni falta de medición, es que el esquema no admite publicar una Cita cuya procedencia no
+documente nada. Un cero sin explicación se lee como «todavía no se ha medido».
+
+---
+
+## Cierre de la Épica 1 — siembra del corpus
+
+**Sembrado con las herramientas, no a mano.** `tools/sembrar.ts` crea los Autores y Temas
+y después da de alta las Citas **por la herramienta de alta**. Es deliberado: escribir los
+ficheros directamente habría producido un corpus que no demuestra nada sobre las
+herramientas y que podría contener cosas que el alta habría rechazado.
+
+**Resultado:** 12 Autores, 8 Temas, 38 Citas publicadas, 0 en revisión. «La vida» (17) y
+«El saber» (15) cruzan el umbral de 15; los otros seis Temas se quedan por debajo. Eso da
+la Historia 2.5 verificable en los dos sentidos —un Tema publicado y uno que debe dar
+404— contra el corpus real y no contra datos de prueba.
+
+**La segunda ejecución señaló las 38 como duplicados y no reescribió nada**, que es la
+idempotencia saliendo gratis de FR-14 sin código dedicado.
+
+**ADVERTENCIA, y es importante.** La siembra es un punto de partida, **no un corpus
+verificado**. La procedencia de cada Cita debe confirmarse contra una edición antes de
+publicar el sitio: la promesa del producto es que la atribución está comprobada, y una
+siembra sin comprobar la incumpliría desde el primer día. Donde el año no está establecido
+con seguridad se ha omitido, dejando la Cita como **parcial** —que es la verdad— en lugar
+de inventar una fecha que la haría figurar como completa. De ahí que la salud esté en el
+52,6 % y no más alta: las 18 parciales son trabajo editorial pendiente, y el número está
+ahí para que se vea.
+
+`corpus/semilla/` se conserva en el repositorio como registro auditable de qué entró y con
+qué datos. Vive fuera de `corpus/{citas,autores,temas}/`, así que ninguna colección lo carga.

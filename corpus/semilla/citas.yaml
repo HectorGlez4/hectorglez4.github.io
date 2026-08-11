@@ -1,0 +1,230 @@
+# Siembra inicial de Citas.
+#
+# ADVERTENCIA EDITORIAL. Estas entradas son un punto de partida, no un corpus verificado.
+# La procedencia de cada una debe confirmarse contra una edición antes de considerar el
+# sitio publicable: la promesa del producto es precisamente que la atribución está
+# comprobada, y una siembra sin comprobar la incumpliría desde el primer día.
+#
+# Donde el año de la obra no está establecido con seguridad se omite y queda `obra` sola.
+# Eso hace la Cita de procedencia **parcial**, que es la verdad, en vez de inventar una
+# fecha que la haría figurar como completa. La auditoría de la Historia 1.8 las cuenta
+# aparte justamente para que ese trabajo pendiente sea visible.
+
+# ── Séneca ───────────────────────────────────────────────────────────────────
+- texto: "No es que tengamos poco tiempo, es que perdemos mucho."
+  autor: Séneca
+  temas: [El tiempo, La vida]
+  procedencia: { obra: Sobre la brevedad de la vida, año: 49 }
+  aptaParaPortada: true
+
+- texto: "La vida, si sabes usarla, es larga."
+  autor: Séneca
+  temas: [El tiempo, La vida]
+  procedencia: { obra: Sobre la brevedad de la vida, año: 49 }
+  aptaParaPortada: true
+
+- texto: "Mientras esperamos vivir, la vida pasa."
+  autor: Séneca
+  temas: [El tiempo, La vida]
+  procedencia: { obra: Cartas a Lucilio, referencia: "Carta 1" }
+
+- texto: "No hay viento favorable para el que no sabe adónde va."
+  autor: Séneca
+  temas: [La vida, El saber]
+  procedencia: { obra: Cartas a Lucilio, referencia: "Carta 71" }
+  aptaParaPortada: true
+
+- texto: "Ninguna cosa se parece tanto a la injusticia como la justicia tardía."
+  autor: Séneca
+  temas: [La virtud]
+  procedencia: { obra: Cartas a Lucilio }
+
+# ── Miguel de Cervantes ──────────────────────────────────────────────────────
+- texto: "La libertad, Sancho, es uno de los más preciosos dones que a los hombres dieron los cielos."
+  autor: Miguel de Cervantes
+  temas: [La libertad, La vida]
+  procedencia: { obra: Don Quijote de la Mancha, año: 1615 }
+  aptaParaPortada: true
+
+- texto: "El que lee mucho y anda mucho, ve mucho y sabe mucho."
+  autor: Miguel de Cervantes
+  temas: [El saber, La vida]
+  procedencia: { obra: Don Quijote de la Mancha, año: 1605 }
+
+- texto: "Cada uno es hijo de sus obras."
+  autor: Miguel de Cervantes
+  temas: [La virtud, La vida]
+  procedencia: { obra: Don Quijote de la Mancha, año: 1605 }
+  aptaParaPortada: true
+
+- texto: "La pluma es la lengua del alma."
+  autor: Miguel de Cervantes
+  temas: [La palabra]
+  procedencia: { obra: Don Quijote de la Mancha, año: 1615 }
+
+- texto: "Bien predica quien bien vive."
+  autor: Miguel de Cervantes
+  temas: [La virtud, La palabra]
+  procedencia: { obra: Don Quijote de la Mancha, año: 1615 }
+
+# ── Baltasar Gracián ─────────────────────────────────────────────────────────
+- texto: "Lo bueno, si breve, dos veces bueno."
+  autor: Baltasar Gracián
+  temas: [La palabra]
+  procedencia: { obra: Oráculo manual y arte de prudencia, año: 1647 }
+  aptaParaPortada: true
+
+- texto: "Saber y saberlo mostrar es saber dos veces."
+  autor: Baltasar Gracián
+  temas: [El saber]
+  procedencia: { obra: Oráculo manual y arte de prudencia, año: 1647 }
+
+- texto: "El sabio hace luego lo que el necio al fin."
+  autor: Baltasar Gracián
+  temas: [El saber, El tiempo]
+  procedencia: { obra: Oráculo manual y arte de prudencia, año: 1647 }
+
+# ── Sor Juana Inés de la Cruz ────────────────────────────────────────────────
+- texto: "Yo no estudio para saber más, sino para ignorar menos."
+  autor: Sor Juana Inés de la Cruz
+  temas: [El saber]
+  procedencia: { obra: Respuesta a sor Filotea de la Cruz, año: 1691 }
+  aptaParaPortada: true
+
+- texto: "Hombres necios que acusáis a la mujer sin razón, sin ver que sois la ocasión de lo mismo que culpáis."
+  autor: Sor Juana Inés de la Cruz
+  temas: [La palabra, La virtud]
+  procedencia: { obra: Redondillas }
+
+# ── Teresa de Jesús ──────────────────────────────────────────────────────────
+- texto: "Nada te turbe, nada te espante, todo se pasa."
+  autor: Teresa de Jesús
+  temas: [La adversidad, La vida]
+  procedencia: { obra: Poesías, referencia: "Conocido como «Nada te turbe»" }
+  aptaParaPortada: true
+
+- texto: "La paciencia todo lo alcanza."
+  autor: Teresa de Jesús
+  temas: [La adversidad, La virtud]
+  procedencia: { obra: Poesías, referencia: "Conocido como «Nada te turbe»" }
+
+# ── Francisco de Quevedo ─────────────────────────────────────────────────────
+- texto: "Poderoso caballero es don Dinero."
+  autor: Francisco de Quevedo
+  temas: [La virtud]
+  procedencia: { obra: Letrillas satíricas }
+
+# ── Concepción Arenal ────────────────────────────────────────────────────────
+- texto: "Odia el delito y compadece al delincuente."
+  autor: Concepción Arenal
+  temas: [La virtud, La libertad]
+  procedencia: { referencia: "Lema de sus escritos sobre la reforma penitenciaria" }
+  aptaParaPortada: true
+
+- texto: "Abrid escuelas y se cerrarán cárceles."
+  autor: Concepción Arenal
+  temas: [El saber, La libertad]
+  procedencia: { referencia: "Atribuida en sus escritos sobre beneficencia y educación" }
+
+# ── Rosalía de Castro ────────────────────────────────────────────────────────
+- texto: "Yo no sé lo que busco eternamente en la tierra, en el aire y en el cielo."
+  autor: Rosalía de Castro
+  temas: [La vida, La adversidad]
+  procedencia: { obra: En las orillas del Sar, año: 1884 }
+  aptaParaPortada: true
+
+# ── José Martí ───────────────────────────────────────────────────────────────
+- texto: "Yo soy un hombre sincero de donde crece la palma."
+  autor: José Martí
+  temas: [La vida, La palabra]
+  procedencia: { obra: Versos sencillos, año: 1891 }
+  aptaParaPortada: true
+
+- texto: "Cultivo una rosa blanca en junio como en enero."
+  autor: José Martí
+  temas: [La amistad, La virtud]
+  procedencia: { obra: Versos sencillos, año: 1891 }
+  aptaParaPortada: true
+
+- texto: "Con los pobres de la tierra quiero yo mi suerte echar."
+  autor: José Martí
+  temas: [La libertad, La vida]
+  procedencia: { obra: Versos sencillos, año: 1891 }
+
+# ── Santiago Ramón y Cajal ───────────────────────────────────────────────────
+- texto: "Todo hombre puede ser, si se lo propone, escultor de su propio cerebro."
+  autor: Santiago Ramón y Cajal
+  temas: [El saber, La vida]
+  procedencia: { obra: Reglas y consejos sobre investigación científica, año: 1898 }
+  aptaParaPortada: true
+
+- texto: "Las ideas no duran mucho; hay que hacer algo con ellas."
+  autor: Santiago Ramón y Cajal
+  temas: [El saber, El tiempo]
+  procedencia: { obra: Charlas de café }
+
+# ── Miguel de Unamuno ────────────────────────────────────────────────────────
+- texto: "La fe que no duda es fe muerta."
+  autor: Miguel de Unamuno
+  temas: [El saber, La vida]
+  procedencia: { obra: Del sentimiento trágico de la vida, año: 1913 }
+
+- texto: "Sólo el que sabe es libre, y más libre el que más sabe."
+  autor: Miguel de Unamuno
+  temas: [El saber, La libertad]
+  procedencia: { referencia: "Atribuida en sus escritos sobre educación" }
+  aptaParaPortada: true
+
+# ── Antonio Machado ──────────────────────────────────────────────────────────
+- texto: "Caminante, no hay camino, se hace camino al andar."
+  autor: Antonio Machado
+  temas: [La vida, El tiempo]
+  procedencia: { obra: Campos de Castilla, año: 1912 }
+  aptaParaPortada: true
+
+- texto: "Despacito y buena letra: el hacer las cosas bien importa más que el hacerlas."
+  autor: Antonio Machado
+  temas: [La virtud, El tiempo]
+  procedencia: { obra: Campos de Castilla, año: 1912 }
+  aptaParaPortada: true
+
+- texto: "Todo necio confunde valor y precio."
+  autor: Antonio Machado
+  temas: [El saber, La virtud]
+  procedencia: { obra: Proverbios y cantares }
+
+- texto: "En mi soledad he visto cosas muy claras que no son verdad."
+  autor: Antonio Machado
+  temas: [La adversidad, El saber]
+  procedencia: { obra: Proverbios y cantares }
+
+- texto: "Es de necios confundir el ruido con la sabiduría."
+  autor: Antonio Machado
+  temas: [El saber, La palabra]
+  procedencia: { obra: Proverbios y cantares }
+
+# ── Ampliación: llevar «La vida» y «El saber» por encima del umbral de 15 ─────
+- texto: "Hoy es siempre todavía."
+  autor: Antonio Machado
+  temas: [El tiempo, La vida]
+  procedencia: { obra: Proverbios y cantares }
+
+- texto: "Donde una puerta se cierra, otra se abre."
+  autor: Miguel de Cervantes
+  temas: [La adversidad, La vida]
+  procedencia: { obra: Don Quijote de la Mancha, año: 1605 }
+
+- texto: "Quien a Dios tiene, nada le falta."
+  autor: Teresa de Jesús
+  temas: [La vida, La virtud]
+  procedencia: { obra: Poesías, referencia: "Conocido como «Nada te turbe»" }
+
+- texto: "Hacer es la mejor manera de decir."
+  autor: José Martí
+  temas: [La palabra, El saber]
+  procedencia: { referencia: "Atribuida en sus escritos periodísticos" }
+
+- texto: "En perseguirme, mundo, ¿qué interesas?"
+  autor: Sor Juana Inés de la Cruz
+  temas: [La adversidad, El saber]
+  procedencia: { obra: Sonetos }
