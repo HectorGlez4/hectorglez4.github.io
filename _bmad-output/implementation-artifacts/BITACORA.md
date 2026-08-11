@@ -336,3 +336,30 @@ Si Héctor prefiere el número, es una línea.
 porque `paginate()` de Astro exige ese nombre de parámetro. No aparece en ninguna URL —el
 segmento público es el número—, así que la convención del español se mantiene donde
 importa: en las rutas que ve el visitante y en los identificadores del dominio.
+
+---
+
+## 2.4 — Paginación de listados largos
+
+**Verificado.** 10 pruebas de build sobre un corpus fabricado de 62 Citas de un Autor, más
+revisión visual del sitio construido con ese corpus. Primera página con 50 tarjetas
+exactas; segunda con las 12 restantes; controles Anterior/Siguiente numerados y sin
+«Anterior» en la primera ni «Siguiente» en la última; la segunda declara
+`noindex, follow`; cada página su propia canónica; y ninguna Cita se pierde ni se repite
+entre páginas. Con exactamente 50 no aparece paginación y **no se genera** una segunda
+página vacía.
+
+**Decidido — no sembrar el corpus real para probar esto.** Habría hecho falta un Autor con
+más de 50 Citas, es decir cincuenta atribuciones inventadas en `corpus/citas/`: justo lo
+que el producto promete que no ocurre. El corpus fabricado vive en el arnés y se destruye
+al terminar.
+
+**Defecto visto en el navegador.** Entre el listado y los controles salían **dos filetes
+paralelos** separados por un hueco: el de cierre de la última tarjeta y el `border-top` de
+la paginación. UX-DR13 hace del filete de 1px el único separador del sistema, no dos
+seguidos. La paginación pierde el suyo y se separa con aire. Hay prueba de regresión.
+
+**Corregido en el arnés.** El serializador de fixtures emitía una lista vacía como
+`clave:` a secas, que YAML lee como `null`, y el esquema respondía «Expected array,
+received object» — `typeof null` otra vez. Y un `afterAll` que limpiaba sin comprobar
+reventaba con un `TypeError` cuando el build había fallado, tapando el error de verdad.

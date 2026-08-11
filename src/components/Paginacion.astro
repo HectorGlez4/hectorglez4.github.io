@@ -47,9 +47,12 @@ const { pagina } = Astro.props;
     align-items: center;
     justify-content: space-between;
     gap: var(--canal);
-    margin-top: calc(var(--unidad) * 4);
-    padding-top: calc(var(--unidad) * 3);
-    border-top: var(--grosor-filete) solid var(--filete);
+    /*
+     * Sin filete propio. El listado ya cierra con el de su última tarjeta, y añadir uno
+     * aquí dibujaba dos reglas paralelas separadas por un hueco — el único separador del
+     * sistema, duplicado. La separación la da el aire.
+     */
+    margin-top: calc(var(--unidad) * 3);
   }
 
   .paginacion a {

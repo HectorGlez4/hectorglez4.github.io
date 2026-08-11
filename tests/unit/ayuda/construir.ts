@@ -127,6 +127,13 @@ function aYaml(objeto: Record<string, unknown>, sangria = ''): string {
   let salida = '';
   for (const [clave, valor] of Object.entries(objeto)) {
     if (Array.isArray(valor)) {
+      // Una lista vacía se emite como `[]`. Emitir `clave:` a secas la convierte en
+      // `null` al parsear, y el esquema responde «Expected array, received object»
+      // —`typeof null` otra vez— por un fallo que solo está en el fixture.
+      if (valor.length === 0) {
+        salida += `${sangria}${clave}: []\n`;
+        continue;
+      }
       salida += `${sangria}${clave}:\n`;
       for (const elemento of valor) salida += `${sangria}  - ${JSON.stringify(elemento)}\n`;
     } else if (valor !== null && typeof valor === 'object') {
