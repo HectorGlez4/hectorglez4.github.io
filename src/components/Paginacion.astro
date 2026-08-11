@@ -1,0 +1,73 @@
+---
+/**
+ * Paginación — UX-DR18, FR-5.
+ *
+ * Anterior y Siguiente numeradas. No se renderiza cuando solo hay una página: un control
+ * de paginación con «1 de 1» es ruido que además invita a buscar una segunda página que
+ * no existe.
+ */
+import type { Page } from 'astro';
+
+interface Props {
+  pagina: Page<unknown>;
+}
+
+const { pagina } = Astro.props;
+---
+
+{
+  pagina.lastPage > 1 && (
+    <nav class="paginacion" aria-label="Paginación del listado">
+      {pagina.url.prev ? (
+        <a href={pagina.url.prev} rel="prev">
+          Anterior
+        </a>
+      ) : (
+        <span aria-hidden="true" />
+      )}
+
+      <p class="cuenta">
+        Página {pagina.currentPage} de {pagina.lastPage}
+      </p>
+
+      {pagina.url.next ? (
+        <a href={pagina.url.next} rel="next">
+          Siguiente
+        </a>
+      ) : (
+        <span aria-hidden="true" />
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--canal);
+    margin-top: calc(var(--unidad) * 4);
+    padding-top: calc(var(--unidad) * 3);
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .paginacion a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    text-decoration: none;
+  }
+
+  .paginacion a:hover {
+    text-decoration: underline;
+  }
+
+  .cuenta {
+    margin: 0;
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+</style>

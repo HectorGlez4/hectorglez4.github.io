@@ -1,0 +1,128 @@
+---
+/**
+ * Página de Autor — FR-4, FR-5.
+ *
+ * Semblanza breve más todas las Citas publicadas del Autor. Un Autor sin Citas publicadas
+ * no tiene página: `autoresPublicados` no lo devuelve, así que no se genera ruta y su URL
+ * da 404 (FR-4). No hay ninguna comprobación que hacer aquí — la ausencia es estructural.
+ *
+ * La paginación de FR-5 vive en esta misma ruta: `[...page]` deja la primera página en
+ * `/autor/{slug}` y las siguientes en `/autor/{slug}/2`. Separarlas en dos ficheros
+ * obligaría a repetir el listado y a mantenerlos sincronizados.
+ *
+ * El parámetro se llama `page` en inglés, contra la convención del proyecto, porque
+ * `paginate()` de Astro lo exige por nombre. No aparece en ninguna URL —el segmento
+ * público es el número—, así que la convención se mantiene donde importa: en las rutas
+ * que ve el visitante y en los identificadores del dominio.
+ */
+import Armazon from '../../../components/Armazon.astro';
+import Paginacion from '../../../components/Paginacion.astro';
+import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
+import { autoresPublicados, citasDeAutor, conjuntoPublicable, type Cita } from '../../../lib/publicado.ts';
+import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const conjunto = await conjuntoPublicable();
+
+  return autoresPublicados(conjunto.autores, conjunto.citas).flatMap((autor) =>
+    paginate(citasDeAutor(conjunto.citas, autor.slug), {
+      params: { slug: autor.slug },
+      props: { autor },
+      pageSize: CITAS_POR_PAGINA,
+    }),
+  );
+}) satisfies GetStaticPaths;
+
+const { autor } = Astro.props;
+const pagina = Astro.props.page as import('astro').Page<Cita>;
+
+const rutaBase = `/autor/${autor.slug}`;
+const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
+
+const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
+const años =
+  autor.añoNacimiento !== undefined
+    ? `${autor.añoNacimiento}–${autor.añoFallecimiento}`
+    : `Fallecido en ${autor.añoFallecimiento}`;
+---
+
+<Armazon
+  titulo={`${autor.nombre}${sufijo} | Sabiduría Diaria`}
+  descripcion={`Citas de ${autor.nombre} con su procedencia documentada. ${autor.semblanza}`}
+  ruta={ruta}
+  noIndexar={pagina.currentPage > 1}
+>
+  <div class="pagina contenedor">
+    <header class="ficha">
+      <h1>{autor.nombre}</h1>
+      <p class="años">{años}</p>
+      <p class="semblanza">{autor.semblanza}</p>
+    </header>
+
+    {
+      /*
+       * El rótulo no lleva la cuenta. UX-DR21 pone los contadores en la misma lista que
+       * el emoji y la gamificación, y aunque «6 citas documentadas» sea informativo y no
+       * una medalla, el número no aporta nada que el listado de debajo no diga. Donde la
+       * cuenta sí hace falta es en la paginación, y ahí la exige UX-DR18.
+       */
+    }
+    <h2 class="rotulo">Citas documentadas</h2>
+
+    {/* UX-DR25 — los listados son listas reales. */}
+    <ul class="listado">
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} />)}
+    </ul>
+
+    <Paginacion pagina={pagina} />
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  .ficha {
+    max-width: var(--medida-prosa);
+  }
+
+  h1 {
+    /* La serif se aplica al nombre de Autor: es una de las tres excepciones. */
+    font-family: var(--serif);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .años {
+    margin: var(--unidad) 0 0;
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+
+  .semblanza {
+    margin: calc(var(--unidad) * 2) 0 0;
+    font-size: var(--cuerpo-lg);
+    max-width: var(--medida-prosa);
+  }
+
+  .rotulo {
+    margin: calc(var(--unidad) * 5) 0 0;
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .listado {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+</style>

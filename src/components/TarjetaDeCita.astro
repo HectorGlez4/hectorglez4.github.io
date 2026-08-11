@@ -1,0 +1,83 @@
+---
+/**
+ * Tarjeta de Cita para listados — UX-DR11.
+ *
+ * Fragmento más autor, filete divisorio, fondo a `surface-container-low` al pasar el
+ * cursor. Toda la tarjeta es zona de toque, con 44px mínimo de alto. Sin imagen, sin
+ * fondo propio y sin sombra al pasar el cursor.
+ *
+ * El enlace envuelve la tarjeta entera en lugar de ir solo en el fragmento: en móvil,
+ * acertarle a una línea de texto con el pulgar es justo el gesto que UJ-1 no concede.
+ */
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  /** Se omite en la Página de Autor, donde el autor es el mismo en todas las tarjetas. */
+  autor?: Autor;
+}
+
+const { cita, autor } = Astro.props;
+
+/**
+ * El fragmento. Una Cita larga se recorta **para el listado**, que no es publicarla
+ * recortada: su página muestra el texto íntegro. NFR-12 prohíbe alterar la Cita, no
+ * resumirla en un índice.
+ */
+const LARGO_DE_FRAGMENTO = 120;
+const fragmento =
+  cita.texto.length > LARGO_DE_FRAGMENTO
+    ? `${cita.texto.slice(0, LARGO_DE_FRAGMENTO - 1).trimEnd()}…`
+    : cita.texto;
+---
+
+<li class="tarjeta">
+  <a href={`/cita/${cita.slug}`}>
+    <span class="fragmento">«{fragmento}»</span>
+    {autor && <span class="autor">{autor.nombre}</span>}
+  </a>
+</li>
+
+<style>
+  .tarjeta {
+    /* UX-DR13 — el filete de 1px es el único separador. */
+    border-bottom: var(--grosor-filete) solid var(--filete);
+  }
+
+  .tarjeta a {
+    display: flex;
+    flex-direction: column;
+    gap: var(--unidad);
+    /* UX-DR22 — zona de toque de 44px como mínimo, con separación. */
+    min-height: var(--zona-de-toque);
+    padding-block: calc(var(--unidad) * 2);
+    padding-inline: var(--unidad);
+    margin-inline: calc(var(--unidad) * -1);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 150ms;
+  }
+
+  .tarjeta a:hover {
+    /* Cambio de fondo, nunca una sombra (UX-DR6). */
+    background: var(--contenedor-bajo);
+  }
+
+  .fragmento {
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--tinta);
+    text-wrap: pretty;
+  }
+
+  .autor {
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+</style>

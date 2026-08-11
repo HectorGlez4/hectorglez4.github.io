@@ -311,3 +311,28 @@ el corpus, para que el dato almacenado siga siendo el dato y no una frase.
 **Estructural.** `src/lib/atribucion.ts` compone el texto plano, y lo consumirá también la
 Imagen de Cita (5.1): si cada superficie lo compusiera por su cuenta, una publicaría
 «Séneca, Cartas a Lucilio» y la otra «Séneca — Cartas a Lucilio, 65».
+
+---
+
+## 2.3 — Página de Autor
+
+**Verificado.** 10 funcionales × 2 viewports, más revisión en Chrome. Semblanza visible;
+todas las Citas publicadas del Autor enlazadas, con el número contrastado contra el
+sitemap en vez de contra una constante repetida en la prueba; cada enlace del listado
+devuelve 200, así que ninguna tarjeta apunta a un 404; lista real; un solo `h1`; la serif
+solo en el nombre del Autor y en los fragmentos; sin paginación con pocas Citas; tarjetas
+de 44px; cero scripts descargados. Un Autor sin Citas publicadas da 404 y no está en el
+sitemap — sin comprobación en la página: `autoresPublicados` no lo devuelve y la ruta no
+se genera.
+
+**Decisión de microcopia, reversible.** El rótulo del listado decía «6 CITAS
+DOCUMENTADAS». UX-DR21 pone los contadores en la misma lista que el emoji y la
+gamificación. Es discutible —un número informativo no es una medalla— pero el número no
+aporta nada que el listado de debajo no diga, así que el rótulo queda en «Citas
+documentadas». Donde la cuenta sí hace falta es en la paginación, y ahí la exige UX-DR18.
+Si Héctor prefiere el número, es una línea.
+
+**Convención con excepción anotada.** El fichero de ruta es `[...page].astro`, en inglés,
+porque `paginate()` de Astro exige ese nombre de parámetro. No aparece en ninguna URL —el
+segmento público es el número—, así que la convención del español se mantiene donde
+importa: en las rutas que ve el visitante y en los identificadores del dominio.
