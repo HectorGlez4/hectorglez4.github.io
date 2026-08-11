@@ -603,3 +603,20 @@ no avisa de nada cuando ocurre.
 
 El destino es GitHub Pages por ser estático y gratuito, que es lo único que la espina
 exige. Cambiarlo es sustituir el trabajo `desplegar`; nada más del sitio lo sabe.
+
+---
+
+## 4.3 — La página 404 como puerta de entrada (Épica 4 completa)
+
+**Verificado.** 9 funcionales. Una URL inexistente devuelve **404 de verdad** y sirve la
+página propia, no la del alojamiento; trae el campo de búsqueda y la Cita del Día, y se
+comprueba que es **la misma** que la portada; el enlace lleva a una página que existe; usa
+el mismo armazón, el mismo papel y la misma alineación de columna; no descarga scripts; y
+no está en el sitemap.
+
+**La prueba de la voz.** Se busca activamente lo que no debe haber: el número 404, las
+palabras «error», «not found», «servidor» o «solicitada», y cualquier exclamación. El
+visitante ya sabe que algo no salió; lo que necesita es por dónde seguir.
+
+**Épica 4 cerrada.** El motivo para volver existe: la portada cambia por jornada, el CI
+tiene su disparador diario y un enlace roto es una entrada más en vez de una salida.

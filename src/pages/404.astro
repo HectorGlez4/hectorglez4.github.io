@@ -1,0 +1,175 @@
+---
+/**
+ * Página 404 — FR-12 en su versión extrema, UX-DR20.
+ *
+ * «Un 404 es una oportunidad de entrada, no un muro.» Quien llega aquí venía de un enlace
+ * roto o de una URL antigua, y casi siempre desde fuera: es tan primera página como
+ * cualquier otra, así que lleva lo mismo que la portada — el campo de búsqueda y la Cita
+ * del Día.
+ *
+ * Sin texto de error técnico. Ni el código, ni «la página solicitada no existe», ni nada
+ * que suene a registro de servidor. El visitante ya sabe que algo no salió; lo que
+ * necesita es por dónde seguir.
+ */
+import Armazon from '../components/Armazon.astro';
+import BloqueDeCita from '../components/BloqueDeCita.astro';
+import portada from '../../corpus/portada.json';
+import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
+
+const conjunto = await conjuntoPublicable();
+const temas = temasPublicados(conjunto.temas, conjunto.citas);
+
+const jornada = jornadaDelBuild(process.env, new Date());
+const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.fijaciones);
+const autorDelDia = seleccion
+  ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
+  : undefined;
+---
+
+<Armazon
+  titulo="Esa página no está aquí | Sabiduría Diaria"
+  descripcion="La página que buscabas no está. Busca una cita o empieza por la de hoy."
+  ruta="/404"
+  noIndexar
+>
+  <div class="pagina contenedor">
+    <h1>Esa página no está aquí.</h1>
+    <p class="entrada">Puede que el enlace fuera antiguo. Busca la frase que te trajo.</p>
+
+    <form class="formulario" role="search" action="/buscar" method="get">
+      <label for="consulta">Escribe un fragmento, un autor o un tema.</label>
+      <input
+        id="consulta"
+        name="q"
+        type="search"
+        autocomplete="off"
+        placeholder="Por ejemplo: no hay camino"
+      />
+    </form>
+
+    {
+      seleccion && autorDelDia && (
+        <section class="del-dia">
+          <h2>La cita de hoy</h2>
+          <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
+          <p class="ir">
+            <a href={`/cita/${seleccion.cita.slug}`}>Ver esta cita</a>
+          </p>
+        </section>
+      )
+    }
+
+    {
+      temas.length > 0 && (
+        <section>
+          <h2>Temas</h2>
+          <ul class="chips">
+            {temas.map((tema) => (
+              <li>
+                <a class="chip" href={`/tema/${tema.slug}`}>
+                  {tema.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  h1 {
+    /* Inter, no serif: no es una Cita, ni un Autor, ni un Tema. */
+    font-family: var(--sans);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .entrada {
+    margin: calc(var(--unidad) * 2) 0 0;
+    max-width: var(--medida-prosa);
+  }
+
+  .formulario {
+    margin-top: calc(var(--unidad) * 4);
+    max-width: var(--medida-prosa);
+  }
+
+  label {
+    display: block;
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+    margin-bottom: var(--unidad);
+  }
+
+  /* UX-DR10 — el mismo campo que la página de búsqueda: filete inferior que pasa a 2px
+     siena al recibir foco, sin caja y sin icono decorativo. */
+  input {
+    width: 100%;
+    min-height: var(--zona-de-toque);
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    color: var(--tinta);
+    background: transparent;
+    border: 0;
+    border-bottom: var(--grosor-filete) solid var(--contorno);
+    border-radius: 0;
+    padding: var(--unidad) 0;
+    transition: border-color 150ms;
+  }
+
+  input:focus,
+  input:focus-visible {
+    outline: none;
+    border-bottom: 2px solid var(--siena);
+  }
+
+  section {
+    margin-top: calc(var(--unidad) * 6);
+  }
+
+  h2 {
+    margin: 0 0 calc(var(--unidad) * 3);
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .ir {
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-size: var(--cuerpo-md);
+  }
+
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    margin: 0;
+    padding: 0;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    background: var(--contenedor);
+    border-radius: var(--radio-tarjeta);
+    font-family: var(--serif);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: none;
+  }
+</style>
