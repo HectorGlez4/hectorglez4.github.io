@@ -43,6 +43,8 @@ export async function construirConCorpus(
      * construido qué cargó de verdad, sin esperar a que existan las páginas reales.
      */
     paginas?: Record<string, string>;
+    /** Jornada que compone la Cita del Día, para no depender del día de ejecución. */
+    jornada?: string;
   } = {},
 ): Promise<ResultadoBuild> {
   const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
@@ -86,7 +88,15 @@ export async function construirConCorpus(
     const { stdout, stderr } = await ejecutar(
       'node',
       [join(RAIZ, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build'],
-      { cwd: proyecto, env: { ...process.env, FORCE_COLOR: '0', ASTRO_TELEMETRY_DISABLED: '1' } },
+      {
+        cwd: proyecto,
+        env: {
+          ...process.env,
+          FORCE_COLOR: '0',
+          ASTRO_TELEMETRY_DISABLED: '1',
+          ...(opciones.jornada ? { FECHA_JORNADA: opciones.jornada } : {}),
+        },
+      },
     );
     salida = `${stdout}\n${stderr}`;
   } catch (error) {

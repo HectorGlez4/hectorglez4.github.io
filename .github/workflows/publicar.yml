@@ -1,0 +1,94 @@
+# Publicación de Sabiduría Diaria.
+#
+# AD-12 — «El CI reconstruye una vez al día a hora fija, además de en cada push.»
+#
+# El disparador programado **no es infraestructura, es producto**: sin él la Cita del Día
+# se congela hasta el siguiente commit y FR-9 deja de cumplirse, sin que nada falle ni
+# avise. Es el fallo más silencioso de toda la arquitectura, y por eso vive aquí junto al
+# resto y no en una tarea aparte que alguien pueda desactivar creyendo que es un detalle
+# de despliegue.
+#
+# El destino es GitHub Pages porque es estático y gratuito, que es lo único que la espina
+# exige. Cambiarlo es sustituir el trabajo `desplegar`; nada más del sitio lo sabe.
+
+name: Publicar
+
+on:
+  # 1) Cada push a la rama principal.
+  push:
+    branches: [main]
+
+  # 2) Una reconstrucción diaria a hora fija. 05:15 UTC: de madrugada en América y
+  #    temprano en la península, así que la jornada cambia antes de que casi nadie mire.
+  #    El minuto no es redondo a propósito — a las horas en punto GitHub encola muchísimo
+  #    y el retraso puede pasar de una hora.
+  schedule:
+    - cron: '15 5 * * *'
+
+  # 3) A mano, para poder forzar una jornada sin esperar ni publicar nada.
+  workflow_dispatch:
+    inputs:
+      jornada:
+        description: 'Jornada a componer (AAAA-MM-DD). Vacío = hoy.'
+        required: false
+        type: string
+
+# Un solo despliegue a la vez, y el que llega después gana. No se cancela el que está en
+# curso: un build a medias que se aborta puede dejar el despliegue sin terminar.
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  construir:
+    name: Construir y validar el corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # La validación no es un paso aparte: la puerta de admisión vive en el esquema
+      # (AD-1), así que una Cita sin procedencia hace fallar este mismo `build`. Si falla,
+      # el trabajo se detiene aquí, `desplegar` no llega a ejecutarse y **el sitio
+      # anterior sigue servido** — que es exactamente lo que pide el criterio.
+      - name: Construir
+        run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          MEDICION_ENDPOINT: ${{ secrets.MEDICION_ENDPOINT }}
+          # Sin valor, `jornadaDelBuild` usa la fecha de hoy. Es lo que hace que dos
+          # builds del mismo día —el programado y cualquier push posterior— compongan
+          # la misma Cita del Día.
+          FECHA_JORNADA: ${{ inputs.jornada }}
+
+      - name: Comprobar tipos
+        run: npx astro check
+
+      - name: Pruebas
+        run: npm test
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  desplegar:
+    name: Desplegar
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

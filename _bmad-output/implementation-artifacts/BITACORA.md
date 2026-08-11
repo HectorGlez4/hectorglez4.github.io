@@ -572,3 +572,34 @@ desobedecerla.
 
 **Corregido en el arnés.** El harness de build no creaba `corpus/portada.json`, así que
 seis pruebas de otras historias fallaron por una causa ajena a lo que medían.
+
+---
+
+## 4.2 — Reconstrucción diaria programada
+
+**Verificado.** 9 pruebas que leen el flujo de trabajo y comprueban su lógica: existen los
+dos disparadores —push a `main` y `schedule` diario a hora fija—; `desplegar` depende de
+`construir`, así que un corpus roto no llega a producción; y **una prueba construye de
+verdad un corpus inválido y comprueba que el build falla**, que es la otra mitad del
+criterio: encadenar los trabajos no sirve de nada si el build no rompe.
+
+La prueba que más dice: se construye el mismo corpus con `FECHA_JORNADA` de dos días
+seguidos y se comprueba que la Cita destacada **cambia**. Eso cierra el criterio de que la
+jornada avanza sin que nadie publique nada, sin necesidad de esperar a mañana.
+
+**Decidido — el cron a las 05:15 y no a las 05:00.** A las horas en punto la cola de
+GitHub Actions se llena y el retraso puede pasar de una hora; en una tarea diaria eso
+significa saltarse la jornada. Hay prueba de que el minuto no es cero.
+
+**Decidido — `FECHA_JORNADA` solo se rellena en la ejecución manual.** Si el disparador de
+push pasara su propia fecha-hora, dos builds del mismo día podrían componer Citas
+distintas. Vacío, `jornadaDelBuild` usa la fecha de hoy, que es la misma toda la jornada.
+
+**LO QUE NO SE HA PODIDO VERIFICAR.** Que el disparador programado dispare de verdad solo
+lo demuestra una ejecución real en GitHub, y este repositorio **no tiene remoto
+configurado**. Queda comprobado el fichero y la lógica; queda pendiente ver una ejecución
+el día del despliegue. Conviene mirarlo explícitamente: es el fallo del que avisa AD-12 y
+no avisa de nada cuando ocurre.
+
+El destino es GitHub Pages por ser estático y gratuito, que es lo único que la espina
+exige. Cambiarlo es sustituir el trabajo `desplegar`; nada más del sitio lo sabe.
