@@ -1,0 +1,9 @@
+# BMAD personal (per-developer) config — team config lives in _bmad/custom/config.toml
+_bmad/config.user.toml
+_bmad/custom/config.user.toml
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store

@@ -1,0 +1,75 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 08-11-2026 09:00
+last_updated: 08-11-2026 09:00
+project: brainlySabiduria
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-andamiaje-del-proyecto: backlog
+  1-2-la-puerta-de-admisión-vive-en-el-esquema: backlog
+  1-3-lo-no-publicado-no-existe-para-el-build: backlog
+  1-4-normalización-canónica-y-slug-inmutable: backlog
+  1-5-alta-de-citas-por-lote: backlog
+  1-6-detección-de-duplicados-en-la-ingesta: backlog
+  1-7-gestión-de-autores-y-temas: backlog
+  1-8-auditoría-de-salud-del-corpus: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-página-de-cita: backlog
+  2-2-copiado-con-atribución: backlog
+  2-3-página-de-autor: backlog
+  2-4-paginación-de-listados-largos: backlog
+  2-5-página-de-tema-con-umbral-de-publicación: backlog
+  2-6-rutas-de-salida-desde-cada-cita: backlog
+  2-7-fundamentos-de-seo: backlog
+  2-8-accesibilidad-y-comportamiento-responsive: backlog
+  2-9-medición-desde-la-primera-página-publicada: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-búsqueda-por-fragmento-autor-y-tema: backlog
+  3-2-resultado-vacío-con-salida: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-portada-con-cita-del-día: backlog
+  4-2-reconstrucción-diaria-programada: backlog
+  4-3-la-página-404-como-puerta-de-entrada: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-generación-de-imagen-de-cita: backlog
+  5-2-selección-de-plantilla: backlog
+  epic-5-retrospective: optional

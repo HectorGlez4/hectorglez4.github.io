@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sabiduría Diaria — Página de Cita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --surface:#faf7f0; --surface-low:#f6f2ea; --surface-container:#f1ece2;
+    --ink:#1f1b16; --ink-dim:#5a5147;
+    --siena:#8c4a2f; --rule:#ddd5c7; --outline:#8a7f72;
+    --unit:8px; --gutter:24px; --margin-mobile:20px; --margin-desktop:56px;
+    --breathing:64px; --quote-measure:34ch; --prose-measure:68ch; --tap:44px;
+    --r:3px; --r-lg:6px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--surface); color:var(--ink);
+    font-family:Inter,system-ui,sans-serif; font-size:15px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--prose-measure);margin:0 auto;padding:0 var(--margin-mobile)}
+  @media(min-width:1024px){.wrap{padding:0 var(--margin-desktop)}}
+
+  /* ── Cabecera: solo marca y búsqueda. Nada más. ─────────── */
+  header{border-bottom:1px solid var(--rule)}
+  .bar{display:flex;align-items:center;justify-content:space-between;
+       min-height:var(--tap);padding:calc(var(--unit)*1.5) 0}
+  .brand{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:17px;
+         letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+  .search{display:flex;align-items:center;gap:8px;min-height:var(--tap)}
+  .search input{
+    font:inherit;color:var(--ink);background:transparent;border:0;
+    border-bottom:1px solid var(--outline);padding:6px 2px;width:150px;outline:0}
+  .search input:focus{border-bottom:2px solid var(--siena);padding-bottom:5px}
+  .search input::placeholder{color:var(--ink-dim)}
+
+  /* ── Bloque de Cita: primer elemento visible. Sin caja. ──── */
+  main{padding-block:var(--breathing)}
+  @media(max-width:599px){main{padding-block:40px}}
+  .quote{
+    font-family:'Source Serif 4',Georgia,serif;font-weight:400;
+    max-width:var(--quote-measure);margin:0;
+    /* tramo quote-lg: 81–160 caracteres */
+    font-size:36px;line-height:1.3;letter-spacing:-.01em;
+  }
+  @media(max-width:599px){.quote{font-size:28px;line-height:1.35}}
+  .rule{width:48px;height:1px;background:var(--rule);border:0;margin:32px 0 20px}
+  .author{
+    font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink);text-decoration:none;display:inline-block;line-height:1.4}
+  .author:hover{text-decoration:underline;text-underline-offset:3px}
+  .source{font-size:13px;color:var(--ink-dim);margin-top:6px}
+  .source em{font-style:italic}
+
+  /* ── Acciones ────────────────────────────────────────────── */
+  .actions{display:flex;gap:12px;margin-top:36px;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border-radius:var(--r);min-height:var(--tap);
+         padding:0 20px;transition:background .12s,color .12s}
+  .primary{background:var(--siena);color:#fff;border:1px solid var(--siena)}
+  .primary:hover{background:#7a3f28}
+  .secondary{background:transparent;color:var(--siena);border:1px solid var(--rule)}
+  .secondary:hover{background:var(--surface-low)}
+  button:focus-visible{outline:2px solid var(--siena);outline-offset:2px}
+  @media(max-width:599px){.actions{flex-direction:column}button{width:100%}}
+
+  /* ── Rutas de salida: ninguna Página de Cita sin salida ──── */
+  .exits{border-top:1px solid var(--rule);margin-top:var(--breathing);padding-top:32px}
+  .exits h2{font-family:'Source Serif 4',Georgia,serif;font-size:21px;font-weight:600;
+            line-height:1.3;margin:0 0 4px}
+  .card{display:block;text-decoration:none;color:inherit;padding:16px 0;
+        border-bottom:1px solid var(--rule);min-height:var(--tap)}
+  .card:hover{background:var(--surface-low);
+              box-shadow:-12px 0 0 var(--surface-low),12px 0 0 var(--surface-low)}
+  .card p{font-family:'Source Serif 4',Georgia,serif;font-size:21px;line-height:1.3;margin:0 0 6px}
+  .card span{font-size:13px;font-weight:600;letter-spacing:.09em;
+             text-transform:uppercase;color:var(--ink-dim)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px}
+  .chip{font-size:13px;color:var(--ink);background:var(--surface-container);
+        border-radius:var(--r-lg);padding:7px 14px;text-decoration:none;
+        display:inline-flex;align-items:center;min-height:36px}
+  .chip:hover{background:#e8e1d4}
+  .label{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+         color:var(--ink-dim);margin:0 0 16px}
+  footer{border-top:1px solid var(--rule);margin-top:var(--breathing);
+         padding:28px 0;font-size:13px;color:var(--ink-dim)}
+
+  /* ── Anotaciones de la maqueta (no forman parte del diseño) ─ */
+  .note{position:relative;font-family:Inter,sans-serif;font-size:11px;line-height:1.45;
+        color:#4a5d73;background:#dde5ef;border-left:2px solid #4a5d73;
+        padding:8px 10px;margin:10px 0;border-radius:2px;max-width:var(--prose-measure)}
+  .note b{letter-spacing:.06em;text-transform:uppercase;font-size:10px}
+  .banner{background:#2b3a4a;color:#dde5ef;font-size:12px;padding:10px 20px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="banner">Maqueta de referencia · Página de Cita · las cajas azules son anotaciones, no interfaz</div>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#">Sabiduría Diaria</a>
+    <form class="search" role="search" onsubmit="return false">
+      <label for="q" style="position:absolute;left:-9999px">Buscar</label>
+      <input id="q" type="search" placeholder="Buscar una frase…">
+    </form>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="note"><b>NFR-10 · sin muro de entrada</b><br>
+    Ni modal, ni aviso de cookies, ni invitación. Lucía (UJ-1) llega desde Google y lo primero que ve es la Cita.
+    La cabecera lleva marca y búsqueda: nada más, porque no hay jerarquía que navegar.</div>
+</div>
+
+<main class="wrap">
+  <blockquote class="quote" cite="#">«Caminante, no hay camino, se hace camino al andar.»</blockquote>
+
+  <div class="note"><b>Tipografía adaptativa · FR-10</b><br>
+    50 caracteres → tramo <code>quote-xl</code> (44px). Aquí se muestra a 36px porque la maqueta simula
+    una cita del tramo medio. El tamaño se elige por tramos discretos, nunca de forma continua: así el
+    resultado de cualquier Cita es predecible y verificable en pruebas.</div>
+
+  <hr class="rule">
+  <a class="author" href="#">Antonio Machado</a>
+  <p class="source">Campos de Castilla · 1912</p>
+
+  <div class="note"><b>FR-2 · procedencia visible</b><br>
+    El nombre va en Inter, no en serif: separa visualmente la voz de quien habla de la voz del sitio.
+    Y no va en siena — el autor es información, no una llamada a la acción.
+    Si faltara la obra, aquí diría «Sin obra documentada»: <b>nunca se omite el bloque en silencio</b>.</div>
+
+  <div class="actions">
+    <button class="primary" onclick="copiar(this)">Copiar</button>
+    <button class="secondary">Imagen</button>
+  </div>
+
+  <div class="note"><b>FR-3 y FR-10</b><br>
+    Copiar se lleva texto <em>y</em> atribución juntos, y confirma en el propio botón durante 2 s —
+    sin notificación flotante. Pruébalo.<br>
+    «Imagen» desaparecería por completo si esta Cita superara los 300 caracteres: ausencia antes que
+    mutilación, porque NFR-12 prohíbe recortar el texto de una Cita.</div>
+
+  <section class="exits">
+    <p class="label">Más de Antonio Machado</p>
+    <a class="card" href="#"><p>«Todo lo que se ignora se desprecia.»</p><span>Juan de Mairena · 1936</span></a>
+    <a class="card" href="#"><p>«Bueno es saber que los vasos nos sirven para beber.»</p><span>Proverbios y cantares</span></a>
+
+    <p class="label" style="margin-top:32px">Temas</p>
+    <div class="chips">
+      <a class="chip" href="#">El camino</a>
+      <a class="chip" href="#">El tiempo</a>
+      <a class="chip" href="#">La duda</a>
+    </div>
+
+    <div class="note"><b>FR-12 · ninguna hoja sin salida</b><br>
+      Toda Página de Cita publicada tiene enlaces salientes. Es lo que convierte la visita de un segundo
+      de Lucía en la sesión de una hora de Marisol (UJ-3), y lo que sostiene SM-4 (≥ 1,8 páginas/sesión).
+      Los chips de Tema nunca van en siena: son navegación, no acento.</div>
+  </section>
+</main>
+
+<footer class="wrap">Sabiduría Diaria · Citas en dominio público, con su procedencia</footer>
+
+<script>
+  function copiar(b){
+    const t = document.querySelector('.quote').textContent.trim();
+    const a = document.querySelector('.author').textContent.trim();
+    const s = document.querySelector('.source').textContent.trim();
+    navigator.clipboard?.writeText(`${t}\n— ${a}, ${s}`).catch(()=>{});
+    const original = b.textContent;
+    b.textContent = 'Copiado.';
+    setTimeout(()=>{ b.textContent = original; }, 2000);
+  }
+</script>
+</body>
+</html>
