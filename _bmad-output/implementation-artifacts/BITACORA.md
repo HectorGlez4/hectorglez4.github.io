@@ -54,3 +54,27 @@ el procesador aplica SmartyPants y reescribiría comillas y guiones, lo que NFR-
 Astro valida las referencias de forma perezosa y ninguna página consulta todavía las
 colecciones. Queda anotado para cerrarlo en `publicado.ts`, que por AD-11 es el dueño del
 conjunto publicable y el sitio natural de la integridad referencial.
+
+---
+
+## 1.3 — Lo no publicado no existe para el build
+
+**Verificado sin escribir código de producción.** La historia salió en verde con el
+esquema tal como lo dejó la 1.2, lo cual es la señal de que AD-2 se materializó donde
+debía: las tres colecciones tienen por base `corpus/{citas,autores,temas}`, de modo que
+`corpus/_revision/` no está al alcance de ninguna. No hay nada que filtrar porque no hay
+nada cargado.
+
+Seis pruebas lo fijan para que no se pierda. La más fuerte es la segunda: una Cita **sin
+procedencia** colocada en `_revision/` **no** rompe el build. Por la Historia 1.2 sabemos
+que en `corpus/citas/` lo rompería. Que no lo haga demuestra que el fichero no se carga
+—no que exista un filtro que lo esquive—, y esa distinción es justo la que AD-2 protege.
+
+Las demás: la sonda que enumera la colección no ve la Cita en revisión y sí la publicada;
+la Cita en revisión no aparece en el sitemap; y mover el mismo contenido byte a byte de
+`_revision/` a `citas/` la publica sin ningún otro cambio. Dos pruebas de código fijan que
+no exista un campo booleano de publicación ni una colección con base en `_revision/`.
+
+**Añadido al arnés.** `construirConCorpus` acepta ahora páginas sonda, que permiten leer
+del HTML construido qué cargó de verdad cada colección sin esperar a que existan las
+páginas reales de la Épica 2.

@@ -35,7 +35,15 @@ export interface ResultadoBuild {
  */
 export async function construirConCorpus(
   corpus: CorpusDePrueba,
-  opciones: { conservar?: boolean } = {},
+  opciones: {
+    conservar?: boolean;
+    /**
+     * Páginas añadidas al proyecto temporal, relativas a `src/pages/`. Sirven de
+     * sonda: una página que enumera una colección permite comprobar desde el HTML
+     * construido qué cargó de verdad, sin esperar a que existan las páginas reales.
+     */
+    paginas?: Record<string, string>;
+  } = {},
 ): Promise<ResultadoBuild> {
   const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
 
@@ -54,6 +62,12 @@ export async function construirConCorpus(
 
   for (const [ruta, contenido] of Object.entries(corpus)) {
     const destino = join(proyecto, 'corpus', ruta);
+    await mkdir(dirname(destino), { recursive: true });
+    await writeFile(destino, contenido, 'utf8');
+  }
+
+  for (const [ruta, contenido] of Object.entries(opciones.paginas ?? {})) {
+    const destino = join(proyecto, 'src', 'pages', ruta);
     await mkdir(dirname(destino), { recursive: true });
     await writeFile(destino, contenido, 'utf8');
   }
