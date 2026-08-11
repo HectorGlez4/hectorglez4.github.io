@@ -135,8 +135,14 @@ test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
     await page.goto(CORTA, { waitUntil: 'networkidle' });
     expect(scripts, `la página descargó ${scripts.join(', ')}`).toHaveLength(0);
 
-    // Y lo que hay en línea es la isla, no un armazón: se mide para que no crezca sin
-    // que nadie lo note.
+    /*
+     * Lo que hay en línea son las dos islas —copiar y abrir el diálogo de imagen—, no un
+     * armazón. El tope existe para que no crezca sin que nadie lo note; se sube cuando
+     * una isla nueva entra a propósito, no cuando algo engorda por su cuenta.
+     *
+     * Hoy son unos 4,8 KB sin comprimir de un HTML de 25 KB. El generador de verdad, que
+     * son decenas de kilobytes, sigue fuera y solo se descarga al pulsar.
+     */
     const bytes = await page.evaluate(() =>
       [...document.querySelectorAll('script')]
         // El `ld+json` de los datos estructurados no es JavaScript ejecutable: el
@@ -144,7 +150,7 @@ test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
         .filter((s) => s.type !== 'application/ld+json')
         .reduce((n, s) => n + s.textContent!.length, 0),
     );
-    expect(bytes).toBeLessThan(2048);
+    expect(bytes).toBeLessThan(6144);
   });
 
   test('el contenido no depende de que se ejecute JavaScript', async ({ browser }) => {

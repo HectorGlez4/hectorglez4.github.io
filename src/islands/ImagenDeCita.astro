@@ -1,0 +1,268 @@
+---
+/**
+ * Isla de Imagen de Cita — FR-10, FR-11, UX-DR16.
+ *
+ * La acción **no se renderiza** cuando la Cita pasa de 300 caracteres: no se oculta con
+ * CSS ni se deshabilita, no existe. Copiar sigue estando, que es lo que pide el criterio.
+ *
+ * AD-6 — hidratada bajo demanda de verdad: el generador es un módulo aparte y solo se
+ * descarga al pulsar. Aquí sí compensa diferir, al revés que en el botón de copiar.
+ *
+ * AD-8 — el tamaño tipográfico del lienzo lo calcula `src/lib/tramos.ts` y viaja en un
+ * atributo. La isla no decide tamaños: si lo hiciera, la previsualización podría mentir
+ * respecto al fichero descargado.
+ */
+import { textoParaCopiar } from '../lib/atribucion.ts';
+import { EVENTOS } from '../lib/medicion.ts';
+import { tramoDe } from '../lib/tramos.ts';
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+}
+
+const { cita, autor } = Astro.props;
+const tramo = tramoDe(cita.texto);
+
+const { obra, año } = cita.procedencia;
+const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
+---
+
+{
+  tramo.admiteImagen && (
+    <div
+      class="isla"
+      data-imagen
+      data-texto={cita.texto}
+      data-autor={autor.nombre}
+      data-procedencia={procedencia}
+      data-tamano={tramo.pixelesEnImagen}
+      data-nombre={cita.slug}
+    >
+      <button type="button" class="abrir" data-abrir>
+        Descargar como imagen
+      </button>
+
+      {/*
+        * `<dialog>` nativo: trae de serie el cierre con Escape, el foco atrapado y el
+        * anuncio como diálogo a los lectores de pantalla. Reimplementarlo a mano habría
+        * sido más código y peor accesibilidad.
+        */}
+      <dialog class="dialogo" data-dialogo aria-label="Descargar la cita como imagen">
+        <div class="cabecera">
+          <p class="titulo">Elige un diseño.</p>
+          <button type="button" class="cerrar" data-cerrar aria-label="Cerrar">
+            Cerrar
+          </button>
+        </div>
+
+        <div class="plantillas" role="group" aria-label="Diseño de la imagen" data-plantillas />
+
+        <canvas class="lienzo" data-lienzo width="1080" height="1080" aria-label="Previsualización de la imagen" />
+
+        <button type="button" class="descargar" data-descargar>
+          Descargar
+        </button>
+      </dialog>
+    </div>
+  )
+}
+
+{
+  /*
+   * El guion va bajo la misma condición que el marcado. Suelto, se insertaba también en
+   * las Citas que no ofrecen imagen: salía sin efecto —aborta al no encontrar la isla—
+   * pero eran bytes muertos en cada página larga, y dejaba en el marcado el rastro de
+   * una acción que ahí no existe.
+   */
+}
+{tramo.admiteImagen && (
+<script
+  is:inline
+  define:vars={{
+    EVENTO_DESCARGA: EVENTOS.descargaDeImagen,
+    TEXTO_PARA_COPIAR: textoParaCopiar(cita, autor),
+  }}>
+  (() => {
+    const isla = document.querySelector('[data-imagen]');
+    if (!isla) return;
+
+    const dialogo = isla.querySelector('[data-dialogo]');
+    const lienzo = isla.querySelector('[data-lienzo]');
+    const contenedorPlantillas = isla.querySelector('[data-plantillas]');
+
+    let generador = null;
+    let plantillaActual = 'papel';
+
+    const datos = () => ({
+      texto: isla.dataset.texto,
+      autor: isla.dataset.autor,
+      procedencia: isla.dataset.procedencia,
+      tamaño: Number(isla.dataset.tamano),
+      plantilla: plantillaActual,
+    });
+
+    async function cargar() {
+      if (generador) return generador;
+      // La descarga ocurre aquí, al pulsar, y no antes.
+      generador = await import('/islas/imagen.js');
+      return generador;
+    }
+
+    function pintarBotonesDePlantilla(plantillas) {
+      contenedorPlantillas.replaceChildren();
+      for (const plantilla of plantillas) {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'plantilla';
+        boton.textContent = plantilla.nombre;
+        boton.dataset.plantilla = plantilla.id;
+        boton.setAttribute('aria-pressed', String(plantilla.id === plantillaActual));
+        boton.addEventListener('click', async () => {
+          plantillaActual = plantilla.id;
+          for (const otro of contenedorPlantillas.children) {
+            otro.setAttribute('aria-pressed', String(otro.dataset.plantilla === plantillaActual));
+          }
+          const g = await cargar();
+          g.dibujar(lienzo, datos());
+        });
+        contenedorPlantillas.append(boton);
+      }
+    }
+
+    isla.querySelector('[data-abrir]').addEventListener('click', async () => {
+      // Se abre antes de tener el generador: el diálogo no espera a la descarga, así que
+      // la Página de Cita sigue siendo utilizable mientras se compone (UX-DR20).
+      dialogo.showModal();
+      const g = await cargar();
+      pintarBotonesDePlantilla(g.PLANTILLAS);
+      g.dibujar(lienzo, datos());
+    });
+
+    isla.querySelector('[data-cerrar]').addEventListener('click', () => dialogo.close());
+
+    // Cierre al tocar fuera: el clic sobre el propio `<dialog>` cae en el fondo, porque
+    // el contenido está dentro de sus hijos.
+    dialogo.addEventListener('click', (evento) => {
+      if (evento.target === dialogo) dialogo.close();
+    });
+
+    isla.querySelector('[data-descargar]').addEventListener('click', async () => {
+      const g = await cargar();
+      // Se redibuja justo antes de descargar para que el fichero sea, sin lugar a dudas,
+      // lo que se está viendo.
+      g.dibujar(lienzo, datos());
+      await g.descargar(lienzo, isla.dataset.nombre);
+      window.__medir && window.__medir(EVENTO_DESCARGA);
+    });
+
+    // UX-DR26 — todo lo que ofrece la imagen está disponible como texto copiable. El
+    // atributo lo consume la prueba y lo puede leer cualquiera desde el marcado.
+    isla.dataset.textoPlano = TEXTO_PARA_COPIAR;
+  })();
+</script>
+)}
+
+<style>
+  .isla {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  /*
+   * UX-DR9 — secundario: texto siena con filete, 44px de alto mínimo.
+   *
+   * `.plantilla` va en `:global` porque esos botones los crea el guion, y Astro acota
+   * los estilos del componente con un atributo que solo pone al renderizar. Sin esto,
+   * los botones de plantilla salían sin ningún estilo —y con ellos, sin los 44px de
+   * zona de toque que exige UX-DR22—. No lo veía ninguna prueba porque todas las de
+   * accesibilidad miran la página con el diálogo cerrado.
+   */
+  .abrir,
+  .cerrar,
+  :global(.plantilla) {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .abrir:hover,
+  .cerrar:hover,
+  :global(.plantilla:hover) {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  :global(.plantilla[aria-pressed='true']) {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  /* UX-DR9 — el primario es siena sólido. Es la única acción primaria de la pantalla. */
+  .descargar {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--sobre-siena);
+    background: var(--siena);
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 4);
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .dialogo {
+    border: var(--grosor-filete) solid var(--filete);
+    border-radius: var(--radio-tarjeta);
+    background: var(--papel);
+    color: var(--tinta);
+    padding: calc(var(--unidad) * 3);
+    max-width: min(92vw, 520px);
+    width: 100%;
+  }
+
+  /*
+   * UX-DR6 — la única profundidad de todo el producto: la atenuación del fondo al 40 %
+   * en este diálogo. Es la excepción que confirma la regla del sistema plano.
+   */
+  .dialogo::backdrop {
+    background: rgb(31 27 22 / 40%);
+  }
+
+  .cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--canal);
+  }
+
+  .titulo {
+    margin: 0;
+    font-size: var(--cuerpo-md);
+  }
+
+  .plantillas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  .lienzo {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-block: calc(var(--unidad) * 3);
+    /* La Imagen de Cita tiene esquinas rectas: es un objeto para publicar fuera. */
+    border-radius: 0;
+    border: var(--grosor-filete) solid var(--filete);
+  }
+</style>

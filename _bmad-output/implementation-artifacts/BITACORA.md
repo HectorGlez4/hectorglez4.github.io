@@ -620,3 +620,41 @@ visitante ya sabe que algo no salió; lo que necesita es por dónde seguir.
 
 **Épica 4 cerrada.** El motivo para volver existe: la portada cambia por jornada, el CI
 tiene su disparador diario y un enlace roto es una entrada más en vez de una salida.
+
+---
+
+## 5.1 y 5.2 — Imagen de Cita y plantillas (Épica 5 completa)
+
+**Verificado.** 17 funcionales × 2 viewports más 7 de build. El generador **no se descarga
+hasta pulsar** y sí al pulsar —las dos mitades—; el lienzo es cuadrado de 1080; hay tres
+plantillas y cambiar de una a otra cambia la composición; el diálogo se cierra con Escape,
+tocando fuera y con el botón; la descarga es directa y produce un `.png`; y el evento sale
+por el módulo de medición.
+
+**La prueba que cierra AD-8.** La previsualización y el fichero descargado se comparan por
+la huella del lienzo antes y después de descargar: son idénticas porque **son el mismo
+lienzo**, no dos caminos que deban coincidir. Y el tamaño tipográfico llega en un atributo
+calculado por `tramos.ts` —52px para esta Cita, según UX-DR19—, con una prueba de que el
+generador no lleva ningún tamaño codificado a mano.
+
+**La Cita de más de 300 caracteres.** El corpus real no tiene ninguna que pase de 101, y
+añadir una frase inventada de 300 habría metido una atribución sin verificar en
+`corpus/citas/`. Se comprueba con un corpus fabricado: en la Cita larga la acción **no
+existe en el marcado** —no se oculta ni se deshabilita—, copiar sigue disponible, y el
+texto se muestra íntegro, comprobado sobre el `blockquote` y no sobre el documento, porque
+el `<title>` sí recorta y debe hacerlo.
+
+**Dos defectos que solo se vieron mirando.**
+
+1. **Los botones de plantilla salían sin estilo**, de unos 20px de alto en vez de 44. Los
+   crea el guion, y Astro acota los estilos del componente con un atributo que solo pone
+   al renderizar; los elementos creados en cliente no lo llevan. Se marcan `:global`. No
+   lo veía ninguna prueba de accesibilidad porque todas miran la página con el diálogo
+   cerrado — ahora hay una que lo abre.
+2. **El guion de la isla se insertaba también en las Citas largas.** Abortaba solo, pero
+   eran bytes muertos en cada página larga y dejaba en el marcado el rastro de una acción
+   que ahí no existe. Lo cazó la prueba de que `data-imagen` no aparezca.
+
+**Tope de JavaScript en línea, subido a conciencia.** De 2 KB a 6: las dos islas suman
+unos 4,8 KB sin comprimir en un HTML de 25. El tope existe para detectar crecimiento que
+nadie ha decidido; se sube cuando entra una isla a propósito, no cuando algo engorda solo.
