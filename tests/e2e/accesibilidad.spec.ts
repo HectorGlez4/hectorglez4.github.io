@@ -3,11 +3,14 @@ import { expect, test } from '@playwright/test';
 
 /** Historia 2.8 — accesibilidad y comportamiento responsive. */
 
+/** Las seis superficies públicas. `/buscar` y el 404 también lo son. */
 const SUPERFICIES = [
   '/',
   '/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los',
   '/autor/antonio-machado',
   '/tema/la-vida',
+  '/buscar',
+  '/una-url-que-no-existe',
 ];
 
 test.describe('Historia 2.8 — WCAG 2.1 AA', () => {

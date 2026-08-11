@@ -658,3 +658,43 @@ el `<title>` sí recorta y debe hacerlo.
 **Tope de JavaScript en línea, subido a conciencia.** De 2 KB a 6: las dos islas suman
 unos 4,8 KB sin comprimir en un HTML de 25. El tope existe para detectar crecimiento que
 nadie ha decidido; se sube cuando entra una isla a propósito, no cuando algo engorda solo.
+
+---
+
+# Cierre del sprint
+
+**Las 24 historias de las cinco épicas, cerradas.** Verificación final sobre un `dist/`
+reconstruido desde cero:
+
+| Puerta | Resultado |
+|---|---|
+| `astro check` | 0 errores, 0 avisos |
+| Unitarias y de build (vitest) | **247 en 15 ficheros** |
+| Funcionales (Playwright, móvil y escritorio) | **260** |
+| axe-core WCAG 2.1 AA | **0 violaciones en las 6 superficies** |
+| Build | 55 páginas, índice de Pagefind incluido |
+
+**Hueco cerrado en el barrido final.** Las pruebas de accesibilidad recorrían cuatro
+superficies; `/buscar` y la 404 —que también son públicas— quedaban fuera. Añadidas: las
+seis pasan axe sin una sola violación.
+
+## Lo que queda pendiente, y no es poco
+
+1. **La procedencia del corpus sembrado no está verificada.** Es lo más importante de esta
+   lista. Las 38 Citas son un punto de partida razonado, no un catálogo comprobado contra
+   ediciones. La promesa del producto es exactamente esa comprobación, así que **el sitio
+   no debería publicarse hasta hacerla**. La auditoría de la 1.8 da hoy un 52,6 % de
+   procedencia completa; ese número es el trabajo editorial pendiente, y está a la vista a
+   propósito.
+2. **El disparador diario del CI no se ha visto disparar.** El repositorio no tiene remoto,
+   así que se ha verificado el fichero y la lógica, no una ejecución. Conviene mirarlo
+   explícitamente el día del despliegue: es el fallo del que avisa AD-12 y, cuando ocurre,
+   no avisa de nada.
+3. **El proveedor de medición está por contratar.** El módulo cierra las propiedades —sin
+   cookies, sin identificador, sin consentimiento— y sin `MEDICION_ENDPOINT` el sitio no
+   envía nada. Falta apuntar el destino.
+4. **El dominio es provisional.** `https://sabiduria-diaria.es` en `astro.config.mjs`,
+   conmutable con `SITE_URL`.
+5. **`AGENTS.md` está desactualizado.** Su bloque gestionado dice que no hay `package.json`
+   y que no hay `uv` en la máquina; ambas cosas dejaron de ser ciertas. Lo regenera
+   `bmad-project-context`, así que conviene volver a ejecutarla.
