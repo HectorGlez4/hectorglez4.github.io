@@ -14,6 +14,8 @@ import '../styles/tokens.css';
 
 interface Props {
   titulo: string;
+  /** Qué tipo de resultado es esta página en la búsqueda: cita, autor o tema. */
+  tipo?: 'cita' | 'autor' | 'tema';
   /** La Página de Cita emite además el evento de vista (AD-13, SM-2). */
   vistaDeCita?: boolean;
   descripcion: string;
@@ -23,7 +25,7 @@ interface Props {
   noIndexar?: boolean;
 }
 
-const { titulo, descripcion, ruta, noIndexar = false, vistaDeCita = false } = Astro.props;
+const { titulo, descripcion, ruta, noIndexar = false, vistaDeCita = false, tipo } = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
 ---
 
@@ -51,7 +53,12 @@ const canonica = new URL(ruta, Astro.site).href;
       <a class="buscar" href="/buscar">Buscar</a>
     </header>
 
-    <main id="contenido">
+    {/*
+      * Pagefind indexa solo lo que hay dentro de `data-pagefind-body`. Sin esto indexaba
+      * también la cabecera y el pie, y buscar «sabiduría» devolvía las 53 páginas del
+      * sitio porque la marca aparece en todas.
+      */}
+    <main id="contenido" data-pagefind-body data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}>
       <slot />
     </main>
 

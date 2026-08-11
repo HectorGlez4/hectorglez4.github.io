@@ -508,3 +508,37 @@ las islas son 1 678 bytes.
 Las nueve historias cerradas. **206 unitarias y 162 funcionales en verde**, `astro check`
 sin errores, y axe-core sin una sola violación WCAG 2.1 AA en las cuatro superficies.
 UJ-1 está completo de principio a fin y UJ-3 entero.
+
+---
+
+## 3.1 y 3.2 — Búsqueda y resultado vacío (Épica 3 completa)
+
+**Comprobado antes de decidir.** La tolerancia a acentos de Pagefind no se dio por
+supuesta: se indexó el sitio y se consultó desde el navegador. `todavia`/`todavía` y
+`sabiduria`/`sabiduría` devuelven lo mismo, y las mayúsculas también. Así que no hizo falta
+inyectar texto normalizado oculto —que además habría sido texto invisible con fines de
+indexación—; AD-3 se cumple sin ayuda.
+
+**Defecto encontrado en esa misma comprobación.** «sabiduría» devolvía las 54 páginas del
+sitio, porque la marca está en la cabecera de todas. Se acota el índice con
+`data-pagefind-body` al contenido principal, y se marca `data-pagefind-ignore` en las
+rutas de salida: sin eso, buscar un fragmento devolvía también las cuatro páginas que lo
+llevan como Cita hermana. Hay prueba de que una consulta por la marca da menos de diez
+resultados.
+
+**Verificado.** 15 funcionales. Un fragmento de tres palabras localiza la Cita; sin
+acentos y en mayúsculas se obtiene lo mismo; los resultados distinguen Cita, Autor y Tema
+—y una consulta devuelve los tres tipos—; todo resultado lleva a una página que existe;
+nada no publicado aparece. El código de Pagefind **no se descarga** hasta enfocar el
+campo, y sí se descarga al enfocarlo: las dos mitades del criterio.
+
+**Resultado vacío.** Temas y Autores destacados están en el HTML inicial, no se piden al
+quedarse sin resultados; el mensaje sugiere reformular con menos palabras; no aparece
+ningún texto de error técnico —hay prueba que busca «error», «undefined», «0 resultados»—;
+y el evento `busqueda-sin-resultados` se emite **por el módulo de medición**, con la
+consulta como texto y sin nada que identifique al visitante. La prueba espía el hueco de
+`window.__medir`, que es justo el punto por donde AD-13 obliga a pasar.
+
+**Defecto de coherencia encontrado por una prueba de la 2.7.** `/buscar` se declara
+`noindex` pero entraba en el sitemap. Lo cazó la prueba que exige que nada de lo que el
+sitemap anuncia se declare no indexable — escrita dos historias antes para otro caso.

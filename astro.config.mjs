@@ -13,10 +13,16 @@ export default defineConfig({
   build: { format: 'file' },
   integrations: [
     sitemap({
-      // FR-5 — las páginas 2+ de un listado son `noindex, follow`. Incluirlas en el
-      // sitemap sería pedirle al buscador que indexe justo lo que se le pide que no
-      // indexe. Las Citas que contienen ya están en el sitemap por su cuenta.
-      filter: (pagina) => !/\/(?:autor|tema)\/[^/]+\/\d+$/.test(pagina),
+      /*
+       * Fuera del sitemap va todo lo que la página declara `noindex`; anunciarlo sería
+       * pedirle al buscador que indexe justo lo que se le pide que no indexe.
+       *
+       *   · Las páginas 2+ de un listado (FR-5). Las Citas que contienen ya están en el
+       *     sitemap por su cuenta, así que no se pierde nada.
+       *   · `/buscar`, que es una herramienta y no contenido.
+       */
+      filter: (pagina) =>
+        !/\/(?:autor|tema)\/[^/]+\/\d+$/.test(pagina) && !/\/buscar$/.test(pagina),
     }),
   ],
 

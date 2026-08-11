@@ -34,7 +34,11 @@ const fragmento = (texto: string) =>
   texto.length > 90 ? `${texto.slice(0, 89).trimEnd()}…` : texto;
 ---
 
-<nav class="salidas" aria-label="Seguir leyendo">
+{/*
+  * `data-pagefind-ignore`: aquí aparece el texto de otras Citas, y sin esto un fragmento
+  * buscado devolvería también las cuatro páginas que lo tienen como ruta de salida.
+  */}
+<nav class="salidas" aria-label="Seguir leyendo" data-pagefind-ignore>
   {
     relacionadas.length > 0 && (
       <section>

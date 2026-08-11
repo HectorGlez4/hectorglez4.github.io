@@ -1,0 +1,332 @@
+---
+/**
+ * Búsqueda — FR-7, FR-8.
+ *
+ * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene
+ * lo que las páginas publican: si una Cita no tiene página, no hay nada que indexar. El
+ * conjunto publicable de AD-11 gobierna la búsqueda sin que la búsqueda sepa que existe.
+ *
+ * AD-6 — la isla se hidrata **bajo demanda**: el código de Pagefind son decenas de
+ * kilobytes y no se descarga hasta que el visitante enfoca el campo. Aquí sí compensa
+ * diferir, al revés que en el botón de copiar.
+ *
+ * La página funciona sin JavaScript: el campo es un formulario real que recarga con la
+ * consulta en la URL, y los Temas y Autores destacados están en el HTML inicial.
+ */
+import Armazon from '../components/Armazon.astro';
+import { EVENTOS } from '../lib/medicion.ts';
+import {
+  autoresPublicados,
+  conjuntoPublicable,
+  temasPublicados,
+} from '../lib/publicado.ts';
+
+const conjunto = await conjuntoPublicable();
+const temas = temasPublicados(conjunto.temas, conjunto.citas);
+const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
+---
+
+<Armazon
+  titulo="Buscar | Sabiduría Diaria"
+  descripcion="Busca una cita por un fragmento, por autor o por tema."
+  ruta="/buscar"
+  noIndexar
+>
+  <div class="pagina contenedor">
+    <h1>Buscar</h1>
+
+    <form class="formulario" role="search" action="/buscar" method="get">
+      <label for="consulta">Escribe un fragmento, un autor o un tema.</label>
+      <input
+        id="consulta"
+        name="q"
+        type="search"
+        autocomplete="off"
+        data-consulta
+        placeholder="Por ejemplo: no hay camino"
+      />
+    </form>
+
+    <p class="estado" data-estado hidden></p>
+
+    <ul class="resultados" data-resultados></ul>
+
+    {/* FR-8 — la salida siempre está, en el HTML inicial. Se muestra al no haber nada. */}
+    <div class="salida" data-salida hidden>
+      <p class="sugerencia">
+        No encontramos esa frase. Prueba con menos palabras.
+      </p>
+
+      {
+        temas.length > 0 && (
+          <section>
+            <h2>Temas</h2>
+            <ul class="chips">
+              {temas.map((tema) => (
+                <li>
+                  <a class="chip" href={`/tema/${tema.slug}`}>
+                    {tema.nombre}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <section>
+        <h2>Autores</h2>
+        <ul class="chips">
+          {
+            autores.map((autor) => (
+              <li>
+                <a class="chip" href={`/autor/${autor.slug}`}>
+                  {autor.nombre}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</Armazon>
+
+<script is:inline define:vars={{ EVENTO_SIN_RESULTADOS: EVENTOS.busquedaSinResultados }}>
+  (() => {
+    const campo = document.querySelector('[data-consulta]');
+    const lista = document.querySelector('[data-resultados]');
+    const estado = document.querySelector('[data-estado]');
+    const salida = document.querySelector('[data-salida]');
+    if (!campo) return;
+
+    let pagefind = null;
+    let ultimaConsulta = '';
+    let temporizador;
+
+    // AD-6 — el código de búsqueda no se descarga hasta que hace falta.
+    async function cargar() {
+      if (pagefind) return pagefind;
+      pagefind = await import('/pagefind/pagefind.js');
+      await pagefind.init();
+      return pagefind;
+    }
+
+    const ETIQUETA = { cita: 'Cita', autor: 'Autor', tema: 'Tema' };
+
+    function pintar(resultados, consulta) {
+      lista.replaceChildren();
+
+      if (resultados.length === 0) {
+        estado.hidden = true;
+        salida.hidden = false;
+        // AD-13 — a través del módulo de medición, nunca del proveedor. La consulta
+        // viaja como texto y no va asociada a ningún visitante.
+        window.__medir && window.__medir(EVENTO_SIN_RESULTADOS, consulta);
+        return;
+      }
+
+      salida.hidden = true;
+      estado.hidden = false;
+      estado.textContent =
+        resultados.length === 1 ? 'Un resultado.' : `${resultados.length} resultados.`;
+
+      for (const dato of resultados) {
+        const tipo = (dato.meta && dato.meta.tipo) || 'cita';
+
+        const li = document.createElement('li');
+        li.className = 'resultado';
+
+        const a = document.createElement('a');
+        a.href = dato.url.replace(/\.html$/, '');
+
+        const clase = document.createElement('span');
+        clase.className = 'clase';
+        clase.dataset.tipo = tipo;
+        clase.textContent = ETIQUETA[tipo] || ETIQUETA.cita;
+
+        const titulo = document.createElement('span');
+        titulo.className = 'titulo';
+        titulo.textContent = dato.meta && dato.meta.title ? dato.meta.title : dato.url;
+
+        a.append(clase, titulo);
+        li.append(a);
+        lista.append(li);
+      }
+    }
+
+    async function buscar(consulta) {
+      if (consulta === ultimaConsulta) return;
+      ultimaConsulta = consulta;
+
+      if (consulta.trim() === '') {
+        lista.replaceChildren();
+        estado.hidden = true;
+        salida.hidden = true;
+        return;
+      }
+
+      const pf = await cargar();
+      const respuesta = await pf.search(consulta);
+      const resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
+      pintar(resultados, consulta);
+    }
+
+    campo.addEventListener('focus', cargar, { once: true });
+    campo.addEventListener('input', () => {
+      clearTimeout(temporizador);
+      temporizador = setTimeout(() => buscar(campo.value), 150);
+    });
+
+    document.querySelector('.formulario').addEventListener('submit', (e) => {
+      e.preventDefault();
+      buscar(campo.value);
+    });
+
+    // Con la consulta en la URL, la búsqueda se ejecuta al cargar: es lo que ocurre
+    // cuando alguien llega desde el formulario sin JavaScript o comparte un enlace.
+    const inicial = new URLSearchParams(location.search).get('q');
+    if (inicial) {
+      campo.value = inicial;
+      buscar(inicial);
+    }
+  })();
+</script>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+    max-width: var(--medida-prosa);
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .formulario {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  label {
+    display: block;
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+    margin-bottom: var(--unidad);
+  }
+
+  /* UX-DR10 — filete inferior que pasa a 2px siena al recibir foco. Sin caja, sin
+     sombra, sin icono decorativo. */
+  input {
+    width: 100%;
+    min-height: var(--zona-de-toque);
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    color: var(--tinta);
+    background: transparent;
+    border: 0;
+    border-bottom: var(--grosor-filete) solid var(--contorno);
+    border-radius: 0;
+    padding: var(--unidad) 0;
+    transition: border-color 150ms;
+  }
+
+  input:focus {
+    outline: none;
+    border-bottom: 2px solid var(--siena);
+  }
+
+  /* El anillo de UX-DR23 se sustituye aquí por el filete de 2px, que es el propio
+     indicador de foco del campo según DESIGN.md. No se suprime nada: se cambia de forma. */
+  input:focus-visible {
+    outline: none;
+    border-bottom: 2px solid var(--siena);
+  }
+
+  .estado {
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+
+  .resultados {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  .resultados :global(.resultado) {
+    border-bottom: var(--grosor-filete) solid var(--filete);
+  }
+
+  .resultados :global(.resultado a) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--unidad);
+    min-height: var(--zona-de-toque);
+    padding-block: calc(var(--unidad) * 2);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .resultados :global(.clase) {
+    font-family: var(--sans);
+    font-size: var(--pie);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .resultados :global(.titulo) {
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    color: var(--tinta);
+  }
+
+  .salida {
+    margin-top: calc(var(--unidad) * 5);
+  }
+
+  .sugerencia {
+    margin: 0;
+    font-size: var(--cuerpo-lg);
+  }
+
+  .salida section {
+    margin-top: calc(var(--unidad) * 4);
+  }
+
+  h2 {
+    margin: 0 0 calc(var(--unidad) * 2);
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    margin: 0;
+    padding: 0;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    background: var(--contenedor);
+    border-radius: var(--radio-tarjeta);
+    font-family: var(--serif);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: none;
+  }
+</style>
