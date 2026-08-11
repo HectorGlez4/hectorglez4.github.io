@@ -78,3 +78,10 @@ no exista un campo booleano de publicación ni una colección con base en `_revi
 **Añadido al arnés.** `construirConCorpus` acepta ahora páginas sonda, que permiten leer
 del HTML construido qué cargó de verdad cada colección sin esperar a que existan las
 páginas reales de la Épica 2.
+
+**Corregido después.** La suite completa falló una vez de forma intermitente en
+«ninguna colección carga una Cita de `corpus/_revision/`». No era el producto: los
+proyectos temporales enlazan el `node_modules` de la raíz en lugar de copiarlo, así que
+todos comparten la caché de Vite y dos builds simultáneos la reoptimizan a la vez. Se
+serializa la suite (`fileParallelism: false`). Cuatro pasadas completas seguidas en verde,
+31 pruebas, ~10 s.
