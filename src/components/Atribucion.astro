@@ -25,15 +25,23 @@ const { obra, año, referencia } = cita.procedencia;
  * El esquema garantiza que algo hay —una Cita sin nada documentado no se publica—, pero
  * la obra puede faltar, y entonces se declara que falta.
  */
-const partes: string[] = [];
-if (obra !== undefined) partes.push(año !== undefined ? `${obra}, ${año}` : obra);
-else if (año !== undefined) partes.push(`Sin obra documentada. Año ${año}.`);
-else partes.push('Sin obra documentada.');
+const frases: string[] = [];
 
-if (obra !== undefined && año === undefined) partes.push('Sin año documentado.');
-if (referencia !== undefined) partes.push(referencia);
+if (obra !== undefined && año !== undefined) frases.push(`${obra}, ${año}`);
+else if (obra !== undefined) frases.push(obra, 'Sin año documentado');
+else if (año !== undefined) frases.push('Sin obra documentada', `Año ${año}`);
+else frases.push('Sin obra documentada');
 
-const procedencia = partes.join(' · ');
+if (referencia !== undefined) frases.push(referencia);
+
+/**
+ * UX-DR21 — frases completas con punto final. Se compone como oraciones separadas por
+ * punto y espacio, no encadenadas con un separador: una línea como «Sin obra documentada.
+ * · Lema de sus escritos» mezcla dos convenciones y deja la segunda mitad sin terminar.
+ * El punto se añade aquí y no se escribe en el corpus, para que el dato guardado sea el
+ * dato y no una frase.
+ */
+const procedencia = frases.map((f) => (/[.?!]$/.test(f) ? f : `${f}.`)).join(' ');
 ---
 
 <p class="autor">

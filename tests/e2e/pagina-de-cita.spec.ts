@@ -119,15 +119,39 @@ test.describe('Historia 2.1 — tramos tipográficos', () => {
 });
 
 test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
-  test('la página no envía JavaScript', async ({ page }) => {
+  test('la página no descarga ningún fichero de script', async ({ page }) => {
+    /*
+     * El criterio de la 2.1 dice «la página no envía JavaScript» y la 2.2 añade el botón
+     * de copiar, que necesita algo. AD-6 resuelve la tensión: existen tres islas, cada
+     * una hidratada bajo demanda. Lo que se exige, entonces, es que no se descargue
+     * ningún script y que el contenido no dependa de que se ejecute nada —las dos cosas
+     * que sostienen NFR-2 y NFR-7—, no que el HTML tenga cero bytes de JavaScript.
+     */
     const scripts: string[] = [];
     page.on('response', (r) => {
       if (r.request().resourceType() === 'script') scripts.push(r.url());
     });
 
     await page.goto(CORTA, { waitUntil: 'networkidle' });
-    expect(scripts, `la página cargó ${scripts.join(', ')}`).toHaveLength(0);
-    expect(await page.locator('script').count()).toBe(0);
+    expect(scripts, `la página descargó ${scripts.join(', ')}`).toHaveLength(0);
+
+    // Y lo que hay en línea es la isla, no un armazón: se mide para que no crezca sin
+    // que nadie lo note.
+    const bytes = await page.evaluate(() =>
+      [...document.querySelectorAll('script')].reduce((n, s) => n + s.textContent!.length, 0),
+    );
+    expect(bytes).toBeLessThan(2048);
+  });
+
+  test('el contenido no depende de que se ejecute JavaScript', async ({ browser }) => {
+    const contexto = await browser.newContext({ javaScriptEnabled: false });
+    const pagina = await contexto.newPage();
+    await pagina.goto(`http://localhost:4321${MEDIA}`);
+
+    await expect(pagina.locator('h1')).toContainText('La libertad, Sancho');
+    await expect(pagina.locator('.autor')).toContainText('Miguel de Cervantes');
+    await expect(pagina.locator('.procedencia')).toContainText('Don Quijote');
+    await contexto.close();
   });
 
   test('el texto, el Autor y la procedencia están en el HTML inicial', async ({ request }) => {
@@ -217,11 +241,14 @@ test.describe('Historia 2.1 — microcopia', () => {
     await page.goto(CORTA);
     // Todo el texto de la página menos la Cita, que es ajena y va como venga.
     const propio = await page.evaluate(() => {
-      const cita = document.querySelector('blockquote');
+      // Solo lo que el visitante lee. Se descuenta la Cita, que es ajena y va como
+      // venga, y también el `<script>` y el respaldo oculto: un clon separado del
+      // documento no tiene maquetación, así que `innerText` cae a `textContent` y
+      // arrastraría el código fuente de la isla —donde un `if (!boton)` cuenta como
+      // exclamación.
       const copia = document.body.cloneNode(true) as HTMLElement;
-      copia.querySelector('blockquote')?.remove();
-      void cita;
-      return copia.innerText;
+      for (const fuera of copia.querySelectorAll('blockquote, script, [hidden]')) fuera.remove();
+      return copia.textContent ?? '';
     });
 
     expect(propio).not.toMatch(/[!¡]/);

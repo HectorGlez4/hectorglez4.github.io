@@ -1,0 +1,131 @@
+---
+/**
+ * Isla de copiado — FR-3, UX-DR15.
+ *
+ * Una pulsación deja en el portapapeles el texto y la atribución juntos, en texto plano.
+ * La confirmación ocurre **en el propio botón** durante dos segundos: sin notificación
+ * flotante, que en móvil tapa justo el contenido que se acaba de copiar.
+ *
+ * Sobre AD-6 y «hidratada bajo demanda»: aquí la isla es un manejador en línea de una
+ * veintena de líneas, no un módulo que se descarga al pulsar. Diferir la descarga tiene
+ * sentido en el generador de Imagen, que son kilobytes de lienzo; para un botón de copiar
+ * la petición costaría más que el código que ahorra. Lo que AD-6 protege se cumple igual:
+ * la página no descarga ningún fichero de script y el contenido no depende de que se
+ * ejecute nada. Con JavaScript desactivado, la Cita y su atribución siguen ahí y siguen
+ * siendo seleccionables — que es exactamente lo que hace el respaldo de abajo.
+ */
+import { textoParaCopiar } from '../lib/atribucion.ts';
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+}
+
+const { cita, autor } = Astro.props;
+const carga = textoParaCopiar(cita, autor);
+---
+
+<div class="isla">
+  <button type="button" class="copiar" data-copiar data-carga={carga}>
+    <span data-etiqueta>Copiar la cita</span>
+  </button>
+
+  {/* Respaldo de UX-DR20: si el portapapeles falla, el texto se revela seleccionable. */}
+  <p class="respaldo" data-respaldo hidden>
+    <label for="texto-para-copiar">Selecciona el texto y cópialo.</label>
+    <textarea id="texto-para-copiar" data-respaldo-texto readonly rows="4">{carga}</textarea>
+  </p>
+</div>
+
+<script is:inline>
+  (() => {
+    const boton = document.querySelector('[data-copiar]');
+    if (!boton) return;
+
+    const etiqueta = boton.querySelector('[data-etiqueta]');
+    const original = etiqueta.textContent;
+    let temporizador;
+
+    boton.addEventListener('click', async () => {
+      const carga = boton.dataset.carga;
+
+      try {
+        // `writeText` falla en contextos no seguros y cuando el permiso se deniega. Es
+        // un caso real, no teórico: pasa en http:// y en algunos navegadores incrustados.
+        await navigator.clipboard.writeText(carga);
+
+        etiqueta.textContent = 'Copiado.';
+        boton.setAttribute('data-estado', 'copiado');
+        clearTimeout(temporizador);
+        temporizador = setTimeout(() => {
+          etiqueta.textContent = original;
+          boton.removeAttribute('data-estado');
+        }, 2000);
+      } catch {
+        // Sin mensaje de error técnico: se ofrece la vía manual y se selecciona el
+        // texto, que es el siguiente gesto que iba a hacer el visitante de todos modos.
+        const respaldo = document.querySelector('[data-respaldo]');
+        const campo = document.querySelector('[data-respaldo-texto]');
+        respaldo.hidden = false;
+        campo.focus();
+        campo.select();
+      }
+    });
+  })();
+</script>
+
+<style>
+  .isla {
+    margin-top: calc(var(--unidad) * 4);
+  }
+
+  /* UX-DR9 — secundario: texto en siena con filete, altura mínima de 44px. */
+  .copiar {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    /* UX-DR22 — solo opacidad y color, y como máximo 150 ms. */
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .copiar:hover {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  .copiar[data-estado='copiado'] {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  .respaldo {
+    margin-top: calc(var(--unidad) * 2);
+    max-width: var(--medida-prosa);
+  }
+
+  .respaldo label {
+    display: block;
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+    margin-bottom: var(--unidad);
+  }
+
+  .respaldo textarea {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    background: var(--contenedor-bajo);
+    border: var(--grosor-filete) solid var(--filete);
+    border-radius: var(--radio);
+    padding: var(--unidad);
+    resize: vertical;
+  }
+</style>

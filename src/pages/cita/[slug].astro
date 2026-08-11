@@ -12,6 +12,7 @@
  */
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
+import CopiarCita from '../../islands/CopiarCita.astro';
 import { conjuntoPublicable } from '../../lib/publicado.ts';
 import type { GetStaticPaths } from 'astro';
 
@@ -39,6 +40,7 @@ const titulo = `«${recorte}» — ${autor.nombre} | Sabiduría Diaria`;
 <Armazon titulo={titulo} descripcion={`${cita.texto} — ${autor.nombre}.`} ruta={`/cita/${cita.slug}`}>
   <article class="pagina contenedor">
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
+    <CopiarCita cita={cita} autor={autor} />
   </article>
 </Armazon>
 

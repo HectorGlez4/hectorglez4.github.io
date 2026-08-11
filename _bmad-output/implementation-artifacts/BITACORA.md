@@ -279,3 +279,35 @@ queda en primer plano y sirve como el alojamiento real, incluido el 404 con su e
 **Cerrado el hueco de la 1.2.** `publicado.ts` verifica la integridad referencial y rompe
 el build nombrando la Cita culpable y la entidad que falta. Era el sitio natural: por
 AD-11 es el dueño del conjunto publicable.
+
+---
+
+## 2.2 — Copiado con atribución
+
+**Verificado.** 7 funcionales más revisión en Chrome. Una pulsación deja texto y
+atribución juntos en texto plano; nunca se copia una procedencia que no consta; el propio
+botón confirma dos segundos y vuelve solo, sin notificación flotante; con el portapapeles
+roto a propósito el texto se revela seleccionable y no aparece ningún mensaje de error
+técnico; el botón mide 44px y su foco es visible.
+
+**Resuelta la tensión entre 2.1 y 2.2.** La 2.1 exige que «la página no envía JavaScript»
+y la 2.2 añade un botón que necesita algo. AD-6 la resuelve: hay tres islas hidratadas
+bajo demanda. Lo que se prueba, entonces, es lo que de verdad sostiene NFR-2 y NFR-7 —que
+no se descargue ningún fichero de script y que el contenido no dependa de ejecutar nada,
+comprobado con JavaScript desactivado—, más un tope de 2 KB al código en línea para que no
+crezca sin que nadie lo note.
+
+**Decidido — isla en línea y no `import()` diferido.** Diferir la descarga tiene sentido
+en el generador de Imagen, que son kilobytes de lienzo. Para un botón de copiar la
+petición costaría más que el código que ahorra. Se cumple lo que AD-6 protege sin aplicar
+el patrón más allá de donde compensa.
+
+**Defecto de microcopia visto en el navegador.** La procedencia salía como «Sin obra
+documentada. · Lema de sus escritos sobre la reforma penitenciaria»: mezclaba un punto con
+un separador y dejaba la segunda mitad sin terminar. Ahora se compone como oraciones
+completas separadas por punto y espacio. El punto se añade al presentar y no se guarda en
+el corpus, para que el dato almacenado siga siendo el dato y no una frase.
+
+**Estructural.** `src/lib/atribucion.ts` compone el texto plano, y lo consumirá también la
+Imagen de Cita (5.1): si cada superficie lo compusiera por su cuenta, una publicaría
+«Séneca, Cartas a Lucilio» y la otra «Séneca — Cartas a Lucilio, 65».
