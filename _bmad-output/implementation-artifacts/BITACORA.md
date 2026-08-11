@@ -85,3 +85,30 @@ proyectos temporales enlazan el `node_modules` de la raíz en lugar de copiarlo,
 todos comparten la caché de Vite y dos builds simultáneos la reoptimizan a la vez. Se
 serializa la suite (`fileParallelism: false`). Cuatro pasadas completas seguidas en verde,
 31 pruebas, ~10 s.
+
+---
+
+## 1.4 — Normalización canónica y slug inmutable
+
+**Verificado.** 22 pruebas. La normalización quita diacríticos, pasa a minúsculas,
+colapsa espacios y elimina puntuación —incluida la que solo usa el español: «», ¿ y ¡—;
+«Corazón» y «corazon» coinciden. El slug de Cita sale del slug del Autor más siete
+palabras del texto en forma canónica, solo admite minúsculas, dígitos y guiones, y el
+mismo texto con otra puntuación da el mismo slug. Tres pruebas de código recorren todo
+`src/` y fijan que nadie descomponga en NFD ni borre marcas combinantes por su cuenta, y
+que `normalizar.ts` y `slug.ts` no importen `node:fs` ni Astro (AD-5).
+
+**Decidido — la eñe se pliega a ene.** Descomponer en NFD convierte «ñ» en «n», y en
+español la eñe es letra propia, no una ene acentuada: lingüísticamente es una pérdida. Se
+acepta porque el propósito de la función lo exige. FR-7 promete que el visitante encuentre
+«escribiendo como se escribe de verdad, sin acentos», y quien busca «español» teclea
+«espanol»; conservar la eñe rompería esa búsqueda. Lo que AD-3 prohíbe no es tomar esta
+decisión, sino tomarla dos veces y distinta en cada sitio.
+
+**Decidido — la puntuación se sustituye por espacio, no por vacío.** Sustituir por vacío
+convertiría «vida,es» en «vidaes», una palabra que no existe y que ninguna búsqueda
+encontraría. Hay prueba que lo fija.
+
+**Decidido — `slugDeCita` no admite Temas en su firma.** AD-4 prohíbe que el Tema
+participe en la ruta de una Cita. Dejarlo fuera de la firma hace que lo prohibido no
+pueda ni escribirse, en lugar de confiar en que nadie lo pase.
