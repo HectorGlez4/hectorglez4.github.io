@@ -52,11 +52,23 @@ export interface CitaRechazada {
   motivos: string[];
 }
 
+export interface PosibleDuplicado {
+  texto: string;
+  /** Slug de la Cita que ya está en el corpus, o `«el propio lote»` si repite dentro. */
+  coincideCon: string;
+  donde: 'publicadas' | 'en revisión' | 'el propio lote';
+}
+
 export interface InformeDeAlta {
   publicadas: CitaPublicada[];
   enRevision: CitaRechazada[];
   /** Autores citados en el lote que no existen en el corpus. No se crean (FR-15). */
   autoresDesconocidos: string[];
+  /**
+   * Señaladas antes de escribirlas — FR-14. No se descartan: quedan aquí para que el
+   * editor decida, y se incorporan tal cual si vuelve a ejecutar con `--con-duplicados`.
+   */
+  posiblesDuplicados: PosibleDuplicado[];
 }
 
 /**
@@ -68,21 +80,51 @@ export interface InformeDeAlta {
 export async function darDeAltaLote(
   lote: EntradaDeLote[],
   rutas: Rutas,
-  opciones: { seco?: boolean } = {},
+  opciones: { seco?: boolean; conDuplicados?: boolean } = {},
 ): Promise<InformeDeAlta> {
   const autores = await leerAutores(rutas);
   const temas = await leerTemas(rutas);
   const yaPublicadas = await leerCitas(rutas.citas);
+  const enRevisionYa = await leerCitas(rutas.revision);
 
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
   const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
 
-  const informe: InformeDeAlta = { publicadas: [], enRevision: [], autoresDesconocidos: [] };
+  // FR-14 — el índice de comparación usa la forma canónica de AD-3, la misma que la
+  // búsqueda. Ese es justo el punto: si duplicados y búsqueda usaran criterios distintos,
+  // el corpus podría acabar con dos Citas que la búsqueda presenta como una sola.
+  const yaEnCorpus = new Map<string, { slug: string; donde: PosibleDuplicado['donde'] }>();
+  for (const c of enRevisionYa) {
+    yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'en revisión' });
+  }
+  // Las publicadas se indexan después para que ganen: si el mismo texto está en los dos
+  // sitios, lo que el editor necesita saber es que ya está publicado.
+  for (const c of yaPublicadas) {
+    yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'publicadas' });
+  }
+
+  const informe: InformeDeAlta = {
+    publicadas: [],
+    enRevision: [],
+    autoresDesconocidos: [],
+    posiblesDuplicados: [],
+  };
 
   for (const entrada of lote) {
     const texto = entrada.texto ?? '';
     const motivos: string[] = [];
+
+    // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
+    const canonico = normalizar(texto);
+    const yaEsta = canonico === '' ? undefined : yaEnCorpus.get(canonico);
+    if (yaEsta && !opciones.conDuplicados) {
+      // No se escribe y no se descarta: se señala y el editor decide. El sistema no
+      // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
+      // ediciones legítimas de la misma frase.
+      informe.posiblesDuplicados.push({ texto, coincideCon: yaEsta.slug, donde: yaEsta.donde });
+      continue;
+    }
 
     // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
     const referenciaAutor = entrada.autor ?? '';
@@ -150,6 +192,9 @@ export async function darDeAltaLote(
         ? null
         : await escribirCita(rutas.revision, nombreFichero, candidata);
       informe.enRevision.push({ texto, ruta, motivos });
+      if (canonico !== '') {
+        yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
+      }
       continue;
     }
 
@@ -157,6 +202,9 @@ export async function darDeAltaLote(
       ? ''
       : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
     slugsOcupados.add(candidata.slug);
+    // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
+    // detecta igual que si la segunda llegara mañana en otro lote.
+    yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
     informe.publicadas.push({
       slug: candidata.slug,
       ruta,
@@ -203,6 +251,17 @@ export function formatearInforme(informe: InformeDeAlta): string {
     for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
   }
 
+  if (informe.posiblesDuplicados.length > 0) {
+    lineas.push('', `Posibles duplicados, no escritos: ${informe.posiblesDuplicados.length}`);
+    for (const d of informe.posiblesDuplicados) {
+      lineas.push(`  · «${recortar(d.texto)}»`);
+      lineas.push(`      Coincide con ${d.coincideCon} (${d.donde}).`);
+    }
+    lineas.push(
+      '  Nada se ha descartado. Para incorporarlos igualmente, repita con --con-duplicados.',
+    );
+  }
+
   if (informe.autoresDesconocidos.length > 0) {
     lineas.push('', 'Autores que no existen en el corpus:');
     for (const a of informe.autoresDesconocidos) lineas.push(`  · ${a}`);
@@ -228,6 +287,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const argumentos = process.argv.slice(2);
   const fichero = argumentos.find((a) => !a.startsWith('--'));
   const seco = argumentos.includes('--seco');
+  const conDuplicados = argumentos.includes('--con-duplicados');
   const indiceCorpus = argumentos.indexOf('--corpus');
   const raizCorpus = indiceCorpus === -1 ? 'corpus' : argumentos[indiceCorpus + 1];
 
@@ -242,7 +302,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(2);
   }
 
-  const informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco });
+  const informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
   process.stdout.write(`${formatearInforme(informe)}\n`);
   if (seco) process.stdout.write('\n(Ejecución en seco: no se ha escrito nada.)\n');
 }

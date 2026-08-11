@@ -142,3 +142,26 @@ decisión tomada cuando es la ausencia de decisión.
 **Aplazado a propósito.** El corpus real no se siembra todavía. Sembrarlo con las
 herramientas —y no a mano— es la demostración honesta de que funcionan, así que se hace al
 cerrar la 1.7, cuando exista también la gestión de Autores y Temas.
+
+---
+
+## 1.6 — Detección de duplicados en la ingesta
+
+**Verificado.** 8 pruebas. Una Cita equivalente a otra ya publicada se señala **antes de
+escribir nada** —se comprueba que ni `citas/` ni `_revision/` cambian—, y la tolerancia se
+prueba por separado para puntuación, acentuación y mayúsculas. Un texto distinto no se
+confunde. Con `--con-duplicados` se incorpora igualmente. El texto señalado sigue íntegro
+en el informe: no se pierde, solo no se escribe.
+
+**Decidido.** El índice se construye con la forma canónica de AD-3, la misma que usará la
+búsqueda. Es el punto entero de la decisión: con dos criterios distintos, el corpus podría
+acabar con dos Citas que la búsqueda presenta como una sola. Hay prueba que fija que
+`alta.ts` importe `normalizar` y que no haya ninguna comparación artesanal —ni un
+`toLowerCase()` suelto— que la esquive.
+
+**Añadido sobre lo pedido.** La detección cubre tres orígenes y el informe los distingue:
+lo ya publicado, lo que está en revisión y la repetición dentro del propio lote. Los dos
+últimos no los pedía el criterio, pero un lote que trae la misma Cita dos veces es
+exactamente el caso que describe la historia —incorporar un lote de un autor recién
+entrado en dominio público— y detectarlo solo mañana, en el siguiente lote, sería llegar
+tarde.
