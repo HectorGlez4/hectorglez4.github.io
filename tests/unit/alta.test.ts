@@ -165,9 +165,13 @@ describe('Historia 1.5 — alta por lote', () => {
 
   it('--seco calcula el informe sin escribir nada', async () => {
     const rutas = await corpusDePrueba();
-    const informe = await darDeAltaLote([COMPLETA, { ...COMPLETA, procedencia: {} }], rutas, {
-      seco: true,
-    });
+    const informe = await darDeAltaLote(
+      // Textos distintos a propósito: con el mismo, la detección de duplicados de la
+      // Historia 1.6 señalaría la segunda y no llegaría a la rama de revisión.
+      [COMPLETA, { ...COMPLETA, texto: 'La vida, si sabes usarla, es larga.', procedencia: {} }],
+      rutas,
+      { seco: true },
+    );
 
     expect(informe.publicadas).toHaveLength(1);
     expect(informe.enRevision).toHaveLength(1);
