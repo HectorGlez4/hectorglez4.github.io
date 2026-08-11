@@ -5,5 +5,14 @@ _bmad/custom/config.user.toml
 # Node
 node_modules/
 
+# Astro
+dist/
+.astro/
+
+# Pruebas
+test-results/
+playwright-report/
+.playwright/
+
 # macOS
 .DS_Store

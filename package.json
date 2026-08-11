@@ -1,0 +1,32 @@
+{
+  "name": "sabiduria-diaria",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "comprobar-node": "node tools/comprobar-node.mjs",
+    "predev": "npm run comprobar-node",
+    "dev": "astro dev",
+    "prebuild": "npm run comprobar-node",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.10"
+  }
+}
