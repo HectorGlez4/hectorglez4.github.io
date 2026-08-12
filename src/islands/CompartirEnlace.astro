@@ -1,0 +1,121 @@
+---
+/**
+ * Isla de compartir enlace — FR-18.
+ *
+ * Los destinos se componen **en el build** y salen en el marcado como enlaces de verdad.
+ * De ahí vienen tres propiedades a la vez: funcionan con JavaScript desactivado, no hay
+ * código que construya direcciones en el cliente, y el guion se queda en las pocas líneas
+ * que cambian una lista por un botón.
+ *
+ * Lo que hay que saber al leer el manejador, escrito aquí porque los comentarios de un
+ * `is:inline` viajan al visitante y la Página de Cita tiene presupuesto de bytes:
+ *
+ *   · La comprobación es `navigator.share` a secas, y **no** `canShare({files})` como en
+ *     la Imagen. Son capacidades distintas y hace falta la contraria: aquí se manda texto
+ *     y enlace, que es justo lo que sabe hacer el navegador que no admite ficheros.
+ *   · Con hoja del sistema se esconde la lista y se enseña el botón. Sin ella la lista ya
+ *     está ahí, visible y con destinos concretos — que es lo que pide el criterio, en vez
+ *     de un control deshabilitado o un aviso de incompatibilidad.
+ *   · Cancelar la hoja no es un fallo y no se registra. Ver la nota de `ImagenDeCita`.
+ */
+import { DESTINOS, textoParaCompartir } from '../lib/compartir.ts';
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+  /** La canónica, absoluta: es lo que se comparte y lo único que el buscador indexa. */
+  canonica: string;
+}
+
+const { cita, autor, canonica } = Astro.props;
+const texto = textoParaCompartir(cita, autor);
+---
+
+<div class="isla" data-pagefind-ignore data-compartir data-texto={texto} data-url={canonica}>
+  <button type="button" class="hoja" data-hoja hidden>Compartir la cita</button>
+
+  <ul class="destinos" data-destinos>
+    {
+      DESTINOS.map((destino) => (
+        <li>
+          <a
+            href={destino.enlace(texto, canonica)}
+            data-destino={destino.id}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {destino.nombre}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script is:inline>
+  (() => {
+    const isla = document.querySelector('[data-compartir]');
+    if (!isla || !navigator.share) return;
+
+    const boton = isla.querySelector('[data-hoja]');
+    isla.querySelector('[data-destinos]').hidden = true;
+    boton.hidden = false;
+
+    boton.addEventListener('click', async () => {
+      try {
+        await navigator.share({ text: isla.dataset.texto, url: isla.dataset.url });
+      } catch {
+        // Cancelar no es un fallo, y aquí no hay nada más que hacer en ninguno de los dos.
+      }
+    });
+  })();
+</script>
+
+<style>
+  .isla {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .destinos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* UX-DR9 — secundario con filete; UX-DR22 — 44px de zona de toque. */
+  .destinos a,
+  .hoja {
+    display: flex;
+    align-items: center;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .destinos a:hover,
+  .hoja:hover {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  /*
+   * `display: flex` gana al `display: none` que el navegador da por defecto a `[hidden]`,
+   * así que sin esto el botón de la hoja y la lista se veían **los dos a la vez**: el
+   * atributo estaba puesto y no hacía nada. Lo destapó la prueba, no la vista.
+   */
+  .destinos[hidden],
+  .hoja[hidden] {
+    display: none;
+  }
+</style>

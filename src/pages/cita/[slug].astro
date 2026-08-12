@@ -14,6 +14,7 @@ import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
+import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import {
@@ -68,6 +69,7 @@ const canonica = new URL(`/cita/${cita.slug}`, Astro.site).href;
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
+    <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
     <RutasDeSalida
       autor={autor}
       relacionadas={relacionadas}

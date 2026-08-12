@@ -63,6 +63,7 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
   tramo.admiteImagen && (
     <div
       class="isla"
+      data-pagefind-ignore
       data-imagen
       data-texto={cita.texto}
       data-autor={autor.nombre}
