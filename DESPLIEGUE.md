@@ -41,3 +41,47 @@ Cómo comprobar que quedó bien, sin entrar en ningún panel:
 curl -sI https://sabiduriadebolsillo.com | head -1
 curl -sI https://www.sabiduriadebolsillo.com | head -1   # 301 hacia el ápice
 ```
+
+## 2. Search Console — Historia 7.2 (LC-2, LC-3)
+
+Hecho en el repositorio:
+
+- `/robots.txt` lo sirve `src/pages/robots.txt.ts` y declara
+  `https://sabiduriadebolsillo.com/sitemap-index.xml`. La URL sale del mismo módulo de
+  dominio que las canónicas, así que un cambio de dominio no puede dejarla apuntando al
+  anterior.
+- No lleva ningún `Disallow`. Lo que no debe indexarse lo dice cada página en su etiqueta
+  `robots` y queda fuera del sitemap. Bloquearlo aquí además sería contraproducente: un
+  rastreador que no puede descargar la página tampoco lee su `noindex`, y la URL se queda
+  indexable sin descripción y sin forma cómoda de retirarla.
+
+A mano, una vez (necesita la cuenta de Google y la del registrador):
+
+1. En [Search Console](https://search.google.com/search-console), **Agregar propiedad →
+   Dominio** y escribir `sabiduriadebolsillo.com`.
+
+   Se elige propiedad de **dominio**, no de prefijo de URL: cubre de una vez el ápice, el
+   `www`, `http` y `https`. Con prefijo de URL harían falta cuatro propiedades y las
+   métricas saldrían repartidas entre ellas, que es justo lo que impediría medir SM-1.
+
+2. Google da un registro `TXT` del tipo `google-site-verification=…`. Añadirlo en el
+   registrador, en el ápice (`@`), junto a los cuatro registros `A` de la Historia 7.1.
+   **No se sustituye ninguno**: un dominio admite varios `TXT` a la vez.
+
+3. Pulsar **Verificar**. Si falla, es propagación: se reintenta al cabo de un rato.
+
+4. **Sitemaps → Agregar sitemap**, con la ruta `sitemap-index.xml`.
+
+5. No borrar el registro `TXT` después. Google revalida cada cierto tiempo y la propiedad
+   se cae sin avisar si el registro ya no está.
+
+Cómo repetirlo o comprobarlo desde fuera:
+
+```bash
+dig +short TXT sabiduriadebolsillo.com | grep google-site-verification
+curl -s https://sabiduriadebolsillo.com/robots.txt
+```
+
+La alternativa —subir el fichero HTML de verificación a `public/`— también funciona con
+este alojamiento, pero verifica solo un prefijo de URL, así que no sirve para lo que se
+necesita aquí.

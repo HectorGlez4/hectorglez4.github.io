@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-12-2026 09:35
+last_updated: 08-12-2026 09:40
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -86,7 +86,9 @@ development_status:
   # review: implementado y probado; falta el DNS y Enforce HTTPS, que piden
   # las cuentas de Héctor. Los pasos están en DESPLIEGUE.md §1.
   7-1-el-dominio-propio-sirviendo: review
-  7-2-anunciar-el-sitio-a-los-buscadores: backlog
+  # review: robots.txt y la coherencia de los tres canales, probados. Falta
+  # verificar la propiedad en Search Console — DESPLIEGUE.md §2.
+  7-2-anunciar-el-sitio-a-los-buscadores: review
   7-3-la-medición-recibe-de-verdad: backlog
   epic-7-retrospective: optional
 
