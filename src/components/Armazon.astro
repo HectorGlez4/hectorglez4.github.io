@@ -34,6 +34,14 @@ interface Props {
    * los resultados y dejaba de ser privada por la puerta de atrás.
    */
   fueraDeLaBusqueda?: boolean;
+  /**
+   * Ruta de la Tarjeta Social de esta página — FR-19.
+   *
+   * Sin ella la página no declara imagen y la previsualización sale desnuda. La portada
+   * y los listados no la llevan todavía: la Épica 10 la pide para toda **Cita**
+   * publicada, que es la unidad que se comparte.
+   */
+  tarjeta?: string;
 }
 
 const {
@@ -44,8 +52,12 @@ const {
   fueraDeLaBusqueda = false,
   vistaDeCita = false,
   tipo,
+  tarjeta,
 } = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
+// Absoluta y no relativa: una previsualización se resuelve en el servidor de la red, que
+// no tiene la página delante para completar la ruta.
+const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.site).href;
 ---
 
 <!doctype html>
@@ -59,6 +71,26 @@ const canonica = new URL(ruta, Astro.site).href;
     <link rel="canonical" href={canonica} />
     {noIndexar && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    {/*
+      * Metadatos de previsualización — FR-19. `og:` lo leen casi todas las redes y
+      * mensajerías; `twitter:card` lo necesita X para elegir el formato grande, y sin
+      * él muestra la miniatura cuadrada aunque la imagen sea apaisada.
+      */}
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:locale" content="es_ES" />
+    {imagenSocial !== undefined && (
+      <>
+        <meta property="og:image" content={imagenSocial} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={imagenSocial} />
+      </>
+    )}
     <Font cssVariable="--fuente-serif" preload />
     <Font cssVariable="--fuente-sans" preload />
     <slot name="cabeza" />

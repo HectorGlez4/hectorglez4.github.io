@@ -29,6 +29,15 @@ export interface Tramo {
   nombre: NombreDeTramo;
   /** Tamaño en píxeles para el lienzo del generador de Imagen (UX-DR19). */
   pixelesEnImagen: number;
+  /**
+   * Tamaño en píxeles para la Tarjeta Social.
+   *
+   * Es un número distinto y no un factor sobre el anterior porque el lienzo es distinto:
+   * la Imagen es cuadrada de 1080 y la Tarjeta es 1200×630, mucho más ancha y menos
+   * alta. Vive aquí, en la tabla, por lo mismo que el otro: dos superficies que compongan
+   * la misma Cita tienen que partir del mismo tramo, o una dirá que cabe y la otra no.
+   */
+  pixelesEnTarjeta: number;
   /** Falso por encima de `MAX_CARACTERES_IMAGEN`: la acción no se ofrece (FR-10). */
   admiteImagen: boolean;
 }
@@ -38,15 +47,23 @@ export interface Tramo {
  * máximo alcance la longitud del texto.
  */
 const TABLA: { hasta: number; tramo: Tramo }[] = [
-  { hasta: 80, tramo: { nombre: 'xl', pixelesEnImagen: 64, admiteImagen: true } },
-  { hasta: 160, tramo: { nombre: 'lg', pixelesEnImagen: 52, admiteImagen: true } },
-  { hasta: 240, tramo: { nombre: 'md', pixelesEnImagen: 42, admiteImagen: true } },
+  { hasta: 80, tramo: { nombre: 'xl', pixelesEnImagen: 64, pixelesEnTarjeta: 56, admiteImagen: true } },
+  { hasta: 160, tramo: { nombre: 'lg', pixelesEnImagen: 52, pixelesEnTarjeta: 46, admiteImagen: true } },
+  { hasta: 240, tramo: { nombre: 'md', pixelesEnImagen: 42, pixelesEnTarjeta: 38, admiteImagen: true } },
   // 34px es el suelo legible del lienzo. Por debajo no se baja: se deja de ofrecer imagen.
-  { hasta: MAX_CARACTERES_IMAGEN, tramo: { nombre: 'sm', pixelesEnImagen: 34, admiteImagen: true } },
+  {
+    hasta: MAX_CARACTERES_IMAGEN,
+    tramo: { nombre: 'sm', pixelesEnImagen: 34, pixelesEnTarjeta: 32, admiteImagen: true },
+  },
 ];
 
 /** El tramo por encima del corte: se compone igual en la página, pero sin imagen. */
-const SIN_IMAGEN: Tramo = { nombre: 'sm', pixelesEnImagen: 0, admiteImagen: false };
+const SIN_IMAGEN: Tramo = {
+  nombre: 'sm',
+  pixelesEnImagen: 0,
+  pixelesEnTarjeta: 0,
+  admiteImagen: false,
+};
 
 /**
  * Tramo que corresponde a un texto por su longitud.
