@@ -30,3 +30,12 @@ export const CITAS_POR_PAGINA = 50;
 
 /** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
 export const MAX_CITAS_RELACIONADAS = 4;
+
+/**
+ * Suelo de Autores de tradición latinoamericana, en porcentaje — §6.1 del PRD.
+ *
+ * El suelo es explícito porque el sesgo hacia España es el resultado por defecto de
+ * cualquier curación no vigilada: se llega a él sin decidirlo, empezando por los autores
+ * que uno tiene más a mano.
+ */
+export const SUELO_TRADICION_LATINOAMERICANA = 40;

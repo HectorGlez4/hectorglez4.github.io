@@ -127,11 +127,27 @@ export const semblanza = z
  * Esquema de Autor completo, sin piezas de Astro. Lo consumen tanto las colecciones
  * como la herramienta de alta y la de gestión de Autores.
  */
+/**
+ * Tradición a la que pertenece un Autor — §6.1 del PRD.
+ *
+ * Es opcional a propósito, y el informe de huecos cuenta aparte los que no la declaran.
+ * Obligarla habría tenido dos efectos malos: bloquear el alta de un Autor mientras se
+ * decide una etiqueta, y —peor— empujar a rellenarla a ojo para desbloquear, con lo que
+ * la proporción que vigila el suelo del 40 % pasaría a medir suposiciones.
+ *
+ * `otra` no es un cajón de sastre: cubre a quien es anterior a las tradiciones
+ * nacionales, como Séneca, y forzarlo a una de las dos falsearía las dos.
+ */
+export const tradicion = z.enum(['latinoamericana', 'peninsular', 'otra'], {
+  message: 'La tradición, si se declara, es latinoamericana, peninsular u otra.',
+});
+
 export const autorAdmisible = z.object({
   nombre: nombre('Autor'),
   añoFallecimiento,
   añoNacimiento: año.optional(),
   semblanza,
+  tradicion: tradicion.optional(),
 });
 
 export type AutorAdmisible = z.infer<typeof autorAdmisible>;

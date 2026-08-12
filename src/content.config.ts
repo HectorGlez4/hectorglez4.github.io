@@ -9,6 +9,7 @@ import {
   semblanza,
   slug,
   texto,
+  tradicion,
 } from './lib/admision.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,6 +55,9 @@ const autores = defineCollection({
     añoFallecimiento,
     añoNacimiento: año.optional(),
     semblanza,
+    // §6.1 — el suelo del 40 % de tradición latinoamericana necesita saber de quién
+    // hablamos. Opcional: ver la nota en `admision.ts`.
+    tradicion: tradicion.optional(),
   }),
 });
 
