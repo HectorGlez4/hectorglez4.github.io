@@ -21,9 +21,14 @@ export default defineConfig({
        *   · Las páginas 2+ de un listado (FR-5). Las Citas que contienen ya están en el
        *     sitemap por su cuenta, así que no se pierde nada.
        *   · `/buscar`, que es una herramienta y no contenido.
+       *   · `/kit`, que es el material de publicación de Héctor y no una superficie del
+       *     sitio. Anunciarlo lo convertiría en una página del producto sin que nadie lo
+       *     hubiera decidido.
        */
       filter: (pagina) =>
-        !/\/(?:autor|tema)\/[^/]+\/\d+$/.test(pagina) && !/\/buscar$/.test(pagina),
+        !/\/(?:autor|tema)\/[^/]+\/\d+$/.test(pagina) &&
+        !/\/buscar$/.test(pagina) &&
+        !/\/kit$/.test(pagina),
     }),
   ],
 

@@ -1,0 +1,102 @@
+---
+/**
+ * La Imagen del Kit, ya compuesta al abrir — FR-21.
+ *
+ * Es la misma Imagen de Cita de la Historia 5.1: el mismo `public/islas/imagen.js`, el
+ * mismo tamaño de `tramos.ts` y la misma marca de `marca.ts`. Lo único que cambia es
+ * cuándo se dibuja.
+ *
+ * Aquí el generador se carga al abrir la página y no al pulsar, al revés que en la
+ * Página de Cita. No contradice AD-6, lo aplica: AD-6 difiere lo caro que **puede que no
+ * se use**, y en el Kit la imagen es a lo que se viene. Diferirla obligaría a Héctor a
+ * pulsar un botón cada mañana para ver lo único que ha ido a ver.
+ *
+ * La descarga es la misma función `descargar()` que usa cualquier visitante, de modo que
+ * el fichero que se lleva Héctor y el que se lleva el visitante son el mismo.
+ */
+import { MARCA } from '../lib/marca.ts';
+import { tramoDe } from '../lib/tramos.ts';
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+}
+
+const { cita, autor } = Astro.props;
+const tramo = tramoDe(cita.texto);
+const { obra, año } = cita.procedencia;
+const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
+---
+
+<div
+  class="imagen"
+  data-imagen-kit={cita.slug}
+  data-texto={cita.texto}
+  data-autor={autor.nombre}
+  data-procedencia={procedencia}
+  data-tamano={tramo.pixelesEnImagen}
+  data-nombre={cita.slug}
+  data-marca={MARCA}
+>
+  <canvas data-lienzo width="1080" height="1080" aria-label={`Imagen de la cita de ${autor.nombre}`}></canvas>
+  <button type="button" class="descargar" data-descargar>Descargar la imagen</button>
+</div>
+
+<script is:inline define:vars={{ INSTANCIA: cita.slug }}>
+  (() => {
+    const isla = document.querySelector(`[data-imagen-kit="${INSTANCIA}"]`);
+    if (!isla) return;
+
+    const lienzo = isla.querySelector('[data-lienzo]');
+    const datos = () => ({
+      texto: isla.dataset.texto,
+      autor: isla.dataset.autor,
+      procedencia: isla.dataset.procedencia,
+      tamaño: Number(isla.dataset.tamano),
+      marca: isla.dataset.marca,
+      plantilla: 'papel',
+    });
+
+    const generador = import('/islas/imagen.js');
+
+    generador.then((g) => g.dibujar(lienzo, datos()));
+
+    isla.querySelector('[data-descargar]').addEventListener('click', async () => {
+      const g = await generador;
+      // Se redibuja justo antes, igual que en la Página de Cita: lo que se descarga es
+      // sin lugar a dudas lo que se está viendo.
+      g.dibujar(lienzo, datos());
+      await g.descargar(lienzo, isla.dataset.nombre);
+    });
+  })();
+</script>
+
+<style>
+  .imagen {
+    margin-block: calc(var(--unidad) * 2);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Esquinas rectas: es un objeto para publicar fuera, como en la Página de Cita. */
+    border: var(--grosor-filete) solid var(--filete);
+  }
+
+  /* UX-DR9 — primario siena sólido, con la zona de toque de UX-DR22. */
+  .descargar {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--sobre-siena);
+    background: var(--siena);
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 4);
+    width: 100%;
+    margin-top: var(--unidad);
+    cursor: pointer;
+  }
+</style>

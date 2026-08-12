@@ -1,0 +1,131 @@
+---
+/**
+ * Kit Diario de Publicación — FR-21, UJ-5.
+ *
+ * Una dirección que Héctor abre por la mañana en el móvil y encuentra el material del día
+ * ya compuesto: la Imagen, el pie de atribución listo para copiar y el enlace.
+ *
+ * No es una superficie del sitio y no debe llegar a serlo: `noindex`, fuera del sitemap y
+ * sin ningún enlace desde la navegación pública. Es la misma condición que la herramienta
+ * de curación — algo que existe en el dominio pero no forma parte de lo que se publica.
+ *
+ * Se compone en el build, así que la reconstrucción diaria de AD-12 la deja hecha sin que
+ * nadie intervenga: la misma ejecución que mueve la Cita del Día de la portada mueve esta.
+ */
+import Armazon from '../components/Armazon.astro';
+import CopiarCita from '../islands/CopiarCita.astro';
+import ImagenDelKit from '../islands/ImagenDelKit.astro';
+import portada from '../../corpus/portada.json';
+import { aptasParaPortada, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { materialDelKit } from '../lib/kit.ts';
+import { tituloDe } from '../lib/marca.ts';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+import { tramoDe } from '../lib/tramos.ts';
+
+const conjunto = await conjuntoPublicable();
+const jornada = jornadaDelBuild(process.env, new Date());
+const material = materialDelKit(aptasParaPortada(conjunto.citas), jornada, portada.fijaciones);
+
+const autorDe = (slug: string) => conjunto.autores.find((a) => a.slug === slug)!;
+
+const delDia = material && { cita: material.delDia.cita, autor: autorDe(material.delDia.cita.autor) };
+const alternativa = material?.alternativa
+  ? { cita: material.alternativa.cita, autor: autorDe(material.alternativa.cita.autor) }
+  : null;
+---
+
+<Armazon
+  titulo={tituloDe('Kit del día')}
+  descripcion="Material del día para publicar en las cuentas."
+  ruta="/kit"
+  noIndexar
+>
+  <div class="pagina contenedor">
+    <h1>Kit del {jornada}</h1>
+
+    {material === null && <p class="aviso">Hoy no hay ninguna Cita apta para portada.</p>}
+
+    {
+      delDia && (
+        <section class="material">
+          <h2>La Cita del Día</h2>
+          <blockquote class="texto" data-tramo={tramoDe(delDia.cita.texto).nombre}>
+            «{delDia.cita.texto}»
+          </blockquote>
+
+          {tramoDe(delDia.cita.texto).admiteImagen ? (
+            <ImagenDelKit cita={delDia.cita} autor={delDia.autor} />
+          ) : (
+            /*
+             * Se dice explícitamente y sin rodeos. Callarlo dejaría a Héctor buscando por
+             * qué no aparece la imagen justo el día que tiene dos minutos.
+             */
+            <p class="aviso" data-sin-imagen>
+              Esta Cita pasa del límite de longitud, así que no admite Imagen. Abajo tienes
+              una alternativa apta con su material completo.
+            </p>
+          )}
+
+          <CopiarCita cita={delDia.cita} autor={delDia.autor} />
+
+          <p class="enlace">
+            <a href={`/cita/${delDia.cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
+          </p>
+        </section>
+      )
+    }
+
+    {
+      alternativa && (
+        <section class="material" data-alternativa>
+          <h2>Alternativa con Imagen</h2>
+          <blockquote class="texto" data-tramo={tramoDe(alternativa.cita.texto).nombre}>
+            «{alternativa.cita.texto}»
+          </blockquote>
+          <ImagenDelKit cita={alternativa.cita} autor={alternativa.autor} />
+          <CopiarCita cita={alternativa.cita} autor={alternativa.autor} />
+          <p class="enlace">
+            <a href={`/cita/${alternativa.cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
+          </p>
+        </section>
+      )
+    }
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  h1,
+  h2 {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--apagado);
+  }
+
+  .material {
+    margin-block: calc(var(--unidad) * 4);
+    padding-top: calc(var(--unidad) * 2);
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .texto {
+    font-family: var(--serif);
+    margin: 0 0 calc(var(--unidad) * 2);
+  }
+
+  .aviso {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+  }
+
+  .enlace {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+  }
+</style>

@@ -25,25 +25,35 @@ interface Props {
 
 const { cita, autor } = Astro.props;
 const carga = textoParaCopiar(cita, autor);
+
+/*
+ * El slug identifica a esta instancia. La Página de Cita solo tiene una, pero el Kit
+ * Diario lleva dos —la Cita del Día y su alternativa—, y sin identificador las dos
+ * copias del guion buscaban el mismo botón: la segunda quedaba muerta y la primera
+ * escuchaba dos veces. El `id` del respaldo también se repetía, que es marcado inválido.
+ */
+const instancia = cita.slug;
 ---
 
 <div class="isla">
-  <button type="button" class="copiar" data-copiar data-carga={carga}>
+  <button type="button" class="copiar" data-copiar={instancia} data-carga={carga}>
     <span data-etiqueta>Copiar la cita</span>
   </button>
 
   {/* Respaldo de UX-DR20: si el portapapeles falla, el texto se revela seleccionable. */}
   <p class="respaldo" data-respaldo hidden>
-    <label for="texto-para-copiar">Selecciona el texto y cópialo.</label>
-    <textarea id="texto-para-copiar" data-respaldo-texto readonly rows="4">{carga}</textarea>
+    <label for={`texto-para-copiar-${instancia}`}>Selecciona el texto y cópialo.</label>
+    <textarea id={`texto-para-copiar-${instancia}`} data-respaldo-texto readonly rows="4">{carga}</textarea>
   </p>
 </div>
 
-<script is:inline define:vars={{ EVENTO_COPIADO: EVENTOS.copiado }}>
+<script is:inline define:vars={{ EVENTO_COPIADO: EVENTOS.copiado, INSTANCIA: instancia }}>
   (() => {
-    const boton = document.querySelector('[data-copiar]');
+    const boton = document.querySelector(`[data-copiar="${INSTANCIA}"]`);
     if (!boton) return;
 
+    // El respaldo es el de esta isla, no el primero de la página.
+    const isla = boton.closest('.isla');
     const etiqueta = boton.querySelector('[data-etiqueta]');
     const original = etiqueta.textContent;
     let temporizador;
@@ -71,8 +81,8 @@ const carga = textoParaCopiar(cita, autor);
       } catch {
         // Sin mensaje de error técnico: se ofrece la vía manual y se selecciona el
         // texto, que es el siguiente gesto que iba a hacer el visitante de todos modos.
-        const respaldo = document.querySelector('[data-respaldo]');
-        const campo = document.querySelector('[data-respaldo-texto]');
+        const respaldo = isla.querySelector('[data-respaldo]');
+        const campo = isla.querySelector('[data-respaldo-texto]');
         respaldo.hidden = false;
         campo.focus();
         campo.select();
