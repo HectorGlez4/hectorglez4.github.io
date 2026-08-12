@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-12-2026 10:45
+last_updated: 08-12-2026 20:34
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -80,7 +80,7 @@ development_status:
 
   epic-6: done
   6-1-renombrado-a-sabiduría-de-bolsillo: done
-  epic-6-retrospective: optional
+  epic-6-retrospective: done
 
   epic-7: in-progress
   # review: implementado y probado; falta el DNS y Enforce HTTPS, que piden
@@ -92,22 +92,115 @@ development_status:
   # review: receptor escrito y probado de punta a punta contra el código que se
   # despliega. Falta desplegar el Worker y definir MEDICION_ENDPOINT — DESPLIEGUE.md §3.
   7-3-la-medición-recibe-de-verdad: review
-  epic-7-retrospective: optional
+  epic-7-retrospective: done
 
   epic-8: done
   8-1-el-kit-diario-de-publicación: done
   8-2-saber-qué-red-trae-visitas: done
-  epic-8-retrospective: optional
+  epic-8-retrospective: done
 
   epic-9: done
   9-1-extracción-de-candidatas-desde-una-fuente: done
   9-2-aprobación-por-lote: done
   9-3-ver-qué-le-falta-al-corpus: done
-  epic-9-retrospective: optional
+  epic-9-retrospective: done
 
   epic-10: done
   10-1-tarjeta-social-de-toda-cita-publicada: done
   10-2-compartir-la-imagen-por-la-hoja-del-sistema: done
   10-3-compartir-el-enlace-a-un-destino: done
   10-4-medir-la-compartición: done
-  epic-10-retrospective: optional
+  epic-10-retrospective: done
+action_items:
+  - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
+    epic: 6
+    action: "Separar los artefactos de planificación de los commits de historia: commit
+      propio antes de empezar, o árbol limpio como precondición"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-6-retro-08-12-2026.md"
+  - id: "epic-7-retro-item-2-ejecutar-despliegue-md-1-3-y-pasar-7-1-7"
+    epic: 7
+    action: "Ejecutar DESPLIEGUE.md §1–§3 y pasar 7-1, 7-2 y 7-3 de review a done
+      con la comprobación de cada una"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-7-retro-08-12-2026.md"
+  - id: "epic-7-retro-item-3-prueba-que-compare-la-lista-de-columnas"
+    epic: 7
+    action: "Prueba que compare la lista de columnas del INSERT de medicion/worker.ts
+      con las de medicion/esquema.sql"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-7-retro-08-12-2026.md"
+  - id: "epic-7-retro-item-4-extraer-el-conjunto-cerrado-de-destinos"
+    epic: 7
+    action: "Extraer el conjunto cerrado de destinos a un módulo sin dependencias,
+      para que el Worker no arrastre atribucion.ts ni los constructores de enlaces"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-7-retro-08-12-2026.md"
+  - id: "epic-7-retro-item-5-medir-el-presupuesto-de-bytes-de-guion-c"
+    epic: 7
+    action: "Medir el presupuesto de bytes de guion con MEDICION_ENDPOINT configurado:
+      en produccion son 6630 bytes frente al tope de 6144"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-7-retro-08-12-2026.md"
+  - id: "epic-8-retro-item-6-registrar-como-convención-que-una-superf"
+    epic: 8
+    action: "Registrar como convención que una superficie fuera del producto sale
+      de los dos índices —buscador externo y Pagefind—, no solo del primero"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-8-retro-08-12-2026.md"
+  - id: "epic-9-retro-item-7-bloqueante-aprobar-sobrescribe-en-silenc"
+    epic: 9
+    action: "BLOQUEANTE: aprobar() sobrescribe en silencio una Cita publicada cuando
+      el slug colisiona. Pasar por slugLibre contra los slugs publicados, o negarse
+      a mover si el destino existe"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-9-retro-08-12-2026.md"
+  - id: "epic-9-retro-item-8-sembrar-ocupados-de-tools-extraer-ts-con"
+    epic: 9
+    action: "Sembrar ocupados de tools/extraer.ts con los slugs ya presentes en corpus/_revision/
+      y corpus/citas/"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-9-retro-08-12-2026.md"
+  - id: "epic-9-retro-item-9-encaminar-toda-escritura-en-corpus-citas"
+    epic: 9
+    action: "Encaminar toda escritura en corpus/citas/ por un único punto que resuelva
+      colisiones"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-9-retro-08-12-2026.md"
+  - id: "epic-9-retro-item-10-prueba-de-la-forma-completa-del-informe"
+    epic: 9
+    action: "Prueba de la forma completa del informe --json de huecos, si algún día
+      lo consume algo"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-9-retro-08-12-2026.md"
+  - id: "epic-10-retro-item-11-restringir-destino-a-los-dos-eventos-de"
+    epic: 10
+    action: "Restringir destino a los dos eventos de compartición en medicion/receptor.ts,
+      como ya se hace con consulta"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-10-retro-08-12-2026.md"
+  - id: "epic-10-retro-item-12-pasar-una-url-de-cita-por-los-validadore"
+    epic: 10
+    action: "Pasar una URL de Cita por los validadores de previsualización reales,
+      una vez el dominio sirva"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-10-retro-08-12-2026.md"
+  - id: "epic-10-retro-item-13-vigilar-el-coste-de-build-de-las-tarjeta"
+    epic: 10
+    action: "Vigilar el coste de build de las Tarjetas cuando el Corpus crezca: hoy
+      38 PNG, y escala con el Corpus"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-10-retro-08-12-2026.md"
