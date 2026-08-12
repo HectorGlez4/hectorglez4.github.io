@@ -85,3 +85,68 @@ curl -s https://sabiduriadebolsillo.com/robots.txt
 La alternativa —subir el fichero HTML de verificación a `public/`— también funciona con
 este alojamiento, pero verifica solo un prefijo de URL, así que no sirve para lo que se
 necesita aquí.
+
+## 3. El receptor de la medición — Historia 7.3 (LC-4)
+
+El sitio emite eventos desde la Historia 2.9 y hasta ahora no iban a ninguna parte. Esto
+les pone receptor; no reescribe la emisión.
+
+Se eligió **Cloudflare Workers con D1** por lo que pide el criterio: poder consultar sin
+exportar nada ni pedir permiso a un tercero. D1 es SQLite y se consulta con SQL desde la
+terminal. Lo que se guarda y lo que se descarta **no depende de esa elección**: vive en
+`medicion/receptor.ts`, que es una función pura y no sabe dónde corre. Cambiar de
+plataforma es reescribir `medicion/worker.ts`, unas treinta líneas.
+
+Hecho en el repositorio:
+
+- `medicion/receptor.ts` — decide qué se registra. Importa el vocabulario cerrado de
+  `src/lib/medicion.ts` en vez de copiarlo: copiado, un evento nuevo en el sitio se
+  descartaría en silencio aquí y el fallo aparecería como «esa métrica está a cero»
+  semanas más tarde.
+- `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
+  agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
+- `medicion/esquema.sql` — cuatro columnas: jornada, evento, ruta y consulta. No hay
+  columna de visitante porque no hay visitante que guardar, y la marca de tiempo es la
+  jornada y no el instante: un instante al milisegundo junto a una ruta poco visitada es,
+  en la práctica, un identificador.
+- `[observability] enabled = false` en `wrangler.toml`. El registro de acceso de la
+  plataforma guarda IP y agente de usuario; apagarlo es parte de la propiedad, no una
+  opción de rendimiento.
+
+A mano, una vez (necesita una cuenta de Cloudflare):
+
+```bash
+cd medicion
+npx wrangler login
+npx wrangler d1 create medicion            # copia el database_id a wrangler.toml
+npx wrangler d1 execute medicion --remote --file=esquema.sql
+npx wrangler deploy                        # imprime la URL del Worker
+```
+
+Después, en el repositorio del sitio: **Settings → Secrets and variables → Actions →
+Secrets**, definir `MEDICION_ENDPOINT` con la URL que imprimió `wrangler deploy`. Sin esa
+variable el sitio no instala la medición y no envía un solo byte — que es como corre en
+desarrollo y en las pruebas.
+
+Consultar, sin panel de nadie:
+
+```bash
+# Vistas de Página de Cita por jornada — SM-2, SM-3.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT jornada, COUNT(*) FROM eventos WHERE evento='vista-de-cita' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# Lo que se llevaron: copiado y descarga — SM-5.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT evento, COUNT(*) FROM eventos WHERE evento IN ('copiado','descarga-de-imagen') GROUP BY evento"
+
+# Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT consulta, COUNT(*) c FROM eventos WHERE evento='busqueda-sin-resultados' GROUP BY consulta ORDER BY c DESC LIMIT 40"
+```
+
+Lo que este receptor **no** hace, y conviene que quede escrito: no comprueba el origen de
+la baliza. Cualquiera que conozca la URL puede escribir en la tabla. Se aceptó a
+conciencia — la comprobación de origen se salta con una orden de terminal, así que no
+protege de nadie, y en cambio descarta eventos de verdad en silencio el día que cambie el
+dominio. Si algún día la tabla se llena de ruido, la respuesta es un límite de frecuencia
+en la plataforma, no una comprobación que aparenta seguridad.

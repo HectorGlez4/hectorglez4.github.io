@@ -45,6 +45,17 @@ export async function construirConCorpus(
     paginas?: Record<string, string>;
     /** Jornada que compone la Cita del Día, para no depender del día de ejecución. */
     jornada?: string;
+    /**
+     * Variables de entorno añadidas al build. Sirve para construir un sitio **con**
+     * medición configurada, que es la única forma de comprobar que los eventos salen
+     * de las superficies de verdad y no de un espía puesto en la prueba.
+     */
+    entorno?: Record<string, string>;
+    /**
+     * Ejecuta Pagefind sobre el `dist/` resultante. La búsqueda no funciona sin índice,
+     * así que sin esto la superficie que emite `busqueda-sin-resultados` no es visitable.
+     */
+    conBusqueda?: boolean;
   } = {},
 ): Promise<ResultadoBuild> {
   const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
@@ -95,6 +106,7 @@ export async function construirConCorpus(
           FORCE_COLOR: '0',
           ASTRO_TELEMETRY_DISABLED: '1',
           ...(opciones.jornada ? { FECHA_JORNADA: opciones.jornada } : {}),
+          ...(opciones.entorno ?? {}),
         },
       },
     );
@@ -103,6 +115,15 @@ export async function construirConCorpus(
     const e = error as { code?: number; stdout?: string; stderr?: string };
     codigo = e.code ?? 1;
     salida = `${e.stdout ?? ''}\n${e.stderr ?? ''}`;
+  }
+
+  if (codigo === 0 && opciones.conBusqueda) {
+    const { stdout, stderr } = await ejecutar(
+      join(RAIZ, 'node_modules', '.bin', 'pagefind'),
+      ['--site', 'dist', '--force-language', 'es'],
+      { cwd: proyecto },
+    );
+    salida += `\n${stdout}\n${stderr}`;
   }
 
   if (opciones.conservar === false) await limpiar(proyecto);

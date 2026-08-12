@@ -16,7 +16,9 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 
-const RAIZ = new URL('../dist/', import.meta.url).pathname;
+// `DIST` permite servir otro `dist/` que el del repositorio: una prueba que construye un
+// sitio aparte —con la medición configurada, por ejemplo— necesita servir el suyo.
+const RAIZ = process.env.DIST ?? new URL('../dist/', import.meta.url).pathname;
 const puerto = Number(process.env.PUERTO ?? 4321);
 
 const TIPOS = {

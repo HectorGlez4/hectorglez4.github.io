@@ -1,0 +1,17 @@
+# Receptor de la medición de Sabiduría de Bolsillo.
+#
+# El sitio no se despliega aquí: sigue en GitHub Pages, estático. Esto es solo el punto
+# final que recibe las balizas, y se despliega por separado — ver DESPLIEGUE.md §3.
+name = "medicion-sabiduria-de-bolsillo"
+main = "worker.ts"
+compatibility_date = "2026-08-01"
+
+# Sin registro de peticiones: el registro de acceso de la plataforma guarda IP y agente
+# de usuario, que es exactamente lo que este receptor existe para no tener.
+[observability]
+enabled = false
+
+[[d1_databases]]
+binding = "MEDICION"
+database_name = "medicion"
+database_id = "PENDIENTE: lo imprime `wrangler d1 create medicion`"
