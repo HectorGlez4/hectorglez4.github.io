@@ -42,6 +42,7 @@
  *     atributo `data-texto-plano` lo deja legible desde el marcado.
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
+import { DESTINO_OPACO } from '../lib/compartir.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import { MARCA } from '../lib/marca.ts';
 import { tramoDe } from '../lib/tramos.ts';
@@ -114,6 +115,8 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
   is:inline
   define:vars={{
     EVENTO_DESCARGA: EVENTOS.descargaDeImagen,
+    EVENTO_COMPARTICION: EVENTOS.comparticionDeImagen,
+    DESTINO_OPACO,
     TEXTO_PARA_COPIAR: textoParaCopiar(cita, autor),
   }}>
   (() => {
@@ -130,7 +133,7 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
     // FR-17 — capacidad de compartir FICHEROS, no de compartir. Ver la nota de arriba.
     let compartible = false;
     try {
-      const p = new File([new Blob([], { type: 'image/png' })], 'p.png', { type: 'image/png' });
+      const p = new File([], 'p.png', { type: 'image/png' });
       compartible = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [p] });
     } catch {}
 
@@ -192,11 +195,17 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
       const g = await cargar();
       // Se redibuja justo antes: lo que sale es, sin dudas, lo que se está viendo.
       g.dibujar(lienzo, datos());
+      const nombre = isla.dataset.nombre;
 
-      const salida = compartible ? await g.compartir(lienzo, isla.dataset.nombre) : 'descarga';
-      if (salida === 'cancelada') return; // No ha pasado nada: ni evento ni mensaje.
-      if (salida !== 'compartida') await g.descargar(lienzo, isla.dataset.nombre);
+      const salida = compartible ? await g.compartir(lienzo, nombre) : 'descarga';
+      if (salida === 'cancelada') return; // Ni evento ni mensaje: no ha pasado nada.
 
+      if (salida === 'compartida') {
+        window.__medir && window.__medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
+        return;
+      }
+
+      await g.descargar(lienzo, nombre);
       window.__medir && window.__medir(EVENTO_DESCARGA);
     });
 

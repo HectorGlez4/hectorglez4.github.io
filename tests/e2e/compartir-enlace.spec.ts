@@ -119,6 +119,67 @@ test.describe('Historia 10.3 — lo que se comparte es la canónica', () => {
   });
 });
 
+test.describe('Historia 10.4 — la compartición del enlace se mide', () => {
+  /** Espía en el hueco del módulo de medición, que es por donde pasa todo (AD-13). */
+  async function conEspia(page: import('@playwright/test').Page) {
+    await page.addInitScript(() => {
+      const ventana = window as unknown as { __emitidos: unknown[] };
+      ventana.__emitidos = [];
+      (window as unknown as { __medir: unknown }).__medir = (
+        evento: string,
+        datos: string,
+        destino: string,
+      ) => ventana.__emitidos.push({ evento, datos, destino });
+    });
+  }
+
+  const emitidos = (page: import('@playwright/test').Page) =>
+    page.evaluate(
+      () =>
+        (window as unknown as { __emitidos: { evento: string; destino: string }[] }).__emitidos,
+    );
+
+  test('un destino elegido en el sitio se registra con su nombre', async ({ page }) => {
+    await conEspia(page);
+    await page.goto(CITA);
+
+    // Se anula la navegación: lo que se comprueba es el evento, no que se abra Telegram.
+    await page.route('**/t.me/**', (ruta) => ruta.abort());
+    await page.locator('[data-destino="telegram"]').click({ modifiers: [] });
+
+    const [evento] = await emitidos(page);
+    expect(evento.evento).toBe('comparticion-de-enlace');
+    expect(evento.destino).toBe('telegram');
+  });
+
+  test('por la hoja del sistema el destino es opaco', async ({ page }) => {
+    await conHojaDeEnlace(page);
+    await conEspia(page);
+    await page.goto(CITA);
+    await page.locator('[data-hoja]').click();
+    await page.waitForFunction(
+      () => (window as unknown as { __emitidos: unknown[] }).__emitidos.length > 0,
+    );
+
+    const [evento] = await emitidos(page);
+    expect(evento.evento).toBe('comparticion-de-enlace');
+    expect(evento.destino).toBe('opaco');
+  });
+
+  test('la compartición de enlace y la de imagen se distinguen', async ({ page }) => {
+    await conHojaDeEnlace(page);
+    await conEspia(page);
+    await page.goto(CITA);
+    await page.locator('[data-hoja]').click();
+    await page.waitForFunction(
+      () => (window as unknown as { __emitidos: unknown[] }).__emitidos.length > 0,
+    );
+
+    expect((await emitidos(page))[0].evento).toBe('comparticion-de-enlace');
+    expect((await emitidos(page))[0].evento).not.toBe('comparticion-de-imagen');
+  });
+});
+
 test.describe('Historia 10.3 — los controles no son contenido buscable', () => {
   /*
    * El índice de Pagefind se construye sobre `dist/`, así que se llevaba dentro las

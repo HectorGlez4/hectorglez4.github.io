@@ -29,9 +29,17 @@ export default {
 
     try {
       await entorno.MEDICION.prepare(
-        'INSERT INTO eventos (jornada, evento, ruta, origen, consulta) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO eventos (jornada, evento, ruta, origen, destino, consulta) ' +
+          'VALUES (?, ?, ?, ?, ?, ?)',
       )
-        .bind(registro.jornada, registro.evento, registro.ruta, registro.origen, registro.consulta)
+        .bind(
+          registro.jornada,
+          registro.evento,
+          registro.ruta,
+          registro.origen,
+          registro.destino,
+          registro.consulta,
+        )
         .run();
     } catch {
       // El almacén caído pierde el evento en silencio. La alternativa —devolver error—

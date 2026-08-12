@@ -166,3 +166,25 @@ npx wrangler d1 execute medicion --remote --command \
    WHERE evento='vista-de-cita' AND origen IS NOT NULL AND jornada >= date('now','-30 days') \
    GROUP BY origen ORDER BY visitas DESC"
 ```
+
+### Consultar la compartición — SM-5, SM-7 y SM-C3
+
+```bash
+# Cuánto se comparte y hacia dónde — SM-7, FR-20.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT evento, destino, COUNT(*) n FROM eventos \
+   WHERE evento IN ('comparticion-de-imagen','comparticion-de-enlace') \
+   GROUP BY evento, destino ORDER BY n DESC"
+
+# SM-C3 — si la compartición creció a costa del copiado, por jornada.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT jornada, \
+     SUM(evento IN ('copiado','descarga-de-imagen')) llevarselo, \
+     SUM(evento IN ('comparticion-de-imagen','comparticion-de-enlace')) compartirlo \
+   FROM eventos GROUP BY jornada ORDER BY jornada DESC LIMIT 60"
+```
+
+`destino = 'opaco'` es una compartición por la hoja del sistema. La Web Share API no dice
+a qué aplicación fue y no se intenta averiguarlo: cualquier forma de deducirlo —medir
+tiempos, mirar qué pierde el foco— sería reconstruir el comportamiento del visitante por
+la puerta de atrás. «Opaco» es un dato honesto: se compartió, y no se sabe adónde.

@@ -22,6 +22,7 @@ describe('Historia 7.3 — registra el evento con su nombre y su ruta', () => {
       evento,
       ruta: '/cita/una',
       origen: null,
+      destino: null,
       consulta: null,
     });
   });
@@ -99,6 +100,7 @@ describe('Historia 7.3 — no se guarda nada que pueda identificar a nadie', () 
     const registro = interpretar(baliza({ evento: EVENTOS.copiado, ruta: '/cita/una' }), INSTANTE)!;
     expect(Object.keys(registro).sort()).toEqual([
       'consulta',
+      'destino',
       'evento',
       'jornada',
       'origen',

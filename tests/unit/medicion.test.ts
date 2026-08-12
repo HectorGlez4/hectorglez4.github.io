@@ -18,9 +18,21 @@ afterAll(async () => {
 });
 
 describe('Historia 2.9 — el vocabulario es cerrado', () => {
-  it('son exactamente los cuatro eventos con nombre', () => {
+  it('son exactamente estos eventos con nombre, y ninguno más', () => {
+    /*
+     * La lista crece solo cuando una historia lo decide, y que haya que tocar esta prueba
+     * para ampliarla es el punto: los cuatro primeros son de la v1 y los dos de
+     * compartición los añadió la Historia 10.4.
+     */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
-      ['busqueda-sin-resultados', 'copiado', 'descarga-de-imagen', 'vista-de-cita'].sort(),
+      [
+        'busqueda-sin-resultados',
+        'comparticion-de-enlace',
+        'comparticion-de-imagen',
+        'copiado',
+        'descarga-de-imagen',
+        'vista-de-cita',
+      ].sort(),
     );
   });
 

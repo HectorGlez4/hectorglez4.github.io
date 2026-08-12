@@ -185,6 +185,38 @@ test.describe('Historia 8.2 — la visita llega con su cuenta de origen', () => 
   });
 });
 
+test.describe('Historia 10.4 — la compartición llega con su destino', () => {
+  test('un destino elegido en el sitio llega con su nombre', async ({ page }) => {
+    await page.goto(`${SITIO}/cita/${CITA}`);
+    // Se anula la navegación: lo que se comprueba es lo que llega al receptor.
+    await page.route('**/t.me/**', (ruta) => ruta.abort());
+    await page.locator('[data-destino="telegram"]').click();
+
+    const registro = await esperarEvento(EVENTOS.comparticionDeEnlace);
+    expect(registro, 'no llegó la compartición de enlace').toBeTruthy();
+    expect(registro!.destino).toBe('telegram');
+    expect(registro!.ruta).toBe(`/cita/${CITA}`);
+  });
+
+  test('lo que llega no trae identificador de ninguna clase', async ({ page }) => {
+    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.route('**/wa.me/**', (ruta) => ruta.abort());
+    await page.locator('[data-destino="whatsapp"]').click();
+
+    const registro = await esperarEvento(EVENTOS.comparticionDeEnlace);
+    expect(registro).toBeTruthy();
+    expect(Object.keys(registro!).sort()).toEqual([
+      'consulta',
+      'destino',
+      'evento',
+      'jornada',
+      'origen',
+      'ruta',
+    ]);
+    expect(await page.context().cookies()).toEqual([]);
+  });
+});
+
 test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
   test('ninguna baliza trae cookie ni nada que pueda convertirse en identificador', async ({ page }) => {
     const cargas: string[] = [];
@@ -198,7 +230,9 @@ test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
     expect(cargas.length).toBeGreaterThan(0);
     for (const carga of cargas) {
       const objeto = JSON.parse(carga);
-      expect(Object.keys(objeto).sort()).toEqual(['datos', 'evento', 'origen', 'ruta']);
+      // Crece solo cuando una historia lo decide: `origen` lo añadió la 8.2 y `destino`
+      // la 10.4. Que haya que tocar esta prueba para ampliarlo es el punto.
+      expect(Object.keys(objeto).sort()).toEqual(['datos', 'destino', 'evento', 'origen', 'ruta']);
       expect(carga).not.toMatch(/uuid|visitante|referrer|userAgent|screen|timeZone/i);
     }
 

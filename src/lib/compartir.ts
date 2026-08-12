@@ -61,6 +61,29 @@ export const DESTINOS: readonly Destino[] = [
 ];
 
 /**
+ * El destino de una compartición por la hoja del sistema — FR-20.
+ *
+ * La Web Share API **no dice** a qué aplicación fue, y no se intenta averiguar: cualquier
+ * forma de deducirlo —medir tiempos, mirar qué pierde el foco— es reconstruir el
+ * comportamiento del visitante por la puerta de atrás, que es lo que NFR-11 impide.
+ * «Opaco» es un dato honesto: se compartió, y no se sabe adónde.
+ */
+export const DESTINO_OPACO = 'opaco';
+
+/**
+ * Todo lo que puede registrarse como destino, y nada más.
+ *
+ * Cerrado por lo mismo que el vocabulario de eventos de AD-13: si el destino fuese texto
+ * libre, la medición de la compartición sería ampliable sin tocar ningún módulo, que es
+ * exactamente la puerta por la que se cuela un perfil del visitante.
+ */
+export const DESTINOS_VALIDOS: readonly string[] = [...DESTINOS.map((d) => d.id), DESTINO_OPACO];
+
+export function esDestinoValido(valor: string): boolean {
+  return DESTINOS_VALIDOS.includes(valor);
+}
+
+/**
  * El texto que se propone al compartir.
  *
  * Nunca es solo la dirección: lleva la Cita entera y el nombre del Autor. El enlace viaja

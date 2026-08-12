@@ -17,6 +17,7 @@
  * AD-5 — Derivación pura: aquí no se emite nada, solo se decide qué y cómo.
  */
 
+import { DESTINOS_VALIDOS } from './compartir.ts';
 import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS } from './redes.ts';
 
 /**
@@ -33,6 +34,16 @@ export const EVENTOS = {
   descargaDeImagen: 'descarga-de-imagen',
   /** SM-6, FR-8 — alimenta la curación del Corpus con lo que se buscó y no había. */
   busquedaSinResultados: 'busqueda-sin-resultados',
+  /**
+   * SM-7 — la Imagen salió hacia una aplicación (FR-17).
+   *
+   * Es distinto de `descarga-de-imagen`, y tiene que serlo: SM-C3 vigila si la
+   * compartición creció **a costa** del copiado, y con un solo evento para las dos
+   * cosas esa pregunta no se puede formular.
+   */
+  comparticionDeImagen: 'comparticion-de-imagen',
+  /** SM-7 — el enlace salió hacia un destino (FR-18). */
+  comparticionDeEnlace: 'comparticion-de-enlace',
 } as const;
 
 export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
@@ -63,8 +74,8 @@ export function puntoFinal(entorno: Record<string, string | undefined>): string 
  * consentimiento por la puerta de atrás.
  *
  * Lo que viaja: el nombre del evento, la ruta de la página, la marca de origen cuando la
- * visita llegó por un enlace del Kit y, solo en la búsqueda sin resultados, el texto de la
- * consulta. Nada más. No hay identificador de visitante, ni se genera uno, ni se lee ni se
+ * visita llegó por un enlace del Kit, el destino de una compartición cuando lo hay y,
+ * solo en la búsqueda sin resultados, el texto de la consulta. Nada más. No hay identificador de visitante, ni se genera uno, ni se lee ni se
  * escribe ninguna cookie.
  *
  * La marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias,
@@ -74,17 +85,20 @@ export function puntoFinal(entorno: Record<string, string | undefined>): string 
  */
 export function guionDeMedicion(url: string): string {
   return `
-window.__medir = function (evento, datos) {
+window.__medir = function (evento, datos, destino) {
   var permitidos = ${JSON.stringify(EVENTOS_VALIDOS)};
   if (permitidos.indexOf(evento) === -1) return;
   try {
     var redes = ${JSON.stringify(REDES_VALIDAS)};
+    var destinos = ${JSON.stringify(DESTINOS_VALIDOS)};
     var marca = new URLSearchParams(location.search).get(${JSON.stringify(PARAMETRO_DE_ORIGEN)});
     var origen = redes.indexOf(marca) === -1 ? null : marca;
+    var adonde = destinos.indexOf(destino) === -1 ? null : destino;
     var carga = JSON.stringify({
       evento: evento,
       ruta: location.pathname,
       origen: origen,
+      destino: adonde,
       datos: datos || null
     });
     if (navigator.sendBeacon) navigator.sendBeacon(${JSON.stringify(url)}, carga);
@@ -94,7 +108,13 @@ window.__medir = function (evento, datos) {
 };`.trim();
 }
 
-/** Llamada de emisión para las islas. Nunca hablan con el proveedor; hablan con esto. */
+/**
+ * Llamada de emisión para las islas. Nunca hablan con el proveedor; hablan con esto.
+ *
+ * El destino, cuando lo hay, viaja en su propio parámetro y no dentro de `datos`. `datos`
+ * es texto libre —lo usa la consulta de búsqueda— y meter ahí el destino habría abierto
+ * la carga libre que el criterio prohíbe expresamente.
+ */
 export function emitir(evento: Evento, datos?: string): string {
   return datos === undefined
     ? `window.__medir && window.__medir(${JSON.stringify(evento)});`

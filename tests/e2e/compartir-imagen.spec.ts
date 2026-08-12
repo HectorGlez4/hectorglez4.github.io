@@ -184,3 +184,66 @@ test.describe('Historia 10.2 — el mismo fichero por los dos caminos', () => {
     expect(iguales).toBe(true);
   });
 });
+
+test.describe('Historia 10.4 — la compartición de la imagen se mide', () => {
+  async function conEspia(page: import('@playwright/test').Page) {
+    await page.addInitScript(() => {
+      const ventana = window as unknown as { __emitidos: unknown[] };
+      ventana.__emitidos = [];
+      (window as unknown as { __medir: unknown }).__medir = (
+        evento: string,
+        datos: string,
+        destino: string,
+      ) => ventana.__emitidos.push({ evento, destino });
+    });
+  }
+
+  const emitidos = (page: import('@playwright/test').Page) =>
+    page.evaluate(
+      () => (window as unknown as { __emitidos: { evento: string; destino: string }[] }).__emitidos,
+    );
+
+  test('compartida por la hoja: evento de compartición y destino opaco', async ({ page }) => {
+    await conHojaDelSistema(page);
+    await conEspia(page);
+    await abrirYComponer(page);
+    await page.locator('[data-descargar]').click();
+    await page.waitForFunction(
+      () => (window as unknown as { __emitidos: unknown[] }).__emitidos.length > 0,
+    );
+
+    const [evento] = await emitidos(page);
+    expect(evento.evento).toBe('comparticion-de-imagen');
+    expect(evento.destino).toBe('opaco');
+  });
+
+  test('descargada: sigue siendo el evento de descarga de la v1', async ({ page }) => {
+    /*
+     * Las dos mitades de SM-C3. Si compartir emitiera el mismo evento que descargar, no
+     * habría forma de saber si la compartición creció a costa del copiado.
+     */
+    await conEspia(page);
+    await abrirYComponer(page);
+
+    const descarga = page.waitForEvent('download');
+    await page.locator('[data-descargar]').click();
+    await descarga;
+    await page.waitForFunction(
+      () => (window as unknown as { __emitidos: unknown[] }).__emitidos.length > 0,
+    );
+
+    const [evento] = await emitidos(page);
+    expect(evento.evento).toBe('descarga-de-imagen');
+    expect(evento.destino).toBeUndefined();
+  });
+
+  test('cancelar la hoja no emite ninguno de los dos', async ({ page }) => {
+    await conHojaDelSistema(page, 'cancela');
+    await conEspia(page);
+    await abrirYComponer(page);
+    await page.locator('[data-descargar]').click();
+    await page.waitForTimeout(400);
+
+    expect(await emitidos(page)).toEqual([]);
+  });
+});

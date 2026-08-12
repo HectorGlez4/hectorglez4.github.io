@@ -12,6 +12,7 @@
  */
 import { esEventoValido, EVENTOS, type Evento } from '../src/lib/medicion.ts';
 import { esRedValida, type Red } from '../src/lib/redes.ts';
+import { esDestinoValido } from '../src/lib/compartir.ts';
 
 /**
  * Una fila registrada. Es todo lo que se guarda, y está escrito como tipo a propósito:
@@ -35,6 +36,13 @@ export interface Registro {
    * columna abierta a texto libre, que es lo que el conjunto cerrado existe para impedir.
    */
   origen: Red | null;
+  /**
+   * Adónde salió una compartición — FR-20.
+   *
+   * Del conjunto cerrado de destinos, con `opaco` para la hoja del sistema, que no dice
+   * a qué aplicación fue. `null` en todo evento que no sea una compartición.
+   */
+  destino: string | null;
   /** Solo la búsqueda sin resultados lo trae: el texto que se buscó y no había (FR-8). */
   consulta: string | null;
 }
@@ -65,7 +73,7 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
   }
 
   if (typeof carga !== 'object' || carga === null) return null;
-  const { evento, ruta, datos, origen } = carga as Record<string, unknown>;
+  const { evento, ruta, datos, origen, destino } = carga as Record<string, unknown>;
 
   if (typeof evento !== 'string' || !esEventoValido(evento)) return null;
   // La ruta se guarda tal cual llega, pero tiene que ser una ruta: una URL absoluta
@@ -86,5 +94,9 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
   // evento por ello: la visita ocurrió, y perderla falsearía el recuento de la jornada.
   const cuenta = typeof origen === 'string' && esRedValida(origen) ? origen : null;
 
-  return { jornada: jornadaDe(instante), evento, ruta, origen: cuenta, consulta };
+  // Mismo criterio que el origen: fuera del conjunto cerrado no se registra, y el evento
+  // se registra igual. Un destino inventado no puede volver la carga libre.
+  const adonde = typeof destino === 'string' && esDestinoValido(destino) ? destino : null;
+
+  return { jornada: jornadaDe(instante), evento, ruta, origen: cuenta, destino: adonde, consulta };
 }

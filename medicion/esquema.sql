@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS eventos (
   evento   TEXT NOT NULL,  -- Del vocabulario cerrado de src/lib/medicion.ts.
   ruta     TEXT NOT NULL,  -- Ruta de la página, sin origen ni parámetros.
   origen   TEXT,            -- Cuenta propia de la que vino la visita (FR-22). NULL si ninguna.
+  destino  TEXT,            -- Adónde salió una compartición (FR-20); «opaco» en la hoja del sistema.
   consulta TEXT            -- Solo en busqueda-sin-resultados (FR-8). NULL en el resto.
 );
 
