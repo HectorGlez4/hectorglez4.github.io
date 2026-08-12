@@ -77,6 +77,29 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
     }
   });
 
+  test('tampoco lo encuentra la búsqueda propia', async ({ page }) => {
+    /*
+     * `noindex` habla con el buscador de fuera y no con el de dentro. Sin excluirlo del
+     * índice de Pagefind, el Kit aparecía entre los resultados del propio sitio: una
+     * herramienta sin enlaces entrantes dejaba de ser privada por la puerta de atrás, y
+     * de paso ensuciaba las búsquedas con una página que no es contenido.
+     */
+    await page.goto('/buscar');
+    await page.locator('[data-consulta]').fill('kit del día');
+    await page.waitForFunction(
+      () =>
+        document.querySelector('[data-resultados]')!.children.length > 0 ||
+        !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
+      undefined,
+      { timeout: 10_000 },
+    );
+
+    const enlaces = await page.locator('[data-resultados] a').evaluateAll((ns) =>
+      ns.map((n) => n.getAttribute('href')),
+    );
+    expect(enlaces).not.toContain('/kit');
+  });
+
   test('ninguna página pública enlaza al Kit', () => {
     const enlazan: string[] = [];
 

@@ -17,6 +17,8 @@
  * AD-5 — Derivación pura: aquí no se emite nada, solo se decide qué y cómo.
  */
 
+import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS } from './redes.ts';
+
 /**
  * El conjunto cerrado de eventos. Añadir uno exige modificar este módulo, que es
  * exactamente lo que AD-13 quiere que cueste: es la revisión que impide que la medición
@@ -60,9 +62,15 @@ export function puntoFinal(entorno: Record<string, string | undefined>): string 
  * proveedor— es un fichero descargado de un tercero, y con él vuelven las cookies y el
  * consentimiento por la puerta de atrás.
  *
- * Lo que viaja: el nombre del evento, la ruta de la página y, solo en la búsqueda sin
- * resultados, el texto de la consulta. Nada más. No hay identificador de visitante, ni
- * se genera uno, ni se lee ni se escribe ninguna cookie.
+ * Lo que viaja: el nombre del evento, la ruta de la página, la marca de origen cuando la
+ * visita llegó por un enlace del Kit y, solo en la búsqueda sin resultados, el texto de la
+ * consulta. Nada más. No hay identificador de visitante, ni se genera uno, ni se lee ni se
+ * escribe ninguna cookie.
+ *
+ * La marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias,
+ * antes de que salga de la página. Llega en la URL, y todo lo que llega en la URL lo
+ * escribe cualquiera: sin cotejarla, `?de=` admitiría el texto que le pusieran —incluido
+ * algo que identifique a quien pulsó el enlace— y la medición lo registraría sin más.
  */
 export function guionDeMedicion(url: string): string {
   return `
@@ -70,7 +78,15 @@ window.__medir = function (evento, datos) {
   var permitidos = ${JSON.stringify(EVENTOS_VALIDOS)};
   if (permitidos.indexOf(evento) === -1) return;
   try {
-    var carga = JSON.stringify({ evento: evento, ruta: location.pathname, datos: datos || null });
+    var redes = ${JSON.stringify(REDES_VALIDAS)};
+    var marca = new URLSearchParams(location.search).get(${JSON.stringify(PARAMETRO_DE_ORIGEN)});
+    var origen = redes.indexOf(marca) === -1 ? null : marca;
+    var carga = JSON.stringify({
+      evento: evento,
+      ruta: location.pathname,
+      origen: origen,
+      datos: datos || null
+    });
     if (navigator.sendBeacon) navigator.sendBeacon(${JSON.stringify(url)}, carga);
   } catch (e) {
     // La medición nunca puede romper la página: si falla, se pierde el evento y ya.

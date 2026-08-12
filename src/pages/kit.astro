@@ -20,6 +20,7 @@ import { aptasParaPortada, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { materialDelKit } from '../lib/kit.ts';
 import { tituloDe } from '../lib/marca.ts';
 import { conjuntoPublicable } from '../lib/publicado.ts';
+import { REDES, enlaceConOrigen } from '../lib/redes.ts';
 import { tramoDe } from '../lib/tramos.ts';
 
 const conjunto = await conjuntoPublicable();
@@ -39,6 +40,7 @@ const alternativa = material?.alternativa
   descripcion="Material del día para publicar en las cuentas."
   ruta="/kit"
   noIndexar
+  fueraDeLaBusqueda
 >
   <div class="pagina contenedor">
     <h1>Kit del {jornada}</h1>
@@ -71,6 +73,22 @@ const alternativa = material?.alternativa
           <p class="enlace">
             <a href={`/cita/${delDia.cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
           </p>
+
+          {/*
+            * Un enlace por cuenta, cada uno con su marca de origen. Es lo único que
+            * distingue de qué red vino cada visita, y por eso se pega el enlace de aquí
+            * y no el de arriba: el de arriba es para mirar la página, estos son para
+            * publicar.
+            */}
+          <ul class="redes" data-redes>
+            {REDES.map((red) => (
+              <li>
+                <a href={enlaceConOrigen(`/cita/${delDia.cita.slug}`, red.id)} data-red={red.id}>
+                  {red.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
       )
     }
@@ -87,6 +105,15 @@ const alternativa = material?.alternativa
           <p class="enlace">
             <a href={`/cita/${alternativa.cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
           </p>
+          <ul class="redes" data-redes>
+            {REDES.map((red) => (
+              <li>
+                <a href={enlaceConOrigen(`/cita/${alternativa.cita.slug}`, red.id)} data-red={red.id}>
+                  {red.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
       )
     }
@@ -127,5 +154,26 @@ const alternativa = material?.alternativa
   .enlace {
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
+  }
+
+  .redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--unidad);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+  }
+
+  /* UX-DR22 — zona de toque de 44px: en el móvil se pulsa con el pulgar. */
+  .redes a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    border: var(--grosor-filete) solid var(--filete);
+    border-radius: var(--radio);
   }
 </style>

@@ -21,6 +21,7 @@ describe('Historia 7.3 — registra el evento con su nombre y su ruta', () => {
       jornada: '2026-08-12',
       evento,
       ruta: '/cita/una',
+      origen: null,
       consulta: null,
     });
   });
@@ -92,9 +93,17 @@ describe('Historia 7.3 — la consulta solo donde significa algo', () => {
 });
 
 describe('Historia 7.3 — no se guarda nada que pueda identificar a nadie', () => {
-  it('la fila tiene exactamente cuatro campos', () => {
+  it('la fila tiene exactamente los campos declarados y ninguno más', () => {
+    // Crece solo cuando una historia lo decide: el origen lo añadió la 8.2. Que esta
+    // prueba haya que tocarla para ampliarla es el punto.
     const registro = interpretar(baliza({ evento: EVENTOS.copiado, ruta: '/cita/una' }), INSTANTE)!;
-    expect(Object.keys(registro).sort()).toEqual(['consulta', 'evento', 'jornada', 'ruta']);
+    expect(Object.keys(registro).sort()).toEqual([
+      'consulta',
+      'evento',
+      'jornada',
+      'origen',
+      'ruta',
+    ]);
   });
 
   it('un campo colado en la baliza no llega a la fila', () => {

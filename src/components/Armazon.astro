@@ -24,9 +24,27 @@ interface Props {
   ruta: string;
   /** Páginas 2+ de un listado: rastreables pero no indexables (FR-5). */
   noIndexar?: boolean;
+  /**
+   * Fuera del índice de la búsqueda propia.
+   *
+   * `noIndexar` habla con el buscador de fuera; esto habla con el de dentro, y no son lo
+   * mismo: `/buscar` es una superficie pública que se declara `noindex` y sigue siendo
+   * parte del sitio. Lo que sale del índice es lo que **no es una superficie**, como el
+   * Kit Diario: sin esto, una herramienta sin enlaces entrantes aparecía igualmente entre
+   * los resultados y dejaba de ser privada por la puerta de atrás.
+   */
+  fueraDeLaBusqueda?: boolean;
 }
 
-const { titulo, descripcion, ruta, noIndexar = false, vistaDeCita = false, tipo } = Astro.props;
+const {
+  titulo,
+  descripcion,
+  ruta,
+  noIndexar = false,
+  fueraDeLaBusqueda = false,
+  vistaDeCita = false,
+  tipo,
+} = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
 ---
 
@@ -59,7 +77,12 @@ const canonica = new URL(ruta, Astro.site).href;
       * también la cabecera y el pie, y buscar «sabiduría» devolvía las 53 páginas del
       * sitio porque la marca aparece en todas.
       */}
-    <main id="contenido" data-pagefind-body data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}>
+    <main
+      id="contenido"
+      data-pagefind-body={fueraDeLaBusqueda ? undefined : true}
+      data-pagefind-ignore={fueraDeLaBusqueda ? true : undefined}
+      data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}
+    >
       <slot />
     </main>
 

@@ -11,6 +11,7 @@
  * y el fallo aparecería como «esa métrica está a cero» semanas después.
  */
 import { esEventoValido, EVENTOS, type Evento } from '../src/lib/medicion.ts';
+import { esRedValida, type Red } from '../src/lib/redes.ts';
 
 /**
  * Una fila registrada. Es todo lo que se guarda, y está escrito como tipo a propósito:
@@ -26,6 +27,14 @@ export interface Registro {
   jornada: string;
   evento: Evento;
   ruta: string;
+  /**
+   * De qué cuenta propia vino la visita, cuando vino de una — FR-22, SM-8.
+   *
+   * Se coteja aquí otra vez, y no por desconfiar del guion: la baliza es una petición
+   * HTTP y cualquiera puede enviarla a mano. Cotejar solo en el cliente dejaría la
+   * columna abierta a texto libre, que es lo que el conjunto cerrado existe para impedir.
+   */
+  origen: Red | null;
   /** Solo la búsqueda sin resultados lo trae: el texto que se buscó y no había (FR-8). */
   consulta: string | null;
 }
@@ -56,7 +65,7 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
   }
 
   if (typeof carga !== 'object' || carga === null) return null;
-  const { evento, ruta, datos } = carga as Record<string, unknown>;
+  const { evento, ruta, datos, origen } = carga as Record<string, unknown>;
 
   if (typeof evento !== 'string' || !esEventoValido(evento)) return null;
   // La ruta se guarda tal cual llega, pero tiene que ser una ruta: una URL absoluta
@@ -73,5 +82,9 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
       ? datos.trim().slice(0, MAX_CONSULTA)
       : null;
 
-  return { jornada: jornadaDe(instante), evento, ruta, consulta };
+  // Un origen que no es una de las cuentas propias no se registra. No se descarta el
+  // evento por ello: la visita ocurrió, y perderla falsearía el recuento de la jornada.
+  const cuenta = typeof origen === 'string' && esRedValida(origen) ? origen : null;
+
+  return { jornada: jornadaDe(instante), evento, ruta, origen: cuenta, consulta };
 }

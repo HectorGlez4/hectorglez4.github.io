@@ -150,3 +150,19 @@ conciencia — la comprobación de origen se salta con una orden de terminal, as
 protege de nadie, y en cambio descarta eventos de verdad en silencio el día que cambie el
 dominio. Si algún día la tabla se llena de ruido, la respuesta es un límite de frecuencia
 en la plataforma, no una comprobación que aparenta seguridad.
+
+### Consultar el canal propio — SM-8
+
+```bash
+# Cuál de las cinco redes trae visitas, por jornada.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT jornada, origen, COUNT(*) visitas FROM eventos \
+   WHERE evento='vista-de-cita' AND origen IS NOT NULL \
+   GROUP BY jornada, origen ORDER BY jornada DESC, visitas DESC"
+
+# El mes entero, para decidir dónde va el tiempo del siguiente.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT origen, COUNT(*) visitas FROM eventos \
+   WHERE evento='vista-de-cita' AND origen IS NOT NULL AND jornada >= date('now','-30 days') \
+   GROUP BY origen ORDER BY visitas DESC"
+```

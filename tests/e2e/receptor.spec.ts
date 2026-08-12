@@ -163,6 +163,28 @@ test.describe('Historia 7.3 — los cuatro eventos llegan', () => {
   });
 });
 
+test.describe('Historia 8.2 — la visita llega con su cuenta de origen', () => {
+  test('una visita marcada se puede agrupar por red y por jornada', async ({ page }) => {
+    await page.goto(`${SITIO}/cita/${CITA}?de=tiktok`);
+    const registro = await esperarEvento(EVENTOS.vistaDeCita);
+
+    expect(registro, 'no llegó la vista marcada').toBeTruthy();
+    expect(registro!.origen).toBe('tiktok');
+    // Las dos claves de SM-8: de qué red y de qué jornada.
+    expect(registro!.jornada).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    // Y la ruta llega sin la marca, así que agrupar por página no la parte en cinco.
+    expect(registro!.ruta).toBe(`/cita/${CITA}`);
+  });
+
+  test('una marca inventada no se registra, pero la visita sí se cuenta', async ({ page }) => {
+    await page.goto(`${SITIO}/cita/${CITA}?de=lo-que-sea-que-me-invente`);
+    const registro = await esperarEvento(EVENTOS.vistaDeCita);
+
+    expect(registro, 'se perdió la visita por una marca inválida').toBeTruthy();
+    expect(registro!.origen).toBeNull();
+  });
+});
+
 test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
   test('ninguna baliza trae cookie ni nada que pueda convertirse en identificador', async ({ page }) => {
     const cargas: string[] = [];
@@ -176,7 +198,7 @@ test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
     expect(cargas.length).toBeGreaterThan(0);
     for (const carga of cargas) {
       const objeto = JSON.parse(carga);
-      expect(Object.keys(objeto).sort()).toEqual(['datos', 'evento', 'ruta']);
+      expect(Object.keys(objeto).sort()).toEqual(['datos', 'evento', 'origen', 'ruta']);
       expect(carga).not.toMatch(/uuid|visitante|referrer|userAgent|screen|timeZone/i);
     }
 
