@@ -1,0 +1,178 @@
+import { describe, expect, it } from 'vitest';
+import { FUENTES, fuenteDe } from '../../tools/lib/fuentes.ts';
+import {
+  MAX_CARACTERES_CANDIDATA,
+  MIN_CARACTERES_CANDIDATA,
+  añoExacto,
+  estaEnEspañol,
+  extraerCandidatas,
+  type DocumentoDeFuente,
+} from '../../tools/lib/extraccion.ts';
+
+/** Historia 9.1 — extracción de candidatas desde una Fuente. */
+
+const OBRA_EN_ESPAÑOL = [
+  'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.',
+  'La vida es larga si sabes usarla y aprovecharla como es debido cada jornada.',
+  'Corta.',
+  'Ninguna cosa hay que sea más nuestra que el tiempo que pasa por delante.',
+].join(' ');
+
+const documento = (campos: Partial<DocumentoDeFuente> = {}): DocumentoDeFuente => ({
+  fuente: 'wikisource-es',
+  obra: 'Sobre la brevedad de la vida',
+  año: 49,
+  url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+  texto: OBRA_EN_ESPAÑOL,
+  ...campos,
+});
+
+describe('Historia 9.1 — la obra y el año vienen de la Fuente', () => {
+  const resultado = extraerCandidatas(documento(), 'seneca');
+
+  it('propone candidatas', () => {
+    expect(resultado.ok).toBe(true);
+    expect(resultado.ok && resultado.candidatas.length).toBeGreaterThan(0);
+  });
+
+  it('cada candidata trae la obra y el año que declaró la Fuente', () => {
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    for (const candidata of resultado.candidatas) {
+      expect(candidata.procedencia.obra).toBe('Sobre la brevedad de la vida');
+      expect(candidata.procedencia.año).toBe(49);
+    }
+  });
+
+  it('sin obra declarada no se extrae nada: habría que inferirla', () => {
+    const sinObra = extraerCandidatas(documento({ obra: '  ' }), 'seneca');
+    expect(sinObra.ok).toBe(false);
+    expect(!sinObra.ok && sinObra.motivo).toMatch(/no declara obra/);
+  });
+});
+
+describe('Historia 9.1 — ninguna Procedencia aproximada', () => {
+  it.each([
+    ['c. 1615', undefined],
+    ['ca. 1615', undefined],
+    ['hacia 1615', undefined],
+    ['1615?', undefined],
+    ['1615-1620', undefined],
+    ['siglo XVII', undefined],
+    ['1615', 1615],
+    [1615, 1615],
+    [-4, -4],
+    [1615.5, undefined],
+  ])('«%s» da %s', (declarado, esperado) => {
+    expect(añoExacto(declarado as string | number)).toBe(esperado);
+  });
+
+  it('un año aproximado deja la candidata con obra y sin año, no con un año inventado', () => {
+    const resultado = extraerCandidatas(documento({ año: 'c. 49' }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    for (const candidata of resultado.candidatas) {
+      expect(candidata.procedencia.obra).toBeTruthy();
+      // Procedencia parcial es un estado legítimo. Un año inventado, no.
+      expect(candidata.procedencia).not.toHaveProperty('año');
+    }
+  });
+});
+
+describe('Historia 9.1 — consta de dónde salió y bajo qué licencia', () => {
+  it('cada candidata lleva su Fuente y su licencia', () => {
+    const resultado = extraerCandidatas(documento(), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    for (const candidata of resultado.candidatas) {
+      expect(candidata.fuente.id).toBe('wikisource-es');
+      expect(candidata.fuente.nombre).toBe('Wikisource en español');
+      expect(candidata.fuente.licencia).toBe('CC BY-SA 4.0');
+      expect(candidata.fuente.url).toContain('wikisource.org');
+    }
+  });
+
+  it('la licencia sale del conjunto cerrado, no del documento', () => {
+    // Si la trajera el documento, bastaría con escribir «dominio público» en el fichero
+    // de entrada para saltarse la comprobación de licencia entera.
+    const resultado = extraerCandidatas(
+      { ...documento(), licencia: 'lo que yo diga' } as DocumentoDeFuente,
+      'seneca',
+    );
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    expect(resultado.candidatas[0].fuente.licencia).toBe('CC BY-SA 4.0');
+  });
+});
+
+describe('Historia 9.1 — una licencia que no permite reutilizar detiene el proceso', () => {
+  const noReutilizable = FUENTES.find((f) => !f.permiteReutilizacion)!;
+  const resultado = extraerCandidatas(documento({ fuente: noReutilizable.id }), 'seneca');
+
+  it('no devuelve ninguna candidata', () => {
+    expect(resultado.ok).toBe(false);
+    expect(resultado).not.toHaveProperty('candidatas');
+  });
+
+  it('explica por qué, con la licencia concreta', () => {
+    expect(!resultado.ok && resultado.motivo).toContain(noReutilizable.nombre);
+    expect(!resultado.ok && resultado.motivo).toContain(noReutilizable.licencia);
+    expect(!resultado.ok && resultado.motivo).toMatch(/no se ha escrito ninguna/i);
+  });
+
+  it('una Fuente que ni siquiera está admitida se detiene igual', () => {
+    const inventada = extraerCandidatas(documento({ fuente: 'sitio-de-citas.example' }), 'seneca');
+    expect(inventada.ok).toBe(false);
+    expect(!inventada.ok && inventada.motivo).toMatch(/no es una Fuente admitida/);
+  });
+
+  it('el conjunto de Fuentes está cerrado y cada una declara su licencia', () => {
+    for (const fuente of FUENTES) {
+      expect(fuente.licencia).toBeTruthy();
+      if (!fuente.permiteReutilizacion) expect(fuente.razon).toBeTruthy();
+    }
+    expect(fuenteDe('no-existe')).toBeUndefined();
+  });
+});
+
+describe('Historia 9.1 — lo que no está en español no se propone', () => {
+  it('reconoce el español y descarta el latín', () => {
+    expect(estaEnEspañol('No es que tengamos poco tiempo, sino que perdemos gran parte de él.')).toBe(true);
+    expect(estaEnEspañol('Non est quod credas quemquam fieri aliena infelicitate felicem.')).toBe(false);
+    expect(estaEnEspañol('The life we receive is not short, but we make it so by waste.')).toBe(false);
+  });
+
+  it('un pasaje en otra lengua dentro de la obra no llega a candidata', () => {
+    const conLatin = documento({
+      texto:
+        OBRA_EN_ESPAÑOL +
+        ' Non est quod credas quemquam fieri aliena infelicitate felicem atque beatum.',
+    });
+    const resultado = extraerCandidatas(conLatin, 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.every((c) => !c.texto.startsWith('Non est'))).toBe(true);
+    expect(resultado.descartadas.some((d) => d.motivo === 'no-esta-en-español')).toBe(true);
+  });
+});
+
+describe('Historia 9.1 — la ventana de longitud y las repeticiones', () => {
+  const resultado = extraerCandidatas(documento(), 'seneca');
+
+  it('lo demasiado corto no es una Cita, es un trozo de frase', () => {
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    expect(resultado.candidatas.every((c) => [...c.texto].length >= MIN_CARACTERES_CANDIDATA)).toBe(true);
+    expect(resultado.descartadas.some((d) => d.texto === 'Corta.')).toBe(true);
+  });
+
+  it('nada pasa del máximo', () => {
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    expect(resultado.candidatas.every((c) => [...c.texto].length <= MAX_CARACTERES_CANDIDATA)).toBe(true);
+  });
+
+  it('una frase repetida en la obra se propone una sola vez', () => {
+    const repetida = 'La vida es larga si sabes usarla y aprovecharla como es debido cada jornada.';
+    const resultado = extraerCandidatas(documento({ texto: `${repetida} ${repetida}` }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    expect(resultado.candidatas).toHaveLength(1);
+    expect(resultado.descartadas.some((d) => d.motivo === 'repetida')).toBe(true);
+  });
+});
