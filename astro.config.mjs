@@ -1,10 +1,11 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { SITIO } from './src/lib/dominio.ts';
 
-// El dominio es provisional hasta que se contrate el definitivo. Vive aquí y en
-// ningún otro sitio: la canónica de cada página y el sitemap lo derivan de `site`.
-const SITIO = process.env.SITE_URL ?? 'https://sabiduriadebolsillo.com';
+// El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
+// exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
+// derivan de `site`, así que el sitio se declara siempre donde de verdad responde.
 
 // https://astro.build/config
 export default defineConfig({

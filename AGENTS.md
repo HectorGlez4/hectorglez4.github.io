@@ -1,7 +1,7 @@
 <!-- bmad:context -->
 <!-- Verified 2026-08-11 against a26cd95. Managed by bmad-project-context; edits inside this block are replaced on refresh. Keep anything you want preserved outside the markers. -->
 
-## Sabiduría Diaria
+## Sabiduría de Bolsillo
 
 Sitio panhispánico de citas célebres en español, estático, construido con Astro 7 sobre un corpus de dominio público en ficheros versionados. No hay base de datos ni servidor de aplicación. La planificación vive en `_bmad-output/planning-artifacts/` y el seguimiento de historias en `_bmad-output/implementation-artifacts/sprint-status.yaml`.
 

@@ -45,8 +45,11 @@ describe('Historia 6.1 — el nombre retirado no queda en ninguna parte', () => 
     ...ficheros(resolve(raiz, 'public')),
     ...ficheros(resolve(raiz, 'tools')).filter((f) => !f.endsWith('.gitkeep')),
     ...ficheros(resolve(raiz, 'tests')),
+    ...ficheros(resolve(raiz, '.github')),
     resolve(raiz, 'package.json'),
+    resolve(raiz, 'package-lock.json'),
     resolve(raiz, 'astro.config.mjs'),
+    resolve(raiz, 'AGENTS.md'),
   ].filter((f) => f !== resolve(raiz, 'tests/unit/marca.test.ts'));
 
   it.each(revisables.map((f) => [f.slice(raiz.length + 1), f]))('%s no lo menciona', (_, ruta) => {
