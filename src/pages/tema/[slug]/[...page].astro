@@ -21,6 +21,7 @@ import {
   type Cita,
 } from '../../../lib/publicado.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+import { tituloDe } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -45,7 +46,7 @@ const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 ---
 
 <Armazon
-  titulo={`${tema.nombre}${sufijo} | Sabiduría Diaria`}
+  titulo={tituloDe(`${tema.nombre}${sufijo}`)}
   descripcion={`Citas sobre ${tema.nombre.toLocaleLowerCase('es')}, de varios autores, con su procedencia documentada.`}
   ruta={ruta}
   tipo="tema"

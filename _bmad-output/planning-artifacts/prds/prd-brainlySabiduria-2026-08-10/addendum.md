@@ -59,3 +59,37 @@ Si alguna de las dos se elimina en una revisión futura, conviene releer este p�
 - **Sin cuentas de usuario.** Implica que no hay forma de medir retorno a nivel de persona; SM-4 y SM-5 son proxies agregados. Aceptado.
 - **Editor único.** FR-13…FR-16 se diseñan para un operador. Multiusuario, roles y permisos son v2 y requerirán revisar la herramienta, no ampliarla.
 - **Temas gestionados a mano.** Escala mal por encima de unos pocos cientos de Citas por Tema, pero protege SM-C2. Consciente.
+
+---
+
+# Addendum de la v2
+
+## Decisiones de mecanismo — compartición
+
+Ninguna de estas pertenece al PRD; se registran aquí para que Arquitectura no las reabra desde cero.
+
+- **Hoja del Sistema = `navigator.share` con ficheros.** Es la única API web que alcanza Instagram y TikTok, que no admiten intención web de ningún tipo. La detección debe ser `navigator.canShare({ files })` y no `'share' in navigator`: el segundo da verdadero en navegadores que comparten enlaces pero no ficheros, y la promesa se rompería en tiempo de ejecución.
+- **El PNG ya existe.** `public/islas/imagen.js` compone el lienzo y lo pasa por `canvas.toBlob()` antes de fabricar el enlace de descarga. FR-17 cambia el destino de ese mismo blob, no la generación. Por eso «el fichero compartido y el descargado son el mismo» es verificable en lugar de aspiracional: hay una sola llamada a `toBlob`.
+- **Destinos de escritorio = URL de intención.** X, WhatsApp, Facebook, Telegram y LinkedIn las admiten. Instagram y TikTok no, y por eso no aparecen como destino en escritorio: ofrecer un botón que no puede cumplir es peor que no ofrecerlo.
+- **La Tarjeta Social se genera en el build, no en el navegador.** El generador actual es `canvas` del navegador y no existe en Node. Arquitectura debe elegir el generador de servidor; lo que no es negociable es que consuma los mismos tramos tipográficos de `src/lib/tramos.ts` que la Imagen de Cita, o la tarjeta y la imagen divergirán.
+- **Eventos nuevos bajo AD-13.** El vocabulario cerrado de `src/lib/medicion.ts` se amplía con la compartición y su destino. La fricción de tener que modificar el módulo es la revisión que AD-13 quería; no se elude añadiendo un evento genérico con carga libre.
+
+## Decisiones de mecanismo — operación y lanzamiento
+
+- **Receptor de medición: Cloudflare Worker.** Se eligió frente a un proveedor externo (Plausible y similares) porque la baliza propia de AD-13 ya está construida y funciona; un proveedor obligaría a introducir su guion, y con él vuelven las cookies y el consentimiento que NFR-10 y NFR-11 excluyeron por diseño. Se descartó Cloudflare Web Analytics por medir páginas vistas y no eventos propios: dejaría SM-5 y SM-7 sin datos, que son justo las que la v2 quiere probar.
+- **El hosting no cambia.** GitHub Pages sirve el sitio desde la v1 con reconstrucción diaria. Salir a producción es conectar el dominio, no migrar de plataforma.
+- **El Kit Diario se sirve como una página más del sitio.** No necesita infraestructura: el CI ya se despierta cada jornada para componer la Cita del Día, y esa misma ejecución puede dejar la página compuesta. Es `noindex` y no está enlazada desde la navegación.
+
+## Origen del Corpus en la v2 — opciones consideradas
+
+La v2 se planteó explícitamente extraer de un sitio de citas existente. Se descartó, y conviene dejar por escrito por qué, porque es una idea que vuelve:
+
+1. **Condiciones de uso.** Prohíben el rastreo automatizado.
+2. **Derecho sobre la compilación.** La selección y disposición de una base de datos de citas está protegida con independencia de que las frases individuales estén en dominio público.
+3. **La razón que decide, y es de producto.** Esos sitios publican texto y nombre, sin obra ni año. La puerta de admisión de FR-13 vive en el esquema de contenido (AD-1), así que cada Cita extraída de ahí quedaría en `corpus/_revision/`. La tubería completa desembocaría en el desagüe.
+
+**Traducciones.** Se descartó traducir Citas de otras lenguas por dos motivos independientes, cualquiera de ellos suficiente. El de derechos: una traducción es obra nueva con su propio plazo, así que un original en dominio público no libera su traducción moderna. El de producto: una traducción propia produce una frase en español que no consta en ninguna edición publicada, es decir, una Cita cuya Procedencia no se puede verificar — el defecto exacto que el producto existe para corregir.
+
+**Fuentes admitidas.** Wikisource en español, Biblioteca Virtual Miguel de Cervantes, Project Gutenberg y Wikiquote en español restringido a sus entradas con referencia. Las tres primeras dan obra y edición; la cuarta obliga a atribuir y compartir bajo la misma licencia, lo que Arquitectura debe resolver antes de usarla.
+
+**Uso legítimo de la competencia.** Consultar qué Autores y Temas concentran demanda es investigación de mercado y sirve para priorizar a quién se dedica cada sesión de sembrado. Es una lectura, no una extracción, y no toca el Corpus.

@@ -15,6 +15,7 @@ import Armazon from '../components/Armazon.astro';
 import BloqueDeCita from '../components/BloqueDeCita.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { tituloDe } from '../lib/marca.ts';
 import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
 
 const conjunto = await conjuntoPublicable();
@@ -28,7 +29,7 @@ const autorDelDia = seleccion
 ---
 
 <Armazon
-  titulo="Esa página no está aquí | Sabiduría Diaria"
+  titulo={tituloDe('Esa página no está aquí')}
   descripcion="La página que buscabas no está. Busca una cita o empieza por la de hoy."
   ruta="/404"
   noIndexar

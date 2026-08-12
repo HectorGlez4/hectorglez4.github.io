@@ -4,10 +4,13 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
+      "runtimeArgs": ["run", "dev"],
+      "port": 4321
+    },
+    {
+      "name": "estatico",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tests/servidor.mjs"],
       "port": 4321
     }
   ]

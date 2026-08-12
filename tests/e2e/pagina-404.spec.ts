@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { MARCA } from '../../src/lib/marca.ts';
 
 /** Historia 4.3 — la página 404 como puerta de entrada. */
 
@@ -9,7 +10,7 @@ test.describe('Historia 4.3 — el 404 no es un muro', () => {
     const respuesta = await request.get(INEXISTENTE, { maxRedirects: 0 });
     expect(respuesta.status()).toBe(404);
     // Y sirve la página propia, no la del alojamiento.
-    expect(await respuesta.text()).toContain('Sabiduría Diaria');
+    expect(await respuesta.text()).toContain(MARCA);
   });
 
   test('trae el campo de búsqueda', async ({ page }) => {

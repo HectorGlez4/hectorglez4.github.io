@@ -10,6 +10,7 @@
  */
 import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
+import { MARCA } from '../lib/marca.ts';
 import '../styles/tokens.css';
 
 interface Props {
@@ -49,7 +50,7 @@ const canonica = new URL(ruta, Astro.site).href;
     <a class="saltar" href="#contenido">Saltar al contenido.</a>
 
     <header class="cabecera contenedor">
-      <a class="marca" href="/">Sabiduría Diaria</a>
+      <a class="marca" href="/">{MARCA}</a>
       <a class="buscar" href="/buscar">Buscar</a>
     </header>
 

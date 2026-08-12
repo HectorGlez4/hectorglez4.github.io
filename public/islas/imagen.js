@@ -102,9 +102,12 @@ export function dibujar(lienzo, datos) {
   }
 
   // ── Marca del sitio ───────────────────────────────────────────────────────
+  // Llega en `datos.marca` desde `src/lib/marca.ts`, por el mismo puente que el tamaño
+  // de AD-8: escrita aquí, sobreviviría al próximo renombrado y la imagen circularía
+  // por las redes con un nombre que el sitio ya no usa.
   ctx.fillStyle = plantilla.apagada;
   ctx.font = '600 20px Inter, system-ui, sans-serif';
-  ctx.fillText('SABIDURÍA DIARIA', MARGEN, LADO - MARGEN + 8);
+  ctx.fillText(datos.marca.toLocaleUpperCase('es'), MARGEN, LADO - MARGEN + 8);
 
   return lienzo;
 }

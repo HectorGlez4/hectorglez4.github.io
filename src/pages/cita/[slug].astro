@@ -23,6 +23,7 @@ import {
   temasPublicados,
 } from '../../lib/publicado.ts';
 import { MAX_CITAS_RELACIONADAS } from '../../lib/umbrales.ts';
+import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async () => {
@@ -50,7 +51,7 @@ const { cita, autor, relacionadas, chips, temasDelSitio } = Astro.props;
  * suspensivos donde no hace falta cuesta clics.
  */
 const recorte = cita.texto.length > 110 ? `${cita.texto.slice(0, 109)}…` : cita.texto;
-const titulo = `«${recorte}» — ${autor.nombre} | Sabiduría Diaria`;
+const titulo = tituloDe(`«${recorte}» — ${autor.nombre}`);
 const canonica = new URL(`/cita/${cita.slug}`, Astro.site).href;
 ---
 

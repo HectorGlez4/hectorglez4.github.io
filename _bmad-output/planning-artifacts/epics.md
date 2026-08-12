@@ -9,11 +9,13 @@ inputDocuments:
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md
 ---
 
-# Sabiduría Diaria - Epic Breakdown
+# Sabiduría de Bolsillo - Epic Breakdown
 
 ## Overview
 
-Descomposición completa en épicas e historias para **Sabiduría Diaria**, a partir de los requisitos del PRD, las espinas de UX y la espina de arquitectura.
+Descomposición completa en épicas e historias para **Sabiduría de Bolsillo** (nombrado «Sabiduría Diaria» durante la v1), a partir de los requisitos del PRD, las espinas de UX y la espina de arquitectura.
+
+Las Épicas 1 a 5 son la v1 y están completas. Las Épicas 6 a 10 son la v2 y se documentan en la segunda mitad de este fichero.
 
 ## Requirements Inventory
 
@@ -35,6 +37,18 @@ Descomposición completa en épicas e historias para **Sabiduría Diaria**, a pa
 - **FR-14: Detección de duplicados** — Coincidencia detectada pese a diferencias de puntuación, acentuación y mayúsculas. El editor decide; el sistema no descarta.
 - **FR-15: Gestión de Autores y Temas** — Crear y editar Autores y Temas y asociar Citas. Año de fallecimiento obligatorio. Un Tema no se elimina con Citas publicadas asociadas. Marcado de Cita como apta para portada.
 - **FR-16: Visibilidad de la salud del Corpus** — Porcentaje de Citas publicadas con Procedencia completa, consultable en cualquier momento sin exportar datos, desglosado por Autor.
+
+#### Añadidos en la v2
+
+- **FR-17: Compartir la Imagen de Cita por la Hoja del Sistema** — Donde el navegador admite compartir ficheros, la acción principal abre la hoja del sistema con la imagen adjunta; donde no, descarga como en la v1. Sin tercera vía ni botón deshabilitado. El fichero compartido y el descargado salen de la misma generación. Cancelar la hoja no registra compartición ni muestra error.
+- **FR-18: Compartir el enlace de una Cita** — Texto propuesto con Cita y Autor, nunca URL desnuda. Hoja del sistema donde exista; destinos concretos donde no. Ningún destino exige registro. El enlace lleva marca de origen sin generar URL indexable distinta de la canónica.
+- **FR-19: Tarjeta Social de toda Cita publicada** — Toda Cita publicada tiene tarjeta. Las que admiten Imagen muestran texto y Autor; las que superan el límite de FR-10 muestran Autor y marca **sin texto**, nunca un fragmento recortado. Verificable con los validadores de las redes.
+- **FR-20: Medición de la compartición** — Evento con destino cuando es conocido, opaco cuando se usó la hoja del sistema. Imagen y enlace se distinguen. Sin cookie ni identificador. Vocabulario de eventos cerrado.
+- **FR-21: La jornada deja el material compuesto** — Imagen de la Cita del Día, pie con atribución y enlace, accesibles desde móvil sin herramientas. Se recompone al cambiar la jornada. No indexable ni enlazada. Si la Cita del Día no admite Imagen, lo indica y ofrece alternativa apta.
+- **FR-22: Atribución del tráfico por cuenta** — Una marca de origen por red. La página de destino es siempre la canónica, con o sin marca. La marca no altera lo que ve el visitante.
+- **FR-23: Extracción de candidatas desde una Fuente** — Candidatas con obra y año tomados de la Fuente, no inferidos. Cada una registra Fuente y licencia. Una Fuente sin licencia de reutilización no produce candidatas. No se proponen textos que no estén en español.
+- **FR-24: Aprobación por lote** — Aprobar somete a las mismas reglas de FR-13 y FR-14; el sembrado no abre puerta lateral. Rechazar descarta sin dejar rastro en el Corpus. Duplicados señalados antes de decidir. El lote es reanudable.
+- **FR-25: Prioridad de sembrado por hueco del Corpus** — Temas por debajo del umbral de FR-6 con cuántas Citas les faltan; proporción de Autores de tradición latinoamericana frente al suelo del 40 %. Informa la decisión del editor, no la sustituye.
 
 ### NonFunctional Requirements
 
@@ -865,3 +879,445 @@ So that un enlace roto no me expulse del sitio.
 **Given** la página 404
 **When** la reviso
 **Then** usa el mismo armazón, tokens y voz que el resto del sitio
+
+---
+
+# Sabiduría de Bolsillo — Épicas de la v2
+
+## Condiciones de Lanzamiento (requisitos adicionales)
+
+No son FR y no producen historias por sí mismas: son las puertas verificables de §13 del PRD, y cada una está asignada a una historia concreta de la Épica 6 o la Épica 7.
+
+- **LC-1 — Dominio propio sirviendo.** `sabiduriadebolsillo.com` por HTTPS; canónica y sitemap lo declaran. → Historia 7.1
+- **LC-2 — El sitemap es anunciable.** `robots.txt` que declara dónde está el sitemap. → Historia 7.2
+- **LC-3 — Search Console verificada.** Propiedad verificada y sitemap enviado. Sin ella SM-1 no es medible. → Historia 7.2
+- **LC-4 — La medición recibe.** Punto final desplegado, eventos de la v1 llegando y consultables. → Historia 7.3
+- **LC-5 — Coherencia de marca.** Ninguna superficie ni la marca de agua mencionan el nombre retirado. → Historia 6.1
+- **LC-6 — Corpus mínimo defendible.** Ninguna Cita publicada sin Procedencia; ningún Tema anunciado en portada por debajo del umbral de FR-6. → Historia 9.3
+
+## Epic List — v2
+
+### Épica 6: El nombre correcto antes de la primera URL
+
+El producto se llama en todas partes como se llaman las cuentas que van a traerle sus primeros visitantes. Va **primera y sola** por una razón de coste: mientras no exista una URL indexada, renombrar es reemplazar cadenas; en cuanto exista, es una migración con redirecciones, pérdida de posiciones y una marca de agua circulando por Instagram que apunta a un nombre retirado.
+
+**Condiciones cubiertas:** LC-5
+**Notas de implementación:** toca 13 ficheros, la marca de agua fija de `public/islas/imagen.js`, tres pruebas que afirman el nombre literal y el `name` de `package.json`. No hay decisión de diseño: la tipografía, los tokens y la disposición no cambian.
+
+### Épica 7: El sitio existe para el mundo
+
+El sitio deja de estar construido y pasa a estar publicado: dominio propio, buscadores avisados y medición recibiendo. Al terminar, cada visita deja rastro y cada página es candidata a indexarse — que es la condición para que cualquier métrica del PRD llegue a existir.
+
+**Condiciones cubiertas:** LC-1, LC-2, LC-3, LC-4
+**Notas de implementación:** el hosting no cambia; GitHub Pages sirve desde la v1 con reconstrucción diaria. El módulo de medición está construido desde la Historia 2.9 y hasta ahora no envía a ninguna parte: esta épica le pone receptor, no lo reescribe. AD-13 se preserva — el receptor acepta la baliza propia, no se introduce el guion de un proveedor.
+
+### Épica 8: El canal propio
+
+Héctor publica la Cita del Día en las cinco cuentas de Sabiduría de Bolsillo en dos minutos y sin decisiones, y al cabo de un mes sabe cuál de ellas merece su tiempo. Es el único mecanismo de entrada de visitantes mientras el Corpus no sostenga tráfico de buscador, y va antes que el sembrado porque su efecto se acumula a diario mientras el sembrado es un proceso continuo sin fecha de corte.
+
+**FRs covered:** FR-21, FR-22
+**Notas de implementación:** materializa UJ-5, el recorrido nuevo del PRD. No necesita infraestructura: la reconstrucción diaria de AD-12 ya se despierta cada jornada y puede dejar compuesta una página más. `noindex` y sin enlaces entrantes, como la herramienta de curación.
+
+### Épica 9: Un Corpus que crece publicado
+
+El Corpus pasa de 38 Citas a un volumen defendible sin que baje el porcentaje de Procedencia verificada, extrayendo de obras en fuentes de dominio público que traen la referencia consigo. Al terminar, sembrar un Autor es una sesión reproducible en lugar de una tarde de copiar y pegar.
+
+**FRs covered:** FR-23, FR-24, FR-25
+**Condiciones cubiertas:** LC-6
+**Notas de implementación:** extiende `tools/` y la puerta de admisión existente; **no la esquiva**. Lo que esta épica NO hace, y conviene que quede escrito porque es una idea que vuelve: rastrear sitios de citas existentes. Sus condiciones lo prohíben, su compilación está protegida y —lo decisivo— publican texto y nombre sin obra ni año, así que cada Cita extraída de ahí moriría en `corpus/_revision/`. Tampoco se traducen Citas: la traducción es obra nueva con plazo propio, y una traducción del editor produce una Cita cuya Procedencia no consta en ninguna edición.
+
+### Épica 10: Que la frase salga hacia una aplicación
+
+El visitante manda la Cita a la aplicación donde publica, sin pasar por la carpeta de descargas, y el enlace que comparte llega con una previsualización que muestra la Cita. Cierra UJ-2 hasta su final, que la v1 dejaba a medio camino.
+
+**FRs covered:** FR-17, FR-18, FR-19, FR-20
+**Notas de implementación:** va la última porque compartir con 38 Citas y sin medición configurada gasta el alcance de las cuentas en un sitio que todavía no puede retener a nadie ni contar si lo hizo. La generación del PNG ya existe (`public/islas/imagen.js`, `canvas.toBlob()`); FR-17 cambia el destino del mismo blob. La Tarjeta Social, en cambio, es pieza nueva: se genera en el build, no en el navegador, y debe consumir los tramos de `src/lib/tramos.ts` o divergirá de la Imagen de Cita.
+
+---
+
+## Epic 6: El nombre correcto antes de la primera URL
+
+El producto se llama en todas partes como se llaman las cuentas que van a traerle sus primeros visitantes.
+
+### Story 6.1: Renombrado a Sabiduría de Bolsillo
+
+As a visitante que llega desde una cuenta de Sabiduría de Bolsillo,
+I want aterrizar en un sitio que se llama igual que la cuenta que me trajo,
+So that no dude si he llegado a donde quería.
+
+**Acceptance Criteria:**
+
+**Given** cualquier superficie pública del sitio
+**When** la reviso
+**Then** la marca dice «Sabiduría de Bolsillo»
+**And** no queda ninguna aparición del nombre retirado en marcado, títulos ni metadatos
+
+**Given** una Imagen de Cita recién generada
+**When** miro su marca de agua
+**Then** dice «Sabiduría de Bolsillo»
+**And** conserva su posición, tamaño y peso tipográfico anteriores
+
+**Given** las pruebas que afirmaban el nombre literal
+**When** ejecuto la suite completa
+**Then** pasan afirmando el nombre nuevo
+**And** ninguna prueba quedó afirmando el antiguo
+
+**Given** el sitio construido
+**When** busco el nombre retirado en `dist/`
+**Then** no aparece en ningún fichero
+
+## Epic 7: El sitio existe para el mundo
+
+El sitio deja de estar construido y pasa a estar publicado.
+
+### Story 7.1: El dominio propio sirviendo
+
+As a Héctor,
+I want que el sitio responda en sabiduriadebolsillo.com,
+So that cada página que se indexe lo haga ya en su dirección definitiva y no haya que redirigirla después.
+
+**Acceptance Criteria:**
+
+**Given** `sabiduriadebolsillo.com`
+**When** lo visito
+**Then** responde por HTTPS con certificado válido
+**And** la versión sin `www` y la versión con `www` llevan a la misma página
+
+**Given** cualquier página publicada
+**When** leo su etiqueta canónica
+**Then** apunta al dominio definitivo
+**And** el sitemap declara ese mismo dominio en todas sus entradas
+
+**Given** el dominio configurado
+**When** reviso dónde vive esa configuración
+**Then** el dominio aparece en la variable de entorno del despliegue y en el fichero que exige el hospedaje
+**And** ningún componente ni página lo lleva escrito a mano
+
+**Given** un despliegue posterior
+**When** se ejecuta la reconstrucción diaria
+**Then** el dominio se mantiene sin intervención manual
+
+### Story 7.2: Anunciar el sitio a los buscadores
+
+As a Héctor,
+I want que los buscadores sepan dónde está el sitemap y quién es el dueño del sitio,
+So that SM-1 pueda medirse en lugar de suponerse.
+
+**Acceptance Criteria:**
+
+**Given** el sitio publicado
+**When** pido `/robots.txt`
+**Then** existe y declara la ubicación del sitemap
+**And** no bloquea ninguna página que el sitemap anuncia
+
+**Given** las páginas marcadas `noindex` en la v1
+**When** comparo `robots.txt`, el sitemap y las etiquetas de cada página
+**Then** los tres coinciden: lo que se pide no indexar no se anuncia en ninguno
+
+**Given** Search Console
+**When** reviso la propiedad
+**Then** está verificada para el dominio y el sitemap enviado
+**And** el método de verificación queda documentado para poder repetirlo
+
+### Story 7.3: La medición recibe de verdad
+
+As a Héctor,
+I want que los eventos que el sitio emite desde la v1 lleguen a algún sitio consultable,
+So that pueda responder «cuántos» en lugar de «no sé» a partir del primer día publicado.
+
+**Acceptance Criteria:**
+
+**Given** el punto final de medición desplegado
+**When** el sitio emite un evento del vocabulario cerrado
+**Then** el evento queda registrado con su nombre y su ruta
+**And** puedo consultarlo sin exportar nada ni pedir permiso a un tercero
+
+**Given** un evento con nombre fuera del vocabulario cerrado
+**When** llega al punto final
+**Then** se descarta
+
+**Given** cualquier evento registrado
+**When** examino lo almacenado
+**Then** no contiene identificador de visitante, cookie ni dato que pueda convertirse en uno
+**And** la propiedad «no requiere consentimiento» sigue siendo cierta por construcción
+
+**Given** el punto final caído o inalcanzable
+**When** un visitante usa el sitio
+**Then** la página funciona con normalidad y el evento se pierde en silencio
+
+**Given** los cuatro eventos de la v1
+**When** recorro las superficies que los emiten
+**Then** los cuatro llegan al receptor
+
+## Epic 8: El canal propio
+
+Héctor publica la Cita del Día en sus cuentas en dos minutos y sin decisiones.
+
+### Story 8.1: El Kit Diario de Publicación
+
+As a Héctor llevando las cuentas de Sabiduría de Bolsillo,
+I want abrir una sola dirección por la mañana y encontrar el material del día ya compuesto,
+So that publicar a diario me cueste dos minutos y lo haga todos los días en vez de tres veces por semana.
+
+**Acceptance Criteria:**
+
+**Given** una jornada cualquiera
+**When** abro la dirección del Kit desde el móvil
+**Then** veo la Imagen de la Cita del Día ya generada
+**And** el pie con la atribución escrito y listo para copiar
+**And** el enlace a la Página de Cita
+
+**Given** el cambio de jornada
+**When** se ejecuta la reconstrucción diaria
+**Then** el Kit muestra la Cita del Día nueva sin ninguna intervención
+
+**Given** el Kit
+**When** compruebo su indexabilidad
+**Then** declara `noindex`
+**And** no aparece en el sitemap
+**And** no hay ningún enlace hacia él desde la navegación pública
+
+**Given** una Cita del Día que supera el límite de longitud para Imagen
+**When** abro el Kit
+**Then** me lo dice explícitamente
+**And** me ofrece una Cita alternativa apta con su material completo
+
+**Given** el Kit abierto en un móvil
+**When** intento llevarme la imagen
+**Then** puedo hacerlo con el mismo gesto que cualquier visitante usa en una Página de Cita
+
+### Story 8.2: Saber qué red trae visitas
+
+As a Héctor,
+I want distinguir de qué cuenta viene cada visita,
+So that dentro de un mes sepa en cuál de las cinco redes invertir el tiempo y en cuáles no.
+
+**Acceptance Criteria:**
+
+**Given** el Kit Diario
+**When** miro los enlaces que ofrece
+**Then** hay uno por red, cada uno con su marca de origen distinta
+
+**Given** una visita llegada por uno de esos enlaces
+**When** consulto la medición
+**Then** puedo agrupar visitas por red de origen y por jornada
+
+**Given** una Página de Cita alcanzada con marca de origen
+**When** la comparo con la misma sin marca
+**Then** la etiqueta canónica es idéntica en ambas
+**And** el buscador no ve dos páginas distintas
+
+**Given** un visitante que llega con marca de origen
+**When** mira la página
+**Then** no percibe ninguna diferencia respecto a llegar sin ella
+
+## Epic 9: Un Corpus que crece publicado
+
+El Corpus crece sin que baje el porcentaje de Procedencia verificada.
+
+### Story 9.1: Extracción de candidatas desde una Fuente
+
+As a Héctor sembrando el Corpus,
+I want partir de una obra concreta y obtener candidatas que ya traen su obra y su año,
+So that la Procedencia no sea algo que haya que buscar después de tener el texto.
+
+**Acceptance Criteria:**
+
+**Given** un Autor y una Fuente admitida
+**When** ejecuto la extracción
+**Then** obtengo candidatas cuyo campo de obra y de año vienen de la Fuente
+**And** ninguna candidata trae Procedencia inferida o aproximada
+
+**Given** cualquier candidata extraída
+**When** examino lo que se guardó
+**Then** consta de qué Fuente salió y bajo qué licencia
+
+**Given** una Fuente cuya licencia no permite reutilización
+**When** intento extraer de ella
+**Then** el proceso se detiene y explica por qué
+**And** no queda ninguna candidata en el Corpus
+
+**Given** una obra con pasajes en otra lengua
+**When** se proponen candidatas
+**Then** las que no están en español no se proponen
+
+**Given** las candidatas extraídas
+**When** compruebo dónde han quedado
+**Then** están en revisión, no publicadas
+
+### Story 9.2: Aprobación por lote
+
+As a Héctor,
+I want revisar un lote entero de candidatas y decidir sobre cada una sin salir de la revisión,
+So that sembrar treinta Citas sea una sesión y no treinta sesiones.
+
+**Acceptance Criteria:**
+
+**Given** un lote de candidatas
+**When** apruebo una
+**Then** pasa por las mismas reglas de admisión que cualquier alta manual
+**And** una que las incumpla no se publica aunque yo la haya aprobado
+
+**Given** una candidata que duplica una Cita ya publicada
+**When** llego a ella en la revisión
+**Then** se me señala antes de decidir
+**And** la decisión sigue siendo mía
+
+**Given** una candidata rechazada
+**When** reviso el Corpus después
+**Then** no ha quedado en ninguna parte
+
+**Given** un lote a medio revisar
+**When** lo dejo y vuelvo otro día
+**Then** continúo donde lo dejé sin repetir lo ya decidido
+
+### Story 9.3: Ver qué le falta al Corpus
+
+As a Héctor a punto de empezar una sesión de sembrado,
+I want saber qué huecos tiene el Corpus antes de elegir a quién dedico la sesión,
+So that el sembrado llene lo que está vacío en vez de engordar lo que ya está lleno.
+
+**Acceptance Criteria:**
+
+**Given** el Corpus actual
+**When** consulto los huecos
+**Then** veo los Temas por debajo del umbral de publicación con cuántas Citas les faltan a cada uno
+
+**Given** el Corpus actual
+**When** consulto el equilibrio de tradición
+**Then** veo la proporción de Autores de tradición latinoamericana frente al suelo comprometido
+
+**Given** la vista de huecos
+**When** la uso
+**Then** informa mi decisión y no elige por mí: no propone Autores automáticamente
+
+**Given** un Tema que se anuncia en la portada
+**When** compruebo su recuento
+**Then** está por encima del umbral de publicación
+
+## Epic 10: Que la frase salga hacia una aplicación
+
+El visitante manda la Cita a la aplicación donde publica.
+
+### Story 10.1: Tarjeta Social de toda Cita publicada
+
+As a alguien que recibe por WhatsApp el enlace de una Cita,
+I want ver de qué Cita se trata antes de decidir si abro el enlace,
+So that el enlace me diga algo en lugar de ser una dirección desnuda.
+
+**Acceptance Criteria:**
+
+**Given** cualquier Cita publicada
+**When** pego su enlace en una red o mensajería
+**Then** la previsualización muestra una imagen propia de esa Cita, no un genérico del sitio
+
+**Given** una Cita que admite Imagen de Cita
+**When** miro su Tarjeta Social
+**Then** presenta el texto de la Cita y el nombre del Autor
+
+**Given** una Cita que supera el límite de longitud de FR-10
+**When** miro su Tarjeta Social
+**Then** presenta el Autor y la marca sin el texto de la Cita
+**And** en ningún caso muestra un fragmento recortado del texto
+
+**Given** la Tarjeta Social y la Imagen de Cita de una misma Cita
+**When** comparo su composición tipográfica
+**Then** ambas derivan del mismo módulo de tramos
+
+**Given** cualquier Cita publicada
+**When** paso su URL por los validadores de previsualización de las redes de destino
+**Then** ninguna reporta tarjeta ausente o imagen inaccesible
+
+### Story 10.2: Compartir la imagen por la hoja del sistema
+
+As a Diego con el móvil en la mano,
+I want mandar la Imagen de Cita directamente a la aplicación donde voy a publicar,
+So that no tenga que buscar dónde ha caído el fichero descargado.
+
+**Acceptance Criteria:**
+
+**Given** un navegador móvil que admite compartir ficheros
+**When** pulso la acción tras elegir plantilla
+**Then** se abre la hoja del sistema con la imagen ya adjunta
+
+**Given** un navegador que no admite compartir ficheros
+**When** pulso la misma acción
+**Then** la imagen se descarga, exactamente como en la v1
+**And** no veo ningún aviso de incompatibilidad ni ningún control deshabilitado
+
+**Given** la imagen compartida y la imagen descargada de la misma Cita y plantilla
+**When** las comparo
+**Then** son el mismo fichero, producido por la misma generación
+
+**Given** la hoja del sistema abierta
+**When** la cierro sin elegir destino
+**Then** no se registra compartición
+**And** no aparece ningún mensaje de error
+
+**Given** la detección de capacidad del navegador
+**When** reviso cómo se decide qué acción ofrecer
+**Then** se comprueba la capacidad de compartir **ficheros**, no la de compartir en general
+
+### Story 10.3: Compartir el enlace a un destino
+
+As a Marisol que quiere mandar una Cita a alguien,
+I want compartir el enlace con la Cita y su autor ya escritos,
+So that quien lo reciba sepa qué le mando sin tener que abrirlo.
+
+**Acceptance Criteria:**
+
+**Given** una Página de Cita
+**When** comparto su enlace
+**Then** el texto propuesto incluye la Cita y el nombre del Autor
+**And** nunca es solo la dirección
+
+**Given** un dispositivo con hoja del sistema
+**When** uso la acción de compartir enlace
+**Then** se abre la hoja con enlace y texto
+
+**Given** un navegador sin hoja del sistema
+**When** uso la misma acción
+**Then** veo destinos concretos y visibles
+**And** solo aparecen los destinos que admiten recibir un enlace desde la web
+
+**Given** cualquier destino ofrecido
+**When** lo uso
+**Then** no se me pide registrarme en el sitio ni instalar nada
+
+**Given** un enlace compartido con marca de origen
+**When** reviso qué indexa el buscador
+**Then** solo existe la URL canónica
+
+### Story 10.4: Medir la compartición
+
+As a Héctor,
+I want saber cuánto y hacia dónde se comparte,
+So that pueda comprobar si la v2 amplió el alcance del sitio o solo movió un botón de sitio.
+
+**Acceptance Criteria:**
+
+**Given** una compartición hacia un destino elegido en el sitio
+**When** se emite la medición
+**Then** el evento registra ese destino
+
+**Given** una compartición a través de la hoja del sistema
+**When** se emite la medición
+**Then** el evento registra el destino como opaco
+**And** no se intenta averiguar cuál fue
+
+**Given** las comparticiones de imagen y de enlace
+**When** consulto la medición
+**Then** puedo distinguirlas entre sí
+
+**Given** los eventos nuevos
+**When** reviso el módulo de medición
+**Then** están declarados en el vocabulario cerrado
+**And** no existe ningún evento genérico con carga libre que permita ampliarlo sin tocar el módulo
+
+**Given** cualquier evento de compartición
+**When** examino lo que viaja
+**Then** no incluye cookie, identificador ni dato que pueda convertirse en uno
+
+**Given** SM-5 y SM-7 medidas durante el mismo periodo
+**When** las comparo
+**Then** puedo comprobar si la compartición creció a costa del copiado, que es lo que SM-C3 vigila

@@ -14,6 +14,7 @@
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
 import { EVENTOS } from '../lib/medicion.ts';
+import { MARCA } from '../lib/marca.ts';
 import { tramoDe } from '../lib/tramos.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
 
@@ -39,6 +40,7 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
       data-procedencia={procedencia}
       data-tamano={tramo.pixelesEnImagen}
       data-nombre={cita.slug}
+      data-marca={MARCA}
     >
       <button type="button" class="abrir" data-abrir>
         Descargar como imagen
@@ -100,6 +102,7 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
       autor: isla.dataset.autor,
       procedencia: isla.dataset.procedencia,
       tamaño: Number(isla.dataset.tamano),
+      marca: isla.dataset.marca,
       plantilla: plantillaActual,
     });
 

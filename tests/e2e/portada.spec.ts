@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { MARCA } from '../../src/lib/marca.ts';
 
 /** Historia 4.1 — portada con Cita del Día. */
 
@@ -83,6 +84,6 @@ test.describe('Historia 4.1 — la portada', () => {
     await page.goto('/');
     await expect(page.locator('h1')).toHaveCount(1);
     // En la portada el h1 es la marca; la Cita del Día no es el título de la página.
-    await expect(page.locator('h1')).toHaveText('Sabiduría Diaria');
+    await expect(page.locator('h1')).toHaveText(MARCA);
   });
 });

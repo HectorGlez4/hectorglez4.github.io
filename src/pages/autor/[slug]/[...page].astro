@@ -20,6 +20,7 @@ import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import { autoresPublicados, citasDeAutor, conjuntoPublicable, type Cita } from '../../../lib/publicado.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+import { tituloDe } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -48,7 +49,7 @@ const años =
 ---
 
 <Armazon
-  titulo={`${autor.nombre}${sufijo} | Sabiduría Diaria`}
+  titulo={tituloDe(`${autor.nombre}${sufijo}`)}
   descripcion={`Citas de ${autor.nombre} con su procedencia documentada. ${autor.semblanza}`}
   ruta={ruta}
   tipo="autor"

@@ -15,6 +15,7 @@
  */
 import Armazon from '../components/Armazon.astro';
 import { EVENTOS } from '../lib/medicion.ts';
+import { tituloDe } from '../lib/marca.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
@@ -27,7 +28,7 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
 ---
 
 <Armazon
-  titulo="Buscar | Sabiduría Diaria"
+  titulo={tituloDe('Buscar')}
   descripcion="Busca una cita por un fragmento, por autor o por tema."
   ruta="/buscar"
   noIndexar

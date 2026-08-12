@@ -15,6 +15,7 @@ import Armazon from '../components/Armazon.astro';
 import BloqueDeCita from '../components/BloqueDeCita.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { MARCA } from '../lib/marca.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
@@ -33,12 +34,12 @@ const autorDelDia = seleccion
 ---
 
 <Armazon
-  titulo="Sabiduría Diaria — citas en español con su procedencia"
+  titulo={`${MARCA} — citas en español con su procedencia`}
   descripcion="Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta."
   ruta="/"
 >
   <div class="pagina contenedor">
-    <h1 class="marca-portada">Sabiduría Diaria</h1>
+    <h1 class="marca-portada">{MARCA}</h1>
 
     {
       seleccion && autorDelDia ? (

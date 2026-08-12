@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { esVersionSuficiente, VERSION_MINIMA } from '../../tools/comprobar-node.mjs';
+import { MARCA } from '../../src/lib/marca.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 
@@ -57,7 +58,9 @@ describe('Historia 1.1 — estructura de directorios', () => {
     // Y la única página es la portada propia, no la de ejemplo de Astro.
     const portada = readFileSync(resolve(raiz, 'src/pages/index.astro'), 'utf8');
     expect(portada).not.toContain('Astro');
-    expect(portada).toContain('Sabiduría Diaria');
+    // La marca llega del módulo único de la Historia 6.1, no escrita en la página.
+    expect(portada).toContain("from '../lib/marca.ts'");
+    expect(portada).toContain('{MARCA}');
   });
 
   it('el corpus está vacío de contenido pero presente en git', () => {

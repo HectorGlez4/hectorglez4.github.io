@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-11-2026 06:24
+last_updated: 08-12-2026 09:30
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -73,3 +73,35 @@ development_status:
   5-1-generación-de-imagen-de-cita: done
   5-2-selección-de-plantilla: done
   epic-5-retrospective: optional
+
+  # ── Sprint v2 ─────────────────────────────────────────────────────────────
+  # Orden fijado por el PRD §6.3: el renombrado antes de que exista una URL
+  # indexada; el sembrado y las Condiciones de Lanzamiento antes de compartir.
+
+  epic-6: done
+  6-1-renombrado-a-sabiduría-de-bolsillo: done
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-el-dominio-propio-sirviendo: backlog
+  7-2-anunciar-el-sitio-a-los-buscadores: backlog
+  7-3-la-medición-recibe-de-verdad: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-el-kit-diario-de-publicación: backlog
+  8-2-saber-qué-red-trae-visitas: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog
+  9-1-extracción-de-candidatas-desde-una-fuente: backlog
+  9-2-aprobación-por-lote: backlog
+  9-3-ver-qué-le-falta-al-corpus: backlog
+  epic-9-retrospective: optional
+
+  epic-10: backlog
+  10-1-tarjeta-social-de-toda-cita-publicada: backlog
+  10-2-compartir-la-imagen-por-la-hoja-del-sistema: backlog
+  10-3-compartir-el-enlace-a-un-destino: backlog
+  10-4-medir-la-compartición: backlog
+  epic-10-retrospective: optional
