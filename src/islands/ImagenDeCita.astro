@@ -11,6 +11,35 @@
  * AD-8 — el tamaño tipográfico del lienzo lo calcula `src/lib/tramos.ts` y viaja en un
  * atributo. La isla no decide tamaños: si lo hiciera, la previsualización podría mentir
  * respecto al fichero descargado.
+ *
+ * FR-17 — la acción manda la imagen a la hoja del sistema cuando el navegador sabe
+ * compartir **ficheros**. Tres decisiones que conviene tener escritas, y que están aquí
+ * y no dentro del guion porque los comentarios de un `is:inline` viajan al visitante y
+ * la Página de Cita tiene presupuesto de bytes:
+ *
+ *   · Se comprueba `canShare({files})` con un fichero de verdad, no `navigator.share` a
+ *     secas. `share` existe en navegadores que solo saben mandar un enlace: darlo por
+ *     bueno abriría la hoja sin la imagen adjunta, y el visitante creería haber
+ *     publicado la Cita habiendo publicado una dirección. Algunos, además, aceptan
+ *     `{files: []}` y rechazan un fichero real, así que la prueba lleva uno.
+ *   · La etiqueta que sale del build es la de la v1 y el guion la cambia al cargar solo
+ *     si se puede compartir. Así el marcado inicial es correcto para quien no puede
+ *     —que es también quien puede tener el JavaScript desactivado— y no hay ni aviso de
+ *     incompatibilidad ni control deshabilitado, que es lo que pide el criterio.
+ *   · Cancelar la hoja no es un fallo: el navegador lo comunica con la misma excepción
+ *     que un error, y distinguirlos es lo que permite no registrar una compartición que
+ *     no ocurrió ni enseñar un error que no lo es. Un fallo de verdad cae a la descarga
+ *     en silencio: el visitante pidió la imagen y quedarse sin ella sería peor.
+ *
+ * Y lo demás que hay que saber al leer el manejador, escrito aquí por lo mismo:
+ *
+ *   · El diálogo se abre **antes** de tener el generador, así que la Página de Cita
+ *     sigue siendo utilizable mientras se compone (UX-DR20). La descarga del módulo
+ *     ocurre al pulsar y no antes, que es lo que AD-6 pide para una isla cara.
+ *   · El cierre al tocar fuera funciona porque el clic sobre el propio `<dialog>` cae en
+ *     el fondo: el contenido está dentro de sus hijos.
+ *   · UX-DR26 — todo lo que ofrece la imagen está disponible como texto copiable; el
+ *     atributo `data-texto-plano` lo deja legible desde el marcado.
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
 import { EVENTOS } from '../lib/medicion.ts';
@@ -97,6 +126,18 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
     let generador = null;
     let plantillaActual = 'papel';
 
+    // FR-17 — capacidad de compartir FICHEROS, no de compartir. Ver la nota de arriba.
+    let compartible = false;
+    try {
+      const p = new File([new Blob([], { type: 'image/png' })], 'p.png', { type: 'image/png' });
+      compartible = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [p] });
+    } catch {}
+
+    if (compartible) {
+      isla.querySelector('[data-abrir]').textContent = 'Compartir como imagen';
+      isla.querySelector('[data-descargar]').textContent = 'Compartir';
+    }
+
     const datos = () => ({
       texto: isla.dataset.texto,
       autor: isla.dataset.autor,
@@ -108,7 +149,6 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
 
     async function cargar() {
       if (generador) return generador;
-      // La descarga ocurre aquí, al pulsar, y no antes.
       generador = await import('/islas/imagen.js');
       return generador;
     }
@@ -135,8 +175,6 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
     }
 
     isla.querySelector('[data-abrir]').addEventListener('click', async () => {
-      // Se abre antes de tener el generador: el diálogo no espera a la descarga, así que
-      // la Página de Cita sigue siendo utilizable mientras se compone (UX-DR20).
       dialogo.showModal();
       const g = await cargar();
       pintarBotonesDePlantilla(g.PLANTILLAS);
@@ -145,23 +183,22 @@ const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
 
     isla.querySelector('[data-cerrar]').addEventListener('click', () => dialogo.close());
 
-    // Cierre al tocar fuera: el clic sobre el propio `<dialog>` cae en el fondo, porque
-    // el contenido está dentro de sus hijos.
     dialogo.addEventListener('click', (evento) => {
       if (evento.target === dialogo) dialogo.close();
     });
 
     isla.querySelector('[data-descargar]').addEventListener('click', async () => {
       const g = await cargar();
-      // Se redibuja justo antes de descargar para que el fichero sea, sin lugar a dudas,
-      // lo que se está viendo.
+      // Se redibuja justo antes: lo que sale es, sin dudas, lo que se está viendo.
       g.dibujar(lienzo, datos());
-      await g.descargar(lienzo, isla.dataset.nombre);
+
+      const salida = compartible ? await g.compartir(lienzo, isla.dataset.nombre) : 'descarga';
+      if (salida === 'cancelada') return; // No ha pasado nada: ni evento ni mensaje.
+      if (salida !== 'compartida') await g.descargar(lienzo, isla.dataset.nombre);
+
       window.__medir && window.__medir(EVENTO_DESCARGA);
     });
 
-    // UX-DR26 — todo lo que ofrece la imagen está disponible como texto copiable. El
-    // atributo lo consume la prueba y lo puede leer cualquiera desde el marcado.
     isla.dataset.textoPlano = TEXTO_PARA_COPIAR;
   })();
 </script>

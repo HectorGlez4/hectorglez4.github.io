@@ -112,20 +112,51 @@ export function dibujar(lienzo, datos) {
   return lienzo;
 }
 
+/**
+ * El PNG del lienzo.
+ *
+ * Lo consumen la descarga y la compartición, y de ahí sale la propiedad que pide el
+ * criterio: la imagen que se comparte y la que se descarga **son el mismo fichero**,
+ * porque salen de la misma generación sobre el mismo lienzo. Dos caminos de generación
+ * habrían podido divergir sin que nadie lo notara hasta comparar dos ficheros.
+ */
+export function aBlob(lienzo) {
+  return new Promise((resolver) => lienzo.toBlob(resolver, 'image/png'));
+}
+
 /** Descarga directa: sin paso intermedio y sin registro (UX-DR16). */
-export function descargar(lienzo, nombre) {
-  return new Promise((resolver) => {
-    lienzo.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const enlace = document.createElement('a');
-      enlace.href = url;
-      enlace.download = `${nombre}.png`;
-      document.body.append(enlace);
-      enlace.click();
-      enlace.remove();
-      // Se libera en el siguiente ciclo: revocarla antes cancela la descarga en Safari.
-      setTimeout(() => URL.revokeObjectURL(url), 0);
-      resolver();
-    }, 'image/png');
-  });
+export async function descargar(lienzo, nombre) {
+  const blob = await aBlob(lienzo);
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = `${nombre}.png`;
+  document.body.append(enlace);
+  enlace.click();
+  enlace.remove();
+  // Se libera en el siguiente ciclo: revocarla antes cancela la descarga en Safari.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+/**
+ * Manda la imagen a la hoja del sistema — FR-17.
+ *
+ * Devuelve qué pasó, y el que llama decide qué medir. `cancelada` no es un error: cerrar
+ * la hoja sin elegir destino es una decisión legítima del visitante, y el navegador la
+ * comunica con la misma excepción que un fallo. Distinguirlas es lo que permite no
+ * registrar una compartición que no ocurrió y no enseñar un error que no lo es.
+ *
+ * `fallida` cae a la descarga en quien llama: el visitante ha pedido la imagen, y
+ * quedarse sin ella porque la hoja no abrió sería peor que dársela por el otro camino.
+ */
+export async function compartir(lienzo, nombre) {
+  const blob = await aBlob(lienzo);
+  const fichero = new File([blob], `${nombre}.png`, { type: 'image/png' });
+
+  try {
+    await navigator.share({ files: [fichero] });
+    return 'compartida';
+  } catch (error) {
+    return error && error.name === 'AbortError' ? 'cancelada' : 'fallida';
+  }
 }

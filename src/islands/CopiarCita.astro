@@ -13,6 +13,21 @@
  * la página no descarga ningún fichero de script y el contenido no depende de que se
  * ejecute nada. Con JavaScript desactivado, la Cita y su atribución siguen ahí y siguen
  * siendo seleccionables — que es exactamente lo que hace el respaldo de abajo.
+ *
+ * Las razones del guion viven aquí y no dentro de él porque **los comentarios de un
+ * `is:inline` viajan al visitante**: Astro no los quita, y la Página de Cita tiene un
+ * presupuesto de bytes de guion que la prueba de la Historia 2.1 vigila. Lo que hay que
+ * saber al leer el manejador:
+ *
+ *   · `clipboard.writeText` falla en contextos no seguros y cuando se deniega el
+ *     permiso. Es un caso real, no teórico: pasa en `http://` y en algunos navegadores
+ *     incrustados. El respaldo revela el texto y lo selecciona, que es el siguiente
+ *     gesto que iba a hacer el visitante de todos modos — sin mensaje de error técnico.
+ *   · AD-13 — la isla no habla con el proveedor: llama a lo que instala `medicion.ts`,
+ *     con un nombre que viene del vocabulario cerrado. Sin medición configurada no hay
+ *     nada que llamar y el copiado funciona igual.
+ *   · El respaldo que se revela es el de **esta** isla y no el primero de la página: el
+ *     Kit Diario lleva dos.
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
 import { EVENTOS } from '../lib/medicion.ts';
@@ -52,7 +67,6 @@ const instancia = cita.slug;
     const boton = document.querySelector(`[data-copiar="${INSTANCIA}"]`);
     if (!boton) return;
 
-    // El respaldo es el de esta isla, no el primero de la página.
     const isla = boton.closest('.isla');
     const etiqueta = boton.querySelector('[data-etiqueta]');
     const original = etiqueta.textContent;
@@ -62,14 +76,8 @@ const instancia = cita.slug;
       const carga = boton.dataset.carga;
 
       try {
-        // `writeText` falla en contextos no seguros y cuando el permiso se deniega. Es
-        // un caso real, no teórico: pasa en http:// y en algunos navegadores incrustados.
         await navigator.clipboard.writeText(carga);
 
-        // AD-13 — la isla no habla con el proveedor. Llama a lo que instala
-        // `medicion.ts`, y el nombre del evento viene del vocabulario cerrado, no de
-        // una cadena escrita aquí. Si no hay medición configurada, no hay nada que
-        // llamar y el copiado funciona igual.
         window.__medir && window.__medir(EVENTO_COPIADO);
         etiqueta.textContent = 'Copiado.';
         boton.setAttribute('data-estado', 'copiado');
@@ -79,8 +87,6 @@ const instancia = cita.slug;
           boton.removeAttribute('data-estado');
         }, 2000);
       } catch {
-        // Sin mensaje de error técnico: se ofrece la vía manual y se selecciona el
-        // texto, que es el siguiente gesto que iba a hacer el visitante de todos modos.
         const respaldo = isla.querySelector('[data-respaldo]');
         const campo = isla.querySelector('[data-respaldo-texto]');
         respaldo.hidden = false;
