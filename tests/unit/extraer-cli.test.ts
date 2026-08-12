@@ -98,6 +98,18 @@ describe('Historia 9.1 — las candidatas quedan en revisión, no publicadas', (
     }
   });
 
+  it('el nombre de fichero es el que fija la espina', async () => {
+    const { corpus } = await corpusVacio();
+    await extraer(DOCUMENTO, corpus);
+
+    for (const fichero of await readdir(join(corpus, '_revision'))) {
+      // `{slug-autor}--{fragmento}.md`, como en corpus/citas/. Sin el ayudante común
+      // salía `seneca--seneca-...`, porque el slug ya empieza por el del Autor.
+      expect(fichero).toMatch(/^seneca--[a-z0-9-]+\.md$/);
+      expect(fichero).not.toContain('seneca--seneca');
+    }
+  });
+
   it('dice cuántas propuso y cuántas descartó, y por qué', async () => {
     const { corpus } = await corpusVacio();
     const resultado = await extraer(DOCUMENTO, corpus);

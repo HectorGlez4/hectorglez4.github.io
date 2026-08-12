@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeCita, slugLibre } from '../src/lib/slug.ts';
-import { aYaml, rutasDelCorpus } from './lib/corpus.ts';
+import { aYaml, nombreDeFicheroDeCita, rutasDelCorpus } from './lib/corpus.ts';
 import { extraerCandidatas, type DocumentoDeFuente } from './lib/extraccion.ts';
 import { opcion, raizDeCorpusDe } from './lib/cli.ts';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -57,7 +57,10 @@ const ocupados = new Set<string>();
 for (const candidata of resultado.candidatas) {
   const slug = slugLibre(slugDeCita(autor, normalizar(candidata.texto)), ocupados);
   ocupados.add(slug);
-  const fichero = join(rutas.revision, `${autor}--${slug}.md`);
+  // El nombre lo fija la espina: `{slug-autor}--{fragmento}.md`. Se compone con el mismo
+  // ayudante que el alta y se deriva del slug ya calculado, no del texto, para que
+  // fichero y URL no puedan divergir.
+  const fichero = join(rutas.revision, `${nombreDeFicheroDeCita(autor, slug)}.md`);
   if (seco) {
     escritas += 1;
     continue;
