@@ -9,6 +9,8 @@ import {
   guionDeMedicion,
   puntoFinal,
 } from '../../src/lib/medicion.ts';
+import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
+import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -44,10 +46,16 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
 
   it('el guion descarta en cliente cualquier evento fuera del conjunto', () => {
     // Añadir uno exige modificar el módulo, no la superficie que lo emite: una isla que
-    // invente un nombre no consigue emitirlo.
-    const guion = guionDeMedicion('https://ejemplo.invalid/e');
-    expect(guion).toContain('permitidos.indexOf(evento) === -1) return');
-    for (const evento of EVENTOS_VALIDOS) expect(guion).toContain(evento);
+    // invente un nombre no consigue emitirlo. Se comprueba **ejecutándolo**, no leyendo
+    // su texto: una prueba sobre la forma del guion se rompe al compactarlo y no dice
+    // nada sobre lo que hace.
+    const { emitir, balizas } = medicionEnUnSandbox();
+
+    for (const evento of EVENTOS_VALIDOS) emitir(evento);
+    expect(balizas().map((b) => b.evento)).toEqual([...EVENTOS_VALIDOS]);
+
+    for (const impostor of ['pageview', 'clic', 'VISTA-DE-CITA', '']) emitir(impostor);
+    expect(balizas()).toHaveLength(EVENTOS_VALIDOS.length);
   });
 });
 
@@ -64,15 +72,25 @@ describe('Historia 2.9 — sin cookies y sin identificar al visitante', () => {
   });
 
   it('lo que viaja es el evento, la ruta y nada más', () => {
-    expect(guion).toContain('evento: evento');
-    expect(guion).toContain('ruta: location.pathname');
+    const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una' });
+    emitir(EVENTOS.copiado);
+
+    const [baliza] = balizas();
+    expect(baliza.evento).toBe(EVENTOS.copiado);
+    expect(baliza.ruta).toBe('/cita/una');
+    expect(Object.keys(baliza).sort()).toEqual(['datos', 'destino', 'evento', 'origen', 'ruta']);
     // Ni referente, ni agente de usuario, ni pantalla, ni zona horaria.
     expect(guion).not.toMatch(/referrer|userAgent|screen\.|timeZone|language/);
   });
 
   it('una medición que falla no rompe la página', () => {
-    expect(guion).toContain('try {');
-    expect(guion).toContain('catch');
+    // El transporte revienta a propósito; emitir no debe propagar nada.
+    const { emitir } = medicionEnUnSandbox({
+      sendBeacon: () => {
+        throw new Error('el transporte falló');
+      },
+    });
+    expect(() => emitir(EVENTOS.copiado)).not.toThrow();
   });
 });
 
@@ -132,5 +150,46 @@ describe('Historia 2.9 — sin configurar, el sitio no envía nada', () => {
      */
     expect(html).not.toContain('__medir = function');
     expect(html).not.toContain('sendBeacon');
+  });
+});
+
+describe('Retro épica 7 — el presupuesto de guion también con la medición encendida', () => {
+  /*
+   * La prueba de la Historia 2.1 exige menos de MAX_BYTES_DE_GUION bytes de guion en
+   * línea en la Página de Cita, y **todas** las construcciones de prueba corren sin
+   * `MEDICION_ENDPOINT`, así que el guion de medición no se contaba nunca. Creció en la
+   * Historia 8.2 (array de redes) y en la 10.4 (array de destinos), y en producción la
+   * página llegó a llevar 6630 bytes frente a un tope de 6144 sin que nada lo viera.
+   *
+   * Se construye aquí un sitio **con** la medición configurada y se mide lo que de
+   * verdad se sirve.
+   */
+  it('la Página de Cita con medición configurada cabe en el presupuesto', async () => {
+    const resultado = await construirConCorpus(
+      {
+        'autores/seneca.yml': AUTOR_VALIDO,
+        'citas/seneca--una.md': citaValida({ temas: [] }),
+      },
+      { entorno: { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' } },
+    );
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).toBe(0);
+
+    const html = await readFile(
+      join(resultado.proyecto, 'dist', 'cita', 'seneca-no-es-que-tengamos-poco-tiempo.html'),
+      'utf8',
+    );
+
+    // El instalador tiene que estar: si no, esto no mide nada.
+    expect(html).toContain('window.__medir=function');
+
+    const guiones = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
+      .filter((m) => !m[1].includes('application/ld+json'))
+      .map((m) => m[2]);
+    const bytes = guiones.reduce((n, g) => n + g.length, 0);
+
+    expect(bytes, `${bytes} bytes de guion en línea con la medición encendida`).toBeLessThan(
+      MAX_BYTES_DE_GUION,
+    );
   });
 });

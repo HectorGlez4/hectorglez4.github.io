@@ -13,10 +13,16 @@
  */
 
 import { textoParaCopiar } from './atribucion.ts';
+import { DESTINOS_CONOCIDOS, type IdDeDestino } from './destinos.ts';
 import type { Cita, Autor } from './publicado.ts';
 
+// Se reexportan para quien ya los consumía por aquí. El conjunto cerrado vive en
+// `destinos.ts` y no aquí: ver la nota de ese módulo — el receptor lo importa desde un
+// Worker y no debe arrastrar estos constructores de direcciones.
+export { DESTINOS_VALIDOS, DESTINO_OPACO, esDestinoValido } from './destinos.ts';
+
 export interface Destino {
-  id: string;
+  id: IdDeDestino;
   nombre: string;
   /** Compone la dirección del destino con el texto y el enlace ya dentro. */
   enlace: (texto: string, url: string) => string;
@@ -34,6 +40,7 @@ export interface Destino {
  *
  * Ninguno pide registrarse en este sitio: son direcciones públicas que el navegador abre.
  */
+/** Un destino por identificador conocido, en el mismo orden y sin ninguno de más. */
 export const DESTINOS: readonly Destino[] = [
   {
     id: 'whatsapp',
@@ -59,29 +66,6 @@ export const DESTINOS: readonly Destino[] = [
       `mailto:?subject=${encodeURIComponent('Una cita')}&body=${encodeURIComponent(`${texto}\n\n${url}`)}`,
   },
 ];
-
-/**
- * El destino de una compartición por la hoja del sistema — FR-20.
- *
- * La Web Share API **no dice** a qué aplicación fue, y no se intenta averiguar: cualquier
- * forma de deducirlo —medir tiempos, mirar qué pierde el foco— es reconstruir el
- * comportamiento del visitante por la puerta de atrás, que es lo que NFR-11 impide.
- * «Opaco» es un dato honesto: se compartió, y no se sabe adónde.
- */
-export const DESTINO_OPACO = 'opaco';
-
-/**
- * Todo lo que puede registrarse como destino, y nada más.
- *
- * Cerrado por lo mismo que el vocabulario de eventos de AD-13: si el destino fuese texto
- * libre, la medición de la compartición sería ampliable sin tocar ningún módulo, que es
- * exactamente la puerta por la que se cuela un perfil del visitante.
- */
-export const DESTINOS_VALIDOS: readonly string[] = [...DESTINOS.map((d) => d.id), DESTINO_OPACO];
-
-export function esDestinoValido(valor: string): boolean {
-  return DESTINOS_VALIDOS.includes(valor);
-}
 
 /**
  * El texto que se propone al compartir.

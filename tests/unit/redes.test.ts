@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PARAMETRO_DE_ORIGEN, REDES, REDES_VALIDAS, enlaceConOrigen, esRedValida } from '../../src/lib/redes.ts';
 import { guionDeMedicion } from '../../src/lib/medicion.ts';
+import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import { interpretar } from '../../medicion/receptor.ts';
 
 const INSTANTE = new Date('2026-08-12T05:15:00Z');
@@ -37,8 +38,16 @@ describe('Historia 8.2 — el origen se coteja en los dos extremos', () => {
   const guion = guionDeMedicion('https://ejemplo.invalid/e');
 
   it('el guion solo deja salir una de las cinco', () => {
-    expect(guion).toContain('redes.indexOf(marca) === -1 ? null : marca');
-    for (const red of REDES_VALIDAS) expect(guion).toContain(red);
+    // Ejecutado con una marca válida y con otra inventada, en vez de leyendo su texto.
+    for (const red of REDES_VALIDAS) {
+      const { emitir, balizas } = medicionEnUnSandbox({ busqueda: `?de=${red}` });
+      emitir('vista-de-cita');
+      expect(balizas()[0].origen, red).toBe(red);
+    }
+
+    const { emitir, balizas } = medicionEnUnSandbox({ busqueda: '?de=visitante-7f3a' });
+    emitir('vista-de-cita');
+    expect(balizas()[0].origen).toBeNull();
   });
 
   it('el guion lee la marca de la URL y nada más de ella', () => {

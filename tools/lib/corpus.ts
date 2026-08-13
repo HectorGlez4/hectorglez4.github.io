@@ -166,10 +166,24 @@ export async function escribirTema(
 /**
  * Publicar es mover el fichero (AD-2). No existe ningún campo que cambiar.
  * Retirar una Cita es el mismo movimiento al revés — nunca un borrado.
+ *
+ * **Nunca sobrescribe.** `rename` sustituye el destino en silencio, y esta función es el
+ * único sitio por el que se escribe en `corpus/citas/`: la aprobación por lote llegó a
+ * pisar una Cita publicada cuyo slug coincidía con el de una candidata —dos Citas del
+ * mismo Autor que empiezan igual generan el mismo slug— y la Cita desapareció sin decir
+ * nada, con su URL sirviendo otro texto. Que el fallo salte aquí es lo que hace que la
+ * próxima puerta que escriba en el corpus herede la salvaguarda sin acordarse de ella.
  */
 export async function mover(origen: string, destinoDir: string): Promise<string> {
   await mkdir(destinoDir, { recursive: true });
   const destino = join(destinoDir, basename(origen));
+
+  if (existsSync(destino)) {
+    throw new Error(
+      `No se mueve ${basename(origen)}: ya existe ${destino}. Resuelva el nombre antes de mover.`,
+    );
+  }
+
   await rename(origen, destino);
   return destino;
 }

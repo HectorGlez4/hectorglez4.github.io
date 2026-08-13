@@ -39,3 +39,24 @@ export const MAX_CITAS_RELACIONADAS = 4;
  * que uno tiene más a mano.
  */
 export const SUELO_TRADICION_LATINOAMERICANA = 40;
+
+/**
+ * Tope de bytes de guion en línea que puede llevar una Página de Cita — AD-6, NFR-2.
+ *
+ * Existía como literal dentro de la prueba de la Historia 2.1, que además solo medía
+ * construcciones **sin** medición configurada: el guion que instala `medicion.ts` no
+ * entraba en la cuenta y creció dos veces sin que nadie lo viera. Con nombre y en un solo
+ * sitio, las dos pruebas —la de la página y la de la página con medición— parten del
+ * mismo número, y subirlo es una decisión visible en el diff.
+ *
+ * No cuenta el `application/ld+json` de los datos estructurados: no es JavaScript
+ * ejecutable y el navegador no lo interpreta.
+ *
+ * Subido de 6144 a 6656 en la v2, por el motivo que la propia prueba de la Historia 2.1
+ * dejó previsto —«se sube cuando una isla nueva entra a propósito, no cuando algo engorda
+ * por su cuenta»—: la Historia 10.3 añadió una tercera isla, la de compartir enlace.
+ * Antes de subirlo se compactó el guion de medición, que pasó de 952 a 572 bytes; el tope
+ * nuevo deja unos 400 de margen, suficiente para no ir justo y poco para que un
+ * crecimiento futuro pase inadvertido.
+ */
+export const MAX_BYTES_DE_GUION = 6656;

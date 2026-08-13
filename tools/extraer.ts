@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeCita, slugLibre } from '../src/lib/slug.ts';
-import { aYaml, nombreDeFicheroDeCita, rutasDelCorpus } from './lib/corpus.ts';
+import { aYaml, leerCitas, nombreDeFicheroDeCita, rutasDelCorpus } from './lib/corpus.ts';
 import { extraerCandidatas, type DocumentoDeFuente } from './lib/extraccion.ts';
 import { opcion, raizDeCorpusDe } from './lib/cli.ts';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -50,9 +50,20 @@ if (!resultado.ok) {
 await mkdir(rutas.revision, { recursive: true });
 
 let escritas = 0;
-// Los slugs ya usados se acumulan durante la propia ejecución: dos sentencias que
-// empiecen igual producen la misma base, y sin esto la segunda pisaría a la primera.
-const ocupados = new Set<string>();
+
+/*
+ * Los slugs ocupados son los del corpus entero, no solo los de esta ejecución.
+ *
+ * Con el conjunto vacío, repetir la extracción de una obra —el gesto natural tras
+ * ajustar la ventana de longitud— sobrescribía las candidatas de la vez anterior,
+ * incluidas las ya revisadas a medias. Y una candidata cuyo slug coincidiera con el de
+ * una Cita publicada llegaba a la aprobación arrastrando una colisión que allí ya no
+ * puede pisar nada, pero que obliga a renombrar.
+ */
+const ocupados = new Set([
+  ...(await leerCitas(rutas.citas)).map((c) => c.slug),
+  ...(await leerCitas(rutas.revision)).map((c) => c.slug),
+]);
 
 for (const candidata of resultado.candidatas) {
   const slug = slugLibre(slugDeCita(autor, normalizar(candidata.texto)), ocupados);

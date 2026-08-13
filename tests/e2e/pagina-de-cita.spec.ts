@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 2.1 — Página de Cita.
@@ -142,6 +143,11 @@ test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
      *
      * Hoy son unos 4,8 KB sin comprimir de un HTML de 25 KB. El generador de verdad, que
      * son decenas de kilobytes, sigue fuera y solo se descarga al pulsar.
+     *
+     * El tope vive en `umbrales.ts` desde la v2 y no aquí: esta prueba mide la página
+     * **sin** medición configurada, y hay otra que la mide **con** ella. Con el número
+     * repetido en dos sitios, subir uno y olvidar el otro dejaba la segunda sin vigilar,
+     * que es exactamente cómo el guion creció sin que nadie lo viera.
      */
     const bytes = await page.evaluate(() =>
       [...document.querySelectorAll('script')]
@@ -150,7 +156,7 @@ test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
         .filter((s) => s.type !== 'application/ld+json')
         .reduce((n, s) => n + s.textContent!.length, 0),
     );
-    expect(bytes).toBeLessThan(6144);
+    expect(bytes).toBeLessThan(MAX_BYTES_DE_GUION);
   });
 
   test('el contenido no depende de que se ejecute JavaScript', async ({ browser }) => {

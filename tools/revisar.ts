@@ -46,6 +46,12 @@ if (aAprobar.length > 0) {
   lineas.push(`Publicadas: ${resultado.publicadas.length}`);
   for (const slug of resultado.publicadas) lineas.push(`  ✓ ${slug}`);
 
+  for (const cambio of resultado.renombradas) {
+    // El slug es la URL. Que cambie está bien —el ocupado no se pisa— pero enterarse
+    // después, no: quien aprueba tiene que poder anotarlo antes de compartir el enlace.
+    lineas.push(`  → ${cambio.de} se publicó como ${cambio.a}: el slug estaba ocupado.`);
+  }
+
   for (const rechazada of resultado.rechazadasPorAdmision) {
     // Aprobada por el editor y rechazada por la puerta: la puerta manda (AD-1).
     fallo = true;

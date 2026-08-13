@@ -118,6 +118,42 @@ describe('Historia 9.1 — las candidatas quedan en revisión, no publicadas', (
   });
 });
 
+describe('Retro épica 9 — repetir la extracción no pisa lo anterior', () => {
+  it('una segunda extracción de la misma obra convive con la primera', async () => {
+    /*
+     * Antes, `ocupados` empezaba vacío en cada ejecución: solo evitaba colisiones dentro
+     * de la misma. Repetir la extracción —lo natural tras ajustar la ventana de
+     * longitud— sobrescribía las candidatas anteriores, incluidas las ya revisadas.
+     */
+    const { corpus } = await corpusVacio();
+
+    await extraer(DOCUMENTO, corpus);
+    const primera = await readdir(join(corpus, '_revision'));
+    expect(primera.length).toBeGreaterThan(0);
+
+    await extraer(DOCUMENTO, corpus);
+    const segunda = await readdir(join(corpus, '_revision'));
+
+    // Ninguna de las primeras desapareció, y las nuevas llevan su propio nombre.
+    for (const fichero of primera) expect(segunda).toContain(fichero);
+    expect(segunda.length).toBe(primera.length * 2);
+  });
+
+  it('no reutiliza el slug de una Cita ya publicada', async () => {
+    const { corpus } = await corpusVacio();
+    await extraer(DOCUMENTO, corpus);
+
+    // Se publica una a mano y se vuelve a extraer: el slug publicado queda ocupado.
+    const [primera] = await readdir(join(corpus, '_revision'));
+    const { rename } = await import('node:fs/promises');
+    await rename(join(corpus, '_revision', primera), join(corpus, 'citas', primera));
+
+    await extraer(DOCUMENTO, corpus);
+    const enRevision = await readdir(join(corpus, '_revision'));
+    expect(enRevision).not.toContain(primera);
+  });
+});
+
 describe('Historia 9.1 — una licencia que no permite reutilizar no deja nada', () => {
   it('sale con error, explica por qué y el corpus queda intacto', async () => {
     const { corpus } = await corpusVacio();

@@ -13,15 +13,18 @@
  * Una candidata que la incumpla se queda donde está por muy aprobada que esté.
  */
 
-import { rm } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
-import { leerCitas, mover, type Rutas } from './corpus.ts';
+import { slugLibre } from '../../src/lib/slug.ts';
+import { leerCitas, mover, nombreDeFicheroDeCita, separarFrontmatter, type Rutas } from './corpus.ts';
 
 export interface CandidataEnRevision {
   slug: string;
   texto: string;
+  /** Slug del Autor: compone el nombre del fichero al publicar. */
+  autor: string;
   ruta: string;
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
@@ -58,6 +61,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
     lote.push({
       slug: candidata.slug,
       texto: candidata.texto,
+      autor: candidata.autor,
       ruta: candidata.ruta,
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
@@ -79,6 +83,14 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
 
 export interface ResultadoDeDecision {
   publicadas: string[];
+  /**
+   * Candidatas cuyo slug estaba ocupado y se publicaron con otro — nunca pisando.
+   *
+   * El sufijo se lo lleva la nueva y no la que ya estaba publicada: cambiarle el slug a
+   * la publicada rompería sus enlaces entrantes. Es la convención que fijó la Historia
+   * 1.5 para el alta por lote, y esta puerta no la heredaba.
+   */
+  renombradas: { de: string; a: string }[];
   /** Aprobadas que la puerta de admisión no deja pasar, con lo que les falta. */
   rechazadasPorAdmision: { slug: string; motivos: string[] }[];
   rechazadas: string[];
@@ -96,10 +108,15 @@ export async function aprobar(rutas: Rutas, slugs: string[]): Promise<ResultadoD
   const lote = await loteEnRevision(rutas);
   const resultado: ResultadoDeDecision = {
     publicadas: [],
+    renombradas: [],
     rechazadasPorAdmision: [],
     rechazadas: [],
     noEncontradas: [],
   };
+
+  // Los slugs que no se pueden pisar: los publicados, más los que esta misma ejecución
+  // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
+  const ocupados = new Set((await leerCitas(rutas.citas)).map((c) => c.slug));
 
   for (const slug of slugs) {
     const candidata = lote.find((c) => c.slug === slug);
@@ -113,11 +130,50 @@ export async function aprobar(rutas: Rutas, slugs: string[]): Promise<ResultadoD
       continue;
     }
 
-    await mover(candidata.ruta, rutas.citas);
+    const definitivo = slugLibre(candidata.slug, ocupados);
+    ocupados.add(definitivo);
+
+    if (definitivo === candidata.slug) {
+      await mover(candidata.ruta, rutas.citas);
+    } else {
+      await reescribirConSlug(candidata, definitivo, rutas);
+      resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+    }
+
     resultado.publicadas.push(slug);
   }
 
   return resultado;
+}
+
+/**
+ * Publica la candidata con otro slug, dejando fichero y frontmatter de acuerdo.
+ *
+ * Se reescribe el fichero en vez de renombrarlo a secas porque el slug vive en los dos
+ * sitios: en el nombre y dentro. Divergir haría que la URL y el contenido dejaran de
+ * corresponderse sin que nada fallara.
+ */
+async function reescribirConSlug(
+  candidata: CandidataEnRevision,
+  definitivo: string,
+  rutas: Rutas,
+): Promise<void> {
+  const bruto = await readFile(candidata.ruta, 'utf8');
+  const conNuevoSlug = bruto.replace(
+    /^slug:.*$/m,
+    `slug: ${JSON.stringify(definitivo)}`,
+  );
+
+  const { writeFile } = await import('node:fs/promises');
+  const destino = join(
+    rutas.citas,
+    `${nombreDeFicheroDeCita(candidata.autor, definitivo)}.md`,
+  );
+
+  // Se escribe el destino antes de borrar el origen: si algo falla en medio, la
+  // candidata sigue en revisión en lugar de haberse evaporado.
+  await writeFile(destino, conNuevoSlug, 'utf8');
+  await rm(candidata.ruta, { force: true });
 }
 
 /**
@@ -132,6 +188,7 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
   const lote = await loteEnRevision(rutas);
   const resultado: ResultadoDeDecision = {
     publicadas: [],
+    renombradas: [],
     rechazadasPorAdmision: [],
     rechazadas: [],
     noEncontradas: [],

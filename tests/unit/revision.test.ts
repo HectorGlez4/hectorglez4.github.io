@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aprobar, loteEnRevision, rechazar } from '../../tools/lib/revision.ts';
-import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { nombreDeFicheroDeCita, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
 
 /** Historia 9.2 — aprobación por lote. */
 
@@ -59,7 +59,10 @@ async function corpusCon(
     await writeFile(join(rutas.revision, `${candidata.slug}.md`), ficheroDeCita(candidata), 'utf8');
   }
   for (const cita of publicadas) {
-    await writeFile(join(rutas.citas, `${cita.slug}.md`), ficheroDeCita(cita), 'utf8');
+    // Con el nombre canónico de la espina, `{slug-autor}--{fragmento}.md`: el corpus real
+    // se llama así, y una prueba que use otro nombre no comprueba lo que ocurre de verdad.
+    const nombre = nombreDeFicheroDeCita(String(cita.autor), String(cita.slug));
+    await writeFile(join(rutas.citas, `${nombre}.md`), ficheroDeCita(cita), 'utf8');
   }
   return rutas;
 }
@@ -106,6 +109,107 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
     const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug as string, 'seneca-otra']);
     expect(resultado.publicadas).toHaveLength(2);
     expect(await readdir(rutas.revision)).toHaveLength(0);
+  });
+});
+
+describe('Retro épica 9 — aprobar nunca sobrescribe una Cita publicada', () => {
+  /*
+   * El slug de una Cita sale del Autor y de sus primeras palabras, así que dos Citas
+   * distintas del mismo Autor que empiezan igual generan el mismo. La detección de
+   * duplicados compara texto normalizado, no slug, y no lo ve. Antes de este arreglo,
+   * aprobar la segunda hacía `rename()` sobre la primera y la Cita publicada
+   * desaparecía sin decir nada, con su URL sirviendo otro texto.
+   */
+  const PUBLICADA = {
+    ...CANDIDATA_COMPLETA,
+    texto: 'No es que tengamos poco tiempo, es que perdemos una parte enorme de él.',
+    slug: 'seneca-no-es-que-tengamos-poco-tiempo',
+  };
+  const CANDIDATA_QUE_COLISIONA = {
+    ...CANDIDATA_COMPLETA,
+    texto: 'No es que tengamos poco tiempo, es que lo perdemos casi todo sin verlo.',
+    slug: 'seneca-no-es-que-tengamos-poco-tiempo',
+  };
+
+  it('la Cita publicada sobrevive, con su texto intacto', async () => {
+    const rutas = await corpusCon([CANDIDATA_QUE_COLISIONA], [PUBLICADA]);
+    await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
+
+    const { readFile } = await import('node:fs/promises');
+    const publicadas = await readdir(rutas.citas);
+    const textos = await Promise.all(
+      publicadas.map((f) => readFile(join(rutas.citas, f), 'utf8')),
+    );
+    expect(textos.some((t) => t.includes(PUBLICADA.texto)), 'la publicada se perdió').toBe(true);
+  });
+
+  it('la candidata se publica con un slug libre, no pisando el ocupado', async () => {
+    const rutas = await corpusCon([CANDIDATA_QUE_COLISIONA], [PUBLICADA]);
+    const resultado = await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
+
+    // Las dos quedan publicadas: ninguna se pierde y ninguna se rechaza.
+    expect(await readdir(rutas.citas)).toHaveLength(2);
+    expect(resultado.publicadas).toHaveLength(1);
+    expect(resultado.renombradas).toEqual([
+      { de: 'seneca-no-es-que-tengamos-poco-tiempo', a: 'seneca-no-es-que-tengamos-poco-tiempo-2' },
+    ]);
+  });
+
+  it('el slug del fichero y el del frontmatter no divergen', async () => {
+    const rutas = await corpusCon([CANDIDATA_QUE_COLISIONA], [PUBLICADA]);
+    await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
+
+    const { readFile } = await import('node:fs/promises');
+    for (const fichero of await readdir(rutas.citas)) {
+      const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
+      const slug = contenido.match(/slug: "([^"]+)"/)![1];
+      // `{slug-autor}--{fragmento}.md` frente a `{slug-autor}-{fragmento}`.
+      expect(fichero).toBe(`${slug.replace('seneca-', 'seneca--')}.md`);
+    }
+  });
+
+  it('la URL que ya existía no cambia: el sufijo se lo lleva la nueva', async () => {
+    // Cambiar la de la Cita publicada rompería enlaces entrantes. Es la misma
+    // convención que fijó la Historia 1.5 para el alta por lote.
+    const rutas = await corpusCon([CANDIDATA_QUE_COLISIONA], [PUBLICADA]);
+    await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
+
+    const { readFile } = await import('node:fs/promises');
+    const contenido = await readFile(
+      join(rutas.citas, 'seneca--no-es-que-tengamos-poco-tiempo.md'),
+      'utf8',
+    );
+    expect(contenido).toContain(PUBLICADA.texto);
+  });
+
+  it('sin colisión no se renombra nada', async () => {
+    const rutas = await corpusCon([CANDIDATA_COMPLETA]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug as string]);
+    expect(resultado.renombradas).toEqual([]);
+  });
+});
+
+describe('Retro épica 9 — el punto de escritura no admite sobrescribir', () => {
+  it('mover() se niega cuando el destino ya existe', async () => {
+    /*
+     * Es el cuello de botella de toda escritura en corpus/citas/. Que falle aquí es lo
+     * que hace que la próxima puerta nueva herede la salvaguarda sin acordarse de ella.
+     */
+    const { mover } = await import('../../tools/lib/corpus.ts');
+    const rutas = await corpusCon([CANDIDATA_COMPLETA]);
+    const origen = join(rutas.revision, `${CANDIDATA_COMPLETA.slug}.md`);
+
+    // La colisión se construye por nombre de fichero, que es lo que `mover` mira.
+    await writeFile(join(rutas.citas, `${CANDIDATA_COMPLETA.slug}.md`), 'ya estaba aquí', 'utf8');
+
+    await expect(mover(origen, rutas.citas)).rejects.toThrow(/ya existe/i);
+    // Y lo que había en el destino sigue intacto.
+    const { readFile } = await import('node:fs/promises');
+    expect(await readFile(join(rutas.citas, `${CANDIDATA_COMPLETA.slug}.md`), 'utf8')).toBe(
+      'ya estaba aquí',
+    );
+    // Y el origen sigue donde estaba: un fallo no puede perder el fichero.
+    expect(existsSync(origen)).toBe(true);
   });
 });
 

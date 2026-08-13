@@ -17,7 +17,7 @@
  * AD-5 — Derivación pura: aquí no se emite nada, solo se decide qué y cómo.
  */
 
-import { DESTINOS_VALIDOS } from './compartir.ts';
+import { DESTINOS_VALIDOS } from './destinos.ts';
 import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS } from './redes.ts';
 
 /**
@@ -84,28 +84,28 @@ export function puntoFinal(entorno: Record<string, string | undefined>): string 
  * algo que identifique a quien pulsó el enlace— y la medición lo registraría sin más.
  */
 export function guionDeMedicion(url: string): string {
-  return `
-window.__medir = function (evento, datos, destino) {
-  var permitidos = ${JSON.stringify(EVENTOS_VALIDOS)};
-  if (permitidos.indexOf(evento) === -1) return;
-  try {
-    var redes = ${JSON.stringify(REDES_VALIDAS)};
-    var destinos = ${JSON.stringify(DESTINOS_VALIDOS)};
-    var marca = new URLSearchParams(location.search).get(${JSON.stringify(PARAMETRO_DE_ORIGEN)});
-    var origen = redes.indexOf(marca) === -1 ? null : marca;
-    var adonde = destinos.indexOf(destino) === -1 ? null : destino;
-    var carga = JSON.stringify({
-      evento: evento,
-      ruta: location.pathname,
-      origen: origen,
-      destino: adonde,
-      datos: datos || null
-    });
-    if (navigator.sendBeacon) navigator.sendBeacon(${JSON.stringify(url)}, carga);
-  } catch (e) {
-    // La medición nunca puede romper la página: si falla, se pierde el evento y ya.
-  }
-};`.trim();
+  /*
+   * Se emite compacto —nombres cortos, sin sangrado— porque este texto **es** lo que se
+   * sirve: va en línea en toda página y cuenta contra `MAX_BYTES_DE_GUION`. Lo legible
+   * es esta función y sus comentarios, que no viajan a ninguna parte.
+   */
+  const e = JSON.stringify(EVENTOS_VALIDOS);
+  const r = JSON.stringify(REDES_VALIDAS);
+  const d = JSON.stringify(DESTINOS_VALIDOS);
+  const p = JSON.stringify(PARAMETRO_DE_ORIGEN);
+
+  return (
+    `window.__medir=function(v,t,z){` +
+    `if(${e}.indexOf(v)<0)return;` +
+    `try{` +
+    `var m=new URLSearchParams(location.search).get(${p});` +
+    `var o=${r}.indexOf(m)<0?null:m;` +
+    `var w=${d}.indexOf(z)<0?null:z;` +
+    `var c=JSON.stringify({evento:v,ruta:location.pathname,origen:o,destino:w,datos:t||null});` +
+    `if(navigator.sendBeacon)navigator.sendBeacon(${JSON.stringify(url)},c);` +
+    `}catch(x){}` +
+    `};`
+  );
 }
 
 /**

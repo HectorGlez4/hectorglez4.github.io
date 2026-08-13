@@ -12,7 +12,7 @@
  */
 import { esEventoValido, EVENTOS, type Evento } from '../src/lib/medicion.ts';
 import { esRedValida, type Red } from '../src/lib/redes.ts';
-import { esDestinoValido } from '../src/lib/compartir.ts';
+import { esDestinoValido } from '../src/lib/destinos.ts';
 
 /**
  * Una fila registrada. Es todo lo que se guarda, y está escrito como tipo a propósito:
@@ -94,9 +94,20 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
   // evento por ello: la visita ocurrió, y perderla falsearía el recuento de la jornada.
   const cuenta = typeof origen === 'string' && esRedValida(origen) ? origen : null;
 
-  // Mismo criterio que el origen: fuera del conjunto cerrado no se registra, y el evento
-  // se registra igual. Un destino inventado no puede volver la carga libre.
-  const adonde = typeof destino === 'string' && esDestinoValido(destino) ? destino : null;
+  /*
+   * El destino solo significa algo en una compartición, igual que la consulta solo
+   * significa algo en una búsqueda sin resultados. En cualquier otro evento se descarta
+   * el campo —no el evento—: dejarlo pasar permitía que una `vista-de-cita` llegara con
+   * destino y que una consulta que agrupara solo por destino contara comparticiones que
+   * nunca ocurrieron.
+   *
+   * Fuera del conjunto cerrado tampoco se registra. Un destino inventado no puede
+   * convertir esta columna en carga libre.
+   */
+  const esComparticion =
+    evento === EVENTOS.comparticionDeImagen || evento === EVENTOS.comparticionDeEnlace;
+  const adonde =
+    esComparticion && typeof destino === 'string' && esDestinoValido(destino) ? destino : null;
 
   return { jornada: jornadaDe(instante), evento, ruta, origen: cuenta, destino: adonde, consulta };
 }
