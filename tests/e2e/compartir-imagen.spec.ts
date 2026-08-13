@@ -173,7 +173,16 @@ test.describe('Historia 10.2 — el mismo fichero por los dos caminos', () => {
 
     // Se generan los dos blobs desde el mismo lienzo, con el módulo de verdad.
     const iguales = await page.evaluate(async () => {
-      const g = await import('/islas/imagen.js');
+      // La isla se pide por su URL del sitio, que es como la carga el navegador de verdad.
+      // El especificador va en una constante y no escrito ahí mismo a propósito: literal,
+      // TypeScript lo leería como una ruta de disco desde la raíz del sistema y no
+      // encontraría nada — `/islas/imagen.js` solo existe una vez servido el sitio.
+      //
+      // Los tipos entran por la anotación, leídos del fichero real (`allowJs` está activo
+      // en la base de Astro). Así el contrato de la isla no se escribe dos veces: si
+      // `imagen.js` cambia una firma, esta prueba deja de compilar sola.
+      const RUTA_ISLA = '/islas/imagen.js';
+      const g: typeof import('../../public/islas/imagen.js') = await import(RUTA_ISLA);
       const lienzo = document.querySelector('[data-lienzo]') as HTMLCanvasElement;
       const uno = await g.aBlob(lienzo);
       const otro = await g.aBlob(lienzo);

@@ -12,6 +12,28 @@
  */
 import { interpretar } from './receptor.ts';
 
+/**
+ * El trozo de D1 que este adaptador usa, y solo ese.
+ *
+ * La alternativa era `@cloudflare/workers-types`, y se probó: trae los globales enteros de
+ * `workerd` al chequeo del sitio —que abarca todo el repositorio— y ahí `Buffer` deja de
+ * ser el de Node. Cuatro pruebas que leen cabeceras PNG con `readUInt32BE` pasaron a no
+ * compilar sin que nadie hubiera tocado una línea suya. Dos runtimes con globales
+ * incompatibles no caben en un mismo programa de TypeScript.
+ *
+ * Declarar la superficie que se toca —`prepare`, `bind`, `run`— la deja verificada sin
+ * importar nada más. Si el receptor pasa a necesitar `all()` o `first()`, esto no
+ * compilará, que es justo cuando conviene volver a mirar esta decisión.
+ */
+interface SentenciaD1 {
+  bind(...valores: unknown[]): SentenciaD1;
+  run(): Promise<unknown>;
+}
+
+interface D1Database {
+  prepare(sql: string): SentenciaD1;
+}
+
 interface Entorno {
   MEDICION: D1Database;
 }
