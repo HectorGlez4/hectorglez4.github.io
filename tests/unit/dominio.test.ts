@@ -13,7 +13,7 @@ describe('Historia 7.1 — el dominio tiene un dueño', () => {
     // GitHub Pages pierde el dominio propio si el artefacto desplegado no trae CNAME.
     // Está en `public/`, así que Astro lo copia a `dist/` en cada build — incluida la
     // reconstrucción diaria de AD-12, que es lo que el último criterio comprueba.
-    expect(leer('public/CNAME').trim()).toBe('sabiduriadebolsillo.com');
+    expect(leer('public/CNAME').trim()).toBe('sabiduriadebolsillo.net');
   });
 
   it('el módulo lo lee de ese mismo fichero, no de una copia', () => {

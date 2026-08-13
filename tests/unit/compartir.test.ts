@@ -18,7 +18,7 @@ const CITA = {
 } as unknown as Cita;
 
 const AUTOR = { slug: 'seneca', nombre: 'Séneca' } as unknown as Autor;
-const URL_CITA = 'https://sabiduriadebolsillo.com/cita/seneca-una';
+const URL_CITA = 'https://sabiduriadebolsillo.net/cita/seneca-una';
 
 describe('Historia 10.3 — el texto propuesto', () => {
   const texto = textoParaCompartir(CITA, AUTOR);

@@ -10,7 +10,7 @@ mano**, con el detalle suficiente para repetirlo si hubiera que rehacerlo.
 
 Hecho en el repositorio:
 
-- `public/CNAME` declara `sabiduriadebolsillo.com`. Astro copia `public/` a `dist/` en
+- `public/CNAME` declara `sabiduriadebolsillo.net`. Astro copia `public/` a `dist/` en
   cada build, así que el fichero viaja en todos los despliegues, incluida la
   reconstrucción diaria. No hay ningún paso del flujo que lo escriba: si lo hubiera,
   sería algo de lo que acordarse.
@@ -22,24 +22,30 @@ Hecho en el repositorio:
 
 A mano, una vez (necesita la cuenta del registrador y la del repositorio):
 
-1. En el registrador de `sabiduriadebolsillo.com`, apuntar el ápice a GitHub Pages con
+1. En el registrador de `sabiduriadebolsillo.net`, apuntar el ápice a GitHub Pages con
    cuatro registros `A`: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`,
    `185.199.111.153`. Y `www` como `CNAME` a `<usuario>.github.io.`.
-2. En **Settings → Pages** del repositorio, escribir `sabiduriadebolsillo.com` en *Custom
+2. En **Settings → Pages** del repositorio, escribir `sabiduriadebolsillo.net` en *Custom
    domain* y esperar a que la comprobación pase.
 3. Marcar **Enforce HTTPS** cuando GitHub termine de emitir el certificado (tarda desde
    unos minutos hasta 24 h desde que el DNS propaga).
 4. En **Settings → Secrets and variables → Actions → Variables**, definir `SITE_URL` con
-   el valor `https://sabiduriadebolsillo.com`.
+   el valor `https://sabiduriadebolsillo.net`.
 
 Con el ápice como dominio propio, GitHub Pages redirige `www` al ápice por su cuenta; no
 hay nada que configurar en el sitio para eso.
 
+El dominio es `.net`. No afecta al posicionamiento —los gTLD se tratan por igual—, pero sí
+al reconocimiento: si el `.com` sigue libre, conviene registrarlo y redirigirlo desde el
+registrador al `.net`, para que nadie se instale ahí con este nombre. Esa redirección se
+hace en el registrador y **no** en el sitio: una segunda entrada en `public/CNAME` no es
+posible, y GitHub Pages sirve un solo dominio propio.
+
 Cómo comprobar que quedó bien, sin entrar en ningún panel:
 
 ```bash
-curl -sI https://sabiduriadebolsillo.com | head -1
-curl -sI https://www.sabiduriadebolsillo.com | head -1   # 301 hacia el ápice
+curl -sI https://sabiduriadebolsillo.net | head -1
+curl -sI https://www.sabiduriadebolsillo.net | head -1   # 301 hacia el ápice
 ```
 
 ## 2. Search Console — Historia 7.2 (LC-2, LC-3)
@@ -47,7 +53,7 @@ curl -sI https://www.sabiduriadebolsillo.com | head -1   # 301 hacia el ápice
 Hecho en el repositorio:
 
 - `/robots.txt` lo sirve `src/pages/robots.txt.ts` y declara
-  `https://sabiduriadebolsillo.com/sitemap-index.xml`. La URL sale del mismo módulo de
+  `https://sabiduriadebolsillo.net/sitemap-index.xml`. La URL sale del mismo módulo de
   dominio que las canónicas, así que un cambio de dominio no puede dejarla apuntando al
   anterior.
 - No lleva ningún `Disallow`. Lo que no debe indexarse lo dice cada página en su etiqueta
@@ -58,7 +64,7 @@ Hecho en el repositorio:
 A mano, una vez (necesita la cuenta de Google y la del registrador):
 
 1. En [Search Console](https://search.google.com/search-console), **Agregar propiedad →
-   Dominio** y escribir `sabiduriadebolsillo.com`.
+   Dominio** y escribir `sabiduriadebolsillo.net`.
 
    Se elige propiedad de **dominio**, no de prefijo de URL: cubre de una vez el ápice, el
    `www`, `http` y `https`. Con prefijo de URL harían falta cuatro propiedades y las
@@ -78,8 +84,8 @@ A mano, una vez (necesita la cuenta de Google y la del registrador):
 Cómo repetirlo o comprobarlo desde fuera:
 
 ```bash
-dig +short TXT sabiduriadebolsillo.com | grep google-site-verification
-curl -s https://sabiduriadebolsillo.com/robots.txt
+dig +short TXT sabiduriadebolsillo.net | grep google-site-verification
+curl -s https://sabiduriadebolsillo.net/robots.txt
 ```
 
 La alternativa —subir el fichero HTML de verificación a `public/`— también funciona con
