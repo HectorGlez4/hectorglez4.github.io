@@ -93,3 +93,42 @@ La v2 se planteó explícitamente extraer de un sitio de citas existente. Se des
 **Fuentes admitidas.** Wikisource en español, Biblioteca Virtual Miguel de Cervantes, Project Gutenberg y Wikiquote en español restringido a sus entradas con referencia. Las tres primeras dan obra y edición; la cuarta obliga a atribuir y compartir bajo la misma licencia, lo que Arquitectura debe resolver antes de usarla.
 
 **Uso legítimo de la competencia.** Consultar qué Autores y Temas concentran demanda es investigación de mercado y sirve para priorizar a quién se dedica cada sesión de sembrado. Es una lectura, no una extracción, y no toca el Corpus.
+
+
+---
+
+# Addendum de la v3
+
+## Monetización — opciones consideradas y por qué esos umbrales
+
+Los cuatro Modelos se evaluaron por **coste sobre el producto**, no por ingreso esperado. La razón es que el ingreso de los cuatro es igualmente desconocido con 38 Citas y cero tráfico medido, así que ordenarlos por una cifra inventada habría sido falsa precisión; el coste, en cambio, sí se conoce hoy.
+
+| Modelo | Coste de implementación | Coste sobre la experiencia | Reversible |
+|---|---|---|---|
+| Donaciones | Un enlace | Ninguno | Sí, sin rastro |
+| Afiliación | Enlace derivado de la Procedencia ya publicada | Bajo; convierte procedencia en superficie comercial | Sí |
+| Producto propio | Alto, y sin definir | Ninguno sobre las páginas públicas | Sí, pero con inventario ya producido |
+| Publicidad | Medio (integración de tercero) | **Alto** — el único que degrada páginas existentes | Sí, pero deja al visitante con la impresión ya formada |
+
+**Anclaje de los umbrales.** Tres de los cuatro se anclan a cifras que el PRD ya se había comprometido en SM-2 (2.000 como primer volumen significativo; 5.000 = meta al mes 6; 25.000 = meta al mes 12). Esto es deliberado: usar metas preexistentes impide fabricar umbrales a medida de la impaciencia. Si SM-2 se revisa alguna vez, los umbrales se revisan con ella y no por separado.
+
+**Descartado: muro blando o límite de lecturas.** Se descartó sin discusión por NFR-10, que no admite excepción. Un producto cuyo mecanismo de crecimiento es el tráfico orgánico no puede poner una puerta delante del contenido que ese tráfico viene a leer.
+
+**Descartado: reservar espacio publicitario desde ya.** La regla de la v1 lo prohíbe explícitamente («no debe crear obstáculos... pero tampoco reservarle espacio»), y sigue siendo correcta: un hueco esperando anuncios es un anuncio de que vendrán.
+
+## Decisiones de mecanismo — v3
+
+- **Motor de vídeo (FR-31).** Sin decidir: composición temporal, audio o su ausencia, duración, formato de salida por red. Es la única pieza de la v3 que introduce una dependencia de cómputo nueva, y §6.3 la había descartado en la v2 con un argumento que sigue en pie. Su umbral (ninguna evidencia de SM-8, ningún motor) existe para que Arquitectura no gaste tiempo en ella antes de que haya señal.
+- **Composición por lote (FR-29).** Dónde vive el material compuesto por adelantado y cómo se reconcilia con la reconstrucción diaria de AD-12. La restricción de producto es que lo anticipado sustituya a lo de la jornada cuando ambos existan; el mecanismo es de Arquitectura.
+- **Modelo de la Colección (FR-26…FR-28).** Si la pertenencia se declara en la Cita o en la Colección. El PRD exige que añadir una Colección no toque ninguna Cita existente, lo que apunta a lo segundo, pero la elección es de Arquitectura y toca AD-4 (slug inmutable) solo si alguien propusiera meter la Colección en la ruta de la Cita — cosa que FR-28 prohíbe.
+- **Integración publicitaria (FR-37).** Qué proveedor y por qué transporte. La restricción dura es NFR-11: un proveedor que exija consentimiento invasivo o identifique al visitante no cumple FR-37 y no se enciende, por rentable que sea. Esto excluye de partida a buena parte del mercado y conviene saberlo antes de evaluar.
+
+## Por qué SM-C2 se extendió en vez de crear una contra-métrica de Colecciones
+
+Una contra-métrica frena cuando la cifra que vigila es una sola y duele mirarla. Las Colecciones y los Temas fallan del mismo modo —agregación con poco dentro— y repartir esa vigilancia en dos métricas habría permitido justificar cada una con la otra («los Temas están densos, aunque las Colecciones no»). Una sola mediana sobre las dos superficies no admite esa salida.
+
+## Deuda conocida que entra a propósito en la v3
+
+- **FR-31 (vídeo) entra sin evidencia que lo respalde.** Registrado como el supuesto peor sostenido del documento (§15) y como candidato preferente al recorte. Se acepta a sabiendas.
+- **El producto propio (FR-36) tiene umbral sin contenido.** Es deuda deliberada: definirlo ahora contradiría la propia regla de §12.
+- **La v3 planifica en paralelo al desbloqueo de LC-1…LC-4.** El riesgo real no es de construcción sino de publicación, y la puerta de activación reescrita en §6.3 es lo que lo contiene. Si esa puerta se salta, la v3 repite el error de la v2 con más superficie en juego.

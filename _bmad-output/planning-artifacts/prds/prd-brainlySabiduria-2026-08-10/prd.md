@@ -2,7 +2,7 @@
 title: Sabiduría de Bolsillo
 status: final
 created: 2026-08-10
-updated: 2026-08-11
+updated: 2026-08-17
 ---
 
 # PRD: Sabiduría de Bolsillo
@@ -79,8 +79,18 @@ Los flujos aguas abajo deben usar estos términos exactamente. Introducir un sin
 - **Hoja del Sistema** — Selector de aplicaciones que ofrece el sistema operativo del visitante al compartir. Es el único camino hacia las redes que no admiten compartición desde la web.
 - **Kit Diario** — Material de publicación que el sistema deja compuesto cada jornada para las cuentas propias: la Imagen de la Cita del Día, su pie con atribución y su enlace marcado por red. Superficie interna, no indexable.
 - **Fuente** — Origen documental del que se extrae una Cita candidata durante el sembrado: una obra concreta en una edición concreta. Distinta de la Procedencia, que es lo que la Cita publica; la Fuente es de dónde lo sacó el editor y bajo qué licencia.
+- **Colección** *(v3)* — Agrupación editorial de Citas escogidas por un criterio que no es el Autor ni el Tema («frases cortas», «para dedicar», «para empezar el año»). Transversal a ambos: una Cita puede estar en varias Colecciones sin que cambie su Tema ni su Autor. Tiene página propia indexable y umbral mínimo de publicación, como el Tema. A diferencia del Tema, su criterio es editorial y su conjunto es abierto.
+- **Pieza de Canal** *(v3)* — Unidad publicable en una cuenta propia. La v2 producía una sola por jornada (la Imagen de la Cita del Día, dentro del Kit Diario); la v3 admite además piezas de varias Citas y piezas en movimiento. Es material de salida, nunca una superficie indexable.
+- **Modelo de Ingreso** *(v3)* — Una de las cuatro vías por las que el producto puede producir ingreso: donaciones, afiliación de libros, producto propio o publicidad. Cada uno tiene su Umbral de Activación.
+- **Umbral de Activación** *(v3)* — Cifra de tráfico orgánico medido por encima de la cual un Modelo de Ingreso puede encenderse. Se mide en el receptor de LC-4. Por debajo del umbral, el Modelo está diseñado pero apagado.
 
 ## 4. Features
+
+Catorce features repartidas en tres rondas. La etiqueta de versión va también en cada encabezado:
+
+- **v1 — §4.1…§4.8.** El producto: las cuatro superficies públicas, la búsqueda, la Imagen de Cita y la herramienta de curación.
+- **v2 — §4.9…§4.11.** Ponerlo delante de personas: compartición, canal propio y sembrado del Corpus.
+- **v3 — §4.12…§4.14.** Que crezca y se sostenga: Colecciones, ampliación del canal y monetización por umbral.
 
 ### 4.1 Página de Cita
 
@@ -428,6 +438,167 @@ El editor puede ver qué falta antes de decidir a qué Autor dedica la sesión. 
 - Se muestra la proporción de Autores de tradición latinoamericana frente al suelo del 40 % de §6.1.
 - La vista no propone Autores automáticamente: informa la decisión del editor, no la sustituye.
 
+### 4.12 Colecciones Curadas *(v3)*
+
+**Descripción:** Superficie de agregación editorial que cruza Tema y Autor. Existe porque las cuatro superficies de §10 dejan un hueco: la consulta real de un visitante rara vez es «frases de Séneca» o «frases sobre el tiempo» — es «frases cortas para reflexionar», «frases para dedicar a una madre», «frases para empezar el año». Ninguna de esas es un Autor ni pertenece al conjunto cerrado de Temas, así que hoy no tiene dónde aterrizar y el tráfico se va a quien sí les ha hecho una página.
+
+**Por qué el conjunto es abierto y el de Temas cerrado.** El Tema clasifica la Cita y por eso debe ser estable: cambiarlo reordena el Corpus entero. La Colección no clasifica, escoge — su criterio es editorial, responde a cómo se busca, y crear una nueva no toca ninguna Cita existente. Son dos mecanismos distintos que se parecen, y confundirlos rompería FR-6.
+
+**El riesgo que esta feature introduce, y su freno.** La vía barata de multiplicar páginas indexables es fabricar Colecciones de cinco Citas. Es exactamente el defecto que SM-C2 vigila en los Temas, y por eso la Colección hereda un umbral mínimo propio en vez de nacer libre.
+
+**Requisitos Funcionales:**
+
+#### FR-26: Página de Colección indexable
+
+Toda Colección publicada tiene URL propia, legible y estable, con las Citas que la componen.
+
+**Consecuencias (verificables):**
+- Una Colección con menos Citas que su umbral mínimo no se publica ni entra en el sitemap.
+- La Página de Colección es rastreable e indexable, con canónica propia, y cumple NFR-1…NFR-5 como las otras superficies.
+- Toda Colección publicada es alcanzable por enlaces internos desde la portada.
+- Retirar una Cita del Corpus la retira de todas sus Colecciones sin dejar hueco ni enlace roto.
+
+#### FR-27: Curación de una Colección
+
+El editor crea una Colección, le da criterio y nombre, y le asigna Citas ya publicadas.
+
+**Consecuencias (verificables):**
+- Una Colección solo admite Citas en estado `publicada`; no es una vía para adelantar contenido en revisión.
+- Una Cita puede pertenecer a varias Colecciones sin que cambien sus Temas ni su Autor.
+- El editor ve cuántas Citas le faltan a una Colección para alcanzar su umbral, como en FR-25.
+- Una Colección se despublica sin borrar ninguna Cita.
+
+#### FR-28: La Colección no compite con la Cita
+
+La Colección agrega y enlaza; no reproduce el producto en otra URL.
+
+**Consecuencias (verificables):**
+- La canónica de cada Cita sigue siendo su Página de Cita, nunca la Colección que la contiene.
+- Una Cita presente en varias Colecciones no genera contenido duplicado indexable.
+- La Página de Colección enlaza a cada Página de Cita; no es un destino terminal.
+- El texto editorial de la Colección describe el criterio; no comenta ni adjetiva las Citas, por §11.
+
+---
+
+### 4.13 Ampliación del Canal Propio *(v3)*
+
+**Descripción:** El Kit Diario de §4.10 compone una pieza por jornada y exige presencia diaria de Héctor. La v3 ataca las dos limitaciones que eso impone: que solo hay un formato, y que olvidar un día es perder ese día.
+
+**Sobre el vídeo, que la v2 dejó fuera a propósito.** §6.3 lo excluyó con este argumento: *«el vídeo exige un motor propio —composición temporal, audio, duración— que no es una historia sino un producto»*. Ese argumento sigue siendo cierto y nada lo ha invalidado. Entra en la v3 por decisión explícita de Héctor, con la advertencia registrada: es la pieza más cara del alcance, la única que exige una decisión de arquitectura nueva, y la candidata preferente al recorte si la v3 se pasa de tamaño. Lleva por eso su propio umbral (FR-31).
+
+**Requisitos Funcionales:**
+
+#### FR-29: Composición anticipada por lote
+
+El editor compone varias jornadas de material de una sola sentada.
+
+**Consecuencias (verificables):**
+- El material compuesto por adelantado es indistinguible del que compone la jornada, y lo sustituye si ambos existen.
+- Cambiar la Cita del Día de una jornada ya compuesta recompone su material, no lo deja obsoleto.
+- El lote es reanudable, como en FR-24.
+- La superficie del lote no es indexable ni enlazada, igual que el Kit Diario.
+
+#### FR-30: Pieza de varias Citas
+
+El sistema compone una Pieza de Canal que reúne varias Citas, no una sola.
+
+**Consecuencias (verificables):**
+- Cada Cita de la pieza conserva su atribución visible; ninguna aparece sin Autor.
+- Una Cita que no admite Imagen por el límite de FR-10 tampoco entra en una pieza de varias.
+- La pieza declara un único enlace de destino, marcado por red según FR-22.
+- La plantilla no altera el texto de ninguna Cita, por NFR-12.
+
+#### FR-31: Pieza en movimiento
+
+El sistema compone una Pieza de Canal con duración, para las redes que la exigen.
+
+**Umbral de construcción:** esta feature no se construye hasta que SM-8 demuestre que al menos una cuenta de imagen fija trae visitas medibles. Sin esa señal, el motor de vídeo es coste sin evidencia.
+
+**Consecuencias (verificables):**
+- La pieza se compone sin intervención manual una vez elegidas las Citas.
+- El texto de cada Cita permanece en pantalla el tiempo necesario para leerlo; no se recorta ni se acelera para caber.
+- La atribución acompaña a cada Cita mientras esta se muestra, no solo al final.
+
+#### FR-32: Pieza derivada de una Colección
+
+Una Colección publicada produce su propia Pieza de Canal.
+
+**Consecuencias (verificables):**
+- La pieza enlaza a la Página de Colección, no a una Cita suelta.
+- Una Colección por debajo de su umbral no produce pieza: no se anuncia lo que no está publicado.
+- La pieza respeta las mismas reglas de atribución de FR-30.
+
+---
+
+### 4.14 Monetización por Umbral *(v3)*
+
+**Descripción:** Cuatro Modelos de Ingreso diseñados ahora y encendidos por separado, cada uno cuando el tráfico medido cruce su Umbral de Activación. La regla que la v1 se dio —*«la decisión se toma con datos de tráfico»*— se conserva íntegra: lo que la v3 adelanta es el diseño, no el cobro.
+
+**Por qué umbrales y no una fecha.** Un calendario monetiza un sitio que quizá no tenga visitantes; un umbral solo se cruza si los hay. Además convierte cada Modelo en una decisión reversible: si el tráfico baja del umbral, el Modelo se apaga sin haber comprometido el diseño del producto.
+
+**La restricción que gobierna toda la sección.** NFR-10 (sin muro de entrada) tiene prioridad sobre cualquier Modelo de Ingreso, y §11 identifica «publicidad intercalada en el contenido» como anti-referencia declarada del producto. Ningún Modelo puede tocar la Página de Cita, que es el punto de entrada real desde buscadores y la superficie donde el producto cumple su promesa.
+
+**Requisitos Funcionales:**
+
+#### FR-33: Activación por umbral medido
+
+Ningún Modelo de Ingreso se enciende antes de que su Umbral de Activación se mida en el receptor de LC-4.
+
+**Consecuencias (verificables):**
+- El umbral se comprueba contra tráfico orgánico medido, no estimado ni proyectado.
+- Cada Modelo se enciende y se apaga por separado, sin afectar a los demás.
+- Un Modelo apagado no deja hueco reservado ni espacio en blanco en ninguna superficie, por §12.
+- El estado de cada Modelo (activo o apagado, y contra qué cifra) es consultable sin exportar datos, como en FR-16.
+
+#### FR-34: Donaciones
+
+El visitante que quiere sostener el sitio encuentra cómo, sin que se le pida.
+
+**Umbral de Activación:** desde que LC-1…LC-4 estén verificadas. Es un enlace; su coste es cero.
+
+**Consecuencias (verificables):**
+- La invitación no aparece en la Página de Cita ni interrumpe ninguna lectura.
+- No introduce JavaScript de terceros en ninguna superficie pública.
+- Rechazar o ignorar la invitación no degrada ninguna funcionalidad.
+
+#### FR-35: Afiliación de libros
+
+La Procedencia de una Cita puede llevar a la edición de la que salió.
+
+**Umbral de Activación:** 2.000 sesiones orgánicas/mes.
+
+**Consecuencias (verificables):**
+- El enlace sale de la Procedencia ya publicada (FR-2); no se inventa una obra para poder enlazar.
+- Una Cita sin Procedencia completa no produce enlace de afiliación, nunca uno aproximado.
+- La relación comercial se declara donde el enlace aparece.
+- La atribución y la Procedencia se leen igual con el Modelo apagado que encendido.
+
+#### FR-36: Producto propio
+
+El Corpus verificado sostiene algo que se vende una vez, no por visita.
+
+**Umbral de Activación:** 5.000 sesiones orgánicas/mes — la meta de SM-2 al mes 6.
+
+**Consecuencias (verificables):**
+- **Definición diferida.** Los candidatos son láminas de alta resolución sin marca (reutilizando FR-10 y FR-11), una antología en PDF apoyada en la Procedencia verificada, o un producto de recurrencia sobre la Cita del Día. La elección se toma cuando el umbral se acerque, no ahora. Registrado en §15.
+- Lo que se venda no retira del sitio nada que hoy sea gratuito.
+- Ninguna Cita deja de ser accesible, copiable ni compartible por existir el producto.
+
+#### FR-37: Publicidad acotada fuera del flujo de lectura
+
+La publicidad, si se enciende, vive donde no está la Cita.
+
+**Umbral de Activación:** 25.000 sesiones orgánicas/mes — la meta de SM-2 al mes 12. Es el último en encenderse porque es el único que cuesta algo al producto.
+
+**Consecuencias (verificables):**
+- **La Página de Cita queda excluida.** También la Página de Colección, que es superficie de lectura. Admiten publicidad la portada, los resultados de búsqueda y la página 404.
+- Ninguna unidad publicitaria se intercala entre el contenido, por §11.
+- No degrada NFR-7: el contenido principal sigue visible en móvil con 4G en menos de 2,5 s, medido con el Modelo encendido.
+- No introduce muro, modal ni aviso previo al contenido, por NFR-10.
+- No exige consentimiento invasivo ni identificación individual del visitante, por NFR-11. Un Modelo que lo exija no cumple este FR y no se enciende.
+
+---
+
 ## 5. No-Objetivos (Explícitos)
 
 - **No somos una red social.** Sin cuentas, sin perfiles, sin comentarios, sin votos.
@@ -436,7 +607,8 @@ El editor puede ver qué falta antes de decidir a qué Autor dedica la sesión. 
 - **No somos una enciclopedia de autores.** La semblanza sitúa; no compite con Wikipedia.
 - **No aspiramos al volumen en la v1.** Un catálogo pequeño y verificado, no uno grande y dudoso.
 - **No traducimos.** El producto es en español y las Citas se publican en español.
-- **No monetizamos todavía.** La v1 se diseña sin publicidad; la decisión se toma con datos de tráfico.
+- **No monetizamos antes de su umbral.** La v1 se diseñó sin ingreso alguno. La v3 no deroga esa regla: diseña los cuatro Modelos de Ingreso y los deja apagados hasta que el tráfico medido cruce el Umbral de Activación de cada uno (§4.14, §12). Lo que se adelanta es el diseño, nunca el cobro.
+- **No monetizamos la lectura.** Ningún Modelo de Ingreso toca la Página de Cita ni la Página de Colección. Son las superficies donde el producto cumple su promesa y el punto de entrada real desde buscadores; §11 y NFR-10 tienen prioridad sobre cualquier ingreso.
 - **No generamos Citas con IA.** El sistema no crea ni parafrasea contenido atribuible a una persona real.
 
 ## 6. Alcance
@@ -458,7 +630,7 @@ El editor puede ver qué falta antes de decidir a qué Autor dedica la sesión. 
 - **Aportes de usuarios** — exigen moderación y verificación de procedencia desde el día uno. Diferido a v2. `[NOTE FOR PM]` Es la vía natural de escalado del Corpus; revisar en cuanto la curación interna sea el cuello de botella.
 - **Boletín y notificaciones** — dependen de tener audiencia. Diferido.
 - **Motor de recomendación** — la relación por Autor y Tema basta con 2.000 Citas.
-- **Monetización y publicidad** — decisión con datos, no con supuestos.
+- **Monetización y publicidad** — decisión con datos, no con supuestos. **Revisado en la v3:** la regla se conserva y se hace operable. La v3 diseña los Modelos de Ingreso y fija su Umbral de Activación en cifras de tráfico medido; ninguno se enciende por debajo del suyo. Ver §4.14 y §12.
 - **App nativa** — la web responsive cubre el caso de uso completo.
 - **Multilingüe** — no es el producto.
 
@@ -474,13 +646,40 @@ La v1 construyó el producto y quedó verificada sin haberse publicado nunca. La
 - Sembrado incremental del Corpus desde fuentes con Procedencia (FR-23…FR-25).
 - Condiciones de Lanzamiento cumplidas y verificadas (§13).
 
-**El orden importa y no es negociable.** El renombrado va primero, antes de que exista una URL indexada. El sembrado y las Condiciones de Lanzamiento van antes que la compartición: compartir con 38 Citas y sin medición configurada gasta el alcance de las cuentas en un sitio que todavía no puede retener a nadie ni contar si lo hizo.
+**El orden importa.** El renombrado va primero, antes de que exista una URL indexada.
+
+**Reescrito en la v3 como puerta de activación, no como orden de construcción.** La redacción original decía que el sembrado y las Condiciones de Lanzamiento iban *antes* que la compartición. La v2 la incumplió —la compartición se construyó con 38 Citas y sin medición— sin consecuencias, porque nunca se compartió de verdad. Eso demuestra que la restricción real nunca fue sobre el orden de construir, sino sobre el de **publicar**:
+
+> Se puede construir en cualquier orden. **Nada se publica ni se comparte hasta que LC-1…LC-4 estén verificadas.** Compartir con un Corpus corto y sin medición gasta el alcance de las cuentas en un sitio que todavía no puede retener a nadie ni contar si lo hizo — y ese gasto es irreversible: la primera impresión de una cuenta se da una vez.
+
+La intención se conserva íntegra; lo que se elimina es un bloqueo al trabajo que no protegía nada.
 
 **Fuera de la v2, y por qué:**
 
 - **Vídeo y por tanto YouTube.** Las otras cuatro cuentas consumen imagen fija, que el sistema ya sabe componer. El vídeo exige un motor propio —composición temporal, audio, duración— que no es una historia sino un producto. Se revisa cuando las cuentas de imagen demuestren que traen visitantes.
 - **Publicación automática en las cuentas.** El Kit Diario deja el material compuesto; publicar lo hace Héctor. Automatizarlo exige credenciales de cuatro plataformas, sus revisiones de aplicación y su mantenimiento, para ahorrar dos minutos al día.
 - **Cuentas, favoritos y aportes de usuarios.** Siguen diferidos por las razones de §6.2, que la v2 no cambia.
+
+### 6.4 Alcance de la v3
+
+La v2 quiso poner el producto delante de personas y no llegó a hacerlo: lo construyó todo y dejó sin abrir las cuatro puertas de §13. La v3 tiene un objetivo en dos tiempos: **abrir esas puertas y, con el sitio ya publicado, convertirlo en algo que crece por sí solo y se sostiene**.
+
+**Dentro:**
+
+- **Cierre de las Condiciones de Lanzamiento.** LC-1…LC-4 verificadas. No produce FR: es ejecución de `DESPLIEGUE.md` §1–§3. Va primera y condiciona todo lo demás por la puerta de activación de §6.3.
+- **Crecimiento del Corpus a volumen.** De 38 Citas hacia el orden de las ~2.000 de §6.1, respetando el suelo del 40 % de Autores de tradición latinoamericana. **No produce FR nuevos:** las herramientas son las de §4.11, ya construidas y probadas. Es operación, no desarrollo.
+- **Colecciones Curadas** (FR-26…FR-28) — la superficie que captura la cola larga.
+- **Ampliación del canal propio** (FR-29…FR-32) — lote, piezas de varias Citas, pieza en movimiento y pieza de Colección.
+- **Monetización por umbral** (FR-33…FR-37) — cuatro Modelos diseñados, encendidos por separado.
+
+**El reloj empieza aquí.** El mes 0 del producto es la jornada en que LC-1…LC-4 quedan verificadas, y toda métrica con plazo se cuenta desde ahí (§13). Hasta la v3, promesas como «5.000 sesiones orgánicas/mes al mes 6» no tenían origen porque el lanzamiento no había ocurrido.
+
+**Fuera de la v3, y por qué:**
+
+- **Publicación automática en las cuentas.** Sigue fuera por las razones de §6.3: credenciales de cuatro plataformas y sus revisiones de aplicación para ahorrar dos minutos al día. FR-29 ataca el mismo problema por el lado barato — componer por adelantado en vez de publicar solo.
+- **Boletín y notificaciones.** Siguen diferidos por §6.2: dependen de tener audiencia, y la v3 es precisamente la que va a averiguar si la hay.
+- **Cuentas, favoritos y aportes de usuarios.** Sin cambios respecto a §6.2.
+- **La definición del producto propio.** FR-36 fija su umbral, no su contenido. Elegir entre lámina, antología y recurrencia sin saber quién visita el sitio sería el supuesto que §12 existe para evitar.
 
 ## 7. Métricas de Éxito
 
@@ -496,12 +695,15 @@ La v1 construyó el producto y quedó verificada sin haberse publicado nunca. La
 - **SM-5 — Circuito de compartición.** ≥ 3 % de las visitas a Página de Cita generan una acción de copiado o de descarga de Imagen de Cita. Valida FR-3, FR-10. Es la métrica que justifica el coste de la feature más cara de la v1.
 - **SM-6 — Cobertura de la búsqueda.** < 15 % de búsquedas internas con cero resultados. Valida FR-7, FR-8.
 - **SM-7 — Compartición efectiva.** ≥ 2 % de las visitas a Página de Cita generan una compartición, de imagen o de enlace. Valida FR-17, FR-18. Se mide aparte de SM-5 a propósito: copiar y descargar son usos privados, compartir es el único que puede traer a otra persona.
+- **SM-9 — Cobertura de la cola larga.** Sesiones orgánicas que aterrizan en una Página de Colección, como proporción del total orgánico. Valida FR-26. Sin objetivo numérico en la primera pasada: la pregunta es si la superficie captura consultas que las otras cuatro no capturaban, y eso se responde comparando las consultas de entrada, no un porcentaje.
+- **SM-10 — Ingreso por Modelo.** Ingreso mensual atribuido a cada Modelo de Ingreso activo, junto al tráfico que lo produjo. Valida FR-33…FR-37. Se mide por Modelo y no agregado a propósito: la decisión que informa es cuál merece seguir encendido, y un total no la responde.
 - **SM-8 — Rendimiento del canal propio.** Visitas atribuidas a cada cuenta de Sabiduría de Bolsillo, por red y por jornada. Valida FR-21, FR-22. No lleva objetivo numérico: en la v2 la pregunta no es cuánto trae, sino **cuál de las cuatro redes trae**, porque de eso depende dónde se invierte el tiempo del mes siguiente.
 
 **Contra-métricas (no optimizar)**
 
 - **SM-C1 — Procedencia verificada.** Porcentaje de Citas publicadas con Procedencia completa. Contrapesa SM-2: el tráfico crece publicando más Citas, y la vía barata de publicar más es relajar la verificación. Si SM-C1 baja mientras SM-2 sube, el producto está destruyendo su único diferenciador defendible. Valida FR-13, FR-16.
-- **SM-C2 — Densidad de las Páginas de Tema.** Número mediano de Citas por Tema publicado. Contrapesa SM-1: la vía barata de multiplicar páginas indexables es crear Temas con tres Citas cada uno, que es exactamente el defecto de los competidores. Valida FR-6, FR-25.
+- **SM-C2 — Densidad de las páginas de agregación.** Número mediano de Citas por Tema publicado **y por Colección publicada**. Contrapesa SM-1: la vía barata de multiplicar páginas indexables es crear Temas con tres Citas cada uno, que es exactamente el defecto de los competidores. **Extendida en la v3:** las Colecciones son agregación igual que los Temas y fallan igual, así que entran en la misma contra-métrica en vez de tener una propia — una contra-métrica repartida en dos no frena en ninguna de las dos. Valida FR-6, FR-25, FR-26.
+- **SM-C4 — Coste de la monetización sobre la experiencia.** SM-3 (rebote en Página de Cita) y NFR-7 (tiempo hasta el contenido en 4G) medidos antes y después de encender cada Modelo de Ingreso. Contrapesa SM-10: la vía barata de subir el ingreso es ocupar más superficie y aceptar que el sitio empeore un poco cada vez. Si SM-10 sube mientras SM-3 o NFR-7 se degradan, el Modelo se apaga — está comprándose ingreso con el activo que lo produce. Valida FR-33, FR-37.
 - **SM-C3 — Sustitución del circuito privado.** Suma de copiados y descargas (SM-5) medida junto a SM-7. Contrapesa SM-7: la vía barata de subir la compartición es hacer que compartir estorbe menos que copiar. Si SM-7 sube mientras SM-5 baja en proporción parecida, la v2 no ha ampliado el alcance del sitio — ha movido un botón de sitio. Valida FR-3, FR-17.
 
 ## 8. SEO y Descubribilidad *(preocupación transversal)*
@@ -514,6 +716,7 @@ En este producto el SEO no es una optimización posterior: es el mecanismo por e
 - **NFR-4.** Las URL son legibles, estables y en español, sin identificadores opacos.
 - **NFR-5.** Ninguna página publicada queda huérfana: toda página es alcanzable por enlaces internos desde la portada en un número acotado de saltos.
 - **NFR-6.** El contenido en estado `en-revisión` no es rastreable, indexable ni alcanzable por URL adivinable.
+- **NFR-13** *(v3)*. Ninguna superficie de agregación canibaliza a la Cita. La canónica de una Cita es siempre su Página de Cita, esté en cuantos Temas y Colecciones esté; una Cita presente en varias agregaciones no genera contenido duplicado indexable. Es la condición para que multiplicar agregación sume superficie en vez de repartir la misma señal entre más URL.
 
 ## 9. NFR Transversales
 
@@ -526,38 +729,62 @@ En este producto el SEO no es una optimización posterior: es el mecanismo por e
 
 ## 10. Arquitectura de la Información
 
-Cuatro superficies públicas y una interna:
+Cinco superficies públicas y dos internas *(la Colección y el Kit Diario se añaden en la v3 y en la v2 respectivamente)*:
 
 - **Portada** — Cita del Día, acceso a la búsqueda, entradas a Temas destacados.
 - **Página de Cita** — hoja del árbol y principal punto de entrada real desde buscadores.
 - **Página de Autor** — agregación por persona; enlaza a sus Citas.
-- **Página de Tema** — agregación transversal; enlaza a Citas de varios Autores.
+- **Página de Tema** — agregación transversal por clasificación; enlaza a Citas de varios Autores.
+- **Página de Colección** *(v3)* — agregación transversal por criterio editorial; cruza Tema y Autor sin sustituir a ninguno.
 - **Herramienta de curación** — interna, no indexable, un solo operador.
+- **Kit Diario y lote de composición** — internos, no indexables, un solo operador.
 
-La navegación real del visitante es lateral, no jerárquica: entra por una hoja y se mueve entre hojas a través de Autor y Tema. La portada es identidad y retorno, no puerta de entrada.
+La navegación real del visitante es lateral, no jerárquica: entra por una hoja y se mueve entre hojas a través de Autor, Tema y Colección. La portada es identidad y retorno, no puerta de entrada.
+
+**Por qué dos agregaciones transversales y no una.** El Tema y la Colección se parecen y hacen cosas distintas. El Tema **clasifica** —responde a qué trata la Cita, su conjunto es cerrado, y cambiarlo reordena el Corpus—. La Colección **escoge** —responde a para qué se busca la Cita, su conjunto es abierto, y crear una no toca ninguna Cita existente—. Fundirlas obligaría a abrir el conjunto de Temas, y con él se iría el umbral de FR-6 que sostiene SM-C2.
 
 ## 11. Estética y Tono
 
 - **Referencias:** el contenido manda sobre el continente. Tipografía grande y legible, mucho aire, cero adornos que compitan con la Cita.
 - **Anti-referencias:** los sitios de citas en español actuales — fondos con textura, publicidad intercalada en el contenido, tipografía pequeña, listados densos sin jerarquía.
+- **Sobre la publicidad, tras la v3.** Esta anti-referencia sigue vigente sin matices y es la razón de la forma exacta de FR-37: la publicidad no puede aparecer donde el visitante lee, ni en la Página de Cita ni en la de Colección. Que un Modelo de Ingreso rinda no es argumento para relajar esta línea — si alguna vez lo fuera, el producto habría dejado de tener la ventaja por la que existe.
 - **Voz del producto:** sobria y sin solemnidad impostada. El sitio no comenta las Citas ni las adjetiva ("¡una frase increíble!"). Presenta y se aparta.
 - **La marca en la Imagen de Cita** está presente pero subordinada: se lee, no se impone sobre la frase.
 
 ## 12. Plataforma y Monetización
 
-- **Plataforma v1:** web responsive, sin app nativa ni PWA instalable.
-- **Monetización:** ninguna en la v1. La decisión se toma con datos de tráfico reales. El diseño no debe crear obstáculos a una futura inserción publicitaria, pero tampoco reservarle espacio: NFR-10 tiene prioridad sobre cualquier consideración publicitaria futura.
+- **Plataforma:** web responsive, sin app nativa ni PWA instalable. Sin cambios en la v3.
+- **Monetización v1:** ninguna. La decisión se toma con datos de tráfico reales. El diseño no debe crear obstáculos a una futura inserción publicitaria, pero tampoco reservarle espacio: NFR-10 tiene prioridad sobre cualquier consideración publicitaria futura.
+
+### 12.1 Modelos de Ingreso y sus umbrales *(v3)*
+
+La regla de la v1 se conserva y se hace operable. No se sustituye por una fecha ni por una corazonada: cada Modelo tiene una cifra, y esa cifra se mide en el receptor de LC-4. Diseñarlos hoy no es monetizar hoy.
+
+| Modelo | Umbral de Activación | Anclaje | Coste sobre la experiencia |
+|---|---|---|---|
+| **Donaciones** (FR-34) | LC-1…LC-4 verificadas | Es un enlace; no tiene coste que amortizar | Ninguno — fuera del flujo de lectura, sin JS de terceros |
+| **Afiliación de libros** (FR-35) | 2.000 sesiones orgánicas/mes | Primer tráfico con volumen suficiente para que un porcentaje signifique algo | Bajo — nace de la Procedencia ya publicada (FR-2) |
+| **Producto propio** (FR-36) | 5.000 sesiones orgánicas/mes | La meta de SM-2 al mes 6 | Ninguno sobre las páginas públicas |
+| **Publicidad acotada** (FR-37) | 25.000 sesiones orgánicas/mes | La meta de SM-2 al mes 12 | **Alto** — el único que degrada superficie; por eso el umbral más exigente y la exclusión de la Página de Cita y de Colección |
+
+**Por qué el orden de los umbrales es ese.** No es por ingreso esperado, es por **coste sobre el producto**. Se enciende primero lo que no cuesta nada y último lo que cuesta más, de modo que el sitio solo acepta degradarse cuando ya tiene tráfico bastante para que compense — y aun entonces, solo donde no se lee.
+
+**Ningún Modelo reserva espacio mientras está apagado.** Un hueco en blanco esperando publicidad es exactamente el obstáculo que la regla de la v1 prohibía crear. Un Modelo apagado es invisible, no latente.
+
+**Ningún Modelo sobrevive a su contra-métrica.** SM-C4 mide rebote y tiempo hasta el contenido antes y después de cada encendido. Un Modelo que suba SM-10 degradando SM-3 o NFR-7 se apaga: estaría comprando ingreso con el activo que lo produce.
 
 ## 13. Condiciones de Lanzamiento
 
 No son features y no producen FR: son las puertas que deben estar abiertas para que el sitio pueda considerarse publicado. Existen como sección propia porque cada una es invisible mientras falta —el sitio funciona igual de bien sin ninguna de ellas— y su ausencia solo se descubre semanas después, cuando la métrica que dependía de ella no existe.
 
-- **LC-1 — Dominio propio sirviendo.** `sabiduriadebolsillo.com` responde por HTTPS, y la URL canónica de cada página y el sitemap lo declaran. Mientras el sitio se sirva desde una URL provisional, cada página indexada es una redirección futura.
+- **LC-1 — Dominio propio sirviendo.** `sabiduriadebolsillo.net` responde por HTTPS, y la URL canónica de cada página y el sitemap lo declaran. Mientras el sitio se sirva desde una URL provisional, cada página indexada es una redirección futura. *(Corregido en la v3: el PRD decía `.com`; el dominio contratado y servido es `.net`, declarado en `public/CNAME` y leído por `src/lib/dominio.ts`.)*
 - **LC-2 — El sitemap es anunciable.** Existe un `robots.txt` que declara dónde está el sitemap. Hoy el sitemap se genera y no lo anuncia nada.
 - **LC-3 — Search Console verificada.** Propiedad verificada y sitemap enviado. Sin ella, SM-1 no es medible: no hay otra forma de saber cuántas Citas están indexadas.
 - **LC-4 — La medición recibe.** El punto final de medición está desplegado y los eventos de la v1 llegan y se pueden consultar. El módulo está construido desde la v1 y hasta hoy no envía a ninguna parte.
 - **LC-5 — Coherencia de marca.** Ninguna superficie, ni la marca de agua de la Imagen de Cita, menciona el nombre retirado.
 - **LC-6 — Corpus mínimo defendible.** Ninguna Cita publicada sin Procedencia, y al menos un Tema publicado por encima del umbral de FR-6 en cada Tema que se anuncie en la portada. Un visitante que llega desde las cuentas y encuentra un Tema vacío no vuelve.
+
+**La jornada en que LC-1…LC-4 quedan verificadas es el mes 0 del producto** *(v3)*. Toda métrica con plazo —SM-1 a los 3 meses, SM-2 a los 6 y a los 12— se cuenta desde ahí y no desde la fecha de este documento. Hasta entonces esos plazos no tienen origen, que es la razón por la que la v2 terminó sin poder medir nada de lo que había construido.
 
 ## 14. Preguntas Abiertas
 
@@ -567,6 +794,12 @@ Las seis preguntas abiertas de la primera redacción se resolvieron en aquella p
 2. **Umbral de reducción tipográfica.** FR-10 fija los tramos por longitud y el corte en 300 caracteres, pero los valores concretos de cada tramo salen de probar plantillas reales. Corresponde a UX, no a producto.
 3. **Cadencia de sembrado.** FR-23…FR-25 definen el proceso, no el ritmo. Cuántas Citas por sesión y cada cuánto es una decisión de operación que se toma con la primera sesión real hecha, no antes.
 
+**Añadidas en la v3, ninguna bloqueante para Arquitectura ni para épicas:**
+
+4. **Umbral mínimo de una Colección.** FR-26 exige que exista; no fija el número. El Tema usa 15 (FR-6), pero una Colección se lee de otra forma —«frases cortas» con 15 puede quedarse pobre y «para dedicar» con 15 puede sobrar— así que el valor sale de curar las tres o cuatro primeras, no de decidirlo ahora.
+5. **Qué es el producto propio.** FR-36 fija el umbral de 5.000 sesiones/mes y aplaza el contenido. Decidir entre lámina, antología y recurrencia antes de saber quién visita el sitio sería exactamente el supuesto que §12 existe para evitar.
+6. **Programa de afiliación concreto.** FR-35 fija la capacidad y el umbral; qué programa se usa depende de la disponibilidad de las ediciones en dominio público que el Corpus cita, y varias no tendrán edición en venta. Se resuelve al acercarse el umbral.
+
 ## 15. Índice de Supuestos
 
 Los supuestos etiquetados en la primera redacción se convirtieron en decisiones (§14). Permanecen dos, ambos de capacidad y no de preferencia:
@@ -574,3 +807,10 @@ Los supuestos etiquetados en la primera redacción se convirtieron en decisiones
 - **§8 / NFR-2** — El sitio se sirve con HTML renderizado en servidor o pregenerado. Es un supuesto de capacidad, no una elección de tecnología: la indexación fiable de ~2.000 páginas lo requiere. La elección concreta corresponde a Arquitectura.
 - **§6.1** — El Corpus de arranque de ~2.000 Citas es alcanzable por un solo editor antes del lanzamiento. Es el supuesto con más riesgo de plan del documento: si resulta falso, la palanca es reducir el Corpus, nunca relajar FR-13. **Revisado en la v2:** resultó falso en su forma original. El lanzamiento no espera a las 2.000 Citas; sale con lo que haya y el Corpus crece publicado, mediante §4.11. Lo que no se toca es FR-13, exactamente como el supuesto preveía.
 - **§4.10 / SM-8** — Las cuentas de Sabiduría de Bolsillo tienen audiencia suficiente para producir visitas medibles. Es un supuesto de capacidad del canal, no del sistema: si resulta falso, SM-8 no dará señal y la conclusión será que el canal propio no sustituye al buscador, no que el Kit Diario esté mal construido.
+
+**Añadidos en la v3:**
+
+- **§4.12 / SM-9** — Existe cola larga en español que las Colecciones pueden capturar y que las cuatro superficies actuales no capturan. Es el supuesto que justifica una superficie nueva entera. Se falsa barato: tres o cuatro Colecciones publicadas y las consultas de entrada de Search Console lo dicen en semanas. Si resulta falso, la palanca es dejar de crear Colecciones, no bajar su umbral para tener más.
+- **§4.13 / FR-31** — El vídeo corto trae visitantes que la imagen fija no trae. **Es el supuesto de mayor coste del documento y el peor sostenido:** §6.3 lo descartó en la v2 con un argumento —el motor de vídeo es un producto, no una historia— que nadie ha refutado desde entonces. Entra por decisión explícita de Héctor, con su propio umbral (ninguna cuenta de imagen fija demostrando visitas, ningún motor de vídeo) y como candidato preferente al recorte si la v3 se pasa de tamaño.
+- **§4.14 / SM-2** — El sitio alcanza los umbrales de activación. Los tres primeros Modelos se anclan a metas que el PRD ya se había fijado (2.000, y las de SM-2 a los meses 6 y 12), así que este supuesto no es nuevo: es SM-2 otra vez, ahora con el ingreso colgando de ella. Si SM-2 falla, no falla la monetización — falla el producto, y la monetización simplemente no se enciende, que es justo lo que los umbrales existen para garantizar.
+- **§6.4** — Llegar al orden de las 2.000 Citas es alcanzable ahora que el sembrado (§4.11) está construido y el Corpus crece publicado. Reformula el supuesto original de §6.1, que resultó falso cuando el volumen era condición de lanzamiento. Ya no lo es: el riesgo dejó de ser de plan y pasó a ser de ritmo.
