@@ -143,6 +143,7 @@ El contrapeso decide tanto como la meta. Si SM-2 sube mientras baja el porcentaj
 
 - **¿Cuál es el umbral mínimo de una Colección?** El Tema usa 15, pero una Colección se lee de otra forma. Sale de curar las tres o cuatro primeras, no de decidirlo ahora. Bloquea el cierre de CAP-12, no su construcción.
 - **¿Qué es el producto propio?** Lámina de alta resolución, antología en PDF o producto de recurrencia. Se decide al acercarse las 5.000 sesiones/mes, no antes.
+- **FR-35 es inconstruible tal y como está redactado.** §5 prohíbe que ningún Modelo de Ingreso toque la Página de Cita, y FR-35 exige que el enlace de afiliación salga de la Procedencia, que se muestra ahí (FR-2). CAP-14 heredó el choque en su `success`. La lectura probable es que §5 quería decir «ninguna publicidad» —FR-37 es el único Modelo con coste sobre la experiencia, y §12.1 asigna a la Afiliación coste «bajo, nace de la Procedencia ya publicada»— pero eso es reconstruir la intención, no leerla. No bloquea nada: el umbral son 2.000 sesiones/mes y hoy hay cero. Se resuelve con `bmad-prd` al acercarse.
 - **¿Qué programa de afiliación concreto?** Depende de qué ediciones en dominio público que el Corpus cita siguen a la venta, y varias no tendrán ninguna.
 - **¿Está libre la marca «Sabiduría de Bolsillo» en OEPM y EUIPO?** El dominio está contratado, que es cosa distinta. No bloquea el desarrollo, sí el gasto en identidad visual.
 - **¿Con qué cadencia se siembra?** Cuántas Citas por sesión y cada cuánto es una decisión de operación que se toma con la primera sesión real hecha.

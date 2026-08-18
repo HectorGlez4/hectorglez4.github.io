@@ -1,12 +1,14 @@
 ---
-stepsCompleted: [1, 2, 3, 4]
+stepsCompleted: [1, 2, 3, 4]  # pasada v3 completada; las pasadas v1 y v2 también completaron 1-4
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
   - _bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md
   - _bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/GUIA-DE-ARRANQUE.md
+  - _bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/RECONCILIACION.md
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md
+  - _bmad-output/specs/spec-brainlySabiduria/SPEC.md
 ---
 
 # Sabiduría de Bolsillo - Epic Breakdown
@@ -1321,3 +1323,477 @@ So that pueda comprobar si la v2 amplió el alcance del sitio o solo movió un b
 **Given** SM-5 y SM-7 medidas durante el mismo periodo
 **When** las comparo
 **Then** puedo comprobar si la compartición creció a costa del copiado, que es lo que SM-C3 vigila
+
+---
+
+# Sabiduría de Bolsillo — Épicas de la v3
+
+Las Épicas 1 a 5 son la v1 y las 6 a 10 la v2, ambas documentadas más arriba. Esta tercera parte cubre la v3: cerrar las Condiciones de Lanzamiento, crecer el Corpus publicado, y las tres features nuevas de §4.12–§4.14 del PRD.
+
+**La puerta que gobierna todas estas épicas.** §6.3 del PRD, reescrita en la v3, dejó de ser un orden de construcción y pasó a ser una puerta de publicación: *se puede construir en cualquier orden; nada se publica ni se comparte hasta que LC-1…LC-4 estén verificadas*. Ninguna historia de aquí está bloqueada por esa puerta, y ninguna la abre — la abre Héctor ejecutando `DESPLIEGUE.md` §1–§3, y la jornada en que se cierra es el mes 0 del producto.
+
+## Requirements Inventory — v3
+
+### Functional Requirements
+
+FR-26: Toda Colección publicada tiene URL propia, legible y estable, con las Citas que la componen; una Colección por debajo de su umbral mínimo no se publica ni entra en el sitemap, y toda Colección publicada es alcanzable por enlaces internos desde la portada.
+FR-27: El editor crea una Colección con criterio y nombre y le asigna Citas ya `publicada`; una Cita puede pertenecer a varias Colecciones sin que cambien sus Temas ni su Autor, el editor ve cuántas le faltan para el umbral, y una Colección se despublica sin borrar ninguna Cita.
+FR-28: La Colección agrega y enlaza pero no reproduce el producto en otra URL: la canónica de cada Cita sigue siendo su Página de Cita, una Cita en varias Colecciones no genera contenido duplicado indexable, y el texto editorial describe el criterio sin comentar ni adjetivar las Citas.
+FR-29: El editor compone varias jornadas de material de una sola sentada; lo compuesto por adelantado es indistinguible de lo que compone la jornada y lo sustituye si ambos existen, cambiar la Cita del Día de una jornada ya compuesta la recompone, el lote es reanudable y su superficie no es indexable ni enlazada.
+FR-30: El sistema compone una Pieza de Canal que reúne varias Citas; cada una conserva su atribución visible, una Cita que no admite Imagen por el límite de FR-10 tampoco entra, la pieza declara un único enlace de destino marcado por red según FR-22, y la plantilla no altera el texto de ninguna Cita.
+FR-31: El sistema compone una Pieza de Canal con duración; se compone sin intervención manual una vez elegidas las Citas, el texto de cada Cita permanece en pantalla el tiempo necesario para leerlo sin recortarse ni acelerarse, y la atribución acompaña a cada Cita mientras se muestra. **Umbral de construcción:** no se construye hasta que SM-8 demuestre que al menos una cuenta de imagen fija trae visitas medibles.
+FR-32: Una Colección publicada produce su propia Pieza de Canal, que enlaza a la Página de Colección y no a una Cita suelta; una Colección por debajo de su umbral no produce pieza, y la pieza respeta las reglas de atribución de FR-30.
+FR-33: Ningún Modelo de Ingreso se enciende antes de que su Umbral de Activación se mida en el receptor de LC-4; cada Modelo se enciende y apaga por separado, un Modelo apagado no deja hueco reservado ni espacio en blanco en ninguna superficie, y su estado y la cifra contra la que se mide son consultables sin exportar datos.
+FR-34: El visitante que quiere sostener el sitio encuentra cómo sin que se le pida; la invitación no aparece en la Página de Cita ni interrumpe ninguna lectura, no introduce JavaScript de terceros, y rechazarla o ignorarla no degrada ninguna funcionalidad. **Umbral:** LC-1…LC-4 verificadas.
+FR-35: La Procedencia de una Cita puede llevar a la edición de la que salió; el enlace sale de la Procedencia ya publicada y nunca se inventa una obra, una Cita sin Procedencia completa no produce enlace, la relación comercial se declara donde el enlace aparece, y la atribución se lee igual con el Modelo apagado que encendido. **Umbral:** 2.000 sesiones orgánicas/mes.
+FR-36: El Corpus verificado sostiene algo que se vende una vez y no por visita; lo que se venda no retira del sitio nada que hoy sea gratuito y ninguna Cita deja de ser accesible, copiable ni compartible. **Definición diferida** a propósito. **Umbral:** 5.000 sesiones orgánicas/mes.
+FR-37: La publicidad, si se enciende, vive donde no está la Cita: la Página de Cita y la Página de Colección quedan excluidas y solo admiten publicidad la portada, los resultados de búsqueda y la 404; ninguna unidad se intercala entre el contenido, no degrada NFR-7 medido con el Modelo encendido, no introduce muro ni modal, y no exige consentimiento invasivo ni identificación individual. **Umbral:** 25.000 sesiones orgánicas/mes.
+
+### NonFunctional Requirements
+
+NFR-13 *(nuevo en la v3)*: Ninguna superficie de agregación canibaliza a la Cita. La canónica de una Cita es siempre su Página de Cita, esté en cuantos Temas y Colecciones esté; una Cita presente en varias agregaciones no genera contenido duplicado indexable.
+
+Los NFR-1…NFR-12 del inventario de la v1 siguen vinculando y no se reenuncian. Los que la v3 pone a prueba de forma nueva:
+
+- **NFR-1…NFR-5** — la Página de Colección es una superficie indexable más: canónica propia, contenido en el HTML inicial, URL legible en español, y ninguna Colección publicada huérfana.
+- **NFR-6** — el lote de composición de FR-29 es superficie interna: ni rastreable, ni indexable, ni alcanzable por URL adivinable.
+- **NFR-7** — se vuelve a medir con cada Modelo de Ingreso **encendido**, no solo en reposo.
+- **NFR-10, NFR-11** — tienen prioridad sobre cualquier Modelo de Ingreso; un proveedor que exija consentimiento invasivo o identifique al visitante no cumple FR-37 y no se enciende.
+- **NFR-12** — la Pieza de Canal no altera el texto de ninguna Cita, igual que la Imagen y la Tarjeta.
+
+### Additional Requirements
+
+De la espina de arquitectura (AD nuevos o extendidos en la v3) y de la reconciliación aguas arriba:
+
+- **AD-15 — el plano de composición lo fija quién consume el artefacto.** Build para lo que pide un tercero que no ejecuta JavaScript (Tarjeta Social); cliente para lo que pide alguien con navegador delante (Imagen de Cita, Imagen del Kit); `tools/` para composición por lote o que exige codificación — ahí caen las cuatro Piezas de Canal de FR-29…FR-32, motor de vídeo incluido. La salida de `tools/` **no se versiona**; lo versionado es la fijación de jornada.
+- **AD-16 — la pregeneración por Cita es incremental.** Una construcción no rasteriza un artefacto por Cita cuya entrada no ha cambiado, y la entrada incluye la versión de la plantilla. Vincula a la clase entera, no solo a la Tarjeta.
+- **AD-17 — el carácter publicable de una superficie tiene un solo dueño.** Una superficie declara en un solo sitio si es publicable, y de ahí derivan la inclusión en el sitemap, el `noindex` y el barrido automatizado de accesibilidad y móvil. Hoy son tres sitios: `noIndexar` y `fueraDeLaBusqueda` en `Armazon.astro`, más el filtro de `astro.config.mjs`.
+- **AD-18 — la pertenencia a una Colección se declara en la Colección, y es blanda.** Miembros por slug en `corpus/colecciones/{slug}.yml`, resueltos por intersección con el conjunto publicable; el umbral se aplica al recuento **resuelto**, nunca al declarado. Invierte a propósito la dirección del Tema, que se declara en la Cita.
+- **AD-19 — ninguna agregación reproduce la Cita.** Toda superficie indexable que enumere Citas usa el **mismo** componente de tarjeta (`src/components/TarjetaDeCita.astro`): fragmento acotado, atribución y enlace. La Colección lo reutiliza; no compone el suyo. No vincula al material de salida: una Pieza de Canal reúne Citas íntegras a propósito.
+- **AD-20 — ningún guion de tercero, y el Modelo de Ingreso no es una excepción.** `MAX_BYTES_DE_GUION` cubre también lo que traiga un Modelo. Qué superficie admite qué Modelo tiene dueño propio, y **el armazón compartido no aloja ninguno**.
+- **AD-21 — encender un Modelo de Ingreso es un commit, no una medición.** El estado es configuración versionada; una herramienta de `tools/` consulta el receptor e **informa**, y un paso del CI avisa al cruzarse el umbral.
+- **AD-11 extendido — publicable y alcanzable son el mismo conjunto.** `src/lib/publicado.ts` posee ahora también la enumeración de descubrimiento, de modo que una superficie no puede ser publicable y quedar huérfana.
+- **AD-9** — el umbral mínimo de Colección y los cuatro Umbrales de Activación entran en `src/lib/umbrales.ts` y en ningún otro sitio.
+- **AD-4** — ni los Temas ni las Colecciones participan en ninguna ruta de Cita; el slug no se recalcula.
+- **AD-12 + AD-15 — no hay segundo calendario.** La composición anticipada de FR-29 son las fijaciones de `corpus/portada.json`, que `citaDelDia.ts` ya prioriza sobre la rotación desde la v1. El lote y la jornada derivan de la misma fijación, así que «lo anticipado sustituye a lo de la jornada» se cumple por construcción y no hay desempate que inventar. *(Corrige la delegación a Arquitectura que el addendum del PRD todavía arrastra — `RECONCILIACION.md` §2.)*
+- **Sin tecnología nueva.** El stack de la v3 es el de la v2: Astro 7, Node ≥22.12, TypeScript estricto, Pagefind, `sharp`, GitHub Pages, Cloudflare Workers + D1.
+- **Diferido a propósito, y no se decide en estas épicas:** el motor de vídeo de FR-31 (sin encoder elegido; su puerta es SM-8), el valor del umbral mínimo de Colección (sale de curar las tres o cuatro primeras), el mecanismo concreto de caché de AD-16, el proveedor de publicidad y la definición del producto propio de FR-36.
+
+### UX Design Requirements
+
+Continúan la numeración de la v2, que terminó en UX-DR29.
+
+UX-DR30: La Página de Colección presenta sus Citas con `src/components/TarjetaDeCita.astro`, el mismo componente que usan los listados de Autor y de Tema — fragmento en `headline-sm`, autor en el token `author`, filete divisorio entre tarjetas. No compone una presentación propia. *(AD-19, NFR-13.)*
+UX-DR31: El nombre de una Colección se compone en Source Serif, como los de Autor y Tema; el resto de la página —criterio editorial, navegación, metadatos— va en Inter. Ningún otro uso de la serif.
+UX-DR32: El texto editorial de la Colección describe su criterio y no adjetiva ni comenta las Citas que contiene, por la voz de producto de `DESIGN.md § Brand & Style` y `EXPERIENCE.md § Voice and Tone`.
+UX-DR33: La Página de Colección cumple el suelo de accesibilidad y el comportamiento responsive de las demás superficies públicas: WCAG 2.1 AA, utilizable a 360 px, foco visible de 2px, un solo `h1`, listados como listas reales. Debe entrar en el barrido automatizado **sin** añadirse a ninguna lista aparte *(AD-17)*.
+UX-DR34: La Colección es navegación lateral, no jerárquica: se alcanza por enlaces internos desde la portada y no introduce migas de pan ni una jerarquía que el sitio no tiene. *(Recortado en la validación final: la redacción original exigía además alcanzarla **desde las Páginas de Cita que contiene**, y el contrato no lo sostiene — FR-28 dice que la Colección enlaza a las Citas, no al revés, y AD-18 invierte a propósito la dirección del Tema. Un enlace inverso en la Página de Cita sería una superficie de diseño nueva; queda como pregunta para una pasada de `bmad-ux`.)*
+UX-DR35: Con un Modelo de Ingreso apagado, ninguna superficie muestra hueco reservado, espacio en blanco ni marcador. Un Modelo apagado es invisible, no latente *(FR-33, §12.1)*.
+UX-DR36: Ningún Modelo de Ingreso aparece en el armazón compartido ni en la Página de Cita ni en la de Colección. La invitación de donación vive en superficies de no-lectura: portada, resultados de búsqueda y 404 *(FR-34, FR-37, AD-20)*.
+UX-DR37: **Hueco declarado.** `DESIGN.md` y `EXPERIENCE.md` están actualizados al 10/08 y no describen ni el Kit Diario (v2, ya construido) ni la Página de Colección (v3). Las historias de Colección se escriben con AD-19 como criterio de aceptación en lugar de con una espina de UX que la cubra. Una pasada de `bmad-ux` acotada a esa superficie puede refinar la presentación después sin invalidar ninguna historia, siempre que respete UX-DR30.
+
+### FR Coverage Map — v3
+
+FR-23, FR-24, FR-25: **Épica 11** — no son nuevos; la Épica 9 construyó las herramientas y esta épica las ejercita en sesiones reales de sembrado hasta alcanzar volumen.
+FR-26: **Épica 12** — Página de Colección indexable, con umbral sobre el recuento resuelto y sin quedar huérfana.
+FR-27: **Épica 12** — curación de una Colección: criterio, nombre y asignación de Citas ya publicadas.
+FR-28: **Épica 12** — la Colección agrega y enlaza; la canónica sigue siendo la Página de Cita.
+FR-29: **Épica 13** — composición anticipada por lote, sobre las fijaciones de `corpus/portada.json`.
+FR-30: **Épica 13** — Pieza de Canal de varias Citas, cada una con su atribución.
+FR-31: **Sin épica — puerta cerrada.** No se construye hasta que SM-8 demuestre que al menos una cuenta de imagen fija trae visitas medibles. Hoy la medición no recibe (LC-4), así que SM-8 no existe todavía. Candidato preferente al recorte; AD-15 lo deja en `tools/` para que recortarlo no toque nada más.
+FR-32: **Épica 13** — Pieza de Canal derivada de una Colección publicada.
+FR-33: **Épica 14** — activación por umbral medido, con el estado como configuración versionada.
+FR-34: **Épica 14** — donaciones. Su umbral es «LC-1…LC-4 verificadas», así que se enciende el mismo día que se abren las puertas.
+FR-35: **Sin épica — puerta cerrada y contradicción sin resolver.** Umbral de 2.000 sesiones orgánicas/mes. Además, §5 del PRD prohíbe que ningún Modelo de Ingreso toque la Página de Cita, mientras que FR-35 exige que el enlace salga de la Procedencia, que se muestra ahí (FR-2). Tal y como está redactado, FR-35 es inconstruible. Se resuelve con `bmad-prd` al acercarse el umbral, no ahora.
+FR-36: **Sin épica — puerta cerrada y contenido sin definir.** Umbral de 5.000 sesiones orgánicas/mes; el PRD difiere a propósito la elección entre lámina, antología y recurrencia.
+FR-37: **Sin épica — puerta cerrada.** Umbral de 25.000 sesiones orgánicas/mes. AD-20 excluye de partida a buena parte del mercado de display, y conviene saberlo antes de evaluar proveedores.
+
+**Cobertura no-FR.** La Épica 11 cierra LC-6 (ningún Tema anunciado en portada por debajo del umbral) y valida SM-C1 y SM-C2. LC-1…LC-4 no aparecen aquí: son de la Épica 7, cuyas tres historias están en `review` esperando `DESPLIEGUE.md` §1–§3.
+
+## Epic List — v3
+
+### Épica 11: Un Corpus con volumen defendible
+
+El Corpus pasa de 38 Citas a un volumen donde hay cola larga que capturar y Temas que superan su umbral, sin que baje el porcentaje de Procedencia verificada. Va primera porque **todo lo demás mejora con volumen y nada lo sustituye**: una Colección necesita Citas entre las que escoger, y una Pieza de varias Citas necesita que haya varias que merezcan ir juntas.
+
+**FRs covered:** ninguno nuevo — ejercita FR-23, FR-24 y FR-25, construidos en la Épica 9.
+**Condiciones cubiertas:** LC-6.
+**Notas de implementación:** es **operación, no desarrollo**, y por eso sus historias son sesiones de sembrado con criterio de aceptación medible en lugar de cambios de código. §6.4 del PRD lo dice explícitamente: las herramientas están construidas y probadas. Lleva épica propia para que el avance quede en `sprint-status.yaml` y no en la memoria de nadie. Las contra-métricas mandan sobre el volumen: si SM-C1 baja mientras el Corpus crece, la sesión ha fallado aunque haya sumado Citas. El suelo del 40 % de Autores de tradición latinoamericana se comprueba con `tools/huecos.ts` antes de elegir a quién se dedica cada sesión, no después.
+
+### Épica 12: La cola larga tiene dónde aterrizar
+
+Un visitante que busca «frases cortas para reflexionar» encuentra una página propia con esas Citas escogidas, y el editor crea una Colección sin tocar una sola Cita. Al terminar, retirar una Cita del Corpus la saca de todas sus Colecciones sin romper el build y sin dejar un enlace roto.
+
+**FRs covered:** FR-26, FR-27, FR-28.
+**NFR:** NFR-13. **UX-DR:** UX-DR30, UX-DR31, UX-DR32, UX-DR33, UX-DR34.
+**Notas de implementación:** el corazón de la feature no es la página, es la **resolución blanda** de AD-18 — la Colección declara sus miembros por slug y `publicado.ts` los intersecta con el conjunto publicable, de modo que mover una Cita a `_revision/` no rompe nada. Empieza por ahí. La Colección es la primera superficie pública nueva desde el Kit, así que esta épica es también donde aterriza el dueño único de AD-17: una sola declaración de la que derivan el sitemap, el `noindex` y el barrido de accesibilidad. La presentación reutiliza `src/components/TarjetaDeCita.astro` y no compone la suya (AD-19). El umbral mínimo sale de curar las tres o cuatro primeras Colecciones, no de decidirlo antes (§14.4 del PRD); mientras tanto vive en `umbrales.ts` con un valor provisional declarado como tal.
+
+### Épica 13: El canal deja de exigir presencia diaria
+
+Héctor compone varias jornadas de material de una sentada, y el sistema produce piezas que reúnen varias Citas o anuncian una Colección. Olvidar un día deja de ser perder ese día.
+
+**FRs covered:** FR-29, FR-30, FR-32.
+**Notas de implementación:** las tres viven en `tools/` por AD-15 y su salida **no se versiona**; lo versionado es la decisión, que es la fijación de jornada. FR-29 **no necesita mecanismo nuevo**: `corpus/portada.json` ya tiene fijaciones y `citaDelDia.ts` ya les da prioridad sobre la rotación desde la v1, así que el lote fija jornadas ahí y la exigencia de que «lo anticipado sustituya a lo de la jornada» se cumple sola. No construyas un segundo calendario — es la trampa que `RECONCILIACION.md` §2 nombra. El lote es una superficie interna nueva y hereda el dueño único de AD-17 de la Épica 12. Las piezas consumen `src/lib/tramos.ts` (AD-8) y excluyen las Citas que no admiten Imagen. FR-31 (pieza en movimiento) **no entra en esta épica** a propósito: su puerta es SM-8 y AD-15 la deja aislada en `tools/` para que recortarla no toque nada de lo de aquí.
+
+### Épica 14: El ingreso tiene interruptor antes de tener ingreso
+
+El visitante que quiere sostener el sitio encuentra cómo, sin que se le pida. Y cada Modelo de Ingreso futuro nace con un interruptor versionado, auditable y reversible por `git revert`, en lugar de con un disparador automático que sabe encenderse y no sabe apagarse.
+
+**FRs covered:** FR-33, FR-34.
+**UX-DR:** UX-DR35, UX-DR36.
+**Notas de implementación:** construye el dueño del estado (AD-21) aunque de momento solo haya un Modelo — con dos ya es tarde. Las donaciones se pueden encender el mismo día que se cierren LC-1…LC-4: ese es su umbral, y su coste de implementación es un enlace. Ningún guion de tercero (AD-20), y el armazón compartido no aloja ningún Modelo, así que la invitación vive en la portada, los resultados de búsqueda y la 404 — nunca en la Página de Cita ni en la de Colección. Los cuatro Umbrales de Activación entran en `umbrales.ts` (AD-9). La herramienta que consulta el receptor **informa y no decide**, y el build no lee el plano de medición jamás (AD-14): dos construcciones del mismo commit tienen que dar el mismo sitio.
+
+---
+
+## Epic 11: Un Corpus con volumen defendible
+
+El Corpus pasa de 38 Citas a un volumen donde hay cola larga que capturar y Temas que superan su umbral, sin que baje el porcentaje de Procedencia verificada.
+
+**Punto de partida medido (2026-08-18):** 38 Citas, 12 Autores, 8 Temas. Solo `la-vida` (17) y `el-saber` (15) superan `MIN_CITAS_POR_TEMA`. Por debajo: `la-virtud` 11, `el-tiempo` 8, `la-palabra` 7, `la-adversidad` 6, `la-libertad` 5, `la-amistad` 1. Tradición: 9 peninsulares, 2 latinoamericanos, 1 otra — un 16,7 % frente al suelo del 40 %.
+
+### Story 11.1: Ningún Tema anunciado en portada queda por debajo de su umbral
+
+As a visitante que llega desde las cuentas de Sabiduría de Bolsillo,
+I want que el Tema que pulso en la portada tenga contenido detrás,
+So that no aterrice en una página vacía y me vaya para no volver.
+
+**Acceptance Criteria:**
+
+**Given** los seis Temas por debajo de `MIN_CITAS_POR_TEMA`
+**When** cierro las sesiones de sembrado de esta historia
+**Then** cada Tema que la portada anuncia tiene al menos 15 Citas publicadas
+**And** `tools/huecos.ts` no reporta ningún Tema de portada por debajo del umbral
+
+**Given** cada Cita incorporada en esta historia
+**When** pasa por la puerta de admisión
+**Then** ninguna llega a `publicada` sin Procedencia, con un Autor sin año de fallecimiento, o con Estado de Derechos distinto de `dominio-público`
+**And** el build falla con la ruta del fichero y la regla incumplida si alguna lo intentara
+
+**Given** SM-C1 medido con `tools/auditoria.ts` antes de empezar
+**When** lo vuelvo a medir al cerrar la historia
+**Then** el porcentaje de Citas publicadas con Procedencia completa no ha bajado
+
+**Given** un Tema que sigue por debajo del umbral al cerrar la historia
+**When** se construye el sitio
+**Then** ese Tema no se publica, no se indexa, sus chips no se renderizan y la portada no lo anuncia
+
+### Story 11.2: El Corpus deja de estar sesgado hacia la península
+
+As a Marisol, que llega buscando un clásico y descubre a alguien que no conocía,
+I want que el catálogo represente la tradición latinoamericana tanto como la peninsular,
+So that el descubrimiento de UJ-3 pueda ocurrir de verdad y no por casualidad.
+
+**Acceptance Criteria:**
+
+**Given** que hoy 2 de los 12 Autores son de tradición latinoamericana (16,7 %)
+**When** cierro esta historia
+**Then** `tools/huecos.ts` reporta una proporción igual o superior a `SUELO_TRADICION_LATINOAMERICANA`
+**And** la proporción se comprueba antes de elegir a qué Autor se dedica cada sesión, no después
+
+**Given** una Fuente en dominio público de un Autor de tradición latinoamericana
+**When** extraigo candidatas con `tools/extraer.ts`
+**Then** cada candidata llega con obra y año tomados de la Fuente y registra bajo qué licencia se obtuvo
+**And** no se propone ninguna candidata cuyo texto no esté en español
+
+**Given** una obra cuyo original no está en español
+**When** la considero como Fuente
+**Then** queda descartada, salvo que exista una traducción al español ya en dominio público e identificable por su edición
+**And** en ningún caso se traduce texto para publicarlo
+
+### Story 11.3: El sembrado tiene cadencia y salud visibles
+
+As a Héctor, único editor,
+I want saber a qué ritmo crece el Corpus y si su salud aguanta ese ritmo,
+So that pueda decidir cuánto sembrar sin descubrir el daño tres meses después.
+
+**Acceptance Criteria:**
+
+**Given** la primera sesión real de sembrado ya hecha
+**When** registro su resultado
+**Then** queda declarada la cadencia —Citas por sesión y con qué frecuencia—, que §14.3 del PRD dejaba abierta a propósito
+**And** la cifra sale de una sesión medida, no de una estimación
+
+**Given** `tools/auditoria.ts` y `tools/huecos.ts`
+**When** los ejecuto al cerrar cada sesión
+**Then** obtengo SM-C1 desglosado por Autor y los Temas que siguen por debajo del umbral, sin exportar datos
+
+**Given** una sesión en la que SM-C1 baja mientras el número de Citas sube
+**When** reviso el resultado
+**Then** la sesión se considera fallida aunque haya sumado Citas
+**And** las Citas sin Procedencia completa se mueven a `corpus/_revision/` en lugar de quedarse publicadas
+
+---
+
+## Epic 12: La cola larga tiene dónde aterrizar
+
+Un visitante que busca «frases cortas para reflexionar» encuentra una página propia con esas Citas escogidas, y el editor crea una Colección sin tocar una sola Cita. Al terminar, retirar una Cita del Corpus la saca de todas sus Colecciones sin romper el build y sin dejar un enlace roto.
+
+### Story 12.1: Una superficie declara en un solo sitio si es publicable
+
+As a visitante que busca en el sitio,
+I want que los resultados sean Citas, Autores y Temas y no páginas internas,
+So that la búsqueda no me devuelva ruido.
+
+**Acceptance Criteria:**
+
+**Given** que hoy `/404.html` y `/buscar.html` figuran en el índice de Pagefind pese a declarar `noIndexar`
+**When** aplico la declaración única de superficie publicable
+**Then** ninguna superficie que no sea del producto aparece en el índice interno
+**And** una búsqueda por un término contenido en una Cita no devuelve la página 404 ni la de búsqueda
+
+**Given** una superficie nueva que no es del producto
+**When** la declaro no publicable en un solo sitio
+**Then** de esa declaración derivan su exclusión del sitemap, su `noindex` y su exclusión del índice interno
+**And** no hay que tocar `astro.config.mjs` ni recordar un segundo fichero
+
+**Given** una superficie nueva declarada pública
+**When** corre el barrido automatizado de accesibilidad y móvil
+**Then** entra en él sin haberse añadido a ninguna lista
+
+**Given** el conjunto publicable
+**When** enumero superficies
+**Then** publicable y alcanzable son el mismo conjunto, y ninguna superficie publicada queda huérfana
+
+### Story 12.2: La Colección declara sus miembros, y la lista es blanda
+
+As a editor,
+I want crear una Colección sin tocar ninguna Cita,
+So that añadir una agrupación no sea editar decenas de ficheros.
+
+**Acceptance Criteria:**
+
+**Given** un fichero en `corpus/colecciones/{slug}.yml` que declara sus miembros por slug
+**When** se construye el sitio
+**Then** la pertenencia se resuelve intersectando esa lista con el conjunto publicable
+**And** ninguna Cita ha sido modificada para pertenecer a la Colección
+
+**Given** una Cita miembro que muevo a `corpus/_revision/`
+**When** se construye el sitio
+**Then** el build no falla
+**And** la Cita sale de todas sus Colecciones sin dejar hueco ni enlace roto
+
+**Given** una Colección cuyo recuento resuelto cae por debajo del umbral mínimo
+**When** se construye el sitio
+**Then** desaparece a la vez de la página, del sitemap, de los chips y del descubrimiento
+
+**Given** el umbral mínimo de Colección, que el PRD §14.4 deja abierto a propósito
+**When** se implementa
+**Then** vive en `src/lib/umbrales.ts` con un valor provisional declarado como tal, nunca como literal suelto en otro módulo
+
+**Given** una Cita que pertenece a varias Colecciones
+**When** consulto sus Temas y su Autor
+**Then** no han cambiado
+
+### Story 12.3: La Página de Colección, sin canibalizar a la Cita
+
+As a Lucía, que busca «frases cortas para reflexionar»,
+I want una página que reúna justo esas Citas,
+So that no tenga que rebuscar por Tema y por Autor hasta dar con ellas.
+
+**Acceptance Criteria:**
+
+**Given** una Colección publicada
+**When** la visito en `/coleccion/{slug}`
+**Then** presenta sus Citas con `src/components/TarjetaDeCita.astro`, el mismo componente que usan los listados de Tema y de Autor
+**And** no compone una presentación propia
+
+**Given** una Cita presente en varias Colecciones
+**When** un rastreador recorre el sitio
+**Then** la canónica de esa Cita sigue siendo su Página de Cita
+**And** no se genera contenido duplicado indexable
+
+**Given** una Colección publicada
+**When** parto de la portada
+**Then** es alcanzable por enlaces internos en un número acotado de saltos
+**And** su URL es legible, en español y sin identificadores opacos
+
+**Given** el nombre de la Colección
+**When** se compone la página
+**Then** va en Source Serif, como los nombres de Autor y de Tema, y el resto de la página en Inter
+
+**Given** el texto editorial de la Colección
+**When** lo leo
+**Then** describe el criterio de la Colección y no adjetiva ni comenta ninguna Cita
+
+**Given** la Página de Colección
+**When** corre el barrido automatizado
+**Then** cumple WCAG 2.1 AA y es plenamente utilizable en un viewport de 360 px
+**And** lo hace sin haberse añadido a ninguna lista aparte
+
+### Story 12.4: Curar una Colección desde la herramienta
+
+As a editor,
+I want crear una Colección, asignarle Citas y ver cuánto le falta para publicarse,
+So that pueda curar sin editar YAML a mano ni adivinar si ya está publicada.
+
+**Acceptance Criteria:**
+
+**Given** la herramienta de curación
+**When** creo una Colección con su criterio y su nombre y le asigno Citas
+**Then** solo admite Citas en estado `publicada`
+
+**Given** una Colección por debajo de su umbral
+**When** consulto su estado
+**Then** veo cuántas Citas le faltan para alcanzarlo, como en la vista de huecos
+
+**Given** una Colección publicada
+**When** la despublico
+**Then** ninguna Cita se borra ni cambia de estado
+
+**Given** que la herramienta es comodidad y no puerta
+**When** edito un fichero de Colección a mano saltándome la herramienta
+**Then** el esquema aplica las mismas reglas y rompe el build si se incumplen
+
+---
+
+## Epic 13: El canal deja de exigir presencia diaria
+
+Héctor compone varias jornadas de material de una sola sentada, y el sistema produce piezas que reúnen varias Citas o anuncian una Colección. Olvidar un día deja de ser perder ese día.
+
+### Story 13.1: Componer varias jornadas de una sentada
+
+As a Héctor, que lleva las cuentas además de editar,
+I want dejar preparadas varias jornadas de material a la vez,
+So that una semana ocupada no sea una semana sin publicar.
+
+**Acceptance Criteria:**
+
+**Given** el lote de composición
+**When** compongo varias jornadas por adelantado
+**Then** fija esas jornadas en `corpus/portada.json`, el mismo mecanismo que ya prioriza la Cita del Día desde la v1
+**And** no se construye un segundo calendario ni un desempate entre ambos
+
+**Given** una jornada con material compuesto por adelantado
+**When** llega esa jornada
+**Then** lo anticipado es indistinguible de lo que compondría el día, porque ambos derivan de la misma fijación
+
+**Given** una jornada ya compuesta cuya Cita del Día cambio
+**When** vuelvo a componer
+**Then** su material se recompone en lugar de quedar obsoleto
+
+**Given** un lote dejado a medias
+**When** lo retomo otro día
+**Then** continúa donde lo dejé
+
+**Given** la superficie del lote
+**When** se construye el sitio
+**Then** no es indexable ni alcanzable desde la navegación pública, heredando la declaración única de la Story 12.1
+
+**Given** la salida del lote
+**When** reviso el repositorio
+**Then** no está versionada; lo versionado es la fijación de jornada
+
+### Story 13.2: Una pieza que reúne varias Citas
+
+As a Héctor,
+I want publicar una pieza que reúna varias Citas,
+So that una jornada rinda más de un formato sin más trabajo.
+
+**Acceptance Criteria:**
+
+**Given** una pieza de varias Citas
+**When** la compongo
+**Then** cada Cita conserva su atribución visible y ninguna aparece sin Autor
+
+**Given** una Cita que supera `MAX_CARACTERES_IMAGEN`
+**When** selecciono Citas para la pieza
+**Then** queda excluida, igual que no admite Imagen de Cita
+
+**Given** la pieza compuesta
+**When** declara su destino
+**Then** lleva un único enlace, marcado por red
+
+**Given** el texto de cada Cita de la pieza
+**When** la plantilla lo compone
+**Then** no se altera, ni se recorta, ni se abrevia
+**And** los tamaños salen de `src/lib/tramos.ts`, no de valores escritos en la plantilla
+
+### Story 13.3: Una Colección anuncia su propia pieza
+
+As a Héctor,
+I want que una Colección publicada produzca su propia pieza,
+So that pueda anunciar la agrupación entera y no una Cita suelta de ella.
+
+**Acceptance Criteria:**
+
+**Given** una Colección publicada
+**When** compongo su pieza
+**Then** el enlace de destino apunta a la Página de Colección, no a una Cita
+
+**Given** una Colección por debajo de su umbral
+**When** intento componer su pieza
+**Then** no se produce: no se anuncia lo que no está publicado
+
+**Given** la pieza de Colección
+**When** la reviso
+**Then** respeta las mismas reglas de atribución y de tramos que la pieza de varias Citas
+
+---
+
+## Epic 14: El ingreso tiene interruptor antes de tener ingreso
+
+El visitante que quiere sostener el sitio encuentra cómo, sin que se le pida. Y cada Modelo de Ingreso futuro nace con un interruptor versionado, auditable y reversible, en lugar de con un disparador automático que sabe encenderse y no sabe apagarse.
+
+### Story 14.1: Encender un Modelo de Ingreso es un commit
+
+As a Héctor,
+I want que activar o desactivar un Modelo de Ingreso sea un cambio visible y reversible,
+So that no tenga un interruptor que sepa encenderse y no sepa apagarse.
+
+**Acceptance Criteria:**
+
+**Given** el estado de un Modelo de Ingreso
+**When** lo consulto
+**Then** es configuración versionada en el repositorio: encenderlo es un diff y `git revert` lo apaga
+
+**Given** un Umbral de Activación cruzado en el receptor
+**When** corre el flujo diario de CI
+**Then** avisa de que se ha cruzado
+**And** ningún Modelo se enciende por su cuenta
+
+**Given** el build
+**When** se construye el sitio
+**Then** ningún byte de `dist/` deriva del plano de medición
+**And** dos construcciones del mismo commit dan el mismo sitio, también con el receptor apagado
+
+**Given** los cuatro Umbrales de Activación
+**When** se implementan
+**Then** viven en `src/lib/umbrales.ts` y en ningún otro sitio
+
+**Given** todos los Modelos apagados
+**When** recorro cualquier superficie del sitio
+**Then** no hay hueco reservado, espacio en blanco ni marcador: un Modelo apagado es invisible, no latente
+
+**Given** el estado de cada Modelo y la cifra contra la que se mide
+**When** los consulto
+**Then** los obtengo sin exportar datos, igual que la salud del Corpus
+
+### Story 14.2: El visitante que quiere sostener el sitio encuentra cómo
+
+As a visitante al que el sitio le ha resuelto algo,
+I want poder apoyarlo sin que me lo pidan,
+So that exista la opción sin que se convierta en un peaje.
+
+**Acceptance Criteria:**
+
+**Given** la Página de Cita y la Página de Colección
+**When** las recorro con las donaciones encendidas
+**Then** la invitación no aparece en ninguna de las dos ni interrumpe ninguna lectura
+
+**Given** las superficies que sí la admiten —portada, resultados de búsqueda y página 404—
+**When** la invitación aparece
+**Then** lo hace fuera del flujo de lectura
+**And** el armazón compartido no la aloja
+
+**Given** la invitación
+**When** se sirve la página
+**Then** no introduce ningún guion de tercero
+**And** `MAX_BYTES_DE_GUION` se sigue cumpliendo
+
+**Given** que ignoro o rechazo la invitación
+**When** sigo usando el sitio
+**Then** ninguna funcionalidad se degrada
+
+**Given** el Umbral de Activación de las donaciones
+**When** compruebo si puede encenderse
+**Then** basta con que LC-1…LC-4 estén verificadas

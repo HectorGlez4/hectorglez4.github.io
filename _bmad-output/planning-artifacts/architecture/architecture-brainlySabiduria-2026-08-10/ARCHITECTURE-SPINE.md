@@ -7,7 +7,7 @@ paradigm: 'Content pipeline (canalización de contenido en tiempo de build) + pl
 scope: 'v1, v2 y v3: sitio público, corpus, ingesta, canal propio, medición, colecciones y monetización por umbral'
 status: final
 created: '2026-08-10'
-updated: '2026-08-17'
+updated: '2026-08-18'
 binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, FR-28, FR-29, FR-30, FR-31, FR-32, FR-33, FR-34, FR-35, FR-36, FR-37, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-13]
 sources:
   - '{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md'
@@ -32,6 +32,7 @@ Las etapas se corresponden con espacios de nombres:
 
 | Etapa | Vive en | Responsabilidad |
 |---|---|---|
+| Recuperación | `tools/` (capa exterior) | Descarga la Fuente y versiona su documento. **La única etapa con red.** |
 | Fuente | `corpus/` | Citas, Autores, Temas y Colecciones como ficheros. Verdad única. |
 | Validación | `src/content.config.ts` | Esquema. La puerta de admisión. |
 | Derivación | `src/lib/` | Normalización, slugs, tramos, umbrales, agregaciones. Puro. |
@@ -49,6 +50,7 @@ graph LR
   F -.valida con.-> B
   E -.balizas.-> G["medicion/<br/>receptor + D1"]
   G -.->|"nunca"| C
+  H["Fuente externa<br/>(red)"] -.->|"solo aquí"| F
   linkStyle 6 stroke:#c0392b,stroke-dasharray:3
 ```
 
@@ -192,12 +194,28 @@ graph LR
 - **Prevents:** que la activación ocurra en vez de decidirse. Si el umbral se comprueba automáticamente, el Modelo se enciende solo — y entonces no sabe apagarse: §12.1 exige apagarlo si SM-C4 se degrada, y un disparador por umbral mide el ingreso pero no el daño. Cierra además la divergencia de dónde vive el estado encendido/apagado, que sin decisión acaba en tres sitios.
 - **Rule:** el estado de cada Modelo de Ingreso es configuración **versionada en el repositorio**, y encender o apagar uno es un cambio visible en un diff, reversible por revert y registrado en la historia de git. Una herramienta de `tools/` consulta el receptor e **informa** de si el umbral está cruzado —informa la decisión del editor, no la sustituye, como `salud.ts` y `huecos.ts`—, y un paso del flujo diario de CI avisa cuando se cruza, para que no dependa de acordarse. Un Modelo apagado no reserva hueco ni deja espacio en blanco: es invisible, no latente.
 
+### AD-22 — La red vive en la cáscara de `tools/`, y en ningún otro sitio
+
+- **Binds:** FR-23, todo `tools/`, `src/lib/`, `src/content.config.ts`, el build
+- **Prevents:** que la primera dependencia de red del proyecto —la recuperación de la Fuente que FR-23 exige— se filtre hacia dentro. Sin regla, un ayudante de `src/lib/` acaba resolviendo una URL «por comodidad» y una construcción pasa a depender de que un servidor ajeno esté vivo y diga hoy lo mismo que ayer. Es la misma propiedad de reproducibilidad que AD-14 protege para la medición, ahora amenazada por el otro extremo de la tubería.
+- **Rule:** solo la capa exterior de `tools/` hace peticiones de red. `tools/lib/`, `src/lib/`, el esquema y las páginas son puros sobre datos **ya recuperados**, y **ningún paso del build descarga nada**. Ratifica lo que el código ya cumple: `tools/lib/extraccion.ts` se declara «puro y sin red», y la descarga vive en `tools/extraer.ts`, una capa fina encima.
+
+### AD-23 — El cotejo corre en el build, contra el documento versionado
+
+- **Binds:** FR-23, FR-24, AD-1, AD-2, AD-10, SM-C1
+- **Prevents:** la única vía por la que el sembrado ejecutado por agentes puede destruir lo único que el producto tiene. AD-1 comprueba que la Procedencia **exista**, no que sea **cierta**, y a volumen esa diferencia deja de ser teórica: una obra plausible y un año plausible pasan la puerta igual que los verdaderos. Si el cotejo viviera solo en `tools/`, un fichero escrito a mano lo esquivaría — exactamente el fallo que AD-1 existe para cerrar.
+- **Rule:** el documento de la Fuente se versiona en `corpus/fuentes/`, que **no es una colección** y sí lo lee el build — carácter propio, distinto tanto de `corpus/citas/` como de `corpus/semilla/`, cuyo registro sigue siendo puramente auditable e invisible al build. Cada Cita referencia su documento, y **el cotejo corre en el build sin que ningún camino lo esquive**: una Cita cuyo texto no se localice literalmente en su documento **rompe el build**, con la ruta del fichero y la regla incumplida. Cuatro precisiones que la regla fija porque sin ellas dos builders divergen:
+  - **Dónde corre el cotejo lo elige el código**, con una condición: fuera de `src/lib/`, que por AD-5 no lee el sistema de ficheros. Cargador, refinamiento del esquema o paso de validación propio son todos válidos; lo invariante es que corra en el build y no se pueda saltar. AD-1 nunca exigió que la puerta fuera el esquema — exigió que no viviera solo en `tools/` y que un fichero escrito a mano no la esquivara.
+  - **Un documento por par (Fuente, obra).** Recuperar una obra ya presente reutiliza su documento en vez de añadir otra copia, y el documento se nombra `{id-de-fuente}--{slug-de-obra}`; la Cita lo referencia por ese mismo identificador. Sin esto, dos sesiones de sembrado dejan dos copias y esquemas de referencia incompatibles.
+  - El documento se versiona como **texto plano**, con el marcado retirado al recuperarlo. Guardar el HTML de origen en un caso y el texto extraído en otro hace que el mismo cotejo pase contra uno y falle contra el otro.
+  - El cotejo compara **colapsando espacios y nada más**. No pasa por `normalizar.ts`: quitar diacríticos haría coincidir «cafe» con «café», y una Cita que difiere en un acento de su edición es justo el defecto que NFR-12 y SM-C1 quieren cazar.
+
 ## Consistency Conventions
 
 | Concern | Convention |
 |---|---|
 | Nombres de entidades | Español, en singular, exactamente como el glosario del PRD: `Cita`, `Autor`, `Tema`, `Procedencia`, `Colección`, `Pieza de Canal`, `Modelo de Ingreso`. Ni `quote`, ni `frase`, ni `author`. Los identificadores de código siguen el glosario. |
-| Ficheros del corpus | `corpus/citas/{slug-autor}--{fragmento}.md` · `corpus/autores/{slug-autor}.yml` · `corpus/temas/{slug-tema}.yml` · `corpus/colecciones/{slug-coleccion}.yml`. En revisión: `corpus/_revision/`. |
+| Ficheros del corpus | `corpus/citas/{slug-autor}--{fragmento}.md` · `corpus/autores/{slug-autor}.yml` · `corpus/temas/{slug-tema}.yml` · `corpus/colecciones/{slug-coleccion}.yml`. En revisión: `corpus/_revision/`. Documentos de Fuente: `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt`. |
 | Rutas públicas | `/cita/{slug}` · `/autor/{slug}` · `/tema/{slug}` · `/coleccion/{slug}` · `/buscar`. En español, minúsculas, sin diacríticos, sin identificadores opacos (NFR-4). |
 | Fechas y años | El año de fallecimiento es un entero. Las fechas completas y las jornadas, ISO 8601. |
 | Ausencia de datos | Un campo opcional ausente se omite del fichero; **nunca** cadena vacía ni `null`. La distinción entre Procedencia completa, parcial y ausente es de presencia de campos, no de valores centinela. |
@@ -235,7 +253,8 @@ sabiduria-de-bolsillo/
     temas/
     colecciones/     # AD-18: la Colección declara sus miembros, en blando
     portada.json     # AD-12: fijaciones de jornada; también las del lote (FR-29)
-    semilla/
+    fuentes/         # AD-23: documentos de Fuente. Los lee el build; NO es colección
+    semilla/         # registro auditable de la siembra inicial; el build no lo lee
     _revision/       # AD-2: el build NO carga este directorio
   src/
     content.config.ts  # AD-1: la puerta de admisión
@@ -286,7 +305,7 @@ erDiagram
 | FR-17, FR-18, FR-20 Compartición | `islands/` + `lib/compartir.ts` | AD-6, AD-13 |
 | FR-19 Tarjeta Social | `pages/tarjeta/[slug].png.ts` | **AD-15**, **AD-16**, AD-11 |
 | FR-21, FR-22 Kit Diario | `kit.astro` + `lib/kit.ts` | AD-15, **AD-17**, AD-12 |
-| FR-23…FR-25 Sembrado | `tools/` | AD-1, AD-10 |
+| FR-23…FR-25 Sembrado | `tools/` + `content.config.ts` | **AD-22**, **AD-23**, AD-1, AD-10 |
 | **FR-26…FR-28 Colecciones** | `corpus/colecciones/` + `pages/coleccion/` | **AD-18**, **AD-19**, AD-11, AD-4 |
 | **FR-29…FR-32 Piezas de Canal** | `tools/` | **AD-15**, AD-12, AD-8 |
 | **FR-33…FR-37 Modelos de Ingreso** | configuración versionada + `tools/` | **AD-21**, **AD-20**, **AD-14**, AD-9 |
@@ -299,6 +318,7 @@ erDiagram
 - **Motor de vídeo (FR-31).** Sin encoder elegido, y es deliberado: su propia puerta —ninguna cuenta de imagen fija demostrando visitas, ningún motor— hace que elegirlo hoy sea vincular una versión que caducará antes de usarse. Lo que **sí** queda decidido es dónde vive (AD-15: `tools/`), y por eso se recorta sin tocar nada más. Se decide cuando SM-8 dé señal.
 - **Umbral mínimo de Colección.** El PRD lo deja abierto a propósito (§14.4) y se fija curando las tres o cuatro primeras. AD-9 dice dónde vivirá el número; AD-18 dice sobre qué recuento se aplica. Nada más se decide aquí.
 - **Mecanismo de caché de la pregeneración por Cita.** AD-16 fija la invariante; el cómo —clave por hash de contenido, caché de CI, o artefacto reutilizado— lo elige el código cuando el build lo pida. Restricción conocida que conviene no descubrir sola: a ~2.000 Citas la caché es del orden de cientos de MB, y las de CI tienen tope por repositorio y se desalojan por desuso. La reconstrucción diaria de AD-12 juega a favor —se usa cada día, así que no caduca—; el tamaño no.
+- **Mecanismo de caché del cotejo (AD-23).** La invariante es que el esquema recoteje; a ~2.000 Citas contra decenas de MB de texto, dos veces al día por AD-12, conviene no rehacerlo entero cada vez. Es el mismo problema que AD-16 resolvió para la pregeneración por Cita —función del contenido, no del calendario— y admite la misma solución. El cómo lo elige el código cuando el build lo pida.
 - **Proveedor concreto de analítica y de publicidad.** AD-13 y AD-20 fijan las propiedades que deben cumplir; qué se contrata se decide al cruzar el umbral. AD-20 ya excluye buena parte del mercado de display, y conviene saberlo antes de evaluar.
 - **Definición del producto propio (FR-36).** Deuda deliberada del PRD: elegir entre lámina, antología y recurrencia sin saber quién visita el sitio es el supuesto que §12 existe para evitar.
 - **Estrategia de crecimiento del build.** AD-16 quita el coste que crecía con el Corpus. Lo que queda —el prerenderizado completo— se revisa si el build supera los cinco minutos con la caché ya puesta, no antes.

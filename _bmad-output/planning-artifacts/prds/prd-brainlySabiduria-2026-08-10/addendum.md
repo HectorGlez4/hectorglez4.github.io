@@ -2,7 +2,7 @@
 title: "Addendum — PRD Sabiduría Diaria"
 status: final
 created: 2026-08-10
-updated: 2026-08-10
+updated: 2026-08-18
 ---
 
 # Addendum del PRD
@@ -119,9 +119,17 @@ Los cuatro Modelos se evaluaron por **coste sobre el producto**, no por ingreso 
 ## Decisiones de mecanismo — v3
 
 - **Motor de vídeo (FR-31).** Sin decidir: composición temporal, audio o su ausencia, duración, formato de salida por red. Es la única pieza de la v3 que introduce una dependencia de cómputo nueva, y §6.3 la había descartado en la v2 con un argumento que sigue en pie. Su umbral (ninguna evidencia de SM-8, ningún motor) existe para que Arquitectura no gaste tiempo en ella antes de que haya señal.
-- **Composición por lote (FR-29).** Dónde vive el material compuesto por adelantado y cómo se reconcilia con la reconstrucción diaria de AD-12. La restricción de producto es que lo anticipado sustituya a lo de la jornada cuando ambos existan; el mecanismo es de Arquitectura.
+- **Composición por lote (FR-29) — resuelto, ya no se delega.** La v3 lo pasó a Arquitectura y Arquitectura respondió: son las fijaciones de jornada de `corpus/portada.json`, que `citaDelDia.ts` ya prioriza sobre la rotación desde la v1 (AD-12, AD-15). El lote fija jornadas ahí y **no existe un segundo calendario**. La exigencia de que lo anticipado sustituya a lo de la jornada se cumple por construcción, porque ambos derivan de la misma fijación: no hay desempate que diseñar. Se deja escrito porque la redacción anterior invitaba a construir el calendario duplicado.
 - **Modelo de la Colección (FR-26…FR-28).** Si la pertenencia se declara en la Cita o en la Colección. El PRD exige que añadir una Colección no toque ninguna Cita existente, lo que apunta a lo segundo, pero la elección es de Arquitectura y toca AD-4 (slug inmutable) solo si alguien propusiera meter la Colección en la ruta de la Cita — cosa que FR-28 prohíbe.
 - **Integración publicitaria (FR-37).** Qué proveedor y por qué transporte. La restricción dura es NFR-11: un proveedor que exija consentimiento invasivo o identifique al visitante no cumple FR-37 y no se enciende, por rentable que sea. Esto excluye de partida a buena parte del mercado y conviene saberlo antes de evaluar.
+
+## Por qué §5 se estrechó a la publicidad *(v3.1)*
+
+El no-objetivo decía «ningún Modelo de Ingreso toca la Página de Cita ni la de Colección», y así redactado hacía **inconstruible FR-35**: el enlace de afiliación nace de la Procedencia, que se muestra precisamente ahí (FR-2).
+
+La generalización fue del redactor, no de la decisión. Lo que se decidió en la v3 fue que la Página de Cita queda intocable **por la publicidad display**, que es el único Modelo con coste sobre la superficie; §12.1 asigna a la afiliación coste «bajo — nace de la Procedencia ya publicada». La restricción dura sigue intacta donde se tomó, y lo que se retira es el alcance que nadie decidió darle.
+
+Conviene saberlo porque es una idea que vuelve: la lectura amplia parece más segura y en realidad prohíbe un Modelo de coste cero mientras deja el resto igual de acotado.
 
 ## Por qué SM-C2 se extendió en vez de crear una contra-métrica de Colecciones
 

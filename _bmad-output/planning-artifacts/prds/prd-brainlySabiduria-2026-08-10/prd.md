@@ -2,7 +2,7 @@
 title: Sabiduría de Bolsillo
 status: final
 created: 2026-08-10
-updated: 2026-08-17
+updated: 2026-08-18
 ---
 
 # PRD: Sabiduría de Bolsillo
@@ -55,7 +55,7 @@ El motor de crecimiento no es una campaña: es la propia estructura del sitio. C
   Marisol, profesora de literatura, busca una cita concreta de un autor clásico. Desde la Página de Cita pulsa el nombre del autor y aterriza en la **Página de Autor**: una semblanza breve y el resto de citas de esa persona en el catálogo. Desde ahí salta a un **Tema** que le interesa y descubre a un autor latinoamericano que no conocía. **Clímax:** cuatro páginas después sigue leyendo. **Resolución:** vuelve por su cuenta días después, directamente al dominio.
 
 - **UJ-4. Héctor incorpora cincuenta citas nuevas sin romper la promesa del sitio.**
-  Héctor, único editor, tiene un lote de citas de un autor recién entrado en dominio público. Las carga en la herramienta interna. El sistema rechaza las que no traen **Procedencia** y las que pertenecen a un **Autor** sin año de fallecimiento registrado, dejándolas en estado de revisión en lugar de publicarlas. Él completa lo que falta y publica el resto. **Clímax:** el catálogo crece sin que baje el porcentaje de citas verificadas. **Caso límite:** si una cita duplica una ya publicada, el sistema lo señala antes de aceptarla.
+  Héctor, único editor, tiene un lote de citas de un autor recién entrado en dominio público. El lote entra por la herramienta interna — lo lanza él o un agente por él; la puerta es la misma. El sistema rechaza las que no traen **Procedencia** y las que pertenecen a un **Autor** sin año de fallecimiento registrado, dejándolas en estado de revisión en lugar de publicarlas. Él completa lo que falta y publica el resto. **Clímax:** el catálogo crece sin que baje el porcentaje de citas verificadas. **Caso límite:** si una cita duplica una ya publicada, el sistema lo señala antes de aceptarla.
 
 - **UJ-5. Héctor publica la Cita del Día en sus cuentas antes de desayunar.**
   Héctor, además de editor, lleva las cuentas de Sabiduría de Bolsillo en Instagram, TikTok, X, Threads y Facebook. Son la única fuente real de visitantes mientras el Corpus sea pequeño. A las siete de la mañana abre el móvil y entra en una URL del propio sitio que el sistema ha dejado compuesta esa madrugada: la Imagen de la Cita del Día ya generada, el pie con la atribución escrito, y el enlace a la Página de Cita. Comparte la imagen a cada cuenta desde la misma hoja del sistema que usa cualquier visitante. **Clímax:** publicar en cuatro redes le cuesta dos minutos y cero decisiones, así que lo hace todos los días en lugar de tres veces por semana. **Resolución:** los enlaces distinguen de qué red viene cada visita, así que al cabo de un mes sabe cuál de las cuatro merece su tiempo. **Caso límite:** si la Cita del Día supera los 300 caracteres y no admite Imagen, el kit lo dice y ofrece una Cita alternativa apta, en vez de dejarle sin material.
@@ -403,6 +403,8 @@ El editor puede saber qué red trae visitas. Valida SM-8.
 
 **Descripción:** Proceso incremental por el que el Corpus crece desde las 38 Citas actuales hacia el orden de magnitud que §6.1 supone, sin que baje el porcentaje de Citas con Procedencia verificada. Extiende la herramienta de §4.8; no la sustituye.
 
+**Quién lo ejecuta, revisado en la v3.1.** El sembrado puede ejecutarlo el editor o un agente. Lo que hace esa apertura segura no es confiar en quien lo lanza, sino que la Procedencia deje de ser una afirmación: la Fuente se recupera y su metadato se deriva del documento (FR-23), y el texto de cada candidata se localiza literalmente en él antes de publicarse (FR-24). Un agente no puede inventar una obra porque nunca la teclea, y no puede inventar una Cita porque su texto tiene que aparecer en el documento.
+
 **La decisión que define esta feature es de dónde NO se extrae.** Los sitios de citas existentes publican texto y nombre, sin obra ni año: cualquier Cita tomada de ellos moriría en la puerta de admisión de FR-13, y además §5 lo excluye explícitamente. La extracción se hace **desde las obras**, en fuentes de dominio público que traen la referencia consigo. La Procedencia no se busca después de tener el texto: viene con él.
 
 **Sobre las traducciones.** Una obra en dominio público no arrastra a sus traducciones, que son obras nuevas con su propio plazo de protección. Y una traducción hecha por el editor produce una frase en español que no consta en ninguna edición publicada, o sea una Cita cuya Procedencia no es verificable — justo el defecto que el producto existe para corregir. Solo se admite texto en español procedente de una edición identificable, sea original o traducción ya en dominio público.
@@ -411,32 +413,39 @@ El editor puede saber qué red trae visitas. Valida SM-8.
 
 #### FR-23: Extracción de candidatas desde una Fuente
 
-El editor elige un Autor y una Fuente, y obtiene Citas candidatas con su Procedencia ya rellena.
+Elegidos un Autor y una Fuente, el sistema obtiene Citas candidatas con su Procedencia ya rellena, **derivada del documento recuperado y no de lo que declare quien lanza la extracción**.
 
 **Consecuencias (verificables):**
+- La Fuente se recupera desde su URL y su metadato —obra, año, licencia— se deriva del documento recuperado. No se teclea al invocar la extracción: un dato escrito a mano no es lo que dice la Fuente, sino lo que recuerda quien lo escribe.
+- Una URL que no pertenezca al conjunto de Fuentes admitidas no produce candidatas.
 - Cada candidata llega con obra y año tomados de la Fuente, no inferidos.
 - Cada candidata registra de qué Fuente y bajo qué licencia se obtuvo.
 - Una Fuente cuya licencia no permita reutilización no produce candidatas.
 - El sistema no propone candidatas cuyo texto no esté en español.
+- El documento recuperado se conserva mientras haya candidatas suyas pendientes, porque el cotejo de FR-24 se hace contra él.
 
-#### FR-24: Aprobación por lote
+#### FR-24: Aprobación por lote con cotejo contra la Fuente
 
-El editor revisa las candidatas en bloque y decide cuáles entran, sin abandonar la revisión para cada una.
+Las candidatas se revisan en bloque y ninguna se publica hasta localizar su texto en el documento de su Fuente. La revisión puede ejecutarla el editor o un agente; lo que no cambia es la puerta.
 
 **Consecuencias (verificables):**
+- El texto de una candidata debe encontrarse **literalmente** en el documento recuperado de su Fuente. Si no se localiza, la candidata no se publica y permanece en revisión.
+- El cotejo se hace contra el documento recuperado, nunca contra la afirmación de quien extrajo la candidata.
 - Aprobar una candidata la somete a las mismas reglas de FR-13 y FR-14 que cualquier alta: el sembrado no abre una puerta lateral.
 - Rechazar una candidata la descarta sin dejarla en el Corpus.
 - Una candidata duplicada de una Cita ya publicada se señala antes de la decisión.
-- El lote es reanudable: el editor puede dejarlo a medias y continuar otro día.
+- El lote es reanudable: puede dejarse a medias y retomarse otro día.
+- Publicar es siempre un acto explícito. Ninguna candidata pasa a `publicada` por acumulación de tiempo ni por ausencia de objeción.
 
 #### FR-25: Prioridad de sembrado por hueco del Corpus
 
-El editor puede ver qué falta antes de decidir a qué Autor dedica la sesión. Valida SM-C2.
+El hueco del Corpus determina a qué se dedica la sesión de sembrado, con una política explícita y reproducible que puede aplicar el editor o un agente. Valida SM-C2.
 
 **Consecuencias (verificables):**
 - Se muestran los Temas por debajo del umbral de publicación de FR-6, con cuántas Citas les faltan.
 - Se muestra la proporción de Autores de tradición latinoamericana frente al suelo del 40 % de §6.1.
-- La vista no propone Autores automáticamente: informa la decisión del editor, no la sustituye.
+- La política de selección es determinista y consultable: con el mismo estado del Corpus propone el mismo objetivo, y dice de qué hueco sale.
+- El editor puede anular la propuesta, y la anulación queda registrada. Automatizar la elección no es retirarle la última palabra.
 
 ### 4.12 Colecciones Curadas *(v3)*
 
@@ -536,7 +545,7 @@ Una Colección publicada produce su propia Pieza de Canal.
 
 **Por qué umbrales y no una fecha.** Un calendario monetiza un sitio que quizá no tenga visitantes; un umbral solo se cruza si los hay. Además convierte cada Modelo en una decisión reversible: si el tráfico baja del umbral, el Modelo se apaga sin haber comprometido el diseño del producto.
 
-**La restricción que gobierna toda la sección.** NFR-10 (sin muro de entrada) tiene prioridad sobre cualquier Modelo de Ingreso, y §11 identifica «publicidad intercalada en el contenido» como anti-referencia declarada del producto. Ningún Modelo puede tocar la Página de Cita, que es el punto de entrada real desde buscadores y la superficie donde el producto cumple su promesa.
+**La restricción que gobierna toda la sección.** NFR-10 (sin muro de entrada) tiene prioridad sobre cualquier Modelo de Ingreso, y §11 identifica «publicidad intercalada en el contenido» como anti-referencia declarada del producto. **Ninguna unidad publicitaria** puede aparecer en la Página de Cita ni en la de Colección, que son el punto de entrada real desde buscadores y las superficies donde el producto cumple su promesa. Un Modelo sin coste de superficie sí puede nacer de lo que la página ya publica —es el caso de FR-35, cuyo enlace sale de la Procedencia—, siempre que la atribución se lea igual con el Modelo encendido que apagado.
 
 **Requisitos Funcionales:**
 
@@ -608,8 +617,8 @@ La publicidad, si se enciende, vive donde no está la Cita.
 - **No aspiramos al volumen en la v1.** Un catálogo pequeño y verificado, no uno grande y dudoso.
 - **No traducimos.** El producto es en español y las Citas se publican en español.
 - **No monetizamos antes de su umbral.** La v1 se diseñó sin ingreso alguno. La v3 no deroga esa regla: diseña los cuatro Modelos de Ingreso y los deja apagados hasta que el tráfico medido cruce el Umbral de Activación de cada uno (§4.14, §12). Lo que se adelanta es el diseño, nunca el cobro.
-- **No monetizamos la lectura.** Ningún Modelo de Ingreso toca la Página de Cita ni la Página de Colección. Son las superficies donde el producto cumple su promesa y el punto de entrada real desde buscadores; §11 y NFR-10 tienen prioridad sobre cualquier ingreso.
-- **No generamos Citas con IA.** El sistema no crea ni parafrasea contenido atribuible a una persona real.
+- **No ponemos publicidad donde se lee.** Ninguna unidad publicitaria aparece en la Página de Cita ni en la Página de Colección: son las superficies donde el producto cumple su promesa y el punto de entrada real desde buscadores. §11 y NFR-10 tienen prioridad sobre cualquier ingreso.
+- **No inventamos texto y lo presentamos como real.** El sistema no crea ni parafrasea el texto de una Cita, ni compone prosa nueva sobre una persona real y la publica como si estuviera documentada. Seleccionar y transcribir literalmente de una edición identificable **sí** es admisible, y es exactamente lo que hace el sembrado de §4.11, lo ejecute el editor o un agente. La distinción es entre *escoger lo que alguien escribió* y *escribir en su lugar*. **La semblanza de un Autor entra en la prohibición**: es prosa nueva sobre una persona real, así que o procede de una fuente citable o la escribe una persona que responde de ella.
 
 ## 6. Alcance
 
@@ -792,7 +801,7 @@ Las seis preguntas abiertas de la primera redacción se resolvieron en aquella p
 
 1. **Marca registrada.** Búsqueda en OEPM y EUIPO para "Sabiduría de Bolsillo". El dominio está contratado, que es cosa distinta. No bloquea el desarrollo, sí el gasto en identidad visual.
 2. **Umbral de reducción tipográfica.** FR-10 fija los tramos por longitud y el corte en 300 caracteres, pero los valores concretos de cada tramo salen de probar plantillas reales. Corresponde a UX, no a producto.
-3. **Cadencia de sembrado.** FR-23…FR-25 definen el proceso, no el ritmo. Cuántas Citas por sesión y cada cuánto es una decisión de operación que se toma con la primera sesión real hecha, no antes.
+3. **Cadencia de sembrado.** FR-23…FR-25 definen el proceso, no el ritmo. Cuántas Citas por sesión y cada cuánto se decide con la primera sesión real hecha, no antes. *(Replanteada en la v3.1: con el sembrado ejecutable por agentes, el límite deja de ser el tiempo del editor y pasa a ser lo que SM-C1 aguante. La pregunta ya no es «cuánto puede sembrar Héctor», sino «a partir de qué ritmo la salud del Corpus empieza a bajar».)*
 
 **Añadidas en la v3, ninguna bloqueante para Arquitectura ni para épicas:**
 
@@ -807,6 +816,10 @@ Los supuestos etiquetados en la primera redacción se convirtieron en decisiones
 - **§8 / NFR-2** — El sitio se sirve con HTML renderizado en servidor o pregenerado. Es un supuesto de capacidad, no una elección de tecnología: la indexación fiable de ~2.000 páginas lo requiere. La elección concreta corresponde a Arquitectura.
 - **§6.1** — El Corpus de arranque de ~2.000 Citas es alcanzable por un solo editor antes del lanzamiento. Es el supuesto con más riesgo de plan del documento: si resulta falso, la palanca es reducir el Corpus, nunca relajar FR-13. **Revisado en la v2:** resultó falso en su forma original. El lanzamiento no espera a las 2.000 Citas; sale con lo que haya y el Corpus crece publicado, mediante §4.11. Lo que no se toca es FR-13, exactamente como el supuesto preveía.
 - **§4.10 / SM-8** — Las cuentas de Sabiduría de Bolsillo tienen audiencia suficiente para producir visitas medibles. Es un supuesto de capacidad del canal, no del sistema: si resulta falso, SM-8 no dará señal y la conclusión será que el canal propio no sustituye al buscador, no que el Kit Diario esté mal construido.
+
+**Añadido en la v3.1:**
+
+- **§4.11 / FR-24** — El cotejo literal contra el documento de la Fuente basta para que el sembrado ejecutado por agentes no degrade SM-C1. Es el supuesto que sostiene toda la apertura: si resulta falso —porque el cotejo pase textos correctos con Procedencia equivocada, o porque el volumen esconda errores que una revisión humana habría visto—, la palanca es volver a poner una persona en la aprobación, nunca relajar el cotejo. Se falsa barato: auditar una muestra de lo sembrado por agente contra sus ediciones.
 
 **Añadidos en la v3:**
 
