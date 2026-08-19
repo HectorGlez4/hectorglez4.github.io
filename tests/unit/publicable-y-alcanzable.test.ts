@@ -7,6 +7,7 @@ import {
   RAIZ,
   TEMA_VALIDO,
   citaValida,
+  coleccionValida,
   construirConCorpus,
   limpiar,
 } from './ayuda/construir.js';
@@ -145,9 +146,12 @@ describe('Historia 12.1 — toda página de src/pages tiene declaración', () =>
   it('la comprobación caza de verdad una página sin declarar', () => {
     // Esta es la que sostiene la garantía en el repositorio —el filtro del sitemap calla a
     // propósito—, así que tiene que demostrarse que no da verde por vacía.
+    // Una página que no existe y que nadie va a declarar. Era `coleccion/[slug].astro`,
+    // y la Historia 12.3 construyó una Página de Colección: si algún día alguien la
+    // declarase con esa forma, esta comprobación se volvería verde sin comprobar nada.
     const declaradas = SUPERFICIES.map((s) => s.pagina);
-    expect(sinDeclaracion([...paginas, 'coleccion/[slug].astro'], declaradas)).toEqual([
-      'coleccion/[slug].astro',
+    expect(sinDeclaracion([...paginas, 'antologia/[slug].astro'], declaradas)).toEqual([
+      'antologia/[slug].astro',
     ]);
   });
 
@@ -177,14 +181,29 @@ describe('Historia 12.1 — toda página de src/pages tiene declaración', () =>
  * no tener nada que mirar. Con una Cita más de las que caben en una página hay Tema
  * publicado y hay página segunda, que son justamente los dos casos que se quieren fijar.
  */
+const SLUGS_DE_CITA = Array.from(
+  { length: CITAS_POR_PAGINA + 1 },
+  (_, i) => `seneca-fragmento-${i + 1}`,
+);
+
 const CORPUS_COMPLETO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,
+  /*
+   * Historia 12.3 — la familia de Colección entra en los dos lazos de esta prueba.
+   *
+   * Sin una Colección publicada, la comprobación de que el barrido recibe **una muestra de
+   * cada familia declarada** empezaría a fallar en cuanto se declarase la familia, y la del
+   * sitemap pasaría sin mirar ninguna. Declara las mismas Citas que el corpus, que son una
+   * más de las que caben en una página: así la Colección también pagina y aparece la ruta
+   * `/coleccion/{slug}/2`, que es la que tiene que quedarse fuera del sitemap y del barrido.
+   */
+  'colecciones/frases-cortas.yml': coleccionValida({ miembros: SLUGS_DE_CITA }),
   ...Object.fromEntries(
-    Array.from({ length: CITAS_POR_PAGINA + 1 }, (_, i) => [
+    SLUGS_DE_CITA.map((slug, i) => [
       `citas/seneca--fragmento-${i + 1}.md`,
       citaValida({
-        slug: `seneca-fragmento-${i + 1}`,
+        slug,
         texto: `Fragmento ${i + 1} sobre la brevedad de la vida, que es larga si sabes usarla.`,
       }),
     ]),
@@ -260,11 +279,20 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       // Si el corpus dejara de producir Temas o páginas 2+, lo de abajo seguiría en verde
       // sin comprobar nada. Que la premisa falle tiene que verse aquí y no allí.
       const rutas = await rutasConstruidas();
-      for (const exigida of ['/', '/buscar', '/404', '/kit', '/tema/el-tiempo']) {
+      for (const exigida of [
+        '/',
+        '/buscar',
+        '/404',
+        '/kit',
+        '/tema/el-tiempo',
+        '/coleccion/frases-cortas',
+      ]) {
         expect(rutas, exigida).toContain(exigida);
       }
       expect(rutas.some((r) => r.startsWith('/cita/'))).toBe(true);
-      expect(rutas.filter((r) => /^\/(autor|tema)\/[^/]+\/\d+$/.test(r)).length).toBeGreaterThan(0);
+      expect(
+        rutas.filter((r) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(r)).length,
+      ).toBeGreaterThan(0);
     });
   });
 
@@ -314,7 +342,16 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
 
     it('la muestra de un listado paginado es la primera página, no la segunda', async () => {
       const barrido = superficiesDelBarrido(await rutasConstruidas());
-      expect(barrido.filter((ruta) => /^\/(autor|tema)\/[^/]+\/\d+$/.test(ruta))).toEqual([]);
+      expect(
+        barrido.filter((ruta) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(ruta)),
+      ).toEqual([]);
+    });
+
+    it('la Colección entra en el barrido sin que se la añada a ninguna lista', async () => {
+      // El criterio de aceptación de la 12.3, por el camino que el CI recorre. Lo único
+      // que se escribió para que esto ocurra es la declaración de `src/lib/superficies.ts`:
+      // ni esta prueba ni `tests/e2e/accesibilidad.spec.ts` nombran la ruta en una lista.
+      expect(superficiesDelBarrido(await rutasConstruidas())).toContain('/coleccion/frases-cortas');
     });
   });
 
@@ -350,14 +387,16 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       for (const fuera of ['/buscar', '/kit', '/404']) {
         expect(rutas, fuera).not.toContain(fuera);
       }
-      expect(rutas.filter((r) => /^\/(autor|tema)\/[^/]+\/\d+$/.test(r))).toEqual([]);
+      expect(rutas.filter((r) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(r))).toEqual([]);
     });
 
-    it('sí anuncia la portada, las Citas, los Autores y los Temas', async () => {
+    it('sí anuncia la portada, las Citas, los Autores, los Temas y las Colecciones', async () => {
       const rutas = await anunciadas();
       expect(rutas).toContain('/');
       expect(rutas).toContain('/autor/seneca');
       expect(rutas).toContain('/tema/el-tiempo');
+      // Historia 12.3 — sale de la misma declaración que el `noindex` y el barrido.
+      expect(rutas).toContain('/coleccion/frases-cortas');
       expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBe(CITAS_POR_PAGINA + 1);
     });
 

@@ -954,3 +954,44 @@ de contar la retirada sería dejar de contar la errata. Y `corpus/colecciones/` 
 dos avisos en cada construcción, uno de ellos engañoso; se investigó callarlos y exigiría
 apoyarse en detalles internos de Astro sin garantía de versión, así que se aceptó el coste
 y quedó escrito con las líneas literales en `src/content.config.ts`.
+
+## 12.3 — La Página de Colección, sin canibalizar a la Cita
+
+**Verificado.** `/coleccion/{slug}` presenta las Citas de una Colección con el mismo
+componente de tarjeta que los listados de Autor y de Tema, con el nombre en Source Serif y
+el criterio editorial al pie. Agrega y enlaza pero no reproduce: la canónica de cada Cita
+sigue siendo su propia página. Va paginada, porque el umbral es un suelo y no un techo.
+
+1107 pruebas unitarias en verde (1049 al empezar), 398 e2e, 0 errores de tipos.
+
+**El estreno del dueño único de la 12.1, y funcionó.** Declarar la familia de Colección en
+`src/lib/superficies.ts` fue **una sola línea**, y de ella salieron el sitemap, el
+`noindex`, el índice interno de Pagefind y el barrido de accesibilidad, sin tocar ninguna
+lista aparte. Comprobado por mutación: retirar las rutas de Colección de la derivación hace
+que el barrido pierda la familia entera.
+
+**La aserción que convierte AD-19 en algo mecánico.** El `<li>` que emite la Colección se
+compara **byte a byte** contra el que emite la Página de Tema para la misma Cita. Astro
+estampa un identificador por componente, así que una tarjeta copiada a mano no puede
+hacerse pasar por la compartida. Una norma de estilo pasa a ser una puerta.
+
+**Una bomba de relojería desactivada.** `busqueda.spec.ts` afirmaba el conjunto **exacto**
+de tipos de resultado —cita, autor, tema— y habría fallado el día que se curase la primera
+Colección, por un motivo que nada tendría que ver con lo que se estuviera haciendo en ese
+momento. Se demostró sembrando una Colección en una copia aislada: la aserción antigua
+falla con `+ "coleccion"`. Ahora afirma contención más «ningún tipo desconocido».
+
+**Una afirmación corregida, que no el código.** La prueba de «no se genera contenido
+duplicado indexable» usaba textos de más de 120 caracteres a propósito, y por eso no podía
+fallar: la tarjeta solo recorta por encima de ese límite. Pero las 38 Citas reales miden
+120 o menos —la más larga, 101—, así que en producción la tarjeta **nunca recorta**, y el
+texto íntegro de una Cita ya aparece hoy en su Página de Tema y en la de Autor. Lo que
+sostiene NFR-13 es la canónica, no el recorte, y ahora el docstring lo dice así.
+
+**Lo que quedó fuera.** La mitad de UX-DR33 que necesita navegador —«sin desplazamiento
+horizontal a 360 px»— sigue en una prueba que hoy se salta, porque producción no tiene
+ninguna Colección que visitar; la mitad medible sobre el HTML sí pasó al plano que el CI
+ejecuta. Se ejercitó todo en una copia aislada con una Colección sembrada —418 e2e en
+verde, axe WCAG 2.1 AA incluido— pero eso no es una garantía que corra sola. La Página de
+Colección no existirá en producción hasta que se cure la primera con la herramienta de la
+12.4, y la portada se comporta bien en ese estado: no la menciona en absoluto.

@@ -309,13 +309,24 @@ export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Ci
 }
 
 /**
- * Todas las rutas publicadas del sitio. El sitemap y la comprobación de enlaces la usan.
+ * Las rutas que el conjunto publicable dice que deberían existir.
  *
- * **Todavía no enumera Colecciones**, y es deliberado: la Página de Colección la construye
- * la Historia 12.3. Enumerar aquí una ruta que ninguna página genera anunciaría un 404 en
- * el sitemap y dejaría huérfana una superficie que no existe. Cuando esa página llegue,
- * la línea que falta sale de `coleccionesPublicadas(conjunto.colecciones, conjunto.citas)`
- * y de ningún otro sitio.
+ * **Quién la consume, dicho sin adornos.** El docblock anterior decía «el sitemap y la
+ * comprobación de enlaces la usan», y desde la Historia 12.1 eso es falso: el sitemap se
+ * arma con las rutas que Astro construyó de verdad, filtradas por `anunciableEnElSitemap`,
+ * y la comprobación de enlaces recorre el `dist/`. Los dos parten de lo **construido**, que
+ * es lo correcto —un sitemap derivado de una intención no ve el día que la intención y la
+ * construcción divergen—. Lo que esta función aporta hoy es el otro lado de esa
+ * comparación: la enumeración **esperada**, escrita desde el conjunto publicable, que
+ * `tests/unit/publicado.test.ts` fija caso a caso. Es una afirmación probada, no una pieza
+ * del camino de ejecución, y conviene que se lea así.
+ *
+ * Enumera Colecciones desde la Historia 12.3, que es la que construye su página. La línea
+ * de Colección no filtra ni cuenta nada, a diferencia de las de Autor y Tema:
+ * `conjunto.colecciones` ya viene resuelto y filtrado por su umbral, y aplicarle aquí un
+ * segundo criterio sería el segundo cómputo que AD-11 existe para impedir. Solo la primera
+ * página de cada listado paginado aparece; las 2+ son `servicio` por la declaración de
+ * `src/lib/superficies.ts`.
  */
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [
@@ -323,6 +334,7 @@ export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
     ...conjunto.citas.map((c) => `/cita/${c.slug}`),
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => `/autor/${a.slug}`),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => `/tema/${t.slug}`),
+    ...conjunto.colecciones.map((c) => `/coleccion/${c.slug}`),
   ];
 }
 

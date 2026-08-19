@@ -9,7 +9,7 @@ import {
   construirConCorpus,
   limpiar,
 } from './ayuda/construir.js';
-import { MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
+import { MAX_CARACTERES_CRITERIO, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 12.2 — la Colección sobre un proyecto construido de verdad.
@@ -214,16 +214,16 @@ describe('Historia 12.2 — el umbral se aplica al recuento resuelto, al constru
   });
 
   /*
-   * Aquí había una prueba que leía el `dist/sitemap-0.xml` y comprobaba que no nombrase la
-   * Colección. **No podía fallar**: `rutasPublicadas` no enumera Colecciones —la Página de
-   * Colección es la 12.3— así que el sitemap no la nombraría ni con el umbral a cero ni con
-   * `coleccionesPublicadas` devolviendo todo. Cobertura que aparenta verificar y no
-   * verifica es peor que no tenerla, y se ha retirado.
+   * Aquí hubo una prueba que leía el `dist/sitemap-0.xml` y comprobaba que no nombrase la
+   * Colección. Cuando se escribió **no podía fallar**: no existía la Página de Colección, así
+   * que el sitemap no la habría nombrado ni con el umbral a cero. Se retiró por eso.
    *
-   * La mitad del criterio que **sí** se puede verificar hoy es la de arriba: lo único que
-   * deriva del conjunto publicable y habla de Colecciones es `coleccionesPublicadas`, y la
-   * sonda comprueba que no la enumera. La mitad que falta —sitemap, chips y
-   * descubrimiento— se verifica en la 12.3, cuando exista la superficie que los produce.
+   * Actualizado en la Historia 12.3, que sí construyó la superficie: sitemap, chips de la
+   * portada y descubrimiento ya existen y ya se verifican, sobre un sitio construido, en
+   * `tests/unit/coleccion-pagina.test.ts` —«el umbral se aplica en un solo sitio»—. Lo que
+   * esta prueba de aquí arriba sigue cubriendo, y sigue siendo suyo, es el plano anterior:
+   * que el conjunto publicable no reparta una Colección bajo umbral, que es de donde
+   * cuelgan las tres.
    */
 });
 
@@ -248,6 +248,26 @@ describe('Historia 12.2 — el esquema de Colección es una puerta del build', (
     expect(codigo).not.toBe(0);
     expect(salida).toContain('frases-cortas');
     expect(salida).toMatch(/criterio de la Colección/);
+  });
+
+  it('un criterio más largo del que cabe en la descripción rompe el build — Historia 12.3', async () => {
+    /*
+     * El criterio se publica **literal** como `<meta name="description">` de la Página de
+     * Colección, y NFR-12 prohíbe que la página lo recorte. Sin puerta, un criterio largo
+     * salía entero en la página y cortado en los resultados de búsqueda sin que nadie lo
+     * dijera. La puerta está donde el editor puede arreglarlo.
+     */
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      'citas/seneca--el-tiempo.md': citaValida(),
+      'colecciones/frases-cortas.yml': coleccionValida({
+        criterio: 'a'.repeat(MAX_CARACTERES_CRITERIO + 1),
+      }),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('frases-cortas');
+    expect(salida).toContain(String(MAX_CARACTERES_CRITERIO));
+    expect(salida).toMatch(/Regla incumplida/);
   });
 
   it('un campo mal tecleado rompe el build en vez de perderse en silencio', async () => {

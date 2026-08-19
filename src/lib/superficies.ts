@@ -98,6 +98,20 @@ export const SUPERFICIES: readonly Superficie[] = [
     noPublicableEn: /^\/tema\/[^/]+\/\d+$/,
   },
   {
+    nombre: 'la Página de Colección',
+    pagina: 'coleccion/[slug]/[...page].astro',
+    reconoce: /^\/coleccion\/[^/]+(?:\/\d+)?$/,
+    // Historia 12.3 — el estreno del dueño único. Esta línea es **todo** lo que hace falta
+    // para que la Colección entre en el sitemap, se indexe en los dos buscadores y entre en
+    // el barrido de accesibilidad y móvil. No hay una segunda lista que tocar; si alguien
+    // se ve añadiéndola en otro sitio, la Historia 12.1 no habría servido de nada.
+    caracter: 'producto',
+    // Anclada a la ruta entera igual que Autor y Tema, y por el mismo motivo: el esquema de
+    // slugs admite uno enteramente numérico, así que `/coleccion/1984` es una Colección y no
+    // la página 1984 de nada.
+    noPublicableEn: /^\/coleccion\/[^/]+\/\d+$/,
+  },
+  {
     nombre: 'la búsqueda',
     pagina: 'buscar.astro',
     reconoce: /^\/buscar$/,

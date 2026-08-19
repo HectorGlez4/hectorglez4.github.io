@@ -2,14 +2,47 @@
 title: 'Story 12.3 — La Página de Colección, sin canibalizar a la Cita'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '04dc6e2a3cce9fbfd1f492c7ac17fb3c86a1b6e3'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-12-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-12-2-la-coleccion-declara-sus-miembros.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      La mitad de UX-DR33 que necesita navegador —«sin desplazamiento horizontal a 360 px»—
+      sigue en una prueba de Playwright que hoy se salta y que el CI no ejecuta.
+    evidence: |-
+      La mitad medible sobre el HTML emitido (que la página use el contenedor compartido y
+      no declare anchura propia) sí pasó al plano unitario. La otra mitad exige medir el
+      desplazamiento real, y en producción no hay ninguna Colección que visitar. Se
+      ejercitó en una copia aislada del repositorio con una Colección sembrada —418 e2e en
+      verde, axe incluido— pero eso no es una garantía que corra sola.
+    location: >-
+      tests/e2e/coleccion.spec.ts
+    severity: medium
+  - summary: >-
+      La Página de Colección no existe en producción y no existirá hasta que se cure la
+      primera Colección con la herramienta de la 12.4.
+    evidence: |-
+      `corpus/colecciones/` está vacío a propósito: curar es de Héctor. Diez de las doce
+      pruebas de extremo a extremo de esta historia se saltan solas por eso, y la superficie
+      se verifica con fixtures. No es un caso borde: es el estado de producción, y la
+      portada se comporta bien en él —no menciona Colecciones en absoluto—.
+    severity: low
+  - summary: >-
+      El texto íntegro de una Cita aparecerá en su Página de Colección, igual que ya aparece
+      hoy en su Página de Tema y en la de Autor.
+    evidence: |-
+      La tarjeta compartida solo recorta por encima de 120 caracteres y la Cita más larga
+      del Corpus mide 101, así que en producción no recorta nunca. La garantía de NFR-13 es
+      la **canónica** —que sí se cumple y sí está probada sobre un build real—, no el
+      recorte. Queda escrito para que nadie lea el recorte como el mecanismo.
+    location: >-
+      src/components/TarjetaDeCita.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -108,3 +141,36 @@ deferred: []
 - `npx vitest run` -- expected: todo en verde; ninguna de las 1049 de la línea base perdida.
 - `npm run build` -- expected: construye, con la puerta de la 11.2 intacta y sin sección de Colecciones en la portada.
 - `npx playwright test` -- expected: 394 en verde más lo nuevo; el barrido recoge la Colección sola.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12: (high 4, medium 4, low 4)
+- defer: 3: (medium 1, low 2)
+- reject: 8: (low 8)
+- addressed_findings:
+  - `[high]` `[patch]` Una bomba de relojería: `busqueda.spec.ts` afirmaba el conjunto **exacto** de tipos de resultado, así que habría fallado el día que se curase la primera Colección, por un motivo ajeno a lo que se estuviera haciendo. Demostrado con una Colección sembrada: la aserción antigua falla con `+ "coleccion"`. Ahora afirma contención más «ningún tipo desconocido», e importa la tabla en vez de llevar una segunda copia.
+  - `[high]` `[patch]` La etiqueta «Colección» de la búsqueda no la comprobaba nada: borrarla etiquetaba cada Colección como «Cita» con todo en verde. Ahora la tabla tiene dueño y el tipo se **deriva** de ella, así que borrar una entrada da 2 errores de tipos. Verificado por mutación.
+  - `[high]` `[patch]` La línea nueva de `rutasPublicadas` no la ejercitaba nadie y su docstring justificaba una premisa falsa: desde la 12.1 ni el sitemap ni la comprobación de enlaces la consumen. Corregido el docstring y añadidas tres pruebas que la ejercitan componiendo la entrada por el único camino que produce una Colección publicable.
+  - `[high]` `[patch]` UX-DR31 no lo verificaba nada que se ejecute: la serif del nombre vivía en una prueba que siempre se salta y que el CI no corre. Pasó al plano unitario comparando el bloque de estilo del `h1` de Colección **byte a byte** contra el del `h1` de Tema. UX-DR33 se partió con honestidad: la mitad medible sobre el HTML al plano unitario, la que necesita navegador queda dicha como tal.
+  - `[medium]` `[patch]` Se corrigió una **afirmación**, no el código: la prueba de «no genera duplicado indexable» usaba textos largos a propósito y no podía fallar, y las 38 Citas reales miden 120 o menos, así que la tarjeta nunca recorta en producción. La garantía es la canónica; el docstring ya no promete más de lo que el mecanismo da.
+  - `[medium]` `[patch]` La prueba del barrido era frágil al orden y habría fallado el día que existiera una Colección alfabéticamente anterior al fixture.
+  - `[medium]` `[patch]` Los dos `beforeAll` afirmaban antes de registrar el proyecto temporal, así que justo las ejecuciones que fallan dejaban basura; y había dos mecanismos de limpieza compitiendo.
+  - `[medium]` `[patch]` El `criterio` era texto libre sin límite y va tal cual a la descripción de la página. El límite entra en la puerta de admisión, donde el editor puede arreglarlo, y no en la página, porque NFR-12 prohíbe recortarlo.
+  - `[low]` `[patch]` El cast `as ColeccionPublicada` reintroducía la marca que la 12.2 construyó como puerta; sustituido por anotación derivada de `getStaticPaths`, y la mutación demuestra que el `as` compilaba en silencio. Comentario rancio; aserción negativa con el dominio escrito a mano; ausencia comprobada por subcadena en todo el documento; y la salida de «sin resultados» que no tenía Colecciones.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `/coleccion/{slug}` presenta las Citas de una Colección con el mismo componente de tarjeta que los listados de Autor y de Tema, con el nombre en Source Serif y el criterio editorial al pie. Agrega y enlaza pero no reproduce: la canónica de cada Cita sigue siendo su propia página. Paginada, porque el umbral es un suelo y no un techo.
+
+**El estreno del dueño único.** Declarar la familia en `src/lib/superficies.ts` fue **una sola línea**, y de ella salieron el sitemap, el `noindex`, el índice interno y el barrido de accesibilidad, sin tocar ninguna lista. Verificado por mutación: retirar las rutas de Colección de la derivación hace que el barrido pierda la familia.
+
+**Verificación.** `npx astro check` 0 errores sobre 143 ficheros. `npx vitest run` **1107/1107** en 42, frente a 1049/41 de la línea base. `npm run build` construye con la puerta de la 11.2 intacta, cero rutas de Colección y la portada en silencio. `npx playwright test` 398 pasan. Y en una copia aislada con una Colección sembrada, la suite completa de extremo a extremo: **418 pasan**, axe WCAG 2.1 AA incluido sobre la Página de Colección, que el barrido recogió solo desde la declaración.
+
+**La aserción que hace cumplir AD-19.** El `<li>` que emite la Colección se compara **byte a byte** contra el que emite la Página de Tema para la misma Cita. Astro estampa un identificador por componente, así que una tarjeta copiada a mano no puede hacerse pasar por la compartida.
+
+**Recomendación de nueva revisión: true.** Cuatro hallazgos de severidad alta.
+
+**Riesgos residuales.** Los tres diferidos están en el frontmatter; el que más pesa es que la mitad de UX-DR33 que necesita navegador no corre sola mientras no exista una Colección real.

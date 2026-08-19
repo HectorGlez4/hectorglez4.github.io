@@ -14,6 +14,7 @@
  */
 
 import { z } from 'astro/zod';
+import { MAX_CARACTERES_CRITERIO } from './umbrales.ts';
 
 /**
  * Un año como entero. Ni fechas completas ni cadenas: el modelo dice entero.
@@ -294,6 +295,23 @@ export const criterioDeColeccion = z
   .regex(
     /\S/,
     'Regla incumplida: el criterio de la Colección no puede estar vacío ni ser solo espacios.',
+  )
+  /*
+   * Y un techo, que es lo que faltaba — Historia 12.3.
+   *
+   * La Página de Colección emite el criterio **literal** como su descripción, y NFR-12
+   * prohíbe que el sistema lo recorte por su cuenta. Sin límite, un criterio largo se
+   * publicaba entero en la página y cortado en los resultados de búsqueda, sin que nadie
+   * lo dijera. El límite va aquí, en la puerta, donde el editor lo está escribiendo y
+   * puede arreglarlo; ponerlo en la página sería reescribir lo que guardó.
+   *
+   * Se mide sobre el original y no sobre el recortado: lo que va a la descripción es el
+   * valor tal cual, espacios incluidos.
+   */
+  .max(
+    MAX_CARACTERES_CRITERIO,
+    `Regla incumplida: el criterio de la Colección no puede pasar de ${MAX_CARACTERES_CRITERIO} ` +
+      'caracteres, porque se publica literal como descripción de la página. Resúmalo.',
   );
 
 /**

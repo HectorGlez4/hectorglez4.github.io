@@ -12,12 +12,21 @@ import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
 import { MARCA } from '../lib/marca.ts';
 import { consecuenciasDe } from '../lib/superficies.ts';
+import type { TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
 
 interface Props {
   titulo: string;
-  /** Qué tipo de resultado es esta página en la búsqueda: cita, autor o tema. */
-  tipo?: 'cita' | 'autor' | 'tema';
+  /**
+   * Qué clase de resultado es esta página en la búsqueda propia.
+   *
+   * El valor y su rótulo salen los dos de `src/lib/tipoDeResultado.ts`: la unión se deriva
+   * de la tabla de rótulos, así que un tipo sin rótulo no compila. Sin valor, un resultado
+   * cae al tipo por omisión, y una Página de Colección se leería como si fuera una Cita.
+   *
+   * Esto **no** decide si la página se indexa: eso sale entero de `src/lib/superficies.ts`.
+   */
+  tipo?: TipoDeResultado;
   /** La Página de Cita emite además el evento de vista (AD-13, SM-2). */
   vistaDeCita?: boolean;
   descripcion: string;

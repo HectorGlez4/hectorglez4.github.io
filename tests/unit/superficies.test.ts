@@ -30,6 +30,8 @@ const MUESTRAS = [
   '/autor/1984',
   '/tema/la-vida',
   '/tema/la-vida/3',
+  '/coleccion/frases-cortas-para-reflexionar',
+  '/coleccion/frases-cortas-para-reflexionar/2',
   '/buscar',
   '/404',
   '/kit',
@@ -168,7 +170,10 @@ describe('Historia 12.1 — publicabilidad condicional', () => {
 
 describe('Historia 12.1 — una superficie sin declaración no pasa desapercibida', () => {
   it('rompe, en vez de decidir por su cuenta', () => {
-    expect(() => caracterDe('/coleccion/frases-cortas')).toThrow(/no está declarada/);
+    // Era `/coleccion/…`, la superficie que la 12.1 imaginaba como la siguiente. La 12.3 la
+    // declaró, así que hace falta una que de verdad no exista: si esta prueba se quedara
+    // con una ruta declarada, dejaría de comprobar nada sin dar señal.
+    expect(() => caracterDe('/antologia/frases-cortas')).toThrow(/no está declarada/);
   });
 
   it('el mensaje nombra el fichero que hay que tocar', () => {
@@ -198,7 +203,7 @@ describe('Historia 12.1 — una superficie sin declaración no pasa desapercibid
     const fallos = [
       () => consecuenciasDe(undefined as unknown as string),
       () => caracterDe('buscar'),
-      () => caracterDe('/coleccion/frases-cortas'),
+      () => caracterDe('/antologia/frases-cortas'),
     ];
     for (const fallar of fallos) {
       expect(fallar).toThrow(Error);
@@ -215,14 +220,14 @@ describe('Historia 12.1 — una superficie sin declaración no pasa desapercibid
 });
 
 describe('Historia 12.1 — el filtro del sitemap consume la declaración', () => {
-  it('anuncia la portada, las Citas, los Autores y los Temas', () => {
-    for (const ruta of ['/', '/cita/x', '/autor/x', '/tema/x']) {
+  it('anuncia la portada, las Citas, los Autores, los Temas y las Colecciones', () => {
+    for (const ruta of ['/', '/cita/x', '/autor/x', '/tema/x', '/coleccion/x']) {
       expect(anunciableEnElSitemap(`https://sabiduriadebolsillo.net${ruta}`), ruta).toBe(true);
     }
   });
 
   it('no anuncia las páginas 2+, ni la búsqueda, ni el Kit, ni la 404', () => {
-    for (const ruta of ['/autor/x/2', '/tema/x/2', '/buscar', '/kit', '/404']) {
+    for (const ruta of ['/autor/x/2', '/tema/x/2', '/coleccion/x/2', '/buscar', '/kit', '/404']) {
       expect(anunciableEnElSitemap(`https://sabiduriadebolsillo.net${ruta}`), ruta).toBe(false);
     }
   });
@@ -261,6 +266,8 @@ describe('Historia 12.1 — el barrido de accesibilidad se deriva, no se escribe
     '/autor/antonio-machado',
     '/autor/antonio-machado/2',
     '/tema/la-vida',
+    '/coleccion/frases-cortas',
+    '/coleccion/frases-cortas/2',
   ];
 
   it('barre una superficie de cada familia y ninguna dos veces', () => {
@@ -269,6 +276,7 @@ describe('Historia 12.1 — el barrido de accesibilidad se deriva, no se escribe
       '/cita/antonio-machado-hoy-es-siempre-todavia',
       '/autor/antonio-machado',
       '/tema/la-vida',
+      '/coleccion/frases-cortas',
       '/buscar',
       '/404',
     ]);
@@ -295,6 +303,16 @@ describe('Historia 12.1 — el barrido de accesibilidad se deriva, no se escribe
   it('la muestra de un listado es la primera página, no la segunda', () => {
     expect(superficiesDelBarrido(CONSTRUIDAS)).toContain('/autor/antonio-machado');
     expect(superficiesDelBarrido(CONSTRUIDAS)).not.toContain('/autor/antonio-machado/2');
+    expect(superficiesDelBarrido(CONSTRUIDAS)).not.toContain('/coleccion/frases-cortas/2');
+  });
+
+  it('la Colección entra en el barrido sin escribirse en ninguna lista — Historia 12.3', () => {
+    // El criterio de aceptación de la 12.3, por el lado puro: la familia aparece en cuanto
+    // el build genera una de sus rutas, y desaparece cuando no. Lo único que se escribió
+    // para que ocurra es su declaración en `src/lib/superficies.ts`.
+    const sinColecciones = CONSTRUIDAS.filter((ruta) => !ruta.startsWith('/coleccion/'));
+    expect(superficiesDelBarrido(sinColecciones)).not.toContain('/coleccion/frases-cortas');
+    expect(superficiesDelBarrido(CONSTRUIDAS)).toContain('/coleccion/frases-cortas');
   });
 });
 

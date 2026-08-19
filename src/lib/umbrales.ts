@@ -93,3 +93,23 @@ export const MAX_BYTES_DE_GUION = 6656;
  * `coleccionesPublicadas` en `src/lib/publicado.ts` (AD-11), y es el único sitio.
  */
 export const MIN_CITAS_POR_COLECCION = 15;
+
+/**
+ * Caracteres que puede medir el criterio de una Colección — Historia 12.3.
+ *
+ * El criterio no es solo texto de la página: la Página de Colección lo emite **tal cual**
+ * como su `<meta name="description">` y como su `og:description`, porque NFR-12 prohíbe
+ * que el sistema altere lo que el editor guardó. Eso deja una sola forma sana de acotarlo:
+ * en la puerta de admisión, donde el editor todavía lo está escribiendo y puede arreglarlo,
+ * y no en la página, donde recortarlo sería reescribirlo.
+ *
+ * 160 es el punto a partir del cual una descripción se corta con puntos suspensivos en los
+ * resultados de búsqueda. Un criterio que no cabe ahí no se publica entero, y entonces la
+ * página anuncia media razón de existir. Es holgado para lo que el campo pide —una frase
+ * que diga por qué estas Citas están juntas—: el de partida mide setenta y cuatro.
+ *
+ * Si algún día el criterio necesita más aire como texto editorial, lo que hay que cambiar
+ * **no** es este número sino dejar de usarlo literalmente como descripción. Esa es una
+ * decisión de diseño, y así se toma mirándola, no desbordando en silencio.
+ */
+export const MAX_CARACTERES_CRITERIO = 160;

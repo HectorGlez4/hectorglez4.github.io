@@ -112,7 +112,7 @@ development_status:
   epic-12: in-progress
   12-1-una-superficie-declara-en-un-solo-sitio-si-es-publicable: done
   12-2-la-colección-declara-sus-miembros-y-la-lista-es-blanda: done
-  12-3-la-página-de-colección-sin-canibalizar-a-la-cita: backlog
+  12-3-la-página-de-colección-sin-canibalizar-a-la-cita: done
   12-4-curar-una-colección-desde-la-herramienta: backlog
   epic-12-retrospective: optional
 

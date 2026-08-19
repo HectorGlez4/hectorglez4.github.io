@@ -5,6 +5,7 @@ import {
   autoresPublicados,
   citasDeAutor,
   citasDeTema,
+  coleccionesPublicadas,
   rutasPublicadas,
   temasDeLaCita,
   temasPublicados,
@@ -13,7 +14,7 @@ import {
   type Autor,
   type Tema,
 } from '../../src/lib/publicado.ts';
-import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 
@@ -121,6 +122,63 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       colecciones: [],
     });
     expect(rutas).not.toContain('/tema/t');
+  });
+
+  /*
+   * Historia 12.3 — la línea de Colección.
+   *
+   * Los dos casos de arriba pasan `colecciones: []`, así que la línea nueva no la ejercitaba
+   * nada: borrarla los dejaba en verde. El conjunto se compone llamando a
+   * `coleccionesPublicadas`, que es la única forma que hay de obtener una `ColeccionPublicada`
+   * —su marca no se puede nombrar desde fuera—, así que la prueba recorre además la puerta
+   * del umbral en vez de fabricarse una Colección publicada de mentira.
+   */
+  const citasDeLaColeccion = nCitas(MIN_CITAS_POR_COLECCION, 't');
+  const declarada = (miembros: string[]) => ({
+    slug: 'frases-cortas',
+    nombre: 'Frases cortas',
+    criterio: 'Un criterio.',
+    miembros,
+  });
+
+  it('una Colección publicada aparece entre las rutas', () => {
+    const rutas = rutasPublicadas({
+      citas: citasDeLaColeccion,
+      autores: [autor('a')],
+      temas: [tema('t')],
+      colecciones: coleccionesPublicadas(
+        [declarada(citasDeLaColeccion.map((c) => c.slug))],
+        citasDeLaColeccion,
+      ),
+    });
+    expect(rutas).toContain('/coleccion/frases-cortas');
+  });
+
+  it('una Colección bajo umbral no aparece, porque no llega hasta aquí', () => {
+    const rutas = rutasPublicadas({
+      citas: citasDeLaColeccion,
+      autores: [autor('a')],
+      temas: [tema('t')],
+      colecciones: coleccionesPublicadas(
+        [declarada(citasDeLaColeccion.slice(0, MIN_CITAS_POR_COLECCION - 1).map((c) => c.slug))],
+        citasDeLaColeccion,
+      ),
+    });
+    expect(rutas).not.toContain('/coleccion/frases-cortas');
+  });
+
+  it('la ruta de Colección es la de la primera página, sin las 2+', () => {
+    // Paginar es cosa de la página; lo que se enumera aquí es la superficie.
+    const rutas = rutasPublicadas({
+      citas: citasDeLaColeccion,
+      autores: [autor('a')],
+      temas: [tema('t')],
+      colecciones: coleccionesPublicadas(
+        [declarada(citasDeLaColeccion.map((c) => c.slug))],
+        citasDeLaColeccion,
+      ),
+    });
+    expect(rutas.filter((r) => /^\/coleccion\//.test(r))).toEqual(['/coleccion/frases-cortas']);
   });
 });
 

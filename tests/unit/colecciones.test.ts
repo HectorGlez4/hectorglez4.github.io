@@ -13,8 +13,8 @@ import {
   type ColeccionPublicada,
   type ConjuntoPublicable,
 } from '../../src/lib/publicado.ts';
-import { MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
-import { coleccionAdmisible, nombre } from '../../src/lib/admision.ts';
+import { MAX_CARACTERES_CRITERIO, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
+import { coleccionAdmisible, criterioDeColeccion, nombre } from '../../src/lib/admision.ts';
 import {
   leerColecciones,
   rutasDelCorpus,
@@ -37,6 +37,33 @@ import {
  */
 
 const RAIZ = resolve(import.meta.dirname, '../..');
+
+/**
+ * Todos los módulos donde un umbral podría escribirse a mano — el barrido de AD-9.
+ *
+ * Estaba dentro del `describe` del umbral de Colección; la Historia 12.3 añadió un segundo
+ * umbral con el mismo barrido y copiar el recorrido habría sido tener dos. `integraciones/`
+ * entra además de `tools/`: `astro.config.mjs` la carga y ya lee de `tools/lib/`, así que un
+ * umbral escrito a mano ahí valdría tanto como uno escrito en `src/`.
+ */
+const modulos = (function recorrer(dir: string): string[] {
+  return readdirSync(dir).flatMap((entrada) => {
+    const ruta = join(dir, entrada);
+    if (statSync(ruta).isDirectory()) return recorrer(ruta);
+    return /\.(ts|astro|mjs)$/.test(entrada) ? [ruta] : [];
+  });
+})(resolve(RAIZ, 'src')).concat(
+  ...['tools', 'integraciones'].map((carpeta) =>
+    (function recorrer(dir: string): string[] {
+      return readdirSync(dir).flatMap((entrada) => {
+        const ruta = join(dir, entrada);
+        if (statSync(ruta).isDirectory()) return recorrer(ruta);
+        return /\.(ts|mjs)$/.test(entrada) ? [ruta] : [];
+      });
+    })(resolve(RAIZ, carpeta)),
+  ),
+);
+
 
 const cita = (slug: string, autor = 'seneca', temas: string[] = []): Cita => ({
   slug,
@@ -267,27 +294,6 @@ describe('Historia 12.2 — el desajuste entre declarado y resuelto es visible y
 });
 
 describe('Historia 12.2 — el umbral vive en un solo sitio (AD-9)', () => {
-  const modulos = (function recorrer(dir: string): string[] {
-    return readdirSync(dir).flatMap((entrada) => {
-      const ruta = join(dir, entrada);
-      if (statSync(ruta).isDirectory()) return recorrer(ruta);
-      return /\.(ts|astro|mjs)$/.test(entrada) ? [ruta] : [];
-    });
-  })(resolve(RAIZ, 'src')).concat(
-    // `integraciones/` entra en el barrido además de `tools/`: `astro.config.mjs` la carga
-    // y ya lee de `tools/lib/`, así que un umbral escrito a mano ahí valdría tanto como uno
-    // escrito en `src/` y el barrido no lo veía.
-    ...['tools', 'integraciones'].map((carpeta) =>
-      (function recorrer(dir: string): string[] {
-        return readdirSync(dir).flatMap((entrada) => {
-          const ruta = join(dir, entrada);
-          if (statSync(ruta).isDirectory()) return recorrer(ruta);
-          return /\.(ts|mjs)$/.test(entrada) ? [ruta] : [];
-        });
-      })(resolve(RAIZ, carpeta)),
-    ),
-  );
-
   it('solo umbrales.ts define el umbral de Colección', () => {
     const definen = modulos.filter((ruta) =>
       /export const MIN_CITAS_POR_COLECCION/.test(readFileSync(ruta, 'utf8')),
@@ -453,6 +459,51 @@ describe('Historia 12.2 — los mensajes de `nombre()`, fijados uno a uno', () =
     // NFR-12: el sistema no altera contenido sin acción explícita del editor. Se mide lo
     // recortado; se guarda lo escrito.
     expect(nombre('Autor').parse('  Séneca  ')).toBe('  Séneca  ');
+  });
+});
+
+describe('Historia 12.3 — el criterio tiene techo, y el techo está en la puerta', () => {
+  /*
+   * El criterio se publica **literal** como `<meta name="description">`, y NFR-12 prohíbe
+   * que la página lo recorte. Acotarlo donde el editor lo escribe es la única forma de que
+   * no se publique entero en la página y cortado en los resultados de búsqueda.
+   */
+  const mensajes = (valor: unknown) => {
+    const resultado = criterioDeColeccion.safeParse(valor);
+    return resultado.success ? [] : resultado.error.issues.map((i) => i.message);
+  };
+
+  const deLargo = (n: number) => 'a'.repeat(n);
+
+  it('un criterio que cabe pasa, justo en el límite', () => {
+    expect(mensajes(deLargo(MAX_CARACTERES_CRITERIO))).toEqual([]);
+  });
+
+  it('un carácter más se rechaza, y el mensaje dice el número y por qué', () => {
+    const [mensaje, ...resto] = mensajes(deLargo(MAX_CARACTERES_CRITERIO + 1));
+    expect(resto).toEqual([]);
+    expect(mensaje).toContain('Regla incumplida');
+    expect(mensaje).toContain(String(MAX_CARACTERES_CRITERIO));
+    expect(mensaje).toContain('descripción');
+  });
+
+  it('el criterio de partida cabe con holgura: el techo no aprieta al uso normal', () => {
+    const deVerdad = 'Citas de una sola frase que se sostienen fuera de la obra de la que salen.';
+    expect(deVerdad.length).toBeLessThan(MAX_CARACTERES_CRITERIO);
+    expect(mensajes(deVerdad)).toEqual([]);
+  });
+
+  it('el techo no recorta ni altera lo que el editor guardó — NFR-12', () => {
+    expect(criterioDeColeccion.parse('  Un criterio con aire.  ')).toBe(
+      '  Un criterio con aire.  ',
+    );
+  });
+
+  it('el límite vive solo en umbrales.ts (AD-9)', () => {
+    const definen = modulos.filter((ruta) =>
+      /export const MAX_CARACTERES_CRITERIO/.test(readFileSync(ruta, 'utf8')),
+    );
+    expect(definen).toEqual([resolve(RAIZ, 'src/lib/umbrales.ts')]);
   });
 });
 

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
 
@@ -18,7 +19,8 @@ async function buscar(page: import('@playwright/test').Page, consulta: string) {
 async function resultados(page: import('@playwright/test').Page) {
   return page.locator('[data-resultados] .resultado').evaluateAll((ns) =>
     ns.map((n) => ({
-      tipo: n.querySelector('.clase')!.getAttribute('data-tipo'),
+      tipo: n.querySelector('.clase')!.getAttribute('data-tipo')!,
+      etiqueta: n.querySelector('.clase')!.textContent!.trim(),
       titulo: n.querySelector('.titulo')!.textContent!.trim(),
       href: n.querySelector('a')!.getAttribute('href')!,
     })),
@@ -54,18 +56,36 @@ test.describe('Historia 3.1 — encontrar', () => {
     expect(enMinusculas.length).toBeGreaterThan(0);
   });
 
-  test('los resultados distinguen si la coincidencia es de Cita, Autor o Tema', async ({ page }) => {
+  test('los resultados distinguen de qué clase de superficie es la coincidencia', async ({
+    page,
+  }) => {
     await buscar(page, 'machado');
     const tipos = new Set((await resultados(page)).map((r) => r.tipo));
     expect(tipos.has('autor')).toBe(true);
 
     await buscar(page, 'no hay camino');
     const conTodo = await resultados(page);
-    expect(new Set(conTodo.map((r) => r.tipo))).toEqual(new Set(['cita', 'autor', 'tema']));
-    // Y la etiqueta que se lee corresponde al tipo.
-    for (const r of conTodo) expect(['Cita', 'Autor', 'Tema']).toContain(
-      { cita: 'Cita', autor: 'Autor', tema: 'Tema' }[r.tipo!],
-    );
+
+    /*
+     * Contención y no igualdad de conjuntos. Esto afirmaba `toEqual(new Set(['cita',
+     * 'autor', 'tema']))`, y era una bomba con fecha: el día que se cure la primera
+     * Colección aparecería un cuarto tipo y esta prueba se caería por algo que no está
+     * midiendo. Lo que la historia promete es que las clases **se distinguen**, no cuántas
+     * hay; que no aparezca ninguna desconocida se afirma justo debajo, y esa sí es la
+     * garantía que interesa conservar.
+     */
+    for (const exigido of ['cita', 'autor', 'tema']) {
+      expect([...new Set(conTodo.map((r) => r.tipo))], exigido).toContain(exigido);
+    }
+
+    // Ninguna clase sin declarar, y el rótulo que se lee es el de la tabla que pinta la
+    // página. La tabla se importa: escribirla aquí a mano era la tercera copia.
+    for (const r of conTodo) {
+      expect(Object.keys(ETIQUETAS_DE_RESULTADO), r.href).toContain(r.tipo);
+      expect(r.etiqueta, r.href).toBe(
+        ETIQUETAS_DE_RESULTADO[r.tipo as keyof typeof ETIQUETAS_DE_RESULTADO],
+      );
+    }
   });
 
   test('todo resultado lleva a una página que existe', async ({ page, request }) => {

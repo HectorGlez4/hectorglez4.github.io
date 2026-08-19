@@ -1,0 +1,187 @@
+---
+/**
+ * Página de Colección — FR-28, Historia 12.3.
+ *
+ * **Agrega y enlaza.** Cada Cita se presenta con el mismo componente de tarjeta que los
+ * listados de Autor y de Tema —`TarjetaDeCita`, AD-19— y toda tarjeta sale hacia la Página
+ * de Cita: la Colección no es un destino terminal.
+ *
+ * **Qué garantiza exactamente NFR-13, y qué no.** Lo que impide el contenido duplicado
+ * indexable es la **canónica**: la de cada Cita es su propia página, esté en cuantas
+ * Colecciones esté, y la de esta página es esta página. No lo garantiza el recorte de la
+ * tarjeta, y conviene no confundirlos. `TarjetaDeCita` solo acorta por encima de su largo
+ * de fragmento, y **ninguna de las 38 Citas del corpus actual lo alcanza** —la más larga
+ * mide 101—, así que hoy el texto íntegro de una Cita ya aparece tal cual en su Página de
+ * Tema y en la de Autor, y aparecerá igual aquí. Eso es correcto y no es nuevo: un listado
+ * que enseña frases cortas enteras es un índice, y lo que le dice al rastreador cuál es la
+ * página buena es la canónica. Si algún día hiciera falta más que eso, la palanca es el
+ * recorte, no esta página.
+ *
+ * **Aquí no se comprueba ningún umbral, y no es un olvido.** `conjuntoPublicable()` reparte
+ * `colecciones` ya resueltas y ya filtradas: una Colección por debajo de su umbral no
+ * aparece en esa lista, esta página no genera su ruta y su URL da 404. Es exactamente lo
+ * que hace la Página de Tema con `temasPublicados`. La Historia 12.2 cerró a propósito el
+ * camino que permitiría saltárselo —el conjunto publicable ya no reparte la lista
+ * declarada—, así que no hay nada que rodear ni tentación que resistir.
+ *
+ * Como el Tema, y a diferencia del Autor, cada tarjeta lleva el nombre de su Autor: una
+ * Colección reúne a varios y sin el nombre el listado no dice de quién es cada frase.
+ *
+ * **No hay enlace de vuelta desde la Página de Cita, y es deliberado.** FR-28 dice que la
+ * Colección enlaza a las Citas y no al revés, y UX-DR34 se recortó en validación por eso.
+ * Un chip de Colección en la Página de Cita sería una superficie de diseño que nadie ha
+ * diseñado; queda para una pasada de `bmad-ux`. Que nadie lo reintroduzca creyendo que
+ * falta. Tampoco hay migas de pan: la Colección es navegación **lateral** y el sitio no
+ * tiene jerarquía que reflejar.
+ *
+ * ── Decisión: una Colección **sí puede** pasar de `CITAS_POR_PAGINA`, y por eso pagina ──
+ *
+ * La especificación deja la decisión abierta y pide que quede escrita. Se pagina, con el
+ * mismo `[...page]` que Autor y Tema:
+ *
+ *   · Nada acota una Colección por arriba. El umbral de `MIN_CITAS_POR_COLECCION` pone un
+ *     suelo —quince— y no un techo, y el criterio que abre la épica, «frases cortas para
+ *     reflexionar», es de los que crecen con el corpus en lugar de agotarse. Cincuenta y
+ *     una Citas no es una hipótesis remota: es el tamaño que ya tiene el listado de un
+ *     Autor prolífico.
+ *   · Sin paginar, esa Colección número cincuenta y uno no se rompería —se serviría una
+ *     página de doscientas tarjetas—, y eso es lo malo: el defecto no avisaría. Con
+ *     `paginate` el comportamiento es idéntico por debajo de cincuenta (una sola página, y
+ *     `Paginacion` ni siquiera se renderiza) y correcto por encima.
+ *   · AD del contexto de la épica: «la ruta de Colección es propia y **paginada**, en línea
+ *     con las de Autor y Tema». Un listado del sitio que paginara distinto que los otros dos
+ *     sería una excepción que habría que recordar.
+ *   · Y sale gratis en publicabilidad: las páginas 2+ ya se degradan a `servicio` desde la
+ *     única declaración de `src/lib/superficies.ts`, sin tocar nada más.
+ *
+ * El orden del listado es el **declarado** en el fichero, que es el que fija
+ * `resolverColeccion`: una Colección es una lista curada a mano y el orden es parte de la
+ * curación. Paginar no lo altera; lo corta.
+ */
+import Armazon from '../../../components/Armazon.astro';
+import Paginacion from '../../../components/Paginacion.astro';
+import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
+import { conjuntoPublicable, type ColeccionPublicada } from '../../../lib/publicado.ts';
+import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+import { tituloDe } from '../../../lib/marca.ts';
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const conjunto = await conjuntoPublicable();
+  const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+
+  return conjunto.colecciones.flatMap((coleccion) =>
+    paginate(coleccion.citas, {
+      params: { slug: coleccion.slug },
+      props: { coleccion, autores },
+      pageSize: CITAS_POR_PAGINA,
+    }),
+  );
+}) satisfies GetStaticPaths;
+
+/*
+ * Las props se **derivan** de `getStaticPaths`, no se afirman con un `as`.
+ *
+ * Escribirlas a mano reintroducía por la puerta de atrás justo la marca que la Historia 12.2
+ * construyó como puerta: un `as { coleccion: ColeccionPublicada }` compila igual aunque
+ * `getStaticPaths` deje de leer `conjunto.colecciones` y empiece a resolver por su cuenta, y
+ * el docblock de arriba pasaría a ser falso en silencio. Derivándolas, cambiar el origen
+ * cambia el tipo y `astro check` se para.
+ */
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { autores, page: pagina } = Astro.props;
+
+/*
+ * **Anotación, no aserción.** `ColeccionPublicada` se escribe a la izquierda del `=`, así que
+ * TypeScript tiene que demostrar que lo que llega ya lo es; un `as` a la derecha se lo habría
+ * creído. El día que `getStaticPaths` deje de leer `conjunto.colecciones` y resuelva por su
+ * cuenta, el tipo derivado dejará de casar y esta línea no compilará — que es lo que hace
+ * cierto el párrafo de arriba en vez de dejarlo como promesa.
+ */
+const coleccion: ColeccionPublicada = Astro.props.coleccion;
+
+const rutaBase = `/coleccion/${coleccion.slug}`;
+const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
+const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
+
+/*
+ * La descripción es el criterio, literal. No se compone una frase que adjetive las Citas
+ * (UX-DR32), y NFR-12 prohíbe alterar lo que el editor guardó.
+ */
+const descripcion = coleccion.criterio;
+---
+
+<Armazon
+  titulo={tituloDe(`${coleccion.nombre}${sufijo}`)}
+  descripcion={descripcion}
+  ruta={ruta}
+  tipo="coleccion"
+>
+  <div class="pagina contenedor">
+    <h1>{coleccion.nombre}</h1>
+
+    {/*
+      * Sin preámbulo: la primera tarjeta es el primer contenido bajo el nombre. El criterio
+      * va al pie, no aquí.
+      */}
+    {/* UX-DR25 — los listados son listas reales. */}
+    <ul class="listado">
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} />)}
+    </ul>
+
+    <Paginacion pagina={pagina} />
+
+    {/*
+      * El criterio, al pie y por debajo de todo lo citado en jerarquía visual (UX-DR32).
+      * Va después de la paginación porque habla de la Colección entera y no de la página
+      * que se está viendo.
+      *
+      * Un `<div>` y no un `<footer>`: el ancestro de sección más cercano de este elemento es
+      * `<body>` —`<main>` no es contenido de sección—, así que un `<footer>` aquí se mapearía
+      * a un segundo `contentinfo` y el sitio pasaría a tener dos pies. El pie del sitio ya lo
+      * pone el armazón.
+      */}
+    <div class="criterio">
+      <p>{coleccion.criterio}</p>
+    </div>
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  h1 {
+    /*
+     * La serif se aplica al nombre de Colección: se une a las tres excepciones —texto de
+     * Cita, nombre de Autor y nombre de Tema— y no hay ninguna más. Todo lo demás de esta
+     * página, criterio y paginación incluidos, va en Inter (UX-DR31).
+     */
+    font-family: var(--serif);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .listado {
+    list-style: none;
+    margin: calc(var(--unidad) * 4) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .criterio {
+    margin-top: calc(var(--unidad) * 4);
+    max-width: var(--medida-prosa);
+  }
+
+  .criterio p {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+</style>
