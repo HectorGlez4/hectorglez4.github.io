@@ -1,13 +1,13 @@
 ---
-name: Sabiduría Diaria
+name: Sabiduría de Bolsillo
 status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
   - "DESIGN.md"
-updated: 2026-08-10
+updated: 2026-08-18
 ---
 
-# Sabiduría Diaria — Experience Spine
+# Sabiduría de Bolsillo — Experience Spine
 
 > Define **cómo funciona**. La identidad visual vive en `DESIGN.md`, referenciada aquí por token con la sintaxis `{ruta.al.token}`. En caso de conflicto con cualquier maqueta o importación, mandan las dos espinas.
 
@@ -26,11 +26,13 @@ Tema claro único. El modo oscuro queda fuera de la v1 por decisión registrada.
 | **Página de Cita** | Buscador externo (mayoritario), listados, Cita del Día | Resolver la intención completa: leer, confiar, copiar o compartir |
 | **Página de Autor** | Atribución de una Cita, búsqueda | Semblanza + catálogo de esa persona |
 | **Página de Tema** | Chips de Tema, portada, búsqueda | Agregación transversal entre Autores |
+| **Página de Colección** *(v3)* | Buscador externo, chips de Colección en la portada | Reunir Citas escogidas por un criterio editorial que no es Autor ni Tema |
 | **Portada** | Dominio directo, retorno | Cita del Día, entrada a la búsqueda, Temas destacados |
 | **Resultados de búsqueda** | Campo de búsqueda (presente en todas las superficies públicas) | Encontrar por fragmento, Autor o Tema |
+| **Kit Diario** *(interna, v2)* | Una dirección que Héctor abre en el móvil | El material de la jornada ya compuesto: Imagen de la Cita del Día, pie con atribución y enlace marcado por red. `noindex`, sin enlaces entrantes |
 | **Curación** *(interna)* | Terminal, en local | Ingesta, revisión y publicación del Corpus. **No es una superficie web:** la arquitectura sitúa el Corpus en ficheros versionados, así que UJ-4 se resuelve en línea de comandos. No hay panel autenticado en producción. |
 
-**Cierre de superficies:** cada UJ del PRD aterriza en una superficie existente y cada superficie tiene al menos un UJ que la alcanza. UJ-1 → Página de Cita. UJ-2 → Página de Cita + diálogo de Imagen. UJ-3 → Cita → Autor → Tema. UJ-4 → Curación.
+**Cierre de superficies:** cada UJ del PRD aterriza en una superficie existente y cada superficie tiene al menos un UJ que la alcanza. UJ-1 → Página de Cita. UJ-2 → Página de Cita + diálogo de Imagen. UJ-3 → Cita → Autor → Tema → Colección. UJ-4 → Curación. UJ-5 → Kit Diario.
 
 **Navegación real:** lateral, no jerárquica. El visitante entra por una hoja y se mueve entre hojas a través de Autor y Tema. No hay migas de pan porque no hay jerarquía que reflejar. La cabecera lleva solo la marca (enlace a portada) y el acceso a búsqueda.
 
@@ -80,6 +82,9 @@ Comportamiento. Las especificaciones visuales viven en `DESIGN.md § Components`
 | **Campo de búsqueda** | Cabecera, todas las superficies públicas | Normaliza acentos y mayúsculas al consultar. Sin autocompletado en v1. |
 | **Tarjeta de Cita** | Listados de Autor y Tema | Fragmento + autor. Toda la tarjeta es zona de toque, mínimo 44px de alto. |
 | **Chip de Tema** | Página de Cita, portada | Navega a Página de Tema. No es filtro ni conmutador. |
+| **Chip de Colección** | Portada | Navega a Página de Colección. Mismo comportamiento que el de Tema. **No aparece en la Página de Cita:** la Colección enlaza a sus Citas, no al revés (FR-28). |
+| **Listado de Colección** | Página de Colección | **Empieza sin preámbulo:** la primera Tarjeta de Cita es el primer contenido visible bajo el nombre. Usa `TarjetaDeCita`, el mismo componente que Tema y Autor — nunca una presentación propia (AD-19). |
+| **Criterio de Colección** | Pie del listado de Colección | Describe para qué está reunida la Colección. No comenta ni adjetiva ninguna Cita. Va después del listado, no antes. |
 | **Paginación** | Listados > 50 Citas | Anterior / Siguiente numerada. Caso excepcional con el Corpus previsto. |
 
 ## State Patterns
@@ -91,6 +96,8 @@ Comportamiento. Las especificaciones visuales viven en `DESIGN.md § Components`
 | Búsqueda sin resultados | Resultados | Mensaje + Temas destacados + Autores destacados como salida (FR-8). Nunca un callejón sin salida. |
 | Autor sin Citas publicadas | — | La Página de Autor no existe: 404. No se genera una página vacía (FR-4). |
 | Tema por debajo de 15 Citas | — | El Tema no se publica ni se indexa (FR-6). Sus chips no se renderizan. |
+| Colección por debajo de su umbral | — | No se publica ni se indexa. Desaparece a la vez de la página, del sitemap, de los chips y del descubrimiento. |
+| Cita retirada de una Colección | Página de Colección | Desaparece del listado sin dejar hueco ni enlace roto; el recuento baja y puede despublicar la Colección. La Cita no cambia de Temas ni de Autor. |
 | Cita > 300 caracteres | Página de Cita | La acción «Imagen» no se muestra. Copiar sigue disponible. |
 | Copiado fallido | Página de Cita | El botón revela el texto seleccionable para copia manual. Sin mensaje de error técnico. |
 | Generando imagen | Diálogo | El diálogo permanece usable; la previsualización muestra estado de progreso. No bloquea la Página de Cita. |

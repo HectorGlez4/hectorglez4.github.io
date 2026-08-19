@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-13-2026 13:30
+last_updated: 08-18-2026 12:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -74,23 +74,13 @@ development_status:
   5-2-selección-de-plantilla: done
   epic-5-retrospective: optional
 
-  # ── Sprint v2 ─────────────────────────────────────────────────────────────
-  # Orden fijado por el PRD §6.3: el renombrado antes de que exista una URL
-  # indexada; el sembrado y las Condiciones de Lanzamiento antes de compartir.
-
   epic-6: done
   6-1-renombrado-a-sabiduría-de-bolsillo: done
   epic-6-retrospective: done
 
   epic-7: in-progress
-  # review: implementado y probado; falta el DNS y Enforce HTTPS, que piden
-  # las cuentas de Héctor. Los pasos están en DESPLIEGUE.md §1.
   7-1-el-dominio-propio-sirviendo: review
-  # review: robots.txt y la coherencia de los tres canales, probados. Falta
-  # verificar la propiedad en Search Console — DESPLIEGUE.md §2.
   7-2-anunciar-el-sitio-a-los-buscadores: review
-  # review: receptor escrito y probado de punta a punta contra el código que se
-  # despliega. Falta desplegar el Worker y definir MEDICION_ENDPOINT — DESPLIEGUE.md §3.
   7-3-la-medición-recibe-de-verdad: review
   epic-7-retrospective: done
 
@@ -111,13 +101,38 @@ development_status:
   10-3-compartir-el-enlace-a-un-destino: done
   10-4-medir-la-compartición: done
   epic-10-retrospective: done
+
+  epic-11: backlog
+  11-1-la-fuente-se-recupera-y-su-metadato-sale-del-documento: backlog
+  11-2-ninguna-cita-se-publica-sin-aparecer-en-su-documento: backlog
+  11-3-el-objetivo-de-cada-sesión-sale-del-hueco-no-del-criterio: backlog
+  11-4-el-corpus-alcanza-volumen-defendible: backlog
+  epic-11-retrospective: optional
+
+  epic-12: backlog
+  12-1-una-superficie-declara-en-un-solo-sitio-si-es-publicable: backlog
+  12-2-la-colección-declara-sus-miembros-y-la-lista-es-blanda: backlog
+  12-3-la-página-de-colección-sin-canibalizar-a-la-cita: backlog
+  12-4-curar-una-colección-desde-la-herramienta: backlog
+  epic-12-retrospective: optional
+
+  epic-13: backlog
+  13-1-componer-varias-jornadas-de-una-sentada: backlog
+  13-2-una-pieza-que-reúne-varias-citas: backlog
+  13-3-una-colección-anuncia-su-propia-pieza: backlog
+  epic-13-retrospective: optional
+
+  epic-14: backlog
+  14-1-encender-un-modelo-de-ingreso-es-un-commit: backlog
+  14-2-el-visitante-que-quiere-sostener-el-sitio-encuentra-cómo: backlog
+  epic-14-retrospective: optional
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
     epic: 6
     action: "Separar los artefactos de planificación de los commits de historia: commit
       propio antes de empezar, o árbol limpio como precondición"
     owner: "Héctor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-6-retro-08-12-2026.md"
   - id: "epic-7-retro-item-2-ejecutar-despliegue-md-1-3-y-pasar-7-1-7"
     epic: 7
@@ -152,7 +167,7 @@ action_items:
     action: "Registrar como convención que una superficie fuera del producto sale
       de los dos índices —buscador externo y Pagefind—, no solo del primero"
     owner: "Héctor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-8-retro-08-12-2026.md"
   - id: "epic-9-retro-item-7-bloqueante-aprobar-sobrescribe-en-silenc"
     epic: 9

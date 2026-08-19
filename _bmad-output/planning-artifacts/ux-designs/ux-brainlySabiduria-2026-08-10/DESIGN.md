@@ -3,7 +3,7 @@ name: Papel y Tinta
 status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
-updated: 2026-08-10
+updated: 2026-08-18
 colors:
   surface: '#faf7f0'
   surface-dim: '#efe9dd'
@@ -135,7 +135,7 @@ El azul (`{colors.secondary}`) queda reservado para estados informativos de la h
 
 La tipografía es el producto. Dos familias, sin excepciones.
 
-- **Source Serif 4** — la voz de la Cita. Serif de lectura con cobertura completa de diacríticos españoles (á é í ó ú ü ñ ¿ ¡ « »), variable, licencia abierta. Se usa para el texto citado y para los títulos de Autor y Tema.
+- **Source Serif 4** — la voz de la Cita. Serif de lectura con cobertura completa de diacríticos españoles (á é í ó ú ü ñ ¿ ¡ « »), variable, licencia abierta. Se usa para el texto citado y para los títulos de Autor, Tema y Colección.
 - **Inter** — la voz del sistema. Atribución, navegación, metadatos, interfaz. Nunca toca el texto de una Cita.
 
 **La regla que gobierna todo:** el texto de la Cita se compone con `quote-*`; ningún otro contenido puede usar esos tokens. Si algo que no es una Cita aparece en Source Serif a 44px, es un error de implementación.
@@ -180,6 +180,9 @@ Sin píldoras, sin círculos salvo el avatar del Autor si algún día existe.
 - **Campo de búsqueda** — filete inferior de 1px en `{colors.outline}` que pasa a `{colors.primary}` con 2px al recibir foco. Sin caja, sin sombra, sin icono decorativo a la izquierda.
 - **Tarjeta de Cita (listados)** — fragmento de la Cita en `headline-sm`, autor en `{typography.author}`, filete divisorio entre tarjetas. Sin imagen, sin fondo, sin sombra al pasar el cursor: solo el fondo pasa a `{colors.surface-container-low}`.
 - **Chip de Tema** — texto en `{typography.caption}`, fondo `{colors.surface-container}`, radio `{rounded.md}`. Nunca en siena: los Temas son navegación, no acento.
+- **Chip de Colección** — idéntico al de Tema. Que se distingan no es trabajo del chip: lo dice el sitio donde aparece y el nombre que lleva.
+- **Nombre de Colección** — `{typography.headline-md}` en Source Serif, una sola línea sobre la primera tarjeta del listado. Sin subtítulo, sin bajada, sin recuento: la página abre por el contenido.
+- **Criterio de Colección** — `{typography.caption}` en `{colors.on-surface-variant}`, al pie del listado, dentro de la medida de prosa. Es la única prosa propia del sitio que comparte página con Citas, y va en el mismo tamaño y color que la Procedencia — deliberadamente por debajo de todo lo citado.
 - **Filete divisorio** — 1px, `{colors.outline-variant}`, ancho completo de la medida de texto. El único separador del sistema.
 - **Iconografía** — de línea, 1,5px, sin relleno. Se usa exclusivamente para copiar, buscar y descargar. Cualquier otro icono es decoración y no entra.
 
@@ -189,6 +192,7 @@ Sin píldoras, sin círculos salvo el avatar del Autor si algún día existe.
 - Dejar que la Cita sea lo primero visible sin desplazar en cualquier pantalla.
 - Usar comillas angulares « » en el texto citado.
 - Reservar el siena para una sola acción por pantalla.
+- Dejar que una página de agregación empiece por su contenido, no por su explicación.
 - Componer la atribución en Inter para separarla de la voz citada.
 - Mantener el filete de 1px como único separador.
 
@@ -196,6 +200,6 @@ Sin píldoras, sin círculos salvo el avatar del Autor si algún día existe.
 - Nunca sombras, degradados ni texturas de fondo.
 - Nunca un icono decorativo junto a una Cita.
 - Nunca la palabra del sitio adjetivando la Cita ("una frase preciosa").
-- Nunca Source Serif en algo que no sea una Cita, un nombre de Autor o un nombre de Tema.
+- Nunca Source Serif en algo que no sea una Cita, un nombre de Autor, de Tema o de Colección.
 - Nunca un modal, aviso de consentimiento o invitación antes de mostrar el contenido — lo prohíbe NFR-10.
 - Nunca más de un nivel de anidamiento visual: la Cita no vive dentro de una tarjeta dentro de una sección.

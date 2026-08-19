@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]  # pasada v3 completada; las pasadas v1 y v2 también completaron 1-4
+stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3 y v3.1 completadas
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
@@ -1193,6 +1193,8 @@ So that el sembrado llene lo que está vacío en vez de engordar lo que ya está
 **When** la uso
 **Then** informa mi decisión y no elige por mí: no propone Autores automáticamente
 
+> **Superada por la Story 11.3.** Este criterio se aceptó con la redacción de FR-25 vigente en la v2. El PRD v3.1 la cambió: la política de selección pasa a ser determinista y consultable, y el editor la anula con la anulación registrada. Se conserva tal cual porque documenta lo que se construyó y se aceptó entonces; lo que hay que implementar ahora es la 11.3.
+
 **Given** un Tema que se anuncia en la portada
 **When** compruebo su recuento
 **Then** está por encima del umbral de publicación
@@ -1376,6 +1378,8 @@ De la espina de arquitectura (AD nuevos o extendidos en la v3) y de la reconcili
 - **AD-9** — el umbral mínimo de Colección y los cuatro Umbrales de Activación entran en `src/lib/umbrales.ts` y en ningún otro sitio.
 - **AD-4** — ni los Temas ni las Colecciones participan en ninguna ruta de Cita; el slug no se recalcula.
 - **AD-12 + AD-15 — no hay segundo calendario.** La composición anticipada de FR-29 son las fijaciones de `corpus/portada.json`, que `citaDelDia.ts` ya prioriza sobre la rotación desde la v1. El lote y la jornada derivan de la misma fijación, así que «lo anticipado sustituye a lo de la jornada» se cumple por construcción y no hay desempate que inventar. *(Corrige la delegación a Arquitectura que el addendum del PRD todavía arrastra — `RECONCILIACION.md` §2.)*
+- **AD-22 — la red vive en la cáscara de `tools/`.** Solo la capa exterior hace peticiones; `tools/lib/`, `src/lib/`, el esquema y las páginas son puros sobre datos ya recuperados, y **ningún paso del build descarga nada**. Es la primera dependencia de red del proyecto y entra acotada.
+- **AD-23 — el cotejo corre en el build, contra el documento versionado.** El documento de la Fuente vive en `corpus/fuentes/` (no es colección, y sí lo lee el build), cada Cita lo referencia, y una Cita cuyo texto no aparezca literalmente en él rompe la construcción. Dónde corre el cotejo lo elige el código con una condición: fuera de `src/lib/`, que por AD-5 no lee el disco. Un documento por par (Fuente, obra), nombrado `{id-de-fuente}--{slug-de-obra}`, en texto plano y sin marcado; el cotejo colapsa espacios y nada más, sin pasar por `normalizar.ts`.
 - **Sin tecnología nueva.** El stack de la v3 es el de la v2: Astro 7, Node ≥22.12, TypeScript estricto, Pagefind, `sharp`, GitHub Pages, Cloudflare Workers + D1.
 - **Diferido a propósito, y no se decide en estas épicas:** el motor de vídeo de FR-31 (sin encoder elegido; su puerta es SM-8), el valor del umbral mínimo de Colección (sale de curar las tres o cuatro primeras), el mecanismo concreto de caché de AD-16, el proveedor de publicidad y la definición del producto propio de FR-36.
 
@@ -1394,7 +1398,7 @@ UX-DR37: **Hueco declarado.** `DESIGN.md` y `EXPERIENCE.md` están actualizados 
 
 ### FR Coverage Map — v3
 
-FR-23, FR-24, FR-25: **Épica 11** — no son nuevos; la Épica 9 construyó las herramientas y esta épica las ejercita en sesiones reales de sembrado hasta alcanzar volumen.
+FR-23, FR-24, FR-25: **Épica 11** — reescritos en el PRD v3.1 para que el sembrado lo pueda ejecutar un agente. La Épica 9 construyó las herramientas; esta épica les añade las salvaguardas que hacen segura esa apertura (recuperación de la Fuente, cotejo en el build, política determinista de objetivo) y después las ejercita hasta alcanzar volumen.
 FR-26: **Épica 12** — Página de Colección indexable, con umbral sobre el recuento resuelto y sin quedar huérfana.
 FR-27: **Épica 12** — curación de una Colección: criterio, nombre y asignación de Citas ya publicadas.
 FR-28: **Épica 12** — la Colección agrega y enlaza; la canónica sigue siendo la Página de Cita.
@@ -1404,7 +1408,7 @@ FR-31: **Sin épica — puerta cerrada.** No se construye hasta que SM-8 demuest
 FR-32: **Épica 13** — Pieza de Canal derivada de una Colección publicada.
 FR-33: **Épica 14** — activación por umbral medido, con el estado como configuración versionada.
 FR-34: **Épica 14** — donaciones. Su umbral es «LC-1…LC-4 verificadas», así que se enciende el mismo día que se abren las puertas.
-FR-35: **Sin épica — puerta cerrada y contradicción sin resolver.** Umbral de 2.000 sesiones orgánicas/mes. Además, §5 del PRD prohíbe que ningún Modelo de Ingreso toque la Página de Cita, mientras que FR-35 exige que el enlace salga de la Procedencia, que se muestra ahí (FR-2). Tal y como está redactado, FR-35 es inconstruible. Se resuelve con `bmad-prd` al acercarse el umbral, no ahora.
+FR-35: **Sin épica — puerta cerrada.** Umbral de 2.000 sesiones orgánicas/mes. *(La contradicción que este mapa registraba quedó resuelta en el PRD v3.1: §5 se estrechó a la publicidad, que es para lo que se había decidido, y FR-35 es construible desde la Procedencia. Sigue sin épica solo por su umbral.)*
 FR-36: **Sin épica — puerta cerrada y contenido sin definir.** Umbral de 5.000 sesiones orgánicas/mes; el PRD difiere a propósito la elección entre lámina, antología y recurrencia.
 FR-37: **Sin épica — puerta cerrada.** Umbral de 25.000 sesiones orgánicas/mes. AD-20 excluye de partida a buena parte del mercado de display, y conviene saberlo antes de evaluar proveedores.
 
@@ -1416,9 +1420,9 @@ FR-37: **Sin épica — puerta cerrada.** Umbral de 25.000 sesiones orgánicas/m
 
 El Corpus pasa de 38 Citas a un volumen donde hay cola larga que capturar y Temas que superan su umbral, sin que baje el porcentaje de Procedencia verificada. Va primera porque **todo lo demás mejora con volumen y nada lo sustituye**: una Colección necesita Citas entre las que escoger, y una Pieza de varias Citas necesita que haya varias que merezcan ir juntas.
 
-**FRs covered:** ninguno nuevo — ejercita FR-23, FR-24 y FR-25, construidos en la Épica 9.
+**FRs covered:** FR-23, FR-24, FR-25 — reescritos en el PRD v3.1.
 **Condiciones cubiertas:** LC-6.
-**Notas de implementación:** es **operación, no desarrollo**, y por eso sus historias son sesiones de sembrado con criterio de aceptación medible en lugar de cambios de código. §6.4 del PRD lo dice explícitamente: las herramientas están construidas y probadas. Lleva épica propia para que el avance quede en `sprint-status.yaml` y no en la memoria de nadie. Las contra-métricas mandan sobre el volumen: si SM-C1 baja mientras el Corpus crece, la sesión ha fallado aunque haya sumado Citas. El suelo del 40 % de Autores de tradición latinoamericana se comprueba con `tools/huecos.ts` antes de elegir a quién se dedica cada sesión, no después.
+**Notas de implementación:** tres historias de desarrollo y una operativa. Las tres primeras construyen las salvaguardas que permiten que el sembrado lo ejecute un agente sin que la Procedencia deje de ser comprobable: lo que hace segura la apertura no es confiar en quien ejecuta, sino que el metadato se derive del documento y que el texto tenga que aparecer en él. La cuarta corre el proceso y solo se cierra si las contra-métricas aguantan — si SM-C1 baja mientras el Corpus crece, la sesión ha fallado aunque haya sumado Citas. La 11.4 es la única de la v3 que `bmad-build` no puede ejecutar, y va la última a propósito: las tres que sí puede la habilitan.
 
 ### Épica 12: La cola larga tiene dónde aterrizar
 
@@ -1451,76 +1455,123 @@ El Corpus pasa de 38 Citas a un volumen donde hay cola larga que capturar y Tema
 
 **Punto de partida medido (2026-08-18):** 38 Citas, 12 Autores, 8 Temas. Solo `la-vida` (17) y `el-saber` (15) superan `MIN_CITAS_POR_TEMA`. Por debajo: `la-virtud` 11, `el-tiempo` 8, `la-palabra` 7, `la-adversidad` 6, `la-libertad` 5, `la-amistad` 1. Tradición: 9 peninsulares, 2 latinoamericanos, 1 otra — un 16,7 % frente al suelo del 40 %.
 
-### Story 11.1: Ningún Tema anunciado en portada queda por debajo de su umbral
+### Story 11.1: La Fuente se recupera, y su metadato sale del documento
+
+As a quien siembra el Corpus —el editor o un agente—,
+I want que la obra, el año y la licencia salgan del documento recuperado,
+So that nadie pueda teclear una Procedencia que la Fuente no dice.
+
+**Acceptance Criteria:**
+
+**Given** una URL perteneciente al conjunto cerrado de Fuentes admitidas
+**When** lanzo la recuperación
+**Then** el documento se descarga y se versiona como texto plano, con el marcado retirado, en `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt`
+
+**Given** una URL que no pertenece al conjunto de Fuentes admitidas
+**When** la paso a la recuperación
+**Then** no produce candidatas
+
+**Given** la obra, el año y la licencia de una candidata
+**When** se componen
+**Then** salen del documento recuperado
+**And** no existe forma de pasarlos por argumento a la orden
+
+**Given** una obra cuyo documento ya está versionado
+**When** la recupero otra vez
+**Then** se reutiliza el documento existente en lugar de añadir otra copia
+
+**Given** la petición de red
+**When** reviso dónde vive
+**Then** está en la capa exterior de `tools/`, y `tools/lib/`, `src/lib/`, el esquema y las páginas no hacen ninguna
+**And** ningún paso del build descarga nada
+
+### Story 11.2: Ninguna Cita se publica sin aparecer en su documento
+
+As a lector que confía en la atribución antes de repetirla en público,
+I want que el texto publicado esté verificado contra la edición de la que dice salir,
+So that la Procedencia sea comprobada y no simplemente declarada.
+
+**Acceptance Criteria:**
+
+**Given** una Cita en `corpus/citas/` que referencia su documento de Fuente
+**When** se construye el sitio
+**Then** el cotejo comprueba que su texto aparezca literalmente en ese documento
+
+**Given** una Cita cuyo texto no se localiza en su documento
+**When** se construye el sitio
+**Then** el build falla con la ruta del fichero y la regla incumplida
+**And** no se degrada a aviso
+
+**Given** una Cita que difiere de su edición en un acento o en un signo de puntuación
+**When** corre el cotejo
+**Then** falla — la comparación colapsa espacios y nada más, y no pasa por `normalizar.ts`
+
+**Given** que las reglas de admisión se cablean desde `src/lib/admision.ts`, que por AD-5 no lee el sistema de ficheros
+**When** se implementa el cotejo
+**Then** vive fuera de `src/lib/`
+**And** ningún camino de publicación lo esquiva
+
+**Given** una Cita escrita a mano directamente en `corpus/citas/`, sin pasar por el sembrado
+**When** se construye el sitio
+**Then** pasa por el cotejo igual que una sembrada
+
+### Story 11.3: El objetivo de cada sesión sale del hueco, no del criterio
+
+As a agente que siembra sin supervisión,
+I want una política determinista que diga a qué Tema y a qué Autor dedicar la sesión,
+So that el sembrado desatendido no derive hacia lo que resulta más fácil de encontrar.
+
+**Acceptance Criteria:**
+
+**Given** un estado del Corpus
+**When** pido el objetivo de la sesión
+**Then** la política devuelve el mismo objetivo para el mismo estado
+**And** declara de qué hueco sale
+
+**Given** una proporción de Autores de tradición latinoamericana por debajo de `SUELO_TRADICION_LATINOAMERICANA`
+**When** la política elige objetivo
+**Then** prioriza cerrar ese hueco
+
+**Given** que el editor quiere dedicar la sesión a otro objetivo
+**When** anula la propuesta
+**Then** la anulación queda registrada
+
+**Given** los Temas por debajo del umbral de publicación
+**When** consulto la vista de huecos
+**Then** veo cuántas Citas le faltan a cada uno
+
+### Story 11.4: El Corpus alcanza volumen defendible
 
 As a visitante que llega desde las cuentas de Sabiduría de Bolsillo,
 I want que el Tema que pulso en la portada tenga contenido detrás,
 So that no aterrice en una página vacía y me vaya para no volver.
 
+**Nota de ejecución:** es la única historia de la v3 que no ejecuta un agente de desarrollo — corre la tubería que construyen 11.1 a 11.3 y se cierra por resultado medido, a lo largo de varias sesiones.
+
 **Acceptance Criteria:**
 
-**Given** los seis Temas por debajo de `MIN_CITAS_POR_TEMA`
-**When** cierro las sesiones de sembrado de esta historia
+**Given** los seis Temas por debajo de `MIN_CITAS_POR_TEMA` al abrir la épica
+**When** la cierro
 **Then** cada Tema que la portada anuncia tiene al menos 15 Citas publicadas
-**And** `tools/huecos.ts` no reporta ningún Tema de portada por debajo del umbral
-
-**Given** cada Cita incorporada en esta historia
-**When** pasa por la puerta de admisión
-**Then** ninguna llega a `publicada` sin Procedencia, con un Autor sin año de fallecimiento, o con Estado de Derechos distinto de `dominio-público`
-**And** el build falla con la ruta del fichero y la regla incumplida si alguna lo intentara
+**And** `tools/huecos.ts` no reporta ninguno por debajo del umbral
 
 **Given** SM-C1 medido con `tools/auditoria.ts` antes de empezar
-**When** lo vuelvo a medir al cerrar la historia
+**When** lo vuelvo a medir al cerrar
 **Then** el porcentaje de Citas publicadas con Procedencia completa no ha bajado
 
-**Given** un Tema que sigue por debajo del umbral al cerrar la historia
-**When** se construye el sitio
-**Then** ese Tema no se publica, no se indexa, sus chips no se renderizan y la portada no lo anuncia
+**Given** la proporción de tradición latinoamericana, hoy en el 16,7 %
+**When** cierro la épica
+**Then** alcanza o supera el suelo del 40 %
 
-### Story 11.2: El Corpus deja de estar sesgado hacia la península
-
-As a Marisol, que llega buscando un clásico y descubre a alguien que no conocía,
-I want que el catálogo represente la tradición latinoamericana tanto como la peninsular,
-So that el descubrimiento de UJ-3 pueda ocurrir de verdad y no por casualidad.
-
-**Acceptance Criteria:**
-
-**Given** que hoy 2 de los 12 Autores son de tradición latinoamericana (16,7 %)
-**When** cierro esta historia
-**Then** `tools/huecos.ts` reporta una proporción igual o superior a `SUELO_TRADICION_LATINOAMERICANA`
-**And** la proporción se comprueba antes de elegir a qué Autor se dedica cada sesión, no después
-
-**Given** una Fuente en dominio público de un Autor de tradición latinoamericana
-**When** extraigo candidatas con `tools/extraer.ts`
-**Then** cada candidata llega con obra y año tomados de la Fuente y registra bajo qué licencia se obtuvo
-**And** no se propone ninguna candidata cuyo texto no esté en español
-
-**Given** una obra cuyo original no está en español
-**When** la considero como Fuente
-**Then** queda descartada, salvo que exista una traducción al español ya en dominio público e identificable por su edición
-**And** en ningún caso se traduce texto para publicarlo
-
-### Story 11.3: El sembrado tiene cadencia y salud visibles
-
-As a Héctor, único editor,
-I want saber a qué ritmo crece el Corpus y si su salud aguanta ese ritmo,
-So that pueda decidir cuánto sembrar sin descubrir el daño tres meses después.
-
-**Acceptance Criteria:**
-
-**Given** la primera sesión real de sembrado ya hecha
+**Given** las sesiones ya corridas
 **When** registro su resultado
-**Then** queda declarada la cadencia —Citas por sesión y con qué frecuencia—, que §14.3 del PRD dejaba abierta a propósito
-**And** la cifra sale de una sesión medida, no de una estimación
-
-**Given** `tools/auditoria.ts` y `tools/huecos.ts`
-**When** los ejecuto al cerrar cada sesión
-**Then** obtengo SM-C1 desglosado por Autor y los Temas que siguen por debajo del umbral, sin exportar datos
+**Then** queda declarada la cadencia de sembrado que §14.3 del PRD dejaba abierta
+**And** sale de sesiones medidas, no de una estimación
 
 **Given** una sesión en la que SM-C1 baja mientras el número de Citas sube
-**When** reviso el resultado
-**Then** la sesión se considera fallida aunque haya sumado Citas
-**And** las Citas sin Procedencia completa se mueven a `corpus/_revision/` en lugar de quedarse publicadas
+**When** la reviso
+**Then** se considera fallida aunque haya sumado Citas
+**And** las Citas sin Procedencia completa se mueven a `corpus/_revision/`
 
 ---
 
