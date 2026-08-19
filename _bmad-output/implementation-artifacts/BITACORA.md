@@ -833,3 +833,30 @@ define: SM-C1 que baja mientras el número de Citas sube.
 quiera. El resultado medido lo mitiga mucho —dos entradas con el mismo recuento delatan
 una sesión que no sembró— pero acoplarlo del todo sería que el alta registrase la sesión,
 y eso es trabajo de la 11.4.
+
+## Cierre de la Épica 11 — desplegada y verificada en vivo
+
+Fusionada a `main` el 19/08 con 14 commits. El flujo `Publicar` salió en verde en un
+minuto y el sitio quedó verificado en vivo: `sabiduriadebolsillo.net` responde 200, la
+canónica es la suya, una Página de Cita responde 200, `www` redirige al ápice con 301, y
+el sitemap desplegado trae **53 URLs, exactamente las 53 del build local**. La Épica 11 no
+añade ninguna superficie pública —es herramienta y una puerta de construcción—, así que lo
+que había que comprobar era que nada se rompiera, y nada se rompió.
+
+Puertas antes de fusionar: `astro check` 0 errores sobre 132 ficheros, 882 pruebas
+unitarias, 392 e2e, y `npm run build` correcto. Cero minutos de CI gastados hasta la
+fusión: una sola ejecución para toda la épica.
+
+**Queda abierta la 11.4**, y a propósito. No la ejecuta un agente de desarrollo: corre la
+tubería que las tres construyen y se cierra por resultado medido a lo largo de varias
+sesiones —los seis Temas a 15 Citas, SM-C1 que no baja, y la tradición latinoamericana del
+16,7 % al 40 %—. Por eso la épica queda en `in-progress` y no en `done`: se despliega lo
+construido, no se miente sobre el estado.
+
+**Lo que la épica deja listo para esa siembra.** `npx tsx tools/objetivo.ts` dice a qué
+hueco dedicar la sesión y a qué Tema van sus Citas; `tools/recuperar.ts` trae el documento
+de la Fuente; `tools/extraer.ts` deriva de él la Procedencia y rechaza cualquier documento
+que la recuperación no produjera; el build coteja que el texto aparezca literalmente; y
+`--registrar` deja la sesión anotada con su resultado medido, que es de donde saldrá la
+cadencia. Sembrar mal ya no es posible en silencio: es un build roto con la ruta del
+fichero y la regla incumplida.
