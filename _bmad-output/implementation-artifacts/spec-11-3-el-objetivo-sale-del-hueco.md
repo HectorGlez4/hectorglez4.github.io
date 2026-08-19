@@ -2,15 +2,36 @@
 title: 'Story 11.3 — El objetivo de cada sesión sale del hueco, no del criterio'
 type: 'feature'
 created: '2026-08-19'
-status: 'in-review'
+status: 'done'
 baseline_revision: '8e9b6c8dd00232c74cf048c1de7b07b0b9f41530'
 review_loop_iteration: 1
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-11-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-11-2-ninguna-cita-se-publica-sin-aparecer.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      El registro es autodeclarado: nada acopla una entrada a que se haya sembrado de
+      verdad, porque `tools/alta.ts` y `tools/sembrar.ts` no escriben en él.
+    evidence: |-
+      `--registrar` lo ejecuta quien quiera cuando quiera. El resultado medido que ahora
+      lleva cada entrada mitiga mucho —dos entradas con el mismo recuento de Citas delatan
+      una sesión que no sembró—, pero la disciplina sigue siendo del operador. Acoplarlo
+      sería que el alta registrase la sesión, y eso es trabajo de la 11.4.
+    location: >-
+      tools/objetivo.ts
+    severity: medium
+  - summary: >-
+      El desempate entre Temas depende de `localeCompare(…, 'es')`, que es dependiente de
+      ICU y podría variar en un Node compilado con small-icu.
+    evidence: |-
+      Todos los slugs de las pruebas son ASCII, así que la suite no puede detectarlo. La
+      decisión de no reordenar en la política es correcta —el orden tiene un solo dueño en
+      `huecos.ts`—, pero la garantía de determinación no es más fuerte que esa llamada.
+    location: >-
+      src/lib/huecos.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -102,3 +123,35 @@ deferred: []
 - `npx vitest run` -- expected: todo en verde; ninguna prueba de la línea base perdida.
 - `npm run build` -- expected: construye.
 - `npx tsx tools/objetivo.ts --json` dos veces seguidas -- expected: salida idéntica.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 2: (high 2)
+- patch: 15: (medium 10, low 5)
+- defer: 2: (medium 1, low 1)
+- reject: 4: (low 4)
+- addressed_findings:
+  - `[high]` `[bad_spec]` La rama de tradición no devolvía Tema, y es la rama en la que el Corpus está hoy y estará durante toda la 11.4: al agente se le decía qué clase de Autor admitir y nada sobre dónde van las Citas, con seis Temas cortos. Mi matriz de E/S lo había estrechado a un solo eje. Ahora el objetivo lleva los dos, con la prioridad decidiendo el titular y no lo que se dice.
+  - `[high]` `[bad_spec]` El registro no podía sostener el criterio de la 11.4 —«registro su **resultado**»— porque no tenía dónde ponerlo. Cada entrada lleva ahora el resultado medido, derivado del Corpus por la orden: Citas publicadas, SM-C1 y porcentaje de tradición. Con eso la 11.4 saca «cuántas Citas por sesión» de la diferencia entre entradas y puede juzgar la sesión fallida que define.
+  - `[medium]` `[patch]` La fecha era UTC: una sesión posterior a las 22:00 peninsulares se fechaba al día siguiente, sesgo sistemático en lo único que el fichero mide. Fecha y hora locales.
+  - `[medium]` `[patch]` Una bandera mal escrita consultaba en silencio y salía con 0, así que un guion creía que la sesión había quedado anotada. Toda bandera desconocida sale con código ≠ 0, y hay `--ayuda`.
+  - `[medium]` `[patch]` Un registro vacío o sin la clave `sesiones:` producía una lista huérfana y todo lector veía cero sesiones. Ahora se valida antes de escribir, la cabecera se crea con `wx`, y solo se añade si la lista crece en exactamente una entrada.
+  - `[medium]` `[patch]` La cabecera del registro estaba escrita dos veces y ya divergía; un solo dueño.
+  - `[medium]` `[patch]` Se guardaban solo frases: ahora también los ejes estructurados, para que la 11.4 no tenga que analizar prosa en español.
+  - `[medium]` `[patch]` `--registrar` sin hueco que cerrar entraba en la serie de cadencia como sesión real; y un reintento de la misma jornada la inflaba. Ambos rechazados.
+  - `[medium]` `[patch]` `--elegido "   "` daba tres representaciones distintas; un solo colapso a `undefined`.
+  - `[medium]` `[patch]` `huecos.test.ts` seguía afirmando «informa, no elige», que ya era falso del código que vigilaba.
+  - `[medium]` `[patch]` Nada fijaba la coma decimal —quitarle el `.replace` dejaba la suite en verde— ni ejercitaba `--anular --json`. Y `tools/auditoria.ts` imprimía con punto mientras su hermana imprimía con coma.
+  - `[low]` `[patch]` `clase` tipada a la unión y sin el doble `as unknown as`; `rechazar()` sustituido por `terminar()`; prueba de nombres reformulada para que cace al peligro real; guiones en `package.json` y sección en `AGENTS.md`.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** Una política determinista, pura y sin disco (`src/lib/objetivo.ts`) que consume `verHuecos` y devuelve el objetivo de la sesión declarando de qué hueco sale. Prioriza el suelo de tradición sobre los Temas cortos, y devuelve **los dos ejes** cuando ambos huecos existen. Caracteriza al Autor por tradición y **nunca por nombre**, que era el criterio que `huecos.ts` protegía desde la v1. `tools/objetivo.ts` la sirve en tres modos —consultar, registrar y anular— y `corpus/sesiones-de-sembrado.yml` guarda la serie de sesiones con su resultado medido, que es de donde la 11.4 sacará la cadencia.
+
+**Verificación.** `npx astro check` 0 errores sobre 132 ficheros. `npx vitest run` **882/882** en 37, frente a 794/35 de la línea base. `npm run build` construye con la puerta de la 11.2 intacta. Dos llamadas seguidas a `--json` dan salida idéntica. Y a mano: la salida real lleva los dos ejes, una bandera con errata sale con código 1, y consultar no toca el fichero.
+
+**Recomendación de nueva revisión: true.** Dos hallazgos de severidad alta, ambos de especificación.
+
+**Riesgos residuales.** Los dos diferidos están en el frontmatter: el registro es autodeclarado —mitigado, no cerrado, por el resultado medido— y el desempate entre Temas depende de ICU.

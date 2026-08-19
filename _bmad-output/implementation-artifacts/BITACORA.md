@@ -791,3 +791,45 @@ documentos compuestos en las pruebas. La primera siembra real dirá si la retira
 marcado de la 11.1 deja el cuerpo lo bastante fiel; si no, el ajuste toca en
 `documento.ts` y no aquí. `astro preview` no coteja, a propósito: sirve un `dist/` que ya
 cruzó la puerta al construirse.
+
+## 11.3 — El objetivo de cada sesión sale del hueco, no del criterio
+
+**Verificado.** `src/lib/objetivo.ts` es una política pura y determinista: consume lo que
+`verHuecos` ya calculó y devuelve el objetivo de la sesión declarando de qué hueco sale.
+Prioriza el suelo de tradición sobre los Temas cortos, porque un Tema corto se cierra
+sembrando a cualquiera que ya esté y el hueco de tradición solo se cierra admitiendo
+Autores nuevos — si ganase el Tema fácil, el hueco caro no se cerraría nunca, que es el
+sesgo que la historia nombra. Dos llamadas sobre el mismo Corpus dan la misma frase.
+
+882 pruebas en verde (794 al empezar), 0 errores de tipos.
+
+**El conflicto entre artefactos, resuelto por escrito.** La cabecera de `src/lib/huecos.ts`
+declaraba desde la v1 que la vista no propone Autores, porque «quién entra en el Corpus es
+la única decisión que este producto no delega». La historia pide una política que diga a
+qué Tema y a qué Autor dedicar la sesión. Se resolvió por el lado conservador: la política
+dice **qué hueco** cerrar y caracteriza al Autor por **tradición**, nunca por nombre. Un
+agente desatendido obtiene objetivo determinista; admitir a una persona concreta sigue
+siendo de Héctor.
+
+**Una cuenta que la versión ingenua habría fallado.** Cuántos Autores latinoamericanos
+faltan no es «el 40 % de 12 son 4,8, faltan 3»: cada alta sube numerador **y** denominador,
+así que hay que resolver (2+k)/(12+k) ≥ 0,40, que da 5. Prometer 3 habría dejado el suelo
+sin alcanzar.
+
+**Dos defectos de contrato que la revisión encontró.** El primero: la matriz de E/S
+estrechaba el objetivo a un solo eje, así que en la rama de tradición —la que el Corpus
+toma hoy y tomará durante toda la 11.4— no se decía dónde van las Citas, con seis Temas
+por debajo del umbral. Ahora lleva los dos ejes: «Admitir Autores de tradición
+latinoamericana… Sus Citas van al Tema «La virtud», al que menos le falta».
+
+El segundo: el registro no tenía dónde poner un resultado, cuando el criterio de la 11.4
+dice literalmente «registro su **resultado**». Cada entrada lleva ahora el resultado
+medido —Citas publicadas, SM-C1 y porcentaje de tradición—, derivado del Corpus por la
+propia orden y no tecleable. Con eso la 11.4 saca «cuántas Citas por sesión» de la
+diferencia entre entradas consecutivas y puede detectar la sesión fallida que su criterio
+define: SM-C1 que baja mientras el número de Citas sube.
+
+**Lo que quedó fuera.** El registro es autodeclarado: `--registrar` lo ejecuta quien
+quiera. El resultado medido lo mitiga mucho —dos entradas con el mismo recuento delatan
+una sesión que no sembró— pero acoplarlo del todo sería que el alta registrase la sesión,
+y eso es trabajo de la 11.4.
