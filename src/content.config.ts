@@ -26,6 +26,10 @@ import {
 // Las tres colecciones apuntan a `corpus/{citas,autores,temas}`. `corpus/_revision/` no
 // es la base de ninguna, así que ninguna colección puede cargarlo. No existe un campo
 // `publicada` que filtrar en tiempo de ejecución: publicar es mover el fichero.
+//
+// `corpus/fuentes/` tampoco es la base de ninguna, y por el mismo motivo: son los
+// documentos de Fuente que versiona `tools/recuperar.ts` (AD-23), texto de terceros que
+// el build **no lee** y que no puede filtrarse al sitio construido.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const citas = defineCollection({

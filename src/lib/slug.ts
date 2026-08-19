@@ -34,16 +34,36 @@ function unir(...trozos: string[]): string {
 }
 
 /**
+ * La canonización de un nombre propio, con un solo dueño.
+ *
+ * Autor, Tema y obra la comparten. Estaba escrita dos veces —idéntica— cuando llegó la
+ * tercera, y tres copias de una regla de canonización son tres sitios donde puede
+ * divergir: bastaría con que una añadiera el recorte de un signo para que el mismo
+ * nombre diera dos rutas distintas según quién lo derive.
+ */
+function slugDeNombre(nombre: string): string {
+  return unir(normalizar(nombre));
+}
+
+/**
  * Slug de un Autor a partir de su nombre. «Séneca» da «seneca»; «Sor Juana Inés de la
  * Cruz» da «sor-juana-ines-de-la-cruz».
  */
 export function slugDeAutor(nombre: string): string {
-  return unir(normalizar(nombre));
+  return slugDeNombre(nombre);
 }
 
 /** Slug de un Tema. No participa en ninguna ruta de Cita — solo en la suya propia. */
 export function slugDeTema(nombre: string): string {
-  return unir(normalizar(nombre));
+  return slugDeNombre(nombre);
+}
+
+/**
+ * Slug de una obra. Nombra el documento de Fuente de la Historia 11.1
+ * (`{id-de-fuente}--{slug-de-obra}.txt`) y no participa en ninguna ruta del sitio.
+ */
+export function slugDeObra(nombre: string): string {
+  return slugDeNombre(nombre);
 }
 
 /**

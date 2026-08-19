@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { equivalentes, normalizar, palabras } from '../../src/lib/normalizar.js';
-import { slugDeAutor, slugDeCita, slugDeTema, slugLibre } from '../../src/lib/slug.js';
+import { slugDeAutor, slugDeCita, slugDeObra, slugDeTema, slugLibre } from '../../src/lib/slug.js';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 
@@ -108,6 +108,31 @@ describe('Historia 1.4 — derivación de slug', () => {
   it('el slug de un Tema sale de su nombre', () => {
     expect(slugDeTema('El tiempo')).toBe('el-tiempo');
     expect(slugDeTema('Amistad y lealtad')).toBe('amistad-y-lealtad');
+  });
+
+  it('el slug de una obra nombra su documento de Fuente (Historia 11.1)', () => {
+    expect(slugDeObra('Del sentimiento trágico de la vida')).toBe(
+      'del-sentimiento-tragico-de-la-vida',
+    );
+    expect(slugDeObra('Sobre la brevedad de la vida')).toBe('sobre-la-brevedad-de-la-vida');
+    expect(slugDeObra('«El Criticón»')).toBe('el-criticon');
+  });
+
+  it('Autor, Tema y obra delegan en el mismo ayudante de canonización', () => {
+    /*
+     * Lo que importa es que la regla tenga un solo dueño, no que las tres salidas sean
+     * iguales para siempre: congelar la igualdad ataría el slug de obra al del Autor y
+     * convertiría en fallo cualquier divergencia legítima futura. Se afirma la estructura
+     * —un cuerpo, tres delegaciones—, que es lo que de verdad impide la divergencia.
+     */
+    const codigo = readFileSync(resolve(RAIZ, 'src/lib/slug.ts'), 'utf8');
+    expect([...codigo.matchAll(/unir\(normalizar\(/gu)]).toHaveLength(1);
+
+    for (const funcion of ['slugDeAutor', 'slugDeTema', 'slugDeObra']) {
+      expect(codigo, funcion).toMatch(
+        new RegExp(`function ${funcion}\\(nombre: string\\): string \\{\\s*return slugDeNombre\\(nombre\\);`, 'u'),
+      );
+    }
   });
 });
 

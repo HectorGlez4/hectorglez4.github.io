@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { FUENTES, fuenteDe } from '../../tools/lib/fuentes.ts';
+import { FUENTES, fuenteDe, fuenteDeUrl } from '../../tools/lib/fuentes.ts';
+import { LECTORES_POR_FUENTE } from '../../tools/lib/documento.ts';
 import {
   MAX_CARACTERES_CANDIDATA,
   MIN_CARACTERES_CANDIDATA,
@@ -130,6 +131,67 @@ describe('Historia 9.1 — una licencia que no permite reutilizar detiene el pro
       if (!fuente.permiteReutilizacion) expect(fuente.razon).toBeTruthy();
     }
     expect(fuenteDe('no-existe')).toBeUndefined();
+  });
+});
+
+describe('Historia 11.1 — FUENTES y las tablas por Fuente no se desincronizan', () => {
+  /*
+   * Sin esto se podía añadir una Fuente con su licencia y sin anfitriones ni lector de
+   * obra: la recuperación descargaría y fallaría después con «no declara título», o ni
+   * siquiera reconocería su propia dirección, y la suite seguiría en verde.
+   */
+  it.each(FUENTES.filter((f) => f.permiteReutilizacion).map((f) => [f.id, f] as const))(
+    '«%s» declara anfitriones y tiene lector de obra',
+    (id, fuente) => {
+      expect(fuente.anfitriones.length).toBeGreaterThan(0);
+      for (const anfitrion of fuente.anfitriones) {
+        expect(anfitrion).toMatch(/^[a-z0-9.-]+\.[a-z]{2,}$/);
+        expect(fuenteDeUrl(`https://${anfitrion}/loquesea`)?.id).toBe(id);
+      }
+      expect(LECTORES_POR_FUENTE[id], `falta el lector de ${id}`).toBeDefined();
+    },
+  );
+
+  it('toda Fuente del conjunto reconoce sus propias direcciones', () => {
+    for (const fuente of FUENTES) {
+      expect(fuente.anfitriones.length, fuente.id).toBeGreaterThan(0);
+      expect(fuenteDeUrl(`https://${fuente.anfitriones[0]}/x`)?.id).toBe(fuente.id);
+    }
+  });
+
+  it('ningún lector sobra: cada uno corresponde a una Fuente que permite reutilizar', () => {
+    for (const id of Object.keys(LECTORES_POR_FUENTE)) {
+      expect(fuenteDe(id)?.permiteReutilizacion, id).toBe(true);
+    }
+  });
+});
+
+describe('Historia 11.1 — la dirección decide la Fuente, con coincidencia exacta', () => {
+  it.each([
+    ['https://es.wikisource.org/wiki/X', 'wikisource-es'],
+    // Una URL copiada del móvil es la misma Fuente y la misma obra.
+    ['https://es.m.wikisource.org/wiki/X', 'wikisource-es'],
+    ['https://www.gutenberg.org/ebooks/7500', 'gutenberg'],
+    ['http://gutenberg.org/ebooks/7500', 'gutenberg'],
+    ['https://www.cervantesvirtual.com/obra/x/', 'cervantes-virtual'],
+  ])('«%s» es de %s', (url, id) => {
+    expect(fuenteDeUrl(url)?.id).toBe(id);
+  });
+
+  it.each([
+    // El que más cuela: termina en «example.com», no en «gutenberg.org».
+    'https://gutenberg.org.example.com/ebooks/7500',
+    'https://notgutenberg.org/x',
+    'https://es.wikisource.org.evil.example/wiki/X',
+    'https://frases-celebres.example.com/seneca',
+    // Ni protocolos que no son http(s): son formas de leer algo que nadie publicó.
+    'file:///etc/passwd',
+    'data:text/html,<h1>Obra</h1>',
+    'javascript:alert(1)',
+    'no es una url',
+    '',
+  ])('«%s» no es de ninguna Fuente', (url) => {
+    expect(fuenteDeUrl(url)).toBeUndefined();
   });
 });
 

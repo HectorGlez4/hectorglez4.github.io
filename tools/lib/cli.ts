@@ -15,6 +15,29 @@ export function raizDeCorpusDe(argumentos: string[]): string {
 }
 
 /**
+ * Los argumentos que no son opciones ni valor de una opción.
+ *
+ * `argumentos.find((a) => !a.startsWith('--'))` parecía suficiente hasta que alguien
+ * escribió `--corpus corpus https://…`: el primer no-guion era `corpus`, y la herramienta
+ * tomaba por dirección la raíz del corpus. `conValor` nombra las opciones que consumen el
+ * argumento siguiente, así que el que queda es el posicional de verdad.
+ */
+export function posicionales(argumentos: string[], conValor: readonly string[] = []): string[] {
+  const salida: string[] = [];
+  for (let i = 0; i < argumentos.length; i += 1) {
+    const actual = argumentos[i];
+    if (conValor.includes(actual)) {
+      const siguiente = argumentos[i + 1];
+      if (siguiente !== undefined && !siguiente.startsWith('--')) i += 1;
+      continue;
+    }
+    if (actual.startsWith('--')) continue;
+    salida.push(actual);
+  }
+  return salida;
+}
+
+/**
  * Escribe el resultado y sale con el código que corresponda.
  *
  * Un rechazo sale con código distinto de cero a propósito: estas herramientas se

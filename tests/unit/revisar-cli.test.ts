@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
+import { componerDocumento } from '../../tools/lib/documento.ts';
 
 const ejecutar = promisify(execFile);
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -18,24 +19,36 @@ afterEach(async () => {
  * encadenadas como se usarían de verdad.
  */
 
-const DOCUMENTO = {
-  fuente: 'wikisource-es',
-  obra: 'Sobre la brevedad de la vida',
-  año: 49,
-  texto: [
+/**
+ * Historia 11.1 — la entrada de `extraer.ts` es el documento que produjo la recuperación,
+ * con su nombre y su cabecera, no un YAML escrito a mano.
+ */
+const NOMBRE_DEL_DOCUMENTO = 'wikisource-es--sobre-la-brevedad-de-la-vida.txt';
+
+const DOCUMENTO = componerDocumento(
+  {
+    fuente: 'wikisource-es',
+    obra: 'Sobre la brevedad de la vida',
+    año: 49,
+    url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+    recuperado: '2026-08-19',
+  },
+  'Sobre la brevedad de la vida\nAño de publicación: 49',
+  [
     'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.',
     'La vida es larga si sabes usarla y aprovecharla como es debido cada jornada.',
     'Ninguna cosa hay que sea más nuestra que el tiempo que pasa por delante de todos.',
   ].join(' '),
-};
+);
 
 async function corpus() {
   const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-sesion-'));
   temporales.push(raiz);
   const dir = join(raiz, 'corpus');
-  for (const sub of ['citas', 'autores', 'temas', '_revision']) {
+  for (const sub of ['citas', 'autores', 'temas', '_revision', 'fuentes']) {
     await mkdir(join(dir, sub), { recursive: true });
   }
+  await writeFile(join(dir, 'fuentes', NOMBRE_DEL_DOCUMENTO), DOCUMENTO, 'utf8');
   await writeFile(
     join(dir, 'autores', 'seneca.yml'),
     'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico hispanorromano."\n',
@@ -56,15 +69,10 @@ async function correr(guion: string, argumentos: string[]) {
 
 describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
   it('extraer deja candidatas y revisar las lista todas de una vez', async () => {
-    const { raiz, dir } = await corpus();
-    await writeFile(
-      join(raiz, 'documento.yaml'),
-      Object.entries(DOCUMENTO).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('\n'),
-      'utf8',
-    );
+    const { dir } = await corpus();
 
     const extraccion = await correr('tools/extraer.ts', [
-      join(raiz, 'documento.yaml'), '--autor', 'seneca', '--corpus', dir,
+      join(dir, 'fuentes', NOMBRE_DEL_DOCUMENTO), '--autor', 'seneca', '--corpus', dir,
     ]);
     expect(extraccion.codigo, extraccion.error).toBe(0);
 
@@ -75,14 +83,9 @@ describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
   });
 
   it('una sesión a medias se retoma donde se dejó', async () => {
-    const { raiz, dir } = await corpus();
-    await writeFile(
-      join(raiz, 'documento.yaml'),
-      Object.entries(DOCUMENTO).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('\n'),
-      'utf8',
-    );
+    const { dir } = await corpus();
     await correr('tools/extraer.ts', [
-      join(raiz, 'documento.yaml'), '--autor', 'seneca', '--corpus', dir,
+      join(dir, 'fuentes', NOMBRE_DEL_DOCUMENTO), '--autor', 'seneca', '--corpus', dir,
     ]);
 
     /*

@@ -10,6 +10,9 @@
  * Épica 9 es explícita sobre lo que **no** se hace: rastrear sitios de citas. Sus
  * compilaciones están protegidas y —lo decisivo— publican texto y nombre sin obra ni año,
  * así que cada Cita extraída de ahí moriría en `corpus/_revision/`.
+ *
+ * Este módulo es puro y no toca la red (AD-22). Aquí solo se decide **a qué Fuente
+ * pertenece** una dirección; quien la pide es `tools/recuperar.ts` y nadie más.
  */
 
 export interface Fuente {
@@ -20,6 +23,14 @@ export interface Fuente {
   permiteReutilizacion: boolean;
   /** Por qué no, cuando no. Es lo que se le dice al editor al detener el proceso. */
   razon?: string;
+  /**
+   * Anfitriones por los que se reconoce una dirección de esta Fuente.
+   *
+   * Se incluyen las variantes móviles: una URL copiada del móvil (`es.m.wikisource.org`)
+   * es la misma Fuente y la misma obra, y rechazarla obligaría a reescribirla a mano —
+   * que es exactamente el gesto que esta historia quiere quitar de en medio.
+   */
+  anfitriones: readonly string[];
 }
 
 export const FUENTES: readonly Fuente[] = [
@@ -28,12 +39,14 @@ export const FUENTES: readonly Fuente[] = [
     nombre: 'Wikisource en español',
     licencia: 'CC BY-SA 4.0',
     permiteReutilizacion: true,
+    anfitriones: ['es.wikisource.org', 'es.m.wikisource.org'],
   },
   {
     id: 'gutenberg',
     nombre: 'Project Gutenberg',
     licencia: 'dominio público',
     permiteReutilizacion: true,
+    anfitriones: ['gutenberg.org', 'www.gutenberg.org', 'm.gutenberg.org'],
   },
   {
     id: 'cervantes-virtual',
@@ -43,9 +56,40 @@ export const FUENTES: readonly Fuente[] = [
     razon:
       'su licencia excluye el uso comercial, y el Corpus se publica sin esa restricción: ' +
       'una Cita con esa procedencia contaminaría las condiciones de todo el conjunto.',
+    anfitriones: ['cervantesvirtual.com', 'www.cervantesvirtual.com'],
   },
 ];
 
 export function fuenteDe(id: string): Fuente | undefined {
   return FUENTES.find((f) => f.id === id);
+}
+
+/**
+ * La Fuente a la que pertenece una dirección, o `undefined` si no pertenece a ninguna.
+ *
+ * La coincidencia es **exacta de anfitrión o de subdominio real**, nunca de subcadena:
+ * `gutenberg.org.example.com` termina en `example.com` y no es Project Gutenberg, pero
+ * un `endsWith('gutenberg.org')` lo daría por bueno y traería texto de cualquiera con la
+ * licencia de una Fuente admitida escrita al lado.
+ *
+ * Solo `http` y `https`. `file:`, `data:` y `javascript:` no son Fuentes: son formas de
+ * que la recuperación lea algo que nadie publicó.
+ */
+export function fuenteDeUrl(url: string): Fuente | undefined {
+  let analizada: URL;
+  try {
+    analizada = new URL(url);
+  } catch {
+    return undefined;
+  }
+
+  if (analizada.protocol !== 'http:' && analizada.protocol !== 'https:') return undefined;
+
+  // El punto final del FQDN («es.wikisource.org.») designa el mismo anfitrión.
+  const anfitrion = analizada.hostname.toLowerCase().replace(/\.$/u, '');
+  if (anfitrion === '') return undefined;
+
+  return FUENTES.find((fuente) =>
+    fuente.anfitriones.some((a) => anfitrion === a || anfitrion.endsWith(`.${a}`)),
+  );
 }

@@ -143,16 +143,22 @@ function sentencias(texto: string): string[] {
  * reutilizar. Devolver «las que se puedan» sería peor que no devolver nada: dejaría en
  * revisión candidatas que nadie puede publicar y que alguien acabaría aprobando.
  */
-export function extraerCandidatas(
-  documento: DocumentoDeFuente,
-  autor: string,
-): ResultadoDeExtraccion {
-  const fuente: Fuente | undefined = fuenteDe(documento.fuente);
+/**
+ * Si de esa Fuente se puede extraer, y si no, por qué no.
+ *
+ * Vive aparte porque la puerta se cruza dos veces: aquí, y antes de derivar nada en
+ * `tools/extraer.ts`. Con el mensaje escrito en un solo sitio, una Fuente cuya licencia
+ * no permite reutilizar recibe la misma explicación se detenga donde se detenga.
+ */
+export function fuenteUtilizable(
+  id: string,
+): { ok: true; fuente: Fuente } | { ok: false; motivo: string } {
+  const fuente: Fuente | undefined = fuenteDe(id);
   if (fuente === undefined) {
     return {
       ok: false,
       motivo:
-        `«${documento.fuente}» no es una Fuente admitida. Las admitidas están en ` +
+        `«${id}» no es una Fuente admitida. Las admitidas están en ` +
         'tools/lib/fuentes.ts, cada una con su licencia.',
     };
   }
@@ -165,6 +171,17 @@ export function extraerCandidatas(
         `(licencia declarada: ${fuente.licencia}). No se ha escrito ninguna candidata.`,
     };
   }
+
+  return { ok: true, fuente };
+}
+
+export function extraerCandidatas(
+  documento: DocumentoDeFuente,
+  autor: string,
+): ResultadoDeExtraccion {
+  const utilizable = fuenteUtilizable(documento.fuente);
+  if (!utilizable.ok) return utilizable;
+  const { fuente } = utilizable;
 
   if (documento.obra.trim() === '') {
     return {

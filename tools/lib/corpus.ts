@@ -20,6 +20,14 @@ export interface Rutas {
   autores: string;
   temas: string;
   revision: string;
+  /**
+   * Los documentos de Fuente que produce `tools/recuperar.ts` (AD-23).
+   *
+   * Vive dentro de `corpus/` porque es contenido versionado, pero **no es una colección
+   * y el build no lo lee**: es texto de terceros y ninguna base de `src/content.config.ts`
+   * apunta aquí. Las rutas del corpus tienen un solo dueño, y es este.
+   */
+  fuentes: string;
 }
 
 export function rutasDelCorpus(raizCorpus: string): Rutas {
@@ -29,6 +37,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     autores: join(raizCorpus, 'autores'),
     temas: join(raizCorpus, 'temas'),
     revision: join(raizCorpus, '_revision'),
+    fuentes: join(raizCorpus, 'fuentes'),
   };
 }
 
