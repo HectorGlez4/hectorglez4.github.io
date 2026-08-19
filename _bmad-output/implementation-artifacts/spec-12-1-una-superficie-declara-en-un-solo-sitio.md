@@ -2,14 +2,58 @@
 title: 'Story 12.1 — Una superficie declara en un solo sitio si es publicable'
 type: 'refactor'
 created: '2026-08-19'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '60c3b84dfed7e1bdc8c8bcb84aef2f221216d7df'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-12-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-11-3-el-objetivo-sale-del-hueco.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      Cada declaración lleva dos identidades de la misma superficie —el fichero y la
+      expresión que reconoce su ruta— y nada comprueba que concuerden.
+    evidence: |-
+      El censo compara `pagina` contra `src/pages/`, pero nadie comprueba que `reconoce`
+      case con las rutas que esa página emite de verdad. Una expresión que dejara de casar
+      desactivaría en silencio sitemap, `noindex`, índice interno y barrido de esa familia.
+      «Acuérdate de tres ficheros» se ha convertido en «mantén de acuerdo dos campos de una
+      entrada», que es mucho mejor pero no es nada.
+    location: >-
+      src/lib/superficies.ts
+    severity: medium
+  - summary: >-
+      `src/lib/publicado.ts` conserva una segunda enumeración de lo publicado, y su
+      docblock afirma que la usan el sitemap y la comprobación de enlaces, que ya es falso.
+    evidence: |-
+      `rutasPublicadas` enumera por instancia del Corpus; `superficies.ts` enumera por
+      familia de superficie. Nada las cruza, en una historia cuyo asunto es el dueño único.
+      Hoy `rutasPublicadas` solo la referencia su propia prueba.
+    location: >-
+      src/lib/publicado.ts
+    severity: medium
+  - summary: >-
+      La equivalencia «publicable y alcanzable son el mismo conjunto» se afirma en prosa y
+      se aplica solo en un sentido.
+    evidence: |-
+      Lo que ejecuta es una inclusión —lo publicado está a tres saltos de la portada— y
+      solo en pruebas, nunca durante el build, a diferencia de `verificarIntegridad`. El
+      sentido inverso es falso a propósito: `/buscar` y la 404 se enlazan desde todas las
+      páginas y no son publicables. Los comentarios prometen más de lo que el código hace.
+    location: >-
+      src/lib/publicado.ts
+    severity: low
+  - summary: >-
+      `tests/e2e/marca.spec.ts` mantiene su propia constante `SUPERFICIES` escrita a mano,
+      con el mismo nombre y sin la familia de Tema.
+    evidence: |-
+      «Llevar la marca» no es una de las cuatro consecuencias que la declaración gobierna,
+      así que no es una adopción pendiente en sentido estricto — pero es una lista paralela
+      de superficies del mismo tipo que la que esta historia elimina.
+    location: >-
+      tests/e2e/marca.spec.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -103,3 +147,30 @@ deferred: []
 - `npm run build` -- expected: construye, con la puerta de la 11.2 intacta.
 - `npx playwright test` -- expected: 392 en verde; el barrido de accesibilidad ahora deriva sus superficies.
 - `grep -l "data-pagefind-body" dist/404.html dist/buscar.html` -- expected: ninguna coincidencia.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6: (high 2, low 4)
+- defer: 4: (medium 2, low 2)
+- reject: 12: (low 12)
+- addressed_findings:
+  - `[high]` `[patch]` Un slug puramente numérico se confundía con una página 2: `noPublicableEn` era «acaba en dígitos», y el esquema de `admision.ts` admite `1984` como slug entero, así que `/autor/1984` se degradaba a servicio y desaparecía del sitemap sin que nadie lo decidiera. Anclada la condición a la forma completa de una ruta paginada. Comprobado: `/autor/1984` es producto y anunciable, y `/autor/1984/2` —la página 2 real de ese mismo autor— sigue siendo servicio.
+  - `[high]` `[patch]` La guarda contra que el barrido de accesibilidad se vaciara vivía en la suite de Playwright, y `AGENTS.md` dice que el CI no la ejecuta: la garantía existía y no vigilaba nada en el único camino automatizado. Llevada al plano unitario, sobre el proyecto que esa prueba ya construía, junto con el lazo hermano del sitemap. Verificado por mutación: quitar `filter: anunciableEnElSitemap` hace fallar ahora 3 pruebas en `vitest`, y antes pasaba en verde.
+  - `[low]` `[patch]` `anunciableEnElSitemap` prometía no romper y rompía, porque delegaba en `rutaNormalizada`.
+  - `[low]` `[patch]` `PORT=0` se trataba como no definido, y cero es justamente el valor de Node para «dame un puerto libre».
+  - `[low]` `[patch]` El corpus del proyecto de prueba pasa de 2 Citas a 51 con Tema declarado: con 2 no había Tema publicado (umbral 15) ni página 2 (umbral 50), así que las comprobaciones nuevas habrían pasado por no tener nada que mirar.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `src/lib/superficies.ts` es el dueño único: declara las superficies del sitio y su carácter, y de ese único valor derivan las cuatro consecuencias. Las tres que hablan de indexación salen **literalmente del mismo booleano**, así que la incoherencia «no me indexes fuera pero sí dentro» ya no se puede escribir. Se retiran el filtro del sitemap de `astro.config.mjs`, las dos banderas sueltas de `Armazon.astro` y la lista escrita a mano del barrido de accesibilidad.
+
+**El defecto que cerraba, verificado en el `dist/` real.** Antes: Pagefind indexaba 55 páginas y el sitemap declaraba 53, porque `/404` y `/buscar` llevaban `noindex` y `data-pagefind-body` a la vez. Ahora: **53 = 53**, y cero páginas `noindex` en el índice interno.
+
+**Verificación.** `npx astro check` 0 errores. `npx vitest run` **970/970** en 39 ficheros, frente a 882/37 de la línea base. `npm run build` construye con la puerta de la 11.2 intacta. `npx playwright test` 394 pasan, 12 saltadas. Y a mano: `/autor/1984` es producto y anunciable; una superficie sin declarar y una sin `ruta` rompen el build con mensaje propio y sin `TypeError`; y la mutación que quita el filtro del sitemap ahora la caza el CI.
+
+**Recomendación de nueva revisión: true.** Dos hallazgos de severidad alta.
+
+**Riesgos residuales.** Los cuatro diferidos están en el frontmatter; el que más pesa es que `reconoce` y `pagina` son dos identidades de la misma superficie y nada comprueba que concuerden.

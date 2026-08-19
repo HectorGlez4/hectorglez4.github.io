@@ -860,3 +860,49 @@ que la recuperación no produjera; el build coteja que el texto aparezca literal
 `--registrar` deja la sesión anotada con su resultado medido, que es de donde saldrá la
 cadencia. Sembrar mal ya no es posible en silencio: es un build roto con la ruta del
 fichero y la regla incumplida.
+
+# v3 — Épica 12
+
+## 12.1 — Una superficie declara en un solo sitio si es publicable
+
+**Verificado.** `src/lib/superficies.ts` declara qué superficies tiene el sitio y cuál es
+publicable, y de ese único valor derivan las cuatro consecuencias: entrada en el sitemap,
+`noindex`, entrada en el índice interno de Pagefind y entrada en el barrido automatizado
+de accesibilidad. Las tres que hablan de indexación salen **del mismo booleano**, así que
+la incoherencia que motivó la historia ya no se puede escribir.
+
+970 pruebas unitarias en verde (882 al empezar), 394 e2e, 0 errores de tipos.
+
+**El defecto era real y estaba en producción.** Antes de empezar, en el `dist/`
+construido: `404.html` y `buscar.html` llevaban a la vez `<meta name="robots"
+content="noindex, follow">` y `data-pagefind-body`. Es decir, le decían al buscador de
+fuera que no las indexara y aparecían en el de dentro. Pagefind indexaba 55 páginas
+mientras el sitemap declaraba 53. El Kit se libraba solo porque en `kit.astro` sí se
+habían puesto las dos banderas — y eso es justamente la prueba de que acordarse no basta:
+el pitfall ya estaba escrito en `AGENTS.md` y aun así volvió a ocurrir. Ahora: **53 = 53**,
+y cero páginas `noindex` en el índice interno.
+
+**Dos defectos que la revisión encontró y las pruebas no.**
+
+El primero, un caso de inferir semántica de la forma de la URL. Antes «página 2 de un
+listado» venía de `pagina.currentPage > 1`, un dato real; la primera versión lo dedujo de
+que la ruta acabara en dígitos. Pero el esquema de slugs de `admision.ts` admite un slug
+enteramente numérico, así que `/autor/1984` se habría degradado a superficie de servicio y
+habría desaparecido del sitemap sin que nadie lo decidiera. Anclada la condición a la
+forma completa de una ruta paginada, y comprobado el caso sutil: `/autor/1984/2` —la
+página 2 real de ese mismo autor— sigue degradándose bien.
+
+El segundo importa más de lo que parece. La guarda contra que el barrido de accesibilidad
+se vaciara entero vivía en la suite de Playwright, y `AGENTS.md` dice explícitamente que
+el CI no la ejecuta: la garantía existía y no vigilaba nada en el único camino
+automatizado que hay. Se llevó al plano unitario, sobre el proyecto que esa prueba ya
+construía, junto con el lazo hermano del sitemap. Verificado por mutación: quitar
+`filter: anunciableEnElSitemap` de `astro.config.mjs` hace fallar ahora tres pruebas en
+`vitest`, y antes pasaba en verde.
+
+**Lo que quedó fuera.** Cada declaración lleva dos identidades de la misma superficie —el
+fichero y la expresión que reconoce su ruta— y nada comprueba que concuerden. «Acuérdate
+de tres ficheros» se ha convertido en «mantén de acuerdo dos campos de una entrada», que
+es mucho mejor pero no es nada. Y `publicado.ts` conserva una segunda enumeración de lo
+publicado, por instancia del Corpus en vez de por familia de superficie, que nada cruza
+con la primera.
