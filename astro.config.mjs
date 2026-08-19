@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import { SITIO } from './src/lib/dominio.ts';
 import { anunciableEnElSitemap } from './src/lib/superficies.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
+import formaDeLasColecciones from './integraciones/colecciones.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -50,6 +51,14 @@ export default defineConfig({
      * sembrada. Rompe el build; no avisa.
      */
     cotejoDeCitas(),
+
+    /*
+     * Historia 12.2 — dos ficheros de Colección no pueden derivar el mismo identificador.
+     *
+     * Va aquí por lo mismo que el cotejo: un esquema juzga un fichero a la vez y esto es
+     * una relación entre ficheros, que sin puerta se pierde en silencio.
+     */
+    formaDeLasColecciones(),
 
     sitemap({
       /*

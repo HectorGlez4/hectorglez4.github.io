@@ -169,10 +169,28 @@ export const fuenteDeCita = z
 
 export type FuenteDeCita = z.infer<typeof fuenteDeCita>;
 
-export const nombre = (entidad: string) =>
+/**
+ * El artículo contraído va como parámetro porque las entidades del corpus no tienen todas
+ * el mismo género: «falta el nombre del Colección» es un mensaje que quien lo lee deja de
+ * tomarse en serio, y estos mensajes son la única documentación que ve el editor cuando
+ * el build se le rompe. Los tres que salen de aquí —Autor, Tema y Colección— están fijados
+ * en `tests/unit/colecciones.test.ts`: sin eso, cambiar el valor por omisión del parámetro
+ * produciría «falta el nombre de la Autor» con la suite en verde.
+ *
+ * `/\S/` y no `.min(1)`: un nombre de un solo espacio tiene longitud uno y pasaría la
+ * comprobación de longitud, dejando publicar una entidad con el nombre en blanco. Se mide
+ * lo que queda al recortar, pero **no se recorta el valor**: un `.trim()` de zod
+ * reescribiría lo que el editor guardó, y NFR-12 prohíbe que el sistema altere contenido
+ * publicado sin acción explícita suya. Lo que hay mal escrito se rechaza; no se arregla a
+ * sus espaldas.
+ */
+export const nombre = (entidad: string, articulo = 'del') =>
   z
-    .string({ message: `Regla incumplida: falta el nombre del ${entidad}.` })
-    .min(1, `Regla incumplida: el nombre del ${entidad} no puede estar vacío.`);
+    .string({ message: `Regla incumplida: falta el nombre ${articulo} ${entidad}.` })
+    .regex(
+      /\S/,
+      `Regla incumplida: el nombre ${articulo} ${entidad} no puede estar vacío ni ser solo espacios.`,
+    );
 
 /** AD-1 — sin año de fallecimiento no hay forma de sostener que la obra es de dominio
  * público. Es obligatorio y su ausencia rompe el build (FR-13, FR-15). */
@@ -254,3 +272,126 @@ export function gradoDeProcedencia(p: Procedencia | null | undefined): GradoDePr
   if (p.obra !== undefined || p.año !== undefined || p.referencia !== undefined) return 'parcial';
   return 'ausente';
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La Colección — Historia 12.2
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * El criterio editorial por el que una Colección está reunida — AD-18.
+ *
+ * Es obligatorio y no puede estar vacío, y no es un adorno: una Colección **es** su
+ * criterio. Sin él queda una lista de Citas sin razón de estar juntas, que es justamente
+ * la vía barata de fabricar páginas indexables que la contra-métrica de densidad vigila.
+ * Que el esquema lo exija hace que escribir la razón sea parte de crear la Colección y no
+ * un paso posterior que nadie da.
+ */
+export const criterioDeColeccion = z
+  .string({ message: 'Regla incumplida: falta el criterio de la Colección, que es obligatorio.' })
+  // Se mide lo que queda al recortar, y por el mismo motivo que en `nombre`: con `.min(1)`
+  // un criterio de un solo espacio pasaba, y una Colección sin razón escrita es justo lo
+  // que este campo existe para impedir.
+  .regex(
+    /\S/,
+    'Regla incumplida: el criterio de la Colección no puede estar vacío ni ser solo espacios.',
+  );
+
+/**
+ * Un miembro declarado: el slug de una Cita, y **nada más fuerte que eso**.
+ *
+ * El mensaje es propio y no el de `slug` a secas porque quien lo lee no está escribiendo
+ * el slug de la Colección sino una entrada de su lista, y «falta el slug, que es inmutable
+ * y obligatorio» le manda a mirar el campo equivocado.
+ */
+export const miembroDeColeccion = z
+  .string({ message: 'Regla incumplida: cada miembro de una Colección es el slug de una Cita.' })
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Regla incumplida: un miembro de una Colección es el slug de una Cita: minúsculas, ' +
+      'dígitos y guiones, sin diacríticos.',
+  );
+
+/**
+ * La lista de miembros declarada.
+ *
+ * **Por omisión, lista vacía.** Una Colección recién creada todavía no tiene miembros, y
+ * exigirlos obligaría a inventarse tres slugs para poder guardar el criterio. Vacía
+ * resuelve a cero y no se publica, que es exactamente lo que debe pasar. Ese camino se
+ * recorre en las pruebas de build con un fichero que **omite** la clave, y no solo con
+ * fixtures que la escriben: si no, quitar el `.default([])` no rompería nada.
+ *
+ * El mensaje propio existe porque `.default()` **solo** actúa sobre `undefined`, y
+ * `miembros:` con nada debajo es `null` en YAML —la forma natural en que un editor escribe
+ * «esto todavía no lo tengo»—. Sin él, quien escribiera eso recibía «Invalid input:
+ * expected array, received null»: un error de tipo en inglés en lugar de la regla
+ * incumplida, que es el mismo defecto que `procedencia` ya tiene cerrado con su
+ * preproceso. Aquí no se preprocesa a lista vacía a propósito: la convención del corpus es
+ * que un campo sin valor **se omite del fichero**, nunca se escribe vacío ni como `null`,
+ * y tragarse el `null` enseñaría a escribirlo.
+ *
+ * El error del array no tapa el de sus elementos: un slug mal escrito sigue contestando
+ * con su propia regla.
+ */
+export const miembrosDeColeccion = z
+  .array(miembroDeColeccion, {
+    error:
+      'Regla incumplida: «miembros» es una lista de slugs de Cita. Si la Colección ' +
+      'todavía no tiene ninguno, omita el campo entero: un campo sin valor no se escribe ' +
+      'vacío ni como null.',
+  })
+  .default([]);
+
+/**
+ * La forma del fichero de Colección — AD-18, Historia 12.2.
+ *
+ * **La pertenencia se declara aquí y no en la Cita**, invirtiendo a propósito la dirección
+ * del Tema. Un Tema es una propiedad de la Cita —de qué habla— y por eso vive en ella. Una
+ * Colección es una decisión editorial *sobre un conjunto*, y puede cambiar sin que ninguna
+ * Cita cambie: declararla en la Cita obligaría a editar decenas de ficheros para crear una
+ * agrupación y a editarlos otra vez para deshacerla.
+ *
+ * **`miembros` es una lista de slugs y jamás una referencia de esquema.** Es la decisión
+ * central de la historia y conviene que cueste deshacerla: si aquí pusiera
+ * `reference('citas')`, Astro exigiría que cada slug existiera y mover una Cita a
+ * `corpus/_revision/` **rompería el build**. Despublicar seguiría siendo mover un fichero,
+ * pero mover un fichero dejaría de ser seguro, y una agrupación que se rompe cuando una
+ * Cita se retira a revisión es una agrupación que nadie se atreve a curar. La pertenencia
+ * se resuelve intersectando esta lista con el conjunto publicable, en
+ * `src/lib/publicado.ts`, que es quien sabe qué está publicado.
+ *
+ * Lo que la blandura **no** debe tapar es una errata: un slug mal escrito desaparecería en
+ * silencio igual que un miembro retirado. Por eso el desajuste entre declarado y resuelto
+ * se cuenta y se anuncia (ver `desajustesDeColecciones`), y la herramienta de curación de
+ * la Historia 12.4 es la que caza la errata en el momento de escribirla. Romper el build
+ * no vale: sería reintroducir la referencia dura por la puerta de atrás.
+ *
+ * AD-5 — aquí solo vive la **forma**. Resolver la pertenencia necesita saber qué Citas
+ * están publicadas, y de eso se ocupa el dueño del conjunto publicable.
+ */
+export const coleccionAdmisible = z
+  .object(
+    {
+      nombre: nombre('Colección', 'de la'),
+      criterio: criterioDeColeccion,
+      miembros: miembrosDeColeccion,
+    },
+    {
+      error: (problema) =>
+        problema.code === 'unrecognized_keys'
+          ? 'Regla incumplida: la Colección no reconoce ' +
+            `«${problema.keys.join('», «')}». Sus campos son nombre, criterio y miembros.`
+          : 'Regla incumplida: una Colección es un objeto con nombre, criterio y miembros.',
+    },
+  )
+  /*
+   * `.strict()`, a diferencia de los esquemas de Tema y de Autor, y por un motivo que solo
+   * aparece aquí: `miembros` tiene valor por omisión, así que un `miembos:` mal tecleado
+   * no faltaría —se descartaría— y la Colección quedaría con cero miembros declarados. Sin
+   * esto sería el único fallo del corpus que no rompe nada ni se cuenta en ningún sitio: el
+   * recuento de desajustes tampoco lo vería, porque declarado y resuelto valdrían cero los
+   * dos. La lista de miembros es blanda a propósito; el nombre del campo que la contiene,
+   * no.
+   */
+  .strict();
+
+export type ColeccionAdmisible = z.infer<typeof coleccionAdmisible>;

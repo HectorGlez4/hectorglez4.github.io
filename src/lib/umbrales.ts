@@ -71,3 +71,25 @@ export const SUELO_TRADICION_LATINOAMERICANA = 40;
  * crecimiento futuro pase inadvertido.
  */
 export const MAX_BYTES_DE_GUION = 6656;
+
+/**
+ * Citas publicadas **resueltas** que necesita una Colección para publicarse — FR de la
+ * Épica 12, §14.4 del PRD.
+ *
+ * **VALOR PROVISIONAL.** El PRD deja este umbral abierto a propósito y dice de dónde
+ * saldrá el definitivo: de curar las tres o cuatro primeras Colecciones y ver cuántas
+ * Citas reúne de verdad un criterio editorial que merezca página. Hasta entonces esto es
+ * un marcador de posición con nombre, no una decisión tomada.
+ *
+ * Arranca igual que `MIN_CITAS_POR_TEMA` porque las dos superficies alimentan la misma
+ * contra-métrica —la mediana de Citas por agregación publicada— y empezar igualadas
+ * garantiza que una Colección no pueda hundir esa mediana por debajo de lo que un Tema ya
+ * puede. Es el arranque prudente: la vía barata de multiplicar páginas indexables es
+ * fabricar Colecciones de cinco Citas, y este número existe para cerrarla. El definitivo
+ * puede bajar —una Colección es curada a mano y no acumula por deriva como un Tema— pero
+ * esa rebaja se decide con Colecciones curadas delante, no aquí.
+ *
+ * Se aplica al recuento **resuelto**, jamás al declarado: quien lo aplica es
+ * `coleccionesPublicadas` en `src/lib/publicado.ts` (AD-11), y es el único sitio.
+ */
+export const MIN_CITAS_POR_COLECCION = 15;

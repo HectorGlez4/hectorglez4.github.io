@@ -906,3 +906,51 @@ de tres ficheros» se ha convertido en «mantén de acuerdo dos campos de una en
 es mucho mejor pero no es nada. Y `publicado.ts` conserva una segunda enumeración de lo
 publicado, por instancia del Corpus en vez de por familia de superficie, que nada cruza
 con la primera.
+
+## 12.2 — La Colección declara sus miembros, y la lista es blanda
+
+**Verificado.** Una Colección declara sus miembros por slug en `corpus/colecciones/{slug}.yml`,
+y la pertenencia se resuelve intersectando esa lista con el conjunto publicable. Es la
+dirección inversa a la del Tema —que se declara en la Cita— y es a propósito: el Tema es
+una propiedad de la Cita, la Colección es una decisión editorial sobre un conjunto y puede
+cambiar sin que ninguna Cita cambie. Declararla en la Cita obligaría a editar decenas de
+ficheros para crear una agrupación y otra vez para deshacerla.
+
+1049 pruebas unitarias en verde (970 al empezar), 394 e2e, 0 errores de tipos.
+
+Comprobado en directo: 21 miembros declarados —con un repetido, una errata y una Cita
+retirada— resuelven a 18 y la Colección se publica; con solo 3 Citas publicables no se
+publica, pese a los 21 declarados. El umbral manda sobre lo resuelto.
+
+**El agujero que la revisión encontró, y por qué importaba tanto.** El conjunto publicable
+repartía la lista **declarada** en crudo, y la resolución estaba exportada sin filtrar. Una
+Página de Colección podía renderizar sin pasar jamás por el umbral — y la página sonda del
+propio cambio ya enseñaba ese atajo, que es la forma que la 12.3 habría copiado por ser la
+que encontraría en el repositorio. Se cerró quitando la entrada: el conjunto publicable
+solo reparte lo ya resuelto y filtrado, así que no hay de dónde sacar una Colección
+declarada. La marca de tipos que lo refuerza es el cinturón; la puerta es que no hay puerta.
+Verificado por mutación: convertir la marca en un alias hace fallar `astro check`.
+
+**Un hallazgo colateral que valía la historia entera.** El andamio de pruebas enlazaba
+`node_modules` completo, y Astro guarda ahí el almacén de datos de contenido: cada build
+temporal escribía en el almacén compartido del repositorio. El cargador limpia y repuebla
+una colección cuando encuentra ficheros, pero cuando **no** encuentra ninguno se va sin
+tocar el almacén — así que una colección vacía hereda lo que dejó la prueba anterior.
+Llevaba ahí desde siempre, curándose sola en silencio porque las tres colecciones
+existentes nunca estaban vacías. `corpus/colecciones/` vacío es el primer caso que lo
+destapa: tras correr la suite, un `npm run build` en la raíz anunciaba una Colección salida
+de un fixture. Arreglado, con prueba de regresión.
+
+**Dos decisiones de criterio que conviene conservar.** No se preprocesa `miembros:` nulo a
+lista vacía: tragárselo enseñaría a escribirlo, y el mensaje dice qué hacer en su lugar
+—omitir el campo—. Y el nombre y el criterio se miden **recortados sin recortarlos**: un
+`.trim()` reescribiría lo que el editor guardó, y NFR-12 lo prohíbe.
+
+**Lo que quedó fuera.** La retirada de una Cita no es silenciosa: reimprime el aviso de
+desajuste en cada build hasta que alguien quite el slug del fichero. Es divergencia
+deliberada con la matriz de la especificación, y la culpa es del contrato: por AD-5 la capa
+pura no lee disco, así que no puede distinguir un slug retirado de uno con errata, y dejar
+de contar la retirada sería dejar de contar la errata. Y `corpus/colecciones/` vacío deja
+dos avisos en cada construcción, uno de ellos engañoso; se investigó callarlos y exigiría
+apoyarse en detalles internos de Astro sin garantía de versión, así que se aceptó el coste
+y quedó escrito con las líneas literales en `src/content.config.ts`.

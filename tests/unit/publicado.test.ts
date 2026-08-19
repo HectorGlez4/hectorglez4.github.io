@@ -104,6 +104,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       citas: [...nCitas(MIN_CITAS_POR_TEMA, 't')],
       autores: [autor('a')],
       temas: [tema('t')],
+      colecciones: [],
     };
     const rutas = rutasPublicadas(conjunto);
     expect(rutas).toContain('/');
@@ -117,6 +118,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       citas: nCitas(MIN_CITAS_POR_TEMA - 1, 't'),
       autores: [autor('a')],
       temas: [tema('t')],
+      colecciones: [],
     });
     expect(rutas).not.toContain('/tema/t');
   });
@@ -125,25 +127,45 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
 describe('Historia 2.1 — integridad referencial', () => {
   it('un corpus coherente pasa', () => {
     expect(() =>
-      verificarIntegridad({ citas: [cita('x', 'a', ['t'])], autores: [autor('a')], temas: [tema('t')] }),
+      verificarIntegridad({
+        citas: [cita('x', 'a', ['t'])],
+        autores: [autor('a')],
+        temas: [tema('t')],
+        colecciones: [],
+      }),
     ).not.toThrow();
   });
 
   it('una Cita que apunta a un Autor inexistente rompe el build', () => {
     expect(() =>
-      verificarIntegridad({ citas: [cita('x', 'fantasma')], autores: [autor('a')], temas: [] }),
+      verificarIntegridad({
+        citas: [cita('x', 'fantasma')],
+        autores: [autor('a')],
+        temas: [],
+        colecciones: [],
+      }),
     ).toThrow(/fantasma.*no existe/s);
   });
 
   it('una Cita que apunta a un Tema inexistente rompe el build', () => {
     expect(() =>
-      verificarIntegridad({ citas: [cita('x', 'a', ['fantasma'])], autores: [autor('a')], temas: [] }),
+      verificarIntegridad({
+        citas: [cita('x', 'a', ['fantasma'])],
+        autores: [autor('a')],
+        temas: [],
+        colecciones: [],
+      }),
     ).toThrow(/fantasma.*no existe/s);
   });
 
   it('el error nombra la Cita concreta, no solo la entidad que falta', () => {
     try {
-      verificarIntegridad({ citas: [cita('la-culpable', 'fantasma')], autores: [], temas: [] });
+      verificarIntegridad({
+        citas: [cita('la-culpable', 'fantasma')],
+        autores: [],
+        temas: [],
+        colecciones: [],
+      });
       expect.unreachable('debería haber roto');
     } catch (error) {
       expect((error as Error).message).toContain('la-culpable');

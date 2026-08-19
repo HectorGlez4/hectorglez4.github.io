@@ -10,7 +10,7 @@
 
 import { appendFile, readFile, readdir, mkdir, writeFile, rename } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { basename, extname, join } from 'node:path';
+import { basename, extname, join, relative } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import type { AutorAdmisible, CitaAdmisible } from '../../src/lib/admision.ts';
 import type {
@@ -32,6 +32,14 @@ export interface Rutas {
   citas: string;
   autores: string;
   temas: string;
+  /**
+   * Las Colecciones — Historia 12.2, AD-18.
+   *
+   * Sí es colección de Astro, a diferencia de `fuentes/`: `src/content.config.ts` la
+   * declara con esta misma base. Se versiona vacía con su `.gitkeep` hasta que el dueño
+   * del Corpus cure la primera; ver la nota de `src/content.config.ts`.
+   */
+  colecciones: string;
   revision: string;
   /**
    * Los documentos de Fuente que produce `tools/recuperar.ts` (AD-23).
@@ -67,6 +75,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     citas: join(raizCorpus, 'citas'),
     autores: join(raizCorpus, 'autores'),
     temas: join(raizCorpus, 'temas'),
+    colecciones: join(raizCorpus, 'colecciones'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
@@ -122,6 +131,91 @@ export async function leerTemas(rutas: Rutas): Promise<{ slug: string; nombre: s
       slug: slugDeFichero(ruta),
       ruta,
     })),
+  );
+}
+
+export interface ColeccionEnCorpus {
+  /** El identificador de la Colección: ver `slugDeColeccion`. */
+  slug: string;
+  ruta: string;
+  /**
+   * `nombre` y `criterio` son opcionales **aquí y solo aquí**. El esquema del build los
+   * exige; esta función existe para poder leer un corpus a medio escribir y decir qué le
+   * falta, y para eso tiene que poder representar que faltan. Anunciarlos como `string`
+   * con un cast sería mentir justo en el caso para el que se escribió.
+   */
+  nombre?: string;
+  criterio?: string;
+  miembros: string[];
+}
+
+/**
+ * El slug de una Colección: su ruta dentro de `corpus/colecciones/`, sin extensión.
+ *
+ * Es **exactamente** el identificador que le da el cargador de Astro, y por eso se deriva
+ * así y no con `slugDeFichero`. Las dos formas coinciden en la raíz y discrepan en cuanto
+ * hay un subdirectorio: `corpus/colecciones/sub/a.yml` sería `a` por basename y `sub/a`
+ * para Astro, y la herramienta y el sitio hablarían de Colecciones distintas con el mismo
+ * nombre. Una sola regla, y es la del cargador.
+ *
+ * Que un slug con `/` no llegue nunca a existir lo garantiza la puerta del build
+ * (`tools/lib/colecciones.ts`), que rechaza los subdirectorios: la URL de una Colección es
+ * `/coleccion/{slug}` y una barra dentro partiría la ruta. Aquí se **describe** lo que hay
+ * en el disco, incluso cuando está mal; rechazarlo es cosa de la puerta.
+ */
+export function slugDeColeccion(rutas: Rutas, ruta: string): string {
+  const relativa = relative(rutas.colecciones, ruta).split('\\').join('/');
+  return relativa.slice(0, relativa.length - extname(relativa).length);
+}
+
+/**
+ * Las Colecciones del corpus, en la línea de `leerTemas` — Historia 12.2.
+ *
+ * Lee la **declaración**, no la pertenencia: resolverla es intersectar con el conjunto
+ * publicable y de eso se ocupa `src/lib/publicado.ts` (AD-11). Aquí se leen ficheros y
+ * nada más, que es lo único que esta capa hace.
+ *
+ * Sobrevive a un corpus a medio escribir, y de forma **uniforme**: lo que no tenga la
+ * forma esperada se representa como ausente o como lista vacía, y nunca se deja pasar tal
+ * cual. Un YAML que no sea un mapa —una lista, o un escalar suelto— se lee como Colección
+ * sin campos: sin esa comprobación, esparcir una cadena daba un objeto con índices de
+ * caracteres por claves. Lo que **sí** se rechaza aquí es un fichero que ni siquiera se
+ * deja analizar, y nombrándolo: leerlo a medias daría una auditoría que miente.
+ *
+ * Nada de esto es tolerancia con el corpus publicado: la puerta que rechaza estas formas
+ * es el esquema de `src/content.config.ts`, y las pruebas de build lo fijan. La tolerancia
+ * es de la herramienta, que existe para arreglar lo que el build rechaza.
+ */
+export async function leerColecciones(rutas: Rutas): Promise<ColeccionEnCorpus[]> {
+  const ficheros = await ficherosDe(rutas.colecciones, ['.yml', '.yaml']);
+  return Promise.all(
+    ficheros.map(async (ruta) => {
+      let leido: unknown;
+      try {
+        leido = parsearYaml(await readFile(ruta, 'utf8'));
+      } catch (fallo) {
+        throw new Error(
+          `${ruta} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        );
+      }
+
+      const datos =
+        leido !== null && typeof leido === 'object' && !Array.isArray(leido)
+          ? (leido as Record<string, unknown>)
+          : {};
+
+      return {
+        // Un campo ausente se omite del objeto, nunca se escribe como cadena vacía: es la
+        // misma convención con la que se escriben los ficheros.
+        ...(typeof datos.nombre === 'string' ? { nombre: datos.nombre } : {}),
+        ...(typeof datos.criterio === 'string' ? { criterio: datos.criterio } : {}),
+        miembros: Array.isArray(datos.miembros)
+          ? datos.miembros.filter((m): m is string => typeof m === 'string')
+          : [],
+        slug: slugDeColeccion(rutas, ruta),
+        ruta,
+      };
+    }),
   );
 }
 

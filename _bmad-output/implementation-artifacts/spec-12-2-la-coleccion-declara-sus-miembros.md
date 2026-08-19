@@ -2,14 +2,64 @@
 title: 'Story 12.2 — La Colección declara sus miembros, y la lista es blanda'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '2ca34047bae818e5efb98fe4325f5d23bed55f9e'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-12-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-12-1-una-superficie-declara-en-un-solo-sitio.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      La retirada de una Cita a `corpus/_revision/` no es silenciosa: reimprime el aviso de
+      desajuste en cada build hasta que alguien quite el slug del fichero de la Colección.
+    evidence: |-
+      Es una divergencia deliberada con la matriz de esta especificación, y la culpa es del
+      contrato: la matriz decía «Sin error» para la retirada y reservaba «contado» para la
+      errata, y eso es inimplementable. Por AD-5 la capa pura no lee disco, así que no puede
+      distinguir un slug retirado de uno mal escrito, y dejar de contar la retirada sería
+      dejar de contar la errata. Distinguirlas exige leer `corpus/_revision/`, que es de
+      `tools/` y por tanto de la Historia 12.4.
+    location: >-
+      src/lib/publicado.ts
+    severity: low
+  - summary: >-
+      La puerta de forma del conjunto de Colecciones amplía el contrato: un corpus cuyos
+      ficheros son todos válidos por separado puede quedar en rojo por la relación entre dos.
+    evidence: |-
+      La matriz solo contemplaba el aborto por fichero incompleto. El slug duplicado
+      —`a.yml` junto a `a.yaml`, o el mismo nombre en dos subdirectorios— es un defecto de
+      relación, no de fichero. Lo mismo vale para el aborto por YAML ilegible, que ocurre
+      antes de que el esquema pueda dar su «Regla incumplida». Ambos quedan escritos en la
+      cabecera de `tools/lib/colecciones.ts`.
+    location: >-
+      tools/lib/colecciones.ts
+    severity: low
+  - summary: >-
+      La marca que distingue lo publicable de lo resuelto es una construcción de tipos, no
+      de ejecución.
+    evidence: |-
+      Nada impide un `as ColeccionPublicada` deliberado en código futuro, como con cualquier
+      tipo marcado. Lo que sí consigue es que deje de ser un descuido posible: el atajo pasa
+      de ser la forma natural de escribir el código a ser una línea visible en un diff. El
+      cierre de verdad no es la marca sino que el conjunto publicable ya no reparte la lista
+      declarada, así que una página no tiene de dónde sacarla.
+    location: >-
+      src/lib/publicado.ts
+    severity: low
+  - summary: >-
+      `corpus/colecciones/` vacío deja dos avisos en cada construcción, uno de ellos
+      engañoso, y saldrán en el CI y en producción hasta que se cure la primera Colección.
+    evidence: |-
+      Uno dice «Please check your content config file for errors», y no hay ningún error que
+      buscar. Se investigó si podían callarse: exigiría envolver el cargador y apoyarse en
+      dos detalles internos de Astro sin garantía de versión. Se aceptó el coste y quedó
+      escrito en `src/content.config.ts` con las dos líneas literales transcritas, para que
+      quien las vea en el CI y las busque caiga justo en la explicación.
+    location: >-
+      src/content.config.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -105,3 +155,35 @@ deferred: []
 - `npx vitest run` -- expected: todo en verde; ninguna de las 970 de la línea base perdida.
 - `npm run build` -- expected: construye, con la puerta de la 11.2 intacta.
 - `grep -rn "MIN_CITAS_POR_COLECCION\|umbral.*[Cc]olecci" src/ tools/ --include="*.ts" | grep -v umbrales.ts` -- expected: solo usos, ninguna definición fuera de `umbrales.ts`.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 1: (medium 1)
+- patch: 14: (high 6, medium 4, low 4)
+- defer: 4: (low 4)
+- reject: 9: (low 9)
+- addressed_findings:
+  - `[high]` `[patch]` El umbral tenía un segundo camino: el conjunto publicable repartía la lista **declarada** en crudo y `resolverColeccion` estaba exportada sin filtrar, así que la Página de Colección de la 12.3 podía publicar saltándose el umbral — y la página sonda del propio cambio ya enseñaba ese atajo. Cerrado quitando la entrada: el conjunto publicable solo reparte lo ya resuelto y filtrado. Reforzado con un tipo marcado cuya marca no se puede nombrar desde fuera, y verificado por mutación: convertirlo en un alias hace fallar `astro check`.
+  - `[high]` `[patch]` `miembros:` sin nada debajo es `null` en YAML y `.default([])` solo actúa sobre `undefined`, así que el editor recibía el inglés crudo de Zod. Este repositorio ya trata esa forma de fallo como defecto en otro campo. Mensaje propio que además dice qué hacer en su lugar: omitir el campo. Deliberadamente **no** se preprocesa el `null` a lista vacía, porque tragárselo enseñaría a escribirlo.
+  - `[high]` `[patch]` `nombre` y `criterio` admitían solo espacios: se podía publicar una Colección con nombre y criterio en blanco, justo lo que el esquema decía impedir. Se mide sobre el valor recortado **sin recortarlo**, porque NFR-12 prohíbe que el sistema altere lo que el editor guardó; hay prueba de que el valor sobrevive intacto. Alcanza también a Autor y Tema, que tenían el mismo agujero.
+  - `[high]` `[patch]` No había guarda de slug repetido, y dos fuentes de slug discrepaban: la herramienta tomaba el basename y el cargador de Astro la ruta relativa, así que un subdirectorio daba dos slugs distintos para el mismo fichero. Una sola regla —el identificador de Astro— y una puerta que rompe el build nombrando los dos ficheros en conflicto.
+  - `[high]` `[patch]` Una prueba no podía fallar: comprobaba que el sitemap no anuncia una Colección bajo umbral, y el sitemap no enumera Colecciones hasta la 12.3, así que habría pasado con el umbral a cero. Retirada, con la explicación en su sitio.
+  - `[high]` `[patch]` Parametrizar `nombre()` dejó los mensajes de Autor y Tema dependiendo de un valor por omisión sin ninguna prueba: cambiarlo producía «falta el nombre de la Autor» con la suite en verde.
+  - `[medium]` `[patch]` El camino de `.default([])` no se probaba nunca a través del esquema; quitarlo no rompía nada.
+  - `[medium]` `[patch]` `.vite` y `.vite-temp` seguían compartidos por enlace entre proyectos temporales, la misma clase de estado mutable que el arreglo del almacén de contenido acababa de cerrar.
+  - `[medium]` `[patch]` El aviso de desajustes no acotaba cuántos slugs enumeraba, y el barrido de AD-9 no recorría `integraciones/`.
+  - `[low]` `[patch]` Docstring que seguía diciendo «tres colecciones»; justificación factualmente falsa sobre las `reference()` de Tema y Autor; casts que mentían en el lector de la herramienta; mensaje de Tema copiado a mano en `gestion.ts`.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** La Colección declara sus miembros por slug en `corpus/colecciones/{slug}.yml`, y la pertenencia se resuelve **intersectando** esa lista con el conjunto publicable. Es la dirección inversa a la del Tema, que se declara en la Cita, y es a propósito: una Colección es una decisión editorial sobre un conjunto y puede cambiar sin que ninguna Cita cambie. El umbral se aplica al recuento **resuelto**, y ahora no hay segundo camino: el conjunto publicable ya no reparte la lista declarada.
+
+**Verificación.** `npx astro check` 0 errores. `npx vitest run` **1049/1049** en 41 ficheros, frente a 970/39 de la línea base. `npm run build` construye con la puerta de la 11.2 intacta. `npx playwright test` 394 pasan. Y a mano: 21 declarados resuelven a 18 y publica; con 3 publicables no publica pese a los 21 declarados; retirar una Cita a `_revision/` no rompe el build; un slug duplicado rompe nombrando los dos ficheros; `miembros:` nulo contesta con la regla y no con el inglés de Zod; y la mutación que desactiva la marca del umbral hace fallar `astro check`.
+
+**Un hallazgo colateral que valía la historia entera.** El andamio de pruebas enlazaba `node_modules` completo, y Astro guarda ahí el almacén de datos de contenido, así que cada build temporal escribía en el almacén compartido del repositorio. El cargador limpia y repuebla una colección cuando encuentra ficheros, pero cuando no encuentra ninguno se va sin tocar el almacén — así que una colección vacía hereda lo que dejó la prueba anterior. Llevaba ahí desde siempre, auto-curándose en silencio porque las tres colecciones existentes nunca estaban vacías; `corpus/colecciones/` vacío es el primer caso que lo destapa. Arreglado y con prueba de regresión.
+
+**Recomendación de nueva revisión: true.** Seis hallazgos de severidad alta.
+
+**Riesgos residuales.** Los cuatro diferidos están en el frontmatter.
