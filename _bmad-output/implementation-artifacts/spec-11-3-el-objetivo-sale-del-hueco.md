@@ -2,9 +2,9 @@
 title: 'Story 11.3 — El objetivo de cada sesión sale del hueco, no del criterio'
 type: 'feature'
 created: '2026-08-19'
-status: 'in-progress'
+status: 'in-review'
 baseline_revision: '8e9b6c8dd00232c74cf048c1de7b07b0b9f41530'
-review_loop_iteration: 0
+review_loop_iteration: 1
 followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-11-context.md'
@@ -70,7 +70,7 @@ deferred: []
 **Execution:**
 - `src/lib/objetivo.ts` (nuevo, puro, sin disco) -- la política: recibe el resultado de `verHuecos` y devuelve el objetivo de la sesión, con el hueco del que sale declarado en texto. Prioridad: primero el suelo de tradición si no se alcanza, después el Tema al que menos le falta, y el desempate por slug que `verHuecos` ya aplica. Puro, para poder probar la determinación entera sin corpus.
 - `src/lib/huecos.ts` -- actualizar la cabecera para que el criterio quede bien dicho: la vista **sigue sin nombrar Autores**, y la política que se apoya en ella tampoco lo hace — propone **qué hueco cerrar** y caracteriza al Autor por tradición. Quién entra en el Corpus se sigue sin delegar.
-- `corpus/sesiones-de-sembrado.yml` (nuevo) -- registro de sesiones, versionado y solo de añadir: por sesión, el objetivo propuesto, el elegido y, cuando difieren, el motivo de la anulación. Se coloca junto a `corpus/portada.json` y `corpus/pendientes-de-cotejo.yml`, que ya son metadato del Corpus y no colección. La Historia 11.4 lo consume para declarar la cadencia de sembrado.
+- `corpus/sesiones-de-sembrado.yml` (nuevo) -- registro de sesiones, versionado y solo de añadir. Por sesión: el objetivo propuesto, el elegido y el motivo cuando difieren, **y el resultado medido** — el recuento de Citas del Corpus, el porcentaje de Procedencia completa (SM-C1) y el de tradición latinoamericana en el momento de registrarla. Sin resultado, la 11.4 no puede cerrar «cuántas Citas por sesión» ni juzgar una sesión fallida, y su criterio dice literalmente «registro su **resultado**». Los tres los deriva la propia orden del Corpus, no se teclean. Se coloca junto a `corpus/portada.json` y `corpus/pendientes-de-cotejo.yml`, que ya son metadato del Corpus y no colección. La Historia 11.4 lo consume para declarar la cadencia de sembrado.
 - `tools/objetivo.ts` (nuevo) -- la orden: `npx tsx tools/objetivo.ts [--corpus corpus] [--json] [--anular <motivo>]`. Sin `--anular`, propone y declara el hueco. Con `--anular`, registra la anulación con su motivo; sin motivo, sale con código ≠ 0.
 - `tools/huecos.ts` -- mostrar el objetivo propuesto al final del informe, para que quien ya mira los huecos no tenga que ejecutar dos órdenes.
 - `tests/unit/objetivo.test.ts` (nuevo) -- la matriz de E/S sobre lo puro: prioridad de la tradición, Tema al que menos le falta, desempate, determinación palabra por palabra en dos llamadas, sin huecos, corpus vacío, y Autores sin tradición declarada.
