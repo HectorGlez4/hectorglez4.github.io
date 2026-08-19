@@ -2,15 +2,45 @@
 title: 'Story 11.2 — Ninguna Cita se publica sin aparecer en su documento'
 type: 'feature'
 created: '2026-08-19'
-status: 'in-review'
+status: 'done'
 baseline_revision: '8784d379de5deddf9efa4e9aec190b7ce5da1ce5'
 review_loop_iteration: 1
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-11-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-11-1-la-fuente-se-recupera.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      `astro preview` no coteja: la integración engancha el build y el arranque de `dev`,
+      pero `preview` sirve un `dist/` ya construido y no dispara ningún gancho.
+    evidence: |-
+      Se argumenta en el módulo que no hace falta, porque lo que `preview` sirve ya cruzó
+      la puerta al construirse. Es cierto mientras nadie sirva un `dist/` traído de otro
+      sitio. Queda anotado como decisión, no como olvido.
+    location: >-
+      integraciones/cotejo.ts
+    severity: low
+  - summary: >-
+      El sembrado automático de documentos en las pruebas de build usa la presencia de un
+      censo propio como señal de «no me siembres», y nada obliga a respetarlo.
+    evidence: |-
+      Una prueba futura que quiera medir el cotejo y no escriba su propio
+      `pendientes-de-cotejo.yml` recibirá documentos automáticos y medirá otra cosa. Está
+      en el docblock de `documentosDeFuenteDe`, pero es una convención, no una puerta.
+    location: >-
+      tests/unit/ayuda/construir.ts
+    severity: medium
+  - summary: >-
+      El recuento de «pendientes» de la auditoría cambió de significado: ahora son Citas
+      publicadas amparadas por el censo, no entradas del censo.
+    evidence: |-
+      Hoy ambas cifras coinciden (38 / 0 rancias). Si divergieran, el informe diría algo
+      distinto de lo que decía antes. El cambio parece más correcto, pero conviene saberlo
+      al leer series históricas del informe.
+    location: >-
+      tools/auditoria.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -111,3 +141,34 @@ deferred: []
 - `npx vitest run` -- expected: todo en verde; ninguna de las 703 de la línea base perdida.
 - `npm run build` -- expected: construye, con las 38 pendientes contadas y sin romper.
 - `grep -rn "cotejo" src/lib/` -- expected: ninguna aparición; el cotejo no vive ahí.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 1: (high 1)
+- patch: 16: (high 1, medium 8, low 7)
+- defer: 3: (medium 1, low 2)
+- reject: 5: (low 5)
+- addressed_findings:
+  - `[high]` `[bad_spec]` El censo se cerraba por **recuento** y no por identidad: en cuanto la 11.4 liberase una entrada quedaba un hueco donde meter una Cita nueva sin que fallase nada. La causa estaba en esta especificación, que pedía comprobar que el recuento no superase el tope. Enmendada a identidad, y el código pasa a atar cada Cita censada a la **huella de su texto**, con lo que reutilizar un slug tampoco hereda la exención.
+  - `[high]` `[patch]` Una Cita en un subdirectorio de `corpus/citas/` esquivaba el cotejo entero y se publicaba: la colección de Astro enumera recursivamente y el lector del cotejo hacía un `readdir` plano. Dos revisores lo reprodujeron construyendo. Lector recursivo, y prueba de build con la Cita en subcarpeta.
+  - `[medium]` `[patch]` El cotejo colapsaba `\s+` pero no los caracteres invisibles (guion blando, anchura cero, marca de orden). Las ediciones web los reparten, y habrían bloqueado el build en la 11.4 sin diferencia visible.
+  - `[medium]` `[patch]` El trinquete del tope se imprimía en el build pero solo se aplicaba en una prueba unitaria.
+  - `[medium]` `[patch]` `tools/alta.ts` y la aprobación de candidatas publicaban una Cita sin Fuente y la construcción siguiente moría: un build roto fabricado por la herramienta que debía impedirlo. Un solo dueño, `motivoParaNoPublicar`, para las tres puertas.
+  - `[medium]` `[patch]` Un censo con YAML mal formado, o con `citas` que no fuese lista, reventaba con la traza de la librería o devolvía `[]` en silencio. Ahora nombra el fichero y la regla. Lo mismo para el frontmatter de una Cita.
+  - `[medium]` `[patch]` La extracción podía emitir una Fuente sin dirección, produciendo candidatas que la admisión rechaza en bloque al aprobar.
+  - `[medium]` `[patch]` El andamio de pruebas eximía del cotejo a todos los fixtures por omisión, invirtiendo la premisa de la historia para cualquier prueba futura. Ahora los fixtures son **legítimos**: el andamio les siembra su documento y las pruebas de build ejercitan el cotejo de verdad en vez de esquivarlo.
+  - `[medium]` `[patch]` `yaml` pasó a ser dependencia de build y seguía en `devDependencies`: bajo `npm ci --omit=dev` la configuración de Astro no cargaba.
+  - `[medium]` `[patch]` `tools/auditoria.ts` no tenía ninguna prueba y su recuento podía mentir en silencio; el cálculo se extrajo a una función pura y se probó.
+  - `[low]` `[patch]` Rutas de fallo rotas en Windows; titular duplicado y plurales mal; tope congelado en las dos direcciones cuando la 11.4 tiene que poder bajarlo; mensaje genérico ante una clave sobrante en `fuente`; aserción que prohibía manejar errores en todo el módulo de la integración.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** El build coteja el texto de cada Cita contra el cuerpo del documento de su Fuente y rompe la construcción si no aparece literalmente, sin degradarse a aviso. Vive fuera de `src/lib/`: la comparación pura en `tools/lib/cotejo.ts` y la lectura de disco en `integraciones/cotejo.ts`, enganchada en `astro.config.mjs`, que es el único sitio por el que pasan todas las construcciones. Las 38 Citas anteriores a la v3, que no tienen documento, quedan en un censo cerrado por identidad y huella, contado a la vista y que solo mengua.
+
+**Verificación.** `npx astro check` 0 errores. `npx vitest run` **794/794** en 35 ficheros, frente a 703/33 de la línea base. `npm run build` construye e informa «0 Citas cotejadas contra su documento; 38 pendientes de cotejo de un tope de 38». `npx playwright test` **392 pasan, 12 saltadas**. Y a mano, los dos agujeros que la revisión encontró: una Cita colada en `corpus/citas/sub/` rompe la construcción nombrando su ruta, y un slug nuevo añadido al censo se rechaza por tope y por identidad.
+
+**Recomendación de nueva revisión: true.** Dos hallazgos de severidad alta.
+
+**Riesgos residuales.** Ninguna Cita del Corpus se coteja hoy de verdad: las 38 están censadas y `corpus/fuentes/` está vacío. El camino completo —documento real, Cita sembrada, cotejo en verde— solo se ejercita con documentos compuestos en las pruebas. La primera siembra real dirá si la retirada de marcado de la 11.1 deja el cuerpo lo bastante fiel; si no, el ajuste toca en `documento.ts`. Los tres hallazgos diferidos están en el frontmatter.

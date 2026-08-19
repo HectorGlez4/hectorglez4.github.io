@@ -104,7 +104,7 @@ development_status:
 
   epic-11: in-progress
   11-1-la-fuente-se-recupera-y-su-metadato-sale-del-documento: done
-  11-2-ninguna-cita-se-publica-sin-aparecer-en-su-documento: backlog
+  11-2-ninguna-cita-se-publica-sin-aparecer-en-su-documento: done
   11-3-el-objetivo-de-cada-sesión-sale-del-hueco-no-del-criterio: backlog
   11-4-el-corpus-alcanza-volumen-defendible: backlog
   epic-11-retrospective: optional

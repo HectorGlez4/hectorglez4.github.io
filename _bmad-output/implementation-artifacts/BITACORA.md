@@ -745,3 +745,49 @@ dos familias de UX-DR3, y `.astro/fonts/` guarda los `.woff2`. Es anterior a la 
 como excepción escrita y comprobada en el barrido de AD-22 —con su nombre y su motivo, en
 vez de como punto ciego—, pero la divergencia entre la espina y la realidad sigue ahí y la
 decide Héctor.
+
+## 11.2 — Ninguna Cita se publica sin aparecer en su documento
+
+**Verificado.** El build coteja el texto de cada Cita contra el cuerpo del documento de su
+Fuente y rompe la construcción cuando no aparece literalmente, nombrando la ruta del
+fichero y la regla. La comparación colapsa espacios —y los caracteres invisibles que las
+ediciones web reparten— y nada más: un acento o una coma de diferencia hacen fallar, y no
+pasa por `normalizar.ts`. Vive fuera de `src/lib/`, que por AD-5 sigue sin leer disco: lo
+puro en `tools/lib/cotejo.ts`, la lectura en `integraciones/cotejo.ts`, enganchada en
+`astro.config.mjs`, que es el único sitio por el que pasan todas las construcciones.
+
+794 pruebas en verde (703 al empezar), 0 errores de tipos, 392 pruebas e2e.
+
+**La decisión de producto: deuda visible que mengua.** Las 38 Citas anteriores a la v3 no
+referencian ningún documento, y quien se lo dará es la 11.4, que es trabajo de Héctor. Un
+cotejo obligatorio hoy habría tumbado la reconstrucción diaria de un sitio que ya está en
+vivo; uno opcional habría dejado justo el agujero que la historia existe para cerrar,
+porque bastaría no poner referencia. Se eligió lo tercero: la referencia es obligatoria y
+las 38 entran en `corpus/pendientes-de-cotejo.yml`, un censo cerrado por **identidad y
+huella del texto**, contado en cada build y en la auditoría, que solo mengua.
+
+**Los dos agujeros que la revisión encontró y las pruebas no.** El primero: una Cita
+colocada en un subdirectorio de `corpus/citas/` esquivaba el cotejo entero y se publicaba
+—la colección de Astro enumera recursivamente y el lector del cotejo hacía un `readdir`
+plano—. Dos revisores lo reprodujeron construyendo de verdad. Es la misma forma del fallo
+de la 11.1: el guardián no cubría todo lo que el build publica, así que conviene mirarlo
+en cada historia que añada una puerta.
+
+El segundo era mío: la especificación pedía comprobar que el **recuento** del censo no
+superase el tope, y eso no cierra nada. En cuanto la 11.4 libere una entrada queda un
+hueco donde meter una Cita nueva sin que falle nada — el gesto «añádela al censo para
+desbloquear el build» que el censo existía para prohibir. Se enmendó a identidad, y el
+código fue más lejos de lo que pedí: ata cada Cita censada a la huella de su texto, con lo
+que reutilizar un slug tampoco hereda la exención.
+
+**Un cambio de método que conviene conservar.** Las pruebas de build ya no eximen del
+cotejo a sus corpus de prueba: el andamio les siembra el documento que sus Citas dicen
+tener, así que una decena de suites ejercitan ahora el cotejo de verdad en vez de
+esquivarlo. Eximir por omisión invertía la premisa de la historia para toda prueba futura.
+
+**Lo que quedó fuera.** Ninguna Cita del Corpus se coteja hoy de verdad —las 38 están
+censadas y `corpus/fuentes/` está vacío—, así que el camino completo solo se ejercita con
+documentos compuestos en las pruebas. La primera siembra real dirá si la retirada de
+marcado de la 11.1 deja el cuerpo lo bastante fiel; si no, el ajuste toca en
+`documento.ts` y no aquí. `astro preview` no coteja, a propósito: sirve un `dist/` que ya
+cruzó la puerta al construirse.
