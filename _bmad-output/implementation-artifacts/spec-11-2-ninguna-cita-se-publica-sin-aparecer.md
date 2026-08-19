@@ -2,8 +2,9 @@
 title: 'Story 11.2 — Ninguna Cita se publica sin aparecer en su documento'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
-review_loop_iteration: 0
+status: 'in-review'
+baseline_revision: '8784d379de5deddf9efa4e9aec190b7ce5da1ce5'
+review_loop_iteration: 1
 followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-11-context.md'
@@ -80,7 +81,7 @@ deferred: []
 - `tools/auditoria.ts` -- informar de cuántas Citas quedan pendientes de cotejo, junto a SM-C1 -- la deuda se cuenta donde ya se cuenta la salud del Corpus.
 - `tests/unit/cotejo.test.ts` (nuevo) -- lo puro: colapso de espacios, diferencia por acento, por signo, texto presente y ausente, y elección del documento.
 - `tests/unit/cotejo-build.test.ts` (nuevo) -- las pruebas de **fallo de build** con el patrón de `puerta-de-admision.test.ts`, cubriendo la matriz: texto ausente, acento distinto, Cita nueva sin documento, entrada rancia en el censo, documento ausente, y una Cita escrita a mano.
-- `tests/unit/andamiaje.test.ts` -- comprobar que el censo existe y que su recuento **no supera** el tope registrado -- un tope que solo se puede bajar a mano es lo que convierte la lista en deuda que mengua.
+- `tests/unit/andamiaje.test.ts` -- el censo se fija por **identidad, no por recuento**: una constante con los 38 slugs de partida, y toda entrada del censo tiene que pertenecer a ese conjunto. Un tope por cardinalidad no cierra nada — en cuanto la 11.4 libere una entrada queda un hueco donde meter una Cita nueva sin que falle nada.
 
 **Acceptance Criteria:**
 - Given una Cita que referencia su documento, when se construye el sitio, then el cotejo comprueba que su texto aparezca literalmente en el cuerpo de ese documento.
