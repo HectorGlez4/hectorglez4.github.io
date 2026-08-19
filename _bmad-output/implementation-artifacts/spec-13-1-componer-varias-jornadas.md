@@ -2,9 +2,10 @@
 title: 'Story 13.1 — Componer varias jornadas de una sentada'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '3a5e2433ce97204001cc6a2b8a2bcc4bc7ee7bd5'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-13-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-12-4-curar-una-coleccion.md'
@@ -110,3 +111,32 @@ deferred: []
 - `npm run build` -- expected: construye, con la puerta de la 11.2 intacta y sin fijaciones, como hoy.
 - `git status --porcelain corpus/` -- expected: vacío tras la suite; las pruebas no fijan jornadas en el repositorio.
 - `grep -rn "fijaciones" src/ tools/ --include="*.ts"` -- expected: un solo origen de jornada fijada; ningún calendario paralelo.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17: (high 5, medium 8, low 4)
+- defer: 0
+- reject: 6: (low 6)
+- addressed_findings:
+  - `[high]` `[patch]` Al enumerar todas las fijaciones, el lote convirtió en fatal algo que antes era inofensivo: una clave mal tecleada a mano —`manana`— es lexicográficamente mayor que una fecha ISO, entraba en el lote, caía a la rotación y hacía lanzar el build **entero**, incluida la reconstrucción diaria del sitio en vivo. La orden validaba y el lector del sitio no: dos lectores del mismo fichero con reglas distintas. Ahora ambos preguntan a `esJornada`.
+  - `[high]` `[patch]` `lote.astro` importaba `corpus/portada.json` en crudo: la clave `fijaciones` ausente —forma que la propia orden acepta— tumbaba el build. Nuevo lector tolerante, compartido con `kit.astro`, así que el sitio tiene un solo lector.
+  - `[high]` `[patch]` La vista del lote reimplementaba a mano el marcado del Kit, así que «indistinguible» era cierto para los datos y falso para lo que Héctor copia y pega. Extraído un componente compartido; la igualdad compara ahora una huella de todo lo publicable y no un solo enlace.
+  - `[high]` `[patch]` El aviso de fijación muda —la funcionalidad estrella— no lo renderizaba ninguna prueba: invertir el guardián dejaba la página avisando en las jornadas correctas y callando en la muda, con todo en verde.
+  - `[high]` `[patch]` El calendario real de `esJornada` no se fijaba donde importa: el consumidor es la caja de texto libre del `workflow_dispatch`, que escribe una persona.
+  - `[medium]` `[patch]` `--corpus` sin valor caía al corpus real; la escritura de `portada.json` no era atómica y una interrupción perdía **todas** las fijaciones; `HOY` en UTC rechazaba jornadas válidas de madrugada en España; `FECHA_JORNADA` olvidada en la shell cambiaba en silencio qué significa «pasada».
+  - `[medium]` `[patch]` La prueba del guardián de banderas leía el corpus **real** y habría escrito en él si el guardián regresara.
+  - `[medium]` `[patch]` `/lote` no entraba en las listas de regresión de superficies, y sus comprobaciones derivadas se hacían con cinco construcciones propias sobre una suite que serializa a propósito; bajaron a tres, y las demás viven ya en la construcción compartida.
+  - `[low]` `[patch]` `soltar` no ordenaba el fichero aunque `fijar` sí, y no se ejercitaba por la orden; aviso al fijar la misma Cita en dos jornadas; `/kit` y `/lote` enlazados entre sí; y el aviso mudo distinguible de un párrafo normal.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `npm run jornada -- fijar` deja varias jornadas preparadas escribiendo en `corpus/portada.json`, el mecanismo que `citaDelDia.ts` ya consultaba antes de rotar desde la v1. La superficie interna `/lote` muestra el material de cada jornada para publicarlo desde el móvil, compartiendo componente con el Kit.
+
+**Lo que la historia no construyó, y es su contenido.** No hay segundo calendario ni desempate. El auditor de intención lo verificó enumerando cada sitio donde el cambio crea la noción de jornada —forma, ventana de visualización, rechazo de pasadas— y ninguno mapea jornada a Cita. `corpus/portada.json` sigue siendo el único mapeo. «Lo anticipado sustituye a lo de la jornada» no se implementa: se cumple.
+
+**Verificación.** `npx astro check` 0 errores. `npx vitest run` **1277/1277** en 47 ficheros, frente a 1158/44 de la línea base. `npm run build` construye con la puerta de la 11.2 intacta. `npx playwright test` 400 pasan. `git status --porcelain corpus/` vacío y `fijaciones` sigue en `{}`. Y a mano: los cinco casos de la orden con el código correcto, incluido el rechazo de una Cita no marcada apta —que sin él dejaría fijar algo que el día señalado se ignoraría en silencio— y el de una fecha que no existe en el calendario.
+
+**Recomendación de nueva revisión: true.** Cinco hallazgos de severidad alta, dos de ellos capaces de tumbar la reconstrucción diaria del sitio en vivo.

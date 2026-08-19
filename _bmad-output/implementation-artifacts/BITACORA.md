@@ -1048,3 +1048,40 @@ Colecciones — las dos últimas por diseño, porque no hay ninguna curada.
 Y el defecto que la 12.1 cerraba, comprobado **en producción**: `/404` y `/buscar` siguen
 declarando `noindex` y ya **no** aparecen en el índice interno. Antes decían al buscador de
 fuera que no las indexara y salían en el de dentro.
+
+# v3 — Épica 13
+
+## 13.1 — Componer varias jornadas de una sentada
+
+**Verificado.** `npm run jornada -- fijar` deja varias jornadas preparadas escribiendo en
+`corpus/portada.json`, y `/lote` muestra el material de cada una para publicarlo desde el
+móvil, compartiendo componente con el Kit.
+
+1277 pruebas unitarias en verde (1158 al empezar), 400 e2e, 0 errores de tipos, y
+`fijaciones` sigue vacío en el repositorio.
+
+**El contenido de la historia es lo que NO se construyó.** No hay segundo calendario ni
+desempate: `corpus/portada.json` ya tenía fijaciones y `citaDelDia.ts` ya les daba prioridad
+sobre la rotación desde la v1. El lote fija ahí, y «lo anticipado sustituye a lo de la
+jornada» no se implementa — se cumple por construcción, porque ambos derivan de la misma
+fijación. Es la trampa que `RECONCILIACION.md` §2 nombra, y se verificó enumerando cada
+sitio donde el cambio crea la noción de jornada: ninguno mapea jornada a Cita.
+
+**El precio de leer más.** Antes, una clave mal escrita en `portada.json` era inerte:
+`citaDelDia` consultaba una sola clave. Al enumerarlas todas, el lote convirtió eso en
+fatal — `"manana"` es lexicográficamente mayor que una fecha ISO, así que entraba, caía a
+la rotación, y `Date.parse` daba `NaN` hasta hacer lanzar el build **entero**, incluida la
+reconstrucción diaria del sitio en vivo. La orden validaba y el lector del sitio no. Ahora
+ambos preguntan a `esJornada`, que además pasó a comprobar que la fecha exista de verdad:
+`2026-02-31` casaba con la expresión regular y producía un índice `NaN` desde la v1.
+
+**El rechazo que más vale.** Fijar una Cita no marcada apta para portada se rechaza
+explicando la consecuencia: `citaDelDia` la ignoraría y ese día rotaría otra. Sin esa
+comprobación, fijar «funciona», no falla nada, y el fallo aparece el único día que importa.
+
+**Lo que la revisión enseñó sobre las pruebas.** El aviso de fijación muda —la
+funcionalidad estrella, hacer visible un fallo silencioso antes de que llegue el día— no lo
+renderizaba ninguna prueba: invertir el guardián dejaba la página avisando en las jornadas
+correctas y callando en la muda, con la suite entera en verde. Y la igualdad con el Kit se
+comprobaba sobre un solo enlace, mientras la vista estaba reimplementada a mano; ahora hay
+componente compartido y la comparación cubre texto, tramo, Imagen, atribución y redes.

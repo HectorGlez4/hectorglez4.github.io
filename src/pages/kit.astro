@@ -11,21 +11,26 @@
  *
  * Se compone en el build, así que la reconstrucción diaria de AD-12 la deja hecha sin que
  * nadie intervenga: la misma ejecución que mueve la Cita del Día de la portada mueve esta.
+ *
+ * El marcado del material vive en `MaterialParaPublicar.astro` desde la Historia 13.1,
+ * compartido con `/lote`: los dos derivan los mismos datos de `materialDelKit`, y compartir
+ * también la vista es lo que impide que enseñen cosas distintas.
  */
 import Armazon from '../components/Armazon.astro';
-import CopiarCita from '../islands/CopiarCita.astro';
-import ImagenDelKit from '../islands/ImagenDelKit.astro';
+import MaterialParaPublicar from '../components/MaterialParaPublicar.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { materialDelKit } from '../lib/kit.ts';
 import { tituloDe } from '../lib/marca.ts';
+import { fijacionesDeclaradas } from '../lib/portada.ts';
 import { conjuntoPublicable } from '../lib/publicado.ts';
-import { REDES, enlaceConOrigen } from '../lib/redes.ts';
-import { tramoDe } from '../lib/tramos.ts';
 
 const conjunto = await conjuntoPublicable();
 const jornada = jornadaDelBuild(process.env, new Date());
-const material = materialDelKit(aptasParaPortada(conjunto.citas), jornada, portada.fijaciones);
+// El fichero se puede editar a mano y ningún esquema lo juzga: se lee por el único lector
+// del sitio, que descarta lo que no entiende en vez de tumbar el build (Historia 13.1).
+const fijaciones = fijacionesDeclaradas(portada);
+const material = materialDelKit(aptasParaPortada(conjunto.citas), jornada, fijaciones);
 
 const autorDe = (slug: string) => conjunto.autores.find((a) => a.slug === slug)!;
 
@@ -33,6 +38,9 @@ const delDia = material && { cita: material.delDia.cita, autor: autorDe(material
 const alternativa = material?.alternativa
   ? { cita: material.alternativa.cita, autor: autorDe(material.alternativa.cita.autor) }
   : null;
+
+/** Las jornadas fijadas que quedan por delante, para saber si hay lote que mirar. */
+const porDelante = Object.keys(fijaciones).filter((j) => j > jornada).length;
 ---
 
 <Armazon
@@ -45,76 +53,33 @@ const alternativa = material?.alternativa
 
     {material === null && <p class="aviso">Hoy no hay ninguna Cita apta para portada.</p>}
 
-    {
-      delDia && (
-        <section class="material">
-          <h2>La Cita del Día</h2>
-          <blockquote class="texto" data-tramo={tramoDe(delDia.cita.texto).nombre}>
-            «{delDia.cita.texto}»
-          </blockquote>
-
-          {tramoDe(delDia.cita.texto).admiteImagen ? (
-            <ImagenDelKit cita={delDia.cita} autor={delDia.autor} />
-          ) : (
-            /*
-             * Se dice explícitamente y sin rodeos. Callarlo dejaría a Héctor buscando por
-             * qué no aparece la imagen justo el día que tiene dos minutos.
-             */
-            <p class="aviso" data-sin-imagen>
-              Esta Cita pasa del límite de longitud, así que no admite Imagen. Abajo tienes
-              una alternativa apta con su material completo.
-            </p>
-          )}
-
-          <CopiarCita cita={delDia.cita} autor={delDia.autor} />
-
-          <p class="enlace">
-            <a href={`/cita/${delDia.cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
-          </p>
-
-          {/*
-            * Un enlace por cuenta, cada uno con su marca de origen. Es lo único que
-            * distingue de qué red vino cada visita, y por eso se pega el enlace de aquí
-            * y no el de arriba: el de arriba es para mirar la página, estos son para
-            * publicar.
-            */}
-          <ul class="redes" data-redes>
-            {REDES.map((red) => (
-              <li>
-                <a href={enlaceConOrigen(`/cita/${delDia.cita.slug}`, red.id)} data-red={red.id}>
-                  {red.nombre}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {delDia && <MaterialParaPublicar cita={delDia.cita} autor={delDia.autor} titulo="La Cita del Día" />}
 
     {
       alternativa && (
-        <section class="material" data-alternativa>
-          <h2>Alternativa con Imagen</h2>
-          <blockquote class="texto" data-tramo={tramoDe(alternativa.cita.texto).nombre}>
-            «{alternativa.cita.texto}»
-          </blockquote>
-          <ImagenDelKit cita={alternativa.cita} autor={alternativa.autor} />
-          <CopiarCita cita={alternativa.cita} autor={alternativa.autor} />
-          <p class="enlace">
-            <a href={`/cita/${alternativa.cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
-          </p>
-          <ul class="redes" data-redes>
-            {REDES.map((red) => (
-              <li>
-                <a href={enlaceConOrigen(`/cita/${alternativa.cita.slug}`, red.id)} data-red={red.id}>
-                  {red.nombre}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <MaterialParaPublicar
+          cita={alternativa.cita}
+          autor={alternativa.autor}
+          titulo="Alternativa con Imagen"
+          esAlternativa
+        />
       )
     }
+
+    {/*
+      * El paso al lote, y de vuelta desde él. Son la misma herramienta en dos momentos —hoy
+      * y los días que vienen—, y las dos son superficies ajenas al producto: este enlace no
+      * las hace alcanzables desde la navegación pública, porque a esta página tampoco llega
+      * ninguno. Sin él, la única forma de pasar de una a otra es teclear la dirección.
+      */}
+    <p class="paso">
+      {
+        porDelante === 0
+          ? 'No hay ninguna jornada preparada por delante.'
+          : `Hay ${porDelante} ${porDelante === 1 ? 'jornada preparada' : 'jornadas preparadas'} por delante.`
+      }{' '}
+      <a href="/lote" data-enlace-lote>Ver el lote</a>
+    </p>
   </div>
 </Armazon>
 
@@ -123,24 +88,12 @@ const alternativa = material?.alternativa
     padding-block: var(--respiracion);
   }
 
-  h1,
-  h2 {
+  h1 {
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--apagado);
-  }
-
-  .material {
-    margin-block: calc(var(--unidad) * 4);
-    padding-top: calc(var(--unidad) * 2);
-    border-top: var(--grosor-filete) solid var(--filete);
-  }
-
-  .texto {
-    font-family: var(--serif);
-    margin: 0 0 calc(var(--unidad) * 2);
+    color: var(--tinta-apagada);
   }
 
   .aviso {
@@ -149,29 +102,11 @@ const alternativa = material?.alternativa
     color: var(--tinta);
   }
 
-  .enlace {
+  .paso {
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
-  }
-
-  .redes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--unidad);
-    list-style: none;
-    padding: 0;
-    margin-top: var(--unidad);
-    font-family: var(--sans);
-    font-size: var(--cuerpo-md);
-  }
-
-  /* UX-DR22 — zona de toque de 44px: en el móvil se pulsa con el pulgar. */
-  .redes a {
-    display: flex;
-    align-items: center;
-    min-height: var(--zona-de-toque);
-    padding-inline: calc(var(--unidad) * 2);
-    border: var(--grosor-filete) solid var(--filete);
-    border-radius: var(--radio);
+    margin-top: calc(var(--unidad) * 4);
+    padding-top: calc(var(--unidad) * 2);
+    border-top: var(--grosor-filete) solid var(--filete);
   }
 </style>

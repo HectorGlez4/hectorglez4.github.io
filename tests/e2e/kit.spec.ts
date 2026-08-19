@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { caracterDe, rutaNormalizada } from '../../src/lib/superficies.ts';
 
 /** Historia 8.1 — el Kit Diario de Publicación. */
 
@@ -101,6 +102,14 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
   });
 
   test('ninguna página pública enlaza al Kit', () => {
+    /*
+     * «Pública» y no «ninguna», y la distinción se volvió real en la Historia 13.1: `/lote`
+     * enlaza al Kit a propósito —son la misma herramienta en dos momentos— y a `/lote`
+     * tampoco llega ningún enlace desde el producto. Quien decide cuáles no cuentan es la
+     * declaración única de `src/lib/superficies.ts`, no una lista de excepciones escrita
+     * aquí: una superficie ajena nueva quedaría exenta sola, y una de producto que enlazara
+     * al Kit seguiría poniendo esto en rojo.
+     */
     const enlazan: string[] = [];
 
     (function recorrer(dir: string) {
@@ -110,11 +119,31 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
           recorrer(ruta);
           continue;
         }
-        if (!entrada.endsWith('.html') || entrada === 'kit.html') continue;
-        if (/href="\/kit"/.test(readFileSync(ruta, 'utf8'))) enlazan.push(ruta.slice(dist.length));
+        if (!entrada.endsWith('.html')) continue;
+
+        const relativa = ruta.slice(dist.length).replace(/\.html$/, '').replace(/\/index$/, '/');
+        // Lo que el build genera y nadie declara —una sonda de otra prueba— no es una
+        // superficie del sitio y no se juzga aquí.
+        let ajena = false;
+        try {
+          ajena = caracterDe(rutaNormalizada(relativa)) === 'ajena';
+        } catch {
+          continue;
+        }
+        if (ajena) continue;
+
+        if (/href="\/kit"/.test(readFileSync(ruta, 'utf8'))) enlazan.push(relativa);
       }
     })(dist);
 
-    expect(enlazan, 'páginas que enlazan al Kit').toEqual([]);
+    expect(enlazan, 'páginas del producto que enlazan al Kit').toEqual([]);
+  });
+
+  test('y el enlace que sí existe sale de una superficie que tampoco es alcanzable', () => {
+    // Sin esto, la comprobación de arriba se volvería verde el día que nadie enlazara al
+    // Kit por ningún lado, y dejaría de vigilar nada.
+    const lote = readFileSync(join(dist, 'lote.html'), 'utf8');
+    expect(lote).toContain('href="/kit"');
+    expect(caracterDe('/lote')).toBe('ajena');
   });
 });

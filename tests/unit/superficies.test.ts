@@ -35,6 +35,7 @@ const MUESTRAS = [
   '/buscar',
   '/404',
   '/kit',
+  '/lote',
 ];
 
 describe('Historia 12.1 — las cuatro consecuencias salen de una sola declaración', () => {
@@ -86,8 +87,11 @@ describe('Historia 12.1 — el defecto que la historia nombra', () => {
     expect(consecuenciasDe(ruta).enElBarrido).toBe(true);
   });
 
-  it('el Kit Diario queda fuera de las cuatro', () => {
-    expect(consecuenciasDe('/kit')).toEqual({
+  it.each(['/kit', '/lote'])('%s queda fuera de las cuatro', (ruta) => {
+    // El Kit y el lote son la misma clase de cosa: material de publicación, no contenido.
+    // El lote entró en la Historia 13.1 con una sola línea de declaración y sin tocar nada
+    // más, que es exactamente lo que la 12.1 prometía.
+    expect(consecuenciasDe(ruta)).toEqual({
       enElSitemap: false,
       noIndexar: true,
       enLaBusquedaPropia: false,
@@ -226,8 +230,16 @@ describe('Historia 12.1 — el filtro del sitemap consume la declaración', () =
     }
   });
 
-  it('no anuncia las páginas 2+, ni la búsqueda, ni el Kit, ni la 404', () => {
-    for (const ruta of ['/autor/x/2', '/tema/x/2', '/coleccion/x/2', '/buscar', '/kit', '/404']) {
+  it('no anuncia las páginas 2+, ni la búsqueda, ni el Kit, ni el lote, ni la 404', () => {
+    for (const ruta of [
+      '/autor/x/2',
+      '/tema/x/2',
+      '/coleccion/x/2',
+      '/buscar',
+      '/kit',
+      '/lote',
+      '/404',
+    ]) {
       expect(anunciableEnElSitemap(`https://sabiduriadebolsillo.net${ruta}`), ruta).toBe(false);
     }
   });
@@ -260,6 +272,7 @@ describe('Historia 12.1 — el barrido de accesibilidad se deriva, no se escribe
     '/404',
     '/buscar',
     '/kit',
+    '/lote',
     '/cita/zenon-lo-ultimo',
     '/cita/antonio-machado-hoy-es-siempre-todavia',
     '/autor/rosalia-de-castro',
@@ -282,8 +295,9 @@ describe('Historia 12.1 — el barrido de accesibilidad se deriva, no se escribe
     ]);
   });
 
-  it('el Kit no entra: no es una superficie que nadie lea', () => {
-    expect(superficiesDelBarrido(CONSTRUIDAS)).not.toContain('/kit');
+  it.each(['/kit', '/lote'])('%s no entra: no es una superficie que nadie lea', (ruta) => {
+    expect(CONSTRUIDAS, 'la premisa: la ruta está construida').toContain(ruta);
+    expect(superficiesDelBarrido(CONSTRUIDAS)).not.toContain(ruta);
   });
 
   it('una superficie pública nueva entra sola, sin añadirse a ninguna lista', () => {

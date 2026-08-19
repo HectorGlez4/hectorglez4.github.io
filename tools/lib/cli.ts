@@ -65,7 +65,19 @@ export function motivosDeArgumentosNoReconocidos(
     if (admitidas.conValor.includes(actual)) {
       // Su valor no es un argumento suelto: pertenece a la opción y se salta con ella.
       const siguiente = argumentos[i + 1];
-      if (siguiente !== undefined && !siguiente.startsWith('--')) i += 1;
+      if (siguiente !== undefined && !siguiente.startsWith('--')) {
+        i += 1;
+        continue;
+      }
+      /*
+       * Una opción con valor a la que **no** le sigue ninguno tampoco es «lo mismo pero sin
+       * ella», y es peor que una bandera con errata: `opcion` devuelve `undefined` y quien
+       * la llama cae a su valor por omisión sin enterarse. Con `--corpus` eso significa que
+       * `npx tsx tools/jornada.ts fijar … --corpus` —o `--corpus --otra-cosa`— escribe en el
+       * corpus **real** creyendo obedecer. Se cuenta aquí, donde ya se cuentan las que
+       * sobran, para que lo hereden todas las órdenes que hacen esta comprobación.
+       */
+      motivos.push(`«${actual}» necesita un valor y no se le ha dado ninguno.`);
       continue;
     }
 

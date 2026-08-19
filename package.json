@@ -16,6 +16,7 @@
     "check": "astro check",
     "huecos": "tsx tools/huecos.ts",
     "coleccion": "tsx tools/coleccion.ts",
+    "jornada": "tsx tools/jornada.ts",
     "objetivo": "tsx tools/objetivo.ts",
     "sesion:registrar": "tsx tools/objetivo.ts --registrar",
     "test": "vitest run",

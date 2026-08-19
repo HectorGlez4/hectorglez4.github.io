@@ -166,7 +166,12 @@ describe('Historia 12.1 — toda página de src/pages tiene declaración', () =>
 
   it('el barrido de esta comprobación ve las páginas que ya hay', () => {
     // Si el recorrido se quedara corto, la comprobación de arriba daría verde sin mirar.
-    for (const exigida of ['index.astro', 'kit.astro', 'autor/[slug]/[...page].astro']) {
+    for (const exigida of [
+      'index.astro',
+      'kit.astro',
+      'lote.astro',
+      'autor/[slug]/[...page].astro',
+    ]) {
       expect(paginas, exigida).toContain(exigida);
     }
   });
@@ -284,6 +289,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         '/buscar',
         '/404',
         '/kit',
+        '/lote',
         '/tema/el-tiempo',
         '/coleccion/frases-cortas',
       ]) {
@@ -334,10 +340,10 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(superficiesDelBarrido([])).toEqual([]);
     });
 
-    it('el Kit no se barre, y no por no estar construido', async () => {
+    it.each(['/kit', '/lote'])('%s no se barre, y no por no estar construido', async (ruta) => {
       const rutas = await rutasConstruidas();
-      expect(rutas).toContain('/kit');
-      expect(superficiesDelBarrido(rutas)).not.toContain('/kit');
+      expect(rutas).toContain(ruta);
+      expect(superficiesDelBarrido(rutas)).not.toContain(ruta);
     });
 
     it('la muestra de un listado paginado es la primera página, no la segunda', async () => {
@@ -352,6 +358,50 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       // que se escribió para que esto ocurra es la declaración de `src/lib/superficies.ts`:
       // ni esta prueba ni `tests/e2e/accesibilidad.spec.ts` nombran la ruta en una lista.
       expect(superficiesDelBarrido(await rutasConstruidas())).toContain('/coleccion/frases-cortas');
+    });
+  });
+
+  /**
+   * Historia 13.1 — el lote entra en este lazo sin traer una construcción propia.
+   *
+   * Las cuatro consecuencias del lote se comprueban **aquí**, sobre el sitio que este fichero
+   * ya construye, y no en `lote-construido.test.ts` con builds propios: la suite unitaria
+   * serializa a propósito porque cada `astro build` cuesta segundos, y estas afirmaciones no
+   * necesitan ninguna jornada fijada. Allí se queda solo lo que sí las necesita.
+   */
+  describe('el lote hereda su carácter de la declaración, como el Kit', () => {
+    it('lleva `noindex` y no entra en el índice de la búsqueda propia', async () => {
+      const html = await readFile(join(proyecto, 'dist', 'lote.html'), 'utf8');
+      expect(html).toMatch(/<meta name="robots" content="noindex/);
+      // La tercera consecuencia sale del mismo booleano que las otras dos, así que no puede
+      // estar `noindex` fuera y visible dentro. Esto lo mira sobre el HTML de verdad.
+      expect(html).not.toContain('data-pagefind-body');
+    });
+
+    it('solo le enlazan superficies ajenas: no se llega desde la navegación pública', async () => {
+      /*
+       * El Kit sí le enlaza, y a propósito: son la misma herramienta en dos momentos, y a
+       * ninguna de las dos llega un enlace desde el producto. Lo que la historia prohíbe no
+       * es todo enlace, es que se llegue **desde el sitio**; por eso la comprobación no es
+       * «nadie enlaza» sino «solo enlaza quien tampoco es alcanzable».
+       */
+      const enlaces = await sitioConstruido();
+      const desdeElProducto = [...enlaces]
+        .filter(([, salientes]) => salientes.includes('/lote'))
+        .filter(([ruta]) => caracterDe(ruta) !== 'ajena')
+        .map(([ruta]) => ruta);
+
+      expect(enlaces.has('/lote'), 'la premisa: el lote se construyó').toBe(true);
+      expect(desdeElProducto).toEqual([]);
+      // Y que la comprobación no sea verde por no mirar nada: alguien sí enlaza.
+      expect([...enlaces].filter(([, s]) => s.includes('/lote')).length).toBeGreaterThan(0);
+    });
+
+    it('y sigue sin ser alcanzable: no cuenta como superficie huérfana de nadie', async () => {
+      const enlaces = await sitioConstruido();
+      const publicables = [...enlaces.keys()].filter((ruta) => caracterDe(ruta) === 'producto');
+      expect(publicables).not.toContain('/lote');
+      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
     });
   });
 
@@ -382,9 +432,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(await anunciadas()).toEqual(esperadas);
     });
 
-    it('no anuncia la búsqueda, ni el Kit, ni la 404, ni las páginas 2+', async () => {
+    it('no anuncia la búsqueda, ni el Kit, ni el lote, ni la 404, ni las páginas 2+', async () => {
       const rutas = await anunciadas();
-      for (const fuera of ['/buscar', '/kit', '/404']) {
+      for (const fuera of ['/buscar', '/kit', '/lote', '/404']) {
         expect(rutas, fuera).not.toContain(fuera);
       }
       expect(rutas.filter((r) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(r))).toEqual([]);

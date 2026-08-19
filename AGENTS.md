@@ -95,3 +95,68 @@ directorio entra en el repositorio con ella y la excepción desaparece sola.
 
 Curar la primera Colección de verdad es de Héctor: `corpus/colecciones/` se versiona vacío
 a propósito y ningún agente siembra Colecciones en él.
+
+## Componer un lote de jornadas
+
+Publicar un día cuesta dos minutos con el Kit, pero exige estar ahí ese día. Un lote deja
+varias jornadas preparadas de una sentada:
+
+```
+npm run jornada -- fijar 2026-08-24 <slug-de-cita>
+npm run jornada -- fijar 2026-08-24 <slug> 2026-08-25 <slug> 2026-08-26 <slug>
+npm run jornada -- soltar 2026-08-25 [2026-08-26 ...]
+npm run jornada -- listar
+```
+
+**No hay ningún calendario del lote.** `fijar` escribe en `corpus/portada.json`, que es
+donde `src/lib/citaDelDia.ts` ya busca antes de rotar desde la v1. Por eso lo compuesto por
+adelantado y lo que se compondría el día son lo mismo: derivan de la misma fijación, y no
+hay dos orígenes entre los que desempatar. Si alguna vez hace falta añadir un segundo sitio
+donde vive una jornada, la respuesta es que no.
+
+**Lo versionado es la fijación, nunca el material.** El material se deriva en cada
+construcción, así que cambiar la Cita de una jornada ya compuesta la recompone sola: no
+existe nada guardado que pudiera quedarse viejo. Y el lote es reanudable, porque `fijar`
+añade y jamás vacía: `listar` enseña hasta dónde se llegó.
+
+**Qué impone la orden que el build no puede imponer.** `corpus/portada.json` no es una
+colección y ningún esquema lo juzga, así que aquí la orden es la única puerta que hay:
+
+- **que el slug sea una Cita publicada.** Una que sigue en `corpus/_revision/` se rechaza:
+  una fijación no adelanta contenido en revisión.
+- **que esté marcada apta para portada** (FR-15). Es la regla que más falta hace. `citaDelDia`
+  busca la Cita fijada **entre las aptas** y, si no está, ignora la fijación y rota para no
+  dejar la portada muda — de modo que fijar una Cita sin marcar no falla: publica otra cosa
+  el día que toque, sin avisar a nadie. `listar` y `/lote` marcan también las fijaciones que
+  se quedaron mudas después, por retirarse la Cita o perder su marca.
+- **que la jornada no haya pasado.** Fijar un día vencido no publica nada, porque ninguna
+  construcción vuelve a componer la Cita del Día de ayer. «Pasado» se juzga contra la más
+  temprana de dos lecturas —la del calendario local de quien ejecuta la orden y la UTC del
+  build—, así que solo se rechaza lo que ya pasó en las dos: a la una de la madrugada
+  peninsular las dos discrepan, y rechazar por error el día que la persona tiene por futuro
+  deja la orden inservible justo cuando se usa. Un día vencido de más no publica nada y sale
+  marcado con «·» en `listar`. Si `FECHA_JORNADA` está en el entorno, manda sobre las dos y
+  la orden lo avisa por la salida de error.
+
+Fijar la misma Cita en dos jornadas se admite y se avisa: repetir puede ser intencionado,
+pero casi siempre es un descuido al pegar una lista.
+
+El material compuesto se mira en `/lote`, que es el Kit de las jornadas que vienen: `noindex`,
+fuera del sitemap y de los dos buscadores, y por la misma declaración única de
+`src/lib/superficies.ts`. `/kit` y `/lote` se enlazan entre sí —son la misma herramienta en
+dos momentos— y ninguna superficie del producto enlaza a ninguna de las dos, que es lo que
+significa que no se llega desde la navegación. Se entra escribiendo la dirección.
+
+El marcado del material lo comparten las dos páginas en `MaterialParaPublicar.astro`. Los
+datos ya los comparten por `materialDelKit`; con la vista duplicada, «indistinguible» sería
+cierto solo por dentro y el lote acabaría enseñando otra cosa en cuanto alguien tocara el Kit.
+
+**`corpus/portada.json` lo puede escribir una persona y ningún esquema lo juzga**, así que el
+sitio lo lee por `src/lib/portada.ts`, que descarta lo que no entiende en vez de tumbar el
+build. La orden, en cambio, rechaza y lo dice: delante de ella hay alguien que puede
+corregir. Las dos preguntan a `esJornada`, el único dueño de qué tiene forma de jornada.
+Antes de la Historia 13.1 una clave mal escrita era inerte porque solo se consultaba la de
+hoy; el lote las enumera todas, y una como `manana:` tumbaba `npm run build` entero.
+
+Fijar jornadas de verdad en el repositorio es de Héctor: `corpus/portada.json` se versiona
+con `fijaciones` vacío a propósito y ningún agente fija jornadas en él.

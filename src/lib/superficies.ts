@@ -137,6 +137,16 @@ export const SUPERFICIES: readonly Superficie[] = [
     // que nadie lo hubiera decidido.
     caracter: 'ajena',
   },
+  {
+    nombre: 'el lote de jornadas',
+    pagina: 'lote.astro',
+    reconoce: /^\/lote$/,
+    // Historia 13.1 — el Kit de las jornadas que vienen, y de la misma clase que el Kit:
+    // material de publicación y no contenido. Esta línea es **todo** lo que hace falta para
+    // que quede fuera del sitemap, fuera de los dos buscadores y fuera del barrido. Si
+    // alguien se ve declarándolo en un segundo sitio, la Historia 12.1 no habría servido.
+    caracter: 'ajena',
+  },
 ];
 
 /** Las cuatro consecuencias de declarar una superficie. */
