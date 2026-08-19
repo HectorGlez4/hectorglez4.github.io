@@ -2,14 +2,69 @@
 title: 'Story 11.1 — La Fuente se recupera, y su metadato sale del documento'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
-baseline_revision: 'f92943e0c63eb3d527104ab9c2ac6881b9ad7732'
+status: 'done'
+baseline_revision: '7c756ec7e4bcebce8b920b6c636f20bbdff2375d'
 review_loop_iteration: 1
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-11-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      tools/alta.ts sigue con el error de argumentos posicionales que `posicionales()` se
+      escribió para sustituir, y su CLI no tiene ninguna prueba.
+    evidence: |-
+      `tools/alta.ts:288` conserva `argumentos.find((a) => !a.startsWith('--'))`, el patrón
+      idéntico que este cambio retiró de `extraer.ts`. Ejecutado con `--corpus <dir>
+      <lote.yaml>` toma `<dir>` por fichero de entrada y muere con una traza de ENOENT.
+      Ninguna prueba lanza el CLI de `alta.ts`, así que el bloque `import.meta.url` nunca
+      se ejecuta en la suite. Es la orden por la que `sembrar.ts` pasa cada Cita.
+    location: >-
+      tools/alta.ts:288
+    severity: medium
+  - summary: >-
+      AD-22 dice que ningún paso del build descarga nada, y el build descarga las
+      tipografías de Google. Es anterior a la v3 y es una decisión de arquitectura.
+    evidence: |-
+      `astro.config.mjs:41` y `:50` usan `fontProviders.google()`; `node_modules/unifont`
+      está instalado y `.astro/fonts/` contiene los `.woff2` descargados. Esta historia lo
+      ha dejado como excepción escrita y comprobada en el barrido de AD-22, en vez de como
+      punto ciego, pero la divergencia entre la espina y la realidad sigue ahí y la decide
+      Héctor: o se reconoce en la espina, o las tipografías se versionan.
+    location: >-
+      astro.config.mjs:41
+    severity: medium
+  - summary: >-
+      tools/alta.ts y tools/sembrar.ts siguen aceptando Procedencia tecleada en un lote
+      YAML y escriben directo a corpus/citas/.
+    evidence: |-
+      El razonamiento que justifica la puerta de procedencia de `extraer.ts` —«mientras la
+      orden aceptase cualquier fichero con forma de cabecera, la superficie de tecleo solo
+      se mudaba»— describe igual de bien a `alta.ts`, que no se ha tocado. La Épica 11 lo
+      cierra en la Historia 11.2, cuyo último criterio dice que una Cita escrita a mano en
+      `corpus/citas/` pasa por el cotejo igual que una sembrada. Queda anotado para que la
+      11.2 no lo dé por hecho.
+    severity: medium
+  - summary: >-
+      quitarElementos reconstruye la cadena entera y reinicia la búsqueda en cada retirada;
+      el peor caso es cuadrático.
+    evidence: |-
+      El tope se subió a 5000 y agotarlo ya es un error en vez de un fallo silencioso, así
+      que no versiona cromo a medio limpiar. Pero una página que se acerque al tope será
+      lenta antes de ser rechazada.
+    location: >-
+      tools/lib/documento.ts
+    severity: low
+  - summary: >-
+      sentencias() de extraccion.ts colapsa los saltos de línea, así que una línea de ficha
+      sin puntuación final se pega a la primera frase del cuerpo.
+    evidence: |-
+      Es comportamiento de la Épica 9 que esta historia expone más, no introduce. Con las
+      tres zonas del documento la ficha ya no está en el cuerpo, así que el caso se ha
+      estrechado mucho; queda anotado por si reaparece al sembrar de verdad.
+    location: >-
+      tools/lib/extraccion.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -173,3 +228,43 @@ Sin año exacto, la línea `año:` **se omite** — nunca se escribe vacía. El 
 
 **Manual checks (if no CLI):**
 - Componer a mano un `.txt` con cabecera creíble fuera de `corpus/fuentes/`, pasarlo a `tools/extraer.ts` y confirmar que `corpus/_revision/` queda vacío y la orden sale con código distinto de cero.
+
+### 2026-08-19 — Review pass 2
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 2, medium 5, low 4)
+- defer: 5: (medium 3, low 2)
+- reject: 3: (low 3)
+- addressed_findings:
+  - `[high]` `[patch]` El `año` no lo ataba ninguna comprobación: editar a mano la cabecera de un documento realmente recuperado cambiaba la Procedencia de la candidata. El documento pasa a tener tres zonas —cabecera, declaración, cuerpo— con las líneas de la ficha conservadas literales, y la extracción re-deriva obra y año de la declaración en vez de creerse la cabecera.
+  - `[high]` `[patch]` La colisión por truncado de nombre informaba de éxito y la segunda obra no se versionaba nunca. Ahora se compara la obra del documento existente y se rechaza nombrando ambas.
+  - `[medium]` `[patch]` Un fichero que ocupa el nombre pero no se deja analizar caía por la puerta de «Ya versionado» con éxito. Ahora se rechaza sin sobrescribir.
+  - `[medium]` `[patch]` Una página de Gutenberg sin las marcas START/END versionaba el cromo y el preámbulo legal como obra; es además la URL que se copia del navegador. Se rechaza indicando la vista en texto plano.
+  - `[medium]` `[patch]` La reutilización no sobrevivía a una redirección porque la cabecera guardaba la URL final. Se registra también la pedida y se casa contra cualquiera de las dos.
+  - `[medium]` `[patch]` El techo de tamaño no acotaba la memoria: se leía el cuerpo entero y después se medía. Ahora se lee por trozos y se aborta al pasarse.
+  - `[medium]` `[patch]` La afirmación «ningún paso del build descarga nada» era falsa y el guardián no podía verla. El barrido cubre ahora la raíz, detecta el proveedor de tipografías y lo excepciona **por su nombre y con su motivo**.
+  - `[low]` `[patch]` El año se derivaba de la página sin limpiar; ahora sale de la región ya acotada.
+  - `[low]` `[patch]` `quitarElementos` se rendía en silencio; agotar el tope es ahora un error.
+  - `[low]` `[patch]` El `User-Agent` escribía el dominio a mano; ahora sale de `src/lib/dominio.ts`.
+  - `[low]` `[patch]` La prueba de canonización congelaba la igualdad de salida de los tres slugs; ahora afirma que comparten ayudante.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** La siembra deja de admitir Procedencia tecleada. Una orden nueva, `tools/recuperar.ts`, recupera el documento de la Fuente por su URL, lo versiona en `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt` con tres zonas —cabecera de auditoría, declaración literal de la ficha, y cuerpo en texto plano—, y `tools/extraer.ts` deriva obra y año **de la declaración** y comprueba que el documento lo produjo la recuperación antes de escribir una sola candidata.
+
+**Ficheros.**
+- `tools/recuperar.ts` (nuevo) — la única `fetch` del proyecto; conjunto cerrado antes de pedir, revalidación tras redirección, tiempo máximo, techo de tamaño por trozos, `Content-Type`, juego de caracteres y `User-Agent` derivado del dominio.
+- `tools/lib/documento.ts` (nuevo, puro) — retirada de marcado acotada a la región de contenido, lectores por Fuente, composición y análisis de las tres zonas, nombre del documento.
+- `tools/extraer.ts` — puerta de procedencia de tres condiciones y derivación desde la declaración.
+- `tools/lib/fuentes.ts` — anfitriones por Fuente y `fuenteDeUrl`. `tools/lib/cli.ts` — `posicionales()`. `tools/lib/corpus.ts` — `rutas.fuentes`. `tools/lib/extraccion.ts` — `fuenteUtilizable()` con un solo dueño. `src/lib/slug.ts` — slug de obra sobre el ayudante compartido. `src/content.config.ts` — comentario corregido.
+- Pruebas: `documento.test.ts` y `recuperar-cli.test.ts` nuevas, `ayuda/doble-de-red.mjs` como doble de red, y `extraer-cli`, `revisar-cli`, `andamiaje`, `aislamiento-de-revision`, `extraccion` y `normalizar-y-slug` adaptadas.
+
+**Revisión.** Dos pasadas de cuatro capas. La primera devolvió el trabajo entero por especificación mala: la garantía estaba fijada en las banderas de la orden y no en la cadena de derivación, y dos revisores demostraron ejecutándolo que un `.txt` escrito a mano producía Citas con Procedencia inventada. La segunda dejó 11 parches, todos aplicados, 5 hallazgos diferidos y 3 descartados.
+
+**Recomendación de nueva revisión: true.** Dos de los parches fueron de severidad alta; la fórmula da además 3×5 + 4 = 19.
+
+**Verificación.** `npx astro check` 0 errores sobre 123 ficheros. `npx vitest run` 703/703 en 33 ficheros, frente a 588/31 de la línea base; ninguna prueba perdida (la única ausente es un renombrado que extiende su propia aserción). `npm run build` construye sin descargar datos del Corpus. `grep` de llamadas de red fuera de `tools/recuperar.ts`: ninguna. Y a mano, lo que motivó la vuelta atrás: un documento forjado fuera de `corpus/fuentes/`, uno con nombre que no cuadra con su cabecera, y uno con `url` de fuera del conjunto salen los tres con código 1 y cero candidatas; y un documento realmente recuperado con `año: 1492` metido a mano en la cabecera produce la candidata con el año de su declaración, 49, sin rastro del 1492.
+
+**Riesgos residuales.** Los lectores por Fuente se han probado contra páginas escritas a mano, nunca contra un servidor real —AD-22 lo prohíbe en pruebas—, así que la primera recuperación de verdad contra Wikisource y Gutenberg puede pedir ajustes en los selectores. La cabecera no es una credencial y no pretende serlo: lo que cubre es el accidente y el atajo. Los cinco hallazgos diferidos están en el frontmatter.

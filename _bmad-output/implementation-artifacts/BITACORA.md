@@ -698,3 +698,50 @@ seis pasan axe sin una sola violación.
 5. **`AGENTS.md` está desactualizado.** Su bloque gestionado dice que no hay `package.json`
    y que no hay `uv` en la máquina; ambas cosas dejaron de ser ciertas. Lo regenera
    `bmad-project-context`, así que conviene volver a ejecutarla.
+
+---
+
+# v3 — Épicas 11 a 14
+
+## 11.1 — La Fuente se recupera, y su metadato sale del documento
+
+**Verificado.** `tools/recuperar.ts` es la primera y única dependencia de red del proyecto:
+conjunto cerrado comprobado **antes** de pedir, revalidación del destino tras cada
+redirección, tiempo máximo, techo de tamaño leído por trozos, `Content-Type`, juego de
+caracteres tomado de la respuesta y `User-Agent` derivado de `public/CNAME`. El documento
+se versiona en `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt` con tres zonas:
+cabecera de auditoría, declaración literal de la ficha de la Fuente, y cuerpo en texto
+plano. `tools/extraer.ts` deriva obra y año **de la declaración**, no de la cabecera, y
+antes de escribir nada comprueba que el documento lo produjo la recuperación: ruta dentro
+de `corpus/fuentes/`, nombre que cuadra con la obra derivada, y `url` del conjunto cerrado.
+
+703 pruebas en verde (588 al empezar), 0 errores de tipos, el build no descarga datos del
+Corpus.
+
+**Lo que costó dos vueltas.** La primera implementación pasó las puertas y estaba mal. La
+extracción aceptaba **cualquier** fichero con cabecera y separador, así que un `.txt`
+escrito a mano producía Citas con Procedencia inventada y licencia `dominio público`: la
+superficie de tecleo se había mudado del `.yaml` a la cabecera del `.txt` sin cerrarse.
+Cuatro capas de revisión coincidieron y dos lo demostraron ejecutándolo. La causa no
+estaba en el código sino en la especificación, que fijaba la garantía en las banderas de
+la orden en vez de en la cadena de derivación. Se revirtió entera y se re-derivó.
+
+En la segunda vuelta apareció el mismo agujero un nivel más abajo: la `obra` quedaba atada
+porque el nombre del fichero se deriva de ella, pero el **año** no lo ataba nada, y editarlo
+a mano en un documento realmente recuperado cambiaba la Procedencia. De ahí la tercera zona
+del documento: la declaración conserva literales las líneas con que la Fuente dice obra y
+año, y el año se vuelve a derivar de ahí al extraer.
+
+**Lo que quedó fuera, a propósito.** La cabecera no es una credencial y no lo pretende: lo
+que estas comprobaciones impiden es el accidente y el atajo, no a quien edite ficheros con
+intención. Lo que cubre ese hueco es el cotejo de la 11.2 y la contra-métrica SM-C1 de la
+11.4. Los lectores por Fuente se han probado contra páginas escritas a mano y nunca contra
+un servidor real —AD-22 lo prohíbe en las pruebas—, así que la primera recuperación de
+verdad puede pedir ajustes en los selectores.
+
+**Un hallazgo que no es de esta historia.** AD-22 dice que ningún paso del build descarga
+nada, y el build **sí** descarga: `astro.config.mjs` usa `fontProviders.google()` para las
+dos familias de UX-DR3, y `.astro/fonts/` guarda los `.woff2`. Es anterior a la v3. Queda
+como excepción escrita y comprobada en el barrido de AD-22 —con su nombre y su motivo, en
+vez de como punto ciego—, pero la divergencia entre la espina y la realidad sigue ahí y la
+decide Héctor.
