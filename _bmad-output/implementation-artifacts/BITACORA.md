@@ -1039,3 +1039,12 @@ propósito: curar es decisión editorial y no la toma un agente. Así que el des
 épica no muestra ninguna Página de Colección, y la portada no menciona la sección. La primera
 Colección la crea Héctor con `npm run coleccion -- crear "…" --criterio "…"`, y ese día la
 superficie aparece sola.
+
+**Desplegada y verificada en vivo.** Fusionada a `main` el 19/08 con 10 commits; el flujo
+`Publicar` salió en verde. Comprobado contra `sabiduriadebolsillo.net`: el sitio responde
+200, el sitemap sigue con 53 URLs, `/coleccion/lo-que-sea` da 404 y la portada no menciona
+Colecciones — las dos últimas por diseño, porque no hay ninguna curada.
+
+Y el defecto que la 12.1 cerraba, comprobado **en producción**: `/404` y `/buscar` siguen
+declarando `noindex` y ya **no** aparecen en el índice interno. Antes decían al buscador de
+fuera que no las indexara y salían en el de dentro.
