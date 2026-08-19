@@ -8,6 +8,7 @@
  * almacén, así que no hay ningún sitio del que «sacar» los datos.
  */
 
+import { porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { auditar, type CitaParaAuditar } from '../src/lib/salud.ts';
 import { leerCensoDeCotejo, leerCitas, rutasDelCorpus } from './lib/corpus.ts';
 import { resumenDeCotejo } from './lib/cotejo.ts';
@@ -55,7 +56,8 @@ if (argumentos.includes('--json')) {
     '════════════════',
     '',
     `Citas publicadas:            ${total.total}`,
-    `Con procedencia completa:    ${total.completa}  (${total.porcentajeCompleta} %)`,
+    `Con procedencia completa:    ${total.completa}  ` +
+      `(${porcentajeEnEspañol(total.porcentajeCompleta)} %)`,
     `Con procedencia parcial:     ${total.parcial}`,
     `Sin procedencia documentada: ${total.ausente}`,
     '',
@@ -93,7 +95,7 @@ if (argumentos.includes('--json')) {
   for (const autor of porAutor) {
     lineas.push(
       `${autor.autor.padEnd(ancho)}  ${String(autor.completa).padStart(4)}/${String(autor.total).padEnd(4)}` +
-        `  ${String(autor.porcentajeCompleta).padStart(5)} %` +
+        `  ${porcentajeEnEspañol(autor.porcentajeCompleta).padStart(5)} %` +
         (autor.parcial > 0 ? `   ${autor.parcial} parcial${autor.parcial === 1 ? '' : 'es'}` : ''),
     );
   }

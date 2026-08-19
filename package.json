@@ -14,6 +14,9 @@
     "build": "astro build && pagefind --site dist --force-language es",
     "preview": "astro preview",
     "check": "astro check",
+    "huecos": "tsx tools/huecos.ts",
+    "objetivo": "tsx tools/objetivo.ts",
+    "sesion:registrar": "tsx tools/objetivo.ts --registrar",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "astro": "astro"

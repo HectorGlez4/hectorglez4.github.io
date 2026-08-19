@@ -38,3 +38,19 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - No traigas `@cloudflare/workers-types`: sus globales redefinen `Buffer` y descompilan las pruebas que leen cabeceras PNG. Declara en `medicion/worker.ts` solo la superficie de D1 que uses.
 
 <!-- /bmad:context -->
+
+## Una sesión de sembrado, de principio a fin
+
+El objetivo de cada sesión no se elige: sale del hueco del Corpus, con una política
+determinista (Historia 11.3). La sesión empieza y termina con la misma orden:
+
+```
+npm run objetivo            # qué hueco toca cerrar, y de dónde sale. No registra nada.
+npm run sesion:registrar    # al terminar de sembrar: anota la sesión y el resultado medido.
+```
+
+Registrar **no es opcional**: de `corpus/sesiones-de-sembrado.yml` sale la cadencia de
+sembrado que declara la Historia 11.4, y es la única serie medida que existe. Una sesión
+sin registrar no la cuenta nadie. Si dedicas la sesión a otra cosa, anúlala con su motivo
+—`npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]`—; una anulación
+sigue siendo una sesión corrida y cuenta igual para la cadencia.

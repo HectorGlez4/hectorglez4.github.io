@@ -1,0 +1,32 @@
+# Sesiones de sembrado — Historia 11.3
+#
+# DE AQUÍ SALE LA CADENCIA DE SEMBRADO que declara la Historia 11.4. No es un registro
+# accesorio ni un cuaderno de incidencias: es la única serie medida de sesiones
+# corridas que existe, y sin ella la cadencia que §14.3 del PRD dejó abierta se
+# cerraría con una estimación en vez de con sesiones contadas.
+#
+# Se escribe SOLO POR AÑADIDO: cada sesión es una entrada nueva al final y ninguna
+# anterior se reescribe. Lo que se apunta es la decisión de la sesión —cuándo se
+# corrió, qué objetivo propuso la política y de qué hueco salía— y el RESULTADO MEDIDO
+# del Corpus en ese momento, que la orden deriva de los ficheros y nadie teclea. De la
+# diferencia entre dos entradas consecutivas salen las Citas por sesión; de la serie de
+# `procedenciaCompleta`, si una sesión fue de las que la 11.4 considera fallidas: SM-C1
+# baja mientras el número de Citas sube.
+#
+#   npx tsx tools/objetivo.ts --registrar
+#   npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]
+#
+# CONSULTAR EL OBJETIVO NO REGISTRA NADA. `npx tsx tools/objetivo.ts` a secas propone y
+# calla: consultar no es sembrar, y un registro que se llenara de consultas no mediría
+# cadencia ninguna. La bandera es la que dice «he corrido una sesión con este objetivo».
+#
+# Una entrada sin `motivo` es una sesión en la que se aceptó el objetivo propuesto; con
+# `motivo`, una en la que el editor conservó la última palabra. Una anulación sin motivo
+# se rechaza con código de error: sin motivo no hay registro, solo una desviación sin
+# dueño.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,
+# junto a `portada.json` y `pendientes-de-cotejo.yml`, y ninguna base de
+# `src/content.config.ts` apunta aquí, así que nada de esto llega al sitio construido.
+
+sesiones:
