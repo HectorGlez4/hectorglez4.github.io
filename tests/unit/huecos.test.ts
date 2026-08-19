@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { verHuecos, type AutorParaHuecos, type CitaParaHuecos } from '../../src/lib/huecos.ts';
@@ -113,21 +113,51 @@ describe('Historia 9.3 — LC-6: lo anunciado en portada supera el umbral', () =
   });
 });
 
-describe('Historia 9.3 — informa, no elige', () => {
-  it('la vista no propone ningún Autor', async () => {
+/**
+ * Historia 9.3, matizada por la 11.3.
+ *
+ * El título de antes —«informa, no elige»— dejó de ser verdad del código que esta prueba
+ * vigila: el informe cierra proponiendo el objetivo de la sesión. Lo que **sigue** siendo
+ * verdad, y es lo que había detrás del criterio, es que no nombra a nadie: dice qué hueco
+ * cerrar y caracteriza al Autor que falta por su tradición. Quién entra en el Corpus es
+ * la única decisión que este producto no delega.
+ *
+ * La comprobación tampoco es ya una lista negra de cuatro frases —que cualquier texto
+ * nuevo esquiva por casualidad—, sino la regla entera: los únicos nombres propios que el
+ * informe escribe van entre «», y todos tienen que ser Temas.
+ */
+describe('Historia 9.3 y 11.3 — informa y propone, pero no nombra a nadie', () => {
+  it('el informe cierra con el objetivo de la sesión', async () => {
     const { stdout } = await ejecutar('npx', ['tsx', 'tools/huecos.ts'], { cwd: RAIZ });
-    for (const insinuacion of ['sugerencia', 'te recomendamos', 'prueba con', 'podrías sembrar']) {
-      expect(stdout.toLowerCase()).not.toContain(insinuacion);
+    expect(stdout).toContain('Objetivo de la sesión');
+    expect(stdout).toContain('Sale del hueco:');
+  });
+
+  it('y lo único que entrecomilla son nombres de Tema', async () => {
+    const { stdout } = await ejecutar('npx', ['tsx', 'tools/huecos.ts'], { cwd: RAIZ });
+    const temas = new Set(
+      readdirSync(resolve(RAIZ, 'corpus/temas'))
+        .filter((f) => f.endsWith('.yml'))
+        .map(
+          (f) =>
+            /^nombre:\s*"?([^"\n]+?)"?\s*$/m.exec(
+              readFileSync(resolve(RAIZ, 'corpus/temas', f), 'utf8'),
+            )?.[1],
+        ),
+    );
+    for (const [, termino] of stdout.matchAll(/«([^»]+)»/gu)) {
+      expect(temas, termino).toContain(termino);
     }
   });
 
-  it('el módulo no tiene por dónde proponerlos: no devuelve Autores, solo recuentos', () => {
+  it('el módulo no tiene por dónde nombrarlos: el equilibrio de tradición son cifras', () => {
     const huecos = verHuecos([], [], [{ slug: 'seneca', nombre: 'Séneca', tradicion: 'otra' }]);
-    // Nombres de Autor no salen de aquí. Un proponedor automático acabaría eligiendo
-    // quién entra en el Corpus, que es la decisión que este producto no delega.
-    expect(JSON.stringify(huecos)).not.toContain('Séneca');
 
-    const fuente = readFileSync(resolve(RAIZ, 'src/lib/huecos.ts'), 'utf8');
-    expect(fuente).not.toMatch(/proponer|sugerir|recomendar/i);
+    // Nombres de Autor no salen de aquí, y no por convención: el bloque de tradición no
+    // tiene ni un campo de texto donde pudiera colarse uno.
+    expect(JSON.stringify(huecos)).not.toContain('Séneca');
+    for (const [clave, valor] of Object.entries(huecos.tradicion)) {
+      expect(typeof valor, clave).not.toBe('string');
+    }
   });
 });

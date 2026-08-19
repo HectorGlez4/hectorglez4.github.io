@@ -16,9 +16,10 @@
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
+import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
-import { leerCitas, mover, nombreDeFicheroDeCita, separarFrontmatter, type Rutas } from './corpus.ts';
+import { leerCitas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
 
 export interface CandidataEnRevision {
   slug: string;
@@ -55,6 +56,20 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
     const canonico = normalizar(candidata.texto ?? '');
     const comprobacion = citaAdmisible.safeParse(candidata);
 
+    /*
+     * Historia 11.2 — aprobar tampoco fabrica builds rotos.
+     *
+     * La misma regla que aplica el build, importada de `tools/lib/cotejo.ts`: una
+     * candidata sin Fuente publicada aquí mataba la construcción siguiente. Se suma a los
+     * motivos de admisión porque para quien revisa es lo mismo —algo que le falta para
+     * poder publicarse— y así se lee en la misma lista.
+     */
+    const sinDocumento = motivoParaNoPublicar({
+      slug: candidata.slug,
+      texto: candidata.texto ?? '',
+      ...(candidata.fuente !== undefined ? { fuente: candidata.fuente } : {}),
+    });
+
     const duplicadaPublicada = yaPublicadas.get(canonico);
     const duplicadaEnRevision = vistasEnRevision.get(canonico);
 
@@ -69,10 +84,11 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
-      admisible: comprobacion.success,
-      motivos: comprobacion.success
-        ? []
-        : comprobacion.error.issues.map((i) => i.message),
+      admisible: comprobacion.success && sinDocumento === undefined,
+      motivos: [
+        ...(comprobacion.success ? [] : comprobacion.error.issues.map((i) => i.message)),
+        ...(sinDocumento !== undefined ? [sinDocumento] : []),
+      ],
     });
 
     if (canonico !== '') vistasEnRevision.set(canonico, candidata.slug);

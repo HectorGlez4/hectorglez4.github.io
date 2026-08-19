@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aprobar, loteEnRevision, rechazar } from '../../tools/lib/revision.ts';
-import { nombreDeFicheroDeCita, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { leerCitas, nombreDeFicheroDeCita, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
 
 /** Historia 9.2 — aprobación por lote. */
 
@@ -33,7 +33,14 @@ const CANDIDATA_COMPLETA = {
   slug: 'seneca-no-es-que-tengamos-poco-tiempo',
   procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
   estadoDerechos: 'dominio-público',
-  fuente: { id: 'wikisource-es', nombre: 'Wikisource en español', licencia: 'CC BY-SA 4.0' },
+  // Historia 11.2 — la dirección entra en el campo: el esquema la exige cuando se
+  // declara Fuente, y es lo que permite volver a la edición y comprobarlo a mano.
+  fuente: {
+    id: 'wikisource-es',
+    nombre: 'Wikisource en español',
+    licencia: 'CC BY-SA 4.0',
+    url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+  },
 };
 
 /** Sin Procedencia: la puerta de admisión no la deja pasar. */
@@ -109,6 +116,76 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
     const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug as string, 'seneca-otra']);
     expect(resultado.publicadas).toHaveLength(2);
     expect(await readdir(rutas.revision)).toHaveLength(0);
+  });
+});
+
+describe('Historia 11.2 — la Fuente sobrevive al paso de _revision/ a citas/', () => {
+  /*
+   * El campo `fuente` lo escribe la extracción y es de donde el cotejo del build saca
+   * qué documento le toca a la Cita. Si se perdiera al aprobar, toda Cita sembrada
+   * llegaría a `corpus/citas/` sin documento y rompería la construcción justo después
+   * de haberla publicado. La ruta de aprobación de la 9.2 no lo menciona en ninguna
+   * parte, así que la garantía es esta prueba.
+   */
+  it('la publicada conserva la Fuente entera, con su dirección', async () => {
+    const rutas = await corpusCon([CANDIDATA_COMPLETA]);
+    await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+
+    const publicadas = await leerCitas(rutas.citas);
+    expect(publicadas).toHaveLength(1);
+    expect(publicadas[0].fuente).toEqual(CANDIDATA_COMPLETA.fuente);
+  });
+
+  it('también cuando el slug estaba ocupado y hay que reescribir el fichero', async () => {
+    // La rama que renombra reescribe el fichero en vez de moverlo, y es justo donde un
+    // campo se puede quedar por el camino.
+    const publicada = { ...CANDIDATA_COMPLETA, texto: 'Ninguna cosa hay más nuestra que el tiempo.' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA], [publicada]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+
+    expect(resultado.renombradas).toHaveLength(1);
+    const citas = await leerCitas(rutas.citas);
+    for (const cita of citas) expect(cita.fuente).toEqual(CANDIDATA_COMPLETA.fuente);
+  });
+
+  it('aprobar una candidata sin Fuente no la publica: la deja en revisión', async () => {
+    /*
+     * Publicarla mataba la construcción siguiente. La aprobación aplica ahora la misma
+     * regla que el build —importada de `tools/lib/cotejo.ts`, no copiada—, así que la
+     * candidata se queda donde estaba con lo que le falta escrito.
+     */
+    const sinFuente = { ...CANDIDATA_COMPLETA, fuente: undefined };
+    delete (sinFuente as { fuente?: unknown }).fuente;
+
+    const rutas = await corpusCon([sinFuente]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/recuperar\.ts/);
+    expect(await readdir(rutas.citas)).toHaveLength(0);
+    expect(await readdir(rutas.revision)).toHaveLength(1);
+  });
+
+  it('el listado dice que le falta la Fuente antes de aprobar nada', async () => {
+    const sinFuente = { ...CANDIDATA_COMPLETA };
+    delete (sinFuente as { fuente?: unknown }).fuente;
+
+    const rutas = await corpusCon([sinFuente]);
+    const lote = await loteEnRevision(rutas);
+    expect(lote[0].admisible).toBe(false);
+    expect(lote[0].motivos.join(' ')).toMatch(/no declara de qué Fuente/);
+  });
+
+  it('la puerta de admisión rechaza una Fuente sin dirección', async () => {
+    const sinUrl = {
+      ...CANDIDATA_COMPLETA,
+      fuente: { id: 'wikisource-es', nombre: 'Wikisource en español' },
+    };
+    const rutas = await corpusCon([sinUrl]);
+    const resultado = await aprobar(rutas, [sinUrl.slug]);
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/dirección/);
   });
 });
 
@@ -305,5 +382,25 @@ describe('Historia 9.2 — se continúa donde se dejó', () => {
     const segunda = await aprobar(rutas, [CANDIDATA_COMPLETA.slug as string]);
     expect(segunda.noEncontradas).toEqual([CANDIDATA_COMPLETA.slug]);
     expect(segunda.publicadas).toEqual([]);
+  });
+});
+
+describe('leer el corpus no se traga un fichero mal escrito', () => {
+  it('una Cita cuyo frontmatter no es YAML falla nombrando el fichero', async () => {
+    /*
+     * Sin esto el fallo salía por la traza del analizador de YAML, sin nombrar la ruta:
+     * quien construye leía el error de una librería que no ha instalado a propósito y no
+     * sabía en cuál de las mil Citas mirar. Y devolverla como `null` era peor: la Cita
+     * desaparecía del recuento, del cotejo y de la auditoría sin que nada se quejara.
+     */
+    const rutas = await corpusCon([]);
+    await writeFile(
+      join(rutas.citas, 'seneca--rota.md'),
+      '---\ntexto: "sin cerrar\ntemas: [\n---\n',
+      'utf8',
+    );
+
+    await expect(leerCitas(rutas.citas)).rejects.toThrow(/seneca--rota\.md/);
+    await expect(leerCitas(rutas.citas)).rejects.toThrow(/frontmatter YAML válido/);
   });
 });

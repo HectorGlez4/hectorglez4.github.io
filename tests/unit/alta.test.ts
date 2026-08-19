@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { darDeAltaLote, type EntradaDeLote } from '../../tools/alta.ts';
 import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -35,12 +36,87 @@ async function corpusDePrueba(
   return rutas;
 }
 
+/**
+ * La Fuente de la que salió — Historia 11.2.
+ *
+ * Sin ella el alta manda la Cita a `corpus/_revision/`: publicar en `corpus/citas/` algo
+ * que el build no puede cotejar sería fabricar un build roto. Las únicas exentas son las
+ * anteriores a la v3 que el censo ampara, y hay una prueba para eso más abajo.
+ */
+const FUENTE = {
+  id: 'wikisource-es',
+  nombre: 'Wikisource en español',
+  licencia: 'CC BY-SA 4.0',
+  url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+};
+
 const COMPLETA: EntradaDeLote = {
   texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
   autor: 'Séneca',
   temas: ['El tiempo'],
   procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
+  fuente: FUENTE,
 };
+
+describe('Historia 11.2 — el alta arrastra la Fuente hasta el fichero', () => {
+  /*
+   * Desde el cotejo del build, una Cita publicada sin Fuente y fuera del censo rompe la
+   * construcción. Si el alta perdiera el campo por el camino, publicaría Citas que el
+   * siguiente `npm run build` no deja pasar, y el editor no tendría dónde mirar.
+   */
+  it('la escribe entera en la Cita publicada', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([COMPLETA], rutas);
+
+    const escritas = await readdir(rutas.citas);
+    const contenido = await readFile(join(rutas.citas, escritas[0]), 'utf8');
+    expect(contenido).toContain('fuente:');
+    expect(contenido).toContain('id: "wikisource-es"');
+    expect(contenido).toContain(`url: "${FUENTE.url}"`);
+  });
+
+  it('sin Fuente, la Cita nueva se queda en revisión en vez de romper el build', async () => {
+    /*
+     * Antes se publicaba en `corpus/citas/` y la construcción siguiente moría: la
+     * herramienta informaba de éxito y el fallo aparecía después, en otro sitio y en boca
+     * de otra puerta. Ahora el alta aplica la misma regla que el build, importada.
+     */
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote(
+      [{ ...COMPLETA, texto: 'Una frase nueva que nadie ha sembrado nunca.', fuente: undefined }],
+      rutas,
+    );
+
+    expect(informe.publicadas).toHaveLength(0);
+    expect(informe.enRevision).toHaveLength(1);
+    expect(informe.enRevision[0].motivos.join(' ')).toMatch(/recuperar\.ts/);
+    expect(await readdir(rutas.citas)).toHaveLength(0);
+  });
+
+  it('una de las anteriores a la v3, censada, sí se publica sin Fuente', async () => {
+    // El censo de partida es el conjunto cerrado de `tools/lib/cotejo.ts`; esta Cita es
+    // una de las 38, con su texto tal cual, así que el alta la deja pasar como el build.
+    const [slug] = Object.keys(CENSO_DE_PARTIDA).filter((s) => s.startsWith('seneca-'));
+    expect(slug).toBeDefined();
+
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([{ ...COMPLETA, fuente: undefined }], rutas);
+    expect(informe.publicadas).toHaveLength(1);
+    expect(informe.publicadas[0].slug).toBe('seneca-no-es-que-tengamos-poco-tiempo-es');
+  });
+
+  it('una Fuente a medias manda la Cita a revisión con la regla incumplida', async () => {
+    // No es puerta lateral: el alta aplica la misma admisión que el build.
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote(
+      [{ ...COMPLETA, fuente: { id: 'wikisource-es' } }],
+      rutas,
+    );
+
+    expect(informe.publicadas).toHaveLength(0);
+    expect(informe.enRevision[0].motivos.join(' ')).toMatch(/dirección/);
+  });
+});
 
 describe('Historia 1.5 — alta por lote', () => {
   it('las Citas completas se escriben en corpus/citas/ con su slug generado', async () => {

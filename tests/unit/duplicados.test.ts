@@ -29,6 +29,12 @@ const ORIGINAL: EntradaDeLote = {
   texto: 'La vida, si sabes usarla, es larga.',
   autor: 'Séneca',
   procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
+  // Historia 11.2 — sin Fuente el alta manda la Cita a revisión, y estas pruebas miden
+  // la detección de duplicados sobre Citas que sí llegan a publicarse.
+  fuente: {
+    id: 'wikisource-es',
+    url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+  },
 };
 
 /** El mismo texto con otra puntuación, otros acentos y otras mayúsculas. */

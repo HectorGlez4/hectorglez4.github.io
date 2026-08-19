@@ -2,6 +2,7 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { SITIO } from './src/lib/dominio.ts';
+import cotejoDeCitas from './integraciones/cotejo.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -13,6 +14,15 @@ export default defineConfig({
   trailingSlash: 'never',
   build: { format: 'file' },
   integrations: [
+    /*
+     * Historia 11.2 — ninguna Cita se publica sin aparecer en su documento.
+     *
+     * Va aquí porque es el único sitio por el que pasan todas las construcciones: una
+     * Cita escrita a mano directamente en `corpus/citas/` cruza la misma puerta que una
+     * sembrada. Rompe el build; no avisa.
+     */
+    cotejoDeCitas(),
+
     sitemap({
       /*
        * Fuera del sitemap va todo lo que la página declara `noindex`; anunciarlo sería

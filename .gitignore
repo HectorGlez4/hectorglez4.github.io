@@ -16,3 +16,7 @@ playwright-report/
 
 # macOS
 .DS_Store
+
+# Estado local del bucle autónomo (Ralph). Es de la máquina, no del proyecto:
+# el estado durable del sprint vive en sprint-status.yaml y LOOP-PROTOCOL-V3.md.
+.claude/*.local.md

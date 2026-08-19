@@ -3,11 +3,15 @@
  *
  *   npx tsx tools/huecos.ts [--corpus corpus] [--json]
  *
- * Se mira antes de elegir a quién se dedica una sesión de sembrado. No propone Autores:
- * dice qué está vacío y la elección es de quien lee.
+ * Se mira antes de elegir a quién se dedica una sesión de sembrado. No nombra Autores:
+ * dice qué está vacío, y desde la Historia 11.3 cierra el informe con el objetivo que la
+ * política deriva de esos mismos huecos, para que quien ya mira los huecos no tenga que
+ * ejecutar dos órdenes. Ese objetivo dice qué hueco cerrar; a quién admitir, nunca.
  */
 
 import { verHuecos, type AutorParaHuecos, type CitaParaHuecos } from '../src/lib/huecos.ts';
+import { porcentajeEnEspañol } from '../src/lib/formato.ts';
+import { lineasDeObjetivo, objetivoDeSesion } from '../src/lib/objetivo.ts';
 import { temasPublicados, type Cita, type Tema } from '../src/lib/publicado.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 import { leerAutores, leerCitas, leerTemas, rutasDelCorpus } from './lib/corpus.ts';
@@ -31,9 +35,10 @@ const anunciados = temasPublicados(
   citas as unknown as Cita[],
 ).map((t) => t.slug);
 const informe = verHuecos(citas, temas, autores, anunciados);
+const objetivo = objetivoDeSesion(informe);
 
 if (argumentos.includes('--json')) {
-  process.stdout.write(`${JSON.stringify(informe, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ ...informe, objetivo }, null, 2)}\n`);
 } else {
   const { temas: huecos, tradicion } = informe;
   const lineas = [
@@ -60,7 +65,8 @@ if (argumentos.includes('--json')) {
     'Equilibrio de tradición',
     '───────────────────────',
     `Autores en el Corpus:        ${tradicion.total}`,
-    `De tradición latinoamericana: ${tradicion.latinoamericana}  (${tradicion.porcentaje} %)`,
+    `De tradición latinoamericana: ${tradicion.latinoamericana}  ` +
+      `(${porcentajeEnEspañol(tradicion.porcentaje)} %)`,
     `De tradición peninsular:      ${tradicion.peninsular}`,
     `De otra tradición:            ${tradicion.otra}`,
     `Sin declarar:                 ${tradicion.sinDeclarar}`,
@@ -78,6 +84,12 @@ if (argumentos.includes('--json')) {
     );
   }
 
-  // Ni una sugerencia de a quién sembrar. La vista informa; elegir es de quien lee.
+  /*
+   * El objetivo va al final, después de los huecos de los que sale: leerlo antes que su
+   * fundamento sería leer una orden en lugar de una derivación. Y sigue sin nombrar a
+   * nadie — dice qué hueco cerrar, y al Autor que falta lo caracteriza por su tradición.
+   */
+  lineas.push('', ...lineasDeObjetivo(objetivo));
+
   process.stdout.write(`${lineas.join('\n')}\n`);
 }

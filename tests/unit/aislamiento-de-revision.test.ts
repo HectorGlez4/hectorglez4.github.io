@@ -42,7 +42,9 @@ const CITA_EN_REVISION = citaValida({
 });
 
 async function construir(corpus: Record<string, string>) {
-  const resultado = await construirConCorpus(corpus, { paginas: { 'sonda.astro': SONDA } });
+  const resultado = await construirConCorpus(corpus, {
+    paginas: { 'sonda.astro': SONDA },
+  });
   aLimpiar.push(resultado.proyecto);
   return resultado;
 }
@@ -112,9 +114,16 @@ describe('Historia 1.3 — la ausencia es estructural, no condicional', () => {
     expect(esquema).not.toMatch(/\b(publicada|publicado|borrador|visible|draft)\b\s*:/);
   });
 
-  it('ninguna colección tiene por base corpus/_revision/', () => {
+  it('ninguna colección tiene por base corpus/_revision/ ni corpus/fuentes/', () => {
     const esquema = readFileSync(resolve(RAIZ, 'src/content.config.ts'), 'utf8');
     expect(esquema).not.toMatch(/base:\s*['"]\.\/corpus\/_revision/);
+    /*
+     * Historia 11.1 — `corpus/fuentes/` son los documentos de Fuente completos: texto de
+     * terceros dentro de `corpus/`. Si una colección lo tomara por base, obras enteras se
+     * publicarían como si fueran contenido del sitio, con la licencia de su Fuente y sin
+     * que nadie lo hubiera decidido.
+     */
+    expect(esquema).not.toMatch(/base:\s*['"]\.\/corpus\/fuentes/);
     // Y las tres bases declaradas son las tres carpetas publicables.
     const bases = [...esquema.matchAll(/base:\s*'\.\/corpus\/([a-z]+)'/g)].map((m) => m[1]);
     expect(bases.sort()).toEqual(['autores', 'citas', 'temas']);

@@ -698,3 +698,138 @@ seis pasan axe sin una sola violación.
 5. **`AGENTS.md` está desactualizado.** Su bloque gestionado dice que no hay `package.json`
    y que no hay `uv` en la máquina; ambas cosas dejaron de ser ciertas. Lo regenera
    `bmad-project-context`, así que conviene volver a ejecutarla.
+
+---
+
+# v3 — Épicas 11 a 14
+
+## 11.1 — La Fuente se recupera, y su metadato sale del documento
+
+**Verificado.** `tools/recuperar.ts` es la primera y única dependencia de red del proyecto:
+conjunto cerrado comprobado **antes** de pedir, revalidación del destino tras cada
+redirección, tiempo máximo, techo de tamaño leído por trozos, `Content-Type`, juego de
+caracteres tomado de la respuesta y `User-Agent` derivado de `public/CNAME`. El documento
+se versiona en `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt` con tres zonas:
+cabecera de auditoría, declaración literal de la ficha de la Fuente, y cuerpo en texto
+plano. `tools/extraer.ts` deriva obra y año **de la declaración**, no de la cabecera, y
+antes de escribir nada comprueba que el documento lo produjo la recuperación: ruta dentro
+de `corpus/fuentes/`, nombre que cuadra con la obra derivada, y `url` del conjunto cerrado.
+
+703 pruebas en verde (588 al empezar), 0 errores de tipos, el build no descarga datos del
+Corpus.
+
+**Lo que costó dos vueltas.** La primera implementación pasó las puertas y estaba mal. La
+extracción aceptaba **cualquier** fichero con cabecera y separador, así que un `.txt`
+escrito a mano producía Citas con Procedencia inventada y licencia `dominio público`: la
+superficie de tecleo se había mudado del `.yaml` a la cabecera del `.txt` sin cerrarse.
+Cuatro capas de revisión coincidieron y dos lo demostraron ejecutándolo. La causa no
+estaba en el código sino en la especificación, que fijaba la garantía en las banderas de
+la orden en vez de en la cadena de derivación. Se revirtió entera y se re-derivó.
+
+En la segunda vuelta apareció el mismo agujero un nivel más abajo: la `obra` quedaba atada
+porque el nombre del fichero se deriva de ella, pero el **año** no lo ataba nada, y editarlo
+a mano en un documento realmente recuperado cambiaba la Procedencia. De ahí la tercera zona
+del documento: la declaración conserva literales las líneas con que la Fuente dice obra y
+año, y el año se vuelve a derivar de ahí al extraer.
+
+**Lo que quedó fuera, a propósito.** La cabecera no es una credencial y no lo pretende: lo
+que estas comprobaciones impiden es el accidente y el atajo, no a quien edite ficheros con
+intención. Lo que cubre ese hueco es el cotejo de la 11.2 y la contra-métrica SM-C1 de la
+11.4. Los lectores por Fuente se han probado contra páginas escritas a mano y nunca contra
+un servidor real —AD-22 lo prohíbe en las pruebas—, así que la primera recuperación de
+verdad puede pedir ajustes en los selectores.
+
+**Un hallazgo que no es de esta historia.** AD-22 dice que ningún paso del build descarga
+nada, y el build **sí** descarga: `astro.config.mjs` usa `fontProviders.google()` para las
+dos familias de UX-DR3, y `.astro/fonts/` guarda los `.woff2`. Es anterior a la v3. Queda
+como excepción escrita y comprobada en el barrido de AD-22 —con su nombre y su motivo, en
+vez de como punto ciego—, pero la divergencia entre la espina y la realidad sigue ahí y la
+decide Héctor.
+
+## 11.2 — Ninguna Cita se publica sin aparecer en su documento
+
+**Verificado.** El build coteja el texto de cada Cita contra el cuerpo del documento de su
+Fuente y rompe la construcción cuando no aparece literalmente, nombrando la ruta del
+fichero y la regla. La comparación colapsa espacios —y los caracteres invisibles que las
+ediciones web reparten— y nada más: un acento o una coma de diferencia hacen fallar, y no
+pasa por `normalizar.ts`. Vive fuera de `src/lib/`, que por AD-5 sigue sin leer disco: lo
+puro en `tools/lib/cotejo.ts`, la lectura en `integraciones/cotejo.ts`, enganchada en
+`astro.config.mjs`, que es el único sitio por el que pasan todas las construcciones.
+
+794 pruebas en verde (703 al empezar), 0 errores de tipos, 392 pruebas e2e.
+
+**La decisión de producto: deuda visible que mengua.** Las 38 Citas anteriores a la v3 no
+referencian ningún documento, y quien se lo dará es la 11.4, que es trabajo de Héctor. Un
+cotejo obligatorio hoy habría tumbado la reconstrucción diaria de un sitio que ya está en
+vivo; uno opcional habría dejado justo el agujero que la historia existe para cerrar,
+porque bastaría no poner referencia. Se eligió lo tercero: la referencia es obligatoria y
+las 38 entran en `corpus/pendientes-de-cotejo.yml`, un censo cerrado por **identidad y
+huella del texto**, contado en cada build y en la auditoría, que solo mengua.
+
+**Los dos agujeros que la revisión encontró y las pruebas no.** El primero: una Cita
+colocada en un subdirectorio de `corpus/citas/` esquivaba el cotejo entero y se publicaba
+—la colección de Astro enumera recursivamente y el lector del cotejo hacía un `readdir`
+plano—. Dos revisores lo reprodujeron construyendo de verdad. Es la misma forma del fallo
+de la 11.1: el guardián no cubría todo lo que el build publica, así que conviene mirarlo
+en cada historia que añada una puerta.
+
+El segundo era mío: la especificación pedía comprobar que el **recuento** del censo no
+superase el tope, y eso no cierra nada. En cuanto la 11.4 libere una entrada queda un
+hueco donde meter una Cita nueva sin que falle nada — el gesto «añádela al censo para
+desbloquear el build» que el censo existía para prohibir. Se enmendó a identidad, y el
+código fue más lejos de lo que pedí: ata cada Cita censada a la huella de su texto, con lo
+que reutilizar un slug tampoco hereda la exención.
+
+**Un cambio de método que conviene conservar.** Las pruebas de build ya no eximen del
+cotejo a sus corpus de prueba: el andamio les siembra el documento que sus Citas dicen
+tener, así que una decena de suites ejercitan ahora el cotejo de verdad en vez de
+esquivarlo. Eximir por omisión invertía la premisa de la historia para toda prueba futura.
+
+**Lo que quedó fuera.** Ninguna Cita del Corpus se coteja hoy de verdad —las 38 están
+censadas y `corpus/fuentes/` está vacío—, así que el camino completo solo se ejercita con
+documentos compuestos en las pruebas. La primera siembra real dirá si la retirada de
+marcado de la 11.1 deja el cuerpo lo bastante fiel; si no, el ajuste toca en
+`documento.ts` y no aquí. `astro preview` no coteja, a propósito: sirve un `dist/` que ya
+cruzó la puerta al construirse.
+
+## 11.3 — El objetivo de cada sesión sale del hueco, no del criterio
+
+**Verificado.** `src/lib/objetivo.ts` es una política pura y determinista: consume lo que
+`verHuecos` ya calculó y devuelve el objetivo de la sesión declarando de qué hueco sale.
+Prioriza el suelo de tradición sobre los Temas cortos, porque un Tema corto se cierra
+sembrando a cualquiera que ya esté y el hueco de tradición solo se cierra admitiendo
+Autores nuevos — si ganase el Tema fácil, el hueco caro no se cerraría nunca, que es el
+sesgo que la historia nombra. Dos llamadas sobre el mismo Corpus dan la misma frase.
+
+882 pruebas en verde (794 al empezar), 0 errores de tipos.
+
+**El conflicto entre artefactos, resuelto por escrito.** La cabecera de `src/lib/huecos.ts`
+declaraba desde la v1 que la vista no propone Autores, porque «quién entra en el Corpus es
+la única decisión que este producto no delega». La historia pide una política que diga a
+qué Tema y a qué Autor dedicar la sesión. Se resolvió por el lado conservador: la política
+dice **qué hueco** cerrar y caracteriza al Autor por **tradición**, nunca por nombre. Un
+agente desatendido obtiene objetivo determinista; admitir a una persona concreta sigue
+siendo de Héctor.
+
+**Una cuenta que la versión ingenua habría fallado.** Cuántos Autores latinoamericanos
+faltan no es «el 40 % de 12 son 4,8, faltan 3»: cada alta sube numerador **y** denominador,
+así que hay que resolver (2+k)/(12+k) ≥ 0,40, que da 5. Prometer 3 habría dejado el suelo
+sin alcanzar.
+
+**Dos defectos de contrato que la revisión encontró.** El primero: la matriz de E/S
+estrechaba el objetivo a un solo eje, así que en la rama de tradición —la que el Corpus
+toma hoy y tomará durante toda la 11.4— no se decía dónde van las Citas, con seis Temas
+por debajo del umbral. Ahora lleva los dos ejes: «Admitir Autores de tradición
+latinoamericana… Sus Citas van al Tema «La virtud», al que menos le falta».
+
+El segundo: el registro no tenía dónde poner un resultado, cuando el criterio de la 11.4
+dice literalmente «registro su **resultado**». Cada entrada lleva ahora el resultado
+medido —Citas publicadas, SM-C1 y porcentaje de tradición—, derivado del Corpus por la
+propia orden y no tecleable. Con eso la 11.4 saca «cuántas Citas por sesión» de la
+diferencia entre entradas consecutivas y puede detectar la sesión fallida que su criterio
+define: SM-C1 que baja mientras el número de Citas sube.
+
+**Lo que quedó fuera.** El registro es autodeclarado: `--registrar` lo ejecuta quien
+quiera. El resultado medido lo mitiga mucho —dos entradas con el mismo recuento delatan
+una sesión que no sembró— pero acoplarlo del todo sería que el alta registrase la sesión,
+y eso es trabajo de la 11.4.

@@ -3,6 +3,9 @@ import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { promisify } from 'node:util';
+import { separarFrontmatter } from '../../../tools/lib/corpus.ts';
+import { FICHERO_DEL_CENSO } from '../../../tools/lib/cotejo.ts';
+import { componerDocumento, nombreDeDocumento } from '../../../tools/lib/documento.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -66,10 +69,15 @@ export async function construirConCorpus(
   }
   await cp(join(RAIZ, 'src'), join(proyecto, 'src'), { recursive: true });
   await cp(join(RAIZ, 'public'), join(proyecto, 'public'), { recursive: true });
+  // `astro.config.mjs` engancha el cotejo de la Historia 11.2, que vive en
+  // `integraciones/` y se apoya en `tools/lib/`. Sin las dos, el proyecto temporal ni
+  // siquiera carga la configuración.
+  await cp(join(RAIZ, 'integraciones'), join(proyecto, 'integraciones'), { recursive: true });
+  await cp(join(RAIZ, 'tools'), join(proyecto, 'tools'), { recursive: true });
 
   // Las cuatro carpetas siempre existen: una colección cuya base no existe emite un
   // aviso que enturbiaría la lectura del fallo que sí importa.
-  for (const dir of ['citas', 'autores', 'temas', '_revision']) {
+  for (const dir of ['citas', 'autores', 'temas', '_revision', 'fuentes']) {
     await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
   }
 
@@ -85,6 +93,10 @@ export async function construirConCorpus(
     const destino = join(proyecto, 'corpus', ruta);
     await mkdir(dirname(destino), { recursive: true });
     await writeFile(destino, contenido, 'utf8');
+  }
+
+  for (const [ruta, contenido] of Object.entries(documentosDeFuenteDe(corpus))) {
+    await writeFile(join(proyecto, 'corpus', ruta), contenido, 'utf8');
   }
 
   for (const [ruta, contenido] of Object.entries(opciones.paginas ?? {})) {
@@ -130,6 +142,96 @@ export async function construirConCorpus(
   return { codigo, salida, proyecto };
 }
 
+interface DocumentoSembrado {
+  idFuente: string;
+  obra: string;
+  url: string;
+  año?: number;
+  textos: string[];
+}
+
+/**
+ * Los documentos de `corpus/fuentes/` que las Citas de un fixture dicen tener — 11.2.
+ *
+ * El cotejo del build exige que el texto de cada Cita publicada aparezca literalmente en
+ * el cuerpo del documento de su Fuente. Un fixture podría esquivarlo censándose, pero eso
+ * dejaría a estas pruebas construyendo un mundo donde el cotejo no existe: cualquier
+ * prueba futura heredaría la exención sin saberlo. Así que en vez de eximirlas se les
+ * **escribe el documento que dicen tener**, con las tres zonas que compone
+ * `componerDocumento`, y cruzan la misma puerta que el corpus real.
+ *
+ * Un documento por par (Fuente, obra), como en AD-23: varias Citas de la misma obra
+ * comparten cuerpo. El nombre sale de `nombreDeDocumento`, el mismo ayudante que usan la
+ * recuperación y el cotejo, para que no puedan divergir.
+ *
+ * No se siembra nada cuando el fixture escribe su propio `pendientes-de-cotejo.yml`: esa
+ * es la señal de que la prueba mide el cotejo y decide ella qué documentos existen y
+ * cuáles faltan, como hace `tests/unit/cotejo-build.test.ts`. Tampoco se pisa un
+ * documento que el propio fixture ya trae.
+ */
+function documentosDeFuenteDe(corpus: CorpusDePrueba): Record<string, string> {
+  if (FICHERO_DEL_CENSO in corpus) return {};
+
+  const porDocumento = new Map<string, DocumentoSembrado>();
+
+  for (const [ruta, contenido] of Object.entries(corpus)) {
+    if (!ruta.startsWith('citas/') || !ruta.endsWith('.md')) continue;
+
+    let datos: Record<string, unknown> | null = null;
+    // Un frontmatter mal escrito es lo que mide alguna prueba de admisión: aquí no es un
+    // fallo del andamio, simplemente no hay Cita de la que derivar documento.
+    try {
+      datos = separarFrontmatter(contenido);
+    } catch {
+      continue;
+    }
+    if (datos === null) continue;
+
+    const fuente = datos.fuente as { id?: unknown; url?: unknown } | null | undefined;
+    const procedencia = datos.procedencia as { obra?: unknown; año?: unknown } | null | undefined;
+    if (!fuente || typeof fuente.id !== 'string' || typeof fuente.url !== 'string') continue;
+    if (!procedencia || typeof procedencia.obra !== 'string') continue;
+
+    const nombre = nombreDeDocumento(fuente.id, procedencia.obra);
+    if (nombre === undefined) continue;
+
+    const documento = porDocumento.get(nombre) ?? {
+      idFuente: fuente.id,
+      obra: procedencia.obra,
+      url: fuente.url,
+      ...(typeof procedencia.año === 'number' ? { año: procedencia.año } : {}),
+      textos: [],
+    };
+    if (typeof datos.texto === 'string') documento.textos.push(datos.texto);
+    porDocumento.set(nombre, documento);
+  }
+
+  const documentos: Record<string, string> = {};
+  for (const [nombre, documento] of porDocumento) {
+    const ruta = `fuentes/${nombre}.txt`;
+    if (ruta in corpus) continue;
+
+    documentos[ruta] = componerDocumento(
+      {
+        fuente: documento.idFuente,
+        obra: documento.obra,
+        ...(documento.año !== undefined ? { año: documento.año } : {}),
+        url: documento.url,
+        recuperado: '2026-08-19',
+      },
+      [
+        documento.obra,
+        ...(documento.año !== undefined ? [`Año de publicación: ${documento.año}`] : []),
+      ].join('\n'),
+      // El cuerpo tiene que contener el texto de cada Cita que apunte a este documento,
+      // que es exactamente lo que el cotejo va a buscar. Los párrafos se separan como en
+      // una edición de verdad: el cotejo colapsa espacios y saltos, y nada más.
+      documento.textos.join('\n\n'),
+    );
+  }
+  return documentos;
+}
+
 export async function limpiar(proyecto: string): Promise<void> {
   await rm(proyecto, { recursive: true, force: true });
 }
@@ -153,6 +255,19 @@ export function citaValida(campos: Partial<Record<string, unknown>> = {}): strin
     slug: 'seneca-no-es-que-tengamos-poco-tiempo',
     procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
     estadoDerechos: 'dominio-público',
+    /*
+     * La Fuente de la que salió, coherente con la obra de su Procedencia — Historia 11.2.
+     *
+     * `wikisource-es` es una de las Fuentes admitidas de `tools/lib/fuentes.ts` que
+     * permiten reutilización, y la dirección es de uno de sus anfitriones. Con el
+     * identificador y la obra se compone el nombre del documento que `construirConCorpus`
+     * siembra en `corpus/fuentes/`, así que estas Citas se cotejan de verdad en vez de
+     * esquivar la puerta.
+     */
+    fuente: {
+      id: 'wikisource-es',
+      url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+    },
   };
   const fusion = { ...base, ...campos };
   for (const [clave, valor] of Object.entries(fusion)) {

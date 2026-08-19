@@ -6,10 +6,17 @@
  * curación no vigilada: se siembra a los Autores que uno tiene más a mano, que son los
  * que ya tienen Citas, y los Temas que faltan siguen faltando indefinidamente.
  *
- * Lo que esta vista **no** hace, y es criterio explícito: no propone Autores. Informa la
- * decisión y no la toma. Un proponedor automático parece más útil y es peor — acabaría
- * eligiendo por su cuenta a quién entra en el Corpus, que es la única decisión que este
- * producto no delega.
+ * Lo que esta vista **no** hace, y es criterio explícito: no nombra Autores. Informa la
+ * decisión y no la toma.
+ *
+ * La Historia 11.3 matiza ese criterio sin soltar lo que protege. `objetivo.ts` deriva de
+ * esta vista el objetivo de cada sesión de sembrado, porque un agente que siembra sin
+ * supervisión no tiene criterio y sin objetivo deriva hacia lo que es más fácil de
+ * encontrar — el mismo sesgo que esta vista existe para corregir. Lo que ese objetivo
+ * dice es **qué hueco cerrar**, y al Autor que falta lo caracteriza por su tradición,
+ * jamás por su nombre: ni la vista ni la política eligen a quién entra en el Corpus, que
+ * sigue siendo la única decisión que este producto no delega. Una lista de nombres la
+ * delegaría por la puerta de atrás.
  *
  * AD-5 — Derivación pura: recibe lo leído, no lee disco.
  */

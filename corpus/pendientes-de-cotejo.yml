@@ -1,0 +1,59 @@
+# Pendientes de cotejo — Historia 11.2
+#
+# Las Citas de esta lista se publican sin que el build compruebe que su texto aparece en
+# el documento de su Fuente, porque no tienen documento: son las 38 anteriores a la v3,
+# dadas de alta cuando la Procedencia se tecleaba y todavía no existía `tools/recuperar.ts`.
+#
+# Es un CENSO CERRADO, y esa es toda su razón de ser:
+#
+#   · No admite altas. Una Cita nueva sin documento **rompe la construcción**; añadirla
+#     aquí para desbloquear el build es exactamente el agujero que la Historia 11.2 cierra.
+#   · Solo mengua. Un slug que ya no corresponde a ninguna Cita publicada rompe la
+#     construcción, y una Cita que ya declara su Fuente y sigue aquí, también.
+#   · Se cuenta a la vista: el build informa de cuántas quedan, `tools/auditoria.ts` lo
+#     reporta junto a la salud del Corpus, y `tests/unit/andamiaje.test.ts` vigila que el
+#     recuento no supere el tope registrado en `tools/lib/cotejo.ts`.
+#
+# Quien las saca de aquí es la Historia 11.4: recuperar el documento de cada obra, cotejar
+# el texto contra su edición y borrar la línea. El día que esta lista quede vacía, el
+# título de la historia será cierto sin excepciones.
+
+citas:
+  - antonio-machado-caminante-no-hay-camino-se-hace-camino
+  - antonio-machado-despacito-y-buena-letra-el-hacer-las
+  - antonio-machado-en-mi-soledad-he-visto-cosas-muy
+  - antonio-machado-es-de-necios-confundir-el-ruido-con
+  - antonio-machado-hoy-es-siempre-todavia
+  - antonio-machado-todo-necio-confunde-valor-y-precio
+  - baltasar-gracian-el-sabio-hace-luego-lo-que-el
+  - baltasar-gracian-lo-bueno-si-breve-dos-veces-bueno
+  - baltasar-gracian-saber-y-saberlo-mostrar-es-saber-dos
+  - concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles
+  - concepcion-arenal-odia-el-delito-y-compadece-al-delincuente
+  - francisco-de-quevedo-poderoso-caballero-es-don-dinero
+  - jose-marti-con-los-pobres-de-la-tierra-quiero
+  - jose-marti-cultivo-una-rosa-blanca-en-junio-como
+  - jose-marti-hacer-es-la-mejor-manera-de-decir
+  - jose-marti-yo-soy-un-hombre-sincero-de-donde
+  - miguel-de-cervantes-bien-predica-quien-bien-vive
+  - miguel-de-cervantes-cada-uno-es-hijo-de-sus-obras
+  - miguel-de-cervantes-donde-una-puerta-se-cierra-otra-se
+  - miguel-de-cervantes-el-que-lee-mucho-y-anda-mucho
+  - miguel-de-cervantes-la-libertad-sancho-es-uno-de-los
+  - miguel-de-cervantes-la-pluma-es-la-lengua-del-alma
+  - miguel-de-unamuno-la-fe-que-no-duda-es-fe
+  - miguel-de-unamuno-solo-el-que-sabe-es-libre-y
+  - rosalia-de-castro-yo-no-se-lo-que-busco-eternamente
+  - santiago-ramon-y-cajal-las-ideas-no-duran-mucho-hay-que
+  - santiago-ramon-y-cajal-todo-hombre-puede-ser-si-se-lo
+  - seneca-la-vida-si-sabes-usarla-es-larga
+  - seneca-mientras-esperamos-vivir-la-vida-pasa
+  - seneca-ninguna-cosa-se-parece-tanto-a-la
+  - seneca-no-es-que-tengamos-poco-tiempo-es
+  - seneca-no-hay-viento-favorable-para-el-que
+  - sor-juana-ines-de-la-cruz-en-perseguirme-mundo-que-interesas
+  - sor-juana-ines-de-la-cruz-hombres-necios-que-acusais-a-la-mujer
+  - sor-juana-ines-de-la-cruz-yo-no-estudio-para-saber-mas-sino
+  - teresa-de-jesus-la-paciencia-todo-lo-alcanza
+  - teresa-de-jesus-nada-te-turbe-nada-te-espante-todo
+  - teresa-de-jesus-quien-a-dios-tiene-nada-le-falta

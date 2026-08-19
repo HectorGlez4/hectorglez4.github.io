@@ -21,8 +21,14 @@ export interface DocumentoDeFuente {
   obra: string;
   /** Año declarado por la Fuente. Puede venir aproximado; ver `añoExacto`. */
   año?: string | number;
-  /** Dirección concreta del documento, para poder volver a él. */
-  url?: string;
+  /**
+   * Dirección concreta del documento, para poder volver a él.
+   *
+   * Obligatoria desde la Historia 11.2: `fuenteDeCita` la exige en el esquema, así que
+   * una candidata sin ella nace inaprobable y el desacuerdo solo se veía al revisar,
+   * lejos de donde se causó. Todo documento versionado la trae en su cabecera.
+   */
+  url: string;
   texto: string;
 }
 
@@ -31,7 +37,7 @@ export interface Candidata {
   autor: string;
   procedencia: { obra: string; año?: number };
   /** De dónde salió el texto y bajo qué licencia — el criterio lo exige por candidata. */
-  fuente: { id: string; nombre: string; licencia: string; url?: string };
+  fuente: { id: string; nombre: string; licencia: string; url: string };
 }
 
 export type Descarte =
@@ -143,16 +149,22 @@ function sentencias(texto: string): string[] {
  * reutilizar. Devolver «las que se puedan» sería peor que no devolver nada: dejaría en
  * revisión candidatas que nadie puede publicar y que alguien acabaría aprobando.
  */
-export function extraerCandidatas(
-  documento: DocumentoDeFuente,
-  autor: string,
-): ResultadoDeExtraccion {
-  const fuente: Fuente | undefined = fuenteDe(documento.fuente);
+/**
+ * Si de esa Fuente se puede extraer, y si no, por qué no.
+ *
+ * Vive aparte porque la puerta se cruza dos veces: aquí, y antes de derivar nada en
+ * `tools/extraer.ts`. Con el mensaje escrito en un solo sitio, una Fuente cuya licencia
+ * no permite reutilizar recibe la misma explicación se detenga donde se detenga.
+ */
+export function fuenteUtilizable(
+  id: string,
+): { ok: true; fuente: Fuente } | { ok: false; motivo: string } {
+  const fuente: Fuente | undefined = fuenteDe(id);
   if (fuente === undefined) {
     return {
       ok: false,
       motivo:
-        `«${documento.fuente}» no es una Fuente admitida. Las admitidas están en ` +
+        `«${id}» no es una Fuente admitida. Las admitidas están en ` +
         'tools/lib/fuentes.ts, cada una con su licencia.',
     };
   }
@@ -165,6 +177,17 @@ export function extraerCandidatas(
         `(licencia declarada: ${fuente.licencia}). No se ha escrito ninguna candidata.`,
     };
   }
+
+  return { ok: true, fuente };
+}
+
+export function extraerCandidatas(
+  documento: DocumentoDeFuente,
+  autor: string,
+): ResultadoDeExtraccion {
+  const utilizable = fuenteUtilizable(documento.fuente);
+  if (!utilizable.ok) return utilizable;
+  const { fuente } = utilizable;
 
   if (documento.obra.trim() === '') {
     return {
@@ -208,7 +231,7 @@ export function extraerCandidatas(
         id: fuente.id,
         nombre: fuente.nombre,
         licencia: fuente.licencia,
-        ...(documento.url !== undefined ? { url: documento.url } : {}),
+        url: documento.url,
       },
     });
   }
