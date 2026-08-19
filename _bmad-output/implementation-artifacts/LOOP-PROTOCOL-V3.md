@@ -131,6 +131,15 @@ Al terminar las once historias del bucle, emitir la promesa de finalización y p
   quedan en `in-progress`, no en `done`: se despliega lo construido, no se miente sobre el
   estado.
 - **Tope de 60 iteraciones.**
+- **El bucle no vuelve a parar a preguntar.** Ante una bifurcación que no sea puramente
+  técnica, toma la opción **más conservadora y reversible**, la deja escrita en
+  `BITACORA.md` y en el spec de la historia, y la resume al cerrar la épica. Decidido el
+  19/08 tras la consulta de la 11.2.
+- **Las 38 Citas actuales son deuda visible que mengua.** El documento de Fuente es
+  obligatorio y ninguna Cita **nueva** se publica sin él, pero las 38 que ya estaban
+  entran en una lista explícita y versionada de pendientes de verificar, que el build
+  cuenta y que la 11.4 vacía. Ni se rompe la reconstrucción diaria, ni el cotejo se
+  degrada a opcional.
 - **Los minutos de CI no son el motivo.** El repositorio es público y los minutos de
   Actions son gratuitos e ilimitados. Se prueba en local porque una puerta de 45 s da mejor
   realimentación que un viaje de 2 min al CI, y porque mantiene `main` en verde — no por
