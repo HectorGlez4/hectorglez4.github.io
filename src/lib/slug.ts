@@ -67,6 +67,24 @@ export function slugDeObra(nombre: string): string {
 }
 
 /**
+ * Slug de una Colección a partir de su nombre — Historia 12.4.
+ *
+ * El nombre es largo a propósito. `tools/lib/corpus.ts` ya exporta un `slugDeColeccion`
+ * que hace algo **distinto**: deriva el identificador de una Colección de la **ruta de su
+ * fichero**, porque es así como lo deriva el cargador de Astro. Dos funciones con el mismo
+ * nombre, una que parte del nombre y otra de la ruta, serían un cambio de una por la otra
+ * esperando a que alguien importe la que no era; y el que se equivocara compilaría, porque
+ * las dos toman una cadena como primer argumento.
+ *
+ * Aquí se deriva **una sola vez**, al crear la Colección, y el resultado es el nombre del
+ * fichero. A partir de ahí el slug es la URL pública de la Colección y no se recalcula
+ * aunque el nombre cambie, por lo mismo que no se recalcula el de un Autor (AD-4).
+ */
+export function slugDeNombreDeColeccion(nombre: string): string {
+  return slugDeNombre(nombre);
+}
+
+/**
  * Slug de una Cita: slug del Autor más las primeras palabras del texto en forma canónica.
  *
  * No recibe los Temas de la Cita, y es deliberado: la firma hace imposible derivar la URL

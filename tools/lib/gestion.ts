@@ -14,7 +14,7 @@
 import { rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { autorAdmisible } from '../../src/lib/admision.ts';
+import { autorAdmisible, nombre as nombreDeEntidad } from '../../src/lib/admision.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
   escribirAutor,
@@ -105,8 +105,15 @@ export async function editarAutor(
 }
 
 export async function crearTema(rutas: Rutas, nombre: string): Promise<Resultado> {
-  if (!nombre || nombre.trim() === '') {
-    return { ok: false, motivos: ['Regla incumplida: falta el nombre del Tema.'] };
+  /*
+   * La regla se pregunta, no se copia. El mensaje estaba escrito a mano aquí y otra vez en
+   * `admision.ts`, y desde que el artículo del mensaje es un parámetro las dos copias
+   * pueden divergir sin que nada lo note: la herramienta diría «falta el nombre del Tema» y
+   * el build otra cosa, sobre la misma regla. Una definición, dos consumidores (AD-1).
+   */
+  const validado = nombreDeEntidad('Tema').safeParse(nombre);
+  if (!validado.success) {
+    return { ok: false, motivos: validado.error.issues.map((i) => i.message) };
   }
   const slug = slugDeTema(nombre);
   if (existsSync(join(rutas.temas, `${slug}.yml`))) {

@@ -1,6 +1,6 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
@@ -128,5 +128,92 @@ describe('Historia 4.2 — la jornada en curso no cambia con un push', () => {
     expect(deHoy).toBeDefined();
     expect(deMañana).toBeDefined();
     expect(deMañana).not.toBe(deHoy);
+  });
+});
+
+/**
+ * Historia 12.1 — lo que se publica no puede decir dos cosas distintas.
+ *
+ * Esta es la aserción que habría cazado el defecto de origen: `dist/404.html` y
+ * `dist/buscar.html` salían a producción con `<meta name="robots" content="noindex,
+ * follow">` **y** `data-pagefind-body`, o sea pidiéndole al buscador de fuera que no las
+ * indexara mientras el de dentro las servía entre los resultados. Se mira sobre el sitio
+ * construido y no sobre el componente porque es en el HTML final donde las dos etiquetas
+ * conviven, y donde nadie las estaba comparando.
+ */
+describe('Historia 12.1 — ninguna página noindex entra en el índice interno', () => {
+  let proyecto: string;
+
+  beforeAll(async () => {
+    const resultado = await construirConCorpus({
+      'autores/seneca.yml': AUTOR_VALIDO,
+      'citas/seneca--poco-tiempo.md': citaValida({
+        slug: 'seneca-no-es-que-tengamos-poco-tiempo',
+        texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
+        temas: [],
+      }),
+    });
+    expect(resultado.codigo, resultado.salida).toBe(0);
+    proyecto = resultado.proyecto;
+  });
+
+  afterAll(async () => {
+    if (proyecto) await limpiar(proyecto);
+  });
+
+  /** Cada página construida con sus dos declaraciones: la de fuera y la de dentro. */
+  async function paginasConstruidas(): Promise<
+    { ruta: string; noIndexable: boolean; enElIndiceInterno: boolean }[]
+  > {
+    const dist = join(proyecto, 'dist');
+    const paginas: { ruta: string; noIndexable: boolean; enElIndiceInterno: boolean }[] = [];
+
+    async function recorrer(dir: string, prefijo: string) {
+      for (const entrada of await readdir(dir, { withFileTypes: true })) {
+        const completa = join(dir, entrada.name);
+        if (entrada.isDirectory()) {
+          await recorrer(completa, `${prefijo}/${entrada.name}`);
+          continue;
+        }
+        if (!entrada.name.endsWith('.html')) continue;
+
+        const html = await readFile(completa, 'utf8');
+        const sinExtension = entrada.name.replace(/\.html$/, '');
+        paginas.push({
+          ruta: sinExtension === 'index' ? `${prefijo}/` : `${prefijo}/${sinExtension}`,
+          noIndexable: /<meta name="robots" content="noindex/.test(html),
+          enElIndiceInterno: html.includes('data-pagefind-body'),
+        });
+      }
+    }
+
+    await recorrer(dist, '');
+    return paginas;
+  }
+
+  it('ninguna página con noindex lleva data-pagefind-body', async () => {
+    const incoherentes = (await paginasConstruidas())
+      .filter((p) => p.noIndexable && p.enElIndiceInterno)
+      .map((p) => p.ruta);
+
+    expect(incoherentes, 'noindex para el buscador de fuera y visibles para el de dentro').toEqual(
+      [],
+    );
+  });
+
+  it('y ninguna indexable se queda fuera del índice interno', async () => {
+    // La otra mitad: si la coherencia se lograra sacándolo todo del índice, la búsqueda
+    // propia se quedaría sin nada que buscar y esta prueba seguiría en verde.
+    const olvidadas = (await paginasConstruidas())
+      .filter((p) => !p.noIndexable && !p.enElIndiceInterno)
+      .map((p) => p.ruta);
+
+    expect(olvidadas, 'indexables fuera del índice de la búsqueda propia').toEqual([]);
+  });
+
+  it('el barrido ve las dos clases de página, así que compara algo', async () => {
+    const paginas = await paginasConstruidas();
+    expect(paginas.filter((p) => p.noIndexable).length).toBeGreaterThan(0);
+    expect(paginas.filter((p) => !p.noIndexable).length).toBeGreaterThan(0);
   });
 });

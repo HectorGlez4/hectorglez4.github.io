@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
-import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { promisify } from 'node:util';
@@ -10,6 +11,50 @@ import { componerDocumento, nombreDeDocumento } from '../../../tools/lib/documen
 const ejecutar = promisify(execFile);
 
 export const RAIZ = resolve(import.meta.dirname, '../../..');
+
+/**
+ * Las dependencias del proyecto temporal, compartidas salvo la caché de contenido.
+ *
+ * Esto era un solo enlace a `node_modules/` de la raíz, y arrastraba un fallo silencioso:
+ * Astro guarda el **almacén de contenido** de la capa de colecciones en
+ * `node_modules/.astro/data-store.json`, así que todos los proyectos temporales —y el
+ * repositorio de verdad— escribían en el mismo. El cargador de globs vacía y repuebla una
+ * colección cuando encuentra ficheros, pero cuando no encuentra **ninguno** avisa y
+ * **vuelve sin tocar el almacén**: las entradas de la construcción anterior sobreviven.
+ *
+ * Con eso, una prueba cuyo corpus no trae Colecciones heredaba las de la prueba anterior, y
+ * un `npm run build` en la raíz después de correr la suite anunciaba una Colección que no
+ * existe en `corpus/`. Se vio nada más versionar `corpus/colecciones/` vacío (Historia
+ * 12.2), que es el primer directorio de colección del proyecto que puede estar sin
+ * ficheros; con las tres colecciones anteriores el fallo estaba ahí y se tapaba solo.
+ *
+ * Se enlaza entrada por entrada en vez de la carpeta entera para poder dejar fuera las
+ * cachés de estado mutable y darle a cada proyecto la suya: `.astro`, y también `.vite` y
+ * `.vite-temp`, que son la misma clase de cosa. Lo que se comparte es lo que solo se lee:
+ * los paquetes, y las fuentes ya descargadas —casi dos megas que Astro se baja de la red,
+ * y una caché por proyecto ataría estas pruebas a tener conexión—.
+ *
+ * Aislar `.vite` no vuelve seguro construir dos a la vez, y `vitest.config.ts` sigue
+ * serializando por eso: los proyectos temporales comparten los paquetes, y la
+ * preoptimización de dependencias de Vite escribe dentro de alguno de ellos.
+ */
+const CACHES_PROPIAS = ['.astro', '.vite', '.vite-temp'];
+
+async function enlazarDependencias(proyecto: string): Promise<void> {
+  const origen = join(RAIZ, 'node_modules');
+  const destino = join(proyecto, 'node_modules');
+  await mkdir(destino, { recursive: true });
+
+  for (const entrada of await readdir(origen)) {
+    if (CACHES_PROPIAS.includes(entrada)) continue;
+    await symlink(join(origen, entrada), join(destino, entrada));
+  }
+
+  for (const cache of CACHES_PROPIAS) await mkdir(join(destino, cache), { recursive: true });
+
+  const fuentes = join(origen, '.astro', 'fonts');
+  if (existsSync(fuentes)) await symlink(fuentes, join(destino, '.astro', 'fonts'), 'dir');
+}
 
 /**
  * Un corpus de prueba: rutas relativas a `corpus/` con su contenido literal.
@@ -63,7 +108,7 @@ export async function construirConCorpus(
 ): Promise<ResultadoBuild> {
   const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
 
-  await symlink(join(RAIZ, 'node_modules'), join(proyecto, 'node_modules'), 'dir');
+  await enlazarDependencias(proyecto);
   for (const fichero of ['package.json', 'astro.config.mjs', 'tsconfig.json']) {
     await cp(join(RAIZ, fichero), join(proyecto, fichero));
   }
@@ -75,9 +120,10 @@ export async function construirConCorpus(
   await cp(join(RAIZ, 'integraciones'), join(proyecto, 'integraciones'), { recursive: true });
   await cp(join(RAIZ, 'tools'), join(proyecto, 'tools'), { recursive: true });
 
-  // Las cuatro carpetas siempre existen: una colección cuya base no existe emite un
-  // aviso que enturbiaría la lectura del fallo que sí importa.
-  for (const dir of ['citas', 'autores', 'temas', '_revision', 'fuentes']) {
+  // Las carpetas siempre existen: una colección cuya base no existe emite un aviso que
+  // enturbiaría la lectura del fallo que sí importa. `colecciones/` entra en la lista
+  // desde la Historia 12.2, por el mismo motivo y no por comodidad.
+  for (const dir of ['citas', 'autores', 'temas', 'colecciones', '_revision', 'fuentes']) {
     await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
   }
 
@@ -246,6 +292,36 @@ semblanza: Filósofo estoico hispanorromano, tutor y después consejero de Neró
 
 export const TEMA_VALIDO = `nombre: El tiempo
 `;
+
+/**
+ * Un fichero de Colección válido — Historia 12.2.
+ *
+ * `miembros` se escribe siempre, aunque venga vacío, porque una lista vacía es uno de los
+ * casos del contrato y `miembros:` a secas se analiza como `null`, que es otro distinto.
+ */
+export function coleccionValida(
+  campos: { nombre?: string; criterio?: string; miembros?: string[] } = {},
+): string {
+  // Pasar `miembros: undefined` **omite la clave**, que es el único modo de recorrer el
+  // `.default([])` del esquema: un fixture que siempre la escribe deja ese camino sin
+  // probar, y quitar el valor por omisión no rompería nada.
+  // `'nombre' in campos` y no `??`: pasar `undefined` explícito es cómo una prueba pide
+  // el fichero **sin** ese campo, que es uno de los casos que rompen el build a propósito.
+  const nombre = 'nombre' in campos ? campos.nombre : 'Frases cortas para reflexionar';
+  const criterio =
+    'criterio' in campos
+      ? campos.criterio
+      : 'Citas de una sola frase que se sostienen fuera de su obra.';
+  const miembros = 'miembros' in campos ? campos.miembros : [];
+
+  return (
+    (nombre === undefined ? '' : `nombre: ${JSON.stringify(nombre)}\n`) +
+    (criterio === undefined ? '' : `criterio: ${JSON.stringify(criterio)}\n`) +
+    (miembros === undefined
+      ? ''
+      : `miembros:${miembros.length === 0 ? ' []\n' : `\n${miembros.map((m) => `  - ${m}\n`).join('')}`}`)
+  );
+}
 
 export function citaValida(campos: Partial<Record<string, unknown>> = {}): string {
   const base: Record<string, unknown> = {

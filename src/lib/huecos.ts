@@ -21,7 +21,11 @@
  * AD-5 — Derivación pura: recibe lo leído, no lee disco.
  */
 
-import { MIN_CITAS_POR_TEMA, SUELO_TRADICION_LATINOAMERICANA } from './umbrales.ts';
+import {
+  MIN_CITAS_POR_COLECCION,
+  MIN_CITAS_POR_TEMA,
+  SUELO_TRADICION_LATINOAMERICANA,
+} from './umbrales.ts';
 
 export interface TemaParaHuecos {
   slug: string;
@@ -48,6 +52,63 @@ export interface HuecoDeTema {
   faltan: number;
 }
 
+/**
+ * Una Colección de la que ya se sabe cuántos miembros **resuelve** — Historia 12.4.
+ *
+ * `resueltas` no se calcula aquí a propósito. Resolver la pertenencia de una Colección es
+ * intersectar su lista declarada con el conjunto publicable, y de eso tiene un solo dueño:
+ * `resolverColeccion`, en `publicado.ts`. Esta vista recibe el número ya resuelto —como
+ * recibe las Citas ya leídas— y no vuelve a derivarlo. Reimplementarlo aquí sería tener
+ * dos respuestas a «cuántas Citas tiene esta Colección».
+ */
+export interface ColeccionParaHuecos {
+  slug: string;
+  nombre: string;
+  /** Miembros que existen y están publicados. Sale de `resolverColeccion`. */
+  resueltas: number;
+}
+
+/**
+ * Lo que le falta a una Colección para publicarse — Historia 12.4.
+ *
+ * Tiene **los mismos campos que `HuecoDeTema` y con los mismos nombres**, y es el punto:
+ * quien cura una Colección y quien mira qué le falta al Corpus son la misma persona en el
+ * mismo momento, así que las dos cosas se leen igual y se escriben con el mismo formateador
+ * (`lineaDeHueco`). `publicadas` es aquí el recuento resuelto, que es lo que el visitante
+ * vería en la página: el declarado no publica nada.
+ */
+export interface HuecoDeColeccion {
+  slug: string;
+  nombre: string;
+  publicadas: number;
+  /** Cuántas Citas le faltan para alcanzar su umbral. */
+  faltan: number;
+}
+
+/**
+ * Qué le falta a **una** Colección, sin filtrar: `faltan` vale cero si ya se publica.
+ *
+ * Se expone aparte de `huecosDeColecciones` porque la herramienta de curación pregunta por
+ * una sola y necesita la respuesta también cuando es «ninguna»; la vista de huecos enumera
+ * las que faltan y descarta el resto.
+ */
+export function huecoDeColeccion(coleccion: ColeccionParaHuecos): HuecoDeColeccion {
+  return {
+    slug: coleccion.slug,
+    nombre: coleccion.nombre,
+    publicadas: coleccion.resueltas,
+    faltan: Math.max(0, MIN_CITAS_POR_COLECCION - coleccion.resueltas),
+  };
+}
+
+/** Las Colecciones por debajo de su umbral, de menos a más les falta, como los Temas. */
+export function huecosDeColecciones(colecciones: ColeccionParaHuecos[]): HuecoDeColeccion[] {
+  return colecciones
+    .map(huecoDeColeccion)
+    .filter((hueco) => hueco.faltan > 0)
+    .sort((a, b) => a.faltan - b.faltan || a.slug.localeCompare(b.slug, 'es'));
+}
+
 export interface EquilibrioDeTradicion {
   total: number;
   latinoamericana: number;
@@ -64,6 +125,16 @@ export interface EquilibrioDeTradicion {
 export interface Huecos {
   /** Temas por debajo del umbral, de menos a más les falta: por dónde empezar. */
   temas: HuecoDeTema[];
+  /**
+   * Colecciones por debajo de su umbral, en el mismo orden y con la misma lectura.
+   *
+   * Están en el informe y **no** en la política de objetivo de sesión, y la distinción es
+   * deliberada: el hueco de un Tema se cierra sembrando Citas nuevas, que es lo que una
+   * sesión de sembrado hace, y el de una Colección se cierra asignándole Citas que ya
+   * existen, que es curación y no sembrado. Mezclarlos mandaría a una sesión a buscar
+   * Autores para llenar una decisión editorial que nadie ha tomado todavía.
+   */
+  colecciones: HuecoDeColeccion[];
   tradicion: EquilibrioDeTradicion;
   /**
    * Temas que la portada anuncia y no llegan al umbral — LC-6.
@@ -80,6 +151,7 @@ export function verHuecos(
   temas: TemaParaHuecos[],
   autores: AutorParaHuecos[],
   temasAnunciadosEnPortada: string[] = [],
+  colecciones: ColeccionParaHuecos[] = [],
 ): Huecos {
   const porTema = new Map<string, number>();
   for (const tema of temas) porTema.set(tema.slug, 0);
@@ -113,6 +185,7 @@ export function verHuecos(
 
   return {
     temas: huecosDeTema,
+    colecciones: huecosDeColecciones(colecciones),
     tradicion: {
       total,
       latinoamericana,

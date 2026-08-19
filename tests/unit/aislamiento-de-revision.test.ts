@@ -124,8 +124,10 @@ describe('Historia 1.3 — la ausencia es estructural, no condicional', () => {
      * que nadie lo hubiera decidido.
      */
     expect(esquema).not.toMatch(/base:\s*['"]\.\/corpus\/fuentes/);
-    // Y las tres bases declaradas son las tres carpetas publicables.
+    // Y las bases declaradas son exactamente las carpetas publicables. `colecciones/`
+    // entra en la lista desde la Historia 12.2: sí es colección, a diferencia de
+    // `fuentes/`, y por eso el esquema de Colección es una puerta del build.
     const bases = [...esquema.matchAll(/base:\s*'\.\/corpus\/([a-z]+)'/g)].map((m) => m[1]);
-    expect(bases.sort()).toEqual(['autores', 'citas', 'temas']);
+    expect(bases.sort()).toEqual(['autores', 'citas', 'colecciones', 'temas']);
   });
 });

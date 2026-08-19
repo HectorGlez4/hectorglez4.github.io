@@ -21,17 +21,27 @@ import {
   conjuntoPublicable,
   temasPublicados,
 } from '../lib/publicado.ts';
+import { ETIQUETAS_DE_RESULTADO, TIPO_POR_OMISION } from '../lib/tipoDeResultado.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
 const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
+/*
+ * Las Colecciones publicadas también son salida — Historia 12.3.
+ *
+ * La salida de FR-8 ofrecía Temas y Autores, que eran las dos familias de agregación que
+ * había. Dejar fuera la tercera convertiría a la Colección en la única superficie de
+ * producto que la búsqueda sin resultados no sabe ofrecer, y sin ninguna razón: es
+ * exactamente el mismo chip que el de Tema. Ya viene resuelto y filtrado por su umbral, y
+ * la sección se omite entera cuando no hay ninguna, igual que la de Temas.
+ */
+const colecciones = conjunto.colecciones;
 ---
 
 <Armazon
   titulo={tituloDe('Buscar')}
   descripcion="Busca una cita por un fragmento, por autor o por tema."
   ruta="/buscar"
-  noIndexar
 >
   <div class="pagina contenedor">
     <h1>Buscar</h1>
@@ -75,6 +85,23 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
         )
       }
 
+      {
+        colecciones.length > 0 && (
+          <section>
+            <h2>Colecciones</h2>
+            <ul class="chips">
+              {colecciones.map((coleccion) => (
+                <li>
+                  <a class="chip" href={`/coleccion/${coleccion.slug}`}>
+                    {coleccion.nombre}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
       <section>
         <h2>Autores</h2>
         <ul class="chips">
@@ -93,7 +120,14 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
   </div>
 </Armazon>
 
-<script is:inline define:vars={{ EVENTO_SIN_RESULTADOS: EVENTOS.busquedaSinResultados }}>
+<script
+  is:inline
+  define:vars={{
+    EVENTO_SIN_RESULTADOS: EVENTOS.busquedaSinResultados,
+    ETIQUETA: ETIQUETAS_DE_RESULTADO,
+    TIPO_POR_OMISION,
+  }}
+>
   (() => {
     const campo = document.querySelector('[data-consulta]');
     const lista = document.querySelector('[data-resultados]');
@@ -113,7 +147,8 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
       return pagefind;
     }
 
-    const ETIQUETA = { cita: 'Cita', autor: 'Autor', tema: 'Tema' };
+    // La tabla llega de `src/lib/tipoDeResultado.ts` por `define:vars`. Escribirla aquí a
+    // mano era la segunda copia, y la que se quedaba atrás al añadir una superficie.
 
     function pintar(resultados, consulta) {
       lista.replaceChildren();
@@ -133,7 +168,7 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
         resultados.length === 1 ? 'Un resultado.' : `${resultados.length} resultados.`;
 
       for (const dato of resultados) {
-        const tipo = (dato.meta && dato.meta.tipo) || 'cita';
+        const tipo = (dato.meta && dato.meta.tipo) || TIPO_POR_OMISION;
 
         const li = document.createElement('li');
         li.className = 'resultado';
@@ -144,7 +179,9 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
         const clase = document.createElement('span');
         clase.className = 'clase';
         clase.dataset.tipo = tipo;
-        clase.textContent = ETIQUETA[tipo] || ETIQUETA.cita;
+        // La reserva cubre un índice viejo que traiga un tipo que ya no existe, no un
+        // tipo nuevo sin rótulo: eso no compila.
+        clase.textContent = ETIQUETA[tipo] || ETIQUETA[TIPO_POR_OMISION];
 
         const titulo = document.createElement('span');
         titulo.className = 'titulo';

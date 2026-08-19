@@ -833,3 +833,209 @@ define: SM-C1 que baja mientras el número de Citas sube.
 quiera. El resultado medido lo mitiga mucho —dos entradas con el mismo recuento delatan
 una sesión que no sembró— pero acoplarlo del todo sería que el alta registrase la sesión,
 y eso es trabajo de la 11.4.
+
+## Cierre de la Épica 11 — desplegada y verificada en vivo
+
+Fusionada a `main` el 19/08 con 14 commits. El flujo `Publicar` salió en verde en un
+minuto y el sitio quedó verificado en vivo: `sabiduriadebolsillo.net` responde 200, la
+canónica es la suya, una Página de Cita responde 200, `www` redirige al ápice con 301, y
+el sitemap desplegado trae **53 URLs, exactamente las 53 del build local**. La Épica 11 no
+añade ninguna superficie pública —es herramienta y una puerta de construcción—, así que lo
+que había que comprobar era que nada se rompiera, y nada se rompió.
+
+Puertas antes de fusionar: `astro check` 0 errores sobre 132 ficheros, 882 pruebas
+unitarias, 392 e2e, y `npm run build` correcto. Cero minutos de CI gastados hasta la
+fusión: una sola ejecución para toda la épica.
+
+**Queda abierta la 11.4**, y a propósito. No la ejecuta un agente de desarrollo: corre la
+tubería que las tres construyen y se cierra por resultado medido a lo largo de varias
+sesiones —los seis Temas a 15 Citas, SM-C1 que no baja, y la tradición latinoamericana del
+16,7 % al 40 %—. Por eso la épica queda en `in-progress` y no en `done`: se despliega lo
+construido, no se miente sobre el estado.
+
+**Lo que la épica deja listo para esa siembra.** `npx tsx tools/objetivo.ts` dice a qué
+hueco dedicar la sesión y a qué Tema van sus Citas; `tools/recuperar.ts` trae el documento
+de la Fuente; `tools/extraer.ts` deriva de él la Procedencia y rechaza cualquier documento
+que la recuperación no produjera; el build coteja que el texto aparezca literalmente; y
+`--registrar` deja la sesión anotada con su resultado medido, que es de donde saldrá la
+cadencia. Sembrar mal ya no es posible en silencio: es un build roto con la ruta del
+fichero y la regla incumplida.
+
+# v3 — Épica 12
+
+## 12.1 — Una superficie declara en un solo sitio si es publicable
+
+**Verificado.** `src/lib/superficies.ts` declara qué superficies tiene el sitio y cuál es
+publicable, y de ese único valor derivan las cuatro consecuencias: entrada en el sitemap,
+`noindex`, entrada en el índice interno de Pagefind y entrada en el barrido automatizado
+de accesibilidad. Las tres que hablan de indexación salen **del mismo booleano**, así que
+la incoherencia que motivó la historia ya no se puede escribir.
+
+970 pruebas unitarias en verde (882 al empezar), 394 e2e, 0 errores de tipos.
+
+**El defecto era real y estaba en producción.** Antes de empezar, en el `dist/`
+construido: `404.html` y `buscar.html` llevaban a la vez `<meta name="robots"
+content="noindex, follow">` y `data-pagefind-body`. Es decir, le decían al buscador de
+fuera que no las indexara y aparecían en el de dentro. Pagefind indexaba 55 páginas
+mientras el sitemap declaraba 53. El Kit se libraba solo porque en `kit.astro` sí se
+habían puesto las dos banderas — y eso es justamente la prueba de que acordarse no basta:
+el pitfall ya estaba escrito en `AGENTS.md` y aun así volvió a ocurrir. Ahora: **53 = 53**,
+y cero páginas `noindex` en el índice interno.
+
+**Dos defectos que la revisión encontró y las pruebas no.**
+
+El primero, un caso de inferir semántica de la forma de la URL. Antes «página 2 de un
+listado» venía de `pagina.currentPage > 1`, un dato real; la primera versión lo dedujo de
+que la ruta acabara en dígitos. Pero el esquema de slugs de `admision.ts` admite un slug
+enteramente numérico, así que `/autor/1984` se habría degradado a superficie de servicio y
+habría desaparecido del sitemap sin que nadie lo decidiera. Anclada la condición a la
+forma completa de una ruta paginada, y comprobado el caso sutil: `/autor/1984/2` —la
+página 2 real de ese mismo autor— sigue degradándose bien.
+
+El segundo importa más de lo que parece. La guarda contra que el barrido de accesibilidad
+se vaciara entero vivía en la suite de Playwright, y `AGENTS.md` dice explícitamente que
+el CI no la ejecuta: la garantía existía y no vigilaba nada en el único camino
+automatizado que hay. Se llevó al plano unitario, sobre el proyecto que esa prueba ya
+construía, junto con el lazo hermano del sitemap. Verificado por mutación: quitar
+`filter: anunciableEnElSitemap` de `astro.config.mjs` hace fallar ahora tres pruebas en
+`vitest`, y antes pasaba en verde.
+
+**Lo que quedó fuera.** Cada declaración lleva dos identidades de la misma superficie —el
+fichero y la expresión que reconoce su ruta— y nada comprueba que concuerden. «Acuérdate
+de tres ficheros» se ha convertido en «mantén de acuerdo dos campos de una entrada», que
+es mucho mejor pero no es nada. Y `publicado.ts` conserva una segunda enumeración de lo
+publicado, por instancia del Corpus en vez de por familia de superficie, que nada cruza
+con la primera.
+
+## 12.2 — La Colección declara sus miembros, y la lista es blanda
+
+**Verificado.** Una Colección declara sus miembros por slug en `corpus/colecciones/{slug}.yml`,
+y la pertenencia se resuelve intersectando esa lista con el conjunto publicable. Es la
+dirección inversa a la del Tema —que se declara en la Cita— y es a propósito: el Tema es
+una propiedad de la Cita, la Colección es una decisión editorial sobre un conjunto y puede
+cambiar sin que ninguna Cita cambie. Declararla en la Cita obligaría a editar decenas de
+ficheros para crear una agrupación y otra vez para deshacerla.
+
+1049 pruebas unitarias en verde (970 al empezar), 394 e2e, 0 errores de tipos.
+
+Comprobado en directo: 21 miembros declarados —con un repetido, una errata y una Cita
+retirada— resuelven a 18 y la Colección se publica; con solo 3 Citas publicables no se
+publica, pese a los 21 declarados. El umbral manda sobre lo resuelto.
+
+**El agujero que la revisión encontró, y por qué importaba tanto.** El conjunto publicable
+repartía la lista **declarada** en crudo, y la resolución estaba exportada sin filtrar. Una
+Página de Colección podía renderizar sin pasar jamás por el umbral — y la página sonda del
+propio cambio ya enseñaba ese atajo, que es la forma que la 12.3 habría copiado por ser la
+que encontraría en el repositorio. Se cerró quitando la entrada: el conjunto publicable
+solo reparte lo ya resuelto y filtrado, así que no hay de dónde sacar una Colección
+declarada. La marca de tipos que lo refuerza es el cinturón; la puerta es que no hay puerta.
+Verificado por mutación: convertir la marca en un alias hace fallar `astro check`.
+
+**Un hallazgo colateral que valía la historia entera.** El andamio de pruebas enlazaba
+`node_modules` completo, y Astro guarda ahí el almacén de datos de contenido: cada build
+temporal escribía en el almacén compartido del repositorio. El cargador limpia y repuebla
+una colección cuando encuentra ficheros, pero cuando **no** encuentra ninguno se va sin
+tocar el almacén — así que una colección vacía hereda lo que dejó la prueba anterior.
+Llevaba ahí desde siempre, curándose sola en silencio porque las tres colecciones
+existentes nunca estaban vacías. `corpus/colecciones/` vacío es el primer caso que lo
+destapa: tras correr la suite, un `npm run build` en la raíz anunciaba una Colección salida
+de un fixture. Arreglado, con prueba de regresión.
+
+**Dos decisiones de criterio que conviene conservar.** No se preprocesa `miembros:` nulo a
+lista vacía: tragárselo enseñaría a escribirlo, y el mensaje dice qué hacer en su lugar
+—omitir el campo—. Y el nombre y el criterio se miden **recortados sin recortarlos**: un
+`.trim()` reescribiría lo que el editor guardó, y NFR-12 lo prohíbe.
+
+**Lo que quedó fuera.** La retirada de una Cita no es silenciosa: reimprime el aviso de
+desajuste en cada build hasta que alguien quite el slug del fichero. Es divergencia
+deliberada con la matriz de la especificación, y la culpa es del contrato: por AD-5 la capa
+pura no lee disco, así que no puede distinguir un slug retirado de uno con errata, y dejar
+de contar la retirada sería dejar de contar la errata. Y `corpus/colecciones/` vacío deja
+dos avisos en cada construcción, uno de ellos engañoso; se investigó callarlos y exigiría
+apoyarse en detalles internos de Astro sin garantía de versión, así que se aceptó el coste
+y quedó escrito con las líneas literales en `src/content.config.ts`.
+
+## 12.3 — La Página de Colección, sin canibalizar a la Cita
+
+**Verificado.** `/coleccion/{slug}` presenta las Citas de una Colección con el mismo
+componente de tarjeta que los listados de Autor y de Tema, con el nombre en Source Serif y
+el criterio editorial al pie. Agrega y enlaza pero no reproduce: la canónica de cada Cita
+sigue siendo su propia página. Va paginada, porque el umbral es un suelo y no un techo.
+
+1107 pruebas unitarias en verde (1049 al empezar), 398 e2e, 0 errores de tipos.
+
+**El estreno del dueño único de la 12.1, y funcionó.** Declarar la familia de Colección en
+`src/lib/superficies.ts` fue **una sola línea**, y de ella salieron el sitemap, el
+`noindex`, el índice interno de Pagefind y el barrido de accesibilidad, sin tocar ninguna
+lista aparte. Comprobado por mutación: retirar las rutas de Colección de la derivación hace
+que el barrido pierda la familia entera.
+
+**La aserción que convierte AD-19 en algo mecánico.** El `<li>` que emite la Colección se
+compara **byte a byte** contra el que emite la Página de Tema para la misma Cita. Astro
+estampa un identificador por componente, así que una tarjeta copiada a mano no puede
+hacerse pasar por la compartida. Una norma de estilo pasa a ser una puerta.
+
+**Una bomba de relojería desactivada.** `busqueda.spec.ts` afirmaba el conjunto **exacto**
+de tipos de resultado —cita, autor, tema— y habría fallado el día que se curase la primera
+Colección, por un motivo que nada tendría que ver con lo que se estuviera haciendo en ese
+momento. Se demostró sembrando una Colección en una copia aislada: la aserción antigua
+falla con `+ "coleccion"`. Ahora afirma contención más «ningún tipo desconocido».
+
+**Una afirmación corregida, que no el código.** La prueba de «no se genera contenido
+duplicado indexable» usaba textos de más de 120 caracteres a propósito, y por eso no podía
+fallar: la tarjeta solo recorta por encima de ese límite. Pero las 38 Citas reales miden
+120 o menos —la más larga, 101—, así que en producción la tarjeta **nunca recorta**, y el
+texto íntegro de una Cita ya aparece hoy en su Página de Tema y en la de Autor. Lo que
+sostiene NFR-13 es la canónica, no el recorte, y ahora el docstring lo dice así.
+
+**Lo que quedó fuera.** La mitad de UX-DR33 que necesita navegador —«sin desplazamiento
+horizontal a 360 px»— sigue en una prueba que hoy se salta, porque producción no tiene
+ninguna Colección que visitar; la mitad medible sobre el HTML sí pasó al plano que el CI
+ejecuta. Se ejercitó todo en una copia aislada con una Colección sembrada —418 e2e en
+verde, axe WCAG 2.1 AA incluido— pero eso no es una garantía que corra sola. La Página de
+Colección no existirá en producción hasta que se cure la primera con la herramienta de la
+12.4, y la portada se comporta bien en ese estado: no la menciona en absoluto.
+
+## 12.4 — Curar una Colección desde la herramienta
+
+**Verificado.** `npm run coleccion` crea una Colección con su nombre y criterio, le asigna
+y le quita Citas —solo publicadas—, dice cuánto le falta para publicarse, la despublica
+moviéndola a `corpus/_colecciones-retiradas/` y la vuelve a publicar. `npm run huecos`
+enumera además las Colecciones cortas junto a los Temas, con la misma redacción: quien cura
+una Colección y quien mira qué le falta al Corpus son la misma persona en el mismo momento.
+
+1158 pruebas unitarias en verde (1107 al empezar), 398 e2e, 0 errores de tipos, y
+`corpus/` intacto byte a byte tras correr la suite entera.
+
+**Comodidad y no puerta, dicho con precisión.** Lo que la herramienta rechaza por forma lo
+rechaza también el esquema, y lo comprueba una prueba que construye el fichero que la propia
+herramienta escribió —verde— y luego le quita el `criterio:` a mano para verlo romper con el
+mismo mensaje. Lo único que impone la herramienta sola es lo que ningún esquema puede ver:
+que el miembro sea una Cita y que esté publicada. `miembros` es una lista de slugs y jamás
+una referencia dura, y esa blandura es exactamente lo que hace que retirar una Cita no rompa
+el build. `AGENTS.md` afirmaba que editar a mano no se salta ninguna regla; se corrigió,
+porque sí se salta esa.
+
+**Tres agujeros con pérdida de datos que la revisión encontró.** El primero: `escribirColeccion`
+componía siempre `{slug}.yml`, pero el lector y el cargador de Astro aceptan `.yml` y
+`.yaml`, así que un `asignar` sobre una Colección guardada como `.yaml` creaba un segundo
+fichero con el mismo slug, informaba de éxito y ponía el build en rojo por la puerta que la
+12.2 había construido. El segundo: un `asignar` sobre un fichero editado a mano borraba en
+silencio las claves que el lector no reconoce, porque el esquema veía un objeto reconstruido
+de tres campos y nunca el juego real. El tercero: una bandera mal tecleada —`--corpuss`— se
+ignoraba y la orden escribía en el corpus **real**, justo lo contrario de la restricción que
+más se había cuidado.
+
+## Cierre de la Épica 12
+
+Las cuatro historias cerradas, y a diferencia de la Épica 11 ésta queda en `done`: no tiene
+ninguna bloqueada. Lo que entra es la cola larga con sitio donde aterrizar —una Colección se
+declara, se resuelve blanda contra el conjunto publicable, se publica en su propia página
+sin canibalizar a la Cita, y se cura sin escribir YAML—, más el dueño único de publicabilidad
+que la 12.1 construyó y que las tres siguientes estrenaron sin tocar ninguna lista.
+
+**La feature queda encendida pero sin encender.** `corpus/colecciones/` está vacío a
+propósito: curar es decisión editorial y no la toma un agente. Así que el despliegue de esta
+épica no muestra ninguna Página de Colección, y la portada no menciona la sección. La primera
+Colección la crea Héctor con `npm run coleccion -- crear "…" --criterio "…"`, y ese día la
+superficie aparece sola.

@@ -3,9 +3,9 @@
  * Portada.
  *
  * De momento es la puerta de entrada al descubrimiento: desde aquí se alcanzan todos los
- * Temas publicados y todos los Autores, y desde ellos toda Página de Cita. Eso es lo que
- * sostiene NFR-5 —ninguna página huérfana— y lo que la Historia 2.7 comprueba recorriendo
- * enlaces de verdad.
+ * Temas publicados, todas las Colecciones publicadas y todos los Autores, y desde ellos
+ * toda Página de Cita. Eso es lo que sostiene NFR-5 —ninguna página huérfana— y lo que la
+ * Historia 2.7 comprueba recorriendo enlaces de verdad.
  *
  * La Cita del Día llega en la Historia 4.1 y ocupará la parte de arriba. El descubrimiento
  * de abajo se queda: sin él, la portada tendría una sola salida y el sitio dejaría de ser
@@ -25,6 +25,19 @@ import {
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
 const autores = autoresPublicados(conjunto.autores, conjunto.citas);
+
+/*
+ * Las Colecciones publicadas — Historia 12.3, descubrimiento de FR-28 y NFR-5.
+ *
+ * `conjunto.colecciones` **ya viene resuelto y filtrado por su umbral** (Historia 12.2):
+ * aquí no se comprueba nada ni se llama a `coleccionesPublicadas`, igual que la Página de
+ * Colección. Lo que esta lista traiga es exactamente lo que tiene página, así que un chip
+ * de esta portada no puede enlazar a un 404 ni faltarle una Colección al sitemap.
+ *
+ * De aquí sale el único salto que separa una Colección de la portada, que es lo que
+ * sostiene NFR-5: publicable y alcanzable son el mismo conjunto.
+ */
+const colecciones = conjunto.colecciones;
 
 const jornada = jornadaDelBuild(process.env, new Date());
 const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.fijaciones);
@@ -67,6 +80,46 @@ const autorDelDia = seleccion
               <li>
                 <a class="chip" href={`/tema/${tema.slug}`}>
                   {tema.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      /*
+       * ── Decisión: cuando no hay ninguna Colección publicada, la portada no dice nada ──
+       *
+       * Es el estado de producción de hoy —`corpus/colecciones/` está vacío a propósito,
+       * porque curar es de Héctor— y no un borde raro, así que se decide en vez de dejarlo
+       * al azar del renderizado.
+       *
+       * La sección entera se omite: ni rótulo, ni lista vacía, ni un «pronto habrá
+       * colecciones». Se descartaron las dos alternativas:
+       *
+       *   · Un `<h2>Colecciones</h2>` sobre una lista vacía deja un encabezado que no
+       *     encabeza nada. Es ruido para quien lee y una promesa incumplida para quien
+       *     navega por encabezados con lector de pantalla.
+       *   · Un aviso de «todavía no hay» convierte una carencia interna del editor en
+       *     contenido de la portada. El visitante no ha pedido saberlo.
+       *
+       * Es exactamente lo que la portada ya hace con los Temas —`temas.length > 0`—, así
+       * que no estrena un comportamiento: aplica el que había. El día que exista la primera
+       * Colección la sección aparece sola, sin tocar esta página.
+       */
+    }
+    {
+      colecciones.length > 0 && (
+        <section>
+          <h2>Colecciones</h2>
+          {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
+          <ul class="chips">
+            {colecciones.map((coleccion) => (
+              <li>
+                <a class="chip" href={`/coleccion/${coleccion.slug}`}>
+                  {coleccion.nombre}
                 </a>
               </li>
             ))}

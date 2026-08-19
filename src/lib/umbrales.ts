@@ -32,6 +32,17 @@ export const CITAS_POR_PAGINA = 50;
 export const MAX_CITAS_RELACIONADAS = 4;
 
 /**
+ * Saltos de enlace interno desde la portada en los que toda superficie publicada debe
+ * alcanzarse — NFR-5, AD-11 extendido.
+ *
+ * Publicable y alcanzable son el mismo conjunto: una página anunciada a la que no llega
+ * ningún enlace es una página que solo existe para el buscador. Tres saltos es lo que hoy
+ * cuesta lo más hondo del sitio —portada, Autor o Tema, Cita—, y dejarlo acotado impide
+ * que una superficie nueva se cuelgue de una cadena cada vez más larga.
+ */
+export const MAX_SALTOS_DESDE_LA_PORTADA = 3;
+
+/**
  * Suelo de Autores de tradición latinoamericana, en porcentaje — §6.1 del PRD.
  *
  * El suelo es explícito porque el sesgo hacia España es el resultado por defecto de
@@ -60,3 +71,52 @@ export const SUELO_TRADICION_LATINOAMERICANA = 40;
  * crecimiento futuro pase inadvertido.
  */
 export const MAX_BYTES_DE_GUION = 6656;
+
+/**
+ * Citas publicadas **resueltas** que necesita una Colección para publicarse — FR de la
+ * Épica 12, §14.4 del PRD.
+ *
+ * **VALOR PROVISIONAL.** El PRD deja este umbral abierto a propósito y dice de dónde
+ * saldrá el definitivo: de curar las tres o cuatro primeras Colecciones y ver cuántas
+ * Citas reúne de verdad un criterio editorial que merezca página. Hasta entonces esto es
+ * un marcador de posición con nombre, no una decisión tomada.
+ *
+ * Arranca igual que `MIN_CITAS_POR_TEMA` porque las dos superficies alimentan la misma
+ * contra-métrica —la mediana de Citas por agregación publicada— y empezar igualadas
+ * garantiza que una Colección no pueda hundir esa mediana por debajo de lo que un Tema ya
+ * puede. Es el arranque prudente: la vía barata de multiplicar páginas indexables es
+ * fabricar Colecciones de cinco Citas, y este número existe para cerrarla. El definitivo
+ * puede bajar —una Colección es curada a mano y no acumula por deriva como un Tema— pero
+ * esa rebaja se decide con Colecciones curadas delante, no aquí.
+ *
+ * Se aplica al recuento **resuelto**, jamás al declarado: quien lo aplica es
+ * `coleccionesPublicadas` en `src/lib/publicado.ts` (AD-11), y es el único sitio **que
+ * decide qué se publica**.
+ *
+ * La precisión no es un matiz: desde la Historia 12.4 hay otros dos lectores de este número
+ * —`huecoDeColeccion`, que dice cuántas Citas le faltan a una Colección, y las órdenes que
+ * lo escriben en su informe—. Ninguno filtra nada ni genera ninguna ruta: informan. Que
+ * lean el mismo número es justamente lo que hace que «le faltan cuatro» y «no se publica»
+ * hablen de lo mismo; lo que estaría mal es que decidieran con él.
+ */
+export const MIN_CITAS_POR_COLECCION = 15;
+
+/**
+ * Caracteres que puede medir el criterio de una Colección — Historia 12.3.
+ *
+ * El criterio no es solo texto de la página: la Página de Colección lo emite **tal cual**
+ * como su `<meta name="description">` y como su `og:description`, porque NFR-12 prohíbe
+ * que el sistema altere lo que el editor guardó. Eso deja una sola forma sana de acotarlo:
+ * en la puerta de admisión, donde el editor todavía lo está escribiendo y puede arreglarlo,
+ * y no en la página, donde recortarlo sería reescribirlo.
+ *
+ * 160 es el punto a partir del cual una descripción se corta con puntos suspensivos en los
+ * resultados de búsqueda. Un criterio que no cabe ahí no se publica entero, y entonces la
+ * página anuncia media razón de existir. Es holgado para lo que el campo pide —una frase
+ * que diga por qué estas Citas están juntas—: el de partida mide setenta y cuatro.
+ *
+ * Si algún día el criterio necesita más aire como texto editorial, lo que hay que cambiar
+ * **no** es este número sino dejar de usarlo literalmente como descripción. Esa es una
+ * decisión de diseño, y así se toma mirándola, no desbordando en silencio.
+ */
+export const MAX_CARACTERES_CRITERIO = 160;

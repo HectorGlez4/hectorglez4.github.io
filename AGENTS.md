@@ -34,7 +34,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Known pitfalls
 
-- Al añadir una superficie que no es del producto, sácala de los **dos** índices y no solo del buscador: `noIndexar` y `fueraDeLaBusqueda` en `Armazon.astro`, más el filtro de `astro.config.mjs`. El Kit se quedó indexable en Pagefind por esto y nadie recibió un error.
+- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind y el barrido de accesibilidad. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1).
 - No traigas `@cloudflare/workers-types`: sus globales redefinen `Buffer` y descompilan las pruebas que leen cabeceras PNG. Declara en `medicion/worker.ts` solo la superficie de D1 que uses.
 
 <!-- /bmad:context -->
@@ -54,3 +54,44 @@ sembrado que declara la Historia 11.4, y es la única serie medida que existe. U
 sin registrar no la cuenta nadie. Si dedicas la sesión a otra cosa, anúlala con su motivo
 —`npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]`—; una anulación
 sigue siendo una sesión corrida y cuenta igual para la cadencia.
+
+## Curar una Colección
+
+Una Colección se cura con su orden, nunca escribiendo el YAML a mano:
+
+```
+npm run coleccion -- crear "Frases cortas para reflexionar" --criterio "Citas de una sola frase."
+npm run coleccion -- asignar frases-cortas-para-reflexionar <slug-de-cita> [<slug-de-cita>...]
+npm run coleccion -- quitar frases-cortas-para-reflexionar <slug-de-cita>
+npm run coleccion -- estado frases-cortas-para-reflexionar     # cuántas Citas le faltan
+npm run coleccion -- listar
+npm run coleccion -- despublicar frases-cortas-para-reflexionar
+npm run coleccion -- publicar frases-cortas-para-reflexionar
+```
+
+**Qué impone la orden que el build no puede imponer.** El esquema juzga un fichero: que
+tenga nombre y criterio, que el criterio quepa en una descripción, que cada miembro tenga
+forma de slug. Lo que ningún esquema puede ver es la relación entre ficheros, y ahí es
+donde la orden es la única puerta que existe:
+
+- **que un miembro esté publicado.** `miembros` es una lista de slugs y jamás una
+  referencia dura de esquema —si lo fuera, mover una Cita a `corpus/_revision/` rompería el
+  build—, así que el build no puede saber si un slug es una Cita en revisión. La orden sí, y
+  la rechaza. Editar el YAML a mano **sí se salta esta regla**: el slug de una Cita en
+  revisión pasa la construcción y desaparece en silencio del listado.
+- **que el slug exista.** Una errata se rechaza al escribirla; al build le da igual y solo
+  la cuenta después como desajuste.
+
+Lo demás sí es comodidad: nombre, criterio y forma de los miembros los aplica el esquema
+igual, se edite el fichero como se edite, y el build se rompe si se incumplen.
+
+Despublicar **mueve** el fichero a `corpus/_colecciones-retiradas/`, como retirar una Cita
+lo mueve a `corpus/_revision/` (AD-2). No borra nada y no toca ninguna Cita; `publicar` lo
+trae de vuelta. Ese directorio **no se versiona con `.gitkeep`**, a diferencia de
+`corpus/_revision/`, `corpus/fuentes/` y `corpus/colecciones/`: lo crea la propia orden la
+primera vez que se retira algo, y versionarlo vacío exigiría un fichero en `corpus/` que
+ninguna Colección real justifica todavía. Cuando se retire la primera de verdad, el
+directorio entra en el repositorio con ella y la excepción desaparece sola.
+
+Curar la primera Colección de verdad es de Héctor: `corpus/colecciones/` se versiona vacío
+a propósito y ningún agente siembra Colecciones en él.
