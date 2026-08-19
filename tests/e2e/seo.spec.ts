@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
 
@@ -104,32 +106,37 @@ test.describe('Historia 2.7 — nada huérfano', () => {
     page,
     request,
   }) => {
-    const objetivo = new Set(await rutasDelSitemap(request));
-    const MAXIMO_DE_SALTOS = 3;
+    /*
+     * Historia 12.1 — quién decide si algo es huérfano no vive aquí.
+     *
+     * Esta prueba tenía su propio recorrido a lo ancho y su propio literal de saltos. El
+     * criterio —publicable y alcanzable son el mismo conjunto— es de `publicado.ts`, el
+     * dueño del conjunto publicable (AD-11), y el tope tiene nombre en `umbrales.ts`
+     * (AD-9). Aquí queda lo único que solo se puede hacer con un navegador delante:
+     * recorrer el sitio de verdad y anotar de dónde sale cada enlace.
+     */
+    const publicadas = await rutasDelSitemap(request);
+    const enlaces = new Map<string, string[]>();
 
-    const visitadas = new Set<string>();
     let frontera = ['/'];
-
-    for (let salto = 0; salto <= MAXIMO_DE_SALTOS && frontera.length > 0; salto += 1) {
+    for (let salto = 0; salto <= MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
       const siguiente: string[] = [];
 
       for (const ruta of frontera) {
-        if (visitadas.has(ruta)) continue;
-        visitadas.add(ruta);
+        if (enlaces.has(ruta)) continue;
 
         await page.goto(ruta);
-        const enlaces = await page.evaluate(() =>
+        const salientes = await page.evaluate(() =>
           [...document.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href')!),
         );
-        for (const enlace of enlaces) {
-          if (!visitadas.has(enlace)) siguiente.push(enlace);
-        }
+        enlaces.set(ruta, salientes);
+        siguiente.push(...salientes.filter((enlace) => !enlaces.has(enlace)));
       }
 
       frontera = [...new Set(siguiente)];
     }
 
-    const inalcanzables = [...objetivo].filter((r) => !visitadas.has(r));
-    expect(inalcanzables, `no se alcanzan en ${MAXIMO_DE_SALTOS} saltos`).toEqual([]);
+    const inalcanzables = superficiesInalcanzables(publicadas, enlaces);
+    expect(inalcanzables, `no se alcanzan en ${MAX_SALTOS_DESDE_LA_PORTADA} saltos`).toEqual([]);
   });
 });

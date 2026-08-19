@@ -32,6 +32,17 @@ export const CITAS_POR_PAGINA = 50;
 export const MAX_CITAS_RELACIONADAS = 4;
 
 /**
+ * Saltos de enlace interno desde la portada en los que toda superficie publicada debe
+ * alcanzarse — NFR-5, AD-11 extendido.
+ *
+ * Publicable y alcanzable son el mismo conjunto: una página anunciada a la que no llega
+ * ningún enlace es una página que solo existe para el buscador. Tres saltos es lo que hoy
+ * cuesta lo más hondo del sitio —portada, Autor o Tema, Cita—, y dejarlo acotado impide
+ * que una superficie nueva se cuelgue de una cadena cada vez más larga.
+ */
+export const MAX_SALTOS_DESDE_LA_PORTADA = 3;
+
+/**
  * Suelo de Autores de tradición latinoamericana, en porcentaje — §6.1 del PRD.
  *
  * El suelo es explícito porque el sesgo hacia España es el resultado por defecto de

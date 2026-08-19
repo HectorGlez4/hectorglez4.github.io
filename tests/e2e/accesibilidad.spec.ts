@@ -1,17 +1,67 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { superficiesDelBarrido } from '../../src/lib/superficies.ts';
 
 /** Historia 2.8 — accesibilidad y comportamiento responsive. */
 
-/** Las seis superficies públicas. `/buscar` y el 404 también lo son. */
-const SUPERFICIES = [
-  '/',
-  '/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los',
-  '/autor/antonio-machado',
-  '/tema/la-vida',
-  '/buscar',
-  '/una-url-que-no-existe',
-];
+const dist = join(new URL('../..', import.meta.url).pathname, 'dist');
+
+/** Las rutas que el sitio construyó de verdad. */
+function rutasConstruidas(): string[] {
+  const rutas: string[] = [];
+
+  function recorrer(dir: string, prefijo: string) {
+    for (const entrada of readdirSync(dir)) {
+      const completa = join(dir, entrada);
+      if (statSync(completa).isDirectory()) {
+        recorrer(completa, `${prefijo}/${entrada}`);
+        continue;
+      }
+      if (!entrada.endsWith('.html')) continue;
+      const sinExtension = entrada.replace(/\.html$/, '');
+      rutas.push(sinExtension === 'index' ? `${prefijo}/` : `${prefijo}/${sinExtension}`);
+    }
+  }
+
+  recorrer(dist, '');
+  return rutas;
+}
+
+/**
+ * Historia 12.1 — las superficies del barrido se **derivan**, no se escriben.
+ *
+ * Antes eran seis rutas a mano en esta constante: la cuarta lista de sitios donde se
+ * declaraba qué es una superficie del sitio, y la que nadie recordaba tocar. Ahora salen
+ * de cruzar la declaración única de `src/lib/superficies.ts` con las páginas que el build
+ * generó, así que una superficie pública nueva entra en el barrido sola. El Kit queda
+ * fuera porque su declaración dice que no es una superficie que nadie lea.
+ *
+ * Se lee `dist/` al cargar el fichero y no durante la prueba porque el barrido genera una
+ * prueba por superficie. Playwright arranca su `webServer` —que construye el sitio— antes
+ * de cargar los ficheros de prueba, así que lo que se lee aquí es el `dist/` recién
+ * construido.
+ */
+const SUPERFICIES = superficiesDelBarrido(rutasConstruidas());
+
+test('el barrido cubre las superficies del sitio y no el Kit', () => {
+  // Sin esto, una derivación que devolviera la lista vacía dejaría el barrido entero sin
+  // ejecutar y la suite seguiría en verde.
+  //
+  // Esta guarda corre exactamente cuando corre el barrido, que es su virtud, pero el CI
+  // no ejecuta `npm run test:e2e`. Su gemela vive en
+  // `tests/unit/publicable-y-alcanzable.test.ts`, que pasa por `superficiesDelBarrido` las
+  // rutas de un sitio construido de verdad y exige una muestra por familia. Las dos, no
+  // una: aquí se comprueba el `dist/` que se va a barrer; allí, que el CI se entere.
+  expect(SUPERFICIES).toContain('/');
+  expect(SUPERFICIES).toContain('/buscar');
+  expect(SUPERFICIES).toContain('/404');
+  expect(SUPERFICIES.some((r) => r.startsWith('/cita/'))).toBe(true);
+  expect(SUPERFICIES.some((r) => r.startsWith('/autor/'))).toBe(true);
+  expect(SUPERFICIES.some((r) => r.startsWith('/tema/'))).toBe(true);
+  expect(SUPERFICIES).not.toContain('/kit');
+});
 
 test.describe('Historia 2.8 — WCAG 2.1 AA', () => {
   for (const ruta of SUPERFICIES) {

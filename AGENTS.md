@@ -34,7 +34,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Known pitfalls
 
-- Al añadir una superficie que no es del producto, sácala de los **dos** índices y no solo del buscador: `noIndexar` y `fueraDeLaBusqueda` en `Armazon.astro`, más el filtro de `astro.config.mjs`. El Kit se quedó indexable en Pagefind por esto y nadie recibió un error.
+- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind y el barrido de accesibilidad. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1).
 - No traigas `@cloudflare/workers-types`: sus globales redefinen `Buffer` y descompilan las pruebas que leen cabeceras PNG. Declara en `medicion/worker.ts` solo la superficie de D1 que uses.
 
 <!-- /bmad:context -->

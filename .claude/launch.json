@@ -4,14 +4,21 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 4321
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 4321,
+      "autoPort": true
     },
     {
       "name": "estatico",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["tests/servidor.mjs"],
-      "port": 4321
+      "runtimeArgs": [
+        "tests/servidor.mjs"
+      ],
+      "port": 4321,
+      "autoPort": false
     }
   ]
 }

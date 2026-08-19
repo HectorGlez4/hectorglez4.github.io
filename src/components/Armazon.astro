@@ -11,6 +11,7 @@
 import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
 import { MARCA } from '../lib/marca.ts';
+import { consecuenciasDe } from '../lib/superficies.ts';
 import '../styles/tokens.css';
 
 interface Props {
@@ -20,20 +21,17 @@ interface Props {
   /** La Página de Cita emite además el evento de vista (AD-13, SM-2). */
   vistaDeCita?: boolean;
   descripcion: string;
-  /** Ruta de la página, sin dominio. Compone la canónica de NFR-1. */
-  ruta: string;
-  /** Páginas 2+ de un listado: rastreables pero no indexables (FR-5). */
-  noIndexar?: boolean;
   /**
-   * Fuera del índice de la búsqueda propia.
+   * Ruta de la página, sin dominio. Compone la canónica de NFR-1 **y** es lo que decide
+   * si la página se indexa, dentro y fuera.
    *
-   * `noIndexar` habla con el buscador de fuera; esto habla con el de dentro, y no son lo
-   * mismo: `/buscar` es una superficie pública que se declara `noindex` y sigue siendo
-   * parte del sitio. Lo que sale del índice es lo que **no es una superficie**, como el
-   * Kit Diario: sin esto, una herramienta sin enlaces entrantes aparecía igualmente entre
-   * los resultados y dejaba de ser privada por la puerta de atrás.
+   * Hasta la Historia 12.1 esas dos decisiones llegaban aquí como banderas sueltas
+   * —`noIndexar` y `fueraDeLaBusqueda`—, y había que acordarse de poner las dos juntas.
+   * No se hizo: `/404` y `/buscar` pedían `noindex` al buscador de fuera y seguían en el
+   * índice del de dentro. Ahora las dos salen de la declaración única de
+   * `src/lib/superficies.ts`, así que no hay dos valores que puedan discrepar.
    */
-  fueraDeLaBusqueda?: boolean;
+  ruta: string;
   /**
    * Ruta de la Tarjeta Social de esta página — FR-19.
    *
@@ -44,17 +42,15 @@ interface Props {
   tarjeta?: string;
 }
 
-const {
-  titulo,
-  descripcion,
-  ruta,
-  noIndexar = false,
-  fueraDeLaBusqueda = false,
-  vistaDeCita = false,
-  tipo,
-  tarjeta,
-} = Astro.props;
+const { titulo, descripcion, ruta, vistaDeCita = false, tipo, tarjeta } = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
+
+/*
+ * Las cuatro consecuencias de la declaración, derivadas de la ruta. `consecuenciasDe`
+ * **rompe el build** si nadie ha declarado esta superficie: una página nueva sin
+ * declaración no pasa desapercibida, se para aquí y el mensaje dice qué fichero tocar.
+ */
+const { noIndexar, enLaBusquedaPropia } = consecuenciasDe(ruta);
 // Absoluta y no relativa: una previsualización se resuelve en el servidor de la red, que
 // no tiene la página delante para completar la ruta.
 const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.site).href;
@@ -108,11 +104,14 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
       * Pagefind indexa solo lo que hay dentro de `data-pagefind-body`. Sin esto indexaba
       * también la cabecera y el pie, y buscar «sabiduría» devolvía las 53 páginas del
       * sitio porque la marca aparece en todas.
+      *
+      * Y quién lo lleva no se decide aquí: sale de la misma declaración que el `noindex`
+      * de arriba, así que el buscador de dentro y el de fuera no pueden discrepar.
       */}
     <main
       id="contenido"
-      data-pagefind-body={fueraDeLaBusqueda ? undefined : true}
-      data-pagefind-ignore={fueraDeLaBusqueda ? true : undefined}
+      data-pagefind-body={enLaBusquedaPropia ? true : undefined}
+      data-pagefind-ignore={enLaBusquedaPropia ? undefined : true}
       data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}
     >
       <slot />

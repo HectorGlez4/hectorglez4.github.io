@@ -17,7 +17,7 @@
  */
 
 import type { CollectionEntry } from 'astro:content';
-import { MIN_CITAS_POR_TEMA } from './umbrales.ts';
+import { MAX_SALTOS_DESDE_LA_PORTADA, MIN_CITAS_POR_TEMA } from './umbrales.ts';
 import type { Procedencia } from './admision.ts';
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
@@ -120,6 +120,44 @@ export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => `/autor/${a.slug}`),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => `/tema/${t.slug}`),
   ];
+}
+
+/**
+ * Las superficies publicadas a las que no llega ningún enlace interno — NFR-5.
+ *
+ * AD-11 extendido: publicable y alcanzable son **el mismo conjunto**. Este módulo ya era
+ * el dueño de qué se publica, así que es también el sitio donde se comprueba que lo
+ * publicado se alcanza; tenerlo en otro lado permitiría que las dos respuestas
+ * divergieran, que es exactamente lo que AD-11 existe para impedir.
+ *
+ * Puro y sin disco (AD-5): recibe el grafo ya leído —qué enlaces salen de cada ruta— y
+ * recorre a lo ancho desde la portada. Quien lo llama es quien sabe leer el sitio
+ * construido o el navegador.
+ */
+export function superficiesInalcanzables(
+  publicadas: readonly string[],
+  enlaces: ReadonlyMap<string, readonly string[]>,
+  opciones: { desde?: string; maximoDeSaltos?: number } = {},
+): string[] {
+  const desde = opciones.desde ?? '/';
+  const maximoDeSaltos = opciones.maximoDeSaltos ?? MAX_SALTOS_DESDE_LA_PORTADA;
+
+  const visitadas = new Set<string>();
+  let frontera = [desde];
+
+  for (let salto = 0; salto <= maximoDeSaltos && frontera.length > 0; salto += 1) {
+    const siguiente: string[] = [];
+    for (const ruta of frontera) {
+      if (visitadas.has(ruta)) continue;
+      visitadas.add(ruta);
+      for (const enlace of enlaces.get(ruta) ?? []) {
+        if (!visitadas.has(enlace)) siguiente.push(enlace);
+      }
+    }
+    frontera = [...new Set(siguiente)];
+  }
+
+  return publicadas.filter((ruta) => !visitadas.has(ruta));
 }
 
 /**
