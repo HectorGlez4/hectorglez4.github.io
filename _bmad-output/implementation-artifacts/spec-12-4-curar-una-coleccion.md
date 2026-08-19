@@ -2,14 +2,38 @@
 title: 'Story 12.4 — Curar una Colección desde la herramienta'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '4fe10498bb3dfe6a8056db49f45ad4918b760486'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-12-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-12-3-la-pagina-de-coleccion.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      `corpus/_colecciones-retiradas/` no se versiona con `.gitkeep`, a diferencia de sus
+      tres hermanos de `corpus/`.
+    evidence: |-
+      Versionarlo dejaría `git status --porcelain corpus/` no vacío, que es criterio de
+      aceptación de esta historia. `mover` lo crea al vuelo y entra en el repositorio con
+      la primera Colección que se retire de verdad, con lo que la excepción se cierra sola.
+      Queda escrito en `Rutas.coleccionesRetiradas` y en `AGENTS.md`.
+    location: >-
+      tools/lib/corpus.ts
+    severity: low
+  - summary: >-
+      La regla de que un miembro esté publicado la impone solo la herramienta, y ningún
+      esquema puede imponerla.
+    evidence: |-
+      `miembros` es una lista de slugs y jamás una referencia dura, y esa blandura es
+      exactamente lo que hace que retirar una Cita no rompa el build. Así que editar el
+      fichero a mano sí se salta esa regla, aunque no se salte ninguna otra. `AGENTS.md`
+      afirmaba lo contrario y se corrigió: ahora dice qué impone la herramienta que el
+      build no puede imponer.
+    location: >-
+      tools/lib/curacion.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -106,3 +130,32 @@ deferred: []
 - `npx vitest run` -- expected: todo en verde; ninguna de las 1107 de la línea base perdida.
 - `npm run build` -- expected: construye, con la puerta de la 11.2 intacta y sin Colecciones reales.
 - `git status --porcelain corpus/` -- expected: vacío tras correr la suite; la herramienta no siembra nada en el repositorio.
+
+### 2026-08-19 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12: (high 4, medium 4, low 4)
+- defer: 2: (low 2)
+- reject: 9: (low 9)
+- addressed_findings:
+  - `[high]` `[patch]` `escribirColeccion` componía siempre `{slug}.yml`, pero el lector y el cargador de Astro aceptan `.yml` y `.yaml`: un `asignar` sobre una Colección guardada como `.yaml` creaba un segundo fichero con el mismo slug, informaba de éxito y ponía el build en rojo por la puerta de la 12.2. Ahora escribe en la ruta que devolvió el lector.
+  - `[high]` `[patch]` Crear una Colección después de despublicar otra con el mismo slug la dejaba sin poder retirarse, y el fallo salía como traza de Node. Se comprueba también contra las retiradas, y todo movimiento pasa por un envoltorio que convierte la negativa a sobrescribir en un rechazo redactado.
+  - `[high]` `[patch]` Un `asignar` sobre un fichero editado a mano borraba en silencio las claves que el lector no reconoce, porque el esquema veía un objeto reconstruido de tres campos y nunca el juego de claves real. Ahora se valida el YAML crudo, así que un `miembos:` mal escrito —que el build rechaza— se rechaza también aquí, sin tocar el fichero.
+  - `[high]` `[patch]` `AGENTS.md` afirmaba que editar a mano «no se salta ninguna regla», y sí se salta una: la de que el miembro esté publicado, que ningún esquema puede tener. El documento que lee un humano decía algo que el comentario del código desmentía.
+  - `[medium]` `[patch]` Una bandera mal tecleada se ignoraba y la orden escribía en el corpus **real**, justo lo contrario de la restricción de no sembrar Colecciones reales. Verificado: `--corpuss` sale con código 2 y no toca nada.
+  - `[medium]` `[patch]` La sección de Colecciones del informe de huecos no la ejercitaba nada, porque todas las llamadas al CLI corren contra el corpus real, que está vacío. Tres pruebas sobre corpus temporales, una de las cuales extrae la línea del informe y exige que `estado` la contenga literalmente, para que las dos lecturas no puedan divergir.
+  - `[medium]` `[patch]` `listar` no tenía ninguna aserción y su rama de «se publica» reescribía a mano el formato recién centralizado — una tercera redacción en un cambio cuya tesis es que la segunda acabará mintiendo.
+  - `[medium]` `[patch]` Un solo fichero de Colección con YAML ilegible mataba el informe de huecos entero, incluidas las secciones de Temas y tradición.
+  - `[low]` `[patch]` Recuento sin deduplicar; falta de `publicar` como espejo de `despublicar` cuando un mensaje de rechazo remitía a `listar` para encontrar las retiradas; y el docblock del umbral que decía «es el único sitio» cuando ya había dos lectores informativos.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `npm run coleccion` crea una Colección con su nombre y criterio, le asigna y le quita Citas —**solo publicadas**—, dice cuánto le falta para publicarse, la despublica moviéndola a `corpus/_colecciones-retiradas/` y la vuelve a publicar. `tools/huecos.ts` enumera además las Colecciones cortas junto a los Temas, con la misma redacción. Es comodidad y no puerta: lo que la herramienta rechaza por forma lo rechaza también el esquema, y lo único que impone ella sola es lo que ningún esquema puede ver.
+
+**Verificación.** `npx astro check` 0 errores sobre 147 ficheros. `npx vitest run` **1158/1158** en 44, frente a 1107/42 de la línea base. `npm run build` construye con la puerta de la 11.2 intacta. `npx playwright test` 398 pasan. `git status --porcelain corpus/` vacío. Y a mano: el ciclo completo sobre un corpus temporal deja las Citas intactas byte a byte, un slug inexistente se rechaza con código 1, una bandera mal tecleada sale con código 2 sin tocar el corpus real, y un `asignar` sobre un fichero `.yaml` escribe en ese mismo fichero sin duplicarlo.
+
+**Recomendación de nueva revisión: true.** Cuatro hallazgos de severidad alta, tres de ellos con pérdida de datos o escritura fuera de sitio.
+
+**Riesgos residuales.** Los dos diferidos están en el frontmatter, ambos de baja severidad y ambos con la decisión escrita.

@@ -10,7 +10,7 @@
 
 import { appendFile, readFile, readdir, mkdir, writeFile, rename } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { basename, extname, join, relative } from 'node:path';
+import { basename, dirname, extname, join, relative } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import type { AutorAdmisible, CitaAdmisible } from '../../src/lib/admision.ts';
 import type {
@@ -40,6 +40,27 @@ export interface Rutas {
    * del Corpus cure la primera; ver la nota de `src/content.config.ts`.
    */
   colecciones: string;
+  /**
+   * Donde va una Colección despublicada — Historia 12.4.
+   *
+   * Es `corpus/_revision/` para Colecciones, y el paralelo es literal: AD-2 dice que lo no
+   * publicado vive **fuera** del árbol construido, y que publicar y despublicar son mover
+   * el fichero. Ninguna base de `src/content.config.ts` apunta aquí, así que una Colección
+   * retirada no la carga nadie, y su criterio y su lista de miembros siguen enteros para
+   * cuando se quiera volver a publicar: se mueve de vuelta.
+   *
+   * No se borra, y no es una preferencia. `AGENTS.md` lo prohíbe expresamente porque git es
+   * el único almacén del contenido; una Colección es contenido editorial —un criterio y una
+   * curación— tanto como una Cita.
+   *
+   * **No se versiona vacío con `.gitkeep`**, a diferencia de sus tres hermanos, y la
+   * excepción queda escrita para que no se lea como olvido: el directorio lo crea `mover` la
+   * primera vez que se retira algo, y hoy no hay ninguna Colección real que retirar. Con el
+   * directorio versionado, `git status --porcelain corpus/` dejaría de estar vacío por un
+   * hueco que todavía no le hace falta a nadie. Cuando se despublique la primera Colección
+   * de verdad, el directorio entra en el repositorio con su fichero dentro.
+   */
+  coleccionesRetiradas: string;
   revision: string;
   /**
    * Los documentos de Fuente que produce `tools/recuperar.ts` (AD-23).
@@ -76,6 +97,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     autores: join(raizCorpus, 'autores'),
     temas: join(raizCorpus, 'temas'),
     colecciones: join(raizCorpus, 'colecciones'),
+    coleccionesRetiradas: join(raizCorpus, '_colecciones-retiradas'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
@@ -186,18 +208,34 @@ export function slugDeColeccion(rutas: Rutas, ruta: string): string {
  * es el esquema de `src/content.config.ts`, y las pruebas de build lo fijan. La tolerancia
  * es de la herramienta, que existe para arreglar lo que el build rechaza.
  */
+/**
+ * El contenido de un fichero de Colección **tal cual lo da el analizador** — Historia 12.4.
+ *
+ * `leerColecciones` describe una Colección con los cuatro campos que sabe nombrar, y por
+ * eso descarta lo que no reconoce: es lo que necesita quien enumera. Quien va a
+ * **reescribir** el fichero necesita lo contrario —el juego de claves real— porque el
+ * `.strict()` del esquema existe justamente para cazar un `miembos:` mal tecleado, y un
+ * objeto reconstruido de tres campos nunca se lo enseña. Sin esto, curar un fichero que el
+ * build habría rechazado lo reescribía perdiendo en silencio lo que no se reconoció.
+ *
+ * Devuelve `unknown` a propósito: aquí no se juzga la forma, se lee. Quien juzga es el
+ * esquema de admisión.
+ */
+export async function leerColeccionBruta(ruta: string): Promise<unknown> {
+  try {
+    return parsearYaml(await readFile(ruta, 'utf8'));
+  } catch (fallo) {
+    throw new Error(
+      `${ruta} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+    );
+  }
+}
+
 export async function leerColecciones(rutas: Rutas): Promise<ColeccionEnCorpus[]> {
   const ficheros = await ficherosDe(rutas.colecciones, ['.yml', '.yaml']);
   return Promise.all(
     ficheros.map(async (ruta) => {
-      let leido: unknown;
-      try {
-        leido = parsearYaml(await readFile(ruta, 'utf8'));
-      } catch (fallo) {
-        throw new Error(
-          `${ruta} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
-        );
-      }
+      const leido = await leerColeccionBruta(ruta);
 
       const datos =
         leido !== null && typeof leido === 'object' && !Array.isArray(leido)
@@ -323,6 +361,42 @@ export async function escribirTema(
   await mkdir(rutas.temas, { recursive: true });
   const ruta = join(rutas.temas, `${slug}.yml`);
   await writeFile(ruta, aYaml(tema), 'utf8');
+  return ruta;
+}
+
+/**
+ * Escribe un fichero de Colección — Historia 12.4.
+ *
+ * Vuelca el fichero entero, como `escribirAutor` y `escribirTema`: es el precio de que la
+ * herramienta sea comodidad y no un editor de texto, y la consecuencia que conviene saber
+ * es que un comentario escrito a mano dentro del fichero no sobrevive a una asignación.
+ *
+ * El orden de las claves es el de la ficha —nombre, criterio, miembros— y no el de la
+ * estructura que se le pase. `aYaml` omite una lista vacía, así que una Colección recién
+ * creada sale sin la clave `miembros`, que es exactamente la convención del corpus: un
+ * campo sin valor se omite, y el esquema ya lo lee como lista vacía.
+ *
+ * **Recibe la ruta, no el slug**, y no es un detalle de comodidad. Componerla aquí como
+ * `{slug}.yml` daba un fichero nuevo cuando el original se llamaba `{slug}.yaml` —las dos
+ * extensiones son la misma Colección para el cargador de Astro y para `slugDeColeccion`—:
+ * la Colección quedaba duplicada, la orden informaba de éxito y la construcción siguiente
+ * moría por la puerta de slug repetido de la Historia 12.2. Se escribe donde estaba, que es
+ * lo que ya hacía bien `despublicarColeccion` moviendo el fichero que el lector devolvió.
+ */
+export async function escribirColeccion(
+  ruta: string,
+  coleccion: { nombre: string; criterio: string; miembros: string[] },
+): Promise<string> {
+  await mkdir(dirname(ruta), { recursive: true });
+  await writeFile(
+    ruta,
+    aYaml({
+      nombre: coleccion.nombre,
+      criterio: coleccion.criterio,
+      miembros: coleccion.miembros,
+    }),
+    'utf8',
+  );
   return ruta;
 }
 

@@ -4,7 +4,11 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { verHuecos, type AutorParaHuecos, type CitaParaHuecos } from '../../src/lib/huecos.ts';
-import { MIN_CITAS_POR_TEMA, SUELO_TRADICION_LATINOAMERICANA } from '../../src/lib/umbrales.ts';
+import {
+  MIN_CITAS_POR_COLECCION,
+  MIN_CITAS_POR_TEMA,
+  SUELO_TRADICION_LATINOAMERICANA,
+} from '../../src/lib/umbrales.ts';
 
 const ejecutar = promisify(execFile);
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -97,6 +101,40 @@ describe('Historia 9.3 — el equilibrio de tradición frente al suelo', () => {
 
   it('un Corpus sin Autores no divide por cero', () => {
     expect(verHuecos([], [], []).tradicion.porcentaje).toBe(0);
+  });
+});
+
+/**
+ * Historia 12.4 — las Colecciones entran en la misma vista, con la misma lectura.
+ *
+ * El recuento llega **ya resuelto**: quién resuelve la pertenencia de una Colección es
+ * `resolverColeccion`, y esta vista no lo repite. Lo que sí es suyo, y es lo que se fija
+ * aquí, es que el umbral y el orden se apliquen igual que a un Tema.
+ */
+describe('Historia 12.4 — las Colecciones por debajo de su umbral', () => {
+  const colecciones = [
+    { slug: 'aforismos', nombre: 'Aforismos', resueltas: MIN_CITAS_POR_COLECCION - 9 },
+    { slug: 'frases-cortas', nombre: 'Frases cortas', resueltas: MIN_CITAS_POR_COLECCION - 2 },
+    { slug: 'ya-publicada', nombre: 'Ya publicada', resueltas: MIN_CITAS_POR_COLECCION },
+  ];
+  const huecos = verHuecos([], [], [], [], colecciones);
+
+  it('la que llega al umbral no es un hueco', () => {
+    expect(huecos.colecciones.map((c) => c.slug)).not.toContain('ya-publicada');
+  });
+
+  it('dice cuántas Citas le faltan a cada una, sobre el recuento resuelto', () => {
+    const aforismos = huecos.colecciones.find((c) => c.slug === 'aforismos')!;
+    expect(aforismos.publicadas).toBe(MIN_CITAS_POR_COLECCION - 9);
+    expect(aforismos.faltan).toBe(9);
+  });
+
+  it('primero lo que menos falta, igual que con los Temas', () => {
+    expect(huecos.colecciones.map((c) => c.slug)).toEqual(['frases-cortas', 'aforismos']);
+  });
+
+  it('sin Colecciones no hay huecos de Colección: es el estado de hoy', () => {
+    expect(verHuecos([], [], []).colecciones).toEqual([]);
   });
 });
 

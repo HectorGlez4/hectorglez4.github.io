@@ -995,3 +995,47 @@ ejecuta. Se ejercitó todo en una copia aislada con una Colección sembrada —4
 verde, axe WCAG 2.1 AA incluido— pero eso no es una garantía que corra sola. La Página de
 Colección no existirá en producción hasta que se cure la primera con la herramienta de la
 12.4, y la portada se comporta bien en ese estado: no la menciona en absoluto.
+
+## 12.4 — Curar una Colección desde la herramienta
+
+**Verificado.** `npm run coleccion` crea una Colección con su nombre y criterio, le asigna
+y le quita Citas —solo publicadas—, dice cuánto le falta para publicarse, la despublica
+moviéndola a `corpus/_colecciones-retiradas/` y la vuelve a publicar. `npm run huecos`
+enumera además las Colecciones cortas junto a los Temas, con la misma redacción: quien cura
+una Colección y quien mira qué le falta al Corpus son la misma persona en el mismo momento.
+
+1158 pruebas unitarias en verde (1107 al empezar), 398 e2e, 0 errores de tipos, y
+`corpus/` intacto byte a byte tras correr la suite entera.
+
+**Comodidad y no puerta, dicho con precisión.** Lo que la herramienta rechaza por forma lo
+rechaza también el esquema, y lo comprueba una prueba que construye el fichero que la propia
+herramienta escribió —verde— y luego le quita el `criterio:` a mano para verlo romper con el
+mismo mensaje. Lo único que impone la herramienta sola es lo que ningún esquema puede ver:
+que el miembro sea una Cita y que esté publicada. `miembros` es una lista de slugs y jamás
+una referencia dura, y esa blandura es exactamente lo que hace que retirar una Cita no rompa
+el build. `AGENTS.md` afirmaba que editar a mano no se salta ninguna regla; se corrigió,
+porque sí se salta esa.
+
+**Tres agujeros con pérdida de datos que la revisión encontró.** El primero: `escribirColeccion`
+componía siempre `{slug}.yml`, pero el lector y el cargador de Astro aceptan `.yml` y
+`.yaml`, así que un `asignar` sobre una Colección guardada como `.yaml` creaba un segundo
+fichero con el mismo slug, informaba de éxito y ponía el build en rojo por la puerta que la
+12.2 había construido. El segundo: un `asignar` sobre un fichero editado a mano borraba en
+silencio las claves que el lector no reconoce, porque el esquema veía un objeto reconstruido
+de tres campos y nunca el juego real. El tercero: una bandera mal tecleada —`--corpuss`— se
+ignoraba y la orden escribía en el corpus **real**, justo lo contrario de la restricción que
+más se había cuidado.
+
+## Cierre de la Épica 12
+
+Las cuatro historias cerradas, y a diferencia de la Épica 11 ésta queda en `done`: no tiene
+ninguna bloqueada. Lo que entra es la cola larga con sitio donde aterrizar —una Colección se
+declara, se resuelve blanda contra el conjunto publicable, se publica en su propia página
+sin canibalizar a la Cita, y se cura sin escribir YAML—, más el dueño único de publicabilidad
+que la 12.1 construyó y que las tres siguientes estrenaron sin tocar ninguna lista.
+
+**La feature queda encendida pero sin encender.** `corpus/colecciones/` está vacío a
+propósito: curar es decisión editorial y no la toma un agente. Así que el despliegue de esta
+épica no muestra ninguna Página de Colección, y la portada no menciona la sección. La primera
+Colección la crea Héctor con `npm run coleccion -- crear "…" --criterio "…"`, y ese día la
+superficie aparece sola.

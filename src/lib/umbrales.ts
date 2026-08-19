@@ -90,7 +90,14 @@ export const MAX_BYTES_DE_GUION = 6656;
  * esa rebaja se decide con Colecciones curadas delante, no aquí.
  *
  * Se aplica al recuento **resuelto**, jamás al declarado: quien lo aplica es
- * `coleccionesPublicadas` en `src/lib/publicado.ts` (AD-11), y es el único sitio.
+ * `coleccionesPublicadas` en `src/lib/publicado.ts` (AD-11), y es el único sitio **que
+ * decide qué se publica**.
+ *
+ * La precisión no es un matiz: desde la Historia 12.4 hay otros dos lectores de este número
+ * —`huecoDeColeccion`, que dice cuántas Citas le faltan a una Colección, y las órdenes que
+ * lo escriben en su informe—. Ninguno filtra nada ni genera ninguna ruta: informan. Que
+ * lean el mismo número es justamente lo que hace que «le faltan cuatro» y «no se publica»
+ * hablen de lo mismo; lo que estaría mal es que decidieran con él.
  */
 export const MIN_CITAS_POR_COLECCION = 15;
 
