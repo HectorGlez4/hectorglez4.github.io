@@ -2,7 +2,8 @@
 title: 'Story 11.3 — El objetivo de cada sesión sale del hueco, no del criterio'
 type: 'feature'
 created: '2026-08-19'
-status: 'ready-for-dev'
+status: 'in-progress'
+baseline_revision: '8e9b6c8dd00232c74cf048c1de7b07b0b9f41530'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
