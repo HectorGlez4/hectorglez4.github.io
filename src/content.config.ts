@@ -4,6 +4,7 @@ import {
   año,
   añoFallecimiento,
   estadoDerechos,
+  fuenteDeCita,
   nombre,
   procedencia,
   semblanza,
@@ -29,7 +30,12 @@ import {
 //
 // `corpus/fuentes/` tampoco es la base de ninguna, y por el mismo motivo: son los
 // documentos de Fuente que versiona `tools/recuperar.ts` (AD-23), texto de terceros que
-// el build **no lee** y que no puede filtrarse al sitio construido.
+// no puede filtrarse al sitio construido.
+//
+// Que no sea colección no quiere decir que el build lo ignore: desde la Historia 11.2 lo
+// lee `integraciones/cotejo.ts`, que comprueba que el texto de cada Cita aparezca
+// literalmente en el cuerpo de su documento y rompe la construcción si no. Lo lee para
+// **cotejar**, nunca para publicar.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const citas = defineCollection({
@@ -47,6 +53,17 @@ const citas = defineCollection({
     slug,
     procedencia,
     estadoDerechos,
+    /*
+     * Historia 11.2 — la Fuente de la que salió la Cita, y con ella su documento.
+     *
+     * Declararlo aquí es lo que hace que el dato sobreviva a la publicación: el esquema
+     * descarta lo que no reconoce, así que sin esta línea el `fuente:` que escribe
+     * `tools/extraer.ts` se perdía al leer la colección y el cotejo no tendría de dónde
+     * agarrarse. Es opcional en el esquema y **no** en la puerta: el cotejo del build
+     * (`integraciones/cotejo.ts`) exige documento a toda Cita que no esté en el censo
+     * cerrado de `corpus/pendientes-de-cotejo.yml`, y rompe la construcción si falta.
+     */
+    fuente: fuenteDeCita.optional(),
     // FR-15 — marcado de Cita apta para portada, que consume la Cita del Día (FR-9).
     aptaParaPortada: z.boolean().default(false),
   }),

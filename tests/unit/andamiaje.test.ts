@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
 import { esVersionSuficiente, VERSION_MINIMA } from '../../tools/comprobar-node.mjs';
 import { MARCA } from '../../src/lib/marca.ts';
+import { FICHERO_DEL_CENSO, TOPE_DE_PENDIENTES_DE_COTEJO } from '../../tools/lib/cotejo.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 
@@ -38,6 +40,8 @@ describe('Historia 1.1 — estructura de directorios', () => {
     'corpus/_revision',
     // Historia 11.1 — los documentos de Fuente que versiona `tools/recuperar.ts` (AD-23).
     'corpus/fuentes',
+    // Historia 11.2 — las integraciones de build que no caben en `src/lib/` por AD-5.
+    'integraciones',
     'src/lib',
     'src/components',
     'src/islands',
@@ -77,6 +81,56 @@ describe('Historia 1.1 — estructura de directorios', () => {
     ]) {
       expect(readdirSync(resolve(raiz, dir)), dir).toContain('.gitkeep');
     }
+  });
+});
+
+/**
+ * Historia 11.2 — el censo de pendientes de cotejo es deuda que solo mengua.
+ *
+ * El cotejo del build exige documento a toda Cita que no esté en este censo. Lo que
+ * impide que el censo se convierta en un vertedero es que su recuento tenga un tope
+ * registrado que solo se puede bajar a mano: añadir una Cita para desbloquear un build
+ * obligaría a subir el tope en `tools/lib/cotejo.ts`, y eso es un cambio visible en el
+ * diff que hay que justificar.
+ */
+describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
+  const ruta = resolve(raiz, 'corpus', FICHERO_DEL_CENSO);
+
+  it('existe y está versionado', () => {
+    expect(existsSync(ruta)).toBe(true);
+  });
+
+  it('explica arriba por qué existe y que es cerrado', () => {
+    // Un censo sin motivo escrito se lee como una lista de excepciones sin dueño.
+    const contenido = readFileSync(ruta, 'utf8');
+    expect(contenido).toMatch(/cerrado/i);
+    expect(contenido).toMatch(/11\.2/);
+  });
+
+  it('su recuento no supera el tope registrado', () => {
+    const censo = parsearYaml(readFileSync(ruta, 'utf8')) as { citas?: unknown };
+    expect(Array.isArray(censo.citas)).toBe(true);
+    const citas = censo.citas as string[];
+    expect(citas.length).toBeLessThanOrEqual(TOPE_DE_PENDIENTES_DE_COTEJO);
+  });
+
+  it('no repite ningún slug', () => {
+    const censo = parsearYaml(readFileSync(ruta, 'utf8')) as { citas: string[] };
+    expect(new Set(censo.citas).size).toBe(censo.citas.length);
+  });
+
+  it('toda entrada corresponde a una Cita que existe', () => {
+    // La misma regla que aplica el build, comprobada también aquí porque una entrada
+    // rancia es una exención que sobrevive a la Cita que la justificaba.
+    const censo = parsearYaml(readFileSync(ruta, 'utf8')) as { citas: string[] };
+    const publicados = new Set(
+      readdirSync(resolve(raiz, 'corpus/citas'))
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => /^slug:\s*"?([^"\n]+?)"?\s*$/m.exec(
+          readFileSync(resolve(raiz, 'corpus/citas', f), 'utf8'),
+        )?.[1]),
+    );
+    expect(censo.citas.filter((slug) => !publicados.has(slug))).toEqual([]);
   });
 });
 
@@ -169,15 +223,21 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
   const barridos = [
     ...ficherosDe(resolve(raiz, 'src')),
     ...ficherosDe(resolve(raiz, 'tools')),
+    // Historia 11.2 — `integraciones/` corre **dentro** del build. Dejarlo fuera del
+    // barrido sería el punto ciego más grande de todos: es el único código nuevo que la
+    // construcción ejecuta por su cuenta.
+    ...ficherosDe(resolve(raiz, 'integraciones')),
     ...configuracionDeLaRaiz,
   ].map((ruta) => relative(raiz, ruta).split('\\').join('/'));
 
-  it('barre src/, todas las órdenes de tools/ y la configuración de la raíz', () => {
+  it('barre src/, tools/, integraciones/ y la configuración de la raíz', () => {
     // Si el barrido se quedara corto, las pruebas de abajo pasarían sin mirar nada.
     for (const exigido of [
       'tools/recuperar.ts',
       'tools/extraer.ts',
       'tools/lib/documento.ts',
+      'tools/lib/cotejo.ts',
+      'integraciones/cotejo.ts',
       'src/content.config.ts',
       'astro.config.mjs',
       'vitest.config.ts',

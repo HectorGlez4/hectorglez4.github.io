@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
 import { componerDocumento, type CabeceraDeDocumento } from '../../tools/lib/documento.ts';
+import { citaAdmisible } from '../../src/lib/admision.ts';
 
 const ejecutar = promisify(execFile);
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -110,6 +111,27 @@ describe('Historia 9.1 — las candidatas quedan en revisión, no publicadas', (
       expect(frontmatter.fuente.licencia).toBe('CC BY-SA 4.0');
       expect(frontmatter.procedencia.obra).toBe('Sobre la brevedad de la vida');
       expect(frontmatter.procedencia.año).toBe(49);
+    }
+  });
+
+  it('lo que escribe pasa la puerta de admisión que aplicará el build', async () => {
+    /*
+     * Historia 11.2 — `fuenteDeCita` exige dirección, y la extracción la tenía opcional.
+     * Una candidata inaprobable no se veía hasta el momento de revisarla, lejos de donde
+     * se causó. La aserción no lee el código: valida lo escrito contra el esquema.
+     */
+    const { corpus } = await corpusVacio();
+    await extraer(await documento(corpus), corpus);
+
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+
+    for (const fichero of ficheros) {
+      const comprobacion = citaAdmisible.safeParse(await frontmatterDe(corpus, fichero));
+      expect(
+        comprobacion.success ? [] : comprobacion.error.issues.map((i) => i.message),
+        fichero,
+      ).toEqual([]);
     }
   });
 

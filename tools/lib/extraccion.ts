@@ -21,8 +21,14 @@ export interface DocumentoDeFuente {
   obra: string;
   /** Año declarado por la Fuente. Puede venir aproximado; ver `añoExacto`. */
   año?: string | number;
-  /** Dirección concreta del documento, para poder volver a él. */
-  url?: string;
+  /**
+   * Dirección concreta del documento, para poder volver a él.
+   *
+   * Obligatoria desde la Historia 11.2: `fuenteDeCita` la exige en el esquema, así que
+   * una candidata sin ella nace inaprobable y el desacuerdo solo se veía al revisar,
+   * lejos de donde se causó. Todo documento versionado la trae en su cabecera.
+   */
+  url: string;
   texto: string;
 }
 
@@ -31,7 +37,7 @@ export interface Candidata {
   autor: string;
   procedencia: { obra: string; año?: number };
   /** De dónde salió el texto y bajo qué licencia — el criterio lo exige por candidata. */
-  fuente: { id: string; nombre: string; licencia: string; url?: string };
+  fuente: { id: string; nombre: string; licencia: string; url: string };
 }
 
 export type Descarte =
@@ -225,7 +231,7 @@ export function extraerCandidatas(
         id: fuente.id,
         nombre: fuente.nombre,
         licencia: fuente.licencia,
-        ...(documento.url !== undefined ? { url: documento.url } : {}),
+        url: documento.url,
       },
     });
   }

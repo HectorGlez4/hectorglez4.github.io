@@ -17,6 +17,7 @@
 import { readFile } from 'node:fs/promises';
 import { parse as parsearYaml } from 'yaml';
 import { citaAdmisible, gradoDeProcedencia, type CitaAdmisible } from '../src/lib/admision.ts';
+import { motivoParaNoPublicar } from './lib/cotejo.ts';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeAutor, slugDeCita, slugDeTema, slugLibre } from '../src/lib/slug.ts';
 import {
@@ -35,6 +36,17 @@ export interface EntradaDeLote {
   autor?: string;
   temas?: string[];
   procedencia?: { obra?: string; año?: number; referencia?: string };
+  /**
+   * La Fuente de la que salió, y con ella el documento contra el que el build coteja
+   * el texto — Historia 11.2.
+   *
+   * Es obligatoria para publicar, salvo que la Cita sea una de las anteriores a la v3
+   * que el censo ampara: sin ella la Cita se queda en `corpus/_revision/` con la regla
+   * escrita. Declararla no relaja nada —el cotejo del build sigue exigiendo que el texto
+   * aparezca literalmente en un documento que la recuperación versionó—, solo permite
+   * que un alta sobre una obra ya recuperada llegue a construir.
+   */
+  fuente?: { id?: string; nombre?: string; licencia?: string; url?: string };
   aptaParaPortada?: boolean;
 }
 
@@ -169,6 +181,9 @@ export async function darDeAltaLote(
       slug: slugLibre(slugBase, slugsOcupados),
       procedencia: entrada.procedencia,
       estadoDerechos: 'dominio-público' as const,
+      // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
+      // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
+      ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
       // Solo se registra el sí. El esquema ya da `false` por defecto, así que escribir
       // `aptaParaPortada: false` en cada Cita del corpus sería ruido que además invita
       // a leerlo como una decisión tomada, cuando es la ausencia de decisión.
@@ -182,6 +197,18 @@ export async function darDeAltaLote(
         motivos.push(campo ? `${campo}: ${issue.message}` : issue.message);
       }
     }
+
+    /*
+     * Historia 11.2 — el alta no fabrica builds rotos.
+     *
+     * Publicar una Cita sin Fuente en `corpus/citas/` mataba la construcción siguiente:
+     * la herramienta escribía el fichero, informaba de éxito, y el fallo aparecía después
+     * en un sitio distinto y en boca de otra puerta. Aquí se aplica **la misma** regla que
+     * aplicará el build —importada, no copiada—, así que la Cita se queda en revisión con
+     * lo que le falta escrito al lado.
+     */
+    const sinDocumento = motivoParaNoPublicar(candidata);
+    if (sinDocumento !== undefined) motivos.push(sinDocumento);
 
     const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
 
@@ -232,6 +259,7 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
     slug: datos.slug,
     procedencia: datos.procedencia,
     estadoDerechos: datos.estadoDerechos,
+    ...(datos.fuente !== undefined ? { fuente: datos.fuente } : {}),
     ...(datos.aptaParaPortada ? { aptaParaPortada: true } : {}),
   };
 }

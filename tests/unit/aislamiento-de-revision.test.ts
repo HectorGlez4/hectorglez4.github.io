@@ -42,7 +42,9 @@ const CITA_EN_REVISION = citaValida({
 });
 
 async function construir(corpus: Record<string, string>) {
-  const resultado = await construirConCorpus(corpus, { paginas: { 'sonda.astro': SONDA } });
+  const resultado = await construirConCorpus(corpus, {
+    paginas: { 'sonda.astro': SONDA },
+  });
   aLimpiar.push(resultado.proyecto);
   return resultado;
 }

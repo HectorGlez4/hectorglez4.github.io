@@ -107,6 +107,68 @@ export const estadoDerechos = z.literal('dominio-público', {
     'cualquier otro estado no puede publicarse.',
 });
 
+/**
+ * La Fuente de la que salió una Cita — Historia 11.2.
+ *
+ * Es lo que ata una Cita a su documento versionado en `corpus/fuentes/`: con el
+ * identificador de la Fuente y la obra de su Procedencia se compone el nombre del
+ * documento, y el build comprueba que el texto de la Cita aparezca literalmente en su
+ * cuerpo. Sin este campo declarado aquí, el dato que escribe la extracción se pierde al
+ * publicar —el esquema descarta lo que no reconoce— y esa comprobación no tendría de
+ * dónde agarrarse.
+ *
+ * Aquí solo vive la **forma**. La comprobación lee ficheros, y por AD-5 este módulo es
+ * puro y no toca el disco: vive fuera, en `tools/lib/` y en la integración de build que
+ * `astro.config.mjs` engancha.
+ *
+ * `id` y `url` son obligatorios cuando el campo se declara: el identificador es lo que
+ * elige el documento, y la dirección es lo que permite volver a la Fuente y comprobarlo
+ * a mano. `nombre` y `licencia` son comodidad de lectura —los escribe la extracción
+ * desde el conjunto cerrado de `tools/lib/fuentes.ts`, que es su dueño— y por eso no se
+ * exigen a quien escriba una Cita a mano.
+ */
+export const fuenteDeCita = z
+  .object(
+    {
+      id: z
+        .string({ message: 'Regla incumplida: la Fuente de la Cita no declara identificador.' })
+        .regex(
+          /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+          'Regla incumplida: el identificador de la Fuente solo admite minúsculas, ' +
+            'dígitos y guiones. Los admitidos están en tools/lib/fuentes.ts.',
+        ),
+      nombre: z.string().min(1, 'El nombre de la Fuente, si se declara, no puede estar vacío.').optional(),
+      licencia: z
+        .string()
+        .min(1, 'La licencia de la Fuente, si se declara, no puede estar vacía.')
+        .optional(),
+      url: z
+        .string({ message: 'Regla incumplida: la Fuente de la Cita no declara dirección.' })
+        .regex(
+          /^https?:\/\/\S+$/,
+          'Regla incumplida: la dirección de la Fuente debe ser una URL http(s).',
+        ),
+    },
+    {
+      /*
+       * El mensaje del objeto cubre **todos** sus fallos propios, y con `.strict()` uno
+       * de ellos es la clave sobrante. Contestar «es un objeto con identificador y
+       * dirección» a un `licencia_` mal tecleado deja al editor releyendo un objeto que
+       * ya tiene las dos cosas, sin decirle cuál sobra. Cada caso lleva el suyo.
+       */
+      error: (problema) =>
+        problema.code === 'unrecognized_keys'
+          ? 'Regla incumplida: la Fuente de la Cita no reconoce ' +
+            `«${problema.keys.join('», «')}». Sus campos son id y url —obligatorios—, y ` +
+            'nombre y licencia. Un dato que no sea de esos no se guarda en la Fuente.'
+          : 'Regla incumplida: la Fuente de la Cita, si se declara, es un objeto con ' +
+            'identificador y dirección.',
+    },
+  )
+  .strict();
+
+export type FuenteDeCita = z.infer<typeof fuenteDeCita>;
+
 export const nombre = (entidad: string) =>
   z
     .string({ message: `Regla incumplida: falta el nombre del ${entidad}.` })
@@ -164,6 +226,14 @@ export const citaAdmisible = z.object({
   procedencia,
   estadoDerechos,
   aptaParaPortada: z.boolean().default(false),
+  /*
+   * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen
+   * documento —se lo da la Historia 11.4— y viven en un censo cerrado, versionado en
+   * `corpus/`, que solo mengua. Para cualquier Cita que no esté en él, la puerta del
+   * build exige este campo y rompe la construcción si falta: la opcionalidad es del
+   * esquema, no de la puerta.
+   */
+  fuente: fuenteDeCita.optional(),
 });
 
 export type CitaAdmisible = z.infer<typeof citaAdmisible>;

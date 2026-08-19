@@ -13,6 +13,8 @@ import { existsSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import type { AutorAdmisible, CitaAdmisible } from '../../src/lib/admision.ts';
+import { FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
+import { analizarDocumento } from './documento.ts';
 
 export interface Rutas {
   raiz: string;
@@ -23,11 +25,22 @@ export interface Rutas {
   /**
    * Los documentos de Fuente que produce `tools/recuperar.ts` (AD-23).
    *
-   * Vive dentro de `corpus/` porque es contenido versionado, pero **no es una colección
-   * y el build no lo lee**: es texto de terceros y ninguna base de `src/content.config.ts`
-   * apunta aquí. Las rutas del corpus tienen un solo dueño, y es este.
+   * Vive dentro de `corpus/` porque es contenido versionado, pero **no es una colección**:
+   * es texto de terceros y ninguna base de `src/content.config.ts` apunta aquí, así que
+   * nada de esto llega al sitio construido. Las rutas del corpus tienen un solo dueño, y
+   * es este.
+   *
+   * La Historia 11.2 sí lo hace leer al build, aunque no como colección:
+   * `integraciones/cotejo.ts` coteja el texto de cada Cita contra el cuerpo de su
+   * documento antes de construir nada.
    */
   fuentes: string;
+  /**
+   * El censo de Citas anteriores a la v3 que todavía no tienen documento — Historia 11.2.
+   *
+   * Va junto a `corpus/portada.json`, que ya es metadato del Corpus y no colección.
+   */
+  pendientesDeCotejo: string;
 }
 
 export function rutasDelCorpus(raizCorpus: string): Rutas {
@@ -38,13 +51,27 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     temas: join(raizCorpus, 'temas'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
+    pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
   };
 }
 
+/**
+ * Los ficheros de un directorio del corpus, **incluidos los de sus subdirectorios**.
+ *
+ * La recursión no es comodidad: es lo que hace que estas funciones enumeren exactamente
+ * lo que publica `src/content.config.ts`, cuyas colecciones globan `**\/*.md` y
+ * `**\/*.{yml,yaml}`. Con un `readdir` plano, una Cita en `corpus/citas/sub/` se
+ * publicaba —la colección la cargaba y su página se generaba— y en cambio no la veía ni
+ * el cotejo del build, ni la auditoría, ni la detección de duplicados, ni el índice de
+ * slugs ocupados del alta. Era un camino de publicación que esquivaba todas las puertas.
+ */
 async function ficherosDe(dir: string, extensiones: string[]): Promise<string[]> {
   if (!existsSync(dir)) return [];
-  const entradas = await readdir(dir);
-  return entradas.filter((e) => extensiones.includes(extname(e))).map((e) => join(dir, e));
+  const entradas = await readdir(dir, { recursive: true });
+  return entradas
+    .filter((e) => extensiones.includes(extname(e)))
+    .map((e) => join(dir, e))
+    .sort();
 }
 
 /** El slug de un Autor o Tema es el nombre de su fichero. Una sola fuente, sin duplicar. */
@@ -89,7 +116,21 @@ export async function leerCitas(directorio: string): Promise<CitaEnCorpus[]> {
   const leidas = await Promise.all(
     ficheros.map(async (ruta) => {
       const bruto = await readFile(ruta, 'utf8');
-      const datos = separarFrontmatter(bruto);
+      let datos: Record<string, unknown> | null;
+      try {
+        datos = separarFrontmatter(bruto);
+      } catch (fallo) {
+        /*
+         * Un frontmatter que no es YAML salía por la traza del analizador, sin nombrar el
+         * fichero. Quien construye leía el error de una librería que no ha instalado a
+         * propósito y no sabía en cuál de las mil Citas mirar. No se lee a medias: una
+         * Cita que no se deja analizar no se puede cotejar ni auditar.
+         */
+        throw new Error(
+          `${ruta} no tiene un frontmatter YAML válido: ` +
+            `${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        );
+      }
       return datos ? { ...(datos as unknown as CitaAdmisible), ruta } : null;
     }),
   );
@@ -206,4 +247,88 @@ export function nombreDeFicheroDeCita(slugAutor: string, slugCita: string): stri
     ? slugCita.slice(slugAutor.length + 1)
     : slugCita;
   return `${slugAutor}--${fragmento}`;
+}
+
+/**
+ * Los documentos de Fuente versionados, por nombre sin extensión — Historia 11.2.
+ *
+ * El valor es el **cuerpo**, nunca el fichero entero: cotejar contra el documento
+ * completo dejaría pasar una Cita cuyo texto coincidiera con una línea de la ficha o de
+ * la cabecera de auditoría. `null` es un fichero que ocupa el nombre y no se deja
+ * analizar; no es lo mismo que faltar, y merece otro mensaje.
+ */
+export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDeFuente> {
+  const ficheros = await ficherosDe(rutas.fuentes, ['.txt']);
+  const documentos = new Map<string, string | null>();
+  for (const ruta of ficheros) {
+    const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
+    documentos.set(slugDeFichero(ruta), analizado === undefined ? null : analizado.cuerpo);
+  }
+  return documentos;
+}
+
+/**
+ * Los slugs del censo de pendientes de cotejo — Historia 11.2.
+ *
+ * Un censo ausente se lee como censo vacío, y es la lectura segura: significa «ninguna
+ * Cita está exenta», así que un corpus al que le falte el fichero rompe la construcción
+ * en vez de dejar pasar lo que el censo amparaba.
+ */
+export async function leerCensoDeCotejo(rutas: Rutas): Promise<string[]> {
+  if (!existsSync(rutas.pendientesDeCotejo)) return [];
+
+  const nombre = `corpus/${FICHERO_DEL_CENSO}`;
+  const contenido = await readFile(rutas.pendientesDeCotejo, 'utf8');
+
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    // Sin esto, una coma mal puesta salía por la traza del analizador de YAML, sin
+    // nombrar el fichero: quien construye leía un error de una librería que no ha
+    // instalado a propósito y no sabía dónde mirar.
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'El censo decide qué Citas se publican sin cotejar, así que no se lee a medias.',
+    );
+  }
+
+  if (leido === null || leido === undefined) return [];
+
+  const citas = (leido as { citas?: unknown }).citas;
+  if (citas === undefined || citas === null) return [];
+
+  /*
+   * Que `citas` no sea una lista **no** se puede leer como censo vacío. Una errata de
+   * sangrado convertiría las 38 exenciones legítimas en 38 fallos que nadie ha causado,
+   * y el mensaje hablaría de las Citas en vez de del fichero que está mal escrito.
+   */
+  if (!Array.isArray(citas)) {
+    throw new Error(
+      `${nombre}: «citas» tiene que ser una lista de slugs, y es ${typeof citas}. ` +
+        'Escríbala como «citas:» y una línea «  - slug» por Cita.',
+    );
+  }
+
+  const slugs: string[] = [];
+  for (const [i, entrada] of citas.entries()) {
+    if (typeof entrada !== 'string' || entrada.trim() === '') {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «citas» no es un slug (${JSON.stringify(entrada)}). ` +
+          'Cada entrada es el slug de una Cita publicada, escrito tal cual.',
+      );
+    }
+    slugs.push(entrada.trim());
+  }
+
+  const repetidos = slugs.filter((slug, i) => slugs.indexOf(slug) !== i);
+  if (repetidos.length > 0) {
+    // Un slug repetido descuadra el recuento contra el tope sin amparar nada nuevo.
+    throw new Error(
+      `${nombre}: «${[...new Set(repetidos)].join('», «')}» aparece más de una vez. ` +
+        'Cada Cita se censa una sola vez.',
+    );
+  }
+
+  return slugs;
 }
