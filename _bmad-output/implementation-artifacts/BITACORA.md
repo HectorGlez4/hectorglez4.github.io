@@ -1305,3 +1305,57 @@ no.
 frente a 1414/52 al abrir la historia. `npm run build` con 53 páginas. `npx playwright test`
 **400 pasan**. Y las tres salidas del mando a mano: el informe con los cuatro apagados,
 `--ayuda` con código 0, y `--json --anotar` dejando stdout como JSON parseable.
+
+## Cierre de la Épica 14 al 50% — desplegada y verificada en vivo
+
+Fusionada en `main` (`ee5fd77`) y desplegada el 2026-08-20. El flujo `Publicar`
+(ID 32340828532) en verde, **incluido el paso nuevo de aviso**, que corrió por primera vez
+en el despliegue real y no tumbó nada. Puerta completa en local antes de fusionar:
+`astro check` 0 errores, **1501 pruebas unitarias** en 55 ficheros, `npm run build` con 53
+páginas, y **400 pruebas de Playwright**.
+
+**Verificado contra `https://sabiduriadebolsillo.net`.** El sitio no cambió, que es
+exactamente el criterio: 53 URL en el sitemap, las mismas de antes, y **cero marcadores** de
+Modelo en portada, `/buscar`, `/404`, una Página de Cita, `/kit` y `/lote`. Un Modelo apagado
+es invisible, no latente — comprobado sobre lo publicado, no sobre `dist/`.
+
+**La épica se queda en `in-progress`, y es deliberado.** La 14.2 no entra: su Umbral es
+«LC-1…LC-4 verificadas» y LC-4 sigue abierta. Se despliega lo construido y no se miente sobre
+el estado.
+
+---
+
+## Lo que queda, y no lo puede hacer el bucle
+
+El bucle de la v3 termina aquí: las once historias que le tocaban están cerradas, desplegadas
+y verificadas en vivo. Lo que sigue pendiente necesita a Héctor, y esto es lo que necesita de
+él, en orden de lo que desbloquea más.
+
+**LC-4 — desplegar el receptor de medición.** `DESPLIEGUE.md` §3. Hoy `wrangler` no está
+autenticado, el `database_id` sigue en `PENDIENTE` y la baliza no aparece en el HTML de
+producción, así que `MEDICION_ENDPOINT` tampoco está definida. Pide una cuenta de Cloudflare
+y conceder OAuth. **Desbloquea tres cosas a la vez**: la Historia 7.3, la 14.2 —cuyo coste de
+implementación real es un enlace— y la única serie medida del proyecto.
+
+Y un aviso que sale de la 14.1 y conviene no olvidar: **cerrar LC-4 no basta para que haya
+cifra**. `MEDICION_ENDPOINT` es la dirección de ingesta de balizas y el receptor contesta 204
+a todo lo que no sea un POST — escribe y no publica. Para que el mando de ingreso y el aviso
+diario den un número hará falta un paso más: que el receptor publique una lectura agregada, o
+leerla con `npx wrangler d1 execute`.
+
+**7.2 — mirar Search Console.** Desde fuera está todo bien: el `TXT` de verificación en la
+zona, el sitemap respondiendo 200 con `application/xml` e idéntico ante Googlebot, y sin
+`Disallow`. Lo que no se puede ver sin la cuenta es la columna *Última lectura*. Si ya tiene
+fecha y páginas, la 7.2 pasa a `done`; si tiene fecha y sigue en error, entonces sí hay algo
+que arreglar.
+
+**11.4 — sembrar.** La tubería está construida y probada (11.1–11.3): `npm run objetivo` dice
+qué hueco toca, y `npm run sesion:registrar` anota la sesión. Lo que falta es correrla varias
+sesiones hasta los seis Temas a ≥15 Citas y el 40 % de tradición latinoamericana. Sembrar
+publica contenido en un sitio público en vivo, y eso es de Héctor por decisión de la épica.
+
+**La primera Colección de verdad.** `corpus/colecciones/` se versiona vacío a propósito y
+ningún agente siembra Colecciones. Hasta que exista una, la Página de Colección de la 12.3 y
+la Pieza de Colección de la 13.3 están construidas y probadas pero no se han visto nunca con
+contenido real — y el umbral provisional de `MIN_CITAS_POR_COLECCION` sale justamente de
+curar las tres o cuatro primeras.
