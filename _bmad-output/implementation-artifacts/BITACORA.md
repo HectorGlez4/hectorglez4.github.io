@@ -1502,3 +1502,39 @@ puerta de legibilidad que falta se paga leyendo candidatas una a una.
 
 **Verificado.** `npx astro check` 0 errores. `npx vitest run` **1617/1617**. `npm run build`
 con 131 páginas y el cotejo literal en verde sobre las 37 Citas nuevas.
+
+## 11.4 — Cuarta sesión: crecer sin hueco que cerrar, y dos paráfrasis cazadas
+
+**El Corpus pasa de 107 a 148 Citas, SM-C1 del 83,2 % al 87,8 %, y el sitio de 131 a 172
+páginas.** Se sembró la segunda mitad del *Oráculo manual* (aforismos 151-300), repartida por
+los siete Temas.
+
+**Sembrar sin hueco.** Desde que todos los Temas pasaron el umbral, la política no propone
+objetivo —responde «No hay hueco que cerrar»— y la sesión se registra por `--anular`. Es
+correcto: la política existe para repartir el esfuerzo cuando escasea, no para prohibir
+crecer. Pero conviene saber que **a partir de aquí toda sesión de crecimiento se registra como
+desviación**, y eso ensucia la serie de la que la 11.4 tiene que sacar la cadencia.
+
+**Dos paráfrasis cazadas, y es el mejor argumento que ha dado el cotejo.** Al intentar
+documentar las 3 Citas de Gracián anteriores a la v3 contra la edición de 1647:
+
+- El Corpus dice **«El sabio hace luego lo que el necio al fin.»**; el aforismo 268 dice
+  **«Haga al principio el cuerdo lo que el necio al fin.»**
+- El Corpus dice **«Saber y saberlo mostrar es saber dos veces.»**; eso no aparece en ninguno
+  de los 300 aforismos.
+
+Son **paráfrasis que circulan por internet atribuidas a Gracián**, no su texto. Estaban
+publicadas desde la v1 y nadie lo había notado. Es exactamente el fallo que la Historia 11.2
+existe para impedir, y la prueba de que el censo de 38 pendientes no es deuda formal: es deuda
+real. La tercera, «Lo bueno, si breve, dos veces bueno», **sí** aparece literal.
+
+**Lo que falta para poder saldar el censo.** No hay ninguna orden que **añada un documento de
+Fuente a una Cita ya publicada**: `alta.ts` lo toma al crear y `revisar --aprobar` al aprobar,
+pero una Cita de la v1 no puede documentarse sin editar su fichero a mano. Es el mismo hueco
+que tenían los Temas antes de esta épica, y bloquea el último criterio abierto de la 11.4.
+
+**Una torpeza propia, anotada porque enseña algo.** Extraje con comodines solapados
+(`*oraculo*15*`, `*17*`…) y varios documentos se procesaron dos y tres veces: 2.192 candidatas
+donde debía haber ~890, con el mismo texto repetido. `extraer` cuenta «Descartadas por
+repetidas» **dentro de una ejecución**, no entre ejecuciones sucesivas sobre el mismo
+documento. Se limpió rechazando todo y repitiendo una vez por fichero.

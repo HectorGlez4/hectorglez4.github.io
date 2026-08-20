@@ -76,3 +76,14 @@ sesiones:
       citasPublicadas: 107
       procedenciaCompleta: 83.2
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-20"
+    hora: "21:23"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Sembrar 41 aforismos más del Oráculo manual (151-300) repartidos por los siete Temas"
+    motivo: "Todos los Temas siguen por encima del umbral, así que la política no propone hueco. La sesión se dedicó a crecer sobre la mejor cantera disponible, que es lo que pidió Héctor: más contenido publicado, más páginas indexables."
+    resultado:
+      citasPublicadas: 148
+      procedenciaCompleta: 87.8
+      tradicionLatinoamericana: 41.2
