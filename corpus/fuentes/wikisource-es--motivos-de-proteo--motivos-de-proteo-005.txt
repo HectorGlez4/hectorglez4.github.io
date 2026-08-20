@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/005
+recuperado: 2026-08-20
+---
+Motivos de Proteo/005
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+IV - Armonía de las edades. Ancianidad gloriosa.
+
+Del desenvolvimiento regular y fácil de la vida en esa curva que enlaza sus modificaciones, se engendra la armonía de sus diferentes edades, la belleza inherente al ser propio y genial de cada una: el orden típico que hace de ellas como los cantos de un bien proporcionado poema, en el que cada paso de la acción concurre a la unidad que consagrará majestuosamente el desenlace, o que acaso quedará suspensa, con poético misterio, por la interrupción de la obra, trunca mas no desentonada, cuando Naturaleza desista, a modo del poeta negligente, de terminar el poema que empezó: cuando la vida escolle en prematura muerte.
+
+La verdadera juventud eterna depende de esta rítmica y tenaz renovación, que ni anticipa vanamente lo aún no maduro, ni consiente adherirse a los modos de vida propios de circunstancias ya pasadas, provocando el despecho, la decepción y la amargura que trae consigo el fracaso del esfuerzo estéril; sino que acierta a encontrar, dentro de las nuevas posibilidades y condiciones de existencia, nuevos motivos de interés y nuevas formas de acción; lo que procura en realidad al alma cierto sentimiento de juventud inextinguible, que nace de la conciencia de la vida perpetuamente renovada, y de la constante adaptación de los medios al fin en que se emplean.
+
+Cuando de tal modo se la guíe, la obra ineluctable del tiempo no será sólo regresión que robe al alma fuerzas y capacidades; ni será como una profanación, por manos bárbaras, de las cosas delicadas y bellas que juntó en sus primeros vuelos el coro de las Horas divinas. Será un descubrimiento de horizontes; será la vida sol que, palideciendo, se engrandece. Así, sobre el conjunto de las historias gloriosas de los hombres, domina, como la paz de las alturas, la excelsitud de las ancianidades triunfales: la ancianidad de Epiménides, la ancianidad del Ticiano, la ancianidad de Humboldt; y más alto que todas, la ancianidad de Sófocles, cúspide de la más bella y armoniosa existencia en que encarnó la serenidad del alma antigua, y que, culminando a un tiempo en años y en genio, pone en labios de la vejez, de cuya poesía sabe, sus más líricos metros, que son la apoteosis de su tierra y su estirpe en el himno inmortal de los ancianos de Colona.
+
+Arrobadora idealidad, austero encanto, los de la vida que acaba completando un orden dialéctico de humana perfección... ¿Vamos, por verlo, allí adonde nos conduce ese mismo nombre de Sófocles, si remontamos la corriente del tiempo?

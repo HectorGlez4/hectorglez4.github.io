@@ -1418,3 +1418,50 @@ con Citas a «La virtud»— **no se pudo cumplir**: Wikisource no tiene obra fe
 latinoamericana que sirva a ese Tema. Los Autores entraron; las Citas fueron a «La libertad»,
 el hueco que la cosecha sí podía cerrar. Queda registrado como desviación con su motivo en
 `corpus/sesiones-de-sembrado.yml`, que es para lo que existe `--anular`.
+
+## 11.4 — Segunda sesión: autores famosos, y el desbloqueo que la hizo posible
+
+**El Corpus pasa de 50 a 70 Citas, SM-C1 del 64 % al 74,3 %, la tradición latinoamericana
+del 33,3 % al 41,2 % —por encima del suelo comprometido—, y «La virtud» alcanza su umbral y
+se publica.** El sitio pasa de 67 a 90 páginas. Entran José Enrique Rodó y Juan Montalvo.
+
+**El criterio cambió, y encajó mejor de lo esperado.** Héctor pidió priorizar autores famosos
+para traer tráfico, no cerrar el suelo panhispánico. Resultó que tiran para el mismo lado: los
+dos ensayistas más citados que Wikisource tiene fechados y en dominio público son
+latinoamericanos, así que la sesión cumplió el objetivo que la 11.3 proponía —dos Autores
+latinoamericanos con sus Citas a «La virtud»— sin anularlo. La política de huecos decide
+**dónde** va cada Cita; el criterio de fama, **de quién**.
+
+**El tapón, y por qué era estructural.** Barrido de 80 páginas de Wikisource con `|año`: **las
+que declaran año son índices —su cuerpo es una tabla de contenidos— y las que traen texto son
+subpáginas sin año**. Es el patrón, no la excepción: *Capítulos que se le olvidaron a
+Cervantes* declara 1895 y su cuerpo es el índice; su Capítulo XLIII trae 8.158 caracteres de
+texto y ningún año. Lo mismo con *Libro de Buen Amor*, *Tratado de la Pintura*, *Ariel*,
+*Motivos de Proteo* y las *Rimas* de Bécquer. Sin resolverlo, **ninguna obra famosa se podía
+sembrar sin degradar SM-C1**, y una sesión que baja SM-C1 es fallida por el criterio de la
+propia historia.
+
+**La salida no fue relajar la regla, sino encadenar dos declaraciones de la Fuente.** La
+subpágina ya dice a qué obra pertenece —`|título = [[Capítulos que se le olvidaron a
+Cervantes]]`, un enlace absoluto— y esa obra dice su año. Las dos frases son de Wikisource;
+encadenarlas no añade ninguna nuestra. Lo que sí sería inferir —y por eso está prohibido— es
+sacar el padre de la ruta `Obra/Capítulo`: ahí el que decide que existe un padre somos
+nosotros. Una subpágina con `|título` relativo no encadena y se queda sin año.
+
+**Lo que enseñó sobre elegir fuente.** Rodó es la mejor cantera que ha entrado al Corpus:
+*Motivos de Proteo* es literalmente un libro de meditaciones aforísticas, y de 65 candidatas
+salieron 11 publicables —«Cada uno de nosotros es, sucesivamente, no uno, sino muchos»—. En
+cambio *Capítulos que se le olvidaron a Cervantes* resultó ser una **continuación novelada del
+Quijote**, no ensayo: de 141 candidatas, 9. La lección, ya vista con Palma, se confirma: lo que
+rinde no es el autor famoso sino la **obra sentenciosa**, y conviene barrer por tipo de obra
+antes que por nombre.
+
+**Dos rechazos que valen más que las aprobaciones.** Una candidata era **Séneca citado por
+Rodó** —«Yo mismo, en el momento de decir que todo cambia, ya he cambiado»—: publicarla la
+habría atribuido a Rodó. Y varias de Montalvo son refranes que dice Sancho, no suyos. La
+extracción no distingue la voz del autor de la voz que el autor cita, y **nada en la tubería lo
+detecta**: el cotejo literal las da por buenas porque están en el documento. Es hermana de la
+avería de OCR de la 11.5 y merece su propia historia.
+
+**Verificado.** `npx astro check` 0 errores. `npx vitest run` **1617/1617** en 56 ficheros.
+`npm run build` con 90 páginas y el cotejo literal en verde sobre las 20 Citas nuevas.

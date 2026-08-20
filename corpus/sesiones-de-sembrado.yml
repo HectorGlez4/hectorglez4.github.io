@@ -51,3 +51,17 @@ sesiones:
       citasPublicadas: 50
       procedenciaCompleta: 64
       tradicionLatinoamericana: 33.3
+  - fecha: "2026-08-20"
+    hora: "17:10"
+    clase: "tema"
+    propuesto: "Sembrar 3 Citas del Tema «El tiempo»: es el Tema al que menos le falta para publicarse."
+    hueco: "«El tiempo» tiene 12 Citas publicadas y el umbral de publicación son 15."
+    tema:
+      slug: "el-tiempo"
+      nombre: "El tiempo"
+      publicadas: 12
+      faltan: 3
+    resultado:
+      citasPublicadas: 70
+      procedenciaCompleta: 74.3
+      tradicionLatinoamericana: 41.2
