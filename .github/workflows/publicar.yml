@@ -78,6 +78,50 @@ jobs:
       - name: Pruebas
         run: npm test
 
+      # Historia 14.1 — el aviso de Umbral cruzado, y el único sitio de toda la épica donde
+      # esto puede romper algo en vivo: **este flujo es el que despliega**. Un paso que
+      # consulte al receptor y falle tumbaría la reconstrucción diaria del sitio publicado
+      # por un problema del plano de medición que el sitio nunca lee — la dependencia exacta
+      # que AD-14 existe para impedir. Que el aviso sea incapaz de fallar no es cortesía: es
+      # el criterio, y por eso lleva tres cinturones y no uno:
+      #
+      #   · la orden sale con 0 pase lo que pase con el receptor (sin desplegar, caído o
+      #     contestando cualquier cosa), y espera un tiempo acotado;
+      #   · `continue-on-error`, por si la orden misma se rompiera —un `npm ci` a medias,
+      #     un `tsx` que no arranca—;
+      #   · `timeout-minutes`, por si algo se quedara colgado antes de subir el artefacto.
+      #
+      # Avisar no es contenido y no enciende nada: `--anotar` deja un `::warning::` en el
+      # registro y el informe entero en el resumen del flujo, para que enterarse no dependa
+      # de acordarse de ejecutar la orden.
+      #
+      # `if:` acota a los dos disparadores donde el secreto llega de verdad. Desde una
+      # bifurcación, `secrets.MEDICION_ENDPOINT` llega **vacío**, y el informe diría
+      # «falta LC-4» — indistinguible del estado legítimo de hoy, así que el aviso pasaría a
+      # mentir en vez de faltar.
+      #
+      # `shell: bash` no es adorno: trae `-o pipefail`, sin el cual el código de salida de la
+      # tubería sería el de `tee` y un `tsx` roto pasaría con el resumen vacío y el paso en
+      # verde. Y el `|| echo` deja dicho en el resumen que esta reconstrucción fue sin aviso,
+      # que es la diferencia entre «no había nada que avisar» y «no se pudo mirar».
+      - name: Avisar si algún Umbral de Activación se cruzó
+        if: github.event_name == 'schedule' || github.event_name == 'push'
+        continue-on-error: true
+        timeout-minutes: 2
+        shell: bash
+        env:
+          MEDICION_ENDPOINT: ${{ secrets.MEDICION_ENDPOINT }}
+        # El informe se envuelve en un bloque de código porque `$GITHUB_STEP_SUMMARY` se
+        # renderiza como Markdown: crudo, la caja de ═ y el sangrado de dos espacios se
+        # colapsan en un párrafo ilegible, justo donde se mira si un Umbral se cruzó.
+        run: |
+          {
+            echo '```text'
+            npm run --silent ingreso -- --anotar \
+              || echo '(el mando de ingreso no pudo ejecutarse: esta reconstrucción va sin aviso de Umbrales)'
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

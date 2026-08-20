@@ -137,11 +137,15 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Dos excepciones, las dos escritas y con nombre. Una excepción escrita se revisa; un
+ * Tres excepciones, las tres escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
  *     que pide el documento de una Fuente.
+ *   · `tools/ingreso.ts` es la cáscara del mando de ingreso —Historia 14.1—: le pide al
+ *     receptor de medición la única cifra contra la que se miden los Umbrales, y **solo
+ *     informa**. Lo que hace con la respuesta vive en `tools/lib/ingresos.ts`, que no pide
+ *     nada, igual que `tools/lib/documento.ts` respecto de `tools/recuperar.ts`.
  *   · `astro.config.mjs` declara las dos familias de UX-DR3 por la Fonts API de Astro, y
  *     `fontProviders.google()` **sí descarga** en el build: los `.woff2` acaban en
  *     `.astro/fonts/` y `unifont` está en el árbol de dependencias por eso.
@@ -160,6 +164,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     [
       'tools/recuperar.ts',
       'la cáscara exterior de las herramientas de editor: la única orden que recupera el documento de una Fuente',
+    ],
+    [
+      'tools/ingreso.ts',
+      'la cáscara del mando de ingreso: le pide al receptor la cifra contra la que se miden los Umbrales, y el build jamás la lee (AD-14)',
     ],
     [
       'astro.config.mjs',
@@ -249,7 +257,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(barridos.some((r) => r.endsWith('.astro'))).toBe(true);
   });
 
-  it('ningún fichero fuera de las dos excepciones pide nada por la red', () => {
+  it('ningún fichero fuera de las excepciones pide nada por la red', () => {
     const culpables = barridos
       .filter((ruta) => !EXCEPCIONES.has(ruta))
       .filter((ruta) => tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8')));
@@ -263,9 +271,13 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas dos', () => {
-    // Añadir una tercera tiene que ser un cambio deliberado de esta prueba.
-    expect([...EXCEPCIONES.keys()].sort()).toEqual(['astro.config.mjs', 'tools/recuperar.ts']);
+  it('no hay más excepciones que esas tres', () => {
+    // Añadir una cuarta tiene que ser un cambio deliberado de esta prueba.
+    expect([...EXCEPCIONES.keys()].sort()).toEqual([
+      'astro.config.mjs',
+      'tools/ingreso.ts',
+      'tools/recuperar.ts',
+    ]);
   });
 
   it('el guardián detecta una llamada de red inyectada', () => {
@@ -300,6 +312,6 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     const conRed = barridos.filter((ruta) =>
       tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8')),
     );
-    expect(conRed.sort()).toEqual(['astro.config.mjs', 'tools/recuperar.ts']);
+    expect(conRed.sort()).toEqual(['astro.config.mjs', 'tools/ingreso.ts', 'tools/recuperar.ts']);
   });
 });

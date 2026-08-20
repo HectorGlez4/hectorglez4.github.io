@@ -1206,3 +1206,102 @@ en `superficies.ts`. De paso quedó corregida una afirmación falsa de su docume
 52 ficheros, frente a 1356/50 al abrir la historia. `npm run build` con 53 páginas.
 `npx playwright test` **400 pasan**. Y una composición real contra una copia de `corpus/` con
 una Colección de 16 miembros, mirada a ojo.
+
+## Cierre de la Épica 13 — desplegada y verificada en vivo
+
+Fusionada en `main` (`b28abfb`) y desplegada el 2026-08-20. El flujo `Publicar` (ID
+32336776771) en verde: construir, comprobar tipos, pruebas y despliegue. Puerta completa en
+local antes de fusionar: `astro check` 0 errores en 166 ficheros, **1414 pruebas unitarias**
+en 52 ficheros, `npm run build` con 53 páginas, y **400 pruebas de Playwright**.
+
+**Verificado contra `https://sabiduriadebolsillo.net`.** La portada responde 200 con
+`last-modified` de este despliegue. `/lote` —la única superficie nueva de la épica— responde
+200 con `noindex, follow`, **no aparece en el sitemap** (que sigue con las mismas 53 URL, o
+sea que la épica no añadió nada indexable) y **ninguna superficie pública la enlaza**:
+comprobado en portada, `/buscar` y `/404`. Revisada además en el navegador a 375px, que es el
+consumidor real: resuelve el estado de hoy —sin ninguna jornada fijada— diciéndolo sin
+quebrarse y enlazando al Kit.
+
+**Lo que la épica levantó.** El Canal ya no exige presencia diaria: `npm run jornada` deja
+varias jornadas preparadas de una sentada, y el repertorio pasa de la Cita suelta a tres
+formatos. Las dos Piezas viven en `tools/` y su salida no se versiona.
+
+**Lo que enseñó, dicho una vez.** Las dos historias de Pieza produjeron el mismo tipo de
+hallazgo en la revisión, y conviene registrarlo como patrón: **una aserción que compara
+posiciones relativas no prueba que dos cosas no se solapen**. En la 13.2 nadie miraba el
+ancho; en la 13.3, comentar `cursor += titulo.alto` dejaba 86 pruebas en verde con el título
+impreso encima de la primera cita. Las dos veces la suite entera daba luz verde a un
+artefacto que se publica, y las dos veces la mutación fue lo que lo destapó.
+
+**Tres asuntos que se quedan en parche y piden contrato.** No los cierra esta épica:
+
+1. **`coleccionAdmisible` no acota la longitud de `nombre`.** `criterio` sí la tiene
+   (`MAX_CARACTERES_CRITERIO`), y el motivo escrito en `umbrales.ts` —va literal a algo que no
+   puede recortarlo, así que el único sitio sensato para acotarlo es la admisión, «donde el
+   editor todavía lo está escribiendo y puede arreglarlo»— vale ahora palabra por palabra para
+   el nombre, que desde la 13.3 va literal a un lienzo de 1080px. Hoy se puede curar una
+   Colección cuya Pieza es imposible y no enterarse hasta componerla. No se inventó un umbral
+   nuevo porque eso es decisión de contrato; se hizo legible el fallo en su lugar.
+2. **`DESIGN.md` dice que el Nombre de Colección es «una sola línea» y la Pieza lo reparte.**
+   La contradicción se resolvió en un comentario del código, que es el sitio equivocado para
+   una decisión de UX contra un documento que manda sobre cualquier maqueta. Pide una pasada
+   acotada de `bmad-ux`.
+3. **El convenio de códigos de salida** —2 es la forma de la invocación, 1 es lo que la
+   invocación dice— vive hoy en la cabecera de `tools/pieza.ts` y gobierna todo `tools/`.
+   Debería estar en `AGENTS.md` o en la espina, o la próxima orden lo partirá de otra manera.
+
+## 14.1 — Encender un Modelo de Ingreso es un commit
+
+`src/lib/ingreso.ts` es el dueño único del estado de los cuatro Modelos —donaciones,
+afiliación de libros, producto propio y publicidad acotada—, hoy los cuatro apagados. Cada
+uno declara qué dispara su Umbral y qué superficies lo admiten, y encenderlo es un diff de un
+booleano que `git revert` deshace. `npm run ingreso` informa sin escribir nada en ninguna
+parte, y un paso del flujo diario avisa cuando un Umbral se cruza.
+
+**El hallazgo de la investigación que le dio forma al interruptor.** Amazon Afiliados cierra
+la cuenta que no logra tres ventas cualificadas en 180 días, y **la del proyecto ya se cerró
+una vez** por esa regla. Se puede resolicitar con etiqueta nueva, pero solicitar arranca el
+reloj otra vez. Así que en la afiliación el Umbral no gobierna el encendido del enlace:
+gobierna **cuándo se pide la cuenta**. Un modelo de datos que solo supiera decir «cruzado ⇒
+encender» obligaría a mentir en una de las cuatro filas, y por eso cada Modelo declara qué
+dispara. El informe lo dice con esas palabras: «dispara la SOLICITUD, no el encendido».
+
+**El aviso de CI es el único sitio donde esto podía romper algo en vivo**, porque el flujo
+que avisa es el que despliega. Lleva tres cinturones —la orden no sale distinto de cero por
+nada que haga el receptor, más `continue-on-error`, más `timeout-minutes`— y eso no es
+cortesía: un paso que consultara al receptor y fallara tumbaría la reconstrucción diaria del
+sitio publicado por un problema del plano que el sitio nunca lee, que es la dependencia
+exacta que AD-14 existe para impedir.
+
+**Una enmienda de contrato, y la razón de que valga la pena contarla.** El contrato decía que
+la Página de Cita y la de Colección no admiten **ningún** Modelo. Eso cerraba por omisión una
+excepción que el PRD ya había bendecido: el enlace de afiliación nace de la Procedencia **ya
+publicada**, que se muestra en la Página de Cita, y la exclusión se había estrechado a la
+publicidad. La corrección no cambia nada de lo que hace el sitio —siguen los cuatro apagados
+y la afiliación sin superficie—, solo la regla: se vedan `donaciones` y `publicidad-acotada`,
+no cualquier Modelo. Lo que importaba no era el efecto, que hoy es ninguno, sino que la
+prohibición habría quedado escrita en un sitio donde nadie la habría vuelto a leer.
+
+**La revisión, otra vez, encontró lo que la suite no ve.** Borrar las dos líneas del
+`env: MEDICION_ENDPOINT` del paso de CI dejaba **la suite entera en verde** y apagaba el
+aviso para siempre — y con un síntoma, «todavía no es medible: falta LC-4», indistinguible
+del estado legítimo de hoy, así que nadie lo habría leído como avería, tampoco el día en que
+LC-4 se cierre. Y la espera acotada no la recorría ninguna prueba: los tres receptores de
+mentira eran «sin desplegar», «caído» —que **rechaza** la conexión— y «contesta»; ninguno
+aceptaba y se callaba, que es el único caso para el que la espera existe.
+
+**Una contradicción documental que el informe ahora dice en voz alta.** `MEDICION_ENDPOINT`
+es la dirección de **ingesta** de balizas, y el receptor contesta 204 a todo lo que no sea un
+POST: escribe y no publica. O sea que **cerrar LC-4 seguirá sin dar cifra** — hará falta un
+paso más, enseñarle a publicar una lectura agregada o leerla con `wrangler d1 execute`. Eso
+estaba escrito en el spec y no en el mensaje que lee quien ejecuta la orden. Ahora sí.
+
+**Lo que no se construyó, y queda registrado.** Nada avisa en la dirección contraria. La
+historia declara que lo importante es poder **apagar**, y la contra-métrica que diría cuándo
+accionar esa palanca no existe: el mando solo compara hacia arriba. La palanca está; la señal
+no.
+
+**Verificado.** `npx astro check` 0 errores. `npx vitest run` **1501/1501** en 55 ficheros,
+frente a 1414/52 al abrir la historia. `npm run build` con 53 páginas. `npx playwright test`
+**400 pasan**. Y las tres salidas del mando a mano: el informe con los cuatro apagados,
+`--ayuda` con código 0, y `--json --anotar` dejando stdout como JSON parseable.
