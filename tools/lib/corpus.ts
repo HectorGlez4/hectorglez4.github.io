@@ -27,6 +27,16 @@ import { analizarDocumento } from './documento.ts';
  */
 export const FICHERO_DE_SESIONES = 'sesiones-de-sembrado.yml';
 
+/**
+ * Las fijaciones de jornada de la Cita del Día — FR-9, y donde escribe el lote (13.1).
+ *
+ * Su nombre tiene un solo dueño, como el del censo de cotejo y el de las sesiones. Lo
+ * consumen el sitio —que lo importa como JSON desde `src/pages/`— y la orden que fija
+ * jornadas; que las dos partes hablen del mismo fichero es lo que hace que componer por
+ * adelantado y componer el día sean la misma cosa.
+ */
+export const FICHERO_DE_PORTADA = 'portada.json';
+
 export interface Rutas {
   raiz: string;
   citas: string;
@@ -88,6 +98,20 @@ export interface Rutas {
    * Corpus, no colección.
    */
   sesionesDeSembrado: string;
+  /**
+   * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
+   *
+   * Metadato del Corpus y no colección, como sus dos vecinos: vive en la raíz de `corpus/`,
+   * fuera de `citas/`, `autores/` y `temas/`, y ninguna base de `src/content.config.ts`
+   * apunta aquí. El sitio lo importa como JSON desde `src/pages/`, que es la excepción que
+   * el propio fichero declara en su comentario.
+   *
+   * **No hay un segundo calendario, y esta ruta es la razón de que no lo haya.** El lote
+   * fija jornadas aquí, que es donde `src/lib/citaDelDia.ts` ya las lee y donde ya tienen
+   * prioridad sobre la rotación desde la v1. Componer por adelantado y componer el día
+   * derivan del mismo dato, así que no hay ningún desempate que diseñar.
+   */
+  portada: string;
 }
 
 export function rutasDelCorpus(raizCorpus: string): Rutas {
@@ -102,6 +126,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
+    portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
 
@@ -397,6 +422,63 @@ export async function escribirColeccion(
     }),
     'utf8',
   );
+  return ruta;
+}
+
+/**
+ * El fichero de portada tal cual está escrito, sin interpretar — Historia 13.1.
+ *
+ * Devuelve el JSON **en bruto** por el mismo motivo por el que `leerColeccionBruta`
+ * devuelve el YAML en bruto: quien lo vaya a reescribir tiene que ver el juego de claves
+ * real, no uno reconstruido. El fichero lleva un `_comentario` que explica su prioridad
+ * sobre la rotación, y un lector que solo supiera nombrar `fijaciones` lo habría borrado
+ * en la primera escritura.
+ *
+ * Un fichero **ausente** no es un fallo: un corpus recién hecho todavía no lo tiene, y
+ * fijar la primera jornada es lo que lo crea. Un fichero ilegible sí, y se dice nombrándolo
+ * en vez de devolver medio dato.
+ */
+export async function leerPortada(
+  rutas: Rutas,
+): Promise<{ ruta: string; bruto: unknown; ausente: boolean }> {
+  if (!existsSync(rutas.portada)) return { ruta: rutas.portada, bruto: undefined, ausente: true };
+
+  const crudo = await readFile(rutas.portada, 'utf8');
+  try {
+    return { ruta: rutas.portada, bruto: JSON.parse(crudo), ausente: false };
+  } catch (fallo) {
+    throw new Error(
+      `${rutas.portada} no es JSON legible: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+    );
+  }
+}
+
+/**
+ * Vuelca el fichero de portada entero.
+ *
+ * **Recibe la ruta que devolvió el lector**, como `escribirColeccion` y por la misma
+ * lección: componer la ruta aquí es cómo se acaba escribiendo en un fichero distinto del
+ * que se leyó. Y recibe el objeto entero, con las claves que traía, para que reescribir las
+ * fijaciones no se lleve por delante nada de lo demás.
+ *
+ * Dos espacios de sangría y salto final, que es exactamente como está escrito el fichero
+ * versionado: así una escritura que no cambia nada no ensucia `git status`.
+ *
+ * **Se escribe a un temporal y se renombra.** `writeFile` sobre el fichero definitivo lo
+ * trunca antes de escribirlo, así que una interrupción a media escritura —un Ctrl-C, un
+ * disco lleno— lo deja cortado y se pierden **todas** las fijaciones, en el único sitio
+ * donde viven: no hay copia en ninguna parte, solo la de git, que es de la última vez que
+ * alguien acordó commitear. El renombrado dentro del mismo directorio es atómico, así que
+ * quien lea el fichero lee el de antes o el de después, nunca uno a medias.
+ */
+export async function escribirPortada(
+  ruta: string,
+  contenido: Record<string, unknown>,
+): Promise<string> {
+  await mkdir(dirname(ruta), { recursive: true });
+  const temporal = `${ruta}.escribiendo`;
+  await writeFile(temporal, `${JSON.stringify(contenido, null, 2)}\n`, 'utf8');
+  await rename(temporal, ruta);
   return ruta;
 }
 

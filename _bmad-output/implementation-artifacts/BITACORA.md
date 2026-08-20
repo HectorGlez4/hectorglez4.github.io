@@ -1039,3 +1039,170 @@ propósito: curar es decisión editorial y no la toma un agente. Así que el des
 épica no muestra ninguna Página de Colección, y la portada no menciona la sección. La primera
 Colección la crea Héctor con `npm run coleccion -- crear "…" --criterio "…"`, y ese día la
 superficie aparece sola.
+
+**Desplegada y verificada en vivo.** Fusionada a `main` el 19/08 con 10 commits; el flujo
+`Publicar` salió en verde. Comprobado contra `sabiduriadebolsillo.net`: el sitio responde
+200, el sitemap sigue con 53 URLs, `/coleccion/lo-que-sea` da 404 y la portada no menciona
+Colecciones — las dos últimas por diseño, porque no hay ninguna curada.
+
+Y el defecto que la 12.1 cerraba, comprobado **en producción**: `/404` y `/buscar` siguen
+declarando `noindex` y ya **no** aparecen en el índice interno. Antes decían al buscador de
+fuera que no las indexara y salían en el de dentro.
+
+# v3 — Épica 13
+
+## 13.1 — Componer varias jornadas de una sentada
+
+**Verificado.** `npm run jornada -- fijar` deja varias jornadas preparadas escribiendo en
+`corpus/portada.json`, y `/lote` muestra el material de cada una para publicarlo desde el
+móvil, compartiendo componente con el Kit.
+
+1277 pruebas unitarias en verde (1158 al empezar), 400 e2e, 0 errores de tipos, y
+`fijaciones` sigue vacío en el repositorio.
+
+**El contenido de la historia es lo que NO se construyó.** No hay segundo calendario ni
+desempate: `corpus/portada.json` ya tenía fijaciones y `citaDelDia.ts` ya les daba prioridad
+sobre la rotación desde la v1. El lote fija ahí, y «lo anticipado sustituye a lo de la
+jornada» no se implementa — se cumple por construcción, porque ambos derivan de la misma
+fijación. Es la trampa que `RECONCILIACION.md` §2 nombra, y se verificó enumerando cada
+sitio donde el cambio crea la noción de jornada: ninguno mapea jornada a Cita.
+
+**El precio de leer más.** Antes, una clave mal escrita en `portada.json` era inerte:
+`citaDelDia` consultaba una sola clave. Al enumerarlas todas, el lote convirtió eso en
+fatal — `"manana"` es lexicográficamente mayor que una fecha ISO, así que entraba, caía a
+la rotación, y `Date.parse` daba `NaN` hasta hacer lanzar el build **entero**, incluida la
+reconstrucción diaria del sitio en vivo. La orden validaba y el lector del sitio no. Ahora
+ambos preguntan a `esJornada`, que además pasó a comprobar que la fecha exista de verdad:
+`2026-02-31` casaba con la expresión regular y producía un índice `NaN` desde la v1.
+
+**El rechazo que más vale.** Fijar una Cita no marcada apta para portada se rechaza
+explicando la consecuencia: `citaDelDia` la ignoraría y ese día rotaría otra. Sin esa
+comprobación, fijar «funciona», no falla nada, y el fallo aparece el único día que importa.
+
+**Lo que la revisión enseñó sobre las pruebas.** El aviso de fijación muda —la
+funcionalidad estrella, hacer visible un fallo silencioso antes de que llegue el día— no lo
+renderizaba ninguna prueba: invertir el guardián dejaba la página avisando en las jornadas
+correctas y callando en la muda, con la suite entera en verde. Y la igualdad con el Kit se
+comprobaba sobre un solo enlace, mientras la vista estaba reimplementada a mano; ahora hay
+componente compartido y la comparación cubre texto, tramo, Imagen, atribución y redes.
+
+## Verificación de producción — 2026-08-20, antes de seguir con la Épica 13
+
+Comprobado el despliegue vivo antes de abrir la 13.2, a petición de Héctor. Lo desplegado
+en `main` es el cierre de la Épica 12 (`c976075`, flujo `Publicar` en verde, 19/08 18:41
+UTC). La rama `sprint/sabiduria-v3` va cuatro commits por delante y **no está fusionada**:
+13.1 todavía no está en vivo, y eso es lo esperado.
+
+**Lo que responde.** `https://sabiduriadebolsillo.net` → 200. `www` → 301 al ápice, `http`
+→ 301 a `https`. `sitemap-index.xml` → 200 `application/xml`, e igual ante el agente de
+Googlebot. `sitemap-0.xml` lleva **53 URL**: portada, 12 Autores, 38 Citas y 2 Temas —
+exactamente el conjunto publicable de hoy. Las Tarjetas Sociales sirven PNG y Pagefind
+responde.
+
+**Lo que no aparece, y así debe ser.** `/kit`, `/buscar` y `/404` responden 200 con
+`noindex, follow` y ninguna está en el sitemap. `/lote` da 404 porque 13.1 vive en la rama.
+`/coleccion/<slug>` no tiene índice y `corpus/colecciones/` se versiona vacío a propósito,
+así que no hay ninguna Página de Colección todavía: la primera la cura Héctor.
+
+**La zona DNS, intacta tras el paquete de Domain Connect.** Los cuatro registros `A` de
+GitHub Pages siguen ahí, `www` sigue apuntando a `hectorglez4.github.io`, el `TXT` de
+`google-site-verification` está presente, y **no hay ningún `MX`**: Gmail Setup, que venía
+en el mismo paquete que la verificación, no escribió nada. Es la comprobación que
+`DESPLIEGUE.md` §2 dejó como obligatoria justamente por ser un paquete y no una casilla.
+
+**Lo que sigue bloqueado.** La baliza de medición no aparece en el HTML de producción:
+`MEDICION_ENDPOINT` no está definida y el Worker no está desplegado, o sea que **LC-4 sigue
+sin cerrarse** y con ella la 7.3 y la 14.2. Y el estado de lectura del sitemap en Search
+Console no se puede comprobar desde fuera —hace falta la cuenta de Héctor—, así que la 7.2
+se queda en `review` hasta que él mire la columna *Última lectura*.
+
+## 13.2 — Una pieza que reúne varias Citas
+
+`npm run pieza -- componer --red instagram <slug> <slug> [...]` compone una Pieza de Canal:
+un PNG cuadrado de 1080 con varias Citas apiladas, cada una con su Autor visible, y por
+salida estándar el texto para publicar con **un solo** enlace marcado por red. Vive en
+`tools/` por AD-15 —composición que no pide ningún visitante a demanda— y **su salida no se
+versiona**: lo versionado es la decisión de qué Citas van juntas, nunca el artefacto, que
+puede quedarse viejo respecto al Corpus del que salió sin que nadie lo vea.
+
+**Tres decisiones que la historia no traía dadas.** Ni el PRD ni la espina fijan formato de
+Pieza. Se toma el lienzo que ya existía —cuadrado de 1080 con margen 96, el de la Imagen de
+Cita— en vez de inventar un vertical: es lo conservador y lo reversible, y la 13.3 lo hereda
+sin reabrir el debate. El destino es **la portada**, porque una Pieza de tres Citas no puede
+enlazar a una de ellas sin favorecerla y el enlace tiene que ser uno; la 13.3 lo sustituirá
+por la Página de Colección, y esa es justamente la diferencia entre las dos. Y una Cita
+demasiado larga **se rechaza nombrando el slug y la regla** en vez de descartarse en
+silencio: componer la Pieza sin ella y no decir nada convierte un error de selección en un
+artefacto publicado al que le falta una Cita, y eso no se ve hasta después de publicarlo.
+
+**Lo que enseñó la revisión: se medía el alto y nunca el ancho.** `repartirEnLineas` no
+parte palabras nunca —por diseño, viene de la Tarjeta—, así que una palabra más larga que la
+línea se emitía sola y salía del lienzo, y el PNG la publicaba cortada. Peor: el nombre del
+Autor y la procedencia ni siquiera pasaban por el reparto, iban en un solo `<text>`, y una
+obra como «Historia verdadera de la conquista de la Nueva España, 1632» se salía sin aviso.
+La historia entera existe para impedir la mutilación del texto y se estaba colando por la
+única dimensión que nadie miraba.
+
+**El fallo más caro era de prueba, no de código.** La atribución visible es el criterio de
+aceptación central, y del PNG solo se comprobaban firma, ancho, alto y peso. Un revisor
+sustituyó el nombre del Autor por su slug y borró la procedencia: **32 de 32 pruebas
+siguieron en verde**. La Pieza habría salido diciendo `SENECA` en vez de `SÉNECA`, sin obra
+ni año, y la verificación no se habría enterado — porque el texto para publicar, que sí se
+comprobaba, viene de otra función.
+
+**Un dueño más, y uno que faltaba.** `escapar` y `repartirEnLineas` bajan a `src/lib/lienzo.ts`
+con la paleta y las familias tipográficas, que estaban a punto de tener una cuarta copia; y
+la procedencia compuesta —«obra, año»— pasa a salir de `procedenciaCompuesta` en
+`atribucion.ts`, porque desde esta historia la escriben dos sitios: el pie que se publica y
+la imagen. Con dos redacciones, una diría «Cartas a Lucilio 65» y la otra «Cartas a Lucilio,
+65», y nadie lo vería hasta tenerlas delante.
+
+**Verificado.** `npx astro check` 0 errores / 163 ficheros. `npx vitest run` **1356/1356** en
+50 ficheros, frente a 1277/47 al abrir la historia. `npm run build` con las 53 páginas de
+siempre: la Pieza no añade superficie. Y una composición real de tres Citas —una de ellas
+sin procedencia— mirada a ojo: texto íntegro, atribución por Cita, sin coma suelta donde no
+hay obra, y el PNG fuera de git.
+
+## 13.3 — Una Colección anuncia su propia pieza
+
+`npm run pieza -- coleccion <slug> --red <red>` compone la Pieza de una Colección: el mismo
+lienzo de la 13.2 con dos diferencias, que son el contenido entero de la historia. El lienzo
+lleva el **nombre de la Colección** como título, y el texto lleva un solo enlace a
+`/coleccion/<slug>?de=<red>` en vez de a la portada.
+
+**El umbral lo cierra el compilador, no un `if`.** `ColeccionPublicada` lleva una marca de
+símbolo único no exportado, así que ningún módulo puede fabricar una: la única conversión de
+todo el proyecto está pegada al `filter` que aplica `MIN_CITAS_POR_COLECCION`. Como la firma
+de la composición exige ese tipo, «una Colección por debajo del umbral no produce Pieza» deja
+de ser una regla que haya que recordar — y hay una prueba con `@ts-expect-error` que fija la
+puerta. Es la lección de la 12.1 aplicada: una nota que hay que leer no es una puerta.
+
+**Aquí sí se excluye, y por eso hay que decirlo.** En la 13.2 una Cita larga se rechaza,
+porque Héctor la nombró. Aquí las Citas vienen de la pertenencia de la Colección, que puede
+tener veinte, así que excluir es lo correcto — pero la salida enumera las tres listas: las
+que entran, las que se quedan fuera con su motivo, y las declaradas que no resuelven.
+
+**La revisión volvió a encontrar lo que la suite no ve.** Comentar una sola línea
+—`cursor += titulo.alto`— dejaba **86 de 86 pruebas en verde** con el nombre de la Colección
+impreso encima de la primera cita. La aserción que debía cazarlo solo comparaba
+`y(título) < y(cita)`, y como el cuerpo de la Cita (44px) supera al del título (30px), seguía
+siendo cierta bajo solapamiento total. La prueba de «la Pieza más llena» también sobrevivía,
+porque el apilado terminaba antes y el hueco con la marca solo crecía.
+
+**El mismo patrón, dos veces más.** Un nombre de Colección que se reparte en dos líneas podía
+perder la segunda sin que fallara nada, porque todos los títulos de prueba cabían en una: la
+misma mutilación que el módulo se niega a hacerle al texto de una Cita, en el único texto que
+no tenía la prueba de «no falta ni una palabra». Y los miembros declarados que no resuelven
+—erratas, o Citas movidas a `corpus/_revision/`— desaparecían del anuncio sin contarse ni
+enumerarse, que es justo la exclusión que el curador no provocó.
+
+**Un dueño más.** `/coleccion/<slug>` estaba escrito a mano en cuatro sitios y la Pieza iba a
+ser el quinto — y el suyo es el peligroso, porque un destino equivocado no falla en ninguna
+parte: da 404 a un visitante semanas después. Ahora los cinco derivan de `rutaDeColeccion`
+en `superficies.ts`. De paso quedó corregida una afirmación falsa de su documentación: Astro
+**no** valida los `href` internos, así que renombrar la ruta daría 404 con el build en verde.
+
+**Verificado.** `npx astro check` 0 errores / 166 ficheros. `npx vitest run` **1414/1414** en
+52 ficheros, frente a 1356/50 al abrir la historia. `npm run build` con 53 páginas.
+`npx playwright test` **400 pasan**. Y una composición real contra una copia de `corpus/` con
+una Colección de 16 miembros, mirada a ojo.

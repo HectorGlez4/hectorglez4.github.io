@@ -137,7 +137,37 @@ export const SUPERFICIES: readonly Superficie[] = [
     // que nadie lo hubiera decidido.
     caracter: 'ajena',
   },
+  {
+    nombre: 'el lote de jornadas',
+    pagina: 'lote.astro',
+    reconoce: /^\/lote$/,
+    // Historia 13.1 — el Kit de las jornadas que vienen, y de la misma clase que el Kit:
+    // material de publicación y no contenido. Esta línea es **todo** lo que hace falta para
+    // que quede fuera del sitemap, fuera de los dos buscadores y fuera del barrido. Si
+    // alguien se ve declarándolo en un segundo sitio, la Historia 12.1 no habría servido.
+    caracter: 'ajena',
+  },
 ];
+
+/**
+ * La ruta de la Página de Colección — Historia 13.3.
+ *
+ * Vive aquí porque aquí está declarada la forma que la reconoce, tres entradas más arriba, y
+ * tener las dos juntas es lo que impide que se separen. La escribían a mano cinco sitios: la
+ * propia página, la portada, la búsqueda, la enumeración de rutas publicadas y —desde la
+ * 13.3— el enlace de destino de la Pieza de Colección.
+ *
+ * **Y ninguno de los cinco fallaría al divergir**, que es el motivo real de que esto exista.
+ * Astro no comprueba que un `href` interno case con ningún `getStaticPaths`, así que renombrar
+ * `src/pages/coleccion/` dejaría los cinco apuntando a un 404 con el build entero en verde;
+ * el de la Pieza es además el que más tarda en verse, porque se publica en una cuenta y el
+ * 404 lo encuentra un visitante semanas después. Que la forma de la ruta y su constructor
+ * estén pegados es lo único que lo impide, y `tests/unit/coleccion-en-pieza.test.ts` ata lo
+ * que devuelve esta función a la entrada de `SUPERFICIES` que la reconoce.
+ */
+export function rutaDeColeccion(slug: string): string {
+  return `/coleccion/${slug}`;
+}
 
 /** Las cuatro consecuencias de declarar una superficie. */
 export interface Consecuencias {

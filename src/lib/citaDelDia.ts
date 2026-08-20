@@ -24,6 +24,25 @@ export type Jornada = string;
 const UN_DIA = 86_400_000;
 
 /**
+ * Qué tiene forma de jornada. El **único** sitio donde se dice, y por eso está aquí.
+ *
+ * Lo consumen `jornadaDelBuild` —que lee la jornada declarada por el entorno— y la orden
+ * que fija jornadas en `corpus/portada.json` (Historia 13.1). Con dos definiciones, una
+ * acabaría admitiendo lo que la otra rechaza y el lote fijaría jornadas que la Cita del
+ * Día no sabe leer.
+ *
+ * No basta con la forma: se exige además que **exista en el calendario**. `2026-02-31`
+ * casa con la expresión y no es ningún día, y de ahí salía un `Date.parse` a `NaN` que
+ * dejaba el índice de la rotación en `NaN` y la selección en `undefined` — un fallo a
+ * cuatro marcos de distancia de la errata que lo causó.
+ */
+export function esJornada(valor: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
+  const fecha = new Date(`${valor}T00:00:00Z`);
+  return !Number.isNaN(fecha.getTime()) && fecha.toISOString().slice(0, 10) === valor;
+}
+
+/**
  * La jornada del build.
  *
  * Se admite fijarla por entorno para que el CI pueda declarar cuál es la jornada en curso
@@ -33,7 +52,7 @@ const UN_DIA = 86_400_000;
  */
 export function jornadaDelBuild(entorno: Record<string, string | undefined>, ahora: Date): Jornada {
   const declarada = entorno.FECHA_JORNADA?.trim();
-  if (declarada && /^\d{4}-\d{2}-\d{2}$/.test(declarada)) return declarada;
+  if (declarada !== undefined && esJornada(declarada)) return declarada;
   return ahora.toISOString().slice(0, 10);
 }
 

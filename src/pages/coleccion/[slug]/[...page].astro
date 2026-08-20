@@ -64,6 +64,7 @@ import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import { conjuntoPublicable, type ColeccionPublicada } from '../../../lib/publicado.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDe } from '../../../lib/marca.ts';
+import { rutaDeColeccion } from '../../../lib/superficies.ts';
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -101,7 +102,7 @@ const { autores, page: pagina } = Astro.props;
  */
 const coleccion: ColeccionPublicada = Astro.props.coleccion;
 
-const rutaBase = `/coleccion/${coleccion.slug}`;
+const rutaBase = rutaDeColeccion(coleccion.slug);
 const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
 const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 

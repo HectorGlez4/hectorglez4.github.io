@@ -38,6 +38,18 @@ export interface Tramo {
    * la misma Cita tienen que partir del mismo tramo, o una dirá que cabe y la otra no.
    */
   pixelesEnTarjeta: number;
+  /**
+   * Tamaño en píxeles para la Pieza de Canal de varias Citas — Historia 13.2.
+   *
+   * Tercera columna y no un factor sobre las otras dos, por lo que ya dice la cabecera de
+   * este módulo: el lienzo es distinto. La Pieza es cuadrada de 1080 como la Imagen, pero
+   * **apila varias Citas** en ella, así que el alto que le toca a cada una es una fracción
+   * del que tiene una Cita sola. Calcularlo en la plantilla —«la mitad del de la Imagen»,
+   * «un poco menos si son cuatro»— es exactamente la decisión que AD-8 le quitó a la
+   * plantilla: en cuanto la Pieza pudiera bajar el cuerpo para que algo quepa, «no cabe»
+   * dejaría de ser una respuesta y NFR-12 se negociaría sola.
+   */
+  pixelesEnPieza: number;
   /** Falso por encima de `MAX_CARACTERES_IMAGEN`: la acción no se ofrece (FR-10). */
   admiteImagen: boolean;
 }
@@ -47,13 +59,31 @@ export interface Tramo {
  * máximo alcance la longitud del texto.
  */
 const TABLA: { hasta: number; tramo: Tramo }[] = [
-  { hasta: 80, tramo: { nombre: 'xl', pixelesEnImagen: 64, pixelesEnTarjeta: 56, admiteImagen: true } },
-  { hasta: 160, tramo: { nombre: 'lg', pixelesEnImagen: 52, pixelesEnTarjeta: 46, admiteImagen: true } },
-  { hasta: 240, tramo: { nombre: 'md', pixelesEnImagen: 42, pixelesEnTarjeta: 38, admiteImagen: true } },
-  // 34px es el suelo legible del lienzo. Por debajo no se baja: se deja de ofrecer imagen.
+  {
+    hasta: 80,
+    tramo: { nombre: 'xl', pixelesEnImagen: 64, pixelesEnTarjeta: 56, pixelesEnPieza: 44, admiteImagen: true },
+  },
+  {
+    hasta: 160,
+    tramo: { nombre: 'lg', pixelesEnImagen: 52, pixelesEnTarjeta: 46, pixelesEnPieza: 36, admiteImagen: true },
+  },
+  {
+    hasta: 240,
+    tramo: { nombre: 'md', pixelesEnImagen: 42, pixelesEnTarjeta: 38, pixelesEnPieza: 30, admiteImagen: true },
+  },
+  /*
+   * 34px es el suelo legible **de la Imagen de Cita**, que compone una sola Cita a pantalla
+   * completa: por debajo de ahí no se baja y se deja de ofrecer imagen (FR-10).
+   *
+   * No es un suelo del lienzo en abstracto, y conviene que quede escrito ahora que hay una
+   * tercera columna: la Pieza usa el mismo lado de 1080 y compone a 26px sin violar nada,
+   * porque su unidad de lectura es otra —varias Citas apiladas, leídas como un conjunto— y
+   * su suelo propio es ese. Cada columna declara el suyo; lo que la regla prohíbe es que la
+   * plantilla lo calcule.
+   */
   {
     hasta: MAX_CARACTERES_IMAGEN,
-    tramo: { nombre: 'sm', pixelesEnImagen: 34, pixelesEnTarjeta: 32, admiteImagen: true },
+    tramo: { nombre: 'sm', pixelesEnImagen: 34, pixelesEnTarjeta: 32, pixelesEnPieza: 26, admiteImagen: true },
   },
 ];
 
@@ -62,6 +92,7 @@ const SIN_IMAGEN: Tramo = {
   nombre: 'sm',
   pixelesEnImagen: 0,
   pixelesEnTarjeta: 0,
+  pixelesEnPieza: 0,
   admiteImagen: false,
 };
 

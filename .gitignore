@@ -9,6 +9,11 @@ node_modules/
 dist/
 .astro/
 
+# Piezas de Canal compuestas por `tools/pieza.ts` (AD-15). Lo versionado es la decisión
+# —qué Citas van juntas y a qué cuenta—, nunca el artefacto: un PNG guardado aquí puede
+# quedarse viejo respecto al corpus del que salió, y nadie lo vería.
+piezas/
+
 # Pruebas
 test-results/
 playwright-report/

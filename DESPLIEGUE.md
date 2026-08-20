@@ -110,27 +110,58 @@ A mano, una vez (necesita la cuenta de Google y la del registrador):
    `www`, `http` y `https`. Con prefijo de URL harían falta cuatro propiedades y las
    métricas saldrían repartidas entre ellas, que es justo lo que impediría medir SM-1.
 
-2. Google da un registro `TXT` del tipo `google-site-verification=…`. Añadirlo en el
-   registrador, en el ápice (`@`), junto a los cuatro registros `A` de la Historia 7.1.
-   **No se sustituye ninguno**: un dominio admite varios `TXT` a la vez.
+2. Google reconoce que el DNS está en GoDaddy y ofrece validar por **Domain Connect**:
+   un botón —*Lancer la validation* / *Iniciar la validación*— que abre GoDaddy, pide
+   autorización y escribe el `TXT` por su cuenta. **Es la vía que se usó** el 2026-08-19.
 
-3. Pulsar **Verificar**. Si falla, es propagación: se reintenta al cabo de un rato.
+   **Lo que se autoriza no es solo la verificación.** GoDaddy lo anuncia literalmente:
+   *«autoriser Google à activer les services Domain Verification, Gmail Setup»*. El
+   `scope` de la URL lo confirma: `domain-verification+gmail-setup`. Gmail Setup es el
+   servicio que escribe registros `MX` para enrutar el correo del dominio hacia Google, y
+   va en el mismo paquete aunque no se haya pedido. **Se comprobó después y no escribió
+   ninguno**: el dominio no tenía `MX` antes y seguía sin tenerlos al terminar. Pero es un
+   paquete, no una casilla, así que la comprobación de abajo forma parte del
+   procedimiento y no es opcional.
 
-4. **Sitemaps → Agregar sitemap**, con la ruta `sitemap-index.xml`.
+   La alternativa manual sigue disponible y es la que hay que usar si algún día el
+   proveedor no se detecta: cambiar el desplegable de proveedor a *Otro*, copiar el `TXT`
+   del tipo `google-site-verification=…` y añadirlo en el registrador, en el ápice (`@`),
+   junto a los cuatro registros `A` de la Historia 7.1. **No se sustituye ninguno**: un
+   dominio admite varios `TXT` a la vez. Escribe un registro y no concede acceso a nadie.
+
+3. Esperar a que termine. La validación tarda un minuto y el resultado es
+   *«La propiedad ha sido validada»*, con método **proveedor de nombre de dominio**.
+
+4. **Sitemaps → Agregar sitemap**, con la URL completa
+   `https://sabiduriadebolsillo.net/sitemap-index.xml`.
+
+   Recién enviado, el estado sale como **«No se ha podido obtener el sitemap»** con cero
+   páginas. **Eso no es un fallo**: la columna *Última lectura* está vacía, que es la
+   señal de que Google todavía no ha ido a buscarlo. Si hubiera intentado y fallado,
+   habría fecha ahí. Se recomprueba a las 24-48 h; si para entonces hay fecha de lectura
+   y sigue en error, entonces sí hay algo que arreglar.
 
 5. No borrar el registro `TXT` después. Google revalida cada cierto tiempo y la propiedad
-   se cae sin avisar si el registro ya no está.
+   se cae sin avisar si el registro ya no está. Tampoco retirar la autorización de Domain
+   Connect en GoDaddy: es lo que sostiene el método de validación elegido.
 
 Cómo repetirlo o comprobarlo desde fuera:
 
 ```bash
 dig +short TXT sabiduriadebolsillo.net | grep google-site-verification
+dig +short MX  sabiduriadebolsillo.net   # vacío: Gmail Setup no escribió nada
+dig +short A   sabiduriadebolsillo.net   # las cuatro de la Historia 7.1, intactas
 curl -s https://sabiduriadebolsillo.net/robots.txt
+curl -sI https://sabiduriadebolsillo.net/sitemap-index.xml | grep -i content-type
 ```
 
-La alternativa —subir el fichero HTML de verificación a `public/`— también funciona con
-este alojamiento, pero verifica solo un prefijo de URL, así que no sirve para lo que se
-necesita aquí.
+Las dos comprobaciones del medio existen por el paquete de Domain Connect: la de `MX`
+detecta que Gmail Setup haya enrutado el correo, y la de `A` que la escritura en la zona
+no haya tocado lo que sostiene LC-1. Sin ellas, autorizar el paquete es un acto a ciegas.
+
+La otra alternativa —subir el fichero HTML de verificación a `public/`— también funciona
+con este alojamiento, pero verifica solo un prefijo de URL, así que no sirve para lo que
+se necesita aquí.
 
 ## 3. El receptor de la medición — Historia 7.3 (LC-4)
 

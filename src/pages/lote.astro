@@ -1,0 +1,209 @@
+---
+/**
+ * El lote de jornadas — Historia 13.1, FR-21.
+ *
+ * El Kit resolvió publicar hoy en dos minutos, pero exigía estar ahí hoy. Esta dirección es
+ * el mismo Kit para las jornadas que vienen: Héctor la abre en el móvil y encuentra el
+ * material de cada día ya compuesto, listo para publicar sin terminal y sin repositorio.
+ *
+ * **Lo que enseña sale de `corpus/portada.json`**, el mismo sitio del que sale la Cita del
+ * Día. No hay un calendario del lote: el material de esta página y el que compondrá el Kit
+ * ese día derivan de la misma fijación, así que son el mismo, y no hay ningún desempate que
+ * hacer. Y no se guarda nada: se deriva en cada construcción, de modo que cambiar la Cita de
+ * una jornada ya compuesta la recompone sola.
+ *
+ * El marcado de cada material es el **mismo componente** que usa el Kit. Que los datos
+ * coincidan lo sostiene `src/lib/lote.ts`; que la vista coincida, `MaterialParaPublicar`.
+ * Con una sola de las dos, «indistinguible» sería cierto solo por dentro.
+ *
+ * No es una superficie del sitio y no debe llegar a serlo: `noindex`, fuera del sitemap y de
+ * los dos buscadores, y sin ningún enlace desde la navegación pública. Todo eso sale de una
+ * sola línea de `src/lib/superficies.ts` (Historia 12.1); aquí no hay ninguna bandera.
+ */
+import Armazon from '../components/Armazon.astro';
+import MaterialParaPublicar from '../components/MaterialParaPublicar.astro';
+import portada from '../../corpus/portada.json';
+import { aptasParaPortada, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { materialDelLote } from '../lib/lote.ts';
+import { tituloDe } from '../lib/marca.ts';
+import { fijacionesDeclaradas } from '../lib/portada.ts';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+
+const conjunto = await conjuntoPublicable();
+const jornada = jornadaDelBuild(process.env, new Date());
+/*
+ * El fichero se importa en crudo y lo puede haber escrito una persona: ningún esquema de
+ * `src/content.config.ts` lo juzga. Esta página es la única que lo **enumera**, así que es la
+ * única a la que una clave mal escrita podía tumbarle el build —y con él el del sitio entero,
+ * incluida la reconstrucción diaria—. `fijacionesDeclaradas` descarta lo que no entiende.
+ */
+const fijaciones = fijacionesDeclaradas(portada);
+const lote = materialDelLote(aptasParaPortada(conjunto.citas), fijaciones, jornada);
+
+const autorDe = (slug: string) => conjunto.autores.find((a) => a.slug === slug)!;
+
+/** Cada jornada con sus piezas ya emparejadas con su Autor, como hace el Kit. */
+const jornadas = lote.map((dia) => ({
+  ...dia,
+  piezas: [
+    ...(dia.material ? [{ seleccion: dia.material.delDia, alternativa: false }] : []),
+    ...(dia.material?.alternativa
+      ? [{ seleccion: dia.material.alternativa, alternativa: true }]
+      : []),
+  ].map((pieza) => ({
+    alternativa: pieza.alternativa,
+    cita: pieza.seleccion.cita,
+    autor: autorDe(pieza.seleccion.cita.autor),
+  })),
+}));
+---
+
+<Armazon
+  titulo={tituloDe('Lote de jornadas')}
+  descripcion="Material ya compuesto de las jornadas fijadas por delante."
+  ruta="/lote"
+>
+  <div class="pagina contenedor">
+    <h1>Lote desde el {jornada}</h1>
+
+    {
+      /*
+       * El estado de hoy, y se dice sin rodeos. `fijaciones` está vacío en el repositorio,
+       * así que esta es la rama que se construye mientras nadie componga un lote: una página
+       * en blanco dejaría a quien la abre sin saber si es que no hay nada fijado o es que la
+       * página está rota.
+       *
+       * Lo primero que dice es qué significa —el sitio sigue publicando, por rotación—, y no
+       * una orden de terminal: quien abre esto está en el móvil, que es exactamente lo que
+       * esta superficie existe para no exigir. La orden va después, para cuando sí haya un
+       * teclado delante.
+       */
+      jornadas.length === 0 && (
+        <div class="vacio">
+          <p class="aviso">
+            No hay ninguna jornada preparada por delante. El sitio sigue publicando: cada día
+            sale la Cita del Día que le toca por rotación.
+          </p>
+          <p class="aviso">
+            Hoy ya está compuesto en <a href="/kit" data-enlace-kit>el Kit del día</a>. Para
+            dejar preparados los días que vienen, desde el ordenador:
+          </p>
+          <p class="orden">
+            <code>npm run jornada -- fijar &lt;AAAA-MM-DD&gt; &lt;slug-de-cita&gt;</code>
+          </p>
+          <p class="aviso">
+            Queda escrito en <code>corpus/portada.json</code>, que es de donde sale la Cita del
+            Día: lo que se prepara aquí es lo mismo que compondría ese día.
+          </p>
+        </div>
+      )
+    }
+
+    {
+      jornadas.map((dia) => (
+        <section class="jornada" data-jornada={dia.jornada}>
+          <h2>{dia.jornada}</h2>
+
+          {dia.material !== null && !dia.honrada && (
+            /*
+             * El único modo en que una fijación se queda muda sin fallar: su Cita dejó de ser
+             * apta para portada —o se retiró a revisión— y `citaDelDia` rota en su lugar,
+             * para no dejar la portada en blanco. Se dice aquí, y destacado, porque esta
+             * página existe para que ese fallo silencioso se vea mientras todavía se puede
+             * arreglar; un párrafo más entre otros no lo haría visible.
+             */
+            <p class="aviso alerta" data-fijacion-ignorada>
+              <strong>Esta jornada no saldrá como está fijada.</strong> La Cita{' '}
+              <code>{dia.fijadaA}</code> ya no está entre las aptas para portada, así que ese
+              día se ignora la fijación. Abajo va lo que saldría de verdad: la Cita de la
+              rotación.
+            </p>
+          )}
+
+          {dia.material === null && <p class="aviso">No hay ninguna Cita apta para portada.</p>}
+
+          {dia.piezas.map((pieza) => (
+            <MaterialParaPublicar
+              cita={pieza.cita}
+              autor={pieza.autor}
+              titulo={pieza.alternativa ? 'Alternativa con Imagen' : 'La Cita del Día'}
+              nivel={3}
+              esAlternativa={pieza.alternativa}
+            />
+          ))}
+        </section>
+      ))
+    }
+
+    {
+      jornadas.length > 0 && (
+        /*
+         * La vuelta al Kit. Son la misma herramienta en dos momentos, y las dos son
+         * superficies ajenas al producto: este enlace no hace alcanzable ninguna de las dos
+         * desde la navegación pública, porque a esta página tampoco llega ningún enlace.
+         */
+        <p class="paso">
+          Lo de hoy está en <a href="/kit" data-enlace-kit>el Kit del día</a>.
+        </p>
+      )
+    }
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  h1,
+  h2 {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--tinta-apagada);
+  }
+
+  .jornada {
+    margin-block: calc(var(--unidad) * 6);
+  }
+
+  .jornada h2 {
+    color: var(--tinta);
+  }
+
+  .aviso {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+  }
+
+  /*
+   * El aviso de fijación muda no puede leerse como un párrafo más: es lo único que esta
+   * página hace que no hace el Kit, y su valor entero está en que se vea de un vistazo.
+   */
+  .alerta {
+    background: var(--contenedor-bajo);
+    border-left: calc(var(--unidad) * 0.5) solid var(--siena);
+    padding: calc(var(--unidad) * 2);
+    border-radius: var(--radio);
+  }
+
+  .vacio {
+    max-width: var(--medida-prosa);
+  }
+
+  .orden code,
+  .alerta code {
+    font-size: var(--pie);
+    word-break: break-word;
+  }
+
+  .paso {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    margin-top: calc(var(--unidad) * 4);
+    padding-top: calc(var(--unidad) * 2);
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+</style>

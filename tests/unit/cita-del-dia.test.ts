@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../../src/lib/citaDelDia.ts';
+import {
+  aptasParaPortada,
+  citaDelDia,
+  esJornada,
+  jornadaDelBuild,
+} from '../../src/lib/citaDelDia.ts';
 import type { Cita } from '../../src/lib/publicado.ts';
 
 const cita = (slug: string, apta = true): Cita => ({
@@ -31,6 +36,60 @@ describe('Historia 4.1 — la jornada del build', () => {
 
   it('una fecha mal escrita se ignora en vez de romper la portada', () => {
     expect(jornadaDelBuild({ FECHA_JORNADA: 'ayer' }, new Date('2026-08-11T00:00:00Z'))).toBe(
+      '2026-08-11',
+    );
+  });
+
+  it.each(['2026-02-31', '2026-13-01', '2026-00-10', '2026-04-31'])(
+    'una fecha que tiene la forma y no existe en el calendario —%s— también se ignora',
+    (imposible) => {
+      /*
+       * `2026-02-31` casa con `\d{4}-\d{2}-\d{2}` y no es ningún día. Antes se aceptaba, y
+       * entonces `Date.parse` daba `NaN`, el índice de la rotación salía `NaN` y la Cita
+       * elegida era `undefined` — un fallo a cuatro marcos de distancia de la errata.
+       *
+       * Y el consumidor no es una prueba: es la caja de texto libre del `workflow_dispatch`
+       * de `.github/workflows/publicar.yml`, que rellena una persona a mano.
+       */
+      expect(jornadaDelBuild({ FECHA_JORNADA: imposible }, new Date('2026-08-11T09:00:00Z'))).toBe(
+        '2026-08-11',
+      );
+    },
+  );
+
+  it('y ese día imposible no llega nunca a la selección', () => {
+    // La consecuencia, por si algún día alguien relajara la comprobación de arriba: lo que
+    // se protege no es el formato, es que la portada no se quede sin Cita.
+    const jornada = jornadaDelBuild({ FECHA_JORNADA: '2026-02-31' }, new Date('2026-08-11T09:00:00Z'));
+    const seleccion = citaDelDia([cita('a'), cita('b')], jornada);
+    expect(seleccion).not.toBeNull();
+    expect(seleccion!.cita).toBeDefined();
+  });
+});
+
+describe('Historia 13.1 — qué tiene forma de jornada, dicho en un solo sitio', () => {
+  it.each(['2026-08-11', '2026-01-01', '2024-02-29', '2026-12-31'])('admite %s', (buena) => {
+    expect(esJornada(buena)).toBe(true);
+  });
+
+  it.each([
+    '11-08-2026',
+    '2026-8-11',
+    '2026-08-11T00:00:00Z',
+    'manana',
+    '',
+    '2026-02-31',
+    '2025-02-29',
+    '2026-13-01',
+  ])('rechaza %s', (mala) => {
+    expect(esJornada(mala)).toBe(false);
+  });
+
+  it('es el único dueño: la orden que fija jornadas y el sitio preguntan lo mismo', () => {
+    // Lo que impide que la herramienta acepte una clave que el sitio no sabe leer, o al
+    // revés. Las dos partes llaman aquí; ninguna escribe su propia expresión regular.
+    expect(esJornada('manana')).toBe(false);
+    expect(jornadaDelBuild({ FECHA_JORNADA: 'manana' }, new Date('2026-08-11T09:00:00Z'))).toBe(
       '2026-08-11',
     );
   });

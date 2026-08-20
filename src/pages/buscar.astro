@@ -22,6 +22,7 @@ import {
   temasPublicados,
 } from '../lib/publicado.ts';
 import { ETIQUETAS_DE_RESULTADO, TIPO_POR_OMISION } from '../lib/tipoDeResultado.ts';
+import { rutaDeColeccion } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
@@ -92,7 +93,7 @@ const colecciones = conjunto.colecciones;
             <ul class="chips">
               {colecciones.map((coleccion) => (
                 <li>
-                  <a class="chip" href={`/coleccion/${coleccion.slug}`}>
+                  <a class="chip" href={rutaDeColeccion(coleccion.slug)}>
                     {coleccion.nombre}
                   </a>
                 </li>

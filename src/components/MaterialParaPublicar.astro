@@ -1,0 +1,145 @@
+---
+/**
+ * El material de una Cita, listo para publicar — FR-21, Historias 8.1 y 13.1.
+ *
+ * Es lo que Héctor copia y pega: el texto, la Imagen ya compuesta, el pie con la atribución
+ * y los enlaces con su marca de origen por cuenta. Lo consumen el Kit Diario —que compone la
+ * jornada de hoy— y el lote —que compone las que vienen—, y **existe precisamente para que
+ * no haya dos versiones de esto**.
+ *
+ * Antes de la Historia 13.1 el marcado vivía entero dentro de `kit.astro`. El lote nació
+ * copiándolo, y con la copia nació el defecto que este componente cierra: que los dos
+ * derivaran los mismos datos —que lo hacen, por `materialDelKit`— y enseñaran cosas distintas
+ * en cuanto alguien tocara uno de los dos. La igualdad de los datos la sostiene
+ * `src/lib/lote.ts`; la de la vista, este fichero. Sin las dos, «indistinguible» es cierto
+ * solo para la mitad que nadie mira.
+ *
+ * La atribución sale de `atribucion.ts` a través de `CopiarCita`, y el tamaño del lienzo de
+ * `tramos.ts` a través de `ImagenDelKit`: la misma tabla y el mismo texto que se lleva el
+ * visitante. Aquí no se compone ninguno de los dos.
+ */
+import CopiarCita from '../islands/CopiarCita.astro';
+import ImagenDelKit from '../islands/ImagenDelKit.astro';
+import { REDES, enlaceConOrigen } from '../lib/redes.ts';
+import { tramoDe } from '../lib/tramos.ts';
+import type { Cita, Autor } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+  /** El rótulo de la sección: «La Cita del Día», «Alternativa con Imagen». */
+  titulo: string;
+  /**
+   * Nivel del rótulo. El Kit encabeza con `h1` y sus materiales cuelgan en `h2`; el lote
+   * mete una jornada en medio, así que allí cuelgan en `h3`. Se eligen los dos elementos a
+   * mano en vez de componer el nombre de la etiqueta: una etiqueta dinámica se sale del
+   * ámbito de los estilos de este componente.
+   */
+  nivel?: 2 | 3;
+  /** Marca la sección como la alternativa con Imagen, no como la Cita del Día. */
+  esAlternativa?: boolean;
+}
+
+const { cita, autor, titulo, nivel = 2, esAlternativa = false } = Astro.props;
+const tramo = tramoDe(cita.texto);
+---
+
+<section class="material" data-alternativa={esAlternativa ? '' : undefined}>
+  {nivel === 3 ? <h3>{titulo}</h3> : <h2>{titulo}</h2>}
+
+  <blockquote class="texto" data-tramo={tramo.nombre}>
+    «{cita.texto}»
+  </blockquote>
+
+  {
+    tramo.admiteImagen ? (
+      <ImagenDelKit cita={cita} autor={autor} />
+    ) : (
+      /*
+       * Se dice explícitamente y sin rodeos. Callarlo dejaría a Héctor buscando por qué no
+       * aparece la imagen justo el día que tiene dos minutos.
+       */
+      <p class="aviso" data-sin-imagen>
+        Esta Cita pasa del límite de longitud, así que no admite Imagen. Abajo tienes una
+        alternativa apta con su material completo.
+      </p>
+    )
+  }
+
+  <CopiarCita cita={cita} autor={autor} />
+
+  <p class="enlace">
+    <a href={`/cita/${cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
+  </p>
+
+  {/*
+    * Un enlace por cuenta, cada uno con su marca de origen. Es lo único que distingue de qué
+    * red vino cada visita, y por eso se pega el enlace de aquí y no el de arriba: el de
+    * arriba es para mirar la página, estos son para publicar.
+    */}
+  <ul class="redes" data-redes>
+    {
+      REDES.map((red) => (
+        <li>
+          <a href={enlaceConOrigen(`/cita/${cita.slug}`, red.id)} data-red={red.id}>
+            {red.nombre}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  h2,
+  h3 {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--tinta-apagada);
+  }
+
+  .material {
+    margin-block: calc(var(--unidad) * 4);
+    padding-top: calc(var(--unidad) * 2);
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .texto {
+    font-family: var(--serif);
+    margin: 0 0 calc(var(--unidad) * 2);
+  }
+
+  .aviso {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+  }
+
+  .enlace {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+  }
+
+  .redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--unidad);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--unidad);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+  }
+
+  /* UX-DR22 — zona de toque de 44px: en el móvil se pulsa con el pulgar. */
+  .redes a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    border: var(--grosor-filete) solid var(--filete);
+    border-radius: var(--radio);
+  }
+</style>
