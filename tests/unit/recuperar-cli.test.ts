@@ -875,3 +875,229 @@ describe('Fix 11.1b — la obra versionada es la que declara el encabezado', () 
     expect(await readdir(join(t.corpus, 'fuentes'))).toEqual(['wikisource-es--el-sable.txt']);
   });
 });
+
+/**
+ * Fix 11.1c — cuando la página no declara el año, lo declara su obra.
+ *
+ * En Wikisource la obra declara el año y la página declara el texto, y casi nunca son la
+ * misma página: el índice de «Capítulos que se le olvidaron a Cervantes» trae `|año = 1895`
+ * y su «Capítulo XLIII» trae ocho mil caracteres de prosa y ningún año. Aquí se comprueba
+ * por la orden, y con el doble de red contando peticiones, que la tercera solo se hace
+ * cuando hace falta y que hereda las guardas de las otras dos.
+ */
+describe('Fix 11.1c — el año de la obra llega a la subpágina', () => {
+  const URL_CAPITULO =
+    'https://es.wikisource.org/wiki/Cap%C3%ADtulos_que_se_le_olvidaron_a_Cervantes/Cap%C3%ADtulo_XLIII';
+  const URL_OBRA = 'https://es.wikisource.org/wiki/Cap%C3%ADtulos_que_se_le_olvidaron_a_Cervantes';
+  const CRUDA_CAPITULO = cruda(URL_CAPITULO);
+  const CRUDA_OBRA = cruda(URL_OBRA);
+
+  const PAGINA_CAPITULO = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Capítulos que se le olvidaron a Cervantes/Capítulo XLIII - Wikisource</title></head><body>
+<h1 id="firstHeading">Cap&iacute;tulos que se le olvidaron a Cervantes/Cap&iacute;tulo XLIII</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>La cordura y la locura se reparten el imperio de la vida humana.</p>
+</div></div></body></html>`;
+
+  /** La subpágina declara a qué obra pertenece, con un enlace absoluto. Y no declara año. */
+  const WIKITEXTO_CAPITULO = `{{Encabezado
+|título = [[Capítulos que se le olvidaron a Cervantes]]
+|autor = Juan Montalvo
+}}
+
+La cordura y la locura se reparten el imperio de la vida humana.`;
+
+  const WIKITEXTO_OBRA = `{{Encabezado
+|título = Capítulos que se le olvidaron a Cervantes
+|autor = Juan Montalvo
+|año = 1895
+}}
+
+* [[/Capítulo I/]]`;
+
+  const RAW = (cuerpo: string): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'text/x-wiki; charset=UTF-8' },
+    cuerpo,
+  });
+
+  const elDocumento = async (t: { corpus: string }) => {
+    const [nombre, ...otros] = await readdir(join(t.corpus, 'fuentes'));
+    expect(otros).toEqual([]);
+    return readFile(join(t.corpus, 'fuentes', nombre), 'utf8');
+  };
+
+  it('encadena: la obra declarada aporta el año, y el documento guarda las dos literales', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_CAPITULO, CRUDA_CAPITULO, CRUDA_OBRA]);
+
+    const documento = await elDocumento(t);
+    expect(documento).toContain('obra: Capítulos que se le olvidaron a Cervantes');
+    expect(documento).toContain('año: 1895');
+    // Las dos declaraciones, literales y distinguibles: `extraer` re-deriva de aquí.
+    expect(documento).toContain('|título = [[Capítulos que se le olvidaron a Cervantes]]');
+    expect(documento).toMatch(/^obra> \|año = 1895$/m);
+    expect(resultado.salida).toContain('Año: 1895');
+  });
+
+  it('la obra se pide al mismo anfitrión, y por el enlace, no por la ruta', async () => {
+    const t = await taller();
+    await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: RAW(WIKITEXTO_OBRA),
+    });
+
+    const [pagina, , obra] = await peticiones(t);
+    expect(new URL(obra.url).host).toBe(new URL(pagina.url).host);
+    expect(new URL(obra.url).pathname).toBe(new URL(URL_OBRA).pathname);
+    // Y hereda la identificación: Wikimedia rechaza a quien no se identifica.
+    expect(obra.cabeceras['user-agent']).toBe(pagina.cabeceras['user-agent']);
+  });
+
+  it('una página que ya declara su año no pide ninguna página más', async () => {
+    const t = await taller();
+    const conAño = WIKITEXTO_CAPITULO.replace(
+      '|autor = Juan Montalvo',
+      '|autor = Juan Montalvo\n|año = 1895',
+    );
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(conAño),
+      // Si se pidiera, el doble lo registraría: está en el guion a propósito.
+      [CRUDA_OBRA]: RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_CAPITULO, CRUDA_CAPITULO]);
+    expect(await elDocumento(t)).toContain('año: 1895');
+  });
+
+  it('un `|título` relativo no encadena: queda sin año y sin error', async () => {
+    // «Ariel/Capítulo III» declara `|título = [[../`. Reconstruir «Ariel» de la ruta sería
+    // derivar el padre de la URL, que es lo que la Historia 11.1 prohíbe.
+    const t = await taller();
+    const url = 'https://es.wikisource.org/wiki/Ariel/Cap%C3%ADtulo_III';
+    const resultado = await recuperar(url, t, {
+      [url]: OK(PAGINA_CAPITULO.replace(/Cap&iacute;tulos[^<]*XLIII/, 'Ariel-Cap&iacute;tulo III')),
+      [cruda(url)]: RAW(`{{Encabezado\n|título = [[../\n|autor = José Enrique Rodó\n}}\n\nTexto.`),
+      '*': RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    // Solo dos peticiones: no se llegó a componer ninguna dirección de obra.
+    expect(await pedidas(t)).toEqual([url, cruda(url)]);
+    const documento = await elDocumento(t);
+    expect(documento).toContain('obra: Ariel-Capítulo III');
+    expect(documento).not.toMatch(/^a[ñn]o:/m);
+  });
+
+  it('un enlace a otro anfitrión o a otro espacio tampoco encadena', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(`{{Encabezado\n|título = [[:en:Chapters]]\n|autor = Juan Montalvo\n}}`),
+      '*': RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_CAPITULO, CRUDA_CAPITULO]);
+    expect(await elDocumento(t)).not.toMatch(/^a[ñn]o:/m);
+  });
+
+  it('si la obra tampoco declara año, la recuperación termina bien y lo dice', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: RAW(`{{Encabezado\n|título = Capítulos\n|autor = Juan Montalvo\n}}`),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await elDocumento(t)).not.toMatch(/^a[ñn]o:/m);
+    expect(resultado.salida).toMatch(/tampoco declara año/i);
+    // Un solo salto: la obra no se usa para pedir una tercera página.
+    expect(await pedidas(t)).toEqual([URL_CAPITULO, CRUDA_CAPITULO, CRUDA_OBRA]);
+  });
+
+  it('si la obra no se puede recuperar, la recuperación termina bien y lo dice', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: { lanza: 'getaddrinfo ENOTFOUND es.wikisource.org' },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const documento = await elDocumento(t);
+    expect(documento).toContain('obra: Capítulos que se le olvidaron a Cervantes');
+    expect(documento).not.toMatch(/^a[ñn]o:/m);
+    expect(resultado.salida).toMatch(/no se pudo leer el de «Capítulos/i);
+  });
+
+  it('un 404 en la obra tampoco tira la recuperación', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: { estado: 404, cabeceras: { 'content-type': 'text/html' }, cuerpo: 'no' },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await elDocumento(t)).not.toMatch(/^a[ñn]o:/m);
+  });
+
+  it('la petición de la obra hereda la revalidación de anfitrión', async () => {
+    const t = await taller();
+    const fuera = 'https://metadatos.example.com/capitulos';
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: { estado: 302, cabeceras: { location: fuera } },
+      [fuera]: RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await elDocumento(t)).not.toMatch(/^a[ñn]o:/m);
+    // Y no se llegó a pedir el destino de fuera.
+    expect(await pedidas(t)).toEqual([URL_CAPITULO, CRUDA_CAPITULO, CRUDA_OBRA]);
+  });
+
+  it('la obra que se versiona es la que declara la página, no la que declara su obra', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(WIKITEXTO_CAPITULO),
+      [CRUDA_OBRA]: RAW(
+        `{{Encabezado\n|título = [[Siete tratados]]\n|autor = Juan Montalvo\n|año = 1882\n}}`,
+      ),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const documento = await elDocumento(t);
+    expect(documento).toContain('obra: Capítulos que se le olvidaron a Cervantes');
+    expect(documento).not.toContain('obra: Siete tratados');
+    // El padre aporta el año, y nada más.
+    expect(documento).toContain('año: 1882');
+  });
+
+  it('una página cuyo `|título` apunta a sí misma no gasta una petición', async () => {
+    const t = await taller();
+    const url = 'https://es.wikisource.org/wiki/El_sable';
+    const resultado = await recuperar(url, t, {
+      [url]: OK(PAGINA_CAPITULO.replace(/Cap&iacute;tulos[^<]*XLIII/, 'El sable')),
+      [cruda(url)]: RAW(`{{Encabezado\n|título = [[El sable]]\n|autor = Gutiérrez Nájera\n}}`),
+      '*': RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([url, cruda(url)]);
+  });
+});

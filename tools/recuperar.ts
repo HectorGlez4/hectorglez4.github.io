@@ -24,6 +24,13 @@
  * wikitexto—. La segunda hereda todas las guardas de la primera, y si no llega, la
  * recuperación sigue adelante sin año y lo dice.
  *
+ * Y hay una **tercera, solo cuando la página no declara año**: el encabezado de la obra a
+ * la que la página dice pertenecer. En Wikisource la obra declara el año y la página
+ * declara el texto, y casi nunca son la misma página. La obra se toma del enlace absoluto
+ * que la página escribe en su `|título`, nunca de la ruta —derivarla de `Obra/Capítulo`
+ * sería la Procedencia inferida que la Historia 11.1 prohíbe—, y es un solo salto: si la
+ * obra tampoco declara año, se acabó.
+ *
  * No acepta `--obra`, `--año` ni `--licencia`, y no es un descuido: el «So that» de la
  * historia es que nadie pueda teclear una Procedencia que la Fuente no dice.
  */
@@ -41,6 +48,7 @@ import {
   derivarDeLaDeclaracion,
   derivarDocumento,
   nombreDeDocumento,
+  paginaDeLaObraDeclarada,
 } from './lib/documento.ts';
 
 /** La única llamada de red del proyecto no puede colgarse ni tragarse una biblioteca. */
@@ -128,8 +136,30 @@ const encabezado = ENCABEZADO_EN_EL_ORIGEN.has(fuente.id)
   ? await encabezadoDeOrigen(descarga.url, fuente)
   : {};
 
-const derivado = derivarDocumento(fuente.id, descarga.contenido, encabezado.texto);
-if (!derivado.ok) terminar({ ok: false, motivos: [derivado.motivo] });
+const deLaPagina = derivarDocumento(fuente.id, descarga.contenido, encabezado.texto);
+if (!deLaPagina.ok) terminar({ ok: false, motivos: [deLaPagina.motivo] });
+
+// ── Y si la página no declara año, el encabezado de la obra que ella declara ──
+
+/*
+ * En Wikisource **la obra declara el año y la página declara el texto**, y casi nunca son
+ * la misma página: el índice trae `|año = 1895` y el capítulo trae la prosa. Solo se pide
+ * cuando falta el año —una página que ya lo trae no gasta una petición— y es **un solo
+ * salto**: si la obra tampoco lo declara, se acabó.
+ */
+const laObra =
+  deLaPagina.año === undefined && encabezado.texto !== undefined
+    ? await encabezadoDeLaObra(descarga.url, encabezado.texto, fuente)
+    : {};
+
+const encadenado =
+  laObra.texto === undefined
+    ? undefined
+    : derivarDocumento(fuente.id, descarga.contenido, encabezado.texto, laObra.texto);
+
+// Encadenar no puede empeorar lo que ya se tenía: si la derivación con el encabezado de la
+// obra fallara, se versiona lo que la página declaraba por su cuenta.
+const derivado = encadenado !== undefined && encadenado.ok ? encadenado : deLaPagina;
 
 const nombre = nombreDeDocumento(fuente.id, derivado.obra, derivado.pagina);
 if (nombre === undefined) {
@@ -232,16 +262,31 @@ await writeFile(
   'utf8',
 );
 
+/*
+ * Un metadato que falta no es un fallo, pero callarlo sí lo sería: quien siembra tiene que
+ * poder distinguir «la Fuente no declara año» de «no se pudo leer lo que declara».
+ */
+const avisos = [encabezado.aviso, laObra.aviso].filter((a): a is string => a !== undefined);
+if (laObra.texto !== undefined && derivado.año === undefined) {
+  avisos.push(
+    `Aviso: «${laObra.obra}», la obra que esta página declara, tampoco declara año. ` +
+      'No se encadena más: un solo salto, de la página a su obra.',
+  );
+}
+
+const deDondeSaleElAño =
+  derivado.año !== undefined && laObra.texto !== undefined
+    ? ` (lo declara «${laObra.obra}», la obra a la que esta página dice pertenecer)`
+    : '';
+
 terminar({
   ok: true,
   ruta: destino,
   mensaje:
     `Documento versionado: ${destino}\n` +
     `Obra: ${derivado.obra}\n` +
-    `Año: ${derivado.año ?? 'no consta exacto (la candidata quedará con obra y sin año)'}\n` +
-    // Un metadato que falta no es un fallo, pero callarlo sí lo sería: quien siembra tiene
-    // que poder distinguir «la Fuente no declara año» de «no se pudo leer lo que declara».
-    (encabezado.aviso === undefined ? '' : `${encabezado.aviso}\n`) +
+    `Año: ${derivado.año === undefined ? 'no consta exacto (la candidata quedará con obra y sin año)' : `${derivado.año}${deDondeSaleElAño}`}\n` +
+    avisos.map((aviso) => `${aviso}\n`).join('') +
     `Licencia: ${fuente.licencia} (${fuente.nombre})`,
 });
 
@@ -311,6 +356,79 @@ async function encabezadoDeOrigen(
   }
 
   return { texto: descarga.contenido };
+}
+
+/**
+ * El texto de origen de **la obra que la página declara**, cuando la página no declara año.
+ *
+ * En Wikisource la obra declara el año y la página declara el texto, y casi nunca son la
+ * misma página: «Capítulos que se le olvidaron a Cervantes» declara `|año = 1895` y su
+ * cuerpo es el índice; su «Capítulo XLIII» trae ocho mil caracteres de prosa y ningún año.
+ * Sin este salto, ninguna obra paginada —que son las de los autores conocidos— se puede
+ * sembrar sin degradar la Procedencia a parcial.
+ *
+ * El padre **no se deriva de la ruta**: sale del enlace absoluto que la propia página
+ * escribe en su `|título`, que es una declaración suya y no una inferencia nuestra
+ * (`paginaDeLaObraDeclarada`). La dirección se compone sobre el **mismo anfitrión** de la
+ * página, y la petición pasa por las mismas guardas que las otras dos, revalidación de
+ * anfitrión incluida.
+ *
+ * Si no hay enlace utilizable, si apunta a la propia página, o si la petición falla, se
+ * devuelve lo que se pueda decir y la recuperación sigue adelante sin año.
+ */
+async function encabezadoDeLaObra(
+  direccion: string,
+  encabezadoDePagina: string,
+  fuente: Fuente,
+): Promise<{ texto?: string; obra?: string; aviso?: string }> {
+  const obra = paginaDeLaObraDeclarada(encabezadoDePagina);
+  if (obra === undefined) return {};
+
+  let cruda: string;
+  try {
+    const destino = new URL(direccion);
+    destino.hash = '';
+    destino.search = '';
+    destino.pathname = `/wiki/${obra.replace(/ /gu, '_')}`;
+
+    // Un `|título` que apunta a la propia página no es un salto: es la misma declaración
+    // que ya se leyó, y pedirla otra vez sería una petición que no puede dar nada.
+    if (mismaPagina(destino.pathname, new URL(direccion).pathname)) return { obra };
+
+    destino.searchParams.set('action', 'raw');
+    cruda = destino.toString();
+  } catch {
+    return { obra, aviso: `No se pudo componer la dirección de la obra «${obra}».` };
+  }
+
+  const descarga = await descargar(cruda, fuente, {
+    tipos: TIPOS_DE_ENCABEZADO,
+    acepta: 'text/x-wiki, text/plain',
+  });
+
+  if (!descarga.ok) {
+    return {
+      obra,
+      aviso:
+        `Aviso: esta página no declara año y no se pudo leer el de «${obra}», la obra a la ` +
+        `que dice pertenecer (${cruda}): ${descarga.motivos[0]} El documento se versiona ` +
+        'igual, y la candidata quedará con obra y sin año.',
+    };
+  }
+
+  return { texto: descarga.contenido, obra };
+}
+
+/** Dos rutas que designan la misma página, comparadas ya sin la codificación por ciento. */
+function mismaPagina(una: string, otra: string): boolean {
+  const legible = (ruta: string) => {
+    try {
+      return decodeURIComponent(ruta);
+    } catch {
+      return ruta;
+    }
+  };
+  return legible(una) === legible(otra);
 }
 
 type Descarga = { ok: true; contenido: string; url: string } | { ok: false; motivos: string[] };
