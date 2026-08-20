@@ -235,3 +235,76 @@ describe('Historia 1.7 — los umbrales tienen nombre (AD-9)', () => {
     }
   });
 });
+
+/*
+ * La tradición de un Autor — Historia 11.4.
+ *
+ * De este campo sale el suelo del 40 % de tradición latinoamericana que el PRD compromete,
+ * y hasta la 11.4 la herramienta no sabía escribirlo: `DatosDeAutor` no lo tenía, así que
+ * el dato se perdía entre la orden y el fichero **sin un solo error**. El Autor se creaba,
+ * la orden decía «creado», la proporción no se movía, y el único camino que quedaba era
+ * editar el `.yml` a mano — lo que la herramienta existe para evitar.
+ */
+describe('Historia 11.4 — la tradición del Autor se escribe con la herramienta', () => {
+  it('crear con tradición la deja en el fichero', async () => {
+    const rutas = await corpusVacio();
+    const resultado = await crearAutor(rutas, {
+      nombre: 'José Enrique Rodó',
+      añoNacimiento: 1871,
+      añoFallecimiento: 1917,
+      semblanza: 'Ensayista uruguayo.',
+      tradicion: 'latinoamericana',
+    });
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+    const escrito = await readFile(join(rutas.autores, 'jose-enrique-rodo.yml'), 'utf8');
+    expect(escrito).toContain('tradicion: "latinoamericana"');
+  });
+
+  it('crear sin tradición no escribe la clave, en vez de inventarse una', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, SENECA);
+
+    const escrito = await readFile(join(rutas.autores, 'seneca.yml'), 'utf8');
+    expect(escrito).not.toContain('tradicion');
+    // Y la convención del corpus: lo que no consta se omite, nunca cadena vacía ni null.
+    expect(escrito).not.toMatch(/tradicion:\s*(""|null)/);
+  });
+
+  it('editar otro campo conserva la tradición ya declarada', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, { ...SENECA, tradicion: 'otra' });
+
+    const resultado = await editarAutor(rutas, 'seneca', { semblanza: 'Otra semblanza.' });
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+    const escrito = await readFile(join(rutas.autores, 'seneca.yml'), 'utf8');
+    expect(escrito).toContain('tradicion: "otra"');
+    expect(escrito).toContain('Otra semblanza.');
+  });
+
+  it('editar puede declarar la tradición de un Autor que no la tenía', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, SENECA);
+
+    await editarAutor(rutas, 'seneca', { tradicion: 'otra' });
+
+    const escrito = await readFile(join(rutas.autores, 'seneca.yml'), 'utf8');
+    expect(escrito).toContain('tradicion: "otra"');
+  });
+
+  it('una tradición que no está en el esquema se rechaza', async () => {
+    const rutas = await corpusVacio();
+    // El tipo lo impide en TypeScript; el esquema tiene que impedirlo también en ejecución,
+    // porque `crearAutor` recibe lo que teclee quien use la orden.
+    const resultado = await crearAutor(rutas, {
+      ...SENECA,
+      tradicion: 'latina' as never,
+    });
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join(' ')).toMatch(/latinoamericana/);
+    expect((await readdir(rutas.autores)).length).toBe(0);
+  });
+});
