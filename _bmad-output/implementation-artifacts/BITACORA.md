@@ -1206,3 +1206,46 @@ en `superficies.ts`. De paso quedó corregida una afirmación falsa de su docume
 52 ficheros, frente a 1356/50 al abrir la historia. `npm run build` con 53 páginas.
 `npx playwright test` **400 pasan**. Y una composición real contra una copia de `corpus/` con
 una Colección de 16 miembros, mirada a ojo.
+
+## Cierre de la Épica 13 — desplegada y verificada en vivo
+
+Fusionada en `main` (`b28abfb`) y desplegada el 2026-08-20. El flujo `Publicar` (ID
+32336776771) en verde: construir, comprobar tipos, pruebas y despliegue. Puerta completa en
+local antes de fusionar: `astro check` 0 errores en 166 ficheros, **1414 pruebas unitarias**
+en 52 ficheros, `npm run build` con 53 páginas, y **400 pruebas de Playwright**.
+
+**Verificado contra `https://sabiduriadebolsillo.net`.** La portada responde 200 con
+`last-modified` de este despliegue. `/lote` —la única superficie nueva de la épica— responde
+200 con `noindex, follow`, **no aparece en el sitemap** (que sigue con las mismas 53 URL, o
+sea que la épica no añadió nada indexable) y **ninguna superficie pública la enlaza**:
+comprobado en portada, `/buscar` y `/404`. Revisada además en el navegador a 375px, que es el
+consumidor real: resuelve el estado de hoy —sin ninguna jornada fijada— diciéndolo sin
+quebrarse y enlazando al Kit.
+
+**Lo que la épica levantó.** El Canal ya no exige presencia diaria: `npm run jornada` deja
+varias jornadas preparadas de una sentada, y el repertorio pasa de la Cita suelta a tres
+formatos. Las dos Piezas viven en `tools/` y su salida no se versiona.
+
+**Lo que enseñó, dicho una vez.** Las dos historias de Pieza produjeron el mismo tipo de
+hallazgo en la revisión, y conviene registrarlo como patrón: **una aserción que compara
+posiciones relativas no prueba que dos cosas no se solapen**. En la 13.2 nadie miraba el
+ancho; en la 13.3, comentar `cursor += titulo.alto` dejaba 86 pruebas en verde con el título
+impreso encima de la primera cita. Las dos veces la suite entera daba luz verde a un
+artefacto que se publica, y las dos veces la mutación fue lo que lo destapó.
+
+**Tres asuntos que se quedan en parche y piden contrato.** No los cierra esta épica:
+
+1. **`coleccionAdmisible` no acota la longitud de `nombre`.** `criterio` sí la tiene
+   (`MAX_CARACTERES_CRITERIO`), y el motivo escrito en `umbrales.ts` —va literal a algo que no
+   puede recortarlo, así que el único sitio sensato para acotarlo es la admisión, «donde el
+   editor todavía lo está escribiendo y puede arreglarlo»— vale ahora palabra por palabra para
+   el nombre, que desde la 13.3 va literal a un lienzo de 1080px. Hoy se puede curar una
+   Colección cuya Pieza es imposible y no enterarse hasta componerla. No se inventó un umbral
+   nuevo porque eso es decisión de contrato; se hizo legible el fallo en su lugar.
+2. **`DESIGN.md` dice que el Nombre de Colección es «una sola línea» y la Pieza lo reparte.**
+   La contradicción se resolvió en un comentario del código, que es el sitio equivocado para
+   una decisión de UX contra un documento que manda sobre cualquier maqueta. Pide una pasada
+   acotada de `bmad-ux`.
+3. **El convenio de códigos de salida** —2 es la forma de la invocación, 1 es lo que la
+   invocación dice— vive hoy en la cabecera de `tools/pieza.ts` y gobierna todo `tools/`.
+   Debería estar en `AGENTS.md` o en la espina, o la próxima orden lo partirá de otra manera.

@@ -219,3 +219,27 @@ action_items:
     owner: "Héctor"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-10-retro-08-12-2026.md"
+  - id: "epic-13-item-1-acotar-la-longitud-del-nombre-de-coleccion"
+    epic: 13
+    action: "Acotar la longitud de `nombre` en coleccionAdmisible, como ya se acota
+      `criterio`: desde la 13.3 el nombre va literal a un lienzo de 1080px y hoy se
+      puede curar una Colección cuya Pieza es imposible"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/spec-13-3-una-coleccion-anuncia-su-pieza.md"
+  - id: "epic-13-item-2-ux-el-nombre-de-coleccion-en-la-pieza"
+    epic: 13
+    action: "Pasada acotada de bmad-ux: DESIGN.md dice que el Nombre de Colección es
+      «una sola línea» y la Pieza lo reparte. Hoy la contradicción se resuelve en un
+      comentario del código, que no es quien manda sobre la maqueta"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/spec-13-3-una-coleccion-anuncia-su-pieza.md"
+  - id: "epic-13-item-3-subir-el-convenio-de-codigos-de-salida"
+    epic: 13
+    action: "Subir a AGENTS.md o a la espina el convenio de códigos de salida de
+      `tools/`: 2 es la forma de la invocación, 1 es lo que la invocación dice. Hoy
+      vive en la cabecera de tools/pieza.ts y gobierna todas las órdenes"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/spec-13-3-una-coleccion-anuncia-su-pieza.md"
