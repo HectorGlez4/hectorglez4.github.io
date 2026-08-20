@@ -2,14 +2,18 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_CARACTERES_SLUG_DE_OBRA,
   MAX_ELEMENTOS_RETIRADOS,
+  MAX_LINEAS_DE_ENCABEZADO,
   aTextoPlano,
   analizarDocumento,
   añoDeclarado,
   componerDocumento,
   derivarDeLaDeclaracion,
   derivarDocumento,
+  lineasDeEncabezadoDeWikitexto,
   nombreDeDocumento,
   resolverEntidades,
+  tituloDeclarado,
+  ultimoAñoPosible,
 } from '../../tools/lib/documento.ts';
 
 /**
@@ -487,5 +491,398 @@ describe('Historia 11.1 — el documento versionado tiene tres zonas', () => {
     );
     expect(analizado?.cuerpo).toContain('Primera parte.');
     expect(analizado?.cuerpo).toContain('Segunda parte.');
+  });
+});
+
+/**
+ * Fix 11.1b — el año de Wikisource sale del encabezado del wikitexto.
+ *
+ * El lector que buscaba una línea «Año:» en la página renderizada no podía dispararse
+ * nunca: Wikisource no la renderiza. El dato vive en los parámetros de la plantilla de
+ * encabezado del wikitexto, y de ahí sale ahora, versionado literal en la declaración.
+ */
+describe('Fix 11.1b — el encabezado del wikitexto declara el año', () => {
+  const PAGINA = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Triste - Wikisource</title></head><body>
+<h1 id="firstHeading">Triste</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>Adi&oacute;s, dijo la voz; y el alma m&iacute;a, temblando de dolor, se estremec&iacute;a.</p>
+</div></div></body></html>`;
+
+  const encabezado = (año: string) => `{{encabezado
+|título=Triste
+|autor=Amado Nervo
+|año = ${año}
+|notas=Del libro «Los jardines interiores».
+}}
+
+Adiós, dijo la voz; y el alma mía,`;
+
+  it('la obra sale con año, y el año es el que declara el wikitexto', () => {
+    const derivado = derivarDocumento('wikisource-es', PAGINA, encabezado('1905'));
+    expect(derivado.ok && derivado.obra).toBe('Triste');
+    expect(derivado.ok && derivado.año).toBe(1905);
+  });
+
+  it('las líneas del encabezado se versionan literales, y solo el metadato', () => {
+    /*
+     * Guardar «año: 1905» ya interpretado convertiría la declaración en una cabecera
+     * editable, que es justo la puerta que la 11.1 cerró. Y `|notas=` no entra: puede
+     * traer párrafos de prosa —con sus propias etiquetas «Año:» dentro— y esa prosa
+     * acabaría en la zona de la que salen la obra y el año.
+     */
+    const derivado = derivarDocumento('wikisource-es', PAGINA, encabezado('1905'));
+    expect(derivado.ok && derivado.declaracion).toContain('|año = 1905');
+    expect(derivado.ok && derivado.declaracion).toContain('|autor=Amado Nervo');
+    expect(derivado.ok && derivado.declaracion).not.toContain('jardines interiores');
+    // La primera línea sigue siendo el título, que es de donde sale la obra.
+    expect(derivado.ok && derivado.declaracion.split('\n')[0]).toBe('Triste');
+  });
+
+  it('el año que deriva la recuperación es el mismo que deriva la extracción', () => {
+    /*
+     * Es la puerta de la 11.1: la obra y el año se vuelven a derivar al extraer, de la
+     * declaración que el documento conserva, para que componer el documento a mano no sea
+     * más rápido que recuperarlo. Los dos derivados tienen que coincidir.
+     */
+    const derivado = derivarDocumento('wikisource-es', PAGINA, encabezado('1905'));
+    expect(derivado.ok).toBe(true);
+    if (!derivado.ok) return;
+
+    const versionado = componerDocumento(
+      {
+        fuente: 'wikisource-es',
+        obra: derivado.obra,
+        año: derivado.año,
+        url: 'https://es.wikisource.org/wiki/Triste_(Nervo)',
+        recuperado: '2026-08-20',
+      },
+      derivado.declaracion,
+      derivado.cuerpo,
+    );
+
+    const analizado = analizarDocumento(versionado);
+    expect(analizado).toBeDefined();
+    const reDerivado = derivarDeLaDeclaracion('wikisource-es', analizado!.declaracion);
+    expect(reDerivado.obra).toBe(derivado.obra);
+    expect(reDerivado.año).toBe(derivado.año);
+    expect(reDerivado.año).toBe(1905);
+  });
+
+  it('un encabezado que no declara año deja la obra sin año, sin error', () => {
+    const sinAño = `{{encabezado\n|título=En paz\n|autor=Amado Nervo\n}}\n\nMuy cerca de mi ocaso,`;
+    const derivado = derivarDocumento('wikisource-es', PAGINA, sinAño);
+    expect(derivado.ok).toBe(true);
+    // La obra sale del `|título` del encabezado, que aquí no es el título de la página.
+    expect(derivado.ok && derivado.obra).toBe('En paz');
+    expect(derivado.ok && derivado.año).toBeUndefined();
+  });
+
+  it('sin wikitexto ninguno la recuperación sigue, con obra y sin año', () => {
+    // Un metadato que falta no es un fallo: si la segunda petición no llega, se versiona
+    // igual y la candidata queda con procedencia parcial, que es un estado legítimo.
+    const derivado = derivarDocumento('wikisource-es', PAGINA);
+    expect(derivado.ok).toBe(true);
+    expect(derivado.ok && derivado.obra).toBe('Triste');
+    expect(derivado.ok && derivado.año).toBeUndefined();
+  });
+
+  it.each(['hacia 1905', 'c. 1905', '180?', '1905-1910', 'siglo XX'])(
+    'un año aproximado («%s») deja la obra sin año',
+    (declarado) => {
+      const derivado = derivarDocumento('wikisource-es', PAGINA, encabezado(declarado));
+      expect(derivado.ok && derivado.año).toBeUndefined();
+    },
+  );
+
+  it.each(['3050', '0', 'MCMV', 'sin fecha'])(
+    'un año imposible («%s») deja la obra sin año',
+    (declarado) => {
+      const derivado = derivarDocumento('wikisource-es', PAGINA, encabezado(declarado));
+      expect(derivado.ok && derivado.año).toBeUndefined();
+    },
+  );
+
+  it('la forma de una sola línea también declara el año', () => {
+    // `{{Encabezado|título=…|año=1909}}` es tan común como la de un parámetro por línea.
+    const inline = `{{Encabezado|título=Motivos de Proteo|autor=José Enrique Rodó|año=1909}}\nTexto.`;
+    const derivado = derivarDocumento('wikisource-es', PAGINA, inline);
+    expect(derivado.ok && derivado.año).toBe(1909);
+    expect(derivado.ok && derivado.declaracion).toContain('|año=1909');
+  });
+
+  it('un parámetro de año vacío no toma el número del parámetro de al lado', () => {
+    // Un parámetro declara su valor en su propia línea. Mirar la siguiente convertiría
+    // «|volumen = 2» en el año de la obra.
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      PAGINA,
+      `{{encabezado\n|título=Triste\n|año =\n|edición = 2\n}}`,
+    );
+    expect(derivado.ok && derivado.año).toBeUndefined();
+  });
+
+  it('el encabezado se lee de la cabeza del wikitexto, no de la obra entera', () => {
+    /*
+     * En una obra larga el wikitexto son megabytes, y un verso que empiece por «|año =»
+     * dentro de una tabla a mitad del poema no es la declaración de la Fuente.
+     */
+    const lejos = `{{encabezado\n|título=Triste\n}}\n${'x'.repeat(30_000)}\n{{tabla\n|año = 1700\n}}`;
+    expect(lineasDeEncabezadoDeWikitexto(lejos)).not.toContain('|año = 1700');
+  });
+
+  it('acota cuántas líneas del encabezado entran en la declaración', () => {
+    const muchos = Array.from({ length: 60 }, (_, i) => `|autor=Autor ${i}`).join('\n');
+    const lineas = lineasDeEncabezadoDeWikitexto(`{{encabezado\n${muchos}\n}}`);
+    expect(lineas.length).toBeLessThanOrEqual(MAX_LINEAS_DE_ENCABEZADO);
+  });
+
+  it('un wikitexto sin plantilla de encabezado no aporta ninguna línea', () => {
+    expect(lineasDeEncabezadoDeWikitexto('Adiós, dijo la voz; y el alma mía,')).toEqual([]);
+  });
+});
+
+describe('Fix 11.1b — un año en el futuro no es un año de publicación', () => {
+  it('el año corriente se admite y el siguiente no', () => {
+    const corriente = ultimoAñoPosible();
+    expect(añoDeclarado(String(corriente))).toBe(corriente);
+    expect(añoDeclarado(String(corriente + 1))).toBeUndefined();
+  });
+
+  it('el año cero tampoco', () => {
+    expect(añoDeclarado('0')).toBeUndefined();
+    expect(añoDeclarado('1')).toBe(1);
+  });
+});
+
+describe('Fix 11.1b — un documento versionado antes del cambio se sigue leyendo', () => {
+  /*
+   * El documento que la 11.1 dejó en `corpus/fuentes/` declara el año con la etiqueta de
+   * la página renderizada. Cambiar el formato de forma que dejara de analizarse
+   * invalidaría todo lo ya versionado, y el texto de aquí está congelado a propósito: no
+   * se compone con `componerDocumento`, para que un cambio en el compositor no lo siga.
+   */
+  const ANTIGUO = [
+    'fuente: wikisource-es',
+    'obra: Sobre la brevedad de la vida',
+    'año: 49',
+    'url: https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+    'recuperado: 2026-08-19',
+    '---',
+    'Sobre la brevedad de la vida',
+    'Año de publicación: 49',
+    '---',
+    'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.',
+    '',
+  ].join('\n');
+
+  it('se sigue analizando en sus tres zonas', () => {
+    const analizado = analizarDocumento(ANTIGUO);
+    expect(analizado?.cabecera.obra).toBe('Sobre la brevedad de la vida');
+    expect(analizado?.cabecera.año).toBe(49);
+    expect(analizado?.declaracion).toBe('Sobre la brevedad de la vida\nAño de publicación: 49');
+    expect(analizado?.cuerpo).toContain('No es que tengamos poco tiempo');
+  });
+
+  it('y su obra y su año se siguen derivando de la declaración', () => {
+    const analizado = analizarDocumento(ANTIGUO);
+    const derivado = derivarDeLaDeclaracion('wikisource-es', analizado!.declaracion);
+    expect(derivado.obra).toBe('Sobre la brevedad de la vida');
+    expect(derivado.año).toBe(49);
+  });
+});
+
+/**
+ * Fix 11.1b — la obra sale de `|título`, no del nombre de la página.
+ *
+ * Wikisource desambigua las páginas —«Triste (Nervo)», «Amor de madre (Palma)»— y ese
+ * paréntesis acababa literal en la atribución que lee el visitante. La obra que contiene
+ * al fragmento la declara el encabezado, y es la que un lector esperaría ver citada.
+ */
+describe('Fix 11.1b — la obra la declara el encabezado, no el nombre de la página', () => {
+  const pagina = (titulo: string) => `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>${titulo} - Wikisource</title></head><body>
+<h1 id="firstHeading">${titulo}</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>Adi&oacute;s, dijo la voz; y el alma m&iacute;a, temblando de dolor, se estremec&iacute;a.</p>
+</div></div></body></html>`;
+
+  it.each([
+    ['entre corchetes', '[[Los jardines interiores]]', 'Los jardines interiores'],
+    ['con texto visible', '[[Tradiciones peruanas|Tradiciones peruanas]]', 'Tradiciones peruanas'],
+    ['con texto visible distinto del destino', '[[Ariel (Rodó)|Ariel]]', 'Ariel'],
+    ['llano, sin corchetes', 'El sable', 'El sable'],
+    ['con cursiva de wikitexto', "''Motivos de Proteo''", 'Motivos de Proteo'],
+  ])('un título %s da «%s» → «%s»', (_forma, declarado, esperado) => {
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      pagina('Triste (Nervo)'),
+      `{{encabezado\n|título=${declarado}\n|año = 1905\n}}`,
+    );
+    expect(derivado.ok && derivado.obra).toBe(esperado);
+  });
+
+  it('un título relativo se descarta y se cae al encabezado de la página', () => {
+    /*
+     * «Ariel/Capítulo I» declara `|título = [[../`, que no es el título de nada.
+     * Reconstruir el del padre desde la ruta sería derivar la Procedencia de la URL, que
+     * es exactamente lo que la Historia 11.1 prohíbe.
+     */
+    for (const relativo of ['[[../', '[[../]]', '[[/Capítulo I]]', '', '{{PAGENAME}}']) {
+      const derivado = derivarDocumento(
+        'wikisource-es',
+        pagina('Ariel/Capítulo I'),
+        `{{encabezado\n|título = ${relativo}\n|año = 1900\n}}`,
+      );
+      expect(derivado.ok && derivado.obra, relativo).toBe('Ariel/Capítulo I');
+    }
+  });
+
+  it('un enlace sin cerrar no se lleva por delante el año de la línea siguiente', () => {
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      pagina('Ariel/Capítulo I'),
+      `{{encabezado\n|título = [[../\n|autor=José Enrique Rodó\n|año = 1900\n}}`,
+    );
+    expect(derivado.ok && derivado.año).toBe(1900);
+  });
+
+  it('sin `|título` la obra sigue siendo el encabezado de la página', () => {
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      pagina('En paz'),
+      `{{encabezado\n|autor=Amado Nervo\n}}`,
+    );
+    expect(derivado.ok && derivado.obra).toBe('En paz');
+  });
+
+  it('la obra que deriva la recuperación es la misma que deriva la extracción', () => {
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      pagina('Triste (Nervo)'),
+      `{{encabezado\n|título=[[Los jardines interiores]]\n|autor=Amado Nervo\n|año = 1905\n}}`,
+    );
+    expect(derivado.ok).toBe(true);
+    if (!derivado.ok) return;
+
+    // La declaración guarda el enlace **literal**; la obra se resuelve al derivarla, las
+    // dos veces, y por eso las dos veces sale la misma.
+    expect(derivado.declaracion).toContain('|título=[[Los jardines interiores]]');
+    expect(derivado.obra).toBe('Los jardines interiores');
+
+    const analizado = analizarDocumento(
+      componerDocumento(
+        {
+          fuente: 'wikisource-es',
+          obra: derivado.obra,
+          año: derivado.año,
+          url: 'https://es.wikisource.org/wiki/Triste_(Nervo)',
+          recuperado: '2026-08-20',
+        },
+        derivado.declaracion,
+        derivado.cuerpo,
+      ),
+    );
+    const reDerivado = derivarDeLaDeclaracion('wikisource-es', analizado!.declaracion);
+    expect(reDerivado.obra).toBe(derivado.obra);
+    expect(reDerivado.año).toBe(derivado.año);
+  });
+
+  it('el nombre lleva la obra declarada y la página de la que salió el cuerpo', () => {
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      pagina('Amor de madre (Palma)'),
+      `{{encabezado\n|título=[[Tradiciones peruanas]]\n|año=1893\n}}`,
+    );
+    expect(derivado.ok && derivado.obra).toBe('Tradiciones peruanas');
+    expect(derivado.ok && derivado.pagina).toBe('Amor de madre (Palma)');
+    expect(
+      derivado.ok && nombreDeDocumento('wikisource-es', derivado.obra, derivado.pagina),
+    ).toBe('wikisource-es--tradiciones-peruanas--amor-de-madre-palma');
+  });
+
+  it.each([
+    ['[[a|b]]', 'b'],
+    ['  Los jardines interiores  ', 'Los jardines interiores'],
+    ["'''Ariel'''", 'Ariel'],
+    ['[[../]]', undefined],
+    ['/Capítulo I', undefined],
+    ['{{PAGENAME}}', undefined],
+    ['[[sin cerrar', undefined],
+    ['   ', undefined],
+    ['···', undefined],
+  ])('tituloDeclarado(«%s») da %s', (valor, esperado) => {
+    expect(tituloDeclarado(valor)).toBe(esperado);
+  });
+});
+
+/**
+ * Fix 11.1b — un documento por página, no por obra.
+ *
+ * El cuerpo versionado es el texto de una página concreta, y la Historia 11.2 coteja cada
+ * Cita contra el documento que la contiene. Atar la identidad del documento a la obra
+ * hacía que dos páginas del mismo libro compitieran por el mismo fichero, y la que perdía
+ * quedaba sin texto contra el que cotejar.
+ */
+describe('Fix 11.1b — el nombre del documento distingue las páginas de una obra', () => {
+  it('dos páginas de la misma obra dan dos nombres distintos', () => {
+    expect(nombreDeDocumento('wikisource-es', 'Los jardines interiores', 'Triste')).toBe(
+      'wikisource-es--los-jardines-interiores--triste',
+    );
+    expect(nombreDeDocumento('wikisource-es', 'Los jardines interiores', 'Tibi Regina')).toBe(
+      'wikisource-es--los-jardines-interiores--tibi-regina',
+    );
+  });
+
+  it('cuando la página es la obra, el nombre es el de siempre', () => {
+    // El caso que ya funcionaba no se renombra: «El estado» sigue llamándose igual.
+    expect(nombreDeDocumento('wikisource-es', 'El estado', 'El estado')).toBe(
+      'wikisource-es--el-estado',
+    );
+    expect(nombreDeDocumento('wikisource-es', 'El sable', 'El sable')).toBe(
+      'wikisource-es--el-sable',
+    );
+  });
+
+  it('una Fuente que no pagina no pasa de un segmento', () => {
+    // El `.txt` de Gutenberg es la obra entera, no una página de ella.
+    expect(nombreDeDocumento('gutenberg', 'Del sentimiento trágico de la vida')).toBe(
+      'gutenberg--del-sentimiento-tragico-de-la-vida',
+    );
+  });
+
+  it('una página que no deja ni una letra colapsa al nombre de la obra', () => {
+    expect(nombreDeDocumento('wikisource-es', 'Ariel', '···')).toBe('wikisource-es--ariel');
+  });
+
+  it('cada segmento se acota por separado, sin partir una palabra', () => {
+    const obraLarga = 'Historia general de las cosas de Nueva España escrita por Fray Bernardino';
+    const paginaLarga = 'Libro duodécimo de la conquista de la Nueva España por los españoles';
+    const nombre = nombreDeDocumento('wikisource-es', obraLarga, paginaLarga);
+    expect(nombre).toBeDefined();
+
+    const [deLaObra, deLaPagina] = nombre!.slice('wikisource-es--'.length).split('--');
+    expect(deLaObra.length).toBeLessThanOrEqual(MAX_CARACTERES_SLUG_DE_OBRA);
+    expect(deLaPagina.length).toBeLessThanOrEqual(MAX_CARACTERES_SLUG_DE_OBRA);
+    for (const segmento of [deLaObra, deLaPagina]) expect(segmento).not.toMatch(/^-|-$/);
+  });
+
+  it('la página se deriva de la declaración, igual que la obra y el año', () => {
+    // El nombre del fichero la lleva dentro, y la puerta de la extracción lo compara
+    // contra lo derivado. Si la página saliera de la cabecera, el segmento quedaría suelto.
+    const declaracion = ['Triste (Nervo)', '|título=[[Los jardines interiores]]', '|año = 1905'].join('\n');
+    const derivado = derivarDeLaDeclaracion('wikisource-es', declaracion);
+    expect(derivado.obra).toBe('Los jardines interiores');
+    expect(derivado.pagina).toBe('Triste (Nervo)');
+    expect(derivado.año).toBe(1905);
+  });
+
+  it('Gutenberg no declara página: su documento es la obra entera', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'gutenberg',
+      'Title: Del sentimiento trágico de la vida\nOriginal publication: Madrid: Renacimiento, 1913',
+    );
+    expect(derivado.obra).toBe('Del sentimiento trágico de la vida');
+    expect(derivado.pagina).toBeUndefined();
   });
 });

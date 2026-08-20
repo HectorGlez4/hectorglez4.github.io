@@ -27,6 +27,17 @@ afterEach(async () => {
 
 const URL_WIKISOURCE = 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida';
 
+/**
+ * La segunda petición: la **misma página del mismo anfitrión**, en su texto de origen.
+ *
+ * Wikisource no renderiza el año —vive en `|año = 1905`, dentro del encabezado del
+ * wikitexto—, así que la recuperación pide también esta dirección. Cuando el guion no la
+ * trae, el doble de red lanza, que es exactamente el caso «wikitexto inalcanzable»: la
+ * recuperación tiene que seguir adelante sin año.
+ */
+const cruda = (pagina: string) => `${pagina}?action=raw`;
+const CRUDA_WIKISOURCE = cruda(URL_WIKISOURCE);
+
 const PAGINA = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
 <title>Sobre la brevedad de la vida - Wikisource</title></head><body>
 <div id="mw-navigation"><nav><a href="/wiki/Portada">Portada</a></nav></div>
@@ -186,7 +197,7 @@ describe('Historia 11.1 — una URL admitida deja el documento versionado', () =
     });
 
     expect(resultado.codigo, resultado.error).toBe(0);
-    expect(await pedidas(t)).toEqual([URL_WIKISOURCE]);
+    expect(await pedidas(t)).toEqual([URL_WIKISOURCE, CRUDA_WIKISOURCE]);
     expect(await readdir(join(t.corpus, 'fuentes'))).toHaveLength(1);
   });
 });
@@ -235,8 +246,8 @@ describe('Historia 11.1 — la obra ya versionada se reutiliza', () => {
     expect(segunda.salida).toMatch(/Ya versionado/);
 
     expect(await readdir(join(t.corpus, 'fuentes'))).toHaveLength(1);
-    // Una sola petición en total: la de la primera vez.
-    expect(await pedidas(t)).toEqual([URL_WIKISOURCE]);
+    // Las de la primera vez y ninguna más: la página y su texto de origen.
+    expect(await pedidas(t)).toEqual([URL_WIKISOURCE, CRUDA_WIKISOURCE]);
   });
 
   it('un fichero que ocupa el sitio pero no se deja analizar no pasa por «ya versionado»', async () => {
@@ -324,7 +335,8 @@ describe('Historia 11.1 — la redirección se revalida contra el conjunto cerra
 
     expect(resultado.codigo, resultado.error).toBe(0);
     expect(await readdir(join(t.corpus, 'fuentes'))).toHaveLength(1);
-    expect(await pedidas(t)).toEqual([URL_WIKISOURCE, definitiva]);
+    // Y el texto de origen se pide de la dirección **final**, no de la que se tecleó.
+    expect(await pedidas(t)).toEqual([URL_WIKISOURCE, definitiva, cruda(definitiva)]);
   });
 });
 
@@ -545,5 +557,321 @@ describe('Historia 11.1 — el techo de tamaño acota la memoria, no solo el dis
     const t = await taller();
     const resultado = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });
     expect(resultado.codigo, resultado.error).toBe(0);
+  });
+});
+
+/**
+ * Fix 11.1b — el año sale del encabezado del wikitexto, por la orden y con la red fingida.
+ *
+ * El lector de año de Wikisource no podía dispararse nunca: buscaba una línea «Año:» en la
+ * página renderizada, y Wikisource no la renderiza. El dato vive en los parámetros de la
+ * plantilla de encabezado del wikitexto, que se recupera de la misma página y del mismo
+ * anfitrión con `?action=raw`.
+ */
+describe('Fix 11.1b — el año del wikitexto llega al documento versionado', () => {
+  const URL_TRISTE = 'https://es.wikisource.org/wiki/Triste_(Nervo)';
+  const CRUDA_TRISTE = cruda(URL_TRISTE);
+
+  const PAGINA_TRISTE = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Triste - Wikisource</title></head><body>
+<h1 id="firstHeading">Triste</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>Adi&oacute;s, dijo la voz; y el alma m&iacute;a, temblando de dolor, se estremec&iacute;a.</p>
+<p>Todo era paz en la arboleda umbr&iacute;a, y la tarde de oto&ntilde;o se mor&iacute;a.</p>
+</div></div></body></html>`;
+
+  const WIKITEXTO = `{{encabezado
+|título=Triste
+|autor=Amado Nervo
+|año = 1905
+|notas=Del libro «Los jardines interiores».
+}}
+
+Adiós, dijo la voz; y el alma mía,`;
+
+  /** El wikitexto llega como `text/x-wiki`, que no es un tipo de documento de obra. */
+  const RAW = (cuerpo: string): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'text/x-wiki; charset=UTF-8' },
+    cuerpo,
+  });
+
+  const documentoDe = (t: { corpus: string }) =>
+    readFile(join(t.corpus, 'fuentes', 'wikisource-es--triste.txt'), 'utf8');
+
+  it('recupera con obra y año, y guarda la línea del encabezado literal', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [CRUDA_TRISTE]: RAW(WIKITEXTO),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_TRISTE, CRUDA_TRISTE]);
+
+    const documento = await documentoDe(t);
+    expect(documento).toContain('obra: Triste');
+    expect(documento).toContain('año: 1905');
+    // Literal, no interpretado: es lo que deja que la extracción derive el mismo año.
+    expect(documento).toContain('|año = 1905');
+    expect(documento).not.toContain('jardines interiores');
+    expect(resultado.salida).toContain('Año: 1905');
+  });
+
+  it('el wikitexto se pide al mismo anfitrión y a la misma página', async () => {
+    // No a un servicio de datos aparte: eso sería un segundo origen de verdad y un
+    // anfitrión que el conjunto cerrado de Fuentes no cubre.
+    const t = await taller();
+    await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [CRUDA_TRISTE]: RAW(WIKITEXTO),
+    });
+
+    const [pagina, encabezado] = await peticiones(t);
+    expect(new URL(encabezado.url).host).toBe(new URL(pagina.url).host);
+    expect(new URL(encabezado.url).pathname).toBe(new URL(pagina.url).pathname);
+    // Y hereda la identificación de la primera: Wikimedia rechaza a quien no se identifica.
+    expect(encabezado.cabeceras['user-agent']).toBe(pagina.cabeceras['user-agent']);
+  });
+
+  it('un encabezado sin año deja la obra sin año, sin error', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [CRUDA_TRISTE]: RAW(`{{encabezado\n|título=Triste\n|autor=Amado Nervo\n}}\n\nAdiós,`),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await documentoDe(t)).not.toMatch(/^a[ñn]o:/m);
+  });
+
+  it('si el wikitexto no se puede recuperar, la recuperación termina bien y lo dice', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [CRUDA_TRISTE]: { lanza: 'getaddrinfo ENOTFOUND es.wikisource.org' },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const documento = await documentoDe(t);
+    expect(documento).toContain('obra: Triste');
+    expect(documento).not.toMatch(/^a[ñn]o:/m);
+    // Callarlo sería peor: quien siembra tiene que poder distinguir «la Fuente no declara
+    // año» de «no se pudo leer lo que declara».
+    expect(resultado.salida).toMatch(/encabezado de origen/i);
+  });
+
+  it('un 404 en el wikitexto tampoco tira la recuperación', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [CRUDA_TRISTE]: { estado: 404, cabeceras: { 'content-type': 'text/html' }, cuerpo: 'no' },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await documentoDe(t)).toContain('obra: Triste');
+    expect(await documentoDe(t)).not.toMatch(/^a[ñn]o:/m);
+  });
+
+  it('el wikitexto hereda la revalidación de anfitrión: si redirige fuera, no se usa', async () => {
+    /*
+     * La segunda petición vive en la misma cáscara y con las mismas guardas. Un
+     * `?action=raw` que redirigiera a otro anfitrión traería metadato no verificado que
+     * se versionaría con la licencia de una Fuente admitida escrita al lado.
+     */
+    const t = await taller();
+    const fuera = 'https://metadatos.example.com/triste';
+    const resultado = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [CRUDA_TRISTE]: { estado: 302, cabeceras: { location: fuera } },
+      [fuera]: RAW(WIKITEXTO),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await documentoDe(t)).not.toMatch(/^a[ñn]o:/m);
+    // Y no se llegó a pedir el destino de fuera.
+    expect(await pedidas(t)).toEqual([URL_TRISTE, CRUDA_TRISTE]);
+  });
+
+  it('Gutenberg no pide ningún encabezado: lee su año del propio texto plano', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_GUTENBERG, t, {
+      [URL_GUTENBERG]: {
+        estado: 200,
+        cabeceras: { 'content-type': 'text/plain; charset=utf-8' },
+        cuerpo: LIBRO_GUTENBERG,
+      },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_GUTENBERG]);
+  });
+});
+
+describe('Fix 11.1b — la obra versionada es la que declara el encabezado', () => {
+  /*
+   * El nombre de la página no es el nombre de la obra: «Triste (Nervo)» lleva dentro el
+   * desambiguador de Wikisource, y ese paréntesis acababa literal en la atribución que lee
+   * el visitante. El encabezado declara «Los jardines interiores», que es el libro que
+   * contiene al poema y lo que un lector esperaría ver citado.
+   */
+  const URL_TRISTE = 'https://es.wikisource.org/wiki/Triste_(Nervo)';
+
+  const PAGINA_TRISTE = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Triste (Nervo) - Wikisource</title></head><body>
+<h1 id="firstHeading">Triste (Nervo)</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>Adi&oacute;s, dijo la voz; y el alma m&iacute;a, temblando de dolor, se estremec&iacute;a.</p>
+</div></div></body></html>`;
+
+  const RAW = (cuerpo: string): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'text/x-wiki; charset=UTF-8' },
+    cuerpo,
+  });
+
+  it('el documento se nombra y se declara por la obra, no por la página', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [cruda(URL_TRISTE)]: RAW(
+        `{{encabezado\n|título=[[Los jardines interiores]]\n|autor=Amado Nervo\n|año = 1905\n}}\n\nAdiós,`,
+      ),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    // El nombre lleva la obra **y** la página: el cuerpo versionado es el de esta página.
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([
+      'wikisource-es--los-jardines-interiores--triste-nervo.txt',
+    ]);
+
+    const documento = await readFile(
+      join(t.corpus, 'fuentes', 'wikisource-es--los-jardines-interiores--triste-nervo.txt'),
+      'utf8',
+    );
+    expect(documento).toContain('obra: Los jardines interiores');
+    expect(documento).not.toContain('obra: Triste (Nervo)');
+    // El enlace se guarda literal: la obra se resuelve al derivarla, las dos veces.
+    expect(documento).toContain('|título=[[Los jardines interiores]]');
+  });
+
+  it('sin `|título` utilizable el documento se sigue nombrando por la página', async () => {
+    // «Ariel/Capítulo I» declara `|título = [[../`, que no es el título de nada.
+    const url = 'https://es.wikisource.org/wiki/Ariel/Cap%C3%ADtulo_I';
+    const t = await taller();
+    const resultado = await recuperar(url, t, {
+      [url]: OK(PAGINA_TRISTE.replace(/Triste \(Nervo\)/g, 'Ariel-Capítulo I')),
+      [cruda(url)]: RAW(`{{encabezado\n|título = [[../\n|autor=José Enrique Rodó\n|año = 1900\n}}`),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const documento = await readFile(
+      join(t.corpus, 'fuentes', 'wikisource-es--ariel-capitulo-i.txt'),
+      'utf8',
+    );
+    expect(documento).toContain('obra: Ariel-Capítulo I');
+    // Y el año de la línea siguiente no se lo comió el enlace sin cerrar.
+    expect(documento).toContain('año: 1900');
+  });
+
+  it('dos páginas de la misma obra dan dos documentos, cada uno con su cuerpo', async () => {
+    /*
+     * Es el fallo que esta decisión existe para impedir. Con el documento atado a la obra,
+     * la segunda página salía con «Ya versionado» y código 0 sin versionar su texto: el
+     * poema no estaba en ninguna parte y cualquier Cita suya reventaría el cotejo literal
+     * de la Historia 11.2.
+     */
+    const t = await taller();
+
+    const encabezado = `{{encabezado\n|título=[[Los jardines interiores]]\n|autor=Amado Nervo\n|año = 1905\n}}`;
+    const paginaCon = (h1: string, verso: string) =>
+      PAGINA_TRISTE.replace(/Triste \(Nervo\)/g, h1).replace(
+        /<p>Adi&oacute;s[\s\S]*?<\/p>/,
+        `<p>${verso}</p>`,
+      );
+
+    const primera = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(
+        paginaCon(
+          'Triste (Nervo)',
+          'Adi&oacute;s, dijo la voz; y el alma m&iacute;a, temblando de dolor, se estremec&iacute;a.',
+        ),
+      ),
+      [cruda(URL_TRISTE)]: RAW(encabezado),
+    });
+    expect(primera.codigo, primera.error).toBe(0);
+
+    const otra = 'https://es.wikisource.org/wiki/Tibi_Regina';
+    const segunda = await recuperar(otra, t, {
+      [otra]: OK(
+        paginaCon(
+          'Tibi Regina',
+          'Ella pas&oacute; y su rostro sereno se qued&oacute; para siempre en mi pecho.',
+        ),
+      ),
+      [cruda(otra)]: RAW(encabezado),
+    });
+    expect(segunda.codigo, segunda.error).toBe(0);
+
+    expect((await readdir(join(t.corpus, 'fuentes'))).sort()).toEqual([
+      'wikisource-es--los-jardines-interiores--tibi-regina.txt',
+      'wikisource-es--los-jardines-interiores--triste-nervo.txt',
+    ]);
+
+    const leer = (nombre: string) => readFile(join(t.corpus, 'fuentes', nombre), 'utf8');
+    const triste = await leer('wikisource-es--los-jardines-interiores--triste-nervo.txt');
+    const tibi = await leer('wikisource-es--los-jardines-interiores--tibi-regina.txt');
+
+    // Cada documento conserva **su propio cuerpo**, y ninguno lleva el del otro.
+    expect(triste).toContain('Adiós, dijo la voz');
+    expect(triste).not.toContain('Ella pasó');
+    expect(tibi).toContain('Ella pasó');
+    expect(tibi).not.toContain('Adiós, dijo la voz');
+
+    // Y los dos declaran la misma obra y el mismo año: la obra es metadato, no identidad.
+    for (const documento of [triste, tibi]) {
+      expect(documento).toContain('obra: Los jardines interiores');
+      expect(documento).toContain('año: 1905');
+    }
+  });
+
+  it('la misma página por otra dirección sigue reutilizando, y dice de dónde salió', async () => {
+    /*
+     * Misma obra y misma página, alcanzadas por otra dirección —la variante móvil, un
+     * alias que no quedó registrado—. Reutilizar es lo que se quiere, y decir de dónde
+     * salió el que ya está es lo que deja comprobarlo.
+     */
+    const t = await taller();
+    const encabezado = `{{encabezado\n|título=[[Los jardines interiores]]\n|autor=Amado Nervo\n|año = 1905\n}}`;
+
+    const primera = await recuperar(URL_TRISTE, t, {
+      [URL_TRISTE]: OK(PAGINA_TRISTE),
+      [cruda(URL_TRISTE)]: RAW(encabezado),
+    });
+    expect(primera.codigo, primera.error).toBe(0);
+
+    const movil = 'https://es.m.wikisource.org/wiki/Triste_(Nervo)';
+    const segunda = await recuperar(movil, t, {
+      [movil]: OK(PAGINA_TRISTE),
+      [cruda(movil)]: RAW(encabezado),
+    });
+
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect(segunda.salida).toMatch(/Ya versionado/);
+    expect(segunda.salida).toContain(URL_TRISTE);
+    expect(segunda.salida).toMatch(/misma página de la misma obra/);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toHaveLength(1);
+  });
+
+  it('una página que es su propia obra no cambia de nombre respecto a hoy', async () => {
+    const t = await taller();
+    const url = 'https://es.wikisource.org/wiki/El_sable';
+    const resultado = await recuperar(url, t, {
+      [url]: OK(PAGINA_TRISTE.replace(/Triste \(Nervo\)/g, 'El sable')),
+      [cruda(url)]: RAW(`{{encabezado\n|título=El sable\n|autor=Manuel Gutiérrez Nájera\n|año=1904\n}}`),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual(['wikisource-es--el-sable.txt']);
   });
 });

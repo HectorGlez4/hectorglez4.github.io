@@ -388,3 +388,262 @@ describe('Historia 11.1 — el metadato sale del documento recuperado, no de qui
     }
   });
 });
+
+/**
+ * Fix 11.1b — la declaración lleva ahora también el encabezado del wikitexto.
+ *
+ * La extracción no se ha tocado, y ese es el punto: si la declaración incluye las líneas
+ * del encabezado, los mismos lectores puros vuelven a derivar de ellas el mismo año. Y lo
+ * ya versionado, que declara el año con la etiqueta de la página renderizada, se sigue
+ * analizando y extrayendo igual.
+ */
+describe('Fix 11.1b — el año del encabezado del wikitexto llega a la candidata', () => {
+  const CABECERA_TRISTE: CabeceraDeDocumento = {
+    fuente: 'wikisource-es',
+    obra: 'Triste',
+    año: 1905,
+    url: 'https://es.wikisource.org/wiki/Triste_(Nervo)',
+    recuperado: '2026-08-20',
+  };
+
+  it('la candidata sale con Procedencia completa, y el año lo dice el wikitexto', async () => {
+    const { corpus } = await corpusVacio();
+    const ruta = await documento(corpus, CABECERA_TRISTE, {
+      nombre: 'wikisource-es--triste.txt',
+      declaracion: ['Triste', '|título=Triste', '|autor=Amado Nervo', '|año = 1905'].join('\n'),
+    });
+
+    const resultado = await extraer(ruta, corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.procedencia.obra).toBe('Triste');
+      expect(frontmatter.procedencia.año).toBe(1905);
+    }
+  });
+
+  it('editar el año de la cabecera sigue sin colar: manda la línea del encabezado', async () => {
+    const { corpus } = await corpusVacio();
+    const ruta = await documento(corpus, { ...CABECERA_TRISTE, año: 1492 }, {
+      nombre: 'wikisource-es--triste.txt',
+      declaracion: ['Triste', '|año = 1905'].join('\n'),
+    });
+
+    const resultado = await extraer(ruta, corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    for (const fichero of await readdir(join(corpus, '_revision'))) {
+      expect((await frontmatterDe(corpus, fichero)).procedencia.año).toBe(1905);
+    }
+  });
+});
+
+describe('Fix 11.1b — un documento versionado antes del cambio se sigue extrayendo', () => {
+  /*
+   * El formato no cambia: la declaración solo gana líneas. Un `.txt` que la Historia 11.1
+   * dejó en `corpus/fuentes/` tiene que seguir produciendo las mismas candidatas, con la
+   * misma obra y el mismo año. El texto de aquí está congelado a propósito —no se compone
+   * con `componerDocumento`— para que un cambio en el compositor no lo siga.
+   */
+  const ANTIGUO = [
+    'fuente: wikisource-es',
+    'obra: Sobre la brevedad de la vida',
+    'año: 49',
+    'url: https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+    'recuperado: 2026-08-19',
+    '---',
+    'Sobre la brevedad de la vida',
+    'Año de publicación: 49',
+    '---',
+    TEXTO,
+    '',
+  ].join('\n');
+
+  it('produce candidatas con la misma obra y el mismo año', async () => {
+    const { corpus } = await corpusVacio();
+    const ruta = join(corpus, 'fuentes', NOMBRE);
+    await writeFile(ruta, ANTIGUO, 'utf8');
+
+    const resultado = await extraer(ruta, corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.procedencia.obra).toBe('Sobre la brevedad de la vida');
+      expect(frontmatter.procedencia.año).toBe(49);
+    }
+  });
+});
+
+describe('Fix 11.1b — la obra de la candidata es la que declara el encabezado', () => {
+  /*
+   * «— Amado Nervo, Triste (Nervo), 1905» llevaba el desambiguador de Wikisource dentro de
+   * la atribución. La obra que contiene al poema es «Los jardines interiores», y la
+   * extracción la deriva de la misma declaración literal de la que salió al recuperar.
+   */
+  const CABECERA_JARDINES: CabeceraDeDocumento = {
+    fuente: 'wikisource-es',
+    obra: 'Los jardines interiores',
+    año: 1905,
+    url: 'https://es.wikisource.org/wiki/Triste_(Nervo)',
+    recuperado: '2026-08-20',
+  };
+
+  const DECLARACION_JARDINES = [
+    'Triste (Nervo)',
+    '|título=[[Los jardines interiores]]',
+    '|autor=Amado Nervo',
+    '|año = 1905',
+  ].join('\n');
+
+  it('la candidata cita la obra, no el nombre de la página', async () => {
+    const { corpus } = await corpusVacio();
+    const ruta = await documento(corpus, CABECERA_JARDINES, {
+      nombre: 'wikisource-es--los-jardines-interiores--triste-nervo.txt',
+      declaracion: DECLARACION_JARDINES,
+    });
+
+    const resultado = await extraer(ruta, corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.procedencia.obra).toBe('Los jardines interiores');
+      expect(frontmatter.procedencia.año).toBe(1905);
+    }
+  });
+
+  it('un documento nombrado por la página ya no cuadra con la obra que declara', async () => {
+    /*
+     * La puerta de procedencia ata el nombre del fichero a la obra **derivada**. Un
+     * documento nombrado por el título de la página no lo produjo esta recuperación, y no
+     * produce candidatas: el mensaje dice qué orden hay que ejecutar en su lugar.
+     */
+    const { corpus } = await corpusVacio();
+    const ruta = await documento(corpus, CABECERA_JARDINES, {
+      // Le falta el segmento de obra: la recuperación nunca produce un nombre así.
+      nombre: 'wikisource-es--triste-nervo.txt',
+      declaracion: DECLARACION_JARDINES,
+    });
+
+    const resultado = await extraer(ruta, corpus);
+    expect(resultado.codigo).not.toBe(0);
+    expect(resultado.error).toMatch(/no es el que implica la obra/);
+    expect(await readdir(join(corpus, '_revision'))).toEqual([]);
+  });
+});
+
+/**
+ * Fix 11.1b — un documento por página, y cada Cita dentro del suyo.
+ *
+ * Es la comprobación que ata esta decisión con la Historia 11.2: el cotejo literal busca
+ * el texto de cada Cita en el documento de su Fuente, y con un solo documento por obra el
+ * texto de la segunda página no estaba en ninguna parte.
+ */
+describe('Fix 11.1b — dos páginas hermanas, dos documentos, cada Cita en el suyo', () => {
+  const OBRA = 'Los jardines interiores';
+
+  const TRISTE = [
+    'Adiós, dijo la voz; y el alma mía, temblando de dolor, se estremecía.',
+    'Todo era paz en la arboleda umbría, y la tarde de otoño se moría.',
+  ].join(' ');
+
+  const TIBI_REGINA = [
+    'Ella pasó y su rostro sereno se quedó para siempre en mi pecho.',
+    'Nadie supo decirme quién había puesto tanta luz en aquel día deshecho.',
+  ].join(' ');
+
+  const cabecera = (url: string): CabeceraDeDocumento => ({
+    fuente: 'wikisource-es',
+    obra: OBRA,
+    año: 1905,
+    url,
+    recuperado: '2026-08-20',
+  });
+
+  const declaracion = (pagina: string) =>
+    [pagina, `|título=[[${OBRA}]]`, '|autor=Amado Nervo', '|año = 1905'].join('\n');
+
+  /** Los dos documentos hermanos, tal y como los dejaría la recuperación. */
+  async function hermanos(corpus: string) {
+    const triste = await documento(corpus, cabecera('https://es.wikisource.org/wiki/Triste_(Nervo)'), {
+      nombre: 'wikisource-es--los-jardines-interiores--triste-nervo.txt',
+      declaracion: declaracion('Triste (Nervo)'),
+      texto: TRISTE,
+    });
+    const tibi = await documento(corpus, cabecera('https://es.wikisource.org/wiki/Tibi_Regina'), {
+      nombre: 'wikisource-es--los-jardines-interiores--tibi-regina.txt',
+      declaracion: declaracion('Tibi Regina'),
+      texto: TIBI_REGINA,
+    });
+    return { triste, tibi };
+  }
+
+  it('los dos derivan la misma obra y el mismo año, y dan candidatas distintas', async () => {
+    const { corpus } = await corpusVacio();
+    const { triste, tibi } = await hermanos(corpus);
+
+    const primera = await extraer(triste, corpus);
+    expect(primera.codigo, primera.error).toBe(0);
+    const deTriste = await readdir(join(corpus, '_revision'));
+
+    const segunda = await extraer(tibi, corpus);
+    expect(segunda.codigo, segunda.error).toBe(0);
+    const todas = await readdir(join(corpus, '_revision'));
+
+    expect(deTriste.length).toBeGreaterThan(0);
+    expect(todas.length).toBeGreaterThan(deTriste.length);
+
+    for (const fichero of todas) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.procedencia.obra).toBe(OBRA);
+      expect(frontmatter.procedencia.año).toBe(1905);
+    }
+
+    // Y ninguna candidata de una página se repite en la otra.
+    const deTibi = todas.filter((f) => !deTriste.includes(f));
+    expect(deTibi.length).toBeGreaterThan(0);
+    expect(deTibi.some((f) => deTriste.includes(f))).toBe(false);
+  });
+
+  it('cada candidata aparece literal en el documento del que salió', async () => {
+    /*
+     * El cotejo de la Historia 11.2 en pequeño, y el fallo que esta decisión existe para
+     * impedir: con un solo documento por obra, el texto de la segunda página no estaba en
+     * ninguna parte y su Cita no se podía cotejar contra nada.
+     */
+    const { corpus } = await corpusVacio();
+    const { triste, tibi } = await hermanos(corpus);
+
+    const cuerpos = new Map<string, string>();
+    for (const ruta of [triste, tibi]) {
+      const contenido = await readFile(ruta, 'utf8');
+      cuerpos.set(ruta, contenido.split('\n---\n').slice(2).join('\n---\n'));
+    }
+
+    // Se extrae de uno, se comprueba, y solo después del otro: así cada candidata se
+    // atribuye sin ambigüedad al documento del que salió.
+    for (const ruta of [triste, tibi]) {
+      const vistas = new Set(await readdir(join(corpus, '_revision')));
+      const resultado = await extraer(ruta, corpus);
+      expect(resultado.codigo, resultado.error).toBe(0);
+
+      const nuevas = (await readdir(join(corpus, '_revision'))).filter((f) => !vistas.has(f));
+      expect(nuevas.length, ruta).toBeGreaterThan(0);
+
+      for (const fichero of nuevas) {
+        const texto = (await frontmatterDe(corpus, fichero)).texto as string;
+        expect(cuerpos.get(ruta), `${fichero} no aparece literal en su documento`).toContain(texto);
+        // Y no está en el del hermano: son textos distintos, no la misma página dos veces.
+        const hermano = ruta === triste ? tibi : triste;
+        expect(cuerpos.get(hermano)).not.toContain(texto);
+      }
+    }
+  });
+});
