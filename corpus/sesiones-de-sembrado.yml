@@ -65,3 +65,14 @@ sesiones:
       citasPublicadas: 70
       procedenciaCompleta: 74.3
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-20"
+    hora: "21:07"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Sembrar 37 aforismos del Oráculo manual de Gracián en «El tiempo», «La palabra», «La adversidad» y «La amistad»: los cuatro Temas que quedaban por debajo del umbral"
+    motivo: "La sesión empezó con «El tiempo» como objetivo y acabó cerrando los cuatro Temas que quedaban, así que al registrar ya no había hueco que aceptar. No es una desviación del criterio: es que la orden mide el hueco al registrar y no al empezar, y la sesión que cierra el último hueco no puede declararse cumplida."
+    resultado:
+      citasPublicadas: 107
+      procedenciaCompleta: 83.2
+      tradicionLatinoamericana: 41.2

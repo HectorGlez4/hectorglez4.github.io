@@ -165,7 +165,20 @@ describe('Historia 11.3 — la orden propone los dos ejes y declara el hueco', (
     );
 
     const entrecomillados = [...salida.matchAll(/«([^»]+)»/gu)].map((m) => m[1]);
-    expect(entrecomillados.length).toBeGreaterThan(0);
+
+    /*
+     * Sin huecos, la política no nombra ningún Tema, y eso es lo correcto: desde la segunda
+     * sesión de sembrado de la 11.4 el Corpus llegó a tener **todos** los Temas por encima
+     * del umbral, y la orden pasó a responder «No hay hueco que cerrar». Exigir aquí un
+     * entrecomillado convertía en fallo el estado que la épica persigue.
+     *
+     * Lo que sí se conserva es el control positivo, que era la razón de aquella exigencia:
+     * o hay algo entrecomillado —y entonces son todos Temas—, o la orden declara que no hay
+     * hueco. Lo que no puede es callar las dos cosas.
+     */
+    if (entrecomillados.length === 0) {
+      expect(salida).toContain('No hay hueco que cerrar');
+    }
     for (const termino of entrecomillados) expect(temas, termino).toContain(termino);
   });
 

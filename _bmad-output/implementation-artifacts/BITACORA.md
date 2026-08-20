@@ -1465,3 +1465,40 @@ avería de OCR de la 11.5 y merece su propia historia.
 
 **Verificado.** `npx astro check` 0 errores. `npx vitest run` **1617/1617** en 56 ficheros.
 `npm run build` con 90 páginas y el cotejo literal en verde sobre las 20 Citas nuevas.
+
+## 11.4 — Tercera sesión: el Oráculo manual, y todos los Temas por encima del umbral
+
+**`npm run huecos` responde por primera vez: «Ninguno: todos los Temas del corpus llegan al
+umbral».** El Corpus pasa de 70 a **107 Citas**, SM-C1 del 74,3 % al **83,2 %**, y el sitio de
+90 a **131 páginas**. Los cuatro Temas que quedaban —«El tiempo», «La palabra», «La
+adversidad» y «La amistad»— cruzan los 15 y se publican.
+
+**La lección de la sesión anterior, aplicada.** En vez de buscar autores famosos, se buscaron
+**obras sentenciosas**, y apareció lo obvio en cuanto se preguntó bien: el *Oráculo manual y
+arte de prudencia* de Gracián (1647) son **300 aforismos**, ya está en el Corpus como Autor, y
+—esto es lo que lo hizo inmediato— **declara `|año` en la propia subpágina**, sin necesidad de
+encadenar. De 769 candidatas salieron 37 publicables, repartidas por el Tema que de verdad les
+toca. Rendimiento del 4,8 %, frente al 6,4 % de Palma y el 17 % de Rodó: el número engaña,
+porque aquí la cantera era enorme.
+
+**Lo que la sesión rompió, y por qué está bien que lo rompiera.** Una prueba se puso en rojo:
+`objetivo-cli.test.ts` exigía que la orden nombrara siempre algún Tema entre comillas. Daba
+por hecho que **siempre habría un hueco**, y desde esta sesión no lo hay: la orden responde
+«No hay hueco que cerrar», que es justo el estado que la épica persigue. La prueba pasa a
+aceptarlo conservando su control positivo: o hay algo entrecomillado y son todos Temas, o la
+orden declara que no hay hueco; callar las dos cosas sigue siendo fallo.
+
+**Una arruga del registro, anotada y no arreglada.** `npm run sesion:registrar` se negó a
+registrar: mide el hueco **al registrar**, no al empezar, así que **la sesión que cierra el
+último hueco es precisamente la que no puede declararse cumplida**. Se registró con `--anular`
+explicando que no fue una desviación del criterio sino del momento de la medición. Si la
+cadencia de la 11.4 tiene que salir de sesiones medidas, esa arruga le quita una — y le quita
+justo la mejor.
+
+**El ornamento del original, otra vez el problema de la 11.5.** Muchas candidatas de Gracián
+traen dentro el adorno que separa los aforismos en la edición —`🙝🙟 133.`— y comillas mal
+escapadas. Se filtraron a mano, como el OCR de Palma. Es la tercera sesión seguida en que la
+puerta de legibilidad que falta se paga leyendo candidatas una a una.
+
+**Verificado.** `npx astro check` 0 errores. `npx vitest run` **1617/1617**. `npm run build`
+con 131 páginas y el cotejo literal en verde sobre las 37 Citas nuevas.
