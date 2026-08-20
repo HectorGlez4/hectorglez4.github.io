@@ -122,8 +122,8 @@ development_status:
   13-3-una-colección-anuncia-su-propia-pieza: done
   epic-13-retrospective: optional
 
-  epic-14: backlog
-  14-1-encender-un-modelo-de-ingreso-es-un-commit: backlog
+  epic-14: in-progress
+  14-1-encender-un-modelo-de-ingreso-es-un-commit: in-progress
   14-2-el-visitante-que-quiere-sostener-el-sitio-encuentra-cómo: backlog
   epic-14-retrospective: optional
 action_items:
