@@ -1359,3 +1359,62 @@ ningún agente siembra Colecciones. Hasta que exista una, la Página de Colecci�
 la Pieza de Colección de la 13.3 están construidas y probadas pero no se han visto nunca con
 contenido real — y el umbral provisional de `MIN_CITAS_POR_COLECCION` sale justamente de
 curar las tres o cuatro primeras.
+
+## 11.4 — Primera sesión de sembrado, y los tres tapones que destapó
+
+Primera sesión real de la tubería que construyeron 11.1–11.3. **El Corpus pasa de 38 a 50
+Citas, SM-C1 sube del 52,6 % al 64 %, la tradición latinoamericana del 16,7 % al 33,3 %, y
+«La libertad» alcanza su umbral y se publica.** El sitio pasa de 53 a 67 páginas.
+
+Pero lo que la sesión sobre todo produjo fueron **cuatro averías de la tubería**, tres de
+ellas silenciosas. Ninguna se habría visto sin correrla de verdad.
+
+**1. La tradición no se podía teclear.** El esquema admite `tradicion` desde la v1 y de ella
+sale el suelo del 40 %, pero `tools/autor.ts` no la aceptaba: `DatosDeAutor` no tenía el
+campo. `--tradicion latinoamericana` se tragaba en silencio, el Autor se creaba, la orden
+decía «creado» y el fichero salía sin la clave. Pasaba de largo porque la orden **no tenía
+guardián de banderas**: aceptaba cualquier `--loquesea` sin rechistar. Es el primer tapón, y
+sin él los cinco Autores que pedía el objetivo no habrían contado para nada.
+
+**2. El año de la Fuente no se podía leer.** El lector de año de Wikisource buscaba una línea
+`Año:` en la página renderizada, y Wikisource no la renderiza: el dato vive en la plantilla de
+encabezado del wikitexto. Comprobado contra el índice: **cero páginas** con la etiqueta
+visible. Como Gutenberg responde 503 y Cervantes Virtual 403, Wikisource era la única Fuente
+alcanzable, así que **toda Cita nueva habría salido con Procedencia parcial**, hundiendo SM-C1
+y haciendo fallida la sesión por el criterio de la propia historia. De paso apareció que la
+obra derivada era el título de la página —«Triste (Nervo)»— y no el de la obra —*Los jardines
+interiores*—, con el desambiguador de Wikisource camino de la atribución del visitante.
+
+**3. Un documento por obra dejaba sin cotejar la segunda página.** Al pasar a leer el
+encabezado, dos poemas del mismo libro resolvían al mismo fichero y el segundo se quedaba sin
+cuerpo. Se decidió **un documento por página**: el cuerpo versionado es el de una página, y la
+11.2 coteja cada Cita contra el documento que la contiene. Y ahí se pagó la decisión: la
+primera aprobación real tumbó el build con «falta `wikisource-es--el-estado.txt`» —un fichero
+que **sí** estaba, con la página en el nombre—, porque el cotejo seguía buscando por la obra
+sola. **La suite entera seguía verde**: todas sus fixtures usan obras de una página, donde el
+nombre se colapsa y la diferencia no se ve. Ahora el cotejo busca todas las páginas de la obra
+y hay siete pruebas que lo fijan.
+
+**4. Las Citas aprobadas llegaban sin Tema.** La tubería de extracción no tenía forma de
+declararlos: `alta.ts` los toma al crear, pero `revisar --aprobar` no, y no existía ninguna
+orden que se los asignara a una Cita. Publicar por esa vía **no cerraba ningún hueco de
+Tema**, que es el primer criterio de la 11.4. Ahora `--temas` acompaña a `--aprobar`, que es
+cuando el revisor tiene la Cita delante; un Tema con errata **detiene el lote entero** sin
+publicar nada, porque el esquema no ve si un slug de Tema existe y el build lo cazaría cuando
+la Cita ya estuviera publicada.
+
+**Y una avería que no es de código: el OCR.** El *Apéndice a Mis últimas tradiciones peruanas*
+de Palma es un escaneo corrupto, y produjo 61 candidatas plagadas de basura —«enseiia»,
+«Ileno», «For- mabalo», «qus», «tata\* rabuelos»—. **El cotejo literal las habría dado por
+buenas**, porque aparecen literales en su documento: la puerta comprueba fidelidad al
+documento, no que el documento sea legible. Se rechazaron las 61 a mano y se retiró el
+documento. Queda historia abierta.
+
+**Lo que la sesión enseñó sobre el rendimiento.** De 183 candidatas se publicaron 12. La
+prosa narrativa es una fuente pésima para un sitio de citas —«Ante tan franca confesión no
+quedaba al tribunal más que aplicar la pena» es un fragmento sin sentido fuera de su cuento—;
+lo que rinde es prosa sentenciosa. Y el objetivo que propuso la 11.3 —Autores latinoamericanos
+con Citas a «La virtud»— **no se pudo cumplir**: Wikisource no tiene obra fechada
+latinoamericana que sirva a ese Tema. Los Autores entraron; las Citas fueron a «La libertad»,
+el hueco que la cosecha sí podía cerrar. Queda registrado como desviación con su motivo en
+`corpus/sesiones-de-sembrado.yml`, que es para lo que existe `--anular`.

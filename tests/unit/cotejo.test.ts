@@ -5,6 +5,7 @@ import {
   colapsarEspacios,
   cotejar,
   documentoDeCita,
+  documentosDeCita,
   formatearFallos,
   huellaDeTexto,
   motivoParaNoPublicar,
@@ -547,5 +548,87 @@ describe('el cotejo no vive en src/lib/', () => {
     expect(gancho).toMatch(/logger\.warn/);
     expect(gancho).not.toMatch(/throw /);
     expect(integracion).toMatch(/no publica nada/);
+  });
+});
+
+/*
+ * Una obra tiene tantos documentos como páginas suyas se hayan recuperado — Historia 11.4.
+ *
+ * Esto no lo cubría nada, y se pagó en el sitio: al pasar a un documento por página, la
+ * primera sesión de sembrado real publicó doce Citas y el build se cayó con «falta
+ * corpus/fuentes/wikisource-es--el-estado.txt» — un fichero que **sí** estaba, con la
+ * página en el nombre. La suite entera seguía en verde porque todas sus fixtures usan
+ * obras de una sola página, donde el nombre se colapsa y la diferencia no se ve.
+ */
+describe('Historia 11.4 — el cotejo busca todas las páginas de la obra', () => {
+  const PAGINA_A = `${DOCUMENTO}--triste`;
+  const PAGINA_B = `${DOCUMENTO}--tibi-regina`;
+
+  it('encuentra el documento aunque el nombre lleve la página', () => {
+    const documentos = new Map<string, string | null>([[PAGINA_A, CUERPO]]);
+
+    expect(documentosDeCita(FUENTE, OBRA, documentos)).toEqual([PAGINA_A]);
+    expect(cotejar({ citas: [cita()], documentos, censo: [] }).ok).toBe(true);
+  });
+
+  it('coteja contra cualquier página de la obra, no solo contra la primera', () => {
+    const documentos = new Map<string, string | null>([
+      [PAGINA_B, 'Otro poema del mismo libro, que no contiene la Cita.'],
+      [PAGINA_A, CUERPO],
+    ]);
+
+    const resultado = cotejar({ citas: [cita()], documentos, censo: [] });
+
+    expect(resultado.ok, JSON.stringify(resultado.fallos)).toBe(true);
+    expect(resultado.cotejadas).toBe(1);
+  });
+
+  it('el nombre corto va primero, para que el fallo nombre la ruta esperada', () => {
+    const documentos = new Map<string, string | null>([
+      [PAGINA_B, CUERPO],
+      [DOCUMENTO, CUERPO],
+      [PAGINA_A, CUERPO],
+    ]);
+
+    expect(documentosDeCita(FUENTE, OBRA, documentos)[0]).toBe(DOCUMENTO);
+  });
+
+  it('no confunde una obra con otra que empiece igual', () => {
+    const documentos = new Map<string, string | null>([
+      [`${DOCUMENTO}-y-otros-poemas`, CUERPO],
+    ]);
+
+    // El separador de página son dos guiones; uno solo es otra obra distinta.
+    expect(documentosDeCita(FUENTE, OBRA, documentos)).toEqual([]);
+    expect(cotejar({ citas: [cita()], documentos, censo: [] }).ok).toBe(false);
+  });
+
+  it('sin ninguna página de la obra, el fallo sigue nombrando el documento que falta', () => {
+    const resultado = cotejar({ citas: [cita()], documentos: new Map(), censo: [] });
+
+    expect(resultado.ok).toBe(false);
+    expect(resultado.fallos[0].regla).toContain(`${DOCUMENTO}.txt`);
+  });
+
+  it('si el texto no está en ninguna página, el fallo las enumera todas', () => {
+    const documentos = new Map<string, string | null>([
+      [PAGINA_A, 'Un poema.'],
+      [PAGINA_B, 'Otro poema.'],
+    ]);
+
+    const resultado = cotejar({ citas: [cita()], documentos, censo: [] });
+
+    expect(resultado.ok).toBe(false);
+    expect(resultado.fallos[0].regla).toContain(PAGINA_A);
+    expect(resultado.fallos[0].regla).toContain(PAGINA_B);
+  });
+
+  it('una página ilegible no tapa a la sana', () => {
+    const documentos = new Map<string, string | null>([
+      [PAGINA_A, null],
+      [PAGINA_B, CUERPO],
+    ]);
+
+    expect(cotejar({ citas: [cita()], documentos, censo: [] }).ok).toBe(true);
   });
 });

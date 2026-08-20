@@ -13,13 +13,13 @@
  * Una candidata que la incumpla se queda donde está por muy aprobada que esté.
  */
 
-import { readFile, rm } from 'node:fs/promises';
+import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
 import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
-import { leerCitas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
+import { leerCitas, leerTemas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
 
 export interface CandidataEnRevision {
   slug: string;
@@ -99,6 +99,8 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
 
 export interface ResultadoDeDecision {
   publicadas: string[];
+  /** Temas que no existen en el corpus: nada se publica si aparece alguno. */
+  temasDesconocidos?: string[];
   /**
    * Candidatas cuyo slug estaba ocupado y se publicaron con otro — nunca pisando.
    *
@@ -120,7 +122,11 @@ export interface ResultadoDeDecision {
  * el de listar: entre una cosa y otra el fichero ha podido editarse a mano, y aprobar por
  * un resultado de hace diez minutos publicaría algo que ya no cumple.
  */
-export async function aprobar(rutas: Rutas, slugs: string[]): Promise<ResultadoDeDecision> {
+export async function aprobar(
+  rutas: Rutas,
+  slugs: string[],
+  temas: string[] = [],
+): Promise<ResultadoDeDecision> {
   const lote = await loteEnRevision(rutas);
   const resultado: ResultadoDeDecision = {
     publicadas: [],
@@ -129,6 +135,22 @@ export async function aprobar(rutas: Rutas, slugs: string[]): Promise<ResultadoD
     rechazadas: [],
     noEncontradas: [],
   };
+
+  /*
+   * Los Temas se comprueban **antes de publicar nada**, y el lote entero se detiene si
+   * alguno no existe. Es la regla de oro de `tools/lib/`: o todo o nada. Publicar la mitad
+   * del lote y luego negarse dejaría al revisor sin saber cuáles entraron.
+   *
+   * Y se comprueban aquí y no solo en el esquema porque el esquema no los ve: `temas` es
+   * una lista de cadenas, y quien decide si «la-libertadd» existe es el corpus. El build
+   * lo caza después con `reference()`, pero para entonces la Cita ya está publicada y lo
+   * que se rompe es la construcción del sitio.
+   */
+  if (temas.length > 0) {
+    const conocidos = new Set((await leerTemas(rutas)).map((t) => t.slug));
+    const desconocidos = [...new Set(temas)].filter((t) => !conocidos.has(t));
+    if (desconocidos.length > 0) return { ...resultado, temasDesconocidos: desconocidos };
+  }
 
   // Los slugs que no se pueden pisar: los publicados, más los que esta misma ejecución
   // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
@@ -149,11 +171,13 @@ export async function aprobar(rutas: Rutas, slugs: string[]): Promise<ResultadoD
     const definitivo = slugLibre(candidata.slug, ocupados);
     ocupados.add(definitivo);
 
-    if (definitivo === candidata.slug) {
+    if (definitivo === candidata.slug && temas.length === 0) {
       await mover(candidata.ruta, rutas.citas);
     } else {
-      await reescribirConSlug(candidata, definitivo, rutas);
-      resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+      await reescribirConSlug(candidata, definitivo, rutas, temas);
+      if (definitivo !== candidata.slug) {
+        resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+      }
     }
 
     resultado.publicadas.push(slug);
@@ -173,14 +197,15 @@ async function reescribirConSlug(
   candidata: CandidataEnRevision,
   definitivo: string,
   rutas: Rutas,
+  temas: string[] = [],
 ): Promise<void> {
   const bruto = await readFile(candidata.ruta, 'utf8');
   const conNuevoSlug = bruto.replace(
     /^slug:.*$/m,
     `slug: ${JSON.stringify(definitivo)}`,
   );
+  const conTemas = conTemasDeclarados(conNuevoSlug, temas);
 
-  const { writeFile } = await import('node:fs/promises');
   const destino = join(
     rutas.citas,
     `${nombreDeFicheroDeCita(candidata.autor, definitivo)}.md`,
@@ -188,8 +213,25 @@ async function reescribirConSlug(
 
   // Se escribe el destino antes de borrar el origen: si algo falla en medio, la
   // candidata sigue en revisión en lugar de haberse evaporado.
-  await writeFile(destino, conNuevoSlug, 'utf8');
+  await writeFile(destino, conTemas, 'utf8');
   await rm(candidata.ruta, { force: true });
+}
+
+/**
+ * Declara los Temas en el frontmatter de una candidata, justo tras el Autor.
+ *
+ * Va ahí y no al final por lo mismo que el año de nacimiento va antes que el de
+ * fallecimiento: el orden del fichero es para quien lo lee, y las Citas ya publicadas lo
+ * tienen así. Un fichero nuevo con las claves en otro orden no rompe nada y se nota.
+ *
+ * Sin Temas devuelve el texto intacto — la convención del corpus es que un campo sin
+ * valor **se omite**, nunca `temas: []`.
+ */
+function conTemasDeclarados(bruto: string, temas: string[]): string {
+  if (temas.length === 0) return bruto;
+  const unicos = [...new Set(temas)];
+  const bloque = ['temas:', ...unicos.map((t) => `  - ${JSON.stringify(t)}`)].join('\n');
+  return bruto.replace(/^(autor:.*)$/m, `$1\n${bloque}`);
 }
 
 /**
