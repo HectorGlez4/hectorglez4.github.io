@@ -71,12 +71,17 @@ export interface DatosDeColeccion {
  * anterior, curar un fichero con un `miembos:` mal tecleado —que el build **sí** habría
  * rechazado— pasaba la comprobación y lo reescribía perdiendo esa clave en silencio. La
  * pérdida de comentarios está documentada y asumida; la de datos, no.
+ *
+ * Se exporta desde la Historia 13.3: la orden que compone la Pieza de una Colección necesita
+ * su `nombre` —es el título del lienzo— y no puede inventárselo ni redactar por su cuenta el
+ * rechazo de un fichero a medio escribir. Preguntar aquí es preguntarle al esquema del build,
+ * que es el único que decide si ese fichero vale.
  */
-type Declaracion =
+export type Declaracion =
   | { ok: true; datos: { nombre: string; criterio: string; miembros: string[] } }
   | { ok: false; motivos: string[] };
 
-async function declaracionDe(coleccion: ColeccionEnCorpus): Promise<Declaracion> {
+export async function declaracionDeColeccion(coleccion: ColeccionEnCorpus): Promise<Declaracion> {
   const validado = coleccionAdmisible.safeParse(await leerColeccionBruta(coleccion.ruta));
   if (validado.success) return { ok: true, datos: validado.data };
   return {
@@ -113,12 +118,16 @@ async function buscar(
 /**
  * Las Colecciones despublicadas, leídas con el mismo lector que las publicadas.
  *
+ * Se exporta desde la Historia 13.3: la orden que compone la Pieza de una Colección necesita
+ * distinguir «no existe» de «está retirada», y con su propia llamada habría un segundo sitio
+ * decidiendo qué directorio son las retiradas.
+ *
  * Se le pasa el directorio de las retiradas como si fuera el de las Colecciones: el lector
  * deriva el slug de la ruta relativa a ese directorio, así que enumerarlas así da
  * exactamente los mismos slugs que tenían cuando se publicaban. Un segundo lector para lo
  * mismo acabaría discrepando en cuál es el slug de un fichero.
  */
-async function retiradas(rutas: Rutas): Promise<ColeccionEnCorpus[]> {
+export async function leerColeccionesRetiradas(rutas: Rutas): Promise<ColeccionEnCorpus[]> {
   return leerColecciones({ ...rutas, colecciones: rutas.coleccionesRetiradas });
 }
 
@@ -256,7 +265,7 @@ export async function crearColeccion(rutas: Rutas, datos: DatosDeColeccion): Pro
    * como traza de Node en lugar del rechazo redactado que esta orden promete. El choque se
    * dice aquí, que es donde todavía se puede elegir otro nombre.
    */
-  const retirada = (await retiradas(rutas)).find((r) => r.slug === slug);
+  const retirada = (await leerColeccionesRetiradas(rutas)).find((r) => r.slug === slug);
   if (retirada) {
     return {
       ok: false,
@@ -316,7 +325,7 @@ export async function asignarCitas(
   const encontrada = await buscar(rutas, slug);
   if (!encontrada.ok) return encontrada;
 
-  const declaracion = await declaracionDe(encontrada.coleccion);
+  const declaracion = await declaracionDeColeccion(encontrada.coleccion);
   if (!declaracion.ok) return declaracion;
 
   const publicadas = await citasPublicadas(rutas);
@@ -391,7 +400,7 @@ export async function quitarCitas(
   const encontrada = await buscar(rutas, slug);
   if (!encontrada.ok) return encontrada;
 
-  const declaracion = await declaracionDe(encontrada.coleccion);
+  const declaracion = await declaracionDeColeccion(encontrada.coleccion);
   if (!declaracion.ok) return declaracion;
 
   const aQuitar = [...new Set(slugsDeCitas)];
@@ -440,7 +449,7 @@ export async function estadoDeColeccion(rutas: Rutas, slug: string): Promise<Res
   const encontrada = await buscar(rutas, slug);
   if (!encontrada.ok) return encontrada;
 
-  const declaracion = await declaracionDe(encontrada.coleccion);
+  const declaracion = await declaracionDeColeccion(encontrada.coleccion);
   if (!declaracion.ok) return declaracion;
 
   const resuelta = resolverColeccion({ slug, ...declaracion.datos }, await citasPublicadas(rutas));
@@ -535,7 +544,7 @@ export async function despublicarColeccion(rutas: Rutas, slug: string): Promise<
  * publicarse, y decir «publicada» ahí sería mentir.
  */
 export async function publicarColeccion(rutas: Rutas, slug: string): Promise<Resultado> {
-  const retirada = (await retiradas(rutas)).find((c) => c.slug === slug);
+  const retirada = (await leerColeccionesRetiradas(rutas)).find((c) => c.slug === slug);
   if (!retirada) {
     return {
       ok: false,
@@ -571,7 +580,7 @@ export async function publicarColeccion(rutas: Rutas, slug: string): Promise<Res
  */
 export async function inventarioDeRetiradas(rutas: Rutas): Promise<HuecoDeColeccion[]> {
   const citas = await citasPublicadas(rutas);
-  return coleccionesParaHuecos(await retiradas(rutas), citas)
+  return coleccionesParaHuecos(await leerColeccionesRetiradas(rutas), citas)
     .map(huecoDeColeccion)
     .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
 }

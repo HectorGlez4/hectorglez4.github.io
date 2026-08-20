@@ -161,15 +161,16 @@ hoy; el lote las enumera todas, y una como `manana:` tumbaba `npm run build` ent
 Fijar jornadas de verdad en el repositorio es de Héctor: `corpus/portada.json` se versiona
 con `fijaciones` vacío a propósito y ningún agente fija jornadas en él.
 
-## Componer una Pieza de Canal de varias Citas
+## Componer una Pieza de Canal
 
 El Canal propio sabía producir un solo formato: una Cita suelta. Una Pieza reúne varias
 Citas del Corpus en una sola imagen, para cuando cuatro Citas del mismo Tema dicen juntas
-algo que ninguna dice sola:
+algo que ninguna dice sola, o anuncia una Colección entera:
 
 ```
 npm run pieza -- componer --red instagram <slug> <slug> [<slug>...]
 npm run pieza -- componer --red x <slug> <slug> --salida /tmp/prueba.png
+npm run pieza -- coleccion <slug-de-coleccion> --red instagram
 ```
 
 **Se compone en `tools/` y su salida no se versiona** (AD-15). El plano lo fija quién
@@ -182,10 +183,20 @@ caso: lo que sostiene AD-15 es quién la pide, no cuántas salen por invocación
 qué cuenta—, nunca el artefacto. Repetir la misma orden sobrescribe la misma Pieza byte a
 byte.
 
+**Con `--salida` esa garantía deja de ser del sistema.** El fichero cae donde diga quien
+invoca, que puede estar dentro del repositorio, así que el parte no afirma ahí que esté
+ignorado: lo dice cuando es verdad —destino por omisión— y avisa de quién es la
+responsabilidad cuando no puede saberlo. Una frase tranquilizadora sobre lo único que AD-15
+manda vigilar es peor que ninguna frase.
+
 **Una red por composición, y un solo enlace.** La Pieza declara un único destino y lo marca
-con `enlaceConOrigen` (FR-22). Ese destino es **la portada**: una Pieza de tres Citas no
-puede enlazar a una de ellas sin favorecerla, y la portada es la única superficie que las
-contiene a todas sin elegir. Publicarla en dos cuentas son dos composiciones, una por marca.
+con `enlaceConOrigen` (FR-22). En `componer` ese destino es **la portada**: una Pieza de tres
+Citas no puede enlazar a una de ellas sin favorecerla, y la portada es la única superficie que
+las contiene a todas sin elegir. En `coleccion` es **la Página de Colección**, y esa es la
+diferencia entre las dos subórdenes. La ruta la da `rutaDeColeccion` en
+`src/lib/superficies.ts`, donde está declarada la familia: escrita a mano aquí, un cambio de
+ruta llevaría al visitante a un 404 semanas después de publicar, sin que nada fallara.
+Publicarla en dos cuentas son dos composiciones, una por marca.
 
 **Qué rechaza la orden, y por qué rechaza en vez de descartar.**
 
@@ -217,8 +228,8 @@ toca a cada una no es el de la Imagen; calcularlo aparte es justo lo que la regl
 lienzo —1080 cuadrado, margen 96— es el de la Imagen de Cita, y se declara **aparte a
 propósito**: `public/islas/imagen.js` ya lo declara para sí porque vive fuera del empaquetado,
 con URL estable, para que el `import()` diferido de AD-6 funcione, y no puede importar de
-`src/`. Dentro del empaquetado el dueño es `src/lib/pieza.ts`, y de ahí lo hereda la pieza de
-Colección de la 13.3.
+`src/`. Dentro del empaquetado el dueño es `src/lib/pieza.ts`, y de ahí lo hereda la Pieza de
+Colección, que compone en el mismo lienzo y con la misma tabla.
 
 El escapado del SVG, el reparto en líneas, la paleta y las familias los comparten la Tarjeta
 y la Pieza en `src/lib/lienzo.ts`. Dos módulos que rasterizan no pueden tener dos algoritmos
@@ -230,3 +241,42 @@ sistema, como en la Tarjeta.
 La atribución del texto para publicar sale de `src/lib/atribucion.ts`, la misma que se lleva
 el visitante al copiar. Cada Cita lleva además su Autor **visible en la imagen**, uno por
 Cita: una Pieza reúne Autores distintos y un pie común los atribuiría todos a uno.
+
+### La Pieza que anuncia una Colección
+
+`npm run pieza -- coleccion <slug> --red <red>` compone la misma plantilla con dos
+diferencias, y son el contenido entero de la historia: el lienzo lleva **el nombre de la
+Colección** como título —con el tratamiento que `DESIGN.md` le da al Nombre de Colección,
+`headline-md` de
+`_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md`— y el
+enlace único apunta a su Página. Las Citas no se nombran en la orden:
+salen de la pertenencia declarada, **en el orden en que el fichero las declara**, porque ese
+orden es curación y no ordenación del sistema.
+
+**Por qué el umbral no se comprueba en `tools/` —y no se puede— y por qué esta suborden
+excluye en vez de rechazar está escrito una sola vez, en la cabecera de
+`src/lib/coleccionEnPieza.ts`.** Léelo ahí antes de tocar la selección; aquí solo el resumen
+operativo. No escribas un `if` con `MIN_CITAS_POR_COLECCION` en `tools/`: la Colección llega
+por `coleccionesPublicadas` y la selección exige un tipo que solo esa función produce, así que
+la regla no se recuerda, se compila.
+
+**Todo lo que no entra se dice, y son tres listas distintas.** Las Citas excluidas con su
+motivo —pasa de `MAX_CARACTERES_IMAGEN`, su Autor falta o no tiene nombre, tiene texto más
+ancho que el lienzo, o ya no cabe en el apilado—; los miembros **declarados que no resuelven**,
+que son erratas o Citas retiradas a `corpus/_revision/` y que no cuentan ni para el umbral ni
+para la Pieza; y, cuando el nombre de la Colección es lo que no deja sitio a las Citas, se
+nombra al nombre en vez de culparlas una por una. Si de todo eso no quedan dos Citas, no hay
+Pieza.
+
+Se rechaza, con código 1: una Colección **retirada** —que es estar en
+`corpus/_colecciones-retiradas/` (AD-2)—, una que no existe, una cuyo fichero **no cumple el
+esquema del build** —lo juzga `declaracionDeColeccion`, no una redacción propia de la orden, y
+el nombre es justamente lo que la Pieza anuncia— y una **por debajo de su umbral**, diciendo
+cuántas tiene y cuántas le faltan con el mismo renglón que `npm run coleccion -- estado`.
+Códigos: **2** es la forma de la invocación (bandera desconocida, `--red` ausente, cero o dos
+slugs) y **1** es lo que la invocación dice, incluido un slug con forma de ruta — igual que en
+`componer`.
+
+El PNG por omisión es `piezas/pieza-coleccion-<slug>.png`, con su propio constructor
+(`nombreDePiezaDeColeccion`): el de las Citas sueltas une slugs con guion doble y resume la
+cola como «y N más», que sobre una Colección borraría del nombre justo lo que anuncia.

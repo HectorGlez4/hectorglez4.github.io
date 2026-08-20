@@ -16,6 +16,7 @@ import BloqueDeCita from '../components/BloqueDeCita.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { MARCA } from '../lib/marca.ts';
+import { rutaDeColeccion } from '../lib/superficies.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
@@ -118,7 +119,7 @@ const autorDelDia = seleccion
           <ul class="chips">
             {colecciones.map((coleccion) => (
               <li>
-                <a class="chip" href={`/coleccion/${coleccion.slug}`}>
+                <a class="chip" href={rutaDeColeccion(coleccion.slug)}>
                   {coleccion.nombre}
                 </a>
               </li>

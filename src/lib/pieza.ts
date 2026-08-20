@@ -25,12 +25,21 @@
  * ponga puntos suspensivos, y no la hay porque componer una Cita a medias es publicarla mal
  * atribuida.
  *
+ * **Con título, y solo uno.** Desde la Historia 13.3 la Pieza admite un título opcional: el
+ * nombre de la Colección que anuncia. No es una Cita ni voz del sistema, así que su
+ * tratamiento no se decide aquí — lo da `DESIGN.md` (la ruta, en las constantes del título),
+ * que al Nombre de Colección le asigna `headline-md`. Lo que sí es de este módulo es que el
+ * título **entre en la cuenta del apilado**: si su alto y su separación no se restaran del alto
+ * útil, el nombre empujaría la última Cita contra la marca del pie, que es exactamente el
+ * defecto que la banda de la marca arregló en la 13.2 y que solo se ve en la Pieza más llena.
+ *
  * La paleta, las familias y las métricas salen de `lienzo.ts`, compartidas con la Tarjeta.
  *
  * AD-5 — puro: devuelve una cadena SVG, no toca disco ni rasteriza. Quien rasteriza es
  * `tools/lib/piezas.ts`, con el mismo `sharp` que la Tarjeta.
  */
 
+import { procedenciaCompuesta } from './atribucion.ts';
 import {
   ANCHO_POR_CARACTER,
   ANCHO_POR_CARACTER_EN_VERSALITAS,
@@ -42,6 +51,7 @@ import {
   repartirEnLineas,
 } from './lienzo.ts';
 import { MARCA } from './marca.ts';
+import type { Autor, Cita } from './publicado.ts';
 import { tramoDe } from './tramos.ts';
 
 /** Lienzo cuadrado: la proporción que aceptan todas las redes sin recortar. */
@@ -92,6 +102,32 @@ const CUERPO_DE_LA_MARCA = 20;
 const ALTURA_DE_LINEA_DEL_AUTOR = 30;
 const ALTURA_DE_LINEA_DE_LA_PROCEDENCIA = 25;
 
+/*
+ * El título — Historia 13.3.
+ *
+ * Estos tres números **no se inventan aquí**, y es lo que los distingue del resto del ritmo
+ * vertical. `_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md`
+ * le da al «Nombre de Colección» el token `headline-md`: Source Serif, peso 600, 30px,
+ * interlínea 1,2. Se compone con ese tratamiento tal cual, incluida su consecuencia visual
+ * —queda por debajo del cuerpo de una Cita corta—, que allí está dicha como decisión y no como
+ * descuido: la superficie «abre por el contenido», y el nombre lo anuncia sin taparlo.
+ * Inventarle un cuerpo mayor porque «un título tiene que mandar» sería decidir presentación en
+ * la plantilla, que es lo que ni AD-8 ni ese documento permiten.
+ *
+ * **Lo único de ese token que no se hereda es «una sola línea», y se dice por qué.** Allí la
+ * restricción se cumple sola: el nombre vive en una medida de prosa de 68 caracteres a 30px y
+ * cabe. Aquí el ancho útil son 888px, así que un nombre largo ocupa dos líneas quiera o no, y
+ * las dos únicas formas de forzar la línea única serían recortarlo o encogerlo — las dos
+ * prohibidas por NFR-12, y prohibidas con más razón sobre un nombre que sobre una Cita, porque
+ * el nombre es el identificador de la Colección que se anuncia. Se reparte, como todo lo demás.
+ *
+ * La separación bajo el título sí es del lienzo, como las demás: es la que separa el anuncio
+ * del apilado, y por eso vale más que la que separa dos Citas entre sí.
+ */
+const CUERPO_DEL_TITULO = 30;
+const ALTURA_DE_LINEA_DEL_TITULO = Math.round(CUERPO_DEL_TITULO * 1.2);
+const SEPARACION_BAJO_EL_TITULO = 48;
+
 /**
  * Una Cita tal y como entra en la Pieza: su texto, su Autor y su procedencia si consta.
  *
@@ -104,6 +140,35 @@ export interface CitaEnPieza {
   autor: string;
   /** Obra y año, ya compuestos por `atribucion.ts`, cuando constan. */
   procedencia?: string;
+}
+
+/**
+ * Una Cita del corpus, tal y como entra en el lienzo.
+ *
+ * Vive junto al tipo que construye, y desde la Historia 13.3 tiene que vivir en `src/lib/`:
+ * lo llaman la orden que compone una selección de slugs (`tools/lib/piezas.ts`) y la
+ * selección pura de una Colección (`coleccionEnPieza.ts`), y una capa de `src/` no puede
+ * importar de `tools/`. Con una copia en cada sitio, la procedencia escrita dentro de la
+ * imagen y la del pie divergirían a la primera corrección.
+ *
+ * La procedencia la compone `atribucion.ts` —el mismo dueño que la del texto que se publica—
+ * para que la obra escrita **dentro** de la imagen y la del pie digan lo mismo hasta la coma.
+ */
+export function citaEnPieza(cita: Cita, autor: Autor): CitaEnPieza {
+  return { texto: cita.texto, autor: autor.nombre, procedencia: procedenciaCompuesta(cita) };
+}
+
+/**
+ * Lo que la Pieza lleva además de sus Citas — Historia 13.3.
+ *
+ * Un objeto de opciones y no un parámetro suelto para que la firma no cambie de forma cada
+ * vez que el lienzo admita algo nuevo, y para que los dos que tienen que estar de acuerdo
+ * —quien pregunta si cabe y quien compone— reciban **lo mismo**: preguntar la cabida sin
+ * título y componer con él es la forma exacta de que la última Cita acabe contra la marca.
+ */
+export interface OpcionesDePieza {
+  /** El nombre de la Colección que la Pieza anuncia, cuando anuncia una. */
+  titulo?: string;
 }
 
 /** Lo que ocupa una Cita en el apilado, ya repartida en líneas. */
@@ -180,18 +245,95 @@ function exigirMinimo(citas: CitaEnPieza[]): void {
   }
 }
 
-/** Los bloques y el alto del apilado, calculados **una vez** por composición. */
-function apilado(citas: CitaEnPieza[]): { bloques: Bloque[]; alto: number } {
-  const bloques = citas.map(bloqueDe);
-  const suma = bloques.reduce((total, b) => total + b.alto, 0);
-  return { bloques, alto: suma + SEPARACION_ENTRE_CITAS * Math.max(0, bloques.length - 1) };
+/** El título ya repartido en líneas, y lo que ocupa con su separación. */
+interface BloqueDeTitulo {
+  lineas: string[];
+  alto: number;
 }
 
-/** El alto de los `cuantas` primeros bloques, con sus separaciones. */
-function altoDe(bloques: Bloque[], cuantas: number): number {
+function bloqueDelTitulo(titulo: string | undefined): BloqueDeTitulo {
+  if (titulo === undefined) return { lineas: [], alto: 0 };
+
+  /*
+   * Se **normaliza antes de medir y de componer**, no solo para juzgar si está en blanco. Un
+   * nombre entrecomillado en el YAML con un espacio de sobra —«  Frases cortas  »— es la misma
+   * Colección, y sin este recorte daba un PNG distinto: `repartirEnLineas` parte por espacios,
+   * así que el sobrante entra en la primera línea y desplaza el reparto entero. La Pieza promete
+   * componer byte a byte lo mismo para la misma Colección, y esa promesa se rompe aquí o no se
+   * rompe en ningún sitio.
+   */
+  const nombre = titulo.trim();
+
+  if (nombre === '') {
+    /*
+     * La misma clase de red que la de FR-10 en `bloqueDe`: sin ella se compondría un `<text>`
+     * vacío y la Pieza reservaría el hueco de un anuncio que no anuncia nada. Quien compone
+     * rechaza antes y nombrando la Colección (`tools/lib/piezas.ts`); esto impide que un
+     * consumidor futuro se salte esa puerta sin enterarse.
+     */
+    throw new Error(
+      'Un título en blanco no es un título: la Pieza de una Colección lleva su nombre, y sin ' +
+        'nombre no hay nada que anunciar.',
+    );
+  }
+
+  /*
+   * Y la red del ancho, aquí y no solo en quien compone. Vive en `bloqueDelTitulo` —y no en
+   * una comprobación de `svgDePieza`— para que **`cabenEnPieza` tampoco pueda decir que sí**:
+   * mientras estuvo fuera, preguntar la cabida de una selección con un título imposible
+   * respondía `cabe: true` y la excepción llegaba después, al componer, a quien se había fiado
+   * de la respuesta. Un título que se sale por el lado no es «no cabe»: es una Pieza que no
+   * existe, igual que una Cita que no admite Imagen.
+   */
+  const desbordadas = palabrasDelTituloQueDesbordan(nombre);
+  if (desbordadas.length > 0) {
+    throw new Error(
+      'El título no cabe a lo ancho del lienzo y saldría cortado: ' +
+        `${desbordadas.map((p) => `«${p}»`).join(', ')}. ` +
+        'No se compone nada — el texto va entero o no va (NFR-12).',
+    );
+  }
+
+  const lineas = repartirEnLineas(nombre, CUERPO_DEL_TITULO, ANCHO_UTIL);
+  return { lineas, alto: lineas.length * ALTURA_DE_LINEA_DEL_TITULO + SEPARACION_BAJO_EL_TITULO };
+}
+
+/** Los bloques y el alto del apilado, calculados **una vez** por composición. */
+function apilado(
+  citas: CitaEnPieza[],
+  opciones: OpcionesDePieza,
+): { titulo: BloqueDeTitulo; bloques: Bloque[]; alto: number } {
+  const titulo = bloqueDelTitulo(opciones.titulo);
+  const bloques = citas.map(bloqueDe);
+  const suma = bloques.reduce((total, b) => total + b.alto, 0);
+  return {
+    titulo,
+    bloques,
+    alto: titulo.alto + suma + SEPARACION_ENTRE_CITAS * Math.max(0, bloques.length - 1),
+  };
+}
+
+/**
+ * El alto de los `cuantas` primeros bloques, con sus separaciones y con el título.
+ *
+ * El título entra siempre, y no es un detalle: cuando la respuesta es «caben tres», esas tres
+ * van a componerse **con** el nombre de la Colección encima. Descontarlo solo del total daría
+ * un máximo que no cabe.
+ */
+function altoDe(bloques: Bloque[], cuantas: number, titulo: BloqueDeTitulo): number {
   const tomados = bloques.slice(0, cuantas);
   const suma = tomados.reduce((total, b) => total + b.alto, 0);
-  return suma + SEPARACION_ENTRE_CITAS * Math.max(0, tomados.length - 1);
+  return titulo.alto + suma + SEPARACION_ENTRE_CITAS * Math.max(0, tomados.length - 1);
+}
+
+/** Cuántos de los primeros bloques caben en el alto útil, con el título puesto. */
+function cuantosCaben(bloques: Bloque[], titulo: BloqueDeTitulo): number {
+  let maximo = 0;
+  for (let cuantas = 1; cuantas <= bloques.length; cuantas += 1) {
+    if (altoDe(bloques, cuantas, titulo) > ALTO_UTIL) break;
+    maximo = cuantas;
+  }
+  return maximo;
 }
 
 /** Una Cita que se sale del lienzo por el lado, con las palabras que no caben. */
@@ -240,6 +382,18 @@ export function desbordanALoAncho(citas: CitaEnPieza[]): Desbordada[] {
 }
 
 /**
+ * Las palabras del título que no caben a lo ancho — Historia 13.3.
+ *
+ * Aparte de `desbordanALoAncho` porque la respuesta se usa distinto: una Cita que se sale se
+ * queda fuera y la Pieza se compone con las demás, pero un título que se sale no se puede
+ * excluir —es lo que la Pieza anuncia—, así que no hay Pieza. Se pregunta antes, por lo mismo
+ * de siempre: el rasterizado no falla, publica la palabra cortada.
+ */
+export function palabrasDelTituloQueDesbordan(titulo: string): string[] {
+  return palabrasQueDesbordan(titulo, CUERPO_DEL_TITULO, ANCHO_UTIL);
+}
+
+/**
  * Si las Citas dadas caben apiladas en la Pieza, y cuántas caben si no.
  *
  * Se pregunta **antes** de componer nada, y esa es la mitad importante: cuando la respuesta
@@ -253,17 +407,13 @@ export function desbordanALoAncho(citas: CitaEnPieza[]): Desbordada[] {
  */
 export function cabenEnPieza(
   citas: CitaEnPieza[],
+  opciones: OpcionesDePieza = {},
 ): { cabe: true } | { cabe: false; maximo: number } {
   exigirMinimo(citas);
-  const { bloques, alto } = apilado(citas);
+  const { titulo, bloques, alto } = apilado(citas, opciones);
   if (alto <= ALTO_UTIL) return { cabe: true };
 
-  let maximo = 0;
-  for (let cuantas = 1; cuantas <= bloques.length; cuantas += 1) {
-    if (altoDe(bloques, cuantas) > ALTO_UTIL) break;
-    maximo = cuantas;
-  }
-  return { cabe: false, maximo };
+  return { cabe: false, maximo: cuantosCaben(bloques, titulo) };
 }
 
 /**
@@ -273,22 +423,20 @@ export function cabenEnPieza(
  * cortas no queda pegada al borde superior con un desierto debajo. Todas las medidas se
  * derivan de la entrada, así que la misma selección compone byte a byte lo mismo.
  */
-export function svgDePieza(citas: CitaEnPieza[]): string {
+export function svgDePieza(citas: CitaEnPieza[], opciones: OpcionesDePieza = {}): string {
   exigirMinimo(citas);
 
-  const { bloques, alto } = apilado(citas);
+  const { titulo, bloques, alto } = apilado(citas, opciones);
   if (alto > ALTO_UTIL) {
-    let maximo = 0;
-    for (let cuantas = 1; cuantas <= bloques.length; cuantas += 1) {
-      if (altoDe(bloques, cuantas) > ALTO_UTIL) break;
-      maximo = cuantas;
-    }
     throw new Error(
-      `Estas ${citas.length} Citas no caben apiladas en la Pieza: caben ${maximo}. ` +
+      `Estas ${citas.length} Citas no caben apiladas en la Pieza: caben ` +
+        `${cuantosCaben(bloques, titulo)}. ` +
         'No se compone nada — el texto de una Cita va entero o no va (NFR-12).',
     );
   }
 
+  // El ancho del título ya lo miró `apilado`, que se niega a medir uno que no cabe. Aquí queda
+  // lo de las Citas, que sí se pregunta por separado del alto (ver `desbordanALoAncho`).
   const desbordadas = desbordanALoAncho(citas);
   if (desbordadas.length > 0) {
     throw new Error(
@@ -305,6 +453,23 @@ export function svgDePieza(citas: CitaEnPieza[]): string {
     `<rect width="${LADO}" height="${LADO}" fill="${PALETA.papel}"/>`,
     `<rect x="0" y="0" width="${LADO}" height="8" fill="${PALETA.siena}"/>`,
   ];
+
+  /*
+   * El título, en la serif y con el peso de `headline-md`: es el nombre de la Colección, no voz
+   * del sistema ni texto citado. Va **encabezando el apilado**, no pegado al borde superior del
+   * lienzo: el cursor arranca en el desplazamiento de centrado que se acaba de calcular, así
+   * que con dos Citas cortas el nombre baja con ellas hacia el medio en vez de quedarse solo
+   * arriba con un desierto debajo. Encabeza y no cierra porque el pie ya lo ocupa la marca.
+   */
+  const primeraDelTitulo = cursor + CUERPO_DEL_TITULO;
+  for (const [i, linea] of titulo.lineas.entries()) {
+    partes.push(
+      `<text x="${MARGEN}" y="${primeraDelTitulo + i * ALTURA_DE_LINEA_DEL_TITULO}" ` +
+        `font-family="${SERIF}" font-size="${CUERPO_DEL_TITULO}" font-weight="600" ` +
+        `fill="${PALETA.tinta}">${escapar(linea)}</text>`,
+    );
+  }
+  cursor += titulo.alto;
 
   for (const bloque of bloques) {
     const primeraLinea = cursor + bloque.cuerpo;

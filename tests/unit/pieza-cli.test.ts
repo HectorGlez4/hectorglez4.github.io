@@ -313,6 +313,10 @@ describe('Historia 13.2 — componer una Pieza de varias Citas', () => {
        */
       const ignorado = await ejecutar('git', ['check-ignore', relativa!], { cwd: RAIZ });
       expect(ignorado.stdout.trim()).toBe(relativa);
+
+      // Y aquí la afirmación **sí** es cierta, así que el parte la hace: la otra mitad de la
+      // pareja, para que quitar la línea de los dos casos no pase inadvertido.
+      expect(hecha.salida).toContain('No se versiona');
     } finally {
       if (absoluta !== undefined) await rm(absoluta, { force: true });
     }
@@ -645,5 +649,24 @@ describe('Historia 13.2 — el nombre derivado del fichero', () => {
   it('es determinista: la misma selección da siempre el mismo nombre', () => {
     const seleccion = [largo(1), largo(2), largo(3), largo(4)];
     expect(nombreDePieza(seleccion)).toBe(nombreDePieza([...seleccion]));
+  });
+});
+
+describe('Historia 13.2 — el parte no afirma lo que no sabe del destino', () => {
+  /*
+   * El parte decía siempre «no se versiona: piezas/ está en .gitignore». Con `--salida` el
+   * fichero cae donde diga quien llamó —incluido, perfectamente, dentro del repositorio— y esa
+   * frase pasa de informar a tranquilizar sin motivo, justo sobre lo único que AD-15 pide
+   * vigilar. Ninguna prueba la miraba: era una cadena fija en el mensaje de éxito.
+   */
+  it('con --salida no afirma que el fichero esté ignorado', async () => {
+    const corpus = await enDisco(corpusCon({ 1: textoBreve(1), 2: textoBreve(2) }));
+    const hecha = await correr(corpus, ['componer', '--red', 'instagram', slugDe(1), slugDe(2), '--salida', await destino()]);
+
+    expect(hecha.codigo, hecha.error).toBe(0);
+    expect(hecha.salida).not.toContain('No se versiona');
+    // Y sí dice de quién es la responsabilidad, que es la información que queda cierta.
+    expect(hecha.salida).toContain('--salida');
+    expect(hecha.salida).toContain('puede no cubrirlo');
   });
 });

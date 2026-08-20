@@ -2,8 +2,9 @@
 title: 'Story 13.3 — Una Colección anuncia su propia pieza'
 type: 'feature'
 created: '2026-08-20'
-status: 'ready-for-dev'
+status: 'done'
 baseline_revision: '3daba87'
+baseline_commit: '29e0fbdeb05867df5449891461c5680cf92cb5d4'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-13-context.md'
@@ -70,13 +71,13 @@ deferred: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/lib/pieza.ts` -- admitir un título opcional en `svgDePieza` y en el cálculo de cabida, con el tratamiento de `headline-md`. Rationale: si el título no entra en el apilado, la Pieza de Colección desborda por abajo exactamente igual que desbordaba la marca antes del parche de la 13.2.
-- [ ] `src/lib/coleccionEnPieza.ts` (nuevo, puro) o dentro de `pieza.ts` -- la selección: recibe una `ColeccionPublicada` y devuelve qué Citas entran y **qué queda fuera con su motivo**, en el orden declarado. Rationale: el criterio dice qué se anuncia; lo que no se anuncia y por qué es lo que hace la orden auditable.
-- [ ] `tools/lib/piezas.ts` -- parametrizar el destino de `textoDeLaPieza`, y añadir `componerPiezaDeColeccion(rutas, slug, red, salida?)`: lee, obtiene la Colección **por `coleccionesPublicadas`**, distingue inexistente de retirada de bajo umbral, y compone reutilizando lo de la 13.2.
-- [ ] `tools/pieza.ts` -- la suborden `coleccion`. `package.json` y `AGENTS.md` -- la orden nueva y sus rechazos, fuera del bloque gestionado.
-- [ ] `tests/unit/pieza.test.ts` -- el título en el SVG con su tratamiento, y que la cabida lo cuenta.
-- [ ] `tests/unit/pieza-coleccion-cli.test.ts` (nuevo) -- la matriz entera con corpus temporal: el enlace es `/coleccion/<slug>` y **no** el de ninguna Cita, bajo umbral, retirada, inexistente, miembro largo excluido y dicho, y que el corpus no cambia ni un byte.
-- [ ] Una prueba de tipos que fije la puerta: pasar una `ColeccionResuelta` sin publicar donde se espera `ColeccionPublicada` **no compila**.
+- [x] `src/lib/pieza.ts` -- admitir un título opcional en `svgDePieza` y en el cálculo de cabida, con el tratamiento de `headline-md`. Rationale: si el título no entra en el apilado, la Pieza de Colección desborda por abajo exactamente igual que desbordaba la marca antes del parche de la 13.2.
+- [x] `src/lib/coleccionEnPieza.ts` (nuevo, puro) o dentro de `pieza.ts` -- la selección: recibe una `ColeccionPublicada` y devuelve qué Citas entran y **qué queda fuera con su motivo**, en el orden declarado. Rationale: el criterio dice qué se anuncia; lo que no se anuncia y por qué es lo que hace la orden auditable.
+- [x] `tools/lib/piezas.ts` -- parametrizar el destino de `textoDeLaPieza`, y añadir `componerPiezaDeColeccion(rutas, slug, red, salida?)`: lee, obtiene la Colección **por `coleccionesPublicadas`**, distingue inexistente de retirada de bajo umbral, y compone reutilizando lo de la 13.2.
+- [x] `tools/pieza.ts` -- la suborden `coleccion`. `package.json` y `AGENTS.md` -- la orden nueva y sus rechazos, fuera del bloque gestionado.
+- [x] `tests/unit/pieza.test.ts` -- el título en el SVG con su tratamiento, y que la cabida lo cuenta.
+- [x] `tests/unit/pieza-coleccion-cli.test.ts` (nuevo) -- la matriz entera con corpus temporal: el enlace es `/coleccion/<slug>` y **no** el de ninguna Cita, bajo umbral, retirada, inexistente, miembro largo excluido y dicho, y que el corpus no cambia ni un byte.
+- [x] Una prueba de tipos que fije la puerta: pasar una `ColeccionResuelta` sin publicar donde se espera `ColeccionPublicada` **no compila**.
 
 **Acceptance Criteria:**
 - Given una Colección publicada, when compongo su Pieza, then el enlace de destino apunta a la Página de Colección y no a una Cita.
@@ -101,3 +102,32 @@ deferred: []
 - `npm run build` -- expected: 53 páginas, sin superficie nueva.
 - `grep -rn "MIN_CITAS_POR_COLECCION" src tools --include="*.ts"` -- expected: solo `umbrales.ts` y `publicado.ts`; ningún umbral replicado en `tools/`.
 - `git status --porcelain` -- expected: vacío tras componer una Pieza de Colección de verdad.
+
+### 2026-08-20 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 18: (high 3, medium 8, low 7)
+- defer: 0
+- reject: 1: (low 1 — unificar el código de salida de un slug con forma de ruta; rechazado con razones: `componer` ya devuelve 1 para un slug mal formado, y cambiarlo aquí daría dos códigos distintos al mismo argumento según la suborden)
+- addressed_findings:
+  - `[high]` `[patch]` **Nada observaba la separación entre el título y la primera Cita.** Comentar `cursor += titulo.alto` dejaba **86 de 86 pruebas en verde** con el nombre de la Colección impreso encima de la primera cita: la aserción «el título va arriba» solo comparaba `y(título) < y(cita)`, y como el cuerpo de la Cita (44px) supera al del título (30px), seguía siendo cierta bajo solapamiento total. Ahora se mide el hueco real; la mutación tumba dos pruebas.
+  - `[high]` `[patch]` **Un nombre que se reparte en varias líneas podía perder líneas.** `titulo.lineas.slice(0, 1)` pasaba las 57 pruebas de la historia porque todos los títulos de prueba cabían en una línea. Un nombre real de dos líneas se habría publicado con la segunda ausente y el hueco reservado detrás — la misma mutilación que el módulo rechaza para el texto de una Cita.
+  - `[high]` `[patch]` **Los miembros declarados que no resuelven desaparecían en silencio.** `resolverColeccion` ya devolvía `sinResolver` y no se leía: una Colección de 20 miembros con 5 en revisión anunciaba «con N de sus 15», sin contarlos ni enumerarlos. Contradecía la tesis de la historia justo en la única exclusión que el curador no provocó.
+  - `[medium]` `[patch]` Un título demasiado alto culpaba a las Citas: «entran 0 de sus 15» con cada Cita marcada «no cabe junto a las anteriores», sin nombrar al culpable — y ese motivo era falso incluso para la primera, que no tiene anteriores. `cabenEnPieza` además decía `cabe: true` para un título que desbordaba a lo ancho.
+  - `[medium]` `[patch]` El nombre por omisión perdía la Colección que anuncia (`pieza-coleccion--y-1-mas--<huella>`) y colisionaba con el de `componer` sobre dos Citas de slug `coleccion` y `<slug>`. Familia propia con guion simple, que ningún slug puede producir.
+  - `[medium]` `[patch]` El título se validaba con `trim()` y se renderizaba sin recortar: el mismo nombre con espacios sobrantes daba otro PNG.
+  - `[medium]` `[patch]` `escribirPieza` escribía el PNG antes de componer un mensaje que podía fallar, y desestructuraba un `encabezado` que podía venir vacío («undefined en …»).
+  - `[medium]` `[patch]` `criterio: declarada.criterio ?? ''` inventaba un criterio vacío en silencio; ahora el fichero lo juzga el esquema del propio build.
+  - `[medium]` `[patch]` La guarda de `--salida` de la suborden nueva no se probaba: las dos pruebas que la ejercitaban invocaban `componer`, que es otra función.
+  - `[low]` `[patch]` El parte afirmaba «no se versiona» también cuando `--salida` apuntaba fuera de `piezas/`. Se resolvió preguntando por el hecho —¿hubo `--salida`?— y no por la forma de la ruta, que en win32 habría hecho desaparecer la línea justo del caso en que es verdad.
+  - `[low]` `[patch]` La documentación de `rutaDeColeccion` afirmaba que el build cazaría una divergencia de ruta, y es falso: Astro no valida los `href` internos. Más el comentario del título, la ruta completa de `DESIGN.md`, la lista de rechazos y los párrafos duplicados en cuatro sitios.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `npm run pieza -- coleccion <slug> --red <red>` compone la Pieza de una Colección: el lienzo lleva su nombre como título y el texto lleva **un solo** enlace a `/coleccion/<slug>?de=<red>`. El umbral no se comprueba: la firma exige una `ColeccionPublicada`, y la única forma de obtener una en todo el proyecto es `coleccionesPublicadas`, donde vive `MIN_CITAS_POR_COLECCION`. Hay una prueba con `@ts-expect-error` que fija esa puerta.
+
+**Verificación.** `npx astro check` 0 errores / 166 ficheros. `npx vitest run` **1414/1414** en 52 ficheros, frente a 1356/50 al abrir la historia. `npm run build` con las 53 páginas de siempre. `npx playwright test` **400 pasan**. Y una composición real contra una copia de `corpus/` con una Colección de 16 miembros: título arriba, tres Citas con su atribución, las trece restantes enumeradas con su motivo, y el enlace correcto.
+
+**Recomendación de nueva revisión: false.**

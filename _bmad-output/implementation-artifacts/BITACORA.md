@@ -1162,3 +1162,47 @@ la imagen. Con dos redacciones, una diría «Cartas a Lucilio 65» y la otra «C
 siempre: la Pieza no añade superficie. Y una composición real de tres Citas —una de ellas
 sin procedencia— mirada a ojo: texto íntegro, atribución por Cita, sin coma suelta donde no
 hay obra, y el PNG fuera de git.
+
+## 13.3 — Una Colección anuncia su propia pieza
+
+`npm run pieza -- coleccion <slug> --red <red>` compone la Pieza de una Colección: el mismo
+lienzo de la 13.2 con dos diferencias, que son el contenido entero de la historia. El lienzo
+lleva el **nombre de la Colección** como título, y el texto lleva un solo enlace a
+`/coleccion/<slug>?de=<red>` en vez de a la portada.
+
+**El umbral lo cierra el compilador, no un `if`.** `ColeccionPublicada` lleva una marca de
+símbolo único no exportado, así que ningún módulo puede fabricar una: la única conversión de
+todo el proyecto está pegada al `filter` que aplica `MIN_CITAS_POR_COLECCION`. Como la firma
+de la composición exige ese tipo, «una Colección por debajo del umbral no produce Pieza» deja
+de ser una regla que haya que recordar — y hay una prueba con `@ts-expect-error` que fija la
+puerta. Es la lección de la 12.1 aplicada: una nota que hay que leer no es una puerta.
+
+**Aquí sí se excluye, y por eso hay que decirlo.** En la 13.2 una Cita larga se rechaza,
+porque Héctor la nombró. Aquí las Citas vienen de la pertenencia de la Colección, que puede
+tener veinte, así que excluir es lo correcto — pero la salida enumera las tres listas: las
+que entran, las que se quedan fuera con su motivo, y las declaradas que no resuelven.
+
+**La revisión volvió a encontrar lo que la suite no ve.** Comentar una sola línea
+—`cursor += titulo.alto`— dejaba **86 de 86 pruebas en verde** con el nombre de la Colección
+impreso encima de la primera cita. La aserción que debía cazarlo solo comparaba
+`y(título) < y(cita)`, y como el cuerpo de la Cita (44px) supera al del título (30px), seguía
+siendo cierta bajo solapamiento total. La prueba de «la Pieza más llena» también sobrevivía,
+porque el apilado terminaba antes y el hueco con la marca solo crecía.
+
+**El mismo patrón, dos veces más.** Un nombre de Colección que se reparte en dos líneas podía
+perder la segunda sin que fallara nada, porque todos los títulos de prueba cabían en una: la
+misma mutilación que el módulo se niega a hacerle al texto de una Cita, en el único texto que
+no tenía la prueba de «no falta ni una palabra». Y los miembros declarados que no resuelven
+—erratas, o Citas movidas a `corpus/_revision/`— desaparecían del anuncio sin contarse ni
+enumerarse, que es justo la exclusión que el curador no provocó.
+
+**Un dueño más.** `/coleccion/<slug>` estaba escrito a mano en cuatro sitios y la Pieza iba a
+ser el quinto — y el suyo es el peligroso, porque un destino equivocado no falla en ninguna
+parte: da 404 a un visitante semanas después. Ahora los cinco derivan de `rutaDeColeccion`
+en `superficies.ts`. De paso quedó corregida una afirmación falsa de su documentación: Astro
+**no** valida los `href` internos, así que renombrar la ruta daría 404 con el build en verde.
+
+**Verificado.** `npx astro check` 0 errores / 166 ficheros. `npx vitest run` **1414/1414** en
+52 ficheros, frente a 1356/50 al abrir la historia. `npm run build` con 53 páginas.
+`npx playwright test` **400 pasan**. Y una composición real contra una copia de `corpus/` con
+una Colección de 16 miembros, mirada a ojo.

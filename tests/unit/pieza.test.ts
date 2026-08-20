@@ -7,9 +7,11 @@ import {
   MINIMO_DE_CITAS,
   cabenEnPieza,
   desbordanALoAncho,
+  palabrasDelTituloQueDesbordan,
   svgDePieza,
   type CitaEnPieza,
 } from '../../src/lib/pieza.ts';
+import { SERIF } from '../../src/lib/lienzo.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { tramoDe } from '../../src/lib/tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
@@ -294,5 +296,193 @@ describe('Historia 13.2 — la misma selección compone lo mismo', () => {
     expect(svgDePieza([BREVE, MEDIANA, SIN_PROCEDENCIA])).toBe(
       svgDePieza([BREVE, MEDIANA, SIN_PROCEDENCIA]),
     );
+  });
+});
+
+describe('Historia 13.3 — la Pieza que anuncia una Colección lleva su nombre', () => {
+  const TITULO = 'Frases cortas para reflexionar';
+  /** Un nombre que **de verdad** se reparte en más de una línea a 30px sobre 888px útiles. */
+  const TITULO_LARGO =
+    'Frases cortas para reflexionar sobre el paso del tiempo y la brevedad de la vida';
+
+  /**
+   * Las `y` de las líneas del título, identificadas por su tratamiento y no por su posición.
+   *
+   * `font-size="30" font-weight="600"` es solo del título: el cuerpo de una Cita nunca lleva
+   * peso, y así la prueba no confunde el título con una Cita del tramo `md`, que también
+   * compone a 30px.
+   */
+  function basesDelTitulo(svg: string): number[] {
+    return [
+      ...svg.matchAll(/<text[^>]*y="(\d+)"[^>]*font-size="30" font-weight="600"/g),
+    ].map((m) => Number(m[1]));
+  }
+
+  /** El `<text>` que compone un contenido dado, con sus atributos. */
+  function elementoDe(svg: string, contenido: string): string {
+    const encontrado = new RegExp(`<text([^>]*)>${contenido}</text>`).exec(svg);
+    expect(encontrado, `no hay ningún <text> con «${contenido}»`).not.toBeNull();
+    return encontrado![1];
+  }
+
+  it('el título se compone con el tratamiento que DESIGN.md le da al Nombre de Colección', () => {
+    /*
+     * `headline-md` de
+     * `_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md`:
+     * Source Serif, peso 600, 30px. La presentación no se inventa en la
+     * plantilla —el nombre de una Colección ya tiene tratamiento asignado— y va en la serif
+     * y no en la sans porque es un nombre, no voz del sistema atribuyendo.
+     */
+    const svg = svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: TITULO });
+    const atributos = elementoDe(svg, TITULO);
+    expect(atributos).toContain(`font-family="${SERIF}"`);
+    expect(atributos).toContain('font-size="30"');
+    expect(atributos).toContain('font-weight="600"');
+  });
+
+  it('el título encabeza el apilado y **no se pisa** con la primera Cita', () => {
+    /*
+     * Que `y(titulo) < y(cita)` no prueba nada: el cuerpo de una Cita corta (44px) es mayor
+     * que el del título (30px), así que la desigualdad se sigue cumpliendo con el nombre
+     * impreso **encima** de la primera línea de la Cita. Comentar `cursor += titulo.alto` deja
+     * el título en y=331 y la Cita en y=345, y con la aserción antigua las 86 pruebas de la
+     * Pieza seguían en verde. Lo que hay que afirmar es la separación real entre la última
+     * línea del título y la primera de la Cita, medida como la mide el ojo: entre la base de
+     * una y la base de la otra tiene que caber al menos el cuerpo de la Cita.
+     */
+    const svg = svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: TITULO });
+    const y = (contenido: string) => Number(/y="(\d+)"/.exec(elementoDe(svg, contenido))![1]);
+
+    const separacion = y(`«${BREVE.texto}»`) - y(TITULO);
+    expect(separacion).toBeGreaterThan(tramoDe(BREVE.texto).pixelesEnPieza);
+    // Y con la separación que el lienzo reserva: no es que «no se toquen por poco».
+    expect(separacion).toBeGreaterThanOrEqual(48);
+  });
+
+  it('un título de dos líneas tampoco se pisa con la primera Cita', () => {
+    // La misma medida sobre la **última** línea del título, que es la que se acerca.
+    const svg = svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: TITULO_LARGO });
+    const delTitulo = basesDelTitulo(svg);
+    expect(delTitulo.length, 'este título debería repartirse en varias líneas').toBeGreaterThan(1);
+
+    const y = (contenido: string) => Number(/y="(\d+)"/.exec(elementoDe(svg, contenido))![1]);
+    expect(y(`«${BREVE.texto}»`) - Math.max(...delTitulo)).toBeGreaterThanOrEqual(48);
+  });
+
+  it('un título que se reparte se compone **entero**: no falta ni una palabra', () => {
+    /*
+     * La mutilación que el módulo se niega a hacerle al texto de una Cita, hecha con el nombre
+     * de la Colección. Un revisor cambió el bucle a `titulo.lineas.slice(0, 1)` y las 57
+     * pruebas de la historia pasaron, porque todos los títulos de prueba cabían en una línea:
+     * el nombre se habría publicado a medias, con el hueco de la línea perdida reservado
+     * detrás. `palabrasDelTituloQueDesbordan` no lo ve — ninguna palabra se sale por el lado.
+     */
+    const svg = svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: TITULO_LARGO });
+    const escrito = textoDelSvg(svg);
+    for (const palabra of TITULO_LARGO.split(' ')) {
+      expect(escrito, `falta «${palabra}» del nombre de la Colección`).toContain(palabra);
+    }
+    // Y las líneas del título no se solapan entre sí.
+    const delTitulo = basesDelTitulo(svg);
+    expect(delTitulo.length).toBeGreaterThan(1);
+    for (let i = 1; i < delTitulo.length; i += 1) {
+      expect(delTitulo[i] - delTitulo[i - 1]).toBeGreaterThanOrEqual(30);
+    }
+  });
+
+  it('los espacios sobrantes del YAML no cambian el PNG de la misma Colección', () => {
+    // «byte a byte» es una promesa del módulo, y un nombre entrecomillado con un espacio de
+    // más la rompía: el sobrante entra en la primera línea y desplaza el reparto entero.
+    expect(svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: `  ${TITULO}  ` })).toBe(
+      svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: TITULO }),
+    );
+  });
+
+  it('sin título el lienzo no cambia: la Pieza de la 13.2 se compone igual', () => {
+    expect(svgDePieza([BREVE, SIN_PROCEDENCIA], {})).toBe(svgDePieza([BREVE, SIN_PROCEDENCIA]));
+  });
+
+  it('el título se escapa como el resto: no puede romper el marcado', () => {
+    const svg = svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: 'Ciencia & <arte>' });
+    expect(svg).toContain('Ciencia &amp; &lt;arte&gt;');
+    expect(svg).not.toMatch(/<arte>/);
+  });
+
+  it('un título en blanco no es un título: se lanza en vez de reservarle sitio', () => {
+    expect(() => svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: '   ' })).toThrow(/en blanco/);
+    expect(() => cabenEnPieza([BREVE, SIN_PROCEDENCIA], { titulo: '' })).toThrow(/en blanco/);
+  });
+
+  it('un título más ancho que el lienzo se denuncia, y la cabida tampoco dice que sí', () => {
+    const imposible = `Colección ${'a'.repeat(120)}`;
+    expect(palabrasDelTituloQueDesbordan(imposible)).toHaveLength(1);
+    expect(palabrasDelTituloQueDesbordan(TITULO_LARGO)).toEqual([]);
+    expect(() => svgDePieza([BREVE, SIN_PROCEDENCIA], { titulo: imposible })).toThrow(
+      /no cabe a lo ancho/,
+    );
+    /*
+     * Y la mitad que faltaba: mientras la comprobación vivió solo en `svgDePieza`, preguntar
+     * la cabida de esta selección respondía `cabe: true`, así que quien se fiaba de la
+     * respuesta recibía una excepción al componer en vez de un rechazo redactado.
+     */
+    expect(() => cabenEnPieza([BREVE, SIN_PROCEDENCIA], { titulo: imposible })).toThrow(
+      /no cabe a lo ancho/,
+    );
+  });
+});
+
+describe('Historia 13.3 — el título entra en la cuenta del apilado', () => {
+  const media = (i: number): CitaEnPieza => ({
+    texto: `${i}. ${frase(198)}`,
+    autor: `Autor número ${i}`,
+    procedencia: 'Una obra cualquiera, 1912',
+  });
+
+  it('lo que cabía sin título puede no caber con él', () => {
+    /*
+     * El defecto que esto vigila no es teórico: es el mismo que la banda de la marca arregló
+     * en la 13.2. Si el alto del título y su separación no se restaran del alto útil, la
+     * cabida diría que caben las mismas de siempre y la última Cita saldría empujada contra
+     * la marca del pie — y solo en la Pieza más llena, que es la que nadie compone probando.
+     */
+    const muchas = [1, 2, 3, 4, 5, 6].map(media);
+    const sinTitulo = cabenEnPieza(muchas);
+    expect(sinTitulo.cabe).toBe(false);
+    if (sinTitulo.cabe) return;
+
+    const justas = muchas.slice(0, sinTitulo.maximo);
+    expect(cabenEnPieza(justas)).toEqual({ cabe: true });
+    expect(cabenEnPieza(justas, { titulo: frase(300) }).cabe).toBe(false);
+  });
+
+  it('lo que la cabida dice que cabe con título, cabe con título', () => {
+    const muchas = [1, 2, 3, 4, 5, 6].map(media);
+    const cabida = cabenEnPieza(muchas, { titulo: frase(300) });
+    expect(cabida.cabe).toBe(false);
+    if (cabida.cabe) return;
+    expect(cabida.maximo).toBeGreaterThanOrEqual(MINIMO_DE_CITAS);
+    expect(cabenEnPieza(muchas.slice(0, cabida.maximo), { titulo: frase(300) })).toEqual({
+      cabe: true,
+    });
+  });
+
+  it('con título, la Pieza más llena sigue sin pisar la marca del pie', () => {
+    const titulo = 'Frases cortas para reflexionar';
+    const muchas = [1, 2, 3, 4, 5, 6].map(media);
+    const cabida = cabenEnPieza(muchas, { titulo });
+    expect(cabida.cabe).toBe(false);
+    if (cabida.cabe) return;
+
+    const svg = svgDePieza(muchas.slice(0, cabida.maximo), { titulo });
+    const textos = [...svg.matchAll(/<text[^>]*y="(\d+)"[^>]*>([^<]*)<\/text>/g)].map((m) => ({
+      y: Number(m[1]),
+      contenido: m[2],
+    }));
+    const marca = textos.find((t) => t.contenido === MARCA.toLocaleUpperCase('es'))!;
+    expect(marca).toBeDefined();
+    const ultima = Math.max(...textos.filter((t) => t !== marca).map((t) => t.y));
+    expect(marca.y - ultima).toBeGreaterThanOrEqual(24);
+    // Y por arriba tampoco se sale: el título es lo primero y está dentro del margen.
+    expect(Math.min(...textos.map((t) => t.y))).toBeGreaterThanOrEqual(MARGEN);
   });
 });
