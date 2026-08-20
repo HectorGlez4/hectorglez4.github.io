@@ -2,9 +2,11 @@
 title: 'Story 13.2 — Una pieza que reúne varias Citas'
 type: 'feature'
 created: '2026-08-20'
-status: 'ready-for-dev'
-baseline_revision: 'cf33fa8'
+status: 'done'
+baseline_revision: '8beece7c1e0432de4d60938bca593f3bd7002395'
+baseline_commit: '8beece7c1e0432de4d60938bca593f3bd7002395'
 review_loop_iteration: 0
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-13-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-13-1-componer-varias-jornadas.md'
@@ -74,14 +76,14 @@ deferred: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/lib/lienzo.ts` (nuevo, puro) -- mover aquí `escapar` y `repartirEnLineas`, y que `src/lib/tarjeta.ts` las importe. Rationale: dos módulos que rasterizan no pueden tener dos algoritmos de salto de línea; el segundo divergiría del primero sin que nadie lo viera.
-- [ ] `src/lib/tramos.ts` -- añadir `pixelesEnPieza` a `Tramo` y a `TABLA` (44 / 36 / 30 / 26). Rationale: AD-8. El lienzo de la pieza apila varias Citas, así que su tamaño no es el de la Imagen; que la plantilla lo calcule aparte es justo lo que la regla impide.
-- [ ] `src/lib/pieza.ts` (nuevo, puro, sin disco) -- `LADO=1080`, `MARGEN=96`; `svgDePieza(citas: CitaEnPieza[]): string` y `cabenEnPieza(citas): {cabe:true} | {cabe:false;maximo:number}`. Apila cada Cita con su Autor y su filete; el alto se calcula antes de componer.
-- [ ] `tools/lib/piezas.ts` (nuevo) -- `componerPieza(rutas, slugs, red, salida?): Promise<Resultado>`: lee el corpus, resuelve los slugs contra las Citas publicadas, aplica los rechazos de la matriz, rasteriza con `sharp` y escribe. Nada se escribe hasta que todo valida.
-- [ ] `tools/pieza.ts` (nuevo) -- la orden `componer`, con `--red`, `--corpus` y `--salida`, guardián de banderas y `terminar`.
-- [ ] `.gitignore` -- ignorar `piezas/`. `package.json` -- guion `pieza`. `AGENTS.md` -- cómo se compone una pieza, fuera del bloque gestionado.
-- [ ] `tests/unit/pieza.test.ts` (nuevo) -- sobre el SVG: 1080×1080; el texto de cada Cita **entero** (recomponer los `<text>` y exigir cada palabra); ningún `…` ni `...`; un Autor por Cita; `font-size` = `pixelesEnPieza` del tramo; escapado de `& < > "`; y la prueba estructural de que el módulo no lleva tabla de tamaños propia (`not.toMatch(/hasta:\s*\d+/)` y `contiene "from './tramos.ts'"`), como en `tests/unit/tarjeta.test.ts`.
-- [ ] `tests/unit/pieza-cli.test.ts` (nuevo) -- la matriz entera por la orden, con corpus temporal: cabeceras PNG 1080×1080, el enlace único marcado en la salida, y `instantanea` probando que el corpus no cambia ni un byte.
+- [x] `src/lib/lienzo.ts` (nuevo, puro) -- mover aquí `escapar` y `repartirEnLineas`, y que `src/lib/tarjeta.ts` las importe. Rationale: dos módulos que rasterizan no pueden tener dos algoritmos de salto de línea; el segundo divergiría del primero sin que nadie lo viera.
+- [x] `src/lib/tramos.ts` -- añadir `pixelesEnPieza` a `Tramo` y a `TABLA` (44 / 36 / 30 / 26). Rationale: AD-8. El lienzo de la pieza apila varias Citas, así que su tamaño no es el de la Imagen; que la plantilla lo calcule aparte es justo lo que la regla impide.
+- [x] `src/lib/pieza.ts` (nuevo, puro, sin disco) -- `LADO=1080`, `MARGEN=96`; `svgDePieza(citas: CitaEnPieza[]): string` y `cabenEnPieza(citas): {cabe:true} | {cabe:false;maximo:number}`. Apila cada Cita con su Autor y su filete; el alto se calcula antes de componer.
+- [x] `tools/lib/piezas.ts` (nuevo) -- `componerPieza(rutas, slugs, red, salida?): Promise<Resultado>`: lee el corpus, resuelve los slugs contra las Citas publicadas, aplica los rechazos de la matriz, rasteriza con `sharp` y escribe. Nada se escribe hasta que todo valida.
+- [x] `tools/pieza.ts` (nuevo) -- la orden `componer`, con `--red`, `--corpus` y `--salida`, guardián de banderas y `terminar`.
+- [x] `.gitignore` -- ignorar `piezas/`. `package.json` -- guion `pieza`. `AGENTS.md` -- cómo se compone una pieza, fuera del bloque gestionado.
+- [x] `tests/unit/pieza.test.ts` (nuevo) -- sobre el SVG: 1080×1080; el texto de cada Cita **entero** (recomponer los `<text>` y exigir cada palabra); ningún `…` ni `...`; un Autor por Cita; `font-size` = `pixelesEnPieza` del tramo; escapado de `& < > "`; y la prueba estructural de que el módulo no lleva tabla de tamaños propia (`not.toMatch(/hasta:\s*\d+/)` y `contiene "from './tramos.ts'"`), como en `tests/unit/tarjeta.test.ts`.
+- [x] `tests/unit/pieza-cli.test.ts` (nuevo) -- la matriz entera por la orden, con corpus temporal: cabeceras PNG 1080×1080, el enlace único marcado en la salida, y `instantanea` probando que el corpus no cambia ni un byte.
 
 **Acceptance Criteria:**
 - Given una pieza compuesta, when la reviso, then cada Cita conserva su atribución visible y ninguna aparece sin Autor.
@@ -112,3 +114,32 @@ deferred: []
 - `npm run build` -- expected: construye igual; la pieza no añade superficie.
 - `git status --porcelain` -- expected: vacío tras componer una pieza de verdad; el PNG queda ignorado.
 - `grep -rn "1080\|pixelesEnPieza" src/ tools/ --include="*.ts"` -- expected: el lienzo declarado en un solo sitio y ningún tamaño de Cita escrito a mano.
+
+### 2026-08-20 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 21: (high 3, medium 12, low 6)
+- defer: 0
+- reject: 1: (low 1)
+- addressed_findings:
+  - `[high]` `[patch]` `cabenEnPieza` solo medía el **alto**. Como `repartirEnLineas` nunca parte palabras, una palabra larga salía del lienzo y el PNG la publicaba cortada —la mutilación que NFR-12 prohíbe, colándose por la puerta que la historia existe para cerrar—. Y Autor y procedencia ni siquiera pasaban por el reparto: iban en un solo `<text>`. Ahora se comprueban las tres cosas a lo ancho y se rechaza nombrando la Cita.
+  - `[high]` `[patch]` La imagen se protegía con `cita.procedencia ?? {}` y a `textoParaCopiar` se le pasaba la misma Cita cruda, que desestructura sin guarda. Como `leerCitas` devuelve el frontmatter **sin validar**, una Cita sin la clave moría con un `TypeError` en una orden que promete rechazos redactados.
+  - `[high]` `[patch]` La atribución visible —el criterio central de la épica— **no estaba verificada**: del PNG solo se miraban firma, ancho, alto y peso. Un revisor sustituyó el nombre del Autor por su slug y quitó la procedencia, y 32/32 pruebas siguieron en verde: la Pieza habría salido diciendo `SENECA` en vez de `SÉNECA`.
+  - `[medium]` `[patch]` La paleta y las familias tipográficas se habían copiado a un cuarto sitio, justo después de crear `lienzo.ts` contra esa misma divergencia. Ahora viven solo en `lienzo.ts`.
+  - `[medium]` `[patch]` La procedencia se componía dos veces con dos expresiones: `procedenciaCompuesta` en `atribucion.ts` pasa a ser su dueño único.
+  - `[medium]` `[patch]` El mínimo de dos Citas solo lo aplicaba la orden; el módulo puro compone tan ricamente una «Pieza» de una sola, y la 13.3 es el consumidor futuro anunciado.
+  - `[medium]` `[patch]` `--salida` no validaba extensión, directorio ni sobrescritura: `--salida src/lib/pieza.ts` machacaba el fuente sin una palabra.
+  - `[medium]` `[patch]` `nombreDePieza` medía en caracteres y no en bytes, su repuesto no se volvía a acotar, y no tenía ninguna prueba — cuando con el corpus **real** la rama de la huella es el caso habitual, no el raro.
+  - `[medium]` `[patch]` Los cuatro literales de `pixelesEnPieza` no estaban fijados: la prueba que parecía cubrirlos comparaba la tabla consigo misma, y una deriva pequeña pasaba entera.
+  - `[medium]` `[patch]` Sin prueba: el rechazo por Autor ausente del corpus, y sin guarda: el Autor cuyo `.yml` existe con `nombre` vacío. Un slug con `/` o `..` habría sacado el PNG de `piezas/`, donde deja de estar ignorado.
+  - `[low]` `[patch]` `bloqueDe` se recalculaba tres veces; `AGENTS.md` afirmaba que el lienzo se declara solo en `pieza.ts` —`imagen.js` ya lo declaraba— y justificaba el plano por «composición por lote» cuando la orden compone una; el nombre por omisión salía con doble guion; y la prueba de la marca la deducía por posición en vez de por contenido.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `npm run pieza -- componer --red <red> <slug> <slug> [...]` compone una Pieza de Canal con varias Citas en un PNG cuadrado de 1080, cada una con su atribución visible, y escribe por salida estándar el texto para publicar con **un** enlace marcado por red. Vive en `tools/` por AD-15 y su salida no se versiona.
+
+**Verificación.** `npx astro check` 0 errores / 163 ficheros. `npx vitest run` **1356/1356** en 50 ficheros, frente a 1277/47 de la línea base. `npm run build` construye con las 53 páginas de siempre: la Pieza no añade superficie. Composición real contra `corpus/` con tres Citas —incluida una sin procedencia— revisada a ojo: texto íntegro, atribución por Cita, procedencia ausente sin coma suelta, y el PNG fuera de git.
+
+**Recomendación de nueva revisión: false.** Los tres hallazgos altos se cerraron con prueba que los reproduce.

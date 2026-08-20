@@ -30,6 +30,34 @@ describe('Historia 2.1 / UX-DR19 — tramos por longitud', () => {
     expect(tramoDe(deLargo(300)).pixelesEnImagen).toBe(34);
   });
 
+  it('los tamaños de la Pieza son los de la tabla', () => {
+    /*
+     * Fijados aquí como literales, no comparados contra la propia tabla. La prueba de
+     * `pieza.test.ts` que casa el `font-size` con `tramoDe(...).pixelesEnPieza` compara la
+     * tabla consigo misma y pasaría con cualquier columna; esto es lo que hace que cambiar
+     * los cuatro números sea una decisión visible en el diff — que es lo que AD-8 pide.
+     */
+    expect(tramoDe(deLargo(80)).pixelesEnPieza).toBe(44);
+    expect(tramoDe(deLargo(160)).pixelesEnPieza).toBe(36);
+    expect(tramoDe(deLargo(240)).pixelesEnPieza).toBe(30);
+    expect(tramoDe(deLargo(300)).pixelesEnPieza).toBe(26);
+  });
+
+  it('ningún tramo que admite imagen se queda con un tamaño de cero', () => {
+    /*
+     * TypeScript pilla la columna **ausente**; el cero lo deja pasar, y un cero compone la
+     * Cita invisible en el lienzo que lo consuma. Es el descuido exacto que deja añadir una
+     * columna nueva a la tabla sin rellenarla en las cuatro filas.
+     */
+    for (const largo of [1, 80, 160, 240, 300]) {
+      const tramo = tramoDe(deLargo(largo));
+      expect(tramo.admiteImagen).toBe(true);
+      expect(tramo.pixelesEnImagen).toBeGreaterThan(0);
+      expect(tramo.pixelesEnTarjeta).toBeGreaterThan(0);
+      expect(tramo.pixelesEnPieza).toBeGreaterThan(0);
+    }
+  });
+
   it('por encima de 300 caracteres no se ofrece imagen', () => {
     expect(admiteImagen(deLargo(MAX_CARACTERES_IMAGEN))).toBe(true);
     expect(admiteImagen(deLargo(MAX_CARACTERES_IMAGEN + 1))).toBe(false);

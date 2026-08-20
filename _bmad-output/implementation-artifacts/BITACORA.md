@@ -1115,3 +1115,50 @@ en el mismo paquete que la verificación, no escribió nada. Es la comprobación
 sin cerrarse** y con ella la 7.3 y la 14.2. Y el estado de lectura del sitemap en Search
 Console no se puede comprobar desde fuera —hace falta la cuenta de Héctor—, así que la 7.2
 se queda en `review` hasta que él mire la columna *Última lectura*.
+
+## 13.2 — Una pieza que reúne varias Citas
+
+`npm run pieza -- componer --red instagram <slug> <slug> [...]` compone una Pieza de Canal:
+un PNG cuadrado de 1080 con varias Citas apiladas, cada una con su Autor visible, y por
+salida estándar el texto para publicar con **un solo** enlace marcado por red. Vive en
+`tools/` por AD-15 —composición que no pide ningún visitante a demanda— y **su salida no se
+versiona**: lo versionado es la decisión de qué Citas van juntas, nunca el artefacto, que
+puede quedarse viejo respecto al Corpus del que salió sin que nadie lo vea.
+
+**Tres decisiones que la historia no traía dadas.** Ni el PRD ni la espina fijan formato de
+Pieza. Se toma el lienzo que ya existía —cuadrado de 1080 con margen 96, el de la Imagen de
+Cita— en vez de inventar un vertical: es lo conservador y lo reversible, y la 13.3 lo hereda
+sin reabrir el debate. El destino es **la portada**, porque una Pieza de tres Citas no puede
+enlazar a una de ellas sin favorecerla y el enlace tiene que ser uno; la 13.3 lo sustituirá
+por la Página de Colección, y esa es justamente la diferencia entre las dos. Y una Cita
+demasiado larga **se rechaza nombrando el slug y la regla** en vez de descartarse en
+silencio: componer la Pieza sin ella y no decir nada convierte un error de selección en un
+artefacto publicado al que le falta una Cita, y eso no se ve hasta después de publicarlo.
+
+**Lo que enseñó la revisión: se medía el alto y nunca el ancho.** `repartirEnLineas` no
+parte palabras nunca —por diseño, viene de la Tarjeta—, así que una palabra más larga que la
+línea se emitía sola y salía del lienzo, y el PNG la publicaba cortada. Peor: el nombre del
+Autor y la procedencia ni siquiera pasaban por el reparto, iban en un solo `<text>`, y una
+obra como «Historia verdadera de la conquista de la Nueva España, 1632» se salía sin aviso.
+La historia entera existe para impedir la mutilación del texto y se estaba colando por la
+única dimensión que nadie miraba.
+
+**El fallo más caro era de prueba, no de código.** La atribución visible es el criterio de
+aceptación central, y del PNG solo se comprobaban firma, ancho, alto y peso. Un revisor
+sustituyó el nombre del Autor por su slug y borró la procedencia: **32 de 32 pruebas
+siguieron en verde**. La Pieza habría salido diciendo `SENECA` en vez de `SÉNECA`, sin obra
+ni año, y la verificación no se habría enterado — porque el texto para publicar, que sí se
+comprobaba, viene de otra función.
+
+**Un dueño más, y uno que faltaba.** `escapar` y `repartirEnLineas` bajan a `src/lib/lienzo.ts`
+con la paleta y las familias tipográficas, que estaban a punto de tener una cuarta copia; y
+la procedencia compuesta —«obra, año»— pasa a salir de `procedenciaCompuesta` en
+`atribucion.ts`, porque desde esta historia la escriben dos sitios: el pie que se publica y
+la imagen. Con dos redacciones, una diría «Cartas a Lucilio 65» y la otra «Cartas a Lucilio,
+65», y nadie lo vería hasta tenerlas delante.
+
+**Verificado.** `npx astro check` 0 errores / 163 ficheros. `npx vitest run` **1356/1356** en
+50 ficheros, frente a 1277/47 al abrir la historia. `npm run build` con las 53 páginas de
+siempre: la Pieza no añade superficie. Y una composición real de tres Citas —una de ellas
+sin procedencia— mirada a ojo: texto íntegro, atribución por Cita, sin coma suelta donde no
+hay obra, y el PNG fuera de git.

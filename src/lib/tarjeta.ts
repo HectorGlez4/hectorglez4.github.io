@@ -16,6 +16,7 @@
  * Imagen. AD-5 — puro: devuelve una cadena SVG, no toca disco ni rasteriza.
  */
 
+import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
 import { MARCA } from './marca.ts';
 import { tramoDe } from './tramos.ts';
 
@@ -24,53 +25,19 @@ export const ANCHO = 1200;
 export const ALTO = 630;
 const MARGEN = 80;
 
-/** Los colores de la plantilla «papel» de DESIGN.md, que es la de la marca. */
-const PAPEL = '#faf7f0';
-const TINTA = '#1f1b16';
-const APAGADA = '#5a5147';
-const FILETE = '#ddd5c7';
+/*
+ * La paleta y las familias salen de `lienzo.ts` desde la Historia 13.2, junto con el
+ * escapado y el reparto en líneas: los comparte con la Pieza de Canal, que rasteriza por
+ * este mismo camino. Retocar el filete aquí y no allí solo se vería con las dos imágenes
+ * juntas.
+ */
+const { papel: PAPEL, tinta: TINTA, apagada: APAGADA, filete: FILETE } = PALETA;
 
 export interface DatosDeTarjeta {
   texto: string;
   autor: string;
   /** Obra y año, ya compuestos, cuando constan. */
   procedencia?: string;
-}
-
-/** `&`, `<` y `>` dentro de una Cita romperían el SVG. Se escapan, no se quitan. */
-function escapar(texto: string): string {
-  return texto
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/**
- * Reparte el texto en líneas que quepan en el ancho dado.
- *
- * El ancho de cada carácter se estima con un factor sobre el cuerpo, porque aquí no hay
- * lienzo que mida como en el navegador. Es una aproximación deliberadamente conservadora:
- * pasarse por corto deja una línea de más, y pasarse por largo saca el texto de la
- * tarjeta. Se prefiere la línea de más.
- */
-export function repartirEnLineas(texto: string, cuerpo: number, anchoUtil: number): string[] {
-  const anchoPorCaracter = cuerpo * 0.52;
-  const maximo = Math.max(1, Math.floor(anchoUtil / anchoPorCaracter));
-
-  const lineas: string[] = [];
-  let actual = '';
-
-  for (const palabra of texto.split(/\s+/)) {
-    const tentativa = actual === '' ? palabra : `${actual} ${palabra}`;
-    if ([...tentativa].length <= maximo || actual === '') actual = tentativa;
-    else {
-      lineas.push(actual);
-      actual = palabra;
-    }
-  }
-  if (actual !== '') lineas.push(actual);
-  return lineas;
 }
 
 /**
@@ -86,13 +53,13 @@ export function svgDeTarjeta(datos: DatosDeTarjeta): string {
   const anchoUtil = ANCHO - MARGEN * 2;
 
   const marca =
-    `<text x="${MARGEN}" y="${ALTO - MARGEN + 8}" font-family="Inter, system-ui, sans-serif" ` +
+    `<text x="${MARGEN}" y="${ALTO - MARGEN + 8}" font-family="${SANS}" ` +
     `font-size="24" font-weight="600" fill="${APAGADA}" letter-spacing="1.5">` +
     `${escapar(MARCA.toLocaleUpperCase('es'))}</text>`;
 
   const fondo =
     `<rect width="${ANCHO}" height="${ALTO}" fill="${PAPEL}"/>` +
-    `<rect x="0" y="0" width="${ANCHO}" height="8" fill="#8c4a2f"/>`;
+    `<rect x="0" y="0" width="${ANCHO}" height="8" fill="${PALETA.siena}"/>`;
 
   if (!tramo.admiteImagen) {
     /*
@@ -103,10 +70,10 @@ export function svgDeTarjeta(datos: DatosDeTarjeta): string {
     return [
       `<svg xmlns="http://www.w3.org/2000/svg" width="${ANCHO}" height="${ALTO}" viewBox="0 0 ${ANCHO} ${ALTO}">`,
       fondo,
-      `<text x="${MARGEN}" y="${ALTO / 2 - 10}" font-family="Georgia, 'Source Serif 4', serif" ` +
+      `<text x="${MARGEN}" y="${ALTO / 2 - 10}" font-family="${SERIF}" ` +
         `font-size="64" fill="${TINTA}">${escapar(datos.autor)}</text>`,
       datos.procedencia
-        ? `<text x="${MARGEN}" y="${ALTO / 2 + 40}" font-family="Inter, system-ui, sans-serif" ` +
+        ? `<text x="${MARGEN}" y="${ALTO / 2 + 40}" font-family="${SANS}" ` +
           `font-size="28" fill="${APAGADA}">${escapar(datos.procedencia)}</text>`
         : '',
       marca,
@@ -129,15 +96,15 @@ export function svgDeTarjeta(datos: DatosDeTarjeta): string {
     ...lineas.map(
       (linea, i) =>
         `<text x="${MARGEN}" y="${inicio + i * alturaLinea}" ` +
-        `font-family="Georgia, 'Source Serif 4', serif" font-size="${cuerpo}" fill="${TINTA}">` +
+        `font-family="${SERIF}" font-size="${cuerpo}" fill="${TINTA}">` +
         `${escapar(linea)}</text>`,
     ),
     `<rect x="${MARGEN}" y="${trasTexto}" width="96" height="2" fill="${FILETE}"/>`,
-    `<text x="${MARGEN}" y="${trasTexto + 40}" font-family="Inter, system-ui, sans-serif" ` +
+    `<text x="${MARGEN}" y="${trasTexto + 40}" font-family="${SANS}" ` +
       `font-size="26" font-weight="600" fill="${TINTA}" letter-spacing="1">` +
       `${escapar(datos.autor.toLocaleUpperCase('es'))}</text>`,
     datos.procedencia
-      ? `<text x="${MARGEN}" y="${trasTexto + 76}" font-family="Inter, system-ui, sans-serif" ` +
+      ? `<text x="${MARGEN}" y="${trasTexto + 76}" font-family="${SANS}" ` +
         `font-size="24" fill="${APAGADA}">${escapar(datos.procedencia)}</text>`
       : '',
     marca,

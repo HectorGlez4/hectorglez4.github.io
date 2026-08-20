@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-19-2026 22:10
+last_updated: 08-20-2026 05:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -118,7 +118,7 @@ development_status:
 
   epic-13: in-progress
   13-1-componer-varias-jornadas-de-una-sentada: done
-  13-2-una-pieza-que-reúne-varias-citas: backlog
+  13-2-una-pieza-que-reúne-varias-citas: done
   13-3-una-colección-anuncia-su-propia-pieza: backlog
   epic-13-retrospective: optional
 

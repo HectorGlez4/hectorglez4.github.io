@@ -160,3 +160,73 @@ hoy; el lote las enumera todas, y una como `manana:` tumbaba `npm run build` ent
 
 Fijar jornadas de verdad en el repositorio es de Héctor: `corpus/portada.json` se versiona
 con `fijaciones` vacío a propósito y ningún agente fija jornadas en él.
+
+## Componer una Pieza de Canal de varias Citas
+
+El Canal propio sabía producir un solo formato: una Cita suelta. Una Pieza reúne varias
+Citas del Corpus en una sola imagen, para cuando cuatro Citas del mismo Tema dicen juntas
+algo que ninguna dice sola:
+
+```
+npm run pieza -- componer --red instagram <slug> <slug> [<slug>...]
+npm run pieza -- componer --red x <slug> <slug> --salida /tmp/prueba.png
+```
+
+**Se compone en `tools/` y su salida no se versiona** (AD-15). El plano lo fija quién
+consume el artefacto: el build para lo que pide un tercero sin JavaScript (la Tarjeta
+Social), el cliente para lo que pide alguien con el navegador delante (la Imagen de Cita), y
+`tools/` para lo que **ningún visitante pide a demanda** — la Pieza la compone el editor
+cuando decide qué Citas van juntas. (Que se componga de una en una o en tanda no viene al
+caso: lo que sostiene AD-15 es quién la pide, no cuántas salen por invocación.) El PNG cae en
+`piezas/`, que está en `.gitignore`: lo versionado es la decisión —qué Citas van juntas y a
+qué cuenta—, nunca el artefacto. Repetir la misma orden sobrescribe la misma Pieza byte a
+byte.
+
+**Una red por composición, y un solo enlace.** La Pieza declara un único destino y lo marca
+con `enlaceConOrigen` (FR-22). Ese destino es **la portada**: una Pieza de tres Citas no
+puede enlazar a una de ellas sin favorecerla, y la portada es la única superficie que las
+contiene a todas sin elegir. Publicarla en dos cuentas son dos composiciones, una por marca.
+
+**Qué rechaza la orden, y por qué rechaza en vez de descartar.**
+
+- **una Cita que pasa de `MAX_CARACTERES_IMAGEN`** no entra, por la misma regla que le niega
+  Imagen de Cita (FR-10). Componer la Pieza sin ella y callarlo convertiría un error de
+  selección en un artefacto publicado al que le falta una Cita, y eso no se ve hasta después
+  de publicarlo. La orden nombra el slug y la regla.
+- **lo que no cabe no se encoge.** El alto se calcula antes de componer nada. Si el apilado
+  se pasa, la Pieza no se compone y la orden dice cuántas caben. No hay «ajustar un poco el
+  tamaño»: los cuerpos salen de `src/lib/tramos.ts` y bajarlos sería devolverle a la
+  plantilla la decisión que AD-8 le quitó. Ausencia antes que mutilación (NFR-12): jamás se
+  recorta, abrevia ni se ponen puntos suspensivos.
+- **una sola Cita** no es una Pieza: para eso está la Imagen de Cita, que compone el
+  visitante en su navegador (AD-7).
+- **una Cita cuyo Autor no está en el corpus, o cuya ficha no trae nombre.** Se compondría
+  con un hueco donde va la firma, y «ninguna Cita aparece sin Autor» es criterio de
+  aceptación de la épica entera.
+- **texto más ancho que el lienzo.** El reparto en líneas no parte palabras nunca, así que
+  una indivisible se sale por el lado y el PNG sale **bien** con la palabra cortada. Se mira
+  el texto, el Autor y la procedencia, porque las tres se componen.
+- **un slug repetido, uno inexistente, uno en `corpus/_revision/` o uno que no tiene forma de
+  slug** —este último porque de él sale el nombre del fichero, y uno con `/` o `..` sacaría el
+  PNG de `piezas/`, donde ya no está ignorado. Igual que `--salida`, que tiene que ser una
+  ruta `.png` y no un directorio. Nada se escribe hasta que la selección entera vale.
+
+**Los tamaños son una columna más de `src/lib/tramos.ts`** (`pixelesEnPieza`), no un número
+escrito en la plantilla. El lienzo de la Pieza apila varias Citas, así que el cuerpo que le
+toca a cada una no es el de la Imagen; calcularlo aparte es justo lo que la regla impide. El
+lienzo —1080 cuadrado, margen 96— es el de la Imagen de Cita, y se declara **aparte a
+propósito**: `public/islas/imagen.js` ya lo declara para sí porque vive fuera del empaquetado,
+con URL estable, para que el `import()` diferido de AD-6 funcione, y no puede importar de
+`src/`. Dentro del empaquetado el dueño es `src/lib/pieza.ts`, y de ahí lo hereda la pieza de
+Colección de la 13.3.
+
+El escapado del SVG, el reparto en líneas, la paleta y las familias los comparten la Tarjeta
+y la Pieza en `src/lib/lienzo.ts`. Dos módulos que rasterizan no pueden tener dos algoritmos
+de salto de línea ni dos paletas: empiezan idénticos y divergen a la primera corrección, y
+entonces una Cita cabe en uno y no en el otro —o el filete queda de dos colores— sin que nadie
+lo vea hasta poner las dos imágenes juntas. Las fuentes del rasterizado siguen siendo las del
+sistema, como en la Tarjeta.
+
+La atribución del texto para publicar sale de `src/lib/atribucion.ts`, la misma que se lleva
+el visitante al copiar. Cada Cita lleva además su Autor **visible en la imagen**, uno por
+Cita: una Pieza reúne Autores distintos y un pie común los atribuiría todos a uno.

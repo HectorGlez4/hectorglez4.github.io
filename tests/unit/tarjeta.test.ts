@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { ALTO, ANCHO, repartirEnLineas, svgDeTarjeta } from '../../src/lib/tarjeta.ts';
+import { ALTO, ANCHO, svgDeTarjeta } from '../../src/lib/tarjeta.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { tramoDe } from '../../src/lib/tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
@@ -94,6 +94,14 @@ describe('Historia 10.1 — la composición sale del módulo de tramos', () => {
     expect(fuente).toContain("from './tramos.ts'");
     expect(fuente).not.toMatch(/hasta:\s*\d+/);
   });
+
+  it('tampoco lleva paleta propia: los colores salen del lienzo compartido', () => {
+    // Misma razón que los tamaños. Retocar el filete aquí y no en la Pieza produce dos
+    // imágenes de la misma marca que solo se ven distintas puestas una al lado de la otra.
+    const fuente = readFileSync(resolve(raiz, 'src/lib/tarjeta.ts'), 'utf8');
+    expect(fuente).toContain("from './lienzo.ts'");
+    expect(fuente).not.toMatch(/#[0-9a-f]{6}/i);
+  });
 });
 
 describe('Historia 10.1 — el SVG no se rompe con el texto de una Cita', () => {
@@ -114,18 +122,12 @@ describe('Historia 10.1 — el SVG no se rompe con el texto de una Cita', () => 
   });
 });
 
-describe('Historia 10.1 — el reparto en líneas', () => {
-  it('no parte palabras', () => {
-    const lineas = repartirEnLineas(CORTA.texto, 46, 1040);
-    for (const linea of lineas) expect(linea).not.toMatch(/^\S*-$/);
-    expect(lineas.join(' ')).toBe(CORTA.texto);
-  });
-
-  it('una palabra más larga que la línea no se pierde ni bloquea el reparto', () => {
-    const lineas = repartirEnLineas('supercalifragilisticoespialidoso y poco más', 56, 200);
-    expect(lineas.join(' ')).toContain('supercalifragilisticoespialidoso');
-  });
-});
+/*
+ * El reparto en líneas y el escapado se probaban aquí mientras eran de la Tarjeta. Desde la
+ * Historia 13.2 son de `src/lib/lienzo.ts`, compartidos con la Pieza, y su contrato se prueba
+ * en `tests/unit/lienzo.test.ts`: probarlos por un solo consumidor dejaría que un cambio
+ * pensado para la Tarjeta rompiera la Pieza sin que nada aquí lo notara.
+ */
 
 describe('Historia 10.1 — sharp está declarada, no heredada', () => {
   it('la generación de la Tarjeta depende de sharp explícitamente', () => {

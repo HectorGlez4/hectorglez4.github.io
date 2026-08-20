@@ -13,6 +13,25 @@
 import type { Cita, Autor } from './publicado.ts';
 
 /**
+ * La procedencia compuesta —obra y año, en ese orden— o `undefined` si no consta ninguna.
+ *
+ * Tiene dueño único por lo mismo que el texto de copiar: desde la Historia 13.2 la consumen
+ * dos cosas —el texto que se publica y la Pieza de Canal, que la escribe **dentro de la
+ * imagen**—, y con dos redacciones la imagen diría «Cartas a Lucilio 65» mientras el pie dice
+ * «Cartas a Lucilio, 65». Nadie lo vería hasta tener las dos delante.
+ *
+ * `procedencia` se lee tolerando su ausencia. En el sitio siempre está —el esquema le pone
+ * un valor por omisión— pero `tools/lib/corpus.ts` devuelve el frontmatter **sin validar**, y
+ * una Cita escrita a mano sin la clave llegaría aquí a reventar por destructuración: un
+ * `TypeError` crudo en una orden que promete rechazos redactados. Lo que no consta no se
+ * escribe, que es la regla de siempre (FR-2).
+ */
+export function procedenciaCompuesta(cita: Cita): string | undefined {
+  const { obra, año } = cita.procedencia ?? {};
+  return [obra, año].filter((x) => x !== undefined).join(', ') || undefined;
+}
+
+/**
  * Cita y atribución juntas, en texto plano y sin marcado.
  *
  * El formato es el de una cita bibliográfica corta, que es lo que Lucía va a pegar en una
@@ -20,11 +39,9 @@ import type { Cita, Autor } from './publicado.ts';
  * consta no se escribe — nunca una obra inferida (FR-2).
  */
 export function textoParaCopiar(cita: Cita, autor: Autor): string {
-  const { obra, año } = cita.procedencia;
+  const fuente = procedenciaCompuesta(cita);
 
-  const fuente = [obra, año].filter((x) => x !== undefined).join(', ');
-
-  return fuente === ''
+  return fuente === undefined
     ? `«${cita.texto}» — ${autor.nombre}.`
     : `«${cita.texto}» — ${autor.nombre}, ${fuente}.`;
 }
