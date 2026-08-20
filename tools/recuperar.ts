@@ -14,7 +14,15 @@
  * cerrado de Fuentes **antes** de pedir nada, reutiliza el documento ya versionado si esa
  * misma dirección ya se recuperó, descarga con tiempo máximo y techo de tamaño, revalida
  * el destino tras cada redirección, deriva obra y año de lo que la Fuente declara y lo
- * versiona como texto plano en `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt`.
+ * versiona como texto plano en `corpus/fuentes/`, con el nombre que le da su obra y su
+ * página: `{id-de-fuente}--{slug-de-obra}--{slug-de-página}.txt`, colapsado a
+ * `{id-de-fuente}--{slug-de-obra}.txt` cuando la página es la obra.
+ *
+ * En Wikisource son **dos peticiones a la misma página y al mismo anfitrión**: la
+ * renderizada, que trae la obra, y la de origen (`?action=raw`), que trae el metadato que
+ * la página no renderiza —el año vive en `|año = 1905`, dentro del encabezado del
+ * wikitexto—. La segunda hereda todas las guardas de la primera, y si no llega, la
+ * recuperación sigue adelante sin año y lo dice.
  *
  * No acepta `--obra`, `--año` ni `--licencia`, y no es un descuido: el «So that» de la
  * historia es que nadie pueda teclear una Procedencia que la Fuente no dice.
@@ -30,6 +38,7 @@ import { fuenteDeUrl, type Fuente } from './lib/fuentes.ts';
 import {
   analizarDocumento,
   componerDocumento,
+  derivarDeLaDeclaracion,
   derivarDocumento,
   nombreDeDocumento,
 } from './lib/documento.ts';
@@ -50,6 +59,19 @@ const MAXIMO_DE_REDIRECCIONES = 5;
 const IDENTIFICACION = `SabiduriaDeBolsillo/0.1 (+https://${DOMINIO}; recuperacion de Fuentes)`;
 
 const TIPOS_ADMITIDOS = ['text/html', 'text/plain', 'application/xhtml+xml'];
+
+/**
+ * Los tipos del **encabezado de origen**, que no son los del documento de la obra.
+ *
+ * `?action=raw` devuelve `text/x-wiki`, que no es un tipo en el que se pueda versionar
+ * una obra —de ahí que no esté en `TIPOS_ADMITIDOS`— pero sí es el que trae el metadato
+ * que la página no renderiza. La lista es aparte porque las dos peticiones piden cosas
+ * distintas: una, el texto de la obra; la otra, la ficha que lo declara.
+ */
+const TIPOS_DE_ENCABEZADO = ['text/x-wiki', 'text/plain', 'text/html'];
+
+/** Las Fuentes cuyo metadato vive en el texto de origen y no en la página renderizada. */
+const ENCABEZADO_EN_EL_ORIGEN = new Set(['wikisource-es']);
 
 const argumentos = process.argv.slice(2);
 const [url, ...sobrantes] = posicionales(argumentos, ['--corpus']);
@@ -100,10 +122,16 @@ if (yaVersionado !== undefined) {
 const descarga = await descargar(url, fuente);
 if (!descarga.ok) terminar({ ok: false, motivos: descarga.motivos });
 
-const derivado = derivarDocumento(fuente.id, descarga.contenido);
+// ── El encabezado, de donde la Fuente declara su metadato ────────────────────
+
+const encabezado = ENCABEZADO_EN_EL_ORIGEN.has(fuente.id)
+  ? await encabezadoDeOrigen(descarga.url, fuente)
+  : {};
+
+const derivado = derivarDocumento(fuente.id, descarga.contenido, encabezado.texto);
 if (!derivado.ok) terminar({ ok: false, motivos: [derivado.motivo] });
 
-const nombre = nombreDeDocumento(fuente.id, derivado.obra);
+const nombre = nombreDeDocumento(fuente.id, derivado.obra, derivado.pagina);
 if (nombre === undefined) {
   terminar({
     ok: false,
@@ -138,24 +166,50 @@ if (existsSync(destino)) {
     });
   }
 
-  const obraExistente = existente.cabecera.obra;
+  /*
+   * Lo que ocupa el nombre tiene que ser **la misma página de la misma obra**. Se compara
+   * contra lo derivado de su propia declaración, no contra su cabecera, porque es lo
+   * derivado lo que el nombre codifica.
+   *
+   * Dos páginas distintas ya no colisionan por serlo —cada una tiene su segmento—, pero el
+   * nombre se recorta, y dos títulos largos pueden seguir coincidiendo al recortarlo.
+   * Callarlo con «ya versionado» y salir 0 dejaba la segunda sin versionar para siempre y
+   * sin que nada lo dijera.
+   */
+  const suyo = derivarDeLaDeclaracion(existente.cabecera.fuente, existente.declaracion);
+  const comoSeLlama = (obra: string | undefined, pagina: string | undefined) =>
+    pagina === undefined || pagina === obra ? `«${obra}»` : `«${pagina}», de «${obra}»`;
 
-  if (obraExistente !== derivado.obra) {
+  if (suyo.obra !== derivado.obra || suyo.pagina !== derivado.pagina) {
     terminar({
       ok: false,
       motivos: [
-        `«${derivado.obra}» y «${obraExistente}» comparten nombre de documento (${nombre}.txt).`,
-        'El nombre se recorta, y estas dos obras coinciden al recortarlo. No se ha ' +
-          'versionado nada: renombre el documento existente o acorte el título antes de ' +
-          'volver a recuperar.',
+        `${comoSeLlama(derivado.obra, derivado.pagina)} y ` +
+          `${comoSeLlama(suyo.obra, suyo.pagina)} comparten nombre de documento (${nombre}.txt).`,
+        'El nombre se recorta, y estas dos coinciden al recortarlo. No se ha versionado ' +
+          'nada: renombre el documento existente o acorte el título antes de volver a ' +
+          'recuperar.',
       ],
     });
   }
 
+  /*
+   * Misma obra y misma página: es el mismo documento, alcanzado por otra dirección —la
+   * variante móvil, un alias que no quedó registrado—. Reutilizar es lo que se quiere, y
+   * decir de dónde salió el que ya está es lo que deja comprobarlo.
+   */
+  const porOtraDireccion =
+    existente.cabecera.url !== descarga.url && existente.cabecera.pedido !== url;
+
   terminar({
     ok: true,
     ruta: destino,
-    mensaje: `Ya versionado: ${destino}\nNo se ha sobrescrito: un documento por par (Fuente, obra).`,
+    mensaje:
+      `Ya versionado: ${destino}\nNo se ha sobrescrito: un documento por página de la obra.` +
+      (porOtraDireccion
+        ? `\nEse documento se recuperó de «${existente.cabecera.url}»: esta dirección lleva a ` +
+          'la misma página de la misma obra, así que se reutiliza y no se ha añadido otra copia.'
+        : ''),
   });
 }
 
@@ -185,6 +239,9 @@ terminar({
     `Documento versionado: ${destino}\n` +
     `Obra: ${derivado.obra}\n` +
     `Año: ${derivado.año ?? 'no consta exacto (la candidata quedará con obra y sin año)'}\n` +
+    // Un metadato que falta no es un fallo, pero callarlo sí lo sería: quien siembra tiene
+    // que poder distinguir «la Fuente no declara año» de «no se pudo leer lo que declara».
+    (encabezado.aviso === undefined ? '' : `${encabezado.aviso}\n`) +
     `Licencia: ${fuente.licencia} (${fuente.nombre})`,
 });
 
@@ -211,6 +268,51 @@ async function documentoConUrl(direccion: string): Promise<string | undefined> {
   return undefined;
 }
 
+/**
+ * El texto de origen de la página, de donde la Fuente declara su metadato.
+ *
+ * Wikisource **no renderiza el año**: vive en los parámetros del encabezado del wikitexto
+ * (`|año = 1905`), así que el lector que buscaba una línea «Año:» en la página no podía
+ * dispararse nunca. Se pide la **misma página del mismo anfitrión** con `?action=raw` —no
+ * un servicio de datos aparte, que sería un segundo origen de verdad y un anfitrión que el
+ * conjunto cerrado de Fuentes no cubre—, y con las mismas guardas que la primera petición:
+ * mismo tiempo máximo, mismo techo, misma identificación y misma revalidación de anfitrión
+ * tras cada redirección.
+ *
+ * Si no llega, no pasa nada: la recuperación sigue y la obra queda sin año. Un metadato
+ * que falta no es un fallo, y una Fuente caída no puede dejar el corpus a medias.
+ */
+async function encabezadoDeOrigen(
+  direccion: string,
+  fuente: Fuente,
+): Promise<{ texto?: string; aviso?: string }> {
+  let cruda: string;
+  try {
+    const destino = new URL(direccion);
+    destino.hash = '';
+    destino.searchParams.set('action', 'raw');
+    cruda = destino.toString();
+  } catch {
+    return { aviso: `No se pudo componer la dirección del encabezado de «${direccion}».` };
+  }
+
+  const descarga = await descargar(cruda, fuente, {
+    tipos: TIPOS_DE_ENCABEZADO,
+    acepta: 'text/x-wiki, text/plain',
+  });
+
+  if (!descarga.ok) {
+    return {
+      aviso:
+        `Aviso: no se pudo leer el encabezado de origen (${cruda}): ${descarga.motivos[0]} ` +
+        'El documento se versiona igual; si la Fuente declaraba el año ahí, la candidata ' +
+        'quedará con obra y sin año.',
+    };
+  }
+
+  return { texto: descarga.contenido };
+}
+
 type Descarga = { ok: true; contenido: string; url: string } | { ok: false; motivos: string[] };
 
 /**
@@ -221,7 +323,14 @@ type Descarga = { ok: true; contenido: string; url: string } | { ok: false; moti
  * que redirige fuera traería texto no verificado que se versionaría con la licencia de una
  * Fuente admitida escrita al lado — y nadie volvería a mirar de dónde salió.
  */
-async function descargar(inicial: string, fuente: Fuente): Promise<Descarga> {
+async function descargar(
+  inicial: string,
+  fuente: Fuente,
+  {
+    tipos = TIPOS_ADMITIDOS,
+    acepta = 'text/html, text/plain',
+  }: { tipos?: string[]; acepta?: string } = {},
+): Promise<Descarga> {
   let actual = inicial;
 
   for (let salto = 0; salto <= MAXIMO_DE_REDIRECCIONES; salto += 1) {
@@ -241,7 +350,7 @@ async function descargar(inicial: string, fuente: Fuente): Promise<Descarga> {
       respuesta = await fetch(actual, {
         redirect: 'manual',
         signal: AbortSignal.timeout(TIEMPO_MAXIMO_MS),
-        headers: { 'user-agent': IDENTIFICACION, accept: 'text/html, text/plain' },
+        headers: { 'user-agent': IDENTIFICACION, accept: acepta },
       });
     } catch (fallo) {
       // Un mensaje propio, no una traza: quien siembra tiene que saber si reintentar.
@@ -286,7 +395,7 @@ async function descargar(inicial: string, fuente: Fuente): Promise<Descarga> {
     }
 
     const tipo = (respuesta.headers.get('content-type') ?? '').toLowerCase();
-    if (!TIPOS_ADMITIDOS.some((admitido) => tipo.startsWith(admitido))) {
+    if (!tipos.some((admitido) => tipo.startsWith(admitido))) {
       return {
         ok: false,
         motivos: [

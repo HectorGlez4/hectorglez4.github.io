@@ -30,3 +30,24 @@
 # `src/content.config.ts` apunta aquí, así que nada de esto llega al sitio construido.
 
 sesiones:
+  - fecha: "2026-08-20"
+    hora: "12:23"
+    clase: "tradicion"
+    propuesto: "Admitir Autores de tradición latinoamericana: faltan 2 para alcanzar el suelo del 40 %. Sus Citas van al Tema «La virtud», al que menos le falta para publicarse: 4 Citas."
+    hueco: "De los 15 Autores del Corpus, 5 son de tradición latinoamericana: un 33,3 %, por debajo del suelo comprometido del 40 %. «La virtud» tiene 11 Citas publicadas y el umbral de publicación son 15."
+    tema:
+      slug: "la-virtud"
+      nombre: "La virtud"
+      publicadas: 11
+      faltan: 4
+    tradicion:
+      nombre: "latinoamericana"
+      porcentaje: 33.3
+      suelo: 40
+      autoresQueFaltan: 2
+    elegido: "Admitir Autores de tradición latinoamericana y publicar 12 Citas de González Prada en «La libertad», que pasa a publicarse"
+    motivo: "Wikisource no tiene obra fechada de tradición latinoamericana que sirva a «La virtud»: de 183 candidatas extraídas no encajaba ninguna. Se admitieron 3 de los 5 Autores que pedía el objetivo (Nervo, Palma, González Prada) y sus Citas fueron a «La libertad», que era el hueco que la cosecha sí podía cerrar."
+    resultado:
+      citasPublicadas: 50
+      procedenciaCompleta: 64
+      tradicionLatinoamericana: 33.3

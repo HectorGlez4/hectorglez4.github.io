@@ -16,7 +16,8 @@
  *
  *   1. la ruta resuelve dentro de `corpus/fuentes/`,
  *   2. su `url` pertenece al conjunto cerrado y a la Fuente que declara, y
- *   3. su nombre coincide con el que implica la obra **derivada del documento**.
+ *   3. su nombre coincide con el que implican la obra y la página **derivadas del
+ *      documento**.
  *
  * Y por eso la obra y el año **no se leen de la cabecera**: se vuelven a derivar aquí, con
  * los mismos lectores puros por Fuente, de la declaración que el documento conserva
@@ -146,7 +147,14 @@ if (derivado.obra === undefined) {
   });
 }
 
-const nombreEsperado = nombreDeDocumento(cabecera.fuente, derivado.obra);
+/*
+ * El nombre lleva dentro la obra **y la página**, y las dos se comprueban contra lo que el
+ * documento declara. Un documento es el texto de una página concreta —«Triste» y «Tibi
+ * Regina» son dos páginas de «Los jardines interiores», con un documento cada una—, así
+ * que admitir el segmento de página sin comprobarlo abriría de nuevo la puerta que esto
+ * cierra: componer un `.txt` a mano saldría más barato que recuperarlo.
+ */
+const nombreEsperado = nombreDeDocumento(cabecera.fuente, derivado.obra, derivado.pagina);
 const nombreReal = basename(rutaDelDocumento, extname(rutaDelDocumento));
 
 if (extname(rutaDelDocumento) !== '.txt' || nombreEsperado !== nombreReal) {

@@ -191,12 +191,32 @@ const APROXIMADO: readonly RegExp[] = [
   /\bB\.?C\.?E?\.?\b/u,
 ];
 
+/** El primer año que este proyecto admite como año de publicación de una obra. */
+export const PRIMER_AÑO_POSIBLE = 1;
+
 /**
- * El año que declara un fragmento, solo si consta uno y exacto.
+ * El último año que puede constar como año de publicación: el corriente.
+ *
+ * Un año en el futuro no es un año de publicación, es una errata o un número de otra
+ * cosa que se coló en el parámetro. Se calcula en cada llamada y no se congela en una
+ * constante para que el límite no se quede corto el 1 de enero.
+ *
+ * Corre en la misma dirección que el tiempo: lo que hoy se admite se seguirá admitiendo
+ * mañana, así que el año que derivó la recuperación es el que deriva la extracción
+ * aunque medien años entre una y otra.
+ */
+export function ultimoAñoPosible(): number {
+  return new Date().getUTCFullYear();
+}
+
+/**
+ * El año que declara un fragmento, solo si consta uno, exacto y posible.
  *
  * «Madrid: Renacimiento, 1913» da 1913. «c. 1615», «1615-1620» y «January 1, 2005
  * [eBook #7500]» no dan nada: el primero es aproximado, el segundo un intervalo y el
- * tercero trae tres números y ninguno se puede elegir sin inventar.
+ * tercero trae tres números y ninguno se puede elegir sin inventar. «3050» tampoco: un
+ * número de cuatro cifras no es un año por serlo, y versionarlo dejaría una Procedencia
+ * que nadie puede haber leído en ninguna edición.
  */
 export function añoDeclarado(fragmento: string): number | undefined {
   const texto = fragmento.trim();
@@ -205,7 +225,10 @@ export function añoDeclarado(fragmento: string): number | undefined {
 
   const numeros = [...new Set([...texto.matchAll(/\b\d{1,4}\b/gu)].map((m) => m[0]))];
   if (numeros.length !== 1) return undefined;
-  return añoExacto(numeros[0]);
+
+  const año = añoExacto(numeros[0]);
+  if (año === undefined) return undefined;
+  return año >= PRIMER_AÑO_POSIBLE && año <= ultimoAñoPosible() ? año : undefined;
 }
 
 /**
@@ -252,6 +275,203 @@ export function recorteDeEtiqueta(plano: string, etiqueta: RegExp): string[] {
   return ventana;
 }
 
+/**
+ * El año que declara un parámetro de plantilla del wikitexto (`|año = 1905`).
+ *
+ * A diferencia de la etiqueta de una página renderizada, un parámetro declara su valor
+ * **en su propia línea**: mirar la siguiente convertiría en año de la obra el número del
+ * parámetro de al lado —«|volumen = 2»— cada vez que el año viniera vacío.
+ */
+export function añoDeParametro(declaracion: string, parametro: RegExp): number | undefined {
+  for (const linea of declaracion.split('\n')) {
+    const encontrado = parametro.exec(linea);
+    if (encontrado === null) continue;
+    return añoDeclarado(linea.slice(encontrado.index + encontrado[0].length));
+  }
+  return undefined;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El encabezado del wikitexto
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Cuánto wikitexto se mira buscando el encabezado, y cuántas plantillas.
+ *
+ * El encabezado de una página de Wikisource va arriba del todo, a veces detrás de una
+ * plantilla de mantenimiento. Más allá empieza la obra, y en una obra larga el wikitexto
+ * son megabytes: recorrerlo entero para buscar un parámetro que solo vive en la cabecera
+ * es trabajo que no puede dar nada.
+ */
+export const MAX_CARACTERES_DE_ENCABEZADO = 20_000;
+const MAX_PLANTILLAS_DE_ENCABEZADO = 5;
+
+/** Cuántas líneas del encabezado entran en la declaración, y de qué largo. */
+export const MAX_LINEAS_DE_ENCABEZADO = 20;
+const MAX_CARACTERES_POR_LINEA = 300;
+
+/**
+ * Los parámetros del encabezado que se versionan como declaración.
+ *
+ * Es una lista cerrada, y por el mismo motivo que la ficha de Gutenberg lo es: `|notas =`
+ * puede traer párrafos de prosa —con sus propias etiquetas «Año:» dentro— y esa prosa
+ * acabaría en la zona de la que salen la obra y el año. Aquí solo entra metadato.
+ */
+const PARAMETRO_DE_ENCABEZADO =
+  /^\s*(?:t[íi]tulo|title|autor|author|traductor|translator|a[ñn]o(?:\s+de\s+(?:publicaci[óo]n|edici[óo]n))?|fecha(?:\s+de\s+publicaci[óo]n)?|edici[óo]n|editorial|publicaci[óo]n|idioma|lengua|language)\s*=/iu;
+
+/** El parámetro del que sale el año. Solo «año», nunca «fecha»: una fecha no es un año. */
+const PARAMETRO_DE_AÑO_WIKITEXTO =
+  /^\s*\|\s*a[ñn]o(?:\s+de\s+(?:publicaci[óo]n|edici[óo]n))?\s*=/iu;
+
+/** El parámetro del que sale la obra. */
+const PARAMETRO_DE_TITULO_WIKITEXTO = /^\s*\|\s*(?:t[íi]tulo|title)\s*=/iu;
+
+const ENLACE_CON_TEXTO = /\[\[[^[\]|]*\|([^[\]|]*)\]\]/gu;
+const ENLACE_SIMPLE = /\[\[([^[\]|]*)\]\]/gu;
+
+/**
+ * El título que declara un parámetro del encabezado, o nada si no declara ninguno.
+ *
+ * El nombre de la página **no** es el nombre de la obra: Wikisource desambigua las
+ * páginas —«Triste (Nervo)», «Amor de madre (Palma)»— y ese paréntesis acabaría literal
+ * en la atribución que lee el visitante. El encabezado declara la obra que contiene al
+ * fragmento: «Los jardines interiores», «Tradiciones peruanas».
+ *
+ * Viene en forma de enlace, así que se resuelve como lo resuelve la propia Fuente:
+ * `[[Los jardines interiores]]` es su texto, y `[[destino|texto visible]]` es el texto
+ * visible, que es lo que la página enseña.
+ *
+ * Devuelve `undefined` —y quien llama cae al encabezado de la página— cuando el valor no
+ * es un título: vacío, un enlace relativo («Ariel/Capítulo I» declara `[[../]]`), o una
+ * forma de wikitexto que este análisis no sabe resolver sin inventarse nada. Reconstruir
+ * el título del padre a partir de la ruta sería derivarlo de la URL, que es exactamente lo
+ * que la Historia 11.1 prohíbe.
+ */
+export function tituloDeclarado(valor: string): string | undefined {
+  const limpio = valor
+    .replace(ENLACE_CON_TEXTO, '$1')
+    .replace(ENLACE_SIMPLE, '$1')
+    .replace(/'{2,}/gu, '')
+    .replace(/\s+/gu, ' ')
+    .trim();
+
+  // Lo que sobrevive con marcado dentro es una forma que no sabemos resolver: una
+  // plantilla sin expandir, un enlace sin cerrar. No se adivina; se cae al encabezado.
+  if (/[[\]{}<>]/u.test(limpio)) return undefined;
+  if (limpio.startsWith('../') || limpio.startsWith('/')) return undefined;
+  if (!/[\p{L}\p{N}]/u.test(limpio)) return undefined;
+  return limpio;
+}
+
+/**
+ * El primer bloque `{{ … }}` que empieza en `desde`, contando anidamientos.
+ *
+ * Un `indexOf('}}')` cortaría en la primera plantilla anidada, y un encabezado con
+ * `{{PD-old}}` dentro de un parámetro las tiene.
+ */
+function plantillaEquilibrada(
+  wikitexto: string,
+  desde: number,
+): { fin: number; interior: string } | undefined {
+  const apertura = wikitexto.indexOf('{{', desde);
+  if (apertura === -1) return undefined;
+
+  let profundidad = 0;
+  for (let i = apertura; i < wikitexto.length - 1; i += 1) {
+    if (wikitexto.startsWith('{{', i)) {
+      profundidad += 1;
+      i += 1;
+    } else if (wikitexto.startsWith('}}', i)) {
+      profundidad -= 1;
+      i += 1;
+      if (profundidad === 0) {
+        return { fin: i + 1, interior: wikitexto.slice(apertura + 2, i - 1) };
+      }
+    }
+  }
+
+  return undefined;
+}
+
+/** Parte el interior de una plantilla por sus `|` de primer nivel. */
+function segmentosDePlantilla(interior: string): string[] {
+  const segmentos: string[] = [];
+  let actual = '';
+  let llaves = 0;
+  let corchetes = 0;
+
+  for (let i = 0; i < interior.length; i += 1) {
+    if (interior.startsWith('{{', i) || interior.startsWith('[[', i)) {
+      if (interior[i] === '{') llaves += 1;
+      else corchetes += 1;
+      actual += interior.slice(i, i + 2);
+      i += 1;
+      continue;
+    }
+    if (interior.startsWith('}}', i) || interior.startsWith(']]', i)) {
+      if (interior[i] === '}') llaves -= 1;
+      else corchetes -= 1;
+      actual += interior.slice(i, i + 2);
+      i += 1;
+      continue;
+    }
+    if (interior[i] === '|' && llaves === 0 && corchetes === 0) {
+      segmentos.push(actual);
+      actual = '';
+      continue;
+    }
+    // Un enlace no cerrado no se lleva por delante los parámetros de las líneas
+    // siguientes. «Ariel/Capítulo I» declara `|título = [[../`, y sin este corte el
+    // `|año` de debajo quedaba dentro del título y no se versionaba nunca.
+    if (interior[i] === '\n') corchetes = 0;
+    actual += interior[i];
+  }
+
+  segmentos.push(actual);
+  return segmentos;
+}
+
+/**
+ * Las líneas del encabezado del wikitexto que se versionan, **literales**.
+ *
+ * Wikisource no renderiza el año: el dato vive en los parámetros de la plantilla de
+ * encabezado (`|año = 1905`), y por eso el lector de la página renderizada no podía
+ * dispararse nunca. Estas líneas son las que la Fuente escribió, tal cual, y son las que
+ * dejan que la extracción vuelva a derivar el mismo año del documento versionado.
+ *
+ * Cada parámetro sale en su propia línea aunque en el wikitexto vinieran todos seguidos
+ * —`{{Encabezado|título=Triste|año=1905}}` es una forma tan común como la de una línea
+ * por parámetro—, porque la declaración se analiza por líneas. El texto de cada parámetro
+ * no se toca: solo se le quitan los saltos de línea que no cabrían en una.
+ */
+export function lineasDeEncabezadoDeWikitexto(wikitexto: string): string[] {
+  const cabeza = wikitexto.replace(/\r\n?/gu, '\n').slice(0, MAX_CARACTERES_DE_ENCABEZADO);
+  const lineas: string[] = [];
+  const vistas = new Set<string>();
+  let desde = 0;
+
+  for (let plantilla = 0; plantilla < MAX_PLANTILLAS_DE_ENCABEZADO; plantilla += 1) {
+    const bloque = plantillaEquilibrada(cabeza, desde);
+    if (bloque === undefined) break;
+    desde = bloque.fin;
+
+    // El primer segmento es el nombre de la plantilla, no un parámetro.
+    for (const segmento of segmentosDePlantilla(bloque.interior).slice(1)) {
+      if (!PARAMETRO_DE_ENCABEZADO.test(segmento)) continue;
+      // Un parámetro sin valor no declara nada, y el encabezado los trae a docenas.
+      if (segmento.slice(segmento.indexOf('=') + 1).trim() === '') continue;
+      const linea = `|${segmento.replace(/\s+/gu, ' ').trim()}`.slice(0, MAX_CARACTERES_POR_LINEA);
+      if (vistas.has(linea)) continue;
+      vistas.add(linea);
+      lineas.push(linea);
+      if (lineas.length >= MAX_LINEAS_DE_ENCABEZADO) return lineas;
+    }
+  }
+
+  return lineas;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Lectores por Fuente
 // ─────────────────────────────────────────────────────────────────────────────
@@ -267,10 +487,27 @@ export interface LectorDeFuente {
    * Se versionan dentro del documento, entre la cabecera y el cuerpo, y son de donde
    * salen la obra y el año: al recuperar y otra vez al extraer. La cabecera es registro
    * de auditoría; lo que llega a una candidata sale de aquí.
+   *
+   * `encabezado` es el texto de origen de la página —el wikitexto, en MediaWiki—, cuando
+   * la recuperación ha podido traerlo. Es opcional a propósito: si no llega, la Fuente
+   * declara lo que declare la página renderizada y ya está. Un metadato que falta no es
+   * un fallo.
    */
-  declaracion(bruto: string, plano: string, regionPlana: string): string;
+  declaracion(bruto: string, plano: string, regionPlana: string, encabezado?: string): string;
   /** La obra que declara esa declaración. */
   obra(declaracion: string): string | undefined;
+  /**
+   * La **página** de la que salió este documento, cuando la obra tiene más de una.
+   *
+   * Un documento es el texto de una página concreta, no el de una obra entera: «Triste» y
+   * «Tibi Regina» son dos páginas de «Los jardines interiores», y si las dos compitieran
+   * por el mismo fichero la que perdiera quedaría sin texto contra el que cotejar. La
+   * obra deja de ser la identidad del documento y pasa a ser lo que es: su metadato.
+   *
+   * `undefined` cuando la Fuente no pagina —el `.txt` de Gutenberg es la obra entera— o
+   * cuando la página **es** la obra, que es el caso que ya funcionaba.
+   */
+  pagina(declaracion: string): string | undefined;
   /** El año de la obra, solo si consta exacto en esa declaración. */
   año(declaracion: string): number | undefined;
 }
@@ -310,6 +547,20 @@ const FICHA_DE_GUTENBERG =
   /^\s*(?:title|author|translator|original\s+publication|first\s+published|release\s+date|language|credits)\s*:/i;
 
 /**
+ * El encabezado de la página de Wikisource, que es la primera línea de la declaración.
+ *
+ * Es lo que distingue a dos documentos de la misma obra, y es también el respaldo del
+ * nombre de la obra cuando el encabezado del wikitexto no declara ninguno. Sale de la
+ * declaración, como todo lo demás, para que la extracción pueda comprobar el nombre del
+ * fichero contra lo **derivado** y no contra la cabecera, que es registro de auditoría.
+ */
+function paginaDeWikisource(declaracion: string): string | undefined {
+  const primera = declaracion.split('\n')[0]?.trim() ?? '';
+  if (primera === '' || primera.startsWith('|')) return undefined;
+  return ETIQUETA_DE_AÑO_WIKISOURCE.test(primera) ? undefined : primera;
+}
+
+/**
  * Los lectores del conjunto cerrado. Toda Fuente que permita reutilización tiene el suyo:
  * sin él la recuperación descargaría y fallaría después con «no declara título», y quien
  * añadió la Fuente se enteraría en la primera obra, no al añadirla.
@@ -341,7 +592,7 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
      * El año sale de la **región ya limpia** (fix: antes salía de la página entera, y una
      * etiqueta de un navbox o de la cabecera del sitio ganaba a la de la obra).
      */
-    declaracion(bruto, _plano, regionPlana) {
+    declaracion(bruto, _plano, regionPlana, encabezadoDeOrigen) {
       const encabezado = /<h1\b[^>]*\bid\s*=\s*["']firstHeading["'][^>]*>([\s\S]*?)<\/h1>/i.exec(bruto);
       const titulo =
         textoDeCaptura(encabezado?.[1]) ??
@@ -352,14 +603,49 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
       // La primera línea es **siempre** el título, aunque venga vacía: si las líneas del
       // año pudieran ocupar su sitio, una página sin encabezado daría por título la
       // primera frase de la obra y se versionaría con ese nombre.
-      return [titulo ?? '', ...recorteDeEtiqueta(regionPlana, ETIQUETA_DE_AÑO_WIKISOURCE)].join('\n');
+      //
+      // Detrás van, literales, las dos formas en las que Wikisource declara su metadato:
+      // la etiqueta de la página renderizada —que casi nunca aparece— y los parámetros
+      // del encabezado del wikitexto, que es donde el dato vive de verdad.
+      return [
+        titulo ?? '',
+        ...recorteDeEtiqueta(regionPlana, ETIQUETA_DE_AÑO_WIKISOURCE),
+        ...(encabezadoDeOrigen === undefined ? [] : lineasDeEncabezadoDeWikitexto(encabezadoDeOrigen)),
+      ].join('\n');
     },
+    /**
+     * La obra que declara el encabezado, y el título de la página cuando no lo declara.
+     *
+     * El nombre de la página no es el nombre de la obra: «Triste (Nervo)» lleva dentro el
+     * desambiguador de Wikisource, y la obra que contiene a ese poema —la que un lector
+     * esperaría ver citada— es «Los jardines interiores», que es lo que el encabezado
+     * declara en `|título`. Cuando no lo declara, o declara algo que no es un título, se
+     * cae al encabezado de la página, que es lo que había antes de esto.
+     */
     obra(declaracion) {
-      const primera = declaracion.split('\n')[0]?.trim() ?? '';
-      return primera === '' || ETIQUETA_DE_AÑO_WIKISOURCE.test(primera) ? undefined : primera;
+      for (const linea of declaracion.split('\n')) {
+        const encontrado = PARAMETRO_DE_TITULO_WIKITEXTO.exec(linea);
+        if (encontrado === null) continue;
+        const titulo = tituloDeclarado(linea.slice(encontrado.index + encontrado[0].length));
+        if (titulo !== undefined) return titulo;
+      }
+
+      return paginaDeWikisource(declaracion);
     },
+    pagina: paginaDeWikisource,
+    /**
+     * El año, de la etiqueta renderizada si la hay y del parámetro del wikitexto si no.
+     *
+     * El orden importa poco en la práctica —el índice de Wikisource no tiene ni una
+     * página con «Año de publicación» visible— y por eso el parámetro es el que trabaja.
+     * Se conserva la etiqueta porque es la forma que declara la página que se versionó, y
+     * lo que la página dice manda sobre lo que dice su código fuente.
+     */
     año(declaracion) {
-      return añoJuntoAEtiqueta(declaracion, ETIQUETA_DE_AÑO_WIKISOURCE);
+      return (
+        añoJuntoAEtiqueta(declaracion, ETIQUETA_DE_AÑO_WIKISOURCE) ??
+        añoDeParametro(declaracion, PARAMETRO_DE_AÑO_WIKITEXTO)
+      );
     },
   },
 
@@ -413,6 +699,10 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
       const declarado = /^\s*title\s*:\s*(.+)$/im.exec(declaracion)?.[1]?.trim();
       return declarado === undefined || declarado === '' ? undefined : declarado;
     },
+    /** Gutenberg no pagina: el `.txt` que se recupera es la obra entera. */
+    pagina() {
+      return undefined;
+    },
     /**
      * El año sale **solo** de `Original Publication`.
      *
@@ -429,24 +719,29 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
 };
 
 /**
- * Obra y año a partir de la declaración de un documento ya versionado.
+ * Obra, página y año a partir de la declaración de un documento ya versionado.
  *
  * Es la misma derivación que corre al recuperar, y corre otra vez al extraer. La cabecera
  * no participa: es registro de auditoría. Atar el año a la cabecera lo dejaba suelto —el
  * nombre del fichero solo ata la Fuente y la obra—, y editar a mano `año: 1492` en un
  * documento realmente recuperado producía candidatas con 1492.
+ *
+ * La **página** sale de aquí por el mismo motivo que la obra y el año: el nombre del
+ * fichero la lleva dentro, y la puerta de la extracción lo compara contra lo derivado.
  */
 export function derivarDeLaDeclaracion(
   idFuente: string,
   declaracion: string,
-): { obra?: string; año?: number } {
+): { obra?: string; pagina?: string; año?: number } {
   const lector = LECTORES_POR_FUENTE[idFuente];
   if (lector === undefined) return {};
 
   const obra = lector.obra(declaracion)?.trim();
+  const pagina = lector.pagina(declaracion)?.trim();
   const año = lector.año(declaracion);
   return {
     ...(obra !== undefined && obra !== '' ? { obra } : {}),
+    ...(pagina !== undefined && pagina !== '' ? { pagina } : {}),
     ...(año !== undefined ? { año } : {}),
   };
 }
@@ -456,11 +751,30 @@ export function derivarDeLaDeclaracion(
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type DerivacionDeDocumento =
-  | { ok: true; obra: string; año?: number; declaracion: string; cuerpo: string }
+  | {
+      ok: true;
+      obra: string;
+      /** La página de la obra de la que salió el cuerpo, si la obra tiene más de una. */
+      pagina?: string;
+      año?: number;
+      declaracion: string;
+      cuerpo: string;
+    }
   | { ok: false; motivo: string };
 
-/** Declaración, obra, año y cuerpo de una página bruta, sin tocar disco ni red. */
-export function derivarDocumento(idFuente: string, bruto: string): DerivacionDeDocumento {
+/**
+ * Declaración, obra, año y cuerpo de una página bruta, sin tocar disco ni red.
+ *
+ * `encabezado` es el texto de origen de la página cuando se ha podido recuperar —el
+ * wikitexto de MediaWiki, de donde sale el `|año = 1905` que la página no renderiza—. Si
+ * no llega, la derivación sigue con lo que declare la página: un metadato que falta no es
+ * un fallo, y la candidata queda con obra y sin año.
+ */
+export function derivarDocumento(
+  idFuente: string,
+  bruto: string,
+  encabezado?: string,
+): DerivacionDeDocumento {
   const lector = LECTORES_POR_FUENTE[idFuente];
   if (lector === undefined) {
     return {
@@ -477,13 +791,13 @@ export function derivarDocumento(idFuente: string, bruto: string): DerivacionDeD
     const region = lector.region(bruto);
     if (!region.ok) return region;
     cuerpo = aTextoPlano(region.region);
-    declaracion = lector.declaracion(bruto, aTextoPlano(bruto), cuerpo);
+    declaracion = lector.declaracion(bruto, aTextoPlano(bruto), cuerpo, encabezado);
   } catch (fallo) {
     // Retirar el cromo puede rendirse; que se rinda es un error, no medio documento.
     return { ok: false, motivo: fallo instanceof Error ? fallo.message : String(fallo) };
   }
 
-  const { obra, año } = derivarDeLaDeclaracion(idFuente, declaracion);
+  const { obra, pagina, año } = derivarDeLaDeclaracion(idFuente, declaracion);
   if (obra === undefined) {
     return {
       ok: false,
@@ -497,7 +811,14 @@ export function derivarDocumento(idFuente: string, bruto: string): DerivacionDeD
     return { ok: false, motivo: 'El documento no trae texto: no se ha versionado nada.' };
   }
 
-  return { ok: true, obra, declaracion, cuerpo, ...(año !== undefined ? { año } : {}) };
+  return {
+    ok: true,
+    obra,
+    declaracion,
+    cuerpo,
+    ...(pagina !== undefined ? { pagina } : {}),
+    ...(año !== undefined ? { año } : {}),
+  };
 }
 
 export interface CabeceraDeDocumento {
@@ -611,17 +932,15 @@ export function analizarDocumento(
 export const MAX_CARACTERES_SLUG_DE_OBRA = 60;
 
 /**
- * El nombre del documento de una obra: `{id-de-fuente}--{slug-de-obra}`, sin extensión.
+ * Un segmento del nombre: el slug, acotado y sin partir una palabra por la mitad.
  *
- * Devuelve `undefined` cuando el título no deja **ni una letra** al normalizarlo. No es
- * un caso de laboratorio: `normalizar` no retira `·` ni los símbolos sueltos, así que un
- * título como «···» produce un slug no vacío y sin nombre, y el fichero resultante no lo
- * podría volver a encontrar nadie.
+ * `undefined` cuando el texto no deja **ni una letra** al normalizarlo. No es un caso de
+ * laboratorio: `normalizar` no retira `·` ni los símbolos sueltos, así que un título como
+ * «···» produce un slug no vacío y sin nombre, y el fichero resultante no lo podría
+ * volver a encontrar nadie.
  */
-export function nombreDeDocumento(idFuente: string, obra: string): string | undefined {
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(idFuente)) return undefined;
-
-  const limpio = slugDeObra(obra)
+function segmentoDeNombre(texto: string): string | undefined {
+  const limpio = slugDeObra(texto)
     .replace(/[^a-z0-9-]+/gu, '-')
     .replace(/-{2,}/gu, '-')
     .replace(/^-|-$/gu, '');
@@ -633,7 +952,34 @@ export function nombreDeDocumento(idFuente: string, obra: string): string | unde
     if (/[a-z0-9]/u.test(porPalabra)) recortado = porPalabra;
   }
   recortado = recortado.replace(/^-|-$/gu, '');
-  if (!/[a-z0-9]/u.test(recortado)) return undefined;
+  return /[a-z0-9]/u.test(recortado) ? recortado : undefined;
+}
 
-  return `${idFuente}--${recortado}`;
+/**
+ * El nombre del documento de **una página**: `{id-de-fuente}--{slug-de-obra}--{slug-de-página}`.
+ *
+ * Un documento es el texto de una página concreta, y la 11.2 coteja cada Cita contra el
+ * documento que la contiene. Atar el nombre solo a la obra hacía que dos páginas del mismo
+ * libro —«Triste» y «Tibi Regina», las dos de «Los jardines interiores»— compitieran por
+ * el mismo fichero, y la que perdía quedaba sin texto contra el que cotejar: la segunda
+ * recuperación decía «ya versionado» y salía con éxito sin haber versionado su poema.
+ *
+ * Cuando la página **es** la obra —«El estado», «El sable»— el nombre se colapsa a
+ * `{id-de-fuente}--{slug-de-obra}`, que es el de siempre: el caso que ya funcionaba no se
+ * renombra. Y Gutenberg, que no pagina, no pasa nunca de un segmento.
+ */
+export function nombreDeDocumento(
+  idFuente: string,
+  obra: string,
+  pagina?: string,
+): string | undefined {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(idFuente)) return undefined;
+
+  const deLaObra = segmentoDeNombre(obra);
+  if (deLaObra === undefined) return undefined;
+
+  const deLaPagina = pagina === undefined ? undefined : segmentoDeNombre(pagina);
+  if (deLaPagina === undefined || deLaPagina === deLaObra) return `${idFuente}--${deLaObra}`;
+
+  return `${idFuente}--${deLaObra}--${deLaPagina}`;
 }

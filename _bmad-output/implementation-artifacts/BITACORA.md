@@ -1305,3 +1305,116 @@ no.
 frente a 1414/52 al abrir la historia. `npm run build` con 53 páginas. `npx playwright test`
 **400 pasan**. Y las tres salidas del mando a mano: el informe con los cuatro apagados,
 `--ayuda` con código 0, y `--json --anotar` dejando stdout como JSON parseable.
+
+## Cierre de la Épica 14 al 50% — desplegada y verificada en vivo
+
+Fusionada en `main` (`ee5fd77`) y desplegada el 2026-08-20. El flujo `Publicar`
+(ID 32340828532) en verde, **incluido el paso nuevo de aviso**, que corrió por primera vez
+en el despliegue real y no tumbó nada. Puerta completa en local antes de fusionar:
+`astro check` 0 errores, **1501 pruebas unitarias** en 55 ficheros, `npm run build` con 53
+páginas, y **400 pruebas de Playwright**.
+
+**Verificado contra `https://sabiduriadebolsillo.net`.** El sitio no cambió, que es
+exactamente el criterio: 53 URL en el sitemap, las mismas de antes, y **cero marcadores** de
+Modelo en portada, `/buscar`, `/404`, una Página de Cita, `/kit` y `/lote`. Un Modelo apagado
+es invisible, no latente — comprobado sobre lo publicado, no sobre `dist/`.
+
+**La épica se queda en `in-progress`, y es deliberado.** La 14.2 no entra: su Umbral es
+«LC-1…LC-4 verificadas» y LC-4 sigue abierta. Se despliega lo construido y no se miente sobre
+el estado.
+
+---
+
+## Lo que queda, y no lo puede hacer el bucle
+
+El bucle de la v3 termina aquí: las once historias que le tocaban están cerradas, desplegadas
+y verificadas en vivo. Lo que sigue pendiente necesita a Héctor, y esto es lo que necesita de
+él, en orden de lo que desbloquea más.
+
+**LC-4 — desplegar el receptor de medición.** `DESPLIEGUE.md` §3. Hoy `wrangler` no está
+autenticado, el `database_id` sigue en `PENDIENTE` y la baliza no aparece en el HTML de
+producción, así que `MEDICION_ENDPOINT` tampoco está definida. Pide una cuenta de Cloudflare
+y conceder OAuth. **Desbloquea tres cosas a la vez**: la Historia 7.3, la 14.2 —cuyo coste de
+implementación real es un enlace— y la única serie medida del proyecto.
+
+Y un aviso que sale de la 14.1 y conviene no olvidar: **cerrar LC-4 no basta para que haya
+cifra**. `MEDICION_ENDPOINT` es la dirección de ingesta de balizas y el receptor contesta 204
+a todo lo que no sea un POST — escribe y no publica. Para que el mando de ingreso y el aviso
+diario den un número hará falta un paso más: que el receptor publique una lectura agregada, o
+leerla con `npx wrangler d1 execute`.
+
+**7.2 — mirar Search Console.** Desde fuera está todo bien: el `TXT` de verificación en la
+zona, el sitemap respondiendo 200 con `application/xml` e idéntico ante Googlebot, y sin
+`Disallow`. Lo que no se puede ver sin la cuenta es la columna *Última lectura*. Si ya tiene
+fecha y páginas, la 7.2 pasa a `done`; si tiene fecha y sigue en error, entonces sí hay algo
+que arreglar.
+
+**11.4 — sembrar.** La tubería está construida y probada (11.1–11.3): `npm run objetivo` dice
+qué hueco toca, y `npm run sesion:registrar` anota la sesión. Lo que falta es correrla varias
+sesiones hasta los seis Temas a ≥15 Citas y el 40 % de tradición latinoamericana. Sembrar
+publica contenido en un sitio público en vivo, y eso es de Héctor por decisión de la épica.
+
+**La primera Colección de verdad.** `corpus/colecciones/` se versiona vacío a propósito y
+ningún agente siembra Colecciones. Hasta que exista una, la Página de Colección de la 12.3 y
+la Pieza de Colección de la 13.3 están construidas y probadas pero no se han visto nunca con
+contenido real — y el umbral provisional de `MIN_CITAS_POR_COLECCION` sale justamente de
+curar las tres o cuatro primeras.
+
+## 11.4 — Primera sesión de sembrado, y los tres tapones que destapó
+
+Primera sesión real de la tubería que construyeron 11.1–11.3. **El Corpus pasa de 38 a 50
+Citas, SM-C1 sube del 52,6 % al 64 %, la tradición latinoamericana del 16,7 % al 33,3 %, y
+«La libertad» alcanza su umbral y se publica.** El sitio pasa de 53 a 67 páginas.
+
+Pero lo que la sesión sobre todo produjo fueron **cuatro averías de la tubería**, tres de
+ellas silenciosas. Ninguna se habría visto sin correrla de verdad.
+
+**1. La tradición no se podía teclear.** El esquema admite `tradicion` desde la v1 y de ella
+sale el suelo del 40 %, pero `tools/autor.ts` no la aceptaba: `DatosDeAutor` no tenía el
+campo. `--tradicion latinoamericana` se tragaba en silencio, el Autor se creaba, la orden
+decía «creado» y el fichero salía sin la clave. Pasaba de largo porque la orden **no tenía
+guardián de banderas**: aceptaba cualquier `--loquesea` sin rechistar. Es el primer tapón, y
+sin él los cinco Autores que pedía el objetivo no habrían contado para nada.
+
+**2. El año de la Fuente no se podía leer.** El lector de año de Wikisource buscaba una línea
+`Año:` en la página renderizada, y Wikisource no la renderiza: el dato vive en la plantilla de
+encabezado del wikitexto. Comprobado contra el índice: **cero páginas** con la etiqueta
+visible. Como Gutenberg responde 503 y Cervantes Virtual 403, Wikisource era la única Fuente
+alcanzable, así que **toda Cita nueva habría salido con Procedencia parcial**, hundiendo SM-C1
+y haciendo fallida la sesión por el criterio de la propia historia. De paso apareció que la
+obra derivada era el título de la página —«Triste (Nervo)»— y no el de la obra —*Los jardines
+interiores*—, con el desambiguador de Wikisource camino de la atribución del visitante.
+
+**3. Un documento por obra dejaba sin cotejar la segunda página.** Al pasar a leer el
+encabezado, dos poemas del mismo libro resolvían al mismo fichero y el segundo se quedaba sin
+cuerpo. Se decidió **un documento por página**: el cuerpo versionado es el de una página, y la
+11.2 coteja cada Cita contra el documento que la contiene. Y ahí se pagó la decisión: la
+primera aprobación real tumbó el build con «falta `wikisource-es--el-estado.txt`» —un fichero
+que **sí** estaba, con la página en el nombre—, porque el cotejo seguía buscando por la obra
+sola. **La suite entera seguía verde**: todas sus fixtures usan obras de una página, donde el
+nombre se colapsa y la diferencia no se ve. Ahora el cotejo busca todas las páginas de la obra
+y hay siete pruebas que lo fijan.
+
+**4. Las Citas aprobadas llegaban sin Tema.** La tubería de extracción no tenía forma de
+declararlos: `alta.ts` los toma al crear, pero `revisar --aprobar` no, y no existía ninguna
+orden que se los asignara a una Cita. Publicar por esa vía **no cerraba ningún hueco de
+Tema**, que es el primer criterio de la 11.4. Ahora `--temas` acompaña a `--aprobar`, que es
+cuando el revisor tiene la Cita delante; un Tema con errata **detiene el lote entero** sin
+publicar nada, porque el esquema no ve si un slug de Tema existe y el build lo cazaría cuando
+la Cita ya estuviera publicada.
+
+**Y una avería que no es de código: el OCR.** El *Apéndice a Mis últimas tradiciones peruanas*
+de Palma es un escaneo corrupto, y produjo 61 candidatas plagadas de basura —«enseiia»,
+«Ileno», «For- mabalo», «qus», «tata\* rabuelos»—. **El cotejo literal las habría dado por
+buenas**, porque aparecen literales en su documento: la puerta comprueba fidelidad al
+documento, no que el documento sea legible. Se rechazaron las 61 a mano y se retiró el
+documento. Queda historia abierta.
+
+**Lo que la sesión enseñó sobre el rendimiento.** De 183 candidatas se publicaron 12. La
+prosa narrativa es una fuente pésima para un sitio de citas —«Ante tan franca confesión no
+quedaba al tribunal más que aplicar la pena» es un fragmento sin sentido fuera de su cuento—;
+lo que rinde es prosa sentenciosa. Y el objetivo que propuso la 11.3 —Autores latinoamericanos
+con Citas a «La virtud»— **no se pudo cumplir**: Wikisource no tiene obra fechada
+latinoamericana que sirva a ese Tema. Los Autores entraron; las Citas fueron a «La libertad»,
+el hueco que la cosecha sí podía cerrar. Queda registrado como desviación con su motivo en
+`corpus/sesiones-de-sembrado.yml`, que es para lo que existe `--anular`.

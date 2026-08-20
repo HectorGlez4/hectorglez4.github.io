@@ -14,7 +14,7 @@
 import { rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { autorAdmisible, nombre as nombreDeEntidad } from '../../src/lib/admision.ts';
+import { autorAdmisible, nombre as nombreDeEntidad, tradicion } from '../../src/lib/admision.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
   escribirAutor,
@@ -34,11 +34,33 @@ export type Resultado =
   | { ok: true; ruta: string; mensaje: string }
   | { ok: false; motivos: string[] };
 
+/**
+ * Las tres tradiciones, derivadas del esquema y no reescritas aquí.
+ *
+ * `admision.ts` es el dueño (AD-1). Copiar la lista habría dejado la orden aceptando
+ * etiquetas que el esquema rechaza, o al revés, sin que nada lo notara hasta el build.
+ */
+export type Tradicion = (typeof tradicion)['options'][number];
+
+/** Las tradiciones válidas, para enumerarlas en el rechazo de la orden. */
+export const TRADICIONES: readonly Tradicion[] = tradicion.options;
+
 export interface DatosDeAutor {
   nombre?: string;
   añoFallecimiento?: number;
   añoNacimiento?: number;
   semblanza?: string;
+  /**
+   * La tradición del Autor — §6.1 del PRD, y el dato del que sale el suelo del 40 %.
+   *
+   * Sigue siendo opcional en el esquema, por la razón que `admision.ts` explica: obligarla
+   * empujaría a rellenarla a ojo y la proporción pasaría a medir suposiciones. Lo que **no**
+   * puede ser es intecleable: hasta la Historia 11.4 la orden no la aceptaba, así que un
+   * `--tradicion latinoamericana` se tragaba en silencio y el Autor quedaba sin declarar.
+   * Con la orden diciendo «creado» y el fichero sin el campo, el suelo del 40 % no se movía
+   * y nadie sabía por qué.
+   */
+  tradicion?: Tradicion;
 }
 
 /**
@@ -67,6 +89,8 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
     añoNacimiento: validado.data.añoNacimiento,
     añoFallecimiento: validado.data.añoFallecimiento,
     semblanza: validado.data.semblanza,
+    // `aYaml` omite lo que no tiene valor, así que un Autor sin declarar sale sin la clave.
+    tradicion: validado.data.tradicion,
   });
   return { ok: true, ruta, mensaje: `Autor «${slug}» creado.` };
 }
@@ -86,6 +110,7 @@ export async function editarAutor(
     añoNacimiento: cambios.añoNacimiento ?? actual.añoNacimiento,
     añoFallecimiento: cambios.añoFallecimiento ?? actual.añoFallecimiento,
     semblanza: cambios.semblanza ?? actual.semblanza,
+    tradicion: cambios.tradicion ?? actual.tradicion,
   };
 
   const validado = autorAdmisible.safeParse(fusion);

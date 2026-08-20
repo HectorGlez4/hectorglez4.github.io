@@ -167,6 +167,32 @@ export function documentoDeCita(
   return nombreDeDocumento(fuente.id, obra);
 }
 
+/**
+ * **Todos** los documentos de una obra, porque una obra tiene tantos como páginas.
+ *
+ * Desde que se versiona un documento por página —y no uno por obra— *Los jardines
+ * interiores* son tantos ficheros como poemas suyos se hayan recuperado. La Cita no apunta
+ * de cuál salió, y no hace falta que lo apunte: lo que la regla exige es que su texto
+ * aparezca **literal en su obra**, y la obra es el conjunto de esos ficheros. Buscar solo
+ * el nombre corto dejaba fuera todo lo paginado y rompía la construcción con un «falta el
+ * documento» que era mentira: estaba, con la página en el nombre.
+ *
+ * El nombre corto va primero para que el fallo, cuando no haya ninguno, siga nombrando la
+ * ruta que quien siembra espera ver.
+ */
+export function documentosDeCita(
+  fuente: { id: string } | undefined,
+  obra: string | undefined,
+  documentos: DocumentosDeFuente,
+): string[] {
+  const corto = documentoDeCita(fuente, obra);
+  if (corto === undefined) return [];
+  const conPagina = `${corto}--`;
+  return [...documentos.keys()]
+    .filter((nombre) => nombre === corto || nombre.startsWith(conPagina))
+    .sort((a, b) => (a === corto ? -1 : b === corto ? 1 : a.localeCompare(b, 'es')));
+}
+
 const RECUPERAR =
   'Recupere su Fuente con: npx tsx tools/recuperar.ts <url> — y siembre desde el ' +
   'documento con tools/extraer.ts.';
@@ -372,7 +398,8 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
     }
 
     const rutaDelDocumento = `corpus/fuentes/${nombre}.txt`;
-    if (!documentos.has(nombre)) {
+    const candidatos = documentosDeCita(cita.fuente, cita.obra, documentos);
+    if (candidatos.length === 0) {
       fallos.push({
         ruta: cita.ruta,
         regla:
@@ -382,10 +409,15 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
       continue;
     }
 
-    const cuerpo = documentos.get(nombre);
-    if (cuerpo === null || cuerpo === undefined) {
+    /*
+     * Un documento ilegible **no** deja de contar como intento: si el único que hay no se
+     * analiza, el fallo es ese y no «no aparece». Con varios, uno roto no puede tapar a los
+     * sanos, así que solo se informa cuando ninguno sirvió.
+     */
+    const legibles = candidatos.filter((n) => typeof documentos.get(n) === 'string');
+    if (legibles.length === 0) {
       fallos.push({
-        ruta: rutaDelDocumento,
+        ruta: `corpus/fuentes/${candidatos[0]}.txt`,
         regla:
           'Regla incumplida: el documento no tiene la forma que produce la recuperación ' +
           '(cabecera, «---», declaración, «---» y cuerpo), así que no hay cuerpo contra ' +
@@ -394,12 +426,14 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
       continue;
     }
 
-    if (!apareceEnDocumento(cita.texto, cuerpo)) {
+    const donde = legibles.find((n) => apareceEnDocumento(cita.texto, documentos.get(n) as string));
+    if (donde === undefined) {
+      const enumerados = legibles.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
       fallos.push({
         ruta: cita.ruta,
         regla:
           'Regla incumplida: el texto de la Cita no aparece literalmente en el cuerpo de ' +
-          `${rutaDelDocumento}. La comparación colapsa espacios y nada más: un acento o un ` +
+          `${enumerados}. La comparación colapsa espacios y nada más: un acento o un ` +
           'signo que difieran de la edición hacen fallar. No se toca el texto de la Cita ' +
           'para que cuadre (NFR-12): corrija la Cita contra su edición o retírela a ' +
           'corpus/_revision/.',
