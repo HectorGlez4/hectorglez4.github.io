@@ -120,3 +120,55 @@ export const MIN_CITAS_POR_COLECCION = 15;
  * decisión de diseño, y así se toma mirándola, no desbordando en silencio.
  */
 export const MAX_CARACTERES_CRITERIO = 160;
+
+/**
+ * Los cuatro Umbrales de Activación de los Modelos de Ingreso — Épica 14, AD-9, AD-21.
+ *
+ * Están aquí y en ningún otro sitio: ni en el mando de `tools/`, ni en el paso de CI, ni
+ * en ninguna página. Quien los cruza con el estado de cada Modelo es `src/lib/ingreso.ts`,
+ * que es el dueño único de ese estado; estos números son solo el número.
+ *
+ * El orden en el que se encienden no es por ingreso esperado sino por **coste sobre el
+ * producto**: primero lo que no cuesta nada y último lo que degrada superficie. De ahí que
+ * publicidad pida diez veces más sesiones que la afiliación.
+ *
+ * Y ojo con lo que un número aquí **no** dice: que cruzarlo encienda nada. En la afiliación
+ * dispara la solicitud de la cuenta, que es un acto con reloj propio. Eso lo declara cada
+ * Modelo en `ingreso.ts`, no este fichero.
+ */
+
+/**
+ * Sesiones orgánicas al mes que activan la **afiliación de libros** — Épica 14.
+ *
+ * Mide sesiones, no sesiones monetizables, y la diferencia está abierta a propósito: en
+ * América solo hay programa de Amazon Afiliados en EEUU, Canadá, Brasil y México, y con el
+ * suelo del 40 % de Autores de tradición latinoamericana buena parte del tráfico no es
+ * monetizable por afiliación de producto físico. El número se deja como está hasta que esa
+ * cuestión se decida; cambiarlo antes sería fingir que ya se decidió.
+ */
+export const SESIONES_PARA_AFILIACION = 2000;
+
+/** Sesiones orgánicas al mes que activan el **producto propio** — Épica 14. */
+export const SESIONES_PARA_PRODUCTO_PROPIO = 5000;
+
+/**
+ * Sesiones orgánicas al mes que activan la **publicidad acotada** — Épica 14.
+ *
+ * El más alto de los tres porque es el único que degrada la superficie que produce el
+ * ingreso. La contra-métrica que lo vigila —rebote de la Página de Cita y tiempo hasta el
+ * contenido— es la razón de que encender sea un gesto humano y reversible.
+ */
+export const SESIONES_PARA_PUBLICIDAD = 25000;
+
+/**
+ * El Umbral de las **donaciones**, que no es un número — Épica 14, LC-1…LC-4.
+ *
+ * Se declara como lista de condiciones y no como cifra porque no lo es: son las cuatro
+ * Condiciones de Lanzamiento verificadas. Escribirlo como número —«0 sesiones», «cuando
+ * toque»— habría metido las donaciones en la misma casilla que las otras tres y con ella la
+ * equivalencia «cruzado ⇒ encender», que no vale para las cuatro filas.
+ *
+ * Quién las verifica: el dueño, ejecutando `DESPLIEGUE.md`. Ningún agente y ninguna orden
+ * abren esa puerta. Hoy LC-4 sigue abierta.
+ */
+export const CONDICIONES_PARA_DONACIONES = ['LC-1', 'LC-2', 'LC-3', 'LC-4'] as const;

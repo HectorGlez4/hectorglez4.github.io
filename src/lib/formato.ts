@@ -22,6 +22,26 @@ export function porcentajeEnEspañol(valor: number): string {
 }
 
 /**
+ * Un entero escrito en español: punto de millar — «2.000», «25.000».
+ *
+ * Aquí y no en `tools/` por lo mismo que el porcentaje: este módulo es donde el proyecto
+ * decide cómo se escribe un número cuando lo lee una persona, y su hermano existe porque dos
+ * informes llegaron a discrepar —«33.3 %» en uno y «16,7 %» en el otro—. Hoy lo usa un solo
+ * lector, el informe del mando de ingreso, que escribe los Umbrales y la cifra medida; el
+ * paso de CI no formatea nada, solo canaliza lo que ese informe ya escribió. Ponerlo aquí es
+ * lo que evita que el segundo lector traiga su propia convención.
+ *
+ * `toLocaleString` daría esto con la configuración regional adecuada y otra cosa con
+ * cualquier otra, y el texto tiene que salir idéntico palabra por palabra en la máquina de
+ * quien lo consulta y en la del flujo diario.
+ */
+export function milesEnEspañol(valor: number): string {
+  const entero = Math.trunc(Math.abs(valor));
+  const agrupado = String(entero).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return valor < 0 ? `-${agrupado}` : agrupado;
+}
+
+/**
  * La línea con la que el proyecto dice qué le falta a una agregación — Historia 12.4.
  *
  * Estaba escrita dentro del bucle de `tools/huecos.ts` y valía mientras solo hubiera una

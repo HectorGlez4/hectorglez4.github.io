@@ -2,13 +2,53 @@
 title: 'Story 14.1 — Encender un Modelo de Ingreso es un commit'
 type: 'feature'
 created: '2026-08-20'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: '47cf9f2aca5ea48b9194c9a6c9b67c6a9c3241fa'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-14-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-12-1-una-superficie-declara-en-un-solo-sitio.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      El mando solo avisa hacia arriba: no hay ninguna señal que diga cuándo **apagar** un
+      Modelo, que es el requisito que la historia declara como el de verdad.
+    evidence: |-
+      El módulo y `AGENTS.md` repiten que lo importante es poder apagar, y que la publicidad
+      va vigilada por la contra-métrica —rebote de la Página de Cita y tiempo hasta el
+      contenido—. El mando compara solo contra el Umbral y hacia arriba: un Modelo ya
+      encendido devuelve `aviso: undefined` por construcción, no se lee ninguna
+      contra-métrica, y tampoco se avisa de un Modelo encendido cuyo Umbral dejó de estar
+      cruzado. La palanca existe y es de una línea; la señal que diría cuándo accionarla, no.
+      Construirla exige que el receptor publique las dos series de la contra-métrica, que es
+      el mismo paso que hoy falta para que haya cifra siquiera.
+    location: >-
+      tools/lib/ingresos.ts
+    severity: medium
+  - summary: >-
+      El receptor no publica ninguna lectura, así que el camino «Umbral cruzado» del mando
+      está probado y no ejercitado por ninguna infraestructura real.
+    evidence: |-
+      El Worker de `medicion/` contesta 204 a todo lo que no sea un POST de baliza: escribe y
+      no se lee, y la cifra se saca hoy con `npx wrangler d1 execute`. El mando pide la
+      lectura por HTTP a `MEDICION_ENDPOINT` y degrada diciendo que el receptor no la publica,
+      que es la respuesta honesta y no una cifra inventada. La rama que compara con el Umbral
+      se prueba contra un receptor de mentira levantado en `127.0.0.1`. Enseñarle al receptor
+      a publicar esa cifra agregada —o leerla por `wrangler` desde `tools/`— queda fuera de
+      esta historia y es lo que hará falta el día que LC-4 se cierre.
+    location: >-
+      tools/lib/ingresos.ts
+    severity: medium
+  - summary: >-
+      `tools/lib/documento.ts` conserva un literal numérico de tope fuera de `umbrales.ts`.
+    evidence: |-
+      `MAX_ELEMENTOS_RETIRADOS = 5000` es anterior a esta historia y no es un Umbral de
+      Activación, pero ensucia la verificación por grep que la especificación declara —«solo
+      `src/lib/umbrales.ts`»— y es, en la letra de AD-9, un literal de regla con nombre que
+      vive en `tools/`. Ninguno de los cuatro Umbrales nuevos está fuera de `umbrales.ts`.
+    location: >-
+      tools/lib/documento.ts
+    severity: low
 ---
 
 <frozen-after-approval reason="human-owned intent — do not modify unless human renegotiates">
@@ -70,14 +110,14 @@ deferred: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/lib/ingreso.ts` (nuevo) -- el dueño único: los cuatro Modelos con su estado (hoy los cuatro `false`), qué dispara su Umbral (`enciende` o `solicita`) y qué familias de superficie los admiten. Puro, sin disco. Rationale: con dos Modelos ya sería tarde; el estado repartido es el fallo que la épica existe para no cometer.
-- [ ] `src/lib/umbrales.ts` -- los cuatro Umbrales, el de donaciones declarado como condición no numérica. Rationale: AD-9, y que el de afiliación no sea un número suelto es lo que impide leerlo como «cruzado ⇒ encender».
-- [ ] `tools/ingreso.ts` + `tools/lib/ingresos.ts` (nuevos) -- el mando que informa: estado, Umbral y cifra medida o el motivo de que no lo sea. Consulta el receptor desde `tools/`, degrada sin inventar y **no enciende nada**.
-- [ ] `.github/workflows/publicar.yml` -- el paso de aviso en el flujo diario, incapaz de tumbarlo. Rationale: si el aviso puede fallar, la reconstrucción diaria del sitio en vivo depende de que el receptor conteste, y eso es exactamente lo que AD-14 prohíbe.
-- [ ] `package.json` y `AGENTS.md` -- el guion `ingreso` y cómo se enciende un Modelo, fuera del bloque gestionado.
-- [ ] `tests/unit/ingreso.test.ts` (nuevo) -- la tabla: los cuatro apagados hoy, ninguna superficie de lectura admite ninguno, y que el estado no se pueda derivar de nada que no sea el módulo.
-- [ ] `tests/unit/ingreso-cli.test.ts` (nuevo) -- la matriz del mando: sin endpoint, con receptor caído, con umbral cruzado —y que en la afiliación el aviso diga *solicitar*, no *encender*.
-- [ ] `tests/unit/ingreso-construido.test.ts` (nuevo) -- sobre el sitio construido: ninguna superficie muestra hueco, marcador ni espacio reservado; el armazón compartido no aloja ningún Modelo; y **dos construcciones del mismo corpus dan el mismo `dist/`**.
+- [x] `src/lib/ingreso.ts` (nuevo) -- el dueño único: los cuatro Modelos con su estado (hoy los cuatro `false`), qué dispara su Umbral (`enciende` o `solicita`) y qué familias de superficie los admiten. Puro, sin disco. Rationale: con dos Modelos ya sería tarde; el estado repartido es el fallo que la épica existe para no cometer.
+- [x] `src/lib/umbrales.ts` -- los cuatro Umbrales, el de donaciones declarado como condición no numérica. Rationale: AD-9, y que el de afiliación no sea un número suelto es lo que impide leerlo como «cruzado ⇒ encender».
+- [x] `tools/ingreso.ts` + `tools/lib/ingresos.ts` (nuevos) -- el mando que informa: estado, Umbral y cifra medida o el motivo de que no lo sea. Consulta el receptor desde `tools/`, degrada sin inventar y **no enciende nada**.
+- [x] `.github/workflows/publicar.yml` -- el paso de aviso en el flujo diario, incapaz de tumbarlo. Rationale: si el aviso puede fallar, la reconstrucción diaria del sitio en vivo depende de que el receptor conteste, y eso es exactamente lo que AD-14 prohíbe.
+- [x] `package.json` y `AGENTS.md` -- el guion `ingreso` y cómo se enciende un Modelo, fuera del bloque gestionado.
+- [x] `tests/unit/ingreso.test.ts` (nuevo) -- la tabla: los cuatro apagados hoy, ninguna superficie de lectura admite ninguno, y que el estado no se pueda derivar de nada que no sea el módulo.
+- [x] `tests/unit/ingreso-cli.test.ts` (nuevo) -- la matriz del mando: sin endpoint, con receptor caído, con umbral cruzado —y que en la afiliación el aviso diga *solicitar*, no *encender*.
+- [x] `tests/unit/ingreso-construido.test.ts` (nuevo) -- sobre el sitio construido: ninguna superficie muestra hueco, marcador ni espacio reservado; el armazón compartido no aloja ningún Modelo; y **dos construcciones del mismo corpus dan el mismo `dist/`**.
 
 **Acceptance Criteria:**
 - Given el estado de un Modelo, when lo consulto, then es configuración versionada: encenderlo es un diff y `git revert` lo apaga.
@@ -88,6 +128,26 @@ deferred: []
 - Given el estado de cada Modelo y su cifra, when los consulto, then los obtengo sin exportar datos.
 
 ## Spec Change Log
+
+### 2026-08-20 — La exclusión de las superficies de lectura se estrecha a dos Modelos
+
+**Qué decía.** «La Página de Cita y la Página de Colección no admiten ninguno», y su prueba
+—«ninguna superficie de lectura admite ninguno»—.
+
+**Por qué cambia.** Eso cerraba por omisión una excepción que el contexto de la épica da por
+buena y ya resuelta aguas arriba: el enlace de afiliación **nace de la Procedencia ya
+publicada**, que la Página de Cita ya muestra, y la exclusión se estrechó expresamente a la
+publicidad. Escrita como «ningún Modelo», la regla obligaría a reabrir UX-DR36 el día de
+solicitar la cuenta, en vez de a escribir una línea.
+
+**Qué dice ahora.** Las superficies de lectura vedan **donaciones y publicidad acotada**, que
+son los dos Modelos que añadirían superficie a una lectura. La afiliación queda admisible por
+regla y **sigue sin superficie declarada**, porque falta decidir qué edición se enlaza.
+
+**Qué no cambia: nada de lo que el código hace hoy.** Los cuatro Modelos siguen apagados, la
+afiliación sigue con `admitidoEn: []` y ninguna superficie aloja nada. Lo que cambia es la
+regla que juzga, y con ella el sitio donde mirará quien mañana quiera admitirla:
+`MODELOS_VEDADOS_EN_LECTURA` en `src/lib/ingreso.ts`, y la sección de `AGENTS.md`.
 
 ## Design Notes
 
@@ -106,3 +166,35 @@ deferred: []
 - `npm run ingreso` -- expected: los cuatro apagados y la cifra declarada no medible, nombrando LC-4.
 - `grep -rn "2000\|5000\|25000" src tools --include="*.ts"` -- expected: solo `src/lib/umbrales.ts`.
 - `grep -rn "MEDICION\|medicion" src/pages src/layouts src/components --include="*.astro"` -- expected: nada nuevo; el build sigue sin leer del plano de medición.
+
+### 2026-08-20 — Review pass
+- intent_gap: 1 (resuelto por enmienda, sin rehacer código)
+- bad_spec: 0
+- patch: 24: (high 5, medium 15, low 4)
+- defer: 1
+- reject: 0
+- addressed_findings:
+  - `[intent_gap]` **La exclusión de superficies de lectura estaba escrita de más.** El «Always» decía que la Página de Cita y la de Colección no admiten **ningún** Modelo, y eso cerraba por omisión una excepción que el contexto de la épica da por buena y ya resuelta aguas arriba: el enlace de afiliación nace de la Procedencia **ya publicada**, que se muestra en la Página de Cita, y la exclusión se estrechó a la publicidad. Se resolvió por la vía conservadora, sin tocar nada de lo que hace el código —los cuatro siguen apagados y la afiliación sigue sin superficie— y cambiando la regla: `MODELOS_VEDADOS_EN_LECTURA` veda `donaciones` y `publicidad-acotada`, no cualquier Modelo, y el porqué queda escrito donde mirará quien mañana quiera admitirla.
+  - `[high]` `[patch]` **Borrar el `env: MEDICION_ENDPOINT` del paso de CI dejaba la suite entera en verde** y apagaba el aviso para siempre — con un síntoma, «falta LC-4», indistinguible del estado legítimo de hoy, también el día que LC-4 se cierre.
+  - `[high]` `[patch]` `milesEnEspañol` entró sin prueba directa y escribe todos los Umbrales: quitarle el `\B` hacía que el informe dijera «.2.000» sin que nada fallara, y devolver cadena vacía habría hecho **pasar vacíamente** las dos aserciones de «no inventa ninguna cifra», cuyo regex exige dígitos delante.
+  - `[high]` `[patch]` **La espera acotada no la recorría ninguna prueba.** Los tres receptores de mentira eran «sin desplegar», «caído» —que rechaza la conexión— y «contesta»: ninguno aceptaba y se callaba, que es el único caso para el que existe `AbortSignal.timeout`. Sin él la orden no vuelve nunca en una terminal.
+  - `[high]` `[patch]` `expect(peticiones).toBe(0)`, la única prueba de AD-14 sobre el build, no tenía control positivo: pasaba igual si el contador no supiera ver una petición.
+  - `[high]` `[patch]` Camino de fuga del secreto: `fallo.message` de `fetch` incluye la dirección entera, y de stdout pasaba por `tee` al resumen del flujo.
+  - `[medium]` `[patch]` El comentario afirmaba que la revisión al cargar impide construir el sitio con una superficie de lectura mal declarada. Hoy es falso —nada de `src/` importa el módulo— y lo será a partir de la 14.2.
+  - `[medium]` `[patch]` La contradicción documental de LC-4 en el texto accionable: `MEDICION_ENDPOINT` es la dirección de **ingesta**, y el receptor contesta 204 a todo lo que no sea un POST, así que cerrar LC-4 seguirá sin publicar cifra. Ahora el informe nombra el paso que de verdad falta.
+  - `[medium]` `[patch]` En CI faltaba `pipefail` —el código de salida era el de `tee`, así que un `tsx` roto pasaba en verde con resumen vacío—, el informe se colapsaba porque `$GITHUB_STEP_SUMMARY` se renderiza como Markdown, y una `pull_request` desde bifurcación confundía el secreto vacío con LC-4.
+  - `[medium]` `[patch]` `interpretarLectura` admitía decimales que el informe truncaba en silencio, y no miraba el `content-type`; el ternario de `dispara` hacía caer cualquier valor futuro en «se puede encender»; las anotaciones no escapaban `%`, saltos ni `::`; y `revisarDeclaracionDeIngreso` no comprobaba el censo completo, los duplicados ni las entradas huérfanas tras un renombrado.
+  - `[medium]` `[patch]` `modelosEn` sin control positivo, `modelosMarcadosEn` ciego al atributo sin comillas, el vigilante de imports ciego al import sin extensión, y `not.toContain(modelo.id)` sobre todo el HTML como bomba de relojería de contenido.
+  - `[medium]` `[patch]` El campo `nota` —cuatro notas cuidadosamente redactadas— no llegaba a ninguna salida. Ahora se publica.
+  - `[low]` `[patch]` Falta de `--ayuda`, `--json --anotar` sin prueba conjunta, sockets keep-alive que colgaban el `afterAll`, y EPIPE sin capturar.
+  - `[defer]` **Nada avisa en la dirección contraria.** La historia declara que lo importante es poder **apagar**, y la contra-métrica que diría cuándo accionar esa palanca no existe: el mando solo compara hacia arriba. Queda registrado, no construido.
+
+## Auto Run Result
+
+Status: done
+
+**Cambio implementado.** `src/lib/ingreso.ts` es el dueño único del estado de los cuatro Modelos —hoy los cuatro apagados—, de qué dispara cada Umbral y de qué superficies lo admiten. Encender uno es un diff de un booleano y `git revert` lo apaga. `npm run ingreso` informa sin escribir nada, y un paso del flujo diario avisa con tres cinturones para no poder tumbar el despliegue.
+
+**Verificación.** `npx astro check` 0 errores. `npx vitest run` **1501/1501** en 55 ficheros, frente a 1414/52 al abrir la historia. `npm run build` con 53 páginas. `npx playwright test` **400 pasan**. `npm run ingreso` da los cuatro apagados y explica qué falta para que haya cifra; `--ayuda` sale con 0; `--json --anotar` deja stdout como JSON parseable.
+
+**Recomendación de nueva revisión: false.**

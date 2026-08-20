@@ -280,3 +280,67 @@ slugs) y **1** es lo que la invocación dice, incluido un slug con forma de ruta
 El PNG por omisión es `piezas/pieza-coleccion-<slug>.png`, con su propio constructor
 (`nombreDePiezaDeColeccion`): el de las Citas sueltas une slugs con guion doble y resume la
 cola como «y N más», que sobre una Colección borraría del nombre justo lo que anuncia.
+
+## Encender un Modelo de Ingreso
+
+Los cuatro Modelos —donaciones, afiliación de libros, producto propio y publicidad
+acotada— tienen un solo dueño de su estado: `src/lib/ingreso.ts`. **Encender uno es cambiar
+un `false` por un `true` ahí, y nada más**; `git revert` de ese diff lo apaga, y git registra
+cuándo y por qué. No hay bandera de entorno, ni casilla de panel, ni consulta al receptor que
+encienda nada, y no debe haberla: el requisito de verdad es poder **apagar** el mismo día un
+Modelo que suba el ingreso degradando el rebote de la Página de Cita.
+
+Hoy los cuatro están apagados. Para consultarlos:
+
+```
+npm run ingreso            # estado, Umbral y cifra medida —o por qué no es medible
+npm run ingreso -- --json  # lo mismo como datos
+```
+
+La orden **informa y no enciende nada**: no escribe en ninguna parte. Sale con código 0 pase
+lo que pase con el receptor —sin desplegar, caído o contestando cualquier cosa—, porque el
+flujo diario que la llama con `--anotar` es el mismo que despliega el sitio en vivo, y un
+aviso capaz de tumbarlo ataría la reconstrucción diaria a un plano que el sitio nunca lee
+(AD-14).
+
+**Hoy la cifra no es medible, y cerrar LC-4 no basta para que lo sea.** Falta LC-4 —el
+receptor sin desplegar, `MEDICION_ENDPOINT` sin definir— y la orden lo dice nombrándola; pero
+esa variable es la dirección de **ingesta de balizas** (`DESPLIEGUE.md` §3) y el receptor
+contesta 204 a todo lo que no sea un `POST`: escribe y no publica. Para que haya cifra hace
+falta un paso más que no es de esta historia: que el receptor publique una lectura agregada,
+o leerla con `npx wrangler d1 execute`. La orden lo dice así en vez de fingir un cero.
+
+**Junto al estado vive qué superficie admite qué Modelo**, en el mismo fichero y con la misma
+identidad con la que se declaran en `src/lib/superficies.ts`. Las superficies de **lectura**
+—la Página de Cita y la Página de Colección— tienen dos Modelos vedados, y la declaración los
+rechaza: **donaciones y publicidad acotada**. La exclusión nace de la invitación de donación,
+que vive en portada, búsqueda y 404, y aguas arriba se estrechó a la publicidad, el único
+Modelo que degrada la superficie que produce el ingreso.
+
+**La afiliación de libros es la excepción, y está registrada.** Su enlace no se añade a la
+Página de Cita: *nace* de la Procedencia ya publicada, que esa página ya muestra y que se
+deriva en el build sin consultar a nadie. No interrumpe ninguna lectura porque no añade
+superficie —convierte en enlace un dato que ya estaba escrito—, así que admitirla ahí el día
+que se solicite la cuenta será una línea en `admitidoEn` y no una renegociación de UX-DR36.
+Hoy no está admitida en ninguna superficie: falta decidir **qué edición se enlaza**, y eso se
+decide con la cuenta delante.
+
+Un Modelo no se aloja jamás en el armazón compartido: es una línea, aparece en todas partes e
+incluye la Página de Cita.
+
+**Lo que un Modelo ponga en una página va marcado con `data-ingreso="<id>"`.** No es
+decoración: `tests/unit/ingreso-construido.test.ts` recorre el `dist/` construido y exige que
+lo marcado en cada página esté encendido y admitido ahí. Lo que hoy vigila la declaración es
+`npm test`, y no el build: mientras ningún fichero de `src/` importe `src/lib/ingreso.ts`
+—que es el estado de hoy, con los cuatro apagados—, `astro build` no lo evalúa. Desde la 14.2,
+cuando alguna superficie lo consulte, detendrá también la construcción. Con todo apagado eso significa que un
+Modelo apagado es **invisible y no latente** (UX-DR35) —ni hueco reservado, ni contenedor
+vacío, ni comentario—, y encendido significa que no puede aparecer donde no se admite.
+
+**Un Umbral cruzado no enciende nada, y en la afiliación ni siquiera habla de encender.**
+Amazon Afiliados cierra la cuenta que no logra 3 ventas cualificadas en 180 días desde el
+alta, y la del proyecto ya se cerró una vez por esa regla: allí el Umbral dispara *solicitar
+la cuenta*, un acto con reloj propio. Por eso cada Modelo declara **qué dispara** su Umbral, y
+por eso no se escribe en ningún sitio la equivalencia «cruzado ⇒ encender». Los cuatro
+Umbrales viven en `src/lib/umbrales.ts` y en ningún otro: ni en la orden, ni en el paso de CI,
+ni en ninguna página.
