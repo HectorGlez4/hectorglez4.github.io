@@ -473,6 +473,106 @@ export function lineasDeEncabezadoDeWikitexto(wikitexto: string): string[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// La obra que la página declara — Fix 11.1c
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * La marca con la que se distinguen, dentro de la declaración, las líneas de **la obra**.
+ *
+ * En Wikisource la obra declara el año y la página declara el texto, y casi nunca son la
+ * misma página: el índice de «Capítulos que se le olvidaron a Cervantes» trae `|año = 1895`
+ * y su «Capítulo XLIII» trae ocho mil caracteres de prosa y ningún año. Cuando la página no
+ * declara año se recupera el encabezado de la obra que ella misma declara, y sus líneas se
+ * guardan **junto a las suyas y distinguibles de ellas**: la obra sale siempre de las
+ * propias —si el padre pudiera aportarla, una subpágina heredaría el nombre del índice— y
+ * solo el año puede caer a las de la obra.
+ *
+ * La marca va delante para que los patrones de parámetro, todos anclados en `^\s*\|`, no
+ * puedan dispararse sobre una línea del padre por descuido.
+ */
+export const MARCA_DE_LA_OBRA = 'obra>';
+
+/** Las líneas que declaró **la página**: todo lo que no viene marcado como de la obra. */
+function loQueDeclaraLaPagina(declaracion: string): string {
+  return declaracion
+    .split('\n')
+    .filter((linea) => !linea.startsWith(MARCA_DE_LA_OBRA))
+    .join('\n');
+}
+
+/** Las líneas que declaró **la obra**, ya sin la marca. */
+function loQueDeclaraLaObra(declaracion: string): string {
+  return declaracion
+    .split('\n')
+    .filter((linea) => linea.startsWith(MARCA_DE_LA_OBRA))
+    .map((linea) => linea.slice(MARCA_DE_LA_OBRA.length).trim())
+    .join('\n');
+}
+
+/** Las líneas del encabezado de la obra, marcadas para entrar en la declaración. */
+export function lineasDeLaObraDeclarada(encabezadoDeLaObra: string): string[] {
+  return lineasDeEncabezadoDeWikitexto(encabezadoDeLaObra).map(
+    (linea) => `${MARCA_DE_LA_OBRA} ${linea}`,
+  );
+}
+
+/**
+ * El destino de un enlace de wikitexto, **solo si es absoluto y del espacio principal**.
+ *
+ * No es lo mismo que `tituloDeclarado`, que resuelve el texto **visible** del enlace: para
+ * pedirle el año a la obra hace falta la página a la que el enlace apunta, que en
+ * `[[Obra|otra cosa]]` es la primera mitad.
+ *
+ * Se rechaza —y entonces no se encadena— todo lo que no sea una página de esta misma
+ * Fuente y de su espacio principal:
+ *
+ *   · lo relativo (`[[../]]`, `[[/Capítulo I]]`), porque el destino lo resolvería la ruta
+ *     de la página y derivar el padre de la ruta es justo lo que la Historia 11.1 prohíbe;
+ *   · lo que lleva prefijo con dos puntos (`[[:en:Something]]`, `[[Índice:Ariel.djvu]]`,
+ *     `[[Wikisource:Portada]]`), que es otro anfitrión u otro espacio de nombres;
+ *   · lo que no es un enlace suelto: una URL externa, una plantilla sin expandir, un
+ *     enlace sin cerrar, o un valor con algo más además del enlace.
+ *
+ * El precio de los dos puntos es que un título que los lleve dentro no encadena. Es el
+ * precio correcto: no encadenar deja la candidata con obra y sin año, que es un estado
+ * legítimo, y confundir un espacio de nombres con un título no lo es.
+ */
+export function destinoDeEnlaceAbsoluto(valor: string): string | undefined {
+  const limpio = valor.replace(/'{2,}/gu, '').replace(/\s+/gu, ' ').trim();
+
+  const enlace = /^\[\[([^[\]|]+)(?:\|[^[\]]*)?\]\]$/u.exec(limpio);
+  if (enlace === null) return undefined;
+
+  // La marca de sección designa un trozo de la página, no otra página.
+  const destino = enlace[1].split('#')[0].replace(/_/gu, ' ').replace(/\s+/gu, ' ').trim();
+
+  if (destino === '') return undefined;
+  if (destino.startsWith('../') || destino.startsWith('/')) return undefined;
+  if (destino.includes(':')) return undefined;
+  if (!/[\p{L}\p{N}]/u.test(destino)) return undefined;
+  return destino;
+}
+
+/**
+ * La página que hay que pedir para que la obra declare su año, o nada si no hay ninguna.
+ *
+ * La subpágina **ya declara a qué obra pertenece**: `|título = [[Capítulos que se le
+ * olvidaron a Cervantes]]` es un enlace absoluto a la página de la obra en esta misma
+ * Fuente. Encadenar esas dos declaraciones —«pertenezco a esta obra» y «soy de 1895»— no
+ * añade ninguna frase nuestra. Sacar el padre de la ruta `Obra/Capítulo` sí la añadiría, y
+ * por eso el único padre admisible es el que la página escribe como enlace.
+ */
+export function paginaDeLaObraDeclarada(encabezado: string): string | undefined {
+  for (const linea of lineasDeEncabezadoDeWikitexto(encabezado)) {
+    const encontrado = PARAMETRO_DE_TITULO_WIKITEXTO.exec(linea);
+    if (encontrado === null) continue;
+    const destino = destinoDeEnlaceAbsoluto(linea.slice(encontrado.index + encontrado[0].length));
+    if (destino !== undefined) return destino;
+  }
+  return undefined;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Lectores por Fuente
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -492,8 +592,19 @@ export interface LectorDeFuente {
    * la recuperación ha podido traerlo. Es opcional a propósito: si no llega, la Fuente
    * declara lo que declare la página renderizada y ya está. Un metadato que falta no es
    * un fallo.
+   *
+   * `encabezadoDeLaObra` es el texto de origen de **la obra que la página declara**, que
+   * la recuperación solo pide cuando la página no declara año. Sus líneas se guardan junto
+   * a las de la página y **distinguibles** de ellas: la obra sale siempre de la página, y
+   * solo el año puede caer a lo que declare la obra.
    */
-  declaracion(bruto: string, plano: string, regionPlana: string, encabezado?: string): string;
+  declaracion(
+    bruto: string,
+    plano: string,
+    regionPlana: string,
+    encabezado?: string,
+    encabezadoDeLaObra?: string,
+  ): string;
   /** La obra que declara esa declaración. */
   obra(declaracion: string): string | undefined;
   /**
@@ -557,6 +668,9 @@ const FICHA_DE_GUTENBERG =
 function paginaDeWikisource(declaracion: string): string | undefined {
   const primera = declaracion.split('\n')[0]?.trim() ?? '';
   if (primera === '' || primera.startsWith('|')) return undefined;
+  // Las líneas de la obra van detrás de las de la página y nunca las primeras, pero si
+  // alguna llegara aquí sería el nombre del índice ocupando el de la página.
+  if (primera.startsWith(MARCA_DE_LA_OBRA)) return undefined;
   return ETIQUETA_DE_AÑO_WIKISOURCE.test(primera) ? undefined : primera;
 }
 
@@ -592,7 +706,7 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
      * El año sale de la **región ya limpia** (fix: antes salía de la página entera, y una
      * etiqueta de un navbox o de la cabecera del sitio ganaba a la de la obra).
      */
-    declaracion(bruto, _plano, regionPlana, encabezadoDeOrigen) {
+    declaracion(bruto, _plano, regionPlana, encabezadoDeOrigen, encabezadoDeLaObra) {
       const encabezado = /<h1\b[^>]*\bid\s*=\s*["']firstHeading["'][^>]*>([\s\S]*?)<\/h1>/i.exec(bruto);
       const titulo =
         textoDeCaptura(encabezado?.[1]) ??
@@ -607,10 +721,16 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
       // Detrás van, literales, las dos formas en las que Wikisource declara su metadato:
       // la etiqueta de la página renderizada —que casi nunca aparece— y los parámetros
       // del encabezado del wikitexto, que es donde el dato vive de verdad.
+      //
+      // Y al final, marcadas, las líneas de la obra que la página declara, cuando la
+      // recuperación las ha tenido que pedir. Se guardan las dos literales porque
+      // `extraer` vuelve a derivar el año de aquí, sin red: guardar «año: 1895» ya
+      // interpretado convertiría la puerta de la 11.1 en un campo editable.
       return [
         titulo ?? '',
         ...recorteDeEtiqueta(regionPlana, ETIQUETA_DE_AÑO_WIKISOURCE),
         ...(encabezadoDeOrigen === undefined ? [] : lineasDeEncabezadoDeWikitexto(encabezadoDeOrigen)),
+        ...(encabezadoDeLaObra === undefined ? [] : lineasDeLaObraDeclarada(encabezadoDeLaObra)),
       ].join('\n');
     },
     /**
@@ -621,9 +741,14 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
      * esperaría ver citada— es «Los jardines interiores», que es lo que el encabezado
      * declara en `|título`. Cuando no lo declara, o declara algo que no es un título, se
      * cae al encabezado de la página, que es lo que había antes de esto.
+     *
+     * **La obra la declara siempre la página**, nunca el encabezado de la obra que se
+     * recuperó para el año: si el padre pudiera aportar el título, toda subpágina heredaría
+     * el nombre del índice y se perdería la distinción entre obra y página. Por eso aquí
+     * solo se miran las líneas propias.
      */
     obra(declaracion) {
-      for (const linea of declaracion.split('\n')) {
+      for (const linea of loQueDeclaraLaPagina(declaracion).split('\n')) {
         const encontrado = PARAMETRO_DE_TITULO_WIKITEXTO.exec(linea);
         if (encontrado === null) continue;
         const titulo = tituloDeclarado(linea.slice(encontrado.index + encontrado[0].length));
@@ -640,11 +765,18 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
      * página con «Año de publicación» visible— y por eso el parámetro es el que trabaja.
      * Se conserva la etiqueta porque es la forma que declara la página que se versionó, y
      * lo que la página dice manda sobre lo que dice su código fuente.
+     *
+     * Y en último lugar, el de **la obra que la página declara**. En Wikisource la obra
+     * declara el año y la página declara el texto, y casi nunca son la misma página: sin
+     * este último salto, toda subpágina de una obra conocida se sembraría con Procedencia
+     * parcial. Lo que declara la página manda sobre lo que declara su obra.
      */
     año(declaracion) {
+      const deLaPagina = loQueDeclaraLaPagina(declaracion);
       return (
-        añoJuntoAEtiqueta(declaracion, ETIQUETA_DE_AÑO_WIKISOURCE) ??
-        añoDeParametro(declaracion, PARAMETRO_DE_AÑO_WIKITEXTO)
+        añoJuntoAEtiqueta(deLaPagina, ETIQUETA_DE_AÑO_WIKISOURCE) ??
+        añoDeParametro(deLaPagina, PARAMETRO_DE_AÑO_WIKITEXTO) ??
+        añoDeParametro(loQueDeclaraLaObra(declaracion), PARAMETRO_DE_AÑO_WIKITEXTO)
       );
     },
   },
@@ -769,11 +901,16 @@ export type DerivacionDeDocumento =
  * wikitexto de MediaWiki, de donde sale el `|año = 1905` que la página no renderiza—. Si
  * no llega, la derivación sigue con lo que declare la página: un metadato que falta no es
  * un fallo, y la candidata queda con obra y sin año.
+ *
+ * `encabezadoDeLaObra` es el texto de origen de la obra que la página declara en su
+ * `|título`, que la recuperación solo pide cuando la página no declara año. Aporta el año
+ * y nada más: la obra la sigue declarando la página.
  */
 export function derivarDocumento(
   idFuente: string,
   bruto: string,
   encabezado?: string,
+  encabezadoDeLaObra?: string,
 ): DerivacionDeDocumento {
   const lector = LECTORES_POR_FUENTE[idFuente];
   if (lector === undefined) {
@@ -791,7 +928,13 @@ export function derivarDocumento(
     const region = lector.region(bruto);
     if (!region.ok) return region;
     cuerpo = aTextoPlano(region.region);
-    declaracion = lector.declaracion(bruto, aTextoPlano(bruto), cuerpo, encabezado);
+    declaracion = lector.declaracion(
+      bruto,
+      aTextoPlano(bruto),
+      cuerpo,
+      encabezado,
+      encabezadoDeLaObra,
+    );
   } catch (fallo) {
     // Retirar el cromo puede rendirse; que se rinda es un error, no medio documento.
     return { ok: false, motivo: fallo instanceof Error ? fallo.message : String(fallo) };

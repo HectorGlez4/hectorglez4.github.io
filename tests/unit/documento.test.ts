@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MARCA_DE_LA_OBRA,
   MAX_CARACTERES_SLUG_DE_OBRA,
   MAX_ELEMENTOS_RETIRADOS,
   MAX_LINEAS_DE_ENCABEZADO,
@@ -9,7 +10,9 @@ import {
   componerDocumento,
   derivarDeLaDeclaracion,
   derivarDocumento,
+  destinoDeEnlaceAbsoluto,
   lineasDeEncabezadoDeWikitexto,
+  paginaDeLaObraDeclarada,
   nombreDeDocumento,
   resolverEntidades,
   tituloDeclarado,
@@ -884,5 +887,209 @@ describe('Fix 11.1b — el nombre del documento distingue las páginas de una ob
     );
     expect(derivado.obra).toBe('Del sentimiento trágico de la vida');
     expect(derivado.pagina).toBeUndefined();
+  });
+});
+
+/**
+ * Fix 11.1c — cuando la página no declara el año, lo declara su obra.
+ *
+ * En Wikisource **la obra declara el año y la página declara el texto**, y casi nunca son
+ * la misma página: «Capítulos que se le olvidaron a Cervantes» declara `|año = 1895` y su
+ * cuerpo es el índice; su «Capítulo XLIII» trae ocho mil caracteres de prosa y ningún año.
+ * La subpágina ya declara a qué obra pertenece, con un enlace absoluto en su `|título`;
+ * encadenar esas dos declaraciones —«pertenezco a esta obra» y «soy de 1895»— no añade
+ * ninguna frase nuestra.
+ */
+describe('Fix 11.1c — qué página hay que pedirle el año', () => {
+  it('el destino del enlace absoluto de `|título` es la obra que hay que pedir', () => {
+    const hija = `{{Encabezado\n|título = [[Capítulos que se le olvidaron a Cervantes]]\n|autor = Juan Montalvo\n}}`;
+    expect(paginaDeLaObraDeclarada(hija)).toBe('Capítulos que se le olvidaron a Cervantes');
+  });
+
+  it('con `[[destino|texto]]` se pide el destino, no el texto visible', () => {
+    // `tituloDeclarado` resuelve el texto visible, que es lo que la página enseña; para
+    // pedirle el año a la obra hace falta la página a la que el enlace apunta.
+    expect(destinoDeEnlaceAbsoluto('[[Ariel|El Ariel de Rodó]]')).toBe('Ariel');
+    expect(tituloDeclarado('[[Ariel|El Ariel de Rodó]]')).toBe('El Ariel de Rodó');
+  });
+
+  it('un `|título` relativo no encadena: derivarlo de la ruta es lo que está prohibido', () => {
+    // «Ariel/Capítulo III» declara `|título = [[../`. Reconstruir «Ariel» de la ruta sería
+    // decidir nosotros que existe un padre, que es justo lo que la Historia 11.1 prohíbe.
+    expect(paginaDeLaObraDeclarada(`{{Encabezado\n|título = [[../\n|autor = Rodó\n}}`)).toBeUndefined();
+    expect(destinoDeEnlaceAbsoluto('[[../]]')).toBeUndefined();
+    expect(destinoDeEnlaceAbsoluto('[[../Capítulo I]]')).toBeUndefined();
+    expect(destinoDeEnlaceAbsoluto('[[/Capítulo I]]')).toBeUndefined();
+  });
+
+  it('nada que salga de esta Fuente o de su espacio principal encadena', () => {
+    for (const valor of [
+      '[[:en:Something]]',
+      '[[en:Something]]',
+      '[[:s:fr:Ariel]]',
+      '[[Índice:Ariel.djvu]]',
+      '[[Wikisource:Portada]]',
+      '[[https://example.com/obra]]',
+      'https://example.com/obra',
+    ]) {
+      expect(destinoDeEnlaceAbsoluto(valor), valor).toBeUndefined();
+    }
+  });
+
+  it('un `|título` que no es un enlace suelto no encadena', () => {
+    // Un título llano ya es el de la obra y no hay a quién preguntarle nada; una plantilla
+    // sin expandir o un enlace con algo pegado no se adivina.
+    for (const valor of ['Triste', '', '{{PD-old}}', '[[Ariel]] (fragmento)', '[[]]', '[[·]]']) {
+      expect(destinoDeEnlaceAbsoluto(valor), valor).toBeUndefined();
+    }
+  });
+
+  it('la marca de sección designa un trozo de la página, no otra página', () => {
+    expect(destinoDeEnlaceAbsoluto('[[Rimas#Rima LIII]]')).toBe('Rimas');
+  });
+
+  it('los guiones bajos del enlace son espacios, como en la propia Fuente', () => {
+    expect(destinoDeEnlaceAbsoluto('[[Libro_de_Buen_Amor]]')).toBe('Libro de Buen Amor');
+  });
+});
+
+describe('Fix 11.1c — el año sale de la obra que la página declara', () => {
+  const PAGINA = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Capítulo XLIII - Wikisource</title></head><body>
+<h1 id="firstHeading">Capítulos que se le olvidaron a Cervantes/Capítulo XLIII</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>La cordura y la locura se reparten el imperio de la vida humana.</p>
+</div></div></body></html>`;
+
+  const HIJA = `{{Encabezado
+|título = [[Capítulos que se le olvidaron a Cervantes]]
+|autor = Juan Montalvo
+}}
+
+La cordura y la locura`;
+
+  const OBRA = `{{Encabezado
+|título = Capítulos que se le olvidaron a Cervantes
+|autor = Juan Montalvo
+|año = 1895
+}}
+
+* [[/Capítulo I/]]`;
+
+  it('la subpágina se versiona con obra y con el año que declara su obra', () => {
+    const derivado = derivarDocumento('wikisource-es', PAGINA, HIJA, OBRA);
+    expect(derivado.ok && derivado.obra).toBe('Capítulos que se le olvidaron a Cervantes');
+    expect(derivado.ok && derivado.año).toBe(1895);
+  });
+
+  it('las dos declaraciones se guardan literales y distinguibles entre sí', () => {
+    /*
+     * Guardar «año: 1895» ya interpretado convertiría la puerta de la 11.1 en un campo
+     * editable: `extraer` vuelve a derivar de aquí, sin red, y tiene que llegar al mismo
+     * año. Y la de la obra va marcada, porque el padre aporta el año y nada más.
+     */
+    const derivado = derivarDocumento('wikisource-es', PAGINA, HIJA, OBRA);
+    expect(derivado.ok).toBe(true);
+    if (!derivado.ok) return;
+
+    const lineas = derivado.declaracion.split('\n');
+    expect(lineas).toContain('|título = [[Capítulos que se le olvidaron a Cervantes]]');
+    expect(lineas).toContain(`${MARCA_DE_LA_OBRA} |año = 1895`);
+    // La de la página no lleva marca, y la de la obra no se confunde con la suya.
+    expect(lineas.filter((l) => l.startsWith(MARCA_DE_LA_OBRA)).length).toBeGreaterThan(0);
+    expect(lineas[0]).toBe('Capítulos que se le olvidaron a Cervantes/Capítulo XLIII');
+  });
+
+  it('el año que deriva la recuperación es el que deriva la extracción', () => {
+    const derivado = derivarDocumento('wikisource-es', PAGINA, HIJA, OBRA);
+    expect(derivado.ok).toBe(true);
+    if (!derivado.ok) return;
+
+    const versionado = componerDocumento(
+      {
+        fuente: 'wikisource-es',
+        obra: derivado.obra,
+        año: derivado.año,
+        url: 'https://es.wikisource.org/wiki/Cap%C3%ADtulo_XLIII',
+        recuperado: '2026-08-20',
+      },
+      derivado.declaracion,
+      derivado.cuerpo,
+    );
+
+    const analizado = analizarDocumento(versionado);
+    expect(analizado).toBeDefined();
+    const reDerivado = derivarDeLaDeclaracion('wikisource-es', analizado!.declaracion);
+    expect(reDerivado.año).toBe(1895);
+    expect(reDerivado.año).toBe(derivado.año);
+    expect(reDerivado.obra).toBe(derivado.obra);
+    expect(reDerivado.pagina).toBe(derivado.pagina);
+  });
+
+  it('la obra la declara la página, nunca el encabezado de su obra', () => {
+    /*
+     * El padre aporta el año y nada más. Si aportara también el título, una subpágina
+     * heredaría el nombre del índice y se perdería la distinción que la 11.1b ganó.
+     */
+    const otraObra = `{{Encabezado\n|título = [[Siete tratados]]\n|autor = Juan Montalvo\n|año = 1882\n}}`;
+    const derivado = derivarDocumento('wikisource-es', PAGINA, HIJA, otraObra);
+    expect(derivado.ok && derivado.obra).toBe('Capítulos que se le olvidaron a Cervantes');
+    expect(derivado.ok && derivado.obra).not.toBe('Siete tratados');
+    // Y aun así el año sale de ahí: es lo único que el padre aporta.
+    expect(derivado.ok && derivado.año).toBe(1882);
+  });
+
+  it('lo que declara la página manda sobre lo que declara su obra', () => {
+    const conAño = HIJA.replace('|autor = Juan Montalvo', '|autor = Juan Montalvo\n|año = 1898');
+    const derivado = derivarDocumento('wikisource-es', PAGINA, conAño, OBRA);
+    expect(derivado.ok && derivado.año).toBe(1898);
+  });
+
+  it('si la obra tampoco declara año, la derivación sigue sin año y sin error', () => {
+    const sinAño = `{{Encabezado\n|título = Capítulos que se le olvidaron a Cervantes\n|autor = Juan Montalvo\n}}`;
+    const derivado = derivarDocumento('wikisource-es', PAGINA, HIJA, sinAño);
+    expect(derivado.ok).toBe(true);
+    expect(derivado.ok && derivado.obra).toBe('Capítulos que se le olvidaron a Cervantes');
+    expect(derivado.ok && derivado.año).toBeUndefined();
+  });
+
+  it('sin encabezado de la obra la subpágina queda con obra y sin año, como hoy', () => {
+    const derivado = derivarDocumento('wikisource-es', PAGINA, HIJA);
+    expect(derivado.ok && derivado.obra).toBe('Capítulos que se le olvidaron a Cervantes');
+    expect(derivado.ok && derivado.año).toBeUndefined();
+  });
+
+  it('un año aproximado o imposible en la obra tampoco pasa la puerta', () => {
+    for (const declarado of ['hacia 1895', '3050', '189?']) {
+      const derivado = derivarDocumento(
+        'wikisource-es',
+        PAGINA,
+        HIJA,
+        `{{Encabezado\n|título = Capítulos\n|año = ${declarado}\n}}`,
+      );
+      expect(derivado.ok && derivado.año, declarado).toBeUndefined();
+    }
+  });
+
+  it('una etiqueta «Año:» de la obra no le pone año a la página', () => {
+    /*
+     * De la obra solo se lee el parámetro del encabezado. Su vecindad de líneas es la de
+     * otra página, y `añoJuntoAEtiqueta` mira líneas contiguas: mezclarlas dejaría que una
+     * línea suelta de la obra se leyera como si fuera de la etiqueta de la página.
+     */
+    const declaracion = [
+      'Capítulos que se le olvidaron a Cervantes/Capítulo XLIII',
+      'Año de publicación:',
+      `${MARCA_DE_LA_OBRA} 1895`,
+    ].join('\n');
+    expect(derivarDeLaDeclaracion('wikisource-es', declaracion).año).toBeUndefined();
+  });
+
+  it('un documento ya versionado, sin líneas de obra, se sigue derivando igual', () => {
+    const declaracion = ['Triste (Nervo)', '|título=[[Los jardines interiores]]', '|año = 1905'].join('\n');
+    const derivado = derivarDeLaDeclaracion('wikisource-es', declaracion);
+    expect(derivado.obra).toBe('Los jardines interiores');
+    expect(derivado.pagina).toBe('Triste (Nervo)');
+    expect(derivado.año).toBe(1905);
   });
 });

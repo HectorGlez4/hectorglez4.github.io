@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/006
+recuperado: 2026-08-20
+---
+Motivos de Proteo/006
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+V - Un friso del Partenón.
+
+Henos aquí en Atenas. El Cerámico abre espacioso cauce a ingente muchedumbre, que, en ordenada procesión, avanza hacia la ciudad, que no trabaja; se interna en ella, la recorre por donde es más hermosa y pulcra, y trepa la falda del Acrópolis. En lo alto, en el Partenón, Palas Atenea aguarda el homenaje de su pueblo: es la fiesta que la está consagrada.
+
+Ves desfilar los magistrados, los sacerdotes, los músicos; ves aparecer doncellas que llevan ánforas y canastas rituales, graciosamente asentadas sobre la cabeza con apoyo del brazo. Pero allí, tras el montón de bueyes lucios, escogidos, que marchan a ser sacrificados a la diosa; allí, precediendo a esa gallarda legión de adolescentes, ya a pie, ya en carros, ya a caballo, que entonan belicoso himno ¿no percibes un concierto venerable de formas y movimientos semejantes a las notas de una música sagrada que se escuchase con los ojos; no ves pintarse un cuadro majestuoso y severo: cuadro viviente, del que se desprende una onda de gravedad sublime, en que se embebe el alma como en la mirada serenante de un dios?... Grandes y firmes estaturas; acompasada marcha, en que la lentitud del movimiento no acusa punto de debilidad ni de fatiga; frentes que dicen majestad, reposo, nobleza, y en las que el espacio natural se ha dilatado a costa de una parte del cabello blanquísimo, que cae en ondas en dirección a las espaldas levemente encorvadas; ojos lejanos, por lo abismados en las órbitas; olímpicos, por el modo de mirar; barbas de nieve que velan en difusa esclavina la rotundidad del pecho anchuroso...: ¿qué selección divina ha constituido ese coro de hermosura senil, donde la mirada se alivia del fulgor de juventud radiante que recoge si atiende a la multitud que viene luego? Cada tribu del Ática ha contribuido a él con sus ancianos más hermosos; Atenas las ha invitado a este concurso; Atenas premiará a la que más hermosos los envíe; y coronando el espectáculo en que parece reunir cuanto hay de bello y noble en la existencia, para ostentarlo ante su diosa, señala así en la ancianidad el don de un belleza genérica, que es, en lo plástico, correspondencia de una belleza ideal, propia también y diferenciada de la que conviene a la idea de la juventud, en la sensibilidad, en la voluntad y en el entendimiento.

@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/010
+recuperado: 2026-08-20
+---
+Motivos de Proteo/010
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+IX - Sentido de esta parábola.
+
+-¡Sabia, candorosa filosofía! -pensé. Del fracaso cruel no recibe desaliento que dure, ni se obstina en volver al goce que perdió; sino que de las mismas condiciones que determinaron el fracaso, toma la ocasión de nuevo juego, de nueva idealidad, de nueva belleza... ¿No hay aquí un polo de sabiduría para la acción? ¡Ah, si en el transcurso de la vida todos imitáramos al niño! ¡Si ante los límites que pone sucesivamente la fatalidad a nuestros propósitos, nuestras esperanzas y nuestros sueños, hiciéramos todos como él!... El ejemplo del niño dice que no debemos empeñarnos en arrancar sonidos de la copa con que nos embelesamos un día, si la naturaleza de las cosas quiere que enmudezca. Y dice luego que es necesario buscar, en derredor de donde entonces estemos, una reparadora flor; una flor que poner sobre la arena por quien el cristal se tornó mudo... No rompamos torpemente la copa contra las piedras del camino, sólo porque haya dejado de sonar. Tal vez la flor reparadora existe. Tal vez está allí cerca... Esto declara la parábola del niño; y toda filosofía viril, viril por el espíritu que la anime, confirmará su enseñanza fecunda.
