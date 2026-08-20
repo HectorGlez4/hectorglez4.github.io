@@ -1085,3 +1085,33 @@ renderizaba ninguna prueba: invertir el guardián dejaba la página avisando en 
 correctas y callando en la muda, con la suite entera en verde. Y la igualdad con el Kit se
 comprobaba sobre un solo enlace, mientras la vista estaba reimplementada a mano; ahora hay
 componente compartido y la comparación cubre texto, tramo, Imagen, atribución y redes.
+
+## Verificación de producción — 2026-08-20, antes de seguir con la Épica 13
+
+Comprobado el despliegue vivo antes de abrir la 13.2, a petición de Héctor. Lo desplegado
+en `main` es el cierre de la Épica 12 (`c976075`, flujo `Publicar` en verde, 19/08 18:41
+UTC). La rama `sprint/sabiduria-v3` va cuatro commits por delante y **no está fusionada**:
+13.1 todavía no está en vivo, y eso es lo esperado.
+
+**Lo que responde.** `https://sabiduriadebolsillo.net` → 200. `www` → 301 al ápice, `http`
+→ 301 a `https`. `sitemap-index.xml` → 200 `application/xml`, e igual ante el agente de
+Googlebot. `sitemap-0.xml` lleva **53 URL**: portada, 12 Autores, 38 Citas y 2 Temas —
+exactamente el conjunto publicable de hoy. Las Tarjetas Sociales sirven PNG y Pagefind
+responde.
+
+**Lo que no aparece, y así debe ser.** `/kit`, `/buscar` y `/404` responden 200 con
+`noindex, follow` y ninguna está en el sitemap. `/lote` da 404 porque 13.1 vive en la rama.
+`/coleccion/<slug>` no tiene índice y `corpus/colecciones/` se versiona vacío a propósito,
+así que no hay ninguna Página de Colección todavía: la primera la cura Héctor.
+
+**La zona DNS, intacta tras el paquete de Domain Connect.** Los cuatro registros `A` de
+GitHub Pages siguen ahí, `www` sigue apuntando a `hectorglez4.github.io`, el `TXT` de
+`google-site-verification` está presente, y **no hay ningún `MX`**: Gmail Setup, que venía
+en el mismo paquete que la verificación, no escribió nada. Es la comprobación que
+`DESPLIEGUE.md` §2 dejó como obligatoria justamente por ser un paquete y no una casilla.
+
+**Lo que sigue bloqueado.** La baliza de medición no aparece en el HTML de producción:
+`MEDICION_ENDPOINT` no está definida y el Worker no está desplegado, o sea que **LC-4 sigue
+sin cerrarse** y con ella la 7.3 y la 14.2. Y el estado de lectura del sitemap en Search
+Console no se puede comprobar desde fuera —hace falta la cuenta de Héctor—, así que la 7.2
+se queda en `review` hasta que él mire la columna *Última lectura*.
