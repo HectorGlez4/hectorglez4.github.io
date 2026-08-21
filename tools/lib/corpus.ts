@@ -537,6 +537,37 @@ export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDe
 }
 
 /**
+ * El censo tal y como está escrito — Historia 11.6.
+ *
+ * Darle de baja a una Cita es borrar **una línea** de un fichero que es dos tercios
+ * comentario, así que quien la borra necesita el texto literal y no la lista de slugs.
+ * `undefined` cuando el fichero no está, que es lo mismo que dice `leerCensoDeCotejo`:
+ * censo ausente es censo vacío, y no hay ninguna baja que dar.
+ */
+export async function leerCensoBruto(rutas: Rutas): Promise<string | undefined> {
+  if (!existsSync(rutas.pendientesDeCotejo)) return undefined;
+  return readFile(rutas.pendientesDeCotejo, 'utf8');
+}
+
+/**
+ * Reescribe el censo entero, **a un temporal y renombrando**.
+ *
+ * La misma cautela que `escribirPortada`, y por la misma razón elevada al cuadrado: el
+ * censo es el que decide qué Citas se publican sin cotejar, y `writeFile` sobre el fichero
+ * definitivo lo trunca antes de escribirlo. Una interrupción a media escritura lo dejaría
+ * cortado, y un censo cortado no es un censo con menos entradas: es un YAML que
+ * `leerCensoDeCotejo` se niega a leer, con lo que la construcción se para sin que nadie
+ * sepa por qué. El renombrado dentro del mismo directorio es atómico.
+ */
+export async function escribirCenso(rutas: Rutas, contenido: string): Promise<string> {
+  await mkdir(dirname(rutas.pendientesDeCotejo), { recursive: true });
+  const temporal = `${rutas.pendientesDeCotejo}.escribiendo`;
+  await writeFile(temporal, contenido, 'utf8');
+  await rename(temporal, rutas.pendientesDeCotejo);
+  return rutas.pendientesDeCotejo;
+}
+
+/**
  * Los slugs del censo de pendientes de cotejo — Historia 11.2.
  *
  * Un censo ausente se lee como censo vacío, y es la lectura segura: significa «ninguna

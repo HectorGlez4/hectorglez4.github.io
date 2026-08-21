@@ -17,6 +17,7 @@
     "huecos": "tsx tools/huecos.ts",
     "ingreso": "tsx tools/ingreso.ts",
     "coleccion": "tsx tools/coleccion.ts",
+    "documentar": "tsx tools/documentar.ts",
     "jornada": "tsx tools/jornada.ts",
     "pieza": "tsx tools/pieza.ts",
     "objetivo": "tsx tools/objetivo.ts",

@@ -1,0 +1,27 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXIX
+recuperado: 2026-08-21
+---
+Versos sencillos/XXXIX
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+Cultivo una rosa blanca
+
+En julio como enero,
+
+Para el amigo sincero
+
+Que me da su mano franca.
+
+Y para el cruel que me arranca
+
+El corazón con que vivo,
+
+Cardo ni ortiga cultivo;
+
+Cultivo la rosa blanca.

@@ -55,6 +55,39 @@ sin registrar no la cuenta nadie. Si dedicas la sesión a otra cosa, anúlala co
 —`npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]`—; una anulación
 sigue siendo una sesión corrida y cuenta igual para la cadencia.
 
+## Documentar una Cita ya publicada
+
+Las Citas anteriores a la v3 se publicaron cuando la Procedencia se tecleaba, y siguen en
+el censo de `corpus/pendientes-de-cotejo.yml` porque no tienen documento. Darles uno es lo
+que hace la Historia 11.4, y se hace con esta orden — **nunca** editando el `.md` a mano y
+borrando la línea del censo:
+
+```
+npx tsx tools/recuperar.ts "<url de la Fuente>"      # primero, el documento
+npm run documentar -- <slug-de-cita> corpus/fuentes/<documento>.txt
+npm run documentar -- <slug> corpus/fuentes/<doc>.txt --texto "<el texto literal de la edición>"
+npm run documentar -- --retirar <slug> "<motivo>"
+```
+
+**Nada se escribe si el texto no aparece literal en el documento.** Es la puerta entera: si
+documentar se pudiera hacer sin cotejar, sería teclear una Procedencia con más pasos. La
+obra y el año salen del documento —no hay banderas `--obra` ni `--año`— y documentar
+**saca la Cita del censo en el mismo gesto**, porque una Cita que declara Fuente y sigue
+censada rompe la construcción, y un slug del censo sin Cita publicada también.
+
+**Cuando el cotejo falla, casi siempre es la puntuación.** El texto se tecleó en la v1
+normalizando comas y puntos finales, y la edición dice lo mismo con otros signos. Eso se
+corrige con `--texto`, que restituye el texto literal de la edición: el texto nuevo también
+tiene que aparecer literal en el documento —si no, se estaría inventando— y tiene que
+parecerse al publicado por encima de `MIN_PARECIDO_PARA_CORREGIR` (0,85 sobre la forma
+canónica de AD-3), que es lo que impide cambiar una Cita por otra de la misma página. El
+slug **no** se recalcula aunque el texto cambie: es la URL (AD-4).
+
+Lo que no es la misma Cita se retira, siempre con su motivo: `--retirar` **mueve** el
+fichero a `corpus/_revision/` (AD-2) y lo saca del censo. No borra nada, y el motivo va en
+el mensaje del commit — git es el único almacén (AD-10). Sin motivo la orden se niega, con
+código 2: una retirada sin motivo no es una retirada, es una desaparición.
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:
