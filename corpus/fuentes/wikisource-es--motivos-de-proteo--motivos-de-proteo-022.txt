@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/022
+recuperado: 2026-08-21
+---
+Motivos de Proteo/022
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXI - El «yo» ficticio.
+
+Este sortilegio de los demás sobre cada uno de nosotros explica muchas vanas apariencias de nuestra personalidad, que no engañan sólo a ojos ajenos, sino que ilusionan también a aquellos íntimos ojos con que nos vemos a nosotros mismos.
+
+Porque a menudo la virtud penetrativa del ambiente no cala y llega hasta el centro del alma, donde, combinándose con nuestra originalidad individual, que tomaría de ella lo capaz de asociársele sin descaracterizarnos, en un proceso de orgánica asimilación, antes enriquecería que menoscabaría nuestra personalidad; sino que se detiene en lo exterior del alma, como una niebla, como un antifaz, como una túnica; nada más que apariencia, pero lo bastante engañadora para que aquel mismo en cuya conciencia se interpone, la tenga por realidad y substancia de su ser. Debajo de ella queda la roca viva, la roca de originalidad, la roca de verdad; ¡acaso siempre, hasta la muerte ignorada!... En toda humana agrupación componen muy mayor número las almas que no tienen otro yo consciente y en acto que el ficticio, de molde, con que cada una de ellas coopera al orden maquinal del conjunto. Pero no por esto deja de existir potencialmente en ellas el real, el verdadero yo, capaz de revelarse y prevalecer en definitiva sobre el otro -aunque no se singularice por la superior originalidad que es atributo del genio-, si cambia el medio en que transcurre la vida, y se sale de aquél a cuyo influjo prospera la falsa personalidad a modo de una planta parásita; o bien si el alma logra apartar de sí, por cierto tiempo, la tiranía del ambiente, con los reparos y baluartes de la soledad.

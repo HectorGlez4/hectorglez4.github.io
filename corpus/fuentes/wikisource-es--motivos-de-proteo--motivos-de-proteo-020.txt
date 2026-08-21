@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/020
+recuperado: 2026-08-21
+---
+Motivos de Proteo/020
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XIX - El conocimiento propio como antecedente de la acción. Amiel y Marco Aurelio.
+
+Ahondar en la conciencia de sí mismo, procurar saber del alma propia; mas no en inmóvil contemplación, ni por prurito de alambicamiento y sutileza; no como quien, desdeñoso de la realidad, dando la espalda a las cien vías que el mundo ofrece para el conocimiento y la acción, vuelve los ojos a lo íntimo del alma, y allí se contiene y es a un tiempo el espectador y el espectáculo. Este continuo análisis de lo que pasa dentro de nosotros, cuando el análisis no va encaminado a un fin trascendente; esa morosidad ante el espejo de la propia consciencia, no tal cual se detendría a consultar, en clara linfa, el porte y el arnés, el guerrero que marchaba a la lucha, sino por simple y obsesionador afán de mirarse, son, más que vana, funesta ocupación de la vida. Son el sutil veneno que paraliza el espíritu de Amiel y le reduce a una crítica ineficaz de sus más mínimos hechos de conciencia; crítica disolvente de toda espontaneidad del sentimiento, enervadora de toda energía de la voluntad. ¿Y quién como ese mismo moderno umbilicario; quién como ese confidente oficioso de sí propio, ha expresado cuán fatal sea esa malversación del tiempo y de las fuerzas de la mente? El alma que, en estéril quietud, se emplea en desmenuzar, con cruel encarnizamiento, cuanto, para ella sola, piensa, siente y no quiere, es «el grano de trigo que, molido en harina, no puede ya germinar y ser la planta fecunda». Cierto; mas yo te hablo del conocerse que es un antecedente de la acción; del conocerse en que la acción es, no sólo el objeto y la norma, sino también el órgano de tal conocimiento, porque ¿cómo podrá saber de sí cuánto se debe quien no ha probado los filos de su voluntad en las lides del mundo?...; modo de saber de sí que no es prurito exasperador, ni deleite moroso, sino obra viva en favor de nuestro perfeccionamiento; que no nos incapacita, como el otro, para el ejercicio de la voluntad, sino que, por lo contrario, nos capacita y corrobora; porque consiste en observarse para reformarse: en sacar todo partido posible de nuestras dotes de naturaleza: en mantener la concordia entre nuestras fuerzas y nuestros propósitos, y descender al fondo del alma, donde las virtualidades y disposiciones que aún no han pasado al acto se ocultan, volviendo de esa profundidad con materiales que luego la acción aplica a su adecuado fin y emplea en hacernos más fuertes y mejores; como quien alza su casa con piedras de la propia cantera, o como quien forja, con hierro de la propia mina, su espada.
+
+Amiel nos dio un ejemplo de contemplación interior sin otro fin que el del melancólico y contradictorio placer que de ella nace. Recordemos ahora la augusta personalidad de Marco Aurelio, y aquel su constante examen de sí mismo, no disipado en vano mirar, sino resuelto en actos de una voluntad afirmativa y fecunda, que van tejiendo una de las más hermosas vidas humanas; y tomemos como puntos de comparación, para discernir entre ambos modos de íntima experiencia, los Pensamientos del inmortal emperador y el Diario del triste Hamlet ginebrino.

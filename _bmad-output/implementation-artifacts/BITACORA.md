@@ -1538,3 +1538,27 @@ que tenían los Temas antes de esta épica, y bloquea el último criterio abiert
 donde debía haber ~890, con el mismo texto repetido. `extraer` cuenta «Descartadas por
 repetidas» **dentro de una ejecución**, no entre ejecuciones sucesivas sobre el mismo
 documento. Se limpió rechazando todo y repitiendo una vez por fichero.
+
+## 11.4 — Quinta sesión: equilibrar los Temas, no llenarlos
+
+**El Corpus pasa de 148 a 197 Citas, SM-C1 del 87,8 % al 90,9 %, y el sitio de 172 a 221
+páginas.** Ningún Tema estaba por debajo del umbral, así que el trabajo fue otro: **igualar**.
+Se pasó de un reparto de 19-32 Citas por Tema a uno de **24-34**. «La libertad» y «La palabra»,
+que iban con 19, quedan con 30 y 28.
+
+**Minar la misma obra por lo que dice, no por lo que falta.** Los 300 aforismos del *Oráculo
+manual* ya estaban recuperados, así que esta sesión **no gastó una sola petición de red para
+Gracián**: se volvió a extraer de los documentos versionados y se buscó por lo que cada
+aforismo trata —amistad, palabra, libertad, tiempo—. Es la ventaja de que el documento se
+versione: la segunda pasada sobre una obra es gratis y se puede afinar el criterio sin volver
+a la Fuente.
+
+**El límite de una cantera se nota antes en unos Temas que en otros.** *Motivos de Proteo* dio
+mucho para «El saber» y «La virtud» y casi nada para «La amistad» y «La palabra»: sus
+capítulos 12-23 son alegóricos —el Faro de Alejandría, las provincias de Roma— y de 156
+candidatas salieron 14. Gracián, en cambio, cubre los ocho Temas porque el *Oráculo* es un
+manual de trato humano. Para equilibrar Temas hace falta una obra que hable de todos, no
+varias que hablen de uno.
+
+**Verificado.** `npx astro check` 0 errores. `npx vitest run` **1617/1617**. `npm run build`
+con 221 páginas y el cotejo literal en verde sobre las 49 Citas nuevas.

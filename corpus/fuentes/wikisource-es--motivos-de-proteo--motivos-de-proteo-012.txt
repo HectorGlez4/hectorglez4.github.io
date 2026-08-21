@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/012
+recuperado: 2026-08-21
+---
+Motivos de Proteo/012
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XI - Don Quijote vencido.
+
+Don Quijote, maestro en la locura razonable y la sublime cordura, tiene en su historia una página que aquí es oportuno recordar. ¿Y habrá de él acción o concepto que no entrañe un significado inmortal, una enseñanza? ¿Habrá paso de los que dio por el mundo que no equivalga a mil pasos, hacia arriba, hacia allí donde nuestro juicio marra y nuestra prudencia estorba?... Vencido Don Quijote en singular contienda por el caballero de la Blanca Luna, queda obligado, según la condición del desafío, a desistir por cierto tiempo de sus andanzas y dar tregua a su pasión de aventuras. Don Quijote, que hubiera deseado perder, con el combate, la vida, acata el compromiso de honor. Resuelto, aunque no resignado, toma el camino de su aldea. «Cuando era -dice- caballero andante, atrevido y valiente, con mis obras y con mis manos acreditaba mis hechos; y ahora, cuando soy escudero pedestre, acreditaré mis palabras cumpliendo la que di de mi promesa». Llega con Sancho al prado donde en otra ocasión habían visto a unos pastores dedicados a imitar la vida de la Arcadia y allí una idea levanta el ánimo del vencido caballero, como fermento de sus melancolías. Dirigiéndose a su acompañante, le hace proposición de que, mientras cumplen el plazo de su forzoso retraimiento, se consagren ambos a la vida pastoril, y arrullados por música de rabeles, gaitas y albogues, concierten una viva y deleitosa Arcadia en el corazón de aquella soledad amena. Allí les darán «sombra los sauces, olor las rosas, alfombras de mil colores matizadas los extendidos prados, aliento el aire claro y puro, luz la luna y las estrellas a pesar de la oscuridad de la noche, gusto el canto, alegría el lloro, Apolo versos, el amor conceptos, con que podrán hacerse eternos y famosos, no sólo en los presentes, sino en los venideros siglos»... ¿Entiendes la trascendental belleza de este acuerdo? La condena de abandonar por cierto espacio de tiempo su ideal de vida, no mueve a Don Quijote ni a la rebelión contra la obediencia que le impone el honor, ni a la tristeza quejumbrosa y baldía, ni a conformarse en quietud trivial y prosaica. Busca la manera de dar a su existencia nueva sazón ideal. Convierte el castigo de su vencimiento en proporción de gustar una poesía y una hermosura nuevas. Propende desde aquel punto a la idealidad de la quietud, como hasta entonces había propendido a la idealidad de la acción y la aventura. Dentro de las condiciones en que el mal hado le ha puesto, quiere mostrar que el hado podrá negarle un género de gloria, el preferido y ya en vía de lograrse; mas no podrá restañar la vena ardiente que brota de su alma, anegándola en superiores anhelos; vena capaz siempre de encontrar o labrar el cauce por donde tienda a su fin, entre las bajas realidades del mundo.

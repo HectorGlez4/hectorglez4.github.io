@@ -87,3 +87,14 @@ sesiones:
       citasPublicadas: 148
       procedenciaCompleta: 87.8
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-21"
+    hora: "06:03"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Equilibrar los ocho Temas: de un reparto de 19-32 Citas a uno de 24-34"
+    motivo: "Todos los Temas siguen por encima del umbral, así que la política no propone hueco. La sesión igualó los Temas más flacos —«La libertad» y «La palabra» iban con 19 frente a los 32 de «La virtud»— minando el Oráculo manual y Motivos de Proteo por lo que cada aforismo dice, no por el hueco."
+    resultado:
+      citasPublicadas: 197
+      procedenciaCompleta: 90.9
+      tradicionLatinoamericana: 41.2

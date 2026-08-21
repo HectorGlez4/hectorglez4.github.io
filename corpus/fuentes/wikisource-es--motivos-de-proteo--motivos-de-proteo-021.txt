@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/021
+recuperado: 2026-08-21
+---
+Motivos de Proteo/021
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XX - La sugestión social.
+
+Cuando te agregas en la calle a una muchedumbre a quien un impulso de pasión arrebata, sientes que, como la hoja suspendida en el viento, tu personalidad queda a merced de aquella fuerza avasalladora. La muchedumbre, que con su movimiento material te lleva adelante y fija el ritmo de tus pasos, gobierna, de igual suerte, los movimientos de tu sensibilidad y de tu voluntad. Si alguna condición de tu natural carácter estorba para que cooperes a lo que en cierto momento el monstruo pide o ejecuta, esa condición desaparece inhibida. Es como una enajenación o un encantamiento de tu alma. Sales, después, del seno de la muchedumbre; vuelves a tu ser anterior; y quizá te asombras de lo que clamaste o hiciste.
+
+Pues no llames sólo muchedumbre a esa que la pasión de una hora reúne y encrespa en los tumultos de la calle. Toda sociedad humana es, en tal sentido, muchedumbre. Toda sociedad a que permaneces vinculado te roba una porción de tu ser y la sustituye con un destello de la gigantesca personalidad que de ella colectivamente nace. De esta manera ¡cuántas cosas que crees propias y esenciales de ti no son más que la imposición, no sospechada, del alma de la sociedad que te rodea! ¿Y quién se exime, del todo, de este poder? Aun aquellos que aparecen como educadores y dominadores de un conjunto humano, suelen no ser sino los instrumentos dóciles de que él se vale para reaccionar sobre sí mismo. En el alarde de libertad, en el arranque de originalidad, con que pretenden afirmar, frente al coro su personalidad emancipada, obra quizá la sugestión del mismo oculto numen. Genio llamamos a esa libertad, a esa originalidad, cuando alcanzan tal grado que puede tenérselas por absolutamente verdaderas. Pero ¡cuán rara vez lo son en tal extremo, y cuántas la contribución con que el pensamiento individual parece aportar nuevos elementos al acervo común, no es sino una restitución de ideas lenta y calladamente absorbidas! Así, quien juzgara por apariencias materiales habría de creer que es la corriente de los ríos la que surte de agua a la mar, puesto que en ella se vierten, mientras que es de la mar de donde viene el agua que toman en sus fuentes los ríos.
