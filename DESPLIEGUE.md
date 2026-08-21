@@ -141,6 +141,29 @@ A mano, una vez (necesita la cuenta de Google y la del registrador):
    habría fecha ahí. Se recomprueba a las 24-48 h; si para entonces hay fecha de lectura
    y sigue en error, entonces sí hay algo que arreglar.
 
+   **Enviar también el sitemap hijo, y por qué** (hecho el 2026-08-21). El índice se leyó
+   sin problema el 20/08 —«Operación efectuada»—, pero las URL no viven en el índice: viven
+   en `sitemap-0.xml`, al que el índice apunta. Dos días después Google **seguía sin haber
+   ido a buscarlo**: *Última lectura* vacía, y la inspección de URL decía «Google no
+   reconoce esta URL, última exploración: no procede». Con 219 URL publicadas, solo la
+   portada estaba indexada.
+
+   No había nada que arreglar en el sitio —la prueba en directo de Search Console responde
+   «**Google tiene acceso a esta URL**», y desde fuera son 200 con `application/xml`, XML
+   válido, idéntico ante el agente de Googlebot y sin `Disallow`—. Lo que faltaba era que
+   Google lo pusiera en cola. La forma de conseguirlo es **enviarlo como sitemap propio**,
+   además del índice, en *Añadir un sitemap*:
+
+       https://sabiduriadebolsillo.net/sitemap-0.xml
+
+   Un dominio admite varios sitemaps y esto no sustituye ni rompe el índice: los dos quedan
+   en la lista. Recién enviado sale otra vez con *Tipo: Desconocido* y «No se ha podido
+   obtener», por lo mismo de antes — todavía no lo ha leído.
+
+   **La lección que conviene no volver a aprender:** un índice de sitemaps «correcto» no
+   significa que sus hijos se hayan leído. Lo que hay que mirar es la fila del **hijo**, y la
+   columna que decide es *Última lectura*, no *Estado*.
+
 5. No borrar el registro `TXT` después. Google revalida cada cierto tiempo y la propiedad
    se cae sin avisar si el registro ya no está. Tampoco retirar la autorización de Domain
    Connect en GoDaddy: es lo que sostiene el método de validación elegido.
