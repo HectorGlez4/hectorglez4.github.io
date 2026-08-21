@@ -53,8 +53,52 @@ Y no es deuda formal. Al cotejar a Gracián contra su edición de 1647 aparecier
 | Retirar | Cita publicada, con motivo | Se mueve a `corpus/_revision/`, **y sale del censo si estaba** | Sin error |
 | Retirar sin motivo | Solo el slug | Se rechaza: sin motivo no es una retirada, es una desaparición | Código 2 |
 | Fuera del censo | Cita publicada después de la v3, ya con Fuente | `retirar` funciona igual; `documentar` la rechaza por ya documentada | Código 1 |
+| Texto corregido | `--texto` con el literal de la edición: aparece en el documento y se parece a la publicada | Se documenta con el texto restituido, **y se dice el antes y el después**; el slug no se recalcula | Sin error |
+| Corregido que no aparece | `--texto` con algo que el documento no dice | Se rechaza: corregir es restituir, no inventar | Código 1 |
+| Corregido que es otra Cita | `--texto` con otro pasaje **del mismo documento** | Se rechaza nombrando el parecido y el umbral | Código 1 |
+| Rechazo al corregir | Cualquiera de los dos anteriores | No quedan tocados ni la Cita, ni el censo, ni el fichero | Código 1 |
 
 </frozen-after-approval>
+
+## Spec Change Log
+
+### 2026-08-21 — `--texto`: restituir el texto de la edición
+
+**Qué cambia.** `documentar` admite `--texto "<el texto literal de la edición>"`. Sin la
+bandera se comporta como se especificó arriba: o el texto publicado aparece literal, o se
+rechaza.
+
+**Por qué.** Medido con las Citas reales del censo: el Corpus dice «Hombres necios que
+acusáis a la mujer sin razón, sin ver que sois la ocasión de lo mismo que culpáis.» y las
+*Redondillas* dicen lo mismo con una coma más y un punto y coma final. No es una paráfrasis:
+es la misma Cita con la puntuación normalizada al teclearla en la v1, y ese es el patrón
+general del censo —las que fallan el cotejo fallan casi todas por signos, no por contenido—.
+Con el contrato original la única salida habría sido **retirar Citas verdaderas por una
+coma**.
+
+**Dónde estaba el hueco.** El «Never» juntaba dos cosas distintas: *ajustar el texto hasta
+que pase* —que sigue prohibido, porque permitiría colar una Cita distinta— y *restituir el
+texto exacto de la edición*, que es lo contrario de inventar: es hacer que el Corpus diga lo
+que la Fuente dice. El propio mensaje de la 11.2 ya ofrecía esa salida por escrito
+(«corríjala contra su edición, o retírela») y no tenía orden que la ejecutara.
+
+**Las guardas que lo hacen seguro.**
+
+1. El texto nuevo tiene que **aparecer literal en el documento**. Sin eso no se escribe
+   nada: es lo que impide inventarlo, porque no se puede teclear algo que la edición no dice.
+2. El texto nuevo tiene que ser **reconociblemente la misma Cita** que la publicada. El
+   parecido se mide sobre la forma canónica de AD-3 —la definición que el proyecto ya tiene
+   de «dos textos son la misma Cita»— con distancia de edición normalizada, y el umbral es
+   `MIN_PARECIDO_PARA_CORREGIR = 0,85`. Una corrección que solo toca signos o acentos vale
+   1; el par que descubrió el problema —«El sabio hace luego lo que el necio al fin» contra
+   «Haga al principio el cuerdo lo que el necio al fin»— vale 0,60. El umbral vive en esa
+   holgura y no pegado a ningún caso concreto.
+3. **Se dice siempre lo que cambia**, con el antes y el después, antes de escribir.
+4. El **slug no se recalcula** aunque el texto cambie: es la URL y es inmutable (AD-4).
+5. Corregir el texto invalida la exención del censo, que va atada a la **huella del texto** y
+   no al slug — razón de más para que documentar, corregir y salir del censo sean el mismo
+   gesto.
+
 
 ## Code Map
 
@@ -77,6 +121,7 @@ Y no es deuda formal. Al cotejar a Gracián contra su edición de 1647 aparecier
 - [ ] `tests/unit/documentacion.test.ts` (nuevo) -- la matriz sobre lo puro, con corpus temporal: documenta, rechaza lo que no aparece, obra distinta, ya documentada, y **que un rechazo no deja ni la Cita ni el censo tocados**.
 - [ ] `tests/unit/documentar-cli.test.ts` (nuevo) -- por la orden, incluido `retirar` sin motivo y que el censo conserva sus comentarios.
 - [ ] Una prueba de que **documentar una Cita y no sacarla del censo rompería el build**, para que quede fijado que van juntos.
+- [ ] `--texto` (enmienda del 2026-08-21, en el Spec Change Log): restituir el texto literal de la edición, con sus dos guardas —aparece literal, y sigue siendo la misma Cita— y su umbral escrito con su porqué.
 
 **Acceptance Criteria:**
 - Given una Cita publicada cuyo texto aparece literal en un documento recuperado, when la documento, then queda con su Fuente y su Procedencia derivadas del documento y **fuera del censo**, y el build sigue en verde.
@@ -96,8 +141,10 @@ Y no es deuda formal. Al cotejar a Gracián contra su edición de 1647 aparecier
 «baltasar-gracian-el-sabio-hace-luego-lo-que-el» no aparece en
 corpus/fuentes/wikisource-es--oraculo-manual-…-aforismos-251-275.txt.
 La comparación colapsa espacios y nada más. No se toca el texto de la Cita para que
-cuadre (NFR-12): corríjala contra su edición, o retírela con
+cuadre (NFR-12): corríjala contra su edición —con --texto "<el texto literal de la
+edición>"—, o retírela con
   npx tsx tools/documentar.ts --retirar <slug> "<motivo>"
+No se ha escrito nada: ni la Cita ni el censo.
 ```
 
 ## Verification

@@ -1562,3 +1562,48 @@ varias que hablen de uno.
 
 **Verificado.** `npx astro check` 0 errores. `npx vitest run` **1617/1617**. `npm run build`
 con 221 páginas y el cotejo literal en verde sobre las 49 Citas nuevas.
+
+## 11.6 — Documentar una Cita publicada, y el censo de 38 a 29
+
+`npm run documentar <slug> <documento>` escribe la Fuente y la Procedencia **derivadas del
+documento** y saca la Cita del censo **en el mismo gesto**, porque el censo exige que ocurran
+juntos: una Cita que declara Fuente y sigue censada rompe la construcción. `--retirar <slug>
+"<motivo>"` mueve a `corpus/_revision/` la que no supera el cotejo. **El censo baja de 38 a 29.**
+
+**La enmienda que hizo útil la orden.** El contrato decía «no corrijas el texto de la Cita
+para que cuadre», y al medir contra las Citas reales resultó que ese «Never» juntaba dos
+cosas distintas. El Corpus decía «Hombres necios que acusáis a la mujer **sin** razón… que
+culpáis**.**» y la edición de *Redondillas* dice «…a la mujer**,** sin razón… que culpáis**;**».
+No es una paráfrasis: **es la misma cita con la puntuación normalizada al teclearla en la v1**,
+y es el patrón general del censo. Con el contrato tal cual, la única salida habría sido
+**retirar Citas verdaderas por una coma**.
+
+Así que se separó *ajustar el texto hasta que pase* —que sigue prohibido— de *restituir el
+texto exacto de la edición*, que es lo contrario de inventar y lo que el propio mensaje de la
+11.2 ofrece. `--texto` lo hace con dos guardas: el texto nuevo tiene que **aparecer literal**
+en el documento, y tiene que **seguir siendo la misma Cita**. El umbral (0,85 sobre la forma
+canónica de AD-3) se fijó en el hueco entre los dos casos reales medidos: la corrección de Sor
+Juana puntúa **1,00** y el par de Gracián que abrió todo esto —«El sabio hace luego…» frente a
+«Haga al principio el cuerdo…»— puntúa **0,60**.
+
+**Lo saldado, y lo que enseña cada caso.**
+
+- **Retiradas dos Citas que no son de Gracián**, con su motivo: llevaban publicadas desde la
+  v1. Es la primera vez que el proyecto retira contenido por falsedad y no por criterio.
+- **Corregidas tres** contra su edición: Sor Juana, Machado y el propio Gracián, todas por
+  signos de puntuación.
+- **Documentadas cuatro** que ya aparecían literales.
+- **La obra que declaraba la Cita no siempre era la obra.** «Quien a Dios tiene, nada le falta»
+  declaraba «Poesías» y el documento declara «Nada te turbe»; «Hoy es siempre todavía» decía
+  «Proverbios y cantares» y son los de *Nuevas Canciones*, no los de *Campos de Castilla*. Manda
+  el documento, y por eso la orden lo dice antes de escribir.
+
+**El límite estructural, que conviene no volver a descubrir.** Las cinco de Séneca **no se
+pueden saldar**: el Corpus dice «La vida, si sabes usarla, es larga» y la traducción que aloja
+Wikisource dice «Larga es la vida, si la sabemos aprovechar». Misma idea, **traducción
+distinta**. Para un autor traducido no existe «la edición»: existe *una* traducción, y la que
+circula no es la que está. Con las seis del Quijote pasa otra cosa —Wikisource solo tiene el
+Quijote apócrifo de Avellaneda y una edición de 1905 sin texto—, y las de Ramón y Cajal y
+Concepción Arenal no tienen obra alcanzable. **De las 29 que quedan, buena parte no es deuda
+que se pague recuperando más documentos: es deuda que solo se salda retirando o cambiando de
+Fuente**, y eso es decisión de Héctor.

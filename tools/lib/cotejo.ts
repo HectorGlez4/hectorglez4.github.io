@@ -153,6 +153,43 @@ export const CENSO_DE_PARTIDA: Readonly<Record<string, string>> = {
 };
 
 /**
+ * El censo sin la línea de una Cita — Historia 11.6.
+ *
+ * Recibe y devuelve el **fichero literal**, no la lista de slugs, y esa es toda la
+ * decisión: el censo se lee con `parsearYaml` pero no se vuelve a volcar con un
+ * serializador, porque el fichero es dos tercios comentario y esos comentarios son la
+ * única explicación escrita de por qué existe un censo cerrado. Volcarlo desde la lista
+ * los borraría en la primera baja, y la segunda persona que lo abriera vería 37 slugs sin
+ * ninguna razón al lado.
+ *
+ * Se borra una línea. Todo lo demás —cabecera, sangrado, orden y el salto final— sale
+ * exactamente como entró, que es lo que hace que el `git diff` de una baja sea legible de
+ * un vistazo: una sola línea, y en rojo.
+ *
+ * `undefined` cuando el slug no está: no es un fallo —una Cita publicada después de la v3
+ * nunca estuvo censada— pero tampoco hay nada que escribir, y distinguirlo evita reescribir
+ * el fichero para dejarlo igual.
+ */
+export function censoSinLaCita(contenido: string, slug: string): string | undefined {
+  const lineas = contenido.split('\n');
+  const quedan = lineas.filter((linea) => !esEntradaDelCenso(linea, slug));
+  return quedan.length === lineas.length ? undefined : quedan.join('\n');
+}
+
+/**
+ * Si una línea del fichero es la entrada de ese slug.
+ *
+ * Se admiten las comillas aunque el fichero versionado no las use: YAML las acepta, y una
+ * entrada entrecomillada que no se reconociera dejaría la Cita documentada **y** censada,
+ * que es justo el estado que la historia dice que no puede existir.
+ */
+function esEntradaDelCenso(linea: string, slug: string): boolean {
+  const entrada = /^[ \t]*-[ \t]*(.*?)[ \t]*\r?$/u.exec(linea);
+  if (entrada === null) return false;
+  return entrada[1].replace(/^["']|["']$/gu, '') === slug;
+}
+
+/**
  * El documento que le toca a una Cita: `{id-de-fuente}--{slug-de-obra}`, sin extensión.
  *
  * Sale del mismo ayudante que nombra el fichero al recuperarlo, y no de un campo
