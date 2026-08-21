@@ -1607,3 +1607,32 @@ Quijote apócrifo de Avellaneda y una edición de 1905 sin texto—, y las de Ra
 Concepción Arenal no tienen obra alcanzable. **De las 29 que quedan, buena parte no es deuda
 que se pague recuperando más documentos: es deuda que solo se salda retirando o cambiando de
 Fuente**, y eso es decisión de Héctor.
+
+## 11.6 — Gutenberg vuelve, y con él los seis del Quijote
+
+Al preguntar por una **cuarta Fuente**, la comprobación previa dio otra respuesta: Gutenberg
+—que ya está en el conjunto cerrado— **volvía a responder 200**. La caída de 503/504 del día
+anterior era pasajera. No hizo falta ampliar el conjunto: bastó usar lo que ya estaba
+declarado. **El censo baja de 29 a 23.**
+
+`gutenberg--don-quijote.txt` (2,1 MB, el texto íntegro) salda las **seis** Citas de Cervantes,
+y las seis estaban mal en algún detalle:
+
+| El Corpus decía | Cervantes escribió |
+|---|---|
+| La pluma es **la** lengua del alma. | la pluma es lengua del alma |
+| El que lee mucho y anda mucho, **ve** mucho y sabe mucho. | el que lee mucho y anda mucho, **vee** mucho y sabe mucho. |
+| Bien predica quien bien vive**.** | Bien predica quien bien vive |
+| Donde una puerta se cierra, otra se abre**.** | Donde una puerta se cierra, otra se abre |
+| Cada uno es hijo de sus obras. | cada uno es hijo de sus obras. |
+| La libertad, Sancho… dieron los cielos**.** | …dieron los cielos**;** |
+
+La primera es la que más vale: **«la pluma es la lengua del alma» es una cita mal transmitida**
+que circula por todas partes, y Cervantes no escribió ese segundo artículo. Llevaba publicada
+desde la v1. Las demás son puntuación, mayúscula inicial de fragmento, y un arcaísmo —«vee»—
+que alguien modernizó al teclear.
+
+**Lo que enseña sobre las Fuentes.** Antes de admitir una cuarta conviene comprobar que las
+tres declaradas responden: una de ellas estaba caída doce horas y eso bastó para dar por
+imposible medio censo. La lección va a `DESPLIEGUE.md` como comprobación previa, no al
+conjunto cerrado.
