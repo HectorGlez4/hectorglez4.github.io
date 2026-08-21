@@ -1636,3 +1636,46 @@ que alguien modernizó al teclear.
 tres declaradas responden: una de ellas estaba caída doce horas y eso bastó para dar por
 imposible medio censo. La lección va a `DESPLIEGUE.md` como comprobación previa, no al
 conjunto cerrado.
+
+## 11.4 — La cadencia que sale de la serie, y la que no
+
+Quinto criterio de la historia: «queda declarada la cadencia de sembrado que §14.3 del PRD
+dejaba abierta, **y sale de sesiones medidas, no de una estimación**». La serie ya existe:
+cinco sesiones registradas en `corpus/sesiones-de-sembrado.yml`.
+
+| Sesión | Citas | Δ | SM-C1 | Δ |
+|---|---:|---:|---:|---:|
+| 20/08 12:23 | 50 | — | 64,0 % | — |
+| 20/08 17:10 | 70 | +20 | 74,3 % | +10,3 |
+| 20/08 21:07 | 107 | +37 | 83,2 % | +8,9 |
+| 20/08 21:23 | 148 | +41 | 87,8 % | +4,6 |
+| 21/08 06:03 | 197 | +49 | 90,9 % | +3,1 |
+
+**Lo que la serie sí dice, y es lo que la historia pedía.** 147 Citas en cinco sesiones, media
+de **36,8 por sesión**. Y el dato que cierra el segundo criterio: **SM-C1 no bajó ni una sola
+vez** —64 → 74,3 → 83,2 → 87,8 → 90,9—, así que ninguna de las cinco fue de las que la 11.4
+declara fallidas. El rendimiento por sesión **subió** mientras la Procedencia **mejoraba**, que
+es exactamente lo contrario de crecer ensuciando.
+
+**Lo que la serie no dice, y sería deshonesto declarar.** Las cinco sesiones ocurrieron en
+**dieciocho horas**, corridas por un agente. «36,8 Citas por sesión» mide el rendimiento de un
+agente con la tubería ya construida, **no la cadencia sostenible de una persona**, que es lo
+que §14.3 dejó abierto. Declarar ese número como *la* cadencia sería sustituir la estimación
+que la historia prohíbe por una medición que mide otra cosa —y sonaría a dato duro, que es
+peor.
+
+**Lo que sí se puede declarar hoy, con estas cinco:**
+
+- El **techo por sesión no lo pone el esfuerzo, lo pone la cantera**. Las sesiones grandes
+  (+41, +49) fueron las del *Oráculo manual*, 300 aforismos ya recuperados; las pequeñas
+  (+20), las de obras narrativas. Predecir por «sesiones» es predecir mal: la unidad real es
+  **la obra sentenciosa**, y una buena rinde 40-50 Citas.
+- **La segunda pasada sobre una obra es gratis**, porque el documento queda versionado: la
+  quinta sesión no gastó una sola petición de red.
+- El coste que sí es constante es **la revisión editorial**: de 769 candidatas salieron 37, y
+  de 2.192 salieron 41. Filtrar es el trabajo, extraer no.
+
+**Qué falta para cerrar el criterio formalmente.** §14.3 vive en el PRD, y `AGENTS.md` prohíbe
+editar a mano los artefactos de `planning-artifacts/`: hay que volver a pasar `bmad-prd` con
+esto como entrada. Es de Héctor, porque cerrar una pregunta abierta del PRD con un número es
+una decisión de producto y no de implementación. La medición ya está hecha y es esta.
