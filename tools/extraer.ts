@@ -238,5 +238,9 @@ terminar({
     `Candidatas en revisión: ${escritas}${seco ? ' (en seco, no se ha escrito nada)' : ''}\n` +
     `Descartadas por longitud: ${porMotivo('longitud')}\n` +
     `Descartadas por no estar en español: ${porMotivo('no-esta-en-español')}\n` +
+    // Historia 11.5 — un descarte mudo es el mismo problema con otro disfraz: si el
+    // documento trae unos párrafos con el OCR roto, quien siembra tiene que enterarse
+    // aquí, no al preguntarse por qué de una página larga salieron cuatro candidatas.
+    `Descartadas por ilegibles (OCR roto): ${porMotivo('ilegible')}\n` +
     `Descartadas por repetidas: ${porMotivo('repetida')}`,
 });

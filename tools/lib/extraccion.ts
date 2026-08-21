@@ -9,8 +9,19 @@
  * Lo que esta extracción **no** hace, y es la mitad del criterio: no completa la
  * Procedencia. Ni deduce el año de la fecha de fallecimiento del Autor, ni acepta un año
  * aproximado de la Fuente. Lo que no consta se omite; nunca se aproxima.
+ *
+ * Desde la Historia 11.5 tampoco propone lo que no se puede leer. Aquí y no en el cotejo:
+ * el cotejo comprueba que una Cita es fiel a su documento, y un escaneo con el OCR roto
+ * cumple eso perfectamente. Son dos puertas y las dos tienen que estar.
  */
 
+import {
+  SEÑALES,
+  medirLegibilidad,
+  type MedidaDeLegibilidad,
+} from '../../src/lib/legibilidad.ts';
+import { porcentajeEnEspañol } from '../../src/lib/formato.ts';
+import { MAX_PROPORCION_ILEGIBLE } from '../../src/lib/umbrales.ts';
 import { fuenteDe, type Fuente } from './fuentes.ts';
 
 /** El documento tal y como lo entrega la Fuente, con su metadato de obra y año. */
@@ -43,7 +54,8 @@ export interface Candidata {
 export type Descarte =
   | { texto: string; motivo: 'no-esta-en-español' }
   | { texto: string; motivo: 'longitud' }
-  | { texto: string; motivo: 'repetida' };
+  | { texto: string; motivo: 'repetida' }
+  | { texto: string; motivo: 'ilegible' };
 
 export type ResultadoDeExtraccion =
   | { ok: true; candidatas: Candidata[]; descartadas: Descarte[] }
@@ -181,6 +193,43 @@ export function fuenteUtilizable(
   return { ok: true, fuente };
 }
 
+/**
+ * Si un texto pasa la puerta de legibilidad — Historia 11.5.
+ *
+ * Vale igual para el documento entero y para una candidata suelta, con el mismo umbral, y
+ * el desnivel entre los dos casos es el que se busca: ver `MAX_PROPORCION_ILEGIBLE`.
+ */
+export function esLegible(medida: MedidaDeLegibilidad): boolean {
+  return medida.proporcion <= MAX_PROPORCION_ILEGIBLE;
+}
+
+/** El porcentaje de una medida, escrito como lo escribe el proyecto: «4,3 %». */
+function comoPorcentaje(proporcion: number): string {
+  return porcentajeEnEspañol(Number((proporcion * 100).toFixed(1)));
+}
+
+/**
+ * Por qué se rechaza un documento entero, con la medida y con lo que se vio.
+ *
+ * La medida va en el mensaje a propósito. Sin ella, «no se puede leer» es un veredicto sin
+ * apelación posible: quien siembra no sabe si el documento está roto del todo o si le ha
+ * faltado un pelo, ni si el umbral es el que hay que discutir.
+ */
+function motivoDeIlegible(medida: MedidaDeLegibilidad): string {
+  const vistas = SEÑALES.filter((s) => medida.señales[s] > 0).join(', ');
+  return (
+    `El documento no se puede leer: ${medida.sospechosas} de sus ${medida.palabras} palabras ` +
+    `traen señales de OCR roto (${comoPorcentaje(medida.proporcion)} %, por encima del ` +
+    `${comoPorcentaje(MAX_PROPORCION_ILEGIBLE)} % admitido).\n` +
+    `Señales vistas: ${vistas}. Por ejemplo: ${medida.ejemplos.map((e) => `«${e}»`).join(', ')}.\n` +
+    'No se ha escrito ninguna candidata: una Cita sacada de aquí saldría mutilada y con la ' +
+    'firma de su Autor, y el cotejo literal la daría por buena porque la basura está en el ' +
+    'documento.\n' +
+    'El documento se queda versionado tal cual. Recuperar es archivar lo que la Fuente da; ' +
+    'lo que no puede es sembrar, y corregirlo a mano sería inventar lo que la edición decía.'
+  );
+}
+
 export function extraerCandidatas(
   documento: DocumentoDeFuente,
   autor: string,
@@ -198,6 +247,16 @@ export function extraerCandidatas(
     };
   }
 
+  /*
+   * La puerta del documento entero, antes de proponer nada.
+   *
+   * Se detiene entero y no candidata a candidata porque cuando la edición está rota lo que
+   * falla no son unas frases sino el testimonio: las que salieran limpias lo estarían por
+   * suerte, y aprobarlas sería fiarse de un documento que ya se sabe que miente.
+   */
+  const medida = medirLegibilidad(documento.texto);
+  if (!esLegible(medida)) return { ok: false, motivo: motivoDeIlegible(medida) };
+
   const año = añoExacto(documento.año);
   const descartadas: Descarte[] = [];
   const candidatas: Candidata[] = [];
@@ -213,6 +272,16 @@ export function extraerCandidatas(
 
     if (!estaEnEspañol(sentencia)) {
       descartadas.push({ texto: sentencia, motivo: 'no-esta-en-español' });
+      continue;
+    }
+
+    /*
+     * Y la puerta por candidata, para el documento que solo está roto a trozos. Se
+     * descarta entera: jamás se «arregla» el texto para que pase, porque corregir un OCR a
+     * ojo es inventar lo que la edición decía. Ausencia antes que mutilación.
+     */
+    if (!esLegible(medirLegibilidad(sentencia))) {
+      descartadas.push({ texto: sentencia, motivo: 'ilegible' });
       continue;
     }
 

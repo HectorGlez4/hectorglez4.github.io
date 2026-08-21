@@ -647,3 +647,117 @@ describe('Fix 11.1b — dos páginas hermanas, dos documentos, cada Cita en el s
     }
   });
 });
+
+/**
+ * Historia 11.5 — un documento ilegible no siembra.
+ *
+ * Por la orden, que es donde se ve lo que de verdad importaba: que las candidatas **no
+ * lleguen a `corpus/_revision/`**. Una candidata que nadie propone no se puede aprobar por
+ * descuido, y las 61 de Palma solo las paró que una persona las leyera una por una.
+ *
+ * Las frases del documento roto son las reales del *Apéndice a Mis últimas tradiciones
+ * peruanas*; las sanas están escritas para la prueba.
+ */
+describe('Historia 11.5 — el OCR roto no llega a revisión', () => {
+  const OBRA = 'Apéndice a Mis últimas tradiciones peruanas';
+  const NOMBRE_DE_PALMA = 'wikisource-es--apendice-a-mis-ultimas-tradiciones-peruanas.txt';
+
+  const CABECERA_DE_PALMA: CabeceraDeDocumento = {
+    fuente: 'wikisource-es',
+    obra: OBRA,
+    año: 1906,
+    url: 'https://es.wikisource.org/wiki/Ap%C3%A9ndice_a_Mis_%C3%BAltimas_tradiciones_peruanas',
+    recuperado: '2026-08-20',
+  };
+
+  const DECLARACION_DE_PALMA = [OBRA, '|autor=Ricardo Palma', '|año = 1906'].join('\n');
+
+  /** Con el OCR roto. Literales del documento que la primera sesión de sembrado recuperó. */
+  const ROTAS = [
+    'For- mabalo un pliego, en folio menor, con las armas de la casa y el escudo de sus mayores.',
+    'El que enseiia con el ejemplo no necesita levantar la voz para que lo escuchen los suyos.',
+    'Era el patio un Ileno de gente que aguardaba la salida del virrey, sin qus nadie se atreviese a moverse.',
+    'Sus tata* rabuelos vinieron de España, y de ellos heredó la casa, el nombre y la pobreza.',
+    'Hablaba el italianoTonti con mucha gracia, y a nadie le importaba si era italiano 6 español.',
+  ];
+
+  /** Bien transcritas, y con largo de candidata: estas sí tienen que llegar a revisión. */
+  const SANAS = [
+    'La memoria de los pueblos es más terca que la de los hombres, y ninguna injusticia se olvida del todo.',
+    'No hay tirano que no haya empezado por hacerse necesario, ni pueblo que no lo haya consentido.',
+    'Quien escribe la historia de los vencidos escribe también la conciencia de los vencedores.',
+    'Nada envejece tanto a un hombre como el empeño de que nadie note que ha envejecido.',
+    'El que perdona por cansancio no perdona, y el que olvida por comodidad tampoco olvida.',
+  ];
+
+  const dePalma = (corpus: string, frases: string[]) =>
+    documento(corpus, CABECERA_DE_PALMA, {
+      nombre: NOMBRE_DE_PALMA,
+      declaracion: DECLARACION_DE_PALMA,
+      texto: frases.join(' '),
+    });
+
+  it('un documento con el OCR roto no propone ni una candidata, y lo dice con su medida', async () => {
+    const { corpus } = await corpusVacio();
+    const resultado = await extraer(await dePalma(corpus, ROTAS), corpus, ['--seco']);
+
+    expect(resultado.codigo).not.toBe(0);
+    expect(await readdir(join(corpus, '_revision'))).toEqual([]);
+    expect(resultado.error).toMatch(/no se puede leer/);
+    // La medida, para que quien siembra sepa si el documento está roto o le faltó un pelo.
+    expect(resultado.error).toMatch(/\d+ de sus \d+ palabras/);
+    expect(resultado.error).toMatch(/%/);
+    // Y qué se vio, con palabras del propio documento.
+    expect(resultado.error).toMatch(/enseiia|qus|italianoTonti|For/);
+  });
+
+  it('el rechazo no toca el documento: sigue versionado, carácter por carácter', async () => {
+    const { corpus } = await corpusVacio();
+    const ruta = await dePalma(corpus, ROTAS);
+    const antes = await readFile(ruta, 'utf8');
+
+    await extraer(ruta, corpus);
+
+    expect(await readFile(ruta, 'utf8')).toBe(antes);
+  });
+
+  it('un documento sano con párrafos rotos propone solo lo sano, y cuenta lo demás', async () => {
+    const { corpus } = await corpusVacio();
+    // Sano de sobra en conjunto —la medida global no lo condena— y roto a trozos.
+    const salpicado = [...SANAS, ...SANAS, ...SANAS, ROTAS[0], ROTAS[4]];
+    const resultado = await extraer(await dePalma(corpus, salpicado), corpus);
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(resultado.salida).toMatch(/Descartadas por ilegibles \(OCR roto\): 2/);
+
+    const textos = [];
+    for (const fichero of await readdir(join(corpus, '_revision'))) {
+      textos.push((await frontmatterDe(corpus, fichero)).texto as string);
+    }
+
+    expect(textos.length).toBe(SANAS.length);
+    for (const sana of SANAS) expect(textos).toContain(sana);
+    for (const rota of [ROTAS[0], ROTAS[4]]) expect(textos).not.toContain(rota);
+  });
+
+  it('un documento sano entero no pierde ninguna candidata por legibilidad', async () => {
+    const { corpus } = await corpusVacio();
+    const resultado = await extraer(await dePalma(corpus, SANAS), corpus);
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(resultado.salida).toMatch(/Descartadas por ilegibles \(OCR roto\): 0/);
+    expect((await readdir(join(corpus, '_revision'))).length).toBe(SANAS.length);
+  });
+
+  it('la línea del recuento sale siempre, aunque no se descarte nada', async () => {
+    // Un descarte mudo es el mismo problema con otro disfraz: la línea acompaña a las que
+    // ya existían por longitud, por idioma y por repetición.
+    const { corpus } = await corpusVacio();
+    const resultado = await extraer(await documento(corpus), corpus, ['--seco']);
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(resultado.salida).toMatch(/Descartadas por longitud: \d+/);
+    expect(resultado.salida).toMatch(/Descartadas por ilegibles \(OCR roto\): \d+/);
+    expect(resultado.salida).toMatch(/Descartadas por repetidas: \d+/);
+  });
+});

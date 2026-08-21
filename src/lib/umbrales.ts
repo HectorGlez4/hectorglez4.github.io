@@ -122,6 +122,35 @@ export const MIN_CITAS_POR_COLECCION = 15;
 export const MAX_CARACTERES_CRITERIO = 160;
 
 /**
+ * Proporción de palabras con señales de OCR roto que un texto puede traer — Historia 11.5.
+ *
+ * **VALOR PROVISIONAL**, y conviene decir de qué sale. Sale de **un solo documento
+ * corrupto**, el *Apéndice a Mis últimas tradiciones peruanas* de Palma que la primera
+ * sesión de sembrado recuperó, más los cincuenta y cinco documentos sanos que el Corpus
+ * tiene versionados. Cuando haya más corruptos habrá que moverlo, y moverlo será una
+ * decisión visible en el diff, que es para lo que este módulo existe.
+ *
+ * De dónde sale el 2 %. Medidos los documentos sanos con `src/lib/legibilidad.ts` —Gracián,
+ * Rodó, Montalvo, el Quijote entero de Gutenberg, Machado, Sor Juana, Séneca, Unamuno,
+ * González Prada: unas 450.000 palabras— el corpus sano entero dispara **dos** señales, y
+ * el peor documento se queda en el 0,49 % (una página de índice de 204 palabras). Las
+ * frases reales del documento de Palma se van del 5 % para arriba. Entre 0,49 y 5 hay
+ * sitio de sobra, y 2 deja un margen de cuatro veces sobre lo peor que se ha visto sano.
+ *
+ * El mismo número mide un documento entero y una candidata suelta, y eso no es un descuido
+ * sino el efecto que se busca: en un documento de diez mil palabras un tropiezo aislado no
+ * mueve la aguja, y en una candidata de treinta —el largo que la extracción admite— uno
+ * solo la condena. Un documento no se juzga por su peor renglón; una Cita sí, porque se
+ * publica entera y con la firma de su Autor.
+ *
+ * Quien lo aplica es `tools/lib/extraccion.ts`, en la extracción y no en la puerta literal
+ * de la Historia 11.2: son dos puertas que miden cosas distintas —que no nos hayamos
+ * inventado el texto, y que la edición de la que salió se pueda leer— y juntarlas dejaría
+ * un solo mensaje de error para dos averías.
+ */
+export const MAX_PROPORCION_ILEGIBLE = 0.02;
+
+/**
  * Los cuatro Umbrales de Activación de los Modelos de Ingreso — Épica 14, AD-9, AD-21.
  *
  * Están aquí y en ningún otro sitio: ni en el mando de `tools/`, ni en el paso de CI, ni
