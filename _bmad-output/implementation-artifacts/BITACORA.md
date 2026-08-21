@@ -1679,3 +1679,34 @@ peor.
 editar a mano los artefactos de `planning-artifacts/`: hay que volver a pasar `bmad-prd` con
 esto como entrada. Es de Héctor, porque cerrar una pregunta abierta del PRD con un número es
 una decisión de producto y no de implementación. La medición ya está hecha y es esta.
+
+## 11.5 — Un documento ilegible no siembra
+
+La puerta que faltaba, y que en tres sesiones seguidas se pagó leyendo candidatas una a una.
+El cotejo de la 11.2 comprueba que una Cita **es fiel a su documento**, no que el documento
+**sea legible**: un escaneo con el OCR roto lo pasa entero, porque la basura aparece literal en
+su fichero. Ahora la extracción mide el documento antes de proponer nada.
+
+**Verificado sobre lo que importa, que es el lado sano.** Los cuatro documentos reales del
+Corpus —Gracián, Rodó, Montalvo, Machado— pasan con **cero descartes por ilegible**. Era el
+riesgo declarado de la historia: una puerta demasiado estricta habría empezado a descartar
+arcaísmos, latín y nombres propios, y entonces el Corpus dejaría de crecer justo por donde más
+vale.
+
+**Y caza el documento que la originó.** Recuperado otra vez el *Apéndice a Mis últimas
+tradiciones peruanas* de Palma, la orden no propone ni una candidata y dice por qué **con la
+medida delante**:
+
+> El documento no se puede leer: 82 de sus 2292 palabras traen señales de OCR roto (3,6 %, por
+> encima del 2 % admitido). Señales vistas: palabra-partida, mayúscula-intercalada,
+> carácter-ajeno, letra-suelta, impronunciable.
+
+Y cierra explicando lo que ninguna otra puerta dice: «una Cita sacada de aquí saldría mutilada
+y con la firma de su Autor, **y el cotejo literal la daría por buena porque la basura está en
+el documento**».
+
+**El documento se queda versionado.** Recuperar es archivar lo que la Fuente da, y un escaneo
+malo sigue siendo registro válido de lo que hay ahí; lo que no puede es sembrar. Corregirlo a
+mano sería inventar lo que la edición decía.
+
+`npx vitest run` **1733/1733** en 59 ficheros, frente a 1644 de la línea base.

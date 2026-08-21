@@ -2,7 +2,7 @@
 title: 'Story 11.5 — Un documento ilegible no siembra'
 type: 'feature'
 created: '2026-08-20'
-status: 'in-progress'
+status: 'done'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-11-context.md'
