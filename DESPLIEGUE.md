@@ -288,3 +288,34 @@ npx wrangler d1 execute medicion --remote --command \
 a qué aplicación fue y no se intenta averiguarlo: cualquier forma de deducirlo —medir
 tiempos, mirar qué pierde el foco— sería reconstruir el comportamiento del visitante por
 la puerta de atrás. «Opaco» es un dato honesto: se compartió, y no se sabe adónde.
+
+
+## 4. Encender las donaciones — Historia 14.2
+
+Cerrar LC-4 es lo último que le falta al Umbral de las donaciones —«LC-1…LC-4
+verificadas»—, así que quien acabe la sección 3 es quien se encuentra con esta.
+
+**Encenderlas es un solo cambio:** poner `encendido: true` en el Modelo `donaciones` de
+`src/lib/ingreso.ts`. Nada más. La invitación ya está construida y la portada, `/buscar` y
+la 404 la piden por su cuenta; `git revert` de ese commit la apaga.
+
+**Antes de hacerlo, abre el `destino` en el navegador y comprueba que es la página de
+cobro correcta.** Hoy declara `https://ko-fi.com/sabiduriadebolsillo`, y esa dirección se
+**supuso** por el nombre del dominio: no hay ninguna cuenta de Ko-fi escrita en el
+repositorio de la que derivarla y nadie la ha abierto todavía. Si no existe, o no es la
+cuenta del proyecto, corrígela en la misma línea del mismo fichero.
+
+Este es el único requisito manual del encendido, y lo es porque es **lo único que el build
+no puede cazar**:
+
+- Un destino **ausente o mal formado** —vacío, sin `https://`— detiene `astro build` con
+  el mensaje que dice qué falta. Ese caso no llega a publicarse.
+- Un destino **bien formado y equivocado** construye, despliega y publica sin que nada
+  proteste. El visitante que quiso apoyar el sitio aterriza en una página que no existe, y
+  el sitio no se entera.
+
+Comprobar el estado en cualquier momento, sin encender nada:
+
+```bash
+npm run ingreso            # estado, Umbral y cifra medida —o por qué no es medible
+```

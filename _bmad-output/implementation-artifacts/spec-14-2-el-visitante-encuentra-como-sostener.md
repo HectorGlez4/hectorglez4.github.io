@@ -2,7 +2,8 @@
 title: 'Story 14.2 — El visitante que quiere sostener el sitio encuentra cómo'
 type: 'feature'
 created: '2026-08-21'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: '6043e1aa156a8b0505ca1a74e82d231a36de04f4'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-14-context.md'
@@ -68,15 +69,15 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/lib/ingreso.ts` -- añadir `destino?: string` a `Modelo` y `destino` a donaciones, documentado como sin verificar -- el destino es dato del Modelo, no de la página, y así no se repite en tres sitios.
-- [ ] `src/lib/ingreso.ts` -- en `revisarDeclaracionDeIngreso`, rechazar un Modelo encendido sin `destino` -- **decisión abierta: ver Design Notes.**
-- [ ] `src/components/Sostener.astro` -- componente nuevo; recibe `href` por prop y emite el bloque con `data-ingreso="donaciones"` -- recibe primitivas y no importa `ingreso.ts`, para que la guarda AD-20 siga estricta.
-- [ ] `src/pages/index.astro`, `src/pages/buscar.astro`, `src/pages/404.astro` -- consultar `modelosEn('<su pagina>')` y renderizar `Sostener` solo si hay Modelo -- la página conoce su identidad; el componente no decide.
-- [ ] `tests/unit/ingreso-construido.test.ts:158` -- generalizar: lo marcado en una página debe estar encendido y admitido ahí -- si no, encender pone la suite en rojo y la promesa del diff de una línea es falsa.
-- [ ] `tests/unit/ingreso-construido.test.ts:221` -- sustituir el vacío por el censo exacto de las tres superficies -- lo pide su propio comentario: el valor está en ver quién entró.
-- [ ] `tests/unit/ingreso-construido.test.ts` -- prueba nueva: construir un proyecto temporal con `encendido: true` parcheado en la copia; el bloque sale en las tres superficies y en ninguna otra -- es lo único que demuestra la promesa central de la épica.
-- [ ] `tests/unit/ingreso.test.ts` -- cubrir la matriz: `destino` presente, encendido sin destino rechazado, apagado sigue sin admitir nada.
-- [ ] `AGENTS.md` -- en «Encender un Modelo de Ingreso», anotar que encender donaciones ya no exige tocar ninguna página.
+- [x] `src/lib/ingreso.ts` -- añadir `destino?: string` a `Modelo` y `destino` a donaciones, documentado como sin verificar -- el destino es dato del Modelo, no de la página, y así no se repite en tres sitios.
+- [x] `src/lib/ingreso.ts` -- en `revisarDeclaracionDeIngreso`, añadir un fallo para el Modelo encendido sin `destino`, junto a su hermano «encendido sin superficie» -- como el módulo se revisa al cargar y desde esta historia una página lo importa, encender sin destino **detiene el build**; ver Design Notes para el texto exacto.
+- [x] `src/components/Sostener.astro` -- componente nuevo; recibe `href` por prop y emite el bloque con `data-ingreso="donaciones"` -- recibe primitivas y no importa `ingreso.ts`, para que la guarda AD-20 siga estricta.
+- [x] `src/pages/index.astro`, `src/pages/buscar.astro`, `src/pages/404.astro` -- consultar `modelosEn('<su pagina>')` y renderizar `Sostener` solo si hay Modelo -- la página conoce su identidad; el componente no decide.
+- [x] `tests/unit/ingreso-construido.test.ts:158` -- generalizar: lo marcado en una página debe estar encendido y admitido ahí -- si no, encender pone la suite en rojo y la promesa del diff de una línea es falsa.
+- [x] `tests/unit/ingreso-construido.test.ts:221` -- sustituir el vacío por el censo exacto de las tres superficies -- lo pide su propio comentario: el valor está en ver quién entró.
+- [x] `tests/unit/ingreso-construido.test.ts` -- prueba nueva: construir un proyecto temporal con `encendido: true` parcheado en la copia; el bloque sale en las tres superficies y en ninguna otra -- es lo único que demuestra la promesa central de la épica.
+- [x] `tests/unit/ingreso.test.ts` -- cubrir la matriz: `destino` presente, encendido sin destino rechazado, apagado sigue sin admitir nada.
+- [x] `AGENTS.md` -- en «Encender un Modelo de Ingreso», anotar que encender donaciones ya no exige tocar ninguna página.
 
 **Acceptance Criteria:**
 - Given el repositorio tal como queda, when `npm run build`, then `dist/` no contiene `data-ingreso` y es idéntico al de la rama base.
@@ -100,7 +101,18 @@ context:
 </aside>
 ```
 
-**Decisión abierta — la puerta del destino.** El destino de Ko-fi es una suposición sin verificar; la pregunta es qué hace el sistema si alguien enciende sin confirmarla. Tres formas, y la elección cambia el comportamiento: (a) fallo en `revisarDeclaracionDeIngreso` — coherente con las otras siete comprobaciones, y como el módulo revisa al cargar, **detiene el build**; (b) `throw` al construir el bloque — más cerca del daño, más tarde; (c) solo documentarlo.
+**La puerta del destino — decidida por Héctor: que rompa el build.** El destino de Ko-fi es una suposición sin verificar, y encender el Modelo sin confirmarla publicaría una invitación que no lleva a ninguna parte. La comprobación va en `revisarDeclaracionDeIngreso`, junto a su hermano exacto —el que rechaza un Modelo encendido que no admite ninguna superficie—, y no en el componente: el módulo se revisa al cargar, así que desde esta historia el fallo **detiene `astro build`** en vez de esperar al renderizado. Se descartaron el `throw` en el componente (llega más tarde y solo si esa superficie se construye) y la vía de solo documentarlo.
+
+```ts
+if (modelo.encendido && modelo.destino === undefined) {
+  fallos.push(
+    `«${modelo.nombre}» está encendido y no declara destino, así que la ` +
+      'invitación no lleva a ninguna parte. Declare su destino, o vuelva a apagarlo.',
+  );
+}
+```
+
+Cubierto por la cuarta fila de la matriz. Nota para quien lo pruebe: `revisarDeclaracionDeIngreso` acepta modelos por parámetro justo para poder afirmarlo sin encender nada en el censo real.
 
 ## Verification
 
@@ -109,3 +121,63 @@ context:
 - `npm run check` -- expected: sin errores de TypeScript
 - `npm run build` -- expected: build limpio; `grep -r 'data-ingreso' dist/` sin resultados
 - `npm run ingreso` -- expected: sigue informando los cuatro apagados y LC-4 sin cerrar
+
+## Suggested Review Order
+
+**El estado y su puerta**
+
+- El dueño del estado gana `destino`: dato del Modelo, no de la página.
+  [`ingreso.ts:119`](../../src/lib/ingreso.ts#L119)
+
+- La puerta decidida por Héctor: ausente, en blanco o no-`https` detienen el build.
+  [`ingreso.ts:427`](../../src/lib/ingreso.ts#L427)
+
+- El destino supuesto y sin verificar, con lo que exige el commit que encienda.
+  [`ingreso.ts:206`](../../src/lib/ingreso.ts#L206)
+
+- El comentario de cierre: la puerta que se prometía ya es real.
+  [`ingreso.ts:455`](../../src/lib/ingreso.ts#L455)
+
+**La invitación**
+
+- Recibe primitivas y no importa el estado: así la guarda AD-20 sigue estricta.
+  [`Sostener.astro:69`](../../src/components/Sostener.astro#L69)
+
+- Por qué la presentación va en atributos y no en un bloque `<style>`.
+  [`Sostener.astro:37`](../../src/components/Sostener.astro#L37)
+
+- Región complementaria con nombre, y el aviso de pestaña nueva dentro del enlace.
+  [`Sostener.astro:156`](../../src/components/Sostener.astro#L156)
+
+**Las tres superficies**
+
+- Ningún `if` propio: la portada delega en el cruce de las dos condiciones.
+  [`index.astro:161`](../../src/pages/index.astro#L161)
+
+- Fuera de `.salida`: dentro solo existiría para quien no encontró nada.
+  [`buscar.astro:137`](../../src/pages/buscar.astro#L137)
+
+- Después de las salidas: quien llega aquí primero necesita por dónde seguir.
+  [`404.astro:93`](../../src/pages/404.astro#L93)
+
+**Las guardas, y lo que la revisión les corrigió**
+
+- La promesa central: encender es un diff de una línea, construido y comprobado.
+  [`ingreso-construido.test.ts:470`](../../tests/unit/ingreso-construido.test.ts#L470)
+
+- Encender mal no llega a publicar: construye de verdad y exige salida distinta de cero.
+  [`ingreso-construido.test.ts:642`](../../tests/unit/ingreso-construido.test.ts#L642)
+
+- El censo de consumidores, hoy exactamente las tres superficies.
+  [`ingreso-construido.test.ts:141`](../../tests/unit/ingreso-construido.test.ts#L141)
+
+**Periféricos**
+
+- El gancho que permite construir encendido sin encender nada en el repositorio.
+  [`construir.ts`](../../tests/unit/ayuda/construir.ts)
+
+- La guarda del dominio, relajada por la coincidencia con el identificador de Ko-fi.
+  [`dominio.test.ts`](../../tests/unit/dominio.test.ts)
+
+- El procedimiento del encendido, y su único requisito manual.
+  [`DESPLIEGUE.md`](../../DESPLIEGUE.md)

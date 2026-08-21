@@ -13,8 +13,10 @@
  */
 import Armazon from '../components/Armazon.astro';
 import BloqueDeCita from '../components/BloqueDeCita.astro';
+import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { modelosEn } from '../lib/ingreso.ts';
 import { tituloDe } from '../lib/marca.ts';
 import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
 
@@ -74,6 +76,22 @@ const autorDelDia = seleccion
             ))}
           </ul>
         </section>
+      )
+    }
+
+    {
+      /*
+       * La invitación a sostener el sitio — Historia 14.2, UX-DR36.
+       *
+       * Va después de las salidas, y por el mismo motivo por el que esta página las lleva:
+       * quien llega aquí venía de un enlace roto y lo primero que necesita es por dónde
+       * seguir. La invitación es lo último, debajo del filete, para quien la busque.
+       *
+       * Quien decide es `modelosEn('404.astro')` —encendido **y** admitido aquí—, no esta
+       * página. Con todo apagado no se emite nada, ni contenedor ni marca (UX-DR35).
+       */
+      modelosEn('404.astro').map(
+        (modelo) => modelo.destino !== undefined && <Sostener id={modelo.id} href={modelo.destino} />,
       )
     }
   </div>

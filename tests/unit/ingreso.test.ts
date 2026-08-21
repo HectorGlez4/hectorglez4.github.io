@@ -41,7 +41,14 @@ const FUENTE = readFileSync(resolve(import.meta.dirname, '../../src/lib/ingreso.
  */
 const CODIGO = FUENTE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
 
-/** Un Modelo cualquiera al que retorcerle un campo, para probar la revisión. */
+/**
+ * Un Modelo cualquiera al que retorcerle un campo, para probar la revisión.
+ *
+ * Trae `destino` puesto porque la revisión lo exige a todo Modelo encendido: sin él, cada
+ * prueba que enciende este molde para medir **otra** cosa recogería dos fallos en vez de uno
+ * y dejaría de decir lo que dice. Quien quiera el caso sin destino lo pide en claro, pasando
+ * `destino: undefined`.
+ */
 function modeloDePrueba(campos: Partial<Modelo> = {}): Modelo {
   return {
     id: 'producto-propio',
@@ -50,6 +57,7 @@ function modeloDePrueba(campos: Partial<Modelo> = {}): Modelo {
     dispara: 'enciende',
     umbral: { clase: 'sesiones-organicas-mensuales', sesiones: 1 },
     admitidoEn: [],
+    destino: 'https://ejemplo.invalido/apoyar',
     nota: 'para la prueba',
     ...campos,
   };
@@ -201,6 +209,128 @@ describe('Historia 14.1 — qué superficie admite qué Modelo', () => {
 
   it('las donaciones solo pueden ir en superficies de no lectura — UX-DR36', () => {
     expect(modeloDe('donaciones')?.admitidoEn).toEqual(['index.astro', 'buscar.astro', '404.astro']);
+  });
+});
+
+describe('Historia 14.2 — a dónde lleva la invitación', () => {
+  it('el destino es dato del Modelo, y las donaciones lo declaran', () => {
+    /*
+     * Vive aquí y no en las tres páginas: escrito en cada una serían tres sitios que pueden
+     * divergir sin que nada falle, y la divergencia se descubriría cuando alguien no pudiera
+     * pagar. Cambiar de proveedor tiene que ser esta línea.
+     */
+    const destino = modeloDe('donaciones')?.destino;
+    expect(destino).toBeDefined();
+    expect(destino).toMatch(/^https:\/\/[^\s]+$/);
+    // Y cruza su propia puerta: el día que se encienda, la revisión no tendrá nada que decir
+    // de su forma. Lo que la revisión **no** puede comprobar es que la dirección exista, y
+    // eso es requisito manual del commit que encienda (AGENTS.md, DESPLIEGUE.md §3).
+    expect(
+      revisarDeclaracionDeIngreso([{ ...(modeloDe('donaciones') as Modelo), encendido: true }]),
+    ).toEqual([]);
+  });
+
+  it('los demás no lo declaran todavía, y es coherente con no tener superficie', () => {
+    // Ni la afiliación —falta decidir qué edición se enlaza—, ni el producto propio —no
+    // existe—, ni la publicidad. Ninguno está admitido en ninguna parte, así que no hay a
+    // dónde llevar a nadie, y fingir un destino sería la primera mentira del censo.
+    for (const id of ['afiliacion-de-libros', 'producto-propio', 'publicidad-acotada']) {
+      expect(modeloDe(id)?.destino, id).toBeUndefined();
+      expect(modeloDe(id)?.admitidoEn, id).toEqual([]);
+    }
+  });
+
+  it('apagado, el destino no admite nada por sí solo', () => {
+    // Declarar a dónde iría no es encenderlo: `modelosEn` sigue cruzando estado y admisión, y
+    // con las donaciones apagadas las tres superficies que las admiten siguen sin alojarlas.
+    for (const pagina of ['index.astro', 'buscar.astro', '404.astro']) {
+      expect(modelosEn(pagina), pagina).toEqual([]);
+    }
+  });
+
+  it('un Modelo encendido sin destino se rechaza', () => {
+    /*
+     * El hermano exacto de «encendido y no lo admite ninguna superficie»: uno no se ve en
+     * ninguna parte y este se ve y no lleva a ninguna. Va en la revisión y no en el
+     * componente porque el módulo se revisa **al cargar**, y desde la 14.2 tres páginas lo
+     * importan.
+     *
+     * Que eso **detenga el build** no se afirma aquí: esto es la función pura, y de una
+     * función que devuelve una lista no se sigue que ninguna construcción se caiga. Lo ata
+     * `tests/unit/ingreso-construido.test.ts`, que construye un proyecto con el destino
+     * quitado y exige que `astro build` salga con código distinto de cero.
+     */
+    const fallos = revisarDeclaracionDeIngreso([
+      modeloDePrueba({ encendido: true, admitidoEn: ['index.astro'], destino: undefined }),
+    ]);
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('no lleva a ninguna parte');
+  });
+
+  it('y declarar un destino en blanco tampoco es declararlo', () => {
+    /*
+     * `destino: ''` cruzaba la puerta cuando solo se miraba la presencia, y se renderiza como
+     * `<a href="">`: eso **recarga la página que el visitante estaba leyendo** en vez de
+     * llevarlo a ninguna parte. Es la misma avería que la puerta existe para impedir, y es
+     * además lo que su vecina ya hacía con `nombre.trim() === ''`.
+     */
+    for (const enBlanco of ['', '   ', '\n\t']) {
+      const fallos = revisarDeclaracionDeIngreso([
+        modeloDePrueba({ encendido: true, admitidoEn: ['index.astro'], destino: enBlanco }),
+      ]);
+      expect(fallos, JSON.stringify(enBlanco)).toHaveLength(1);
+      expect(fallos[0]).toContain('en blanco');
+    }
+  });
+
+  it('y un destino que no es «https://» se rechaza', () => {
+    // Una invitación a pagar no se publica en claro, ni con un esquema cualquiera, ni con
+    // espacios pegados delante: las tres formas dejan un enlace que no hace lo que dice.
+    for (const torcido of [
+      'http://ko-fi.com/alguien',
+      'ko-fi.com/alguien',
+      '/apoyar',
+      'javascript:void 0',
+      ' https://ko-fi.com/alguien',
+      'https://',
+    ]) {
+      const fallos = revisarDeclaracionDeIngreso([
+        modeloDePrueba({ encendido: true, admitidoEn: ['index.astro'], destino: torcido }),
+      ]);
+      expect(fallos, torcido).toHaveLength(1);
+      expect(fallos[0], torcido).toContain('https://');
+    }
+  });
+
+  it('y apagado no se le exige nada al destino, que es lo que lo deja abierto', () => {
+    /*
+     * La puerta juzga **Modelos encendidos**. Un Modelo apagado puede no tener destino todavía
+     * —es el estado de tres de los cuatro— y puede incluso tenerlo a medias mientras se
+     * decide; exigirle forma convertiría la revisión en un obstáculo para escribir el estado
+     * que la épica quiere que sea fácil de escribir.
+     */
+    for (const destino of [undefined, '', 'ko-fi.com/alguien']) {
+      expect(revisarDeclaracionDeIngreso([modeloDePrueba({ destino })]), String(destino)).toEqual(
+        [],
+      );
+    }
+  });
+
+  it('y con destino, el mismo Modelo encendido se acepta', () => {
+    // El control positivo: sin él, la aserción de arriba pasaría igual con una revisión que
+    // rechazara cualquier Modelo encendido.
+    expect(
+      revisarDeclaracionDeIngreso([
+        modeloDePrueba({ encendido: true, admitidoEn: ['index.astro'] }),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('encender las donaciones tal como están declaradas hoy no rompe la revisión', () => {
+    // La promesa de la épica por dentro: el diff de una línea deja la declaración en pie.
+    // Si esto fallara, encender exigiría un segundo cambio y la promesa sería falsa.
+    const encendido = { ...(modeloDe('donaciones') as Modelo), encendido: true };
+    expect(revisarDeclaracionDeIngreso([encendido])).toEqual([]);
   });
 });
 
