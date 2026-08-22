@@ -13,8 +13,10 @@
  */
 import Armazon from '../components/Armazon.astro';
 import BloqueDeCita from '../components/BloqueDeCita.astro';
+import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { modelosEn } from '../lib/ingreso.ts';
 import { MARCA } from '../lib/marca.ts';
 import { rutaDeColeccion } from '../lib/superficies.ts';
 import {
@@ -141,6 +143,25 @@ const autorDelDia = seleccion
         }
       </ul>
     </section>
+
+    {
+      /*
+       * Lo último de la columna: la invitación a sostener el sitio — Historia 14.2, UX-DR36.
+       *
+       * **No hay ningún `if` de la portada aquí.** Quien decide es `modelosEn('index.astro')`,
+       * que cruza las dos condiciones en un solo sitio: el Modelo tiene que estar **encendido**
+       * y tener admitida **esta** superficie. Con los cuatro apagados —el estado de hoy—
+       * devuelve la lista vacía y esta página no emite absolutamente nada: ni contenedor, ni
+       * clase reservada, ni comentario (UX-DR35). El día que las donaciones se enciendan, el
+       * diff es el booleano de `src/lib/ingreso.ts` y esta página no se toca.
+       *
+       * El `destino !== undefined` no decide nada: `revisarDeclaracionDeIngreso` ya detiene el
+       * build de un Modelo encendido sin destino, así que aquí solo estrecha el tipo opcional.
+       */
+      modelosEn('index.astro').map(
+        (modelo) => modelo.destino !== undefined && <Sostener id={modelo.id} href={modelo.destino} />,
+      )
+    }
   </div>
 </Armazon>
 

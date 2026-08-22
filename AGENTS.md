@@ -323,6 +323,23 @@ cuándo y por qué. No hay bandera de entorno, ni casilla de panel, ni consulta 
 encienda nada, y no debe haberla: el requisito de verdad es poder **apagar** el mismo día un
 Modelo que suba el ingreso degradando el rebote de la Página de Cita.
 
+**Encender las donaciones ya no exige tocar ninguna página.** La invitación está construida
+—`src/components/Sostener.astro`, y la portada, `/buscar` y `/404` preguntan por ella con
+`modelosEn('<su pagina>')`—, así que el commit del encendido es el booleano y nada más.
+
+**Ese mismo commit tiene un requisito manual: abrir el `destino` y comprobar que existe.** La
+dirección de Ko-fi que declara el Modelo se supuso por el nombre del dominio y nadie la ha
+abierto todavía. Es manual porque es lo único que el build no alcanza a comprobar, y conviene
+ver los dos casos por separado:
+
+  · un destino **ausente o mal formado** —vacío, sin `https://`— **detiene la construcción**,
+    así que no llega a publicarse;
+  · un destino **bien formado y equivocado** construye y se publica sin que nada proteste, y
+    el visitante que quiso apoyar el sitio aterriza donde no hay nada.
+
+El paso está escrito también en `DESPLIEGUE.md` §4, que es lo que se lee el día de cerrar
+LC-4.
+
 Hoy los cuatro están apagados. Para consultarlos:
 
 ```
@@ -363,12 +380,20 @@ incluye la Página de Cita.
 
 **Lo que un Modelo ponga en una página va marcado con `data-ingreso="<id>"`.** No es
 decoración: `tests/unit/ingreso-construido.test.ts` recorre el `dist/` construido y exige que
-lo marcado en cada página esté encendido y admitido ahí. Lo que hoy vigila la declaración es
-`npm test`, y no el build: mientras ningún fichero de `src/` importe `src/lib/ingreso.ts`
-—que es el estado de hoy, con los cuatro apagados—, `astro build` no lo evalúa. Desde la 14.2,
-cuando alguna superficie lo consulte, detendrá también la construcción. Con todo apagado eso significa que un
-Modelo apagado es **invisible y no latente** (UX-DR35) —ni hueco reservado, ni contenedor
-vacío, ni comentario—, y encendido significa que no puede aparecer donde no se admite.
+lo marcado en cada página esté encendido y admitido ahí. La declaración la vigila `npm test` y
+también el build: desde la 14.2 tres superficies importan `src/lib/ingreso.ts`, así que
+`astro build` lo evalúa al cargar y una declaración que no se sostiene detiene la construcción.
+Con todo apagado eso significa que un Modelo apagado es **invisible y no latente** (UX-DR35)
+—ni hueco reservado, ni contenedor vacío, ni comentario—, y encendido significa que no puede
+aparecer donde no se admite.
+
+**Cuidado con el `<style>` de un componente de Modelo: se emite aunque no se renderice.** Astro
+recoge los estilos por el grafo de importaciones, no por lo que se dibuja, así que un bloque
+`<style>` en `Sostener.astro` dejaría su regla `.sostener` en el `<head>` de las tres páginas
+con las donaciones apagadas — un hueco reservado en toda regla, y `dist/` dejaría de ser
+idéntico al de antes. Por eso ese componente lleva la presentación en atributos `style`, dentro
+del elemento marcado. Vale para cualquier Modelo que venga después: lo que emita empieza y
+acaba dentro de su `data-ingreso`.
 
 **Un Umbral cruzado no enciende nada, y en la afiliación ni siquiera habla de encender.**
 Amazon Afiliados cierra la cuenta que no logra 3 ventas cualificadas en 180 días desde el

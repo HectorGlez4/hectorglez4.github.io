@@ -104,6 +104,19 @@ export interface Modelo {
    * propósito, y este módulo se diseñó para que sigan siendo decidibles después.
    */
   admitidoEn: readonly string[];
+  /**
+   * A dónde lleva la invitación que este Modelo pone en sus superficies.
+   *
+   * Es dato del **Modelo** y no de la página, y por eso vive aquí: las tres superficies que
+   * admiten las donaciones emiten el mismo enlace, y escribirlo en cada una sería el estado
+   * repartido en tres sitios que este módulo existe para no cometer —con la diferencia de
+   * que un destino divergente no rompe nada y se descubre cuando alguien no puede pagar.
+   *
+   * Opcional porque un Modelo apagado puede no tenerlo todavía: hoy solo las donaciones
+   * saben a dónde van. Encendido **sí** es obligatorio, y `revisarDeclaracionDeIngreso` lo
+   * exige: una invitación encendida que no lleva a ninguna parte es peor que no ponerla.
+   */
+  destino?: string;
   /** Por qué está donde está. Se lee en el diff que lo encienda. */
   nota: string;
 }
@@ -175,6 +188,22 @@ export const MODELOS: readonly Modelo[] = [
     umbral: { clase: 'condiciones-de-lanzamiento', condiciones: CONDICIONES_PARA_DONACIONES },
     // UX-DR36 — superficies de **no lectura**, y siempre fuera del flujo de lectura.
     admitidoEn: ['index.astro', 'buscar.astro', '404.astro'],
+    /*
+     * A dónde lleva «Apoyar el sitio». **Sin verificar**, y hay que verificarlo antes de
+     * encender.
+     *
+     * Es una suposición hecha desde el dominio: no hay ningún identificador social ni
+     * ninguna cuenta de Ko-fi escrita en el repositorio de la que derivarlo, así que esta
+     * dirección se escribió por parecido y nadie la ha abierto. Mientras las donaciones
+     * sigan apagadas no la renderiza nadie y no puede llevar a ninguna parte; el día que se
+     * enciendan, comprobarla es requisito del mismo commit —una invitación que aterriza en
+     * una página que no existe es peor que no invitar—.
+     *
+     * Ko-fi y no otro por AD-20: la donación es un enlace y no un widget, así que lo único
+     * que el sitio necesita del proveedor es una dirección. Cambiar de proveedor es cambiar
+     * esta línea, y por eso vive aquí y no en tres páginas.
+     */
+    destino: 'https://ko-fi.com/sabiduriadebolsillo',
     nota:
       'La donación es un enlace, no un widget (AD-20): un proveedor que exija su guion en la ' +
       'página no cumple y no se enciende, por rentable que sea.',
@@ -368,6 +397,52 @@ export function revisarDeclaracionDeIngreso(modelos: readonly Modelo[] = MODELOS
           'aparece en ninguna parte. Declare dónde va, o vuelva a apagarlo.',
       );
     }
+
+    /*
+     * El hermano exacto del de arriba, y la puerta del destino.
+     *
+     * Uno dice «no se ve en ninguna parte» y este «se ve y no lleva a ninguna parte»: las dos
+     * formas que tiene un Modelo encendido de no funcionar sin que nada falle. Y va aquí y no
+     * en el componente a propósito: desde la Historia 14.2 tres páginas importan este módulo,
+     * así que la revisión al cargar la evalúa `astro build` y **detiene la construcción**. Un
+     * `throw` en el componente llegaría más tarde, y solo si esa superficie llegara a
+     * construirse.
+     *
+     * **Se exige forma y no solo presencia**, por la misma razón que su vecina rechaza un
+     * nombre en blanco: `destino: ''` se renderiza como `<a href="">`, que recarga la página
+     * que el visitante estaba leyendo en vez de llevarlo a ninguna parte, y `http://` publica
+     * una invitación a pagar que viaja en claro. Las tres son la misma avería —encendido, sin
+     * error, y sin funcionar— y no tendría sentido cazar solo la más aparatosa.
+     *
+     * **Lo que esta puerta da por supuesto, escrito para quien llegue con el segundo Modelo:**
+     * que un Modelo encendido pone un **enlace** en una página. Vale para las donaciones y
+     * valdría para la afiliación de libros. No tiene por qué valer para `producto-propio` ni
+     * para `publicidad-acotada`, que podrían no llevar a ninguna dirección propia; encenderlos
+     * tal como está escrito hoy obligaría a declarar un destino falso solo para cruzar la
+     * puerta, que es peor que no tenerla. No se resuelve aquí —no hay ningún Modelo así
+     * todavía y adivinar su forma sería inventarse un requisito—, pero el día que lo haya, lo
+     * que hay que cambiar es esta condición, no el destino que se declare.
+     */
+    if (modelo.encendido) {
+      if (modelo.destino === undefined) {
+        fallos.push(
+          `«${modelo.nombre}» está encendido y no declara destino, así que la ` +
+            'invitación no lleva a ninguna parte. Declare su destino, o vuelva a apagarlo.',
+        );
+      } else if (modelo.destino.trim() === '') {
+        fallos.push(
+          `«${modelo.nombre}» está encendido y su destino está en blanco, que no es declararlo: ` +
+            'un `href` vacío recarga la página que el visitante estaba leyendo. Declare su ' +
+            'destino, o vuelva a apagarlo.',
+        );
+      } else if (!/^https:\/\/\S/.test(modelo.destino)) {
+        fallos.push(
+          `«${modelo.nombre}» está encendido y su destino «${modelo.destino}» no es una ` +
+            'dirección «https://» sin espacios alrededor. Una invitación a pagar no se publica ' +
+            'en claro ni con un esquema cualquiera.',
+        );
+      }
+    }
   }
 
   return fallos;
@@ -409,12 +484,11 @@ export function revisarCensoDeIngreso(): string[] {
 /*
  * El censo se revisa al cargar el módulo, y no solo desde las pruebas.
  *
- * **Qué protege hoy, con precisión.** Hoy ningún fichero de `src/` importa este módulo —los
- * cuatro Modelos están apagados y no hay nada que pintar—, así que `astro build` no lo evalúa
- * y quien recorre este `throw` es `npm test`, que sí lo importa. A partir de la Historia 14.2,
- * cuando alguna superficie lo consulte para decidir si pinta la invitación, esto pasará a
- * detener también la construcción, que es donde más falta hace. Decirlo al revés —«quien la
- * añada no llega a construir el sitio»— sería prometer hoy una puerta que todavía no existe.
+ * **Qué protege, con precisión.** Desde la Historia 14.2 lo importan la portada, `/buscar` y
+ * `/404` para preguntar qué Modelo alojan, así que `astro build` lo evalúa y este `throw`
+ * **detiene la construcción** — que es donde más falta hace: quien encienda un Modelo mal
+ * declarado no llega a publicar el sitio. Hasta entonces solo lo recorría `npm test`, que
+ * también lo importa y lo sigue haciendo.
  */
 const FALLOS = revisarCensoDeIngreso();
 if (FALLOS.length > 0) {

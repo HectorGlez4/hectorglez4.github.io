@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve, dirname } from 'node:path';
+import { join, resolve, dirname, sep } from 'node:path';
 import { promisify } from 'node:util';
 import { separarFrontmatter } from '../../../tools/lib/corpus.ts';
 import { FICHERO_DEL_CENSO } from '../../../tools/lib/cotejo.ts';
@@ -104,6 +104,32 @@ export async function construirConCorpus(
      * así que sin esto la superficie que emite `busqueda-sin-resultados` no es visitable.
      */
     conBusqueda?: boolean;
+    /**
+     * Ficheros del proyecto **reescritos en la copia**, por su ruta relativa a la raíz.
+     *
+     * Sirve para construir un sitio cuyo código difiere del repositorio en un punto exacto,
+     * que es la única forma de comprobar lo que pasaría con un Modelo de Ingreso encendido
+     * sin encenderlo de verdad (Historia 14.2): el estado es configuración versionada, así
+     * que la prueba no puede pedirlo por entorno —eso es justo lo que AD-21 prohíbe— y lo que
+     * hace es parchear la copia y construirla.
+     *
+     * **Es lo último que se escribe**, después de `package.json`, `astro.config.mjs`,
+     * `tsconfig.json`, `src/`, `public/`, `integraciones/`, `tools/`, el corpus, los
+     * documentos de Fuente sembrados y `paginas`. Puede pisar cualquiera de ellos, y es a
+     * propósito: un parche que no gane a lo que copió el andamio no serviría para nada. Quien
+     * lo use escribe el fichero **entero**.
+     *
+     * Dos cosas se comprueban aquí y no en cada prueba, porque las dos fallan en silencio:
+     *
+     *   · **La ruta no puede salirse del proyecto temporal.** Una clave con `..` o absoluta
+     *     escribiría sobre las fuentes de verdad del repositorio, y una prueba que ensucia el
+     *     árbol real es peor que una prueba que no existe.
+     *   · **El parche tiene que cambiar algo.** Si el contenido nuevo es idéntico al que ya
+     *     había, quien lo compuso —casi siempre una sustitución sobre el fichero original—
+     *     no encontró su sitio, y la prueba seguiría construyendo el sitio de siempre y
+     *     afirmando en verde lo contrario de lo que cree medir.
+     */
+    ficheros?: Record<string, string>;
   } = {},
 ): Promise<ResultadoBuild> {
   const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
@@ -149,6 +175,40 @@ export async function construirConCorpus(
     const destino = join(proyecto, 'src', 'pages', ruta);
     await mkdir(dirname(destino), { recursive: true });
     await writeFile(destino, contenido, 'utf8');
+  }
+
+  /*
+   * Si un parche no se sostiene se rompe **aquí**, y se limpia antes de romper: la copia ya
+   * está hecha a estas alturas, y una excepción que la dejara atrás llenaría el directorio
+   * temporal de proyectos huérfanos justo en la ejecución que ya ha ido mal.
+   */
+  try {
+    const raizDelProyecto = resolve(proyecto);
+    for (const [ruta, contenido] of Object.entries(opciones.ficheros ?? {})) {
+      const destino = resolve(proyecto, ruta);
+      if (destino !== raizDelProyecto && !destino.startsWith(raizDelProyecto + sep)) {
+        throw new Error(
+          `«${ruta}» se sale del proyecto temporal y escribiría en ${destino}. Las rutas de ` +
+            '`ficheros` son relativas a la raíz de la copia: una con «..» o absoluta pisaría ' +
+            'el repositorio de verdad.',
+        );
+      }
+
+      const previo = existsSync(destino) ? await readFile(destino, 'utf8') : undefined;
+      if (previo === contenido) {
+        throw new Error(
+          `El parche de «${ruta}» es idéntico al fichero que ya había, así que no encontró ` +
+            'su sitio. La construcción saldría igual que sin parche y la prueba afirmaría en ' +
+            'verde lo contrario de lo que mide.',
+        );
+      }
+
+      await mkdir(dirname(destino), { recursive: true });
+      await writeFile(destino, contenido, 'utf8');
+    }
+  } catch (fallo) {
+    await limpiar(proyecto);
+    throw fallo;
   }
 
   let codigo = 0;

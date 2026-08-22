@@ -1,0 +1,177 @@
+---
+/**
+ * La invitación a sostener el sitio — Historia 14.2, UX-DR36.
+ *
+ * «Sin que se le pida»: existe para quien la busque y no interpela. No es un peaje ni una
+ * interrupción, y su ausencia de efecto sobre el resto del sitio es parte de la aceptación —
+ * ignorarla no degrada nada, no hay muro, ni modal, ni aviso previo al contenido.
+ *
+ * Va al **final de la columna y fuera del flujo de lectura**, separada por el filete del
+ * sistema, con el mismo patrón que las Rutas de Salida: lo que hay debajo del filete es lo
+ * que viene después de haber leído, no algo que se cruce en medio.
+ *
+ * **Es un enlace, no un widget (AD-20).** Cero JavaScript, cero guion de tercero, cero
+ * recurso remoto: lo único que el sitio necesita del proveedor de donaciones es una
+ * dirección, y un proveedor que exija su guion en la página no cumple y no se enciende, por
+ * rentable que sea. Si alguna vez aparece un `<script>` en este fichero, la decisión que se
+ * está tomando no es de presentación.
+ *
+ * **Por qué recibe primitivas y no el Modelo.** Ningún fichero de `src/components/` puede
+ * importar `src/lib/ingreso.ts` —`tests/unit/ingreso-construido.test.ts` lo vigila, porque
+ * alojar un Modelo en un componente compartido es una línea y aparece en todas partes,
+ * incluida la Página de Cita—. Importar aunque solo fuera el *tipo* `IdDeModelo` metería este
+ * fichero en ese censo y obligaría a decidir si se relaja la guarda. Con `id` y `href` como
+ * cadenas, la guarda sigue igual de estricta y el censo de quién consulta el estado queda en
+ * las tres páginas, que es justo la lista que se quiere poder leer de un vistazo.
+ *
+ * **`id` es un parámetro y el texto no.** El marcador sale de quien llama, para que un segundo
+ * Modelo admitido en estas superficies no se marque «donaciones» por herencia; pero el
+ * párrafo habla de donar —«sin publicidad y sin muros», «puedes apoyarlo»— y eso **no** sirve
+ * para un enlace de afiliación ni para un producto propio. Un Modelo distinto necesita su
+ * propio componente con su propio texto; lo que se reutiliza de aquí es la forma —el filete,
+ * el sitio en la columna y la marca—, no la redacción.
+ *
+ * Quién decide si esto se pinta: la página, preguntando `modelosEn('<su pagina>')`. Este
+ * componente no decide nada; si se le llama, se dibuja.
+ *
+ * ── Por qué la presentación va en atributos `style` y no en un bloque `<style>` ──
+ *
+ * **Un `<style>` de componente se emite aunque el componente no se renderice nunca.** Astro
+ * recoge los estilos por el grafo de importaciones, no por lo que se dibuja: desde que la
+ * portada, `/buscar` y `/404` importan este fichero, un `<style>` scoped de aquí aparecería
+ * en el `<head>` de esas tres páginas con las donaciones **apagadas** — la regla entera, con
+ * su filete y su margen, esperando a que alguien la use.
+ *
+ * Eso es exactamente el hueco reservado que UX-DR35 prohíbe: «un Modelo apagado es invisible,
+ * no latente; ni hueco, ni espacio en blanco, ni marcador». Y se comprobó midiendo, no
+ * razonando: con el bloque `<style>` puesto, `dist/` dejaba de ser idéntico al de la rama base
+ * en tres ficheros, y la diferencia era literalmente la regla reservada. Mover las reglas a
+ * una hoja global —`src/styles/tokens.css`— tiene el mismo defecto y peor: llegan a las nueve
+ * superficies en vez de a tres.
+ *
+ * La prueba que lo sostiene mira **este fichero** y exige que no haya ningún `<style>`, y no
+ * una lista de nombres de clase reservados: un selector que no nombre a nadie —
+ * `aside[data-pagefind-ignore] { … }`— se cuela por cualquier lista de palabras y deja el
+ * mismo hueco. La propiedad que se protege es «este componente no aporta hoja», no «su clase
+ * no se llama así».
+ *
+ * Con `style` en línea, lo que el Modelo aporta a la página **empieza y acaba dentro del
+ * elemento marcado con `data-ingreso`**: con el Modelo apagado no se emite un solo byte, y
+ * encendido no queda nada suyo fuera del bloque. Se paga con lo que se pierde —no hay
+ * pseudoclases ni consultas de medio aquí dentro—, y da la casualidad de que no hace falta
+ * ninguna: el anillo de foco (UX-DR23) y el color de enlace son globales, y la respiración
+ * responsiva ya viene dentro de los tokens. El día que esto necesite un `:hover` o un
+ * `@media` propios, la conversación que toca es dónde vive la hoja de un Modelo encendido, no
+ * colar el bloque y perder la invisibilidad.
+ */
+import { MARCA } from '../lib/marca.ts';
+
+interface Props {
+  /**
+   * El identificador del Modelo que pone esto aquí, tal cual lo declara `src/lib/ingreso.ts`.
+   * Llega como cadena y no como `IdDeModelo` a propósito: ver la cabecera.
+   */
+  id: string;
+  /** A dónde lleva. Sale de `destino` del Modelo, que es su único dueño. */
+  href: string;
+}
+
+const { id, href } = Astro.props;
+
+/*
+ * Los tokens del sistema, no valores sueltos: el filete y la separación son los mismos que
+ * usan las Rutas de Salida —`border-top` de un filete y `--respiracion` por 1,5—, para que la
+ * invitación se lea como el final de la columna y no como una tarjeta pegada al final.
+ */
+const DEL_BLOQUE = [
+  'margin-top: calc(var(--respiracion) * 1.5)',
+  'padding-top: calc(var(--unidad) * 3)',
+  'border-top: var(--grosor-filete) solid var(--filete)',
+  'max-width: var(--medida-prosa)',
+].join('; ');
+
+/** Apagado y en cuerpo pequeño: acompaña, no llama. */
+const DEL_TEXTO = [
+  'margin: 0',
+  'font-size: var(--cuerpo-md)',
+  'color: var(--tinta-apagada)',
+  'text-wrap: pretty',
+].join('; ');
+
+/** UX-DR22 — la zona de toque completa, aunque el texto del enlace sea corto. */
+const DEL_ENLACE = [
+  'display: inline-flex',
+  'align-items: center',
+  'min-height: var(--zona-de-toque)',
+  'font-family: var(--sans)',
+  'font-size: var(--cuerpo-md)',
+].join('; ');
+
+/*
+ * El patrón de «solo para lectores de pantalla», en línea por lo mismo que todo lo demás.
+ *
+ * Existe porque el enlace abre pestaña nueva y quien no ve la pantalla no tiene forma de
+ * saberlo: el foco se va a otro sitio y el gesto de volver atrás no vuelve. `CompartirEnlace`
+ * —el único otro enlace externo del repositorio— tampoco lo avisa, así que no había patrón
+ * que heredar y este se estrena aquí.
+ *
+ * No se usa `display: none` ni `visibility: hidden`: los dos lo esconden **también** del
+ * lector de pantalla, que es justo lo contrario de lo que hace falta.
+ */
+const SOLO_PARA_LECTORES = [
+  'position: absolute',
+  'width: 1px',
+  'height: 1px',
+  'margin: -1px',
+  'padding: 0',
+  'border: 0',
+  'overflow: hidden',
+  'clip-path: inset(50%)',
+  'white-space: nowrap',
+].join('; ');
+---
+
+{/*
+  * `data-ingreso` marca todo lo que un Modelo pone en una página (UX-DR35). No es
+  * decoración: es lo que hace comprobable sobre el `dist/` construido que lo marcado en una
+  * página esté encendido y admitido ahí — y, con todo apagado, que no haya ni hueco
+  * reservado ni contenedor vacío. El elemento entero va dentro; nada de este bloque queda
+  * fuera de la marca.
+  *
+  * La clase no puede llamarse `.ingreso` ni `.donaciones`: la prueba de huecos reservados
+  * rechaza cualquier `class` o `id` que contenga el nombre de un Modelo o la palabra
+  * «ingreso», porque un contenedor con clase reservada es lo que UX-DR35 prohíbe. Hoy pasaría
+  * igual —no se pinta nada—, y rompería el día del encendido. `sostener` nombra lo que hace.
+  *
+  * `aria-label`: una región complementaria sin nombre es una parada anónima para quien navega
+  * por regiones. Las Rutas de Salida se nombran con su `<h2>`; aquí no hay encabezado que
+  * poner —un `<h2>` la subiría al índice de encabezados de la página y la invitación dejaría
+  * de ser lo discreto que UX-DR36 pide—, así que el nombre va en el atributo.
+  *
+  * `data-pagefind-ignore`: esto no es contenido del sitio y no tiene por qué devolverlo la
+  * búsqueda propia, igual que las Rutas de Salida.
+  */}
+<aside
+  class="sostener"
+  aria-label={`Cómo apoyar ${MARCA}`}
+  data-ingreso={id}
+  data-pagefind-ignore
+  style={DEL_BLOQUE}
+>
+  <p style={DEL_TEXTO}>
+    {MARCA} se sostiene sin publicidad y sin muros. Si algo de lo que has leído aquí te ha
+    acompañado, puedes apoyarlo.
+  </p>
+  {/*
+    * `target="_blank"` con `rel="noopener noreferrer"`, como el único otro enlace externo
+    * del repositorio (`src/islands/CompartirEnlace.astro`): el pago ocurre fuera y quien
+    * estaba leyendo no pierde la página en la que estaba.
+    *
+    * El aviso de pestaña nueva va **dentro** del enlace y no en un `title`: así forma parte
+    * de su nombre accesible —«Apoyar el sitio (se abre en una pestaña nueva)»— y lo anuncia
+    * cualquier lector de pantalla al enfocarlo, sin cambiar lo que se ve.
+    */}
+  <a href={href} target="_blank" rel="noopener noreferrer" style={DEL_ENLACE}>
+    Apoyar el sitio<span style={SOLO_PARA_LECTORES}> (se abre en una pestaña nueva)</span>
+  </a>
+</aside>
