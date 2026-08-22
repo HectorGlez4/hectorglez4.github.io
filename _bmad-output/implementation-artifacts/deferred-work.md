@@ -38,3 +38,28 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     nadie reformatee ese literal. Sus dos aserciones prueban que **algo** cambió y que queda
     exactamente un `encendido: true`, no que cambiara la entrada de donaciones. Vive solo en
     pruebas, así que su fallo sería ruidoso y no silencioso.
+
+- source_spec: sesión de sembrado del 2026-08-22
+  summary: El suelo del 40 % de tradición latinoamericana cuenta autores declarados, no autores con Citas publicadas.
+  evidence: |-
+    `src/lib/huecos.ts:182` hace `const total = autores.length`, así que el porcentaje incluye
+    a quien no ha publicado nada. Con el Corpus de 195 Citas, la herramienta informaba 7/17 =
+    41,2 % —por encima del suelo—, pero dos de esos siete, Amado Nervo y Ricardo Palma, no
+    tenían ni una Cita. Medido sobre autores que el visitante puede ver: 5/15 = 33,3 %, por
+    debajo del suelo comprometido. Choca con la Historia 1.3, «lo no publicado no existe para
+    el build», que es el principio del que sale todo lo demás. Decidir si el suelo se mide
+    sobre declarados o sobre publicados es de producto, no de implementación; medirlo sobre
+    Citas en vez de sobre autores es una tercera lectura, y hoy daría 36,3 %.
+
+- source_spec: sesión de sembrado del 2026-08-22
+  summary: `tools/recuperar.ts` no retira las plantillas de mantenimiento de Wikisource, y su texto llega a proponerse como Cita.
+  evidence: |-
+    Al recuperar «Nuestra América» y el «Prólogo al Poema del Niágara», el documento versionado
+    se quedó con el aviso de Wikisource sobre fuente no especificada, y `tools/extraer.ts`
+    propuso como candidatas frases suyas —«A menos que se añada información de derechos de
+    autor y/o la fuente de este texto…»— atribuidas a José Martí. Ninguna puerta lo caza: es
+    español perfectamente legible, así que la de la 11.5 lo pasa, y está literal en el
+    documento, así que el cotejo de la 11.2 lo daría por bueno. Se puede publicar un aviso
+    legal de Wikisource firmado por un Autor. Aparte de retirar la plantilla, la presencia de
+    ese aviso es señal editorial de que la transcripción no declara su edición de origen, que
+    es más débil de lo que piden FR-23 y FR-24; esta sesión descartó las dos fuentes por eso.
