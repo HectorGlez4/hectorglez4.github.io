@@ -98,3 +98,14 @@ sesiones:
       citasPublicadas: 197
       procedenciaCompleta: 90.9
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-22"
+    hora: "22:12"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Sembrar José Martí desde tres ensayos con la fuente especificada, para bajar la concentración de Gracián y subir la tradición latinoamericana medida sobre Citas"
+    motivo: "Todos los Temas siguen por encima del umbral y la política no propone hueco. La sesión sembró José Martí desde tres ensayos suyos —«Maestros ambulantes», «Educación popular» y «La futura esclavitud»— por dos medidas que el informe de huecos no ve: Gracián era el 58,5 % del Corpus, y el suelo del 40 % de tradición latinoamericana se cumplía contando dos autores declarados sin ninguna Cita publicada. Descartadas a propósito «Nuestra América» y el «Prólogo al Poema del Niágara», que Wikisource marca con la plantilla de fuente no especificada: eran 287 de las 379 candidatas."
+    resultado:
+      citasPublicadas: 223
+      procedenciaCompleta: 83.9
+      tradicionLatinoamericana: 41.2
