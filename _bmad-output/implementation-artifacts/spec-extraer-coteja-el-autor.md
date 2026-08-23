@@ -2,7 +2,8 @@
 title: 'Extraer coteja el Autor contra lo que el documento declara'
 type: 'bugfix'
 created: '2026-08-23'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: '270d3bb95e5e024136111a9155c4d4ff3e733568'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/deferred-work.md'
@@ -61,21 +62,42 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `tools/lib/documento.ts` -- añadir `autor(declaracion)` a `LectorDeFuente` e implementarlo en las dos Fuentes, retirando `[[`, `]]` y el prefijo `Autor:` -- el autor sale de donde ya salen la obra y el año, y no de la cabecera de auditoría.
-- [ ] `tools/lib/documento.ts` -- `derivarDeLaDeclaracion` devuelve `autor` cuando lo haya -- misma forma opcional que el resto, para que un metadato ausente siga sin ser un fallo.
-- [ ] `tools/lib/documento.ts` -- función pura que decide si un nombre declarado y un nombre del Corpus son el mismo Autor: normaliza acentos y caja, descarta partículas y tratamientos, y exige que **todos** los tokens del nombre del Corpus estén en el declarado -- ver Design Notes para por qué la dirección importa.
-- [ ] `tools/extraer.ts` -- rechazar con código 1 el `--autor` que no existe en `corpus/autores/`, antes de leer el documento -- hoy produce candidatas con un Autor inventado y sale con 0.
-- [ ] `tools/extraer.ts` -- rechazar con código 1 cuando el documento declare un autor que no concuerda, nombrando las dos partes -- es la puerta de esta historia.
-- [ ] `tools/extraer.ts` -- cuando el documento no declare autor, extraer e informarlo en la salida -- la ausencia no es fallo, pero conviene que se vea que la puerta no actuó.
-- [ ] `tests/unit/` -- cubrir la matriz entera, incluida la fila de la excepción real: «El sable» con `--autor juan-montalvo` se rechaza, y con `manuel-gonzalez-prada` se acepta.
-- [ ] `tests/unit/` -- prueba que recorre **todos** los documentos de `corpus/fuentes/` y exige que el autor derivado concuerde con el del Corpus de alguna Cita que salga de ese documento -- convierte los 13 casos reales en la red que impide endurecer la regla de más.
-- [ ] `AGENTS.md` -- en la sección de la sesión de sembrado, anotar que `extraer` ya no acepta un `--autor` que el documento contradiga.
+- [x] `tools/lib/documento.ts` -- añadir `autor(declaracion)` a `LectorDeFuente` e implementarlo en las dos Fuentes, retirando `[[`, `]]` y el prefijo `Autor:` -- el autor sale de donde ya salen la obra y el año, y no de la cabecera de auditoría.
+- [x] `tools/lib/documento.ts` -- `derivarDeLaDeclaracion` devuelve `autor` cuando lo haya -- misma forma opcional que el resto, para que un metadato ausente siga sin ser un fallo.
+- [x] `tools/lib/documento.ts` -- función pura que decide si un nombre declarado y un nombre del Corpus son el mismo Autor: normaliza acentos y caja, descarta partículas y tratamientos, y exige que **todos** los tokens del nombre del Corpus estén en el declarado -- ver Design Notes para por qué la dirección importa.
+- [x] `tools/extraer.ts` -- rechazar con código 1 el `--autor` que no existe en `corpus/autores/`, antes de leer el documento -- hoy produce candidatas con un Autor inventado y sale con 0.
+- [x] `tools/extraer.ts` -- rechazar con código 1 cuando el documento declare un autor que no concuerda, nombrando las dos partes -- es la puerta de esta historia.
+- [x] `tools/extraer.ts` -- cuando el documento no declare autor, extraer e informarlo en la salida -- la ausencia no es fallo, pero conviene que se vea que la puerta no actuó.
+- [x] `tests/unit/` -- cubrir la matriz entera, incluida la fila de la excepción real: «El sable» con `--autor juan-montalvo` se rechaza, y con `manuel-gonzalez-prada` se acepta.
+- [x] `tests/unit/` -- prueba que recorre **todos** los documentos de `corpus/fuentes/` y exige que el autor derivado concuerde con el del Corpus de alguna Cita que salga de ese documento -- convierte los 13 casos reales en la red que impide endurecer la regla de más.
+- [x] `AGENTS.md` -- en la sección de la sesión de sembrado, anotar que `extraer` ya no acepta un `--autor` que el documento contradiga.
 
 **Acceptance Criteria:**
 - Given `corpus/fuentes/wikisource-es--el-sable.txt`, when se extrae con `--autor juan-montalvo`, then sale con código 1, el mensaje nombra «Manuel González Prada» y «Juan Montalvo», y `corpus/_revision/` no cambia.
 - Given el mismo documento, when se extrae con `--autor manuel-gonzalez-prada`, then extrae como antes de este cambio.
 - Given los 13 documentos versionados hoy, when se derivan sus autores, then ninguno se rechaza contra el Autor con el que ya se sembró.
 - Given `npm test`, `npm run check` y `npm run build`, then pasan sin regresión sobre las 1768 pruebas de la línea base.
+
+## Spec Change Log
+
+- **2026-08-23 — la puerta se extendió a `documentar`, por decisión de Héctor.**
+  Disparador: la capa de revisión demostró, ejecutándolo, que `tools/documentar.ts` ataba una
+  Cita de Montalvo al documento de González Prada con `ok: true` — y la sacaba de
+  `pendientes-de-cotejo.yml` en el mismo gesto, o sea que la mal-atribuía *y* la daba por
+  cotejada. Es la misma puerta en la orden hermana, y el camino por el que se documentaron las
+  Citas anteriores a la v3, que son las más expuestas a estarlo mal.
+  Enmienda: cotejo añadido en `tools/lib/documentacion.ts` con las mismas cuatro decisiones que
+  en `extraer` —sin autor declarado documenta, ilegible se niega, varios declarados basta uno,
+  ficha sin `nombre` se niega—. El lado del Corpus no sale de una bandera sino del `autor` de
+  la Cita que se documenta.
+  Estado malo evitado: cerrar una puerta y dejar la hermana abierta, con `documentacion.ts`
+  afirmando en su cabecera que hace «las mismas comprobaciones que `extraer`».
+  KEEP: el bloque `<frozen-after-approval>` **no** se reescribió, a propósito. De las tres vías
+  ofrecidas, Héctor eligió cerrar la puerta sin retitular la especificación, así que su Intent,
+  sus Boundaries y su matriz siguen describiendo `extraer` y es esta entrada la que dice el
+  resto. KEEP también la razón de que el cotejo vaya **antes** del cotejo literal: con un
+  documento de otro Autor, «tu texto no aparece» es el síntoma y no la causa, y mandaría a
+  quien lo lea a tocar `--texto` cuando lo que sobra es el documento.
 
 ## Design Notes
 

@@ -30,18 +30,40 @@
  * quien siembra, persona o agente con prisa, componga el documento a mano porque es más
  * rápido que recuperarlo.
  *
+ * Y el `--autor` tampoco se cree a ciegas — misma Historia 11.1, mismo FR-23. El
+ * documento declara **quién firma** en la misma declaración literal de la que salen la
+ * obra y el año, así que la orden lo coteja: un `--autor` que no nombra a ningún Autor de
+ * `corpus/autores/` se rechaza antes de leer nada, y uno que el documento contradice se
+ * rechaza nombrando las dos partes. Sale de un hallazgo registrado en
+ * `_bmad-output/implementation-artifacts/deferred-work.md`: pasarle `--autor
+ * juan-montalvo` a «El sable» —que declara «Manuel González Prada»— produjo 32 candidatas
+ * atribuidas al Autor equivocado, y el cotejo literal de la 11.2 las habría dado por
+ * buenas, porque el texto **está** en ese documento.
+ *
+ * Lo que esta puerta no cierra, y conviene no prometer: no dice que la Cita sea del Autor,
+ * dice que el documento y el Corpus llaman igual a quien firma el documento. Una copla
+ * ajena citada dentro de la obra sigue pasando. Eso es otra puerta y otra historia.
+ *
  * Todas las candidatas van a `corpus/_revision/`, ninguna a `corpus/citas/`, aunque
  * traigan obra y año. Publicarlas es la decisión de la Historia 9.2, y es de una persona.
  */
 
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeCita, slugLibre } from '../src/lib/slug.ts';
-import { aYaml, leerCitas, nombreDeFicheroDeCita, rutasDelCorpus } from './lib/corpus.ts';
+import {
+  aYaml,
+  leerAutores,
+  leerCitas,
+  nombreDeFicheroDeCita,
+  rutasDelCorpus,
+} from './lib/corpus.ts';
 import {
   analizarDocumento,
   derivarDeLaDeclaracion,
+  esElMismoAutor,
   nombreDeDocumento,
 } from './lib/documento.ts';
 import {
@@ -71,6 +93,81 @@ if (rutaDelDocumento === undefined || autor === undefined || sobrantes.length > 
 const EN_SU_LUGAR =
   'Recupérelo con: npx tsx tools/recuperar.ts <url de la Fuente> --corpus ' +
   `${rutas.raiz}`;
+
+// ── El Autor de la orden tiene que existir en el Corpus ──────────────────────
+//
+// Antes de leer nada: `--autor autor-que-no-existe` producía 32 candidatas atribuidas a
+// un Autor inventado y salía con código 0, de modo que el guion de ingesta que la llamó
+// creía haber sembrado bien. El Autor de una candidata lo declara `corpus/autores/`, que
+// es su único dueño, y esta orden no lo inventa ni lo deduce del documento.
+
+/*
+ * Que el directorio falte se comprueba aparte, y no por pulcritud: `leerAutores` no
+ * lanza si no existe —devuelve lista vacía—, así que un corpus sin `autores/` recibía
+ * «este Autor no existe» y mandaba a dar de alta a quien puede que ya estuviera dado. Son
+ * dos fallos distintos y se dicen distinto.
+ */
+if (!existsSync(rutas.autores)) {
+  terminar({
+    ok: false,
+    motivos: [
+      `No existe ${rutas.autores}, así que este corpus no declara ningún Autor.`,
+      'Sin los Autores del Corpus no hay contra qué cotejar el --autor de la orden.',
+      'No se ha escrito ninguna candidata.',
+    ],
+  });
+}
+
+let delCorpus: { slug: string; nombre?: string } | undefined;
+try {
+  delCorpus = (await leerAutores(rutas)).find((a) => a.slug === autor);
+} catch (fallo) {
+  // Una ficha de Autor con el YAML roto tampoco es «este Autor no existe»: es que no se
+  // sabe qué Autores hay.
+  terminar({
+    ok: false,
+    motivos: [
+      `No se pudieron leer los Autores de ${rutas.autores}: ` +
+        `${fallo instanceof Error ? fallo.message : String(fallo)}`,
+      'Sin los Autores del Corpus no hay contra qué cotejar el --autor de la orden.',
+      'No se ha escrito ninguna candidata.',
+    ],
+  });
+}
+
+if (delCorpus === undefined) {
+  terminar({
+    ok: false,
+    motivos: [
+      // La extensión va en plural porque el lector acepta las dos: señalar solo `.yml` a
+      // quien escribe `.yaml` es mandarlo a mirar una ruta que la orden no lee.
+      `«${autor}» no es ningún Autor del Corpus: no existe ` +
+        `${join(rutas.autores, `${autor}.yml`)} (ni su .yaml).`,
+      'El Autor de una candidata es el que declara corpus/autores/, y esta orden no lo inventa.',
+      'No se ha escrito ninguna candidata.',
+      `Dé de alta al Autor primero, o extraiga con el slug de uno que ya esté en ${rutas.autores}.`,
+    ],
+  });
+}
+
+/*
+ * El `nombre` es el lado del Corpus en el cotejo, y una ficha que no lo declara no tiene
+ * lado. Sin esta comprobación la comparación llegaba a normalizar `undefined` y la orden
+ * salía por una traza, que es justo lo que no hace ninguna otra rama de este guion.
+ */
+const nombreDelCorpus = delCorpus.nombre?.trim();
+if (nombreDelCorpus === undefined || nombreDelCorpus === '') {
+  terminar({
+    ok: false,
+    motivos: [
+      `La ficha de «${autor}» no declara ningún nombre, y el nombre es lo que el Corpus ` +
+        'pone en el cotejo.',
+      'Sin él no hay contra qué comparar lo que declare el documento.',
+      'No se ha escrito ninguna candidata.',
+      `Declare «nombre» en ${join(rutas.autores, `${autor}.yml`)}.`,
+    ],
+  });
+}
 
 // ── El documento tiene que haberlo producido la recuperación ─────────────────
 
@@ -170,6 +267,61 @@ if (extname(rutaDelDocumento) !== '.txt' || nombreEsperado !== nombreReal) {
   });
 }
 
+/*
+ * ── Y el Autor que declara el documento tiene que ser el de la orden ─────────
+ *
+ * El autor sale de la **declaración literal** que el documento conserva, con los mismos
+ * lectores por Fuente de los que salen la obra y el año, y nunca de la cabecera, que es
+ * registro de auditoría: cotejar contra la cabecera sería cotejar contra un campo
+ * editable a mano.
+ *
+ * La comparación es Corpus ⊆ declarado, va contra el `nombre` del Autor en
+ * `corpus/autores/` —su único dueño— y se hace contra **cada** Autor declarado por
+ * separado: fundir dos en un nombre dejaría cruzar la puerta a un tercero hecho de
+ * pedazos de los dos.
+ *
+ * Tres estados, y los tres se tratan distinto:
+ *
+ *   · no declara a nadie —ni parámetro, ni firma— pasa sin cotejar, como el año que
+ *     falta, y el informe lo dice para que se vea que la puerta no actuó;
+ *   · declara algo que no se sabe interpretar se **rechaza**: dar eso por «no declara
+ *     autor» convertía la línea del informe en una mentira, que es el único modo en que
+ *     una puerta muda se parece a una puerta que aprueba;
+ *   · declara y no concuerda se rechaza nombrando las dos partes.
+ */
+const autorDeclarado = derivado.autor;
+
+if (autorDeclarado !== undefined && autorDeclarado.nombres.length === 0) {
+  terminar({
+    ok: false,
+    motivos: [
+      `El documento declara un autor que no se sabe interpretar: «${autorDeclarado.crudo}».`,
+      'No se coteja lo que no se entiende, y tampoco se da por no declarado: pasarlo ' +
+        'atribuiría el texto a quien dice la orden sin que nada lo respalde.',
+      'No se ha escrito ninguna candidata.',
+      `Recupere el documento otra vez, o corrija la Fuente, hasta que su línea de autor ` +
+        'nombre a una persona.',
+    ],
+  });
+}
+
+if (
+  autorDeclarado !== undefined &&
+  !autorDeclarado.nombres.some((nombre) => esElMismoAutor(nombre, nombreDelCorpus))
+) {
+  terminar({
+    ok: false,
+    motivos: [
+      `El documento declara «${autorDeclarado.nombres.join('» y «')}» y la orden dice ` +
+        `«${autor}», que el Corpus llama «${nombreDelCorpus}». No son el mismo Autor.`,
+      'El Autor sale de lo que la Fuente declara en el documento, y el nombre de ' +
+        'corpus/autores/; extraer así atribuiría el texto a quien no lo escribió.',
+      'No se ha escrito ninguna candidata.',
+      `Extraiga con el --autor que este documento declara, o recupere un documento de ${nombreDelCorpus}.`,
+    ],
+  });
+}
+
 // ── A partir de aquí, la extracción de la 9.1 tal cual ───────────────────────
 
 const documento: DocumentoDeFuente = {
@@ -236,6 +388,13 @@ terminar({
   ruta: rutas.revision,
   mensaje:
     `Candidatas en revisión: ${escritas}${seco ? ' (en seco, no se ha escrito nada)' : ''}\n` +
+    // Que se vea de qué lado quedó la puerta del Autor, y sobre todo cuándo **no** actuó:
+    // una puerta muda que no se disparó se parece demasiado a una puerta que aprobó.
+    (autorDeclarado === undefined
+      ? `Autor sin cotejar: el documento no declara autor, así que «${nombreDelCorpus}» ` +
+        'lo pone la orden y nada lo contradice.\n'
+      : `Autor cotejado: el documento declara «${autorDeclarado.nombres.join('» y «')}» ` +
+        `y el Corpus, «${nombreDelCorpus}».\n`) +
     `Descartadas por longitud: ${porMotivo('longitud')}\n` +
     `Descartadas por no estar en español: ${porMotivo('no-esta-en-español')}\n` +
     // Historia 11.5 — un descarte mudo es el mismo problema con otro disfraz: si el

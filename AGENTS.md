@@ -55,6 +55,38 @@ sin registrar no la cuenta nadie. Si dedicas la sesión a otra cosa, anúlala co
 —`npx tsx tools/objetivo.ts --anular "<motivo>" [--elegido "<objetivo>"]`—; una anulación
 sigue siendo una sesión corrida y cuenta igual para la cadencia.
 
+Entre las dos órdenes, sembrar son tres pasos y ninguno acepta metadato tecleado:
+
+```
+# 1 — el documento, versionado
+npx tsx tools/recuperar.ts "<url de la Fuente>"
+# 2 — las candidatas, a corpus/_revision/
+npx tsx tools/extraer.ts corpus/fuentes/<documento>.txt --autor <slug>
+# 3 — decidir, una por una
+npx tsx tools/revisar.ts
+```
+
+**`extraer` ya no acepta un `--autor` que el documento contradiga** (FR-23, Historia 11.1).
+El documento declara quién firma en la misma declaración literal de la que salen la obra y
+el año, así que la orden lo coteja contra el `nombre` de `corpus/autores/` y se niega, con
+código 1, cuando no concuerdan: el mensaje pone delante las dos partes. También se niega
+cuando el `--autor` no nombra a ningún Autor del Corpus —antes de leer el documento— y
+cuando el documento declara un autor que la orden no sabe interpretar, que no es lo mismo
+que no declarar ninguno. El hallazgo que la abrió está en
+`_bmad-output/implementation-artifacts/deferred-work.md`: `--autor juan-montalvo` sobre «El
+sable» —que declara «Manuel González Prada»— dio 32 candidatas atribuidas al Autor
+equivocado, y el cotejo de la 11.2 las habría dado por buenas, porque el texto **está** en
+ese documento.
+
+Lo que esa puerta **no** cierra, y conviene no confiarle: no dice que la Cita sea del
+Autor, dice que el documento y el Corpus llaman igual a quien firma el documento. Una copla
+ajena citada dentro de la obra —el caso de Palma en «Predestinación»— sigue pasando. **Las
+citas que la Fuente trae dentro no se publican**, y eso lo mira quien revisa. Tampoco
+distingue a un Autor del homónimo que el Corpus no desambigua —«Séneca» concuerda con
+«Séneca el Viejo»—; eso se cierra declarando el nombre completo en `corpus/autores/`.
+Cuando el documento no declara autor —o firma «Anónimo», que es lo mismo—, el informe de
+`extraer` lo dice —«Autor sin cotejar»— para que se vea que la puerta no actuó.
+
 ## Documentar una Cita ya publicada
 
 Las Citas anteriores a la v3 se publicaron cuando la Procedencia se tecleaba, y siguen en
@@ -74,6 +106,15 @@ documentar se pudiera hacer sin cotejar, sería teclear una Procedencia con más
 obra y el año salen del documento —no hay banderas `--obra` ni `--año`— y documentar
 **saca la Cita del censo en el mismo gesto**, porque una Cita que declara Fuente y sigue
 censada rompe la construcción, y un slug del censo sin Cita publicada también.
+
+**Y la orden ya no ata una Cita a un documento firmado por otro** (FR-23). Coteja el Autor
+que la Cita declara —por el `nombre` de su ficha en `corpus/autores/`— contra el que
+declara el documento, con la misma comparación que usa `extraer`, y se niega con código 1
+cuando no concuerdan; también cuando el documento declara un autor que no sabe interpretar.
+Importa más de lo que parece porque documentar **descensa**: sin esta puerta, una Cita
+atada al documento de otro no solo quedaba mal atribuida, sino que salía de
+`pendientes-de-cotejo.yml` y quedaba registrada como verificada. Si el documento no declara
+autor —o firma «Anónimo»—, documenta igual y el parte lo dice: «Autor: sin cotejar».
 
 **Cuando el cotejo falla, casi siempre es la puntuación.** El texto se tecleó en la v1
 normalizando comas y puntos finales, y la edición dice lo mismo con otros signos. Eso se

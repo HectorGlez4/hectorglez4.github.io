@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { basename, join, resolve } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
 import {
   MARCA_DE_LA_OBRA,
   MAX_CARACTERES_SLUG_DE_OBRA,
@@ -14,8 +17,11 @@ import {
   lineasDeEncabezadoDeWikitexto,
   paginaDeLaObraDeclarada,
   nombreDeDocumento,
+  autoresDeclarados,
+  esElMismoAutor,
   resolverEntidades,
   tituloDeclarado,
+  tokensDeNombreDeAutor,
   ultimoAñoPosible,
 } from '../../tools/lib/documento.ts';
 
@@ -1091,5 +1097,393 @@ La cordura y la locura`;
     expect(derivado.obra).toBe('Los jardines interiores');
     expect(derivado.pagina).toBe('Triste (Nervo)');
     expect(derivado.año).toBe(1905);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El Autor que la Fuente declara, y el cotejo contra el que declara el Corpus
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * FR-23, Historia 11.1 — el metadato de una candidata sale del documento recuperado.
+ *
+ * El Autor es el último que faltaba, y sale del hallazgo registrado en
+ * `_bmad-output/implementation-artifacts/deferred-work.md`: `--autor juan-montalvo` sobre
+ * «El sable» —que declara «Manuel González Prada» en la declaración que el propio
+ * documento conserva— produjo 32 candidatas atribuidas al Autor equivocado, y el cotejo
+ * literal de la 11.2 las habría dado por buenas, porque el texto **está** en ese
+ * documento. El dato ya estaba recuperado y versionado: lo único que faltaba era mirarlo.
+ */
+describe('FR-23 — el autor sale de la declaración, con las formas reales de las Fuentes', () => {
+  /** Un único Autor, legible. Las cuatro formas del Corpus y sus variantes. */
+  const UNO: [string, string][] = [
+    ['Juan Montalvo', 'Juan Montalvo'],
+    ['[[José Martí]]', 'José Martí'],
+    ['[[Autor:Antonio Machado|Antonio Machado]]', 'Antonio Machado'],
+    ['[[Santa Teresa de Jesús|Santa Teresa de Jesús]]', 'Santa Teresa de Jesús'],
+    // Un enlace sin cerrar no lo resuelve el patrón entero: se le retiran los corchetes y
+    // el espacio de nombres a mano, que es lo que la Fuente enseñaría.
+    ['[[Autor:Antonio Machado', 'Antonio Machado'],
+    ['[[Autor:Sor Juana Inés de la Cruz]]', 'Sor Juana Inés de la Cruz'],
+    ["'''Miguel de Unamuno'''", 'Miguel de Unamuno'],
+    ['  Manuel   González Prada  ', 'Manuel González Prada'],
+    // La conjunción que une dos apellidos de una sola persona no la parte en dos.
+    ['Santiago Ramón y Cajal', 'Santiago Ramón y Cajal'],
+    ['José Ortega y Gasset', 'José Ortega y Gasset'],
+  ];
+
+  it.each(UNO)('«%s» declara a %s, y a nadie más', (crudo, esperado) => {
+    expect(autoresDeclarados(crudo)?.nombres).toEqual([esperado]);
+  });
+
+  it('el destino del enlace manda sobre el texto visible', () => {
+    /*
+     * El destino es a quién enlaza la Fuente; el texto visible es cómo lo llama en esa
+     * frase, y puede no ser un nombre. Quedarse con lo segundo rechazaría un documento
+     * legítimo de Montalvo por llamarle «el maestro».
+     */
+    expect(autoresDeclarados('[[Autor:Juan Montalvo|el maestro]]')?.nombres).toEqual([
+      'Juan Montalvo',
+    ]);
+  });
+
+  it('y se cae al texto visible cuando el destino no sirve de nombre', () => {
+    // Otro espacio de nombres, o un enlace relativo: ahí el nombre está en lo visible.
+    expect(autoresDeclarados('[[w:es:Antonio Machado|Antonio Machado]]')?.nombres).toEqual([
+      'Antonio Machado',
+    ]);
+    expect(autoresDeclarados('[[../|Antonio Machado]]')?.nombres).toEqual(['Antonio Machado']);
+  });
+
+  it('dos Autores en una línea son dos, y no la unión de sus palabras', () => {
+    /*
+     * Fundirlos daba los tokens {manuel, machado, antonio} —`y` es partícula— y con esa
+     * unión cruzaba la puerta cualquiera de los dos **y también un tercero** que se
+     * llamara «Manuel Antonio Machado». Los dos Machado están declarados en el Corpus.
+     */
+    const declarado = autoresDeclarados(
+      '[[Autor:Manuel Machado|Manuel Machado]] y [[Autor:Antonio Machado|Antonio Machado]]',
+    );
+    expect(declarado?.nombres).toEqual(['Manuel Machado', 'Antonio Machado']);
+  });
+
+  it.each([
+    ['Manuel Machado y Antonio Machado', ['Manuel Machado', 'Antonio Machado']],
+    ['Manuel Machado, Antonio Machado', ['Manuel Machado', 'Antonio Machado']],
+    ['Manuel Machado; Antonio Machado', ['Manuel Machado', 'Antonio Machado']],
+  ])('«%s» declara a dos sin enlaces', (crudo, esperados) => {
+    expect(autoresDeclarados(crudo)?.nombres).toEqual(esperados);
+  });
+
+  it.each(['', '   ', '1907', '—'])('«%s» no declara a nadie', (crudo) => {
+    expect(autoresDeclarados(crudo)).toBeUndefined();
+  });
+
+  it.each(['Anónimo', 'anonimo', 'ANÓNIMA', 'Desconocido', 'Varios autores', 'Anonymous'])(
+    'una firma sin firma —«%s»— tampoco declara a nadie',
+    (crudo) => {
+      /*
+       * Tratarlo como nombre real hacía que un documento anónimo se rechazara contra
+       * cualquier --autor con un «no son el mismo Autor» que era falso: no hay dos partes
+       * que comparar, hay una sola.
+       */
+      expect(autoresDeclarados(crudo)).toBeUndefined();
+    },
+  );
+
+  it.each([
+    '{{PD-old}}',
+    'Manuel González Prada<ref>nota</ref>',
+    '{{Autor|x}}',
+    'Antonio Machado {{sic}}',
+    '[[Autor:Antonio Machado|',
+  ])(
+    '«%s» declara algo que no se sabe leer, y eso no es «no declara»',
+    (crudo) => {
+      /*
+       * El fallo que esta distinción existe para impedir: leerlo como «no declara autor»
+       * dejaba la puerta sin actuar **y** hacía que el informe imprimiera que el documento
+       * no declaraba autor, que es mentira. Una puerta muda no puede parecer una puerta
+       * que aprueba.
+       */
+      const declarado = autoresDeclarados(crudo);
+      expect(declarado, crudo).toBeDefined();
+      expect(declarado!.nombres).toEqual([]);
+      expect(declarado!.crudo).toBe(crudo);
+    },
+  );
+
+  it('una firma anónima junto a un nombre deja el nombre', () => {
+    expect(autoresDeclarados('Anónimo, José Martí')?.nombres).toEqual(['José Martí']);
+  });
+
+  it('wikisource-es lo deriva del parámetro del encabezado de la página', () => {
+    const declaracion = ['El sable', '|título=El sable', '|autor=Manuel González Prada', '|año=1904'].join('\n');
+    expect(derivarDeLaDeclaracion('wikisource-es', declaracion).autor?.nombres).toEqual([
+      'Manuel González Prada',
+    ]);
+  });
+
+  it('gutenberg lo deriva de la línea «Author:» de su ficha', () => {
+    const declaracion = ['Title: Don Quijote', 'Author: Miguel de Cervantes Saavedra'].join('\n');
+    expect(derivarDeLaDeclaracion('gutenberg', declaracion).autor?.nombres).toEqual([
+      'Miguel de Cervantes Saavedra',
+    ]);
+  });
+
+  it('un documento que no declara autor no declara autor, y eso no es un fallo', () => {
+    // La misma forma opcional que la obra, la página y el año: un metadato ausente deja
+    // la puerta sin actuar, no rompe la derivación.
+    const declaracion = ['Sobre la brevedad de la vida', 'Año de publicación: 49'].join('\n');
+    const derivado = derivarDeLaDeclaracion('wikisource-es', declaracion);
+    expect(derivado.autor).toBeUndefined();
+    expect(derivado.obra).toBe('Sobre la brevedad de la vida');
+    expect(derivado.año).toBe(49);
+  });
+
+  it('la obra que la página declara no aporta el Autor, igual que no aporta la obra', () => {
+    /*
+     * Si el índice pudiera aportarlo, una subpágina de una antología heredaría el Autor de
+     * su índice y la puerta cotejaría contra quien no firma el texto.
+     */
+    const declaracion = [
+      'Una página cualquiera',
+      `${MARCA_DE_LA_OBRA} |autor=Quien Firma El Índice`,
+    ].join('\n');
+    expect(derivarDeLaDeclaracion('wikisource-es', declaracion).autor).toBeUndefined();
+  });
+});
+
+describe('FR-23 — el cotejo compara lo que declara la Fuente con lo que declara el Corpus', () => {
+  /** El caso real que abrió esta puerta: cero tokens en común. */
+  it('«Manuel González Prada» no es «Juan Montalvo»', () => {
+    expect(esElMismoAutor('Manuel González Prada', 'Juan Montalvo')).toBe(false);
+  });
+
+  it('lo que la Fuente añade no rompe el cotejo: la dirección es Corpus ⊆ declarado', () => {
+    // Medido sobre los documentos versionados: la Fuente añade apellido o tratamiento.
+    expect(esElMismoAutor('Miguel de Cervantes Saavedra', 'Miguel de Cervantes')).toBe(true);
+    expect(esElMismoAutor('Santa Teresa de Jesús', 'Teresa de Jesús')).toBe(true);
+  });
+
+  it('y la dirección contraria sí rechaza: al Corpus no le puede faltar un nombre', () => {
+    // Exigir que los tokens del declarado estén en el del Corpus rechazaría los mismos
+    // dos, al revés; por eso la dirección importa y no es simétrica.
+    expect(esElMismoAutor('Miguel de Cervantes', 'Miguel de Cervantes Saavedra')).toBe(false);
+  });
+
+  it('lo que esa dirección deja abierto queda escrito: el homónimo desambiguado pasa', () => {
+    /*
+     * No es un descuido de la implementación sino el precio de admitir a Cervantes
+     * Saavedra, y por eso está en el docblock de `esElMismoAutor` y aquí: un nombre del
+     * Corpus con un solo token significativo lo contiene cualquier nombre más largo. Se
+     * cierra declarando el nombre completo en corpus/autores/, no endureciendo esto.
+     */
+    expect(esElMismoAutor('Séneca el Viejo', 'Séneca')).toBe(true);
+    // Y en cuanto el Corpus desambigua, deja de pasar.
+    expect(esElMismoAutor('Séneca el Viejo', 'Lucio Anneo Séneca')).toBe(false);
+  });
+
+  it('acentos y caja no distinguen a nadie', () => {
+    expect(esElMismoAutor('JOSE MARTI', 'José Martí')).toBe(true);
+    expect(esElMismoAutor('josé martí', 'Jose Marti')).toBe(true);
+  });
+
+  it('las partículas y los tratamientos se descartan en los dos sentidos', () => {
+    expect(tokensDeNombreDeAutor('Sor Juana Inés de la Cruz')).toEqual(['juana', 'ines', 'cruz']);
+    expect(esElMismoAutor('Juana Inés de la Cruz', 'Sor Juana Inés de la Cruz')).toBe(true);
+    expect(esElMismoAutor('Sor Juana Inés de la Cruz', 'Juana Inés de la Cruz')).toBe(true);
+    expect(esElMismoAutor('Fray Luis de León', 'Luis de León')).toBe(true);
+  });
+
+  it('un nombre que se queda entero en partículas no abre la puerta del todo', () => {
+    /*
+     * Sin esto, un Corpus que llamara «Sor» a alguien exigiría un conjunto vacío de
+     * tokens, y un conjunto vacío está contenido en cualquier cosa: pasaría todo.
+     */
+    expect(esElMismoAutor('Manuel González Prada', 'Sor')).toBe(false);
+    expect(esElMismoAutor('Sor', 'Sor')).toBe(true);
+  });
+
+  it('un nombre vacío no concuerda con nadie', () => {
+    expect(esElMismoAutor('', 'Juan Montalvo')).toBe(false);
+    expect(esElMismoAutor('Juan Montalvo', '')).toBe(false);
+    expect(esElMismoAutor('', '')).toBe(false);
+  });
+
+  it('compartir un apellido no basta: hacen falta todos los tokens del Corpus', () => {
+    expect(esElMismoAutor('Antonio Machado', 'Manuel Machado')).toBe(false);
+    expect(esElMismoAutor('José Martí', 'José Enrique Rodó')).toBe(false);
+  });
+
+  it('cada Autor declarado se compara entero: la unión de dos no es un tercero', () => {
+    /*
+     * Con la unión de tokens, un documento de los dos Machado admitía a «Manuel Antonio
+     * Machado», que no es ninguno de ellos. Comparando uno a uno, los dos Machado pasan
+     * —el documento es suyo— y el tercero no.
+     */
+    const declarados = autoresDeclarados('[[Manuel Machado]] y [[Antonio Machado]]')!.nombres;
+    const concuerda = (delCorpus: string) =>
+      declarados.some((nombre) => esElMismoAutor(nombre, delCorpus));
+
+    expect(concuerda('Antonio Machado')).toBe(true);
+    expect(concuerda('Manuel Machado')).toBe(true);
+    expect(concuerda('Manuel Antonio Machado')).toBe(false);
+  });
+});
+
+/**
+ * Y la prueba que no se puede escribir con fixtures: los documentos que el Corpus tiene
+ * versionados de verdad, cada uno contra el Autor con el que ya se sembró.
+ *
+ * Es la red que impide endurecer la regla de más. Cualquier ajuste al cotejo —una
+ * partícula que se deje de descartar, una dirección que se invierta— rechaza aquí a
+ * Cervantes o a Teresa de Jesús antes de rechazarlos en una sesión de sembrado.
+ *
+ * Todo lo que lee disco lo hace a prueba de ausencias y **dentro** de una prueba, no al
+ * recolectarlas: un directorio que falta o un fichero sin frontmatter tienen que salir en
+ * rojo con su nombre, no tumbar el bloque entero antes de que corra nada.
+ */
+describe('FR-23 — ningún documento versionado se rechaza contra el Autor que lo sembró', () => {
+  const raiz = resolve(import.meta.dirname, '../..');
+  const fuentes = join(raiz, 'corpus/fuentes');
+
+  /** Los ficheros de un directorio, o ninguno si el directorio no está. */
+  function ficherosDe(dir: string, extension: RegExp): string[] {
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir)
+      .filter((fichero) => extension.test(fichero))
+      .sort();
+  }
+
+  const documentos = ficherosDe(fuentes, /\.txt$/);
+
+  /** Cómo llama el Corpus a cada Autor: su `nombre`, que es el lado del Corpus. */
+  const nombreDelCorpus = new Map<string, string | undefined>(
+    ficherosDe(join(raiz, 'corpus/autores'), /\.ya?ml$/).map((fichero) => {
+      const declarado = parsearYaml(
+        readFileSync(join(raiz, 'corpus/autores', fichero), 'utf8'),
+      ) as { nombre?: string } | null;
+      return [fichero.replace(/\.ya?ml$/, ''), declarado?.nombre];
+    }),
+  );
+
+  /** Cada Cita publicada, con el slug de su Autor y la obra de su Procedencia. */
+  const citas = ficherosDe(join(raiz, 'corpus/citas'), /\.md$/).map((fichero) => {
+    const contenido = readFileSync(join(raiz, 'corpus/citas', fichero), 'utf8');
+    // Un fichero sin frontmatter no tumba el bloque: se queda sin campos y lo dice la
+    // prueba que cuenta cuántas Citas se leyeron.
+    const frontmatter = (parsearYaml(contenido.split('---')[1] ?? '') ?? {}) as {
+      autor?: string;
+      procedencia?: { obra?: string };
+    };
+    return { fichero, ...frontmatter };
+  });
+
+  /** El autor que declara un documento, derivado como lo deriva la orden al extraer. */
+  function derivadoDe(fichero: string) {
+    const analizado = analizarDocumento(readFileSync(join(fuentes, fichero), 'utf8'));
+    if (analizado === undefined) return undefined;
+    return {
+      fuente: analizado.cabecera.fuente,
+      ...derivarDeLaDeclaracion(analizado.cabecera.fuente, analizado.declaracion),
+    };
+  }
+
+  /**
+   * Los Autores del Corpus que ya publicaron desde ese documento.
+   *
+   * La Cita no apunta a un documento concreto: apunta a su **obra**. Así que los dos
+   * lados se pasan por el mismo ayudante —la obra que el documento declara y la que la
+   * Cita declara— y se comparan los nombres que implican. Comparar el nombre del fichero
+   * por prefijo se dejaba fuera «Proverbios y cantares (Nuevas Canciones)», cuyo
+   * documento no lleva segmento de página, y ese caso pasaba en vacío sin decirlo.
+   */
+  function autoresQuePublicaronDesde(fichero: string): string[] {
+    const derivado = derivadoDe(fichero);
+    if (derivado?.obra === undefined) return [];
+    const suyo = nombreDeDocumento(derivado.fuente, derivado.obra);
+    if (suyo === undefined) return [];
+
+    const slugs = new Set<string>();
+    for (const cita of citas) {
+      if (cita.autor === undefined || cita.procedencia?.obra === undefined) continue;
+      if (nombreDeDocumento(derivado.fuente, cita.procedencia.obra) === suyo) slugs.add(cita.autor);
+    }
+    return [...slugs];
+  }
+
+  it('hay corpus que cotejar: documentos, Autores y Citas', () => {
+    /*
+     * Los tres recuentos son lo que impide que las pruebas de abajo pasen por no mirar
+     * nada, y van a lo medido con el margen justo: hoy son 59 documentos, 17 Autores y
+     * 231 Citas. Los suelos admiten que se retire alguno sin poner en rojo una prueba que
+     * no va de eso, pero no que se vacíe el corpus ni que falte el directorio.
+     */
+    expect(documentos.length).toBeGreaterThanOrEqual(55);
+    expect(nombreDelCorpus.size).toBeGreaterThanOrEqual(15);
+    expect(citas.filter((c) => c.autor !== undefined).length).toBeGreaterThanOrEqual(220);
+  });
+
+  it('todos los documentos se analizan y declaran a quien firma', () => {
+    /*
+     * No es una regla —un documento sin autor declarado se extrae igual— sino una medida:
+     * es lo que dice que los lectores de las dos Fuentes saben leer todas las formas
+     * reales, y no solo las del fixture. El día que entre un documento sin autor legible,
+     * esta prueba lo nombra y quien lo añada decide si es la Fuente o el lector.
+     */
+    const sinLeer = documentos.filter((fichero) => {
+      const derivado = derivadoDe(fichero);
+      return derivado === undefined || derivado.autor === undefined;
+    });
+    expect(sinLeer).toEqual([]);
+
+    const ilegibles = documentos.filter((f) => derivadoDe(f)!.autor!.nombres.length === 0);
+    expect(ilegibles).toEqual([]);
+  });
+
+  it('ninguno se rechaza contra el Autor de sus Citas', () => {
+    const rechazados: string[] = [];
+
+    for (const fichero of documentos) {
+      const derivado = derivadoDe(fichero);
+      // Un documento sin autor declarado no rechaza a nadie: la puerta no actúa.
+      if (derivado?.autor === undefined) continue;
+
+      for (const slug of autoresQuePublicaronDesde(fichero)) {
+        const nombre = nombreDelCorpus.get(slug);
+        if (nombre === undefined) {
+          rechazados.push(`${fichero}: corpus/autores/${slug}.yml no declara nombre`);
+          continue;
+        }
+        const concuerda = derivado.autor.nombres.some((n) => esElMismoAutor(n, nombre));
+        if (!concuerda) {
+          rechazados.push(
+            `${fichero} declara «${derivado.autor.nombres.join(' y ')}» y el Corpus llama ` +
+              `«${nombre}» a ${slug}`,
+          );
+        }
+      }
+    }
+
+    expect(rechazados).toEqual([]);
+  });
+
+  it('y casi todos se cotejan de verdad contra una Cita publicada, con la lista de los que no', () => {
+    /*
+     * El recuento es lo que impide que la prueba de arriba pase por no mirar nada, y la
+     * lista es lo que impide que un documento que dejó de casar con sus Citas se vuelva
+     * mudo. Hoy casan 56 de los 59; los tres que no —«De la brevedad de la vida», «Del
+     * sentimiento trágico de la vida» y la letrilla de Quevedo— publicaron sus Citas antes
+     * de la v3, con otro nombre de obra, y están en el censo de pendientes de cotejo.
+     */
+    const sinCita = documentos.filter((f) => autoresQuePublicaronDesde(f).length === 0);
+
+    expect(sinCita).toEqual([
+      'wikisource-es--de-la-brevedad-de-la-vida.txt',
+      'wikisource-es--del-sentimiento-tragico-de-la-vida-i.txt',
+      'wikisource-es--poderoso-caballero-es-don-dinero-letrilla-satirica.txt',
+    ]);
+    expect(documentos.length - sinCita.length).toBeGreaterThanOrEqual(54);
   });
 });

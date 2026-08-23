@@ -84,17 +84,33 @@ const CUERPO = [
   'La paciencia todo lo alcanza, decía otra.',
 ].join('\n');
 
-const documento = componerDocumento(
-  {
-    fuente: 'wikisource-es',
-    obra: OBRA,
-    año: AÑO,
-    url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
-    recuperado: '2026-08-21',
-  },
-  [OBRA, `Año de publicación: ${AÑO}`].join('\n'),
-  CUERPO,
-);
+/**
+ * Cómo declara la Fuente a quien firma. Coincide con el `nombre` de `AUTOR_VALIDO`, que
+ * es la ficha de `autores/seneca.yml` de este corpus: es el lado del Corpus en la puerta
+ * del Autor, y sin la línea de autor en la declaración no habría nada que cotejar —cosa
+ * que ningún documento real de Wikisource hace—.
+ */
+const AUTOR_DECLARADO = 'Séneca';
+
+function documentoDe(autor: string | null = AUTOR_DECLARADO): string {
+  return componerDocumento(
+    {
+      fuente: 'wikisource-es',
+      obra: OBRA,
+      año: AÑO,
+      url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+      recuperado: '2026-08-21',
+    },
+    [
+      OBRA,
+      `Año de publicación: ${AÑO}`,
+      ...(autor === null ? [] : [`|autor=${autor}`]),
+    ].join('\n'),
+    CUERPO,
+  );
+}
+
+const documento = documentoDe();
 
 /** La Cita tal y como está publicada desde la v1: con Procedencia tecleada y sin Fuente. */
 const CITA_CENSADA = citaValida({
@@ -303,5 +319,93 @@ describe('Historia 11.6 — documentar y salir del censo van juntos', () => {
 
   it('el slug de la prueba es de verdad una de las 38, o esto no mide nada', () => {
     expect(CENSO_DE_PARTIDA[SLUG]).toBeDefined();
+  });
+});
+
+/**
+ * FR-23, Historia 11.6 — por la orden: el documento tiene que ser del Autor de la Cita.
+ *
+ * Lo puro está en `documentacion.test.ts`. Aquí se mide lo que solo se ve ejecutando: el
+ * código de salida —**1**, lo que la invocación dice, no 2, que es su forma— y que el
+ * censo del corpus real en disco queda byte a byte como estaba.
+ */
+describe('FR-23 — documentar no ata una Cita a un documento firmado por otro', () => {
+  it('el mismo Autor documenta y el parte dice que se cotejó', async () => {
+    const corpus = await enDisco(CORPUS);
+
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toMatch(/Autor:\s+cotejado/);
+    expect(hecho.salida).toContain(AUTOR_DECLARADO);
+  });
+
+  it('otro Autor sale con código 1, y el censo queda byte a byte como estaba', async () => {
+    const corpus = await enDisco({ ...CORPUS, [DOCUMENTO]: documentoDe('Manuel González Prada') });
+    const censoAntes = await readFile(join(corpus, FICHERO_DEL_CENSO), 'utf8');
+    const citaAntes = await readFile(join(corpus, FICHERO), 'utf8');
+
+    const rechazo = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+
+    // 1, no 2: la invocación está bien escrita y lo que dice es lo que no cuadra.
+    expect(rechazo.codigo).toBe(1);
+    expect(rechazo.error).toContain('Manuel González Prada');
+    expect(rechazo.error).toContain('Séneca');
+
+    /*
+     * Documentar saca la Cita del censo. Sin la puerta, esta Cita quedaba mal atribuida
+     * **y** registrada como cotejada, que borra la única señal de que nadie la verificó.
+     */
+    expect(await readFile(join(corpus, FICHERO_DEL_CENSO), 'utf8')).toBe(censoAntes);
+    expect(await readFile(join(corpus, FICHERO), 'utf8')).toBe(citaAntes);
+    expect(censoAntes).toContain(SLUG);
+  });
+
+  it('un autor ilegible sale con código 1 y tampoco toca el censo', async () => {
+    const corpus = await enDisco({
+      ...CORPUS,
+      [DOCUMENTO]: documentoDe('Séneca<ref>el Joven</ref>'),
+    });
+    const censoAntes = await readFile(join(corpus, FICHERO_DEL_CENSO), 'utf8');
+
+    const rechazo = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+
+    expect(rechazo.codigo).toBe(1);
+    expect(rechazo.error).toMatch(/no se sabe interpretar/);
+    expect(await readFile(join(corpus, FICHERO_DEL_CENSO), 'utf8')).toBe(censoAntes);
+  });
+
+  it('un documento sin línea de autor documenta igual, y el parte lo dice', async () => {
+    // Un metadato que falta no es un fallo, igual que el año: la puerta no actúa y se ve.
+    const corpus = await enDisco({ ...CORPUS, [DOCUMENTO]: documentoDe(null) });
+
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toMatch(/Autor:\s+sin cotejar/);
+  });
+
+  it('con dos Autores declarados basta con que la Cita concuerde con uno', async () => {
+    const corpus = await enDisco({
+      ...CORPUS,
+      [DOCUMENTO]: documentoDe('[[Autor:Séneca|Séneca]] y [[Autor:Lucilio|Lucilio]]'),
+    });
+
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toContain('Lucilio');
+  });
+
+  it('y lo que la orden deja tras cotejar el Autor sigue construyendo', async () => {
+    // La puerta nueva no puede dejar un corpus que el build rechace: es la comprobación
+    // que ata esta historia con la 11.2, igual que la de más arriba.
+    const corpus = await enDisco(CORPUS);
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+
+    const verde = await construir(await leerCorpus(corpus));
+    expect(verde.codigo, verde.salida).toBe(0);
+    expect(verde.salida).toContain('1 Cita cotejada');
   });
 });

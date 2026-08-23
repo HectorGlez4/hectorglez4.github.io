@@ -11,6 +11,7 @@
  * servidor de fuera esté disponible y diga hoy lo mismo que ayer.
  */
 
+import { normalizar, palabras } from '../../src/lib/normalizar.ts';
 import { slugDeObra } from '../../src/lib/slug.ts';
 import { añoExacto } from './extraccion.ts';
 
@@ -327,6 +328,9 @@ const PARAMETRO_DE_AÑO_WIKITEXTO =
 /** El parámetro del que sale la obra. */
 const PARAMETRO_DE_TITULO_WIKITEXTO = /^\s*\|\s*(?:t[íi]tulo|title)\s*=/iu;
 
+/** El parámetro del que sale el Autor que la Fuente declara. */
+const PARAMETRO_DE_AUTOR_WIKITEXTO = /^\s*\|\s*(?:autor|author)\s*=/iu;
+
 const ENLACE_CON_TEXTO = /\[\[[^[\]|]*\|([^[\]|]*)\]\]/gu;
 const ENLACE_SIMPLE = /\[\[([^[\]|]*)\]\]/gu;
 
@@ -362,6 +366,177 @@ export function tituloDeclarado(valor: string): string | undefined {
   if (limpio.startsWith('../') || limpio.startsWith('/')) return undefined;
   if (!/[\p{L}\p{N}]/u.test(limpio)) return undefined;
   return limpio;
+}
+
+/** El espacio de nombres con el que Wikisource enlaza a la página de un Autor. */
+const ESPACIO_DE_AUTOR = /^(?:autor|author)\s*:\s*/iu;
+
+/** Un enlace entero de wikitexto, con su interior: `[[destino]]` o `[[destino|visible]]`. */
+const ENLACE_ENTERO = /\[\[([^[\]]*)\]\]/gu;
+
+/**
+ * Las formas con las que una Fuente firma «sin firma».
+ *
+ * `|autor=Anónimo` **no** nombra a nadie, y tratarlo como un nombre real hacía que un
+ * documento anónimo se rechazara contra cualquier `--autor` con un «no son el mismo
+ * Autor» que era falso: no hay dos partes que comparar, hay una sola. Se comparan en
+ * forma canónica, así que «Anónimo», «anonimo» y «ANÓNIMA» son la misma.
+ */
+const SIN_FIRMA: ReadonlySet<string> = new Set([
+  'anonimo', 'anonima', 'anonimos', 'anonimas', 'anonymous',
+  'desconocido', 'desconocida', 'autor desconocido', 'autora desconocida',
+  'author unknown', 'unknown', 'unknown author',
+  'varios', 'varios autores', 'autores varios', 'various authors',
+  'vv aa', 'vvaa', 'aa vv', 'aavv',
+]);
+
+/**
+ * Lo que una Fuente declara en su parámetro de autor.
+ *
+ * `undefined` —el valor que devuelven los lectores— es «no declara a nadie»: el parámetro
+ * falta, viene vacío, o firma sin firmar («Anónimo»). Eso pasa sin cotejar, como el año
+ * que falta.
+ *
+ * Un objeto con `nombres` **vacío** es otra cosa muy distinta: el documento sí declara
+ * autor y no se sabe interpretar lo que declara. Confundir los dos estados era el fallo
+ * que esta forma existe para impedir: `|autor=Manuel González Prada<ref>nota</ref>` se
+ * leía como «no declara autor», la puerta no actuaba y el informe imprimía que el
+ * documento no declaraba autor, que es mentira. Toda la razón de esa línea del informe es
+ * que una puerta muda no parezca una puerta que aprueba.
+ */
+export interface AutorDeLaFuente {
+  /** Los Autores que se han sabido leer. Vacío cuando lo declarado no se sabe interpretar. */
+  nombres: string[];
+  /** Lo que la Fuente escribió, en una línea, para poder citarlo en el rechazo. */
+  crudo: string;
+}
+
+/**
+ * El Autor al que enlaza un `[[…]]`, prefiriendo **el destino** al texto visible.
+ *
+ * El destino es a quién enlaza la Fuente; el texto visible es cómo lo llama en esa frase,
+ * y puede no ser un nombre: `[[Autor:Juan Montalvo|el maestro]]` declara a Montalvo y
+ * enseña «el maestro», y quedarse con lo segundo rechazaría un documento legítimo.
+ *
+ * Se cae al texto visible cuando el destino no sirve como nombre: vacío, relativo
+ * (`[[../]]`), o de otro espacio de nombres que no sea el de Autor —`[[w:es:Fulano|…]]`—,
+ * porque ahí el nombre está en lo visible y no en la dirección.
+ */
+function autorDeEnlace(interior: string): string {
+  const barra = interior.indexOf('|');
+  const visible = barra === -1 ? '' : interior.slice(barra + 1).trim();
+  // La marca de sección designa un trozo de la página, no a otra persona.
+  const destino = (barra === -1 ? interior : interior.slice(0, barra))
+    .split('#')[0]
+    .replace(/_/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim()
+    .replace(ESPACIO_DE_AUTOR, '')
+    .trim();
+
+  const sirve =
+    destino !== '' &&
+    !destino.includes(':') &&
+    !destino.startsWith('../') &&
+    !destino.startsWith('/') &&
+    /\p{L}/u.test(destino);
+
+  return sirve ? destino : visible;
+}
+
+/**
+ * Si dos mitades separadas por « y » son dos Autores o los dos apellidos de uno.
+ *
+ * En español la conjunción une los apellidos de una sola persona —«Santiago Ramón y
+ * Cajal», «José Ortega y Gasset»— tanto como a dos personas. Lo que los distingue es que
+ * el segundo apellido va **solo**: se parte únicamente cuando las dos mitades traen
+ * nombre y apellido. Sin esta comprobación, Ramón y Cajal —que está declarado en el
+ * Corpus— quedaría partido en «Santiago Ramón» y «Cajal» y no concordaría con ninguno.
+ */
+function partirPorConjuncion(trozo: string): string[] {
+  const mitades = trozo.split(/\s+(?:y|e|and)\s+/iu);
+  if (mitades.length < 2) return [trozo];
+  return mitades.every((mitad) => tokensDeNombreDeAutor(mitad).length >= 2) ? mitades : [trozo];
+}
+
+/**
+ * Los nombres que declara un valor, uno por Autor.
+ *
+ * Dos Autores en una línea no se pueden fundir en un nombre: `|autor=[[Manuel Machado]] y
+ * [[Antonio Machado]]` daría los tokens {manuel, machado, antonio} —`y` es partícula— y
+ * con esa unión cruzaría la puerta cualquiera de los dos **y también un tercero** que se
+ * llamara «Manuel Antonio Machado». Cada declarado se compara entero y por separado.
+ *
+ * Cuando hay dos enlaces o más, cada enlace es un Autor y lo que va entre ellos es
+ * conjunción. Cuando no los hay, se parte por comas y por la conjunción, con la cautela
+ * de `partirPorConjuncion`.
+ */
+function trozosDeAutor(crudo: string): string[] {
+  const enlaces = [...crudo.matchAll(ENLACE_ENTERO)];
+  if (enlaces.length >= 2) return enlaces.map((enlace) => autorDeEnlace(enlace[1]));
+
+  const llano = crudo
+    .replace(ENLACE_ENTERO, (_entero, interior: string) => autorDeEnlace(interior))
+    // Un enlace sin cerrar —`[[Autor:Antonio Machado`— no lo resuelve el patrón entero.
+    .replace(/\[\[|\]\]/gu, '');
+
+  const porComa = llano.split(/\s*[;,]\s*|\s+&\s+/u).filter((trozo) => trozo.trim() !== '');
+  const trozos = porComa.flatMap(partirPorConjuncion);
+  return trozos.length === 0 ? [llano] : trozos;
+}
+
+/** Un nombre suelto, ya sin enlace, o nada si lo que queda no se sabe leer. */
+function nombreLegible(trozo: string): string | undefined {
+  const limpio = trozo
+    .replace(/'{2,}/gu, '')
+    .replace(/\s+/gu, ' ')
+    .trim()
+    .replace(ESPACIO_DE_AUTOR, '')
+    .trim();
+
+  // Lo que sobrevive con marcado dentro es una forma que no sabemos resolver: una
+  // plantilla sin expandir, una referencia, un enlace roto. No se adivina —y tampoco se
+  // calla: quien llama distingue esto de «no declara nadie» y lo rechaza.
+  if (/[[\]{}<>|]/u.test(limpio)) return undefined;
+  if (!/\p{L}/u.test(limpio)) return undefined;
+  return limpio;
+}
+
+/**
+ * Lo que declara el parámetro de autor de un encabezado — FR-23, Historia 11.1.
+ *
+ * Sale del mismo sitio del que salen la obra y el año —la declaración literal que el
+ * documento conserva— y no de la cabecera, que es registro de auditoría. Las formas
+ * reales de los documentos versionados son cuatro: `Juan Montalvo`, `[[José Martí]]`,
+ * `[[Autor:Antonio Machado|Antonio Machado]]` y `Author: Miguel de Cervantes Saavedra`.
+ *
+ * Devuelve `undefined` cuando no declara a nadie —vacío, o una firma sin firma— y un
+ * objeto con `nombres` vacío cuando declara algo que no se sabe interpretar. Los dos
+ * estados son distintos y quien llama los trata distinto.
+ */
+export function autoresDeclarados(valor: string): AutorDeLaFuente | undefined {
+  const crudo = valor.replace(/\s+/gu, ' ').trim();
+  // Un valor sin ni una letra —una fecha suelta, un signo— no nombra a nadie ni pretende.
+  if (crudo === '' || !/\p{L}/u.test(crudo)) return undefined;
+
+  const nombres: string[] = [];
+  let ilegible = false;
+
+  for (const trozo of trozosDeAutor(crudo)) {
+    const nombre = nombreLegible(trozo);
+    if (nombre === undefined) {
+      ilegible = true;
+      continue;
+    }
+    // Una firma sin firma no es un Autor: no hay dos partes que comparar.
+    if (SIN_FIRMA.has(normalizar(nombre))) continue;
+    nombres.push(nombre);
+  }
+
+  if (nombres.length > 0) return { nombres, crudo };
+  // Declara algo, y no se sabe qué. No es lo mismo que no declarar.
+  if (ilegible) return { nombres: [], crudo };
+  return undefined;
 }
 
 /**
@@ -608,6 +783,16 @@ export interface LectorDeFuente {
   /** La obra que declara esa declaración. */
   obra(declaracion: string): string | undefined;
   /**
+   * El **Autor** que declara esa declaración, si declara alguno.
+   *
+   * Sale de donde salen la obra y el año, y por el mismo motivo: la cabecera es registro
+   * de auditoría, y un `--autor` cotejado contra ella se cotejaría contra un campo
+   * editable. `undefined` cuando la Fuente no declara autor, que no es un fallo —igual
+   * que con el año— sino una puerta que no actúa; y `nombres` vacío cuando declara algo
+   * que no se sabe interpretar, que sí lo es.
+   */
+  autor(declaracion: string): AutorDeLaFuente | undefined;
+  /**
    * La **página** de la que salió este documento, cuando la obra tiene más de una.
    *
    * Un documento es el texto de una página concreta, no el de una obra entera: «Triste» y
@@ -757,6 +942,23 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
 
       return paginaDeWikisource(declaracion);
     },
+    /**
+     * El Autor que declara el encabezado de **la página**, nunca el de la obra.
+     *
+     * La misma dirección que la obra, y por el mismo motivo: si el índice pudiera aportar
+     * el Autor, una subpágina de una antología heredaría el de su índice y la puerta
+     * cotejaría contra quien no firma el texto. Cuando la página no declara ninguno, la
+     * puerta no actúa: un metadato que falta no es un fallo.
+     */
+    autor(declaracion) {
+      for (const linea of loQueDeclaraLaPagina(declaracion).split('\n')) {
+        const encontrado = PARAMETRO_DE_AUTOR_WIKITEXTO.exec(linea);
+        if (encontrado === null) continue;
+        const declarado = autoresDeclarados(linea.slice(encontrado.index + encontrado[0].length));
+        if (declarado !== undefined) return declarado;
+      }
+      return undefined;
+    },
     pagina: paginaDeWikisource,
     /**
      * El año, de la etiqueta renderizada si la hay y del parámetro del wikitexto si no.
@@ -831,6 +1033,11 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
       const declarado = /^\s*title\s*:\s*(.+)$/im.exec(declaracion)?.[1]?.trim();
       return declarado === undefined || declarado === '' ? undefined : declarado;
     },
+    /** La línea `Author:` de la ficha, que es donde Gutenberg declara quién firma. */
+    autor(declaracion) {
+      const declarado = /^\s*author\s*:\s*(.+)$/im.exec(declaracion)?.[1];
+      return declarado === undefined ? undefined : autoresDeclarados(declarado);
+    },
     /** Gutenberg no pagina: el `.txt` que se recupera es la obra entera. */
     pagina() {
       return undefined;
@@ -851,7 +1058,7 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
 };
 
 /**
- * Obra, página y año a partir de la declaración de un documento ya versionado.
+ * Obra, página, Autor y año a partir de la declaración de un documento ya versionado.
  *
  * Es la misma derivación que corre al recuperar, y corre otra vez al extraer. La cabecera
  * no participa: es registro de auditoría. Atar el año a la cabecera lo dejaba suelto —el
@@ -864,18 +1071,87 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
 export function derivarDeLaDeclaracion(
   idFuente: string,
   declaracion: string,
-): { obra?: string; pagina?: string; año?: number } {
+): { obra?: string; pagina?: string; autor?: AutorDeLaFuente; año?: number } {
   const lector = LECTORES_POR_FUENTE[idFuente];
   if (lector === undefined) return {};
 
   const obra = lector.obra(declaracion)?.trim();
   const pagina = lector.pagina(declaracion)?.trim();
+  const autor = lector.autor(declaracion);
   const año = lector.año(declaracion);
   return {
     ...(obra !== undefined && obra !== '' ? { obra } : {}),
     ...(pagina !== undefined && pagina !== '' ? { pagina } : {}),
+    // Ausente cuando el documento no declara a nadie: no es un documento roto, y la
+    // puerta que lo coteja simplemente no actúa. Presente y con `nombres` vacío cuando
+    // declara algo ilegible, que es otro estado y se rechaza.
+    ...(autor !== undefined ? { autor } : {}),
     ...(año !== undefined ? { año } : {}),
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El Autor declarado y el Autor del Corpus — FR-23, Historia 11.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Partículas y tratamientos que no distinguen a un Autor de otro.
+ *
+ * Sin descartar `santa`, «Santa Teresa de Jesús» no concuerda con la «Teresa de Jesús»
+ * que declara el Corpus. Sin descartar las partículas, la comparación se vuelve sensible
+ * a cómo escribe cada Fuente el mismo nombre. `sor` se descarta aunque el Corpus lo lleve
+ * dentro de «Sor Juana Inés de la Cruz», y por eso la regla funciona en los dos sentidos.
+ */
+const PARTICULAS_DE_NOMBRE: ReadonlySet<string> = new Set([
+  'de', 'del', 'la', 'las', 'los', 'el', 'y', 'san', 'santa', 'santo', 'sor', 'fray', 'don',
+]);
+
+/** Las palabras de un nombre que sí distinguen a un Autor, en forma canónica. */
+export function tokensDeNombreDeAutor(nombre: string): string[] {
+  return palabras(nombre).filter((token) => !PARTICULAS_DE_NOMBRE.has(token));
+}
+
+/**
+ * Si el nombre que declara un documento y el que declara el Corpus son el mismo Autor.
+ *
+ * La dirección de la comparación es **Corpus ⊆ declarado**, y está medida sobre los
+ * documentos versionados: la Fuente añade y no quita. «Miguel de Cervantes Saavedra» por
+ * «Miguel de Cervantes», «Santa Teresa de Jesús» por «Teresa de Jesús». Exigir igualdad
+ * rechazaría los dos; exigir que los tokens del declarado estén en el del Corpus
+ * rechazaría los mismos dos, al revés. Exigir que los del Corpus estén en el declarado
+ * los admite y sigue rechazando el caso real que abrió esta puerta: «Juan Montalvo»
+ * contra «Manuel González Prada» no comparte ni un token.
+ *
+ * **Lo que esa dirección deja abierto, y conviene no prometer.** El argumento «la Fuente
+ * añade y no quita» vale mientras lo que añade sea del mismo Autor. Cuando lo que añade
+ * es el desambiguador de **otra persona**, la puerta pasa: el Corpus dice «Séneca» y un
+ * documento de «Séneca el Viejo» concuerda, porque todos los tokens del Corpus están en
+ * el declarado. No se arregla con un tope de tokens añadidos —«Cervantes Saavedra» y
+ * «Séneca el Viejo» añaden uno cada uno y no se distinguen así—, y el riesgo crece cuanto
+ * menos significativo sea el nombre del Corpus: un solo token lo contiene cualquier
+ * nombre más largo. La vía de cerrarlo es declarar el nombre completo, o nombres
+ * alternativos, en `corpus/autores/`, que es el dueño del lado del Corpus; endurecer esta
+ * comparación rechazaría a Cervantes y a Teresa de Jesús antes que a nadie.
+ *
+ * No inventa nada ni deduce a nadie: compara lo que la Fuente declara con lo que el
+ * Corpus declara, y quien no coincide no se extrae.
+ */
+export function esElMismoAutor(declarado: string, nombreDelCorpus: string): boolean {
+  const delCorpus = tokensDeNombreDeAutor(nombreDelCorpus);
+  const delDocumento = tokensDeNombreDeAutor(declarado);
+
+  /*
+   * Un nombre que se queda **entero** en partículas —«Sor», a secas— daría un conjunto
+   * exigido vacío, y un conjunto vacío está contenido en cualquier cosa: la puerta se
+   * abriría del todo. En ese caso mandan las palabras sin filtrar, en los dos lados a la
+   * vez, para que la comparación siga siendo la misma en un sentido y en el otro.
+   */
+  const sinFiltrar = delCorpus.length === 0 || delDocumento.length === 0;
+  const exigidos = sinFiltrar ? palabras(nombreDelCorpus) : delCorpus;
+  const presentes = new Set(sinFiltrar ? palabras(declarado) : delDocumento);
+
+  if (exigidos.length === 0 || presentes.size === 0) return false;
+  return exigidos.every((token) => presentes.has(token));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
