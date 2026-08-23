@@ -111,3 +111,15 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     editor que apruebe sin mirar el sufijo deja el sitio con la misma sentencia dos veces,
     en dos URLs que solo difieren en un dígito, y con el mismo Autor. El único síntoma es ese
     sufijo, y no aparece en ningún recuento del informe.
+
+- source_spec: sesión de sembrado del 2026-08-23 (Rodó)
+  summary: La extracción propone las entradas del índice de una obra como Citas.
+  evidence: |-
+    De los 22 documentos de «Motivos de Proteo» salieron candidatas como «VI - De cómo el
+    tránsito violento suele ser necesario», «X - Actitud en la desilusión y el fracaso» o
+    «XXII - La inscripción del Faro de Alejandría»: son títulos de capítulo del índice, no
+    prosa del autor. Pasan todas las puertas —están literales en el documento, son español
+    legible y las firma quien firma el documento— y solo las para el ojo de quien revisa.
+    Tienen una forma bastante reconocible: numeral romano al principio, seguido de guion o
+    punto. No es urgente, porque descartarlas es barato, pero ensucia cada lote y el coste se
+    paga en cada sesión.
