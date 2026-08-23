@@ -142,3 +142,14 @@ sesiones:
       citasPublicadas: 248
       procedenciaCompleta: 85.5
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-23"
+    hora: "17:13"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Segunda pasada sobre González Prada, ya versionado, hacia «La palabra»"
+    motivo: "Segunda pasada sobre los dos documentos de González Prada, ya versionados: cero red. De 47 candidatas, 12 eran las suyas ya publicadas y de las 35 nuevas se publicaron 4. González Prada es polemista anticlerical y antimilitarista, no moralista: casi todo su material es invectiva de su momento —Dreyfus, Kuropatkin, los anarquistas de Vaillant y Ravachol— y no sentencia durable. La que más valía cae en «La palabra», que era el Tema más flaco con 29. Descartadas a mano dos candidatas con el título del documento pegado al texto: «El sable Un general, un tonel vacío…» y «El estado Esclavizarse por razón de política…»."
+    resultado:
+      citasPublicadas: 252
+      procedenciaCompleta: 85.7
+      tradicionLatinoamericana: 41.2
