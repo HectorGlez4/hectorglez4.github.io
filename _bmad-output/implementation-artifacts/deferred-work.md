@@ -63,3 +63,27 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     legal de Wikisource firmado por un Autor. Aparte de retirar la plantilla, la presencia de
     ese aviso es señal editorial de que la transcripción no declara su edición de origen, que
     es más débil de lo que piden FR-23 y FR-24; esta sesión descartó las dos fuentes por eso.
+
+- source_spec: sesión de sembrado del 2026-08-23
+  summary: Ricardo Palma está declarado como Autor y su obra es del género equivocado para el producto.
+  evidence: |-
+    Tres Tradiciones recuperadas —«Un litigio original», «Justos y pecadores» y
+    «Predestinación»— dieron 266 candidatas y **una** Cita publicable: «Los amigos se parecen
+    a las navajas de barba: sale una buena entre diez». Un rendimiento del 0,4 % frente al
+    30 % de Martí (28 de 92). Palma escribe anécdota histórica: lo que la extracción propone
+    es heráldica, nombres propios y trozos de trama. No es un hueco de sembrado, es que el
+    Autor no cabe en un producto de sentencias, y conviene decidirlo antes de gastar más
+    sesiones. Queda abierto qué hacer con un Autor declarado que no da Citas: hoy infla el
+    suelo de tradición sin aportar nada, que es el hallazgo hermano de esta lista.
+
+- source_spec: sesión de sembrado del 2026-08-23
+  summary: Ni la extracción ni el cotejo distinguen lo que un Autor escribe de lo que un Autor cita.
+  evidence: |-
+    En «Predestinación», Palma introduce una copla ajena —«dijo bien el que dijo: El amor y la
+    naranja se parecen infinito…»— y la extracción la propuso como Cita suya. El cotejo de la
+    11.2 la habría dado por buena, porque aparece literal en su documento, y la puerta de
+    legibilidad tampoco la ve. Es la misma familia que la plantilla de Wikisource del día
+    anterior: el documento es fiel, y aun así la atribución sería falsa. Cazarlo automáticamente
+    es difícil —haría falta detectar entrecomillado y verbos de decir—, pero al menos debería
+    quedar escrito en el procedimiento de sembrado que las citas dentro de la fuente no se
+    publican.
