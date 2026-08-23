@@ -120,3 +120,14 @@ sesiones:
       citasPublicadas: 224
       procedenciaCompleta: 83.9
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-23"
+    hora: "12:29"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Segunda pasada sobre los Capítulos de Montalvo, ya versionados, hacia «La adversidad»"
+    motivo: "Segunda pasada sobre los cuatro «Capítulos que se le olvidaron a Cervantes», que ya estaban versionados: la sesión no gastó una sola petición de red para el material que publicó. De 141 candidatas se publicaron 7, todas del ensayo moral sobre la pobreza que Montalvo mete dentro del pastiche del Quijote, y dirigidas a «La adversidad», que era el Tema más flaco con 27. Dos avisos que la sesión dejó por escrito: pasé por error --autor juan-montalvo a «El sable», que es de González Prada y lo declara en su cabecera, y la orden lo aceptó; y 7 de mis 14 elegidas ya estaban publicadas, con «Descartadas por repetidas: 0» y el único síntoma en un sufijo -2 del slug."
+    resultado:
+      citasPublicadas: 231
+      procedenciaCompleta: 84.4
+      tradicionLatinoamericana: 41.2
