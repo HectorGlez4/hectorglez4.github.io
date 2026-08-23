@@ -109,3 +109,14 @@ sesiones:
       citasPublicadas: 223
       procedenciaCompleta: 83.9
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-23"
+    hora: "09:26"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Dar Citas a Ricardo Palma, el último Autor latinoamericano declarado sin ninguna publicada, para que el suelo del 40 % deje de cumplirse contando autores invisibles"
+    motivo: "Sesión dedicada a Ricardo Palma, que estaba declarado como Autor y no tenía ni una Cita publicada. Resultado honesto: de 266 candidatas salidas de tres Tradiciones —«Un litigio original», «Justos y pecadores» y «Predestinación»— se publicó UNA. Palma escribe anécdota histórica, no sentencia: lo que da son heráldica, nombres propios y trozos de trama. No es un problema de sembrado sino de género, y conviene no volver a gastar sesiones aquí. Rechazadas las 265 restantes en vez de dejarlas pendientes, porque no se publicarán nunca. Evitada además una atribución falsa: «El amor y la naranja se parecen infinito» es una copla que Palma cita, no suya."
+    resultado:
+      citasPublicadas: 224
+      procedenciaCompleta: 83.9
+      tradicionLatinoamericana: 41.2
