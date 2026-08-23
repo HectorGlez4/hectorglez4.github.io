@@ -131,3 +131,14 @@ sesiones:
       citasPublicadas: 231
       procedenciaCompleta: 84.4
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-08-23"
+    hora: "17:08"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, y la tradición latinoamericana alcanza el suelo del 40 %."
+    elegido: "Segunda pasada sobre Motivos de Proteo, ya versionado, hacia «La adversidad» y «La libertad»"
+    motivo: "Segunda pasada sobre los 22 documentos de «Motivos de Proteo», ya versionados: cero peticiones de red. De 221 candidatas, 25 eran las que Rodó ya tenía publicadas —el sufijo -2 otra vez como único síntoma— y de las 196 nuevas se publicaron 17. Rodó pasa de 25 Citas a 42. Con esto Gracián baja del 58,5 % al 46,0 % del Corpus y las Citas de autores latinoamericanos suben del 27,2 % al 42,7 % en tres sesiones. Dos descartes a mano que ninguna puerta habría hecho: las entradas del índice del libro, que la extracción propone como Citas —«VI - De cómo el tránsito violento suele ser necesario»—, y una frase de Séneca que Rodó cita y que se habría publicado como suya, el mismo caso que la copla de Palma."
+    resultado:
+      citasPublicadas: 248
+      procedenciaCompleta: 85.5
+      tradicionLatinoamericana: 41.2
