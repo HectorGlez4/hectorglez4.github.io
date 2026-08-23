@@ -11,8 +11,19 @@
  * la Historia 11.2 dejaría de significar nada para las 38 Citas que más lo necesitan. Por
  * eso la obra y el año se **derivan del documento** con los mismos lectores puros que usan
  * `recuperar` y `extraer`, y por eso el documento tiene que ser uno que produjera la
- * recuperación: las mismas tres comprobaciones que hace `tools/extraer.ts`, porque si no la
- * superficie de tecleo se mudaría del `.yaml` al `.txt`.
+ * recuperación: las mismas tres comprobaciones de procedencia que hace `tools/extraer.ts`
+ * —la ruta dentro de `corpus/fuentes/`, la dirección del conjunto cerrado y el nombre que
+ * implica lo derivado—, porque si no la superficie de tecleo se mudaría del `.yaml` al
+ * `.txt`.
+ *
+ * **Y tampoco se ata una Cita a un documento firmado por otro.** Las dos órdenes cotejan
+ * el Autor contra el que declara el documento, con la misma comparación pura
+ * (`esElMismoAutor`); lo que difiere es de dónde sale el lado del Corpus: en `extraer` lo
+ * escribe quien invoca, en la bandera `--autor`, y aquí lo trae la **Cita que ya está
+ * publicada**, de cuyo `autor` se lee la ficha de `corpus/autores/`. Sin esta puerta,
+ * documentar una Cita contra el documento de otro Autor no solo la mal-atribuía: la sacaba
+ * de `pendientes-de-cotejo.yml`, con lo que la Cita dejaba de estar marcada como no
+ * verificada y quedaba registrada como cotejada.
  *
  * **Documentar y salir del censo son un solo gesto.** El censo declara «esta Cita se
  * publica sin cotejar porque no tiene documento». En cuanto lo tiene, la frase es falsa, y
@@ -38,6 +49,7 @@ import {
   escribirCenso,
   escribirCita,
   fechaLocal,
+  leerAutores,
   leerCensoBruto,
   leerCensoDeCotejo,
   leerCitas,
@@ -46,7 +58,13 @@ import {
   type CitaEnCorpus,
   type Rutas,
 } from './corpus.ts';
-import { analizarDocumento, derivarDeLaDeclaracion, nombreDeDocumento } from './documento.ts';
+import {
+  analizarDocumento,
+  derivarDeLaDeclaracion,
+  esElMismoAutor,
+  nombreDeDocumento,
+  type AutorDeLaFuente,
+} from './documento.ts';
 import { fuenteUtilizable } from './extraccion.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
@@ -175,6 +193,13 @@ async function localizarPublicada(rutas: Rutas, slug: string): Promise<Localizad
 interface DocumentoLeido {
   obra: string;
   año?: number;
+  /**
+   * Quién firma, según la declaración literal del documento.
+   *
+   * Ausente cuando no declara a nadie —o firma «Anónimo»—, que no es un fallo; y con
+   * `nombres` vacío cuando declara algo que no se sabe interpretar, que sí lo es.
+   */
+  autor?: AutorDeLaFuente;
   url: string;
   idFuente: string;
   nombreDeLaFuente: string;
@@ -187,12 +212,16 @@ type LecturaDeDocumento =
   | { ok: false; motivos: string[] };
 
 /**
- * El documento ya recuperado, comprobado como lo comprueba `tools/extraer.ts`.
+ * El documento ya recuperado, con las tres puertas de **procedencia** de `tools/extraer.ts`.
  *
- * Las mismas tres puertas, y por el mismo motivo: mientras se admita cualquier fichero con
- * forma de cabecera, la superficie de tecleo solo se muda del frontmatter al `.txt`. Un
- * fichero compuesto a mano con `fuente: gutenberg` y `año: 1492` documentaría una Cita
- * publicada con esa Procedencia, que es exactamente lo que esta orden existe para impedir.
+ * Las mismas tres, y por el mismo motivo: mientras se admita cualquier fichero con forma
+ * de cabecera, la superficie de tecleo solo se muda del frontmatter al `.txt`. Un fichero
+ * compuesto a mano con `fuente: gutenberg` y `año: 1492` documentaría una Cita publicada
+ * con esa Procedencia, que es exactamente lo que esta orden existe para impedir.
+ *
+ * De aquí sale también **quién firma el documento**, que es el lado de la Fuente en la
+ * puerta del Autor. Quien la aplica es `documentarCita`, porque el otro lado —el nombre
+ * del Corpus— lo trae la Cita y aquí todavía no se sabe cuál es.
  */
 async function leerDocumento(
   rutas: Rutas,
@@ -283,6 +312,7 @@ async function leerDocumento(
     documento: {
       obra: derivado.obra,
       ...(derivado.año !== undefined ? { año: derivado.año } : {}),
+      ...(derivado.autor !== undefined ? { autor: derivado.autor } : {}),
       url: cabecera.url,
       idFuente: utilizable.fuente.id,
       nombreDeLaFuente: utilizable.fuente.nombre,
@@ -308,6 +338,85 @@ export interface OpcionesDeDocumentacion {
    */
   texto?: string;
   avisar?: Avisar;
+}
+
+/** Lo que se dice cuando no hay Cita ni censo que tocar porque el documento es de otro. */
+const NI_LA_CITA_NI_EL_CENSO = 'No se ha escrito nada: ni la Cita ni el censo.';
+
+/**
+ * Por qué el documento **no** es de esta Cita, o nada si lo es.
+ *
+ * El lado de la Fuente ya viene leído; el del Corpus se lee aquí, de la ficha del Autor
+ * que la Cita declara, porque `nombre` es el único dueño de cómo se llama un Autor. Se
+ * consulta solo cuando el documento declara a alguien: si no declara a nadie no hay nada
+ * que comparar, y exigir la ficha convertiría en fallo un caso que no lo es.
+ */
+async function motivoParaNoCotejarElAutor(
+  rutas: Rutas,
+  cita: CitaEnCorpus,
+  declarado: AutorDeLaFuente,
+  rutaDelDocumento: string,
+): Promise<string[] | undefined> {
+  if (declarado.nombres.length === 0) {
+    return [
+      `${rutaDelDocumento} declara un autor que no se sabe interpretar: ` +
+        `«${declarado.crudo}».`,
+      'No se coteja lo que no se entiende, y tampoco se da por no declarado: documentar ' +
+        `«${cita.slug}» contra él la daría por verificada sin que nada lo respalde.`,
+      NI_LA_CITA_NI_EL_CENSO,
+    ];
+  }
+
+  let ficha: { slug: string; nombre?: string } | undefined;
+  try {
+    ficha = (await leerAutores(rutas)).find((a) => a.slug === cita.autor);
+  } catch (fallo) {
+    return [
+      `No se pudieron leer los Autores de ${rutas.autores}: ` +
+        `${fallo instanceof Error ? fallo.message : String(fallo)}`,
+      `Sin la ficha de «${cita.autor}» no hay contra qué cotejar quien firma el documento.`,
+      NI_LA_CITA_NI_EL_CENSO,
+    ];
+  }
+
+  if (ficha === undefined) {
+    return [
+      `«${cita.slug}» dice ser de «${cita.autor}», y ese Autor no está en ${rutas.autores}.`,
+      'El nombre del Autor lo declara su ficha, que es su único dueño, y sin ella no hay ' +
+        'contra qué cotejar a quien firma el documento.',
+      NI_LA_CITA_NI_EL_CENSO,
+    ];
+  }
+
+  const nombreDelCorpus = ficha.nombre?.trim();
+  if (nombreDelCorpus === undefined || nombreDelCorpus === '') {
+    // Sin esto, la comparación llegaba a normalizar `undefined` y la orden salía por una
+    // traza, que es lo que no hace ninguna otra rama de este módulo.
+    return [
+      `La ficha de «${cita.autor}» no declara ningún nombre, y el nombre es lo que el ` +
+        'Corpus pone en el cotejo.',
+      'Sin él no hay contra qué comparar lo que declare el documento.',
+      NI_LA_CITA_NI_EL_CENSO,
+    ];
+  }
+
+  // Basta con concordar con **uno** de los declarados: un documento firmado por dos es de
+  // los dos. Comparar contra la unión de sus palabras admitiría a un tercero hecho de
+  // pedazos de ambos.
+  if (declarado.nombres.some((nombre) => esElMismoAutor(nombre, nombreDelCorpus))) {
+    return undefined;
+  }
+
+  return [
+    `${rutaDelDocumento} declara «${declarado.nombres.join('» y «')}» y «${cita.slug}» es ` +
+      `de «${cita.autor}», que el Corpus llama «${nombreDelCorpus}». No son el mismo Autor.`,
+    'Documentar ata una Cita a un documento **y la saca del censo de pendientes de ' +
+      'cotejo**: hacerlo contra el documento de otro la dejaría mal atribuida y, además, ' +
+      'registrada como verificada.',
+    NI_LA_CITA_NI_EL_CENSO,
+    `Documente «${cita.slug}» contra un documento de ${nombreDelCorpus}, o retírela con`,
+    `  npx tsx tools/documentar.ts --retirar ${cita.slug} "<motivo>"`,
+  ];
 }
 
 /**
@@ -344,6 +453,33 @@ export async function documentarCita(
   const lectura = await leerDocumento(rutas, rutaDelDocumento);
   if (!lectura.ok) return { ok: false, motivos: lectura.motivos };
   const { documento } = lectura;
+
+  /*
+   * ── Y que el documento sea de **este** Autor ──────────────────────────────
+   *
+   * Va antes del cotejo literal a propósito: cuando el documento es de otra persona, «su
+   * texto no aparece aquí» es el síntoma y no la causa, y mandaría a corregir la Cita con
+   * `--texto` cuando lo que hay que cambiar es el documento. El caso que abrió esta
+   * puerta pasa **las dos**: una Cita de Montalvo contra «El sable», que declara a
+   * González Prada y cuyo cuerpo contiene el texto, se documentaba con `ok: true`.
+   *
+   * Y no se quedaba en la atribución: documentar saca a la Cita de
+   * `pendientes-de-cotejo.yml`, así que la Cita mal atribuida dejaba de estar marcada como
+   * no verificada y quedaba registrada como cotejada, que es lo contrario de lo que había
+   * pasado.
+   *
+   * Las tres decisiones son las de `extraer`, porque es la misma puerta: un documento que
+   * no declara autor documenta igual —un metadato que falta no es un fallo, y el parte lo
+   * dice—; uno que declara algo que no se sabe interpretar se niega, para que una puerta
+   * muda no parezca una que aprueba; y con varios Autores declarados basta con que la Cita
+   * concuerde con uno.
+   */
+  const declarado = documento.autor;
+
+  if (declarado !== undefined) {
+    const noCotejable = await motivoParaNoCotejarElAutor(rutas, cita, declarado, rutaDelDocumento);
+    if (noCotejable !== undefined) return { ok: false, motivos: noCotejable };
+  }
 
   // ── El cotejo, que es la puerta entera ────────────────────────────────────
 
@@ -500,6 +636,13 @@ export async function documentarCita(
       `«${slug}» queda documentada contra ${rutaDelDocumento}.`,
       `  Fuente:      ${documento.nombreDeLaFuente} (${documento.licencia})`,
       `  Procedencia: ${documento.obra}${documento.año !== undefined ? `, ${documento.año}` : ''}`,
+      // Que se vea de qué lado quedó la puerta del Autor, y sobre todo cuándo **no**
+      // actuó: una puerta muda que no se disparó se parece demasiado a una que aprobó.
+      declarado === undefined
+        ? `  Autor:       sin cotejar — el documento no declara autor, así que nada ` +
+          `contradice a «${cita.autor}».`
+        : `  Autor:       cotejado — el documento declara ` +
+          `«${declarado.nombres.join('» y «')}».`,
       censoDespues === undefined
         ? `No estaba en el censo de ${FICHERO_DEL_CENSO}; siguen ${pendientes} pendientes.`
         : `Sale del censo de ${FICHERO_DEL_CENSO}: quedan ${pendientes} pendientes de cotejo.`,

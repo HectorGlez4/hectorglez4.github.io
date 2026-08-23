@@ -12,7 +12,7 @@ import {
 import { censoSinLaCita } from '../../tools/lib/cotejo.ts';
 import { leerCensoDeCotejo, rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
-import { AUTOR_VALIDO, TEMA_VALIDO, citaValida } from './ayuda/construir.js';
+import { TEMA_VALIDO, citaValida } from './ayuda/construir.js';
 
 /**
  * Historia 11.6 — documentar y retirar una Cita ya publicada, sin construir.
@@ -56,13 +56,24 @@ const CUERPO = [
   'Solo Dios basta.',
 ].join('\n');
 
-/** Un documento como el que deja `tools/recuperar.ts`: cabecera, declaración y cuerpo. */
+/** Cómo declara la Fuente a quien firma, que es el lado del documento en el cotejo. */
+const AUTOR_DECLARADO = 'Teresa de Jesús';
+
+/**
+ * Un documento como el que deja `tools/recuperar.ts`: cabecera, declaración y cuerpo.
+ *
+ * La declaración trae **también** la línea de autor, que es de donde sale el lado de la
+ * Fuente en la puerta del Autor. Sin ella, las fixturas medían un documento que ningún
+ * Wikisource produce: los 59 documentos versionados declaran quién firma.
+ */
 function documentoDePrueba(
   cuerpo: string,
-  campos: { obra?: string; año?: number } = {},
+  campos: { obra?: string; año?: number; autor?: string | null } = {},
 ): string {
   const obra = campos.obra ?? OBRA;
   const año = 'año' in campos ? campos.año : AÑO;
+  // `null` es «este documento no declara autor», que es un caso de la matriz.
+  const autor = 'autor' in campos ? campos.autor : AUTOR_DECLARADO;
   return componerDocumento(
     {
       fuente: 'wikisource-es',
@@ -71,7 +82,11 @@ function documentoDePrueba(
       url: 'https://es.wikisource.org/wiki/Nada_te_turbe',
       recuperado: '2026-08-21',
     },
-    [obra, ...(año !== undefined ? [`Año de publicación: ${año}`] : [])].join('\n'),
+    [
+      obra,
+      ...(año !== undefined ? [`Año de publicación: ${año}`] : []),
+      ...(autor === null || autor === undefined ? [] : [`|autor=${autor}`]),
+    ].join('\n'),
     cuerpo,
   );
 }
@@ -117,8 +132,23 @@ async function enDisco(corpus: Record<string, string>) {
   return rutasDelCorpus(directorio);
 }
 
+/**
+ * La ficha de la Autora de la Cita, con **su** nombre.
+ *
+ * `AUTOR_VALIDO` declara «Séneca», y usarlo aquí ataba el slug `teresa-de-jesus` a un
+ * nombre que no es el suyo. Daba igual mientras nada leyera el `nombre`; desde que la
+ * puerta del Autor lo pone en el cotejo, una ficha que miente hace fallar al documento
+ * correcto.
+ */
+const FICHA_DE_TERESA = [
+  `nombre: ${AUTOR_DECLARADO}`,
+  'añoFallecimiento: 1582',
+  'semblanza: Monja y escritora castellana, fundadora de las Descalzas.',
+  '',
+].join('\n');
+
 const CORPUS_BASE = {
-  'autores/teresa-de-jesus.yml': AUTOR_VALIDO,
+  'autores/teresa-de-jesus.yml': FICHA_DE_TERESA,
   'temas/el-tiempo.yml': TEMA_VALIDO,
   'pendientes-de-cotejo.yml': CENSO,
 };
@@ -490,5 +520,262 @@ describe('Historia 11.6 — el censo se edita línea a línea, nunca se vuelca',
 
   it('devuelve undefined cuando el slug no está: no hay nada que escribir', () => {
     expect(censoSinLaCita(CENSO, 'seneca-una-que-no-esta')).toBeUndefined();
+  });
+});
+
+/**
+ * FR-23, Historia 11.6 — documentar tampoco ata una Cita a un documento de otro.
+ *
+ * Es la misma puerta que `extraer` ya tenía, en la orden hermana, y con la misma
+ * comparación pura. Lo que difiere es de dónde sale el lado del Corpus: allí lo escribe
+ * quien invoca, en `--autor`; aquí lo trae la Cita ya publicada, de cuya ficha se lee el
+ * `nombre`.
+ *
+ * Lo que la hace grave, y lo que estas pruebas fijan: documentar **saca la Cita del censo
+ * de pendientes de cotejo**. Sin la puerta, una Cita atada al documento de otro no solo
+ * quedaba mal atribuida: dejaba de estar marcada como no verificada y quedaba registrada
+ * como cotejada. Por eso cada rechazo comprueba el censo byte a byte, además de la Cita.
+ */
+describe('FR-23 — el documento tiene que ser de la Autora de la Cita', () => {
+  const documento = (rutas: ReturnType<typeof rutasDelCorpus>) =>
+    join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt');
+
+  it('el mismo Autor documenta, y el parte dice que se cotejó', async () => {
+    const rutas = await corpusDocumentable();
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Autor:\s+cotejado/);
+    expect(resultado.ok && resultado.mensaje).toContain(AUTOR_DECLARADO);
+    expect((await leerCensoDeCotejo(rutas)).includes(SLUG)).toBe(false);
+  });
+
+  it('la Fuente puede añadir un tratamiento: «Santa Teresa de Jesús» concuerda', async () => {
+    // La dirección de la comparación es Corpus ⊆ declarado: la Fuente añade y no quita.
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, { autor: 'Santa Teresa de Jesús' }),
+    });
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+  });
+
+  it('otro Autor se rechaza, nombra las dos partes, y no toca ni la Cita ni el censo', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, { autor: 'Manuel González Prada' }),
+    });
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos[0]).toContain('Manuel González Prada');
+    expect(!resultado.ok && resultado.motivos[0]).toContain(AUTOR_DECLARADO);
+    expect(!resultado.ok && resultado.motivos.join('\n')).toMatch(/No son el mismo Autor/);
+
+    // Ni la Cita ni el censo: la Cita sigue sin Fuente y sigue censada, byte a byte.
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+    expect((await leerCensoDeCotejo(rutas)).includes(SLUG)).toBe(true);
+  });
+
+  it('un autor declarado que no se sabe interpretar se rechaza, y el censo queda intacto', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, { autor: 'Teresa de Jesús<ref>o no</ref>' }),
+    });
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos[0]).toMatch(/no se sabe interpretar/);
+    expect(!resultado.ok && resultado.motivos.join('\n')).not.toMatch(/no declara autor/);
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+  });
+
+  it('un documento que no declara autor documenta igual, y el parte lo dice', async () => {
+    // Un metadato que falta no es un fallo, igual que el año. Pero conviene que se vea
+    // que la puerta no actuó: una puerta muda se parece a una que aprueba.
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, { autor: null }),
+    });
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Autor:\s+sin cotejar/);
+  });
+
+  it('un documento firmado «Anónimo» tampoco declara a nadie: documenta sin cotejar', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, { autor: 'Anónimo' }),
+    });
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Autor:\s+sin cotejar/);
+  });
+
+  it('con dos Autores declarados basta con que la Cita concuerde con uno', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, {
+        autor: '[[Autor:Teresa de Jesús|Teresa de Jesús]] y [[Autor:Juan de la Cruz|Juan de la Cruz]]',
+      }),
+    });
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect(resultado.ok && resultado.mensaje).toContain('Juan de la Cruz');
+  });
+
+  it('y si no concuerda con ninguno de los dos, se rechaza', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO, {
+        autor: '[[Manuel Machado]] y [[Antonio Machado]]',
+      }),
+    });
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok).toBe(false);
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+  });
+
+  it('una ficha de Autora sin nombre se rechaza por su motivo, no por una traza', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      'autores/teresa-de-jesus.yml': 'añoFallecimiento: 1582\nsemblanza: Sin nombre, a propósito.\n',
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+    });
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos[0]).toMatch(/no declara ningún nombre/);
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+  });
+
+  it('una Cita cuyo Autor no está en el corpus se rechaza sin tocar nada', async () => {
+    const rutas = await enDisco({
+      'temas/el-tiempo.yml': TEMA_VALIDO,
+      'pendientes-de-cotejo.yml': CENSO,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+    });
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(rutas, SLUG, documento(rutas));
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos[0]).toContain('teresa-de-jesus');
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+  });
+});
+
+/**
+ * La demostración del revisor, como prueba de regresión.
+ *
+ * Una Cita de Montalvo, el documento de «El sable» —que declara «Manuel González Prada»— y
+ * el texto de González Prada literal en el cuerpo. Las tres puertas de procedencia lo
+ * dejan pasar, el cotejo literal también —el texto **está** ahí—, y antes de esto la orden
+ * devolvía `ok: true`: la Cita quedaba atribuida a Montalvo, con Fuente, y **fuera** del
+ * censo de pendientes de cotejo.
+ */
+describe('FR-23 — regresión: «El sable» no documenta una Cita de Montalvo', () => {
+  const SLUG_DE_MONTALVO = 'juan-montalvo-el-habito-no-hace-al-monje-pero-la';
+  const TEXTO_DE_PRADA =
+    'El hábito no hace al monje; pero la casaca influye mucho en la formación del tigre.';
+  const EL_SABLE = 'fuentes/wikisource-es--el-sable.txt';
+
+  const CENSO_DE_MONTALVO = `# Pendientes de cotejo — Historia 11.2
+#
+# Es un CENSO CERRADO: no admite altas y solo mengua.
+
+citas:
+  - ${SLUG_DE_MONTALVO}
+`;
+
+  async function corpusDelHallazgo() {
+    return enDisco({
+      'autores/juan-montalvo.yml': [
+        'nombre: Juan Montalvo',
+        'añoFallecimiento: 1889',
+        'semblanza: Ensayista ecuatoriano, desterrado por escribir contra los tiranos.',
+        '',
+      ].join('\n'),
+      'temas/el-tiempo.yml': TEMA_VALIDO,
+      'pendientes-de-cotejo.yml': CENSO_DE_MONTALVO,
+      'citas/juan-montalvo--el-habito-no-hace-al-monje-pero-la.md': citaValida({
+        autor: 'juan-montalvo',
+        temas: ['el-tiempo'],
+        slug: SLUG_DE_MONTALVO,
+        texto: TEXTO_DE_PRADA,
+        procedencia: { obra: 'Capítulos que se le olvidaron a Cervantes' },
+        fuente: undefined,
+      }),
+      [EL_SABLE]: componerDocumento(
+        {
+          fuente: 'wikisource-es',
+          obra: 'El sable',
+          año: 1904,
+          url: 'https://es.wikisource.org/wiki/El_sable',
+          recuperado: '2026-08-21',
+        },
+        ['El sable', '|título=El sable', '|autor=Manuel González Prada', '|año=1904'].join('\n'),
+        `Un general, un tonel vacío. ${TEXTO_DE_PRADA} Y sin embargo, muchos sociólogos.`,
+      ),
+    });
+  }
+
+  it('el texto sí aparece literal en el documento: no es el cotejo lo que lo para', async () => {
+    // Si esto fallara, la prueba de abajo pasaría por el motivo equivocado.
+    const rutas = await corpusDelHallazgo();
+    const bruto = await readFile(join(rutas.fuentes, 'wikisource-es--el-sable.txt'), 'utf8');
+    expect(bruto).toContain(TEXTO_DE_PRADA);
+  });
+
+  it('se rechaza, y la Cita sigue censada como no verificada', async () => {
+    const rutas = await corpusDelHallazgo();
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(
+      rutas,
+      SLUG_DE_MONTALVO,
+      join(rutas.fuentes, 'wikisource-es--el-sable.txt'),
+    );
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos[0]).toContain('Manuel González Prada');
+    expect(!resultado.ok && resultado.motivos[0]).toContain('Juan Montalvo');
+
+    /*
+     * Lo que de verdad estaba en juego: sin la puerta, la Cita salía del censo. Una Cita
+     * mal atribuida es mala; una Cita mal atribuida y **registrada como cotejada** borra
+     * la única señal de que nadie la ha verificado.
+     */
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+    expect(await leerCensoDeCotejo(rutas)).toContain(SLUG_DE_MONTALVO);
+    expect(await frontmatterDe(join(rutas.citas, 'juan-montalvo--el-habito-no-hace-al-monje-pero-la.md')))
+      .not.toHaveProperty('fuente');
   });
 });
