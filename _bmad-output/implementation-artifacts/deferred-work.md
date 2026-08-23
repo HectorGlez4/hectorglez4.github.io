@@ -87,3 +87,27 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     es difícil —haría falta detectar entrecomillado y verbos de decir—, pero al menos debería
     quedar escrito en el procedimiento de sembrado que las citas dentro de la fuente no se
     publican.
+
+- source_spec: sesión de sembrado del 2026-08-23 (Montalvo)
+  summary: `tools/extraer.ts` no coteja el `--autor` que se le pasa contra el autor que el documento declara en su cabecera.
+  evidence: |-
+    `corpus/fuentes/wikisource-es--el-sable.txt` trae `|autor=Manuel González Prada` en la
+    cabecera que escribió `recuperar`, y la orden aceptó sin rechistar
+    `--autor juan-montalvo`, proponiendo 32 candidatas atribuidas al Autor equivocado. El
+    error se cazó por fuera —el texto habla de Dreyfus y de Kuropatkin, y Montalvo murió en
+    1889—, no por ninguna puerta. El cotejo de la 11.2 las habría dado por buenas, porque el
+    texto está literal en el documento. A diferencia de los otros hallazgos de esta familia,
+    **este el sistema lo puede cazar solo**: el dato ya está recuperado y versionado. Bastaría
+    con que `extraer` compare el `--autor` con lo que declara la cabecera y se niegue, o pida
+    confirmación, cuando no concuerden.
+
+- source_spec: sesión de sembrado del 2026-08-23 (Montalvo)
+  summary: El deduplicado de la extracción mira dentro del lote, no contra las Citas ya publicadas.
+  evidence: |-
+    De 141 candidatas de los «Capítulos», 7 eran textos **ya publicados** de Montalvo, y el
+    informe dijo «Descartadas por repetidas: 0». La guarda de la retro de la Épica 9 —sembrar
+    `ocupados` con los slugs presentes en `corpus/citas/`— sí actuó, pero lo que hace es
+    **renombrar en silencio** a `-2`: impide sobrescribir, no publicar por segunda vez. Un
+    editor que apruebe sin mirar el sufijo deja el sitio con la misma sentencia dos veces,
+    en dos URLs que solo difieren en un dígito, y con el mismo Autor. El único síntoma es ese
+    sufijo, y no aparece en ningún recuento del informe.
