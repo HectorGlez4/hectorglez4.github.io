@@ -2010,3 +2010,6 @@ lo que deben hacer. El recuento seguirá moviéndose con el contenido; lo que ha
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 429
 páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32786386775 en verde): `sitemap-0.xml` declara
+**429 URL**, las mismas del build, y las Citas nuevas responden 200.
