@@ -1973,3 +1973,6 @@ poema de una sola Cita, publicada antes de la v3 con otro nombre de obra. Pide `
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 399
 páginas; `npx playwright test` **396 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32785220702 en verde): `sitemap-0.xml` declara
+**399 URL**, las mismas del build, y las Citas nuevas responden 200.
