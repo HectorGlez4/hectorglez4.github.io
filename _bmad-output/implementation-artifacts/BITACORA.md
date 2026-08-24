@@ -1945,3 +1945,6 @@ sesión precisamente para que una bajada **real** de cobertura se distinga de es
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 365
 páginas; `npx playwright test` **396 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32783987321 en verde): `sitemap-0.xml` declara
+**365 URL**, las mismas del build, y las Citas nuevas responden 200.
