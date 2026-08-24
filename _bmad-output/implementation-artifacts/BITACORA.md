@@ -2055,3 +2055,49 @@ páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32787723500 en verde): `sitemap-0.xml` declara
 **433 URL**, las mismas del build.
+
+## 15.3 (7.ª sesión) — El censo de pendientes de cotejo, diagnosticado entero
+
+Sin Citas nuevas: el tramo pide Autores que este bucle no admite, así que la sesión se dedicó a
+la otra deuda que la 11.4 tiene encomendada — **vaciar el censo de pendientes de cotejo**— y a
+averiguar por qué no se vacía.
+
+**El censo pasa de 23 a 22**, y el build ya lo canta: «374 Citas cotejadas contra su documento;
+22 pendientes de cotejo de un tope de 38».
+
+**Clasificadas las 23 contra los 59 documentos versionados**, comparando con espacios colapsados
+y luego sin acentos ni mayúsculas, salen tres clases y ninguna es «falta trabajo»:
+
+| Clase | Cuántas | Qué significa |
+|---|---|---|
+| **Solo signos** | 4 | El texto está en un documento y difiere en mayúsculas o puntuación |
+| **No aparece** | 19 | El texto no está en ningún documento versionado |
+
+**La clase «solo signos» es casi toda verso, y ahí está el nudo.** Las ediciones son poesía con
+mayúscula al principio de cada renglón, y el cotejo colapsa los saltos de línea: restituir el
+literal dejaría «Yo soy un hombre sincero **D**e donde crece la palma», con una mayúscula en
+mitad de la frase que un lector lee como errata. Es una **decisión de producto** —si el Corpus
+publica el verso como verso o normalizado— y no la toma el bucle.
+
+La excepción se cerró: «La paciencia todo lo alcanza» difería **solo en la mayúscula inicial**, y
+el Corpus ya publica Citas que empiezan en minúscula cuando la edición lo manda («cada uno es
+hijo de sus obras»). Restituida a «la paciencia todo lo alcanza.», y de paso `documentar` corrigió
+la obra: declaraba *Poesías* y el documento declara *Nada te turbe*. Manda el documento.
+
+**La clase «no aparece» tiene dentro un caso que da la razón a toda la Historia 11.2.** «Yo no
+estudio para saber más, sino para ignorar menos» **no está en la *Respuesta a Sor Filotea***. Lo
+que la edición dice es «Yo no estudio para escribir, ni menos para enseñar…, sino sólo por ver si
+con estudiar ignoro menos». La Cita publicada es la condensación popular, no el texto de su
+Autora. Es exactamente lo que el cotejo existe para encontrar — y es la misma frase que dos
+sesiones atrás estuvo a punto de publicarse **por segunda vez** desde el documento.
+
+Las cinco de la brevedad de la vida son otra cosa: **otra traducción**. El documento versionado
+dice «Larga es la vida, si la sabemos aprovechar» y el Corpus publica «La vida, si sabes usarla,
+es larga». Ninguna de las dos es falsa; simplemente no salieron de la misma edición.
+
+**Lo que el censo necesita, en tres decisiones que son de Héctor:** cómo se publica el verso; qué
+se hace con las Citas que ninguna edición versionada respalda; y si se recupera la edición de la
+que salió cada traducción huérfana.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 433
+páginas y 22 pendientes de 38; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
