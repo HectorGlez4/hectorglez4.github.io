@@ -2104,3 +2104,34 @@ páginas y 22 pendientes de 38; `npx playwright test` **394 pasadas**, 14 saltad
 
 **Verificado en vivo** (25/08/2026, ejecución 32789462703 en verde): la Cita restituida sirve su
 texto nuevo y su obra corregida en `https://sabiduriadebolsillo.net/cita/teresa-de-jesus-la-paciencia-todo-lo-alcanza`.
+
+## 15.3 (8.ª sesión) — Catorce del *Quijote*, escogidas a mano en vez de extraídas a bulto
+
+**396 → 410 Citas**, el sitio de **433 a 447 páginas**, el Autor más representado del 28,8 % al
+**27,8 %**, y el objetivo declarado de 364 a **350**.
+
+**El cambio de método, que es lo que hay que retener.** La extracción propone **3.267 candidatas**
+sobre el *Quijote* y la novela rinde el 2 %: volcarlas a `_revision` habría dejado la revisión
+inservible durante meses para cosechar unas 65 Citas. En vez de eso se escogieron catorce
+pasajes a mano y se dieron de alta por lote con `tools/alta.ts`.
+
+**Y no relaja ninguna puerta, que era la duda.** `alta.ts` importa `motivoParaNoPublicar` de
+`tools/lib/cotejo.ts` —el mismo cotejo que el build— y `citaAdmisible` de `src/lib/admision.ts`.
+Las catorce pasaron con «Publicadas: 14, En revisión: 0». La diferencia con `extraer` no es la
+puerta: es quién propone.
+
+**La comprobación que mejor define el método.** Antes de escribir el lote se buscó «Ladran, luego
+cabalgamos» en el documento versionado: **no está**. Es apócrifa, se le atribuye al *Quijote*
+desde hace un siglo y el Corpus no la publica. Esa búsqueda cuesta un segundo y es exactamente lo
+que ningún sitio de frases hace.
+
+Entraron «Dime con quién andas, decirte he quién eres», «La mejor salsa del mundo es la hambre»,
+«la verdad adelgaza y no quiebra», «bien haya el que inventó el sueño, capa que cubre todos los
+humanos pensamientos», «Con la iglesia hemos dado, Sancho», «Aún hay sol en las bardas»,
+«paciencia y barajar».
+
+El build cuenta ahora **388 Citas cotejadas contra su documento**, y las 22 pendientes siguen
+siendo las mismas: la deuda vieja no crece.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 447
+páginas y 388 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
