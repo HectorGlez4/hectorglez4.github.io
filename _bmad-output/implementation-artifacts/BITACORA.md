@@ -1821,3 +1821,8 @@ que Gracián sobre, dice cuánto falta de los demás.
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 289
 páginas y 12 en `dist/coleccion/`; `npx playwright test` **400 pasadas**, 14 saltadas.
+
+**Verificado en vivo** (24/08/2026, ejecución 32779201262 en verde): las **doce** Colecciones
+están en `sitemap-0.xml` del dominio y las nuevas responden 200. Con esto el tramo de
+Colecciones de la Meta queda cerrado y `sprint-status.yaml` pasa 15-2 a `done` y 15-3 —el techo
+de concentración— a `in-progress`.
