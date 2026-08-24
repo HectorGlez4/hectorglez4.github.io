@@ -1,7 +1,9 @@
 ---
-texto: "¡El hombre envainará al fin en el sol su espada de batalla!"
+texto: "No enviaríamos pedagogos por los campos, sino conversadores."
 autor: "jose-marti"
-slug: "jose-marti-el-hombre-envainara-al-fin-en-el"
+temas:
+  - "el-saber"
+slug: "jose-marti-no-enviariamos-pedagogos-por-los-campos-sino"
 procedencia:
   obra: "Maestros ambulantes"
   año: 1884

@@ -1,7 +1,9 @@
 ---
-texto: "Es necesario mantener a los hombres en el conocimiento de la tierra y en el de la perdurabilidad y trascendencia de la vida."
+texto: "El sol no es más necesario que el establecimiento de la enseñanza elemental científica."
 autor: "jose-marti"
-slug: "jose-marti-es-necesario-mantener-a-los-hombres-en"
+temas:
+  - "el-saber"
+slug: "jose-marti-el-sol-no-es-mas-necesario-que"
 procedencia:
   obra: "Maestros ambulantes"
   año: 1884

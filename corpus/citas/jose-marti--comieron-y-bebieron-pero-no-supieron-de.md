@@ -1,7 +1,9 @@
 ---
-texto: "El sol no es más necesario que el establecimiento de la enseñanza elemental científica."
+texto: "Comieron y bebieron; pero no supieron de sí."
 autor: "jose-marti"
-slug: "jose-marti-el-sol-no-es-mas-necesario-que"
+temas:
+  - "la-vida"
+slug: "jose-marti-comieron-y-bebieron-pero-no-supieron-de"
 procedencia:
   obra: "Maestros ambulantes"
   año: 1884

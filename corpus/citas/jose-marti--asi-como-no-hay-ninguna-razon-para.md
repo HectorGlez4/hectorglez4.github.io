@@ -1,7 +1,9 @@
 ---
-texto: "Un pueblo instruido ama el trabajo y sabe sacar provecho de él."
+texto: "Así como no hay ninguna razón para que el rico se eduque, y el pobre no, ¿qué razón hay para que se eduque el pobre, y no el rico?"
 autor: "jose-marti"
-slug: "jose-marti-un-pueblo-instruido-ama-el-trabajo-y"
+temas:
+  - "el-saber"
+slug: "jose-marti-asi-como-no-hay-ninguna-razon-para"
 procedencia:
   obra: "Educación popular"
 estadoDerechos: "dominio-público"

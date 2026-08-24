@@ -1,7 +1,9 @@
 ---
-texto: "No enviaríamos pedagogos por los campos, sino conversadores."
+texto: "Los hombres crecen, crecen físicamente, de una manera visible crecen, cuando aprenden algo, cuando entran a poseer algo, y cuando han hecho algún bien."
 autor: "jose-marti"
-slug: "jose-marti-no-enviariamos-pedagogos-por-los-campos-sino"
+temas:
+  - "el-saber"
+slug: "jose-marti-los-hombres-crecen-crecen-fisicamente-de-una"
 procedencia:
   obra: "Maestros ambulantes"
   año: 1884

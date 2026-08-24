@@ -1,6 +1,8 @@
 ---
 texto: "De ser siervo de sí mismo, pasaría el hombre a ser siervo del Estado."
 autor: "jose-marti"
+temas:
+  - "la-libertad"
 slug: "jose-marti-de-ser-siervo-de-si-mismo-pasaria"
 procedencia:
   obra: "La futura esclavitud"

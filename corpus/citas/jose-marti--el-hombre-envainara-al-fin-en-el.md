@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres crecen, crecen físicamente, de una manera visible crecen, cuando aprenden algo, cuando entran a poseer algo, y cuando han hecho algún bien."
+texto: "¡El hombre envainará al fin en el sol su espada de batalla!"
 autor: "jose-marti"
-slug: "jose-marti-los-hombres-crecen-crecen-fisicamente-de-una"
+temas:
+  - "la-vida"
+slug: "jose-marti-el-hombre-envainara-al-fin-en-el"
 procedencia:
   obra: "Maestros ambulantes"
   año: 1884

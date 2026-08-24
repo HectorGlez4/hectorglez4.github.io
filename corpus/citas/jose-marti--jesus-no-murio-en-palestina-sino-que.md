@@ -1,6 +1,8 @@
 ---
 texto: "Jesús no murió en Palestina, sino que está vivo en cada hombre."
 autor: "jose-marti"
+temas:
+  - "la-vida"
 slug: "jose-marti-jesus-no-murio-en-palestina-sino-que"
 procedencia:
   obra: "Maestros ambulantes"

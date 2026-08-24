@@ -1,7 +1,9 @@
 ---
-texto: "Un hombre instruido vive de su ciencia, y como la lleva en sí, no se le pierde, y su existencia es fácil y segura."
+texto: "No hay que dudar entre un pueblo de Dioses y un pueblo de bestias."
 autor: "jose-marti"
-slug: "jose-marti-un-hombre-instruido-vive-de-su-ciencia"
+temas:
+  - "la-libertad"
+slug: "jose-marti-no-hay-que-dudar-entre-un-pueblo"
 procedencia:
   obra: "Educación popular"
 estadoDerechos: "dominio-público"

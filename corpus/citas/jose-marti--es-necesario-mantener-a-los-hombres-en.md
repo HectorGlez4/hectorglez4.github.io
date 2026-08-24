@@ -1,7 +1,9 @@
 ---
-texto: "Comieron y bebieron; pero no supieron de sí."
+texto: "Es necesario mantener a los hombres en el conocimiento de la tierra y en el de la perdurabilidad y trascendencia de la vida."
 autor: "jose-marti"
-slug: "jose-marti-comieron-y-bebieron-pero-no-supieron-de"
+temas:
+  - "el-saber"
+slug: "jose-marti-es-necesario-mantener-a-los-hombres-en"
 procedencia:
   obra: "Maestros ambulantes"
   año: 1884

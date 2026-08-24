@@ -1,7 +1,9 @@
 ---
-texto: "Educación popular no quiere decir exclusivamente educación de la clase pobre; sino que todas las clases de la nación, que es lo mismo que el pueblo, sean bien educadas."
+texto: "Un rico necesita de sus monedas para vivir, y pueden perdérsele, y ya no tiene modos de vida."
 autor: "jose-marti"
-slug: "jose-marti-educacion-popular-no-quiere-decir-exclusivamente-educacion"
+temas:
+  - "la-vida"
+slug: "jose-marti-un-rico-necesita-de-sus-monedas-para"
 procedencia:
   obra: "Educación popular"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Esclavo es todo aquel que trabaja para otro que tiene dominio sobre él; y en ese sistema socialista dominaría la comunidad al hombre, que a la comunidad entregaría todo su trabajo."
+texto: "Nosotros diríamos a la política: ¡Yerra, pero consuela!"
 autor: "jose-marti"
-slug: "jose-marti-esclavo-es-todo-aquel-que-trabaja-para"
+temas:
+  - "la-virtud"
+slug: "jose-marti-nosotros-diriamos-a-la-politica-yerra-pero"
 procedencia:
   obra: "La futura esclavitud"
   año: 1884

@@ -1826,3 +1826,46 @@ páginas y 12 en `dist/coleccion/`; `npx playwright test` **400 pasadas**, 14 sa
 están en `sitemap-0.xml` del dominio y las nuevas responden 200. Con esto el tramo de
 Colecciones de la Meta queda cerrado y `sprint-status.yaml` pasa 15-2 a `done` y 15-3 —el techo
 de concentración— a `in-progress`.
+
+## 15.3 — El techo empieza a diluir, y la extracción enseña su escala
+
+Primera sesión del tramo de concentración. **252 → 268 Citas**, el sitio de **289 a 305
+páginas**, y el Autor más representado baja del **45,2 % al 42,5 %**. El objetivo declarado pasó
+de «sembrar 508 Citas de otros Autores» a 492 él solo: el techo funciona como se diseñó, sin que
+nadie lo empuje.
+
+**Lo primero fue lo que ya estaba.** `corpus/_revision/` tenía **66 candidatas pendientes** de
+sesiones anteriores, extraídas y cotejadas, esperando decisión. Antes de extraer nada nuevo se
+revisaron esas.
+
+**Y de 64, entraron 16.** El resto no son Citas: son **prosa de enlace** de *La futura
+esclavitud* y *Maestros ambulantes* —«La Futura Esclavitud se llama este tratado de Herbert
+Spencer», «Nueva York, abril de 1884», «He ahí, pues, lo que han de llevar los maestros»—.
+Fragmentos que su documento sostiene y que fuera de él no dicen nada. El criterio aplicado es el
+que el propio sitio declara: una Cita se sostiene fuera de su obra. Se descartaron también las
+que abren con conectivo —«Y el único camino…», «Pero cuando se serene este mar…»—: el conectivo
+delata la dependencia.
+
+Las que entraron son de las que aguantan solas: «Comieron y bebieron; pero no supieron de sí»,
+«De ser siervo de sí mismo, pasaría el hombre a ser siervo del Estado», «Los hombres crecen,
+crecen físicamente, de una manera visible crecen, cuando aprenden algo», «Nosotros diríamos a la
+política: ¡Yerra, pero consuela!».
+
+**Las dos candidatas del Autor que está por encima del techo se dejaron sin aprobar.** Aprobarlas
+sería empujar en la dirección contraria a la del tramo. No se rechazan —son buenas— sino que
+esperan a que el reparto lo permita. Decisión conservadora, escrita aquí como manda el protocolo.
+
+**La escala de lo que queda, medida.** `extraer` en seco sobre el *Quijote* de Gutenberg —386.652
+palabras, y su Autor con solo 6 Citas— propone **3.267 candidatas**, con 3.580 descartadas por
+longitud, 30 por no estar en español, 12 por ilegibles y 1 repetida. Es el documento que más
+diluye y el mayor pozo del repositorio, pero 3.267 candidatas no son una sesión de revisión: son
+el trabajo de muchas. La sesión siguiente empieza por ahí, por lotes.
+
+**Un hallazgo que no se toca todavía.** `rechazar` hace `rm` sobre el fichero de la candidata,
+mientras que `despublicar` **mueve** a `_colecciones-retiradas` porque AD-2 dice que git es el
+único almacén. Son dos criterios distintos para la misma clase de acto. Las 46 candidatas de
+prosa de enlace se quedan por tanto pendientes en vez de borradas: borrar 46 ficheros en bloque
+no es la opción reversible, y la discrepancia merece decidirse mirándola, no de pasada.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 305
+páginas; `npx playwright test` **400 pasadas**, 14 saltadas.
