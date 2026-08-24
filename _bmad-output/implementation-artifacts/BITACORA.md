@@ -1910,3 +1910,38 @@ páginas; `npx playwright test` **400 pasadas**, 14 saltadas.
 
 **Verificado en vivo** (25/08/2026, ejecución 32782544083 en verde): `sitemap-0.xml` del dominio
 declara **345 URL**, las mismas que produjo el build, y las Citas nuevas responden 200.
+
+## 15.3 (3.ª sesión) — Veinte de la *Respuesta a Sor Filotea*, y la concentración al 34,8 %
+
+**308 → 328 Citas**, el sitio de **345 a 365 páginas**, el Autor más representado del **37 % al
+34,8 %**, y el objetivo declarado de 452 a **432**.
+
+Elegido este documento por dos razones que apuntan al mismo sitio: su Autora tenía **tres** Citas
+y el Corpus solo cuenta con **cuatro Autoras, nueve Citas entre las cuatro**. Diluye y corrige a
+la vez.
+
+**De 196 candidatas entraron 20, un 10 % — la mitad del rendimiento de Séneca.** No es peor
+extracción: es otro género. La *Respuesta* es una epístola erudita, y sus párrafos se apoyan en
+citas latinas, en referencias patrísticas y en la carta a la que contesta. Un libro de aforismos
+da una Cita de cada cinco; una carta de defensa, una de cada diez. Conviene saberlo antes de
+estimar cuánto rinde un documento por su tamaño.
+
+Entraron las que no necesitan la carta para entenderse: «Si Aristóteles hubiera guisado, mucho
+más hubiera escrito», «¿qué os pudiera contar, Señora, de los secretos naturales que he
+descubierto estando guisando?», «Bien dijo Lupercio Leonardo, que bien se puede filosofar y
+aderezar la cena», «¡Rara demencia: cansarse más en quitarse el crédito que pudiera en
+granjearlo!», «Mi entendimiento tal cual ¿no es tan libre como el suyo, pues viene de un solar?».
+
+**Y otro casi-duplicado esquivado**, el segundo en dos sesiones: «Yo no estudio para escribir, ni
+menos para enseñar… sino sólo por ver si con estudiar ignoro menos» se descartó porque el Corpus
+ya publica «Yo no estudio para saber más, sino para ignorar menos». Van dos veces que el filtro
+que salva al Corpus de repetirse es el juicio, no una puerta.
+
+**Un número que conviene vigilar.** La suite de Playwright pasó con **396** en vez de las 400 de
+la sesión anterior, sin un solo fallo y con las mismas 14 saltadas. Varios casos se generan a
+partir del contenido —los que recorren Temas por debajo del umbral, por ejemplo, desaparecen
+cuando no hay ninguno—, así que el recuento se mueve con el Corpus. Queda anotado aquí en cada
+sesión precisamente para que una bajada **real** de cobertura se distinga de esta.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 365
+páginas; `npx playwright test` **396 pasadas**, 14 saltadas, 0 fallos.
