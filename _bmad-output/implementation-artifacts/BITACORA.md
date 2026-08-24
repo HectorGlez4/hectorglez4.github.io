@@ -2013,3 +2013,42 @@ páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32786386775 en verde): `sitemap-0.xml` declara
 **429 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (6.ª sesión) — Cuatro Citas, y el hallazgo vale más que las cuatro
+
+**392 → 396 Citas**, el sitio de **429 a 433 páginas**, el Autor más representado del 29,1 % al
+**28,8 %**. La cosecha más pobre de la noche, y por un motivo que había que descubrir midiendo.
+
+**Los documentos pequeños y densos se han agotado.** Medidos ya siete géneros, la curva es clara:
+
+| Género | Documento | Candidatas | Aprobadas | Rendimiento |
+|---|---|---|---|---|
+| Aforismos | *De la brevedad de la vida* | 196 | 40 | 20 % |
+| Prosa filosófica | *Del sentimiento trágico* | 176 | 34 | 19 % |
+| Poesía aforística | *Proverbios y cantares* | 171 | 30 | 17,5 % |
+| Epístola erudita | *Respuesta a Sor Filotea* | 196 | 20 | 10 % |
+| Narrativa | *Capítulos que se le olvidaron a Cervantes* | 141 | 3 | **2 %** |
+| Parábola | *Motivos de Proteo* 018/020/022 | 52 | 1 | **2 %** |
+
+**Y la extracción re-propone lo ya publicado, que resulta ser una función y no un fallo.** De las
+141 candidatas de los *Capítulos*, dieciséis eran las dieciséis Citas que el Corpus ya publica de
+ese Autor. La revisión las marca una a una —«⚠ Duplica a … (**publicadas**). Decide tú»— y les
+pone sufijo al slug. La puerta está donde debe estar: en la revisión, no en la extracción, porque
+un duplicado a veces es una variante que interesa y la máquina no puede decidirlo.
+
+**El tramo necesita otra estrategia, y conviene decirlo antes de gastar seis sesiones más.**
+Faltan 364 Citas de otros Autores y quedan tres caminos, ninguno igual a los de esta noche:
+
+1. **El *Quijote*, por lotes.** 3.267 candidatas, género narrativo, rendimiento esperado ~2 %:
+   unas 65 Citas por todo el libro. Mucho trabajo de revisión para poco.
+2. **Los once documentos restantes del *Oráculo manual***. Rendimiento alto —es el género denso—
+   pero son del Autor que **ya está por encima del techo**: sembrarlos empeora el tramo.
+3. **Recuperar Fuentes nuevas** con `npx tsx tools/recuperar.ts <url>`. Es el único camino que
+   sirve a **dos** tramos a la vez: cada Autor nuevo dilui y acerca el censo de 17 a 35.
+
+El tercero es el que toca, y no lo decide el bucle: recuperar de una URL es traer material de
+fuera al Corpus, y **a quién se admite es la única decisión que este producto no delega**. Queda
+escrito aquí para que Héctor lo vea al leer la bitácora.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 433
+páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
