@@ -1790,3 +1790,34 @@ páginas; `npx playwright test` **400 pasadas**, 14 saltadas. Las cuatro Colecci
 Colección responden 200 en `https://sabiduriadebolsillo.net/coleccion/…`, están las cuatro en
 `sitemap-0.xml`, y la canónica de cada una apunta a sí misma —no canibaliza a ninguna Cita, que
 era el criterio de la Historia 12.3—.
+
+## 15.2 (cierre) — Doce Colecciones, y el tramo escala solo
+
+Ocho más en una sesión: **4 → 12 de 12**, y `objetivoDeMeta` pasó por su cuenta al tramo
+siguiente. El sitio va de **281 a 289 páginas**, y sigue sin haberse sembrado una sola Cita ni
+recuperado un solo documento. **204 de las 252 Citas (81 %)** pertenecen ya a alguna Colección.
+
+**Lo que desbloqueó las ocho.** La sesión anterior concluyó que los criterios estrechos no
+llegan a quince, y era verdad a medias: lo que fallaba era buscarlos por palabra clave. Leídas
+las 114 de Gracián de una sentada, las agrupaciones aparecen solas —el trato, la fortuna, los
+amigos, la necedad, el silencio, la sazón— porque el *Oráculo manual* está escrito por temas
+aunque no los rotule. Un `grep` de «callar|silencio» encontraba dos Citas; leyéndolo, el
+silencio reúne diecisiete.
+
+También cayó una restricción que yo mismo me había inventado: creía que una Colección no podía
+solaparse con un Tema. La Historia 12.3 dice «sin canibalizar **a la Cita**», y de eso se ocupa
+la canónica. Un Tema es un asunto; una Colección es un criterio, y «el silencio como cordura»
+no es lo mismo que «la palabra» aunque compartan Citas.
+
+Las ocho: **Amigos de los que fiarse** (19), **Prevenirse en la próspera** (19), **Los escollos
+del trato** (17), **Achaques de necedad** (15), **El silencio es sagrado de la cordura** (20),
+**Conocer las cosas en su sazón** (15), **La vida, si sabes usarla, es larga** (15) y **Cada uno
+es hijo de sus obras** (17). Diez de las doce mezclan Autores; ninguna es una antología de uno
+solo por accidente.
+
+**Y el tramo siguiente ya está declarado, con su cifra:** «Sembrar 508 Citas de otros Autores:
+ningún Autor puede pasar del 15 % del Corpus». Es el techo funcionando como se diseñó — no dice
+que Gracián sobre, dice cuánto falta de los demás.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 289
+páginas y 12 en `dist/coleccion/`; `npx playwright test` **400 pasadas**, 14 saltadas.

@@ -136,8 +136,8 @@ development_status:
   # este fichero solo registra por dónde va. Protocolo: LOOP-PROTOCOL-V4.md
   epic-15: in-progress
   15-1-el-liston-agresivo-tiene-nombre-y-lo-cruza-un-solo-modulo: done
-  15-2-doce-colecciones-sobre-lo-ya-publicado: in-progress
-  15-3-ningun-autor-pasa-del-techo-de-concentracion: backlog
+  15-2-doce-colecciones-sobre-lo-ya-publicado: done
+  15-3-ningun-autor-pasa-del-techo-de-concentracion: in-progress
   15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
   15-5-veinticuatro-temas-publicados: backlog
   15-6-mil-citas-publicadas: backlog
