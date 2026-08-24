@@ -1477,16 +1477,19 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
      * trágico de la vida» y la letrilla de Quevedo—: los tres publicaron sus Citas antes de
      * la v3, con otro nombre de obra, y están en el censo de pendientes de cotejo.
      *
-     * Son dos desde la sesión del 24/08/2026, y la lista mengua en la buena dirección. El
-     * tramo de concentración de la Meta sembró cuarenta Citas nuevas desde «De la brevedad
-     * de la vida», y esas sí casan con su documento porque salieron de él por la extracción
-     * de la 11.1. Lo que sigue pendiente de cotejo son las cinco viejas, no el documento.
-     * Cuando los otros dos reciban el mismo trato, esta lista quedará vacía.
+     * Queda **uno**, y la lista ha menguado dos veces en la misma noche por el mismo motivo:
+     * el tramo de concentración de la Meta sembró cuarenta Citas desde «De la brevedad de la
+     * vida» y treinta y cuatro desde «Del sentimiento trágico de la vida», y todas casan con
+     * su documento porque salieron de él por la extracción de la 11.1. Lo que sigue pendiente
+     * de cotejo son las Citas viejas de esos documentos, no los documentos.
+     *
+     * El que queda es la letrilla de Quevedo, y no se cierra sembrando: es un poema de una
+     * sola Cita, ya publicada antes de la v3 con otro nombre de obra. Ese caso pide
+     * `documentar`, no `extraer`.
      */
     const sinCita = documentos.filter((f) => autoresQuePublicaronDesde(f).length === 0);
 
     expect(sinCita).toEqual([
-      'wikisource-es--del-sentimiento-tragico-de-la-vida-i.txt',
       'wikisource-es--poderoso-caballero-es-don-dinero-letrilla-satirica.txt',
     ]);
     expect(documentos.length - sinCita.length).toBeGreaterThanOrEqual(54);

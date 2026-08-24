@@ -1948,3 +1948,28 @@ páginas; `npx playwright test` **396 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32783987321 en verde): `sitemap-0.xml` declara
 **365 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (4.ª sesión) — Treinta y cuatro de Unamuno, y la lista de documentos mudos baja a uno
+
+**328 → 362 Citas**, el sitio de **365 a 399 páginas**, el Autor más representado del **34,8 %
+al 31,5 %**, y el objetivo declarado de 432 a **398**.
+
+**El mejor rendimiento hasta ahora: 34 de 176, un 19 %**, casi el doble que la epístola de la
+sesión anterior y a la altura del libro de aforismos. *Del sentimiento trágico de la vida* es
+prosa filosófica que **piensa en sentencias**: «Como a otros les duele una mano o un pie o el
+corazón o la cabeza, a Spinoza le dolía Dios», «No basta curar la peste, hay que saber llorarla»,
+«Lo más santo de un templo es que es el lugar a que se va a llorar en común», «Querer ser otro,
+es querer dejar de ser uno el que es», «Hasta un axioma puede llegar a ser en ciertos casos una
+impertinencia».
+
+Con tres documentos medidos, la regla empieza a verse: **el rendimiento lo marca el género, no
+el tamaño**. Aforismos ~20 %, prosa filosófica aforística ~19 %, epístola erudita ~10 %.
+
+**Y la lista de documentos mudos baja de dos a uno.** `documento.test.ts` vuelve a rojo por
+segunda vez en la noche y por el mismo motivo bueno: «Del sentimiento trágico» ya tiene Citas que
+se cotejan contra él. Queda solo la letrilla de Quevedo, y **ese no se cierra sembrando**: es un
+poema de una sola Cita, publicada antes de la v3 con otro nombre de obra. Pide `documentar`, no
+`extraer`. Escrito así en el test para que quien lo lea sepa que el último caso es de otra clase.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 399
+páginas; `npx playwright test` **396 pasadas**, 14 saltadas, 0 fallos.
