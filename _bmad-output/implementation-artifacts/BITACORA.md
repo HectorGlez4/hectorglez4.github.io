@@ -2101,3 +2101,6 @@ que salió cada traducción huérfana.
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 433
 páginas y 22 pendientes de 38; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32789462703 en verde): la Cita restituida sirve su
+texto nuevo y su obra corregida en `https://sabiduriadebolsillo.net/cita/teresa-de-jesus-la-paciencia-todo-lo-alcanza`.
