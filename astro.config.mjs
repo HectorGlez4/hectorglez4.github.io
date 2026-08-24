@@ -5,6 +5,7 @@ import { SITIO } from './src/lib/dominio.ts';
 import { anunciableEnElSitemap } from './src/lib/superficies.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
+import coberturaTipografica from './integraciones/cobertura.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -60,6 +61,19 @@ export default defineConfig({
      */
     formaDeLasColecciones(),
 
+    /*
+     * Ninguna página se publica con un carácter que las fuentes declaradas abajo no sepan
+     * componer.
+     *
+     * Va aquí, y no en el esquema de contenido, porque lo que se juzga es la página ya
+     * compuesta: un carácter puede entrar por una Cita, por un rótulo de `src/lib/` o por
+     * una plantilla, y solo el HTML final los tiene todos. Es la puerta que vuelve segura
+     * la decisión de bajar `subsets` a `latin`: sin ella, una Cita con una `ő` se
+     * publicaría componiéndose en Georgia a mitad de línea, sin que nada fallara ni
+     * avisara.
+     */
+    coberturaTipografica(),
+
     sitemap({
       /*
        * Historia 12.1 — aquí no se decide nada.
@@ -92,26 +106,50 @@ export default defineConfig({
     }),
   ],
 
-  // UX-DR3 — las dos familias de DESIGN.md por la Fonts API, con `latin-ext` para que
-  // los diacríticos españoles y las comillas angulares « » tengan cobertura completa.
-  // Sin `latin-ext`, la eñe y las vocales acentuadas caerían al tipo de reserva y la
-  // Cita se compondría con dos fuentes distintas en la misma línea.
+  /*
+   * UX-DR3 — las dos familias de DESIGN.md por la Fonts API.
+   *
+   * Solo el subconjunto `latin` y solo el estilo `normal`. Las dos restricciones se
+   * miden en la Cita: cada cara que se declara aquí es un `.woff2` **precargado**, y los
+   * precargados compiten por el ancho de banda en el camino crítico. Con `latin-ext` y
+   * las cursivas eran ocho ficheros y 460 KiB; el LCP en móvil salía a 3,2 s con un HTML
+   * de 22 KiB. Ahora son dos ficheros y ~99 KiB.
+   *
+   * Lo que se retiró no se usaba, y no es una apuesta:
+   *
+   * - `latin-ext` **no** cubre lo español. Este comentario decía lo contrario —que sin él
+   *   «la eñe y las vocales acentuadas caerían al tipo de reserva»— y era falso: `ñ á é
+   *   í ó ú ü`, las angulares « » y los signos de apertura ¿ ¡ viven todos en
+   *   U+0000–U+00FF, que es `latin`. `latin-ext` empieza en U+0100 y cubre el polaco, el
+   *   rumano o el húngaro, que el corpus no tiene.
+   * - Las cursivas no las selecciona nadie. La familia serif se aplica a texto de Cita,
+   *   nombre de Autor y nombre de Tema, y ninguna regla del sitio pide `font-style:
+   *   italic`. Se descargaban cuatro caras que ningún elemento podía llegar a componer.
+   *   `styles` va explícito en las dos familias porque su valor por omisión es
+   *   `['normal', 'italic']`: Inter no declaraba estilos y traía cursivas igual.
+   *
+   * Que siga siendo verdad no depende de que alguien lo recuerde. `coberturaTipografica()`
+   * —arriba, en `integrations`— rompe el build si una página publicada contiene un
+   * carácter que las caras declaradas aquí no saben componer. Ampliar esta lista ensancha
+   * la puerta sola: la puerta lee los `unicode-range` que este bloque emite, no una copia.
+   */
   fonts: [
     {
       provider: fontProviders.google(),
       name: 'Source Serif 4',
       cssVariable: '--fuente-serif',
-      subsets: ['latin', 'latin-ext'],
+      subsets: ['latin'],
       weights: [400, 600],
-      styles: ['normal', 'italic'],
+      styles: ['normal'],
       fallbacks: ['Georgia', 'Times New Roman', 'serif'],
     },
     {
       provider: fontProviders.google(),
       name: 'Inter',
       cssVariable: '--fuente-sans',
-      subsets: ['latin', 'latin-ext'],
+      subsets: ['latin'],
       weights: [400, 600],
+      styles: ['normal'],
       fallbacks: ['system-ui', 'sans-serif'],
     },
   ],

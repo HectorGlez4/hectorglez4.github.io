@@ -88,6 +88,32 @@ curl -sI https://hectorglez4.github.io | head -1         # 301 hacia el ápice
 curl -s https://sabiduriadebolsillo.net | grep -o '<link rel="canonical"[^>]*>'
 ```
 
+### El techo de caché del hospedaje
+
+GitHub Pages sirve **todo** con `cache-control: max-age=600` y no ofrece forma de
+cambiarlo: no hay `_headers`, ni `netlify.toml`, ni panel donde tocarlo. Se comprueba en
+un segundo, y conviene comprobarlo antes de creer a nadie —este documento incluido—:
+
+```bash
+curl -sI https://sabiduriadebolsillo.net/favicon.svg | grep -i cache-control
+```
+
+Diez minutos es un techo bajo para lo que no cambia nunca. Los `.woff2` de `_astro/`
+llevan el hash del contenido en el nombre —cambiar la fuente cambia la URL—, así que
+podrían cachearse un año sin riesgo de servir nada rancio, y hoy se revalidan cada diez
+minutos. Es lo que PageSpeed señala como «Use efficient cache lifetimes».
+
+**No se ha arreglado, y es una decisión de hospedaje y no de código.** Lo que costaría:
+poner el dominio detrás de Cloudflare —la cuenta ya existe por el receptor de la medición,
+§3— cambiando los NS en el registrador y activando el proxy, y ahí sí se declara una Cache
+Rule con Edge TTL largo para `/_astro/*`. Lo que costaría a cambio: el dominio deja de
+resolverse solo con los registros A de GitHub, y una caída o un cambio de Cloudflare pasa
+a poder tirar el sitio. Hoy el sitio depende de un proveedor; con eso dependería de dos.
+
+Mientras tanto, lo que sí está bajo control del repositorio es **cuánto** hay que
+recachear cada diez minutos, y eso se redujo de 460 KiB a ~99 KiB recortando `subsets` y
+`styles` en `astro.config.mjs`. La puerta que lo mantiene es `integraciones/cobertura.ts`.
+
 ## 2. Search Console — Historia 7.2 (LC-2, LC-3)
 
 Hecho en el repositorio:
