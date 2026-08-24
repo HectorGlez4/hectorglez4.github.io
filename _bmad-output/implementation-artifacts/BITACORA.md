@@ -1907,3 +1907,6 @@ esas palabras.
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 345
 páginas; `npx playwright test` **400 pasadas**, 14 saltadas.
+
+**Verificado en vivo** (25/08/2026, ejecución 32782544083 en verde): `sitemap-0.xml` del dominio
+declara **345 URL**, las mismas que produjo el build, y las Citas nuevas responden 200.
