@@ -1869,3 +1869,7 @@ no es la opción reversible, y la discrepancia merece decidirse mirándola, no d
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 305
 páginas; `npx playwright test` **400 pasadas**, 14 saltadas.
+
+**Verificado en vivo** (24/08/2026, ejecución 32780763027 en verde): `sitemap-0.xml` del dominio
+declara **305 URL**, exactamente las que el build produjo, y 48 de ellas son Citas del Autor
+sembrado esta sesión. Las Citas nuevas responden 200.
