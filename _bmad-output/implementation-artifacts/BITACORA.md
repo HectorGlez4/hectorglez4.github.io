@@ -2135,3 +2135,6 @@ siendo las mismas: la deuda vieja no crece.
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 447
 páginas y 388 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32790671514 en verde): `sitemap-0.xml` declara
+**447 URL**, las mismas del build, y las Citas nuevas responden 200.
