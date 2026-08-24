@@ -1,0 +1,50 @@
+---
+/**
+ * Datos estructurados de la Página de Tema.
+ *
+ * La misma forma que la Página de Autor —`CollectionPage` con su `about` y su
+ * `ItemList`—, porque es la misma clase de página con otro sujeto: un listado de Citas
+ * acerca de algo.
+ *
+ * El sujeto es un `Thing` y no un tipo más concreto, y es deliberado. Un Tema del corpus
+ * —«La adversidad», «El saber»— es una idea, no una obra ni un lugar ni una persona, y
+ * `Thing` es exactamente el tipo que schema.org da a lo que no cabe en nada más
+ * específico. Forzar `DefinedTerm` pediría un `inDefinedTermSet` —el vocabulario del que
+ * el término forma parte— que aquí no existe: los Temas son ocho ficheros del corpus, no
+ * una taxonomía publicada. Declararlo sería inventarse una autoridad.
+ *
+ * Se emite como `application/ld+json`, que no es JavaScript ejecutable: no lo descarga ni
+ * lo ejecuta el navegador, así que no toca AD-6.
+ */
+import type { Cita, Tema } from '../lib/publicado.ts';
+import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+
+interface Props {
+  tema: Tema;
+  /** Las Citas de **esta** página, no las del Tema entero. */
+  citas: readonly Cita[];
+  canonica: string;
+  tramo: TramoDeLaLista;
+}
+
+const { tema, citas, canonica, tramo } = Astro.props;
+
+/* Sin número de página, por lo mismo que el Autor: el Tema es el mismo en la página 2. */
+const idDelTema = new URL(`/tema/${tema.slug}#tema`, canonica).href;
+
+const datos = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': canonica,
+  url: canonica,
+  inLanguage: 'es',
+  about: {
+    '@type': 'Thing',
+    '@id': idDelTema,
+    name: tema.nombre,
+  },
+  mainEntity: listaDeCitas(citas, canonica, tramo),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(datos)} is:inline />

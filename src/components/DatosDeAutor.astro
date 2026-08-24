@@ -1,0 +1,64 @@
+---
+/**
+ * Datos estructurados de la Página de Autor.
+ *
+ * `CollectionPage` y no `ProfilePage`, aunque la página lleve semblanza y fechas: lo que
+ * el visitante viene a ver es el listado, y la semblanza es el encabezado que lo sitúa.
+ * El tipo describe lo que la página **es**, y esta es una colección de Citas *acerca de*
+ * una persona — de ahí `about`. La misma forma que la Página de Tema, que es la misma
+ * clase de página con otro sujeto.
+ *
+ * El `Person` de `about` importa aparte: la Página de Cita ya emite uno dentro de su
+ * `creator`, y sin esto nada dice cuál de las 253 páginas donde aparece Séneca es la
+ * suya. Compartiendo `@id` con aquel, las dos declaraciones hablan de la misma persona en
+ * vez de de dos homónimos.
+ *
+ * Solo se declara lo que consta —FR-2—: `birthDate` se omite cuando el corpus no lo trae,
+ * igual que en `DatosEstructurados.astro`, en vez de inventar un año aproximado.
+ *
+ * Se emite como `application/ld+json`, que no es JavaScript ejecutable: no lo descarga ni
+ * lo ejecuta el navegador, así que no toca AD-6.
+ */
+import type { Autor, Cita } from '../lib/publicado.ts';
+import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+
+interface Props {
+  autor: Autor;
+  /** Las Citas de **esta** página, no las del Autor entero. */
+  citas: readonly Cita[];
+  canonica: string;
+  tramo: TramoDeLaLista;
+}
+
+const { autor, citas, canonica, tramo } = Astro.props;
+
+/*
+ * El `@id` de la persona cuelga de la URL de su página y no es la URL a secas: la URL
+ * identifica el documento —la `CollectionPage`— y el fragmento identifica a quien el
+ * documento trata. Son dos cosas distintas y darles el mismo `@id` las funde.
+ *
+ * `/autor/{slug}` sin número de página a propósito. Séneca es el mismo en la página 2 que
+ * en la 1, y un `@id` que arrastrara el número partiría al Autor en tantas personas como
+ * páginas tenga su listado.
+ */
+const idDeLaPersona = new URL(`/autor/${autor.slug}#persona`, canonica).href;
+
+const datos = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': canonica,
+  url: canonica,
+  inLanguage: 'es',
+  about: {
+    '@type': 'Person',
+    '@id': idDeLaPersona,
+    name: autor.nombre,
+    description: autor.semblanza,
+    ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
+    deathDate: String(autor.añoFallecimiento),
+  },
+  mainEntity: listaDeCitas(citas, canonica, tramo),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(datos)} is:inline />

@@ -16,6 +16,7 @@
  * que ve el visitante y en los identificadores del dominio.
  */
 import Armazon from '../../../components/Armazon.astro';
+import DatosDeAutor from '../../../components/DatosDeAutor.astro';
 import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import { autoresPublicados, citasDeAutor, conjuntoPublicable, type Cita } from '../../../lib/publicado.ts';
@@ -46,6 +47,7 @@ const años =
   autor.añoNacimiento !== undefined
     ? `${autor.añoNacimiento}–${autor.añoFallecimiento}`
     : `Fallecido en ${autor.añoFallecimiento}`;
+const canonica = new URL(ruta, Astro.site).href;
 ---
 
 <Armazon
@@ -54,6 +56,13 @@ const años =
   ruta={ruta}
   tipo="autor"
 >
+  <DatosDeAutor
+    slot="cabeza"
+    autor={autor}
+    citas={pagina.data}
+    canonica={canonica}
+    tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
+  />
   <div class="pagina contenedor">
     <header class="ficha">
       <h1>{autor.nombre}</h1>

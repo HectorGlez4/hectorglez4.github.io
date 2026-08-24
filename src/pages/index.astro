@@ -13,6 +13,7 @@
  */
 import Armazon from '../components/Armazon.astro';
 import BloqueDeCita from '../components/BloqueDeCita.astro';
+import DatosDelSitio from '../components/DatosDelSitio.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
@@ -47,13 +48,23 @@ const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.
 const autorDelDia = seleccion
   ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
   : undefined;
+
+/*
+ * La descripción se nombra una vez y se usa dos: la etiqueta `description` del armazón y
+ * el `description` del `WebSite`. Escritas aparte, un retoque a una dejaría a la otra
+ * diciendo algo distinto sobre el mismo sitio, y quien lo notaría sería un buscador.
+ */
+const DESCRIPCION =
+  'Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta.';
 ---
 
 <Armazon
   titulo={`${MARCA} — citas en español con su procedencia`}
-  descripcion="Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta."
+  descripcion={DESCRIPCION}
   ruta="/"
 >
+  <DatosDelSitio slot="cabeza" descripcion={DESCRIPCION} />
+
   <div class="pagina contenedor">
     <h1 class="marca-portada">{MARCA}</h1>
 
