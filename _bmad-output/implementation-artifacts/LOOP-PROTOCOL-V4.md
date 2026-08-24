@@ -7,7 +7,22 @@ dónde va, y `npm run huecos`, que dice qué toca ahora.
 Sucede a `LOOP-PROTOCOL-V3.md`, que sigue siendo válido en todo lo que este no contradiga.
 Lo que sí contradice, y hay que decirlo antes que nada, está en «La regla que se levanta».
 
-Rama: `sprint/corpus-v4`, abierta **desde `main`** (7918820) y no desde la rama de trabajo
+## Cambio de estrategia — 24/08/2026, decidido por Héctor
+
+**El bucle trabaja directamente sobre `main`.** Cada push despliega, y eso es lo que se quiere:
+publicar es desplegar, sin rama intermedia ni fusión por tramo. Lo que la v3 hacía por épica
+—una fusión, un despliegue, una verificación en vivo— pasa a ser **una sesión, un despliegue**.
+
+Lo que **no** cambia: la puerta completa se pasa antes de cada push. `main` no se deja en rojo.
+Publicar más a menudo obliga a la puerta a ser más fiable, no menos.
+
+El resto de este fichero se escribió con la rama `sprint/corpus-v4` en la cabeza. Esa rama
+existió y llevó las dos primeras sesiones —15.1 y 15.2—; sus commits entraron en `main` por
+rebase el 24/08 y desde ahí se trabaja sin ella.
+
+---
+
+Rama original: `sprint/corpus-v4`, abierta **desde `main`** (7918820) y no desde la rama de trabajo
 del momento.
 
 **Y en un worktree aparte**, que es lo que no era obvio: el 24/08/2026 había otra sesión
