@@ -22,6 +22,7 @@ import {
   type ColeccionParaHuecos,
 } from '../src/lib/huecos.ts';
 import { lineaDeHueco, porcentajeEnEspañol } from '../src/lib/formato.ts';
+import { lineasDeMeta, objetivoDeMeta, verMeta } from '../src/lib/meta.ts';
 import { lineasDeObjetivo, objetivoDeSesion } from '../src/lib/objetivo.ts';
 import { temasPublicados, type Cita, type Tema } from '../src/lib/publicado.ts';
 import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
@@ -68,10 +69,16 @@ const anunciados = temasPublicados(
 ).map((t) => t.slug);
 const informe = verHuecos(citas, temas, autores, anunciados, colecciones);
 const objetivo = objetivoDeSesion(informe);
+/*
+ * La Meta de Corpus (v4) se deriva del mismo informe y no de una segunda lectura: dice
+ * cuánto falta para el listón, no qué falta para poder publicar. Son dos preguntas y las
+ * dos se responden aquí porque quien mira los huecos antes de una sesión quiere las dos.
+ */
+const meta = objetivoDeMeta(verMeta(citas, temas, colecciones, informe));
 
 if (argumentos.includes('--json')) {
   process.stdout.write(
-    `${JSON.stringify({ ...informe, objetivo, ...(falloDeColecciones ? { falloDeColecciones } : {}) }, null, 2)}\n`,
+    `${JSON.stringify({ ...informe, objetivo, meta, ...(falloDeColecciones ? { falloDeColecciones } : {}) }, null, 2)}\n`,
   );
 } else {
   const { temas: huecos, tradicion } = informe;
@@ -152,6 +159,17 @@ if (argumentos.includes('--json')) {
    * nadie — dice qué hueco cerrar, y al Autor que falta lo caracteriza por su tradición.
    */
   lineas.push('', ...lineasDeObjetivo(objetivo));
+
+  /*
+   * Y debajo, la Meta. Va después del objetivo de la sesión y no antes porque el objetivo
+   * sale del suelo de publicación, que es una regla del producto, y la Meta de una ambición
+   * que Héctor puede mover mañana: leer primero lo que no se negocia.
+   *
+   * Tampoco nombra a nadie, y ahí estuvo el filo: el tramo de concentración habla del «Autor
+   * más representado» y jamás de su nombre. La prueba de la Historia 9.3 que vigila que lo
+   * único entrecomillado de este informe sean Temas sigue valiendo palabra por palabra.
+   */
+  lineas.push('', ...lineasDeMeta(meta));
 
   process.stdout.write(`${lineas.join('\n')}\n`);
 }

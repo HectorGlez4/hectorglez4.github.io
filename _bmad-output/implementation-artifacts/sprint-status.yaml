@@ -128,6 +128,21 @@ development_status:
   14-1-encender-un-modelo-de-ingreso-es-un-commit: done
   14-2-el-visitante-que-quiere-sostener-el-sitio-encuentra-cómo: review
   epic-14-retrospective: optional
+
+  # Épica 15 — Meta de Corpus (v4). No sale de un PRD: sale de que los criterios medibles
+  # de la 11.4 quedaron cumplidos y el bucle se quedó sin hueco del que derivar trabajo,
+  # con 59 documentos de Fuente y 489.690 palabras versionadas sin exprimir.
+  # El orden de los tramos lo declara `objetivoDeMeta` y lo enseña `npm run huecos`;
+  # este fichero solo registra por dónde va. Protocolo: LOOP-PROTOCOL-V4.md
+  epic-15: in-progress
+  15-1-el-liston-agresivo-tiene-nombre-y-lo-cruza-un-solo-modulo: done
+  15-2-doce-colecciones-sobre-lo-ya-publicado: backlog
+  15-3-ningun-autor-pasa-del-techo-de-concentracion: backlog
+  15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
+  15-5-veinticuatro-temas-publicados: backlog
+  15-6-mil-citas-publicadas: backlog
+  epic-15-retrospective: optional
+
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
     epic: 6

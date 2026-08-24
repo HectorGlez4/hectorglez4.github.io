@@ -201,3 +201,95 @@ export const SESIONES_PARA_PUBLICIDAD = 25000;
  * abren esa puerta. Hoy LC-4 sigue abierta.
  */
 export const CONDICIONES_PARA_DONACIONES = ['LC-1', 'LC-2', 'LC-3', 'LC-4'] as const;
+
+/**
+ * La **Meta de Corpus** — el listón agresivo de la v4, decidido por Héctor el 24/08/2026.
+ *
+ * Estos cuatro números no son umbrales de publicación: son una **ambición**. La diferencia
+ * importa y por eso viven juntos y separados de los de arriba. `MIN_CITAS_POR_TEMA` decide
+ * si una página existe para el visitante; esto decide cuánto le falta al Corpus para ser lo
+ * que se quiere que sea. Un umbral que se mueve rompe páginas publicadas; una meta que se
+ * mueve solo cambia a qué se dedica la próxima sesión.
+ *
+ * De dónde salen. El Corpus del 24/08/2026 tenía 252 Citas, 8 Temas, 17 Autores y ninguna
+ * Colección, y `objetivoDeSesion` devolvía «no hay hueco que cerrar»: los criterios de la
+ * Historia 11.4 estaban **cumplidos** y el bucle autónomo se quedaba sin trabajo derivable.
+ * La meta existe para que vuelva a haberlo, y su tamaño sale de lo que ya está en el
+ * repositorio: **59 documentos de Fuente versionados, 489.690 palabras**, de los que solo
+ * han salido esas 252 Citas.
+ *
+ * Quien las cruza con el estado es `meta.ts`, y nadie más. Ninguna de las cuatro filtra
+ * nada ni decide qué se publica: eso sigue siendo de `publicado.ts` (AD-11).
+ */
+
+/**
+ * Citas publicadas a las que aspira el Corpus — Meta de Corpus v4.
+ *
+ * Mil sobre 489.690 palabras recuperadas es una Cita por cada 490 palabras, y hoy la
+ * proporción real es una por cada 1.943. No es, por tanto, una cifra que pida recuperar
+ * mucho más: pide **exprimir lo que ya está**, que es exactamente lo que estaba sin hacer.
+ */
+export const META_CITAS_PUBLICADAS = 1000;
+
+/**
+ * Temas publicados a los que aspira el Corpus — Meta de Corpus v4.
+ *
+ * La Página de Tema es la superficie con forma de consulta —«frases sobre la amistad»— y
+ * ocho es una red muy pequeña para un sitio que vive de la cola larga. Veinticuatro Temas a
+ * `MIN_CITAS_POR_TEMA` son 360 Citas colocadas como mínimo, holgadamente por debajo de la
+ * meta de volumen: la anchura cabe dentro del fondo y no compite con él.
+ *
+ * Cuenta Temas **publicados**, no declarados. Un Tema con cuatro Citas no es una página que
+ * exista para nadie, y contarlo aquí dejaría la meta alcanzable abriendo ficheros vacíos.
+ */
+export const META_TEMAS_PUBLICADOS = 24;
+
+/**
+ * Autores en el Corpus a los que aspira — Meta de Corpus v4.
+ *
+ * Treinta y cinco es el doble largo de los diecisiete de hoy, y va atado al techo de
+ * concentración: es el censo que hace falta para que ningún Autor tenga que cargar con más
+ * del `TECHO_CONCENTRACION_POR_AUTOR`. Con treinta y cinco Autores, el reparto plano es el
+ * 2,9 % cada uno — el techo del 15 % deja sitio de sobra para que unos pesen más que otros
+ * sin que ninguno sea el Corpus entero.
+ *
+ * Sigue sin decir **a quién**: el `SUELO_TRADICION_LATINOAMERICANA` caracteriza por
+ * tradición y esta cifra solo cuenta. Quién entra es del editor, y ninguna meta lo delega.
+ */
+export const META_AUTORES = 35;
+
+/**
+ * Colecciones publicadas a las que aspira el Corpus — Meta de Corpus v4.
+ *
+ * Es el tramo más barato de los cuatro y por eso va primero en el escalonado: una Colección
+ * **no siembra nada**. Se cura sobre Citas ya publicadas, así que doce Colecciones son doce
+ * superficies indexables nuevas a coste de curación y con cero riesgo editorial.
+ *
+ * Doce y no más porque `MIN_CITAS_POR_COLECCION` son 15 y las 252 Citas de partida dan para
+ * eso sin que la mediana de Citas por agregación publicada se hunda, que es la
+ * contra-métrica que ese umbral vigila. Cuando el volumen suba, esta cifra puede subir; lo
+ * que no puede es subir antes que él.
+ */
+export const META_COLECCIONES_PUBLICADAS = 12;
+
+/**
+ * Porcentaje de las Citas del Corpus que puede aportar **un solo Autor** — Meta de Corpus v4.
+ *
+ * Es el número que impide que la meta de volumen se cumpla por el camino fácil. El 24/08/2026
+ * Gracián aportaba **114 de 252 Citas, el 45,2 %**, y no por decisión editorial ninguna: el
+ * *Oráculo manual* son trescientos aforismos ya troceados, y Machado hay que leerlo entero
+ * para sacar seis. Es literalmente el sesgo que `objetivo.ts` describe —«un agente que
+ * siembra sin supervisión deriva hacia lo que es más fácil de encontrar»— materializado en
+ * una cifra. Sin techo, mil Citas se alcanzan minando más Gracián.
+ *
+ * **VALOR PROVISIONAL.** Sale de cruzar `META_AUTORES` con lo que se considera un Corpus que
+ * no es la antología de nadie: con 35 Autores el reparto plano es el 2,9 %, y 15 deja que el
+ * más representado pese cinco veces la media sin ser el Corpus. Cuando haya treinta Autores
+ * de verdad se sabrá si sobra o falta, y moverlo será un diff visible.
+ *
+ * Cómo se cierra, que no es evidente: **diluyendo, nunca quitando**. Una Cita publicada no se
+ * despublica, así que el hueco que este techo declara se mide en Citas de **otros** Autores.
+ * Con Gracián en 114 y un techo del 15 %, el Corpus tiene que llegar a 760 Citas para que su
+ * peso baje solo — y de ahí sale buena parte de la meta de volumen.
+ */
+export const TECHO_CONCENTRACION_POR_AUTOR = 15;

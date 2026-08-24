@@ -1710,3 +1710,39 @@ malo sigue siendo registro válido de lo que hay ahí; lo que no puede es sembra
 mano sería inventar lo que la edición decía.
 
 `npx vitest run` **1733/1733** en 59 ficheros, frente a 1644 de la línea base.
+
+## 15.1 — El listón agresivo tiene nombre, y lo cruza un solo módulo
+
+El día que el bucle se quedó sin trabajo. `npm run huecos` cerraba con «No hay hueco que
+cerrar» y decía la verdad: ningún Tema por debajo del umbral y la tradición latinoamericana en
+el **41,2 %** sobre un suelo del 40 %. Los criterios medibles de la 11.4, cumplidos. Y un bucle
+que deriva su trabajo del hueco, sin nada que derivar.
+
+Mientras tanto, en el repositorio: **59 documentos de Fuente versionados, 489.690 palabras**, de
+los que habían salido 252 Citas — una por cada 1.943 palabras recuperadas. Y las Épicas 12 y 13
+enteras, con Colección, Página de Colección, curación y Pieza construidas y **sin usar una sola
+vez**. La tubería estaba puesta y sin exprimir.
+
+**La Meta de Corpus.** 1.000 Citas, 24 Temas publicados, 35 Autores, 12 Colecciones. Vive en
+`umbrales.ts` bajo AD-9 y la cruza `src/lib/meta.ts`, que es su único dueño. Va en un módulo
+aparte de `objetivo.ts` a propósito: el suelo de publicación es una regla del producto —moverlo
+rompe páginas vivas— y la meta es una ambición —moverla solo cambia la próxima sesión—. Ese
+corte dejó **las 96 pruebas de la 11.3 intactas**, sin tocar una línea.
+
+**El techo de concentración es la pieza que impide hacer trampa.** Gracián aportaba 114 de las
+252 Citas: el **45,2 %**, y no por decisión editorial ninguna — el *Oráculo manual* son
+trescientos aforismos ya troceados y Machado hay que leerlo entero para sacar seis. Es el sesgo
+que `objetivo.ts` describe, materializado en una cifra. Sin techo, mil Citas se alcanzan minando
+más Gracián. Con techo del 15 %, y como **una Cita publicada no se despublica**, el hueco se
+mide en Citas de *otros*: el Corpus tiene que llegar a 760 para que su peso baje solo.
+
+**Y no nombra a nadie, que es donde estuvo el filo.** El tramo de concentración tenía una excusa
+buena para saltarse la regla de la Historia 9.3 —nombrar al que ya está no es elegir a quién
+admitir— y no se la saltó: el informe dice «el Autor más representado» y el slug viaja solo en
+el `--json`. La prueba que extrae todo lo entrecomillado del informe y exige que sea un nombre
+de Tema sigue en verde sin tocarla.
+
+El escalonado es por **coste**, no por importancia: Colecciones (no siembra nada), concentración,
+Autores, Temas, volumen. Hoy el tramo es el primero — doce Colecciones sobre lo ya publicado.
+
+`npx astro check` **0 errores / 182 ficheros**. Protocolo en `LOOP-PROTOCOL-V4.md`.
