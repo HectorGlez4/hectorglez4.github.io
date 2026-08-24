@@ -1785,3 +1785,8 @@ directorio no cambie, no se toca.
 `npx astro check` 0 errores; `npx vitest run` **1872/1872** en 60 ficheros; `npm run build` 281
 páginas; `npx playwright test` **400 pasadas**, 14 saltadas. Las cuatro Colecciones responden en
 `dist/coleccion/` y están en `sitemap-0.xml`.
+
+**Verificado en vivo** (24/08/2026, ejecución 32777407793 en verde): las cuatro Páginas de
+Colección responden 200 en `https://sabiduriadebolsillo.net/coleccion/…`, están las cuatro en
+`sitemap-0.xml`, y la canónica de cada una apunta a sí misma —no canibaliza a ninguna Cita, que
+era el criterio de la Historia 12.3—.
