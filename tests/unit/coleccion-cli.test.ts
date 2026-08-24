@@ -230,7 +230,18 @@ describe('Historia 12.4 — la orden no escribe donde no debe', () => {
     expect(resultado.codigo).toBe(2);
     expect(resultado.error).toContain('«--corpuss» no es una opción de esta orden');
     expect(await readdir(join(RAIZ, 'corpus', 'colecciones'))).toEqual(antes);
-    expect(antes).toEqual(['.gitkeep']);
+    /*
+     * Antes esto decía `expect(antes).toEqual(['.gitkeep'])`, y valía mientras el corpus real
+     * no tuviera ninguna Colección. Desde el tramo de Colecciones de la Meta las tiene, y esa
+     * línea fijaba un estado transitorio del Corpus en vez de un comportamiento de la orden:
+     * habría empezado a fallar por la primera Colección curada, que es exactamente lo que la
+     * historia quería que ocurriese.
+     *
+     * Lo que sí es comportamiento, y es más fuerte que lo de antes, es que la orden rechazada
+     * no haya dejado **su** fichero: el guardián de arriba dice que el directorio no cambió, y
+     * este dice que lo que la orden iba a escribir no está ahí.
+     */
+    expect(antes).not.toContain(`${SLUG}.yml`);
   });
 
   it('crear con el slug de una despublicada se rechaza redactado, sin traza de Node', async () => {

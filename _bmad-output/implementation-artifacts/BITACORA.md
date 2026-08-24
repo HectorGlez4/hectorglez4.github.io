@@ -1746,3 +1746,42 @@ El escalonado es por **coste**, no por importancia: Colecciones (no siembra nada
 Autores, Temas, volumen. Hoy el tramo es el primero — doce Colecciones sobre lo ya publicado.
 
 `npx astro check` **0 errores / 182 ficheros**. Protocolo en `LOOP-PROTOCOL-V4.md`.
+
+## 15.2 — Las cuatro primeras Colecciones, sin sembrar una sola Cita
+
+El tramo más barato de la Meta, y el que llevaba dos épicas construido sin estrenar. Las
+Épicas 12 y 13 dejaron página, umbral, curación y Pieza; `corpus/colecciones/` seguía con su
+`.gitkeep` y nada más. Cuatro Colecciones después, el sitio pasa de **277 a 281 páginas** sin
+haber recuperado ni un documento nuevo.
+
+**Lo que la curación enseñó, que no estaba previsto.** Los criterios editoriales estrechos y
+transversales **no llegan a quince**. El eje «decir frente a hacer» —Machado, Martí, Cervantes y
+Gracián hablando de lo mismo— reúne nueve Citas, y ocho son de Gracián. Medidos los seis ejes
+temáticos dentro de las 114 de Gracián, ninguno llega solo al umbral: amigos/enemigos 14,
+fortuna/suerte 14, necios/vulgo 8, fama 8, callar/secreto 2. Es la concentración del Corpus
+vista desde otro sitio: con 114 Citas de un Autor repartidas por todos los asuntos, y 252 en
+total, casi cualquier corte fino se queda corto.
+
+Las que sí salieron son las que **coinciden con la obra de un autor entero**, y esa es la
+lección: hoy una Colección se sostiene cuando un libro entero trata de una cosa.
+
+- **Empezar de nuevo** (22) — *Motivos de Proteo* de Rodó es, de principio a fin, un libro sobre
+  cambiar de rumbo. Con el «Caminante, no hay camino» de Machado y Martí al lado.
+- **Saber para ser libre** (17) — la tesis de Martí en *Maestros ambulantes* y *Educación
+  popular*: la ignorancia como primera forma de la servidumbre.
+- **El uniforme y la sotana** (17) — González Prada entero, que no escribió sobre otra cosa: el
+  cuartel, la casaca y el altar. «Para un asesino, el cadalso; para un guerrero, la apoteosis».
+- **Elogio de lo escaso** (15) — Montalvo entero, más el «Poderoso caballero es don Dinero» de
+  Quevedo y los pobres de la tierra de Martí.
+
+**Y un test en rojo que era una suposición caducada.** `coleccion-cli.test.ts` afirmaba
+`expect(antes).toEqual(['.gitkeep'])` dentro del guardián que comprueba que una bandera con
+errata no siembre en el corpus real. Esa línea fijaba un **estado transitorio del Corpus** —que
+no hubiera Colecciones— en vez de un comportamiento de la orden, así que la primera Colección
+curada la rompía por diseño. Se sustituye por lo que sí es comportamiento y además es más
+fuerte: que la orden rechazada no haya dejado **su** fichero. El guardián de verdad, que el
+directorio no cambie, no se toca.
+
+`npx astro check` 0 errores; `npx vitest run` **1872/1872** en 60 ficheros; `npm run build` 281
+páginas; `npx playwright test` **400 pasadas**, 14 saltadas. Las cuatro Colecciones responden en
+`dist/coleccion/` y están en `sitemap-0.xml`.
