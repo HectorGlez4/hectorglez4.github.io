@@ -1473,14 +1473,19 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     /*
      * El recuento es lo que impide que la prueba de arriba pase por no mirar nada, y la
      * lista es lo que impide que un documento que dejó de casar con sus Citas se vuelva
-     * mudo. Hoy casan 56 de los 59; los tres que no —«De la brevedad de la vida», «Del
-     * sentimiento trágico de la vida» y la letrilla de Quevedo— publicaron sus Citas antes
-     * de la v3, con otro nombre de obra, y están en el censo de pendientes de cotejo.
+     * mudo. Eran tres los que no casaban —«De la brevedad de la vida», «Del sentimiento
+     * trágico de la vida» y la letrilla de Quevedo—: los tres publicaron sus Citas antes de
+     * la v3, con otro nombre de obra, y están en el censo de pendientes de cotejo.
+     *
+     * Son dos desde la sesión del 24/08/2026, y la lista mengua en la buena dirección. El
+     * tramo de concentración de la Meta sembró cuarenta Citas nuevas desde «De la brevedad
+     * de la vida», y esas sí casan con su documento porque salieron de él por la extracción
+     * de la 11.1. Lo que sigue pendiente de cotejo son las cinco viejas, no el documento.
+     * Cuando los otros dos reciban el mismo trato, esta lista quedará vacía.
      */
     const sinCita = documentos.filter((f) => autoresQuePublicaronDesde(f).length === 0);
 
     expect(sinCita).toEqual([
-      'wikisource-es--de-la-brevedad-de-la-vida.txt',
       'wikisource-es--del-sentimiento-tragico-de-la-vida-i.txt',
       'wikisource-es--poderoso-caballero-es-don-dinero-letrilla-satirica.txt',
     ]);

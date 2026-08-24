@@ -1873,3 +1873,37 @@ páginas; `npx playwright test` **400 pasadas**, 14 saltadas.
 **Verificado en vivo** (24/08/2026, ejecución 32780763027 en verde): `sitemap-0.xml` del dominio
 declara **305 URL**, exactamente las que el build produjo, y 48 de ellas son Citas del Autor
 sembrado esta sesión. Las Citas nuevas responden 200.
+
+## 15.3 (2.ª sesión) — Cuarenta de Séneca, y la concentración baja al 37 %
+
+**268 → 308 Citas**, el sitio de **305 a 345 páginas**, y el Autor más representado pasa del
+**42,5 % al 37 %**. El objetivo declarado cae de 492 a **452**.
+
+**Por qué no se empezó por el Quijote.** Es el mayor pozo —386.652 palabras y su Autor con seis
+Citas— pero propone 3.267 candidatas, y volcarlas a `_revision` crearía de golpe un montón
+irrevisable. Se empezó por el documento pequeño de un Autor con pocas Citas, que diluye igual y
+sí cabe en una sesión: *De la brevedad de la vida*, 9.198 palabras, **196 candidatas**.
+
+**De 196 entraron 40, un 20 %.** El criterio, el mismo de siempre: que la frase se sostenga
+fuera de su obra. Fuera quedan las que arrastran un pronombre sin referente —«Ésta no puede
+inquietarse ni quitarse», «Estas cosas te abrirán el camino»—, las que abren con conectivo, y
+las que **casi repiten una Cita ya publicada**: «Larga es la vida, si la sabemos aprovechar» se
+descartó porque el Corpus ya tiene «La vida, si sabes usarla, es larga», que es la misma
+sentencia en otra traducción. El detector de repetidas no la vio —son cadenas distintas— y la
+habría publicado dos veces.
+
+**Un defecto de la extracción, medido de paso.** Veintitantas candidatas llegan con el
+encabezado del capítulo pegado al cuerpo: «Capítulo IX ¿Por ventura alguno…», «Capítulo XX
+Recógete a estas cosas…». Ninguna se aprobó. Es exactamente lo que la otra sesión está
+arreglando en `tools/lib/extraccion.ts`; cuando ese arreglo entre, este documento merece una
+segunda pasada, porque varias de esas frases son buenas y hoy están inservibles por el prefijo.
+
+**Y un test en rojo que era una mejora disfrazada.** `documento.test.ts` fijaba la lista de
+documentos versionados **sin ninguna Cita que se cotejara contra ellos**: eran tres, y ahora son
+dos. *De la brevedad de la vida* salió de esa lista porque estas cuarenta Citas sí salieron de
+él por la extracción de la 11.1. Lo que sigue en el censo de pendientes de cotejo son las cinco
+Citas viejas, no el documento. La lista mengua en la buena dirección y el test lo dice ahora con
+esas palabras.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 345
+páginas; `npx playwright test` **400 pasadas**, 14 saltadas.
