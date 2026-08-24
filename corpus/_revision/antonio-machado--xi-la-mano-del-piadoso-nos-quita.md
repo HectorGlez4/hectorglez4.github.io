@@ -1,0 +1,13 @@
+---
+texto: "XI La mano del piadoso nos quita siempre honor; mas nunca ofende al darnos su mano el lidiador."
+autor: "antonio-machado"
+slug: "antonio-machado-xi-la-mano-del-piadoso-nos-quita"
+procedencia:
+  obra: "Proverbios y cantares"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Proverbios_y_cantares_%28Campos_de_Castilla%29"
+---

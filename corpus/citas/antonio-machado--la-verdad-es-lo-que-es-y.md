@@ -1,0 +1,15 @@
+---
+texto: "La verdad es lo que es, y sigue siendo verdad aunque se piense al revés."
+autor: "antonio-machado"
+temas:
+  - "el-saber"
+slug: "antonio-machado-la-verdad-es-lo-que-es-y"
+procedencia:
+  obra: "Proverbios y cantares"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Proverbios_y_cantares_%28Campos_de_Castilla%29"
+---

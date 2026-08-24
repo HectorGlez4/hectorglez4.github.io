@@ -1976,3 +1976,37 @@ páginas; `npx playwright test` **396 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32785220702 en verde): `sitemap-0.xml` declara
 **399 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (5.ª sesión) — Treinta de los *Proverbios y cantares*, y la concentración baja del 30 %
+
+**362 → 392 Citas**, el sitio de **399 a 429 páginas**, el Autor más representado del **31,5 %
+al 29,1 %** —por primera vez por debajo del 30 %— y el objetivo declarado de 398 a **368**.
+
+Dos documentos pequeños, 171 candidatas, **30 aprobadas (17,5 %)**. Entraron «La verdad es lo que
+es, y sigue siendo verdad aunque se piense al revés», «Confiemos en que no será verdad nada de lo
+que sabemos», «Españolito que vienes al mundo, te guarde Dios», «Una de las dos Españas ha de
+helarte el corazón», «Yo vivo en paz con los hombres y en guerra con mis entrañas».
+
+**El defecto del encabezado, otra vez y peor.** Aquí el prefijo es el numeral romano del
+proverbio: «XXIX Caminante, son tus huellas…», «LXVIII Todo necio confunde valor y precio». Y hay
+un dato que lo confirma desde el otro lado: **varias de las numeradas duplican Citas que el
+Corpus ya publica limpias** —«Todo necio confunde valor y precio», «Hoy es siempre todavía»,
+«Despacito y buena letra»—, prueba de que el texto bueno está ahí y solo lo tapa el prefijo.
+Ninguna se aprobó. Cuando el arreglo de `tools/lib/extraccion.ts` entre, estos dos documentos son
+los primeros que merecen segunda pasada.
+
+**Una decisión de juicio, escrita porque es discutible.** Se aprobó «Caminante, no hay camino,
+sino estelas en la mar» aunque el Corpus ya publique «Caminante, no hay camino, se hace camino al
+andar». Son dos versos consecutivos del mismo poema que circulan por separado y cada uno se cita
+solo; el riesgo es que en un listado se lean como repetición. Se acepta ese riesgo: son dos Citas
+distintas, no dos redacciones de una.
+
+**Y la explicación del recuento de Playwright que se venía anotando.** Baja —400, 396, 394— y
+**no es cobertura perdida**: `coleccion.spec.ts` tiene casos escritos para el estado «todavía no
+hay Colecciones», guardados con `test.skip(PRIMERA !== undefined, …)`. Al curar las doce
+Colecciones, esos casos pasan a saltarse porque su premisa dejó de ser cierta, que es exactamente
+lo que deben hacer. El recuento seguirá moviéndose con el contenido; lo que hay que vigilar es un
+**fallo**, no una bajada.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 429
+páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
