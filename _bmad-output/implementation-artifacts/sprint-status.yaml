@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-22-2026 02:05
+last_updated: 08-25-2026 19:45
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -147,7 +147,10 @@ development_status:
   15-3-ningun-autor-pasa-del-techo-de-concentracion: done
   15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
   15-5-veinticuatro-temas-publicados: in-progress
-  15-6-mil-citas-publicadas: backlog
+  # 25/08: 828 de 1000. El tramo que la politica declara sigue siendo el censo de Autores
+  # —reservado—, pero este si avanza sin esa decision: la cantera de los Autores admitidos
+  # se midio por fin y no estaba agotada. 761 -> 801 -> 828 en tres sesiones.
+  15-6-mil-citas-publicadas: in-progress
   epic-15-retrospective: optional
 
 action_items:

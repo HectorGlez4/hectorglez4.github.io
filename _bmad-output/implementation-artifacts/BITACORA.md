@@ -4475,3 +4475,76 @@ NFR-5 y UX-DR18.
 
 **La meta no está alcanzada y no se emite promesa:** 801 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-24 (63.ª sesión) — El mismo defecto de la 60.ª, un renglón más abajo
+
+**801 → 828 Citas. 846 → 873 páginas.** Y esta vez la iteración se abrió como manda el protocolo,
+con `npm run huecos`, que las dos anteriores las abrí eligiendo yo el tramo.
+
+### Lo que la política declara, y por qué no se toca
+
+El informe dice: **«Admitir 19 Autores más»**. Es el tramo reservado, y al ir a mirar qué vigila
+exactamente la regla de «no nombrar Autores en los informes» resultó ser bastante más fuerte de lo
+que yo suponía. No prohíbe repetir un nombre del Corpus:
+
+> el peligro no es que repita a alguien del Corpus, sino que **proponga a alguien que no está en
+> él**, y una lista de los que sí están no puede cazar eso.
+
+Hay una prueba cuyo único fin es que **el sistema sea incapaz de proponer a quién admitir**. Así que
+tampoco se prepara una lista de candidatos para que Héctor la apruebe: proponer nombres *es* el acto
+reservado, y rodearlo por la puerta de atrás sería peor que saltárselo de frente. Se sigue por lo
+que sí está abierto y también es Meta: 828 Citas de 1000.
+
+### El defecto
+
+Leyendo candidatas aparecían, una tras otra, sentencias excelentes envenenadas por delante:
+
+    «Discurso Puede el hombre con ardimiento y con bondad ser valiente y virtuoso…»
+
+«Discurso» es el epígrafe con que ese libro anuncia el comentario del Autor frente al relato
+histórico. **Es el mismo defecto que arregló la 60.ª sesión con el título de la obra, un renglón más
+abajo**: un epígrafe no acaba en punto, y el troceador lo pegaba a la frase siguiente.
+
+Medido antes de tocarlo: **42 candidatas** en un solo documento, y no las peores — **26 empiezan por
+«Discurso»**, es decir, justo la parte citable del libro.
+
+Y el daño no es perder candidatas. Aprobar una publicaría una Cita que empieza con un epígrafe de la
+Fuente, y **el cotejo de la 11.2 la daría por buena**, porque ese texto sí está en el documento. Es
+la tercera vez que aparece la misma forma de fallo: algo que escribió la Fuente y que ninguna otra
+puerta distingue del Autor.
+
+### El arreglo, que no adivina nada
+
+`sentencias()` empezaba colapsando **todo** el espacio en blanco a un espacio, y con él se llevaba
+por delante los saltos de párrafo. La corrección no es una heurística sobre qué parece un epígrafe
+—«línea corta y sin punto» cazaría el primer verso de un poema—: es **respetar una estructura que la
+Fuente ya declaraba**. Una frase no cruza un párrafo; un epígrafe es un párrafo entero. Se trocea
+dentro de cada párrafo y nunca a través de ellos, y los saltos sueltos de dentro sí se colapsan,
+porque ahí Wikisource parte los renglones donde le caben.
+
+Cuatro pruebas: las dos del defecto, y dos guardas —que una frase partida en dos renglones siga
+siendo **una** candidata, y que dos frases del mismo párrafo sigan siendo **dos**—.
+
+Al reextraer: 69 candidatas nuevas y 82 fragmentos más descartados por longitud, que son los
+epígrafes quedándose solos. Las 42 envenenadas se rechazan, pero **solo después de comprobar una por
+una que su gemela limpia existe**: retirar la única copia de una sentencia buena habría sido peor
+que el defecto. Ninguna huérfana.
+
+### La siembra
+
+**27 Citas** en ocho Temas: cinco en «la prudencia», cinco en «la adversidad», cinco en «la virtud»,
+cinco en «la riqueza», dos en «la palabra», dos en «el saber», una en «la vida», una en «la amistad»
+y una en «la verdad». Diez de ellas salen de las liberadas hoy.
+
+Una se publicó en el Tema equivocado —una sentencia sobre cómo se cree una acusación no es «la
+vida»— y se movió a «la verdad» con `tema quitar` y `tema asignar`. Queda anotado porque el error lo
+cometí yo al elegir, no la herramienta.
+
+El Autor más representado baja a **13,8 %**.
+
+`npx astro check` 0 errores; `npx vitest run` **2034/2034** en 66 ficheros; `npm run build` **873
+páginas**; `npx playwright test` **412 pasadas y 2 fallos** — las mismas tres Citas de NFR-5, sin
+crecer con las 27 nuevas.
+
+**La meta no está alcanzada y no se emite promesa:** 828 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

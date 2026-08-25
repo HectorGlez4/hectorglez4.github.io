@@ -192,11 +192,31 @@ export function añoExacto(declarado: string | number | undefined): number | und
   return /^-?\d{1,4}$/.test(limpio) ? Number(limpio) : undefined;
 }
 
-/** Parte el texto en sentencias, respetando las comillas angulares y los puntos suspensivos. */
+/**
+ * Parte el texto en sentencias, respetando las comillas angulares y los puntos suspensivos.
+ *
+ * **Dentro de cada párrafo, nunca a través de ellos.** Antes esto empezaba colapsando todo
+ * el espacio en blanco a un espacio, y con él se llevaba por delante los saltos de párrafo;
+ * entonces un párrafo que no acaba en punto —un epígrafe— se pegaba al que venía detrás:
+ *
+ *   «Discurso Puede el hombre con ardimiento y con bondad ser valiente y virtuoso…»
+ *
+ * Es el mismo defecto que el título pegado de la 60.ª sesión, un renglón más abajo, y en un
+ * solo documento de 222 KB envenenaba 42 candidatas — 26 de ellas las mejores del libro.
+ *
+ * El arreglo no adivina qué es un epígrafe: **respeta una estructura que la Fuente ya
+ * declara**. Una frase no cruza un párrafo, y un epígrafe es un párrafo entero. Los saltos
+ * sueltos de dentro del párrafo sí se colapsan: ahí Wikisource parte los renglones donde le
+ * caben, y cortar por ellos trocearía media obra por la mitad de sus frases.
+ */
 function sentencias(texto: string): string[] {
   return texto
-    .replace(/\s+/g, ' ')
-    .split(/(?<=[.!?…])\s+(?=[«"¿¡A-ZÁÉÍÓÚÑ])/u)
+    .split(/\n[ \t]*\n\s*/u)
+    .flatMap((parrafo) =>
+      parrafo
+        .replace(/\s+/gu, ' ')
+        .split(/(?<=[.!?…])\s+(?=[«"¿¡A-ZÁÉÍÓÚÑ])/u),
+    )
     .map((s) => s.trim())
     .filter((s) => s !== '');
 }
