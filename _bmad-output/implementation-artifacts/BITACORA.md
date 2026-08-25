@@ -3525,3 +3525,43 @@ filosófica pura y más que la sátira.
 392 pasadas, 14 saltadas; `npm run build` **720 páginas**.
 
 **El tramo sigue abierto y ahora dice 85** (era 117). No se alcanza, y se dice.
+
+## 15.3 (46.ª sesión) — Treinta y dos, y un documento que rindió el 2 %
+
+**675 → 707 Citas. 720 → 752 páginas. Concentración 16,9 % → 16,1 %.** Faltan **53** para cerrar el
+tramo. Eran 85.
+
+**Un documento medido y publicado casi vacío, a propósito.** De los tres recuperados, uno no
+declaraba Autor y se fue en seco. De los dos que quedaron, uno rindió lo esperado y el otro —un
+sueño satírico de 350 candidatas— dio **siete Citas: un 2 %**.
+
+No se forzó. Es diálogo fantasmagórico casi entero: parlamentos, acotaciones y respuestas que
+fuera de su escena no dicen nada, más algún pasaje en verso, que sigue bloqueado. Las siete que
+salieron son las siete frases del sueño que se sostienen solas. **Publicar veinte de ahí habría
+sido llenar el Corpus para que la cifra subiera**, que es exactamente lo que la meta no pide.
+
+Con esto la tabla de rendimiento por género queda medida de punta a punta, y ya no es intuición:
+
+| Género | Rendimiento |
+|---|---|
+| Ensayo filosófico moderno | 29 % |
+| Prosa didáctica | ~19 % |
+| Tratado moral (traducción del XVII) | 16 % |
+| Ensayo literario o prologal | 13 % |
+| Sátira en prosa | 9 % |
+| Ensayo de viaje | 2,7 % |
+| **Sueño satírico dialogado** | **2 %** |
+
+**El guardián de la selección avisó una vez, y por eso está.** Uno de los prefijos escritos a mano
+no casaba con ninguna candidata; el guion lo dijo y no publicó nada en su lugar. Sin esa
+comprobación habría publicado la Cita de al lado sin que nadie se enterara.
+
+**Ortografía de época, respetada.** El ensayo del otro Autor viene en la ortografía de su edición
+—«á», «ó», «fué»— y así se publica: NFR-12 prohíbe que el sistema toque lo que el editor guardó, y
+eso vale también cuando lo que parece un error es la norma de 1905. Sí se descartaron las que
+traían OCR roto de verdad («ílama», «beduinismol»), que es otra cosa.
+
+`npx astro check` 0 errores; `npx vitest run` **1976/1976** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **752 páginas**.
+
+**El tramo sigue abierto y ahora dice 53** (era 85). No se alcanza, y se dice.
