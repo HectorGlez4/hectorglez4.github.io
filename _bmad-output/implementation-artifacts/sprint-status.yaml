@@ -137,9 +137,11 @@ development_status:
   epic-15: in-progress
   15-1-el-liston-agresivo-tiene-nombre-y-lo-cruza-un-solo-modulo: done
   15-2-doce-colecciones-sobre-lo-ya-publicado: done
-  # 15-3 sigue in-progress y no avanza: la aritmetica del techo exige 256 Citas que ningun
-  # Autor ya admitido puede dar. Bloqueada en la admision, que no delega el producto.
-  # Evidencia y salida en deferred-work.md.
+  # 15-3 sigue in-progress y AVANZA. El 25/08 quedo claro que no estaba bloqueada: se leia
+  # mal una regla propia. Elegir que obra representa a un Autor **sin Citas** no se delega;
+  # ampliar un Autor **ya representado** con otra de sus obras es trabajo del bucle, y asi
+  # entraron los 59 documentos. Quedan Autores admitidos con una obra minima o ninguna.
+  # Lo que sigue sin delegarse es admitir Autores NUEVOS: eso es 15-4. Ver deferred-work.md.
   15-3-ningun-autor-pasa-del-techo-de-concentracion: in-progress
   15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
   15-5-veinticuatro-temas-publicados: in-progress
