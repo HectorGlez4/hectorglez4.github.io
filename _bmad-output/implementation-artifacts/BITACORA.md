@@ -5200,3 +5200,53 @@ hará falta o más Corpus o una tanda que no se me ha ocurrido todavía.
 
 **La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, **17 Temas de 24**,
 16 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.5 (78.ª sesión) — Tres tandas, ningún Tema, y un género medido por primera vez
+
+**1000 → 1001 Citas. 1050 → 1051 páginas. Temas: 17, los mismos.** Sesión de medidas, casi todas
+negativas, y las negativas medidas valen tanto como las positivas.
+
+### La tercera tanda, por un ángulo distinto
+
+Las dos anteriores fueron por virtudes y pasiones. Ésta fue por **oficios de la vida** —leer, callar,
+reír, dormir, dar— y por los lugares donde la sabiduría se juega: la mesa, el camino, la casa. Diez
+asuntos, y **ninguno llega**:
+
+- «Los libros» solapa el 52 % con «la palabra»; «la conversación» y «el consejo», el 60 % con «la
+  amistad» y «la prudencia». Son esos Temas con otro nombre.
+- «La casa» era el único que prometía —32 con solape del 22 %— y leída se queda en **trece**: casi la
+  mitad eran metáforas, «cada uno es hijo de sus obras», «la diligencia es madre de la buena
+  ventura», «la verdad, cuya madre es la historia».
+
+**Conclusión, dicha entera: con 1000 Citas la veta de Temas está agotada.** Tres tandas, treinta
+asuntos, cinco Temas. Para el dieciocho hace falta más Corpus, no más ingenio.
+
+### Un género medido por primera vez, y retirado
+
+Un Autor con **84 huecos libres** bajo el techo tiene nueve obras sin recuperar, y las nueve son
+entremeses. Nunca se había medido ese género. Se recuperó uno: **144 candidatas y ninguna
+publicable.** Es diálogo de escena —«¡Dellos es, dellos el señor furrier!»—, y una réplica no es una
+sentencia.
+
+El documento **se retira** y sus 144 candidatas se rechazan con la orden del proyecto. Una candidata
+cuyo documento ya no está es peor que ninguna: aprobarla daría una Cita que el cotejo de la 11.2 no
+puede comprobar. Y un documento versionado sin ninguna Cita publicada deja en rojo la prueba que
+vigila exactamente eso.
+
+Queda medido para quien venga: **el entremés no alimenta este Corpus**, y esos 84 huecos no se
+llenan por ahí.
+
+### Y mi guion me engañó por segunda vez con lo mismo
+
+Apareció una candidata con sufijo `-2` cuyo texto parecía estar en el documento nuevo: sería una Cita
+del **censo cerrado** que por fin encuentra su Fuente. Comprobado contra el documento: **cero
+apariciones**. Era la propia Cita del censo, que vive en el mismo directorio que las candidatas.
+
+**Es la segunda vez** —la primera fue en la 72.ª, y entonces lo anoté y no lo arreglé—. Ahora los dos
+guiones de criba saltan lo que no declara Fuente, que es la marca que las distingue. No habrá tercera.
+
+`npx astro check` 0 errores; `npx vitest run` **2076/2076**; `npm run build` **1051 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1001 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.
