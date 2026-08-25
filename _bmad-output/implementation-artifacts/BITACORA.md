@@ -2316,3 +2316,7 @@ centradas contiene esa cadena. Se corrigió mirando la línea del Tema y no el f
 
 `npx astro check` 0 errores; `npx vitest run` **1914/1914** en 62 ficheros; `npm run build` 490
 páginas y 430 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32796002863 en verde): la Página del Tema nuevo
+responde 200 en `https://sabiduriadebolsillo.net/tema/la-verdad` y `sitemap-0.xml` declara **490
+URL**, las mismas del build.
