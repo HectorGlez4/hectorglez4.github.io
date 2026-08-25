@@ -3060,3 +3060,35 @@ ser el volumen y pasa a ser el de Autores. Arreglado el reparto y explicado en e
 
 `npx astro check` 0 errores; `npx vitest run` **1946/1946** en 63 ficheros; `npm run build` 501
 páginas.
+
+## 15.3 (36.ª sesión) — El Autor admitido que nunca se sembró
+
+**456 Citas, 501 páginas: sin cambios.** Seguido el hilo que dejó la resta de ayer —16 Páginas de
+Autor frente a 17 Autores declarados— hasta el final.
+
+**Quién es y de dónde viene.** El Autor sin Citas entró en el commit «feat(11.4): primera sesión
+de sembrado, y los tapones que destapó», con su semblanza y su tradición escritas, y **nunca se
+recuperó un documento suyo**. Es un tapón de aquella sesión que se quedó puesto ocho meses.
+
+**Y aquí el bucle sí se paró, con la línea bien trazada.** Recuperar una Fuente para un Autor **ya
+admitido** es trabajo suyo —así entraron los 59 documentos del Corpus— y la orden lo permite: el
+conjunto cerrado de Fuentes incluye Wikisource. La decisión que no delega no es «recuperar»: es
+**qué obra representa a un Autor**.
+
+Se comprobó antes de decidir, que es lo que esta bitácora lleva toda la noche aprendiendo a hacer:
+
+- Su libro más citado **sí está** en Wikisource. Pero la página es un **índice de 99 enlaces y
+  495 palabras**, no un texto — el mismo caso que `deferred-work.md` ya tenía anotado sobre los
+  índices de obra, que la extracción propone como Citas.
+- Sembrarlo de verdad pide recuperar poemas **uno a uno** y elegir cuáles. Eso no es continuar una
+  sesión de sembrado: es construir el canon de un Autor desde cero.
+
+Así que no se sembró, y queda en `deferred-work.md` con lo que hace falta: **una línea de Héctor
+con las obras que entran**. Con las URL, el bucle hace el resto solo.
+
+**Lo que sí cambió, y es de ayer:** ese Autor ya no cuenta para la meta. El tramo dice **«Autores
+16 de 35 · faltan 19»** y el equilibrio de tradición sigue contando 17, que son dos preguntas
+distintas y ahora se responden distinto.
+
+`npx astro check` 0 errores; `npx vitest run` **1946/1946** en 63 ficheros; `npm run build` 501
+páginas.

@@ -227,3 +227,27 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     Caben dos salidas y las dos son decisión de Héctor: generar en el build una imagen por Tema,
     Colección y Autor —como ya se hace con las 456 Tarjetas—, o poner una imagen de marca fija
     como respaldo, que hoy no existe: `public/` solo tiene el `favicon.svg`.
+
+- source_spec: Historia 11.4 — destapado en la 35.ª sesión del bucle v4 al cuadrar el sitemap
+  summary: Hay un Autor admitido desde la primera sesión de sembrado y nunca sembrado: cero Citas, cero documentos.
+  evidence: |-
+    Salió de una resta: **16 Páginas de Autor en el sitemap y 17 Autores en `corpus/autores/`**.
+    El Autor entró en el commit «feat(11.4): primera sesión de sembrado, y los tapones que
+    destapó», con su semblanza y su tradición declaradas, y **nunca se recuperó un documento
+    suyo**: `corpus/fuentes/` no tiene ninguno. Es un tapón de aquella sesión que se quedó puesto.
+
+    **El bucle no lo siembra, y conviene decir por qué no es pereza.** Recuperar una Fuente para
+    un Autor **ya admitido** sí sería su trabajo —así entraron los 59 documentos—, y la orden lo
+    permite: `recuperar` acepta Wikisource, que es la Fuente de casi todo el Corpus. Lo que no es
+    del bucle es **elegir qué obra suya representa al Autor**, y aquí no hay atajo:
+
+    · Su libro más citado existe en Wikisource, pero la página es un **índice de 99 enlaces y 495
+      palabras**, no un texto: exactamente el caso que esta misma lista ya tiene anotado sobre los
+      índices de obra. Recuperarla sembraría entradas de índice, no Citas.
+    · Sembrarlo de verdad pide recuperar poemas **uno a uno** y decidir cuáles. Eso es construir
+      el canon de un Autor desde cero, y es la decisión editorial que el producto no delega.
+
+    Lo que hace falta de Héctor es una línea: **qué obras suyas entran**. Con las URL, el bucle
+    recupera, extrae, coteja y publica sin más intervención. Mientras tanto el Autor no estorba
+    —no tiene página, no está en el sitemap y ya no cuenta para la meta— pero está declarado y no
+    dice nada.
