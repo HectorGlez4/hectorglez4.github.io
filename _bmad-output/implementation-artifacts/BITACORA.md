@@ -2644,3 +2644,36 @@ perder tiempo la próxima vez peleándose con la captura.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 498
 páginas.
+
+## 15.3 (24.ª sesión) — El buscador, probado en vivo por primera vez desde que el Corpus dobló
+
+**457 Citas, 12 Temas, 498 páginas: sin cambios.** Verificada la otra superficie que el
+crecimiento cambió de raíz: el buscador pasó de indexar 252 Citas a **498 páginas y 2,7 MB de
+índice**. Nunca se había escrito una consulta.
+
+**Cuatro consultas, y las cuatro correctas:**
+
+| Consulta | Resultado |
+|---|---|
+| `nidos de antaño` | **3 resultados**: la Cita publicada hace dos sesiones, su Autor y su Tema |
+| `prudencia` | **30 resultados**, y el primero es `/tema/la-prudencia` — el Tema abierto ayer manda |
+| `aristoteles guisado` | **2**: encuentra «Si Aristóteles hubiera guisado» **sin acentos en la consulta** |
+| `zzzqqq` | mensaje vacío + la lista de Temas como salida, que es la Historia 3.2 funcionando |
+
+**Y dos falsas alarmas que se comprobaron antes de llamarlas fallo.** Las dos del mismo origen:
+`textContent` **incluye el texto oculto**.
+
+1. Con tres resultados en pantalla, el texto del `<main>` traía además «No encontramos esa frase».
+   Parecía un mensaje contradictorio. Comprobado: vive bajo un ancestro `[hidden]` con
+   `display:none` y mide **0×0**. No se ve.
+2. Con `zzzqqq` el texto traía «2 resultados» —el recuento de la consulta anterior—. Parecía un
+   contador rancio anunciando resultados inexistentes. Comprobado: también bajo `[hidden]`, alto
+   0, y **sin `aria-live` ni `role="status"`**, así que tampoco lo anuncia un lector de pantalla;
+   `[hidden]` lo saca del árbol de accesibilidad.
+
+La lección de método vale para las dos sesiones de revisión visual: **`textContent` no es lo que
+el visitante ve**. Antes de escribir «hay un fallo» hay que mirar `getBoundingClientRect` y los
+estilos computados, y las dos veces que lo hice aquí el fallo no existía.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 498
+páginas.
