@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
 import { citaDeAutorConUnaSola, temaBajoUmbral } from './ayuda/corpus.ts';
 
 /** Historia 2.6 — rutas de salida desde cada Cita. */
@@ -66,30 +66,39 @@ test.describe('Historia 2.6 — hacia dónde seguir', () => {
     expect(await salidas.count()).toBeGreaterThan(0);
   });
 
-  test('ninguna Página de Cita publicada queda sin enlaces salientes', async ({ page, request }) => {
-    const sitemap = await (await request.get('/sitemap-0.xml')).text();
-    const rutas = [...sitemap.matchAll(/<loc>[^<]*(\/cita\/[^<]+)<\/loc>/g)].map((m) => m[1]);
+  /*
+   * Estas dos recorren **todas** las Páginas de Cita, y con 848 el navegador ya no llega: se
+   * caían por tiempo agotado, no por lo que afirman. Así que piden el HTML en vez de navegar.
+   *
+   * **El cambio de fidelidad hay que decirlo**: se mira el HTML servido y no el DOM ya
+   * montado. En un sitio estático son lo mismo dentro de `main` —nada inyecta enlaces ahí
+   * después de cargar—, y si algún día algo lo hiciera, estas dos dejarían de verlo. A cambio
+   * dejan de tardar más cada sesión, que era lo que iba a acabar borrándolas.
+   */
+  function enlacesInternosDe(html: string): string[] {
+    const dentroDeMain = /<main\b[^>]*>([\s\S]*?)<\/main>/i.exec(html)?.[1] ?? '';
+    return [...dentroDeMain.matchAll(/<a\b[^>]*\shref="(\/[^"]*)"/gi)].map((m) => m[1]);
+  }
+
+  async function rutasDeCita(peticion: APIRequestContext): Promise<string[]> {
+    const sitemap = await (await peticion.get('/sitemap-0.xml')).text();
+    return [...sitemap.matchAll(/<loc>[^<]*(\/cita\/[^<]+)<\/loc>/g)].map((m) => m[1]);
+  }
+
+  test('ninguna Página de Cita publicada queda sin enlaces salientes', async ({ request }) => {
+    const rutas = await rutasDeCita(request);
     expect(rutas.length).toBeGreaterThan(30);
 
     for (const ruta of rutas) {
-      await page.goto(ruta);
-      const internos = await page.evaluate(() =>
-        [...document.querySelectorAll('main a[href^="/"]')].map((a) => a.getAttribute('href')!),
-      );
+      const internos = enlacesInternosDe(await (await request.get(ruta)).text());
       expect(internos.length, `${ruta} no tiene enlaces salientes`).toBeGreaterThan(0);
     }
   });
 
-  test('ningún enlace saliente apunta a una página que no existe', async ({ page, request }) => {
-    const sitemap = await (await request.get('/sitemap-0.xml')).text();
-    const rutas = [...sitemap.matchAll(/<loc>[^<]*(\/cita\/[^<]+)<\/loc>/g)].map((m) => m[1]);
-
+  test('ningún enlace saliente apunta a una página que no existe', async ({ request }) => {
     const destinos = new Set<string>();
-    for (const ruta of rutas) {
-      await page.goto(ruta);
-      for (const href of await page.evaluate(() =>
-        [...document.querySelectorAll('main a[href^="/"]')].map((a) => a.getAttribute('href')!),
-      )) {
+    for (const ruta of await rutasDeCita(request)) {
+      for (const href of enlacesInternosDe(await (await request.get(ruta)).text())) {
         destinos.add(href);
       }
     }

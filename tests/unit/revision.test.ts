@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -116,6 +116,40 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
     const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug as string, 'seneca-otra']);
     expect(resultado.publicadas).toHaveLength(2);
     expect(await readdir(rutas.revision)).toHaveLength(0);
+  });
+
+  /**
+   * Historia 9.2 — aprobar con Temas una candidata que **ya** los trae.
+   *
+   * No es un caso de laboratorio: hoy hay veintiuna candidatas en revisión con su bloque
+   * `temas:` puesto. Son Citas **retiradas** —AD-2 retira moviendo a revisión, no borrando—,
+   * y vuelven allí con los Temas que tenían. Aprobar una de ellas con `--temas` añadía un
+   * segundo bloque `temas:` al frontmatter.
+   *
+   * Lo que hace ese fichero es **detener el sitio entero**: dos claves iguales no son YAML
+   * válido, así que la siguiente orden que lea el Corpus revienta —no solo la Cita rota, la
+   * lectura completa— y el `build` con ella. Se descubrió así, con una orden que se cayó
+   * leyendo el Corpus y señalando la línea.
+   *
+   * Los Temas se **funden**, no se sustituyen: la orden dice a qué Tema más pertenece, no
+   * cuáles deja de tener, y descartar los que ya estaban borraría trabajo editorial que
+   * nadie pidió borrar.
+   */
+  it('una candidata que ya trae Temas no acaba con dos bloques «temas:»', async () => {
+    const conTemas = { ...CANDIDATA_COMPLETA, temas: ['el-tiempo'] };
+    const rutas = await corpusCon([conTemas]);
+    // El Tema tiene que existir: `aprobar` rechaza el lote entero si no lo conoce.
+    await writeFile(join(rutas.temas, 'el-saber.yml'), 'nombre: "El saber"\n', 'utf8');
+    await aprobar(rutas, [conTemas.slug], ['el-saber']);
+
+    const bruto = await readFile(
+      join(rutas.citas, `${nombreDeFicheroDeCita(conTemas.autor, conTemas.slug)}.md`),
+      'utf8',
+    );
+    expect(bruto.split('\n').filter((l) => l.startsWith('temas:'))).toHaveLength(1);
+
+    const publicadas = await leerCitas(rutas.citas);
+    expect(publicadas[0].temas.sort()).toEqual(['el-saber', 'el-tiempo']);
   });
 });
 

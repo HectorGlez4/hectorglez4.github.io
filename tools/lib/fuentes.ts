@@ -93,3 +93,41 @@ export function fuenteDeUrl(url: string): Fuente | undefined {
     fuente.anfitriones.some((a) => anfitrion === a || anfitrion.endsWith(`.${a}`)),
   );
 }
+
+/** Cuánto se espera antes del reintento número `n`, en milisegundos. */
+const ESPERA_BASE_MS = 1500;
+
+/**
+ * Repite lo que falla por rachas, y se rinde a tiempo.
+ *
+ * Wikisource limita la tasa **por rachas**: la misma dirección contesta 200, 503 y 200 en tres
+ * intentos seguidos. Un 503 dice «ahora no», no «esto no existe», y reintentar es de las pocas
+ * respuestas honestas que admite.
+ *
+ * Hace falta porque el fallo no se queda en el fallo. Cuando el wikitexto no llega, `recuperar`
+ * versiona el documento igual —con un aviso— y lo deja sin el metadato que la Fuente declara,
+ * **el Autor incluido**; dos pasos más allá, la puerta de FR-23 informa de que «el documento no
+ * declara autor» de una página que sí lo declara.
+ *
+ * Se espera **más en cada intento**, para no empujar a quien acaba de decir que no. Y hay tope:
+ * sin él, una Fuente caída dejaría la orden colgada para siempre, que es peor que un aviso
+ * porque no se puede leer.
+ *
+ * La espera se inyecta para que las pruebas no duerman de verdad.
+ */
+export async function conReintentos<T>(
+  intentar: () => Promise<T>,
+  logrado: (resultado: T) => boolean,
+  opciones: { intentos?: number; esperar?: (ms: number) => Promise<void> } = {},
+): Promise<T> {
+  const intentos = opciones.intentos ?? 3;
+  const esperar =
+    opciones.esperar ?? ((ms: number) => new Promise<void>((listo) => setTimeout(listo, ms)));
+
+  let ultimo = await intentar();
+  for (let n = 1; n < intentos && !logrado(ultimo); n += 1) {
+    await esperar(ESPERA_BASE_MS * n);
+    ultimo = await intentar();
+  }
+  return ultimo;
+}

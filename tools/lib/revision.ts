@@ -227,11 +227,35 @@ async function reescribirConSlug(
  * Sin Temas devuelve el texto intacto — la convención del corpus es que un campo sin
  * valor **se omite**, nunca `temas: []`.
  */
+/** El bloque `temas:` ya escrito, en cualquiera de las dos formas de YAML. */
+const TEMAS_YA_ESCRITOS = /^temas:[ \t]*(?:(\[[^\]]*\])[ \t]*\n|\n((?:[ \t]+-.*\n)*))/gmu;
+
 function conTemasDeclarados(bruto: string, temas: string[]): string {
   if (temas.length === 0) return bruto;
-  const unicos = [...new Set(temas)];
+
+  /*
+   * Los Temas que la candidata **ya trae**, que no siempre son ninguno: AD-2 retira moviendo a
+   * revisión, no borrando, así que una Cita retirada vuelve allí con los suyos puestos. Añadir
+   * un segundo bloque `temas:` no dejaba una Cita mal etiquetada: dejaba un fichero con dos
+   * claves iguales, que **no es YAML válido**, y con él caía la lectura entera del Corpus y el
+   * build detrás. Se descubrió con una orden que reventó leyendo el Corpus.
+   *
+   * Se funden, no se sustituyen: la orden dice a qué Tema más pertenece la Cita, no cuáles deja
+   * de tener, y quedarse solo con los de la orden borraría trabajo editorial que nadie pidió
+   * borrar.
+   */
+  const suyos = [...bruto.matchAll(TEMAS_YA_ESCRITOS)].flatMap((casa) =>
+    // Las dos formas que admite YAML y que el Corpus usa: en línea —`temas: ["x"]`— y
+    // desplegada en guiones. Se cubren las dos porque una sola dejaría la otra duplicándose.
+    [...(casa[1] ?? casa[2] ?? '').matchAll(/(?:^[ \t]+-\s*|[[,]\s*)([^,\]\n]+)/gmu)].map((t) =>
+      t[1].trim().replace(/^"|"$/gu, ''),
+    ),
+  );
+  const sinLosSuyos = bruto.replace(TEMAS_YA_ESCRITOS, '');
+
+  const unicos = [...new Set([...suyos, ...temas])];
   const bloque = ['temas:', ...unicos.map((t) => `  - ${JSON.stringify(t)}`)].join('\n');
-  return bruto.replace(/^(autor:.*)$/m, `$1\n${bloque}`);
+  return sinLosSuyos.replace(/^(autor:.*)$/m, `$1\n${bloque}`);
 }
 
 /**

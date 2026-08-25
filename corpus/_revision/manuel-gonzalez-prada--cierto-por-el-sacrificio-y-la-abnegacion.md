@@ -1,9 +1,7 @@
 ---
-texto: "El descrédito de una revolución empieza el mismo día de su triunfo; y los deshonradores son sus propios caudillos."
+texto: "Cierto, por el sacrificio y la abnegación de almas heroicas, la Humanidad va entrando en el camino de la justicia."
 autor: "manuel-gonzalez-prada"
-temas:
-  - "la-libertad"
-slug: "manuel-gonzalez-prada-el-descredito-de-una-revolucion-empieza-el"
+slug: "manuel-gonzalez-prada-cierto-por-el-sacrificio-y-la-abnegacion"
 procedencia:
   obra: "El intelectual y el obrero"
 estadoDerechos: "dominio-público"

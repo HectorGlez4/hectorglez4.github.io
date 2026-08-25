@@ -695,6 +695,63 @@ export function firmaDeCabeceraDeWikitexto(wikitexto: string): string | undefine
   return primera.slice(0, MAX_CARACTERES_POR_LINEA);
 }
 
+/**
+ * La categoría con que Wikisource clasifica una obra bajo su Autor.
+ *
+ *     [[Categoría:Discursos de Manuel González Prada]]
+ *
+ * Es la cuarta y última forma en que una página puede declarar a quien firma, y la más pobre:
+ * las otras tres dicen «esto es el autor», y ésta lo dice **de la obra**. Existe porque hay
+ * páginas cuyo único autor declarado va dentro de una frase en prosa —«Discurso de [[X]] leído
+ * el 1 de mayo…»—, que la puerta rechaza con razón, y que sin embargo traen esta línea.
+ *
+ * Vive al **final** del wikitexto, detrás de la obra entera, así que aquí no se puede mirar
+ * solo la cabeza como hace el lector del encabezado.
+ *
+ * Las categorías reales están llenas de trampas, y de ahí las dos exigencias:
+ *
+ *   · la preposición es `de` y nunca `sobre` — «Obras sobre X» dice lo contrario;
+ *   · y el nombre tiene que parecer nombre de persona: **dos palabras o más, con al menos dos
+ *     en mayúscula**. Eso deja fuera «Obras de teatro», «Poemas de amor», «Cuentos de Navidad»
+ *     y «Obras de la Edad Media» sin necesidad de enumerar lo que no es un Autor, que es una
+ *     lista que nunca se acaba.
+ */
+const CATEGORIA_DE_WIKITEXTO = /\[\[\s*Categor[íi]a\s*:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]/giu;
+
+/** Los géneros con que Wikisource encabeza una categoría de Autor. */
+const GENERO_DE_CATEGORIA =
+  /^(?:obras|textos|escritos|discursos|ensayos|art[íi]culos|poemas|poes[íi]as?|cartas|novelas|cuentos|prosa)\s+de\s+(.+)$/iu;
+
+/** Si lo que sigue a «de» puede ser el nombre de una persona. */
+function pareceNombreDePersona(nombre: string): boolean {
+  const palabras = nombre.trim().split(/\s+/u);
+  if (palabras.length < 2) return false;
+  if (!/^\p{Lu}/u.test(palabras[0])) return false;
+  return palabras.filter((p) => /^\p{Lu}/u.test(p)).length >= 2;
+}
+
+/** Las líneas de categoría del wikitexto que declaran Autor, literales. */
+export function categoriasDeAutorDeWikitexto(wikitexto: string): string[] {
+  const lineas: string[] = [];
+  for (const [entera, nombreDeCategoria] of wikitexto.matchAll(CATEGORIA_DE_WIKITEXTO)) {
+    const encontrado = GENERO_DE_CATEGORIA.exec(nombreDeCategoria);
+    if (encontrado === null || !pareceNombreDePersona(encontrado[1])) continue;
+    lineas.push(entera.replace(/\s+/gu, ' ').slice(0, MAX_CARACTERES_POR_LINEA));
+    if (lineas.length >= MAX_LINEAS_DE_ENCABEZADO) break;
+  }
+  return lineas;
+}
+
+/** Lo que una línea de la declaración declara como categoría de Autor, si es que lo es. */
+export function autorDeLaCategoria(linea: string): string | undefined {
+  CATEGORIA_DE_WIKITEXTO.lastIndex = 0;
+  const casa = CATEGORIA_DE_WIKITEXTO.exec(linea.trim());
+  if (casa === null) return undefined;
+  const encontrado = GENERO_DE_CATEGORIA.exec(casa[1]);
+  if (encontrado === null || !pareceNombreDePersona(encontrado[1])) return undefined;
+  return encontrado[1].trim();
+}
+
 /** Lo que una línea de la declaración declara como firma, si es que lo es. */
 export function autorDeLaFirma(linea: string): string | undefined {
   const encontrado = FIRMA_DE_CABECERA_WIKITEXTO.exec(linea.trim());
@@ -985,6 +1042,11 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         ...(encabezadoDeOrigen === undefined
           ? []
           : [firmaDeCabeceraDeWikitexto(encabezadoDeOrigen) ?? []].flat()),
+        // Y las categorías de Autor, que viven al final del wikitexto. También solo las de la
+        // página: la categoría del índice clasifica al índice.
+        ...(encabezadoDeOrigen === undefined
+          ? []
+          : categoriasDeAutorDeWikitexto(encabezadoDeOrigen)),
         // Delante del recorte de año **a propósito**: esta línea arrastra su propia fecha
         // —«, 191?.»— y detrás de una etiqueta de año vacía se leería como año de la obra.
         ...lineaDeEtiqueta(regionPlana, ETIQUETA_DE_AUTOR_WIKISOURCE),
@@ -1063,6 +1125,19 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         const firma = autorDeLaFirma(linea);
         if (firma === undefined) continue;
         const declarado = autoresDeclarados(firma);
+        if (declarado !== undefined) return declarado;
+      }
+
+      /*
+       * Y en último lugar de todos, la categoría con que la Fuente clasifica la obra.
+       *
+       * La última porque es la única que no habla del texto sino **de la obra**: dice de quién
+       * son estos discursos, no quién firma esta página. Cede ante las otras tres a propósito.
+       */
+      for (const linea of loQueDeclaraLaPagina(declaracion).split('\n')) {
+        const categoria = autorDeLaCategoria(linea);
+        if (categoria === undefined) continue;
+        const declarado = autoresDeclarados(categoria);
         if (declarado !== undefined) return declarado;
       }
 

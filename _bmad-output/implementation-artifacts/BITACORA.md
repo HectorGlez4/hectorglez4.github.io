@@ -4607,3 +4607,81 @@ misma causa.
 
 **La meta no está alcanzada y no se emite promesa:** 836 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-23 (65.ª sesión) — La categoría, un diagnóstico falso y una Cita que paraba el sitio
+
+**836 → 848 Citas. 881 → 893 páginas.** Sesión de tres arreglos, y el que más vale es el que
+consistió en **desdecirme**.
+
+### La categoría, hecha como se dijo que se haría
+
+Queda de la 64.ª, apartado allí con nombre: hay páginas cuyo único Autor declarado va dentro de una
+frase en prosa, y la puerta lo rechaza con razón. Pero esas páginas traen, al final del wikitexto:
+
+    [[Categoría:Discursos de Manuel González Prada]]
+
+Eso ya no es prosa, es un campo estructurado. Se lee como cuarta y **última** forma —el parámetro,
+la etiqueta y la firma dicen «esto es el autor»; la categoría lo dice de la obra—, y se versiona
+literal, como las otras tres.
+
+Lo difícil no era leerla sino **no leer como Autor lo que no lo es**, porque las categorías reales
+están llenas de trampas. Dos exigencias bastan, y once pruebas las fijan: la preposición es `de` y
+nunca `sobre` —«Obras sobre X» dice lo contrario—, y el nombre tiene que parecer nombre de persona,
+**dos palabras con al menos dos en mayúscula**. Eso deja fuera «Obras de teatro», «Poemas de amor»,
+«Cuentos de Navidad» y «Obras de la Edad Media» sin enumerar lo que no es un Autor, que es una lista
+que no se acaba nunca.
+
+### El diagnóstico que era falso, y cómo se supo
+
+Un documento seguía saliendo «sin cotejar». El aviso estaba en la salida y yo **la había cortado con
+`head -1`**: era un 503 al pedir el wikitexto.
+
+Al medir, `/wiki/X?action=raw` daba 503 y `w/index.php?title=X&action=raw` daba 200. Di por hecho que
+la culpa era de la forma de la dirección, la cambié, y lo escribí en el código y en una prueba.
+**Era falso.** Medido tres veces seguidas, las dos formas alternan 200 y 503: es limitación de tasa.
+El cambio se revirtió entero —había puesto 19 pruebas en rojo por acomodar algo que no arreglaba
+nada— y en su lugar quedó lo que sí lo arregla: **reintentar**, y solo lo que el servidor declara
+suyo. Un 5xx dice «ahora no»; un 404 dice «esto no existe» y repetirlo es ruido.
+
+Importa porque el fallo no se quedaba en el fallo: sin wikitexto, el documento se versiona igual
+—con aviso— y **sin el Autor que la Fuente declara**; dos pasos más allá la puerta informa de que
+«el documento no declara autor» de una página que sí lo declara, y la atribución se queda apoyada
+solo en lo que diga la orden. Un fallo de red convertido en una atribución que nada respalda.
+
+Y las 81 candidatas que se habían extraído mientras la puerta no actuaba **se retiraron y se
+volvieron a extraer**, para que todo lo que está en revisión haya pasado por un cotejo que se
+disparó de verdad.
+
+### Una Cita publicada que paraba el sitio entero
+
+Al aprobar un lote, una orden reventó leyendo el Corpus. La causa: una Cita con **dos claves
+`temas:`**, que no es YAML válido — y lo que se cae no es esa Cita, es la lectura completa, y el
+`build` detrás.
+
+`conTemasDeclarados` insertaba su bloque sin mirar si ya había uno. No es un caso de laboratorio:
+hoy hay **veintiuna candidatas en revisión con `temas:` puesto**, porque AD-2 retira moviendo a
+revisión y una Cita retirada vuelve con los suyos. Aprobar cualquiera de ellas con `--temas` rompía
+el Corpus. Ahora se **funden** —la orden dice a qué Tema más pertenece, no cuáles deja de tener—, y
+se cubren las dos formas que admite YAML, porque cubrir una sola dejaba la otra duplicándose.
+
+No conseguí reconstruir por qué le tocó a esa Cita concreta y no a otra; lo que sí está medido es que
+el camino existe y que hoy hay veintiuna candidatas que pueden tomarlo.
+
+### Y dos pruebas que se caían por tamaño, no por lo que afirman
+
+Las que recorren **todas** las Páginas de Cita agotaban los 30 segundos con 848. Se dejan de navegar
+con el navegador y se pide el HTML. **El cambio de fidelidad se dice en la propia prueba**: se mira
+el HTML servido y no el DOM montado; en un sitio estático son lo mismo dentro de `main`, y si algún
+día algo inyectara enlaces ahí, estas dos dejarían de verlo. A cambio dejan de tardar más cada
+sesión, que era lo que iba a acabar borrándolas. La suite pasó de 1,8 a 1,3 minutos.
+
+### La siembra
+
+**12 Citas** de tres ensayos que ayer no se podían sembrar: cinco en «la palabra», tres en «el
+saber», dos en «la virtud», una en «el tiempo» y una en «la adversidad».
+
+`npx astro check` 0 errores; `npx vitest run` **2057/2057** en 68 ficheros; `npm run build` **893
+páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 848 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

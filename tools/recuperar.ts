@@ -41,7 +41,7 @@ import { extname, join } from 'node:path';
 import { DOMINIO } from '../src/lib/dominio.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
-import { fuenteDeUrl, type Fuente } from './lib/fuentes.ts';
+import { conReintentos, fuenteDeUrl, type Fuente } from './lib/fuentes.ts';
 import {
   analizarDocumento,
   componerDocumento,
@@ -341,10 +341,15 @@ async function encabezadoDeOrigen(
     return { aviso: `No se pudo componer la dirección del encabezado de «${direccion}».` };
   }
 
-  const descarga = await descargar(cruda, fuente, {
-    tipos: TIPOS_DE_ENCABEZADO,
-    acepta: 'text/x-wiki, text/plain',
-  });
+  /*
+   * Con reintento: Wikisource limita la tasa por rachas, y un 503 pasajero aquí no se queda en
+   * un 503. El documento se versiona igual —con aviso— y se queda sin el metadato que la Fuente
+   * declara, el Autor incluido; después la puerta de FR-23 no puede actuar.
+   */
+  const descarga = await conReintentos(
+    () => descargar(cruda, fuente, { tipos: TIPOS_DE_ENCABEZADO, acepta: 'text/x-wiki, text/plain' }),
+    (r) => r.ok || !esPasajero(r),
+  );
 
   if (!descarga.ok) {
     return {
@@ -401,10 +406,15 @@ async function encabezadoDeLaObra(
     return { obra, aviso: `No se pudo componer la dirección de la obra «${obra}».` };
   }
 
-  const descarga = await descargar(cruda, fuente, {
-    tipos: TIPOS_DE_ENCABEZADO,
-    acepta: 'text/x-wiki, text/plain',
-  });
+  /*
+   * Con reintento: Wikisource limita la tasa por rachas, y un 503 pasajero aquí no se queda en
+   * un 503. El documento se versiona igual —con aviso— y se queda sin el metadato que la Fuente
+   * declara, el Autor incluido; después la puerta de FR-23 no puede actuar.
+   */
+  const descarga = await conReintentos(
+    () => descargar(cruda, fuente, { tipos: TIPOS_DE_ENCABEZADO, acepta: 'text/x-wiki, text/plain' }),
+    (r) => r.ok || !esPasajero(r),
+  );
 
   if (!descarga.ok) {
     return {
@@ -431,7 +441,16 @@ function mismaPagina(una: string, otra: string): boolean {
   return legible(una) === legible(otra);
 }
 
-type Descarga = { ok: true; contenido: string; url: string } | { ok: false; motivos: string[] };
+/** Un fallo del que solo la Fuente es responsable, y que por eso vale la pena repetir. */
+function esPasajero(descarga: Descarga): boolean {
+  return !descarga.ok && descarga.estado !== undefined && descarga.estado >= 500;
+}
+
+type Descarga =
+  | { ok: true; contenido: string; url: string }
+  // `estado` solo cuando la Fuente contestó con uno: es lo que distingue «ahora no»
+  // —un 5xx, que se reintenta— de «esto no existe», que no se reintenta nunca.
+  | { ok: false; motivos: string[]; estado?: number };
 
 /**
  * Pide el documento y devuelve su texto, o el motivo por el que no.
@@ -494,6 +513,7 @@ async function descargar(
     if (!respuesta.ok) {
       return {
         ok: false,
+        estado: respuesta.status,
         motivos: [
           `${fuente.nombre} respondió ${respuesta.status} a «${actual}».`,
           'No se ha versionado nada.',
