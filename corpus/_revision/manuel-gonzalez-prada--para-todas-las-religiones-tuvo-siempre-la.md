@@ -1,0 +1,13 @@
+---
+texto: "Para todas las religiones tuvo siempre la carcajada de Voltaire, y aunque judío de nacimiento y luterano de conveniencia o capricho, sólo rindió culto literario a las divinidades griegas."
+autor: "manuel-gonzalez-prada"
+slug: "manuel-gonzalez-prada-para-todas-las-religiones-tuvo-siempre-la"
+procedencia:
+  obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Conferencia_en_el_Ateneo_de_Lima_(ortograf%C3%ADa_RAE)"
+---

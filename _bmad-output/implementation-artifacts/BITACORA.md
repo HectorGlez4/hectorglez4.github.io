@@ -4909,3 +4909,35 @@ ese «ella» es la prudencia del párrafo anterior y en su página no lo sabría
 
 **La meta no está alcanzada y no se emite promesa:** 933 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.6 (71.ª sesión) — Sembrar donde hay hueco, no donde hay cantera
+
+**933 → 947 Citas. 978 → 992 páginas.**
+
+Aplicando lo que la sesión anterior dejó escrito —que la meta ya no la limita la cantera sino el
+reparto—, esta vez se sembró **donde había hueco**: el Autor con más margen de los que tienen obra
+extraíble, no el que tenía más candidatas leídas.
+
+Sus tres ensayos ya cribados daban poco nuevo, así que se recuperó **un cuarto**, 47 KB de
+conferencia: 230 candidatas, cotejo de Autor superado —la puerta de la categoría de la 65.ª sigue
+disparándose sola en estas páginas sin plantilla— y **14 Citas** publicadas.
+
+Efecto secundario y buscado: el Autor más representado no ha sembrado nada y baja de **14,8 % a
+14,6 %** sin perder ni una Cita. Es la misma aritmética de ayer leída al revés — sembrar de otra
+cantera sube el techo de todos— y es lo que permitirá que la suya vuelva a abrirse la próxima vez.
+
+### Lo que cae, dos sesiones seguidas
+
+Vuelven a caer sentencias de época sobre las mujeres, y esta vez se publica su contrario, que estaba
+en el mismo documento: una que reprocha «la incuria o la necedad del marido» a quien niega la
+igualdad. No es equilibrio buscado ni corrección de nadie: es que ambas estaban en la cantera y solo
+una se sostiene sola sin pedir disculpas al lector.
+
+**14 Citas**: tres en «la palabra», tres en «la libertad», dos en «el saber», dos en «la verdad»,
+dos en «la vida», y una en «el tiempo» y «la virtud».
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **992 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 947 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

@@ -1,0 +1,13 @@
+---
+texto: "La audacia de Heine parecerá increíble a quien no esté familiarizado con la llaneza infantil de los autores alemanes; pocos habrán escrito rasgos más atrevidos ni valientes."
+autor: "manuel-gonzalez-prada"
+slug: "manuel-gonzalez-prada-la-audacia-de-heine-parecera-increible-a"
+procedencia:
+  obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Conferencia_en_el_Ateneo_de_Lima_(ortograf%C3%ADa_RAE)"
+---
