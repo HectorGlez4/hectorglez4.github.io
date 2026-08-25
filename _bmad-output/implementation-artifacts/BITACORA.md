@@ -2582,3 +2582,31 @@ cortes, y la Página de Tema se lee igual de bien en escritorio.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 493
 páginas.
+
+## 15.3 (22.ª sesión) — Las cinco últimas del *Quijote*, y el techo se cierra por el otro lado
+
+**452 → 457 Citas**, el sitio de **493 a 498 páginas**, el Autor más representado del 25,2 % al
+**24,95 %**. El build cuenta **435 Citas cotejadas**.
+
+**Cinco, no seis, y el número está razonado.** Es lo que cabe bajo el techo del 15 % sin llevar al
+segundo Autor al borde: **67 sobre 457 es el 14,66 %**, y el techo está en 68,5. Con seis habría
+quedado en 14,85 % —dentro, pero sin un dedo de margen—, y con siete se rompía. La cuenta se hizo
+antes de escribir el lote, no después, que es la lección de la 12.ª sesión.
+
+Entran «cada uno es como Dios le hizo, y aun peor muchas veces», «De gente bien nacida es agradecer
+los beneficios que reciben», «no se ha de mentar la soga en casa del ahorcado», «donde reina la
+envidia no puede vivir la virtud, ni adonde hay escaseza la liberalidad», y la despedida del
+hidalgo: «en los nidos de antaño no hay pájaros hogaño: yo fui loco, y ya soy cuerdo; fui don
+Quijote de la Mancha, y soy agora, como he dicho, Alonso Quijano el Bueno».
+
+**Cinco sesiones sobre el mismo libro: 50 Citas, 50 publicadas, cero rechazos, cero candidatas
+volcadas a `_revision`.** Y dos apócrifas cazadas por el camino que no entraron —«Ladran, luego
+cabalgamos» y «Hoy es el día más hermoso de nuestra vida»—, ninguna de las dos en el libro.
+
+**Con esto se agota la última vía que el bucle tenía sin depender de nadie.** El protocolo listaba
+tres: los lotes del *Quijote* (cerrada hoy por el techo), re-extraer con el arreglo del encabezado
+(sigue sin estar en `main`) y un Tema más (la cantera se midió agotada en doce). Las tres,
+cerradas o esperando.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 498
+páginas y 435 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
