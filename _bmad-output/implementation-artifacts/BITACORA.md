@@ -4548,3 +4548,62 @@ crecer con las 27 nuevas.
 
 **La meta no está alcanzada y no se emite promesa:** 828 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-23 (64.ª sesión) — La cantera medida de verdad, y un límite que no se rodea
+
+**828 → 836 Citas. 873 → 881 páginas.** Iteración corta en siembra y larga en medida, y la medida
+es lo que vale.
+
+### El Tema más flaco no lo puede alimentar cualquier obra
+
+«La felicidad» está **justo en el umbral**, con 15 Citas: una retirada la dejaría sin página. Se
+dirigió la lectura ahí, sobre las 1100 candidatas en revisión, y salió que **el documento grande de
+esta semana no puede alimentarla**: es un libro sobre la tiranía y la muerte. No es un fracaso de la
+criba, es una propiedad de la obra, y conviene tenerla escrita antes de volver a intentarlo.
+
+Así que se fue a buscar otra obra, y para eso se midió la cantera **de los Autores con más margen
+bajo el techo**, no de todos: quien ya roza el 15 % no puede dar Citas aunque le sobre obra, y
+gastar peticiones en él es tirar el trabajo. De nueve Autores medidos, seis tienen **cero** textos de
+más de 8 KB sin recuperar — su fondo en esa Fuente está agotado de verdad, y ahora consta— y uno solo
+tiene dos, ambos en verso, que esperan la decisión reservada.
+
+Se recuperó una novela de 121 KB de un Autor que tenía **una sola Cita**: 506 candidatas, y de ellas
+**cinco** publicables. Es el rendimiento del género, ya medido y ahora confirmado: una novela es
+narración con personajes, y una sentencia que nombra a don Braulio no se sostiene sola en su página.
+Cinco Citas parecen pocas; para ese Autor son pasar de una a seis.
+
+### El límite que se documenta en vez de rodearse
+
+Dos ensayos de un Autor con **47 huecos libres** bajo el techo se recuperaron, y `extraer --seco`
+volvió a decir «Autor sin cotejar». La causa, esta vez, no es un lector corto: la página declara a
+quien firma **dentro de una frase en prosa**:
+
+    Discurso de [[Manuel González Prada]] leído el 1 de mayo de 1905 en la ''Federación...''
+
+Y eso la puerta de FR-23 lo rechaza **a propósito**, con una prueba escrita ayer que dice por qué: un
+enlace con prosa alrededor es texto, no una firma, y admitirlo atribuiría el texto a cualquiera que
+la obra nombre de pasada.
+
+Hay una salida, y está medida: la página trae `[[Categoría:Discursos de Manuel González Prada]]`, que
+ya no es prosa sino estructura. Pero leerla exige cambiar **qué se versiona** —las categorías van al
+final del wikitexto, fuera del encabezado— y hoy la extracción ya se había tocado dos veces. **Se
+toma la opción conservadora**: los dos documentos se retiran —apartados, no borrados— y el hallazgo
+queda escrito para que otra sesión lo haga con sus propias pruebas. Volver a descargarlos cuesta una
+orden.
+
+Retirarlos no es cosmético: dos documentos versionados sin ninguna Cita publicada dejan en rojo la
+prueba que vigila justamente eso.
+
+### Y otra prueba que afirmaba algo que dejó de ser cierto
+
+`un Autor con una sola Cita no se queda sin salidas` fijaba a mano la Cita de aquel Autor. Al pasarlo
+de una a seis, la prueba empezó a afirmar que quien tiene seis no tiene hermanas. Se añade
+`citaDeAutorConUnaSola()` al ayudante, que **pregunta al Corpus** y, cuando ningún Autor está en esa
+situación, dice que no lo está en vez de fingir que comprobó. Van 31 pruebas arregladas por esta
+misma causa.
+
+`npx astro check` 0 errores; `npx vitest run` **2035/2035**; `npm run build` **881 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 836 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

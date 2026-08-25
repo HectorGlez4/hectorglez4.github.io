@@ -1,10 +1,15 @@
 import { expect, test } from '@playwright/test';
-import { temaBajoUmbral } from './ayuda/corpus.ts';
+import { citaDeAutorConUnaSola, temaBajoUmbral } from './ayuda/corpus.ts';
 
 /** Historia 2.6 — rutas de salida desde cada Cita. */
 
 const CON_HERMANAS = '/cita/antonio-machado-hoy-es-siempre-todavia';
-const AUTOR_DE_UNA = '/cita/rosalia-de-castro-yo-no-se-lo-que-busco-eternamente';
+/*
+ * La Cita de un Autor sin ninguna otra **se deriva**: estaba fijada, y era cierta hasta que una
+ * siembra dio cinco Citas mas a ese Autor y la prueba paso a afirmar que quien tiene seis no
+ * tiene hermanas.
+ */
+const AUTOR_DE_UNA = citaDeAutorConUnaSola();
 
 test.describe('Historia 2.6 — hacia dónde seguir', () => {
   test('se ven hasta cuatro Citas más del mismo Autor', async ({ page }) => {
@@ -35,7 +40,8 @@ test.describe('Historia 2.6 — hacia dónde seguir', () => {
 
   test('no se renderiza ningún chip de un Tema sin página', async ({ page, request }) => {
     // Esta Cita pertenece además a «La adversidad», que se queda por debajo del umbral.
-    await page.goto(AUTOR_DE_UNA);
+    test.skip(AUTOR_DE_UNA === undefined, 'Hoy ningún Autor del Corpus tiene una sola Cita.');
+    await page.goto(AUTOR_DE_UNA!);
     const hrefs = await page.locator('.chip').evaluateAll((ns) => ns.map((n) => n.getAttribute('href')!));
 
     /*
@@ -51,7 +57,8 @@ test.describe('Historia 2.6 — hacia dónde seguir', () => {
   });
 
   test('un Autor con una sola Cita no se queda sin salidas', async ({ page }) => {
-    await page.goto(AUTOR_DE_UNA);
+    test.skip(AUTOR_DE_UNA === undefined, 'Hoy ningún Autor del Corpus tiene una sola Cita.');
+    await page.goto(AUTOR_DE_UNA!);
     // No hay hermanas que ofrecer...
     expect(await page.locator('.hermanas li').count()).toBe(0);
     // ...pero la sección de salidas no está vacía.

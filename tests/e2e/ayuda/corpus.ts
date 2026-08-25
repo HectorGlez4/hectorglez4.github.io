@@ -135,3 +135,28 @@ export function autorEnUnaPagina(): { slug: string; citas: number } | undefined 
   const elegido = caben[0];
   return elegido === undefined ? undefined : { slug: elegido[0], citas: elegido[1] };
 }
+
+/**
+ * La ruta de una Cita cuyo Autor **no tiene ninguna otra**, si es que hoy existe alguna.
+ *
+ * Estaba fijada a mano y era cierta: aquel Autor tenía una sola Cita. Dejó de serlo en cuanto
+ * una siembra le dio cinco más, y la prueba pasó a afirmar que un Autor con seis Citas no
+ * tiene hermanas. El nombre fijado no se cambia por otro, que caducaría igual: se pregunta.
+ *
+ * Cuando **ningún** Autor está en esa situación, esto devuelve `undefined` y quien lo use debe
+ * saltarse la prueba diciendo por qué. Es preferible a fingir que se comprobó algo que el
+ * Corpus ya no contiene.
+ */
+export function citaDeAutorConUnaSola(): string | undefined {
+  const porAutor = new Map<string, string[]>();
+  for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
+    const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
+    const autor = campo(contenido, 'autor');
+    const slug = campo(contenido, 'slug');
+    if (autor === undefined || slug === undefined) continue;
+    porAutor.set(autor, [...(porAutor.get(autor) ?? []), slug]);
+  }
+
+  const sola = [...porAutor.values()].find((slugs) => slugs.length === 1);
+  return sola === undefined ? undefined : `/cita/${sola[0]}`;
+}
