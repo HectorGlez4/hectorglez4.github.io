@@ -142,7 +142,9 @@ development_status:
   # ampliar un Autor **ya representado** con otra de sus obras es trabajo del bucle, y asi
   # entraron los 59 documentos. Quedan Autores admitidos con una obra minima o ninguna.
   # Lo que sigue sin delegarse es admitir Autores NUEVOS: eso es 15-4. Ver deferred-work.md.
-  15-3-ningun-autor-pasa-del-techo-de-concentracion: in-progress
+  # CERRADA el 25/08: 114 Citas sobre 761 son el 14,98 %, dentro del techo del 15 %.
+  # Se cerro diluyendo, sin despublicar ninguna Cita, como manda la politica.
+  15-3-ningun-autor-pasa-del-techo-de-concentracion: done
   15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
   15-5-veinticuatro-temas-publicados: in-progress
   15-6-mil-citas-publicadas: backlog

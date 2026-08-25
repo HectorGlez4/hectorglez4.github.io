@@ -3565,3 +3565,60 @@ traían OCR roto de verdad («ílama», «beduinismol»), que es otra cosa.
 392 pasadas, 14 saltadas; `npm run build` **752 páginas**.
 
 **El tramo sigue abierto y ahora dice 53** (era 85). No se alcanza, y se dice.
+
+## 15.3 (47.ª sesión) — El techo se cierra: ningún Autor pasa del 15 %
+
+**707 → 761 Citas. 752 → 806 páginas.** Y la línea que llevaba trece sesiones en rojo:
+
+> El Autor más representado aporta 114 Citas, un 15 % — **dentro del techo del 15 %**
+
+**La Historia 15.3 queda cerrada.** Se cerró como mandaba la política —**diluyendo, sin despublicar
+ni una sola Cita**— y el Autor que la abrió sigue teniendo exactamente las 114 que tenía cuando el
+bucle empezó a medirlo, en el 45,1 %.
+
+### La sesión se planeó con la aritmética antes de sembrar, y por eso salió justa
+
+El techo se calcula sobre el Corpus final, así que cuántas Citas admite cada Autor **depende de
+cuántas se publiquen en total**. Se resolvió antes de tocar nada: con 761 Citas el techo son 114,
+y el reparto tenía que ser 18 / 17 / 19 entre tres Autores para que ninguno de ellos cruzara al
+llegar. Salió exacto:
+
+| | Citas | Peso |
+|---|---|---|
+| El que abrió el tramo | 114 | 14,98 % |
+| Sembrado A | 114 | 14,98 % |
+| Sembrado B | 113 | 14,85 % |
+| Sembrado C | 113 | 14,85 % |
+
+**No se apoya en el redondeo.** `pesa()` redondea a un decimal y compara con `>` estricto, así que
+un 15,02 % pasaría por 15,0 y colaría. Se comprobó el código antes de fijar la cifra y se apuntó a
+que los cuatro quedaran **genuinamente** por debajo del 15 %, no empatados con él.
+
+### Cuatro documentos descartados, cada uno por su motivo
+
+De nueve recuperados, cuatro no llegaron a sembrar:
+
+· **Tres no declaraban Autor** — la comprobación en seco, que ya es lo primero que se hace.
+· **Uno declaraba dos**: «José Martí / M. Gómez». La puerta lo dio por cotejado porque uno de los
+  nombres coincide, y aun así **no se sembró**: es un manifiesto cofirmado, y atribuir frases
+  sueltas a uno solo de sus dos firmantes es una afirmación que no se puede verificar. La puerta no
+  se equivoca —comprueba que el Corpus y el documento hablan del mismo Autor— pero no está hecha
+  para decidir esto, y quien lo decide es quien lee.
+
+**Y un quinto se quitó al final, porque una prueba lo pidió.** «Vindicación de Cuba» pasó todas las
+puertas y no dio ni una Cita: sus 27 candidatas son réplicas puntuales a un artículo de prensa y
+ninguna se sostiene fuera de esa polémica. FR-23 contó el documento huérfano y se fue.
+
+### Lo que viene ahora, y por qué no es del bucle
+
+Con el tramo cerrado, la política declara el siguiente: **«Admitir 19 Autores más, respetando el
+suelo de tradición latinoamericana»**. Ese es exactamente el que `deferred-work.md` tiene anotado
+desde la 36.ª sesión como **no delegable**: admitir un Autor nuevo es decidir a quién representa
+este Corpus, y eso no lo decide una herramienta.
+
+La meta **no está alcanzada** y no se emite promesa: 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35. Lo que hace falta de Héctor sigue cabiendo en una línea: **nombres de Autor, o URL de
+Wikisource**. Con eso el bucle recupera, coteja, publica y despliega.
+
+`npx astro check` 0 errores; `npx vitest run` **1980/1980** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas, cero fallos; `npm run build` **806 páginas**.
