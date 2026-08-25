@@ -2677,3 +2677,36 @@ estilos computados, y las dos veces que lo hice aquí el fallo no existía.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 498
 páginas.
+
+## 15.2 (25.ª sesión) — Dos Colecciones más, y un duplicado que me había hecho yo
+
+**457 → 456 Citas** (una retirada), **12 → 14 Colecciones**, el sitio de **498 a 499 páginas**.
+
+**Por qué se pasa de doce.** La Meta pedía doce y están puestas, pero **doce era un suelo, no un
+techo**: más superficies indexables es exactamente lo que el encargo pedía. Y quedaba material —
+**253 de las 457 Citas sin Colección**, casi todas sembradas esta noche.
+
+**«Cuatro mujeres», con 29 Citas.** Las cuatro Autoras del Corpus reunidas: la que defendió su
+derecho a estudiar, la que pidió escuelas para cerrar cárceles, y las otras dos. Es un criterio
+editorial de verdad y además **señala el punto flaco del Corpus en vez de esconderlo**: cuatro
+Autoras de diecisiete Autores.
+
+**«Consejos para gobernar», con 15.** El pasaje más denso del *Quijote*, ahora también reunido
+como Colección: cómo juzgar, qué comer, y por qué el que no madruga con el sol no goza del día.
+
+**Y el hallazgo de la sesión, que es un fallo mío.** Al reunir esos consejos aparecieron
+`la-diligencia-es-madre-de-la-buena` **y** `…-2`: la misma sentencia publicada dos veces, en dos
+lotes distintos, porque el texto del primero es **prefijo literal** del segundo. `alta` resolvió
+la colisión renombrando en silencio, que es lo que hace.
+
+Es exactamente el riesgo que `deferred-work.md` tenía anotado desde la retro de la Épica 9 —«un
+editor que apruebe sin mirar el sufijo deja el sitio con la misma sentencia dos veces, en dos URL
+que solo difieren en un dígito»— y me lo hice yo, en la 12.ª y la 13.ª sesión, sin verlo. **La
+advertencia estaba escrita y no me protegió, porque nadie la lee en mitad de un lote.**
+
+Retirada la corta con `documentar --retirar` y motivo: se movió a `_revision`, no se borró nada, y
+quedó su huella. Se conserva la larga, que contiene a la corta entera y además tiene la URL
+original. Barrido el resto del Corpus: **no hay ninguna otra Cita con sufijo numérico**.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 499
+páginas y 434 cotejadas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
