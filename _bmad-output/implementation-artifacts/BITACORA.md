@@ -2926,3 +2926,33 @@ regla de distinción, y ahora la auditoría. **Lo que no está en la herramienta
 
 `npx astro check` 0 errores; `npx vitest run` **1935/1935** en 62 ficheros; `npm run build` 501
 páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+## 15.2 (32.ª sesión) — La portada y la primera Pieza de Colección, miradas por fin
+
+**456 Citas, 16 Colecciones, 501 páginas: sin cambios.** Verificadas las dos superficies que
+quedaban sin mirar.
+
+**La portada, sana y mejor de lo que esperaba.** Enlaza **los 17 Autores, los 12 Temas y las 16
+Colecciones**: 46 enlaces desde la raíz. Eso significa que las cuatro superficies nuevas de esta
+noche entraron solas en la red de enlaces internos y que **NFR-5 sigue cumpliéndose sin tocar
+nada**: toda Cita está a dos saltos de la portada, no a tres. La Cita del día salió «Lo bueno, si
+breve, dos veces bueno;» con su obra y su año, y los chips de Tema ya enseñan La felicidad, La
+prudencia, La riqueza y La verdad.
+
+**Y la primera Pieza de Colección desde que se construyó la Historia 13.3.** Compuesta la de
+«Cuatro mujeres» para Instagram: **3 de sus 29 Citas** —lo que cabe en el lienzo— con el nombre de
+la Colección arriba, las tres atribuciones y la marca abajo. Se ve bien y está lista para publicar.
+
+**Pero destapó algo que no estaba pensado.** La Pieza toma las primeras Citas **en el orden
+declarado en el fichero**, y ese orden decide qué se publica en redes. En las dieciséis
+Colecciones curadas ese orden es **alfabético por slug**, porque `asignar` añade en el orden en
+que se le pasan y los lotes salieron de barridos ordenados. Aquí el azar salió bien —dos de
+Concepción Arenal y una de Rosalía, un trío que se sostiene— pero es azar: en otra Colección las
+tres primeras pueden ser tres del mismo Autor, o las tres más flojas.
+
+Faltan dos cosas distintas y las dos quedan en `deferred-work.md`: decidir **si el orden
+significa algo** —«las tres que van a la Pieza»— y, si significa, **una forma de reordenar** que
+no sea editar el YAML a mano, que es justo lo que `asignar` vino a evitar.
+
+`npx astro check` 0 errores; `npx vitest run` **1935/1935** en 62 ficheros; `npm run build` 501
+páginas.

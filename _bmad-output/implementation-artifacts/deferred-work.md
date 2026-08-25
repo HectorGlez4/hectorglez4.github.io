@@ -194,3 +194,21 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
 
     Lo demás de la revisión visual salió bien: en móvil (375×812) la maqueta es holgada y
     legible, sin desbordes ni cortes.
+
+- source_spec: Historia 13.3 — visto al componer la primera Pieza de Colección, 32.ª sesión del bucle v4
+  summary: El orden de los miembros de una Colección es una decisión editorial que nadie ha tomado.
+  evidence: |-
+    `pieza coleccion` compone con las primeras Citas **en el orden declarado en el fichero**, y
+    dice cuáles quedan fuera: de las 29 de «Cuatro mujeres» entraron **3**. Ese orden decide, por
+    tanto, qué se publica en redes y qué no.
+
+    Y en las dieciséis Colecciones curadas ese orden es **alfabético por slug**, porque `asignar`
+    añade en el orden en que se le pasan los slugs y los lotes salieron de barridos ordenados. En
+    «Cuatro mujeres» el azar salió bien —dos de Concepción Arenal y una de Rosalía, un trío que se
+    sostiene— pero es azar: en otra Colección las tres primeras pueden ser las tres más flojas, o
+    tres del mismo Autor.
+
+    Faltan dos cosas, y son distintas. Una es de producto: decidir si el orden de una Colección
+    significa algo —«las tres que van a la Pieza»— o no significa nada. La otra es de herramienta:
+    hoy no hay forma de reordenar los miembros salvo editando el YAML a mano, que es justo lo que
+    `asignar` vino a evitar.
