@@ -2413,3 +2413,6 @@ Van seis asuntos medidos y descartados frente a tres abiertos.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 492
 páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32799383764 en verde): `/tema/la-prudencia` responde
+200 y `sitemap-0.xml` declara **492 URL**, las mismas del build.
