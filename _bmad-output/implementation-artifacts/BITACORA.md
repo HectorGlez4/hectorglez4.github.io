@@ -2510,3 +2510,6 @@ Van **catorce asuntos medidos: cuatro abiertos y diez descartados.**
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 493
 páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32802469917 en verde): `/tema/la-felicidad` responde
+200 y `sitemap-0.xml` declara **493 URL**, las mismas del build.
