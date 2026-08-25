@@ -3131,3 +3131,47 @@ claude.ai y un artefacto es privado. Se validó lo que sí se puede validar sin 
 etiquetas equilibrada, los 9 tokens de color definidos en el `:root` pelado (el fallo clásico del
 artefacto ilegible en tema claro), y el `body` pintando su propio fondo— y se dice aquí que la
 comprobación visual queda pendiente en vez de darla por hecha.
+
+## 15.3 (38.ª sesión) — El tramo no estaba bloqueado, y llevaba veinte sesiones diciéndolo mal
+
+**456 → 461 Citas. 501 → 506 páginas. Concentración 25,0 % → 24,7 %.** Primera siembra en veinte
+sesiones, y lo que la desbloqueó no fue una decisión de Héctor: fue leer bien una regla propia.
+
+**El error, con nombre.** En la sesión anterior escribí que «recuperar una Fuente para un Autor ya
+admitido es trabajo del bucle; lo que no se delega es qué obra representa a un Autor». Escribí esa
+frase para el Autor con **cero Citas**, donde elegir obra es fundar su canon desde nada, y después
+la apliqué a los **dieciséis que sí tienen obra publicada**. No es el mismo caso, y la diferencia
+es exactamente la que separa «esperar a Héctor» de «hacer el trabajo»: ampliar un Autor ya
+representado con otra de sus obras es como entraron los 59 documentos del Corpus.
+
+**Dónde estaba el material, a la vista en la cola de la distribución.** Tres Autores admitidos
+tienen Citas y **ningún documento** —viven en el censo de pendientes de cotejo— y otros tres tienen
+una obra mínima. Ahí hay volumen que no toca al Autor dominante, que es justo lo que el tramo pide.
+
+**La trampa de los índices, otra vez, y esta vez se comprobó antes.** De las tres obras que
+Wikisource ofrece de la Autora escogida, dos pesan **998 y 913 bytes**: son índices, el mismo caso
+que `deferred-work.md` tiene anotado. La tercera pesa **16.549** y es texto. Se recuperó esa. Mirar
+el tamaño antes de recuperar cuesta una petición y ahorra sembrar entradas de índice.
+
+**Rendimiento: 31 candidatas, 5 publicadas, 26 descartadas — un 16 %**, en línea con el ~19 % medido
+para la prosa didáctica. Las cinco se escogieron a mano leyéndolas, que es el método que funciona
+desde el Quijote. Las 26 se descartaron por tres motivos, y ninguno es de gusto: anáforas sin
+antecedente («Con unas cuantas leyes se remedia todo **esto**»), prosa de trabazón que solo existe
+dentro del argumento del ensayo, y **OCR roto**.
+
+**Y ahí hay un defecto que no es mío y conviene decir.** La puerta de legibilidad de la 11.5
+descartó **1** candidata por OCR roto. Se le colaron al menos cinco: `laspocas`, `manifilesto`,
+`indivicluo`, `porpue`, `piensenlo`, más un `bastantes. ideas` con punto intruso. No se publicaron
+porque las leí una por una — pero **la puerta es lo que protege cuando nadie lee**, y con más
+documentos escaneados por delante va a volver a pasar. Queda en `deferred-work.md` con los seis
+ejemplos, que es lo que hace falta para diseñar el arreglo.
+
+**Dos Citas que siguen sin Fuente, y el cotejo aguantó.** Las dos Citas antiguas de esta Autora se
+probaron contra el documento nuevo por si cerraban censo. No aparecen —son de otras obras— y
+`documentar` se negó sin escribir nada, ni en la Cita ni en el censo. Es el comportamiento correcto:
+NFR-12 prohíbe tocar el texto para que cuadre.
+
+`npx astro check` 0 errores; `npx vitest run` **1947/1947** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **506 páginas**.
+
+**El tramo sigue abierto y ahora dice 299** (era 304). No se alcanza esta sesión, y se dice.

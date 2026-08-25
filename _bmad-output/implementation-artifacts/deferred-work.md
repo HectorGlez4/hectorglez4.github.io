@@ -251,3 +251,30 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     recupera, extrae, coteja y publica sin más intervención. Mientras tanto el Autor no estorba
     —no tiene página, no está en el sitemap y ya no cuenta para la meta— pero está declarado y no
     dice nada.
+
+- id: puerta-de-legibilidad-demasiado-laxa-con-el-ocr
+  summary: La puerta de legibilidad de la 11.5 deja pasar palabras rotas por OCR; en un documento descartó 1 de 6.
+  evidence: |-
+    Medido sembrando «La instrucción del obrero»: `extraer` informó de **«Descartadas por
+    ilegibles (OCR roto): 1»** y entre las 31 candidatas que sí escribió venían al menos cinco
+    con la palabra partida o fundida:
+
+    · `laspocas` — dos palabras fundidas («las pocas»)
+    · `manifilesto` — letra intrusa («manifiesto»)
+    · `indivicluo` — «cl» por «d» («individuo»), el error de OCR más típico que hay
+    · `porpue` — «p» por «q» («porque»)
+    · `piensenlo` — fusión con el pronombre
+    · `De que el pueblo no tenga bastantes. ideas` — punto intruso a mitad de frase
+
+    **Ninguna se publicó**, porque esta sesión leyó las 31 una por una. Ese es justo el problema:
+    la puerta existe para el día que nadie lea. El Corpus tiene 59 documentos y los que vengan de
+    ediciones escaneadas traerán más de esto.
+
+    **Lo que no se hace aquí, y por qué.** El arreglo obvio —un léxico del español -- es una
+    decisión de producto con coste real: hay que elegir el diccionario, versionarlo y aceptar que
+    marcará como rotas palabras de 1650 que son correctas (el Corpus tiene a Gracián y a Quevedo).
+    Una heurística sin diccionario tiene el fallo contrario y peor: descartaría Citas buenas en
+    silencio. Ante esa bifurcación la regla del bucle manda la opción reversible, que es medir y
+    anotar en vez de apretar una puerta a ojo.
+
+    Con los seis ejemplos de arriba el arreglo se puede diseñar y probar en rojo primero.
