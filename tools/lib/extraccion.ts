@@ -70,9 +70,22 @@ export type Descarte =
  * que dejar pasar aparato: el aparato lo caza un lector, y la Cita perdida no la ve nadie.
  */
 const APARATO_DE_LA_FUENTE = [
+  // El pie de licencia.
   /se encuentra en dominio p[úu]blico/i,
   /fallecid?[oó] hace m[áa]s de \d+ a[ñn]os/i,
   /la traducci[óo]n de la obra puede no estar en dominio p[úu]blico/i,
+  /*
+   * Y el aviso de mantenimiento, que apareció después y entero: tres frases que la puerta
+   * anterior dejó pasar porque solo miraba el pie. La ironía conviene tenerla presente —es
+   * el aviso de que **la Fuente no consta**, y sin puerta se publicaría firmado por el Autor
+   * y cotejado contra su documento, porque la frase está literal en él: la escribió la Fuente.
+   *
+   * Dos aparatos distintos en la misma familia de Fuentes dicen que el aparato **no se
+   * acaba**. Cuando aparezca el tercero, su sitio es esta lista.
+   */
+  /la fuente de este texto no se ha especificado/i,
+  /a menos que se a[ñn]ada informaci[óo]n de derechos de autor/i,
+  /este aviso fue puesto el/i,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

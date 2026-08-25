@@ -295,3 +295,63 @@ describe('FR-24 — el aparato de la Fuente no se atribuye al Autor', () => {
     expect(resultado.candidatas.map((c) => c.texto)).toContain(suya);
   });
 });
+
+/**
+ * El aviso de mantenimiento tampoco es texto del Autor — FR-24.
+ *
+ * La puerta `aparato-de-la-fuente` se escribió mirando **un** aparato: el pie de licencia.
+ * Sembrando un ensayo apareció otro, y la puerta lo dejó pasar entero — tres frases que
+ * Wikisource escribe sobre las páginas cuya procedencia aún no ha comprobado:
+ *
+ *   «A menos que se añada información de derechos de autor y/o la fuente de este texto en la
+ *    página de discusión, puede ser borrado un mes después del día en el cual esta plantilla
+ *    fue agregada.»
+ *   «Este aviso fue puesto el 23 de octubre de 2018.»
+ *   «La fuente de este texto no se ha especificado.»
+ *
+ * La ironía vale la pena anotarla: es el aviso de que **la Fuente no consta**, y sin esta
+ * puerta se publicaría firmado por el Autor y cotejado contra su documento. El cotejo lo daría
+ * por bueno, porque la frase está literal en el documento — la escribió la Fuente.
+ *
+ * Con esto son dos aparatos distintos en dos Fuentes de la misma familia, así que la lección
+ * no es «añadir esta plantilla» sino que **el aparato no se acaba**: cada vez que aparezca uno
+ * nuevo, su sitio es esta lista y su prueba es esta.
+ */
+describe('FR-24 — el aviso de mantenimiento tampoco se atribuye al Autor', () => {
+  const AVISO_DE_WIKISOURCE = [
+    'La fuente de este texto no se ha especificado.',
+    'A menos que se añada información de derechos de autor y/o la fuente de este texto en la',
+    'página de discusión, puede ser borrado un mes después del día en el cual esta plantilla',
+    'fue agregada.',
+    'Este aviso fue puesto el 23 de octubre de 2018.',
+  ].join(' ');
+
+  it('ninguna de sus tres frases llega a candidata', () => {
+    const conAviso = documento({ texto: `${OBRA_EN_ESPAÑOL} ${AVISO_DE_WIKISOURCE}` });
+    const resultado = extraerCandidatas(conAviso, 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.every((c) => !/fuente de este texto/i.test(c.texto))).toBe(true);
+    expect(resultado.candidatas.every((c) => !/este aviso fue puesto/i.test(c.texto))).toBe(true);
+    expect(resultado.candidatas.every((c) => !/derechos de autor/i.test(c.texto))).toBe(true);
+  });
+
+  it('se descarta como aparato, no como otra cosa', () => {
+    // El motivo importa: contado como «longitud» o «repetida» el informe mentiría sobre por
+    // qué se fue, y la próxima vez nadie sabría que hay una puerta vigilando esto.
+    const conAviso = documento({ texto: `${OBRA_EN_ESPAÑOL} ${AVISO_DE_WIKISOURCE}` });
+    const resultado = extraerCandidatas(conAviso, 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.descartadas.some((d) => d.motivo === 'aparato-de-la-fuente')).toBe(true);
+  });
+
+  it('y la obra que venía con él sale intacta', () => {
+    const conAviso = documento({ texto: `${OBRA_EN_ESPAÑOL} ${AVISO_DE_WIKISOURCE}` });
+    const soloObra = extraerCandidatas(documento(), 'seneca');
+    const resultado = extraerCandidatas(conAviso, 'seneca');
+    if (!resultado.ok || !soloObra.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas).toHaveLength(soloObra.candidatas.length);
+  });
+});

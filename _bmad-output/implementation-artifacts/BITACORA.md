@@ -3391,3 +3391,50 @@ su contexto no dicen nada.
 
 **El tramo sigue abierto y ahora dice 191** (era 241). No se alcanza, y se dice — y ahora hay dos
 Autores que esperar, no uno.
+
+## 15.3 (43.ª sesión) — Treinta y una repartidas, y el aparato que no se acaba
+
+**569 → 600 Citas. 614 → 645 páginas. Concentración 20,0 % → 19,0 %.** El Corpus cruza las
+seiscientas, y esta vez **sin crear un techo nuevo**: los dos Autores sembrados quedan en el 13,0 %
+y el 11,7 %.
+
+**La regla de ayer se aplicó desde el minuto uno, y con la cuenta hecha antes de sembrar.** Se
+midieron cuatro canteras; dos no daban nada —una porque lo que le queda es verso, que sigue
+bloqueado, y otra porque su obra en prosa es un índice de 1.425 bytes— y las otras dos se
+repartieron con tope: nadie por encima del 13 %. La aritmética se hizo **antes**, no después.
+
+**El género vuelve a explicarlo todo mejor que el Autor.** Del mismo Autor que rindió un 29 % en
+sus ensayos filosóficos, un ensayo de viaje rindió **2 de 74: un 2,7 %**. No es peor escritor esa
+tarde: es prosa descriptiva, y una descripción no es una Cita. Las dos que salieron son las dos
+frases del ensayo que se sostienen fuera de él.
+
+### La puerta del aparato se quedó corta, y se vio en el mismo sitio de siempre
+
+Entre las candidatas del ensayo americano venían **tres frases que no son de su Autor**:
+
+    «La fuente de este texto no se ha especificado.»
+    «A menos que se añada información de derechos de autor y/o la fuente de este texto en la
+     página de discusión, puede ser borrado un mes después del día en el cual esta plantilla
+     fue agregada.»
+    «Este aviso fue puesto el 23 de octubre de 2018.»
+
+Es el **aviso de mantenimiento** de Wikisource, y la puerta `aparato-de-la-fuente` —escrita hace
+dos sesiones— lo dejó pasar entero, porque se escribió mirando el pie de licencia y solo el pie.
+
+**La ironía conviene tenerla escrita**: es el aviso de que *la Fuente no consta*, y sin puerta se
+habría publicado firmado por el Autor y cotejado contra su documento — el cotejo lo daría por
+bueno, porque la frase está literal en él. La escribió la Fuente.
+
+Arreglado con tres pruebas en rojo primero, y una de ellas comprueba el **motivo** del descarte y
+no solo que desaparezca: contado como «longitud» el informe mentiría sobre por qué se fue, y la
+próxima vez nadie sabría que hay una puerta vigilando esto. Se comprobó además que **ninguna Cita
+publicada** arrastra ninguna de las dos plantillas.
+
+La lección no es «añadir esta plantilla». Son dos aparatos distintos en la misma familia de
+Fuentes, así que **el aparato no se acaba**: cuando aparezca el tercero, su sitio es esa lista.
+
+`npx astro check` 0 errores; `npx vitest run` **1966/1966** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **645 páginas**.
+
+**El tramo sigue abierto y ahora dice 160** (era 191). No se alcanza, y se dice. El segundo Autor
+que pasa del techo cabe ya con **34 Citas más de cualquier otro**; el primero sigue pidiendo 760.
