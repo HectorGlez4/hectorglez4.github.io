@@ -2172,3 +2172,37 @@ páginas y 407 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 
 
 **Verificado en vivo** (25/08/2026, ejecución 32791852775 en verde): `sitemap-0.xml` declara
 **466 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (10.ª sesión) — Doce de los consejos a Sancho, y el barrido mecánico que no sirvió
+
+**429 → 441 Citas**, el sitio de **466 a 478 páginas**, el Autor más representado del 26,6 % al
+**25,9 %**, y el objetivo declarado de 331 a **319**. El build cuenta **419 Citas cotejadas**.
+
+**Se probó primero un barrido mecánico y salió mal, que también es un resultado.** Un patrón de
+refrán —frases de 25 a 105 caracteres que abren con «quien», «el que», «más vale», «no hay»,
+«cada», «todo»…, descartando las que traen guion de diálogo o nombre de personaje— devolvió 130
+candidatas del *Quijote*. Leídas las setenta primeras: «El licenciado Francisco Murcia de la
+Llana», «El cabrero, que le quiso defender, corrió el mesmo peligro», «Todo lo prometió
+Carrasco». Es el 2 % de la novela otra vez, y por debajo hay un motivo: **la forma sintáctica de
+un refrán no distingue un refrán de una oración narrativa cualquiera**. Lo que distingue es de
+qué habla, y eso ningún patrón lo ve.
+
+**Lo que sí funcionó fue ir a donde están.** Casi todo este lote sale de los **consejos de don
+Quijote a Sancho antes del gobierno de la Ínsula**, que es el pasaje más denso en sentencias del
+libro entero: doce propuestas, doce publicadas, cero en revisión.
+
+«Haz gala, Sancho, de la humildad de tu linaje». «Al que has de castigar con obras no trates mal
+con palabras». «Nunca te guíes por la ley del encaje, que suele tener mucha cabida con los
+ignorantes que presumen de agudos». «Hallen en ti más compasión las lágrimas del pobre, pero no
+más justicia, que las informaciones del rico». «Si acaso doblares la vara de la justicia, no sea
+con el peso de la dádiva, sino con el de la misericordia». «Come poco y cena más poco». «Sé
+templado en el beber, considerando que el vino demasiado ni guarda secreto ni cumple palabra». Y
+la definición de la historia: «la verdad, cuya madre es la historia, émula del tiempo, depósito de
+las acciones, testigo de lo pasado, ejemplo y aviso de lo presente, advertencia de lo por venir».
+
+**La lección de método, para las obras grandes que vengan:** en un libro largo no se busca la
+sentencia por su forma, se busca **el pasaje donde el autor está sentenciando** y se recoge
+entero. Tres sesiones, 45 Citas del *Quijote*, cero rechazos.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 478
+páginas y 419 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
