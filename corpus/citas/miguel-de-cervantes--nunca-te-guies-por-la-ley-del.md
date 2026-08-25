@@ -3,6 +3,7 @@ texto: "Nunca te guíes por la ley del encaje, que suele tener mucha cabida con 
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "miguel-de-cervantes-nunca-te-guies-por-la-ley-del"
 procedencia:
   obra: "Don Quijote"

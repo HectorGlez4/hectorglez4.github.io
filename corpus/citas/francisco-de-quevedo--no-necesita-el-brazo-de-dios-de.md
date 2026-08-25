@@ -3,6 +3,7 @@ texto: "No necesita el brazo de Dios de nuestros puñales para sus castigos, ni 
 autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "francisco-de-quevedo-no-necesita-el-brazo-de-dios-de"
 procedencia:
   obra: "Marco Bruto"

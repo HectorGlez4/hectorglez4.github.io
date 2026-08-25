@@ -12,4 +12,5 @@ fuente:
   url: "https://es.wikisource.org/wiki/Marco_Bruto"
 temas:
   - "la-verdad"
+  - "la-justicia"
 ---

@@ -5072,3 +5072,46 @@ crece con el Corpus**: de 3 declaradas a 12 reales en veinte sesiones.
 
 **La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, 12 Temas de 24, 16
 Autores de 35.
+
+## 15.5 (75.ª sesión) — El Tema trece, que llevaba quince sesiones declarado imposible
+
+**1000 Citas y 1046 páginas. Temas: 12 → 13.**
+
+### La cifra de ayer, aplicada a mí mismo
+
+La sesión anterior terminó con una lección: llevaba veinte sesiones repitiendo una cifra vieja sin
+volver a contarla. Lo primero de hoy fue preguntarse **qué otra cifra estoy repitiendo**.
+
+Y había una, en cada informe desde la 60.ª: «un Tema número trece no llega, porque ningún asunto
+junta quince Citas sin solaparse con uno de los doce por encima de lo que se solapan entre sí».
+**Aquella medida se hizo con 761 Citas. Hoy hay 1000.**
+
+Rehecha, la respuesta es otra. Con la misma vara —el solape máximo que ya comparten entre sí los
+Temas publicados, que es del 33 %— hay **once asuntos** que hoy pasan de quince Citas, y varios muy
+por debajo de ese solape: la justicia (55, solape 31 %), la guerra (32, 19 %), el trabajo (30, 23 %),
+la fama (21, 19 %), el miedo (20, 20 %).
+
+### «La justicia», leída y no contada por regex
+
+Se eligió el mayor y **se leyeron sus 54 coincidencias una por una**, porque un contador de palabras
+clave no distingue el asunto de la casualidad: «pena» es castigo y es tristeza, «derecho» es facultad
+y es recto. De las 54, **31 son de justicia de verdad**, y —lo que decide que sea un Tema y no una
+vista de otro— son de **ocho Autores distintos**, de cuatro siglos: la ley que se dobla con la
+dádiva, el juez que es oreja, la justicia tardía, el rigor de las penas contra la propiedad, el
+letrado que hurta con el entendimiento, y la justicia que anduvo desnuda hasta que la vistieron de
+papel.
+
+Quedan fuera las que traían la palabra de paso: las de educación como «ley» del espíritu, la del
+matrimonio con «iguales derechos», la de la pobreza «por ley de naturaleza».
+
+### Lo que esto dice del bucle
+
+El tramo de Temas no estaba cerrado por falta de asuntos: **estaba cerrado por una medida caducada
+que yo repetía**. El Corpus creció un 31 % y nadie volvió a preguntar. Quedan diez asuntos medidos y
+por leer, así que el trece no es el último.
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **1046 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, **13 Temas de 24**,
+16 Autores de 35, 16 Colecciones de 12 —puesto—.

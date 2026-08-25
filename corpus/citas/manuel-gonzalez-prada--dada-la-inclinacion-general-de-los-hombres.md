@@ -3,6 +3,7 @@ texto: "Dada la inclinación general de los hombres al abuso del poder, todo gob
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-dada-la-inclinacion-general-de-los-hombres"
 procedencia:
   obra: "El deber anárquico"

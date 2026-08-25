@@ -4,6 +4,7 @@ autor: "manuel-gonzalez-prada"
 temas:
   - "la-palabra"
   - "la-virtud"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-la-enormidad-de-un-crimen-o-de"
 procedencia:
   obra: "El sable"

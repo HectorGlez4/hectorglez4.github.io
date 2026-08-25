@@ -4,6 +4,7 @@ autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
   - "la-riqueza"
+  - "la-justicia"
 slug: "miguel-de-cervantes-hallen-en-ti-mas-compasion-las-lagrimas"
 procedencia:
   obra: "Don Quijote"

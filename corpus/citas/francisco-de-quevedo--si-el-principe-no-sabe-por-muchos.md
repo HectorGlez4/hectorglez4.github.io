@@ -3,6 +3,7 @@ texto: "Si el príncipe no sabe por muchos, muchos son los que le engañan; pues
 autor: "francisco-de-quevedo"
 temas:
   - "la-prudencia"
+  - "la-justicia"
 slug: "francisco-de-quevedo-si-el-principe-no-sabe-por-muchos"
 procedencia:
   obra: "Marco Bruto"

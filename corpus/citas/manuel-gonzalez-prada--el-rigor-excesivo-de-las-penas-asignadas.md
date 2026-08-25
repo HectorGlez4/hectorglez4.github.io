@@ -3,6 +3,7 @@ texto: "El rigor excesivo de las penas asignadas a los delitos contra la propied
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-el-rigor-excesivo-de-las-penas-asignadas"
 procedencia:
   obra: "El deber anárquico"

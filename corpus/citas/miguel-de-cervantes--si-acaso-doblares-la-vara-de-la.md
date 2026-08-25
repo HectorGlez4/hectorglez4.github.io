@@ -3,6 +3,7 @@ texto: "Si acaso doblares la vara de la justicia, no sea con el peso de la dádi
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "miguel-de-cervantes-si-acaso-doblares-la-vara-de-la"
 procedencia:
   obra: "Don Quijote"

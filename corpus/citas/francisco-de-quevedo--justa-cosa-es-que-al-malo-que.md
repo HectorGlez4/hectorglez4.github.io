@@ -3,6 +3,7 @@ texto: "Justa cosa es que al malo, que con su delito quiere difamar lo bueno de 
 autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "francisco-de-quevedo-justa-cosa-es-que-al-malo-que"
 procedencia:
   obra: "Marco Bruto"

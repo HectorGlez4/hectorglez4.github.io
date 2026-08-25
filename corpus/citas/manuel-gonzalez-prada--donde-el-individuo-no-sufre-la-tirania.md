@@ -3,6 +3,7 @@ texto: "Donde el individuo no sufre la tiranía de un gobierno, soporta la de la
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-donde-el-individuo-no-sufre-la-tirania"
 procedencia:
   obra: "El deber anárquico"

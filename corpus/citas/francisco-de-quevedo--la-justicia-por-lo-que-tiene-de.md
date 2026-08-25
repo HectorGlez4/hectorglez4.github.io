@@ -3,6 +3,7 @@ texto: "La justicia, por lo que tiene de verdad, andaba desnuda; ahora anda empa
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "la-justicia"
 slug: "francisco-de-quevedo-la-justicia-por-lo-que-tiene-de"
 procedencia:
   obra: "La visita de los chistes"

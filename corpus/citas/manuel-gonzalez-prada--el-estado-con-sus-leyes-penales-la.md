@@ -3,6 +3,7 @@ texto: "El Estado con sus leyes penales, la Iglesia con sus amenazas póstumas, 
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-el-estado-con-sus-leyes-penales-la"
 procedencia:
   obra: "El individuo"

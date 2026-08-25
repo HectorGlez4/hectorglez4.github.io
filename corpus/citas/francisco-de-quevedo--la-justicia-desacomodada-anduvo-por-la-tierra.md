@@ -3,6 +3,7 @@ texto: "La Justicia, desacomodada, anduvo por la tierra rogando a todos, y viend
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "la-justicia"
 slug: "francisco-de-quevedo-la-justicia-desacomodada-anduvo-por-la-tierra"
 procedencia:
   obra: "El alguacil endemoniado"

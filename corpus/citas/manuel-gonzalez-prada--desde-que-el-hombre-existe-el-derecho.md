@@ -3,6 +3,7 @@ texto: "Desde que el hombre existe, el derecho figura como un lujo de los fuerte
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-desde-que-el-hombre-existe-el-derecho"
 procedencia:
   obra: "La fuerza"

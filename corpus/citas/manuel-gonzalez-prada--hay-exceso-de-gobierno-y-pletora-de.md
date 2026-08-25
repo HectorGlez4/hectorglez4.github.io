@@ -3,6 +3,7 @@ texto: "Hay exceso de gobierno y plétora de leyes."
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-hay-exceso-de-gobierno-y-pletora-de"
 procedencia:
   obra: "El deber anárquico"

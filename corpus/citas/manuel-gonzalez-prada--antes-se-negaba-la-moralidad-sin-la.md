@@ -3,6 +3,7 @@ texto: "Antes se negaba la moralidad sin la religión; hoy no se admiten el orde
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-antes-se-negaba-la-moralidad-sin-la"
 procedencia:
   obra: "El estado"

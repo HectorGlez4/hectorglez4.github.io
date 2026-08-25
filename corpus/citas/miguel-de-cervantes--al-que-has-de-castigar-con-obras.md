@@ -3,6 +3,7 @@ texto: "Al que has de castigar con obras no trates mal con palabras, pues le bas
 autor: "miguel-de-cervantes"
 temas:
   - "la-palabra"
+  - "la-justicia"
 slug: "miguel-de-cervantes-al-que-has-de-castigar-con-obras"
 procedencia:
   obra: "Don Quijote"

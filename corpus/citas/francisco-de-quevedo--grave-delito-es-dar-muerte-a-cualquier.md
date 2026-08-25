@@ -3,6 +3,7 @@ texto: "Grave delito es dar muerte a cualquier hombre; mas darla al rey es malda
 autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "francisco-de-quevedo-grave-delito-es-dar-muerte-a-cualquier"
 procedencia:
   obra: "Marco Bruto"

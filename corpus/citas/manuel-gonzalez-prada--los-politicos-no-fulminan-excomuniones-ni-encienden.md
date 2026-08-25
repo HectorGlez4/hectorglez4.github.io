@@ -3,6 +3,7 @@ texto: "Los políticos no fulminan excomuniones ni encienden hogueras, mas decla
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-los-politicos-no-fulminan-excomuniones-ni-encienden"
 procedencia:
   obra: "El estado"

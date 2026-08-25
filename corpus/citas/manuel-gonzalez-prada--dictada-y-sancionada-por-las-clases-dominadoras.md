@@ -3,6 +3,7 @@ texto: "Dictada y sancionada por las clases dominadoras, la ley se reduce a la i
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-dictada-y-sancionada-por-las-clases-dominadoras"
 procedencia:
   obra: "El deber anárquico"

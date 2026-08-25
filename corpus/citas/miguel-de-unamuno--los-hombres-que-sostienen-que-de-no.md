@@ -3,6 +3,7 @@ texto: "Los hombres que sostienen que de no creer en el castigo eterno del infie
 autor: "miguel-de-unamuno"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "miguel-de-unamuno-los-hombres-que-sostienen-que-de-no"
 procedencia:
   obra: "Mi religión"

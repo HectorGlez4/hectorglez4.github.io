@@ -3,6 +3,7 @@ texto: "¿No hurta con el entendimiento el letrado que le da malo y torcido a la
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "la-justicia"
 slug: "francisco-de-quevedo-no-hurta-con-el-entendimiento-el-letrado"
 procedencia:
   obra: "El alguacil endemoniado"

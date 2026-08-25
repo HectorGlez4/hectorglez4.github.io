@@ -3,6 +3,7 @@ texto: "La antigüedad imaginó hijas de la Justicia a las Horas: mito de sentid
 autor: "jose-enrique-rodo"
 temas:
   - "el-tiempo"
+  - "la-justicia"
 slug: "jose-enrique-rodo-la-antiguedad-imagino-hijas-de-la-justicia"
 procedencia:
   obra: "Motivos de Proteo"

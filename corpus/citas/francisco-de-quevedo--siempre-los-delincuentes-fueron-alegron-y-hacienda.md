@@ -3,6 +3,7 @@ texto: "Siempre los delincuentes fueron alegrón y hacienda de los malos jueces:
 autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "francisco-de-quevedo-siempre-los-delincuentes-fueron-alegron-y-hacienda"
 procedencia:
   obra: "Marco Bruto"

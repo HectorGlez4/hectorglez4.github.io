@@ -3,6 +3,7 @@ texto: "El mismo Dios no castiga con bastón, sino con sazón."
 autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
+  - "la-justicia"
 slug: "baltasar-gracian-el-mismo-dios-no-castiga-con-baston"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

@@ -3,6 +3,7 @@ texto: "¿De qué la Ley de Imprenta si no sabemos ni leer?"
 autor: "manuel-gonzalez-prada"
 temas:
   - "el-saber"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-de-que-la-ley-de-imprenta-si"
 procedencia:
   obra: "Los partidos y la Unión Nacional"

@@ -3,6 +3,7 @@ texto: "No hay príncipe que, mientras vive, no sea entre sus lisonjeros héroe,
 autor: "baltasar-gracian"
 temas:
   - "la-verdad"
+  - "la-justicia"
 slug: "baltasar-gracian-no-hay-principe-que-mientras-vive-no"
 procedencia:
   obra: "El político"

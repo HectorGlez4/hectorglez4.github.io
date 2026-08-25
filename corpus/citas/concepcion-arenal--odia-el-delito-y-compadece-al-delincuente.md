@@ -4,6 +4,7 @@ autor: "concepcion-arenal"
 temas:
   - "la-virtud"
   - "la-libertad"
+  - "la-justicia"
 slug: "concepcion-arenal-odia-el-delito-y-compadece-al-delincuente"
 procedencia:
   referencia: "Lema de sus escritos sobre la reforma penitenciaria"
