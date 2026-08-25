@@ -3,6 +3,7 @@ texto: "Un rico necesita de sus monedas para vivir, y pueden perdérsele, y ya n
 autor: "jose-marti"
 temas:
   - "la-vida"
+  - "la-riqueza"
 slug: "jose-marti-un-rico-necesita-de-sus-monedas-para"
 procedencia:
   obra: "Educación popular"

@@ -3,6 +3,7 @@ texto: "Hallen en ti más compasión las lágrimas del pobre, pero no más justi
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-riqueza"
 slug: "miguel-de-cervantes-hallen-en-ti-mas-compasion-las-lagrimas"
 procedencia:
   obra: "Don Quijote"

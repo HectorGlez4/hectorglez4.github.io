@@ -3,6 +3,7 @@ texto: "El faisán, la perdiz son necesidades para el opulento, hijo de la gula;
 autor: "juan-montalvo"
 temas:
   - "la-virtud"
+  - "la-riqueza"
 slug: "juan-montalvo-el-faisan-la-perdiz-son-necesidades-para"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

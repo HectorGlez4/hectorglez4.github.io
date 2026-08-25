@@ -3,6 +3,7 @@ texto: "¿A cuántos son molestas sus mismas riquezas?"
 autor: "seneca"
 temas:
   - "la-vida"
+  - "la-riqueza"
 slug: "seneca-a-cuantos-son-molestas-sus-mismas-riquezas"
 procedencia:
   obra: "De la brevedad de la vida"

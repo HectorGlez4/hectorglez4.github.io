@@ -4,6 +4,7 @@ autor: "juan-montalvo"
 temas:
   - "la-adversidad"
   - "la-vida"
+  - "la-riqueza"
 slug: "juan-montalvo-la-pobreza-tiene-privilegios-que-la-riqueza"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

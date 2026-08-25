@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "la-libertad"
   - "la-vida"
+  - "la-riqueza"
 slug: "jose-marti-con-los-pobres-de-la-tierra-quiero"
 procedencia:
   obra: "Versos sencillos"

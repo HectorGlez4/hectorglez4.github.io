@@ -3,6 +3,7 @@ texto: "El pobre nunca lo tiene malo, porque la escasez y moderación le sirven 
 autor: "juan-montalvo"
 temas:
   - "la-adversidad"
+  - "la-riqueza"
 slug: "juan-montalvo-el-pobre-nunca-lo-tiene-malo-porque"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

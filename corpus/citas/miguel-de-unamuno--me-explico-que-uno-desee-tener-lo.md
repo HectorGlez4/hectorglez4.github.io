@@ -3,6 +3,7 @@ texto: "Me explico que uno desee tener lo que otro tiene, sus riquezas o sus con
 autor: "miguel-de-unamuno"
 temas:
   - "la-vida"
+  - "la-riqueza"
 slug: "miguel-de-unamuno-me-explico-que-uno-desee-tener-lo"
 procedencia:
   obra: "Del sentimiento trágico de la vida/I"

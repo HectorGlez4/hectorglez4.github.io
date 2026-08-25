@@ -3,6 +3,7 @@ texto: "Está condenado a morir un pueblo en que no se desenvuelven por igual la
 autor: "jose-marti"
 temas:
   - "la-vida"
+  - "la-riqueza"
 slug: "jose-marti-esta-condenado-a-morir-un-pueblo-en"
 procedencia:
   obra: "Maestros ambulantes"

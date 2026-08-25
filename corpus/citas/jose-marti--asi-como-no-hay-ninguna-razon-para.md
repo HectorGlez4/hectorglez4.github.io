@@ -3,6 +3,7 @@ texto: "Así como no hay ninguna razón para que el rico se eduque, y el pobre n
 autor: "jose-marti"
 temas:
   - "el-saber"
+  - "la-riqueza"
 slug: "jose-marti-asi-como-no-hay-ninguna-razon-para"
 procedencia:
   obra: "Educación popular"

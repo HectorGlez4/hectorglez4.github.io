@@ -3,6 +3,7 @@ texto: "El Señor promete el reino de los cielos a los pobres; de los ricos, dic
 autor: "juan-montalvo"
 temas:
   - "la-virtud"
+  - "la-riqueza"
 slug: "juan-montalvo-el-senor-promete-el-reino-de-los"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

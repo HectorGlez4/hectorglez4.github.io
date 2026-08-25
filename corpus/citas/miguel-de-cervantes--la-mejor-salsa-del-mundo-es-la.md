@@ -3,6 +3,7 @@ texto: "La mejor salsa del mundo es la hambre; y como ésta no falta a los pobre
 autor: "miguel-de-cervantes"
 temas:
   - "la-vida"
+  - "la-riqueza"
 slug: "miguel-de-cervantes-la-mejor-salsa-del-mundo-es-la"
 procedencia:
   obra: "Don Quijote"

@@ -2350,3 +2350,36 @@ Fuente en las dos Citas, y **afirma que publican las dos** antes de comprobar na
 
 `npx astro check` 0 errores sobre 190 ficheros; `npx vitest run` **1920/1920** en 62 ficheros
 (seis pruebas nuevas); `npm run build` 490 páginas.
+
+## 15.5 (15.ª sesión) — «La riqueza», el primer Tema abierto con la orden nueva
+
+**452 Citas, las mismas. 9 → 10 Temas publicados**, el sitio de 490 a **491 páginas**. El tramo de
+anchura avanza sin sembrar.
+
+Estreno de `tema asignar`: creado el Tema, una sola orden con diecisiete slugs y «Tema
+«la-riqueza»: 17 Citas marcadas». Lo que la sesión anterior costó un script, un fallo y una
+corrección, hoy es una línea.
+
+**«La riqueza», con 17 Citas**, y es de los asuntos que mejor cruzan el Corpus: Quevedo
+(«Poderoso caballero es don Dinero»), Montalvo entero («La pobreza tiene privilegios que la
+riqueza comprara a toda costa si los pudiera comprar»), Martí («Con los pobres de la tierra quiero
+yo mi suerte echar»), Cervantes («Hallen en ti más compasión las lágrimas del pobre, pero no más
+justicia, que las informaciones del rico»), Séneca, Unamuno.
+
+**Dos Temas medidos que no se crearon**, y el segundo trae la mejor lección de la noche sobre
+barridos:
+
+- **«La fama»** daba 16 por barrido y se queda en **10** al leerla. Entre las falsas, una que vale
+  el viaje: «nunca se ha de dar menos **crédito** a la fortuna que cuando se muestra favorable»
+  entró por «crédito», donde crédito es **creer**, no reputación. Es el mismo error que «Santo
+  Oficio» en el Tema del trabajo, y ya van dos: un barrido léxico no distingue la palabra del
+  sentido.
+- **«La soledad»** ni se acercó: 3.
+
+Van cinco asuntos medidos y descartados —el trabajo, la fama, la soledad, la muerte, la justicia—
+frente a dos abiertos. La proporción importa para lo que viene: **el Corpus, a 452 Citas, da de sí
+unos diez u once Temas honestos**. Los catorce que faltan para la meta no salen de repartir mejor
+lo que hay; salen de tener más.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 491
+páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.

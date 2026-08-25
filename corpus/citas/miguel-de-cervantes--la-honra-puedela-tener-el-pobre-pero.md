@@ -3,6 +3,7 @@ texto: "La honra puédela tener el pobre, pero no el vicioso; la pobreza puede a
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-riqueza"
 slug: "miguel-de-cervantes-la-honra-puedela-tener-el-pobre-pero"
 procedencia:
   obra: "Don Quijote"

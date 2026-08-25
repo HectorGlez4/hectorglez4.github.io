@@ -3,6 +3,7 @@ texto: "Dichosos los pobres si tienen qué comer, porque comen con hambre."
 autor: "juan-montalvo"
 temas:
   - "la-virtud"
+  - "la-riqueza"
 slug: "juan-montalvo-dichosos-los-pobres-si-tienen-que-comer"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

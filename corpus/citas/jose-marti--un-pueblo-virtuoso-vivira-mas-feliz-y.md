@@ -3,6 +3,7 @@ texto: "Un pueblo virtuoso vivirá más feliz y más rico que otro lleno de vici
 autor: "jose-marti"
 temas:
   - "la-virtud"
+  - "la-riqueza"
 slug: "jose-marti-un-pueblo-virtuoso-vivira-mas-feliz-y"
 procedencia:
   obra: "Educación popular"

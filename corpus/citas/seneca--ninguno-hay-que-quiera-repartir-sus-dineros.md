@@ -3,6 +3,7 @@ texto: "Ninguno hay que quiera repartir sus dineros, habiendo muchos que distrib
 autor: "seneca"
 temas:
   - "el-tiempo"
+  - "la-riqueza"
 slug: "seneca-ninguno-hay-que-quiera-repartir-sus-dineros"
 procedencia:
   obra: "De la brevedad de la vida"
