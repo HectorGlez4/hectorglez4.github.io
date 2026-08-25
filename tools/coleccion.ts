@@ -27,7 +27,7 @@ import {
   crearColeccion,
   despublicarColeccion,
   estadoDeColeccion,
-  inventarioDeColecciones,
+  inventarioConSolape,
   inventarioDeRetiradas,
   publicarColeccion,
   quitarCitas,
@@ -40,7 +40,7 @@ import {
   raizDeCorpusDe,
   terminar,
 } from './lib/cli.ts';
-import { lineaDeHueco, lineaDePublicada } from '../src/lib/formato.ts';
+import { lineaDeHueco, lineaDePublicada, porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { MIN_CITAS_POR_COLECCION } from '../src/lib/umbrales.ts';
 
 /** Las opciones que consumen el argumento siguiente, para que no se cuelen de posicional. */
@@ -146,13 +146,27 @@ try {
       // Como en `tools/tema.ts listar`: la pregunta que uno se hace mirando la lista es
       // cuál está a punto de publicarse y cuál se quedó corta, y se contesta con la misma
       // línea que la vista de huecos.
-      const colecciones = await inventarioDeColecciones(rutas);
+      const colecciones = await inventarioConSolape(rutas);
       const lineas =
         colecciones.length === 0
           ? ['No hay ninguna Colección en corpus/colecciones/. Cree la primera con «crear».']
-          : colecciones.map((c) =>
+          : colecciones.flatMap((c) => [
               c.faltan === 0 ? lineaDePublicada(c, MIN_CITAS_POR_COLECCION) : lineaDeHueco(c),
-            );
+              /*
+               * El solape va debajo de cada fila y no en una columna: son dos porcentajes y el
+               * nombre de una superficie, y en una tabla de ancho fijo eso obliga a recortar
+               * justo lo que hay que leer. Duplicar es que las dos listas sean la misma, así que
+               * los dos números tienen que verse enteros.
+               */
+              ...(c.solape.mayor === undefined
+                ? []
+                : [
+                    `                       ↳ ${porcentajeEnEspañol(c.solape.mayor.porcentaje)} % ` +
+                      `de ella se ve también en ${c.solape.mayor.clase === 'autor' ? 'el Autor' : 'el Tema'} ` +
+                      `«${c.solape.mayor.slug}», y es el ` +
+                      `${porcentajeEnEspañol(c.solape.mayor.porcentajeDeLaSuperficie)} % de esa página.`,
+                  ]),
+            ]);
 
       /*
        * Y las retiradas, en su propio bloque. El rechazo de una orden que no encuentra una

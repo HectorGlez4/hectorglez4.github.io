@@ -2889,3 +2889,40 @@ un Tema es una lista ya curada.
 
 `npx astro check` 0 errores; `npx vitest run` **1934/1934** en 62 ficheros; `npm run build` 501
 páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+## 15.2 (31.ª sesión) — La auditoría deja de ser un guion de usar y tirar
+
+**456 Citas, 16 Colecciones, 501 páginas: sin cambios en el sitio.** La sesión auditó las dieciséis
+Colecciones con la medida de ayer y **ninguna duplica**. Después movió la auditoría a la
+herramienta, que es lo que hacía falta para que se pueda repetir.
+
+**El resultado, ordenado por duplicación —el mínimo de las dos coberturas—:**
+
+| Duplicación | Colección | Cobertura de ella / de la superficie |
+|---|---|---|
+| 79 % | Cuatro mujeres | 79,3 % / **100 %** de una Autora con 23 Citas |
+| 64 % | El uniforme y la sotana | 64 % / **100 %** de un Autor con 16 |
+| 63 % | Elogio de lo escaso | 80 % / 63,2 % |
+| ≤ 50 % | las trece restantes | — |
+
+**Ninguna es un duplicado, y el motivo importa.** Las tres de arriba lo son por **contener la
+Página entera de un Autor pequeño**, no por repetir una lista: la Colección enseña más de lo que
+esa página enseña, y mezcla voces que allí no están. La duplicación que había que evitar es la
+contraria —que la Colección **no añada nada** sobre una página existente—, y esa no aparece en
+ninguna de las dieciséis.
+
+**Y la lección de método, que es la tercera de la noche del mismo tipo.** La auditoría se hizo con
+un guion de usar y tirar, y eso garantiza que la próxima vez haya que volver a escribirlo. Así que
+la medida vive ahora en `coleccion listar`: cada fila lleva debajo su solape con los dos
+porcentajes enteros.
+
+```
+Amigos de los que fiarse  19 publicadas  ·  se publica (umbral 15)
+                       ↳ 89,5 % de ella se ve también en el Tema «la-amistad», y es el 50 % de esa página.
+```
+
+Va de aviso en prosa a puerta de código tres veces esta noche: el duplicado por contención, la
+regla de distinción, y ahora la auditoría. **Lo que no está en la herramienta no se aplica.**
+
+`npx astro check` 0 errores; `npx vitest run` **1935/1935** en 62 ficheros; `npm run build` 501
+páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.

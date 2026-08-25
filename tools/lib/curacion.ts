@@ -198,6 +198,40 @@ export async function inventarioDeColecciones(rutas: Rutas): Promise<HuecoDeCole
     .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
 }
 
+/** Una Colección del inventario con su solape mayor al lado. */
+export interface ColeccionConSolape extends HuecoDeColeccion {
+  solape: SolapeDeColeccion;
+}
+
+/**
+ * El inventario, y para cada Colección cuánto de su lista se ve ya en otra parte — Historia 15.2.
+ *
+ * La primera auditoría de las dieciséis Colecciones se hizo con un guion de usar y tirar, y esa
+ * es exactamente la forma de que no se repita: la próxima vez habría que volver a escribirlo. Si
+ * la medida vale para curar una, vale para mirarlas todas, y su sitio es la orden que ya las
+ * enumera.
+ *
+ * Las Colecciones sin miembros siguen en la lista, con el solape ausente: lo que se pregunta
+ * mirando el inventario es cuáles están cerca de publicarse, y una vacía es la que más lejos
+ * está — esconderla sería esconder el trabajo pendiente.
+ */
+export async function inventarioConSolape(rutas: Rutas): Promise<ColeccionConSolape[]> {
+  const colecciones = await leerColecciones(rutas);
+  const citas = await citasPublicadas(rutas);
+  const porSlug = new Map(
+    coleccionesParaHuecos(colecciones, citas).map((c) => [c.slug, c] as const),
+  );
+  const publicadas = citas as unknown as { slug: string; autor: string; temas?: string[] }[];
+
+  return [...porSlug.values()]
+    .map((c) => {
+      const declarados = colecciones.find((x) => x.slug === c.slug)?.miembros ?? [];
+      const resueltos = declarados.filter((s) => publicadas.some((p) => p.slug === s));
+      return { ...huecoDeColeccion(c), solape: solapeDeColeccion(resueltos, publicadas) };
+    })
+    .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
+}
+
 /**
  * Las Citas publicadas, que son las de `corpus/citas/` y ninguna más (AD-2).
  *

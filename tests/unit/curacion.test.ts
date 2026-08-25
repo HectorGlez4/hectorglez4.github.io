@@ -10,6 +10,7 @@ import {
   crearColeccion,
   despublicarColeccion,
   estadoDeColeccion,
+  inventarioConSolape,
   solapeDeColeccion,
   inventarioDeColecciones,
   inventarioDeRetiradas,
@@ -742,5 +743,30 @@ describe('Historia 15.2 — duplicar es que las dos listas sean la misma', () =>
     expect(solape.mayor?.clase).toBe('tema');
     expect(solape.mayor?.slug).toBe('el-espejo');
     expect(solape.mayor?.porcentajeDeLaSuperficie).toBe(100);
+  });
+});
+
+describe('Historia 15.2 — el inventario enseña el solape de cada Colección', () => {
+  /*
+   * La auditoría de las dieciséis Colecciones se hizo con un guion de usar y tirar, y esa es
+   * justo la forma de que no se repita: la próxima vez habría que volver a escribirlo. Si la
+   * medida vale para curar una, vale para mirarlas todas, y su sitio es la orden que ya las
+   * enumera.
+   */
+  it('cada fila trae su solape mayor, y las Colecciones sin miembros no revientan', async () => {
+    const rutas = await conColeccion({ publicadas: MIN_CITAS_POR_COLECCION });
+    await crearColeccion(rutas, { nombre: 'Vacía del todo', criterio: 'Todavía sin miembros.' });
+    const slugs = Array.from({ length: MIN_CITAS_POR_COLECCION }, (_, i) => slugDeCita(i));
+    await asignarCitas(rutas, SLUG, slugs);
+
+    const inventario = await inventarioConSolape(rutas);
+
+    const conMiembros = inventario.find((c) => c.slug === SLUG);
+    expect(conMiembros?.solape?.mayor?.clase).toBe('autor');
+    expect(conMiembros?.solape?.mayor?.porcentaje).toBe(100);
+
+    const vacia = inventario.find((c) => c.slug === 'vacia-del-todo');
+    expect(vacia, 'la Colección sin miembros sigue en el inventario').toBeDefined();
+    expect(vacia?.solape?.mayor).toBeUndefined();
   });
 });
