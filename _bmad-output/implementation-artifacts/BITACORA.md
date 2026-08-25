@@ -3345,3 +3345,49 @@ de producto, no un ajuste. Queda en `deferred-work.md` con la lista de las 16 y 
 392 pasadas, 14 saltadas; `npm run build` **564 páginas**.
 
 **El tramo sigue abierto y ahora dice 241** (era 273). No se alcanza, y se dice.
+
+## 15.3 (42.ª sesión) — Cincuenta de Séneca, y un techo nuevo que me puse yo solo
+
+**519 → 569 Citas. 564 → 614 páginas. Concentración 22,0 % → 20,0 %.** Cincuenta Citas, la mayor
+siembra del bucle. Y el informe cierra con una línea que es sobre mí:
+
+> El Autor más representado aporta 114 Citas, un 20 % — por encima del techo del 15 %
+> **(lo pasan 2 Autores)**
+
+**Diluí a uno concentrando a otro.** El Autor de esta sesión pasa de 45 a 95 Citas sobre un Corpus
+de 569: un **16,7 %**, por encima del techo. Antes de sembrar estaba en el 8,7 % y no estorbaba a
+nadie. Las cincuenta son buenas y están bien cotejadas; el error no está en ninguna de ellas, está
+en **haberlas sacado todas del mismo Autor**.
+
+**No se retira ninguna, y no es indulgencia: es la política.** «Se cierra diluyendo, nunca
+despublicando», y eso vale también cuando el que concentró fui yo. Retirar Citas buenas para
+maquillar un porcentaje sería exactamente lo que la regla prohíbe.
+
+**Lo que sí cambia es el método, y esta es la regla nueva:** repartir entre Autores en vez de
+vaciar la mejor cantera. El tramo no pide diluir a uno, pide que **ninguno** pase del 15 %, y una
+sesión de cincuenta en un solo nombre lo cumple por un lado y lo rompe por el otro. La cuenta
+ahora: hacen falta 634 Citas para que quepa el segundo y **760 para el primero**.
+
+**Y hay una simetría que merece anotarse.** El aviso «lo pasan 2 Autores» existe porque en la
+34.ª sesión se arregló que el techo vigilara a **todos** los Autores y no solo al primero. El
+comentario de aquel commit decía «casi lo pago». Hoy esa corrección ha cazado mi propio error, y
+si no la hubiera hecho, esta sesión habría cerrado dando el tramo por más cerca de lo que está.
+
+### La cantera, y por qué era la buena
+
+Se midieron tres canteras antes de tocar nada. Una no tenía nada nuevo utilizable; otra no
+resolvía por el nombre de su página de Autor. La tercera —**catorce obras, cinco de ellas tratados
+morales de entre 37 y 80 KB**— es la mayor reserva de calidad del Corpus, y del género que más
+rinde.
+
+Los tres documentos recuperados **cotejaron Autor en seco**, la comprobación que ahora va primero.
+319 candidatas, 50 publicadas: un **16 %**, por debajo del 29 % de la prosa filosófica moderna y
+por una razón concreta del texto — es una traducción del XVII donde muchas frases arrastran pegado
+su «Capítulo XIV», que es aparato y no texto, y otras muchas son ejemplos históricos que fuera de
+su contexto no dicen nada.
+
+`npx astro check` 0 errores; `npx vitest run` **1960/1960** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **614 páginas**.
+
+**El tramo sigue abierto y ahora dice 191** (era 241). No se alcanza, y se dice — y ahora hay dos
+Autores que esperar, no uno.
