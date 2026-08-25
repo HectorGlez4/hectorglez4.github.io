@@ -2550,3 +2550,35 @@ esperando.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 493
 páginas.
+
+## 15.5 (21.ª sesión) — La primera revisión visual, y lo que veintidós «200 OK» no veían
+
+**452 Citas, 12 Temas, 493 páginas: sin cambios.** La sesión gastó la puerta 5 del protocolo —la
+que pide navegador— que llevaba veintidós despliegues sin ejercerse de verdad: se comprobaba el
+código HTTP, el sitemap y la canónica, y **nunca se había mirado una página**.
+
+**Lo que se vio.** Con las doce Colecciones publicadas, la Página de Colección enseña **título y
+lista, y nada más**. El criterio —lo único que responde a «¿por qué están juntas?»— va **dos veces
+en la cabecera** y **cero en el cuerpo**. En `/coleccion/empezar-de-nuevo`, `curl` encuentra «Para
+quien creyó que ya no había otra vida posible dentro de la suya…» en el HTML; el texto de `<main>`
+no lo encuentra.
+
+**Y es peor por culpa de esta bitácora.** La mitad de las Colecciones que se curaron aquí llevan
+**nombre metafórico** —«El uniforme y la sotana», «Empezar de nuevo», «Los escollos del trato»—
+porque parecían mejores títulos. Con el criterio invisible, un título figurado es **peor** que uno
+literal: «La riqueza» se explica solo y «El uniforme y la sotana» no. Quien llega de un buscador
+ve un título que no entiende y una lista sin razón declarada.
+
+**Segundo efecto, del mismo sitio:** la Página de Colección y la de Tema son **visualmente
+indistinguibles** —título, línea, lista de Citas con su Autor—, así que la superficie que debía
+aportar «un criterio editorial» se lee como un Tema más.
+
+**No se tocó, y a propósito.** La 12.3 dejó escrito que `DESIGN.md` y `EXPERIENCE.md` no cubren
+esta página (UX-DR37) y que el bucle no inventa presentación. El dato ya está ahí; lo que falta es
+decidir enseñarlo y dónde. Queda en `deferred-work.md` con la evidencia.
+
+**Lo demás salió bien:** en móvil (375×812) la maqueta es holgada y legible, sin desbordes ni
+cortes, y la Página de Tema se lee igual de bien en escritorio.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 493
+páginas.

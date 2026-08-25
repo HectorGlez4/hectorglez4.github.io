@@ -168,3 +168,29 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     no existe: si un Tema se asigna por error a una Cita, hoy se corrige editando el
     frontmatter a mano, que es justo lo que `asignar` vino a evitar. No es urgente —`eliminar`
     borra el Tema entero y la asignación es idempotente y comprobada— pero la asimetría está.
+
+- source_spec: Historia 12.3 / UX-DR37 — visto en vivo en la 21.ª sesión del bucle v4
+  summary: El criterio de una Colección se sirve al buscador y se le esconde al visitante.
+  evidence: |-
+    Con las doce Colecciones ya publicadas, la Página de Colección enseña **título y lista de
+    Citas, y nada más**. El criterio —lo único que responde a «¿por qué están juntas?»— aparece
+    **dos veces en la cabecera** (`<meta name="description">` y `og:description`) y **cero veces
+    en el cuerpo**. Comprobado en vivo sobre `/coleccion/empezar-de-nuevo`: el `curl` encuentra
+    «Para quien creyó que ya no había otra vida posible dentro de la suya…» en el HTML, y
+    `get_page_text` sobre `<main>` no lo encuentra.
+
+    Duele más de lo que parecía porque la mitad de las Colecciones curadas llevan **nombre
+    metafórico** —«El uniforme y la sotana», «Empezar de nuevo», «Los escollos del trato»,
+    «Achaques de necedad»—. Un Tema como «La riqueza» se explica solo; un título figurado, no.
+    Quien llega desde un buscador ve un título que no entiende y una lista sin razón declarada.
+
+    Y hay un segundo efecto: **la Página de Colección y la Página de Tema son visualmente
+    indistinguibles** —título, línea, lista de Citas con su Autor—, así que la superficie que
+    debía aportar «un criterio editorial» se lee como un Tema más.
+
+    No se tocó, y a propósito: la BITÁCORA de la 12.3 dejó escrito que `DESIGN.md` y
+    `EXPERIENCE.md` no cubren esta página (UX-DR37) y que el bucle no inventa presentación. El
+    dato ya está en la página; lo que falta es la decisión de enseñarlo y dónde.
+
+    Lo demás de la revisión visual salió bien: en móvil (375×812) la maqueta es holgada y
+    legible, sin desbordes ni cortes.
