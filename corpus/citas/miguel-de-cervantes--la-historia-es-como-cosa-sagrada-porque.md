@@ -3,6 +3,7 @@ texto: "La historia es como cosa sagrada; porque ha de ser verdadera, y donde es
 autor: "miguel-de-cervantes"
 temas:
   - "el-saber"
+  - "la-verdad"
 slug: "miguel-de-cervantes-la-historia-es-como-cosa-sagrada-porque"
 procedencia:
   obra: "Don Quijote"

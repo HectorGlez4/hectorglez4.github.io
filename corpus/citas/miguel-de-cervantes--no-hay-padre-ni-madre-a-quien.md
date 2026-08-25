@@ -3,6 +3,7 @@ texto: "no hay padre ni madre a quien sus hijos le parezcan feos, y en los que l
 autor: "miguel-de-cervantes"
 temas:
   - "la-vida"
+  - "la-verdad"
 slug: "miguel-de-cervantes-no-hay-padre-ni-madre-a-quien"
 procedencia:
   obra: "Don Quijote"

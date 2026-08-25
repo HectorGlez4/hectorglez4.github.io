@@ -3,6 +3,7 @@ texto: "Conozca al que siempre ríe por falto, y al que nunca por falso."
 autor: "baltasar-gracian"
 temas:
   - "la-amistad"
+  - "la-verdad"
 slug: "baltasar-gracian-conozca-al-que-siempre-rie-por-falto"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

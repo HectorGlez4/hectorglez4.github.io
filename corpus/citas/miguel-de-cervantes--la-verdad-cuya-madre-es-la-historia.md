@@ -3,6 +3,7 @@ texto: "la verdad, cuya madre es la historia, émula del tiempo, depósito de la
 autor: "miguel-de-cervantes"
 temas:
   - "el-saber"
+  - "la-verdad"
 slug: "miguel-de-cervantes-la-verdad-cuya-madre-es-la-historia"
 procedencia:
   obra: "Don Quijote"

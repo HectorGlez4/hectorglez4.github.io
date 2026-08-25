@@ -2280,3 +2280,39 @@ de método: es la cuenta. Y admitir es lo único que este producto no delega.
 
 `npx astro check` 0 errores; `npx vitest run` **1914/1914** en 62 ficheros (cuatro pruebas nuevas);
 `npm run build` 489 páginas y 430 cotejadas.
+
+## 15.3 → 15.5 (13.ª sesión) — Un Tema nuevo sin sembrar una Cita, y uno que no se creó
+
+**452 Citas, las mismas.** Lo que cambia es la anchura: **8 → 9 Temas publicados**, el sitio de
+489 a **490 páginas**, y el tramo de Temas empieza sin haber recuperado ni un documento.
+
+**Por qué se movió de tramo.** El de concentración quedó sin trabajo disponible, y con la cuenta
+delante: el segundo Autor tiene **seis Citas de margen** bajo el techo, y llevarlo al borde sería
+pintarse en una esquina —cualquier Cita suya posterior lo rompería—. Los demás Autores admitidos
+tienen sus documentos densos exprimidos. El tramo sigue declarándose y sigue bloqueado en la
+admisión, que no es del bucle. Se pasa a lo siguiente que sí está desbloqueado y lo dice aquí.
+
+**Un Tema se cura como una Colección: sobre lo ya publicado.** Medidos ocho asuntos que laten en
+las 452 Citas —la muerte 10, la justicia 11, la verdad 20, el trabajo 16, la envidia 7, la
+esperanza 3, el poder 12, la belleza 6—, dos pasaban el umbral por barrido. Leídos uno a uno,
+solo uno lo pasa de verdad.
+
+**«La verdad», con 17 Citas.** Machado («La verdad es lo que es, y sigue siendo verdad aunque se
+piense al revés»), Cervantes («la verdad adelgaza y no quiebra»; «la verdad, cuya madre es la
+historia»), Gracián sobre el engaño y el desengaño, Martí sobre el pueblo al que se engaña con
+superstición, Unamuno, Sor Juana.
+
+**«El trabajo» no se creó, y ese es el resultado honesto.** El barrido daba 16; leídas, solo 12
+hablan de trabajo. Las otras cuatro son falsos positivos, y una es preciosa: «no quiero ruido con
+el **Santo Oficio**» entró por «oficio». Doce está por debajo de quince y el umbral no se baja
+para que salga un Tema: el Tema no sale y se dice.
+
+**Dos avisos para quien siga por aquí.** Primero: **no hay orden para etiquetar Temas en Citas ya
+publicadas**. `tema` crea y elimina; `alta` escribe Citas nuevas. Marcar diecisiete Citas
+existentes se hizo editando su frontmatter, que es legítimo —los ficheros son el Corpus— pero
+merece herramienta si el tramo de anchura va a repetirlo quince veces. Segundo: el primer intento
+saltó **cuatro** Citas porque comprobaba `'la-verdad' in fichero` y el **slug** de las más
+centradas contiene esa cadena. Se corrigió mirando la línea del Tema y no el fichero entero.
+
+`npx astro check` 0 errores; `npx vitest run` **1914/1914** en 62 ficheros; `npm run build` 490
+páginas y 430 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.

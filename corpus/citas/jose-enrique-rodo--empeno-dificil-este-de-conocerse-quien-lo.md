@@ -3,6 +3,7 @@ texto: "Empeño difícil éste de conocerse -¿quién lo duda?- y expuesto a mil
 autor: "jose-enrique-rodo"
 temas:
   - "el-saber"
+  - "la-verdad"
 slug: "jose-enrique-rodo-empeno-dificil-este-de-conocerse-quien-lo"
 procedencia:
   obra: "Motivos de Proteo"

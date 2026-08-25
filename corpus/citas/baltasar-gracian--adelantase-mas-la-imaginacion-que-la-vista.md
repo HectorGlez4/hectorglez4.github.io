@@ -3,6 +3,7 @@ texto: "Adelántase más la imaginación que la vista, y el engaño, que entra d
 autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
+  - "la-verdad"
 slug: "baltasar-gracian-adelantase-mas-la-imaginacion-que-la-vista"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

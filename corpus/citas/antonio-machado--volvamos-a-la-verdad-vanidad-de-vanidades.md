@@ -3,6 +3,7 @@ texto: "Volvamos a la verdad: vanidad de vanidades."
 autor: "antonio-machado"
 temas:
   - "el-saber"
+  - "la-verdad"
 slug: "antonio-machado-volvamos-a-la-verdad-vanidad-de-vanidades"
 procedencia:
   obra: "Proverbios y cantares"

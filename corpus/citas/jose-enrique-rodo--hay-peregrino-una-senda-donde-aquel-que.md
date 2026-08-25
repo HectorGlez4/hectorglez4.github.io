@@ -3,6 +3,7 @@ texto: "Hay, peregrino, una senda, donde aquel que entra y avanza pierde temor a
 autor: "jose-enrique-rodo"
 temas:
   - "la-adversidad"
+  - "la-verdad"
 slug: "jose-enrique-rodo-hay-peregrino-una-senda-donde-aquel-que"
 procedencia:
   obra: "Motivos de Proteo"

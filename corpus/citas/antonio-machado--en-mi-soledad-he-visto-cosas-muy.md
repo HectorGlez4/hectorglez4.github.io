@@ -4,6 +4,7 @@ autor: "antonio-machado"
 temas:
   - "la-adversidad"
   - "el-saber"
+  - "la-verdad"
 slug: "antonio-machado-en-mi-soledad-he-visto-cosas-muy"
 procedencia:
   obra: "Proverbios y cantares (Nuevas Canciones)"

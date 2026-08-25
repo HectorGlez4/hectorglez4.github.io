@@ -3,6 +3,7 @@ texto: "Fíngense de menos edad, y lisonjéanse con la mentira; engáñanse con 
 autor: "seneca"
 temas:
   - "el-tiempo"
+  - "la-verdad"
 slug: "seneca-fingense-de-menos-edad-y-lisonjeanse-con"
 procedencia:
   obra: "De la brevedad de la vida"

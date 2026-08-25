@@ -3,6 +3,7 @@ texto: "La verdad es lo que es, y sigue siendo verdad aunque se piense al revés
 autor: "antonio-machado"
 temas:
   - "el-saber"
+  - "la-verdad"
 slug: "antonio-machado-la-verdad-es-lo-que-es-y"
 procedencia:
   obra: "Proverbios y cantares"

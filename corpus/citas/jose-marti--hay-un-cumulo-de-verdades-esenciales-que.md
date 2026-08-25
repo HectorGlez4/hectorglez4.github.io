@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "la-palabra"
   - "el-saber"
+  - "la-verdad"
 slug: "jose-marti-hay-un-cumulo-de-verdades-esenciales-que"
 procedencia:
   obra: "Maestros ambulantes"

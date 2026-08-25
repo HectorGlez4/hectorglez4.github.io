@@ -3,6 +3,7 @@ texto: "Confiemos en que no será verdad nada de lo que sabemos."
 autor: "antonio-machado"
 temas:
   - "el-saber"
+  - "la-verdad"
 slug: "antonio-machado-confiemos-en-que-no-sera-verdad-nada"
 procedencia:
   obra: "Proverbios y cantares"

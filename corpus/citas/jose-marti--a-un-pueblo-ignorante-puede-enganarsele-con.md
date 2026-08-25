@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "el-saber"
   - "la-libertad"
+  - "la-verdad"
 slug: "jose-marti-a-un-pueblo-ignorante-puede-enganarsele-con"
 procedencia:
   obra: "Educación popular"

@@ -3,6 +3,7 @@ texto: "Arte era de artes saber discurrir: ya no basta, menester es adivinar, y 
 autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
+  - "la-verdad"
 slug: "baltasar-gracian-arte-era-de-artes-saber-discurrir-ya"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

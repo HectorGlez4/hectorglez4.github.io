@@ -3,6 +3,7 @@ texto: "la verdad adelgaza y no quiebra, y siempre anda sobre la mentira como el
 autor: "miguel-de-cervantes"
 temas:
   - "la-palabra"
+  - "la-verdad"
 slug: "miguel-de-cervantes-la-verdad-adelgaza-y-no-quiebra-y"
 procedencia:
   obra: "Don Quijote"
