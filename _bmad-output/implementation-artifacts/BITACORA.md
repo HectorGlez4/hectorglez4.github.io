@@ -3693,3 +3693,48 @@ comentario.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35. Lo que hace falta sigue cabiendo en una línea: **nombres de Autor, o URL de Wikisource**.
+
+## 15.1 (49.ª sesión) — Las Colecciones se curaron con 456 Citas y el Corpus tiene 761
+
+**761 Citas y 806 páginas: las mismas.** Lo que cambia son **cuatro páginas de Colección**, que
+llevaban diez sesiones sin ver nada de lo sembrado desde que se curaron.
+
+**El hallazgo es de arqueología, no de medida.** Los miembros de una Colección son una **lista
+explícita** en su `.yml`: se escriben al curarla y no se actualizan solos. Las dieciséis se curaron
+entre las sesiones 30.ª y 34.ª, cuando el Corpus tenía 456 Citas. Hoy tiene 761 — **305 Citas que
+ninguna Colección había mirado**, y varias de ellas estaban clavadas en el mínimo de quince.
+
+| Colección | Antes | Ahora |
+|---|---|---|
+| Prevenirse en la próspera | 19 | **28** |
+| El uniforme y la sotana | 25 | **35** |
+| El yo frente a la muchedumbre | 17 | **25** |
+| Saber para ser libre | 17 | **24** |
+
+**Y dos de ellas no solo crecieron: se ensancharon.** «Saber para ser libre» era **100 % de un solo
+Autor** —una selección suya con otro nombre— y ahora es el 79,2 %, con tres Autores más dentro. «El
+yo frente a la muchedumbre» baja del 35 % al 24 %. Esa es la mejora que importa: una Colección que
+coincide con una Página de Autor no aporta una página, la repite.
+
+**Lo que se descartó, que es la mitad del trabajo.** En una Colección de catorce candidatas que
+encajaban, se asignaron **diez**: doce de las catorce eran del mismo Autor y la Colección ya era un
+64 % suya. Cargarla entera la habría convertido en su página con otro nombre. Se metieron los dos
+de otro Autor a propósito, para que no se estrechara.
+
+Y una se dejó fuera por coherencia y no por calidad: «Un Miserere, cantado en común por una
+muchedumbre, azotada del destino, vale tanto como una filosofía» es excelente y dice **lo
+contrario** del criterio de «El yo frente a la muchedumbre» —que va de lo que la multitud te quita—.
+Una Colección es un criterio, no un tema; lo que lo contradice no entra aunque case por palabras.
+
+**La regla la dice la propia herramienta**, y por eso se comprobó cada asignación con
+`coleccion estado`: «duplicar es que las dos listas sean la misma: hacen falta los dos porcentajes
+altos». Las cuatro quedan con el segundo porcentaje entre el 14 % y el 40 %.
+
+**Queda anotado para quien siga:** las otras doce Colecciones siguen sin revisar contra el Corpus
+nuevo, y seis de ellas están en el mínimo de quince.
+
+`npx astro check` 0 errores; `npx vitest run` **1982/1982** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35. El tramo declarado sigue siendo el que no se delega.
