@@ -4242,3 +4242,66 @@ páginas**; `npx playwright test` **2 fallos** —la misma prueba en sus dos pro
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## Historia 11.2 (59.ª sesión) — Una Cita publicada decía «junio» donde su edición dice «julio»
+
+**761 Citas y 806 páginas: las mismas.** El censo de pendientes de cotejo baja de **22 a 21**, y
+la que sale lo hace porque **estaba mal**.
+
+### Lo que se buscaba y lo que apareció
+
+La pregunta era sencilla: de las 22 Citas del censo cerrado —las anteriores a la 11.2, que se
+publicaron cuando la Procedencia se tecleaba—, ¿alguna aparece ya en alguno de los **82 documentos**
+que hoy tiene el Corpus? Respuesta literal: **ninguna**.
+
+Pero comparando **sin signos** aparecieron cinco, y una de ellas no difería en signos:
+
+    publicado: Cultivo una rosa blanca en junio como en enero.
+    edición  : Cultivo una rosa blanca / En julio como enero,
+
+**«Junio» donde la edición dice «julio».** No es una variante de puntuación: es otra palabra, en un
+verso que el Corpus tiene versionado desde hace semanas. La Cita llevaba publicada desde antes de
+la 11.2 y por eso el cotejo no la miraba: el censo cerrado es justamente la lista de las que no se
+comprueban.
+
+Es la tercera atribución falsa que caza este bucle, y la primera **contra un documento propio**: las
+dos del Quijote se cazaron leyendo, ésta comparando.
+
+### Se restituyó, y hay que decir lo que eso dejó
+
+`documentar --texto` existe para esto, y funcionó: la Cita queda cotejada contra
+*Versos sencillos* XXXIX y sale del censo. Pero el literal de la edición trae la mayúscula de
+verso, así que en la página se lee:
+
+    «Cultivo una rosa blanca En julio como enero»
+
+**No es bonito y se queda.** Una Cita falsa es peor que una Cita con una mayúscula rara, y este
+sitio se sostiene sobre que cada texto es el de su edición. La mayúscula es exactamente la pregunta
+que `deferred-work.md` tiene reservada sobre el verso — y ahora, en vez de un ejemplo hipotético,
+hay **una página en vivo** que la enseña.
+
+### Las otras cuatro no se tocan, y ahora se sabe por qué
+
+Las cuatro que difieren solo en signos parecían el caso fácil. No lo son: **las cuatro arrastran la
+misma consecuencia**, y se comprobó una por una en su edición.
+
+| Publicado | La edición dice | Lo que dejaría restituir |
+|---|---|---|
+| Caminante, no hay camino, se hace… | «…y nada más; / **c**aminante, no hay camino: / se hace…» | empieza en **minúscula** |
+| Poderoso caballero es don Dinero. | «Poderoso caballero / **Es** don Dinero.» | «caballero **Es** don» |
+| Con los pobres de la tierra quiero… | «Con los pobres de la tierra / **Q**uiero yo…» | «tierra **Q**uiero» |
+| Yo soy un hombre sincero de donde… | «Yo soy un hombre sincero / **D**e donde…» | «sincero **D**e donde» |
+
+No hay ninguna que se arregle sin tocar la pregunta reservada. Eso no se sabía: estaba anotado que
+«cuatro difieren en signos», y la palabra «signos» hacía pensar en comas. Son **saltos de verso**,
+las cuatro.
+
+Y una quinta no aparece en ninguna edición ni ignorando signos: la que ya estaba anotada como
+condensación popular que su Autora no escribió así — la comparación lo confirma, porque su obra
+**sí** está versionada y dice otra cosa.
+
+`npx astro check` 0 errores; `npx vitest run` **2015/2015** en 65 ficheros; `npm run build` **806
+páginas**; `npx playwright test` 2 fallos —los de NFR-5—, 412 pasadas.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.
