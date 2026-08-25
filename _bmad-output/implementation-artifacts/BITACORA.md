@@ -3622,3 +3622,74 @@ Wikisource**. Con eso el bucle recupera, coteja, publica y despliega.
 
 `npx astro check` 0 errores; `npx vitest run` **1980/1980** en 63 ficheros; `npx playwright test`
 390 pasadas, 14 saltadas, cero fallos; `npm run build` **806 páginas**.
+
+## 15.4/15.5 (48.ª sesión) — El tramo declarado está bloqueado, y las dos medidas que lo confirman
+
+**761 Citas, 806 páginas: sin cambios, y con motivo.** Con la 15.3 cerrada, la política declara el
+tramo **«Admitir 19 Autores más»**.
+
+**Antes de repetir por novena vez que eso no lo decide el bucle, lo comprobé en el fichero que
+manda**, en vez de fiarme de mi propia nota. `LOOP-PROTOCOL-V4.md` lo dice sin ambigüedad:
+
+> **Lo que la v4 no levanta, y sigue siendo de Héctor: a quién se admite.** Ninguna política de
+> este repositorio nombra un Autor para proponerlo […] **a quién se admite es lo único que este
+> producto no delega.**
+
+Comprobar era lo que tocaba —en la 39.ª sesión un límite que yo creía firme resultó ser una regla
+mía mal aplicada, y desbloqueó veinte sesiones—. Esta vez la comprobación confirma el límite en vez
+de disolverlo, y además `autor crear` pide una **semblanza**: el dato biográfico se lee, pero la
+decisión de a quién se le escribe una no.
+
+### El otro tramo tampoco se mueve, y esta vez la razón se puede medir
+
+El propio protocolo lista lo que el bucle sí puede hacer sin esa decisión, y ahí está «un Tema más,
+quizá dos». Se midieron diez asuntos sobre las 761 Citas. Dos parecían llegar:
+
+· **La justicia** — 31 candidatas. Al leerlas, unas 18 hablan de veras de la ley y de lo justo…
+  pero **nueve ya están en «La libertad»**. Un 50 % de solape.
+· **La muerte** — 15 candidatas justas. Al leerlas, unas 11: el resto usa «morir» en sentido
+  figurado, hablando de pueblos.
+
+**Y aquí lo que convierte una impresión en un dato.** «Un 50 % parece mucho» no es un criterio, así
+que se midió el solape real entre los doce Temas que ya existen: **el máximo entre dos Temas
+cualesquiera es 33 % y la mediana es 6 %**. Un Tema nuevo al 50 % estaría muy fuera del patrón del
+Corpus. Y construido solo con las que no están ya en «La libertad» se queda en nueve, por debajo
+del umbral de quince.
+
+**Ninguno de los dos se crea, y el umbral no se toca.**
+
+**El diagnóstico, que es lo útil para la próxima sesión:** el Corpus creció de 452 a 761 Citas
+alimentando **los mismos doce Temas** —«El saber» tiene ya 151 y «La virtud» 129—. Cerrar el techo
+de concentración pedía volumen, y el volumen se colocó a lo hondo, no a lo ancho. Para un Tema
+número trece hacen falta quince Citas sobre un asunto que ninguno de los doce cubra, y eso pide
+**obras sobre otras cosas**, que es otra vez la decisión de arriba.
+
+### Lo que sí se arregló: re-extraer proponía lo que ya estaba publicado
+
+La puerta de idempotencia de la 41.ª sesión compara con `corpus/_revision/` y solo con ella. Falta
+justo en el gesto más natural que hay: **volver a extraer un documento del que ya se publicó**,
+que es lo que se hace cada vez que entra una puerta nueva.
+
+Medido: un tratado daba 36 candidatas y **15 ya eran Citas publicadas**. Como sus slugs estaban
+ocupados, `slugLibre` les ponía sufijo `-2` y las escribía como nuevas. Arreglado con dos pruebas
+en rojo primero, y con contador propio en el informe: **«Ya eran Cita publicada: 15»**. Se cuenta
+aparte de las de revisión porque son dos cosas distintas.
+
+### Y un error mío que paró el build, que es exactamente para lo que está
+
+Al limpiar, **borré el documento del que salían esas 15 Citas publicadas**. El cotejo de la 11.2
+se negó a construir y nombró las quince, una por una, con su regla incumplida. Se restauró y el
+build volvió a pasar.
+
+Lo instructivo es lo segundo: **mi primera explicación del defecto era falsa**. Escribí en el
+código que aquel documento era «un compendio que reúne sentencias de otras obras del mismo Autor»,
+y no lo era — las 15 coincidencias eran las Citas que yo mismo había aprobado de él en la 42.ª
+sesión. El defecto es real y el arreglo es correcto; la historia que contaba el comentario, no. Se
+corrigió el comentario, porque un comentario que explica mal un arreglo envejece peor que no tener
+comentario.
+
+`npx astro check` 0 errores; `npx vitest run` **1982/1982** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35. Lo que hace falta sigue cabiendo en una línea: **nombres de Autor, o URL de Wikisource**.

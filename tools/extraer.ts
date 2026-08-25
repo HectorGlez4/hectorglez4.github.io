@@ -350,8 +350,10 @@ let escritas = 0;
  */
 const enRevision = await leerCitas(rutas.revision);
 
+const publicadas = await leerCitas(rutas.citas);
+
 const ocupados = new Set([
-  ...(await leerCitas(rutas.citas)).map((c) => c.slug),
+  ...publicadas.map((c) => c.slug),
   ...enRevision.map((c) => c.slug),
 ]);
 
@@ -368,13 +370,38 @@ const ocupados = new Set([
  * divergir. Y va por Autor porque el mismo refrán en dos obras de Autores distintos son
  * dos candidatas, no una.
  */
-const yaEnRevision = new Set(enRevision.map((c) => `${c.autor} ${normalizar(c.texto)}`));
+const clave = (autorDeLaCita: string, texto: string) => `${autorDeLaCita} ${normalizar(texto)}`;
+
+const yaEnRevision = new Set(enRevision.map((c) => clave(c.autor, c.texto)));
+
+/*
+ * Y lo que ya **es Cita publicada**, también por texto.
+ *
+ * La puerta de arriba no basta, y falta en el gesto más natural que hay: **volver a extraer un
+ * documento del que ya se publicó**. Se vio con un tratado del que salían 36 candidatas y del
+ * que 15 ya eran Citas publicadas —las que se aprobaron de él la primera vez—. Como sus slugs
+ * estaban ocupados, `slugLibre` les puso sufijo `-2` y se escribieron como si fueran nuevas.
+ * Revisarlas es trabajo perdido; aprobarlas, duplicar.
+ *
+ * Y re-extraer no es raro: es lo que se hace cada vez que entra una puerta nueva y hay que
+ * pasar por ella los documentos viejos.
+ */
+const yaPublicadas = new Set(publicadas.map((c) => clave(c.autor, c.texto)));
 
 let repetidas = 0;
+let yaEstaban = 0;
 
 for (const candidata of resultado.candidatas) {
-  if (yaEnRevision.has(`${autor} ${normalizar(candidata.texto)}`)) {
+  if (yaEnRevision.has(clave(autor, candidata.texto))) {
     repetidas += 1;
+    continue;
+  }
+  /*
+   * Aparte de las de revisión a propósito: fundidas en un solo número se perdería la única
+   * señal de que el documento nuevo es, en realidad, una reedición de lo que ya está dentro.
+   */
+  if (yaPublicadas.has(clave(autor, candidata.texto))) {
+    yaEstaban += 1;
     continue;
   }
   const slug = slugLibre(slugDeCita(autor, normalizar(candidata.texto)), ocupados);
@@ -427,5 +454,8 @@ terminar({
     `Descartadas por ser aparato de la Fuente: ${porMotivo('aparato-de-la-fuente')}\n` +
     `Descartadas por repetidas: ${porMotivo('repetida')}` +
     // Se dice aunque sea cero: es lo que distingue «no había nada nuevo» de «no se ejecutó».
-    `\nYa estaban en revisión: ${repetidas}`,
+    `\nYa estaban en revisión: ${repetidas}` +
+    // Y este número, además, dice algo del documento: si es alto, lo que se ha recuperado no
+    // es cantera nueva sino una antología de lo que el Corpus ya tiene.
+    `\nYa eran Cita publicada: ${yaEstaban}`,
 });

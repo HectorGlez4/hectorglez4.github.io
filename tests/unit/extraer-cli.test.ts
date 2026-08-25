@@ -1128,3 +1128,56 @@ describe('FR-23 — sobre el Corpus real: «El sable» no se extrae como Montalv
     expect(await readdir(join(CORPUS, '_revision'))).toEqual(antes);
   });
 });
+
+describe('FR-24 — una Cita ya publicada no se vuelve a proponer como candidata', () => {
+  /*
+   * La puerta de idempotencia de la 41.ª sesión compara con `corpus/_revision/` y solo con
+   * ella. Basta para no duplicar el montón por revisar, y no basta para esto:
+   *
+   * Se vio recuperando un **compendio** —una obra que reúne sentencias de las otras del mismo
+   * Autor—. De sus 36 candidatas, **15 eran textos que ya son Citas publicadas**. Como sus
+   * slugs estaban ocupados, `slugLibre` les puso sufijo `-2` y las escribió como si fueran
+   * nuevas. Revisarlas es trabajo perdido; aprobarlas, un duplicado.
+   *
+   * El caso no es raro: las antologías y los compendios son género corriente en las Fuentes
+   * abiertas, y son justo los documentos que más se parecen a una buena cantera.
+   *
+   * Se compara por texto y por Autor, igual que la puerta hermana, y se informa aparte: contado
+   * junto con «ya estaban en revisión» se perdería la única señal de que el documento nuevo es
+   * en realidad una reedición de lo que ya está dentro.
+   */
+  it('el texto que ya es Cita publicada no se escribe otra vez en revisión', async () => {
+    const { corpus } = await corpusConAutores();
+    const ruta = await documento(corpus);
+
+    await extraer(ruta, corpus);
+    const enRevision = await readdir(join(corpus, '_revision'));
+    expect(enRevision.length).toBeGreaterThan(0);
+
+    // Se publican todas y se vuelve a extraer el mismo documento.
+    for (const fichero of enRevision) {
+      await rename(join(corpus, '_revision', fichero), join(corpus, 'citas', fichero));
+    }
+    await extraer(ruta, corpus);
+
+    expect(await readdir(join(corpus, '_revision'))).toEqual([]);
+  });
+
+  it('y no se cuela con otro nombre por tener el slug ocupado', async () => {
+    /*
+     * Ésta es la que habría cazado el fallo: sin la puerta, las candidatas sí se escribían —con
+     * sufijo `-2`— y una comprobación por slug las habría dado por distintas.
+     */
+    const { corpus } = await corpusConAutores();
+    const ruta = await documento(corpus);
+
+    await extraer(ruta, corpus);
+    for (const fichero of await readdir(join(corpus, '_revision'))) {
+      await rename(join(corpus, '_revision', fichero), join(corpus, 'citas', fichero));
+    }
+    await extraer(ruta, corpus);
+
+    const conSufijo = (await readdir(join(corpus, '_revision'))).filter((f) => /-\d+\.md$/.test(f));
+    expect(conSufijo).toEqual([]);
+  });
+});
