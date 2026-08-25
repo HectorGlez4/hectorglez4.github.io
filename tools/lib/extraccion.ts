@@ -86,6 +86,17 @@ const APARATO_DE_LA_FUENTE = [
   /la fuente de este texto no se ha especificado/i,
   /a menos que se a[ñn]ada informaci[óo]n de derechos de autor/i,
   /este aviso fue puesto el/i,
+  /*
+   * Y la línea con que el encabezado **firma** la página, que es el tercer aparato en tres
+   * sesiones y el más irónico: es exactamente la línea que el lector de documentos aprendió a
+   * interpretar para saber quién firma. Leída por él es un metadato; leída por la extracción,
+   * una candidata a Cita del Autor cuya firma contiene.
+   *
+   * Va por la etiqueta al **principio** de la línea y no por el nombre: el nombre cambia con
+   * cada Autor y la etiqueta no, y filtrar por nombre perdería toda Cita que hable de otro
+   * escritor — que en este Corpus son muchas. Una frase de un Autor no empieza por «Autor:».
+   */
+  /^\s*(?:<<|«|‹‹)?\s*autor(?:es)?\s*:/i,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

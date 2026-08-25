@@ -355,3 +355,47 @@ describe('FR-24 — el aviso de mantenimiento tampoco se atribuye al Autor', () 
     expect(resultado.candidatas).toHaveLength(soloObra.candidatas.length);
   });
 });
+
+/**
+ * La línea de firma tampoco es texto del Autor — FR-24.
+ *
+ * Tercer aparato en tres sesiones, y el más irónico de los tres: la línea con que el
+ * encabezado de Wikisource **firma** la página.
+ *
+ *     << Autor: Manuel González Prada Publicado en Los Parias, periódico de Lima, 1907.
+ *
+ * Es exactamente la línea que la 43.ª sesión enseñó al lector de documentos a interpretar para
+ * saber quién firma —y gracias a la cual dos documentos dejaron de quedarse sin Autor—. Leída
+ * por el lector es un metadato; leída por la extracción, una candidata a Cita del Autor cuya
+ * firma contiene. Publicarla habría atribuido a un Autor el nombre de su propio periódico.
+ *
+ * Se descarta por la etiqueta al **principio** de la línea, no por el nombre: el nombre cambia
+ * con cada Autor y la etiqueta no. Y una frase de un Autor jamás empieza por «Autor:».
+ */
+describe('FR-24 — la línea de firma de la Fuente no es una Cita', () => {
+  const CON_FIRMA = [
+    '<< Autor: Manuel González Prada Publicado en Los Parias, periódico de Lima, 1907.',
+    'Autor: Alguien Que Firma, y detrás una frase larga que rellena la ventana de longitud.',
+  ].join(' ');
+
+  it('la línea del encabezado no llega a candidata', () => {
+    const conFirma = documento({ texto: `${OBRA_EN_ESPAÑOL} ${CON_FIRMA}` });
+    const resultado = extraerCandidatas(conFirma, 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.every((c) => !/^\s*(?:<<)?\s*Autor\s*:/i.test(c.texto))).toBe(true);
+    expect(resultado.descartadas.some((d) => d.motivo === 'aparato-de-la-fuente')).toBe(true);
+  });
+
+  it('una frase que solo NOMBRA a un autor sí se propone', () => {
+    /*
+     * La puerta va por la etiqueta al principio, no por el nombre: si fuera por el nombre se
+     * perdería toda Cita que hable de otro escritor, y este Corpus está lleno de ellas.
+     */
+    const suya = 'Manuel González Prada escribió que la justicia nace de la sabiduría del pueblo.';
+    const resultado = extraerCandidatas(documento({ texto: suya }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.map((c) => c.texto)).toContain(suya);
+  });
+});

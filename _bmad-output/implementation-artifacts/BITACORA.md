@@ -3487,3 +3487,41 @@ hacer a mano dos veces.
 
 **El tramo sigue abierto y ahora dice 117** (era 160). No se alcanza, y se dice — pero por primera
 vez desde la 42.ª sesión, el que falta es uno solo.
+
+## 15.3 (45.ª sesión) — Treinta y dos, y el aparato que se firmaba a sí mismo
+
+**643 → 675 Citas. 688 → 720 páginas. Concentración 17,7 % → 16,9 %.** Faltan **85** para que el
+único Autor que queda por encima del techo quepa. Era 117 al empezar.
+
+**Una cantera medida y descartada, y conviene decir por qué.** Un Autor con 66 Citas tiene 47 obras
+en Wikisource, pero lo que hay son **entremeses** —diálogo teatral, del género que peor rinde— y
+una «Biografía» que es **sobre** él, no suya. Sembrar de ahí habría atribuido a un Autor lo que
+otro escribió de él. Ni se recuperó.
+
+### Tercer aparato en tres sesiones, y el más irónico
+
+Entre las candidatas apareció esta:
+
+    << Autor: Manuel González Prada Publicado en Los Parias, periódico de Lima, 1907.
+
+Es **exactamente la línea** que la 43.ª sesión enseñó al lector de documentos a interpretar para
+saber quién firma —la que rescató dos documentos que se quedaban sin Autor—. Leída por el lector es
+un metadato; leída por la extracción, una candidata a Cita **del Autor cuya firma contiene**.
+Publicarla habría atribuido a un Autor el nombre de su propio periódico.
+
+Cerrada con dos pruebas en rojo, y la segunda es la que importa: **una frase que solo nombra a un
+escritor sí se propone**. La puerta va por la etiqueta al principio de la línea, no por el nombre —
+filtrar por nombre perdería toda Cita que hable de otro autor, y este Corpus está lleno de ellas.
+
+Tres aparatos en tres sesiones —pie de licencia, aviso de mantenimiento, línea de firma— dicen algo
+que ya no es casualidad: **cada vez que se abre una Fuente nueva conviene leer las candidatas
+buscando lo que la Fuente escribió, no lo que escribió el Autor.**
+
+**Rendimiento: 245 candidatas, 32 publicadas — un 13 %.** El prólogo que dio la mitad es un ensayo
+sobre poesía, muy metafórico y muy atado a la obra que prologa; de ahí que rinda menos que la prosa
+filosófica pura y más que la sátira.
+
+`npx astro check` 0 errores; `npx vitest run` **1974/1974** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **720 páginas**.
+
+**El tramo sigue abierto y ahora dice 85** (era 117). No se alcanza, y se dice.
