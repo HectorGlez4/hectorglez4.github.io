@@ -2613,3 +2613,34 @@ páginas y 435 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 
 
 **Verificado en vivo** (25/08/2026, ejecución 32805144604 en verde): `sitemap-0.xml` declara **498
 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (23.ª sesión) — La paginación, que nadie había mirado desde que el Corpus dobló
+
+**457 Citas, 12 Temas, 498 páginas: sin cambios.** La sesión verificó la superficie que el
+crecimiento de esta noche puso a trabajar de verdad: **la paginación de la Página de Autor**. Con
+`CITAS_POR_PAGINA` en 50 y un Autor en 114, son tres páginas; antes de la v4 ninguna llegaba a
+dos.
+
+**Comprobado, y correcto en todo:**
+
+| Comprobación | Resultado |
+|---|---|
+| `/autor/…`, `/2`, `/3` | 200, 200, 200 |
+| `/autor/…/4` | **404** — no se inventan páginas vacías |
+| Citas en la página 2 | **50** |
+| Canónica de la página 2 | apunta **a sí misma**, no a la primera |
+| Navegación | `<nav>` con «Anterior · Página 2 de 3 · Siguiente» y los dos enlaces correctos |
+| Área de pulsación | 66×44 px — los 44 de alto son el mínimo accesible |
+
+**Un no-hallazgo que conviene dejar escrito para no volver a mirarlo:** las páginas no llevan
+`<link rel="prev">` ni `rel="next"`. **No es un defecto**: Google dejó de usarlos como señal de
+indexación en 2019 y la canónica auto-referencial ya hace el trabajo. Se comprueba y se descarta.
+
+**Y una limitación de la herramienta, no del sitio.** Las capturas del navegador **no reflejan el
+desplazamiento hecho por guion**: tras `scrollIntoView` la captura sigue devolviendo el lienzo
+vacío del final del documento. La verificación se hizo por DOM —posición, estilos computados,
+texto y `href` del `<nav>`— que para esto es evidencia igual de buena. Queda anotado para no
+perder tiempo la próxima vez peleándose con la captura.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 498
+páginas.
