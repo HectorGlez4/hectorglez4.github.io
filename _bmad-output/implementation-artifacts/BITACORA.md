@@ -3175,3 +3175,58 @@ NFR-12 prohíbe tocar el texto para que cuadre.
 392 pasadas, 14 saltadas; `npm run build` **506 páginas**.
 
 **El tramo sigue abierto y ahora dice 299** (era 304). No se alcanza esta sesión, y se dice.
+
+## 15.3 (39.ª sesión) — Quince de una sátira, y dos puertas que la siembra destapó
+
+**461 → 476 Citas. 506 → 521 páginas. Concentración 24,7 % → 23,9 %.** Un Autor que tenía **una**
+Cita pasa a tener dieciséis.
+
+**El método de ayer, aplicado con la herramienta de medir delante.** Se listaron las 92 obras que
+Wikisource tiene de este Autor y se pidió el tamaño de cada una antes de recuperar nada: la
+mayoría son poemas sueltos —y el verso sigue bloqueado— pero hay prosa de sobra, hasta una de
+222 KB. Se escogió una sátira moral de 38 KB, manejable y del género que mejor rinde. **Se
+descartó a propósito una obra del listado**, un libelo antisemita: no entra en este Corpus, y se
+dice aquí para que la decisión conste y no parezca un descuido.
+
+**Rendimiento: 165 candidatas, 15 publicadas.** Un 9 %, la mitad de lo normal en prosa, y el
+motivo es del texto: es una sátira narrativa con mucho diálogo y mucha trabazón, más una veta de
+misoginia de época que no se siembra en un sitio de sabiduría. La cifra baja es la correcta.
+
+### Dos defectos que solo aparecen sembrando
+
+**Uno: el pie de licencia de la Fuente se proponía como Cita del Autor.** Entre las 167 candidatas
+venían «Esta obra se encuentra en dominio público» y «Esto es aplicable en todo el mundo debido a
+que su autor falleció hace más de 100 años». No son suyas: las escribe Wikisource.
+
+Lo grave no es que aparezcan, es **contra qué no chocan**. No las caza la puerta de longitud, ni
+la de español, ni la de legibilidad —son legibles y están en español— y **tampoco el cotejo de la
+11.2**, porque la frase sí aparece literal en el documento: la sirvió la Fuente. Atribuir a un
+Autor algo que no escribió es el único error que este producto no se puede permitir, y aquí no
+había nada debajo. Se comprobó que **ninguna Cita publicada lo tiene** —y de paso que el primer
+`grep` daba un falso positivo: casaba el campo `licencia:`, que es metadato correcto—.
+
+Ahora hay puerta, con prueba en rojo primero: descarte `aparato-de-la-fuente`, por **frase
+completa de plantilla** y nunca por palabras sueltas. Un Autor puede escribir «público»; nadie
+escribe «se encuentra en dominio público» dentro de su obra. Una puerta laxa perdería Citas buenas
+en silencio, y eso es peor: el aparato lo caza un lector, la Cita perdida no la ve nadie.
+
+**Dos: `extraer` no era idempotente, y lo decía una prueba verde.** Al volver a extraer con la
+puerta nueva salieron **332 ficheros para 167 textos**: cada candidata repetida con sufijo `-2`.
+
+La causa estaba escrita en el propio código. Un arreglo anterior contaba como slugs ocupados los
+de todo el Corpus para no **pisar** candidatas ya revisadas a medias —problema real—, y al hacerlo
+convirtió una pérdida en una duplicación: el gesto que su propio comentario llamaba natural
+(«repetir la extracción tras ajustar la ventana») doblaba el montón por revisar.
+
+Aquí la bifurcación no era técnica: **`extraer-cli.test.ts` especificaba el doblado en verde**,
+`expect(segunda.length).toBe(primera.length * 2)`. Se cambió la especificación, y la razón se
+escribe entera en la prueba: su intención declarada —no pisar lo anterior— se conserva íntegra;
+lo que se quita es el doblado, que nadie quiere. Una candidata cuyo **texto** ya está en revisión
+para ese Autor no es nueva, es la misma. La comparación va por texto y no por slug porque el slug
+es justo lo que el arreglo anterior hacía divergir. Verificado en vivo: 165 → 165, y el informe
+dice «Ya estaban en revisión: 165».
+
+`npx astro check` 0 errores; `npx vitest run` **1951/1951** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **521 páginas**.
+
+**El tramo sigue abierto y ahora dice 284** (era 299). No se alcanza, y se dice.

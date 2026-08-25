@@ -348,12 +348,35 @@ let escritas = 0;
  * una Cita publicada llegaba a la aprobación arrastrando una colisión que allí ya no
  * puede pisar nada, pero que obliga a renombrar.
  */
+const enRevision = await leerCitas(rutas.revision);
+
 const ocupados = new Set([
   ...(await leerCitas(rutas.citas)).map((c) => c.slug),
-  ...(await leerCitas(rutas.revision)).map((c) => c.slug),
+  ...enRevision.map((c) => c.slug),
 ]);
 
+/*
+ * Y lo que ya está por revisar de este Autor, por TEXTO.
+ *
+ * Sin esto, el arreglo de arriba cambia una pérdida por una duplicación: como las
+ * candidatas de la vez anterior cuentan como slugs ocupados, repetir la extracción las
+ * reescribe enteras con sufijo `-2`. Medido en vivo re-extrayendo una sátira tras añadir
+ * una puerta: **332 ficheros para 167 textos**. El montón por revisar se dobla y las dos
+ * copias solo se distinguen por el nombre.
+ *
+ * Va por texto y no por slug precisamente porque el slug es lo que `slugLibre` hace
+ * divergir. Y va por Autor porque el mismo refrán en dos obras de Autores distintos son
+ * dos candidatas, no una.
+ */
+const yaEnRevision = new Set(enRevision.map((c) => `${c.autor} ${normalizar(c.texto)}`));
+
+let repetidas = 0;
+
 for (const candidata of resultado.candidatas) {
+  if (yaEnRevision.has(`${autor} ${normalizar(candidata.texto)}`)) {
+    repetidas += 1;
+    continue;
+  }
   const slug = slugLibre(slugDeCita(autor, normalizar(candidata.texto)), ocupados);
   ocupados.add(slug);
   // El nombre lo fija la espina: `{slug-autor}--{fragmento}.md`. Se compone con el mismo
@@ -401,5 +424,8 @@ terminar({
     // documento trae unos párrafos con el OCR roto, quien siembra tiene que enterarse
     // aquí, no al preguntarse por qué de una página larga salieron cuatro candidatas.
     `Descartadas por ilegibles (OCR roto): ${porMotivo('ilegible')}\n` +
-    `Descartadas por repetidas: ${porMotivo('repetida')}`,
+    `Descartadas por ser aparato de la Fuente: ${porMotivo('aparato-de-la-fuente')}\n` +
+    `Descartadas por repetidas: ${porMotivo('repetida')}` +
+    // Se dice aunque sea cero: es lo que distingue «no había nada nuevo» de «no se ejecutó».
+    `\nYa estaban en revisión: ${repetidas}`,
 });

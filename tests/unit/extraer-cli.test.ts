@@ -207,11 +207,26 @@ describe('Historia 9.1 — las candidatas quedan en revisión, no publicadas', (
 });
 
 describe('Retro épica 9 — repetir la extracción no pisa lo anterior', () => {
-  it('una segunda extracción de la misma obra convive con la primera', async () => {
+  it('una segunda extracción de la misma obra no pisa nada y tampoco duplica', async () => {
     /*
-     * Antes, `ocupados` empezaba vacío en cada ejecución: solo evitaba colisiones dentro
-     * de la misma. Repetir la extracción —lo natural tras ajustar la ventana de
-     * longitud— sobrescribía las candidatas anteriores, incluidas las ya revisadas.
+     * Esta prueba tuvo dos versiones, y la historia explica la de ahora.
+     *
+     * Al principio `ocupados` empezaba vacío en cada ejecución: solo evitaba colisiones
+     * dentro de la misma. Repetir la extracción —lo natural tras ajustar la ventana de
+     * longitud— **sobrescribía** las candidatas anteriores, incluidas las ya revisadas a
+     * medias. Se arregló contando como ocupados los slugs de todo el Corpus, y la prueba
+     * fijó el resultado de entonces: `segunda.length === primera.length * 2`.
+     *
+     * Ese arreglo cambiaba una pérdida por una duplicación. Se vio en vivo re-extrayendo
+     * una sátira tras añadir una puerta nueva: **332 ficheros para 167 textos**, cada
+     * candidata repetida con sufijo `-2`. El gesto que el propio comentario nombraba como
+     * natural doblaba el montón por revisar, y las dos copias son indistinguibles salvo
+     * por el nombre.
+     *
+     * Así que se conserva la intención —no pisar lo anterior— y se quita el doblado: una
+     * candidata cuyo texto ya está en revisión para ese Autor **no es una candidata
+     * nueva**, es la misma. La comparación es por texto y no por slug, porque el slug es
+     * justo lo que el arreglo anterior hacía divergir.
      */
     const { corpus } = await corpusConAutores();
     const ruta = await documento(corpus);
@@ -223,9 +238,10 @@ describe('Retro épica 9 — repetir la extracción no pisa lo anterior', () => 
     await extraer(ruta, corpus);
     const segunda = await readdir(join(corpus, '_revision'));
 
-    // Ninguna de las primeras desapareció, y las nuevas llevan su propio nombre.
+    // Ninguna de las primeras desapareció —esa es la parte que no cambia—…
     for (const fichero of primera) expect(segunda).toContain(fichero);
-    expect(segunda.length).toBe(primera.length * 2);
+    // …y no hay una segunda copia de cada una.
+    expect(segunda.length).toBe(primera.length);
   });
 
   it('no reutiliza el slug de una Cita ya publicada', async () => {

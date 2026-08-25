@@ -55,7 +55,30 @@ export type Descarte =
   | { texto: string; motivo: 'no-esta-en-español' }
   | { texto: string; motivo: 'longitud' }
   | { texto: string; motivo: 'repetida' }
-  | { texto: string; motivo: 'ilegible' };
+  | { texto: string; motivo: 'ilegible' }
+  | { texto: string; motivo: 'aparato-de-la-fuente' };
+
+/**
+ * Las frases con que la Fuente **envuelve** la obra: el pie de licencia que Wikisource añade a
+ * cada página. Vienen dentro del documento, así que el cotejo de la 11.2 las da por buenas —la
+ * frase aparece literal, porque la sirvió la Fuente— y sin esta puerta la extracción propone
+ * atribuírselas al Autor. Se vio con 167 candidatas de una sátira: dos eran de Wikisource.
+ *
+ * Van por **frase completa de plantilla**, nunca por palabras sueltas. Un Autor puede escribir
+ * «público» y en este Corpus hay quien escribe de leyes; nadie escribe «se encuentra en dominio
+ * público» dentro de su obra. Una puerta laxa perdería Citas buenas en silencio, que es peor
+ * que dejar pasar aparato: el aparato lo caza un lector, y la Cita perdida no la ve nadie.
+ */
+const APARATO_DE_LA_FUENTE = [
+  /se encuentra en dominio p[úu]blico/i,
+  /fallecid?[oó] hace m[áa]s de \d+ a[ñn]os/i,
+  /la traducci[óo]n de la obra puede no estar en dominio p[úu]blico/i,
+];
+
+/** Si la frase es aparato de la Fuente y no texto del Autor. */
+export function esAparatoDeLaFuente(sentencia: string): boolean {
+  return APARATO_DE_LA_FUENTE.some((plantilla) => plantilla.test(sentencia));
+}
 
 export type ResultadoDeExtraccion =
   | { ok: true; candidatas: Candidata[]; descartadas: Descarte[] }
@@ -272,6 +295,15 @@ export function extraerCandidatas(
 
     if (!estaEnEspañol(sentencia)) {
       descartadas.push({ texto: sentencia, motivo: 'no-esta-en-español' });
+      continue;
+    }
+
+    /*
+     * Antes que la legibilidad, porque el pie **es** legible y está en español: no lo caza
+     * ninguna de las otras puertas, y el cotejo tampoco, que es justo lo que lo hace peligroso.
+     */
+    if (esAparatoDeLaFuente(sentencia)) {
+      descartadas.push({ texto: sentencia, motivo: 'aparato-de-la-fuente' });
       continue;
     }
 

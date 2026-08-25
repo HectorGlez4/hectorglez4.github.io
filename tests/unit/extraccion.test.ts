@@ -238,3 +238,60 @@ describe('Historia 9.1 — la ventana de longitud y las repeticiones', () => {
     expect(resultado.descartadas.some((d) => d.motivo === 'repetida')).toBe(true);
   });
 });
+
+/**
+ * El pie de licencia de la Fuente no es texto del Autor — FR-24.
+ *
+ * Se vio sembrando “El mundo por dentro”: entre las 167 candidatas que la extracción propuso
+ * atribuir a su Autor venían **dos frases de Wikisource**, no suyas:
+ *
+ *   «Esta obra se encuentra en dominio público.»
+ *   «Esto es aplicable en todo el mundo debido a que su autor falleció hace más de 100 años.»
+ *
+ * Ninguna llegó a publicarse porque esta sesión leyó las 167 una por una, y ninguna Cita del
+ * Corpus las tiene. Pero **atribuir a un Autor una frase que no escribió es el único error que
+ * este producto no se puede permitir**: el sitio entero se sostiene sobre que cada Cita está
+ * cotejada contra el documento de su Fuente. Y aquí el cotejo no protege, porque la frase **sí**
+ * aparece literal en el documento: la sirvió la Fuente, en su pie.
+ *
+ * Es la misma familia que la trampa de los índices de obra que `deferred-work.md` ya tiene
+ * anotada: el documento trae, además de la obra, el aparato con que la Fuente la envuelve.
+ *
+ * Se cierra por frase completa de plantilla y no por palabras sueltas, y es deliberado: un Autor
+ * puede escribir «dominio» o «público» —y en este Corpus hay quien escribe de leyes— pero nadie
+ * escribe «se encuentra en dominio público» dentro de su obra. La puerta laxa que descarta de
+ * más sería peor que la que descarta de menos: perdería Citas buenas en silencio.
+ */
+describe('FR-24 — el aparato de la Fuente no se atribuye al Autor', () => {
+  const PIE_DE_WIKISOURCE =
+    'Esta obra se encuentra en dominio público. Esto es aplicable en todo el mundo debido a ' +
+    'que su autor falleció hace más de 100 años. La traducción de la obra puede no estar en ' +
+    'dominio público.';
+
+  it('el pie de licencia no llega a candidata, aunque esté literal en el documento', () => {
+    const conPie = documento({ texto: `${OBRA_EN_ESPAÑOL} ${PIE_DE_WIKISOURCE}` });
+    const resultado = extraerCandidatas(conPie, 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.every((c) => !/dominio público/i.test(c.texto))).toBe(true);
+    expect(resultado.descartadas.some((d) => d.motivo === 'aparato-de-la-fuente')).toBe(true);
+  });
+
+  it('no se lleva por delante la obra que venía con él', () => {
+    const conPie = documento({ texto: `${OBRA_EN_ESPAÑOL} ${PIE_DE_WIKISOURCE}` });
+    const soloObra = extraerCandidatas(documento(), 'seneca');
+    const resultado = extraerCandidatas(conPie, 'seneca');
+    if (!resultado.ok || !soloObra.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas).toHaveLength(soloObra.candidatas.length);
+  });
+
+  it('una frase del Autor que hable de lo público no se descarta por parecerse', () => {
+    // La puerta va por frase de plantilla, no por palabras sueltas.
+    const suya = 'Lo que es de todos y es público suele cuidarse menos que lo que es de uno.';
+    const resultado = extraerCandidatas(documento({ texto: suya }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.map((c) => c.texto)).toContain(suya);
+  });
+});
