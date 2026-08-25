@@ -2242,3 +2242,41 @@ páginas y 430 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 
 
 **Verificado en vivo** (25/08/2026, ejecución 32793972095 en verde): `sitemap-0.xml` declara
 **489 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (12.ª sesión) — El techo vigilaba a uno solo, y casi lo pago
+
+Sin Citas nuevas. Antes de sacar el quinto lote se hizo la cuenta que había que haber hecho tres
+sesiones antes, y salió esto:
+
+```
+Total: 452   techo 15 % = 68 Citas
+   114   25,2 %  el Autor más representado
+    62   13,7 %  el segundo
+    48   10,6 %  el tercero
+```
+
+**El segundo estaba a seis Citas del techo.** Cuatro sesiones diluyendo al primero lo habían
+llevado ahí, y otro lote de once lo habría puesto en el **15,8 %**: cerrar el tramo creando la
+concentración que el tramo existe para deshacer. Y la política **no lo habría dicho**, porque
+`concentracionDe` miraba únicamente al primero de la lista.
+
+**Arreglado con prueba primero.** `Concentracion` gana `porEncimaDelTecho`, `excede` pasa a mirar
+a todos y `citasDeOtrosQueFaltan` se calcula como el **máximo** sobre los que exceden, no como el
+del primero. Hoy los dos números coinciden —el que más pesa es el que más dilución pide— y aun
+así se escribió sobre el conjunto a propósito: esa coincidencia es una casualidad de que `k`
+crezca con las Citas del Autor, no una propiedad de la que quiera depender. El informe y el
+objetivo dicen ahora «y no es el único: son N Autores los que lo pasan» cuando toca. Hoy no toca,
+y el aviso no aparece: el guardián está para el día que sí.
+
+**Y la aritmética que cierra la discusión sobre el tramo.** Para que el primero baje del 15 % el
+Corpus tiene que llegar a **760 Citas**, y ninguna puede ser suya: faltan 308. Con el techo
+puesto, en un Corpus de 760 ningún Autor puede pasar de 114, así que el segundo —hoy en 62—
+puede aportar como mucho **52 más**. Las **256 restantes no pueden salir de ningún Autor ya
+admitido**: los documentos densos de los demás están exprimidos y los que quedan sin tocar son
+del que sobra.
+
+El tramo de concentración **no se puede cerrar sin admitir Autores nuevos**. No es una preferencia
+de método: es la cuenta. Y admitir es lo único que este producto no delega.
+
+`npx astro check` 0 errores; `npx vitest run` **1914/1914** en 62 ficheros (cuatro pruebas nuevas);
+`npm run build` 489 páginas y 430 cotejadas.

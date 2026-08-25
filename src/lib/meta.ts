@@ -91,6 +91,16 @@ export interface Concentracion {
    * `suyas / (total + k) ≤ techo/100`, que despejado es `k ≥ 100·suyas/techo − total`.
    */
   citasDeOtrosQueFaltan: number;
+  /**
+   * Cuántos Autores pasan del techo, no solo si alguno pasa.
+   *
+   * Existe porque el campo de arriba miraba **solo al primero**, y eso resultó ser un agujero
+   * de verdad: once sesiones diluyendo al Autor más representado llevaron al segundo a seis
+   * Citas del techo sin que la política dijera una palabra. Un tramo que se cierra creando
+   * una concentración nueva no ha cerrado nada, y quien lee el informe tiene que poder verlo
+   * antes de sembrar el lote siguiente, no después.
+   */
+  porEncimaDelTecho: number;
 }
 
 export interface Meta {
@@ -130,22 +140,33 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
   const porAutor = new Map<string, number>();
   for (const cita of citas) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
 
-  const [autor, suyas] = [...porAutor.entries()].sort(
+  const ordenados = [...porAutor.entries()].sort(
     (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es'),
-  )[0]!;
+  );
+  const [autor, suyas] = ordenados[0]!;
 
   const total = citas.length;
-  const porcentaje = Math.round((suyas / total) * 1000) / 10;
+  const pesa = (n: number) => Math.round((n / total) * 1000) / 10;
+  const porcentaje = pesa(suyas);
+
+  /*
+   * La dilución se mide sobre **todos** los que exceden y se queda con la mayor, no con la del
+   * primero. Hoy dan lo mismo —el que más pesa es el que más dilución pide— y aun así se
+   * escribe así a propósito: la equivalencia es una casualidad de que `k` crezca con `suyas`,
+   * no una propiedad de la que quiera depender el día que el techo se calcule de otro modo.
+   */
+  const excedentes = ordenados.filter(([, n]) => pesa(n) > TECHO_CONCENTRACION_POR_AUTOR);
+  const faltanPara = (n: number) =>
+    Math.max(0, Math.ceil((100 * n) / TECHO_CONCENTRACION_POR_AUTOR) - total);
+
   return {
     autor,
     citas: suyas,
     porcentaje,
     techo: TECHO_CONCENTRACION_POR_AUTOR,
-    excede: porcentaje > TECHO_CONCENTRACION_POR_AUTOR,
-    citasDeOtrosQueFaltan: Math.max(
-      0,
-      Math.ceil((100 * suyas) / TECHO_CONCENTRACION_POR_AUTOR) - total,
-    ),
+    excede: excedentes.length > 0,
+    citasDeOtrosQueFaltan: Math.max(0, ...excedentes.map(([, n]) => faltanPara(n))),
+    porEncimaDelTecho: excedentes.length,
   };
 }
 
@@ -230,8 +251,11 @@ export function objetivoDeMeta(meta: Meta): ObjetivoDeMeta {
       hueco:
         `El Autor más representado aporta ${citas(concentracion.citas)} de ` +
         `${citas(volumen.alcanzado)}: un ${porcentajeEnEspañol(concentracion.porcentaje)} %, por ` +
-        `encima del techo del ${porcentajeEnEspañol(concentracion.techo)} %. Se cierra diluyendo, ` +
-        'nunca despublicando.',
+        `encima del techo del ${porcentajeEnEspañol(concentracion.techo)} %` +
+        (concentracion.porEncimaDelTecho > 1
+          ? `, y no es el único: son ${concentracion.porEncimaDelTecho} Autores los que lo pasan`
+          : '') +
+        '. Se cierra diluyendo, nunca despublicando.',
       meta,
     };
   }
@@ -308,7 +332,10 @@ export function lineasDeMeta(objetivo: ObjetivoDeMeta): string[] {
             `${meta.concentracion.citas} Citas, un ` +
             `${porcentajeEnEspañol(meta.concentracion.porcentaje)} %` +
             (meta.concentracion.excede
-              ? ` — por encima del techo del ${porcentajeEnEspañol(meta.concentracion.techo)} %`
+              ? ` — por encima del techo del ${porcentajeEnEspañol(meta.concentracion.techo)} %` +
+                (meta.concentracion.porEncimaDelTecho > 1
+                  ? ` (lo pasan ${meta.concentracion.porEncimaDelTecho} Autores)`
+                  : '')
               : ` — dentro del techo del ${porcentajeEnEspañol(meta.concentracion.techo)} %`),
         ]),
     '',

@@ -232,3 +232,46 @@ describe('Meta de Corpus — cada objetivo declara de qué tramo sale', () => {
     expect(objetivoDeMeta(estado())).toEqual(objetivoDeMeta(estado()));
   });
 });
+
+describe('Meta de Corpus — el techo vigila a todos los Autores, no solo al primero', () => {
+  /*
+   * El defecto que esta prueba cierra apareció sembrando. Cuatro sesiones diluyendo al Autor
+   * más representado habían llevado al **segundo** a seis Citas del techo, y la política no lo
+   * habría dicho, porque solo miraba al primero. Un tramo que se cierra creando una
+   * concentración nueva no ha cerrado nada.
+   */
+  const dosPorEncima: CitaParaHuecos[] = [
+    ...Array.from({ length: 40 }, (_, i) => ({ slug: `a-${i}`, autor: 'autor-0', temas: ['tema-0'] })),
+    ...Array.from({ length: 30 }, (_, i) => ({ slug: `b-${i}`, autor: 'autor-1', temas: ['tema-0'] })),
+    ...Array.from({ length: 30 }, (_, i) => ({ slug: `c-${i}`, autor: `autor-${(i % 8) + 2}`, temas: ['tema-0'] })),
+  ];
+
+  it('cuenta cuántos Autores pasan del techo, no solo si alguno pasa', () => {
+    // 40 y 30 sobre 100: el 40 % y el 30 %, los dos por encima del 15 %.
+    const estado = meta(dosPorEncima, temas(1), autoresEquilibrados(10));
+    expect(estado.concentracion?.porEncimaDelTecho).toBe(2);
+  });
+
+  it('y las Citas que faltan salen del Autor que más dilución exige', () => {
+    const estado = meta(dosPorEncima, temas(1), autoresEquilibrados(10));
+    // Manda el de 40, no el de 30: diluir hasta el segundo dejaría al primero fuera.
+    const esperadas = Math.ceil((100 * 40) / TECHO_CONCENTRACION_POR_AUTOR) - 100;
+    expect(estado.concentracion?.citasDeOtrosQueFaltan).toBe(esperadas);
+  });
+
+  it('un reparto con uno solo por encima sigue contando uno', () => {
+    const soloUno: CitaParaHuecos[] = [
+      ...Array.from({ length: 40 }, (_, i) => ({ slug: `a-${i}`, autor: 'autor-0', temas: ['tema-0'] })),
+      ...Array.from({ length: 60 }, (_, i) => ({ slug: `d-${i}`, autor: `autor-${(i % 9) + 1}`, temas: ['tema-0'] })),
+    ];
+    expect(meta(soloUno, temas(1), autoresEquilibrados(10)).concentracion?.porEncimaDelTecho).toBe(1);
+  });
+
+  it('y el objetivo dice cuántos son cuando es más de uno', () => {
+    const objetivo = objetivoDeMeta(
+      meta(dosPorEncima, temas(1), autoresEquilibrados(10), colecciones(META_COLECCIONES_PUBLICADAS)),
+    );
+    expect(objetivo.clase).toBe('concentracion');
+    expect(objetivo.hueco).toContain('2 Autores');
+  });
+});
