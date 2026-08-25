@@ -2513,3 +2513,40 @@ páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32802469917 en verde): `/tema/la-felicidad` responde
 200 y `sitemap-0.xml` declara **493 URL**, las mismas del build.
+
+## 15.5 (20.ª sesión) — La cantera de Temas se agota en doce, y queda medido
+
+**452 Citas, 12 Temas, 493 páginas: sin cambios.** La sesión midió los cuatro asuntos que quedaban
+por encima del umbral y **ninguno se creó**. Es un resultado negativo, y conviene que esté escrito
+con su cifra para que nadie lo vuelva a intentar a ciegas.
+
+**La prueba de distinción, ahora sistemática.** En vez de leer y suponer, se contó de qué Temas
+existentes vienen ya las candidatas de cada asunto:
+
+| Asunto | Candidatas | Tema que más repite | Veredicto |
+|---|---|---|---|
+| la vejez | 22 | el-tiempo, **11 de 22** | duplica media lista |
+| la naturaleza | 22 | la-vida, 8 | bien repartido → se lee |
+| el amor | 17 | la-vida, 5 | bien repartido → se lee |
+| la guerra | 7 | — | por debajo del umbral |
+
+**Y leídos los dos que pasaban el reparto, se caen los dos.**
+
+- **«La naturaleza»: 6 genuinas de 22.** El motivo es una característica del Corpus que no se
+  había nombrado: **`tierra`, `mar`, `sol` y `campo` son aquí casi siempre metáfora**. «Cielo y
+  Tierra pasarán», «con el barro de la tierra», «los pobres de la tierra», «se hincha el mar».
+  Es un corpus de aforismo moral, no de escritura de naturaleza.
+- **«El amor»: 2 genuinas de 17.** `corazón` casi nunca es amor —es ánimo o valor: «se lleva la
+  mano al corazón», «Kant reconstruyó con el corazón»—. Y hay un falso positivo que merece
+  quedar: **«no se ganó Za·mor·a en un hora»**, cazado por la subcadena `amor`.
+
+**Conclusión medida, no impresión: sobre 452 Citas el Corpus da doce Temas honestos.** Van
+dieciséis asuntos medidos, cuatro abiertos y doce descartados. Los doce que faltan para la Meta no
+salen de repartir mejor lo que hay.
+
+**Y comprobado otra vez:** el arreglo del encabezado en `tools/lib/extraccion.ts` sigue sin estar
+en `main` —su último commit es el de la Historia 11.5—, así que la segunda vía del protocolo sigue
+esperando.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 493
+páginas.
