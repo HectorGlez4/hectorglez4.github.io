@@ -1,0 +1,15 @@
+---
+texto: "No es la miel para la boca del asno"
+autor: "miguel-de-cervantes"
+temas:
+  - "el-saber"
+slug: "miguel-de-cervantes-no-es-la-miel-para-la-boca"
+procedencia:
+  obra: "Don Quijote"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/2000/pg2000.txt"
+---

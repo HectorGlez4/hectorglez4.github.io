@@ -2138,3 +2138,34 @@ páginas y 388 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 
 
 **Verificado en vivo** (25/08/2026, ejecución 32790671514 en verde): `sitemap-0.xml` declara
 **447 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (9.ª sesión) — Diecinueve más del *Quijote*, y una segunda apócrifa cazada
+
+**410 → 429 Citas**, el sitio de **447 a 466 páginas**, el Autor más representado del 27,8 % al
+**26,6 %**, y el objetivo declarado de 350 a **331**. El build cuenta **407 Citas cotejadas**
+contra su documento.
+
+Segundo lote por el método de la sesión anterior —escoger a mano, copiar el literal, dejar que
+`alta` aplique el cotejo—: 19 propuestas, **19 publicadas, 0 en revisión**.
+
+Entraron los refranes que el libro pone en boca de Sancho y que ningún florilegio verifica:
+«al buen callar llaman Sancho», «Dos linajes solos hay en el mundo… que son el tener y el no
+tener», «tanto vales cuanto tienes, y tanto tienes cuanto vales», «dádivas quebrantan peñas»,
+«un asno cargado de oro sube ligero por una montaña», «no se ganó Zamora en un hora», «No es la
+miel para la boca del asno», «el consejo de la mujer es poco, y el que no le toma es loco». Y las
+sentencias del hidalgo: «la sangre se hereda y la virtud se aquista», «cada uno es artífice de su
+ventura», «el que hoy cae puede levantarse mañana», «Yo sé quién soy», «La razón de la sinrazón
+que a mi razón se hace», y la primera frase del libro entera.
+
+**Segunda apócrifa cazada, y conviene llevar la cuenta.** «Hoy es el día más hermoso de nuestra
+vida» se buscó en el documento y **no está**, igual que «Ladran, luego cabalgamos» en la sesión
+anterior. Dos de las frases más citadas de internet como cervantinas no aparecen en el libro.
+Cada una costó un segundo de comprobación, y ese segundo es la diferencia entre este Corpus y un
+florilegio.
+
+**El método ya tiene número:** dos sesiones, 33 Citas del *Quijote*, cero rechazos, cero
+candidatas volcadas a `_revision`. Frente a las ~65 que la extracción a bulto habría dado tras
+revisar 3.267 propuestas.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 466
+páginas y 407 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
