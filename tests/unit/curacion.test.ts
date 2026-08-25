@@ -10,6 +10,7 @@ import {
   crearColeccion,
   despublicarColeccion,
   estadoDeColeccion,
+  solapeDeColeccion,
   inventarioDeColecciones,
   inventarioDeRetiradas,
   publicarColeccion,
@@ -585,3 +586,161 @@ function citasDe(n: number): Cita[] {
     aptaParaPortada: false,
   }));
 }
+
+/**
+ * Historia 15.2 — cuánto de una Colección ya se ve en otra parte.
+ *
+ * La regla salió del trabajo y tardó dieciséis Colecciones en formularse: **una Colección tiene
+ * que traer una lista que no se pueda ver ya en otra parte**. Si sus miembros son los mismos que
+ * los de un Tema o los de una Página de Autor, la página no añade superficie: la repite, que es
+ * la forma cara de la «vía barata de multiplicar páginas indexables» que `umbrales.ts` nombra.
+ *
+ * Descartó «la fortuna» —14 de 26 candidatas salían del Tema «la adversidad»— y destapó que «El
+ * uniforme y la sotana» reunía las 16 Citas de un Autor que tiene 16. Pero vivía en la bitácora,
+ * y una regla que solo vive en prosa no protege a nadie: la primera vez que hizo falta llevaba
+ * dieciséis Colecciones sin aplicarse.
+ *
+ * Así que se mide y se informa, **sin umbral y sin bloquear**. El sistema no tiene criterio para
+ * decidir cuánto solape es demasiado —a veces reunir lo que un Tema dispersa es justo el trabajo
+ * editorial— pero sí puede poner el número delante. Es la misma línea que la Historia 1.6 con los
+ * duplicados: se señala, decide quien cura.
+ */
+describe('Historia 15.2 — el solape de una Colección con lo ya visible', () => {
+  it('mide cuántos miembros comparte con el Tema que más repite', () => {
+    // Tres Autores distintos bajo un mismo Tema: así el Tema manda sin empatar con nadie.
+    const citas = [
+      { slug: 'a', autor: 'seneca', temas: ['el-tiempo'] },
+      { slug: 'b', autor: 'machado', temas: ['el-tiempo'] },
+      { slug: 'c', autor: 'marti', temas: ['el-tiempo'] },
+      { slug: 'd', autor: 'gracian', temas: ['la-vida'] },
+    ];
+
+    const solape = solapeDeColeccion(['a', 'b', 'c', 'd'], citas);
+
+    expect(solape.mayor?.clase).toBe('tema');
+    expect(solape.mayor?.slug).toBe('el-tiempo');
+    expect(solape.mayor?.miembros).toBe(3);
+    expect(solape.mayor?.porcentaje).toBe(75);
+  });
+
+  it('en empate gana el Autor, porque su Página siempre las enseña todas', () => {
+    /*
+     * Tres del mismo Autor y del mismo Tema: los dos solapan en tres. Gana el Autor a propósito,
+     * y no por el orden en que se leyó nada: la Página de Autor **siempre existe** y enseña
+     * **todas** sus Citas, mientras que un Tema es una lista ya curada que puede no incluirlas.
+     * De las dos duplicaciones posibles, la del Autor es la segura.
+     */
+    const citas = [
+      { slug: 'a', autor: 'seneca', temas: ['el-tiempo'] },
+      { slug: 'b', autor: 'seneca', temas: ['el-tiempo'] },
+      { slug: 'c', autor: 'seneca', temas: ['el-tiempo'] },
+    ];
+
+    expect(solapeDeColeccion(['a', 'b', 'c'], citas).mayor?.clase).toBe('autor');
+  });
+
+  it('y también con la Página de Autor, que fue el caso que destapó la regla', () => {
+    // Dieciséis Citas de un Autor que tiene dieciséis: la Colección repetía su Página.
+    const citas = Array.from({ length: 16 }, (_, i) => ({
+      slug: `g-${i}`,
+      autor: 'gonzalez-prada',
+      temas: ['la-libertad'],
+    }));
+
+    const solape = solapeDeColeccion(
+      citas.map((c) => c.slug),
+      citas,
+    );
+
+    expect(solape.mayor?.clase).toBe('autor');
+    expect(solape.mayor?.porcentaje).toBe(100);
+  });
+
+  it('gana el mayor de los dos: un Autor que repite más que cualquier Tema', () => {
+    const citas = [
+      { slug: 'a', autor: 'seneca', temas: ['el-tiempo'] },
+      { slug: 'b', autor: 'seneca', temas: ['la-vida'] },
+      { slug: 'c', autor: 'seneca', temas: ['la-virtud'] },
+    ];
+
+    expect(solapeDeColeccion(['a', 'b', 'c'], citas).mayor?.clase).toBe('autor');
+  });
+
+  it('una Colección repartida no declara solape mayor que el de su parte más gruesa', () => {
+    const citas = [
+      { slug: 'a', autor: 'seneca', temas: ['el-tiempo'] },
+      { slug: 'b', autor: 'machado', temas: ['la-vida'] },
+      { slug: 'c', autor: 'marti', temas: ['la-libertad'] },
+      { slug: 'd', autor: 'gracian', temas: ['la-virtud'] },
+    ];
+
+    expect(solapeDeColeccion(['a', 'b', 'c', 'd'], citas).mayor?.porcentaje).toBe(25);
+  });
+
+  it('sin miembros no hay solape que medir, y no revienta', () => {
+    expect(solapeDeColeccion([], []).mayor).toBeUndefined();
+  });
+});
+
+describe('Historia 15.2 — duplicar es que las dos listas sean la misma', () => {
+  /*
+   * La primera versión de esta medida solo miraba «qué parte de la Colección se ve en la
+   * superficie», y con eso «Refranes de Sancho» —veinte Citas de un Autor con sesenta y siete—
+   * salía al 100 % y parecía un duplicado. No lo es: enseña veinte de sesenta y siete, y esas
+   * veinte juntas no se ven en ninguna otra parte. Lo que hay que mirar son las **dos**
+   * direcciones, y la que manda es la más floja de las dos.
+   */
+  const deUnAutor = (cuantas: number, desde = 0) =>
+    Array.from({ length: cuantas }, (_, i) => ({
+      slug: `c-${desde + i}`,
+      autor: 'cervantes',
+      temas: ['la-vida'],
+    }));
+
+  it('una Colección que es un recorte de un Autor grande no se declara duplicada', () => {
+    const citas = deUnAutor(67);
+    const veinte = citas.slice(0, 20).map((c) => c.slug);
+
+    const solape = solapeDeColeccion(veinte, citas);
+
+    expect(solape.mayor?.porcentaje).toBe(100);
+    expect(solape.mayor?.tamañoDeLaSuperficie).toBe(67);
+    // La otra dirección es la que desmiente la alarma: cubre menos de un tercio de su Autor.
+    expect(solape.mayor?.porcentajeDeLaSuperficie).toBeLessThan(35);
+  });
+
+  it('una Colección que agota a su Autor sí lo declara en las dos direcciones', () => {
+    const citas = deUnAutor(16);
+
+    const solape = solapeDeColeccion(
+      citas.map((c) => c.slug),
+      citas,
+    );
+
+    expect(solape.mayor?.porcentaje).toBe(100);
+    expect(solape.mayor?.porcentajeDeLaSuperficie).toBe(100);
+  });
+
+  it('gana la superficie que más duplica, no la que más miembros comparte', () => {
+    /*
+     * Ocho miembros: siete de un Autor con cuarenta Citas, y los ocho bajo un Tema que solo
+     * tiene ocho. El Autor comparte más miembros (7) pero el Tema es el que repite la lista
+     * entera, y es el que hay que enseñar.
+     */
+    const citas = [
+      ...Array.from({ length: 40 }, (_, i) => ({
+        slug: `a-${i}`,
+        autor: 'seneca',
+        temas: i < 7 ? ['el-espejo'] : ['otro'],
+      })),
+      { slug: 'z', autor: 'machado', temas: ['el-espejo'] },
+    ];
+    const miembros = [...Array.from({ length: 7 }, (_, i) => `a-${i}`), 'z'];
+
+    const solape = solapeDeColeccion(miembros, citas);
+
+    expect(solape.mayor?.clase).toBe('tema');
+    expect(solape.mayor?.slug).toBe('el-espejo');
+    expect(solape.mayor?.porcentajeDeLaSuperficie).toBe(100);
+  });
+});

@@ -2844,3 +2844,48 @@ anterior; ésta era la única.
 
 `npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` 501
 páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+## 15.2 (30.ª sesión) — La regla de distinción se vuelve número, y el número se equivoca primero
+
+**456 Citas, 16 Colecciones, 501 páginas: sin cambios en el sitio.** La sesión convirtió en código
+la regla que llevaba doce sesiones viviendo en esta bitácora, y de paso enseñó por qué medir es
+distinto de opinar.
+
+**Por qué merecía código.** La regla —«una Colección tiene que traer una lista que no se pueda ver
+ya en otra parte»— descartó «la fortuna», descartó tres candidatas más y destapó el defecto de «El
+uniforme y la sotana». Pero vivía en prosa, y **una regla que solo vive en prosa no protege a
+nadie**: la primera vez que hizo falta llevaba dieciséis Colecciones sin aplicarse, y la única que
+la incumplía se encontró de casualidad. Es la segunda vez esta noche que pasa lo mismo —la
+primera fue el aviso de duplicados de la retro de la Épica 9— y las dos veces la salida ha sido la
+misma: ponerlo en la herramienta.
+
+`coleccion estado` informa ahora del solape, **sin umbral y sin bloquear**. El sistema no tiene
+criterio para decir cuánto es demasiado; el editor sí.
+
+**Y la primera versión medía mal, que es lo interesante.** Contaba «qué parte de la Colección se ve
+en la superficie», y con eso salió esto:
+
+```
+Refranes de Sancho:       20 de 20 (100 %) en la Página de Autor
+```
+
+Alarma máxima sobre una Colección que **no duplica nada**: son veinte Citas de un Autor que tiene
+sesenta y seis, y esas veinte juntas no se ven en ninguna parte. **Duplicar es que las dos listas
+sean la misma**, y eso solo se ve mirando en las **dos direcciones**. Corregido: la medida es
+ahora el mínimo de las dos coberturas, y el informe las enseña las dos.
+
+```
+Refranes de Sancho:       100 % de la Colección · 30,3 % de las 66 de esa página  → recorte
+El uniforme y la sotana:   64 % de la Colección · 100 % de las 16 de esa página  → la contiene
+```
+
+**Lo destapó la propia herramienta al estrenarla.** Escribí la métrica, la corrí sobre las
+dieciséis Colecciones y el resultado no cuadraba con lo que yo sabía de ellas. Un número que
+contradice lo que sabes es un número que hay que revisar antes que la creencia.
+
+Nueve pruebas nuevas, y una de ellas fija un desempate que al principio era accidental: **en
+empate gana el Autor**, porque su Página siempre existe y siempre las enseña todas, mientras que
+un Tema es una lista ya curada.
+
+`npx astro check` 0 errores; `npx vitest run` **1934/1934** en 62 ficheros; `npm run build` 501
+páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.

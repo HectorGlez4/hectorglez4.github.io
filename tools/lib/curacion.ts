@@ -25,7 +25,7 @@
 
 import { join } from 'node:path';
 import { coleccionAdmisible } from '../../src/lib/admision.ts';
-import { lineaDeHueco } from '../../src/lib/formato.ts';
+import { lineaDeHueco, porcentajeEnEspañol } from '../../src/lib/formato.ts';
 import {
   huecoDeColeccion,
   type ColeccionParaHuecos,
@@ -452,7 +452,16 @@ export async function estadoDeColeccion(rutas: Rutas, slug: string): Promise<Res
   const declaracion = await declaracionDeColeccion(encontrada.coleccion);
   if (!declaracion.ok) return declaracion;
 
-  const resuelta = resolverColeccion({ slug, ...declaracion.datos }, await citasPublicadas(rutas));
+  const publicadas = await citasPublicadas(rutas);
+  const resuelta = resolverColeccion({ slug, ...declaracion.datos }, publicadas);
+  /*
+   * El solape se calcula aquí y se enseña siempre, tenga el valor que tenga: el número solo sirve
+   * si está delante cuando se cura, no cuando alguien va a buscarlo.
+   */
+  const solape = solapeDeColeccion(
+    resuelta.citas.map((c) => c.slug),
+    publicadas as readonly { slug: string; autor: string; temas?: string[] }[],
+  );
   const estado = huecoDeColeccion({
     slug,
     nombre: resuelta.nombre,
@@ -468,6 +477,17 @@ export async function estadoDeColeccion(rutas: Rutas, slug: string): Promise<Res
       '',
       `Miembros declarados: ${resuelta.declarados}`,
       `Miembros resueltos:  ${resuelta.citas.length}`,
+      ...(solape.mayor === undefined
+        ? []
+        : [
+            `Solape mayor:        ${solape.mayor.miembros} de ${resuelta.citas.length} ` +
+              `(${porcentajeEnEspañol(solape.mayor.porcentaje)} %) se ven también en ` +
+              `${solape.mayor.clase === 'autor' ? 'la Página de Autor' : 'el Tema'} ` +
+              `«${solape.mayor.slug}», y son el ` +
+              `${porcentajeEnEspañol(solape.mayor.porcentajeDeLaSuperficie)} % de las ` +
+              `${solape.mayor.tamañoDeLaSuperficie} que esa página enseña.`,
+            'Duplicar es que las dos listas sean la misma: hacen falta los dos porcentajes altos.',
+          ]),
       ...(resuelta.sinResolver.length > 0
         ? [
             '',
@@ -590,4 +610,122 @@ function lineaDeEstado(estado: HuecoDeColeccion): string {
   return estado.faltan === 0
     ? `Se publica: ${estado.publicadas} Citas resueltas, y el umbral está en ${MIN_CITAS_POR_COLECCION}.`
     : `Todavía no se publica.\n${lineaDeHueco(estado)}`;
+}
+
+/** Una superficie que ya enseña parte de la lista de una Colección: un Tema o una Página de Autor. */
+export interface SolapeConSuperficie {
+  clase: 'tema' | 'autor';
+  slug: string;
+  /** Miembros de la Colección que esa superficie también enseña. */
+  miembros: number;
+  /** Qué parte de la Colección es eso, a una décima. */
+  porcentaje: number;
+  /** Cuántas Citas enseña la superficie en total. */
+  tamañoDeLaSuperficie: number;
+  /**
+   * Qué parte de **la superficie** cubre la Colección, a una décima.
+   *
+   * Es la mitad que faltaba, y sin ella el número engaña. «Refranes de Sancho» tiene el 100 %
+   * de sus veinte miembros en una Página de Autor —son todos del mismo Autor— y aun así no
+   * duplica nada: ese Autor tiene sesenta y siete Citas y la Colección enseña veinte. Duplicar
+   * es que las **dos listas sean la misma**, y eso solo se ve mirando en las dos direcciones.
+   */
+  porcentajeDeLaSuperficie: number;
+}
+
+export interface SolapeDeColeccion {
+  /** La superficie que más repite. Ausente si la Colección no tiene miembros. */
+  mayor?: SolapeConSuperficie;
+}
+
+/**
+ * Cuánto de una Colección se puede ver ya en otra parte — Historia 15.2.
+ *
+ * La regla que esto mide tardó dieciséis Colecciones en formularse: **una Colección tiene que
+ * traer una lista que no se pueda ver ya en otro sitio**. Si sus miembros son los mismos que los
+ * de un Tema o los de una Página de Autor, la página no añade superficie: la repite, que es la
+ * versión cara de la «vía barata de multiplicar páginas indexables» que `umbrales.ts` nombra a
+ * propósito del umbral de Colección.
+ *
+ * Descartó «la fortuna» —14 de 26 candidatas salían del Tema «la adversidad»— y destapó que «El
+ * uniforme y la sotana» reunía las dieciséis Citas de un Autor que tiene dieciséis. Pero vivía en
+ * la bitácora, y **una regla que solo vive en prosa no protege a nadie**: la primera vez que hizo
+ * falta llevaba dieciséis Colecciones sin aplicarse, y la única que la incumplía se encontró de
+ * casualidad.
+ *
+ * **No lleva umbral y no bloquea nada, y es deliberado.** El sistema no tiene criterio para decir
+ * cuánto solape es demasiado —reunir lo que un Tema dispersa es a veces justo el trabajo
+ * editorial que la Colección hace— pero sí puede poner el número delante de quien cura. Es la
+ * misma línea que la Historia 1.6 con los duplicados: se señala, decide el editor.
+ *
+ * AD-5 — puro: recibe los slugs y las Citas ya leídas, no toca disco.
+ */
+export function solapeDeColeccion(
+  miembros: string[],
+  citas: readonly { slug: string; autor: string; temas?: string[] }[],
+): SolapeDeColeccion {
+  if (miembros.length === 0) return {};
+
+  const enLaColeccion = new Set(miembros);
+  const cuenta = new Map<
+    string,
+    { clase: 'tema' | 'autor'; slug: string; miembros: number; tamaño: number }
+  >();
+  const sumar = (clase: 'tema' | 'autor', slug: string, esMiembro: boolean) => {
+    const clave = `${clase}:${slug}`;
+    const previo = cuenta.get(clave) ?? { clase, slug, miembros: 0, tamaño: 0 };
+    previo.tamaño += 1;
+    if (esMiembro) previo.miembros += 1;
+    cuenta.set(clave, previo);
+  };
+
+  // Se recorre el corpus entero, no solo los miembros: el tamaño de cada superficie hace falta
+  // para saber si la Colección la cubre o solo se apoya en ella.
+  for (const cita of citas) {
+    const esMiembro = enLaColeccion.has(cita.slug);
+    sumar('autor', cita.autor, esMiembro);
+    for (const tema of cita.temas ?? []) sumar('tema', tema, esMiembro);
+  }
+  for (const clave of [...cuenta.keys()]) {
+    if (cuenta.get(clave)!.miembros === 0) cuenta.delete(clave);
+  }
+
+  /*
+   * En empate gana el **Autor**, y no por casualidad del orden alfabético de las clases: la
+   * Página de Autor siempre existe y enseña **todas** sus Citas, mientras que un Tema es una
+   * lista ya curada que puede no incluirlas. De las dos duplicaciones posibles, la del Autor es
+   * la segura, y es la que hay que enseñar primero a quien cura.
+   *
+   * El segundo desempate es por slug en español y no por el orden en que se leyeron los ficheros:
+   * el mismo estado tiene que dar el mismo informe, se pregunte cuando se pregunte.
+   */
+  const decima = (n: number) => Math.round(n * 1000) / 10;
+  /*
+   * Ordena por la **duplicación real**, que es el mínimo de las dos coberturas: una superficie
+   * solo repite la lista de la Colección si la Colección está dentro de ella **y** la llena. Con
+   * la cobertura de la Colección a secas, «Refranes de Sancho» —veinte Citas de un Autor que
+   * tiene sesenta y siete— salía al 100 % y parecía un duplicado sin serlo.
+   */
+  const duplicacion = (c: { miembros: number; tamaño: number }) =>
+    Math.min(c.miembros / miembros.length, c.miembros / c.tamaño);
+
+  const mayor = [...cuenta.values()].sort(
+    (a, b) =>
+      duplicacion(b) - duplicacion(a) ||
+      b.miembros - a.miembros ||
+      a.clase.localeCompare(b.clase) ||
+      a.slug.localeCompare(b.slug, 'es'),
+  )[0];
+  if (mayor === undefined) return {};
+
+  return {
+    mayor: {
+      clase: mayor.clase,
+      slug: mayor.slug,
+      miembros: mayor.miembros,
+      porcentaje: decima(mayor.miembros / miembros.length),
+      tamañoDeLaSuperficie: mayor.tamaño,
+      porcentajeDeLaSuperficie: decima(mayor.miembros / mayor.tamaño),
+    },
+  };
 }
