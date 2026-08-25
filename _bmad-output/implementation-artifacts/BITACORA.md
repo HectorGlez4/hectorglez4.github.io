@@ -4183,3 +4183,62 @@ páginas**; `npx playwright test` **2 fallos** —la misma prueba en sus dos pro
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## UX-DR17 (58.ª sesión) — «Más de este Autor» dejaba de enseñar más del Autor
+
+**761 Citas y 806 páginas: las mismas.** Cambia qué cuatro Citas se ofrecen al pie de cada Página
+de Cita, y con ello **las inalcanzables bajan de cuatro a tres**.
+
+### El defecto se veía en la página, no en la métrica
+
+Al pie de «Hoy es siempre todavía» se ofrecían estas cuatro:
+
+    «¡Ah, cuando yo era niño soñaba con los héroes de la Iliada!»
+    «Al andar se hace camino, y al volver la vista atrás se ve la senda…»
+    «Caminante, no hay camino, se hace camino al andar.»
+    «Caminante, no hay camino, sino estelas en la mar.»
+
+`citasRelacionadas` hacía `.slice(0, 4)` sobre una lista ordenada por slug: **las cuatro primeras
+del alfabeto**. Y slugs contiguos son casi siempre textos casi iguales —el mismo verso, la misma
+obra, el mismo arranque—, así que «Más de este Autor» enseñaba **variantes de lo mismo** en vez de
+más del Autor. Con 36 Citas de ese Autor disponibles.
+
+Ahora se reparten a pasos iguales. Las mismas cuatro plazas, mismo Autor, misma preferencia por
+Tema compartido —eso lo declara UX-DR17 y no se toca—, pero **cuáles** es implementación, y esta
+elige mejor:
+
+    «¡Ah, cuando yo era niño soñaba con los héroes de la Iliada!»
+    «Todo el que camina anda, como Jesús, sobre el mar.»
+    «La luz nada ilumina y el sabio nada enseña.»
+    «Volvamos a la verdad: vanidad de vanidades.»
+
+**Sin azar.** El paso es aritmético sobre `length - 1`, para que dos construcciones del mismo
+commit den el mismo sitio y para que la última candidata entre siempre: es la que ninguna otra
+superficie alcanza.
+
+### La función no tenía ni una prueba
+
+Seis nuevas. Cuatro fijan lo que ya garantizaba y nadie había escrito —del mismo Autor, nunca la
+propia, prefiere Tema compartido, nunca repite—, y dos piden el reparto.
+
+**Y una de las cuatro «viejas» estaba mal escrita por mí.** El ayudante ponía `autor: 'seneca'` a
+todas las Citas de prueba, incluidas las dos que llamé `marti-*`: la comprobación «solo del mismo
+Autor» pasaba **sin comprobar nada**. Salió a la luz en cuanto el reparto empezó a llegar al final
+de la lista y las alcanzó. Un fixture que se contradice a sí mismo no falla: aprueba.
+
+### Lo que esto no arregla, dicho claro
+
+De doce Páginas inalcanzables quedan **tres**. El reparto alcanzó a la última de un Autor, que
+ahora es hermana de todas las suyas. Las otras tres están hacia la mitad de la cola —posiciones
+101 a 107 de 113— y ni el reparto ni una Colección las alcanzan.
+
+**No se fuerza más.** Subir `MAX_CITAS_RELACIONADAS` es mover un umbral, y UX-DR17 dice «hasta 4»;
+contorsionar el reparto para que caiga justo en esas tres sería optimizar para la prueba y no para
+quien lee, que es lo contrario de por qué se ha hecho este cambio. Sigue haciendo falta la línea de
+`deferred-work.md`.
+
+`npx astro check` 0 errores; `npx vitest run` **2015/2015** en 65 ficheros; `npm run build` **806
+páginas**; `npx playwright test` **2 fallos** —la misma prueba en sus dos proyectos—, 412 pasadas.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

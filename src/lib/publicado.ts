@@ -306,7 +306,28 @@ export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Ci
   const temas = new Set(cita.temas);
   const comparteTema = (c: Cita) => c.temas.some((t) => temas.has(t));
 
-  return [...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))].slice(0, maximo);
+  const candidatas = [...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))];
+  if (candidatas.length <= maximo) return candidatas;
+
+  /*
+   * **Repartidas, no las primeras.** Antes esto era `.slice(0, maximo)` sobre una lista ordenada
+   * por slug, es decir las primeras del alfabeto. Y slugs contiguos son casi siempre textos casi
+   * iguales, así que «Más de este Autor» enseñaba variantes de lo mismo. Visto en una página de
+   * verdad:
+   *
+   *     «Caminante, no hay camino, se hace camino al andar.»
+   *     «Caminante, no hay camino, sino estelas en la mar.»
+   *
+   * UX-DR17 declara **cuántas** y **de quién**; cuáles es de aquí. Se toman a pasos iguales a lo
+   * largo de las candidatas, lo que da cuatro Citas distintas entre sí y hace que la cola de un
+   * Autor con muchas —que en un listado de tres páginas no se veía nunca— aparezca.
+   *
+   * El paso se calcula sobre `length - 1` para que la última entre siempre: es la que ninguna
+   * otra superficie alcanza. Y es aritmética pura, sin azar: dos construcciones del mismo commit
+   * tienen que dar el mismo sitio.
+   */
+  const paso = (candidatas.length - 1) / (maximo - 1);
+  return Array.from({ length: maximo }, (_, i) => candidatas[Math.round(i * paso)]);
 }
 
 /**
