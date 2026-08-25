@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { ALTO, ANCHO, svgDeTarjeta } from '../../src/lib/tarjeta.ts';
+import { ALTO, ANCHO, svgDeTarjeta, svgDeTarjetaDeListado } from '../../src/lib/tarjeta.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { tramoDe } from '../../src/lib/tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
@@ -141,5 +141,74 @@ describe('Historia 10.1 — sharp está declarada, no heredada', () => {
 
     const endpoint = readFileSync(resolve(raiz, 'src/pages/tarjeta/[slug].png.ts'), 'utf8');
     expect(endpoint).toContain("from 'sharp'");
+  });
+});
+
+/**
+ * FR-19 — la Tarjeta Social de las páginas de listado.
+ *
+ * Hasta aquí solo la Página de Cita declaraba `og:image`: la portada, el buscador, los Temas,
+ * las Colecciones y las Páginas de Autor se compartían **sin previsualización**. Se anotó como
+ * bloqueado «porque no hay recurso de marca en `public/`», y esa premisa era falsa: la Tarjeta
+ * de Cita no sale de ningún recurso, se **dibuja** con la paleta y la marca del propio sitio y
+ * se rasteriza en el build. Lo que faltaba no era un activo: era esta variante.
+ *
+ * Es otra tarjeta y no la misma con otro texto. La de Cita enseña una Cita —texto, Autor,
+ * procedencia—; la de un listado enseña **el nombre de la página y por qué existe**. Compartir
+ * un Tema y que la previsualización muestre una de sus Citas prometería la Cita, no el Tema.
+ */
+describe('FR-19 — la Tarjeta de una página de listado', () => {
+  const svg = svgDeTarjetaDeListado({
+    titulo: 'La prudencia',
+    bajada: 'Lo que conviene mirar antes de obrar, y lo que se gana esperando.',
+  });
+
+  it('tiene la misma proporción que la de Cita: las redes piden una sola', () => {
+    expect(svg).toContain(`width="${ANCHO}"`);
+    expect(svg).toContain(`height="${ALTO}"`);
+  });
+
+  it('enseña el nombre de la página y su bajada', () => {
+    expect(svg).toContain('La prudencia');
+    expect(svg).toContain('Lo que conviene mirar antes de obrar');
+  });
+
+  it('lleva la marca del sitio, como su hermana', () => {
+    expect(svg).toContain(MARCA.toLocaleUpperCase('es'));
+  });
+
+  it('escapa lo que podría romper el SVG', () => {
+    /*
+     * El criterio de una Colección y la semblanza de un Autor son texto de editor: pueden
+     * traer comillas y ampersands. Sin escapar, un `&` deja el SVG mal formado y el
+     * rasterizador devuelve una imagen rota — que las redes reportan como inaccesible.
+     */
+    const conSignos = svgDeTarjetaDeListado({
+      titulo: 'Ley & orden',
+      bajada: 'Lo que <dicen> las "leyes" y lo que hacen.',
+    });
+
+    expect(conSignos).toContain('Ley &amp; orden');
+    expect(conSignos).not.toMatch(/<dicen>/);
+    expect(conSignos).toContain('&quot;leyes&quot;');
+  });
+
+  it('una bajada larga se reparte en líneas y no se sale del lienzo', () => {
+    const larga = svgDeTarjetaDeListado({
+      titulo: 'Un Tema',
+      bajada: 'palabra '.repeat(60).trim(),
+    });
+
+    // Varias líneas de texto, y ninguna empieza fuera del margen.
+    const lineas = [...larga.matchAll(/<text[^>]*\sx="(\d+)"/g)].map((m) => Number(m[1]));
+    expect(lineas.length).toBeGreaterThan(2);
+    for (const x of lineas) expect(x).toBeLessThan(ANCHO);
+  });
+
+  it('sin bajada sigue siendo una tarjeta válida', () => {
+    // Una Página de Autor sin semblanza es admisible; su tarjeta no puede romperse por eso.
+    const sinBajada = svgDeTarjetaDeListado({ titulo: 'Solo el nombre' });
+    expect(sinBajada).toContain('Solo el nombre');
+    expect(sinBajada).toContain(`width="${ANCHO}"`);
   });
 });

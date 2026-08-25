@@ -45,7 +45,16 @@ describe('Historia 10.1 — la Cita larga también tiene Tarjeta', () => {
   });
 
   it('las dos Citas tienen su Tarjeta, aunque solo una admita Imagen', async () => {
-    const tarjetas = await readdir(join(proyecto, 'dist', 'tarjeta'));
+    /*
+     * Se filtran los `.png` a propósito. La comprobación es «cada Cita tiene la suya», y
+     * comparar el directorio entero decía además «y aquí no hay nada más», que no es lo que
+     * esta prueba mira: desde la 53.ª sesión `dist/tarjeta/` tiene también los subdirectorios
+     * `tema/`, `coleccion/` y `autor/`, con la Tarjeta de cada página de listado. Que esas
+     * existan es asunto de sus propias pruebas, no de ésta.
+     */
+    const tarjetas = (await readdir(join(proyecto, 'dist', 'tarjeta'))).filter((f) =>
+      f.endsWith('.png'),
+    );
     expect(tarjetas.sort()).toEqual(['seneca-corta.png', 'seneca-larga.png']);
   });
 

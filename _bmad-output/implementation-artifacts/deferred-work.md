@@ -224,9 +224,26 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     La Cita la tiene porque la Historia 10.1 genera su Tarjeta en el build. Para las demás no hay
     imagen que apuntar: la Pieza de una Colección (13.3) se compone a demanda y `piezas/` está
     fuera del control de versiones a propósito (AD-15), así que no se sirve.
-    Caben dos salidas y las dos son decisión de Héctor: generar en el build una imagen por Tema,
-    Colección y Autor —como ya se hace con las 456 Tarjetas—, o poner una imagen de marca fija
-    como respaldo, que hoy no existe: `public/` solo tiene el `favicon.svg`.
+    Caben dos salidas: generar en el build una imagen por Tema, Colección y Autor —como ya se
+    hace con las Tarjetas de Cita—, o poner una imagen de marca fija como respaldo, que hoy no
+    existe: `public/` solo tiene el `favicon.svg`.
+
+    **RESUELTA el 25/08 (53.ª sesión) por la primera salida, y conviene decir con qué regla.**
+    De las dos, la segunda pide **inventar un activo de marca** que nadie ha diseñado; la primera
+    no inventa nada: reutiliza la paleta, el filete y la marca que ya dibuja `svgDeTarjeta`, y
+    toma el texto de lo que **cada página ya declara** en su `<meta>` —el criterio de la
+    Colección, la semblanza del Autor, la descripción compuesta del Tema—. Esa es la opción
+    conservadora y reversible que la regla del bucle manda tomar en una bifurcación así, y es
+    reversible entera: tres ficheros de ruta y tres líneas en las plantillas.
+
+    Hecho: `svgDeTarjetaDeListado` con seis pruebas en rojo primero, y tres rutas —
+    `/tarjeta/tema/`, `/tarjeta/coleccion/`, `/tarjeta/autor/`— que salen de los mismos filtros
+    de publicación que las páginas, para no generar una imagen que ninguna página enlace.
+    Medido tras el build: **12 Temas, 16 Colecciones y 16 Autores**, los publicados exactos.
+
+    **Lo que sigue sin imagen, y sigue siendo decisión de Héctor:** la portada, el buscador y el
+    404. No tienen nombre ni bajada que dibujar —no son *una* cosa, son la entrada al sitio— y
+    ahí sí hace falta decidir qué enseña el sitio cuando lo que se comparte es el sitio.
 
 - source_spec: Historia 11.4 — destapado en la 35.ª sesión del bucle v4 al cuadrar el sitemap
   summary: Hay un Autor admitido desde la primera sesión de sembrado y nunca sembrado: cero Citas, cero documentos.

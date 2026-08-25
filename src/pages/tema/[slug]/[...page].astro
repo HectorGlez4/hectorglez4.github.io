@@ -50,6 +50,7 @@ const canonica = new URL(ruta, Astro.site).href;
 <Armazon
   titulo={tituloDe(`${tema.nombre}${sufijo}`)}
   descripcion={`Citas sobre ${tema.nombre.toLocaleLowerCase('es')}, de varios autores, con su procedencia documentada.`}
+  tarjeta={`/tarjeta/tema/${tema.slug}.png`}
   ruta={ruta}
   tipo="tema"
 >

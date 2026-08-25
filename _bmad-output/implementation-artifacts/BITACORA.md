@@ -3918,3 +3918,64 @@ tres `case` del fichero ya lo producían. Mi caso sigue el patrón de sus tres h
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-19 (54.ª sesión) — Los Temas, las Colecciones y los Autores dejan de compartirse sin imagen
+
+**761 Citas y 806 páginas: las mismas.** Lo que cambia es que **44 páginas** que hasta hoy se
+compartían como un enlace pelado ahora llevan previsualización: 12 Temas, 16 Colecciones y 16
+Páginas de Autor.
+
+### La bifurcación que había anotada, y con qué regla se resolvió
+
+`deferred-work.md` lo tenía desde la 34.ª sesión con **dos salidas, marcadas como decisión de
+Héctor**: generar una imagen por página en el build, o poner una imagen de marca fija de respaldo.
+
+Conviene decirlo bien, porque al empezar la sesión lo llamé «una premisa falsa» y no lo era: era
+una bifurcación real. Lo que sí es cierto es que **las dos opciones no cuestan lo mismo**. La
+segunda pide **inventar un activo de marca** que nadie ha diseñado. La primera no inventa nada:
+
+· reutiliza la paleta, el filete y la marca que ya dibuja `svgDeTarjeta` desde la Historia 10.1, y
+· toma el texto de lo que **cada página ya declara en su `<meta>`** — el criterio de la Colección,
+  la semblanza del Autor, la descripción compuesta del Tema.
+
+Esa es la opción conservadora y reversible, que es la que la regla dura manda tomar en una
+bifurcación que no es puramente técnica. Y es reversible entera: tres ficheros de ruta y tres
+líneas en las plantillas.
+
+### Es otra tarjeta, no la misma con otro texto
+
+La de Cita enseña una Cita —texto, Autor, procedencia—. La de un listado enseña **el nombre de la
+página y por qué existe**. Compartir un Tema y que la previsualización mostrara una de sus Citas
+prometería la Cita y no el Tema, que es lo que el enlace lleva.
+
+Seis pruebas en rojo primero. Una de ellas es la que más importa y no es de maquetación: **el
+escapado**. El criterio de una Colección y la semblanza de un Autor son texto de editor y pueden
+traer un `&` o unas comillas; sin escapar, el SVG queda mal formado, el rasterizador devuelve una
+imagen rota y las redes la reportan como inaccesible — un fallo que solo se vería al compartir.
+
+### Las rutas salen de los mismos filtros que las páginas
+
+`temasPublicados`, `coleccionesPublicadas` y `autoresPublicados`, no de los conjuntos crudos. Un
+Tema bajo el umbral no tiene página, y su tarjeta sería un fichero que nadie enlaza. Medido tras el
+build: **12, 16 y 16** — los publicados exactos, y **ninguna para el Autor declarado sin Citas**.
+
+Verificado además mirando dos PNG: la Colección de nombre más largo —que obliga al título a
+partirse en dos líneas— y la semblanza más larga, que se reparte en tres y no toca la marca.
+
+### Una prueba en rojo, y por qué se cambió la aserción y no el código
+
+`tarjeta-construida.test.ts` comparaba el contenido **entero** de `dist/tarjeta/` con los dos PNG
+de Cita del corpus de prueba. Al aparecer los subdirectorios `tema/`, `coleccion/` y `autor/`, se
+puso roja. Su intención es «cada Cita tiene la suya»; comparar el directorio entero decía además
+«y aquí no hay nada más», que es otra cosa y no la que esa prueba mira. Se filtran los `.png` y se
+escribe el porqué al lado.
+
+**Lo que sigue sin imagen, y sigue siendo decisión de Héctor:** la portada, el buscador y el 404.
+No tienen nombre ni bajada que dibujar —no son *una* cosa, son la entrada al sitio— y ahí sí hay
+que decidir qué enseña el sitio cuando lo que se comparte es el sitio.
+
+`npx astro check` 0 errores; `npx vitest run` **2002/2002** en 64 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

@@ -111,3 +111,86 @@ export function svgDeTarjeta(datos: DatosDeTarjeta): string {
     '</svg>',
   ].join('');
 }
+
+export interface DatosDeTarjetaDeListado {
+  /** El nombre de la página: el Tema, la Colección, el Autor. */
+  titulo: string;
+  /** Por qué existe esa página: el criterio, la semblanza. Opcional a propósito. */
+  bajada?: string;
+}
+
+/**
+ * El SVG de la Tarjeta de una página de listado — FR-19.
+ *
+ * Hasta aquí solo la Página de Cita declaraba `og:image`: la portada, el buscador, los Temas,
+ * las Colecciones y las Páginas de Autor se compartían **sin previsualización**. Estaba anotado
+ * como bloqueado «porque no hay recurso de marca en `public/`», y la premisa era falsa: la
+ * Tarjeta de Cita tampoco sale de ningún recurso — se dibuja con la paleta y la marca del
+ * propio sitio y se rasteriza en el build. Lo que faltaba no era un activo: era esta variante.
+ *
+ * **Es otra tarjeta, no la misma con otro texto.** La de Cita enseña una Cita; ésta enseña el
+ * nombre de la página y por qué existe. Compartir un Tema y que la previsualización mostrara
+ * una de sus Citas prometería la Cita y no el Tema, que es lo que el enlace lleva.
+ *
+ * Comparte con su hermana el lienzo, la paleta, el filete y el escapado, y por el mismo motivo
+ * que ella los comparte con la Pieza de Canal: retocar el filete en un sitio y no en el otro
+ * solo se vería con las dos imágenes juntas.
+ */
+export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
+  const anchoUtil = ANCHO - MARGEN * 2;
+
+  const marca =
+    `<text x="${MARGEN}" y="${ALTO - MARGEN + 8}" font-family="${SANS}" ` +
+    `font-size="24" font-weight="600" fill="${APAGADA}" letter-spacing="1.5">` +
+    `${escapar(MARCA.toLocaleUpperCase('es'))}</text>`;
+
+  const fondo =
+    `<rect width="${ANCHO}" height="${ALTO}" fill="${PAPEL}"/>` +
+    `<rect x="0" y="0" width="${ANCHO}" height="8" fill="${PALETA.siena}"/>`;
+
+  /*
+   * El título se reparte igual que el cuerpo de una Cita: hay Colecciones con nombres largos
+   * —«El silencio es sagrado de la cordura»— y una sola línea los sacaría del lienzo.
+   */
+  const CUERPO_TITULO = 68;
+  const lineasDeTitulo = repartirEnLineas(datos.titulo, CUERPO_TITULO, anchoUtil);
+  const alturaTitulo = Math.round(CUERPO_TITULO * 1.25);
+
+  const CUERPO_BAJADA = 30;
+  const lineasDeBajada =
+    datos.bajada === undefined || datos.bajada.trim() === ''
+      ? []
+      : /*
+         * Cuatro líneas como mucho: por debajo del filete no cabe más sin comerse la marca, y
+         * una bajada que no cabe se corta aquí y se lee entera al abrir el enlace — el mismo
+         * criterio que su hermana aplica a la Cita que no admite Imagen.
+         */
+        repartirEnLineas(datos.bajada, CUERPO_BAJADA, anchoUtil).slice(0, 4);
+  const alturaBajada = Math.round(CUERPO_BAJADA * 1.45);
+
+  const altoTitulo = lineasDeTitulo.length * alturaTitulo;
+  const altoBajada = lineasDeBajada.length * alturaBajada;
+  const inicio =
+    Math.max(MARGEN, (ALTO - altoTitulo - altoBajada - 40) / 2) + CUERPO_TITULO;
+  const trasTitulo = inicio + altoTitulo - alturaTitulo + 40;
+
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${ANCHO}" height="${ALTO}" viewBox="0 0 ${ANCHO} ${ALTO}">`,
+    fondo,
+    ...lineasDeTitulo.map(
+      (linea, i) =>
+        `<text x="${MARGEN}" y="${inicio + i * alturaTitulo}" ` +
+        `font-family="${SERIF}" font-size="${CUERPO_TITULO}" fill="${TINTA}">` +
+        `${escapar(linea)}</text>`,
+    ),
+    `<rect x="${MARGEN}" y="${trasTitulo}" width="96" height="2" fill="${FILETE}"/>`,
+    ...lineasDeBajada.map(
+      (linea, i) =>
+        `<text x="${MARGEN}" y="${trasTitulo + 44 + i * alturaBajada}" ` +
+        `font-family="${SANS}" font-size="${CUERPO_BAJADA}" fill="${APAGADA}">` +
+        `${escapar(linea)}</text>`,
+    ),
+    marca,
+    '</svg>',
+  ].join('');
+}
