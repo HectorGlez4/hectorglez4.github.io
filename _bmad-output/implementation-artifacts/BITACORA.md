@@ -2810,3 +2810,37 @@ Quedan **unas 173 Citas sin Colección**.
 
 `npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` 501
 páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+## 15.2 (29.ª sesión) — Arreglado el defecto propio de la 2.ª sesión
+
+**456 Citas, 16 Colecciones, 501 páginas: sin cambios en los recuentos.** Lo que cambia es una
+Colección que estaba mal y ahora no lo está.
+
+**El defecto, tal como se destapó ayer.** «El uniforme y la sotana» reunía **16 Citas de un Autor
+que tiene 16**: su Página de Autor enseñaba exactamente la misma lista. La Colección no añadía
+superficie, la repetía. Se curó en la 2.ª sesión, cuando la regla de distinción todavía no estaba
+formulada —se formuló en la 18.ª, descartando «la fortuna»—, así que no es un descuido: es trabajo
+anterior a su propia norma.
+
+**Arreglado ensanchando, no retirando.** El criterio era bueno —«el poder cuando se disfraza: el
+cuartel, la casaca y el altar»— y lo que le faltaba eran las otras voces que dicen lo mismo:
+
+- «Poderoso caballero es don Dinero» — el poder disfrazado de dinero.
+- «A un pueblo ignorante puede engañársele con la superstición, y hacérsele servil».
+- «De ser siervo de sí mismo, pasaría el hombre a ser siervo del Estado».
+- «Con la iglesia hemos dado, Sancho».
+- «Ninguna cosa se parece tanto a la injusticia como la justicia tardía».
+- «Dejen eso para quien lo entienda, que yo no quiero ruido con el Santo Oficio» — el miedo al
+  poder con sotana, dicho por quien lo tenía encima.
+- «A ninguno se ha de tener muy obligado, y al poderoso menos».
+
+**De 17 Citas y 2 Autores a 25 Citas y 7 Autores.** Ya no es la obra de nadie: es un asunto que
+seis siglos y dos continentes dicen de la misma manera.
+
+**Y la lección, que vale más que el arreglo:** una regla formulada tarde deja trabajo anterior que
+no la cumple. Encontrarlo pide **volver sobre lo hecho con la regla nueva en la mano**, no
+esperar a que salga solo. Las otras quince Colecciones se revisaron con ese criterio en la sesión
+anterior; ésta era la única.
+
+`npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` 501
+páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
