@@ -3092,3 +3092,42 @@ distintas y ahora se responden distinto.
 
 `npx astro check` 0 errores; `npx vitest run` **1946/1946** en 63 ficheros; `npm run build` 501
 páginas.
+
+## 15.3 (37.ª sesión) — El traspaso, en una página que se lee en un minuto
+
+**456 Citas, 501 páginas: sin cambios, y a propósito.** El bucle lleva veinte sesiones sin sembrar
+porque los tres caminos de crecimiento están medidos y **bloqueados en decisiones que son de
+Héctor**, no del bucle. Lo que faltaba no era más auditoría: era que al volver no tuviera que leer
+una transcripción enorme para saber dónde está y qué se le pide.
+
+Se publicó como artefacto privado: <https://claude.ai/code/artifact/73e8c036-0117-4bde-9799-a7da175122e1>
+
+**Lo que importa de esta sesión no es la página: son las cifras que corrigió al hacerla.** Se
+verificó todo contra el repositorio antes de escribirlo, y **cuatro números que esta bitácora venía
+arrastrando estaban mal**:
+
+- «Faltan 308 Citas para el techo» era de hace cuatro sesiones. `npm run huecos` dice **304**.
+- «El segundo Autor puede aportar 52» se calculó cuando el segundo Autor era otro. Hoy es Cervantes
+  con 66, y a un Corpus de 760 el techo son 114: puede poner **48**, no 52.
+- «435 cotejadas» — el censo de pendientes tiene **22** entradas, así que son **434**.
+- «4 que difieren en signos + 19 sin edición» sumaban 23 sobre un censo de 22. Sobraba una: la
+  restituida en «el censo de pendientes de cotejo, diagnosticado entero y una menos». Son **4 + 18**.
+
+Ninguno cambiaba una decisión, pero los cuatro iban a imprimirse en la página que Héctor usaría
+para decidir. **Una cifra recordada no es una cifra medida**, y en un informe de estado esa
+diferencia es todo lo que hay.
+
+**Dos cosas que se aprendieron midiendo:**
+
+- El Autor dominante aporta **114 Citas hoy y aportaba 114 al abrir el bucle**: la concentración
+  bajó del 45,1 % al 25,0 % **sin despublicar una sola**, que es exactamente lo que manda la
+  política. La cuenta lo confirma en vez de suponerlo.
+- `curl … | grep -c '<loc>'` sobre el sitemap devuelve **1**, no 501: el XML va en una sola línea y
+  `-c` cuenta líneas, no coincidencias. Las 501 URL en vivo se confirmaron con `grep -o … | wc -l`.
+  El mismo error habría hecho pasar por roto un sitemap sano.
+
+**No se pudo verificar el render en el navegador**: el navegador de la app no tiene sesión en
+claude.ai y un artefacto es privado. Se validó lo que sí se puede validar sin ojos —estructura de
+etiquetas equilibrada, los 9 tokens de color definidos en el `:root` pelado (el fallo clásico del
+artefacto ilegible en tema claro), y el `body` pintando su propio fondo— y se dice aquí que la
+comprobación visual queda pendiente en vez de darla por hecha.
