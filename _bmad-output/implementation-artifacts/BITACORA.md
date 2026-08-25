@@ -3828,3 +3828,49 @@ lista escrita a mano— y aquí se veía especialmente mal, porque la Colección
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.1 (52.ª sesión) — Las dieciséis Colecciones, revisadas: 297 → 390 miembros
+
+**761 Citas y 806 páginas: las mismas.** Se cierran las dos que quedaban, y con eso **las dieciséis
+Colecciones están revisadas** contra el Corpus que creció bajo ellas.
+
+| Colección | Antes | Ahora | Solape mayor (antes → ahora) |
+|---|---|---|---|
+| Conocer las cosas en su sazón | 15 | **21** | 13,5 % → **18,9 %** |
+| El silencio es sagrado de la cordura | 20 | **21** | 37,3 % → **39,2 %** |
+
+**El total de las tres sesiones: 297 → 390 miembros**, y las **dos únicas sin cambio** son
+«Consejos para gobernar» y «Refranes de Sancho», cerradas por su propio criterio.
+
+### La del silencio creció una, y esa es la respuesta correcta
+
+Su criterio es estrecho a propósito —«**cuándo conviene no hablar**»— y de las 31 candidatas que
+rozaban sus palabras, casi todas hablan **de la palabra**, no de callar: el periódico que desflora
+las ideas, el escritor que no debe decir en privado lo contrario que en público, el nombre que se
+cobra popularizando una frase. Todas buenas y todas del Tema «La palabra», que ya existe.
+
+Entró **una sola**: la de la Autora que dice que deja el asunto «para quien lo entienda», que no
+quiere ruido con el Santo Oficio y que teme decir una proposición malsonante. Esa sí es callar, y
+callar por prudencia, que es exactamente el criterio.
+
+La Colección ya estaba al **95 % dentro de su Tema hermano**. Llenarla con las otras treinta la
+habría convertido en ese Tema con otro nombre — y habría subido la cifra de miembros, que no es la
+cifra que importa.
+
+### Y una trampa de las palabras clave, anotada porque volverá
+
+Buscando para «Conocer las cosas en su sazón» —cuyo criterio es que **el acierto tiene hora**— la
+palabra «principio» trajo nueve candidatas y **ninguna** servía: en todas era «principio» en el
+sentido de *axioma*, no de *comienzo*. «Ocasión» trajo otra tanto: era «sois la ocasión de lo mismo
+que culpáis», es decir *causa*.
+
+Las palabras clave dicen dónde mirar y **no** qué es. La segunda búsqueda —diferir, dilación,
+tardía, presteza— dio seis en el primer intento, todas buenas. El coste de la trampa no es perder
+tiempo: es que una candidata que casa por la palabra y no por el sentido **parece** buena si nadie
+la lee entera.
+
+`npx astro check` 0 errores; `npx vitest run` **1982/1982** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35. El tramo declarado sigue siendo el que no se delega.
