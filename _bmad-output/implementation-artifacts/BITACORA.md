@@ -5250,3 +5250,47 @@ guiones de criba saltan lo que no declara Fuente, que es la marca que las distin
 
 **La Meta no está alcanzada y no se emite promesa:** 1001 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.6 (79.ª sesión) — Tres canteras que nunca se habían medido, y el Tema más flaco por fin crece
+
+**1001 → 1028 Citas. 1051 → 1078 páginas.**
+
+### Lo que ayer quedó dicho, hecho hoy
+
+La sesión anterior cerró con una conclusión medida: para el Tema dieciocho hace falta **más Corpus**.
+Así que se fue a buscarlo donde el techo lo permite, y ahí apareció lo de siempre: **tres Autores con
+unos 37 huecos libres cada uno cuya cantera no se había medido nunca.** Doce sesiones midiendo
+canteras y esos tres no habían entrado en ninguna lista.
+
+Medidos: seis obras sin recuperar en uno, seis en otro, siete en el tercero. Y en el primero, un
+**tratado moral de 80 KB** —el género que más rinde de todos los medidos, 16 % contra el 2 % de la
+novela y el 0 % del entremés—.
+
+270 candidatas, cotejo de Autor superado, **27 publicadas**.
+
+### «La felicidad» deja de ser la flaca
+
+El Tema más delgado del Corpus llevaba **catorce sesiones clavado en 18 Citas**, y en la 67.ª se
+escribió por qué: «las obras que hay en la cantera tratan de tiranía, muerte y política, y ninguna la
+alimenta».
+
+Era verdad de las obras que había. La obra recuperada hoy trata **literalmente de la vida dichosa**, y
+le da seis: «será bienaventurado el que es su juicio recto, y el que se contentare con lo que posee»,
+«consiste la verdadera felicidad en la virtud», «busquemos lo que nos coloque en la posesión de eterna
+felicidad, y no lo que califica el vulgo». **La felicidad pasa de 18 a 24** y deja de ser el Tema más
+flaco: ahora lo es «la patria», con los quince justos con que nació.
+
+Diez más van a «la riqueza», que es el otro asunto del tratado —la defensa del filósofo rico—: «las
+riquezas serán mías, pero tú serás de las riquezas».
+
+### El techo, otra vez contado antes
+
+27 Citas de un solo Autor lo dejan en 140 sobre 1028: **13,6 %**. Y el más representado, que no ha
+sembrado nada, baja de 14,9 % a **14,5 %** — la misma aritmética de la 71.ª, que ahora ya se aplica
+sola.
+
+`npx astro check` 0 errores; `npx vitest run` **2077/2077**; `npm run build` **1078 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1028 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.
