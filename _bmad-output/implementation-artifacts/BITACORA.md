@@ -3783,3 +3783,48 @@ al crecer se acercan a una página que ya existe.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.1 (51.ª sesión) — Cuatro Colecciones más, y dos que están cerradas por su propio criterio
+
+**761 Citas y 806 páginas: las mismas.** Van **doce de dieciséis** Colecciones revisadas.
+
+| Colección | Antes | Ahora | Solape mayor (antes → ahora) |
+|---|---|---|---|
+| Empezar de nuevo | 22 | **28** | 90,9 % → **71,4 %** |
+| Cuatro mujeres | 29 | **34** | 79,3 % → **67,6 %** |
+| Cada uno es hijo de sus obras | 17 | **22** | 52,9 % → **40,9 %** |
+| Los escollos del trato | 17 | **21** | 58,8 % → **57,1 %** |
+
+**Las cuatro se ensanchan**, que es lo que se busca: en las cuatro baja el porcentaje de la
+Colección que vive dentro de otra página. «Empezar de nuevo» era un **90,9 % de un solo Autor** y
+baja veinte puntos.
+
+### Dos que no se tocan, y por qué eso también es trabajo
+
+«Consejos para gobernar» y «Refranes de Sancho» **están cerradas por su propio criterio**: una
+recoge «lo que don Quijote dijo a Sancho antes de la Ínsula» y la otra «los refranes que el Quijote
+pone en boca del escudero». No son asuntos: son **pasajes**. Meterles una Cita de otro Autor —o del
+mismo, de otra obra— no las mejoraría: las rompería, porque su criterio dejaría de ser cierto.
+
+Que una Colección no crezca cuando el Corpus crece no es siempre un descuido. A veces es que **ya
+está completa**, y saber distinguir los dos casos es la mitad de esta revisión.
+
+### Un 100 % que es inherente y no se puede bajar
+
+«Cuatro mujeres» queda en 67,6 % / **100 %**: las 23 Citas de una de las cuatro están todas dentro.
+Eso parece la firma de un duplicado y no lo es — la Colección tiene once Citas que ella no escribió
+—, pero **es un 100 % real y conviene decirlo en vez de esconderlo**. Sale de que una de las cuatro
+tiene pocas Citas en el Corpus, no de cómo esté curada la Colección, y solo baja cuando esa Autora
+crezca. Añadir las cinco de otra de ellas lo mejoró en doce puntos por el otro lado.
+
+**Todas las Citas de una de las cuatro faltaban**: las cinco sembradas en la 39.ª sesión, de la
+Autora que el criterio nombra por su obra. Es el mismo olvido de siempre —los miembros son una
+lista escrita a mano— y aquí se veía especialmente mal, porque la Colección la nombra y no la traía.
+
+**Quedan cuatro Colecciones sin revisar**, dos de ellas cerradas por criterio: quedan dos de verdad.
+
+`npx astro check` 0 errores; `npx vitest run` **1982/1982** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.
