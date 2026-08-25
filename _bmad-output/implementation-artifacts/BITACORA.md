@@ -2239,3 +2239,6 @@ ya se sabe que sentencian.
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 489
 páginas y 430 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32793972095 en verde): `sitemap-0.xml` declara
+**489 URL**, las mismas del build, y las Citas nuevas responden 200.
