@@ -3438,3 +3438,52 @@ Fuentes, así que **el aparato no se acaba**: cuando aparezca el tercero, su sit
 
 **El tramo sigue abierto y ahora dice 160** (era 191). No se alcanza, y se dice. El segundo Autor
 que pasa del techo cabe ya con **34 Citas más de cualquier otro**; el primero sigue pidiendo 760.
+
+## 15.3 (44.ª sesión) — Cuarenta y tres repartidas, y el techo que me puse yo queda reparado
+
+**600 → 643 Citas. 645 → 688 páginas. Concentración 19,0 % → 17,7 %.** Y una línea que desaparece
+del informe, que es lo que de verdad cuenta esta sesión:
+
+> El Autor más representado aporta 114 Citas, un 17,7 % — por encima del techo del 15 %
+> ~~(lo pasan 2 Autores)~~
+
+**Vuelve a haber un solo Autor por encima del techo.** El que crucé yo hace dos sesiones baja al
+14,8 % y cabe otra vez. Se reparó **diluyendo**, sin retirar ni una de sus Citas, que es
+exactamente lo que la política manda y lo que dije que haría.
+
+La sesión se planeó con la aritmética delante: hacían falta 34 Citas de cualquier otro Autor para
+que cupiera, y se sembraron 43 repartidas entre dos — 36 de uno que estaba en el 1,8 % y 7 de otro
+en el 2,7 %. Ninguno de los dos se acerca al techo.
+
+### Tres comprobaciones que evitaron tres errores distintos
+
+**Una: el Autor, en seco.** De los cuatro documentos recuperados, uno no declaraba Autor. Fuera
+antes de escribir una candidata. Ya es rutina y ya no cuesta nada.
+
+**Dos: una sospecha propia, medida y descartada.** Al leer las candidatas reconocí cuatro textos
+que **retiré anteayer**, y pensé que mi propia puerta de idempotencia los había bloqueado: si dos
+obras del mismo Autor comparten una frase, comparar por «Autor + texto» las cuenta como una sola,
+y una candidata retirada taparía la versión buena venida de una obra que sí declara.
+
+Se midió en vez de arreglarlo a ojo: **cero de las 16 aparecen literales en los documentos nuevos**.
+Lo que vi en el listado eran los propios ficheros retirados, que están en la misma carpeta. La
+puerta no bloqueó nada y no se tocó. Queda escrito porque el razonamiento era correcto y el hecho
+no: si algún día dos obras sí comparten frase, ahí está el fallo esperando.
+
+**Tres: la cola mezcla dos cosas, y el descarte tenía que saberlo.** `corpus/_revision/` guarda a
+la vez candidatas frescas y las 16 Citas retiradas que AD-2 manda conservar. El guion de descarte
+que venía usando borra **por Autor**, y usarlo aquí habría deshecho la retirada de anteayer sin
+avisar. Se reescribió para descartar **por obra**, y el de selección comprueba además que la obra
+de cada candidata tenga documento vivo — publicar una de las retiradas habría sido republicar
+justo lo que se retiró.
+
+Las 16 siguen ahí, intactas, y el problema de fondo sigue siendo el mismo que ya está anotado:
+**la retirada no guarda su motivo**, así que nada en el disco distingue una candidata fresca de una
+Cita retirada salvo mirarle la obra y buscar si su documento existe. Esta sesión lo ha tenido que
+hacer a mano dos veces.
+
+`npx astro check` 0 errores; `npx vitest run` **1969/1969** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **688 páginas**.
+
+**El tramo sigue abierto y ahora dice 117** (era 160). No se alcanza, y se dice — pero por primera
+vez desde la 42.ª sesión, el que falta es uno solo.
