@@ -84,7 +84,12 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
   });
 
   test('una Cita en revisión no tiene tarjeta: las rutas salen del conjunto publicable', () => {
-    const tarjetas = readdirSync(join(dist, 'tarjeta')).filter((f) => f.endsWith('.png'));
+    const tarjetas = readdirSync(join(dist, 'tarjeta')).filter(
+      // Desde la 55.ª sesión, en este directorio cae también `portada.png` —la Tarjeta del
+      // sitio, que no es de ninguna Cita— y los subdirectorios `tema/`, `coleccion/` y
+      // `autor/`, que `readdirSync` no lista como `.png`. La cuenta sigue siendo de Citas.
+      (f) => f.endsWith('.png') && f !== 'portada.png',
+    );
     expect(tarjetas.length).toBe(paginasDeCita().length);
   });
 });

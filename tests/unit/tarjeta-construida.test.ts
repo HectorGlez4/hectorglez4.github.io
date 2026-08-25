@@ -52,9 +52,12 @@ describe('Historia 10.1 — la Cita larga también tiene Tarjeta', () => {
      * `tema/`, `coleccion/` y `autor/`, con la Tarjeta de cada página de listado. Que esas
      * existan es asunto de sus propias pruebas, no de ésta.
      */
-    const tarjetas = (await readdir(join(proyecto, 'dist', 'tarjeta'))).filter((f) =>
-      f.endsWith('.png'),
+    const tarjetas = (await readdir(join(proyecto, 'dist', 'tarjeta'))).filter(
+      // `portada.png` es la del sitio, no la de ninguna Cita, y cae en este mismo directorio.
+      (f) => f.endsWith('.png') && f !== 'portada.png',
     );
+    // Se mantiene la igualdad exacta y no una contención: dice además que **no hay una
+    // tarjeta de más**, que es lo que garantiza que una Cita en revisión no tenga la suya.
     expect(tarjetas.sort()).toEqual(['seneca-corta.png', 'seneca-larga.png']);
   });
 

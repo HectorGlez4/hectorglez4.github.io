@@ -3979,3 +3979,63 @@ que decidir qué enseña el sitio cuando lo que se comparte es el sitio.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-19 (55.ª sesión) — La portada ya tiene imagen. Y una corrección que pesa más que eso
+
+**761 Citas y 806 páginas: las mismas.** La portada deja de compartirse como enlace pelado.
+
+### Primero la corrección, porque afecta a lo que vengo diciendo
+
+**He estado informando «390 pasadas, 14 saltadas» leyendo solo el final del resumen de Playwright,
+y el recuento de fallos va más arriba.** `tail -3` enseña la lista de *saltadas* y las pasadas; la
+línea `N failed` queda por encima y no la veía.
+
+Medido hoy, y con el árbol limpio para no atribuirme lo que no es mío:
+
+    con mis cambios de hoy:   32 failed · 14 skipped · 388 passed
+    con mis cambios apartados: 30 failed · 14 skipped · 390 passed
+
+**Dos eran míos y treinta ya estaban.** Los dos míos, arreglados en esta sesión. Los treinta llevan
+rotos varias sesiones mientras yo cerraba cada una diciendo que Playwright pasaba — y en la 47.ª,
+al ver unas `✘` en la salida, concluí que eran reintentos «porque el resumen dice 390 passed». Esa
+conclusión estaba mal por el mismo motivo: el resumen que miré no era el resumen entero.
+
+**Lo que sí era cierto en cada sesión:** `astro check`, `vitest` y `npm run build` sí los leí
+enteros y sí estaban en verde. El error está acotado a Playwright.
+
+**Diagnóstico empezado, para que la próxima sesión no lo repita.** Son 15 pruebas × 2 proyectos.
+Al menos seis salen de una premisa caducada: tres specs fijan **a mano** un Tema como «bajo el
+umbral» —`const BAJO_UMBRAL = '/tema/la-amistad'`— y ese Tema tiene hoy 44 Citas y su página. Las
+otras nueve tienen otra causa: la Cita de Cervantes que fijan cinco specs **sí existe** y responde
+200, así que no es eso. Arreglarlas es el trabajo de la sesión siguiente, y va escrito aquí para
+que no se pierda.
+
+### Y lo hecho: la Tarjeta de la portada
+
+Ayer dejé la portada como decisión de Héctor con el argumento de que «no es *una* cosa». Al
+comprobarlo, el argumento no se sostenía: la portada **declara su título y su descripción** igual
+que las otras cuarenta y cuatro, así que su tarjeta es igual de derivable. Es la tercera vez en el
+bucle que me reservo algo que no había que reservarse, y las tres veces lo ha destapado la misma
+comprobación: *mirar qué declara ya la página en vez de razonar sobre ella*.
+
+**`/buscar` y `/404` sí se quedan sin tarjeta, y con motivo escrito:** las dos se declaran
+`noindex` en `superficies.ts`. Una previsualización para una página que nadie comparte ni indexa es
+un fichero que no mira nadie.
+
+**Una arruga que obligó a una decisión:** en las demás tarjetas el título es el nombre de la página
+y la marca de abajo dice de qué sitio es. En la portada **el título es la marca**, y se vería dos
+veces. Se resuelve con una opción explícita, `conMarca: false`, y **no** con una regla implícita
+del tipo «si el título coincide con la marca, quítala»: esa funcionaría hasta el día que una
+Colección se llamara como el sitio, y entonces fallaría sin que nadie supiera por qué.
+
+**Y la descripción del sitio sube a `marca.ts`.** Estaba como constante local de la portada, con un
+comentario que ya explicaba por qué no debía escribirse dos veces. Ahora la usan tres —la etiqueta
+`description`, el `WebSite` de datos estructurados y la bajada de la Tarjeta—, así que su dueño es
+quien ya posee el nombre del sitio.
+
+`npx astro check` 0 errores; `npx vitest run` **2007/2007** en 64 ficheros; `npm run build` **806
+páginas**; `npx playwright test` **30 fallos**, los mismos que en el árbol limpio antes de tocar
+nada.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

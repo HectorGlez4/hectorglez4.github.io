@@ -117,6 +117,15 @@ export interface DatosDeTarjetaDeListado {
   titulo: string;
   /** Por qué existe esa página: el criterio, la semblanza. Opcional a propósito. */
   bajada?: string;
+  /**
+   * Si se dibuja la marca al pie. Cierto salvo en la portada, donde **el título ya es la
+   * marca** y repetirla la enseñaría dos veces.
+   *
+   * Es una opción explícita y no una regla implícita del tipo «si el título coincide con la
+   * marca, quítala»: esa funcionaría hasta el día que una Colección se llamara como el sitio,
+   * y entonces fallaría sin que nadie supiera por qué.
+   */
+  conMarca?: boolean;
 }
 
 /**
@@ -140,9 +149,11 @@ export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
   const anchoUtil = ANCHO - MARGEN * 2;
 
   const marca =
-    `<text x="${MARGEN}" y="${ALTO - MARGEN + 8}" font-family="${SANS}" ` +
-    `font-size="24" font-weight="600" fill="${APAGADA}" letter-spacing="1.5">` +
-    `${escapar(MARCA.toLocaleUpperCase('es'))}</text>`;
+    datos.conMarca === false
+      ? ''
+      : `<text x="${MARGEN}" y="${ALTO - MARGEN + 8}" font-family="${SANS}" ` +
+        `font-size="24" font-weight="600" fill="${APAGADA}" letter-spacing="1.5">` +
+        `${escapar(MARCA.toLocaleUpperCase('es'))}</text>`;
 
   const fondo =
     `<rect width="${ANCHO}" height="${ALTO}" fill="${PAPEL}"/>` +

@@ -212,3 +212,39 @@ describe('FR-19 — la Tarjeta de una página de listado', () => {
     expect(sinBajada).toContain(`width="${ANCHO}"`);
   });
 });
+
+/**
+ * FR-19 — la Tarjeta de la portada, y la marca que no se repite.
+ *
+ * La portada es la que más duele de las que no tenían imagen: es lo que se comparte cuando se
+ * recomienda el sitio entero. Su tarjeta sale de lo que la propia página declara —el nombre del
+ * sitio y su descripción— igual que las de Tema, Colección y Autor.
+ *
+ * Con una diferencia que hay que declarar y no adivinar: en las demás, el título es el nombre de
+ * la página y la marca de abajo dice de qué sitio es. En la portada **el título es la marca**, y
+ * dibujarla otra vez abajo la enseña dos veces. Por eso `conMarca` es una opción explícita: una
+ * regla implícita del tipo «si el título coincide con la marca, quítala» funcionaría hasta el día
+ * que una Colección se llamara como el sitio, y entonces fallaría sin que nadie supiera por qué.
+ *
+ * `/404` y `/buscar` **no llevan tarjeta a propósito**: las dos se declaran `noindex` en
+ * `superficies.ts`, y una previsualización para una página que nadie comparte ni indexa es un
+ * fichero que no mira nadie.
+ */
+describe('FR-19 — la Tarjeta de la portada', () => {
+  it('sin marca abajo, porque el título ya es la marca', () => {
+    const svg = svgDeTarjetaDeListado({
+      titulo: MARCA,
+      bajada: 'Citas célebres en español, cada una con su autor y la obra de la que procede.',
+      conMarca: false,
+    });
+
+    expect(svg).toContain(MARCA);
+    // Una sola vez: la del título. La versalita de abajo no está.
+    expect(svg).not.toContain(MARCA.toLocaleUpperCase('es'));
+  });
+
+  it('y las demás la siguen llevando: la opción no cambia el caso normal', () => {
+    const svg = svgDeTarjetaDeListado({ titulo: 'La prudencia', bajada: 'Una bajada.' });
+    expect(svg).toContain(MARCA.toLocaleUpperCase('es'));
+  });
+});
