@@ -138,3 +138,87 @@ describe('Historia 1.6 — detección de duplicados', () => {
     expect(codigo).not.toMatch(/toLowerCase\(\)/);
   });
 });
+
+/**
+ * Historia 15.2 — una Cita contenida en otra también es un duplicado.
+ *
+ * El caso salió del Corpus, no de la imaginación. En la 12.ª sesión del bucle v4 se publicó
+ * «la diligencia es madre de la buena ventura»; en la 13.ª, «la diligencia es madre de la buena
+ * ventura, y la pereza, su contraria, jamás llegó al término que pide un buen deseo». El detector
+ * comparaba **formas canónicas iguales**, así que informó de cero duplicados —con razón: no son
+ * iguales— y `slugLibre` resolvió la colisión renombrando la segunda a `-2` en silencio. El sitio
+ * quedó con la misma sentencia en dos URL que solo se diferencian en un dígito, y el único
+ * síntoma era ese sufijo.
+ *
+ * La guarda que faltaba es la contención: si una está entera dentro de la otra, es la misma
+ * sentencia recortada. No se descarta —a veces el recorte es la Cita que uno quiere— sino que se
+ * señala, como manda la Historia 1.6: el sistema no tiene criterio para decidirlo, el editor sí.
+ */
+describe('Historia 15.2 — una Cita contenida en otra también se señala', () => {
+  const LARGA: EntradaDeLote = {
+    ...ORIGINAL,
+    texto: 'la diligencia es madre de la buena ventura, y la pereza, su contraria, jamás llegó al término que pide un buen deseo.',
+  };
+  const CORTA: EntradaDeLote = {
+    ...ORIGINAL,
+    texto: 'la diligencia es madre de la buena ventura',
+  };
+
+  it('la corta se señala cuando la larga ya está publicada', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([LARGA], rutas);
+
+    const informe = await darDeAltaLote([CORTA], rutas);
+
+    expect(informe.posiblesDuplicados).toHaveLength(1);
+    expect(informe.posiblesDuplicados[0].coincideCon).toMatch(/diligencia/);
+    expect(informe.publicadas).toHaveLength(0);
+  });
+
+  it('y también al revés: la larga se señala cuando la corta ya está', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([CORTA], rutas);
+
+    const informe = await darDeAltaLote([LARGA], rutas);
+
+    expect(informe.posiblesDuplicados).toHaveLength(1);
+    expect(informe.publicadas).toHaveLength(0);
+  });
+
+  it('no deja ninguna Cita con sufijo numérico, que era el único síntoma', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([LARGA], rutas);
+    await darDeAltaLote([CORTA], rutas);
+
+    const ficheros = await readdir(rutas.citas);
+    expect(ficheros.filter((f) => /-\d+\.md$/.test(f))).toHaveLength(0);
+  });
+
+  it('una frase corta que aparece dentro de otra por casualidad NO se señala', async () => {
+    /*
+     * El guardián tiene que distinguir «la misma sentencia recortada» de «dos sentencias
+     * distintas que comparten un giro». Sin suelo de longitud, «Yo sé quién soy» quedaría
+     * atrapada por cualquier Cita larga que contuviese esas palabras, y el aviso se volvería
+     * ruido que el editor aprende a ignorar — que es peor que no tenerlo.
+     */
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote(
+      [{ ...ORIGINAL, texto: 'Quien no sabe adónde va, ningún viento le es favorable, y así navega toda su vida.' }],
+      rutas,
+    );
+
+    const informe = await darDeAltaLote([{ ...ORIGINAL, texto: 'ningún viento le es' }], rutas);
+
+    expect(informe.posiblesDuplicados).toHaveLength(0);
+  });
+
+  it('con --con-duplicados se publica igual, como con los duplicados exactos', async () => {
+    const rutas = await corpusDePrueba();
+    await darDeAltaLote([LARGA], rutas);
+
+    const informe = await darDeAltaLote([CORTA], rutas, { conDuplicados: true });
+
+    expect(informe.posiblesDuplicados).toHaveLength(0);
+    expect(informe.publicadas).toHaveLength(1);
+  });
+});

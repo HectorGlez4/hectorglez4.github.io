@@ -2714,3 +2714,36 @@ páginas y 434 cotejadas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 
 **Verificado en vivo** (25/08/2026, ejecución 32808358355 en verde): `/coleccion/cuatro-mujeres` y
 `/coleccion/consejos-para-gobernar` responden **200**, y la Cita retirada responde **404** — sale
 del sitio como debe, sin quedarse huérfana en el sitemap.
+
+## 15.2 (26.ª sesión) — La advertencia se convierte en puerta
+
+**456 Citas, 14 Colecciones, 499 páginas: sin cambios en el sitio.** La sesión convirtió en código
+lo que ayer era una nota que no me protegió.
+
+**El caso, otra vez, para que la puerta se entienda.** `alta` compara **formas canónicas iguales**
+(Historia 1.6). «la diligencia es madre de la buena ventura» y esa misma sentencia con su segunda
+mitad **no son iguales**, así que el informe dijo «cero duplicados» —con razón— y `slugLibre`
+resolvió la colisión renombrando a `-2` en silencio. El único síntoma era ese sufijo, y no aparece
+en ningún recuento.
+
+**La guarda que faltaba es la contención**, y ahora existe: si una Cita está **entera dentro de
+otra**, se señala. En las dos direcciones, porque el orden en que llegan los lotes no lo decide
+nadie: la corta después de la larga y la larga después de la corta.
+
+**Con suelo de longitud, y el suelo tiene su porqué.** `MIN_CARACTERES_PARA_CONTENCION = 40`, en
+`umbrales.ts` como manda AD-9. Sin él, «Yo sé quién soy» —13 caracteres canónicos— quedaría
+atrapada por cualquier Cita larga que contuviese esas palabras, y **un aviso que salta de más es
+un aviso que el editor aprende a ignorar**, que es peor que no tenerlo. Cuarenta es holgado para
+lo que hay que atrapar —el caso real medía **41**— y deja fuera las sentencias breves del Corpus:
+«paciencia y barajar», «Aún hay sol en las bardas», «Yo sé quién soy». **VALOR PROVISIONAL**: sale
+de un solo caso observado.
+
+**Y no descarta: señala**, como su hermana. A veces el recorte es justo la Cita que se quiere, y
+`--con-duplicados` sigue publicando igual. El sistema no tiene criterio para decidirlo; el editor
+sí.
+
+Cinco pruebas nuevas, escritas antes: las dos direcciones, que no quede sufijo numérico, que una
+frase corta contenida por casualidad **no** se señale, y que la bandera siga funcionando.
+
+`npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` 499
+páginas.

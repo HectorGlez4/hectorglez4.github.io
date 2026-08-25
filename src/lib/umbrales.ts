@@ -293,3 +293,25 @@ export const META_COLECCIONES_PUBLICADAS = 12;
  * peso baje solo — y de ahí sale buena parte de la meta de volumen.
  */
 export const TECHO_CONCENTRACION_POR_AUTOR = 15;
+
+/**
+ * Caracteres que necesita una Cita para que su **contención** dentro de otra cuente como
+ * posible duplicado — Historia 15.2.
+ *
+ * El detector de duplicados de la Historia 1.6 compara formas canónicas **iguales**, y eso deja
+ * pasar el caso que de verdad ocurre: la misma sentencia publicada dos veces, una entera y otra
+ * recortada. Pasó en el Corpus el 25/08/2026 con «la diligencia es madre de la buena ventura» y
+ * su versión larga; el sitio quedó con dos URL que solo se diferenciaban en un dígito, porque
+ * `slugLibre` resolvió la colisión renombrando en silencio y el informe dijo «cero duplicados».
+ *
+ * De dónde sale el número, y por qué hay número. Sin suelo, cualquier Cita corta quedaría
+ * atrapada por cualquier Cita larga que contuviese sus palabras —«Yo sé quién soy» mide 13
+ * caracteres canónicos y cabe en media literatura—, y un aviso que salta de más es un aviso que
+ * el editor aprende a ignorar, que es peor que no tenerlo. Cuarenta es holgado para lo que hay
+ * que atrapar: el caso real medía **41**, y las sentencias breves del Corpus —«Yo sé quién soy»,
+ * «paciencia y barajar», «Aún hay sol en las bardas»— se quedan todas por debajo.
+ *
+ * **VALOR PROVISIONAL**, como los demás de su clase: sale de **un solo caso observado**. Cuando
+ * haya un segundo se sabrá si sobra o falta, y moverlo será una decisión visible en el diff.
+ */
+export const MIN_CARACTERES_PARA_CONTENCION = 40;

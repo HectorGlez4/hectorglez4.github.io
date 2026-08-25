@@ -19,6 +19,7 @@ import { parse as parsearYaml } from 'yaml';
 import { citaAdmisible, gradoDeProcedencia, type CitaAdmisible } from '../src/lib/admision.ts';
 import { motivoParaNoPublicar } from './lib/cotejo.ts';
 import { normalizar } from '../src/lib/normalizar.ts';
+import { MIN_CARACTERES_PARA_CONTENCION } from '../src/lib/umbrales.ts';
 import { slugDeAutor, slugDeCita, slugDeTema, slugLibre } from '../src/lib/slug.ts';
 import {
   escribirCita,
@@ -129,7 +130,7 @@ export async function darDeAltaLote(
 
     // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
     const canonico = normalizar(texto);
-    const yaEsta = canonico === '' ? undefined : yaEnCorpus.get(canonico);
+    const yaEsta = canonico === '' ? undefined : (yaEnCorpus.get(canonico) ?? contenidaEn(canonico, yaEnCorpus));
     if (yaEsta && !opciones.conDuplicados) {
       // No se escribe y no se descarta: se señala y el editor decide. El sistema no
       // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
@@ -296,6 +297,35 @@ export function formatearInforme(informe: InformeDeAlta): string {
   }
 
   return lineas.join('\n');
+}
+
+/**
+ * La otra forma de duplicar: una Cita **entera dentro de otra** — Historia 15.2.
+ *
+ * El índice de la Historia 1.6 compara formas canónicas iguales, y por eso no vio el caso que
+ * de verdad ocurrió: «la diligencia es madre de la buena ventura» publicada, y después la misma
+ * sentencia con su segunda mitad. No son iguales, así que el informe dijo cero duplicados y
+ * `slugLibre` renombró la segunda a `-2` en silencio. El sitio acabó con dos URL que solo se
+ * diferenciaban en un dígito y con la misma sentencia en las dos.
+ *
+ * Se mira en las dos direcciones —la nueva dentro de una vieja y una vieja dentro de la nueva—
+ * porque el orden en que llegan los lotes no lo decide nadie. Y se pide un mínimo de longitud a
+ * la más corta (AD-9, `MIN_CARACTERES_PARA_CONTENCION`): sin él, «Yo sé quién soy» quedaría
+ * atrapada por cualquier Cita larga que contuviese esas palabras, y un aviso que salta de más es
+ * un aviso que se aprende a ignorar.
+ *
+ * Como su hermana, **no descarta: señala**. A veces el recorte es justo la Cita que se quiere.
+ */
+function contenidaEn(
+  canonico: string,
+  yaEnCorpus: Map<string, { slug: string; donde: PosibleDuplicado['donde'] }>,
+): { slug: string; donde: PosibleDuplicado['donde'] } | undefined {
+  for (const [otro, quien] of yaEnCorpus) {
+    const corta = canonico.length <= otro.length ? canonico : otro;
+    if (corta.length < MIN_CARACTERES_PARA_CONTENCION) continue;
+    if (otro.includes(canonico) || canonico.includes(otro)) return quien;
+  }
+  return undefined;
 }
 
 function recortar(texto: string, maximo = 60): string {
