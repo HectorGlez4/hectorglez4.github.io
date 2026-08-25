@@ -990,15 +990,35 @@ function paginaDeWikisource(declaracion: string): string | undefined {
  */
 export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
   'wikisource-es': {
+    /**
+     * La región de contenido, y **se sigue buscando mientras la elegida no traiga texto**.
+     *
+     * Wikisource presenta los libros escaneados por transclusión: la página no contiene la
+     * obra, la compone incluyendo otras. Entonces la primera `mw-parser-output` del HTML es un
+     * envoltorio vacío y la obra está en la siguiente. Medido sobre una página real:
+     *
+     *     mw-parser-output [0]  interior 678 caracteres,  texto plano 0
+     *     mw-parser-output [1]  interior 29083,           texto plano 20690
+     *
+     * Pararse en la primera coincidencia devolvía «el documento no trae texto» de una página
+     * que trae veinte mil caracteres. **No es un caso raro**: así se presenta hoy buena parte
+     * de la Fuente, así que lo que esto abre no es una obra sino un género de página entero.
+     *
+     * El orden de los marcadores no cambia —`mw-parser-output` antes que `mw-content-text`,
+     * porque el segundo arrastra más cromo—: solo se deja de parar en la primera que casa.
+     */
     region(bruto) {
       for (const marcador of REGION_MEDIAWIKI) {
-        const encontrado = marcador.exec(bruto);
-        if (encontrado === null) continue;
-        let region = elementoEquilibrado(bruto, encontrado.index, 'div').interior;
-        for (const [etiqueta, apertura] of CROMO_MEDIAWIKI) {
-          region = quitarElementos(region, etiqueta, apertura);
+        const global = new RegExp(marcador.source, `${marcador.flags.replace(/g/gu, '')}g`);
+        for (const encontrado of bruto.matchAll(global)) {
+          let region = elementoEquilibrado(bruto, encontrado.index, 'div').interior;
+          for (const [etiqueta, apertura] of CROMO_MEDIAWIKI) {
+            region = quitarElementos(region, etiqueta, apertura);
+          }
+          // Una región sin texto no es la región de contenido: es un envoltorio.
+          if (region.replace(/<[^>]+>/gu, ' ').trim() === '') continue;
+          return { ok: true, region };
         }
-        return { ok: true, region };
       }
       // Sin región de contenido, lo que se versionaría es la barra lateral, el pie y la
       // lista de categorías, y de ahí saldrían candidatas.

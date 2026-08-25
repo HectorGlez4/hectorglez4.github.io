@@ -5294,3 +5294,47 @@ sola.
 
 **La Meta no está alcanzada y no se emite promesa:** 1028 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## Fix 11.1 (80.ª sesión) — Una región vacía cerraba un género entero de páginas
+
+**1028 → 1040 Citas. 1078 → 1090 páginas.**
+
+### El documento que «no traía texto» y traía veinte mil caracteres
+
+Se fue a recuperar un ensayo de un Autor con cuarenta huecos libres, y `recuperar` contestó:
+
+    El documento no trae texto: no se ha versionado nada.
+
+La página trae el ensayo entero. **Antes de tocar el lector se midió por qué**, con una sonda que
+cuenta el texto plano de cada región candidata:
+
+    mw-parser-output [0]  interior    678 caracteres,  texto plano      0
+    mw-parser-output [1]  interior  29083 caracteres,  texto plano  20690
+
+La primera es un envoltorio vacío. Wikisource presenta los libros escaneados **por transclusión**: la
+página no contiene la obra, la compone incluyendo otras, y el envoltorio de esa maquinaria va
+delante. El lector se quedaba con la primera coincidencia y daba la página por vacía.
+
+**Lo que esto cerraba no era una obra, era un género de página entero**, y así se presenta hoy buena
+parte de la Fuente. Nadie lo había medido en ochenta sesiones porque el mensaje de error era
+plausible: «no trae texto» suena a página mala, no a lector corto.
+
+La regla que se añade es la que dice el nombre: **se sigue buscando mientras la región elegida no
+traiga texto**. No se toca el orden de los marcadores —el segundo arrastra más cromo— y no se tapa el
+fallo: si ninguna región trae texto, la recuperación sigue deteniéndose, porque versionar documentos
+vacíos dejaría Citas contra las que después nada se puede cotejar. Hay una prueba para cada una de
+esas tres cosas.
+
+De paso: la página que lo destapó dio **127 candidatas y 12 Citas**, y son de las mejores del día
+—«no hace el plan a la vida, sino que ésta lo traza viviendo», «te atacan por lo que piensas, pero
+les hieres por lo que haces», «chapúzate en el dolor para curarte de su maleficio»—.
+
+### El techo
+
+El Autor más representado, que lleva tres sesiones sin sembrar, baja de 14,5 % a **14,3 %**.
+
+`npx astro check` 0 errores; `npx vitest run` **2081/2081**; `npm run build` **1090 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1040 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.
