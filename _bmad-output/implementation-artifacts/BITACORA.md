@@ -4984,3 +4984,43 @@ más representado queda en 141 de 967, **14,6 %**, el mismo porcentaje que antes
 
 **La meta no está alcanzada y no se emite promesa:** 967 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.6 (73.ª sesión) — Mil Citas
+
+**967 → 1000 Citas. 1012 → 1045 páginas.**
+
+    Citas           1000 de  1000  ·  puesto
+
+El tramo de volumen de la Meta queda **puesto**. Se cierra con el umbral que tenía —no se bajó
+ninguno— y con el techo de concentración respetado en todo momento: el Autor más representado queda
+en **149 de 1000, 14,9 %**.
+
+### Cómo se repartieron las últimas treinta y tres
+
+No se eligieron por gusto sino por aritmética. Las tres canteras con obra extraíble tenían, contra el
+techo del 15 % sobre 1000, márgenes de 30, 9 y 10 Citas. Sembrar de una sola habría roto el techo
+antes de llegar; sembrar de las tres a la vez no. El reparto —15, 8, 9 y una cuarta de otra cantera—
+sale de esa cuenta y de ninguna otra cosa, y se hizo **antes** de leer.
+
+Casi todas salen de la **franja corta** que la sesión anterior descubrió que yo llevaba doce sesiones
+sin mirar. Es justo: las últimas treinta y tres del Corpus son de las más breves que tiene.
+
+### Lo que NO se hace hoy
+
+**No se emite la promesa.** El protocolo dice que se emite cuando `npm run huecos` declara *el tramo*
+alcanzado, y el tramo que la política declara desde hace catorce sesiones no es éste: es **«Admitir
+19 Autores más»**, y sigue en 16 de 35. Mil Citas es un hito, no el tramo.
+
+Y quedan dos cosas dichas y sin cerrar, que conviene no perder de vista ahora que el número redondo
+podría taparlas:
+
+- **12 Temas de 24.** No es falta de trabajo: está medido desde la 60.ª que ningún asunto nuevo junta
+  quince Citas sin solaparse con uno de los doce por encima de lo que se solapan entre sí.
+- **Las tres Citas que NFR-5 no alcanza en tres saltos**, esperando la decisión entre NFR-5 y
+  UX-DR18 desde hace veinte sesiones.
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **1045 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, 12 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.
