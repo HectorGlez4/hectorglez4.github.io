@@ -12,7 +12,7 @@ import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
 import { MARCA } from '../lib/marca.ts';
 import { consecuenciasDe } from '../lib/superficies.ts';
-import type { TipoDeResultado } from '../lib/tipoDeResultado.ts';
+import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
 
 interface Props {
@@ -82,7 +82,7 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
       * mensajerías; `twitter:card` lo necesita X para elegir el formato grande, y sin
       * él muestra la miniatura cuadrada aunque la imagen sea apaisada.
       */}
-    <meta property="og:type" content="article" />
+    <meta property="og:type" content={tipoDeOpenGraph(tipo)} />
     <meta property="og:title" content={titulo} />
     <meta property="og:description" content={descripcion} />
     <meta property="og:url" content={canonica} />

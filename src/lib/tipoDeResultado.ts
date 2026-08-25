@@ -29,3 +29,25 @@ export type TipoDeResultado = keyof typeof ETIQUETAS_DE_RESULTADO;
 
 /** El tipo por el que responde un resultado sin metadato, o con uno que no reconocemos. */
 export const TIPO_POR_OMISION: TipoDeResultado = 'cita';
+
+/**
+ * Qué clase de página dice ser una superficie al compartirse — FR-19.
+ *
+ * `Armazon` declaraba `og:type="article"` para **todas** las páginas del sitio: la portada, el
+ * buscador, los Temas, las Colecciones y las Páginas de Autor incluidas. Se vio contándolo en
+ * vivo sobre el dominio, y es sencillamente falso: en el Open Graph `article` es una pieza de
+ * contenido con autor y fecha, y un listado no lo es. La portada declarándose artículo es el caso
+ * que mejor lo enseña.
+ *
+ * La regla cabe en una línea —**una Cita es un artículo, todo lo demás es un sitio**— y por eso
+ * vive aquí, junto a la tabla de la que sale la unión de tipos, y no repartida por cada página:
+ * una superficie nueva que olvide declararlo cae del lado correcto sin hacer nada.
+ *
+ * Las superficies sin tipo —la portada, el buscador, el 404— llegan con `undefined` y caen
+ * también en `website`. Ojo con la tentación de reusar `TIPO_POR_OMISION` aquí: aquel es «cita»
+ * a propósito, porque un **resultado de búsqueda** sin metadato casi siempre lo es, y aplicarlo a
+ * esto devolvería justo el `article` que este cambio viene a quitar de la portada.
+ */
+export function tipoDeOpenGraph(tipo: TipoDeResultado | undefined): 'article' | 'website' {
+  return tipo === 'cita' ? 'article' : 'website';
+}

@@ -213,3 +213,17 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     significa algo —«las tres que van a la Pieza»— o no significa nada. La otra es de herramienta:
     hoy no hay forma de reordenar los miembros salvo editando el YAML a mano, que es justo lo que
     `asignar` vino a evitar.
+
+- source_spec: FR-19 — contado en vivo en la 34.ª sesión del bucle v4
+  summary: Solo las Páginas de Cita llevan og:image; la portada y los listados se comparten sin imagen.
+  evidence: |-
+    Contando `og:image` por superficie sobre el dominio: **Cita 1, Tema 0, Colección 0, Autor 0,
+    portada 0**. Compartir cualquiera de ellas en WhatsApp, X o LinkedIn da un enlace pelado sin
+    previsualización, y la que más duele es la portada: es lo que se comparte cuando se recomienda
+    el sitio entero.
+    La Cita la tiene porque la Historia 10.1 genera su Tarjeta en el build. Para las demás no hay
+    imagen que apuntar: la Pieza de una Colección (13.3) se compone a demanda y `piezas/` está
+    fuera del control de versiones a propósito (AD-15), así que no se sirve.
+    Caben dos salidas y las dos son decisión de Héctor: generar en el build una imagen por Tema,
+    Colección y Autor —como ya se hace con las 456 Tarjetas—, o poner una imagen de marca fija
+    como respaldo, que hoy no existe: `public/` solo tiene el `favicon.svg`.

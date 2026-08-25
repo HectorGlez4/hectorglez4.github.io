@@ -2993,3 +2993,32 @@ las superficies construidas, y la nueva entró sola.
 
 `npx astro check` 0 errores; `npx vitest run` **1939/1939** en 62 ficheros; `npm run build` 501
 páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+## 15.2 (34.ª sesión) — La portada decía ser un artículo
+
+**456 Citas, 501 páginas: sin cambios en el contenido.** Repetida la cuenta que funcionó ayer
+—contar etiquetas por clase de superficie— sobre las de compartición, y salieron dos cosas.
+
+**Arreglada: `og:type` estaba fijo en `article` para todas las páginas del sitio.** La portada, el
+buscador, los doce Temas, las dieciséis Colecciones y los diecisiete Autores se declaraban
+artículos. En el Open Graph `article` es una pieza de contenido con autor y fecha; un listado no
+lo es, y la portada declarándose artículo es el caso que mejor lo enseña.
+
+La regla cabe en una línea —**una Cita es un artículo, todo lo demás es un sitio**— y vive en
+`tipoDeResultado.ts`, junto a la tabla de la que sale la unión de tipos, para que una superficie
+nueva que olvide declarar su tipo caiga del lado correcto sin hacer nada. Verificado en el build:
+`/` `website`, `/tema/…` `website`, `/coleccion/…` `website`, `/cita/…` `article`.
+
+Con una trampa esquivada y anotada en el propio código: **no se reusó `TIPO_POR_OMISION`**. Aquel
+vale «cita» a propósito —un resultado de búsqueda sin metadato casi siempre lo es— y aplicarlo
+aquí habría devuelto justo el `article` que este cambio viene a quitar de la portada.
+
+**No arreglada, y anotada: solo las Citas llevan `og:image`.** Tema 0, Colección 0, Autor 0,
+portada 0. Compartir cualquiera de ellas da un enlace pelado sin previsualización. La Cita la
+tiene porque la Historia 10.1 genera su Tarjeta en el build; para las demás **no hay imagen que
+apuntar** —la Pieza de una Colección se compone a demanda y `piezas/` está fuera del control de
+versiones a propósito (AD-15)— y `public/` solo tiene el `favicon.svg`. Generar una imagen por
+listado o crear una de marca son las dos salidas, y las dos son decisión de Héctor.
+
+`npx astro check` 0 errores; `npx vitest run` **1943/1943** en 63 ficheros; `npm run build` 501
+páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
