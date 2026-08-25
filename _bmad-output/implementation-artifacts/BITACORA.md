@@ -5024,3 +5024,51 @@ podría taparlas:
 
 **La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, 12 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## NFR-5 (74.ª sesión) — Lo que la 57.ª predijo pasó, y el remedio se agota
+
+**1000 Citas y 1045 páginas: las mismas.** Sesión sin siembra —el tramo de volumen está puesto— y
+con una medida que hacía falta.
+
+### La lista había vuelto a crecer, y nadie la había vuelto a mirar
+
+Yo llevaba veinte sesiones diciendo «las **tres** Citas que NFR-5 no alcanza». Al medirlo con el
+Corpus en 1000: **doce**.
+
+La 57.ª sesión lo había escrito con todas las letras —«los listados ordenan por slug, así que la cola
+alfabética cae siempre en la última página; volverá a pasar cada vez que el Corpus crezca»— y ha
+pasado exactamente así: los dos Autores mayores llegaron a tres páginas, y su cola volvió a quedar a
+cuatro saltos.
+
+**Repetir una cifra vieja no es informar.** La cifra era de la 57.ª y yo la repetí en cada informe
+hasta hoy sin volver a contarla.
+
+### Acotado de doce a seis, sin doblar ninguna regla
+
+Por el mismo camino que entonces: seis Citas entraron en Colecciones **cuyo criterio cumplen**, y la
+portada enlaza las dieciséis, así que un miembro está a dos saltos. Tres a «la instrucción del pueblo
+como condición de su libertad», dos a «obrar como quien se es», una a «el acierto tiene hora».
+
+**Y se dice qué tentación se rechaza**, porque las dos que más se parecían a un encaje no lo eran:
+
+- Una habla de la multitud, y hay una Colección sobre la multitud — pero **dice lo contrario que el
+  criterio**: la Cita elogia que la multitud baje las cuestiones a terreno práctico, y la Colección
+  trata de lo que la multitud quita. Meterla ahí sería hacerle decir a la Colección algo que no dice.
+- Otra defiende la igualdad de las mujeres, y hay una Colección de mujeres — pero es de mujeres
+  **autoras**, no de textos sobre ellas.
+
+Forzar cualquiera de las dos sería la misma falta que inventar una Colección de relleno.
+
+### Lo que hay que decir de las seis que quedan
+
+**El remedio por Colecciones se agota.** Ha servido dos veces y cada vez cubre menos, y no es
+casualidad: las Citas que quedan fuera son, por construcción, las que ningún criterio editorial
+reunió. La decisión reservada —**¿el paginador puede enseñar los números de página, o las páginas de
+listado admiten más Citas?**— sigue haciendo falta, y ahora con más urgencia, porque **el número
+crece con el Corpus**: de 3 declaradas a 12 reales en veinte sesiones.
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **1045 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos** — las seis Citas de NFR-5, que eran doce al empezar.
+
+**La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, 12 Temas de 24, 16
+Autores de 35.

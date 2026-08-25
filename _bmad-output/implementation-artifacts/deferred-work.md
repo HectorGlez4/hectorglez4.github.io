@@ -355,7 +355,28 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
       lo que la regla dura del bucle prohíbe, y además alarga las páginas de listado, que es una
       decisión de lectura.
 
-    **Acotado el 25/08 (57.ª sesión): de doce Citas inalcanzables quedan cuatro.** Seis entraron
+    **Vuelto a medir el 26/08 (74.ª sesión), con el Corpus en 1000 Citas: eran doce otra vez.**
+    Lo que la 57.ª predijo —«volverá a pasar cada vez que el Corpus crezca»— pasó: los listados
+    ordenan por slug, los dos Autores mayores llegaron a tres páginas y su cola alfabética volvió
+    a caer fuera. Se acotaron **de doce a seis** por el mismo camino que entonces, que no dobla
+    ninguna regla: seis Citas entraron en Colecciones cuyo criterio cumplen —«la instrucción del
+    pueblo como condición de su libertad» se llevó tres, «obrar como quien se es» dos, «el acierto
+    tiene hora» una—, y la portada enlaza las dieciséis Colecciones, así que un miembro está a dos
+    saltos.
+
+    **Las seis que quedan no encajan en ningún criterio**, y se dice cuál es la tentación que se
+    rechaza: una de ellas habla de la multitud, y hay una Colección sobre la multitud —pero dice lo
+    contrario que el criterio, y meterla ahí sería hacerle decir a la Colección algo que no dice.
+    Otra defiende la igualdad de las mujeres, y hay una Colección de mujeres —pero es de mujeres
+    **autoras**, no de textos sobre ellas. Forzar cualquiera de las dos sería la misma falta que
+    inventar una Colección de relleno.
+
+    **Y el remedio por Colecciones se agota.** Ha servido dos veces y cada vez cubre menos: las
+    Citas que quedan fuera son, por construcción, las que ningún criterio editorial reunió. La
+    decisión de una línea sigue haciendo falta, y ahora con más urgencia, porque el número crece
+    con el Corpus.
+
+    **Acotado antes, el 25/08 (57.ª sesión): de doce Citas inalcanzables quedaban cuatro.** Seis entraron
     en Colecciones cuyo criterio cumplen —la portada enlaza las dieciséis, así que un miembro está
     a dos saltos— y eso no dobla ninguna regla. Las cuatro que quedan no encajan en ningún
     criterio, y forzarlas sería la misma falta que inventar una Colección de relleno.
