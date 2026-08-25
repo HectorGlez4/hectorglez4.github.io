@@ -3230,3 +3230,67 @@ dice «Ya estaban en revisión: 165».
 392 pasadas, 14 saltadas; `npm run build` **521 páginas**.
 
 **El tramo sigue abierto y ahora dice 284** (era 299). No se alcanza, y se dice.
+
+## 15.3 (40.ª sesión) — Once netas, y dieciséis retiradas por no poder verificar quién firma
+
+**476 → 487 Citas. 521 → 532 páginas. Concentración 23,9 % → 23,4 %.** Se publicaron 27 y se
+retiraron 16 en la misma sesión. La resta es lo que cuenta esta entrada.
+
+**La cantera del Autor elegido era buena**: 41 obras en Wikisource, diez de ellas prosa ensayística
+de la que mejor rinde. Se recuperaron tres. Ninguna de las tres llegó entera al Corpus, y cada una
+falló por un motivo distinto y útil.
+
+### El discurso que no se puede leer, y por qué no se toca la puerta
+
+La puerta de legibilidad de la 11.5 rechazó uno de los tres: **4,2 % de palabras con señales de
+OCR roto, sobre un techo del 2 %**, y las señales eran íes sueltas. No es OCR: **este Autor
+escribía «i» donde la norma pone «y»** —fue reformista ortográfico— y la puerta lee esas íes como
+basura de escaneo.
+
+No se baja el umbral, que es regla dura, y tampoco se añade una excepción por Autor: la puerta
+tiene razón en general y el caso tiene salida propia. Wikisource publica versiones «ortografía
+RAE» de algunas de sus obras; se buscó una de este discurso y **no existe**, así que el documento
+no sirve. Queda anotado: para este Autor, preferir siempre la edición RAE cuando la haya.
+
+### El encabezado que el lector no sabía leer, y sí se arregla
+
+Los otros dos documentos pasaron la legibilidad y **fallaron una prueba distinta**: FR-23 contó
+dos documentos versionados sin Autor derivable. La extracción ya lo había avisado en voz alta
+—«Autor sin cotejar: el documento no declara autor, así que lo pone la orden y nada lo
+contradice»— y yo pasé de largo. Ese aviso **es** la puerta diciendo que no está actuando.
+
+Uno de los dos sí firmaba, en la línea que el encabezado de Wikisource imprime sobre el texto:
+
+    << Autor: Manuel González Prada, 191?.
+
+El lector solo miraba el parámetro `|autor=` del wikitexto. Ahora mira también esa línea, con tres
+pruebas en rojo primero, y en ese orden: el parámetro manda, la línea renderizada es el respaldo.
+Dos detalles que costaron pensar y quedan escritos en el código:
+
+· La línea se añade **delante** del recorte de año, no detrás: arrastra su propia fecha —«, 191?.»—
+  y detrás de una etiqueta de año vacía ese número se leería como año de la obra.
+· Se toma **solo su línea**, con un ayudante nuevo, y no la ventana de tres que usa el año. Por lo
+  mismo.
+
+Y hubo que **volver a recuperar** los documentos: la declaración se guarda en el fichero al
+recuperarlo, así que arreglar el lector no arregla lo ya versionado.
+
+### El documento que no firma de ninguna forma, y las dieciséis que se fueron con él
+
+El tercero no declara Autor en ninguna forma legible: ni parámetro, ni línea de encabezado. Solo
+una frase en prosa, «Discurso de … leído el 1 de mayo de 1905 en …». Sacar un nombre de ahí sería
+la Procedencia inferida que la 11.1 prohíbe. Se comprobó que **no hay otra copia en Wikisource**.
+
+La prueba que lo cazó dice exactamente qué hacer, y por eso se cita: «no es una regla —un documento
+sin autor declarado se extrae igual— sino una medida… **el día que entre un documento sin autor
+legible, esta prueba lo nombra y quien lo añada decide si es la Fuente o el lector**».
+
+Aquí el lector ya estaba arreglado —por eso el otro documento pasa—, así que era la Fuente. Y con
+la Fuente sin declarar, la puerta de FR-23 no coteja nada: esas Citas se sostendrían **solo en mi
+palabra**, que es justo lo que este Corpus existe para no hacer. Se retiraron las 16 con
+`documentar --retirar`, con su motivo escrito, una por una. Eran buenas, y da igual.
+
+`npx astro check` 0 errores; `npx vitest run` **1955/1955** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **532 páginas**.
+
+**El tramo sigue abierto y ahora dice 273** (era 284). No se alcanza, y se dice.

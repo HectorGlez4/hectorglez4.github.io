@@ -266,6 +266,19 @@ export function añoJuntoAEtiqueta(plano: string, etiqueta: RegExp): number | un
  * Se conservan **literales** en la declaración del documento versionado para que la
  * derivación se pueda repetir en la extracción sobre lo mismo que se leyó al recuperar.
  */
+/**
+ * **Solo** la línea donde aparece una etiqueta, sin la ventana de las siguientes.
+ *
+ * A diferencia de `recorteDeEtiqueta`, que conserva las dos líneas de detrás porque una
+ * etiqueta renderizada declara su valor debajo, esta se queda en la suya. La diferencia
+ * importa: la firma del encabezado arrastra un año en su propia línea —«, 191?.»— y si la
+ * ventana la arrimara a una etiqueta de año vacía, ese número se leería como año de la obra.
+ */
+export function lineaDeEtiqueta(plano: string, etiqueta: RegExp): string[] {
+  const linea = plano.split('\n').find((candidata) => etiqueta.exec(candidata) !== null);
+  return linea === undefined ? [] : [linea];
+}
+
 export function recorteDeEtiqueta(plano: string, etiqueta: RegExp): string[] {
   const lineas = plano.split('\n');
   const indice = lineas.findIndex((linea) => etiqueta.exec(linea) !== null);
@@ -833,6 +846,18 @@ const CROMO_MEDIAWIKI: readonly [string, RegExp][] = [
 const ETIQUETA_DE_AÑO_WIKISOURCE =
   /^\s*(?:a[ñn]o(?:\s+de\s+(?:publicaci[óo]n|edici[óo]n))?|fecha\s+de\s+publicaci[óo]n|publicaci[óo]n)\s*:/iu;
 
+/**
+ * La línea con la que el encabezado de Wikisource firma la página ya renderizada:
+ *
+ *     << Autor: Manuel González Prada, 191?.
+ *
+ * Es el respaldo del parámetro `|autor=` del wikitexto, no una segunda opinión: hay páginas
+ * cuyo wikitexto no trae el parámetro y que sin embargo firman aquí, a la vista. Sin leerla,
+ * el Autor queda sin derivar, la puerta de FR-23 no actúa y la atribución la decide quien
+ * teclea la orden — que es justo lo que FR-23 existe para impedir.
+ */
+const ETIQUETA_DE_AUTOR_WIKISOURCE = /^\s*(?:<<|«|‹‹)?\s*(?:autor|author)\s*:/iu;
+
 const ETIQUETA_DE_AÑO_GUTENBERG = /^\s*(?:original\s+publication|first\s+published)\s*:/iu;
 
 const INICIO_GUTENBERG = /\*\*\*\s*START OF [\s\S]{0,300}?\*\*\*/i;
@@ -913,6 +938,9 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
       // interpretado convertiría la puerta de la 11.1 en un campo editable.
       return [
         titulo ?? '',
+        // Delante del recorte de año **a propósito**: esta línea arrastra su propia fecha
+        // —«, 191?.»— y detrás de una etiqueta de año vacía se leería como año de la obra.
+        ...lineaDeEtiqueta(regionPlana, ETIQUETA_DE_AUTOR_WIKISOURCE),
         ...recorteDeEtiqueta(regionPlana, ETIQUETA_DE_AÑO_WIKISOURCE),
         ...(encabezadoDeOrigen === undefined ? [] : lineasDeEncabezadoDeWikitexto(encabezadoDeOrigen)),
         ...(encabezadoDeLaObra === undefined ? [] : lineasDeLaObraDeclarada(encabezadoDeLaObra)),
@@ -957,6 +985,26 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         const declarado = autoresDeclarados(linea.slice(encontrado.index + encontrado[0].length));
         if (declarado !== undefined) return declarado;
       }
+
+      /*
+       * Y si el wikitexto no lo declara, la línea que la página imprime.
+       *
+       * En este orden y no al revés: el parámetro es donde el dato vive de verdad y donde
+       * una página con dos Autores los declara por separado. La línea renderizada es el
+       * respaldo para cuando el parámetro no está — y no está más a menudo de lo que
+       * parece: dos documentos del Corpus se versionaron sin Autor derivable y solo se
+       * supo porque una prueba los contó.
+       */
+      for (const linea of lineaDeEtiqueta(
+        loQueDeclaraLaPagina(declaracion),
+        ETIQUETA_DE_AUTOR_WIKISOURCE,
+      )) {
+        const encontrado = ETIQUETA_DE_AUTOR_WIKISOURCE.exec(linea);
+        if (encontrado === null) continue;
+        const declarado = autoresDeclarados(linea.slice(encontrado.index + encontrado[0].length));
+        if (declarado !== undefined) return declarado;
+      }
+
       return undefined;
     },
     pagina: paginaDeWikisource,

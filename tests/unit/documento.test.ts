@@ -1495,3 +1495,75 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     expect(documentos.length - sinCita.length).toBeGreaterThanOrEqual(54);
   });
 });
+
+/**
+ * El Autor que declara la página renderizada — FR-23, Historia 11.1.
+ *
+ * Hasta aquí el Autor salía **solo** del parámetro del wikitexto (`|autor=`). Wikisource
+ * tiene además una forma renderizada, la línea de navegación que su plantilla de encabezado
+ * imprime encima del texto:
+ *
+ *     << Autor: Manuel González Prada, 191?.
+ *
+ * No es un caso raro: es el encabezado estándar de Wikisource, y hay páginas cuyo wikitexto
+ * no trae el parámetro y sin embargo firman ahí, a la vista de cualquiera que abra la página.
+ *
+ * Lo que fallaba no era la extracción sino **la puerta que la vigila**. Con el Autor sin
+ * derivar, el cotejo de FR-23 no actúa y `extraer` avisa de que «el documento no declara
+ * autor, así que lo pone la orden y nada lo contradice». La atribución quedaba entonces en
+ * manos de quien teclea la orden, que es exactamente lo que FR-23 existe para impedir, y una
+ * prueba del Corpus lo cazó: dos documentos versionados sin Autor derivable.
+ *
+ * El año de cola no estorba —`autoresDeclarados` ya lo descarta— y por eso el arreglo es solo
+ * hacer llegar la línea a la declaración: leerla, no interpretarla.
+ */
+describe('FR-23 — el Autor también se lee de la línea que la página imprime', () => {
+  const paginaConAutorRenderizado = [
+    '<h1 id="firstHeading">El individuo</h1>',
+    '<div class="mw-parser-output">',
+    '<div>&lt;&lt; Autor: Manuel González Prada, 191?.</div>',
+    '<p>La Roma clásica nos legó al Dios-Estado: la Roma medioeval nos impuso a la Diosa-Iglesia.</p>',
+    '</div>',
+  ].join('\n');
+
+  it('la línea del encabezado renderizado declara al Autor', () => {
+    const derivado = derivarDocumento('wikisource-es', paginaConAutorRenderizado);
+    if (!derivado.ok) throw new Error(derivado.motivo);
+
+    const { autor } = derivarDeLaDeclaracion('wikisource-es', derivado.declaracion);
+    expect(autor?.nombres).toEqual(['Manuel González Prada']);
+  });
+
+  it('el año que la línea arrastra no se cuela en el nombre', () => {
+    // «191?» es una fecha dudosa de Wikisource, y va pegada al nombre en la misma línea.
+    const derivado = derivarDocumento('wikisource-es', paginaConAutorRenderizado);
+    if (!derivado.ok) throw new Error(derivado.motivo);
+
+    const { autor } = derivarDeLaDeclaracion('wikisource-es', derivado.declaracion);
+    expect(autor?.nombres.some((nombre) => /\d/.test(nombre))).toBe(false);
+  });
+
+  it('el parámetro del wikitexto sigue mandando sobre la línea renderizada', () => {
+    /*
+     * Si los dos declaran, gana el wikitexto: es donde el dato vive de verdad y donde una
+     * página con dos Autores los declara por separado. La línea renderizada es el respaldo
+     * para cuando el parámetro no está, no una segunda opinión.
+     */
+    const conAmbos = [
+      '<h1 id="firstHeading">El individuo</h1>',
+      '<div class="mw-parser-output">',
+      '<div>&lt;&lt; Autor: Quien Sea, 191?.</div>',
+      '<p>La Roma clásica nos legó al Dios-Estado.</p>',
+      '</div>',
+    ].join('\n');
+    const derivado = derivarDocumento(
+      'wikisource-es',
+      conAmbos,
+      '{{encabezado\n|título=El individuo\n|autor=Manuel González Prada\n}}',
+    );
+    if (!derivado.ok) throw new Error(derivado.motivo);
+
+    const { autor } = derivarDeLaDeclaracion('wikisource-es', derivado.declaracion);
+    expect(autor?.nombres).toEqual(['Manuel González Prada']);
+  });
+});
