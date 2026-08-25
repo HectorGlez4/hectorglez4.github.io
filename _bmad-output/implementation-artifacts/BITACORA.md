@@ -2206,3 +2206,6 @@ entero. Tres sesiones, 45 Citas del *Quijote*, cero rechazos.
 
 `npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 478
 páginas y 419 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32792912251 en verde): `sitemap-0.xml` declara
+**478 URL**, las mismas del build, y las Citas nuevas responden 200.
