@@ -2956,3 +2956,40 @@ no sea editar el YAML a mano, que es justo lo que `asignar` vino a evitar.
 
 `npx astro check` 0 errores; `npx vitest run` **1935/1935** en 62 ficheros; `npm run build` 501
 páginas.
+
+## 15.2 (33.ª sesión) — Retirado un hallazgo falso, y tapado el hueco de verdad
+
+**456 Citas, 16 Colecciones, 501 páginas.** Dos cosas, y la primera es una corrección.
+
+**Retirado el hallazgo de la 21.ª sesión, que era falso.** Allí se afirmó que el criterio de una
+Colección «va dos veces en la cabecera y cero en el cuerpo», y se anotó en `deferred-work.md` como
+decisión pendiente para Héctor. **Es falso.** El criterio **está en `<main>`**, al pie, después de
+las Citas y de la paginación, y no por descuido: el comentario de la propia página lo dice —«El
+criterio, al pie y por debajo de todo lo citado en jerarquía visual (UX-DR32)»—. La página hace
+exactamente lo que su historia manda.
+
+**Dos errores de método, los dos míos.** Leí el texto de la página con un límite de 700
+caracteres y vi solo la cabecera de la lista. Y conté con `grep -c`, salió **2**, y **supuse** que
+eran `meta description` y `og:description` sin comprobar cuáles: eran la cabecera y el cuerpo.
+
+Es doblemente incómodo porque esa misma sesión y la siguiente presumieron de lo contrario:
+«comprobar antes de llamarlo fallo», dos veces con el buscador. **La disciplina se aplicó donde el
+fallo no existía y se saltó donde creí verlo.** Una comprobación que solo se hace cuando el
+resultado sorprende no es una comprobación. La entrada se deja en `deferred-work.md` marcada
+RETIRADA en vez de borrarse: el error importa más que el hallazgo.
+
+**Y el hueco de verdad, que apareció buscando otra cosa.** Contando bloques de
+`application/ld+json` por superficie: Cita **1**, Tema **1**, Autor **1**, **Colección 0**.
+Dieciséis páginas publicadas que un buscador leía sin saber que son un listado ni de qué.
+
+`DatosDeColeccion.astro` emite ahora `CollectionPage` con su `about` y su `ItemList`, la misma
+forma que el Tema. Con una diferencia que merecía el componente propio: el `about` de un Tema es
+una idea y va pelado; el de una Colección es **un criterio editorial que tiene texto**, y ese
+texto va como `description`, literal. Es el dato que mejor explica esta página a un buscador
+—«por qué están juntas»— y hasta ahora solo viajaba en la descripción.
+
+La suite pasó de 1935 a **1939 pruebas sin escribir ninguna**: las de datos estructurados recorren
+las superficies construidas, y la nueva entró sola.
+
+`npx astro check` 0 errores; `npx vitest run` **1939/1939** en 62 ficheros; `npm run build` 501
+páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.

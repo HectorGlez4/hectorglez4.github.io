@@ -169,31 +169,32 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     frontmatter a mano, que es justo lo que `asignar` vino a evitar. No es urgente —`eliminar`
     borra el Tema entero y la asignación es idempotente y comprobada— pero la asimetría está.
 
-- source_spec: Historia 12.3 / UX-DR37 — visto en vivo en la 21.ª sesión del bucle v4
-  summary: El criterio de una Colección se sirve al buscador y se le esconde al visitante.
+- source_spec: RETIRADA — Historia 12.3 / UX-DR37, anotada en la 21.ª sesión y desmentida en la 33.ª
+  summary: RETIRADA. Se afirmó que el criterio de una Colección no se enseña al visitante, y es falso: sí se enseña.
   evidence: |-
-    Con las doce Colecciones ya publicadas, la Página de Colección enseña **título y lista de
-    Citas, y nada más**. El criterio —lo único que responde a «¿por qué están juntas?»— aparece
-    **dos veces en la cabecera** (`<meta name="description">` y `og:description`) y **cero veces
-    en el cuerpo**. Comprobado en vivo sobre `/coleccion/empezar-de-nuevo`: el `curl` encuentra
-    «Para quien creyó que ya no había otra vida posible dentro de la suya…» en el HTML, y
-    `get_page_text` sobre `<main>` no lo encuentra.
+    **Esta entrada estaba mal y se deja escrita en vez de borrarse, porque el error importa más
+    que el hallazgo.**
 
-    Duele más de lo que parecía porque la mitad de las Colecciones curadas llevan **nombre
-    metafórico** —«El uniforme y la sotana», «Empezar de nuevo», «Los escollos del trato»,
-    «Achaques de necedad»—. Un Tema como «La riqueza» se explica solo; un título figurado, no.
-    Quien llega desde un buscador ve un título que no entiende y una lista sin razón declarada.
+    Se afirmó que el criterio aparecía «dos veces en la cabecera y cero en el cuerpo». Comprobado
+    de verdad: el criterio **está en `<main>`**, al pie, después de las Citas y de la paginación.
+    Y no es un descuido sino el diseño escrito: el propio comentario de la página lo dice —«El
+    criterio, al pie y por debajo de todo lo citado en jerarquía visual (UX-DR32)»—. La página
+    hace exactamente lo que su historia manda.
 
-    Y hay un segundo efecto: **la Página de Colección y la Página de Tema son visualmente
-    indistinguibles** —título, línea, lista de Citas con su Autor—, así que la superficie que
-    debía aportar «un criterio editorial» se lee como un Tema más.
+    **Dos errores de método, y los dos míos.** Primero, leí el texto de la página con un límite de
+    700 caracteres y vi solo la cabecera de la lista; el criterio está al final de un documento
+    mucho más largo. Segundo, conté las apariciones con `grep -c`, salió **2**, y **supuse** que
+    eran `meta description` y `og:description` sin comprobar cuáles: eran la cabecera y el cuerpo.
 
-    No se tocó, y a propósito: la BITÁCORA de la 12.3 dejó escrito que `DESIGN.md` y
-    `EXPERIENCE.md` no cubren esta página (UX-DR37) y que el bucle no inventa presentación. El
-    dato ya está en la página; lo que falta es la decisión de enseñarlo y dónde.
+    Es doblemente incómodo porque esa misma sesión y la siguiente presumieron de lo contrario:
+    «comprobar antes de llamarlo fallo», dos veces con el buscador. La disciplina se aplicó donde
+    el fallo no existía y se saltó donde sí creí verlo. **Una comprobación que solo se hace cuando
+    el resultado sorprende no es una comprobación.**
 
-    Lo demás de la revisión visual salió bien: en móvil (375×812) la maqueta es holgada y
-    legible, sin desbordes ni cortes.
+    Lo único que queda en pie, y es de producto y no de defecto: el criterio va **al pie**, así
+    que quien llega de un buscador ve título y lista antes que la razón de la lista. Eso es una
+    decisión tomada (UX-DR32), no un olvido, y cambiarla sería revisar la jerarquía visual de esa
+    página, no arreglar nada.
 
 - source_spec: Historia 13.3 — visto al componer la primera Pieza de Colección, 32.ª sesión del bucle v4
   summary: El orden de los miembros de una Colección es una decisión editorial que nadie ha tomado.

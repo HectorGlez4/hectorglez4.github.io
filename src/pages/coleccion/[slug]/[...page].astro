@@ -59,6 +59,7 @@
  * curación. Paginar no lo altera; lo corta.
  */
 import Armazon from '../../../components/Armazon.astro';
+import DatosDeColeccion from '../../../components/DatosDeColeccion.astro';
 import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import { conjuntoPublicable, type ColeccionPublicada } from '../../../lib/publicado.ts';
@@ -111,6 +112,9 @@ const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
  * (UX-DR32), y NFR-12 prohíbe alterar lo que el editor guardó.
  */
 const descripcion = coleccion.criterio;
+
+/* La canónica de **esta** página, como en el Tema: la 2 se declara canónica de sí misma. */
+const canonica = new URL(ruta, Astro.site).href;
 ---
 
 <Armazon
@@ -119,6 +123,15 @@ const descripcion = coleccion.criterio;
   ruta={ruta}
   tipo="coleccion"
 >
+  <DatosDeColeccion
+    slot="cabeza"
+    slug={coleccion.slug}
+    nombre={coleccion.nombre}
+    criterio={coleccion.criterio}
+    citas={pagina.data}
+    canonica={canonica}
+    tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
+  />
   <div class="pagina contenedor">
     <h1>{coleccion.nombre}</h1>
 

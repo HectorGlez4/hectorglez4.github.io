@@ -1,0 +1,59 @@
+---
+/**
+ * Datos estructurados de la Página de Colección.
+ *
+ * Faltaban, y se vio contándolos: Cita, Tema y Autor emitían su bloque de
+ * `application/ld+json` y la Colección **cero**. Dieciséis páginas publicadas que un buscador
+ * leía sin saber que son un listado ni de qué.
+ *
+ * La misma forma que el Tema —`CollectionPage` con su `about` y su `ItemList`— porque es la
+ * misma clase de página: un listado de Citas reunidas por algo. Lo que cambia es qué es ese
+ * algo, y ahí está la diferencia que merece decirse:
+ *
+ * · El `about` de un Tema es una idea —«La riqueza»—, y por eso es un `Thing` pelado.
+ * · El de una Colección es **un criterio editorial**, que sí tiene texto propio: el `criterio`
+ *   que el editor escribió. Va como `description` del `Thing`, literal y sin adjetivar, por lo
+ *   mismo que la página lo emite literal en su `<meta>`: NFR-12 prohíbe que el sistema altere lo
+ *   que el editor guardó, y UX-DR32 prohíbe componer una frase que adjetive las Citas.
+ *
+ * Es el dato que mejor explica esta página a un buscador —«por qué están juntas»— y hasta ahora
+ * solo viajaba en la descripción.
+ *
+ * Se emite como `application/ld+json`, que no es JavaScript ejecutable: no lo descarga ni lo
+ * ejecuta el navegador, así que no toca AD-6.
+ */
+import type { Cita } from '../lib/publicado.ts';
+import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+
+interface Props {
+  slug: string;
+  nombre: string;
+  criterio: string;
+  /** Las Citas de **esta** página, no las de la Colección entera. */
+  citas: readonly Cita[];
+  canonica: string;
+  tramo: TramoDeLaLista;
+}
+
+const { slug, nombre, criterio, citas, canonica, tramo } = Astro.props;
+
+/* Sin número de página, como el Tema y el Autor: la Colección es la misma en la página 2. */
+const idDeLaColeccion = new URL(`/coleccion/${slug}#coleccion`, canonica).href;
+
+const datos = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': canonica,
+  url: canonica,
+  inLanguage: 'es',
+  about: {
+    '@type': 'Thing',
+    '@id': idDeLaColeccion,
+    name: nombre,
+    description: criterio,
+  },
+  mainEntity: listaDeCitas(citas, canonica, tramo),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(datos)} is:inline />
