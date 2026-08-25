@@ -2610,3 +2610,6 @@ cerradas o esperando.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 498
 páginas y 435 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32805144604 en verde): `sitemap-0.xml` declara **498
+URL**, las mismas del build, y las Citas nuevas responden 200.
