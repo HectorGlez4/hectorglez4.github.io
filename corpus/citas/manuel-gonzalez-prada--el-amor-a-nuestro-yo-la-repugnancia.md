@@ -3,6 +3,7 @@ texto: "El amor a nuestro yo, la repugnancia a padecer y morir, nos infunden el 
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
+  - "la-muerte"
 slug: "manuel-gonzalez-prada-el-amor-a-nuestro-yo-la-repugnancia"
 procedencia:
   obra: "El individuo"

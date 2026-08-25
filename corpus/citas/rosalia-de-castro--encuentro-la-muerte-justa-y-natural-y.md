@@ -3,6 +3,7 @@ texto: "Encuentro la muerte justa y natural, y me resigno a ella con el íntimo 
 autor: "rosalia-de-castro"
 temas:
   - "la-vida"
+  - "la-muerte"
 slug: "rosalia-de-castro-encuentro-la-muerte-justa-y-natural-y"
 procedencia:
   obra: "Ruinas"

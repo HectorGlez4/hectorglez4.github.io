@@ -3,6 +3,7 @@ texto: "¡Qué necio olvido de la mortalidad es diferir los santos consejos hast
 autor: "seneca"
 temas:
   - "el-tiempo"
+  - "la-muerte"
 slug: "seneca-que-necio-olvido-de-la-mortalidad-es"
 procedencia:
   obra: "De la brevedad de la vida"

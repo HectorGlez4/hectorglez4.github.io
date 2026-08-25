@@ -3,6 +3,7 @@ texto: "Empero también los muertos tienen su vanidad, y los difuntos y difuntas
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "la-muerte"
 slug: "francisco-de-quevedo-empero-tambien-los-muertos-tienen-su-vanidad"
 procedencia:
   obra: "El mundo por dentro"

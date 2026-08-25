@@ -3,6 +3,7 @@ texto: "Y sin embargo, muchos sociólogos nos preconizan el servicio militar obl
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-patria"
 slug: "manuel-gonzalez-prada-y-sin-embargo-muchos-sociologos-nos-preconizan"
 procedencia:
   obra: "El sable"

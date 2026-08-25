@@ -3,6 +3,7 @@ texto: "Más quiero muerte con juicio que vida sin él."
 autor: "francisco-de-quevedo"
 temas:
   - "la-vida"
+  - "la-muerte"
 slug: "francisco-de-quevedo-mas-quiero-muerte-con-juicio-que-vida"
 procedencia:
   obra: "La visita de los chistes"

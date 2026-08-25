@@ -3,6 +3,7 @@ texto: "Un hombre que no es de aquí o de allí ni de esta época o de la otra, 
 autor: "miguel-de-unamuno"
 temas:
   - "la-vida"
+  - "la-patria"
 slug: "miguel-de-unamuno-un-hombre-que-no-es-de-aqui"
 procedencia:
   obra: "Del sentimiento trágico de la vida/I"

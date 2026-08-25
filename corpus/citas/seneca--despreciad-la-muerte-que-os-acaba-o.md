@@ -3,6 +3,7 @@ texto: "Despreciad la muerte, que os acaba o transfiere."
 autor: "seneca"
 temas:
   - "la-vida"
+  - "la-muerte"
 slug: "seneca-despreciad-la-muerte-que-os-acaba-o"
 procedencia:
   obra: "De la Divina Providencia"

@@ -3,6 +3,7 @@ texto: "En ninguna parte conviene más que en las naciones sudamericanas enaltec
 autor: "manuel-gonzalez-prada"
 temas:
   - "el-saber"
+  - "la-patria"
 slug: "manuel-gonzalez-prada-en-ninguna-parte-conviene-mas-que-en"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

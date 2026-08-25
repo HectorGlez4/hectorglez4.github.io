@@ -4,6 +4,7 @@ autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
   - "el-miedo"
+  - "la-muerte"
 slug: "francisco-de-quevedo-quien-afrenta-o-consiente-que-afrenten-a"
 procedencia:
   obra: "Marco Bruto"

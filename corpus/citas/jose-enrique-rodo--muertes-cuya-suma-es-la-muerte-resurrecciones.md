@@ -3,6 +3,7 @@ texto: "Muertes cuya suma es la muerte; resurrecciones cuya persistencia es la v
 autor: "jose-enrique-rodo"
 temas:
   - "el-tiempo"
+  - "la-muerte"
 slug: "jose-enrique-rodo-muertes-cuya-suma-es-la-muerte-resurrecciones"
 procedencia:
   obra: "Motivos de Proteo"

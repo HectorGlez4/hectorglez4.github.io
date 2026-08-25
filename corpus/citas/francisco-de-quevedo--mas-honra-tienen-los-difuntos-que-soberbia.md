@@ -3,6 +3,7 @@ texto: "Más honra tienen los difuntos que soberbia los vivos que los quieren de
 autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
+  - "la-muerte"
 slug: "francisco-de-quevedo-mas-honra-tienen-los-difuntos-que-soberbia"
 procedencia:
   obra: "Marco Bruto"

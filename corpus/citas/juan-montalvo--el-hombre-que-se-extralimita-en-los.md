@@ -3,6 +3,7 @@ texto: "El hombre que se extralimita en los términos comunes de la existencia h
 autor: "juan-montalvo"
 temas:
   - "el-tiempo"
+  - "la-muerte"
 slug: "juan-montalvo-el-hombre-que-se-extralimita-en-los"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

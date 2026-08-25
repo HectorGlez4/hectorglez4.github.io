@@ -3,6 +3,7 @@ texto: "Educación popular no quiere decir exclusivamente educación de la clase
 autor: "jose-marti"
 temas:
   - "el-saber"
+  - "la-patria"
 slug: "jose-marti-educacion-popular-no-quiere-decir-exclusivamente-educacion"
 procedencia:
   obra: "Educación popular"

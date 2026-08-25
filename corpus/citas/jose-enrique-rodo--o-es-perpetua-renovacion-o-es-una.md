@@ -3,6 +3,7 @@ texto: "O es perpetua renovación o es una lánguida muerte, nuestra vida."
 autor: "jose-enrique-rodo"
 temas:
   - "la-virtud"
+  - "la-muerte"
 slug: "jose-enrique-rodo-o-es-perpetua-renovacion-o-es-una"
 procedencia:
   obra: "Motivos de Proteo"

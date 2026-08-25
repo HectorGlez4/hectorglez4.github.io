@@ -3,6 +3,7 @@ texto: "Ninguno pone los ojos en la muerte; todos alargan las esperanzas, y algu
 autor: "seneca"
 temas:
   - "el-tiempo"
+  - "la-muerte"
 slug: "seneca-ninguno-pone-los-ojos-en-la-muerte"
 procedencia:
   obra: "De la brevedad de la vida"

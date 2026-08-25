@@ -4,6 +4,7 @@ autor: "manuel-gonzalez-prada"
 temas:
   - "el-tiempo"
   - "el-miedo"
+  - "la-muerte"
 slug: "manuel-gonzalez-prada-nada-de-extrano-que-los-viejos-de"
 procedencia:
   obra: "Librepensamiento de acción"

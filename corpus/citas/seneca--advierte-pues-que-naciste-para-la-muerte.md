@@ -3,6 +3,7 @@ texto: "Advierte, pues, que naciste para la muerte, y que el entierro con silenc
 autor: "seneca"
 temas:
   - "la-vida"
+  - "la-muerte"
 slug: "seneca-advierte-pues-que-naciste-para-la-muerte"
 procedencia:
   obra: "De la tranquilidad del ánimo"

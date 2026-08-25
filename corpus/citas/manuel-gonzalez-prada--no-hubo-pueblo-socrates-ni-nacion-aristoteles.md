@@ -3,6 +3,7 @@ texto: "No hubo pueblo-Sócrates ni nación-Aristóteles."
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
+  - "la-patria"
 slug: "manuel-gonzalez-prada-no-hubo-pueblo-socrates-ni-nacion-aristoteles"
 procedencia:
   obra: "La fuerza"

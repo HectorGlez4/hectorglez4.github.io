@@ -3,6 +3,7 @@ texto: "Buenos libros son los muertos, y mejores las muertes."
 autor: "francisco-de-quevedo"
 temas:
   - "el-saber"
+  - "la-muerte"
 slug: "francisco-de-quevedo-buenos-libros-son-los-muertos-y-mejores"
 procedencia:
   obra: "Marco Bruto"

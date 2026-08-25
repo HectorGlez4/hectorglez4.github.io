@@ -5155,3 +5155,48 @@ Siete asuntos medidos y sin leer, y ahora se sabe que **leerlos tumbará a algun
 
 **La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, **15 Temas de 24**,
 16 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.5 (77.ª sesión) — Dos Temas más, y la segunda tanda medida antes de dar nada por agotado
+
+**Temas: 15 → 17.** 1048 → 1050 páginas. 1000 Citas, las mismas.
+
+### Los once candidatos de la 75.ª, resueltos
+
+Leídos los siete que faltaban: **cuatro fueron Tema y siete no**. El saldo completo de aquella lista
+de once —que yo estuve a punto de dar por buena entera— es: la justicia, el miedo, el trabajo y la
+muerte sí; la guerra, la fama, la soledad, la costumbre, la esperanza, la educación y el poder no.
+
+Los tres de hoy que cayeron, con su cifra:
+
+- **«La soledad» contaba 21 y tiene cuatro.** El patrón cazaba «solo» y «sola», que están en todas
+  partes.
+- **«La costumbre» contaba 23 y tiene once o doce** leídas de verdad.
+- **«La esperanza», doce.**
+
+Y los dos que resistieron:
+
+- **«La muerte»** — 23 de 47, siete Autores. Cae entera la parte del tiranicidio, que es de la
+  libertad y de la justicia, no de la muerte. Queda lo que trata de morir: «naciste para la muerte»,
+  «aquel vivirá mal que ignorare el útil de morir bien», «teméis como mortales todas las cosas y como
+  inmortales las deseáis».
+- **«La patria»** — y aquí hay que decir dos cosas. La primera, que el patrón cazaba **«nación»
+  dentro de «determinación» e «inclinación»**: ocho de las 27 eran esa palabra partida por la mitad.
+  La segunda, que las que quedan son **exactamente quince**, justo el umbral y **sin un solo margen**:
+  una retirada la dejaría por debajo. Cumple el umbral que hay, que es lo que las reglas piden, y se
+  publica diciendo esto.
+
+### Antes de declarar agotada la veta, medirla otra vez
+
+Es el error que este bucle ya cometió dos veces —con la cantera de los Autores y con el Tema trece—,
+así que en vez de cerrar se midió una **segunda tanda** de nueve asuntos distintos. Resultado: ocho
+no llegan o solapan demasiado —la fortuna es la adversidad al 46 %, la religión es la libertad al
+45 %, la vejez es el tiempo al 100 %— y uno sí, que es el que se ha publicado.
+
+**La veta queda medida, no supuesta**: dos tandas, veinte asuntos, cinco Temas. Para el dieciocho
+hará falta o más Corpus o una tanda que no se me ha ocurrido todavía.
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **1050 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, **17 Temas de 24**,
+16 Autores de 35, 16 Colecciones de 12 —puesto—.

@@ -3,6 +3,7 @@ texto: "Cuidar de menudencias para después de muerto, y no de los riesgos para 
 autor: "francisco-de-quevedo"
 temas:
   - "la-prudencia"
+  - "la-muerte"
 slug: "francisco-de-quevedo-cuidar-de-menudencias-para-despues-de-muerto"
 procedencia:
   obra: "Marco Bruto"

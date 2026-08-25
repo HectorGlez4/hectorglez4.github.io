@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "el-saber"
   - "la-libertad"
+  - "la-patria"
 slug: "jose-marti-el-mejor-modo-de-defender-nuestros-derechos"
 procedencia:
   obra: "Educación popular"

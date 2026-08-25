@@ -3,6 +3,7 @@ texto: "De esto resulta que muchas veces los destierros y las calamidades vienen
 autor: "seneca"
 temas:
   - "la-adversidad"
+  - "la-patria"
 slug: "seneca-de-esto-resulta-que-muchas-veces-los"
 procedencia:
   obra: "De la tranquilidad del ánimo"

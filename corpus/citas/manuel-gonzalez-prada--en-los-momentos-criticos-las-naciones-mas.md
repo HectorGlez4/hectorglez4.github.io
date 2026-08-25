@@ -3,6 +3,7 @@ texto: "En los momentos críticos, las naciones más civilizadas revelan alma de
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
+  - "la-patria"
 slug: "manuel-gonzalez-prada-en-los-momentos-criticos-las-naciones-mas"
 procedencia:
   obra: "La fuerza"

@@ -3,6 +3,7 @@ texto: "Hay que tener además en cuenta que, hasta vista la cosa egoístamente, 
 autor: "miguel-de-unamuno"
 temas:
   - "la-virtud"
+  - "la-patria"
 slug: "miguel-de-unamuno-hay-que-tener-ademas-en-cuenta-que"
 procedencia:
   obra: "La crisis actual del patriotismo español"

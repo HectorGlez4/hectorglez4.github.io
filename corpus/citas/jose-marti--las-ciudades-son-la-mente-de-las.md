@@ -3,6 +3,7 @@ texto: "Las ciudades son la mente de las naciones; pero su corazón, donde se ag
 autor: "jose-marti"
 temas:
   - "la-vida"
+  - "la-patria"
 slug: "jose-marti-las-ciudades-son-la-mente-de-las"
 procedencia:
   obra: "Maestros ambulantes"

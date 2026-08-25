@@ -3,6 +3,7 @@ texto: "El que llora y alaba a su enemigo ya difunto, muestra mañoso que si no 
 autor: "francisco-de-quevedo"
 temas:
   - "la-amistad"
+  - "la-muerte"
 slug: "francisco-de-quevedo-el-que-llora-y-alaba-a-su"
 procedencia:
   obra: "Marco Bruto"

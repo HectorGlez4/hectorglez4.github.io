@@ -3,6 +3,7 @@ texto: "Naciones hay que echan a perder sus reyes y otras que los ganan."
 autor: "baltasar-gracian"
 temas:
   - "la-libertad"
+  - "la-patria"
 slug: "baltasar-gracian-naciones-hay-que-echan-a-perder-sus"
 procedencia:
   obra: "El político"

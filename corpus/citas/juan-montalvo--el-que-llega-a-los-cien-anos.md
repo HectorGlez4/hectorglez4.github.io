@@ -3,6 +3,7 @@ texto: "El que llega a los cien años tiene ya sobradas conexiones con la tumba,
 autor: "juan-montalvo"
 temas:
   - "el-tiempo"
+  - "la-muerte"
 slug: "juan-montalvo-el-que-llega-a-los-cien-anos"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

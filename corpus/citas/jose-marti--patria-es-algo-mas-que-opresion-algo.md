@@ -3,6 +3,7 @@ texto: "Patria es algo más que opresión, algo más que pedazos de terreno sin 
 autor: "jose-marti"
 temas:
   - "la-libertad"
+  - "la-patria"
 slug: "jose-marti-patria-es-algo-mas-que-opresion-algo"
 procedencia:
   obra: "La República española ante la Revolución cubana"

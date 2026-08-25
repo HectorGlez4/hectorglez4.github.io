@@ -3,6 +3,7 @@ texto: "¡Desgraciada la patria donde no se permite analizar el patriotismo!"
 autor: "miguel-de-unamuno"
 temas:
   - "la-libertad"
+  - "la-patria"
 slug: "miguel-de-unamuno-desgraciada-la-patria-donde-no-se-permite"
 procedencia:
   obra: "Verdad y vida"

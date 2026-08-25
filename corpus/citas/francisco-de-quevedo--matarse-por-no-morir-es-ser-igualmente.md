@@ -4,6 +4,7 @@ autor: "francisco-de-quevedo"
 temas:
   - "la-vida"
   - "el-miedo"
+  - "la-muerte"
 slug: "francisco-de-quevedo-matarse-por-no-morir-es-ser-igualmente"
 procedencia:
   obra: "Marco Bruto"

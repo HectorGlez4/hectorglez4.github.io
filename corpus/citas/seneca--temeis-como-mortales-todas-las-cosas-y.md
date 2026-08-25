@@ -3,6 +3,7 @@ texto: "Teméis como mortales todas las cosas, y como inmortales las deseáis."
 autor: "seneca"
 temas:
   - "la-vida"
+  - "la-muerte"
 slug: "seneca-temeis-como-mortales-todas-las-cosas-y"
 procedencia:
   obra: "De la brevedad de la vida"

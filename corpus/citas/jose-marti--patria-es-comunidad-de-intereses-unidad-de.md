@@ -3,6 +3,7 @@ texto: "Patria es comunidad de intereses, unidad de tradiciones, unidad de fines
 autor: "jose-marti"
 temas:
   - "la-libertad"
+  - "la-patria"
 slug: "jose-marti-patria-es-comunidad-de-intereses-unidad-de"
 procedencia:
   obra: "La República española ante la Revolución cubana"

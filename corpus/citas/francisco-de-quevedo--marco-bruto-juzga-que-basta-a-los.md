@@ -3,6 +3,7 @@ texto: "Marco Bruto juzga que basta a los desterrados (por consuelo) llevar sus 
 autor: "francisco-de-quevedo"
 temas:
   - "la-adversidad"
+  - "la-patria"
 slug: "francisco-de-quevedo-marco-bruto-juzga-que-basta-a-los"
 procedencia:
   obra: "Marco Bruto"

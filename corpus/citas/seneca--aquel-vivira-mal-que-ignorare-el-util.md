@@ -3,6 +3,7 @@ texto: "Aquel vivirá mal que ignorare el útil de morir bien."
 autor: "seneca"
 temas:
   - "la-vida"
+  - "la-muerte"
 slug: "seneca-aquel-vivira-mal-que-ignorare-el-util"
 procedencia:
   obra: "De la tranquilidad del ánimo"

@@ -3,6 +3,7 @@ texto: "Aquel está mortal, en quien es tan peligroso el remedio como la dolenci
 autor: "francisco-de-quevedo"
 temas:
   - "la-adversidad"
+  - "la-muerte"
 slug: "francisco-de-quevedo-aquel-esta-mortal-en-quien-es-tan"
 procedencia:
   obra: "Marco Bruto"
