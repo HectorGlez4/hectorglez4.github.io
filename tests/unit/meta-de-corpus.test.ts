@@ -195,8 +195,14 @@ describe('Meta de Corpus — el escalonado decide el titular', () => {
   });
 
   it('5.º el volumen: con todo lo demás puesto, seguir sembrando hasta la meta', () => {
+    /*
+     * Cada Tema reparte sus Citas entre los Autores con `i % META_AUTORES`, así que hacen falta
+     * **al menos tantas Citas por Tema como Autores** para que todos publiquen alguna. Con menos,
+     * el censo de Autores —que desde la 35.ª sesión cuenta a los que publican y no a los
+     * declarados— se queda corto y el tramo que manda pasa a ser el de Autores, no el de volumen.
+     */
     const conTodo = [
-      ...Array.from({ length: META_TEMAS_PUBLICADOS }, (_, t) => citas(MIN_CITAS_POR_TEMA + 10, `tema-${t}`, META_AUTORES)).flat(),
+      ...Array.from({ length: META_TEMAS_PUBLICADOS }, (_, t) => citas(META_AUTORES + 5, `tema-${t}`, META_AUTORES)).flat(),
     ];
     const objetivo = objetivoDeMeta(
       meta(conTodo, temas(META_TEMAS_PUBLICADOS), autoresEquilibrados(META_AUTORES), colecciones(META_COLECCIONES_PUBLICADAS)),
@@ -273,5 +279,49 @@ describe('Meta de Corpus — el techo vigila a todos los Autores, no solo al pri
     );
     expect(objetivo.clase).toBe('concentracion');
     expect(objetivo.hueco).toContain('2 Autores');
+  });
+});
+
+describe('Meta de Corpus — el censo de Autores cuenta los que publican, no los declarados', () => {
+  /*
+   * La incoherencia la destapó un número que no cuadraba: el sitemap traía 16 Páginas de Autor y
+   * el Corpus declaraba 17. No era un fallo del sitemap —un Autor sin Citas no tiene página— pero
+   * sí de esta política, que contaba los ficheros de `corpus/autores/`.
+   *
+   * `META_TEMAS_PUBLICADOS` ya lo hacía bien, y su propio comentario dice por qué: «Un Tema con
+   * cuatro Citas no es una página que exista para nadie, y contarlo aquí dejaría la meta
+   * alcanzable abriendo ficheros vacíos». El argumento vale igual para los Autores y no se había
+   * aplicado: con el censo de declarados, la meta de 35 se alcanza creando dieciocho ficheros
+   * y sin publicar una sola Cita.
+   */
+  it('un Autor sin Citas publicadas no cuenta para la meta', () => {
+    const conFantasma = [
+      ...autoresEquilibrados(4),
+      { slug: 'autor-fantasma', nombre: 'Fantasma', tradicion: 'peninsular' as const },
+    ];
+    // Las Citas solo son de los cuatro primeros: el quinto es un fichero sin nada detrás.
+    const estado = meta(citas(20, 'tema-0', 4), temas(1), conFantasma);
+
+    expect(estado.autores.alcanzado).toBe(4);
+  });
+
+  it('y el equilibrio de tradición sigue contándolos a todos, que es otra pregunta', () => {
+    /*
+     * El suelo del 40 % mide **a quién se ha admitido**, no a quién se ha sembrado: un Autor
+     * admitido y todavía sin Citas ya cuenta como compromiso editorial tomado. Son dos censos
+     * distintos a propósito, y por eso este caso está escrito: para que quien toque uno vea que
+     * el otro no le sigue.
+     */
+    const conFantasma = [
+      ...autoresEquilibrados(4),
+      { slug: 'autor-fantasma', nombre: 'Fantasma', tradicion: 'peninsular' as const },
+    ];
+    const huecos = verHuecos(citas(20, 'tema-0', 4), temas(1), conFantasma);
+
+    expect(huecos.tradicion.total).toBe(5);
+  });
+
+  it('un Corpus sin Citas no declara ningún Autor alcanzado, aunque haya ficheros', () => {
+    expect(meta([], temas(1), autoresEquilibrados(6)).autores.alcanzado).toBe(0);
   });
 });

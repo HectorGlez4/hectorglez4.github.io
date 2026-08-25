@@ -3022,3 +3022,41 @@ listado o crear una de marca son las dos salidas, y las dos son decisión de Hé
 
 `npx astro check` 0 errores; `npx vitest run` **1943/1943** en 63 ficheros; `npm run build` 501
 páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+## 15.3 (35.ª sesión) — Un número que no cuadraba, y la incoherencia que había debajo
+
+**456 Citas, 501 páginas: sin cambios.** Auditadas las superficies de indexación, y el hallazgo
+salió de una resta.
+
+**Lo que estaba bien.** `robots.txt` responde 200, no lleva `Disallow` —con su motivo escrito:
+«lo que no debe indexarse lo dice cada página en su etiqueta robots, y para que un buscador la lea
+tiene que poder descargarla»— y declara el sitemap. El sitemap índice apunta a `sitemap-0.xml`, y
+sus **501 URL** se reparten en 456 Citas, 16 Colecciones, 16 Autores, 12 Temas y la portada. Nada
+que no deba estar.
+
+**El número que no cuadraba: 16 Páginas de Autor en el sitemap y 17 Autores en el Corpus.** No es
+fallo del sitemap —un Autor sin Citas no tiene página, y así debe ser— pero al ir a comprobarlo
+apareció lo otro.
+
+**`META_AUTORES` contaba ficheros, no presencia.** El censo salía de `corpus/autores/`, así que
+un Autor dado de alta y nunca sembrado contaba igual que uno con cuarenta Citas. Con ese criterio
+**la meta de 35 se alcanza creando dieciocho ficheros vacíos** y sin publicar una sola Cita.
+
+Y lo peor es que la respuesta llevaba escrita desde la primera sesión, en el comentario de
+`META_TEMAS_PUBLICADOS`: «Un Tema con cuatro Citas no es una página que exista para nadie, y
+contarlo aquí dejaría la meta alcanzable abriendo ficheros vacíos». El argumento vale igual para
+los Autores y **no lo apliqué**. Escribí la regla y la incumplí en la línea siguiente.
+
+Corregido: el tramo cuenta ahora los Autores **con al menos una Cita publicada**. El informe pasa
+de «Autores 17 de 35» a **«16 de 35 · faltan 19»**, que es la verdad.
+
+**Y los dos censos se quedan separados a propósito**, con una prueba que lo fija: el equilibrio de
+tradición sigue contando a los diecisiete, porque el suelo del 40 % mide **a quién se ha
+admitido** —un compromiso tomado en el alta— y no a quién se ha sembrado.
+
+**Un test viejo cayó, y por el motivo correcto:** su corpus de prueba repartía 25 Citas entre 35
+Autores, así que diez no publicaban ninguna. Con el censo arreglado, el tramo que manda deja de
+ser el volumen y pasa a ser el de Autores. Arreglado el reparto y explicado en el propio caso.
+
+`npx astro check` 0 errores; `npx vitest run` **1946/1946** en 63 ficheros; `npm run build` 501
+páginas.

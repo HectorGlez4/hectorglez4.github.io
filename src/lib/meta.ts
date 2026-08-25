@@ -187,7 +187,19 @@ export function verMeta(
   const estado = {
     citas: tramo(citas.length, META_CITAS_PUBLICADAS),
     temas: tramo(temas.length - huecos.temas.length, META_TEMAS_PUBLICADOS),
-    autores: tramo(huecos.tradicion.total, META_AUTORES),
+    /*
+     * Los Autores **que publican**, no los declarados, por el mismo motivo que los Temas: un
+     * fichero en `corpus/autores/` sin ninguna Cita detrás no es una página que exista para
+     * nadie, y contarlo dejaría la meta alcanzable creando ficheros vacíos. Lo destapó un número
+     * que no cuadraba —el sitemap traía 16 Páginas de Autor y el Corpus declaraba 17— y la
+     * respuesta estaba escrita desde el principio en el comentario de `META_TEMAS_PUBLICADOS`;
+     * simplemente no se había aplicado aquí.
+     *
+     * `huecos.tradicion.total` sigue contándolos a todos y está bien que así sea: el suelo del
+     * 40 % mide **a quién se ha admitido**, que es un compromiso tomado en el momento del alta,
+     * no a quién se ha sembrado. Son dos censos distintos y hay una prueba que lo fija.
+     */
+    autores: tramo(new Set(citas.map((c) => c.autor)).size, META_AUTORES),
     colecciones: tramo(colecciones.length - huecos.colecciones.length, META_COLECCIONES_PUBLICADAS),
     concentracion: concentracionDe(citas),
   };
