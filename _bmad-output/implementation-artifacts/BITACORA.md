@@ -4768,3 +4768,46 @@ El Autor más representado queda en **12,9 %**.
 
 **La meta no está alcanzada y no se emite promesa:** 886 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.6 (68.ª sesión) — Novecientas, y el techo cambia de dueño
+
+**886 → 900 Citas. 931 → 945 páginas.**
+
+### Una obra más, y su rendimiento medido
+
+Se recuperó la última obra en prosa sin recuperar de un Autor con margen: 36 KB, cotejo de Autor
+superado, **159 candidatas y tres publicables**. Rendimiento del 2 %, el mismo que la novela de la
+64.ª y por la misma razón de fondo, aunque el género sea otro: es un **tratado filosófico apócrifo**,
+prosa densa cuyas frases se apoyan unas en otras. «Este pensar», «a este precio», «ese momento»: casi
+todo empieza señalando hacia atrás.
+
+Queda dicho junto a las demás medidas de género, porque la conclusión práctica es clara: **el tamaño
+del documento no predice la cosecha**. 222 KB de prosa moral dieron decenas; 36 KB de filosofía dan
+tres; 121 KB de novela dieron cinco.
+
+Y la novela se declara agotada para sentencias: se cribaron sus 39 candidatas de «el tiempo» y
+ninguna se sostiene sola. No se volverá a ella.
+
+### El techo cambia de dueño
+
+Por primera vez desde que se abrió la v4, el Autor más representado **no es el que lo era**: el que
+llevaba 114 desde hace veinte sesiones ha sido pasado por otro, que llega a **116 de 900 — 12,9 %**.
+
+No hay nada que arreglar —el techo del 15 % son 135, y le quedan 19— pero conviene tenerlo escrito
+antes de que sorprenda: la cantera de esa obra es grande y las sesiones recientes han tirado mucho
+de ella. **La próxima siembra suya hay que contarla contra el techo antes de leer, no después.**
+
+### La siembra
+
+**14 Citas**: cinco en «la virtud», cuatro en «la palabra», dos en «la prudencia», y una en «la
+amistad», «la adversidad» y «el saber».
+
+Cae una del lote que era buena por una razón que merece constar: su cláusula final es un lugar común
+de época sobre la cobardía de las mujeres. Publicable como texto histórico, sí; puesta sola en una
+página de «la virtud», no. Queda en revisión.
+
+`npx astro check` 0 errores; `npx vitest run` **2065/2065**; `npm run build` **945 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 900 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

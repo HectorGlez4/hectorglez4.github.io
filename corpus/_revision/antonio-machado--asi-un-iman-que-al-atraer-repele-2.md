@@ -1,0 +1,13 @@
+---
+texto: "Así un imán que, al atraer, repele (¡oh claros ojos de mirar furtivo!), amor que asombra, aguija, halaga y duele, y más se ofrece cuanto más esquivo."
+autor: "antonio-machado"
+slug: "antonio-machado-asi-un-iman-que-al-atraer-repele-2"
+procedencia:
+  obra: "Abel Martín"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Abel_Mart%C3%ADn"
+---
