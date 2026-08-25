@@ -2710,3 +2710,7 @@ original. Barrido el resto del Corpus: **no hay ninguna otra Cita con sufijo num
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 499
 páginas y 434 cotejadas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32808358355 en verde): `/coleccion/cuatro-mujeres` y
+`/coleccion/consejos-para-gobernar` responden **200**, y la Cita retirada responde **404** — sale
+del sitio como debe, sin quedarse huérfana en el sitemap.
