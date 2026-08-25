@@ -2209,3 +2209,33 @@ páginas y 419 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 
 
 **Verificado en vivo** (25/08/2026, ejecución 32792912251 en verde): `sitemap-0.xml` declara
 **478 URL**, las mismas del build, y las Citas nuevas responden 200.
+
+## 15.3 (11.ª sesión) — Once más, y el Corpus cruza las 450
+
+**441 → 452 Citas**, el sitio de **478 a 489 páginas**, el Autor más representado del 25,9 % al
+**25,2 %**, y el objetivo declarado de 319 a **308**. El build cuenta **430 Citas cotejadas**.
+
+Cuarto lote, aplicando la lección de la sesión anterior: ir a los pasajes donde el autor
+sentencia y recogerlos enteros. Esta vez, tres yacimientos distintos:
+
+- **La segunda mitad de los consejos a Sancho**, la que va sobre el cuerpo y el trato: «Anda
+  despacio; habla con reposo, pero no de manera que parezca que te escuchas a ti mismo, que toda
+  afectación es mala», «No comas ajos ni cebollas, porque no saquen por el olor tu villanería»,
+  «Sea moderado tu sueño, que el que no madruga con el sol, no goza del día».
+- **El discurso de Marcela**, que es la defensa de la libertad de una mujer a no ser amada por ser
+  hermosa: «Yo nací libre, y para poder vivir libre escogí la soledad de los campos», «Los árboles
+  destas montañas son mi compañía, las claras aguas destos arroyos mis espejos».
+- **El discurso de la poesía** del Caballero del Verde Gabán: «La poesía, señor hidalgo, a mi
+  parecer, es como una doncella tierna y de poca edad, y en todo estremo hermosa», «es hecha de una
+  alquimia de tal virtud, que quien la sabe tratar la volverá en oro purísimo de inestimable
+  precio».
+
+Más «La historia es como cosa sagrada; porque ha de ser verdadera, y donde está la verdad está
+Dios, en cuanto a verdad» y «la ingratitud es hija de la soberbia».
+
+**Cuatro sesiones sobre el mismo libro: 56 Citas, 56 publicadas, cero rechazos.** El método se
+sostiene y el rendimiento no baja, porque no se busca en el libro entero sino en los pasajes que
+ya se sabe que sentencian.
+
+`npx astro check` 0 errores; `npx vitest run` **1910/1910** en 62 ficheros; `npm run build` 489
+páginas y 430 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
