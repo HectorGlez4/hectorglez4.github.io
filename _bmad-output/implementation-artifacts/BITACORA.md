@@ -4039,3 +4039,85 @@ nada.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## Pruebas (56.ª sesión) — De 30 fallos a 2, y el que queda no es una prueba caduca
+
+**761 Citas y 806 páginas: las mismas.** Ni una línea de `src/` cambiada salvo lo indispensable:
+esta sesión va entera sobre los 30 fallos de Playwright que la anterior destapó.
+
+    antes:  30 failed · 14 skipped · 390 passed
+    ahora:   2 failed · 20 skipped · 412 passed
+
+**Veintiocho arreglados, y los seis saltos nuevos son parte del arreglo**: son pruebas que ahora
+**dicen que la condición no existe** en vez de fingir que la comprobaron.
+
+### La causa era una sola, repetida
+
+Las quince pruebas (×2 proyectos) fijaban **a mano un dato del Corpus** que dejó de ser cierto al
+crecer de 231 Citas a 761:
+
+| Lo que estaba fijado | Lo que dice hoy el Corpus |
+|---|---|
+| `'/tema/la-amistad'` como Tema **bajo umbral** | 44 Citas: publicado, con página |
+| `'/tema/la-adversidad'` sin página | 65 Citas: publicado |
+| «Don Quijote de la Mancha, 1615» | «Don Quijote», **sin año** |
+| «…dieron los cielos**.**» | «…dieron los cielos**;**» |
+| «menos de 10 resultados» para «sabiduría» | 13, sobre 806 páginas en vez de 54 |
+| «xylofonorquesta inexistente» como consulta sin resultados | devuelve 2 |
+
+**El arreglo no es cambiar un dato fijado por otro** —sería el mismo fallo esperando a la siguiente
+siembra— sino preguntarle al Corpus. Se añade `tests/e2e/ayuda/corpus.ts` con cuatro funciones
+—`temaBajoUmbral`, `procedenciaDe`, `citaConProcedenciaCompleta`, `textoDe`— y cada prueba usa la
+que necesita. Cuando la condición no existe, la prueba **se salta diciéndolo**.
+
+Y donde el listón era una calibración —«menos de 10 resultados»— se deriva del tamaño del sitio:
+lo que la prueba quiere decir es «la marca de la cabecera no convierte cada página en resultado»,
+y trece sobre 806 no es cada página.
+
+### Dos que eran defectos de la prueba, no fijaciones
+
+· **La microcopia contaba el texto ajeno como propio.** La regla es que *el texto del sitio* no
+  lleva exclamaciones; la prueba descontaba la Cita de la página pero **no** las del listado «Más
+  de este Autor», y empezó a fallar el día que entró ahí una Cita con exclamación. Una Cita no es
+  texto del sitio, y NFR-12 prohíbe tocarla para que cumpla una regla de microcopia.
+
+· **Una comparación demasiado ancha.** Dos pruebas comparaban el contenido **entero** de
+  `dist/tarjeta/` con las dos Tarjetas del corpus de prueba; al aparecer `portada.png` y los
+  subdirectorios de listado, se pusieron rojas. Su intención es «cada Cita tiene la suya».
+
+### Y una sospecha propia, medida y descartada
+
+Al ver que el estado «sin resultados» no aparecía ni con una consulta inventada, escribí que podía
+ser **una regresión del buscador**: que la salida de FR-8 fuera inalcanzable. Antes de anotarlo lo
+comprobé en vivo contra el dominio, y era falso:
+
+    wkjhgfdsa   → 0 resultados · salida VISIBLE
+    zzzzzzzz    → 0 resultados · salida VISIBLE
+    ñññmmmkkk   → 2 resultados
+    qqzzxvwk    → 1 resultado (casa con una Página de Autor)
+
+**El estado vacío funciona.** Pagefind casa por fragmentos, así que una consulta sin resultados
+tiene que serlo por construcción — incluida la que yo mismo elegí primero, que también casaba.
+
+## El que queda: NFR-5 contra UX-DR18, y no lo resuelvo yo
+
+Las 2 que siguen en rojo son la misma, y **no es una prueba caduca: es un defecto real**.
+
+**Doce Páginas de Cita no se alcanzan en tres saltos desde la portada.** Son la cola de los dos
+Autores con más Citas. La causa está medida:
+
+· El paginador enlaza **solo a la anterior y la siguiente** — así lo declara **UX-DR18**.
+· Con 50 Citas por página, un Autor de 113 tiene tres páginas.
+· portada → Autor (1) → página 2 (2) → página 3 (3) → **la Cita (4)**.
+
+Las dos reglas del propio producto se han vuelto incompatibles al crecer el Corpus: **NFR-5** pide
+tres saltos y **UX-DR18** prohíbe los saltos numerados. Arreglarlo pide doblar una de las dos —
+añadir enlaces numerados al paginador, o subir `CITAS_POR_PAGINA`— y ninguna de las dos es un
+ajuste técnico: son decisiones declaradas del producto, y la segunda además es mover un umbral,
+que la regla dura prohíbe hacer para que algo pase.
+
+Queda en `deferred-work.md` con la aritmética. **Lo que hace falta es una línea**: si el paginador
+puede enseñar los números de página, o si las páginas de listado admiten más Citas.
+
+`npx astro check` 0 errores; `npx vitest run` **2008/2008** en 64 ficheros; `npm run build` **806
+páginas**; `npx playwright test` **2 fallos**, los dos de NFR-5.

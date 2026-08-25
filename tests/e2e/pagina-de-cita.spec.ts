@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
+import { citaConProcedenciaCompleta, procedenciaDe } from './ayuda/corpus.ts';
 
 /**
  * Historia 2.1 — Página de Cita.
@@ -48,9 +49,18 @@ test.describe('Historia 2.1 — la Cita y su atribución', () => {
   });
 
   test('se muestran la obra y el año cuando la Cita tiene procedencia', async ({ page }) => {
-    await page.goto(MEDIA);
-    await expect(page.locator('.procedencia')).toContainText('Don Quijote de la Mancha');
-    await expect(page.locator('.procedencia')).toContainText('1615');
+    /*
+     * La Cita se busca por su Procedencia y no se fija por su nombre. La que estaba fijada aquí
+     * tiene hoy obra y **no** año —su documento de Gutenberg no lo declara— así que había
+     * dejado de servir para comprobar que se enseñan los dos, y la prueba fallaba pidiendo un
+     * 1615 que ninguna Fuente dice.
+     */
+    const completa = citaConProcedenciaCompleta();
+    test.skip(completa === undefined, 'Ninguna Cita del Corpus declara obra y año a la vez.');
+
+    await page.goto(`/cita/${completa!.slug}`);
+    await expect(page.locator('.procedencia')).toContainText(completa!.obra);
+    await expect(page.locator('.procedencia')).toContainText(String(completa!.año));
   });
 
   test('la ausencia de obra se declara y el bloque no se omite', async ({ page }) => {
@@ -176,7 +186,8 @@ test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
     const html = await (await request.get(MEDIA)).text();
     expect(html).toContain('La libertad, Sancho');
     expect(html).toContain('Miguel de Cervantes');
-    expect(html).toContain('Don Quijote de la Mancha');
+    // La obra se lee del Corpus: la declara la Fuente y cambió al resembrar desde Gutenberg.
+    expect(html).toContain(procedenciaDe(MEDIA.replace('/cita/', '')).obra!);
   });
 });
 
@@ -278,7 +289,16 @@ test.describe('Historia 2.1 — microcopia', () => {
       // arrastraría el código fuente de la isla —donde un `if (!boton)` cuenta como
       // exclamación.
       const copia = document.body.cloneNode(true) as HTMLElement;
-      for (const fuera of copia.querySelectorAll('blockquote, script, [hidden]')) fuera.remove();
+      /*
+       * `.cita` va con `blockquote`: el texto ajeno no solo está en la Cita de la página, sino
+       * también en las tarjetas del listado «Más de este Autor». Faltaba, y la prueba empezó a
+       * fallar el día que una Cita con exclamación —«¡Ah, cuando yo era niño…!»— entró en ese
+       * listado. La regla es sobre el texto **propio** del sitio; una Cita no lo es, y NFR-12
+       * prohíbe tocarla para que cumpla una regla de microcopia.
+       */
+      for (const fuera of copia.querySelectorAll('blockquote, .cita, .hermanas, script, [hidden]')) {
+        fuera.remove();
+      }
       return copia.textContent ?? '';
     });
 

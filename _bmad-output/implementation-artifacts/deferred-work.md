@@ -327,3 +327,34 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
 
     Lo que hace falta de Héctor es una línea: **¿retirada = candidata con nota, o estado propio?**
     Con eso el arreglo se escribe con prueba en rojo primero.
+
+- source_spec: NFR-5 contra UX-DR18 — medido en la 56.ª sesión del bucle v4
+  summary: Doce Páginas de Cita no se alcanzan en tres saltos desde la portada, y arreglarlo obliga a doblar una de dos reglas declaradas.
+  evidence: |-
+    `tests/e2e/seo.spec.ts` lo dice desde hace sesiones y yo no lo veía: **doce Páginas de Cita
+    quedan a más de `MAX_SALTOS_DESDE_LA_PORTADA` (3)**. Son la cola de los dos Autores con más
+    Citas. La aritmética, medida:
+
+    · El paginador enlaza **solo a la anterior y la siguiente**, y así lo declara **UX-DR18**
+      —«Anterior y Siguiente numeradas»— en la cabecera de `src/components/Paginacion.astro`.
+    · `CITAS_POR_PAGINA` son 50, así que un Autor con 113 Citas tiene **tres** páginas.
+    · portada → `/autor/{slug}` (1) → `/autor/{slug}/2` (2) → `/autor/{slug}/3` (3) →
+      **la Cita (4)**. Fuera del límite.
+
+    No es una prueba caduca ni un fallo del código: **las dos reglas del producto se han vuelto
+    incompatibles al crecer el Corpus**. Con 456 Citas ningún listado pasaba de dos páginas y las
+    dos convivían; con 761 ya no.
+
+    **Las dos salidas, y por qué ninguna la toma el bucle:**
+
+    · **Enlaces numerados en el paginador** («1 2 3»). Deja la tercera página a 2 saltos y sus
+      Citas a 3. Arregla NFR-5 sin tocar ningún umbral, pero **contradice UX-DR18**, que es una
+      decisión de diseño escrita y no un detalle de implementación.
+    · **Subir `CITAS_POR_PAGINA`** hasta que ningún listado pase de dos páginas —hoy harían falta
+      ~120—. No toca UX-DR18, pero es **mover un umbral para que algo pase**, que es exactamente
+      lo que la regla dura del bucle prohíbe, y además alarga las páginas de listado, que es una
+      decisión de lectura.
+
+    Lo que hace falta de Héctor es una línea: **¿el paginador puede enseñar los números de página,
+    o las páginas de listado admiten más Citas?** Con cualquiera de las dos, el arreglo es de una
+    sesión y con prueba en rojo primero — la prueba ya existe y ya está en rojo.

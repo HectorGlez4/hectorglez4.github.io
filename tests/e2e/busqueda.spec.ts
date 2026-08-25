@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
+import { temaBajoUmbral } from './ayuda/corpus.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
 
@@ -96,18 +97,34 @@ test.describe('Historia 3.1 — encontrar', () => {
   });
 
   test('el índice no contiene nada no publicado', async ({ page }) => {
-    // Un Tema por debajo del umbral no tiene página, así que no hay nada que indexar.
-    await buscar(page, 'amistad');
+    // Un Tema por debajo del umbral no tiene página, así que no hay nada que indexar. Cuál es
+    // se deriva del Corpus: fijarlo a mano caducó en cuanto la siembra lo cruzó.
+    const bajoUmbral = temaBajoUmbral();
+    test.skip(
+      bajoUmbral === undefined,
+      'Hoy todos los Temas declarados se publican: no hay ninguno cuya ausencia comprobar.',
+    );
+
+    await buscar(page, bajoUmbral!.replace(/^(el|la|los|las)-/, ''));
     for (const r of await resultados(page)) {
-      expect(r.href).not.toContain('/tema/la-amistad');
+      expect(r.href).not.toContain(`/tema/${bajoUmbral}`);
     }
   });
 
-  test('la marca del sitio no convierte cada página en un resultado', async ({ page }) => {
-    // Sin acotar el índice al contenido principal, «sabiduría» devolvía las 54 páginas
-    // porque la marca está en la cabecera de todas.
+  test('la marca del sitio no convierte cada página en un resultado', async ({ page, request }) => {
+    /*
+     * Sin acotar el índice al contenido principal, «sabiduría» devolvía **todas** las páginas
+     * porque la marca está en la cabecera de cada una. Eso es lo que se comprueba.
+     *
+     * El listón estaba calibrado a mano —«menos de 10»— sobre un sitio de 54 páginas. Con 806
+     * hay Citas que hablan de la sabiduría de verdad, y trece resultados no son «todas»: son
+     * los que la palabra merece. Se compara con el tamaño del sitio en vez de con un número.
+     */
     await buscar(page, 'sabiduria');
-    expect((await resultados(page)).length).toBeLessThan(10);
+    const paginas = ((await (await request.get('/sitemap-0.xml')).text()).match(/<loc>/g) ?? [])
+      .length;
+    expect(paginas).toBeGreaterThan(100);
+    expect((await resultados(page)).length).toBeLessThan(paginas / 10);
   });
 });
 
@@ -139,7 +156,15 @@ test.describe('Historia 3.1 — la búsqueda no se carga hasta que hace falta', 
 });
 
 test.describe('Historia 3.2 — resultado vacío con salida', () => {
-  const SIN_RESULTADOS = 'xylofonorquesta inexistente';
+  /*
+   * Una cadena sin raíz española posible. La que había —«xylofonorquesta inexistente»— dejó de
+   * dar cero al crecer el Corpus. Comprobado en vivo contra el dominio: «xylofonorquesta
+   * inexistente» devuelve 2 resultados y «ñññmmmkkk» otros 2, mientras que «zzzzzzzz» y
+   * «wkjhgfdsa» devuelven 0 y muestran la salida. Pagefind casa por fragmentos, así que una
+   * consulta sin resultados tiene que serlo por construcción y no por que el Corpus todavía
+   * no tenga esa palabra. El estado vacío funciona; lo caducado era la consulta.
+   */
+  const SIN_RESULTADOS = 'zzzzzzzz';
 
   test('se ofrecen Temas y Autores destacados', async ({ page }) => {
     await buscar(page, SIN_RESULTADOS);

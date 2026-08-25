@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
 
@@ -27,8 +28,13 @@ test.describe('Historia 2.7 — sitemap', () => {
 
   test('no contiene nada no publicado', async ({ request }) => {
     const rutas = await rutasDelSitemap(request);
-    // Un Tema bajo umbral y las páginas 2+ de un listado, que son `noindex`.
-    expect(rutas).not.toContain('/tema/la-amistad');
+    /*
+     * Dos cosas que no deben estar. La segunda —las páginas 2+ de un listado, que son
+     * `noindex`— vale siempre. La primera necesita que exista un Tema bajo umbral, y hoy no
+     * existe: se deriva en vez de fijarse, y si no hay ninguno, no se afirma nada sobre él.
+     */
+    const bajoUmbral = temaBajoUmbral();
+    if (bajoUmbral !== undefined) expect(rutas).not.toContain(`/tema/${bajoUmbral}`);
     expect(rutas.filter((r) => /\/(autor|tema)\/[^/]+\/\d+$/.test(r))).toEqual([]);
   });
 
@@ -75,7 +81,10 @@ test.describe('Historia 2.7 — datos estructurados', () => {
     expect(datos.text).toContain('La libertad, Sancho');
     expect(datos.creator['@type']).toBe('Person');
     expect(datos.creator.name).toBe('Miguel de Cervantes');
-    expect(datos.isPartOf.name).toBe('Don Quijote de la Mancha');
+    // Del Corpus y no fijado: la obra la declara la Fuente, y este título cambió al resembrar.
+    expect(datos.isPartOf.name).toBe(
+      procedenciaDe('miguel-de-cervantes-la-libertad-sancho-es-uno-de-los').obra,
+    );
     expect(datos.inLanguage).toBe('es');
   });
 

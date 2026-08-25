@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { temaBajoUmbral } from './ayuda/corpus.ts';
 
 /** Historia 2.6 — rutas de salida desde cada Cita. */
 
@@ -37,7 +38,13 @@ test.describe('Historia 2.6 — hacia dónde seguir', () => {
     await page.goto(AUTOR_DE_UNA);
     const hrefs = await page.locator('.chip').evaluateAll((ns) => ns.map((n) => n.getAttribute('href')!));
 
-    expect(hrefs).not.toContain('/tema/la-adversidad');
+    /*
+     * El Tema sin página se deriva: estaba fijado como «La adversidad», que hoy tiene 65 Citas
+     * y su página. El bucle de abajo cubre la intención general —ningún chip lleva a un 404—
+     * y esta línea sigue siendo la comprobación concreta cuando la condición existe.
+     */
+    const bajoUmbral = temaBajoUmbral();
+    if (bajoUmbral !== undefined) expect(hrefs).not.toContain(`/tema/${bajoUmbral}`);
     for (const href of hrefs) {
       expect((await request.get(href, { maxRedirects: 0 })).status(), href).toBe(200);
     }
