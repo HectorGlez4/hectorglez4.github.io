@@ -3,6 +3,7 @@
  *
  *   npx tsx tools/tema.ts crear "El tiempo"
  *   npx tsx tools/tema.ts asignar el-tiempo <slug-cita> [<slug-cita>...]
+ *   npx tsx tools/tema.ts quitar  el-tiempo <slug-cita> [<slug-cita>...]
  *   npx tsx tools/tema.ts eliminar el-tiempo
  *   npx tsx tools/tema.ts listar
  *
@@ -10,7 +11,7 @@
  * herramienta y no un campo libre en el alta.
  */
 
-import { asignarTema, crearTema, eliminarTema } from './lib/gestion.ts';
+import { asignarTema, crearTema, eliminarTema, quitarTema } from './lib/gestion.ts';
 import { leerCitas, leerTemas, rutasDelCorpus } from './lib/corpus.ts';
 import { raizDeCorpusDe, terminar } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
@@ -43,6 +44,21 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await asignarTema(rutas, slugTema, slugsDeCitas));
+    break;
+  }
+
+  case 'quitar': {
+    /*
+     * La simétrica de `asignar`, y hacía falta por lo mismo: sin ella, un Tema mal puesto solo
+     * se deshacía editando el frontmatter a mano. `eliminar` no vale — borra el Tema entero.
+     */
+    const slugTema = argumentos[1];
+    const slugsDeCitas = argumentos.slice(2).filter((a) => !a.startsWith('--'));
+    if (!slugTema || slugTema.startsWith('--')) {
+      process.stderr.write('Indique el slug del Tema y las Citas a las que quitárselo.\n');
+      process.exit(2);
+    }
+    terminar(await quitarTema(rutas, slugTema, slugsDeCitas));
     break;
   }
 
@@ -80,6 +96,7 @@ switch (orden) {
         'Uso:',
         '  npx tsx tools/tema.ts crear "Nombre del Tema" [--corpus corpus]',
         '  npx tsx tools/tema.ts asignar <slug-tema> <slug-cita> [<slug-cita>...]',
+        '  npx tsx tools/tema.ts quitar  <slug-tema> <slug-cita> [<slug-cita>...]',
         '  npx tsx tools/tema.ts eliminar <slug>',
         '  npx tsx tools/tema.ts listar',
         '',

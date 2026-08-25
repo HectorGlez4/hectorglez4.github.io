@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import {
   asignarTema,
+  quitarTema,
   crearAutor,
   crearTema,
   editarAutor,
@@ -426,4 +427,75 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       expect(cita.temas).not.toContain('la-verdad');
     }
   });
+
+  describe('FR-14 — quitar un Tema de una Cita, que es lo que faltaba', () => {
+    /*
+     * `coleccion` tiene `asignar` y `quitar`; `tema` solo tenía `asignar`. La asimetría no era
+     * cosmética: un Tema mal puesto solo se podía deshacer **editando el frontmatter de la Cita
+     * a mano**, que es exactamente lo que estas órdenes existen para evitar. Y `tema eliminar`
+     * no sirve —borra el Tema entero, no la marca de una Cita—.
+     *
+     * Se escribe con las mismas guardas que su hermana, y por los mismos motivos:
+     *
+     * · El lote se rechaza entero si alguna Cita no está publicada, para no dejar unas
+     *   desmarcadas y otras no.
+     * · Es idempotente: quitar lo que no está no es un fallo, se cuenta y se dice.
+     * · No toca el texto (NFR-12), y por eso hay una prueba que solo mira el texto.
+     *
+     * Lo que **no** hace, a propósito: no borra el Tema aunque se quede sin Citas. Que un Tema
+     * baje del umbral y deje de publicarse es cosa de `publicado.ts` (AD-11), no de esta orden.
+     */
+    async function corpusConDosCitasEnDosTemas() {
+      const { rutas, slugs } = await corpusConDosCitas();
+      await asignarTema(rutas, 'la-verdad', slugs);
+      return { rutas, slugs };
+    }
+
+    it('quita el Tema y conserva los demás que la Cita tenía', async () => {
+      const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
+      const resultado = await quitarTema(rutas, 'la-verdad', slugs);
+
+      expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+      for (const cita of await leerCitas(rutas.citas)) {
+        expect(cita.temas).not.toContain('la-verdad');
+        expect(cita.temas).toContain('el-tiempo');
+      }
+    });
+
+    it('no toca el texto de la Cita, que es lo que NFR-12 protege', async () => {
+      const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
+      const antes = (await leerCitas(rutas.citas)).map((c) => c.texto).sort();
+
+      await quitarTema(rutas, 'la-verdad', slugs);
+
+      expect((await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
+    });
+
+    it('quitar dos veces no es un fallo: la segunda dice que ya no lo tenían', async () => {
+      const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
+      await quitarTema(rutas, 'la-verdad', slugs);
+      const segunda = await quitarTema(rutas, 'la-verdad', slugs);
+
+      expect(segunda.ok, segunda.ok ? '' : segunda.motivos.join(' ')).toBe(true);
+      expect(segunda.ok && segunda.mensaje).toMatch(/no lo ten/i);
+    });
+
+    it('un Tema que no existe se rechaza antes de tocar nada', async () => {
+      const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
+      const resultado = await quitarTema(rutas, 'la-muerte', slugs);
+
+      expect(resultado.ok).toBe(false);
+      // Y las Citas siguen con los suyos: el rechazo es antes de escribir.
+      for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+    });
+
+    it('si una Cita del lote no está publicada, no se desmarca ninguna', async () => {
+      const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
+      const resultado = await quitarTema(rutas, 'la-verdad', [...slugs, 'seneca-no-existe']);
+
+      expect(resultado.ok).toBe(false);
+      for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+    });
+  });
+
 });

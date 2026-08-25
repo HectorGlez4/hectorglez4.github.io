@@ -317,3 +317,84 @@ export async function asignarTema(
         : '.'),
   };
 }
+
+/**
+ * Quita un Tema de Citas ya publicadas — FR-14.
+ *
+ * `coleccion` tenía `asignar` y `quitar`; `tema` solo tenía `asignar`. La asimetría no era
+ * cosmética: un Tema mal puesto solo se deshacía **editando el frontmatter de la Cita a mano**,
+ * que es justo lo que estas órdenes existen para evitar. Y `tema eliminar` no vale: borra el
+ * Tema entero, no la marca de una Cita.
+ *
+ * Mismas guardas que su hermana, y por los mismos motivos: el lote se rechaza entero si alguna
+ * Cita no está publicada —para no dejar unas desmarcadas y otras no—, es idempotente, y no toca
+ * el texto (NFR-12).
+ *
+ * Lo que **no** hace, a propósito: no borra el Tema aunque se quede sin ninguna Cita. Que un
+ * Tema baje del umbral y deje de publicarse lo decide `publicado.ts`, que es su único dueño
+ * (AD-11), y no una orden de marcado.
+ */
+export async function quitarTema(
+  rutas: Rutas,
+  slugTema: string,
+  slugsDeCitas: string[],
+): Promise<Resultado> {
+  const temas = await leerTemas(rutas);
+  if (!temas.some((t) => t.slug === slugTema)) {
+    return {
+      ok: false,
+      motivos: [
+        `El Tema «${slugTema}» no existe, así que no hay nada que quitar. Los que hay se ven ` +
+          'con: npx tsx tools/tema.ts listar',
+      ],
+    };
+  }
+
+  if (slugsDeCitas.length === 0) {
+    return { ok: false, motivos: ['Indique al menos una Cita a la que quitar el Tema.'] };
+  }
+
+  const publicadas = await leerCitas(rutas.citas);
+  const porSlug = new Map(publicadas.map((c) => [c.slug, c]));
+  const noEstan = slugsDeCitas.filter((s) => !porSlug.has(s));
+  if (noEstan.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `No están publicadas: ${noEstan.join(', ')}. El lote se rechaza entero para no dejar ` +
+          'unas Citas desmarcadas y otras no.',
+      ],
+    };
+  }
+
+  let desmarcadas = 0;
+  let noLoTenian = 0;
+  for (const slug of new Set(slugsDeCitas)) {
+    const cita = porSlug.get(slug)!;
+    const bruto = await readFile(cita.ruta, 'utf8');
+    const datos = separarFrontmatter(bruto);
+    if (!datos) return { ok: false, motivos: [`El fichero ${cita.ruta} no tiene frontmatter.`] };
+
+    const actuales = Array.isArray(datos.temas) ? (datos.temas as string[]) : [];
+    if (!actuales.includes(slugTema)) {
+      noLoTenian += 1;
+      continue;
+    }
+    datos.temas = actuales.filter((t) => t !== slugTema);
+    await escribirCita(rutas.citas, basename(cita.ruta, '.md'), datos);
+    desmarcadas += 1;
+  }
+
+  const citas = (n: number) => `${n} ${n === 1 ? 'Cita' : 'Citas'}`;
+  return {
+    ok: true,
+    // Como su hermana: escribe tantos ficheros como Citas se desmarquen, así que lo único
+    // cierto que cabe en `ruta` es el directorio. El detalle va en el mensaje.
+    ruta: rutas.citas,
+    mensaje:
+      `Tema «${slugTema}»: ${citas(desmarcadas)} desmarcadas` +
+      (noLoTenian > 0
+        ? `, ${citas(noLoTenian)} no lo ${noLoTenian === 1 ? 'tenía' : 'tenían'}.`
+        : '.'),
+  };
+}

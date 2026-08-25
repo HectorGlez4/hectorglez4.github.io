@@ -3874,3 +3874,47 @@ la lee entera.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35. El tramo declarado sigue siendo el que no se delega.
+
+## 15.5 (53.ª sesión) — `tema quitar`, la orden que faltaba desde que existe `tema asignar`
+
+**761 Citas y 806 páginas: las mismas.** Lo que cambia es una asimetría que llevaba anotada en
+`deferred-work.md` desde la 15.5 y que **no dependía de Héctor**: `coleccion` tenía `asignar` y
+`quitar`; `tema` solo tenía `asignar`.
+
+**No era cosmética.** Un Tema mal puesto solo se deshacía **editando el frontmatter de la Cita a
+mano** — que es exactamente lo que estas órdenes existen para evitar, y el fallo que dio origen a
+`tema asignar` en primer lugar. Y `tema eliminar` no servía: borra el Tema entero, no la marca de
+una Cita.
+
+**Escrita con cinco pruebas en rojo primero**, y con las mismas guardas que su hermana porque las
+razones son las mismas:
+
+· El lote se rechaza **entero** si alguna Cita no está publicada, para no dejar unas desmarcadas y
+  otras no. Hay una prueba que lo comprueba mirando que **ninguna** quedó tocada.
+· Es idempotente: quitar lo que no está no es un fallo, se cuenta y se dice.
+· No toca el texto (NFR-12), y por eso hay una prueba que solo mira el texto.
+
+**Y una cosa que a propósito no hace:** no borra el Tema aunque se quede sin Citas. Que un Tema
+baje del umbral y deje de publicarse lo decide `publicado.ts`, que es su único dueño (AD-11), y no
+una orden de marcado.
+
+### La verificación que vale es la ida y vuelta
+
+Además de las pruebas, se probó sobre el Corpus de verdad: se asignó un Tema a una Cita, se
+comprobó que `git` veía el fichero modificado, se quitó, y **`git status` volvió a quedar vacío**.
+Byte a byte idéntico. Una orden que deshace tiene que dejar las cosas como estaban, y eso no lo
+demuestra una prueba con corpus de mentira tan bien como el propio Corpus.
+
+También en vivo: quitar dos veces dice «0 Citas desmarcadas, 1 Cita no lo tenía», y un Tema
+inexistente se rechaza mandando a `tema listar` en vez de fallar a secas.
+
+**Un aviso nuevo, explicado:** `astro check` pasa de 27 a 28 avisos. El nuevo es
+`Unreachable code detected` en el `break` que sigue a `terminar()`, que nunca retorna — los otros
+tres `case` del fichero ya lo producían. Mi caso sigue el patrón de sus tres hermanos; quitarle el
+`break` lo haría distinto de ellos sin ganar nada.
+
+`npx astro check` 0 errores; `npx vitest run` **1987/1987** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.
