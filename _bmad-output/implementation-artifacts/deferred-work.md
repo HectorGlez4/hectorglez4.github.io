@@ -355,6 +355,14 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
       lo que la regla dura del bucle prohíbe, y además alarga las páginas de listado, que es una
       decisión de lectura.
 
+    **Acotado el 25/08 (57.ª sesión): de doce Citas inalcanzables quedan cuatro.** Seis entraron
+    en Colecciones cuyo criterio cumplen —la portada enlaza las dieciséis, así que un miembro está
+    a dos saltos— y eso no dobla ninguna regla. Las cuatro que quedan no encajan en ningún
+    criterio, y forzarlas sería la misma falta que inventar una Colección de relleno.
+
+    La causa de fondo queda medida: los listados ordenan por slug, así que **la cola alfabética
+    cae siempre en la última página**. Volverá a pasar cada vez que el Corpus crezca.
+
     Lo que hace falta de Héctor es una línea: **¿el paginador puede enseñar los números de página,
     o las páginas de listado admiten más Citas?** Con cualquiera de las dos, el arreglo es de una
     sesión y con prueba en rojo primero — la prueba ya existe y ya está en rojo.

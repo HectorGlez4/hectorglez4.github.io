@@ -4121,3 +4121,65 @@ puede enseñar los números de página, o si las páginas de listado admiten má
 
 `npx astro check` 0 errores; `npx vitest run` **2008/2008** en 64 ficheros; `npm run build` **806
 páginas**; `npx playwright test` **2 fallos**, los dos de NFR-5.
+
+## NFR-5 (57.ª sesión) — De doce Citas inalcanzables a cuatro, sin doblar ninguna regla
+
+**761 Citas y 806 páginas: las mismas.** Seis Citas más entran en Colecciones que les
+corresponden, y con eso **doce Páginas inalcanzables pasan a cuatro**.
+
+### Primero, la salida que ayer no vi
+
+Ayer cerré diciendo que el conflicto NFR-5 / UX-DR18 era decisión de Héctor. Hoy, antes de
+repetirlo, leí **UX-DR18 en su fuente** y no en el comentario del componente: «Paginación —
+Anterior/Siguiente numerada para listados de más de 50». Especifica el patrón, así que sí,
+añadirle saltos numerados va más allá de lo declarado.
+
+**Pero la reachability no depende solo del paginador.** Una Cita se alcanza por cualquier camino, y
+la portada enlaza **las dieciséis Colecciones**: portada → Colección (1) → Cita (2). Bien dentro
+del límite.
+
+Así que la pregunta buena no era «¿qué regla doblo?» sino **«¿por qué esas Citas no están en
+ninguna Colección?»**. Medido:
+
+    todas en la página 3 de su Autor Y de su Tema a la vez
+    ninguna pertenece a ninguna Colección
+    sus slugs empiezan por «s», «t», «y»
+
+Los listados ordenan por slug, así que **la cola alfabética cae siempre en la tercera página**. No
+era un fallo del paginador: era una zona del Corpus que la curación no había tocado.
+
+### Seis entran por su propio mérito, y cuatro no entran
+
+Se leyeron las diez y se buscó criterio, no hueco:
+
+| Cita | Colección | Por qué |
+|---|---|---|
+| «Téngase la suficiente cantidad de libros, sin que ninguno sirva para sola ostentación» | Elogio de lo escaso | lo superfluo estorba |
+| «Todos aquellos que se te allegan te apartan de ti» | Los escollos del trato | cuándo lo cuerdo es retirarse |
+| «Teméis como mortales todas las cosas, y como inmortales las deseáis» | La vida, si sabes usarla | la prisa por vivir |
+| «Lo primero que cada uno ha de hacer es tantear su capacidad» | Cada uno es hijo de sus obras | el que no se conoce |
+| «Lo más de mi labor ha sido siempre inquietar a mis prójimos» | Cada uno es hijo de sus obras | obrar como quien se es |
+| «Yo he buscado siempre agitar, y a lo sumo sugerir, más que instruir» | Cada uno es hijo de sus obras | ídem |
+
+**Las otras cuatro se quedan fuera y siguen inalcanzables.** No encajan en el criterio de ninguna
+Colección, y meterlas a la fuerza para que una prueba pase es la misma falta que inventar una
+Colección de relleno: la regla dice que una Colección es un criterio, y un criterio que admite
+cualquier cosa no es un criterio.
+
+    «Y cuando en una región anida la peste, de nada sirve acordonarse contra ella…»
+    «Y no hay pueblo que conserve su personalidad aislándose.»
+    «Súfranse todas las cosas con suavidad de ánimo…»
+    «Yo no llamo invulnerable a lo que se puede herir, sino a lo que no se puede ofender.»
+
+### Lo que queda en manos de Héctor, ahora más acotado
+
+Para esas cuatro sigue haciendo falta la decisión de `deferred-work.md` —números de página en el
+paginador, o más Citas por página—. Pero el problema es hoy **un tercio del de ayer**, y se sabe
+por qué: cuando el Corpus siga creciendo, la cola alfabética volverá a caer fuera, y la curación
+la alcanzará antes si se la mira.
+
+`npx astro check` 0 errores; `npx vitest run` **2008/2008** en 64 ficheros; `npm run build` **806
+páginas**; `npx playwright test` **2 fallos** —la misma prueba en sus dos proyectos—, 412 pasadas.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.
