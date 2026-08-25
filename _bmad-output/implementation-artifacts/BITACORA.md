@@ -2777,3 +2777,36 @@ páginas**; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32810201041 en verde): `/coleccion/refranes-de-sancho`
 responde 200 y `sitemap-0.xml` declara **500 URL**, las mismas del build.
+
+## 15.2 (28.ª sesión) — Una Colección creada y tres descartadas por la misma regla
+
+**456 Citas, 15 → 16 Colecciones**, el sitio de 500 a **501 páginas**. Y lo que importa de esta
+sesión son las **tres que no se crearon**, porque la regla de distinción funcionó contra mí tres
+veces seguidas.
+
+**«El yo frente a la muchedumbre», con 17 Citas.** Criterio: lo que la multitud te quita sin que
+lo notes. Rodó lo dice de cuatro maneras —«Toda sociedad a que permaneces vinculado te roba una
+porción de tu ser», «Cuando te agregas en la calle a una muchedumbre…»—, Unamuno de otras cuatro
+—«Querer ser otro, es querer dejar de ser uno el que es»—, y Martí lo cierra con «De ser siervo de
+sí mismo, pasaría el hombre a ser siervo del Estado». Ningún Tema domina la lista: el-saber 6,
+la-libertad 6.
+
+**Las tres descartadas, y por qué cada una:**
+
+1. **Toda la obra de un Autor.** Sus 34 Citas sin Colección son casi su Página de Autor entera
+   (36). Reunirlas habría sido **duplicar una lista que ya existe**. Y de paso queda anotado que
+   «El uniforme y la sotana», curada en la 2.ª sesión antes de que la regla estuviera formulada,
+   tiene ese mismo defecto: 16 Citas de un Autor que tiene 16.
+2. **«El tiempo perdido»**, 37 candidatas — pero **24 de ellas ya están en el Tema «el tiempo»**,
+   que tiene 70. Dos tercios de la lista visibles en otra parte: peor solape que el 54 % que hizo
+   descartar «la fortuna» en la 18.ª sesión.
+3. **«La muerte»**: 5 candidatas sin Colección. Ni se acerca.
+
+**La regla, ya afilada por seis usos:** una Colección tiene que traer **una lista que no se pueda
+ver ya en otra parte** —ni en un Tema, ni en una Página de Autor, ni en otra Colección—. Da igual
+que el criterio sea bueno: si la lista está vista, la página no añade superficie, la repite.
+
+Quedan **unas 173 Citas sin Colección**.
+
+`npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` 501
+páginas; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
