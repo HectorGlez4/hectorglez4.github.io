@@ -2747,3 +2747,30 @@ frase corta contenida por casualidad **no** se señale, y que la bandera siga fu
 
 `npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` 499
 páginas.
+
+## 15.2 (27.ª sesión) — «Refranes de Sancho», y el sitio llega a 500 páginas
+
+**456 Citas, 14 → 15 Colecciones**, el sitio de 499 a **500 páginas**. Empezó la noche en 277.
+
+**«Refranes de Sancho», con 20 Citas**, y el criterio es una distinción que el libro hace y el
+Corpus no recogía: **sabiduría de pueblo, no de hidalgo**. Las sentencias de don Quijote ya están
+en «Consejos para gobernar»; esto es lo otro, lo que el escudero suelta a puñados y que media
+España sigue diciendo sin saber de dónde viene: «dádivas quebrantan peñas», «no se ganó Zamora en
+un hora», «al buen callar llaman Sancho», «más vale un toma que dos te daré», «Dime con quién
+andas, decirte he quién eres», «No es la miel para la boca del asno», «un asno cargado de oro sube
+ligero por una montaña», «paciencia y barajar», «tanto vales cuanto tienes, y tanto tienes cuanto
+vales».
+
+Y cierra con la despedida, que es refrán y epitafio a la vez: «en los nidos de antaño no hay
+pájaros hogaño: yo fui loco, y ya soy cuerdo».
+
+**Por qué esta Colección se sostiene y no duplica.** El mismo Autor, la misma obra, y aun así
+ninguna de las tres listas se parece: «Consejos para gobernar» son quince sentencias de un solo
+pasaje didáctico; ésta son veinte refranes tradicionales repartidos por todo el libro; y la Página
+de Autor las enseña todas revueltas con las otras veintisiete. Un criterio editorial es
+exactamente eso: una forma de mirar que ninguna otra superficie ofrece.
+
+Quedan **unas 190 Citas sin Colección**, casi todas sembradas esta noche.
+
+`npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` **500
+páginas**; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
