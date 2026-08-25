@@ -1,7 +1,9 @@
 ---
-texto: "Y pues ninguno es tan grande como el sol, ni tiene tantas cosas a su cargo, para acertar deben imitarle -46- todos."
+texto: "Quien estorba que no hurte su ministro, guarda su ministro y su hacienda."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-y-pues-ninguno-es-tan-grande-como"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-quien-estorba-que-no-hurte-su-ministro"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

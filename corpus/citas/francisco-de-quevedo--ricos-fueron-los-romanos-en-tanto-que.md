@@ -1,7 +1,9 @@
 ---
-texto: "El rey de Francia, viendo con don Fernando al Gran -131- Capitán, propuso y porfió que había de comer con ellos en la misma mesa quien vencía reyes y quitaba y daba coronas."
+texto: "Ricos fueron los romanos en tanto que supieron ser pobres: con su pobreza se enterró su honra."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-el-rey-de-francia-viendo-con-don"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-ricos-fueron-los-romanos-en-tanto-que"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El desplazamiento de una imperceptible arenilla ocasiona tal vez la desviación de un río caudaloso."
+texto: "El alma del niño no es del padre, de la madre, ni del sacerdote, es de la verdad, de ese algo tan fecundo que no se encierra ni puede encerrarse en el estéril credo de ninguna religión."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-el-desplazamiento-de-una-imperceptible-arenilla-ocasiona"
+temas:
+  - "la-libertad"
+slug: "manuel-gonzalez-prada-el-alma-del-nino-no-es-del"
 procedencia:
   obra: "Las esclavas de la Iglesia"
 estadoDerechos: "dominio-público"

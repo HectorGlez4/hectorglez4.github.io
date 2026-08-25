@@ -1,7 +1,9 @@
 ---
-texto: "El nacer nos impone la obligación de vivir, y esta obligación nos da el derecho de tomar, no sólo lo necesario, sino lo cómodo y lo agradable."
+texto: "En algunas líneas férreas, cada durmiente representa la vida de un hombre."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-el-nacer-nos-impone-la-obligacion-de"
+temas:
+  - "la-riqueza"
+slug: "manuel-gonzalez-prada-en-algunas-lineas-ferreas-cada-durmiente-representa"
 procedencia:
   obra: "El intelectual y el obrero"
 estadoDerechos: "dominio-público"

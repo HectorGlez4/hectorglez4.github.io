@@ -1,7 +1,9 @@
 ---
-texto: "No hay pobreza agradecida ni riqueza quejosa; es bienquista la abundancia y sediciosa la carestía."
+texto: "Marco Bruto entró en Cilicia; Cilicia no entró en Marco Bruto: halló en la riqueza suya lo que despreciaba, y en su paz lo que no pretendía."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-no-hay-pobreza-agradecida-ni-riqueza-quejosa"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-marco-bruto-entro-en-cilicia-cilicia-no"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

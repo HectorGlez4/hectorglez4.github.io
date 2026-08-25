@@ -97,6 +97,24 @@ const APARATO_DE_LA_FUENTE = [
    * escritor — que en este Corpus son muchas. Una frase de un Autor no empieza por «Autor:».
    */
   /^\s*(?:<<|«|‹‹)?\s*autor(?:es)?\s*:/i,
+  /*
+   * Y el folio de la edición transcrita, que es el cuarto aparato en cuatro sesiones y el
+   * primero que va **dentro** de la frase del Autor en vez de ocupar línea propia:
+   *
+   *     …vida que envenenase la vida, -61- adoración que produjese el desprecio…
+   *
+   * Wikisource lo intercala donde caía en el papel. Publicarlo pondría un número de página en
+   * medio de la Cita, y **el cotejo de la 11.2 lo daría por bueno**, porque está literal en el
+   * documento: lo escribió la Fuente.
+   *
+   * Se descarta la candidata entera y no se le quita el número: quitarlo alteraría el texto
+   * —NFR-12— y además dejaría una Cita que ya no aparece literal en su documento, así que la
+   * 11.2 la rechazaría después de todos modos.
+   *
+   * La forma es estrecha —número **entre guiones y rodeado de espacios**— para que un rango
+   * «1914-1918» y un guion de inciso sigan pasando.
+   */
+  /(?:^|\s)-\d{1,4}-(?=\s|$)/u,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

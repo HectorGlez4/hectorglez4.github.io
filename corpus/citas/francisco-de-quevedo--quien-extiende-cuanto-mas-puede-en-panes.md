@@ -1,6 +1,8 @@
 ---
 texto: "Quien extiende cuanto más puede en panes la barra de oro, al paso que la extiende, la adelgaza, y de barra sólida que no se puede romper, la vuelve hoja que aun no se defiende de la respiración del que la mira."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-riqueza"
 slug: "francisco-de-quevedo-quien-extiende-cuanto-mas-puede-en-panes"
 procedencia:
   obra: "Marco Bruto"

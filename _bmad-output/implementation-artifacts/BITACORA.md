@@ -4685,3 +4685,47 @@ páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
 
 **La meta no está alcanzada y no se emite promesa:** 848 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-24 (66.ª sesión) — El folio de la edición, dentro de la frase
+
+**848 → 867 Citas. 893 → 912 páginas.**
+
+### El cuarto aparato en cuatro sesiones
+
+Leyendo candidatas apareció ésta:
+
+    …vida que envenenase la vida, -61- adoración que produjese el desprecio…
+
+Es el número de página de la edición transcrita, que Wikisource intercala donde caía en el papel. Y
+es el **cuarto aparato de la Fuente en cuatro sesiones** —el pie de licencia, el título de la obra,
+el epígrafe interior y ahora el folio—, pero el primero que va **dentro** de la frase del Autor en
+vez de ocupar línea propia.
+
+La trampa es la de siempre, y conviene nombrarla otra vez porque no deja de repetirse: aprobar esa
+candidata publicaría una Cita con un número de página en medio, y **el cotejo de la 11.2 la daría
+por buena**, porque ese texto está literal en el documento. Lo escribió la Fuente.
+
+Medido antes de tocar nada: **seis candidatas lo traen y ninguna Cita publicada**. Se llega a
+tiempo, que no siempre pasa.
+
+**Se descarta la candidata entera y no se le quita el número.** Quitarlo alteraría el texto —lo que
+NFR-12 prohíbe— y además dejaría una Cita que ya no aparece literal en su documento, así que la 11.2
+la rechazaría después de todos modos. Perder la sentencia es el precio, y es el mismo que se paga
+con el resto del aparato.
+
+La forma se reconoce estrecha —un número **entre guiones y rodeado de espacios**— y hay una prueba
+por cada manera de equivocarse: un rango «1914-1918», un guion de inciso y una resta escrita en
+prosa siguen pasando.
+
+### La siembra
+
+**19 Citas**: diez en «la riqueza» —que era el segundo Tema más flaco y pasa de 37 a 47—, tres en
+«la amistad», dos en «la libertad», y una en «la prudencia», «el saber», «la vida» y «la virtud».
+
+El Autor más representado baja al **13,1 %**.
+
+`npx astro check` 0 errores; `npx vitest run` **2064/2064** en 69 ficheros; `npm run build` **912
+páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 867 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

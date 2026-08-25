@@ -1,7 +1,9 @@
 ---
-texto: "Siempre los delincuentes fueron alegrón y hacienda de los malos jueces: por esto los buscan, para hallarlos, no para corregirlos."
+texto: "No hay pobreza agradecida ni riqueza quejosa; es bienquista la abundancia y sediciosa la carestía."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-siempre-los-delincuentes-fueron-alegron-y-hacienda"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-no-hay-pobreza-agradecida-ni-riqueza-quejosa"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

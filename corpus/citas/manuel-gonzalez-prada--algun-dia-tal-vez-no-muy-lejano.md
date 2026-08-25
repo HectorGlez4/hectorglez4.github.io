@@ -1,7 +1,9 @@
 ---
-texto: "El alma del niño no es del padre, de la madre, ni del sacerdote, es de la verdad, de ese algo tan fecundo que no se encierra ni puede encerrarse en el estéril credo de ninguna religión."
+texto: "Algún día, tal vez no muy lejano, los enemigos domésticos se transformarán en los mejores aliados."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-el-alma-del-nino-no-es-del"
+temas:
+  - "la-amistad"
+slug: "manuel-gonzalez-prada-algun-dia-tal-vez-no-muy-lejano"
 procedencia:
   obra: "Las esclavas de la Iglesia"
 estadoDerechos: "dominio-público"

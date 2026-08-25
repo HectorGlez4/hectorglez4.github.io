@@ -1,6 +1,8 @@
 ---
 texto: "Cuando en las primeras horas de la mañana sale de las prensas el diario húmedo y tentador, a la vez que surge de los hornos el pan oloroso y provocativo, debemos demandarnos: ¿quién aprovechó más su noche, el diarista o el panadero?"
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-riqueza"
 slug: "manuel-gonzalez-prada-cuando-en-las-primeras-horas-de-la"
 procedencia:
   obra: "El intelectual y el obrero"

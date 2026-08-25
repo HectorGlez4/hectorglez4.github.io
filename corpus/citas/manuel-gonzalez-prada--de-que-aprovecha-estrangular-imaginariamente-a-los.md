@@ -1,6 +1,8 @@
 ---
 texto: "¿De qué aprovecha estrangular imaginariamente a los criminales, si realmente les tendemos la mano de amigo?"
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-amistad"
 slug: "manuel-gonzalez-prada-de-que-aprovecha-estrangular-imaginariamente-a-los"
 procedencia:
   obra: "Librepensamiento de acción"

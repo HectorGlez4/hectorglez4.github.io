@@ -1,6 +1,8 @@
 ---
 texto: "Mientras los moderados y los teóricos se imaginan evoluciones geométricas o se enredan en menudencias y detalles de forma, la multitud simplifica las cuestiones, las baja de las alturas nebulosas y las confina en terreno práctico."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-mientras-los-moderados-y-los-teoricos-se"
 procedencia:
   obra: "El intelectual y el obrero"

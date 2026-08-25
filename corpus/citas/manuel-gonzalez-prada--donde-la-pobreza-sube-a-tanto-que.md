@@ -1,7 +1,9 @@
 ---
-texto: "Hay tal vez que lanzarse al campo de batalla, sin fiar en la colaboración leal de muchos, temiendo tanto al enemigo que nos ataca de frente como al amigo que nos hiere por la espalda."
+texto: "Donde la pobreza sube a tanto que el hambre concluirá por llamarse un hábito nacional, ¿qué hacen los hombres sino disputarse la presa y devorarse?"
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-hay-tal-vez-que-lanzarse-al-campo"
+temas:
+  - "la-riqueza"
+slug: "manuel-gonzalez-prada-donde-la-pobreza-sube-a-tanto-que"
 procedencia:
   obra: "Los partidos y la Unión Nacional"
 estadoDerechos: "dominio-público"

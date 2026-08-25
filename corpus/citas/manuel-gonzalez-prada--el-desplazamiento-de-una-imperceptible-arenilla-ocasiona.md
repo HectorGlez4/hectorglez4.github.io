@@ -1,7 +1,9 @@
 ---
-texto: "Algún día, tal vez no muy lejano, los enemigos domésticos se transformarán en los mejores aliados."
+texto: "El desplazamiento de una imperceptible arenilla ocasiona tal vez la desviación de un río caudaloso."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-algun-dia-tal-vez-no-muy-lejano"
+temas:
+  - "la-prudencia"
+slug: "manuel-gonzalez-prada-el-desplazamiento-de-una-imperceptible-arenilla-ocasiona"
 procedencia:
   obra: "Las esclavas de la Iglesia"
 estadoDerechos: "dominio-público"

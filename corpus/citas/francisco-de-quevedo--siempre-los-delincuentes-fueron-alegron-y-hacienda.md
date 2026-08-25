@@ -1,7 +1,9 @@
 ---
-texto: "Sólo deseo saber dónde halla el valor para matarse -91- quien no le tiene para aguardar que le maten."
+texto: "Siempre los delincuentes fueron alegrón y hacienda de los malos jueces: por esto los buscan, para hallarlos, no para corregirlos."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-solo-deseo-saber-donde-halla-el-valor"
+temas:
+  - "la-virtud"
+slug: "francisco-de-quevedo-siempre-los-delincuentes-fueron-alegron-y-hacienda"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "No extrañemos si un socialista del siglo XIX, al mirar en Caín el primer detentador del suelo y el primer fratricida, se valga de esa coincidencia para deducir una pavorosa conclusión: La propiedad es el asesinato."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-riqueza"
 slug: "manuel-gonzalez-prada-no-extranemos-si-un-socialista-del-siglo"
 procedencia:
   obra: "El intelectual y el obrero"

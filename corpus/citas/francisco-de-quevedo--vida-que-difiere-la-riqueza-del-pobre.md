@@ -1,7 +1,9 @@
 ---
-texto: "Marco Bruto entró en Cilicia; Cilicia no entró en Marco Bruto: halló en la riqueza suya lo que despreciaba, y en su paz lo que no pretendía."
+texto: "Vida que difiere la riqueza del pobre que espera, es más aborrecida que la pobreza que padece el que espera."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-marco-bruto-entro-en-cilicia-cilicia-no"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-vida-que-difiere-la-riqueza-del-pobre"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"
