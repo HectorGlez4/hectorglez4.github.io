@@ -2416,3 +2416,38 @@ páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32799383764 en verde): `/tema/la-prudencia` responde
 200 y `sitemap-0.xml` declara **492 URL**, las mismas del build.
+
+## 15.3 (17.ª sesión) — 854 candidatas decididas, y una corrección de la bitácora
+
+**452 Citas y 11 Temas, los mismos; 492 páginas, las mismas.** Lo que cambia es la mesa de
+trabajo: `corpus/_revision/` pasa de **854 candidatas pendientes a 2**.
+
+**Y antes, una corrección de lo que escribí en la 6.ª sesión.** Allí quedó anotado que `rechazar`
+hace `rm` mientras `despublicar` **mueve**, «dos criterios distintos para la misma clase de acto»,
+y por eso no se borraron 46 candidatas en bloque. Comprobado hoy, **no era una incoherencia**:
+
+- Las 855 estaban **versionadas** (`git ls-files corpus/_revision` → 855). Borrarlas es reversible
+  por historia, así que la premisa de «no es la opción reversible» era falsa.
+- El test de la Historia 9.2 se titula «una candidata rechazada **no queda en ninguna parte**»: el
+  borrado es una decisión tomada, no un descuido. Un `_rechazadas/` que solo crece sería peor.
+- Y hay un argumento más fuerte que los dos: **una candidata es derivable**. Sale de un documento
+  versionado con `extraer`, así que es caché, no fuente. Una Colección retirada, en cambio, es una
+  decisión editorial que no se puede regenerar — por eso aquélla se mueve y ésta se borra.
+
+**Qué se decidió.** Las 852 de los siete Autores cuyos documentos se leyeron enteros entre la 3.ª
+y la 8.ª sesión: prosa de enlace, fragmentos con pronombre sin referente, encabezados de capítulo
+pegados al cuerpo, y las que casi repiten una Cita ya publicada. Todas leídas en su momento, todas
+decididas ahora.
+
+**Las 2 del Autor que excede el techo se conservan.** Son buenas y no se rechazan: esperan a que
+el reparto del Corpus permita publicarlas sin empeorar el tramo de concentración. Es la misma
+decisión de la 3.ª sesión, sostenida.
+
+**Lo que esto no destruye.** Las candidatas descartadas por el encabezado pegado —«Capítulo IX
+¿Por ventura alguno…», «XXIX Caminante, son tus huellas…»— se recuperan volviendo a ejecutar
+`extraer` sobre el mismo documento cuando entre el arreglo de `tools/lib/extraccion.ts`. Se
+comprobó hoy que ese arreglo **sigue sin estar en `main`**: el último commit que toca ese fichero
+es el de la Historia 11.5.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 492
+páginas y 430 cotejadas.
