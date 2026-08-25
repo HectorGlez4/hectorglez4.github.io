@@ -277,6 +277,32 @@ function motivoDeIlegible(medida: MedidaDeLegibilidad): string {
   );
 }
 
+/**
+ * El cuerpo sin la línea del título, cuando la trae.
+ *
+ * Wikisource renderiza el título **dentro** de la región de contenido, así que el cuerpo que
+ * `recuperar` versiona empieza a menudo con el nombre de la obra en su propia línea. Como esa
+ * línea no acaba en punto, el troceador la pega a la primera frase de verdad y la candidata sale
+ * así:
+ *
+ *   «La crisis actual del patriotismo español «Á lo cual replicó el vizcaíno: ¿yo no caballero?»
+ *
+ * Estaba anotado en `LOOP-PROTOCOL-V4.md` desde la 20.ª sesión y seguía sin arreglar. No es solo
+ * una candidata desperdiciada: aprobarla publicaría una Cita cuyo texto **empieza con el título de
+ * su propia obra**, y el cotejo de la 11.2 la daría por buena, porque ese texto está en el
+ * documento.
+ *
+ * Se quita por **igualdad con la obra declarada**, y solo la primera línea. Una heurística del
+ * tipo «línea corta y sin punto» cazaría también el primer verso de un poema; y quitar cualquier
+ * aparición del título silenciaría al Autor que nombra su propia obra dentro del texto.
+ */
+function sinElEncabezado(texto: string, obra: string): string {
+  const lineas = texto.split('\n');
+  const primera = lineas.findIndex((l) => l.trim() !== '');
+  if (primera === -1 || lineas[primera].trim() !== obra.trim()) return texto;
+  return lineas.slice(primera + 1).join('\n');
+}
+
 export function extraerCandidatas(
   documento: DocumentoDeFuente,
   autor: string,
@@ -309,7 +335,7 @@ export function extraerCandidatas(
   const candidatas: Candidata[] = [];
   const vistas = new Set<string>();
 
-  for (const sentencia of sentencias(documento.texto)) {
+  for (const sentencia of sentencias(sinElEncabezado(documento.texto, documento.obra))) {
     const longitud = [...sentencia].length;
 
     if (longitud < MIN_CARACTERES_CANDIDATA || longitud > MAX_CARACTERES_CANDIDATA) {

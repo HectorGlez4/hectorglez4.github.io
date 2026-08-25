@@ -399,3 +399,77 @@ describe('FR-24 — la línea de firma de la Fuente no es una Cita', () => {
     expect(resultado.candidatas.map((c) => c.texto)).toContain(suya);
   });
 });
+
+/**
+ * FR-24 — el encabezado de la página no es la primera frase de la obra.
+ *
+ * Wikisource renderiza el título **dentro** de la región de contenido, así que el cuerpo que
+ * `recuperar` versiona empieza a menudo con el nombre de la obra en su propia línea. Como esa
+ * línea no acaba en punto, el troceador la pega a la primera frase de verdad:
+ *
+ *   «La crisis actual del patriotismo español «Á lo cual replicó el vizcaíno: ¿yo no caballero?»
+ *
+ * Está anotado en `LOOP-PROTOCOL-V4.md` desde la 20.ª sesión y seguía sin arreglar. No es solo
+ * una candidata desperdiciada: aprobarla publicaría una Cita cuyo texto empieza con el título de
+ * su propia obra, y el cotejo de la 11.2 la daría por buena — porque ese texto **está** en el
+ * documento.
+ *
+ * Se descarta por igualdad con la obra declarada y no por heurística —«línea corta sin punto»
+ * cazaría también el primer verso de un poema—. Es preciso y no tiene falsos positivos: la
+ * primera línea que repite el título es el título.
+ */
+describe('FR-24 — el título del documento no se pega a la primera frase', () => {
+  const CUERPO = [
+    'Sobre la brevedad de la vida',
+    '',
+    'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.',
+    'La vida es larga si sabes usarla y aprovecharla como es debido cada jornada.',
+  ].join('\n');
+
+  it('ninguna candidata empieza con el nombre de la obra', () => {
+    const resultado = extraerCandidatas(documento({ texto: CUERPO }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(
+      resultado.candidatas.every((c) => !c.texto.startsWith('Sobre la brevedad de la vida')),
+    ).toBe(true);
+  });
+
+  it('y la primera frase de verdad sí llega entera', () => {
+    const resultado = extraerCandidatas(documento({ texto: CUERPO }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.map((c) => c.texto)).toContain(
+      'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.',
+    );
+  });
+
+  it('una frase que solo MENCIONA el título no se descarta', () => {
+    /*
+     * La puerta quita **la primera línea** cuando repite el título, no cualquier aparición. Un
+     * Autor que nombra su propia obra dentro del texto sigue diciéndolo.
+     */
+    const conMencion = [
+      'Sobre la brevedad de la vida',
+      '',
+      'Sobre la brevedad de la vida escribí ya bastante, y conviene no repetirse en ello.',
+    ].join('\n');
+    const resultado = extraerCandidatas(documento({ texto: conMencion }), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.map((c) => c.texto)).toContain(
+      'Sobre la brevedad de la vida escribí ya bastante, y conviene no repetirse en ello.',
+    );
+  });
+
+  it('un cuerpo que no empieza por su título se deja intacto', () => {
+    const soloObra = extraerCandidatas(documento(), 'seneca');
+    const conTitulo = extraerCandidatas(documento({ texto: CUERPO }), 'seneca');
+    if (!soloObra.ok || !conTitulo.ok) throw new Error('no hubo candidatas');
+
+    // El fixture de siempre no lleva título delante: su primera candidata no cambia.
+    expect(soloObra.candidatas[0].texto).toBe(
+      'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.',
+    );
+  });
+});

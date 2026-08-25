@@ -4305,3 +4305,59 @@ páginas**; `npx playwright test` 2 fallos —los de NFR-5—, 412 pasadas.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-24 (60.ª sesión) — El título de la obra se pegaba a su primera frase, y llevaba cuarenta sesiones anotado
+
+**761 Citas y 806 páginas: las mismas.** Se arregla un defecto de extracción que el propio
+`LOOP-PROTOCOL-V4.md` señalaba desde la 20.ª sesión, y se pone al día ese fichero, que describía un
+Corpus que ya no existe.
+
+### El defecto, reproducido antes de tocarlo
+
+El protocolo decía que el arreglo del «encabezado pegado» **seguía sin estar en `main`**. En vez de
+creerlo o desmentirlo, se reprodujo:
+
+    primera candidata: «La crisis actual del patriotismo español «Á lo cual replicó el vizcaíno…»
+
+Seguía vivo. La causa, al mirar el documento: **Wikisource renderiza el título dentro de la región
+de contenido**, así que el cuerpo que `recuperar` versiona empieza con el nombre de la obra en su
+propia línea. Como esa línea no acaba en punto, el troceador la pega a la primera frase.
+
+**Y no es solo una candidata desperdiciada.** Aprobarla publicaría una Cita cuyo texto **empieza con
+el título de su propia obra**, y el cotejo de la 11.2 la daría por buena — porque ese texto sí está
+en el documento. Es la misma forma que el aparato de la Fuente: algo que la Fuente escribió y que
+ninguna otra puerta distingue del Autor.
+
+Arreglado con cuatro pruebas en rojo primero, y **por igualdad con la obra declarada**, no por
+heurística: «línea corta y sin punto» cazaría también el primer verso de un poema, y quitar
+cualquier aparición del título silenciaría al Autor que nombra su propia obra dentro del texto. Hay
+una prueba para cada una de esas dos cosas.
+
+Medido sobre los 82 documentos: **cuatro** lo traen. Pocos, y cada uno tenía su primera candidata
+envenenada.
+
+### El fichero que manda describía un Corpus de hace cuarenta sesiones
+
+Su tabla de traspaso decía 452 Citas y 492 páginas, y su lista de «lo que el bucle sí puede seguir
+haciendo» estaba entera superada: los lotes del Quijote limitados a seis Citas —el techo se cerró—,
+el arreglo del encabezado —hecho hoy— y un Tema más —medido y descartado—.
+
+Se reescribe con lo de ahora, con la tabla en tres columnas para que se vea el movimiento, y con
+una lista que sale de lo medido:
+
+1. Ampliar Autores ya admitidos, **comprobando el Autor en seco antes de invertir**.
+2. Curar Colecciones contra el Corpus que crece bajo ellas: sus miembros no se actualizan solos.
+3. Cotejar el censo cerrado — 21, de los cuales cinco esperan la decisión del verso.
+
+Y por qué un Tema trece no llega: el Corpus creció alimentando los mismos doce, y ningún asunto
+junta quince Citas sin solaparse con uno de ellos por encima de lo que se solapan entre sí.
+
+**Quien lea ese fichero dentro de tres meses ya no encontrará una foto de hace cuarenta sesiones.**
+Eso importa más que el defecto arreglado: es el primer fichero que se lee, y estaba mintiendo por
+omisión.
+
+`npx astro check` 0 errores; `npx vitest run` **2019/2019** en 65 ficheros; `npm run build` **806
+páginas**; `npx playwright test` 2 fallos —los de NFR-5—, 412 pasadas.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

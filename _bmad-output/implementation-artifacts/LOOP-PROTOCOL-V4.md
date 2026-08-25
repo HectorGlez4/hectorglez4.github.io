@@ -205,33 +205,41 @@ podido hacer. Cerrarla sería afirmar algo que nadie ha medido.
 Veinte sesiones, veinte despliegues en verde, veinte verificaciones contra el dominio. Lo que el
 bucle movió:
 
-| | Al abrir la v4 | Ahora |
-|---|---|---|
-| Citas publicadas | 252 | **452** |
-| Temas publicados | 8 | **11** |
-| Colecciones publicadas | 0 | **12** |
-| Páginas del sitio | 277 | **492** |
-| Autor más representado | 45,2 % | **25,2 %** |
-| Citas cotejadas contra su documento | — | **430** |
-| Candidatas pendientes de decisión | 66 | **2** |
+| | Al abrir la v4 | En la 20.ª sesión | **Ahora (60.ª)** |
+|---|---|---|---|
+| Citas publicadas | 252 | 452 | **761** |
+| Temas publicados | 8 | 11 | **12** |
+| Colecciones publicadas | 0 | 12 | **16** |
+| Páginas del sitio | 277 | 492 | **806** |
+| Autor más representado | 45,2 % | 25,2 % | **15,0 % — dentro del techo** |
+| Citas cotejadas contra su documento | — | 430 | **740 (21 pendientes)** |
+| Pruebas unitarias | — | — | **2015** |
 
-**Y dónde se paró, que es lo que importa para quien siga.** Los tres tramos abiertos —
-concentración, censo y anchura — convergen en la misma decisión, y está en `deferred-work.md` con
-su aritmética: **la Meta no se cierra sin admitir Autores nuevos**, y a quién se admite es lo
-único que este producto no delega.
+**Historia 15.3 cerrada.** El techo de concentración se cerró **diluyendo, sin despublicar ni una
+sola Cita**, y el Autor que lo abrió sigue teniendo las mismas 114 que tenía en el 45,2 %.
 
-Lo que el bucle **sí** puede seguir haciendo sin esa decisión, por orden de valor decreciente:
+**Y dónde se paró, que es lo que importa para quien siga.** El tramo que la política declara ahora
+es **«Admitir 19 Autores más»**, y es el que este fichero reserva más arriba: a quién se admite es
+lo único que el producto no delega. Comprobado en la 48.ª sesión leyendo esta misma sección, en vez
+de fiarse de la nota de una bitácora.
 
-1. **Lotes del *Quijote* por el método de la 8.ª sesión** —escoger a mano, copiar el literal,
-   dejar que `alta` coteje—, pero solo **unas 6 Citas más**: por encima de eso el segundo Autor
-   cruza el techo del 15 % y el tramo se cerraría creando la concentración que existe para
-   deshacer.
-2. **Re-extraer los documentos afectados por el encabezado pegado** en cuanto entre el arreglo de
-   `tools/lib/extraccion.ts`, que a día de hoy sigue sin estar en `main`. Ahí hay Citas buenas
-   —Machado, Séneca— hoy inservibles solo por un prefijo.
-3. **Un Tema más, quizá dos.** Medidos nueve asuntos: tres abiertos (la verdad, la riqueza, la
-   prudencia) y seis descartados por no llegar al umbral o por duplicar la lista de otro. La
-   cantera sobre 452 Citas está casi agotada.
+Lo que el bucle **sí** puede seguir haciendo sin esa decisión, medido y no supuesto:
+
+1. **Ampliar Autores ya admitidos con otras de sus obras.** Es trabajo del bucle —así entraron los
+   82 documentos— y de ahí salieron 309 Citas entre la 39.ª y la 47.ª. La cantera de los dieciséis
+   está muy mermada, pero no agotada: quedan obras en prosa sin recuperar de al menos tres.
+   **Antes de invertir en ninguna: `extraer --seco` y leer la línea del Autor.** Un documento que
+   no declara Autor no se siembra, y comprobarlo cuesta una orden.
+2. **Curar Colecciones contra el Corpus que creció bajo ellas.** Sus miembros son una lista escrita
+   a mano que no se actualiza sola. Las dieciséis se revisaron entre la 49.ª y la 52.ª —297 → 390
+   miembros— y hay que volver a hacerlo cada vez que la siembra avance.
+3. **Cotejar el censo cerrado.** Quedan 21. Cinco están en un documento del Corpus salvo por el
+   salto de verso, y ésas esperan la decisión reservada; las otras dieciséis no aparecen en ninguna
+   edición versionada.
+
+**Un Tema número trece no llega**, y la razón está medida: el Corpus creció alimentando los mismos
+doce, así que ningún asunto nuevo junta quince Citas sin solaparse con uno de ellos por encima de
+lo que se solapan entre sí (máximo 33 %, mediana 6 %).
 
 **Cómo se desbloquea, en una línea:** nombres de Autor o URL de Wikisource/Gutenberg. Con eso el
 bucle recupera con `tools/recuperar.ts`, extrae, coteja, publica y despliega sin más intervención.
