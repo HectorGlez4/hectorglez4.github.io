@@ -278,3 +278,35 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     anotar en vez de apretar una puerta a ojo.
 
     Con los seis ejemplos de arriba el arreglo se puede diseñar y probar en rojo primero.
+
+- id: la-retirada-exige-motivo-y-no-lo-guarda
+  summary: `documentar --retirar` valida el motivo, lo imprime y lo tira; la Cita retirada queda en revisión indistinguible de una candidata nueva.
+  evidence: |-
+    Comprobado en `tools/lib/*` — `retirarCita(rutas, slug, motivo)` rechaza el motivo vacío
+    con «Una retirada sin motivo no es una retirada: es una desaparición», y después **no lo
+    escribe en ninguna parte**: mueve la Cita a `corpus/_revision/` con su frontmatter intacto
+    y el motivo solo sale por pantalla.
+
+    El resultado se ve hoy en el Corpus. Las **16 Citas retiradas el 25/08** están en la cola de
+    revisión, con su texto, su Autor, sus Temas y su `fuente`, exactamente igual que una
+    candidata recién extraída. Nada en el disco dice que **no deben aprobarse nunca**: el
+    documento del que salieron ya no está en `corpus/fuentes/`, porque su página no declara
+    Autor en ninguna forma legible.
+
+    Las 16, todas de la misma obra («El intelectual y el obrero»):
+    casi-todos-los-revolucionarios · casi-todos-vivimos-girando · el-descredito-de-una-revolucion ·
+    el-mayor-inconveniente-de-los-pensadores · la-justicia-consiste-en-dar · la-justicia-nace-de-la-sabiduria ·
+    la-resignacion-y-el-sacrificio · las-revoluciones-vienen-de-arriba · los-intelectuales-sirven-de-luz ·
+    nos-parecemos-a-los-marineros · pero-modificarse-con-los-acontecimientos · que-idea-no-se-degrada ·
+    que-reformador-no-se-desprestigia · si-el-hombre-pudiera-convertirse · solo-hay-un-trabajo-ciego ·
+    toda-revolucion-arribada
+
+    **Por qué no se arregla sobre la marcha.** No se borran: borrarlas deshace justo lo que AD-2
+    quiere al mandar que retirar sea mover. Y guardar el motivo en el fichero obliga a decidir
+    antes si una Cita retirada **es una candidata más** —y entonces el motivo es una nota que
+    `revisar` debe enseñar y la aprobación debe respetar— o **es otra clase de cosa**, con su
+    sitio propio fuera de la cola. Eso es una decisión de producto, no un ajuste, y la regla del
+    bucle manda anotar en vez de elegir por su cuenta.
+
+    Lo que hace falta de Héctor es una línea: **¿retirada = candidata con nota, o estado propio?**
+    Con eso el arreglo se escribe con prueba en rojo primero.

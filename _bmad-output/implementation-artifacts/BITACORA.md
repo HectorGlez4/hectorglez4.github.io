@@ -3294,3 +3294,54 @@ palabra**, que es justo lo que este Corpus existe para no hacer. Se retiraron la
 392 pasadas, 14 saltadas; `npm run build` **532 páginas**.
 
 **El tramo sigue abierto y ahora dice 273** (era 284). No se alcanza, y se dice.
+
+## 15.3 (41.ª sesión) — Treinta y dos, y la comprobación de ayer pagándose sola
+
+**487 → 519 Citas. 532 → 564 páginas. Concentración 23,4 % → 22,0 %.** La mejor sesión de siembra
+del bucle, y ni una sola retirada.
+
+**La lección de ayer entró en el método y se pagó en la primera hora.** La regla nueva es: tras
+recuperar, `extraer --seco` y **leer la línea del Autor antes de invertir en nada más**.
+
+Se apuntó a la mayor reserva disponible, una obra moral de 222 KB. El seco dijo **1.175 candidatas
+y «Autor sin cotejar»**. Se miró el documento: la página firma con **el nombre suelto en una
+línea**, sin etiqueta ni parámetro. Tratar «la línea de debajo del título» como Autor sería
+inferir, no leer, y la 11.1 lo prohíbe. Fuera el documento, cero candidatas escritas.
+
+Ayer ese mismo error costó 16 Citas publicadas y retiradas. Hoy costó una orden en seco. Esa es
+toda la diferencia, y es la razón de que la comprobación valga.
+
+**Dos obras hermanas sí cotejaban** (332 y 350 candidatas) pero se descartaron por otra razón, y
+conviene decirla porque no es pereza: son **sátira narrativa, el género que rindió un 9 %**, y
+había prosa filosófica pendiente, que rinde el doble. Se quitaron los dos documentos en lugar de
+dejarlos versionados sin uso: un documento sin Citas rompe la otra mitad de FR-23.
+
+**Y el rendimiento lo confirmó: 110 candidatas, 32 publicadas — un 29 %**, el mejor medido hasta
+ahora, muy por encima del ~19 % de la prosa didáctica y triplicando la sátira. Dos ensayos
+filosóficos breves dieron más que 682 candidatas de sátira.
+
+**Tres cosas que se dejaron sin publicar y no por gusto:**
+
+· Las que citan a otros —Kierkegaard, James, Platón por boca de Sócrates— aunque la frase sea suya.
+· Las anafóricas sin antecedente, que fuera de su párrafo no dicen nada.
+· Una más de OCR que la puerta dejó pasar: «Pues **le** que no se acostumbra…». Van seis ejemplos
+  ya en `deferred-work.md`, del mismo caso.
+
+### Lo que se encontró y **no** se arregló, con el motivo
+
+Las 16 Citas retiradas ayer **volvieron a la cola de revisión**, que es lo que manda AD-2: retirar
+es mover, no borrar. Pero `documentar --retirar` **exige un motivo y no lo guarda en ninguna
+parte**. Se comprobó en el código: lo valida —«una retirada sin motivo no es una retirada: es una
+desaparición»— y lo escribe solo por pantalla. El fichero que aterriza en `corpus/_revision/` es
+indistinguible de una candidata fresca.
+
+Así que ahí quedan 16 candidatas que **nunca deben aprobarse** —su documento ya no existe— sin
+nada en el disco que lo diga. No se borran, porque borrarlas sería deshacer justo lo que la
+retirada quiso preservar; y no se arregla la orden esta sesión porque guardar el motivo obliga a
+decidir si una Cita retirada es una candidata más o **otra clase de cosa**, y eso es una decisión
+de producto, no un ajuste. Queda en `deferred-work.md` con la lista de las 16 y la evidencia.
+
+`npx astro check` 0 errores; `npx vitest run` **1957/1957** en 63 ficheros; `npx playwright test`
+392 pasadas, 14 saltadas; `npm run build` **564 páginas**.
+
+**El tramo sigue abierto y ahora dice 241** (era 273). No se alcanza, y se dice.
