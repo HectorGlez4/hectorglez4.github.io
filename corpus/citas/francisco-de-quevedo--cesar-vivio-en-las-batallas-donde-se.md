@@ -1,7 +1,9 @@
 ---
-texto: "Determinarse tarde al remedio del daño, es daño sin remedio."
+texto: "César vivió en las batallas, donde se muere."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-determinarse-tarde-al-remedio-del-dano-es"
+temas:
+  - "la-vida"
+slug: "francisco-de-quevedo-cesar-vivio-en-las-batallas-donde-se"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

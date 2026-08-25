@@ -1,7 +1,9 @@
 ---
-texto: "Bueno es descubrir la traición, mas no del todo seguro."
+texto: "Dañoso es el consejo en el príncipe que no sabe temerle como tomarle."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-bueno-es-descubrir-la-traicion-mas-no"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-danoso-es-el-consejo-en-el-principe"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Entran algunos a ser reyes sin arte ni experiencia."
+texto: "De una heroica educación sale un heroico rey."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-entran-algunos-a-ser-reyes-sin-arte"
+temas:
+  - "el-saber"
+slug: "baltasar-gracian-de-una-heroica-educacion-sale-un-heroico"
 procedencia:
   obra: "El político"
   año: 1640

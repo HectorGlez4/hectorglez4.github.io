@@ -1,6 +1,8 @@
 ---
 texto: "César fue justiciado, y ninguno fue homicida."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-verdad"
 slug: "francisco-de-quevedo-cesar-fue-justiciado-y-ninguno-fue-homicida"
 procedencia:
   obra: "Marco Bruto"

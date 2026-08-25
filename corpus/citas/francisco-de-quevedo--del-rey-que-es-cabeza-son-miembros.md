@@ -1,7 +1,9 @@
 ---
-texto: "Buenos libros son los muertos, y mejores las muertes."
+texto: "Del rey, que es cabeza, son miembros los vasallos."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-buenos-libros-son-los-muertos-y-mejores"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-del-rey-que-es-cabeza-son-miembros"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

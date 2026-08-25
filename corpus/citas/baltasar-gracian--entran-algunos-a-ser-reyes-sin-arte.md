@@ -1,7 +1,9 @@
 ---
-texto: "Grande aforismo fue siempre hacer antídoto del veneno."
+texto: "Entran algunos a ser reyes sin arte ni experiencia."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-grande-aforismo-fue-siempre-hacer-antidoto-del"
+temas:
+  - "el-saber"
+slug: "baltasar-gracian-entran-algunos-a-ser-reyes-sin-arte"
 procedencia:
   obra: "El político"
   año: 1640

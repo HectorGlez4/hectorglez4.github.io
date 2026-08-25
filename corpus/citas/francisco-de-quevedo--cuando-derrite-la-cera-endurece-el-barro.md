@@ -1,7 +1,9 @@
 ---
-texto: "César murió en el Senado, donde se vive."
+texto: "Cuando derrite la cera, endurece el barro."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-cesar-murio-en-el-senado-donde-se"
+temas:
+  - "la-adversidad"
+slug: "francisco-de-quevedo-cuando-derrite-la-cera-endurece-el-barro"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

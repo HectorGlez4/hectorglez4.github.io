@@ -1,7 +1,9 @@
 ---
-texto: "Dañoso es el consejo en el príncipe que no sabe temerle como tomarle."
+texto: "Buenos libros son los muertos, y mejores las muertes."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-danoso-es-el-consejo-en-el-principe"
+temas:
+  - "el-saber"
+slug: "francisco-de-quevedo-buenos-libros-son-los-muertos-y-mejores"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

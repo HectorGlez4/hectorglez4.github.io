@@ -1,6 +1,8 @@
 ---
 texto: "Bien acierta quien sospecha que siempre yerra."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-prudencia"
 slug: "francisco-de-quevedo-bien-acierta-quien-sospecha-que-siempre-yerra"
 procedencia:
   obra: "Marco Bruto"

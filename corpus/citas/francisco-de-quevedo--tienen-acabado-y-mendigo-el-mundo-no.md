@@ -1,7 +1,9 @@
 ---
-texto: "César vivió en las batallas, donde se muere."
+texto: "Tienen acabado y mendigo el mundo, no los premios que se piden por los servicios sino los premios que se piden por los premios."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-cesar-vivio-en-las-batallas-donde-se"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-tienen-acabado-y-mendigo-el-mundo-no"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

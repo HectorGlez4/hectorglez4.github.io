@@ -1,7 +1,9 @@
 ---
-texto: "De una heroica educación sale un heroico rey."
+texto: "Grande aforismo fue siempre hacer antídoto del veneno."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-de-una-heroica-educacion-sale-un-heroico"
+temas:
+  - "la-prudencia"
+slug: "baltasar-gracian-grande-aforismo-fue-siempre-hacer-antidoto-del"
 procedencia:
   obra: "El político"
   año: 1640

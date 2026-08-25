@@ -1,7 +1,9 @@
 ---
-texto: "Del rey, que es cabeza, son miembros los vasallos."
+texto: "Determinarse tarde al remedio del daño, es daño sin remedio."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-del-rey-que-es-cabeza-son-miembros"
+temas:
+  - "el-tiempo"
+slug: "francisco-de-quevedo-determinarse-tarde-al-remedio-del-dano-es"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

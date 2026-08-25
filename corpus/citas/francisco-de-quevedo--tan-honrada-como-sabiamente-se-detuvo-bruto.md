@@ -1,6 +1,8 @@
 ---
 texto: "Tan honrada como sabiamente se detuvo Bruto; porque si, como decían, Porcia era muerta, no podía resucitarla, y si pasaba la ocasión, no era posible restituirla."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-prudencia"
 slug: "francisco-de-quevedo-tan-honrada-como-sabiamente-se-detuvo-bruto"
 procedencia:
   obra: "Marco Bruto"

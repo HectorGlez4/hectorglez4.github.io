@@ -1,7 +1,9 @@
 ---
-texto: "Tenemos por honesto morir de nuestra enfermedad, y ¿rehusaremos morir de la que tiene nuestra república?"
+texto: "Cuando los vasallos se quejan, el rey les duele."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-tenemos-por-honesto-morir-de-nuestra-enfermedad"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-cuando-los-vasallos-se-quejan-el-rey"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "En todo verdadero razonamiento no puede haber conclusiones que estén contenidas en las premisas."
 autor: "antonio-machado"
+temas:
+  - "el-saber"
 slug: "antonio-machado-en-todo-verdadero-razonamiento-no-puede-haber"
 procedencia:
   obra: "Abel Martín"

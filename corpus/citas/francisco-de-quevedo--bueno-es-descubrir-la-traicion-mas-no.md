@@ -1,7 +1,9 @@
 ---
-texto: "Tienen acabado y mendigo el mundo, no los premios que se piden por los servicios sino los premios que se piden por los premios."
+texto: "Bueno es descubrir la traición, mas no del todo seguro."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-tienen-acabado-y-mendigo-el-mundo-no"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-bueno-es-descubrir-la-traicion-mas-no"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -4941,3 +4941,46 @@ dos en «la vida», y una en «el tiempo» y «la virtud».
 
 **La meta no está alcanzada y no se emite promesa:** 947 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.6 (72.ª sesión) — Mi propia criba llevaba doce sesiones escondiéndome lo mejor
+
+**947 → 967 Citas. 992 → 1012 páginas.** El sitio pasa de las mil páginas.
+
+### El error era mío, y estaba en la herramienta con la que leo
+
+La extracción admite candidatas **desde 40 caracteres**. El guion con el que las cribo —el que
+escribí en la 62.ª y he usado en todas las sesiones desde entonces— exigía **70**.
+
+Es decir: toda la franja de 40 a 69 caracteres, **la de las sentencias más breves, que son las más
+citables**, no la había leído nunca. Doce sesiones eligiendo entre lo que quedaba después de tirar lo
+mejor.
+
+Se vio por casualidad, al reparar en que una Cita publicada —«No hay cosa tan disimulada como el
+pecado», 41 caracteres— no habría pasado mi propia criba. Llegó por otro camino.
+
+Medido al bajar el mínimo: **185 candidatas cortas** en una cantera y **66** en otra, y de las 34
+primeras que se leyeron salieron **once publicables**. Un tercio, contra el uno de cada ocho de la
+franja larga.
+
+La lección no es sobre el número: es que **la herramienta con la que se mira decide lo que se
+encuentra**, y una herramienta propia no se audita sola. La de la extracción tenía sus umbrales
+escritos y probados; la mía los tenía inventados de memoria.
+
+### Y una comprobación que salió que no
+
+En la franja corta apareció «El sabio hace luego lo que el necio al fin», que es una Cita del **censo
+cerrado** —sin documento desde la v3— y que si de verdad estuviera en la obra recuperada se podría
+documentar por fin. Se comprobó contra el documento: **cero apariciones**. La candidata era la propia
+Cita del censo, que vive en el mismo directorio que las candidatas y que mi guion no distingue. El
+censo sigue en 21.
+
+### La siembra
+
+**20 Citas** en diez Temas, de tres canteras a la vez para que ninguna se acerque al techo: el Autor
+más representado queda en 141 de 967, **14,6 %**, el mismo porcentaje que antes de sembrar veinte.
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **1012 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 967 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

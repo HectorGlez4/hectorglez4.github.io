@@ -1,7 +1,9 @@
 ---
-texto: "Yo no te llamo al peligro, sino a la gloria; y tengo tan conocida tu virtud, que no la agravio con aguardar la respuesta de tu boca, oyéndola en tu obligación."
+texto: "César murió en el Senado, donde se vive."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-yo-no-te-llamo-al-peligro-sino"
+temas:
+  - "la-vida"
+slug: "francisco-de-quevedo-cesar-murio-en-el-senado-donde-se"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"
