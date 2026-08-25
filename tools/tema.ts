@@ -2,6 +2,7 @@
  * Gestión de Temas — FR-15.
  *
  *   npx tsx tools/tema.ts crear "El tiempo"
+ *   npx tsx tools/tema.ts asignar el-tiempo <slug-cita> [<slug-cita>...]
  *   npx tsx tools/tema.ts eliminar el-tiempo
  *   npx tsx tools/tema.ts listar
  *
@@ -9,7 +10,7 @@
  * herramienta y no un campo libre en el alta.
  */
 
-import { crearTema, eliminarTema } from './lib/gestion.ts';
+import { asignarTema, crearTema, eliminarTema } from './lib/gestion.ts';
 import { leerCitas, leerTemas, rutasDelCorpus } from './lib/corpus.ts';
 import { raizDeCorpusDe, terminar } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
@@ -26,6 +27,22 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await crearTema(rutas, nombre));
+    break;
+  }
+
+  case 'asignar': {
+    /*
+     * Un Tema nuevo casi nunca nace de Citas nuevas: nace de reconocer que un puñado de las
+     * que ya están publicadas hablan de lo mismo. Sin esta orden eso se hacía editando
+     * frontmatter a mano, y la primera vez salió un fallo.
+     */
+    const slugTema = argumentos[1];
+    const slugsDeCitas = argumentos.slice(2).filter((a) => !a.startsWith('--'));
+    if (!slugTema || slugTema.startsWith('--')) {
+      process.stderr.write('Indique el slug del Tema y las Citas a las que asignarlo.\n');
+      process.exit(2);
+    }
+    terminar(await asignarTema(rutas, slugTema, slugsDeCitas));
     break;
   }
 
@@ -62,6 +79,7 @@ switch (orden) {
       [
         'Uso:',
         '  npx tsx tools/tema.ts crear "Nombre del Tema" [--corpus corpus]',
+        '  npx tsx tools/tema.ts asignar <slug-tema> <slug-cita> [<slug-cita>...]',
         '  npx tsx tools/tema.ts eliminar <slug>',
         '  npx tsx tools/tema.ts listar',
         '',

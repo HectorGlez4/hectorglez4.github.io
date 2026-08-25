@@ -226,3 +226,94 @@ export async function marcarAptaParaPortada(
 
 /** Nombre de fichero canónico de una Cita, reexportado para las herramientas. */
 export { nombreDeFicheroDeCita };
+
+/**
+ * Marca un Tema en Citas que **ya están publicadas** — Historia 15.5, tramo de anchura de la Meta.
+ *
+ * Faltaba, y se notó tarde. `crearTema` abre el Tema y `darDeAltaLote` escribe Citas nuevas con
+ * los suyos; poner un Tema a Citas que llevan meses publicadas no lo sabía hacer nadie. Un Tema
+ * nuevo, sin embargo, casi nunca nace de Citas nuevas: nace de reconocer que diecisiete de las
+ * que ya están hablan de lo mismo. Sin esta orden, el tramo de anchura obliga a editar frontmatter
+ * a mano quince veces, y la primera vez que se hizo salió un fallo —el script saltaba las Citas
+ * cuyo **slug** contiene el slug del Tema, que eran justo las más centradas en él—.
+ *
+ * Tres decisiones que la prueba fija:
+ *
+ *   · **Comprueba todo antes de escribir nada.** Un lote con una errata en un slug no deja media
+ *     docena de Citas marcadas y el resto no: se rechaza entero y el corpus queda como estaba.
+ *   · **No toca el texto** (NFR-12). Se lee el frontmatter, se añade una entrada a `temas` y se
+ *     vuelve a escribir; el texto viaja intacto porque nadie lo mira.
+ *   · **Es idempotente y lo dice.** Volver a asignar no duplica la entrada, y el mensaje distingue
+ *     cuántas se marcaron de cuántas ya lo tenían: quien repite un lote necesita saber si hizo
+ *     algo o no.
+ *
+ * Lo que **no** hace es decidir qué Citas van a qué Tema. Eso es curación y se lee una a una,
+ * como las Colecciones: un barrido por palabra clave mete «no quiero ruido con el Santo Oficio»
+ * en el Tema del trabajo.
+ */
+export async function asignarTema(
+  rutas: Rutas,
+  slugTema: string,
+  slugsDeCitas: string[],
+): Promise<Resultado> {
+  const temas = await leerTemas(rutas);
+  if (!temas.some((t) => t.slug === slugTema)) {
+    return {
+      ok: false,
+      motivos: [
+        `El Tema «${slugTema}» no existe. Créelo primero con: npx tsx tools/tema.ts crear "<Nombre>"`,
+      ],
+    };
+  }
+
+  if (slugsDeCitas.length === 0) {
+    return { ok: false, motivos: ['Indique al menos una Cita a la que asignar el Tema.'] };
+  }
+
+  const publicadas = await leerCitas(rutas.citas);
+  const porSlug = new Map(publicadas.map((c) => [c.slug, c]));
+  const noEstan = slugsDeCitas.filter((s) => !porSlug.has(s));
+  if (noEstan.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `No están publicadas: ${noEstan.join(', ')}. Un Tema se asigna a lo publicado, y el ` +
+          'lote se rechaza entero para no dejar unas Citas marcadas y otras no.',
+      ],
+    };
+  }
+
+  let marcadas = 0;
+  let yaLoTenian = 0;
+  for (const slug of new Set(slugsDeCitas)) {
+    const cita = porSlug.get(slug)!;
+    const bruto = await readFile(cita.ruta, 'utf8');
+    const datos = separarFrontmatter(bruto);
+    if (!datos) return { ok: false, motivos: [`El fichero ${cita.ruta} no tiene frontmatter.`] };
+
+    const actuales = Array.isArray(datos.temas) ? (datos.temas as string[]) : [];
+    if (actuales.includes(slugTema)) {
+      yaLoTenian += 1;
+      continue;
+    }
+    datos.temas = [...actuales, slugTema];
+    await escribirCita(rutas.citas, basename(cita.ruta, '.md'), datos);
+    marcadas += 1;
+  }
+
+  const citas = (n: number) => `${n} ${n === 1 ? 'Cita' : 'Citas'}`;
+  return {
+    ok: true,
+    /*
+     * `Resultado` trae una sola `ruta` porque sus hermanas escriben un fichero. Esta escribe
+     * tantos como Citas se marquen, así que devuelve el directorio: es lo único cierto que
+     * cabe en el campo. Quien quiera el detalle lo tiene en el mensaje, que cuenta cuántas.
+     */
+    ruta: rutas.citas,
+    mensaje:
+      `Tema «${slugTema}»: ${citas(marcadas)} marcadas` +
+      (yaLoTenian > 0
+        ? `, ${citas(yaLoTenian)} ya lo ${yaLoTenian === 1 ? 'tenía' : 'tenían'}.`
+        : '.'),
+  };
+}

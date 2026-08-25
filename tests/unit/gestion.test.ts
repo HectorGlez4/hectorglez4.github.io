@@ -4,13 +4,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import {
+  asignarTema,
   crearAutor,
   crearTema,
   editarAutor,
   eliminarTema,
   marcarAptaParaPortada,
 } from '../../tools/lib/gestion.ts';
-import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { leerCitas, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -306,5 +307,123 @@ describe('Historia 11.4 — la tradición del Autor se escribe con la herramient
     if (resultado.ok) return;
     expect(resultado.motivos.join(' ')).toMatch(/latinoamericana/);
     expect((await readdir(rutas.autores)).length).toBe(0);
+  });
+});
+
+/**
+ * Historia 15.5 — asignar un Tema a Citas ya publicadas.
+ *
+ * La orden faltaba. `tema` sabía crear y eliminar, y `alta` sabe escribir Citas nuevas con sus
+ * Temas; marcar un Tema en Citas que **ya están publicadas** no lo sabía hacer nadie, y el
+ * tramo de anchura de la Meta lo pide quince veces seguidas. La primera vez se hizo con un
+ * script a mano y salió un fallo —saltaba las Citas cuyo **slug** contiene el slug del Tema—,
+ * que es exactamente la clase de error que una orden con pruebas no comete dos veces.
+ */
+describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
+  const PRIMERA = 'No hay viento favorable para el que no sabe adónde va.';
+  const SEGUNDA = 'La verdad padece, pero no perece, y siempre acaba por asomar donde menos se la espera.';
+  const FUENTE = {
+    id: 'wikisource-es',
+    nombre: 'Wikisource en español',
+    licencia: 'CC BY-SA 4.0',
+    url: 'https://es.wikisource.org/wiki/De_la_brevedad_de_la_vida',
+  };
+
+  /*
+   * El corpus de prueba versiona un documento **de verdad** y declara la Fuente en las dos
+   * Citas, en vez de apoyarse en que su texto esté en el censo de pendientes de cotejo. Sin
+   * esto la segunda caía a `_revision` —una Cita sin Fuente no publica desde la 11.2— y las
+   * comprobaciones de abajo pasaban recorriendo una lista de una sola Cita.
+   */
+  async function corpusConDosCitas(): Promise<{ rutas: Rutas; slugs: string[] }> {
+    const rutas = await corpusVacio();
+    await mkdir(rutas.fuentes, { recursive: true });
+    await writeFile(
+      join(rutas.fuentes, 'wikisource-es--de-la-brevedad-de-la-vida.txt'),
+      `fuente: wikisource-es\nobra: De la brevedad de la vida\nurl: ${FUENTE.url}\nrecuperado: 2026-08-25\n---\n${PRIMERA}\n${SEGUNDA}\n`,
+      'utf8',
+    );
+    await crearAutor(rutas, SENECA);
+    await crearTema(rutas, 'El tiempo');
+    await crearTema(rutas, 'La verdad');
+    const informe = await darDeAltaLote(
+      [
+        { texto: PRIMERA, autor: 'Séneca', temas: ['El tiempo'], procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
+        { texto: SEGUNDA, autor: 'Séneca', temas: ['El tiempo'], procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
+      ],
+      rutas,
+    );
+    // Si el lote no publicase, las comprobaciones de abajo pasarían recorriendo cero Citas.
+    expect(informe.publicadas.map((c) => c.slug), JSON.stringify(informe.enRevision)).toHaveLength(2);
+    return { rutas, slugs: informe.publicadas.map((c) => c.slug) };
+  }
+
+  it('añade el Tema y conserva los que la Cita ya tenía', async () => {
+    const { rutas, slugs } = await corpusConDosCitas();
+    const resultado = await asignarTema(rutas, 'la-verdad', slugs);
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+    const citas = await leerCitas(rutas.citas);
+    for (const cita of citas) {
+      expect(cita.temas).toContain('la-verdad');
+      expect(cita.temas).toContain('el-tiempo');
+    }
+  });
+
+  it('no toca el texto de la Cita, que es lo que NFR-12 protege', async () => {
+    const { rutas, slugs } = await corpusConDosCitas();
+    const antes = (await leerCitas(rutas.citas)).map((c) => c.texto).sort();
+
+    await asignarTema(rutas, 'la-verdad', slugs);
+
+    expect((await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
+  });
+
+  it('marca la Cita cuyo slug contiene el slug del Tema, que es donde falló el script a mano', async () => {
+    const { rutas, slugs } = await corpusConDosCitas();
+    // «La verdad padece…» genera el slug «seneca-la-verdad-padece-pero-no-perece»: contiene
+    // «la-verdad» como cadena sin tener el Tema. Buscar en el fichero entero la saltaba.
+    const conTrampa = slugs.find((s) => s.includes('la-verdad'));
+    expect(conTrampa, 'el corpus de prueba debe tener esa Cita').toBeDefined();
+
+    await asignarTema(rutas, 'la-verdad', [conTrampa!]);
+
+    const cita = (await leerCitas(rutas.citas)).find((c) => c.slug === conTrampa);
+    expect(cita?.temas).toContain('la-verdad');
+  });
+
+  it('asignar dos veces no duplica el Tema y lo dice', async () => {
+    const { rutas, slugs } = await corpusConDosCitas();
+    await asignarTema(rutas, 'la-verdad', slugs);
+    const segunda = await asignarTema(rutas, 'la-verdad', slugs);
+
+    expect(segunda.ok).toBe(true);
+    if (!segunda.ok) return;
+    expect(segunda.mensaje).toMatch(/ya lo ten|0 Citas/i);
+    const cita = (await leerCitas(rutas.citas))[0]!;
+    expect(cita.temas!.filter((t) => t === 'la-verdad')).toHaveLength(1);
+  });
+
+  it('un Tema que no existe se rechaza y no escribe nada', async () => {
+    const { rutas, slugs } = await corpusConDosCitas();
+    const resultado = await asignarTema(rutas, 'la-muerte', slugs);
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join(' ')).toMatch(/la-muerte/);
+    expect((await leerCitas(rutas.citas))[0]!.temas).not.toContain('la-muerte');
+  });
+
+  it('una Cita que no existe se rechaza nombrándola, y ninguna otra se modifica', async () => {
+    const { rutas, slugs } = await corpusConDosCitas();
+    const resultado = await asignarTema(rutas, 'la-verdad', [...slugs, 'seneca-no-existe']);
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join(' ')).toContain('seneca-no-existe');
+    // Se comprueba antes de escribir: un lote con una errata no deja el corpus a medias.
+    for (const cita of await leerCitas(rutas.citas)) {
+      expect(cita.temas).not.toContain('la-verdad');
+    }
   });
 });

@@ -2320,3 +2320,33 @@ páginas y 430 cotejadas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 
 **Verificado en vivo** (25/08/2026, ejecución 32796002863 en verde): la Página del Tema nuevo
 responde 200 en `https://sabiduriadebolsillo.net/tema/la-verdad` y `sitemap-0.xml` declara **490
 URL**, las mismas del build.
+
+## 15.5 (14.ª sesión) — La orden que faltaba: `tema asignar`
+
+Sin Citas ni Temas nuevos. Se construyó la herramienta que la sesión anterior echó en falta:
+**`npx tsx tools/tema.ts asignar <slug-tema> <slug-cita>...`**, con seis pruebas escritas antes.
+
+**Por qué merecía sesión.** El tramo de anchura pide **quince Temas más**, y un Tema nuevo casi
+nunca nace de Citas nuevas: nace de reconocer que diecisiete de las que ya están hablan de lo
+mismo. `tema` sabía crear y eliminar; `alta` sabe escribir Citas nuevas con sus Temas; marcar un
+Tema en Citas publicadas no lo sabía hacer nadie. Hacerlo a mano quince veces es quince
+oportunidades de repetir el fallo del script, que saltaba las Citas cuyo **slug** contiene el slug
+del Tema —justo las más centradas en él—. Esa es hoy la tercera prueba de la orden.
+
+Lo que la orden fija, y por qué:
+
+- **Comprueba todo antes de escribir nada.** Un lote con una errata en un slug se rechaza entero
+  en vez de dejar media docena marcadas y el resto no.
+- **No toca el texto** (NFR-12): lee el frontmatter, añade una entrada a `temas`, reescribe.
+- **Es idempotente y lo dice**: «0 Citas marcadas, 1 Cita ya lo tenía». Quien repite un lote
+  necesita saber si hizo algo.
+
+**Y de paso, un corpus de prueba que pasaba por casualidad.** Al escribir el caso nuevo, el
+fixture publicaba **una** de las dos Citas y las comprobaciones recorrían esa lista de uno sin
+protestar. La causa: una Cita sin Fuente no publica desde la 11.2 —cae a `_revision`—, y la que
+sí publicaba lo hacía porque su texto está en el censo cerrado de pendientes de cotejo. El fixture
+se apoyaba en esa casualidad. Ahora versiona un documento de verdad en `fuentes/`, declara la
+Fuente en las dos Citas, y **afirma que publican las dos** antes de comprobar nada más.
+
+`npx astro check` 0 errores sobre 190 ficheros; `npx vitest run` **1920/1920** en 62 ficheros
+(seis pruebas nuevas); `npm run build` 490 páginas.
