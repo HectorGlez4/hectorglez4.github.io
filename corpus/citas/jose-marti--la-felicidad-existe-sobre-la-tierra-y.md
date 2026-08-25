@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "la-virtud"
   - "la-vida"
+  - "la-prudencia"
 slug: "jose-marti-la-felicidad-existe-sobre-la-tierra-y"
 procedencia:
   obra: "Maestros ambulantes"

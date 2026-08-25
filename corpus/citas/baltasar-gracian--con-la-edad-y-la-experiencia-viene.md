@@ -3,6 +3,7 @@ texto: "Con la edad y la experiencia viene a sazonarse del todo la razón, y lle
 autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
+  - "la-prudencia"
 slug: "baltasar-gracian-con-la-edad-y-la-experiencia-viene"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

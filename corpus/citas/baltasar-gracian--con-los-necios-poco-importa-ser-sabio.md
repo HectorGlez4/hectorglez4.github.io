@@ -3,6 +3,7 @@ texto: "Con los necios poco importa ser sabio, y con los locos cuerdo: hásele d
 autor: "baltasar-gracian"
 temas:
   - "el-saber"
+  - "la-prudencia"
 slug: "baltasar-gracian-con-los-necios-poco-importa-ser-sabio"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

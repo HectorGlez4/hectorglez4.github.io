@@ -2386,3 +2386,30 @@ páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
 
 **Verificado en vivo** (25/08/2026, ejecución 32798413276 en verde): `/tema/la-riqueza` responde
 200 y `sitemap-0.xml` declara **491 URL**, las mismas del build.
+
+## 15.5 (16.ª sesión) — «La prudencia», y una que no se creó por duplicar
+
+**452 Citas, las mismas. 10 → 11 Temas publicados**, el sitio de 491 a **492 páginas**.
+
+**«La prudencia», con 18 Citas.** Se había quedado en 14 con un patrón estrecho y es el asunto
+central del *Oráculo manual*, así que se amplió la red —`cordura`, `cuerdo`, `atento`, `cautela`,
+`recatado`, `templado`, `moderado`, `prevenir`— y se leyó entera. Es Tema distinto de «el saber»:
+uno es conocer y el otro es acertar. Gracián casi entero, más el «Sé templado en el beber» de
+Cervantes, el «ejercicio prudente de la razón» de Martí y el aviso de Séneca sobre la curiosidad
+inútil.
+
+**Tres falsos positivos más para la colección**, y los tres del mismo tipo: la palabra sin el
+sentido. «ejemplo y **aviso** de lo presente» —aviso es noticia, no consejo—; «la compasión muy
+**discreta**» —discreta es modesta, no juiciosa—; «Dijo un **discreto** que no es necio entero el
+que no sabe latín» —el discreto es quien habla, no el asunto—.
+
+**Y «la fortuna» no se creó, aunque el barrido daba 26.** Contadas, **14 de esas 26 ya están en
+«la adversidad»**: serían dos Temas enseñando casi la misma lista. Es exactamente lo que
+`umbrales.ts` llama «la vía barata de multiplicar páginas indexables», escrito allí a propósito de
+las Colecciones y que vale igual para los Temas. Un Tema nuevo tiene que traer una lista que no se
+pueda ver ya en otra parte.
+
+Van seis asuntos medidos y descartados frente a tres abiertos.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 492
+páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.

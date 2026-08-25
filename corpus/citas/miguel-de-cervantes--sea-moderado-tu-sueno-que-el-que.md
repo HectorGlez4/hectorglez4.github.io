@@ -3,6 +3,7 @@ texto: "Sea moderado tu sue√±o, que el que no madruga con el sol, no goza del d√
 autor: "miguel-de-cervantes"
 temas:
   - "el-tiempo"
+  - "la-prudencia"
 slug: "miguel-de-cervantes-sea-moderado-tu-sueno-que-el-que"
 procedencia:
   obra: "Don Quijote"

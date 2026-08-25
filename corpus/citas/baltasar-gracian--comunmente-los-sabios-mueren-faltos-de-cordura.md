@@ -3,6 +3,7 @@ texto: "Comúnmente, los sabios mueren faltos de cordura; al contrario, los neci
 autor: "baltasar-gracian"
 temas:
   - "el-saber"
+  - "la-prudencia"
 slug: "baltasar-gracian-comunmente-los-sabios-mueren-faltos-de-cordura"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

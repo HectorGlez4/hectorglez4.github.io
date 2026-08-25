@@ -3,6 +3,7 @@ texto: "Ármese cada día de propósitos al espejo de su atención, y así vence
 autor: "baltasar-gracian"
 temas:
   - "la-virtud"
+  - "la-prudencia"
 slug: "baltasar-gracian-armese-cada-dia-de-propositos-al-espejo"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

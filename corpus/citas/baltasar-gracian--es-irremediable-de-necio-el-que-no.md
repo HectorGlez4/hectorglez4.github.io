@@ -3,6 +3,7 @@ texto: "Es irremediable de necio el que no escucha; el más exento ha de dar lug
 autor: "baltasar-gracian"
 temas:
   - "la-amistad"
+  - "la-prudencia"
 slug: "baltasar-gracian-es-irremediable-de-necio-el-que-no"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

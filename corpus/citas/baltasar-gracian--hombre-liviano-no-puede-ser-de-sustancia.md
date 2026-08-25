@@ -3,6 +3,7 @@ texto: "Hombre liviano no puede ser de sustancia, y más si fuere anciano, donde
 autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
+  - "la-prudencia"
 slug: "baltasar-gracian-hombre-liviano-no-puede-ser-de-sustancia"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

@@ -3,6 +3,7 @@ texto: "Atención a no errar una, más que a acertar ciento."
 autor: "baltasar-gracian"
 temas:
   - "la-virtud"
+  - "la-prudencia"
 slug: "baltasar-gracian-atencion-a-no-errar-una-mas-que"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

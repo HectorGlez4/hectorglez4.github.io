@@ -4,6 +4,7 @@ autor: "baltasar-gracian"
 temas:
   - "la-palabra"
   - "la-verdad"
+  - "la-prudencia"
 slug: "baltasar-gracian-gran-asunto-de-la-atencion-no-hablar"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

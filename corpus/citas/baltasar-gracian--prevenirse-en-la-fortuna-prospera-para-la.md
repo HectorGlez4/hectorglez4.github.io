@@ -3,6 +3,7 @@ texto: "Prevenirse en la fortuna próspera para la adversa."
 autor: "baltasar-gracian"
 temas:
   - "la-adversidad"
+  - "la-prudencia"
 slug: "baltasar-gracian-prevenirse-en-la-fortuna-prospera-para-la"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

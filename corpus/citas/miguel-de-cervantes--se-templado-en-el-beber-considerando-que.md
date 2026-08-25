@@ -3,6 +3,7 @@ texto: "Sé templado en el beber, considerando que el vino demasiado ni guarda s
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-prudencia"
 slug: "miguel-de-cervantes-se-templado-en-el-beber-considerando-que"
 procedencia:
   obra: "Don Quijote"

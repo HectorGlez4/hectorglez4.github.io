@@ -3,6 +3,7 @@ texto: "Hay torbellinos en el humano trato, tempestades de voluntad; entonces es
 autor: "baltasar-gracian"
 temas:
   - "la-amistad"
+  - "la-prudencia"
 slug: "baltasar-gracian-hay-torbellinos-en-el-humano-trato-tempestades"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

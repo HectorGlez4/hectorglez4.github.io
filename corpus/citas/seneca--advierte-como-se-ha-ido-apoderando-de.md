@@ -3,6 +3,7 @@ texto: "Advierte cómo se ha ido apoderando de los romanos la inútil curiosidad
 autor: "seneca"
 temas:
   - "el-saber"
+  - "la-prudencia"
 slug: "seneca-advierte-como-se-ha-ido-apoderando-de"
 procedencia:
   obra: "De la brevedad de la vida"

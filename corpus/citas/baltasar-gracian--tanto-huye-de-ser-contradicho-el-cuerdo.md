@@ -3,6 +3,7 @@ texto: "Tanto huye de ser contradicho el cuerdo como de contradecir, lo que es p
 autor: "baltasar-gracian"
 temas:
   - "la-palabra"
+  - "la-prudencia"
 slug: "baltasar-gracian-tanto-huye-de-ser-contradicho-el-cuerdo"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

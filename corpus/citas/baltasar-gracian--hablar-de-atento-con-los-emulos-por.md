@@ -3,6 +3,7 @@ texto: "Hablar de atento: con los émulos, por cautela; con los demás, por dece
 autor: "baltasar-gracian"
 temas:
   - "la-palabra"
+  - "la-prudencia"
 slug: "baltasar-gracian-hablar-de-atento-con-los-emulos-por"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

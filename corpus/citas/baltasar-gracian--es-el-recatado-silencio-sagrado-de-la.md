@@ -3,6 +3,7 @@ texto: "Es el recatado silencio sagrado de la cordura."
 autor: "baltasar-gracian"
 temas:
   - "la-palabra"
+  - "la-prudencia"
 slug: "baltasar-gracian-es-el-recatado-silencio-sagrado-de-la"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"
