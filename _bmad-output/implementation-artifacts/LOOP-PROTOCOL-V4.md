@@ -226,10 +226,24 @@ de fiarse de la nota de una bitácora.
 Lo que el bucle **sí** puede seguir haciendo sin esa decisión, medido y no supuesto:
 
 1. **Ampliar Autores ya admitidos con otras de sus obras.** Es trabajo del bucle —así entraron los
-   82 documentos— y de ahí salieron 309 Citas entre la 39.ª y la 47.ª. La cantera de los dieciséis
-   está muy mermada, pero no agotada: quedan obras en prosa sin recuperar de al menos tres.
-   **Antes de invertir en ninguna: `extraer --seco` y leer la línea del Autor.** Un documento que
-   no declara Autor no se siembra, y comprobarlo cuesta una orden.
+   82 documentos— y de ahí salieron 309 Citas entre la 39.ª y la 47.ª.
+
+   **La cantera NO está agotada, y decir que lo estaba costó trece sesiones sin crecer.** Medido
+   contra la API de Wikisource en la 61.ª y la 62.ª, obra por obra de cada Autor declarado, cruzado
+   con los documentos ya versionados: Quevedo tenía **diecisiete** textos de más de 8 KB sin
+   recuperar, Gracián uno de 95 KB, Machado dos. Nadie lo había medido nunca; se repetía «están
+   casi exprimidos» de bitácora en bitácora. **Mídase antes de repetirlo**, y con pausa entre
+   peticiones: la API responde 429 si se la barre de golpe.
+
+   Dos cosas se comprueban **antes** de invertir en un documento, y las dos cuestan una orden:
+
+   - **`extraer --seco` y leer la línea del Autor.** Si dice «Autor sin cotejar», no se siembra
+     todavía: primero se averigua **por qué**. En la 62.ª esa línea no señalaba un documento sin
+     Autor, sino un lector que no sabía leer la firma en negrita de las páginas anteriores a
+     `{{Encabezado}}` — y así son casi todas las páginas viejas de Quevedo.
+   - **El techo de concentración, contra el recuento de Citas por Autor.** Gracián tiene 95 KB sin
+     recuperar y solo cabe que dé **dos** Citas más; invertir ahí es tirar el trabajo. El margen
+     está donde el Autor tiene pocas Citas, no donde tiene mucha obra.
 2. **Curar Colecciones contra el Corpus que creció bajo ellas.** Sus miembros son una lista escrita
    a mano que no se actualiza sola. Las dieciséis se revisaron entre la 49.ª y la 52.ª —297 → 390
    miembros— y hay que volver a hacerlo cada vez que la siembra avance.

@@ -660,6 +660,48 @@ export function lineasDeEncabezadoDeWikitexto(wikitexto: string): string[] {
   return lineas;
 }
 
+/**
+ * La firma en negrita con la que declaran su Autor las páginas anteriores a la plantilla.
+ *
+ *     '''[[Francisco de Quevedo]]'''
+ *
+ * Wikisource no siempre ha tenido `{{Encabezado}}`, y las páginas que se cargaron antes
+ * declaran a quien firma en su primera línea y en negrita. «Marco Bruto» es una de ellas,
+ * y el lector, que solo sabía leer el parámetro, informaba de que «el documento no declara
+ * autor» sobre un documento que lo declara en su renglón primero: la puerta de FR-23 se
+ * quedaba muda y la atribución se apoyaba entera en lo que dijera la orden.
+ *
+ * **La forma se reconoce estrecha a propósito**: negrita, un enlace, y nada más en la
+ * línea. Una negrita sin enlace es el título de la obra —«'''VIDA DE MARCO BRUTO'''»— y
+ * un enlace con prosa alrededor es texto de la obra, no una firma; admitir cualquiera de
+ * los dos convertiría en Autor a quienquiera que la obra nombre de pasada.
+ *
+ * Y el destino no puede ser una subpágina ni un espacio de nombres de servicio: en las
+ * páginas viejas `'''[[../]]'''` enlaza a la obra que las contiene, no a una persona.
+ */
+const FIRMA_DE_CABECERA_WIKITEXTO = /^'''\s*\[\[([^[\]|]+)(?:\|[^[\]]*)?\]\]\s*'''$/u;
+
+/** Destinos que un enlace en negrita puede tener sin ser jamás una firma de Autor. */
+const DESTINO_QUE_NO_ES_AUTOR = /^(?:\.\.\/|\/|(?:categor[íi]a|category|archivo|file|imagen|image|[íi]ndice|index)\s*:)/iu;
+
+/** La línea de firma tal como la escribió la Fuente, o nada si la página no trae una. */
+export function firmaDeCabeceraDeWikitexto(wikitexto: string): string | undefined {
+  const cabeza = wikitexto.replace(/\r\n?/gu, '\n').slice(0, MAX_CARACTERES_DE_ENCABEZADO);
+  const primera = cabeza.split('\n').map((linea) => linea.trim()).find((linea) => linea !== '');
+  if (primera === undefined) return undefined;
+
+  const encontrado = FIRMA_DE_CABECERA_WIKITEXTO.exec(primera);
+  if (encontrado === null || DESTINO_QUE_NO_ES_AUTOR.test(encontrado[1].trim())) return undefined;
+  return primera.slice(0, MAX_CARACTERES_POR_LINEA);
+}
+
+/** Lo que una línea de la declaración declara como firma, si es que lo es. */
+export function autorDeLaFirma(linea: string): string | undefined {
+  const encontrado = FIRMA_DE_CABECERA_WIKITEXTO.exec(linea.trim());
+  if (encontrado === null || DESTINO_QUE_NO_ES_AUTOR.test(encontrado[1].trim())) return undefined;
+  return linea.trim().replace(/^'''\s*/u, '').replace(/\s*'''$/u, '');
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // La obra que la página declara — Fix 11.1c
 // ─────────────────────────────────────────────────────────────────────────────
@@ -938,6 +980,11 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
       // interpretado convertiría la puerta de la 11.1 en un campo editable.
       return [
         titulo ?? '',
+        // La firma de las páginas sin plantilla, literal y **solo la de la página**: la
+        // del padre haría que toda subpágina de una antología heredara su Autor.
+        ...(encabezadoDeOrigen === undefined
+          ? []
+          : [firmaDeCabeceraDeWikitexto(encabezadoDeOrigen) ?? []].flat()),
         // Delante del recorte de año **a propósito**: esta línea arrastra su propia fecha
         // —«, 191?.»— y detrás de una etiqueta de año vacía se leería como año de la obra.
         ...lineaDeEtiqueta(regionPlana, ETIQUETA_DE_AUTOR_WIKISOURCE),
@@ -1002,6 +1049,20 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         const encontrado = ETIQUETA_DE_AUTOR_WIKISOURCE.exec(linea);
         if (encontrado === null) continue;
         const declarado = autoresDeclarados(linea.slice(encontrado.index + encontrado[0].length));
+        if (declarado !== undefined) return declarado;
+      }
+
+      /*
+       * Y en último lugar, la firma en negrita de las páginas anteriores a la plantilla.
+       *
+       * La última porque es la forma más pobre de las tres: no distingue Autor de
+       * traductor ni declara dos por separado, y se apoya en que la línea esté sola. Las
+       * dos de arriba dicen «esto es el autor»; ésta lo da a entender por su sitio.
+       */
+      for (const linea of loQueDeclaraLaPagina(declaracion).split('\n')) {
+        const firma = autorDeLaFirma(linea);
+        if (firma === undefined) continue;
+        const declarado = autoresDeclarados(firma);
         if (declarado !== undefined) return declarado;
       }
 

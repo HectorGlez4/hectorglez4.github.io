@@ -4403,3 +4403,75 @@ página numerados, o más Citas por página—, y no se toca ningún umbral para
 
 **La meta no está alcanzada y no se emite promesa:** 776 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35, 16 Colecciones de 12 —la única alcanzada—.
+
+## FR-23 (62.ª sesión) — La puerta del Autor llevaba callada todo el rato en las páginas viejas
+
+**776 → 801 Citas. 821 → 846 páginas.** Y esta vez lo que se arregla no es una prueba: es una
+puerta que no se disparaba.
+
+### Lo que pasó al ir a por Quevedo
+
+Medida la cantera de los dieciséis, Quevedo salió como el filón evidente: **29 Citas publicadas y
+diecisiete obras suyas sin recuperar**, con ochenta y siete de margen bajo el techo de
+concentración. Gracián tiene 95 KB sin tocar y solo admite dos Citas más; Quevedo admite casi cien.
+
+Versionado «Marco Bruto» —222 KB de prosa moral—, `extraer --seco` dijo:
+
+    Autor sin cotejar: el documento no declara autor, así que «Francisco de Quevedo» lo pone la
+    orden y nada lo contradice.
+
+**Y el documento sí lo declara**, en su renglón primero. Lo que pasa es que «Marco Bruto» no lleva
+`{{Encabezado}}`: es una página anterior a la plantilla, y declara a quien firma como Wikisource lo
+hacía entonces, en negrita y sola:
+
+    '''[[Francisco de Quevedo]]'''
+
+El lector sabía leer el parámetro `|autor=` y la línea renderizada «Autor:», y nada más. Así que la
+puerta de FR-23 se quedaba muda y la atribución se apoyaba entera en lo que dijera la orden — que
+es exactamente lo que esa puerta existe para impedir. Y no era un caso: **de las diecisiete obras de
+Quevedo sin recuperar, las viejas tienen todas esta forma.**
+
+### El reparto que no se toca
+
+Se versiona **el literal** —`'''[[Francisco de Quevedo]]'''`— y es el lector quien lo interpreta.
+Traducirlo a un `|autor=` al guardarlo habría metido una interpretación disfrazada de literal en la
+declaración, que es justo lo que la 11.1 cerró al sacar el año de la cabecera editable.
+
+La forma se reconoce **estrecha a propósito**, con una prueba por cada manera de equivocarse: una
+negrita sin enlace es el título de la obra —«'''VIDA DE MARCO BRUTO'''»— y un enlace con prosa
+alrededor es texto, no una firma. El destino tampoco puede ser una subpágina: en las páginas viejas
+`'''[[../]]'''` enlaza a la obra que las contiene, no a una persona. Y la firma del padre no aporta
+el Autor de la página, por lo mismo que no aporta la obra: si pudiera, toda subpágina de una
+antología heredaría el Autor de su índice.
+
+Siete pruebas nuevas. Las tres primeras se escribieron contra `derivarDocumento` y **las negativas
+pasaban en vano** —esa función no devuelve Autor, así que comparaban `undefined` con `undefined`—;
+se reescribieron contra `derivarDeLaDeclaracion`, que es el camino real de `extraer`. Una prueba que
+no puede fallar no vigila nada.
+
+Al pasarlas, dos pruebas del Corpus real se pusieron en rojo diciendo la verdad: el único documento
+de los cuarenta y cinco que no declaraba Autor era «Marco Bruto», versionado veinte minutos antes
+del arreglo. Se apartó la copia rancia —no se borró— y se recuperó otra vez. Ahora dice
+**«Autor cotejado»**.
+
+### La siembra
+
+De 1175 candidatas se publican **25**: trece en «la libertad», nueve en «la prudencia», tres en «la
+verdad». Las 1150 restantes **se quedan en revisión, no se rechazan**: son cantera para las
+siguientes sesiones, y rechazarlas sería tirar el trabajo de leerlas otra vez.
+
+El criterio de lectura fue uno solo: **que la sentencia se sostenga sola en su página**. Cae todo lo
+que empieza por un pronombre sin antecedente —«No le mataron porque era tirano…», que es de las
+mejores del libro— porque en su página nadie sabría de quién habla. Y queda fuera, por decisión
+editorial y no por regla, una sentencia del XVII sobre cómo ha de tratarse a las mujeres: el Corpus
+la conserva en revisión, pero no la pone en la página de «la prudencia» como consejo.
+
+El Autor más representado queda en **14,2 %**, más lejos del techo que antes de sembrar.
+
+`npx astro check` 0 errores; `npx vitest run` **2029/2029** en 65 ficheros; `npm run build` **846
+páginas**; `npx playwright test` **412 pasadas y 2 fallos**: las mismas tres Citas que NFR-5 no
+alcanza en tres saltos, ni una más pese a las veinticinco nuevas. Siguen esperando la decisión entre
+NFR-5 y UX-DR18.
+
+**La meta no está alcanzada y no se emite promesa:** 801 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

@@ -1,0 +1,13 @@
+---
+texto: "No rehusaba la conversación, por no ser desapacible; ni la buscaba, por no ser entremetido."
+autor: "francisco-de-quevedo"
+slug: "francisco-de-quevedo-no-rehusaba-la-conversacion-por-no-ser"
+procedencia:
+  obra: "Marco Bruto"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Marco_Bruto"
+---
