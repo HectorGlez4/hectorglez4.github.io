@@ -1,6 +1,8 @@
 ---
 texto: "Tan desnuda anduviera la mentira como la verdad, si la lisonja no la vistiera de todos colores."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-verdad"
 slug: "francisco-de-quevedo-tan-desnuda-anduviera-la-mentira-como-la"
 procedencia:
   obra: "Marco Bruto"

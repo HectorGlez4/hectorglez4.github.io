@@ -1,7 +1,9 @@
 ---
-texto: "¿Qué necedad más ciega que fiar la defensa del homicidio en los cómplices en él, y su fortuna en la facilidad ligera y desenfrenada de la multitud?"
+texto: "Tenía César para la disimulación tan a su mandar sus ojos, que en la cabeza de Pompeyo los hizo reír con lágrimas."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-que-necedad-mas-ciega-que-fiar-la"
+temas:
+  - "la-verdad"
+slug: "francisco-de-quevedo-tenia-cesar-para-la-disimulacion-tan-a"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

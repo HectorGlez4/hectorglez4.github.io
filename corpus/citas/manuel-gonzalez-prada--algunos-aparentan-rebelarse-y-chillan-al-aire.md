@@ -1,7 +1,9 @@
 ---
-texto: "Hay una cosa soberanamente ridícula y vana, dogmatizar; hay un personaje verdaderamente risible y odioso, el inquisidor a la inversa, el sacristán del librepensamiento."
+texto: "Algunos aparentan rebelarse y chillan al aire libre; pero los más se resignan y callan a la sombra del baldaquino."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-hay-una-cosa-soberanamente-ridicula-y-vana"
+temas:
+  - "la-libertad"
+slug: "manuel-gonzalez-prada-algunos-aparentan-rebelarse-y-chillan-al-aire"
 procedencia:
   obra: "Las esclavas de la Iglesia"
 estadoDerechos: "dominio-público"

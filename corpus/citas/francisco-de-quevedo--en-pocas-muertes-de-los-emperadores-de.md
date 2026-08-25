@@ -1,7 +1,9 @@
 ---
-texto: "Mal se asegura la vida de uno cuando en su muerte está la medra de muchos."
+texto: "En pocas muertes de los emperadores de Roma dejó de ser cómplice el Senado."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-mal-se-asegura-la-vida-de-uno"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-en-pocas-muertes-de-los-emperadores-de"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

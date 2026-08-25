@@ -1,6 +1,8 @@
 ---
 texto: "Lejos de inquisidores y tiranos, poseemos un asilo inviolable donde rendimos culto a los dioses que nos place, donde erigimos un trono para los buenos o un patíbulo para los malos."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-lejos-de-inquisidores-y-tiranos-poseemos-un"
 procedencia:
   obra: "Librepensamiento de acción"

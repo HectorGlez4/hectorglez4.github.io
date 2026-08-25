@@ -1,7 +1,9 @@
 ---
-texto: "Tenía César para la disimulación tan a su mandar sus ojos, que en la cabeza de Pompeyo los hizo reír con lágrimas."
+texto: "Hase de poner en el alma tan estrecha reclusión a los pensamientos, que no se les deje salida ni respiradero desde los sentidos a las potencias."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-tenia-cesar-para-la-disimulacion-tan-a"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-hase-de-poner-en-el-alma-tan"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

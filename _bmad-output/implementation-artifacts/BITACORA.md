@@ -4729,3 +4729,42 @@ páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
 
 **La meta no está alcanzada y no se emite promesa:** 867 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.6 (67.ª sesión) — Diecinueve más, y una auditoría que salió limpia
+
+**867 → 886 Citas. 912 → 931 páginas.** Sesión de volumen, sin arreglo: la primera en varias.
+
+### Lo primero, comprobar que las cuatro puertas llegaron a tiempo
+
+Cuatro sesiones seguidas han encontrado una forma nueva de aparato de la Fuente —el pie de
+licencia, el título de la obra, el epígrafe interior y el folio de la edición—, y las cuatro veces la
+puerta se puso **después** de que la forma existiera. La pregunta que faltaba por hacer es si alguna
+se coló antes.
+
+Medido sobre las 867 Citas publicadas: **ninguna** empieza por un epígrafe, ninguna trae el aviso de
+licencia, ninguna nombra a la Fuente y ninguna lleva folio intercalado. Las cuatro puertas llegaron a
+tiempo. Conviene haberlo comprobado en vez de suponerlo, que es la lección que este bucle lleva
+repitiendo.
+
+### La siembra
+
+**19 Citas** de la cantera ya extraída, leídas una por una con el criterio de siempre —que la
+sentencia se sostenga sola en su página—: cuatro en «la libertad», cuatro en «la verdad», cuatro en
+«la prudencia», dos en «el saber», dos en «la vida», dos en «la virtud» y una en «la palabra».
+
+Cae, como siempre, casi todo lo que empieza por un pronombre sin antecedente. Y cae una que era de
+las mejores del lote porque la transcripción escribe un nombre propio en minúscula: publicarla sería
+publicar el descuido de la Fuente con la firma del Autor, y corregirlo sería alterar el texto y
+romper el cotejo. Queda en revisión.
+
+«La felicidad» sigue siendo el Tema más flaco con 18 —por encima del umbral de 15, pero el único que
+no crece—: las obras que hay en la cantera tratan de tiranía, muerte y política, y ninguna la
+alimenta. Está dicho desde la 64.ª y sigue siendo verdad.
+
+El Autor más representado queda en **12,9 %**.
+
+`npx astro check` 0 errores; `npx vitest run` **2064/2064**; `npm run build` **931 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 886 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

@@ -1,7 +1,9 @@
 ---
-texto: "Si el príncipe no sabe por muchos, muchos son los que le engañan; pues quien juzga por lo que oye, y no por lo que entiende, es oreja y no juez."
+texto: "Éste es el riesgo de los monarcas, que ni conocen los matadores cuando los matan, ni la muerte estando muriéndose."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-si-el-principe-no-sabe-por-muchos"
+temas:
+  - "la-vida"
+slug: "francisco-de-quevedo-este-es-el-riesgo-de-los-monarcas"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

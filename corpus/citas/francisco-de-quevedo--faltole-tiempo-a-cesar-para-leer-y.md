@@ -1,7 +1,9 @@
 ---
-texto: "Yo no tengo enemistad con la persona de César, sino con su intento, ni en estas palabras oís mi venganza, sino mi celo."
+texto: "Faltole tiempo a César para leer, y faltole la vida por no haber leído."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-yo-no-tengo-enemistad-con-la-persona"
+temas:
+  - "el-saber"
+slug: "francisco-de-quevedo-faltole-tiempo-a-cesar-para-leer-y"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

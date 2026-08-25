@@ -1,7 +1,9 @@
 ---
-texto: "Yo afirmo que lo bueno en el malo es peor, porque ordinariamente es achaque y no virtud, y lo malo en él es verdad, y lo bueno mentira."
+texto: "Si el príncipe no sabe por muchos, muchos son los que le engañan; pues quien juzga por lo que oye, y no por lo que entiende, es oreja y no juez."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-yo-afirmo-que-lo-bueno-en-el"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-si-el-principe-no-sabe-por-muchos"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

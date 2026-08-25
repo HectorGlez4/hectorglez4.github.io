@@ -1,6 +1,8 @@
 ---
 texto: "Quien afrenta o consiente que afrenten a su enemigo difunto, miserablemente se confiesa dichoso y infamemente cobarde, pues ni pudo vencer su vida valiente ni su muerte disimulado."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-quien-afrenta-o-consiente-que-afrenten-a"
 procedencia:
   obra: "Marco Bruto"

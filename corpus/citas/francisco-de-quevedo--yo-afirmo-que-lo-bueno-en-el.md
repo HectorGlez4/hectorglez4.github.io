@@ -1,7 +1,9 @@
 ---
-texto: "Éste es el riesgo de los monarcas, que ni conocen los matadores cuando los matan, ni la muerte estando muriéndose."
+texto: "Yo afirmo que lo bueno en el malo es peor, porque ordinariamente es achaque y no virtud, y lo malo en él es verdad, y lo bueno mentira."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-este-es-el-riesgo-de-los-monarcas"
+temas:
+  - "la-virtud"
+slug: "francisco-de-quevedo-yo-afirmo-que-lo-bueno-en-el"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

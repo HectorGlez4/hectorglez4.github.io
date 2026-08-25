@@ -1,7 +1,9 @@
 ---
-texto: "El hombre cuerdo no impone, que la imposición hiere el orgullo y suscita la resistencia; manifiesta con hechos que entre un espíritu libre y un devoto las diferencias no abonan al rezador."
+texto: "Hay una cosa soberanamente ridícula y vana, dogmatizar; hay un personaje verdaderamente risible y odioso, el inquisidor a la inversa, el sacristán del librepensamiento."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-el-hombre-cuerdo-no-impone-que-la"
+temas:
+  - "el-saber"
+slug: "manuel-gonzalez-prada-hay-una-cosa-soberanamente-ridicula-y-vana"
 procedencia:
   obra: "Las esclavas de la Iglesia"
 estadoDerechos: "dominio-público"

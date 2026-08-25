@@ -1,7 +1,9 @@
 ---
-texto: "Hase de poner en el alma tan estrecha reclusión a los pensamientos, que no se les deje salida ni respiradero desde los sentidos a las potencias."
+texto: "Es matador invisible a la guarda de los monarcas; éntrales la muerte por los oídos, envainada en palabras halagüeñas."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-hase-de-poner-en-el-alma-tan"
+temas:
+  - "la-palabra"
+slug: "francisco-de-quevedo-es-matador-invisible-a-la-guarda-de"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"
