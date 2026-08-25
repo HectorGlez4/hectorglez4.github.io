@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "la-virtud"
   - "la-riqueza"
+  - "la-felicidad"
 slug: "jose-marti-un-pueblo-virtuoso-vivira-mas-feliz-y"
 procedencia:
   obra: "Educación popular"

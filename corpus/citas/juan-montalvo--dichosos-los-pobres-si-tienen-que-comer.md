@@ -4,6 +4,7 @@ autor: "juan-montalvo"
 temas:
   - "la-virtud"
   - "la-riqueza"
+  - "la-felicidad"
 slug: "juan-montalvo-dichosos-los-pobres-si-tienen-que-comer"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

@@ -3,6 +3,7 @@ texto: "Pierden el día esperando la noche, y la noche con el temor del día; y 
 autor: "seneca"
 temas:
   - "el-tiempo"
+  - "la-felicidad"
 slug: "seneca-pierden-el-dia-esperando-la-noche-y"
 procedencia:
   obra: "De la brevedad de la vida"

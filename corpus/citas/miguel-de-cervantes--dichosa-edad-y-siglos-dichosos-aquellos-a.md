@@ -3,6 +3,7 @@ texto: "Dichosa edad y siglos dichosos aquéllos a quien los antiguos pusieron n
 autor: "miguel-de-cervantes"
 temas:
   - "el-tiempo"
+  - "la-felicidad"
 slug: "miguel-de-cervantes-dichosa-edad-y-siglos-dichosos-aquellos-a"
 procedencia:
   obra: "Don Quijote"

@@ -3,6 +3,7 @@ texto: "A muchos les sobra la vida y se les acaba la felicidad."
 autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
+  - "la-felicidad"
 slug: "baltasar-gracian-a-muchos-les-sobra-la-vida-y"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

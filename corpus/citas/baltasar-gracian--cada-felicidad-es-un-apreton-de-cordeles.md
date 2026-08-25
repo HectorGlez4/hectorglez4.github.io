@@ -3,6 +3,7 @@ texto: "Cada felicidad es un apretón de cordeles al mal afecto, y es un infiern
 autor: "baltasar-gracian"
 temas:
   - "la-adversidad"
+  - "la-felicidad"
 slug: "baltasar-gracian-cada-felicidad-es-un-apreton-de-cordeles"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

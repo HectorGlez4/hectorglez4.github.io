@@ -4,6 +4,7 @@ autor: "jose-marti"
 temas:
   - "la-virtud"
   - "la-vida"
+  - "la-felicidad"
 slug: "jose-marti-ser-bueno-es-el-unico-modo-de"
 procedencia:
   obra: "Maestros ambulantes"

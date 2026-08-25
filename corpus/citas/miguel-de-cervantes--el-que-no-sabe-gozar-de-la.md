@@ -3,6 +3,7 @@ texto: "el que no sabe gozar de la ventura cuando le viene, que no se debe queja
 autor: "miguel-de-cervantes"
 temas:
   - "la-adversidad"
+  - "la-felicidad"
 slug: "miguel-de-cervantes-el-que-no-sabe-gozar-de-la"
 procedencia:
   obra: "Don Quijote"

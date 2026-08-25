@@ -4,6 +4,7 @@ autor: "miguel-de-cervantes"
 temas:
   - "la-vida"
   - "la-riqueza"
+  - "la-felicidad"
 slug: "miguel-de-cervantes-la-mejor-salsa-del-mundo-es-la"
 procedencia:
   obra: "Don Quijote"

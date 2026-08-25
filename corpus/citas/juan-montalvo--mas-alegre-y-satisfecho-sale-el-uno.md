@@ -3,6 +3,7 @@ texto: "Más alegre y satisfecho sale el uno de su merienda parca y bien ganada,
 autor: "juan-montalvo"
 temas:
   - "la-virtud"
+  - "la-felicidad"
 slug: "juan-montalvo-mas-alegre-y-satisfecho-sale-el-uno"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

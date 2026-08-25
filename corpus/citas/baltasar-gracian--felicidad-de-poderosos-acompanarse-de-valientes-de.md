@@ -3,6 +3,7 @@ texto: "Felicidad de poderosos: acompañarse de valientes de entendimiento que l
 autor: "baltasar-gracian"
 temas:
   - "la-amistad"
+  - "la-felicidad"
 slug: "baltasar-gracian-felicidad-de-poderosos-acompanarse-de-valientes-de"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

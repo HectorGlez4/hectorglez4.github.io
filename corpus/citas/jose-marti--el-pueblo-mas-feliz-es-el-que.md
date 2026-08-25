@@ -3,6 +3,7 @@ texto: "El pueblo más feliz es el que tenga mejor educados a sus hijos, en la i
 autor: "jose-marti"
 temas:
   - "el-saber"
+  - "la-felicidad"
 slug: "jose-marti-el-pueblo-mas-feliz-es-el-que"
 procedencia:
   obra: "Educación popular"

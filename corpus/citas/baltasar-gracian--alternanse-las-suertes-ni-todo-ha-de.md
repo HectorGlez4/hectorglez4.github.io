@@ -3,6 +3,7 @@ texto: "Altérnanse las suertes: ni todo ha de ser felicidad, ni todo adversidad
 autor: "baltasar-gracian"
 temas:
   - "la-adversidad"
+  - "la-felicidad"
 slug: "baltasar-gracian-alternanse-las-suertes-ni-todo-ha-de"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

@@ -2481,3 +2481,32 @@ evidencia.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 492
 páginas.
+
+## 15.5 (19.ª sesión) — «La felicidad», y la prueba de distinción aplicada al revés
+
+**452 Citas, las mismas. 11 → 12 Temas publicados**, el sitio de 492 a **493 páginas**. La mitad
+del tramo de anchura, sin haber sembrado una Cita desde la 11.ª sesión.
+
+Medidos ocho asuntos nuevos —la vejez 22, la felicidad 30, el amor 17, la educación 20, la guerra
+15, el miedo 6, la costumbre 8, la naturaleza 22—, se eligió el más distinto de los once que ya
+había. «La educación» solapa con «el saber», «la vejez» con «el tiempo»; **de la felicidad no
+habla ningún Tema del Corpus**.
+
+**«La felicidad», con 15 Citas: justo el umbral.** Y ahí estuvo la decisión de la sesión. De las
+30 del barrido, quince son ruido del tipo ya conocido —«buen **gusto**», «se pegan los **gustos**
+con el trato»: gusto es paladar, no alegría—. Las quince que quedan son exactas, ni una de más
+para llegar, y por eso se aplicó al revés la prueba que descartó «la fortuna»: allí **14 de 26
+salían de un solo Tema** —«la adversidad»— y por eso era duplicar. Aquí la lista viene repartida
+de cuatro sitios distintos —la riqueza aporta 4, la adversidad 1, y el resto de la vida y la
+virtud—, así que no reproduce ninguna lista existente.
+
+Entran «A muchos les sobra la vida y se les acaba la felicidad» de Gracián, «Ser bueno es el único
+modo de ser dichoso» y «El pueblo más feliz es el que tenga mejor educados a sus hijos» de Martí,
+«Donde la necesidad y la comodidad se dan la mano, allí está la felicidad» de Montalvo, «Dichosa
+edad y siglos dichosos» de Cervantes, y el «Pierden el día esperando la noche, y la noche con el
+temor del día» de Séneca.
+
+Van **catorce asuntos medidos: cuatro abiertos y diez descartados.**
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 493
+páginas; `npx playwright test` **394 pasadas**, 14 saltadas, 0 fallos.
