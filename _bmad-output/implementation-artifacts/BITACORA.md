@@ -4361,3 +4361,45 @@ páginas**; `npx playwright test` 2 fallos —los de NFR-5—, 412 pasadas.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-24 (61.ª sesión) — «Estaban casi exprimidos» era una suposición, y era falsa
+
+**761 → 776 Citas. 806 → 821 páginas.** El sitio llevaba trece sesiones sin crecer, y yo llevaba
+trece sesiones repitiendo que la cantera de los dieciséis Autores admitidos estaba agotada. Nunca lo
+había medido.
+
+### Lo que salió al medirlo
+
+Un guion contra la API de Wikisource, obra por obra de cada Autor declarado, cruzado con los 82
+documentos ya versionados. **«Juan de Mairena» —37 KB, en prosa, de un Autor ya admitido— no estaba
+recuperado.** Ni «Abel Martín» (36 KB) ni «La tierra de Alvargonzález» (23 KB).
+
+Recuperado el documento: **166 candidatas**, cotejo de Autor en seco superado antes de invertir nada
+—la lección de la 48.ª—. Publicadas **15**: ocho a «la palabra», tres a «la vida», dos a «el tiempo»
+y dos a «la verdad». Rechazadas 151, que es la proporción normal del ensayo filosófico moderno.
+
+**Ninguna decisión de Héctor hizo falta.** El tramo declarado sigue siendo admitir Autores nuevos y
+sigue reservado; esto es otra cosa: obra sin extraer de un Autor que ya está dentro.
+
+El Autor más representado **baja del 15,0 % al 14,7 %** aunque se le sumen quince Citas, porque el
+denominador crece más deprisa que él.
+
+### Y una prueba que afirmaba de un Autor algo que dejó de ser cierto
+
+Dos pruebas fijaban `antonio-machado` y daban por hecho que sus Citas cabían en una página. Tenía 36
+y la página son 50 — hasta que estas quince lo dejaron en **51**, y las dos se pusieron en rojo:
+«esperaba 51, recibió 50» y «esperaba 0 paginadores, recibió 1». Las dos decían la verdad.
+
+No se cambia un nombre fijado por otro, que sería el mismo fallo esperando a la siguiente siembra.
+Se añade `autorEnUnaPagina()` al ayudante del Corpus, que **pregunta** por uno que hoy quepa y
+devuelve el de más Citas entre ésos, para que la prueba siga siendo exigente y no pase mirando a un
+Autor de tres. `MACHADO` se queda solo donde se comprueba su semblanza, que no depende del recuento.
+Van 30 pruebas de Playwright arregladas por esta misma causa en dos sesiones.
+
+`npx astro check` 0 errores; `npx vitest run` **2020/2020** en 64 ficheros; `npm run build` **821
+páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los mismos de siempre: las tres Citas
+que NFR-5 no alcanza en tres saltos. Siguen esperando la decisión entre NFR-5 y UX-DR18 —enlaces de
+página numerados, o más Citas por página—, y no se toca ningún umbral para taparlo.
+
+**La meta no está alcanzada y no se emite promesa:** 776 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35, 16 Colecciones de 12 —la única alcanzada—.

@@ -13,7 +13,7 @@
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
 
@@ -108,4 +108,30 @@ export function textoDe(slug: string): string {
     return campo(contenido, 'texto')!;
   }
   throw new Error(`No hay ninguna Cita con el slug «${slug}» en el Corpus.`);
+}
+
+/**
+ * Un Autor cuyas Citas **caben en una sola página**, con su recuento.
+ *
+ * Dos pruebas fijaban un Autor concreto y daban por hecho que cabía: «se ven todas sus Citas» y
+ * «con pocas Citas no aparece paginación». Tenía 36 y la página son 50 — hasta que una siembra
+ * lo dejó en 51 y las dos se pusieron rojas afirmando algo que ya no era cierto de él.
+ *
+ * No se cambia un nombre fijado por otro, que sería el mismo fallo esperando a la siguiente
+ * siembra: se pregunta al Corpus por uno que hoy quepa. Se elige el de **más** Citas entre los
+ * que caben, para que la prueba siga siendo exigente y no pase mirando un Autor de tres.
+ */
+export function autorEnUnaPagina(): { slug: string; citas: number } | undefined {
+  const cuenta = new Map<string, number>();
+  for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
+    const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
+    const autor = campo(contenido, 'autor');
+    if (autor !== undefined) cuenta.set(autor, (cuenta.get(autor) ?? 0) + 1);
+  }
+
+  const caben = [...cuenta.entries()]
+    .filter(([, n]) => n > 0 && n <= CITAS_POR_PAGINA)
+    .sort((a, b) => b[1] - a[1]);
+  const elegido = caben[0];
+  return elegido === undefined ? undefined : { slug: elegido[0], citas: elegido[1] };
 }

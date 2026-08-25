@@ -1,8 +1,16 @@
 import { expect, test } from '@playwright/test';
+import { autorEnUnaPagina } from './ayuda/corpus.ts';
 
 /** Historia 2.3 — Página de Autor. */
 
 const MACHADO = '/autor/antonio-machado';
+
+/*
+ * El Autor de las pruebas que miran el listado entero **se deriva**: el que estaba fijado tenía
+ * 36 Citas y la página son 50, hasta que una siembra lo dejó en 51. `MACHADO` se queda solo donde
+ * lo que se comprueba es su semblanza, que no depende de cuántas Citas tenga.
+ */
+const enUnaPagina = autorEnUnaPagina();
 
 test.describe('Historia 2.3 — ficha y listado de Autor', () => {
   test('se ve la semblanza en un párrafo breve', async ({ page }) => {
@@ -13,16 +21,18 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
   });
 
   test('se ven todas sus Citas publicadas, cada una enlazada a su página', async ({ page, request }) => {
-    await page.goto(MACHADO);
+    test.skip(enUnaPagina === undefined, 'Ningún Autor del Corpus cabe hoy en una sola página.');
+    await page.goto(`/autor/${enUnaPagina!.slug}`);
     const enlaces = page.locator('.listado li a');
 
     // El número sale del sitio construido, no de una constante repetida en la prueba.
     const sitemap = await (await request.get('/sitemap-0.xml')).text();
-    const suyas = [...sitemap.matchAll(/\/cita\/(antonio-machado-[^<]+)</g)].length;
+    const patron = new RegExp(`/cita/(${enUnaPagina!.slug}-[^<]+)<`, 'g');
+    const suyas = [...sitemap.matchAll(patron)].length;
 
     await expect(enlaces).toHaveCount(suyas);
     for (const href of await enlaces.evaluateAll((ns) => ns.map((n) => n.getAttribute('href')))) {
-      expect(href).toMatch(/^\/cita\/antonio-machado-/);
+      expect(href).toMatch(new RegExp(`^/cita/${enUnaPagina!.slug}-`));
     }
   });
 
@@ -73,7 +83,8 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
   });
 
   test('con pocas Citas no aparece paginación', async ({ page }) => {
-    await page.goto(MACHADO);
+    test.skip(enUnaPagina === undefined, 'Ningún Autor del Corpus cabe hoy en una sola página.');
+    await page.goto(`/autor/${enUnaPagina!.slug}`);
     await expect(page.locator('nav[aria-label*="Paginación"]')).toHaveCount(0);
   });
 
