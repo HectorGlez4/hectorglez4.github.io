@@ -1,7 +1,9 @@
 ---
-texto: "No necesita el brazo de Dios de nuestros puñales para sus castigos, ni de nuestras manos para sus venganzas."
+texto: "Justo es que quien difiere a otro tiempo su remedio, no alcance remedio ni tiempo."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-no-necesita-el-brazo-de-dios-de"
+temas:
+  - "el-tiempo"
+slug: "francisco-de-quevedo-justo-es-que-quien-difiere-a-otro"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

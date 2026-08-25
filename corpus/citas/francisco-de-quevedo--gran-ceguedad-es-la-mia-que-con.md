@@ -1,7 +1,9 @@
 ---
-texto: "¡Oh, ceguedad del hombre, que no sabiendo lo que es y olvidando lo que fue, quiere saber lo que será!"
+texto: "¡Gran ceguedad es la mía, que con vanidad de maestro estoy enseñando estas cosas a los príncipes de quien las aprendo!"
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-oh-ceguedad-del-hombre-que-no-sabiendo"
+temas:
+  - "el-saber"
+slug: "francisco-de-quevedo-gran-ceguedad-es-la-mia-que-con"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

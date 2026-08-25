@@ -1,6 +1,8 @@
 ---
 texto: "Conocerse en sí mismo no lo permite la propia afición; conocerse en los otros no lo sufre la trascendental adulación."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-conocerse-en-si-mismo-no-lo-permite"
 procedencia:
   obra: "El político"

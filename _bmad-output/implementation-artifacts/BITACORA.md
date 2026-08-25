@@ -4871,3 +4871,41 @@ hizo al revés.
 
 **La meta no está alcanzada y no se emite promesa:** 915 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## 15.6 (70.ª sesión) — El techo cortó la siembra por la mitad, y se dice
+
+**915 → 933 Citas. 960 → 978 páginas.**
+
+### La cuenta que decidió qué se podía publicar
+
+La cantera abierta ayer daba once Citas buenas de un solo Autor. **No se publicaron once.** La
+aritmética del techo, hecha *antes* de aprobar:
+
+    129 + n ≤ 0,15 × (915 + n)   →   n ≤ 9
+
+Con once, ese Autor habría quedado en 140 sobre 926: **15,1 %**, por encima del techo. Y el techo no
+se toca. Lo que se hizo fue **sembrar también de otra cantera**, porque cada Cita de otro Autor sube
+el techo de todos: nueve de aquélla y nueve de ésta dejan al más representado en 138 de 933, **14,8 %**.
+
+Conviene que quede escrito con la fórmula delante, porque es la tercera vez que este techo decide
+trabajo y la primera que lo hace **recortándolo**: en la 42.ª se descubrió después de sembrar —y hubo
+que diluir durante siete sesiones—, en la 68.ª se anotó como aviso, y hoy ha cortado una siembra por
+la mitad antes de tocar nada.
+
+Dicho de otro modo: **la meta de 1000 no la limita ya la cantera, la limita el reparto.** Quedan
+candidatas de sobra; lo que escasea son Autores con hueco.
+
+### La siembra
+
+**18 Citas**: seis en «el tiempo», dos en «la prudencia», dos en «el saber», dos en «la verdad», dos
+en «la libertad», y una en «la amistad», «la adversidad», «la virtud» y «la palabra».
+
+Cae otra vez, y van dos sesiones, una sentencia por su cláusula sobre las mujeres. Y cae una de las
+mejores del lote —«Con ella los mancebos son ancianos, y sin ella los ancianos son mancebos»— porque
+ese «ella» es la prudencia del párrafo anterior y en su página no lo sabría nadie.
+
+`npx astro check` 0 errores; `npx vitest run` **2074/2074**; `npm run build` **978 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 933 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.

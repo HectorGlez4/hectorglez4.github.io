@@ -1,7 +1,9 @@
 ---
-texto: "Hasta ahora hemos sabido todos que Roma es nuestra madre; hoy apenas sabe Roma quién de todos es su hijo."
+texto: "No necesita el brazo de Dios de nuestros puñales para sus castigos, ni de nuestras manos para sus venganzas."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-hasta-ahora-hemos-sabido-todos-que-roma"
+temas:
+  - "la-virtud"
+slug: "francisco-de-quevedo-no-necesita-el-brazo-de-dios-de"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

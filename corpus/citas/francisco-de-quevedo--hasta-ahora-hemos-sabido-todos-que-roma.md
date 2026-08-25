@@ -1,7 +1,9 @@
 ---
-texto: "Grande dolor es sentir mucho, y grande enfermedad no sentir nada: esto es ya de muerto, aquello aún es de vivo."
+texto: "Hasta ahora hemos sabido todos que Roma es nuestra madre; hoy apenas sabe Roma quién de todos es su hijo."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-grande-dolor-es-sentir-mucho-y-grande"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-hasta-ahora-hemos-sabido-todos-que-roma"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

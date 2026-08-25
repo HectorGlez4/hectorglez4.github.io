@@ -1,6 +1,8 @@
 ---
 texto: "Compitieron en Fernando el caudal y la aplicación para componer un rey perfecto, un monarca máximo: cuarenta años reinó, sin desperdiciar uno tan sólo, y obró más que cuarenta reyes juntos."
 autor: "baltasar-gracian"
+temas:
+  - "el-tiempo"
 slug: "baltasar-gracian-compitieron-en-fernando-el-caudal-y-la"
 procedencia:
   obra: "El político"

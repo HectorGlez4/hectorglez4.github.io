@@ -1,7 +1,9 @@
 ---
-texto: "Justo es que quien difiere a otro tiempo su remedio, no alcance remedio ni tiempo."
+texto: "Marco Bruto y Casio, por darse muerte sin tiempo y aceleradamente, acabaron de perder las reliquias de la libertad romana."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-justo-es-que-quien-difiere-a-otro"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-marco-bruto-y-casio-por-darse-muerte"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

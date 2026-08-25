@@ -1,7 +1,9 @@
 ---
-texto: "¡Gran ceguedad es la mía, que con vanidad de maestro estoy enseñando estas cosas a los príncipes de quien las aprendo!"
+texto: "¡Oh, ceguedad del hombre, que no sabiendo lo que es y olvidando lo que fue, quiere saber lo que será!"
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-gran-ceguedad-es-la-mia-que-con"
+temas:
+  - "el-tiempo"
+slug: "francisco-de-quevedo-oh-ceguedad-del-hombre-que-no-sabiendo"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

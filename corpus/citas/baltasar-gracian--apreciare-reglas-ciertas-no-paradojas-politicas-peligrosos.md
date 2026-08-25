@@ -1,7 +1,9 @@
 ---
-texto: "Acabáronseles a muchos con los floridos años los felices sucesos, y perdió Pompeyo en la vejez cuanto adquirió en su gallarda mocedad."
+texto: "Apreciaré reglas ciertas, no paradojas políticas, peligrosos ensanches de la razón, estimando más la seguridad que la novedad."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-acabaronseles-a-muchos-con-los-floridos-anos"
+temas:
+  - "la-prudencia"
+slug: "baltasar-gracian-apreciare-reglas-ciertas-no-paradojas-politicas-peligrosos"
 procedencia:
   obra: "El político"
   año: 1640

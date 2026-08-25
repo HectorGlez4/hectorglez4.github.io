@@ -1,7 +1,9 @@
 ---
-texto: "Por no querer perder Galieno una flor de sus jardines, dejó perder veinte provincias y sufrió que se le alzasen treinta tiranos."
+texto: "Dura en la vasija largo tiempo el buen o mal olor del primer licor que tuvo."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-por-no-querer-perder-galieno-una-flor"
+temas:
+  - "el-tiempo"
+slug: "baltasar-gracian-dura-en-la-vasija-largo-tiempo-el"
 procedencia:
   obra: "El político"
   año: 1640

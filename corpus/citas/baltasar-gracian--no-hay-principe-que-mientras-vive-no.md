@@ -1,7 +1,9 @@
 ---
-texto: "De algunos simples y de locos hicieron príncipes muy prudentes oráculos de la verdad, que ya ellos solos la dicen."
+texto: "No hay príncipe que, mientras vive, no sea entre sus lisonjeros héroe, entre los demás tolerado, pero después entra haciendo justicia la enterísima verdad."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-de-algunos-simples-y-de-locos-hicieron"
+temas:
+  - "la-verdad"
+slug: "baltasar-gracian-no-hay-principe-que-mientras-vive-no"
 procedencia:
   obra: "El político"
   año: 1640

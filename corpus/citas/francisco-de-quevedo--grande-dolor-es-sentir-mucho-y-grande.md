@@ -1,7 +1,9 @@
 ---
-texto: "Marco Bruto y Casio, por darse muerte sin tiempo y aceleradamente, acabaron de perder las reliquias de la libertad romana."
+texto: "Grande dolor es sentir mucho, y grande enfermedad no sentir nada: esto es ya de muerto, aquello aún es de vivo."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-marco-bruto-y-casio-por-darse-muerte"
+temas:
+  - "la-adversidad"
+slug: "francisco-de-quevedo-grande-dolor-es-sentir-mucho-y-grande"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"
