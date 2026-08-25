@@ -3,6 +3,7 @@ texto: "No son ociosos aquellos cuyos deleites los traen afanados, y nadie duda 
 autor: "seneca"
 temas:
   - "la-vida"
+  - "el-trabajo"
 slug: "seneca-no-son-ociosos-aquellos-cuyos-deleites-los"
 procedencia:
   obra: "De la brevedad de la vida"

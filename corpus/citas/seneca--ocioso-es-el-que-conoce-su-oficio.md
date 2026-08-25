@@ -3,6 +3,7 @@ texto: "Ocioso es el que conoce su oficio; pero el que para entender sus accione
 autor: "seneca"
 temas:
   - "la-vida"
+  - "el-trabajo"
 slug: "seneca-ocioso-es-el-que-conoce-su-oficio"
 procedencia:
   obra: "De la brevedad de la vida"

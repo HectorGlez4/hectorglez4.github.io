@@ -3,6 +3,7 @@ texto: "Nada de extraño que los viejos de hoy copien fielmente a los viejos de 
 autor: "manuel-gonzalez-prada"
 temas:
   - "el-tiempo"
+  - "el-miedo"
 slug: "manuel-gonzalez-prada-nada-de-extrano-que-los-viejos-de"
 procedencia:
   obra: "Librepensamiento de acción"

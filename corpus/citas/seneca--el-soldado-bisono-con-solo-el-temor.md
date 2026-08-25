@@ -3,6 +3,7 @@ texto: "El soldado bisoño con sólo el temor de las heridas se espanta; mas el 
 autor: "seneca"
 temas:
   - "la-adversidad"
+  - "el-miedo"
 slug: "seneca-el-soldado-bisono-con-solo-el-temor"
 procedencia:
   obra: "De la Divina Providencia"

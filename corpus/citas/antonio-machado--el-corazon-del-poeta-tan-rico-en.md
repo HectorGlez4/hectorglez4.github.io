@@ -3,6 +3,7 @@ texto: "El corazón del poeta, tan rico en sonoridades, es casi un insulto a la 
 autor: "antonio-machado"
 temas:
   - "la-palabra"
+  - "el-trabajo"
 slug: "antonio-machado-el-corazon-del-poeta-tan-rico-en"
 procedencia:
   obra: "Juan de Mairena"

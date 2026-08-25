@@ -3,6 +3,7 @@ texto: "Para destruir en algunas horas el trabajo de la Humanidad en muchos sigl
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
+  - "el-trabajo"
 slug: "manuel-gonzalez-prada-para-destruir-en-algunas-horas-el-trabajo"
 procedencia:
   obra: "El deber anárquico"

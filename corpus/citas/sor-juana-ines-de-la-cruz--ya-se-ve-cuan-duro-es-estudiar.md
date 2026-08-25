@@ -3,6 +3,7 @@ texto: "Ya se ve cuán duro es estudiar en aquellos caracteres sin alma, carecie
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "sor-juana-ines-de-la-cruz-ya-se-ve-cuan-duro-es-estudiar"
 procedencia:
   obra: "Respuesta a Sor Filotea de la Cruz"

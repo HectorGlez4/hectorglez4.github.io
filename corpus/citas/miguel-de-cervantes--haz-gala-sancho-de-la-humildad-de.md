@@ -3,6 +3,7 @@ texto: "Haz gala, Sancho, de la humildad de tu linaje, y no te desprecies de dec
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "el-trabajo"
 slug: "miguel-de-cervantes-haz-gala-sancho-de-la-humildad-de"
 procedencia:
   obra: "Don Quijote"

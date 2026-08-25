@@ -3,6 +3,7 @@ texto: "Quien afrenta o consiente que afrenten a su enemigo difunto, miserableme
 autor: "francisco-de-quevedo"
 temas:
   - "la-virtud"
+  - "el-miedo"
 slug: "francisco-de-quevedo-quien-afrenta-o-consiente-que-afrenten-a"
 procedencia:
   obra: "Marco Bruto"

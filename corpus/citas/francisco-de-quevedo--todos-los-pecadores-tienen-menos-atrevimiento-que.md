@@ -3,6 +3,7 @@ texto: "Todos los pecadores tienen menos atrevimiento que el hipócrita, pues el
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "el-miedo"
 slug: "francisco-de-quevedo-todos-los-pecadores-tienen-menos-atrevimiento-que"
 procedencia:
   obra: "El mundo por dentro"

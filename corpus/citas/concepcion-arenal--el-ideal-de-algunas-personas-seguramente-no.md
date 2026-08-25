@@ -3,6 +3,7 @@ texto: "El ideal de algunas personas, seguramente no bello, es que el trabajador
 autor: "concepcion-arenal"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "concepcion-arenal-el-ideal-de-algunas-personas-seguramente-no"
 procedencia:
   obra: "La instrucción del obrero"

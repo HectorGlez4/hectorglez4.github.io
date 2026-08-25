@@ -3,6 +3,7 @@ texto: "Consiguen con su sudor lo que desean, y poseen con ansias lo que adquiri
 autor: "seneca"
 temas:
   - "la-vida"
+  - "el-trabajo"
 slug: "seneca-consiguen-con-su-sudor-lo-que-desean"
 procedencia:
   obra: "De la brevedad de la vida"

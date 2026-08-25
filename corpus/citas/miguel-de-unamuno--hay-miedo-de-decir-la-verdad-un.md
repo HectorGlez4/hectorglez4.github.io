@@ -3,6 +3,7 @@ texto: "Hay miedo de decir la verdad, un miedo cerval, y más que miedo á perde
 autor: "miguel-de-unamuno"
 temas:
   - "la-verdad"
+  - "el-miedo"
 slug: "miguel-de-unamuno-hay-miedo-de-decir-la-verdad-un"
 procedencia:
   obra: "Sobre la tumba de Costa"

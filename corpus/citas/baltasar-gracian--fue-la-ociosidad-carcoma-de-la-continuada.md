@@ -3,6 +3,7 @@ texto: "Fue la ociosidad carcoma de la continuada felicidad de España, manantia
 autor: "baltasar-gracian"
 temas:
   - "la-virtud"
+  - "el-trabajo"
 slug: "baltasar-gracian-fue-la-ociosidad-carcoma-de-la-continuada"
 procedencia:
   obra: "El político"

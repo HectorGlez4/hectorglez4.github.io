@@ -3,6 +3,7 @@ texto: "Quien por vivir queda esclavo, no sabe que la esclavitud no merece nombr
 autor: "francisco-de-quevedo"
 temas:
   - "la-libertad"
+  - "el-miedo"
 slug: "francisco-de-quevedo-quien-por-vivir-queda-esclavo-no-sabe"
 procedencia:
   obra: "Marco Bruto"

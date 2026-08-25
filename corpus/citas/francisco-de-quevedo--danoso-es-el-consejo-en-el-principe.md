@@ -3,6 +3,7 @@ texto: "Dañoso es el consejo en el príncipe que no sabe temerle como tomarle."
 autor: "francisco-de-quevedo"
 temas:
   - "la-prudencia"
+  - "el-miedo"
 slug: "francisco-de-quevedo-danoso-es-el-consejo-en-el-principe"
 procedencia:
   obra: "Marco Bruto"

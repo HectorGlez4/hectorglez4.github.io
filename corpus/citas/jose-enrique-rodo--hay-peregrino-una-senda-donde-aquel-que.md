@@ -4,6 +4,7 @@ autor: "jose-enrique-rodo"
 temas:
   - "la-adversidad"
   - "la-verdad"
+  - "el-miedo"
 slug: "jose-enrique-rodo-hay-peregrino-una-senda-donde-aquel-que"
 procedencia:
   obra: "Motivos de Proteo"

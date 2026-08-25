@@ -3,6 +3,7 @@ texto: "A las antiguas ocupaciones sustituyen otras de nuevo; una esperanza desp
 autor: "seneca"
 temas:
   - "la-vida"
+  - "el-trabajo"
 slug: "seneca-a-las-antiguas-ocupaciones-sustituyen-otras-de"
 procedencia:
   obra: "De la brevedad de la vida"

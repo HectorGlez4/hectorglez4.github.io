@@ -3,6 +3,7 @@ texto: "La pereza espiritual huye de la posición crítica o escéptica."
 autor: "miguel-de-unamuno"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "miguel-de-unamuno-la-pereza-espiritual-huye-de-la-posicion"
 procedencia:
   obra: "Mi religión"

@@ -3,6 +3,7 @@ texto: "Un pueblo instruido ama el trabajo y sabe sacar provecho de él."
 autor: "jose-marti"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "jose-marti-un-pueblo-instruido-ama-el-trabajo-y"
 procedencia:
   obra: "Educación popular"

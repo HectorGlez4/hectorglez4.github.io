@@ -3,6 +3,7 @@ texto: "Y ¡todo lo sufrimos cobarde y ovejunamente!"
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "el-miedo"
 slug: "manuel-gonzalez-prada-y-todo-lo-sufrimos-cobarde-y-ovejunamente"
 procedencia:
   obra: "El estado"

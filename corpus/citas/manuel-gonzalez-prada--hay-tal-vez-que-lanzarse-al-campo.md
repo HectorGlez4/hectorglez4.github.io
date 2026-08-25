@@ -3,6 +3,7 @@ texto: "Hay tal vez que lanzarse al campo de batalla, sin fiar en la colaboraci√
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-amistad"
+  - "el-miedo"
 slug: "manuel-gonzalez-prada-hay-tal-vez-que-lanzarse-al-campo"
 procedencia:
   obra: "Los partidos y la Uni√≥n Nacional"

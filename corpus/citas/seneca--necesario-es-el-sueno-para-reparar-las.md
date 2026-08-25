@@ -3,6 +3,7 @@ texto: "Necesario es el sueño para reparar las fuerzas; pero si le continúas d
 autor: "seneca"
 temas:
   - "la-vida"
+  - "el-trabajo"
 slug: "seneca-necesario-es-el-sueno-para-reparar-las"
 procedencia:
   obra: "De la tranquilidad del ánimo"

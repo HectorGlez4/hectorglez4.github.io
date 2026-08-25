@@ -3,6 +3,7 @@ texto: "Considerar los peligros es prudencia de cobardes, habiendo de entrar en 
 autor: "francisco-de-quevedo"
 temas:
   - "la-prudencia"
+  - "el-miedo"
 slug: "francisco-de-quevedo-considerar-los-peligros-es-prudencia-de-cobardes"
 procedencia:
   obra: "Marco Bruto"

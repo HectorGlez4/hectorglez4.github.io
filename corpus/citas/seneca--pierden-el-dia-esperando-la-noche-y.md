@@ -4,6 +4,7 @@ autor: "seneca"
 temas:
   - "el-tiempo"
   - "la-felicidad"
+  - "el-miedo"
 slug: "seneca-pierden-el-dia-esperando-la-noche-y"
 procedencia:
   obra: "De la brevedad de la vida"

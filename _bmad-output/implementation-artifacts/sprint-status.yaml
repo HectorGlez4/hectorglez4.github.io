@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 08-26-2026 06:20
+last_updated: 08-26-2026 07:10
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -148,7 +148,9 @@ development_status:
   15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
   # 26/08: 13 de 24. El tramo NO estaba cerrado por falta de asuntos: lo estaba
   # por una medida de la 60.ª —hecha con 761 Citas— que yo repetia sin rehacer.
-  # Con 1000 hay once asuntos que pasan del umbral; quedan diez por leer.
+  # Con 1000 habia once asuntos por encima del umbral POR REGEX; leidos uno a uno,
+  # dos de los cuatro primeros no eran —la guerra usa al soldado como metafora de
+  # la adversidad—. 26/08: 15 de 24. Quedan siete por leer.
   15-5-veinticuatro-temas-publicados: in-progress
   # 26/08: 1000 de 1000, puesto. El techo ya no lo limita la cantera sino el reparto:
   # sobran candidatas y escasean Autores con hueco. El techo cambio de dueño: el Autor mas representado

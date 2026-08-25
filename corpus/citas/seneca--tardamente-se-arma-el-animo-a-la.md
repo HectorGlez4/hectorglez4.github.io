@@ -3,6 +3,7 @@ texto: "Tardamente se arma el ánimo a la paciencia de los trabajos, después qu
 autor: "seneca"
 temas:
   - "la-adversidad"
+  - "el-trabajo"
 slug: "seneca-tardamente-se-arma-el-animo-a-la"
 procedencia:
   obra: "De la tranquilidad del ánimo"

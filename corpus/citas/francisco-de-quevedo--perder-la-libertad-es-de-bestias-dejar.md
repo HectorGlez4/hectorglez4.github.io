@@ -3,6 +3,7 @@ texto: "Perder la libertad es de bestias; dejar que nos la quiten, de cobardes."
 autor: "francisco-de-quevedo"
 temas:
   - "la-libertad"
+  - "el-miedo"
 slug: "francisco-de-quevedo-perder-la-libertad-es-de-bestias-dejar"
 procedencia:
   obra: "Marco Bruto"

@@ -3,6 +3,7 @@ texto: "No se recoge sin haber sembrado ni se conquistan adeptos sin haberles co
 autor: "manuel-gonzalez-prada"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "manuel-gonzalez-prada-no-se-recoge-sin-haber-sembrado-ni"
 procedencia:
   obra: "El deber anárquico"

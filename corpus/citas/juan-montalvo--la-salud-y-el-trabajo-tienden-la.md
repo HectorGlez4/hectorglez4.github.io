@@ -4,6 +4,7 @@ autor: "juan-montalvo"
 temas:
   - "la-virtud"
   - "la-vida"
+  - "el-trabajo"
 slug: "juan-montalvo-la-salud-y-el-trabajo-tienden-la"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

@@ -3,6 +3,7 @@ texto: "La pluma es tan herramienta como el azadón, el escoplo o el badilejo; y
 autor: "manuel-gonzalez-prada"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "manuel-gonzalez-prada-la-pluma-es-tan-herramienta-como-el"
 procedencia:
   obra: "El deber anárquico"

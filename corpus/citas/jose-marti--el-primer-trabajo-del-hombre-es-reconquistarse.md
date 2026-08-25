@@ -3,6 +3,7 @@ texto: "El primer trabajo del hombre es reconquistarse."
 autor: "jose-marti"
 temas:
   - "la-vida"
+  - "el-trabajo"
 slug: "jose-marti-el-primer-trabajo-del-hombre-es-reconquistarse"
 procedencia:
   obra: "Prólogo al Poema del Niágara"

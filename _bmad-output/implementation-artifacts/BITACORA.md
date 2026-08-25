@@ -5115,3 +5115,43 @@ por leer, así que el trece no es el último.
 
 **La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, **13 Temas de 24**,
 16 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.5 (76.ª sesión) — Dos Temas más, y dos que se midieron y no eran
+
+**Temas: 13 → 15.** 1046 → 1048 páginas. 1000 Citas, las mismas.
+
+### Contar no es leer
+
+La medida de ayer daba once asuntos por encima del umbral. Hoy se leyeron cuatro, uno por uno, y
+**dos de los cuatro no eran**:
+
+- **«La guerra» contaba 32 y tiene seis o siete.** El resto usa al soldado y la batalla como
+  **metáfora de la adversidad** —«al piloto conocerás en la tormenta, y al soldado en la batalla»—,
+  que ya es el asunto de un Tema publicado. No llega, y se dice.
+- **«La fama» contaba 21 y con el vocabulario ajustado baja a diez.** «Gloria» es casi siempre la
+  gloria de morir por algo, no el renombre. No llega.
+
+Esto vale más que los dos que sí salieron: **el contador de palabras clave mide la palabra, no el
+asunto**, y ayer estuve a punto de fiarme de él para once. La lista de once era una lista de
+candidatos, no de Temas.
+
+### Los dos que resistieron la lectura
+
+- **«El miedo»** — 18 de 21, de seis Autores: la prudencia de los cobardes, el miedo cerval de decir
+  la verdad, el que se deja morir de miedo de no dejarse matar, y «nada te turbe, nada te espante».
+- **«El trabajo»** — 22 de 31, y de **diez Autores distintos**, que lo hace el Tema más transversal
+  del Corpus: la pluma que es tan herramienta como el azadón, el ocioso que conoce su oficio, el
+  esclavo que trabaja para quien tiene dominio sobre él, y el pueblo instruido que ama el trabajo.
+
+Diez Autores en un Tema es la señal de que el asunto es del Corpus y no de un libro.
+
+### Lo que queda
+
+Siete asuntos medidos y sin leer, y ahora se sabe que **leerlos tumbará a algunos**. El tramo va por
+15 de 24 y avanza; lo que no avanza sigue siendo lo reservado.
+
+`npx astro check` 0 errores; `npx vitest run` **2075/2075**; `npm run build` **1048 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1000 Citas de 1000 —puesto—, **15 Temas de 24**,
+16 Autores de 35, 16 Colecciones de 12 —puesto—.

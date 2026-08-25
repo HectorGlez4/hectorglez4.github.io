@@ -3,6 +3,7 @@ texto: "Esclavo es todo aquel que trabaja para otro que tiene dominio sobre él;
 autor: "jose-marti"
 temas:
   - "la-libertad"
+  - "el-trabajo"
 slug: "jose-marti-esclavo-es-todo-aquel-que-trabaja-para"
 procedencia:
   obra: "La futura esclavitud"

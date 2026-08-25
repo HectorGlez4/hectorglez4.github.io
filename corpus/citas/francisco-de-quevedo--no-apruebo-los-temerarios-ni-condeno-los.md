@@ -3,6 +3,7 @@ texto: "No apruebo los temerarios, ni condeno los cuerdos: digo quiénes son los
 autor: "francisco-de-quevedo"
 temas:
   - "la-prudencia"
+  - "el-miedo"
 slug: "francisco-de-quevedo-no-apruebo-los-temerarios-ni-condeno-los"
 procedencia:
   obra: "Marco Bruto"

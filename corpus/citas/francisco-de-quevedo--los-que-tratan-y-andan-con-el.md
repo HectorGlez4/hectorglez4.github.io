@@ -3,6 +3,7 @@ texto: "Los que tratan y andan con el azogue, todos andan temblando: así han de
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "el-miedo"
 slug: "francisco-de-quevedo-los-que-tratan-y-andan-con-el"
 procedencia:
   obra: "La visita de los chistes"

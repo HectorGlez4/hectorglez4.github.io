@@ -3,6 +3,7 @@ texto: "La masa inculta es perezosa, y tímida en las cosas de la inteligencia, 
 autor: "jose-marti"
 temas:
   - "la-libertad"
+  - "el-trabajo"
 slug: "jose-marti-la-masa-inculta-es-perezosa-y-timida"
 procedencia:
   obra: "Nuestra América"

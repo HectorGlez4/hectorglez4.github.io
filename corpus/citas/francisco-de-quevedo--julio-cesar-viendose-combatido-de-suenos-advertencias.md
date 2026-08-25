@@ -3,6 +3,7 @@ texto: "Julio César, viéndose combatido de sueños, advertencias, pronósticos
 autor: "francisco-de-quevedo"
 temas:
   - "la-prudencia"
+  - "el-miedo"
 slug: "francisco-de-quevedo-julio-cesar-viendose-combatido-de-suenos-advertencias"
 procedencia:
   obra: "Marco Bruto"

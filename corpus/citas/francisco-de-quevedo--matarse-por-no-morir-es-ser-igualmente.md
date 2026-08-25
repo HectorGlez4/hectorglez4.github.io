@@ -3,6 +3,7 @@ texto: "Matarse por no morir es ser igualmente necio y cobarde."
 autor: "francisco-de-quevedo"
 temas:
   - "la-vida"
+  - "el-miedo"
 slug: "francisco-de-quevedo-matarse-por-no-morir-es-ser-igualmente"
 procedencia:
   obra: "Marco Bruto"

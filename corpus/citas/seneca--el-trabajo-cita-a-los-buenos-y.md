@@ -3,6 +3,7 @@ texto: "El trabajo cita a los buenos, y el Senado suele estar todo el día en co
 autor: "seneca"
 temas:
   - "la-virtud"
+  - "el-trabajo"
 slug: "seneca-el-trabajo-cita-a-los-buenos-y"
 procedencia:
   obra: "De la Divina Providencia"

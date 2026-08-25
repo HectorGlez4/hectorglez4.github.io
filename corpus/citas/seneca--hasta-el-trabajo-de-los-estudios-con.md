@@ -3,6 +3,7 @@ texto: "Hasta el trabajo de los estudios, con ser tan ingenuo, en tanto se ajust
 autor: "seneca"
 temas:
   - "el-saber"
+  - "el-trabajo"
 slug: "seneca-hasta-el-trabajo-de-los-estudios-con"
 procedencia:
   obra: "De la tranquilidad del ánimo"
