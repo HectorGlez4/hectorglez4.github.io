@@ -197,3 +197,41 @@ latinoamericana en el 41,2 %—. El tercero, «SM-C1 que no baja», mide sobre d
 mientras LC-4 esté abierta. Por eso **11.4 se queda en `in-progress` y no se marca `done`**: lo
 que la sustituye como motor del bucle es la Meta de Corpus, no una comprobación que no se ha
 podido hacer. Cerrarla sería afirmar algo que nadie ha medido.
+
+---
+
+## Dónde está el bucle — cierre de la 20.ª sesión (25/08/2026)
+
+Veinte sesiones, veinte despliegues en verde, veinte verificaciones contra el dominio. Lo que el
+bucle movió:
+
+| | Al abrir la v4 | Ahora |
+|---|---|---|
+| Citas publicadas | 252 | **452** |
+| Temas publicados | 8 | **11** |
+| Colecciones publicadas | 0 | **12** |
+| Páginas del sitio | 277 | **492** |
+| Autor más representado | 45,2 % | **25,2 %** |
+| Citas cotejadas contra su documento | — | **430** |
+| Candidatas pendientes de decisión | 66 | **2** |
+
+**Y dónde se paró, que es lo que importa para quien siga.** Los tres tramos abiertos —
+concentración, censo y anchura — convergen en la misma decisión, y está en `deferred-work.md` con
+su aritmética: **la Meta no se cierra sin admitir Autores nuevos**, y a quién se admite es lo
+único que este producto no delega.
+
+Lo que el bucle **sí** puede seguir haciendo sin esa decisión, por orden de valor decreciente:
+
+1. **Lotes del *Quijote* por el método de la 8.ª sesión** —escoger a mano, copiar el literal,
+   dejar que `alta` coteje—, pero solo **unas 6 Citas más**: por encima de eso el segundo Autor
+   cruza el techo del 15 % y el tramo se cerraría creando la concentración que existe para
+   deshacer.
+2. **Re-extraer los documentos afectados por el encabezado pegado** en cuanto entre el arreglo de
+   `tools/lib/extraccion.ts`, que a día de hoy sigue sin estar en `main`. Ahí hay Citas buenas
+   —Machado, Séneca— hoy inservibles solo por un prefijo.
+3. **Un Tema más, quizá dos.** Medidos nueve asuntos: tres abiertos (la verdad, la riqueza, la
+   prudencia) y seis descartados por no llegar al umbral o por duplicar la lista de otro. La
+   cantera sobre 452 Citas está casi agotada.
+
+**Cómo se desbloquea, en una línea:** nombres de Autor o URL de Wikisource/Gutenberg. Con eso el
+bucle recupera con `tools/recuperar.ts`, extrae, coteja, publica y despliega sin más intervención.

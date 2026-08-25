@@ -123,3 +123,48 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     Tienen una forma bastante reconocible: numeral romano al principio, seguido de guion o
     punto. No es urgente, porque descartarlas es barato, pero ensucia cada lote y el coste se
     paga en cada sesión.
+
+- source_spec: Meta de Corpus v4 — tramo de concentración (15.3)
+  summary: La Meta no se puede cerrar sin admitir Autores nuevos, y esa decisión no la delega el producto.
+  evidence: |-
+    No es una preferencia de método: es la cuenta. Para que el Autor más representado baje del
+    techo del 15 %, el Corpus tiene que llegar a **760 Citas** y ninguna puede ser suya: faltan
+    **308**. Con el techo puesto, en un Corpus de 760 ningún Autor puede pasar de 114, así que
+    el segundo —hoy en 62— puede aportar como mucho **52 más**. Las **256 restantes no pueden
+    salir de ningún Autor ya admitido**: los documentos densos de los demás están exprimidos
+    (medidos siete géneros, del 20 % de los aforismos al 2 % de la narrativa) y los once que
+    quedan sin tocar son del Autor que sobra, así que sembrarlos empeora el tramo.
+    El bucle recupera, extrae, coteja y publica en cuanto haya nombres o URL. Lo único que no
+    hace es elegirlos.
+
+- source_spec: censo de pendientes de cotejo (11.2) — diagnosticado en la 7.ª sesión del bucle v4
+  summary: El censo no se vacía porque las ediciones son verso, y eso pide una decisión de producto.
+  evidence: |-
+    Clasificadas las 23 del censo contra los 59 documentos versionados: **4 difieren solo en
+    signos** y **19 no aparecen en ningún documento**. Las 4 son casi todas verso, y ahí está
+    el nudo: las ediciones traen mayúscula al principio de cada renglón y el cotejo colapsa los
+    saltos, así que restituir el literal dejaría «Yo soy un hombre sincero **D**e donde crece la
+    palma», con una mayúscula en mitad de la frase que un lector lee como errata. Hay que
+    decidir si el Corpus publica el verso como verso o normalizado. La única que se pudo cerrar
+    —«la paciencia todo lo alcanza»— difería solo en la mayúscula inicial, y hay precedente
+    publicado de Citas que empiezan en minúscula («cada uno es hijo de sus obras»).
+
+- source_spec: censo de pendientes de cotejo (11.2) — misma sesión
+  summary: Diecinueve Citas publicadas no aparecen en ninguna edición versionada, y una es una condensación popular.
+  evidence: |-
+    «Yo no estudio para saber más, sino para ignorar menos» **no está en la Respuesta a Sor
+    Filotea**. Lo que la edición dice es «Yo no estudio para escribir, ni menos para enseñar…,
+    sino sólo por ver si con estudiar ignoro menos». La publicada es la condensación que
+    circula, no el texto de su Autora. Otras cinco son de **otra traducción**: el documento dice
+    «Larga es la vida, si la sabemos aprovechar» y el Corpus publica «La vida, si sabes usarla,
+    es larga». Ninguna es falsa; simplemente no salieron de la edición que el Corpus versiona.
+    Caben tres salidas y son de Héctor: recuperar la edición de la que salió cada una,
+    restituir el texto contra una edición versionada, o retirarlas.
+
+- source_spec: tools/tema.ts — añadido `asignar` en la 14.ª sesión del bucle v4
+  summary: Hay orden para poner un Tema a una Cita publicada, pero no para quitárselo.
+  evidence: |-
+    `tema asignar` se construyó porque el tramo de anchura lo pedía quince veces. Su simétrica
+    no existe: si un Tema se asigna por error a una Cita, hoy se corrige editando el
+    frontmatter a mano, que es justo lo que `asignar` vino a evitar. No es urgente —`eliminar`
+    borra el Tema entero y la asignación es idempotente y comprobada— pero la asimetría está.

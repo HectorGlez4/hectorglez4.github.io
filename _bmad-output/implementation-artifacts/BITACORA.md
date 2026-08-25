@@ -2451,3 +2451,33 @@ es el de la Historia 11.5.
 
 `npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 492
 páginas y 430 cotejadas.
+
+## 15.3 / 15.5 (18.ª sesión) — El traspaso: los bloqueos, escritos donde se buscan
+
+Sin cambios en el sitio: **452 Citas, 11 Temas, 492 páginas**. La sesión se dedicó a dejar el
+estado en condiciones de que otro —o el propio bucle tras un compactado— lo retome sin releer
+veinte entradas de bitácora.
+
+**Cuatro entradas nuevas en `deferred-work.md`**, en el formato que ya usa, con su evidencia:
+
+1. **La Meta no se cierra sin admitir Autores**, con la aritmética entera: 760 Citas para bajar
+   del techo, 52 como mucho del segundo Autor, **256 que no puede dar nadie ya admitido**.
+2. **El censo de cotejo pide una decisión sobre el verso**: 4 de las 23 difieren solo en signos y
+   son casi todas poesía con mayúscula de renglón.
+3. **Diecinueve Citas publicadas no aparecen en ninguna edición versionada**, y una es una
+   condensación popular que su Autora no escribió así.
+4. **`tema asignar` no tiene simétrica**: no hay orden para quitar un Tema de una Cita.
+
+**Y una sección de cierre en `LOOP-PROTOCOL-V4.md`** con la tabla de lo que el bucle movió, dónde
+se paró y las tres cosas que aún puede hacer sin decisión ajena, por valor decreciente. El
+protocolo es el fichero que manda si el contexto se limpia, así que el estado va ahí y no solo
+aquí.
+
+**Un detalle que se corrigió sobre la marcha:** `sprint-status.yaml` se marcó un momento con
+estado `blocked`, que **no está en el vocabulario que el propio fichero declara** —backlog,
+ready-for-dev, in-progress, review, done—. Inventar un estado sexto habría roto a quien lo valide.
+Queda `in-progress` con tres líneas de comentario diciendo por qué no avanza y dónde está la
+evidencia.
+
+`npx astro check` 0 errores; `npx vitest run` **1920/1920** en 62 ficheros; `npm run build` 492
+páginas.
