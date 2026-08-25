@@ -3738,3 +3738,48 @@ nuevo, y seis de ellas están en el mínimo de quince.
 
 **La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35. El tramo declarado sigue siendo el que no se delega.
+
+## 15.1 (50.ª sesión) — Cuatro Colecciones más, y una que se dejó de engordar a propósito
+
+**761 Citas y 806 páginas: las mismas.** Cambian otras cuatro páginas de Colección. Van **ocho de
+dieciséis** revisadas contra el Corpus que creció bajo ellas.
+
+| Colección | Antes | Ahora | Solape mayor (antes → ahora) |
+|---|---|---|---|
+| Elogio de lo escaso | 15 | **27** | 63,2 % → **53,1 %** |
+| Amigos de los que fiarse | 19 | **26** | 38,6 % → **47,7 %** |
+| Achaques de necedad | 15 | **22** | 19,2 % → **19,2 %** |
+| La vida, si sabes usarla, es larga | 15 | **21** | 13,5 % → **17,6 %** |
+
+**«Elogio de lo escaso» es el caso que mejor sale.** Era un **80 % de un solo Autor** y su criterio
+—la mesa parca, los privilegios del que tiene poco, lo superfluo que estorba— encajaba de lleno con
+la docena de Citas estoicas sobre la suficiencia sembradas en la 42.ª sesión. Doce entraron, todas
+de otro Autor: el solape del mayor baja del 63,2 % al 53,1 %, que es la dirección que importa.
+
+**Y una se dejó de engordar a propósito, que es el hallazgo de la sesión.** «Amigos de los que
+fiarse» creció siete y su solape **subió** del 38,6 % al 47,7 %: casi la mitad de su Tema hermano
+está ya dentro. Había más candidatas que encajaban y **no se asignaron**. Una Colección que se llena
+con todo lo que roza su asunto termina siendo el Tema con otro nombre, y entonces deja de aportar
+una página: la repite.
+
+Eso obliga a leer las dos cifras y no una. La herramienta lo dice en cada informe —«duplicar es que
+las dos listas sean la misma: hacen falta los dos porcentajes altos»— y el número que hay que
+vigilar al crecer no es cuánto de la Colección está en la otra página, sino **cuánto de la otra
+página está en la Colección**.
+
+**Dos cosas que la herramienta hizo bien y conviene anotar:**
+
+· Rechazó un lote entero de ocho asignaciones porque **un** slug no existía —una Cita que leí y no
+  llegué a publicar—, y no escribió las otras siete: «el lote se escribe entero o no se escribe».
+  Sin esa atomicidad la Colección habría quedado a medias y el error, invisible.
+· `coleccion estado` da las dos cifras después de cada asignación, así que la comprobación no es un
+  recuerdo: es una orden.
+
+**Quedan ocho Colecciones sin revisar**, y ya se sabe qué mirar en ellas: no solo si crecen, sino si
+al crecer se acercan a una página que ya existe.
+
+`npx astro check` 0 errores; `npx vitest run` **1982/1982** en 63 ficheros; `npx playwright test`
+390 pasadas, 14 saltadas; `npm run build` **806 páginas**.
+
+**La meta no está alcanzada y no se emite promesa:** 761 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.
