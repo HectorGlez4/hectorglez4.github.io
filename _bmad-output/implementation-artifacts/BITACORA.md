@@ -2774,3 +2774,6 @@ Quedan **unas 190 Citas sin Colección**, casi todas sembradas esta noche.
 
 `npx astro check` 0 errores; `npx vitest run` **1925/1925** en 62 ficheros; `npm run build` **500
 páginas**; `npx playwright test` **392 pasadas**, 14 saltadas, 0 fallos.
+
+**Verificado en vivo** (25/08/2026, ejecución 32810201041 en verde): `/coleccion/refranes-de-sancho`
+responde 200 y `sitemap-0.xml` declara **500 URL**, las mismas del build.
