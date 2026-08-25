@@ -115,6 +115,28 @@ const APARATO_DE_LA_FUENTE = [
    * «1914-1918» y un guion de inciso sigan pasando.
    */
   /(?:^|\s)-\d{1,4}-(?=\s|$)/u,
+  /*
+   * Y la aprobación del libro impreso, que es la quinta forma en cinco sesiones y **la peor**.
+   *
+   * Las otras cuatro ensucian la Cita; ésta se la atribuye a quien no la escribió:
+   *
+   *     Ofrécelo su Autor ilustrado con erudición curiosa… sin haber en él algo que pueda
+   *     deslucir el renombre de católico, ni ofender a las buenas costumbres.
+   *
+   * Eso lo firmó el censor que aprobó el libro en el XVII, y la Fuente transcribe la obra
+   * entera, preliminares incluidos. **Y no lo caza nada de lo que hay**: el cotejo de la 11.2
+   * pasa porque el texto está literal en el documento, y la puerta de FR-23 pasa porque el
+   * documento declara a ese Autor —y es verdad, es su libro—. Una atribución falsa dentro de
+   * un documento auténtico es un caso que ninguna de las dos puertas mira.
+   *
+   * Las fórmulas son las **del trámite**, nunca las del asunto. Un moralista escribe sobre las
+   * buenas costumbres y sobre la fe a todas horas —estos Autores lo hacen—; lo que no escribe
+   * es la petición de licencia de su propio libro.
+   */
+  /\bla licencia que (?:se )?(?:pide|suplica|solicita)\b/i,
+  /\bofr[ée]cel[oa] su autor\b/i,
+  /\bofend[ae]n? las buenas costumbres\b/i,
+  /\bcontrario a nuestra santa fe\b/i,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

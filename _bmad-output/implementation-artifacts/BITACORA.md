@@ -4811,3 +4811,63 @@ página de «la virtud», no. Queda en revisión.
 
 **La meta no está alcanzada y no se emite promesa:** 900 Citas de 1000, 12 Temas de 24, 16 Autores
 de 35.
+
+## FR-23 (69.ª sesión) — La aprobación del censor, firmada por el Autor
+
+**900 → 915 Citas. 945 → 960 páginas.**
+
+### La aritmética antes de leer
+
+Primero se hizo la cuenta que decide si la meta se alcanza con los Autores que hay. Con el techo del
+15 % sobre 1000 —150 Citas por Autor— y el reparto de hoy, los cuatro Autores más representados
+tienen **146 huecos entre ellos y casi ninguna candidata en revisión**. Toda la cantera leída está
+concentrada en dos Autores, y a uno de ellos le quedan 34 huecos y al otro 44.
+
+De ahí salió el trabajo de la sesión: uno de esos cuatro tiene **95 KB sin recuperar** que en la
+61.ª se descartaron porque entonces solo le cabían dos Citas más. Hoy le caben 36. La obra no había
+cambiado; el margen sí, y nadie había vuelto a mirar.
+
+554 candidatas, cotejo de Autor superado, y **15 publicadas**: es la prosa sentenciosa, que rinde
+diez veces más que la novela y el tratado filosófico de las dos sesiones anteriores.
+
+### El quinto aparato, y el peor de los cinco
+
+Al cribar apareció esto:
+
+    Ofrécelo su Autor ilustrado con erudición curiosa… sin haber en él algo que pueda deslucir
+    el renombre de católico, ni ofender a las buenas costumbres.
+
+**No lo escribió el Autor: lo firmó el censor que aprobó el libro en el siglo XVII**, y la Fuente
+transcribe la obra entera, preliminares incluidos.
+
+Las cuatro formas anteriores ensuciaban la Cita —un pie de licencia, un título, un epígrafe, un
+folio—. Ésta se la **atribuye a quien no la escribió**, y es la primera que ninguna de las dos
+puertas grandes puede ver: el cotejo de la 11.2 pasa porque el texto está literal en el documento, y
+la de FR-23 pasa porque el documento declara a ese Autor —y es verdad, es su libro—. **Una
+atribución falsa dentro de un documento auténtico** es un caso que ninguna de las dos mira.
+
+Las fórmulas que se cierran son las **del trámite**, nunca las del asunto: «la licencia que pide»,
+«ofrécelo su Autor», «ofenda las buenas costumbres», «contrario a nuestra santa fe». Un moralista
+escribe sobre las buenas costumbres y sobre la fe a todas horas —estos Autores lo hacen—; lo que no
+escribe es la petición de licencia de su propio libro. Hay una prueba por cada una de esas tres
+maneras de confundirse.
+
+**Queda un residuo, y se dice**: los encabezados de las aprobaciones —«Del Doctor N. N., catedrático
+de artes en la universidad de Zaragoza»— no los caza ninguna fórmula, porque no la tienen: son un
+nombre y un cargo. Se retiraron a mano los dos que había. Cerrarlos por patrón exigiría cazar
+«Del doctor…» al principio de frase, que es algo que un Autor puede escribir.
+
+Medido: seis candidatas retiradas, **ninguna Cita publicada** afectada. Quinta vez que se llega a
+tiempo, y las cinco por leer las candidatas una por una en vez de aprobar en bloque.
+
+### El techo, contado antes y no después
+
+La siembra deja al Autor más representado en **129 de 915 — 14,1 %**, contra un techo de 137. Se
+comprobó **antes** de leer, que es lo que la sesión anterior dejó anotado y lo que en la 42.ª se
+hizo al revés.
+
+`npx astro check` 0 errores; `npx vitest run` **2074/2074**; `npm run build` **960 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los de NFR-5.
+
+**La meta no está alcanzada y no se emite promesa:** 915 Citas de 1000, 12 Temas de 24, 16 Autores
+de 35.
