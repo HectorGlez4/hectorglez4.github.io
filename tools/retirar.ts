@@ -20,8 +20,13 @@ import { retirarFuente } from './lib/gestion.ts';
 const argumentos = process.argv.slice(2);
 const conCorpus = argumentos.indexOf('--corpus');
 const corpus = conCorpus === -1 ? 'corpus' : (argumentos[conCorpus + 1] ?? 'corpus');
+/*
+ * El `conCorpus === -1` no es defensivo de más: sin él, `indexOf` devuelve -1, `conCorpus + 1`
+ * es 0, y el filtro descarta el argumento **0** —el único que hay—. La orden respondía siempre
+ * con su propio modo de empleo y nunca retiró nada sin `--corpus`. Lo vigila `retirar-cli.test.ts`.
+ */
 const sueltos = argumentos.filter(
-  (a, i) => !a.startsWith('--') && i !== conCorpus + 1,
+  (a, i) => !a.startsWith('--') && (conCorpus === -1 || i !== conCorpus + 1),
 );
 
 if (sueltos.length !== 1) {

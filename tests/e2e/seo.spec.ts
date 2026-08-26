@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
@@ -127,23 +127,60 @@ test.describe('Historia 2.7 — nada huérfano', () => {
     const publicadas = await rutasDelSitemap(request);
     const enlaces = new Map<string, string[]>();
 
+    /*
+     * El recorrido va por tandas y no de una en una — 93.ª sesión.
+     *
+     * Medido: con 1230 páginas esta prueba tardaba **22 s de los 30** que tiene, y en la tanda
+     * completa, compitiendo por el servidor, se pasaba y moría por tiempo. No fallaba la
+     * aserción: **no llegaba a evaluarla**, que es la peor forma de rojo porque no dice nada.
+     *
+     * La causa es propia y de la sesión anterior: al enseñar el paginador los números de página,
+     * la frontera de cada salto creció de golpe. Y el coste sube con el Corpus, así que subir el
+     * tiempo máximo solo compraría unas cuantas sesiones.
+     *
+     * Lo que **no** se hace es cambiar el navegador por peticiones sueltas: el comentario de
+     * arriba dice por qué está aquí y no en una prueba de unidad —recorrer el sitio de verdad—,
+     * y eso se respeta. Lo que cambia es solo cuántas páginas se miran a la vez. La aserción, el
+     * tope de saltos y lo que se cuenta como enlace son exactamente los de antes.
+     *
+     * Las pestañas se abren **una vez y se reparten el trabajo**, y eso tampoco es un detalle:
+     * el primer intento abría y cerraba una pestaña por página y salió a **27,6 s**, peor que
+     * los 22 s de ir de una en una. El coste que manda aquí no es esperar al servidor —que es lo
+     * que yo había supuesto— sino construir el contexto de cada pestaña. Medir lo dijo; suponer,
+     * no.
+     */
+    const A_LA_VEZ = 6;
+    const contexto = page.context();
+    const pestañas = [page, ...(await Promise.all(
+      Array.from({ length: A_LA_VEZ - 1 }, () => contexto.newPage()),
+    ))];
+
+    const salientesDe = async (pestaña: Page, ruta: string) => {
+      await pestaña.goto(ruta);
+      return pestaña.evaluate(() =>
+        [...document.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href')!),
+      );
+    };
+
     let frontera = ['/'];
     for (let salto = 0; salto <= MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
+      const pendientes = frontera.filter((ruta) => !enlaces.has(ruta));
       const siguiente: string[] = [];
 
-      for (const ruta of frontera) {
-        if (enlaces.has(ruta)) continue;
-
-        await page.goto(ruta);
-        const salientes = await page.evaluate(() =>
-          [...document.querySelectorAll('a[href^="/"]')].map((a) => a.getAttribute('href')!),
+      for (let desde = 0; desde < pendientes.length; desde += A_LA_VEZ) {
+        const tanda = pendientes.slice(desde, desde + A_LA_VEZ);
+        const salientesDeLaTanda = await Promise.all(
+          tanda.map((ruta, i) => salientesDe(pestañas[i], ruta)),
         );
-        enlaces.set(ruta, salientes);
-        siguiente.push(...salientes.filter((enlace) => !enlaces.has(enlace)));
+
+        tanda.forEach((ruta, i) => enlaces.set(ruta, salientesDeLaTanda[i]));
+        siguiente.push(...salientesDeLaTanda.flat());
       }
 
-      frontera = [...new Set(siguiente)];
+      frontera = [...new Set(siguiente)].filter((enlace) => !enlaces.has(enlace));
     }
+
+    await Promise.all(pestañas.slice(1).map((p) => p.close()));
 
     const inalcanzables = superficiesInalcanzables(publicadas, enlaces);
     expect(inalcanzables, `no se alcanzan en ${MAX_SALTOS_DESDE_LA_PORTADA} saltos`).toEqual([]);

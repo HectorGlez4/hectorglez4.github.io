@@ -5923,3 +5923,94 @@ Y lo que más importa: **el arreglo no caduca**. Los números dejan cualquier p�
 salto de la primera, así que la profundidad ya no depende del tamaño del Corpus. La predicción de la
 57.ª —«volverá a pasar cada vez que el Corpus crezca»— deja de aplicar por construcción, no por
 haber acertado con un número.
+
+## 94.ª sesión — el Autor que llevaba noventa sesiones de alta sin sostener nada
+
+`npm run huecos` declaró el tramo de Autores, y el informe se contradecía a sí mismo en dos
+líneas: **«Autores en el Corpus: 17»** arriba y **«Autores 17 de 35»** abajo decían 17 y 16. No
+era un defecto: son dos cuentas distintas y las dos legítimas —el bloque de tradición cuenta
+Autores **dados de alta** y la meta cuenta Autores **con al menos una Cita publicada**—. La
+diferencia de uno era la noticia: **había un Autor de alta que no sostenía ni una Cita**.
+
+Se admitió en la **primera** sesión de sembrado, cuando el Corpus tenía 50 Citas. Llevaba unas
+noventa sesiones con su ficha escrita, su semblanza, su tradición declarada, y cero. Cerrar eso no
+exige ninguna decisión reservada: el Autor ya está admitido; lo que faltaba era sembrarlo. Y es de
+la tradición cuyo suelo hay que defender.
+
+### Lo que se sembró, y lo que se dejó fuera
+
+De la obra en prosa aforística de 1918 se recuperaron **diez capítulos**, y el rendimiento en seco
+salió del **67 %** —seis candidatas de nueve sentencias—, muy por encima del 16 % medido para el
+tratado moral. Tiene explicación: el libro entero está escrito en frases sueltas.
+
+**Tres capítulos se dejaron fuera por estar maquetados en verso**, y uno de ellos ya versionado se
+retiró. No es escrúpulo: cómo se publica el verso sigue siendo decisión reservada —hay cinco Citas
+de censo que difieren solo en saltos de línea y mayúsculas—, y sembrar versículos la tomaría de
+lado sin decirlo.
+
+De **76 candidatas se publicaron 19**. Lo descartado se descartó por regla, no por gusto:
+
+· las que empiezan con conector y remiten a lo anterior («De allí que», «Pues análogamente», «Y así
+  pasarán»): fuera del capítulo no dicen nada;
+· las que arrastran errata de la Fuente —«gris en redentor», «Enorgullecemos», «volviendo al
+  inversa», una exclamación sin abrir—;
+· las que solo viven dentro del ejemplo del capítulo (el gato, el perro, el pájaro);
+· y **una que es cita de Dante dentro del texto**. Publicarla habría atribuido a un Autor lo que la
+  Fuente dice de otro, que es justo la falta que el cotejo existe para impedir.
+
+**Las 57 candidatas restantes no se rechazan.** `revisar --rechazar` **borra** —su propio criterio
+lo dice: «después de rechazarla no queda en ninguna parte»—, y borrar de forma irreversible 57
+candidatas juzgadas en una tarde es más de lo que este tramo pide. Sus documentos siguen
+versionados, así que volver a extraer las regenera idénticas, y varias cayeron por errata de la
+Fuente, que un cotejo contra la edición impresa podría levantar.
+
+### Dos herramientas rotas, encontradas al usarlas
+
+**`tools/retirar.ts` nunca había funcionado sin `--corpus`.** El filtro de argumentos era
+`i !== conCorpus + 1`; cuando la bandera no está, `indexOf` devuelve `-1`, `conCorpus + 1` es `0`,
+y la condición descartaba el argumento **0** —el único que hay—. La orden respondía siempre con su
+propio modo de empleo.
+
+Lo que hay que aprender no es el fallo sino **por qué no se vio**: la construí en la 78.ª
+precisamente porque el gesto manual fabricaba defectos, le escribí una prueba... **de la función, no
+de la orden**. La lógica estaba impecable y la puerta no abría. Ahora hay `retirar-cli.test.ts`, que
+la ejecuta por la boca por la que se usa, y que estaba en rojo antes del arreglo.
+
+**Y una sonda mía volvió a medir nada.** Para separar prosa de verso pedí `prop=extracts`, que
+Wikisource no tiene instalado: devolvió cadena vacía para los veinte capítulos y mi sonda imprimió
+una fila por cada uno. Es la **segunda vez** en este bucle. La reescribí para que pida wikitexto, lo
+haga en **una sola petición** —Wikisource limita por tasa: 429 medido, coherente con la 65.ª— y
+**reviente si no ha medido nada**, en vez de fingir un informe. Después se validó sola: clasificó
+como verso justo el capítulo que yo ya había leído con mis ojos.
+
+### El recorrido de NFR-5 estaba a punto de no poder ejecutarse
+
+La puerta se puso roja en la prueba de los tres saltos, pero **no por la aserción: por tiempo
+agotado**. Aislada tardaba **22 s de los 30** que tiene; en la tanda completa, compitiendo por el
+servidor, moría. Y el rojo por tiempo es el peor, porque no dice nada.
+
+La causa es mía y de ayer: al enseñar el paginador los números de página, la frontera de cada salto
+creció. Subir el tiempo máximo habría comprado unas sesiones y aplazado —el patrón que acababa de
+romper—, así que se paralelizó el recorrido **manteniendo el navegador**, que es lo que el
+comentario de la prueba defiende y lo único que solo se puede hacer con él.
+
+El primer intento salió **peor: 27,6 s**. Abría y cerraba una pestaña por página, y el coste que
+manda aquí no es esperar al servidor —lo que yo había supuesto— sino construir el contexto de cada
+pestaña. Reutilizando seis pestañas: **11,2 s**, del 73 % del presupuesto al 37 %.
+
+Y se comprobó que **sigue detectando**, sin acercarse a ningún umbral: se devolvió el paginador a su
+versión anterior, que produce 30 páginas fuera de alcance, y el recorrido nuevo **falló la aserción
+de verdad en 12,8 s**. Luego se restauró.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1122 | **1141** |
+| Autores con Cita | 16 | **17** |
+| Autores de alta sin ninguna Cita | 1 | **0** |
+| Techo de concentración | 14,5 % | **14,3 %** |
+| Recorrido de NFR-5 | 22 s (moría en tanda) | **11,2 s** |
+
+Puerta completa en verde: `astro check` 0 errores, **2127 pruebas de unidad** (75 ficheros),
+`build`, y **414 E2E**, con la prueba de los tres saltos en 16,5 s dentro de la tanda completa.
