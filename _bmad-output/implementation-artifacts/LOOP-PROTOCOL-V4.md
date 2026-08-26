@@ -406,6 +406,20 @@ El camino, en orden: buscar la dirección donde sea —el navegador vale—, `re
 que es la única orden con red; comprobar la cabecera del documento; `autor crear` con tradición;
 `extraer --autor`; leer; `revisar --aprobar`.
 
+**No se busca por nombre: se lista la categoría.** Las sesiones 134.ª y 135.ª pensaban en un Autor
+y comprobaban si la Fuente lo tenía —lento, y sesgado hacia lo famoso—. La Fuente vieja tiene una
+**categoría de ensayos ordenada por Autor**, 78 firmas con sus obras y su tamaño, que sale entera de
+una consulta:
+
+```
+/wiki/Categoría:Ensayos_por_autor
+/w/api.php?action=query&list=categorymembers&cmtitle=Categoría:Ensayos de X&format=json
+```
+
+Con eso la pregunta deja de ser «¿está fulano?» y pasa a ser «¿cuál de estas 78 escribe prosa de
+tesis?», que es la que importa. En la 136.ª aparecieron así dos Autores que no se le habrían
+ocurrido a nadie, y uno rindió el **54 %**, empatando el mejor del bucle.
+
 ### Lo que descarta no es el conector, es el agujero (133.ª)
 
 Durante 130 sesiones se apartó **todo** lo que empieza por conector. Demasiado grueso: se estaban

@@ -8505,3 +8505,59 @@ error—. Cuarta obra en cinco sesiones donde el rendimiento no es del libro sin
 | Documentos recuperados y retirados tras mirarlos | — | **1** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 136.ª sesión — la Fuente tenía una categoría de ensayos y nadie la había mirado
+
+Tercera sesión con el tramo abierto. **20 → 22 Autores**, y la tradición latinoamericana llega al
+**50 %**.
+
+### El atajo que estaba delante desde el principio
+
+Las dos sesiones anteriores buscaron Autores **por nombre**: se pensaba en alguien y se comprobaba
+si la Fuente lo tenía. Lento y sesgado hacia lo famoso.
+
+La Fuente vieja tiene una **categoría de ensayos ordenada por Autor**: 78 firmas, cada una con sus
+obras y su tamaño. Se saca entera con una consulta, y entonces el problema deja de ser «¿está
+fulano?» y pasa a ser «¿cuál de estas 78 escribe prosa de tesis?», que es la pregunta correcta.
+
+Ahí aparecieron dos que no se me habrían ocurrido: un ensayista moral con once ensayos sueltos y un
+jurista de las repúblicas nuevas.
+
+### Uno al 54 %, empatando el mejor del bucle
+
+El primero dio **7 de 13**. Su prosa es exactamente lo que el sitio necesita:
+
+> De lo verdadero nos servimos; de lo real vivimos, o por mejor decir, lo real es lo que vive.
+> Descubrir la energía interior y entregarla para renovar el mundo; he aquí el altruismo.
+
+El segundo dio **2 de 12**: su ensayo es académico y muy trabado de conectores —«Se ve, pues»,
+«A estas escuelas», «He aquí»—. Dos bastan para que el Autor cuente, y se publican las dos que se
+sostienen solas.
+
+### Y una frase que la regla de la 133.ª salvó
+
+> No hay, pues, una filosofía universal, porque no hay una solución universal de las cuestiones
+> que la constituyen en el fondo.
+
+Lleva «pues», que es deíctico. Pero **no abre la frase**: va dentro, entre comas, y la frase abre
+con «No hay» y da su propia razón detrás. La regla afinada en la 133.ª mira la **primera palabra**,
+y por eso esta entra y «Se ve, pues, que…» no. La distinción resultó tener filo, no solo nombre.
+
+### Una decisión de tradición, escrita porque es discutible
+
+Uno de los dos nació en España y escribió **toda su obra** en el Paraguay, en Asunción y Buenos
+Aires, sobre realidades americanas. El campo mide **tradición**, no lugar de nacimiento, así que se
+declaró latinoamericana. Queda escrito por si alguien lo lee distinto: `autor editar` lo corrige en
+una orden, así que la decisión es reversible y no había motivo para dejarla sin declarar.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 20 | **22** de 35 |
+| Tradición latinoamericana | 45 % | **50 %** |
+| Citas | 1507 | **1516** |
+| Firmas con ensayo listadas de una consulta | — | **78** |
+
+Puerta completa en verde y consultada por su código de salida.
