@@ -1,6 +1,8 @@
 ---
 texto: "El que huye del mundo sigue del mundo esclavo, porque lo lleva en sí; sé dueño de él, único modo de comulgar con tus hermanos en humanidad."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-libertad"
 slug: "miguel-de-unamuno-el-que-huye-del-mundo-sigue-del"
 procedencia:
   obra: "¡Adentro!"

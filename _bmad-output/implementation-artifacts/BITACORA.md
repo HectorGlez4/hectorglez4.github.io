@@ -5808,3 +5808,36 @@ romperlo. Queda anotado: si alguna vez se retira una de esas quince, la Colecci�
 
 **La Meta no está alcanzada y no se emite promesa:** 1119 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 12.4 (92.ª sesión) — Tres Colecciones más, y un patrón que era inútil por ancho
+
+**1119 → 1122 Citas. 1169 → 1172 páginas. Veinte miembros nuevos de Colección.**
+
+Se siguió la curación de ayer. Tres Colecciones más, y las tres crecen:
+
+- «Cómo se elige y se prueba a un amigo» — de 26 a **34**. Entra «temiendo tanto al enemigo que nos
+  ataca de frente como al amigo que nos hiere por la espalda», que es el criterio dicho con otras
+  palabras, y «no hay mayores enemigos que el no tenerlos».
+- «No es que tengamos poco tiempo: es que perdemos mucho» — de 22 a **28**. Entra «cuarenta años
+  reinó, sin desperdiciar uno tan sólo, y obró más que cuarenta reyes juntos».
+- «Las suertes se alternan y eso se sabe de antemano» — de 28 a **34**. Entra «advierte a tu corazón
+  que les ame en la inteligencia de que ha de perderlos».
+
+### Un patrón demasiado ancho no acerca el montón: lo esconde
+
+Para la de las edades, el primer patrón —«tiempo», «años», «hora»— devolvió **139 candidatas** sobre
+1119 Citas. Con ciento treinta y nueve delante no se lee: se hojea, y hojeando entra cualquier cosa.
+
+Apretado a las palabras que el criterio nombra de verdad —vejez, mocedad, niñez, prisa— bajó a
+**cinco**, y de esas cinco cuatro eran buenas. **El guion no decide, pero decide cuánto se puede
+decidir**: si devuelve la octava parte del Corpus, lo que hace es trasladarle al lector la criba que
+él tenía que hacer.
+
+Es la tercera vez que una herramienta mía resulta ser la que limita el trabajo —el mínimo de setenta
+caracteres en la 72.ª, la medida de cantera por título en la 83.ª, y hoy el patrón ancho—.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109**; `npm run build` **1172 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1122 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

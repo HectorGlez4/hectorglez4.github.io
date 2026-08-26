@@ -1,7 +1,9 @@
 ---
-texto: "Toma la vida en serio sin dejarte emborrachar por ella; sé su dueño y no su esclavo, porque tu vida pasa y tú te quedarás."
+texto: "Puede creerse en el pasado; fe sólo en el porvenir se tiene, sólo en la libertad."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-toma-la-vida-en-serio-sin-dejarte"
+temas:
+  - "la-libertad"
+slug: "miguel-de-unamuno-puede-creerse-en-el-pasado-fe-solo"
 procedencia:
   obra: "¡Adentro!"
 estadoDerechos: "dominio-público"
