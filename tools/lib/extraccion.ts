@@ -242,6 +242,22 @@ const APARATO_DE_LA_FUENTE = [
    * Con sujeto, se queda: «La imprenta se ha modernizado, y con ella la lectura» lo dice el Autor.
    */
   /^\s*se\s+han?\s+(?:respetado|conservado|mantenido|corregido|actualizado|modernizado|unificado)\s+(?:la|las|el|los)\b/iu,
+  /*
+   * Decimotercera: la **ficha bibliográfica** de una sección de reseñas.
+   *
+   *     Federico de Castro.--Madrid, 1895; un tomo en 4.º, 2,50 pesetas.
+   *
+   * El volumen que la trajo no es solo un ensayo: incluye la sección de reseñas de la revista
+   * donde apareció, y cada ficha sale como candidata bien formada. La escribió el redactor de esa
+   * sección, no el Autor, y está literal en el documento: la 11.2 la daría por buena.
+   *
+   * Lo que la delata es **el aparato de librero y no el tema**: tomos con su formato, precio en
+   * pesetas, o pie de imprenta con ciudad, año y punto y coma. Hablar de libros, de Madrid o de
+   * dinero no basta —hay prueba de las tres cosas—, porque el Autor puede hacerlo y lo hace.
+   *
+   * Medido: 13 candidatas de 7209, y cero de las 1360 Citas publicadas.
+   */
+  /\b(?:un|dos|tres|cuatro|cinco|seis)\s+tomos?\s+en\s+\d|\d+[,.]\d+\s*pesetas|\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+,\s*1[89]\d\d(?:-\d\d)?\s*;/u,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

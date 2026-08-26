@@ -1,7 +1,9 @@
 ---
-texto: "Después de haber estudiado el problema social de la igualdad, ¿no nos sentimos más fuertes para convencer, y con una mayor tolerancia para ser convencidos?"
+texto: "De la posición humilde viene la templanza en los deseos, esa clave de la felicidad que el pobre recibe casi gratis, que el rico logra tan difícilmente."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-despues-de-haber-estudiado-el-problema-social"
+temas:
+  - "la-riqueza"
+slug: "concepcion-arenal-de-la-posicion-humilde-viene-la-templanza"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

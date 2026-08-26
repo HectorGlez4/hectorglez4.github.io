@@ -124,6 +124,25 @@ test.describe('Historia 2.7 — nada huérfano', () => {
      * (AD-9). Aquí queda lo único que solo se puede hacer con un navegador delante:
      * recorrer el sitio de verdad y anotar de dónde sale cada enlace.
      */
+    /*
+     * Ésta es una **prueba de barrido**: recorre el Corpus entero, no una página.
+     *
+     * El presupuesto por defecto de Playwright son 30 s y vale para las pruebas que miran una
+     * cosa. Éstas crecen con el Corpus, y la cuenta lo dice sin lugar a dudas: el recorrido de
+     * NFR-5 tardaba 11,2 s con 1230 páginas y **20,5 s con 1466**; la de Tarjetas baja una imagen
+     * por Cita publicada, y son más de mil trescientas.
+     *
+     * Las dos se pararon por tiempo —la 94.ª, la 114.ª y la 117.ª— y las dos se paralelizaron ya.
+     * Seguir exprimiendo el paralelismo sería el tercer parche al mismo problema: **lo que hay no
+     * es una prueba lenta, son dos clases de prueba con costes distintos**, y eso se declara.
+     *
+     * `test.slow()` triplica el presupuesto de ésta y solo de ésta. No toca ningún umbral del
+     * producto —`MAX_SALTOS_DESDE_LA_PORTADA` sigue en 3— ni cambia lo que se comprueba: cambia
+     * cuánto se le deja tardar a una prueba que mira mil cosas en vez de una. Se revierte
+     * borrando la línea.
+     */
+    test.slow();
+
     const publicadas = await rutasDelSitemap(request);
     const enlaces = new Map<string, string[]>();
 

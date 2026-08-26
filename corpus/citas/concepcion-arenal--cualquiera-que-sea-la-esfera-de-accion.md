@@ -1,7 +1,9 @@
 ---
-texto: "Creemos haber dicho bastante para probar que la igualdad ante la ley, como generalmente se entiende, y la igualdad ante la justicia, no son una misma cosa."
+texto: "Cualquiera que sea la esfera de acción de la libertad, no se sustrae á las condiciones de toda regla de justicia; puede ser mal comprendida y mal aplicada."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-creemos-haber-dicho-bastante-para-probar-que"
+temas:
+  - "la-libertad"
+slug: "concepcion-arenal-cualquiera-que-sea-la-esfera-de-accion"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

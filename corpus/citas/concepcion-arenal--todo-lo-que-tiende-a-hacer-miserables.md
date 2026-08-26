@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo que tiende a hacer miserables, tiende a hacer degradados, y la inferioridad de la mujer, su inutilidad en muchos casos, es un elemento de miseria."
 autor: "concepcion-arenal"
+temas:
+  - "la-riqueza"
 slug: "concepcion-arenal-todo-lo-que-tiende-a-hacer-miserables"
 procedencia:
   obra: "La mujer del porvenir"

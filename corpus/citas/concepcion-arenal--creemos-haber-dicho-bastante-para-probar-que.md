@@ -1,7 +1,9 @@
 ---
-texto: "En todas las naciones que progresan, progresa la igualdad, y puede afirmarse que, en la medida justa, es un elemento indispensable de bienestar y grandeza."
+texto: "Creemos haber dicho bastante para probar que la igualdad ante la ley, como generalmente se entiende, y la igualdad ante la justicia, no son una misma cosa."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-en-todas-las-naciones-que-progresan-progresa"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-creemos-haber-dicho-bastante-para-probar-que"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

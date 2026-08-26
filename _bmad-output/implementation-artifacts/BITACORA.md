@@ -7310,3 +7310,65 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el de
 verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 117.ª sesión — dos clases de prueba, y la comprobación de duplicados deja de ser mi memoria
+
+**12 Citas** del ensayo abierto ayer, en cinco Temas, y dos arreglos que valen más.
+
+### La tercera prueba que muere por tiempo, y esta vez no se parchea
+
+NFR-5 volvió a pararse por **tiempo agotado**. Ya la paralelicé en la 94.ª, y la 115.ª dejó escrito
+que el margen era estrecho y volvería. Volvió, y la cuenta lo explica sin lugar a dudas:
+
+| | páginas del sitio | tarda |
+|---|---|---|
+| 94.ª | 1230 | 11,2 s |
+| **117.ª** | **1466** | **20,5 s** |
+
+Sube casi linealmente con el Corpus, y el presupuesto es fijo. Con la de Tarjetas van **dos pruebas
+paradas por lo mismo y las dos ya paralelizadas**: seguir exprimiendo el paralelismo sería el tercer
+parche.
+
+**Lo que hay no es una prueba lenta: son dos clases de prueba con costes distintos.** Las que miran
+una página caben de sobra en los 30 s por defecto; las que **recorren el Corpus entero** no, y no
+van a caber nunca porque el Corpus crece. Así que se declara: `test.slow()` en esas dos y solo en
+esas dos.
+
+Y conviene decir por qué **esto no es mover un umbral para que algo pase**:
+`MAX_SALTOS_DESDE_LA_PORTADA` sigue en 3 y la aserción es la misma. Lo que cambia es cuánto se le
+deja tardar a una prueba que mira mil cosas en vez de una. Se revierte borrando una línea, y la
+razón queda escrita donde está la línea.
+
+### Y la comprobación de duplicados deja de depender de mí
+
+La 116.ª encontró que un volumen traía obra ya sembrada con **otra ortografía**, invisible al cotejo
+literal, y lo resolví comprobando a mano cinco candidatas. Comprobar a mano no escala.
+
+Ahora el listador compara cada candidata **en forma llana** —sin tildes, sin puntuación, sin
+mayúsculas— contra todas las Citas publicadas, y aparta lo que ya está. La primera medida con él
+dice **0**, y eso también es un resultado: las candidatas que reconocí ayer no estaban publicadas,
+eran las que en su día **descarté**. El temor estaba bien fundado y el daño no llegó; ahora lo
+vigila una comprobación en vez de mi memoria.
+
+### Decimotercera forma de aparato
+
+La **ficha bibliográfica** de una sección de reseñas —«Federico de Castro.--Madrid, 1895; un tomo en
+4.º, 2,50 pesetas»—: el volumen incluye las reseñas de la revista donde apareció. Lo que la delata
+es el aparato de librero, no el tema: tomos con formato, precio en pesetas, pie de imprenta con
+punto y coma. Hablar de libros, de Madrid o de dinero no basta, y hay prueba de las tres.
+
+Medido: **13 candidatas de 7209, y cero de las 1360 Citas publicadas.**
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1360 | **1367** … y 5 más de la tanda anterior |
+| Formas de aparato cazadas | 12 | **13** |
+| Pruebas de unidad | 2223 | **2230** |
+| Páginas del sitio | 1417 | **1466** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la 116.ª
+verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

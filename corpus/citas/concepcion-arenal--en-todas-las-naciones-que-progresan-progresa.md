@@ -1,7 +1,9 @@
 ---
-texto: "Tan pronto como los hombres dejan de estar apremiados por necesidades imprescindibles é idénticas, empiezan á rebajarse los unos, á elevarse los otros."
+texto: "En todas las naciones que progresan, progresa la igualdad, y puede afirmarse que, en la medida justa, es un elemento indispensable de bienestar y grandeza."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-tan-pronto-como-los-hombres-dejan-de"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-en-todas-las-naciones-que-progresan-progresa"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"
