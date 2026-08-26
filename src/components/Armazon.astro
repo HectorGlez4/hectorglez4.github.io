@@ -75,6 +75,18 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     <title>{titulo}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={canonica} />
+    {/*
+      * El canal de la Cita del Día. Va en TODAS las superficies y no solo en la portada:
+      * quien llega por un buscador aterriza en una Página de Cita, y es ahí donde decide
+      * si quiere seguir recibiéndolas. Ofrecérselo solo en la portada sería ofrecérselo
+      * a quien ya llegó por su cuenta.
+      */}
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${MARCA} — la Cita del Día`}
+      href={new URL('/rss.xml', Astro.site).href}
+    />
     {noIndexar && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
