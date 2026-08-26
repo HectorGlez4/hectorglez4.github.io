@@ -484,6 +484,43 @@ function sinElEncabezado(texto: string, obra: string): string {
   return lineas.slice(primera + 1).join('\n');
 }
 
+/**
+ * Un numeral romano bien formado y nada más — la línea de sección de una obra numerada.
+ *
+ * Anclado a la línea **entera**: es lo que hace que no pueda mutilar prosa. Una heurística
+ * sobre el principio de la frase —«numeral, espacio, mayúscula»— habría necesitado guardas
+ * para no comerse una palabra en versales hecha de letras romanas; aquí no hace falta
+ * ninguna, porque ningún verso ni ninguna frase de este Corpus es exactamente «LXVIII».
+ */
+const SOLO_UN_NUMERAL =
+  /^(?=[IVXLCDM])M{0,4}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})$/u;
+
+/**
+ * El cuerpo sin las líneas que son solo el numeral de una sección.
+ *
+ * El mismo accidente que `sinElEncabezado`, un piso más abajo. Las obras numeradas —los
+ * «Proverbios y cantares», la «Consolación a Marcia»— ponen el numeral en su propia línea, y
+ * como esa línea no acaba en punto el troceador la pega al primer verso:
+ *
+ *   «I Nunca perseguí la gloria ni dejar en la memoria de los hombres mi canción…»
+ *
+ * Aprobarla publicaría una Cita que empieza por el número de su sección, y el cotejo de la
+ * 11.2 la daría por buena porque ese texto está en el documento. Medido sobre los 147
+ * documentos versionados: 187 sentencias, en ocho obras.
+ *
+ * Se **retira** en vez de descartarse, que es lo contrario de lo que hace
+ * `esAparatoDeLaFuente`, y la diferencia no es de estilo. «Capítulo I» es aparato: un rótulo
+ * sin obra dentro. Un numeral suelto delante de un proverbio numerado no lo es —el proverbio
+ * **es** el texto—, así que descartarlo tiraría la Cita entera. Se quita el rótulo y se deja
+ * hablar a la obra.
+ */
+function sinLosNumeralesDeSeccion(texto: string): string {
+  return texto
+    .split('\n')
+    .filter((linea) => !SOLO_UN_NUMERAL.test(linea.trim()))
+    .join('\n');
+}
+
 export function extraerCandidatas(
   documento: DocumentoDeFuente,
   autor: string,
@@ -516,7 +553,9 @@ export function extraerCandidatas(
   const candidatas: Candidata[] = [];
   const vistas = new Set<string>();
 
-  for (const sentencia of sentencias(sinElEncabezado(documento.texto, documento.obra))) {
+  for (const sentencia of sentencias(
+    sinLosNumeralesDeSeccion(sinElEncabezado(documento.texto, documento.obra)),
+  )) {
     const longitud = [...sentencia].length;
 
     if (longitud < MIN_CARACTERES_CANDIDATA || longitud > MAX_CARACTERES_CANDIDATA) {

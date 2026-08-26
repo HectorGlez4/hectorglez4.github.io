@@ -473,3 +473,59 @@ describe('FR-24 — el título del documento no se pega a la primera frase', () 
     );
   });
 });
+
+describe('FR-24 — el numeral de sección no se pega al primer verso', () => {
+  const CUERPO = [
+    'I',
+    '',
+    'Nunca perseguí la gloria ni dejar en la memoria de los hombres mi canción.',
+    '',
+    'II',
+    '',
+    '¿Para qué llamar caminos a los surcos del azar, si todo el que camina anda sobre el mar?',
+  ].join('\n');
+
+  it('ninguna candidata empieza por el numeral', () => {
+    const resultado = extraerCandidatas(documento({ texto: CUERPO }), 'antonio-machado');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    const conNumeral = resultado.candidatas.filter((c) =>
+      /^(?=[IVXLCDM])M{0,4}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})\s/u.test(c.texto),
+    );
+    expect(conNumeral.map((c) => c.texto)).toEqual([]);
+  });
+
+  it('y el verso llega entero, que es lo que distingue retirar de descartar', () => {
+    /*
+     * `esAparatoDeLaFuente` descarta la sentencia; aquí se retira el rótulo y se deja la obra.
+     * La diferencia no es de estilo: «Capítulo I» es un rótulo sin obra dentro, y un numeral
+     * suelto delante de un proverbio numerado no lo es —el proverbio **es** el texto—, así que
+     * descartarlo tiraría la Cita entera.
+     */
+    const resultado = extraerCandidatas(documento({ texto: CUERPO }), 'antonio-machado');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.map((c) => c.texto)).toContain(
+      'Nunca perseguí la gloria ni dejar en la memoria de los hombres mi canción.',
+    );
+  });
+
+  it('una línea que solo PARECE un numeral no se retira', () => {
+    /*
+     * El ancla a la línea entera es lo que hace innecesaria cualquier guarda: «MIL» seguido de
+     * texto en su misma línea es prosa, y una línea de verso jamás es exactamente «LXVIII».
+     */
+    const conVersal = [
+      'MIL veces me lo dijo, y ninguna de ellas le presté la atención que merecía.',
+      '',
+      'CIVIL era el tono, y sin embargo la advertencia sonaba a cosa de otro mundo.',
+    ].join('\n');
+
+    const resultado = extraerCandidatas(documento({ texto: conVersal }), 'antonio-machado');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+
+    expect(resultado.candidatas.map((c) => c.texto)).toContain(
+      'MIL veces me lo dijo, y ninguna de ellas le presté la atención que merecía.',
+    );
+  });
+});
