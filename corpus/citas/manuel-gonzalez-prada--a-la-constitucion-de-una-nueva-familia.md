@@ -3,6 +3,7 @@ texto: "A la constitución de una nueva familia dulcificada por la buena fe, la 
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-vida"
+  - "el-amor"
 slug: "manuel-gonzalez-prada-a-la-constitucion-de-una-nueva-familia"
 procedencia:
   obra: "Las esclavas de la Iglesia"

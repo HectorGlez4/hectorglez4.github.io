@@ -3,6 +3,7 @@ texto: "El odio acaso, que acumula y concentra, puede aún producir naturalmente
 autor: "jose-marti"
 temas:
   - "la-vida"
+  - "el-amor"
 slug: "jose-marti-el-odio-acaso-que-acumula-y-concentra"
 procedencia:
   obra: "Prólogo al Poema del Niágara"

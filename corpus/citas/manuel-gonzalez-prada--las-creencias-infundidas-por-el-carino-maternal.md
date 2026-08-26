@@ -1,6 +1,9 @@
 ---
 texto: "Las creencias infundidas por el cariño maternal llegan a un sitio del alma donde más tarde no alcanzan las lecciones trasvasadas con el rigor del pedante."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
+  - "el-amor"
 slug: "manuel-gonzalez-prada-las-creencias-infundidas-por-el-carino-maternal"
 procedencia:
   obra: "Las esclavas de la Iglesia"

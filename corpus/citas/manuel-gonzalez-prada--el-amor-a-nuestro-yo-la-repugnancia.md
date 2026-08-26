@@ -4,6 +4,7 @@ autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
   - "la-muerte"
+  - "el-amor"
 slug: "manuel-gonzalez-prada-el-amor-a-nuestro-yo-la-repugnancia"
 procedencia:
   obra: "El individuo"

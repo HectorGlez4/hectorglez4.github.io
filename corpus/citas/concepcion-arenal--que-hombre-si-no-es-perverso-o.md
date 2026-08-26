@@ -3,6 +3,7 @@ texto: "¿Qué hombre, si no es perverso o brutal, preferirá la obediencia cieg
 autor: "concepcion-arenal"
 temas:
   - "el-miedo"
+  - "el-amor"
 slug: "concepcion-arenal-que-hombre-si-no-es-perverso-o"
 procedencia:
   obra: "La mujer del porvenir"

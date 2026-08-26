@@ -1,6 +1,9 @@
 ---
 texto: "La ciencia y la razón tienen su puesto, la benevolencia y la ternura tienen el suyo, y es absurdo, al organizar una sociedad de seres sensibles, prescindir del sentimiento."
 autor: "concepcion-arenal"
+temas:
+  - "la-prudencia"
+  - "el-amor"
 slug: "concepcion-arenal-la-ciencia-y-la-razon-tienen-su"
 procedencia:
   obra: "La mujer del porvenir"

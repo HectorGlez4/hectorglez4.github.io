@@ -1,6 +1,9 @@
 ---
 texto: "El amor o el recelo paterno es un fatal escollo donde dieron al traste muchos sucesores."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
+  - "el-amor"
 slug: "baltasar-gracian-el-amor-o-el-recelo-paterno-es"
 procedencia:
   obra: "El político"

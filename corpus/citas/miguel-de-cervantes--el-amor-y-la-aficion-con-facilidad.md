@@ -3,6 +3,7 @@ texto: "el amor y la afición con facilidad ciegan los ojos del entendimiento"
 autor: "miguel-de-cervantes"
 temas:
   - "la-vida"
+  - "el-amor"
 slug: "miguel-de-cervantes-el-amor-y-la-aficion-con-facilidad"
 procedencia:
   obra: "Don Quijote"

@@ -3,6 +3,7 @@ texto: "Pues cabe amor entre los adversarios, y el amor los junta muchas veces e
 autor: "miguel-de-unamuno"
 temas:
   - "la-amistad"
+  - "el-amor"
 slug: "miguel-de-unamuno-pues-cabe-amor-entre-los-adversarios-y"
 procedencia:
   obra: "La crisis actual del patriotismo español"

@@ -3,6 +3,7 @@ texto: "Por amor hacia mi prójimo trato de hacerlo á mi imagen y semejanza; po
 autor: "miguel-de-unamuno"
 temas:
   - "la-amistad"
+  - "el-amor"
 slug: "miguel-de-unamuno-por-amor-hacia-mi-projimo-trato-de"
 procedencia:
   obra: "La crisis actual del patriotismo español"

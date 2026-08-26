@@ -1,6 +1,9 @@
 ---
 texto: "Sin el amor, las ideas son como mujeres feas, o copias dificultosas de los cuerpos de las diosas."
 autor: "antonio-machado"
+temas:
+  - "el-saber"
+  - "el-amor"
 slug: "antonio-machado-sin-el-amor-las-ideas-son-como"
 procedencia:
   obra: "Abel Martín"

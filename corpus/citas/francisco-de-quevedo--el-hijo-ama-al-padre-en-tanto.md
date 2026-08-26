@@ -3,6 +3,7 @@ texto: "El hijo ama al padre en tanto que no sabe que en muriendo su padre hered
 autor: "francisco-de-quevedo"
 temas:
   - "la-riqueza"
+  - "el-amor"
 slug: "francisco-de-quevedo-el-hijo-ama-al-padre-en-tanto"
 procedencia:
   obra: "Marco Bruto"

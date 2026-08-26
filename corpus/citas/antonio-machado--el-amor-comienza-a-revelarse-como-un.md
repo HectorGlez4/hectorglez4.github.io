@@ -3,6 +3,7 @@ texto: "El amor comienza a revelarse como un súbito incremento del caudal de la
 autor: "antonio-machado"
 temas:
   - "la-vida"
+  - "el-amor"
 slug: "antonio-machado-el-amor-comienza-a-revelarse-como-un"
 procedencia:
   obra: "Abel Martín"

@@ -1,6 +1,9 @@
 ---
 texto: "El cariño, si no es mutuo, no puede ser dichoso, y el hombre no podía prohibir a la mujer el sentimiento sin vedarse a sí propio la felicidad."
 autor: "concepcion-arenal"
+temas:
+  - "la-felicidad"
+  - "el-amor"
 slug: "concepcion-arenal-el-carino-si-no-es-mutuo-no"
 procedencia:
   obra: "La mujer del porvenir"

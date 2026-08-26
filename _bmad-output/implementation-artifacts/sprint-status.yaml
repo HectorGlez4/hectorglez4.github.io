@@ -153,6 +153,13 @@ development_status:
   # la adversidad—. 26/08: 15 de 24. Quedan siete por leer.
   # 26/08, medido con `npm run huecos`: 17 de 24. Ningun Tema por debajo del umbral de 15
   # Citas, y el mas flaco sostiene ocho Autores: los que hay estan sanos, faltan asuntos.
+  # 26/08: 18 de 24. Se midieron 24 familias de palabras sobre lo YA publicado y se leyeron
+  # una a una. La cifra util que faltaba: hacen falta ~30-35 coincidencias por regex para dar
+  # 15 Citas reales, porque casi todas se caen de tres maneras —el Tema que ya existe con otro
+  # nombre, el regex flojo, y la palabra que aparece al paso—. Eso descarta el tramo medio de
+  # la tabla sin leerlo. El asunto con MAS coincidencias (57 estrictas) dio al leerlo 13 Citas
+  # y 5 Autores, seis de una sola firma: ni umbral ni reparto, y ademas toca una decision
+  # editorial que no es del bucle. Queda medido y sin tocar.
   15-5-veinticuatro-temas-publicados: in-progress
   # 26/08: 1000 de 1000, puesto. El techo ya no lo limita la cantera sino el reparto:
   # sobran candidatas y escasean Autores con hueco. El techo cambio de dueño: el Autor mas representado

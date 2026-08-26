@@ -7775,3 +7775,89 @@ Puerta completa en verde: `astro check` 0 errores, **2253 pruebas**, `build`, **
 despliegue de la 123.ª (`de2333b`) verificado en éxito.
 
 **El tramo sigue sin alcanzarse**: 18 Autores, y a quién se admite no lo decide el bucle.
+
+
+## 125.ª sesión — «El amor» abre como Tema, y las pruebas no se generaban por Cita
+
+`npm run huecos` volvió a declarar el tramo reservado. El que sí puede moverse sin esa decisión es
+**Temas: 17 de 24**, y llevaba dos sesiones anotado como «quedan siete asuntos por leer» sin que
+nadie midiera si esos asuntos existen.
+
+### Primero medir cuáles son Temas, y descubrir que casi ninguno lo es
+
+Se contaron, sobre las Citas **ya publicadas**, veinticinco familias de palabras. La tabla en crudo
+prometía mucho: un asunto con 77 coincidencias, otro con 66, otro con 60. Leídas una a una, casi
+todas se caen, y de tres maneras distintas que conviene distinguir:
+
+· **El Tema que ya existe con otro nombre.** Un asunto daba 45 coincidencias y 26 de esas Citas ya
+  estaban en un mismo Tema publicado. No es un Tema nuevo: es aquél otra vez.
+· **El regex flojo mío.** Otro daba 66 porque yo había metido `\bsolo\b` en el patrón. Apretado a
+  las palabras que de verdad nombran el asunto, baja a **8**. Otro pasó de 38 a **24** en cuanto se
+  quitó el adjetivo y se dejó el sustantivo.
+· **La palabra que aparece al paso.** El resto: la Cita usa el término pero su asunto es otro.
+
+Y de ahí sale la cifra útil, que no estaba escrita en ninguna parte:
+
+| asunto | por regex | leídas y firmes | conversión |
+|---|---|---|---|
+| uno | 23 | **13** | 57 % |
+| otro | 22 | **9** | 41 % |
+
+**Un asunto necesita del orden de 30-35 coincidencias para dar 15 Citas reales.** Eso descarta de
+golpe todo el tramo medio de la tabla sin leerlo, y explica por qué la nota de la 15-5 decía «once
+asuntos por encima del umbral» y luego «dos de los cuatro primeros no eran».
+
+El candidato con más coincidencias resistió hasta el final: 57 con patrón estricto y quince firmas
+según la tabla. Leído, son **13 Citas y 5 Autores, seis de ellas de una sola firma** —el 46 %—.
+Ni llega al umbral ni tendría un reparto admisible. Además, ese asunto toca una decisión editorial
+que no es del bucle; queda medido y sin tocar, que es la opción reversible.
+
+### El que sí: seis Citas nuevas para abrirlo con margen
+
+Quedó uno vivo, con **12 Autores** —el mejor reparto de firmas de toda la tabla— y ningún Tema
+existente dueño de más de cinco de sus Citas. Leído en estricto daba **13**, y con las dos primeras
+Citas de la cantera **15**: justo el umbral, con dos juicios que yo mismo había marcado como
+discutibles sosteniéndolo.
+
+Un Tema clavado en el umbral es frágil: la primera Cita que se retire lo despublica. Así que en vez
+de estirar los juicios —que es bajar el umbral por otra puerta— se leyeron **187 candidatas más** de
+la cantera y salieron **cuatro tesis limpias**, sin deixis y sin necesidad de contexto. Con ellas el
+Tema abre en **19 Citas y 12 Autores**, por encima de ocho de los Temas ya publicados en reparto de
+firmas.
+
+Se apartaron, por el criterio de siempre, las que empiezan remitiendo a lo anterior —«Así, el amor
+de la madre…», «Otro grande enemigo…», «Si es vulgar…»—: están literales en el documento y el cotejo
+las daría por buenas, pero solas no se sostienen.
+
+Y se retiró una que yo mismo había contado: trata de la educación de la mujer, y el cariño maternal
+es la prenda del argumento, no su asunto.
+
+### La corrección: en la entrada de ayer expliqué una cifra sin medirla
+
+La 124.ª cerró diciendo que las pruebas pasaron de 2244 a 2253 «porque hay pruebas que se generan
+por Cita». **Es falso.** Hoy entraron **seis Citas y un Tema entero** y el contador se quedó clavado
+en 2253.
+
+Medido de verdad: `tests/unit/marca.test.ts` genera **un caso por fichero fuente** —barre `src/`,
+`public/`, `tools/`, `tests/` y `.github/`—, y ayer se añadieron tres ficheros. Ahí están las tres.
+
+Duele en el sitio justo: la entrada que denunciaba afirmar cifras sin medirlas **explicó una cifra
+con un mecanismo que no había medido**, y aguantó exactamente una sesión. La regla que sale de aquí
+no es «tener más cuidado» —eso ya lo escribí ayer— sino la que ya estaba escrita y no apliqué: si
+no se ha medido, se dice que no se ha medido.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1414 | **1420** |
+| Temas publicados | 17 | **18** de 24 |
+| Reparto del Tema nuevo | — | **19 Citas · 12 Autores** |
+| Asuntos medidos y descartados | — | **24** |
+
+Puerta completa en verde y **consultada por su código de salida**, no leída: `astro check` 0 errores,
+2253 pruebas, `build`, E2E. El despliegue de la 124.ª quedó verificado en vivo con la página servida
+y su texto íntegro.
+
+**El tramo declarado sigue sin alcanzarse**: 18 Autores, y a quién se admite no lo decide el bucle.
+Lo que sí se movió hoy es la meta que no dependía de esa decisión.

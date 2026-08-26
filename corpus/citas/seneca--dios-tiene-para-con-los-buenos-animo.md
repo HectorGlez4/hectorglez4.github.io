@@ -3,6 +3,7 @@ texto: "Dios tiene para con los buenos ánimo paternal, y cuando más apretadame
 autor: "seneca"
 temas:
   - "la-virtud"
+  - "el-amor"
 slug: "seneca-dios-tiene-para-con-los-buenos-animo"
 procedencia:
   obra: "De la Divina Providencia"

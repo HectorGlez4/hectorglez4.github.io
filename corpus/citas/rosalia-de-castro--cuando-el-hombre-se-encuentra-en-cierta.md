@@ -3,6 +3,7 @@ texto: "Cuando el hombre se encuentra en cierta situación, y cuando no puede of
 autor: "rosalia-de-castro"
 temas:
   - "la-vida"
+  - "el-amor"
 slug: "rosalia-de-castro-cuando-el-hombre-se-encuentra-en-cierta"
 procedencia:
   obra: "Ruinas"

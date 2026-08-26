@@ -3,6 +3,7 @@ texto: "La conversación larga, así de bienes como de males, engendra amor."
 autor: "seneca"
 temas:
   - "la-amistad"
+  - "el-amor"
 slug: "seneca-la-conversacion-larga-asi-de-bienes-como"
 procedencia:
   obra: "De la tranquilidad del ánimo"

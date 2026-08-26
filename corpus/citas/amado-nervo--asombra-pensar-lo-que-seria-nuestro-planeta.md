@@ -3,6 +3,7 @@ texto: "Asombra pensar lo que sería nuestro planeta si todos los humanos estuvi
 autor: "amado-nervo"
 temas:
   - "la-virtud"
+  - "el-amor"
 slug: "amado-nervo-asombra-pensar-lo-que-seria-nuestro-planeta"
 procedencia:
   obra: "Plenitud"
