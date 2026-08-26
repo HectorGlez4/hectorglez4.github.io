@@ -7256,3 +7256,57 @@ Puerta completa en verde: `astro check` 0 errores, **2220 pruebas**, `build`, **
 despliegue de la 114.ª —el que llevaba el trabajo de las dos sesiones— verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 116.ª sesión — la Fuente nueva devuelve obra vieja, y la familia de notas no se cierra enumerando
+
+Se aplicó lo que la 115.ª midió —abrir obra nueva rinde más que apurar la anterior— y se recuperó
+un ensayo de tesis de una Autora con margen para 147. **758 candidatas**, y el Autor cotejado con un
+nombre que trae el apellido de casada.
+
+### El libro no era el que decía su portada
+
+Leyendo aparecieron candidatas conocidas: «En las artes se distinguen las mujeres…», «Como
+operadoras tal vez no se distinguirían…», «Tampoco quisiéramos para ella derechos políticos…». Son
+de **otra obra suya, la que se sembró entera entre la 95.ª y la 100.ª** desde la otra Fuente.
+
+El volumen recopila las dos, y el contador de la extracción no lo canta porque **la ortografía
+difiere** —tildes a la antigua, «ó» por «o»—: el cotejo literal no las reconoce como repetidas y
+dice «Ya eran Cita publicada: 0» con toda razón.
+
+Es el mismo fenómeno de la 113.ª —otra edición de texto ya sembrado— pero **más difícil de ver**,
+porque aquí el título anunciaba obra nueva y la obra nueva sí estaba: solo que acompañada. Así que
+la regla de la 112.ª —mirar si el Autor ya está sembrado antes de recuperar una antología— se queda
+corta: hay que mirar **también qué más trae el volumen**, y comprobar cada candidata contra lo
+publicado antes de aprobarla. Se hizo, y ninguna de las cinco estaba.
+
+### Tercera variante de la nota del transcriptor, y la lección que ya toca escribir
+
+    Se ha respetado la ortografía y la acentuación del original.
+
+Ni asterisco —como la de la 108.ª— ni «han sido» —como la de la 112.ª—. Tres libros de la misma
+Fuente, tres modos de decir lo mismo.
+
+**La familia no se cierra enumerando fórmulas**, y a la tercera conviene decirlo en el código: cada
+transcriptor escribe la suya. Lo que se puede cerrar es el patrón —hablar de lo que se le hizo al
+texto sin decir quién—, y de ahí las tres formas que hay: asterisco inicial, pasiva «han sido…» e
+impersonal «se ha…». Con sujeto se queda: «La imprenta se ha modernizado, y con ella la lectura» lo
+dice el Autor, y hay prueba.
+
+Medido: **1 candidata de 7214, y cero de las 1355 Citas publicadas.**
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1355 | **1360** |
+| Documentos de Gutenberg | 3 | **4** |
+| Formas de aparato cazadas | 11 | **12** |
+| Pruebas de unidad | 2220 | **2223** |
+
+Y un dato que da gusto ver: de este documento, **18 candidatas se descartaron por aparato** antes de
+que yo mirara nada. Las puertas construidas para una Fuente funcionan en la siguiente.
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la 115.ª
+verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

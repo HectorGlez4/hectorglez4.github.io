@@ -228,6 +228,20 @@ const APARATO_DE_LA_FUENTE = [
    * corrigió los errores de aquella impresión» está en activa, lo dice el Autor y se queda.
    */
   /^\s*(?:errores?|erratas?|las\s+notas|la\s+ortograf[íi]a|las\s+p[áa]ginas|se\s+han?)\b[^.]*\bhan?\s+sido\s+(?:corregid|actualizad|renumerad|eliminad|respetad|conservad)/iu,
+  /*
+   * Y la tercera variante, del tercer libro de la misma Fuente: el **impersonal**.
+   *
+   *     Se ha respetado la ortografía y la acentuación del original.
+   *
+   * Ni asterisco ni «han sido». A estas alturas la lección conviene dejarla escrita: **la familia
+   * no se cierra enumerando fórmulas**, porque cada transcriptor escribe la suya. Lo que se cierra
+   * es el patrón —hablar de lo que se le hizo al texto sin decir quién—, y de ahí las tres formas:
+   * asterisco inicial, pasiva «han sido …» e impersonal «se ha …» seguido del verbo de la
+   * intervención.
+   *
+   * Con sujeto, se queda: «La imprenta se ha modernizado, y con ella la lectura» lo dice el Autor.
+   */
+  /^\s*se\s+han?\s+(?:respetado|conservado|mantenido|corregido|actualizado|modernizado|unificado)\s+(?:la|las|el|los)\b/iu,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

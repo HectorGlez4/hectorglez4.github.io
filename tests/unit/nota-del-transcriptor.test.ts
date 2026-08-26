@@ -116,4 +116,41 @@ describe('FR-24 — la nota del transcriptor no es texto del Autor', () => {
       esAparatoDeLaFuente('El editor corrigió los errores evidentes de aquella impresión.'),
     ).toBe(false);
   });
+  /**
+   * Tercera variante, y ya son tres libros de la misma Fuente con tres modos de decirlo:
+   *
+   *     Se ha respetado la ortografía y la acentuación del original.
+   *
+   * No lleva asterisco —como la de la 112.ª— y tampoco dice «han sido», así que la forma pasiva
+   * que se añadió entonces no la caza. Lo que comparte con las otras es **el verbo de la
+   * intervención en impersonal**: se ha respetado, se han conservado, se ha modernizado.
+   *
+   * A estas alturas la lección está clara y conviene dejarla escrita: **la familia no se cierra
+   * enumerando fórmulas**. Cada transcriptor escribe la suya, y cada vez que entra un libro nuevo
+   * aparece otra. Lo que se puede cerrar es el patrón —hablar de lo que se le hizo al texto, sin
+   * decir quién—, y por eso las tres formas que hay son un asterisco inicial, la pasiva
+   * «han sido …» y ahora el impersonal «se ha …».
+   *
+   * Sigue habiendo prueba de que una frase del Autor sobre lo mismo, con sujeto, se queda.
+   *
+   * Medido: **1 candidata de 7214, y cero de las 1355 Citas publicadas.**
+   */
+  it('la nota en impersonal también es aparato', () => {
+    for (const nota of [
+      'Se ha respetado la ortografía y la acentuación del original.',
+      'Se han conservado las abreviaturas de la edición príncipe.',
+      'Se ha modernizado la puntuación.',
+    ]) {
+      expect(esAparatoDeLaFuente(nota), nota).toBe(true);
+    }
+  });
+
+  it('pero no una frase del Autor con sujeto, aunque hable de lo mismo', () => {
+    for (const suya of [
+      'Se ha respetado siempre al que sabe callar a tiempo.',
+      'La imprenta se ha modernizado, y con ella la lectura.',
+    ]) {
+      expect(esAparatoDeLaFuente(suya), suya).toBe(false);
+    }
+  });
 });

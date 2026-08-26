@@ -1,0 +1,13 @@
+---
+texto: "¡Si la ley lo sabe, y parte de este conocimiento, porque si todos _pudieran_ eximirse no habría ejército!"
+autor: "concepcion-arenal"
+slug: "concepcion-arenal-si-la-ley-lo-sabe-y-parte"
+procedencia:
+  obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/52502/pg52502.txt"
+---
