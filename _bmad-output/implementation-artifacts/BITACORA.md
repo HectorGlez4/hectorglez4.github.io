@@ -8455,3 +8455,53 @@ con el motivo escrito: poner «decimocuarta» habría sido afirmar un número no
 Puerta completa en verde y consultada por su código de salida.
 
 **El tramo lleva dieciséis Autores por delante**, y ahora sí depende del bucle.
+
+
+## 135.ª sesión — elegir Autor es sobre todo saber a quién NO admitir
+
+Segunda sesión con el tramo abierto. Se miraron **1133 firmas** en español de la Fuente y entró
+**una**, y en eso está el trabajo.
+
+### Lo descartado, con su motivo
+
+· Un ensayo argentino sobre **la transformación de las razas en América**: teoría racial de época.
+  No entra en este sitio, como no entró el panfleto de la 123.ª. La diferencia con aquél es que
+  éste se descartó **por el título, sin recuperarlo**.
+· Novela y cuento de una firma peninsular importante: el género medido al 1-2 %. Un nombre ilustre
+  cuya obra disponible es narrativa entra para dar dos Citas.
+· **«Granos de oro: Pensamientos Seleccionados»** — una **antología de un Autor ya sembrado**.
+  Exactamente lo que la 120.ª prohíbe recuperar: rinde 0,7 % y duplica lo que ya está.
+· Un libro de viaje de una firma latinoamericana de primera. Recuperado y **retirado tras mirarlo**:
+  el cuerpo es descripción estadística —«La estadística de los Estados Unidos muestra el número de
+  hombres adultos…»— y el volumen abre con una **biografía escrita por su editor**. Segunda vez en
+  dos sesiones que un volumen trae prólogo ajeno.
+
+Ese último dolió, porque la tradición latinoamericana es un suelo comprometido y era el candidato
+que lo subía. **No se admitió igualmente para cuadrar la proporción**: el suelo está en el 45 % y
+aguanta; forzar un Autor de relleno para defender un porcentaje habría sido el mismo error que
+bajar un umbral.
+
+### Lo admitido
+
+Un tratado sobre **el arte de pensar bien**, prosa doctrinal de definición:
+
+> Si deseamos pensar bien, hemos de procurar conocer la verdad, es decir la realidad de las cosas.
+> Si afirmo una cosa de otra, formo un juicio; si lo enuncio con palabras, tengo una proposición.
+
+**5 de 13 en la primera tanda: 38 %**, el mejor arranque de un Autor nuevo en todo el bucle.
+
+La segunda tanda cayó a **1 de 12**, y también se ve por qué: el libro alterna secciones doctrinales
+con **ejemplos de personajes** —dos nombres propios que razonan mal para que el lector vea el
+error—. Cuarta obra en cinco sesiones donde el rendimiento no es del libro sino del tramo.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 19 | **20** de 35 |
+| Tradición latinoamericana | 47,4 % | **45 %** (suelo: 40 %) |
+| Citas | 1501 | **1507** |
+| Firmas revisadas en la Fuente | — | **1133** |
+| Documentos recuperados y retirados tras mirarlos | — | **1** |
+
+Puerta completa en verde y consultada por su código de salida.
