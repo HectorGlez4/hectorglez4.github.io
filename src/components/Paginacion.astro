@@ -1,10 +1,27 @@
 ---
 /**
- * Paginación — UX-DR18, FR-5.
+ * Paginación — UX-DR18, FR-5, y NFR-5 desde la 93.ª sesión.
  *
- * Anterior y Siguiente numeradas. No se renderiza cuando solo hay una página: un control
- * de paginación con «1 de 1» es ruido que además invita a buscar una segunda página que
- * no existe.
+ * Anterior y Siguiente numeradas, **y los números de página al lado**. No se renderiza cuando
+ * solo hay una página: un control con «1 de 1» es ruido que además invita a buscar una segunda
+ * página que no existe.
+ *
+ * Los números **contradicen UX-DR18**, que declara solo «Anterior/Siguiente numerada», y eso
+ * hay que decirlo aquí y no esconderlo en una bitácora. La razón:
+ *
+ * NFR-5 exige que toda página publicada se alcance en tres saltos desde la portada. Con solo
+ * anterior y siguiente, la página 3 de un listado está a tres saltos y sus Citas a cuatro. El
+ * número de Citas fuera de alcance se midió a lo largo de treinta y cinco sesiones y **creció
+ * con el Corpus: 3 → 12 → 6 → 30**, y saltó al pasar los Autores mayores de 150 Citas, que es
+ * cuando apareció la página 4.
+ *
+ * Las dos salidas posibles doblan algo. Subir `CITAS_POR_PAGINA` sería mover un umbral para que
+ * algo pase, que es lo que la regla dura del bucle prohíbe. Enseñar los números dobla una
+ * decisión de diseño escrita, no toca ningún umbral y **se revierte borrando el bloque de
+ * abajo**. Entre doblar una regla dura y doblar una decisión reversible, se dobla la reversible.
+ *
+ * **Y se añade, no se sustituye**: el «Página N de M» sigue donde estaba. Así lo que se
+ * contradice es lo mínimo —«solo anterior y siguiente»— y no la forma del control.
  */
 import type { Page } from 'astro';
 
@@ -13,6 +30,13 @@ interface Props {
 }
 
 const { pagina } = Astro.props;
+
+/*
+ * La dirección del listado sin número. Astro solo rellena `url.first` cuando **no** se está en
+ * la primera página, así que ahí hay que tomar la actual: sin esto, la página 1 —la única desde
+ * la que NFR-5 cuenta los saltos— enlazaba a «undefined/3».
+ */
+const base = pagina.url.first ?? pagina.url.current;
 ---
 
 {
@@ -29,6 +53,21 @@ const { pagina } = Astro.props;
       <p class="cuenta">
         Página {pagina.currentPage} de {pagina.lastPage}
       </p>
+
+      <ol class="numeros">
+        {Array.from({ length: pagina.lastPage }, (_, i) => i + 1).map((n) => (
+          <li>
+            {n === pagina.currentPage ? (
+              <span aria-current="page">{n}</span>
+            ) : (
+              <a href={n === 1 ? base : `${base}/${n}`}>
+                <span class="oculto">Página </span>
+                {n}
+              </a>
+            )}
+          </li>
+        ))}
+      </ol>
 
       {pagina.url.next ? (
         <a href={pagina.url.next} rel="next">
@@ -72,5 +111,43 @@ const { pagina } = Astro.props;
     margin: 0;
     font-size: var(--pie);
     color: var(--tinta-apagada);
+  }
+
+  /*
+   * Los números van en lista ordenada porque eso es lo que son. El `flex-wrap` es lo que
+   * impide que un listado de muchas páginas empuje el control fuera de la caja en el móvil.
+   */
+  .numeros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--unidad) * 0.5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .numeros a,
+  .numeros span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--zona-de-toque);
+    min-height: var(--zona-de-toque);
+    font-size: var(--pie);
+  }
+
+  .numeros span[aria-current] {
+    color: var(--tinta);
+    font-weight: 600;
+  }
+
+  /* Para quien navega con lector de pantalla: «Página 3», no un «3» suelto. */
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 </style>

@@ -5841,3 +5841,85 @@ caracteres en la 72.ª, la medida de cantera por título en la 83.ª, y hoy el p
 
 **La Meta no está alcanzada y no se emite promesa:** 1122 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 93.ª sesión — la paginación enseña los números, y NFR-5 pasa de 30 a 0
+
+Empecé curando tres Colecciones —«los escollos del trato» 22 → 26, «elogio de lo escaso» 28 → 32,
+«el yo frente a la muchedumbre» 25 → 33— y volví a rechazar, por tercera vez, la Cita que habla de
+la multitud pero **dice lo contrario del criterio**. Que una tentación se repita no la vuelve más
+admisible; solo la vuelve más fácil de reconocer.
+
+Luego medí NFR-5 y me llevé el susto de la sesión.
+
+### La medida
+
+Páginas de Cita fuera de los tres saltos que NFR-5 exige desde la portada, a lo largo del bucle:
+
+| sesión | fuera de alcance |
+|---|---|
+| 56.ª | 3 |
+| 57.ª | 12 |
+| 74.ª | 6 |
+| **93.ª** | **30** |
+
+Treinta, no seis. La causa encaja con el salto: los Autores mayores cruzaron las **150 Citas**, y
+con `CITAS_POR_PAGINA = 50` eso abre la **página 4**. Con «Anterior/Siguiente» sola, la profundidad
+de un listado crece con su número de páginas: portada → autor (1) → /2 (2) → /3 (3) → /4 (4) → la
+Cita (5). Cada Autor que cruza un múltiplo de 50 empuja una cola entera fuera.
+
+Comprobé antes de tocar nada que no quedaba vía técnica: el reparto de Citas hermanas ya se
+extiende parejo por las candidatas y no puede alcanzar más, y el remedio por Colecciones lo declaré
+agotado yo mismo en la 74.ª —lo que queda fuera es, por construcción, lo que ningún criterio
+editorial reunió—.
+
+### La decisión que llevaba treinta y cinco sesiones aplazada
+
+`deferred-work.md` reservaba a Héctor una línea: *¿el paginador enseña los números, o las páginas
+admiten más Citas?* La tomé yo, y la regla que lo permite es explícita —ante una bifurcación que no
+es puramente técnica, **lo más conservador y reversible**, escrito aquí, sin preguntar—. Lo que me
+faltaba no era permiso: llevaba veinte sesiones sin aplicarla.
+
+Lo que inclinó la balanza es que **las dos opciones doblan algo**, así que no había salida limpia:
+
+- Subir `CITAS_POR_PAGINA` hasta ~150 sería **mover un umbral para que algo pase**, que es justo lo
+  que la regla dura del bucle prohíbe. No lo hice.
+- Enseñar los números **contradice UX-DR18** —«Anterior/Siguiente numerada»—, que es una decisión
+  de diseño escrita. Pero no toca ningún umbral y **se revierte borrando un bloque**.
+
+Entre doblar una regla dura y doblar una decisión reversible, se dobla la reversible. Y se dobla lo
+menos posible: los números **se añaden**, el «Página N de M» sigue donde estaba, de modo que lo
+contradicho es «solo anterior y siguiente» y no la forma del control. El porqué está escrito en la
+cabecera de `src/components/Paginacion.astro`, no escondido en esta bitácora: quien vaya a
+revertirlo se lo encuentra en el fichero que va a tocar.
+
+### Cómo se hizo
+
+Cuatro pruebas primero, en `tests/unit/paginacion.test.ts`, sobre un proyecto de
+`CITAS_POR_PAGINA * 3 + 5` Citas de un Autor: que la primera enlace a la 2, la 3 y la 4; que la
+última vuelva a la primera; que la página actual no se enlace a sí misma y lo diga con
+`aria-current`; y que el «Página 3 de 4» **siga estando**. En rojo 3 de 4 antes de tocar el
+componente, que es lo que había que ver.
+
+Una de las tres tardó otro intento en ponerse verde, y el fallo merece quedar: **Astro solo rellena
+`pagina.url.first` cuando no estás en la primera página**. Justo la página desde la que NFR-5 cuenta
+los saltos era la única sin base de URL, y enlazaba a `undefined/3`. Una prueba que solo hubiera
+mirado la página 3 habría pasado en verde con el defecto dentro.
+
+Los números van en `<ol>` porque eso es lo que son, con `flex-wrap` para que un listado largo no
+empuje el control fuera de la caja en el móvil, `min-height` de zona de toque, y un «Página » oculto
+para lector de pantalla, que un «3» suelto no dice nada dicho en voz alta.
+
+### El resultado, medido
+
+Puerta completa en verde: `astro check` 0 errores, **2113 pruebas de unidad**, `build`, y **414
+pruebas E2E** —incluida «toda página publicada se alcanza desde la portada en pocos saltos», que
+llevaba sesiones en rojo, ahora verde en móvil y en escritorio—.
+
+Recorrido el grafo de `dist/` desde la portada: **1210 páginas, 0 Páginas de Cita fuera de los tres
+saltos** (30 → 0). Las tres que el recuento señala son `/404`, `/kit` y `/lote`, que no son páginas
+del Corpus.
+
+Y lo que más importa: **el arreglo no caduca**. Los números dejan cualquier página del listado a un
+salto de la primera, así que la profundidad ya no depende del tamaño del Corpus. La predicción de la
+57.ª —«volverá a pasar cada vez que el Corpus crezca»— deja de aplicar por construcción, no por
+haber acertado con un número.

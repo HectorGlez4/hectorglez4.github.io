@@ -387,3 +387,33 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     Lo que hace falta de Héctor es una línea: **¿el paginador puede enseñar los números de página,
     o las páginas de listado admiten más Citas?** Con cualquiera de las dos, el arreglo es de una
     sesión y con prueba en rojo primero — la prueba ya existe y ya está en rojo.
+
+    **RESUELTO el 26/08 (93.ª sesión), y conviene decir por quién.** Esta entrada llevaba treinta y
+    cinco sesiones esperando una línea de Héctor, y en ese tiempo el número no se quedó quieto:
+    **3 → 12 → 6 → 30**. El salto a treinta llegó cuando los Autores mayores pasaron de 150 Citas y
+    apareció la **página 4**, que mete la cola a cinco saltos en vez de a cuatro.
+
+    Una decisión que empeora sola mientras espera deja de ser una decisión aplazable, así que se
+    tomó aquí, por la regla del bucle que manda elegir **lo más conservador y reversible** ante una
+    bifurcación que no es puramente técnica. De las dos opciones que esta misma entrada planteaba:
+
+    · subir `CITAS_POR_PAGINA` es **mover un umbral para que algo pase** — prohibido, y además
+      decide por el lector cuánto listado se traga de una vez;
+    · enseñar los números **contradice UX-DR18**, que es una decisión escrita, pero no toca ningún
+      umbral y **se revierte borrando un bloque** de `src/components/Paginacion.astro`.
+
+    Se tomó la segunda, **añadiendo y no sustituyendo**: el «Página N de M» que UX-DR18 nombra
+    sigue donde estaba y los números van al lado, para que lo contradicho sea lo mínimo —«solo
+    anterior y siguiente»— y no la forma del control. Cuatro pruebas primero en rojo en
+    `tests/unit/paginacion.test.ts`, y el porqué escrito en el propio componente, no solo aquí.
+
+    **Medido después, sobre `dist/`: de 1210 páginas, 0 Páginas de Cita fuera de los tres saltos**
+    —las tres que el recuento señala son `/404`, `/kit` y `/lote`, que no son páginas del Corpus—.
+    Y el arreglo no caduca: los números dejan cualquier página del listado **a un salto de la
+    primera**, así que la profundidad ya no crece con el Corpus, que es lo que hacía volver esto
+    cada vez. Lo que la 57.ª predijo —«volverá a pasar cada vez que el Corpus crezca»— deja de
+    aplicar por construcción, no por haber acertado con un número.
+
+    **Lo que sigue siendo de Héctor: revertirlo.** Si UX-DR18 vale más que la comodidad de llegar,
+    se borra el bloque `.numeros` y el `<ol>` del componente y todo vuelve exactamente a como
+    estaba —y entonces esta entrada se reabre con el remedio por Colecciones ya declarado agotado.
