@@ -1,6 +1,8 @@
 ---
 texto: "En las ciencias sociales la idea necesita hacerse hombre, y al encarnar, pierde mucho de su diáfana pureza."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-en-las-ciencias-sociales-la-idea-necesita"
 procedencia:
   obra: "La mujer del porvenir"

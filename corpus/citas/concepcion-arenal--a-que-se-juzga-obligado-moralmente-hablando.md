@@ -1,6 +1,8 @@
 ---
 texto: "¿A qué se juzga obligado, moralmente hablando, un orgulloso aristócrata con el último de sus criados?"
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-a-que-se-juzga-obligado-moralmente-hablando"
 procedencia:
   obra: "La mujer del porvenir"

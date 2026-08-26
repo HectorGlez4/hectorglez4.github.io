@@ -1,7 +1,9 @@
 ---
-texto: "¿Qué hacer para obligar á la sociedad á que sea lógica y admita las consecuencias de sus principios?"
+texto: "¿Por qué quieren los hombres ser iguales á los que están más arriba en riqueza, en poder, en consideración?"
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-que-hacer-para-obligar-a-la-sociedad"
+temas:
+  - "la-riqueza"
+slug: "concepcion-arenal-por-que-quieren-los-hombres-ser-iguales"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

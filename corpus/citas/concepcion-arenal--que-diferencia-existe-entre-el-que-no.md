@@ -1,7 +1,9 @@
 ---
-texto: "¿Por qué quieren los hombres ser iguales á los que están más arriba en riqueza, en poder, en consideración?"
+texto: "¿Qué diferencia existe entre el que no halla qué comprar y el que no tiene medios de comprar lo que halla?"
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-por-que-quieren-los-hombres-ser-iguales"
+temas:
+  - "la-riqueza"
+slug: "concepcion-arenal-que-diferencia-existe-entre-el-que-no"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

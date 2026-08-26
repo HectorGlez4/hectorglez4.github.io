@@ -1,6 +1,8 @@
 ---
 texto: "Una vez casado, el hombre sufre las consecuencias de la falta de educación intelectual de su mujer."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-una-vez-casado-el-hombre-sufre-las"
 procedencia:
   obra: "La mujer del porvenir"

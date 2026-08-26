@@ -1,6 +1,8 @@
 ---
 texto: "Soltera en casa de su padre, casada en la suya, ¿no le quedará tiempo para ningún otro trabajo?"
 autor: "concepcion-arenal"
+temas:
+  - "el-trabajo"
 slug: "concepcion-arenal-soltera-en-casa-de-su-padre-casada"
 procedencia:
   obra: "La mujer del porvenir"

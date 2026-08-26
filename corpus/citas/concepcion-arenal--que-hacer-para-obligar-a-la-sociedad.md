@@ -1,7 +1,9 @@
 ---
-texto: "¡Dichoso el que, colocándose á la altura que requiere, haga brillar la verdad con todo su esplendor!"
+texto: "¿Qué hacer para obligar á la sociedad á que sea lógica y admita las consecuencias de sus principios?"
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-dichoso-el-que-colocandose-a-la-altura"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-que-hacer-para-obligar-a-la-sociedad"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

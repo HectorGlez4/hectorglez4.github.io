@@ -1,6 +1,8 @@
 ---
 texto: "Madre, tiene con sus hijos una paciencia verdaderamente infinita, de que ni remotamente es capaz el hombre."
 autor: "concepcion-arenal"
+temas:
+  - "el-amor"
 slug: "concepcion-arenal-madre-tiene-con-sus-hijos-una-paciencia"
 procedencia:
   obra: "La mujer del porvenir"

@@ -1,6 +1,8 @@
 ---
 texto: "¿No sería posible la armonía entre las cosas más sublimes, ni que la mujer que piensa fuese madre amorosa?"
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-no-seria-posible-la-armonia-entre-las"
 procedencia:
   obra: "La mujer del porvenir"

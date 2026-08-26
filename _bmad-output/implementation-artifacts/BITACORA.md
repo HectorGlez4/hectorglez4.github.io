@@ -8037,3 +8037,75 @@ Puerta completa en verde y consultada por su código de salida.
 
 **Actions sigue caído** —`major_outage` cuando se comprobó—, así que las sesiones 125, 126 y esta
 esperan en `main` a que el servicio vuelva. El sitio en vivo sirve lo de la 124.ª, íntegro.
+
+
+## 128.ª sesión — la puerta de aparato solo cubría lo que entra a partir de hoy
+
+Mismo tramo reservado. La meta de volumen dice «puesto» desde hace sesiones, pero el encargo era
+**explotar el contenido para ganar visitas** y cada Cita es una página indexable más, así que se
+siembra.
+
+### Doce Citas, al mejor rendimiento medido en mucho tiempo
+
+Se midió primero **dónde** sembrar, cruzando cantera legible con el sitio que deja el techo de
+concentración. La firma elegida tenía 507 candidatas sin leer, hueco para 105 y escribe ensayo de
+tesis, que es el género medido al 16 %.
+
+Dio mucho más: **7 firmes de 20** en la primera tanda —35 %— y 5 de 19 en la segunda. Doce en total,
+repartidas en seis Temas, y una de ellas al Tema que la 125.ª abrió.
+
+Se apartaron, además de las de siempre, dos por lo que dicen fuera de su contexto: una que juzga a
+los «pueblos salvajes» y otra que fija en la naturaleza las diferencias de carácter. Están literales
+en el documento y el cotejo las daría por buenas; sueltas en una tarjeta dicen otra cosa.
+
+### La rendija, que estaba abierta desde la primera forma
+
+Entre las candidatas de la tanda apareció esto:
+
+> Urbano).--Estudio sobre los principios de la moral con relación á la doctrina positivista.--1,50
+> pesetas.
+
+Es la **ficha bibliográfica** que la 123.ª ya había cerrado —precio en pesetas, pie de imprenta—.
+Seguía ahí porque las trece formas de `esAparatoDeLaFuente` se aplican **al extraer**, y
+`corpus/_revision/` guarda **7133 candidatas** extraídas casi todas antes de que existiera la mayoría
+de esas reglas. Una candidata vieja no vuelve a pasar por la puerta: se aprueba y se publica.
+
+La cazó mi lectura. **Y ese es exactamente el problema**: el bucle está construido sobre que leer
+falla y la puerta es el respaldo. Un respaldo que solo cubre lo que entra a partir de hoy no cubre
+las siete mil que ya están dentro, y la rendija se vuelve a abrir sola cada vez que se añade una
+forma nueva.
+
+Ahora la puerta se aplica también **al aprobar**, con tres pruebas —la primera es esa ficha, literal—
+y con el motivo nombrado aparte: quien revisa tiene que poder distinguir «le falta la Procedencia»
+de «esto no lo escribió el Autor», porque son dos arreglos distintos —uno se completa, el otro se
+descarta—.
+
+**Medido antes de aplicarla**, que es lo que la 123.ª hizo con cada una de las trece formas:
+
+| | |
+|---|---|
+| Citas publicadas que rechazaría | **0 de 1441** |
+| Candidatas en revisión que rechaza | **15 de 7133** |
+
+Las quince son aparato de verdad: fichas de librero, notas del transcriptor, flechas de nota al pie,
+avisos de ortografía actualizada. La puerta no muerde nada bueno.
+
+### Tres Colecciones curadas por criterio, no por tema
+
+Y una de ellas gana lo que le faltaba: la Colección del poder disfrazado la sostenía **una sola
+firma**, y la Cita de hoy sobre el ejército y la igualdad le da la **segunda**. Una Colección de un
+solo Autor es su página de Autor con otro nombre.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1429 | **1441** |
+| Pruebas | 2265 | **2269** |
+| Colecciones curadas | — | **3** (35→36, 66→69, 48→49) |
+| Puertas que solo cubrían la entrada | 1 | **0** |
+
+Puerta completa en verde y consultada por su código de salida.
+
+**Actions seguía caído** al cerrar. Las sesiones 125 a 128 esperan en `main`; el sitio en vivo sirve
+lo de la 124.ª, íntegro.

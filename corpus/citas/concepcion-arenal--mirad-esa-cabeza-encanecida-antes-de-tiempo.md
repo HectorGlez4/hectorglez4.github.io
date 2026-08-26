@@ -1,7 +1,9 @@
 ---
-texto: "Nada más contrario á la igualdad que un ejército disciplinado, á no ser el pueblo que conquista."
+texto: "Mirad esa cabeza encanecida antes de tiempo por el estudio, esa frente contraída por la meditación."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-nada-mas-contrario-a-la-igualdad-que"
+temas:
+  - "el-saber"
+slug: "concepcion-arenal-mirad-esa-cabeza-encanecida-antes-de-tiempo"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

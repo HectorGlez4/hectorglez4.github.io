@@ -16,6 +16,7 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
+import { esAparatoDeLaFuente } from './extraccion.ts';
 import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
@@ -70,6 +71,21 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       ...(candidata.fuente !== undefined ? { fuente: candidata.fuente } : {}),
     });
 
+    /*
+     * La puerta de aparato de la Fuente, otra vez y aquí.
+     *
+     * Las trece formas se aplicaban **solo al extraer**, y se fueron añadiendo a lo largo de
+     * treinta sesiones. Pero `corpus/_revision/` guarda más de siete mil candidatas extraídas
+     * antes de que existiera la mayoría de ellas, y una candidata vieja no vuelve a pasar por
+     * la puerta: se aprueba y se publica.
+     *
+     * La 128.ª tuvo delante, en una siembra normal, una ficha bibliográfica con su precio en
+     * pesetas que la 123.ª ya había cerrado. La cazó la lectura, y ese es el problema: el bucle
+     * está construido sobre que **leer falla y la puerta es el respaldo**. Un respaldo que solo
+     * cubre lo que entra a partir de hoy no cubre lo que ya está dentro.
+     */
+    const aparato = esAparatoDeLaFuente(candidata.texto ?? '');
+
     const duplicadaPublicada = yaPublicadas.get(canonico);
     const duplicadaEnRevision = vistasEnRevision.get(canonico);
 
@@ -84,10 +100,13 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
-      admisible: comprobacion.success && sinDocumento === undefined,
+      admisible: comprobacion.success && sinDocumento === undefined && !aparato,
       motivos: [
         ...(comprobacion.success ? [] : comprobacion.error.issues.map((i) => i.message)),
         ...(sinDocumento !== undefined ? [sinDocumento] : []),
+        // Se nombra el aparato para que no se confunda con «le falta un campo»: son dos
+        // arreglos distintos —uno se completa, el otro se descarta—.
+        ...(aparato ? ['es aparato de la Fuente, no texto del Autor'] : []),
       ],
     });
 
