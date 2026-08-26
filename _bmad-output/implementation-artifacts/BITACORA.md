@@ -7048,3 +7048,60 @@ Puerta completa en verde: `astro check` 0 errores, **2206 pruebas**, `build`, **
 despliegue de la 110.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 112.ª sesión — una antología del mismo Autor rinde poco, y no es por su género
+
+Ayer comprobé Gutenberg para los Autores de la **cola**; hoy toca a los de **margen amplio**, que es
+lo que faltaba. Salieron dos: una antología en prosa del Autor que ya tiene 83 Citas, y las obras
+selectas de una Autora con 23 y sitio para 188.
+
+### El resultado, y la causa que hay que separar
+
+La antología dio **415 candidatas y 3 Citas**: un **0,7 %**, el más bajo que este bucle ha medido —
+por debajo del 2 % del costumbrismo—. Pero atribuirlo al género sería quedarse corto, y la propia
+tubería lo dijo antes que yo:
+
+    Ya estaban en revisión: 17
+
+Es una **antología de un Autor ya sembrado**: recoge páginas de la obra que se agotó en la 104.ª, así
+que buena parte de lo doctrinal **ya está publicado** y el resto es prosa poética narrativa. La
+extracción detecta el solape literal —esas 17—, pero el solape real es mayor, porque muchas
+candidatas son de un libro que ya leí entero y juzgué.
+
+**Conviene decirlo separado del rendimiento por género**: una antología rinde poco no por lo que es,
+sino por venir después. Y de ahí una regla práctica para elegir obra: **antes de recuperar una
+antología, mirar si su Autor ya está sembrado**; si lo está, lo que queda es la parte que no cabía
+en las obras mayores, y eso es poco por construcción.
+
+Las tres que sí valen son las que no estaban —«Deshecho en polvo leve, caerá de la superficie de tu
+alma cuanto es allí vanidad, adherencia, remedo; y entonces, acaso por primera vez, conocerás la
+verdad de ti mismo»—.
+
+### Undécima forma de aparato: la misma nota, sin asterisco
+
+    Errores evidentes de impresión y de puntuación han sido corregidos.
+
+La forma genérica de la 108.ª —la línea que abre con asterisco— no la caza, porque **este
+transcriptor no los usa**. Cada libro de una misma Fuente puede traer su propio modo de decir lo
+mismo, así que la familia se cierra ahora también por **lo que la nota dice**: hablar de la
+intervención sobre el texto en voz pasiva y sin sujeto humano. «El editor corrigió los errores de
+aquella impresión» está en activa, lo dice el Autor, y se queda —hay prueba de ello—.
+
+Medido antes: **1 candidata de 6482, y cero de las 1329 Citas publicadas.**
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1329 | **1332** |
+| Documentos de Gutenberg | 2 | **3** |
+| Formas de aparato cazadas | 10 | **11** |
+| Pruebas de unidad | 2206 | **2210** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la 111.ª
+verificado en vivo.
+
+**Queda medido para la siguiente**: las obras selectas de la Autora con 23 Citas, sin recuperar
+todavía, y 424 candidatas legibles del primer libro de Gutenberg aún sin leer.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

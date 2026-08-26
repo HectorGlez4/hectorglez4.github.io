@@ -1,6 +1,8 @@
 ---
 texto: "Toda igualdad de condiciones es en el orden de las sociedades, como toda homogeneidad en el de la Naturaleza, un equilibrio inestable."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-justicia"
 slug: "jose-enrique-rodo-toda-igualdad-de-condiciones-es-en-el"
 procedencia:
   obra: "Ariel"

@@ -217,6 +217,17 @@ const APARATO_DE_LA_FUENTE = [
    */
   /^\s*\*\s/u,
   /^\s*nota\s+del\s+transcriptor/iu,
+  /*
+   * Y la misma nota **sin asterisco**, que llegó con el segundo libro de la misma Fuente:
+   *
+   *     Errores evidentes de impresión y de puntuación han sido corregidos.
+   *
+   * Cada libro puede traer su propio modo de decir lo mismo, así que la familia se cierra también
+   * por **lo que la nota dice**: hablar de la intervención sobre el texto —errores corregidos,
+   * ortografía actualizada, notas renumeradas— en voz pasiva y sin sujeto humano. «El editor
+   * corrigió los errores de aquella impresión» está en activa, lo dice el Autor y se queda.
+   */
+  /^\s*(?:errores?|erratas?|las\s+notas|la\s+ortograf[íi]a|las\s+p[áa]ginas|se\s+han?)\b[^.]*\bhan?\s+sido\s+(?:corregid|actualizad|renumerad|eliminad|respetad|conservad)/iu,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

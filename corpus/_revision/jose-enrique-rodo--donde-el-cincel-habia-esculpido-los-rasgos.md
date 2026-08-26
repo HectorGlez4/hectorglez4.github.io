@@ -1,0 +1,14 @@
+---
+texto: "Donde el cincel había esculpido los rasgos del semblante, quedaba apenas una superficie rasa, como la cara de los Hermes arcaicos, obscura y vil profanación del tiempo."
+autor: "jose-enrique-rodo"
+slug: "jose-enrique-rodo-donde-el-cincel-habia-esculpido-los-rasgos"
+procedencia:
+  obra: "Parábolas"
+  año: 1920
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/79262/pg79262.txt"
+---

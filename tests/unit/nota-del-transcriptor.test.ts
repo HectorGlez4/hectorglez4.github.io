@@ -78,4 +78,42 @@ describe('FR-24 — la nota del transcriptor no es texto del Autor', () => {
   it('pero un asterisco dentro de la frase no la convierte en nota', () => {
     expect(esAparatoDeLaFuente('La regla vale siempre * salvo cuando no vale.')).toBe(false);
   });
+  /**
+   * Y la nota **sin asterisco**, que llegó con el segundo libro de la misma Fuente.
+   *
+   *     Errores evidentes de impresión y de puntuación han sido corregidos.
+   *
+   * La forma genérica de la 108.ª —la línea que abre con asterisco— no la caza, porque este
+   * transcriptor no los usa. Confirma que **cada libro de una Fuente puede traer su propio modo**
+   * de decir lo mismo, y que la familia se cierra por lo que la nota dice, no solo por cómo se
+   * marca.
+   *
+   * La forma es estrecha a propósito: lo que la delata es hablar de **la intervención sobre el
+   * texto** —errores corregidos, ortografía actualizada, notas renumeradas, páginas eliminadas— en
+   * voz pasiva y sin sujeto humano. Una frase del Autor que hable de erratas no la cumple, y hay
+   * prueba de ello arriba.
+   *
+   * Medido: **1 candidata de 6482, y cero de las 1329 Citas publicadas.**
+   */
+  it('la nota del transcriptor sin asterisco también es aparato', () => {
+    expect(
+      esAparatoDeLaFuente('Errores evidentes de impresión y de puntuación han sido corregidos.'),
+    ).toBe(true);
+  });
+
+  it('y sus hermanas, con la misma forma pasiva', () => {
+    for (const nota of [
+      'La ortografía del texto original ha sido actualizada.',
+      'Las notas a pie de página han sido renumeradas.',
+    ]) {
+      expect(esAparatoDeLaFuente(nota), nota).toBe(true);
+    }
+  });
+
+  it('pero no una frase del Autor que hable de lo mismo en activa', () => {
+    // El editor corrigió los errores del manuscrito: eso lo dice el Autor, y se queda.
+    expect(
+      esAparatoDeLaFuente('El editor corrigió los errores evidentes de aquella impresión.'),
+    ).toBe(false);
+  });
 });
