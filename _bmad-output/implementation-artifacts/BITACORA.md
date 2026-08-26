@@ -6261,3 +6261,25 @@ de las 1191 Citas publicadas**. Se llega a tiempo, como con el folio.
 Puerta completa en verde, con `astro check` 0 errores, `build` y **414 E2E**.
 
 **El tramo sigue sin alcanzarse**: 18 Autores, y eso pide nombres o direcciones.
+
+### Y una autocrítica de la misma sesión: probado no es lo mismo que usado
+
+Al releer lo de arriba vi que **`citasQueCabenDe` había nacido probada y sin que la usara nadie**,
+y `tools/lib/cantera.ts` igual. Código probado que no llama ninguna orden es media tarea con
+aspecto de tarea entera, y decir «hecho» de eso es exactamente el autoengaño que este bucle
+castiga en todo lo demás.
+
+La aritmética tenía sitio natural y se le dio: **la línea del techo en `npm run huecos`**, que es
+lo primero que el bucle lee cada sesión. Decía cuánto se ha usado y no cuánto queda; ahora dice
+las dos cosas —«un 13,7 % — dentro del techo del 15 % · caben 18 Citas más suyas»— y así el número
+con el que se decide dónde sembrar deja de calcularse a mano. Cuatro pruebas, y una comprueba que
+**sigue sin nombrar a nadie**, que es la regla de la 9.3.
+
+Dos cosas que las pruebas me corrigieron por el camino, las dos antes de que llegaran a producción:
+mi fixture ponía al Autor mayor en el 40 % —por encima del techo— para probar un caso que solo
+existe por debajo; y llamé al campo `hechas` cuando se llama `alcanzado`, lo que daba `NaN` en la
+línea. Lo segundo lo habría cazado `astro check`; la prueba llegó antes.
+
+**`tools/lib/cantera.ts` sigue sin usarlo ninguna orden, y eso queda dicho como deuda y no como
+trabajo hecho.** Su cáscara pide red, y ampliar las excepciones de AD-22 es una decisión que no
+toca tomar hoy por comodidad.

@@ -6,7 +6,7 @@ import {
   type ColeccionParaHuecos,
   type TemaParaHuecos,
 } from '../../src/lib/huecos.ts';
-import { citasQueCabenDe, objetivoDeMeta, verMeta } from '../../src/lib/meta.ts';
+import { citasQueCabenDe, lineasDeMeta, objetivoDeMeta, verMeta } from '../../src/lib/meta.ts';
 import {
   META_AUTORES,
   META_CITAS_PUBLICADAS,
@@ -397,5 +397,63 @@ describe('Meta de Corpus — cuántas Citas propias caben bajo el techo', () => 
 
       expect((citas + unaMas) / (total + unaMas), `${citas} de ${total}`).toBeGreaterThan(techo);
     }
+  });
+});
+
+
+/**
+ * El informe dice **cuánto sitio queda**, no solo cuánto se ha usado — Historia 15.3.
+ *
+ * `citasQueCabenDe` nació probada y sin que la usara nadie, y código probado que no usa ninguna
+ * orden sigue siendo media tarea. Su sitio natural es el informe que el bucle lee al empezar cada
+ * sesión: la línea del techo decía cuánto pesa el Autor más representado y **no** cuánto cabe
+ * todavía, que es justo el número con el que se decide dónde sembrar.
+ *
+ * Sin nombres, como el resto de la línea: la regla de la 9.3 vale igual para esta cifra.
+ */
+describe('Meta de Corpus — el informe dice cuánto cabe todavía bajo el techo', () => {
+  const citasDe = (reparto: Record<string, number>): CitaParaHuecos[] =>
+    Object.entries(reparto).flatMap(([autor, cuantas]) =>
+      Array.from({ length: cuantas }, (_, i) => ({
+        slug: `${autor}-${i}`,
+        autor,
+        temas: ['la-vida'],
+      })),
+    );
+
+  // Por el mismo ayudante que el resto del fichero: `verMeta` quiere los huecos ya calculados.
+  const lineas = (reparto: Record<string, number>): string[] =>
+    lineasDeMeta(objetivoDeMeta(meta(citasDe(reparto), [], [])));
+
+  /** Diez Autores a diez Citas: el mayor pesa un 10 %, holgadamente bajo el techo del 15 %. */
+  const REPARTO_HOLGADO = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [`autor${i}`, 10]),
+  );
+
+  it('cuando el más representado está dentro del techo, dice cuántas suyas caben aún', () => {
+    const texto = lineas(REPARTO_HOLGADO).join('\n');
+
+    expect(texto).toMatch(/caben \d+ Citas más suyas/);
+  });
+
+  it('la cifra es la que calcula la aritmética del techo, no una aproximada', () => {
+    const esperadas = citasQueCabenDe(10, 100);
+
+    expect(esperadas).toBeGreaterThan(0);
+    expect(lineas(REPARTO_HOLGADO).join('\n')).toContain(`caben ${esperadas} Citas más suyas`);
+  });
+
+  it('cuando ya excede el techo no promete sitio que no hay', () => {
+    // Ahí lo que el informe tiene que decir es cuánto falta para diluirlo, no cuánto cabe.
+    const texto = lineas({ uno: 80, dos: 20 }).join('\n');
+
+    expect(texto).toContain('por encima del techo');
+    expect(texto).not.toMatch(/caben \d+ Citas más suyas/);
+  });
+
+  it('y sigue sin nombrar a nadie, que es la regla de la 9.3', () => {
+    const texto = lineas(REPARTO_HOLGADO).join('\n');
+
+    expect(texto).not.toContain('autor0');
   });
 });

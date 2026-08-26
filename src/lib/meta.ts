@@ -374,7 +374,18 @@ export function lineasDeMeta(objetivo: ObjetivoDeMeta): string[] {
                 (meta.concentracion.porEncimaDelTecho > 1
                   ? ` (lo pasan ${meta.concentracion.porEncimaDelTecho} Autores)`
                   : '')
-              : ` — dentro del techo del ${porcentajeEnEspañol(meta.concentracion.techo)} %`),
+              : ` — dentro del techo del ${porcentajeEnEspañol(meta.concentracion.techo)} %` +
+                /*
+                 * Y cuánto sitio queda, que es el número con el que se decide dónde sembrar.
+                 *
+                 * La línea decía cuánto se ha usado y no cuánto cabe, así que el bucle calculaba
+                 * esto a mano en un guion de usar y tirar cada vez que iba a elegir Autor. Sin
+                 * nombres, como el resto de la línea: la regla de la 9.3 vale igual para esta
+                 * cifra. Cuando ya excede no se dice, porque ahí lo que hace falta saber es
+                 * cuánto falta para diluirlo, no un sitio que no hay.
+                 */
+                ` · caben ${citasQueCabenDe(meta.concentracion.citas, meta.citas.alcanzado)} ` +
+                  `Citas más suyas`),
         ]),
     '',
     'Tramo de esta sesión',
