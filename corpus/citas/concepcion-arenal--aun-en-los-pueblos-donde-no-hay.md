@@ -1,7 +1,9 @@
 ---
-texto: "A los desórdenes que una desigualdad exagerada, depravando los sentimientos, introduce en el mundo moral, hay que añadir los que llevan al mundo económico el lujo y la miseria."
+texto: "Aun en los pueblos donde no hay casta sacerdotal, ni teocracia, forman los sacerdotes un cuerpo privilegiado, que, depositario de la verdad, no la comunican á todos igualmente."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-a-los-desordenes-que-una-desigualdad-exagerada"
+temas:
+  - "la-verdad"
+slug: "concepcion-arenal-aun-en-los-pueblos-donde-no-hay"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

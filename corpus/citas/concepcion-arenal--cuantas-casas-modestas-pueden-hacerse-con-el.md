@@ -1,7 +1,9 @@
 ---
-texto: "¿En qué pueden ser iguales aquel pobre y aquel rico, aquel poderoso y aquel débil, aquel sabio y aquel ignorante?"
+texto: "¿Cuántas casas modestas pueden hacerse con el trabajo que necesita un palacio ó con el capital, que es lo mismo?"
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-en-que-pueden-ser-iguales-aquel-pobre"
+temas:
+  - "la-riqueza"
+slug: "concepcion-arenal-cuantas-casas-modestas-pueden-hacerse-con-el"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

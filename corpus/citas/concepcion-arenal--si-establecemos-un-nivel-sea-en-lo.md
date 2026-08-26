@@ -1,7 +1,9 @@
 ---
-texto: "Salvo los casos de miseria extrema, la independencia del elector está en su conciencia y en su carácter, no en su posición social, que sólo sirve para evaluar el precio de su voto."
+texto: "Si establecemos un nivel, sea en lo físico, en lo intelectual ó en lo moral, veremos la tendencia á elevarse más los que están sobre él y á rebajarse los que quedan por debajo."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-salvo-los-casos-de-miseria-extrema-la"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-si-establecemos-un-nivel-sea-en-lo"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

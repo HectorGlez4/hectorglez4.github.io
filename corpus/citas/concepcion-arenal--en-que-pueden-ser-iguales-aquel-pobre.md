@@ -1,7 +1,9 @@
 ---
-texto: "Menos fuerza muscular puede suplirse con mayor destreza; una cualidad moral, una aptitud intelectual con otra ó con mayor perseverancia en el trabajo y constancia para el bien."
+texto: "¿En qué pueden ser iguales aquel pobre y aquel rico, aquel poderoso y aquel débil, aquel sabio y aquel ignorante?"
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-menos-fuerza-muscular-puede-suplirse-con-mayor"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-en-que-pueden-ser-iguales-aquel-pobre"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

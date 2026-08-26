@@ -8109,3 +8109,62 @@ Puerta completa en verde y consultada por su código de salida.
 
 **Actions seguía caído** al cerrar. Las sesiones 125 a 128 esperan en `main`; el sitio en vivo sirve
 lo de la 124.ª, íntegro.
+
+
+## 129.ª sesión — la heurística de la longitud se da la vuelta según el género
+
+Mismo tramo reservado, misma veta que la 128.ª. Empezó mal y por eso midió algo que sirve.
+
+### El rendimiento caía, y la causa no era la obra
+
+El tramo 95-175 caracteres había dado 35 % y 26 % en la sesión anterior. Hoy dio **3 de 18** —17 %—:
+ese trozo es el **medio argumentativo** del ensayo, preguntas retóricas que no se sostienen sin lo
+que va delante.
+
+Lo natural era buscar frases más cortas, porque la 115.ª tiene medido que **la densidad cae con la
+longitud**: una sentencia de sesenta caracteres suele ser tesis y una de doscientos ochenta, un
+procedimiento. Se probó el tramo 55-94 y dio **0 de 19**. Cero.
+
+Leídas, se ve por qué: en un ensayo que **discute**, las frases cortas son el andamiaje del debate
+—«Nuestros adversarios, ¿niegan una verdad que sostenemos?», «Levantaremos otro enfrente para
+guarecernos de sus tiros»— y no dicen nada solas.
+
+Así que se probó al revés, el tramo largo. **7 de 13: 54 %**, el mejor rendimiento medido en todo el
+bucle.
+
+| tramo | leídas | firmes | rendimiento |
+|---|---|---|---|
+| 55-94 | 19 | 0 | **0 %** |
+| 95-175 | 57 | 15 | 26 % |
+| 176-260 | 13 | 7 | **54 %** |
+
+La regla de la 115.ª **no era falsa: era parcial**. Vale para prosa aforística y doctrinal, donde la
+frase corta es la sentencia. En el ensayo polémico se invierte, porque la tesis necesita su cláusula
+entera para sostenerse sola y lo corto es la maniobra.
+
+Queda en el protocolo con la consecuencia práctica: **el tramo de lectura no se fija de antemano**.
+Se prueban dos bandas cortas de la misma obra y se sigue por la que rinde. Costó diecinueve
+candidatas averiguarlo y ahorra cientos.
+
+### Trece Citas, y tres que se apartan por lo que dicen sueltas
+
+Trece publicadas en siete Temas. Y tres apartadas que **están literales en el documento y pasarían el
+cotejo**: una que opone la libertad antigua al «despotismo sin límites de Oriente», un tópico
+orientalista de su siglo; otra que describe a la mujer como incapaz de entender los problemas del
+marido —que en el ensayo es la denuncia y en una tarjeta suelta es la afirmación—; y una tercera
+sobre «el muladar del vicio» que fuera de su página es un sermón.
+
+Es el mismo criterio de la 128.ª y merece nombre propio: **una Cita no es un fragmento correcto, es
+un fragmento que sigue diciendo lo mismo cuando se queda solo.**
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1441 | **1454** |
+| Colecciones curadas | — | **2** (36→37, 69→71) |
+| Tramos de longitud medidos | 1 | **3** |
+
+Puerta completa en verde y consultada por su código de salida.
+
+**Actions seguía caído.** Las sesiones 125 a 129 esperan en `main`; el sitio en vivo sirve la 124.ª.

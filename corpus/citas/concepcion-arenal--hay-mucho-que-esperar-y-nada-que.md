@@ -1,6 +1,8 @@
 ---
 texto: "Hay mucho que esperar y nada que temer para la armonía y paz doméstica de la educación intelectual de la mujer, que no necesita mandar para dirigir, ni dominar para ser dichosa."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-hay-mucho-que-esperar-y-nada-que"
 procedencia:
   obra: "La mujer del porvenir"

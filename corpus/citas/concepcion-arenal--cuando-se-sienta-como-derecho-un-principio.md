@@ -1,7 +1,9 @@
 ---
-texto: "¿Cuántas casas modestas pueden hacerse con el trabajo que necesita un palacio ó con el capital, que es lo mismo?"
+texto: "Cuando se sienta como derecho un principio imposible de convertir en hecho, la lucha es inevitable, la lucha con su siniestro acompañamiento de exageraciones, de iras, de represalias."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-cuantas-casas-modestas-pueden-hacerse-con-el"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-cuando-se-sienta-como-derecho-un-principio"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

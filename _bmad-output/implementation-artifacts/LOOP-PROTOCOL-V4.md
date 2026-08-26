@@ -385,6 +385,26 @@ candidata, una y otra vez, son tres cosas y no el tema: **empieza remitiendo** (
 es…», «Muchas puede haber…»), **cita a otro** («Ya Locke notó…», «Yo os digo con Renan…»), o **trae
 nombre propio y anécdota**.
 
+### La longitud se invierte según el género (129.ª)
+
+La 115.ª midió que **la densidad cae con la longitud de la frase**: una sentencia de sesenta
+caracteres suele ser una tesis y una de doscientos ochenta, un procedimiento. Es cierto en prosa
+aforística y doctrinal, y **se da la vuelta en el ensayo polémico**. Medido en una obra, tres tramos,
+89 candidatas:
+
+| tramo | leídas | firmes | rendimiento |
+|---|---|---|---|
+| 55-94 | 19 | 0 | **0 %** |
+| 95-175 | 57 | 15 | 26 % |
+| 176-260 | 13 | 7 | **54 %** |
+
+El porqué se ve leyendo: en un ensayo que discute, **las frases cortas son el andamiaje del debate**
+—«Nuestros adversarios, ¿niegan una verdad que sostenemos?», «Levantaremos otro enfrente»— y la
+tesis necesita su cláusula entera para sostenerse sola. En prosa aforística pasa justo lo contrario.
+
+Así que el tramo de lectura **no se fija de antemano**: se prueban dos bandas cortas de la misma
+obra y se sigue por la que rinde. Costaba diecinueve candidatas averiguarlo y ahorra cientos.
+
 ### La conclusión, que es una cuenta cerrada
 
 Sumando lo publicado y lo que la cantera puede dar, **ninguno de los cuatro asuntos llega a 15**.

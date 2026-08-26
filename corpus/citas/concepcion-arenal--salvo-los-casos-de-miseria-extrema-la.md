@@ -1,7 +1,9 @@
 ---
-texto: "Cuando se sienta como derecho un principio imposible de convertir en hecho, la lucha es inevitable, la lucha con su siniestro acompañamiento de exageraciones, de iras, de represalias."
+texto: "Salvo los casos de miseria extrema, la independencia del elector está en su conciencia y en su carácter, no en su posición social, que sólo sirve para evaluar el precio de su voto."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-cuando-se-sienta-como-derecho-un-principio"
+temas:
+  - "la-libertad"
+slug: "concepcion-arenal-salvo-los-casos-de-miseria-extrema-la"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

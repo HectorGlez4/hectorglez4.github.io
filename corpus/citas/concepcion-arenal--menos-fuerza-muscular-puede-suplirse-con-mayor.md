@@ -1,7 +1,9 @@
 ---
-texto: "Aun en los pueblos donde no hay casta sacerdotal, ni teocracia, forman los sacerdotes un cuerpo privilegiado, que, depositario de la verdad, no la comunican á todos igualmente."
+texto: "Menos fuerza muscular puede suplirse con mayor destreza; una cualidad moral, una aptitud intelectual con otra ó con mayor perseverancia en el trabajo y constancia para el bien."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-aun-en-los-pueblos-donde-no-hay"
+temas:
+  - "el-trabajo"
+slug: "concepcion-arenal-menos-fuerza-muscular-puede-suplirse-con-mayor"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

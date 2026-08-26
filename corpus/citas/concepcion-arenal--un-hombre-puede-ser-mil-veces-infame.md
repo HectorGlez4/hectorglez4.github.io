@@ -1,6 +1,8 @@
 ---
 texto: "Un hombre puede ser mil veces infame, y con tal que lo sea con mujeres, pasará por caballero; puede ser vil, y gozar fama de digno; puede ser cruel, sin que le tengan por malo."
 autor: "concepcion-arenal"
+temas:
+  - "la-virtud"
 slug: "concepcion-arenal-un-hombre-puede-ser-mil-veces-infame"
 procedencia:
   obra: "La mujer del porvenir"

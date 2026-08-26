@@ -1,7 +1,9 @@
 ---
-texto: "Si establecemos un nivel, sea en lo físico, en lo intelectual ó en lo moral, veremos la tendencia á elevarse más los que están sobre él y á rebajarse los que quedan por debajo."
+texto: "A los desórdenes que una desigualdad exagerada, depravando los sentimientos, introduce en el mundo moral, hay que añadir los que llevan al mundo económico el lujo y la miseria."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-si-establecemos-un-nivel-sea-en-lo"
+temas:
+  - "la-riqueza"
+slug: "concepcion-arenal-a-los-desordenes-que-una-desigualdad-exagerada"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

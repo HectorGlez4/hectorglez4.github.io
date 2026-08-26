@@ -1,7 +1,9 @@
 ---
-texto: "¿Tendrían los hombres que temer con tanta frecuencia que la mujer que quieren hacer su esposa por amor se una a ellos por... cuesta trabajo, pero es preciso decirlo, por comer?"
+texto: "Con la falta de lo necesario vienen la niñez enfermiza, y la juventud débil, y la enfermedad, y la muerte prematura."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-tendrian-los-hombres-que-temer-con-tanta"
+temas:
+  - "la-riqueza"
+slug: "concepcion-arenal-con-la-falta-de-lo-necesario-vienen"
 procedencia:
   obra: "La mujer del porvenir"
   año: 1844
