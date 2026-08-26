@@ -133,6 +133,17 @@ const APARATO_DE_LA_FUENTE = [
    * buenas costumbres y sobre la fe a todas horas —estos Autores lo hacen—; lo que no escribe
    * es la petición de licencia de su propio libro.
    */
+  /*
+   * Y el aviso de que la transcripción está a medias, que es la sexta forma y la primera que
+   * llega **por el arreglo de otra cosa**: apareció al abrirse las páginas compuestas por
+   * transclusión en la 80.ª, porque son justamente las que lo llevan mientras se corrigen.
+   *
+   * Lo que esta sexta enseña sobre las cinco anteriores: cada vez que se abre una puerta
+   * nueva —un lector que entiende una forma más de página— entra con ella una forma nueva de
+   * aparato. La lista no estaba incompleta; crece con el alcance.
+   */
+  /\blagunas de contenido\b|\bdeficiencias de formato\b/i,
+  /\b(?:esta )?obra se encuentra en desarrollo\b/i,
   /\bla licencia que (?:se )?(?:pide|suplica|solicita)\b/i,
   /\bofr[ée]cel[oa] su autor\b/i,
   /\bofend[ae]n? las buenas costumbres\b/i,

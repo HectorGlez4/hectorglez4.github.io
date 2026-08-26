@@ -1,7 +1,9 @@
 ---
-texto: "Es posible que, a causa de ello, haya lagunas de contenido o deficiencias de formato."
+texto: "Cada cual es único e insustituible; en serlo a conciencia, pon tu principal empeño."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-es-posible-que-a-causa-de-ello"
+temas:
+  - "el-saber"
+slug: "miguel-de-unamuno-cada-cual-es-unico-e-insustituible-en"
 procedencia:
   obra: "¡Adentro!"
 estadoDerechos: "dominio-público"

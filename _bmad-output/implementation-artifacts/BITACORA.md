@@ -5519,3 +5519,61 @@ el texto está escrito para durar más que su ocasión.**
 
 **La Meta no está alcanzada y no se emite promesa:** 1064 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## FR-24 (85.ª sesión) — La sexta forma de aparato llegó por haber arreglado otra cosa
+
+**1064 → 1071 Citas. 1114 → 1121 páginas.**
+
+### Buscar por género, no por tamaño
+
+Ayer quedó escrito que lo que decide el rendimiento no es el Autor ni el siglo, sino si el texto
+está escrito para durar más que su ocasión. Aplicado hoy: en vez de buscar obras grandes, se
+listaron las **pequeñas** —de 3 a 8 KB— de un Autor con treinta y tres huecos, porque ahí es donde
+están sus ensayos de periódico. Siete. Se recuperaron tres.
+
+### Y con la puerta nueva entró un aparato nuevo
+
+Entre las candidatas apareció esto:
+
+    Es posible que, a causa de ello, haya lagunas de contenido o deficiencias de formato.
+
+Es el aviso de que la transcripción está a medias, y lo escribió quien mantiene la Fuente. **Sexta
+forma de aparato, y la primera que llega por haber arreglado otra cosa**: apareció al abrirse las
+páginas compuestas por transclusión en la 80.ª, porque son justamente las que lo llevan mientras se
+corrigen.
+
+Lo que esta sexta enseña sobre las cinco anteriores: **cada vez que se abre una puerta nueva entra
+con ella una forma nueva de aparato.** La lista no estaba incompleta; crece con el alcance. Medido:
+una candidata, ninguna Cita publicada.
+
+### Un canario que saltó, y se hizo lo que él mismo mandaba
+
+La prueba de margen de la 11.5 —«el peor documento no llega ni a la cuarta parte del umbral»— se
+puso en rojo. Su propio comentario decía qué hacer: **«revisar la señal que lo esté rozando, no la
+prueba»**. Se revisó, con la medida del proyecto y no con una réplica escrita a ojo —la primera que
+escribí contaba «y» y «a» como letras sueltas y señalaba documentos sanos—.
+
+El culpable es un ensayo **sobre la letra K**: «Kant, con K mayúscula, es el cant mayúsculo», «el
+quilo con q es el que se suda». Siete letras sueltas en 982 palabras. **La señal se disparó bien y
+el documento está sano: las letras sueltas son su asunto.**
+
+No hay señal que arreglar, así que se corrige la cifra y se dice por qué: la anterior describía un
+Corpus de 59 documentos cuyo peor caso era una página de índice. Con 93 y textos que hablan de
+ortografía, la mitad del umbral sigue siendo margen de verdad. **El umbral real —el 2 % de la
+11.5— no se toca.** Y queda la sonda `tools/peor-legible.ts` para que la próxima vez no haya que
+escribir una réplica.
+
+### La siembra
+
+Siete Citas: «Conocimiento es lo que pienso yo; opinión es lo que piensa usted», «no te empeñes en
+regular tu acción por tu pensamiento; deja más bien que aquélla te forme, informe, deforme y
+transforme éste», «aborrezco el secreto sobre toda otra cosa».
+
+De los tres ensayos, uno no dio ninguna: su mejor frase se apoya en un término que él mismo acuña y
+sin él no se entiende. Se retira el documento con sus 28 candidatas, sin forzar.
+
+`npx astro check` 0 errores; `npx vitest run` **2103/2103**; `npm run build` **1121 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1071 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

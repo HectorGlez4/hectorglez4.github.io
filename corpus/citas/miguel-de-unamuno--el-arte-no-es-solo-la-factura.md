@@ -1,6 +1,8 @@
 ---
 texto: "El arte no es sólo la factura: eso es más bien oficio; el arte es la intuicion del medio en que se vive, saber qué se pinta, dónde se pinta y para qué y quiénes se pinta."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-el-arte-no-es-solo-la-factura"
 procedencia:
   obra: "En Alcalá de Henares"

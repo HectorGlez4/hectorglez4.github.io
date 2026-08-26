@@ -1,7 +1,9 @@
 ---
-texto: "Cada cual es único e insustituible; en serlo a conciencia, pon tu principal empeño."
+texto: "No te empeñes en regular tu acción por tu pensamiento; deja más bien que aquélla te forme, informe, deforme y transforme éste."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-cada-cual-es-unico-e-insustituible-en"
+temas:
+  - "la-vida"
+slug: "miguel-de-unamuno-no-te-empenes-en-regular-tu-accion"
 procedencia:
   obra: "¡Adentro!"
 estadoDerechos: "dominio-público"
