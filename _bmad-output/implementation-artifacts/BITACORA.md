@@ -8781,3 +8781,58 @@ para el tramo —el tramo cuenta Autores, no obras— pero queda anotado para un
 | Mejor rendimiento medido | 54 % | **57 %** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 141.ª sesión — el tramo no avanza, y se dice
+
+Octava sesión con el tramo abierto y **la primera que no admite a nadie**. Autores siguen en 29.
+Tres Citas.
+
+### Cuatro vetas de búsqueda, agotadas o inservibles
+
+· **Materia en la Fuente nueva**: `s.aphorisms`, `s.proverbs`, `s.wisdom` **no existen** en
+  castellano; `s.maxims` ya se exprimió en la 140.ª y solo tenía dos entradas, una de ellas anónima
+  —autoría que el Corpus rechaza—.
+· **Título**: «pensamientos», «máximas», «aforismos», «sentencias». Devuelven un Autor bloqueado por
+  derechos, una **antología de un Autor ya sembrado** —lo que la 120.ª prohíbe— y costumbrismo.
+· **Epístolas** en la Fuente vieja, género vecino sin tocar: 32 firmas, y casi todas correspondencia
+  histórica y personal. Circunstancial por definición.
+· **Clásicos nombrados de memoria** —los libros de emblemas y sentencias del Siglo de Oro, cuya
+  forma sé que rinde—: la Fuente los tiene como **fichas de 94 y 306 bytes**. Vacías.
+
+### Y un libro que se recuperó, se leyó y se retiró entero
+
+El filtro por año y forma sacó un estudio decimonónico sobre la educación de la mujer. Prometía:
+sería la **cuarta voz femenina** del Corpus sobre ese asunto, junto a las tres que ya están.
+
+Leídas **treinta candidatas, cero firmes**. El libro es narración con diálogo —cuentos ejemplares con
+personajes— y, donde deja de serlo, reparte papeles por sexo y atribuye la indigencia a «los extravíos
+del hombre». Retirado con sus **1531 candidatas**, y borrada la ficha de Autora que ya se había creado.
+
+**Que encajara en una línea del Corpus no es motivo para admitirlo.** Es la misma tentación que la
+135.ª rechazó con la proporción de tradición: forzar un ingreso para cuadrar algo es bajar un umbral
+por otra puerta.
+
+### Lo que sí dio la sesión
+
+Un Autor ya admitido tenía una **segunda obra** que la búsqueda por materia había sacado. Son
+lecciones **sobre otro pensador**, con nombres propios en casi cada frase, y rindió lo que ese género
+rinde: **3 de 24**. Las tres se sostienen solas:
+
+> Aun si existe un Creador, no debemos humillar nuestra humanidad ni vivir postrados ante él.
+> Cuanto menos conoce un hombre sus virtudes, cuanto menos piensa en ellas, tanto más lo amamos.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 29 | **29** de 35 |
+| Citas | 1546 | **1549** |
+| Vetas de búsqueda agotadas | — | **4** |
+| Candidatas retiradas de golpe | — | **1531** |
+
+Puerta completa en verde y consultada por su código de salida.
+
+**El tramo no se alcanza esta sesión y no se fuerza.** Lo que queda por probar, anotado para la
+siguiente: obras de Autores admitidos sin tocar, y las categorías de la Fuente vieja que no son ni
+ensayo ni epístola.

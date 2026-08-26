@@ -1,0 +1,13 @@
+---
+texto: "Lo que es falso, muerto está; hay que darle sepultura."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-lo-que-es-falso-muerto-esta-hay"
+procedencia:
+  obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/56301/pg56301.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "No es todavía una ética _fuera_ de la religión; pero es ya una ética como fundamento de la religión misma, invirtiendo su rango clásico."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-no-es-todavia-una-etica-fuera-de"
+procedencia:
+  obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/56301/pg56301.txt"
+---
