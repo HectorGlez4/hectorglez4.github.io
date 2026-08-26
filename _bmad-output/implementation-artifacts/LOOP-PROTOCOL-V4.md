@@ -123,6 +123,13 @@ Línea base al abrir la v4 (24/08/2026): `astro check` 0 errores / 182 ficheros;
 **Una puerta que tarda un minuto no se salta.** Si el bucle empieza a saltarse puertas «por
 tiempo», el fallo es del bucle.
 
+**Y se corre con `set -o pipefail`.** En una tubería, `$?` es el estado del **último** proceso: un
+`npx vitest run | tail -8` devuelve lo que devuelva `tail`, que es 0 casi siempre —comprobado:
+`false | tail -1` sale con 0—. Durante 124 sesiones la puerta se juzgó leyendo el resumen impreso,
+que suele coincidir con el estado y por eso nunca saltó. Discrepa justo cuando el programa muere
+**después** de imprimir algo que parece bueno: la 124.ª vio una suite con «9 did not run» y «exited
+with code 0» debajo. Una suite que no corre entera **no es verde**, aunque lo ponga.
+
 ## Al cerrar cada sesión
 
 1. Commit en `sprint/corpus-v4`: `feat(meta): <lo que cerró la sesión>` para sembrado y

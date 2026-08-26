@@ -151,6 +151,8 @@ development_status:
   # Con 1000 habia once asuntos por encima del umbral POR REGEX; leidos uno a uno,
   # dos de los cuatro primeros no eran —la guerra usa al soldado como metafora de
   # la adversidad—. 26/08: 15 de 24. Quedan siete por leer.
+  # 26/08, medido con `npm run huecos`: 17 de 24. Ningun Tema por debajo del umbral de 15
+  # Citas, y el mas flaco sostiene ocho Autores: los que hay estan sanos, faltan asuntos.
   15-5-veinticuatro-temas-publicados: in-progress
   # 26/08: 1000 de 1000, puesto. El techo ya no lo limita la cantera sino el reparto:
   # sobran candidatas y escasean Autores con hueco. El techo cambio de dueño: el Autor mas representado

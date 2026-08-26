@@ -15,6 +15,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "huecos": "tsx tools/huecos.ts",
+    "cifras": "git ls-tree -r --name-only HEAD corpus/citas | tsx tools/cifras.ts",
     "ingreso": "tsx tools/ingreso.ts",
     "coleccion": "tsx tools/coleccion.ts",
     "documentar": "tsx tools/documentar.ts",

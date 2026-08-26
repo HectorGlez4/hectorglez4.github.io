@@ -1,6 +1,8 @@
 ---
 texto: "Tendremos presente que el hecho nuevo lo descubre, no el que lo ve primeramente, sino quien, merced a una técnica habilísima, supo mostrarlo con entera evidencia, logrando llevar la convicción al ánimo de todos."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-tendremos-presente-que-el-hecho-nuevo-lo"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

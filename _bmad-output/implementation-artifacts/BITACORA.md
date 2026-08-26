@@ -7665,3 +7665,113 @@ despliegue de la 122.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores. Lo que cambia hoy es que el porqué ya no hay que
 reconstruirlo leyendo quince bitácoras: está en el fichero que manda.
+
+
+## 124.ª sesión — tres entradas llevaban cuatro Citas de más, y ninguna herramienta falló
+
+`npm run huecos` volvió a declarar el mismo tramo —**18 Autores**, que no se delega—, así que la
+sesión fue de siembra dentro de lo admitido y de cerrar dos cuentas que estaban abiertas.
+
+### El censo, remedido contra los documentos nuevos
+
+Las 21 Citas del censo cerrado se cotejaron otra vez ahora que hay más documentos versionados:
+**5 ya están dentro de un documento** y esperan la decisión del verso, **16 siguen sin edición**.
+Sin cambio. Los documentos que abrió la Fuente nueva no cierran ninguna, y queda medido para que
+la próxima sesión no lo vuelva a intentar creyendo que sí.
+
+### Cinco Citas, y una que dice lo contrario de la Colección que la quería
+
+Del libro de ciencia salieron cinco, repartidas en cinco Temas distintos —el saber, la palabra,
+la riqueza, la verdad y el trabajo—, y se curaron tres Colecciones con lo sembrado en las últimas
+sesiones: 47→48, 30→31 y 28→29.
+
+Y se rechazó, por quinta vez, la misma trampa: «Sea nuestra divisa la de los grandes financieros:
+ganar mucho…» **comparte el asunto** de «elogio de lo escaso» y **dice lo contrario del criterio**.
+Una Colección es un criterio, no una bolsa temática; meterla ahí no la habría hecho crecer, la
+habría dejado sin significar nada.
+
+### Lo que de verdad se arregló hoy
+
+Al ir a escribir el «antes» de esta entrada, la cifra no cuadró con el árbol. Rastreada commit a
+commit:
+
+| commit | Citas medidas | lo que dijo la bitácora |
+|---|---|---|
+| `cbb9993` | 1397 | 1393 → 1397 ✓ |
+| `bf6a459` | **1405** | 1397 → **1409** ✗ |
+| `fb81f7d` | 1405 | 1409 → 1409 |
+| `de2333b` | **1409** | 1409 → **1413** ✗ |
+
+Aquella sesión comprometió **dos veces** —cuatro Citas en `cbb9993` y ocho en `bf6a459`— y al
+cerrar escribió «llevo doce en la sesión», sumó doce sobre la base del **segundo** commit y contó
+dos veces las cuatro primeras. **No se ha perdido ninguna Cita: se perdió la cifra**, y tres
+entradas la heredaron, porque cada una toma como «antes» el «después» de la anterior.
+
+Lo que hace ese error invisible es que **mueve las dos columnas a la vez**: la tabla cuadra consigo
+misma y con la siguiente. Y lo que lo hace importante es que la bitácora es de donde salen las
+decisiones cuando el contexto se compacta.
+
+**Ninguna herramienta falló.** `huecos` imprimió el número correcto todo el tiempo. Falló el paso
+de en medio, que era aritmética de memoria. Así que el total de la sesión deja de entrar en la
+cuenta: `npm run cifras` lee el «antes» de lo que HEAD tiene versionado, el «después» del árbol, y
+saca la diferencia sola.
+
+`git` **no entró en `tools/`**: ninguna orden de ahí lanza un proceso hijo, y abrir esa puerta para
+una cuenta de ficheros sería pagar una capacidad nueva por comodidad —el criterio con que AD-22
+deja la red en la cáscara—. Se queda en el guion de npm y lo que cruza es una lista de líneas. La
+lógica es pura y tiene seis pruebas, una de ellas por el `.gitkeep` que hoy costó una comprobación:
+`git ls-tree` lo devuelve y `find -name '*.md'` no, y esa diferencia de uno es justo la que uno se
+pone a explicar en vez de medir.
+
+No lleva número de FR a propósito. Las FR viven en `epics.md` y describen lo que el sitio hace para
+quien lo lee; esto no lo ve nadie desde fuera.
+
+### Y el mismo defecto, una capa más abajo: la puerta se leía, no se consultaba
+
+La suite E2E terminó una vez con **«9 did not run»** y, debajo, **«exited with code 0»**. Las dos
+cosas no pueden ser verdad a la vez, y la que mentía era la segunda: la puerta se ha corrido
+siempre como `npx vitest run | tail -8`, y en una tubería `$?` es el estado del **último** proceso.
+Devuelve lo que devuelva `tail`. Comprobado: `false | tail -1` sale con **0**.
+
+Ciento veinticuatro sesiones juzgando la puerta por el resumen impreso, que casi siempre coincide
+con el estado —por eso no saltó nunca—. Solo discrepa cuando el programa muere **después** de
+imprimir algo que parece bueno, que es justo el caso de hoy y justo el que hay que cazar. La puerta
+se corre en adelante con `set -o pipefail`, y una suite que no corre entera **no es verde**, aunque
+lo ponga.
+
+La siguiente ejecución trajo **3 fallos** y, otra vez, «exited with code 0» debajo. Las nueve
+pruebas de esos dos ficheros pasaron aisladas en 35 s, y ahí es donde apetece escribir «flaky» y
+seguir. La cifra que lo explica es el reloj: **la ejecución roja tardó 6,1 minutos y la verde 1,6**.
+No fue el sitio ni fueron las pruebas: **yo tenía otra suite todavía viva encima**, y la contención
+alargó unas navegaciones por encima de su presupuesto de 30 s. La causa era mía y medible, no una
+propiedad de las pruebas. **Las suites no se solapan.**
+
+Queda dicho también lo que *no* se ha comprobado: el barrido de canónicas recorre ~1465 rutas de
+una en una dentro de un test de 30 s, así que su coste **crece con el Corpus** y algún día cruzará
+el presupuesto sin que nadie lo haya tocado. Hoy pasa en 1,6 minutos de suite entera y no se toca;
+queda escrito para que, cuando caiga, no se busque la causa en otro sitio.
+
+### Cifras
+
+Medidas con la orden nueva, no recordadas:
+
+| | antes | después |
+|---|---|---|
+| Citas | 1409 | **1414** |
+| Colecciones curadas | — | **3** (47→48, 30→31, 28→29) |
+| Censo cerrado | 5 y 16 | **5 y 16**, sin cambio |
+| Pruebas unitarias | 2244 | **2253** |
+
+Escribí primero **2250** en esa última fila: seis pruebas nuevas sobre 2244. Son **nueve** más,
+porque hay pruebas que se generan por Cita y cinco Citas nuevas traen las suyas. Es el mismo
+defecto de esta entrada cometido **dentro de esta entrada**, y sirve mejor contado que borrado: no
+se arregla teniendo cuidado, se arregla no calculando.
+
+El «antes» de 1409 es el real. La entrada de la 123.ª dice 1413 y **está mal en 4**; queda aquí
+corregida en vez de reescrita, porque lo que hay que poder leer dentro de diez sesiones no es la
+cifra buena sino **por qué la mala aguantó tres entradas**.
+
+Puerta completa en verde: `astro check` 0 errores, **2253 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 123.ª (`de2333b`) verificado en éxito.
+
+**El tramo sigue sin alcanzarse**: 18 Autores, y a quién se admite no lo decide el bucle.

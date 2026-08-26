@@ -1,6 +1,8 @@
 ---
 texto: "Tan exacto es que para el sabio no hay nada comparable al hecho descubierto por él, que no se hallará acaso un investigador capaz de cambiar la paternidad de una conquista científica por todo el oro de la tierra."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-riqueza"
 slug: "santiago-ramon-y-cajal-tan-exacto-es-que-para-el-sabio"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
