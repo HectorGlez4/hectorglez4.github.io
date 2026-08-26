@@ -1,7 +1,9 @@
 ---
-texto: "Ha de ser asimismo diligente en todas las cosas que instruye la vida, usando de los bienes de la fortuna sin causar admiración a otros y sin ser esclavo de ella."
+texto: "¿Cómo sufrirá la presencia de la muerte, cómo la del dolor, cómo los estruendos del mundo y cómo resistirá a los ásperos enemigos si se deja vencer de tan flaco contrario?"
 autor: "seneca"
-slug: "seneca-ha-de-ser-asimismo-diligente-en-todas"
+temas:
+  - "el-miedo"
+slug: "seneca-como-sufrira-la-presencia-de-la-muerte"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El sumo bien es inmortal, no sabe irse si no le echan, no causa fastidio ni arrepentimiento, porque el ánimo recto jamás se altera, ni se aborrece, ni se muda, porque sigue siempre lo mejor."
 autor: "seneca"
+temas:
+  - "la-virtud"
 slug: "seneca-el-sumo-bien-es-inmortal-no-sabe"
 procedencia:
   obra: "De la vida bienaventurada"

@@ -5421,3 +5421,52 @@ El Autor más representado baja a **14,1 %** sin haber sembrado en cuatro sesion
 
 **La Meta no está alcanzada y no se emite promesa:** 1055 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## FR-23 (83.ª sesión) — La costumbre de ayer pasa a la herramienta, y la medida deja de mentir
+
+**1055 → 1063 Citas. 1105 → 1113 páginas.**
+
+### Una costumbre en la cabeza caduca con quien la tiene
+
+Ayer se aprendió a mirar el wikitexto antes de gastar una recuperación, para no versionar listas.
+Eso es una costumbre, y las costumbres viven en quien las recuerda. **Hoy pasa a la herramienta.**
+
+La señal es estructurada y no una heurística: MediaWiki marca estas páginas con
+`{{desambiguación}}`, que significa exactamente «esto no es un texto, es una lista de textos». No se
+adivina por el tamaño, ni por cuántos enlaces trae, ni por el título. Y **solo cuando el wikitexto ha
+llegado**: la Fuente limita la tasa y a veces no llega, y no saber no es motivo para rechazar.
+
+Cinco pruebas, una por cada manera de equivocarse —incluida la de nombrar la palabra dentro de una
+obra, que no la convierte en lista—. Comprobado después contra la página real que lo motivó: ahora
+la rechaza sola y no escribe nada.
+
+### Y mi medida de cantera daba obras por recuperar que ya lo estaban
+
+Al ir a recuperar el siguiente tratado, la herramienta contestó **«ya versionado»**, bajo un nombre
+más largo. La causa: mi medida compara el **título de la página** con el nombre de la obra
+versionada, y difieren siempre que la página declara un título más completo —«De la constancia del
+sabio» contra «De la constancia del sabio y que en él no puede caer injuria»—.
+
+Es el error simétrico al de la 81.ª: aquella medida **no veía** obras que existían; ésta **inventaba**
+obras que ya estaban. Las dos por comparar por el nombre en vez de por lo que identifica: **la
+dirección**, que el documento guarda exacta. Arreglado así, y de seis pendientes de ese Autor quedan
+cuatro reales.
+
+### La siembra
+
+Un tratado de consolación —302 candidatas— da **ocho Citas**, y el techo permitía diez: se dejan dos
+de margen a propósito, porque ese Autor queda en 14,7 % y apurar hasta el 14,9 % obliga a la sesión
+siguiente a sembrar de otro sitio.
+
+«Cuando te quejas de la muerte de tu hijo, acusas al día de su nacimiento, porque al nacer se le
+notificó la muerte.» «El dolor también tiene su modestia.» «Advierte a tu corazón que les ame en la
+inteligencia de que ha de perderlos.»
+
+Cae, y van tres sesiones, una que apoya su argumento en que las mujeres se duelen más que los
+hombres. Es de su siglo y no del Corpus.
+
+`npx astro check` 0 errores; `npx vitest run` **2092/2092**; `npm run build` **1113 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1063 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

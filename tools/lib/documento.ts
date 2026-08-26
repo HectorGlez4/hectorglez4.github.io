@@ -1386,6 +1386,9 @@ export type DerivacionDeDocumento =
  * `|título`, que la recuperación solo pide cuando la página no declara año. Aporta el año
  * y nada más: la obra la sigue declarando la página.
  */
+/** La plantilla con que MediaWiki marca lo que es una lista de textos y no un texto. */
+const DESAMBIGUACION = /\{\{\s*desambiguaci[óo]n\s*(\||\}\})/iu;
+
 export function derivarDocumento(
   idFuente: string,
   bruto: string,
@@ -1399,6 +1402,27 @@ export function derivarDocumento(
       motivo:
         `No hay lector de obra para «${idFuente}». Toda Fuente que permita reutilización ` +
         'necesita el suyo en tools/lib/documento.ts.',
+    };
+  }
+
+  /*
+   * Una página de desambiguación no es una obra, y lo dice ella misma.
+   *
+   * En la 82.ª se versionó una «obra» de 20 KB que era una lista de enlaces. La puerta de
+   * FR-23 la paró después —«el documento no declara autor», y era verdad: una lista no la
+   * firma nadie—, pero el documento ya estaba escrito y hubo que retirarlo a mano.
+   *
+   * La señal es estructurada y no una heurística: `{{desambiguación}}` significa exactamente
+   * «esto no es un texto, es una lista de textos». No se adivina por el tamaño ni por cuántos
+   * enlaces trae. **Y solo cuando el wikitexto ha llegado**: si no llegó —la Fuente limita la
+   * tasa—, no se sabe, y no saber no es motivo para rechazar.
+   */
+  if (encabezado !== undefined && DESAMBIGUACION.test(encabezado)) {
+    return {
+      ok: false,
+      motivo:
+        'La página se declara de desambiguación: es una lista de enlaces a otras páginas, no ' +
+        'una obra. No se ha versionado nada. Busque en esa lista la obra que quería.',
     };
   }
 
