@@ -1,7 +1,9 @@
 ---
-texto: "Todos los pueblos han pasado, pasan ó pasarán por esa crisis de su civilización en que la desigualdad inevitable llega á un máximum incompatible con el progreso si no se reacciona contra ella."
+texto: "En lo moral, la voluntad del hombre, su conciencia, su libre albedrío, limitan mucho la influencia de su posición social; en todas puede ser bueno, justo, santo, y lo es."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-todos-los-pueblos-han-pasado-pasan-o"
+temas:
+  - "la-virtud"
+slug: "concepcion-arenal-en-lo-moral-la-voluntad-del-hombre"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

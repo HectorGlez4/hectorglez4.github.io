@@ -7372,3 +7372,49 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el de
 verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 118.ª sesión — nadie vigilaba el reparto por Tema, y resulta que está sano
+
+**12 Citas** más del ensayo sobre la igualdad, en cinco Temas. Y una comprobación que faltaba.
+
+### La concentración que nadie mira
+
+El techo del 15 % vigila que ningún **Autor** pese demasiado. **Nadie vigila lo mismo en los
+Temas**, y llevaba dos sesiones sembrando de un ensayo sobre la igualdad: era razonable temer que
+«la justicia» se hinchara sin que saltara nada.
+
+Se midió antes de suponer, y el reparto está sano:
+
+| | Citas | % | Autores |
+|---|---|---|---|
+| el saber | 249 | 18,1 % | 14 |
+| la virtud | 199 | 14,4 % | 15 |
+| la libertad | 156 | 11,3 % | 12 |
+| … | | | |
+| **la justicia** | **74** | **5,4 %** | **9** |
+| el miedo | 23 | 1,7 % | 7 |
+
+Dos cosas que merecen quedar dichas. La primera, que el temor era infundado: pese a doce Citas
+nuevas sobre la igualdad, «la justicia» pesa un 5,4 % y ni se acerca al Tema más cargado.
+
+La segunda importa más: **ningún Tema baja de siete Autores**. Es el criterio que la 105.ª usó para
+no inventar un Tema nuevo —uno que reúne «lo que un Autor dijo sobre X» es su página de Autor con
+otro nombre—, y aplicado hacia atrás dice que **ninguno de los diecisiete lo es**. La medida que
+sirvió para no crear un Tema sirve también para comprobar los que hay.
+
+No se propone umbral: **el bucle no mueve umbrales**. Se propone la medida, que ahora existe y se
+puede repetir.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1367 | **1379** |
+| Citas de esa Autora | 90 | **102** |
+| Tema más cargado | — | **18,1 %, con 14 Autores** |
+| Tema con menos Autores | — | **7** |
+
+Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 117.ª —con el canal RSS de la otra sesión— verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

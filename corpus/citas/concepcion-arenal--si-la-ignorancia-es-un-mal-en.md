@@ -1,7 +1,9 @@
 ---
-texto: "¡Qué vértigos de cólera, ó qué angustias de pena, cuando otro alcanza el puesto que se ambicionaba, ó recibe los aplausos que se clavan como espinas en el corazón del que los quería para sí!"
+texto: "Si la ignorancia es un mal en la madre, lo es también para la esposa, que no será la compañera de su marido siempre que entre ellos haya una gran desigualdad intelectual."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-que-vertigos-de-colera-o-que-angustias"
+temas:
+  - "el-saber"
+slug: "concepcion-arenal-si-la-ignorancia-es-un-mal-en"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Si la ignorancia es un mal en la madre, lo es también para la esposa, que no será la compañera de su marido siempre que entre ellos haya una gran desigualdad intelectual."
+texto: "En virtud de la igualdad ante el Derecho, existe á veces la desigualdad entre los hombres; porque no teniendo todos iguales títulos, sería injusta su pretensión de igualarse."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-si-la-ignorancia-es-un-mal-en"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-en-virtud-de-la-igualdad-ante-el"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

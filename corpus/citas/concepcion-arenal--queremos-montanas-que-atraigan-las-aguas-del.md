@@ -1,7 +1,9 @@
 ---
-texto: "No es necesario subir mucho en la historia de los pueblos para ver que no había equivalencia social respecto á las clases elevadas más que en dos: el sacerdote y el guerrero."
+texto: "Queremos montañas que atraigan las aguas del cielo y dirijan su curso sobre la tierra, pero no tan altas que no se pueda respirar en su cima y que nos roben la luz del sol."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-no-es-necesario-subir-mucho-en-la"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-queremos-montanas-que-atraigan-las-aguas-del"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

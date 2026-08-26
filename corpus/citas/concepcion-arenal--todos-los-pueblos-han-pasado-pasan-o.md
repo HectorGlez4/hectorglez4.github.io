@@ -1,7 +1,9 @@
 ---
-texto: "Hay clases, hay castas: la organización social forma alrededor de los hombres como un círculo de hierro que nadie puede romper, y fatalmente encadenado, debe morir allí porque allí nació."
+texto: "Todos los pueblos han pasado, pasan ó pasarán por esa crisis de su civilización en que la desigualdad inevitable llega á un máximum incompatible con el progreso si no se reacciona contra ella."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-hay-clases-hay-castas-la-organizacion-social"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-todos-los-pueblos-han-pasado-pasan-o"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

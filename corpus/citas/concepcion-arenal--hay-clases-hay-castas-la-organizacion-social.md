@@ -1,7 +1,9 @@
 ---
-texto: "En virtud de la igualdad ante el Derecho, existe á veces la desigualdad entre los hombres; porque no teniendo todos iguales títulos, sería injusta su pretensión de igualarse."
+texto: "Hay clases, hay castas: la organización social forma alrededor de los hombres como un círculo de hierro que nadie puede romper, y fatalmente encadenado, debe morir allí porque allí nació."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-en-virtud-de-la-igualdad-ante-el"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-hay-clases-hay-castas-la-organizacion-social"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

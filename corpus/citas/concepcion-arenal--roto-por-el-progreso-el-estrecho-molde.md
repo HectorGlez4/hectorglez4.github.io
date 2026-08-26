@@ -1,7 +1,9 @@
 ---
-texto: "A medida que los conocimientos se acumulan, se multiplican, se diferencian mayor número de facultades ó todas entran en actividad, y las desigualdades se marcan más cada vez."
+texto: "Roto por el progreso el estrecho molde en que se encerraba la actividad humana, ésta halló nuevos caminos y multiplicó los medios de perfección moral é intelectual y de progreso material."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-a-medida-que-los-conocimientos-se-acumulan"
+temas:
+  - "el-tiempo"
+slug: "concepcion-arenal-roto-por-el-progreso-el-estrecho-molde"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

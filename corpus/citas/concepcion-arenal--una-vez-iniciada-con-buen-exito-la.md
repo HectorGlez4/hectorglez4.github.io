@@ -1,7 +1,9 @@
 ---
-texto: "No se inmovilizan las masas en el aislamiento de las clases, y las inferiores progresarán de dos modos: ilustrándose y participando de la herencia de otras más ilustradas."
+texto: "Una vez iniciada con buen éxito la reacción contra desigualdades injustas, van disminuyendo ó desaparecen muchas que, en fuerza de ser antiguas y positivas, parecían naturales y necesarias."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-no-se-inmovilizan-las-masas-en-el"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-una-vez-iniciada-con-buen-exito-la"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Roto por el progreso el estrecho molde en que se encerraba la actividad humana, ésta halló nuevos caminos y multiplicó los medios de perfección moral é intelectual y de progreso material."
+texto: "No es necesario subir mucho en la historia de los pueblos para ver que no había equivalencia social respecto á las clases elevadas más que en dos: el sacerdote y el guerrero."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-roto-por-el-progreso-el-estrecho-molde"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-no-es-necesario-subir-mucho-en-la"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Queremos montañas que atraigan las aguas del cielo y dirijan su curso sobre la tierra, pero no tan altas que no se pueda respirar en su cima y que nos roben la luz del sol."
+texto: "A medida que los conocimientos se acumulan, se multiplican, se diferencian mayor número de facultades ó todas entran en actividad, y las desigualdades se marcan más cada vez."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-queremos-montanas-que-atraigan-las-aguas-del"
+temas:
+  - "el-saber"
+slug: "concepcion-arenal-a-medida-que-los-conocimientos-se-acumulan"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "En lo moral, la voluntad del hombre, su conciencia, su libre albedrío, limitan mucho la influencia de su posición social; en todas puede ser bueno, justo, santo, y lo es."
+texto: "¡Qué vértigos de cólera, ó qué angustias de pena, cuando otro alcanza el puesto que se ambicionaba, ó recibe los aplausos que se clavan como espinas en el corazón del que los quería para sí!"
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-en-lo-moral-la-voluntad-del-hombre"
+temas:
+  - "la-adversidad"
+slug: "concepcion-arenal-que-vertigos-de-colera-o-que-angustias"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"
