@@ -1,6 +1,8 @@
 ---
 texto: "Más gloria mereció Justiniano por las leyes que Aureliano por las armas."
 autor: "baltasar-gracian"
+temas:
+  - "la-justicia"
 slug: "baltasar-gracian-mas-gloria-merecio-justiniano-por-las-leyes"
 procedencia:
   obra: "El político"

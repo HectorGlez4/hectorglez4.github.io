@@ -1,6 +1,8 @@
 ---
 texto: "Has nacido para perder, para temer y desear la muerte, y lo que es peor, para perecer, para esperar, para inquietar a los otros y para no saber nunca cuál es tu condición."
 autor: "seneca"
+temas:
+  - "el-miedo"
 slug: "seneca-has-nacido-para-perder-para-temer-y"
 procedencia:
   obra: "Consolación a Marcia"

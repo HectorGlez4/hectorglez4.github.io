@@ -1,7 +1,9 @@
 ---
-texto: "Quien sabe recibir consejo, hace que se le sepan dar."
+texto: "Rey que se deja quitar la capa, da ánimo para que le quiten la vida."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-quien-sabe-recibir-consejo-hace-que-se"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-rey-que-se-deja-quitar-la-capa"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

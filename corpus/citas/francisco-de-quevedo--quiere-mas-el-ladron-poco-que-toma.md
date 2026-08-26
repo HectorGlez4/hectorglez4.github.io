@@ -1,7 +1,9 @@
 ---
-texto: "Siempre fue sumamente aborrecible a Dios la hipocresía."
+texto: "Quiere más el ladrón poco que toma, que mucho que le den."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-siempre-fue-sumamente-aborrecible-a-dios-la"
+temas:
+  - "la-justicia"
+slug: "francisco-de-quevedo-quiere-mas-el-ladron-poco-que-toma"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

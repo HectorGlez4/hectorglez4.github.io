@@ -1,7 +1,9 @@
 ---
-texto: "Quien le deja hurtar, pierde su hacienda y su ministro."
+texto: "Si los dioses no me asistieren, yo no dejaré de asistir a los dioses."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-quien-le-deja-hurtar-pierde-su-hacienda"
+temas:
+  - "la-virtud"
+slug: "francisco-de-quevedo-si-los-dioses-no-me-asistieren-yo"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

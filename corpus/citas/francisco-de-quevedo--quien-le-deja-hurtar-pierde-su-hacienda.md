@@ -1,7 +1,9 @@
 ---
-texto: "¡Qué cosa no hace confederación con la desdicha del ambicioso!"
+texto: "Quien le deja hurtar, pierde su hacienda y su ministro."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-que-cosa-no-hace-confederacion-con-la"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-quien-le-deja-hurtar-pierde-su-hacienda"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

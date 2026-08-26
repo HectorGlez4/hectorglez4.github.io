@@ -1,7 +1,9 @@
 ---
-texto: "Quiere más el ladrón poco que toma, que mucho que le den."
+texto: "¡Qué cosa no hace confederación con la desdicha del ambicioso!"
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-quiere-mas-el-ladron-poco-que-toma"
+temas:
+  - "la-adversidad"
+slug: "francisco-de-quevedo-que-cosa-no-hace-confederacion-con-la"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

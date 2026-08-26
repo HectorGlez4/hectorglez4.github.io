@@ -1,7 +1,9 @@
 ---
-texto: "Si los dioses no me asistieren, yo no dejaré de asistir a los dioses."
+texto: "Quien sabe recibir consejo, hace que se le sepan dar."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-si-los-dioses-no-me-asistieren-yo"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-quien-sabe-recibir-consejo-hace-que-se"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

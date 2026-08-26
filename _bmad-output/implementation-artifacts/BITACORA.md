@@ -5733,3 +5733,36 @@ llegar a él, y eso es una noticia, no un aprobado.
 
 **La Meta no está alcanzada y no se emite promesa:** 1107 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.6 (90.ª sesión) — Los Temas nuevos abren poco donde ya se preguntó mucho
+
+**1107 → 1118 Citas. 1157 → 1168 páginas.**
+
+### El matiz que faltaba a la lección de la 88.ª
+
+«Una cantera no se agota: se agota respecto de las preguntas que se le hicieron.» En la 88.ª abrió
+743 candidatas y en la 89.ª sacó cuatro de una novela declarada agotada. Hoy tocaba probarla en las
+dos canteras **más leídas** del Corpus, y ahí **abre poco**: dos y dos.
+
+No es que la lección falle: es que esas dos ya se habían cribado por doce Temas que cubren casi todo
+lo que dicen. **Cuanto más completas fueron las preguntas anteriores, menos abre una pregunta
+nueva** — que es exactamente lo que la lección predice si se la lee entera, y conviene dejarlo
+escrito para no esperar de ella más de lo que da.
+
+Lo que sí quedaba era **franja corta sin leer**: cincuenta candidatas de menos de setenta caracteres
+en la cantera mayor, de las que salen siete de las once de hoy.
+
+- «Quien sabe recibir consejo, hace que se le sepan dar.»
+- «Quiere más el ladrón poco que toma, que mucho que le den.»
+- «Rey que se deja quitar la capa, da ánimo para que le quiten la vida.»
+- «Si los dioses no me asistieren, yo no dejaré de asistir a los dioses.»
+- «Has nacido para perder, para temer y desear la muerte… y para no saber nunca cuál es tu
+  condición.»
+
+El Autor más representado queda en 163 de 1118, **14,6 %**.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109**; `npm run build` **1168 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1118 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

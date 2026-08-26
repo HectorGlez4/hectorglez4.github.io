@@ -1,7 +1,9 @@
 ---
-texto: "Rey que se deja quitar la capa, da ánimo para que le quiten la vida."
+texto: "Siempre fue sumamente aborrecible a Dios la hipocresía."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-rey-que-se-deja-quitar-la-capa"
+temas:
+  - "la-verdad"
+slug: "francisco-de-quevedo-siempre-fue-sumamente-aborrecible-a-dios-la"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

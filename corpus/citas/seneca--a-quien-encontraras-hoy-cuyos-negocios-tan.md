@@ -1,6 +1,8 @@
 ---
 texto: "¿A quién encontrarás hoy cuyos negocios tan bien ordenados estén y sobre cimiento tan sólido que nada tenga que temor de la marcha del tiempo?"
 autor: "seneca"
+temas:
+  - "el-miedo"
 slug: "seneca-a-quien-encontraras-hoy-cuyos-negocios-tan"
 procedencia:
   obra: "Consolación a Marcia"
