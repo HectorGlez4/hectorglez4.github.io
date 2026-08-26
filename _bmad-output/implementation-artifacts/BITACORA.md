@@ -8607,3 +8607,68 @@ propio derecho a pensar, con dos siglos de distancia entre ellas. Ahora son tres
 | Reglas de admisión mecánicas | 0 | **1** (†1946) |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 138.ª sesión — veinte obras de ciento noventa bytes no son veinte obras
+
+Quinta sesión con el tramo abierto. **25 → 26 Autores**, tradición latinoamericana al **53,8 %**.
+
+### La sonda que decía «sin dato» sesenta y cinco veces
+
+Para aplicar la regla de la 137.ª —†1946 o antes— hacía falta el año de muerte de cada candidato.
+La primera consulta buscó un campo `|muerte=` en la ficha de Autor y devolvió **«sin dato» sesenta y
+cinco veces seguidas**.
+
+Sesenta y cinco de sesenta y cinco no es una Fuente sin fechas: es una sonda mirando donde no es. Se
+abrió una ficha y ahí estaban, **en prosa dentro del campo del texto**: «(13 de diciembre de 1865 -
+29 de noviembre de 1898)». Sacando el segundo año de cada ficha salió la lista entera y ordenada.
+
+Es la enésima vez que aparece el mismo patrón en este bucle, y la enésima vez que lo delata **la
+uniformidad del resultado**, no la intuición: cero de cero, 86 y 86, sesenta y cinco de sesenta y
+cinco.
+
+### Y el ordenamiento de ayer estaba mal
+
+La 137.ª ordenó los candidatos por **bytes totales por Autor**. Una firma aparecía con **veinte
+obras**; abiertas, cada una pesa **190 bytes**. Son fichas de marcador, no textos. Otra tenía «un
+ensayo» de 147.
+
+La cifra que decide es el **tamaño por obra**, con el umbral que `cantera.ts` ya usaba para separar
+índice de texto: **2 KB**. Sumar da la ilusión contraria — cuantas más fichas vacías, más arriba
+sale la firma.
+
+### Lo admitido, y un ensayo entero descartado por su forma
+
+Entró un moralista centroamericano cuyo ensayo sobre el silencio es una **serie de definiciones**,
+que es la forma que mejor funciona en una tarjeta: **5 de 15**.
+
+> Silencio es ser uno mismo, y no tambor que resuene bajo los dedos de la muchedumbre.
+> Silencio es reprimir la injuria que iba a escapársenos, y olvidar la que nos infirieron.
+> Tú no eres la luz; tampoco la luciérnaga es luz, pero en su cabecita lleva una antorcha.
+
+Tres de ellas fueron a la Colección del silencio, que hasta hoy sostenía una sola firma.
+
+De sus tres ensayos, **uno se retiró entero**: es una apóstrofe sostenida en segunda persona —«A
+vosotros, los que…», «Ahora comprendéis…»— y ni una frase se sostiene sola. Dieciocho candidatas
+rechazadas con él.
+
+### El guardián que obligó a decidirlo
+
+Ese documento no se retiró por gusto: **lo cazó una prueba**. Hay una que lista los documentos
+versionados **sin ninguna Cita publicada**, con una lista explícita de excepciones, y el nuevo
+apareció en ella.
+
+Cabían tres salidas: publicar algo de él, meterlo en la lista, o retirarlo. Meterlo en la lista
+habría sido **hacer crecer un permiso para acomodar mi propia decisión de no publicar**; retirarlo
+es exactamente para lo que la orden existe. El guardián no impidió un error: **impidió una excusa**.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 25 | **26** de 35 |
+| Tradición latinoamericana | 52 % | **53,8 %** |
+| Citas | 1523 | **1528** |
+| Colección del silencio | 28 · 1 firma | **31 · 2 firmas** |
+
+Puerta completa en verde y consultada por su código de salida.

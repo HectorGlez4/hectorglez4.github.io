@@ -427,6 +427,17 @@ Con eso la pregunta deja de ser «¿está fulano?» y pasa a ser «¿cuál de es
 tesis?», que es la que importa. En la 136.ª aparecieron así dos Autores que no se le habrían
 ocurrido a nadie, y uno rindió el **54 %**, empatando el mejor del bucle.
 
+**Se ordena por tamaño DE CADA OBRA, nunca por la suma del Autor.** La 137.ª sumó los bytes por
+firma y una salió con **veinte obras**; abiertas, cada una pesa **190 bytes**: son fichas de
+marcador. Otra tenía «un ensayo» de 147. Sumar da la ilusión al revés —cuantas más fichas vacías,
+más arriba sale la firma—. El umbral es el que `cantera.ts` ya usaba para separar índice de texto:
+**2 KB por obra**.
+
+**Y el año de muerte no está en un campo.** La ficha de Autor lo escribe **en prosa** dentro de
+`|Texto=`: «(13 de diciembre de 1865 - 29 de noviembre de 1898)». Buscar `|muerte=` devuelve «sin
+dato» **sesenta y cinco veces de sesenta y cinco**, que es la firma de una sonda que mira donde no
+es, no de una Fuente sin fechas. Se saca el segundo año de la ficha.
+
 ### Lo que descarta no es el conector, es el agujero (133.ª)
 
 Durante 130 sesiones se apartó **todo** lo que empieza por conector. Demasiado grueso: se estaban
