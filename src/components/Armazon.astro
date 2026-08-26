@@ -10,7 +10,7 @@
  */
 import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
-import NuestrasRedes from './NuestrasRedes.astro';
+import DondeSeguirnos from './DondeSeguirnos.astro';
 import { MARCA } from '../lib/marca.ts';
 import { consecuenciasDe } from '../lib/superficies.ts';
 import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
@@ -143,7 +143,7 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
       <p>
         Citas de dominio público, con su procedencia documentada cuando consta.
       </p>
-      <NuestrasRedes />
+      <DondeSeguirnos />
     </footer>
   </body>
 </html>
