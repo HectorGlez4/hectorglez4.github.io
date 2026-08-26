@@ -7964,3 +7964,76 @@ pruebas, `build`, E2E.
 
 **Dos tramos quedan cerrados por la misma decisión**: los Autores porque se reserva, y ahora también
 los Temas, porque medido cuatro veces no salen sin ella.
+
+
+## 127.ª sesión — la cuenta por asunto deja de ser un grep distinto cada sesión
+
+`npm run huecos` declaró el mismo tramo reservado. La 126.ª dejó medido que la meta de Temas
+tampoco sale sin esa decisión, así que esta sesión no siembra: paga una deuda.
+
+### Un asunto más, y tampoco
+
+Antes de nada se terminó de contar el asunto que había quedado más cerca. De sus veinte
+coincidencias publicadas, **tres eran falsos positivos de mi propio `grep`** —casaba «c*errar*án» y
+«t*error*»— y de las diecisiete restantes, **trece tratan de verdad del asunto**. Dos cortas.
+
+La cantera dentro del rango de lectura estaba agotada, así que se miró **fuera** de él —el rango
+80-220 caracteres es una heurística de la 115.ª, no una regla, y no aplicarla no es bajar nada—:
+seis candidatas largas y dos cortas, y **ninguna firme**. Las seis largas empiezan remitiendo; las
+dos cortas son aparato de la Fuente.
+
+**Sexta medición, sexto no.** El asunto se queda en 13 y no abre Tema. No se estiran los tres o
+cuatro juicios discutibles para llegar a quince: eso es bajar el umbral por otra puerta.
+
+### La deuda, que es la misma que el protocolo ya tenía escrita
+
+La cuenta por asunto llevaba cuatro sesiones viviendo en guiones de usar y tirar. El protocolo dice
+esto desde la 97.ª, palabra por palabra: «las tres veces la cuenta vivía en un guion de usar y
+tirar, sin una sola prueba, así que cada arreglo empezaba de cero y traía su propio defecto».
+
+Volvió a pasar, con otro cálculo y **dos defectos el mismo día**:
+
+· un patrón escrito `errar\b`, **sin frontera por delante**, que daba por Citas del error «Abrid
+  escuelas y se c*errar*án cárceles» y «el t*error* secreto»;
+· familias tan anchas que un asunto bajaba de 66 coincidencias a 8 al quitarles el adverbio `solo`,
+  y otro de 38 a 24 al quitarle el adjetivo `natural`.
+
+Los dos hacen el mismo daño y por eso no saltan: **producen una cifra alta que se lee como cantera y
+no lo es**. Nadie relee la lista entera; se mira el total y se decide con él.
+
+Ahora la parte que se puede probar vive en `tools/lib/asuntos.ts` con **nueve pruebas**, y las dos
+primeras son exactamente los dos defectos. La asimetría que las resuelve es todo el módulo: la
+frontera **de delante es obligatoria y la de detrás no**, porque «error» tiene que encontrar
+«errores» —misma palabra, otra flexión— y no puede encontrar «terror», que es otra.
+
+Y `npm run asuntos` imprime, junto a las coincidencias, **el Tema que ya posee más de ellas**. Esa
+columna es la que ahorra una sesión entera: el asunto que encabeza la tabla con 40 coincidencias
+tiene 21 de ellas en un mismo Tema publicado. No es un Tema nuevo; es ése con otro nombre, y ahora
+lo dice la orden en vez de descubrirlo cada vez leyendo.
+
+Lo que la orden **no** hace, y no es carencia: decir si una Cita *trata* del asunto. Eso es juicio de
+lectura, y la conversión medida en seis asuntos va del **4 % al 57 %**. La cuenta es un puntero.
+
+### Y una explicación que ahora predice
+
+La 125.ª midió que las pruebas crecen **por fichero fuente**, no por Cita. Esta sesión añadió tres
+ficheros y nueve pruebas, y el contador pasó de 2253 a **2265**: nueve más tres. Exacto.
+
+Que una explicación **prediga** es la diferencia entre haberla medido y haberse contado una historia
+que encajaba. La de la 124.ª —«hay pruebas que se generan por Cita»— encajaba con los datos que
+tenía y falló a la primera comprobación.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1429 | 1429 |
+| Temas publicados | 18 | 18 de 24 |
+| Pruebas | 2253 | **2265** |
+| Asuntos medidos hasta el fondo | 5 | **6** |
+| Cuentas por asunto en guiones sin prueba | 4 | **0** |
+
+Puerta completa en verde y consultada por su código de salida.
+
+**Actions sigue caído** —`major_outage` cuando se comprobó—, así que las sesiones 125, 126 y esta
+esperan en `main` a que el servicio vuelva. El sitio en vivo sirve lo de la 124.ª, íntegro.
