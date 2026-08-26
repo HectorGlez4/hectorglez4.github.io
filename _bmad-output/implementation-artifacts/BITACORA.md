@@ -6339,3 +6339,35 @@ Puerta completa en verde, con `playwright` incluido porque este tramo toca super
 
 **El tramo sigue sin alcanzarse, y van cinco sesiones diciéndolo**: 18 Autores, y eso solo se
 desbloquea con nombres o direcciones.
+
+### Apéndice — el censo cerrado, remedido, y una descripción suya que era imprecisa
+
+Aprovechando la espera del despliegue remedí el **censo cerrado** —las 21 Citas que se publican sin
+cotejo porque no tienen documento—, que es el tercer trabajo que el protocolo lista. Se venía
+describiendo como «cinco están en un documento salvo por el salto de verso y dieciséis no aparecen
+en ninguna edición versionada», y el Corpus ha pasado de 82 a 119 documentos desde que se dijo.
+
+**La primera mitad se confirma**: cinco siguen apareciendo literalmente en documentos ya
+versionados y difieren solo por saltos de línea y mayúsculas. Siguen esperando la decisión
+reservada sobre cómo se publica el verso. Repetir una cifra sin medirla ha costado sesiones en este
+bucle; ésta se midió y resultó cierta, que también es un resultado.
+
+**La segunda mitad era imprecisa, y el matiz cambia lo que se puede hacer.** Una de las Citas de un
+autor latino no está «sin edición»: su obra **sí está versionada**, en otra traducción. El
+documento trae la versión clásica —«El tiempo que tenemos no es corto; pero perdiendo mucho de él,
+hacemos que lo sea»— y la Cita publicada es una traducción moderna y breve de la misma idea.
+Comprobado leyendo el texto, no deducido.
+
+Eso no es un cotejo que falte: es **un texto distinto del mismo autor**. Y deja la decisión en una
+disyuntiva que hay que nombrar para que alguien pueda tomarla:
+
+· o se conserva la frase moderna, memorable y sin documento —lo que la 11.2 prohíbe—;
+· o se sustituye por el pasaje de la traducción versionada, que sí tiene documento pero **es otra
+  Cita**: más larga, más antigua y con otro son.
+
+Restituir con `documentar --texto` haría lo segundo sin decirlo, y por eso no se ha hecho.
+
+Medido además, con el alcance que tiene: **19 de las 21 pertenecen a Autores que ya tienen
+documentos versionados** —solo dos no—. Eso **no** prueba que la obra concreta de cada una esté
+versionada; es una cota superior, y se dice así en vez de convertirla en una promesa. Lo que sí
+queda probado es el caso que se leyó entero.
