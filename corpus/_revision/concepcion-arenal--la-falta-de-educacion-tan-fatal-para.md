@@ -1,0 +1,14 @@
+---
+texto: "La falta de educación, tan fatal para la mujer, ¿es ventajosa para el hombre?"
+autor: "concepcion-arenal"
+slug: "concepcion-arenal-la-falta-de-educacion-tan-fatal-para"
+procedencia:
+  obra: "La mujer del porvenir"
+  año: 1844
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_mujer_del_porvenir/6"
+---

@@ -6014,3 +6014,86 @@ de verdad en 12,8 s**. Luego se restauró.
 
 Puerta completa en verde: `astro check` 0 errores, **2127 pruebas de unidad** (75 ficheros),
 `build`, y **414 E2E**, con la prueba de los tres saltos en 16,5 s dentro de la tanda completa.
+
+## 95.ª sesión — el techo no estorba donde nadie estaba mirando
+
+El tramo declarado sigue siendo el de Autores, y **volví a comprobar en el protocolo, no en una
+bitácora, si «a quién se admite» sigue reservado**. Sigue: el fichero lo llama «lo único que el
+producto no delega», y lo dice en la misma sección donde declara qué **sí** puede hacer el bucle
+sin esa decisión. Volver a la fuente costó una orden; darlo por sabido me ha costado sesiones
+enteras otras veces.
+
+Lo primero de esa lista es ampliar Autores ya admitidos con otras de sus obras, con un criterio que
+el propio protocolo escribe: **el margen está donde el Autor tiene pocas Citas, no donde tiene mucha
+obra**. Así que antes de mirar ninguna obra, puse el número delante.
+
+### El reparto que el techo permite
+
+Con el techo de concentración en el 15 % y el Corpus en 1141, cabe de cada Autor
+`n ≤ (0,15 × corpus − citas) / 0,85`:
+
+| Citas del Autor | caben |
+|---|---|
+| 1 | 200 |
+| 2 | 199 |
+| 3 | 197 |
+| 7 | 193 |
+| … | … |
+| 158 | 15 |
+| 163 | **9** |
+
+El hallazgo no es la fórmula sino la cola: **tres Autores admitidos con 1, 2 y 3 Citas**, y margen
+de casi doscientas cada uno. El techo no limita **nada** ahí; limita solo a los cuatro de cabeza,
+donde caben entre nueve y quince. Invertir en la cabeza es tirar el trabajo, y esto lo confirma con
+números en vez de repetirlo.
+
+### La cantera, cruzada por URL
+
+La sonda de cantera cruza **por la URL exacta** que cada documento declara, no por el nombre de la
+obra: comparar por nombre fue el error de la 62.ª —inventaba obras ya recuperadas y se perdía las
+que la Fuente titula de otro modo—. Se midió contra 118 URLs ya versionadas, retiradas incluidas.
+
+De ahí salió que las obras mayores de un Autor de la cola tienen **página raíz de 1 KB**: son
+índices, como pasaba con la obra de la sesión anterior. La cantera real está en los capítulos, y
+sondearlos dijo: **catorce capítulos, prosa entera, unas 25.000 palabras**.
+
+Se recuperaron **cuatro**, no los catorce. Recuperar es barato; **leer** las candidatas no lo es, y
+dejar doscientas sin revisar es dejar el trabajo a medias con aspecto de haberlo hecho. Los otros
+diez quedan sin recuperar, dichos aquí, para la sesión siguiente.
+
+`extraer --seco` antes de invertir, como manda el protocolo: **«Autor cotejado»**, treinta
+candidatas de un solo capítulo.
+
+### Lo que se publicó y lo que no
+
+De **233 candidatas, 21 Citas**, repartidas en ocho Temas: la justicia (5), el saber (4), la virtud
+(3), la libertad (2), la verdad (2), la felicidad (2), el trabajo (2), la riqueza (1).
+
+Un filtro mecánico apartó **79** de la lectura por abrir con conector que remite al párrafo anterior
+o por arrastrar marca de nota. **El filtro no decide qué es Cita** —eso sale de leerlo—, solo decide
+a qué llego a mirar; hacerlo más ancho escondería el mejor material, que ya pasó una vez en este
+bucle con la criba de 70 caracteres.
+
+De lo leído se descartó, por regla y no por gusto:
+
+· lo que va entre comillas angulares, que es **cita de otro autor dentro del ensayo** —publicarlo
+  atribuiría a este Autor lo que la Fuente dice de otro, la misma falta que ayer con Dante—;
+· una que arrastra la llamada de nota pegada al texto, que mi filtro no cazó por ir sin corchetes;
+· un encabezado de la Fuente que el filtro tampoco vio;
+· y un dato estadístico de un país extranjero: es un dato, no una Cita.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1141 | **1162** |
+| Citas del Autor sembrado | 7 | **28** |
+| Documentos versionados | 111 | **115** |
+| Techo de concentración | 14,3 % | **14,0 %** |
+
+Puerta completa en verde: `astro check` 0 errores, **2131 pruebas de unidad**, `build`, **414 E2E**.
+
+**El tramo no se alcanza y se dice.** Siguen faltando 18 Autores, y eso no lo cierra el bucle: pide
+nombres o direcciones. Lo que el bucle sí puede seguir haciendo está medido arriba y queda dicho con
+número: **cuatro Autores de la cola con margen para más de 190 Citas cada uno**, y diez capítulos ya
+sondeados y sin recuperar de la obra de esta sesión.
