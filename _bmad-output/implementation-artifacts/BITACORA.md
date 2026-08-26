@@ -6525,3 +6525,61 @@ su lengua, y el retrato del fatuo que desprecia lo suyo—, las dos al Tema de l
 Puerta completa en verde: `astro check` 0 errores, **2173 pruebas**, `build`, **414 E2E**.
 
 **El tramo sigue sin alcanzarse**: 18 Autores, y eso pide nombres o direcciones.
+
+## 102.ª sesión — «periodismo polémico» no era un solo género, y la escala se afina
+
+Con la cola agotándose, dejé de bajar por la lista y volví a medir **dónde hay obra y sitio a la
+vez**. El Autor elegido tiene margen para 47 Citas y 61 páginas sin recuperar, tres de ellas
+enormes… y **novelas**: 357, 169 y 77 KB, con rendimiento medido ≈1 %. Se fue a sus **artículos**,
+que es donde la escala de géneros dice que está el rendimiento. Aplicar lo medido en vez de ir al
+fichero más gordo.
+
+### Lo que la medida corrigió
+
+Esperaba el ≈16 % del periodismo polémico. Salió un **6 %**: de 62 candidatas, 39 leídas, **4
+Citas**. Y la causa se ve en el propio material:
+
+    Vea el señor conde de Jiquena si puede hacer algo en tal sentido.
+    Bilbao padece el brutal caciquismo de la industria…
+    Si se escribiera racionalmente Méjico, podría acaso correr peligro… la próspera república de
+    Porfirio Díaz.
+
+Ese ≈16 % se midió sobre artículos de **tesis general**. Éstos son de **coyuntura local con nombres
+propios**: un conde, una ciudad, un presidente, una polémica ortográfica de 1900. Es otro
+subgénero, y hay que decirlo así en vez de dejar la escala como estaba:
+
+| género | rendimiento medido |
+|---|---|
+| ensayo aforístico (frases sueltas) | ~40 % y más |
+| ensayo de tesis | ~16 % |
+| periodismo polémico **de tesis** | ~16 % |
+| carta narrativa | ~13 % |
+| **periodismo de coyuntura con nombres propios** | **6 %** |
+| costumbrismo narrativo con diálogo dialectal | 2 % |
+| novela, crónica, índice, entremés | ≈1 % o 0 |
+
+**La escala no se refina inventando categorías: se parte una cuando los números de dentro no se
+parecen.** Aquí se partió porque 6 % y 16 % no son el mismo género medido dos veces.
+
+Las cuatro que valen son justo las que sueltan el asunto del día y dicen algo que sigue en pie
+—«Hay que distinguirse, aunque sólo sea por una x»—.
+
+### Y el test volvió a cazar lo que yo iba a dejar pasar
+
+Uno de los tres artículos no dio **ninguna** Cita, y quien lo dijo fue la prueba de FR-23, no yo.
+Retirado con sus 20 candidatas. Van tres sesiones seguidas en que esa prueba señala la deuda antes
+que yo.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1221 | **1225** |
+| Documentos versionados | 130 | **132** |
+| Documentos retirados | 5 | **6** |
+| Pruebas de unidad | 2173 | **2175** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**. Y el vigía corregido de la
+101.ª hizo su trabajo: identificó el run **por SHA**, y lo que antes daba 404 devuelve 200.
+
+**El tramo sigue sin alcanzarse**: 18 Autores, y eso pide nombres o direcciones.
