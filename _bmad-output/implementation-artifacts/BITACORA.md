@@ -7213,3 +7213,46 @@ Puerta completa en verde: `astro check` 0 errores, **2210 pruebas**, `build`, **
 despliegue de la 113.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 115.ª sesión — el libro no se agota por candidatas, se agota por tramos
+
+**6 Citas** y dos Colecciones curadas. Es la cosecha más floja desde que se abrió la Fuente nueva, y
+la razón está medida, no supuesta.
+
+### Quedan 400 candidatas y la parte que rinde ya se sacó
+
+El libro tiene todavía **236 legibles en el tramo largo y 57 en el corto**, pero leerlas rinde cada
+vez menos:
+
+| tramo del libro | sesión | leídas | Citas |
+|---|---|---|---|
+| breve (40–170), primera pasada | 108.ª–110.ª | ~250 | 48 |
+| medio, segunda pasada | 111.ª–113.ª | ~200 | 25 |
+| **largo (170–300) y restos del corto** | **114.ª–115.ª** | **~180** | **17** |
+
+No es que las candidatas se acaben: es que **lo aforístico está al principio y en las frases
+cortas**, y lo que queda son los tramos técnicos —métodos de laboratorio, aparatos, presupuestos— y
+los coyunturales —la Inquisición, la agricultura comparada, autores citados por su nombre—.
+
+Eso afina otra vez la escala: dentro de una misma obra, y ya no solo entre tramos doctrinales y
+coyunturales como vio la 104.ª, **la densidad cae con la longitud de la frase**. Una sentencia de
+sesenta caracteres es casi siempre una tesis; una de doscientos ochenta suele ser un procedimiento.
+
+Y de ahí una consecuencia práctica que conviene dejar escrita: **exprimir un libro hasta el final no
+compensa**. Quedan 293 legibles sin leer y se dicen, pero la siguiente sesión rendirá más abriendo
+obra nueva que apurando ésta.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1349 | **1355** |
+| Citas de ese Autor | 75 | **81** |
+| saber-para-ser-libre | 43 | **45** |
+| achaques-de-necedad | 34 | **35** |
+| Legibles de este libro aún sin leer | ~310 | **293** |
+
+Puerta completa en verde: `astro check` 0 errores, **2220 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 114.ª —el que llevaba el trabajo de las dos sesiones— verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

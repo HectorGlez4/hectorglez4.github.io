@@ -1,7 +1,9 @@
 ---
-texto: "No nos engañen el optimismo y el buen deseo."
+texto: "Difícil es dictar reglas para imaginar hipótesis."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-no-nos-enganen-el-optimismo-y-el"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-dificil-es-dictar-reglas-para-imaginar-hipotesis"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
