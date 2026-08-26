@@ -1,6 +1,8 @@
 ---
 texto: "Pasaron aquellos hermosos tiempos de antaño, en que el curioso de la Naturaleza, recogido en el silencio de su gabinete, podía estar seguro de que ningún émulo vendría a turbar sus tranquilas meditaciones."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-tiempo"
 slug: "santiago-ramon-y-cajal-pasaron-aquellos-hermosos-tiempos-de-antano-en"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

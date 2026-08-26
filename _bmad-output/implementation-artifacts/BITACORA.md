@@ -7165,3 +7165,51 @@ Puerta completa en verde: `astro check` 0 errores, **2210 pruebas**, `build`, **
 despliegue de la 112.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 114.ª sesión — la segunda prueba que muere por tiempo, y una comprobación mía que no valía
+
+**11 Citas** más del libro que rinde, en cinco Temas, y tres Colecciones curadas. Pero lo que hay
+que contar es lo otro.
+
+### La misma avería que la 94.ª, en otra prueba
+
+La puerta se puso roja en «cada Tarjeta declarada existe», y otra vez **por tiempo agotado, no por
+la aserción**: la prueba baja **una imagen por Cita publicada** —más de mil trescientas, de una en
+una—. Aislada tarda 7,9 s de los 30 que tiene; en la tanda completa, compitiendo por el servidor,
+moría.
+
+Es exactamente el patrón de NFR-5 en la 94.ª: **una prueba cuyo coste crece con el Corpus**. Y el
+mismo arreglo —pedirlas por tandas de doce, sin tocar qué se comprueba de cada una—. Ahora pasa la
+tanda completa en **21,3 s**, y conviene decir que **el margen sigue siendo estrecho**: siete de
+cada diez segundos del presupuesto. Volverá.
+
+### La comprobación que hice mal, y que por eso se escribe
+
+Para asegurarme de que la prueba **sigue detectando**, rompí una tarjeta de `dist/` dejándola en 200
+bytes y esperé el rojo. Salió **verde**, y por un momento pareció que la prueba no miraba nada.
+
+No era eso. El `webServer` de Playwright corre `npm run build &&` antes de servir, así que
+**regeneró la tarjeta** antes de que nadie la mirase. Lo que comprobé fue que el build repara, no
+que la prueba detecta.
+
+Así que la protección se puso donde sí se puede comprobar: **una cuenta de cuántas se revisaron**,
+contrastada al final con cuántas hay. Porque el riesgo propio de repartir en tandas no es dejar de
+mirar bien una tarjeta —eso no cambió—, sino **saltarse alguna sin que nada chille**: una tanda mal
+cortada deja huecos y la prueba pasa igual, verde y vacía.
+
+Queda escrito en la propia prueba, con el intento fallido incluido, para que nadie repita el
+experimento del PNG truncado creyendo que prueba algo.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1338 | **1349** |
+| Citas de ese Autor | 64 | **75** |
+| saber-para-ser-libre | 41 | **43** |
+| Prueba de Tarjetas en la tanda completa | moría a los 30 s | **21,3 s** |
+
+Puerta completa en verde: `astro check` 0 errores, **2210 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 113.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

@@ -1,7 +1,9 @@
 ---
-texto: "Lejos de abatirse el investigador novicio ante las grandes autoridades de la Ciencia, debe saber que su destino, por ley cruel, pero ineluctable, es crecer un poco a costa de la reputación de las mismas."
+texto: "Un talento de refresco, llegado sin prejuicio al análisis de un asunto, siempre hallará un aspecto nuevo, algo de que no se percataron quienes creyeron definitivamente apurado aquel estudio."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-lejos-de-abatirse-el-investigador-novicio-ante"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-un-talento-de-refresco-llegado-sin-prejuicio"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
