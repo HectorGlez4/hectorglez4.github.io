@@ -6097,3 +6097,46 @@ Puerta completa en verde: `astro check` 0 errores, **2131 pruebas de unidad**, `
 nombres o direcciones. Lo que el bucle sí puede seguir haciendo está medido arriba y queda dicho con
 número: **cuatro Autores de la cola con margen para más de 190 Citas cada uno**, y diez capítulos ya
 sondeados y sin recuperar de la obra de esta sesión.
+
+## 96.ª sesión — cuatro capítulos más, y las que se descartan por estar fechadas
+
+Mismo tramo declarado y misma reserva, así que se siguió por donde la sesión anterior lo dejó
+dicho: **los capítulos sondeados y sin recuperar**. Cuatro más —los de mayor extensión de los que
+quedaban—, 163 candidatas nuevas.
+
+Se leyeron **solo las nuevas**. Las de la sesión anterior ya están juzgadas y en git, y releerlas
+sería volver a decidir lo decidido; el guion las distingue preguntándole a git cuáles no rastrea
+todavía, no por fecha ni por memoria.
+
+De 163, el filtro apartó **54** de la lectura y se leyeron **109**. De ésas salen **22 Citas** en
+once Temas: el saber (4), la justicia (4), la palabra (2), la virtud (2), el trabajo (2), la
+adversidad (2), la patria (2), la verdad (1), la felicidad (1), la prudencia (1), el miedo (1).
+
+### Tres motivos de descarte que no había tenido que usar antes
+
+· **Autoridad citada por su nombre.** Varias candidatas apoyan su afirmación en un fisiólogo del XIX
+  al que el texto nombra. Publicadas sueltas, atribuyen a este Autor lo que el texto atribuye a
+  aquél —la misma falta de Dante en la 94.ª, con otra cara.
+· **Series de preguntas retóricas.** El ensayo encadena cuatro preguntas seguidas que solo funcionan
+  juntas. Una sola, sacada de la fila, no dice nada.
+· **Tomas de posición fechadas.** Esto merece decirse con precisión, porque es lo que más fácil
+  sería disfrazar: se descartaron las candidatas que defienden posturas concretas de la polémica de
+  1869 —a favor o en contra—, y **no por lo que opinan**, sino porque son argumentos de un debate
+  con fecha y no se sostienen fuera de él. Es exactamente el mismo criterio que descarta «De allí
+  que…»: lo que necesita su contexto para significar algo, no es Cita. Lo que se publicó de esta
+  obra es lo que sigue siendo verdad leído hoy suelto, que resultó ser mucho.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1162 | **1184** |
+| Citas del Autor sembrado | 28 | **50** |
+| Documentos versionados | 115 | **119** |
+| Techo de concentración | 14,0 % | **13,8 %** |
+
+Puerta completa en verde: `astro check` 0 errores, **2135 pruebas de unidad**, `build`, **414 E2E**.
+
+**El tramo sigue sin alcanzarse y se dice otra vez**: faltan 18 Autores, y eso pide nombres o
+direcciones. Queda medido para seguir: **seis capítulos de esta obra sin recuperar**, y tres Autores
+de la cola con 1, 2 y 3 Citas y margen para más de doscientas cada uno.
