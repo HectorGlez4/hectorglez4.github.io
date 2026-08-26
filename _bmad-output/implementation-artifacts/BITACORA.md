@@ -5766,3 +5766,45 @@ El Autor más representado queda en 163 de 1118, **14,6 %**.
 
 **La Meta no está alcanzada y no se emite promesa:** 1118 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 12.4 (91.ª sesión) — Las Colecciones llevaban trescientas Citas sin mirarse
+
+**1118 → 1119 Citas. 1168 → 1169 páginas.** Una sola Cita nueva, y dieciséis miembros de Colección:
+la sesión es de curación, que es trabajo declarado y llevaba sin hacerse desde las 761.
+
+### Lo que se hizo primero y no dio
+
+Se probó la cantera con más margen por «la muerte», siguiendo la veta de las tres sesiones
+anteriores: **de diecinueve coincidencias, una**. Ese Autor escribe de política, de la Iglesia y del
+trabajo; la muerte no es su asunto. Se dice para no volver a intentarlo.
+
+### Las Colecciones no se actualizan solas, y se notaba
+
+Sus miembros son listas escritas a mano. La última revisión fue con **761 Citas** y hoy hay 1118: han
+entrado trescientas cincuenta y siete Citas que **ninguna Colección ha mirado nunca**.
+
+Curadas dos, y las dos crecen un 40 %:
+
+- «La necedad no se cura porque no se reconoce» — de 22 a **31**. Entran «todo necio confunde valor y
+  precio», «bien puede haber puñalada sin lisonja, mas pocas veces hay lisonja sin puñalada», «tan
+  desnuda anduviera la mentira como la verdad, si la lisonja no la vistiera de todos colores».
+- «Cuándo conviene no hablar» — de 21 a **28**. Entra «el que comunicó sus secretos a otro hízose
+  esclavo de él», que es literalmente lo que el criterio dice.
+
+**Y lo que no entra importa igual.** De veintisiete candidatas por palabra, seis traían «necio» o
+«ignorante» en otro sentido —el suicidio, el tiranicidio, un pueblo sin escuelas— y quedan fuera. En
+la otra, se dejaron tres que hablan de **disimular la cara**, que es cosa distinta de callar. Meter
+una Cita en una Colección porque comparte una palabra es lo mismo que inventar una Colección de
+relleno, pero al revés: el criterio deja de decir lo que dice.
+
+### Una fragilidad que se mira y no se toca
+
+«Consejos para gobernar» tiene **quince miembros justos**, sin margen. No se le añade nada: su
+criterio es cerrado —lo que un personaje dijo a otro en un pasaje concreto— y crecerlo exigiría
+romperlo. Queda anotado: si alguna vez se retira una de esas quince, la Colección cae con ella.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109**; `npm run build` **1169 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1119 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

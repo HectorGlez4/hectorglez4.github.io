@@ -1,6 +1,8 @@
 ---
 texto: "Ercilla escribe en la noche lo que pelea en el día, Byron envidia las victorias de Bonaparte y corre a morir en Mesolonghi."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-ercilla-escribe-en-la-noche-lo-que"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"
