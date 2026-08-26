@@ -7507,3 +7507,60 @@ despliegue de la 119.ª verificado en vivo.
 admitidos con margen, **ninguno tiene ensayo disponible sin tocar** en ninguna de las dos Fuentes.
 Lo que el bucle puede hacer con las firmas que ya hay se va estrechando, y eso es exactamente lo que
 la decisión reservada desbloquearía.
+
+## 121.ª sesión — una Colección que no puede crecer sin traicionarse
+
+**12 Citas** en seis Temas, cinco Colecciones curadas, y un hallazgo sobre las Colecciones que
+conviene dejar escrito.
+
+### La Colección más flaca, y por qué se queda como está
+
+«Consejos para gobernar» tiene **exactamente 15 miembros**, que es el umbral: si una sola Cita
+saliera, caería por debajo y se despublicaría. Parecía la candidata evidente a reforzar.
+
+Su criterio, leído entero, lo impide: *«Lo que don Quijote dijo a Sancho antes de la Ínsula: cómo
+juzgar, qué comer y por qué el que no madruga con el sol no goza del día»*. **Es una Colección sobre
+un pasaje, no sobre el tema del gobierno.**
+
+El guion acercó **42 candidatas** que hablan de justicia, de juzgar y de gobernar —de cuatro Autores
+distintos— y ninguna cumple ese criterio. Meter cualquiera sería exactamente lo que la regla dura
+prohíbe: **inventar relleno**, solo que disfrazado de refuerzo.
+
+> Una Colección puede estar en el umbral y **no poder crecer sin traicionarse**. La respuesta
+> correcta es dejarla, no rellenarla. Su fragilidad es el precio de tener un criterio estrecho, y un
+> criterio estrecho es justamente lo que la hace merecer página.
+
+Y el riesgo, medido: solo caería si se despublicara una Cita del Quijote, y **en todo el bucle no se
+ha despublicado ninguna Cita** —se retiran documentos, no Citas—.
+
+### El ensayo, agotado en su parte rentable
+
+Quedan 278 candidatas y el tramo breve es ya casi todo **preguntas retóricas encadenadas**, que se
+descartan desde la 96.ª porque una sola, sacada de la fila, no dice nada. Se deja, como se dejó el
+libro anterior en la 115.ª y por la misma razón medida.
+
+### Y el reparto por Tema se usó para decidir, no solo para mirar
+
+La 118.ª midió que «el saber» es el Tema más cargado (18,1 %) y «el miedo» el más flaco. Al asignar
+las Citas nuevas de un libro que trata **de la investigación científica** —todas candidatas
+naturales de «el saber»— se miró ese reparto.
+
+Conviene decir dónde está la raya: **no se fuerza ninguna**. La que fue a «el miedo» habla
+literalmente del desaliento —«la convicción de que, dada nuestra cortedad de luces, nada podremos
+hacer»— y encaja ahí mejor que en «el saber». Mirar el reparto sirve para **elegir entre Temas que
+encajan**, no para meter una Cita donde no va.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1397 | **1409** |
+| cuatro-mujeres | 64 | **66** |
+| saber-para-ser-libre | 46 | **47** |
+| elogio-de-lo-escaso | 38 | **39** |
+| achaques-de-necedad | 35 | **36** |
+
+Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 120.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

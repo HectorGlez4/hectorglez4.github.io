@@ -1,6 +1,8 @@
 ---
 texto: "Entre las preocupaciones más funestas de la juventud intelectual contamos la extremada admiración a la obra de los grandes talentos y la convicción de que, dada nuestra cortedad de luces, nada podremos hacer para continuarla o completarla."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-miedo"
 slug: "santiago-ramon-y-cajal-entre-las-preocupaciones-mas-funestas-de-la"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
