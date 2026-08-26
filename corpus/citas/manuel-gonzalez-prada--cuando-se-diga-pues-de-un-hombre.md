@@ -1,6 +1,8 @@
 ---
 texto: "Cuando se diga, pues, de un hombre: Cumplidor de las leyes, tradúzcase: Naturaleza servil."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-cuando-se-diga-pues-de-un-hombre"
 procedencia:
   obra: "Librepensamiento de acción"

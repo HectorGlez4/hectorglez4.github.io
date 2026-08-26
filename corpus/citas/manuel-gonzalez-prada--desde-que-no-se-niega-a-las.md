@@ -1,6 +1,8 @@
 ---
 texto: "Desde que no se niega a las naciones el derecho de insurrección para derrocar a sus malos gobiernos, debe concederse a la Humanidad ese mismo derecho para sacudirse de sus inexorables explotadores."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-desde-que-no-se-niega-a-las"
 procedencia:
   obra: "El intelectual y el obrero"

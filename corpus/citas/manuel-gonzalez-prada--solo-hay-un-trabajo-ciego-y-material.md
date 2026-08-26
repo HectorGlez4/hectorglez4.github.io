@@ -1,7 +1,10 @@
 ---
-texto: "Cuando preconizamos la unión o alianza de la inteligencia con el trabajo no pretendemos que a título de una jerarquía ilusoria, el intelectual se erija en tutor o lazarillo del obrero."
+texto: "Sólo hay un trabajo ciego y material -el de la máquina; donde funciona el brazo de un hombre, ahí se deja sentir el cerebro."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-cuando-preconizamos-la-union-o-alianza-de"
+temas:
+  - "el-saber"
+  - "el-trabajo"
+slug: "manuel-gonzalez-prada-solo-hay-un-trabajo-ciego-y-material"
 procedencia:
   obra: "El intelectual y el obrero"
 estadoDerechos: "dominio-público"

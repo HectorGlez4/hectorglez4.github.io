@@ -1,6 +1,8 @@
 ---
 texto: "Sólo en la sociedad te encontrarás a ti mismo; si te aíslas de ella no darás más que con un fantasma de tu verdadero sujeto propio."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-amistad"
 slug: "miguel-de-unamuno-solo-en-la-sociedad-te-encontraras-a"
 procedencia:
   obra: "¡Adentro!"

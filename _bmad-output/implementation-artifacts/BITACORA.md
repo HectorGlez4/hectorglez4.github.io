@@ -5651,3 +5651,42 @@ las dos quedan en 157 sobre 1086, **14,5 %**, y ninguna se acerca.
 
 **La Meta no está alcanzada y no se emite promesa:** 1086 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.6 (88.ª sesión) — Los Temas nuevos abren canteras viejas
+
+**1086 → 1098 Citas. 1136 → 1148 páginas.**
+
+### Primero, la cifra que tocaba rehacer
+
+«La casa» fue el candidato a Tema que más cerca estuvo —trece leídas, umbral quince— y el Corpus ha
+crecido un 8 % desde entonces. Medido: **31 coincidencias contra 29**. Dos más, que a lo sumo dan
+catorce leídas. **Sigue corto**, y no se gasta la sesión en releerlo por dos: queda anotado para
+cuando el Corpus crezca de verdad.
+
+### Y luego, la veta que abrieron los Temas nuevos
+
+Un Autor con 743 candidatas sin leer y 25 huecos bajo el techo. Ya lo había cribado por los doce
+Temas de entonces —y por eso parecía agotado—, pero desde la 75.ª hay **cinco Temas más**, y sus
+candidatas no se habían mirado nunca por esos asuntos.
+
+Nueve de las doce salen de ahí: cinco a «la justicia» y cuatro a «el trabajo», dos Temas que no
+existían cuando esa cantera se leyó por primera vez.
+
+- «Cuando se diga, pues, de un hombre: Cumplidor de las leyes, tradúzcase: Naturaleza servil.»
+- «Toda la Naturaleza sufre la dura ley y calla, el hombre la rechaza y se subleva.»
+- «No se conoce bien a un pueblo sin haber estudiado la condición social y jurídica de la mujer.»
+- «Si los hombres de ayer trabajaron por nosotros, los de hoy estamos obligados a trabajar por los
+  de mañana.»
+- «Sólo hay un trabajo ciego y material —el de la máquina; donde funciona el brazo de un hombre, ahí
+  se deja sentir el cerebro.»
+
+**Una cantera no se agota: se agota respecto de las preguntas que se le hicieron.** Cada Tema nuevo
+la vuelve a abrir, y eso vale para las cinco canteras grandes que quedan.
+
+El Autor más representado baja a **14,3 %** sin haber sembrado.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109**; `npm run build` **1148 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1098 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

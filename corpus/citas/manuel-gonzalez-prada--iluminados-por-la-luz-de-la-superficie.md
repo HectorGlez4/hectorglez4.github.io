@@ -1,6 +1,8 @@
 ---
 texto: "Iluminados por la luz de la superficie, los oprimidos del fondo ven la justicia y se lanzan a conquistarla, sin detenerse en los medios ni arredrarse con los resultados."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-iluminados-por-la-luz-de-la-superficie"
 procedencia:
   obra: "El intelectual y el obrero"

@@ -1,6 +1,8 @@
 ---
 texto: "Si los hombres de ayer trabajaron por nosotros, los de hoy estamos obligados a trabajar por los de mañana."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-trabajo"
 slug: "manuel-gonzalez-prada-si-los-hombres-de-ayer-trabajaron-por"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

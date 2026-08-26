@@ -1,6 +1,8 @@
 ---
 texto: "¿De qué el derecho de sufragio, si no podemos ejercerle conscientemente?"
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-de-que-el-derecho-de-sufragio-si"
 procedencia:
   obra: "Los partidos y la Unión Nacional"
