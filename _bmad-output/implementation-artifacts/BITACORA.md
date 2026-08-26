@@ -5338,3 +5338,44 @@ El Autor más representado, que lleva tres sesiones sin sembrar, baja de 14,5 % 
 
 **La Meta no está alcanzada y no se emite promesa:** 1040 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.6 (81.ª sesión) — Mis medidas de cantera tenían un punto ciego, y era el de ayer
+
+**1040 → 1046 Citas. 1090 → 1096 páginas.**
+
+### La consecuencia de ayer, aplicada a mis propias medidas
+
+Ayer se arregló el lector para las páginas compuestas **por transclusión**. Lo primero de hoy fue la
+pregunta que se desprende: **si esas páginas existen, ¿las veían mis medidas de cantera?**
+
+No. Todas ellas —doce sesiones de medir canteras— filtran por el **tamaño del wikitexto**, y una
+página por transclusión tiene wikitexto diminuto y obra entera: pasaba por debajo del filtro de 8 KB
+sin que nadie la mirara.
+
+Medido en dos Autores: en uno, ninguna. En otro, **cinco obras invisibles**, entre ellas dos novelas
+y el volumen que contiene un prólogo célebre.
+
+**Pero el hallazgo no es tan grande como parecía**, y conviene decirlo entero: al recuperar ese
+volumen, el documento salió con **33 palabras**. Es una página **índice** —la lista de las tres
+novelas—, no la obra. La puerta de legibilidad de la 11.5 lo rechazó sola, y el documento se retiró.
+
+Así que el punto ciego es real pero está lleno de índices: la transclusión se usa tanto para
+presentar un libro como para listar sus partes, y desde fuera se parecen. Queda anotado para quien
+mida: **una obra invisible por transclusión hay que abrirla antes de contarla como cantera.**
+
+### La siembra, y un género más medido
+
+Dos ensayos políticos de un Autor con cuarenta y dos huecos libres: 37 candidatas, **6 Citas**. El
+género es periodismo polémico y rinde como el tratado moral —uno de cada seis—, pero lo que da es
+distinto: casi todo es circunstancial —nombres, ciudades, un periódico de Filadelfia— y lo que queda
+son las frases que sobreviven a su ocasión. «No hay razas: no hay más que modificaciones diversas del
+hombre.» «Lo bueno no se ha de desamar, sólo porque no sea nuestro.»
+
+Tres van a «la patria», que **nació en la 77.ª con los quince justos y sin margen**. Ahora tiene
+dieciocho, y esa fragilidad queda resuelta.
+
+`npx astro check` 0 errores; `npx vitest run` **2084/2084**; `npm run build` **1096 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1046 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.
