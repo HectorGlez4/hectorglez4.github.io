@@ -1,6 +1,8 @@
 ---
 texto: "Al siglo XXI tocará comenzar nuevamente la obra, acaso quimérica, de la reconciliación definitiva de los Estados de Europa, y de someter definitivamente al derecho atávicas codicias y desapoderadas ambiciones territoriales."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-tiempo"
 slug: "santiago-ramon-y-cajal-al-siglo-xxi-tocara-comenzar-nuevamente-la"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

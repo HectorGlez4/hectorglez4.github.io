@@ -257,3 +257,66 @@ lo que se solapan entre sí (máximo 33 %, mediana 6 %).
 
 **Cómo se desbloquea, en una línea:** nombres de Autor o URL de Wikisource/Gutenberg. Con eso el
 bucle recupera con `tools/recuperar.ts`, extrae, coteja, publica y despliega sin más intervención.
+
+
+## Apéndice medido — el estado de la cantera al cerrar la 123.ª sesión
+
+Esta sección **no cambia ninguna regla**: recoge lo que se ha medido entre la 108.ª y la 123.ª para
+que nadie repita el barrido. Todo lo de abajo está comprobado contra las dos Fuentes, no supuesto.
+
+### La segunda Fuente estaba admitida y sin usar
+
+**Project Gutenberg** figura en el conjunto cerrado de Fuentes desde el principio —dominio público,
+reutilización permitida— y en la 108.ª tenía **un solo documento de 143**. Abrirla dio 128 Citas en
+quince sesiones. Da **libros enteros** donde Wikisource da capítulos: un documento puede producir
+más de mil candidatas.
+
+### La escala de géneros, medida y afinada
+
+| género | rendimiento |
+|---|---|
+| ensayo aforístico (frases sueltas) | ~40 % |
+| ensayo de tesis · periodismo de tesis | ~16 % |
+| carta narrativa | ~13 % |
+| periodismo de **coyuntura** con nombres propios | 6 % |
+| costumbrismo con diálogo dialectal | 2 % |
+| antología de un Autor **ya sembrado** | 0,7 % |
+| novela, crónica, índice, entremés, **sátira alegórica** | ≈1 % o **0** |
+
+Y tres matices que costaron sesiones aprender:
+
+· **Dentro de una obra**, el tramo doctrinal rinde más que el histórico-coyuntural (104.ª), y **la
+  densidad cae con la longitud de la frase** (115.ª): una sentencia de sesenta caracteres suele ser
+  una tesis; una de doscientos ochenta, un procedimiento.
+· **No se recuperan antologías de Autores cuya obra principal es verso** (120.ª): traen su poesía
+  con los saltos perdidos, indistinguible de prosa para la tubería e inadmisible mientras la
+  decisión del verso siga reservada.
+· **Antes de recuperar un volumen, mirar qué más trae** (116.ª): uno anunciaba obra nueva y
+  recopilaba además otra ya sembrada, con ortografía antigua que el cotejo literal no reconoce.
+
+### Lo que queda por Autor, comprobado en las dos Fuentes
+
+De los Autores admitidos con **margen amplio bajo el techo**, se comprobó uno por uno:
+
+· Uno con 47 páginas sin recuperar: **todo entremeses**, más biografía escrita por otro.
+· Uno con 92 páginas y sitio para 56: **todo sátira burlesca**; la mayor dio 403 candidatas y cero
+  Citas. En la otra Fuente, novela picaresca y dos traducciones **al inglés**.
+· Uno con sitio para 47: solo **novelas** y una traducción al inglés.
+· Dos de la cola: **narrativa costumbrista**, medida al 2 %.
+· Dos más: nada disponible.
+
+**Ninguno tiene ensayo o prosa aforística sin tocar en ninguna de las dos Fuentes.**
+
+### Lo que sí queda, y cuánto
+
+· **510 candidatas legibles sin leer** de dos libros ya versionados —los tramos técnicos y
+  coyunturales, que rinden poco pero no cero—.
+· **Curar Colecciones** cada vez que la siembra avanza: sus miembros son listas escritas a mano.
+· El **censo cerrado**: 21 Citas, de las que cinco esperan la decisión del verso y una está en otra
+  traducción (98.ª).
+
+### Y una obra descartada por lo que dice, no por cómo rinde
+
+Entre las páginas disponibles de un Autor admitido hay un **panfleto antisemita**. No se recuperó y
+no se recuperará: ninguna Cita de ahí cabe en este sitio. Queda escrito para que no se lea como un
+descuido ni se «arregle» en una sesión futura.

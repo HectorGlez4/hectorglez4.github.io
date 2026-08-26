@@ -7623,3 +7623,45 @@ despliegue de la 121.ª verificado en vivo.
 **El tramo sigue sin alcanzarse**: 18 Autores. Y esta sesión lo dice con más peso que las
 anteriores: se comprobaron **dos Autores más con margen amplio y obra disponible**, y ninguno tiene
 nada que este Corpus pueda publicar.
+
+## 123.ª sesión — el mapa de lo medido entra en el protocolo, que es donde se lee
+
+**4 Citas** y, sobre todo, **el estado de la cantera escrito donde manda**.
+
+### Por qué esto era el trabajo de hoy
+
+El protocolo tiene una sección que dice «la cantera NO está agotada», medida en la 61.ª y la 62.ª
+con 82 documentos y una sola Fuente. Sigue siendo verdad en su intención —hay obra— y **ya no
+describe el terreno**: entre la 108.ª y la 123.ª se ha abierto una Fuente entera, se ha medido una
+escala de géneros con siete tramos y se ha comprobado Autor por Autor qué queda.
+
+Todo eso vivía repartido en quince entradas de bitácora. El protocolo es lo que se lee **cuando el
+contexto se compacta**, así que un mapa que no esté ahí es un mapa que la siguiente sesión no verá.
+
+Se añadió como **apéndice fechado, sin tocar una sola regla**: la escala de géneros con sus siete
+tramos y sus tres matices, lo comprobado y descartado Autor por Autor, lo que sí queda con su
+cifra —510 candidatas legibles sin leer, las Colecciones, el censo— y la obra descartada por lo que
+dice.
+
+### Y se cerró la última comprobación que faltaba
+
+El Autor con más obra disponible y sitio para 56 Citas: en la Fuente vieja, **todo sátira
+burlesca**; en la nueva, **novela picaresca y dos traducciones al inglés**. Agotado en las dos.
+
+Con eso, la frase que llevo diez sesiones repitiendo deja de ser una impresión y pasa a ser una
+comprobación cerrada: **de los Autores admitidos con margen amplio, ninguno tiene ensayo ni prosa
+aforística sin tocar en ninguna de las dos Fuentes.**
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1409 | **1413** |
+| Por leer del libro de ciencia | 232 | **224** |
+| Secciones del protocolo | — | **+1 apéndice medido** |
+
+Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 122.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores. Lo que cambia hoy es que el porqué ya no hay que
+reconstruirlo leyendo quince bitácoras: está en el fichero que manda.
