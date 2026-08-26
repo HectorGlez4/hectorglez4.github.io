@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: La educación de la mujer
+año: 1896
+url: https://es.wikisource.org/wiki/La_educación_de_la_mujer/3
+recuperado: 2026-08-26
+---
+La educación de la mujer/3
+|titulo = [[La educación de la mujer]]
+|autor = Concepción Arenal
+obra> |título=La educación de la mujer
+obra> |autor=Concepción Arenal
+obra> |año=1896
+obra> |título={{Anclaje+|Índice}}
+---
+La mujer es paciente, afectuosa, insinuante; no le falta perspicacia; si convenientemente se la educa e instruye, comprenderá y aun adivinará, si el discípulo atiende, se distrae o se cansa, hasta dónde entiende ésa y encontrará medios de que aprenda lo que es capaz de aprender; es decir, que consideramos a la mujer con aptitud para la enseñanza.
+
+¿Hasta dónde deberá enseñar? Hasta donde sepa; su esfera de acción pedagógica debe coincidir exactamente con su esfera moral a intelectual, y aun creemos que las cosas que sepa tan bien como el hombre las enseñará mejor que él.

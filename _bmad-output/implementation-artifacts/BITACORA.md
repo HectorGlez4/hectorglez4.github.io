@@ -6416,3 +6416,54 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**.
 
 **El tramo sigue sin alcanzarse, y van seis sesiones diciéndolo**: 18 Autores, y eso pide nombres o
 direcciones.
+
+## 100.ª sesión — la obra agotada, y un criterio que solo vale si duele
+
+Mismo tramo y misma reserva. Se recuperaron **los seis capítulos que quedaban** de la primera obra
+y **el que faltaba** de la segunda: las dos quedan agotadas. 126 candidatas, 43 apartadas por el
+filtro, **83 leídas, 17 Citas** en siete Temas —el trabajo (4), la verdad (3), el saber (3), la
+virtud (3), la justicia (2), la prudencia (1), la adversidad (1)—.
+
+### El criterio, aplicado donde duele
+
+En la 99.ª descarté los ítems numerados de una enumeración porque fuera de su lista no dicen nada.
+Esta vez la misma forma se llevó por delante una candidata **magnífica**:
+
+    Que sin negar a la razón sus derechos, hagan valer los del corazón, y digan y prueben que hay
+    casos y cuestiones, grandes cuestiones, en que un ¡ay! es un argumento y una lágrima una
+    demostración.
+
+Fuera, como las otras. Un criterio que se aplica solo cuando no cuesta nada no es un criterio: es
+una preferencia con coartada. Queda escrito lo que se perdió, para que se vea el precio.
+
+### Una discrepancia que no lo era
+
+Verifiqué en vivo la Colección de las cuatro mujeres y conté **50** enlaces donde la orden había
+dicho «54 resueltas». Antes de dar por buena ninguna de las dos cifras, miré: la Colección había
+**cruzado las 50 Citas por página** y tiene ahora dos páginas —50 en la primera y el resto en la
+segunda—. Mi comprobación en vivo contaba solo la primera.
+
+De paso confirma que la paginación numerada de la 93.ª hacía falta justo aquí: la página 2 se
+enlaza desde la 1, y sin esos números las Citas de la cola quedarían a un salto de más.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1202 | **1219** |
+| Citas del Autor sembrado | 61 | **78** |
+| Documentos versionados | 123 | **129** |
+| cuatro-mujeres | 59 | **64** |
+| saber-para-ser-libre | 33 | **35** |
+| Techo de concentración | 13,7 % | **13,4 %** |
+
+Puerta completa en verde: `astro check` 0 errores, **2172 pruebas**, `build`, **414 E2E**.
+
+Y una torpeza mía, la segunda vez: encadené el guion de aprobación dos veces en el mismo comando,
+así que la segunda pasada informó de diecisiete «no está entre las candidatas pendientes» que eran
+las diecisiete ya publicadas por la primera. No rompió nada —la orden es idempotente en la
+práctica— pero el informe asustaba, y el remedio es no encadenarlo.
+
+**El tramo sigue sin alcanzarse, y van siete sesiones diciéndolo**: 18 Autores, y eso pide nombres
+o direcciones. Lo que queda medido para seguir sin esa decisión: la obra de este Autor está
+**agotada**, y el mapa de cantera de la 96.ª sigue vigente para los demás.
