@@ -8724,3 +8724,60 @@ y ésta dice otra cosa.
 | Medidas que se miran y no se ponen | 4 | **5** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 140.ª sesión — buscar por materia en vez de por categoría, y el 57 %
+
+Séptima sesión con el tramo abierto. **28 → 29 Autores**, y el mejor rendimiento de todo el bucle.
+
+### La categoría se agotaba; la otra Fuente clasifica por materia
+
+Las cuatro sesiones anteriores exprimieron la categoría de ensayos de una Fuente. La otra no tiene
+categorías por género, pero **clasifica por materia**, y eso permite preguntar directamente por lo
+que rinde:
+
+```
+?query=l.es+s.maxims      ?query=l.es+s.philosophy      ?query=l.es+s.ethics
+```
+
+«Maxims» devolvió **dos** obras en castellano. Una es anónima —y la autoría anónima el Corpus la
+rechaza, con su prueba—. La otra es una **colección de frases** de un poeta cubano, †1934, en
+castellano original.
+
+Buscar «ensayo» daba ensayistas; buscar **máximas** da el género que la escala mide al 40 %.
+
+### 47 % y luego 57 %
+
+| tanda | leídas | firmes | rendimiento |
+|---|---|---|---|
+| primera | 15 | 7 | 47 % |
+| segunda | 14 | 8 | **57 %** |
+
+Es el mejor medido en el bucle, y sube en vez de bajar: veta intacta. La forma explica el número —una
+frase suelta escrita para ser suelta no necesita contexto—:
+
+> Si fuéramos justos, de cada cárcel haríamos un hospital.
+> A veces, un vicio fomenta una virtud, como un veneno estimula la vida.
+> Me voy convenciendo de que en todo revolucionario hay un dictador escondido.
+> Cuando un hombre a una injuria contesta con el desprecio, se le tiene por cobarde.
+
+**Quince Citas de un solo Autor en una sesión.** Dos fueron a «la patria», que era de los Temas más
+flacos.
+
+Lo que se descarta aquí no es el tema sino tres formas ya conocidas: el diálogo con guion, la cita
+de otro escritor y el fragmento que abre con puntos suspensivos.
+
+### Y un Autor ya admitido tiene una segunda obra
+
+La búsqueda por materia sacó también un segundo libro de un Autor que ya está en el Corpus. No sirve
+para el tramo —el tramo cuenta Autores, no obras— pero queda anotado para una sesión de siembra.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 28 | **29** de 35 |
+| Citas | 1531 | **1546** |
+| Mejor rendimiento medido | 54 % | **57 %** |
+
+Puerta completa en verde y consultada por su código de salida.

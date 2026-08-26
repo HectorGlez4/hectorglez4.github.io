@@ -440,6 +440,18 @@ marcador. Otra tenía «un ensayo» de 147. Sumar da la ilusión al revés —cu
 más arriba sale la firma—. El umbral es el que `cantera.ts` ya usaba para separar índice de texto:
 **2 KB por obra**.
 
+**Y en la otra Fuente se busca por MATERIA, no por género.** No tiene categorías de ensayo, pero
+clasifica por materia, y eso permite pedir directamente lo que rinde en vez de pedir «ensayo» y
+filtrar después:
+
+```
+?query=l.es+s.maxims        ?query=l.es+s.philosophy        ?query=l.es+s.ethics
+```
+
+Buscar «ensayo» da ensayistas; buscar **máximas** da el género que la escala mide al 40 %. En la
+140.ª eso sacó una colección de frases en castellano original que rindió **47 % y luego 57 %**, el
+mejor del bucle, y quince Citas de un solo Autor en una sesión.
+
 **Y el año de muerte no está en un campo.** La ficha de Autor lo escribe **en prosa** dentro de
 `|Texto=`: «(13 de diciembre de 1865 - 29 de noviembre de 1898)». Buscar `|muerte=` devuelve «sin
 dato» **sesenta y cinco veces de sesenta y cinco**, que es la firma de una sonda que mira donde no
