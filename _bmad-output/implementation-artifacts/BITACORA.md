@@ -6679,3 +6679,64 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el de
 103.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 105.ª sesión — el Tema dieciocho no llega, y ahora se sabe por qué
+
+Sesión sin siembra apenas, y con el resultado en la medida. La 74.ª dejó escrito que «un Tema
+número trece no llega» **con 761 Citas**. Hoy hay **1266** y diecisiete Temas, y las últimas
+sesiones han metido cuarenta Citas de un ensayo entero sobre estética. Esa conclusión pedía
+remedirse, no repetirse.
+
+### Lo que se midió
+
+Seis asuntos candidatos, con su recuento y su solape contra los diecisiete Temas:
+
+| asunto | Citas que lo tocan | solape máximo |
+|---|---|---|
+| lo hermoso, el gusto, lo estético | 65 | 25 % |
+| la costumbre, el hábito, la rutina | 21 | 19 % |
+| la soberbia, el orgullo, la vanidad | 14 | — |
+| la envidia | 10 | — |
+| la esperanza, la ilusión | 9 | — |
+| la juventud | 3 | — |
+
+Los dos primeros pasan el umbral de 15 **contando a máquina**, y el solape es menor que el 33 % al
+que llegan entre sí los Temas que ya existen. Así que la conclusión de la 74.ª parecía caducada.
+
+### Lo que la lectura deshizo
+
+**Más de la mitad son falsos positivos**, y se ven en cuanto se leen: «bella sorpresa», «arte de
+reformar la murmuración», «comen con gusto», «no vista un hábito», «el hábito no hace al monje»,
+«como de costumbre». De las 65 del primer asunto quedan unas quince reales; de las 21 del segundo,
+unas diez.
+
+Y al mirar quién las escribe aparece lo que de verdad lo impide: **se concentran en uno o dos
+Autores**. Ocho de las quince del primero son del mismo; seis de las diez del segundo, también.
+
+De ahí sale un criterio que no estaba escrito y que conviene que lo esté:
+
+> Un Tema necesita quince Citas **de varios Autores**. Uno que en el fondo reúne «lo que un Autor
+> dijo sobre X» no es un asunto del Corpus: es su página de Autor con otro nombre, y publicarlo
+> sería inventar un Tema de relleno, que es lo que la regla prohíbe para las Colecciones.
+
+**No es un umbral nuevo ni se propone como tal** —eso no lo mueve el bucle—: es la razón, ahora
+medida, por la que el recuento a máquina engaña. La conclusión de la 74.ª sigue en pie con 505
+Citas más, y ahora se sabe **por qué** y no solo **que**.
+
+### Y una obra que se cierra
+
+Se recuperó la última página del Autor del ensayo: **cero candidatas**, es un índice. Retirada. Ese
+Autor queda **agotado** en la Fuente, con 83 Citas y su obra mayor entera.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1266 | 1266 |
+| Temas | 17 | **17, y se dice por qué** |
+| Documentos retirados | 6 | **7** |
+
+Puerta completa en verde: `astro check` 0 errores, **2186 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 104.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores. Y el de Temas tampoco, con la razón medida arriba.
