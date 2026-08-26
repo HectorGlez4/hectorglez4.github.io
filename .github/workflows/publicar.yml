@@ -136,3 +136,42 @@ jobs:
     steps:
       - id: despliegue
         uses: actions/deploy-pages@v4
+
+  # El aviso a los buscadores por IndexNow — Bing, Yandex, Naver y Seznam.
+  #
+  # Va en un trabajo aparte y con `needs: desplegar` por una razón que no es de orden sino
+  # de verdad: IndexNow acude a la URL avisada casi al momento, y avisar antes de que el
+  # despliegue termine la manda a la versión anterior. Sería peor que no avisar.
+  #
+  # Y va aquí y no en una integración de Astro porque AD-22 prohíbe que la construcción
+  # pida nada por la red. `npm run build` sigue funcionando sin internet; esto no es parte
+  # de construir el sitio, es parte de publicarlo.
+  #
+  # `continue-on-error` es deliberado: el sitio ya está en línea cuando esto corre, así que
+  # un buscador caído no puede tumbar una publicación. El fallo se ve en rojo en el
+  # trabajo, que es donde tiene que verse, y no arrastra al resto.
+  avisar:
+    name: Avisar a los buscadores
+    needs: desplegar
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # El rango de commits del empujón se lee con `git diff`, y con la copia
+          # superficial de un solo commit que hace `checkout` por omisión no existe.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # Sin `--desde` en las reconstrucciones programadas: no hay empujón que comparar y lo
+      # único que cambia es la Cita del Día, que la orden avisa siempre.
+      - name: Avisar
+        run: >
+          npx tsx tools/avisar.ts
+          ${{ github.event_name == 'push' && format('--desde {0} --hasta {1}', github.event.before, github.sha) || '' }}

@@ -173,6 +173,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'astro.config.mjs',
       'el proveedor de tipografías de la Fonts API: el build baja las dos familias de UX-DR3 a .astro/fonts/ y nada más',
     ],
+    [
+      'tools/avisar.ts',
+      'la cáscara del aviso a IndexNow: avisa a los buscadores de lo ya publicado, y corre en el flujo de trabajo con needs: desplegar — el build no la invoca, así que sigue construyendo sin internet',
+    ],
   ]);
 
   /*
@@ -271,10 +275,11 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas tres', () => {
-    // Añadir una cuarta tiene que ser un cambio deliberado de esta prueba.
+  it('no hay más excepciones que esas cuatro', () => {
+    // Añadir una quinta tiene que ser un cambio deliberado de esta prueba.
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
+      'tools/avisar.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',
     ]);
@@ -309,9 +314,29 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       expect(pkg.scripts[guion], guion).not.toMatch(/recuperar|curl|wget/);
     }
 
+    /*
+     * La lista es cerrada a propósito: añadir una llamada de red al proyecto tiene que ser
+     * una decisión, no un descuido que aparece en un `git diff` largo. Quien añada un
+     * fichero aquí está diciendo por qué.
+     *
+     * - `astro.config.mjs` baja las dos familias de la Fonts API durante el build.
+     * - `tools/recuperar.ts` trae el documento de una Fuente, y por eso el build no lo
+     *   invoca nunca.
+     * - `tools/ingreso.ts` consulta el proveedor del Modelo de Ingreso.
+     * - `tools/avisar.ts` avisa a IndexNow de lo publicado. **El build no lo llama**: corre
+     *   en el flujo de trabajo con `needs: desplegar`, que es lo que mantiene en pie la
+     *   garantía que esta prueba defiende —`npm run build` sigue construyendo sin internet—
+     *   y además lo único correcto, porque avisar antes de desplegar manda al buscador a la
+     *   versión anterior.
+     */
     const conRed = barridos.filter((ruta) =>
       tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8')),
     );
-    expect(conRed.sort()).toEqual(['astro.config.mjs', 'tools/ingreso.ts', 'tools/recuperar.ts']);
+    expect(conRed.sort()).toEqual([
+      'astro.config.mjs',
+      'tools/avisar.ts',
+      'tools/ingreso.ts',
+      'tools/recuperar.ts',
+    ]);
   });
 });
