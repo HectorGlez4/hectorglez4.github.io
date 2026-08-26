@@ -1181,3 +1181,59 @@ describe('FR-24 — una Cita ya publicada no se vuelve a proponer como candidata
     expect(conSufijo).toEqual([]);
   });
 });
+
+
+/**
+ * FR-23 — un documento con **dos firmantes** no se siembra.
+ *
+ * Apareció en la 84.ª al recuperar un manifiesto fundacional, que la Fuente declara firmado
+ * por dos personas. La puerta lo dejó pasar, y con razón según su regla: compara el `--autor`
+ * contra **cada** declarado por separado y casa con uno de ellos.
+ *
+ * Pero lo que sale de ahí es una Cita cuyo campo `autor` nombra a uno solo, y **eso es una
+ * afirmación que el documento no sostiene**. Es exactamente el mismo daño que la puerta existe
+ * para impedir —atribuir a quien no lo escribió— por el camino contrario: no atribuir a un
+ * extraño, sino atribuir a medias.
+ *
+ * Medido antes de cerrarlo: de los noventa documentos versionados, **ninguno** declara más de
+ * un Autor, así que ninguna Cita publicada está afectada. Se cierra para que siga siendo así.
+ *
+ * Y se cierra **rechazando**, no eligiendo: el sistema no puede saber cuál de los dos firmó qué
+ * frase, y repartir sería inventarse la atribución que falta.
+ *
+ * La forma que se cierra es **la barra**, que es la que apareció. La conjunción «y» ya la
+ * trataba el partidor con cautela y hay que dejarla así: un Autor de este mismo Corpus lleva
+ * una «y» dentro del apellido, y partir por ella lo rompería en dos.
+ */
+describe('FR-23 — un documento con dos firmantes no se siembra', () => {
+  const CABECERA_A_DOS: CabeceraDeDocumento = {
+    fuente: 'wikisource-es',
+    obra: 'Manifiesto',
+    url: 'https://es.wikisource.org/wiki/Manifiesto',
+    recuperado: '2026-08-26',
+  };
+
+  const aDos = (corpus: string) =>
+    documento(corpus, CABECERA_A_DOS, {
+      nombre: 'wikisource-es--manifiesto.txt',
+      declaracion: ['Manifiesto', '|autor=Séneca / Amado Nervo'].join('\n'),
+    });
+
+  it('no escribe ninguna candidata', async () => {
+    const { corpus } = await corpusConAutores();
+    const ruta = await aDos(corpus);
+    const { error } = await extraer(ruta, corpus);
+
+    expect(error).toMatch(/dos|más de un/i);
+    expect(await readdir(join(corpus, '_revision'))).toHaveLength(0);
+  });
+
+  it('y dice quiénes son los dos, para que se pueda decidir a mano', async () => {
+    const { corpus } = await corpusConAutores();
+    const ruta = await aDos(corpus);
+    const { error } = await extraer(ruta, corpus);
+
+    expect(error).toContain('Séneca');
+    expect(error).toContain('Amado Nervo');
+  });
+});

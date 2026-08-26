@@ -305,6 +305,32 @@ if (autorDeclarado !== undefined && autorDeclarado.nombres.length === 0) {
   });
 }
 
+/*
+ * Y un cuarto estado, que apareció en la 84.ª: **el documento declara más de un Autor**.
+ *
+ * La regla de arriba compara contra cada declarado por separado y casa con uno de ellos, así
+ * que un manifiesto firmado por dos personas cruzaba la puerta. Lo que sale de ahí es una Cita
+ * cuyo campo `autor` nombra a uno solo, y eso es una afirmación que el documento no sostiene:
+ * el mismo daño que esta puerta impide —atribuir a quien no lo escribió— por el camino
+ * contrario, atribuyendo a medias.
+ *
+ * Se rechaza en vez de elegir, porque el sistema no puede saber cuál de los dos firmó qué
+ * frase y repartir sería inventarse la atribución que falta. Se nombran los dos para que la
+ * decisión, si la hay, la tome una persona.
+ */
+if (autorDeclarado !== undefined && autorDeclarado.nombres.length > 1) {
+  terminar({
+    ok: false,
+    motivos: [
+      `El documento declara más de un Autor: «${autorDeclarado.nombres.join('» y «')}».`,
+      'Una Cita nombra a un solo Autor, así que sembrar de aquí atribuiría a uno lo que la ' +
+        'Fuente declara de dos. No se elige por su cuenta: repartir sería inventar la ' +
+        'atribución que falta.',
+      'No se ha escrito ninguna candidata.',
+    ],
+  });
+}
+
 if (
   autorDeclarado !== undefined &&
   !autorDeclarado.nombres.some((nombre) => esElMismoAutor(nombre, nombreDelCorpus))

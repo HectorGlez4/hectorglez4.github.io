@@ -5470,3 +5470,52 @@ hombres. Es de su siglo y no del Corpus.
 
 **La Meta no está alcanzada y no se emite promesa:** 1063 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## FR-23 (84.ª sesión) — La puerta del Autor dejaba pasar un documento firmado por dos
+
+**1063 → 1064 Citas. 1113 → 1114 páginas.** Una sola Cita, y el trabajo está en otro sitio.
+
+### Lo que el informe decía y yo casi no leo
+
+Al recuperar un manifiesto fundacional, la línea del cotejo dijo:
+
+    Autor cotejado: el documento declara «José Martí / M. Gómez» y el Corpus, «José Martí».
+
+**Cotejado**, es decir: pasa. Y pasa según su regla, que compara contra cada declarado por
+separado. Pero lo que sale de ahí es una Cita cuyo campo `autor` nombra a uno solo, y eso es **una
+afirmación que el documento no sostiene**. Es el mismo daño que esta puerta existe para impedir
+—atribuir a quien no lo escribió— por el camino contrario: atribuir a medias.
+
+### Dos agujeros, no uno
+
+Al escribir la prueba salió que el problema era peor. La forma real —`José Martí / M. Gómez`— no se
+partía en dos nombres: **la barra no era separador**, así que el valor se leía como un nombre único.
+Y como la comparación es «Corpus ⊆ declarado», los tokens de cualquiera de los dos caben dentro y la
+puerta pasaba. De modo que hacían falta dos arreglos:
+
+- **La barra separa firmantes** y no cabe dentro de un nombre de persona. La conjunción «y» **no se
+  toca**: ya la trata el partidor con cautela, porque un Autor de este mismo Corpus la lleva dentro
+  del apellido y partir por ella lo rompería en dos.
+- **Un documento que declara más de un Autor no se siembra**, y se rechaza **nombrando a los dos**.
+  No se elige por cuenta propia: el sistema no puede saber cuál de los dos firmó qué frase, y
+  repartir sería inventarse la atribución que falta.
+
+Medido antes de cerrarlo, y con la sonda corregida dos veces —la primera solo miraba los documentos
+de un Autor por una mayúscula en el patrón—: de los noventa documentos versionados, **ninguno**
+declara más de un Autor. Ninguna Cita publicada está afectada.
+
+### Y un género más, medido en cero
+
+Se probó la **crónica** —el reportaje de un congreso—: 66 candidatas y **ninguna** publicable. Son
+nombres, fechas, hoteles y barcos: «Al día siguiente, en carro especial, salieron los delegados». El
+documento se retira y sus candidatas se rechazan, como el entremés de la 78.ª.
+
+Van tres géneros medidos en cero o casi: el entremés, la crónica y el índice. Y tres que rinden: el
+tratado moral, el ensayo y el periodismo polémico. **La diferencia no es el Autor ni el siglo: es si
+el texto está escrito para durar más que su ocasión.**
+
+`npx astro check` 0 errores; `npx vitest run` **2094/2094**; `npm run build` **1114 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1064 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

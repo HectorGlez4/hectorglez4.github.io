@@ -493,7 +493,18 @@ function trozosDeAutor(crudo: string): string[] {
     // Un enlace sin cerrar —`[[Autor:Antonio Machado`— no lo resuelve el patrón entero.
     .replace(/\[\[|\]\]/gu, '');
 
-  const porComa = llano.split(/\s*[;,]\s*|\s+&\s+/u).filter((trozo) => trozo.trim() !== '');
+  /*
+   * La **barra** separa firmantes y no cabe dentro de un nombre de persona. Se añadió en la
+   * 84.ª, al aparecer un manifiesto que declara «José Martí / M. Gómez»: sin ella el valor se
+   * leía como un solo nombre, y como la comparación es «Corpus ⊆ declarado», los tokens de
+   * cualquiera de los dos cabían dentro y la puerta pasaba.
+   *
+   * La conjunción «y» no se toca: la trata `partirPorConjuncion` con cautela porque un Autor
+   * de este mismo Corpus la lleva dentro del apellido.
+   */
+  const porComa = llano
+    .split(/\s*[;,/]\s*|\s+&\s+/u)
+    .filter((trozo) => trozo.trim() !== '');
   const trozos = porComa.flatMap(partirPorConjuncion);
   return trozos.length === 0 ? [llano] : trozos;
 }

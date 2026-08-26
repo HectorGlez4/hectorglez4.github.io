@@ -1,6 +1,8 @@
 ---
 texto: "De las covachas de Dakota, y la nación que por allá va alzándose, bárbara y viril, hay todo un mundo a las ciudades del Este, arrellanadas, privilegiadas, encastadas, sensuales, injustas."
 autor: "jose-marti"
+temas:
+  - "la-patria"
 slug: "jose-marti-de-las-covachas-de-dakota-y-la"
 procedencia:
   obra: "La verdad sobre los Estados Unidos"
