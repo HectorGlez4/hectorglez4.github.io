@@ -12,6 +12,7 @@
  */
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
+import Fuente from '../../components/Fuente.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
 import CompartirEnlace from '../../islands/CompartirEnlace.astro';
@@ -67,6 +68,14 @@ const canonica = new URL(`/cita/${cita.slug}`, Astro.site).href;
   <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />
   <article class="pagina contenedor">
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
+    {/*
+      * Va aquí y no dentro de `BloqueDeCita` a propósito: ese bloque lo comparten la
+      * portada y esta página, y la Cita del Día no es una superficie de comprobación —el
+      * documento debajo del titular de la portada sería aparato en el sitio donde menos
+      * pinta—. La Página de Cita sí: es la canónica, y a la que llega quien viene a
+      * verificar una atribución.
+      */}
+    <Fuente cita={cita} />
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />

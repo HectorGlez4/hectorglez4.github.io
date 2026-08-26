@@ -22,7 +22,7 @@ import {
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
 } from './umbrales.ts';
-import type { Procedencia } from './admision.ts';
+import type { FuenteDeCita, Procedencia } from './admision.ts';
 import { rutaDeColeccion } from './superficies.ts';
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
@@ -33,6 +33,20 @@ export interface Cita {
   autor: string;
   temas: string[];
   procedencia: Procedencia;
+  /**
+   * De dónde se tomó el texto — FR-2, y la única prueba que el visitante puede seguir.
+   *
+   * Hasta ahora el esquema la validaba y `aplanarCita` la dejaba caer aquí, así que el
+   * dato existía en `corpus/` y no llegaba a ninguna página. La consecuencia no era
+   * cosmética: la Página de Cita afirmaba una obra y un año sin ofrecer forma de
+   * comprobarlos, y quien viene precisamente a comprobar una atribución —que es casi todo
+   * el que llega a una web de citas desde un buscador— se iba a buscarlo a otra parte.
+   *
+   * Opcional porque lo es en el corpus: las Citas anteriores a la v3 se publicaron cuando
+   * la Procedencia se tecleaba y muchas no declaran Fuente. Ausente, no se enseña nada;
+   * nunca se inventa un documento, que es lo que FR-2 prohíbe.
+   */
+  fuente?: FuenteDeCita;
   aptaParaPortada: boolean;
 }
 
@@ -455,6 +469,7 @@ export function aplanarCita(entrada: EntradaCita): Cita {
     autor: entrada.data.autor.id,
     temas: entrada.data.temas.map((t) => t.id),
     procedencia: entrada.data.procedencia,
+    ...(entrada.data.fuente !== undefined ? { fuente: entrada.data.fuente } : {}),
     aptaParaPortada: entrada.data.aptaParaPortada,
   };
 }
