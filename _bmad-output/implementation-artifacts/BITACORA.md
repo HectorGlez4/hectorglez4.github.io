@@ -6283,3 +6283,59 @@ línea. Lo segundo lo habría cazado `astro check`; la prueba llegó antes.
 **`tools/lib/cantera.ts` sigue sin usarlo ninguna orden, y eso queda dicho como deuda y no como
 trabajo hecho.** Su cáscara pide red, y ampliar las excepciones de AD-22 es una decisión que no
 toca tomar hoy por comodidad.
+
+## 98.ª sesión — las Colecciones, contra el Corpus que creció bajo ellas
+
+Mismo tramo declarado y misma reserva. Esta vez fui por el segundo trabajo que el protocolo lista
+y que llevaba **cinco sesiones sin tocar**: curar Colecciones. Sus miembros son listas escritas a
+mano que no se actualizan solas, y desde la última curación el Corpus había crecido de 1122 a 1191
+Citas —casi todas de dos Autores nuevos—.
+
+### La que más se había quedado atrás, y por qué
+
+Una Colección de **cuatro mujeres** tenía este reparto: 23 Citas de una, 7 de otra, 3 de la
+tercera y **1** de la cuarta. Y las 67 Citas nuevas eran justo de dos de esas cuatro. Una Colección
+que se llama por sus cuatro y que en la práctica es de una sola no está cumpliendo su criterio.
+
+Antes de asignar nada leí su criterio entero y sus miembros, y de ahí salió la regla que gobernó la
+selección: **no es «todo lo que escribieron cuatro autoras»** —eso ya son sus páginas de Autor y no
+merecería página aparte—, sino lo que dicen de **su condición y su derecho a saber**, que es lo que
+hacen los miembros que ya tenía. Por eso quedaron fuera Citas suyas excelentes que hablan de otra
+cosa: «Hay más libros que arenas tiene el mar» es magnífica y no entra, porque va de literatura y
+no de lo que a esta Colección la hace una Colección.
+
+Resultado: **34 → 54 miembros**, y el reparto pasa de 23-7-3-1 a 23-22-6-3.
+
+### Y la trampa de siempre, otra vez rechazada
+
+«El silencio es sagrado de la cordura» —cuándo conviene no hablar— tenía una candidata que la
+rozaba: «No puede llamarse armonía el silencio de la mujer, que si no tiene una palabra para la
+contradicción, tampoco la halla para el consejo». Comparte la palabra y **dice lo contrario del
+criterio**: es una acusación contra el silencio impuesto, no un elogio del callar oportuno.
+Fuera. Van cuatro veces que se rechaza una de esta forma, y cada vez es más fácil de reconocer.
+
+### Lo demás, y un lote que la orden se negó a escribir a medias
+
+Cinco Colecciones más contra las Citas nuevas de cortesía, amistad, educación y escasez:
+
+| Colección | antes | después |
+|---|---|---|
+| cuatro-mujeres | 34 | **54** |
+| amigos-de-los-que-fiarse | 34 | **37** |
+| elogio-de-lo-escaso | 32 | **35** |
+| los-escollos-del-trato | 26 | **30** |
+| saber-para-ser-libre | 27 | **30** |
+| cada-uno-es-hijo-de-sus-obras | 27 | **29** |
+
+**+35 miembros en total**, de 297 a 332 sumando las dieciséis.
+
+En medio, un error mío que la herramienta atajó bien: atribuí una Cita al Autor equivocado al
+copiar el slug, y `coleccion asignar` respondió «no se ha asignado ninguna: el lote se escribe
+entero o no se escribe». Media asignación habría sido peor que ninguna, y no hubo que deshacer
+nada.
+
+Puerta completa en verde, con `playwright` incluido porque este tramo toca superficie web:
+`astro check` 0 errores, **2162 pruebas de unidad**, `build`, **414 E2E**.
+
+**El tramo sigue sin alcanzarse, y van cinco sesiones diciéndolo**: 18 Autores, y eso solo se
+desbloquea con nombres o direcciones.
