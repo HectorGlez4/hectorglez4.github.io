@@ -171,6 +171,27 @@ const APARATO_DE_LA_FUENTE = [
    */
   /^\s*↑/u,
   /[\p{Ll}\p{Lu}]-$/u,
+  /*
+   * Novena forma, y **la que más produce de golpe**: la línea del índice de capítulos.
+   *
+   *     Capítulo I - De la penitencia que a imitación de Beltenebros principió y no concluyó
+   *     nuestro buen caballero don Quijote
+   *
+   * La página raíz de una obra con capítulos es su tabla de contenidos, y cada línea sale como
+   * candidata perfectamente formada. Un solo documento dio **sesenta**. Las escribió la Fuente al
+   * componer el índice, no el Autor al escribir la obra, y **la 11.2 las daría por buenas** porque
+   * están literales en el documento.
+   *
+   * Enseña además un límite de la heurística del tamaño: `ES_INDICE_POR_DEBAJO_DE`, en
+   * `tools/lib/cantera.ts`, distingue índice de texto por lo que pesa la página, y funciona
+   * mientras el índice sea escueto. Éste pesaba **8,2 KB** porque sus sesenta títulos son largos,
+   * así que pasó por texto. El tamaño no basta; lo que delata un índice es de qué están hechas
+   * sus líneas, y por eso la puerta va aquí y no allí.
+   *
+   * La forma es estrecha: palabra de división, su número —romano o árabe— y un separador. «Capítulo
+   * aparte merece…» y «En el capítulo III se demuestra…» siguen pasando, y hay pruebas de ello.
+   */
+  /^\s*(?:cap[íi]tulo|libro|parte|tomo|acto|escena)\s+[IVXLCDM\d]+\s*[-–—.:]/iu,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

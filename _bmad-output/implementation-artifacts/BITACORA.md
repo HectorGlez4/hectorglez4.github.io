@@ -6740,3 +6740,59 @@ Puerta completa en verde: `astro check` 0 errores, **2186 pruebas**, `build`, **
 despliegue de la 104.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores. Y el de Temas tampoco, con la razón medida arriba.
+
+## 106.ª sesión — sesenta candidatas de un índice, y el tamaño no bastaba para verlo
+
+Buscando prosa aforística en Autores con margen, un documento de 8,2 KB dio **60 candidatas de
+golpe**, todas bien formadas:
+
+    Capítulo I - De la penitencia que a imitación de Beltenebros principió y no concluyó nuestro
+    buen caballero don Quijote
+
+**El documento era el índice de la obra.** Novena forma de aparato, y la que más produce de una
+vez: cada línea de una tabla de contenidos sale como candidata perfecta, y todas son la trampa de
+siempre —la 11.2 las daría por buenas porque están literales; las escribió la Fuente al componer
+el índice, no el Autor al escribir la obra—.
+
+### Lo que enseña sobre una heurística mía
+
+`ES_INDICE_POR_DEBAJO_DE`, en `tools/lib/cantera.ts`, distingue índice de texto **por lo que pesa
+la página**, y funciona mientras el índice sea escueto. Éste pesaba 8,2 KB porque sus sesenta
+títulos son largos, así que pasó por texto y me mandó a recuperarlo.
+
+**El tamaño no basta: lo que delata un índice es de qué están hechas sus líneas.** Por eso la
+puerta va en `APARATO_DE_LA_FUENTE` y no en el umbral de la sonda —subir los 2 KB solo movería el
+punto donde falla, y bajarlos escondería capítulos cortos de verdad—. La forma es estrecha:
+palabra de división, número romano o árabe, y separador. «Capítulo aparte merece…» y «En el
+capítulo III se demuestra…» siguen pasando, y hay pruebas de las dos.
+
+Medido antes de escribirla, no después: **60 candidatas de 4981, y cero de las 1266 Citas
+publicadas.**
+
+### Comprobado de punta a punta
+
+El documento se retiró con sus 60, **se volvió a recuperar** y se pasó `extraer --seco` otra vez:
+
+    Candidatas en revisión: 0
+    Descartadas por ser aparato de la Fuente: 60
+
+De sesenta a cero. Luego se retiró de nuevo. No es la prueba de unidad diciendo que la expresión
+casa: es la tubería entera diciendo que ya no propone ninguna.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1266 | 1266 |
+| Formas de aparato cazadas | 8 | **9** |
+| Pruebas de unidad | 2186 | **2192** |
+| Documentos retirados | 7 | **8** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la
+105.ª verificado en vivo.
+
+**Sin Citas nuevas, y está bien que se diga así.** Lo que esta sesión deja no es Corpus sino una
+puerta que impide sesenta atribuciones falsas, y la constancia de que una heurística mía tenía un
+punto ciego que solo se ve con obras de índice largo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.
