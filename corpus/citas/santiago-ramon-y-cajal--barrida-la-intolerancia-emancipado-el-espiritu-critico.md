@@ -1,7 +1,9 @@
 ---
-texto: "Réplicas acres y violentas y silencios rencorosos reconocen casi siempre por causa nuestra falta de urbanidad y comedimiento al exponer y valorar el trabajo de los demás."
+texto: "Barrida la intolerancia, emancipado el espíritu crítico, la ciencia deberá surgir por sí misma como espontánea floración de la cultura y de la prosperidad material."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-replicas-acres-y-violentas-y-silencios-rencorosos"
+temas:
+  - "la-libertad"
+slug: "santiago-ramon-y-cajal-barrida-la-intolerancia-emancipado-el-espiritu-critico"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

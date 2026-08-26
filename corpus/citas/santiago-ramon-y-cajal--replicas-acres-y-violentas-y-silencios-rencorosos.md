@@ -1,7 +1,9 @@
 ---
-texto: "¡Qué más desea la flaca voluntad del estudioso o del profesor que poder cohonestar su pereza con la modesta cuanto desconsoladora confesión de mediocridad intelectual!"
+texto: "Réplicas acres y violentas y silencios rencorosos reconocen casi siempre por causa nuestra falta de urbanidad y comedimiento al exponer y valorar el trabajo de los demás."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-que-mas-desea-la-flaca-voluntad-del"
+temas:
+  - "la-palabra"
+slug: "santiago-ramon-y-cajal-replicas-acres-y-violentas-y-silencios-rencorosos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

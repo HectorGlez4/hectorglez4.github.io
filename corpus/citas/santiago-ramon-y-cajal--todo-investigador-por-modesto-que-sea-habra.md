@@ -1,7 +1,9 @@
 ---
-texto: "En presencia de un fenómeno insólito, el primer movimiento del ánimo es imaginar una hipótesis que dé razón de él y que lo subordine a alguna de las leyes conocidas."
+texto: "Todo investigador, por modesto que sea, habrá sentido alguna vez algo de aquella sobrehumana satisfacción que debió experimentar Colón al oír el grito de ¡Tierra!"
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-presencia-de-un-fenomeno-insolito-el"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-todo-investigador-por-modesto-que-sea-habra"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

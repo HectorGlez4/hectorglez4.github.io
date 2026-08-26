@@ -1,6 +1,8 @@
 ---
 texto: "No basta examinar; hay que contemplar: impregnemos de emoción y simpatía las cosas observadas; hagámoslas nuestras, tanto por el corazón como por la inteligencia."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-no-basta-examinar-hay-que-contemplar-impregnemos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

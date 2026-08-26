@@ -7001,3 +7001,50 @@ Puerta completa en verde: `astro check` 0 errores, **2206 pruebas**, `build`, **
 despliegue de la 109.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 111.ª sesión — antes de exprimir más, comprobar si hay algo mejor que exprimir
+
+Llevaba tres sesiones seguidas en el mismo Autor, así que antes de seguir miré si la Fuente nueva
+abre obra para los de **menos** Citas —que es lo que equilibra el Corpus en vez de concentrarlo—.
+
+**No la abre.** De los dos Autores de la cola que aparecen en Gutenberg, lo único disponible es
+narrativa costumbrista, cuyo rendimiento está medido en el 2 %. De un tercero no hay nada. Es un
+resultado negativo y por eso se escribe: la siguiente sesión no tiene que volver a buscarlo.
+
+Así que se hicieron las dos cosas que sí quedaban: **curar Colecciones**, que llevaban tres sesiones
+sin ver las Citas nuevas, y seguir leyendo.
+
+### Colecciones, doce miembros en seis
+
+| Colección | antes | después |
+|---|---|---|
+| saber-para-ser-libre | 38 | **41** |
+| el-yo-frente-a-la-muchedumbre | 33 | **35** |
+| prevenirse-en-la-prospera | 34 | **35** |
+| achaques-de-necedad | 31 | **33** |
+| cada-uno-es-hijo-de-sus-obras | 29 | **30** |
+| conocer-las-cosas-en-su-sazon | 22 | **25** |
+
+Dos encajes que merecen mención por lo exactos: «ninguna empresa llega a plena sazón» en la
+Colección cuyo criterio es **que el acierto tiene hora**, y «los impugnadores no defienden una
+doctrina, sino su propia infalibilidad» en la de los **achaques de necedad**.
+
+### Y ocho Citas más
+
+**8 Citas** en cinco Temas, del mismo libro. Los descartes, todos por criterios ya escritos:
+coyuntura española con nombres propios, autoridad ajena citada —Descartes, Becquerel, Salillas— y
+el grupo sobre la esposa que la 110.ª ya documentó.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1321 | **1329** |
+| Citas de ese Autor | 50 | **58** |
+| Miembros de Colección | 340 | **364** |
+| Legibles de este libro aún sin leer | 433 | **424** |
+
+Puerta completa en verde: `astro check` 0 errores, **2206 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 110.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

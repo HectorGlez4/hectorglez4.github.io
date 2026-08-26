@@ -1,7 +1,9 @@
 ---
-texto: "Barrida la intolerancia, emancipado el espíritu crítico, la ciencia deberá surgir por sí misma como espontánea floración de la cultura y de la prosperidad material."
+texto: "¡Qué más desea la flaca voluntad del estudioso o del profesor que poder cohonestar su pereza con la modesta cuanto desconsoladora confesión de mediocridad intelectual!"
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-barrida-la-intolerancia-emancipado-el-espiritu-critico"
+temas:
+  - "el-trabajo"
+slug: "santiago-ramon-y-cajal-que-mas-desea-la-flaca-voluntad-del"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

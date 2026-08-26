@@ -1,7 +1,9 @@
 ---
-texto: "Todo investigador, por modesto que sea, habrá sentido alguna vez algo de aquella sobrehumana satisfacción que debió experimentar Colón al oír el grito de ¡Tierra!"
+texto: "¿Habrá alguno tan menguado de sindéresis que no repare que allí donde los principios o los hechos son descubiertos brotan también, por modo inmediato, las aplicaciones?"
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-todo-investigador-por-modesto-que-sea-habra"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-habra-alguno-tan-menguado-de-sinderesis-que"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
