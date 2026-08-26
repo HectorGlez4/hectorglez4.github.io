@@ -1,6 +1,8 @@
 ---
 texto: "Breve es la vida; antes ninguna en aquel que olvida lo pasado, y desperdicia lo presente, y desprecia lo por venir."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-tiempo"
 slug: "francisco-de-quevedo-breve-es-la-vida-antes-ninguna-en"
 procedencia:
   obra: "Marco Bruto"

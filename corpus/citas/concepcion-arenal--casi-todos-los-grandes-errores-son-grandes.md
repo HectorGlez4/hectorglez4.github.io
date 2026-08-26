@@ -1,6 +1,8 @@
 ---
 texto: "Casi todos los grandes errores son grandes verdades exageradas ó torcidas, y este origen, que hasta cierto punto los ennoblece en la esfera moral, los hace más peligrosos en la práctica."
 autor: "concepcion-arenal"
+temas:
+  - "la-verdad"
 slug: "concepcion-arenal-casi-todos-los-grandes-errores-son-grandes"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

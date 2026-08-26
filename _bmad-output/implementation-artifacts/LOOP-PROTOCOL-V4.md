@@ -327,3 +327,51 @@ De los Autores admitidos con **margen amplio bajo el techo**, se comprobó uno p
 Entre las páginas disponibles de un Autor admitido hay un **panfleto antisemita**. No se recuperó y
 no se recuperará: ninguna Cita de ahí cabe en este sitio. Queda escrito para que no se lea como un
 descuido ni se «arregle» en una sesión futura.
+
+
+## Apéndice medido — sembrar hacia un Tema, y por qué casi nunca sale (126.ª sesión)
+
+El apéndice anterior midió el rendimiento **por género**. Este mide el rendimiento **por asunto**,
+que es lo que hace falta cuando la meta que queda abierta es la de Temas y no la de Citas.
+
+### La cantera es mucho mayor de lo que decía la cifra anterior
+
+El apéndice de la 123.ª anota «510 candidatas legibles sin leer», y esa cifra era de **dos libros
+concretos**. Medida sobre todo el conjunto en revisión, con el filtro de siempre —conectores fuera,
+aparato de la Fuente fuera, longitud entre 80 y 220— son **3415 candidatas legibles y en rango**.
+
+### Contar por asunto engaña en los dos lados, y ya está cuantificado
+
+**Del lado publicado**, un asunto necesita del orden de **30-35 coincidencias por regex para dar 15
+Citas reales**. Las que se caen lo hacen de tres maneras que conviene distinguir, porque la primera
+no se arregla leyendo más:
+
+· **el Tema que ya existe con otro nombre** —45 coincidencias de las que 26 ya estaban en un mismo
+  Tema publicado—;
+· **el regex flojo** —66 coincidencias que bajan a 8 al quitar `\bsolo\b`; 38 que bajan a 24 al
+  dejar el sustantivo y quitar el adjetivo—;
+· **la palabra que aparece al paso**, que es el resto.
+
+**Del lado de la cantera**, el engaño es el mismo con otra cara: el asunto aparece en la frase pero
+**la frase cuenta una historia**. Cuatro asuntos leídos de punta a punta, 232 candidatas:
+
+| asunto | cantera | leídas | firmes | rendimiento |
+|---|---|---|---|---|
+| A | 67 | 54 | 2 | **4 %** |
+| B | 45 | 45 | 6 | **13 %** |
+| C | 59 | 20 | 2 | **10 %** |
+| D | 61 | 18 | 2 | **11 %** |
+
+El que prometía la cantera más limpia fue el peor: resultó **narrativa entera**. Lo que descarta una
+candidata, una y otra vez, son tres cosas y no el tema: **empieza remitiendo** («Tal es…», «Éste
+es…», «Muchas puede haber…»), **cita a otro** («Ya Locke notó…», «Yo os digo con Renan…»), o **trae
+nombre propio y anécdota**.
+
+### La conclusión, que es una cuenta cerrada
+
+Sumando lo publicado y lo que la cantera puede dar, **ninguno de los cuatro asuntos llega a 15**.
+Con el Tema abierto en la 125.ª son **18 de 24**, y los seis que faltan **no salen de aquí**: salen
+de Autores nuevos, que es la decisión reservada. No se baja el umbral y no se estiran los juicios de
+pertenencia, que es bajarlo por otra puerta.
+
+Queda medido para que ninguna sesión futura repita las cuatro lecturas creyendo que no se han hecho.

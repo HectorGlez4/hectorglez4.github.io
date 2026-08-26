@@ -1,6 +1,8 @@
 ---
 texto: "Piden las edades sus empleos: compete el valor a la mocedad y la prudencia a la vejez."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-piden-las-edades-sus-empleos-compete-el"
 procedencia:
   obra: "El político"

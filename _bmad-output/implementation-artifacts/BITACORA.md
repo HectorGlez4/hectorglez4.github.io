@@ -7861,3 +7861,85 @@ y su texto íntegro.
 
 **El tramo declarado sigue sin alcanzarse**: 18 Autores, y a quién se admite no lo decide el bucle.
 Lo que sí se movió hoy es la meta que no dependía de esa decisión.
+
+
+## 126.ª sesión — cuatro asuntos leídos enteros, ninguno abre Tema, y el despliegue no arranca
+
+La 125.ª abrió un Tema reordenando lo publicado y dejó la pregunta obvia: ¿se puede repetir? Esta
+sesión la responde midiendo, y la respuesta es **no**.
+
+### Sembrar hacia un asunto: medido en cuatro, fallido en cuatro
+
+Se contó la cantera por asunto —no por Autor, que es como se contaba hasta ahora— y salieron
+**3415 candidatas legibles y en rango**, muy por encima de las «510» que anotaba el apéndice de la
+123.ª, que eran de dos libros concretos.
+
+Cuatro asuntos leídos, **232 candidatas**:
+
+| asunto | cantera | leídas | firmes | rendimiento |
+|---|---|---|---|---|
+| A | 67 | 54 | 2 | **4 %** |
+| B | 45 | 45 | 6 | **13 %** |
+| C | 59 | 20 | 2 | **10 %** |
+| D | 61 | 18 | 2 | **11 %** |
+
+**El que prometía la cantera más limpia fue el peor.** Sesenta y siete candidatas, y al leerlas
+resultó narrativa entera: el asunto está en la frase, pero la frase cuenta una historia. Es el mismo
+engaño que la 125.ª midió del lado publicado, ahora del lado de la cantera, y ahora cuantificado en
+los dos lados.
+
+Lo que descarta una candidata, una y otra vez, son **tres formas y no el tema**: empieza remitiendo
+—«Tal es…», «Éste es…», «Muchas puede haber…»—, cita a otro —«Ya Locke notó…», «Yo os digo con
+Renan…»—, o trae nombre propio y anécdota.
+
+Sumando lo publicado y lo que la cantera puede dar, **ninguno de los cuatro llega a 15**. Los seis
+Temas que faltan no salen de aquí: salen de Autores nuevos, que es la decisión reservada. No se baja
+el umbral y no se estiran los juicios de pertenencia, que sería bajarlo por otra puerta.
+
+### Nueve Citas que no abren nada, y se publican igual
+
+De las lecturas salieron nueve tesis limpias. No abren Tema y se publican de todos modos, porque son
+buenas y porque acercan sus asuntos para una sesión futura. Se apartó una sobre el error que usa
+«afemina» como sinónimo de debilitarse: es de su época y no se gana nada con ella.
+
+### El despliegue no arranca, y esto no es del bucle
+
+El push de la 125.ª llegó al remoto —comprobado con `git ls-remote`— y su ejecución murió en
+**`startup_failure`**. El run del push no admite reintento, así que se relanzó a mano dos veces más:
+**tres arranques fallidos seguidos sobre el mismo ref**.
+
+Lo que se comprobó antes de tocar nada:
+
+· el fichero del flujo es **el mismo** que en el commit que desplegó bien media hora antes —el
+  commit solo toca `corpus/` y documentos—;
+· hay **un solo** flujo en `.github/workflows`;
+· Actions está **habilitado**, con todas las acciones permitidas, y Pages sigue en `build_type:
+  workflow`;
+· la API **no expone motivo**: el trabajo aparece creado, sin pasos y sin conclusión.
+
+El sitio en vivo sigue sano y sirviendo lo de la 124.ª: portada 200, y el Tema nuevo 404 —que es lo
+que debe devolver algo que no se ha desplegado—. **Un arranque fallido no ha tocado nada.**
+
+Y el vigilante hizo su trabajo: dijo `SIN RUN` en vez de leer el «success» del commit anterior, que
+es exactamente el fallo que se arregló en la 122.ª. Se le añadió un hermano, `esperar-run.sh`, que
+espera **por identificador de ejecución**, porque el run relanzado a mano ya no lleva el SHA del push
+como clave de búsqueda.
+
+**No se ha reintentado a ciegas más veces ni se ha creado ningún ref en el remoto para diagnosticar.**
+El experimento que faltaba es el paso normal del bucle: empujar esta sesión. Si su ejecución también
+muere al arrancar, no era este commit.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1420 | **1429** |
+| Temas publicados | 18 | **18** de 24 |
+| Candidatas leídas | — | **232** en cuatro asuntos |
+| Cantera legible medida | 510 (de dos libros) | **3415** (del conjunto) |
+
+Puerta completa en verde y consultada por su código de salida: `astro check` 0 errores, 2253
+pruebas, `build`, E2E.
+
+**Dos tramos quedan cerrados por la misma decisión**: los Autores porque se reserva, y ahora también
+los Temas, porque medido cuatro veces no salen sin ella.

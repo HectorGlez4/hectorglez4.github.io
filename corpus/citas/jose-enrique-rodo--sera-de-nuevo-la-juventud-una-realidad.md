@@ -1,6 +1,8 @@
 ---
 texto: "¿Será de nuevo la juventud una realidad de la vida colectiva, como lo es de la vida individual?"
 autor: "jose-enrique-rodo"
+temas:
+  - "la-vida"
 slug: "jose-enrique-rodo-sera-de-nuevo-la-juventud-una-realidad"
 procedencia:
   obra: "Ariel"

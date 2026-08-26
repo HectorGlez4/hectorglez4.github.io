@@ -1,6 +1,8 @@
 ---
 texto: "Si acierto, ¿quién aplaudirá?; y si me equivoco, ¿quién me corregirá y me alentará para proseguir?"
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-si-acierto-quien-aplaudira-y-si-me"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

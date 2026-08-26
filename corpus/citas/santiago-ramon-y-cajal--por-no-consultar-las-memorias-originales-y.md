@@ -1,6 +1,8 @@
 ---
 texto: "Por no consultar las memorias originales y fiarse de obras de conjunto, ¡cuántos principiantes caen en el error de considerar ciertos ajenos y antiguos descubrimientos como fruto de propia labor!"
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-por-no-consultar-las-memorias-originales-y"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -1,6 +1,8 @@
 ---
 texto: "Allá, en lo hondo del alma de cada uno, duermen las tendidas aguas de la memoria."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-tiempo"
 slug: "jose-enrique-rodo-alla-en-lo-hondo-del-alma-de"
 procedencia:
   obra: "Parábolas"
