@@ -6371,3 +6371,48 @@ Medido además, con el alcance que tiene: **19 de las 21 pertenecen a Autores qu
 documentos versionados** —solo dos no—. Eso **no** prueba que la obra concreta de cada una esté
 versionada; es una cota superior, y se dice así en vez de convertirla en una promesa. Lo que sí
 queda probado es el caso que se leyó entero.
+
+## 99.ª sesión — la segunda obra del mismo Autor, y por qué no empujé al terminar
+
+Mismo tramo y misma reserva. Se sembró de la **segunda obra** del Autor de la cola, cuyos cinco
+capítulos quedaron sondeados en la 96.ª: cuatro recuperados, **76 candidatas**, de las que el
+filtro apartó 20 de la lectura y se leyeron 56.
+
+**11 Citas** en seis Temas: el saber (3), la justicia (2), la verdad (2), la virtud (2), el trabajo
+(1), la libertad (1). Y de ellas, cinco entraron en la Colección de las cuatro mujeres —que sube a
+**59**— y tres en la de la instrucción como condición de la libertad, que sube a **33**.
+
+### Un motivo de descarte que no es aparato y conviene no confundir
+
+Varias candidatas son **ítems numerados de una enumeración**: «1.ª Porque hoy, aunque no se
+exprese así…», «2.ª Porque en todo es regla de razón empezar por lo más fácil…». Se descartan, y
+la razón importa: **no son aparato de la Fuente**. Las escribió el Autor y son suyas enteras. Lo
+que pasa es que fuera de su lista no dicen nada, igual que «De allí que…» fuera de su párrafo.
+
+Es la diferencia entre una puerta y un juicio, y meterlas en `APARATO_DE_LA_FUENTE` habría sido
+confundir **estilo con aparato**: la puerta se dispararía sobre cualquier enumeración de cualquier
+Autor, incluidas las que sí se sostienen. Se quedan sin regla, descartadas a mano y dicho aquí.
+
+### Y una decisión de proceso, chica pero repetida
+
+Van **dos despliegues cancelados** esta noche, y no por fallo: GitHub cancela el anterior cuando
+llega un push nuevo. Cada cancelación en sí no pierde nada —el despliegue siguiente lleva todo lo
+anterior— pero encadenadas significan que **nada llega a producción mientras yo siga empujando**.
+
+Así que a partir de aquí el orden es: hacer el trabajo, pasar la puerta, **commit local**, y
+empujar solo cuando el despliegue en vuelo haya terminado. El commit no dispara nada; solo el push.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1191 | **1202** |
+| Citas del Autor sembrado | 50 | **61** |
+| Documentos versionados | 119 | **123** |
+| Miembros de Colección | 332 | **340** |
+| Pruebas de unidad | 2162 | **2166** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**.
+
+**El tramo sigue sin alcanzarse, y van seis sesiones diciéndolo**: 18 Autores, y eso pide nombres o
+direcciones.
