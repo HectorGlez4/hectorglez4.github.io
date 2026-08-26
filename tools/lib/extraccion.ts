@@ -148,6 +148,29 @@ const APARATO_DE_LA_FUENTE = [
   /\bofr[ée]cel[oa] su autor\b/i,
   /\bofend[ae]n? las buenas costumbres\b/i,
   /\bcontrario a nuestra santa fe\b/i,
+  /*
+   * Séptima y octava forma, las dos de un artículo de prensa del XIX y las dos con la trampa de
+   * siempre: **la 11.2 las daría por buenas**, porque están literales en el documento.
+   *
+   *   · `↑` es el retorno de una nota al pie, y arrastra la línea entera detrás:
+   *     «↑ Almanaque de Galicia, para uso de la juventud elegante y de buen tono». Sale como
+   *     candidata perfectamente formada y es la bibliografía de una nota, no una frase del Autor.
+   *     Solo cuenta **al principio de la línea**: en medio, la flecha es del Autor y se respeta.
+   *
+   *   · El guion con que el impresor cortaba la palabra al acabar el renglón, que la
+   *     transcripción conserva: «…no son en tales ocasio-». La sentencia queda cercenada.
+   *     La forma es estrecha a propósito —guion **pegado a letras** y en final de frase— para que
+   *     un guion de inciso («Y entonces calló —») y un compuesto («franco-alemán») sigan pasando.
+   *
+   * Se descarta la candidata entera y **no se recompone la palabra**: unirla sería reconstruir
+   * texto que la Fuente no da junto —NFR-12— y dejaría una Cita que ya no aparece literal en su
+   * documento, así que la 11.2 la rechazaría después.
+   *
+   * Medido antes de escribirlas: **una candidata en revisión de cada forma, de 4265, y cero de
+   * las 1191 Citas publicadas**. Se llega a tiempo, como con el folio.
+   */
+  /^\s*↑/u,
+  /[\p{Ll}\p{Lu}]-$/u,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

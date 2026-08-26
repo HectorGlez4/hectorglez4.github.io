@@ -6,7 +6,7 @@ import {
   type ColeccionParaHuecos,
   type TemaParaHuecos,
 } from '../../src/lib/huecos.ts';
-import { objetivoDeMeta, verMeta } from '../../src/lib/meta.ts';
+import { citasQueCabenDe, objetivoDeMeta, verMeta } from '../../src/lib/meta.ts';
 import {
   META_AUTORES,
   META_CITAS_PUBLICADAS,
@@ -323,5 +323,79 @@ describe('Meta de Corpus — el censo de Autores cuenta los que publican, no los
 
   it('un Corpus sin Citas no declara ningún Autor alcanzado, aunque haya ficheros', () => {
     expect(meta([], temas(1), autoresEquilibrados(6)).autores.alcanzado).toBe(0);
+  });
+});
+
+
+/**
+ * Cuántas Citas más cabe sembrar de un Autor sin romper el techo — Historia 15.3.
+ *
+ * `verMeta` ya sabe la aritmética contraria: cuántas Citas **de otros** faltan para diluir a
+ * quien excede. Falta la que decide dónde invertir una sesión de sembrado: **cuántas propias
+ * caben todavía**. La he calculado a mano en un guion de usar y tirar tres sesiones seguidas, y
+ * el protocolo apoya en ella una regla —«el margen está donde el Autor tiene pocas Citas, no
+ * donde tiene mucha obra»—, así que merece estar aquí, probada y al lado de su hermana. Dos
+ * aritméticas del mismo techo en sitios distintos acaban divergiendo.
+ *
+ * Sale de despejar `(citas + n) / (total + n) ≤ techo`, que da
+ * `n ≤ (techo·total − citas) / (1 − techo)`. Lo que importa de la fórmula es que **el corpus
+ * crece con lo que se siembra**: sembrar de un Autor sube su numerador y también el denominador
+ * de todos, y por eso caben más de las que una regla de tres ingenua diría.
+ */
+describe('Meta de Corpus — cuántas Citas propias caben bajo el techo', () => {
+  it('de un Autor sin ninguna Cita caben casi tantas como Citas tiene el Corpus', () => {
+    // Con el techo en el 15 %, un Autor a cero puede llegar a ser el 15 % de un Corpus mayor.
+    const caben = citasQueCabenDe(0, 1000);
+
+    expect(caben).toBeGreaterThan(150);
+    expect((0 + caben) / (1000 + caben)).toBeLessThanOrEqual(TECHO_CONCENTRACION_POR_AUTOR / 100);
+  });
+
+  it('de uno que ya está justo en el techo no cabe ninguna', () => {
+    const total = 1000;
+    const enElTecho = Math.floor((TECHO_CONCENTRACION_POR_AUTOR / 100) * total);
+
+    expect(citasQueCabenDe(enElTecho, total)).toBe(0);
+  });
+
+  it('de uno que lo excede tampoco, y no devuelve un número negativo', () => {
+    // Un margen negativo se sumaría mal en cualquier cuenta que lo use: aquí el suelo es cero.
+    expect(citasQueCabenDe(500, 1000)).toBe(0);
+  });
+
+  it('nunca propone una siembra que rompa el techo, para cualquier reparto', () => {
+    /*
+     * La propiedad es «sembrar no mete a nadie por encima del techo», y **no** «después de
+     * sembrar todos están por debajo»: hay repartos que ya lo exceden antes de tocar nada —siete
+     * Citas en un Corpus de diez son el 70 %—, y ahí lo correcto es no sembrar ninguna, no
+     * arreglar por arte un exceso que ya venía. La primera redacción de esta prueba pedía lo
+     * segundo y se puso roja con razón.
+     */
+    const techo = TECHO_CONCENTRACION_POR_AUTOR / 100;
+
+    for (const total of [10, 137, 1184, 5000]) {
+      for (const citas of [0, 1, 7, 50, 163]) {
+        const caben = citasQueCabenDe(citas, total);
+
+        if (citas / total > techo) {
+          expect(caben, `${citas} de ${total} ya excede`).toBe(0);
+          continue;
+        }
+
+        const despues = (citas + caben) / (total + caben);
+        expect(despues, `${citas} de ${total} + ${caben}`).toBeLessThanOrEqual(techo);
+      }
+    }
+  });
+
+  it('y una más rompería el techo: el margen es el mayor que cabe, no uno prudente', () => {
+    // Sin esto, la función podría devolver siempre 0 y pasar todas las pruebas de arriba.
+    const techo = TECHO_CONCENTRACION_POR_AUTOR / 100;
+
+    for (const [citas, total] of [[0, 1000], [7, 1141], [50, 1184]]) {
+      const unaMas = citasQueCabenDe(citas, total) + 1;
+
+      expect((citas + unaMas) / (total + unaMas), `${citas} de ${total}`).toBeGreaterThan(techo);
+    }
   });
 });

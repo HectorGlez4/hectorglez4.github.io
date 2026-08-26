@@ -6178,3 +6178,86 @@ y reintento— y degrada diciendo qué obra no pudo mirar, en vez de matar el in
 **Esta sonda merece estar en `tools/` con prueba, y no lo está.** La he reescrito tres veces en tres
 sesiones y las tres ha tenido un defecto distinto. Queda dicho aquí como trabajo pendiente, no como
 algo hecho.
+
+## 97.ª sesión — la cuenta que fallaba tres veces deja de vivir en un guion de usar y tirar
+
+Empecé pagando la deuda que llevaba **tres sesiones declarando y sin hacer**, porque «decir y
+aplazar» es justo el patrón que este tramo del bucle está rompiendo.
+
+### Lo que AD-22 obligó a hacer mejor
+
+La tentación era meter la sonda de cantera entera en `tools/`. **AD-22 lo impide**: la red vive
+solo en la cáscara exterior, con tres excepciones escritas, y su propia prueba dice que ampliarlas
+«es una decisión». No la tomé.
+
+Y la restricción resultó tener razón por un motivo que yo no había visto: **lo que ha fallado las
+tres veces es la cuenta, nunca la descarga**. Separadas, lo frágil quedó probado sin tocar una
+decisión de arquitectura. `tools/lib/cantera.ts` no pide nada y lleva ocho pruebas, dos de ellas
+regresiones de los defectos reales:
+
+· cruzar **por dirección y no por nombre de obra** —el defecto de la 62.ª, que costó doce sesiones
+  repitiendo que la cantera estaba agotada cuando no lo estaba—;
+· contar una obra **por sus capítulos y no por su índice** —el de la 96.ª: la página raíz pesa 1 KB
+  y nunca se versiona, así que una obra con ocho de catorce capítulos sembrados salía como intacta—.
+
+También se subió al producto la aritmética que llevaba tres sesiones calculando a mano en un guion:
+**`citasQueCabenDe(citas, total)`**, en `src/lib/meta.ts`, al lado de su hermana —la que dice
+cuántas Citas de otros faltan para diluir a quien excede—. Dos aritméticas del mismo techo en
+sitios distintos acaban divergiendo. Lo que la fórmula recoge y una regla de tres ingenua pierde es
+que **el Corpus crece con lo que se siembra**: de un Autor a cero caben ~176 en un Corpus de 1000,
+no 150.
+
+**Y una de esas pruebas me corrigió a mí.** Escribí «tras sembrar, nadie queda por encima del
+techo», y se puso roja con siete Citas en un Corpus de diez: ese reparto **ya** estaba al 70 %
+antes de tocar nada. La propiedad correcta es que sembrar no meta a nadie por encima, no que
+arregle un exceso que ya venía. Cambié la prueba, no la función.
+
+### La siembra, y un rendimiento que confirma lo medido
+
+Se sembró del Autor de la cola con prosa sin recuperar. **De 55 candidatas, 7 Citas**: un 13 % muy
+por debajo del 40 % largo que dio el ensayo de las dos sesiones anteriores. No es una decepción,
+es la confirmación de la escala de géneros: esto es **carta narrativa con diálogo**, no tratado.
+
+**Dos documentos retirados, los dos por su razón y dicha:**
+
+· uno lo paró **la puerta de legibilidad al 3,3 %** de OCR roto. Antes de retirarlo comprobé si la
+  puerta acertaba **por la razón correcta**: este Autor mezcla castellano y gallego, y si la puerta
+  confundiera una lengua con OCR roto sería un defecto que afectaría a muchos documentos. No lo es
+  —el cuerpo trae «beile>;as», «iiaranj',><», «í>o>-co^»: daño real— y de paso quedó comprobado que
+  la medida se hace sobre el **cuerpo**, no sobre el encabezado de wikitexto. Dos sospechas mías,
+  las dos infundadas, las dos comprobadas en vez de supuestas;
+· el otro no daba ni una Cita, y **lo cazó el test de FR-23**, no yo. `tools/retirar.ts` arrastró
+  sus nueve candidatas con él, que es exactamente el paso que el gesto manual olvidaba dos de cada
+  cinco veces.
+
+### Dos formas nuevas de aparato, la séptima y la octava
+
+Leyendo las candidatas aparecieron dos que ninguna puerta cazaba, **las dos con la trampa de
+siempre: la 11.2 las daría por buenas porque están literales en el documento**.
+
+· **`↑`**, el retorno de la nota al pie, que arrastra la línea entera detrás: «↑ Almanaque de
+  Galicia, para uso de la juventud elegante y de buen tono». Candidata perfectamente formada y
+  bibliografía de una nota, no frase del Autor.
+· **La palabra partida por el final de renglón**, que la transcripción conserva con su guion:
+  «…no son en tales ocasio-».
+
+Se descarta la candidata entera y **no se recompone la palabra**: unirla sería reconstruir texto
+que la Fuente no da junto. Las formas son estrechas a propósito, y hay pruebas de que un guion de
+inciso, un compuesto «franco-alemán» y una flecha en medio de la frase siguen pasando.
+
+**Medido antes de escribir la puerta**, no afirmado: **una candidata de cada forma de 4265, y cero
+de las 1191 Citas publicadas**. Se llega a tiempo, como con el folio.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1184 | **1191** |
+| Citas del Autor sembrado | 10 | **17** |
+| Formas de aparato cazadas | 6 | **8** |
+| Pruebas de unidad | 2135 | **2158** |
+| Techo de concentración | 13,8 % | **13,7 %** |
+
+Puerta completa en verde, con `astro check` 0 errores, `build` y **414 E2E**.
+
+**El tramo sigue sin alcanzarse**: 18 Autores, y eso pide nombres o direcciones.

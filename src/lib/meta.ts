@@ -178,6 +178,32 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
  * decide qué está por debajo tiene un solo dueño, y una segunda cuenta podría discrepar de
  * la primera el día que el umbral se mueva.
  */
+/**
+ * Cuántas Citas más cabe sembrar de un Autor sin que rompa el techo de concentración.
+ *
+ * La aritmética contraria —cuántas Citas **de otros** faltan para diluir a quien ya excede— vive
+ * dentro de `verMeta`, y es la que el informe enseña. Ésta es la que decide **dónde invertir una
+ * sesión de sembrado**, y el protocolo apoya en ella una regla: «el margen está donde el Autor
+ * tiene pocas Citas, no donde tiene mucha obra».
+ *
+ * Sale de despejar `(citas + n) / (total + n) ≤ techo`:
+ *
+ *     n ≤ (techo · total − citas) / (1 − techo)
+ *
+ * Lo que importa de la fórmula, y lo que una regla de tres ingenua se pierde, es que **el Corpus
+ * crece con lo que se siembra**: cada Cita sembrada sube el numerador de ese Autor y también el
+ * denominador de todos. Por eso de un Autor a cero caben unas 176 en un Corpus de 1000, no 150.
+ *
+ * Devuelve 0 —nunca un negativo— para quien ya está en el techo o lo excede: un margen negativo
+ * se sumaría mal en cualquier cuenta que lo use.
+ */
+export function citasQueCabenDe(citasDelAutor: number, totalDelCorpus: number): number {
+  const techo = TECHO_CONCENTRACION_POR_AUTOR / 100;
+  const caben = (techo * totalDelCorpus - citasDelAutor) / (1 - techo);
+
+  return Math.max(0, Math.floor(caben));
+}
+
 export function verMeta(
   citas: CitaParaHuecos[],
   temas: TemaParaHuecos[],
