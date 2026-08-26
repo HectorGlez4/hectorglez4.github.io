@@ -6488,3 +6488,40 @@ estado terminal, no solo el éxito: un filtro que solo mire `success` calla igua
 cancelación o un cuelgue.
 
 Lo que sí quedó verificado de verdad, ya con el run correcto, va abajo.
+
+## 101.ª sesión — la cantera más pobre medida hasta hoy, dicha como tal
+
+Con la obra del Autor anterior agotada, se fue al siguiente de la cola: dos artículos suyos en
+prosa, 28 y 18 KB, **130 candidatas**, 35 apartadas por el filtro, **95 leídas**.
+
+**Dos Citas.** Un 2 %, y es la cantera más pobre que este bucle ha medido —por debajo del 13 % de
+la carta narrativa, del 16 % del tratado y del 40 % largo del ensayo—. La causa está a la vista en
+las candidatas: es **costumbrismo narrativo con diálogo dialectal transcrito**, y una página entera
+sale así:
+
+    A mí no me abastaron todavía coatro bayules bien atacaos, y tiven que dejar en cas de un
+    campañero varios afeutos, que me mandará por embarque...
+
+Eso es castellano deformado a propósito por la Autora para retratar a un personaje. Es texto suyo y
+legítimo, y no es una Cita ni puede serlo. La puerta del idioma lo deja pasar con razón —está en
+castellano— y el juicio tiene que ponerlo la lectura.
+
+**No es un fracaso: es la medida.** Y confirma con números la regla que el protocolo enuncia y que
+la 96.ª ya apuntaba: cantera grande no es cantera útil. Un documento de 28 KB dio **cero**, y se
+retiró con sus 54 candidatas.
+
+Las dos que sí valen son las que miran al personaje desde fuera —el desarraigo del que vuelve sin
+su lengua, y el retrato del fatuo que desprecia lo suyo—, las dos al Tema de la patria.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1219 | **1221** |
+| Documentos versionados | 129 | **130** |
+| Documentos retirados | 4 | **5** |
+| Rendimiento del género | — | **2 %, el más bajo medido** |
+
+Puerta completa en verde: `astro check` 0 errores, **2173 pruebas**, `build`, **414 E2E**.
+
+**El tramo sigue sin alcanzarse**: 18 Autores, y eso pide nombres o direcciones.
