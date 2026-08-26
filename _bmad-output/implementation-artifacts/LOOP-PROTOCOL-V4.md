@@ -123,6 +123,24 @@ Línea base al abrir la v4 (24/08/2026): `astro check` 0 errores / 182 ficheros;
 **Una puerta que tarda un minuto no se salta.** Si el bucle empieza a saltarse puertas «por
 tiempo», el fallo es del bucle.
 
+**Antes de diagnosticar un despliegue que no arranca, mirar si el servicio está en pie.**
+
+```
+curl -s https://www.githubstatus.com/api/v2/components.json
+```
+
+La 126.ª vio tres `startup_failure` seguidos sobre el mismo ref y luego un push que **no generó
+ejecución ninguna**. Se comprobó, en este orden: que el fichero del flujo era idéntico al del commit
+que había desplegado bien media hora antes; que solo hay un flujo; que Actions estaba habilitado con
+todas las acciones permitidas; que Pages seguía en `build_type: workflow`; que el repositorio es
+público, o sea sin cuota de minutos; y que la API no daba motivo. Todo correcto, y todo irrelevante:
+**Actions estaba en `major_outage` y Pages en `degraded_performance`**.
+
+El orden estuvo del revés. Se fue de lo específico a lo general —¿es mi commit? ¿el flujo? ¿la
+configuración?— y la pregunta más barata y más amplia quedó para el final. **Lo barato y ancho
+primero.** Un despliegue que falla sin motivo visible es antes un servicio caído que un repositorio
+roto, y comprobarlo cuesta dos segundos.
+
 **Y se corre con `set -o pipefail`.** En una tubería, `$?` es el estado del **último** proceso: un
 `npx vitest run | tail -8` devuelve lo que devuelva `tail`, que es 0 casi siempre —comprobado:
 `false | tail -1` sale con 0—. Durante 124 sesiones la puerta se juzgó leyendo el resumen impreso,

@@ -7929,6 +7929,27 @@ como clave de búsqueda.
 El experimento que faltaba es el paso normal del bucle: empujar esta sesión. Si su ejecución también
 muere al arrancar, no era este commit.
 
+### La causa, y el orden de diagnóstico que estuvo del revés
+
+El push de esta sesión llegó al remoto —comprobado— y **no generó ejecución ninguna**: ni siquiera
+una que muriese. Entonces se miró lo que había que haber mirado primero:
+
+> **Actions: `major_outage`. Pages: `degraded_performance`.**
+
+Externo. Ni el commit, ni el flujo, ni el repositorio, ni el bucle.
+
+Lo que hay que aprender no es la causa sino **el orden**. Se fue de lo específico a lo general —¿es
+mi commit?, ¿el fichero del flujo?, ¿la configuración?, ¿la cuota?— y la pregunta más barata y más
+amplia, «¿está el servicio en pie?», quedó para el final. Costó tres reintentos y seis consultas a
+la API, y se resuelve con un `curl` de dos segundos.
+
+Es hermano del defecto de la 124.ª: allí se leía el resumen impreso en vez de consultar el código de
+salida; aquí se interrogó al repositorio en vez de al servicio. **Lo barato y ancho primero.** Queda
+escrito en el protocolo, junto a la puerta.
+
+Los commits de la 125.ª y la 126.ª están en `main` y se desplegarán cuando Actions vuelva. El sitio
+en vivo sigue sirviendo lo de la 124.ª, íntegro y sano.
+
 ### Cifras
 
 | | antes | después |
