@@ -6467,3 +6467,24 @@ práctica— pero el informe asustaba, y el remedio es no encadenarlo.
 **El tramo sigue sin alcanzarse, y van siete sesiones diciéndolo**: 18 Autores, y eso pide nombres
 o direcciones. Lo que queda medido para seguir sin esa decisión: la obra de este Autor está
 **agotada**, y el mapa de cantera de la 96.ª sigue vigente para los demás.
+
+### Corrección — llevaba vigilando despliegues equivocados
+
+Al verificar en vivo lo de arriba, la Cita nueva devolvió **404** y la segunda página de la
+Colección enseñaba el estado anterior, con un despliegue que yo había dado por **success**. La
+causa no estaba en el despliegue sino en cómo lo buscaba:
+
+    gh run list --branch main --limit 1
+
+ejecutado **justo después de un push** devuelve el run **anterior**, porque el nuevo tarda unos
+segundos en registrarse. Así que apunté el vigía al despliegue del commit de antes, leí su «éxito»
+y lo conté como si fuera el mío. El sitio estaba bien; mi cadena de verificación miraba a otro
+sitio.
+
+Esto vale más que el fallo concreto: **una verificación que puede confirmar la cosa equivocada no
+verifica nada**, y ésta llevaba varias sesiones en uso. El vigía ahora busca el run **por el SHA de
+HEAD**, avisa si no aparece ninguno tras doce intentos —«¿se empujó de verdad?»— y reconoce todo
+estado terminal, no solo el éxito: un filtro que solo mire `success` calla igual ante un fallo, una
+cancelación o un cuelgue.
+
+Lo que sí quedó verificado de verdad, ya con el run correcto, va abajo.
