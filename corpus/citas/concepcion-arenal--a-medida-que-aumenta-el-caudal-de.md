@@ -1,6 +1,8 @@
 ---
 texto: "A medida que aumenta el caudal de los conocimientos humanos, se ven las íntimas relaciones que tienen unos con otros, su enlace íntimo y los mutuos servicios que se prestan los que cultivan las ciencias al parecer menos afines."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-a-medida-que-aumenta-el-caudal-de"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

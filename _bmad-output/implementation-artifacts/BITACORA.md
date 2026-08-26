@@ -7456,3 +7456,54 @@ Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **
 despliegue de la 118.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 120.ª sesión — no se recuperan antologías de poetas, y ya se sabe por qué
+
+**4 Citas** de la cola del ensayo —dos de ellas de las mejores que ha dado— y un documento entero
+retirado con **615 candidatas**.
+
+### La regla nueva, con su medida
+
+Se buscó obra nueva en la Fuente para Autores con margen, y de los cinco comprobados solo uno tenía
+algo: una **antología de un poeta**. Al leerla, casi todo era **verso con los saltos colapsados**:
+
+    Daba el reloj las doce..., y eran doce golpes de azada en tierra...
+    Entre los álamos de oro, lejos, la sombra del amor te aguarda.
+
+Son versos suyos con los renglones quitados. Publicarlos **tomaría de lado la decisión reservada
+sobre el verso**, que es exactamente el riesgo que la 113.ª nombró. Y lo poco que sí es prosa va
+atribuido a su heterónimo —«Sólo se mueven, dice Abel Martín, las cosas que no cambian»—, que es el
+caso de Dante de la 94.ª con otra cara: publicarlo atribuiría al Autor lo que el texto atribuye a su
+criatura.
+
+De ahí una regla que no estaba escrita y que ahorra sesiones enteras:
+
+> **No se recuperan antologías de Autores cuya obra principal es verso.** Lo que traen es su poesía
+> con los saltos perdidos, indistinguible de prosa para la tubería y **inadmisible mientras la
+> decisión del verso siga pendiente**. Es hermana de la regla de la 112.ª —mirar si el Autor ya está
+> sembrado— pero mira otra cosa: **en qué escribe**, no si ya se sembró.
+
+Retirado con sus 615, que es la segunda retirada mayor del bucle tras las 1994 de la 113.ª.
+
+### Lo comprobado y descartado, para que no se repita
+
+Cinco Autores con margen, mirados en la Fuente nueva: de uno solo hay novelas y una traducción **al
+inglés** —que la puerta del idioma descartaría—; de otro, alegoría narrativa con margen de solo 28;
+de dos, nada. Es un resultado negativo y por eso se escribe.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1393 | **1397** |
+| Documentos retirados | 10 | **11** |
+| Candidatas retiradas de golpe | — | **615** |
+| Por leer del ensayo | 282 | **278** |
+
+Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 119.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores. Y esta sesión enseña por qué duele: de cinco Autores
+admitidos con margen, **ninguno tiene ensayo disponible sin tocar** en ninguna de las dos Fuentes.
+Lo que el bucle puede hacer con las firmas que ya hay se va estrechando, y eso es exactamente lo que
+la decisión reservada desbloquearía.
