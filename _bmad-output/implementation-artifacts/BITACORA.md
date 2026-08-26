@@ -8322,3 +8322,57 @@ Catorce Citas en siete Temas. Dos van a los dos Temas más flacos del Corpus.
 | Candidatas descartadas sin leer | — | **290**, por una línea de tabla |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 133.ª sesión — no todos los conectores dejan agujero
+
+Mismo tramo reservado. Dos cosas: la veta que subía dejó de subir, y un criterio mío de 130
+sesiones resultó ser demasiado grueso.
+
+### La subida se acabó, y también se ve por qué
+
+La obra doctrinal venía dando 27 %, 33 % y 38 %. La cuarta tanda dio **1 de 13: 8 %**. No es
+casualidad ni cansancio: ahí acaba el núcleo doctrinal y empieza la **polémica contra una escuela
+rival**, con citas ajenas, nombres propios y comillas que abren y no cierran.
+
+Es la tercera vez que aparece el mismo dibujo dentro de una sola obra —la 104.ª con lo doctrinal
+frente a lo histórico, la 131.ª con la carta que se vuelve personal, y ahora el tratado que se
+vuelve disputa—. **Una obra no tiene un rendimiento: tiene tramos.**
+
+Se cambió de firma, que además era lo que pedía el escalonado: la firma más representada estaba
+en el 12 % del techo y subiendo.
+
+### El criterio que era demasiado grueso
+
+En la firma nueva apareció esto:
+
+> En resumen, no hay cuestiones pequeñas; las que lo parecen son cuestiones grandes no comprendidas.
+
+Y esto:
+
+> En general, puede afirmarse que no hay cuestiones agotadas, sino hombres agotados en las
+> cuestiones.
+
+Las dos son de lo mejor del libro, y **las dos las apartaba mi filtro** por empezar con conector.
+Llevo 130 sesiones tratando igual a todo lo que abre una frase, y no son lo mismo:
+
+· **el deíctico señala algo ausente y deja un agujero** —«Tal es», «Esto», «Aquellos», «Éste es»—;
+  sin lo anterior, la Cita no se entiende;
+· **el marcador de cierre no señala nada** —«En resumen», «En general»—; la frase que le sigue está
+  entera, y nadie se queda preguntando resumen de qué.
+
+La regla no cambia, se afina: lo que descarta una candidata no es *empezar por conector*, es
+**dejar un hueco que el lector no puede rellenar**. Es la misma vara de la 129.ª —«una Cita es un
+fragmento que sigue diciendo lo mismo cuando se queda solo»— aplicada a la primera palabra en vez
+de a la frase entera.
+
+Y no es un permiso: la mayoría de los conectores siguen apartando, porque la mayoría son deícticos.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1489 | **1497** |
+| Tramos medidos dentro de una obra | 3 | **4** (27 → 33 → 38 → 8 %) |
+
+Puerta completa en verde y consultada por su código de salida.

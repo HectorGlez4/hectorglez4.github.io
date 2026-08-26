@@ -1,7 +1,9 @@
 ---
-texto: "Desgraciadamente, en las Ciencias biológicas casi todos los recursos analíticos débense al azar."
+texto: "Inútil será recordar que todos los grandes investigadores han sido fecundos creadores de hipótesis."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-desgraciadamente-en-las-ciencias-biologicas-casi-todos"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-inutil-sera-recordar-que-todos-los-grandes"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

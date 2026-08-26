@@ -1,7 +1,9 @@
 ---
-texto: "Notorio es que los psicólogos, abismados en la contemplación del espíritu, desprecian el cerebro."
+texto: "En resumen, no hay cuestiones pequeñas; las que lo parecen son cuestiones grandes no comprendidas."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-notorio-es-que-los-psicologos-abismados-en"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-en-resumen-no-hay-cuestiones-pequenas-las"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

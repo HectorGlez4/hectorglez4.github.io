@@ -1,7 +1,9 @@
 ---
-texto: "En resumen, no hay cuestiones pequeñas; las que lo parecen son cuestiones grandes no comprendidas."
+texto: "Desgraciadamente, en las Ciencias biológicas casi todos los recursos analíticos débense al azar."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-resumen-no-hay-cuestiones-pequenas-las"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-desgraciadamente-en-las-ciencias-biologicas-casi-todos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

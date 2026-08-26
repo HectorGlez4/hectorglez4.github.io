@@ -1,7 +1,9 @@
 ---
-texto: "Inútil será recordar que todos los grandes investigadores han sido fecundos creadores de hipótesis."
+texto: "Para el amante de la observación la práctica profesional constituye el mejor aliado del laboratorio."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-inutil-sera-recordar-que-todos-los-grandes"
+temas:
+  - "el-trabajo"
+slug: "santiago-ramon-y-cajal-para-el-amante-de-la-observacion-la"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

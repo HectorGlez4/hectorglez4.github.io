@@ -1,7 +1,9 @@
 ---
-texto: "En general, puede afirmarse que no hay cuestiones agotadas, sino hombres agotados en las cuestiones."
+texto: "Notorio es que los psicólogos, abismados en la contemplación del espíritu, desprecian el cerebro."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-general-puede-afirmarse-que-no-hay"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-notorio-es-que-los-psicologos-abismados-en"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

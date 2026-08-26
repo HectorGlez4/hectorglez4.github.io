@@ -1,6 +1,8 @@
 ---
 texto: "Poco importa que una verdad científica sea aprovechada por nuestros hijos o por nuestros nietos."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-tiempo"
 slug: "santiago-ramon-y-cajal-poco-importa-que-una-verdad-cientifica-sea"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

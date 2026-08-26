@@ -385,6 +385,35 @@ candidata, una y otra vez, son tres cosas y no el tema: **empieza remitiendo** (
 es…», «Muchas puede haber…»), **cita a otro** («Ya Locke notó…», «Yo os digo con Renan…»), o **trae
 nombre propio y anécdota**.
 
+### Lo que descarta no es el conector, es el agujero (133.ª)
+
+Durante 130 sesiones se apartó **todo** lo que empieza por conector. Demasiado grueso: se estaban
+tirando dos de las mejores frases de un libro —«En resumen, no hay cuestiones pequeñas…», «En
+general, puede afirmarse que no hay cuestiones agotadas…»—.
+
+· **El deíctico señala algo ausente y deja un agujero** —«Tal es», «Esto», «Aquellos», «Éste es»,
+  «Otro»—: sin lo anterior, la Cita no se entiende. **Se aparta.**
+· **El marcador de cierre no señala nada** —«En resumen», «En general»—: la frase que le sigue está
+  entera, y nadie se queda preguntando resumen de qué. **Se admite.**
+
+No es un permiso: la mayoría de los conectores siguen apartando, porque la mayoría son deícticos.
+Es la vara de la 129.ª —«una Cita es un fragmento que sigue diciendo lo mismo cuando se queda
+solo»— aplicada a la primera palabra en vez de a la frase entera.
+
+### Una obra no tiene un rendimiento: tiene tramos (133.ª)
+
+Medido tres veces en tres obras distintas, y siempre igual: el tramo doctrinal rinde y el otro no.
+
+| obra | dibujo |
+|---|---|
+| tratado (104.ª) | doctrinal **>** histórico-coyuntural |
+| carta (131.ª) | doctrinal 33 % **→** dirigida a una persona 13 % |
+| tratado (133.ª) | doctrinal 27 → 33 → **38 %** → polémica contra otra escuela **8 %** |
+
+Cuando el rendimiento se desploma de golpe dentro de una obra que venía subiendo, **no es cansancio
+del lector: es que empezó otro tramo**. Se mira qué clase de prosa es antes de abandonarla, y si
+es disputa —citas ajenas, nombres propios, comillas sin cerrar— se cambia de obra sin más.
+
 ### Se elige OBRA, no firma (131.ª)
 
 La cantera se contaba por Autor y se leía también por Autor. Pero **una firma tiene varias obras y

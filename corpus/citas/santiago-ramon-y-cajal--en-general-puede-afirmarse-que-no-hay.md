@@ -1,7 +1,9 @@
 ---
-texto: "Para el amante de la observación la práctica profesional constituye el mejor aliado del laboratorio."
+texto: "En general, puede afirmarse que no hay cuestiones agotadas, sino hombres agotados en las cuestiones."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-para-el-amante-de-la-observacion-la"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-en-general-puede-afirmarse-que-no-hay"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
