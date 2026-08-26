@@ -35,3 +35,36 @@ export function esRedValida(valor: string): valor is Red {
 export function enlaceConOrigen(ruta: string, red: Red): string {
   return `${ruta}?${PARAMETRO_DE_ORIGEN}=${red}`;
 }
+
+/**
+ * El enlace público de cada cuenta, para poder ir del sitio a las redes.
+ *
+ * Es el sentido contrario de `enlaceConOrigen`: aquello marca lo que llega DESDE
+ * una red, esto lleva al visitante HACIA ella. Viven juntos porque el conjunto de
+ * cuentas es el mismo y partirlo en dos ficheros sería invitar a que
+ * discrepen.
+ *
+ * **X no está, y no es un olvido:** `https://x.com/sabiduriabolsillo` devuelve 404
+ * el 26 de agosto de 2026. La cuenta figura en REDES porque el PRD la declara en
+ * §4.10, pero no existe todavía. Enlazar a un 404 desde el pie de todas las
+ * páginas es peor que no enlazar. En cuanto exista, se añade aquí y aparece sola.
+ */
+export const PERFILES: Partial<Record<Red, string>> = {
+  instagram: 'https://www.instagram.com/sabiduriabolsillo/',
+  tiktok: 'https://www.tiktok.com/@sabiduriabolsillo',
+  threads: 'https://www.threads.net/@sabiduriabolsillo',
+  facebook: 'https://www.facebook.com/100618132774413',
+};
+
+/**
+ * Las cuentas que se pueden enlazar hoy, en el orden de REDES.
+ *
+ * Se deriva, no se escribe a mano: así el orden es el mismo que ofrece el Kit y
+ * añadir una cuenta a PERFILES basta para que salga en el pie.
+ */
+export const CUENTAS_PUBLICAS: readonly { id: Red; nombre: string; perfil: string }[] =
+  REDES.filter((r) => PERFILES[r.id]).map((r) => ({
+    id: r.id,
+    nombre: r.nombre,
+    perfil: PERFILES[r.id]!,
+  }));

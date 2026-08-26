@@ -1,0 +1,73 @@
+---
+/**
+ * Las cuentas propias, enlazadas desde el pie.
+ *
+ * Enlaces de **texto, no iconos**. El sitio es tipográfico de arriba abajo —serif
+ * para la Cita, sans en versalitas para el Autor— y una fila de logotipos de
+ * marcas ajenas sería lo único de la página que no habla ese idioma. Además los
+ * iconos obligarían a traer SVG de terceros, y AD-6 dice que la página no envía
+ * JavaScript: no hace falta añadirle peso por un adorno.
+ *
+ * Van en el pie y no en la cabecera a propósito. La cabecera lleva solo marca y
+ * búsqueda (UX-DR29), y quien llega desde un buscador viene a leer una Cita: la
+ * invitación a seguirnos es para quien terminó de leer, no para quien empieza.
+ *
+ * `rel="me"` no es decorativo: declara que esas cuentas son de la misma entidad
+ * que el sitio, que es exactamente lo que un enlace de perfil afirma.
+ *
+ * La lista sale de `CUENTAS_PUBLICAS`, que deriva de REDES y de PERFILES. Añadir
+ * una cuenta allí la hace aparecer aquí sola; una red sin perfil conocido —hoy,
+ * X— no se pinta en vez de enlazar a un 404.
+ */
+import { CUENTAS_PUBLICAS } from '../lib/redes.ts';
+---
+
+{
+  CUENTAS_PUBLICAS.length > 0 && (
+    <nav class="redes" aria-label="Nuestras cuentas">
+      <ul>
+        {CUENTAS_PUBLICAS.map((cuenta) => (
+          <li>
+            <a href={cuenta.perfil} rel="me noopener" target="_blank">
+              {cuenta.nombre}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<style>
+  .redes {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .redes ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--unidad) * 2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /*
+   * `--zona-de-toque` es la misma que usan la marca y el buscador de la cabecera:
+   * en móvil estos enlaces caen al final de una página larga, que es justo donde
+   * el pulgar llega peor. Un enlace de 13 px sin zona de toque sería inalcanzable
+   * en la práctica para media pantalla.
+   */
+  .redes a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    font-size: var(--pie);
+    color: var(--siena);
+    text-decoration: none;
+  }
+
+  .redes a:hover {
+    text-decoration: underline;
+  }
+</style>
