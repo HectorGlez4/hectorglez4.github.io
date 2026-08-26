@@ -5577,3 +5577,47 @@ sin él no se entiende. Se retira el documento con sus 28 candidatas, sin forzar
 
 **La Meta no está alcanzada y no se emite promesa:** 1071 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## AD-2 (86.ª sesión) — Retirar un documento deja de ser cinco gestos a mano
+
+**1071 Citas y 1121 páginas: las mismas.** Sesión sin siembra, para arreglar el proceso que las
+fabrica mal.
+
+### Un proceso que ha fallado dos veces de cinco no es un descuido
+
+Cinco veces en ocho sesiones se versionó un documento que no daba ninguna Cita —un entremés, una
+crónica, dos índices, un ensayo con un término propio—. Y las cinco veces el remedio fue el mismo:
+**apartar el fichero con `mv` y rechazar sus candidatas con un guion de usar y tirar**.
+
+Dos de esas cinco las candidatas se quedaron huérfanas hasta que una prueba las cazó. Y una
+candidata cuyo documento ya no está produciría una Cita que el cotejo de la 11.2 no puede comprobar:
+el daño no es cosmético.
+
+Ahora es una orden, `tools/retirar.ts`, con cuatro pruebas. Hace tres cosas y las tres importan:
+
+- **se niega** si alguna Cita publicada sale de ese documento, y lo dice **con el número y los
+  slugs**, porque retirarlo las dejaría sin nada contra lo que cotejarse;
+- **mueve y no borra**, a `corpus/_fuentes-retiradas/`, como AD-2 hace con las Colecciones;
+- **y arrastra las candidatas**, que es justo el paso que se olvidaba.
+
+### Y el Corpus recupera una memoria que no tenía
+
+Los seis documentos retirados a mano vivían en un directorio temporal, fuera del Corpus. Eso no es
+solo desorden: **sin ellos, la sesión siguiente vuelve a recuperar lo mismo** —y de hecho una de las
+medidas de cantera los seguía listando como pendientes—. Se traen a `corpus/_fuentes-retiradas/`,
+con su dirección dentro, así que volver atrás es copiar un fichero y saber qué se probó ya es mirar
+un directorio.
+
+### Dos cosas que la prueba corrigió, y no al revés
+
+- El primer fixture escribía las candidatas con nombres inventados (`a.md`) en vez del canónico
+  `{slug-autor}--{fragmento}.md`. La orden no las borraba, y **tenía razón**: el corpus real se
+  llama así, y una prueba que use otro nombre no comprueba lo que ocurre de verdad.
+- El tipo `Resultado` exige `ruta` en el caso bueno, y el `astro check` lo dijo. Se devuelve la
+  ruta del documento retirado, que además es lo que hace falta para volver.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109** en 74 ficheros; `npm run build` **1121
+páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1071 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

@@ -51,6 +51,15 @@ export interface Rutas {
    */
   colecciones: string;
   /**
+   * Donde va un documento de Fuente retirado — AD-2, como las Colecciones.
+   *
+   * Se retira el documento que no da ninguna Cita: un entremés, una crónica, un índice.
+   * **Se mueve y no se borra** porque el fichero lleva dentro la dirección de la que salió,
+   * así que volver atrás es copiarlo, y porque borrar deja al Corpus sin memoria de lo que
+   * ya se probó: sin esto, la sesión siguiente vuelve a recuperar lo mismo.
+   */
+  fuentesRetiradas: string;
+  /**
    * Donde va una Colección despublicada — Historia 12.4.
    *
    * Es `corpus/_revision/` para Colecciones, y el paralelo es literal: AD-2 dice que lo no
@@ -122,6 +131,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     temas: join(raizCorpus, 'temas'),
     colecciones: join(raizCorpus, 'colecciones'),
     coleccionesRetiradas: join(raizCorpus, '_colecciones-retiradas'),
+    fuentesRetiradas: join(raizCorpus, '_fuentes-retiradas'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),

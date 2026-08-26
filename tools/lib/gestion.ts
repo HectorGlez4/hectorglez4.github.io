@@ -11,7 +11,7 @@
  *     porque ese hueco bloquea después la publicación de todas sus Citas.
  */
 
-import { rm } from 'node:fs/promises';
+import { mkdir, rename, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { autorAdmisible, nombre as nombreDeEntidad, tradicion } from '../../src/lib/admision.ts';
@@ -396,5 +396,78 @@ export async function quitarTema(
       (noLoTenian > 0
         ? `, ${citas(noLoTenian)} no lo ${noLoTenian === 1 ? 'tenía' : 'tenían'}.`
         : '.'),
+  };
+}
+
+/**
+ * Retira un documento de Fuente: lo aparta y **arrastra sus candidatas**.
+ *
+ * Cinco veces en ocho sesiones se versionó un documento que no daba ninguna Cita —un entremés,
+ * una crónica, dos índices, un ensayo con un término propio— y las cinco hubo que apartar el
+ * fichero a mano y rechazar sus candidatas con un guion de usar y tirar. Dos de esas cinco las
+ * candidatas quedaron huérfanas hasta que una prueba las cazó, y una candidata sin documento
+ * produciría una Cita que el cotejo de la 11.2 no puede comprobar.
+ *
+ * Un proceso manual que ha fallado dos veces de cinco no es un descuido: es un proceso que
+ * fabrica defectos.
+ *
+ * **Se niega** si alguna Cita publicada sale de ese documento —retirarlo la dejaría sin nada
+ * contra lo que cotejarse— y lo dice con el número. **Mueve y no borra**, como AD-2 con las
+ * Colecciones: el fichero lleva dentro su dirección, así que volver atrás es copiarlo, y borrar
+ * dejaría al Corpus sin memoria de lo que ya se probó.
+ */
+export async function retirarFuente(rutas: Rutas, fichero: string): Promise<Resultado> {
+  const origen = join(rutas.fuentes, fichero);
+  if (!existsSync(origen)) {
+    return {
+      ok: false,
+      motivos: [
+        `No hay ningún documento «${fichero}» en ${rutas.fuentes}.`,
+        'Retirar es una orden sobre un documento concreto, no una limpieza.',
+      ],
+    };
+  }
+
+  const bruto = await readFile(origen, 'utf8');
+  const url = bruto
+    .split('\n')
+    .slice(0, 5)
+    .find((l) => l.startsWith('url:'))
+    ?.slice('url:'.length)
+    .trim();
+
+  const publicadas = (await leerCitas(rutas.citas)).filter((c) => c.fuente?.url === url);
+  if (publicadas.length > 0) {
+    const cuantas = `${publicadas.length} Cita${publicadas.length === 1 ? '' : 's'}`;
+    return {
+      ok: false,
+      motivos: [
+        `De ese documento sale${publicadas.length === 1 ? '' : 'n'} ${cuantas} publicada` +
+          `${publicadas.length === 1 ? '' : 's'}: retirarlo la` +
+          `${publicadas.length === 1 ? '' : 's'} dejaría sin nada contra lo que cotejarse.`,
+        ...publicadas.slice(0, 5).map((c) => `  · ${c.slug}`),
+        ...(publicadas.length > 5 ? [`  · … y ${publicadas.length - 5} más.`] : []),
+        'No se ha movido nada.',
+      ],
+    };
+  }
+
+  const suyas = (await leerCitas(rutas.revision)).filter((c) => c.fuente?.url === url);
+
+  await mkdir(rutas.fuentesRetiradas, { recursive: true });
+  await rename(origen, join(rutas.fuentesRetiradas, fichero));
+  for (const candidata of suyas) {
+    await rm(
+      join(rutas.revision, `${nombreDeFicheroDeCita(candidata.autor, candidata.slug)}.md`),
+      { force: true },
+    );
+  }
+
+  return {
+    ok: true,
+    ruta: join(rutas.fuentesRetiradas, fichero),
+    mensaje:
+      `Documento retirado a ${rutas.fuentesRetiradas}: ${fichero}. ` +
+      `Candidatas rechazadas con él: ${suyas.length}.`,
   };
 }
