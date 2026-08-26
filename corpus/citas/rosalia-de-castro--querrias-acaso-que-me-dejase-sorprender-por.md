@@ -1,6 +1,8 @@
 ---
 texto: "¿Querrías, acaso, que me dejase sorprender por la muerte en medio de las riquezas?"
 autor: "rosalia-de-castro"
+temas:
+  - "la-riqueza"
 slug: "rosalia-de-castro-querrias-acaso-que-me-dejase-sorprender-por"
 procedencia:
   obra: "Ruinas"

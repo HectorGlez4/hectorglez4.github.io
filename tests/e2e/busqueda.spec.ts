@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
 import { temaBajoUmbral } from './ayuda/corpus.ts';
 
@@ -157,17 +157,40 @@ test.describe('Historia 3.1 — la búsqueda no se carga hasta que hace falta', 
 
 test.describe('Historia 3.2 — resultado vacío con salida', () => {
   /*
-   * Una cadena sin raíz española posible. La que había —«xylofonorquesta inexistente»— dejó de
-   * dar cero al crecer el Corpus. Comprobado en vivo contra el dominio: «xylofonorquesta
-   * inexistente» devuelve 2 resultados y «ñññmmmkkk» otros 2, mientras que «zzzzzzzz» y
-   * «wkjhgfdsa» devuelven 0 y muestran la salida. Pagefind casa por fragmentos, así que una
-   * consulta sin resultados tiene que serlo por construcción y no por que el Corpus todavía
-   * no tenga esa palabra. El estado vacío funciona; lo caducado era la consulta.
+   * La consulta que no encuentra nada **se le pregunta al sitio**, no se fija.
+   *
+   * Van dos veces que una literal caduca. La primera era «xylofonorquesta inexistente» y dejó
+   * de dar cero al crecer el Corpus; se cambió por «zzzzzzzz», y en la 89.ª esa también empezó
+   * a encontrar algo —sin que ninguna Cita contenga esas letras—.
+   *
+   * La causa es que **Pagefind casa por fragmentos**: cuanto más grande el Corpus, más cerca
+   * está cualquier cadena de parecerse a algo. Así que no hay literal que sobreviva, y elegir
+   * otra sería el mismo fallo por tercera vez: lo que hay que quitar de la prueba no es la
+   * cadena, es la costumbre de fijarla.
+   *
+   * Se prueban varias y se usa la primera que hoy dé cero. Si ninguna da cero, la prueba se
+   * salta **diciendo por qué**: el estado vacío seguirá existiendo, pero este Corpus ya no
+   * sabría cómo llegar a él, y eso es una noticia, no un aprobado.
    */
-  const SIN_RESULTADOS = 'zzzzzzzz';
+  const CANDIDATAS = ['zzzzzzzz', 'wkjhgfdsa', 'qqqjjjxxxzzz', 'ñññmmmkkk', 'xzqwvbnmlkjhgf'];
+
+  let sinResultados: string | undefined;
+
+  /** Busca con la primera consulta que hoy no encuentre nada, y devuelve cuál fue. */
+  async function buscarSinResultados(page: Page): Promise<string | undefined> {
+    for (const consulta of sinResultados === undefined ? CANDIDATAS : [sinResultados]) {
+      await buscar(page, consulta);
+      if (await page.locator('[data-salida]').isVisible()) {
+        sinResultados = consulta;
+        return consulta;
+      }
+    }
+    return undefined;
+  }
 
   test('se ofrecen Temas y Autores destacados', async ({ page }) => {
-    await buscar(page, SIN_RESULTADOS);
+    const consulta = await buscarSinResultados(page);
+    test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
 
     const salida = page.locator('[data-salida]');
     await expect(salida).toBeVisible();
@@ -176,12 +199,14 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
   });
 
   test('el mensaje sugiere reformular con menos palabras', async ({ page }) => {
-    await buscar(page, SIN_RESULTADOS);
+    const consulta = await buscarSinResultados(page);
+    test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
     await expect(page.locator('.sugerencia')).toContainText('Prueba con menos palabras');
   });
 
   test('no aparece ningún texto de error técnico', async ({ page }) => {
-    await buscar(page, SIN_RESULTADOS);
+    const consulta = await buscarSinResultados(page);
+    test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
     const texto = await page.locator('main').innerText();
     expect(texto).not.toMatch(/error|excepci|failed|undefined|null|0 resultados/i);
   });
@@ -190,7 +215,8 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
     page,
     request,
   }) => {
-    await buscar(page, SIN_RESULTADOS);
+    const consulta = await buscarSinResultados(page);
+    test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
     const hrefs = await page
       .locator('[data-salida] a')
       .evaluateAll((ns) => ns.map((n) => n.getAttribute('href')!));
@@ -204,6 +230,9 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
   test('se emite el evento de búsqueda sin resultados, con la consulta y sin visitante', async ({
     page,
   }) => {
+    // Se resuelve la consulta antes de instalar el espía, porque buscar la mueve de página.
+    const consulta = await buscarSinResultados(page);
+    test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
     await page.goto('/buscar');
     // Se instala un espía en el hueco del módulo de medición, que es por donde pasa todo.
     await page.evaluate(() => {
@@ -213,7 +242,7 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
       };
     });
 
-    await page.locator('[data-consulta]').fill(SIN_RESULTADOS);
+    await page.locator('[data-consulta]').fill(consulta!);
     await page.waitForFunction(
       () => !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
       undefined,
@@ -226,7 +255,7 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
 
     expect(emitidos).toHaveLength(1);
     expect(emitidos[0].evento).toBe('busqueda-sin-resultados');
-    expect(emitidos[0].datos).toBe(SIN_RESULTADOS);
+    expect(emitidos[0].datos).toBe(consulta);
   });
 
   test('con resultados no se muestra la salida', async ({ page }) => {

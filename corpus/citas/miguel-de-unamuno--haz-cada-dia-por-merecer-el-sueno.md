@@ -1,7 +1,9 @@
 ---
-texto: "Morir como Icaro vale más que vivir sin haber intentado volar nunca, aunque fuese con alas de cera."
+texto: "Haz cada día por merecer el sueño, y que sea el descanso de tu cerebro preparación para cuando tu corazón descanse; haz por merecer la muerte."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-morir-como-icaro-vale-mas-que-vivir"
+temas:
+  - "la-muerte"
+slug: "miguel-de-unamuno-haz-cada-dia-por-merecer-el-sueno"
 procedencia:
   obra: "¡Adentro!"
 estadoDerechos: "dominio-público"

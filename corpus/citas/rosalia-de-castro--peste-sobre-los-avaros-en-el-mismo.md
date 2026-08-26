@@ -1,6 +1,8 @@
 ---
 texto: "Peste sobre los avaros; en el mismo sepulcro han de ser perseguidos por los desharrapados que les piden pan."
 autor: "rosalia-de-castro"
+temas:
+  - "la-riqueza"
 slug: "rosalia-de-castro-peste-sobre-los-avaros-en-el-mismo"
 procedencia:
   obra: "Ruinas"

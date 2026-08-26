@@ -1,7 +1,9 @@
 ---
-texto: "Haz cada día por merecer el sueño, y que sea el descanso de tu cerebro preparación para cuando tu corazón descanse; haz por merecer la muerte."
+texto: "No sea tu pesar por lo que hiciste más que propósito de futuro mejoramiento; todo otro arrepentimiento es muerte, y nada más que muerte."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-haz-cada-dia-por-merecer-el-sueno"
+temas:
+  - "la-virtud"
+slug: "miguel-de-unamuno-no-sea-tu-pesar-por-lo-que"
 procedencia:
   obra: "¡Adentro!"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Vas saliendo de ti mismo, revelándote a ti propio; tu acabada personalidad está al fin y no al principio de tu vida; sólo con la muerte se te completa y corona."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-vas-saliendo-de-ti-mismo-revelandote-a"
 procedencia:
   obra: "¡Adentro!"

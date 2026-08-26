@@ -1,6 +1,8 @@
 ---
 texto: "El sueño y la muerte tienen su poesía, á la que prefiero la poesía de la vigilia y la vida."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-muerte"
 slug: "miguel-de-unamuno-el-sueno-y-la-muerte-tienen-su"
 procedencia:
   obra: "En Alcalá de Henares"

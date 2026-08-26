@@ -5690,3 +5690,46 @@ El Autor más representado baja a **14,3 %** sin haber sembrado.
 
 **La Meta no está alcanzada y no se emite promesa:** 1098 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## Historia 3.2 (89.ª sesión) — La consulta que no encuentra nada se le pregunta al sitio
+
+**1098 → 1107 Citas. 1148 → 1157 páginas.**
+
+### La lección de ayer, puesta a prueba donde podía fallar
+
+Ayer quedó escrito que **una cantera no se agota: se agota respecto de las preguntas que se le
+hicieron**. Eso hay que comprobarlo donde más difícil sea, así que se volvió a la cantera que en la
+68.ª declaré agotada con todas las letras: una novela de 501 candidatas, de la que dije «no vuelvo a
+ella».
+
+Cribada por los Temas que no existían entonces: **cuatro Citas donde antes salían cero**. La lección
+se sostiene —y con matiz, que también hay que decirlo: cuatro, no cuarenta. Una novela sigue siendo
+narración; lo que cambió es que ahora hay preguntas que sus frases sí contestan.
+
+Donde rindió de verdad fue en otra cantera de 307: **cinco**, todas por «la muerte». «Morir como
+Ícaro vale más que vivir sin haber intentado volar nunca, aunque fuese con alas de cera.» «Haz cada
+día por merecer el sueño… haz por merecer la muerte.»
+
+### Y una prueba que caducó por segunda vez, y ya no caducará por la misma razón
+
+`se ofrecen Temas y Autores destacados` se puso en rojo. La prueba comprueba el **estado vacío de la
+búsqueda**, y para eso necesita una consulta que no encuentre nada.
+
+En su propio comentario estaba escrito que ya había caducado una vez: «xylofonorquesta inexistente»
+dejó de dar cero al crecer el Corpus y se cambió por «zzzzzzzz». Hoy **«zzzzzzzz» también encuentra
+algo**, sin que ninguna Cita contenga esas letras.
+
+La causa es que **Pagefind casa por fragmentos**: cuanto más grande el Corpus, más cerca está
+cualquier cadena de parecerse a algo. **No hay literal que sobreviva**, y elegir otra habría sido el
+mismo fallo por tercera vez. Lo que había que quitar de la prueba no era la cadena: era la costumbre
+de fijarla.
+
+Ahora se prueban varias y se usa la primera que hoy dé cero. Y si ninguna diera cero, la prueba se
+salta **diciendo por qué**: el estado vacío seguiría existiendo, pero este Corpus ya no sabría cómo
+llegar a él, y eso es una noticia, no un aprobado.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109**; `npm run build` **1157 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1107 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

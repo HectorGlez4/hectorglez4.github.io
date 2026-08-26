@@ -1,7 +1,9 @@
 ---
-texto: "No sea tu pesar por lo que hiciste más que propósito de futuro mejoramiento; todo otro arrepentimiento es muerte, y nada más que muerte."
+texto: "Morir como Icaro vale más que vivir sin haber intentado volar nunca, aunque fuese con alas de cera."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-no-sea-tu-pesar-por-lo-que"
+temas:
+  - "la-muerte"
+slug: "miguel-de-unamuno-morir-como-icaro-vale-mas-que-vivir"
 procedencia:
   obra: "¡Adentro!"
 estadoDerechos: "dominio-público"
