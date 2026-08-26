@@ -1,6 +1,8 @@
 ---
 texto: "¡Oh soledad confortadora, cuán propicia eres a la originalidad del pensamiento!"
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-oh-soledad-confortadora-cuan-propicia-eres-a"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

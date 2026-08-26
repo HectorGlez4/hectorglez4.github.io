@@ -1,7 +1,9 @@
 ---
-texto: "Propende, según es sabido, la juventud a acometer los grandes problemas y estrenarse con una catedral."
+texto: "No basta la atención expectante, ahincada; es preciso llegar a la preocupación."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-propende-segun-es-sabido-la-juventud-a"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-no-basta-la-atencion-expectante-ahincada-es"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

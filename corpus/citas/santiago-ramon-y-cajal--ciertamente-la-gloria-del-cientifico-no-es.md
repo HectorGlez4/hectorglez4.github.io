@@ -1,7 +1,9 @@
 ---
-texto: "Se lucha por la gloria de la patria, como se lucha por el honor de su nombre..."
+texto: "Ciertamente la gloria del científico no es tan popular ni ruidosa como la del artista o del dramaturgo."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-se-lucha-por-la-gloria-de-la"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-ciertamente-la-gloria-del-cientifico-no-es"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

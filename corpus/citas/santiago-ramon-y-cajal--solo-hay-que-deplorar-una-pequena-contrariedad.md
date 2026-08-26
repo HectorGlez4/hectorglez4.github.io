@@ -1,7 +1,9 @@
 ---
-texto: "En la Naturaleza no hay superior ni inferior, ni cosas accesorias y principales."
+texto: "Solo hay que deplorar una pequeña contrariedad: ninguna empresa llega a plena sazón."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-la-naturaleza-no-hay-superior-ni"
+temas:
+  - "el-tiempo"
+slug: "santiago-ramon-y-cajal-solo-hay-que-deplorar-una-pequena-contrariedad"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

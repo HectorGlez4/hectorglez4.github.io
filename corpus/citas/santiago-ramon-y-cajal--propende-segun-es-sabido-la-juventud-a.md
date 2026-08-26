@@ -1,7 +1,9 @@
 ---
-texto: "Si su labor es realmente meritoria, el premio vendrá a sorprenderle en su rincón."
+texto: "Propende, según es sabido, la juventud a acometer los grandes problemas y estrenarse con una catedral."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-si-su-labor-es-realmente-meritoria-el"
+temas:
+  - "la-vida"
+slug: "santiago-ramon-y-cajal-propende-segun-es-sabido-la-juventud-a"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

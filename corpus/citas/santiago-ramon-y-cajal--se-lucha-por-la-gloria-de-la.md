@@ -1,7 +1,9 @@
 ---
-texto: "¡Qué de talentos conocemos que no han tenido más desgracia que haber sido discípulos de un gran hombre!"
+texto: "Se lucha por la gloria de la patria, como se lucha por el honor de su nombre..."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-que-de-talentos-conocemos-que-no-han"
+temas:
+  - "la-patria"
+slug: "santiago-ramon-y-cajal-se-lucha-por-la-gloria-de-la"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

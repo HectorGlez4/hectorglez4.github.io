@@ -1,7 +1,9 @@
 ---
-texto: "Nuestro novel hombre de ciencia debe huir de resúmenes y manuales como de peste."
+texto: "A nadie se oculta que señalar las causas de nuestra insuficiencia vale tanto como mostrar sus remedios."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-nuestro-novel-hombre-de-ciencia-debe-huir"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-a-nadie-se-oculta-que-senalar-las"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

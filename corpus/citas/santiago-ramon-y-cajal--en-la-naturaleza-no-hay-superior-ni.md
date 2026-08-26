@@ -1,7 +1,9 @@
 ---
-texto: "A nadie se oculta que señalar las causas de nuestra insuficiencia vale tanto como mostrar sus remedios."
+texto: "En la Naturaleza no hay superior ni inferior, ni cosas accesorias y principales."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-a-nadie-se-oculta-que-senalar-las"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-en-la-naturaleza-no-hay-superior-ni"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

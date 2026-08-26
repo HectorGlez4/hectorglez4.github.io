@@ -1,7 +1,9 @@
 ---
-texto: "Solo hay que deplorar una pequeña contrariedad: ninguna empresa llega a plena sazón."
+texto: "Evolucionistas convencidos en teoría, resultan providencialistas en la práctica."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-solo-hay-que-deplorar-una-pequena-contrariedad"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-evolucionistas-convencidos-en-teoria-resultan-providencialistas-en"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

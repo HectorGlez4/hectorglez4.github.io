@@ -1,7 +1,9 @@
 ---
-texto: "Impongámonos severa autocrítica, basada en la desconfianza de nosotros mismos."
+texto: "Si su labor es realmente meritoria, el premio vendrá a sorprenderle en su rincón."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-impongamonos-severa-autocritica-basada-en-la-desconfianza"
+temas:
+  - "el-trabajo"
+slug: "santiago-ramon-y-cajal-si-su-labor-es-realmente-meritoria-el"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

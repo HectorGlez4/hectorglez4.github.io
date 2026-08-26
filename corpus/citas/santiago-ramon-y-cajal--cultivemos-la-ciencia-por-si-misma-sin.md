@@ -1,7 +1,9 @@
 ---
-texto: "Ciertamente la gloria del científico no es tan popular ni ruidosa como la del artista o del dramaturgo."
+texto: "Cultivemos la ciencia por sí misma, sin considerar por el momento las aplicaciones."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-ciertamente-la-gloria-del-cientifico-no-es"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-cultivemos-la-ciencia-por-si-misma-sin"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

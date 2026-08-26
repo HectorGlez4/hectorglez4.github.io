@@ -1,7 +1,9 @@
 ---
-texto: "Cuando el novel investigador pueda marchar por sí mismo, procúrese imbuirle el gusto por la originalidad."
+texto: "Hay, además, un noble orgullo en triunfar con pobres medios: el orgullo de la elegancia y de la sobriedad."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-cuando-el-novel-investigador-pueda-marchar-por"
+temas:
+  - "la-riqueza"
+slug: "santiago-ramon-y-cajal-hay-ademas-un-noble-orgullo-en-triunfar"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

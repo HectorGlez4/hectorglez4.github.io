@@ -1,7 +1,9 @@
 ---
-texto: "No basta la atención expectante, ahincada; es preciso llegar a la preocupación."
+texto: "Cuando el novel investigador pueda marchar por sí mismo, procúrese imbuirle el gusto por la originalidad."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-no-basta-la-atencion-expectante-ahincada-es"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-cuando-el-novel-investigador-pueda-marchar-por"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

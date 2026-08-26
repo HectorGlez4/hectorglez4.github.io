@@ -1,7 +1,9 @@
 ---
-texto: "Cultivemos la ciencia por sí misma, sin considerar por el momento las aplicaciones."
+texto: "No se enseña bien sino lo que se hace, y quien no investiga no enseña a investigar."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-cultivemos-la-ciencia-por-si-misma-sin"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-no-se-ensena-bien-sino-lo-que"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

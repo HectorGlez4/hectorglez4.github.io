@@ -6905,3 +6905,55 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el de
 
 **El tramo sigue sin alcanzarse**: 18 Autores. Pero la cantera acaba de multiplicarse sin tocar esa
 decisión.
+
+## 109.ª sesión — leer es ahora el cuello de botella, y se dice con número
+
+Segunda tanda del libro que abrió la Fuente nueva. **18 Citas** en seis Temas, y ese Autor pasa de
+14 a **32** —tenía 2 hace dos sesiones—.
+
+Lo que esta sesión deja claro es **dónde está ahora el límite**. Durante cien sesiones el cuello de
+botella fue encontrar obra; desde que entró Gutenberg es **leerla**:
+
+| | |
+|---|---|
+| candidatas de este libro | 1161 |
+| apartadas por el filtro | 385 |
+| fuera del tramo de lectura | 304 |
+| legibles en el tramo breve | 460 |
+| **leídas en dos sesiones** | **~250** |
+| **legibles aún sin leer** | **442** |
+
+Cuatrocientas cuarenta y dos siguen pendientes, **y se dicen**. No están rechazadas ni revisadas:
+están sin mirar, y fingir lo contrario sería exactamente lo que este bucle castiga en todo lo demás.
+
+### Un guion mío dejó de funcionar sin avisar
+
+El listador de candidatas se apoyaba en `git ls-files --others` para distinguir «lo nuevo». En
+cuanto las candidatas se commitearon en la 108.ª, **dejó de encontrarlas y devolvió cero** —«tramo
+60-170: 0 legibles»—, que leído deprisa parece «no queda nada por leer» y significa lo contrario.
+
+Es el mismo defecto de siempre con otra cara: **una sonda que confunde “no encuentro” con “no
+hay”**. El listador nuevo mira `corpus/_revision` tal cual, imprime cuántas quedan fuera del tramo y
+permite avanzar por saltos, para que la cifra de lo no leído esté siempre delante.
+
+### Lo que se descartó, y ya sin puerta nueva
+
+Todo por criterios ya escritos: autoridad ajena citada (Laplace, Renan, Maeztu), líneas de índice
+sin numeral, títulos en versales —la puerta que la 108.ª midió y rechazó—, coyuntura española con
+nombres propios, y una toma de posición fechada sobre el matrimonio que no se sostiene fuera de su
+polémica. **Ninguna forma nueva de aparato**, que después de tres sesiones seguidas añadiendo puertas
+es una noticia en sí.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1285 | **1303** |
+| Citas de ese Autor | 14 | **32** |
+| saber-para-ser-libre | 35 | **38** |
+| elogio-de-lo-escaso | 35 | **36** |
+
+Puerta completa en verde: `astro check` 0 errores, **2206 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 108.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

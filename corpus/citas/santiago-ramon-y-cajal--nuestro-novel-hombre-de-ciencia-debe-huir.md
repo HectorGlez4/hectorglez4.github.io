@@ -1,7 +1,9 @@
 ---
-texto: "Algunas semanas de solaz y de silencio en el campo, traerán la calma y la lucidez a nuestro espíritu."
+texto: "Nuestro novel hombre de ciencia debe huir de resúmenes y manuales como de peste."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-algunas-semanas-de-solaz-y-de-silencio"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-nuestro-novel-hombre-de-ciencia-debe-huir"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

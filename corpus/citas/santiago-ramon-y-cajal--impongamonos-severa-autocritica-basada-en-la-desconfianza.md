@@ -1,7 +1,9 @@
 ---
-texto: "Hay, además, un noble orgullo en triunfar con pobres medios: el orgullo de la elegancia y de la sobriedad."
+texto: "Impongámonos severa autocrítica, basada en la desconfianza de nosotros mismos."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-hay-ademas-un-noble-orgullo-en-triunfar"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-impongamonos-severa-autocritica-basada-en-la-desconfianza"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

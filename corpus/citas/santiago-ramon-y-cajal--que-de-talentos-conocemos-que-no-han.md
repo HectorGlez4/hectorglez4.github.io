@@ -1,7 +1,9 @@
 ---
-texto: "No se enseña bien sino lo que se hace, y quien no investiga no enseña a investigar."
+texto: "¡Qué de talentos conocemos que no han tenido más desgracia que haber sido discípulos de un gran hombre!"
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-no-se-ensena-bien-sino-lo-que"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-que-de-talentos-conocemos-que-no-han"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
