@@ -1,6 +1,8 @@
 ---
 texto: "Afirmamos solamente que las composiciones literarias de sobresaliente mérito son dificilísimas y cuestan más desvelos y trabajo que las producciones científicas originales."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-palabra"
 slug: "santiago-ramon-y-cajal-afirmamos-solamente-que-las-composiciones-literarias-de"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

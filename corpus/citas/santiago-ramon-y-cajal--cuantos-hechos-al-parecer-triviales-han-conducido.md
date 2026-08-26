@@ -1,7 +1,9 @@
 ---
-texto: "En vez de menudencias indignas de ser consideradas por el pensador, lo que hay es hombres cuya pequeñez intelectual no alcanza a penetrar la transcendencia de lo minúsculo."
+texto: "¡Cuántos hechos, al parecer triviales, han conducido a ciertos investigadores, adecuadamente preparados por el conocimiento de los métodos, a grandes conquistas científicas!"
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-vez-de-menudencias-indignas-de-ser"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-cuantos-hechos-al-parecer-triviales-han-conducido"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

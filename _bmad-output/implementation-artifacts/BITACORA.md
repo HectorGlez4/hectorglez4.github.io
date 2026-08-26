@@ -7105,3 +7105,63 @@ verificado en vivo.
 todavía, y 424 candidatas legibles del primer libro de Gutenberg aún sin leer.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 113.ª sesión — mil novecientas noventa y cuatro candidatas retiradas, y por tres razones
+
+Fui a lo que la 112.ª dejó medido: las obras selectas de una Autora con 23 Citas y sitio para 188.
+**1994 candidatas.** Y las 1994 se retiraron.
+
+### Primero, la puerta del Autor pasó — y comprobé por qué
+
+    Autor cotejado: el documento declara «Sister Juana Inés de la Cruz» y el Corpus, «Sor Juana…»
+
+Gutenberg cataloga en inglés. En vez de fiarme del mensaje de éxito fui a leer la regla: exige que
+**los tokens del nombre del Corpus estén en el declarado**, y `sor` figura en la lista de
+tratamientos que no distinguen a nadie —el comentario lo dice con todas las letras—. El nombre
+exigido es «juana inés cruz», presente. **Pasó por la razón correcta.**
+
+### Y luego, tres razones para no sembrar nada de ahí
+
+· **Verso con los saltos colapsados.** «Oh! qué bien me dijo Celia De que irse á un convento
+  quiere!». Entraría como prosa mientras la decisión sobre el verso sigue reservada, que es
+  colarla por la puerta de atrás.
+
+· **El prólogo de su editor de 1873**, atribuido a la Autora: «Nunca fué demasiado robusta, y
+  fácilmente vino á dar en achacosa». La puerta de FR-23 **no puede** cazarlo, porque el documento
+  declara a la Autora y es verdad: es su libro. Es el caso de la 84.ª —una atribución falsa dentro
+  de un documento auténtico— con otra cara.
+
+· **Es otra edición de texto ya sembrado.** Contiene la obra en prosa de la que ya salieron sus 23
+  Citas, en la ortografía de 1873 —«entenderia» sin tilde—, que no coteja con lo publicado.
+  Sembrar de aquí duplicaría el contenido con la grafía antigua.
+
+Cualquiera de las tres bastaba. Retirado con sus 1994 candidatas.
+
+### La puerta del verso que se midió y no se puso
+
+El verso colapsado deja rastro: mayúscula que abre palabra en mitad de la frase. Medirlo lo
+descartó como puerta: **caza 1294 candidatas, el 15 %**, y casi todas son prosa legítima con
+nombres propios —«Abel Martín», «La Romería de Kevlaar», «De la Virtud»—. Segunda puerta que se
+considera y se rechaza con la medida delante, después de la de versales en la 108.ª.
+
+La medida sí dejó un dato: **una Cita publicada es verso colapsado**, y es una de las cinco del
+censo cerrado que esperan esa decisión. No añade problema nuevo; confirma el que ya está escrito.
+
+### Y lo que sí se sembró
+
+Del libro que rinde, **6 Citas** en cuatro Temas: «En vez de menudencias indignas de ser
+consideradas por el pensador, lo que hay es hombres cuya pequeñez intelectual no alcanza a penetrar
+la transcendencia de lo minúsculo».
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1332 | **1338** |
+| Documentos retirados | 9 | **10** |
+| Candidatas retiradas de golpe | — | **1994** |
+
+Puerta completa en verde: `astro check` 0 errores, **2210 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 112.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.
