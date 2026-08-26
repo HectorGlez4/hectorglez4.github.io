@@ -1,7 +1,9 @@
 ---
-texto: "No es posible ya tratar con suavidad y timidez tan inveterado dolor: es necesario operar con energía."
+texto: "Llena e infestada de muchos males está la vida, con los que no puede haber larga paz, y apenas tregua."
 autor: "seneca"
-slug: "seneca-no-es-posible-ya-tratar-con-suavidad"
+temas:
+  - "la-vida"
+slug: "seneca-llena-e-infestada-de-muchos-males-esta"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

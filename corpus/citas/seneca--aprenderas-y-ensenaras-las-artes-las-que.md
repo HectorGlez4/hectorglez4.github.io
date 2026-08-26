@@ -1,7 +1,9 @@
 ---
-texto: "¿Cuántas casas se han conservado intactas hasta el fin en todas sus partes y sin ningún deterioro?"
+texto: "Aprenderás y enseñarás las artes, las que entretienen, las que embellecen y las que dirigen la vida."
 autor: "seneca"
-slug: "seneca-cuantas-casas-se-han-conservado-intactas-hasta"
+temas:
+  - "el-saber"
+slug: "seneca-aprenderas-y-ensenaras-las-artes-las-que"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

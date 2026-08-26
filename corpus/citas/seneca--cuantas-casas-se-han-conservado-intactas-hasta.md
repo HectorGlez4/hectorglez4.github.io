@@ -1,7 +1,9 @@
 ---
-texto: "Recorre con la vista la multitud de los conocidos y desconocidos: en todas partes encontrarás aflicciones más terribles."
+texto: "¿Cuántas casas se han conservado intactas hasta el fin en todas sus partes y sin ningún deterioro?"
 autor: "seneca"
-slug: "seneca-recorre-con-la-vista-la-multitud-de"
+temas:
+  - "el-tiempo"
+slug: "seneca-cuantas-casas-se-han-conservado-intactas-hasta"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

@@ -1,6 +1,8 @@
 ---
 texto: "Buscad una regla, una ley moral: imposible es que la halléis en el caos que resulta del choque continuo entre las preocupaciones y la ilustración, el error y la verdad, la injusticia y la conciencia."
 autor: "concepcion-arenal"
+temas:
+  - "la-verdad"
 slug: "concepcion-arenal-buscad-una-regla-una-ley-moral-imposible"
 procedencia:
   obra: "La mujer del porvenir"

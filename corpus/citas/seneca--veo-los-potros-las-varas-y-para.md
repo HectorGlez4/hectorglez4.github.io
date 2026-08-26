@@ -1,7 +1,9 @@
 ---
-texto: "Llena e infestada de muchos males está la vida, con los que no puede haber larga paz, y apenas tregua."
+texto: "Veo los potros, las varas, y para cada miembro, cada músculo, un instrumento de tortura; pero también veo la muerte."
 autor: "seneca"
-slug: "seneca-llena-e-infestada-de-muchos-males-esta"
+temas:
+  - "la-muerte"
+slug: "seneca-veo-los-potros-las-varas-y-para"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

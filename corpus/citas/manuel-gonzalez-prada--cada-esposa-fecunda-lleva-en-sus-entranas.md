@@ -1,6 +1,8 @@
 ---
 texto: "Cada esposa fecunda lleva en sus entrañas el germen de futuras humanidades, llamadas a expandirse en la individualidad consciente o condenadas a vegetar en el gregarismo religioso."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-cada-esposa-fecunda-lleva-en-sus-entranas"
 procedencia:
   obra: "Las esclavas de la Iglesia"

@@ -1,7 +1,9 @@
 ---
-texto: "Si lloras porque ha muerto, has debido llorar siempre, porque siempre has sabido que debía morir."
+texto: "Recorre con la vista la multitud de los conocidos y desconocidos: en todas partes encontrarás aflicciones más terribles."
 autor: "seneca"
-slug: "seneca-si-lloras-porque-ha-muerto-has-debido"
+temas:
+  - "la-adversidad"
+slug: "seneca-recorre-con-la-vista-la-multitud-de"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

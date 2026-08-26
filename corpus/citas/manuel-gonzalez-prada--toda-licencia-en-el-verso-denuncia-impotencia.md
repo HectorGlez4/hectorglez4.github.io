@@ -1,6 +1,8 @@
 ---
 texto: "Toda licencia en el verso denuncia impotencia del versificador."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-toda-licencia-en-el-verso-denuncia-impotencia"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

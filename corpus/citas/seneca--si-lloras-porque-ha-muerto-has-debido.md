@@ -1,7 +1,9 @@
 ---
-texto: "Aprenderás y enseñarás las artes, las que entretienen, las que embellecen y las que dirigen la vida."
+texto: "Si lloras porque ha muerto, has debido llorar siempre, porque siempre has sabido que debía morir."
 autor: "seneca"
-slug: "seneca-aprenderas-y-ensenaras-las-artes-las-que"
+temas:
+  - "la-muerte"
+slug: "seneca-si-lloras-porque-ha-muerto-has-debido"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

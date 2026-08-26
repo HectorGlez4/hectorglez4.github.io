@@ -1,7 +1,9 @@
 ---
-texto: "Veo los potros, las varas, y para cada miembro, cada músculo, un instrumento de tortura; pero también veo la muerte."
+texto: "No es posible ya tratar con suavidad y timidez tan inveterado dolor: es necesario operar con energía."
 autor: "seneca"
-slug: "seneca-veo-los-potros-las-varas-y-para"
+temas:
+  - "la-adversidad"
+slug: "seneca-no-es-posible-ya-tratar-con-suavidad"
 procedencia:
   obra: "Consolación a Marcia"
   año: 1884

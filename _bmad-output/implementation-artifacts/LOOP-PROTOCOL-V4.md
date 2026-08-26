@@ -385,6 +385,28 @@ candidata, una y otra vez, son tres cosas y no el tema: **empieza remitiendo** (
 es…», «Muchas puede haber…»), **cita a otro** («Ya Locke notó…», «Yo os digo con Renan…»), o **trae
 nombre propio y anécdota**.
 
+### Se elige OBRA, no firma (131.ª)
+
+La cantera se contaba por Autor y se leía también por Autor. Pero **una firma tiene varias obras y
+el rendimiento es del género**, así que leer «de tal Autor» es leer al azar entre sus libros. La
+131.ª encadenó tres sondas al 23 %, al 8 % y al 13 % antes de ver que estaba leyendo una
+**conferencia política** —nombres propios, coyuntura— mientras la prosa aforística de ese mismo
+Autor estaba en otro volumen.
+
+La cuenta por documento lleva una columna que la de por firma no tenía: **cuántas Citas ha dado ya
+esa obra**. Es la que separa la veta exprimida de la intacta, y desmiente el total:
+
+| cantera | ya publicadas | qué es |
+|---|---|---|
+| 210 | 7 | consolación doctrinal — **intacta y buena** |
+| 261 | 2 | parábolas — **intacta y mala**: es el género del 1 % |
+
+Un total alto no es una veta. Con la obra bien elegida —doctrinal, sin tocar— el rendimiento pasó
+de 8-13 % a **33 %**.
+
+Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
+a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
+
 ### La longitud se invierte según el género (129.ª)
 
 La 115.ª midió que **la densidad cae con la longitud de la frase**: una sentencia de sesenta

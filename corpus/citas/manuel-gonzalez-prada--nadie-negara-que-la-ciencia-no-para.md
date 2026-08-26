@@ -1,6 +1,8 @@
 ---
 texto: "Nadie negará que la Ciencia no para en su movimiento de ascensión."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-nadie-negara-que-la-ciencia-no-para"
 procedencia:
   obra: "Italia y el papado"

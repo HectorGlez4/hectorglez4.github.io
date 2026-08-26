@@ -8220,3 +8220,60 @@ positivos que aciertos. La cazó la lectura, que para esto sí sirve.
 Puerta completa en verde y consultada por su código de salida.
 
 **Actions seguía caído.** Las sesiones 125 a 130 esperan en `main`; el sitio en vivo sirve la 124.ª.
+
+
+## 131.ª sesión — la cantera se contaba por firma y hay que leerla por obra
+
+Mismo tramo reservado. La sesión empezó mal, y el mal fue de método.
+
+### Tres sondas al 23 %, al 8 % y al 13 %
+
+Se siguió en la veta de la 130.ª: **3 de 13**. Se probó el tramo largo en otra firma de ensayo
+polémico, que es donde la 129.ª midió el 54 %: **1 de 13**. Se probó su tramo corto, que es donde
+la prosa aforística rinde: **2 de 15**.
+
+Tres sondas seguidas por debajo del 15 %, y la explicación no era el género ni la longitud.
+
+### El error: se elegía Autor y se leía obra
+
+`ver6.py` filtra **por firma**, y una firma tiene varias obras. Las quince candidatas del segundo
+intento salían de una **conferencia política** —nombres propios, coyuntura, crítica literaria—
+mientras la prosa aforística de ese mismo Autor está en otro volumen. Se leyó el libro equivocado
+y se culpó al género.
+
+La 116.ª ya avisaba de esto por el otro lado: «antes de recuperar un volumen, mirar qué más trae».
+Hacía falta lo mismo **antes de leerlo**.
+
+### La cuenta por obra, y lo que enseña de golpe
+
+Se midió la cantera por documento, con una columna que no existía: **cuántas Citas ha dado ya cada
+obra**. Esa columna separa la veta exprimida de la intacta:
+
+| cantera | ya publicadas | qué es |
+|---|---|---|
+| 210 | **7** | consolación doctrinal, casi sin tocar |
+| 290 | **9** | sin tocar |
+| 261 | **2** | parábolas — el género del 1 %, y por eso está sin tocar |
+
+Un total alto **no** significa veta: la obra de 261 candidatas lleva dos Citas en toda la historia
+del bucle porque es narrativa, y seguirá dando dos.
+
+### Y con la obra elegida, el rendimiento se dobla
+
+La consolación doctrinal, sin tocar y del género medido al 40 %, dio **5 de 15: 33 %** —contra el
+8-13 % de leer a ciegas por firma—. Su segunda tanda cayó a 13 %, y también se ve por qué: la obra
+abre doctrinal y sigue **dirigida a una persona concreta**, con su nombre y su hijo muerto. Es el
+mismo patrón interno que la 104.ª midió —el tramo doctrinal rinde más que el circunstancial—, ahora
+visto dentro de una carta.
+
+Trece Citas en total, en ocho Temas. Tres van a «la muerte», que era de los más flacos.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1462 | **1475** |
+| Unidad para elegir dónde leer | firma | **obra** |
+| Rendimiento leyendo a ciegas · eligiendo obra | 8-13 % | **33 %** |
+
+Puerta completa en verde y consultada por su código de salida.
