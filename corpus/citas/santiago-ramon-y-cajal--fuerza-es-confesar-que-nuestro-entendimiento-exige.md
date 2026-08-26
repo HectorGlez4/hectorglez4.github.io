@@ -1,7 +1,9 @@
 ---
-texto: "Da pena reconocer que, en la mayoría de los casos, los impugnadores no defienden una doctrina, sino su propia infalibilidad."
+texto: "Fuerza es confesar que nuestro entendimiento exige imperiosamente teorías concebibles, representables en términos mecánicos."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-da-pena-reconocer-que-en-la-mayoria"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-fuerza-es-confesar-que-nuestro-entendimiento-exige"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

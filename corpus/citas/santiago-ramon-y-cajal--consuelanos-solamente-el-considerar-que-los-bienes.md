@@ -1,7 +1,9 @@
 ---
-texto: "En ambiente favorable, hasta el apocado siente crecer sus fuerzas; un medio hostil o indiferente abate el ánimo mejor templado."
+texto: "Consuélanos solamente el considerar que los bienes logrados, aunque mezquinos, corresponden aproximadamente a la importancia de los esfuerzos."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-ambiente-favorable-hasta-el-apocado-siente"
+temas:
+  - "el-trabajo"
+slug: "santiago-ramon-y-cajal-consuelanos-solamente-el-considerar-que-los-bienes"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

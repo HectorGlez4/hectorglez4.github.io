@@ -1,7 +1,9 @@
 ---
-texto: "Si la hipótesis no se conforma con los hechos, hay que rechazarla sin piedad, e imaginar otra explicación exenta de reproche."
+texto: "Excelentes son los estímulos del patriotismo y el noble afán de celebridad para mover a la ejecución de grandes empresas."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-si-la-hipotesis-no-se-conforma-con"
+temas:
+  - "la-patria"
+slug: "santiago-ramon-y-cajal-excelentes-son-los-estimulos-del-patriotismo-y"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

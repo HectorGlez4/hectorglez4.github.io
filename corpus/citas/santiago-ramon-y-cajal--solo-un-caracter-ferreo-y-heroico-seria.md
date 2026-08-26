@@ -1,7 +1,9 @@
 ---
-texto: "Pueril y temerario fuera concurrir a torneos científicos, con carácter de rigurosas luchas internacionales, sin prepararse tenaz y adecuadamente."
+texto: "Solo un carácter férreo y heroico sería capaz de sobreponerse a un medio adverso, y esperar, resignado y obscuro, la aprobación de la posteridad."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-pueril-y-temerario-fuera-concurrir-a-torneos"
+temas:
+  - "la-adversidad"
+slug: "santiago-ramon-y-cajal-solo-un-caracter-ferreo-y-heroico-seria"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Sabido es que el hombre mezcla a todo su personalidad, y cuando cree fotografiar el mundo exterior, a menudo se contempla y se retrata a sí mismo."
+texto: "En punto a reputación, la ventura suprema fuera merecer la aprobación de esos raros espíritus superiores que la humanidad produce de vez en cuando."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-sabido-es-que-el-hombre-mezcla-a"
+temas:
+  - "la-virtud"
+slug: "santiago-ramon-y-cajal-en-punto-a-reputacion-la-ventura-suprema"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

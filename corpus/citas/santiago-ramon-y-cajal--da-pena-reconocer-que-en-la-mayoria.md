@@ -1,7 +1,9 @@
 ---
-texto: "Tan fragmentario es nuestro saber, que aun en los temas más prolijamente explorados surgen a lo mejor insólitos hallazgos."
+texto: "Da pena reconocer que, en la mayoría de los casos, los impugnadores no defienden una doctrina, sino su propia infalibilidad."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-tan-fragmentario-es-nuestro-saber-que-aun"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-da-pena-reconocer-que-en-la-mayoria"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Conmiseración, por el talento consumido persiguiendo quimeras; disgusto, por el tiempo y trabajo lastimosamente perdidos."
+texto: "A la excelsa alegría que lleva aparejado el cumplimiento austero del deber, se añadirán también el bienestar material y los halagos de la nombradía."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-conmiseracion-por-el-talento-consumido-persiguiendo-quimeras"
+temas:
+  - "el-trabajo"
+slug: "santiago-ramon-y-cajal-a-la-excelsa-alegria-que-lleva-aparejado"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

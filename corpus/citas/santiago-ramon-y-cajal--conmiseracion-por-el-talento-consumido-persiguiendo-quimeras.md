@@ -1,7 +1,9 @@
 ---
-texto: "Solo un carácter férreo y heroico sería capaz de sobreponerse a un medio adverso, y esperar, resignado y obscuro, la aprobación de la posteridad."
+texto: "Conmiseración, por el talento consumido persiguiendo quimeras; disgusto, por el tiempo y trabajo lastimosamente perdidos."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-solo-un-caracter-ferreo-y-heroico-seria"
+temas:
+  - "el-tiempo"
+slug: "santiago-ramon-y-cajal-conmiseracion-por-el-talento-consumido-persiguiendo-quimeras"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

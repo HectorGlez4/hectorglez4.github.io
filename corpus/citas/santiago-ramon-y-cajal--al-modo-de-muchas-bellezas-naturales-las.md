@@ -1,7 +1,9 @@
 ---
-texto: "A la excelsa alegría que lleva aparejado el cumplimiento austero del deber, se añadirán también el bienestar material y los halagos de la nombradía."
+texto: "Al modo de muchas bellezas naturales, las obras humanas necesitan, para no perder sus encantos, ser contempladas a distancia."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-a-la-excelsa-alegria-que-lleva-aparejado"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-al-modo-de-muchas-bellezas-naturales-las"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

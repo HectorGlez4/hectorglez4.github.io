@@ -6957,3 +6957,47 @@ Puerta completa en verde: `astro check` 0 errores, **2206 pruebas**, `build`, **
 despliegue de la 108.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 110.ª sesión — el mismo libro, y un grupo de candidatas que se descarta entero
+
+Tercera tanda del libro de Gutenberg: **18 Citas** en siete Temas. Ese Autor pasa de 32 a **50** —de
+2 hace tres sesiones—, y el Corpus a **1321**.
+
+### Un descarte que conviene nombrar porque es un grupo, no un caso
+
+El libro dedica varias páginas a la esposa del hombre de ciencia, y de ahí salen candidatas
+perfectamente formadas:
+
+    Salvo honrosas excepciones, tales hembras constituyen constante perturbación o perenne ocasión
+    de disgustos para el cultivador de la ciencia.
+
+    Muchos ciudadanos padecen mujer, pero se la padecen ellos solos; mas de la mujer del sabio
+    sufre, a veces, la sociedad y hasta la humanidad entera.
+
+**Fuera, y por el criterio de la 96.ª**, no por otro: son toma de posición en una polémica de su
+época y no se sostienen fuera de ella. Merece decirse que es **un grupo y no un caso suelto**,
+porque un guion las dejaría pasar todas —están bien escritas, no tienen erratas, no citan a nadie y
+no arrancan con conector—. Lo único que las descarta es leerlas.
+
+### El criterio del «Que» inicial vuelve a costar caro
+
+    Que a los libros, como a los hombres, los respetamos y admiramos por sus buenas cualidades,
+    pero solo los amamos por algunos de sus defectos.
+
+Es de las mejores frases del libro. Empieza con el «Que» de un ítem de enumeración, que la 99.ª y la
+100.ª descartan. **Fuera otra vez.** Van tres sesiones en que esa regla se lleva por delante algo
+que me habría gustado publicar, y ése es exactamente el motivo de que siga siendo una regla.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1303 | **1321** |
+| Citas de ese Autor | 32 | **50** |
+| Legibles de este libro aún sin leer | 442 | **433** |
+| Techo de concentración | 12,5 % | **12,3 %** |
+
+Puerta completa en verde: `astro check` 0 errores, **2206 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 109.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

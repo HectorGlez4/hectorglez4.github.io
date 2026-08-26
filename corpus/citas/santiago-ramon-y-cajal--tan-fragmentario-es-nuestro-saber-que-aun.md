@@ -1,7 +1,9 @@
 ---
-texto: "En punto a reputación, la ventura suprema fuera merecer la aprobación de esos raros espíritus superiores que la humanidad produce de vez en cuando."
+texto: "Tan fragmentario es nuestro saber, que aun en los temas más prolijamente explorados surgen a lo mejor insólitos hallazgos."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-punto-a-reputacion-la-ventura-suprema"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-tan-fragmentario-es-nuestro-saber-que-aun"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

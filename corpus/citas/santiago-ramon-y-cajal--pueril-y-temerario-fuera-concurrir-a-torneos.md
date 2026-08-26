@@ -1,7 +1,9 @@
 ---
-texto: "Excelentes son los estímulos del patriotismo y el noble afán de celebridad para mover a la ejecución de grandes empresas."
+texto: "Pueril y temerario fuera concurrir a torneos científicos, con carácter de rigurosas luchas internacionales, sin prepararse tenaz y adecuadamente."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-excelentes-son-los-estimulos-del-patriotismo-y"
+temas:
+  - "la-prudencia"
+slug: "santiago-ramon-y-cajal-pueril-y-temerario-fuera-concurrir-a-torneos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

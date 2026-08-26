@@ -1,7 +1,9 @@
 ---
-texto: "Consideremos que, si hay ciencias que parecen tocar a su perfección, existen otras en vías de constitución y algunas que no han nacido todavía."
+texto: "En ambiente favorable, hasta el apocado siente crecer sus fuerzas; un medio hostil o indiferente abate el ánimo mejor templado."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-consideremos-que-si-hay-ciencias-que-parecen"
+temas:
+  - "la-adversidad"
+slug: "santiago-ramon-y-cajal-en-ambiente-favorable-hasta-el-apocado-siente"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

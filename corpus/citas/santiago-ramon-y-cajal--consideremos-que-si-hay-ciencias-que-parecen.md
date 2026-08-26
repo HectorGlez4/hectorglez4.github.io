@@ -1,7 +1,9 @@
 ---
-texto: "Si, a pesar de todo, la solución no aparece y presentimos, no obstante, que el asunto se acerca a su madurez, procurémonos algún tiempo de reposo."
+texto: "Consideremos que, si hay ciencias que parecen tocar a su perfección, existen otras en vías de constitución y algunas que no han nacido todavía."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-si-a-pesar-de-todo-la-solucion"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-consideremos-que-si-hay-ciencias-que-parecen"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Consuélanos solamente el considerar que los bienes logrados, aunque mezquinos, corresponden aproximadamente a la importancia de los esfuerzos."
+texto: "Toda descripción, por objetiva e ingenua que parezca, constituye interpretación personal, punto de vista propio del autor."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-consuelanos-solamente-el-considerar-que-los-bienes"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-toda-descripcion-por-objetiva-e-ingenua-que"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

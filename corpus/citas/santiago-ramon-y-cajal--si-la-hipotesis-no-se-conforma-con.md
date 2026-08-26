@@ -1,7 +1,9 @@
 ---
-texto: "Al modo de muchas bellezas naturales, las obras humanas necesitan, para no perder sus encantos, ser contempladas a distancia."
+texto: "Si la hipótesis no se conforma con los hechos, hay que rechazarla sin piedad, e imaginar otra explicación exenta de reproche."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-al-modo-de-muchas-bellezas-naturales-las"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-si-la-hipotesis-no-se-conforma-con"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

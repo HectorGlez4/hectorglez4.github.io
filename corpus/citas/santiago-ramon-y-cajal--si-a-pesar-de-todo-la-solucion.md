@@ -1,7 +1,9 @@
 ---
-texto: "Toda descripción, por objetiva e ingenua que parezca, constituye interpretación personal, punto de vista propio del autor."
+texto: "Si, a pesar de todo, la solución no aparece y presentimos, no obstante, que el asunto se acerca a su madurez, procurémonos algún tiempo de reposo."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-toda-descripcion-por-objetiva-e-ingenua-que"
+temas:
+  - "la-prudencia"
+slug: "santiago-ramon-y-cajal-si-a-pesar-de-todo-la-solucion"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
