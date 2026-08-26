@@ -399,6 +399,13 @@ Lo que **no** cambia, y hay que releerlo antes de cada alta:
   tiene que ser verdad. En la 137.ª el candidato mejor de la lista —35 obras, 250 KB, un filósofo de
   primera fila— murió en **1955**: dominio público en 2036. Descartado sin gastar una descarga.
   La regla es mecánica y se comprueba en la lista, antes de abrir nada.
+· **Y en una traducción, el año de la edición manda sobre el año del Autor.** Los derechos del
+  traductor son propios: que el Autor lleve dos mil años muerto no libera la versión castellana. La
+  regla la da el precedente del propio Corpus: la *Consolación a Marcia* declara **año 1884**, y una
+  edición de 1884 implica un traductor muerto hace mucho más de ochenta años. **Sin año declarado,
+  la traducción no entra**, porque no hay con qué respaldar el `estadoDerechos: dominio-público` que
+  se escribe en cada Cita. En la 139.ª eso descartó dos colecciones de aforismos puros —el género
+  del 40 %— del mejor candidato del filtro.
 · **La meta cuenta Autores que PUBLICAN**, no declarados —`src/lib/meta.ts` lo dice y lo razona—.
   Crear fichas vacías no mueve el tramo. Admitir es recuperar, versionar, extraer, leer y publicar.
 · **El suelo del 40 % de tradición latinoamericana** sigue siendo un compromiso del PRD, y se mide

@@ -8672,3 +8672,55 @@ es exactamente para lo que la orden existe. El guardián no impidió un error: *
 | Colección del silencio | 28 · 1 firma | **31 · 2 firmas** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 139.ª sesión — una traducción sin año no puede declararse de dominio público
+
+Sexta sesión con el tramo abierto. **26 → 28 Autores**. Quedan siete.
+
+### El mejor candidato del filtro, descartado por los derechos del traductor
+
+Con las tres reglas aplicadas de una consulta —categoría, †1946, tamaño **por obra**— el mejor
+candidato traía **dos colecciones de aforismos puros**, que es el género medido al 40 %. En
+castellano es **traducción**, y en una traducción los derechos del traductor son propios: no bastan
+los del Autor.
+
+Ninguna de las dos páginas declara traductor. Y aquí el precedente del Corpus da la regla, en vez de
+tener que inventarla: la *Consolación a Marcia* que ya se publica declara **año 1884**, y una edición
+de 1884 implica un traductor muerto hace mucho más de ochenta años. Las dos páginas de aforismos **no
+declaran año ninguno**.
+
+**Una traducción entra solo si la edición declara año, y ese año la sostiene.** Sin año no hay con
+qué respaldar el `estadoDerechos: dominio-público` que el Corpus escribe en cada Cita.
+
+Se descartó también, por su asunto, un panfleto de 42 KB sobre control de la natalidad.
+
+### Dos que entraron, y lo poco que dieron
+
+· Una **conferencia sobre la imagen poética**: **1 de 27**. Es enteramente sobre un poeta concreto
+  —nombres, biografía, versos citados—, o sea crítica literaria, el género que la escala mide en
+  torno al 1 %. La única que se sostiene sola lo hace bien:
+
+  > Se puede hacer un poema épico de la lucha que sostienen los leucocitos en el ramaje aprisionado
+  > de las venas, y se puede dar una inacabable impresión de infinito con la forma y olor de una rosa
+  > tan sólo.
+
+· Un ensayo de **filosofía de la historia**: **2 de 11**. El documento trae OCR dañado que la puerta
+  de la 11.5 no ve porque produce **palabras válidas**: «do» por «de», «so» por «se». No se convierte
+  en regla —«do» y «so» existen en castellano y una puerta así mordería lo bueno—, pero queda
+  anotado como quinta medida que se mira y no se pone.
+
+Y se apartó una que fuera de su página defiende «una cuidadosa, y á veces, despótica tutela». Es el
+criterio de la 129.ª: una Cita es un fragmento que **sigue diciendo lo mismo** cuando se queda solo,
+y ésta dice otra cosa.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 26 | **28** de 35 |
+| Tradición latinoamericana | 53,8 % | **50 %** |
+| Citas | 1528 | **1531** |
+| Medidas que se miran y no se ponen | 4 | **5** |
+
+Puerta completa en verde y consultada por su código de salida.
