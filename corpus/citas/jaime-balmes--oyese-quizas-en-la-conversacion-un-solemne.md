@@ -1,7 +1,9 @@
 ---
-texto: "En todo acto hay un gasto de fuerza, hay pues un principio de cansancio, y por consiguiente de sufrimiento."
+texto: "Óyese quizas en la conversacion un solemne desatino dicho con la mayor serenidad y buena fe del mundo."
 autor: "jaime-balmes"
-slug: "jaime-balmes-en-todo-acto-hay-un-gasto-de"
+temas:
+  - "la-palabra"
+slug: "jaime-balmes-oyese-quizas-en-la-conversacion-un-solemne"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

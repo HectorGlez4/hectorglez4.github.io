@@ -1,6 +1,8 @@
 ---
 texto: "No todas las cosas se han de mirar de la misma manera, sino del modo que cada una de ellas se ve mejor."
 autor: "jaime-balmes"
+temas:
+  - "la-prudencia"
 slug: "jaime-balmes-no-todas-las-cosas-se-han-de"
 procedencia:
   obra: "El Criterio"

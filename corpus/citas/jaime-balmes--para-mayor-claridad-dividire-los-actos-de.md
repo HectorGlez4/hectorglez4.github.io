@@ -1,7 +1,9 @@
 ---
-texto: "Hasta los sentimientos buenos, si se exaltan en demasía, son capaces de conducirnos á errores deplorables."
+texto: "Para mayor claridad, dividiré los actos de nuestro entendimiento en dos clases: especulativos y prácticos."
 autor: "jaime-balmes"
-slug: "jaime-balmes-hasta-los-sentimientos-buenos-si-se-exaltan"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-para-mayor-claridad-dividire-los-actos-de"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

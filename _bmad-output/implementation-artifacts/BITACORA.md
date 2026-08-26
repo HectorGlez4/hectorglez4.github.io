@@ -8836,3 +8836,57 @@ Puerta completa en verde y consultada por su código de salida.
 **El tramo no se alcanza esta sesión y no se fuerza.** Lo que queda por probar, anotado para la
 siguiente: obras de Autores admitidos sin tocar, y las categorías de la Fuente vieja que no son ni
 ensayo ni epístola.
+
+
+## 142.ª sesión — las dos vetas mayores del Corpus estaban en casa
+
+La 141.ª dejó anotado que faltaba probar «obras sin tocar de Autores admitidos». La tabla por obra
+lo dice de un vistazo, y lo que dice es que **las dos vetas mayores del Corpus llevaban ahí todo el
+tiempo**:
+
+| cantera | ya publicadas | qué es |
+|---|---|---|
+| **1433** | **2** | ensayo doctrinal sobre la mediocridad |
+| **982** | **6** | tratado sobre el arte de pensar bien |
+
+Ocho sesiones buscando Autores nuevos por dos Fuentes, y los dos filones más grandes eran de firmas
+ya admitidas. **La tabla por obra existía desde la 131.ª**; lo que faltaba era mirarla cuando el
+tramo declarado empuja a buscar otra cosa.
+
+Rindieron **25 %, 27 % y 25 %**, sostenido:
+
+> No todas las cosas se han de mirar de la misma manera, sino del modo que cada una de ellas se ve mejor.
+> Hasta los sentimientos buenos, si se exaltan en demasía, son capaces de conducirnos á errores deplorables.
+> Cuando el cuerpo se niega á servir todas nuestras intenciones y deseos, podemos afirmar que ha comenzado la vejez.
+
+Nueve Citas en seis Temas.
+
+### Una forma de aparato nueva, y el conteo que casi la mide mal
+
+Entre las candidatas apareció la **lista de lecturas** que el Autor deja al cerrar un capítulo:
+
+> Las historias y las costumbres de los germanos (uno).--SALUSTIO: Conjuración de Catilina.
+
+Es hermana de la ficha bibliográfica que ya se cierra, y **distinta**: aquélla la escribe el redactor
+de una sección de reseñas y la delata el aparato de librero —tomos, formato, pesetas—; ésta **la
+escribe el Autor**, es un plan de estudios y no lleva precio. Que la escriba él no la hace Cita: es
+un índice, y un índice no dice nada suelto.
+
+**El primer conteo devolvió cero, y el cero era falso**: el comando murió con «argument list too
+long» al pasarle catorce mil ficheros, y un cero de un comando roto se lee igual que un cero de
+verdad. Rehecho, la cifra es **0 de 1558 publicadas y 10 de 14 745 candidatas**, y las diez son
+listas. Regla limpia, y entra.
+
+Es el mismo defecto de la 124.ª y la 138.ª por tercera vez, y la tercera vez que lo caza **mirar la
+salida del comando** en lugar de su resultado.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1549 | **1558** |
+| Autores | 29 | 29 de 35 |
+| Pruebas | 2307 | **2313** |
+| Formas de aparato cerradas | — | **+1** |
+
+Puerta completa en verde y consultada por su código de salida.

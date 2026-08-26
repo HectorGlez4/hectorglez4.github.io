@@ -1,7 +1,9 @@
 ---
-texto: "Para mayor claridad, dividiré los actos de nuestro entendimiento en dos clases: especulativos y prácticos."
+texto: "En todo acto hay un gasto de fuerza, hay pues un principio de cansancio, y por consiguiente de sufrimiento."
 autor: "jaime-balmes"
-slug: "jaime-balmes-para-mayor-claridad-dividire-los-actos-de"
+temas:
+  - "el-trabajo"
+slug: "jaime-balmes-en-todo-acto-hay-un-gasto-de"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

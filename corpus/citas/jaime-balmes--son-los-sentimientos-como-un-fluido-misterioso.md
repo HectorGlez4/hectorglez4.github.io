@@ -1,6 +1,8 @@
 ---
 texto: "Son los sentimientos como un flúido misterioso que circula por conductos cuyo interior es impenetrable."
 autor: "jaime-balmes"
+temas:
+  - "la-vida"
 slug: "jaime-balmes-son-los-sentimientos-como-un-fluido-misterioso"
 procedencia:
   obra: "El Criterio"

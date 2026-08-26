@@ -1,7 +1,9 @@
 ---
-texto: "Cuando el cuerpo se niega á servir todas nuestras intenciones y deseos, ó cuando éstos son medidos en previsión de fracasos posibles, podemos afirmar que ha comenzado la vejez."
+texto: "En las grandes horas, de una raza ó de un hombre, la inspiración es indispensable para crear; esa chispa se enciende en la imaginación y la experiencia la convierte en hoguera."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cuando-el-cuerpo-se-niega-a-servir"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-en-las-grandes-horas-de-una-raza"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

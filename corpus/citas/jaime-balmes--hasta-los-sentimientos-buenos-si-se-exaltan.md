@@ -1,7 +1,9 @@
 ---
-texto: "Óyese quizas en la conversacion un solemne desatino dicho con la mayor serenidad y buena fe del mundo."
+texto: "Hasta los sentimientos buenos, si se exaltan en demasía, son capaces de conducirnos á errores deplorables."
 autor: "jaime-balmes"
-slug: "jaime-balmes-oyese-quizas-en-la-conversacion-un-solemne"
+temas:
+  - "la-prudencia"
+slug: "jaime-balmes-hasta-los-sentimientos-buenos-si-se-exaltan"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

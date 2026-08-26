@@ -288,6 +288,25 @@ const APARATO_DE_LA_FUENTE = [
    * Medido: **0 de 1497 publicadas** y **34 de 11 095 candidatas**, y las 34 son doblado real.
    */
   /^\s*\d{1,4}\s+\p{L}/u,
+
+  /*
+   * La **lista de lecturas** que el Autor deja al final de un capítulo.
+   *
+   *     Las historias y las costumbres de los germanos (uno).--SALUSTIO: Conjuración de Catilina.
+   *     Teatro selecto (dos).--HUMBOLDT: Colón y el descubrimiento de América (dos).
+   *
+   * Hermana de la ficha bibliográfica de arriba y distinta: aquélla la escribe el redactor de una
+   * sección de reseñas y la delata el aparato de librero —tomos, formato, pesetas—; ésta **la
+   * escribe el Autor**, es un plan de estudios y no lleva precio ninguno. Que la escriba él no la
+   * hace Cita: es un índice, y un índice no dice nada suelto.
+   *
+   * Lo que la delata es el **nombre en versales con dos puntos detrás de una raya doble**, que es
+   * como la Fuente transcribe las entradas. Un nombre en versales dentro de la prosa no lo cumple,
+   * ni un inciso con raya doble sin nombre detrás.
+   *
+   * Medido: **0 de 1558 publicadas** y **10 de 14 745 candidatas**, y las diez son listas.
+   */
+  /--\s*[A-ZÁÉÍÓÚÑÜ]{3,}\s*:/u,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */
