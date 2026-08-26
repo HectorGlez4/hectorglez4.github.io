@@ -6796,3 +6796,44 @@ puerta que impide sesenta atribuciones falsas, y la constancia de que una heurí
 punto ciego que solo se ve con obras de índice largo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 107.ª sesión — tres documentos del mismo Autor, tres rendimientos distintos
+
+Se sembró de un Autor con margen para 73 Citas, eligiendo por la escala. Tres documentos suyos, y
+el resultado separa lo que la 104.ª había empezado a distinguir:
+
+| documento | candidatas | Citas | rendimiento |
+|---|---|---|---|
+| ensayo de tesis (6,2 KB) | 34 | **6** | ~18 % |
+| carta política (7,4 KB) | 14 | **1** | 7 % |
+| artículo de coyuntura agrícola (4,7 KB) | 14 | **0** | 0 % |
+
+**Mismo Autor, misma sesión, tres géneros, tres rendimientos.** Es la confirmación más limpia que
+ha tenido la escala, porque elimina la variable del Autor: no es que unos escriban más citable que
+otros, es **en qué registro escriben cada vez**.
+
+El ensayo dio lo que la escala predice y las Citas son de las que se sostienen solas —«Hombre es
+más que blanco, más que mulato, más que negro»; «Dos racistas serían igualmente culpables»—. El
+artículo agrícola dio **cero**, y no por malo: habla de arados, de buques y de aprendices, y nada de
+eso vive fuera de su año.
+
+### Otra vez el test antes que yo
+
+El de coyuntura agrícola no sostenía ninguna Cita, y quien lo dijo fue **la prueba de FR-23**.
+Retirado con sus 14 candidatas. Van cuatro sesiones en que esa prueba señala la deuda antes que yo,
+y a estas alturas es más un procedimiento que una casualidad: **siembro, y luego dejo que la prueba
+me diga de qué documento no saqué nada**.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1266 | **1273** |
+| Documentos versionados | 141 | **143** |
+| Documentos retirados | 8 | **9** |
+| Pruebas de unidad | 2192 | **2194** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la
+106.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.
