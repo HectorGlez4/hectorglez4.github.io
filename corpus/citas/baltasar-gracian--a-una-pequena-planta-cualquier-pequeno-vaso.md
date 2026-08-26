@@ -1,6 +1,8 @@
 ---
 texto: "A una pequeña planta, cualquier pequeño vaso le es campo espacioso; un árbol gigante, una empinada palma, un descollado cedro, hállase violentado en la vasija estrecha: no puede espaciarse, no puede campear."
 autor: "baltasar-gracian"
+temas:
+  - "la-vida"
 slug: "baltasar-gracian-a-una-pequena-planta-cualquier-pequeno-vaso"
 procedencia:
   obra: "El político"

@@ -1,7 +1,9 @@
 ---
-texto: "Mujeres dieron a Roma los reyes y los quitaron."
+texto: "Nada se ha de mostrar menos que lo que se desea más."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-mujeres-dieron-a-roma-los-reyes-y"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-nada-se-ha-de-mostrar-menos-que"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

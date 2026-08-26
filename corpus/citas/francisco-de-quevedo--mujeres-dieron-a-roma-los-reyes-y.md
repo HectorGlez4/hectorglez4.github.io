@@ -1,7 +1,9 @@
 ---
-texto: "No aborreces el Imperio, sino el emperador."
+texto: "Mujeres dieron a Roma los reyes y los quitaron."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-no-aborreces-el-imperio-sino-el-emperador"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-mujeres-dieron-a-roma-los-reyes-y"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

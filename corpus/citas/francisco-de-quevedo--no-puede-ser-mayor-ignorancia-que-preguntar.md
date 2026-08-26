@@ -1,7 +1,9 @@
 ---
-texto: "Nada se ha de mostrar menos que lo que se desea más."
+texto: "No puede ser mayor ignorancia que preguntar uno lo que ve."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-nada-se-ha-de-mostrar-menos-que"
+temas:
+  - "el-saber"
+slug: "francisco-de-quevedo-no-puede-ser-mayor-ignorancia-que-preguntar"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

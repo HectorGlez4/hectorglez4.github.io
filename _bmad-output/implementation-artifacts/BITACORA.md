@@ -5621,3 +5621,33 @@ páginas**; `npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
 
 **La Meta no está alcanzada y no se emite promesa:** 1071 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.6 (87.ª sesión) — Quince de la cantera que ya estaba en casa
+
+**1071 → 1086 Citas. 1121 → 1136 páginas.**
+
+Sesión de siembra pura, y **sin tocar la red**: las dos canteras grandes tienen más de mil quinientas
+candidatas ya extraídas y sin leer, y los dos Autores tenían diez y once huecos bajo el techo. No
+hacía falta buscar fuera.
+
+Casi todas salen de la **franja corta**, la que hasta la 72.ª no miraba. De las quince, once tienen
+menos de setenta caracteres:
+
+- «Nada se ha de mostrar menos que lo que se desea más.»
+- «Ninguno ve la cara de su pecado, que no se turbe.»
+- «No es sólo César el príncipe que ha muerto a manos de sus consejeros.»
+- «No puede ser mayor ignorancia que preguntar uno lo que ve.»
+- «No sé cómo diga que erró quien acertó errando.»
+
+Y una larga que merecía el sitio: «A una pequeña planta, cualquier pequeño vaso le es campo
+espacioso; un árbol gigante, una empinada palma, un descollado cedro, hállase violentado en la
+vasija estrecha: no puede espaciarse, no puede campear.»
+
+El reparto —siete de una cantera y ocho de la otra— sale de la aritmética del techo, no del gusto:
+las dos quedan en 157 sobre 1086, **14,5 %**, y ninguna se acerca.
+
+`npx astro check` 0 errores; `npx vitest run` **2109/2109**; `npm run build` **1136 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1086 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.

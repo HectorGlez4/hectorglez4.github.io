@@ -1,7 +1,9 @@
 ---
-texto: "Murió en vida, que es muerte intolerable; ventaja fue en Calígula y Nerón quedar muertos, para no sentir los póstumos agravios; pero Tiberio quedó muerto para la autoridad y sensible para el desprecio."
+texto: "Cuando los príncipes émulos o vecinos son marciales y guerreros, un rey cebado en los entretenimientos y delicias de la paz es fatal, es peligroso y aun desestimado."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-murio-en-vida-que-es-muerte-intolerable"
+temas:
+  - "la-prudencia"
+slug: "baltasar-gracian-cuando-los-principes-emulos-o-vecinos-son"
 procedencia:
   obra: "El político"
   año: 1640

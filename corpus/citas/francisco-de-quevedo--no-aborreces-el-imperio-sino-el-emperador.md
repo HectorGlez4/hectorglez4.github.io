@@ -1,7 +1,9 @@
 ---
-texto: "Ninguno ve la cara de su pecado, que no se turbe."
+texto: "No aborreces el Imperio, sino el emperador."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-ninguno-ve-la-cara-de-su-pecado"
+temas:
+  - "la-libertad"
+slug: "francisco-de-quevedo-no-aborreces-el-imperio-sino-el-emperador"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Fueron muchos guerreros de corazón, pero destruyeron más sus reinos que los contrarios; hiciéronse primero la guerra a sí mismos, empobreciendo sus estados de oro y gente, que es la mayor y principal riqueza."
 autor: "baltasar-gracian"
+temas:
+  - "la-riqueza"
 slug: "baltasar-gracian-fueron-muchos-guerreros-de-corazon-pero-destruyeron"
 procedencia:
   obra: "El político"

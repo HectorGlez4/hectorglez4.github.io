@@ -1,6 +1,8 @@
 ---
 texto: "No es sólo César el príncipe que ha muerto a manos de sus consejeros."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-prudencia"
 slug: "francisco-de-quevedo-no-es-solo-cesar-el-principe-que"
 procedencia:
   obra: "Marco Bruto"

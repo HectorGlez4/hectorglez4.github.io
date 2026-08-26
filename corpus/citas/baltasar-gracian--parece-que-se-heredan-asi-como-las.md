@@ -1,7 +1,9 @@
 ---
-texto: "Es la Providencia suma autora de los imperios, que no la ciega vulgar fortuna."
+texto: "Parece que se heredan, así como las propiedades naturales, así las morales, los privilegios o achaques de la naturaleza y fortuna."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-es-la-providencia-suma-autora-de-los"
+temas:
+  - "la-adversidad"
+slug: "baltasar-gracian-parece-que-se-heredan-asi-como-las"
 procedencia:
   obra: "El político"
   año: 1640

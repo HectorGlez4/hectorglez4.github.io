@@ -1,7 +1,9 @@
 ---
-texto: "No sé cómo diga que erró quien acertó errando."
+texto: "Ninguno ve la cara de su pecado, que no se turbe."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-no-se-como-diga-que-erro-quien"
+temas:
+  - "la-virtud"
+slug: "francisco-de-quevedo-ninguno-ve-la-cara-de-su-pecado"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

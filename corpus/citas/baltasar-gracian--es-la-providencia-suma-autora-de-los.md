@@ -1,7 +1,9 @@
 ---
-texto: "Cuando los príncipes émulos o vecinos son marciales y guerreros, un rey cebado en los entretenimientos y delicias de la paz es fatal, es peligroso y aun desestimado."
+texto: "Es la Providencia suma autora de los imperios, que no la ciega vulgar fortuna."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-cuando-los-principes-emulos-o-vecinos-son"
+temas:
+  - "la-adversidad"
+slug: "baltasar-gracian-es-la-providencia-suma-autora-de-los"
 procedencia:
   obra: "El político"
   año: 1640

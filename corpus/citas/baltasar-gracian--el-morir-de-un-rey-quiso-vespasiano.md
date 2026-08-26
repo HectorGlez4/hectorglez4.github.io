@@ -1,7 +1,9 @@
 ---
-texto: "Casas hay que llevan consigo hereditaria la felicidad, y otras la desdicha."
+texto: "El morir de un rey quiso Vespasiano que fuese en pie, y despachando, cuanto más el vivir."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-casas-hay-que-llevan-consigo-hereditaria-la"
+temas:
+  - "la-muerte"
+slug: "baltasar-gracian-el-morir-de-un-rey-quiso-vespasiano"
 procedencia:
   obra: "El político"
   año: 1640

@@ -1,7 +1,9 @@
 ---
-texto: "No puede ser mayor ignorancia que preguntar uno lo que ve."
+texto: "No sé cómo diga que erró quien acertó errando."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-no-puede-ser-mayor-ignorancia-que-preguntar"
+temas:
+  - "la-verdad"
+slug: "francisco-de-quevedo-no-se-como-diga-que-erro-quien"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"
