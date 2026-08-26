@@ -6634,3 +6634,48 @@ verificado en vivo con el vigía por SHA.
 **El tramo sigue sin alcanzarse**: 18 Autores. Pero esta sesión matiza lo que dije en la 102.ª
 —«el rendimiento cae sesión a sesión»—: **no cae por agotamiento, cae cuando se elige mal el
 género**. Elegido bien, vuelve al 16 %. Quedan tres capítulos de esta obra.
+
+## 104.ª sesión — la obra agotada, y el género se parte otra vez por dentro
+
+Los tres capítulos que faltaban de la obra de ensayo: **182 candidatas**, 77 apartadas, **105
+leídas, 15 Citas**. La obra queda **agotada**, con sus ocho capítulos versionados.
+
+### 16 % y 14 %, en la misma obra y el mismo Autor
+
+La sesión anterior dio **16 %** con los cinco primeros capítulos. Éstos dan **14 %**, y la
+diferencia no es ruido: los primeros son la parte **doctrinal** del ensayo —«Dar a sentir lo
+hermoso es obra de misericordia»— y éstos son la parte **histórico-coyuntural**, llena de nombres
+propios y de juicios sobre un país concreto en un momento concreto:
+
+    Al virginiano y al yankee ha sucedido, como tipo representativo, ese dominador de las ayer
+    desiertas Praderas…
+
+Es la misma distinción que partió el periodismo en la 102.ª —tesis frente a coyuntura—, y aquí
+aparece **dentro de una sola obra**. Lo que la escala mide, entonces, no es el género del libro sino
+**el modo de cada tramo**: donde el Autor argumenta una idea, la cosecha sube; donde comenta un
+asunto del día, baja, aunque la firma y el libro sean los mismos.
+
+Eso no cambia ningún umbral ni ninguna regla: cambia dónde conviene mirar dentro de una obra, y por
+eso queda escrito.
+
+### Lo que se quedó fuera, y por qué
+
+· **Cita de autoridad ajena**, otra vez: varias apoyan la afirmación en Emerson, Spencer, Montaigne
+  o Diógenes. Publicarlas sueltas atribuiría a este Autor lo que el texto atribuye a aquéllos.
+· **Una errata de la Fuente** que no caza ninguna puerta: «ciudades populosas, opulentas,
+  magníficas, **?para** probar…». Un signo de interrogación suelto en mitad de la frase.
+· Y las que remiten al hilo con un «su», «ella» o «ese esfuerzo» sin referente dentro de la Cita.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1251 | **1266** |
+| Documentos versionados | 138 | **141** |
+| Citas de este Autor | 43 | **83** |
+| Pruebas de unidad | 2183 | **2186** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la
+103.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.
