@@ -1,6 +1,8 @@
 ---
 texto: "Cada ateniense libre describe en derredor de sí, para contener su acción, un círculo perfecto, en el que ningún desordenado impulso quebrantará la graciosa proporción de la línea."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-prudencia"
 slug: "jose-enrique-rodo-cada-ateniense-libre-describe-en-derredor-de"
 procedencia:
   obra: "Ariel"

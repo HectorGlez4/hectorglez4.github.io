@@ -1,6 +1,8 @@
 ---
 texto: "Aunque la posición social de la mujer es muy desventajosa, no deja de ejercer grande influencia respecto á la familia, en la que no propaga verdades que desconoce ó que tiene por errores."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-aunque-la-posicion-social-de-la-mujer"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

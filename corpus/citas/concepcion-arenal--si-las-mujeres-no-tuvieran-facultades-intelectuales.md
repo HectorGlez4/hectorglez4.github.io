@@ -1,6 +1,8 @@
 ---
 texto: "Si las mujeres no tuvieran facultades intelectuales, debían estar satisfechas cuando no sienten grandes penas en el corazón ni les falta lo necesario para la vida material; no obstante, no es así."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-si-las-mujeres-no-tuvieran-facultades-intelectuales"
 procedencia:
   obra: "La mujer del porvenir"

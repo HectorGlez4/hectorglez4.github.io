@@ -1,6 +1,8 @@
 ---
 texto: "Afirmamos, sin vacilar, que la mujer más educada, más perfecta, más útil, puede atender más constantemente al cuidado de sus hijos, porque puede estar más tiempo en casa y tener más vagar."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-afirmamos-sin-vacilar-que-la-mujer-mas"
 procedencia:
   obra: "La mujer del porvenir"

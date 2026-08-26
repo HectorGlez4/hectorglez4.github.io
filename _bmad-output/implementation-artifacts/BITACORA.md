@@ -8168,3 +8168,55 @@ un fragmento que sigue diciendo lo mismo cuando se queda solo.**
 Puerta completa en verde y consultada por su código de salida.
 
 **Actions seguía caído.** Las sesiones 125 a 129 esperan en `main`; el sitio en vivo sirve la 124.ª.
+
+
+## 130.ª sesión — el hallazgo de ayer no se transfiere, y eso lo confirma
+
+La 129.ª midió que el tramo largo rinde el 54 % en ensayo polémico. La tentación era aplicarlo
+como regla. Se probó primero en **otra firma**, y ahí está el valor de la sesión.
+
+### El tramo largo, en prosa alegórica: 2 de 12
+
+La firma probada escribe parábola —peregrinos, mercaderes, estatuas—, y su tramo largo da **17 %**,
+no 54 %. Los descartes no son por longitud: son relatos con nombre propio, exactamente el género
+que la escala mide en torno al 1 %.
+
+Eso **confirma** que el hallazgo es de género y no de longitud, que es como quedó escrito ayer en
+el protocolo: «el tramo de lectura no se fija de antemano; se prueban dos bandas y se sigue por la
+que rinde». Si se hubiera escrito «lo largo rinde más», esta sesión lo habría desmentido.
+
+### Y en la veta buena, el rendimiento se asienta
+
+Vuelta al ensayo polémico, tres tandas más del mismo tramo: **31 %** y luego **15 %**. El 54 % era
+la primera tanda, que es la mejor de la obra; según se avanza hacia el cierre argumentativo, el
+texto se vuelve recapitulación —«Al terminar nuestro trabajo…», «Todos estos contrastes…»— y deja
+de sostenerse solo.
+
+Ocho Citas en total, en cinco Temas.
+
+### Una palabra pegada, y una puerta que no se añade
+
+Entre las descartadas apareció «decentemirar»: dos palabras fundidas por la Fuente. Se midió si
+merece puerta propia:
+
+· palabras de más de 22 letras, en todo el Corpus y en la cantera: **0**. La longitud no sirve de
+  proxy —«decentemirar» tiene doce y hay palabras españolas legítimas de esa talla—;
+· punto sin espacio, coma sin espacio, en publicadas y en cantera: **0 y 0**. Esa familia ya está
+  cubierta.
+
+La fusión de dos palabras **sin puntuación entre ellas** no se detecta sin diccionario. Queda como
+**tercera medida deliberadamente no convertida en puerta** —con las líneas en mayúsculas y el verso
+colapsado—, y con su motivo escrito: no es que no importe, es que el detector costaría más falsos
+positivos que aciertos. La cazó la lectura, que para esto sí sirve.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1454 | **1462** |
+| Firmas con el tramo largo medido | 1 | **2** |
+| Medidas no convertidas en puerta | 2 | **3** |
+
+Puerta completa en verde y consultada por su código de salida.
+
+**Actions seguía caído.** Las sesiones 125 a 130 esperan en `main`; el sitio en vivo sirve la 124.ª.

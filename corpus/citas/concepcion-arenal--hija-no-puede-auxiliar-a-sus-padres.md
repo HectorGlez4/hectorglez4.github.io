@@ -1,6 +1,8 @@
 ---
 texto: "Hija, no puede auxiliar a sus padres ancianos; esposa, no puede ayudar al esposo; madre, se ve en el mayor desamparo, si la muerte la deja viuda o la perversidad de su marido la abandona."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-hija-no-puede-auxiliar-a-sus-padres"
 procedencia:
   obra: "La mujer del porvenir"
