@@ -1,6 +1,8 @@
 ---
 texto: "No pretendemos que las mujeres sean militares, sino que no sean rechazadas de aquellas profesiones y oficios para que resulten aptas, y que no se declare su ineptitud sin que esté probada por la experiencia."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-no-pretendemos-que-las-mujeres-sean-militares"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

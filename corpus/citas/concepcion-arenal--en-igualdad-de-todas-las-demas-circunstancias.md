@@ -1,6 +1,8 @@
 ---
 texto: "En igualdad de todas las demás circunstancias, la ley será tanto más justa cuanto sea mayor el número de clases que contribuyen á formarla; por eso deben extenderse los derechos políticos hasta donde sea compatible con la ilustración."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-en-igualdad-de-todas-las-demas-circunstancias"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

@@ -1,6 +1,8 @@
 ---
 texto: "Un error que lo es por sus cuatro costados, digámoslo así, no es difícil de demostrar; pero cuando está emparentado con la verdad y enlazado con grandes principios de justicia, el problema se complica mucho."
 autor: "concepcion-arenal"
+temas:
+  - "la-verdad"
 slug: "concepcion-arenal-un-error-que-lo-es-por-sus"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

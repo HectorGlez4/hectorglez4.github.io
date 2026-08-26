@@ -1,6 +1,8 @@
 ---
 texto: "Es cierto que hoy (en muchos países, al menos) ningún privilegio vincula la riqueza en una clase; ninguna ley escrita se opone á que todos lleguen al poder y á la fortuna; pero ¿no hay mucho de ilusorio y de mentido en estas facilidades?"
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-es-cierto-que-hoy-en-muchos-paises"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

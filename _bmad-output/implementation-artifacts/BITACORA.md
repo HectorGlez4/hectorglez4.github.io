@@ -7418,3 +7418,41 @@ Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **
 despliegue de la 117.ª —con el canal RSS de la otra sesión— verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 119.ª sesión — veinte Citas, y un criterio que se aplica por lo que hace y no por cómo empieza
+
+**20 Citas** del ensayo sobre la igualdad, en siete Temas. La cosecha más alta desde la 110.ª, y
+viene de lo mismo que la 115.ª predijo: obra nueva bien elegida rinde más que apurar la anterior.
+
+### El criterio del conector, afinado por un caso que no encajaba
+
+Vengo descartando lo que abre con conector porque **remite a un párrafo que la Cita no lleva
+consigo**. Esta vez apareció una que abre con «Porque» y sí se sostiene:
+
+    Porque haya un miserable alegre y un opulento que se desespere y se suicide; porque ciertas
+    individuales condiciones se sobrepongan á todas las circunstancias exteriores, no hay que negar
+    á éstas la influencia que por lo común tienen.
+
+Ese «Porque» no remite hacia atrás: **abre una concesiva que la propia frase cierra** —«Porque X…,
+no hay que negar Y»—. Es la misma forma que «Porque se dejan arrastrar por sus instintos», que
+descarté en la 103.ª, y la función es la contraria: aquélla era la respuesta a una pregunta que
+estaba en otro párrafo.
+
+Así que el criterio se aplica **por lo que el conector hace, no por cómo empieza la frase**. No es
+ablandarlo: es enunciarlo bien. El filtro mecánico sigue apartándolas todas —y debe—, porque su
+trabajo es decidir a qué llego a mirar; el juicio lo pone la lectura.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1379 | **1393** … y 6 más de la tanda previa |
+| Citas de esa Autora | 102 | **122** |
+| saber-para-ser-libre | 45 | **46** |
+| Techo de concentración | 11,9 % | **11,7 %** |
+| Por leer de este ensayo | 308 | **282** |
+
+Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 118.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores.

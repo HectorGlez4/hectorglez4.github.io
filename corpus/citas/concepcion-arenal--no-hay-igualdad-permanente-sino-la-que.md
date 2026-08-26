@@ -1,6 +1,8 @@
 ---
 texto: "No hay igualdad permanente sino la que es armónica, ni armónica sino aquella que contiene, en grado mayor ó menor, pero siempre suficiente, los tres elementos esenciales del hombre, físico, intelectual y moral."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-no-hay-igualdad-permanente-sino-la-que"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
