@@ -1,0 +1,16 @@
+---
+texto: "Más bien te preveo hostil que te espero benévolo, lector, a quien por tanto no me atrevo a llamar amigo."
+autor: "concepcion-arenal"
+temas:
+  - "la-palabra"
+slug: "concepcion-arenal-mas-bien-te-preveo-hostil-que-te"
+procedencia:
+  obra: "La mujer del porvenir"
+  año: 1844
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_mujer_del_porvenir/1"
+---

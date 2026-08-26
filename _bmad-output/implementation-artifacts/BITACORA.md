@@ -6583,3 +6583,54 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**. Y el vi
 101.ª hizo su trabajo: identificó el run **por SHA**, y lo que antes daba 404 devuelve 200.
 
 **El tramo sigue sin alcanzarse**: 18 Autores, y eso pide nombres o direcciones.
+
+## 103.ª sesión — la escala se usa para elegir, y acierta: 16 % y 26 Citas
+
+Primera sesión en que la escala de géneros no solo se mide sino que **decide dónde buscar**. En vez
+de bajar por la lista de Autores, se preguntó dónde hay **ensayo de tesis** —el género de ~16 %— con
+margen de techo. Salió una obra clásica de ensayo con ocho capítulos y **ninguno versionado**, de un
+Autor con sitio para 164 Citas.
+
+De cinco capítulos: **240 candidatas**, 80 apartadas, **160 leídas, 25 Citas** en siete Temas. Un
+**16 % clavado**, que es lo que la escala predecía. Es la primera vez que la predicción se hace
+antes y se cumple, y por eso vale más que las 25 Citas.
+
+### La sonda mentía otra vez, y era la tercera forma
+
+Antes de recuperar nada, la sonda anunció **50 capítulos sin recuperar** de una obra que tiene ocho.
+En vez de creerlo, se miró: la cáscara pedía los capítulos con la **búsqueda por prefijo** de la
+Fuente, que es **difusa e ignora la barra**. Preguntando por «Ariel/» devolvía «Abel Sánchez»,
+«Abril», «Árboles», «Arena»…
+
+Con títulos largos el defecto no se veía —nada se les parece—, y por eso las cifras de la 96.ª y la
+99.ª eran correctas: se comprobaron una a una. Con títulos cortos, inflaba.
+
+Dos arreglos, no uno:
+
+· la cáscara pide ahora las páginas por **prefijo literal**, y devuelve los ocho de verdad;
+· y `tools/lib/cantera.ts` **no cuenta como capítulo lo que no cuelga de la obra**, con dos pruebas
+  de regresión. La guarda vive en la lógica pura a propósito: quien llene el mapa puede volver a
+  equivocarse, y **contar de más es peor que contar de menos**, porque manda a recuperar obra que
+  no existe.
+
+### Una inexactitud propia, cazada por el mismo arreglo
+
+Al remedir con la sonda arreglada apareció que la obra que declaré «agotada» en la 100.ª tenía
+**un capítulo sin recuperar** —el más corto, 145 palabras—. Dicho y cerrado: dio tres candidatas,
+todas del prólogo al lector, y una se sostiene sola.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1225 | **1251** |
+| Documentos versionados | 132 | **138** |
+| Pruebas de unidad | 2175 | **2183** |
+| Techo de concentración | 13,3 % | **13,0 %** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**. Y el despliegue anterior,
+verificado en vivo con el vigía por SHA.
+
+**El tramo sigue sin alcanzarse**: 18 Autores. Pero esta sesión matiza lo que dije en la 102.ª
+—«el rendimiento cae sesión a sesión»—: **no cae por agotamiento, cae cuando se elige mal el
+género**. Elegido bien, vuelve al 16 %. Quedan tres capítulos de esta obra.

@@ -83,8 +83,19 @@ export function estadoDeLaCantera(
   for (const pagina of [...paginas].sort((a, b) => b.bytes - a.bytes)) {
     if (versionadas.has(urlDeLaPagina(pagina.titulo))) continue;
 
-    const capitulos = capitulosDe.get(pagina.titulo);
-    if (pagina.bytes < ES_INDICE_POR_DEBAJO_DE && capitulos !== undefined && capitulos.length > 0) {
+    /*
+     * Solo cuenta como capítulo lo que **cuelga de la obra**, y la guarda está aquí y no en quien
+     * llena el mapa por una razón medida: la cáscara pedía los capítulos con la búsqueda por
+     * prefijo de la Fuente, que es difusa e ignora la barra, así que preguntando por «Ariel/»
+     * devolvía «Abel Sánchez», «Abril» y «Árboles». La sonda anunció **50 capítulos** de una obra
+     * que tiene seis partes.
+     *
+     * Contar de más es peor que contar de menos: manda a recuperar obra que no existe.
+     */
+    const capitulos = (capitulosDe.get(pagina.titulo) ?? []).filter((c) =>
+      c.startsWith(`${pagina.titulo}/`),
+    );
+    if (pagina.bytes < ES_INDICE_POR_DEBAJO_DE && capitulos.length > 0) {
       const versionados = capitulos.filter((c) => versionadas.has(urlDeLaPagina(c))).length;
       queda.push({
         clase: 'índice',

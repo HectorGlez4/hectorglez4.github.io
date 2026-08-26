@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: La mujer del porvenir
+año: 1844
+url: https://es.wikisource.org/wiki/La_mujer_del_porvenir/1
+recuperado: 2026-08-26
+---
+La mujer del porvenir/1
+|título=[[La mujer del porvenir]]
+|autor=Concepción Arenal
+obra> |título=La mujer del porvenir
+obra> |autor=Concepción Arenal
+obra> |año=1844
+obra> |título={{Anclaje+|Índice}}
+---
+Más bien te preveo hostil que te espero benévolo, lector, a quien por tanto no me atrevo a llamar amigo.
+
+Te presento este librito, y si te propones leerle, me debes agradecer que sea tan breve, porque el asunto es largo, y te aseguro que me ha costado trabajo no decir más sobre él.
+
+He procurado agrupar los argumentos y concentrar las razones para que tengan más fuerza, porque ya se me alcanza que no será poca la resistencia que necesitan vencer.
+
+Los que se dirigen a ti, suelen tener la idea de atraerte a su creencia, a su opinión; mis pretensiones son más modestas: no intento persuadirte ni convencerte; toda mi ambición se limita a que al concluir estas páginas, dudes y digas, primero para ti y después para los otros: «¿Si tendrá razón esta mujer en algo de lo que dice?»

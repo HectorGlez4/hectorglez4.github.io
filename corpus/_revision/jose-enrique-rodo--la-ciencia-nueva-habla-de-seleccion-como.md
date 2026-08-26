@@ -1,0 +1,13 @@
+---
+texto: "La ciencia nueva habla de selección como de una necesidad de todo progreso."
+autor: "jose-enrique-rodo"
+slug: "jose-enrique-rodo-la-ciencia-nueva-habla-de-seleccion-como"
+procedencia:
+  obra: "Ariel"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Ariel/Capítulo_V"
+---

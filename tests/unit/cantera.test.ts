@@ -137,4 +137,42 @@ describe('Cantera — qué queda sin recuperar de un Autor', () => {
 
     expect(estado.map((e) => e.titulo)).toEqual(['Grande', 'Mediana', 'Pequeña']);
   });
+  /**
+   * Y no se cuenta como capítulo lo que no cuelga de la obra — 102.ª sesión.
+   *
+   * La cáscara que pide los capítulos usaba la búsqueda por prefijo de la Fuente, que es
+   * **difusa e ignora la barra**: preguntando por «Ariel/» devolvía «Abel Sánchez», «Abril»,
+   * «Árboles» y «Arena». La sonda anunció **50 capítulos sin recuperar** de una obra que tiene
+   * seis partes, y con títulos largos el defecto no se veía porque no hay nada que se les parezca.
+   *
+   * El arreglo de la cáscara es pedir las páginas por prefijo literal. Pero la guarda vive aquí
+   * a propósito: **quien llene el mapa puede volver a equivocarse**, y entonces lo que se
+   * anuncia como cantera son títulos ajenos. Contar de más es peor que contar de menos, porque
+   * manda a recuperar obra que no existe.
+   */
+  it('un título que no cuelga de la obra no es capítulo suyo, aunque se lo pasen', () => {
+    const estado = estadoDeLaCantera(
+      [{ titulo: 'Obra con partes', bytes: 1_000 }],
+      versionadas,
+      new Map([
+        [
+          'Obra con partes',
+          ['Obra con partes/1', 'Obra completamente ajena', 'Obra con partes/2', 'Obrita'],
+        ],
+      ]),
+    );
+
+    expect(estado[0]).toMatchObject({ clase: 'índice', capitulos: 2, versionados: 1 });
+  });
+
+  it('y si NINGUNO cuelga de la obra, se trata como página suelta y no como índice vacío', () => {
+    // Decir «índice, 0 capítulos» sugeriría una obra sin partes; lo cierto es que no se sabe.
+    const estado = estadoDeLaCantera(
+      [{ titulo: 'Obra con partes', bytes: 1_000 }],
+      versionadas,
+      new Map([['Obra con partes', ['Otra cosa', 'Y otra']]]),
+    );
+
+    expect(estado[0]).toEqual({ clase: 'suelta', titulo: 'Obra con partes', bytes: 1_000 });
+  });
 });
