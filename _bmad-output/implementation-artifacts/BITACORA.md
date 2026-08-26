@@ -5379,3 +5379,45 @@ dieciocho, y esa fragilidad queda resuelta.
 
 **La Meta no está alcanzada y no se emite promesa:** 1046 Citas de 1000 —puesto—, 17 Temas de 24, 16
 Autores de 35, 16 Colecciones de 12 —puesto—.
+
+## 15.6 (82.ª sesión) — Dos de tres recuperaciones no eran obras, y la comprobación cuesta una petición
+
+**1046 → 1055 Citas. 1096 → 1105 páginas.**
+
+### Lo que la lista de cantera llama «obra»
+
+Ayer quedó anotado que el punto ciego de la transclusión está lleno de índices. Hoy pasó dos veces
+más, y por caminos distintos:
+
+- Una obra de 20 KB en la lista resultó ser una **página de desambiguación**: veinte kilobytes de
+  enlaces a otras páginas. La puerta de FR-23 la paró —«el documento no declara autor»— y era verdad:
+  una lista no la firma nadie.
+- Ayer, una de 30 KB resultó ser un **índice de transclusión**: 33 palabras al abrirlo, y la puerta
+  de legibilidad de la 11.5 la paró.
+
+**Dos puertas distintas, dos aciertos, y ninguna de las dos se escribió para esto.** Eso es lo que
+hace que el sistema aguante: las puertas no comprueban lo que se les ocurrió a sus autores, sino
+propiedades —«esto no declara autor», «esto no tiene texto legible»— que valen para casos que nadie
+previó.
+
+**Y de aquí sale una costumbre nueva**, que ya se aplicó a la tercera: antes de gastar una
+recuperación, pedir el wikitexto y mirar si trae `{{Encabezado}}`. Cuesta una petición y ahorra
+versionar una lista. La tercera sí era obra, y se recuperó con eso ya sabido.
+
+### La siembra, y un género confirmado
+
+Nueve Citas. Ocho salen de la cantera ya extraída del tratado moral —«a la virtud hallarás en el
+templo, llena de polvo, encendida y con las manos llenas de callos», «bástame el ir cercenando cada
+día alguna parte de mis vicios»— y una del artículo de viaje que sí era obra.
+
+Una sola de 146 candidatas: el **periodismo de viaje** se midió en el 2,7 % hace veinte sesiones y hoy
+lo confirma. Casi todo es circunstancial —una ciudad, un pintor, un río— y lo que queda es lo que no
+depende del sitio: «nuestras glorias están más en el futuro que en el pasado».
+
+El Autor más representado baja a **14,1 %** sin haber sembrado en cuatro sesiones.
+
+`npx astro check` 0 errores; `npx vitest run` **2085/2085**; `npm run build` **1105 páginas**;
+`npx playwright test` **412 pasadas y 2 fallos**, los seis de NFR-5.
+
+**La Meta no está alcanzada y no se emite promesa:** 1055 Citas de 1000 —puesto—, 17 Temas de 24, 16
+Autores de 35, 16 Colecciones de 12 —puesto—.
