@@ -1,7 +1,9 @@
 ---
-texto: "Yerra el que piensa que el dar es acción fácil: mucho tiene de dificultad el dar con juicio, y no derramar acaso y con ímpetu."
+texto: "Ninguno sin salud es bien afortunado, y no la tiene el que en vez de lo saludable apetece lo dañoso."
 autor: "seneca"
-slug: "seneca-yerra-el-que-piensa-que-el-dar"
+temas:
+  - "la-prudencia"
+slug: "seneca-ninguno-sin-salud-es-bien-afortunado-y"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

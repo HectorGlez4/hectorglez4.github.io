@@ -1,7 +1,9 @@
 ---
-texto: "Ninguno sin salud es bien afortunado, y no la tiene el que en vez de lo saludable apetece lo dañoso."
+texto: "¿Qué duda puede haber de que el varón sabio tendrá más ocasiones para mostrar su ánimo en las riquezas que en la pobreza?"
 autor: "seneca"
-slug: "seneca-ninguno-sin-salud-es-bien-afortunado-y"
+temas:
+  - "la-riqueza"
+slug: "seneca-que-duda-puede-haber-de-que-el"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

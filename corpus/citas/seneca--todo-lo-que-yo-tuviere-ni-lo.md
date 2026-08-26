@@ -1,7 +1,9 @@
 ---
-texto: "¿Pregúntasme qué pido a la virtud?; pido la misma virtud, porque ella no tiene otra cosa que sea mejor, y es la paga de sí misma."
+texto: "Todo lo que yo tuviere, ni lo guardaré con escasez ni lo derramaré con prodigalidad; y juzgaré que ninguna cosa poseo mejor que lo que doy bien."
 autor: "seneca"
-slug: "seneca-preguntasme-que-pido-a-la-virtud-pido"
+temas:
+  - "la-riqueza"
+slug: "seneca-todo-lo-que-yo-tuviere-ni-lo"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

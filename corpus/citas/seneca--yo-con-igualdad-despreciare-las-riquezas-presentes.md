@@ -1,7 +1,9 @@
 ---
-texto: "¿Qué inclinación tan enemiga de los dioses y de los hombres es infamar las virtudes y con malignas razones desacreditar las cosas santas?"
+texto: "Yo con igualdad despreciaré las riquezas presentes como las ausentes: no me entristeceré de verlas en otro, ni me desvanecerá el poseerlas."
 autor: "seneca"
-slug: "seneca-que-inclinacion-tan-enemiga-de-los-dioses"
+temas:
+  - "la-riqueza"
+slug: "seneca-yo-con-igualdad-despreciare-las-riquezas-presentes"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

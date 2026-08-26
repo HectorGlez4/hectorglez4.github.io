@@ -1,7 +1,9 @@
 ---
-texto: "Tuve amistad con muchos, y de aborrecimiento volví a la gracia (si es que la hay entre los malos), y hasta ahora no tengo amistad conmigo."
+texto: "Ojalá se manifestasen todas las cosas, y la verdad estuviese sin velo, y sin que alterásemos algo de sus secretos."
 autor: "seneca"
-slug: "seneca-tuve-amistad-con-muchos-y-de-aborrecimiento"
+temas:
+  - "la-verdad"
+slug: "seneca-ojala-se-manifestasen-todas-las-cosas-y"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

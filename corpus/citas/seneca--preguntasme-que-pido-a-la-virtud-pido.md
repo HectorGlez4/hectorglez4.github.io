@@ -1,7 +1,9 @@
 ---
-texto: "¿Cómo podrá ser buen amparador y defensor de su patria y de sus amigos el que se inclina a los deleites?"
+texto: "¿Pregúntasme qué pido a la virtud?; pido la misma virtud, porque ella no tiene otra cosa que sea mejor, y es la paga de sí misma."
 autor: "seneca"
-slug: "seneca-como-podra-ser-buen-amparador-y-defensor"
+temas:
+  - "la-virtud"
+slug: "seneca-preguntasme-que-pido-a-la-virtud-pido"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

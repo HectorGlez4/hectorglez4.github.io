@@ -8277,3 +8277,48 @@ Trece Citas en total, en ocho Temas. Tres van a «la muerte», que era de los m�
 | Rendimiento leyendo a ciegas · eligiendo obra | 8-13 % | **33 %** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 132.ª sesión — la primera vez que elegir obra se usa antes de leer, y se nota
+
+La 131.ª aprendió a elegir obra en vez de firma. Esta es la primera sesión que **empieza** por ahí,
+y es la diferencia entre tropezar y apuntar.
+
+### Una veta descartada sin leer una sola candidata
+
+La mayor cantera intacta del corpus —**290 candidatas y 9 Citas**— resultó ser una **novela**. La
+tabla por obra lo dice sin abrir el fichero: total alto, `ya` mínimo, y el título delata el género.
+Nueve Citas en toda la historia del bucle porque es narrativa, y seguiría dando nueve.
+
+Antes de la 131.ª eso eran doscientas noventa candidatas leídas para sacar una o dos. Hoy es una
+línea de tabla.
+
+### Y una elegida que rinde en subida
+
+Se fue a la otra doctrinal de la misma firma, con 155 candidatas y solo 38 Citas sacadas. Tres
+tandas seguidas:
+
+| tanda | leídas | firmes | rendimiento |
+|---|---|---|---|
+| primera | 15 | 4 | 27 % |
+| segunda | 15 | 5 | 33 % |
+| tercera | 13 | 5 | **38 %** |
+
+Sube en vez de bajar, que es lo contrario de lo que hacen las obras ya exprimidas —la 130.ª las vio
+caer del 54 % al 15 %—. Una veta que sube es una veta que no se había tocado.
+
+Lo que descarta aquí no es el género sino la **forma dialógica**: la obra discute con un
+interlocutor —«Dirásme», «Respóndote», «Podrás decirme»— y esas frases no dicen nada solas. Es el
+mismo criterio de siempre con otra cara.
+
+Catorce Citas en siete Temas. Dos van a los dos Temas más flacos del Corpus.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1475 | **1489** |
+| Rendimiento de la obra elegida | — | **27 % → 33 % → 38 %** |
+| Candidatas descartadas sin leer | — | **290**, por una línea de tabla |
+
+Puerta completa en verde y consultada por su código de salida.

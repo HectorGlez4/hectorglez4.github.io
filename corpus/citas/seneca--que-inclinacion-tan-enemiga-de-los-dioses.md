@@ -1,7 +1,9 @@
 ---
-texto: "Todo lo que yo tuviere, ni lo guardaré con escasez ni lo derramaré con prodigalidad; y juzgaré que ninguna cosa poseo mejor que lo que doy bien."
+texto: "¿Qué inclinación tan enemiga de los dioses y de los hombres es infamar las virtudes y con malignas razones desacreditar las cosas santas?"
 autor: "seneca"
-slug: "seneca-todo-lo-que-yo-tuviere-ni-lo"
+temas:
+  - "la-virtud"
+slug: "seneca-que-inclinacion-tan-enemiga-de-los-dioses"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Yo con igualdad despreciaré las riquezas presentes como las ausentes: no me entristeceré de verlas en otro, ni me desvanecerá el poseerlas."
+texto: "Verdaderamente os ha caído en suerte una naturaleza adornada de razón: y así, ¿qué cosa se os puede proponer mejor que ella?"
 autor: "seneca"
-slug: "seneca-yo-con-igualdad-despreciare-las-riquezas-presentes"
+temas:
+  - "el-saber"
+slug: "seneca-verdaderamente-os-ha-caido-en-suerte-una"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

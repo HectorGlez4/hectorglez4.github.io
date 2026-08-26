@@ -1,6 +1,8 @@
 ---
 texto: "Yo despreciaré todo el reino de la fortuna; pero si me dieren a escoger, elegiré lo mejor de él."
 autor: "seneca"
+temas:
+  - "la-riqueza"
 slug: "seneca-yo-despreciare-todo-el-reino-de-la"
 procedencia:
   obra: "De la vida bienaventurada"

@@ -1,7 +1,9 @@
 ---
-texto: "Busquemos algo que sea bueno, no en la apariencia, sino sólido y macizo, y en la parte interior hermoso."
+texto: "Tuve amistad con muchos, y de aborrecimiento volví a la gracia (si es que la hay entre los malos), y hasta ahora no tengo amistad conmigo."
 autor: "seneca"
-slug: "seneca-busquemos-algo-que-sea-bueno-no-en"
+temas:
+  - "la-amistad"
+slug: "seneca-tuve-amistad-con-muchos-y-de-aborrecimiento"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

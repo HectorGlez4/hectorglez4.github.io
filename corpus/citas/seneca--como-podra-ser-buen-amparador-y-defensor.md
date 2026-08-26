@@ -1,7 +1,9 @@
 ---
-texto: "¿Qué duda puede haber de que el varón sabio tendrá más ocasiones para mostrar su ánimo en las riquezas que en la pobreza?"
+texto: "¿Cómo podrá ser buen amparador y defensor de su patria y de sus amigos el que se inclina a los deleites?"
 autor: "seneca"
-slug: "seneca-que-duda-puede-haber-de-que-el"
+temas:
+  - "la-patria"
+slug: "seneca-como-podra-ser-buen-amparador-y-defensor"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

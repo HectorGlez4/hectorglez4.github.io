@@ -1,7 +1,9 @@
 ---
-texto: "Ojalá se manifestasen todas las cosas, y la verdad estuviese sin velo, y sin que alterásemos algo de sus secretos."
+texto: "Yerra el que piensa que el dar es acción fácil: mucho tiene de dificultad el dar con juicio, y no derramar acaso y con ímpetu."
 autor: "seneca"
-slug: "seneca-ojala-se-manifestasen-todas-las-cosas-y"
+temas:
+  - "la-prudencia"
+slug: "seneca-yerra-el-que-piensa-que-el-dar"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Verdaderamente os ha caído en suerte una naturaleza adornada de razón: y así, ¿qué cosa se os puede proponer mejor que ella?"
+texto: "Gemid, y ejercitad vuestra infeliz lengua en injurias de los buenos: instad y morded, que antes os romperéis los dientes que hagáis presa en ellos."
 autor: "seneca"
-slug: "seneca-verdaderamente-os-ha-caido-en-suerte-una"
+temas:
+  - "la-palabra"
+slug: "seneca-gemid-y-ejercitad-vuestra-infeliz-lengua-en"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"

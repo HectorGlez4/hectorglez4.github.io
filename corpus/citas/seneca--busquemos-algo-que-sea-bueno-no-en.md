@@ -1,7 +1,9 @@
 ---
-texto: "Gemid, y ejercitad vuestra infeliz lengua en injurias de los buenos: instad y morded, que antes os romperéis los dientes que hagáis presa en ellos."
+texto: "Busquemos algo que sea bueno, no en la apariencia, sino sólido y macizo, y en la parte interior hermoso."
 autor: "seneca"
-slug: "seneca-gemid-y-ejercitad-vuestra-infeliz-lengua-en"
+temas:
+  - "la-verdad"
+slug: "seneca-busquemos-algo-que-sea-bueno-no-en"
 procedencia:
   obra: "De la vida bienaventurada"
 estadoDerechos: "dominio-público"
