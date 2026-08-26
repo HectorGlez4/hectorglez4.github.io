@@ -7564,3 +7564,62 @@ Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **
 despliegue de la 120.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 122.ª sesión — cero Citas de 403, y dos sondas mías que decían «no hay» cuando era «no encuentro»
+
+Sesión de resultado negativo, y por eso se escribe entera.
+
+### Lo que se comprobó y no dio nada
+
+Con los dos libros grandes agotados en su parte rentable, se buscó qué queda en la Fuente vieja
+para Autores con margen:
+
+· De uno con 47 páginas sin recuperar: **todo son entremeses**, más una biografía escrita por otro
+  y páginas de retratos. El entremés está medido al 0 % desde la 78.ª.
+· De otro, 92 páginas y sitio para 56 Citas: sátiras en prosa. Se recuperó la mayor —75,8 KB— y dio
+  **403 candidatas y cero Citas**.
+
+**La sátira alegórica narrativa se suma a la lista de géneros que no dan nada**, con el entremés, la
+crónica y el índice. Lo que hay son diálogos con diablos y escenas; la única sentencia que se
+sostiene —«el partir es nacer, el vivir es caminar, la venta es el mundo»— va **en boca de un
+personaje**, y en la 120.ª descarté la del heterónimo por exactamente lo mismo. Coherencia: fuera.
+Documento retirado con sus 403.
+
+### Y una obra que no se recuperó, dicho aquí
+
+Entre las páginas disponibles de ese Autor hay un **panfleto antisemita** de 67 KB. No se recuperó,
+y no por la escala de géneros: **ninguna Cita de ahí cabe en este sitio**. Es la primera vez que el
+bucle descarta obra por lo que dice y no por cómo rinde, y conviene que quede escrito para que no se
+lea como un olvido.
+
+### Dos sondas mías, el mismo defecto, la tercera vez
+
+Al filtrar candidatas por documento —un Autor con varias obras en revisión las mezcla todas y
+confunde el rendimiento de una con el de otra— la sonda dijo **«0 por leer»**. Se lee igual que «no
+queda nada» y significaba lo contrario.
+
+La causa: `campo()` buscaba líneas que **empiezan** por `url:`, y ese campo va **sangrado** dentro
+de `fuente:`. Devolvía cadena vacía y el filtro descartaba las 1464 candidatas del Autor.
+
+Es el defecto de la 109.ª con otra cara, y van tres en el bucle: **una sonda que confunde “no
+encuentro” con “no hay”**. Arreglada, el mismo filtro dice «215 por leer», que era la verdad.
+
+También fallé yo al buscar por «zahurdas» cuando la URL lleva «zahúrdas» con tilde: el filtro
+funcionaba y la consulta estaba mal. Se dice porque el síntoma es idéntico —cero resultados— y
+distinguir el fallo de la herramienta del fallo de quien la usa costó dos intentos.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1409 | 1409 |
+| Documentos retirados | 11 | **12** |
+| Candidatas retiradas de golpe | — | **403** |
+| Géneros medidos al 0 % | 3 | **4** |
+
+Puerta completa en verde: `astro check` 0 errores, **2244 pruebas**, `build`, **414 E2E**, y el
+despliegue de la 121.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores. Y esta sesión lo dice con más peso que las
+anteriores: se comprobaron **dos Autores más con margen amplio y obra disponible**, y ninguno tiene
+nada que este Corpus pueda publicar.
