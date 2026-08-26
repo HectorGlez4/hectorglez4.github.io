@@ -385,6 +385,27 @@ candidata, una y otra vez, son tres cosas y no el tema: **empieza remitiendo** (
 es…», «Muchas puede haber…»), **cita a otro** («Ya Locke notó…», «Yo os digo con Renan…»), o **trae
 nombre propio y anécdota**.
 
+### El tramo de Autores YA NO está reservado (134.ª, decidido por Héctor)
+
+Durante toda la v4, «a quién se admite» fue **lo único que el producto no delegaba**. El 26/08/2026
+Héctor lo delegó: «agrega más autores». El bucle elige.
+
+Lo que **no** cambia, y hay que releerlo antes de cada alta:
+
+· **La meta cuenta Autores que PUBLICAN**, no declarados —`src/lib/meta.ts` lo dice y lo razona—.
+  Crear fichas vacías no mueve el tramo. Admitir es recuperar, versionar, extraer, leer y publicar.
+· **El suelo del 40 % de tradición latinoamericana** sigue siendo un compromiso del PRD, y se mide
+  sobre los admitidos, no sobre los sembrados.
+· **Se elige por género medido, no por fama**: prosa doctrinal y aforística. Un nombre ilustre cuya
+  obra disponible es novela o crónica entra para dar dos Citas.
+· **Y se mira el volumen antes de crear la ficha** (116.ª): en la 134.ª, «Meditaciones» resultó ser
+  una sátira política de otro Autor —título homónimo— y «Soliloquios», un índice sin texto. Las dos
+  se retiraron antes de crear ningún Autor.
+
+El camino, en orden: buscar la dirección donde sea —el navegador vale—, `recuperar` para descargar,
+que es la única orden con red; comprobar la cabecera del documento; `autor crear` con tradición;
+`extraer --autor`; leer; `revisar --aprobar`.
+
 ### Lo que descarta no es el conector, es el agujero (133.ª)
 
 Durante 130 sesiones se apartó **todo** lo que empieza por conector. Demasiado grueso: se estaban

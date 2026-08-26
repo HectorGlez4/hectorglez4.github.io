@@ -1,0 +1,13 @@
+---
+texto: "Sus cánones no son absolutos ni inviolables; se transforman obedeciendo al enmarañado determinismo de la evolución social."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-sus-canones-no-son-absolutos-ni-inviolables"
+procedencia:
+  obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64974/pg64974.txt"
+---

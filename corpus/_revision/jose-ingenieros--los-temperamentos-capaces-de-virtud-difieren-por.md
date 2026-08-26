@@ -1,0 +1,13 @@
+---
+texto: "Los temperamentos capaces de virtud difieren por su intensidad."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-los-temperamentos-capaces-de-virtud-difieren-por"
+procedencia:
+  obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64974/pg64974.txt"
+---

@@ -258,6 +258,36 @@ const APARATO_DE_LA_FUENTE = [
    * Medido: 13 candidatas de 7209, y cero de las 1360 Citas publicadas.
    */
   /\b(?:un|dos|tres|cuatro|cinco|seis)\s+tomos?\s+en\s+\d|\d+[,.]\d+\s*pesetas|\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+,\s*1[89]\d\d(?:-\d\d)?\s*;/u,
+
+  /*
+   * El **número de página al abrir el renglón**, que el OCR dejó pegado al texto.
+   *
+   * Sin ordinal a propósito: los comentarios de arriba numeran hasta la decimotercera y el array
+   * tiene diecisiete patrones, así que la cuenta ya iba por detrás. Añadir «decimocuarta» sería
+   * afirmar un número no comprobado, que es justo lo que este fichero existe para no hacer.
+   *
+   * No confundir con el **folio intercalado** —«…que envenenase la vida, -61- adoración que…»—,
+   * que tiene su propia forma y su propia prueba: aquél va dentro de la frase y entre guiones;
+   * éste abre el renglón y viene del entrelazado de columnas.
+   *
+   * El documento que la abrió está compuesto a dos columnas y el OCR las entrelazó:
+   *
+   *     109 Su ejemplo es por sí sólo una Su ejemplo es por sí solo una influencia social
+   *     127 para cuanto dice referencia á para cuanto hace referencia á las necesidades materiales
+   *
+   * Es la peor clase de basura porque **es español legible**: la puerta de la 11.5 mide caracteres
+   * ajenos y OCR roto, no repetición, así que la deja pasar entera.
+   *
+   * La firma obvia era la repetición —cuatro palabras que aparecen dos veces—, y medida **caza 17
+   * de las 1497 Citas publicadas**, todas buenas: son anáfora («Aun en el nombre es peligroso
+   * comunicar con los malos, y hasta en el nombre es útil comunicar con los buenos»). Diecisiete
+   * muertas para cazar treinta y cuatro. Descartada.
+   *
+   * Lo que sirve es la etiqueta de página con que abre el renglón, sin depender de la repetición.
+   *
+   * Medido: **0 de 1497 publicadas** y **34 de 11 095 candidatas**, y las 34 son doblado real.
+   */
+  /^\s*\d{1,4}\s+\p{L}/u,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

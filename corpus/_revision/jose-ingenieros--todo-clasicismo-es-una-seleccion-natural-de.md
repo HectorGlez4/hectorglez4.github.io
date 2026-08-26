@@ -1,0 +1,13 @@
+---
+texto: "Todo clasicismo es una selección natural de ideales sobrevivientes á través de los siglos."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-todo-clasicismo-es-una-seleccion-natural-de"
+procedencia:
+  obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64974/pg64974.txt"
+---

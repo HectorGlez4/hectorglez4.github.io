@@ -1,0 +1,14 @@
+---
+texto: "La pasión así adulterada que sirve de materia dramática es el amor sexual."
+autor: "eugenio-maria-de-hostos"
+slug: "eugenio-maria-de-hostos-la-pasion-asi-adulterada-que-sirve-de"
+procedencia:
+  obra: "Moral social"
+  año: 1917
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/73064/pg73064.txt"
+---

@@ -8376,3 +8376,82 @@ Y no es un permiso: la mayoría de los conectores siguen apartando, porque la ma
 | Tramos medidos dentro de una obra | 3 | **4** (27 → 33 → 38 → 8 %) |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 134.ª sesión — Héctor delega a quién se admite, y entran dos Autores
+
+**El tramo reservado deja de estarlo.** Héctor dijo «agrega más autores», y eso es exactamente lo
+que `deferred-work.md` esperaba: «el bucle recupera, extrae, coteja y publica en cuanto haya
+nombres o URL. Lo único que no hace es elegirlos».
+
+### Lo primero fue comprobar que no se puede hacer trampa
+
+Antes de crear nada se miró **cómo cuenta la meta**. Cuenta *Autores que publican*, no declarados,
+y está escrito en `src/lib/meta.ts` con su motivo: «un fichero en `corpus/autores/` sin ninguna
+Cita detrás no es una página que exista para nadie, y contarlo dejaría la meta alcanzable creando
+ficheros vacíos». Así que admitir un Autor es recuperar, versionar, extraer, leer y publicar.
+
+### Dos títulos que no eran lo que decían
+
+Se buscó prosa **doctrinal y aforística**, que es el género medido al 40 %, no fama.
+
+· «Meditaciones» en la Fuente **no es Marco Aurelio**: es una sátira política de 1868 de otro
+  Autor. Título homónimo. Retirada.
+· «Soliloquios» **sí** es Marco Aurelio, pero la página es un índice de 4,5 KB con un aviso de
+  «se está trabajando actualmente en este texto» y una lista de idiomas. Sin texto. Retirada.
+
+Las dos las cazó la comprobación de la 116.ª —mirar qué trae el volumen antes de fiarse del
+nombre—, y las dos antes de crear una ficha de Autor equivocada.
+
+Los que sí entraron son un tratado de moral social y un ensayo de psicología moral, los dos de
+tradición latinoamericana y los dos de Project Gutenberg. Buscar la dirección se hizo en el
+navegador; **descargar, la orden de siempre**, que es la única con red (AD-22).
+
+### Un aparato nuevo, y una regla medida y descartada
+
+Uno de los documentos está compuesto **a dos columnas** y el OCR las entrelazó:
+
+> 109 Su ejemplo es por sí sólo una Su ejemplo es por sí solo una influencia social influencia
+
+Es la peor clase de basura porque **es español legible**: la puerta de la 11.5 mide caracteres
+ajenos y OCR roto, no repetición, y la deja pasar entera.
+
+La firma obvia era la repetición —cuatro palabras que aparecen dos veces—. Medida: **caza 17 de
+las 1497 Citas publicadas, y las diecisiete son buenas**. Son anáfora: «Aun en el nombre es
+peligroso comunicar con los malos, y hasta en el nombre es útil comunicar con los buenos». Regla
+**descartada**, la cuarta que se mide y no se pone.
+
+La que sirve es la **etiqueta de página** con que abre el renglón: **0 de 1497 publicadas** y **34
+de 11 095 candidatas**, y las 34 son doblado real. Ésa sí entró, y como la 128.ª hizo que la puerta
+se aplique también al aprobar, protege ya a las once mil viejas y no solo a lo que entre después.
+
+### Y el error de la sesión, que lo cazó una resta
+
+Al escribir la prueba se **sobrescribió un fichero de pruebas existente** que guardaba otro defecto
+—el folio `-61-` intercalado dentro de la frase—. Cinco pruebas destruidas.
+
+La herramienta lo dijo: «has been **updated**», no «created». Lo leí por encima. Es el mismo defecto
+de la 124.ª —leer el resumen en vez de consultar el estado— aplicado a la salida de una herramienta.
+
+**No lo cazó mi atención: lo cazó una cifra que no cuadraba.** 86 ficheros de prueba antes y 86
+después de «añadir» uno. Restaurado, y lo nuevo en fichero propio.
+
+Y de paso se vio que la numeración de las formas de aparato **ya iba por detrás**: los comentarios
+llegan a la decimotercera y el array tiene diecisiete patrones. La forma nueva entró **sin ordinal**,
+con el motivo escrito: poner «decimocuarta» habría sido afirmar un número no comprobado.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 17 | **19** de 35 |
+| Tradición latinoamericana | 41,2 % | **47,4 %** |
+| Citas | 1497 | **1501** |
+| Documentos versionados | 147 | **149** |
+| Candidatas en revisión | 7 133 | **11 095** |
+| Pruebas | 2286 | **2295** |
+| Reglas medidas y NO puestas | 3 | **4** |
+
+Puerta completa en verde y consultada por su código de salida.
+
+**El tramo lleva dieciséis Autores por delante**, y ahora sí depende del bucle.
