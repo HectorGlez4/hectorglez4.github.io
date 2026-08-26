@@ -156,6 +156,43 @@ describe('Historia 11.5 — la señal es de OCR, no de vocabulario', () => {
  * versionados de verdad. Son la mejor evidencia de que la puerta no da falsos positivos,
  * porque cada uno de ellos ya produjo Citas publicadas. Ninguno puede quedar descartado.
  */
+/**
+ * El guion bajo con que Gutenberg marca la cursiva **no es daño de escáner** — 108.ª sesión.
+ *
+ * Al abrir esa Fuente, su primer libro grande llegó con **804 guiones bajos** en 55.894 palabras:
+ * `_mujer_`, `_la_`, `_a_)`. Son la marca de cursiva de la transcripción, no manchas leídas mal, y
+ * bastaron para que el documento midiera 1,09 % y saltara la canaria del margen.
+ *
+ * La prueba de la canaria dice qué hacer cuando salta —«revisar la señal que lo esté rozando, no
+ * la prueba»— y eso es lo que se hizo. Aquí la señal se disparaba **sin razón**: un guion bajo que
+ * abre y cierra alrededor de una palabra es tipografía; uno suelto sí puede ser basura de escaneo.
+ *
+ * Medido antes de tocarla: **cero candidatas y cero Citas publicadas traen guion bajo**, porque la
+ * puerta por sentencia ya las descartaba. Así que no había ninguna Cita en riesgo; lo único que
+ * pasaba es que un documento sano parecía dañado, y eso vuelve la medida menos útil justo cuando
+ * más Fuentes entran.
+ */
+describe('Historia 11.5 — la marca de cursiva no es una mancha', () => {
+  it('un guion bajo que abre y cierra es cursiva, y no cuenta como daño', () => {
+    for (const sano of ['La _mujer_ moderna', 'el punto _a_) del capítulo', '_todo_ eso']) {
+      expect(medirLegibilidad(sano).señales['carácter-ajeno'] ?? 0, sano).toBe(0);
+    }
+  });
+
+  it('pero un guion bajo suelto sigue disparando: eso sí puede ser un escáner', () => {
+    for (const roto of ['la mu_er moderna', 'el capi_ulo', 'palabra_']) {
+      expect(medirLegibilidad(roto).señales['carácter-ajeno'] ?? 0, roto).toBeGreaterThan(0);
+    }
+  });
+
+  it('y el resto de caracteres ajenos siguen disparando igual', () => {
+    // El arreglo es del guion bajo y de nada más: la lista de prohibidos no se ablanda.
+    for (const roto of ['pa*abra', 'te|to', 'ca^a', 'na{a']) {
+      expect(medirLegibilidad(roto).señales['carácter-ajeno'] ?? 0, roto).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe('Historia 11.5 — ningún documento sano del Corpus queda condenado', () => {
   const fuentes = resolve(import.meta.dirname, '../../corpus/fuentes');
   const documentos = readdirSync(fuentes).filter((f) => f.endsWith('.txt'));

@@ -6837,3 +6837,71 @@ Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el de
 106.ª verificado en vivo.
 
 **El tramo sigue sin alcanzarse**: 18 Autores.
+
+## 108.ª sesión — una segunda Fuente llevaba cien sesiones admitida y sin usar
+
+Buscando dónde queda obra, miré lo que nunca había mirado: **qué Fuentes admite el proyecto**.
+Project Gutenberg está en la lista desde siempre —dominio público, reutilización permitida— y de
+**143 documentos versionados solo uno** venía de ahí. Cien sesiones exprimiendo una biblioteca con
+otra al lado sin tocar, y sin que haga falta decidir Autores nuevos: son las mismas firmas con
+mucha más obra.
+
+El primer libro que entró lo confirma: un tratado en prosa de un Autor que tenía **2 Citas** y
+margen para doscientas. **1161 candidatas de un solo documento** —Gutenberg da libros enteros,
+donde Wikisource da capítulos—.
+
+Se leyó el tramo breve, que es donde la escala dice que está la densidad de aforismo, y salieron
+**12 Citas**. Las 800 y pico restantes quedan sin leer y **se dice**, no se finge revisadas.
+
+### Tres puertas nuevas, y una que se midió y no se puso
+
+Abrir una Fuente trae aparato nuevo, como la 80.ª ya había anotado. De este libro salieron:
+
+· **La nota del transcriptor** —«Las páginas en blanco han sido eliminadas»—. Empecé enumerando
+  fórmulas y al leer aparecieron tres variantes más, así que medí la forma genérica: **la línea que
+  abre con asterisco**. De 6123 candidatas la cumplen cinco, y las cinco son notas; de las 1273
+  Citas publicadas, ninguna. Enumerar deja siempre la sexta fuera.
+
+· **Y la puerta que NO se puso.** El libro trae títulos de sección en versales, y cerrar «toda línea
+  entera en mayúsculas» era fácil. Medirlo lo impidió: de las cinco candidatas que casaban, **dos
+  eran epitafios citados dentro de la obra**, que son texto del Autor —«UN HOMBRE QUE NO EN VANO HA
+  ESPERADO EN DIOS»—. Una puerta que se lleva por delante texto legítimo es peor que no tenerla,
+  **porque el descarte no se ve**: la candidata simplemente no aparece. Hay una prueba que deja
+  constancia de que se consideró y se rechazó.
+
+### La canaria saltó, y tenía razón en saltar
+
+La puerta de legibilidad puso el documento nuevo en **1,09 %** —bajo el umbral del 2 %, pero por
+encima de la mitad, que es donde vigila la canaria del margen—. La prueba dice qué hacer cuando
+salta: «revisar la señal que lo esté rozando, no la prueba».
+
+La señal era `carácter-ajeno`, disparada **804 veces por el guion bajo con que Gutenberg marca la
+cursiva**: `_mujer_`, `_a_)`. Eso es tipografía de la Fuente, no una mancha leída mal.
+
+Medido antes de tocar nada: **cero candidatas y cero Citas publicadas traen guion bajo**, porque la
+puerta por sentencia ya las descartaba. No había ninguna Cita en riesgo; lo único que pasaba es que
+un documento sano parecía dañado.
+
+Así que se afinó la señal, no el umbral ni la canaria: **un guion bajo que abre y cierra es
+cursiva; uno suelto sigue disparando**, y el resto de caracteres prohibidos no se ablanda —hay
+pruebas de las tres cosas—. El documento pasa de 1,09 % a **0,72 %**.
+
+Es la diferencia que más va a importar de aquí en adelante: cada Fuente trae su propio marcado, y
+confundirlo con daño enturbia la medida justo donde hay que afinarla.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1273 | **1285** |
+| Citas de ese Autor | 2 | **14** |
+| Documentos de Gutenberg | 1 | **2** |
+| Formas de aparato cazadas | 9 | **10** |
+| Pruebas de unidad | 2194 | **2206** |
+| Peor documento por legibilidad | 1,09 % | **0,94 %** |
+
+Puerta completa en verde: `astro check` 0 errores, `build`, **414 E2E**, y el despliegue de la
+107.ª verificado en vivo.
+
+**El tramo sigue sin alcanzarse**: 18 Autores. Pero la cantera acaba de multiplicarse sin tocar esa
+decisión.

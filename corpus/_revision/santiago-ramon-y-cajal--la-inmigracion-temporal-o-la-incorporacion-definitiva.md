@@ -1,0 +1,13 @@
+---
+texto: "La inmigración temporal o la incorporación definitiva de investigadores forasteros constituye método de inoculación directa y supraintensiva, capaz de sacudir, en circunstancias favorables, el amodorramiento intelectual de un país."
+autor: "santiago-ramon-y-cajal"
+slug: "santiago-ramon-y-cajal-la-inmigracion-temporal-o-la-incorporacion-definitiva"
+procedencia:
+  obra: "Reglas y consejos sobre investigación científica"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/66373/pg66373.txt"
+---

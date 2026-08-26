@@ -192,6 +192,31 @@ const APARATO_DE_LA_FUENTE = [
    * aparte merece…» y «En el capítulo III se demuestra…» siguen pasando, y hay pruebas de ello.
    */
   /^\s*(?:cap[íi]tulo|libro|parte|tomo|acto|escena)\s+[IVXLCDM\d]+\s*[-–—.:]/iu,
+  /*
+   * Décima forma, y **la primera que llega de otra Fuente**. Al abrir Project Gutenberg —admitido
+   * desde siempre y con un solo documento en ciento cuarenta y tres— entraron sus propias marcas:
+   *
+   *     * Las páginas en blanco han sido eliminadas.
+   *     * Los errores de imprenta han sido corregidos.
+   *
+   * Lo escribió quien transcribió el libro, no el Autor, y está literal en el documento: la 11.2
+   * lo daría por bueno. Confirma lo que la 80.ª anotó —cada puerta nueva trae su aparato nuevo—.
+   *
+   * **Y hay una segunda forma que se midió y NO se puso.** El mismo libro trae títulos de sección
+   * en versales, y cerrar «toda línea entera en mayúsculas» habría sido fácil; medirlo lo impidió:
+   * de las cinco candidatas que casaban, **dos eran epitafios citados dentro de la obra**, que son
+   * texto del Autor. Una puerta que se lleva por delante texto legítimo es peor que no tenerla,
+   * porque el descarte no se ve. Los títulos en versales se descartan a mano al leer.
+   *
+   * **Y la forma que se eligió no enumera fórmulas.** Al leer aparecieron tres variantes más
+   * —la ortografía actualizada, las notas renumeradas, las tildes puestas a las mayúsculas—, y
+   * enumerar deja siempre la sexta fuera. Se midió entonces **la línea que abre con asterisco**:
+   * de 6123 candidatas la cumplen **cinco, y las cinco son notas del transcriptor**; de las 1273
+   * Citas publicadas, **ninguna**. Es a la vez más ancha y más segura, porque el asterisco inicial
+   * lo pone la Fuente y nunca el Autor.
+   */
+  /^\s*\*\s/u,
+  /^\s*nota\s+del\s+transcriptor/iu,
 ];
 
 /** Si la frase es aparato de la Fuente y no texto del Autor. */

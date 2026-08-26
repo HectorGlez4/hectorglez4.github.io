@@ -1,0 +1,13 @@
+---
+texto: "Pero el pensamiento de Bunge, de que España vivió casi aislada de las naciones cultas, es, desgraciadamente, verdadero, y por eso lo citamos."
+autor: "santiago-ramon-y-cajal"
+slug: "santiago-ramon-y-cajal-pero-el-pensamiento-de-bunge-de-que"
+procedencia:
+  obra: "Reglas y consejos sobre investigación científica"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/66373/pg66373.txt"
+---

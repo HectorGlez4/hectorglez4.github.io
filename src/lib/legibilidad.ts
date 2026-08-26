@@ -72,7 +72,22 @@ const EJEMPLOS = 6;
  * `&` queda fuera a propósito: «&c.» por «etcétera» es abreviatura de época. `/` también:
  * separa versos cuando se cita poesía en línea.
  */
-const AJENOS = /[*|\\_^~=+#@<>{}$%`�]/u;
+const AJENOS = /[*|\\^~=+#@<>{}$%`�]/u;
+
+/**
+ * El guion bajo va aparte porque **marca la cursiva** en las transcripciones de Gutenberg.
+ *
+ * `_mujer_`, `_a_)`: eso es tipografía de la Fuente, no una mancha leída mal, y el primer libro
+ * grande que entró de ahí traía 804 en 55.894 palabras —bastante para mover la canaria del margen
+ * sin que el documento tuviera nada roto—.
+ *
+ * Lo que sí puede ser basura de escáner es un guion bajo **suelto**: `mu_er`, `capi_ulo`. Así que
+ * dispara cuando no abre y cierra. La diferencia importa más cuanto más Fuentes entran, porque
+ * cada una trae su propio marcado y confundirlo con daño enturbia la medida justo donde hay que
+ * afinarla.
+ */
+const CURSIVA = /_[^_\s][^_]*_|^_[^_]*_$/u;
+const GUION_BAJO = /_/u;
 
 /** Guiones que parten una palabra al final de renglón. La raya (—) no es uno de ellos. */
 const GUIONES_DE_CORTE = /\p{L}[-‐‑­¬]$/u;
@@ -224,7 +239,9 @@ export function medirLegibilidad(texto: string): MedidaDeLegibilidad {
     if (/\p{L}\p{N}|\p{N}\p{L}/u.test(sinVoladitas)) disparadas.push('cifra-en-palabra');
 
     // «tata* rabuelos»: la mancha que se leyó como signo.
-    if (AJENOS.test(cruda)) disparadas.push('carácter-ajeno');
+    if (AJENOS.test(cruda) || (GUION_BAJO.test(cruda) && !CURSIVA.test(cruda))) {
+      disparadas.push('carácter-ajeno');
+    }
 
     /*
      * «6» donde va «ó», «i» donde va «í».
