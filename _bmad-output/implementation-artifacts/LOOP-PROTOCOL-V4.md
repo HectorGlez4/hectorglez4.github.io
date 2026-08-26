@@ -392,6 +392,13 @@ Héctor lo delegó: «agrega más autores». El bucle elige.
 
 Lo que **no** cambia, y hay que releerlo antes de cada alta:
 
+· **Lo primero de todo: †1946 o antes.** En España el dominio público llega a los **ochenta años**
+  de la muerte, así que en 2026 lo seguro es haber muerto en 1946 o antes. **Que la Fuente aloje una
+  obra no la hace de dominio público aquí**: Wikisource puede alojar lo que es libre en Estados
+  Unidos, y el Corpus escribe `estadoDerechos: dominio-público` en **cada Cita**, afirmación que
+  tiene que ser verdad. En la 137.ª el candidato mejor de la lista —35 obras, 250 KB, un filósofo de
+  primera fila— murió en **1955**: dominio público en 2036. Descartado sin gastar una descarga.
+  La regla es mecánica y se comprueba en la lista, antes de abrir nada.
 · **La meta cuenta Autores que PUBLICAN**, no declarados —`src/lib/meta.ts` lo dice y lo razona—.
   Crear fichas vacías no mueve el tramo. Admitir es recuperar, versionar, extraer, leer y publicar.
 · **El suelo del 40 % de tradición latinoamericana** sigue siendo un compromiso del PRD, y se mide

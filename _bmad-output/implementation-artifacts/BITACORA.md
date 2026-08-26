@@ -8561,3 +8561,49 @@ una orden, así que la decisión es reversible y no había motivo para dejarla s
 | Firmas con ensayo listadas de una consulta | — | **78** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 137.ª sesión — el candidato mejor de la lista muere en 1955
+
+Cuarta sesión con el tramo abierto. **22 → 25 Autores**, tradición latinoamericana al **52 %**.
+
+### La comprobación que hay que hacer antes que ninguna otra
+
+Con el atajo de la 136.ª, la categoría de ensayos sale ordenada por volumen. **El primero de la
+lista tiene 35 obras y 250 KB**, es un filósofo de primera fila y estaba a un `recuperar` de
+distancia.
+
+**Murió en 1955.** En España el dominio público llega a los ochenta años, o sea en 2036.
+
+Que la Fuente lo aloje no lo hace de dominio público **aquí**: Wikisource puede alojar lo que es
+libre en Estados Unidos, y el Corpus escribe `estadoDerechos: dominio-público` en cada Cita que
+publica. Esa afirmación tiene que ser verdad, y no lo sería.
+
+De ahí sale una regla que faltaba y que no depende de mirar caso por caso: **†1946 o antes**. Es
+mecánica, se comprueba en la lista sin abrir nada, y descarta al candidato más goloso antes de
+gastar una descarga en él.
+
+### Tres que sí, y lo que dieron
+
+· Un tratado sobre la educación moral: **2 de 5 — 40 %**. Cinco candidatas en veinte kilobytes,
+  porque escribe en períodos largos, pero densas.
+· Un ensayo sobre cómo estudiar la historia: **3 de 11**. «Interrogad a cada civilización en sus
+  obras; pedid a cada historiador sus garantías.»
+· Un **discurso en defensa del talento de las mujeres, de 1786**: **2 de 12**. Va muy enumerado
+  —«12.º En España no se han distinguido menos las mugeres»— y eso descarta mucho, pero lo que
+  queda es feroz: «¿Qué progresos podrán hacer estando rodeadas de tiranos, en lugar de
+  compañeros?»
+
+Ese último importa más allá de su rendimiento: el Corpus ya tenía dos voces de mujer discutiendo su
+propio derecho a pensar, con dos siglos de distancia entre ellas. Ahora son tres.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 22 | **25** de 35 |
+| Tradición latinoamericana | 50 % | **52 %** |
+| Citas | 1516 | **1523** |
+| Reglas de admisión mecánicas | 0 | **1** (†1946) |
+
+Puerta completa en verde y consultada por su código de salida.
