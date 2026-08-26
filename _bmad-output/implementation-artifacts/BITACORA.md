@@ -6140,3 +6140,41 @@ Puerta completa en verde: `astro check` 0 errores, **2135 pruebas de unidad**, `
 **El tramo sigue sin alcanzarse y se dice otra vez**: faltan 18 Autores, y eso pide nombres o
 direcciones. Queda medido para seguir: **seis capítulos de esta obra sin recuperar**, y tres Autores
 de la cola con 1, 2 y 3 Citas y margen para más de doscientas cada uno.
+
+### Apéndice — el mapa de la cantera, medido, para no volver a barrerlo
+
+Se midió mientras desplegaba, y se escribe aquí porque **si no queda escrito, la sesión siguiente
+repite el barrido y se vuelve a comer el 429**. Sin nombres, por la regla de la 9.3: se identifica
+cada Autor por su posición en la cola de concentración.
+
+| Autor (por Citas) | margen por techo | cantera de prosa sin recuperar |
+|---|---|---|
+| 1 Cita | ~200 | 39 páginas, todas de 3-5 KB, **narrativa costumbrista** |
+| 2 Citas | ~200 | 3 páginas, de 5,5 KB la mayor |
+| 10 Citas | ~193 | **prólogo de 31 KB y artículos de 28 y 25 KB**, más una novela de 121 KB |
+| 19 Citas (a) | ~182 | 7 capítulos en tres obras |
+| 19 Citas (b) | ~182 | 3 páginas, la mayor de 8,2 KB |
+| 28 → 50 Citas | ~180 | **6 capítulos de una obra y 5 de otra** |
+| 57 Citas | ~134 | 10 páginas de 13 |
+| 66 Citas | ~123 | 46 páginas de 47 |
+| 143 Citas | **33** | 49 páginas de 61 — mucha obra, poco sitio |
+
+**La lectura importante no es dónde hay obra, sino dónde hay obra Y sitio.** El Autor con 143 Citas
+tiene 49 páginas sin tocar y solo caben 33 Citas suyas; el de 10 Citas tiene menos páginas pero
+193 de margen. Y el de 1 Cita tiene 39 páginas que **no sirven**: son narrativa costumbrista, y el
+rendimiento medido de la narrativa es ≈1 % frente al ≈16 % del ensayo. Cantera grande no es cantera
+útil.
+
+**Y la sonda mentía, de una forma que costó ver.** Contaba una obra como «sin recuperar» porque su
+**página raíz de 1 KB** no está versionada, aunque ya se hubieran sembrado ocho de sus capítulos:
+decía cantera intacta donde quedaba menos de la mitad. Ahora, cuando una página pesa menos de 2 KB,
+mira sus subpáginas y dice «14 capítulos, 8 versionados». Es literalmente el mismo defecto de la
+62.ª —contar mal lo ya recuperado— con otro disfraz, y van tres.
+
+Al arreglarla, **la propia mejora la tumbó**: mirar las subpáginas de cada índice multiplica las
+peticiones y Wikisource devolvió 429. Lleva ya la misma guarda que `recuperar.ts` —espera creciente
+y reintento— y degrada diciendo qué obra no pudo mirar, en vez de matar el informe entero.
+
+**Esta sonda merece estar en `tools/` con prueba, y no lo está.** La he reescrito tres veces en tres
+sesiones y las tres ha tenido un defecto distinto. Queda dicho aquí como trabajo pendiente, no como
+algo hecho.
