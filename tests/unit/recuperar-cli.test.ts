@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -1099,5 +1099,67 @@ La cordura y la locura se reparten el imperio de la vida humana.`;
 
     expect(resultado.codigo, resultado.error).toBe(0);
     expect(await pedidas(t)).toEqual([url, cruda(url)]);
+  });
+});
+
+describe('Historia 11.1 — lo que el Corpus ya retiró no se vuelve a descargar', () => {
+  /*
+   * `documentoConUrl` solo miraba `corpus/fuentes/`, así que un documento **retirado** —que
+   * está en `corpus/_fuentes-retiradas/` con su cabecera y su `url` intactas— no contaba como
+   * ya visto y la orden lo volvía a pedir tal cual.
+   *
+   * No es una hipótesis: la 148.ª recuperó dos documentos que sesiones anteriores ya habían
+   * leído, juzgado y retirado, y volvió a extraerlos y a leerlos enteros antes de que la
+   * puerta lo dijera. El aviso estaba versionado en el propio repositorio y nadie lo miraba.
+   *
+   * Se niega en vez de avisar, y sin gastar la petición, porque el aviso lo escribiría la
+   * misma orden que ya se está ignorando. Es reversible sin tocar código: quien quiera
+   * insistir de verdad saca el fichero de `_fuentes-retiradas/`, que es un gesto deliberado.
+   */
+  const NOMBRE = 'wikisource-es--sobre-la-brevedad-de-la-vida.txt';
+
+  async function retirarAMano(t: { corpus: string }) {
+    const retiradas = join(t.corpus, '_fuentes-retiradas');
+    await mkdir(retiradas, { recursive: true });
+    await rename(join(t.corpus, 'fuentes', NOMBRE), join(retiradas, NOMBRE));
+  }
+
+  it('se niega nombrando la retirada, y no pide nada', async () => {
+    const t = await taller();
+    const primera = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });
+    expect(primera.codigo, primera.error).toBe(0);
+    await retirarAMano(t);
+
+    const antes = await pedidas(t);
+    const segunda = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });
+
+    expect(segunda.codigo).not.toBe(0);
+    expect(segunda.error).toMatch(/retirad/i);
+    expect(segunda.error).toContain(NOMBRE);
+    expect(await pedidas(t)).toEqual(antes);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([]);
+  });
+
+  it('y sacarlo de las retiradas lo vuelve a permitir', async () => {
+    const t = await taller();
+    expect((await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) })).codigo).toBe(0);
+    await retirarAMano(t);
+    await rename(
+      join(t.corpus, '_fuentes-retiradas', NOMBRE),
+      join(t.corpus, 'fuentes', NOMBRE),
+    );
+
+    const tercera = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });
+
+    expect(tercera.codigo, tercera.error).toBe(0);
+    expect(tercera.salida).toMatch(/Ya versionado/);
+  });
+
+  it('un corpus sin carpeta de retiradas no se rompe', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(existsSync(join(t.corpus, '_fuentes-retiradas'))).toBe(false);
   });
 });

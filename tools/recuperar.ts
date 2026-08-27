@@ -12,7 +12,8 @@
  *
  * Lo que la orden hace, y en este orden: comprueba que la dirección pertenece al conjunto
  * cerrado de Fuentes **antes** de pedir nada, reutiliza el documento ya versionado si esa
- * misma dirección ya se recuperó, descarga con tiempo máximo y techo de tamaño, revalida
+ * misma dirección ya se recuperó, **se niega si esa dirección corresponde a un documento que
+ * el Corpus ya retiró**, descarga con tiempo máximo y techo de tamaño, revalida
  * el destino tras cada redirección, deriva obra y año de lo que la Fuente declara y lo
  * versiona como texto plano en `corpus/fuentes/`, con el nombre que le da su obra y su
  * página: `{id-de-fuente}--{slug-de-obra}--{slug-de-página}.txt`, colapsado a
@@ -37,7 +38,7 @@
 
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { extname, join } from 'node:path';
+import { basename, extname, join } from 'node:path';
 import { DOMINIO } from '../src/lib/dominio.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
@@ -116,12 +117,27 @@ if (!fuente.permiteReutilizacion) {
 
 // ── Lo ya versionado se reutiliza, sin volver a pedirlo ──────────────────────
 
-const yaVersionado = await documentoConUrl(url);
+const yaVersionado = await documentoConUrl(url, rutas.fuentes);
 if (yaVersionado !== undefined) {
   terminar({
     ok: true,
     ruta: yaVersionado,
     mensaje: `Ya versionado: ${yaVersionado}\nNo se ha vuelto a descargar ni se ha añadido otra copia.`,
+  });
+}
+
+// ── Y lo que el Corpus ya retiró tampoco se vuelve a pedir ───────────────────
+
+const yaRetirado = await documentoConUrl(url, rutas.fuentesRetiradas);
+if (yaRetirado !== undefined) {
+  terminar({
+    ok: false,
+    motivos: [
+      `Este documento ya se retiró del Corpus: ${basename(yaRetirado)}`,
+      'Se retira lo que no da ninguna Cita, así que volver a descargarlo es repetir una',
+      'lectura que ya se hizo y ya se juzgó. No se ha descargado nada.',
+      `Para insistir de verdad, saca el fichero de ${basename(rutas.fuentesRetiradas)}/.`,
+    ],
   });
 }
 
@@ -293,18 +309,23 @@ terminar({
 // ── Piezas ───────────────────────────────────────────────────────────────────
 
 /**
- * El documento ya versionado que salió de esta misma dirección, si lo hay.
+ * El documento de una carpeta que salió de esta misma dirección, si lo hay.
  *
  * Se mira contra las dos direcciones que puede llevar la cabecera —la pedida y la final—,
  * porque con redirección no son la misma y comparar solo con la final hacía que cada
  * ejecución volviera a descargar lo que ya estaba versionado.
+ *
+ * La carpeta es un parámetro porque hay **dos** sitios donde el Corpus guarda un documento
+ * que ya vio: `fuentes/`, del que se reutiliza, y `_fuentes-retiradas/`, del que hay que
+ * negarse. La 148.ª descubrió que mirar solo el primero deja pasar la repetición completa
+ * —descargar, extraer y leer entero— de una obra ya juzgada y desechada.
  */
-async function documentoConUrl(direccion: string): Promise<string | undefined> {
-  if (!existsSync(rutas.fuentes)) return undefined;
+async function documentoConUrl(direccion: string, carpeta: string): Promise<string | undefined> {
+  if (!existsSync(carpeta)) return undefined;
 
-  for (const entrada of await readdir(rutas.fuentes)) {
+  for (const entrada of await readdir(carpeta)) {
     if (extname(entrada) !== '.txt') continue;
-    const ruta = join(rutas.fuentes, entrada);
+    const ruta = join(carpeta, entrada);
     const cabecera = analizarDocumento(await readFile(ruta, 'utf8'))?.cabecera;
     if (cabecera === undefined) continue;
     if (cabecera.url === direccion || cabecera.pedido === direccion) return ruta;

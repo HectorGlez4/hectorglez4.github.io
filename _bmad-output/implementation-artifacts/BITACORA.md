@@ -9129,3 +9129,103 @@ Lo que sí es suyo:
 | Citas | 1583 | **1585** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 148.ª sesión — repetí una lectura que el Corpus ya había hecho y desechado
+
+**32 Autores.** Faltan tres. Y lo que importa de esta sesión es el rato que perdí.
+
+### El aviso llevaba meses versionado y nadie lo miraba
+
+Elegí una firma, recuperé tres de sus obras, extraje **3411 candidatas** y me puse a leer. Dos de
+esas tres obras **ya estaban en `corpus/_fuentes-retiradas/`**, con su cabecera y su `url` intactas,
+puestas ahí por dos sesiones anteriores que las habían leído, juzgado y desechado. Sus propios
+commits lo dicen: *«elegir Autor es sobre todo saber a quién NO admitir»* y *«el tramo no avanza, y
+se dice»*.
+
+Y no era un olvido de hace meses: una se retiró **ayer** y la otra **hoy**, unas horas antes, en
+esta misma tirada del bucle. Lo que falla no es la memoria larga — es que no hay ninguna.
+
+`recuperar` reutiliza el documento si está en `fuentes/` —para no gastar la descarga— y **era ciego
+a lo retirado**. Así que descargó otra vez, extrajo otra vez, y yo leí otra vez, hasta que la puerta
+lo dijo por su cuenta.
+
+Ya no depende de que alguien se acuerde. La orden **se niega**, nombrando el fichero retirado y sin
+gastar la petición, y para insistir de verdad hay que sacarlo de esa carpeta a mano. Tres pruebas
+nuevas: que se niega, que sacarlo de la carpeta lo vuelve a permitir, y que un corpus sin esa
+carpeta no se rompe.
+
+Es el mismo defecto de siempre con otra cara: **el proyecto sabía algo que yo no consulté**.
+
+### La puerta dijo tres cosas más, y las tres tenían razón
+
+**Una.** Un documento que recuperé y ni siquiera llegué a usar mide **4,1 % de ilegible**, sobre un
+umbral del 2 %. La sonda dice por qué: `letra-suelta=808`, cuando el segundo peor documento del
+Corpus tiene 40. No es OCR roto — es una ortografía del XIX que **escribe la conjunción «i» en vez
+de «y»**, y la medida no distingue una conjunción antigua de una letra suelta de ruido. Queda
+anotado como límite conocido, junto al de la 145.ª: si algún día aparece un aforista en esa
+ortografía, la puerta lo rechazará por una convención de imprenta, no por daño.
+
+**Dos.** `documento.test.ts` lleva una **lista nominal de los documentos versionados que no dan
+ninguna Cita**, y sólo queda **uno** —una letrilla en verso, del censo pendiente—. Mis tres
+documentos la rompieron. Mi primer impulso fue añadirlos «como registro para que nadie repita la
+veta»; habría invertido el sentido de una lista que el proyecto reduce a propósito. **Un documento
+versionado que no produce nada es indistinguible de uno que aún no se ha leído.** Los tres se
+retiraron con `retirar`, que arrastra las candidatas, y la ficha del Autor sin Cita también.
+
+**Tres.** La misma orden de la 147.ª volvió a acertar: el cotejo del Autor pasó a la primera porque
+esta vez copié el nombre en vez de completarlo.
+
+### La obra más célebre de la sesión rindió cero
+
+Lo único nuevo de esa firma era su obra mayor, el ensayo hispanoamericano más citado del XIX:
+
+| tramo | leídas | firmes |
+|---|---|---|
+| medio (95-175) | 14 | **0** |
+| largo (176-265) | 14 | **0** |
+| sólo las generales | 16 | **0** |
+
+**0 de 44**, primer cero del bucle. Es un ensayo, sí, pero **sobre un país y una década**: sus
+frases son verdaderas, están bien escritas y ninguna se sostiene sola, porque llevan dentro un
+nombre propio, una provincia o un año que quien lee una Cita no tiene delante. «Ensayo de tesis»
+describe el propósito, no la forma.
+
+### Dos sondas nuevas de lectura, y una es floja a propósito
+
+La primera **sitúa cada candidata en la línea del documento**, así que el prólogo ajeno de la 134.ª
+deja de esquivarse recordándolo: se pide un tramo de líneas y lo de fuera no se lee.
+
+La segunda aparta lo que lleva **nombre propio o año**. **No debe ascender nunca a puerta**: «Dios»,
+«Roma» o «Europa» viven en aforismos excelentes. Y se anota su límite medido: **no bastó** —quitar
+nombres propios no quita el anclaje narrativo, y las dieciséis «generales» rindieron cero igual.
+
+### Lo que sí entró
+
+Una segunda firma que escribió en castellano desde Filipinas —la otra tradición pasa a tres— con un
+estudio político breve. Tres Citas de 64 leídas:
+
+> Para leer en el destino de los pueblos, es menester abrir el libro de su pasado.
+>
+> Una nación se conquista respeto no sosteniendo ni encubriendo abusos, sino castigándolos y
+> reprobándolos.
+>
+> Si no hay un estado eterno en la naturaleza, ¡cuánto menos lo debe de haber en la vida de los
+> pueblos, seres dotados de movilidad y movimiento!
+
+Y una confirmación que vale más que las tres: se apartó una candidata excelente porque la afirmación
+que contiene **es de Maquiavelo**, a quien el Autor está citando. Es exactamente la trampa que la
+147.ª descubrió ayer en otro libro y con otra lengua de origen. Que reaparezca a la primera dice que
+**no era una rareza de aquel volumen**: es lo que hace el género polémico.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 31 | **32** de 35 |
+| Citas | 1585 | **1588** |
+| Firmas del segundo catálogo contadas | — | **1133** (143 admisibles) |
+| Obras leídas que ya estaban retiradas | — | **2** (y ya no puede repetirse) |
+| Obras medidas a rendimiento cero | 0 | **1** |
+
+Puerta completa en verde y consultada por su código de salida.

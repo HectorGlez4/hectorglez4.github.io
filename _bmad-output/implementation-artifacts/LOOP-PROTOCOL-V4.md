@@ -426,9 +426,36 @@ Lo que **no** cambia, y hay que releerlo antes de cada alta:
   suyas. Publicarlas le atribuiría lo contrario de lo que sostiene, y **no hay puerta que lo vea**:
   están literales en el documento, el cotejo las da por buenas y la legibilidad no ve nada raro. Es
   peor que el prólogo ajeno de la 134.ª, porque el prólogo se salta y esto va entreverado.
+· **Y la trampa del que cita para refutar no era de aquel libro** (148.ª): a la primera obra
+  polémica siguiente, en otra lengua de origen y sin ninguna relación con la anterior, volvió a
+  aparecer —una afirmación que es **de Maquiavelo**, a quien el Autor está citando—. Es lo que hace
+  el género, no una rareza de un volumen.
+· **La celebridad de una obra no dice nada de su cantera** (148.ª). El ensayo hispanoamericano más
+  citado del XIX se leyó en tres tandas —tramo medio, tramo largo y sólo las generales— y dio
+  **0 de 44**. Primer cero del bucle, y la razón se ve al leer: es un ensayo **sobre un país y una
+  década**, y sus frases llevan dentro un nombre propio, una provincia o un año que quien lee una
+  Cita no tiene delante. «Ensayo de tesis» describe el propósito, no la forma; lo que decide es si
+  la frase se sostiene sin su contexto.
+· **Y una firma admitida que no publica NO se queda** (148.ª). La tentación era dejar la ficha y sus
+  candidatas «como registro para que nadie repita la veta». La suite lo prohíbe, y con razón:
+  `documento.test.ts` lleva una **lista nominal de los documentos sin Cita** que el proyecto está
+  reduciendo a propósito, y añadir tres habría invertido su sentido. Un documento versionado que no
+  produce nada **es indistinguible de uno que aún no se ha leído**. El registro va a la BITÁCORA y
+  aquí; el documento, a `retirar`.
 · **Y se mira el volumen antes de crear la ficha** (116.ª): en la 134.ª, «Meditaciones» resultó ser
   una sátira política de otro Autor —título homónimo— y «Soliloquios», un índice sin texto. Las dos
   se retiraron antes de crear ningún Autor.
+
+**Y antes de recuperar nada, mira `corpus/_fuentes-retiradas/`** (148.ª). Esta sesión descargó,
+extrajo y leyó enteras dos obras que sesiones anteriores ya habían leído, juzgado y retirado —una
+retirada **el día antes** y la otra **unas horas antes**, en la misma tirada del bucle—. El aviso
+estaba versionado en el propio repositorio, con su cabecera y su `url` intactas, y nadie lo miraba:
+`recuperar` reutilizaba lo que estaba en `fuentes/` y era ciego a lo retirado. Lo que falla no es la
+memoria larga: es que entre sesiones no hay ninguna, y por eso tiene que estar en la orden.
+
+Ya no hace falta acordarse: **la orden se niega** cuando la dirección corresponde a un documento
+retirado, y lo dice sin gastar la petición. Para insistir de verdad hay que sacar el fichero de esa
+carpeta, que es un gesto deliberado y no un despiste.
 
 El camino, en orden: buscar la dirección donde sea —el navegador vale—, `recuperar` para descargar,
 que es la única orden con red; comprobar la cabecera del documento; `autor crear` con tradición;
@@ -521,6 +548,20 @@ de 8-13 % a **33 %**.
 
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
+
+### Dos sondas de lectura, y una que no debe ascender a puerta (148.ª)
+
+**Situar la candidata en la línea del documento.** El prólogo ajeno de la 134.ª se esquivaba
+recordándolo. Ahora se busca el texto de cada candidata en el documento, se anota su línea y se pide
+un tramo; lo que cae fuera no se lee. El límite lo sigue poniendo quien lee el documento —ninguna
+orden sabe dónde acaba un prólogo—, pero una vez sabido deja de depender de la memoria. Vale
+igual para el aparato editorial del final: índices, apéndices y proclamas de terceros.
+
+**Apartar lo que lleva nombre propio o año.** Es una **lente para elegir qué leer primero** cuando
+una obra deja dos mil candidatas, y **no debe convertirse en puerta**: «Dios», «Roma» o «Europa»
+viven en aforismos excelentes y un filtro así los mataría. Se anota además su límite medido:
+**no basta**. Quitar los nombres propios no quita el anclaje narrativo, y en la obra del cero las
+dieciséis «generales» rindieron cero igual.
 
 ### La longitud se invierte según el género (129.ª)
 
