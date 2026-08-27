@@ -417,6 +417,15 @@ Lo que **no** cambia, y hay que releerlo antes de cada alta:
   sobre los admitidos, no sobre los sembrados.
 · **Se elige por género medido, no por fama**: prosa doctrinal y aforística. Un nombre ilustre cuya
   obra disponible es novela o crónica entra para dar dos Citas.
+· **El nombre del Autor se copia, no se completa** (147.ª). El documento firmaba «T. H. Pardo de
+  Tavera» y la ficha se creó desplegando las iniciales; `extraer` se negó, y con razón: no es
+  equivocarse de persona, es **añadir un dato que la Fuente no da**, y una vez dentro nadie
+  distingue lo declarado de lo supuesto.
+· **Cuidado con la obra que cita para refutar** (147.ª). Una conferencia polémica reproduce las
+  afirmaciones del adversario **para condenarlas**, y esas candidatas salen de la extracción como
+  suyas. Publicarlas le atribuiría lo contrario de lo que sostiene, y **no hay puerta que lo vea**:
+  están literales en el documento, el cotejo las da por buenas y la legibilidad no ve nada raro. Es
+  peor que el prólogo ajeno de la 134.ª, porque el prólogo se salta y esto va entreverado.
 · **Y se mira el volumen antes de crear la ficha** (116.ª): en la 134.ª, «Meditaciones» resultó ser
   una sátira política de otro Autor —título homónimo— y «Soliloquios», un índice sin texto. Las dos
   se retiraron antes de crear ningún Autor.

@@ -9080,3 +9080,52 @@ aceptando rendimientos del 15-20 % en géneros que no son el aforismo.
 | Firmas del catálogo contadas y clasificadas | — | **144** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 147.ª sesión — el cotejo se negó a que yo desplegara unas iniciales
+
+**31 Autores**, y una tradición nueva en el Corpus. Faltan cuatro.
+
+### La orden se plantó, y tenía razón
+
+Entró una conferencia de un médico e historiador **filipino que escribía en castellano**. Al crear
+la ficha desplegué sus iniciales al nombre completo, que es lo que uno hace sin pensar. `extraer`
+se negó:
+
+> El documento declara «T. H. Pardo de Tavera» y la orden dice
+> «trinidad-hermenegildo-pardo-de-tavera»… **No son el mismo Autor.**
+> El Autor sale de lo que la Fuente declara en el documento, y el nombre de `corpus/autores/`;
+> extraer así atribuiría el texto a quien no lo escribió.
+
+Es un caso más fino que los que la puerta suele cazar: no me equivoqué de persona, **completé** un
+dato que la Fuente no da. Y la orden hace bien en no aceptarlo, porque una vez dentro nadie
+distingue lo que el documento declaraba de lo que yo supuse. Se creó con el nombre con que él firmó.
+
+### Y una cantera peligrosa de una clase nueva
+
+La conferencia está construida **citando a los adversarios para refutarlos**. De sus 228 candidatas,
+buena parte son afirmaciones despectivas sobre los filipinos —tomadas de textos de frailes— que él
+reproduce **para condenarlas**.
+
+Extraer una de ésas la publicaría **bajo su firma**, diciendo lo contrario de lo que sostiene. Y no
+hay puerta que lo vea: están literales en el documento, el cotejo de la 11.2 las da por buenas y la
+legibilidad no encuentra nada raro. Lo único que las separa es leer y saber de quién son.
+
+Es una clase de peligro que no estaba anotada: **la obra polémica que cita para refutar convierte su
+propia cantera en trampa**. Se suma a lo que ya se sabía del prólogo ajeno (134.ª y 135.ª), y es
+peor, porque el prólogo se salta y esto va entreverado.
+
+Lo que sí es suyo:
+
+> En el hombre inmoral no hay lucha entre dos tendencias, una hacia el mal, otra hacia el bien.
+> No debemos ocultar la verdad cuando pone en evidencia cosas que no halagan nuestro amor propio.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 30 | **31** de 35 |
+| Tradiciones representadas | 2 + 1 | **2 + 2** |
+| Citas | 1583 | **1585** |
+
+Puerta completa en verde y consultada por su código de salida.
