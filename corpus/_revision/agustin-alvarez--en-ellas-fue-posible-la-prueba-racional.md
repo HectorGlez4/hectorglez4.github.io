@@ -1,0 +1,13 @@
+---
+texto: "En ellas fue posible la prueba racional y la convicción inteligente, en lugar de la eterna esterilidad del debate teológico sobre proposiciones irracionales."
+autor: "agustin-alvarez"
+slug: "agustin-alvarez-en-ellas-fue-posible-la-prueba-racional"
+procedencia:
+  obra: "La transformación de las razas en América"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/26947/pg26947.txt"
+---

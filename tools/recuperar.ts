@@ -191,6 +191,27 @@ if (nombre === undefined) {
 const destino = join(rutas.fuentes, `${nombre}.txt`);
 
 /*
+ * La puerta de lo retirado va por `url`, y eso deja un hueco: la Fuente tiene **dos
+ * ediciones del mismo título del mismo Autor** con números de catálogo distintos, así que
+ * la dirección no coincide y el mismo libro vuelve a entrar. Aquí ya se sabe la obra —sale
+ * del documento, y por eso esta comprobación no puede ahorrar la petición—, y el par
+ * (Fuente, obra) es el que AD-23 declara único. Lo caro no es la descarga: es extraer y
+ * volver a leer entero lo que ya se juzgó.
+ */
+const retirado = join(rutas.fuentesRetiradas, `${nombre}.txt`);
+if (existsSync(retirado)) {
+  terminar({
+    ok: false,
+    motivos: [
+      `Esta obra ya se retiró del Corpus: ${nombre}.txt`,
+      'Es otra edición de lo mismo —la dirección no coincide, la obra sí—, y lo que se',
+      'retira es la obra. No se ha versionado nada.',
+      `Para insistir de verdad, saca el fichero de ${basename(rutas.fuentesRetiradas)}/.`,
+    ],
+  });
+}
+
+/*
  * Un documento por par (Fuente, obra), AD-23. Pero el nombre se recorta a 60 caracteres,
  * y dos obras largas distintas de la misma Fuente pueden dar el mismo. Callarlo con «ya
  * versionado» y salir 0 dejaba la segunda obra sin versionar para siempre y sin que nada

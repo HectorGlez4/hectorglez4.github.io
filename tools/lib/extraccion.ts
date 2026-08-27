@@ -56,7 +56,8 @@ export type Descarte =
   | { texto: string; motivo: 'longitud' }
   | { texto: string; motivo: 'repetida' }
   | { texto: string; motivo: 'ilegible' }
-  | { texto: string; motivo: 'aparato-de-la-fuente' };
+  | { texto: string; motivo: 'aparato-de-la-fuente' }
+  | { texto: string; motivo: 'trozo-de-cita-ajena' };
 
 /**
  * Las frases con que la Fuente **envuelve** la obra: el pie de licencia que Wikisource añade a
@@ -312,6 +313,44 @@ const APARATO_DE_LA_FUENTE = [
 /** Si la frase es aparato de la Fuente y no texto del Autor. */
 export function esAparatoDeLaFuente(sentencia: string): boolean {
   return APARATO_DE_LA_FUENTE.some((plantilla) => plantilla.test(sentencia));
+}
+
+const ABRE_COMILLA = new Set(['«', '“']);
+const CIERRA_COMILLA = new Set(['»', '”']);
+
+/**
+ * Si la frase lleva una comilla sin pareja, y por tanto dice palabras de otro.
+ *
+ * La 144.ª apartó a mano una candidata excelente por **cerrar** una comilla que no abría:
+ * eso es el final de una cita dentro del texto, y publicarla atribuiría al Autor lo que
+ * quizá copió. El caso espejo vale igual —si **abre** y no cierra, la cita sigue más allá
+ * de la frase—, y de la 147.ª a la 151.ª el mismo peligro salió en cuatro obras seguidas y
+ * sin relación entre ellas: la conferencia que reproduce al adversario para condenarlo, la
+ * que cita a Maquiavelo, la que sigue traduciendo a un historiador después de nombrarlo y
+ * la que copia a Tocqueville párrafo a párrafo.
+ *
+ * Ninguna de las otras puertas la ve, y **ésa es la razón de que sea peligrosa**: la frase
+ * está literal en el documento, así que el cotejo de la 11.2 la da por buena; está en
+ * español y es legible. Sólo la delata la puntuación.
+ *
+ * Medido antes de escribirla, que es lo que decide si una medida asciende a puerta:
+ * **0 de 1595 Citas publicadas** llevan comillas descompensadas y **351 de 19 036
+ * candidatas** sí. Una puerta que no muerde nada de lo publicado.
+ *
+ * No mira la comilla recta `"`: abre y cierra con el mismo carácter, así que un número
+ * impar dentro de una frase no dice de qué lado está el hueco, y contarlo obligaría a leer
+ * el párrafo entero. Ausencia de regla antes que regla que adivina.
+ */
+export function esTrozoDeCitaAjena(sentencia: string): boolean {
+  let abiertas = 0;
+  for (const caracter of sentencia) {
+    if (ABRE_COMILLA.has(caracter)) abiertas += 1;
+    else if (CIERRA_COMILLA.has(caracter)) {
+      if (abiertas === 0) return true;
+      abiertas -= 1;
+    }
+  }
+  return abiertas > 0;
 }
 
 export type ResultadoDeExtraccion =
@@ -584,6 +623,17 @@ export function extraerCandidatas(
      */
     if (esAparatoDeLaFuente(sentencia)) {
       descartadas.push({ texto: sentencia, motivo: 'aparato-de-la-fuente' });
+      continue;
+    }
+
+    /*
+     * Y aquí mismo, por lo mismo: la frase con una comilla sin pareja está literal en el
+     * documento y en español, así que ninguna de las puertas de abajo la ve. La diferencia
+     * con el aparato es de quién son las palabras — allí de la Fuente, aquí de un tercero
+     * a quien el Autor cita— y por eso lleva motivo propio en vez de colarse en aquél.
+     */
+    if (esTrozoDeCitaAjena(sentencia)) {
+      descartadas.push({ texto: sentencia, motivo: 'trozo-de-cita-ajena' });
       continue;
     }
 

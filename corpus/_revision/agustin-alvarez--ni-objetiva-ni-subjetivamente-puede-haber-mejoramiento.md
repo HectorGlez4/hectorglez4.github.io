@@ -1,0 +1,13 @@
+---
+texto: "Ni objetiva ni subjetivamente puede haber mejoramiento sin cambio del estado precedente."
+autor: "agustin-alvarez"
+slug: "agustin-alvarez-ni-objetiva-ni-subjetivamente-puede-haber-mejoramiento"
+procedencia:
+  obra: "La transformación de las razas en América"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/26947/pg26947.txt"
+---

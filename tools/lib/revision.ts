@@ -16,7 +16,7 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
-import { esAparatoDeLaFuente } from './extraccion.ts';
+import { esAparatoDeLaFuente, esTrozoDeCitaAjena } from './extraccion.ts';
 import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
@@ -86,6 +86,14 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
      */
     const aparato = esAparatoDeLaFuente(candidata.texto ?? '');
 
+    /*
+     * Y lo mismo con la comilla sin pareja, por el mismo motivo y con una cifra que lo hace
+     * urgente: cuando esta puerta se escribió había **351 candidatas versionadas** con las
+     * comillas descompensadas, todas extraídas antes de que existiera. Ninguna se publica
+     * ya sin que la orden lo diga.
+     */
+    const citaAjena = esTrozoDeCitaAjena(candidata.texto ?? '');
+
     const duplicadaPublicada = yaPublicadas.get(canonico);
     const duplicadaEnRevision = vistasEnRevision.get(canonico);
 
@@ -100,13 +108,17 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
-      admisible: comprobacion.success && sinDocumento === undefined && !aparato,
+      admisible: comprobacion.success && sinDocumento === undefined && !aparato && !citaAjena,
       motivos: [
         ...(comprobacion.success ? [] : comprobacion.error.issues.map((i) => i.message)),
         ...(sinDocumento !== undefined ? [sinDocumento] : []),
         // Se nombra el aparato para que no se confunda con «le falta un campo»: son dos
         // arreglos distintos —uno se completa, el otro se descarta—.
         ...(aparato ? ['es aparato de la Fuente, no texto del Autor'] : []),
+        // Y esto se nombra aparte del aparato porque la diferencia importa: aquello es de la
+        // Fuente, esto es de un tercero a quien el Autor cita. Los dos se descartan, pero
+        // quien lee el motivo tiene que saber cuál de los dos peligros acaba de esquivar.
+        ...(citaAjena ? ['lleva una comilla sin pareja: es trozo de una cita ajena'] : []),
       ],
     });
 

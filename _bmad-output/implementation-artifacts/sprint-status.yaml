@@ -145,7 +145,16 @@ development_status:
   # CERRADA el 25/08: 114 Citas sobre 761 son el 14,98 %, dentro del techo del 15 %.
   # Se cerro diluyendo, sin despublicar ninguna Cita, como manda la politica.
   15-3-ningun-autor-pasa-del-techo-de-concentracion: done
-  15-4-el-censo-llega-a-treinta-y-cinco-autores: backlog
+  # El estado decía `backlog` mientras la historia avanzaba de 16 a 34 Autores: se quedó sin
+  # tocar desde el 25/08, cuando admitir Autores NUEVOS aún era decisión reservada. Héctor la
+  # delegó, y con ella dejó de ser una puerta y pasó a ser un procedimiento: †<=1946, tamaño
+  # POR OBRA, traducción sólo con año declarado, y se lista la categoría del catálogo en vez
+  # de pensar nombres. Los dos catálogos en castellano están contados enteros: 144 y 143
+  # firmas admisibles.
+  # PUESTA el 27/08: 35 de 35, sin bajar ningún umbral. En la última tirada entraron cinco
+  # firmas y se retiraron cinco obras que no daban dos Citas —una de ellas midió CERO de 44—,
+  # porque una firma que no publica no se queda.
+  15-4-el-censo-llega-a-treinta-y-cinco-autores: done
   # 26/08: 13 de 24. El tramo NO estaba cerrado por falta de asuntos: lo estaba
   # por una medida de la 60.ª —hecha con 761 Citas— que yo repetia sin rehacer.
   # Con 1000 habia once asuntos por encima del umbral POR REGEX; leidos uno a uno,

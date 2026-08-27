@@ -478,6 +478,10 @@ terminar({
     // aquí, no al preguntarse por qué de una página larga salieron cuatro candidatas.
     `Descartadas por ilegibles (OCR roto): ${porMotivo('ilegible')}\n` +
     `Descartadas por ser aparato de la Fuente: ${porMotivo('aparato-de-la-fuente')}\n` +
+    // Y éstas dicen algo del documento que ninguna otra cifra dice: si son muchas, la obra
+    // está construida citando a otros, y lo que quede pide leerse con la lupa de saber
+    // de quién es cada frase.
+    `Descartadas por ser trozo de una cita ajena: ${porMotivo('trozo-de-cita-ajena')}\n` +
     `Descartadas por repetidas: ${porMotivo('repetida')}` +
     // Se dice aunque sea cero: es lo que distingue «no había nada nuevo» de «no se ejecutó».
     `\nYa estaban en revisión: ${repetidas}` +

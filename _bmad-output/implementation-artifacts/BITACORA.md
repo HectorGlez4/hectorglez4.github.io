@@ -9229,3 +9229,137 @@ que contiene **es de Maquiavelo**, a quien el Autor está citando. Es exactament
 | Obras medidas a rendimiento cero | 0 | **1** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 149.ª sesión — la categoría se lista, y el título miente
+
+**33 Autores.** La 148.ª buscaba por **palabras del título** —«ensayo», «tratado», «máximas»— y
+esta sesión midió por qué eso falla: «Vida de Cervantes» es una biografía y «El origen del
+pensamiento», una novela. El título es una pista, no una declaración.
+
+El catálogo completo de la Fuente trae, por obra, sus **categorías**. Dos son exactamente el género
+que el bucle mide como rentable:
+
+| categoría declarada | obras en castellano | de firmas nuevas †≤1946 |
+|---|---|---|
+| Philosophy & Ethics + Essays, Letters & Speeches | 66 | **42** |
+
+Eso sí es «listar la categoría», que es lo que el protocolo pedía desde la 136.ª y que hasta hoy se
+venía aproximando mal.
+
+### Y de paso, el agujero del arreglo de ayer
+
+La puerta que la 148.ª puso contra volver a bajar lo retirado compara **por dirección**. Al primer
+listado se vio el hueco: la Fuente tiene **dos ediciones del mismo título del mismo Autor** con
+números de catálogo distintos. La dirección no coincide, la obra sí, y el mismo libro vuelve a
+entrar entero.
+
+Hay ahora una segunda comprobación, después de derivar la obra del documento. No ahorra la
+petición —la obra sale del documento, y el documento hay que bajarlo—, pero sí lo caro: extraer y
+volver a leer. **50 pruebas de `recuperar` en verde.**
+
+### Lo que entró, y lo que se apartó sin puerta
+
+Un ensayista uruguayo, tres Citas de sesenta leídas:
+
+> Como la función crea el órgano, el deseo crea la moral.
+>
+> Todo vive de la misma vida y una es el ánima de toda cosa.
+
+Y buena parte del volumen se apartó **por criterio editorial, no por puerta**: su tesis es que la
+compasión y el desinterés debilitan a los pueblos, y varias candidatas impecables de forma dicen
+exactamente eso. Publicarlas bajo un rótulo de sabiduría sería poner doctrina antialtruista sin su
+argumento.
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 32 | **33** de 35 |
+| Citas | 1588 | **1591** |
+
+## 150.ª sesión — la cita que sigue después de cerrar las comillas
+
+**34 Autores.** Entró un ensayista y educador argentino con cuatro Citas:
+
+> Es necesario obrar para vivir, y es necesario saber para obrar.
+>
+> Muchas hebras de paja reunidas detienen el paso de un elefante y muchas menudencias acumulativas
+> detienen la marcha de una nación.
+
+### Y una variante del peligro que es peor que las dos anteriores
+
+Estaba apartada una quinta, buenísima: «Donde la ignorancia y el temor van unidos, es el reino de
+la superstición». Al comprobar de quién era, el párrafo anterior dice **«dice Robertson en su
+_Short History of Christianity_»** — y después de esa atribución la cita **sigue, sin comillas,
+durante varios párrafos**. La frase cae dentro.
+
+La 147.ª encontró la cita **marcada** —el adversario reproducido para refutarlo—. La 148.ª,
+la cita **atribuida** —una frase de Maquiavelo—. Ésta es la **continuación de una cita
+tipográficamente cerrada y no terminada**, y no la ve ninguna marca. Sólo la ve leer hacia atrás
+hasta encontrar a quién se atribuyó el párrafo. Descartada.
+
+### El cotejo del Autor, bien pensado
+
+La ficha se creó como «Agustín **Á**lvarez» y el documento declara «Agustín **A**lvarez». No falló
+—normaliza para comparar— pero **tampoco lo aceptó en silencio**: imprimió las dos formas. Es lo
+contrario del caso de la 147.ª, donde yo añadía un dato que la Fuente no daba; aquí sólo cambia un
+diacrítico, y la orden lo dice en vez de ocultarlo.
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 33 | **34** de 35 |
+| Citas | 1591 | **1595** |
+
+## 151.ª sesión — cuatro veces es un género, no una casualidad
+
+**35 Autores de 35. El tramo queda puesto.**
+
+### La comilla sin pareja asciende a puerta
+
+De la 147.ª a la 151.ª el mismo peligro salió en **cuatro obras seguidas**, sin relación entre
+ellas. La 144.ª ya había apartado a mano una candidata por cerrar una comilla que no abría, había
+escrito la regla y no la había implementado.
+
+El caso espejo vale igual: si la frase **abre** comilla y no la cierra, la cita continúa más allá de
+la frase, así que lo que la frase dice es de otro. Y se midió **antes** de escribirla, que es lo que
+decide si una medida asciende a regla:
+
+| | comillas descompensadas |
+|---|---|
+| 1595 Citas publicadas | **0** |
+| 19 036 candidatas | **351** |
+
+Muerde exactamente la clase buscada y nada de lo bueno. Va en los **dos** sitios —extracción y
+aprobación— por la lección de la 128.ª: una puerta que sólo cubre lo que entra hoy no cubre las
+diecinueve mil que ya están dentro. No mira la comilla recta `"`, que abre y cierra con el mismo
+carácter y no dice de qué lado está el hueco.
+
+### Y resultó ser un diagnóstico previo a leer
+
+Lo que no se esperaba: el recuento sale en la salida de `extraer` y dice, **antes de leer una
+línea**, cuánto se apoya un libro en palabras ajenas.
+
+| obra | candidatas | trozos de cita ajena |
+|---|---|---|
+| tratado que expone a dos pensadores franceses | 796 | **180 (23 %)** |
+| volumen de prosa propia | 1803 | **0** |
+
+El primero se retiró tras no poder verificar dos candidatas. El segundo dio tres Citas en la primera
+lectura, y con ellas el Autor 35:
+
+> Tengamos siempre limpio el corazón, cultivemos siempre la inteligencia: al resplandor de esas
+> luces, es difícil errar el buen camino.
+
+### Tres obras retiradas, y se dicen todas
+
+Un volumen de crónica parisina del nombre más famoso de las letras hispanoamericanas; una memoria
+médica cuyas mejores frases resultaron ser **de Samuel Smiles**, cazadas al comprobar el contexto y
+no por ninguna puerta; y el tratado del 23 %. Ninguna daba dos Citas, y **una firma que no publica
+no se queda**.
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 34 | **35** de 35 · puesto |
+| Citas | 1595 | **1598** |
+| Obras retiradas en esta sesión | — | **3** |
+
+Puerta completa en verde y consultada por su código de salida.

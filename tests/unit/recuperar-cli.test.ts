@@ -1155,6 +1155,31 @@ describe('Historia 11.1 — lo que el Corpus ya retiró no se vuelve a descargar
     expect(tercera.salida).toMatch(/Ya versionado/);
   });
 
+  it('y otra edición de la misma obra tampoco entra, aunque su dirección sea otra', async () => {
+    /*
+     * La comprobación de arriba va por `url`, y eso deja un hueco que se vio a la primera:
+     * la Fuente tiene **dos ediciones del mismo título del mismo Autor**, con números de
+     * catálogo distintos. La dirección no coincide, así que la puerta de la url las deja
+     * pasar, y lo que se vuelve a leer es el mismo libro.
+     *
+     * Aquí no se puede ahorrar la petición —la obra sale del documento, y el documento hay
+     * que bajarlo para leerla—, pero sí lo caro: la extracción y la lectura. Se comprueba
+     * contra el **nombre que implica la obra**, que es el mismo par (Fuente, obra) que
+     * AD-23 declara único, y no se versiona nada.
+     */
+    const t = await taller();
+    expect((await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) })).codigo).toBe(0);
+    await retirarAMano(t);
+
+    const otraEdicion = 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida_(1884)';
+    const resultado = await recuperar(otraEdicion, t, { [otraEdicion]: OK(PAGINA) });
+
+    expect(resultado.codigo).not.toBe(0);
+    expect(resultado.error).toMatch(/retirad/i);
+    expect(resultado.error).toContain(NOMBRE);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([]);
+  });
+
   it('un corpus sin carpeta de retiradas no se rompe', async () => {
     const t = await taller();
     const resultado = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });

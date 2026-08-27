@@ -426,6 +426,17 @@ Lo que **no** cambia, y hay que releerlo antes de cada alta:
   suyas. Publicarlas le atribuiría lo contrario de lo que sostiene, y **no hay puerta que lo vea**:
   están literales en el documento, el cotejo las da por buenas y la legibilidad no ve nada raro. Es
   peor que el prólogo ajeno de la 134.ª, porque el prólogo se salta y esto va entreverado.
+· **Se lista la CATEGORÍA del catálogo, no palabras del título** (149.ª). El título es una pista
+  floja: «Vida de Cervantes» es biografía y «El origen del pensamiento», una novela. El catálogo
+  completo de Gutenberg —`/cache/epub/feeds/pg_catalog.csv`— trae por obra sus `Bookshelves`, y dos
+  son el género rentable: **«Philosophy & Ethics»** y **«Essays, Letters & Speeches»**. En castellano
+  son 66 obras, 42 de firmas nuevas †≤1946. Y el aforismo puro **está agotado en esta Fuente**: se
+  buscó en el catálogo entero por «máximas», «aforismos», «pensamientos», «sentencias» y todas las
+  colecciones reales ya están en el Corpus.
+· **El recuento de «trozo de cita ajena» diagnostica la obra antes de leerla** (151.ª). Sale en la
+  salida de `extraer` y dice cuánto se apoya el libro en palabras de otros: un tratado que expone a
+  Tocqueville dio **180 de 796 (23 %)** y se retiró; un volumen de prosa propia dio **0 de 1803** y
+  publicó a la primera lectura. Es la cifra que la 131.ª necesitaba y no tenía.
 · **Y la trampa del que cita para refutar no era de aquel libro** (148.ª): a la primera obra
   polémica siguiente, en otra lengua de origen y sin ninguna relación con la anterior, volvió a
   aparecer —una afirmación que es **de Maquiavelo**, a quien el Autor está citando—. Es lo que hace
@@ -548,6 +559,32 @@ de 8-13 % a **33 %**.
 
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
+
+### La comilla sin pareja: cuándo una medida asciende a puerta (151.ª)
+
+La 144.ª apartó **a mano** una candidata excelente por cerrar una comilla que no abría, escribió la
+regla y no la implementó. De la 147.ª a la 151.ª el mismo peligro salió en **cuatro obras seguidas
+sin relación entre ellas**: la conferencia que reproduce al adversario para condenarlo, la que cita
+a Maquiavelo, la que sigue traduciendo a un historiador después de nombrarlo, y la que expone a
+Tocqueville párrafo a párrafo. Cuatro veces es un género.
+
+El caso espejo vale igual y por lo mismo: si la frase **abre** comilla y no la cierra, la cita
+continúa más allá de la frase, así que lo que dice es de otro.
+
+Lo que la hizo ascender a puerta no fue la repetición sino **la medida previa**:
+
+| | comillas descompensadas |
+|---|---|
+| 1595 Citas publicadas | **0** |
+| 19 036 candidatas | **351** |
+
+Ése es el criterio, y es el mismo que dejó fuera las cinco medidas de la 133.ª: **una regla entra
+cuando no muerde nada de lo ya publicado.** Si hubiera tocado diecisiete anáforas, como la
+detección de repetición, se habría quedado en lente.
+
+Va en los **dos** sitios —extracción y aprobación— por la lección de la 128.ª. Y no mira la comilla
+recta `"`: abre y cierra con el mismo carácter, así que un número impar no dice de qué lado está el
+hueco. Ausencia de regla antes que regla que adivina.
 
 ### Dos sondas de lectura, y una que no debe ascender a puerta (148.ª)
 

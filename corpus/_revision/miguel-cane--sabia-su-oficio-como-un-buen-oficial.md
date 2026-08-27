@@ -1,0 +1,13 @@
+---
+texto: "Sabía su oficio como un buen oficial sabe la táctica."
+autor: "miguel-cane"
+slug: "miguel-cane-sabia-su-oficio-como-un-buen-oficial"
+procedencia:
+  obra: "Juvenilla; Prosa ligera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/41575/pg41575.txt"
+---
