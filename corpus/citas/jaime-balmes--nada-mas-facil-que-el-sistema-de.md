@@ -1,7 +1,9 @@
 ---
-texto: "¿De qué sirve discurrir con sutileza, ó con profundidad aparente, si el pensamiento no está conforme con la realidad?"
+texto: "Nada mas fácil que el sistema de nuestra numeracion; y sin embargo, no lo conocieron ni los griegos, ni los romanos."
 autor: "jaime-balmes"
-slug: "jaime-balmes-de-que-sirve-discurrir-con-sutileza-o"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-nada-mas-facil-que-el-sistema-de"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

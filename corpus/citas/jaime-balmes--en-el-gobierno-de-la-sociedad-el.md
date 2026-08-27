@@ -1,7 +1,9 @@
 ---
-texto: "Nada mas fácil que el sistema de nuestra numeracion; y sin embargo, no lo conocieron ni los griegos, ni los romanos."
+texto: "En el gobierno de la sociedad el abuso del poder acarrea su ruina; el abuso de la libertad da orígen á la esclavitud."
 autor: "jaime-balmes"
-slug: "jaime-balmes-nada-mas-facil-que-el-sistema-de"
+temas:
+  - "la-libertad"
+slug: "jaime-balmes-en-el-gobierno-de-la-sociedad-el"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Para proponerse acertadamente un fin, es necesario comprender perfectamente la posicion del que le ha de alcanzar."
+texto: "Si en lo que piensa el hombre encolerizado hubíese algo de verdad, no la desconocerian del todo los circunstantes."
 autor: "jaime-balmes"
-slug: "jaime-balmes-para-proponerse-acertadamente-un-fin-es-necesario"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-si-en-lo-que-piensa-el-hombre"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

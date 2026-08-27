@@ -1,7 +1,9 @@
 ---
-texto: "¿Quién sabe lo que se descubrirá en los tiempos futuros, y el aspecto que presentará el mundo de aquí á diez siglos?"
+texto: "Para proponerse acertadamente un fin, es necesario comprender perfectamente la posicion del que le ha de alcanzar."
 autor: "jaime-balmes"
-slug: "jaime-balmes-quien-sabe-lo-que-se-descubrira-en"
+temas:
+  - "la-prudencia"
+slug: "jaime-balmes-para-proponerse-acertadamente-un-fin-es-necesario"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

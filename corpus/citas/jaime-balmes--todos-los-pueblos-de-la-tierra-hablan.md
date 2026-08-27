@@ -1,7 +1,9 @@
 ---
-texto: "En el gobierno de la sociedad el abuso del poder acarrea su ruina; el abuso de la libertad da orígen á la esclavitud."
+texto: "Todos los pueblos de la tierra hablan de una revelacion; y la humanidad no se concierta para tramar una impostura."
 autor: "jaime-balmes"
-slug: "jaime-balmes-en-el-gobierno-de-la-sociedad-el"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-todos-los-pueblos-de-la-tierra-hablan"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

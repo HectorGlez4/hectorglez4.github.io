@@ -1,7 +1,9 @@
 ---
-texto: "Todos los pueblos de la tierra hablan de una revelacion; y la humanidad no se concierta para tramar una impostura."
+texto: "¿De qué sirve discurrir con sutileza, ó con profundidad aparente, si el pensamiento no está conforme con la realidad?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-todos-los-pueblos-de-la-tierra-hablan"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-de-que-sirve-discurrir-con-sutileza-o"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

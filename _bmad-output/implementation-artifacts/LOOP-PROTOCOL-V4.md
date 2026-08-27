@@ -368,7 +368,12 @@ no se arregla leyendo más:
   Tema publicado—;
 · **el regex flojo** —66 coincidencias que bajan a 8 al quitar `\bsolo\b`; 38 que bajan a 24 al
   dejar el sustantivo y quitar el adjetivo—;
-· **la palabra que aparece al paso**, que es el resto.
+· **la palabra que aparece al paso**, que es el resto;
+· y **la palabra que significa dos cosas** (145.ª). «Naturaleza» es mundo natural *y* índole de
+  alguien —«su naturaleza», «naturaleza servil»—, y el contador no las separa. Los tres motivos de
+  arriba se arreglan **apretando el patrón**; éste no, porque **es la misma palabra**. Solo lo separa
+  leer, así que un asunto con una palabra polisémica en su familia hay que descontarlo a ojo antes
+  de creerse su cifra: medido, la mitad de las coincidencias eran el otro sentido.
 
 **Del lado de la cantera**, el engaño es el mismo con otra cara: el asunto aparece en la frase pero
 **la frase cuenta una historia**. Cuatro asuntos leídos de punta a punta, 232 candidatas:

@@ -8983,3 +8983,53 @@ la procedencia**, no el contenido.
 | Obras con las tres bandas medidas | 3 | **4** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 145.ª sesión — «naturaleza» significa dos cosas, y el contador solo ve una
+
+Nueve Citas, **1572 → 1581**.
+
+### Se remidieron los asuntos, y uno falló por una razón nueva
+
+El Corpus ha crecido 75 Citas desde la última medición de Temas, así que se volvió a pasar
+`npm run asuntos`. Ninguno cruza el umbral, pero uno merecía leerse: **28 coincidencias, 12 Autores,
+y ningún Tema dueño de más de siete**. Es el perfil de un Tema que puede abrirse.
+
+Leído, **8 de 20 tratan de la Naturaleza**. El resto usa la misma palabra en su **otro sentido**:
+
+> …la de las armas, que repugna a **su naturaleza**…
+> Cumplidor de las leyes, tradúzcase: **Naturaleza servil**.
+> Yo no sé lo que es el sol; no conozco **su naturaleza**.
+
+Mundo natural en un caso, **índole de alguien** en el otro. Y aquí está lo que no había pasado antes:
+los asuntos que fallaron hasta ahora lo hacían por **forma** —regex flojo, palabra al paso, Tema
+existente con otro nombre— y se arreglaban apretando el patrón. Éste falla por **ambigüedad léxica**,
+que no se arregla apretando nada, porque **es la misma palabra**. Solo lo separa leer.
+
+No llega a quince y no se abre.
+
+### Y una obra que encadena todo
+
+Se probó una veta doctrinal intacta de 616 candidatas: **1 de 11**. Es un tratado sistemático y casi
+cada frase abre enganchada a la anterior —«Con efecto», «En otros términos», «Si, pues»—, así que
+casi ninguna se sostiene sola por bien construida que esté. Género doctrinal, forma encadenada: el
+género no basta.
+
+La veta buena siguió dando **27 % y 45 %**:
+
+> ¿De qué sirve discurrir con sutileza, ó con profundidad aparente, si el pensamiento no está
+> conforme con la realidad?
+>
+> En el gobierno de la sociedad el abuso del poder acarrea su ruina; el abuso de la libertad da
+> orígen á la esclavitud.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1572 | **1581** |
+| Autores | 29 | 29 de 35 |
+| Asuntos medidos hasta el fondo | 6 | **7** |
+| Motivos por los que un asunto falla | 3 | **4** (+ ambigüedad léxica) |
+
+Puerta completa en verde y consultada por su código de salida.

@@ -1,6 +1,8 @@
 ---
 texto: "Á toda hora, en toda tierra, con estos ó con aquellos medios, siempre trabaja el mal; pero á toda hora, en toda tierra, con los mismos recursos que emplea el mal, trabaja el bien."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-virtud"
 slug: "eugenio-maria-de-hostos-a-toda-hora-en-toda-tierra-con"
 procedencia:
   obra: "Moral social"

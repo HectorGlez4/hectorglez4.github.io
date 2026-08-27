@@ -1,7 +1,9 @@
 ---
-texto: "Si en lo que piensa el hombre encolerizado hubíese algo de verdad, no la desconocerian del todo los circunstantes."
+texto: "No es el espíritu quien se cansa, sino los órganos corporales que le sirven; pero el resultado viene á ser el mismo."
 autor: "jaime-balmes"
-slug: "jaime-balmes-si-en-lo-que-piensa-el-hombre"
+temas:
+  - "el-trabajo"
+slug: "jaime-balmes-no-es-el-espiritu-quien-se-cansa"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

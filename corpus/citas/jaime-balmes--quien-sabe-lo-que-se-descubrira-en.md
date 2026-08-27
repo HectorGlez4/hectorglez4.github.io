@@ -1,7 +1,9 @@
 ---
-texto: "No es el espíritu quien se cansa, sino los órganos corporales que le sirven; pero el resultado viene á ser el mismo."
+texto: "¿Quién sabe lo que se descubrirá en los tiempos futuros, y el aspecto que presentará el mundo de aquí á diez siglos?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-no-es-el-espiritu-quien-se-cansa"
+temas:
+  - "el-tiempo"
+slug: "jaime-balmes-quien-sabe-lo-que-se-descubrira-en"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"
