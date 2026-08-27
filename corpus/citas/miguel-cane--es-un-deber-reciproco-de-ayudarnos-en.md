@@ -1,6 +1,8 @@
 ---
 texto: "Es un deber recíproco de ayudarnos en las horas amargas, en nombre de la solidaridad de la civilización."
 autor: "miguel-cane"
+temas:
+  - "el-deber"
 slug: "miguel-cane-es-un-deber-reciproco-de-ayudarnos-en"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

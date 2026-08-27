@@ -1,7 +1,9 @@
 ---
-texto: "Armado del deber, el derecho no necesita para nada de la fuerza bruta."
+texto: "Si el deber rige el mundo moral, es porque rige á la conciencia humana."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-armado-del-deber-el-derecho-no-necesita"
+temas:
+  - "el-deber"
+slug: "eugenio-maria-de-hostos-si-el-deber-rige-el-mundo-moral"
 procedencia:
   obra: "Moral social"
   año: 1917

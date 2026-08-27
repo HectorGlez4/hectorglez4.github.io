@@ -1,7 +1,9 @@
 ---
-texto: "Si el deber rige el mundo moral, es porque rige á la conciencia humana."
+texto: "Entre dos deberes, se ha de cumplir primero el más inmediato, el más extenso, el más concreto."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-si-el-deber-rige-el-mundo-moral"
+temas:
+  - "el-deber"
+slug: "eugenio-maria-de-hostos-entre-dos-deberes-se-ha-de-cumplir"
 procedencia:
   obra: "Moral social"
   año: 1917

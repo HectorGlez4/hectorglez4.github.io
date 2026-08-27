@@ -3,6 +3,7 @@ texto: "Si el hábito enuncia el error, la casaca le sostiene."
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "el-error"
 slug: "manuel-gonzalez-prada-si-el-habito-enuncia-el-error-la"
 procedencia:
   obra: "El sable"

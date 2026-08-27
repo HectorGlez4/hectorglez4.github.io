@@ -560,6 +560,29 @@ de 8-13 % a **33 %**.
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
 
+### Publicar contenido puede poner una prueba en rojo, y no siempre manda la prueba (156.ª)
+
+Un Tema llamado «El error» tumbó cuatro pruebas E2E que exigen que el 404 y la búsqueda vacía
+**no enseñen jerga técnica**: las dos páginas llevan el índice de Temas debajo, y el patrón
+`/error|excepci|failed|.../i` casaba el nombre del Tema. La prueba de la línea anterior, además,
+**exige** que esa página ofrezca enlaces a Temas: el sitio hacía lo que se le pide y el patrón lo
+llamaba fallo.
+
+Ante eso hay dos salidas, y la cómoda no es la correcta:
+
+· **Renombrar el contenido** devuelve el verde sin tocar una prueba, y deja que **un patrón
+  escriba el catálogo**. Se descarta salvo que el nombre fuera malo por sí mismo.
+· **Apretar el alcance de la aserción**, cuando lo que falla es el alcance y no la señal. Aquí la
+  promesa es «al visitante no se le enseña jerga»; un enlace rotulado «El error» dentro de un
+  índice no es jerga. Se mira la prosa de la página y no el índice, y la promesa queda entera.
+
+**La pregunta que decide es qué promete la prueba, no qué comprueba.** Y cuando se afloja un
+alcance, el razonamiento va escrito **dentro de la prueba**, porque a ojos de la siguiente sesión
+esto se parece a relajar una puerta, y hay que poder distinguirlo.
+
+Señal de que es este caso y no una relajación: la aserción **funcionaba sólo porque el contenido
+todavía no existía**.
+
 ### Abrir un Tema: el orden de las tres preguntas (152.ª-155.ª)
 
 Cuatro sesiones perdidas por hacerlas al revés. El orden correcto es éste, y las dos primeras

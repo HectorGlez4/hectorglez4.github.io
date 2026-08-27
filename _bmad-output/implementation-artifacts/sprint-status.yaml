@@ -134,7 +134,9 @@ development_status:
   # con 59 documentos de Fuente y 489.690 palabras versionadas sin exprimir.
   # El orden de los tramos lo declara `objetivoDeMeta` y lo enseña `npm run huecos`;
   # este fichero solo registra por dónde va. Protocolo: LOOP-PROTOCOL-V4.md
-  epic-15: in-progress
+  # CERRADA el 27/08: `npm run huecos` declara «Meta de Corpus alcanzada» por su cuenta —1.632
+  # Citas, 24 Temas, 35 Autores, 16 Colecciones— y ningún Autor pasa del techo del 15 %.
+  epic-15: done
   15-1-el-liston-agresivo-tiene-nombre-y-lo-cruza-un-solo-modulo: done
   15-2-doce-colecciones-sobre-lo-ya-publicado: done
   # 15-3 sigue in-progress y AVANZA. El 25/08 quedo claro que no estaba bloqueada: se leia
@@ -180,7 +182,15 @@ development_status:
   # Medidos como imposibles por ambigüedad léxica, con su cifra: la memoria (311 coincidencias,
   # la mayor de todas, y no da cinco Citas), la costumbre y la ira.
   # Quedan dos. Libres y medidos: «el deber» (28 Citas, 12 firmas) y «el error» (24, 11).
-  15-5-veinticuatro-temas-publicados: in-progress
+  # PUESTA el 27/08: 24 de 24, sin bajar ningún umbral. Los dos últimos —«el error» y «el
+  # deber»— salieron sólo después de arreglar sus familias: «el deber» contaba `conciencia`,
+  # que aquí es casi siempre la conciencia de Unamuno y Rodó —el estar consciente— y no la
+  # moral, y pasó de 28 Citas a 12; «el error» sin frontera por delante casaba «t-error» y
+  # «c-errar-án», que es el fallo de la 127.ª que el propio módulo documenta.
+  # Tres veces en dos sesiones reproduje en una sonda un defecto ya catalogado —razón/corazón,
+  # ira/irá, error/terror—: una sonda nueva hereda los defectos conocidos salvo que se escriba
+  # mirando el catálogo, y el catálogo está en la cabecera del módulo que se imita.
+  15-5-veinticuatro-temas-publicados: done
   # 26/08: 1000 de 1000, puesto. El techo ya no lo limita la cantera sino el reparto:
   # sobran candidatas y escasean Autores con hueco. El techo cambio de dueño: el Autor mas representado
   # ya no es el mismo, y llega al 12,9 % con 19 Citas de margen. El tramo que la politica declara sigue siendo el censo de Autores

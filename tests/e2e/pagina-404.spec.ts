@@ -38,7 +38,25 @@ test.describe('Historia 4.3 — el 404 no es un muro', () => {
 
   test('no contiene texto de error técnico', async ({ page }) => {
     await page.goto(INEXISTENTE);
-    const texto = await page.locator('main').innerText();
+    /*
+     * Se mira la **prosa de la página**, no el catálogo de Temas que lleva debajo.
+     *
+     * La 156.ª publicó un Tema llamado «El error» —asunto legítimo de un catálogo de
+     * sabiduría, con dieciséis Citas de ocho firmas— y esta prueba se puso roja: el chip del
+     * Tema aparece en `main` y la palabra casaba. La promesa que esta prueba guarda es que
+     * **al visitante no se le enseña jerga técnica**, y un enlace rotulado «El error» dentro
+     * de un índice de Temas no es jerga: es el índice funcionando.
+     *
+     * El defecto estaba en el alcance, no en la señal, y llevaba ahí desde el principio:
+     * funcionaba sólo porque ningún Tema se llamaba así todavía. Apretar el alcance conserva
+     * la promesa entera; renombrar el Tema habría dejado que un patrón escribiera el
+     * catálogo.
+     */
+    const texto = await page.locator('main').evaluate((main) => {
+      const copia = main.cloneNode(true) as HTMLElement;
+      copia.querySelectorAll('.chips').forEach((chips) => chips.remove());
+      return copia.textContent ?? '';
+    });
 
     expect(texto).not.toMatch(/\b404\b/);
     expect(texto).not.toMatch(/error|not found|excepci|servidor|solicitada/i);

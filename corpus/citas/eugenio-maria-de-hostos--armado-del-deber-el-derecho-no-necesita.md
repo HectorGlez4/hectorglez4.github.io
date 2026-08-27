@@ -1,7 +1,9 @@
 ---
-texto: "Entre dos deberes, se ha de cumplir primero el más inmediato, el más extenso, el más concreto."
+texto: "Armado del deber, el derecho no necesita para nada de la fuerza bruta."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-entre-dos-deberes-se-ha-de-cumplir"
+temas:
+  - "el-deber"
+slug: "eugenio-maria-de-hostos-armado-del-deber-el-derecho-no-necesita"
 procedencia:
   obra: "Moral social"
   año: 1917

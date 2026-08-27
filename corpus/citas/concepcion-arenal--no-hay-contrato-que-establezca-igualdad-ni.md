@@ -3,6 +3,7 @@ texto: "No hay contrato que establezca igualdad ni deberes mutuos entre dos sere
 autor: "concepcion-arenal"
 temas:
   - "la-justicia"
+  - "el-deber"
 slug: "concepcion-arenal-no-hay-contrato-que-establezca-igualdad-ni"
 procedencia:
   obra: "La mujer del porvenir"

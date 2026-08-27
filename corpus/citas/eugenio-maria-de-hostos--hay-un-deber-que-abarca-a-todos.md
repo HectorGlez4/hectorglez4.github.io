@@ -1,6 +1,8 @@
 ---
 texto: "Hay un deber que abarca á todos los demás: es el deber de los deberes."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-deber"
 slug: "eugenio-maria-de-hostos-hay-un-deber-que-abarca-a-todos"
 procedencia:
   obra: "Moral social"

@@ -3,6 +3,7 @@ texto: "¿Se concibe idea de derechos en un hombre que no reconozca deberes para
 autor: "concepcion-arenal"
 temas:
   - "la-libertad"
+  - "el-deber"
 slug: "concepcion-arenal-se-concibe-idea-de-derechos-en-un"
 procedencia:
   obra: "La mujer del porvenir"

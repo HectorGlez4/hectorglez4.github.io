@@ -3,6 +3,7 @@ texto: "Para que haya cosmopolitismo ha de haberse fundado en el cumplimiento co
 autor: "eugenio-maria-de-hostos"
 temas:
   - "la-virtud"
+  - "el-deber"
 slug: "eugenio-maria-de-hostos-para-que-haya-cosmopolitismo-ha-de-haberse"
 procedencia:
   obra: "Moral social"

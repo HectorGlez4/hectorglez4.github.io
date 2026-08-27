@@ -3,6 +3,7 @@ texto: "Casi todos los grandes errores son grandes verdades exageradas ó torcid
 autor: "concepcion-arenal"
 temas:
   - "la-verdad"
+  - "el-error"
 slug: "concepcion-arenal-casi-todos-los-grandes-errores-son-grandes"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

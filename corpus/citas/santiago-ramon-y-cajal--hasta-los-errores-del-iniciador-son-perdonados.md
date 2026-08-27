@@ -3,6 +3,7 @@ texto: "Hasta los errores del iniciador son perdonados o piadosamente explicados
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-saber"
+  - "el-error"
 slug: "santiago-ramon-y-cajal-hasta-los-errores-del-iniciador-son-perdonados"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

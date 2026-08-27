@@ -1,6 +1,8 @@
 ---
 texto: "Nada es sagrado fuera de la integridad de vuestra propia conciencia moral."
 autor: "jose-ingenieros"
+temas:
+  - "el-deber"
 slug: "jose-ingenieros-nada-es-sagrado-fuera-de-la-integridad"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

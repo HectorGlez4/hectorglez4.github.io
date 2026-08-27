@@ -1,6 +1,8 @@
 ---
 texto: "¿El pueblo está en el estado de cumplir los deberes que son consecuencia de los derechos que para él se piden?"
 autor: "concepcion-arenal"
+temas:
+  - "el-deber"
 slug: "concepcion-arenal-el-pueblo-esta-en-el-estado-de"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

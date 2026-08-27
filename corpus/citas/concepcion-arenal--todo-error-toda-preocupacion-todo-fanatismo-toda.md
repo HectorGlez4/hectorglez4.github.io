@@ -3,6 +3,7 @@ texto: "Todo error, toda preocupación, todo fanatismo, toda rutina, han de hall
 autor: "concepcion-arenal"
 temas:
   - "el-saber"
+  - "el-error"
 slug: "concepcion-arenal-todo-error-toda-preocupacion-todo-fanatismo-toda"
 procedencia:
   obra: "La mujer del porvenir"

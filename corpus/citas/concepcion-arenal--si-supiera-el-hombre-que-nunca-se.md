@@ -3,6 +3,7 @@ texto: "Si supiera el hombre que nunca se equivoca impunemente, buscaría el aci
 autor: "concepcion-arenal"
 temas:
   - "la-prudencia"
+  - "el-error"
 slug: "concepcion-arenal-si-supiera-el-hombre-que-nunca-se"
 procedencia:
   obra: "La mujer del porvenir"

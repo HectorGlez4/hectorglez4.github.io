@@ -3,6 +3,7 @@ texto: "La esperanza y el honor de la raza humana, está en la noción innata de
 autor: "miguel-cane"
 temas:
   - "la-virtud"
+  - "el-deber"
 slug: "miguel-cane-la-esperanza-y-el-honor-de-la"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

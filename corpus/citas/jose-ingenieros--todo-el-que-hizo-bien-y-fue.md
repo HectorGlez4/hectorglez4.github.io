@@ -1,6 +1,8 @@
 ---
 texto: "Todo el que hizo bien y fué virtuoso, cumplió, sólo con eso, su deber moral con sus semejantes y con la comunidad."
 autor: "jose-ingenieros"
+temas:
+  - "el-deber"
 slug: "jose-ingenieros-todo-el-que-hizo-bien-y-fue"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

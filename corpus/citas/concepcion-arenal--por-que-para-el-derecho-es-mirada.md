@@ -3,6 +3,7 @@ texto: "¿Por qué para el derecho es mirada como inferior al hombre, y ante el 
 autor: "concepcion-arenal"
 temas:
   - "la-justicia"
+  - "el-deber"
 slug: "concepcion-arenal-por-que-para-el-derecho-es-mirada"
 procedencia:
   obra: "La mujer del porvenir"

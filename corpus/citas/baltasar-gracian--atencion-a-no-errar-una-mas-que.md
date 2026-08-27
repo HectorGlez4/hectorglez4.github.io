@@ -4,6 +4,7 @@ autor: "baltasar-gracian"
 temas:
   - "la-virtud"
   - "la-prudencia"
+  - "el-error"
 slug: "baltasar-gracian-atencion-a-no-errar-una-mas-que"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

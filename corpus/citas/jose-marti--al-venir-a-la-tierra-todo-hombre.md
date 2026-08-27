@@ -3,6 +3,7 @@ texto: "Al venir a la tierra, todo hombre tiene derecho a que se le eduque, y de
 autor: "jose-marti"
 temas:
   - "el-saber"
+  - "el-deber"
 slug: "jose-marti-al-venir-a-la-tierra-todo-hombre"
 procedencia:
   obra: "Educación popular"

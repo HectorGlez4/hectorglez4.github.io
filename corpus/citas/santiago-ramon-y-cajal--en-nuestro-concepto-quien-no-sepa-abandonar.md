@@ -3,6 +3,7 @@ texto: "En nuestro concepto, quien no sepa abandonar una opinión falsa se decla
 autor: "santiago-ramon-y-cajal"
 temas:
   - "la-verdad"
+  - "el-error"
 slug: "santiago-ramon-y-cajal-en-nuestro-concepto-quien-no-sepa-abandonar"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

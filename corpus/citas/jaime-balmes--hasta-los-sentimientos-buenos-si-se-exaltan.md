@@ -3,6 +3,7 @@ texto: "Hasta los sentimientos buenos, si se exaltan en demasía, son capaces de
 autor: "jaime-balmes"
 temas:
   - "la-prudencia"
+  - "el-error"
 slug: "jaime-balmes-hasta-los-sentimientos-buenos-si-se-exaltan"
 procedencia:
   obra: "El Criterio"

@@ -207,7 +207,16 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
   test('no aparece ningún texto de error técnico', async ({ page }) => {
     const consulta = await buscarSinResultados(page);
     test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
-    const texto = await page.locator('main').innerText();
+    /*
+     * Igual que en `pagina-404.spec.ts`, y aquí el argumento es aún más claro: la prueba de
+     * arriba **exige** que la salida ofrezca enlaces a Temas. Uno de ellos se llama desde la
+     * 156.ª «El error». Se mira la prosa del mensaje, no el índice que la acompaña.
+     */
+    const texto = await page.locator('main').evaluate((main) => {
+      const copia = main.cloneNode(true) as HTMLElement;
+      copia.querySelectorAll('.chips').forEach((chips) => chips.remove());
+      return copia.textContent ?? '';
+    });
     expect(texto).not.toMatch(/error|excepci|failed|undefined|null|0 resultados/i);
   });
 

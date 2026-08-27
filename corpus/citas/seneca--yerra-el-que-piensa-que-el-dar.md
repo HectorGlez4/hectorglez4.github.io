@@ -4,6 +4,7 @@ autor: "seneca"
 temas:
   - "la-prudencia"
   - "la-razon"
+  - "el-error"
 slug: "seneca-yerra-el-que-piensa-que-el-dar"
 procedencia:
   obra: "De la vida bienaventurada"

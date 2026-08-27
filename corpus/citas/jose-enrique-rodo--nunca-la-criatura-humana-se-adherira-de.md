@@ -3,6 +3,7 @@ texto: "Nunca la criatura humana se adherirá de más segura manera al cumplimie
 autor: "jose-enrique-rodo"
 temas:
   - "la-virtud"
+  - "el-deber"
 slug: "jose-enrique-rodo-nunca-la-criatura-humana-se-adherira-de"
 procedencia:
   obra: "Ariel"

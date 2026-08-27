@@ -3,6 +3,7 @@ texto: "No acatemos como oráculo el fallo de autoridades, sean quienes fueren, 
 autor: "manuel-gonzalez-prada"
 temas:
   - "el-saber"
+  - "el-error"
 slug: "manuel-gonzalez-prada-no-acatemos-como-oraculo-el-fallo-de"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

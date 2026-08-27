@@ -3,6 +3,7 @@ texto: "Se huirá del mal y del error como de una disonancia; se buscará lo bue
 autor: "jose-enrique-rodo"
 temas:
   - "la-virtud"
+  - "el-error"
 slug: "jose-enrique-rodo-se-huira-del-mal-y-del-error"
 procedencia:
   obra: "Ariel"

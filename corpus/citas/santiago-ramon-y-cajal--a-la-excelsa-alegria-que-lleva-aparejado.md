@@ -3,6 +3,7 @@ texto: "A la excelsa alegría que lleva aparejado el cumplimiento austero del de
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-trabajo"
+  - "el-deber"
 slug: "santiago-ramon-y-cajal-a-la-excelsa-alegria-que-lleva-aparejado"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

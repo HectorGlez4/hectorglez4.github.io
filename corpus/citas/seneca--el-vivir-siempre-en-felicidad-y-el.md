@@ -3,6 +3,7 @@ texto: "El vivir siempre en felicidad, y el pasar la vida sin algún remordimien
 autor: "seneca"
 temas:
   - "la-vida"
+  - "el-deber"
 slug: "seneca-el-vivir-siempre-en-felicidad-y-el"
 procedencia:
   obra: "De la Divina Providencia"

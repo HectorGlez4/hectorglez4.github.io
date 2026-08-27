@@ -3,6 +3,7 @@ texto: "Antes que las modificaciones de profesión y de cultura está el cumplim
 autor: "jose-enrique-rodo"
 temas:
   - "la-virtud"
+  - "el-deber"
 slug: "jose-enrique-rodo-antes-que-las-modificaciones-de-profesion-y"
 procedencia:
   obra: "Ariel"

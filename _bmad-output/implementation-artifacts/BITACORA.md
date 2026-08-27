@@ -9480,3 +9480,76 @@ Tema. **Organiza el Corpus, no lo agranda.**
 | Asuntos medidos como imposibles, con su motivo | 4 | **7** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 156.ª sesión — Meta de Corpus alcanzada
+
+`npm run huecos` lo dice por su cuenta, que es la única forma en que vale decirlo:
+
+| | | |
+|---|---|---|
+| Citas | **1632** de 1000 | puesto |
+| **Temas** | **24** de 24 | **puesto** |
+| Autores | **35** de 35 | puesto |
+| Colecciones | **16** de 12 | puesto |
+
+Ningún Autor por encima del techo del 15 % —el más representado queda en **11,1 %**—, y el
+suelo del 40 % de tradición latinoamericana, respetado. **Ningún umbral se bajó para llegar.**
+
+### Los dos últimos Temas, y por qué ninguna de sus familias servía
+
+**«El deber» contaba `conciencia`**, que en este Corpus es casi siempre la *conciencia* de
+Unamuno y de Rodó —el estar consciente—, no la conciencia moral; y `obligación`, que en Gracián
+es el rango social. Apretada a las formas donde «deber» es sustantivo, el asunto pasó de **28
+Citas a 12**. Es la ambigüedad léxica de la 145.ª, y ya van cuatro asuntos caídos por ella.
+
+**«El error» repetía literalmente el fallo de la 127.ª** que el módulo tiene escrito en su
+propia cabecera: sin frontera por delante, `error` casa **t-error** y `errar` casa **c-errar-án**.
+
+Con eso son **tres veces en dos sesiones** que reproduzco en una sonda el defecto exacto que el
+módulo documenta: `razón` casando *co-razón*, `ira` casando *irá*, y ahora `error` casando
+*terror*. La lección no es «escribir mejor los regex»: es que **una sonda nueva hereda los
+defectos ya catalogados salvo que se la escriba mirando el catálogo**, y el catálogo está en la
+cabecera del módulo que se está imitando.
+
+Y una ambigüedad que no estaba anotada: **«cumplimiento» es también un cumplido**. Larra
+escribiendo «grabar un cumplimiento… en todos los álbums» no habla del deber.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Temas** | 22 | **24** de 24 · puesto |
+| Citas | 1624 | **1632** |
+| «El error» | — | 16 Citas de 8 firmas |
+| «El deber» | — | 18 Citas de 8 firmas |
+
+En «el deber», la firma que más aporta pone **5 de 18** —un 28 %—. Es alto y se dice: escribió
+el tratado de moral social del que sale la mitad de la cantera del asunto.
+
+### Y el Tema nuevo puso el E2E en rojo
+
+Cuatro pruebas —el 404 y la búsqueda vacía, en móvil y escritorio— cayeron con:
+
+```
+Expected pattern: not /error|excepci|failed|undefined|null|0 resultados/i
+```
+
+**La causa era el Tema recién publicado.** Las dos páginas llevan debajo el índice completo de
+Temas, y desde hacía veinte minutos uno se llama «El error». Y la prueba de búsqueda de la línea
+anterior **exige** que esa página ofrezca enlaces a Temas: el sitio hacía exactamente lo que se
+le pide, y el patrón lo llamaba fallo.
+
+Había dos salidas. **Renombrar el Tema** —«El yerro», «La equivocación»— devolvía el verde sin
+tocar una prueba, y se descartó: «El error» es el nombre natural del asunto en castellano, y
+renombrarlo habría dejado que **un patrón escribiera el catálogo**.
+
+Se aprieta el **alcance** de la aserción: se mira la prosa de la página, no el índice que la
+acompaña. La promesa que la prueba guarda —*al visitante no se le enseña jerga técnica*— queda
+entera; un enlace rotulado «El error» dentro de un índice no es jerga, es el índice funcionando.
+
+Lo que estaba mal era el alcance y no la señal, y llevaba ahí desde el principio: **funcionaba
+sólo porque ningún Tema se llamaba así todavía**. El razonamiento va escrito en las dos pruebas,
+para que nadie lo deshaga tomándolo por una relajación.
+
+Puerta completa en verde y consultada por su código de salida.

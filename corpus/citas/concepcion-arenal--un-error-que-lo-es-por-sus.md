@@ -3,6 +3,7 @@ texto: "Un error que lo es por sus cuatro costados, digámoslo así, no es difí
 autor: "concepcion-arenal"
 temas:
   - "la-verdad"
+  - "el-error"
 slug: "concepcion-arenal-un-error-que-lo-es-por-sus"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

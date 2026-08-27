@@ -3,6 +3,7 @@ texto: "La muchedumbre de libros carga, y no enseña; y así te será más segur
 autor: "seneca"
 temas:
   - "el-saber"
+  - "el-error"
 slug: "seneca-la-muchedumbre-de-libros-carga-y-no"
 procedencia:
   obra: "De la tranquilidad del ánimo"
