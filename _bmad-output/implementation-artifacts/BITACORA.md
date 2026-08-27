@@ -9033,3 +9033,50 @@ La veta buena siguió dando **27 % y 45 %**:
 | Motivos por los que un asunto falla | 3 | **4** (+ ambigüedad léxica) |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 146.ª sesión — el catálogo de una lengua entera, contado
+
+**30 Autores.** Faltan cinco.
+
+### Lo que hay realmente disponible, medido de una vez
+
+En vez de buscar candidatos uno a uno, se contó **todo el catálogo en castellano** de la Fuente
+nueva con los tres filtros del protocolo aplicados a la vez: muerto en 1946 o antes, con dos obras
+o más, y descontando a los que ya están.
+
+**144 firmas.** Y leídas, la respuesta a por qué cuesta tanto: son casi todas **novelistas y poetas
+del XIX**. Los diez primeros por número de obras son seis novelistas, dos poetas y dos historiadores
+de la literatura. La prosa de tesis en dominio público y en castellano **es escasa de verdad**, y
+no es que se estuviera buscando mal.
+
+Las categorías didácticas de la Fuente vieja quedaron también agotadas: sus «manuales» son de
+ajedrez y recetarios, y sus «memorias», dos títulos.
+
+### Y el más citable de los que quedaban rinde el 18 %
+
+Entró un periodista satírico del XIX, de los escritores más citados de la lengua. Su tramo corto dio
+**0 de 13**: sus artículos están construidos **sobre diálogo**, y las frases breves son todas
+réplicas con guion. El largo dio **2 de 11**.
+
+> Palabras hay malas, profundamente malas por sí mismas, y sin necesidad de accesorios, que forman
+> por sí solas oración y sentido, por más que suelan ellas no tener sentido común.
+
+Dos bastan para que el Autor cuente, y el Corpus gana una firma que ningún catálogo de sabiduría en
+castellano debería no tener.
+
+### Lo que esta cuenta cambia para el bucle
+
+Hasta hoy, cada sesión sin Autor nuevo podía leerse como «he buscado mal». Con las 144 contadas, la
+frase correcta es otra: **quedan pocos candidatos posibles, y hay que ir a por ellos de uno en uno**,
+aceptando rendimientos del 15-20 % en géneros que no son el aforismo.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| **Autores** | 29 | **30** de 35 |
+| Citas | 1581 | **1583** |
+| Firmas del catálogo contadas y clasificadas | — | **144** |
+
+Puerta completa en verde y consultada por su código de salida.

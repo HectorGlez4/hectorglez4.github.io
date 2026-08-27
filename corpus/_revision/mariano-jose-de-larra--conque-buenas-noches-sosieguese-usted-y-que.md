@@ -1,0 +1,13 @@
+---
+texto: "Conque buenas noches: sosiéguese usted, y que usted descanse."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-conque-buenas-noches-sosieguese-usted-y-que"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

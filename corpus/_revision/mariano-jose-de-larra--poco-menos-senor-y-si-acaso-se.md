@@ -1,0 +1,13 @@
+---
+texto: "--Poco menos, señor; y si acaso se lo imprimen a usted, será caro y mal."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-poco-menos-senor-y-si-acaso-se"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

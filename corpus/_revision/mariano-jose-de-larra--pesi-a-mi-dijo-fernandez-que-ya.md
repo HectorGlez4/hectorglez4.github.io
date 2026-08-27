@@ -1,0 +1,13 @@
+---
+texto: "¡Pesi a mí?--dijo Fernández, que ya estaba a punto de volverse loco."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-pesi-a-mi-dijo-fernandez-que-ya"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

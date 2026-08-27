@@ -1,0 +1,13 @@
+---
+texto: "Fue el caso, al llegar aquí, que el expediente salió del primer establecimiento y nunca llegó al otro."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-fue-el-caso-al-llegar-aqui-que"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

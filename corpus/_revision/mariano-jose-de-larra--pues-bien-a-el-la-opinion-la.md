@@ -1,0 +1,13 @@
+---
+texto: "--Pues bien: a él: la opinión, la verruga; duro en sus defectos."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-pues-bien-a-el-la-opinion-la"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

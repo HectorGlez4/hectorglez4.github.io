@@ -1,0 +1,13 @@
+---
+texto: "Así como no notamos el movimiento de la tierra, porque todos vamos envueltos en él, así no echamos de ver tampoco nuestros progresos."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-asi-como-no-notamos-el-movimiento-de"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

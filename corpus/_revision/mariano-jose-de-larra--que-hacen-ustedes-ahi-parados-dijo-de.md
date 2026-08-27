@@ -1,0 +1,13 @@
+---
+texto: "--¿Qué hacen ustedes ahí parados?--dijo de allí a un rato para darnos a entender que ya podíamos entrar."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-que-hacen-ustedes-ahi-parados-dijo-de"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

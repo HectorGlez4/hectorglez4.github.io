@@ -1,0 +1,13 @@
+---
+texto: "¡Sólo la costumbre de comer y servirse bien diariamente, puede evitar semejantes destrozos!"
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-solo-la-costumbre-de-comer-y-servirse"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

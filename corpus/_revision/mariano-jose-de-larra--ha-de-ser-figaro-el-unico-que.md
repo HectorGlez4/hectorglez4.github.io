@@ -1,0 +1,13 @@
+---
+texto: "¿Ha de ser _Fígaro_ el único que hable de eso?"
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-ha-de-ser-figaro-el-unico-que"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

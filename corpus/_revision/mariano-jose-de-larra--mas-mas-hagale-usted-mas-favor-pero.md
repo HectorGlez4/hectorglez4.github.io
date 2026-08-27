@@ -1,0 +1,13 @@
+---
+texto: "--Más, más: hágale usted más favor... pero ¿qué tiene que ver eso con la cuestión de tabacos?"
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-mas-mas-hagale-usted-mas-favor-pero"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

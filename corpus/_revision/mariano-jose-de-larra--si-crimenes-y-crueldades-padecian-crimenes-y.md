@@ -1,0 +1,13 @@
+---
+texto: "Si crímenes y crueldades padecían, crímenes y crueldades tienen diariamente lugar entre nosotros."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-si-crimenes-y-crueldades-padecian-crimenes-y"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Me abrió mi criado, y no tardé en reconocer su estado."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-me-abrio-mi-criado-y-no-tarde"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

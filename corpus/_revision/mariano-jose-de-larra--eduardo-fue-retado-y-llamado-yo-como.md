@@ -1,0 +1,13 @@
+---
+texto: "Eduardo fue retado, y llamado yo como padrino no pude menos de asistir a la satisfacción."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-eduardo-fue-retado-y-llamado-yo-como"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---

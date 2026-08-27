@@ -1,0 +1,13 @@
+---
+texto: "¿Por qué extraña fatalidad ha de anhelar el hombre siempre lo que no tiene?"
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-por-que-extrana-fatalidad-ha-de-anhelar"
+procedencia:
+  obra: "Fígaro (Artículos selectos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31541/pg31541.txt"
+---
