@@ -3,6 +3,7 @@ texto: "Privilegio es de la inocencia no despertar envidia ni en las que presume
 autor: "juan-montalvo"
 temas:
   - "la-virtud"
+  - "la-envidia"
 slug: "juan-montalvo-privilegio-es-de-la-inocencia-no-despertar"
 procedencia:
   obra: "Capítulos que se le olvidaron a Cervantes"

@@ -3,6 +3,7 @@ texto: "¡Gran ceguedad es la mía, que con vanidad de maestro estoy enseñando 
 autor: "francisco-de-quevedo"
 temas:
   - "el-saber"
+  - "la-humildad"
 slug: "francisco-de-quevedo-gran-ceguedad-es-la-mia-que-con"
 procedencia:
   obra: "Marco Bruto"

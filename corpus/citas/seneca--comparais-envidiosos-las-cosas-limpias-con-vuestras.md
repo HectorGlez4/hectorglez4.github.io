@@ -1,6 +1,8 @@
 ---
 texto: "Comparáis envidiosos las cosas limpias con vuestras suciedades, sin atender con cuánto daño vuestro os atrevéis."
 autor: "seneca"
+temas:
+  - "la-envidia"
 slug: "seneca-comparais-envidiosos-las-cosas-limpias-con-vuestras"
 procedencia:
   obra: "De la vida bienaventurada"

@@ -3,6 +3,7 @@ texto: "Arrima tú la razón a las dificultades, y verás cómo con ella se abla
 autor: "seneca"
 temas:
   - "la-adversidad"
+  - "la-razon"
 slug: "seneca-arrima-tu-la-razon-a-las-dificultades"
 procedencia:
   obra: "De la tranquilidad del ánimo"

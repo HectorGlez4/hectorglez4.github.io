@@ -560,6 +560,39 @@ de 8-13 % a **33 %**.
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
 
+### Abrir un Tema: el orden de las tres preguntas (152.ª-155.ª)
+
+Cuatro sesiones perdidas por hacerlas al revés. El orden correcto es éste, y las dos primeras
+no cuestan lectura ninguna:
+
+**1. ¿Lo posee ya otro Tema?** El módulo lo dice en su cabecera —«si un Tema publicado ya posee
+la mitad de las Citas del asunto, el asunto es ese Tema»— y es el único de los tres modos de
+fallo **que se ve sin leer nada**. Cuatro de los seis asuntos en cola estaban ocupados: la
+educación era `el-saber` (79 %), la mentira era `la-verdad` (71 %), el poder era `la-libertad`,
+la ley era `la-justicia`. Se leyeron 50 candidatas de «la mentira» antes de mirarlo.
+
+**2. ¿Cuántos sentidos tiene la palabra que lo cuenta?** «La memoria» tiene la mayor cantera de
+todas —311 coincidencias, 24 firmas— y **no da ni cinco Citas**, porque «memoria» es un informe
+escrito, «recuerdos» es el género de las memorias y «olvidar» es de los verbos más comunes del
+castellano. **La regla útil no es cuántas coincidencias hay, sino cuántos sentidos tiene la
+palabra.** Eso invierte la heurística de las 30-35 coincidencias: el asunto que más coincide
+puede ser el que menos trata.
+
+**3. Y sólo entonces, ¿hay cantera?** `npm run asuntos -- --cantera`, no la cuenta sobre lo
+publicado. La 145.ª declaró el tramo bloqueado midiendo sobre las Citas ya publicadas, que es la
+pregunta de otra cosa: «la humildad» daba 25 publicadas —cerrado— y **239 candidatas en 24
+firmas** —de sobra—.
+
+Y dos avisos más:
+
+· **Las quince familias de `asuntos.ts` no son el Corpus.** Las escribió una sesión y nadie las
+  volvió a discutir. Concluir «ningún asunto llega a quince» sobre esa lista es concluir sobre la
+  lista. Fuera de ella estaban «la razón» (59 Citas, 12 firmas), «el deber» (28, 12) y «la
+  gloria», que abrió.
+· **Un Tema puede salir de Citas ya publicadas.** Una Cita lleva varios Temas, y `tema asignar`
+  no despublica nada. Pero se dice cuando pasa: un Tema hecho sólo de reetiquetado **organiza el
+  Corpus, no lo agranda**.
+
 ### La comilla sin pareja: cuándo una medida asciende a puerta (151.ª)
 
 La 144.ª apartó **a mano** una candidata excelente por cerrar una comilla que no abría, escribió la

@@ -3,6 +3,7 @@ texto: "A los sabios lo que les favorecieron naturaleza y fama les envidió la f
 autor: "baltasar-gracian"
 temas:
   - "la-adversidad"
+  - "la-envidia"
 slug: "baltasar-gracian-a-los-sabios-lo-que-les-favorecieron"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

@@ -3,6 +3,7 @@ texto: "Hay, además, un noble orgullo en triunfar con pobres medios: el orgullo
 autor: "santiago-ramon-y-cajal"
 temas:
   - "la-riqueza"
+  - "la-humildad"
 slug: "santiago-ramon-y-cajal-hay-ademas-un-noble-orgullo-en-triunfar"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

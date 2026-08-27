@@ -1,6 +1,8 @@
 ---
 texto: "Altivos rechazan la imposición moral del poder religioso, mientras soportan humildes la coerción del poder civil."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-humildad"
 slug: "manuel-gonzalez-prada-altivos-rechazan-la-imposicion-moral-del-poder"
 procedencia:
   obra: "Librepensamiento de acción"

@@ -1,7 +1,9 @@
 ---
-texto: "Si hay méritos el orgullo es un derecho; si no los hay se trata de vanidad."
+texto: "Llaman modestia á la prohibición de reclamar los derechos naturales del genio, de la santidad ó del heroísmo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-si-hay-meritos-el-orgullo-es-un"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-llaman-modestia-a-la-prohibicion-de-reclamar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

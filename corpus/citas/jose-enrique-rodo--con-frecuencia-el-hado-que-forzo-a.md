@@ -3,6 +3,7 @@ texto: "Con frecuencia el hado que forzó a la voluntad a abandonar el rumbo que
 autor: "jose-enrique-rodo"
 temas:
   - "la-adversidad"
+  - "la-gloria"
 slug: "jose-enrique-rodo-con-frecuencia-el-hado-que-forzo-a"
 procedencia:
   obra: "Motivos de Proteo"

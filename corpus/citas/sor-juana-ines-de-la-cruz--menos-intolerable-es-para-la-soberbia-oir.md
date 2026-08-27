@@ -3,6 +3,8 @@ texto: "Menos intolerable es para la soberbia oír las reprensiones, que para la
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-virtud"
+  - "la-humildad"
+  - "la-envidia"
 slug: "sor-juana-ines-de-la-cruz-menos-intolerable-es-para-la-soberbia-oir"
 procedencia:
   obra: "Respuesta a Sor Filotea de la Cruz"

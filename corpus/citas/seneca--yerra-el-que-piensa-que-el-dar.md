@@ -3,6 +3,7 @@ texto: "Yerra el que piensa que el dar es acción fácil: mucho tiene de dificul
 autor: "seneca"
 temas:
   - "la-prudencia"
+  - "la-razon"
 slug: "seneca-yerra-el-que-piensa-que-el-dar"
 procedencia:
   obra: "De la vida bienaventurada"

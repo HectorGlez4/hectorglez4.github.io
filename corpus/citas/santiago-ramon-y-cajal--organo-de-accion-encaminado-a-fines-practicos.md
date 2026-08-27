@@ -3,6 +3,7 @@ texto: "Órgano de acción encaminado a fines prácticos, nuestro cerebro parece
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-saber"
+  - "la-razon"
 slug: "santiago-ramon-y-cajal-organo-de-accion-encaminado-a-fines-practicos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

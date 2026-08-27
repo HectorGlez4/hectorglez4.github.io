@@ -3,6 +3,7 @@ texto: "Ni aunque te elogie un bruto ha de tener razón."
 autor: "antonio-machado"
 temas:
   - "la-palabra"
+  - "la-razon"
 slug: "antonio-machado-ni-aunque-te-elogie-un-bruto-ha"
 procedencia:
   obra: "Proverbios y cantares"

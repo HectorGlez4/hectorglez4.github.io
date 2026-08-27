@@ -1,7 +1,9 @@
 ---
-texto: "Se puede odiar á las cosas y á los animales; sólo se puede envidiar á los hombres."
+texto: "Si hay méritos el orgullo es un derecho; si no los hay se trata de vanidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-se-puede-odiar-a-las-cosas-y"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-si-hay-meritos-el-orgullo-es-un"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

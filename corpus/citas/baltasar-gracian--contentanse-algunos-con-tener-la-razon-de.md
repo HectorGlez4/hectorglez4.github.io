@@ -3,6 +3,7 @@ texto: "Conténtanse algunos con tener la razón de su parte; pero no basta, que
 autor: "baltasar-gracian"
 temas:
   - "la-virtud"
+  - "la-razon"
 slug: "baltasar-gracian-contentanse-algunos-con-tener-la-razon-de"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

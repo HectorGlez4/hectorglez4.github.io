@@ -3,6 +3,7 @@ texto: "la ingratitud es hija de la soberbia, y uno de los mayores pecados que s
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-humildad"
 slug: "miguel-de-cervantes-la-ingratitud-es-hija-de-la-soberbia"
 procedencia:
   obra: "Don Quijote"

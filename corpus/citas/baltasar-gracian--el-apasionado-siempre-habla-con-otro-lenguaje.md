@@ -3,6 +3,7 @@ texto: "El apasionado siempre habla con otro lenguaje diferente de lo que las co
 autor: "baltasar-gracian"
 temas:
   - "la-palabra"
+  - "la-razon"
 slug: "baltasar-gracian-el-apasionado-siempre-habla-con-otro-lenguaje"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

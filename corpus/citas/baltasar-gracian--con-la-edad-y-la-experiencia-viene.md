@@ -4,6 +4,7 @@ autor: "baltasar-gracian"
 temas:
   - "el-tiempo"
   - "la-prudencia"
+  - "la-razon"
 slug: "baltasar-gracian-con-la-edad-y-la-experiencia-viene"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

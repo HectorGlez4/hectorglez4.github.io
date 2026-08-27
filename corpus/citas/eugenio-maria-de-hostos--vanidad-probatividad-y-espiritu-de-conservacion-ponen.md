@@ -1,6 +1,8 @@
 ---
 texto: "Vanidad, probatividad y espíritu de conservación ponen el germen de la envidia en todos los corazones, menos en aquellos que necesitan verse caídos á los golpes de la envidia para convencerse de que existe."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-envidia"
 slug: "eugenio-maria-de-hostos-vanidad-probatividad-y-espiritu-de-conservacion-ponen"
 procedencia:
   obra: "Moral social"

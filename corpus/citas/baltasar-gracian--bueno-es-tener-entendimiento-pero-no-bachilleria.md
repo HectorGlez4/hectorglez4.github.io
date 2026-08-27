@@ -3,6 +3,7 @@ texto: "Bueno es tener entendimiento, pero no bachillería."
 autor: "baltasar-gracian"
 temas:
   - "el-saber"
+  - "la-razon"
 slug: "baltasar-gracian-bueno-es-tener-entendimiento-pero-no-bachilleria"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

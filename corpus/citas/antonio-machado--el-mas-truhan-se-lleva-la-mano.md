@@ -3,6 +3,7 @@ texto: "El más truhán se lleva la mano al corazón, y el bruto más espeso se 
 autor: "antonio-machado"
 temas:
   - "la-virtud"
+  - "la-razon"
 slug: "antonio-machado-el-mas-truhan-se-lleva-la-mano"
 procedencia:
   obra: "Proverbios y cantares"

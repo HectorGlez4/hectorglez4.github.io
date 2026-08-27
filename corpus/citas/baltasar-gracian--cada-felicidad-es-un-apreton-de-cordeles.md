@@ -4,6 +4,7 @@ autor: "baltasar-gracian"
 temas:
   - "la-adversidad"
   - "la-felicidad"
+  - "la-gloria"
 slug: "baltasar-gracian-cada-felicidad-es-un-apreton-de-cordeles"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

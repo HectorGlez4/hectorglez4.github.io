@@ -4,6 +4,7 @@ autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
   - "el-trabajo"
+  - "la-humildad"
 slug: "miguel-de-cervantes-haz-gala-sancho-de-la-humildad-de"
 procedencia:
   obra: "Don Quijote"

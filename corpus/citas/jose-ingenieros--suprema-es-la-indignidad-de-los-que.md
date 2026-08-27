@@ -1,7 +1,9 @@
 ---
-texto: "Es posible sentirse superior en cien cosas é inferior en una sola; éste es el punto frágil por donde tienta su asalto la envidia."
+texto: "Suprema es la indignidad de los que adulan teniendo fortuna; ésta les redimiría de todas las domesticidades, si no fuesen esclavos de la vanidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-posible-sentirse-superior-en-cien-cosas"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-suprema-es-la-indignidad-de-los-que"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

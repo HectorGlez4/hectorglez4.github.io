@@ -3,6 +3,7 @@ texto: "Nuestras glorias están más en el futuro que en el pasado."
 autor: "miguel-de-unamuno"
 temas:
   - "la-patria"
+  - "la-gloria"
 slug: "miguel-de-unamuno-nuestras-glorias-estan-mas-en-el-futuro"
 procedencia:
   obra: "En Alcalá de Henares"

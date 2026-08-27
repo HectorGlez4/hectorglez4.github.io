@@ -1,7 +1,9 @@
 ---
-texto: "Llaman modestia á la prohibición de reclamar los derechos naturales del genio, de la santidad ó del heroísmo."
+texto: "Poner la propia fe en algún ensueño, apasionadamente, con la más honda emoción lírica, es ascender hacia las cumbres donde aletea la gloria."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-llaman-modestia-a-la-prohibicion-de-reclamar"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-poner-la-propia-fe-en-algun-ensueno"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

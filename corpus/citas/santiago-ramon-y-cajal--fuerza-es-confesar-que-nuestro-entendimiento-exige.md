@@ -3,6 +3,7 @@ texto: "Fuerza es confesar que nuestro entendimiento exige imperiosamente teorí
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-saber"
+  - "la-razon"
 slug: "santiago-ramon-y-cajal-fuerza-es-confesar-que-nuestro-entendimiento-exige"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

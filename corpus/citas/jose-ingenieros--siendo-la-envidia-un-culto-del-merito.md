@@ -1,7 +1,9 @@
 ---
-texto: "En pocas cosas el hombre puede llegar al fin que la imaginación señala: su gloria está en marchar hacia él, siempre inalcanzado é inalcanzable."
+texto: "Siendo la envidia un culto del mérito, los envidiosos son sus naturales sacerdotes."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-en-pocas-cosas-el-hombre-puede-llegar"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-siendo-la-envidia-un-culto-del-merito"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

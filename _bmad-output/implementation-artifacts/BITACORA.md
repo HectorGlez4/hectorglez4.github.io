@@ -9363,3 +9363,120 @@ no se queda**.
 | Obras retiradas en esta sesión | — | **3** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 152.ª sesión — el tramo de Temas no estaba bloqueado: lo estaba la pregunta
+
+**19 Temas.** El primero en cinco sesiones, y el bloqueo era mío.
+
+`npm run asuntos` cuenta sobre las **Citas publicadas**, y con eso ningún asunto llegaba a
+quince. Pero la pregunta para **abrir** un Tema es otra, y la responde la misma orden con
+`-- --cantera`:
+
+| «la humildad» | coincidencias |
+|---|---|
+| sobre 1598 Citas publicadas | 25 |
+| sobre 20 057 candidatas sin leer | **239, en 24 firmas** |
+
+Con lo publicado el asunto parecía cerrado; con la cantera sobra material. Es exactamente el
+error que la 145.ª documentó —repetir una medida en vez de rehacerla— cometido sobre su propia
+lección.
+
+«La humildad» salió de **dos sitios**: 12 Citas ya publicadas que lo tratan y llevaban otro
+Tema —una Cita puede llevar varios— y 11 leídas de la cantera, de 88 candidatas.
+
+> Llamáis a la prudencia miedo, a la moderación apocamiento, a la humildad ignorancia.
+
+Y una se apartó por una razón menuda y firme: el documento trae **un espacio antes de la coma**
+—«para él , sino»—. Corregirlo rompería el cotejo literal; publicarlo pondría la errata en la
+página. Ausencia antes que mutilación.
+
+## 153.ª sesión — la lista de asuntos no era el Corpus
+
+**21 Temas.** Las quince familias de `tools/lib/asuntos.ts` las escribió una sesión concreta y
+nadie las había vuelto a discutir. Concluir «ningún asunto llega a quince» sobre una lista
+cerrada es concluir **sobre la lista**. Probados los que no estaban:
+
+| asunto | publicadas · firmas | cantera · firmas |
+|---|---|---|
+| la razón | 66 · 12 | 647 · 27 |
+| la ley | 61 · 14 | 563 · 27 |
+| el deber | 37 · 14 | 470 · 28 |
+| **la gloria** | 14 · 8 | 156 · 25 |
+
+«La gloria» abrió con 9 publicadas y 8 de la cantera, nueve firmas.
+
+> Gloria por gloria, vale más dejar chispas de luz que regueros de sangre.
+
+### Y una inflación que se deja estar, con su cifra
+
+«la ira» cuenta el verbo *ir*: al quitar tildes para la ortografía vieja, **«irá» se vuelve
+«ira»**. Medido: **10 de 103** candidatas y **1 de 8** publicadas. **No se arregla**, y el
+motivo va escrito en el módulo: quitar la raíz perdería las Citas donde «ira» sí es el
+sustantivo, y una cuenta que pierde en silencio es peor que una que sobra a la vista.
+
+Al medirlo, la sonda cometió el error que investigaba —`ir[áa]n?` casaba también el
+sustantivo— y dio 35 en vez de 10. Se corrigió antes de creerse la cifra.
+
+## 154.ª sesión — «la memoria» tiene la mayor cantera y no da ni cinco
+
+Leídas **76 de 109** candidatas más las 24 Citas publicadas que la mencionan. **No llega a
+quince: no llega a cinco.** Y tiene **311 coincidencias, 24 firmas**, la cifra más alta de
+todos los asuntos.
+
+Invierte la heurística que el propio módulo declara —«hacen falta 30-35 coincidencias para dar
+15 Citas»—. Tiene diez veces esa cifra y da casi cero, porque sus tres palabras significan otra
+cosa más a menudo que ella:
+
+  · **«memoria» = un informe escrito** —«su memoria presentada a la Exposición»— y «de memoria»
+    = de carrerilla;
+  · **«recuerdos» = el género** —«¿por qué publico estos recuerdos?»—;
+  · **«olvidar» es de los verbos más comunes del castellano** —«se me olvidaba decirte»—.
+
+**La regla útil no es cuántas coincidencias hay, sino cuántos sentidos tiene la palabra que las
+cuenta.** Queda medida como inalcanzable, junto a «la costumbre» y «la ira».
+
+## 155.ª sesión — la tabla que debí construir seis sesiones antes
+
+**22 Temas.** Faltan dos.
+
+El módulo lo dice en su cabecera desde siempre: «si un Tema publicado ya posee la mitad de las
+Citas del asunto, el asunto es ese Tema». Es el primero de los tres modos de fallo y **el único
+que se ve sin leer nada**. Yo llevaba sesiones leyendo primero.
+
+| asunto | Citas | Tema que ya las posee |
+|---|---|---|
+| la educación | 33 | **el-saber (79 %)** |
+| la mentira | 34 | **la-verdad (71 %)** |
+| la vejez | 13 | el-tiempo (62 %) |
+| el poder | 29 | la-libertad (62 %) |
+| la ley | 38 | la-justicia (58 %) |
+| **la razón** | 59 | el-saber (25 %) — libre |
+| el deber | 28 | el-saber (32 %) — libre |
+
+Se leyeron 50 candidatas de «la mentira» **antes** de mirar que la-verdad ya poseía 24 de sus
+34. Cuatro de los seis asuntos en cola estaban ocupados, y la tabla cuesta un segundo.
+
+### Y al construirla, el defecto de la 127.ª otra vez
+
+La regla del módulo es «frontera por delante obligatoria, por detrás no». La sonda escribía
+`razón\b` **sin la de delante**, y contaba **co-razón**. «La razón» aparentaba 79 Citas y
+tiene **59**. Se vio porque en la lista salían las Citas sobre el corazón del poeta.
+
+«La razón» abre con 19 Citas de ocho firmas, ninguna con más de cuatro:
+
+> El apasionado siempre habla con otro lenguaje diferente de lo que las cosas son; habla en él
+> la pasión, no la razón.
+
+Y se dice lo que este Tema **no** hace: sale entero de Citas ya publicadas que llevaban otro
+Tema. **Organiza el Corpus, no lo agranda.**
+
+### Cifras de la tirada
+
+| | antes | después |
+|---|---|---|
+| **Temas** | 18 | **22** de 24 |
+| Citas | 1598 | **1624** |
+| Asuntos medidos como imposibles, con su motivo | 4 | **7** |
+
+Puerta completa en verde y consultada por su código de salida.

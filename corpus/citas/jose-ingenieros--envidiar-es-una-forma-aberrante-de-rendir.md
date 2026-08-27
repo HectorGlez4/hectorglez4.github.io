@@ -1,7 +1,9 @@
 ---
-texto: "Suprema es la indignidad de los que adulan teniendo fortuna; ésta les redimiría de todas las domesticidades, si no fuesen esclavos de la vanidad."
+texto: "Envidiar es una forma aberrante de rendir homenaje á la superioridad ajena."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-suprema-es-la-indignidad-de-los-que"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-envidiar-es-una-forma-aberrante-de-rendir"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -3,6 +3,7 @@ texto: "¿Hay diablo como un adulador, como un envidioso, como un amigo falso y 
 autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
+  - "la-envidia"
 slug: "francisco-de-quevedo-hay-diablo-como-un-adulador-como-un"
 procedencia:
   obra: "El alguacil endemoniado"

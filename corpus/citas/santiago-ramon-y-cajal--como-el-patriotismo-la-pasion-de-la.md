@@ -1,7 +1,9 @@
 ---
-texto: "Al entrar en la historia no hay grande hombre que no sea avaro de sus títulos y que no dispute encarnizadamente a la nueva generación sus derechos a la gloria."
+texto: "Como el patriotismo, la pasión de la gloria debe sugerirse y nunca analizarse."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-al-entrar-en-la-historia-no-hay"
+temas:
+  - "la-gloria"
+slug: "santiago-ramon-y-cajal-como-el-patriotismo-la-pasion-de-la"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

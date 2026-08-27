@@ -3,6 +3,7 @@ texto: "Se trata, como veis, de un valor afectivo, y contra los valores afectivo
 autor: "miguel-de-unamuno"
 temas:
   - "el-saber"
+  - "la-razon"
 slug: "miguel-de-unamuno-se-trata-como-veis-de-un-valor"
 procedencia:
   obra: "Del sentimiento trágico de la vida/I"

@@ -3,6 +3,7 @@ texto: "Verdaderamente os ha caído en suerte una naturaleza adornada de razón:
 autor: "seneca"
 temas:
   - "el-saber"
+  - "la-razon"
 slug: "seneca-verdaderamente-os-ha-caido-en-suerte-una"
 procedencia:
   obra: "De la vida bienaventurada"

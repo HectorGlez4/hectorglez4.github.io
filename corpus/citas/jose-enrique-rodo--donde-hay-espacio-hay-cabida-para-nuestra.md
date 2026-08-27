@@ -3,6 +3,7 @@ texto: "Donde hay espacio, hay cabida para nuestra gloria."
 autor: "jose-enrique-rodo"
 temas:
   - "la-vida"
+  - "la-gloria"
 slug: "jose-enrique-rodo-donde-hay-espacio-hay-cabida-para-nuestra"
 procedencia:
   obra: "Motivos de Proteo"

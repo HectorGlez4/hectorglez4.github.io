@@ -1,7 +1,9 @@
 ---
-texto: "Envidiar es una forma aberrante de rendir homenaje á la superioridad ajena."
+texto: "Se puede odiar á las cosas y á los animales; sólo se puede envidiar á los hombres."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-envidiar-es-una-forma-aberrante-de-rendir"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-se-puede-odiar-a-las-cosas-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

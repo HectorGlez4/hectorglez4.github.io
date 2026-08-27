@@ -4,6 +4,7 @@ autor: "antonio-machado"
 temas:
   - "el-saber"
   - "la-verdad"
+  - "la-humildad"
 slug: "antonio-machado-volvamos-a-la-verdad-vanidad-de-vanidades"
 procedencia:
   obra: "Proverbios y cantares"

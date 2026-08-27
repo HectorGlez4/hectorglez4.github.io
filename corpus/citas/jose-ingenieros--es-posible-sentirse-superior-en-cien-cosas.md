@@ -1,7 +1,9 @@
 ---
-texto: "Cuando se vive hartando los propios apetitos y nadie piensa que en cada ingenio original puede estar una partícula de la gloria común, la nación se abisma."
+texto: "Es posible sentirse superior en cien cosas é inferior en una sola; éste es el punto frágil por donde tienta su asalto la envidia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cuando-se-vive-hartando-los-propios-apetitos"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-es-posible-sentirse-superior-en-cien-cosas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

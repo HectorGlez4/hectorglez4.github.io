@@ -1,7 +1,9 @@
 ---
-texto: "Siendo la envidia un culto del mérito, los envidiosos son sus naturales sacerdotes."
+texto: "Cuando se vive hartando los propios apetitos y nadie piensa que en cada ingenio original puede estar una partícula de la gloria común, la nación se abisma."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-siendo-la-envidia-un-culto-del-merito"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-cuando-se-vive-hartando-los-propios-apetitos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

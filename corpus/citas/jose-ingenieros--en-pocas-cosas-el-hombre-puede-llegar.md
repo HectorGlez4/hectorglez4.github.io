@@ -1,7 +1,9 @@
 ---
-texto: "Poner la propia fe en algún ensueño, apasionadamente, con la más honda emoción lírica, es ascender hacia las cumbres donde aletea la gloria."
+texto: "En pocas cosas el hombre puede llegar al fin que la imaginación señala: su gloria está en marchar hacia él, siempre inalcanzado é inalcanzable."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-poner-la-propia-fe-en-algun-ensueno"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-en-pocas-cosas-el-hombre-puede-llegar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

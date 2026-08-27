@@ -4,6 +4,7 @@ autor: "francisco-de-quevedo"
 temas:
   - "la-verdad"
   - "la-muerte"
+  - "la-humildad"
 slug: "francisco-de-quevedo-empero-tambien-los-muertos-tienen-su-vanidad"
 procedencia:
   obra: "El mundo por dentro"

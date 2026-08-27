@@ -3,6 +3,7 @@ texto: "Yo no te llamo al peligro, sino a la gloria; y tengo tan conocida tu vir
 autor: "francisco-de-quevedo"
 temas:
   - "la-amistad"
+  - "la-gloria"
 slug: "francisco-de-quevedo-yo-no-te-llamo-al-peligro-sino"
 procedencia:
   obra: "Marco Bruto"

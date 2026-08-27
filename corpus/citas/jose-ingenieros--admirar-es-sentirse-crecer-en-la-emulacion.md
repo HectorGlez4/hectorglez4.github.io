@@ -3,6 +3,7 @@ texto: "Admirar es sentirse crecer en la emulación de los más grandes: un Idea
 autor: "jose-ingenieros"
 temas:
   - "la-virtud"
+  - "la-envidia"
 slug: "jose-ingenieros-admirar-es-sentirse-crecer-en-la-emulacion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -3,6 +3,7 @@ texto: "Excelentes son los estímulos del patriotismo y el noble afán de celebr
 autor: "santiago-ramon-y-cajal"
 temas:
   - "la-patria"
+  - "la-gloria"
 slug: "santiago-ramon-y-cajal-excelentes-son-los-estimulos-del-patriotismo-y"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

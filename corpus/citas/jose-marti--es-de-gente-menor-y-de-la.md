@@ -3,6 +3,7 @@ texto: "Es de gente menor, y de la envidia incapaz y roedora, el picar puntos a 
 autor: "jose-marti"
 temas:
   - "la-virtud"
+  - "la-envidia"
 slug: "jose-marti-es-de-gente-menor-y-de-la"
 procedencia:
   obra: "La verdad sobre los Estados Unidos"

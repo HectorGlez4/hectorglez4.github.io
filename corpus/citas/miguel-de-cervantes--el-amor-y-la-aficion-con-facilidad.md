@@ -4,6 +4,7 @@ autor: "miguel-de-cervantes"
 temas:
   - "la-vida"
   - "el-amor"
+  - "la-razon"
 slug: "miguel-de-cervantes-el-amor-y-la-aficion-con-facilidad"
 procedencia:
   obra: "Don Quijote"

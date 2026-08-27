@@ -3,6 +3,7 @@ texto: "Ciertamente la gloria del científico no es tan popular ni ruidosa como 
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-saber"
+  - "la-gloria"
 slug: "santiago-ramon-y-cajal-ciertamente-la-gloria-del-cientifico-no-es"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

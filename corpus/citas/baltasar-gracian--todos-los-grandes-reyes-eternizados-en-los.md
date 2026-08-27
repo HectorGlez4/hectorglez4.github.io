@@ -1,6 +1,8 @@
 ---
 texto: "Todos los grandes reyes, eternizados en los archivos de la fama, en los inmortales catálogos del aplauso, fueron de gran caudal, que sin este no puede haber grandeza."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-todos-los-grandes-reyes-eternizados-en-los"
 procedencia:
   obra: "El político"

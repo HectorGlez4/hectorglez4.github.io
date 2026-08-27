@@ -3,6 +3,7 @@ texto: "La razón de la sinrazón que a mi razón se hace, de tal manera mi raz�
 autor: "miguel-de-cervantes"
 temas:
   - "la-palabra"
+  - "la-razon"
 slug: "miguel-de-cervantes-la-razon-de-la-sinrazon-que-a"
 procedencia:
   obra: "Don Quijote"

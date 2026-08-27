@@ -1,6 +1,8 @@
 ---
 texto: "¡Con qué cariño cuidamos de los instrumentos propios, cada uno de los cuales representa una vanidad negada o un vicio insatisfecho!"
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-humildad"
 slug: "santiago-ramon-y-cajal-con-que-carino-cuidamos-de-los-instrumentos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -3,6 +3,7 @@ texto: "donde reina la envidia no puede vivir la virtud, ni adonde hay escaseza 
 autor: "miguel-de-cervantes"
 temas:
   - "la-virtud"
+  - "la-envidia"
 slug: "miguel-de-cervantes-donde-reina-la-envidia-no-puede-vivir"
 procedencia:
   obra: "Don Quijote"

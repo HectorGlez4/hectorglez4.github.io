@@ -169,6 +169,17 @@ development_status:
   # la tabla sin leerlo. El asunto con MAS coincidencias (57 estrictas) dio al leerlo 13 Citas
   # y 5 Autores, seis de una sola firma: ni umbral ni reparto, y ademas toca una decision
   # editorial que no es del bucle. Queda medido y sin tocar.
+  # 27/08: 18 -> 22 de 24, y el bloqueo no era del Corpus sino del ORDEN de las preguntas.
+  # `npm run asuntos` cuenta sobre lo PUBLICADO; abrir un Tema pregunta por la CANTERA, y con
+  # `-- --cantera` «la humildad» pasaba de 25 a 239 candidatas en 24 firmas.
+  # Segunda: la lista de quince familias del módulo no es el Corpus. Fuera de ella estaban
+  # «la razón» (59 Citas, 12 firmas) y «la gloria», que abrieron.
+  # Tercera, y la que más costó: el módulo ya decía que un asunto cuyas Citas posee otro Tema
+  # ES ese Tema, y eso se ve SIN LEER. Cuatro de los seis en cola estaban ocupados —la
+  # educación es el-saber al 79 %, la mentira es la-verdad al 71 %—.
+  # Medidos como imposibles por ambigüedad léxica, con su cifra: la memoria (311 coincidencias,
+  # la mayor de todas, y no da cinco Citas), la costumbre y la ira.
+  # Quedan dos. Libres y medidos: «el deber» (28 Citas, 12 firmas) y «el error» (24, 11).
   15-5-veinticuatro-temas-publicados: in-progress
   # 26/08: 1000 de 1000, puesto. El techo ya no lo limita la cantera sino el reparto:
   # sobran candidatas y escasean Autores con hueco. El techo cambio de dueño: el Autor mas representado

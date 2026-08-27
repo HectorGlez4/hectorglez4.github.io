@@ -1,6 +1,8 @@
 ---
 texto: "Llamáis a la prudencia miedo, a la moderación apocamiento, a la humildad ignorancia."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-humildad"
 slug: "mariano-jose-de-larra-llamais-a-la-prudencia-miedo-a-la"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

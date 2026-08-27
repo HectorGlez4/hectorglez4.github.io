@@ -3,6 +3,7 @@ texto: "La gloria es transfiguración, divinización, orgullo exaltado y beatíf
 autor: "amado-nervo"
 temas:
   - "la-libertad"
+  - "la-gloria"
 slug: "amado-nervo-la-gloria-es-transfiguracion-divinizacion-orgullo-exaltado"
 procedencia:
   obra: "Plenitud"

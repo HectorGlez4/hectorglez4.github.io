@@ -1,6 +1,8 @@
 ---
 texto: "Lisonjead al orgulloso, y rechazará la lisonja, temeroso de dañar á su reputacion haciéndose ridículo; de él se ha dicho con mucha verdad, que es demasiado orgulloso para ser vano."
 autor: "jaime-balmes"
+temas:
+  - "la-humildad"
 slug: "jaime-balmes-lisonjead-al-orgulloso-y-rechazara-la-lisonja"
 procedencia:
   obra: "El Criterio"

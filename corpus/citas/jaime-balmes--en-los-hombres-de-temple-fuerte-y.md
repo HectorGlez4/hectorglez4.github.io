@@ -3,6 +3,7 @@ texto: "En los hombres de temple fuerte y de entendimiento sagaz, es orgullo; en
 autor: "jaime-balmes"
 temas:
   - "la-virtud"
+  - "la-humildad"
 slug: "jaime-balmes-en-los-hombres-de-temple-fuerte-y"
 procedencia:
   obra: "El Criterio"

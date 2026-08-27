@@ -3,6 +3,7 @@ texto: "De los dóciles y humildes pueden salir los santos, pocas veces los sabi
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-saber"
+  - "la-humildad"
 slug: "santiago-ramon-y-cajal-de-los-dociles-y-humildes-pueden-salir"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -3,6 +3,7 @@ texto: "Penetrados y como saturados de cuanto sobre el tema ha sido escrito, ¿n
 autor: "santiago-ramon-y-cajal"
 temas:
   - "el-saber"
+  - "la-razon"
 slug: "santiago-ramon-y-cajal-penetrados-y-como-saturados-de-cuanto-sobre"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

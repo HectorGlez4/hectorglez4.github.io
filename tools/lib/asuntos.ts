@@ -19,6 +19,19 @@
  * coincidir y tratar, la conversión medida en cinco asuntos va del **4 % al 57 %**, y lo que
  * descarta una candidata son tres formas —empieza remitiendo, cita a otro, trae nombre propio y
  * anécdota— que ningún patrón reconoce. **La cuenta es un puntero, nunca un veredicto.**
+ *
+ * ## Y una inflación conocida que se deja estar, con su cifra (153.ª)
+ *
+ * Quitar las tildes hace falta para la ortografía vieja —«razon» por «razón»—, pero con ello
+ * **«irá» se vuelve «ira»**, y la raíz `ira` de «la ira» cuenta el futuro del verbo *ir*. Medido:
+ * **10 de 103** candidatas y **1 de 8** Citas publicadas del asunto son el verbo.
+ *
+ * No se quita la raíz, y la razón es la misma que gobierna las puertas de la extracción: quitarla
+ * perdería las Citas donde «ira» **es** el sustantivo —«no era la razón sino la ira»— y una cuenta
+ * que pierde en silencio es peor que una que sobra a la vista. Un 10 % de más en un puntero se
+ * descuenta leyendo; lo que no se recupera es lo que la cuenta nunca enseñó.
+ *
+ * Queda escrito para que nadie lo «arregle» sin medir lo que cuesta.
  */
 
 /** Una raíz, comparable: sin tildes y en minúsculas. */

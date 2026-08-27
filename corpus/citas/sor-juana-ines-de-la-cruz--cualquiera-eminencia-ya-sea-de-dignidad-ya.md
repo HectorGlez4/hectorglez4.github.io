@@ -3,6 +3,7 @@ texto: "Cualquiera eminencia, ya sea de dignidad, ya de nobleza, ya de riqueza, 
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-adversidad"
+  - "la-razon"
 slug: "sor-juana-ines-de-la-cruz-cualquiera-eminencia-ya-sea-de-dignidad-ya"
 procedencia:
   obra: "Respuesta a Sor Filotea de la Cruz"

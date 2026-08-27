@@ -3,6 +3,7 @@ texto: "Será, pues, bienaventurado el que es su juicio recto, y el que se conte
 autor: "seneca"
 temas:
   - "la-felicidad"
+  - "la-razon"
 slug: "seneca-sera-pues-bienaventurado-el-que-es-su"
 procedencia:
   obra: "De la vida bienaventurada"

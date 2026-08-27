@@ -1,7 +1,9 @@
 ---
-texto: "No creamos en genios mudos ni en modestias sobrehumanas: quien no alza la voz en el certamen del Siglo, es porque nada tiene que decir."
+texto: "Gloria por gloria, vale más dejar chispas de luz que regueros de sangre."
 autor: "manuel-gonzalez-prada"
-slug: "manuel-gonzalez-prada-no-creamos-en-genios-mudos-ni-en"
+temas:
+  - "la-gloria"
+slug: "manuel-gonzalez-prada-gloria-por-gloria-vale-mas-dejar-chispas"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"
 estadoDerechos: "dominio-público"

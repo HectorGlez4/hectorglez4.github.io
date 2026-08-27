@@ -3,6 +3,7 @@ texto: "Á pesar de sus temperamentos heterogéneos, el destino suele agrupar á
 autor: "jose-ingenieros"
 temas:
   - "la-virtud"
+  - "la-envidia"
 slug: "jose-ingenieros-a-pesar-de-sus-temperamentos-heterogeneos-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

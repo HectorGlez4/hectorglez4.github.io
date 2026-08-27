@@ -3,6 +3,7 @@ texto: "Mi entendimiento tal cual ¿no es tan libre como el suyo, pues viene de 
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-libertad"
+  - "la-razon"
 slug: "sor-juana-ines-de-la-cruz-mi-entendimiento-tal-cual-no-es-tan"
 procedencia:
   obra: "Respuesta a Sor Filotea de la Cruz"

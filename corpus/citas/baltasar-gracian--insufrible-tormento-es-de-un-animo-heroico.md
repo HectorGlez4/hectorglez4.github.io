@@ -1,6 +1,8 @@
 ---
 texto: "Insufrible tormento es de un ánimo heroico ver que no alcanzan las fuerzas de su reino a las de su valor, y gran dicha no tener que envidiar la ajena monarquía."
 autor: "baltasar-gracian"
+temas:
+  - "la-envidia"
 slug: "baltasar-gracian-insufrible-tormento-es-de-un-animo-heroico"
 procedencia:
   obra: "El político"

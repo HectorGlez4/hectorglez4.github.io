@@ -1,6 +1,8 @@
 ---
 texto: "Si los que buscamos la Gloria siempre, no supiéramos despreciarla a veces, no seríamos dignos de ella."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-gloria"
 slug: "gustavo-sanchez-galarraga-si-los-que-buscamos-la-gloria-siempre"
 procedencia:
   obra: "A Flor De Piel: Frases"

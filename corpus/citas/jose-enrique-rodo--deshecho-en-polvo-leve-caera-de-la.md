@@ -3,6 +3,7 @@ texto: "Deshecho en polvo leve, caerá de la superficie de tu alma cuanto es all
 autor: "jose-enrique-rodo"
 temas:
   - "la-verdad"
+  - "la-humildad"
 slug: "jose-enrique-rodo-deshecho-en-polvo-leve-caera-de-la"
 procedencia:
   obra: "Parábolas"
