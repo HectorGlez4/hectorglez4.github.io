@@ -1,6 +1,8 @@
 ---
 texto: "Yo no sé lo que es el sol; no conozco su naturaleza; y por tanto si me preguntan su definicion, no podré darla."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-yo-no-se-lo-que-es-el"
 procedencia:
   obra: "El Criterio"

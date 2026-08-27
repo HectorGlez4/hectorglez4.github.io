@@ -1,7 +1,9 @@
 ---
-texto: "Hombres muy bien dotados para un objeto, se muestran con una inferioridad lastimosa cuando se ocupan de otro."
+texto: "¿Acaso los malos no son tambien con mucha frecuencia víctima de otros malos, y los pérfidos de otros pérfidos?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-hombres-muy-bien-dotados-para-un-objeto"
+temas:
+  - "la-virtud"
+slug: "jaime-balmes-acaso-los-malos-no-son-tambien-con"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

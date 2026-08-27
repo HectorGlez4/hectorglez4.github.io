@@ -8937,3 +8937,49 @@ siguiente no sabe que ocurrió.
 | Rendimiento de la veta | 25 % | **33 % → 17 %** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 144.ª sesión — la banda buena es de la obra, y se comprueba en cada una
+
+Ocho Citas, **1564 → 1572**.
+
+### Tres bandas en la misma obra, y la de en medio gana
+
+El tratado sobre el arte de pensar bien lleva tres sesiones dando en torno al 27 % en su tramo
+medio. Se probó el largo, que es donde la 129.ª midió el 54 % en otro ensayo:
+
+| tramo | leídas | firmes | rendimiento |
+|---|---|---|---|
+| 95-175 | 11 | 3 | 27 % |
+| **176-260** | 11 | **1** | **9 %** |
+| 95-175 (otra tanda) | 11 | 4 | **36 %** |
+
+El tramo largo es **peor** aquí, y se ve por qué al leerlo: en esta obra las frases largas son sus
+**ejemplos narrados** —el barro de los marinos de Aníbal, la carta del hijo al padre, el viajero que
+publica un tomo— y las tesis viven en la frase media.
+
+Cuarta obra en la que se comprueba la banda, y cuarto resultado distinto. La regla del protocolo
+—«el tramo no se fija de antemano; se prueban dos bandas y se sigue por la que rinde»— aguanta
+porque **no dice cuál es la buena**. Si dijera «la larga» o «la corta», habría fallado ya dos veces.
+
+### Y una excelente que se apartó por una comilla
+
+> En no respetando la mente de la ley, todo se puede hacer con la ley en la mano; basta asirse de
+> una palabra ambigua, para contrariar abiertamente todas las miras del legislador.»
+
+Cierra con una **comilla que no abre**. Eso significa que es el final de una cita dentro del texto:
+palabras de otro, o un trozo cortado. Publicarla sería atribuir al Autor lo que quizá copió, y el
+cotejo de la 11.2 la daría por buena porque está literal en el documento.
+
+Es la misma clase de señal que el guion de diálogo y el nombre en versales: **puntuación que delata
+la procedencia**, no el contenido.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1564 | **1572** |
+| Autores | 29 | 29 de 35 |
+| Obras con las tres bandas medidas | 3 | **4** |
+
+Puerta completa en verde y consultada por su código de salida.

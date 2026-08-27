@@ -1,7 +1,9 @@
 ---
-texto: "¿Cuál es el desgraciado, que lo sea por su culpa, si nos atenemos á lo que nos dice él? ninguno, ó casi ninguno."
+texto: "En los hombres de temple fuerte y de entendimiento sagaz, es orgullo; en los flojos y poco avisados, es vanidad."
 autor: "jaime-balmes"
-slug: "jaime-balmes-cual-es-el-desgraciado-que-lo-sea"
+temas:
+  - "la-virtud"
+slug: "jaime-balmes-en-los-hombres-de-temple-fuerte-y"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

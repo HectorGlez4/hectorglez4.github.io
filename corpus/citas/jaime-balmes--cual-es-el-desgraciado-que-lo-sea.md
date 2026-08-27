@@ -1,7 +1,9 @@
 ---
-texto: "A todos se nos arroja, por decirlo así, en un mismo molde: para la eleccion de las profesiones suele atenderse á todo, ménos á la disposicion particular de los destinados á ellas."
+texto: "¿Cuál es el desgraciado, que lo sea por su culpa, si nos atenemos á lo que nos dice él? ninguno, ó casi ninguno."
 autor: "jaime-balmes"
-slug: "jaime-balmes-a-todos-se-nos-arroja-por-decirlo"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-cual-es-el-desgraciado-que-lo-sea"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

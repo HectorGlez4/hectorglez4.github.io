@@ -1,7 +1,9 @@
 ---
-texto: "¿Acaso los malos no son tambien con mucha frecuencia víctima de otros malos, y los pérfidos de otros pérfidos?"
+texto: "Si no encuentra, finge; en vez de construir sobre la realidad, edifica sobre las creaciones de su pensamiento."
 autor: "jaime-balmes"
-slug: "jaime-balmes-acaso-los-malos-no-son-tambien-con"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-si-no-encuentra-finge-en-vez-de"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "En los hombres de temple fuerte y de entendimiento sagaz, es orgullo; en los flojos y poco avisados, es vanidad."
+texto: "Hombres muy bien dotados para un objeto, se muestran con una inferioridad lastimosa cuando se ocupan de otro."
 autor: "jaime-balmes"
-slug: "jaime-balmes-en-los-hombres-de-temple-fuerte-y"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-hombres-muy-bien-dotados-para-un-objeto"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

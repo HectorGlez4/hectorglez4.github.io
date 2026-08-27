@@ -1,7 +1,9 @@
 ---
-texto: "Si no encuentra, finge; en vez de construir sobre la realidad, edifica sobre las creaciones de su pensamiento."
+texto: "Desde que se han cultivado las matemáticas y las ciencias naturales, el progreso de las artes ha sido asombroso."
 autor: "jaime-balmes"
-slug: "jaime-balmes-si-no-encuentra-finge-en-vez-de"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-desde-que-se-han-cultivado-las-matematicas"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"
