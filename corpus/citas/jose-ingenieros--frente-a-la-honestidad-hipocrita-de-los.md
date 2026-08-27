@@ -1,7 +1,9 @@
 ---
-texto: "No incurramos en la simpleza de esperar una vejez santa, heroica ó genial tras una juventud equívoca, mansa y opaca; la vejez siega todas las originalidades con su hoz niveladora."
+texto: "Frente á la honestidad hipócrita de los mediocres--propia de mentes rutinarias y de caracteres domesticados--, existe una heráldica moral cuyos blasones son la virtud y la santidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-no-incurramos-en-la-simpleza-de-esperar"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-frente-a-la-honestidad-hipocrita-de-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

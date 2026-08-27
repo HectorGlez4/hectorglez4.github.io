@@ -1,7 +1,9 @@
 ---
-texto: "Nuestra especie ha salido de las precedentes como resultado de la selección natural; sólo hay evolución donde pueden seleccionarse las variaciones descollantes de los individuos."
+texto: "No incurramos en la simpleza de esperar una vejez santa, heroica ó genial tras una juventud equívoca, mansa y opaca; la vejez siega todas las originalidades con su hoz niveladora."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-nuestra-especie-ha-salido-de-las-precedentes"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-no-incurramos-en-la-simpleza-de-esperar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

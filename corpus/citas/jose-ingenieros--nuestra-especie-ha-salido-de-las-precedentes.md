@@ -1,7 +1,9 @@
 ---
-texto: "Si el sereno ateniense hubiera adulado á sus conciudadanos, la historia helénica no estaría manchada por su condena y el sabio no habría bebido la cicuta; pero no sería Sócrates."
+texto: "Nuestra especie ha salido de las precedentes como resultado de la selección natural; sólo hay evolución donde pueden seleccionarse las variaciones descollantes de los individuos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-si-el-sereno-ateniense-hubiera-adulado-a"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-nuestra-especie-ha-salido-de-las-precedentes"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -8890,3 +8890,50 @@ salida del comando** en lugar de su resultado.
 | Formas de aparato cerradas | — | **+1** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 143.ª sesión — lo que se aparta por lo que dice, no por cómo está escrito
+
+Segunda sesión en la veta mayor. Seis Citas, **1558 → 1564**.
+
+Rindió **33 %** y luego **17 %**, y la caída tiene la causa de siempre: el tramo doctrinal se acaba
+y empieza el retrato satírico del hombre mediocre, con nombres propios en cada frase —Lamartine,
+Heine, Borgia, Mayer, Joule—.
+
+Lo que sí queda se sostiene entero:
+
+> No incurramos en la simpleza de esperar una vejez santa, heroica ó genial tras una juventud
+> equívoca, mansa y opaca; la vejez siega todas las originalidades con su hoz niveladora.
+>
+> Si el sereno ateniense hubiera adulado á sus conciudadanos, la historia helénica no estaría
+> manchada por su condena y el sabio no habría bebido la cicuta; pero no sería Sócrates.
+>
+> El destino suele agrupar á los envidiosos en camarillas ó en círculos, sirviéndoles de argamasa
+> el común sufrimiento por la dicha ajena.
+
+### Y una que se apartó por lo que dice
+
+> Conviénese en llamar urbanidad á la hipocresía, **distinción al amaricamiento**, cultura á la
+> timidez, tolerancia á la complicidad.
+
+La frase es buena en su forma y está literal en el documento: el cotejo de la 11.2 la daría por
+buena y la puerta de legibilidad no ve nada raro. Pero **enumera un insulto de época** como si fuera
+un rasgo despreciable más, y el sitio no lo publica.
+
+No es una regla nueva ni una puerta: **ninguna máquina la habría cazado**, y es la misma decisión que
+apartó el «despotismo de Oriente» en la 129.ª, la mujer incapaz de entender a su marido en la misma
+sesión, y el volumen entero de la 141.ª. Todas comparten la forma: *correcto en el documento,
+inadmisible suelto*.
+
+Queda escrito porque es lo único del bucle que no se automatiza y que, si no se anota, la sesión
+siguiente no sabe que ocurrió.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1558 | **1564** |
+| Autores | 29 | 29 de 35 |
+| Rendimiento de la veta | 25 % | **33 % → 17 %** |
+
+Puerta completa en verde y consultada por su código de salida.

@@ -1,7 +1,9 @@
 ---
-texto: "Flota en la atmósfera el contagio mental y acosa por todas partes; nunca se ha visto un tonto originalizado por contigüidad y es frecuente que un ingenio se amodorre entre pazguatos."
+texto: "Si el sereno ateniense hubiera adulado á sus conciudadanos, la historia helénica no estaría manchada por su condena y el sabio no habría bebido la cicuta; pero no sería Sócrates."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-flota-en-la-atmosfera-el-contagio-mental"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-si-el-sereno-ateniense-hubiera-adulado-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Frente á la honestidad hipócrita de los mediocres--propia de mentes rutinarias y de caracteres domesticados--, existe una heráldica moral cuyos blasones son la virtud y la santidad."
+texto: "Flota en la atmósfera el contagio mental y acosa por todas partes; nunca se ha visto un tonto originalizado por contigüidad y es frecuente que un ingenio se amodorre entre pazguatos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-frente-a-la-honestidad-hipocrita-de-los"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-flota-en-la-atmosfera-el-contagio-mental"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
