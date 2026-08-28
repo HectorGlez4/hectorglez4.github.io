@@ -1,7 +1,9 @@
 ---
-texto: "Cuéstale mucho al hombre parecer malo, ni aun á sus propios ojos; no se atreve, se hace hipócrita."
+texto: "Aun los genios mas privilegiados no llegan á adquirir su fuerza hercúlea, sino despues de largos trabajos."
 autor: "jaime-balmes"
-slug: "jaime-balmes-cuestale-mucho-al-hombre-parecer-malo-ni"
+temas:
+  - "el-trabajo"
+slug: "jaime-balmes-aun-los-genios-mas-privilegiados-no-llegan"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

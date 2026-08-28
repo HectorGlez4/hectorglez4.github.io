@@ -560,6 +560,24 @@ de 8-13 % a **33 %**.
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
 
+### Un rendimiento bajo tiene causa, y la causa está en el modo retórico (160.ª)
+
+Dos obras con cantera enorme y rendimiento casi nulo, y las dos por lo mismo: **su prosa no
+produce frases que se sostengan solas.**
+
+· *Facundo* — **0 de 44**: sus proposiciones llevan dentro un nombre propio, una provincia o un
+  año que quien lee una Cita no tiene delante.
+· *El Hombre Mediocre* — **21 publicadas de 1414 candidatas**: es una caracterización corrida en
+  tercera persona del plural, con el sujeto declarado párrafos atrás. «Acogen», «Repudian»,
+  «Esquivan» — todas empiezan por un agujero.
+
+La lección para elegir obra: **no basta con el género**. Un ensayo de tesis puede estar escrito
+en un modo que impide la sentencia suelta, y eso se ve leyendo quince candidatas seguidas —no
+una aquí y otra allá—, porque lo que delata el modo es la repetición de la misma forma.
+
+Y cuando una veta lleva sesiones dando poco, **la pregunta no es cuánto rinde sino por qué**: la
+cifra sin explicación se repite sesión tras sesión sin que nadie decida abandonarla.
+
 ### Una prueba que nace verde no sobra, pero hay que probarle los dientes (159.ª)
 
 La 159.ª escribió en rojo una prueba para un defecto que no existía, y **salió verde a la

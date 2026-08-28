@@ -1,7 +1,9 @@
 ---
-texto: "Aun los genios mas privilegiados no llegan á adquirir su fuerza hercúlea, sino despues de largos trabajos."
+texto: "Quien se ha dominado á sí mismo domina fácilmente el negocio, y á los demas que en él toman parte."
 autor: "jaime-balmes"
-slug: "jaime-balmes-aun-los-genios-mas-privilegiados-no-llegan"
+temas:
+  - "la-prudencia"
+slug: "jaime-balmes-quien-se-ha-dominado-a-si-mismo"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

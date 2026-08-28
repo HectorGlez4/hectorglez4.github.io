@@ -9725,3 +9725,51 @@ pasándole por dentro `/buscar` y el 404 —que sí carecen de imagen— la aser
 | Citas publicadas | **0** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 160.ª sesión — por qué una veta de 1414 candidatas lleva sesiones dando 21
+
+Seis Citas, **1632 → 1638**. Alcanzada la Meta y verificada la deuda, la única veta que no pide
+decisión de Héctor es seguir sembrando de los Autores ya admitidos: más Citas son más páginas
+indexables, que es el objetivo con el que se abrió esta tanda.
+
+### El hallazgo, que explica una cifra vieja
+
+`El Hombre Mediocre` tiene **1414 candidatas y 21 Citas publicadas** tras muchas sesiones, y
+nadie había explicado el porqué. Leídas quince seguidas, salta a la vista:
+
+> **Acogen** con facilidad la insidia de los mediocres y proclaman loco al hombre mejor…
+> **Repudian** las cosas líricas porque obligan á pensamientos muy altos…
+> **Esquivan** la responsabilidad de sus acciones, son audaces en la traición y tímidos en la
+> lealtad.
+
+El libro entero es una **caracterización corrida en tercera persona del plural**: el sujeto —«los
+mediocres»— se declara párrafos atrás y no vuelve a aparecer. Casi ninguna frase se sostiene
+sola por buena que sea; la tercera tiene una joya en su segunda mitad y un agujero en la primera.
+
+Es el mismo hallazgo estructural que el cero de *Facundo* con otra cara: **allí eran nombres
+propios, aquí es un sujeto elidido.** No es que la obra sea mala; es que su modo retórico no
+produce sentencias sueltas. Y esa es la cifra que faltaba explicar.
+
+### Lo que sí dio
+
+El tratado doctrinal, cinco de cuarenta leídas:
+
+> Un vicio virtuoso es un imposible absoluto, porque el vicio fuera y no fuera vicio á un mismo
+> tiempo.
+>
+> Aun los genios mas privilegiados no llegan á adquirir su fuerza hercúlea, sino despues de
+> largos trabajos.
+
+Y mejora el reparto: esa firma pasa de 30 a 35 Citas mientras la más representada se queda en
+181. El techo del 15 % está en **11,1 %**.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1632 | **1638** |
+| Leídas | — | 55 |
+| Obras con su rendimiento explicado, no sólo medido | — | **+1** |
+
+Puerta completa en verde y consultada por su código de salida.

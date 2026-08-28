@@ -1,7 +1,9 @@
 ---
-texto: "Un vicio virtuoso es un imposible absoluto, porque el vicio fuera y no fuera vicio á un mismo tiempo."
+texto: "¿Para qué se nos ha dado la razon sino para valernos de ella, y emplearla como guia en nuestras acciones?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-un-vicio-virtuoso-es-un-imposible-absoluto"
+temas:
+  - "la-razon"
+slug: "jaime-balmes-para-que-se-nos-ha-dado-la"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

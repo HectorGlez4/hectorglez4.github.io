@@ -1,7 +1,9 @@
 ---
-texto: "¿Para qué se nos ha dado la razon sino para valernos de ella, y emplearla como guia en nuestras acciones?"
+texto: "Cuéstale mucho al hombre parecer malo, ni aun á sus propios ojos; no se atreve, se hace hipócrita."
 autor: "jaime-balmes"
-slug: "jaime-balmes-para-que-se-nos-ha-dado-la"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-cuestale-mucho-al-hombre-parecer-malo-ni"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

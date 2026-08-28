@@ -1,7 +1,9 @@
 ---
-texto: "Quien se ha dominado á sí mismo domina fácilmente el negocio, y á los demas que en él toman parte."
+texto: "Un vicio virtuoso es un imposible absoluto, porque el vicio fuera y no fuera vicio á un mismo tiempo."
 autor: "jaime-balmes"
-slug: "jaime-balmes-quien-se-ha-dominado-a-si-mismo"
+temas:
+  - "la-virtud"
+slug: "jaime-balmes-un-vicio-virtuoso-es-un-imposible-absoluto"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"
