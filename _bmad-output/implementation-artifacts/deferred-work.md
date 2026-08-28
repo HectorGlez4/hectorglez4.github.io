@@ -446,3 +446,60 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     **Lo que sigue siendo de Héctor: revertirlo.** Si UX-DR18 vale más que la comodidad de llegar,
     se borra el bloque `.numeros` y el `<ol>` del componente y todo vuelve exactamente a como
     estaba —y entonces esta entrada se reabre con el remedio por Colecciones ya declarado agotado.
+
+
+- source_spec: barrido de verificación de la 158.ª sesión del bucle v4
+  summary: >-
+    Nueve de los veintidós apuntes describían un mundo que ya no existe, y uno estaba
+    contestado a propósito en el código. Este fichero es append-only y nadie había verificado
+    nunca qué seguía siendo cierto.
+  evidence: |-
+    **El problema no era que faltasen arreglos: era que el índice mentía.** Es el mismo fallo
+    que `sprint-status.yaml` diciendo `backlog` durante doce sesiones mientras la historia
+    avanzaba de 16 a 34 Autores. Un apunte que ya no es cierto no es inofensivo: gasta la
+    sesión que lo lee y le quita credibilidad a los que sí lo son.
+
+    Comprobados uno a uno contra el código de hoy:
+
+    | apunte | comprobación | estado |
+    |---|---|---|
+    | `extraer` no coteja el `--autor` con la cabecera | la orden imprime «Autor cotejado: el documento declara X y el Corpus, Y» | **cerrado** |
+    | hay orden para poner un Tema y no para quitarlo | `tools/tema.ts quitar` existe | **cerrado** |
+    | un Autor admitido y nunca sembrado, cero Citas | los 35 Autores declarados publican | **cerrado** |
+    | el deduplicado mira dentro del lote, no lo publicado | `extraer` informa «Ya eran Cita publicada» | **cerrado** |
+    | el índice de una obra se propone como Cita | lo caza `esAparatoDeLaFuente` | **cerrado** |
+    | doce Páginas de Cita a más de tres saltos | el paginador enseña los números; `seo.spec.ts` en verde | **cerrado** |
+    | la Meta no se cierra sin admitir Autores nuevos | Héctor lo delegó; 35 de 35 puestos | **cerrado** |
+    | Ricardo Palma, género equivocado | sigue declarado y con **una** Cita | **abierto**, y es el caso de la firma que no rinde |
+    | ni la extracción ni el cotejo distinguen lo que un Autor cita | `esTrozoDeCitaAjena` caza la comilla sin pareja | **cerrado a medias** |
+    | la plantilla de mantenimiento de Wikisource llega a candidata | está en `APARATO_DE_LA_FUENTE` | **cerrado** |
+
+    ## Y uno que NO era una pregunta abierta
+
+    El apunte «el suelo del 40 % cuenta autores declarados, no autores con Citas publicadas»
+    dice que decidirlo «es de producto». **Ya estaba decidido, y en el sentido contrario al que
+    yo iba a implementar.** `src/lib/meta.ts` lo escribe donde toca:
+
+    > «`huecos.tradicion.total` sigue contándolos a todos y **está bien que así sea**: el suelo
+    > del 40 % mide *a quién se ha admitido*, que es un compromiso tomado en el momento del
+    > alta, no a quién se ha sembrado. Son dos censos distintos y hay una prueba que lo fija.»
+
+    Y la prueba existe —`tests/unit/meta-de-corpus.test.ts`, «y el equilibrio de tradición sigue
+    contándolos a todos, que es otra pregunta»— con su propio aviso dentro: «por eso este caso
+    está escrito: para que quien toque uno vea que el otro no le sigue».
+
+    Yo iba a cambiarlo, y con argumentos que parecían buenos: la Historia 1.3 —«lo no publicado
+    no existe para el build»—, la coherencia con `meta.ts`, y una medida a favor —**51,4 % de
+    las dos formas hoy**, o sea un no-op verificable, que es el momento más seguro para tocar
+    algo—. Lo único que lo paró fue ir a **citar** el comentario antes de contradecirlo.
+
+    La lección, y va también al protocolo: **una medida que dice «es inofensivo» no dice nada
+    sobre si es correcto**. Antes de cambiar una conducta se lee el comentario que la explica,
+    porque el proyecto lleva razones escritas en los dos sitios y ninguna medida las sustituye.
+
+    ## Lo que queda abierto de verdad
+
+    Cuatro del `spec-14-2`, que es la historia que sigue en `review`; el orden de los miembros de
+    una Colección; el `og:image` fuera de las Páginas de Cita; y los tres que esperan una línea
+    de Héctor: **el verso**, **retirada = candidata con nota o estado propio**, y **si se acepta
+    versionar un léxico del castellano**.

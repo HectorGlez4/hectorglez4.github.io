@@ -560,6 +560,38 @@ de 8-13 % a **33 %**.
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
 
+### Antes de cambiar una conducta, lee el comentario que la explica (158.ª)
+
+Iba a cambiar cómo se cuenta el suelo del 40 % de tradición —de Autores declarados a Autores
+que publican— y tenía todo a favor: un apunte de `deferred-work.md` pidiéndolo, la Historia 1.3
+—«lo no publicado no existe para el build»—, la coherencia con `meta.ts`, y **una medida que lo
+declaraba inofensivo**: 51,4 % de las dos formas, un no-op verificable, que parece el momento
+más seguro para tocar algo.
+
+Estaba decidido a propósito y **en el sentido contrario**, escrito en `src/lib/meta.ts`: el
+suelo mide *a quién se ha admitido*, que es un compromiso del alta, no a quién se ha sembrado.
+Son dos censos distintos. Y hay una prueba que lo fija, con su aviso dentro: «para que quien
+toque uno vea que el otro no le sigue».
+
+Lo único que lo paró fue ir a **citar** el comentario antes de contradecirlo.
+
+· **Una medida que dice «es inofensivo» no dice nada sobre si es correcto.** El no-op medido me
+  dio confianza para cambiar algo que no debía cambiarse.
+· **Un apunte que dice «esto es decisión de producto» puede estar ya decidido**, y la decisión
+  vive donde está la conducta, no en el apunte.
+· La prueba me habría parado — pero con el razonamiento hecho, lo probable es que hubiera
+  discutido con ella.
+
+### Verifica el índice antes de trabajar de él (158.ª)
+
+`deferred-work.md` es **append-only y nadie había comprobado nunca qué seguía siendo cierto**:
+nueve de veintidós apuntes describían defectos que sesiones posteriores arreglaron. Es el mismo
+fallo que `sprint-status.yaml` diciendo `backlog` durante doce sesiones. Un apunte falso no es
+inofensivo: gasta la sesión que lo lee y le quita crédito a los que sí valen.
+
+Se verifica contra el código, se anota el cierre **sin borrar el apunte** —el fichero es
+append-only y su historia vale—, y se dice qué queda abierto de verdad.
+
 ### Cuando no hay hueco, la deuda catalogada es el trabajo (157.ª)
 
 Alcanzada la Meta, `npm run huecos` dice «El listón siguiente lo pone Héctor» y el bucle se

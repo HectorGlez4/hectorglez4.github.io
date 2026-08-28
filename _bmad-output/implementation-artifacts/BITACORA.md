@@ -9613,3 +9613,63 @@ con la mitad que falta.
 | Sitios donde se aplica | **2** — extracción y aprobación, por la 128.ª |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 158.ª sesión — estuve a punto de «arreglar» una decisión
+
+Ninguna Cita publicada. La sesión entera fue mirar la deuda catalogada, y lo que encontró no
+fue trabajo pendiente: fue que **el índice mentía**.
+
+### Nueve de veintidós apuntes describen un mundo que ya no existe
+
+`deferred-work.md` es append-only y nadie había verificado nunca qué seguía siendo cierto.
+Comprobados uno a uno contra el código de hoy, están cerrados: el cotejo del `--autor`, el
+`tema quitar`, el Autor admitido y nunca sembrado, el deduplicado contra lo publicado, el índice
+de una obra como candidata, las doce Páginas a más de tres saltos, la Meta que no se cerraba sin
+Autores nuevos, la plantilla de mantenimiento de Wikisource, y a medias el que pedía distinguir
+lo que un Autor cita de lo que escribe.
+
+Es el mismo fallo que `sprint-status.yaml` diciendo `backlog` durante doce sesiones mientras la
+historia avanzaba de 16 a 34 Autores. **Un apunte falso no es inofensivo**: gasta la sesión que
+lo lee y le quita crédito a los que sí valen. Se anotó el barrido sin borrar ningún apunte, que
+es lo que manda la regla del fichero.
+
+### Y el que iba a arreglar estaba decidido en contra
+
+El apunte dice que el suelo del 40 % de tradición cuenta Autores **declarados** y no Autores que
+publican, y que decidirlo «es de producto». Iba a cambiarlo, y con todo a favor:
+
+· la Historia 1.3 —«lo no publicado no existe para el build»—;
+· la coherencia con `meta.ts`, que sí cuenta a los que publican;
+· y **una medida que lo declaraba inofensivo**: 51,4 % de las dos formas hoy, porque los 35
+  Autores declarados publican. Un no-op verificable, que parece el momento más seguro para
+  tocar algo.
+
+Fui a citar `meta.ts` para justificarlo y encontré lo contrario, escrito ahí a propósito:
+
+> «`huecos.tradicion.total` sigue contándolos a todos y **está bien que así sea**: el suelo del
+> 40 % mide *a quién se ha admitido*, que es un compromiso tomado en el momento del alta, no a
+> quién se ha sembrado. Son dos censos distintos y hay una prueba que lo fija.»
+
+La prueba existe, y lleva su propio aviso dentro: «para que quien toque uno vea que el otro no le
+sigue». Alguien previó este error exacto, lo escribió en los dos sitios, y aun así estuve a punto
+de cometerlo.
+
+**Lo único que lo paró fue ir a citar el comentario antes de contradecirlo.** Y hay una trampa
+dentro de la trampa: la medida de que era un no-op me dio **confianza**, no información. Una
+medida que dice «es inofensivo» no dice nada sobre si es correcto.
+
+La prueba me habría parado en rojo. Pero con el razonamiento ya hecho y una medida a favor, lo
+probable es que hubiera discutido con ella — que es exactamente lo que la 156.ª hizo bien y por
+un motivo distinto.
+
+### Cifras
+
+| | |
+|---|---|
+| Apuntes verificados | **22** |
+| Cerrados por sesiones posteriores | **9** |
+| Contestados en el código, no abiertos | **1** |
+| Citas publicadas | **0** |
+
+Puerta completa en verde y consultada por su código de salida.
