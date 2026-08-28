@@ -560,6 +560,28 @@ de 8-13 % a **33 %**.
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
 
+### Cuando no hay hueco, la deuda catalogada es el trabajo (157.ª)
+
+Alcanzada la Meta, `npm run huecos` dice «El listón siguiente lo pone Héctor» y el bucle se
+queda sin objetivo del que derivar trabajo. **Inventarse un listón no es del bucle**; lo que sí
+lo es: `deferred-work.md`, que lleva sesiones acumulando apuntes con su evidencia medida.
+
+Y un apunte que dice «no se arregla porque haría falta una decisión de producto» **no siempre
+está entero bloqueado**. El de la puerta de OCR razonaba que un léxico es decisión de producto y
+que una heurística sin diccionario «descartaría Citas buenas en silencio». Las dos cosas son
+ciertas **de una heurística elegida a ojo**. Midiendo cada señal candidata contra las Citas ya
+publicadas —el patrón de lo que no debe morderse— se puede cerrar la mitad mecánica sin tocar la
+que espera decisión.
+
+Dos cosas que hay que hacer y que no salen de razonar:
+
+· **Imprimir la lista entera de lo que la señal apartaría, y leerla.** Los dos afinados de la
+  157.ª salieron de ahí: que los puntos suspensivos con espacio delante son tipografía del XIX
+  —nueve de once falsos positivos— y que las abreviaturas del castellano son cortas, así que
+  exigir cuatro letras antes del punto las excluye todas.
+· **Decir qué mitad queda abierta.** Cerrar a medias y presentarlo como cerrado es peor que no
+  tocarlo: el apunte deja de avisar.
+
 ### Publicar contenido puede poner una prueba en rojo, y no siempre manda la prueba (156.ª)
 
 Un Tema llamado «El error» tumbó cuatro pruebas E2E que exigen que el 404 y la búsqueda vacía

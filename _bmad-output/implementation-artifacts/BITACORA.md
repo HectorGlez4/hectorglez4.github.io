@@ -9553,3 +9553,63 @@ sólo porque ningún Tema se llamaba así todavía**. El razonamiento va escrito
 para que nadie lo deshaga tomándolo por una relajación.
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 157.ª sesión — el miedo del apunte, convertido en cifra
+
+Alcanzada la Meta, `npm run huecos` dice «El listón siguiente lo pone Héctor» y el bucle se
+queda sin hueco del que derivar trabajo. En vez de inventar un listón, se fue a la deuda
+catalogada: **la puerta de legibilidad deja pasar palabras rotas por OCR**, anotada en
+`deferred-work.md` con seis ejemplos.
+
+### Por qué llevaba sesiones sin arreglarse, y por qué eso ya no vale
+
+El apunte lo razona bien: el arreglo obvio es un **léxico del castellano**, que es decisión de
+producto —hay que elegirlo, versionarlo, y marcará como rotas palabras de 1650 que son
+correctas, con Gracián y Quevedo dentro—. Y añade que **una heurística sin diccionario
+descartaría Citas buenas en silencio**.
+
+Las dos objeciones son ciertas de una heurística **elegida a ojo**. Así que no se eligió a ojo:
+se midieron seis señales contra las **1632 Citas publicadas**, que son el patrón de lo que no
+debe morderse, y sólo asciende la que no muerde ninguna. Es el criterio de la 151.ª.
+
+| señal | publicadas | candidatas | |
+|---|---|---|---|
+| punto intruso, con ≥4 letras delante | **0** | 10 | entra |
+| espacio antes de coma, punto y coma o punto | **0** | 5 | entra |
+| **cuatro consonantes seguidas** | **24** | 308 | **fuera** |
+| mayúscula dentro de palabra | 0 | 0 | fuera: no encuentra nada |
+| palabra sin vocales | 0 | 4 | fuera: dos de las cuatro no supe explicarlas |
+
+**Las cuatro consonantes son el aviso del apunte convertido en cifra.** «Construido» lleva
+«nstr», y esa regla se habría llevado por delante 24 Citas publicadas. El miedo era correcto y
+ahora tiene número; sin medirlo, la alternativa era seguir sin puerta o ponerla a ciegas.
+
+### Dos afinados, y los dos salieron de mirar lo que la señal mordía
+
+**Los puntos suspensivos con espacio delante son tipografía del XIX** —«y aquello ... también»,
+«siquiera ...»— y eran **nueve de los once** que la señal ancha cazaba. Apretada a la coma, el
+punto y coma y el punto simple, los devuelve todos.
+
+**Las abreviaturas del castellano son cortas**: «Av.», «Imp.», «Mad.», «etc.», «a. m.», «q.».
+Exigir **cuatro letras antes del punto** excluye las seis sin perder ninguna palabra entera —de
+once frases con punto intruso, se quedan las diez rotas y se va sólo «conciencia y. con»—.
+
+Ninguno de los dos se habría descubierto razonando: los dos salieron de imprimir la lista
+entera de lo que cada señal apartaba y leerla.
+
+### Lo que NO cierra, y se dice
+
+«indivicluo», «porpue» y «laspocas» siguen pasando. Ésas necesitan el léxico, y el léxico sigue
+siendo una decisión que no es del bucle. La deuda se cierra **a medias**, y el apunte se queda
+con la mitad que falta.
+
+### Cifras
+
+| | |
+|---|---|
+| Pruebas nuevas | **11**, en rojo antes de tocar la orden |
+| Candidatas versionadas que la puerta caza | **15** |
+| Sitios donde se aplica | **2** — extracción y aprobación, por la 128.ª |
+
+Puerta completa en verde y consultada por su código de salida.

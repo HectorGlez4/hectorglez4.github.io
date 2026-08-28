@@ -270,8 +270,37 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     dice nada.
 
 - id: puerta-de-legibilidad-demasiado-laxa-con-el-ocr
-  summary: La puerta de legibilidad de la 11.5 deja pasar palabras rotas por OCR; en un documento descartó 1 de 6.
+  summary: >-
+    CERRADO A MEDIAS en la 157.ª. La puntuación rota ya tiene puerta —punto intruso y espacio
+    antes del signo, `tienePuntuacionRota`—; las palabras rotas siguen pasando y siguen
+    esperando el léxico.
   evidence: |-
+    **157.ª — lo que se cerró y lo que no.**
+
+    Las dos objeciones de abajo son ciertas de una heurística **elegida a ojo**, así que no se
+    eligió a ojo: se midieron seis señales contra las 1632 Citas publicadas, que son el patrón
+    de lo que no debe morderse, y sólo ascendió la que no muerde ninguna.
+
+    | señal | publicadas | candidatas | |
+    |---|---|---|---|
+    | punto intruso, ≥4 letras delante | **0** | 10 | entra |
+    | espacio antes de coma, punto y coma o punto | **0** | 5 | entra |
+    | **cuatro consonantes seguidas** | **24** | 308 | **fuera** |
+    | mayúscula dentro de palabra | 0 | 0 | fuera: no encuentra nada |
+    | palabra sin vocales | 0 | 4 | fuera: dos de las cuatro sin explicar |
+
+    Las cuatro consonantes son **el aviso de abajo convertido en cifra**: «construido» lleva
+    «nstr». El miedo era correcto, y ahora tiene número.
+
+    **Sigue abierto**: «indivicluo», «porpue», «laspocas» y «manifilesto» pasan igual. Son
+    palabras bien puntuadas y mal escritas, y para ésas hace falta el léxico. Lo que sigue
+    esperando de Héctor es lo mismo que decía el apunte original: si se acepta versionar un
+    diccionario del castellano y convivir con sus falsos positivos en Gracián y Quevedo.
+
+    ---
+
+    **Apunte original:**
+
     Medido sembrando «La instrucción del obrero»: `extraer` informó de **«Descartadas por
     ilegibles (OCR roto): 1»** y entre las 31 candidatas que sí escribió venían al menos cinco
     con la palabra partida o fundida:

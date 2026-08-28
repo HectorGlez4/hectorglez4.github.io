@@ -57,7 +57,8 @@ export type Descarte =
   | { texto: string; motivo: 'repetida' }
   | { texto: string; motivo: 'ilegible' }
   | { texto: string; motivo: 'aparato-de-la-fuente' }
-  | { texto: string; motivo: 'trozo-de-cita-ajena' };
+  | { texto: string; motivo: 'trozo-de-cita-ajena' }
+  | { texto: string; motivo: 'puntuacion-rota' };
 
 /**
  * Las frases con que la Fuente **envuelve** la obra: el pie de licencia que Wikisource añade a
@@ -341,6 +342,55 @@ const CIERRA_COMILLA = new Set(['»', '”']);
  * impar dentro de una frase no dice de qué lado está el hueco, y contarlo obligaría a leer
  * el párrafo entero. Ausencia de regla antes que regla que adivina.
  */
+/** Minúsculas del castellano, con la diéresis y las vocales acentuadas que traen las ediciones. */
+const MINUSCULA = 'a-záéíóúñüïö';
+
+/**
+ * El punto que el escaneo puso donde había una coma: «leerlo. hay que amarlo».
+ *
+ * En castellano el punto seguido abre en mayúscula. En minúscula es casi siempre una coma mal
+ * leída. Se exigen **cuatro letras o más antes del punto** porque las abreviaturas del
+ * castellano son cortas —«Av.», «Imp.», «Mad.», «etc.», «a. m.», «q.»— y las palabras enteras
+ * no: en la medición, esa condición dejó fuera las seis abreviaturas del Corpus sin perder
+ * ninguna de las diez frases rotas.
+ */
+const PUNTO_INTRUSO = new RegExp(`[${MINUSCULA}]{4,}\\.\\s+[${MINUSCULA}]`, 'u');
+
+/**
+ * El espacio delante del signo: «para él , sino», «los hombres .».
+ *
+ * No mira los **puntos suspensivos**, que en las ediciones del XIX llevan espacio delante con
+ * toda normalidad —«y aquello ... también»—. Nueve de los once que la señal ancha mordía eran
+ * eso, y no son un defecto.
+ */
+const ESPACIO_ANTES_DEL_SIGNO = /\s+[,;]|\s+\.(?!\.)/u;
+
+/**
+ * Si la frase trae puntuación que rompió la edición o el escaneo, y no el Autor.
+ *
+ * `deferred-work.md` lleva sesiones con este apunte: la puerta de legibilidad deja pasar
+ * palabras rotas por OCR, y el arreglo obvio —un léxico del castellano— es una decisión de
+ * producto que marcaría como rotas palabras de 1650 correctas. El apunte añade que **una
+ * heurística sin diccionario descartaría Citas buenas en silencio**, y tiene razón sobre una
+ * heurística elegida a ojo.
+ *
+ * Éstas no se eligieron a ojo. Cada señal se midió contra las 1632 Citas publicadas, que son
+ * el patrón de lo que no debe morderse, y sólo entra la que no muerde ninguna:
+ *
+ *   · punto intruso con cuatro letras delante — **0 publicadas**, 10 candidatas;
+ *   · espacio antes de coma, punto y coma o punto — **0 publicadas**, 5 candidatas.
+ *
+ * Y una que se midió y **no** entra, que es el aviso del apunte convertido en cifra: «cuatro
+ * consonantes seguidas» muerde **24 Citas publicadas**, porque «construido» lleva «nstr».
+ *
+ * Lo que esto no cierra, y conviene no prometer: «indivicluo», «porpue» y «laspocas» siguen
+ * pasando. Ésas necesitan el léxico, y el léxico sigue esperando una decisión que no es del
+ * bucle.
+ */
+export function tienePuntuacionRota(sentencia: string): boolean {
+  return PUNTO_INTRUSO.test(sentencia) || ESPACIO_ANTES_DEL_SIGNO.test(sentencia);
+}
+
 export function esTrozoDeCitaAjena(sentencia: string): boolean {
   let abiertas = 0;
   for (const caracter of sentencia) {
@@ -634,6 +684,16 @@ export function extraerCandidatas(
      */
     if (esTrozoDeCitaAjena(sentencia)) {
       descartadas.push({ texto: sentencia, motivo: 'trozo-de-cita-ajena' });
+      continue;
+    }
+
+    /*
+     * Antes de la legibilidad por proporción, y por el mismo motivo que las dos de arriba: la
+     * frase con un punto intruso o un espacio antes de la coma tiene todas sus palabras bien
+     * escritas, así que `medirLegibilidad` no la ve. Lo roto es la puntuación, no las letras.
+     */
+    if (tienePuntuacionRota(sentencia)) {
+      descartadas.push({ texto: sentencia, motivo: 'puntuacion-rota' });
       continue;
     }
 

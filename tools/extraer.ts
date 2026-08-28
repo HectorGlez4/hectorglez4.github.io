@@ -482,6 +482,9 @@ terminar({
     // está construida citando a otros, y lo que quede pide leerse con la lupa de saber
     // de quién es cada frase.
     `Descartadas por ser trozo de una cita ajena: ${porMotivo('trozo-de-cita-ajena')}\n` +
+    // Y ésta dice algo de la EDICIÓN, no de la obra: si es alta, el escaneo del que salió el
+    // documento viene sucio y lo que quede pide leerse mirando la puntuación.
+    `Descartadas por puntuación rota de la edición: ${porMotivo('puntuacion-rota')}\n` +
     `Descartadas por repetidas: ${porMotivo('repetida')}` +
     // Se dice aunque sea cero: es lo que distingue «no había nada nuevo» de «no se ejecutó».
     `\nYa estaban en revisión: ${repetidas}` +

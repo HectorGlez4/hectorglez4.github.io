@@ -16,7 +16,7 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
-import { esAparatoDeLaFuente, esTrozoDeCitaAjena } from './extraccion.ts';
+import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
 import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
@@ -94,6 +94,13 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
      */
     const citaAjena = esTrozoDeCitaAjena(candidata.texto ?? '');
 
+    /*
+     * Y la puntuación rota, por lo mismo: cuando esta puerta se escribió había **quince
+     * candidatas versionadas** que la llevan, todas extraídas antes de que existiera. La 152.ª
+     * ya apartó una a mano —«para él , sino»— y estuvo a punto de publicarla.
+     */
+    const puntuacion = tienePuntuacionRota(candidata.texto ?? '');
+
     const duplicadaPublicada = yaPublicadas.get(canonico);
     const duplicadaEnRevision = vistasEnRevision.get(canonico);
 
@@ -108,7 +115,12 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
-      admisible: comprobacion.success && sinDocumento === undefined && !aparato && !citaAjena,
+      admisible:
+        comprobacion.success &&
+        sinDocumento === undefined &&
+        !aparato &&
+        !citaAjena &&
+        !puntuacion,
       motivos: [
         ...(comprobacion.success ? [] : comprobacion.error.issues.map((i) => i.message)),
         ...(sinDocumento !== undefined ? [sinDocumento] : []),
@@ -119,6 +131,10 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         // Fuente, esto es de un tercero a quien el Autor cita. Los dos se descartan, pero
         // quien lee el motivo tiene que saber cuál de los dos peligros acaba de esquivar.
         ...(citaAjena ? ['lleva una comilla sin pareja: es trozo de una cita ajena'] : []),
+        // Y éste se nombra aparte de los dos anteriores porque el arreglo es otro: aquello no
+        // lo escribió el Autor y se descarta; esto sí lo escribió, y lo que está roto es la
+        // edición de la que salió. Quien lo lea sabrá si buscar otra edición o dejarlo estar.
+        ...(puntuacion ? ['la edición trae la puntuación rota: punto intruso o espacio antes del signo'] : []),
       ],
     });
 
