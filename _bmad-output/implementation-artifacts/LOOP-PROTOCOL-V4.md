@@ -571,9 +571,19 @@ produce frases que se sostengan solas.**
   tercera persona del plural, con el sujeto declarado párrafos atrás. «Acogen», «Repudian»,
   «Esquivan» — todas empiezan por un agujero.
 
-La lección para elegir obra: **no basta con el género**. Un ensayo de tesis puede estar escrito
-en un modo que impide la sentencia suelta, y eso se ve leyendo quince candidatas seguidas —no
-una aquí y otra allá—, porque lo que delata el modo es la repetición de la misma forma.
+La 161.ª añadió dos más, y con ellas el dato que cierra la duda: **dos de las cuatro son del
+mismo Autor y fallan por razones distintas.**
+
+| obra | cantera | publicadas | por qué no da |
+|---|---|---|---|
+| historia decimonónica | 2060 | 0 | nombre propio, provincia y año dentro de cada frase |
+| ensayo de psicología moral | 1414 | 22 | caracterización corrida, sujeto declarado párrafos atrás |
+| lecciones sobre otro pensador | 515 | 6 | la prosa es suya, el pensamiento es del otro |
+| artículos costumbristas | 1239 | 3 | narración con personajes, apelación en segunda persona |
+
+La lección para elegir obra: **no basta con el género, ni con la firma**. Lo que decide es el
+**modo retórico de la obra concreta**, y se ve leyendo quince candidatas seguidas —no una aquí y
+otra allá—, porque lo que delata el modo es la repetición de la misma forma.
 
 Y cuando una veta lleva sesiones dando poco, **la pregunta no es cuánto rinde sino por qué**: la
 cifra sin explicación se repite sesión tras sesión sin que nadie decida abandonarla.

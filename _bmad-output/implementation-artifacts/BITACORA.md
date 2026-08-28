@@ -9773,3 +9773,52 @@ Y mejora el reparto: esa firma pasa de 30 a 35 Citas mientras la más representa
 | Obras con su rendimiento explicado, no sólo medido | — | **+1** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 161.ª sesión — el mismo Autor falla de dos maneras distintas
+
+Una Cita, **1638 → 1639**. Sesión de medición más que de siembra, y lo que mide confirma la
+regla de la 160.ª por el camino que más la pone a prueba.
+
+### Dos vetas más, y ninguna rinde por un motivo nuevo
+
+**«Hacia una Moral sin Dogmas»** —515 candidatas, 5 publicadas— dio **1 de 18**. Es una serie de
+lecciones **sobre Emerson**: biografía, exposición de su doctrina y citas suyas. La prosa es del
+Autor pero el pensamiento es del otro, que es lo mismo que hundió el tratado que expone a
+Tocqueville en la 155.ª.
+
+**«Fígaro (Artículos selectos)»**, tramo largo —1239 candidatas, 3 publicadas— dio **0 de 16**.
+La 146.ª midió aquí un 18 %; lo que queda hoy es narración costumbrista con personajes y con
+apelación en segunda persona.
+
+### Lo que esto le hace a la regla de la 160.ª
+
+Ya son cuatro obras con la cantera enorme y el rendimiento casi nulo, y **cada una falla por un
+motivo distinto de forma**:
+
+| obra | cantera | publicadas | por qué no da |
+|---|---|---|---|
+| historia decimonónica | 2060 | 0 | nombre propio, provincia y año dentro de cada frase |
+| ensayo de psicología moral | 1414 | 22 | caracterización corrida: el sujeto se declaró párrafos atrás |
+| lecciones sobre otro pensador | 515 | 6 | la prosa es suya, el pensamiento es del otro |
+| artículos costumbristas | 1239 | 3 | narración con personajes y apelación en segunda persona |
+
+Y el dato que más pesa: **las dos del medio son del mismo Autor**, y fallan por razones que no
+tienen nada que ver entre sí. Eso cierra la duda que quedaba: lo que decide no es la firma ni el
+género declarado, sino **el modo retórico de la obra concreta**.
+
+De las cuatro, la única con una frase rescatable fue la de Emerson, y por serlo de su voz propia
+y no de la expuesta:
+
+> Reconozcamos que la sociedad es enemiga de toda verdad que perturbe sus creencias más
+> ancestrales.
+
+### Cifras
+
+| | antes | después |
+|---|---|---|
+| Citas | 1638 | **1639** |
+| Leídas | — | 34 |
+| Modos retóricos catalogados que no dan sentencia suelta | 2 | **4** |
+
+Puerta completa en verde y consultada por su código de salida.
