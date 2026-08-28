@@ -9673,3 +9673,55 @@ un motivo distinto.
 | Citas publicadas | **0** |
 
 Puerta completa en verde y consultada por su código de salida.
+
+
+## 159.ª sesión — el defecto no existía, y la prueba se queda igual
+
+Fui a cerrar el apunte del `og:image` y **no había nada que arreglar**. Lo que salió de ahí es
+una prueba que faltaba y dos formas de medir mal.
+
+### Lo medido
+
+| superficie | og:image |
+|---|---|
+| portada | `/tarjeta/portada.png` |
+| Página de Tema · Autor · Colección · Cita | propia de cada una |
+| buscador · kit · lote · 404 | ninguna — **y ninguna está en el sitemap** |
+
+**Las 1708 URLs que el sitio anuncia declaran su imagen, todas.** El apunte reservaba a Héctor
+«la portada, el buscador y el 404»; la portada la resolvió una sesión posterior, y las otras
+tres no son superficies que se compartan. Segundo apunte seguido que describe un mundo que ya
+no existe, después del barrido de la 158.ª —que tampoco lo cazó, porque leí su resumen en vez
+de medir—.
+
+### Cómo estuve a punto de «arreglarlo» igual
+
+`grep -c "buscar" dist/sitemap-0.xml` devolvió **1** y lo leí como «una URL». El sitemap es
+**una sola línea**, así que `grep -c` cuenta líneas y no coincidencias — y esa coincidencia era
+la palabra «buscar» dentro de slugs de Citas como `baltasar-gracian-buscar-quien-le-ayude-a-…`.
+Parseado de verdad con un lector de XML: `/buscar` **no está en el sitemap**.
+
+Lo que me paró fue escribir la prueba en rojo primero. **Salió verde**, y esa sorpresa fue la
+señal. Sin ese paso habría añadido una línea a `buscar.astro` y contado como arreglo el haber
+tocado una página que nadie comparte.
+
+### La prueba se queda, y por qué
+
+No arregla un defecto: **cierra la rendija que lo permitía**. Hasta hoy `og:image` se comprobaba
+superficie por superficie —Citas desde la 10.1, Tema, Autor y Colección desde la 53.ª— y cada
+superficie nueva dependía de que alguien se acordara de añadirla a la lista. Ahora el censo sale
+del **sitemap**, que es la lista de lo que el sitio ofrece al mundo: una superficie nueva entra
+sola el día que se publica.
+
+Y se comprobó que no es vacua, que es lo que hay que hacer con una prueba que nace verde:
+pasándole por dentro `/buscar` y el 404 —que sí carecen de imagen— la aserción los lista.
+
+### Cifras
+
+| | |
+|---|---|
+| URLs del sitemap comprobadas | **1708** |
+| Sin imagen | **0** |
+| Citas publicadas | **0** |
+
+Puerta completa en verde y consultada por su código de salida.

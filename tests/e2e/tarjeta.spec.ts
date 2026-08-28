@@ -139,6 +139,42 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
     expect(rutas.length, 'no hay tarjetas que mirar').toBeGreaterThan(100);
   });
 
+  test('toda página que el sitemap anuncia declara una imagen, sea propia o de marca', async ({
+    request,
+  }) => {
+    /*
+     * La comprobación que faltaba, y por qué se escribe por el **sitemap** y no por una lista.
+     *
+     * Hasta la 159.ª, `og:image` se comprobaba superficie por superficie: las Páginas de Cita
+     * arriba, y las de Tema, Autor y Colección desde la 53.ª. Cada vez que aparecía una
+     * superficie nueva había que acordarse de añadirla, y `/buscar` llevaba desde siempre en el
+     * sitemap **sin imagen ninguna**: quien la compartía obtenía un enlace pelado. Nadie lo vio
+     * porque no había nada que mirase el conjunto.
+     *
+     * El sitemap es la lista de lo que el sitio ofrece al mundo, así que es el censo correcto:
+     * una superficie nueva entra aquí sola el día que se publica, sin que nadie se acuerde.
+     *
+     * El 404 y las superficies de trabajo —`/kit`, `/lote`— **no** están en el sitemap a
+     * propósito y por eso quedan fuera: no son páginas que se compartan.
+     */
+    const sitemap = await request.get('/sitemap-0.xml');
+    expect(sitemap.status()).toBe(200);
+    const rutas = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) =>
+      new URL(m[1]!).pathname.replace(/\/$/, ''),
+    );
+    expect(rutas.length, 'el sitemap no anuncia nada').toBeGreaterThan(100);
+
+    const sinImagen: string[] = [];
+    for (const ruta of rutas) {
+      const respuesta = await request.get(ruta === '' ? '/' : ruta);
+      if (respuesta.status() !== 200) continue;
+      const imagen = metadatos(await respuesta.text())['og:image'];
+      if (!imagen?.startsWith('https://')) sinImagen.push(ruta === '' ? '/' : ruta);
+    }
+
+    expect(sinImagen, 'páginas anunciadas y sin previsualización').toEqual([]);
+  });
+
   test('una Cita en revisión no tiene tarjeta: las rutas salen del conjunto publicable', () => {
     const tarjetas = readdirSync(join(dist, 'tarjeta')).filter(
       // Desde la 55.ª sesión, en este directorio cae también `portada.png` —la Tarjeta del

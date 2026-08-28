@@ -560,6 +560,25 @@ de 8-13 % a **33 %**.
 Y dentro de una misma obra sigue valiendo lo de la 104.ª: la carta abre doctrinal y luego se dirige
 a una persona con nombre; el primer tramo dio 33 % y el segundo 13 %.
 
+### Una prueba que nace verde no sobra, pero hay que probarle los dientes (159.ª)
+
+La 159.ª escribió en rojo una prueba para un defecto que no existía, y **salió verde a la
+primera**. Esa sorpresa es la señal: quería decir que la premisa era falsa, no que la prueba
+estuviera mal.
+
+Dos cosas se hacen entonces, y ninguna es borrarla:
+
+· **Comprobar que no es vacua.** Se le pasa por dentro un caso que sí falla —aquí `/buscar` y el
+  404, que carecen de imagen— y se verifica que la aserción lo señalaría. Una prueba verde que
+  no puede ponerse roja no guarda nada.
+· **Quedársela si cierra una rendija.** Ésta no arregla nada: convierte «acuérdate de añadir
+  `og:image` a la superficie nueva» en un censo que sale del **sitemap** y se actualiza solo.
+
+Y el error que la provocó, que es de medición y ya ha salido tres veces: **`grep -c` cuenta
+líneas, no coincidencias**. El sitemap es una sola línea, así que `grep -c "buscar"` devolvió 1
+por la palabra dentro de slugs de Citas, y yo lo leí como «una URL». Para contar dentro de un
+fichero de una línea hace falta parsearlo, no contar líneas.
+
 ### Antes de cambiar una conducta, lee el comentario que la explica (158.ª)
 
 Iba a cambiar cómo se cuenta el suelo del 40 % de tradición —de Autores declarados a Autores
