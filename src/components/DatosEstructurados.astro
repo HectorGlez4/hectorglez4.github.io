@@ -37,6 +37,25 @@ const datos: Record<string, unknown> = {
   },
 };
 
+/*
+ * De dónde se tomó el texto, también para quien lee el marcado y no la página.
+ *
+ * `isBasedOn` es lo que schema.org define para «esta obra deriva de aquella», y aquí es
+ * literal: el texto se tomó de ese documento. No se declara `sameAs` —que afirmaría que
+ * las dos URLs son la misma cosa— ni `citation`, que es para una obra citada *dentro*.
+ *
+ * Solo cuando consta, como el resto: una Cita sin Fuente declarada no emite el campo en
+ * vez de emitirlo vacío.
+ */
+if (cita.fuente !== undefined) {
+  datos.isBasedOn = {
+    '@type': 'CreativeWork',
+    url: cita.fuente.url,
+    ...(cita.fuente.nombre !== undefined ? { publisher: { '@type': 'Organization', name: cita.fuente.nombre } } : {}),
+    ...(cita.fuente.licencia !== undefined ? { license: cita.fuente.licencia } : {}),
+  };
+}
+
 if (obra !== undefined) {
   datos.isPartOf = {
     '@type': 'CreativeWork',

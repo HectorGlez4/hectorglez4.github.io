@@ -1,0 +1,82 @@
+---
+/**
+ * De dónde se tomó el texto, con el documento enlazado — FR-2.
+ *
+ * ── Por qué existe ───────────────────────────────────────────────────────────────────
+ *
+ * Todo el producto se apoya en una promesa: aquí las Citas tienen procedencia y están
+ * cotejadas contra el documento del que salen. Esa promesa la sostenía el build —la
+ * puerta de la Historia 11.2— y no la veía nadie. La página decía «Campos de Castilla,
+ * 1912» y el visitante tenía que creerse el año.
+ *
+ * Quien llega a una web de citas desde un buscador viene casi siempre a **comprobar una
+ * atribución**. Sin el documento, esa persona se va a buscarlo a otra parte, y con ella se
+ * va la única razón por la que alguien enlazaría a un sitio de citas.
+ *
+ * ── Lo que dice y lo que no ──────────────────────────────────────────────────────────
+ *
+ * Dice de dónde se tomó el texto. **No** dice que esté cotejada, y la diferencia no es
+ * un matiz: `corpus/pendientes-de-cotejo.yml` exime a unas cuantas de la puerta, así que
+ * afirmar el cotejo en todas sería falso justo donde más caro sale. Prometer una garantía
+ * que no se tiene es la versión elegante de la procedencia inferida que FR-2 prohíbe.
+ *
+ * Sin Fuente declarada no se enseña nada. No se busca un sustituto ni se enlaza a una
+ * búsqueda: un documento aproximado es peor que ninguno, porque parece una comprobación.
+ *
+ * La licencia se nombra cuando consta porque estos documentos vienen de proyectos que la
+ * piden —Wikisource publica bajo CC BY-SA— y porque decir de quién es el trabajo ajeno es
+ * parte de lo mismo que hace este sitio con las Citas.
+ */
+import type { Cita } from '../lib/publicado.ts';
+
+interface Props {
+  cita: Cita;
+}
+
+const { fuente } = Astro.props.cita;
+
+/*
+ * El rótulo del enlace es el nombre de la Fuente cuando consta y su anfitrión cuando no.
+ * Nunca la URL desnuda: una dirección de Wikisource con guiones bajos y barras leída en
+ * voz alta por un lector de pantalla es ruido, y UX-DR21 pide frases.
+ */
+const anfitrion = (() => {
+  try {
+    return new URL(fuente!.url).hostname.replace(/^www\./, '');
+  } catch {
+    return undefined;
+  }
+})();
+
+const rotulo = fuente?.nombre ?? anfitrion;
+---
+
+{
+  fuente !== undefined && rotulo !== undefined && (
+    <p class="fuente">
+      Texto tomado de <a href={fuente.url} rel="noopener nofollow">{rotulo}</a>.
+      {fuente.licencia !== undefined && ` ${fuente.licencia}.`}
+    </p>
+  )
+}
+
+<style>
+  /*
+   * Tinta apagada y cuerpo de pie: es aparato, no la Cita. Va debajo de la atribución y
+   * separada del filete de `figcaption` por su propio margen, sin añadir un segundo
+   * separador —UX-DR13 deja el filete de 1px como el único del sistema—.
+   */
+  .fuente {
+    margin: var(--unidad) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    line-height: 1.5;
+    color: var(--tinta-apagada);
+  }
+
+  /* El enlace sí va en siena: aquí sí es una invitación a salir y comprobar. */
+  .fuente a {
+    color: var(--siena);
+    text-underline-offset: 0.2em;
+  }
+</style>
