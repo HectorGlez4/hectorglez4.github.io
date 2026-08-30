@@ -89,3 +89,42 @@ No es hipotético. La primera sesión de sembrado real recuperó el *Apéndice a
 - `npx astro check` -- expected: 0 errores.
 - `npx vitest run` -- expected: verde; ninguna de las 1589 de la línea base perdida.
 - `npx tsx tools/extraer.ts corpus/fuentes/wikisource-es--el-sable.txt --autor manuel-gonzalez-prada --seco` -- expected: sigue proponiendo lo que proponía; la puerta no toca un documento sano.
+
+
+### Review Findings
+
+Revisión de código del 28/08/2026 sobre el rango `6dc0b8dd..a15c6e5d` (12 ficheros, 653+/14−),
+cuatro capas: Blind Hunter, Edge Case Hunter, Verification Gap y Acceptance Auditor.
+
+**Aviso de alcance.** Esta historia está `done` y es anterior al código revisado. Sólo los
+hallazgos marcados `[11.5]` le pertenecen; los demás se anotan aquí porque entraron en el mismo
+rango, con su historia real entre corchetes.
+
+- [ ] [Review][Decision] [11.5] La señal de edición rota no llega al veredicto del documento — AC-1 pide que un documento con el OCR roto salga con código ≠ 0 y ninguna candidata; `tienePuntuacionRota` se aplica sólo por candidata, y el recuento es informativo. ¿Debe una proporción alta de puntuación rota tumbar el documento entero?
+- [ ] [Review][Decision] [11.5] El literal `{4,}` de `PUNTO_INTRUSO` vive fuera de `umbrales.ts` — AD-9 dice que un umbral de negocio vive en `src/lib/umbrales.ts` y en ningún otro sitio. Precedente en contra: `MIN_CARACTERES_CANDIDATA` y `MAX_CARACTERES_CANDIDATA` ya viven en `tools/lib/extraccion.ts`. ¿Se mueve o se declara la excepción?
+- [ ] [Review][Decision] [11.5] `... ;` se aparta y `... .` se perdona — la excepción de puntos suspensivos cubre el punto pero no la coma ni el punto y coma, y una prueba nueva afirma que `consuelo... ;pero` está roto. ¿Es tipografía legítima del XIX o defecto?
+
+- [ ] [Review][Patch] [11.1] La comilla baja `„` no está en ningún conjunto y `“` se asume siempre de apertura: el par alemán `„…“`, equilibrado, se lee descompensado y la candidata se descarta [tools/lib/extraccion.ts:394]
+- [ ] [Review][Patch] [11.1] Las dos familias de comillas no se emparejan: `«texto”` cuenta como equilibrado [tools/lib/extraccion.ts:394]
+- [ ] [Review][Patch] [11.5] Ninguna prueba fija la puerta de puntuación al aprobar: borrar `!puntuacion` de `admisible` deja la suite entera en verde [tools/lib/revision.ts:124]
+- [ ] [Review][Patch] [11.1+11.5] Ninguna de las dos puertas nuevas está probada donde se conecta, dentro de `extraerCandidatas`; la del aparato lo está cuatro veces [tools/lib/extraccion.ts:685,695]
+- [ ] [Review][Patch] [11.1] La docstring de `esTrozoDeCitaAjena` quedó huérfana 70 líneas por encima de su función, y `MINUSCULA` hereda un ensayo sobre comillas [tools/lib/extraccion.ts:323]
+- [ ] [Review][Patch] [10.1] El comentario de la prueba del sitemap afirma que `/buscar` «llevaba desde siempre en el sitemap sin imagen ninguna», y es falso: no está en el sitemap. El fichero se contradice dos párrafos más abajo [tests/e2e/tarjeta.spec.ts:151]
+- [ ] [Review][Patch] [11.1+11.5] Las dos líneas nuevas del informe de `extraer` no se comprueban en ninguna prueba [tools/extraer.ts:484,487]
+- [ ] [Review][Patch] [10.1] Las rutas del sitemap con estado ≠ 200 se saltan en silencio: una página anunciada y rota pasa la prueba [tests/e2e/tarjeta.spec.ts:89]
+- [ ] [Review][Patch] [10.1] `sitemap-0.xml` está fijo: el censo muere el día que el sitemap se parta en varios [tests/e2e/tarjeta.spec.ts:80]
+- [ ] [Review][Patch] [11.5] El razonamiento de las abreviaturas no describe lo que mide el regex: cuenta la racha antes del punto, no la longitud de la abreviatura, y `Excmo.` y `págs.` la pasan [tools/lib/extraccion.ts:610]
+- [ ] [Review][Patch] [3.2+4.3] `textContent` incluye el texto de elementos ocultos, que `innerText` no veía; `/buscar` tiene `.estado` y `.salida` con `hidden` [tests/e2e/busqueda.spec.ts:215]
+- [ ] [Review][Patch] [4.3] La Cita del Día sigue dentro del alcance del 404: una Cita cuyo texto lleve «error» o «¡» reabre el mismo falso rojo [tests/e2e/pagina-404.spec.ts:46]
+- [ ] [Review][Patch] [10.1] El barrido del sitemap pide 1708 rutas en serie sin `test.slow()`, en dos proyectos; el barrido hermano del mismo fichero documenta haber muerto por tiempo dos veces [tests/e2e/tarjeta.spec.ts:160]
+- [ ] [Review][Patch] [11.5] Falta el caso de verso en las pruebas nuevas: `\s` incluye el salto de línea, y el spec nombra la poesía como el lado sano que más pesa [tests/unit/puntuacion-rota.test.ts]
+- [ ] [Review][Patch] [11.5] `MINUSCULA` no lleva `à è ì ò ù ç`, presentes en ediciones de época [tools/lib/extraccion.ts:346]
+- [ ] [Review][Patch] [varias] La misma puerta lleva tres números de historia: 9.2, 11.1 y 10.1 [tests/unit/cita-ajena-al-aprobar.test.ts]
+- [ ] [Review][Patch] [varias] Tres líneas base distintas —1595, 1632, 1639— presentadas como la misma medida, sin fecha ni sesión [tools/lib/extraccion.ts]
+
+- [x] [Review][Defer] [11.5] `PUNTO_INTRUSO` exige espacio tras el punto, así que se le escapa «leerlo.hay» [tools/lib/extraccion.ts:610] — deferred, pide su propia medición antes de aflojar el patrón
+- [x] [Review][Defer] [11.1] `recuperar`: el nombre se recorta a 60 caracteres, así que dos obras largas distintas pueden colisionar y negarse una nueva como «ya retirada» [tools/recuperar.ts] — deferred, pre-existente
+- [x] [Review][Defer] [11.1] `yaVersionado` se comprueba antes que `yaRetirado`: un documento en ambas carpetas se reutiliza sin nombrar la retirada [tools/recuperar.ts] — deferred, pre-existente
+- [x] [Review][Defer] [11.1] Las 351 candidatas ya versionadas con comillas descompensadas siguen en la cola, sin informe ni purga [corpus/_revision] — deferred, pre-existente
+- [x] [Review][Defer] [—] CI no ejecuta el E2E, así que la garantía del `og:image` sólo vale en local [.github/workflows/publicar.yml] — deferred, pre-existente y documentado en AGENTS.md
+- [x] [Review][Defer] [11.5] Las señales de la 11.5 viven en dos módulos y `legibilidad.ts` sigue diciendo «seis señales» [src/lib/legibilidad.ts] — deferred, pre-existente

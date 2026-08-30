@@ -503,3 +503,24 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     una Colección; el `og:image` fuera de las Páginas de Cita; y los tres que esperan una línea
     de Héctor: **el verso**, **retirada = candidata con nota o estado propio**, y **si se acepta
     versionar un léxico del castellano**.
+
+
+## Deferred from: code review of spec-11-5-el-documento-ilegible-no-siembra (2026-08-28)
+
+- `PUNTO_INTRUSO` exige espacio tras el punto, así que se le escapa «leerlo.hay», que es un
+  defecto de escaneo corriente. Aflojar a `\s*` cazaría también `Excmo.señor`, así que pide su
+  propia medición contra las Citas publicadas antes de tocarlo.
+- `tools/recuperar.ts` recorta el nombre del documento a 60 caracteres. Dos obras largas
+  distintas pueden dar el mismo nombre, y entonces la puerta nueva niega una obra **nueva**
+  diciendo que ya se retiró. Comparar la `obra` de la cabecera del retirado lo resolvería.
+- En `tools/recuperar.ts`, `yaVersionado` se comprueba antes que `yaRetirado`: si el mismo
+  documento está en las dos carpetas, se reutiliza como «Ya versionado» y la retirada nunca se
+  nombra.
+- Quedan **351 candidatas versionadas** con las comillas descompensadas en `corpus/_revision/`.
+  La puerta impide publicarlas, pero nada las trabaja: ni informe, ni purga, ni cola aparte.
+- El flujo de CI corre `build`, `astro check` y `vitest`, pero **no** el E2E. La garantía nueva
+  de que toda página del sitemap declara imagen sólo se comprueba cuando alguien corre Playwright
+  en local.
+- Las señales contables de la 11.5 viven ahora en dos módulos: las seis de `src/lib/legibilidad.ts`
+  y la de puntuación en `tools/lib/extraccion.ts`. La cabecera de `legibilidad.ts` sigue diciendo
+  «para eso están las seis señales», y `medirLegibilidad` no puede informar de la séptima.
