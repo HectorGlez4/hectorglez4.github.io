@@ -524,3 +524,19 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
 - Las señales contables de la 11.5 viven ahora en dos módulos: las seis de `src/lib/legibilidad.ts`
   y la de puntuación en `tools/lib/extraccion.ts`. La cabecera de `legibilidad.ts` sigue diciendo
   «para eso están las seis señales», y `medirLegibilidad` no puede informar de la séptima.
+
+## Deferred from: code review of la barra final y la marca del sitio (2026-08-31)
+
+- `svgDelIcono()` vive en `src/lib/marca.ts`, y todos los demás compositores de SVG que el
+  build rasteriza —`tarjeta.ts`, `pieza.ts`— son hermanos de `lienzo.ts` y consumen su paleta.
+  Un `src/lib/icono.ts` encajaría con la forma establecida y quitaría de `marca.ts` —que
+  importa el armazón de toda página— la dependencia de la paleta del ráster. Es refactor de
+  colocación, no defecto: no cuesta nada en ejecución, porque el sitio es estático.
+- No hay manifiesto web ni `/favicon.ico`. Android al «añadir a la pantalla de inicio» se queda
+  sin icono, y algún rastreador antiguo pide `/favicon.ico` antes que nada. El caso que abrió
+  el trabajo —el icono del resultado de Google— lo cubre `/icono/48.png`, así que esto es
+  ensanchar el alcance, no cerrarlo.
+- `theme-color` mete un segundo declarante del color de fondo: `PALETA.papel` en
+  `src/lib/lienzo.ts` y `--papel` en `src/styles/tokens.css` escriben `#faf7f0` cada uno por su
+  cuenta, y ninguno falla si el otro cambia. La duplicación es anterior a este cambio —la
+  paleta del ráster ya existía—; lo que hace `theme-color` es añadirle un consumidor más.
