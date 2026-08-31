@@ -202,6 +202,25 @@ test.describe('Historia 2.8 — responsive', () => {
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
+        .filter((n) => {
+          /*
+           * La exención en línea de EXPERIENCE.md § Interaction Primitives: queda fuera el
+           * objetivo que va dentro de una frase y cuya altura fija el interlineado del
+           * texto que lo rodea. Es la excepción que trae el propio criterio de WCAG —la
+           * 2.5.5 y la 2.5.8 la tienen las dos—, y sin ella un enlace de procedencia a
+           * mitad de oración solo podría cumplir saliéndose de la frase.
+           *
+           * Se reconoce por las dos condiciones a la vez, y la segunda importa: un enlace
+           * en línea que fuese **todo** el párrafo no está dentro de una frase, nada le
+           * constriñe la altura y sigue debiendo sus 44px.
+           */
+          const enLinea = getComputedStyle(n).display === 'inline';
+          const padre = n.parentElement;
+          const acompanado =
+            padre !== null &&
+            (padre.textContent ?? '').trim().length > (n.textContent ?? '').trim().length;
+          return !(enLinea && acompanado);
+        })
         .map((n) => n.getBoundingClientRect())
         .filter((r) => r.width > 0 && r.height > 0)
         .map((r) => ({ arriba: r.top, abajo: r.bottom, izq: r.left, der: r.right, alto: r.height })),

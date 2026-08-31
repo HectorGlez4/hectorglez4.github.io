@@ -114,12 +114,14 @@ const ALTURA_DE_LINEA_DE_LA_PROCEDENCIA = 25;
  * Inventarle un cuerpo mayor porque «un título tiene que mandar» sería decidir presentación en
  * la plantilla, que es lo que ni AD-8 ni ese documento permiten.
  *
- * **Lo único de ese token que no se hereda es «una sola línea», y se dice por qué.** Allí la
- * restricción se cumple sola: el nombre vive en una medida de prosa de 68 caracteres a 30px y
- * cabe. Aquí el ancho útil son 888px, así que un nombre largo ocupa dos líneas quiera o no, y
- * las dos únicas formas de forzar la línea única serían recortarlo o encogerlo — las dos
- * prohibidas por NFR-12, y prohibidas con más razón sobre un nombre que sobre una Cita, porque
- * el nombre es el identificador de la Colección que se anuncia. Se reparte, como todo lo demás.
+ * **La «una sola línea» del token no se hereda, y tampoco se decide aquí.** El propio
+ * DESIGN.md la acota a la Página de Colección —donde se cumple sola, porque el nombre vive en
+ * una medida de prosa a 30px— y dice que donde la medida es otra el nombre se reparte. Aquí el
+ * ancho útil son 888px, así que un nombre largo ocupa dos líneas quiera o no. Se reparte, como
+ * todo lo demás.
+ *
+ * Este párrafo argumentaba antes esa excepción en vez de citarla, que es resolver la maqueta en
+ * un comentario. Ya no hace falta: está en el contrato.
  *
  * La separación bajo el título sí es del lienzo, como las demás: es la que separa el anuncio
  * del apilado, y por eso vale más que la que separa dos Citas entre sí.
