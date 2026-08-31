@@ -4,6 +4,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
+import { rutaDeCita } from '../../src/lib/superficies.ts';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from '../unit/ayuda/construir.js';
 
 /**
@@ -35,6 +36,15 @@ const PUERTO_SITIO = 4400;
 const SITIO = `http://localhost:${PUERTO_SITIO}`;
 
 const CITA = 'seneca-no-es-que-tengamos-poco-tiempo';
+
+/*
+ * La ruta sale del constructor, y no de `/cita/${CITA}` escrito aquí. Lo que la baliza
+ * manda es `location.pathname`, así que la forma que se pide y la que se espera tienen que
+ * ser la misma que el sitio publica: escritas a mano se quedaron sin barra al migrar, y la
+ * prueba pedía una URL que redirige para luego comparar contra la forma que ya no llega.
+ */
+const RUTA_CITA = rutaDeCita(CITA);
+const RUTA_BUSCAR = '/buscar/';
 const SIN_RESULTADOS = 'zzzzqqqxxx';
 
 let recibidos: (Registro | null)[] = [];
@@ -92,16 +102,51 @@ test.beforeAll(async () => {
     stdio: 'ignore',
   });
 
-  // Se espera a que responda en vez de dormir un rato fijo.
+  // Que muera al arrancar —el puerto ocupado -- deja de ser mudo. Con `stdio: 'ignore'`
+  // no hay salida que leer, así que el código de salida es lo único que queda.
+  let muerto: number | null = null;
+  servidor.on('exit', (codigo) => (muerto = codigo ?? 1));
+
+  /*
+   * Se espera a que responda **su propio sitio**, y no a que el puerto conteste algo.
+   *
+   * Preguntando solo «¿contesta alguien en 4400?», un servidor ajeno que se hubiera
+   * quedado ocupando el puerto daba la espera por buena: el `spawn` de arriba moría con
+   * EADDRINUSE sin decir nada y las pruebas navegaban contra el sitio de otro, que
+   * devolvía 404 a todo. El síntoma era «no llegó la vista de cita» —la baliza no sale de
+   * una página que no existe—, y no se parece en nada a su causa.
+   *
+   * No es hipotético: un `servidor.mjs` de un árbol de trabajo ya borrado se quedó cinco
+   * días escuchando en 4400, y con él estas cuatro pruebas en rojo por un motivo que no
+   * era el suyo.
+   *
+   * La sonda es una Cita que solo existe en el corpus de esta prueba. Si responde 200, el
+   * servidor es el nuestro; si responde otra cosa, hay alguien más en el puerto.
+   */
+  let ajeno: number | undefined;
   for (let intento = 0; intento < 100; intento++) {
+    if (muerto !== null) break;
     try {
-      await fetch(SITIO);
-      return;
+      const respuesta = await fetch(`${SITIO}${RUTA_CITA}`);
+      if (respuesta.ok) return;
+      ajeno = respuesta.status;
     } catch {
-      await new Promise((r) => setTimeout(r, 100));
+      // Todavía no ha levantado; se reintenta.
     }
+    await new Promise((r) => setTimeout(r, 100));
   }
-  throw new Error('el servidor del sitio de prueba no llegó a responder');
+
+  throw new Error(
+    [
+      `El sitio de prueba no llegó a servir ${RUTA_CITA} en el puerto ${PUERTO_SITIO}.`,
+      muerto !== null
+        ? `El servidor murió al arrancar (código ${muerto}); casi siempre es el puerto ocupado.`
+        : ajeno !== undefined
+          ? `Alguien responde en ${PUERTO_SITIO}, pero con ${ajeno}: no es este sitio.`
+          : 'Nadie respondió en el puerto.',
+      `Comprueba quién lo ocupa con \`lsof -nP -iTCP:${PUERTO_SITIO} -sTCP:LISTEN\`.`,
+    ].join(' '),
+  );
 });
 
 test.afterAll(async () => {
@@ -117,24 +162,24 @@ test.beforeEach(({ }, info) => {
 
 test.describe('Historia 7.3 — los cuatro eventos llegan', () => {
   test('la Página de Cita emite su vista', async ({ page }) => {
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     const registro = await esperarEvento(EVENTOS.vistaDeCita);
     expect(registro, 'no llegó la vista de cita').toBeTruthy();
-    expect(registro!.ruta).toBe(`/cita/${CITA}`);
+    expect(registro!.ruta).toBe(RUTA_CITA);
   });
 
   test('copiar la Cita emite el copiado', async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     await page.getByRole('button', { name: 'Copiar la cita' }).click();
 
     const registro = await esperarEvento(EVENTOS.copiado);
     expect(registro, 'no llegó el copiado').toBeTruthy();
-    expect(registro!.ruta).toBe(`/cita/${CITA}`);
+    expect(registro!.ruta).toBe(RUTA_CITA);
   });
 
   test('descargar la imagen emite la descarga', async ({ page }) => {
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     await page.getByRole('button', { name: 'Descargar como imagen' }).click();
     await page.waitForFunction(() => {
       const l = document.querySelector('[data-lienzo]') as HTMLCanvasElement | null;
@@ -150,7 +195,7 @@ test.describe('Historia 7.3 — los cuatro eventos llegan', () => {
   });
 
   test('la búsqueda sin resultados emite la consulta que no encontró nada', async ({ page }) => {
-    await page.goto(`${SITIO}/buscar`);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}`);
     await page.locator('[data-consulta]').fill(SIN_RESULTADOS);
     await page.waitForFunction(
       () => !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
@@ -159,13 +204,13 @@ test.describe('Historia 7.3 — los cuatro eventos llegan', () => {
     const registro = await esperarEvento(EVENTOS.busquedaSinResultados);
     expect(registro, 'no llegó la búsqueda sin resultados').toBeTruthy();
     expect(registro!.consulta).toBe(SIN_RESULTADOS);
-    expect(registro!.ruta).toBe('/buscar');
+    expect(registro!.ruta).toBe(RUTA_BUSCAR);
   });
 });
 
 test.describe('Historia 8.2 — la visita llega con su cuenta de origen', () => {
   test('una visita marcada se puede agrupar por red y por jornada', async ({ page }) => {
-    await page.goto(`${SITIO}/cita/${CITA}?de=tiktok`);
+    await page.goto(`${SITIO}${RUTA_CITA}?de=tiktok`);
     const registro = await esperarEvento(EVENTOS.vistaDeCita);
 
     expect(registro, 'no llegó la vista marcada').toBeTruthy();
@@ -173,11 +218,11 @@ test.describe('Historia 8.2 — la visita llega con su cuenta de origen', () => 
     // Las dos claves de SM-8: de qué red y de qué jornada.
     expect(registro!.jornada).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     // Y la ruta llega sin la marca, así que agrupar por página no la parte en cinco.
-    expect(registro!.ruta).toBe(`/cita/${CITA}`);
+    expect(registro!.ruta).toBe(RUTA_CITA);
   });
 
   test('una marca inventada no se registra, pero la visita sí se cuenta', async ({ page }) => {
-    await page.goto(`${SITIO}/cita/${CITA}?de=lo-que-sea-que-me-invente`);
+    await page.goto(`${SITIO}${RUTA_CITA}?de=lo-que-sea-que-me-invente`);
     const registro = await esperarEvento(EVENTOS.vistaDeCita);
 
     expect(registro, 'se perdió la visita por una marca inválida').toBeTruthy();
@@ -187,7 +232,7 @@ test.describe('Historia 8.2 — la visita llega con su cuenta de origen', () => 
 
 test.describe('Historia 10.4 — la compartición llega con su destino', () => {
   test('un destino elegido en el sitio llega con su nombre', async ({ page }) => {
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     // Se anula la navegación: lo que se comprueba es lo que llega al receptor.
     await page.route('**/t.me/**', (ruta) => ruta.abort());
     await page.locator('[data-destino="telegram"]').click();
@@ -195,11 +240,11 @@ test.describe('Historia 10.4 — la compartición llega con su destino', () => {
     const registro = await esperarEvento(EVENTOS.comparticionDeEnlace);
     expect(registro, 'no llegó la compartición de enlace').toBeTruthy();
     expect(registro!.destino).toBe('telegram');
-    expect(registro!.ruta).toBe(`/cita/${CITA}`);
+    expect(registro!.ruta).toBe(RUTA_CITA);
   });
 
   test('lo que llega no trae identificador de ninguna clase', async ({ page }) => {
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     await page.route('**/wa.me/**', (ruta) => ruta.abort());
     await page.locator('[data-destino="whatsapp"]').click();
 
@@ -224,7 +269,7 @@ test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
       if (peticion.url().includes(`:${PUERTO_RECEPTOR}`)) cargas.push(peticion.postData() ?? '');
     });
 
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     await esperarEvento(EVENTOS.vistaDeCita);
 
     expect(cargas.length).toBeGreaterThan(0);
@@ -251,7 +296,7 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
     await page.route(`**/*:${PUERTO_RECEPTOR}/**`, (ruta) => ruta.abort());
     await page.route('**/e', (ruta) => ruta.abort());
 
-    await page.goto(`${SITIO}/cita/${CITA}`);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
     await expect(page.locator('blockquote .texto')).toBeVisible();
 
     // Copiar sigue funcionando aunque el evento no llegue a ninguna parte.
