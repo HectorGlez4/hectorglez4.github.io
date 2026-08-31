@@ -4,7 +4,7 @@ status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
   - "DESIGN.md"
-updated: 2026-08-18
+updated: 2026-08-31
 ---
 
 # Sabiduría de Bolsillo — Experience Spine
@@ -109,7 +109,7 @@ Comportamiento. Las especificaciones visuales viven en `DESIGN.md § Components`
 - **Sin gestos ocultos.** Nada de deslizar, mantener pulsado ni pellizcar. Toda acción tiene un control visible.
 - **Sin interstitial.** Ningún modal, aviso ni invitación antes del contenido (NFR-10). Esto incluye el aviso de cookies: la analítica elegida no debe requerirlo (NFR-11).
 - **Movimiento mínimo.** Solo transiciones de opacidad y color, ≤ 150ms. Sin animación de entrada del contenido, que retrasaría la lectura. `prefers-reduced-motion` las elimina por completo.
-- **Zonas de toque** mínimo `{components.tap-target-min}` (44px) con 8px de separación.
+- **Zonas de toque** mínimo `{components.tap-target-min}` (44px) con 8px de separación. **Queda exento el objetivo que va dentro de una frase y cuya altura fija el interlineado del texto que lo rodea** — un enlace de procedencia a mitad de oración, por ejemplo. No es una rebaja: es la excepción que trae el propio criterio de WCAG, tanto en la 2.5.5 (AAA, 44px) como en la 2.5.8 (AA, 24px), y sin ella la única forma de cumplir sería sacar el enlace de la frase o quitarlo. Los 44px, por lo demás, son más de lo que exige el suelo declarado: WCAG 2.1 AA no tiene ningún criterio de tamaño de objetivo, y sostenerlos es decisión de producto.
 - **Desplazamiento** siempre nativo. Sin scroll infinito ni secuestro del desplazamiento.
 
 ## Accessibility Floor

@@ -3,7 +3,7 @@ name: Papel y Tinta
 status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
-updated: 2026-08-18
+updated: 2026-08-31
 colors:
   surface: '#faf7f0'
   surface-dim: '#efe9dd'
@@ -181,7 +181,7 @@ Sin píldoras, sin círculos salvo el avatar del Autor si algún día existe.
 - **Tarjeta de Cita (listados)** — fragmento de la Cita en `headline-sm`, autor en `{typography.author}`, filete divisorio entre tarjetas. Sin imagen, sin fondo, sin sombra al pasar el cursor: solo el fondo pasa a `{colors.surface-container-low}`.
 - **Chip de Tema** — texto en `{typography.caption}`, fondo `{colors.surface-container}`, radio `{rounded.md}`. Nunca en siena: los Temas son navegación, no acento.
 - **Chip de Colección** — idéntico al de Tema. Que se distingan no es trabajo del chip: lo dice el sitio donde aparece y el nombre que lleva.
-- **Nombre de Colección** — `{typography.headline-md}` en Source Serif, una sola línea sobre la primera tarjeta del listado. Sin subtítulo, sin bajada, sin recuento: la página abre por el contenido.
+- **Nombre de Colección** — `{typography.headline-md}` en Source Serif, sobre la primera tarjeta del listado. Sin subtítulo, sin bajada, sin recuento: la página abre por el contenido. En la Página de Colección ocupa **una sola línea**, y eso no es una restricción que haya que hacer cumplir: a 30px dentro de la medida de prosa se cumple sola. Donde la medida es otra —la Pieza, con 888px útiles— un nombre largo se reparte en dos líneas, y debe repartirse: recortarlo o encogerlo son las dos únicas alternativas y NFR-12 las prohíbe, con más razón sobre el identificador de lo que se anuncia que sobre una Cita.
 - **Criterio de Colección** — `{typography.caption}` en `{colors.on-surface-variant}`, al pie del listado, dentro de la medida de prosa. Es la única prosa propia del sitio que comparte página con Citas, y va en el mismo tamaño y color que la Procedencia — deliberadamente por debajo de todo lo citado.
 - **Filete divisorio** — 1px, `{colors.outline-variant}`, ancho completo de la medida de texto. El único separador del sistema.
 - **Iconografía** — de línea, 1,5px, sin relleno. Se usa exclusivamente para copiar, buscar y descargar. Cualquier otro icono es decoración y no entra.
