@@ -57,7 +57,7 @@ test.describe('Historia 6.1 — el sitio construido', () => {
 
 test.describe('Historia 6.1 — la marca de agua de la Imagen de Cita', () => {
   test('se dibuja con el nombre nuevo, en su sitio y con su peso de siempre', async ({ page }) => {
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
 
     /*
      * Se intercepta `fillText` antes de abrir el diálogo: comparar píxeles diría que la

@@ -7,9 +7,16 @@
  * huérfano de una ejecución anterior —que servía un `dist/` viejo— en lugar de con el
  * recién construido. Los fallos que produce eso no se parecen en nada a su causa.
  *
- * Sirve además exactamente como un alojamiento estático: `/cita/x` resuelve a
- * `dist/cita/x.html`, y lo que no existe devuelve `dist/404.html` con estado 404, que es
- * lo que la Historia 2.1 necesita poder comprobar.
+ * Sirve además exactamente como el alojamiento: `/cita/x/` resuelve a
+ * `dist/cita/x/index.html`, `/cita/x` **redirige** con un 301 a la forma con barra, y lo
+ * que no existe devuelve `dist/404.html` con estado 404, que es lo que la Historia 2.1
+ * necesita poder comprobar.
+ *
+ * El 301 no es un adorno: GitHub Pages lo hace, y sin él este servidor devolvía 200 donde
+ * el sitio publicado redirige. Eso es peor que una diferencia cualquiera, porque es la que
+ * esconde precisamente el defecto que se quiere vigilar — que el sitio se anuncie en la
+ * forma que no sirve directa. Con el 301 aquí, `seo.spec.ts` puede pedir cada ruta del
+ * sitemap con `maxRedirects: 0` y exigir un 200.
  */
 
 import { createServer } from 'node:http';
@@ -48,7 +55,8 @@ async function primeroQueExista(candidatos) {
 }
 
 createServer(async (peticion, respuesta) => {
-  const ruta = normalize(decodeURIComponent(new URL(peticion.url, 'http://localhost').pathname));
+  const entrante = new URL(peticion.url, 'http://localhost');
+  const ruta = normalize(decodeURIComponent(entrante.pathname));
   // Sin escapes hacia arriba: `normalize` deja `..` si sobran, y aquí se corta.
   if (ruta.includes('..')) {
     respuesta.writeHead(400).end('Petición inválida.');
@@ -56,6 +64,21 @@ createServer(async (peticion, respuesta) => {
   }
 
   const base = join(RAIZ, ruta);
+
+  /*
+   * La forma sin barra de algo que se publica como carpeta redirige, no se sirve. Se mira
+   * antes que nada porque `primeroQueExista` la resolvería calladamente al `index.html`.
+   */
+  if (!ruta.endsWith('/') && extname(ruta) === '') {
+    const comoCarpeta = await primeroQueExista([join(base, 'index.html')]);
+    if (comoCarpeta) {
+      // La consulta viaja con la redirección, que es lo que hace el hospedaje. Perdiéndola,
+      // un enlace antiguo con `?de=` llegaba a la Cita sin su cuenta de origen (SM-8).
+      respuesta.writeHead(301, { location: `${ruta}/${entrante.search}` }).end();
+      return;
+    }
+  }
+
   const fichero = await primeroQueExista([
     ruta.endsWith('/') ? join(base, 'index.html') : base,
     `${base}.html`,

@@ -2,7 +2,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { AUTOR_VALIDO, RAIZ, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  RAIZ,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { CITAS_POR_PAGINA } from '../../src/lib/umbrales.ts';
 
 /**
@@ -44,43 +51,43 @@ describe('Historia 2.4 — un listado por encima del umbral', () => {
     if (proyecto) await limpiar(proyecto);
   });
 
-  const leer = (ruta: string) => readFile(join(proyecto, 'dist', ruta), 'utf8');
+  const leer = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
   const contarTarjetas = (html: string) => [...html.matchAll(/<li class="tarjeta"/g)].length;
 
   it('la primera página trae exactamente el tamaño de página', async () => {
-    expect(contarTarjetas(await leer('autor/seneca.html'))).toBe(CITAS_POR_PAGINA);
+    expect(contarTarjetas(await leer('/autor/seneca/'))).toBe(CITAS_POR_PAGINA);
   });
 
   it('la segunda trae el resto', async () => {
-    expect(contarTarjetas(await leer('autor/seneca/2.html'))).toBe(total - CITAS_POR_PAGINA);
+    expect(contarTarjetas(await leer('/autor/seneca/2/'))).toBe(total - CITAS_POR_PAGINA);
   });
 
   it('aparecen controles de anterior y siguiente numerados', async () => {
-    const primera = await leer('autor/seneca.html');
+    const primera = await leer('/autor/seneca/');
     expect(primera).toMatch(/Paginación del listado/);
     expect(primera).toMatch(/Siguiente/);
     expect(primera).toMatch(/Página\s*1\s*de\s*2/);
     // En la primera no hay «Anterior» que seguir.
     expect(primera).not.toMatch(/>Anterior</);
 
-    const segunda = await leer('autor/seneca/2.html');
+    const segunda = await leer('/autor/seneca/2/');
     expect(segunda).toMatch(/>Anterior</);
     expect(segunda).not.toMatch(/>Siguiente</);
     expect(segunda).toMatch(/Página\s*2\s*de\s*2/);
   });
 
   it('la segunda página y siguientes son rastreables pero no indexables', async () => {
-    const segunda = await leer('autor/seneca/2.html');
+    const segunda = await leer('/autor/seneca/2/');
     expect(segunda).toMatch(/<meta name="robots" content="noindex, follow">/);
 
-    const primera = await leer('autor/seneca.html');
+    const primera = await leer('/autor/seneca/');
     expect(primera).not.toMatch(/noindex/);
   });
 
   it('cada página declara su propia canónica', async () => {
-    expect(await leer('autor/seneca.html')).toMatch(/rel="canonical" href="[^"]*\/autor\/seneca"/);
-    expect(await leer('autor/seneca/2.html')).toMatch(
-      /rel="canonical" href="[^"]*\/autor\/seneca\/2"/,
+    expect(await leer('/autor/seneca/')).toMatch(/rel="canonical" href="[^"]*\/autor\/seneca\/"/);
+    expect(await leer('/autor/seneca/2/')).toMatch(
+      /rel="canonical" href="[^"]*\/autor\/seneca\/2\/"/,
     );
   });
 
@@ -94,11 +101,11 @@ describe('Historia 2.4 — un listado por encima del umbral', () => {
 
   it('ninguna Cita se pierde ni se repite entre páginas', async () => {
     const slugs = (html: string) =>
-      [...html.matchAll(/href="\/cita\/(seneca-frase-\d+)"/g)].map((m) => m[1]);
+      [...html.matchAll(/href="\/cita\/(seneca-frase-\d+)\/"/g)].map((m) => m[1]);
 
     const todos = [
-      ...slugs(await leer('autor/seneca.html')),
-      ...slugs(await leer('autor/seneca/2.html')),
+      ...slugs(await leer('/autor/seneca/')),
+      ...slugs(await leer('/autor/seneca/2/')),
     ];
     expect(todos).toHaveLength(total);
     expect(new Set(todos).size).toBe(total);
@@ -121,12 +128,12 @@ describe('Historia 2.4 — un listado en el umbral justo', () => {
   });
 
   it('con el tamaño de página exacto no aparece paginación', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'autor', 'seneca.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/autor/seneca/'), 'utf8');
     expect(html).not.toMatch(/Paginación del listado/);
   });
 
   it('y no se genera una segunda página vacía', () => {
-    expect(existsSync(join(proyecto, 'dist', 'autor', 'seneca', '2.html'))).toBe(false);
+    expect(existsSync(paginaConstruida(proyecto, '/autor/seneca/2/'))).toBe(false);
   });
 });
 
@@ -180,10 +187,10 @@ describe('NFR-5 — desde la primera página se llega a todas', () => {
     if (proyecto) await limpiar(proyecto);
   });
 
-  const leer = (ruta: string) => readFile(join(proyecto, 'dist', ruta), 'utf8');
+  const leer = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 
   it('la primera enlaza a todas las demás, no solo a la siguiente', async () => {
-    const primera = await leer('autor/seneca.html');
+    const primera = await leer('/autor/seneca/');
     for (const n of [2, 3, 4]) {
       expect(primera, `falta el enlace a la página ${n}`).toContain(`/autor/seneca/${n}`);
     }
@@ -191,17 +198,17 @@ describe('NFR-5 — desde la primera página se llega a todas', () => {
 
   it('y la última enlaza de vuelta a la primera', async () => {
     // Sin esto, volver del final del listado costaría tres clics de «Anterior».
-    const ultima = await leer('autor/seneca/4.html');
+    const ultima = await leer('/autor/seneca/4/');
     expect(ultima).toMatch(/href="\/autor\/seneca\/?"/);
   });
 
   it('la página en la que se está no se enlaza a sí misma, y se dice cuál es', async () => {
-    const tercera = await leer('autor/seneca/3.html');
+    const tercera = await leer('/autor/seneca/3/');
     expect(tercera).toMatch(/aria-current="page"/);
   });
 
   it('el «Página N de M» que declara UX-DR18 sigue estando', async () => {
     // Los números se AÑADEN: la decisión que se contradice es la mínima posible.
-    expect(await leer('autor/seneca/3.html')).toMatch(/Página\s*3\s*de\s*4/);
+    expect(await leer('/autor/seneca/3/')).toMatch(/Página\s*3\s*de\s*4/);
   });
 });

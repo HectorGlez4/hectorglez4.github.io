@@ -8,9 +8,14 @@ const dist = join(new URL('../..', import.meta.url).pathname, 'dist');
 
 /** Todas las Páginas de Cita construidas, por su ruta pública. */
 function paginasDeCita(): string[] {
-  return readdirSync(join(dist, 'cita'))
-    .filter((f) => f.endsWith('.html'))
-    .map((f) => `/cita/${f.replace(/\.html$/, '')}`);
+  /*
+   * Se listan carpetas, no ficheros: con `build.format: 'directory'` cada Página de Cita
+   * es `dist/cita/<slug>/index.html`. Filtrando por `.html` esto devolvía la lista vacía,
+   * y las comprobaciones que recorren la lista pasaban en verde sin mirar ni una tarjeta.
+   */
+  return readdirSync(join(dist, 'cita'), { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => `/cita/${e.name}`);
 }
 
 /** Las cabeceras `<meta>` de una página, como diccionario. */
@@ -28,8 +33,15 @@ test.describe('Historia 10.1 — toda Cita publicada declara su Tarjeta', () => 
   test('cada Página de Cita declara una imagen propia, no un genérico del sitio', () => {
     const imagenes = new Set<string>();
 
+    /*
+     * Antes que nada, que haya algo que mirar. Cuando `paginasDeCita()` devolvía la lista
+     * vacía —filtraba por `.html` y las páginas pasaron a ser carpetas—, el bucle no corría
+     * y la comparación final quedaba en `0 === 0`: verde sin haber visto una sola Tarjeta.
+     */
+    expect(paginasDeCita().length, 'no hay Páginas de Cita que mirar').toBeGreaterThan(100);
+
     for (const ruta of paginasDeCita()) {
-      const html = readFileSync(join(dist, `${ruta}.html`), 'utf8');
+      const html = readFileSync(join(dist, ruta, 'index.html'), 'utf8');
       const meta = metadatos(html);
       const imagen = meta['og:image'];
 
@@ -43,7 +55,7 @@ test.describe('Historia 10.1 — toda Cita publicada declara su Tarjeta', () => 
   });
 
   test('declara lo que un validador necesita para componer la previsualización', () => {
-    const html = readFileSync(join(dist, `${paginasDeCita()[0]}.html`), 'utf8');
+    const html = readFileSync(join(dist, paginasDeCita()[0], 'index.html'), 'utf8');
     const meta = metadatos(html);
 
     expect(meta['og:title']).toBeTruthy();
@@ -57,7 +69,7 @@ test.describe('Historia 10.1 — toda Cita publicada declara su Tarjeta', () => 
 
   test('la imagen declarada es absoluta: la resuelve el servidor de la red, no la página', () => {
     for (const ruta of paginasDeCita()) {
-      const meta = metadatos(readFileSync(join(dist, `${ruta}.html`), 'utf8'));
+      const meta = metadatos(readFileSync(join(dist, ruta, 'index.html'), 'utf8'));
       expect(meta['og:image']).toMatch(/^https:\/\//);
     }
   });
@@ -114,7 +126,7 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
     let revisadas = 0;
 
     const revisar = async (ruta: string) => {
-      const meta = metadatos(readFileSync(join(dist, `${ruta}.html`), 'utf8'));
+      const meta = metadatos(readFileSync(join(dist, ruta, 'index.html'), 'utf8'));
       const camino = new URL(meta['og:image']).pathname;
 
       const respuesta = await request.get(camino);
@@ -159,17 +171,22 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
      */
     const sitemap = await request.get('/sitemap-0.xml');
     expect(sitemap.status()).toBe(200);
-    const rutas = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) =>
-      new URL(m[1]!).pathname.replace(/\/$/, ''),
+    /*
+     * La ruta se pide **tal y como la anuncia el sitemap**, con su barra final. Quitarla
+     * no era cosmético: cada una de las 1.715 pasaba a ser un 301 que había que seguir, y
+     * la prueba se quedaba sin contexto antes de acabar.
+     */
+    const rutas = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+      (m) => new URL(m[1]!).pathname,
     );
     expect(rutas.length, 'el sitemap no anuncia nada').toBeGreaterThan(100);
 
     const sinImagen: string[] = [];
     for (const ruta of rutas) {
-      const respuesta = await request.get(ruta === '' ? '/' : ruta);
+      const respuesta = await request.get(ruta);
       if (respuesta.status() !== 200) continue;
       const imagen = metadatos(await respuesta.text())['og:image'];
-      if (!imagen?.startsWith('https://')) sinImagen.push(ruta === '' ? '/' : ruta);
+      if (!imagen?.startsWith('https://')) sinImagen.push(ruta);
     }
 
     expect(sinImagen, 'páginas anunciadas y sin previsualización').toEqual([]);

@@ -39,10 +39,28 @@ const PUERTO_DEL_SERVIDOR =
 // https://astro.build/config
 export default defineConfig({
   site: SITIO,
-  trailingSlash: 'never',
+
+  /*
+   * La barra final es parte de la ruta, y estas dos líneas van juntas.
+   *
+   * `format: 'directory'` publica `tema/la-vida/index.html` en vez de `tema/la-vida.html`,
+   * y eso es lo que decide qué sirve el hospedaje. Con `'file'` respondía `/tema/la-vida`
+   * y `/tema/la-vida/` daba **404**: ningún enlace del sitio la escribía con barra, pero
+   * cualquiera pegado desde fuera con una barra de más caía en la página de error. Con
+   * `'directory'`, GitHub Pages sirve la forma con barra y redirige la otra con un 301, así
+   * que responden las dos y ninguna se pierde.
+   *
+   * `trailingSlash: 'always'` es la otra mitad, y sin ella el arreglo sale al revés: el
+   * sitio seguiría anunciándose —canónica, sitemap, RSS— en la forma sin barra, que ahora
+   * es la que redirige. Cada enlace interno pagaría un salto y la canónica apuntaría a una
+   * URL que no sirve directa; el buscador acabaría indexando la forma con barra igual, pero
+   * sin que nadie lo hubiera decidido. Los constructores de `src/lib/superficies.ts`
+   * escriben esa misma forma, y `tests/unit/barra-final.test.ts` impide volver a la otra.
+   */
+  trailingSlash: 'always',
 
   server: { port: PUERTO_DEL_SERVIDOR },
-  build: { format: 'file' },
+  build: { format: 'directory' },
   integrations: [
     /*
      * Historia 11.2 — ninguna Cita se publica sin aparecer en su documento.

@@ -7,6 +7,7 @@ import {
   citaValida,
   construirConCorpus,
   limpiar,
+  paginaConstruida,
 } from './ayuda/construir.js';
 import { FICHERO_DEL_CENSO } from '../../tools/lib/cotejo.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
@@ -62,7 +63,7 @@ describe('la Página de Cita enseña de dónde salió el texto', () => {
 
     expect(resultado.codigo).toBe(0);
 
-    const html = readFileSync(join(resultado.proyecto, 'dist', 'cita', `${SLUG}.html`), 'utf8');
+    const html = readFileSync(paginaConstruida(resultado.proyecto, `/cita/${SLUG}/`), 'utf8');
 
     // La prueba que el visitante puede seguir: la dirección exacta del documento.
     expect(html).toContain(`href="${URL_DE_LA_FUENTE}"`);

@@ -2,7 +2,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 
 /**
@@ -115,7 +121,7 @@ function seccionDe(html: string, jornada: string): string {
 function huella(html: string) {
   const todos = (patron: RegExp) => [...html.matchAll(patron)].map((m) => m[1]).sort();
   return {
-    citas: todos(/<a href="\/cita\/([^"]+)"[^>]*data-enlace-cita/g),
+    citas: todos(/<a href="\/cita\/([^"/]+)\/"[^>]*data-enlace-cita/g),
     tramos: todos(/data-tramo="([^"]*)"/g),
     textos: todos(/data-texto="([^"]*)"/g),
     autores: todos(/data-autor="([^"]*)"/g),
@@ -143,8 +149,8 @@ describe('Historia 13.1 — lo compuesto por adelantado es lo que sale el día q
     aLimpiar.push(manana.proyecto);
     expect(manana.codigo, manana.salida).toBe(0);
 
-    lote = await readFile(join(hoy.proyecto, 'dist', 'lote.html'), 'utf8');
-    kitDeManana = await readFile(join(manana.proyecto, 'dist', 'kit.html'), 'utf8');
+    lote = await readFile(paginaConstruida(hoy.proyecto, '/lote/'), 'utf8');
+    kitDeManana = await readFile(paginaConstruida(manana.proyecto, '/kit/'), 'utf8');
   });
 
   afterAll(async () => {
@@ -267,11 +273,11 @@ describe('Historia 13.1 — sin ninguna jornada fijada, que es el estado de hoy'
   });
 
   it('el sitio construye igual y la superficie existe', () => {
-    expect(existsSync(join(proyecto, 'dist', 'lote.html'))).toBe(true);
+    expect(existsSync(paginaConstruida(proyecto, '/lote/'))).toBe(true);
   });
 
   it('lo dice, y dice antes qué significa que no haya nada preparado', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'lote.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/lote/'), 'utf8');
     expect(html).toMatch(/No hay ninguna jornada preparada/);
     // Lo primero es que el sitio sigue publicando: quien abre esto en el móvil necesita
     // saber eso antes que ninguna orden de terminal.
@@ -282,8 +288,8 @@ describe('Historia 13.1 — sin ninguna jornada fijada, que es el estado de hoy'
   it('y remite al Kit, que es donde sí hay algo que publicar hoy', async () => {
     // La superficie existe para no exigir terminal ni repositorio: un estado vacío cuya
     // única salida fuera una orden de consola contradiría eso justo cuando más se nota.
-    const html = await readFile(join(proyecto, 'dist', 'lote.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/lote/'), 'utf8');
     expect(html).toContain('data-enlace-kit');
-    expect(html).toContain('href="/kit"');
+    expect(html).toContain('href="/kit/"');
   });
 });

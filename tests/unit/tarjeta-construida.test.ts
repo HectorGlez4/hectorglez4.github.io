@@ -1,7 +1,13 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 import { tramoDe } from '../../src/lib/tramos.ts';
 
@@ -62,7 +68,7 @@ describe('Historia 10.1 — la Cita larga también tiene Tarjeta', () => {
   });
 
   it('la Página de la Cita larga la declara igual', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'cita', 'seneca-larga.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/cita/seneca-larga/'), 'utf8');
     expect(html).toContain('/tarjeta/seneca-larga.png');
     // Y sigue sin ofrecer Imagen de Cita, que es otra cosa (FR-10).
     expect(html).not.toContain('data-imagen');

@@ -24,6 +24,7 @@ import {
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDe } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
+import { rutaDeTema } from '../../../lib/superficies.ts';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const conjunto = await conjuntoPublicable();
@@ -41,8 +42,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { tema, autores } = Astro.props as { tema: { slug: string; nombre: string }; autores: Map<string, Autor> };
 const pagina = Astro.props.page as import('astro').Page<Cita>;
 
-const rutaBase = `/tema/${tema.slug}`;
-const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
+const ruta = rutaDeTema(tema.slug, pagina.currentPage);
 const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 const canonica = new URL(ruta, Astro.site).href;
 ---

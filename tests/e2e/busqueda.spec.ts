@@ -6,7 +6,7 @@ import { temaBajoUmbral } from './ayuda/corpus.ts';
 
 /** Escribe la consulta y espera a que la lista se estabilice. */
 async function buscar(page: import('@playwright/test').Page, consulta: string) {
-  await page.goto('/buscar');
+  await page.goto('/buscar/');
   await page.locator('[data-consulta]').fill(consulta);
   await page.waitForFunction(
     () =>
@@ -147,7 +147,7 @@ test.describe('Historia 3.1 — la búsqueda no se carga hasta que hace falta', 
       if (r.request().resourceType() === 'script') descargados.push(r.url());
     });
 
-    await page.goto('/buscar');
+    await page.goto('/buscar/');
     await page.locator('[data-consulta]').focus();
     await page.waitForResponse((r) => r.url().includes('pagefind'), { timeout: 10_000 });
 
@@ -242,7 +242,7 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
     // Se resuelve la consulta antes de instalar el espía, porque buscar la mueve de página.
     const consulta = await buscarSinResultados(page);
     test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
-    await page.goto('/buscar');
+    await page.goto('/buscar/');
     // Se instala un espía en el hueco del módulo de medición, que es por donde pasa todo.
     await page.evaluate(() => {
       (window as unknown as { __emitidos: unknown[] }).__emitidos = [];

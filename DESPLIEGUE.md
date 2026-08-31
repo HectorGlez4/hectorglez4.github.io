@@ -88,6 +88,35 @@ curl -sI https://hectorglez4.github.io | head -1         # 301 hacia el ápice
 curl -s https://sabiduriadebolsillo.net | grep -o '<link rel="canonical"[^>]*>'
 ```
 
+### La barra final, que es la única suposición del sitio sobre el hospedaje
+
+El sitio construye con `build.format: 'directory'` y `trailingSlash: 'always'`: publica
+`tema/el-amor/index.html` y anuncia `/tema/el-amor/` en la canónica, el sitemap y el RSS.
+Eso descansa en una conducta de GitHub Pages que no se declara en ningún sitio del
+repositorio — que sirva la forma con barra y **redirija la otra con un 301**. El servidor
+de las pruebas la imita, pero un servidor que imita no prueba nada del hospedaje: si Pages
+dejara de comportarse así, la suite seguiría verde y el sitio estaría roto.
+
+Se comprueba después de cada despliegue, y son dos líneas:
+
+```bash
+# La forma que se anuncia: 200 directo, sin salto.
+curl -sI https://sabiduriadebolsillo.net/tema/el-amor/ | head -1
+# La otra: 301 hacia la de arriba. Nunca 404 — eso era el defecto que esto vigila.
+curl -sI https://sabiduriadebolsillo.net/tema/el-amor | grep -iE '^(HTTP|location)'
+```
+
+Y que lo anunciado sirva directo, sin redirección intermedia, en todo el sitemap:
+
+```bash
+curl -s https://sabiduriadebolsillo.net/sitemap-0.xml \
+  | grep -o '<loc>[^<]*</loc>' | sed 's|</\?loc>||g' \
+  | while read -r u; do
+      c=$(curl -s -o /dev/null -w '%{http_code}' --max-redirs 0 "$u")
+      [ "$c" = 200 ] || echo "$c $u"
+    done
+```
+
 ### El techo de caché del hospedaje
 
 GitHub Pages sirve **todo** con `cache-control: max-age=600` y no ofrece forma de

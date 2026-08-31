@@ -83,8 +83,11 @@ async function paginasDe(directorio: string): Promise<Record<string, string>> {
 /**
  * La ruta del sitio que sirve un fichero de `dist/`.
  *
- * `astro.config.mjs` construye con `format: 'file'` y `trailingSlash: 'never'`, así que
- * `buscar.html` se sirve en `/buscar` y `index.html` en `/`. Se necesita para preguntarle a
+ * `astro.config.mjs` construye con `format: 'directory'` y `trailingSlash: 'always'`, así
+ * que `buscar/index.html` se sirve en `/buscar/` y `index.html` en `/`. Lo que se devuelve
+ * aquí va sin barra final a propósito: `rutaNormalizada` la quita antes de comparar, y así
+ * esta función no tiene que saber cuál de las dos formas se anuncia. Se necesita para
+ * preguntarle a
  * `src/lib/superficies.ts` de qué superficie es cada página construida, que es lo que ata lo
  * marcado en el HTML a lo declarado en el módulo del estado.
  */
@@ -96,8 +99,9 @@ function rutaDe(relativa: string): string {
    * Escrito como `=== 'index'`, un `dist/x/index.html` daba `/x/index`,
    * `superficieDeclaradaDe` no reconocía esa ruta y la aserción generalizada de UX-DR35
    * degradaba en silencio a «aquí no se espera nada» justo para esa página — que es la forma
-   * más callada posible de dejar de comprobar algo. Hoy `build.format` es `'file'` y no salen
-   * índices anidados; cambiarlo a `'directory'` los produciría todos.
+   * más callada posible de dejar de comprobar algo. Y ya no es hipotético: `build.format`
+   * pasó a `'directory'` para que las rutas con barra final dejaran de dar 404, y desde
+   * entonces **todas** las páginas son un índice anidado.
    */
   const sinIndice = sinExtension.replace(/(^|\/)index$/, '');
   return sinIndice === '' ? '/' : `/${sinIndice}`;
@@ -217,7 +221,7 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
 
   it('y el sitio construido no está vacío, que es lo que haría trivial la comparación', () => {
     expect(Object.keys(paginas).length).toBeGreaterThan(3);
-    for (const superficie of ['index.html', 'buscar.html', '404.html']) {
+    for (const superficie of ['index.html', 'buscar/index.html', '404.html']) {
       expect(paginas, superficie).toHaveProperty(superficie);
     }
   });
@@ -262,7 +266,7 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     // Y las tres rutas que la 14.2 sí usa se reconocen: si `rutaDe` las perdiera, la prueba
     // de arriba compararía contra `[]` también con las donaciones encendidas.
     expect(superficieDeclaradaDe(rutaDe('index.html'))?.pagina).toBe('index.astro');
-    expect(superficieDeclaradaDe(rutaDe('buscar.html'))?.pagina).toBe('buscar.astro');
+    expect(superficieDeclaradaDe(rutaDe('buscar/index.html'))?.pagina).toBe('buscar.astro');
     expect(superficieDeclaradaDe(rutaDe('404.html'))?.pagina).toBe('404.astro');
   });
 
@@ -359,7 +363,7 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     }
 
     // Ni el barrido mira una lista vacía: las tres superficies de la 14.2 traen hoja propia.
-    for (const ruta of ['index.html', 'buscar.html', '404.html']) {
+    for (const ruta of ['index.html', 'buscar/index.html', '404.html']) {
       expect(bloquesDe(paginas[ruta]).length, ruta).toBeGreaterThan(0);
     }
 
@@ -472,7 +476,7 @@ describe('Historia 14.2 — el sitio con las donaciones encendidas', () => {
   let paginas: Record<string, string> = {};
 
   /** Las tres superficies de no lectura que UX-DR36 admite, por su fichero en `dist/`. */
-  const ADMITIDAS = ['index.html', 'buscar.html', '404.html'];
+  const ADMITIDAS = ['index.html', 'buscar/index.html', '404.html'];
 
   beforeAll(async () => {
     const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
@@ -603,7 +607,7 @@ describe('Historia 14.2 — el sitio con las donaciones encendidas', () => {
      * ofrecerla. Y estaría **después** de `data-salida` en el HTML igualmente, así que la
      * comparación de posiciones daba verde sobre el descuido que dice impedir.
      */
-    const html = paginas['buscar.html'];
+    const html = paginas['buscar/index.html'];
     const salida = divDesde(html, html.lastIndexOf('<div', html.indexOf('data-salida')));
     expect(salida, 'no se recortó el bloque de salida').toContain('data-salida');
     expect(salida, 'la invitación está dentro del bloque de salida').not.toContain(

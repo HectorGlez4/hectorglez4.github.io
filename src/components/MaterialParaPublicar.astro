@@ -23,6 +23,7 @@ import ImagenDelKit from '../islands/ImagenDelKit.astro';
 import { REDES, enlaceConOrigen } from '../lib/redes.ts';
 import { tramoDe } from '../lib/tramos.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
+import { rutaDeCita } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
@@ -69,7 +70,7 @@ const tramo = tramoDe(cita.texto);
   <CopiarCita cita={cita} autor={autor} />
 
   <p class="enlace">
-    <a href={`/cita/${cita.slug}`} data-enlace-cita>Ver la Página de Cita</a>
+    <a href={rutaDeCita(cita.slug)} data-enlace-cita>Ver la Página de Cita</a>
   </p>
 
   {/*
@@ -81,7 +82,7 @@ const tramo = tramoDe(cita.texto);
     {
       REDES.map((red) => (
         <li>
-          <a href={enlaceConOrigen(`/cita/${cita.slug}`, red.id)} data-red={red.id}>
+          <a href={enlaceConOrigen(rutaDeCita(cita.slug), red.id)} data-red={red.id}>
             {red.nombre}
           </a>
         </li>

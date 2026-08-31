@@ -45,7 +45,7 @@ test.describe('Historia 2.1 — la Cita y su atribución', () => {
     await page.goto(CORTA);
     const enlace = page.locator('figcaption a').first();
     await expect(enlace).toHaveText('Antonio Machado');
-    await expect(enlace).toHaveAttribute('href', '/autor/antonio-machado');
+    await expect(enlace).toHaveAttribute('href', '/autor/antonio-machado/');
   });
 
   test('se muestran la obra y el año cuando la Cita tiene procedencia', async ({ page }) => {
@@ -197,7 +197,7 @@ test.describe('Historia 2.1 — armazón y tratamiento visual', () => {
     const enlaces = page.locator('header a');
     await expect(enlaces).toHaveCount(2);
     await expect(enlaces.nth(0)).toHaveAttribute('href', '/');
-    await expect(enlaces.nth(1)).toHaveAttribute('href', '/buscar');
+    await expect(enlaces.nth(1)).toHaveAttribute('href', '/buscar/');
     await expect(page.locator('nav[aria-label*="miga" i], .migas, .breadcrumb')).toHaveCount(0);
   });
 

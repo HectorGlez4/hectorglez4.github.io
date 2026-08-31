@@ -83,11 +83,11 @@ test.describe('Historia 2.5 — un Tema por debajo del umbral', () => {
   test('el sitemap solo contiene Temas que existen', async ({ request }) => {
     // La divergencia que AD-11 impide: una superficie publica un Tema que otra no.
     const sitemap = await (await request.get('/sitemap-0.xml')).text();
-    const temas = [...sitemap.matchAll(/<loc>[^<]*\/tema\/([^<\/]+)<\/loc>/g)].map((m) => m[1]);
+    const temas = [...sitemap.matchAll(/<loc>[^<]*\/tema\/([^<\/]+)\/<\/loc>/g)].map((m) => m[1]);
     expect(temas.length).toBeGreaterThan(0);
 
     for (const tema of temas) {
-      expect((await request.get(`/tema/${tema}`)).status(), tema).toBe(200);
+      expect((await request.get(`/tema/${tema}/`)).status(), tema).toBe(200);
     }
   });
 });

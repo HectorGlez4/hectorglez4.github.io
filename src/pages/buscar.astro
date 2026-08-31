@@ -24,7 +24,7 @@ import {
   temasPublicados,
 } from '../lib/publicado.ts';
 import { ETIQUETAS_DE_RESULTADO, TIPO_POR_OMISION } from '../lib/tipoDeResultado.ts';
-import { rutaDeColeccion } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
@@ -44,12 +44,12 @@ const colecciones = conjunto.colecciones;
 <Armazon
   titulo={tituloDe('Buscar')}
   descripcion="Busca una cita por un fragmento, por autor o por tema."
-  ruta="/buscar"
+  ruta="/buscar/"
 >
   <div class="pagina contenedor">
     <h1>Buscar</h1>
 
-    <form class="formulario" role="search" action="/buscar" method="get">
+    <form class="formulario" role="search" action="/buscar/" method="get">
       <label for="consulta">Escribe un fragmento, un autor o un tema.</label>
       <input
         id="consulta"
@@ -78,7 +78,7 @@ const colecciones = conjunto.colecciones;
             <ul class="chips">
               {temas.map((tema) => (
                 <li>
-                  <a class="chip" href={`/tema/${tema.slug}`}>
+                  <a class="chip" href={rutaDeTema(tema.slug)}>
                     {tema.nombre}
                   </a>
                 </li>
@@ -111,7 +111,7 @@ const colecciones = conjunto.colecciones;
           {
             autores.map((autor) => (
               <li>
-                <a class="chip" href={`/autor/${autor.slug}`}>
+                <a class="chip" href={rutaDeAutor(autor.slug)}>
                   {autor.nombre}
                 </a>
               </li>

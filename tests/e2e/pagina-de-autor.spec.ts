@@ -76,7 +76,7 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
   });
 
   test('un Autor sin Citas publicadas no tiene página ni entra en el sitemap', async ({ request }) => {
-    expect((await request.get('/autor/un-autor-que-no-existe')).status()).toBe(404);
+    expect((await request.get('/autor/un-autor-que-no-existe/')).status()).toBe(404);
 
     const sitemap = await (await request.get('/sitemap-0.xml')).text();
     expect(sitemap).not.toContain('/autor/un-autor-que-no-existe');

@@ -5,15 +5,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
-import {
-  AUTOR_VALIDO,
-  RAIZ,
-  TEMA_VALIDO,
-  citaValida,
-  construirConCorpus,
-  limpiar,
-  type CorpusDePrueba,
-} from './ayuda/construir.js';
+import { AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida, construirConCorpus, limpiar, paginaConstruida, type CorpusDePrueba } from './ayuda/construir.js';
 import { MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
 
 const ejecutar = promisify(execFile);
@@ -376,7 +368,7 @@ describe('Historia 12.4 — comodidad, no puerta', () => {
     aLimpiar.push(resultado.proyecto);
 
     expect(resultado.codigo, resultado.salida).toBe(0);
-    expect(existsSync(join(resultado.proyecto, 'dist', 'coleccion', `${SLUG}.html`))).toBe(true);
+    expect(existsSync(paginaConstruida(resultado.proyecto, `/coleccion/${SLUG}/`))).toBe(true);
     // Ningún miembro se quedó sin resolver: la orden solo dejó entrar Citas publicadas, así
     // que el aviso de desajuste de la 12.2 no tiene nada que anunciar.
     expect(resultado.salida).not.toContain('sin resolver');

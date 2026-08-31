@@ -9,6 +9,7 @@ import {
   coleccionValida,
   construirConCorpus,
   limpiar,
+  paginaEnDist,
 } from './ayuda/construir.js';
 import { CITAS_POR_PAGINA, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
@@ -129,7 +130,9 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     dist = join(resultado.proyecto, 'dist');
   });
 
-  const leer = (relativa: string) => readFile(join(dist, relativa), 'utf8');
+  const leer = (ruta: string) => readFile(paginaEnDist(dist, ruta), 'utf8');
+  /* Lo que no es una página se lee por su fichero: el sitemap no tiene ruta que servir. */
+  const leerCrudo = (relativa: string) => readFile(join(dist, relativa), 'utf8');
 
   /**
    * El ámbito de estilos con el que Astro marcó un elemento de la página.
@@ -166,13 +169,13 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
   /** El `<li>` de una Cita dentro de un listado, tal y como quedó en el HTML. */
   function tarjetaDe(html: string, slug: string): string | undefined {
     const marcas = [...html.matchAll(/<li class="tarjeta[\s\S]*?<\/li>/g)].map((m) => m[0]);
-    return marcas.find((marca) => marca.includes(`href="/cita/${slug}"`));
+    return marcas.find((marca) => marca.includes(`href="/cita/${slug}/"`));
   }
 
   describe('presenta sus Citas con el componente compartido — AD-19', () => {
     it('la ruta existe y su URL es legible, en español y sin identificadores opacos', async () => {
-      expect(existsSync(join(dist, 'coleccion', 'frases-cortas.html'))).toBe(true);
-      const html = await leer('coleccion/frases-cortas.html');
+      expect(existsSync(paginaEnDist(dist, '/coleccion/frases-cortas/'))).toBe(true);
+      const html = await leer('/coleccion/frases-cortas/');
       expect(html).toMatch(/<h1[^>]*>Frases cortas para reflexionar<\/h1>/);
     });
 
@@ -184,8 +187,8 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
        * `<li>` entero contra el que emite la Página de Tema para la misma Cita no deja
        * sitio a una copia: o es el mismo componente, o no coincide.
        */
-      const enLaColeccion = tarjetaDe(await leer('coleccion/frases-cortas.html'), slugDe(0));
-      const enElTema = tarjetaDe(await leer('tema/el-tiempo.html'), slugDe(0));
+      const enLaColeccion = tarjetaDe(await leer('/coleccion/frases-cortas/'), slugDe(0));
+      const enElTema = tarjetaDe(await leer('/tema/el-tiempo/'), slugDe(0));
 
       expect(enElTema, 'la Página de Tema tiene que traer esa Cita para poder comparar')
         .toBeDefined();
@@ -193,7 +196,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     });
 
     it('cada tarjeta lleva el nombre de su Autor, porque la Colección agrupa a varios', async () => {
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       const nombres = [...html.matchAll(/<span class="autor"[^>]*>([^<]+)<\/span>/g)].map(
         (m) => m[1],
       );
@@ -202,7 +205,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     });
 
     it('el criterio va al pie del listado, después de las Citas y no antes', async () => {
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       const criterio = 'Citas de una sola frase que se sostienen fuera de la obra de la que salen.';
       // `lastIndexOf` y no `indexOf`: el criterio es también la descripción de la página y
       // aparece antes, en la cabecera. Lo que se fija aquí es dónde va en el cuerpo.
@@ -211,11 +214,11 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     });
 
     it('todo enlace del listado apunta a una página que el build generó', async () => {
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       const destinos = [...html.matchAll(/href="(\/cita\/[^"]+)"/g)].map((m) => m[1]);
       expect(destinos.length).toBeGreaterThan(0);
       for (const destino of destinos) {
-        expect(existsSync(join(dist, `${destino.slice(1)}.html`)), destino).toBe(true);
+        expect(existsSync(paginaEnDist(dist, destino)), destino).toBe(true);
       }
     });
   });
@@ -224,20 +227,20 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     it('la canónica de una Cita en tres Colecciones sigue siendo su Página de Cita', async () => {
       // La Cita 0 la declaran `frases-cortas`, `para-pensar` y `breves`.
       for (const coleccion of ['frases-cortas', 'para-pensar', 'breves']) {
-        expect(await leer(`coleccion/${coleccion}.html`)).toContain(`href="/cita/${slugDe(0)}"`);
+        expect(await leer(`/coleccion/${coleccion}/`)).toContain(`href="/cita/${slugDe(0)}/"`);
       }
 
-      const cita = await leer(`cita/${slugDe(0)}.html`);
+      const cita = await leer(`/cita/${slugDe(0)}/`);
       expect(cita).toMatch(
-        new RegExp(`<link rel="canonical" href="[^"]*/cita/${slugDe(0)}"`),
+        new RegExp(`<link rel="canonical" href="[^"]*/cita/${slugDe(0)}/"`),
       );
     });
 
     it('ninguna Página de Colección se declara canónica de una Cita', async () => {
       for (const coleccion of ['frases-cortas', 'para-pensar', 'breves']) {
-        const html = await leer(`coleccion/${coleccion}.html`);
+        const html = await leer(`/coleccion/${coleccion}/`);
         expect(html).toMatch(
-          new RegExp(`<link rel="canonical" href="[^"]*/coleccion/${coleccion}">`),
+          new RegExp(`<link rel="canonical" href="[^"]*/coleccion/${coleccion}/">`),
         );
         // Y no la de ninguna de sus Citas: la canónica de una Cita es su propia página.
         // Con el dominio escrito a mano esta negativa se volvía vacua el día que cambiase
@@ -259,9 +262,9 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
        * arriba, sobre un sitio construido.
        */
       const integro = textoLargo(0);
-      expect(await leer(`cita/${slugDe(0)}.html`)).toContain(integro);
+      expect(await leer(`/cita/${slugDe(0)}/`)).toContain(integro);
       for (const coleccion of ['frases-cortas', 'para-pensar', 'breves']) {
-        expect(await leer(`coleccion/${coleccion}.html`), coleccion).not.toContain(integro);
+        expect(await leer(`/coleccion/${coleccion}/`), coleccion).not.toContain(integro);
       }
     });
 
@@ -269,11 +272,11 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
       // Se recortó en validación a propósito: FR-28 dice que la Colección enlaza a las
       // Citas y no al revés. Esta comprobación existe para que nadie lo reintroduzca
       // creyendo que faltaba.
-      expect(await leer(`cita/${slugDe(0)}.html`)).not.toContain('href="/coleccion/');
+      expect(await leer(`/cita/${slugDe(0)}/`)).not.toContain('href="/coleccion/');
     });
 
     it('la Colección no es un destino terminal: toda tarjeta sale hacia una Cita', async () => {
-      const html = await leer('coleccion/breves.html');
+      const html = await leer('/coleccion/breves/');
       const tarjetas = [...html.matchAll(/<li class="tarjeta[\s\S]*?<\/li>/g)].map((m) => m[0]);
       expect(tarjetas).toHaveLength(MIN_CITAS_POR_COLECCION);
       for (const tarjeta of tarjetas) expect(tarjeta).toMatch(/href="\/cita\//);
@@ -285,18 +288,18 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
       // Exactamente como un Tema: nadie escribió una comprobación aquí; `conjuntoPublicable`
       // no la reparte, así que `getStaticPaths` no la ve y el fichero no existe. Un 404 en
       // un sitio estático es la ausencia del fichero.
-      expect(existsSync(join(dist, 'coleccion', 'apenas-tres.html'))).toBe(false);
+      expect(existsSync(paginaEnDist(dist, '/coleccion/apenas-tres/'))).toBe(false);
     });
 
     it('tampoco se anuncia en el sitemap ni se enlaza desde la portada', async () => {
-      expect(await leer('sitemap-0.xml')).not.toContain('/coleccion/apenas-tres');
-      expect(await leer('index.html')).not.toContain('href="/coleccion/apenas-tres"');
+      expect(await leerCrudo('sitemap-0.xml')).not.toContain('/coleccion/apenas-tres');
+      expect(await leer('/')).not.toContain('href="/coleccion/apenas-tres/"');
     });
 
     it('y las que sí llegan al umbral están en el sitemap, sin sus páginas 2+', async () => {
-      const sitemap = await leer('sitemap-0.xml');
+      const sitemap = await leerCrudo('sitemap-0.xml');
       for (const coleccion of ['frases-cortas', 'para-pensar', 'breves']) {
-        expect(sitemap, coleccion).toContain(`/coleccion/${coleccion}<`);
+        expect(sitemap, coleccion).toContain(`/coleccion/${coleccion}/<`);
       }
       expect(sitemap).not.toContain('/coleccion/frases-cortas/2');
     });
@@ -305,11 +308,13 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
   describe('un miembro retirado a revisión desaparece sin dejar hueco', () => {
     it('ni se lista, ni se enlaza, ni deja una tarjeta vacía', async () => {
       const paginas = [
-        await leer('coleccion/frases-cortas.html'),
-        await leer('coleccion/frases-cortas/2.html'),
+        await leer('/coleccion/frases-cortas/'),
+        await leer('/coleccion/frases-cortas/2/'),
       ];
       const listadas = paginas.flatMap((html) =>
-        [...html.matchAll(/href="\/cita\/([^"]+)"/g)].map((m) => m[1]),
+        // Sin excluir la barra del grupo, el slug salía como `x/` y `not.toContain` —que
+        // compara contra el slug pelado— no podía volver a fallar nunca.
+        [...html.matchAll(/href="\/cita\/([^"/]+)\/"/g)].map((m) => m[1]),
       );
 
       expect(listadas).not.toContain(slugDe(RETIRADA));
@@ -323,41 +328,41 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     });
 
     it('la Colección sigue publicada, porque el resuelto sigue por encima del umbral', () => {
-      expect(existsSync(join(dist, 'coleccion', 'frases-cortas.html'))).toBe(true);
+      expect(existsSync(paginaEnDist(dist, '/coleccion/frases-cortas/'))).toBe(true);
     });
   });
 
   describe('la decisión de paginar, comprobada', () => {
     it('una Colección con más de CITAS_POR_PAGINA miembros pagina, como Autor y Tema', async () => {
-      const primera = await leer('coleccion/frases-cortas.html');
+      const primera = await leer('/coleccion/frases-cortas/');
       expect([...primera.matchAll(/<li class="tarjeta/g)]).toHaveLength(CITAS_POR_PAGINA);
-      expect(existsSync(join(dist, 'coleccion', 'frases-cortas', '2.html'))).toBe(true);
-      expect(primera).toContain('href="/coleccion/frases-cortas/2"');
+      expect(existsSync(paginaEnDist(dist, '/coleccion/frases-cortas/2/'))).toBe(true);
+      expect(primera).toContain('href="/coleccion/frases-cortas/2/"');
     });
 
     it('la página 2 es rastreable y no indexable, sin declararlo por su cuenta', async () => {
       // Sale de `noPublicableEn` en la declaración única, igual que en Autor y Tema.
-      const segunda = await leer('coleccion/frases-cortas/2.html');
+      const segunda = await leer('/coleccion/frases-cortas/2/');
       expect(segunda).toContain('<meta name="robots" content="noindex, follow">');
-      expect(await leer('coleccion/frases-cortas.html')).not.toContain('name="robots"');
+      expect(await leer('/coleccion/frases-cortas/')).not.toContain('name="robots"');
     });
 
     it('una Colección que cabe en una página no muestra control de paginación', async () => {
-      expect(await leer('coleccion/breves.html')).not.toContain('Paginación del listado');
+      expect(await leer('/coleccion/breves/')).not.toContain('Paginación del listado');
     });
   });
 
   describe('descubrimiento desde la portada', () => {
     it('la portada enlaza a cada Colección publicada, a un solo salto', async () => {
-      const portada = await leer('index.html');
+      const portada = await leer('/');
       expect(portada).toContain('>Colecciones</h2>');
       for (const coleccion of ['frases-cortas', 'para-pensar', 'breves']) {
-        expect(portada, coleccion).toContain(`href="/coleccion/${coleccion}"`);
+        expect(portada, coleccion).toContain(`href="/coleccion/${coleccion}/"`);
       }
     });
 
     it('el chip de la portada lleva el nombre de la Colección, no su slug', async () => {
-      expect(await leer('index.html')).toContain('Frases cortas para reflexionar');
+      expect(await leer('/')).toContain('Frases cortas para reflexionar');
     });
   });
 
@@ -371,8 +376,8 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
      */
 
     it('el h1 de Colección se compone exactamente igual que el de Tema', async () => {
-      const enLaColeccion = await leer('coleccion/frases-cortas.html');
-      const enElTema = await leer('tema/el-tiempo.html');
+      const enLaColeccion = await leer('/coleccion/frases-cortas/');
+      const enElTema = await leer('/tema/el-tiempo/');
 
       const deColeccion = declaracionesDe(enLaColeccion, `h1[${ambitoDe(enLaColeccion, 'h1')}]`);
       const deTema = declaracionesDe(enElTema, `h1[${ambitoDe(enElTema, 'h1')}]`);
@@ -385,7 +390,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     });
 
     it('el criterio va en Inter, que es lo que la serif deja fuera', async () => {
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       const ambito = ambitoDe(html, 'h1');
       expect(declaracionesDe(html, `.criterio[${ambito}] p[${ambito}]`)).toContain(
         'font-family:var(--sans)',
@@ -394,7 +399,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
 
     it('la serif no aparece en ninguna otra regla de la página', async () => {
       // La otra mitad de UX-DR31: no basta con que el nombre la lleve; nada más debe llevarla.
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       const ambito = ambitoDe(html, 'h1');
       const conSerif = reglasDelAmbito(html, ambito).filter((r) =>
         r.includes('font-family:var(--serif)'),
@@ -405,7 +410,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     it('la página no lleva ni un literal de color ni de tipografía', async () => {
       // UX-DR1 y UX-DR2. Se barre el ámbito propio de la página: los `@font-face` que la
       // Fonts API inyecta llevan nombres y rutas literales y no son de nadie de aquí.
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       for (const regla of reglasDelAmbito(html, ambitoDe(html, 'h1'))) {
         expect(regla, regla).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
         for (const propiedad of ['font-family', 'font-size', 'color', 'background']) {
@@ -423,7 +428,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
        * mitad —que a 360 px no hay desplazamiento horizontal y todo se puede tocar— sigue
        * necesitando navegador y vive en `tests/e2e/coleccion.spec.ts`.
        */
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       expect(html).toMatch(/<div class="pagina contenedor"/);
       for (const regla of reglasDelAmbito(html, ambitoDe(html, 'h1'))) {
         expect(regla, regla).not.toMatch(/(?:^|;)(?:width|min-width):/);
@@ -440,7 +445,7 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
      * el lado productor.
      */
     it('la página de búsqueda embarca la tabla de rótulos, con el de Colección', async () => {
-      const buscar = await leer('buscar.html');
+      const buscar = await leer('/buscar/');
       expect(buscar).toContain(`"coleccion":"${ETIQUETAS_DE_RESULTADO.coleccion}"`);
       for (const [tipo, etiqueta] of Object.entries(ETIQUETAS_DE_RESULTADO)) {
         expect(buscar, tipo).toContain(`"${tipo}":"${etiqueta}"`);
@@ -457,21 +462,21 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
       // FR-8 — la salida ofrecía Temas y Autores. Dejar fuera la tercera familia de
       // agregación habría hecho de la Colección la única superficie de producto que la
       // búsqueda sin resultados no sabe ofrecer.
-      const buscar = await leer('buscar.html');
-      expect(buscar).toContain('href="/coleccion/frases-cortas"');
+      const buscar = await leer('/buscar/');
+      expect(buscar).toContain('href="/coleccion/frases-cortas/"');
       expect(buscar).toMatch(/<h2[^>]*>Colecciones<\/h2>/);
     });
   });
 
   describe('la superficie entra sola en el índice de la búsqueda propia', () => {
     it('se indexa dentro y se marca como Colección, sin tocar ninguna lista', async () => {
-      const html = await leer('coleccion/frases-cortas.html');
+      const html = await leer('/coleccion/frases-cortas/');
       expect(html).toContain('data-pagefind-body');
       expect(html).toContain('tipo:coleccion');
     });
 
     it('y la página 2 queda fuera del índice, como todo listado paginado', async () => {
-      const segunda = await leer('coleccion/frases-cortas/2.html');
+      const segunda = await leer('/coleccion/frases-cortas/2/');
       expect(segunda).toContain('data-pagefind-ignore');
       expect(segunda).not.toContain('data-pagefind-body');
     });
@@ -501,7 +506,7 @@ describe('Historia 12.3 — sin ninguna Colección publicada', () => {
   });
 
   it('el sitio construye igual', () => {
-    expect(existsSync(join(dist, 'index.html'))).toBe(true);
+    expect(existsSync(paginaEnDist(dist, '/'))).toBe(true);
   });
 
   it('la portada no muestra una sección de Colecciones vacía', async () => {

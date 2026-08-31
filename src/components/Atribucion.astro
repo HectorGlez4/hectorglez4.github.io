@@ -11,6 +11,7 @@
  * inferida o aproximada. Presencia de la ausencia.
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
+import { rutaDeAutor } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
@@ -45,7 +46,7 @@ const procedencia = frases.map((f) => (/[.?!]$/.test(f) ? f : `${f}.`)).join(' '
 ---
 
 <p class="autor">
-  <a href={`/autor/${autor.slug}`}>{autor.nombre}</a>
+  <a href={rutaDeAutor(autor.slug)}>{autor.nombre}</a>
 </p>
 <p class="procedencia">{procedencia}</p>
 

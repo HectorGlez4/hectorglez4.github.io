@@ -23,7 +23,7 @@ import {
   MIN_CITAS_POR_TEMA,
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia } from './admision.ts';
-import { rutaDeColeccion } from './superficies.ts';
+import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
 
@@ -367,9 +367,9 @@ export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Ci
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [
     '/',
-    ...conjunto.citas.map((c) => `/cita/${c.slug}`),
-    ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => `/autor/${a.slug}`),
-    ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => `/tema/${t.slug}`),
+    ...conjunto.citas.map((c) => rutaDeCita(c.slug)),
+    ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
+    ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
     ...conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
   ];
 }

@@ -18,7 +18,7 @@ test.describe('Historia 4.1 — la portada', () => {
   test('la Cita destacada es una de las marcadas como aptas para portada', async ({ page }) => {
     await page.goto('/');
     const href = (await page.locator('.ir a').getAttribute('href'))!;
-    const slug = href.replace('/cita/', '');
+    const slug = href.replace('/cita/', '').replace(/\/$/, '');
 
     /*
      * Se contrasta contra el corpus en disco, no contra una lista repetida en la prueba
@@ -41,7 +41,7 @@ test.describe('Historia 4.1 — la portada', () => {
 
   test('ofrece el acceso a la búsqueda y entradas a los Temas publicados', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('header a[href="/buscar"]')).toBeVisible();
+    await expect(page.locator('header a[href="/buscar/"]')).toBeVisible();
 
     const temas = page.locator('a[href^="/tema/"]');
     expect(await temas.count()).toBeGreaterThan(0);

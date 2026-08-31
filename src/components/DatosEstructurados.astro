@@ -11,6 +11,7 @@
  * de que un buscador se la creería.
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
+import { rutaDeAutor } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
@@ -31,7 +32,7 @@ const datos: Record<string, unknown> = {
   creator: {
     '@type': 'Person',
     name: autor.nombre,
-    url: new URL(`/autor/${autor.slug}`, canonica).href,
+    url: new URL(rutaDeAutor(autor.slug), canonica).href,
     ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
     deathDate: String(autor.añoFallecimiento),
   },

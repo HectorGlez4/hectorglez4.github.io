@@ -109,8 +109,8 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
     };
     const rutas = rutasPublicadas(conjunto);
     expect(rutas).toContain('/');
-    expect(rutas).toContain('/autor/a');
-    expect(rutas).toContain('/tema/t');
+    expect(rutas).toContain('/autor/a/');
+    expect(rutas).toContain('/tema/t/');
     expect(rutas.filter((r) => r.startsWith('/cita/'))).toHaveLength(MIN_CITAS_POR_TEMA);
   });
 
@@ -121,7 +121,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
       temas: [tema('t')],
       colecciones: [],
     });
-    expect(rutas).not.toContain('/tema/t');
+    expect(rutas).not.toContain('/tema/t/');
   });
 
   /*
@@ -151,7 +151,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
         citasDeLaColeccion,
       ),
     });
-    expect(rutas).toContain('/coleccion/frases-cortas');
+    expect(rutas).toContain('/coleccion/frases-cortas/');
   });
 
   it('una Colección bajo umbral no aparece, porque no llega hasta aquí', () => {
@@ -164,7 +164,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
         citasDeLaColeccion,
       ),
     });
-    expect(rutas).not.toContain('/coleccion/frases-cortas');
+    expect(rutas).not.toContain('/coleccion/frases-cortas/');
   });
 
   it('la ruta de Colección es la de la primera página, sin las 2+', () => {
@@ -178,7 +178,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
         citasDeLaColeccion,
       ),
     });
-    expect(rutas.filter((r) => /^\/coleccion\//.test(r))).toEqual(['/coleccion/frases-cortas']);
+    expect(rutas.filter((r) => /^\/coleccion\//.test(r))).toEqual(['/coleccion/frases-cortas/']);
   });
 });
 

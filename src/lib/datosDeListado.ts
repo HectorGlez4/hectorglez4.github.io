@@ -26,6 +26,7 @@
  */
 
 import type { Cita } from './publicado.ts';
+import { rutaDeCita } from './superficies.ts';
 
 /** Un elemento del `ItemList`: la Cita, por su URL, con su lugar en la lista completa. */
 export interface ElementoDeLista {
@@ -72,7 +73,7 @@ export function listaDeCitas(
     itemListElement: citas.map((cita, i) => ({
       '@type': 'ListItem',
       position: primera + i + 1,
-      url: new URL(`/cita/${cita.slug}`, origen).href,
+      url: new URL(rutaDeCita(cita.slug), origen).href,
     })),
   };
 }

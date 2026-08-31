@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { superficiesDelBarrido } from '../../src/lib/superficies.ts';
+import { rutaNormalizada, superficiesDelBarrido } from '../../src/lib/superficies.ts';
 
 /**
  * Historia 12.3 — la Página de Colección, mirada en el navegador.
@@ -47,7 +47,7 @@ function rutasConstruidas(): string[] {
 const RUTAS = rutasConstruidas();
 
 /** Las Páginas de Colección construidas: primeras páginas, sin las 2+. */
-const COLECCIONES = RUTAS.filter((ruta) => /^\/coleccion\/[^/]+$/.test(ruta)).sort();
+const COLECCIONES = RUTAS.filter((ruta) => /^\/coleccion\/[^/]+\/$/.test(ruta)).sort();
 const PRIMERA: string | undefined = COLECCIONES[0];
 
 const SIN_COLECCIONES =
@@ -101,7 +101,8 @@ test.describe('Historia 12.3 — la familia entra sola en el barrido', () => {
 
   test('y si el sitio ya trae alguna, el barrido la recoge sin excepción', () => {
     test.skip(PRIMERA === undefined, SIN_COLECCIONES);
-    expect(superficiesDelBarrido(RUTAS)).toContain(laColeccion());
+    // `superficiesDelBarrido` devuelve rutas normalizadas, que van sin barra final.
+    expect(superficiesDelBarrido(RUTAS)).toContain(rutaNormalizada(laColeccion()));
   });
 });
 

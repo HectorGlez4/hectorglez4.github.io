@@ -20,6 +20,7 @@
 
 import { citaDelDia, type Jornada } from './citaDelDia.ts';
 import type { Autor, Cita } from './publicado.ts';
+import { rutaDeCita } from './superficies.ts';
 
 const UN_DIA = 86_400_000;
 
@@ -106,7 +107,7 @@ export function canalRss(
 ): string {
   const items = entradas
     .map((e) => {
-      const url = new URL(`/cita/${e.cita.slug}`, origen).href;
+      const url = new URL(rutaDeCita(e.cita.slug), origen).href;
       return [
         '    <item>',
         `      <title>${escapar(e.autor.nombre)}</title>`,

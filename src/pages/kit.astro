@@ -46,7 +46,7 @@ const porDelante = Object.keys(fijaciones).filter((j) => j > jornada).length;
 <Armazon
   titulo={tituloDe('Kit del día')}
   descripcion="Material del día para publicar en las cuentas."
-  ruta="/kit"
+  ruta="/kit/"
 >
   <div class="pagina contenedor">
     <h1>Kit del {jornada}</h1>
@@ -78,7 +78,7 @@ const porDelante = Object.keys(fijaciones).filter((j) => j > jornada).length;
           ? 'No hay ninguna jornada preparada por delante.'
           : `Hay ${porDelante} ${porDelante === 1 ? 'jornada preparada' : 'jornadas preparadas'} por delante.`
       }{' '}
-      <a href="/lote" data-enlace-lote>Ver el lote</a>
+      <a href="/lote/" data-enlace-lote>Ver el lote</a>
     </p>
   </div>
 </Armazon>

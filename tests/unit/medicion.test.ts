@@ -11,7 +11,13 @@ import {
 } from '../../src/lib/medicion.ts';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
-import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 const aLimpiar: string[] = [];
@@ -139,7 +145,7 @@ describe('Historia 2.9 — sin configurar, el sitio no envía nada', () => {
     expect(resultado.codigo, resultado.salida).toBe(0);
 
     const html = await readFile(
-      join(resultado.proyecto, 'dist', 'cita', 'seneca-no-es-que-tengamos-poco-tiempo.html'),
+      paginaConstruida(resultado.proyecto, '/cita/seneca-no-es-que-tengamos-poco-tiempo/'),
       'utf8',
     );
     /*
@@ -176,7 +182,7 @@ describe('Retro épica 7 — el presupuesto de guion también con la medición e
     expect(resultado.codigo, resultado.salida).toBe(0);
 
     const html = await readFile(
-      join(resultado.proyecto, 'dist', 'cita', 'seneca-no-es-que-tengamos-poco-tiempo.html'),
+      paginaConstruida(resultado.proyecto, '/cita/seneca-no-es-que-tengamos-poco-tiempo/'),
       'utf8',
     );
 

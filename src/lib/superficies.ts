@@ -149,24 +149,74 @@ export const SUPERFICIES: readonly Superficie[] = [
   },
 ];
 
-/**
- * La ruta de la Página de Colección — Historia 13.3.
+/*
+ * Los constructores de ruta — uno por familia, todos aquí.
  *
- * Vive aquí porque aquí está declarada la forma que la reconoce, tres entradas más arriba, y
- * tener las dos juntas es lo que impide que se separen. La escribían a mano cinco sitios: la
- * propia página, la portada, la búsqueda, la enumeración de rutas publicadas y —desde la
- * 13.3— el enlace de destino de la Pieza de Colección.
+ * Viven junto a las declaraciones que las reconocen, unas líneas más arriba, y tenerlas
+ * juntas es lo que impide que se separen. Empezó siendo solo el de Colección (Historia
+ * 13.3), que ya entonces escribían a mano cinco sitios; las otras tres las escribían a
+ * mano quince plantillas.
  *
- * **Y ninguno de los cinco fallaría al divergir**, que es el motivo real de que esto exista.
- * Astro no comprueba que un `href` interno case con ningún `getStaticPaths`, así que renombrar
- * `src/pages/coleccion/` dejaría los cinco apuntando a un 404 con el build entero en verde;
- * el de la Pieza es además el que más tarda en verse, porque se publica en una cuenta y el
- * 404 lo encuentra un visitante semanas después. Que la forma de la ruta y su constructor
- * estén pegados es lo único que lo impide, y `tests/unit/coleccion-en-pieza.test.ts` ata lo
- * que devuelve esta función a la entrada de `SUPERFICIES` que la reconoce.
+ * **Y ninguna fallaría al divergir**, que es el motivo real de que esto exista. Astro no
+ * comprueba que un `href` interno case con ningún `getStaticPaths`, así que renombrar
+ * `src/pages/coleccion/` dejaría los cinco apuntando a un 404 con el build entero en
+ * verde; el de la Pieza es además el que más tarda en verse, porque se publica en una
+ * cuenta y el 404 lo encuentra un visitante semanas después.
+ *
+ * La **barra final** es la segunda razón, y la que los generalizó a las cuatro familias.
+ * El hospedaje sirve `foo/index.html`: `/foo/` responde directa y `/foo` llega con un
+ * 301. Mientras las rutas se escribieran a mano sin barra, el sitio se anunciaba entero
+ * en la forma que no sirve directa —canónica, sitemap y cada enlace interno pagando un
+ * salto—, y ni el build ni las pruebas decían nada porque la página, al final del
+ * redirección, existía.
+ *
+ * Que sigan pegados a su declaración lo ata `tests/unit/barra-final.test.ts`, que además
+ * niega el `href` compuesto a mano en cualquier plantilla, y
+ * `tests/unit/coleccion-en-pieza.test.ts` para el caso de la Pieza.
  */
-export function rutaDeColeccion(slug: string): string {
-  return `/coleccion/${slug}`;
+export function rutaDeCita(slug: string): string {
+  return `/cita/${slug}/`;
+}
+
+/**
+ * La ruta de un listado paginado — Autor, Tema y Colección comparten forma.
+ *
+ * La primera página **no** lleva número, y no es cosmética: `/tema/la-vida/1/` sería una
+ * segunda URL para lo que ya publica `/tema/la-vida/`, con el mismo contenido y sin nadie
+ * que lo declarase. Astro lo hace igual al paginar, y esto es lo que hace que los enlaces
+ * escritos desde fuera de la paginación digan lo mismo que ella.
+ *
+ * `rutaDePagina` se exporta aparte porque `Paginacion.astro` no sabe de qué familia es el
+ * listado que está numerando —solo tiene la base que le da Astro—, y aun así la numeración
+ * tiene que salir de aquí: componía `${base}/${n}` y, con la base ya acabada en barra, eso
+ * da `/tema/la-vida//2`.
+ */
+export function rutaDePagina(base: string, pagina: number): string {
+  /*
+   * La base se normaliza en vez de suponerse. Hoy siempre llega con barra —Astro la compone
+   * así con `trailingSlash: 'always'`—, pero es el único valor de toda la familia que **no**
+   * sale de estos constructores: `Paginacion.astro` lo toma de `pagina.url`. Sin esto, una
+   * base sin barra componía `/tema/la-vida2/` en silencio, que no es un 404 llamativo sino
+   * un enlace a una ruta que nadie declara.
+   */
+  const raiz = base.endsWith('/') ? base : `${base}/`;
+  return pagina === 1 ? raiz : `${raiz}${pagina}/`;
+}
+
+function rutaDeListado(familia: string, slug: string, pagina: number): string {
+  return rutaDePagina(`/${familia}/${slug}/`, pagina);
+}
+
+export function rutaDeAutor(slug: string, pagina = 1): string {
+  return rutaDeListado('autor', slug, pagina);
+}
+
+export function rutaDeTema(slug: string, pagina = 1): string {
+  return rutaDeListado('tema', slug, pagina);
+}
+
+export function rutaDeColeccion(slug: string, pagina = 1): string {
+  return rutaDeListado('coleccion', slug, pagina);
 }
 
 /** Las cuatro consecuencias de declarar una superficie. */
@@ -201,9 +251,13 @@ export function consecuenciasDelCaracter(caracter: Caracter): Consecuencias {
 /**
  * La ruta de una página, tal como la reconoce este módulo.
  *
- * Admite una ruta suelta —`/buscar`— o una dirección completa, que es lo que recibe el
- * filtro del sitemap. La barra final se quita: la configuración declara
- * `trailingSlash: 'never'`, y una ruta con barra y otra sin ella son la misma superficie.
+ * Admite una ruta suelta —`/buscar/`— o una dirección completa, que es lo que recibe el
+ * filtro del sitemap. La barra final se quita, y por eso las expresiones de `reconoce` se
+ * escriben sin ella: una ruta con barra y otra sin ella son la misma superficie.
+ *
+ * Que se quite aquí es lo que dejó la migración a `trailingSlash: 'always'` en un cambio de
+ * configuración y no en una reescritura del censo: las diez declaraciones de arriba siguen
+ * valiendo palabra por palabra, porque nunca vieron la barra.
  *
  * Lo que llega mal dicho se rechaza aquí y con nombre. Una página que se olvida de pasar
  * `ruta` al armazón llegaba como `undefined` y reventaba con un

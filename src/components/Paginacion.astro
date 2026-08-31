@@ -24,6 +24,7 @@
  * contradice es lo mínimo —«solo anterior y siguiente»— y no la forma del control.
  */
 import type { Page } from 'astro';
+import { rutaDePagina } from '../lib/superficies.ts';
 
 interface Props {
   pagina: Page<unknown>;
@@ -60,7 +61,7 @@ const base = pagina.url.first ?? pagina.url.current;
             {n === pagina.currentPage ? (
               <span aria-current="page">{n}</span>
             ) : (
-              <a href={n === 1 ? base : `${base}/${n}`}>
+              <a href={rutaDePagina(base, n)}>
                 <span class="oculto">Página </span>
                 {n}
               </a>

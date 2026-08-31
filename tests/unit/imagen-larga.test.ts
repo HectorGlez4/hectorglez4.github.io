@@ -1,7 +1,13 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 import { tramoDe } from '../../src/lib/tramos.ts';
 
@@ -52,26 +58,26 @@ describe('Historia 5.1 — por encima del corte no se ofrece imagen', () => {
   });
 
   it('la acción de imagen no se muestra en la Cita larga', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'cita', 'seneca-larga.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/cita/seneca-larga/'), 'utf8');
     // No se oculta con CSS ni se deshabilita: no existe en el marcado.
     expect(html).not.toContain('data-imagen');
     expect(html).not.toContain('Descargar como imagen');
   });
 
   it('la acción de copiar sigue disponible en la Cita larga', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'cita', 'seneca-larga.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/cita/seneca-larga/'), 'utf8');
     expect(html).toContain('Copiar la cita');
   });
 
   it('en la Cita corta sí se ofrece', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'cita', 'seneca-corta.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/cita/seneca-corta/'), 'utf8');
     expect(html).toContain('Descargar como imagen');
   });
 
   it('el texto de la Cita larga se muestra entero, sin recortar', async () => {
     // NFR-12 — el sistema no abrevia una Cita publicada. Que no quepa en una imagen no
     // es motivo para que no quepa en su página.
-    const html = await readFile(join(proyecto, 'dist', 'cita', 'seneca-larga.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/cita/seneca-larga/'), 'utf8');
     expect(html).toContain(larga.slice(0, 60));
     expect(html).toContain(larga.slice(-40));
 
@@ -84,7 +90,7 @@ describe('Historia 5.1 — por encima del corte no se ofrece imagen', () => {
   });
 
   it('se compone en el suelo legible y no por debajo', async () => {
-    const html = await readFile(join(proyecto, 'dist', 'cita', 'seneca-larga.html'), 'utf8');
+    const html = await readFile(paginaConstruida(proyecto, '/cita/seneca-larga/'), 'utf8');
     expect(html).toMatch(/data-tramo="sm"/);
   });
 });

@@ -23,6 +23,7 @@ import { autoresPublicados, citasDeAutor, conjuntoPublicable, type Cita } from '
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDe } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
+import { rutaDeAutor } from '../../../lib/superficies.ts';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const conjunto = await conjuntoPublicable();
@@ -39,8 +40,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { autor } = Astro.props;
 const pagina = Astro.props.page as import('astro').Page<Cita>;
 
-const rutaBase = `/autor/${autor.slug}`;
-const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
+const ruta = rutaDeAutor(autor.slug, pagina.currentPage);
 
 const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 const años =

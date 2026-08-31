@@ -23,8 +23,15 @@ function paginasConstruidas(): { ruta: string; indexable: boolean }[] {
 
       const html = readFileSync(completa, 'utf8');
       const relativa = completa.slice(dist.length).replace(/\.html$/, '');
+      /*
+       * El `index` final se quita a cualquier profundidad y deja la barra puesta: con
+       * `build.format: 'directory'` **toda** página es un `index.html` dentro de su
+       * carpeta, y la ruta que anuncia el sitemap es la que acaba en barra. Comparado
+       * contra `'/index'` a secas, cada página del sitio salía como `/cita/x/index`, no
+       * casaba con nada anunciado y las 1.715 se declaraban huérfanas.
+       */
       salida.push({
-        ruta: relativa === '/index' ? '/' : relativa,
+        ruta: relativa.replace(/(^|\/)index$/, '/'),
         indexable: !/<meta name="robots" content="noindex/.test(html),
       });
     }

@@ -11,10 +11,11 @@
 import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
 import DondeSeguirnos from './DondeSeguirnos.astro';
-import { MARCA } from '../lib/marca.ts';
+import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
 import { consecuenciasDe } from '../lib/superficies.ts';
 import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
+import { PALETA } from '../lib/lienzo.ts';
 
 interface Props {
   titulo: string;
@@ -88,7 +89,35 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
       href={new URL('/rss.xml', Astro.site).href}
     />
     {noIndexar && <meta name="robots" content="noindex, follow" />}
+    {/*
+      * El icono del sitio, en las tres formas que hacen falta.
+      *
+      * El SVG lo prefiere cualquier navegador moderno, pero **no basta**: el icono que
+      * Google pone junto al resultado de búsqueda quiere un cuadrado múltiplo de 48, y con
+      * solo el vector declarado el sitio salía sin icono en la lista de resultados. Un
+      * resultado sin marca al lado, en un sitio cuyo argumento es la procedencia
+      * documentada, es exactamente la impresión que no interesa dar.
+      *
+      * `sizes` va explícito en los PNG porque es lo que deja elegir sin descargar los dos,
+      * y `apple-touch-icon` va aparte porque iOS no mira los `rel="icon"`: sin él, añadir
+      * el sitio a la pantalla de inicio guarda una captura de la página.
+      *
+      * Las rutas las publica `src/pages/icono/[tamano].png.ts` a partir de la misma marca, y
+      * los lados se recorren desde `TAMANOS_DEL_ICONO` en vez de repetirse aquí: escritos a
+      * mano, quitar un lado de la tupla dejaba un `<link>` apuntando a un 404 con el build
+      * en verde, que es la divergencia que `superficies.ts` existe para impedir.
+      */}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {TAMANOS_DEL_ICONO.filter((lado) => lado !== LADO_DE_IOS).map((lado) => (
+      <link rel="icon" href={`/icono/${lado}.png`} type="image/png" sizes={`${lado}x${lado}`} />
+    ))}
+    <link
+      rel="apple-touch-icon"
+      href={`/icono/${LADO_DE_IOS}.png`}
+      sizes={`${LADO_DE_IOS}x${LADO_DE_IOS}`}
+    />
+    {/* El color con el que el navegador tiñe su interfaz: el papel del sitio, no el suyo. */}
+    <meta name="theme-color" content={PALETA.papel} />
 
     {/*
       * Metadatos de previsualización — FR-19. `og:` lo leen casi todas las redes y
@@ -119,7 +148,7 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
 
     <header class="cabecera contenedor">
       <a class="marca" href="/">{MARCA}</a>
-      <a class="buscar" href="/buscar">Buscar</a>
+      <a class="buscar" href="/buscar/">Buscar</a>
     </header>
 
     {/*

@@ -10,6 +10,7 @@
  * acertarle a una línea de texto con el pulgar es justo el gesto que UJ-1 no concede.
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
+import { rutaDeCita } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
@@ -32,7 +33,7 @@ const fragmento =
 ---
 
 <li class="tarjeta">
-  <a href={`/cita/${cita.slug}`}>
+  <a href={rutaDeCita(cita.slug)}>
     <span class="fragmento">«{fragmento}»</span>
     {autor && <span class="autor">{autor.nombre}</span>}
   </a>

@@ -79,7 +79,7 @@ test.describe('Historia 2.8 — WCAG 2.1 AA', () => {
 
 test.describe('Historia 2.8 — foco', () => {
   test('el foco es visible con anillo de 2px separado 2px', async ({ page }) => {
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
     await page.getByRole('button', { name: 'Copiar la cita' }).focus();
 
     const anillo = await page
@@ -121,7 +121,7 @@ test.describe('Historia 2.8 — foco', () => {
      * criterio de al lado. Para eso está el enlace de salto, que es lo primero que
      * recibe foco en toda la página.
      */
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
 
     const orden = await page.evaluate(() => {
       const enfocables = [...document.querySelectorAll('main a, main button')];
@@ -136,13 +136,13 @@ test.describe('Historia 2.8 — foco', () => {
   });
 
   test('el enlace de salto es lo primero que recibe foco', async ({ page }) => {
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => document.activeElement?.className)).toContain('saltar');
   });
 
   test('todo el sitio se recorre con teclado', async ({ page }) => {
-    await page.goto('/autor/antonio-machado');
+    await page.goto('/autor/antonio-machado/');
     const alcanzados = new Set<string>();
 
     for (let i = 0; i < 30; i += 1) {
@@ -178,7 +178,7 @@ test.describe('Historia 2.8 — semántica', () => {
   });
 
   test('la Cita se marca como cita con su atribución asociada', async ({ page }) => {
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
     await expect(page.locator('figure > blockquote')).toHaveCount(1);
     await expect(page.locator('figure > figcaption')).toHaveCount(1);
   });
@@ -198,7 +198,7 @@ test.describe('Historia 2.8 — responsive', () => {
 
   test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
-    await page.goto('/cita/antonio-machado-hoy-es-siempre-todavia');
+    await page.goto('/cita/antonio-machado-hoy-es-siempre-todavia/');
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
@@ -225,7 +225,7 @@ test.describe('Historia 2.8 — responsive', () => {
   test('el ancho extra de escritorio es margen y no contenido nuevo', async ({ page }) => {
     const bloques = async (ancho: number) => {
       await page.setViewportSize({ width: ancho, height: 900 });
-      await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+      await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
       return page.evaluate(() => document.querySelectorAll('main *').length);
     };
 
@@ -241,7 +241,7 @@ test.describe('Historia 2.8 — responsive', () => {
   }) => {
     // Zoom del navegador al 200 % equivale a la mitad de ancho de ventana gráfica.
     await page.setViewportSize({ width: 640, height: 512 });
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
 
     const desborda = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -294,7 +294,7 @@ test.describe('Historia 2.8 — sin muro de entrada ni movimiento impuesto', () 
   });
 
   test('sin movimiento reducido, las transiciones no pasan de 150 ms', async ({ page }) => {
-    await page.goto('/cita/antonio-machado-hoy-es-siempre-todavia');
+    await page.goto('/cita/antonio-machado-hoy-es-siempre-todavia/');
     const duraciones = await page.evaluate(() =>
       [...document.querySelectorAll('body *')]
         .flatMap((n) => getComputedStyle(n).transitionDuration.split(', '))

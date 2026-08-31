@@ -209,7 +209,7 @@ describe('Historia 13.3 — una Colección anuncia su propia Pieza', () => {
      */
     const marcados = [...hecha.salida.matchAll(/\?de=([a-z]+)/g)].map((m) => m[1]);
     expect(marcados).toEqual(['instagram']);
-    expect(hecha.salida).toContain(`${SITIO}/coleccion/${SLUG_COLECCION}?de=instagram`);
+    expect(hecha.salida).toContain(`${SITIO}/coleccion/${SLUG_COLECCION}/?de=instagram`);
     expect(hecha.salida).not.toContain('/cita/');
 
     expect(await corpusEnDisco(corpus)).toEqual(antes);

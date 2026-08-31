@@ -17,7 +17,7 @@ test.describe('Historia 4.3 — el 404 no es un muro', () => {
     await page.goto(INEXISTENTE);
     const campo = page.locator('input[type="search"]');
     await expect(campo).toBeVisible();
-    await expect(page.locator('form[role="search"]')).toHaveAttribute('action', '/buscar');
+    await expect(page.locator('form[role="search"]')).toHaveAttribute('action', '/buscar/');
   });
 
   test('trae la Cita del Día, la misma que la portada', async ({ page }) => {

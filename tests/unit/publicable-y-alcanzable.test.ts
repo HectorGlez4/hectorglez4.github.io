@@ -10,6 +10,7 @@ import {
   coleccionValida,
   construirConCorpus,
   limpiar,
+  paginaConstruida,
 } from './ayuda/construir.js';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import {
@@ -371,7 +372,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
    */
   describe('el lote hereda su carácter de la declaración, como el Kit', () => {
     it('lleva `noindex` y no entra en el índice de la búsqueda propia', async () => {
-      const html = await readFile(join(proyecto, 'dist', 'lote.html'), 'utf8');
+      const html = await readFile(paginaConstruida(proyecto, '/lote/'), 'utf8');
       expect(html).toMatch(/<meta name="robots" content="noindex/);
       // La tercera consecuencia sale del mismo booleano que las otras dos, así que no puede
       // estar `noindex` fuera y visible dentro. Esto lo mira sobre el HTML de verdad.

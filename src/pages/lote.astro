@@ -61,7 +61,7 @@ const jornadas = lote.map((dia) => ({
 <Armazon
   titulo={tituloDe('Lote de jornadas')}
   descripcion="Material ya compuesto de las jornadas fijadas por delante."
-  ruta="/lote"
+  ruta="/lote/"
 >
   <div class="pagina contenedor">
     <h1>Lote desde el {jornada}</h1>
@@ -85,7 +85,7 @@ const jornadas = lote.map((dia) => ({
             sale la Cita del Día que le toca por rotación.
           </p>
           <p class="aviso">
-            Hoy ya está compuesto en <a href="/kit" data-enlace-kit>el Kit del día</a>. Para
+            Hoy ya está compuesto en <a href="/kit/" data-enlace-kit>el Kit del día</a>. Para
             dejar preparados los días que vienen, desde el ordenador:
           </p>
           <p class="orden">
@@ -143,7 +143,7 @@ const jornadas = lote.map((dia) => ({
          * desde la navegación pública, porque a esta página tampoco llega ningún enlace.
          */
         <p class="paso">
-          Lo de hoy está en <a href="/kit" data-enlace-kit>el Kit del día</a>.
+          Lo de hoy está en <a href="/kit/" data-enlace-kit>el Kit del día</a>.
         </p>
       )
     }

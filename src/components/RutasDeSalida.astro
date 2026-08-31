@@ -15,6 +15,7 @@
  * dos, y con razón: el acento deja de señalar en cuanto se reparte.
  */
 import type { Cita, Autor, Tema } from '../lib/publicado.ts';
+import { rutaDeAutor, rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
 
 interface Props {
   autor: Autor;
@@ -46,7 +47,7 @@ const fragmento = (texto: string) =>
         <ul class="hermanas">
           {relacionadas.map((otra) => (
             <li>
-              <a href={`/cita/${otra.slug}`}>«{fragmento(otra.texto)}»</a>
+              <a href={rutaDeCita(otra.slug)}>«{fragmento(otra.texto)}»</a>
             </li>
           ))}
         </ul>
@@ -61,7 +62,7 @@ const fragmento = (texto: string) =>
         <ul class="chips">
           {temasAMostrar.map((tema) => (
             <li>
-              <a class="chip" href={`/tema/${tema.slug}`}>
+              <a class="chip" href={rutaDeTema(tema.slug)}>
                 {tema.nombre}
               </a>
             </li>
@@ -82,7 +83,7 @@ const fragmento = (texto: string) =>
         <h2>Seguir leyendo</h2>
         <ul class="chips">
           <li>
-            <a class="chip" href={`/autor/${autor.slug}`}>
+            <a class="chip" href={rutaDeAutor(autor.slug)}>
               Sobre {autor.nombre}
             </a>
           </li>

@@ -18,6 +18,7 @@
  */
 import type { Cita, Tema } from '../lib/publicado.ts';
 import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+import { rutaDeTema } from '../lib/superficies.ts';
 
 interface Props {
   tema: Tema;
@@ -30,7 +31,7 @@ interface Props {
 const { tema, citas, canonica, tramo } = Astro.props;
 
 /* Sin número de página, por lo mismo que el Autor: el Tema es el mismo en la página 2. */
-const idDelTema = new URL(`/tema/${tema.slug}#tema`, canonica).href;
+const idDelTema = new URL(`${rutaDeTema(tema.slug)}#tema`, canonica).href;
 
 const datos = {
   '@context': 'https://schema.org',

@@ -196,7 +196,7 @@ test.describe('Historia 10.3 — los controles no son contenido buscable', () =>
    */
   test('la parte indexable de una Página de Cita es la Cita, y nada más', () => {
     const html = readFileSync(
-      join(dist, 'cita', 'miguel-de-cervantes-la-libertad-sancho-es-uno-de-los.html'),
+      join(dist, 'cita', 'miguel-de-cervantes-la-libertad-sancho-es-uno-de-los', 'index.html'),
       'utf8',
     );
 

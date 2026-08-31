@@ -24,7 +24,7 @@ test.describe('Historia 7.1 — el dominio en lo que se despliega', () => {
       const entradas = [...cuerpo.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
       expect(entradas.length).toBeGreaterThan(0);
       for (const entrada of entradas) {
-        // La portada sale sin barra final: el sitio construye con `trailingSlash: 'never'`.
+        // La portada es el único `<loc>` sin ruta detrás: sale como el origen y su barra.
         const enElDominio = entrada === SITIO || entrada.startsWith(`${SITIO}/`);
         expect(enElDominio, `entrada fuera del dominio: ${entrada}`).toBe(true);
       }

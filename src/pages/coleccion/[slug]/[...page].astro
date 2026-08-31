@@ -103,8 +103,7 @@ const { autores, page: pagina } = Astro.props;
  */
 const coleccion: ColeccionPublicada = Astro.props.coleccion;
 
-const rutaBase = rutaDeColeccion(coleccion.slug);
-const ruta = pagina.currentPage === 1 ? rutaBase : `${rutaBase}/${pagina.currentPage}`;
+const ruta = rutaDeColeccion(coleccion.slug, pagina.currentPage);
 const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 
 /*

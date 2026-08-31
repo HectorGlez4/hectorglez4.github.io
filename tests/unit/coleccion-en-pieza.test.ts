@@ -8,7 +8,7 @@ import {
   type Cita,
   type ColeccionPublicada,
 } from '../../src/lib/publicado.ts';
-import { SUPERFICIES, rutaDeColeccion } from '../../src/lib/superficies.ts';
+import { SUPERFICIES, rutaDeColeccion, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { MAX_CARACTERES_IMAGEN, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
 
 /**
@@ -290,7 +290,8 @@ describe('Historia 13.3 — la ruta de destino sale de donde está declarada la 
     const familia = SUPERFICIES.find((s) => s.pagina.startsWith('coleccion/'));
     expect(familia, 'no hay familia de Colección declarada').toBeDefined();
     for (const slug of ['frases-cortas', '1984', 'a']) {
-      expect(familia!.reconoce.test(rutaDeColeccion(slug))).toBe(true);
+      // `reconoce` se escribe contra la ruta normalizada, que es la que no lleva barra final.
+      expect(familia!.reconoce.test(rutaNormalizada(rutaDeColeccion(slug)))).toBe(true);
     }
     // Y es una ruta de producto: la Pieza enlaza a algo anunciable, no a una página de servicio.
     expect(familia!.caracter).toBe('producto');

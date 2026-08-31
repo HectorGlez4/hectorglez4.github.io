@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
+import { rutaDeTema } from '../../src/lib/superficies.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
 
@@ -16,8 +17,8 @@ test.describe('Historia 2.7 — sitemap', () => {
 
     expect(rutas).toContain('/');
     expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBeGreaterThan(30);
-    expect(rutas).toContain('/autor/antonio-machado');
-    expect(rutas).toContain('/tema/la-vida');
+    expect(rutas).toContain('/autor/antonio-machado/');
+    expect(rutas).toContain('/tema/la-vida/');
   });
 
   test('todo lo que anuncia existe de verdad', async ({ request }) => {
@@ -34,8 +35,13 @@ test.describe('Historia 2.7 — sitemap', () => {
      * existe: se deriva en vez de fijarse, y si no hay ninguno, no se afirma nada sobre él.
      */
     const bajoUmbral = temaBajoUmbral();
-    if (bajoUmbral !== undefined) expect(rutas).not.toContain(`/tema/${bajoUmbral}`);
-    expect(rutas.filter((r) => /\/(autor|tema)\/[^/]+\/\d+$/.test(r))).toEqual([]);
+    /*
+     * Las dos se escriben contra la forma que el sitemap anuncia hoy, con barra final. Con
+     * la forma vieja seguían pasando y ya no podían fallar: `toContain` compara el elemento
+     * entero, y `\d+$` no casa con `/autor/x/2/`. Dos guardias mudos.
+     */
+    if (bajoUmbral !== undefined) expect(rutas).not.toContain(rutaDeTema(bajoUmbral));
+    expect(rutas.filter((r) => /\/(autor|tema|coleccion)\/[^/]+\/\d+\/$/.test(r))).toEqual([]);
   });
 
   test('nada de lo que anuncia se declara no indexable', async ({ request }) => {
@@ -71,7 +77,7 @@ test.describe('Historia 2.7 — cabecera de cada página', () => {
 
 test.describe('Historia 2.7 — datos estructurados', () => {
   test('la Página de Cita expone la cita y su autor', async ({ page }) => {
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
 
     const datos = JSON.parse(
       await page.locator('script[type="application/ld+json"]').innerText(),
@@ -89,7 +95,7 @@ test.describe('Historia 2.7 — datos estructurados', () => {
   });
 
   test('no se declara una obra que no consta', async ({ page }) => {
-    await page.goto('/cita/concepcion-arenal-odia-el-delito-y-compadece-al-delincuente');
+    await page.goto('/cita/concepcion-arenal-odia-el-delito-y-compadece-al-delincuente/');
     const datos = JSON.parse(
       await page.locator('script[type="application/ld+json"]').innerText(),
     );

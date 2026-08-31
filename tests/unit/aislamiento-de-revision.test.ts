@@ -9,6 +9,7 @@ import {
   citaValida,
   construirConCorpus,
   limpiar,
+  paginaConstruida,
 } from './ayuda/construir.js';
 
 const aLimpiar: string[] = [];
@@ -58,7 +59,7 @@ describe('Historia 1.3 — lo no publicado no existe para el build', () => {
     });
     expect(codigo).toBe(0);
 
-    const sonda = await readFile(join(proyecto, 'dist', 'sonda.html'), 'utf8');
+    const sonda = await readFile(paginaConstruida(proyecto, '/sonda/'), 'utf8');
     expect(sonda).toContain('seneca-no-es-que-tengamos-poco-tiempo');
     expect(sonda).not.toContain('seneca-la-vida-si-sabes-usarla-es-larga');
   });
@@ -97,8 +98,8 @@ describe('Historia 1.3 — lo no publicado no existe para el build', () => {
       'citas/seneca--la-vida.md': CITA_EN_REVISION,
     });
 
-    const antes = await readFile(join(enRevision.proyecto, 'dist', 'sonda.html'), 'utf8');
-    const despues = await readFile(join(publicada.proyecto, 'dist', 'sonda.html'), 'utf8');
+    const antes = await readFile(paginaConstruida(enRevision.proyecto, '/sonda/'), 'utf8');
+    const despues = await readFile(paginaConstruida(publicada.proyecto, '/sonda/'), 'utf8');
 
     expect(antes).not.toContain('seneca-la-vida-si-sabes-usarla-es-larga');
     expect(despues).toContain('seneca-la-vida-si-sabes-usarla-es-larga');

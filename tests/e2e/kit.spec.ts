@@ -9,7 +9,7 @@ const dist = join(new URL('../..', import.meta.url).pathname, 'dist');
 
 test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
   test('la Imagen está dibujada sin pulsar nada', async ({ page }) => {
-    await page.goto('/kit');
+    await page.goto('/kit/');
 
     // Se comprueba que el lienzo tiene píxeles, no solo que el elemento existe: un canvas
     // vacío también está «visible» y no sirve para publicar nada.
@@ -21,7 +21,7 @@ test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
 
   test('el pie de atribución está escrito y se puede copiar', async ({ page, context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-    await page.goto('/kit');
+    await page.goto('/kit/');
 
     const boton = page.locator('[data-copiar]').first();
     await expect(boton).toBeVisible();
@@ -34,7 +34,7 @@ test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
   });
 
   test('trae el enlace a la Página de Cita, y esa página existe', async ({ page, request }) => {
-    await page.goto('/kit');
+    await page.goto('/kit/');
     const href = await page.locator('[data-enlace-cita]').first().getAttribute('href');
     expect(href).toMatch(/^\/cita\//);
     expect((await request.get(href!, { maxRedirects: 0 })).status()).toBe(200);
@@ -44,7 +44,7 @@ test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
     await page.goto('/');
     const enPortada = await page.locator('.ir a').getAttribute('href');
 
-    await page.goto('/kit');
+    await page.goto('/kit/');
     const enElKit = await page.locator('[data-enlace-cita]').first().getAttribute('href');
 
     // Si el Kit publicara otra, las cuentas y el sitio contarían cosas distintas ese día.
@@ -52,7 +52,7 @@ test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
   });
 
   test('la imagen se lleva con el mismo gesto que en una Página de Cita', async ({ page }) => {
-    await page.goto('/kit');
+    await page.goto('/kit/');
     await page.waitForFunction(() => {
       const l = document.querySelector('[data-lienzo]') as HTMLCanvasElement | null;
       return !!l && l.getContext('2d')!.getImageData(0, 0, 1, 1).data[3] === 255;
@@ -67,7 +67,7 @@ test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
 
 test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
   test('se declara noindex', async ({ page }) => {
-    await page.goto('/kit');
+    await page.goto('/kit/');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 
@@ -85,7 +85,7 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
      * herramienta sin enlaces entrantes dejaba de ser privada por la puerta de atrás, y
      * de paso ensuciaba las búsquedas con una página que no es contenido.
      */
-    await page.goto('/buscar');
+    await page.goto('/buscar/');
     await page.locator('[data-consulta]').fill('kit del día');
     await page.waitForFunction(
       () =>
@@ -99,6 +99,7 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
       ns.map((n) => n.getAttribute('href')),
     );
     expect(enlaces).not.toContain('/kit');
+    expect(enlaces).not.toContain('/kit/');
   });
 
   test('ninguna página pública enlaza al Kit', () => {
@@ -132,7 +133,9 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
         }
         if (ajena) continue;
 
-        if (/href="\/kit"/.test(readFileSync(ruta, 'utf8'))) enlazan.push(relativa);
+        // La barra final es opcional en el patrón a propósito: escrito solo contra la forma
+        // vieja, este guardia dejó de casar con nada al migrar y pasó a estar siempre verde.
+        if (/href="\/kit\/?"/.test(readFileSync(ruta, 'utf8'))) enlazan.push(relativa);
       }
     })(dist);
 
@@ -142,8 +145,8 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
   test('y el enlace que sí existe sale de una superficie que tampoco es alcanzable', () => {
     // Sin esto, la comprobación de arriba se volvería verde el día que nadie enlazara al
     // Kit por ningún lado, y dejaría de vigilar nada.
-    const lote = readFileSync(join(dist, 'lote.html'), 'utf8');
-    expect(lote).toContain('href="/kit"');
+    const lote = readFileSync(join(dist, 'lote', 'index.html'), 'utf8');
+    expect(lote).toContain('href="/kit/"');
     expect(caracterDe('/lote')).toBe('ajena');
   });
 });

@@ -27,6 +27,7 @@ import {
 import { MAX_CITAS_RELACIONADAS } from '../../lib/umbrales.ts';
 import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
+import { rutaDeCita } from '../../lib/superficies.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
@@ -54,13 +55,13 @@ const { cita, autor, relacionadas, chips, temasDelSitio } = Astro.props;
  */
 const recorte = cita.texto.length > 110 ? `${cita.texto.slice(0, 109)}…` : cita.texto;
 const titulo = tituloDe(`«${recorte}» — ${autor.nombre}`);
-const canonica = new URL(`/cita/${cita.slug}`, Astro.site).href;
+const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
 ---
 
 <Armazon
   titulo={titulo}
   descripcion={`${cita.texto} — ${autor.nombre}.`}
-  ruta={`/cita/${cita.slug}`}
+  ruta={rutaDeCita(cita.slug)}
   tarjeta={`/tarjeta/${cita.slug}.png`}
   vistaDeCita
   tipo="cita"

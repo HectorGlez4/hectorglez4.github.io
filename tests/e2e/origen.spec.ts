@@ -7,7 +7,7 @@ const CITA = '/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los';
 
 test.describe('Historia 8.2 — el Kit ofrece un enlace por red', () => {
   test('hay uno por cuenta y cada uno lleva su marca', async ({ page }) => {
-    await page.goto('/kit');
+    await page.goto('/kit/');
     const enlaces = page.locator('[data-redes]').first().locator('a');
     await expect(enlaces).toHaveCount(REDES.length);
 
@@ -22,7 +22,7 @@ test.describe('Historia 8.2 — el Kit ofrece un enlace por red', () => {
   });
 
   test('los enlaces marcados llevan a la Página de Cita de verdad', async ({ page, request }) => {
-    await page.goto('/kit');
+    await page.goto('/kit/');
     const href = (await page.locator('[data-red="instagram"]').first().getAttribute('href'))!;
     // El alojamiento estático ignora la cadena de consulta y sirve la misma página.
     expect((await request.get(href, { maxRedirects: 0 })).status()).toBe(200);

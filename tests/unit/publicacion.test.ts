@@ -3,7 +3,13 @@ import { readFileSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
-import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { citaDelDia } from '../../src/lib/citaDelDia.ts';
 import type { Cita } from '../../src/lib/publicado.ts';
 
@@ -118,8 +124,8 @@ describe('Historia 4.2 — la jornada en curso no cambia con un push', () => {
     expect(mañana.codigo, mañana.salida).toBe(0);
 
     const destacada = async (proyecto: string) => {
-      const html = await readFile(join(proyecto, 'dist', 'index.html'), 'utf8');
-      return /href="\/cita\/([^"]+)"[^>]*>Ver esta cita/.exec(html)?.[1];
+      const html = await readFile(paginaConstruida(proyecto, '/'), 'utf8');
+      return /href="\/cita\/([^"/]+)\/"[^>]*>Ver esta cita/.exec(html)?.[1];
     };
 
     const deHoy = await destacada(hoy.proyecto);

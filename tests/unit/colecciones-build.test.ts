@@ -8,6 +8,7 @@ import {
   coleccionValida,
   construirConCorpus,
   limpiar,
+  paginaConstruida,
 } from './ayuda/construir.js';
 import { MAX_CARACTERES_CRITERIO, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
 
@@ -85,7 +86,7 @@ async function construir(corpus: Record<string, string>) {
   return resultado;
 }
 
-const leerSonda = (proyecto: string) => readFile(join(proyecto, 'dist', 'sonda.html'), 'utf8');
+const leerSonda = (proyecto: string) => readFile(paginaConstruida(proyecto, '/sonda/'), 'utf8');
 
 describe('Historia 12.2 — la pertenencia se resuelve al construir', () => {
   it('una Colección con miembros publicados resuelve, y ninguna Cita se ha modificado', async () => {

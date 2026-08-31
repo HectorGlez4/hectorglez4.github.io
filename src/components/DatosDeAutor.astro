@@ -21,6 +21,7 @@
  */
 import type { Autor, Cita } from '../lib/publicado.ts';
 import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+import { rutaDeAutor } from '../lib/superficies.ts';
 
 interface Props {
   autor: Autor;
@@ -41,7 +42,7 @@ const { autor, citas, canonica, tramo } = Astro.props;
  * en la 1, y un `@id` que arrastrara el número partiría al Autor en tantas personas como
  * páginas tenga su listado.
  */
-const idDeLaPersona = new URL(`/autor/${autor.slug}#persona`, canonica).href;
+const idDeLaPersona = new URL(`${rutaDeAutor(autor.slug)}#persona`, canonica).href;
 
 const datos = {
   '@context': 'https://schema.org',

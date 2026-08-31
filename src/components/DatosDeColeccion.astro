@@ -24,6 +24,7 @@
  */
 import type { Cita } from '../lib/publicado.ts';
 import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+import { rutaDeColeccion } from '../lib/superficies.ts';
 
 interface Props {
   slug: string;
@@ -38,7 +39,7 @@ interface Props {
 const { slug, nombre, criterio, citas, canonica, tramo } = Astro.props;
 
 /* Sin número de página, como el Tema y el Autor: la Colección es la misma en la página 2. */
-const idDeLaColeccion = new URL(`/coleccion/${slug}#coleccion`, canonica).href;
+const idDeLaColeccion = new URL(`${rutaDeColeccion(slug)}#coleccion`, canonica).href;
 
 const datos = {
   '@context': 'https://schema.org',

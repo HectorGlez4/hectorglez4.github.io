@@ -439,3 +439,26 @@ function aYaml(objeto: Record<string, unknown>, sangria = ''): string {
   }
   return salida;
 }
+
+/**
+ * El fichero que publica una ruta, sin que la prueba tenga que saber cómo se publica.
+ *
+ * Lo escribían a mano dieciséis ficheros de prueba —`join(proyecto, 'dist', 'cita',
+ * 'x.html')`—, y eso ató la suite entera a `build.format`. Al pasar a `'directory'` para
+ * que `/cita/x/` dejara de dar 404, ochenta pruebas fallaron por la ruta del fichero y
+ * ninguna por lo que de verdad comprobaban.
+ *
+ * La 404 es la excepción y no es de Astro: el hospedaje la busca en `dist/404.html`, en la
+ * raíz, y por eso se publica ahí aunque todo lo demás vaya en su carpeta.
+ */
+export function paginaEnDist(dist: string, ruta: string): string {
+  const limpia = ruta.replace(/^\/+/, '').replace(/\/+$/, '');
+  if (limpia === '') return join(dist, 'index.html');
+  if (limpia === '404') return join(dist, '404.html');
+  return join(dist, ...limpia.split('/'), 'index.html');
+}
+
+/** Lo mismo, desde la raíz del proyecto, que es como lo tienen casi todas las pruebas. */
+export function paginaConstruida(proyecto: string, ruta: string): string {
+  return paginaEnDist(join(proyecto, 'dist'), ruta);
+}

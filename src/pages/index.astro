@@ -19,7 +19,7 @@ import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { modelosEn } from '../lib/ingreso.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
-import { rutaDeColeccion } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
@@ -70,7 +70,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
           <h2>La cita de hoy</h2>
           <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
           <p class="ir">
-            <a href={`/cita/${seleccion.cita.slug}`}>Ver esta cita</a>
+            <a href={rutaDeCita(seleccion.cita.slug)}>Ver esta cita</a>
           </p>
         </section>
       ) : (
@@ -88,7 +88,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
           <ul class="chips">
             {temas.map((tema) => (
               <li>
-                <a class="chip" href={`/tema/${tema.slug}`}>
+                <a class="chip" href={rutaDeTema(tema.slug)}>
                   {tema.nombre}
                 </a>
               </li>
@@ -144,7 +144,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
         {
           autores.map((autor) => (
             <li>
-              <a href={`/autor/${autor.slug}`}>{autor.nombre}</a>
+              <a href={rutaDeAutor(autor.slug)}>{autor.nombre}</a>
             </li>
           ))
         }

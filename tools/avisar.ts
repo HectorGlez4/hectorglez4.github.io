@@ -50,6 +50,13 @@ import {
   type AvisoDeIndexNow,
 } from '../src/lib/buscadores.ts';
 import { SITIO } from '../src/lib/dominio.ts';
+/*
+ * Las rutas se componen con los constructores y no a mano, por lo mismo que en el sitio:
+ * lo que se anuncia aquí tiene que ser la canónica. Escritas a mano se quedaron sin barra
+ * final al migrar, y este aviso —que corre tras cada despliegue— pasó a entregar al
+ * buscador la forma que redirige, que es justo lo que la migración venía a quitar.
+ */
+import { rutaDeAutor, rutaDeCita, rutaDeTema } from '../src/lib/superficies.ts';
 import { opcion } from './lib/cli.ts';
 import { leerCitas, rutasDelCorpus, separarFrontmatter } from './lib/corpus.ts';
 
@@ -100,14 +107,14 @@ export async function rutasTocadas(
     const cita = porRuta.get(resolve(join(raiz, fichero)));
 
     if (cita !== undefined) {
-      rutas.add(`/cita/${cita.slug}`);
-      if (cita.autor) rutas.add(`/autor/${cita.autor}`);
-      for (const tema of cita.temas ?? []) rutas.add(`/tema/${tema}`);
+      rutas.add(rutaDeCita(cita.slug));
+      if (cita.autor) rutas.add(rutaDeAutor(cita.autor));
+      for (const tema of cita.temas ?? []) rutas.add(rutaDeTema(tema));
       continue;
     }
 
     const retirada = await slugDeCitaRetirada(raiz, desde, fichero);
-    if (retirada !== undefined) rutas.add(`/cita/${retirada}`);
+    if (retirada !== undefined) rutas.add(rutaDeCita(retirada));
   }
 
   return [...rutas];

@@ -19,6 +19,7 @@ import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia
 import { modelosEn } from '../lib/ingreso.ts';
 import { tituloDe } from '../lib/marca.ts';
 import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
+import { rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
@@ -39,7 +40,7 @@ const autorDelDia = seleccion
     <h1>Esa página no está aquí.</h1>
     <p class="entrada">Puede que el enlace fuera antiguo. Busca la frase que te trajo.</p>
 
-    <form class="formulario" role="search" action="/buscar" method="get">
+    <form class="formulario" role="search" action="/buscar/" method="get">
       <label for="consulta">Escribe un fragmento, un autor o un tema.</label>
       <input
         id="consulta"
@@ -56,7 +57,7 @@ const autorDelDia = seleccion
           <h2>La cita de hoy</h2>
           <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
           <p class="ir">
-            <a href={`/cita/${seleccion.cita.slug}`}>Ver esta cita</a>
+            <a href={rutaDeCita(seleccion.cita.slug)}>Ver esta cita</a>
           </p>
         </section>
       )
@@ -69,7 +70,7 @@ const autorDelDia = seleccion
           <ul class="chips">
             {temas.map((tema) => (
               <li>
-                <a class="chip" href={`/tema/${tema.slug}`}>
+                <a class="chip" href={rutaDeTema(tema.slug)}>
                   {tema.nombre}
                 </a>
               </li>

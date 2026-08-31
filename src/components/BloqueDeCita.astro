@@ -12,6 +12,7 @@
 import { tramoDe } from '../lib/tramos.ts';
 import Atribucion from './Atribucion.astro';
 import type { Cita, Autor } from '../lib/publicado.ts';
+import { rutaDeAutor } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
@@ -25,7 +26,7 @@ const tramo = tramoDe(cita.texto);
 ---
 
 <figure class="bloque">
-  <blockquote class="cita" data-tramo={tramo.nombre} cite={`/autor/${autor.slug}`}>
+  <blockquote class="cita" data-tramo={tramo.nombre} cite={rutaDeAutor(autor.slug)}>
     {
       /*
        * El texto va envuelto en comillas angulares por marcado y no por `::before`

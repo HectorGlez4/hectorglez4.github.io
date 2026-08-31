@@ -1,7 +1,13 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { AUTOR_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 
 /**
@@ -52,7 +58,7 @@ describe('Historia 8.1 — la reconstrucción diaria mueve el Kit sola', () => {
     const resultado = await construirConCorpus(CORPUS, { jornada });
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).toBe(0);
-    kits[jornada] = await readFile(join(resultado.proyecto, 'dist', 'kit.html'), 'utf8');
+    kits[jornada] = await readFile(paginaConstruida(resultado.proyecto, '/kit/'), 'utf8');
   });
 
   it('el Kit de una jornada y el de la siguiente no traen la misma Cita', () => {
@@ -82,7 +88,7 @@ describe('Historia 8.1 — cuando la Cita del Día no admite Imagen', () => {
       const resultado = await construirConCorpus(CORPUS, { jornada });
       aLimpiar.push(resultado.proyecto);
       expect(resultado.codigo, resultado.salida).toBe(0);
-      const kit = await readFile(join(resultado.proyecto, 'dist', 'kit.html'), 'utf8');
+      const kit = await readFile(paginaConstruida(resultado.proyecto, '/kit/'), 'utf8');
       if (kit.includes('data-sin-imagen')) html = kit;
     }
     expect(html, 'ninguna jornada compuso la Cita larga').not.toBe('');
