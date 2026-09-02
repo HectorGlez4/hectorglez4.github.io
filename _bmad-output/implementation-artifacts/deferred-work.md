@@ -540,3 +540,33 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
   `src/lib/lienzo.ts` y `--papel` en `src/styles/tokens.css` escriben `#faf7f0` cada uno por su
   cuenta, y ninguno falla si el otro cambia. La duplicación es anterior a este cambio —la
   paleta del ráster ya existía—; lo que hace `theme-color` es añadirle un consumidor más.
+
+- source_spec: none
+  summary: Una prueba que verifique la INVARIANCIA del dist/ con el Modelo apagado, no solo su determinismo.
+  evidence: |-
+    Separado del barrido de accesibilidad con el Modelo encendido en la sesión del
+    2026-09-02, por el control de alcance de bmad-build: son dos entregables
+    independientes. Se eligió el barrido primero porque encender las donaciones es
+    inminente —los cuatro LC quedaron verificados ese día— y el barrido es la guarda del
+    estado al que se entra; la invariancia protege el estado del que se sale. Sigue
+    valiendo, y no poco: los otros tres Modelos —afiliación, producto propio y publicidad—
+    siguen apagados y heredan la misma promesa de UX-DR35. El hallazgo original, con su
+    evidencia, está más arriba en este mismo fichero (source_spec: spec-14-2).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-barrido-de-accesibilidad-con-el-modelo-encendido.md`
+  summary: Dos punteros a «DESPLIEGUE.md §3» para el requisito manual del encendido, que vive en §4.
+  evidence: |-
+    `tests/unit/ingreso.test.ts:227` y `tools/lib/ingresos.ts:99` mandan a §3, que es la
+    medición; el requisito de encendido es §4. Preexistente —ninguno de los dos lo tocó
+    esta sesión—, y sale a la luz porque §4 acaba de ganar un segundo requisito. Quien siga
+    el puntero lee el apartado del receptor y no encuentra lo que busca.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-barrido-de-accesibilidad-con-el-modelo-encendido.md`
+  summary: Dos ficheros e2e lanzan un `astro build` cada uno y `fullyParallel` no los serializa.
+  evidence: |-
+    `tests/e2e/ingreso-accesible.spec.ts` y `tests/e2e/receptor.spec.ts` construyen ambos un
+    proyecto temporal. `playwright.config.ts` declara `fullyParallel: true` sin fijar
+    `workers`, así que pueden coincidir compartiendo `node_modules`. `vitest.config.ts`
+    desactiva `fileParallelism` exactamente por ese motivo, y ahí está el precedente. Hoy no
+    ha fallado —la tirada de comprobación salió en verde—, así que es riesgo medido y no
+    avería: conviene decidirlo con una medida, no de oído.
