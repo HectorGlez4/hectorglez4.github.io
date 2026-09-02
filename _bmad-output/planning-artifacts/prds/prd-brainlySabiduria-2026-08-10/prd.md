@@ -2,7 +2,7 @@
 title: Sabiduría de Bolsillo
 status: final
 created: 2026-08-10
-updated: 2026-08-18
+updated: 2026-09-02
 ---
 
 # PRD: Sabiduría de Bolsillo
@@ -65,7 +65,9 @@ El motor de crecimiento no es una campaña: es la propia estructura del sitio. C
 Los flujos aguas abajo deben usar estos términos exactamente. Introducir un sinónimo en cualquier parte del documento es una violación de disciplina.
 
 - **Cita** — Unidad atómica de contenido: un texto textual atribuido a un Autor. Tiene exactamente un Autor, cero o más Temas, una Procedencia y un Estado de Derechos. Es la única entidad con página propia indexable individualmente.
-- **Autor** — Persona a quien se atribuye una o más Citas. Registra nombre, semblanza breve, nacionalidad y año de fallecimiento. El año de fallecimiento es obligatorio: sin él, ninguna Cita del Autor puede publicarse.
+- **Autor** — Persona a quien se atribuyen una o más Citas. Registra nombre, semblanza, nacionalidad y año de fallecimiento. El año de fallecimiento es obligatorio: sin él, ninguna Cita del Autor puede publicarse.
+- **Semblanza** *(v5)* — Texto que sitúa al Autor en su Página de Autor. Hasta la v5 se definía por su brevedad; ahora por su contenido y su fuente (FR-4 y FR-41).
+- **Obra** *(v5)* — Título del que procede al menos una Cita publicada, según su Procedencia. No es una entidad que se dé de alta: se **deriva** del Corpus, y por eso la bibliografía de un Autor es la de sus Citas publicadas y no la de su vida. Distinta de la Procedencia, que es el campo de una Cita; la Obra **agrupa** las Citas que comparten ese campo.
 - **Tema** — Etiqueta transversal que agrupa Citas de distintos Autores (por ejemplo, el amor, el tiempo, el esfuerzo). Una Cita puede pertenecer a varios Temas.
 - **Procedencia** — Origen documentado de una Cita: obra, año o referencia. Distinta de la atribución, que es solo el nombre del Autor. Una Cita puede tener Procedencia completa, parcial o ausente.
 - **Estado de Derechos** — Campo de la Cita que registra bajo qué criterio es publicable. En la v1 solo se publica el valor `dominio-público`. El campo existe para admitir otros criterios sin rehacer la ingesta.
@@ -86,11 +88,14 @@ Los flujos aguas abajo deben usar estos términos exactamente. Introducir un sin
 
 ## 4. Features
 
-Catorce features repartidas en tres rondas. La etiqueta de versión va también en cada encabezado:
+Dieciséis features repartidas en cuatro rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
 
 - **v1 — §4.1…§4.8.** El producto: las cuatro superficies públicas, la búsqueda, la Imagen de Cita y la herramienta de curación.
 - **v2 — §4.9…§4.11.** Ponerlo delante de personas: compartición, canal propio y sembrado del Corpus.
 - **v3 — §4.12…§4.14.** Que crezca y se sostenga: Colecciones, ampliación del canal y monetización por umbral.
+- **v5 — §4.15…§4.16.** Que lo encuentren: entrar en el índice, y darle a la Página de Autor el contenido que su consulta pide.
+
+**No hay v4 en este documento, y no es un salto por error.** La v4 fue la Meta de Corpus —1.639 Citas, 24 Temas, 35 Autores— y no salió de aquí: salió de que el bucle de sembrado agotó el hueco del que derivaba trabajo (FR-25). Se numera igual que las demás para que el histórico no mienta.
 
 ### 4.1 Página de Cita
 
@@ -143,7 +148,7 @@ Cualquier visitante puede ver, en una URL propia, la semblanza de un Autor y tod
 
 **Consecuencias (verificables):**
 - La página lista todas las Citas del Autor en estado `publicada`, y ninguna en `en-revisión`.
-- La semblanza no supera un párrafo breve.
+- La semblanza sitúa al Autor: **cuándo vivió, en qué corriente escribió y por qué se le cita.** *(v5 — antes decía «no supera un párrafo breve». El límite era de longitud y no de contenido, así que una semblanza podía cumplirlo sin situar a nadie. Lo que la acota ahora es §4.16.)*
 - Un Autor sin Citas publicadas no tiene Página de Autor accesible ni indexable.
 - Cada Cita del listado enlaza a su Página de Cita.
 
@@ -608,12 +613,101 @@ La publicidad, si se enciende, vive donde no está la Cita.
 
 ---
 
+### 4.15 Estar en el índice, no solo ser indexable *(v5)*
+
+**Descripción:** El sitio cumple NFR-1 —toda página publicada es rastreable e indexable, con canónica y presencia en el sitemap— y aun así **Google ha indexado 8 de 1.715 URL**, con 1.534 en «Detectada, actualmente no indexada»: descubiertas y descartadas. *Ser* indexable es una propiedad del sitio; *estar* indexado es una decisión del buscador, y hasta la v5 el PRD exigía la primera y medía la segunda sin nada en medio. SM-1 llevaba razón al llamarse «el indicador temprano»: su primera lectura la deja entre el 0 % y el 0,5 % —§7 explica por qué el agregado del panel no es la métrica— frente a una meta del 90 %, y por debajo de ella ninguna otra métrica llega a existir. Esta feature es lo que faltaba entre el requisito y la métrica.
+
+**Requisitos Funcionales:**
+
+#### FR-38: El sitio anuncia sus cambios a los buscadores que aceptan el aviso
+
+El sistema notifica cada publicación o modificación de una superficie a los buscadores que admiten aviso de cambio, además de mantener el sitemap.
+
+**Lo primero que hay que decir es lo que este FR *no* arregla.** **Google no acepta aviso de cambio** —no participa en IndexNow; sus canales son el sitemap y su propio rastreo—, y las 1.534 páginas descartadas están en *su* índice, que es el que mide SM-1. Así que FR-38 **no es el remedio de SM-1**: quien ataca SM-1 son FR-39 y §4.16, por la vía del enlace interno y del contenido por página. FR-38 se sostiene por un motivo propio y distinto, registrado en la investigación de la v3.2: el aviso llega a Bing, y **Bing es el índice del que se sirve ChatGPT Search**, de modo que dejar de ser residual ahí es la puerta a la búsqueda por IA. Confundir las dos cosas sería poner primero lo que no mueve la métrica.
+
+**Consecuencias (verificables):**
+- Publicar una Cita, un Autor, un Tema o una Colección emite un aviso de cambio por un canal abierto y compartido, sin exigir el panel de un proveedor concreto.
+- El aviso se emite desde la reconstrucción, no a mano: una jornada sin editor lo emite igual.
+- El sitemap sigue siendo el catálogo; el aviso es el canal de cambios. Ninguno sustituye al otro.
+- El sistema registra qué envió y qué respondió el receptor. Que un buscador acepte el aviso **no se cuenta como indexación**: eso solo lo dice FR-40.
+- El efecto se mide aparte del de Google, porque son índices distintos. Mezclarlos haría ilegible cuál de las dos vías funcionó.
+
+**Fuera de alcance:** pagar por indexación, o cualquier servicio que prometa posiciones. `[NON-GOAL]`
+
+#### FR-39: El enlace interno se reparte desde donde el buscador ya entra
+
+Lo que este FR añade a NFR-5 es el **origen** del enlace: que salga de superficies que están **en el índice**, no de cualquier página del sitio.
+
+Toda superficie de agregación publicada reparte enlace hacia las Citas que agrega, y el sistema informa de qué superficies no reciben ninguno desde una página indexada.
+
+Lo que este FR añade a NFR-5 es el **origen** del enlace. NFR-5 exige que ninguna página quede huérfana desde la portada. Eso se cumple y no bastó: una página que el buscador no ha indexado no transmite nada, así que un grafo interno perfecto entre páginas invisibles no mueve la aguja.
+
+**Consecuencias (verificables):**
+- El sistema distingue, para cada superficie publicada, cuántos enlaces entrantes le llegan **desde superficies indexadas** y cuántos desde el resto. NFR-5 cuenta saltos; esto cuenta procedencia.
+- Existe una lista consultable de superficies publicadas con cero enlaces entrantes desde una indexada, ordenada por familia.
+- Las superficies de agregación —Autor, Tema, Colección— reparten enlace hacia las Citas que agregan. Son 75 páginas —35 de Autor, 24 de Tema, 16 de Colección— frente a 1.639 de Cita, así que su capacidad de reparto es limitada por aritmética y el informe la expresa como cifra, no como intención.
+
+#### FR-40: La indexación se lee por familia, no como un total
+
+El editor puede saber qué proporción de cada familia de superficies está indexada, y cuáles no lo están.
+
+**El dato de origen es de Google y no hay alternativa**: solo el buscador sabe qué ha indexado, y Search Console es la única vía. Lo que este FR exige no es prescindir de esa fuente —sería fingir— sino **dejar de leerla a ojo**: traerla de forma reproducible y agruparla como el producto la necesita, que es por familia.
+
+**Consecuencias (verificables):**
+- El informe distingue Cita, Autor, Tema y Colección. El panel da un total y el total engaña: el remedio no es el mismo para 1.639 páginas de una frase que para las 75 de agregación, y un porcentaje global no dice cuál de las dos falla.
+- La cifra que se compara con SM-1 es la de la familia Cita, no el agregado del sitio.
+- El informe registra su fecha de lectura. Un dato de indexación sin fecha es inútil: el índice cambia y la comparación con la meta es temporal.
+- Cuando la fuente no está disponible, el informe lo dice y no publica un número, igual que hace §4.14 con la medición.
+
+---
+
+### 4.16 La Página de Autor se gana su propia consulta *(v5)*
+
+**Descripción:** Es la única superficie de contenido que hoy recibe impresiones —solo la comparte la portada, que las recibe por el nombre de la marca— —`/autor/miguel-de-unamuno` y `/autor/baltasar-gracian`, y ninguna Página de Cita— , y la que §4.2 ya llamaba «la segunda fuente de tráfico orgánico», con el 2 % de las URL del sitio. Las nueve consultas que existen son todas de Autor y cuatro son biográficas explícitas. Esta feature le da a esa superficie el contenido que la consulta pide: una semblanza que sitúa, y la **obra** del Autor. Ambas de fuente citable, porque §5 lo exige y no se deroga.
+
+**Requisitos Funcionales:**
+
+#### FR-41: La semblanza sitúa al Autor con fuente
+
+La Página de Autor presenta una semblanza que dice cuándo vivió el Autor, en qué corriente escribió y por qué se le cita, y la atribuye a la fuente de la que procede. Es la misma tríada que FR-4 exige, aquí con su requisito de fuente.
+
+**Consecuencias (verificables):**
+- La semblanza declara su fuente y su licencia, como ya hace toda Cita con su Fuente.
+- El sistema **no compone** prosa nueva sobre el Autor: o la semblanza procede de una fuente citable admitida, o la escribe una persona que responde de ella. Es §5 sin excepción.
+- La tríada se comprueba una a una: años de nacimiento y fallecimiento para el «cuándo vivió», tradición o corriente declarada para el «en qué corriente escribió», y el motivo por el que el Autor está en este Corpus para el «por qué se le cita». Un elemento que la fuente no sostenga se omite; no se rellena.
+- No cubre vida privada, polémicas ni recepción crítica: eso es la cobertura enciclopédica que §5 sigue descartando.
+- Una semblanza sin fuente declarada no se publica.
+
+#### FR-42: La Página de Autor enumera su obra
+
+La página lista las obras del Autor de las que este Corpus publica Citas, cada una enlazada a las Citas que proceden de ella.
+
+**Consecuencias (verificables):**
+- La lista se **deriva** de las Procedencias publicadas; no es una lista escrita a mano que pueda divergir del Corpus.
+- Cada obra muestra cuántas Citas publicadas proceden de ella y enlaza a ellas.
+- Una obra de la que no se publica ninguna Cita no aparece: la bibliografía es la del Corpus, no la del Autor. La página lo dice de sí misma, para no aparentar una completitud que no tiene.
+- Cuando la Procedencia declara año, se muestra; cuando no, se omite el campo y no se infiere. Hoy solo el 26,8 % de las Citas declara año.
+
+#### FR-43: La obra es la superficie natural del enlace de afiliación
+
+La lista de obras es el lugar donde un Modelo de Ingreso de afiliación puede aparecer cuando su Umbral lo autorice, sin rediseñar la página.
+
+**Consecuencias (verificables):**
+- La lista de obras **se publica con el Modelo de afiliación apagado** y no cambia de forma al encenderse: lo que aparece es el enlace, no la sección. Se comprueba construyendo el sitio en los dos estados.
+- Todo enlace de afiliación de una obra se deriva de una Procedencia ya publicada. Una obra sin Citas publicadas no aparece, luego no puede llevar enlace: la regla de FR-42 lo garantiza sin necesidad de una regla nueva.
+- La Página de Autor pasa a ser superficie admitida del Modelo de afiliación, **que se suma a la Página de Cita y no la sustituye**: §5 veda *unidades publicitarias* en la Página de Cita, no todo Modelo, y §4.14 ya declara admisible el enlace de FR-35 por nacer de la Procedencia que la Página de Cita muestra.
+- Lo de §4.14 rige sin excepción: apagado hasta su Umbral, sin guion de tercero, y encender es un commit.
+
+**Fuera de alcance:** decidir qué edición se enlaza, y si la afiliación de libros es viable. Es la pregunta 7 de §14 y esta feature no la resuelve; la asume. `[NON-GOAL]`
+
+---
+
 ## 5. No-Objetivos (Explícitos)
 
 - **No somos una red social.** Sin cuentas, sin perfiles, sin comentarios, sin votos.
 - **No somos un agregador.** El Corpus se cura, no se rastrea de otros sitios. Se evaluó explícitamente en la v2 extraer de un sitio de citas existente y se descartó por tres razones concurrentes: sus condiciones lo prohíben, su compilación está protegida, y —lo decisivo— publica texto y nombre sin obra ni año, así que **nada de lo extraído pasaría la puerta de admisión de FR-13**. Ver §4.11.
 - **No traducimos Citas para publicarlas.** Una traducción propia produce una frase que no consta en ninguna edición, es decir, una Cita sin Procedencia verificable. Solo entra texto en español de una edición identificable.
-- **No somos una enciclopedia de autores.** La semblanza sitúa; no compite con Wikipedia.
+- **No competimos con Wikipedia en cobertura biográfica** *(estrechado en la v5)*. La Página de Autor sitúa a la persona y enumera su obra; no narra su vida entera, no cubre polémicas ni recepción crítica, y no aspira a ser la página que alguien lea *en lugar de* una enciclopedia. Hasta la v5 este no-objetivo decía «no somos una enciclopedia de autores» y se escribió **sin ningún dato de demanda**; los primeros datos de Search Console (§7) muestran que las únicas consultas que alcanzan el sitio son de Autor y que cuatro de nueve son explícitamente biográficas. Lo que el no-objetivo protegía —no llenar páginas de refrito— lo protege ahora §4.16, que exige fuente citable y acota qué se dice. Lo que prohibía de más, se retira.
 - **No aspiramos al volumen en la v1.** Un catálogo pequeño y verificado, no uno grande y dudoso.
 - **No traducimos.** El producto es en español y las Citas se publican en español.
 - **No monetizamos antes de su umbral.** La v1 se diseñó sin ingreso alguno. La v3 no deroga esa regla: diseña los cuatro Modelos de Ingreso y los deja apagados hasta que el tráfico medido cruce el Umbral de Activación de cada uno (§4.14, §12). Lo que se adelanta es el diseño, nunca el cobro.
@@ -690,12 +784,40 @@ La v2 quiso poner el producto delante de personas y no llegó a hacerlo: lo cons
 - **Cuentas, favoritos y aportes de usuarios.** Sin cambios respecto a §6.2.
 - **La definición del producto propio.** FR-36 fija su umbral, no su contenido. Elegir entre lámina, antología y recurrencia sin saber quién visita el sitio sería el supuesto que §12 existe para evitar.
 
+### 6.5 Alcance de la v5
+
+**El origen es un dato, no una idea.** El 2026-09-02 quedaron verificadas LC-1…LC-4 y llegaron las primeras cifras de Search Console. Dicen dos cosas, y las dos son la v5.
+
+**Dentro:**
+
+- **Estar en el índice** (FR-38…FR-40) — 8 URL indexadas de 1.715 y 1.534 en «Detectada, actualmente no indexada». Va primera porque ninguna feature produce visitas si la página que la lleva no se indexa.
+- **La Página de Autor se gana su consulta** (FR-41…FR-43) — semblanza con fuente y lista de obras derivada de las Procedencias. Es la única superficie de contenido que hoy recibe impresiones.
+
+**El orden importa y es el declarado.** La lista de obras sirve a las dos: es contenido real y distinto por página —lo que le falta a un sitio que el buscador ve como fino— y a la vez captura la intención de Autor que las consultas ya muestran. Empezar por la Página de Autor sin atacar la indexación produciría una página mejor que nadie encontraría.
+
+**Fuera de la v5, y por qué:**
+
+- **Encender la afiliación de libros.** FR-43 construye la superficie; encenderla es FR-35 y su Umbral, y la pregunta 7 de §14 dice por qué eso está más lejos de lo que parecía. La lista de obras se construye por su valor propio y no queda inservible si la afiliación no llega nunca.
+- **Elegir qué edición se enlaza.** La tensión de §14 sigue sin resolver y esta ronda no la resuelve.
+- **Sembrar obra que el Corpus no publica.** La bibliografía es la del Corpus, no la del Autor. Completarla sería inventar cobertura, que es justo lo que §5 sigue descartando.
+- **Cobertura biográfica enciclopédica.** Estrechar el no-objetivo de §5 no lo deroga: sigue fuera la vida entera, la polémica y la recepción crítica.
+
 ## 7. Métricas de Éxito
 
 **Primarias**
 
-- **SM-1 — Indexación.** ≥ 90 % de las Citas publicadas indexadas a los 3 meses del lanzamiento. Valida FR-1 y §8. Es el indicador temprano: si las páginas no se indexan, ninguna otra métrica llega a existir.
+- **SM-1 — Indexación.** ≥ 90 % de las Citas publicadas indexadas a los 3 meses del lanzamiento. Valida FR-1, FR-38…FR-40 y §8. Es el indicador temprano: si las páginas no se indexan, ninguna otra métrica llega a existir.
+
+  **Primera lectura, 2026-09-02 (mes 0), en el índice de Google.** Search Console informa **8 URL indexadas y 1.534 en «Detectada, actualmente no indexada»** sobre las 1.715 del sitemap. Ese agregado **no es SM-1**: esta métrica se mide sobre **Citas publicadas** (1.639), y el panel no separa por familia. Con el peor de los repartos posibles —que ninguna de las 8 sea una Cita— SM-1 estaría en **0 %**; con el mejor, en 0,5 %. En cualquiera de los dos, la métrica está a dos órdenes de magnitud de su meta. La cifra que se compare con el 90 % sale de FR-40, que sí separa por familia, y no de este agregado.
+
+  **Hito intermedio, añadido en la v5:** el 90 % a los 3 meses se conserva como meta y se le pone un escalón comprobable antes — **≥ 10 % de las Citas publicadas indexadas al mes 2** (hacia noviembre de 2026). No es rebajar la meta: es que un salto de 0 a 90 sin punto intermedio no distingue «va lento» de «no se mueve», y esa distinción es la que decide si la hipótesis de la pregunta 8 de §14 es falsa.
+
+  La métrica se cumplía sola en el papel mientras nada la atacaba: NFR-1 exige que las páginas *sean* indexables y se cumple, pero *estar* indexado lo decide el buscador. §4.15 existe para llenar ese hueco, y hasta la v5 el PRD no tenía ni un requisito entre el NFR y esta métrica.
 - **SM-2 — Tráfico orgánico.** 5.000 sesiones orgánicas/mes al mes 6; 25.000 al mes 12. Valida FR-1, FR-4, FR-6.
+
+  **El mes 0 fue el 2026-09-02**, así que el mes 6 cae hacia marzo de 2027 y el mes 12 hacia septiembre. Primera lectura: **0 clics, 26 impresiones en 13 días, posición media 49,4.**
+
+  **Esa cifra no admite proyección, y conviene que quede escrito.** Veintiséis impresiones son señal cualitativa —de qué se busca— y no volumen del que estimar nada. Lo cualitativo sí es nítido y es lo que decide la v5: las nueve consultas que existen son **todas** de Autor, cuatro son biográficas explícitas (`unamuno biografia`, `quien fue unamuno`), y las únicas páginas con impresiones son dos Páginas de Autor y la portada. **Ninguna Página de Cita ha recibido una sola impresión**, con el 95,6 % de las URL del sitio.
 
 **Secundarias**
 
@@ -809,6 +931,12 @@ Las seis preguntas abiertas de la primera redacción se resolvieron en aquella p
 5. **Qué es el producto propio.** FR-36 fija el umbral de 5.000 sesiones/mes y aplaza el contenido. Decidir entre lámina, antología y recurrencia antes de saber quién visita el sitio sería exactamente el supuesto que §12 existe para evitar.
 6. **Programa de afiliación concreto.** FR-35 fija la capacidad y el umbral; qué programa se usa depende de la disponibilidad de las ediciones en dominio público que el Corpus cita, y varias no tendrán edición en venta. Se resuelve al acercarse el umbral.
 
+**Añadidas en la v5:**
+
+7. **Qué edición se enlaza, y si la afiliación de libros es viable siquiera.** La pregunta 6 daba por hecho que era cuestión de elegir programa. La investigación de la v3.2 —registrada en `.memlog.md`— dice algo más incómodo, y FR-43 hereda la pregunta sin resolverla: el libro físico paga el 4,5 %, las 103 obras del Corpus son de dominio público y su edición cotejada suele tener versión electrónica gratuita o de ~1 €. Enlazar **la edición que se cotejó** respeta FR-24 y no ingresa nada; enlazar **una edición moderna anotada** ingresa y erosiona el principio de que la Procedencia es la que se verificó y no la que conviene vender. A eso se suma la cobertura: el programa no existe en Argentina, Chile, Colombia ni Perú, lo que choca con el suelo del 40 % de tradición latinoamericana. **Consecuencia asumida en la v5:** FR-43 construye la superficie por su valor propio —contenido e intención de Autor— y no la condiciona a que esta pregunta tenga buena respuesta.
+
+8. **Por qué el buscador descarta 1.534 páginas.** FR-39, FR-40 y §4.16 atacan la hipótesis más probable —FR-38 no, y él mismo lo dice— —contenido fino y páginas casi idénticas—, pero es hipótesis y no diagnóstico: «Detectada, actualmente no indexada» no dice su motivo. Se falsa con la propia v5: si al enriquecer la Página de Autor esas 35 páginas entran en el índice y las Citas no, la causa está en la Página de Cita y no en el sitio. Es la pregunta con más consecuencia del documento, porque de ella depende SM-2.
+
 ## 15. Índice de Supuestos
 
 Los supuestos etiquetados en la primera redacción se convirtieron en decisiones (§14). Permanecen dos, ambos de capacidad y no de preferencia:
@@ -827,3 +955,8 @@ Los supuestos etiquetados en la primera redacción se convirtieron en decisiones
 - **§4.13 / FR-31** — El vídeo corto trae visitantes que la imagen fija no trae. **Es el supuesto de mayor coste del documento y el peor sostenido:** §6.3 lo descartó en la v2 con un argumento —el motor de vídeo es un producto, no una historia— que nadie ha refutado desde entonces. Entra por decisión explícita de Héctor, con su propio umbral (ninguna cuenta de imagen fija demostrando visitas, ningún motor de vídeo) y como candidato preferente al recorte si la v3 se pasa de tamaño.
 - **§4.14 / SM-2** — El sitio alcanza los umbrales de activación. Los tres primeros Modelos se anclan a metas que el PRD ya se había fijado (2.000, y las de SM-2 a los meses 6 y 12), así que este supuesto no es nuevo: es SM-2 otra vez, ahora con el ingreso colgando de ella. Si SM-2 falla, no falla la monetización — falla el producto, y la monetización simplemente no se enciende, que es justo lo que los umbrales existen para garantizar.
 - **§6.4** — Llegar al orden de las 2.000 Citas es alcanzable ahora que el sembrado (§4.11) está construido y el Corpus crece publicado. Reformula el supuesto original de §6.1, que resultó falso cuando el volumen era condición de lanzamiento. Ya no lo es: el riesgo dejó de ser de plan y pasó a ser de ritmo.
+
+**Añadidos en la v5:**
+
+- **§4.16 / FR-41** — Existe una fuente citable con licencia admisible que sostenga una semblanza de cada uno de los 35 Autores. Es un supuesto de disponibilidad, no de preferencia: Wikipedia es CC BY-SA 4.0, la misma licencia con la que Wikisource-es ya aporta 1.275 Citas, así que la postura de licencia no es nueva. **Consecuencia asumida:** una semblanza derivada de una fuente CC BY-SA queda bajo esa misma licencia y no es propiedad exclusiva del sitio. Alcanza al texto derivado, no al Corpus ni al resto del sitio. Si un Autor no tiene fuente citable, se queda con la semblanza que ya tiene antes que componérsela — §5 no admite excepción.
+- **§4.15** — Que el sitio anuncie sus cambios y reparta enlace interno mueve la aguja de la indexación. Es el supuesto que sostiene la v5 entera y **puede ser falso**: si el buscador descarta las Páginas de Cita por lo que son —una frase corta en una plantilla repetida 1.639 veces—, ningún canal de aviso lo cambia, y la palanca pasa a ser la Página de Cita misma. Se falsa en la misma ronda, por la pregunta 8 de §14.
