@@ -260,10 +260,13 @@ Hecho en el repositorio:
   semanas más tarde.
 - `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
   agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
-- `medicion/esquema.sql` — cuatro columnas: jornada, evento, ruta y consulta. No hay
-  columna de visitante porque no hay visitante que guardar, y la marca de tiempo es la
-  jornada y no el instante: un instante al milisegundo junto a una ruta poco visitada es,
-  en la práctica, un identificador.
+- `medicion/esquema.sql` — seis columnas: jornada, evento, ruta, origen, destino y
+  consulta. Las tres últimas son de un solo evento cada una —`origen` de la visita que
+  viene de una cuenta propia (FR-22), `destino` de una compartición (FR-20), `consulta` de
+  una búsqueda sin resultados (FR-8)— y llegan `NULL` en el resto. No hay columna de
+  visitante porque no hay visitante que guardar, y la marca de tiempo es la jornada y no el
+  instante: un instante al milisegundo junto a una ruta poco visitada es, en la práctica,
+  un identificador.
 - `[observability] enabled = false` en `wrangler.toml`. El registro de acceso de la
   plataforma guarda IP y agente de usuario; apagarlo es parte de la propiedad, no una
   opción de rendimiento.
@@ -277,6 +280,23 @@ npx wrangler d1 create medicion            # copia el database_id a wrangler.tom
 npx wrangler d1 execute medicion --remote --file=esquema.sql
 npx wrangler deploy                        # imprime la URL del Worker
 ```
+
+**El paso que no está en esa lista y para el despliegue en seco** (hecho el 2026-09-02): la
+cuenta necesita un **subdominio `workers.dev`**, que se elige una sola vez y lo comparten
+todos sus Workers. Una cuenta recién creada no lo tiene. `wrangler deploy` intenta
+registrarlo solo tomando el nombre del Worker, y falla si está cogido —el espacio de
+nombres es global para todo Cloudflare— con «could not automatically register». El
+`workers/onboarding` que nombra ese error **da 404**; la página que sirve es:
+
+    https://dash.cloudflare.com/<account-id>/workers/subdomain
+
+Se registró `sabiduriadebolsillo`, así que la URL del receptor es
+`https://medicion-sabiduria-de-bolsillo.sabiduriadebolsillo.workers.dev` — nombre del
+Worker (de `wrangler.toml`) más subdominio de cuenta. El aviso de esa página sobre dejar de
+enrutar es sobre **renombrar** un subdominio en uso; con cero Workers desplegados no rompe
+nada. Después de confirmar, el certificado tarda unos minutos: hasta que propaga, `curl`
+falla con error de TLS (código 35) y no con un HTTP, que es un síntoma que no se parece a
+su causa.
 
 Después, en el repositorio del sitio: **Settings → Secrets and variables → Actions →
 Secrets**, definir `MEDICION_ENDPOINT` con la URL que imprimió `wrangler deploy`. Sin esa
