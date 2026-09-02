@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3 y v3.1 completadas
+stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
@@ -51,6 +51,18 @@ Las Épicas 1 a 5 son la v1 y están completas. Las Épicas 6 a 10 son la v2 y s
 - **FR-23: Extracción de candidatas desde una Fuente** — Candidatas con obra y año tomados de la Fuente, no inferidos. Cada una registra Fuente y licencia. Una Fuente sin licencia de reutilización no produce candidatas. No se proponen textos que no estén en español.
 - **FR-24: Aprobación por lote** — Aprobar somete a las mismas reglas de FR-13 y FR-14; el sembrado no abre puerta lateral. Rechazar descarta sin dejar rastro en el Corpus. Duplicados señalados antes de decidir. El lote es reanudable.
 - **FR-25: Prioridad de sembrado por hueco del Corpus** — Temas por debajo del umbral de FR-6 con cuántas Citas les faltan; proporción de Autores de tradición latinoamericana frente al suelo del 40 %. Informa la decisión del editor, no la sustituye.
+
+
+#### Añadidos en la v5
+
+- **FR-38: El sitio anuncia sus cambios a los buscadores que lo aceptan** — Aviso de cambio por canal abierto al publicar o modificar cualquiera de las cuatro familias, emitido desde la publicación y no desde el build; su fallo no falla el despliegue. **No arregla SM-1**: el buscador que la mide no acepta aviso. Se sostiene por su motivo propio y se mide aparte.
+- **FR-39: El enlace interno se reparte desde donde el buscador ya entra** — Para cada superficie publicada, cuántos enlaces entrantes llegan desde superficies **indexadas** y cuántos del resto. Lista consultable de las que no reciben ninguno. Añade el origen del enlace a lo que NFR-5 ya cuenta en saltos.
+- **FR-40: La indexación se lee por familia, no como un total** — Proporción indexada de cada familia, con su fecha de lectura. La cifra que se compara con SM-1 es la de la familia Cita. Sin fuente disponible, no publica número.
+- **FR-41: La semblanza sitúa al Autor con fuente** — Cuándo vivió, en qué corriente escribió y por qué se le cita, con la atribución publicada visible. El sistema no compone prosa nueva sobre el Autor. Sin procedencia declarada no se publica.
+- **FR-42: La Página de Autor enumera su obra** — Lista derivada de las Procedencias publicadas, con recuento por obra y enlace a sus Citas. Una obra sin Citas publicadas no aparece. Año solo cuando la Procedencia lo declara.
+- **FR-43: La obra es la superficie natural del enlace de afiliación** — La lista se publica con el Modelo apagado y no cambia de forma al encenderse. La Página de Autor se suma a las superficies admitidas, sin sustituir a la de Cita.
+
+*(**FR-4** queda enmendado en la v5: la semblanza deja de medirse por su longitud y pasa a medirse por lo que trae.)*
 
 ### NonFunctional Requirements
 
@@ -1848,3 +1860,272 @@ So that exista la opción sin que se convierta en un peaje.
 **Given** el Umbral de Activación de las donaciones
 **When** compruebo si puede encenderse
 **Then** basta con que LC-1…LC-4 estén verificadas
+
+---
+
+## Epic 16: El buscador deja de descartar el sitio
+
+Las 1.639 Páginas de Cita existen, son rastreables y están en el sitemap, y **Google ha indexado ocho**. Las otras 1.534 están en «Detectada, actualmente no indexada»: descubiertas y descartadas. Esta épica no añade ninguna superficie — pone el instrumento para saber por qué, el canal para anunciar lo que cambia, y el reparto de enlace hacia donde el buscador ya entra.
+
+**FRs covered:** FR-38, FR-39, FR-40
+**Condiciones cubiertas:** ninguna nueva; ataca SM-1, que va al 0,5 % con meta del 90 %
+**Notas de implementación:** va **primera** por la razón que el PRD escribe en §6.5 — ninguna feature produce visitas si su página no se indexa. Dentro de la épica, la medición va antes que el remedio: sin la serie de AD-24 no se sabe si algo funcionó, y la pregunta 8 de §14 solo se falsa comparando el reparto por familia a lo largo del tiempo. Restricción externa que las historias heredan y **no deben redescubrir**: la Search Console API no expone informe de cobertura; solo `URL Inspection`, una URL por petición, con tope de 2.000 al día y 600 por minuto por propiedad.
+
+### Story 16.1: El estado de indexación se lee por familia y se versiona
+
+As a editor que necesita saber si el producto existe para el buscador,
+I want una serie con cuántas superficies están indexadas de cada familia,
+So that pueda distinguir «va lento» de «no se mueve», que es lo que decide todo lo demás.
+
+**Acceptance Criteria:**
+
+**Given** una lectura de indexación
+**When** se registra
+**Then** queda versionada en el repositorio con su fecha, su reparto por familia —Cita, Autor, Tema, Colección— y el estado de lectura de cada una
+**And** la escribe una orden de `tools/`, nunca el build ni un paso de CI que commitee a `main`
+
+**Given** que la fuente del dato solo ofrece inspección de una URL por petición, con tope diario
+**When** el barrido no cabe en la cuota
+**Then** la serie se compone por muestreo por familia y **el tamaño de muestra queda escrito en la entrada**
+**And** una comparación entre jornadas sabe qué está comparando
+
+**Given** una familia cuya lectura no se logró
+**When** se escribe la entrada
+**Then** esa familia **se omite**, y jamás se escribe cero
+**And** el cero real —que es casi el estado de hoy— sigue siendo distinguible de la ausencia de lectura
+
+**Given** dos lecturas de la misma jornada
+**When** se registra la segunda
+**Then** reemplaza a la primera en vez de añadirse: esto mide un estado, no una sesión
+
+**Given** la cifra que se compara con SM-1
+**When** se informa
+**Then** es la de la familia Cita, no el agregado del sitio
+
+**Given** cualquier módulo de `src/lib/`
+**When** se construye el sitio
+**Then** ninguno recibe el estado de indexación, ni siquiera por parámetro
+**And** dos construcciones del mismo commit siguen dando el mismo sitio
+
+### Story 16.2: El sitio anuncia lo que cambia, y las cuatro familias cuentan
+
+As a sitio que publica a diario,
+I want avisar de cada cambio a los buscadores que aceptan aviso,
+So that no dependa solo de que alguien pase a mirar el sitemap.
+
+**Acceptance Criteria:**
+
+**Given** que se publica o modifica una Cita, un Autor, un Tema o una Colección
+**When** el despliegue termina
+**Then** el aviso cubre **las cuatro familias**, no solo `corpus/citas/`
+**And** el mapeo de fichero del corpus a rutas afectadas tiene un solo dueño
+
+**Given** el aviso
+**When** el receptor no responde o falla
+**Then** el despliegue **no** falla
+**And** queda registrado qué se envió y qué contestó
+
+**Given** el build
+**When** corre
+**Then** no depende de ningún servidor ajeno: el aviso es efecto de publicar y nunca condición de construir
+
+**Given** una jornada en la que solo cambió la serie de indexación
+**When** el flujo termina
+**Then** no se emite aviso: quien avisa de todo a diario enseña a los buscadores a no hacerle caso
+
+**Given** el aviso emitido
+**When** se lee su efecto
+**Then** se mide **aparte** del índice que mide SM-1, porque ese buscador no acepta aviso y el aviso no puede mover su cifra
+
+### Story 16.3: El enlace interno se reparte desde donde el buscador ya entra
+
+As a editor que quiere que las Citas entren en el índice,
+I want saber qué superficies publicadas no reciben enlace desde una indexada,
+So that el reparto deje de ser una intención y pase a ser una cifra.
+
+**Acceptance Criteria:**
+
+**Given** cada superficie publicada
+**When** se informa
+**Then** se distingue cuántos enlaces entrantes le llegan **desde superficies indexadas** y cuántos desde el resto
+**And** NFR-5 sigue contando saltos desde la portada; esto cuenta procedencia
+
+**Given** las superficies publicadas
+**When** se listan las que no reciben ningún enlace desde una indexada
+**Then** la lista es consultable y va ordenada por familia
+
+**Given** las superficies de agregación
+**When** reparten enlace hacia las Citas que agregan
+**Then** el informe expresa su capacidad como cifra —75 páginas frente a 1.639— y no como intención
+
+**Given** el cruce entre el grafo de enlace y lo indexado
+**When** se calcula
+**Then** ocurre en `tools/`, consumiendo de `publicado.ts` lo que ya es suyo
+**And** el sitio construido no cambia por ello
+
+---
+
+## Epic 17: La Página de Autor responde a quién fue
+
+Es la única superficie de contenido con impresiones medidas, y las nueve consultas que alcanzan el sitio son de Autor —cuatro de ellas biográficas explícitas—. Al terminar, esa página sitúa al Autor con fuente citada y enumera su obra, y deja lista la superficie donde un enlace de afiliación tendría sentido el día que lo tenga.
+
+**FRs covered:** FR-4 *(enmendado)*, FR-41, FR-42, FR-43
+**Notas de implementación:** la primera historia no la ve ningún visitante y es la mayor de la épica: admitir una Fuente **mutable** no es una línea en el conjunto cerrado, porque la extracción de metadato está construida sobre las plantillas de encabezado de Wikisource. El orden de la página lo fija la espina de UX —ficha primero, orden B— y deroga para esta superficie la regla de «contenido antes que explicación», que sigue entera en Tema y Colección.
+
+### Story 17.1: Una Fuente mutable entra por revisión, y su documento no comparte espacio con las obras
+
+As a sistema que coteja lo que publica,
+I want tratar una fuente que cambia como un documento fijo,
+So that el build no se rompa un martes porque alguien editó un artículo.
+
+**Acceptance Criteria:**
+
+**Given** una Fuente cuyo contenido puede cambiar
+**When** se evalúa su entrada al conjunto cerrado
+**Then** solo entra si ofrece direccionamiento por revisión
+**And** se recupera **por el origen de esa revisión** —el texto en bruto—, nunca por la página renderizada ni por la dirección viva
+
+**Given** el documento recuperado
+**When** se versiona
+**Then** la revisión forma parte de su identidad
+**And** el build **rompe** cuando la revisión declarada en el Autor no es la del documento versionado
+
+**Given** el cotejo de una Cita
+**When** busca su documento
+**Then** **jamás** casa con un documento de biografía, ni por prefijo ni por nombre exacto
+**And** una obra cuyo identificador coincida con el de un Autor no se traga el documento del otro
+
+**Given** una Fuente sin las plantillas de encabezado sobre las que se construyó la extracción existente
+**When** se recupera de ella
+**Then** su metadato sale de su propia extracción declarada, y no de un encabezado que no tiene
+
+**Given** una obra ya versionada cuyo identificador trunca igual que otra
+**When** se intenta reutilizar su documento
+**Then** se compara la obra declarada en la cabecera con la pedida y **se rechaza la reutilización cuando difieren**, en vez de contestar «ya versionado»
+
+### Story 17.2: La semblanza sitúa al Autor, publica su atribución, y sale de la Tarjeta
+
+As a visitante que busca quién fue un autor,
+I want que la página me lo diga y me enseñe de dónde lo saca,
+So that pueda fiarme sin salir a comprobarlo.
+
+**Acceptance Criteria:**
+
+**Given** la semblanza de un Autor
+**When** se publica
+**Then** dice cuándo vivió, en qué corriente escribió y por qué se le cita
+**And** un elemento que la fuente no sostenga se omite, no se rellena
+
+**Given** una semblanza procedente de una fuente citable
+**When** se sirve la página
+**Then** su atribución se publica **visible** —enlace a la revisión concreta y su licencia—, no solo guardada
+**And** va compuesta en la familia de la interfaz, no en la voz citada
+
+**Given** una semblanza sin procedencia declarada
+**When** se intenta publicar
+**Then** no se publica, y el sistema **no compone** una en su lugar
+
+**Given** un Autor sin fuente citable disponible
+**When** se construye su página
+**Then** conserva la semblanza breve que ya tenía, sin hueco y sin prosa nueva
+
+**Given** la Tarjeta Social de un Autor
+**When** se genera
+**Then** se compone con hechos derivados del Corpus —nombre, años y recuento de Citas documentadas—
+**And** **no** reproduce la semblanza, que es texto ajeno en una superficie que no puede portar su atribución
+**And** tampoco lleva una bajada escrita por el sistema, que sería prosa nueva sobre una persona real
+
+### Story 17.3: La Página de Autor enumera su obra
+
+As a visitante que quiere saber qué escribió alguien,
+I want ver de qué obras salen sus Citas y cuántas de cada una,
+So that entienda qué me ofrece este sitio de esa persona.
+
+**Acceptance Criteria:**
+
+**Given** las Procedencias publicadas de un Autor
+**When** se compone su bibliografía
+**Then** se **deriva** de ellas y no de una lista escrita a mano
+**And** cada obra muestra cuántas Citas publicadas proceden de ella y enlaza a ellas
+
+**Given** dos grafías del mismo Autor que normalizan igual
+**When** se construye el sitio
+**Then** el build **rompe**, nombrando los ficheros y las dos formas
+**And** ni se elige una por cuenta propia ni se publican dos entradas
+
+**Given** dos formas canónicas del mismo Autor en que una es prefijo de la otra
+**When** se construye
+**Then** se avisa al editor sin romper: pueden ser la misma obra partida por la Fuente, y pueden ser dos legítimas
+
+**Given** dos obras realmente distintas con el mismo título
+**When** el editor las desambigua en la Procedencia
+**Then** el sistema las publica como dos, y sin esa desambiguación explícita no las separa por su cuenta
+
+**Given** una Cita del Autor que no declara obra
+**When** se compone la lista
+**Then** queda fuera de ella y el recuento lo refleja: la bibliografía es la del Corpus y no finge completitud
+
+**Given** la sección de obra
+**When** se sirve
+**Then** enumera Obras y no Citas, así que ninguna Cita aparece dos veces en la misma URL
+**And** el título de una Obra va en la familia de la interfaz, igual que en la atribución de una Cita
+
+**Given** la enumeración de Obras
+**When** se calcula
+**Then** su dueño es el módulo del conjunto publicable, y el gate corre sobre el corpus entero en el build
+**And** un Autor sin página publicada no lo esquiva
+
+### Story 17.4: La ficha abre la página, y solo la primera
+
+As a visitante que llegó buscando quién fue alguien,
+I want la respuesta antes que el catálogo,
+So that no tenga que desplazar para encontrar lo que vine a buscar.
+
+**Acceptance Criteria:**
+
+**Given** la Página de Autor
+**When** se sirve
+**Then** la ficha —semblanza, atribución y lista de obras— va **antes** del catálogo de Citas
+**And** es la excepción declarada de la regla de agregación, que sigue entera en Tema y Colección
+
+**Given** las páginas 2 y siguientes del listado de un Autor
+**When** se sirven
+**Then** **no** llevan la ficha: son otra superficie y van `noindex`
+
+**Given** un viewport de 360 px
+**When** se carga la página
+**Then** el nombre del Autor y su semblanza son visibles sin desplazar
+**And** no se introduce muro, modal ni aviso previo al contenido
+
+**Given** la Página de Autor con la ficha
+**When** se mide
+**Then** sigue cumpliendo el tope de guion en línea y no carga guion de tercero
+
+### Story 17.5: Un Modelo se admite por ruta, y el tope de guion se mide donde se admite
+
+As a dueño del sitio,
+I want que admitir un Modelo en una superficie no lo cuele en las que no se indexan,
+So that encender un ingreso no publique enlaces comerciales donde el sitio pide no mirar.
+
+**Acceptance Criteria:**
+
+**Given** la declaración de qué superficie admite qué Modelo de Ingreso
+**When** se revisa
+**Then** se expresa sobre el mismo predicado de ruta con el que se decide la publicabilidad
+**And** un Modelo admitido en rutas que la superficie declara no publicables **se rechaza**
+
+**Given** la Página de Autor como superficie admitida de la afiliación
+**When** se declara
+**Then** **se suma** a la Página de Cita y no la sustituye: lo vedado ahí son unidades publicitarias, no todo Modelo
+
+**Given** cualquier superficie que admita un Modelo
+**When** se mide su guion en línea
+**Then** el tope se comprueba **en esa superficie**, no solo en la Página de Cita
+
+**Given** la lista de obras con el Modelo de afiliación apagado
+**When** se construye el sitio
+**Then** se publica igual y no cambia de forma al encenderse: lo que aparece es el enlace, no la sección
+
+**Given** una obra sin Citas publicadas
+**When** se compone la página
+**Then** no aparece, luego no puede llevar enlace de afiliación
