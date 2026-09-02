@@ -3,7 +3,7 @@ name: Papel y Tinta
 status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
-updated: 2026-08-31
+updated: 2026-09-02
 colors:
   surface: '#faf7f0'
   surface-dim: '#efe9dd'
@@ -192,7 +192,7 @@ Sin píldoras, sin círculos salvo el avatar del Autor si algún día existe.
 - Dejar que la Cita sea lo primero visible sin desplazar en cualquier pantalla.
 - Usar comillas angulares « » en el texto citado.
 - Reservar el siena para una sola acción por pantalla.
-- Dejar que una página de agregación empiece por su contenido, no por su explicación.
+- Dejar que la Página de Tema y la de Colección empiecen por su contenido, no por su explicación. *(Acotado en la v5: **la Página de Autor es la excepción y empieza por su ficha**. La regla se escribió sin un solo dato de demanda; las nueve consultas medidas que alcanzan el sitio son de Autor y cuatro son biográficas, así que ahí la explicación **es** el contenido que se vino a buscar. En Tema y Colección nadie busca una explicación, y la regla sigue entera.)*
 - Componer la atribución en Inter para separarla de la voz citada.
 - Mantener el filete de 1px como único separador.
 
@@ -200,6 +200,6 @@ Sin píldoras, sin círculos salvo el avatar del Autor si algún día existe.
 - Nunca sombras, degradados ni texturas de fondo.
 - Nunca un icono decorativo junto a una Cita.
 - Nunca la palabra del sitio adjetivando la Cita ("una frase preciosa").
-- Nunca Source Serif en algo que no sea una Cita, un nombre de Autor, de Tema o de Colección.
+- Nunca Source Serif en algo que no sea una Cita, un nombre de Autor, de Tema o de Colección. **El título de una Obra va en Inter** — se consideró incluirlo en la v5 y se dejó fuera a propósito: la obra ya se muestra en Inter en la atribución de cada Página de Cita, y vestir la misma entidad de dos formas según dónde aparezca es divergencia sin motivo.
 - Nunca un modal, aviso de consentimiento o invitación antes de mostrar el contenido — lo prohíbe NFR-10.
 - Nunca más de un nivel de anidamiento visual: la Cita no vive dentro de una tarjeta dentro de una sección.

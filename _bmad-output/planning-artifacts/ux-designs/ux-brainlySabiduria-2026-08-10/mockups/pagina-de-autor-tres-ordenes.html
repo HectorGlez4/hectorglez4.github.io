@@ -1,0 +1,230 @@
+<title>Orden de la Página de Autor</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&display=swap">
+<style>
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: el sitio es papel cálido,
+         y la mesa no debe confundirse con él. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --tinta:#1c2027; --tinta-suave:#59616e; --marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#e0c88a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --tinta:#e6e8ec; --tinta-suave:#98a1af; --marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --tinta:#e6e8ec; --tinta-suave:#98a1af; --marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  /* ---- Tokens del sitio, literales de DESIGN.md. No se adaptan al tema:
+         «Papel y Tinta» es un diseño claro por decisión, y estas son pruebas de él. ---- */
+  .lienzo{
+    --surface:#faf7f0; --on-surface:#1f1b16; --tinta-apagada:#5a5147;
+    --filete:#ddd5c7; --primary:#8c4a2f; --surface-container:#f1ece2;
+    --unidad:8px; --respiracion:24px; --medida-prosa:68ch;
+    --serif:"Source Serif 4",Georgia,serif; --sans:Inter,system-ui,sans-serif;
+  }
+
+  body{background:var(--mesa);color:var(--tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1240px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;margin-bottom:10px;}
+  h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:66ch;color:var(--tinta-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;color:var(--tinta-suave);letter-spacing:.03em;}
+  .meta b{color:var(--tinta);font-weight:600;}
+
+  .aviso{background:var(--aviso-fondo);border:1px solid var(--aviso-linea);color:var(--aviso-tinta);
+         border-radius:3px;padding:14px 16px;margin:26px 0 0;font-size:13.5px;line-height:1.6;}
+  .aviso b{font-weight:600;}
+  .aviso ul{margin:8px 0 0;padding-left:18px;} .aviso li{margin:4px 0;}
+
+  .rejilla{display:grid;gap:28px;margin-top:34px;
+           grid-template-columns:repeat(auto-fit,minmax(340px,1fr));align-items:start;}
+
+  .prueba{display:flex;flex-direction:column;gap:0;background:var(--mesa-alta);
+          border:1px solid var(--mesa-linea);border-radius:4px;overflow:hidden;}
+  .prueba > .cab{padding:16px 18px 14px;border-bottom:1px solid var(--mesa-linea);}
+  .letra{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;
+         color:var(--marca);margin-bottom:6px;}
+  .prueba h2{font-family:"Source Serif 4",Georgia,serif;font-size:19px;font-weight:600;
+             margin:0 0 6px;line-height:1.25;}
+  .prueba .que{margin:0;font-size:13px;line-height:1.55;color:var(--tinta-suave);}
+
+  /* ---- El lienzo: 360px, que es el viewport que manda por NFR-8 ---- */
+  .marco{padding:20px 18px 22px;display:flex;justify-content:center;}
+  .lienzo{width:360px;background:var(--surface);color:var(--on-surface);
+          border:1px solid var(--filete);border-radius:2px;padding:20px;
+          font-family:var(--sans);font-size:15px;line-height:1.6;}
+  .lienzo .marca{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.09em;
+                 text-transform:uppercase;color:var(--tinta-apagada);
+                 padding-bottom:12px;border-bottom:1px solid var(--filete);margin-bottom:20px;}
+  .lienzo h3{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1.2;margin:0 0 4px;}
+  .fechas{font-size:13px;color:var(--tinta-apagada);margin:0 0 16px;}
+  .lienzo .semblanza{font-size:15px;line-height:1.65;margin:0 0 10px;max-width:var(--medida-prosa);}
+  .fuente{font-size:12.5px;color:var(--tinta-apagada);margin:0 0 20px;line-height:1.5;}
+  .fuente a{color:var(--primary);text-decoration:underline;text-underline-offset:2px;}
+  .rotulo{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.09em;
+          text-transform:uppercase;color:var(--tinta-apagada);margin:0 0 12px;}
+  .sep{border:0;border-top:1px solid var(--filete);margin:24px 0;}
+
+  .cita{border-top:1px solid var(--filete);padding:13px 0;}
+  .cita:first-of-type{border-top:0;}
+  .cita p{font-family:var(--serif);font-size:17px;line-height:1.4;margin:0 0 5px;}
+  .cita span{font-size:12px;color:var(--tinta-apagada);}
+
+  ul.obras{list-style:none;margin:0;padding:0;}
+  ul.obras li{display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+              border-top:1px solid var(--filete);padding:11px 0;min-height:44px;box-sizing:border-box;}
+  ul.obras li:first-child{border-top:0;}
+  ul.obras .t{font-family:var(--sans);font-size:14.5px;line-height:1.4;}
+  ul.obras .n{font-size:12.5px;color:var(--tinta-apagada);white-space:nowrap;
+              font-variant-numeric:tabular-nums;}
+
+  .nota{padding:0 18px 18px;font-size:12.5px;line-height:1.6;color:var(--tinta-suave);}
+  .nota p{margin:0 0 8px;} .nota p:last-child{margin:0;}
+  .nota .bien{color:var(--tinta);} .nota b{color:var(--tinta);font-weight:600;}
+
+  footer.fin{margin-top:44px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--tinta-suave);max-width:74ch;}
+  footer.fin b{color:var(--tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--tinta);
+                margin:0 0 10px;font-weight:600;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;
+       background:var(--mesa-alta);border:1px solid var(--mesa-linea);
+       border-radius:3px;padding:1px 5px;}
+  a:focus-visible,li:focus-visible{outline:2px solid var(--marca);outline-offset:2px;}
+</style>
+
+<div class="env">
+  <header class="top">
+    <h1>Orden de la Página de Autor</h1>
+    <p class="sub">La v5 mete dos cosas nuevas en esta página —una semblanza que sitúa con su fuente, y la lista de obras— y hay que decidir dónde van respecto al catálogo de Citas. Tres órdenes posibles, con datos reales de Miguel de Unamuno, a 360&nbsp;px.</p>
+    <p class="meta">Tokens de <b>DESIGN.md</b> · 146 Citas · 13 obras · el único Autor con impresiones medidas</p>
+  </header>
+
+  <div class="aviso">
+    <b>Dos cosas que salieron al montar esto con datos de verdad, y que ninguna maqueta debería tapar:</b>
+    <ul>
+      <li><b>«Del sentimiento trágico de la vida/I»</b> (34 Citas) y <b>«Del sentimiento trágico de la vida»</b> (1 Cita, 1913) son la misma obra partida por la paginación de la Fuente. Es el caso de prefijo que AD-25 previó, y aquí se ve.</li>
+      <li>Una Cita de Unamuno <b>no declara obra</b>. La lista tendrá que decidir si la omite, la agrupa aparte, o lo dice.</li>
+    </ul>
+  </div>
+
+  <div class="rejilla">
+
+    <!-- A -->
+    <section class="prueba">
+      <div class="cab">
+        <span class="letra">ORDEN A</span>
+        <h2>Contenido primero</h2>
+        <p class="que">Lo que hoy manda <code>DESIGN.md</code>: «una página de agregación empieza por su contenido, no por su explicación».</p>
+      </div>
+      <div class="marco">
+        <div class="lienzo">
+          <div class="marca">Sabiduría de Bolsillo</div>
+          <h3>Miguel de Unamuno</h3>
+          <p class="fechas">1864–1936 · peninsular</p>
+          <p class="rotulo">146 Citas documentadas</p>
+          <div class="cita"><p>«Aborrezco el secreto sobre toda otra cosa.»</p><span>Confesión de culpa</span></div>
+          <div class="cita"><p>«Antes romperá la verdad al palo que el palo á la verdad.»</p><span>La crisis actual del patriotismo español</span></div>
+          <div class="cita"><p>«Bastaba que una cosa se creyese edificante para que se pretendiera hacerla pasar por verdadera.»</p><span>Verdad y vida</span></div>
+          <hr class="sep">
+          <p class="rotulo">Quién fue</p>
+          <p class="semblanza">Filósofo y novelista vasco, rector de Salamanca en tres ocasiones y destituido otras tantas. Escribió sobre la contradicción entre lo que la razón admite y lo que el hombre necesita.</p>
+          <p class="fuente">Semblanza de <a href="#">Wikipedia, revisión 168420931</a> · CC BY-SA 4.0</p>
+          <p class="rotulo">Su obra en este Corpus</p>
+          <ul class="obras">
+            <li><span class="t">Del sentimiento trágico de la vida</span><span class="n">34</span></li>
+            <li><span class="t">La crisis actual del patriotismo español</span><span class="n">26</span></li>
+            <li><span class="t">¡Adentro!</span><span class="n">24</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nota">
+        <p class="bien"><b>A favor:</b> no toca ninguna regla. El visitante que viene por una frase la tiene sin desplazar.</p>
+        <p><b>En contra:</b> las cuatro consultas biográficas que ya tienes —<code>quien fue unamuno</code>— aterrizan en una página que entierra la respuesta bajo el catálogo.</p>
+      </div>
+    </section>
+
+    <!-- B -->
+    <section class="prueba">
+      <div class="cab">
+        <span class="letra">ORDEN B</span>
+        <h2>Ficha primero</h2>
+        <p class="que">La página responde antes que nada a quién fue. Rompe la regla de <code>DESIGN.md</code> a propósito.</p>
+      </div>
+      <div class="marco">
+        <div class="lienzo">
+          <div class="marca">Sabiduría de Bolsillo</div>
+          <h3>Miguel de Unamuno</h3>
+          <p class="fechas">1864–1936 · peninsular</p>
+          <p class="semblanza">Filósofo y novelista vasco, rector de Salamanca en tres ocasiones y destituido otras tantas. Escribió sobre la contradicción entre lo que la razón admite y lo que el hombre necesita.</p>
+          <p class="fuente">Semblanza de <a href="#">Wikipedia, revisión 168420931</a> · CC BY-SA 4.0</p>
+          <p class="rotulo">Su obra en este Corpus</p>
+          <ul class="obras">
+            <li><span class="t">Del sentimiento trágico de la vida</span><span class="n">34</span></li>
+            <li><span class="t">La crisis actual del patriotismo español</span><span class="n">26</span></li>
+            <li><span class="t">¡Adentro!</span><span class="n">24</span></li>
+            <li><span class="t">Sobre la tumba de Costa</span><span class="n">17</span></li>
+          </ul>
+          <hr class="sep">
+          <p class="rotulo">146 Citas documentadas</p>
+          <div class="cita"><p>«Aborrezco el secreto sobre toda otra cosa.»</p><span>Confesión de culpa</span></div>
+          <div class="cita"><p>«Antes romperá la verdad al palo que el palo á la verdad.»</p><span>La crisis actual del patriotismo español</span></div>
+        </div>
+      </div>
+      <div class="nota">
+        <p class="bien"><b>A favor:</b> resuelve la intención medida sin desplazar, y la obra queda arriba, que es donde el enlace de afiliación tendría valor.</p>
+        <p><b>En contra:</b> contradice una regla vigente, y empuja la primera Cita fuera de la pantalla — en una página cuyo trabajo declarado en el PRD es «el principal motor de sesión larga».</p>
+      </div>
+    </section>
+
+    <!-- C -->
+    <section class="prueba">
+      <div class="cab">
+        <span class="letra">ORDEN C</span>
+        <h2>Dos tiempos</h2>
+        <p class="que">Sitúa en una línea, entra en el contenido, y deja la ficha completa al pie — como ya resolviste el Criterio de Colección.</p>
+      </div>
+      <div class="marco">
+        <div class="lienzo">
+          <div class="marca">Sabiduría de Bolsillo</div>
+          <h3>Miguel de Unamuno</h3>
+          <p class="fechas">1864–1936 · peninsular</p>
+          <p class="semblanza" style="color:var(--tinta-apagada);font-size:14.5px;">Filósofo y novelista vasco, rector de Salamanca en tres ocasiones y destituido otras tantas.</p>
+          <p class="rotulo">146 Citas documentadas</p>
+          <div class="cita"><p>«Aborrezco el secreto sobre toda otra cosa.»</p><span>Confesión de culpa</span></div>
+          <div class="cita"><p>«Antes romperá la verdad al palo que el palo á la verdad.»</p><span>La crisis actual del patriotismo español</span></div>
+          <hr class="sep">
+          <p class="rotulo">Quién fue</p>
+          <p class="semblanza">Escribió sobre la contradicción entre lo que la razón admite y lo que el hombre necesita. Rector de Salamanca en tres ocasiones y destituido otras tantas, murió confinado en su casa en diciembre de 1936.</p>
+          <p class="fuente">Semblanza de <a href="#">Wikipedia, revisión 168420931</a> · CC BY-SA 4.0</p>
+          <p class="rotulo">Su obra en este Corpus</p>
+          <ul class="obras">
+            <li><span class="t">Del sentimiento trágico de la vida</span><span class="n">34</span></li>
+            <li><span class="t">La crisis actual del patriotismo español</span><span class="n">26</span></li>
+            <li><span class="t">¡Adentro!</span><span class="n">24</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="nota">
+        <p class="bien"><b>A favor:</b> respeta la regla —el contenido sigue empezando arriba— y aun así el visitante sabe quién es en la primera pantalla. Reutiliza un patrón que ya existe en el sitio.</p>
+        <p><b>En contra:</b> la semblanza vive partida en dos, y eso hay que escribirlo como regla o cada Autor acabará repartido de una forma distinta.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="fin">
+    <h2>Lo que decides al elegir</h2>
+    <p>No es dónde va un bloque: es <b>a quién sirve esta página primero</b>. Hoy es la única superficie de contenido con impresiones medidas, y las nueve consultas que la alcanzan son de Autor — cuatro de ellas biográficas. El orden A protege una regla escrita antes de tener un solo dato; el B la rompe para servir el dato; el C intenta las dos cosas y paga con una regla nueva que habrá que redactar.</p>
+    <p>Quede el que quede, hay tres decisiones que van con él: si el título de una Obra va en serif —hoy la regla reserva la serif a Cita, Autor, Tema y Colección, y la Obra es entidad nueva—; si la sección de obras aparece en las páginas 2 y siguientes del listado, que llevan <code>noindex</code>; y con qué texto se compone la Tarjeta Social ahora que no puede llevar la semblanza ajena.</p>
+  </footer>
+</div>

@@ -4,7 +4,7 @@ status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
   - "DESIGN.md"
-updated: 2026-08-31
+updated: 2026-09-02
 ---
 
 # Sabiduría de Bolsillo — Experience Spine
@@ -24,7 +24,7 @@ Tema claro único. El modo oscuro queda fuera de la v1 por decisión registrada.
 | Superficie | Se llega desde | Propósito |
 |---|---|---|
 | **Página de Cita** | Buscador externo (mayoritario), listados, Cita del Día | Resolver la intención completa: leer, confiar, copiar o compartir |
-| **Página de Autor** | Atribución de una Cita, búsqueda | Semblanza + catálogo de esa persona |
+| **Página de Autor** | Atribución de una Cita, búsqueda, **consulta biográfica de buscador** | Ficha del Autor —quién fue, con su fuente, y su obra en este Corpus— y después el catálogo de esa persona *(v5)* |
 | **Página de Tema** | Chips de Tema, portada, búsqueda | Agregación transversal entre Autores |
 | **Página de Colección** *(v3)* | Buscador externo, chips de Colección en la portada | Reunir Citas escogidas por un criterio editorial que no es Autor ni Tema |
 | **Portada** | Dominio directo, retorno | Cita del Día, entrada a la búsqueda, Temas destacados |
@@ -86,6 +86,12 @@ Comportamiento. Las especificaciones visuales viven en `DESIGN.md § Components`
 | **Listado de Colección** | Página de Colección | **Empieza sin preámbulo:** la primera Tarjeta de Cita es el primer contenido visible bajo el nombre. Usa `TarjetaDeCita`, el mismo componente que Tema y Autor — nunca una presentación propia (AD-19). |
 | **Criterio de Colección** | Pie del listado de Colección | Describe para qué está reunida la Colección. No comenta ni adjetiva ninguna Cita. Va después del listado, no antes. |
 | **Paginación** | Listados > 50 Citas | Anterior / Siguiente numerada. Caso excepcional con el Corpus previsto. |
+| **Ficha de Autor** *(v5)* | Cabecera de la Página de Autor | **Abre la página, antes del catálogo** — es la excepción declarada en `DESIGN.md § Do's and Don'ts`. Reúne semblanza, atribución y lista de obras. Vive **solo en la primera página** del listado: las 2+ son otra superficie y llevan `noindex`. |
+| **Semblanza con fuente** *(v5)* | Ficha de Autor | Sitúa al Autor: cuándo vivió, en qué corriente escribió y por qué se le cita. **La atribución se publica visible** —enlace a la revisión concreta de la fuente y su licencia— porque una procedencia guardada y no mostrada no atribuye nada (AD-28). Es el primer enlace saliente del cuerpo de una página de contenido, y va en `{typography.caption}`, no en la voz citada. |
+| **Lista de Obras** *(v5)* | Ficha de Autor | **Enumera Obras, no Citas** (AD-19): título en Inter, recuento de Citas publicadas de esa obra, y el enlace lleva a ellas. Nunca despliega Citas dentro, que las reproduciría dos veces en la misma URL. Una obra sin Citas publicadas no aparece. |
+| **Tarjeta Social de Autor** *(v5)* | Previsualización en redes | Se compone con **hechos derivados del Corpus** —nombre, años y recuento de Citas documentadas—, nunca con la semblanza: es texto ajeno y un PNG no puede portar su atribución (AD-28). Tampoco con una bajada escrita por el sistema, que sería prosa nueva sobre una persona real (§5 del PRD). |
+
+**Maqueta:** [Página de Autor, los tres órdenes que se compararon](mockups/pagina-de-autor-tres-ordenes.html) — a 360 px y con datos reales de Unamuno. Se eligió el orden B, ficha primero. Estas espinas mandan sobre la maqueta si algún día divergen.
 
 ## State Patterns
 
@@ -93,6 +99,9 @@ Comportamiento. Las especificaciones visuales viven en `DESIGN.md § Components`
 |---|---|---|
 | Carga normal | Todas | El contenido llega en el HTML inicial (NFR-2). No hay esqueletos de carga: no hay nada que esperar. |
 | Cita sin Procedencia | Página de Cita | «Sin obra documentada» en tinta apagada, en el lugar donde iría la obra. Presencia de la ausencia. |
+| Autor sin semblanza de fuente citable | Página de Autor | Conserva la semblanza breve que ya tenía. **No se compone una nueva** ni se deja el hueco: §5 del PRD no admite excepción. *(v5)* |
+| Cita del Autor sin obra declarada | Lista de Obras | Queda fuera de la lista y el recuento lo dice: la bibliografía es la del Corpus y no finge completitud. Medido: Unamuno tiene una. *(v5)* |
+| Dos obras que son la misma partida por la Fuente | Lista de Obras | No se publican dos entradas. Es el caso de prefijo de AD-25 —«Del sentimiento trágico de la vida/I» y «Del sentimiento trágico de la vida», 34 Citas y 1—, y se avisa al editor en vez de decidir por él. *(v5)* |
 | Búsqueda sin resultados | Resultados | Mensaje + Temas destacados + Autores destacados como salida (FR-8). Nunca un callejón sin salida. |
 | Autor sin Citas publicadas | — | La Página de Autor no existe: 404. No se genera una página vacía (FR-4). |
 | Tema por debajo de 15 Citas | — | El Tema no se publica ni se indexa (FR-6). Sus chips no se renderizan. |
