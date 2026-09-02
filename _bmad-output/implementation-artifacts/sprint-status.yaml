@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-02-2026 15:35
+last_updated: 09-02-2026 17:35
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -200,6 +200,24 @@ development_status:
   # concentracion respetado —el Autor mas representado queda en 14,9 %—.
   15-6-mil-citas-publicadas: done
   epic-15-retrospective: optional
+
+  # Épicas 16 y 17 — la v5. Salen de los primeros datos de Search Console del 02/09/2026:
+  # 8 URL indexadas de 1.715, y las nueve consultas que alcanzan el sitio son de Autor.
+  # El orden entre épicas lo manda el PRD §6.5; el orden dentro de la 16 no, y es
+  # deliberado: la medición va antes que el remedio.
+  epic-16: backlog
+  16-1-el-estado-de-indexación-se-lee-por-familia-y-se-versiona: backlog
+  16-2-el-sitio-anuncia-lo-que-cambia-y-las-cuatro-familias-cuentan: backlog
+  16-3-el-enlace-interno-se-reparte-desde-donde-el-buscador-ya-entr: backlog
+  epic-16-retrospective: optional
+
+  epic-17: backlog
+  17-1-una-fuente-mutable-entra-por-revisión-y-su-documento-no-comp: backlog
+  17-2-la-semblanza-sitúa-al-autor-publica-su-atribución-y-sale-de: backlog
+  17-3-la-página-de-autor-enumera-su-obra: backlog
+  17-4-la-ficha-abre-la-página-y-solo-la-primera: backlog
+  17-5-un-modelo-se-admite-por-ruta-y-el-tope-de-guion-se-mide-dond: backlog
+  epic-17-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
