@@ -3,7 +3,15 @@ import { createHash } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
+import {
+  AUTOR_VALIDO,
+  RAIZ,
+  TEMA_VALIDO,
+  citaValida,
+  construirConCorpus,
+  fuenteConDonacionesEncendidas,
+  limpiar,
+} from './ayuda/construir.js';
 import {
   MARCA_DE_INGRESO,
   MODELOS,
@@ -481,17 +489,15 @@ describe('Historia 14.2 — el sitio con las donaciones encendidas', () => {
   beforeAll(async () => {
     const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
     /*
-     * El parche es el diff que promete la épica: el `encendido` de las donaciones, y nada
-     * más. Se ancla al `id` para no depender de que sean el primer Modelo del censo. Que el
-     * parche haya encontrado su sitio ya no se afirma aquí: `construirConCorpus` rompe si el
-     * fichero que se le da es idéntico al que había, así que lo hereda cualquiera que use el
-     * gancho. Lo que sí se afirma aquí es que encendió **uno solo**.
+     * El parche es el diff que promete la épica: el `encendido` de las donaciones, y nada más.
+     * Lo compone `fuenteConDonacionesEncendidas`, que acota la sustitución al tramo de ese
+     * Modelo y rompe si encendiera otro —la versión con regex perezosa que había aquí casaba
+     * con el `encendido: false,` del Modelo siguiente en cuanto donaciones dejara de estar
+     * apagado, es decir, el día del encendido y en el CI—. Que el parche haya encontrado su
+     * sitio lo hereda además cualquiera que use el gancho: `construirConCorpus` rompe si el
+     * fichero que se le da es idéntico al que había.
      */
-    const encendida = fuente.replace(
-      /(id: 'donaciones',[\s\S]*?)encendido: false,/,
-      '$1encendido: true,',
-    );
-    expect(encendida.match(/encendido: true,/g) ?? []).toHaveLength(1);
+    const encendida = fuenteConDonacionesEncendidas(fuente);
 
     const build = await construirConCorpus(CORPUS, {
       jornada: JORNADA,
@@ -651,10 +657,10 @@ describe('Historia 14.2 — encender sin destino detiene la construcción', () =
     const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
     // El mismo parche de encendido de arriba, y además le quitamos la línea del destino: es
     // el descuido exacto del día que alguien encienda sin haber verificado la dirección.
-    const encendida = fuente
-      .replace(/(id: 'donaciones',[\s\S]*?)encendido: false,/, '$1encendido: true,')
-      .replace(/^\s*destino: 'https:\/\/[^']*',\n/m, '');
-    expect(encendida.match(/encendido: true,/g) ?? []).toHaveLength(1);
+    const encendida = fuenteConDonacionesEncendidas(fuente).replace(
+      /^\s*destino: 'https:\/\/[^']*',\n/m,
+      '',
+    );
     expect(encendida, 'seguía declarando un destino').not.toMatch(/^\s*destino:/m);
 
     resultado = await construirConCorpus(CORPUS, {
@@ -723,4 +729,78 @@ describe('la ayuda de build — el gancho `ficheros` no escribe donde no debe', 
       await limpiar(build.proyecto);
     }
   }, 240_000);
+});
+
+/**
+ * El parche del encendido, que es el otro ayudante compartido — y el que tenía fecha.
+ *
+ * La sustitución vivía copiada en tres ficheros como
+ * `/(id: 'donaciones',[\s\S]*?)encendido: false,/`, sin acotar al bloque de donaciones. Con el
+ * Modelo apagado casa con su propio booleano y acierta; **encendido, la coincidencia perezosa
+ * salta al Modelo siguiente** y la prueba construye un sitio con afiliación encendida creyendo
+ * medir donaciones. Este fichero lo corre el CI, así que el fallo habría aparecido en el commit
+ * del encendido y hablando de otra cosa.
+ *
+ * Se ejercita sobre censos de mentira escritos aquí: lo que se comprueba es la sustitución, y
+ * atarla al censo real la dejaría verde el día en que el censo cambie. No cuesta ninguna
+ * construcción.
+ */
+describe('la ayuda de build — el parche del encendido no puede encender a otro', () => {
+  /** Un censo con la forma que importa: donaciones primero y otro Modelo apagado detrás. */
+  function censo(encendidoDeDonaciones: boolean): string {
+    return [
+      'export const MODELOS = [',
+      "  {",
+      "    id: 'donaciones',",
+      `    encendido: ${encendidoDeDonaciones},`,
+      "    destino: 'https://ko-fi.com/x',",
+      '  },',
+      '  {',
+      "    id: 'afiliacion-de-libros',",
+      '    encendido: false,',
+      '  },',
+      '];',
+    ].join('\n');
+  }
+
+  it('enciende donaciones y deja al Modelo siguiente como estaba', () => {
+    const parcheado = fuenteConDonacionesEncendidas(censo(false));
+    expect(parcheado).toContain("id: 'donaciones',\n    encendido: true,");
+    expect(parcheado).toContain("id: 'afiliacion-de-libros',\n    encendido: false,");
+    expect(parcheado.match(/encendido: true,/g) ?? []).toHaveLength(1);
+  });
+
+  it('con las donaciones ya encendidas lo dice, en vez de encender a su vecino', () => {
+    // El caso con fecha: es exactamente el árbol del día que LC-4 se cierre.
+    expect(() => fuenteConDonacionesEncendidas(censo(true))).toThrow(
+      'ya están encendidas en el árbol',
+    );
+  });
+
+  it('y si el bloque no está, no parchea a ciegas', () => {
+    expect(() => fuenteConDonacionesEncendidas("export const MODELOS = [{ id: 'otro' }];")).toThrow(
+      'No hay ningún',
+    );
+  });
+
+  it('sobre el censo de verdad, el único encendido de más es donaciones', async () => {
+    // El control positivo contra el fichero que se parchea de verdad: si el censo real cambia
+    // de forma —otro orden, otro sangrado, un `id` renombrado—, esto se entera aquí y no en
+    // una construcción de cuatro minutos.
+    const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
+    const parcheado = fuenteConDonacionesEncendidas(fuente);
+    expect(modelosEncendidosEn(parcheado)).toEqual(['donaciones']);
+  });
+
+  /** Qué Modelos declara encendidos una fuente de `ingreso.ts`, leyendo tramo por tramo. */
+  function modelosEncendidosEn(fuente: string): string[] {
+    const encendidos: string[] = [];
+    const ids = [...fuente.matchAll(/id: '([a-z-]+)',/g)];
+    for (const [indice, coincidencia] of ids.entries()) {
+      const desde = coincidencia.index!;
+      const hasta = ids[indice + 1]?.index ?? fuente.length;
+      if (fuente.slice(desde, hasta).includes('encendido: true,')) encendidos.push(coincidencia[1]);
+    }
+    return encendidos;
+  }
 });

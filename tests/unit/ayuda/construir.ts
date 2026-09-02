@@ -342,6 +342,96 @@ export async function limpiar(proyecto: string): Promise<void> {
   await rm(proyecto, { recursive: true, force: true });
 }
 
+// ─── El parche del encendido, en un solo sitio ───────────────────────────────
+
+/** El Modelo que este ayudante enciende. Se nombra una vez y se usa en los mensajes. */
+const DONACIONES = "id: 'donaciones',";
+
+/**
+ * `src/lib/ingreso.ts` con las donaciones encendidas, para dárselo al gancho `ficheros`.
+ *
+ * Es el diff exacto que hará el commit del día que LC-4 se cierre —un booleano— aplicado a la
+ * **copia** temporal y nunca al árbol real (AD-21). Vive aquí y no en cada prueba porque lo
+ * necesitan tres —el barrido de accesibilidad con el Modelo encendido, y las dos
+ * construcciones parcheadas de `ingreso-construido.test.ts`— y porque copiado era una trampa
+ * con fecha:
+ *
+ * La sustitución que había en los tres sitios era
+ * `/(id: 'donaciones',[\s\S]*?)encendido: false,/`, y **no está acotada al bloque de
+ * donaciones**. Mientras donaciones esté apagado casa con su propio `encendido: false,` y
+ * acierta por casualidad. El día que ese booleano pase a `true` en el árbol, la coincidencia
+ * perezosa sigue avanzando hasta el `encendido: false,` del Modelo siguiente
+ * —`afiliacion-de-libros`— y **enciende el Modelo equivocado**: la prueba construiría un sitio
+ * con afiliación encendida creyendo medir donaciones. Como `ingreso-construido.test.ts` sí lo
+ * corre el CI, el commit del encendido pondría el CI en rojo por un motivo que no es el suyo.
+ *
+ * Aquí la sustitución se acota al tramo que va del `id:` de donaciones al `id:` del Modelo
+ * siguiente, así que no puede alcanzar a nadie más, y las tres cosas que fallaban en silencio
+ * se dicen en voz alta:
+ *
+ *   · el bloque de donaciones **existe** —si alguien renombra el `id`, esto se entera—;
+ *   · su `encendido: false,` **estaba ahí**, y si no, el mensaje dice que las donaciones ya
+ *     están encendidas en el árbol, que es lo que de verdad ha pasado y no «el parche no
+ *     encontró su sitio»;
+ *   · el Modelo que queda encendido de más es donaciones y **ninguno otro**, que es la
+ *     propiedad que la sustitución sin acotar perdía.
+ *
+ * Se compara contra la fuente recibida y no contra una cuenta fija de `encendido: true,`: el
+ * día que además haya otro Modelo encendido de verdad en el árbol, esto tiene que seguir
+ * valiendo. Lo que se exige es **un encendido más que antes**, y que sea el suyo.
+ */
+export function fuenteConDonacionesEncendidas(fuente: string): string {
+  const inicio = fuente.indexOf(DONACIONES);
+  if (inicio === -1) {
+    throw new Error(
+      `No hay ningún «${DONACIONES}» en la fuente de \`src/lib/ingreso.ts\`. O el Modelo se ` +
+        'renombró, o lo que se ha pasado aquí no es ese fichero: en los dos casos el parche ' +
+        'del encendido ya no significa lo que dice.',
+    );
+  }
+
+  // El tramo de donaciones acaba donde empieza el `id:` del Modelo siguiente. Si es el
+  // último del censo, acaba con el fichero.
+  const siguiente = fuente.indexOf("id: '", inicio + DONACIONES.length);
+  const fin = siguiente === -1 ? fuente.length : siguiente;
+  const tramo = fuente.slice(inicio, fin);
+
+  if (!tramo.includes('encendido: false,')) {
+    throw new Error(
+      'Las donaciones ya están encendidas en el árbol: su bloque de `src/lib/ingreso.ts` no ' +
+        'trae ningún `encendido: false,` que cambiar. Este ayudante existe para construir el ' +
+        'sitio encendido **sin** encenderlo en el repositorio; si ya lo está, quien lo llama ' +
+        'está midiendo otra cosa y tiene que decidir qué.',
+    );
+  }
+
+  const parcheado =
+    fuente.slice(0, inicio) + tramo.replace('encendido: false,', 'encendido: true,') + fuente.slice(fin);
+
+  const encendidosAntes = (fuente.match(/encendido: true,/g) ?? []).length;
+  const encendidosDespues = (parcheado.match(/encendido: true,/g) ?? []).length;
+  if (encendidosDespues !== encendidosAntes + 1) {
+    throw new Error(
+      `El parche encendió ${encendidosDespues - encendidosAntes} Modelos en vez de uno. La ` +
+        'sustitución se salió de su tramo, que es exactamente el fallo que este ayudante ' +
+        'existe para no repetir.',
+    );
+  }
+
+  // El tramo se recorta igual que arriba: con `indexOf` a secas, un censo cuyo último Modelo
+  // fuera donaciones daría -1 y `slice(inicio, -1)` cortaría por el final del fichero.
+  const siguienteNuevo = parcheado.indexOf("id: '", inicio + DONACIONES.length);
+  const tramoNuevo = parcheado.slice(inicio, siguienteNuevo === -1 ? parcheado.length : siguienteNuevo);
+  if (!tramoNuevo.includes('encendido: true,')) {
+    throw new Error(
+      'El Modelo que quedó encendido no es donaciones. El parche cambió un booleano de otro ' +
+        'bloque, así que la construcción mediría un Modelo distinto del que se pidió.',
+    );
+  }
+
+  return parcheado;
+}
+
 // ─── Piezas de corpus válidas, para partir de algo que sí construye ──────────
 
 export const AUTOR_VALIDO = `nombre: Séneca

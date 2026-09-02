@@ -368,18 +368,29 @@ Modelo que suba el ingreso degradando el rebote de la Página de Cita.
 —`src/components/Sostener.astro`, y la portada, `/buscar` y `/404` preguntan por ella con
 `modelosEn('<su pagina>')`—, así que el commit del encendido es el booleano y nada más.
 
-**Ese mismo commit tiene un requisito manual: abrir el `destino` y comprobar que existe.** La
-dirección de Ko-fi que declara el Modelo se supuso por el nombre del dominio y nadie la ha
-abierto todavía. Es manual porque es lo único que el build no alcanza a comprobar, y conviene
-ver los dos casos por separado:
+**Ese mismo commit tiene dos requisitos que el booleano no trae puestos**, y saltarse
+cualquiera de los dos publica una invitación que no debería haberse publicado:
 
-  · un destino **ausente o mal formado** —vacío, sin `https://`— **detiene la construcción**,
-    así que no llega a publicarse;
-  · un destino **bien formado y equivocado** construye y se publica sin que nada proteste, y
-    el visitante que quiso apoyar el sitio aterriza donde no hay nada.
+1. **Abrir el `destino` y comprobar que existe.** La dirección de Ko-fi que declara el Modelo
+   se supuso por el nombre del dominio y nadie la ha abierto todavía. Es manual porque es lo
+   único que ninguna puerta alcanza a comprobar, y conviene ver los dos casos por separado:
 
-El paso está escrito también en `DESPLIEGUE.md` §4, que es lo que se lee el día de cerrar
-LC-4.
+     · un destino **ausente o mal formado** —vacío, sin `https://`— **detiene la
+       construcción**, así que no llega a publicarse;
+     · un destino **bien formado y equivocado** construye y se publica sin que nada proteste,
+       y el visitante que quiso apoyar el sitio aterriza donde no hay nada.
+
+2. **Correr el barrido de accesibilidad con el Modelo encendido:**
+   `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`. Ninguna
+   otra prueba mira la invitación: la suite de accesibilidad barre el sitio del repositorio,
+   donde las donaciones están apagadas y no hay invitación que barrer. Esta construye un sitio
+   parcheado —la copia temporal, nunca el árbol (AD-21)— y le pasa axe a las tres superficies
+   con la invitación puesta. El CI no corre las pruebas de punta a punta, así que esto no lo
+   comprueba nadie por su cuenta. Si sale en rojo, se aborta el encendido.
+
+Los dos pasos están escritos también en `DESPLIEGUE.md` §4 —con lo que tarda la orden, los
+puertos que necesita libres y la comprobación posterior al despliegue—, que es lo que se lee
+el día de cerrar LC-4.
 
 Hoy los cuatro están apagados. Para consultarlos:
 

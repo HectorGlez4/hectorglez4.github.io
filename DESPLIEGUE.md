@@ -370,24 +370,85 @@ la puerta de atrás. «Opaco» es un dato honesto: se compartió, y no se sabe a
 Cerrar LC-4 es lo último que le falta al Umbral de las donaciones —«LC-1…LC-4
 verificadas»—, así que quien acabe la sección 3 es quien se encuentra con esta.
 
-**Encenderlas es un solo cambio:** poner `encendido: true` en el Modelo `donaciones` de
-`src/lib/ingreso.ts`. Nada más. La invitación ya está construida y la portada, `/buscar` y
-la 404 la piden por su cuenta; `git revert` de ese commit la apaga.
+**Encenderlas es un solo cambio de código:** poner `encendido: true` en el Modelo
+`donaciones` de `src/lib/ingreso.ts`. Nada más que tocar. La invitación ya está construida y
+la portada, `/buscar` y la 404 la piden por su cuenta; `git revert` de ese commit la apaga.
+Lo que sí hay que hacer además del cambio son **dos comprobaciones antes** —el destino, a
+ojo; el barrido de accesibilidad, con una orden— y **una después**, sobre el sitio ya
+publicado. Las tres están abajo, en ese orden.
 
 **Antes de hacerlo, abre el `destino` en el navegador y comprueba que es la página de
 cobro correcta.** Hoy declara `https://ko-fi.com/sabiduriadebolsillo`, y esa dirección se
 **supuso** por el nombre del dominio: no hay ninguna cuenta de Ko-fi escrita en el
-repositorio de la que derivarla y nadie la ha abierto todavía. Si no existe, o no es la
-cuenta del proyecto, corrígela en la misma línea del mismo fichero.
+repositorio de la que derivarla.
 
-Este es el único requisito manual del encendido, y lo es porque es **lo único que el build
-no puede cazar**:
+**Y a fecha de 2026-09-02 esa cuenta no existe** — lo confirmó Héctor, y con eso el Modelo
+no se puede encender aunque sus cuatro condiciones de lanzamiento estén cumplidas desde ese
+mismo día. Encender con este destino publicaría una invitación que lleva a ninguna parte, y
+es justo el caso que ninguna puerta caza: bien formado y equivocado. Así que el primer paso
+del encendido no es tocar el booleano, es **abrir la cuenta** —o cualquier otra pasarela— y
+escribir su dirección real en esa línea. Ko-fi contesta `403` a `curl`, así que esta
+comprobación no se automatiza desde aquí: se hace con un navegador y un par de ojos.
+
+Este es el único requisito que pide **un ojo humano**, y lo es porque el destino es lo único
+que ninguna puerta del repositorio puede cazar:
 
 - Un destino **ausente o mal formado** —vacío, sin `https://`— detiene `astro build` con
   el mensaje que dice qué falta. Ese caso no llega a publicarse.
 - Un destino **bien formado y equivocado** construye, despliega y publica sin que nada
   proteste. El visitante que quiso apoyar el sitio aterriza en una página que no existe, y
   el sitio no se entera.
+
+### El segundo requisito: correr el barrido con el Modelo encendido
+
+Es una orden y no un juicio, y va **antes** de cambiar el `false`:
+
+```bash
+npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio
+```
+
+Hace falta porque **ninguna otra prueba mira la invitación**: la suite de accesibilidad barre
+el sitio del repositorio, donde las donaciones están apagadas y la invitación no existe. Esta
+construye un sitio con `encendido: true` en una copia temporal —el repositorio no se toca— y le
+pasa axe a la portada, `/buscar` y la 404 con la invitación puesta. El porqué técnico está en
+la cabecera de `tests/e2e/ingreso-accesible.spec.ts`; aquí solo hace falta saber que sin ella
+se publica una invitación cuya accesibilidad no ha medido nadie.
+
+Lo que conviene saber antes de teclearla:
+
+- **Tarda minutos, no segundos.** La orden dispara el `webServer` de `playwright.config.ts`,
+  que hace un `npm run build` completo del repositorio —Astro más Pagefind— con
+  `reuseExistingServer: false`, y encima la prueba construye su propio sitio parcheado. Son
+  dos construcciones seguidas.
+- **Necesita libres el 4321 y el 4402.** El primero es el `webServer`; el segundo, el sitio
+  encendido. Un `astro dev` o un `npm run test:e2e` abierto en otra terminal la tumba con
+  EADDRINUSE, que no tiene nada que ver con accesibilidad. Quién ocupa un puerto:
+  `lsof -nP -iTCP:4321 -sTCP:LISTEN`.
+- **No cambia nada al correrse.** Las donaciones siguen apagadas en el repositorio y
+  `git status` sale limpio; si no sale limpio, algo va mal y no es el encendido.
+- **El CI no corre las pruebas de punta a punta.** `npm test` no la incluye y el flujo de
+  publicación tampoco: esto no lo comprueba nadie por ti.
+
+**Si sale en rojo, se aborta el encendido.** No se baja un umbral de axe, ni se excluye una
+regla, ni se enciende «mientras tanto»: la invitación se publica accesible o no se publica.
+Lo que falle se arregla en `src/components/Sostener.astro` —o se decide aparte— y se vuelve a
+correr hasta verde.
+
+### Y después de desplegar, abrir el sitio publicado
+
+El encendido no termina en el commit. Cuando el despliegue acabe, abre
+`https://sabiduriadebolsillo.net/`, baja al final de la columna y **pulsa la invitación**:
+
+```bash
+# Que la invitación viaje de verdad en lo publicado.
+curl -s https://sabiduriadebolsillo.net/ | grep -o 'data-ingreso="donaciones"'
+curl -s https://sabiduriadebolsillo.net/ | grep -o 'href="https://[^"]*"' | grep ko-fi
+```
+
+Los dos `grep` dicen que el bloque salió y con qué dirección; lo que no dicen es si esa
+dirección lleva a alguna parte. Eso es justo el caso que ninguna puerta caza —destino bien
+formado y equivocado— y solo se cierra abriéndolo con el navegador, una vez, el día del
+encendido.
 
 Comprobar el estado en cualquier momento, sin encender nada:
 
