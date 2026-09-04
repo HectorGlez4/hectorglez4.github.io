@@ -43,3 +43,53 @@
 # commit dejarían de dar el mismo `dist/`.
 
 lecturas:
+  - fecha: "2026-09-04"
+    hora: "19:30"
+    propiedad: "sc-domain:sabiduriadebolsillo.net"
+    publicadas: 1714
+    inspeccionadas: 80
+    familias:
+      cita:
+        publicadas: 1639
+        muestra: 24
+        indexadas: 0
+        noIndexadas: 24
+        estados:
+          - estado: "URL is unknown to Google"
+            urls: 13
+          - estado: "Discovered - currently not indexed"
+            urls: 11
+      autor:
+        publicadas: 35
+        muestra: 20
+        indexadas: 1
+        noIndexadas: 19
+        estados:
+          - estado: "Discovered - currently not indexed"
+            urls: 10
+          - estado: "URL is unknown to Google"
+            urls: 9
+          - estado: "Submitted and indexed"
+            urls: 1
+      tema:
+        publicadas: 24
+        muestra: 20
+        indexadas: 0
+        noIndexadas: 20
+        estados:
+          - estado: "URL is unknown to Google"
+            urls: 13
+          - estado: "Discovered - currently not indexed"
+            urls: 7
+      coleccion:
+        publicadas: 16
+        muestra: 16
+        indexadas: 1
+        noIndexadas: 15
+        estados:
+          - estado: "URL is unknown to Google"
+            urls: 10
+          - estado: "Discovered - currently not indexed"
+            urls: 5
+          - estado: "Submitted and indexed"
+            urls: 1

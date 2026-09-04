@@ -97,12 +97,45 @@ const USO = [
 /**
  * El paso entre peticiones, derivado del techo por minuto de la propiedad.
  *
- * Se pide **de una en una y espaciadas**, no en paralelo. Una pasada completa tarda
- * minutos, y es el precio correcto: pasarse del techo devuelve 429 para el resto de la
- * jornada, y entonces no hay lectura ninguna. Esto se ejecuta a mano y como mucho una vez
- * al día.
+ * Se pide **de una en una y espaciadas**, no en paralelo. Pasarse del techo devuelve 429
+ * para el resto de la jornada, y entonces no hay lectura ninguna.
+ *
+ * **En la práctica este paso no lo nota nadie**, y conviene saber por qué: ver
+ * `SEGUNDOS_POR_INSPECCION`.
  */
 export const PASO_MS = Math.ceil(60_000 / PETICIONES_POR_MINUTO);
+
+/**
+ * Lo que tarda **de verdad** una inspección, medido contra la propiedad el 4/09/2026.
+ *
+ * No es una estimación: la primera lectura real dio 6,6 s, 8,0 s y 16,3 s en tres URL
+ * seguidas, y la obtención del token 25 s. Está aquí porque **corrige el supuesto sobre el
+ * que se diseñó esta historia**: se escribió que el techo era la cuota —2.000 peticiones
+ * al día, y las ~1.714 URL cabían al 86 %— y es falso. A este ritmo, recorrerlas todas son
+ * entre tres y siete horas de reloj.
+ *
+ * La consecuencia no es un número: **el muestreo deja de ser la previsión para cuando el
+ * Corpus crezca y pasa a ser el único modo posible desde el primer día.** Una pasada
+ * completa no es «cara», es impracticable.
+ */
+export const SEGUNDOS_POR_INSPECCION = 10;
+
+/**
+ * Reintentos por URL ante un fallo transitorio.
+ *
+ * Existen porque la primera lectura real cayó cuatro veces con `read ETIMEDOUT` tras lograr
+ * entre una y cinco inspecciones. Lo que parecía un corte de red no lo era: la API tarda
+ * segundos por URL y el cliente se cansaba antes. Se reintenta lo transitorio; un permiso
+ * denegado o una cuota agotada no, porque reintentarlos no cambia la respuesta y gasta el
+ * presupuesto que la familia siguiente necesita.
+ */
+export const REINTENTOS = 3;
+
+/** Espera base entre reintentos; crece con el número de intento. */
+export const ESPERA_DE_REINTENTO_MS = 2_000;
+
+/** Aviso cuando lo pedido va a tardar más de lo que nadie espera de una orden. */
+export const MINUTOS_ANTES_DE_AVISAR = 5;
 
 const dormir = (ms: number) => new Promise<void>((listo) => setTimeout(listo, ms));
 
@@ -208,11 +241,32 @@ export async function leerIndexacion(opciones: {
   momento?: Date;
   /** El espaciado entre peticiones. Las pruebas lo ponen a cero; nadie más lo toca. */
   pasoMs?: number;
+  /**
+   * Por dónde sale el aviso de duración. Opcional a propósito: quien no lo pase no recibe
+   * aviso y todo lo demás funciona igual, que es lo que deja a las pruebas mudas sin
+   * tener que silenciar nada.
+   */
+  escribir?: (linea: string) => void;
 }): Promise<{ lectura: LecturaDeIndexacion; plan: PlanDeInspeccion }> {
   const momento = opciones.momento ?? new Date();
   const censo = censoPorFamilia(opciones.conjunto);
   const plan = planDeInspeccion(censo, opciones.presupuesto);
   const pasoMs = opciones.pasoMs ?? PASO_MS;
+
+  /*
+   * **Se avisa antes de empezar, no después.** Una inspección tarda del orden de
+   * `SEGUNDOS_POR_INSPECCION`, así que un presupuesto grande deja la terminal muda durante
+   * horas y quien la mira no sabe si avanza o se colgó. El aviso no impide nada —el
+   * presupuesto ya lo aceptó quien lo escribió— pero convierte una espera inexplicable en
+   * una espera anunciada. Sin esto, la primera lectura real pareció un cuelgue y no lo era.
+   */
+  const minutos = Math.round((plan.inspecciones * SEGUNDOS_POR_INSPECCION) / 60);
+  if (minutos >= MINUTOS_ANTES_DE_AVISAR) {
+    opciones.escribir?.(
+      `Aviso: ${plan.inspecciones} inspecciones a ~${SEGUNDOS_POR_INSPECCION} s cada una ` +
+        `son unos ${minutos} min. La API es lenta; no se ha colgado.`,
+    );
+  }
 
   const lecturas: Partial<Record<Familia, LecturaDeFamilia>> = {};
   const sinLeer: FamiliaSinLeer[] = [];
@@ -237,13 +291,34 @@ export async function leerIndexacion(opciones: {
 
     for (const ruta of deFamilia.rutas) {
       const comienzo = Date.now();
-      try {
-        inspecciones.push(await opciones.inspeccionar(ruta));
-      } catch (error) {
-        // Normalizado y acotado, nunca el mensaje crudo: esto se versiona para siempre.
-        fallo = motivoDeFallo(error);
-        break;
+      /*
+       * **Se reintenta lo transitorio, no lo definitivo.** La primera lectura real contra
+       * Search Console —4/09/2026— cayó cuatro veces seguidas con `read ETIMEDOUT` tras
+       * lograr entre una y cinco inspecciones: las peticiones funcionan y la conexión se
+       * cansa. Sin reintento, una familia entera se tira por un corte de segundos, y con
+       * el techo diario de 2.000 peticiones tirar una pasada cuesta un día.
+       *
+       * Un permiso denegado o una cuota agotada NO se reintentan: reintentarlos no cambia
+       * la respuesta y sí gasta el presupuesto que a la familia siguiente le hace falta.
+       */
+      let intento = 0;
+      for (;;) {
+        try {
+          inspecciones.push(await opciones.inspeccionar(ruta));
+          break;
+        } catch (error) {
+          // Normalizado y acotado, nunca el mensaje crudo: esto se versiona para siempre.
+          const motivo = motivoDeFallo(error);
+          const reintentable = !motivo.startsWith('permiso') && !motivo.startsWith('cuota');
+          if (!reintentable || intento >= REINTENTOS) {
+            fallo = motivo;
+            break;
+          }
+          intento += 1;
+          await dormir(ESPERA_DE_REINTENTO_MS * intento);
+        }
       }
+      if (fallo !== undefined) break;
       const espera = pasoMs - (Date.now() - comienzo);
       if (espera > 0) await dormir(espera);
     }
@@ -378,6 +453,8 @@ export async function principal(
     propiedad,
     presupuesto,
     inspeccionar,
+    // El aviso va por el error estándar: no ensucia el `--json`, que es contrato.
+    escribir: (linea) => process.stderr.write(`${linea}\n`),
   });
 
   if (!registra) {
