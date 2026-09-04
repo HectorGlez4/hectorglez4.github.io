@@ -743,6 +743,18 @@ El editor puede solicitar la inspección y el rastreo de una selección corta de
 
 **Fuera de alcance:** cualquier servicio que prometa indexación a cambio de dinero. `[NON-GOAL]`
 
+#### FR-47: El sitemap declara qué cambió y cuándo
+
+Cada entrada del sitemap declara la fecha del último cambio real de esa superficie.
+
+**Consecuencias (verificables):**
+- La fecha sale de **cuándo cambió el contenido**, que en este producto es el historial del repositorio donde vive el Corpus. Nunca de la hora de construcción.
+- La reconstrucción diaria **no mueve** la fecha de una superficie que no cambió. Un sitio que declara 1.715 páginas nuevas cada día enseña al buscador a no creerle, que es peor que no declarar nada.
+- Una superficie cuya fecha no puede determinarse **omite el campo** en vez de inventarlo, como todo campo opcional en este producto.
+- Se comprueba en la suite: que las entradas la declaran, y que dos construcciones del mismo commit dan la misma fecha.
+
+**Por qué está aquí y no en §4.15:** salió de mirar el sitemap el 2026-09-04, con la primera medición ya hecha. Hoy son **1.715 `<loc>` a secas, sin una sola señal de novedad**, en un sitio que reconstruye a diario y que por tanto tiene ese dato y no lo publica. No se afirma que sea la causa —la causa medida es que un sitio nuevo sin señales externas no recibe rastreo—, pero es una señal que el sitio puede dar gratis, que hoy no da, y que apunta al mismo problema.
+
 ---
 
 ## 5. No-Objetivos (Explícitos)

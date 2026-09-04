@@ -2143,7 +2143,7 @@ So that encender un ingreso no publique enlaces comerciales donde el sitio pide 
 
 Google conoce las 1.715 URL —el sitemap se leyó el 2/09 y las descubrió todas— y aun así indexa 2 de cada 80. No es descubrimiento, no es contenido y no es SEO técnico: el sitemap, las canónicas, el `robots.txt` y los códigos de respuesta están comprobados. Es que un sitio de dos días, sin un solo enlace entrante externo, que publicó 1.715 URL de golpe, no recibe presupuesto de rastreo.
 
-**FRs covered:** FR-44, FR-45, FR-46
+**FRs covered:** FR-44, FR-45, FR-46, FR-47
 **Notas de implementación:** esta épica **no la escribió el PRD original de la v5**: nació el 2026-09-04 de la Historia 16.1, que midió y demostró que las Épicas 16 y 17 atacaban la causa equivocada. Casi nada de ella es código — es trabajo editorial y de canal, y el instrumento para saber si funciona ya existe (FR-40). El Kit Diario de la Épica 8 está construido desde la v2 y es exactamente la herramienta que la 18.2 necesita.
 
 ### Story 18.1: El sitio deja de tener cero enlaces entrantes
@@ -2214,3 +2214,39 @@ So that pueda distinguir lo que entró por petición de lo que entró solo.
 **Given** cualquier servicio que prometa indexación a cambio de dinero
 **When** aparezca en la conversación
 **Then** queda fuera, como declara §4.17
+
+### Story 18.4: El sitemap dice qué cambió y cuándo
+
+As a buscador con presupuesto de rastreo limitado y 1.715 URL delante,
+I want saber cuáles han cambiado y cuándo,
+So that pueda gastar ese presupuesto en lo que lo merece en vez de repartirlo a ciegas.
+
+**Acceptance Criteria:**
+
+**Given** el sitemap publicado
+**When** se sirve
+**Then** cada entrada declara su `lastmod`
+**And** hoy ninguna lo hace: son 1.715 `<loc>` a secas, sin una sola señal de novedad
+
+**Given** la fecha de una superficie
+**When** se compone
+**Then** sale de **cuándo cambió su contenido de verdad** —el historial del repositorio, que es donde vive el Corpus—, nunca de la hora de construcción
+
+**Given** la reconstrucción diaria de AD-12
+**When** corre sin que el Corpus haya cambiado
+**Then** el `lastmod` de las superficies **no se mueve**
+**And** el sitio no le dice al buscador que 1.715 páginas cambiaron cuando no cambió ninguna: una fecha falsa es peor que ninguna fecha, porque enseña a no hacer caso
+
+**Given** una superficie cuya fecha no se puede determinar
+**When** se compone su entrada
+**Then** se omite el `lastmod` de esa entrada en vez de inventarlo
+**And** se sigue la misma regla que el resto del Corpus: un campo sin valor se omite, nunca se rellena
+
+**Given** una Página de Cita
+**When** se deriva su fecha
+**Then** refleja el último cambio de su propia Cita, no el del Corpus entero
+
+**Given** el sitemap construido
+**When** lo comprueba la suite
+**Then** hay una prueba que falla si las entradas pierden el `lastmod`
+**And** otra que falla si dos construcciones del mismo commit dan fechas distintas

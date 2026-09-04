@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-04-2026 20:30
+last_updated: 09-04-2026 21:15
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -229,7 +229,12 @@ development_status:
   epic-18: backlog
   18-1-el-sitio-deja-de-tener-cero-enlaces-entrantes: backlog
   18-2-el-canal-propio-se-usa-como-fuente-de-rastreo: backlog
+  # 18-3: dos URL pedidas a mano el 04/09 —las dos únicas con impresiones, Unamuno y
+  # Gracián—. Quedan seis del lote elegido y falta el registro que la historia exige.
   18-3-se-pide-rastreo-de-lo-que-representa-al-sitio: backlog
+  # 18-4: salió de mirar el sitemap el 04/09. Es la única de la Épica 18 que es código,
+  # y la única enteramente en el tejado del repositorio.
+  18-4-el-sitemap-dice-que-cambio-y-cuando: backlog
   epic-18-retrospective: optional
 
 action_items:
