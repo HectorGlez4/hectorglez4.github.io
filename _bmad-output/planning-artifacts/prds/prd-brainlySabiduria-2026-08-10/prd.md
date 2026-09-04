@@ -88,12 +88,12 @@ Los flujos aguas abajo deben usar estos términos exactamente. Introducir un sin
 
 ## 4. Features
 
-Dieciséis features repartidas en cuatro rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
+Diecinueve features repartidas en cuatro rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
 
 - **v1 — §4.1…§4.8.** El producto: las cuatro superficies públicas, la búsqueda, la Imagen de Cita y la herramienta de curación.
 - **v2 — §4.9…§4.11.** Ponerlo delante de personas: compartición, canal propio y sembrado del Corpus.
 - **v3 — §4.12…§4.14.** Que crezca y se sostenga: Colecciones, ampliación del canal y monetización por umbral.
-- **v5 — §4.15…§4.16.** Que lo encuentren: entrar en el índice, y darle a la Página de Autor el contenido que su consulta pide.
+- **v5 — §4.15…§4.17.** Que lo encuentren: entrar en el índice, darle a la Página de Autor el contenido que su consulta pide, y **conseguir que el buscador gaste rastreo en el sitio** — esta última añadida el 2026-09-04, cuando la primera medición demostró que las otras dos atacaban la causa equivocada.
 
 **No hay v4 en este documento, y no es un salto por error.** La v4 fue la Meta de Corpus —1.639 Citas, 24 Temas, 35 Autores— y no salió de aquí: salió de que el bucle de sembrado agotó el hueco del que derivaba trabajo (FR-25). Se numera igual que las demás para que el histórico no mienta.
 
@@ -615,7 +615,9 @@ La publicidad, si se enciende, vive donde no está la Cita.
 
 ### 4.15 Estar en el índice, no solo ser indexable *(v5)*
 
-**Descripción:** El sitio cumple NFR-1 —toda página publicada es rastreable e indexable, con canónica y presencia en el sitemap— y aun así **Google ha indexado 8 de 1.715 URL**, con 1.534 en «Detectada, actualmente no indexada»: descubiertas y descartadas. *Ser* indexable es una propiedad del sitio; *estar* indexado es una decisión del buscador, y hasta la v5 el PRD exigía la primera y medía la segunda sin nada en medio. SM-1 llevaba razón al llamarse «el indicador temprano»: su primera lectura la deja entre el 0 % y el 0,5 % —§7 explica por qué el agregado del panel no es la métrica— frente a una meta del 90 %, y por debajo de ella ninguna otra métrica llega a existir. Esta feature es lo que faltaba entre el requisito y la métrica.
+**Descripción:** El sitio cumple NFR-1 —toda página publicada es rastreable e indexable, con canónica y presencia en el sitemap— y aun así **Google ha indexado 8 de 1.715 URL**.
+
+**Corregido el 2026-09-04, con la primera lectura por familia de FR-40.** Esta feature se escribió culpando al contenido —«páginas finas y casi idénticas»— y esa hipótesis está descartada: sobre 80 URL inspeccionadas hay 2 indexadas y **45 que Google declara desconocidas**, sin diferencia entre familias. Con el sitemap leído y sus 1.715 páginas descubiertas, Google **conoce** las URL y **no las rastrea**. No es un juicio sobre lo que dicen: no ha llegado a leerlas. Lo que queda de esta feature es el instrumento —FR-40— y lo que se va a §4.17 es el remedio. *Ser* indexable es una propiedad del sitio; *estar* indexado es una decisión del buscador, y hasta la v5 el PRD exigía la primera y medía la segunda sin nada en medio. SM-1 llevaba razón al llamarse «el indicador temprano»: su primera lectura la deja entre el 0 % y el 0,5 % —§7 explica por qué el agregado del panel no es la métrica— frente a una meta del 90 %, y por debajo de ella ninguna otra métrica llega a existir. Esta feature es lo que faltaba entre el requisito y la métrica.
 
 **Requisitos Funcionales:**
 
@@ -634,7 +636,9 @@ El sistema notifica cada publicación o modificación de una superficie a los bu
 
 **Fuera de alcance:** pagar por indexación, o cualquier servicio que prometa posiciones. `[NON-GOAL]`
 
-#### FR-39: El enlace interno se reparte desde donde el buscador ya entra
+#### FR-39: El enlace interno se reparte desde donde el buscador ya entra *(APLAZADO el 2026-09-04)*
+
+**No se construye todavía, y el motivo es aritmético:** este requisito reparte enlace **desde superficies indexadas**, y la primera lectura encontró **dos** en todo el sitio. No hay desde dónde repartir. Se reabre cuando la serie de FR-40 muestre una familia por encima del 20 % indexado; hasta entonces su trabajo lo hace §4.17, que ataca por qué no se rastrea. Lo que sigue escrito abajo es válido y no se toca — solo espera.
 
 Lo que este FR añade a NFR-5 es el **origen** del enlace: que salga de superficies que están **en el índice**, no de cualquier página del sitio.
 
@@ -699,6 +703,45 @@ La lista de obras es el lugar donde un Modelo de Ingreso de afiliación puede ap
 - Lo de §4.14 rige sin excepción: apagado hasta su Umbral, sin guion de tercero, y encender es un commit.
 
 **Fuera de alcance:** decidir qué edición se enlaza, y si la afiliación de libros es viable. Es la pregunta 7 de §14 y esta feature no la resuelve; la asume. `[NON-GOAL]`
+
+---
+
+### 4.17 Que el buscador gaste rastreo en este sitio *(v5, añadida el 2026-09-04)*
+
+**Descripción:** Google conoce las 1.715 URL —el sitemap se leyó el 2/09 y las descubrió todas— y aun así indexa 2 de cada 80. No es descubrimiento, no es contenido y no es SEO técnico: el sitemap, las canónicas, el `robots.txt` y los códigos de respuesta están comprobados y correctos. Es que **un sitio de dos días, sin un solo enlace entrante externo, que publicó 1.715 URL de golpe, no recibe presupuesto de rastreo**. Esta feature es la única de la v5 que ataca esa causa; §4.15 la había supuesto en el contenido y se equivocaba.
+
+**Requisitos Funcionales:**
+
+#### FR-44: El sitio tiene señales externas que no se ha dado a sí mismo
+
+Existen enlaces y menciones al sitio desde dominios que no controla el proyecto.
+
+**Consecuencias (verificables):**
+- El sitio deja de tener cero dominios de referencia. La cifra sale del informe de enlaces de la propiedad, no de una estimación.
+- Las señales proceden de sitios que aceptan una obra de dominio público por lo que es —directorios de recursos abiertos, catálogos de citas, comunidades de lectura—, nunca de compra de enlaces ni de granjas: el sitio no gana rastreo a costa de una penalización posterior.
+- Cada señal conseguida se registra con su fecha, para poder cruzarla con la serie de FR-40.
+
+**Fuera de alcance:** comprar enlaces, intercambiarlos, o publicar en sitios cuyo criterio de admisión sea el pago. `[NON-GOAL]`
+
+#### FR-45: El canal propio se usa como fuente de rastreo, no solo de visitas
+
+La publicación en las cuentas propias se aprovecha para que el buscador vea actividad y llegada de personas.
+
+**Consecuencias (verificables):**
+- La Cita del Día publicada enlaza siempre a su URL canónica, que ya hace FR-22, y ese enlace se cuenta como señal en el registro de FR-44.
+- La cadencia de publicación se sostiene: una cuenta que publica dos veces y calla no produce señal ninguna.
+- **No produce FR nuevos de canal:** el Kit Diario de §4.10 ya está construido desde la v2 y es exactamente el instrumento. Lo que cambia es que su valor deja de medirse solo por SM-8.
+
+#### FR-46: Se pide rastreo de lo que importa, no de todo
+
+El editor puede solicitar la inspección y el rastreo de una selección corta de URL, y sabe cuáles ha pedido.
+
+**Consecuencias (verificables):**
+- La selección es corta y deliberada —el orden de magnitud de la decena, no del millar—: pedir rastreo de 1.715 URL no es una petición, es ruido.
+- Quedan registradas las URL solicitadas y la fecha, para distinguir en la serie de FR-40 lo que entró por petición de lo que entró solo.
+- **La petición no se automatiza sobre el Corpus entero.** Es una decisión editorial sobre qué páginas representan el sitio, del mismo carácter que elegir la Cita del Día.
+
+**Fuera de alcance:** cualquier servicio que prometa indexación a cambio de dinero. `[NON-GOAL]`
 
 ---
 
@@ -790,10 +833,15 @@ La v2 quiso poner el producto delante de personas y no llegó a hacerlo: lo cons
 
 **Dentro:**
 
-- **Estar en el índice** (FR-38…FR-40) — 8 URL indexadas de 1.715 y 1.534 en «Detectada, actualmente no indexada». Va primera porque ninguna feature produce visitas si la página que la lleva no se indexa.
-- **La Página de Autor se gana su consulta** (FR-41…FR-43) — semblanza con fuente y lista de obras derivada de las Procedencias. Es la única superficie de contenido que hoy recibe impresiones.
+- **Medir la indexación** (FR-40) — el instrumento. Va primero, y la decisión se pagó sola: descubrió en una tarde que las otras dos features de esta ronda atacaban la causa equivocada.
+- **Que el buscador gaste rastreo** (FR-44…FR-46) — *añadida el 2026-09-04*. Señales externas, el canal propio como fuente de rastreo, y petición deliberada de las URL que representan el sitio. **Es la única que ataca la causa medida.**
+- **La Página de Autor se gana su consulta** (FR-41…FR-43) — semblanza con fuente y lista de obras. Es la única superficie de contenido con impresiones, y sigue siendo donde está la demanda.
 
-**El orden importa y es el declarado.** La lista de obras sirve a las dos: es contenido real y distinto por página —lo que le falta a un sitio que el buscador ve como fino— y a la vez captura la intención de Autor que las consultas ya muestran. Empezar por la Página de Autor sin atacar la indexación produciría una página mejor que nadie encontraría.
+**Reordenado el 2026-09-04, con el dato delante.** El orden original —indexación y luego contenido— era correcto en su instinto y equivocado en su contenido:
+
+- **FR-38** (anunciar cambios) se queda **solo por su motivo propio** —los índices que sí aceptan aviso, y con ellos la búsqueda por IA—, nunca como remedio de SM-1. Google conoce ya las 1.715 URL: no hay nada que anunciarle.
+- **FR-39** (repartir enlace desde superficies indexadas) queda **aplazado**: hay dos superficies indexadas en todo el sitio, así que no hay desde dónde repartir.
+- **§4.16 va después de §4.17.** Enriquecer 35 páginas de las que Google conoce 11 e indexa 1 no produce visitas mientras nadie las rastree. El contenido no sobra: llega tarde si va antes.
 
 **Fuera de la v5, y por qué:**
 
@@ -935,7 +983,13 @@ Las seis preguntas abiertas de la primera redacción se resolvieron en aquella p
 
 7. **Qué edición se enlaza, y si la afiliación de libros es viable siquiera.** La pregunta 6 daba por hecho que era cuestión de elegir programa. La investigación de la v3.2 —registrada en `.memlog.md`— dice algo más incómodo, y FR-43 hereda la pregunta sin resolverla: el libro físico paga el 4,5 %, las 103 obras del Corpus son de dominio público y su edición cotejada suele tener versión electrónica gratuita o de ~1 €. Enlazar **la edición que se cotejó** respeta FR-24 y no ingresa nada; enlazar **una edición moderna anotada** ingresa y erosiona el principio de que la Procedencia es la que se verificó y no la que conviene vender. A eso se suma la cobertura: el programa no existe en Argentina, Chile, Colombia ni Perú, lo que choca con el suelo del 40 % de tradición latinoamericana. **Consecuencia asumida en la v5:** FR-43 construye la superficie por su valor propio —contenido e intención de Autor— y no la condiciona a que esta pregunta tenga buena respuesta.
 
-8. **Por qué el buscador descarta 1.534 páginas.** FR-39, FR-40 y §4.16 atacan la hipótesis más probable —FR-38 no, y él mismo lo dice— —contenido fino y páginas casi idénticas—, pero es hipótesis y no diagnóstico: «Detectada, actualmente no indexada» no dice su motivo. Se falsa con la propia v5: si al enriquecer la Página de Autor esas 35 páginas entran en el índice y las Citas no, la causa está en la Página de Cita y no en el sitio. Es la pregunta con más consecuencia del documento, porque de ella depende SM-2.
+8. ~~**Por qué el buscador descarta 1.534 páginas.**~~ **CONTESTADA el 2026-09-04, y con el «no» que no se esperaba.**
+
+   La hipótesis era que si las Páginas de Autor se indexaban y las Citas no, la causa estaría en la Página de Cita. **No se indexa ninguna familia.** Sobre 80 URL inspeccionadas por la Historia 16.1: **2 indexadas** —Cita 0 de 24, Autor 1 de 20, Tema 0 de 20, Colección 1 de 16— y **45 «desconocidas para Google»**. No hay diferencia entre familias que explique nada, así que el contenido de la Página de Cita queda exculpado.
+
+   Y lo que descarta pesa más que lo que confirma: Search Console declara `sitemap-0.xml` leído el 2/09 con **1.715 páginas descubiertas**. Google conoce todas las URL. Luego el problema **no es descubrimiento ni contenido** —no ha llegado a mirarlo—: es **rastreo**. Un sitio de dos días, sin un solo enlace entrante externo, que publicó 1.715 URL de golpe.
+
+   Eso lo ataca §4.17 y no lo atacaba ninguna de las ocho historias que la v5 escribió antes de tener el dato.
 
 ## 15. Índice de Supuestos
 
@@ -959,4 +1013,4 @@ Los supuestos etiquetados en la primera redacción se convirtieron en decisiones
 **Añadidos en la v5:**
 
 - **§4.16 / FR-41** — Existe una fuente citable con licencia admisible que sostenga una semblanza de cada uno de los 35 Autores. Es un supuesto de disponibilidad, no de preferencia: Wikipedia es CC BY-SA 4.0, la misma licencia con la que Wikisource-es ya aporta 1.275 Citas, así que la postura de licencia no es nueva. **Consecuencia asumida:** una semblanza derivada de una fuente CC BY-SA queda bajo esa misma licencia y no es propiedad exclusiva del sitio. Alcanza al texto derivado, no al Corpus ni al resto del sitio. Si un Autor no tiene fuente citable, se queda con la semblanza que ya tiene antes que componérsela — §5 no admite excepción.
-- **§4.15** — Que el sitio anuncie sus cambios y reparta enlace interno mueve la aguja de la indexación. Es el supuesto que sostiene la v5 entera y **puede ser falso**: si el buscador descarta las Páginas de Cita por lo que son —una frase corta en una plantilla repetida 1.639 veces—, ningún canal de aviso lo cambia, y la palanca pasa a ser la Página de Cita misma. Se falsa en la misma ronda, por la pregunta 8 de §14.
+- ~~**§4.15**~~ — **FALSADO el 2026-09-04, dos días después de escribirlo.** Decía que anunciar los cambios y repartir enlace interno movería la indexación. Las dos mitades cayeron por separado: **anunciar no sirve** porque Google ya conoce las 1.715 URL —sitemap leído el 2/09, con las páginas descubiertas—, y **repartir enlace desde superficies indexadas** no se puede hacer cuando hay dos superficies indexadas en todo el sitio. La palanca que queda no es de código: un sitio nuevo sin señales externas no recibe presupuesto de rastreo. Se falsó el mismo día y por una tarde de trabajo, que es exactamente para lo que se escribió como supuesto y no como certeza.

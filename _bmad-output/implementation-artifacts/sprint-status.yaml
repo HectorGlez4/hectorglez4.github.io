@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-02-2026 18:55
+last_updated: 09-04-2026 20:30
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -207,7 +207,11 @@ development_status:
   # deliberado: la medición va antes que el remedio.
   epic-16: in-progress
   16-1-el-estado-de-indexación-se-lee-por-familia-y-se-versiona: review
+  # Reenfocada el 04/09: pierde su premisa —Google ya conoce las 1.715 URL— y se queda
+  # solo por su motivo propio, los índices que sí aceptan aviso.
   16-2-el-sitio-anuncia-lo-que-cambia-y-las-cuatro-familias-cuentan: backlog
+  # APLAZADA el 04/09: reparte enlace «desde superficies indexadas» y hay dos en todo el
+  # sitio. Se reabre cuando una familia pase del 20 % indexado en la serie.
   16-3-el-enlace-interno-se-reparte-desde-donde-el-buscador-ya-entr: backlog
   epic-16-retrospective: optional
 
@@ -218,6 +222,15 @@ development_status:
   17-4-la-ficha-abre-la-página-y-solo-la-primera: backlog
   17-5-un-modelo-se-admite-por-ruta-y-el-tope-de-guion-se-mide-dond: backlog
   epic-17-retrospective: optional
+
+  # Épica 18 — no la escribió el PRD de la v5: nació el 04/09 de la Historia 16.1, que midió
+  # 2 indexadas de 80 y demostró que las Épicas 16 y 17 atacaban la causa equivocada.
+  # Casi nada es código: es trabajo editorial y de canal.
+  epic-18: backlog
+  18-1-el-sitio-deja-de-tener-cero-enlaces-entrantes: backlog
+  18-2-el-canal-propio-se-usa-como-fuente-de-rastreo: backlog
+  18-3-se-pide-rastreo-de-lo-que-representa-al-sitio: backlog
+  epic-18-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"

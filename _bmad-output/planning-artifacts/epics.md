@@ -1867,8 +1867,15 @@ So that exista la opción sin que se convierta en un peaje.
 
 Las 1.639 Páginas de Cita existen, son rastreables y están en el sitemap, y **Google ha indexado ocho**. Las otras 1.534 están en «Detectada, actualmente no indexada»: descubiertas y descartadas. Esta épica no añade ninguna superficie — pone el instrumento para saber por qué, el canal para anunciar lo que cambia, y el reparto de enlace hacia donde el buscador ya entra.
 
-**FRs covered:** FR-38, FR-39, FR-40
-**Condiciones cubiertas:** ninguna nueva; ataca SM-1, que va al 0,5 % con meta del 90 %
+**FRs covered:** FR-38, FR-40 *(FR-39 aplazado el 2026-09-04)*
+**Condiciones cubiertas:** ninguna nueva; ataca SM-1
+
+**RECORTADA el 2026-09-04, por lo que midió su propia primera historia.** La 16.1 se estrenó contra Search Console y encontró 2 URL indexadas de 80, con 45 «desconocidas para Google» y el sitemap leído con sus 1.715 páginas descubiertas. Eso deja a las otras dos historias sin la premisa sobre la que se escribieron:
+
+- **16.2** (anunciar cambios) pierde su motivo principal —Google ya conoce las URL, no hay nada que anunciarle— y **se queda solo por el suyo propio**: los índices que sí aceptan aviso, y con ellos la búsqueda por IA. Deja de ser trabajo de indexación y pasa a ser trabajo de descubribilidad en otros buscadores.
+- **16.3** (repartir enlace desde superficies indexadas) queda **aplazada**: hay dos superficies indexadas en todo el sitio. Se reabre cuando la serie muestre una familia por encima del 20 %.
+
+El remedio de verdad se fue a la **Épica 18**, que no existía cuando esto se planificó. Y la 16.1 se queda entera: es el instrumento que descubrió el error, y sin él la Épica 18 no sabría si funciona.
 **Notas de implementación:** va **primera** por la razón que el PRD escribe en §6.5 — ninguna feature produce visitas si su página no se indexa. Dentro de la épica, la medición va antes que el remedio: sin la serie de AD-24 no se sabe si algo funcionó, y la pregunta 8 de §14 solo se falsa comparando el reparto por familia a lo largo del tiempo. Restricción externa que las historias heredan y **no deben redescubrir**: la Search Console API no expone informe de cobertura; solo `URL Inspection`, una URL por petición, con tope de 2.000 al día y 600 por minuto por propiedad.
 
 ### Story 16.1: El estado de indexación se lee por familia y se versiona
@@ -2129,3 +2136,81 @@ So that encender un ingreso no publique enlaces comerciales donde el sitio pide 
 **Given** una obra sin Citas publicadas
 **When** se compone la página
 **Then** no aparece, luego no puede llevar enlace de afiliación
+
+---
+
+## Epic 18: Que el buscador gaste rastreo en este sitio
+
+Google conoce las 1.715 URL —el sitemap se leyó el 2/09 y las descubrió todas— y aun así indexa 2 de cada 80. No es descubrimiento, no es contenido y no es SEO técnico: el sitemap, las canónicas, el `robots.txt` y los códigos de respuesta están comprobados. Es que un sitio de dos días, sin un solo enlace entrante externo, que publicó 1.715 URL de golpe, no recibe presupuesto de rastreo.
+
+**FRs covered:** FR-44, FR-45, FR-46
+**Notas de implementación:** esta épica **no la escribió el PRD original de la v5**: nació el 2026-09-04 de la Historia 16.1, que midió y demostró que las Épicas 16 y 17 atacaban la causa equivocada. Casi nada de ella es código — es trabajo editorial y de canal, y el instrumento para saber si funciona ya existe (FR-40). El Kit Diario de la Épica 8 está construido desde la v2 y es exactamente la herramienta que la 18.2 necesita.
+
+### Story 18.1: El sitio deja de tener cero enlaces entrantes
+
+As a sitio nuevo que ningún buscador tiene motivo para rastrear,
+I want que existan enlaces hacia mí desde dominios que no controlo,
+So that el buscador tenga una razón para gastar rastreo en mis páginas.
+
+**Acceptance Criteria:**
+
+**Given** el informe de enlaces de la propiedad
+**When** se consulta
+**Then** el número de dominios de referencia es mayor que cero
+**And** la cifra sale del informe, no de una estimación
+
+**Given** cada señal conseguida
+**When** se registra
+**Then** queda anotada con su fecha, para poder cruzarla con la serie de indexación
+
+**Given** el origen de una señal
+**When** se decide buscarla
+**Then** es un sitio que admite una obra de dominio público por lo que es
+**And** nunca un enlace comprado, intercambiado, ni un sitio cuyo criterio de admisión sea el pago
+
+### Story 18.2: El canal propio se usa como fuente de rastreo
+
+As a editor que ya publica a diario en cinco cuentas,
+I want que esa publicación cuente como señal y no solo como visitas,
+So that el instrumento que ya existe sirva también para lo que ahora hace falta.
+
+**Acceptance Criteria:**
+
+**Given** la Cita del Día publicada en una cuenta propia
+**When** se compone su pieza
+**Then** enlaza a la URL canónica, como ya exige FR-22
+**And** ese enlace queda contado como señal en el registro de la 18.1
+
+**Given** la cadencia de publicación
+**When** se mide
+**Then** se sostiene en el tiempo: una cuenta que publica dos veces y calla no produce señal ninguna
+
+**Given** el Kit Diario
+**When** se usa para esto
+**Then** no se le añade ninguna capacidad nueva: está construido desde la v2 y basta
+
+### Story 18.3: Se pide rastreo de lo que representa al sitio
+
+As a editor,
+I want pedir rastreo de unas pocas URL escogidas y saber cuáles pedí,
+So that pueda distinguir lo que entró por petición de lo que entró solo.
+
+**Acceptance Criteria:**
+
+**Given** la selección de URL para las que se pide rastreo
+**When** se compone
+**Then** es del orden de la decena, no del millar: pedir rastreo de 1.715 URL no es una petición, es ruido
+
+**Given** cada petición
+**When** se cursa
+**Then** quedan registradas las URL y la fecha
+**And** la serie de indexación puede distinguir lo pedido de lo espontáneo
+
+**Given** la selección
+**When** se decide
+**Then** la hace una persona, como se elige la Cita del Día
+**And** no se automatiza sobre el Corpus entero
+
+**Given** cualquier servicio que prometa indexación a cambio de dinero
+**When** aparezca en la conversación
+**Then** queda fuera, como declara §4.17
