@@ -24,6 +24,8 @@
     "pieza": "tsx tools/pieza.ts",
     "objetivo": "tsx tools/objetivo.ts",
     "sesion:registrar": "tsx tools/objetivo.ts --registrar",
+    "indexacion": "tsx tools/indexacion.ts",
+    "indexacion:registrar": "tsx tools/indexacion.ts --registrar",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "astro": "astro"
@@ -38,6 +40,7 @@
     "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.62.1",
+    "googleapis": "178.0.0",
     "pagefind": "^1.5.2",
     "tsx": "^4.23.12",
     "typescript": "^5.9.0",

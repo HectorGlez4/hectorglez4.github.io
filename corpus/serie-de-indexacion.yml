@@ -1,0 +1,45 @@
+# Serie de indexación por familia — Historia 16.1, Épica 16
+#
+# QUÉ MIDE. Cuántas de las URL publicadas de cada familia —Cita, Autor, Tema,
+# Colección— dice el buscador que tiene indexadas. Es el instrumento de la Épica 16: sin
+# esta serie no se sabe si el remedio de la 16.2 o el de la 16.3 sirvieron de algo, y la
+# pregunta que abre la épica —por qué el buscador descarta lo que descarta— SOLO se
+# contesta comparando el reparto POR FAMILIA a lo largo del tiempo. El total engaña: el
+# remedio no es el mismo para las páginas de una frase que para las de agregación.
+#
+# La cifra que se compara con la meta de indexación es la de la familia CITA, nunca el
+# agregado del sitio.
+#
+# JUNTO AL RECUENTO VA EL DIAGNÓSTICO. `estados` reparte la muestra de cada familia por el
+# estado de cobertura que declara el buscador, y es lo que distingue «Descubierta,
+# actualmente sin indexar» —ni siquiera ha pasado— de «Rastreada, actualmente sin indexar»
+# —pasó y la descartó—. Las dos suman al mismo `noIndexadas` y piden remedios distintos.
+#
+# DE DÓNDE SALE. De la API de inspección de URL de Search Console, una URL por petición,
+# con techo de 2.000 al día y 600 por minuto por propiedad. No hay informe de cobertura
+# que pedir: por eso se compone URL a URL y por eso, en cuanto el sitio pase de ~2.000
+# páginas, la lectura será por MUESTRA. El tamaño de muestra va escrito en cada familia
+# de cada entrada, para que una comparación entre jornadas sepa qué compara. El dato es
+# el del último rastreo del buscador y no el de ahora: esta serie mide CON RETARDO.
+#
+#   npx tsx tools/indexacion.ts              # consulta e informa. NO escribe nada.
+#   npx tsx tools/indexacion.ts --registrar  # además anota la entrada de hoy.
+#
+# POR QUÉ REEMPLAZA EN VEZ DE AÑADIR, a diferencia de sesiones-de-sembrado.yml. Esto
+# mide un ESTADO, no una sesión: es idempotente por fecha, y una segunda lectura de la
+# misma jornada sustituye a la primera en vez de sumarse. Su vecina mide hechos
+# acumulables —sesiones corridas— y por eso solo añade; dos lecturas del mismo día no
+# son dos estados, son la misma pregunta hecha dos veces.
+#
+# AUSENCIA ANTES QUE CERO. Una familia cuya lectura no se logró SE OMITE de `familias` y
+# aparece en `sinLeer` con su motivo. Jamás se escribe cero: el fallo de esa API es
+# parcial —cuota agotada, espera vencida— y el cero real es casi el estado de partida, así
+# que un cero fabricado sería indistinguible del cero de verdad.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,
+# junto a `portada.json` y `sesiones-de-sembrado.yml`, y ninguna base de
+# `src/content.config.ts` apunta aquí. Además NINGÚN módulo de `src/lib/` lo lee, ni
+# siquiera por parámetro (AD-24): si el sitio lo leyera, dos construcciones del mismo
+# commit dejarían de dar el mismo `dist/`.
+
+lecturas:

@@ -137,7 +137,7 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Tres excepciones, las tres escritas y con nombre. Una excepción escrita se revisa; un
+ * Cinco excepciones, las cinco escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
@@ -146,6 +146,12 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     receptor de medición la única cifra contra la que se miden los Umbrales, y **solo
  *     informa**. Lo que hace con la respuesta vive en `tools/lib/ingresos.ts`, que no pide
  *     nada, igual que `tools/lib/documento.ts` respecto de `tools/recuperar.ts`.
+ *   · `tools/indexacion.ts` es la cáscara de la lectura del estado de indexación —Historia
+ *     16.1—: es la única que importa `googleapis`, y lo hace con un `import()` diferido para
+ *     que `--ayuda` no cargue el SDK. Lo que decide qué se mide y cómo se agrega vive en
+ *     `tools/lib/indexacion.ts`, que no pide nada, igual que `tools/lib/ingresos.ts` respecto
+ *     de `tools/ingreso.ts`. El build no la invoca: la corre una persona, y ningún paso de CI
+ *     la ejecuta ni commitea lo que escribe.
  *   · `astro.config.mjs` declara las dos familias de UX-DR3 por la Fonts API de Astro, y
  *     `fontProviders.google()` **sí descarga** en el build: los `.woff2` acaban en
  *     `.astro/fonts/` y `unifont` está en el árbol de dependencias por eso.
@@ -174,6 +180,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'el proveedor de tipografías de la Fonts API: el build baja las dos familias de UX-DR3 a .astro/fonts/ y nada más',
     ],
     [
+      'tools/indexacion.ts',
+      'la cáscara de la lectura del estado de indexación: la única que importa googleapis, y el build no la invoca — la corre una persona y ningún paso de CI la ejecuta (AD-24)',
+    ],
+    [
       'tools/avisar.ts',
       'la cáscara del aviso a IndexNow: avisa a los buscadores de lo ya publicado, y corre en el flujo de trabajo con needs: desplegar — el build no la invoca, así que sigue construyendo sin internet',
     ],
@@ -193,6 +203,17 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     /from\s+['"](?:node:)?(?:http|https|net|tls|dgram)['"]/,
     /require\(\s*['"](?:node:)?(?:http|https|net|tls|dgram)['"]\s*\)/,
     /from\s+['"](?:axios|undici|node-fetch|got)['"]/,
+    /*
+     * `googleapis` — Historia 16.1, el quinto punto de red del proyecto.
+     *
+     * Las tres formas, y la del `import()` no es teórica: es justo la que usa
+     * `tools/indexacion.ts` para no cargar el SDK entero al pedir `--ayuda`, y sin este
+     * patrón el guardián no la veía. Importar el cliente en `tools/lib/indexacion.ts`
+     * —cuya cabecera promete que la red no entra— pasaba la suite entera.
+     */
+    /from\s+['"]googleapis(?:\/[^'"]*)?['"]/,
+    /\bimport\s*\(\s*['"]googleapis(?:\/[^'"]*)?['"]\s*\)/,
+    /require\(\s*['"]googleapis(?:\/[^'"]*)?['"]\s*\)/,
   ];
 
   /**
@@ -275,11 +296,12 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas cuatro', () => {
-    // Añadir una quinta tiene que ser un cambio deliberado de esta prueba.
+  it('no hay más excepciones que esas cinco', () => {
+    // Añadir una sexta tiene que ser un cambio deliberado de esta prueba.
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
       'tools/avisar.ts',
+      'tools/indexacion.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',
     ]);
@@ -292,6 +314,14 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed("const c = require('http');")).toBe(true);
     expect(tieneLlamadaDeRed("import axios from 'axios';")).toBe(true);
     expect(tieneLlamadaDeRed('provider: fontProviders.google(),')).toBe(true);
+    /*
+     * `googleapis` en sus tres formas — Historia 16.1. La del `import()` diferido es la que
+     * de verdad usa el proyecto, y sin ella el guardián dejaba pasar un cliente de red
+     * dentro de `tools/lib/`, que es donde AD-22 promete que no hay ninguno.
+     */
+    expect(tieneLlamadaDeRed("import { google } from 'googleapis';")).toBe(true);
+    expect(tieneLlamadaDeRed("const { google } = await import('googleapis');")).toBe(true);
+    expect(tieneLlamadaDeRed("const g = require('googleapis');")).toBe(true);
     expect(tieneLlamadaDeRed('export function extraerCandidatas() { return []; }')).toBe(false);
   });
 
@@ -323,6 +353,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
      * - `tools/recuperar.ts` trae el documento de una Fuente, y por eso el build no lo
      *   invoca nunca.
      * - `tools/ingreso.ts` consulta el proveedor del Modelo de Ingreso.
+     * - `tools/indexacion.ts` lee el estado de indexación por familia con `googleapis`. **El
+     *   build no lo llama** y ningún paso de CI lo ejecuta ni commitea lo que escribe: si lo
+     *   hiciera, el `push` dispararía el flujo de publicación y con él el aviso, anunciando
+     *   una jornada en la que no cambió un byte.
      * - `tools/avisar.ts` avisa a IndexNow de lo publicado. **El build no lo llama**: corre
      *   en el flujo de trabajo con `needs: desplegar`, que es lo que mantiene en pie la
      *   garantía que esta prueba defiende —`npm run build` sigue construyendo sin internet—
@@ -335,6 +369,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(conRed.sort()).toEqual([
       'astro.config.mjs',
       'tools/avisar.ts',
+      'tools/indexacion.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',
     ]);

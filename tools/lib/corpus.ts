@@ -20,6 +20,12 @@ import type {
 } from '../../src/lib/objetivo.ts';
 import { FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
 import { analizarDocumento } from './documento.ts';
+/*
+ * Solo los tipos, y a propósito: quien decide qué se inspecciona y cómo se agrega es
+ * `indexacion.ts`, que es puro y no toca disco. Esta capa escribe lo que le den. Al ser
+ * `import type`, TypeScript lo borra al compilar y no queda dependencia en ejecución.
+ */
+import type { LecturaDeFamilia, LecturaDeIndexacion, RepartoDeEstado } from './indexacion.ts';
 
 /**
  * El registro de sesiones de sembrado — Historia 11.3. Su nombre tiene un solo dueño,
@@ -36,6 +42,15 @@ export const FICHERO_DE_SESIONES = 'sesiones-de-sembrado.yml';
  * adelantado y componer el día sean la misma cosa.
  */
 export const FICHERO_DE_PORTADA = 'portada.json';
+
+/**
+ * La serie de indexación por familia — Historia 16.1. Su nombre tiene un solo dueño.
+ *
+ * Vecino de `sesiones-de-sembrado.yml` y de la misma clase: metadato del Corpus, no
+ * colección. Lo que mide y por qué **reemplaza** en vez de añadir está escrito en su
+ * cabecera, unas líneas más abajo.
+ */
+export const FICHERO_DE_INDEXACION = 'serie-de-indexacion.yml';
 
 export interface Rutas {
   raiz: string;
@@ -108,6 +123,16 @@ export interface Rutas {
    */
   sesionesDeSembrado: string;
   /**
+   * La serie de indexación por familia — Historia 16.1.
+   *
+   * Metadato del Corpus como sus vecinos, y con el mismo aislamiento: ninguna base de
+   * `src/content.config.ts` apunta aquí y **ningún módulo de `src/lib/` lo lee**, ni
+   * siquiera por parámetro (AD-24). Si el sitio lo leyera, `dist/` pasaría a ser función de
+   * lo que el buscador opinó ayer y dos construcciones del mismo commit dejarían de dar el
+   * mismo sitio.
+   */
+  serieDeIndexacion: string;
+  /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
    * Metadato del Corpus y no colección, como sus dos vecinos: vive en la raíz de `corpus/`,
@@ -136,6 +161,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
+    serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
@@ -348,7 +374,28 @@ export function aYaml(objeto: Record<string, unknown>, sangria = ''): string {
     if (Array.isArray(valor)) {
       if (valor.length === 0) continue;
       salida += `${sangria}${clave}:\n`;
-      for (const elemento of valor) salida += `${sangria}  - ${escalar(elemento)}\n`;
+      for (const elemento of valor) {
+        /*
+         * Una lista de objetos, y no solo de escalares — Historia 16.1.
+         *
+         * Hasta aquí toda lista del corpus era de cadenas (miembros de Colección, temas de
+         * una Cita) y un objeto dentro salía como `[object Object]`: un fichero corrupto
+         * escrito en silencio. El reparto por estado de cobertura de la serie de indexación
+         * es la primera lista de objetos que se escribe, así que la capacidad entra aquí, en
+         * el único sitio que escribe ficheros, en vez de en un segundo serializador.
+         *
+         * El `- ` ocupa el sitio de los dos primeros espacios de la primera clave, igual que
+         * hace el registro de sesiones al componer su entrada; las demás claves cuelgan
+         * sangradas de él.
+         */
+        if (elemento !== null && typeof elemento === 'object' && !Array.isArray(elemento)) {
+          const anidado = aYaml(elemento as Record<string, unknown>, `${sangria}    `);
+          if (anidado === '') continue;
+          salida += `${sangria}  -${anidado.slice(sangria.length + 3)}`;
+        } else {
+          salida += `${sangria}  - ${escalar(elemento)}\n`;
+        }
+      }
     } else if (typeof valor === 'object') {
       const anidado = aYaml(valor as Record<string, unknown>, `${sangria}  `);
       if (anidado === '') continue;
@@ -908,5 +955,317 @@ export async function registrarSesionDeSembrado(
   }
 
   await appendFile(ruta, añadido, 'utf8');
+  return ruta;
+}
+
+/**
+ * La cabecera de la serie de indexación — Historia 16.1.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que la de sesiones: un
+ * corpus de pruebas, o un clon al que le falte el fichero, tiene que poder anotar su
+ * primera lectura sin que nadie escriba la cabecera a mano.
+ *
+ * Y dice lo que la diferencia de su vecina, que es lo único que hay que saber para no
+ * confundirlas: aquélla **añade** porque mide hechos acumulables —sesiones corridas—, y
+ * ésta **reemplaza** porque mide un estado.
+ */
+export const CABECERA_DE_INDEXACION = [
+  '# Serie de indexación por familia — Historia 16.1, Épica 16',
+  '#',
+  '# QUÉ MIDE. Cuántas de las URL publicadas de cada familia —Cita, Autor, Tema,',
+  '# Colección— dice el buscador que tiene indexadas. Es el instrumento de la Épica 16: sin',
+  '# esta serie no se sabe si el remedio de la 16.2 o el de la 16.3 sirvieron de algo, y la',
+  '# pregunta que abre la épica —por qué el buscador descarta lo que descarta— SOLO se',
+  '# contesta comparando el reparto POR FAMILIA a lo largo del tiempo. El total engaña: el',
+  '# remedio no es el mismo para las páginas de una frase que para las de agregación.',
+  '#',
+  '# La cifra que se compara con la meta de indexación es la de la familia CITA, nunca el',
+  '# agregado del sitio.',
+  '#',
+  '# JUNTO AL RECUENTO VA EL DIAGNÓSTICO. `estados` reparte la muestra de cada familia por el',
+  '# estado de cobertura que declara el buscador, y es lo que distingue «Descubierta,',
+  '# actualmente sin indexar» —ni siquiera ha pasado— de «Rastreada, actualmente sin indexar»',
+  '# —pasó y la descartó—. Las dos suman al mismo `noIndexadas` y piden remedios distintos.',
+  '#',
+  '# DE DÓNDE SALE. De la API de inspección de URL de Search Console, una URL por petición,',
+  '# con techo de 2.000 al día y 600 por minuto por propiedad. No hay informe de cobertura',
+  '# que pedir: por eso se compone URL a URL y por eso, en cuanto el sitio pase de ~2.000',
+  '# páginas, la lectura será por MUESTRA. El tamaño de muestra va escrito en cada familia',
+  '# de cada entrada, para que una comparación entre jornadas sepa qué compara. El dato es',
+  '# el del último rastreo del buscador y no el de ahora: esta serie mide CON RETARDO.',
+  '#',
+  '#   npx tsx tools/indexacion.ts              # consulta e informa. NO escribe nada.',
+  '#   npx tsx tools/indexacion.ts --registrar  # además anota la entrada de hoy.',
+  '#',
+  '# POR QUÉ REEMPLAZA EN VEZ DE AÑADIR, a diferencia de sesiones-de-sembrado.yml. Esto',
+  '# mide un ESTADO, no una sesión: es idempotente por fecha, y una segunda lectura de la',
+  '# misma jornada sustituye a la primera en vez de sumarse. Su vecina mide hechos',
+  '# acumulables —sesiones corridas— y por eso solo añade; dos lecturas del mismo día no',
+  '# son dos estados, son la misma pregunta hecha dos veces.',
+  '#',
+  '# AUSENCIA ANTES QUE CERO. Una familia cuya lectura no se logró SE OMITE de `familias` y',
+  '# aparece en `sinLeer` con su motivo. Jamás se escribe cero: el fallo de esa API es',
+  '# parcial —cuota agotada, espera vencida— y el cero real es casi el estado de partida, así',
+  '# que un cero fabricado sería indistinguible del cero de verdad.',
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,',
+  '# junto a `portada.json` y `sesiones-de-sembrado.yml`, y ninguna base de',
+  '# `src/content.config.ts` apunta aquí. Además NINGÚN módulo de `src/lib/` lo lee, ni',
+  '# siquiera por parámetro (AD-24): si el sitio lo leyera, dos construcciones del mismo',
+  '# commit dejarían de dar el mismo `dist/`.',
+  '',
+  'lecturas:',
+  '',
+].join('\n');
+
+/** La clave de la que cuelgan las entradas. Se comprueba antes de reescribir el fichero. */
+const CLAVE_DE_LECTURAS = 'lecturas';
+
+/** Una entrada ya escrita en la serie, tal y como se relee. */
+export interface LecturaRegistrada {
+  fecha: string;
+  hora?: string;
+  propiedad: string;
+  publicadas: number;
+  inspeccionadas: number;
+  /**
+   * Solo las familias **leídas**. Una que no se leyó no tiene clave aquí.
+   *
+   * `estados` es opcional al releer y obligatorio al escribir, y la asimetría es
+   * deliberada: una entrada anterior al reparto por estado de cobertura sigue siendo una
+   * lectura válida y comparable en lo que sí trae, y romper al leerla convertiría una
+   * mejora del formato en una serie ilegible.
+   */
+  familias?: Record<string, Omit<LecturaDeFamilia, 'estados'> & { estados?: RepartoDeEstado[] }>;
+  /** Solo las que no se leyeron, con su motivo. Ausente cuando se leyeron todas. */
+  sinLeer?: Record<string, string>;
+}
+
+/**
+ * Las entradas de una serie ya leída, comprobando que el fichero sea lo que dice ser.
+ *
+ * Es la misma comprobación que la del registro de sesiones y por el mismo motivo, con una
+ * agravante: este escritor **reescribe** el fichero entero en vez de añadir al final. Leer
+ * mal lo que había no dejaría una lista huérfana, que es reparable — dejaría la serie
+ * anterior fuera del fichero nuevo. Nada se escribe hasta que esto entiende lo que hay.
+ */
+function analizarSerie(nombre: string, contenido: string): LecturaRegistrada[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'De esta serie sale la comparación por familia entre jornadas, y una lectura nueva ' +
+        'reescribe el fichero: no se lee a medias.',
+    );
+  }
+
+  if (leido === null || leido === undefined || typeof leido !== 'object' || Array.isArray(leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_LECTURAS}:» en la raíz del fichero. Las entradas ` +
+        'cuelgan de ella; sin la clave, no hay serie que reemplazar ni que comparar. ' +
+        'Restaure la cabecera y vuelva a intentarlo.',
+    );
+  }
+
+  if (!(CLAVE_DE_LECTURAS in leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_LECTURAS}:» en la raíz del fichero. Las entradas ` +
+        'cuelgan de ella; sin la clave, lo que se escriba no lo cuenta nadie.',
+    );
+  }
+
+  const lecturas = (leido as Record<string, unknown>)[CLAVE_DE_LECTURAS];
+  if (lecturas === null || lecturas === undefined) return [];
+
+  if (!Array.isArray(lecturas)) {
+    throw new Error(
+      `${nombre}: «${CLAVE_DE_LECTURAS}» tiene que ser una lista de lecturas, y es ` +
+        `${typeof lecturas}. Escríbala como «${CLAVE_DE_LECTURAS}:» y una entrada ` +
+        '«  - fecha: …» por jornada.',
+    );
+  }
+
+  for (const [i, entrada] of lecturas.entries()) {
+    if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no es una lectura ` +
+          `(${JSON.stringify(entrada)}). Cada entrada lleva al menos fecha y propiedad.`,
+      );
+    }
+    if (typeof (entrada as Record<string, unknown>).fecha !== 'string') {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no declara «fecha». La ` +
+          'serie es idempotente por fecha, así que sin ella no se sabe a cuál de las ' +
+          'entradas sustituye una lectura nueva.',
+      );
+    }
+  }
+
+  return lecturas as LecturaRegistrada[];
+}
+
+/**
+ * La serie ya registrada. Una serie que no existe se lee como serie vacía.
+ *
+ * La consumen la propia orden —para saber a qué entrada reemplaza— y quien compare dos
+ * jornadas. Una familia que no se leyó **no aparece** en `familias`: eso es lo que hay que
+ * leer como «no se sabe», y nunca como cero.
+ */
+export async function leerSerieDeIndexacion(rutas: Rutas): Promise<LecturaRegistrada[]> {
+  if (!existsSync(rutas.serieDeIndexacion)) return [];
+  return analizarSerie(
+    `corpus/${FICHERO_DE_INDEXACION}`,
+    await readFile(rutas.serieDeIndexacion, 'utf8'),
+  );
+}
+
+/** Una entrada, serializada como elemento de la lista `lecturas`. */
+function bloqueDeLectura(entrada: Record<string, unknown>): string {
+  // `- ` ocupa el sitio de los dos primeros espacios de la primera clave, igual que en el
+  // registro de sesiones: la entrada es un elemento de la lista y sus claves cuelgan de él.
+  return `  -${aYaml(entrada, '    ').slice(3)}`;
+}
+
+/**
+ * Anota la lectura de hoy, **reemplazando** la que ya hubiera de la misma jornada.
+ *
+ * A diferencia de `registrarSesionDeSembrado`, que solo añade, esto reescribe el fichero:
+ * la serie mide un estado y dos lecturas del mismo día no son dos estados. La consecuencia
+ * que conviene saber es que **un comentario escrito a mano entre las entradas no
+ * sobrevive** — como en los ficheros de Colección, que también se vuelcan enteros. Lo que
+ * sí sobrevive es la cabecera: se conserva **el texto que el fichero tenga** por encima de
+ * «lecturas:», no la constante de arriba, para que una nota añadida allí no se pierda.
+ *
+ * Se compone el fichero entero en memoria, se analiza, y solo si contiene exactamente las
+ * entradas que debe se toca el disco. La escritura es a un temporal y un `rename`, que en
+ * el mismo sistema de ficheros es atómico: un fallo a media escritura no puede dejar la
+ * serie truncada, que es el riesgo nuevo de reescribir en vez de añadir.
+ */
+export async function registrarLecturaDeIndexacion(
+  rutas: Rutas,
+  lectura: LecturaDeIndexacion,
+): Promise<string> {
+  const ruta = rutas.serieDeIndexacion;
+  const nombre = `corpus/${FICHERO_DE_INDEXACION}`;
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      // `wx` por lo mismo que en el registro de sesiones: si el fichero apareció
+      // entretanto, se falla en vez de truncar lo que otra ejecución acabara de escribir.
+      await writeFile(ruta, CABECERA_DE_INDEXACION, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const habia = analizarSerie(nombre, anterior);
+
+  const momento = lectura.momento ?? new Date();
+  const fecha = fechaLocal(momento);
+
+  /*
+   * La cabecera es lo que hay por encima de la línea «lecturas:», ella incluida. Se busca
+   * al principio de línea y sin sangrar: «  lecturas:» dentro de una entrada no es la clave
+   * de la raíz, y cortar por ahí habría partido el fichero por la mitad.
+   */
+  const marca = anterior.match(/^lecturas:[^\S\n]*$/m);
+  if (marca?.index === undefined) {
+    throw new Error(
+      `${nombre}: no se encuentra la línea «${CLAVE_DE_LECTURAS}:» de la que cuelgan las ` +
+        'entradas. La serie se reescribe entera en cada lectura y esa línea es la frontera ' +
+        'entre la cabecera —que se conserva— y las entradas —que se vuelven a volcar—. ' +
+        'No se ha escrito nada.',
+    );
+  }
+  const cabecera = anterior.slice(0, marca.index + marca[0].length) + '\n';
+
+  const conservadas = habia.filter((entrada) => entrada.fecha !== fecha);
+  const nueva: Record<string, unknown> = {
+    fecha,
+    hora: horaLocal(momento),
+    propiedad: lectura.propiedad,
+    publicadas: lectura.publicadas,
+    inspeccionadas: lectura.inspeccionadas,
+    familias: lectura.familias,
+    // `aYaml` omite un objeto sin claves, así que una lectura sin fallos no escribe
+    // «sinLeer» en absoluto: la ausencia de la clave es «se leyeron todas».
+    sinLeer: lectura.sinLeer,
+  };
+
+  const contenido =
+    cabecera +
+    [...conservadas.map((e) => bloqueDeLectura(e as unknown as Record<string, unknown>)),
+      bloqueDeLectura(nueva),
+    ].join('');
+
+  const quedaria = analizarSerie(nombre, contenido);
+  if (quedaria.length !== conservadas.length + 1) {
+    throw new Error(
+      `${nombre}: la serie recompuesta no tiene las entradas que debería ` +
+        `(había ${habia.length}, se conservan ${conservadas.length} y quedarían ` +
+        `${quedaria.length}). No se ha escrito nada.`,
+    );
+  }
+  const deLaJornada = quedaria.filter((e) => e.fecha === fecha);
+  if (deLaJornada.length !== 1) {
+    throw new Error(
+      `${nombre}: la jornada ${fecha} quedaría con ${deLaJornada.length} entradas y esta ` +
+        'serie es idempotente por fecha. No se ha escrito nada.',
+    );
+  }
+
+  /*
+   * «Ausencia antes que cero», reafirmada sobre **lo que va a disco** y no solo sobre lo que
+   * se compuso en memoria.
+   *
+   * `componerLectura` ya vigila la entrada en memoria, pero entre ella y el fichero está
+   * `aYaml`, que omite lo que no tiene valor: una familia cuyo objeto quedara vacío, o un
+   * motivo que llegara en blanco, desaparecería aquí de las dos listas y la entrada diría en
+   * silencio que esa familia no existe. Se comprueba releyendo lo escrito, que es el único
+   * sitio donde esa pérdida se ve.
+   */
+  const escrita = deLaJornada[0];
+  const familiasEnDisco = Object.keys(escrita.familias ?? {});
+  const sinLeerEnDisco = Object.keys(escrita.sinLeer ?? {});
+
+  for (const familia of Object.keys(lectura.familias)) {
+    if (!familiasEnDisco.includes(familia)) {
+      throw new Error(
+        `${nombre}: la familia «${familia}» se leyó y no ha llegado al fichero. Una familia ` +
+          'que desaparece sin decirlo se lee después como si no existiera. No se ha escrito nada.',
+      );
+    }
+  }
+  for (const familia of Object.keys(lectura.sinLeer)) {
+    if (!sinLeerEnDisco.includes(familia)) {
+      throw new Error(
+        `${nombre}: la familia «${familia}» no se leyó y su motivo no ha llegado al fichero. ` +
+          'Sin motivo escrito, su ausencia es indistinguible de que no exista. No se ha ' +
+          'escrito nada.',
+      );
+    }
+  }
+  const enAmbas = familiasEnDisco.filter((familia) => sinLeerEnDisco.includes(familia));
+  if (enAmbas.length > 0) {
+    throw new Error(
+      `${nombre}: ${enAmbas.join(', ')} quedaría a la vez como leída y como sin leer. ` +
+        'No se ha escrito nada.',
+    );
+  }
+
+  /*
+   * El temporal lleva el PID. Con un nombre fijo, dos ejecuciones a la vez se pisaban el
+   * fichero intermedio, y el que muriera entre el volcado y el `rename` dejaba un
+   * `serie-de-indexacion.yml.nueva` huérfano que nadie sigue — y que el criterio de la
+   * historia, un `git status --short` limpio, no perdona. El patrón está en `.gitignore`
+   * por si aun así queda uno.
+   */
+  const temporal = `${ruta}.${process.pid}.nueva`;
+  await writeFile(temporal, contenido, 'utf8');
+  await rename(temporal, ruta);
   return ruta;
 }

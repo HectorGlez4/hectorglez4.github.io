@@ -25,3 +25,9 @@ playwright-report/
 # Estado local del bucle autónomo (Ralph). Es de la máquina, no del proyecto:
 # el estado durable del sprint vive en sprint-status.yaml y LOOP-PROTOCOL-V3.md.
 .claude/*.local.md
+
+# Volcado a medio escribir de la serie de indexación (Historia 16.1). El escritor vuelca a
+# un temporal con su PID y hace `rename`, que es atómico; si un proceso muere justo en medio
+# queda uno huérfano, y el criterio de aceptación de esa historia es un `git status --short`
+# limpio.
+corpus/*.nueva

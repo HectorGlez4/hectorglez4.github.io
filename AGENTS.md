@@ -87,6 +87,40 @@ distingue a un Autor del homónimo que el Corpus no desambigua —«Séneca» co
 Cuando el documento no declara autor —o firma «Anónimo», que es lo mismo—, el informe de
 `extraer` lo dice —«Autor sin cotejar»— para que se vea que la puerta no actuó.
 
+## Leer el estado de indexación
+
+El sitio cumple desde hace tiempo la exigencia de *ser* indexable y aun así el buscador ha
+indexado 8 URL de 1.715. *Estar* indexado es decisión suya, y la única forma de saber si algo
+lo mueve es comparar el reparto **por familia** a lo largo del tiempo:
+
+```
+npm run indexacion              # consulta, agrega por familia e informa. NO escribe nada.
+npm run indexacion:registrar    # además anota la entrada de hoy en la serie.
+```
+
+La serie vive en `corpus/serie-de-indexacion.yml` y **es idempotente por fecha**: una segunda
+lectura de la misma jornada *reemplaza* a la primera. Es la diferencia con
+`sesiones-de-sembrado.yml`, que solo añade porque mide hechos acumulables; esto mide un estado.
+Por eso consultar no registra: una consulta de tanteo anotada se llevaría por delante la
+lectura buena del día.
+
+**Una familia que no se pudo leer se omite y jamás se escribe como cero.** Sale nombrada en
+`sinLeer` con su motivo. El cero real es casi el estado de partida, así que un cero fabricado
+sería indistinguible de él — y la cifra que se compara con la meta de indexación es la de la
+familia **Cita**, nunca el agregado del sitio.
+
+Necesita `SEARCH_CONSOLE_CREDENCIALES` —la clave JSON de una cuenta de servicio, o la ruta del
+fichero que la contiene— y que esa cuenta esté dada de alta **como propietaria** de la
+propiedad en Search Console; un permiso de menos devuelve 403 en cada URL. El paso manual, con
+sus trampas, está en `DESPLIEGUE.md` §5. Sin la variable la orden no escribe nada, nombra lo
+que falta y sale con **código 2**, propio y distinto del 1 de cualquier otro rechazo, para que
+un guion pueda separar «falta la credencial» de «la lectura falló».
+
+La orden tarda minutos a propósito: la fuente concede 2.000 inspecciones al día y 600 por
+minuto por propiedad, se pide una URL por petición y se van espaciando. Al pasar de ~2.000 URL
+publicadas la lectura pasa sola a **muestreo por familia**, con el tamaño de muestra escrito en
+cada entrada.
+
 ## Documentar una Cita ya publicada
 
 Las Citas anteriores a la v3 se publicaron cuando la Procedencia se tecleaba, y siguen en

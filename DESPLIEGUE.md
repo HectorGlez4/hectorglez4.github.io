@@ -455,3 +455,118 @@ Comprobar el estado en cualquier momento, sin encender nada:
 ```bash
 npm run ingreso            # estado, Umbral y cifra medida —o por qué no es medible
 ```
+
+## 5. La lectura del estado de indexación — Historia 16.1
+
+El sitio cumple desde hace tiempo la exigencia de *ser* indexable, y aun así el buscador ha
+indexado 8 URL de 1.715. *Estar* indexado es una decisión suya, y hasta ahora esa cifra se
+leía a ojo en el panel: sin serie, y mezclando 1.639 páginas de una frase con las ~75 de
+agregación. Esto le pone instrumento — `corpus/serie-de-indexacion.yml`, una entrada por
+jornada con el reparto **por familia**.
+
+Hecho en el repositorio:
+
+- `tools/indexacion.ts` consulta, agrega por familia e informa. **Consultar no registra**:
+  la serie es idempotente por fecha, así que una consulta de tanteo anotada reemplazaría la
+  lectura buena del día en vez de sumarse a ella.
+- La propiedad **se deriva** del dominio (`sc-domain:` + lo que diga `public/CNAME`), así
+  que no hay una segunda variable que pueda quedarse apuntando al dominio anterior.
+- La red vive solo en la cáscara de `tools/` (AD-22) y **ningún módulo de `src/lib/` recibe
+  el estado de indexación, ni por parámetro** (AD-24). Ningún paso de CI la ejecuta ni la
+  commitea a `main`: si lo hiciera, el `push` dispararía el flujo de publicación y con él el
+  aviso a los buscadores, anunciando una jornada en la que no cambió un byte.
+
+```bash
+npm run indexacion              # consulta e informa. No escribe nada.
+npm run indexacion:registrar    # además anota la entrada de hoy.
+```
+
+A mano, una vez (necesita la cuenta de Google que ya es dueña de la propiedad):
+
+1. En [Google Cloud](https://console.cloud.google.com/), crear un proyecto —o reutilizar
+   uno— y **habilitar la API «Google Search Console API»**. Sin habilitarla, la credencial
+   es válida y cada petición contesta que la API está deshabilitada para el proyecto.
+
+2. **IAM y administración → Cuentas de servicio → Crear cuenta de servicio.** No necesita
+   ningún rol de IAM: los permisos que le hacen falta no son de Google Cloud, sino de Search
+   Console, y se conceden en el paso 4.
+
+3. En esa cuenta, **Claves → Agregar clave → Crear clave nueva → JSON**. Se descarga una
+   sola vez y no se puede volver a descargar. **No se versiona**: `corpus/` no es sitio para
+   una credencial, y git es un almacén sin borrado.
+
+4. **El paso que se olvida, y sin el que nada de lo anterior sirve:** en
+   [Search Console](https://search.google.com/search-console), con la propiedad
+   `sabiduriadebolsillo.net` abierta, **Configuración → Usuarios y permisos → Agregar
+   usuario**, con la dirección de correo de la cuenta de servicio —la del campo
+   `client_email` del JSON, que acaba en `.iam.gserviceaccount.com`— y permiso
+   **Propietario** («Owner»).
+
+   **No vale «Restringido», y el fallo es del peor tipo.** La matriz de permisos de Search
+   Console le da al usuario restringido *fetch only* sobre la inspección de URL, y la
+   inspección del estado en el índice —lo único que esta serie lee— le está vedada: la
+   credencial se autentica sin problema, y **cada URL devuelve 403**. Que es exactamente lo
+   mismo que se ve cuando el alta no se hizo, así que un permiso de menos se diagnostica como
+   un alta olvidada y se pierde la tarde. La orden traduce ese 403 a un motivo escrito —«sin
+   acceso a la propiedad»— que nombra las dos causas juntas por este mismo motivo.
+
+   Sin ninguna alta, la credencial se autentica igual y la propiedad **no existe** para ella.
+   Es un permiso de la propiedad, no del proyecto de Cloud, y por eso no lo cubre ningún rol
+   de IAM.
+
+5. Poner la clave en la variable `SEARCH_CONSOLE_CREDENCIALES`, que admite las dos formas
+   en las que llega según de dónde salga:
+
+   ```bash
+   # En local: la ruta del fichero descargado, fuera del repositorio.
+   export SEARCH_CONSOLE_CREDENCIALES="$HOME/.credenciales/sabiduria-search-console.json"
+
+   # Donde un secreto es una cadena: el JSON entero, en una línea.
+   export SEARCH_CONSOLE_CREDENCIALES='{"type":"service_account", …}'
+   ```
+
+   Se distinguen por la primera llave, no por una segunda variable. Sin la variable la orden
+   **no escribe nada**, nombra lo que falta y sale con código **2** —propio, distinto del 1
+   de cualquier otro rechazo— para que un guion pueda separar «falta la credencial» de «la
+   lectura falló».
+
+Cómo comprobarlo:
+
+```bash
+# Que la cuenta de servicio ve la propiedad, y que las cuatro familias contestan.
+# 80 y no 4: el presupuesto sirve primero el suelo de 20 por familia y de la más pequeña a
+# la mayor, así que con 4 peticiones las cuatro se van a Colección y Cita no se toca.
+npm run indexacion -- --presupuesto 80
+
+# Sin credencial: nombra lo que falta, no escribe y sale con 2.
+env -u SEARCH_CONSOLE_CREDENCIALES npm run indexacion; echo "código: $?"
+```
+
+Cómo se lee el resultado de la primera, que **no** falla ni sale vacío cuando el alta falta:
+la orden escribe siempre un informe, y lo que cambia es de qué lado caen las familias. Con el
+alta puesta salen bajo su nombre con su reparto; sin ella —o con permiso de menos— salen todas
+bajo «Familias sin leer» con el motivo «sin acceso a la propiedad (403)». Consultar no escribe
+nada, así que esta comprobación se puede repetir sin ensuciar la serie.
+
+Lo que conviene saber antes de leer la serie:
+
+- **El dato llega con retardo.** Es el del último rastreo del buscador, no el de ahora. Una
+  entrada de hoy describe lo que el buscador sabía la última vez que pasó.
+- **La cuota manda.** 2.000 inspecciones al día y 600 por minuto **por propiedad**. Las
+  ~1.716 URL de hoy son el 86 % de la cuota diaria: cabe una pasada y no dos, y la orden se
+  toma sus minutos porque va espaciando las peticiones a propósito. Al pasar de ~2.000, la
+  lectura pasa sola a **muestreo por familia** y escribe el tamaño de muestra en cada
+  entrada.
+- **Una familia que no se pudo leer se omite; jamás se escribe cero.** Aparece nombrada en
+  `sinLeer` con su motivo. El cero real es casi el estado de partida, así que un cero
+  fabricado sería indistinguible de él.
+- **Junto al recuento va el diagnóstico.** Cada familia lleva su reparto por estado de
+  cobertura, que viene en la misma respuesta y no cuesta ni una petición más. Es lo que
+  distingue «Descubierta, actualmente sin indexar» —el buscador ni ha pasado— de «Rastreada,
+  actualmente sin indexar» —pasó y la descartó—: las dos suman al mismo `noIndexadas` y piden
+  remedios distintos.
+- **La cifra que se compara con la meta de indexación es la de la familia Cita**, nunca el
+  agregado del sitio.
+- **Hoy la pasada completa cabe, y por poco.** Son 1.714 URL publicadas contra un techo de
+  2.000, así que el presupuesto por omisión las lee todas. Al pasar de ~2.000 dejará de caber
+  sin que nadie toque nada: la orden muestreará por familia y lo dirá en la entrada.
