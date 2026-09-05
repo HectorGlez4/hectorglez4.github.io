@@ -2,7 +2,7 @@
 title: 'Historia 18.4 — El sitemap dice qué cambió y cuándo'
 type: 'feature'
 created: '2026-09-04'
-status: 'in-review'
+status: 'done'
 baseline_commit: '3c788b9cfe7a04689a82bd00491a4d4049547b90'
 review_loop_iteration: 1
 context:

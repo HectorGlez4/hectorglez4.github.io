@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-04-2026 21:15
+last_updated: 09-05-2026 13:55
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -234,7 +234,10 @@ development_status:
   18-3-se-pide-rastreo-de-lo-que-representa-al-sitio: backlog
   # 18-4: salió de mirar el sitemap el 04/09. Es la única de la Épica 18 que es código,
   # y la única enteramente en el tejado del repositorio.
-  18-4-el-sitemap-dice-que-cambio-y-cuando: review
+  # PUESTA el 05/09: probada contra CI real, que era el riesgo declarado del spec. El
+  # sitemap servido lleva 1.714 lastmod sobre 1.715 URL —la portada es la única sin
+  # campo, a propósito— con fechas del historial y no del build.
+  18-4-el-sitemap-dice-que-cambio-y-cuando: done
   epic-18-retrospective: optional
 
 action_items:
