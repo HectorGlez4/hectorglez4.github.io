@@ -226,7 +226,7 @@ development_status:
   # Épica 18 — no la escribió el PRD de la v5: nació el 04/09 de la Historia 16.1, que midió
   # 2 indexadas de 80 y demostró que las Épicas 16 y 17 atacaban la causa equivocada.
   # Casi nada es código: es trabajo editorial y de canal.
-  epic-18: backlog
+  epic-18: in-progress
   18-1-el-sitio-deja-de-tener-cero-enlaces-entrantes: backlog
   18-2-el-canal-propio-se-usa-como-fuente-de-rastreo: backlog
   # 18-3: dos URL pedidas a mano el 04/09 —las dos únicas con impresiones, Unamuno y
@@ -234,7 +234,7 @@ development_status:
   18-3-se-pide-rastreo-de-lo-que-representa-al-sitio: backlog
   # 18-4: salió de mirar el sitemap el 04/09. Es la única de la Épica 18 que es código,
   # y la única enteramente en el tejado del repositorio.
-  18-4-el-sitemap-dice-que-cambio-y-cuando: backlog
+  18-4-el-sitemap-dice-que-cambio-y-cuando: review
   epic-18-retrospective: optional
 
 action_items:
