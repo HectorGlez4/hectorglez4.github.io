@@ -570,3 +570,17 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     desactiva `fileParallelism` exactamente por ese motivo, y ahí está el precedente. Hoy no
     ha fallado —la tirada de comprobación salió en verde—, así que es riesgo medido y no
     avería: conviene decidirlo con una medida, no de oído.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-18-3-el-registro-de-lo-que-se-pidio.md`
+  summary: La serie de indexación guarda recuentos y no qué URL inspeccionó, así que la atribución que la 18.3 promete no es computable.
+  evidence: |-
+    `LecturaDeFamilia` es publicadas/muestra/indexadas/noIndexadas/estados. No queda rastro
+    de QUÉ URL se inspeccionaron. Con muestreo —que desde la 16.1 es el único modo posible,
+    porque el techo es el reloj y no la cuota— la pregunta que la Épica 18 existe para
+    contestar, «¿entró esta URL porque la pedí o porque le tocaba?», no tiene respuesta en
+    disco: la muestra puede no incluir ninguna de las pedidas, y nada lo dice.
+    El informe de la 18.3 se corrigió para no fingir que sí. El arreglo de fondo es de la
+    16.1 —que la entrada de la serie anote las rutas muestreadas, o al menos las indexadas
+    de la muestra—, y tiene coste: hoy la entrada es un recuento por familia y pasaría a
+    llevar del orden de decenas de rutas por jornada, en un fichero versionado que crece a
+    diario. Decidir si eso vale el tamaño es de producto.

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-05-2026 13:55
+last_updated: 09-05-2026 17:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -230,8 +230,15 @@ development_status:
   18-1-el-sitio-deja-de-tener-cero-enlaces-entrantes: backlog
   18-2-el-canal-propio-se-usa-como-fuente-de-rastreo: backlog
   # 18-3: dos URL pedidas a mano el 04/09 —las dos únicas con impresiones, Unamuno y
-  # Gracián—. Quedan seis del lote elegido y falta el registro que la historia exige.
-  18-3-se-pide-rastreo-de-lo-que-representa-al-sitio: backlog
+  # Gracián—. Quedan seis del lote elegido y faltaba el registro que la historia exige.
+  # PUESTA el 05/09: corpus/peticiones-de-rastreo.yml con esas dos anotadas en su fecha
+  # real, tools/rastreo.ts para anotar y para cruzar por familia con la serie, y el
+  # registro escrito SOLO POR AÑADIDO —al revés que la serie, que reemplaza por fecha—.
+  # La petición se sigue cursando a mano: no hay vía legítima de automatizarla.
+  # El registro está construido y las dos peticiones del 04/09 anotadas. Queda en review
+  # porque de las ocho URL escogidas solo se pidieron dos: la historia se llama «se pide
+  # rastreo», y pedir es trabajo de Héctor en Search Console.
+  18-3-se-pide-rastreo-de-lo-que-representa-al-sitio: review
   # 18-4: salió de mirar el sitemap el 04/09. Es la única de la Épica 18 que es código,
   # y la única enteramente en el tejado del repositorio.
   # PUESTA el 05/09: probada contra CI real, que era el riesgo declarado del spec. El
