@@ -26,6 +26,11 @@ import { analizarDocumento } from './documento.ts';
  * `import type`, TypeScript lo borra al compilar y no queda dependencia en ejecución.
  */
 import type { LecturaDeFamilia, LecturaDeIndexacion, RepartoDeEstado } from './indexacion.ts';
+/*
+ * Y lo mismo con el registro de peticiones (18.3): quién decide si una URL se puede pedir
+ * es `tools/lib/rastreo.ts`, que es puro. Esta capa escribe lo que le den.
+ */
+import type { PeticionDeRastreo } from './rastreo.ts';
 
 /**
  * El registro de sesiones de sembrado — Historia 11.3. Su nombre tiene un solo dueño,
@@ -51,6 +56,15 @@ export const FICHERO_DE_PORTADA = 'portada.json';
  * cabecera, unas líneas más abajo.
  */
 export const FICHERO_DE_INDEXACION = 'serie-de-indexacion.yml';
+
+/**
+ * El registro de peticiones de rastreo — Historia 18.3. Su nombre tiene un solo dueño.
+ *
+ * Vecino de la serie de indexación y su contrario en lo único que importa no confundir:
+ * aquélla **reemplaza** por fecha porque mide un estado, y éste **solo añade** porque
+ * registra actos. Está escrito en las dos cabeceras.
+ */
+export const FICHERO_DE_PETICIONES = 'peticiones-de-rastreo.yml';
 
 export interface Rutas {
   raiz: string;
@@ -133,6 +147,14 @@ export interface Rutas {
    */
   serieDeIndexacion: string;
   /**
+   * El registro de peticiones de rastreo — Historia 18.3, FR-46.
+   *
+   * Metadato del Corpus como sus vecinos y con el mismo aislamiento (AD-24): ninguna base
+   * de `src/content.config.ts` apunta aquí y ningún módulo de `src/lib/` lo lee. Lo que se
+   * pidió rastrear es una decisión editorial sobre el sitio, nunca una entrada del sitio.
+   */
+  peticionesDeRastreo: string;
+  /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
    * Metadato del Corpus y no colección, como sus dos vecinos: vive en la raíz de `corpus/`,
@@ -162,6 +184,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
+    peticionesDeRastreo: join(raizCorpus, FICHERO_DE_PETICIONES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
@@ -1003,6 +1026,11 @@ export const CABECERA_DE_INDEXACION = [
   '# acumulables —sesiones corridas— y por eso solo añade; dos lecturas del mismo día no',
   '# son dos estados, son la misma pregunta hecha dos veces.',
   '#',
+  '# Y lo mismo la separa de peticiones-de-rastreo.yml (Historia 18.3), que está justo al',
+  '# lado: aquél registra ACTOS —qué URL se pidió rastrear y qué día— y por eso SOLO AÑADE,',
+  '# porque pedir la misma URL dos días son dos peticiones. Ésta mide un estado y reemplaza.',
+  '# Cruzar los dos es lo que dice si una familia se movió porque se pidió o porque le tocaba.',
+  '#',
   '# AUSENCIA ANTES QUE CERO. Una familia cuya lectura no se logró SE OMITE de `familias` y',
   '# aparece en `sinLeer` con su motivo. Jamás se escribe cero: el fallo de esa API es',
   '# parcial —cuota agotada, espera vencida— y el cero real es casi el estado de partida, así',
@@ -1267,5 +1295,219 @@ export async function registrarLecturaDeIndexacion(
   const temporal = `${ruta}.${process.pid}.nueva`;
   await writeFile(temporal, contenido, 'utf8');
   await rename(temporal, ruta);
+  return ruta;
+}
+
+/**
+ * La cabecera del registro de peticiones de rastreo — Historia 18.3.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que las otras dos: un corpus
+ * de pruebas, o un clon al que le falte el fichero, tiene que poder anotar su primera
+ * petición sin que nadie escriba la cabecera a mano.
+ *
+ * Y dice **por qué añade en vez de reemplazar**, que es lo único que hay que saber para no
+ * confundirlo con su vecina. Están uno al lado del otro en `corpus/` y la confusión sería
+ * silenciosa: quien tomara éste por idempotente creería que la segunda petición de una URL
+ * sustituye a la primera, y quien tomara aquélla por acumulable creería que la serie perdió
+ * entradas.
+ */
+export const CABECERA_DE_PETICIONES = [
+  '# Peticiones de rastreo — Historia 18.3, Épica 18, FR-46',
+  '#',
+  '# QUÉ REGISTRA. Qué URL se pidió rastrear y qué día. Nada más: con la URL y la fecha se',
+  '# cruza con corpus/serie-de-indexacion.yml, que es para lo único que existe. Cuando la',
+  '# serie muestre movimiento en una familia, esto es lo que dirá si esas URL entraron',
+  '# PORQUE SE PIDIERON o porque les tocaba — y eso es lo que decide si pedir rastreo sirve',
+  '# de algo o es teatro.',
+  '#',
+  '# POR QUÉ AÑADE EN VEZ DE REEMPLAZAR, al revés que serie-de-indexacion.yml. Su vecina',
+  '# mide un ESTADO —cuántas URL están indexadas hoy— y por eso es idempotente por fecha:',
+  '# una segunda lectura de la misma jornada sustituye a la primera. Esto registra ACTOS.',
+  '# Pedir rastreo de la misma URL dos días son DOS PETICIONES, y borrar la primera perdería',
+  '# justo el dato de si repetir sirve. Solo se añade al final; ninguna entrada anterior se',
+  '# reescribe.',
+  '#',
+  '# LA PIDE UNA PERSONA; ESTO SOLO LA ANOTA. La solicitud se cursa a mano en Search',
+  '# Console: la API de inspección informa y no solicita, y la Indexing API solo admite',
+  '# ofertas de empleo y retransmisiones en directo. No hay vía legítima de automatizarla, y',
+  '# si algún día la hay es una decisión de producto y no de implementación.',
+  '#',
+  '# LA DECENA, NO EL MILLAR. La selección es corta y deliberada: §4.17 declara que pedir',
+  '# rastreo de 1.715 URL no es una petición, es ruido. La orden se niega a anotar un lote',
+  '# que no quepa en una decena, y se niega a anotar una URL que el sitio no publique.',
+  '#',
+  '#   npx tsx tools/rastreo.ts                              # lista lo pedido. NO escribe.',
+  '#   npx tsx tools/rastreo.ts --registrar <url> [<url>...] # anota lo que ya se pidió.',
+  '#',
+  '# SE ANOTA LA RUTA Y NO LA URL ENTERA. El dominio tiene un solo dueño —src/lib/dominio.ts,',
+  '# que lo lee de public/CNAME— y repetirlo en cada línea sería un segundo sitio donde',
+  '# quedarse apuntando al dominio anterior. La orden acepta la URL entera al teclearla.',
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,',
+  '# junto a `portada.json` y `serie-de-indexacion.yml`, y ninguna base de',
+  '# `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee (AD-24).',
+  '',
+  'peticiones:',
+  '',
+].join('\n');
+
+/** La clave de la que cuelgan las entradas. Se comprueba antes de añadir nada. */
+const CLAVE_DE_PETICIONES = 'peticiones';
+
+/** Una petición ya escrita en el registro, tal y como se relee. */
+export interface PeticionRegistrada {
+  fecha: string;
+  ruta: string;
+}
+
+/**
+ * Las peticiones de un registro ya leído, comprobando que el fichero sea lo que dice ser.
+ *
+ * La misma comprobación que la del registro de sesiones y por el mismo motivo: un fichero
+ * vacío, o al que le falte la clave `peticiones:`, deja que `appendFile` escriba una lista
+ * huérfana al final. El YAML sigue siendo válido, todo lector ve **cero** peticiones, y el
+ * registro con el que se iba a cruzar la serie desaparece sin que nada se queje.
+ */
+function analizarPeticiones(nombre: string, contenido: string): PeticionRegistrada[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'De este registro sale la distinción entre lo que el buscador rastreó porque se le ' +
+        'pidió y lo que rastreó solo, así que no se lee a medias.',
+    );
+  }
+
+  if (leido === null || leido === undefined || typeof leido !== 'object' || Array.isArray(leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_PETICIONES}:» en la raíz del fichero. Añadir una ` +
+        'petición a un fichero vacío o sin esa clave dejaría una lista huérfana que ningún ' +
+        'lector cuenta. Restaure la cabecera del registro y vuelva a intentarlo.',
+    );
+  }
+
+  if (!(CLAVE_DE_PETICIONES in leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_PETICIONES}:» en la raíz del fichero. Las ` +
+        'entradas cuelgan de ella; sin la clave, lo que se añada no lo cuenta nadie.',
+    );
+  }
+
+  const peticiones = (leido as Record<string, unknown>)[CLAVE_DE_PETICIONES];
+  if (peticiones === null || peticiones === undefined) return [];
+
+  if (!Array.isArray(peticiones)) {
+    throw new Error(
+      `${nombre}: «${CLAVE_DE_PETICIONES}» tiene que ser una lista de peticiones, y es ` +
+        `${typeof peticiones}. Escríbala como «${CLAVE_DE_PETICIONES}:» y una entrada ` +
+        '«  - fecha: …» por petición.',
+    );
+  }
+
+  for (const [i, entrada] of peticiones.entries()) {
+    if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_PETICIONES}» no es una petición ` +
+          `(${JSON.stringify(entrada)}). Cada entrada lleva su fecha y su ruta, que es todo ` +
+          'lo que hace falta para cruzarla con la serie.',
+      );
+    }
+    for (const clave of ['fecha', 'ruta']) {
+      if (typeof (entrada as Record<string, unknown>)[clave] !== 'string') {
+        throw new Error(
+          `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_PETICIONES}» no declara «${clave}». ` +
+            'Una petición sin las dos cosas no se puede cruzar con nada, que es lo único ' +
+            'para lo que este registro existe.',
+        );
+      }
+    }
+  }
+
+  return peticiones as PeticionRegistrada[];
+}
+
+/**
+ * Las peticiones ya registradas. Un registro que no existe se lee como registro vacío.
+ *
+ * Lo consumen la propia orden —para listar lo pedido sin escribir nada— y quien cruce el
+ * registro con la serie de indexación.
+ */
+export async function leerPeticionesDeRastreo(rutas: Rutas): Promise<PeticionRegistrada[]> {
+  if (!existsSync(rutas.peticionesDeRastreo)) return [];
+  return analizarPeticiones(
+    `corpus/${FICHERO_DE_PETICIONES}`,
+    await readFile(rutas.peticionesDeRastreo, 'utf8'),
+  );
+}
+
+/**
+ * Añade peticiones al registro. **Solo añade**: nunca reescribe lo que ya está.
+ *
+ * Sigue punto por punto a `registrarSesionDeSembrado`, que es el precedente de una serie
+ * append-only en este proyecto: se crea con `wx` para no truncar lo que otra ejecución
+ * acabara de escribir, se lee antes de escribir, se compone en memoria el fichero que
+ * quedaría, se analiza, y solo si la lista crece exactamente en lo añadido se tocan esos
+ * bytes del final. Así ningún fallo de forma llega al disco.
+ *
+ * Es lo contrario de `registrarLecturaDeIndexacion`, que reescribe el fichero entero: aquél
+ * mide un estado y éste registra actos. La consecuencia buena de solo añadir es que las
+ * entradas viejas no se pueden perder en un fallo a media escritura, y que los comentarios
+ * escritos a mano sobreviven — ningún serializador de YAML los preserva.
+ *
+ * Un lote vacío no escribe nada y no es un error: quien valida la selección es
+ * `tools/lib/rastreo.ts`, y llegar aquí sin peticiones significa que no había ninguna que
+ * anotar.
+ */
+export async function registrarPeticionesDeRastreo(
+  rutas: Rutas,
+  peticiones: readonly PeticionDeRastreo[],
+): Promise<string> {
+  const ruta = rutas.peticionesDeRastreo;
+  const nombre = `corpus/${FICHERO_DE_PETICIONES}`;
+
+  /*
+   * Antes de tocar el disco, y no después: con el `wx` por delante, un lote vacío creaba el
+   * fichero con su cabecera y cero peticiones, que es exactamente lo contrario de «un lote
+   * vacío no escribe nada». Dejaba en `corpus/` un registro que nadie pidió y que un
+   * `git status` presenta como trabajo de la jornada.
+   */
+  if (peticiones.length === 0) return ruta;
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      // `wx` falla si el fichero apareció entretanto, en vez de truncar lo que otra
+      // ejecución acabara de añadir.
+      await writeFile(ruta, CABECERA_DE_PETICIONES, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const cuantasHabia = analizarPeticiones(nombre, anterior).length;
+
+  // `- ` ocupa el sitio de los dos primeros espacios de la primera clave: cada entrada es un
+  // elemento de la lista `peticiones` y el resto de sus claves cuelgan sangradas de él.
+  const bloques = peticiones
+    .map((peticion) => `  -${aYaml({ fecha: peticion.fecha, ruta: peticion.ruta }, '    ').slice(3)}`)
+    .join('');
+
+  const salto = anterior === '' || anterior.endsWith('\n') ? '' : '\n';
+  const añadido = `${salto}${bloques}`;
+
+  const quedaria = analizarPeticiones(nombre, `${anterior}${añadido}`);
+  if (quedaria.length !== cuantasHabia + peticiones.length) {
+    throw new Error(
+      `${nombre}: añadir al final no deja las peticiones colgando de ` +
+        `«${CLAVE_DE_PETICIONES}:» (había ${cuantasHabia}, se añaden ${peticiones.length} y ` +
+        `quedarían ${quedaria.length}). El registro se escribe solo por añadido, así que la ` +
+        'lista tiene que ser lo último del fichero. No se ha escrito nada.',
+    );
+  }
+
+  await appendFile(ruta, añadido, 'utf8');
   return ruta;
 }

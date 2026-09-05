@@ -1,0 +1,40 @@
+# Peticiones de rastreo — Historia 18.3, Épica 18, FR-46
+#
+# QUÉ REGISTRA. Qué URL se pidió rastrear y qué día. Nada más: con la URL y la fecha se
+# cruza con corpus/serie-de-indexacion.yml, que es para lo único que existe. Cuando la
+# serie muestre movimiento en una familia, esto es lo que dirá si esas URL entraron
+# PORQUE SE PIDIERON o porque les tocaba — y eso es lo que decide si pedir rastreo sirve
+# de algo o es teatro.
+#
+# POR QUÉ AÑADE EN VEZ DE REEMPLAZAR, al revés que serie-de-indexacion.yml. Su vecina
+# mide un ESTADO —cuántas URL están indexadas hoy— y por eso es idempotente por fecha:
+# una segunda lectura de la misma jornada sustituye a la primera. Esto registra ACTOS.
+# Pedir rastreo de la misma URL dos días son DOS PETICIONES, y borrar la primera perdería
+# justo el dato de si repetir sirve. Solo se añade al final; ninguna entrada anterior se
+# reescribe.
+#
+# LA PIDE UNA PERSONA; ESTO SOLO LA ANOTA. La solicitud se cursa a mano en Search
+# Console: la API de inspección informa y no solicita, y la Indexing API solo admite
+# ofertas de empleo y retransmisiones en directo. No hay vía legítima de automatizarla, y
+# si algún día la hay es una decisión de producto y no de implementación.
+#
+# LA DECENA, NO EL MILLAR. La selección es corta y deliberada: §4.17 declara que pedir
+# rastreo de 1.715 URL no es una petición, es ruido. La orden se niega a anotar un lote
+# que no quepa en una decena, y se niega a anotar una URL que el sitio no publique.
+#
+#   npx tsx tools/rastreo.ts                              # lista lo pedido. NO escribe.
+#   npx tsx tools/rastreo.ts --registrar <url> [<url>...] # anota lo que ya se pidió.
+#
+# SE ANOTA LA RUTA Y NO LA URL ENTERA. El dominio tiene un solo dueño —src/lib/dominio.ts,
+# que lo lee de public/CNAME— y repetirlo en cada línea sería un segundo sitio donde
+# quedarse apuntando al dominio anterior. La orden acepta la URL entera al teclearla.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,
+# junto a `portada.json` y `serie-de-indexacion.yml`, y ninguna base de
+# `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee (AD-24).
+
+peticiones:
+  - fecha: "2026-09-04"
+    ruta: "/autor/miguel-de-unamuno/"
+  - fecha: "2026-09-04"
+    ruta: "/autor/baltasar-gracian/"

@@ -570,3 +570,90 @@ Lo que conviene saber antes de leer la serie:
 - **Hoy la pasada completa cabe, y por poco.** Son 1.714 URL publicadas contra un techo de
   2.000, así que el presupuesto por omisión las lee todas. Al pasar de ~2.000 dejará de caber
   sin que nadie toque nada: la orden muestreará por familia y lo dirá en la entrada.
+
+## 6. Pedir rastreo de unas pocas URL, y anotarlo — Historia 18.3 (FR-46)
+
+Google conoce las 1.715 URL —el sitemap se lee, §2— y aun así indexa 2 de cada 80. No es un
+problema de descubrimiento: es que un sitio nuevo y sin enlaces entrantes no recibe
+presupuesto de rastreo. Search Console deja **pedir el rastreo de una selección corta**, y
+esa petición es la única palanca que hay sobre ese presupuesto.
+
+**Es un procedimiento manual y lo va a seguir siendo.** La API de inspección de URL informa
+y no solicita, y la Indexing API solo admite ofertas de empleo y retransmisiones en directo:
+hoy no hay vía legítima de automatizarlo. Si algún día la hubiera, es decisión de producto.
+
+Hecho en el repositorio:
+
+- `tools/rastreo.ts` **no pide nada**: anota en `corpus/peticiones-de-rastreo.yml` lo que ya
+  se pidió. Se niega a anotar una URL que el sitio no publique, una de otro dominio, un lote
+  de más de diez (§4.17 lo llama ruido) y una fecha que no pueda corresponder a una petición
+  real. Un rechazo sale con código **1**; una bandera mal escrita, con **2**.
+- El registro **solo añade**, al revés que `corpus/serie-de-indexacion.yml` (§5): aquélla
+  mide un estado y reemplaza por fecha, éste registra actos y pedir la misma URL dos días
+  son dos peticiones. Repetir la misma URL **el mismo día** se rechaza: es la misma petición
+  escrita dos veces, no dos hechos.
+
+```bash
+npm run rastreo                                          # lista lo pedido. NO escribe nada.
+npm run rastreo -- --registrar <url> [<url>...]          # anota lo que YA se cursó
+npm run rastreo -- --registrar <url> --fecha 2026-09-04  # con su fecha real, si fue otro día
+```
+
+A mano, cada vez (necesita la cuenta de Google dueña de la propiedad):
+
+1. En [Search Console](https://search.google.com/search-console), con la propiedad
+   `sabiduriadebolsillo.net` abierta, pegar la URL en la **barra de inspección** de arriba.
+
+2. Cuando termine la inspección, **Solicitar indexación**. Google hace una prueba en directo
+   de un minuto y responde *«URL añadida a la cola de rastreo prioritario»*. Es una cola, no
+   una promesa: puede tardar días y puede acabar en «Rastreada, actualmente sin indexar».
+
+3. Repetirlo con las demás URL de la selección. **Como mucho una decena**, y elegidas: qué
+   páginas representan al sitio es una decisión editorial, del mismo carácter que elegir la
+   Cita del Día. Hay además un límite diario propio de la herramienta, no publicado, que se
+   agota sin aviso claro.
+
+4. **Y volver al repositorio a anotarlo, en la misma sesión.** Este es el paso que se
+   olvida, y su olvido es silencioso:
+
+   ```bash
+   npm run rastreo -- --registrar \
+     https://sabiduriadebolsillo.net/autor/miguel-de-unamuno/ \
+     https://sabiduriadebolsillo.net/autor/baltasar-gracian/
+   git add corpus/peticiones-de-rastreo.yml && git commit
+   ```
+
+   La orden se pega tal cual las URL que se acaban de inspeccionar, y escribe la ruta: el
+   dominio tiene un solo dueño (`public/CNAME`) y repetirlo en cada línea sería un segundo
+   sitio donde quedarse apuntando al dominio anterior.
+
+**El modo más probable de fallo de todo esto es el paso 4 olvidado**, y no un fallo de la
+orden. Pedir el rastreo y no anotarlo deja el trabajo hecho y el dato perdido: cuando la
+serie de §5 muestre movimiento en una familia, sin el registro no habrá forma de saber si
+esas URL entraron **porque se pidieron** o porque les tocaba — que es la única pregunta que
+justifica seguir pidiendo. Ya pasó una vez: las dos peticiones del 2026-09-04 —Unamuno y
+Gracián, las dos únicas URL del sitio con impresiones— se cursaron y no quedaron registradas
+en ninguna parte, y esta historia existe por eso. La regla práctica: **la petición no está
+terminada hasta que el `git commit` del registro está hecho.**
+
+Y lo contrario tampoco: **nunca anotar una petición que no se cursó.** Una entrada inventada
+es peor que no tener el registro, porque la serie le atribuiría a una petición un movimiento
+que nadie provocó. Por eso `--fecha` no admite el futuro ni nada anterior al 2026-08-19, la
+jornada en que se validó la propiedad (§2): antes de ella no había desde dónde pedir nada.
+
+Cómo comprobarlo:
+
+```bash
+# Qué se ha pedido, por familia, cruzado con la serie de indexación. No escribe nada.
+npm run rastreo
+
+# Una URL que el sitio no publica: nombra el motivo, no escribe y sale con 1.
+npm run rastreo -- --registrar https://sabiduriadebolsillo.net/tema/la-vida/2/; echo "código: $?"
+```
+
+**Lo que el cruce no dice, y conviene no leer de más.** El informe reparte lo pedido por
+familia y pone al lado lo indexado de la última lectura de la serie, pero las dos cifras
+**no se cruzan URL a URL**: la serie guarda recuentos y no qué URL inspeccionó, así que de
+las indexadas de una muestra no se puede decir si alguna es de las pedidas. El informe lo
+dice en pantalla en vez de insinuar lo contrario. Cerrarlo del todo exige que la lectura de
+§5 anote las rutas que muestreó, y eso está anotado como trabajo diferido.

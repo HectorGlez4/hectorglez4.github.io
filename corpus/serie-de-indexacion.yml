@@ -31,6 +31,11 @@
 # acumulables —sesiones corridas— y por eso solo añade; dos lecturas del mismo día no
 # son dos estados, son la misma pregunta hecha dos veces.
 #
+# Y lo mismo la separa de peticiones-de-rastreo.yml (Historia 18.3), que está justo al
+# lado: aquél registra ACTOS —qué URL se pidió rastrear y qué día— y por eso SOLO AÑADE,
+# porque pedir la misma URL dos días son dos peticiones. Ésta mide un estado y reemplaza.
+# Cruzar los dos es lo que dice si una familia se movió porque se pidió o porque le tocaba.
+#
 # AUSENCIA ANTES QUE CERO. Una familia cuya lectura no se logró SE OMITE de `familias` y
 # aparece en `sinLeer` con su motivo. Jamás se escribe cero: el fallo de esa API es
 # parcial —cuota agotada, espera vencida— y el cero real es casi el estado de partida, así

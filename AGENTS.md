@@ -121,6 +121,36 @@ minuto por propiedad, se pide una URL por petición y se van espaciando. Al pasa
 publicadas la lectura pasa sola a **muestreo por familia**, con el tamaño de muestra escrito en
 cada entrada.
 
+## Pedir rastreo de unas pocas URL, y anotarlo
+
+Google conoce las 1.715 URL y aun así indexa 2 de cada 80: no es descubrimiento, es que un
+sitio nuevo sin enlaces entrantes no recibe presupuesto de rastreo. Se puede pedir rastreo
+de una selección corta en Search Console — **a mano, y solo una persona**: la API de
+inspección informa y no solicita, y la Indexing API solo admite ofertas de empleo y
+retransmisiones. La orden no pide nada; **anota lo que ya se pidió**:
+
+```
+npm run rastreo                                          # lista lo pedido. NO escribe nada.
+npm run rastreo -- --registrar <url> [<url>...]          # anota lo que ya se cursó
+npm run rastreo -- --registrar <url> --fecha 2026-09-04  # con su fecha real, si fue otro día
+```
+
+Sin el registro no sirve de nada haber pedido: cuando `corpus/serie-de-indexacion.yml`
+muestre movimiento en una familia, esto es lo único que dirá si esas URL entraron **porque se
+pidieron** o porque les tocaba. La consulta cruza los dos ficheros y dice de cada familia
+cuántas de sus URL se pidieron frente a cuántas están indexadas.
+
+`corpus/peticiones-de-rastreo.yml` **solo añade**, y es lo contrario de su vecina. La serie
+mide un estado y por eso reemplaza por fecha; esto registra actos, y pedir la misma URL dos
+días son **dos peticiones** — borrar la primera perdería justo el dato de si repetir sirve.
+
+**La selección la escribe una persona.** La orden no elige y solo se niega a dos cosas: a
+anotar una URL que el sitio no publique —una ruta inexistente, un listado paginado, la
+búsqueda— y a anotar más de diez de golpe, porque §4.17 declara que pedir rastreo de 1.715
+URL no es una petición, es ruido. Un rechazo sale con código 1; una bandera mal escrita, con
+2. No se anota nada que no corresponda a una petición real: una entrada inventada es peor que
+no tener el registro.
+
 ## Documentar una Cita ya publicada
 
 Las Citas anteriores a la v3 se publicaron cuando la Procedencia se tecleaba, y siguen en

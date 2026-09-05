@@ -26,6 +26,7 @@
     "sesion:registrar": "tsx tools/objetivo.ts --registrar",
     "indexacion": "tsx tools/indexacion.ts",
     "indexacion:registrar": "tsx tools/indexacion.ts --registrar",
+    "rastreo": "tsx tools/rastreo.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "astro": "astro"
