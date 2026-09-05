@@ -40,7 +40,14 @@ export const RAIZ = resolve(import.meta.dirname, '../../..');
  */
 const CACHES_PROPIAS = ['.astro', '.vite', '.vite-temp'];
 
-async function enlazarDependencias(proyecto: string): Promise<void> {
+/**
+ * Enlaza las dependencias en un proyecto que no salió de `construirConCorpus`.
+ *
+ * Se exporta para la fase superficial de `tests/unit/fecha-de-cambio-build.test.ts`, que
+ * construye un **clon** del proyecto temporal: `node_modules` no se versiona, así que el
+ * clon no lo trae y sin esto no arranca ni la configuración.
+ */
+export async function enlazarDependencias(proyecto: string): Promise<void> {
   const origen = join(RAIZ, 'node_modules');
   const destino = join(proyecto, 'node_modules');
   await mkdir(destino, { recursive: true });
@@ -211,8 +218,37 @@ export async function construirConCorpus(
     throw fallo;
   }
 
-  let codigo = 0;
-  let salida = '';
+  const construccion = await construirProyecto(proyecto, opciones);
+  const codigo = construccion.codigo;
+  let salida = construccion.salida;
+
+  if (codigo === 0 && opciones.conBusqueda) {
+    const { stdout, stderr } = await ejecutar(
+      join(RAIZ, 'node_modules', '.bin', 'pagefind'),
+      ['--site', 'dist', '--force-language', 'es'],
+      { cwd: proyecto },
+    );
+    salida += `\n${stdout}\n${stderr}`;
+  }
+
+  if (opciones.conservar === false) await limpiar(proyecto);
+  return { codigo, salida, proyecto };
+}
+
+/**
+ * Construye **otra vez** un proyecto temporal ya montado, sin volver a copiarlo.
+ *
+ * Es lo que `construirConCorpus` hace al final, sacado aparte porque hay criterios que
+ * solo se pueden comprobar construyendo dos veces **lo mismo**: «dos construcciones del
+ * mismo commit dan las mismas fechas» (Historia 18.4) no se puede medir con dos proyectos
+ * distintos, porque entonces lo que se compara son dos repositorios y no dos builds. Y
+ * también permite alterar el entorno del proyecto entre una construcción y la siguiente
+ * —crear su repositorio de git, por ejemplo— sin volver a pagar la copia.
+ */
+export async function construirProyecto(
+  proyecto: string,
+  opciones: { jornada?: string; entorno?: Record<string, string> } = {},
+): Promise<{ codigo: number; salida: string }> {
   try {
     const { stdout, stderr } = await ejecutar(
       'node',
@@ -228,24 +264,11 @@ export async function construirConCorpus(
         },
       },
     );
-    salida = `${stdout}\n${stderr}`;
+    return { codigo: 0, salida: `${stdout}\n${stderr}` };
   } catch (error) {
     const e = error as { code?: number; stdout?: string; stderr?: string };
-    codigo = e.code ?? 1;
-    salida = `${e.stdout ?? ''}\n${e.stderr ?? ''}`;
+    return { codigo: e.code ?? 1, salida: `${e.stdout ?? ''}\n${e.stderr ?? ''}` };
   }
-
-  if (codigo === 0 && opciones.conBusqueda) {
-    const { stdout, stderr } = await ejecutar(
-      join(RAIZ, 'node_modules', '.bin', 'pagefind'),
-      ['--site', 'dist', '--force-language', 'es'],
-      { cwd: proyecto },
-    );
-    salida += `\n${stdout}\n${stderr}`;
-  }
-
-  if (opciones.conservar === false) await limpiar(proyecto);
-  return { codigo, salida, proyecto };
 }
 
 interface DocumentoSembrado {

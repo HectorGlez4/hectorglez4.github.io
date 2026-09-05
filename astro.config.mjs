@@ -3,6 +3,8 @@ import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { SITIO } from './src/lib/dominio.ts';
 import { anunciableEnElSitemap } from './src/lib/superficies.ts';
+import { fechaDeLaEntrada } from './tools/lib/cambios.ts';
+import historialDelCorpus, { fechasDelSitemap } from './integraciones/historial.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
@@ -92,6 +94,17 @@ export default defineConfig({
      */
     coberturaTipografica(),
 
+    /*
+     * Historia 18.4 — captura la raíz del proyecto para la lectura del historial.
+     *
+     * No hace nada más. Está aquí porque `git log` imprime rutas relativas a la raíz del
+     * repositorio y hay que cruzarlas contra las del Corpus: suponer que el directorio de
+     * trabajo es la raíz solo funciona mientras lo sea. Astro la entrega en
+     * `astro:config:setup`, que es de donde la toman también el cotejo y la forma de las
+     * Colecciones.
+     */
+    historialDelCorpus(),
+
     sitemap({
       /*
        * Historia 12.1 — aquí no se decide nada.
@@ -121,6 +134,31 @@ export default defineConfig({
        * verde mientras el sitio anunciaba `/buscar`, `/kit`, la 404 y las páginas 2+.
        */
       filter: anunciableEnElSitemap,
+
+      /*
+       * Historia 18.4 — el sitemap dice **cuándo** cambió cada superficie.
+       *
+       * Y sigue sin decidir **qué** se anuncia: eso es el `filter` de arriba, y son dos
+       * preguntas distintas. La fecha es un atributo de lo ya anunciado, así que esto no
+       * añade ni quita una sola entrada — devuelve siempre la que recibe, con un campo más
+       * o con ninguno.
+       *
+       * **Cuando no hay fecha, se omite el campo.** Nunca la hora de construcción, ni un
+       * valor por defecto, ni «hoy»: AD-12 reconstruye a diario, así que una fecha de build
+       * declararía las 1.715 páginas como nuevas cada mañana y enseñaría al buscador a no
+       * hacer caso del campo. Un sitemap sin `lastmod` es pobre; uno con 1.715 fechas
+       * falsas es peor, porque quema la señal. De dónde sale la fecha —el historial del
+       * repositorio, que es donde vive el Corpus— y qué compone cada superficie está en
+       * `tools/lib/cambios.ts`; leerlo, en `integraciones/historial.ts`.
+       *
+       * **La portada es la primera en cumplir la regla**, y no una excepción a ella: rota
+       * a diario sin commit, así que no hay ninguna fecha honesta que darle y sale sin el
+       * campo. El porqué, en `tools/lib/cambios.ts`.
+       */
+      serialize: async (entrada) => {
+        const fecha = fechaDeLaEntrada(await fechasDelSitemap(), entrada.url);
+        return fecha === undefined ? entrada : { ...entrada, lastmod: fecha };
+      },
     }),
   ],
 

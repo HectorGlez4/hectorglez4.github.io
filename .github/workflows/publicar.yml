@@ -50,6 +50,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Historia 18.4 — el sitemap declara cuándo cambió cada superficie, y esa fecha
+          # sale del historial del repositorio, que es donde vive el Corpus.
+          #
+          # Con la copia superficial de un solo commit que hace `checkout` por omisión, el
+          # fallo **no** sería quedarse sin fechas: git trata el commit injertado como raíz,
+          # así que `git log --name-only` lista el árbol entero y las 1.715 entradas
+          # saldrían con la misma fecha, indistinguible de una fecha de build. Verde en la
+          # máquina de quien lo escribe y mentira en producción.
+          #
+          # `integraciones/historial.ts` comprueba `--is-shallow-repository` antes de leer y en
+          # ese caso no declara ninguna fecha, así que olvidar esta línea degrada el sitemap
+          # en vez de falsearlo. Lo que la línea consigue es que no haga falta degradar.
+          #
+          # El coste está medido y no supuesto: 31 MB de `.git`, 348 commits, 16 MB
+          # empaquetados — segundos. El trabajo `avisar` lo pide desde hace épicas.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
