@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-05-2026 17:00
+last_updated: 09-05-2026 18:30
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -246,6 +246,21 @@ development_status:
   # campo, a propósito— con fechas del historial y no del build.
   18-4-el-sitemap-dice-que-cambio-y-cuando: done
   epic-18-retrospective: optional
+
+  # Épica 19 — la v6, «los clásicos». Sale de dos hechos del 05/09: `npm run huecos` decía
+  # «Meta de Corpus alcanzada, el listón siguiente lo pone Héctor», y la primera medición de
+  # demanda enseñó que el Corpus está INVERTIDO respecto a lo que se busca —González Prada
+  # 154 Citas, García Lorca 1—. Protocolo: LOOP-PROTOCOL-V5.md
+  # La 19.1 es una PUERTA y bloquea a las demás: sin ella el bucle sembraría a volumen
+  # traducciones cuyo estado de derechos no verificó nadie.
+  epic-19: backlog
+  19-1-una-obra-traducida-declara-el-año-de-su-traduccion: backlog
+  19-2-el-bucle-siembra-clasicos-con-meta-propia: backlog
+  19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog
+  # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie
+  # de indexación muestre una familia por encima del 20 %.
+  19-4-la-epoca-agrupa-a-los-autores-que-comparten-tiempo-y-escuela: backlog
+  epic-19-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"

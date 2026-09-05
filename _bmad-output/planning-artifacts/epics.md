@@ -2250,3 +2250,103 @@ So that pueda gastar ese presupuesto en lo que lo merece en vez de repartirlo a 
 **When** lo comprueba la suite
 **Then** hay una prueba que falla si las entradas pierden el `lastmod`
 **And** otra que falla si dos construcciones del mismo commit dan fechas distintas
+
+---
+
+## Epic 19: El Corpus se abre a los clásicos
+
+El Corpus está invertido respecto a la demanda: González Prada aporta 154 Citas y García Lorca aporta 1. Creció por lo que había disponible, que es lo único que podía hacer mientras no hubiera demanda medida. Ahora la hay, y esta épica gira el catálogo hacia donde se busca — filosofía antigua y teología, en profundidad por Autor.
+
+**FRs covered:** FR-48, FR-49, FR-50
+**Notas de implementación:** la primera historia es una **puerta**, y bloquea a las demás: sin ella el bucle sembraría a volumen textos traducidos cuyo estado de derechos no verificó nadie. Las dos siguientes son operación —el bucle— y no producen FR nuevos: las herramientas son las de la Épica 9, ya construidas. La 19.4 es superficie nueva y va la última, con condición de indexación.
+
+### Story 19.1: Una obra traducida declara el año de su traducción
+
+As a sistema que solo publica dominio público,
+I want negarme a publicar una traducción cuyo año no consta,
+So that abrir el Corpus a los clásicos no signifique publicar a ciegas.
+
+**Acceptance Criteria:**
+
+**Given** una Cita de una obra traducida
+**When** se intenta publicar sin el año de la traducción
+**Then** el build **rompe**, con la ruta del fichero y la regla incumplida
+
+**Given** una Cita de obra escrita originalmente en español
+**When** se publica
+**Then** nada cambia para ella: la regla nueva solo alcanza a lo traducido
+
+**Given** las Citas ya publicadas de obra traducida
+**When** entra la regla
+**Then** el informe dice **cuáles** quedan sin año y cuántas son
+**And** no se despublica ninguna en silencio: retirarlas o completarlas es decisión del editor
+
+**Given** el año de la traducción
+**When** se declara
+**Then** es el de la traducción y no el de la obra, y el campo lo dice sin ambigüedad
+
+### Story 19.2: El bucle siembra clásicos con meta propia
+
+As a editor,
+I want que el bucle sepa cuántos clásicos faltan y a quién buscar,
+So that la siembra se derive del hueco y no de mi criterio cada mañana.
+
+**Acceptance Criteria:**
+
+**Given** el informe de huecos
+**When** lo consulto
+**Then** cuenta los Autores de tradición `otra` **aparte**, con su propia meta
+**And** el suelo panhispánico se mide sobre hispánicos y no sobre el Corpus entero
+
+**Given** dos Autores admisibles
+**When** el bucle elige a quién sembrar
+**Then** prioriza por **demanda** y no por disponibilidad
+
+**Given** el techo de concentración por Autor
+**When** el bucle siembra en profundidad
+**Then** lo respeta sin excepción, y dice cuántas Citas más caben de ese Autor
+
+**Given** una sesión del bucle
+**When** termina
+**Then** queda registrada en la serie de sembrado, como toda sesión desde la 11.3
+
+### Story 19.3: La profundidad por Autor llega a la obra y a la biografía
+
+As a visitante que busca a un autor famoso,
+I want encontrar sus frases, sus obras y quién fue,
+So that la página resuelva la consulta entera y no un tercio.
+
+**Acceptance Criteria:**
+
+**Given** un Autor de esta épica
+**When** se publica
+**Then** su Página de Autor trae semblanza con fuente citada, su obra y sus Citas
+**And** eso es exactamente FR-41 y FR-42, ya especificados en la Épica 17: esta historia **no los reimplementa**, los consume
+
+**Given** el orden entre épicas
+**When** se planifica
+**Then** la 17.1 y la 17.2 van antes que esta historia, porque son las que construyen la semblanza con fuente
+
+### Story 19.4: La Época agrupa a los Autores que comparten tiempo y escuela
+
+As a visitante que busca «filósofos estoicos» y no un nombre,
+I want recorrer el catálogo por época,
+So that pueda llegar sin saber a quién busco.
+
+**Acceptance Criteria:**
+
+**Given** una Época
+**When** se publica
+**Then** agrupa **Autores** y no Citas, que es lo que la distingue del Tema
+
+**Given** una Época sin Autores publicados
+**When** se construye el sitio
+**Then** no se publica ni se indexa, como todo umbral de este producto
+
+**Given** la superficie nueva
+**When** se declara
+**Then** dice en un solo sitio si es publicable, como manda la Historia 12.1
+
+**Given** la serie de indexación
+**When** ninguna familia pasa del 20 % indexado
+**Then** esta historia **no se construye todavía**: añadir superficies a un sitio que no se rastrea es gastar en la dirección contraria

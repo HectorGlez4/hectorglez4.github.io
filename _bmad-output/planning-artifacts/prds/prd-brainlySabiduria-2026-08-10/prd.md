@@ -88,11 +88,12 @@ Los flujos aguas abajo deben usar estos términos exactamente. Introducir un sin
 
 ## 4. Features
 
-Diecinueve features repartidas en cuatro rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
+Veinte features repartidas en cinco rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
 
 - **v1 — §4.1…§4.8.** El producto: las cuatro superficies públicas, la búsqueda, la Imagen de Cita y la herramienta de curación.
 - **v2 — §4.9…§4.11.** Ponerlo delante de personas: compartición, canal propio y sembrado del Corpus.
 - **v3 — §4.12…§4.14.** Que crezca y se sostenga: Colecciones, ampliación del canal y monetización por umbral.
+- **v6 — §4.18.** Que el catálogo deje de estar invertido respecto a la demanda: clásicos y teología, en profundidad por Autor, con la Época como eje nuevo.
 - **v5 — §4.15…§4.17.** Que lo encuentren: entrar en el índice, darle a la Página de Autor el contenido que su consulta pide, y **conseguir que el buscador gaste rastreo en el sitio** — esta última añadida el 2026-09-04, cuando la primera medición demostró que las otras dos atacaban la causa equivocada.
 
 **No hay v4 en este documento, y no es un salto por error.** La v4 fue la Meta de Corpus —1.639 Citas, 24 Temas, 35 Autores— y no salió de aquí: salió de que el bucle de sembrado agotó el hueco del que derivaba trabajo (FR-25). Se numera igual que las demás para que el histórico no mienta.
@@ -757,6 +758,44 @@ Cada entrada del sitemap declara la fecha del último cambio real de esa superfi
 
 ---
 
+### 4.18 El Corpus cubre a los clásicos, y en profundidad *(v6, 2026-09-05)*
+
+**Descripción:** el Corpus tiene 1.639 Citas de 35 Autores y está **invertido respecto a la demanda**: Manuel González Prada aporta 154 Citas y Federico García Lorca aporta 1. Creció por lo que había disponible y era fácil de extraer, no por lo que se busca — y no podía crecer de otro modo, porque hasta el 2026-09-02 no había demanda medida que consultar. Esta feature lo corrige por el lado que más búsqueda tiene: filosofía antigua y teología, en profundidad por Autor.
+
+**Requisitos Funcionales:**
+
+#### FR-48: Una obra traducida no se publica sin el año de su traducción
+
+El sistema impide publicar una Cita de obra traducida cuya traducción no declare año.
+
+**Consecuencias (verificables):**
+- Para una obra traducida, el año que decide el estado de derechos es el de **la traducción**, no el de la obra: Platón murió hace veinticuatro siglos y su traductor pudo morir en 1980.
+- La regla existe desde la v4 —«traducción sólo con año declarado»— pero vive en un comentario de seguimiento y **no la aplica ninguna puerta**. El esquema declara `año` opcional y las Citas de Séneca no lo traen.
+- Una Cita marcada como traducida sin año de traducción **rompe el build**, con la ruta y la regla incumplida, igual que el resto de la puerta de admisión.
+- **Es condición previa a cualquier siembra automática de clásicos:** sin ella, un bucle publicaría a volumen textos cuyo estado de derechos no ha verificado nadie. Es el único riesgo legal de esta feature.
+
+#### FR-49: El Corpus cubre a los clásicos sin diluir lo panhispánico
+
+El catálogo incorpora Autores de la antigüedad y de la tradición teológica, con meta propia y sin tocar el compromiso panhispánico.
+
+**Consecuencias (verificables):**
+- Los Autores de tradición `otra` tienen **meta propia**, contada aparte, y no entran en el denominador del suelo panhispánico (§6.1).
+- El techo de concentración por Autor sigue rigiendo sin excepción: la profundidad por Autor obliga a que el total crezca en paralelo, no a que uno solo pese más.
+- Todo lo demás de la puerta de admisión se aplica igual: dominio público, año de fallecimiento del Autor, Procedencia, y el cotejo contra el documento versionado.
+- Se prioriza por **demanda**, no por disponibilidad: entre dos Autores admisibles entra antes el que más se busca.
+
+#### FR-50: La Época agrupa a los Autores que comparten tiempo y escuela
+
+El visitante puede recorrer el catálogo por época —filosofía antigua, patrística, escolástica, y las que el catálogo pida— además de por Autor y por Tema.
+
+**Consecuencias (verificables):**
+- La Época agrupa **Autores**, no Citas: es la diferencia con el Tema, y lo que evita que compita con la Página de Cita.
+- Un Autor pertenece a lo sumo a una Época, y una Época sin Autores publicados no se publica ni se indexa.
+- La Época declara en un solo sitio si es publicable, como toda superficie desde la Historia 12.1.
+- **Va la última de esta feature, y con condición:** añade superficies a un sitio con 2 URL indexadas de 1.715, que es el problema que §4.17 ataca. No se construye hasta que la serie de indexación muestre una familia por encima del 20 %.
+
+---
+
 ## 5. No-Objetivos (Explícitos)
 
 - **No somos una red social.** Sin cuentas, sin perfiles, sin comentarios, sin votos.
@@ -781,6 +820,10 @@ Cada entrada del sitemap declara la fecha del último cambio real de esa superfi
 - Herramienta interna de ingesta y curación (FR-13…FR-16).
 - Fundamentos de SEO y rendimiento (§8).
 - Corpus de arranque: ~2.000 Citas de 150–250 Autores, con **mínimo del 40 % de Autores de tradición latinoamericana**. El suelo es explícito porque el sesgo hacia España es el resultado por defecto de cualquier curación no vigilada.
+
+  **Redefinido el 2026-09-05: el suelo se mide sobre los Autores de tradición hispánica, no sobre el Corpus entero.** El compromiso del brief es «no escorar hacia España», y eso es una afirmación sobre el reparto **entre peninsulares y latinoamericanos** — nunca sobre cuántos clásicos universales hay. Medido sobre todos, cada Séneca que entra diluye un compromiso que no tenía nada que ver con él: con cuarenta clásicos nuevos el indicador caería al 24 % sin que un solo autor hispánico hubiera cambiado de sitio. Medido sobre hispánicos, hoy va al **56,2 %** y sigue igual después. **El suelo no baja: cambia su denominador.** Se escribe aquí y no en un comentario para que nadie dentro de seis meses crea que se relajó a escondidas.
+
+  La tercera categoría —`otra`— existe en el esquema desde la v1 y hoy la ocupan tres Autores. Deja de contar en el denominador del suelo y pasa a tener meta propia, porque un catálogo panhispánico que además cubre a los clásicos es más que uno que solo cubre a los clásicos.
 
 ### 6.2 Fuera de la v1
 
