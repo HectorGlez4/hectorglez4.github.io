@@ -57,8 +57,15 @@ export interface DatosDeAutor {
    * empujaría a rellenarla a ojo y la proporción pasaría a medir suposiciones. Lo que **no**
    * puede ser es intecleable: hasta la Historia 11.4 la orden no la aceptaba, así que un
    * `--tradicion latinoamericana` se tragaba en silencio y el Autor quedaba sin declarar.
-   * Con la orden diciendo «creado» y el fichero sin el campo, el suelo del 40 % no se movía
-   * y nadie sabía por qué.
+   * Con la orden diciendo «creado» y el fichero sin el campo, el indicador del suelo no
+   * subía con un alta que sí lo merecía, y nadie sabía por qué.
+   *
+   * **Un Autor sin declarar cuenta en el denominador del suelo** desde la Historia 19.2, así
+   * que dejarlo sin campo no es neutral: baja el porcentaje en vez de no moverlo. Es a
+   * propósito y es la lectura conservadora —un dato que falta nunca declara cumplido un
+   * compromiso—, pero significa que rellenar este campo es trabajo pendiente y no adorno.
+   * Antes de la 19.2 estos Autores estaban fuera del denominador, y ahí sí que un fallo de
+   * captura *mejoraba* la cifra.
    */
   tradicion?: Tradicion;
 }

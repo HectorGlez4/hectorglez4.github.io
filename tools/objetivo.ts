@@ -184,7 +184,16 @@ const salud = auditar(citas as unknown as CitaParaAuditar[]);
 const resultado = {
   citasPublicadas: salud.publicadas.total,
   procedenciaCompleta: salud.publicadas.porcentajeCompleta,
-  tradicionLatinoamericana: huecos.tradicion.porcentaje,
+  /*
+   * Sobre la base del suelo desde la v6 —todos menos los de tradición `otra`—, no sobre el
+   * Corpus entero. **Y con clave nueva**: la vieja, `tradicionLatinoamericana`, medía otra
+   * cosa, y reutilizarla habría metido un salto de +15 puntos en la serie de la 11.4 en una
+   * sesión que no admitió a nadie. Se copia tal cual, ausencia incluida: sin base no hay
+   * reparto que medir, y anotar un 0 sería anotar una medición que nadie hizo.
+   */
+  ...(huecos.tradicion.porcentaje === undefined
+    ? {}
+    : { tradicionLatinoamericanaSobreHispanicos: huecos.tradicion.porcentaje }),
 };
 
 const momento = new Date();
@@ -276,7 +285,11 @@ const mensaje = quiereJson
       '───────────────────────────',
       `Citas publicadas:            ${resultado.citasPublicadas}`,
       `Con procedencia completa:    ${porcentajeEnEspañol(resultado.procedenciaCompleta)} %`,
-      `Tradición latinoamericana:   ${porcentajeEnEspañol(resultado.tradicionLatinoamericana)} %`,
+      resultado.tradicionLatinoamericanaSobreHispanicos === undefined
+        ? 'Tradición latinoamericana:   sin Autores en la base del suelo, no hay reparto'
+        : `Tradición latinoamericana:   ` +
+          `${porcentajeEnEspañol(resultado.tradicionLatinoamericanaSobreHispanicos)} %` +
+          ' (sobre todos los Autores menos los de tradición otra)',
       '',
       `Registrado en ${ruta}`,
     ].join('\n');

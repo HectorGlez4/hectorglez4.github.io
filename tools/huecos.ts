@@ -13,9 +13,23 @@
  * hace la hace en el mismo momento. Lo que **no** se mezcla es el objetivo de la sesión: un
  * hueco de Tema se cierra sembrando Citas nuevas y uno de Colección asignando las que ya
  * están, que es curación y no sembrado.
+ *
+ * Desde la Historia 19.2 el bloque de tradición son **dos cuentas separadas**: el suelo
+ * panhispánico, que se mide sobre todos los Autores menos los de tradición `otra`, y los
+ * clásicos —tradición `otra`—, que se cuentan aparte y con meta propia. Estaban en el mismo
+ * recuento y eso hacía que admitir a un clásico universal contase como escorarse hacia España.
+ * Debajo va el margen que queda bajo el techo de concentración, que dice **dónde cabe** sembrar
+ * en profundidad y no a quién sembrar: eso lo prioriza la demanda (FR-49). Sigue sin nombres, y
+ * el margen por Autor viaja con su slug solo en `--json`.
+ *
+ * Los recuentos de Autores del informe **dicen qué cuentan**, porque son tres y no uno: los
+ * declarados en el Corpus, los que tienen margen medido —declarados más los que firman— y los
+ * de la Meta, que son solo los que firman alguna Cita. Hoy coinciden; divergen en silencio en
+ * cuanto una Cita apunte a un Autor no declarado.
  */
 
 import {
+  lineasDeClasicos,
   verHuecos,
   type AutorParaHuecos,
   type CitaParaHuecos,
@@ -25,7 +39,11 @@ import { lineaDeHueco, porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { lineasDeMeta, objetivoDeMeta, verMeta } from '../src/lib/meta.ts';
 import { lineasDeObjetivo, objetivoDeSesion } from '../src/lib/objetivo.ts';
 import { temasPublicados, type Cita, type Tema } from '../src/lib/publicado.ts';
-import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
+import {
+  MIN_CITAS_POR_COLECCION,
+  MIN_CITAS_POR_TEMA,
+  TECHO_CONCENTRACION_POR_AUTOR,
+} from '../src/lib/umbrales.ts';
 import { leerAutores, leerCitas, leerColecciones, leerTemas, rutasDelCorpus } from './lib/corpus.ts';
 import { coleccionesParaHuecos } from './lib/curacion.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
@@ -81,7 +99,7 @@ if (argumentos.includes('--json')) {
     `${JSON.stringify({ ...informe, objetivo, meta, ...(falloDeColecciones ? { falloDeColecciones } : {}) }, null, 2)}\n`,
   );
 } else {
-  const { temas: huecos, tradicion } = informe;
+  const { temas: huecos, tradicion, clasicos } = informe;
   const lineas = [
     'Huecos del Corpus',
     '═════════════════',
@@ -129,21 +147,109 @@ if (argumentos.includes('--json')) {
     for (const hueco of informe.colecciones) lineas.push(lineaDeHueco(hueco));
   }
 
+  /*
+   * Las dos cuentas van en dos bloques y no en dos filas del mismo, que es el cambio de la
+   * v6: el suelo panhispánico mide el reparto **entre hispánicos**, y los clásicos tienen
+   * meta propia. Mezclarlos es lo que hacía que admitir a Séneca contase como escorarse
+   * hacia España, y con cuarenta clásicos nuevos habría tirado el indicador al 24 % sin que
+   * un solo Autor hispánico cambiara de sitio.
+   */
+  const cifra = (valor: number | string) => String(valor).padStart(4);
+
   lineas.push(
     '',
-    'Equilibrio de tradición',
-    '───────────────────────',
-    `Autores en el Corpus:        ${tradicion.total}`,
-    `De tradición latinoamericana: ${tradicion.latinoamericana}  ` +
-      `(${porcentajeEnEspañol(tradicion.porcentaje)} %)`,
-    `De tradición peninsular:      ${tradicion.peninsular}`,
-    `De otra tradición:            ${tradicion.otra}`,
-    `Sin declarar:                 ${tradicion.sinDeclarar}`,
+    'Suelo panhispánico (sobre todos los Autores menos los de tradición otra)',
+    '────────────────────────────────────────────────────────────────────────',
+    `Autores declarados en el Corpus:   ${cifra(tradicion.total)}`,
+    `Base del suelo:                    ${cifra(tradicion.hispanicos)}`,
+    `  de tradición latinoamericana:    ${cifra(tradicion.latinoamericana)}` +
+      (tradicion.porcentaje === undefined
+        ? ''
+        : `  (${porcentajeEnEspañol(tradicion.porcentaje)} % de la base)`),
+    `  de tradición peninsular:         ${cifra(tradicion.peninsular)}`,
+    `  sin tradición declarada:         ${cifra(tradicion.sinDeclarar)}`,
+    `Fuera de la base (tradición otra): ${cifra(tradicion.otra)}`,
     '',
-    tradicion.alcanzaElSuelo
-      ? `Por encima del suelo comprometido del ${tradicion.suelo} %.`
-      : `POR DEBAJO del suelo comprometido del ${tradicion.suelo} %.`,
+    /*
+     * Los que no declaran tradición cuentan en la base, y se dice: es la cuenta conservadora
+     * —un dato que falta no puede mejorar el indicador— y quien lee la cifra tiene que saber
+     * que no todos los de la base están clasificados.
+     */
+    'Los Autores sin tradición declarada cuentan en la base del suelo: un dato que falta no',
+    'puede volver el reparto más favorable de lo medido. Los de tradición otra quedan fuera.',
+    '',
+    /*
+     * Denominador cero: se dice y no se publica cifra. Un 0 % aquí sería el artefacto de no
+     * dividir por cero disfrazado de medición, y de esta línea sale una decisión editorial.
+     */
+    tradicion.porcentaje === undefined
+      ? `Sin Autores en la base no hay reparto que medir: el suelo del ` +
+        `${tradicion.suelo} % no se informa.`
+      : tradicion.alcanzaElSuelo
+        ? `Por encima del suelo comprometido del ${tradicion.suelo} %.`
+        : `POR DEBAJO del suelo comprometido del ${tradicion.suelo} %.`,
   );
+
+  lineas.push(
+    '',
+    'Clásicos y otras tradiciones (cuenta aparte, meta propia)',
+    '─────────────────────────────────────────────────────────',
+    `Autores de tradición otra:         ${cifra(clasicos.autores)}`,
+    // Las escribe `lineasDeClasicos`, que es su dueño único: la rama de la meta puesta no la
+    // corre nadie mientras el listón siga sin poner, y ahí es donde vivía el «Faltan 1».
+    ...lineasDeClasicos(clasicos),
+    'No entran en el denominador del suelo panhispánico, y por lo demás pasan la misma',
+    'puerta que cualquiera: dominio público, año de fallecimiento, Procedencia y cotejo.',
+  );
+
+  /*
+   * Y cuánto sitio queda bajo el techo. Es **capacidad, no prioridad**: dice dónde cabe
+   * sembrar en profundidad, nunca a quién sembrar. Ordenar el trabajo por este margen sería
+   * priorizar por disponibilidad, que es exactamente el eje que FR-49 prohíbe. Sin nombres,
+   * como todo este informe: el margen de **cada** Autor va en la salida `--json` con su slug,
+   * que es dato para el bucle y no una propuesta a una persona.
+   */
+  lineas.push(
+    '',
+    'Margen bajo el techo de concentración por Autor (capacidad, no prioridad)',
+    '────────────────────────────────────────────────────────────────────────',
+    `Techo por Autor:                   ${cifra(TECHO_CONCENTRACION_POR_AUTOR)} % del Corpus`,
+  );
+
+  const masEstrecho = informe.margenPorAutor[0];
+  const masAncho = informe.margenPorAutor[informe.margenPorAutor.length - 1];
+
+  if (masEstrecho === undefined || masAncho === undefined) {
+    lineas.push('Todavía no hay Autores: no hay reparto del que hablar.');
+  } else {
+    /*
+     * Tres estados y no uno. «Rozan el techo» los mezclaba: quien está en el límite —cabe
+     * cero, pero no lo pasa— y quien ya lo pasó, que es un problema distinto y se cierra
+     * sembrando **a los demás**. El segundo no se recuenta aquí: sale de la Meta, que ya lo
+     * cuenta con la razón exacta y es su dueña. Recontarlo era arriesgarse a que las dos
+     * cuentas del mismo techo divergieran.
+     */
+    const porEncima = meta.meta.concentracion?.porEncimaDelTecho ?? 0;
+    const sinSitio = informe.margenPorAutor.filter((m) => m.caben === 0).length;
+
+    lineas.push(
+      `Autores con margen medido:         ${cifra(informe.margenPorAutor.length)}` +
+        '   (declarados y con Cita)',
+      `Del más representado caben:        ${cifra(masEstrecho.caben)} Citas más suyas ` +
+        `(aporta ${masEstrecho.citas})`,
+      `Del que menos aporta caben:        ${cifra(masAncho.caben)} Citas más suyas ` +
+        `(aporta ${masAncho.citas})`,
+      `Autores en el límite:              ${cifra(Math.max(0, sinSitio - porEncima))}` +
+        '   (no cabe ninguna más suya, y no lo pasan)',
+      `Autores por encima del techo:      ${cifra(porEncima)}` +
+        '   (se cierra sembrando a los demás)',
+      '',
+      'Este orden es capacidad y no prioridad: dice dónde cabe sembrar, no a quién sembrar.',
+      'Entre dos Autores admisibles la prioridad la pone la demanda (FR-49).',
+      'El margen de cada Autor, con su slug, va en la salida --json: esta vista informa la',
+      'decisión del editor y no nombra a nadie.',
+    );
+  }
 
   if (informe.anunciadosBajoUmbral.length > 0) {
     lineas.push(

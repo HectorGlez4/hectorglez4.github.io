@@ -336,7 +336,9 @@ describe('Historia 12.4 — la vista de huecos ve las Colecciones', () => {
     expect(informe.codigo, informe.error).toBe(0);
     expect(informe.salida).toContain('rota.yml no es YAML válido');
     expect(informe.salida).toContain('Temas por debajo del umbral');
-    expect(informe.salida).toContain('Equilibrio de tradición');
+    // Desde la Historia 19.2 el equilibrio son dos bloques: el suelo y los clásicos.
+    expect(informe.salida).toContain('Suelo panhispánico');
+    expect(informe.salida).toContain('Clásicos y otras tradiciones');
     expect(informe.salida).toContain('Objetivo de la sesión');
   });
 });

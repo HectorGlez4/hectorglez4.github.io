@@ -753,6 +753,14 @@ export const CABECERA_DE_SESIONES = [
   '# calla: consultar no es sembrar, y un registro que se llenara de consultas no mediría',
   '# cadencia ninguna. La bandera es la que dice «he corrido una sesión con este objetivo».',
   '#',
+  '# EL 2026-09-05 CAMBIÓ UNA MEDIDA DE NOMBRE, y por eso hay dos claves donde había una.',
+  '# `tradicionLatinoamericana` se medía sobre el Corpus entero y solo la llevan las entradas',
+  '# anteriores a esa fecha; desde la Historia 19.2 la medida se llama',
+  '# `tradicionLatinoamericanaSobreHispanicos` y su denominador son todos los Autores menos',
+  '# los de tradición `otra`. Las dos series NO son comparables término a término: bajo una',
+  '# sola clave el cambio habría puesto un salto de +15 puntos en una sesión que no admitió a',
+  '# nadie, y de aquí se leen justamente las diferencias entre entradas consecutivas.',
+  '#',
   '# Una entrada sin `motivo` es una sesión en la que se aceptó el objetivo propuesto; con',
   '# `motivo`, una en la que el editor conservó la última palabra. Una anulación sin motivo',
   '# se rechaza con código de error: sin motivo no hay registro, solo una desviación sin',
@@ -798,8 +806,31 @@ export interface ResultadoDeLaSesion {
   citasPublicadas: number;
   /** Porcentaje de Citas publicadas con Procedencia completa — SM-C1. */
   procedenciaCompleta: number;
-  /** Porcentaje de Autores de tradición latinoamericana. */
-  tradicionLatinoamericana: number;
+  /**
+   * Porcentaje de Autores de tradición latinoamericana **sobre el Corpus entero**.
+   *
+   * **Nombre histórico: solo lo llevan las entradas anteriores al 2026-09-05.** Desde la v6
+   * la medida se llama `tradicionLatinoamericanaSobreHispanicos` y tiene otro denominador.
+   * El campo se conserva —el registro se escribe solo por añadido y las entradas viejas no se
+   * reescriben— precisamente para que **el nombre identifique la medida**: dos denominadores
+   * distintos bajo la misma clave habrían puesto un escalón de +15 puntos en la serie de la
+   * Historia 11.4, en una sesión que no admitió a nadie, y la cabecera del registro enseña a
+   * leer diferencias entre entradas consecutivas.
+   */
+  tradicionLatinoamericana?: number;
+  /**
+   * Porcentaje de Autores de tradición latinoamericana **sobre la base del suelo** — todos
+   * los Autores menos los de tradición `otra`, con los que no la declaran dentro.
+   *
+   * Lo escriben las sesiones desde el 2026-09-05 (Historia 19.2). La serie vieja vive bajo
+   * `tradicionLatinoamericana` y **no es comparable término a término** con ésta: por eso son
+   * dos claves y no una, siguiendo el precedente de AD-24 para la serie hermana de
+   * indexación, donde cada entrada declara sobre qué se midió.
+   *
+   * Ausente cuando la base está vacía: un 0 sería el artefacto de no dividir por cero, no una
+   * medición.
+   */
+  tradicionLatinoamericanaSobreHispanicos?: number;
 }
 
 /**
@@ -834,7 +865,7 @@ export interface SesionRegistrada {
   propuesto: string;
   hueco?: string;
   tema?: { slug: string; nombre: string; publicadas: number; faltan: number };
-  tradicion?: { nombre: string; porcentaje: number; suelo: number; autoresQueFaltan?: number };
+  tradicion?: { nombre: string; porcentaje?: number; suelo: number; autoresQueFaltan?: number };
   elegido?: string;
   motivo?: string;
   resultado?: ResultadoDeLaSesion;

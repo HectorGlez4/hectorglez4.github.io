@@ -266,7 +266,7 @@ describe('Historia 11.3 — el resultado medido lo deriva la orden del Corpus', 
     expect(sesion.resultado).toEqual({
       citasPublicadas: 4,
       procedenciaCompleta: 25,
-      tradicionLatinoamericana: 25,
+      tradicionLatinoamericanaSobreHispanicos: 25,
     });
   });
 
@@ -564,6 +564,18 @@ describe('Historia 11.3 — el registro del corpus está versionado', () => {
     expect(CABECERA_DE_SESIONES).toMatch(/RESULTADO MEDIDO/);
   });
 
+  it('avisa arriba del día en que una medida cambió de nombre, y de por qué son dos', () => {
+    /*
+     * El 2026-09-05 el suelo cambió de denominador. Bajo la misma clave, la serie habría
+     * dado un salto de +15 puntos en una sesión que no admitió a nadie — y esta cabecera
+     * enseña explícitamente a leer diferencias entre entradas consecutivas. Por eso la clave
+     * es otra y la cabecera lo dice, como AD-24 fijó para la serie hermana de indexación.
+     */
+    expect(CABECERA_DE_SESIONES).toMatch(/2026-09-05/);
+    expect(CABECERA_DE_SESIONES).toContain('tradicionLatinoamericanaSobreHispanicos');
+    expect(CABECERA_DE_SESIONES).toMatch(/NO son comparables/i);
+  });
+
   it('es metadato del Corpus, no una colección', () => {
     // Vive en la raíz de `corpus/`, junto a `portada.json`: ninguna base de
     // `src/content.config.ts` apunta ahí, así que nada de esto llega al sitio construido.
@@ -587,8 +599,9 @@ describe('Historia 11.3 — la vista de huecos cierra con el objetivo', () => {
     expect(stdout).toContain('Sale del hueco:');
     // Y va al final: leer la propuesta antes que su fundamento sería leer una orden.
     expect(stdout.indexOf('Objetivo de la sesión')).toBeGreaterThan(
-      stdout.indexOf('Equilibrio de tradición'),
+      stdout.indexOf('Suelo panhispánico'),
     );
+    expect(stdout.indexOf('Suelo panhispánico')).toBeGreaterThan(-1);
   });
 
   it('el --json de los huecos lo lleva junto al informe', async () => {

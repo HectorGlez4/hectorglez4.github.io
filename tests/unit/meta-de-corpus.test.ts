@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  citasQueCabenDe,
   verHuecos,
   type AutorParaHuecos,
   type CitaParaHuecos,
   type ColeccionParaHuecos,
   type TemaParaHuecos,
 } from '../../src/lib/huecos.ts';
-import { citasQueCabenDe, lineasDeMeta, objetivoDeMeta, verMeta } from '../../src/lib/meta.ts';
+import { lineasDeMeta, objetivoDeMeta, verMeta } from '../../src/lib/meta.ts';
 import {
   META_AUTORES,
   META_CITAS_PUBLICADAS,
@@ -148,6 +149,55 @@ describe('Meta de Corpus — el techo de concentración por Autor', () => {
   it('un Corpus sin Citas no tiene concentración que medir', () => {
     const estado = meta([], temas(1), autoresEquilibrados(3));
     expect(estado.concentracion).toBeUndefined();
+  });
+
+  it('el techo se compara con la razón exacta, no con la cifra redondeada', () => {
+    /*
+     * `Math.round` redondea al **más cercano**, no al alza, así que la cifra de presentación
+     * cae hacia abajo en toda la franja `[15 %, 15,05 %)` — y decidir con ella declaraba
+     * cumplido un techo ya roto. El caso está medido sobre el estado real: 246 Citas de
+     * 1.639 son el 15,0092 %, y el informe decía «un 15 % — dentro del techo del 15 % ·
+     * caben 0 Citas más suyas». Un Autor por encima del techo con la línea diciendo que
+     * está dentro y con un margen de cero es el peor de los dos mundos.
+     */
+    const enElBorde: CitaParaHuecos[] = [
+      ...Array.from({ length: 246 }, (_, i) => ({
+        slug: `x-${i}`,
+        autor: 'el-que-mas',
+        temas: ['tema-0'],
+      })),
+      ...Array.from({ length: 1639 - 246 }, (_, i) => ({
+        slug: `y-${i}`,
+        autor: `relleno-${i % 30}`,
+        temas: ['tema-0'],
+      })),
+    ];
+    const estado = meta(enElBorde, temas(1), autoresEquilibrados(31));
+
+    // La cifra de presentación sigue siendo la de una décima, y ahí sí redondea al cercano.
+    expect(estado.concentracion?.porcentaje).toBe(15);
+    // Pero quien decide es la razón exacta: 100·246 > 15·1.639.
+    expect(100 * 246).toBeGreaterThan(TECHO_CONCENTRACION_POR_AUTOR * 1639);
+    expect(estado.concentracion?.excede).toBe(true);
+    expect(estado.concentracion?.porEncimaDelTecho).toBe(1);
+    expect(estado.concentracion?.citasDeOtrosQueFaltan).toBeGreaterThan(0);
+    expect(estado.alcanzada).toBe(false);
+  });
+
+  it('y quien está justo en el techo, al milímetro, no lo excede', () => {
+    // El techo se cumple con igualdad: 15 de 100 es el 15 % y no está «por encima».
+    const justo: CitaParaHuecos[] = [
+      ...Array.from({ length: 15 }, (_, i) => ({ slug: `x-${i}`, autor: 'justo', temas: ['tema-0'] })),
+      ...Array.from({ length: 85 }, (_, i) => ({
+        slug: `y-${i}`,
+        autor: `relleno-${i % 17}`,
+        temas: ['tema-0'],
+      })),
+    ];
+    const estado = meta(justo, temas(1), autoresEquilibrados(18));
+
+    expect(estado.concentracion?.excede).toBe(false);
+    expect(estado.concentracion?.porEncimaDelTecho).toBe(0);
   });
 });
 
@@ -396,6 +446,51 @@ describe('Meta de Corpus — cuántas Citas propias caben bajo el techo', () => 
       const unaMas = citasQueCabenDe(citas, total) + 1;
 
       expect((citas + unaMas) / (total + unaMas), `${citas} de ${total}`).toBeGreaterThan(techo);
+    }
+  });
+
+  it('y la propiedad se cumple también EN la frontera exacta', () => {
+    /*
+     * La prueba de arriba medía tres pares que no tocan la frontera, y con eso pasaba en
+     * verde sobre una función que **no** cumplía lo que su nombre promete. La aritmética
+     * vieja operaba con `0,15` y `1 − 0,15`, que en coma flotante no son exactos: un barrido
+     * de todos los pares hasta 5.000 dio cero sobreestimaciones y 44.441 subestimaciones de
+     * exactamente 1, y todas ellas caían justo donde la respuesta es un entero. El caso
+     * mínimo es `citasQueCabenDe(1, 18)`, que devolvía 1 cuando caben 2.
+     *
+     * Aquí los pares son los que caen **sobre** el entero: `n = (techo·total − 100·citas) /
+     * (100 − techo)` exacto.
+     */
+    const techo = TECHO_CONCENTRACION_POR_AUTOR / 100;
+    const enLaFrontera: [number, number][] = [];
+
+    for (let total = 1; total <= 400 && enLaFrontera.length < 40; total += 1) {
+      for (let citas = 0; citas <= total; citas += 1) {
+        const numerador = TECHO_CONCENTRACION_POR_AUTOR * total - 100 * citas;
+        if (numerador > 0 && numerador % (100 - TECHO_CONCENTRACION_POR_AUTOR) === 0) {
+          enLaFrontera.push([citas, total]);
+          break;
+        }
+      }
+    }
+
+    expect(enLaFrontera.length).toBeGreaterThan(20);
+    expect(enLaFrontera).toContainEqual([1, 18]);
+    expect(citasQueCabenDe(1, 18)).toBe(2);
+
+    for (const [citas, total] of enLaFrontera) {
+      const caben = citasQueCabenDe(citas, total);
+
+      // Cabe justo hasta el techo…
+      expect((citas + caben) / (total + caben), `${citas} de ${total} + ${caben}`).toBeCloseTo(
+        techo,
+        10,
+      );
+      // …y una más lo rompe: el margen es el mayor que cabe, no uno prudente.
+      expect(
+        (citas + caben + 1) / (total + caben + 1),
+        `${citas} de ${total} + ${caben + 1}`,
+      ).toBeGreaterThan(techo);
     }
   });
 });

@@ -18,13 +18,20 @@
  * sigue siendo la única decisión que este producto no delega. Una lista de nombres la
  * delegaría por la puerta de atrás.
  *
+ * La Historia 19.2 pone el mismo filo que la 15.3 puso en `meta.ts`: `margenPorAutor` lleva
+ * el **slug** de cada Autor para que el bucle sepa dónde queda sitio bajo el techo. Viaja en
+ * la estructura y jamás en el texto del informe, y son Autores que **ya están** en el Corpus:
+ * decir cuánto cabe de quien ya entró no es decir a quién admitir.
+ *
  * AD-5 — Derivación pura: recibe lo leído, no lee disco.
  */
 
 import {
+  META_AUTORES_DE_OTRA_TRADICION,
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
   SUELO_TRADICION_LATINOAMERICANA,
+  TECHO_CONCENTRACION_POR_AUTOR,
 } from './umbrales.ts';
 
 export interface TemaParaHuecos {
@@ -110,16 +117,162 @@ export function huecosDeColecciones(colecciones: ColeccionParaHuecos[]): HuecoDe
 }
 
 export interface EquilibrioDeTradicion {
+  /**
+   * Todos los Autores del Corpus, de la tradición que sean.
+   *
+   * **No es el denominador del suelo**, y desde la v6 conviene no confundirlos: esta cifra
+   * dice el tamaño del censo, y la que mide el compromiso panhispánico es `hispanicos`.
+   */
   total: number;
   latinoamericana: number;
   peninsular: number;
   otra: number;
-  /** Autores sin tradición declarada. Se cuentan aparte: el dato está incompleto. */
+  /**
+   * Autores sin tradición declarada. Se enseñan aparte porque el dato está incompleto, pero
+   * **cuentan en el denominador del suelo**: ver `hispanicos`.
+   */
   sinDeclarar: number;
-  /** Porcentaje de tradición latinoamericana sobre el total, a una décima. */
-  porcentaje: number;
+  /**
+   * El denominador del suelo desde la v6: **todos los Autores menos los de tradición
+   * `otra`** — o sea `latinoamericana` + `peninsular` + `sinDeclarar`.
+   *
+   * Lo que la v6 cambió es que salen los clásicos. El compromiso del brief es sobre el
+   * reparto **entre hispánicos**, y un clásico universal no lo escora hacia ningún lado: con
+   * el denominador viejo, admitir a Séneca contaba como escorarse hacia España.
+   *
+   * **Los que no declaran tradición se quedan dentro, y es deliberado.** El campo es
+   * opcional a propósito —`tools/lib/gestion.ts` explica por qué: obligarlo empujaría a
+   * rellenarlo a ojo y la proporción pasaría a medir suposiciones—, así que un Autor sin
+   * declarar es **un dato que falta, no un Autor que no cuente**. Sacarlos del denominador
+   * hacía que un fallo de captura *mejorase* el indicador: un Corpus con 34 sin clasificar y
+   * un solo latinoamericano declarado informaba el 100 % y «por encima del suelo». Dentro
+   * del denominador la cuenta es la conservadora, que es la que corresponde a un suelo:
+   * nunca declara cumplido lo que no se sabe.
+   */
+  hispanicos: number;
+  /**
+   * Porcentaje de tradición latinoamericana **sobre `hispanicos`**, a una décima.
+   *
+   * **Ausente cuando no hay ninguno.** Un 0 ahí sería el artefacto de no dividir por cero
+   * disfrazado de medición —el mismo que `objetivo.ts` ya tuvo que desactivar a mano para el
+   * Corpus vacío—, así que el reparto que no existe no se informa en vez de informarse falso.
+   */
+  porcentaje?: number;
   suelo: number;
   alcanzaElSuelo: boolean;
+}
+
+/**
+ * Los clásicos, contados aparte y con meta propia — FR-49, v6.
+ *
+ * Salen del denominador del suelo panhispánico y no del Corpus. La puerta de admisión no se
+ * mueve ni un milímetro —FR-13 entero, sin excepción ninguna— y pesan lo mismo bajo el techo
+ * de concentración: lo único que cambia es que se cuentan en su propia cuenta, porque un
+ * catálogo panhispánico que **además** cubre a los clásicos es más que uno que solo cubre a
+ * los clásicos.
+ */
+export interface MetaDeClasicos {
+  /** Autores de tradición `otra` en el Corpus. */
+  autores: number;
+  /** El listón, cuando esté puesto. Ausente mientras no lo esté: lo pone Héctor. */
+  meta?: number;
+  /** Cuántos faltan para el listón. Ausente por lo mismo, y nunca negativo. */
+  faltan?: number;
+}
+
+/**
+ * Las líneas del bloque de clásicos del informe, con su dueño único.
+ *
+ * Vive aquí y no en la orden porque en la orden **nadie podía correrla**: mientras
+ * `META_AUTORES_DE_OTRA_TRADICION` siga sin poner —y sigue, a propósito—, la rama de la meta
+ * es código que no ejecuta ninguna prueba ni ningún usuario. Recibiendo la cuenta ya hecha se
+ * prueban las tres ramas sin tocar la constante.
+ *
+ * El plural se resuelve aquí y no se deja a la interpolación: con la meta puesta y uno
+ * faltando, la línea decía «Faltan 1».
+ */
+export function lineasDeClasicos(clasicos: MetaDeClasicos): string[] {
+  if (clasicos.meta === undefined) {
+    return [
+      'Meta:                              sin poner',
+      '',
+      'Cuántos clásicos quiere el Corpus es un listón, y el listón lo pone Héctor.',
+    ];
+  }
+
+  return [
+    `Meta:                              ${String(clasicos.meta).padStart(4)}`,
+    '',
+    clasicos.faltan === 0
+      ? 'Meta de clásicos alcanzada.'
+      : clasicos.faltan === 1
+        ? 'Falta 1 Autor para la meta de clásicos.'
+        : `Faltan ${clasicos.faltan} Autores para la meta de clásicos.`,
+  ];
+}
+
+/**
+ * Cuánto sitio le queda a un Autor bajo el techo de concentración — Historia 19.2.
+ *
+ * El slug viaja en la estructura y **jamás en el texto** del informe, exactamente como el de
+ * `Concentracion` en `meta.ts`: aquí es dato para el bucle que consume el `--json`, no una
+ * propuesta a una persona. Quién entra en el Corpus sigue siendo del editor; esto solo dice
+ * cuánto cabe de quien ya está.
+ */
+export interface MargenDeAutor {
+  /** El Autor, por slug. */
+  autor: string;
+  /** Citas suyas publicadas. */
+  citas: number;
+  /** Citas más suyas que caben antes de rozar el techo. Cero si ya lo roza o lo pasa. */
+  caben: number;
+}
+
+/**
+ * Cuántas Citas más cabe sembrar de un Autor sin que rompa el techo de concentración.
+ *
+ * La aritmética contraria —cuántas Citas **de otros** faltan para diluir a quien ya excede—
+ * vive en `verMeta`. Ésta dice **cuánto cabe**, que es capacidad y no prioridad: el protocolo
+ * apoya en ella una regla —«el margen está donde el Autor tiene pocas Citas, no donde tiene
+ * mucha obra»— para saber dónde hay sitio, nunca para elegir a quién sembrar. Eso lo decide
+ * la demanda (FR-49).
+ *
+ * Sale de despejar `(citas + n) / (total + n) ≤ techo`:
+ *
+ *     n ≤ (techo · total − citas) / (1 − techo)
+ *
+ * Lo que importa de la fórmula, y lo que una regla de tres ingenua se pierde, es que **el
+ * Corpus crece con lo que se siembra**: cada Cita sembrada sube el numerador de ese Autor y
+ * también el denominador de todos. Por eso de un Autor a cero caben unas 176 en un Corpus de
+ * 1000, no 150.
+ *
+ * Devuelve 0 —nunca un negativo— para quien ya está en el techo o lo excede: un margen
+ * negativo se sumaría mal en cualquier cuenta que lo use.
+ *
+ * Vive aquí y no en `meta.ts`, donde nació en la Historia 15.3, porque desde la 19.2 esta
+ * vista deriva el margen de **cada** Autor y `meta.ts` depende de ella y no al revés. Sigue
+ * teniendo un solo dueño, que era lo que importaba: dos aritméticas del mismo techo en
+ * sitios distintos acaban divergiendo.
+ */
+export function citasQueCabenDe(citasDelAutor: number, totalDelCorpus: number): number {
+  /*
+   * **En enteros, y no en fracciones.** La primera redacción dividía el techo por 100 y
+   * operaba con `0,15` y `1 − 0,15`, que en coma flotante no son exactos, y el error caía
+   * siempre del mismo lado: un barrido de todos los pares hasta 5.000 dio cero
+   * sobreestimaciones y 44.441 subestimaciones de exactamente 1, todas ellas cuando la
+   * respuesta cae **justo sobre un entero**. El caso mínimo es `citasQueCabenDe(1, 18)`, que
+   * devolvía 1 cuando caben 2. Era conservador y aun así falso: la propiedad que la 15.3
+   * prometió —«el margen es el mayor que cabe, no uno prudente»— no se cumplía en la
+   * frontera, y su prueba pasaba porque los tres pares que medía no la tocaban.
+   *
+   * Con el techo en porcentaje entero, numerador y denominador son enteros exactos y la
+   * división de una razón que da entero da ese entero.
+   */
+  const caben =
+    (TECHO_CONCENTRACION_POR_AUTOR * totalDelCorpus - 100 * citasDelAutor) /
+    (100 - TECHO_CONCENTRACION_POR_AUTOR);
+
+  return Math.max(0, Math.floor(caben));
 }
 
 export interface Huecos {
@@ -136,6 +289,28 @@ export interface Huecos {
    */
   colecciones: HuecoDeColeccion[];
   tradicion: EquilibrioDeTradicion;
+  /**
+   * Los Autores de tradición `otra`, en su propia cuenta — v6.
+   *
+   * Va al lado del equilibrio de tradición y **no dentro** de él, que es justo lo que la v6
+   * quiere que se lea: son dos cuentas, no dos filas de la misma. Mezclarlas es lo que hacía
+   * que admitir a Séneca contase como escorarse hacia España.
+   */
+  clasicos: MetaDeClasicos;
+  /**
+   * Cuántas Citas más caben de cada Autor antes de rozar el techo de concentración.
+   *
+   * De menos margen a más: el primero de la lista es el que más pesa y el que antes tocaría
+   * el techo, y el último es donde una sesión de profundidad tiene sitio de sobra. El techo
+   * rige sin excepción y esto no lo relaja — dice dónde queda hueco bajo él.
+   *
+   * **Es capacidad, no prioridad.** Este orden no es un ranking de a quién sembrar: leerlo
+   * así sería priorizar por **disponibilidad**, que es justo el eje que FR-49 prohíbe —«se
+   * prioriza por demanda, no por disponibilidad: entre dos Autores admisibles entra antes el
+   * que más se busca»— y que el protocolo del bucle llama la corrección de rumbo entera. La
+   * prioridad la pone la demanda; esto solo dice dónde cabe lo que la demanda pida.
+   */
+  margenPorAutor: MargenDeAutor[];
   /**
    * Temas que la portada anuncia y no llegan al umbral — LC-6.
    *
@@ -181,7 +356,57 @@ export function verHuecos(
 
   const total = autores.length;
   const latinoamericana = cuenta('latinoamericana');
-  const porcentaje = total === 0 ? 0 : Math.round((latinoamericana / total) * 1000) / 10;
+  const peninsular = cuenta('peninsular');
+  const otra = cuenta('otra');
+  const sinDeclarar = autores.filter((a) => a.tradicion === undefined).length;
+  /*
+   * El denominador del suelo, y el cambio entero de la v6: **todos menos los de tradición
+   * `otra`**. El valor del suelo no se mueve —sigue siendo el 40 % de `umbrales.ts`—; lo que
+   * se corrige es sobre qué se mide, porque el compromiso es sobre el reparto entre
+   * hispánicos y no sobre cuántos clásicos universales hay.
+   *
+   * Los que no declaran tradición **siguen dentro**, que es la opción conservadora: un dato
+   * que falta no puede volver el indicador más favorable de lo que se ha medido. Ver el
+   * comentario de `EquilibrioDeTradicion.hispanicos`.
+   */
+  const hispanicos = latinoamericana + peninsular + sinDeclarar;
+  /*
+   * A una décima, y **el empate cae hacia abajo**: un suelo no se alcanza por redondeo. 18 de
+   * 32 es el 56,25 % exacto, y `Math.round` lo escribiría 56,3 — media décima de compromiso
+   * que nadie ha cumplido. `Math.ceil(v − 0,5)` es el redondeo de toda la vida salvo en el
+   * empate justo, donde cae del lado que no promete de más, y es la cifra con la que §6.1 del
+   * PRD escribe esta misma medición: 56,2 %.
+   *
+   * Su hermana de `meta.ts` **no** redondea al alza, aunque este comentario lo afirmara: allí
+   * la cifra a una décima es solo de presentación, y quien decide si el techo se excede es la
+   * razón exacta `100·citas > techo·total`. Comparar contra la cifra ya redondeada declaraba
+   * cumplido un techo ya roto.
+   */
+  const porcentaje =
+    hispanicos === 0
+      ? undefined
+      : Math.ceil((latinoamericana / hispanicos) * 1000 - 0.5) / 10;
+
+  /*
+   * El margen de cada Autor bajo el techo, incluidos los admitidos que todavía no publican:
+   * son precisamente donde más sitio hay, y dejarlos fuera escondería la mitad de la
+   * respuesta a «dónde sembrar en profundidad». El recuento se hace aquí y no se recibe
+   * porque las Citas ya están en la mano; el techo, en cambio, sale de `umbrales.ts`.
+   */
+  const citasPorAutor = new Map<string, number>(autores.map((a) => [a.slug, 0]));
+  for (const cita of citas) {
+    citasPorAutor.set(cita.autor, (citasPorAutor.get(cita.autor) ?? 0) + 1);
+  }
+  const margenPorAutor = [...citasPorAutor.entries()]
+    .map(([autor, suyas]) => ({
+      autor,
+      citas: suyas,
+      caben: citasQueCabenDe(suyas, citas.length),
+    }))
+    // De menos margen a más, desempatado por slug en español como el resto de esta vista:
+    // sin desempate, dos Autores con las mismas Citas cambiarían de orden según se leyeran
+    // los ficheros y el informe dejaría de ser el mismo para el mismo estado.
+    .sort((a, b) => a.caben - b.caben || a.autor.localeCompare(b.autor, 'es'));
 
   return {
     temas: huecosDeTema,
@@ -189,13 +414,25 @@ export function verHuecos(
     tradicion: {
       total,
       latinoamericana,
-      peninsular: cuenta('peninsular'),
-      otra: cuenta('otra'),
-      sinDeclarar: autores.filter((a) => a.tradicion === undefined).length,
-      porcentaje,
+      peninsular,
+      otra,
+      sinDeclarar,
+      hispanicos,
+      ...(porcentaje === undefined ? {} : { porcentaje }),
       suelo: SUELO_TRADICION_LATINOAMERICANA,
-      alcanzaElSuelo: porcentaje >= SUELO_TRADICION_LATINOAMERICANA,
+      alcanzaElSuelo:
+        porcentaje !== undefined && porcentaje >= SUELO_TRADICION_LATINOAMERICANA,
     },
+    clasicos: {
+      autores: otra,
+      ...(META_AUTORES_DE_OTRA_TRADICION === undefined
+        ? {}
+        : {
+            meta: META_AUTORES_DE_OTRA_TRADICION,
+            faltan: Math.max(0, META_AUTORES_DE_OTRA_TRADICION - otra),
+          }),
+    },
+    margenPorAutor,
     anunciadosBajoUmbral: temasAnunciadosEnPortada.filter(
       (slug) => (porTema.get(slug) ?? 0) < MIN_CITAS_POR_TEMA,
     ),

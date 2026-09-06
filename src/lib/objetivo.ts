@@ -57,7 +57,14 @@ export interface ObjetivoDeTema {
 export interface ObjetivoDeTradicion {
   /** La tradición que hay que reforzar. Nunca un Autor: la caracterización es esta. */
   nombre: 'latinoamericana';
-  porcentaje: number;
+  /**
+   * Su peso **sobre la base del suelo** — v6, no sobre el Corpus entero: todos los Autores
+   * menos los de tradición `otra`, con los que no la declaran dentro.
+   *
+   * Ausente cuando esa base está vacía: ahí no hay reparto que medir, y una cifra sería
+   * inventada. Ver `EquilibrioDeTradicion.hispanicos` y `.porcentaje`.
+   */
+  porcentaje?: number;
   suelo: number;
   /**
    * Autores de esa tradición que hay que admitir para alcanzar el suelo.
@@ -89,20 +96,30 @@ function citas(cuantas: number): string {
  * Cuántos Autores de tradición latinoamericana hay que admitir para alcanzar el suelo.
  *
  * Cada alta sube el numerador y el denominador a la vez, así que no basta con la
- * diferencia contra el suelo: se busca el menor `k` con `(lat + k) / (total + k) ≥ suelo`,
- * que despejado es `k ≥ (suelo · total − 100 · lat) / (100 − suelo)`.
+ * diferencia contra el suelo: se busca el menor `k` con `(lat + k) / (hisp + k) ≥ suelo`,
+ * que despejado es `k ≥ (suelo · hisp − 100 · lat) / (100 − suelo)`.
+ *
+ * **El denominador es la base del suelo, no el Corpus entero** — v6. Es la misma corrección
+ * que la del suelo, y tiene que ser la misma o la cifra prometería un alta que no bastaría:
+ * admitir a un latinoamericano mueve el reparto de la base, no el censo de clásicos.
+ *
+ * Con la base vacía el despeje da 0, y 0 sería mentira: el reparto `0/0` no alcanza ningún
+ * suelo, y hace falta al menos un alta para que haya reparto. De ahí el mínimo de 1.
  *
  * No es un segundo cómputo de huecos: los tres números salen tal cual de `verHuecos`, y
  * quien decide si el suelo se alcanza sigue siendo su `alcanzaElSuelo`.
  */
 function autoresQueFaltanParaElSuelo(
-  total: number,
+  hispanicos: number,
   latinoamericana: number,
   suelo: number,
 ): number | undefined {
   const margen = 100 - suelo;
   if (margen <= 0) return undefined;
-  return Math.max(0, Math.ceil((suelo * total - 100 * latinoamericana) / margen));
+  return Math.max(
+    hispanicos === 0 ? 1 : 0,
+    Math.ceil((suelo * hispanicos - 100 * latinoamericana) / margen),
+  );
 }
 
 /** El eje de Autor, cuando es el titular: qué tradición hay que admitir, y cuánta. */
@@ -137,11 +154,30 @@ function dondeVanLasCitas(tema: HuecoDeTema): string {
   );
 }
 
+/**
+ * De qué hueco sale la rama de tradición, con el denominador que de verdad se mide.
+ *
+ * Dice «que cuentan para el suelo» y no «del Corpus» porque desde la v6 el suelo se mide
+ * sobre todos los Autores menos los de tradición `otra`: escribir el total del Corpus aquí
+ * haría creer que un clásico universal cuenta contra el compromiso, que es justo lo que la v6
+ * corrige. Los que no declaran tradición sí cuentan, que es la lectura conservadora.
+ *
+ * Con la base vacía no se publica cifra. El reparto no existe todavía, y un porcentaje
+ * inventado en la frase de la que sale el trabajo de la sesión es peor que no tenerlo.
+ */
 function huecoDeTradicion(tradicion: EquilibrioDeTradicion, suelo: string): string {
+  if (tradicion.porcentaje === undefined) {
+    return (
+      'El Corpus no tiene ningún Autor que cuente para el suelo panhispánico, así que no hay ' +
+      `reparto que medir frente al suelo comprometido del ${suelo} %.`
+    );
+  }
+
   return (
-    `De los ${tradicion.total} Autores del Corpus, ${tradicion.latinoamericana} son de ` +
-    `tradición latinoamericana: un ${porcentajeEnEspañol(tradicion.porcentaje)} %, por ` +
-    `debajo del suelo comprometido del ${suelo} %.`
+    `De los ${tradicion.hispanicos} Autores que cuentan para el suelo —todos menos los de ` +
+    `tradición otra—, ${tradicion.latinoamericana} son de tradición latinoamericana: un ` +
+    `${porcentajeEnEspañol(tradicion.porcentaje)} %, por debajo del suelo comprometido del ` +
+    `${suelo} %.`
   );
 }
 
@@ -209,7 +245,7 @@ export function objetivoDeSesion(huecos: Huecos): ObjetivoDeSesion {
 
   if (!tradicion.alcanzaElSuelo) {
     const faltan = autoresQueFaltanParaElSuelo(
-      tradicion.total,
+      tradicion.hispanicos,
       tradicion.latinoamericana,
       tradicion.suelo,
     );
@@ -225,7 +261,7 @@ export function objetivoDeSesion(huecos: Huecos): ObjetivoDeSesion {
       ].join(' '),
       tradicion: {
         nombre: 'latinoamericana',
-        porcentaje: tradicion.porcentaje,
+        ...(tradicion.porcentaje === undefined ? {} : { porcentaje: tradicion.porcentaje }),
         suelo: tradicion.suelo,
         ...(faltan === undefined ? {} : { autoresQueFaltan: faltan }),
       },
@@ -247,7 +283,8 @@ export function objetivoDeSesion(huecos: Huecos): ObjetivoDeSesion {
     objetivo: 'No hay hueco que cerrar.',
     hueco:
       `Ningún Tema por debajo del umbral de ${MIN_CITAS_POR_TEMA} Citas, y la tradición ` +
-      `latinoamericana alcanza el suelo del ${suelo} %.`,
+      `latinoamericana alcanza el suelo del ${suelo} % sobre los Autores que cuentan para ` +
+      'él: todos menos los de tradición otra.',
   };
 }
 

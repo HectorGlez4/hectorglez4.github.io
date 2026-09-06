@@ -33,7 +33,13 @@
  */
 
 import { milesEnEspañol, porcentajeEnEspañol } from './formato.ts';
-import type { CitaParaHuecos, ColeccionParaHuecos, Huecos, TemaParaHuecos } from './huecos.ts';
+import {
+  citasQueCabenDe,
+  type CitaParaHuecos,
+  type ColeccionParaHuecos,
+  type Huecos,
+  type TemaParaHuecos,
+} from './huecos.ts';
 import {
   META_AUTORES,
   META_CITAS_PUBLICADAS,
@@ -146,7 +152,15 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
   const [autor, suyas] = ordenados[0]!;
 
   const total = citas.length;
+  /*
+   * `pesa` es **solo para escribir**: redondea a la décima y `Math.round` redondea al más
+   * cercano, o sea hacia abajo en toda la franja `[techo, techo + 0,05)`. Decidir con ella si
+   * el techo se excede declaraba cumplido un techo ya roto — medido: 246 Citas de 1.639 son
+   * el 15,0092 %, y el informe decía «un 15 % — dentro del techo del 15 % · caben 0 Citas más
+   * suyas». Quien decide es `excedeElTecho`, con la razón exacta y en enteros.
+   */
   const pesa = (n: number) => Math.round((n / total) * 1000) / 10;
+  const excedeElTecho = (n: number) => 100 * n > TECHO_CONCENTRACION_POR_AUTOR * total;
   const porcentaje = pesa(suyas);
 
   /*
@@ -155,7 +169,7 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
    * escribe así a propósito: la equivalencia es una casualidad de que `k` crezca con `suyas`,
    * no una propiedad de la que quiera depender el día que el techo se calcule de otro modo.
    */
-  const excedentes = ordenados.filter(([, n]) => pesa(n) > TECHO_CONCENTRACION_POR_AUTOR);
+  const excedentes = ordenados.filter(([, n]) => excedeElTecho(n));
   const faltanPara = (n: number) =>
     Math.max(0, Math.ceil((100 * n) / TECHO_CONCENTRACION_POR_AUTOR) - total);
 
@@ -178,31 +192,11 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
  * decide qué está por debajo tiene un solo dueño, y una segunda cuenta podría discrepar de
  * la primera el día que el umbral se mueva.
  */
-/**
- * Cuántas Citas más cabe sembrar de un Autor sin que rompa el techo de concentración.
- *
- * La aritmética contraria —cuántas Citas **de otros** faltan para diluir a quien ya excede— vive
- * dentro de `verMeta`, y es la que el informe enseña. Ésta es la que decide **dónde invertir una
- * sesión de sembrado**, y el protocolo apoya en ella una regla: «el margen está donde el Autor
- * tiene pocas Citas, no donde tiene mucha obra».
- *
- * Sale de despejar `(citas + n) / (total + n) ≤ techo`:
- *
- *     n ≤ (techo · total − citas) / (1 − techo)
- *
- * Lo que importa de la fórmula, y lo que una regla de tres ingenua se pierde, es que **el Corpus
- * crece con lo que se siembra**: cada Cita sembrada sube el numerador de ese Autor y también el
- * denominador de todos. Por eso de un Autor a cero caben unas 176 en un Corpus de 1000, no 150.
- *
- * Devuelve 0 —nunca un negativo— para quien ya está en el techo o lo excede: un margen negativo
- * se sumaría mal en cualquier cuenta que lo use.
+/*
+ * `citasQueCabenDe` nació aquí en la Historia 15.3 y desde la 19.2 vive en `huecos.ts`: esa
+ * vista deriva ahora el margen de **cada** Autor, y depende de ésta y no al revés. Sigue
+ * teniendo un solo dueño, que era lo que la 15.3 quería proteger.
  */
-export function citasQueCabenDe(citasDelAutor: number, totalDelCorpus: number): number {
-  const techo = TECHO_CONCENTRACION_POR_AUTOR / 100;
-  const caben = (techo * totalDelCorpus - citasDelAutor) / (1 - techo);
-
-  return Math.max(0, Math.floor(caben));
-}
 
 export function verMeta(
   citas: CitaParaHuecos[],
@@ -223,7 +217,10 @@ export function verMeta(
      *
      * `huecos.tradicion.total` sigue contándolos a todos y está bien que así sea: el suelo del
      * 40 % mide **a quién se ha admitido**, que es un compromiso tomado en el momento del alta,
-     * no a quién se ha sembrado. Son dos censos distintos y hay una prueba que lo fija.
+     * no a quién se ha sembrado. Son dos censos distintos y hay una prueba que lo fija. Desde
+     * la v6 el suelo tampoco se mide sobre `total`, sino sobre `huecos.tradicion.hispanicos`
+     * —todos menos los de tradición `otra`—; lo que no cambia es que cuenta **altas** y no
+     * Citas, que es el punto de este comentario.
      */
     autores: tramo(new Set(citas.map((c) => c.autor)).size, META_AUTORES),
     colecciones: tramo(colecciones.length - huecos.colecciones.length, META_COLECCIONES_PUBLICADAS),
@@ -352,8 +349,14 @@ export function objetivoDeMeta(meta: Meta): ObjetivoDeMeta {
  */
 export function lineasDeMeta(objetivo: ObjetivoDeMeta): string[] {
   const { meta } = objetivo;
+  /*
+   * El nombre de la fila dice **qué cuenta**, porque en el mismo informe conviven tres censos
+   * de Autores que hoy coinciden y pueden divergir en silencio: los declarados en el Corpus,
+   * los que tienen margen medido —declarados más los que firman alguna Cita— y éstos, que son
+   * solo los que firman. Sin etiqueta, «Autores 35 de 35» se lee como los tres a la vez.
+   */
   const fila = (nombre: string, t: TramoDeMeta) =>
-    `${nombre.padEnd(14)} ${String(t.alcanzado).padStart(5)} de ${String(t.meta).padStart(5)}` +
+    `${nombre.padEnd(18)} ${String(t.alcanzado).padStart(5)} de ${String(t.meta).padStart(5)}` +
     (t.faltan === 0 ? '  ·  puesto' : `  ·  faltan ${t.faltan}`);
 
   return [
@@ -361,7 +364,7 @@ export function lineasDeMeta(objetivo: ObjetivoDeMeta): string[] {
     '──────────────',
     fila('Citas', meta.citas),
     fila('Temas', meta.temas),
-    fila('Autores', meta.autores),
+    fila('Autores con Cita', meta.autores),
     fila('Colecciones', meta.colecciones),
     ...(meta.concentracion === undefined
       ? []
@@ -383,6 +386,9 @@ export function lineasDeMeta(objetivo: ObjetivoDeMeta): string[] {
                  * nombres, como el resto de la línea: la regla de la 9.3 vale igual para esta
                  * cifra. Cuando ya excede no se dice, porque ahí lo que hace falta saber es
                  * cuánto falta para diluirlo, no un sitio que no hay.
+                 *
+                 * Es capacidad y no prioridad: dice cuánto cabe de quien ya está, nunca a quién
+                 * sembrar. Entre dos Autores admisibles prioriza la demanda (FR-49).
                  */
                 ` · caben ${citasQueCabenDe(meta.concentracion.citas, meta.citas.alcanzado)} ` +
                   `Citas más suyas`),

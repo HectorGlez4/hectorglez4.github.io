@@ -38,7 +38,7 @@ function autores(composicion: AutorParaHuecos['tradicion'][]): AutorParaHuecos[]
 /** Una composición que alcanza el suelo, para poder mirar los Temas sin que la tapen. */
 const CON_EL_SUELO_ALCANZADO = autores(['latinoamericana', 'latinoamericana', 'peninsular']);
 
-/** Una composición por debajo del suelo: 1 de 4 es el 25 %, y el suelo es el 40 %. */
+/** Por debajo del suelo: 1 latinoamericano de 4 hispánicos es el 25 %, y el suelo es 40 %. */
 const POR_DEBAJO_DEL_SUELO = autores([
   'latinoamericana',
   'peninsular',
@@ -86,7 +86,12 @@ describe('Historia 11.3 — la tradición por debajo del suelo tiene prioridad',
   });
 
   it('con el hueco más ancho, la cifra crece y el plural también', () => {
-    // 2 de 12 es el punto de partida medido de la Épica 11: el 16,7 % frente al 40 %.
+    /*
+     * El punto de partida medido de la Épica 11 eran 12 Autores, uno de ellos de tradición
+     * `otra`. Con el denominador de la v6 ése sale de la cuenta: 2 de 11 hispánicos, el
+     * 18,2 % frente al 40 %, y hacen falta 4 altas y no 5. El hueco se estrecha porque el
+     * clásico dejó de contar contra un compromiso que no era suyo — que es la historia entera.
+     */
     const objetivoReal = objetivoDeSesion(
       verHuecos(
         [],
@@ -99,9 +104,12 @@ describe('Historia 11.3 — la tradición por debajo del suelo tiene prioridad',
         ]),
       ),
     );
-    expect(objetivoReal.tradicion?.porcentaje).toBe(16.7);
-    expect(objetivoReal.tradicion?.autoresQueFaltan).toBe(5);
-    expect(objetivoReal.objetivo).toContain('faltan 5');
+    expect(objetivoReal.tradicion?.porcentaje).toBe(18.2);
+    expect(objetivoReal.tradicion?.autoresQueFaltan).toBe(4);
+    expect(objetivoReal.objetivo).toContain('faltan 4');
+    // 2 de 11 + 4 altas son 6 de 15: el 40 % justo. Con 3 se quedaría en el 35,7 %.
+    expect((2 + 4) / (11 + 4)).toBeGreaterThanOrEqual(SUELO_TRADICION_LATINOAMERICANA / 100);
+    expect((2 + 3) / (11 + 3)).toBeLessThan(SUELO_TRADICION_LATINOAMERICANA / 100);
   });
 
   it('un suelo que no se alcanza admitiendo Autores no promete ninguna cifra', () => {
@@ -289,6 +297,21 @@ describe('Historia 11.3 — cuando no hay hueco, y cuando no hay estado', () => 
     expect(objetivo.hueco).not.toBe('');
   });
 
+  it('con Autores pero sin ninguno hispánico, no escribe un porcentaje inventado', () => {
+    /*
+     * El estado que la v6 hace posible: un Corpus que solo tiene clásicos. El suelo mide el
+     * reparto entre hispánicos y ese reparto todavía no existe, así que la frase de la que
+     * sale el trabajo de la sesión lo dice en vez de publicar una cifra falsa. Y la cifra que
+     * sí se promete es 1: con cero hispánicos, el despeje daría 0 y 0 sería mentira.
+     */
+    const objetivo = objetivoDeSesion(verHuecos([], [], autores(['otra', 'otra'])));
+    expect(objetivo.clase).toBe('tradicion');
+    expect(objetivo.tradicion?.porcentaje).toBeUndefined();
+    expect(objetivo.tradicion?.autoresQueFaltan).toBe(1);
+    expect(objetivo.hueco).toContain('no hay reparto que medir');
+    expect(`${objetivo.objetivo} ${objetivo.hueco}`).not.toMatch(/undefined/);
+  });
+
   it('sin Autores no se inventa un déficit de tradición con el 0 % de dividir por cero', () => {
     // El 0 % que devuelve `verHuecos` sin Autores es el artefacto de no dividir por cero,
     // no una medición. Y sin Autores tampoco hay a quién atribuir una Cita.
@@ -308,12 +331,42 @@ describe('Historia 11.3 — los Autores sin tradición declarada no se imputan a
     expect(objetivoDeSesion(huecos).clase).not.toBe('tradicion');
   });
 
-  it('cuando el déficit es real, la cifra que falta se cuenta sobre el total', () => {
+  it('pero sí entran en el denominador del suelo: es la cuenta conservadora', () => {
+    /*
+     * La v6 los sacó del denominador un momento y hubo que devolverlos. Fuera, 1
+     * latinoamericano declarado y 3 sin clasificar informaban el **100 %** y «por encima del
+     * suelo»: un fallo de captura mejoraba el indicador, y el bucle dejaba de derivar el
+     * trabajo de admisión que sí hacía falta. El campo es opcional a propósito, así que un
+     * Autor sin declarar es un dato que falta, no un Autor que no cuente. Dentro, la cifra
+     * es el 25 % y hay déficit, que es lo que de verdad se ha medido.
+     */
     const huecos = verHuecos([], [], autores(['latinoamericana', undefined, undefined, undefined]));
     const objetivo = objetivoDeSesion(huecos);
+    expect(huecos.tradicion.sinDeclarar).toBe(3);
+    expect(huecos.tradicion.hispanicos).toBe(4);
+    expect(huecos.tradicion.porcentaje).toBe(25);
     expect(objetivo.clase).toBe('tradicion');
-    // El total son 4 Autores, aunque tres no declaren tradición: 1 de 4 es el 25 %.
+  });
+
+  it('los de tradición otra sí quedan fuera: es lo que la v6 cambió', () => {
+    // La base del suelo es el censo entero menos los clásicos, sin declarar incluidos.
+    const huecos = verHuecos([], [], autores(['latinoamericana', 'peninsular', 'otra', 'otra']));
+    expect(huecos.tradicion.hispanicos).toBe(2);
+    expect(huecos.tradicion.porcentaje).toBe(50);
+    expect(objetivoDeSesion(huecos).clase).not.toBe('tradicion');
+  });
+
+  it('cuando el déficit es real, la cifra que falta se cuenta sobre la base del suelo', () => {
+    const huecos = verHuecos(
+      [],
+      [],
+      autores(['latinoamericana', 'peninsular', 'peninsular', undefined]),
+    );
+    const objetivo = objetivoDeSesion(huecos);
+    expect(objetivo.clase).toBe('tradicion');
+    // La base son los 4: los sin declarar cuentan, los de tradición otra no. 1 de 4 es el 25 %.
     expect(objetivo.tradicion?.porcentaje).toBe(25);
+    // Y con un alta la base pasa a 5: 2 de 5 es el 40 % justo, el suelo comprometido.
     expect(objetivo.tradicion?.autoresQueFaltan).toBe(1);
   });
 });
@@ -332,10 +385,16 @@ describe('Historia 11.3 — la política dice qué hueco cerrar, nunca a quién 
     return [...`${objetivo.objetivo} ${objetivo.hueco}`.matchAll(/«([^»]+)»/gu)].map((m) => m[1]);
   }
 
+  /*
+   * Dos peninsulares y no uno: con el denominador de la v6 —hispánicos, sin Séneca— un solo
+   * peninsular dejaría el reparto en el 50 % y la rama de tradición no se recorrería. Las
+   * ramas que esta prueba enumera tienen que ser las que dice ser.
+   */
   const conNombres: AutorParaHuecos[] = [
     { slug: 'seneca', nombre: 'Séneca', tradicion: 'otra' },
     { slug: 'jose-marti', nombre: 'José Martí', tradicion: 'latinoamericana' },
     { slug: 'antonio-machado', nombre: 'Antonio Machado', tradicion: 'peninsular' },
+    { slug: 'baltasar-gracian', nombre: 'Baltasar Gracián', tradicion: 'peninsular' },
   ];
 
   const ramas: [string, Huecos][] = [

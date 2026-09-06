@@ -48,8 +48,35 @@ export const MAX_SALTOS_DESDE_LA_PORTADA = 3;
  * El suelo es explícito porque el sesgo hacia España es el resultado por defecto de
  * cualquier curación no vigilada: se llega a él sin decidirlo, empezando por los autores
  * que uno tiene más a mano.
+ *
+ * **QUÉ MIDE, que cambió el 2026-09-05 y el valor no.** Se mide sobre los Autores de
+ * **tradición hispánica** —`latinoamericana` + `peninsular`—, no sobre el Corpus entero.
+ * Antes el denominador eran todos los Autores, y con ese denominador cada clásico universal
+ * que entraba diluía un compromiso que no tenía nada que ver con él: cuarenta Autores de
+ * tradición `otra` habrían tirado el indicador del 51,4 % al 24 % **sin que un solo Autor
+ * hispánico cambiara de sitio**. El compromiso del brief es «no escorar hacia España», y eso
+ * es una afirmación sobre el reparto entre peninsulares y latinoamericanos, nunca sobre
+ * cuántos griegos hay.
+ *
+ * **El 40 no se ha tocado.** Bajarlo habría soltado el diferenciador que el brief llama la
+ * ventaja competitiva; cambiar el denominador lo deja intacto y además lo hace más fiel a lo
+ * que se prometió. Medido sobre hispánicos, el 2026-09-05 va al 56,2 %.
  */
 export const SUELO_TRADICION_LATINOAMERICANA = 40;
+
+/**
+ * Autores de tradición `otra` a los que aspira el Corpus — FR-49, v6.
+ *
+ * **Sin poner, y a propósito.** Desde la v6 los clásicos universales —la antigüedad, la
+ * tradición teológica— se cuentan **aparte** del suelo panhispánico, con meta propia; pero
+ * cuál es esa meta es un listón, y el listón lo pone Héctor. `undefined` significa
+ * exactamente eso: el informe dice cuántos hay y dice que falta el número, en vez de
+ * inventárselo. El día que se ponga, es un diff de una línea y visible.
+ *
+ * `otra` **no** es sinónimo de traducido ni de extranjero: Rizal y Pardo de Tavera son `otra`
+ * y escribieron en español. Es la tercera categoría del esquema desde la v1, no un cajón.
+ */
+export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
 
 /**
  * Tope de bytes de guion en línea que puede llevar una Página de Cita — AD-6, NFR-2.

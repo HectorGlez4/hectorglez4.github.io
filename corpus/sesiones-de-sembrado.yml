@@ -20,6 +20,14 @@
 # calla: consultar no es sembrar, y un registro que se llenara de consultas no mediría
 # cadencia ninguna. La bandera es la que dice «he corrido una sesión con este objetivo».
 #
+# EL 2026-09-05 CAMBIÓ UNA MEDIDA DE NOMBRE, y por eso hay dos claves donde había una.
+# `tradicionLatinoamericana` se medía sobre el Corpus entero y solo la llevan las entradas
+# anteriores a esa fecha; desde la Historia 19.2 la medida se llama
+# `tradicionLatinoamericanaSobreHispanicos` y su denominador son todos los Autores menos
+# los de tradición `otra`. Las dos series NO son comparables término a término: bajo una
+# sola clave el cambio habría puesto un salto de +15 puntos en una sesión que no admitió a
+# nadie, y de aquí se leen justamente las diferencias entre entradas consecutivas.
+#
 # Una entrada sin `motivo` es una sesión en la que se aceptó el objetivo propuesto; con
 # `motivo`, una en la que el editor conservó la última palabra. Una anulación sin motivo
 # se rechaza con código de error: sin motivo no hay registro, solo una desviación sin
