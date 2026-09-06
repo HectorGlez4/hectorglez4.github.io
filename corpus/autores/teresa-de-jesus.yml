@@ -3,3 +3,9 @@ añoNacimiento: 1515
 añoFallecimiento: 1582
 semblanza: "Religiosa y escritora abulense, reformadora del Carmelo. Escribió sobre la vida interior en una prosa deliberadamente llana."
 tradicion: "peninsular"
+# Cómo la titula Wikisource-es, que no es como la nombra el Corpus — Historia 19.5.
+# Medido el 2026-09-06 contra su API: «Autor:Santa Teresa de Jesús» (pageid 2294), y
+# «Autor:Teresa de Jesús» no existe. Sin este alias, el día que entre en una categoría de
+# época el cruce la contaría como pendiente estando sembrada, y esa época no podría
+# terminarse nunca. No se publica: el esquema de la colección lo descarta.
+tituloEnFuente: "Santa Teresa de Jesús"

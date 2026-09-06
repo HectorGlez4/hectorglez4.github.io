@@ -116,6 +116,123 @@ export function huecosDeColecciones(colecciones: ColeccionParaHuecos[]): HuecoDe
     .sort((a, b) => a.faltan - b.faltan || a.slug.localeCompare(b.slug, 'es'));
 }
 
+/**
+ * Una época ya cruzada contra el Corpus — Historia 19.5.
+ *
+ * `candidatos`, `sembrados` y `descartados` llegan **ya contados**, exactamente como
+ * `ColeccionParaHuecos` recibe sus `resueltas`: quién es candidato lo dice la Fuente y quién
+ * está sembrado o descartado lo cruza `tools/lib/epocas.ts`, que es su dueño único. Esta
+ * vista no vuelve a derivarlo — no tiene con qué, y reimplementarlo sería tener dos
+ * respuestas a «cuántos candidatos de esta época faltan».
+ *
+ * **Son cifras y un nombre de época, nunca nombres de Autor.** La regla de la 9.3 vale aquí
+ * igual que en el bloque de tradición: la lista de candidatos vive versionada en `corpus/`,
+ * que es donde el editor la mira, y esta vista informa la decisión sin tomarla.
+ */
+export interface EpocaParaHuecos {
+  /** El identificador de la época, tal y como la declara la Fuente. */
+  id: string;
+  /** El nombre de la época. Es una categoría de la Fuente, jamás el nombre de un Autor. */
+  nombre: string;
+  /** Cuántos candidatos trae la categoría. */
+  candidatos: number;
+  /** Cuántos de ellos ya están en el Corpus. */
+  sembrados: number;
+  /** Cuántos se descartaron **con su motivo escrito**. Saltárselos no cuenta. */
+  descartados: number;
+  /**
+   * La jornada en que se le preguntó a la Fuente, en `AAAA-MM-DD`.
+   *
+   * Es la única cadena de este bloque que no es un nombre de época, y está aquí porque sin
+   * ella «TERMINADA» se imprime igual si la lista se recuperó hoy que hace ocho meses — y en
+   * el segundo caso significa «terminada respecto de lo que la Fuente decía hace ocho meses»,
+   * que es otra cosa. La lista versionada existe para que el bucle siga con la red caída, y
+   * esa misma caché reintroduce por la puerta de atrás la lista que se queda vieja: enseñar
+   * su edad es lo que la mantiene a la vista.
+   *
+   * **Una fecha no es un nombre de Autor.** La regla de la 9.3 sigue entera: lo que este
+   * bloque no lleva, y no puede llevar, es a quién admitir.
+   *
+   * Ausente cuando no consta, que es distinto de vieja: es una época que no se ha recuperado
+   * nunca. Quién decide si ya caducó es `listaCaducada`, en `tools/lib/epocas.ts`, porque esa
+   * decisión necesita el día de hoy y esta derivación es determinista.
+   */
+  recuperada?: string;
+}
+
+/**
+ * Lo que le falta a una época para estar terminada — Historia 19.5.
+ *
+ * Mismos campos y misma lectura que `HuecoDeTema` y `HuecoDeColeccion` en lo que comparten:
+ * `faltan` es lo que queda por hacer y cero significa que no queda nada. Lo que esta añade
+ * es `terminada`, que **no es opinión: es una cuenta**. Una época está terminada cuando
+ * todos sus candidatos admisibles están sembrados o descartados con motivo, y por eso el
+ * denominador es la lista entera de la Fuente y no una selección.
+ *
+ * Una época **sin candidatos no está terminada**, y es deliberado: cero de cero da cero
+ * pendientes, pero una categoría que no devolvió a nadie es casi siempre una lista que no se
+ * ha recuperado todavía, no una época agotada. Declararla terminada mandaría al bucle a la
+ * siguiente sin haber sembrado nada.
+ */
+export interface HuecoDeEpoca {
+  id: string;
+  nombre: string;
+  candidatos: number;
+  sembrados: number;
+  descartados: number;
+  /** Ni sembrados ni descartados: lo que queda por mirar. */
+  faltan: number;
+  /** Todos sembrados o descartados, y al menos uno. */
+  terminada: boolean;
+  /** La jornada en que se recuperó la lista. Ver `EpocaParaHuecos.recuperada`. */
+  recuperada?: string;
+}
+
+/** Qué le falta a **una** época, sin filtrar: `faltan` vale cero si ya está agotada. */
+export function huecoDeEpoca(epoca: EpocaParaHuecos): HuecoDeEpoca {
+  /*
+   * `Math.max(0, …)` y no una resta a secas. Un candidato puede estar sembrado **y**
+   * descartado —se descartó una sesión y se sembró la siguiente desde otra obra suya—, y
+   * entonces las dos cifras suman más que la lista. Sin el suelo, `faltan` saldría negativo
+   * y cualquier cuenta que lo sume después se iría al revés.
+   */
+  const faltan = Math.max(0, epoca.candidatos - epoca.sembrados - epoca.descartados);
+  return {
+    id: epoca.id,
+    nombre: epoca.nombre,
+    candidatos: epoca.candidatos,
+    sembrados: epoca.sembrados,
+    descartados: epoca.descartados,
+    faltan,
+    terminada: epoca.candidatos > 0 && faltan === 0,
+    ...(epoca.recuperada === undefined || epoca.recuperada === ''
+      ? {}
+      : { recuperada: epoca.recuperada }),
+  };
+}
+
+/**
+ * Todas las épocas, terminadas incluidas, y en el orden en que se trabajan.
+ *
+ * **No se filtran las terminadas**, a diferencia de los Temas y las Colecciones: que una
+ * época esté agotada es justo lo que el bucle necesita leer para pasar a la siguiente, y
+ * desaparecer de la lista es indistinguible de no haberse recuperado nunca.
+ *
+ * Las que quedan van primero y de menos a más les falta, que es la regla de la casa desde la
+ * 9.3: la época a la que le faltan dos se cierra esta semana y la de ochenta es un proyecto.
+ * Ordenar al revés escondería el trabajo que está a punto de terminarse.
+ */
+export function huecosDeEpocas(epocas: EpocaParaHuecos[]): HuecoDeEpoca[] {
+  return epocas
+    .map(huecoDeEpoca)
+    .sort(
+      (a, b) =>
+        Number(a.terminada) - Number(b.terminada) ||
+        a.faltan - b.faltan ||
+        a.id.localeCompare(b.id, 'es'),
+    );
+}
+
 export interface EquilibrioDeTradicion {
   /**
    * Todos los Autores del Corpus, de la tradición que sean.
@@ -288,6 +405,18 @@ export interface Huecos {
    * Autores para llenar una decisión editorial que nadie ha tomado todavía.
    */
   colecciones: HuecoDeColeccion[];
+  /**
+   * La cobertura por época — Historia 19.5.
+   *
+   * Va junto a la de Tema y no dentro de ella porque son dos listones distintos: el de un
+   * Tema es un número de Citas y el de una época es **cobertura extensiva hasta agotarla**,
+   * candidato a candidato. Están en la misma vista porque quien mira qué le falta al Corpus
+   * antes de una sesión quiere las dos respuestas.
+   *
+   * Llega vacía cuando la lista de candidatos no se ha recuperado nunca, que no es lo mismo
+   * que «no queda nada»: la orden que la recupera es `npm run epocas`.
+   */
+  epocas: HuecoDeEpoca[];
   tradicion: EquilibrioDeTradicion;
   /**
    * Los Autores de tradición `otra`, en su propia cuenta — v6.
@@ -327,6 +456,11 @@ export function verHuecos(
   autores: AutorParaHuecos[],
   temasAnunciadosEnPortada: string[] = [],
   colecciones: ColeccionParaHuecos[] = [],
+  /*
+   * Las épocas ya cruzadas — Historia 19.5. Opcionales y vacías por omisión, como las
+   * Colecciones: un corpus sin lista recuperada tiene que poder consultar sus huecos igual.
+   */
+  epocas: EpocaParaHuecos[] = [],
 ): Huecos {
   const porTema = new Map<string, number>();
   for (const tema of temas) porTema.set(tema.slug, 0);
@@ -411,6 +545,7 @@ export function verHuecos(
   return {
     temas: huecosDeTema,
     colecciones: huecosDeColecciones(colecciones),
+    epocas: huecosDeEpocas(epocas),
     tradicion: {
       total,
       latinoamericana,

@@ -66,6 +66,25 @@ export const FICHERO_DE_INDEXACION = 'serie-de-indexacion.yml';
  */
 export const FICHERO_DE_PETICIONES = 'peticiones-de-rastreo.yml';
 
+/**
+ * La lista de candidatos por época — Historia 19.5. Su nombre tiene un solo dueño.
+ *
+ * Vecino de la serie de indexación y de la misma clase que ella: **reemplaza**, porque lo
+ * que guarda es lo que la Fuente dice hoy, no un acto que se acumule. Se regenera con
+ * `npm run epocas -- --registrar` y no se edita a mano; su cabecera lo dice.
+ */
+export const FICHERO_DE_CANDIDATOS = 'candidatos-por-epoca.yml';
+
+/**
+ * El registro de descartes de candidatos — Historia 19.5. Su nombre tiene un solo dueño.
+ *
+ * Es el contrario del anterior y son vecinos, así que la confusión sería silenciosa: aquél
+ * reemplaza porque lo escribe la Fuente, y **éste solo añade** porque lo escribe el editor.
+ * Un descarte es un acto con motivo y con fecha; regenerarlo sería borrar el criterio por el
+ * que un candidato dejó de proponerse, y la sesión siguiente volvería a proponerlo.
+ */
+export const FICHERO_DE_DESCARTES = 'descartes-de-candidatos.yml';
+
 export interface Rutas {
   raiz: string;
   citas: string;
@@ -155,6 +174,22 @@ export interface Rutas {
    */
   peticionesDeRastreo: string;
   /**
+   * La lista de candidatos por época — Historia 19.5.
+   *
+   * Metadato del Corpus como sus vecinos y con el mismo aislamiento (AD-24): ninguna base de
+   * `src/content.config.ts` apunta aquí y ningún módulo de `src/lib/` lo lee. La lista de
+   * quién **podría** entrar en el Corpus no es contenido del sitio, y si el build la leyera,
+   * `dist/` pasaría a ser función de lo que la Fuente categorizó ayer.
+   */
+  candidatosPorEpoca: string;
+  /**
+   * El registro de descartes de candidatos — Historia 19.5.
+   *
+   * Al lado del anterior y con el mismo aislamiento. Por qué un candidato no da Citas es una
+   * decisión editorial sobre lo que **no** entra, y nada de eso se publica.
+   */
+  descartesDeCandidatos: string;
+  /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
    * Metadato del Corpus y no colección, como sus dos vecinos: vive en la raíz de `corpus/`,
@@ -185,6 +220,8 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
     peticionesDeRastreo: join(raizCorpus, FICHERO_DE_PETICIONES),
+    candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
+    descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
@@ -216,13 +253,32 @@ export function slugDeFichero(ruta: string): string {
 export interface AutorEnCorpus extends AutorAdmisible {
   slug: string;
   ruta: string;
+  /**
+   * Cómo titula la **Fuente** a este Autor, cuando no coincide con su nombre en el Corpus.
+   *
+   * Es un alias explícito para el cruce por época de la Historia 19.5, y nada más: no se
+   * publica, no entra en el esquema de la colección de Astro —el build lo descarta, que es lo
+   * que se quiere— y no interviene en ninguna puerta de admisión.
+   *
+   * Existe porque el cruce compara el slug derivado del título de Wikisource contra el nombre
+   * del fichero, y los dos no tienen por qué coincidir: la Fuente titula «Autor:Santa Teresa
+   * de Jesús» y el Corpus tiene `teresa-de-jesus.yml`. Sin el alias, el día que esa categoría
+   * entre, Teresa se cuenta como pendiente estando sembrada y la época no puede terminarse
+   * nunca. Se escribe a mano y no se adivina: una heurística que quitara «Santa» o «Fray»
+   * fundiría a dos Autores distintos sin avisar. Ver `slugsSembrados` en `lib/epocas.ts`.
+   */
+  tituloEnFuente?: string;
 }
 
 export async function leerAutores(rutas: Rutas): Promise<AutorEnCorpus[]> {
   const ficheros = await ficherosDe(rutas.autores, ['.yml', '.yaml']);
   return Promise.all(
     ficheros.map(async (ruta) => ({
-      ...(parsearYaml(await readFile(ruta, 'utf8')) as AutorAdmisible),
+      // `tituloEnFuente` no está en el esquema de admisión —no es una puerta ni se publica—,
+      // así que se declara aquí para que el cruce por época lo vea con tipo y no por casualidad.
+      ...(parsearYaml(await readFile(ruta, 'utf8')) as AutorAdmisible & {
+        tituloEnFuente?: string;
+      }),
       slug: slugDeFichero(ruta),
       ruta,
     })),
@@ -1536,6 +1592,454 @@ export async function registrarPeticionesDeRastreo(
         `«${CLAVE_DE_PETICIONES}:» (había ${cuantasHabia}, se añaden ${peticiones.length} y ` +
         `quedarían ${quedaria.length}). El registro se escribe solo por añadido, así que la ` +
         'lista tiene que ser lo último del fichero. No se ha escrito nada.',
+    );
+  }
+
+  await appendFile(ruta, añadido, 'utf8');
+  return ruta;
+}
+
+/**
+ * La cabecera de la lista de candidatos por época — Historia 19.5.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que las otras tres: un corpus
+ * de pruebas, o un clon al que le falte el fichero, tiene que poder recuperar su primera
+ * época sin que nadie escriba la cabecera a mano.
+ *
+ * Y lo primero que dice es lo único que hay que saber antes de tocarlo: **se regenera, no se
+ * edita**.
+ */
+export const CABECERA_DE_CANDIDATOS = [
+  '# Candidatos por época — Historia 19.5, Épica 19',
+  '#',
+  '# SE REGENERA, NO SE EDITA. Esta lista NO es un catálogo del proyecto: es lo que las',
+  '# categorías de Wikisource-es contestan cuando se les pregunta. Un nombre añadido a mano',
+  '# aquí desaparece en la siguiente recuperación, y uno borrado a mano vuelve. Para que un',
+  '# candidato deje de proponerse se DESCARTA CON MOTIVO, que es el fichero de al lado.',
+  '#',
+  '#   npx tsx tools/epocas.ts                # recupera, cruza contra el Corpus e informa.',
+  '#   npx tsx tools/epocas.ts --registrar    # además versiona la lista recuperada.',
+  '#',
+  '# DE DÓNDE SALE. De `list=categorymembers` sobre las categorías con las que la propia',
+  '# Fuente clasifica a sus autores por época. La lista se deriva y no se escribe porque una',
+  '# lista escrita se queda vieja en cuanto la Fuente crece, y nadie la mantiene: derivándola,',
+  '# crecer la Fuente crece el plan.',
+  '#',
+  '# QUÉ ES `dominioPublico`. Que la Fuente clasifica a ese autor en DP-Autores-100, o sea',
+  '# muerto hace más de cien años. Es SEÑAL Y NO PERMISO: entra en el informe y jamás en una',
+  '# puerta automática. Admitir sigue siendo del editor, y la puerta de admisión no se mueve',
+  '# —dominio público, año de fallecimiento, Procedencia y cotejo siguen exactamente igual—.',
+  '# Quien no la lleva se mira A MANO; no se admite solo.',
+  '#',
+  '# LAS ÉPOCAS SE SOLAPAN A PROPÓSITO. La Antigüedad contiene a Grecia y a Roma, y un autor',
+  '# cuenta en cada época en la que la Fuente lo clasificó. Fundirlas en un conjunto único',
+  '# borraría lo que se quiere medir, que es la cobertura POR ÉPOCA hasta agotarla.',
+  '#',
+  '# UNA ÉPOCA QUE NO SE PUDO RECUPERAR CONSERVA SU ENTRADA ANTERIOR. La red se cae y el',
+  '# bucle no: se trabaja con lo versionado y la orden dice que no se actualizó. Por eso',
+  '# `recuperada` va en cada época y no en la raíz del fichero.',
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,',
+  '# junto a `portada.json` y `serie-de-indexacion.yml`, y ninguna base de',
+  '# `src/content.config.ts` apunta aquí. Además NINGÚN módulo de `src/lib/` lo lee (AD-24):',
+  '# quién PODRÍA entrar en el Corpus no es contenido del sitio.',
+  '',
+  'epocas:',
+  '',
+].join('\n');
+
+/**
+ * La cabecera del registro de descartes — Historia 19.5.
+ *
+ * Dice **por qué añade en vez de reemplazar**, que es lo único que hay que saber para no
+ * confundirlo con su vecino, que está justo al lado y hace lo contrario.
+ */
+export const CABECERA_DE_DESCARTES = [
+  '# Descartes de candidatos — Historia 19.5, Épica 19',
+  '#',
+  '# QUÉ ES. Los candidatos de una época que NO van a dar Citas, con el motivo escrito. Un',
+  '# candidato descartado deja de contar como pendiente y la época puede llegar a estar',
+  '# terminada; uno SALTADO no deja rastro y se vuelve a mirar cada sesión, hasta que alguien',
+  '# se cansa. Esa es la diferencia entera, y es la que impide dar una época por terminada por',
+  '# cansancio en vez de por la cuenta.',
+  '#',
+  '#   npx tsx tools/epocas.ts --descartar <slug> --motivo "por qué no da Citas"',
+  '#',
+  '# SIN MOTIVO NO HAY DESCARTE. La orden se niega con código de error: un descarte sin motivo',
+  '# es una desviación sin dueño, exactamente como una anulación de objetivo sin motivo en',
+  '# sesiones-de-sembrado.yml.',
+  '#',
+  '# EL DESCARTE ES POR AUTOR, NO POR ÉPOCA. Un autor cuya prosa no da sentencia suelta no la',
+  '# da en ninguna de las categorías en las que la Fuente lo haya clasificado. `epoca` queda',
+  '# escrita porque dice desde dónde se miró, no porque acote dónde vale.',
+  '#',
+  '# POR QUÉ SOLO AÑADE, a diferencia de candidatos-por-epoca.yml, que está justo al lado.',
+  '# Aquél lo escribe la FUENTE y se regenera entero; éste lo escribe el EDITOR y registra',
+  '# actos. Regenerarlo borraría el criterio por el que un candidato dejó de proponerse, y la',
+  '# sesión siguiente volvería a proponerlo — que es el bucle que este fichero existe para',
+  '# cortar. Es la misma distinción que separa a serie-de-indexacion.yml de',
+  '# peticiones-de-rastreo.yml.',
+  '#',
+  '# DESCARTAR NO ES CONDENAR. Si un día aparece obra suya en español con sentencia suelta, se',
+  '# siembra y ya está: el cruce cuenta como sembrado a quien está en el Corpus, mire lo que',
+  '# mire este registro.',
+  '#',
+  '# Metadato del Corpus y no colección, como sus vecinos. Ningún módulo de `src/lib/` lo lee.',
+  '',
+  'descartes:',
+  '',
+].join('\n');
+
+const CLAVE_DE_EPOCAS = 'epocas';
+const CLAVE_DE_DESCARTES = 'descartes';
+
+/** Una época tal y como se relee del fichero versionado. */
+export interface EpocaRegistrada {
+  id: string;
+  nombre?: string;
+  categoria?: string;
+  recuperada?: string;
+  candidatos?: {
+    nombre: string;
+    slug: string;
+    /**
+     * El identificador de página en la Fuente, que sobrevive a un renombrado del título.
+     *
+     * Opcional porque una lista versionada antes de la revisión de la 19.5 no lo lleva: ahí
+     * el cruce se queda con el slug, que es lo único que había.
+     */
+    idDePagina?: number;
+    pagina?: string;
+    dominioPublico?: boolean;
+  }[];
+}
+
+/** Un descarte tal y como se relee del registro. */
+export interface DescarteRegistrado {
+  fecha?: string;
+  epoca?: string;
+  candidato: string;
+  /** El identificador de página del candidato en la Fuente. Ver `Candidato.idDePagina`. */
+  idDePagina?: number;
+  nombre?: string;
+  motivo: string;
+}
+
+/**
+ * La raíz de un fichero de lista, comprobando que sea lo que dice ser.
+ *
+ * Nada de esto es paranoia, y es la misma comprobación que ya hacen sus tres vecinos: un
+ * fichero vacío, o al que le falte su clave de raíz, deja que lo que se escriba quede como
+ * una lista huérfana. El YAML sigue siendo válido, todo lector ve **cero** entradas, y la
+ * época que se creía cubierta desaparece sin que nada se queje.
+ */
+function listaDeLaRaiz(nombre: string, contenido: string, clave: string): unknown[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'De este fichero sale la cobertura por época, así que no se lee a medias.',
+    );
+  }
+
+  if (leido === null || leido === undefined || typeof leido !== 'object' || Array.isArray(leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${clave}:» en la raíz del fichero. Lo que se escriba en un ` +
+        'fichero vacío o sin esa clave queda como una lista huérfana que ningún lector cuenta. ' +
+        'Restaure la cabecera y vuelva a intentarlo.',
+    );
+  }
+
+  if (!(clave in leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${clave}:» en la raíz del fichero. Las entradas cuelgan de ` +
+        'ella; sin la clave, lo que se añada no lo cuenta nadie.',
+    );
+  }
+
+  const lista = (leido as Record<string, unknown>)[clave];
+  if (lista === null || lista === undefined) return [];
+
+  if (!Array.isArray(lista)) {
+    throw new Error(
+      `${nombre}: «${clave}» tiene que ser una lista, y es ${typeof lista}. Escríbala como ` +
+        `«${clave}:» y una entrada «  - …» por elemento.`,
+    );
+  }
+
+  return lista;
+}
+
+function analizarEpocas(nombre: string, contenido: string): EpocaRegistrada[] {
+  const lista = listaDeLaRaiz(nombre, contenido, CLAVE_DE_EPOCAS);
+
+  for (const [i, entrada] of lista.entries()) {
+    if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_EPOCAS}» no es una época ` +
+          `(${JSON.stringify(entrada)}). Cada entrada lleva al menos su id y sus candidatos.`,
+      );
+    }
+    if (typeof (entrada as Record<string, unknown>).id !== 'string') {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_EPOCAS}» no declara «id». Sin id no se ` +
+          'sabe a qué época sustituye una recuperación nueva.',
+      );
+    }
+  }
+
+  return lista as EpocaRegistrada[];
+}
+
+function analizarDescartes(nombre: string, contenido: string): DescarteRegistrado[] {
+  const lista = listaDeLaRaiz(nombre, contenido, CLAVE_DE_DESCARTES);
+
+  for (const [i, entrada] of lista.entries()) {
+    if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_DESCARTES}» no es un descarte ` +
+          `(${JSON.stringify(entrada)}). Cada entrada lleva su candidato y su motivo.`,
+      );
+    }
+    for (const clave of ['candidato', 'motivo']) {
+      const valor = (entrada as Record<string, unknown>)[clave];
+      if (typeof valor !== 'string' || valor.trim() === '') {
+        throw new Error(
+          `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_DESCARTES}» no declara «${clave}». ` +
+            'Un descarte sin motivo escrito es indistinguible de un candidato saltado, que es ' +
+            'justo lo que este registro existe para separar.',
+        );
+      }
+    }
+  }
+
+  return lista as DescarteRegistrado[];
+}
+
+/**
+ * Las épocas ya versionadas. Un fichero que no existe se lee como lista vacía.
+ *
+ * Es lo que se usa **cuando la Fuente no responde**: se trabaja con lo versionado y la orden
+ * dice que no se actualizó. Una lista que solo existiera en memoria no dejaría rastro de qué
+ * se decidió con qué.
+ */
+export async function leerCandidatosPorEpoca(rutas: Rutas): Promise<EpocaRegistrada[]> {
+  if (!existsSync(rutas.candidatosPorEpoca)) return [];
+  return analizarEpocas(
+    `corpus/${FICHERO_DE_CANDIDATOS}`,
+    await readFile(rutas.candidatosPorEpoca, 'utf8'),
+  );
+}
+
+/** Los descartes ya escritos. Un registro que no existe se lee como registro vacío. */
+export async function leerDescartesDeCandidatos(rutas: Rutas): Promise<DescarteRegistrado[]> {
+  if (!existsSync(rutas.descartesDeCandidatos)) return [];
+  return analizarDescartes(
+    `corpus/${FICHERO_DE_DESCARTES}`,
+    await readFile(rutas.descartesDeCandidatos, 'utf8'),
+  );
+}
+
+/** Una época, serializada como elemento de la lista `epocas`. */
+function bloqueDeEpoca(entrada: Record<string, unknown>): string {
+  // `- ` ocupa el sitio de los dos primeros espacios de la primera clave, como en los otros
+  // tres registros: la entrada es un elemento de la lista y sus claves cuelgan de él.
+  return `  -${aYaml(entrada, '    ').slice(3)}`;
+}
+
+/**
+ * Versiona las épocas recuperadas, **reemplazando** la entrada anterior de cada una.
+ *
+ * Reemplaza y no añade porque esto guarda **lo que la Fuente dice hoy**, no un acto: dos
+ * recuperaciones de la misma época no son dos listas, son la misma pregunta hecha dos veces.
+ * Es la misma clase que `registrarLecturaDeIndexacion`, y por lo mismo se conserva **el
+ * texto que el fichero tenga** por encima de «epocas:» en vez de la constante de arriba,
+ * para que una nota añadida allí no se pierda.
+ *
+ * **Las épocas que no se recuperaron conservan su entrada tal cual.** Es lo que sostiene la
+ * promesa de la historia: la red se cae, y el bucle sigue trabajando con lo versionado.
+ *
+ * Se compone el fichero entero en memoria, se analiza, y solo si contiene exactamente las
+ * épocas que debe se toca el disco, con escritura a temporal y `rename` —atómico en el mismo
+ * sistema de ficheros—, que es el riesgo nuevo de reescribir en vez de añadir.
+ */
+export async function registrarCandidatosPorEpoca(
+  rutas: Rutas,
+  recuperadas: readonly EpocaRegistrada[],
+  opciones: { admitirVaciado?: boolean } = {},
+): Promise<string> {
+  const ruta = rutas.candidatosPorEpoca;
+  const nombre = `corpus/${FICHERO_DE_CANDIDATOS}`;
+
+  /*
+   * Antes de tocar el disco, y no después: sin esto, una ejecución en la que la Fuente no
+   * contestó ninguna época crearía el fichero con su cabecera y cero épocas — un fichero que
+   * nadie pidió y que un `git status` presenta como trabajo de la jornada.
+   */
+  if (recuperadas.length === 0) return ruta;
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      // `wx` por lo mismo que en los otros tres registros: si el fichero apareció
+      // entretanto, se falla en vez de truncar lo que otra ejecución acabara de escribir.
+      await writeFile(ruta, CABECERA_DE_CANDIDATOS, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const habia = analizarEpocas(nombre, anterior);
+
+  /*
+   * La cabecera es lo que hay por encima de la línea «epocas:», ella incluida. Se busca al
+   * principio de línea y sin sangrar: una «  epocas:» dentro de una entrada no es la clave de
+   * la raíz, y cortar por ahí partiría el fichero por la mitad.
+   */
+  const marca = anterior.match(/^epocas:[^\S\n]*$/m);
+  if (marca?.index === undefined) {
+    throw new Error(
+      `${nombre}: no se encuentra la línea «${CLAVE_DE_EPOCAS}:» de la que cuelgan las ` +
+        'entradas. La lista se reescribe entera en cada recuperación y esa línea es la ' +
+        'frontera entre la cabecera —que se conserva— y las entradas —que se vuelven a ' +
+        'volcar—. No se ha escrito nada.',
+    );
+  }
+  const cabecera = anterior.slice(0, marca.index + marca[0].length) + '\n';
+
+  /*
+   * **Una entrada de n candidatos no se sustituye por una de cero.** Red independiente, y
+   * puesta aquí a propósito: las dos comprobaciones de más abajo cotejan lo recuperado contra
+   * lo que va a disco —`0 === 0` pasa— y ninguna mira contra lo que *había*. El fallo medido:
+   * una categoría renombrada contesta 200 sin `error` y sin `query`, el lector la tomaba por
+   * vacía, y la lista buena de una época quedaba sustituida por una vacía sellada con la
+   * fecha de hoy, con código de salida 0 y sin un aviso.
+   *
+   * Se puede vaciar a propósito —una categoría que de verdad se queda sin nadie— pero
+   * entonces se dice con la bandera. Un vaciado deliberado es un acto; uno silencioso es una
+   * época que se declara terminada sin estarlo.
+   */
+  if (opciones.admitirVaciado !== true) {
+    for (const recuperada of recuperadas) {
+      const antes = habia.find((e) => e.id === recuperada.id)?.candidatos?.length ?? 0;
+      const ahora = recuperada.candidatos?.length ?? 0;
+      if (antes > 0 && ahora === 0) {
+        throw new Error(
+          `${nombre}: la época ${recuperada.id} tenía ${antes} candidatos versionados y la ` +
+            'recuperación trae 0. Una lista que mengua sola se lee después como una época más ' +
+            'cerca de estar terminada de lo que está. No se ha escrito nada.',
+        );
+      }
+    }
+  }
+
+  const sustituidas = new Set(recuperadas.map((epoca) => epoca.id));
+  const conservadas = habia.filter((epoca) => !sustituidas.has(epoca.id));
+  const quedan = [...conservadas, ...recuperadas].sort((a, b) => a.id.localeCompare(b.id, 'es'));
+
+  const contenido =
+    cabecera + quedan.map((e) => bloqueDeEpoca(e as unknown as Record<string, unknown>)).join('');
+
+  const escritas = analizarEpocas(nombre, contenido);
+  if (escritas.length !== quedan.length) {
+    throw new Error(
+      `${nombre}: la lista recompuesta no tiene las épocas que debería (había ${habia.length}, ` +
+        `se recuperan ${recuperadas.length} y quedarían ${escritas.length}). No se ha escrito ` +
+        'nada.',
+    );
+  }
+
+  /*
+   * Y se comprueba **sobre lo que va a disco** que ninguna época recuperada perdió candidatos
+   * por el camino. Entre la lista compuesta y el fichero está `aYaml`, que omite lo que no
+   * tiene valor: una época cuya lista quedara vacía diría en silencio que la categoría no
+   * tiene a nadie, que es indistinguible de una época agotada.
+   */
+  for (const recuperada of recuperadas) {
+    const enDisco = escritas.find((e) => e.id === recuperada.id);
+    const cuantos = enDisco?.candidatos?.length ?? 0;
+    const esperados = recuperada.candidatos?.length ?? 0;
+    if (cuantos !== esperados) {
+      throw new Error(
+        `${nombre}: la época ${recuperada.id} se recuperó con ${esperados} candidatos y al ` +
+          `fichero llegan ${cuantos}. Una lista que mengua sola se lee después como una época ` +
+          'más cerca de estar terminada de lo que está. No se ha escrito nada.',
+      );
+    }
+  }
+
+  // El temporal lleva el PID, por lo mismo que el de la serie de indexación: con un nombre
+  // fijo, dos ejecuciones a la vez se pisan el fichero intermedio.
+  const temporal = `${ruta}.${process.pid}.nueva`;
+  await writeFile(temporal, contenido, 'utf8');
+  await rename(temporal, ruta);
+  return ruta;
+}
+
+/**
+ * Añade un descarte al registro. **Solo añade**: nunca reescribe lo que ya está.
+ *
+ * Sigue punto por punto a `registrarPeticionesDeRastreo`, que es el precedente de un registro
+ * de actos en este proyecto. Lo que un descarte protege es el criterio: sin él escrito, el
+ * candidato que no dio Citas vuelve a proponerse la sesión siguiente.
+ */
+export async function registrarDescarteDeCandidato(
+  rutas: Rutas,
+  descarte: DescarteRegistrado,
+): Promise<string> {
+  const ruta = rutas.descartesDeCandidatos;
+  const nombre = `corpus/${FICHERO_DE_DESCARTES}`;
+
+  if (descarte.motivo.trim() === '') {
+    throw new Error(
+      `${nombre}: un descarte sin motivo no se registra. Sin motivo escrito es indistinguible ` +
+        'de un candidato saltado, y saltarse a uno es como una época se da por terminada sin ' +
+        'estarlo. No se ha escrito nada.',
+    );
+  }
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      await writeFile(ruta, CABECERA_DE_DESCARTES, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const cuantosHabia = analizarDescartes(nombre, anterior).length;
+
+  const bloque = `  -${aYaml(
+    {
+      fecha: descarte.fecha,
+      epoca: descarte.epoca,
+      candidato: descarte.candidato,
+      /*
+       * La clave estable, cuando se sabe. El slug se deriva del título del wiki y el título
+       * se mueve: sin esto, un renombrado en la Fuente descasa el descarte y el candidato
+       * vuelve a proponerse, que es el bucle que este registro existe para cortar.
+       */
+      idDePagina: descarte.idDePagina,
+      nombre: descarte.nombre,
+      motivo: descarte.motivo,
+    },
+    '    ',
+  ).slice(3)}`;
+
+  const salto = anterior === '' || anterior.endsWith('\n') ? '' : '\n';
+  const añadido = `${salto}${bloque}`;
+
+  const quedaria = analizarDescartes(nombre, `${anterior}${añadido}`);
+  if (quedaria.length !== cuantosHabia + 1) {
+    throw new Error(
+      `${nombre}: añadir el descarte al final no lo deja colgando de «${CLAVE_DE_DESCARTES}:» ` +
+        `(había ${cuantosHabia} y quedarían ${quedaria.length}). El registro se escribe solo ` +
+        'por añadido, así que la lista tiene que ser lo último del fichero. No se ha escrito ' +
+        'nada.',
     );
   }
 

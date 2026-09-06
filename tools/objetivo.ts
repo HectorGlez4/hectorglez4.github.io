@@ -29,7 +29,12 @@
  * disco (AD-5). Aquí solo se lee el corpus, se llama a la derivación y se imprime.
  */
 
-import { verHuecos, type AutorParaHuecos, type CitaParaHuecos } from '../src/lib/huecos.ts';
+import {
+  verHuecos,
+  type AutorParaHuecos,
+  type CitaParaHuecos,
+  type EpocaParaHuecos,
+} from '../src/lib/huecos.ts';
 import { porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { lineasDeObjetivo, objetivoDeSesion } from '../src/lib/objetivo.ts';
 import { temasPublicados, type Cita, type Tema } from '../src/lib/publicado.ts';
@@ -37,12 +42,15 @@ import { auditar, type CitaParaAuditar } from '../src/lib/salud.ts';
 import {
   fechaLocal,
   leerAutores,
+  leerCandidatosPorEpoca,
   leerCitas,
+  leerDescartesDeCandidatos,
   leerSesionesDeSembrado,
   leerTemas,
   registrarSesionDeSembrado,
   rutasDelCorpus,
 } from './lib/corpus.ts';
+import { epocasParaHuecos } from './lib/epocas.ts';
 import { motivosDeArgumentosNoReconocidos, opcion, raizDeCorpusDe, terminar } from './lib/cli.ts';
 
 const argumentos = process.argv.slice(2);
@@ -91,7 +99,35 @@ const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 
 const citas = (await leerCitas(rutas.citas)) as unknown as CitaParaHuecos[];
 const temas = await leerTemas(rutas);
-const autores = (await leerAutores(rutas)) as unknown as AutorParaHuecos[];
+/*
+ * Una sola lectura de los Autores. `AutorParaHuecos` es la vista recortada del equilibrio de
+ * tradición; el cruce por época necesita además `tituloEnFuente`, que esa vista no lleva.
+ */
+const autoresDelCorpus = await leerAutores(rutas);
+const autores = autoresDelCorpus as unknown as AutorParaHuecos[];
+
+/*
+ * La cobertura por época — Historia 19.5. Se lee **aquí también**, y no es un adorno: desde
+ * que `objetivoDeSesion` deriva una rama de época, esta orden y `npm run huecos` tienen que
+ * partir del mismo `Huecos` o darían dos respuestas a «qué toca ahora» — una diciendo «agotar
+ * la Antigüedad» y la otra «no hay hueco que cerrar». Es la divergencia de dueño único que
+ * AD-11 existe para impedir, y quien la evita es `epocasParaHuecos`, que las dos comparten.
+ *
+ * Degradando, como las Colecciones en `tools/huecos.ts`: un fichero de candidatos ilegible no
+ * puede llevarse por delante el objetivo de la sesión. Sin épocas, la política vuelve a la
+ * rama que había antes de la 19.5, que sigue siendo correcta.
+ */
+let epocas: EpocaParaHuecos[] = [];
+let falloDeEpocas: string | undefined;
+try {
+  epocas = epocasParaHuecos(
+    await leerCandidatosPorEpoca(rutas),
+    autoresDelCorpus,
+    await leerDescartesDeCandidatos(rutas),
+  );
+} catch (fallo) {
+  falloDeEpocas = fallo instanceof Error ? fallo.message : String(fallo);
+}
 
 /*
  * Los Temas anunciados salen del dueño único del conjunto publicable (AD-11), igual que
@@ -103,7 +139,7 @@ const anunciados = temasPublicados(
   citas as unknown as Cita[],
 ).map((t) => t.slug);
 
-const huecos = verHuecos(citas, temas, autores, anunciados);
+const huecos = verHuecos(citas, temas, autores, anunciados, [], epocas);
 const objetivo = objetivoDeSesion(huecos);
 
 const quiereJson = argumentos.includes('--json');
@@ -127,11 +163,25 @@ if (!anula && opcion(argumentos, '--elegido') !== undefined) {
   });
 }
 
+/*
+ * El fichero de candidatos ilegible se dice, y no se calla: sin él la política vuelve a la
+ * rama anterior a la 19.5 y puede contestar «no hay hueco que cerrar» teniendo ochenta y dos
+ * candidatos pendientes en un fichero que no se ha podido leer.
+ */
+const avisoDeEpocas =
+  falloDeEpocas === undefined
+    ? []
+    : [
+        '',
+        `Aviso: no se ha podido leer la cobertura por época — ${falloDeEpocas}`,
+        'El objetivo de arriba se ha derivado sin ella.',
+      ];
+
 if (!registra) {
   process.stdout.write(
     quiereJson
-      ? `${JSON.stringify({ objetivo }, null, 2)}\n`
-      : `${lineasDeObjetivo(objetivo).join('\n')}\n`,
+      ? `${JSON.stringify({ objetivo, ...(falloDeEpocas === undefined ? {} : { falloDeEpocas }) }, null, 2)}\n`
+      : `${[...lineasDeObjetivo(objetivo), ...avisoDeEpocas].join('\n')}\n`,
   );
   process.exit(0);
 }
@@ -269,6 +319,7 @@ const mensaje = quiereJson
     )
   : [
       ...lineasDeObjetivo(objetivo),
+      ...avisoDeEpocas,
       '',
       anula ? 'Anulado por el editor' : 'Sesión registrada',
       anula ? '─────────────────────' : '─────────────────',

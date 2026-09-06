@@ -137,7 +137,7 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Cinco excepciones, las cinco escritas y con nombre. Una excepción escrita se revisa; un
+ * Seis excepciones, las seis escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
@@ -152,6 +152,12 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     `tools/lib/indexacion.ts`, que no pide nada, igual que `tools/lib/ingresos.ts` respecto
  *     de `tools/ingreso.ts`. El build no la invoca: la corre una persona, y ningún paso de CI
  *     la ejecuta ni commitea lo que escribe.
+ *   · `tools/epocas.ts` es la cáscara de la cobertura por época —Historia 19.5—: le pide a
+ *     Wikisource-es los miembros de sus categorías de autores para derivar de ahí la lista de
+ *     candidatos, en vez de escribirla a mano en el repositorio. Lo que decide qué se pide,
+ *     cómo se lee lo que contesta y cómo se cruza contra el Corpus vive en
+ *     `tools/lib/epocas.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
+ *     ejecuta: la corre una persona antes de una sesión de sembrado.
  *   · `astro.config.mjs` declara las dos familias de UX-DR3 por la Fonts API de Astro, y
  *     `fontProviders.google()` **sí descarga** en el build: los `.woff2` acaban en
  *     `.astro/fonts/` y `unifont` está en el árbol de dependencias por eso.
@@ -182,6 +188,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     [
       'tools/indexacion.ts',
       'la cáscara de la lectura del estado de indexación: la única que importa googleapis, y el build no la invoca — la corre una persona y ningún paso de CI la ejecuta (AD-24)',
+    ],
+    [
+      'tools/epocas.ts',
+      'la cáscara de la cobertura por época: deriva la lista de candidatos de las categorías de la Fuente en vez de escribirla a mano, y el build no la invoca — la corre una persona antes de sembrar (AD-22)',
     ],
     [
       'tools/avisar.ts',
@@ -296,11 +306,12 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas cinco', () => {
-    // Añadir una sexta tiene que ser un cambio deliberado de esta prueba.
+  it('no hay más excepciones que esas seis', () => {
+    // Añadir una séptima tiene que ser un cambio deliberado de esta prueba.
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
       'tools/avisar.ts',
+      'tools/epocas.ts',
       'tools/indexacion.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',
@@ -357,6 +368,9 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
      *   build no lo llama** y ningún paso de CI lo ejecuta ni commitea lo que escribe: si lo
      *   hiciera, el `push` dispararía el flujo de publicación y con él el aviso, anunciando
      *   una jornada en la que no cambió un byte.
+     * - `tools/epocas.ts` le pide a Wikisource-es los miembros de sus categorías de época,
+     *   que es de donde sale la lista de candidatos del bucle. **El build no lo llama**: la
+     *   lista vive versionada en `corpus/` y `npm run huecos` la lee de ahí, sin red.
      * - `tools/avisar.ts` avisa a IndexNow de lo publicado. **El build no lo llama**: corre
      *   en el flujo de trabajo con `needs: desplegar`, que es lo que mantiene en pie la
      *   garantía que esta prueba defiende —`npm run build` sigue construyendo sin internet—
@@ -369,6 +383,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(conRed.sort()).toEqual([
       'astro.config.mjs',
       'tools/avisar.ts',
+      'tools/epocas.ts',
       'tools/indexacion.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',

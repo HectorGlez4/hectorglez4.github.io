@@ -24,6 +24,8 @@
     "pieza": "tsx tools/pieza.ts",
     "objetivo": "tsx tools/objetivo.ts",
     "sesion:registrar": "tsx tools/objetivo.ts --registrar",
+    "epocas": "tsx tools/epocas.ts",
+    "epocas:registrar": "tsx tools/epocas.ts --registrar",
     "indexacion": "tsx tools/indexacion.ts",
     "indexacion:registrar": "tsx tools/indexacion.ts --registrar",
     "rastreo": "tsx tools/rastreo.ts",

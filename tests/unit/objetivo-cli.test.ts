@@ -173,11 +173,15 @@ describe('Historia 11.3 — la orden propone los dos ejes y declara el hueco', (
      * entrecomillado convertía en fallo el estado que la épica persigue.
      *
      * Lo que sí se conserva es el control positivo, que era la razón de aquella exigencia:
-     * o hay algo entrecomillado —y entonces son todos Temas—, o la orden declara que no hay
-     * hueco. Lo que no puede es callar las dos cosas.
+     * o hay algo entrecomillado —y entonces son todos Temas—, o la orden declara de qué otro
+     * hueco sale. Lo que no puede es callar las dos cosas.
+     *
+     * Desde la 19.5 ese «otro hueco» puede ser una **época**, y su nombre va sin guillemets a
+     * propósito: es una categoría de la Fuente, no un Tema del Corpus, y esta misma prueba es
+     * la que lo obliga.
      */
     if (entrecomillados.length === 0) {
-      expect(salida).toContain('No hay hueco que cerrar');
+      expect(salida).toMatch(/No hay hueco que cerrar|Agotar la época|tradición latinoamericana/u);
     }
     for (const termino of entrecomillados) expect(temas, termino).toContain(termino);
   });
@@ -609,7 +613,9 @@ describe('Historia 11.3 — la vista de huecos cierra con el objetivo', () => {
     const informe = JSON.parse(stdout);
     // Sin fijar cuál: la clase que salga depende del estado del Corpus, y la Historia
     // 11.4 lo va a mover. Lo que no puede faltar es el objetivo con su hueco declarado.
-    expect(['tradicion', 'tema', 'ninguno', 'sin-estado']).toContain(informe.objetivo.clase);
+    expect(['tradicion', 'tema', 'epoca', 'ninguno', 'sin-estado']).toContain(
+      informe.objetivo.clase,
+    );
     expect(informe.objetivo.hueco.length).toBeGreaterThan(0);
     expect(informe.tradicion.suelo).toBe(SUELO_TRADICION_LATINOAMERICANA);
   });

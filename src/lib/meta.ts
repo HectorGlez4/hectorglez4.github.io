@@ -63,7 +63,15 @@ export type ClaseDeMeta =
   | 'temas'
   /** Todo lo demás está y falta volumen: seguir sembrando. */
   | 'volumen'
-  /** Los cuatro tramos puestos y el reparto sano. */
+  /**
+   * Los cuatro tramos puestos, y aún queda cobertura por época — Historia 19.5.
+   *
+   * Va el último de los tramos con trabajo porque la cobertura extensiva no tiene fondo: es
+   * el listón que sigue habiendo cuando los cuatro números están puestos, y es la razón por
+   * la que este módulo dejó de cerrar con «Meta alcanzada» el día que se midió por época.
+   */
+  | 'epoca'
+  /** Los cuatro tramos puestos, el reparto sano y ninguna época sin agotar. */
   | 'alcanzada';
 
 /** Un tramo de la meta: dónde está, adónde va y cuánto le falta. */
@@ -109,6 +117,21 @@ export interface Concentracion {
   porEncimaDelTecho: number;
 }
 
+/**
+ * La cobertura por época, resumida para la meta — Historia 19.5.
+ *
+ * Se deriva de `huecos.epocas` y no vuelve a contar nada: quien decide cuántos candidatos le
+ * faltan a una época es `huecoDeEpoca`, que tiene un solo dueño. Aquí solo se suma.
+ */
+export interface CoberturaPorEpoca {
+  /** Épocas versionadas, terminadas incluidas. Cero significa que no se ha recuperado nada. */
+  epocas: number;
+  /** Las que ya están agotadas: todos sus candidatos sembrados o descartados con motivo. */
+  terminadas: number;
+  /** Candidatos que quedan por sembrar o por descartar, sumando todas las épocas. */
+  faltan: number;
+}
+
 export interface Meta {
   citas: TramoDeMeta;
   temas: TramoDeMeta;
@@ -116,7 +139,21 @@ export interface Meta {
   colecciones: TramoDeMeta;
   /** Ausente en un Corpus sin Citas: no hay reparto del que hablar. */
   concentracion?: Concentracion;
-  /** Los cuatro tramos cerrados **y** el reparto por debajo del techo. */
+  /**
+   * La cobertura por época — Historia 19.5.
+   *
+   * Sin ella, `objetivoDeMeta` cerraba con «Meta de Corpus alcanzada» mientras el bloque de
+   * cobertura del mismo informe decía «82 pendientes»: dos respuestas contradictorias a la
+   * misma pregunta, que es la divergencia que AD-11 existe para impedir.
+   */
+  epocas: CoberturaPorEpoca;
+  /**
+   * Los cuatro tramos cerrados, el reparto por debajo del techo **y** ninguna época sin
+   * agotar.
+   *
+   * La cobertura entró en la cuenta y no al lado: «alcanzada» tiene que querer decir lo
+   * mismo que la frase con la que el informe cierra, o vuelve a haber dos verdades.
+   */
   alcanzada: boolean;
 }
 
@@ -225,6 +262,16 @@ export function verMeta(
     autores: tramo(new Set(citas.map((c) => c.autor)).size, META_AUTORES),
     colecciones: tramo(colecciones.length - huecos.colecciones.length, META_COLECCIONES_PUBLICADAS),
     concentracion: concentracionDe(citas),
+    /*
+     * La cobertura por época sale de `huecos.epocas`, ya cruzada: sumar aquí es sumar, no
+     * volver a decidir quién está sembrado. Una época sin recuperar **no cuenta como
+     * terminada** —lo dice `huecoDeEpoca`— y por eso no infla `terminadas`.
+     */
+    epocas: {
+      epocas: huecos.epocas.length,
+      terminadas: huecos.epocas.filter((e) => e.terminada).length,
+      faltan: huecos.epocas.reduce((suma, e) => suma + e.faltan, 0),
+    },
   };
 
   return {
@@ -234,7 +281,8 @@ export function verMeta(
       estado.temas.faltan === 0 &&
       estado.autores.faltan === 0 &&
       estado.colecciones.faltan === 0 &&
-      estado.concentracion?.excede !== true,
+      estado.concentracion?.excede !== true &&
+      estado.epocas.faltan === 0,
   };
 }
 
@@ -262,7 +310,7 @@ function citas(cuantas: number): string {
  * concentración, donde el nombre que aparece es el del que ya está.
  */
 export function objetivoDeMeta(meta: Meta): ObjetivoDeMeta {
-  const { colecciones, concentracion, autores, temas, citas: volumen } = meta;
+  const { colecciones, concentracion, autores, temas, citas: volumen, epocas } = meta;
 
   if (colecciones.faltan > 0) {
     return {
@@ -329,13 +377,40 @@ export function objetivoDeMeta(meta: Meta): ObjetivoDeMeta {
     };
   }
 
+  /*
+   * Y antes de declarar nada alcanzado, la cobertura por época — Historia 19.5.
+   *
+   * Los cuatro tramos son números y se llegan; la cobertura es extensiva y se **agota**. Sin
+   * esta rama, el informe cerraba con «Meta de Corpus alcanzada» cuatro líneas después de
+   * decir «82 pendientes» en su propio bloque de cobertura, que es la contradicción que
+   * dejaba al bucle sin trabajo del que tirar teniendo ochenta y dos candidatos delante.
+   *
+   * Sin nombres, como todo este módulo: se dice cuántos faltan y en qué época, nunca quiénes.
+   */
+  if (epocas.faltan > 0) {
+    return {
+      clase: 'epoca',
+      objetivo:
+        `Agotar las épocas: quedan ${epocas.faltan} candidatos de la Fuente por sembrar o por ` +
+        'descartar con motivo escrito. Admitir sigue siendo del editor.',
+      hueco:
+        `Los cuatro tramos están puestos, y de las ${epocas.epocas} épocas versionadas hay ` +
+        `${epocas.terminadas} agotadas. Una época está terminada cuando todos sus candidatos ` +
+        'están sembrados o descartados con motivo: es una cuenta, no una opinión.',
+      meta,
+    };
+  }
+
   return {
     clase: 'alcanzada',
     objetivo: 'Meta de Corpus alcanzada. El listón siguiente lo pone Héctor.',
     hueco:
       `${citas(volumen.alcanzado)}, ${temas.alcanzado} Temas, ${autores.alcanzado} Autores y ` +
-      `${colecciones.alcanzado} Colecciones publicadas, y ningún Autor por encima del ` +
-      `${porcentajeEnEspañol(TECHO_CONCENTRACION_POR_AUTOR)} %.`,
+      `${colecciones.alcanzado} Colecciones publicadas, ningún Autor por encima del ` +
+      `${porcentajeEnEspañol(TECHO_CONCENTRACION_POR_AUTOR)} %` +
+      (epocas.epocas === 0
+        ? ', y ninguna época versionada de la que derivar cobertura: npm run epocas:registrar'
+        : `, y las ${epocas.epocas} épocas versionadas agotadas.`),
     meta,
   };
 }

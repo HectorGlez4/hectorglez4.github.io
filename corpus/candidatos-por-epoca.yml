@@ -1,0 +1,1000 @@
+# Candidatos por época — Historia 19.5, Épica 19
+#
+# SE REGENERA, NO SE EDITA. Esta lista NO es un catálogo del proyecto: es lo que las
+# categorías de Wikisource-es contestan cuando se les pregunta. Un nombre añadido a mano
+# aquí desaparece en la siguiente recuperación, y uno borrado a mano vuelve. Para que un
+# candidato deje de proponerse se DESCARTA CON MOTIVO, que es el fichero de al lado.
+#
+#   npx tsx tools/epocas.ts                # recupera, cruza contra el Corpus e informa.
+#   npx tsx tools/epocas.ts --registrar    # además versiona la lista recuperada.
+#
+# DE DÓNDE SALE. De `list=categorymembers` sobre las categorías con las que la propia
+# Fuente clasifica a sus autores por época. La lista se deriva y no se escribe porque una
+# lista escrita se queda vieja en cuanto la Fuente crece, y nadie la mantiene: derivándola,
+# crecer la Fuente crece el plan.
+#
+# QUÉ ES `dominioPublico`. Que la Fuente clasifica a ese autor en DP-Autores-100, o sea
+# muerto hace más de cien años. Es SEÑAL Y NO PERMISO: entra en el informe y jamás en una
+# puerta automática. Admitir sigue siendo del editor, y la puerta de admisión no se mueve
+# —dominio público, año de fallecimiento, Procedencia y cotejo siguen exactamente igual—.
+# Quien no la lleva se mira A MANO; no se admite solo.
+#
+# LAS ÉPOCAS SE SOLAPAN A PROPÓSITO. La Antigüedad contiene a Grecia y a Roma, y un autor
+# cuenta en cada época en la que la Fuente lo clasificó. Fundirlas en un conjunto único
+# borraría lo que se quiere medir, que es la cobertura POR ÉPOCA hasta agotarla.
+#
+# UNA ÉPOCA QUE NO SE PUDO RECUPERAR CONSERVA SU ENTRADA ANTERIOR. La red se cae y el
+# bucle no: se trabaja con lo versionado y la orden dice que no se actualizó. Por eso
+# `recuperada` va en cada época y no en la raíz del fichero.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,
+# junto a `portada.json` y `serie-de-indexacion.yml`, y ninguna base de
+# `src/content.config.ts` apunta aquí. Además NINGÚN módulo de `src/lib/` lo lee (AD-24):
+# quién PODRÍA entrar en el Corpus no es contenido del sitio.
+
+epocas:
+  - id: "antigua-grecia"
+    nombre: "Antigua Grecia"
+    categoria: "Categoría:Autores de la Antigua Grecia"
+    recuperada: "2026-09-06"
+    candidatos:
+      - nombre: "Apolodoro de Atenas"
+        slug: "apolodoro-de-atenas"
+        idDePagina: 223163
+        pagina: "https://es.wikisource.org/wiki/Autor:Apolodoro_de_Atenas"
+        dominioPublico: true
+      - nombre: "Apolonio de Rodas"
+        slug: "apolonio-de-rodas"
+        idDePagina: 282284
+        pagina: "https://es.wikisource.org/wiki/Autor:Apolonio_de_Rodas"
+        dominioPublico: true
+      - nombre: "Aristófanes"
+        slug: "aristofanes"
+        idDePagina: 15484
+        pagina: "https://es.wikisource.org/wiki/Autor:Arist%C3%B3fanes"
+        dominioPublico: true
+      - nombre: "Aristóteles"
+        slug: "aristoteles"
+        idDePagina: 9768
+        pagina: "https://es.wikisource.org/wiki/Autor:Arist%C3%B3teles"
+        dominioPublico: true
+      - nombre: "Arquímides"
+        slug: "arquimides"
+        idDePagina: 224345
+        pagina: "https://es.wikisource.org/wiki/Autor:Arqu%C3%ADmides"
+        dominioPublico: true
+      - nombre: "Bión"
+        slug: "bion"
+        idDePagina: 280885
+        pagina: "https://es.wikisource.org/wiki/Autor:Bi%C3%B3n"
+        dominioPublico: true
+      - nombre: "Cebes"
+        slug: "cebes"
+        idDePagina: 282239
+        pagina: "https://es.wikisource.org/wiki/Autor:Cebes"
+        dominioPublico: true
+      - nombre: "Claudio Ptolomeo"
+        slug: "claudio-ptolomeo"
+        idDePagina: 196421
+        pagina: "https://es.wikisource.org/wiki/Autor:Claudio_Ptolomeo"
+        dominioPublico: true
+      - nombre: "Demóstenes"
+        slug: "demostenes"
+        idDePagina: 25152
+        pagina: "https://es.wikisource.org/wiki/Autor:Dem%C3%B3stenes"
+        dominioPublico: true
+      - nombre: "Diodoro Sículo"
+        slug: "diodoro-siculo"
+        idDePagina: 223098
+        pagina: "https://es.wikisource.org/wiki/Autor:Diodoro_S%C3%ADculo"
+        dominioPublico: true
+      - nombre: "Esopo"
+        slug: "esopo"
+        idDePagina: 4671
+        pagina: "https://es.wikisource.org/wiki/Autor:Esopo"
+        dominioPublico: true
+      - nombre: "Esquilo"
+        slug: "esquilo"
+        idDePagina: 53554
+        pagina: "https://es.wikisource.org/wiki/Autor:Esquilo"
+        dominioPublico: true
+      - nombre: "Estrabón"
+        slug: "estrabon"
+        idDePagina: 139483
+        pagina: "https://es.wikisource.org/wiki/Autor:Estrab%C3%B3n"
+        dominioPublico: true
+      - nombre: "Euclides"
+        slug: "euclides"
+        idDePagina: 62008
+        pagina: "https://es.wikisource.org/wiki/Autor:Euclides"
+        dominioPublico: true
+      - nombre: "Eurípides"
+        slug: "euripides"
+        idDePagina: 26012
+        pagina: "https://es.wikisource.org/wiki/Autor:Eur%C3%ADpides"
+        dominioPublico: true
+      - nombre: "Evémero"
+        slug: "evemero"
+        idDePagina: 223018
+        pagina: "https://es.wikisource.org/wiki/Autor:Ev%C3%A9mero"
+        dominioPublico: true
+      - nombre: "Filemón"
+        slug: "filemon"
+        idDePagina: 134688
+        pagina: "https://es.wikisource.org/wiki/Autor:Filem%C3%B3n"
+        dominioPublico: true
+      - nombre: "Gorgias"
+        slug: "gorgias"
+        idDePagina: 126552
+        pagina: "https://es.wikisource.org/wiki/Autor:Gorgias"
+        dominioPublico: true
+      - nombre: "Heródoto"
+        slug: "herodoto"
+        idDePagina: 19925
+        pagina: "https://es.wikisource.org/wiki/Autor:Her%C3%B3doto"
+        dominioPublico: true
+      - nombre: "Hesíodo"
+        slug: "hesiodo"
+        idDePagina: 3266
+        pagina: "https://es.wikisource.org/wiki/Autor:Hes%C3%ADodo"
+        dominioPublico: true
+      - nombre: "Homero"
+        slug: "homero"
+        idDePagina: 2448
+        pagina: "https://es.wikisource.org/wiki/Autor:Homero"
+        dominioPublico: true
+      - nombre: "Jenofonte"
+        slug: "jenofonte"
+        idDePagina: 43278
+        pagina: "https://es.wikisource.org/wiki/Autor:Jenofonte"
+        dominioPublico: true
+      - nombre: "Longo"
+        slug: "longo"
+        idDePagina: 74248
+        pagina: "https://es.wikisource.org/wiki/Autor:Longo"
+        dominioPublico: true
+      - nombre: "Luciano de Samosata"
+        slug: "luciano-de-samosata"
+        idDePagina: 43292
+        pagina: "https://es.wikisource.org/wiki/Autor:Luciano_de_Samosata"
+        dominioPublico: true
+      - nombre: "Mosco"
+        slug: "mosco"
+        idDePagina: 280887
+        pagina: "https://es.wikisource.org/wiki/Autor:Mosco"
+        dominioPublico: true
+      - nombre: "Pitágoras"
+        slug: "pitagoras"
+        idDePagina: 119088
+        pagina: "https://es.wikisource.org/wiki/Autor:Pit%C3%A1goras"
+        dominioPublico: true
+      - nombre: "Platón"
+        slug: "platon"
+        idDePagina: 4239
+        pagina: "https://es.wikisource.org/wiki/Autor:Plat%C3%B3n"
+        dominioPublico: true
+      - nombre: "Plutarco"
+        slug: "plutarco"
+        idDePagina: 21319
+        pagina: "https://es.wikisource.org/wiki/Autor:Plutarco"
+        dominioPublico: true
+      - nombre: "Polibio"
+        slug: "polibio"
+        idDePagina: 354967
+        pagina: "https://es.wikisource.org/wiki/Autor:Polibio"
+        dominioPublico: true
+      - nombre: "Safo"
+        slug: "safo"
+        idDePagina: 129720
+        pagina: "https://es.wikisource.org/wiki/Autor:Safo"
+        dominioPublico: true
+      - nombre: "Sófocles"
+        slug: "sofocles"
+        idDePagina: 3381
+        pagina: "https://es.wikisource.org/wiki/Autor:S%C3%B3focles"
+        dominioPublico: true
+      - nombre: "Teócrito"
+        slug: "teocrito"
+        idDePagina: 125406
+        pagina: "https://es.wikisource.org/wiki/Autor:Te%C3%B3crito"
+        dominioPublico: true
+      - nombre: "Teofrasto"
+        slug: "teofrasto"
+        idDePagina: 282229
+        pagina: "https://es.wikisource.org/wiki/Autor:Teofrasto"
+        dominioPublico: true
+      - nombre: "Teognis"
+        slug: "teognis"
+        idDePagina: 274221
+        pagina: "https://es.wikisource.org/wiki/Autor:Teognis"
+        dominioPublico: true
+      - nombre: "Tucídides"
+        slug: "tucidides"
+        idDePagina: 134112
+        pagina: "https://es.wikisource.org/wiki/Autor:Tuc%C3%ADdides"
+        dominioPublico: true
+  - id: "antigua-roma"
+    nombre: "Antigua Roma"
+    categoria: "Categoría:Autores de la Antigua Roma"
+    recuperada: "2026-09-06"
+    candidatos:
+      - nombre: "Agustín de Hipona"
+        slug: "agustin-de-hipona"
+        idDePagina: 31979
+        pagina: "https://es.wikisource.org/wiki/Autor:Agust%C3%ADn_de_Hipona"
+        dominioPublico: true
+      - nombre: "Amiano Marcelino"
+        slug: "amiano-marcelino"
+        idDePagina: 240531
+        pagina: "https://es.wikisource.org/wiki/Autor:Amiano_Marcelino"
+        dominioPublico: true
+      - nombre: "Apiano"
+        slug: "apiano"
+        idDePagina: 76708
+        pagina: "https://es.wikisource.org/wiki/Autor:Apiano"
+        dominioPublico: true
+      - nombre: "Apuleyo"
+        slug: "apuleyo"
+        idDePagina: 62556
+        pagina: "https://es.wikisource.org/wiki/Autor:Apuleyo"
+        dominioPublico: true
+      - nombre: "Arnobio"
+        slug: "arnobio"
+        idDePagina: 223137
+        pagina: "https://es.wikisource.org/wiki/Autor:Arnobio"
+        dominioPublico: true
+      - nombre: "Aulo Hircio"
+        slug: "aulo-hircio"
+        idDePagina: 78243
+        pagina: "https://es.wikisource.org/wiki/Autor:Aulo_Hircio"
+        dominioPublico: true
+      - nombre: "Aurelio Víctor"
+        slug: "aurelio-victor"
+        idDePagina: 233523
+        pagina: "https://es.wikisource.org/wiki/Autor:Aurelio_V%C3%ADctor"
+        dominioPublico: true
+      - nombre: "Catón el Viejo"
+        slug: "caton-el-viejo"
+        idDePagina: 221171
+        pagina: "https://es.wikisource.org/wiki/Autor:Cat%C3%B3n_el_Viejo"
+        dominioPublico: true
+      - nombre: "Catulo"
+        slug: "catulo"
+        idDePagina: 62181
+        pagina: "https://es.wikisource.org/wiki/Autor:Catulo"
+        dominioPublico: true
+      - nombre: "Cicerón"
+        slug: "ciceron"
+        idDePagina: 9342
+        pagina: "https://es.wikisource.org/wiki/Autor:Cicer%C3%B3n"
+        dominioPublico: true
+      - nombre: "Cipriano de Cartago"
+        slug: "cipriano-de-cartago"
+        idDePagina: 223225
+        pagina: "https://es.wikisource.org/wiki/Autor:Cipriano_de_Cartago"
+        dominioPublico: true
+      - nombre: "Claudio Ptolomeo"
+        slug: "claudio-ptolomeo"
+        idDePagina: 196421
+        pagina: "https://es.wikisource.org/wiki/Autor:Claudio_Ptolomeo"
+        dominioPublico: true
+      - nombre: "Clemente de Alejandría"
+        slug: "clemente-de-alejandria"
+        idDePagina: 222975
+        pagina: "https://es.wikisource.org/wiki/Autor:Clemente_de_Alejandr%C3%ADa"
+        dominioPublico: true
+      - nombre: "Columela"
+        slug: "columela"
+        idDePagina: 87900
+        pagina: "https://es.wikisource.org/wiki/Autor:Columela"
+        dominioPublico: true
+      - nombre: "Diodoro Sículo"
+        slug: "diodoro-siculo"
+        idDePagina: 223098
+        pagina: "https://es.wikisource.org/wiki/Autor:Diodoro_S%C3%ADculo"
+        dominioPublico: true
+      - nombre: "Diofanto de Alejandría"
+        slug: "diofanto-de-alejandria"
+        idDePagina: 224346
+        pagina: "https://es.wikisource.org/wiki/Autor:Diofanto_de_Alejandr%C3%ADa"
+        dominioPublico: true
+      - nombre: "Diógenes Laercio"
+        slug: "diogenes-laercio"
+        idDePagina: 124750
+        pagina: "https://es.wikisource.org/wiki/Autor:Di%C3%B3genes_Laercio"
+        dominioPublico: false
+      - nombre: "Dion Casio"
+        slug: "dion-casio"
+        idDePagina: 236686
+        pagina: "https://es.wikisource.org/wiki/Autor:Dion_Casio"
+        dominioPublico: true
+      - nombre: "Epicteto"
+        slug: "epicteto"
+        idDePagina: 282160
+        pagina: "https://es.wikisource.org/wiki/Autor:Epicteto"
+        dominioPublico: true
+      - nombre: "Epifanio de Salamina"
+        slug: "epifanio-de-salamina"
+        idDePagina: 223101
+        pagina: "https://es.wikisource.org/wiki/Autor:Epifanio_de_Salamina"
+        dominioPublico: true
+      - nombre: "Estacio"
+        slug: "estacio"
+        idDePagina: 282277
+        pagina: "https://es.wikisource.org/wiki/Autor:Estacio"
+        dominioPublico: true
+      - nombre: "Eusebio de Cesarea"
+        slug: "eusebio-de-cesarea"
+        idDePagina: 222974
+        pagina: "https://es.wikisource.org/wiki/Autor:Eusebio_de_Cesarea"
+        dominioPublico: true
+      - nombre: "Flavio Josefo"
+        slug: "flavio-josefo"
+        idDePagina: 36084
+        pagina: "https://es.wikisource.org/wiki/Autor:Flavio_Josefo"
+        dominioPublico: true
+      - nombre: "Floro"
+        slug: "floro"
+        idDePagina: 236722
+        pagina: "https://es.wikisource.org/wiki/Autor:Floro"
+        dominioPublico: true
+      - nombre: "Gayo Julio Fedro"
+        slug: "gayo-julio-fedro"
+        idDePagina: 126164
+        pagina: "https://es.wikisource.org/wiki/Autor:Gayo_Julio_Fedro"
+        dominioPublico: true
+      - nombre: "Herodiano"
+        slug: "herodiano"
+        idDePagina: 127213
+        pagina: "https://es.wikisource.org/wiki/Autor:Herodiano"
+        dominioPublico: true
+      - nombre: "Horacio"
+        slug: "horacio"
+        idDePagina: 43286
+        pagina: "https://es.wikisource.org/wiki/Autor:Horacio"
+        dominioPublico: true
+      - nombre: "Jámblico"
+        slug: "jamblico"
+        idDePagina: 222977
+        pagina: "https://es.wikisource.org/wiki/Autor:J%C3%A1mblico"
+        dominioPublico: true
+      - nombre: "Julio César"
+        slug: "julio-cesar"
+        idDePagina: 10696
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_C%C3%A9sar"
+        dominioPublico: true
+      - nombre: "Justino Mártir"
+        slug: "justino-martir"
+        idDePagina: 223019
+        pagina: "https://es.wikisource.org/wiki/Autor:Justino_M%C3%A1rtir"
+        dominioPublico: true
+      - nombre: "Juvenal"
+        slug: "juvenal"
+        idDePagina: 249522
+        pagina: "https://es.wikisource.org/wiki/Autor:Juvenal"
+        dominioPublico: true
+      - nombre: "Lactancio"
+        slug: "lactancio"
+        idDePagina: 223016
+        pagina: "https://es.wikisource.org/wiki/Autor:Lactancio"
+        dominioPublico: true
+      - nombre: "Lucano"
+        slug: "lucano"
+        idDePagina: 236740
+        pagina: "https://es.wikisource.org/wiki/Autor:Lucano"
+        dominioPublico: true
+      - nombre: "Marco Aurelio"
+        slug: "marco-aurelio"
+        idDePagina: 282165
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Aurelio"
+        dominioPublico: true
+      - nombre: "Marco Fabio Quintiliano"
+        slug: "marco-fabio-quintiliano"
+        idDePagina: 18605
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Fabio_Quintiliano"
+        dominioPublico: true
+      - nombre: "Marco Juniano Justino"
+        slug: "marco-juniano-justino"
+        idDePagina: 262593
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Juniano_Justino"
+        dominioPublico: true
+      - nombre: "Marco Terencio Varrón"
+        slug: "marco-terencio-varron"
+        idDePagina: 222981
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Terencio_Varr%C3%B3n"
+        dominioPublico: true
+      - nombre: "Marco Valerio Marcial"
+        slug: "marco-valerio-marcial"
+        idDePagina: 19125
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Valerio_Marcial"
+        dominioPublico: true
+      - nombre: "Minucio Félix"
+        slug: "minucio-felix"
+        idDePagina: 223015
+        pagina: "https://es.wikisource.org/wiki/Autor:Minucio_F%C3%A9lix"
+        dominioPublico: true
+      - nombre: "Ovidio"
+        slug: "ovidio"
+        idDePagina: 19847
+        pagina: "https://es.wikisource.org/wiki/Autor:Ovidio"
+        dominioPublico: true
+      - nombre: "Petronio"
+        slug: "petronio"
+        idDePagina: 19792
+        pagina: "https://es.wikisource.org/wiki/Autor:Petronio"
+        dominioPublico: true
+      - nombre: "Plauto"
+        slug: "plauto"
+        idDePagina: 252958
+        pagina: "https://es.wikisource.org/wiki/Autor:Plauto"
+        dominioPublico: true
+      - nombre: "Plinio el Joven"
+        slug: "plinio-el-joven"
+        idDePagina: 122672
+        pagina: "https://es.wikisource.org/wiki/Autor:Plinio_el_Joven"
+        dominioPublico: true
+      - nombre: "Plinio el Viejo"
+        slug: "plinio-el-viejo"
+        idDePagina: 122666
+        pagina: "https://es.wikisource.org/wiki/Autor:Plinio_el_Viejo"
+        dominioPublico: true
+      - nombre: "Plotino"
+        slug: "plotino"
+        idDePagina: 241836
+        pagina: "https://es.wikisource.org/wiki/Autor:Plotino"
+        dominioPublico: true
+      - nombre: "Plutarco"
+        slug: "plutarco"
+        idDePagina: 21319
+        pagina: "https://es.wikisource.org/wiki/Autor:Plutarco"
+        dominioPublico: true
+      - nombre: "Pomponio Mela"
+        slug: "pomponio-mela"
+        idDePagina: 127207
+        pagina: "https://es.wikisource.org/wiki/Autor:Pomponio_Mela"
+        dominioPublico: true
+      - nombre: "Porfirio"
+        slug: "porfirio"
+        idDePagina: 222976
+        pagina: "https://es.wikisource.org/wiki/Autor:Porfirio"
+        dominioPublico: true
+      - nombre: "Propercio"
+        slug: "propercio"
+        idDePagina: 134622
+        pagina: "https://es.wikisource.org/wiki/Autor:Propercio"
+        dominioPublico: true
+      - nombre: "Publio Terencio Africano"
+        slug: "publio-terencio-africano"
+        idDePagina: 9347
+        pagina: "https://es.wikisource.org/wiki/Autor:Publio_Terencio_Africano"
+        dominioPublico: true
+      - nombre: "Quinto Curcio Rufo"
+        slug: "quinto-curcio-rufo"
+        idDePagina: 355284
+        pagina: "https://es.wikisource.org/wiki/Autor:Quinto_Curcio_Rufo"
+        dominioPublico: true
+      - nombre: "Salustio"
+        slug: "salustio"
+        idDePagina: 74887
+        pagina: "https://es.wikisource.org/wiki/Autor:Salustio"
+        dominioPublico: true
+      - nombre: "Séneca"
+        slug: "seneca"
+        idDePagina: 8123
+        pagina: "https://es.wikisource.org/wiki/Autor:S%C3%A9neca"
+        dominioPublico: true
+      - nombre: "Servio"
+        slug: "servio"
+        idDePagina: 239762
+        pagina: "https://es.wikisource.org/wiki/Autor:Servio"
+        dominioPublico: true
+      - nombre: "Silio Itálico"
+        slug: "silio-italico"
+        idDePagina: 268256
+        pagina: "https://es.wikisource.org/wiki/Autor:Silio_It%C3%A1lico"
+        dominioPublico: true
+      - nombre: "Suetonio"
+        slug: "suetonio"
+        idDePagina: 44295
+        pagina: "https://es.wikisource.org/wiki/Autor:Suetonio"
+        dominioPublico: true
+      - nombre: "Tácito"
+        slug: "tacito"
+        idDePagina: 51432
+        pagina: "https://es.wikisource.org/wiki/Autor:T%C3%A1cito"
+        dominioPublico: true
+      - nombre: "Tertuliano"
+        slug: "tertuliano"
+        idDePagina: 223123
+        pagina: "https://es.wikisource.org/wiki/Autor:Tertuliano"
+        dominioPublico: true
+      - nombre: "Tibulo"
+        slug: "tibulo"
+        idDePagina: 293263
+        pagina: "https://es.wikisource.org/wiki/Autor:Tibulo"
+        dominioPublico: true
+      - nombre: "Tito Livio"
+        slug: "tito-livio"
+        idDePagina: 127212
+        pagina: "https://es.wikisource.org/wiki/Autor:Tito_Livio"
+        dominioPublico: true
+      - nombre: "Tito Lucrecio Caro"
+        slug: "tito-lucrecio-caro"
+        idDePagina: 34947
+        pagina: "https://es.wikisource.org/wiki/Autor:Tito_Lucrecio_Caro"
+        dominioPublico: true
+      - nombre: "Vegecio"
+        slug: "vegecio"
+        idDePagina: 196327
+        pagina: "https://es.wikisource.org/wiki/Autor:Vegecio"
+        dominioPublico: true
+      - nombre: "Virgilio"
+        slug: "virgilio"
+        idDePagina: 19953
+        pagina: "https://es.wikisource.org/wiki/Autor:Virgilio"
+        dominioPublico: true
+  - id: "antiguedad"
+    nombre: "Antigüedad"
+    categoria: "Categoría:Autores de la Antigüedad"
+    recuperada: "2026-09-06"
+    candidatos:
+      - nombre: "Agustín de Hipona"
+        slug: "agustin-de-hipona"
+        idDePagina: 31979
+        pagina: "https://es.wikisource.org/wiki/Autor:Agust%C3%ADn_de_Hipona"
+        dominioPublico: true
+      - nombre: "Amiano Marcelino"
+        slug: "amiano-marcelino"
+        idDePagina: 240531
+        pagina: "https://es.wikisource.org/wiki/Autor:Amiano_Marcelino"
+        dominioPublico: true
+      - nombre: "Apiano"
+        slug: "apiano"
+        idDePagina: 76708
+        pagina: "https://es.wikisource.org/wiki/Autor:Apiano"
+        dominioPublico: true
+      - nombre: "Apolodoro de Atenas"
+        slug: "apolodoro-de-atenas"
+        idDePagina: 223163
+        pagina: "https://es.wikisource.org/wiki/Autor:Apolodoro_de_Atenas"
+        dominioPublico: true
+      - nombre: "Apolonio de Rodas"
+        slug: "apolonio-de-rodas"
+        idDePagina: 282284
+        pagina: "https://es.wikisource.org/wiki/Autor:Apolonio_de_Rodas"
+        dominioPublico: true
+      - nombre: "Apuleyo"
+        slug: "apuleyo"
+        idDePagina: 62556
+        pagina: "https://es.wikisource.org/wiki/Autor:Apuleyo"
+        dominioPublico: true
+      - nombre: "Arnobio"
+        slug: "arnobio"
+        idDePagina: 223137
+        pagina: "https://es.wikisource.org/wiki/Autor:Arnobio"
+        dominioPublico: true
+      - nombre: "Aulo Hircio"
+        slug: "aulo-hircio"
+        idDePagina: 78243
+        pagina: "https://es.wikisource.org/wiki/Autor:Aulo_Hircio"
+        dominioPublico: true
+      - nombre: "Aurelio Víctor"
+        slug: "aurelio-victor"
+        idDePagina: 233523
+        pagina: "https://es.wikisource.org/wiki/Autor:Aurelio_V%C3%ADctor"
+        dominioPublico: true
+      - nombre: "Bión"
+        slug: "bion"
+        idDePagina: 280885
+        pagina: "https://es.wikisource.org/wiki/Autor:Bi%C3%B3n"
+        dominioPublico: true
+      - nombre: "Boecio"
+        slug: "boecio"
+        idDePagina: 271464
+        pagina: "https://es.wikisource.org/wiki/Autor:Boecio"
+        dominioPublico: true
+      - nombre: "Buda Gautama"
+        slug: "buda-gautama"
+        idDePagina: 18886
+        pagina: "https://es.wikisource.org/wiki/Autor:Buda_Gautama"
+        dominioPublico: true
+      - nombre: "Cebes"
+        slug: "cebes"
+        idDePagina: 282239
+        pagina: "https://es.wikisource.org/wiki/Autor:Cebes"
+        dominioPublico: true
+      - nombre: "Cipriano de Cartago"
+        slug: "cipriano-de-cartago"
+        idDePagina: 223225
+        pagina: "https://es.wikisource.org/wiki/Autor:Cipriano_de_Cartago"
+        dominioPublico: true
+      - nombre: "Claudio Ptolomeo"
+        slug: "claudio-ptolomeo"
+        idDePagina: 196421
+        pagina: "https://es.wikisource.org/wiki/Autor:Claudio_Ptolomeo"
+        dominioPublico: true
+      - nombre: "Clemente de Alejandría"
+        slug: "clemente-de-alejandria"
+        idDePagina: 222975
+        pagina: "https://es.wikisource.org/wiki/Autor:Clemente_de_Alejandr%C3%ADa"
+        dominioPublico: true
+      - nombre: "Columela"
+        slug: "columela"
+        idDePagina: 87900
+        pagina: "https://es.wikisource.org/wiki/Autor:Columela"
+        dominioPublico: true
+      - nombre: "Diofanto de Alejandría"
+        slug: "diofanto-de-alejandria"
+        idDePagina: 224346
+        pagina: "https://es.wikisource.org/wiki/Autor:Diofanto_de_Alejandr%C3%ADa"
+        dominioPublico: true
+      - nombre: "Dion Casio"
+        slug: "dion-casio"
+        idDePagina: 236686
+        pagina: "https://es.wikisource.org/wiki/Autor:Dion_Casio"
+        dominioPublico: true
+      - nombre: "Epicteto"
+        slug: "epicteto"
+        idDePagina: 282160
+        pagina: "https://es.wikisource.org/wiki/Autor:Epicteto"
+        dominioPublico: true
+      - nombre: "Epifanio de Salamina"
+        slug: "epifanio-de-salamina"
+        idDePagina: 223101
+        pagina: "https://es.wikisource.org/wiki/Autor:Epifanio_de_Salamina"
+        dominioPublico: true
+      - nombre: "Esopo"
+        slug: "esopo"
+        idDePagina: 4671
+        pagina: "https://es.wikisource.org/wiki/Autor:Esopo"
+        dominioPublico: true
+      - nombre: "Estacio"
+        slug: "estacio"
+        idDePagina: 282277
+        pagina: "https://es.wikisource.org/wiki/Autor:Estacio"
+        dominioPublico: true
+      - nombre: "Estrabón"
+        slug: "estrabon"
+        idDePagina: 139483
+        pagina: "https://es.wikisource.org/wiki/Autor:Estrab%C3%B3n"
+        dominioPublico: true
+      - nombre: "Euclides"
+        slug: "euclides"
+        idDePagina: 62008
+        pagina: "https://es.wikisource.org/wiki/Autor:Euclides"
+        dominioPublico: true
+      - nombre: "Eurípides"
+        slug: "euripides"
+        idDePagina: 26012
+        pagina: "https://es.wikisource.org/wiki/Autor:Eur%C3%ADpides"
+        dominioPublico: true
+      - nombre: "Eusebio de Cesarea"
+        slug: "eusebio-de-cesarea"
+        idDePagina: 222974
+        pagina: "https://es.wikisource.org/wiki/Autor:Eusebio_de_Cesarea"
+        dominioPublico: true
+      - nombre: "Evémero"
+        slug: "evemero"
+        idDePagina: 223018
+        pagina: "https://es.wikisource.org/wiki/Autor:Ev%C3%A9mero"
+        dominioPublico: true
+      - nombre: "Flavio Josefo"
+        slug: "flavio-josefo"
+        idDePagina: 36084
+        pagina: "https://es.wikisource.org/wiki/Autor:Flavio_Josefo"
+        dominioPublico: true
+      - nombre: "Floro"
+        slug: "floro"
+        idDePagina: 236722
+        pagina: "https://es.wikisource.org/wiki/Autor:Floro"
+        dominioPublico: true
+      - nombre: "Gayo Julio Fedro"
+        slug: "gayo-julio-fedro"
+        idDePagina: 126164
+        pagina: "https://es.wikisource.org/wiki/Autor:Gayo_Julio_Fedro"
+        dominioPublico: true
+      - nombre: "Gorgias"
+        slug: "gorgias"
+        idDePagina: 126552
+        pagina: "https://es.wikisource.org/wiki/Autor:Gorgias"
+        dominioPublico: true
+      - nombre: "Herodiano"
+        slug: "herodiano"
+        idDePagina: 127213
+        pagina: "https://es.wikisource.org/wiki/Autor:Herodiano"
+        dominioPublico: true
+      - nombre: "Hesíodo"
+        slug: "hesiodo"
+        idDePagina: 3266
+        pagina: "https://es.wikisource.org/wiki/Autor:Hes%C3%ADodo"
+        dominioPublico: true
+      - nombre: "Homero"
+        slug: "homero"
+        idDePagina: 2448
+        pagina: "https://es.wikisource.org/wiki/Autor:Homero"
+        dominioPublico: true
+      - nombre: "Jámblico"
+        slug: "jamblico"
+        idDePagina: 222977
+        pagina: "https://es.wikisource.org/wiki/Autor:J%C3%A1mblico"
+        dominioPublico: true
+      - nombre: "Julio César"
+        slug: "julio-cesar"
+        idDePagina: 10696
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_C%C3%A9sar"
+        dominioPublico: true
+      - nombre: "Justino Mártir"
+        slug: "justino-martir"
+        idDePagina: 223019
+        pagina: "https://es.wikisource.org/wiki/Autor:Justino_M%C3%A1rtir"
+        dominioPublico: true
+      - nombre: "Juvenal"
+        slug: "juvenal"
+        idDePagina: 249522
+        pagina: "https://es.wikisource.org/wiki/Autor:Juvenal"
+        dominioPublico: true
+      - nombre: "Lactancio"
+        slug: "lactancio"
+        idDePagina: 223016
+        pagina: "https://es.wikisource.org/wiki/Autor:Lactancio"
+        dominioPublico: true
+      - nombre: "Laozi"
+        slug: "laozi"
+        idDePagina: 6274
+        pagina: "https://es.wikisource.org/wiki/Autor:Laozi"
+        dominioPublico: true
+      - nombre: "Longo"
+        slug: "longo"
+        idDePagina: 74248
+        pagina: "https://es.wikisource.org/wiki/Autor:Longo"
+        dominioPublico: true
+      - nombre: "Lucano"
+        slug: "lucano"
+        idDePagina: 236740
+        pagina: "https://es.wikisource.org/wiki/Autor:Lucano"
+        dominioPublico: true
+      - nombre: "Luciano de Samosata"
+        slug: "luciano-de-samosata"
+        idDePagina: 43292
+        pagina: "https://es.wikisource.org/wiki/Autor:Luciano_de_Samosata"
+        dominioPublico: true
+      - nombre: "Marco Aurelio"
+        slug: "marco-aurelio"
+        idDePagina: 282165
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Aurelio"
+        dominioPublico: true
+      - nombre: "Marco Fabio Quintiliano"
+        slug: "marco-fabio-quintiliano"
+        idDePagina: 18605
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Fabio_Quintiliano"
+        dominioPublico: true
+      - nombre: "Marco Juniano Justino"
+        slug: "marco-juniano-justino"
+        idDePagina: 262593
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Juniano_Justino"
+        dominioPublico: true
+      - nombre: "Marco Valerio Marcial"
+        slug: "marco-valerio-marcial"
+        idDePagina: 19125
+        pagina: "https://es.wikisource.org/wiki/Autor:Marco_Valerio_Marcial"
+        dominioPublico: true
+      - nombre: "María de Nazaret"
+        slug: "maria-de-nazaret"
+        idDePagina: 272969
+        pagina: "https://es.wikisource.org/wiki/Autor:Mar%C3%ADa_de_Nazaret"
+        dominioPublico: true
+      - nombre: "Minucio Félix"
+        slug: "minucio-felix"
+        idDePagina: 223015
+        pagina: "https://es.wikisource.org/wiki/Autor:Minucio_F%C3%A9lix"
+        dominioPublico: true
+      - nombre: "Moisés"
+        slug: "moises"
+        idDePagina: 293257
+        pagina: "https://es.wikisource.org/wiki/Autor:Mois%C3%A9s"
+        dominioPublico: true
+      - nombre: "Mosco"
+        slug: "mosco"
+        idDePagina: 280887
+        pagina: "https://es.wikisource.org/wiki/Autor:Mosco"
+        dominioPublico: true
+      - nombre: "Nono de Panópolis"
+        slug: "nono-de-panopolis"
+        idDePagina: 396725
+        pagina: "https://es.wikisource.org/wiki/Autor:Nono_de_Pan%C3%B3polis"
+        dominioPublico: true
+      - nombre: "Ovidio"
+        slug: "ovidio"
+        idDePagina: 19847
+        pagina: "https://es.wikisource.org/wiki/Autor:Ovidio"
+        dominioPublico: true
+      - nombre: "Parménides de Elea"
+        slug: "parmenides-de-elea"
+        idDePagina: 80285
+        pagina: "https://es.wikisource.org/wiki/Autor:Parm%C3%A9nides_de_Elea"
+        dominioPublico: true
+      - nombre: "Petronio"
+        slug: "petronio"
+        idDePagina: 19792
+        pagina: "https://es.wikisource.org/wiki/Autor:Petronio"
+        dominioPublico: true
+      - nombre: "Pitágoras"
+        slug: "pitagoras"
+        idDePagina: 119088
+        pagina: "https://es.wikisource.org/wiki/Autor:Pit%C3%A1goras"
+        dominioPublico: true
+      - nombre: "Platón"
+        slug: "platon"
+        idDePagina: 4239
+        pagina: "https://es.wikisource.org/wiki/Autor:Plat%C3%B3n"
+        dominioPublico: true
+      - nombre: "Plinio el Joven"
+        slug: "plinio-el-joven"
+        idDePagina: 122672
+        pagina: "https://es.wikisource.org/wiki/Autor:Plinio_el_Joven"
+        dominioPublico: true
+      - nombre: "Plinio el Viejo"
+        slug: "plinio-el-viejo"
+        idDePagina: 122666
+        pagina: "https://es.wikisource.org/wiki/Autor:Plinio_el_Viejo"
+        dominioPublico: true
+      - nombre: "Plotino"
+        slug: "plotino"
+        idDePagina: 241836
+        pagina: "https://es.wikisource.org/wiki/Autor:Plotino"
+        dominioPublico: true
+      - nombre: "Plutarco"
+        slug: "plutarco"
+        idDePagina: 21319
+        pagina: "https://es.wikisource.org/wiki/Autor:Plutarco"
+        dominioPublico: true
+      - nombre: "Polibio"
+        slug: "polibio"
+        idDePagina: 354967
+        pagina: "https://es.wikisource.org/wiki/Autor:Polibio"
+        dominioPublico: true
+      - nombre: "Pomponio Mela"
+        slug: "pomponio-mela"
+        idDePagina: 127207
+        pagina: "https://es.wikisource.org/wiki/Autor:Pomponio_Mela"
+        dominioPublico: true
+      - nombre: "Porfirio"
+        slug: "porfirio"
+        idDePagina: 222976
+        pagina: "https://es.wikisource.org/wiki/Autor:Porfirio"
+        dominioPublico: true
+      - nombre: "Proclo"
+        slug: "proclo"
+        idDePagina: 222979
+        pagina: "https://es.wikisource.org/wiki/Autor:Proclo"
+        dominioPublico: true
+      - nombre: "Publio Terencio Africano"
+        slug: "publio-terencio-africano"
+        idDePagina: 9347
+        pagina: "https://es.wikisource.org/wiki/Autor:Publio_Terencio_Africano"
+        dominioPublico: true
+      - nombre: "Quinto Curcio Rufo"
+        slug: "quinto-curcio-rufo"
+        idDePagina: 355284
+        pagina: "https://es.wikisource.org/wiki/Autor:Quinto_Curcio_Rufo"
+        dominioPublico: true
+      - nombre: "Safo"
+        slug: "safo"
+        idDePagina: 129720
+        pagina: "https://es.wikisource.org/wiki/Autor:Safo"
+        dominioPublico: true
+      - nombre: "Séneca"
+        slug: "seneca"
+        idDePagina: 8123
+        pagina: "https://es.wikisource.org/wiki/Autor:S%C3%A9neca"
+        dominioPublico: true
+      - nombre: "Servio"
+        slug: "servio"
+        idDePagina: 239762
+        pagina: "https://es.wikisource.org/wiki/Autor:Servio"
+        dominioPublico: true
+      - nombre: "Silio Itálico"
+        slug: "silio-italico"
+        idDePagina: 268256
+        pagina: "https://es.wikisource.org/wiki/Autor:Silio_It%C3%A1lico"
+        dominioPublico: true
+      - nombre: "Suetonio"
+        slug: "suetonio"
+        idDePagina: 44295
+        pagina: "https://es.wikisource.org/wiki/Autor:Suetonio"
+        dominioPublico: true
+      - nombre: "Sun Tzu"
+        slug: "sun-tzu"
+        idDePagina: 4150
+        pagina: "https://es.wikisource.org/wiki/Autor:Sun_Tzu"
+        dominioPublico: true
+      - nombre: "Tácito"
+        slug: "tacito"
+        idDePagina: 51432
+        pagina: "https://es.wikisource.org/wiki/Autor:T%C3%A1cito"
+        dominioPublico: true
+      - nombre: "Teócrito"
+        slug: "teocrito"
+        idDePagina: 125406
+        pagina: "https://es.wikisource.org/wiki/Autor:Te%C3%B3crito"
+        dominioPublico: true
+      - nombre: "Teognis"
+        slug: "teognis"
+        idDePagina: 274221
+        pagina: "https://es.wikisource.org/wiki/Autor:Teognis"
+        dominioPublico: true
+      - nombre: "Tertuliano"
+        slug: "tertuliano"
+        idDePagina: 223123
+        pagina: "https://es.wikisource.org/wiki/Autor:Tertuliano"
+        dominioPublico: true
+      - nombre: "Tibulo"
+        slug: "tibulo"
+        idDePagina: 293263
+        pagina: "https://es.wikisource.org/wiki/Autor:Tibulo"
+        dominioPublico: true
+      - nombre: "Tirteo"
+        slug: "tirteo"
+        idDePagina: 268411
+        pagina: "https://es.wikisource.org/wiki/Autor:Tirteo"
+        dominioPublico: true
+      - nombre: "Tito Livio"
+        slug: "tito-livio"
+        idDePagina: 127212
+        pagina: "https://es.wikisource.org/wiki/Autor:Tito_Livio"
+        dominioPublico: true
+      - nombre: "Tucídides"
+        slug: "tucidides"
+        idDePagina: 134112
+        pagina: "https://es.wikisource.org/wiki/Autor:Tuc%C3%ADdides"
+        dominioPublico: true
+      - nombre: "Vegecio"
+        slug: "vegecio"
+        idDePagina: 196327
+        pagina: "https://es.wikisource.org/wiki/Autor:Vegecio"
+        dominioPublico: true
+  - id: "catolicos"
+    nombre: "Autores católicos"
+    categoria: "Categoría:Autores católicos"
+    recuperada: "2026-09-06"
+    candidatos:
+      - nombre: "Agustín de Hipona"
+        slug: "agustin-de-hipona"
+        idDePagina: 31979
+        pagina: "https://es.wikisource.org/wiki/Autor:Agust%C3%ADn_de_Hipona"
+        dominioPublico: true
+      - nombre: "Antoine Arnauld"
+        slug: "antoine-arnauld"
+        idDePagina: 230273
+        pagina: "https://es.wikisource.org/wiki/Autor:Antoine_Arnauld"
+        dominioPublico: true
+      - nombre: "Félix Torres Amat"
+        slug: "felix-torres-amat"
+        idDePagina: 216249
+        pagina: "https://es.wikisource.org/wiki/Autor:F%C3%A9lix_Torres_Amat"
+        dominioPublico: true
+      - nombre: "Fray Ambrosio Montesino"
+        slug: "fray-ambrosio-montesino"
+        idDePagina: 15074
+        pagina: "https://es.wikisource.org/wiki/Autor:Fray_Ambrosio_Montesino"
+        dominioPublico: true
+      - nombre: "Fray Luis de León"
+        slug: "fray-luis-de-leon"
+        idDePagina: 3847
+        pagina: "https://es.wikisource.org/wiki/Autor:Fray_Luis_de_Le%C3%B3n"
+        dominioPublico: true
+      - nombre: "José Ignacio Bartolache"
+        slug: "jose-ignacio-bartolache"
+        idDePagina: 134845
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Ignacio_Bartolache"
+        dominioPublico: true
+      - nombre: "Nicolas Malebranche"
+        slug: "nicolas-malebranche"
+        idDePagina: 230263
+        pagina: "https://es.wikisource.org/wiki/Autor:Nicolas_Malebranche"
+        dominioPublico: true
+      - nombre: "Tomás de Aquino"
+        slug: "tomas-de-aquino"
+        idDePagina: 42863
+        pagina: "https://es.wikisource.org/wiki/Autor:Tom%C3%A1s_de_Aquino"
+        dominioPublico: true

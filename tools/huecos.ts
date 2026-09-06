@@ -34,6 +34,7 @@ import {
   type AutorParaHuecos,
   type CitaParaHuecos,
   type ColeccionParaHuecos,
+  type EpocaParaHuecos,
 } from '../src/lib/huecos.ts';
 import { lineaDeHueco, porcentajeEnEspañol } from '../src/lib/formato.ts';
 import { lineasDeMeta, objetivoDeMeta, verMeta } from '../src/lib/meta.ts';
@@ -44,16 +45,43 @@ import {
   MIN_CITAS_POR_TEMA,
   TECHO_CONCENTRACION_POR_AUTOR,
 } from '../src/lib/umbrales.ts';
-import { leerAutores, leerCitas, leerColecciones, leerTemas, rutasDelCorpus } from './lib/corpus.ts';
+import {
+  fechaLocal,
+  leerAutores,
+  leerCandidatosPorEpoca,
+  leerCitas,
+  leerColecciones,
+  leerDescartesDeCandidatos,
+  leerTemas,
+  rutasDelCorpus,
+} from './lib/corpus.ts';
 import { coleccionesParaHuecos } from './lib/curacion.ts';
+import {
+  diasDesdeLaRecuperacion,
+  epocasParaHuecos,
+  listaCaducada,
+  DIAS_DE_VIGENCIA_DE_LA_LISTA,
+} from './lib/epocas.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 
 const argumentos = process.argv.slice(2);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
+/*
+ * La jornada de hoy, y **solo** para decir cuántos días hace que se recuperó la lista de
+ * candidatos. Ninguna cuenta del informe depende de ella: el objetivo de la sesión sigue
+ * siendo el mismo para el mismo estado, se pregunte cuando se pregunte.
+ */
+const hoy = fechaLocal(new Date());
 
 const citas = (await leerCitas(rutas.citas)) as unknown as CitaParaHuecos[];
 const temas = await leerTemas(rutas);
-const autores = (await leerAutores(rutas)) as unknown as AutorParaHuecos[];
+/*
+ * Los Autores se leen **una vez**. `AutorParaHuecos` es la vista recortada con la que cuenta
+ * el equilibrio de tradición; el cruce por época necesita además `tituloEnFuente`, que esa
+ * vista no lleva. Dos lecturas del mismo directorio serían dos censos que pueden discrepar.
+ */
+const autoresDelCorpus = await leerAutores(rutas);
+const autores = autoresDelCorpus as unknown as AutorParaHuecos[];
 /*
  * Las Colecciones llegan con su recuento **ya resuelto**: resolver la pertenencia es
  * intersectar la lista declarada con el conjunto publicable y de eso tiene un solo dueño
@@ -85,7 +113,38 @@ const anunciados = temasPublicados(
   temas as unknown as Tema[],
   citas as unknown as Cita[],
 ).map((t) => t.slug);
-const informe = verHuecos(citas, temas, autores, anunciados, colecciones);
+/*
+ * La cobertura por época — Historia 19.5. Sale de la lista **ya versionada** y esta orden no
+ * toca la red: quien recupera es `tools/epocas.ts`, la cáscara, y aquí solo se lee lo que
+ * dejó escrito. Así `npm run huecos` sigue contestando con la red caída, que es lo que un
+ * bucle necesita de la orden que le dice qué toca.
+ *
+ * Se lee aparte y degradando, por lo mismo que las Colecciones: un fichero ilegible no puede
+ * llevarse por delante el informe entero, y los Temas y el equilibrio de tradición no tienen
+ * nada que ver con él.
+ */
+let epocas: EpocaParaHuecos[] = [];
+let falloDeEpocas: string | undefined;
+try {
+  /*
+   * El cruce entero sale de `tools/lib/epocas.ts` y no se rehace aquí (12.1). Estaba escrito
+   * línea a línea aquí y en `tools/epocas.ts`, y el día que una copia derivara las dos
+   * órdenes habrían dado cuentas distintas del mismo fichero.
+   *
+   * «Sembrado» se cruza contra los Autores declarados y no contra las Citas: un Autor
+   * declarado ya pasó la puerta de admisión, tenga una Cita o cien, y contarlo como pendiente
+   * mandaría al bucle a recuperar otra vez a quien ya está dentro.
+   */
+  epocas = epocasParaHuecos(
+    await leerCandidatosPorEpoca(rutas),
+    autoresDelCorpus,
+    await leerDescartesDeCandidatos(rutas),
+  );
+} catch (fallo) {
+  falloDeEpocas = fallo instanceof Error ? fallo.message : String(fallo);
+}
+
+const informe = verHuecos(citas, temas, autores, anunciados, colecciones, epocas);
 const objetivo = objetivoDeSesion(informe);
 /*
  * La Meta de Corpus (v4) se deriva del mismo informe y no de una segunda lectura: dice
@@ -96,7 +155,17 @@ const meta = objetivoDeMeta(verMeta(citas, temas, colecciones, informe));
 
 if (argumentos.includes('--json')) {
   process.stdout.write(
-    `${JSON.stringify({ ...informe, objetivo, meta, ...(falloDeColecciones ? { falloDeColecciones } : {}) }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        ...informe,
+        objetivo,
+        meta,
+        ...(falloDeColecciones ? { falloDeColecciones } : {}),
+        ...(falloDeEpocas ? { falloDeEpocas } : {}),
+      },
+      null,
+      2,
+    )}\n`,
   );
 } else {
   const { temas: huecos, tradicion, clasicos } = informe;
@@ -147,6 +216,78 @@ if (argumentos.includes('--json')) {
     for (const hueco of informe.colecciones) lineas.push(lineaDeHueco(hueco));
   }
 
+  // Las cifras del informe se alinean a cuatro, y con un solo formateador: dos anchos
+  // distintos en el mismo informe se leen como dos escalas distintas.
+  const cifra = (valor: number | string) => String(valor).padStart(4);
+
+  /*
+   * La cobertura por época — Historia 19.5. Va junto a la de Tema y no dentro de ella porque
+   * son dos listones distintos: el de un Tema es un número de Citas y el de una época es
+   * cobertura extensiva hasta agotarla, candidato a candidato.
+   *
+   * **Sin nombres, como todo este informe.** La lista de candidatos vive versionada en
+   * corpus/candidatos-por-epoca.yml, que es donde el editor la mira; aquí van las cuentas.
+   * El nombre de una época es una categoría de la Fuente, no el de un Autor.
+   */
+  lineas.push(
+    '',
+    'Cobertura por época (todos los candidatos de la Fuente, hasta agotarla)',
+    '───────────────────────────────────────────────────────────────────────',
+  );
+
+  if (falloDeEpocas !== undefined) {
+    lineas.push(
+      'No se ha podido leer: ' + falloDeEpocas,
+      'El resto del informe no depende de ese fichero y sigue siendo válido.',
+    );
+  } else if (informe.epocas.length === 0) {
+    /*
+     * Sin guillemets, como el resto: una prueba de la Historia 9.3 exige que lo único que
+     * este informe entrecomille sean nombres de Tema, y la orden que se sugiere aquí no es
+     * un nombre del Corpus.
+     */
+    lineas.push(
+      'Ninguna: la lista de candidatos no se ha recuperado todavía, que no es lo mismo que',
+      'no quedar nada. Se deriva de las categorías de la Fuente con: npm run epocas:registrar',
+    );
+  } else {
+    /*
+     * Con la edad de la lista al lado de la cuenta, y no solo en `npm run epocas`. TERMINADA
+     * se imprime igual con una lista de hoy que con una de hace ocho meses, y en el segundo
+     * caso quiere decir «terminada respecto de lo que la Fuente decía entonces». La lista se
+     * versiona para que el bucle siga con la red caída, y esa misma caché reintroduce por la
+     * puerta de atrás la lista que se queda vieja: enseñar su edad es lo que la deja a la
+     * vista. Una fecha no es un nombre de Autor, así que la regla de la 9.3 sigue entera.
+     */
+    let algunaCaducada = false;
+    for (const epoca of informe.epocas) {
+      const dias = diasDesdeLaRecuperacion(epoca.recuperada, hoy);
+      const caducada = listaCaducada(epoca.recuperada, hoy);
+      algunaCaducada = algunaCaducada || caducada;
+      lineas.push(
+        `${epoca.nombre.padEnd(22)} ${cifra(epoca.candidatos)} candidatos, ` +
+          `${cifra(epoca.sembrados)} sembrados, ${cifra(epoca.descartados)} descartados, ` +
+          `${cifra(epoca.faltan)} pendientes` +
+          (epoca.terminada ? '   TERMINADA' : '') +
+          (dias === undefined
+            ? '   (sin fecha de recuperación)'
+            : `   (recuperada hace ${dias} ${dias === 1 ? 'día' : 'días'}${caducada ? ', CADUCADA' : ''})`),
+      );
+    }
+    lineas.push(
+      '',
+      'Una época está terminada cuando todos sus candidatos están sembrados o descartados con',
+      'motivo escrito: es una cuenta, no una opinión. Saltarse a uno no lo descarta.',
+      'La lista sale de las categorías de la Fuente y se regenera: npm run epocas',
+    );
+    if (algunaCaducada) {
+      lineas.push(
+        `Hay listas de más de ${DIAS_DE_VIGENCIA_DE_LA_LISTA} días: lo de arriba se cuenta contra`,
+        'lo que la Fuente decía entonces. Regenérelas con: npm run epocas:registrar',
+      );
+    }
+  }
+
   /*
    * Las dos cuentas van en dos bloques y no en dos filas del mismo, que es el cambio de la
    * v6: el suelo panhispánico mide el reparto **entre hispánicos**, y los clásicos tienen
@@ -154,7 +295,6 @@ if (argumentos.includes('--json')) {
    * hacia España, y con cuarenta clásicos nuevos habría tirado el indicador al 24 % sin que
    * un solo Autor hispánico cambiara de sitio.
    */
-  const cifra = (valor: number | string) => String(valor).padStart(4);
 
   lineas.push(
     '',

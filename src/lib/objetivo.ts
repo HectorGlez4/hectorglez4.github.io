@@ -27,7 +27,7 @@
  */
 
 import { porcentajeEnEspañol } from './formato.ts';
-import type { EquilibrioDeTradicion, HuecoDeTema, Huecos } from './huecos.ts';
+import type { EquilibrioDeTradicion, HuecoDeEpoca, HuecoDeTema, Huecos } from './huecos.ts';
 import { MIN_CITAS_POR_TEMA } from './umbrales.ts';
 
 /**
@@ -42,6 +42,16 @@ export type ClaseDeObjetivo =
   | 'tradicion'
   /** Sembrar el Tema al que menos le falta para llegar al umbral. */
   | 'tema'
+  /**
+   * Agotar la época a la que menos le falta — Historia 19.5.
+   *
+   * Va después del Tema porque un Tema corto es una página que no se publica, y una época
+   * sin agotar es cobertura que falta: lo primero rompe algo vivo y lo segundo no. Va antes
+   * de `ninguno` porque **existir es todo el punto**: sin esta rama, el informe decía «82
+   * pendientes» en el bloque de cobertura y «No hay hueco que cerrar» cuatro líneas más
+   * abajo, que son dos respuestas contradictorias a la misma pregunta en el mismo informe.
+   */
+  | 'epoca'
   /** Ni déficit de tradición ni Temas cortos: no hay hueco que cerrar. */
   | 'ninguno'
   /** Un Corpus sin Autores: no hay estado del que derivar objetivo. */
@@ -75,6 +85,22 @@ export interface ObjetivoDeTradicion {
   autoresQueFaltan?: number;
 }
 
+/**
+ * La época de la que sale el trabajo de la sesión — Historia 19.5.
+ *
+ * Son cifras y el nombre de una **categoría de la Fuente**, jamás el de un Autor. Quién de
+ * los que faltan entra sigue siendo del editor, y la lista de candidatos vive versionada en
+ * `corpus/candidatos-por-epoca.yml`, que es donde se mira.
+ */
+export interface ObjetivoDeEpoca {
+  id: string;
+  nombre: string;
+  candidatos: number;
+  sembrados: number;
+  descartados: number;
+  faltan: number;
+}
+
 export interface ObjetivoDeSesion {
   clase: ClaseDeObjetivo;
   /** Qué hacer en esta sesión, en texto legible, con los dos ejes cuando los hay. */
@@ -85,6 +111,8 @@ export interface ObjetivoDeSesion {
   tema?: ObjetivoDeTema;
   /** La tradición que hay que reforzar, cuando está por debajo de su suelo. */
   tradicion?: ObjetivoDeTradicion;
+  /** La época que hay que agotar, cuando no hay Tema corto y queda cobertura — 19.5. */
+  epoca?: ObjetivoDeEpoca;
 }
 
 /** «1 Cita» / «7 Citas», sin dejar el plural al azar de la interpolación. */
@@ -189,6 +217,40 @@ function huecoDeTema(tema: HuecoDeTema): string {
   );
 }
 
+/**
+ * El eje de época: qué cobertura falta, en candidatos de la Fuente — Historia 19.5.
+ *
+ * **Sin guillemets y sin nombres.** Lo único que este informe entrecomilla son nombres de
+ * Tema —hay una prueba de la 9.3 que lo vigila entero—, y el nombre de una época es una
+ * categoría de la Fuente, no un Tema del Corpus. Y de los candidatos no se nombra a ninguno:
+ * quién entra sigue siendo la decisión que este producto no delega.
+ */
+function agotarEpoca(epoca: HuecoDeEpoca): string {
+  return (
+    `Agotar la época ${epoca.nombre}: le ${epoca.faltan === 1 ? 'queda 1 candidato' : `quedan ${epoca.faltan} candidatos`} ` +
+    'por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor.'
+  );
+}
+
+function huecoDeEpocaEnTexto(epoca: HuecoDeEpoca): string {
+  return (
+    `La Fuente clasifica ${epoca.candidatos} candidatos en la época ${epoca.nombre}: ` +
+    `${epoca.sembrados} ya sembrados y ${epoca.descartados} descartados con motivo. La lista ` +
+    'está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar'
+  );
+}
+
+function ejeDeEpoca(epoca: HuecoDeEpoca): ObjetivoDeEpoca {
+  return {
+    id: epoca.id,
+    nombre: epoca.nombre,
+    candidatos: epoca.candidatos,
+    sembrados: epoca.sembrados,
+    descartados: epoca.descartados,
+    faltan: epoca.faltan,
+  };
+}
+
 function ejeDeTema(tema: HuecoDeTema): ObjetivoDeTema {
   return {
     slug: tema.slug,
@@ -207,7 +269,8 @@ function ejeDeTema(tema: HuecoDeTema): ObjetivoDeTema {
  *   2. Si la tradición latinoamericana está por debajo de su suelo, el titular es cerrar
  *      ese hueco — y el Tema al que menos le falta va también, como segundo eje.
  *   3. Si no, el titular es el Tema al que **menos** le falta.
- *   4. Si tampoco hay Temas cortos, decirlo: no hay hueco que cerrar.
+ *   4. Si tampoco hay Temas cortos, la época a la que menos le falta por agotar — 19.5.
+ *   5. Y solo si tampoco queda ninguna, decirlo: no hay hueco que cerrar.
  *
  * La tradición va antes que el Tema más corto porque un Tema corto se cierra sembrando
  * cualquier Autor de los que ya están, y el hueco de tradición solo se cierra admitiendo
@@ -278,13 +341,37 @@ export function objetivoDeSesion(huecos: Huecos): ObjetivoDeSesion {
     };
   }
 
+  /*
+   * Y si no hay Tema corto, la cobertura por época — Historia 19.5.
+   *
+   * `verHuecos` ya deja las épocas con lo que queda primero y de menos a más les falta, así
+   * que la primera con pendientes es la que menos trabajo pide. Se busca la primera con
+   * `faltan > 0` y no se coge la primera a secas: con todas terminadas, la lista sigue
+   * completa a propósito —una época agotada tiene que poder leerse— y `epocas[0]` sería una
+   * época sin nada que hacer.
+   *
+   * Sin esta rama, el mismo informe decía «82 pendientes» arriba y «No hay hueco que cerrar»
+   * abajo. Dos respuestas a la misma pregunta es la divergencia de dueño único que AD-11
+   * existe para impedir, y aquí la respuesta buena es la que cuenta candidatos.
+   */
+  const epoca = huecos.epocas.find((e) => e.faltan > 0);
+  if (epoca !== undefined) {
+    return {
+      clase: 'epoca',
+      objetivo: agotarEpoca(epoca),
+      hueco: huecoDeEpocaEnTexto(epoca),
+      epoca: ejeDeEpoca(epoca),
+    };
+  }
+
   return {
     clase: 'ninguno',
     objetivo: 'No hay hueco que cerrar.',
     hueco:
-      `Ningún Tema por debajo del umbral de ${MIN_CITAS_POR_TEMA} Citas, y la tradición ` +
+      `Ningún Tema por debajo del umbral de ${MIN_CITAS_POR_TEMA} Citas, la tradición ` +
       `latinoamericana alcanza el suelo del ${suelo} % sobre los Autores que cuentan para ` +
-      'él: todos menos los de tradición otra.',
+      'él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos ' +
+      'pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar',
   };
 }
 
