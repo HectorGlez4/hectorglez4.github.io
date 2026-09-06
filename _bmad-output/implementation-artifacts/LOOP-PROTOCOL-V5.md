@@ -23,10 +23,17 @@ por Autor.**
 
 ## Lo que cambia respecto a la v4
 
-**1. El suelo panhispánico cambió de denominador, no de valor.** Se mide sobre Autores de
-tradición hispánica —`latinoamericana` + `peninsular`—, no sobre el Corpus entero. Hoy va al
-56,2 %. Un clásico que entra como `otra` **no lo mueve**. Sin este cambio, cuarenta clásicos
-nuevos habrían tirado el indicador al 24 % sin que un solo autor hispánico cambiara de sitio.
+**1. El suelo panhispánico cambió de denominador, no de valor.** Se mide sobre **todos los
+Autores menos los de tradición `otra`**, no sobre el Corpus entero. Hoy va al 56,2 %. Un
+clásico que entra como `otra` **no lo mueve**. Sin este cambio, cuarenta clásicos nuevos
+habrían tirado el indicador al 24 % sin que un solo autor hispánico cambiara de sitio.
+
+*(Precisado el 2026-09-05, en la revisión de la 19.2.)* Esta línea decía «`latinoamericana` +
+`peninsular`», y con ese denominador **los Autores sin tradición declarada quedaban fuera**:
+un Corpus con 34 sin clasificar y un solo latinoamericano declarado informaba el 100 % y «por
+encima del suelo», o sea que un fallo de captura mejoraba el indicador. Cuentan dentro, que es
+la lectura conservadora: un dato que falta nunca declara cumplido un compromiso. Lo que sí
+salió del denominador —y es lo que la historia venía a cambiar— son los de tradición `otra`.
 
 **2. El año de la traducción se conserva si la Fuente lo da, y no se exige si no.** *(Suavizado
 el 2026-09-05, tras la sonda.)* Se pensó primero como puerta que rompía el build. La sonda

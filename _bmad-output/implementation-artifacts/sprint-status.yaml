@@ -254,9 +254,9 @@ development_status:
   # La 19.1 se especificó como PUERTA y se suavizó el 05/09: la verificación de derechos ya
   # la hace el conjunto cerrado de Fuentes —Wikisource solo aloja dominio público— y la sonda
   # enseñó que el año vive en la EDICIÓN y no en la obra. Ya no bloquea a las demás.
-  epic-19: backlog
+  epic-19: in-progress
   19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: backlog
-  19-2-el-bucle-siembra-clasicos-con-meta-propia: backlog
+  19-2-el-bucle-siembra-clasicos-con-meta-propia: review  # falta el listón, que lo pone Héctor
   19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog
   # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie
   # de indexación muestre una familia por encima del 20 %.

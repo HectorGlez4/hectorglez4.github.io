@@ -821,11 +821,13 @@ El visitante puede recorrer el catálogo por época —filosofía antigua, patr�
 - Descubrimiento por Autor y Tema (FR-12).
 - Herramienta interna de ingesta y curación (FR-13…FR-16).
 - Fundamentos de SEO y rendimiento (§8).
-- Corpus de arranque: ~2.000 Citas de 150–250 Autores, con **mínimo del 40 % de Autores de tradición latinoamericana**. El suelo es explícito porque el sesgo hacia España es el resultado por defecto de cualquier curación no vigilada.
+- Corpus de arranque: ~2.000 Citas de 150–250 Autores, con **mínimo del 40 % de Autores de tradición latinoamericana sobre los Autores que cuentan para el suelo** — todos menos los de tradición `otra`, según la redefinición de más abajo. El suelo es explícito porque el sesgo hacia España es el resultado por defecto de cualquier curación no vigilada.
 
-  **Redefinido el 2026-09-05: el suelo se mide sobre los Autores de tradición hispánica, no sobre el Corpus entero.** El compromiso del brief es «no escorar hacia España», y eso es una afirmación sobre el reparto **entre peninsulares y latinoamericanos** — nunca sobre cuántos clásicos universales hay. Medido sobre todos, cada Séneca que entra diluye un compromiso que no tenía nada que ver con él: con cuarenta clásicos nuevos el indicador caería al 24 % sin que un solo autor hispánico hubiera cambiado de sitio. Medido sobre hispánicos, hoy va al **56,2 %** y sigue igual después. **El suelo no baja: cambia su denominador.** Se escribe aquí y no en un comentario para que nadie dentro de seis meses crea que se relajó a escondidas.
+  **Redefinido el 2026-09-05: el suelo se mide sobre todos los Autores menos los de tradición `otra`, no sobre el Corpus entero.** El compromiso del brief es «no escorar hacia España», y eso es una afirmación sobre el reparto **entre peninsulares y latinoamericanos** — nunca sobre cuántos clásicos universales hay. Medido sobre todos, cada Séneca que entra diluye un compromiso que no tenía nada que ver con él: con cuarenta clásicos nuevos el indicador caería al 24 % sin que un solo autor hispánico hubiera cambiado de sitio. Medido sobre hispánicos, hoy va al **56,2 %** y sigue igual después. **El suelo no baja: cambia su denominador.** Se escribe aquí y no en un comentario para que nadie dentro de seis meses crea que se relajó a escondidas.
 
   La tercera categoría —`otra`— existe en el esquema desde la v1 y hoy la ocupan tres Autores. Deja de contar en el denominador del suelo y pasa a tener meta propia, porque un catálogo panhispánico que además cubre a los clásicos es más que uno que solo cubre a los clásicos.
+
+  Los Autores **sin tradición declarada sí cuentan** en el denominador. El campo es opcional a propósito —obligarlo empujaría a rellenarlo a ojo y la proporción pasaría a medir suposiciones—, así que un Autor sin declarar es un dato que falta, no un Autor que no cuente: sacarlo del denominador dejaría que un fallo de captura *mejorase* el indicador. Dentro es la lectura conservadora, que es la que corresponde a un suelo.
 
 ### 6.2 Fuera de la v1
 
