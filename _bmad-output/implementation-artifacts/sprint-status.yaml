@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 09-05-2026 18:30
+last_updated: 09-06-2026 14:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -261,6 +261,10 @@ development_status:
   # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie
   # de indexación muestre una familia por encima del 20 %.
   19-4-la-epoca-agrupa-a-los-autores-que-comparten-tiempo-y-escuela: backlog
+  # 19.5 sustituye al listón numérico: la época se deriva de las categorías de Wikisource-es
+  # —Antigüedad 83 autores, Roma 63, Grecia 35, católicos 8— y termina por agotamiento, no
+  # por una cifra. `DP-Autores-100` es la marca de dominio público de la propia Fuente.
+  19-5-la-epoca-se-declara-desde-la-fuente: review  # npm run epocas; 189 candidatos, 187 pendientes
   epic-19-retrospective: optional
 
 action_items:

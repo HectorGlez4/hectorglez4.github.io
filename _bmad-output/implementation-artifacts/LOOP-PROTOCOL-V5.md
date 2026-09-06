@@ -68,13 +68,25 @@ Console con volumen, manda ella y no la intuición.
 
 En este orden, y sin saltarse ninguno:
 
-1. `npm run huecos` — dice el hueco y el tramo. **Manda sobre cualquier idea previa.**
-2. Si el hueco es de clásicos, elegir Autor **por demanda**, no por lo que haya a mano.
-3. Comprobar que su obra está en una **Fuente admitida** y que la traducción declara año.
-4. `npm run recuperar` → `npm run extraer` → aprobar por lote. Las herramientas de la Épica 9,
+1. `npm run epocas:registrar` — regenera la lista de candidatos desde las categorías de la
+   Fuente. **La lista versionada se queda vieja**, y ese es justamente el problema que la
+   Historia 19.5 derivaba de la Fuente para no tener. Vale unos treinta días: si `npm run
+   huecos` marca alguna época como CADUCADA, este paso no es opcional. Si la Fuente no
+   responde, se sigue igual con la versionada y la orden lo dice.
+2. `npm run huecos` — dice el hueco y el tramo. **Manda sobre cualquier idea previa.** Desde
+   la 19.5 también dice la cobertura por época, y el objetivo de la sesión sale de ella
+   cuando no hay Tema por debajo del umbral.
+3. Si el hueco es de clásicos o de época, elegir Autor **por demanda**, no por lo que haya a
+   mano. La marca `DP-Autores-100` es señal y no permiso: admitir sigue siendo del editor.
+4. Comprobar que su obra está en una **Fuente admitida** y que la traducción declara año.
+5. `npm run recuperar` → `npm run extraer` → aprobar por lote. Las herramientas de la Épica 9,
    sin esquivar nada.
-5. `npm run sesion:registrar`.
-6. Puerta completa, y push.
+6. Un candidato que **no dé Citas se descarta con su motivo escrito**, no se salta:
+   `npx tsx tools/epocas.ts --descartar <slug> --motivo "por qué no da Citas"`. Saltárselo lo
+   deja pendiente para siempre, y es como una época se da por terminada por cansancio en vez
+   de por la cuenta.
+7. `npm run sesion:registrar`.
+8. Puerta completa, y push.
 
 ## Lo que este bucle NO arregla, y conviene tenerlo delante
 
