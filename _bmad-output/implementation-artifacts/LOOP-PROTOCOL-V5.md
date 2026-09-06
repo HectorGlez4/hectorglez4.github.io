@@ -28,12 +28,19 @@ tradición hispánica —`latinoamericana` + `peninsular`—, no sobre el Corpus
 56,2 %. Un clásico que entra como `otra` **no lo mueve**. Sin este cambio, cuarenta clásicos
 nuevos habrían tirado el indicador al 24 % sin que un solo autor hispánico cambiara de sitio.
 
-**2. Hay una puerta nueva y es previa a todo: la Historia 19.1.** Para una obra traducida, el
-año que decide el dominio público es el de **la traducción**, no el de la obra. Platón murió
-hace veinticuatro siglos y su traductor pudo morir en 1980. Hasta que esa puerta esté en el
-build, **este bucle no siembra clásicos traducidos**. No es prudencia: es que la regla existe
-desde la v4 y vive en un comentario, y un bucle a volumen publicaría textos cuyo estado de
-derechos no verificó nadie.
+**2. El año de la traducción se conserva si la Fuente lo da, y no se exige si no.** *(Suavizado
+el 2026-09-05, tras la sonda.)* Se pensó primero como puerta que rompía el build. La sonda
+sobre Wikisource-es enseñó dos cosas: que el dato **vive en la edición y no en la obra** —Fedón
+declara «Azcárate, 1871» y Critón, de la misma edición, no declara nada—, y que exigirlo
+habría dejado en falta 165 Citas ya publicadas de Séneca por un dato que la Fuente no da.
+
+La comprobación que de verdad protege ya existe y está un nivel más arriba: **el conjunto
+cerrado de `tools/lib/fuentes.ts` solo admite Fuentes cuya licencia permite reutilización**, y
+por eso rechaza a Cervantes Virtual. Wikisource solo aloja dominio público. **El bucle no
+necesita verificar nada por su cuenta más allá de sembrar desde Fuentes admitidas.**
+
+Lo que sí se hace: conservar traductor y año cuando el encabezado los trae, y contar en el
+informe cuántas Citas de obra traducida no los traen. Cifra, no bloqueo.
 
 **3. Se prioriza por demanda, no por disponibilidad.** Es la corrección de rumbo entera. Entre
 dos Autores admisibles entra antes el que más se busca — y si algún día hay serie de Search

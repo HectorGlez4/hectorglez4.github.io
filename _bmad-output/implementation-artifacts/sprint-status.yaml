@@ -251,10 +251,11 @@ development_status:
   # «Meta de Corpus alcanzada, el listón siguiente lo pone Héctor», y la primera medición de
   # demanda enseñó que el Corpus está INVERTIDO respecto a lo que se busca —González Prada
   # 154 Citas, García Lorca 1—. Protocolo: LOOP-PROTOCOL-V5.md
-  # La 19.1 es una PUERTA y bloquea a las demás: sin ella el bucle sembraría a volumen
-  # traducciones cuyo estado de derechos no verificó nadie.
+  # La 19.1 se especificó como PUERTA y se suavizó el 05/09: la verificación de derechos ya
+  # la hace el conjunto cerrado de Fuentes —Wikisource solo aloja dominio público— y la sonda
+  # enseñó que el año vive en la EDICIÓN y no en la obra. Ya no bloquea a las demás.
   epic-19: backlog
-  19-1-una-obra-traducida-declara-el-año-de-su-traduccion: backlog
+  19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: backlog
   19-2-el-bucle-siembra-clasicos-con-meta-propia: backlog
   19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog
   # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie

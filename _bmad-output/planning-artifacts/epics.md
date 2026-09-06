@@ -2258,32 +2258,34 @@ So that pueda gastar ese presupuesto en lo que lo merece en vez de repartirlo a 
 El Corpus está invertido respecto a la demanda: González Prada aporta 154 Citas y García Lorca aporta 1. Creció por lo que había disponible, que es lo único que podía hacer mientras no hubiera demanda medida. Ahora la hay, y esta épica gira el catálogo hacia donde se busca — filosofía antigua y teología, en profundidad por Autor.
 
 **FRs covered:** FR-48, FR-49, FR-50
-**Notas de implementación:** la primera historia es una **puerta**, y bloquea a las demás: sin ella el bucle sembraría a volumen textos traducidos cuyo estado de derechos no verificó nadie. Las dos siguientes son operación —el bucle— y no producen FR nuevos: las herramientas son las de la Épica 9, ya construidas. La 19.4 es superficie nueva y va la última, con condición de indexación.
+**Notas de implementación:** la primera historia se especificó como puerta y **se suavizó el 2026-09-05**: la verificación de derechos ya la hace el conjunto cerrado de Fuentes —Wikisource solo aloja dominio público— y exigir además el año de cada traducción duplicaba esa comprobación un nivel más abajo y peor. Ya no bloquea a las demás. Las dos siguientes son operación —el bucle— y no producen FR nuevos: las herramientas son las de la Épica 9, ya construidas. La 19.4 es superficie nueva y va la última, con condición de indexación.
 
-### Story 19.1: Una obra traducida declara el año de su traducción
+### Story 19.1: De una obra traducida se conserva lo que la Fuente declare
 
-As a sistema que solo publica dominio público,
-I want negarme a publicar una traducción cuyo año no consta,
-So that abrir el Corpus a los clásicos no signifique publicar a ciegas.
+As a editor que abre el Corpus a los clásicos,
+I want que no se pierda el traductor y el año cuando la Fuente los da,
+So that quede constancia de la edición sin que falte de ella bloquee nada.
 
 **Acceptance Criteria:**
 
-**Given** una Cita de una obra traducida
-**When** se intenta publicar sin el año de la traducción
-**Then** el build **rompe**, con la ruta del fichero y la regla incumplida
+**Given** un documento de Fuente cuyo encabezado declara traductor o año
+**When** se recupera y se extraen sus Citas
+**Then** esos datos quedan en la Procedencia
+**And** hoy `recuperar.ts` los descarta: solo conserva título y autor
 
-**Given** una Cita de obra escrita originalmente en español
-**When** se publica
-**Then** nada cambia para ella: la regla nueva solo alcanza a lo traducido
+**Given** una obra traducida cuya Fuente **no** declara traductor ni año
+**When** se publica una Cita suya
+**Then** se publica igual: **esto no es una puerta**
+**And** la verificación de derechos sigue donde ya estaba, en el conjunto cerrado de Fuentes
 
-**Given** las Citas ya publicadas de obra traducida
-**When** entra la regla
-**Then** el informe dice **cuáles** quedan sin año y cuántas son
-**And** no se despublica ninguna en silencio: retirarlas o completarlas es decisión del editor
+**Given** el informe de salud del Corpus
+**When** lo consulto
+**Then** dice cuántas Citas de obra traducida no traen traductor ni año
+**And** las 165 de Séneca aparecen ahí como cifra, no como error
 
-**Given** el año de la traducción
-**When** se declara
-**Then** es el de la traducción y no el de la obra, y el campo lo dice sin ambigüedad
+**Given** el conjunto cerrado de Fuentes
+**When** entra una nueva
+**Then** sigue declarando su licencia y rechazándose si no permite reutilización, como hasta ahora
 
 ### Story 19.2: El bucle siembra clásicos con meta propia
 

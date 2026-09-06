@@ -764,15 +764,17 @@ Cada entrada del sitemap declara la fecha del último cambio real de esa superfi
 
 **Requisitos Funcionales:**
 
-#### FR-48: Una obra traducida no se publica sin el año de su traducción
+#### FR-48: De una obra traducida se registra lo que la Fuente declare
 
-El sistema impide publicar una Cita de obra traducida cuya traducción no declare año.
+Cuando la Fuente declara traductor o año de la traducción, el sistema lo conserva; cuando no, la Cita se publica igual.
 
 **Consecuencias (verificables):**
-- Para una obra traducida, el año que decide el estado de derechos es el de **la traducción**, no el de la obra: Platón murió hace veinticuatro siglos y su traductor pudo morir en 1980.
-- La regla existe desde la v4 —«traducción sólo con año declarado»— pero vive en un comentario de seguimiento y **no la aplica ninguna puerta**. El esquema declara `año` opcional y las Citas de Séneca no lo traen.
-- Una Cita marcada como traducida sin año de traducción **rompe el build**, con la ruta y la regla incumplida, igual que el resto de la puerta de admisión.
-- **Es condición previa a cualquier siembra automática de clásicos:** sin ella, un bucle publicaría a volumen textos cuyo estado de derechos no ha verificado nadie. Es el único riesgo legal de esta feature.
+- El encabezado de la Fuente se conserva entero: si trae `traductor` o `año`, quedan en la Procedencia. Hoy `recuperar.ts` los descarta.
+- **No es una puerta.** Una obra traducida sin año de traducción **se publica**. La verificación de derechos ya ocurre —y ocurre mejor— al admitir la Fuente: el conjunto cerrado solo admite Fuentes cuya licencia permite reutilización, y por eso rechaza a las que no.
+- El informe de salud dice **cuántas** Citas de obra traducida no traen traductor ni año. Es visibilidad, no bloqueo: sirve para decidir si algún día conviene rastrear una edición, y para que la cifra no sorprenda a nadie.
+- **Ajustado el 2026-09-05, y conviene decir por qué.** Se especificó primero como puerta que rompía el build. La sonda sobre Wikisource-es enseñó que el dato existe pero **vive en la edición y no en la obra** —Fedón declara «Azcárate, 1871» y Critón, de la misma edición, no declara nada—, y que exigirlo habría dejado 165 Citas ya publicadas de Séneca en falta por un dato que la Fuente no da. Para autores de la antigüedad el riesgo real es ínfimo —Azcárate murió en 1886— y la comprobación que importa ya la hace el conjunto de Fuentes.
+
+**Fuera de alcance:** rastrear ediciones para completar lo ya publicado. Se informa y se decide aparte. `[NON-GOAL]`
 
 #### FR-49: El Corpus cubre a los clásicos sin diluir lo panhispánico
 
