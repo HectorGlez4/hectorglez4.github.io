@@ -274,6 +274,11 @@ development_status:
   # Autor de lo escaneado con <pages index=… autor="…" /> y el lector solo entiende
   # {{Encabezado|autor=}}. Medido el 07/09: 18.040 páginas contra 40.923, el 31 %.
   19-7-el-lector-entiende-la-obra-escaneada: in-review
+  # 19.8 sale de la 19.7: los documentos de Platón se versionaron mudos llevando
+  # [[Categoría:Obras de Platón]] escrito, porque pareceNombreDePersona exigía dos
+  # palabras y el clásico firma con una. Medido el 07/09 sobre 2.295 categorías:
+  # 50 con nombre de una palabra en mayúscula, 48 personas y 2 que no.
+  19-8-el-clasico-firma-con-un-solo-nombre: in-review
   epic-19-retrospective: optional
 
 action_items:

@@ -1,0 +1,13 @@
+---
+texto: "¿Y podremos vivir despues de corrompida esta otra parte de nosotros mismos, que no tiene salud en nosotros, sino por la justicia, y que la injusticia destruye?"
+autor: "platon"
+slug: "platon-y-podremos-vivir-despues-de-corrompida-esta"
+procedencia:
+  obra: "Critón"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Crit%C3%B3n"
+---

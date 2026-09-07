@@ -1,0 +1,14 @@
+---
+texto: "Estos dos poetas, Sócrates, podrían con razón echarse a reír de este hombre, que se imaginaba hacer una tragedia de todas estas partes reunidas a la casualidad, sin acuerdo, sin proporciones y sin idea del conjunto."
+autor: "platon"
+slug: "platon-estos-dos-poetas-socrates-podrian-con-razon"
+procedencia:
+  obra: "Fedro"
+  año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Fedro_%28de_Azc%C3%A1rate_tr.%29"
+---

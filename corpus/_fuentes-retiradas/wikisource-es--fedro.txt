@@ -1,0 +1,25 @@
+fuente: wikisource-es
+obra: Fedro
+año: 1871
+url: https://es.wikisource.org/wiki/Fedro
+recuperado: 2026-09-07
+---
+Fedro
+|titulo = Fedro
+|autor = Platón
+|traductor=[[Autor:Patricio de Azcárate Corral|Patricio de Azcárate]]
+|título=[[Obras completas de Platón]]
+|año=1871
+|editorial=[[Portal:Medina y Navarro|Medina y Navarro]]
+---
+Ediciones de
+Fedro
+por Platón
+
+Papyrus of Plato Phaedrus.jpg
+
+multimedia artículo enciclopédico metadatos.
+
+Traducciones
+
+«Fedro». Obras completas de Platón (Patricio de Azcárate, trad.) II. Madrid: Medina y Navarro. 1871. A transcribir

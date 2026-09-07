@@ -1,0 +1,13 @@
+---
+texto: "—En verdad, dijo Agaton, creo que tienes razon, Sócrates; y estoy seguro de que el haber venido á colocarse entre tú y yo, sólo ha sido para separarnos."
+autor: "platon"
+slug: "platon-en-verdad-dijo-agaton-creo-que-tienes"
+procedencia:
+  obra: "El banquete (de Azcárate tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_banquete_%28de_Azc%C3%A1rate_tr.%29"
+---

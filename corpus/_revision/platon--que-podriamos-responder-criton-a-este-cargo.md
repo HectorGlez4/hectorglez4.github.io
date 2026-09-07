@@ -1,0 +1,13 @@
+---
+texto: "¿Qué podriamos responder, Criton, á este cargo y otros semejantes que se nos podian dirigir?"
+autor: "platon"
+slug: "platon-que-podriamos-responder-criton-a-este-cargo"
+procedencia:
+  obra: "Critón"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Crit%C3%B3n"
+---

@@ -1,0 +1,25 @@
+fuente: wikisource-es
+obra: Gorgias
+año: 1871
+url: https://es.wikisource.org/wiki/Gorgias_%28Plat%C3%B3n%29
+recuperado: 2026-09-07
+---
+Gorgias (Platón)
+|titulo = Gorgias
+|autor = Platón
+|traductor=[[Autor:Patricio de Azcárate Corral|Patricio de Azcárate]]
+|título=[[Obras completas de Platón]]
+|año=1871
+|editorial=[[Portal:Medina y Navarro|Medina y Navarro]]
+---
+Ediciones de
+Gorgias
+por Platón
+
+multimedia artículo enciclopédico metadatos.
+
+Traducciones
+
+«Gorgias». Obras completas de Platón (Patricio de Azcárate, trad.) V. Madrid: Medina y Navarro. 1871. A transcribir
+
+Gorgias, traducción de Luis Roig de Lluis.

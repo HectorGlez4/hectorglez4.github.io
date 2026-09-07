@@ -1,0 +1,13 @@
+---
+texto: "Me serviré de una prueba análoga para demostrar cuán delicado es el Amor."
+autor: "platon"
+slug: "platon-me-servire-de-una-prueba-analoga-para"
+procedencia:
+  obra: "El banquete (de Azcárate tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_banquete_%28de_Azc%C3%A1rate_tr.%29"
+---

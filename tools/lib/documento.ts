@@ -777,10 +777,9 @@ export function firmaDeCabeceraDeWikitexto(wikitexto: string): string | undefine
  * Las categorías reales están llenas de trampas, y de ahí las dos exigencias:
  *
  *   · la preposición es `de` y nunca `sobre` — «Obras sobre X» dice lo contrario;
- *   · y el nombre tiene que parecer nombre de persona: **dos palabras o más, con al menos dos
- *     en mayúscula**. Eso deja fuera «Obras de teatro», «Poemas de amor», «Cuentos de Navidad»
- *     y «Obras de la Edad Media» sin necesidad de enumerar lo que no es un Autor, que es una
- *     lista que nunca se acaba.
+ *   · y el nombre tiene que parecer nombre de persona. Eso deja fuera «Obras de teatro»,
+ *     «Poemas de amor», «Cuentos de Navidad» y «Obras de la Edad Media» sin necesidad de
+ *     enumerar lo que no es un Autor, que es una lista que nunca se acaba.
  */
 const CATEGORIA_DE_WIKITEXTO = /\[\[\s*Categor[íi]a\s*:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]/giu;
 
@@ -788,17 +787,51 @@ const CATEGORIA_DE_WIKITEXTO = /\[\[\s*Categor[íi]a\s*:\s*([^\]|]+?)\s*(?:\|[^\
 const GENERO_DE_CATEGORIA =
   /^(?:obras|textos|escritos|discursos|ensayos|art[íi]culos|poemas|poes[íi]as?|cartas|novelas|cuentos|prosa)\s+de\s+(.+)$/iu;
 
-/** Si lo que sigue a «de» puede ser el nombre de una persona. */
+/**
+ * Si lo que sigue a «de» puede ser el nombre de una persona.
+ *
+ * Dos palabras piden **dos mayúsculas**, que es lo que separa a «Antonio Machado» de «la Edad
+ * Media». Una sola palabra pide **una**, y ésa es la Historia 19.8: la regla original exigía
+ * dos palabras siempre, se calibró con Autores hispanoamericanos de dos apellidos, y **el
+ * clásico firma con un solo nombre**. Los ocho documentos de Platón se versionaron mudos
+ * llevando `[[Categoría:Obras de Platón]]` escrito.
+ *
+ * Medido el 07/09/2026 contra las **2.295** categorías de Wikisource-es que empiezan por uno
+ * de los doce géneros de arriba. Con nombre de una sola palabra hay 53: **3 en minúscula**
+ * —esoterismo, juventud, referencia—, que la mayúscula excluye sola, y **50 en mayúscula**,
+ * de las cuales **48 son personas**. Son el catálogo entero de la Épica 19: Aristóteles,
+ * Cicerón, Esopo, Heródoto, Homero, Horacio, Jenofonte, Ovidio, Platón, Plutarco, Séneca,
+ * Sófocles, Tácito, Virgilio.
+ *
+ * Y **dos que no lo son**, que se nombran porque callarlos sería peor que tenerlos:
+ * `Cuentos de Marineda` —la ciudad inventada de Pardo Bazán— y `Cuentos de Nasrudin` —el
+ * personaje—. La casa exige cero falsos positivos para una puerta, y esto no llega a cero.
+ * La diferencia está en el modo de fallo: una puerta **descarta en silencio** y lo que muerde
+ * no vuelve; esto **declara**, y lo declarado lo compara después la puerta de FR-23 contra el
+ * `--autor` de la orden. Un documento de Marineda sembrado como Pardo Bazán no se atribuiría
+ * mal: se **negaría a sembrarse**, en voz alta y a la primera. Bloquear es visible y
+ * recuperable; atribuir mal no es ninguna de las dos cosas.
+ */
 function pareceNombreDePersona(nombre: string): boolean {
   const palabras = nombre.trim().split(/\s+/u);
-  if (palabras.length < 2) return false;
+  if (palabras.length === 0 || palabras[0] === '') return false;
   if (!/^\p{Lu}/u.test(palabras[0])) return false;
+  // Una palabra ya está: la mayúscula del principio es toda la señal que hay.
+  if (palabras.length === 1) return true;
   return palabras.filter((p) => /^\p{Lu}/u.test(p)).length >= 2;
 }
 
 /** Las líneas de categoría del wikitexto que declaran Autor, literales. */
 export function categoriasDeAutorDeWikitexto(wikitexto: string): string[] {
   const lineas: string[] = [];
+  /*
+   * El `lastIndex` se reinicia, como en `autorDeLaCategoria`, y no es ceremonia: la expresión
+   * es global y compartida, `matchAll` **arranca donde la dejó el `exec` anterior**, y las dos
+   * funciones se llaman una detrás de otra sobre el mismo documento. Sin esto, la primera
+   * categoría del wikitexto se pierde según lo que se hubiera mirado antes — un fallo que
+   * depende del orden de las llamadas, que son los que no se encuentran leyendo.
+   */
+  CATEGORIA_DE_WIKITEXTO.lastIndex = 0;
   for (const [entera, nombreDeCategoria] of wikitexto.matchAll(CATEGORIA_DE_WIKITEXTO)) {
     const encontrado = GENERO_DE_CATEGORIA.exec(nombreDeCategoria);
     if (encontrado === null || !pareceNombreDePersona(encontrado[1])) continue;

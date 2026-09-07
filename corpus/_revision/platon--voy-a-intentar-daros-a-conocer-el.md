@@ -1,0 +1,13 @@
+---
+texto: "Voy á intentar daros á conocer el poder del Amor, y queda á vuestro cargo enseñar á los demás lo que aprendais de mí."
+autor: "platon"
+slug: "platon-voy-a-intentar-daros-a-conocer-el"
+procedencia:
+  obra: "El banquete (de Azcárate tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_banquete_%28de_Azc%C3%A1rate_tr.%29"
+---

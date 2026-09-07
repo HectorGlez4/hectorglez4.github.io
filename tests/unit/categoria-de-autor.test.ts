@@ -81,8 +81,22 @@ describe('FR-23 — la categoría de Wikisource declara al Autor de la obra', ()
     expect(autorDe(pagina('[[Categoría:Obras de teatro]]'))).toBeUndefined();
   });
 
-  it('«Cuentos de Navidad» tampoco: un nombre de persona no es una palabra suelta', () => {
-    expect(autorDe(pagina('[[Categoría:Cuentos de Navidad]]'))).toBeUndefined();
+  /*
+   * Historia 19.8 — esta prueba decía lo contrario, y cambia con su razón escrita.
+   *
+   * La regla vieja pedía **dos palabras**, y con ella «Cuentos de Navidad» no declaraba a
+   * nadie. También dejaba mudos a Platón, Homero, Esopo y Séneca, que es media Épica 19: el
+   * clásico firma con un solo nombre. Medido el 07/09/2026 sobre las 2.295 categorías de
+   * Wikisource-es que empiezan por uno de los doce géneros, hay 50 con nombre de una palabra
+   * en mayúscula y **48 son personas**; «Navidad» no está entre las que existen.
+   *
+   * Lo que se acepta a cambio, y por eso esta prueba se queda enseñándolo: un nombre propio
+   * que no es persona ahora **declara**. No atribuye — la puerta de FR-23 compara lo
+   * declarado con el `--autor` de la orden, así que lo que hace es **negar la siembra**, en
+   * voz alta y a la primera. Bloquear es visible y recuperable; atribuir mal, no.
+   */
+  it('«Cuentos de Navidad» ahora sí declara, y ése es el precio medido de la 19.8', () => {
+    expect(autorDe(pagina('[[Categoría:Cuentos de Navidad]]'))).toEqual(['Navidad']);
   });
 
   it('«Obras de la Edad Media» tampoco', () => {
