@@ -342,3 +342,73 @@ export const TECHO_CONCENTRACION_POR_AUTOR = 15;
  * haya un segundo se sabrá si sobra o falta, y moverlo será una decisión visible en el diff.
  */
 export const MIN_CARACTERES_PARA_CONTENCION = 40;
+
+/**
+ * Los pesos del orden de revisión — Historia 19.6.
+ *
+ * `corpus/_revision/` guardaba **21.021 candidatas** el 07/09/2026 y la cola las servía
+ * ordenadas por slug, que es por la primera palabra de la frase: respecto a si la Cita
+ * vale, azar. Estos pesos la ordenan.
+ *
+ * ## Por qué un orden admite señales que una puerta no
+ *
+ * `tools/lib/extraccion.ts` fija el listón de la casa para una **puerta**: sólo entra la
+ * señal que no muerde **ninguna** Cita publicada. Es el listón correcto ahí, porque una
+ * puerta destruye —lo que muerde no vuelve— y descartar a Góngora en silencio es el
+ * peligro que `deferred-work.md` lleva sesiones nombrando.
+ *
+ * Un orden no destruye: **coloca**. Lo que baja sigue listado, sigue contado y sigue
+ * revisable. Por eso el listón aquí no es «no morder ninguna» sino **separar**, y por eso
+ * la vocal acentuada suelta —que muerde 89 Citas publicadas y como puerta sería un
+ * desastre— sirve perfectamente para colocar.
+ *
+ * ## De dónde salen los números
+ *
+ * Medido el 07/09/2026 sobre **1.642 Citas publicadas y 21.021 candidatas**: la proporción
+ * de cada conjunto que lleva la señal, y la razón entre ambas. Cuanto más baja la razón,
+ * más separa la señal, y más pesa.
+ *
+ * Y dos que se midieron y **no** están, porque son las que yo habría dado por buenas sin
+ * medir. La **longitud**: mediana de 108 caracteres en lo publicado y 122 en lo candidato,
+ * con los cuartiles solapados; no discrimina. Y **abrir en minúscula**, que apunta al revés
+ * de lo que suponía: 2,1 % de las publicadas contra 0,5 % de las candidatas.
+ *
+ * **VALORES PROVISIONALES**, como los demás de su clase: salen de una sola medición contra
+ * el Corpus de hoy. Cuando el Corpus sea otro habrá que volver a medir, y moverlos será un
+ * diff visible.
+ */
+
+/** Lleva cifra: **0,0 %** de las publicadas, 3,3 % de las candidatas. Ninguna Cita del Corpus lleva un dígito. */
+export const PESO_CIFRA_EN_CANDIDATA = 4;
+
+/**
+ * Inicial de nombre abreviada —«lo que escribió S.», «tuvo que sufrir M.»—: **0,0 %** de las
+ * publicadas, 0,9 % de las candidatas.
+ *
+ * Ninguna de las 1.642 Citas del Corpus lleva una letra suelta con punto. En la edición de
+ * Antonio Sancha son la firma del aparato: el traductor abrevia al autor que cita. Pesa como
+ * la cifra porque separa igual de limpio, aunque atrape menos.
+ */
+export const PESO_INICIAL_ABREVIADA = 4;
+
+/** Abre en conjunción o deíctico —«y», «pero», «esto»—: 1,8 % contra 8,7 %, razón 0,20. La frase colgaba de la anterior. */
+export const PESO_ABRE_ENCADENADA = 3;
+
+/**
+ * Comillas de cualquier clase: 0,6 % de las publicadas, **5,3 %** de las candidatas, razón 0,11.
+ *
+ * `esTrozoDeCitaAjena` ya cierra la puerta a la comilla **sin pareja**, que es un corte mal
+ * hecho. Ésta es otra cosa y por eso pesa en vez de cerrar: la comilla emparejada es el Autor
+ * —o su traductor— citando a un tercero, y lo que se entrecomilla no es del Autor. A veces la
+ * frase vale igual, y de ahí que baje en lugar de desaparecer.
+ */
+export const PESO_COMILLAS_EN_CANDIDATA = 3;
+
+/** Lleva paréntesis o corchete: 0,6 % contra 1,8 %, razón 0,34. Casi siempre es el aparato del editor. */
+export const PESO_PARENTESIS_EN_CANDIDATA = 2;
+
+/** Vocal acentuada suelta —«á», «ó», «é»—: 5,4 % contra 16,0 %, razón 0,34. Ortografía de época, no basura: por eso pesa y no cierra. */
+export const PESO_VOCAL_SUELTA = 2;
+
+/** Nombre propio en interior de frase: 10,5 % contra 23,9 %, razón 0,44. Suele ser el traductor nombrando a un tercero. */
+export const PESO_NOMBRE_PROPIO_INTERIOR = 1;

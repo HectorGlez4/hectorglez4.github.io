@@ -16,6 +16,7 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
+import { cargaDeCandidata, type SeñalDeOrden } from '../../src/lib/ordenDeRevision.ts';
 import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
 import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
@@ -38,9 +39,24 @@ export interface CandidataEnRevision {
   /** Si pasaría la puerta de admisión ahora mismo, y qué le falta si no. */
   admisible: boolean;
   motivos: string[];
+  /**
+   * Lo que pesa en contra de esta candidata, y qué señales pesaron — Historia 19.6.
+   *
+   * Coloca, no decide. Una candidata con toda la carga sigue en la lista y sigue
+   * aprobable; sólo está más abajo.
+   */
+  carga: number;
+  señalesDeOrden: SeñalDeOrden[];
 }
 
-/** Todo lo que está pendiente de decisión, en el orden en que se revisa. */
+/**
+ * Todo lo que está pendiente de decisión, en el orden en que se revisa.
+ *
+ * El recorrido es por slug y la salida **no** — Historia 19.6. Se separan a propósito: el
+ * aviso de duplicado señala a la primera de dos candidatas equivalentes, y si el recorrido
+ * dependiese de la carga, cambiar un peso cambiaría cuál de las dos queda señalada. El
+ * orden en que se lee es una preferencia; cuál duplica a cuál, un hecho.
+ */
 export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[]> {
   const pendientes = await leerCitas(rutas.revision);
   const publicadas = await leerCitas(rutas.citas);
@@ -53,7 +69,9 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
   const vistasEnRevision = new Map<string, string>();
   const lote: CandidataEnRevision[] = [];
 
-  for (const candidata of [...pendientes].sort((a, b) => a.slug.localeCompare(b.slug, 'es'))) {
+  const porSlug = (a: { slug: string }, b: { slug: string }) => a.slug.localeCompare(b.slug, 'es');
+
+  for (const candidata of [...pendientes].sort(porSlug)) {
     const canonico = normalizar(candidata.texto ?? '');
     const comprobacion = citaAdmisible.safeParse(candidata);
 
@@ -115,6 +133,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
+      ...cargaYSeñales(candidata.texto ?? ''),
       admisible:
         comprobacion.success &&
         sinDocumento === undefined &&
@@ -141,7 +160,24 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
     if (canonico !== '') vistasEnRevision.set(canonico, candidata.slug);
   }
 
-  return lote;
+  /*
+   * Y aquí se coloca — Historia 19.6.
+   *
+   * Tres criterios, en este orden. Lo inadmisible al fondo porque aprobarlo no publica
+   * nada: la puerta de AD-1 lo devolvería igual, así que leerlo primero es tiempo tirado.
+   * Después la carga, que es la medida. Y el slug al final para que dos ejecuciones
+   * seguidas den la misma lista: sin desempate estable, revisar «las trescientas primeras»
+   * dos días seguidos no significaría lo mismo.
+   */
+  return lote.sort(
+    (a, b) => Number(b.admisible) - Number(a.admisible) || a.carga - b.carga || porSlug(a, b),
+  );
+}
+
+/** La carga de la 19.6, con el nombre que lleva dentro de la candidata. */
+function cargaYSeñales(texto: string): { carga: number; señalesDeOrden: SeñalDeOrden[] } {
+  const { carga, señales } = cargaDeCandidata(texto);
+  return { carga, señalesDeOrden: señales };
 }
 
 export interface ResultadoDeDecision {
@@ -336,11 +372,18 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
   return resultado;
 }
 
-/** El informe que lee quien revisa. */
-export function formatearLote(lote: CandidataEnRevision[]): string {
-  if (lote.length === 0) return 'No queda ninguna candidata por revisar.\n';
+/**
+ * El informe que lee quien revisa.
+ *
+ * `total` es cuántas hay pendientes; `lote`, cuántas se enseñan. Que sean dos números y no
+ * uno es la garantía de la Historia 19.6: **un corte que no dice lo que deja fuera es una
+ * puerta en secreto**, y una puerta silenciosa que rechaza Citas buenas es justo lo que el
+ * proyecto lleva sesiones evitando. Aquí el corte se declara y lo de abajo se cuenta.
+ */
+export function formatearLote(lote: CandidataEnRevision[], total: number = lote.length): string {
+  if (total === 0) return 'No queda ninguna candidata por revisar.\n';
 
-  const lineas = [`Pendientes de decisión: ${lote.length}`, ''];
+  const lineas = [`Pendientes de decisión: ${total}`, ''];
 
   for (const candidata of lote) {
     lineas.push(`${candidata.slug}`);
@@ -354,6 +397,15 @@ export function formatearLote(lote: CandidataEnRevision[]): string {
       lineas.push('  ✕ No pasaría la admisión aunque se apruebe:');
       for (const motivo of candidata.motivos) lineas.push(`      ${motivo}`);
     }
+    lineas.push('');
+  }
+
+  const debajo = total - lote.length;
+  if (debajo > 0) {
+    lineas.push(
+      `Quedan ${debajo} por debajo del corte, ordenadas de más a menos prometedora. ` +
+        'Se ven subiendo --primeras.',
+    );
     lineas.push('');
   }
 

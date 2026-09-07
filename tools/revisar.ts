@@ -1,7 +1,7 @@
 /**
  * Revisión de candidatas por lote — FR-24.
  *
- *   npx tsx tools/revisar.ts [--corpus corpus]                     lista lo pendiente
+ *   npx tsx tools/revisar.ts [--autor <slug>] [--primeras <n>]     lista lo pendiente
  *   npx tsx tools/revisar.ts --aprobar <slug> [<slug>...] [--temas <tema> [<tema>...]]
  *   npx tsx tools/revisar.ts --rechazar <slug> [<slug>...]
  *
@@ -10,6 +10,10 @@
  * extracción publicaba Citas **sin ningún Tema**, así que no cerraban ningún hueco de Tema
  * — que es el primer criterio de la Historia 11.4 — y la única salida era editar el
  * frontmatter a mano.
+ *
+ * La cola sale ordenada de más a menos prometedora (Historia 19.6), y `--primeras` corta
+ * por arriba **diciendo cuántas quedan debajo**: con veintiún mil candidatas pendientes,
+ * leerlas todas no es un plan, y esconderlas tampoco.
  *
  * Sin argumentos lista lo que queda por decidir, con el aviso de duplicado y lo que le
  * falta a cada candidata para poder publicarse. Volver otro día es volver a ejecutarlo:
@@ -36,6 +40,14 @@ function slugsTras(orden: string): string[] {
   return slugs;
 }
 
+/** El único valor que sigue a una opción, si la opción está. */
+function valorTras(orden: string): string | undefined {
+  const desde = argumentos.indexOf(orden);
+  if (desde === -1) return undefined;
+  const valor = argumentos[desde + 1];
+  return valor === undefined || valor.startsWith('--') ? undefined : valor;
+}
+
 const aAprobar = slugsTras('--aprobar');
 const aRechazar = slugsTras('--rechazar');
 const temas = slugsTras('--temas');
@@ -46,7 +58,37 @@ if (temas.length > 0 && aAprobar.length === 0) {
 }
 
 if (aAprobar.length === 0 && aRechazar.length === 0) {
-  process.stdout.write(formatearLote(await loteEnRevision(rutas)));
+  const autor = valorTras('--autor');
+  const primeras = valorTras('--primeras');
+
+  if (argumentos.includes('--autor') && autor === undefined) {
+    process.stderr.write('«--autor» necesita el slug de un Autor.\n');
+    process.exit(2);
+  }
+
+  // Se comprueba antes de leer el corpus: «--primeras dos» es un error de invocación, y
+  // esperar a que se lean veintiún mil ficheros para decirlo no lo mejora.
+  const corte = primeras === undefined ? undefined : Number(primeras);
+  if (
+    argumentos.includes('--primeras') &&
+    (corte === undefined || !Number.isInteger(corte) || corte < 1)
+  ) {
+    process.stderr.write('«--primeras» necesita un número entero mayor que cero.\n');
+    process.exit(2);
+  }
+
+  const todas = await loteEnRevision(rutas);
+  const suyas = autor === undefined ? todas : todas.filter((c) => c.autor === autor);
+
+  if (autor !== undefined && suyas.length === 0) {
+    process.stdout.write(`No queda ninguna candidata de «${autor}» por revisar.\n`);
+    process.exit(0);
+  }
+
+  // El segundo argumento es el total: lo que se recorta se cuenta, nunca se esconde.
+  process.stdout.write(
+    formatearLote(corte === undefined ? suyas : suyas.slice(0, corte), suyas.length),
+  );
   process.exit(0);
 }
 
