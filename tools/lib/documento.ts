@@ -672,6 +672,61 @@ export function lineasDeEncabezadoDeWikitexto(wikitexto: string): string[] {
 }
 
 /**
+ * La etiqueta con la que Wikisource sirve lo transcrito de un escaneo — Historia 19.7.
+ *
+ *     <pages index="Obras de los moralistas griegos … (1888).pdf" include=139-162 header=1
+ *       titulo="[[Soliloquios]]" autor="Marco Aurelio" traductor="Jacinto Díaz de Miranda" />
+ *
+ * Es la **segunda** forma en que la Fuente declara su metadato, y el lector no la veía: sus
+ * atributos no son parámetros de plantilla —no van tras `|` ni dentro de `{{…}}`—, así que
+ * `lineasDeEncabezadoDeWikitexto` no encontraba nada y los doce libros de los *Soliloquios*
+ * se versionaron sin Autor declarado.
+ *
+ * No es un rincón de la Fuente. Medido el 07/09/2026 con `insource:` sobre el espacio
+ * principal de Wikisource-es: **18.040 páginas** la usan frente a 40.923 con la plantilla, y
+ * 8.465 de ellas declaran `autor`. Es la forma de lo escaneado, que es como llega a
+ * Wikisource casi todo clásico y casi toda teología.
+ *
+ * Lo que devuelve son las **mismas líneas** que produce la plantilla, para que de aquí para
+ * dentro nada más cambie: la cadena de Autor, la obra, el año y el traductor se derivan con
+ * el código que ya existía. Un metadato leído en dos sitios acaba divergiendo, y la Historia
+ * 12.1 ya cobró esa factura una vez.
+ *
+ * **El `index` no entra**, y es deliberado: su valor es el nombre del fichero escaneado y
+ * lleva un año dentro —«… (1888).pdf»—. Tomarlo sería la Procedencia inferida que FR-2
+ * prohíbe. La Fuente no ha declarado que la obra sea de 1888; ha nombrado un fichero. Cae
+ * solo, porque `index` no está en la lista cerrada de metadatos.
+ */
+const ETIQUETA_DE_ESCANEO = /<pages\b([^>]*)\/?>/giu;
+
+/** Un atributo de la etiqueta: `autor="Marco Aurelio"`, con comilla doble o simple. */
+const ATRIBUTO_DE_ESCANEO = /([A-Za-z\u00C0-\u024F]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/gu;
+
+/** Los atributos que la etiqueta declara, en la forma en que los declara la plantilla. */
+export function lineasDeEtiquetaDeEscaneo(wikitexto: string): string[] {
+  const cabeza = wikitexto.replace(/\r\n?/gu, '\n').slice(0, MAX_CARACTERES_DE_ENCABEZADO);
+  const lineas: string[] = [];
+  const vistas = new Set<string>();
+
+  for (const etiqueta of cabeza.matchAll(ETIQUETA_DE_ESCANEO)) {
+    for (const atributo of (etiqueta[1] ?? '').matchAll(ATRIBUTO_DE_ESCANEO)) {
+      const valor = (atributo[2] ?? atributo[3] ?? '').trim();
+      // Un atributo vacío no declara nada, igual que un parámetro vacío de la plantilla.
+      if (valor === '') continue;
+      const segmento = `${atributo[1]}=${valor}`;
+      if (!PARAMETRO_DE_ENCABEZADO.test(segmento)) continue;
+      const linea = `|${segmento.replace(/\s+/gu, ' ').trim()}`.slice(0, MAX_CARACTERES_POR_LINEA);
+      if (vistas.has(linea)) continue;
+      vistas.add(linea);
+      lineas.push(linea);
+      if (lineas.length >= MAX_LINEAS_DE_ENCABEZADO) return lineas;
+    }
+  }
+
+  return lineas;
+}
+
+/**
  * La firma en negrita con la que declaran su Autor las páginas anteriores a la plantilla.
  *
  *     '''[[Francisco de Quevedo]]'''
@@ -1083,6 +1138,10 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         ...lineaDeEtiqueta(regionPlana, ETIQUETA_DE_AUTOR_WIKISOURCE),
         ...recorteDeEtiqueta(regionPlana, ETIQUETA_DE_AÑO_WIKISOURCE),
         ...(encabezadoDeOrigen === undefined ? [] : lineasDeEncabezadoDeWikitexto(encabezadoDeOrigen)),
+        // Y la etiqueta de lo escaneado, normalizada a esas mismas líneas — Historia 19.7.
+        // Detrás de la plantilla a propósito: una página que traiga las dos formas declara
+        // en la plantilla lo suyo y en la etiqueta lo del escaneo, y manda lo suyo.
+        ...(encabezadoDeOrigen === undefined ? [] : lineasDeEtiquetaDeEscaneo(encabezadoDeOrigen)),
         ...(encabezadoDeLaObra === undefined ? [] : lineasDeLaObraDeclarada(encabezadoDeLaObra)),
       ].join('\n');
     },

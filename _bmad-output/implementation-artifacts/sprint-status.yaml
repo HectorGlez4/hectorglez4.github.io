@@ -265,6 +265,15 @@ development_status:
   # —Antigüedad 83 autores, Roma 63, Grecia 35, católicos 8— y termina por agotamiento, no
   # por una cifra. `DP-Autores-100` es la marca de dominio público de la propia Fuente.
   19-5-la-epoca-se-declara-desde-la-fuente: review  # npm run epocas; 189 candidatos, 187 pendientes
+  # 19.6 sale del diagnóstico del 07/09: el bucle no rinde por falta de candidatas —hay
+  # 21.021 en corpus/_revision/— sino porque loteEnRevision las ordena por slug, que
+  # respecto a si valen es azar. Cinco señales medidas separan; la longitud no.
+  19-6-la-cola-de-revision-se-ordena: in-review
+  # 19.7 sale de la 19.6: al publicar las primeras Citas de Marco Aurelio, FR-23 nombró
+  # doce documentos sin Autor declarado. La causa no es la Fuente: Wikisource declara el
+  # Autor de lo escaneado con <pages index=… autor="…" /> y el lector solo entiende
+  # {{Encabezado|autor=}}. Medido el 07/09: 18.040 páginas contra 40.923, el 31 %.
+  19-7-el-lector-entiende-la-obra-escaneada: in-review
   epic-19-retrospective: optional
 
 action_items:
