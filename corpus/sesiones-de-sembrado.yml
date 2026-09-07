@@ -161,3 +161,12 @@ sesiones:
       citasPublicadas: 252
       procedenciaCompleta: 85.7
       tradicionLatinoamericana: 41.2
+  - fecha: "2026-09-07"
+    hora: "07:26"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores católicos: le quedan 3 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 8 candidatos en la época Autores católicos: 1 ya sembrados y 4 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    resultado:
+      citasPublicadas: 1642
+      procedenciaCompleta: 26.8
+      tradicionLatinoamericanaSobreHispanicos: 54.5

@@ -1,0 +1,56 @@
+# Descartes de candidatos — Historia 19.5, Épica 19
+#
+# QUÉ ES. Los candidatos de una época que NO van a dar Citas, con el motivo escrito. Un
+# candidato descartado deja de contar como pendiente y la época puede llegar a estar
+# terminada; uno SALTADO no deja rastro y se vuelve a mirar cada sesión, hasta que alguien
+# se cansa. Esa es la diferencia entera, y es la que impide dar una época por terminada por
+# cansancio en vez de por la cuenta.
+#
+#   npx tsx tools/epocas.ts --descartar <slug> --motivo "por qué no da Citas"
+#
+# SIN MOTIVO NO HAY DESCARTE. La orden se niega con código de error: un descarte sin motivo
+# es una desviación sin dueño, exactamente como una anulación de objetivo sin motivo en
+# sesiones-de-sembrado.yml.
+#
+# EL DESCARTE ES POR AUTOR, NO POR ÉPOCA. Un autor cuya prosa no da sentencia suelta no la
+# da en ninguna de las categorías en las que la Fuente lo haya clasificado. `epoca` queda
+# escrita porque dice desde dónde se miró, no porque acote dónde vale.
+#
+# POR QUÉ SOLO AÑADE, a diferencia de candidatos-por-epoca.yml, que está justo al lado.
+# Aquél lo escribe la FUENTE y se regenera entero; éste lo escribe el EDITOR y registra
+# actos. Regenerarlo borraría el criterio por el que un candidato dejó de proponerse, y la
+# sesión siguiente volvería a proponerlo — que es el bucle que este fichero existe para
+# cortar. Es la misma distinción que separa a serie-de-indexacion.yml de
+# peticiones-de-rastreo.yml.
+#
+# DESCARTAR NO ES CONDENAR. Si un día aparece obra suya en español con sentencia suelta, se
+# siembra y ya está: el cruce cuenta como sembrado a quien está en el Corpus, mire lo que
+# mire este registro.
+#
+# Metadato del Corpus y no colección, como sus vecinos. Ningún módulo de `src/lib/` lo lee.
+
+descartes:
+  - fecha: "2026-09-07"
+    epoca: "catolicos"
+    candidato: "nicolas-malebranche"
+    idDePagina: 230263
+    nombre: "Nicolas Malebranche"
+    motivo: "La ficha de Autor de la Fuente no enlaza ninguna obra: no hay texto del que extraer. Comprobado el 2026-09-07."
+  - fecha: "2026-09-07"
+    epoca: "catolicos"
+    candidato: "antoine-arnauld"
+    idDePagina: 230273
+    nombre: "Antoine Arnauld"
+    motivo: "La ficha de Autor de la Fuente no enlaza ninguna obra: no hay texto del que extraer. Comprobado el 2026-09-07."
+  - fecha: "2026-09-07"
+    epoca: "catolicos"
+    candidato: "felix-torres-amat"
+    idDePagina: 216249
+    nombre: "Félix Torres Amat"
+    motivo: "Su única obra en la Fuente es «La Sagrada Biblia»: figura como TRADUCTOR de la Escritura, no como autor del texto. Una sentencia de ahí no sería suya, y la Épica 9 ya prohíbe publicar lo que un Autor cita en vez de lo que escribe. Comprobado el 2026-09-07."
+  - fecha: "2026-09-07"
+    epoca: "catolicos"
+    candidato: "jose-ignacio-bartolache"
+    idDePagina: 134845
+    nombre: "José Ignacio Bartolache"
+    motivo: "Sus obras son «Lecciones Matemáticas» y una arenga protocolaria. Prosa matemática y de circunstancia: no da sentencia suelta, que es el modo retórico que la bitácora ya catalogó con la historia decimonónica y los artículos costumbristas. Comprobado el 2026-09-07."
