@@ -36,7 +36,7 @@ epocas:
   - id: "antigua-grecia"
     nombre: "Antigua Grecia"
     categoria: "Categoría:Autores de la Antigua Grecia"
-    recuperada: "2026-09-06"
+    recuperada: "2026-09-07"
     candidatos:
       - nombre: "Apolodoro de Atenas"
         slug: "apolodoro-de-atenas"
@@ -216,7 +216,7 @@ epocas:
   - id: "antigua-roma"
     nombre: "Antigua Roma"
     categoria: "Categoría:Autores de la Antigua Roma"
-    recuperada: "2026-09-06"
+    recuperada: "2026-09-07"
     candidatos:
       - nombre: "Agustín de Hipona"
         slug: "agustin-de-hipona"
@@ -536,7 +536,7 @@ epocas:
   - id: "antiguedad"
     nombre: "Antigüedad"
     categoria: "Categoría:Autores de la Antigüedad"
-    recuperada: "2026-09-06"
+    recuperada: "2026-09-07"
     candidatos:
       - nombre: "Agustín de Hipona"
         slug: "agustin-de-hipona"
@@ -956,7 +956,7 @@ epocas:
   - id: "catolicos"
     nombre: "Autores católicos"
     categoria: "Categoría:Autores católicos"
-    recuperada: "2026-09-06"
+    recuperada: "2026-09-07"
     candidatos:
       - nombre: "Agustín de Hipona"
         slug: "agustin-de-hipona"

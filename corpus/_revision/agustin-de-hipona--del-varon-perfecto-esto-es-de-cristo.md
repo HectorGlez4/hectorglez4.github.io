@@ -1,0 +1,13 @@
+---
+texto: "Del varón perfecto, esto es, de Cristo y de su cuerpo: es decir, de la iglesia que es su plenitud"
+autor: "agustin-de-hipona"
+slug: "agustin-de-hipona-del-varon-perfecto-esto-es-de-cristo"
+procedencia:
+  obra: "La ciudad de Dios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/XXII"
+---

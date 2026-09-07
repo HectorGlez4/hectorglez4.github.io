@@ -1,0 +1,13 @@
+---
+texto: "Qué tal sea la religión que enseña que los hombres, para encaminarse a los dioses buenos, deben aprovecharse del patrocinio o intercesión de los demonios"
+autor: "agustin-de-hipona"
+slug: "agustin-de-hipona-que-tal-sea-la-religion-que-ensena"
+procedencia:
+  obra: "La ciudad de Dios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/VIII"
+---

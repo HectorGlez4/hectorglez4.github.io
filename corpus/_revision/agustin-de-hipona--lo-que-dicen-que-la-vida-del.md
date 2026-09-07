@@ -1,0 +1,13 @@
+---
+texto: "Lo que dicen que la vida del sabio es política y sociable, también no otros lo aprobamos y confirmamos ce más solidez que ellos."
+autor: "agustin-de-hipona"
+slug: "agustin-de-hipona-lo-que-dicen-que-la-vida-del"
+procedencia:
+  obra: "La ciudad de Dios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/XIX"
+---

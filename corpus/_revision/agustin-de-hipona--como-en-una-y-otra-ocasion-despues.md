@@ -1,0 +1,13 @@
+---
+texto: "¿Cómo en una y otra ocasión, después de ajustadas alianzas y paces, tornaron a renovarse entre los, yernos y suegros, y entre sus descendientes y posteridad?"
+autor: "agustin-de-hipona"
+slug: "agustin-de-hipona-como-en-una-y-otra-ocasion-despues"
+procedencia:
+  obra: "La ciudad de Dios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/III"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Porque ¿quién está seguro de si los demonios sienten dolor corporalmente cuando confiesan a voces que padece horribles tormentos?"
+autor: "agustin-de-hipona"
+slug: "agustin-de-hipona-porque-quien-esta-seguro-de-si-los"
+procedencia:
+  obra: "La ciudad de Dios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/XXI"
+---

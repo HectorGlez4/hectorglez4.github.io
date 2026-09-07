@@ -54,3 +54,15 @@ descartes:
     idDePagina: 134845
     nombre: "José Ignacio Bartolache"
     motivo: "Sus obras son «Lecciones Matemáticas» y una arenga protocolaria. Prosa matemática y de circunstancia: no da sentencia suelta, que es el modo retórico que la bitácora ya catalogó con la historia decimonónica y los artículos costumbristas. Comprobado el 2026-09-07."
+  - fecha: "2026-09-07"
+    epoca: "catolicos"
+    candidato: "tomas-de-aquino"
+    idDePagina: 42863
+    nombre: "Tomás de Aquino"
+    motivo: "Wikisource-es solo tiene de él el himno «Verbum Supernum Prodiens», en latín: no hay obra suya en español de la que extraer sentencia. La Summa Theologica no está en la Fuente."
+  - fecha: "2026-09-07"
+    epoca: "catolicos"
+    candidato: "fray-ambrosio-montesino"
+    idDePagina: 15074
+    nombre: "Fray Ambrosio Montesino"
+    motivo: "Su única obra en Wikisource-es es el villancico «La noche Santa»: un estribillo y una copla, en verso y sin sentencia que se sostenga suelta. Es el defecto que la bitácora ya catalogó con la lírica breve."
