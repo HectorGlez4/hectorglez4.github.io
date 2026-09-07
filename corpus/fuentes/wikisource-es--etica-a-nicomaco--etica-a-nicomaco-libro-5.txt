@@ -1,0 +1,928 @@
+fuente: wikisource-es
+obra: Ética a Nicómaco
+url: https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_5
+recuperado: 2026-09-07
+---
+Ética a Nicómaco/Libro 5
+|título=[[Ética a Nicómaco]]
+|autor=[[Aristóteles]]
+obra> |título=Ética a Nicómaco
+obra> |autor=Aristóteles
+obra> |título={{Anclaje+|Índice}}
+---
+De los morales de Aristóteles, escritos a Nicomaco, su hijo, y por esta causa llamados nicomaquios
+
+Argumento del libro quinto
+
+En el tercero y cuarto libro ha tratado Aristóteles de las tres virtudes que
+consisten en la voluntad, que son fortaleza, templanza, liberalidad y otras a ellas
+anexas, como son la magnificencia y magnanimidad. En el quinto trata de la virtud
+más necesaria de todas para la conservación del mundo, que es la virtud de la
+justicia, sin la cual ni las cosas de la guerra, ni los grandes tesoros adquiridos, ni
+el vivir con mucha guarda, ni el hacer largas mercedes, bastan a conservar salva la
+república. Lo cual podemos fácilmente entender por las historias, que son la fuente
+de toda erudición. Pues hallaremos haber comenzado a caer el imperio Romano,
+que fue la mayor monarquía que el mundo ha visto, dende que esta virtud entre
+ellos comenzó a escurecerse, y los unos comenzaron a desear las cosas de los otros,
+hasta tanto que vino a dar tan grande caída que pereció del todo. También veremos
+las gentes bárbaras septentrionales, que lo arruinaron, tantas y tan varias aunque
+valerosas en las armas, haberse conservado poco por no saber poner asiento con
+esta virtud en las cosas tocantes al gobierno. Porque como se verá en los libros de
+República, no hay cosa que tantas mudanzas cause en la república como la falta
+desta justicia, y el procurar los unos, so color de esto, enseñorearse de las cosas de
+los otros. Como cosa, pues, tan necesaria para el bien y paz de los hombres y sosiego
+de la vida, trátala muy largamente, porque tiene muchos senos esta virtud y muchas
+diferentes materias que tratar, como se verá por sus capítulos.
+
+Capítulo I
+
+De la justicia y sin justicia
+
+En el primer capítulo, guardando su acostumbrada orden, Aristóteles distingue
+los vocablos de justicia y sinjusticia, y después pone sus difiniciones y declara en
+qué género de obras se emplean y ejercitan.
+
+Habemos, pues, de tratar de la justicia y sinjusticia en qué hechos consisten,
+y qué medianía es la justicia, y de qué cosas es lo justo el medio, y habémoslo de
+tratar por la misma orden que habemos tratado lo pasado. Vemos, pues, que todos
+pretenden llamar justicia aquel hábito y costumbre, que hace prontos a los hombres
+en el hacer las cosas justas, y por la cual los hombres obran justamente y aman las
+cosas justas. Y de la misma manera la sinjusticia aquella costumbre que induce a
+los hombres a hacer agravios y a querer lo que no es justo. Por esto, habemos de
+presuponer agora esto como en suma, porque no es todo de una misma manera en
+las facultades y en las sciencias y en los hábitos. Porque la facultad y la sciencia
+parece que una misma trata cosas contrarias, pero en los hábitos cada contrario
+tiene su proprio hábito, ni puede un mismo hábito inclinar a dos contrarios, como
+la salud no hace las cosas que le son contrarias, sino sólo lo que a ella pertenece.
+Porque decimos que uno anda sanamente, cuando anda como andaría un sano.
+Muchas veces, pues, un hábito se conoce por el hábito contrario, y muchas también
+por el subjeto donde está. Porque si está entendido cuál es el buen hábito de cuerpo,
+también lo estará cuál es el mal hábito, y también el buen hábito de cuerpo se
+entenderá por lo que lo engendra, y lo que lo engendra por el buen hábito mismo se
+sabrá. Porque si el buen hábito de cuerpo consiste en ser de carne dura y musculosa,
+de necesidad el mal hábito de cuerpo consistirá en tener las carnes raras y flojas,
+y aquello hará buen hábito de cuerpo, que las carnes tiesas hiciere y musculosas.
+Acontece, casi de ordinario que si el nombre del contrario se entiende de muchas
+maneras, también se entienda el otro. Como si lo justo se entiende de diversas
+maneras, también lo injusto. Parece, pues, que así la justicia como la sinjusticia se
+entiende de diversas maneras, aunque por ser muy cercana la una significación de
+la otra, no se entiende la ambigüidad, como está clara cuando las significaciones
+son muy diferentes. Porque entre estas dos maneras de ambigüidad hay mucha
+diferencia. Como agora, que se llama llave aquel hueso que está debajo de la
+cerviz de los animales, y también aquella con que cierran las puertas, y esto sólo
+por la comunicación del nombre. Entendamos, pues, de cuántas maneras se dice
+uno injusto. Parece, pues, que así el que traspasa las leyes, como el que codicia
+demasiado, y también el que no guarda igualdad, se dice injusto, y así también
+claramente aquél se dirá ser justo, que vive conforme a ley y guarda igualdad en el
+trato de las cosas, y lo justo será lo que es conforme a ley y a igualdad, y lo injusto
+lo que es contra ley y desigual. Y pues el injusto es codicioso, cosa cierta es que
+se ejercitará en los bienes, pero no en todos, sino en aquellos en que hay fortuna
+prospera y adversa, los cuales, así sencillamente hablando, siempre son buenos,
+pero particularmente para algunos no son siempre buenos, y los hombres por éstos
+ruegan y éstos procuran, lo cual no había de ser así, sino que habrían de rogar que
+las cosas que en sí son propriamente buenas, fuesen también buenas para ellos, y
+escoger aquello que para ellos es mejor. Pero el injusto no elige siempre lo que
+es más, porque en lo que son de suyo proprio cosas malas, siempre escoge lo que
+es menos. Mas porque lo que es menos malo parece en alguna manera bueno, y la
+codicia siempre es de cosas buenas, por esto parece siempre amigo de lo más. Éste,
+pues, es desigual, porque este nombre es común y lo comprende todo en sí, pues lo
+desigual tiene en sí lo más, y lo menos. Es asimismo quebrantador de leyes. Porque
+el traspasar las leyes, o si así lo queremos, decir, la desigualdad, comprende en sí
+toda sinjusticia y es común de toda sinjusticia. Y, pues, el que traspasa las leyes es
+injusto y justo el que las guarda, cosa cierta es que todas las cosas legítimas serán
+en alguna manera justas. Porque todas las cosas determinadas por la facultad de
+poner leyes son legítimas, y cada una dellas decimos ser cosa justa. Las leyes, pues,
+mandan todas las cosas, dirigiéndolas, o al bien común de todos, o de los mejores, o
+de los más principales en virtud, o en cualquier otra manera. De una manera, pues,
+decimos ser justas las cosas que causan y conservan la felicidad y los miembros
+della en la civil comunidad. Porque también manda la ley que se hagan las obras
+proprias del hombre valeroso, como no desamparar la orden, no huir, no arrojar
+las armas. Y también las que son del varón templado, como no cometer adulterio,
+no hacer afrenta a nadie: asimismo las del varón manso, como no herir a nadie, no
+decirle injurias, y de la misma manera en los demás géneros de virtudes y de vicios,
+mandando unas cosas y prohibiendo otras, lo cual, la ley que bien hecha está, lo
+hace bien, y ni al la que sin maduro consejo y repentinamente. Esta manera, pues,
+de justicia es virtud perfeta, aunque no así sencillamente, sino para con otro, y por
+esto nos parece muchas veces la mejor de las virtudes, y más digna de admiración
+que el poniente ni el levante, como solemos decir en proverbio comúnmente. La
+justicia, pues, encierra en sí y comprende todas las virtudes, y es la más perfeta
+de todas la virtudes, porque es el uso de la virtud que es más perfeta. Y es perfeta,
+porque el que la posee puede usar para con otro de virtud y no para consigo mismo
+solamente. Porque muchos en sus cosas proprias pueden usar de virtud, lo que no
+pueden hacer en las ajenas. Por esto dice muy bien aquel dicho de Biante, que el
+mando y señorío demostrará quién es el varón. Porque el señorío para el bien de
+otrie se encamina, y consiste ya en el bien común. Y por esta misma razón sola, la
+justicia entre todas las virtudes parece bien ajeno, porque para el bien de otrie se
+dirige, pues hace las cosas que son útiles a otro, o al que gobierna, o a la comunidad
+de la república. Aquél, pues, es el peor de todos, que contra sí mismo y contra sus
+amigos usa de maldad, y el mejor de todos será, no el que usa de virtud para consigo
+mismo, sino el que para con otro, porque ésta es la obra de mayor dificultad. De
+manera que justicia no es una sola especie de virtud, sino una suma de todas las
+virtudes. Ni su contraria la sinjusticia es una especie de vicio, sino una suma de
+todo género de vicios. En qué difiera, pues, esta justicia y la virtud, de lo que está
+dicho se entiende claramente. Porque en realidad de verdad todo es una misma
+cosa, aunque no lo es en cuanto al uso y ejercicio, sino que en cuanto se dirige
+al bien de otro es justicia, y en cuanto es tal manera de hábito, dícese así
+sencillamente virtud.
+
+Capítulo II
+
+Cómo hay muchas maneras de justicias, y cómo hay una diversa de aquélla, que comprende en sí todas las virtudes, y cuál es y qué tal
+
+En el capítulo pasado distinguió los vocablos de justicia y sinjusticia, y declaró
+cómo la perfeta justicia comprendía en sí todas las virtudes, y asimismo la sinjusticia
+todos los vicios. Porque todo hombre vicioso hace agravio o a sí mismo o a otro,
+y el que hace agravio es injusto; por donde todo hombre vicioso es injusto. Pero
+porque esta justicia, tan por sus números y remates puesta, es rara de hallar entre los
+hombres, y no es la que comúnmente se pide en el contrato de las gentes (porque
+no se podría tratar, tanta falta hay della), trata agora de la justicia particular, que
+consiste en dar a cada uno lo que es suyo, y muestra lo que se requiere en ella
+y en qué se peca.
+
+Pero buscamos la justicia, que es particular especie de virtud, pues la hay, según
+decimos, y de la misma manera queremos tratar de la particular sinjusticia, la cual,
+con esta señal entenderemos que se halla: que el que conforme a los demás vicios
+vive, bien hace cierto agravio, pero no se dice que desea más de lo que tiene. Como
+el que de cobarde arrojó el escudo, o el que habló malcriadamente por su cólera, o
+el que no socorrió con dineros por su escaseza y avaricia. Pero cuando uno desea
+tener más, muchas veces no peca en nada desto, ni aun en ninguno de los otros
+vicios, y peca en algún vicio, en fin, pues vituperan a los hombres por la sinjusticia.
+De do se colige que hay alguna otra sinjusticia, que es como parte de aquella
+sinjusticia general, y alguna cosa particularmente injusta que es parte de aquello
+injusto universal, que era contra ley. A más desto, si uno por alguna ganancia
+cometiese un adulterio, y recibiese de aquello dineros, y otro hiciese lo mismo
+pagando por cumplir con su deseo, y recibiese daño en su hacienda, ¿no juzgaríamos
+a éste por hombre disoluto, más que no por codicioso, y al otro por injusto y no por
+disoluto? Luego cosa cierta es que en el ganar, fuera de las demás otras sinjusticias,
+se puede referir la misma ganancia siempre a alguna especie de vicio propriamente;
+y como se refiere el cometer adulterio a la disolución, y el desamparar en la batalla
+al compañero a la cobardía, y el herir a la cólera, así también el malganar no se
+puede referir a otro vicio sino a la sinjusticia. De manera que queda mostrado a la
+clara haber otra particular sinjusticia fuera de aquella universal, que tiene el mismo
+nombre que aquélla. Porque la difinición ha de consistir en un mismo género, y la
+una y la otra tienen el ser en respecto de otro, aunque la justicia particular refiérese
+o a alguna honra, o a intereses, o a evitar algún peligro, o si con algún nombre
+podemos comprender todas estas cosas, y también al placer que de la ganancia
+recebimos. Mas la justicia universal refiérese a todo aquello que tiene obligación de
+hacer cualquiera bueno. De manera que queda sacado en limpio cómo hay muchas
+maneras de justicias, y cómo hay una particular diferente de aquella universal,
+que es la confederación de todas las virtudes. Qué justicia, pues, y qué tal sea esta
+particular, habemos agora de tratarlo. Ya, pues, definimos ser aquello lo injusto
+que era contra ley y desigual, y lo justo lo que era legítimo y igual. De manera que
+la sinjusticia, de que arriba habemos dicho, consiste en las cosas hechas contra ley.
+Pero porque no es todo uno ser una cosa desigual y contra ley, sino que sea lo uno
+con lo otro como la parte con el todo (porque toda cosa desigual es contra ley, pero
+no toda cosa contra ley es desigual, porque toda demasía es desigual, pero no toda
+cosa desigual es demasía), no será todo de una manera lo injusto y la sinjusticia,
+sino que una será como la parte y otra como el todo. Porque también esta particular
+sinjusticia es parte de la sinjusticia universal, y de la misma manera la justicia
+particular es parte de la justicia universal. De manera que habemos de tratar de las
+particulares justicia y sinjusticia, y de la misma manera de lo justo y de lo injusto.
+Aquella justicia, pues, que resulta de todas las virtudes, y es el uso de todas ellas
+referido a otro, y la sinjusticia, que de la universal confederación de los vicios
+procede, quédense a una parte. Pero lo justo y injusto que dellas procede es cosa
+manifiesta que se ha de definir, porque casi todas las cosas que las leyes disponen,
+proceden de la virtud universal; pues la ley manda que vivamos conforme a cada
+género de virtud, y prohíbe, en particular, las cosas de cada género de vicios. Y de
+las cosas por ley establecidas y ordenadas, aquéllas valen para hacer a los hombres,
+generalmente, dotados de toda manera de virtud, que están hechas para enseñar
+cómo se han de criar todos los vecinos de la ciudad así en común. Pero si pertenece
+a la disciplina de la república, o a otra, tratar de la particular doctrina y crianza de
+cada uno, con que un varón se cría del todo bueno, después lo determinaremos.
+Porque, por ventura, no es todo uno ser uno hombre de bien y serlo todos los
+ciudadanos. Una, pues, de las partes de la particular justicia y de lo justo que
+procede della, consiste en el repartir de las honras, o de los dineros, o de las
+demás cosas que a los que en una misma ciudad viven se reparten. Porque en esto
+acontece tener uno más o menos que otro, o igualmente. Otra en el regir y ordenar
+las cosas que consisten en contrataciones, la cual tiene dos partes. Porque de las
+contrataciones, unas hay que son voluntarias y otras que forzosas. Voluntarias
+contrataciones son como el vender y comprar, el prestar, el salir fiador, el alquilar, el
+depositar, el tomar a jornal o asoldadar. Llámanse estas contrataciones voluntarias,
+porque el principio y causa dellas es libre y voluntaria. Pero las forzosas, unas
+hay secretas, como el hurto, el adulterio, el dar ponzoña, el ser alcahuete, el
+sobornar esclavos, el matar de secreto, el jurar falso, y otras violentas, como el
+azotar, el echar en la cárcel, el condenar a muerte, el robar, el mancar, el decir
+una injuria y el hacer una afrenta.
+
+Capítulo III
+
+De la justicia que consiste en los repartimientos
+
+Ya que nos ha desengañado Aristóteles que aquí no se trata de la perfeta justicia,
+que procede de la concordia de todas las virtudes, sino de la que es especie de virtud
+y consiste en el guardar de la igualdad, y ha dicho que tiene dos especies: la una,
+que toca a lo público, y consiste en el repartir de las honras y intereses comunes,
+y la otra en los particulares contratos, que de necesidad se han de ofrecer entre las
+gentes, trata en el capítulo presente de los repartimientos de las honras y intereses.
+Y como no hay sólo un género de república, sino muchos (como en los libros de
+República veremos), da la regla que se ha de guardar conforme a ellos, y dice que
+cuanto más uno tenga de aquello que en la tal república es preciado, tanto más es
+merecedor de las honras y cargos públicos. Y así, en la aristocracia, que quiere decir
+república donde los mejores en virtud y bondad rigen, la cual sola en realidad de
+verdad es república, ora se rija por uno sólo, como el reino, ora por muchos, porque
+allí sola la virtud es tenida en precio, cuanto uno es mejor en vida y costumbres,
+tanto es habido por más digno de los cargos y honras públicas. Pero en las no tan
+bien regidas, como son donde se tiene mucha cuenta con el censo y hacienda de
+cada uno, según que uno tiene y puede así es honrado. Lo cual es la total causa
+del mal de nuestra vida, porque si no al que el temor de Dios le refrena, todos los
+demás procuran, por ser más tenidos, acrecentar sus casas por cualquiera vía. Y
+esto lloraba sabiamente Horacio en la república de Roma: que eran los hombres
+admitidos a los cargos y honras por el censo y hacienda que tenían. Y decía que
+eran más cuerdos los mochachos en sus juegos, pues hacían ley, que el que más
+diestro fuese en el juego, aquél fuese el rey.
+
+Pero por cuanto el injusto es desigual, y lo injusto desigual, cosa clara es que
+lo desigual terná su medio, el cual es lo igual. Porque en todo hecho donde haya
+más y menos, ha de haber, de necesidad, igual. Y, pues, si lo injusto es desigual,
+lo justo será igual; lo cual, sin más dar razones, lo tienen todos por verdad. Y,
+pues, lo igual es medio, seguirse ha que lo justo es una cierta especie de medio.
+Cualquier medio, pues, de necesidad ha de consistir, a lo menos, entre dos. Por lo
+cual necesariamente se colige que lo justo es medio y igual a algunos, en respecto
+de algo; y en cuanto es medio eslo de algunos, que es de lo más y de lo menos. Y en
+cuanto medio es de dos, y en cuanto justo a algunos justo. De manera que lo justo
+ha de consistir de necesidad en cuatro cosas, a lo menos. Porque a los que les es
+justo son dos y las cosas en que es justo asimismo son dos. Y la misma medianía es
+para los dos, y en las dos cosas. Porque de la misma manera que sean las dos cosas
+en qué, sean también las dos personas a quién. Porque si así no fuese, ya los que son
+iguales no ternían cosas iguales. Pues de aquí nacen las bregas y contiendas, cuando
+los que son iguales no tienen iguales cosas, o cuando los que no lo son las tienen
+y gozan. Véese esto a la clara por lo que de la dignidad procede. Porque todos a
+una voz confiesan que lo justo en los repartimientos se ha de repartir conforme a la
+dignidad de cada uno; pero en qué consista esta dignidad, no conforman todos en
+un parecer, sino que en el pueblo que por gobierno de toda la comunidad se rige,
+pretenden que consiste en la libertad; donde pocos y poderosos gobiernan, juzgan
+que consiste en las riquezas, y otros en la nobleza del linaje; mas donde los buenos
+gobiernan, júzgase que consiste en la virtud. De manera que lo justo es cosa que
+consiste en proporción; porque el tener proporción no es lo proprio del número de
+uno, sino de todo número en general, porque la proporción es igualdad de cuenta, y
+consiste a lo menos entre cuatro, y la proporción dividida, cosa clara es que consiste
+en cuatro; pero también la continua, porque usará dos veces de uno, y lo dirá dos
+veces desta manera: como sea la proporción de a con la de b, sea la de b con la
+de c. De manera que la b dos veces se nombra, y así tomada la proporción de b
+dos veces, serán cuatro las cosas que tienen proporción. Lo justo, pues, consiste
+a lo menos en cuatro cosas, y es la misma cuenta, porque así las personas a quien
+es justo, como las cosas que lo son, están distinctas. Será, pues, desta manera la
+proporción: que, como sea este término a con este término b, así se ha de haber este
+término c con este término d. Y, al contrario, como sea la a con la c, se ha de haber
+la b con la d. Y de la misma manera el un todo con el otro que el repartimiento
+ajunta. Y si desta manera se conciertan, justamente los ajunta. La confederación,
+pues, del término a con el de c, y la del de b con el de d, es lo justo en la repartición,
+y lo justo es el medio; quiero decir de lo que no admite proporción, porque lo que
+proporción tiene, es el medio, y lo justo es medio que consiste en proporción. A
+esta proporción llámanla los matemáticos proporción geométrica, porque en la
+geometría es así, que como sea el todo con el todo, se ha de haber lo uno con lo
+otro. Y tal proporción como ésta no es proporción continua, porque no es un mismo
+término el que se compara y el con quien se compara. Es, pues, esta manera de
+justo, cosa que consiste en proporción, y esta manera de injusto, cosa que no tiene
+proporción. Uno, pues, dello es lo más, y otro lo menos, lo cual en las mismas obras
+se vee claro, porque el que hace agravio, tiene más del bien de lo que merece, y el
+que lo recibe menos. Y en lo malo es al revés, porque el menor mal, comparado
+con el mayor, tiénese en cuenta de bien, pues el menor mal es más de escoger que
+no el mayor, y todo lo que es de escoger es bien, y lo más digno de escoger, mayor
+bien. Desta manera, pues, es la una especie de lo justo.
+
+Capítulo IV
+
+De la justicia que se ha de guardar en los contractos
+
+En el capítulo pasado trató de la distribución de las honras y intereses públicos,
+y de la justicia y igualdad que se debe guardar en ellos. Aunque conforme a la
+doctrina de sus tiempos, en los cuales ninguno se tenía por hombre de valor si no
+era matemático y hábil en la geometría y aritmética, redujo la distribución desta
+igualdad a proporción de geometría, para mostrar la fuerza que tiene la igualdad.
+Agora, en el capítulo presente, trata de la otra especie de igualdad, que consiste en
+los contractos que se ofrecen en el tratar de los negocios, y pone la diferencia que
+hay desta especie a la primera, que aquí no se tiene cuenta con la dignidad de las
+personas, como en la otra se tenía, sino en la igualdad de las cosas. Porque aunque el
+que debe sea bueno y a quien debe malo, el juez condemnará al bueno que satisfaga
+al malo el interese que le debe, si ha de hacerlo de justicia y igualdad.
+
+La otra especie que resta, y es para reformar, consiste en los contractos, así
+voluntarios como forzosos. Esta especie de justo es diferente de la primera. Porque
+la justicia que consiste en la distribución de las cosas comunes, siempre se ha
+de tratar por la proporción que habemos dicho, pues la repartición de intereses
+comunes, si se hiciese, se ha de hacer por la misma cuenta y proporción que se
+hace el repartimiento del tributo, y la sinjusticia que a esta justicia contradice, es
+fuera de proporción. Pero lo justo, que consiste en los contractos, es cierta igualdad,
+y lo injusto desigualdad, pero no conforme a la proporción que allí dijimos, sino
+conforme a la proporción aritmética. Porque aquí no se hace diferencia si el bueno
+defrauda al malo en algo, o si el malo al bueno, ni si el bueno cometió adulterio
+o si el malo, sino que la ley solamente tiene cuenta con la diferencia del daño, y
+quiere reducir a igualdad al que hace injuria y al que la padece. Y si de dos el uno
+hizo daño y el otro lo recibió, el juez pretende tal cosa como aquélla, como injusta
+y desigual, reducirla a igualdad. Porque cuando uno es herido y otro lo hiere o lo
+mata, y el que fue herido muere, aquel daño y hecho divídese en partes desiguales,
+pero el juez procura igualar el daño quitando de la ganancia (porque, generalmente
+hablando, en semejantes cosas que éstas, aunque a algunas no parece cuadrarles
+propriamente el nombre de ganancia, dícese ganancia en el que hiere y daño en el
+que lo padece, y cuando viene a reglarse aquel tal daño, llámase en el que lo recibió
+daño y en el que lo hizo ganancia), de manera que lo igual es medio entre lo más
+y lo que es menos; y destas dos cosas la ganancia es lo más, y lo menos es, por el
+contrario, el daño. Porque lo que toma más del bien y menos del mal es ganancia,
+y lo que al contrario desto es daño o perjuicio, de las cuales dos cosas es el medio
+lo igual, que es lo que llamamos justo. De manera que lo que corrige y emienda
+los contractos, es lo justo y el medio entre el perjuicio y la ganancia. Y así, cuando
+dos contienden sobre esto, luego acuden al juez, y ir al juez es lo mismo que ir a
+lo justo. Porque el juez no se pretende que es otra cosa sino una justicia que habla.
+Y buscan un juez medio, y aun algunos los llaman medianeros, porque si alcanzan
+el medio, alcanzan lo que es justo. De manera que lo justo es una medianía, pues
+lo es el juez mismo que lo juzga. Ni hace otro el juez sino igualar, de la misma
+manera que una línea en dos partes dividida, tanto cuanto más la una parte excede
+de la mitad, le quita y lo añade a la otra parte. Pero cuando el todo estuviere en
+dos iguales partes repartido, entonces dicen que tiene cada uno lo que es suyo,
+si cada uno recibe partes iguales. Y lo igual, conforme a cuenta de aritméticos, y
+su proporción, es medio de lo más y de lo menos. Y por esto se llama lo justo en
+griego diceon, que en aquella lengua quiere casi decir cosa en dos partes partida,
+como si uno dijese en la misma lengua dicheon; y el juez se llama dicastes, que
+quiere casi decir repartidor, como quien dijiese dichastes. Porque si siendo dos
+cosas iguales le quitan a la una una parte y la añaden a la otra, excederá la una a la
+otra en aquellas dos partes. Porque si a la una le quitasen y a la otra no añadiesen,
+no le excedería sino en sola una parte. De manera que la parte a quien le dieron,
+excede al medio en una sola parte, y el medio, a la parte que le quitaron, en otra.
+Esto, pues, es entender lo que es justo: saber cuánta parte se ha de quitar al que
+tiene de más, y cuánta añadir al que tiene de menos. Porque tanto cuanto el que
+tiene de más excede al medio, se ha de añadir al que menos tiene, y tanto cuanto le
+falta al que menos tiene, se ha de quitar al que tiene de más. Sean, hagamos cuenta,
+tres líneas iguales a, a, b, b, c, c, las unas a las otras. De las dos líneas iguales a,
+a, quítenles sendas partes que se llamen a, e, y añádanse a las líneas c, c, y lo que
+de allí resulte llámese d, f, sucederá de aquí que la línea d, f, será mayor que la
+línea a, a, toda la parte de a, e. Lo mismo acaece en las demás artes. Porque si
+no hobiese proporción entre el que hace y el que padece, en qué y cuánto ha de hacer
+el uno y padecer el otro, confundirse hían. Estos dos nombres de ganancia y perjuicio
+procedieron de los contractos voluntarios, donde tener más de lo que tenían llaman ganar,
+y recibir perjuicio tener menos de lo que tuvieron al principio. Como es en el vender y
+comprar, y en todos los demás contractos donde la ley permite contratar. Pero donde ni
+hay más ni menos, sino que se tienen lo mismo que antes se tenían por sí mismos, dicen
+que tienen lo que es suyo, y que ni han perdido ni ganado. De manera que lo justo es el
+medio entre cierta pérdida y ganancia, que es el tenerlo igual, y lo más y lo menos en las
+cosas que no son voluntarias antes y después.
+
+Capítulo V
+
+Del talión, del dinero y de la necesidad
+
+Declaradas las dos especies de la vulgar justicia, la una que consiste en los comunes
+repartimientos de honras y intereses, y la otra en la reformación de los particulares
+contractos, así voluntarios como forzosos, en lo cual se comprenden los dos géneros de
+acciones, civiles digo y criminales, y la regla que el recto juez debe guardar en el juzgar
+rectamente, que es quitar del que hizo el agravio y añadir al que lo recibió hasta reducirlos
+a igualdad, trata agora, en el capítulo quinto, de la pena del talión, tan celebrada entre
+jurisconsultos, que es cuando uno recibe el mismo mal que a otro hizo, como si juró falso
+contra otro en causa capital, lleve la misma pena que había de llevar el reo, y en las demás
+causas criminales de la misma manera. Prueba, pues, no ser cierta regla de justicia la pena
+del talión, por las diversas calidades que puede haber en los agente y paciente. Como si
+uno diese una cuchillada al rey, o al que su persona representa, no pagaría con recebir
+otra cuchillada, sino que sería digno de todo género de castigo, por haber tenido en poco
+el ofender la majestad pública. Y a más desto, como todas las voluntarias contrataciones
+se hacen con el dinero, o se, reducen al dinero, trata del uso del dinero, y cómo los
+contractos se han de reglar por él, y él ha de ser la ley dellos. Y también cómo la
+necesidad de las cosas que para conservar la vida son menester, hizo los contractos y las
+demás artes que se tratan en la vida.
+
+Paréceles a algunos que la pena del talión es del todo justa, como lo dijeron los
+pitagóricos difiniendo desta manera lo justo: ser cuando uno recibe lo mismo que hizo a
+otro. Pero el talión ni conforma con lo legítimo ni menos con lo público (llamo público
+lo que a todos pertenece), ni tampoco con lo justo distributivo, ni con lo que consiste en
+el reformar de los contractos. Aunque en esto parece que quieren dar a entender lo justo
+que los poetas a Radamante atribuyen en sus fábulas:
+
+Si el mismo daño que hizo padeciere,
+
+Será recto el juicio que se hiciere.
+
+Porque muchas veces no conforman con lo de razón. Porque si uno, administrando
+cargo público, hirió a uno, no por eso ha de recebir otra tal herida, y si uno hirió al
+que administraba cargo público y regía la república, no solamente merece que le den
+otra herida, pero todo grave castigo. A más desto, mucha diferencia hay de lo que
+voluntariamente se hace a lo que se hace contra voluntad. Pero en las compañías
+de contrataciones tal justicia como ésta ha de consistir en el talión, y comprenderlo
+en sí, conforme a proporción, y no conforme a igualdad. Porque la conservación
+de la república consiste en darle a cada uno lo que merece, conforme a la regla
+de proporciones. Porque, o pretenden retaliar el mal que les han hecho, y si no
+les parece que es vida de servidumbre si no se satisfacen, o que les gualardonen
+el bien. Y sin esto no hay comunicación de dádivas, con las cuales las civiles
+compañías se conservan. Y por esto, en medio de la ciudad edificaban el templo
+de las gracias: porque haya entre las gentes gualardones, porque esto es proprio
+del agradecimiento; porque el que ha recebido la buena obra tiene obligación de
+hacer otro tanto por el que la hizo, para que el tal comience de nuevo a hacerle
+otras buenas obras. Y la gratificación, que ha de ser conforme a proporción hecha,
+ha de tener diametral oposición. Como si hiciésemos cuenta que el arquitecto es a,
+y el zapatero b, la casa c, el zapato d. El arquitecto, pues, o albañir, ha de tomar en
+cuenta al zapatero la obra que hace el mismo zapatero, y él al zapatero darle la que
+él hace. Si hobiere, pues, de principio, entre ellos igualdad proporcionada y después
+sucediere el talión, sera lo que decimos, y si no, no habrá igualdad ni podrá durar
+aquel contracto. Porque puede ser que la obra del uno sea de mucho más precio y
+valor que la del otro. Conviene, pues, que las tales obras se igualen. Y lo mismo se
+ha de hacer en todas las demás artes y oficios. Porque si el que obra no tiene tasa en
+cuánto y qué tal ha de hacer, y el que recibe de la misma manera, vernán las artes
+a perderse. Porque nunca se hace la contractación de dos de una misma arte, como
+digamos agora de dos médicos, sino de médico y labrador y, generalmente, de artes
+diversas y no iguales; y por esto conviene que vengan estos tales a igualarse. Por
+tanto, conviene que todas las cosas en que ha de haber contratación, sean de manera
+que puedan admitir apreciación. Para lo cual se inventó el uso del dinero, y es la
+regla del contrato, porque todas las cosas regla, y por la misma razón el exceso y
+el defecto; ¿cuántos pares, hagamos cuenta, de zapatos serán equivalentes a una
+casa, o a un mantenimiento? Conviene, pues, que cuanta diferencia hay del albañir
+al zapatero, tantos más pares de zapatos se pongan por precio de la casa, o del
+mantenimiento. Porque si así no se hace, ni habrá contratación ni compañía. Lo
+cual no se podría hacer si en el valor no tuviesen alguna proporción. Conviene,
+pues, como ya está dicho, que todas las cosas se reglen con alguna regla común,
+la cual es, en realidad de verdad, la necesidad, que es la causa de todas las cosas.
+Porque si los hombres no tuviesen necesidad de nada o no de una misma manera,
+o no habría contratación entre ellos, o sería no conforme. Inventose, pues, el
+dinero como un común contrato de la necesidad de común consentimiento de los
+hombres. Y por esto se llama en griego nomisma, como cosa que no es tal por
+su naturaleza, sino por ley, la cual los griegos llaman nomon, y está en mano de
+las gentes mudarla y hacerla que no valga. Entonces, pues, habrá talión, cuando
+estas cosas se igualaren. Como agora, la misma diferencia que hay del labrador al
+zapatero, hay de las obras del zapatero a las del labrador. Cuando contrataren, pues,
+hanlo de reducir a figura de proporción, porque si no el uno de los extremos terná
+ambos a dos excesos; pero cuando cada uno viniere a tener lo que es suyo, entonces
+serán iguales y ternán comunidad, porque puede haber entre ellos esta igualdad.
+Sea el labrador a, el mantenimiento c, el zapatero b, su obra que se ha de igualar
+d. Y si desta manera no se retaliasen, no podría haber comunicación ni contracto.
+Y que la necesidad y menester sea sola la causa de todo véese por la obra, porque
+cuando o el uno no tiene necesidad del otro, o ni el uno ni el otro, no contratan.
+Como cuando uno no tiene necesidad de lo que el otro tiene, como si dijésemos,
+vino, danle que lleve, a trueque dello, trigo; conviene, pues, que se iguale lo uno
+con lo otro. Pero, para el contrato venidero, si agora el tal no tiene necesidad de las
+cosas, pues verná tiempo que la terná, el dinero es como un fiador para nosotros.
+Porque ha de estar puesto por ley que cada uno, trayendo el dinero, pueda llevar lo
+que se vendiere. Y sucede lo mismo en esto que en lo otro, porque no es siempre
+de un mismo valor, aunque parece que él quiere conservarlo más durable. Y por
+esto conviene que estén todas las cosas apreciadas, porque desta manera siempre
+habrá contrato, y habiéndolo habrá comunicación. Es, pues, el dinero, como una
+medida que reduce a proporción todas las cosas y las iguala. Porque no habiendo
+contrato no habrá comunicación, ni faltando la igualdad habrá contracto, ni faltando
+la proporción podría haber igualdad. En realidad de verdad, pues, es imposible
+que las cosas, entre cuyos valores hay muy gran distancia, puedan reducirse a
+proporción. Pero, por la necesidad, sucede que una cosa particular baste, y esto por
+el consentimiento que las gentes tienen dado en ello. Y por esto el dinero se llama
+en griego nomisma, que casi quiere decir regla, porque todas las cosas reduce a
+proporción, pues todas las cosas se reglan con el dinero. Sea, pues, la casa a, cien
+coronas b, la cama c; valga a la mitad que b, si la casa vale cincuenta coronas, o lo
+igual dellas. La cama valga la decena parte que las cien coronas, que es que valga
+c la décima parte de b. Véese de aquí claro que cinco camas harán el valor de una
+casa. Entendido, pues, está que, antes que se inventase el uso del dinero, se hacían
+desta manera los contractos. Porque todo es una misma cosa dar cinco camas por
+una cosa, y dar el valor de cinco camas. Ya, pues, está entendido qué cosa es lo
+injusto y qué lo justo. Entendido, pues, esto, también está muy claro, que el hacer
+justicia es el medio entre hacer agravio y recebirlo. Porque el hacer agravio es
+tener más y el recebirlo tener menos; pero la justicia es medianía, aunque no de
+la misma manera que las demás virtudes de que arriba se ha tratado, sino porque
+es propria del medio, quiero decir de lo igual, y de los extremos la sinjusticia. Es,
+pues, la justicia un hábito que hace al justo pronto en hacer, de su propria voluntad
+y elección, las cosas justas, y apto para hacer repartición de las cosas, ora entre sí
+mismo y otro, ora entre otras personas diferentes, pero no de tal manera que de lo
+bueno y digno de escoger tome la mayor parte para sí, y para su prójimo deje la
+menor, y haga al revés en lo que es perjudicial, sino que reparta por igual conforme
+a proporción; y de la misma manera lo ha de hacer repartiendo entre personas
+diferentes. La sinjusticia induce al injusto a todo lo contrario, lo cual es el exceso y
+el defeto de lo útil y perjudicial fuera de toda proporción. Y por esto la sinjusticia se
+dice exceso y defecto, porque consiste en exceso y en defecto, que es en el exceso
+de lo que sencillamente es útil, y en el defecto de lo que es perjudicial. Y en las
+demás cosas, lo que es entero y perfecto es de la misma manera, pero lo que va fuera
+de proporción no tiene regla cierta, sino como caiga. Mas en lo que toca al agraviar,
+lo menos es ser agraviado y lo más agraviar. Desta manera, pues, habemos tratado
+de la justicia y sinjusticia, qué tal es la naturaleza y propriedad de cada una, y de la
+misma manera de lo justo y injusto así generalmente y en común.
+
+Capítulo VI
+
+De las sinjusticias y agravios, y de lo justo de la república o político, del derecho del señor, del padre y del señor de casa
+
+En el capítulo sexto pone primeramente diferencia entre estas dos cosas: hurtar
+y ser ladrón, adulterar y ser adúltero y sus semejantes, que el ser ladrón, adúltero
+y tales cosas como éstas dicen hábito y costumbre, y así por las leyes son más
+gravemente castigadas, que si por una flaqueza cayeren en ello alguna vez no
+teniéndolo por hábito y oficio. Después trata de lo justo civil y del derecho del
+señor y del padre, y del señor de casa. Donde avisa lo que en lo de República se
+verá mejor, que para regirse bien una república no han de mandar los hombres
+sino las leyes, y los hombres no han de ser sino ejecutores dellas. Porque como
+los hombres sen quieren tanto a sí mismos, siempre toman la mayor parte del
+bien para sí, y del mal escogen la menor, lo cual es contra la justicia si no se
+hace con equidad y como debe.
+
+Pero porque puede acontecer que uno haga agravio, y no por eso sea injusto,
+¿qué agravios diremos que ha de hacer en cada género de sinjusticia, para que ya
+se llame injusto, como ladrón o adúltero o salteador? ¿O diremos que en esto no
+hay ninguna diferencia? Porque si aconteciese que un hombre tuviese acceso con
+una mujer sabiendo qué mujer es la con quien lo tiene, pero que el tal acceso no
+tuvo principio de determinada elección, sino que cayó en ello ocasionalmente por
+flaqueza de ánimo, este tal agravio cierto hace, mas no es aún del todo injusto,
+así como uno no por cualquier cosa que hurte es ladrón, aunque haya hurtado, ni
+adúltero aunque haya cometido un adulterio. Y de la misma manera es en todo
+lo demás. Ya, pues, está arriba declarada la conformidad y respecto que la pena
+del talión tiene con lo justo. Habemos, pues, de entender, que esto que inquirimos
+puede ser por sí mismo justo, y también justo civil; lo cual no es otra cosa sino
+una comunidad de vida, para que en la ciudad haya suficiencia de hombres libres
+y iguales o en número o conforme a proporción. De manera, que los que esto no
+tienen, no guardan entre sí civil justicia, sino alguna otra que tiene aparencia de
+justicia. Porque para aquellos para quien la tal ley se hace, justo es, y la ley hácese
+para el injusto, pues no es otra cosa el público juicio, sino determinación de lo
+justo y lo injusto. Y dondequiera que la sinjusticia mora, mora también el hacer
+agravios, pero no en todos aquellos que hacen agravios se puede decir que hay
+sinjusticia, pues es la sinjusticia tomarse para sí mayor parte de las cosas que son
+absolutamente buenas y menor de las que son absolutamente malas. Y por esto, no
+se permite que el hombre mande, sino la razón, porque el hombre tómaselo aquello
+para sí y hácese tirano, y el que rige ha de ser el guardián de lo que es justo. Y si
+de lo justo, también de lo igual. Y así por cuanto el justo no parece que tiene más
+que los otros, si justo es (porque no reparte más para sí de lo que es absolutamente
+bueno, si ya por ley de proporción no le pertenece) el justo trabaja para otrie, y por
+esto dicen que es bien ajeno la justicia, como ya también arriba lo dijimos. Es, pues,
+razón que se le dé algún premio al hombre justo, y éste sea la honra y dignidad, con
+la cual, los que no se tienen por contentos, hácense tiranos. El derecho del señor y
+el del padre no son lo mismo que éstos, sino que les parecen en algo, porque nadie
+puede hacer agravio a las cosas que son absolutamente suyas. Y el siervo y el hijo,
+mientras es pequeño y no está emancipado de la patria potestad, es como parte del
+padre o del señor, y ninguno para sí mismo nunca escoge el perjudicar ni hacer
+daño. Y así contra este derecho nunca se comete agravio. De manera que la civil
+equidad, ni se puede decir justa ni injusta, porque está hecha conforme a ley, y en
+personas sobre quien puede hacerse ley, que son los que tienen iguales veces en el
+mandar y ser mandados. Y por esto, más con verdad se puede decir que hay derecho
+sobre la mujer, que sobre los hijos o criados, porque esto es lo justo familiar, lo
+cual también de lo civil es diferente.
+
+Capítulo VII
+
+De lo justo natural y legitimo
+
+En el séptimo capítulo distingue Aristóteles lo justo civil en dos especies: uno
+que es natural y por naturaleza tiene fuerza de ser justo, como es la defensión de
+la propria vida, otro que obliga, no por naturaleza, sino por voluntaria aceptación
+de los hombres, y porque ellos voluntariamente quisieron ponerse aquellas leyes
+de vivir por vivir vida más quieta, como prohibir tal o tal traje. Disputa si hay
+cosa alguna que naturalmente sea justa (la cual disputa pone también Platón en el
+primero de República), y prueba haberlas muchas.
+
+De lo justo civil, uno hay que es natural, y otro que es legítimo. Pero aquello
+es justo natural, que donde quiera tiene la misma fuerza, y es justo no porque les
+parezca así a los hombres, ni porque deje de parecerles justo legítimo es lo que al
+principio no había diferencia de hacerlo desta manera o de la otra, pero después de
+ordenado por ley ya la hay, como pagar por un captivo diez coronas, o sacrificar
+una cabra y no dos ovejas. Ítem, las demás cosas que particularmente se mandan
+por ley, como hacer sacrificio a Brasida, y las ordinaciones que hacen los concejos.
+Algunos, pues, hay que son de opinión que todo lo legítimo es desta manera, porque
+lo que natural es, no puede mudarse, y donde quiera tiene una misma facultad,
+como vemos que el fuego quema aquí y también en la tierra de los persas. Pero las
+cosas justas véese que se mudan. Pero esto no es así, generalmente hablando, sino
+en alguna manera. Y entre los dioses por ventura es así, que no hay cosa mudable;
+pero entre nosotros bien hay cosas naturales que se mudan, aunque no todas. Pero
+con todo eso hay justo que es por naturaleza, y justo que no es por naturaleza. Cuál,
+pues, de los que se pueden mudar de otra manera es natural, y cuál no sino legítimo
+y por aceptación, aunque los dos se muden de una misma manera, fácilmente se
+entiende. Y la misma distinción bastará para todo lo demás. Porque naturalmente
+la mano derecha es de más fuerza, y con todo es posible que todos los hombres se
+valiesen igualmente de las dos manos. Pero las cosas justas que son por aceptación
+y porque conviene hacerse así, son semejantes a las medidas. Porque ni las medidas
+del vino ni las del trigo son iguales en todas las tierras, sino do las cosas se compran
+son mayores, y do se venden son menores. De la misma manera lo justo no natural,
+sino humano, no es todo uno dondequiera, pues no es un mismo el modo de regir
+la república. Pero el mejor y más perfecto modo de gobierno de república sólo éste
+es un mismo naturalmente dondequiera. Hase, pues, cada una de las cosas justas
+y legítimas como se ha lo universal con lo particular. Porque los negocios que se
+hacen son muchos, pero las cosas justas tienen cada una por sí su especie, pues
+son universales. Entre lo injusto y el agravio hay esta diferencia y también entre lo
+justo y la justicia, que lo injusto es tal por naturaleza o por ordinación y esto mismo
+cuando se pone por obra es agravio, pero antes de hacerse no se dice agravio,
+sino cosa injusta, porque cuando se hiciere será agravio. Y de la misma manera
+habemos de decir de la justicia. Aunque obra justa es más general vocablo, y
+la justicia parece que quiere más significar la enmienda del agravio. Pero qué
+especies tiene cada cosa destas y cuántas, y en qué géneros de cosas consiste,
+después lo trataremos.
+
+Capítulo VIII
+
+De las tres especies de agravios con que los hombres son perjudicados
+Cumple Aristóteles lo que prometió al fin del capítulo pasado, y distingue
+por sus especies los agravios para que puedan mejor juzgar dellos los hombres,
+primeramente en dos especies, diciendo cómo hay unos forzados y otros voluntarios,
+y éstos son los peores de todos. Los forzados después dividelos en dos especies,
+unos que suceden por violencia, que son los que el principio y causa procede de
+fuerza, y otros por ignorancia. Los de ignorancia divide en otras tres especies:
+unos que proceden de ignorancia crasa, que procede de la negligencia que uno
+tuvo en saber lo que le convenía para hacer las cosas, y éstos son los peores; otros
+de ignorancia invincible (como dicen nuestros teólogos), como fue el parricidio
+y maternal ajuntamiento que de Edipo se cuenta en las fábulas antiguas; otros,
+por fortuna, como si a uno, reventándole el arcabuz, le aconteciese herir o matar
+al que le está al lado.
+
+Pero cuando alguno de los justos o injustos sobredichos hace algún agravio
+o alguna obra de justicia, dícese que hace justicia o agravio si lo hace de su
+propria voluntad. Mas si por fuerza lo hace, ni hace justicia, ni agravia, sino
+accidentariamente, porque aconteció ser justo o injusto lo que hacía. Pero el agravio
+y la obra de justicia distínguense en ser voluntarias o forzosas, porque el agravio
+cuando se hace voluntariamente es reprendido y es agravio entonces. De manera,
+que puede acontecer que alguna cosa sea injusta y no sea aún agravio, si no se le
+añade el ser obra voluntaria. Llamo voluntario (como ya al principio se dijo) lo
+que uno hace por sí mismo, entendiendo que está en su mano, y no ignorando a
+quién, ni con qué, ni por qué lo hace, como si hiere sabiendo a quién hiere, y con
+qué y por qué lo hiere, y cada cosa déstas la hace de propósito deliberado y no
+accidentariamente ni por fuerza. Como si uno tomando la mano de otro lo hiriese
+con su misma mano, no herirá el tal voluntariamente, porque no está en su mano el
+no hacerlo. Puede también acontecer que el que fue herido fuese el padre, y el que
+lo hirió lo tomase por otro alguno de los que presentes estaban, y no entendiese que
+era su padre. Lo mismo habemos de decir del fin por que lo hizo, y en fin de todo el
+hecho. Todo aquello, pues, que se hace no entendiéndose, o ya que se entienda no
+estando en su mano, o por ajena violencia, se dice ser forzoso. Porque muchas cosas
+de las que naturalmente hay en nosotros sabiéndolas las padecemos o hacemos, de
+las cuales ninguna se dice voluntaria ni forzosa, como el envejecerse y el morir, y
+lo mismo es en las cosas justas y injustas lo que accidentariamente sucede. Porque
+si uno por fuerza y por temor restituyese lo que tenía en depósito, no diremos que
+obra lo de justicia, ni que hace cosas justas sino accidentariamente. De la misma
+manera el que por fuerza y contra su voluntad deja de restituirlo, accidentariamente
+diremos que hace agravio y obra cosas injustas. Las cosas, pues, voluntarias, unas
+se hacen por elección y otras sin elección. Por elección se hacen las cosas que
+se hacen con consulta, y sin elección las que se obran sin consulta. Siendo, pues,
+tres las especies de los daños que en las contrataciones suceden, las cosas que por
+ignorancia se hacen son hierros, cuando uno los hace no entendiendo ni a quién,
+ni qué, ni con qué, ni por qué. Porque o no pensó arrojarlo, o no aquel, o no con
+aquello, o no por aquel fin, sino que sucedió al revés de como él pensó, como si
+lo arrojó, no por herirle, sino por picarle, o si no a quien quiso, o no como quiso.
+Cuando el daño, pues, es fuera de razón, dícese desgracia, pero cuando es no fuera
+de razón, pero sin malicia, dícese hierro (porque hierra uno cuando en él está el
+principio y origen de la causa, y es desgraciado cuando en él no está); mas cuando
+lo entiende y no lo hace sobre consulta dícese injuria o agravio, como lo que por
+enojo se hace, o por otras alteraciones que o la necesidad o la naturaleza a los
+hombres acarrea. Porque los que en semejantes cosas perjudican y hierran, dícense
+que hacen injuria, y los hechos se llaman agravios, pero ellos por esto no son aún
+del todo injustos ni perversos, porque aquel tal daño no procede de maldad. Pero
+cuando con consulta y elección lo hace, llámase injusto y mal hombre. Por esto las
+cosas que con enojo se hacen no se dicen, y con razón, proceder de providencia.
+Porque no comienza el hecho el que hace algo con enojo, sino el que le hace que se
+enoje. A mas desto en semejantes negocios nunca se disputa si fue así o si no fue,
+sino si hubo justa razón para ello, porque la saña es una injuria manifiesta; ni se
+disputa si fue o no fue, como en las contrataciones, en las cuales, de necesidad el
+uno o el otro ha de ser mal hombre, si ya por olvido no lo hacen, pero cuando del
+hecho concuerdan, dispútase cual de las dos partes pide justicia, mas el que antes
+de hacerlo pensó y deliberó no lo ignora. De manera, que el uno pretende que ha
+recebido agravio, y el otro que no. Pero el que sobre consulta hace daño, hace
+agravio, y así el que semejantes agravios hace ya es injusto, cuando fuera de
+proporción y de igualdad lo hace. De la misma manera el justo cuando sobre
+deliberación hiciere alguna obra justa, la cual entonces la hace, cuando la hace
+voluntariamente. Pero de las cosas forzosas unas hay que son dignas de misericordia
+y otras que no. Porque las cosas que los hombres hierran no sólo ignorantemente,
+pero también por ignorancia, dignas cierto son de misericordia. Pero las que se
+hacen, no por ignorancia, sino ignorantemente por alguna alteración ni natural ni
+humana, no son dignas de misericordia.
+
+Capítulo IX
+
+Del recebir agravio cómo acontece, y que ninguno voluntariamente lo recibe.
+En el capítulo nono, tomando ocasión de unos versos de Eurípides, disputa
+qué manera de cosa es el recebir agravio, y prueba ser cosa violenta y en ninguna
+manera voluntaria; disputa asimismo si uno puede voluntariamente a sí mismo
+agraviarse, y si el disoluto hace a sí mismo voluntariamente perjuicio, y otras
+cosas semejantes.
+
+Dudará por ventura alguno si habemos del recebir y hacer agravio suficientemente
+disputado. Y primeramente, si es verdad lo que Eurípides escribe fuera de toda
+buena razón:
+
+Pónesteme a preguntar
+
+Cómo a mi madre maté:
+
+En breve te lo diré,
+
+Sin mucho tiempo gastar.
+
+Yo quise y ella aprobó
+
+De aquella suerte el morir,
+
+O, enfadada del vivir,
+
+A matarla me forzó;
+
+¿por ventura pasa así en realidad de verdad, que uno voluntariamente es agraviado
+o no, sino que cualquier recebir de agravio es forzoso así como el hacerlo es
+voluntario, o es todo recebir de agravio o voluntario o forzoso, así como el hacerlo
+todo es voluntario, o diremos que un recebir de agravios hay voluntario y otro
+forzoso, y, de la misma manera en el recebir buenas obras? Porque todo hacer
+justicia es voluntario. De manera que parece conforme a razón, que el recebir
+agravios y el recebir buenas obras, el uno al contrario de lo otro, sean cosas
+voluntarias o forzosas. Parecería, cierto, cosa fuera de razón, que todo recebir de
+buenas obras fuese voluntario, porque muchos, cierto, las reciben muy contra su
+voluntad. Pues también alguno dudaría si cualquiera que padeció cosa injusta,
+padeció injuria, o si es lo mismo en el padecerla que en el hacerla, porque puede
+acontecer que accidentariamente uno obre ambas maneras de justo, y de la misma
+manera injusto. Porque no es todo uno hacer cosas injustas y agraviar, y de la
+misma manera tampoco es todo uno sufrir injurias y ser agraviado, y asimismo
+habemos de juzgar del hacer cosas justas y recebirlas. Porque es imposible que uno
+sea agraviado, sin que haya algún otro que le agravie, ni que alguno reciba buenas
+obras, sin que haya alguno que las haga. Y si, general y sencillamente hablando, el
+hacer agravio es hacer uno a otro daño voluntariamente, que es sabiendo a quién,
+y con qué, y cómo, cierta cosa será que el disoluto voluntariamente a sí mismo se
+hace daño, y a sí voluntariamente será agraviado, y sucederá que uno a sí mismo
+se haga agravio. Esta es, pues, una de las cosas que dudábamos: si puede uno a sí
+mismo agraviarse. Asimismo, por el vicio de la disolución uno voluntariamente se
+dejará perjudicar de otro que voluntariamente también le perjudique, de manera,
+que será verdad que uno voluntariamente sea agraviado. ¿O diremos que no está
+entera aquella difinición, sino que se ha de añadir que hace daño sabiendo a quién y
+con qué, y cómo, y esto contra la voluntad de aquel que lo recibe? De manera que
+uno podrá recebir daño de su voluntad y sufrir cosas injustas, pero agravio ninguno
+lo recebirá de su voluntad, porque ninguno lo ama, ni aun el disoluto, sino que obra
+contra su voluntad, porque ninguno quiere lo que no tiene por bueno, y el disoluto
+hace lo que entiende que no debría hacer. Y el que sus proprias cosas da, como
+Homero dice de Glauco, que le daba a Diómedes las armas de oro por las de hierro,
+y lo que valía ciento por lo que valía nueve, no es agraviado, porque en su mano
+está el no darlas, pero el ser agraviado no está en su mano, sino que de necesidad
+ha de haber otro que le agravie. Cosa, pues, es muy clara y manifiesta que el ser
+agraviado no es cosa voluntaria. De las cosas asimismo ya arriba propuestas, dos
+nos restan por disputar: cuál es el que hace el agravio, el que en el repartir da uno
+más de lo que merece, o el que lo recibe; y lo segundo: si uno a sí mismo se puede
+hacer agravio. Porque si lo que primero habemos dicho es verdad, el que reparte es
+el que hace el agravio, y no el que toma lo que es más. Y si uno reparte más para
+otro que para sí, sabiendo lo que hace, y de su propria voluntad (lo cual parece que
+hacen los hombres que son bien comedidos), éste tal a sí mismo él mismo se hará
+agravio, porque el hombre de bien y virtuoso siempre es amigo de tomarse para sí
+lo menos. O diremos que esto no es verdad así sencillamente, sino que por ventura
+de otro bien recibe más, como digamos de la honra, o de lo que es absolutamente
+bueno. A más de que se suelta fácilmente el argumento por la difinición del agraviar,
+porque no padece cosa contra su voluntad, de manera que en cuanto a aquello
+no recibe agravio, sino que recibe daño solamente. Cosa, pues, es cierta que el
+que reparte es el que hace el agravio siempre, y no el que recibe, porque no hace
+agravio el que tiene lo injusto, sino el que tiene facultad de hacerlo de su voluntad,
+lo cual consiste en el que es origen y principio de aquel hecho, lo cual está en el
+que lo reparte y no en el que lo recibe. Asimismo esto que decimos hacer tómase
+de muchas maneras, porque una cosa sin ánima puede matar, y la mano y el siervo
+mandándoselo el señor, el cual no hace agravio, pero hace cosas injustas. Asimismo
+si lo juzga sin entenderlo, no hizo agravio a lo justo legítimo o legal, ni el tal juicio
+es injusto, sino como injusto. Porque lo justo legal es diferente de lo justo principal.
+Pero si entendiéndolo lo juzgó injustamente, excede este tal la igualdad del favor o
+del castigo. Aquel, pues, que desta manera juzgó injustamente, tiene demás, de la
+misma manera que el que se toma para sí parte del agravio que hace. Porque aquel
+que a los tales adjudicó el campo, no recibió dellos campo, sino dinero. Piensan,
+pues, los hombres que está en su mano el hacer agravio, y que por esto es cosa fácil
+ser un hombre justo. Pero no es ello así. Porque tener uno acceso con la mujer de
+su vecino, y herir a su prójimo, y entregar con su mano su dinero, cosa fácil es, y
+que está en mano de los hombres; pero el hacerlo de tal o tal manera dispuestos, no
+es cosa fácil, ni que esté en su mano. De la misma manera el saber las cosas justas y
+injustas no lo tienen por cosa de hombre muy sabio, porque no hay mucha dificultad
+en entender las cosas de que las leyes tratan. Pero las cosas justas no consisten en
+esto, sino accidentariamente, sino en cómo se han de hacer y distribuir las cosas
+justas, lo cual es cosa de mayor dificultad que entender las cosas provechosas
+para la salud. Porque en la medicina cosa fácil es conocer la miel y el vino, y el
+veratro y el cauterio y la abertura. Pero el entender cómo se ha de distribuir esto en
+provecho de la salud, y para quién y cuándo, es tan dificultosa cosa como ser uno
+buen médico; por esto tienen por cierto que el hacer agravio no menos conviene
+al justo que al injusto, porque no menos lo puede hacer el justo que el injusto,
+antes más facultad tiene para hacer cada cosa déstas. Porque también el justo tiene
+fuerzas para allegarse a la mujer de su vecino y para herir a su prójimo, y el hombre
+valeroso también tiene fuerzas para arrojar allá el escudo y para volver espaldas
+y huir a do quisiere. Pero el cobardear y hacer agravio no es el hacer estas cosas
+sino accidentariamente, sino el hacerlas de tal manera o tal dispuestos, así como
+el curar y el dar salud no es el abrir o no abrir, ni el purgar ni no purgar, sino el
+hacerlo desta manera o de la otra. Consisten, pues, las cosas justas en aquellas
+que participan de las cosas absolutamente buenas, en las cuales tienen también sus
+excesos y defectos. Porque en algunos no hay exceso de bienes, como por ventura
+en los dioses. En otros no se halla ningún género de bienes, como en los que tienen
+la malicia ya incurable, a los cuales toda cosa les es perjudicial. Otros los tienen cuál
+más cuál menos, y desta manera tenerlos es proprio de los hombres.
+
+Capítulo X
+
+De la bondad y del hombre bueno
+
+Gran mención se hace en los Derechos de lo que en griego llaman epiices, y en
+latín aequum bonum; en romance podémosle decir moderación de justicia. De la
+cual hay tanta necesidad en el mundo como del vivir, según a algunos les agrada,
+en cierta manera, el ser crueles y rigurosos en el ejecutar la justicia, pretendiendo
+que por allí vernán a ser más afamados, y temo no vengan a ser más aflamados.
+Porque como las cosas, en particular consideradas, son tan varias, no puede la ley
+determinar de muchas dellas tan al caso y conformemente, porque, en fin, la ley o
+manda o prohíbe en general, sin circunstancias, que si en todas se ha de ejecutar
+como él lo dispone, verná a cumplirse lo que dice el cómico latino: summum ius,
+summa injuria, que es: el derecho riguroso es extremo agravio. Como agora manda
+la ley que cualquiera que a hombre delincuente diere favor y ayuda, sea castigado
+de tal o tal castigo. Un delincuente, huyendo de la justicia, pidió a otro hombre, que
+no le conocía, que le mostrase el camino, o que le pasase si era barquero; este tal
+no merece castigo por aquella ley, porque éste no era delincuente para el ánimo del
+que le enseñó el camino o le pasó el río, que no había el otro de adevinar. Para esto,
+pues, es la moderación del juez y el derecho de igualdad buena, la cual es freno de lo
+justo legal, como aquí dice Aristóteles. Desta bondad, pues, trata en este capítulo, y
+disputa en qué difiere de la justicia, o si es lo mismo, o especie della.
+
+De la bondad que modera el derecho y del que es por ella moderado se ofrece
+haber de tratar, cómo se ha con la justicia, y lo tal moderado con lo justo. Porque
+los que curiosamente lo consideran, hallan que, ni del todo son una misma cosa, ni
+tampoco diferentes en el género. Porque algunas veces de tal suerte alabamos esta
+virtud y al hombre que la posee, que el vocablo della generalmente lo extendemos
+a significar con él toda cosa buena, mostrando que lo más moderado en igualdad
+es lo mejor. Otras veces, si consultamos con la razón, nos parece cosa del todo
+apartada della el decir que lo bueno y igual, siendo diferente de lo justo, sea digno
+de alabanza. Porque, o lo justo no es bueno, o lo moderado no es justo, si es
+diferente cosa de lo justo; o si lo uno y lo otro es bueno, son una misma cosa. Estas
+razones, pues, en lo bueno moderado causan dificultad y duda. Todo ello, pues, en
+cierta manera, está rectamente dispuesto, y lo uno a lo otro no contradice. Porque
+lo bueno moderado, siendo y consistiendo en alguna cosa justa, es un justo más
+perfeto, y no es mejor que lo justo como cosa de género diverso. De manera que
+todo es una misma cosa lo justo y lo bueno moderado; porque siendo ambas a dos
+cosas buenas, es más perfecto lo justo moderado. Pero lo que hace dificultad es
+que lo bueno moderado, aunque es justo, no es lo justo legal, sino reformación
+dél. La causa es que la ley, cualquiera que sea, habla generalmente, y de las cosas
+particulares no se puede hablar ni tratar perfectamente en general. Donde de
+necesidad, pues, se ha de hablar en general, no pudiéndolo decir así en común
+perfetamente, arrímase la ley a lo que más ordinariamente acaece, aunque bien
+entiende aquella falta; y con todo eso es recta y justa la ley. Porque la falta no está
+en la ley ni en el que la hace, sino en la naturaleza de la cosa. Porque la materia de
+los negocios se vee claro ser deste jaez, pues cuando la ley hablare en general, y en
+los negocios sucediere al revés de lo general, para que la ley esté como debe, aquella
+parte en que el legislador faltó y erró, hablando en general, ha de enmendarse,
+porque si el legislador estuviera presente, de aquella misma manera lo dijera, y,
+si lo entendiera, de aquella manera lo divulgara. Por esto lo bueno moderado es
+justo, y mejor que alguna cosa justa, no así generalmente, sino mejor que aquel
+justo que erró por hablar así tan en general. No es, pues, otra la naturaleza de lo
+bueno moderado, sino ser reformación de ley en cuanto a la parte en que faltó por
+hablar tan en general. Porque esto es la causa de que no se pueden reglar por ley
+todas las cosas, porque es imposible hacer ley de cada cosa, y así hay necesidad de
+particulares estatutos. Porque la cosa que es indeterminada, también tiene su regla
+indeterminada, como la regla de la arquitectura lesbia, que es de plomo, y así se
+conforma con la figura de la piedra y no es regla cierta; de la misma manera se ha
+el estatuto con los negocios. Entendido, pues, esta qué cosa es lo bueno moderado
+y qué es lo justo, y a cuál justo hace ventaja lo bueno moderado. De aquí se colige
+claramente cuál es el hombre de moderada justicia, que es el que elige tal manera
+de justicia y la pone por obra, ni interpreta rigurosamente el derecho a la peor
+parte; antes remite la fuerza y rigor de la ley, aunque ella hable en su favor.
+Y semejante hábito que éste es la bondad moderada, y es parte de la justicia y
+no hábito diferente della.
+
+Capítulo XI
+
+Cómo ninguno hace agravio a sí mismo
+
+En este último capítulo concluye la disputa de la justicia, disputando si puede
+uno hacerse agravio a sí mismo, como el que a sí mismo mata, o su propria hacienda
+destruye; y fundándose en los principios ya puestos, prueba que no, porque no
+hay agravio voluntario, y, pues aquél voluntariamente se perjudica, no se hace
+agravio aunque se haga daño. Pero hace agravio a la república introduciendo
+ejemplo de hecho tan perverso.
+
+Pero si puede uno o no puede a sí mismo agraviarse, de lo que ya está dicho se
+entiende fácilmente. Porque unas cosas justas hay que las dispone la ley conforme
+a todo género de virtud, como agora que no manda que ninguno a sí mismo se
+mate, y lo que no manda prohíbelo. A más desto, cuando uno, sin legítima causa,
+perjudica a otro sin haber dél recebido perjuicio, voluntariamente perjudica, y aquél
+perjudica voluntariamente, que sabe a quién y cómo. Pues el que de ira a sí mismo
+se mata voluntariamente, lo hace contra toda buena razón, haciendo lo que la ley no
+le permite. De manera que hace agravio, pero, ¿a quién?: a la república, pero no a sí
+mismo, pues voluntariamente lo padece, y ninguno es voluntariamente agraviado.
+Y por esto la república castiga semejantes hechos y tiene ya ordenada afrenta
+para el que a sí mismo se matare, como a hombre que hace agravio a ella. A más
+desto, el que solamente hace agravio y no ha llegado a lo último de la maldad,
+en cuanto tal no puede a sí mismo agraviarse, porque este tal es diferentemente
+malo que no el otro; porque hay algún injusto que es malo, de la misma manera
+que el cobarde, y no como hombre que ha llegado ya al extremo de maldad. De
+manera que, conforme a esta sinjusticia, ninguno hace agravio a sí mismo, porque
+se seguiría que una misma cosa juntamente a un mismo se le añade y se le quita, lo
+cual es imposible, sino que siempre lo justo y lo injusto ha de suceder entre muchos,
+de necesidad, y ha de ser voluntario y hecho por elección, y, primero, porque el
+que hace daño a otro por volver las veces al que primero le perjudicó, no parece
+que hace agravio, pero el que a sí mismo se perjudica, juntamente hace y padece
+unas mismas cosas. A más desto, que sucedería que voluntariamente alguno fuese
+agraviado. Dejo aparte que ninguno puede agraviar sin hacer alguna particular
+especie de agravio, y ninguno comete adulterio con su propria mujer, ni horada sus
+proprias paredes, ni hurta sus proprias cosas. En fin, el no poder agraviar nadie a
+sí mismo, muéstrase claro por la difinición de el recebir agravio voluntario. Cosa,
+pues, es cierta y manifiesta que lo uno y lo otro es cosa mala, digo el recebir agravio
+y el hacerlo, porque el recebir agravio es tener menos de lo justo, que es medio, y
+el hacerlo tener más; como en la medicina el exceder o faltar de la templanza sana;
+y en el arte de la lucha y ejercicios corporales, exceder o faltar de buen hábito de
+cuerpo. Pero, con todo eso, es peor el hacer agravio que no el recebirlo. Porque el
+hacer agravio trae consigo anexa la maldad, y es cosa digna de reprensión, y que
+procede o de la extrema maldad, o de la que no está lejos della. Porque no toda
+cosa voluntaria trae consigo agravio. Pero el recebir agravio puede acontecer sin
+maldad y sin caer en vicio de sinjusticia. De manera que el recebir agravio, cuanto
+a su propria naturaleza, menor mal es que el hacerlo, aunque accidentariamente
+puede acontecer que sea mayor el mal; pero lo accidentario no lo considera el arte,
+sino que dice: el dolor de costado es más grave enfermedad que un encuentro del
+pie, aunque, accidentariamente, alguna vez el encuentro del pie podría ser mayor,
+como si uno tropezando cayese y viniese a manos de los enemigos y pereciese uno;
+pues no se dice bien que guarda justicia para consigo mismo, pero para algunas
+cosas suyas bien se dice, por una manera de semejanza y metáfora, aunque no
+toda manera de justicia, sino la señoril y familiar. Porque en estas razones difiere
+la parte del alma que es capaz de razón de la que no lo es, con las cuales partes
+teniendo cuenta, parece que puede uno a sí mismo agraviarse, pues puede en ellas
+padecer algo contra los deseos dellas. De la misma manera, pues, que entre el
+que gobierna y el súbdito hay su justo, de la misma parece que lo habrá entre
+estas dos partes. De la justicia, pues, y de las demás morales virtudes, desta
+manera habemos disputado.
+
+Lo que Aristóteles dice aquí, que el que perjudica a otro por satisfacerse del
+agravio que aquel tal le ha hecho no le hace agravio, también lo dice Tulio en los
+Oficios. Pero el uno y el otro serían como hombres que no aprendieron en escuela
+cristiana. Porque hacen agravio a la divina justicia usurpándole su oficio, el cual
+es castigar a los que hacen agravios a sus prójimos. Y aunque no luego los castiga,
+él sabe por qué lo hace; pero es cierto que no quedará agravio ninguno sin castigo.
+Mejor se acercó al blanco de la verdad Platón en el diálogo Criton, donde, en
+persona de Sócrates, dice que ni aun por satisfacerse ni por salvar la vida se ha
+de hacer a nadie perjuicio. También lo que dice de la justicia de las dos partes
+del alma, es la que los teólogos llaman justicia original, cuando la parte superior,
+que es la razón, manda, y la inferior, que es la parte que apetece, obedece a la
+razón, rehusando las cosas que la razón dice que no convienen; y este es el mejor
+del hombre, en el cual fueron criados nuestros primeros padres; y cuando esta
+orden se pervierte, amotinándose la parte inferior contra la superior, caemos
+en los vicios.
+
+Fin del libro quinto

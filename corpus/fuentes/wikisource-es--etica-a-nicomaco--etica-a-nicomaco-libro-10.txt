@@ -1,0 +1,861 @@
+fuente: wikisource-es
+obra: Ética a Nicómaco
+url: https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_10
+recuperado: 2026-09-07
+---
+Ética a Nicómaco/Libro 10
+|título=[[Ética a Nicómaco]]
+|autor=[[Aristóteles]]
+obra> |título=Ética a Nicómaco
+obra> |autor=Aristóteles
+obra> |título={{Anclaje+|Índice}}
+---
+De los morales de Aristóteles, escritos a Nicomaco, su hijo, y por esta causa llamados nicomaquios
+
+Argumento del libro décimo
+
+Ya que ha concluido en los dos libros pasados la disputa y materia de amistad, da
+fin en el presente libro a sus Morales y trata del deleite largamente y de propósito,
+porque lo que trató en el séptimo fue de paso y no de su intento principal. Trata,
+pues, en los cinco capítulos primeros del deleite, qué cosa es y cuántas especies
+tiene. Después trata de la felicidad, que es lo que puso por último fin de nuestra vida
+humana, y hace dos partes della: una, activa y otra contemplativa, y al fin, haciendo
+un largo epílogo de todo lo tratado, concluye con su obra.
+
+Capítulo I
+
+Del deleite
+
+En el primer capítulo muestra de qué manera toca al filósofo moral el tratar
+del deleite, y por qué causas. Muestra cuán varios pareceres hay acerca de si el
+deleite es cosa buena o no lo es. Para entender esto conviene que entendamos
+que el deleite es conformación de la cosa con la voluntad, porque entonces nos
+deleitamos, cuando las cosas se hacen a nuestro gusto, y la tristeza es lo contrario:
+disconformidad entre él suceso de la cosa y nuestra voluntad. De aquí se colige
+claramente que si la voluntad no es errada, el deleite es bueno, y si es errada
+y viciosa, es malo. Porque el hallar deleite y gusto en las cosas buenas, hace
+perseverar en ellas, y el hallar deleite y gusto en las cosas malas, hace incorregibles
+a hombres, porque es imposible enmendar uno su vida mientras no aborrezca lo
+mal hecho, y es imposible aborrecello mientras en ello halle deleite. De manera que
+el deleite de lo malo será malo, y bueno el de lo bueno.
+
+Tras desto se ofrece tratar, por ventura, del deleite, porque parece ser éste una
+cosa muy familiar a nuestra naturaleza, y por esto a los mancebos los enseñan
+rigiéndolos con deleite y con tristeza. Parece asimismo que, para lo que toca a las
+costumbres, importa mucho, y es lo principal, el hallar gusto en lo que conviene
+hallarlo, y aborrecer lo que se debe aborrecer, porque esto dura toda la vida, y es
+cosa de mucha importancia y valor para alcanzar la virtud y vida próspera, porque
+los hombres escogen las cosas deleitosas y huyen de las tristes. Estas cosas, pues,
+no se han de pasar así por alto, especialmente que lo que sobre esto se disputa
+hace mucha dificultad, porque unos dicen que el deleite es el sumo bien, y otros,
+por el contrario, que es cosa muy mala; los unos persuadidos, por ventura, ser ello
+así, y los otros entendiendo que, para lo que cumple a nuestra vida, es mejor dar
+a entender que el deleite es cosa mala, puesto que ello así no fuese, porque los
+hombres, vulgarmente, se van tras dél, y no atienden sino a darse a sus deleites, y
+que por esto era bien torcerlos al contrario, porque desta manera verníase a dar en
+el medio. Pero esto no es bien dicho, porque en materia de afectos y ejercicios las
+razones no hacen tanta fe como las obras. Cuando discrepan, pues, éstas con lo que
+se vee por el sentido, son despreciadas y, juntamente con esto, destruyen la verdad,
+porque el que vitupera el deleite, si alguna vez se muestra apetecerlo, parece que se
+inclina a él, casi dando a entender que no son todos malos, porque el distinguir entre
+deleite y deleite no es de los vulgares. Las verdaderas razones, pues, parecen ser
+muy importantes, no solamente para el entender las cosas, pero aun también para
+pasar la vida, porque cuando conforman con la experiencia de las obras, persuaden,
+y así inducen a los que las entienden a vivir conforme a ellas. Pero desto baste por
+agora, y prosigamos lo que está dicho del deleite.
+
+Capítulo II
+
+En que se propone la opinión, de Eudoxo, de Platón y de otros acerca del deleite
+
+Propone la diversidad de las opiniones acerca de si el deleite es cosa buena o
+no lo es. La primera es de Eudoxo, el cual decía ser el deleite el sumo bien, pues
+todas las cosas lo apetecían, y también que su contrario, que es la tristeza, todas
+las cosas la rehúsan como cosa mala y enemiga de natura. Terceramente, porque
+el deleite, por sí mismo es apetecido, y si a otro bien se allega lo hace más digno
+de ser apetecido y deseado. La segunda es de Platón, el cual, por la misma razón,
+concluía no ser el sumo bien, pues el deleite con virtud es más de apetecer que sin
+virtud; pero el sumo bien no admite más o menos. Pone asimismo las opiniones
+de otros para probar que es malo, las cuales se entenderán en el mismo texto
+fácilmente.
+
+Eudoxo, pues, tenía por opinión que el deleite era el sumo bien, porque veía que
+todas las cosas, así capaces de razón, como incapaces, lo apetecen, y que en todas
+las cosas lo que es de escoger aquello es bueno, y lo más digno de escoger lo mejor
+de todo; y el ver que todas las cosas se inclinan a lo mismo, muestra que aquello es
+para todas las cosas lo mejor, porque cada cosa halla lo que es bueno para sí, como
+el mantenimiento, y así, lo que es bien para todos y todos lo apetecen, aquello decía
+él ser el sumo bien. Estas razones de Eudoxo más persuadían por la bondad de las
+costumbres del hombre, que por sí mismas, porque por extremo se mostraba ser
+templado en su vivir. De manera que no parecería que decía esto como hombre
+al deleite aficionado, sino que, en realidad de verdad, era ello así como él decía.
+No menos se persuadía el ser esto así verdad por el contrario del deleite, porque la
+tristeza de suyo es cosa digna de que todos la aborrezcan, y de la misma manera
+será cosa digna de amar la que le es contraria. Ítem, que aquello parece ser lo
+más digno de escoger, lo cual no por amor de otra cosa lo apetecemos, y esto,
+sin controversia ninguna, es el deleite, porque ninguno pregunta jamás a otro a
+qué fin se deleita, casi mostrando que el deleite es cosa de suyo digna de escoger.
+Asimismo, allegado el deleite a otra cualquier cosa buena, la hace más digna
+de escoger, como el hacer justicia, el vivir templadamente, y hace que el bien
+mismo se acreciente y haga mayor. Aunque esta razón parece que demuestra ser
+el deleite uno de los bienes, pero no que sea más perfecto bien que cualquier otro,
+porque cualquier bien es más de desear acompañado de otro, que no a solas. Con
+esta misma razón demuestra Platón no ser el deleite el sumo bien, porque la vida
+deleitosa, tomada juntamente con la prudencia, es más de desear que no sin ella,
+y si lo mezclado más perfeto es, no es el deleite el sumo bien, porque lo que es
+sumo bien no se hace más digno de desear porque se le añada otra cualquier cosa.
+Consta, pues, que ninguna cosa, que en compañía de las cosas que son de suyo
+buenas fuere más digna de escoger, será el sumo bien. ¿Cuál, pues, será tal, del
+cual participemos? Porque éste es el que buscamos. Pues los que dicen que aquello
+que todos apetecen no es cosa buena, ninguna cosa dicen, porque lo que a todos
+les parece, aquello decimos que es; y el que esta persuasión refutare, no dirá cosas
+más dignas de fe. Porque si solas las cosas que no alcanzan razón apeteciesen los
+deleites, aún sería algo lo que dicen. Pero, pues, lo apetecen también las cosas
+dotadas de prudencia, ¿qué tienen que decir en esto? Y aun en los mismos malos,
+por ventura hay algún natural bien mayor que lo que es de suyo bueno, lo cual
+apetece su bien proprio. Ni aun lo que dicen del contrario parece estar bien dicho.
+Porque dicen que no se sigue que porque la tristeza sea cosa mala por eso es bueno
+el deleite, porque bien puede un mal ser contrario de otro, y ambos de otro que
+no sea lo que el uno o lo que el otro. Esto que ellos dicen no está mal dicho, pero,
+en lo que aquí tratamos, no es verdad, porque si ambas a dos cosas fueran malas,
+ambas a dos fueran de aborrecer; y si ninguna dellas mala, ninguna de aborrecer;
+y si la una, aquélla, de la misma manera, lo fuera. Pero agora parece que de la
+tristeza huyen como, de mal, y el deleite lo escogen como bien: pues luego, de
+la misma manera, son contrarios.
+
+Capítulo III
+
+En que se prueba cómo el deleite es cosa buena, y que no se han de escoger todos los deleites, y se satisface a las razones de los que tienen lo contrario
+
+Propuesta la opinión de Eudoxo, y respondido a las razones de los que la
+refutaban, muestra cómo las razones de los que querían probar que el deleite no era
+cosa buena, no coligen nada, ni tienen ninguna consecución, Porque no se colige:
+el deleite no es calidad, luego no es cosa buena; el deleite admite más y menos,
+luego no es cosa buena. Porque en muchas cosas demuestra haber esto que es no
+ser calidad, como en un buen ejercicio, y admitir más y menos, como el ser justo,
+y con todo eso ser cosas buenas. Demuestra después el deleite no ser movimiento
+ni generación, y que no todos los deleites tienen por contraria la tristeza, sino
+solos los corporales. Declara, al cabo, que no todo lo que parece deleite es deleite,
+porque lo que la voluntad viciosa juzga por deleite a la tal le es, pero de suyo no
+lo es, así como el buen manjar, que el enfermo lo juzga amargo, al tal enfermo
+le es amargo, pero no lo es de suyo. Y así, lo que la voluntad sin virtud juzga
+ser deleite, no se ha de apetecer.
+
+Pero no porque el deleite no sea calidad, deja por eso de ser uno de los bienes,
+porque tampoco son calidades los ejercicios virtuosos, ni menos lo es la misma
+felicidad. Dicen, asimismo, que lo bueno es cosa ya determinada, pero que el deleite
+no tiene cierto término, pues admite más y menos. Pues si del deleitarse lo coligen
+esto, lo mismo hallarán en la justicia y en las demás virtudes, conforme a las cuales,
+clara y manifiestamente, confiesan ser unos más tales y otros menos, porque unos
+hay que son más justos que otros, y otros más valerosos que otros. Y aun acontece
+que uno use más de justicia que otro, y uno sea más templado en su vivir que otro.
+Pero si en los mismos deleites dicen que consiste, no dan aún bien en la cuenta de
+la causa, si unos deleites hay que no admiten mezcla y otros que son mezclados.
+Pero ¿qué inconveniente hallan en que así como la salud, siendo cosa que tiene
+fin y término, con todo eso admite más y menos, de la misma manera también
+acontezca en el deleite? Porque ni en todas las cosas hay la misma templanza, ni
+aun en la misma cosa es siempre una misma, sino que aunque se debilite, queda
+la misma hasta llegar a cierto término, y difiere en más y menos. Y esto mismo
+puede acontecer en el deleite. Los que ponen que el sumo bien es cosa perfeta, y
+que los movimientos y generaciones son cosas imperfetas, pretenden mostrar que
+el deleite es movimiento y generación. Pero no parece que dicen bien en esto, ni
+que el deleite es movimiento, porque a todo movimiento le es anexa la presteza y la
+pereza, aunque no en respecto y comparación de sí mismo, sino de algún otro, como
+al movimiento del mundo en respecto de otro, pero en el deleite ni hay presteza ni
+pereza, porque caer en un deleite de presto puede acontecer, como caer en ira, pero
+deleitarse no es posible ni de presto ni respecto de otrie; pero el andar y crecer,
+y las cosas otras como éstas, bien pueden hacerse presta y perezosamente. Caer,
+pues, en el deleite presta o perezosamente, bien es posible, pero no lo es el obrar
+conforme a él, digo el mismo deleitarse. ¿Cómo será, pues, generación? Porque
+no parece que cualquier cosa se haga de cualquiera, sino que de lo mismo que se
+hace, en aquello mismo se resuelve, y así, de lo que el deleite fuese generación, de
+aquello mismo sería la tristeza perdición. Dicen, asimismo, que la tristeza es falta
+de lo que naturaleza requiere, y el deleite cumplimiento o henchimiento de aquello.
+Pero estas cosas son afectos corporales, porque si el deleite fuese henchimiento de
+lo que naturaleza requiere, aquello mismo en quien se hace el henchimiento, sentiría
+el deleite; luego el cuerpo sería el que se deleitase, lo cual no parece ser así. No es,
+pues, el deleite henchimiento, sino que haciéndose este henchimiento, se deleita
+el hombre, y quitándole alguna parte, se entristece. Pero esta opinión parece haber
+procedido de las tristezas y deleites que acaecen acerca del mantenimiento, porque
+los que están faltos dél, y por la misma razón tristes, cuando matan su hambre,
+se deleitan. Pero esto no acaece en todos los deleites, porque los deleites de las
+sciencias y de los sentidos, como son los que dan los olores, las músicas, las
+hermosas vistas, y muchas memorias y esperanzas, carecen de tristeza. ¿De quién,
+pues, diremos que son generaciones estos deleites semejantes? Porque de ninguna
+cosa son defectos, cuyas harturas o henchimientos sean. Pero a los que proponen
+deleites feos y torpes, puédeseles responder que cosas semejantes no son cosas
+deleitosas; porque no porque a los que tienen los afectos estragados les parezcan
+deleitosas, por eso habemos de creer que lo son absolutamente, sino deleitosas a los
+tales; de la misma manera que las cosas que a los enfermos les parecen provechosas,
+dulces o amargas, o las que a los lagañosos les parecen blancas, no por eso diremos
+que son tales. ¿O responderemos que los deleites son, cierto, cosas de apetecer, pero
+no los de cosas como aquéllas; así como el enriquecer es cosa de desear, pero no,
+haciendo traiciones a la patria, y el tener salud es cosa de desear también, pero no
+comiendo cualquier cosa? ¿O diremos que los deleites difieren en especie, porque
+los que proceden de cosas honestas son diferentes de los que de cosas feas, y que
+ninguno puede deleitarse como se deleita el hombre justo, no siendo justo, ni como
+se deleita el músico, no siendo músico, y de la misma manera en todo lo demás? Y
+que el deleite no sea bueno, o que haya diferentes especies de deleites, claramente
+lo muestra la diferencia que hay entre el amigo y el lisonjero, porque el amigo
+conversa encaminando su conversación a lo bueno, y el lisonjero a lo deleitable,
+y así lo del lisonjero es vituperado y lo del amigo es alabado, como cosas que
+enderezan su conversación a cosas diferentes. Ninguno tampoco habría que holgase
+de vivir toda la vida teniendo entendimiento de mochacho, por deleitarse con las
+cosas con que más parece que se deleitan los mochachos, ni se alegrase haciendo
+alguna cosa torpe, aunque nunca se hobiese de entristecer. Muchas cosas, asimismo,
+procuramos con mucha solicitud, aunque ningún deleite den, como el ver, el
+acordarnos, el saber, el ser dotados de virtudes. Y si tras destas cosas de necesidad
+se siguen deleites, no importa, porque también las escogeríamos aunque ningún
+deleite nos procediese dellas. Consta, pues, al parecer, que ni el deleite es cosa
+buena, ni todo deleite es de escoger, y que hay algunos deleites dignos de escoger de
+suyo mismos, los cuales difieren en especie, o, a lo menos, las cosas de do proceden
+ellos. Baste, pues, lo que está dicho del deleite y la tristeza.
+
+Capítulo IV
+
+En el cual se declara qué cosa es deleite y cómo perficiona todo ejercicio
+
+Aunque el fin último de la moral sciencia es el bien obrar, para mediante
+aquél vivir prósperamente, y por esto la sciencia moral es sciencia activa y no
+contemplativa, con todo eso, siempre se ofrece tratar algunas cosas contemplativas,
+y que no pertenecen para el obrar; una de las cuales es la que se trata en el
+capítulo presente, en el cual el filósofo propone la definición del deleite, buscando
+primeramente, conforme a método lógico, su género, que es un súbito accidente que
+perficiona el ejercicio. Después pone algunas dudas, y satisface a ellas. Pero casi
+todo lo de este capítulo, más curioso es que necesario.
+
+Pero qué cosa sea el deleite, o qué tal sea, más claramente se entenderá,
+tomando la cosa de principio. Porque el ver en cualquier cantidad de tiempo qué se
+haga, parece ser cosa perfeta, porque no tiene necesidad de otra cosa alguna que,
+añadiéndosele después, haga perfeta su especie. El deleite, pues, parece ser una
+cosa como ésta, porque es una cosa entera, y en ningún espacio de tiempo puede
+ninguno tomar un deleite de manera que, si más tiempo dura, venga a ser su especie
+más perfeta. Y por esto, el deleite no es movimiento, porque todo movimiento se
+hace en tiempo y va a algún fin enderezado, como el edificar entonces se dice ser
+perfeto, cuando haya dado remate a lo que pretende, o en todo el tiempo, o en este
+tal particular; pero considerados los movimientos en cualquiera parte del tiempo,
+todos son imperfetos y diferentes en especie, así del todo como entre sí; porque el
+poner una piedra sobre otra, diverso movimiento es del levantar el pilar, y ambas
+a dos cosas difieren del hacer el templo, y el edificar el templo es acción perfeta,
+porque para lo propuesto no le falta nada. Pero el echar los cimientos y el hacer
+la crucería son acciones imperfetas, pues ambas a dos son de lo que es parte;
+difieren, pues, en especie, y no puede hallarse en cualquier manera de tiempo
+perfeto movimiento en especie, si no es en todo el tiempo considerado juntamente.
+Lo mismo se halla en el andar y en los demás; porque si el ir es moverse de una
+parte a otra, sus diversas especies serán volar, andar, saltar, y otras semejantes. Y
+no solamente en éstas pasa ello así, pero aun en el mismo andar también, porque el
+de dónde y adónde no es un mismo en toda la corrida que en la parte, ni el mismo
+en la una parte que en la otra, ni es todo uno pasar esta raya o aquella otra, porque
+no solamente pasa la raya, pero pasa la puesta en lugar, y la una está en diferente
+lugar de la otra. Pero del movimiento ya en otros libros se ha tratado de propósito.
+Parece, pues, que ni aun en todo el tiempo no es una acción perfeta, sino muchas
+imperfetas y diferentes en especie, pues el de dónde y el adónde les hacen diversas
+en especie. Pero la especie del deleite en cualquier tiempo es perfeta. Consta, pues,
+manifiestamente que el movimiento y el deleite son cosas diversas entre sí, y que el
+deleite es cosa entera y perfeta, lo cual también parece que se entiende ser así de que
+ninguna cosa se puede mover sin discurso de tiempo, pero deleitarse bien puede,
+porque lo que agora en este presente tiempo es, entera cosa es. De aquí se colige
+que no dicen bien los que dicen ser el deleite movimiento o generación, porque
+éstas no se dicen en las cosas que tienen en sí todo su ser, sino de las que están por
+partes repartidas y no son cosas enteras; porque ni en la vista hay generación, ni
+en el punto, ni en la unidad, ni cosa ninguna déstas es movimiento ni generación,
+ni tampoco lo habrá en el deleite, porque es una cosa entera. Pero todo sentido
+ejercita su operación en respecto, y el que bien dispuesto está en respecto de lo más
+hermoso que por el sentido se puede percibir, la ejercita perfetamente, porque tal
+cosa como ésta parece que es señaladamente el perfeto ejercicio, ni importa nada
+que digamos que el mismo sentido se ejercita o que se ejercita el que lo tiene. Y en
+cada uno de los sentidos, aquel es el mejor ejercicio, que es de más bien dispuesto
+sentido y va dirigido al mejor de sus objetos. Este tal, pues, será el más perfeto
+ejercicio y el más suave o deleitoso; porque en cada sentido hay, su deleite, y de la
+misma manera en cada ejercicio del entendimiento y en la contemplación, y el más
+deleitoso es el que es más perfeto, y el más perfeto es el del que está bien dispuesto
+para lo más virtuoso que con el entendimiento puede ser comprendido. Y este tal
+ejercicio perficiónase con el deleite, pero no de una misma manera lo hace perfeto
+el deleite y el objeto y el sentido, aunque son todas cosas buenas, de la misma
+manera que la salud y el médico no son de una misma manera causa del estar sano.
+Consta, pues, que en cada sentido hay su deleite, porque decimos que tales vistas
+y tales sonidos dan deleite; también consta que aquel será mayor deleite, que se
+tomará estando el sentido muy más perfeto, y siendo enderezado a muy más perfeto
+objeto. Siendo, pues, tales el objeto que se ha de sentir y el sentido que lo perciba,
+siempre habrá deleite, pues habrá quien lo dé y quien lo reciba. Perficiona, pues, el
+deleite al ejercicio, no como hábito que consista en él, sino como fin que de nuevo
+dél resulta, de la misma manera que a los mancebos la hermosura, y mientras lo
+que se siente o se entiende estuviere dispuesto como debe, y por la misma razón el
+que lo juzga y considera, en tal ejercicio siempre habrá deleite. Porque las cosas
+que son semejantes y de una misma manera están entre sí dispuestas, digo el que
+recibe y el que hace, siempre están aptas para producir el mismo efecto, pues como
+ninguno continuamente se deleita o está en fatiga, porque ninguna cosa humana
+puede durar continuamente en el ejercicio, y por esto no, ni el deleite tampoco
+dura a la continua, porque es anexo al ejercicio. Y aun algunas cosas deleitan
+siendo nuevas, y después no, por la misma causa. Porque al principio cébase en
+ellas el entendimiento y ejercitase con hervor, como los que miran ponen su vista
+ahincadamente, pero después no es tan vivo el ejercicio, sino remiso, y por esto
+también el deleite se escurece. Alguno, pues habrá que piense que apetecen los
+hombres el deleite, porque apetecen el vivir, y la vida es un ejercicio, y cada uno
+en aquello y con aquello que más ama se ejercita, como el músico con el oír en las
+consonancias, y el amigo de saber con el entendimiento en las consideraciones, y
+cada uno de los demás de la misma manera. Pero el deleite da la perfición y remate
+a los ejercicios, y así también al vivir, al cual apetecen. Con razón, pues, apetecen
+los hombres el deleite, pues a cada uno le perficiona la vida, la cual es cosa de
+desear. Pero si apetecemos el vivir por el deleite o al contrario el deleite por el
+vivir, no lo disputemos por agora, porque estas dos cosas parecen tan anexas la
+una a la otra, que no se pueden hallar la una sin la otra; porque sin ejercicio no hay
+deleite, y a todo ejercicio le da el deleite su remate.
+
+Capítulo V
+
+En que se muestra cómo los deleites difieren en especie
+
+En el capítulo presente da fin a la disputa del deleite, probando una cuestión
+no muy dificultosa: que los deleites difieren en especie. Pruébalo con semejantes
+razones que éstas: que lo que unos perficionan, otros lo impiden, como los deleites
+del entendimiento perficionan las sciencias, los del sentido las destruyen. Ítem, que
+cada deleite sigue su proprio ejercicio, y así como los ejercicios son diversos, lo
+han de ser también de necesidad los deleites que los siguen, con otras razones que
+se entenderán por el mismo texto fácilmente.
+
+De donde parece que los deleites difieren en especie, porque las cosas que son
+diferentes en especie, juzgamos que son perficionadas por cosas también diferentes
+en especie; y los ejercicios del entendimiento diversos son de los del sentido.
+Porque desta manera parece que difieren las cosas naturales de las artificiales, como
+los animales y los árboles, la pintura y la estatua, la casa y el vaso; y de la misma
+manera los ejercicios diferentes en especie son hechos perfetos por cosas también
+diferentes en especie. Pues los ejercicios del entendimiento difieren en especie
+de los del sentido, y éstos también los unos de los otros, luego también ternán la
+misma diferencia los deleites que la perfición le dieren y remate. Demuéstrase
+también esto mismo en que cada deleite es proprio de aquel ejercicio, al cual hace
+perfeto; porque el proprio deleite acrecienta el ejercicio, porque los que cualquier
+cosa hacen con deleite, mejor juzgan della, y mejor la declaran, como los que se
+deleitan con la geometría dícense geómetras, y las cosas tocantes a geometría mejor
+las entienden que los otros. De la misma manera los aficionados a la música, y a
+la arquitectura, y a las demás artes, aprovechan en sus proprias obras deleitándose
+con ellas. Acrecientan, pues, los deleites a las obras, y las cosas que acrecientan
+proprias son de aquello que acrecientan, y las cosas diferentes en especie tienen
+también cosas proprias diferentes en especie. Pero aun más a la clara se verá esto,
+en que los deleites que de unas cosas proceden, son estorbos para los ejercicios
+de las otras. Porque los aficionados a las flautas no pueden escuchar las buenas
+conversaciones, si vieren tañer a un músico de flautas, porque se huelgan más con
+la música de las flautas, que no con el ejercicio que tratan de presente, de manera
+que el deleite de la música de flautas destruye el ejercicio de la buena conversación.
+De la misma manera acontece en las demás cosas, cuando uno en dos diversas
+cosas juntamente se ejercita. Porque la más deleitosa excluye a la otra, y si en el
+deleite difiere mucho la una de la otra, ya la excluye mucho más, de manera que
+en la otra verná a no ejercitarse nada. Por esto cuando en una cosa nos deleitamos
+mucho, no nos curamos de hacer otra; pero cuando ya con unas cosas no nos
+deleitamos mucho, entonces nos damos a hacer otras, como en los teatros, cuando
+los que combaten lo hacen fríamente, los miradores pónense a comer sus colaciones.
+Y, pues, el proprio deleite esclarece más los ejercicios, y los hace más durables y
+mejores, y los que son ajenos lo destruyen, claramente se demuestra que difieren
+mucho los tales deleites entre sí, porque los ajenos deleites casi hacen lo mismo que
+las proprias tristezas, porque las proprias tristezas destruyen los ejercicios, como
+si a uno le es pesado o desabrido el escrebir o el contar a otro, ni el uno escribe, ni
+el otro cuenta, porque le es desabrido y pesado el ejercicio dello. En los ejercicios,
+pues, de los proprios deleites y molestias procede lo contrario, y proprios deleites
+o molestias se dicen aquellas que de suyo trae consigo el ejercicio, pero los otros
+deleites llamámoslos ajenos, porque hacen lo mismo que las molestias, porque
+destruyen, aunque no de la misma manera. Y, pues, los ejercicios difieren en bondad
+y malicia, y los unos son dignos de amar y los otros de aborrecer y otros hay que
+son indiferentes, de la misma manera será de los deleites, que cada ejercicio tiene
+su proprio deleite. El deleite, pues, que fuere proprio del buen ejercicio, será buen
+deleite, y el que del malo, será malo. Porque también los deseos, si son de cosas
+buenas, son de alabar, y si de malas, de vituperar; verdad es que más proprios de
+los ejercicios son los deleites que los deseos, porque los deseos son distintos de los
+ejercicios, así en el tiempo como en la naturaleza; pero los deleites están conjuntos
+con los mismos ejercicios, y tan unidos, que hay cuestión si el ejercicio es lo mismo
+que el deleite. Pero con todo eso el deleite no parece que sea entendimiento, ni
+tampoco sentido, porque es cosa ajena de razón, sino que como nunca está apartado
+el deleite, o del entendimiento, o del sentido, paréceles a algunos que es lo mismo
+como los demás ejercicios y deleites. Pero la vista difiere del tacto en la limpieza,
+y el oído y el olfato del gusto por lo mismo, y de la misma manera difieren los
+deleites dellos, y déstos los del entendimiento, y entre sí los unos de los otros.
+Parece, pues, que cada animal tiene su proprio deleite, como su proprio ejercicio
+y obra propria, porque uno es el deleite del caballo, y otro el del perro, y otro el
+del hombre, como dice Heráclito de los asnos, que antes acuden a la paja, que no
+al oro, porque a los asnos más aplacible les es el comer que no el oro. Los deleites,
+pues, de cosas diversas en especie, también entre sí difieren en especie; pero los
+de las cosas que son unas mismas, es conforme a razón que sean no diferentes.
+Aunque las de los hombres no poco difieren entre sí, porque unas mismas cosas a
+unos dan pena y a otros dan deleite, y a unos les parecen cosas tristes y dignas de
+aborrecer, y a otros deleitosas y dignas de amar, lo cual en las cosas dulces acaece,
+porque una misma cosa no le parece dulce al que está con calentura y al que está
+sano, ni de la misma manera caliente al que está flaco, que al que tiene buen hábito
+de cuerpo,y lo mismo acaece en todo lo demás. En todas estas cosas, pues, aquello
+parece ser realmente, que el que bien dispuesto está juzgare que es. Pues si esto
+está bien dicho, como lo parece estar, y si la virtud es la regla en cada cosa, y el
+bueno es el que lo ha de reglar, aquéllos por cierto serán realmente deleites, que
+al bueno le parecieren que lo son, y aquellas serán cosas deleitosas, con las cuales
+él se deleitare. Y si las cosas de que este tal abomina, a otro le parecen deleitosas,
+no es de maravillar, porque de diversas maneras se pervierten los hombres y se
+estragan. No son, pues, las tales cosas deleitosas, sino sonlo a los tales, y a los que
+de aquella manera están dispuestos. Los que son, pues, a confesión de todos cosas
+feas, claro está que no habemos de decir que son deleites, sino para los estragados
+y perdidos; pero de las que ser parecen buenas, cuál o qué tal sea el que habemos
+de decir ser proprio del hombre, por el mismo ejercicio se entiende claramente,
+porque a los ejercicios son anexos los deleites. Si el ejercicio, pues, del hombre bien
+afortunado es uno solo, o si son muchos los deleites que a este tal o a estos tales
+dieren perfición, estos se dirán propriamente ser deleites proprios del hombre; pero
+los demás, secundariamente y muy de lejos, como también sus ejercicios.
+
+Capítulo VI
+
+De la felicidad
+
+En el principio desta obra mostró Aristóteles ser el blanco, adonde los hombres
+habían de enderezar todos sus hechos, la felicidad. Y después ha tratado de todos
+los géneros de virtudes, como de medios y cosas, mediante las cuales se alcanza
+esta felicidad, y por la misma razón ha tratado de la amistad y del deleite como de
+cosas anexas a la misma felicidad. Agora, en lo que resta deste libro, trata de la
+misma felicidad, dando con esto el remate a sus Morales. Porque en toda cosa el
+fin es lo primero que acude a la intención, y lo postrero que el que obra pone en
+ejecución. En el capítulo presente hace una breve recopilación de lo que ya se trató
+della en el principio. Muestra después ser la felicidad un ejercicio que los hombres
+perfetos lo aman por sí y no por causa de otro. Esto dice como hombre que en esto
+alcanzó lo que humanamente pudo. Si doctrina evangélica alcanzara, dijera, con
+la verdad, ser la felicidad nuestra ver a Dios y gozar de aquella inmensa gloria
+que de su suma bondad procede a los que la merecen alcanzar; y que las virtudes
+que están ya dichas, con otras que él no supo, que son: fe, esperanza, caridad, son
+losmedios para alcanzar esta felicidad.
+
+Pero, pues habemos ya concluido con lo de las virtudes, amistades y deleites,
+resta que tratemos así sumariamente de la felicidad, pues la pusimos por fin y
+blanco de las humanas cosas. Reiterando, pues, lo que ya está dicho en otra parte,
+será nuestra disputa más sumaria. Dijimos, pues, que la felicidad no era hábito,
+porque se siguiría que pudiese cuadrar al que duerme y viva vida de planta, y
+también al que estuviese puesto en muy grandes desventuras. Pues si tales cosas
+no nos cuadran, más habemos de decir que consiste en ejercicio, como ya se dijo
+en lo pasado. De los ejercicios, pues, unos hay que son forzosos y que por fin de
+otras cosas los escogemos, y otros que por respecto dellos mismos. Consta, pues,
+que la felicidad se ha de contar por uno de aquellos ejercicios que por sí mismos
+se escogen, y no se ha de poner entre los que por fin de otras cosas se apetecen,
+porque la felicidad de ninguna cosa es falta, antes para sí misma es muy bastante.
+Aquellos ejercicios, pues, son dignos por sí mismos de escoger, de los cuales no
+se pretende otra cosa fuera del mismo ejercicio. Tales, pues, parecen ser las obras
+de virtud, porque el obrar cosas honestas y virtuosas es una de las cosas que por
+sí mismas son dignas de escoger, y asimismo los juegos que en sí son deleitosos,
+porque no por otro fin son apetecidos, porque más daño reciben los hombres dellos
+que provecho, pues se descuidan por ellos de su propria salud y de sus intereses. Y
+aun muchos de los bien afortunados se dan a semejantes pasatiempos, y por esto los
+tiranos, a los que en semejantes conversaciones son graciosos y aplacibles, precisan
+mucho, porque estos tales se muestran deleitosos en aquello que los tales poderosos
+apetecen, y sienten ellos necesidad de cosas semejantes. Estas tales cosas, pues,
+parecen cosas prósperas, porque se deleitan en ellas los que están puestos en poder
+y señorío. Aunque los tales no son por ventura bastante argumento para persuadirlo,
+porque no consiste la virtud en el poder mucho y señorear, ni tampoco el buen
+entendimiento, de las cuales dos cosas proceden los buenos ejercicios. Y si estos
+tales, no gustando del deleite verdadero y liberal, se dan a los deleites sensuales,
+no por eso habemos de juzgar ser los deleites sensuales más dignos de escoger,
+porque también los niños juzgan ser lo más principal lo que en ellos es tenido en
+precio y en estima. Es, pues, cosa conforme a razón, que así como a los niños y a
+los varones las cosas que les parecen de estimar son diferentes, de la misma manera
+también a los malos y a los buenos. Aquellas cosas pues, son dignas de estima y
+deleitosas (como ya está dicho muchas veces), que las juzga ser tales el hombre
+virtuoso, porque cada uno juzga por más digno de escoger el ejercicio que es según
+su proprio hábito, y así también el virtuoso juzga por más digno de escoger el
+ejercicio que essegún virtud. No consiste, pues, la felicidad en gracias y burlas,
+porque cosa sería ajena de razón, que el fin de nuestra vida fuesen gracias, y
+que todo el discurso de nuestra vida negociásemos y padeciésemos trabajos por
+causa de decir donaires. Porque todas las cosas, hablando así sumariamente, las
+apetecemos por causa de otras, excepto la felicidad, porque este es el fin de todas
+ellas. Afanarse, pues, mucho y trabajar por amor de burlas y niñerías, mucha
+necesidad parece y mucha niñería. Pero burlarse algún poco para después volver
+a las cosas de veras con hervor, como decía Anacarsis, parece estar bien dicho.
+Porque las burlas parecen una manera de descanso, y como los hombres no pueden
+perseverar en el trabajo de contino, tienen necesidad de algún descanso. No es,
+pues, el reposo el fin de nuestra vida, porque lo tomamos por amor del ejercicio.
+Y la vida bien afortunada parece consistir en las cosas hechas conforme a virtud,
+y esta es la vida virtuosa, y no en las burlas ni en las gracias, porque las cosas
+virtuosas mejores decimos que son, que no las cosas de risa y las de gracias,
+y el ejercicio de la mejor parte y del mejor hombre, mejor virtuoso cierto es,
+así el ejercicio del que es mejor, más principal será y más importante para la
+felicidad. De los deleites corporales, pues, quienquiera puede gozar, aunque sea
+un vil esclavo, no menos que el bueno, pero la felicidad ninguno la atribuirá al
+esclavo; si ya también la vida virtuosa no tuviese. Porque no consiste la felicidad
+en semejantes conversaciones, sino en los ejercicios hechos conforme a virtud,
+como ya está dicho en lo pasado.
+
+Capítulo VII
+
+De la felicidad contemplativa
+
+Declarado ya qué es y en qué consiste la felicidad, propone agora Aristóteles cuál
+es la mayor felicidad, y muestra ser la mayor la que consiste en la contemplación
+y en la consideración de las cosas, pues la parte que es más excelente y más divina
+en los hombres, se ejercita en ella, que es el entendimiento. Y también porque
+esto es lo que los hombres pueden hacer más continuamente sin fatiga, y porque al
+juicio bien dispuesto no hay cosa que tanto gusto le dé. Asimismo porque este es
+un ejercicio que menos necesidad tiene de cosas exteriores, lo cual es proprio de la
+felicidad. Confórmase mucho este parecer con la verdad de nuestra fe, la cual nos
+enseña que aquellos verdaderamente bienaventurados, que en el otro siglo gozan de
+Dios, en éste tienen su felicidad, cuyo deleite excede a todo género de deleites. Y
+aun por boca de nuestro mismo Redemptor está esto aprobado, cuando pronunció
+que María Magdalena había escogido la mejor parte, la cual, como el sagrado
+Evangelio lo cuenta, estaba a los pies del Señor contemplando y considerando
+sus divinos sermones y palabras.
+
+Pues si la felicidad es ejercicio conforme a la virtud, más princiforme (sic)
+a razón que ha de ser conforme a la virtud más principal, la cual es la virtud de
+la mejor y más principal parte, ora sea ésta el entendimiento, ora otra cosa, la
+cual conforme a la naturaleza parece que manda y es la capitana, y que tiene
+conocimiento de las cosas honestas y divinas, ora sea ella de suyo cosadivina, ora
+la más divina que en nosotros se halla. El ejercicio, pues, désta, hecho conforme
+a su propria virtud, será la perfeta felicidad. Y que la virtud desta parte sea la
+contemplativa, ya está dicho, y esto que decimos muestra conformar con lo que ya
+antes está dicho y con la verdad misma. Porque este ejercicio es el más principal de
+los ejercicios, pues el entendimiento es lo principal que hay en nosotros, y de las
+cosas que se conocen, las más principales son las que el entendimiento considera.
+A más desto, éste es el más continuo de los ejercicios, porque más continuamente
+podemos contemplar que no obrar cualquiera cosa. También tenemos por cierto
+que en la felicidad ha de haber mezcla de deleite, pues sin contradicción ninguna el
+ejercicio de la sabiduría es el más deleitoso de todos los ejercicios de virtud, porque
+parece que la sabiduría tiene en sí maravillosos deleites, así cuanto a la pureza
+dellos, como cuanto a la firmeza, y por esto, conforme a razón, más aplacible les
+es la vida a los que saben, que a los que preguntan, así como aquello que llamamos
+suficiencia más cuadra a la contemplación. Porque de las cosas que son menester
+para el vivir, el sabio y el justo y todos los demás tienen necesidad. Pero siendo
+destas cosas bastantemente proveídos, el justo tiene aún necesidad de aquellos para
+quien y con quien use de justicia, y de la misma manera el templado, y también el
+valeroso, y cada uno de todos los demás. Pero el sabio, estando consigo a solas,
+puede contemplar, y cuanto más sabio fuere muy mejor. Ello por ventura es mejor
+hacerlo en compañía, pero con todo eso es el sabio más bastante para sí. Parece
+asimismo que sola la contemplación es amada por sí misma, porque della ningún
+otro provecho procede fuera del mismo contemplar, pero en los negocios parece
+que algo más o menos alcanzamos fuera de la misma obra. También parece que
+la felicidad consiste en el reposo, porque si tratamos negocios es por después
+descansar, y si hacemos guerra es por después vivir en paz; los ejercicios, pues,
+de las virtudes activas consisten, o en los negocios tocantes a la república, o en
+las cosas que pertenecen a la guerra, y las obras que en estas cosas se emplean
+parecen obras ajenas de descanso, y sobre todas, las cosas tocantes a la guerra.
+Porque ninguno hay que amase el hacer guerra sólo por hacer guerra, ni aparejase
+lo necesario sólo por aquel fin, porque se mostraría ser del todo cruel uno y
+sanguinario, si de amigos hiciese enemigos sólo porque hobiese batallas y muertes
+se hiciesen. También es falto de descanso el ejercicio del que gobierna la república,
+y a más del gobierno procura para si señoríos o dignidades, o la felicidad para sí
+o para sus ciudadanos, diferente de aquella común civil que aquí buscamos como
+manifiestamente diferente. Pues si entre todos los ejercicios y obras de virtud, las
+civiles y tocantes a la guerra son las más principales en honestidad y grandeza, y
+éstas carecen de descanso y van dirigidas a otro fin, y no son por sí mismas dignas
+de escoger, y el ejercicio del entendimiento, siendo contemplativo, parece que
+difiere y se aventaja en la afición y que no pretende otro fin alguno fuera de sí
+mismo, pero que en sí mismo tiene su deleite proprio, el cual su proprio ejercicio
+hace ir de augmento y hay en él bastante suficiencia y descanso y seguridad de
+fatiga, cuanto el humano estado es capaz della; y todas las demás cosas que se
+atribuyen a un varón bien afortunado, parece que se hallan en este ejercicio de la
+contemplación, ésta por cierto será la felicidad perfeta del hombre, si se le añade
+perfeta largueza de la vida, porque ninguna cosa imperfeta es de las que comprende
+en si la felicidad. Pero tal vida como ésta más perfeta sería que la que un hombre
+puede vivir en cuanto hombre, porque en cuanto hombre no viviría desta manera,
+sino en cuanto hay en él alguna cosa divina; y cuanto ésta difiere de las cosas
+compuestas, tanta diferencia hay del ejercicio désta al de las demás virtudes. Y si
+en comparación del hombre el entendimiento es cosa divina, también será divina la
+vida que es conforme al entendimiento, en comparación de la vida de los hombres.
+Conviene, pues, que no sigamos el parecer de los que dicen que, pues somos
+hombres, que nos contentemos con saber las cosas de hombres, y pues somos
+mortales, que amemos lo mortal, sino que en cuanto posible fuere nos hagamos
+inmortales y hagamos todo lo posible por vivir conforme a lo mejor que hay en
+nosotros; lo cual aunque en el tomo es poco, con todo eso en poder y valor a todo
+lo demás hace mucha ventaja. Y aun parece que cada uno de nosotros es este
+entendimiento, pues somos lo qué es más principal y lo mejor. Cosa, pues sería,
+por cierto ajena de razón, que uno dejase de seguir la vida que es propria suya
+por escoger la de otra cualquier cosa. Cuadra también al propósito lo que está ya
+dicho arriba, porque lo que a cada uno le es proprio, según su naturaleza, aquello
+mismo le es lo mejor y lo más deleitoso y aplacible. Y así al hombre le será tal
+la vida que es conforme al entendimiento, pues el hombre más particularmente
+es entendimiento que otra cosa. Esta tal vida, pues, será la más próspera y
+mejor afortunada.
+
+Capítulo VIII
+
+En que se prueba que el sabio es el mejor afortunado
+
+Después que con muy claras razones ha probado el filósofo que la vida
+contemplativa es la más perfeta vida, trata agora de la vida activa, la cual consiste
+en el ejercicio de las demás virtudes, y muestra ser ésta inferior a la contemplativa,
+pues consiste más en negocios y en afectos, los cuales, sin duda ninguna, no
+tienen que ver con el sosiego y quietud del entendimiento. Pruébalo también por la
+común opinión de los hombres, los cuales atribuyen a Dios la vida más perfeta, así
+como él, sin comparación, es lo más perfeto; y así le atribuyen la contemplación y
+consideración, en cuanto el hombre puede considerar y entender la divinidad. Nadie
+a Dios le atribuye negocios ni ocupaciones, sino los necios de los poetas gentiles, que
+las cosas de Dios las pintaban al modo de los hombres, por lo cual son reprendidos
+de Platón en los libros de república, como hombres que las flaquezas de los hombres
+las quisieron autorizar con el nombre de Dios, con grande injuria de la divinidad. Y
+así también aquí el filósofo se burla de semejantes necedades.
+
+Después désta es la más perfeta la que es conforme a las demás virtudes.
+Porque los ejercicios dellas son humanos, porque las cosas justas, y las valerosas,
+y las demás que conforme a virtud se hacen, tratámoslas los unos con los otros en
+nuestras contrataciones y necesidades, y en todo género de negocios, repartiendo
+a cada uno lo que conviene en lo que toca a los afectos. Pero todas estas cosas
+parecen ser cosas humanas, y aun algunas dellas proceder del mismo cuerpo, y aun
+la virtud moral es cosa muy anexa a los afectos. La prudencia también está unida
+con la moral virtud, y la moral virtud con la prudencia, pues los principios de la
+prudencia consisten en las virtudes morales, y lo perfeto de las virtudes morales será
+regla por la virtud de la prudencia. Y pues estas virtudes a los afectos son anexas,
+consistirán por cierto en todo el compuesto, y las virtudes de todo el compuesto
+son virtudes humanas, y así lo será también la vida que conforme a ellas se hace
+y la felicidad que procede dellas. Pero la felicidad que del entendimiento procede,
+es cosa que está de parte, porque sólo esto tratamos aquí della, porque tratarlo más
+exquisitamente excede a la materia que tratamos de presente. Y aun parece que
+de las cosas de defuera tiene esta felicidad poca necesidad, o a lo menos no tanta
+cuanta la moral. Porque de las cosas para su proprio sustento necesarias, ambas
+a dos tienen igual necesidad, aunque mas se fatiga el varón civil por lo que toca
+al cuerpo y por las cosas semejantes. Pero, en fin, difieren poco en cuanto a esto,
+pero en cuanto a sus proprios ejercicios, hay entre ellos mucha diferencia, porque
+el varón liberal tiene necesidad de dineros para ejercitar las cosas de la liberalidad,
+y también el justo para volver el galardón, porque las voluntades son inciertas, y
+aun los que no son justos fingen tener gana de hacer obras de justicia. Asimismo
+el hombre valeroso tiene necesidad de poder, si algo ha de llegar al cabo de las
+cosas que, a aquella virtud tocan. También el templado tiene necesidad de libertad,
+porque no teniéndola ¿como se verá si es tal, o es al contrario? Dispútase también
+cuál es más propria de la virtud, la elección o la obra, como cosa que en ambas a
+dos consiste. La perfeta virtud, pues, claramente se vee que consiste en la una y
+en la otra, pero para el ponerlo por obra, otras muchas cosas ha menester; y aun
+cuanto mayores y más ilustres sean las obras, tanto más cosas requiere. Pero el
+que contempla, ninguna cosa destas ha menester para su ejercicio; antes le son
+(digámoslo así) una manera de estorbo para su contemplación. Aunque este tal, en
+cuanto es hombre y huelga de vivir con muchos, obrará también según virtud, y así,
+para tratarse como hombre, terná necesidad destas cosas. Pero que la contemplación
+y ejercicio contemplativo sea la perfeta felicidad, por esto lo entenderemos
+claramente: porque a los dioses más particularmente los juzgamos por dichosos
+y bienaventurados; pero ¿qué ejercicios o qué obras les debemos atribuir? ¿Por
+ventura las de justicia? ¿No sería cosa de risa ver a los dioses hacer contratos y
+restituir los depósitos y hacer cosas semejantes? ¿O diremos que son valientes,
+y que guardan las cosas temerosas, y se ponen en peligros, porque el hacer esto
+es cosa honesta? ¿Pues qué, diremos que son liberales? ¿A quién, pues, darán?
+También parece cosa ajena de razón decir que los dioses tengan dineros o cosa
+semejante ¿O diremos que son templados? ¿Para qué lo han de ser? ¿O es para ellos
+por ventura alabanza pesada el decir que carecen de deseos malos? Si queremos,
+pues, discurrir por todo, hallaremos que todas las cosas tocantes a negocios son
+cosas pequeñas y no dignas de ser atribuidas a los dioses. Pero todos piensan que
+los dioses viven y que se ocupan en algunos ejercicios por la misma razón, porque
+no han de estar durmiendo como Endimion. Quitándole pues al que vive el obrar,
+o por mejor decir, el hacer, qué le resta sino el contemplar? De manera que el
+ejercicio de Dios, el cual excede en bienaventuranza, es contemplativo, y de la
+misma manera, entre los hombres, el ejercicio que más cercano fuere a éste, será
+el más bien afortunado. Entiéndese también por esto que los demás animales no
+participan de la felicidad, careciendo del todo deste ejercicio, porque a los dioses
+toda la vida les es bienaventurada; pero a los hombres tanto cuanto su vida es un
+retrato del ejercicio de los dioses. Pero de los demás animales ninguno se dice
+ser bienaventurado, porque en ninguna manera participan de la contemplación.
+Tanto, pues, se extiende la felicidad, cuanto la contemplación, y los que más
+participan del contemplar, también participan más del ser bienaventurados, y esto
+no accidentariamente, sino por razón de la misma contemplación, porque ella por
+sí misma es cosa preciosa. De manera que la felicidad no es otra cosa sino una
+contemplación. Aunque este tal bien afortunado, pues es hombre, también terná
+necesidad de tener abundancia de los hombres de defuera, porque la naturaleza de
+suyo no es suficiente para el contemplar, sino que conviene que el cuerpo esté sano
+y que tenga su mantenimiento y el demás servicio necesario. Pero no porque no sea
+posible ser uno bienaventurado sin los bienes exteriores, por eso habemos de pensar
+que el bienaventurado terná necesidad de muchos dellos y de muy cumplidos,
+porque la suficiencia no consiste en exceso, ni tampoco el juicio, ni menos el hacer
+la obra, porque bien podemos obrar cosas honestas sin ser señores de la tierra o
+de la mar, pues puede uno con mediana facultad de cosas ejercitarse en las obras
+de virtud. Lo cual se puede ver muy a la clara, porque los particulares ciudadanos
+no parece que se ejercitan menos en las cosas de virtud, antes más que las gentes
+poderosas. Basta, pues, tener hasta esta cantidad los bienes de fortuna, porque la
+vida del que en virtud se ejercitare, será bienaventurada. Solón, pues, por ventura
+que quiere significarnos los bienaventurados donde dice, y muy bien, que aquellos
+lo serán, que en las cosas exteriores fueren medianamente abundantes y hobieren
+hecho cosas ilustres, según a él le parecía, y templadamente hayan vivido. Porque
+bien es posible que los que medianamente tienen lo que han menester, hagan lo
+que deben. Parece asimismo que Anaxágoras no llama bien afortunado al rico
+ni tampoco al poderoso, cuando decía que no se maravillaba él de que el vulgo
+estimase en mucho a un hombre malo, porque el vulgo juzga solamente por las
+cosas que parecen de fuera, y, de solas aquellas tiene conocimiento, y parece que
+las opiniones de los sabios conforman con las razones. Estas cosas, pues, parece
+que tienen alguna probabilidad, pero en los negocios júzgase la verdad por las obras
+y la vida, porque en éstas está lo principal. Conviene, pues, que se considere esto
+que habemos dicho haciendo anotomía dello en las obras y en la vida, y que cuando
+las razones conformaren con las obras, se acepten; y si difieren, han de diputarse
+por fábulas y palabras huecas. El que en los negocios de la vida se conduce según
+la razón, honrándola y respetándola, paréceme ser el mejor y el más amado de los
+dioses; porque si los dioses tienen algún cuidado de las cosas humanas (como parece
+verisímil), probable es que se deleiten con aquella parte del hombre que mejor es
+y más aproximada a ellos, es decir, con la razón, y que protejan especialmente a
+los que en mayor grado aman y veneran a aquélla, porque ven que éstos prestan
+acatamiento a lo que ellos prefieren, y viven recta y honestamente. Y está claro que
+todo eso se da principalmente en el sabio, por lo cual es éste el más amado de Dios,
+y resulta verisímil que sea también el más feliz. Por lo cual, aun en este concepto,
+será el sabio el más dichoso de todos los hombres.
+
+Capítulo IX
+
+Del saber y de la práctica en esta filosofía
+
+Trata el filósofo en este capítulo de la necesidad de que el gobernador de la
+república dicte preceptos para mover a los hombres al ejercicio de la virtud, lo cual
+no puede hacer si no se le da autoridad para que lo que él determinare y ordenare
+dentro de aquel pueblo o ciudad, sea firme y valga por ley particular, y pueda
+prohibir las demasías en lo que toca al comer, al vestir, a los juegos, al holgar,
+a los malos tratos y torpes usuras, a las mercaderías que no valen para otro sino
+para estragar la pública honestidad. Porque con esto habrá pública disciplina, y
+los hombres, comenzando a seguir la virtud por temor de la ley, vernán después
+cuando tengan más sano el juicio a amarla por sí misma. Todo esto se hará muy
+bien si en semejantes senados no se admitieren hombres ambiciosos de honra, ni
+codiciosos de dinero, porque tales gentes como éstas no valen sino para destruir
+la buena disciplina, sino hombres de costumbres moderadas, y que tengan esta
+sciencia, y sepan a quién han de inducir con premio y a quién con castigo, que
+son las dos riendas por donde los hombres han de ser regidos. Concluye, en fin,
+su libro, prometiendo tratar de la república, y mostrando el cómo, la cual obra
+también, si el Señor nos diere fuerzas para ello, la traduciremos para utilidad de
+todos en nuestra vulgar lengua.
+
+Pero por ventura, si destas cosas y de las virtudes, y también del amistad y
+deleite, así sumariamente está tratado, ¿habemos por eso de entender que ya nuestro
+propósito ha llegado al cabo? ¿O como se dice comúnmente en las cosas que se
+hacen, no consiste el fin en el considerar ni entender cada una dellas, sino en el
+ponerlas por la obra? No basta, pues, en lo que toca a la virtud el saber, sino que se
+ha de procurar de poseer la virtud y usar della, o si otra vía hay por donde seamos
+hechos buenos. Si las razones, pues, fueran bastantes para hacer los hombres buenos,
+de muchos y grandes premios (como Teognis dice), fueran dignas, y con cualquier
+dinero fuera bien comprarlas. Pero parece que lo que ellas más pueden hacer, es
+exhortar y incitar a los más generosos mancebos a las costumbres generosas, y el
+que de suyo es aficionado a lo bueno, hácele perseverar en la virtud. Pero a la vulgar
+gente no bastan a inducirla a que a las cosas buenas se aficione, porque el vulgo no
+es apto para ser regido por vergüenza, sino por temor, ni apartarse de lo malo por
+su proprio corrimiento, sino por el castigo, porque viven rigiéndose por sus afectos,
+buscan sus proprios deleites y las cosas de donde les pueden proceder, y huyen de
+las contrarias pesadumbres. Pero de lo que es honesto y realmente deleitoso ni aun
+noticia no tienen, porque no son gente que gustan de cosas semejantes. A tal gente,
+pues, como ésta, ¿qué razón hay que baste a ponerlos en regla ni concierto? Porque
+las cosas que de mucho tiempo están recebidas en costumbres, no pueden, a lo
+menos no es cosa fácil, mudarlas por palabras. Y aun por ventura nos habemos de
+tener por contentos, si cuando están a la mano todas las cosas que para ser buenos
+parece que habemos menester, abrazamos aún entonces la virtud. Hay, pues, algunos
+que tienen por opinión que los hombres se hacen buenos por naturaleza, otros
+que por costumbres, y otros que por doctrina. Lo que toca, pues, a la naturaleza,
+manifiesta cosa es que no está en nuestra mano, sino que los que son realmente bien
+afortunados, lo alcanzan por alguna causa divina. Pero la razón y la doctrina no
+tienen fuerza en todo, sino que es menester que el ánimo del oyente esté dispuesto
+con buenas costumbres para que, como debe, ame lo que ha de amar y aborrezca
+lo que ha de aborrecer, de la misma manera que conviene estar bien sazonada la
+tierra que ha de recebir la simiente. Porque el que a su gusto vive, ni escucha la
+razón que le desaconseje aquello, ni tampoco la entenderá. Y al que desta manera
+está dispuesto, ¿quién será bastante a persuadirle? En fin, el afecto no parece
+que es cosa que se subjeta a la razón, sino a la fuerza y al castigo. Conviene,
+pues, que preceda costumbre propria en alguna manera de la tal virtud, la cual
+costumbre ame y se aficione a lo honesto, y aborrezca lo que es torpe y deshonesto.
+Pero es dificultosa cosa, dende la mocedad, alcanzar vida encaminada a la virtud,
+no criándose uno debajo de leyes que inclinen a lo mismo, porque el vivir
+templadamente y perseverando en ello, a la gente vulgar no le es aplacible, y
+especialmente a gente moza. Por esto conviene que así el comer como los ejercicios
+en que se han de ejercitar sea tasado por las leyes, porque acostumbrándose a
+ello, no les será pesado. Pero no basta por ventura que los que son mancebos
+alcancen buena regla en su vivir y buen regimiento, sino que conviene también
+que, llegados a ser varones, se ejerciten y acostumbren en lo mismo, y para esto
+tenemos necesidad de buenas leyes, y aun para todo el discurso de la vida, porque
+los más de los hombres, más obedecen por fuerza que por razón, y más por castigos
+que por honestidad. Por esto les parece a algunos que los que hacen leyes deben
+convidar y exhortar a la virtud por causa de la misma honestidad, como cosa a la
+cual los buenos señaladamente obedecerán por lo que tienen de costumbre; pero a
+los que fueren desobedientes y no bien inclinados se les pongan penas y castigos,
+y a los que del todo fueren incurables los echen de la tierra. Porque el que bueno
+fuere y viviere conforme a la honestidad, dejará regirse por razón, pero el malo
+y amigo de vivir a su apetito como bestia, sea castigado con la pena. Y por esto
+dicen que conviene que se pongan tales penas, que sean del todo contrarias a los
+deleites a que ellos son aficionados, pues si el que ha de ser bueno, como está dicho,
+conviene que sea criado y acostumbrado bien y que después viva ejercitándose en
+buenos ejercicios, y que ni por fuerza, ni de su voluntad haga cosa mala, y esto se
+ha de hacer, viviendo conforme a algún buen juicio y a orden alguna buena que en
+sí tenga alguna fuerza, el paternal señorío, por cierto, ni tiene fuerza, ni necesidad
+que fuerce ni aun el de un solo varón, sino que sea rey o cosa semejante. Pero
+la ley tiene fuerza y poder obligatorio, siendo una razón que haya procedido de
+alguna grave prudencia y buen juicio. Asimismo los hombres suelen aborrecer a
+los que les van a la mano a sus deseos, aunque lo hagan con razón, pero la ley no
+es cosa pesada cuando manda lo que es bueno. En sola, pues, la república de los
+Lacedemonios parecen algunas otras pocas parece que el legislador tuvo algún
+cuidado de la crianza y ejercicio, pero en los más de los pueblos ningún cuidado
+hay de cosas semejantes, sino que cada uno vive como quiere, rigiendo sus hijos
+y mujer de la manera que se cuenta en las fábulas que los regían los Cíclopes. Lo
+mejor, pues, de todo sería que en esto hobiese un común y buen gobierno, que
+fuese bastante para haberlo de hacer. Pero si en lo público hay descuido en esto,
+parece que le convernía a cada uno encaminar sus hijos y amigos a la virtud, o a lo
+menos procurarlo. Y parece que más perfetamente lo podría esto hacer, si conforme
+a lo que hasta aquí habemos tratado se hiciese este tal un buen legislador; pues los
+comunes gobiernos se tratan y rigen por las leyes, y aquellas son buenas leyes que
+están hechas por buenos. Ni parece que habrá diferencia de que las tales leyes sean
+escritas o no sean, ni tampoco de que por las tales leyes uno o muchos sean regidos
+o instruidos de la misma manera que en la música, y en el arte de la lucha y en los
+demás otros ejercicios, porque así como en los pueblos mandan la cosas instituidas
+por ley o por costumbre, de la misma manera en las casas las palabras y costumbres
+paternales, y aun más aquí por el cercano parentesco y por los beneficios, porque
+naturalmente los hijos son ya aficionados y benévolos al padre. Asimismo hay
+mucha diferencia de la crianza y doctrina particular a la universal o general, de la
+misma manera que en la medicina. Porque generalmente a todo hombre que está
+con calentura le conviene la dieta y el reposo, pero particularmente a alguno por
+ventura no le es provechoso. También el que enseña a combatir no ejercita por
+ventura a todos en un mismo género de ejercicio, y aun parece que cada cosa se
+tratará más exquisitamente, teniéndose particular cuidado della, porque de esta
+manera cada uno alcanza mejor lo que le conviene; pero de cualquier cosa en
+particular ternía mejor cuido el médico o el maestro de la lucha o cualquier otro
+artífice que sea, si generalmente entendiere lo que a todos conviene, y también lo
+que a éstos o aquéllos, porque las sciencias son de cosas generales y estas mismas
+tratan. Pero con todo eso bien pudiera ser por ventura que algún particular, aunque
+no entienda la sciencia en general, rija bien y tenga cuidado de alguna cosa así
+en particular, sabiendo y habiendo visto por la experiencia lo que en las cosas
+particulares acaece, así como hay algunos que para sí mismos parece que son
+buenos médicos, y para otrie no podrían aprovechar cosa ninguna; no menos, pues,
+por ventura parece que el que en cualquiera cosa quiere ser artífice y contemplativo,
+ha de darse a entender lo universal y comprenderlo de la mejor manera que ser
+pueda, porque ya está dicho que en éste están las sciencias puestas; y aun que por
+ventura, que el que quiere poner diligencia en hacer mejores, ora a muchos, ora
+a pocos, debe procurar de ser hombre apto para hacer leyes, si mediante las leyes
+nos habemos de hacer buenos. Porque disponer bien una buena ley, que ya de antes
+está puesta, no es oficio de quien quiera, sino que si de alguno es, es del que lo
+entiende, así como en la medicina y en las demás artes, que consisten en diligencia
+y en prudencia, ¿Habemos, pues, por ventura de tratar tras desto, de dónde y cómo
+se hace uno apto para hacer leyes? ¿O habemos de decir que esto, como todo lo
+demás, se ha de tomar de los libros de república? Porque esta facultad parece ser
+una partecilla de la disciplina de república. ¿O diremos que no es de la misma
+manera en la disciplina de república, que en las demás sciencias y facultades?
+Porque en las demás facultades véese claro que los mismos que las enseñan son
+los que usan dellas, como los médicos y los pintores. Las cosas, pues, tocantes al
+gobierno de la república, los sofistas prometen enseñarlas, pero ninguno dellos
+las ejercita sino los que están para el gobierno de los pueblos, los que les parece
+que lo hacen más por su buen juicio, y por la experiencia, que por cierta razón
+de entendimiento. Porque desta facultad jamás vemos que escriban ni disputen
+(aunque fuera por ventura mejor hacerlo esto que escribir oraciones judiciales o
+deliberativas), ni tampoco vemos que a sus proprios hijos los hacen aptos para el
+gobierno de la república, ni menos a ninguno de sus amigos, y parece conforme a
+razón que, si pudieran, lo hicieran, porque ninguna cosa podían desear más útil para
+los pueblos, ni desear para sí cosa mejor que semejante facultad, ni para los que
+más queridos suyos fuesen. Pero importa para esto mucho la experiencia, porque
+si no fuese así, no se harían los hombres más aptos para el gobierno de la república
+por el uso y costumbre de regirla. Por esto los que desean entender las cosas de
+la república, parece que tienen necesidad de experiencia. Pero los sofistas, que
+prometen enseñarlas, parecen estar muy lejos de hacer lo que prometen, porque del
+todo, ni ellos saben qué cosa es esta sciencia, ni menos de qué trata, porque si lo
+supiesen, no dirían que es lo mismo que la retórica, ni que es menor que la retórica;
+ni tenían por opinión que es cosa fácil el hacer leyes, juntando a una las leyes que
+les parecen buenas, porque se pueden escoger de allí las que fueren mejores, como
+si el escoger no fuese cosa que requiere buen ingenio y saber bien discernir cuál
+es lo mejor, como en las cosas que pertenecen a la música. Porque los que en cada
+cosa tienen experiencia, juzgan bien las obras, y de dónde, y cómo se hacen perfetas
+las cosas que ellos saben, y qué cosas conforman las unas con las otras, pero los que
+no tienen experiencia, hanse de tener por contentos de alcanzar siquiera a entender
+si está bien o mal hecha la obra, como acontece en la pintura. Pero las leyes parecen
+ser obras civiles. ¿Cómo, pues, con lo que los sofistas enseñan, será, uno apto
+para hacer leyes o para juzgar cuáles son las mejores? Porque ni aun médicos no
+parece que se hacen los hombres con sólo leer los libros, y con todo se atienen no
+solamente a tratar de los remedios, pero aun si pueden tener sciencia de ellos, y aun
+la de curar, distinguiendo los hábitos por sí de cada uno. Estas cosas, pues, para
+los que tienen experiencia cosas útiles parecen, pero para los que no son doctos, no
+sirven de nada. El hacer, pues, conferencias de leyes y de repúblicas para aquellos
+que pueden considerar y juzgar en esta materia lo que es bueno, o lo contrario,
+y determinar qué cosas cuadran unas con otras, por ventura que sería útil. Pero
+los que sin tener hábito en esto quieren tratar dello, no juzgarán bien dello, sino
+acaso. Lo que por ventura ternían, es que serían más aptos para comprenderlo.
+Pero, pues, los pasados dejaron esta materia del hacer leyes sin tratar, mejor será
+por ventura quo nosotros la tratemos y estudiemos, y aunque del todo disputemos
+de la disciplina de república, para que, cuanto a nosotros fuere posible, demos
+el remate a la filosofía que trata y considera las cosas que tocan al gobierno de
+los hombres. Procuremos, pues primeramente de tratar si algo particularmente
+dijeron bien acerca desto los pasados. Después, conferiendo unas repúblicas con
+otras, consideremos qué cosas son las que conservan y cuáles las que destruyen las
+repúblicas, y también cuáles destruyen particularmente cada género de república y
+por qué causas unas son bien administradas y otras al contrario. Porque, consideradas
+estas cosas, entenderemos por ventura mejor cuál es el mejor gobierno de república
+y cómo está ordenada cada una, y de qué leyes y costumbres usa. Sigámoslo, o
+pues, comenzándolo a tratar desta manera.
+
+Fin de los diez libros morales de Aristóteles

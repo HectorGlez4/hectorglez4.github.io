@@ -1,0 +1,1030 @@
+fuente: wikisource-es
+obra: Ética a Nicómaco
+url: https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_7
+recuperado: 2026-09-07
+---
+Ética a Nicómaco/Libro 7
+|título=[[Ética a Nicómaco]]
+|autor=[[Aristóteles]]
+obra> |título=Ética a Nicómaco
+obra> |autor=Aristóteles
+obra> |título={{Anclaje+|Índice}}
+---
+De los morales de Aristóteles, escritos a Nicomaco, su hijo, y por esta causa llamados nicomaquios
+
+Argumento del séptimo libro
+
+En los libros precedentes ha tratado Aristóteles de las virtudes y los vicios que
+común y ordinariamente se hallan en los hombres. Pero porque acaece, aunque
+raramente, hallarse hombres extremadamente buenos y también extrañamente
+malos, trata desta bondad y malicia en este libro séptimo Aristóteles, y a la
+extremada virtud llámala virtud heroica y divina: divina porque en alguna manera
+parece que se allega más a la bondad de Dios (aunque cualquiera bondad de la
+criatura dista infinitamente de la de Dios, así como también la naturaleza), y heroica
+porque en aquellos antigos príncipes que después el simple pueblo honraba como
+a dioses, se creía haber habido aquella bondad tan perfecta y tan cendrada, y a
+aquéllos llamábanlos héroes los poetas, de donde vino que decimos que uno hizo
+un hecho heroico. A la extremada malicia llámala brutalidad, y con mucha razón,
+porque vienen algunos a depravarse tanto en sus maldades, que no les queda otro
+rastro de ser hombres sino la figura exterior, pero en lo interior y en los afectos se
+tornan bestias, y se hacen o leones en la crueldad, o si más queremos ponderarlo
+tigres, y en la incontinencia puercos, y en la hambre de chuparse hacienda ajena,
+lobos. Y esto es lo que quiso dar a entender Homero en la fábula que en su Odisea
+cuenta de la maga Circe, que con ciertas bebidas que les daba tornaba a los hombres
+en fieras, a unos en puercos, a otros en lobos, según el vicio en que pecaba cada uno.
+Trata asimismo de la virtud de la continencia y del vicio que le es contrario, y en
+qué difiere de la templanza, y después del regalo o pasatiempo y de las diversidades
+dél, como pasando adelante lo veremos.
+
+Capítulo I
+
+De la virtud heroica y divina, y de la continencia y sus contrarios
+
+En el capítulo primero propone tres diferencias de vicios; malicia, disolución y
+brutalidad, y tres maneras de virtudes que les son contrarias, a la maldad la virtud, a
+la disolución la continencia, a la brutalidad una que no hallándole nombre proprio la
+llama virtud heroica y divina; todo esto es lo más subido de quilate, lo uno en maldad
+y la otra en perfición, y por esto dice que tales cosas como éstas se hallan raramente
+entre los hombres; de la bondad verdad dice: ¡ojalá tanta la dijese de la extrema
+malicia, que ya por nuestro mal tanto en el mundo va creciendo!
+
+Tras desto habemos de proseguir adelante poniendo otro principio, que
+de las cosas de que en lo que toca a las costumbres habemos de huir, hay tres
+diferencias: maldad, disolución, bestialidad o brutalidad, y que los que a las dos
+déstas son contrarias, son cosas entendidas, porque a la maldad es contraria la
+virtud, y a la disolución lo que llamamos continencia. Pero para la brutalidad
+diría alguno que cuadra mucho la virtud que excede a los hombres para contrario,
+y es heroica y divina, como Homero dijo de Héctor, introduciendo a Priamo
+que lo lloraba desta suerte:
+
+Por extremo era bueno este valiente,
+
+Ni hijo de mortales parecía,
+
+Sino de dioses altos decendiente.
+
+De manera, que si, como dicen, de hombres se hacen divinos por llegar al
+extremo de virtud, tal hábito como aquél sería cierto el contrario de la brutalidad.
+Porque así como la bestia ni tiene vicio ni virtud, así tampoco Dios, sino que la
+bondad de Dios es cosa de mayor quilate y valor que la virtud, y el vicio de la fiera
+es otro género de vicio. Y como es cosa rara hallarse un varón divino entre los
+hombres (como acostumbran decir los spartiatas cuando mucho quieren alabar a
+uno, es un divino varón dicen), de la misma manera dicen que es cosa rara hallarse
+un hombre de bestiales condiciones, y señaladamente se halla entre los bárbaros.
+Algunas cosas destas acaecen también entre los hombres, o por enfermedades, o
+por golpes desastrados. A los que porsus vicios, pues, desta manera exceden a los
+otros hombres, solémosles poner este nombre de brutales. Pero deste hábito de
+virtud heroica habremos de hacer alguna mención en lo de adelante, y del vicio ya
+está dicho en lo pasado. Habemos, pues, de tratar de la disolución, del vicio del
+hombre afeminado, y de la lujuria o regalo vicioso, y también de la continencia y
+perseverancia en la virtud, porque ninguna déstas la habemos de juzgar por hábito
+de la virtud ni del vicio, ni tampoco por cosas de género diverso. Habemos, pues, de
+demostrar su naturaleza como lo habemos hecho en todo lo demás, proponiendo al
+principio las cosas más claras y entendidas, y también algunas dadas y dificultades.
+Proponemos, pues, señaladamente las cosas más puestas en opinión acerca destos
+afectos, y si no lo que más pudiéremos y proprio fuere dellos, porque si soltáremos
+lo que causa dificultad, y quedare en limpio lo que tiene probabilidad, quedará
+bastantemente demostrado. La continencia, pues, y la perseverancia parecen ser
+cosas virtuosas y dignas de alabanza, pero la disolución y afeminación de ánimo
+viciosas y dignas de reprensión. Y un mismo es continente y perseverante en el
+discurso de razón, y el mismo que es disoluto es también inconstante en el discurso
+de razón. Asimismo, el disoluto, pues entiende que son vanos sus deseos, no se dirá
+que los sigue conforme a uso de razón. Y al que es prudente todos lo tienen por
+continente y perseverante, pero al que es continente y perseverante unos lo tienen
+cualquiera que él sea por prudente, y otros no a cualquiera que tal sea lo juzga por
+prudente. De la misma manera, a cualquier disoluto lo juzgan por incontinente, y a
+cualquiera incontinente por disoluto, confundiendo el un vocablo con el otro. Otros
+dicen que son vicios diferentes. Del prudente también unas veces dicen que no puede
+ser incontinente, y otras, que algunos que son prudentes y prontos, son con todo eso
+incontinentes. Llámanse asimismo incontinentes en el enojo, y en las honras, y en
+el interés. Esta es, pues, la suma de lo que se ha propuesto.
+
+Capítulo II
+
+En que se disputa cómo uno, teniendo buena opinión de las cosas, puede ser incontinente
+
+Ha dicho en el capítulo pasado que el disoluto no obra conforme a uso de
+razón, pues entiende al revés de lo que obra, sobre esto mueve una dificultad,
+y prueba que se puede obrar mal sin ignorancia, por ser uno de ánimo flojo en
+resistir, y después pone la diferencia entre el continente y el templado, que consiste
+en la fuerza y rigor de los afectos, los cuales en el templado son moderados, y
+fuertes en el continente.
+
+Preguntará alguno por ventura cómo se compadece, que uno sienta bien de las
+cosas, y con todo eso sea incontinente; a esto responden algunos que el que tiene
+sciencia de las cosas no puede ser incontinente, porque sería cosa ajena de razón
+y fuerte (como Sócrates decía) que estando presente la sciencia otra alguna cosa
+venciese, y llevase al hombre tras sí forzado como esclavo. Porque Sócrates muy
+de veras argumentaba contra la razón, quiriendo probar que no había incontinencia,
+porque no había ninguno que a sabiendas obrase al revés de lo que era mejor, sino
+por ignorancias. Esta razón pues, es contra lo que se vee por experiencia. Y así
+conviene disputar deste afecto, si por ignorancia acaece, qué manera es esta de
+ignorancia. Cosa, pues, es cierta y manifiesta que el incontinente, antes de caer en
+su incontinencia, tiene por cierto que hacer aquello tal que después hace, no es cosa
+que conviene. Pero hay algunos que parte desto conceden, y parte dello niegan,
+porque confiesan no haber cosa más poderosa que la sciencia, pero que haya alguno
+que obre al revés de lo que entiende ser mejor, esto es lo que niegan. Y por esto
+dicen que el incontinente, por no tener sciencia sino opinión, es vencido de los
+deleites. Pero si opinión es y no sciencia la que tiene, y el parecer en contrario no
+es fuerte sino flaco y remiso, como acontece a los que están en duda, será este tal
+digno de perdón por no perseverar en ellas contra los fuertes deseos. Pero la maldad
+no es cosa digna de perdón, ni cualquier otra cosa de las que se reprenden. Diremos,
+pues, que las hace resistiendo en contrario la prudencia, porque ésta también es muy
+poderosa. Pero esto también es cosa ajena de razón, porque sería uno juntamente
+prudente y incontinente, y ninguno habrá que diga ser de hombre prudente hacer
+voluntariamente las cosas que son malas. A más desto, ya está arriba demostrado
+que la prudencia es virtud activa, porque el prudente consiste en las cosas últimas, y
+estando ya de todas las demás virtudes adornado. Asimismo, si el ser uno continente
+consiste en tener fuertes y malos los deseos, no será el hombre destemplado
+continente, ni el continente templado, porque ni el tener fuertes los deseos es de
+hombre templado, ni el tenerlos malos; pero conviene que lo sea, porque si los
+deseos son buenos, malo es el hábito que los impide y no deja seguirlos, de manera
+que no toda continencia será buena; pero si son flacos, y no malos, no son nada
+ilustres; ni tampoco, si son malos y remisos, son cosas de tomo. Tampoco es cosa
+insigne la mala continencia si en toda opinión hace perseverar a uno, como si le
+hace arrimarse a una opinión falsa. Y si de toda opinión la incontinencia aparta,
+también habrá alguna incontinencia buena. Como aquel Neoptolemo de Sófocles,
+en la tragedia Filoctetes, es digno de alabanza por no haber perseverado en los
+consejos que Ulises le había dado, por la pena que sintió de ver que le había
+mentido. Asimismo, la razón sofística que miente es una perplejidad, porque los
+sofistas, por quererse mostrar poderosos en el disputar, redarguyendo cuando ellos
+procuran de concluir las cosas fuera de opinión, hacen que aquel tal discurso se
+vuelva perplejidad de ánimo, porque está como atado el entendimiento, cuando
+no quiere dar crédito a la conclusión, por no satisfacerle lo que se ha concluido;
+y pasar adelante no puede, por no saber cómo ha de satisfacer al argumento. Hay,
+pues, una razón por donde parece que la imprudencia, junto con la incontinencia,
+será virtud, porque este tal, por su incontinencia, hará al revés de como entiende, y
+pues cree ser lo bueno malo y cosa que no conviene que se haga, hará lo que bueno
+sea, y no lo que fuere malo. Asimismo, el que por persuasión de otro hace y procura
+las cosas de deleite, y las escoge, parece que será mejor que no el que no las hace
+por discurso de razón, sino por incontinencia. Porque aquel tal más fácilmente
+se puede remediar, si hay quien lo persuada lo contrario. Pero al incontinente
+cuádrale aquel vulgar proverbio que decimos: ¿qué necesidad tiene de beber el que
+le da la agua a la garganta? Porque si no estuviese desengañado de lo que hace
+cuando le persuaden al contrario, cesaría; pero teniendo entendido lo contrario, con
+todo eso no menos lo hace. A más desto, si en todas las cosas hay incontinencia
+y continencia, ¿cuál diremos que es el verdaderamente incontinente? Porque no
+hay ninguno que caiga en todas las incontinencias; y decimos que hay algunas
+que lo son de veras. Estas dificultades, pues, se ofrecen, de las cuales algunas
+conviene desatar, y con las demás no hay que tener cuenta, porque el soltar la
+duda es el hallar la verdad.
+
+Capítulo III
+
+De cómo acontece ser uno incontinente, entendiendo ser malo lo que hace
+
+En el capítulo pasado ha propuesto ciertas cuistiones curiosas y contemplativas
+que se ofrecen disputar en esta materia de la continencia, y ha dicho cómo unas
+es bien tratarlas, y otras son de tan poco momento, que es mejor dejarlas. Agora
+disputa la cuestión primera, si es posible que uno sea incontinente entendiendo
+lo que hace. Después disputa en qué géneros de cosas se dice uno continente o
+incontinente. Terceramente, sí es todo uno o son cosas diversas continencia o
+perseverancia. Todas estas cuestiones son contemplativas y curiosas, pero para el
+fin de la felicidad no importan mucho.
+
+Primeramente, pues, habemos de disputar si obran los incontinentes entendiendo
+lo que hacen, o si no entendiendo; y si entendiendo, de qué manera lo entienden.
+Tras desto, en qué genero o calidades de cosas habemos de decir que consisten
+el incontinente y el continente; quiero decir si en todo regalo y en todo género
+de pesadumbre, o particularmente en algunas. Terceramente, si el continente y
+el perseverante son una misma cosa, o son diversos. Y de la misma manera de
+todas las demás cosas que son anexas a esta consideración. Es, pues, el principio
+de nuestra disputa, si por ventura consiste el ser uno continente o incontinente en
+ejercitarse en tales o tales cosas, o en ejercitarse de tal o tal manera. Quiero decir, si
+por ventura viene uno a ser incontinente sólo por ejercitarse en tal manera de cosas,
+o no, sino por lo uno y por lo otro. Tras desto, si por ventura la incontinencia y la
+continencia consisten en todas las cosas o no, porque el que del todo es incontinente,
+no se ejercita en todo género de cosas, sino en aquellas mismas que el disoluto.
+Ni tampoco se dice incontinente sólo por tratarlas, sea de cualquiera manera
+(porque sería lo mismo la incontinencia que la disolución), sino por tratarse en
+ellas de tal particular manera, porque el disoluto déjase vencer de los pasatiempos
+voluntariamente, pareciéndole que es cosa que conviene siempre gozar de la
+presente dulzura; pero el incontinente no le parece que es bien hacerlo, y con todo
+eso lo hace. Para lo que toca, pues, a nuestra razón, todo es uno decir que tienen
+opinión verdadera de aquellas cosas en que son incontinentes, o que tienen sciencia,
+porque algunos que tienen opiniones, no dudan dellas, sino que les parece que
+lo entienden muy bien y por el cabo. Pues si por creer más, remisamente los que
+tienen las opiniones que los que tienen sciencia, obran al revés de como entienden,
+no habría diferencia de la sciencia a la opinión, porque algunos no menos crédito
+dan a las opiniones que tienen, que otros a las cosas que saben, como Heráclito lo
+dice claramente. Pero porque saber una cosa se dice de dos maneras, porque el que
+entiende la sciencia, aunque no use della, se dice que la sabe, y también el que se
+sirve della, habrá diferencia del entender y no considerar, y no considerando hacer
+lo que no conviene, al entenderlo y considerarlo. Porque hacer lo que no conviene,
+entendiéndolo y considerándolo, parece cosa fuerte y ajena de razón, pero no si
+lo hace no considerándolo. Asimismo, pues hay dos maneras de proposiciones,
+bien puede acaecer que, aunque uno las tenga ambas, obre al revés de aquella
+sciencia, no serviéndose sino de la general y no de la que se toma en parte; porque
+las cosas particulares son las que se ponen por obra. Hay también diferencia desto a
+lo universal, porque lo universal en el mismo que dice se está; pero lo particular en
+la misma cosa. Es proposición universal, como si dijésemos agora: a todo hombre
+le es útil la vianda enjuta; y particular, como si dijésemos: este es hombre; o tal o
+tal vianda es enjuta. Pero si esto es tal o tal, o no lo sabe o, en realidad de verdad,
+no lo advierte. Entre estas dos maneras hay tanta diferencia, que entenderlo de
+una manera no causa admiración ninguna, y de la otra sería cosa de admiración
+que acaeciese. Asimismo el tener una sciencia los hombres se dice de otra manera
+fuera de las que habemos dicho, porque en aquellos que entienden una sciencia
+y no se sirven della, vemos en el tal hábito dos diversidades, tanto que en alguna
+manera se puede decir que la tienen y que no la tienen, como el que duerme, y el
+que está furioso, y también el que está borracho. Desta misma manera, pues, están
+dispuestos los que están puestos en afectos, porque las iras, enojos y los deseos
+y concupiscencias de la carne, y las cosas deste jaez, manifiestamente alteran los
+cuerpos, y aun en algunos causan furias. Es, pues, cosa clara que los incontinentes
+habemos de decir ser a éstos semejantes. Pero el saber uno bien proponer las
+razones de una sciencia, no es bastante señal para creer que obrará bien conforme
+a aquella sciencia, porque aun estos mismos, cuando están en semejantes afectos
+puestos, hacen demostraciones y citan versos de Empédocles. Y los que ahora, de
+principio, comienzan de aprender, conciertan bien cierto las razones, pero aún no
+las entienden, porque han de arraigarse bien en el entendimiento, y para esto es
+menester tiempo. Habemos, pues, de entender que así como los que representan
+recitan ajenos pareceres, así también los incontinentes las razones de los otros. Podrá
+también uno en esto la causa considerar naturalmente, porque una opinión universal
+y otra de, cosas particulares, de las cuales ya juzga el sentido solamente, cuando
+destas dos, pues, una razón se compusiere, de necesidad, en lo contemplativo, ha
+de afirmar el alma ser así, y en lo activo ponello luego por obra, como, si conviene
+gustar todo lo dulce, y esto es una de las cosas dulces, de necesidad el que pudiere,
+y nadie se lo estorbare, lo pondrá por obra juntamente. Pues cuando hobiere una
+opinión universal que prohíba el gustarlo, y otra que diga que toda cosa dulce es
+suave, y que ésta es cosa dulce, y es ésta la que manda por ser acaso tal el deseo,
+la una le dice: desto has de huir, y la otra, que es el deseo, le mueve a que lo siga,
+porque bien puede mover por sí cada una de las partes del alma. De manera, que
+en alguna manera podemos decir que acaece hacerse uno, por la razón y opinión,
+incontinente, no siendo ellas por sí mismas sino accidentariamente, porque el deseo
+es el que es contrario a la recta razón, y no la opinión. Y por esto los fieros animales
+no se llaman incontinentes, porque no tienen opinión universal, sino representación
+y memoria de las cosas singulares. Cómo, pues, se suelte la ignorancia y torne a
+ser sabio el destemplado, es la misma razón que del borracho y del dormido, y
+no es propria deste afecto, la cual razón habémosla de entender de los que tratan
+la fisiología y naturaleza, de las cosas. Y, pues la última proposición es opinión
+del sentido y propria de los negocios, esta tal, el que en afecto de intemperancia
+puesto está, o no la tiene, o de tal suerte la tiene, como si aquel su tener no fuese
+saberla, sino decirla solamente, como el borracho versos de Empédocles recita, y
+porque el término menor, ni es universal, ni parece pertenecer a la sciencia, como el
+universal. Y así parece que acaece lo que Sócrates inquiría, porque la intemperancia
+no parece que acaece estando presente la que es propria y verdaderasciencia, ni
+esta tal sciencia se turba con este tal afecto, sino la que consiste en el sentido. De la
+cuestión, pues, si el intemperante obra sabiendo lo que hace, o si no, y si sabiendo,
+de qué manera sabiendo, baste lo tratado.
+
+El engerir Aristóteles las reglas de lógica con la materia moral, me fuerza a que lo
+que los ignorantes en lógica no entenderán, lo declare brevemente. Consta, pues un
+discurso de razón, que llaman silogismo, de dos proposiciones y una conclusión que
+de ellas se colige. Ya la más general y que comprende más universales sentencias,
+llámala Aristóteles primera proposición y primer término, y a la que ya particulariza,
+postrera proposición y postrer término, como si decimos: con cualquier bueno y
+virtuoso es bien tomar amistad, y pues éste es bueno y virtuoso, bien será tomes
+amistad con él; aquella sentencia general es primera proposición, la otra que ya
+particulariza y dice que éste es tal, es la última proposición, y de ambas se colige la
+conclusión, que conviene tomar amistad con aquel tal. Pocas veces, pues, se hierran
+las consultas por falta de aquellas primeras proposiciones generales, porque no son
+muchas, y como hablan en general déjanse entender, pero acerca del particularizar
+suele haber engaño, y por esto dice bien Aristóteles que saber las proposiciones
+generales, y no particular no es saber perfecto.
+
+Capítulo IV
+
+En que se disputa si hay alguno del todo incontinente, o si todos los que lo son lo son en parte, y si alguno del todo lo es, en qué género de cosas lo es
+
+En el capítulo pasado propuso Aristóteles tratar ciertas cuestiones acerca de
+la continencia, y trató las que habemos visto. Agora disputa si hay alguno que
+en todo género de vicios sea incontinente. Y así divide los deleites en unos de
+cosas necesariamente obligatorias, como es el comer y beber para vivir, y otros
+de cosas voluntarias, como son los que proceden de las honras, y declara cómo
+incontinente, así absolutamente dicho, se entiende en los deleites corporales, pero
+con aditamento incontinente en el desear honras o haciendas bien se dirá. De modo
+que el incontinente absolutamente dicho y el disoluto, en unas mismas cosas se
+emplean, aunque de diferente manera.
+
+Tras desto habemos de disputar si hay alguno absolutamente incontinente, o si
+lo son todos en parte y, si lo hay, en qué calidad de cosas consiste. Entendido, pues,
+está que los continentes y los perseverantes, y los incontinentes y los afeminados,
+consisten en los deleites y pesadumbres. Pero, porque destas cosas que dan deleite,
+unas hay necesariamente obligatorias, y otras, en cuanto a sí mismas, voluntarias
+y subjetas a nuestra elección, pero que tienen en sí gran exceso (llamo necesarias
+las corporales, como son las cosas de mantenimiento y carnales apetitos, y cosas
+semejantes que al cuerpo pertenecen, en las cuales pusimos la disolución y la
+templanza), y otras que no son necesariamente obligatorias, pero dignas de ser
+por sí mismas escogidas y estimadas, como si dijésemos: la victoria, la honra, las
+riquezas y otros bienes semejantes y aplacibles cosas; a los que en tales bienes
+como éstos, contra el uso de la buena razón que tienen, quieren exceder, no los
+llamamos absolutamente incontinentes, sino, con aditamento, incontinentes en los
+dineros y en la ganancia, y en la honra y en la saña; pero absolutamente no los
+llamamos incontinentes, como a personas diferentes de los que son absolutamente
+incontinentes, y que los llamamos así por cierta semejanza, de la misma manera que
+decimos el hombre que gana la joya en las fiestas del Olimpo: porque con aquella
+poquita de adición se distinguió el vocablo común del particular y proprio. Pero
+con todo eso, el absolutamente incontinente diferente es de los otros, como se vee
+por esta razón: que la incontinencia es vituperada, no solamente como yerro, pero
+como especie de vicio, ora sea en general, ora en parte, pero de los otros ninguno.
+Pero de aquellos que se emplean en los usos corporales, en que decimos consiste
+ser uno templado o disoluto, el que no por propria elección busca los excesos de
+los deleites y huye los de las cosas tristes y pesadas, como de la hambre, de la sed,
+del calor y frío, y de las demás cosas que en el tacto y gusto consisten, sino fuera
+de su elección y parecer, este tal se dice incontinente, no con aditamento en tal o
+tal cosa, como lo decimos en la cólera, sino así: absolutamente incontinente. Lo
+cual en esto se conoce: que los que se llaman disolutos, por causa destas cosas se
+llaman, y no por ninguna de las otras. Y por esto, ponemos que el incontinente y
+el disoluto se emplean en un mismo género de cosas, y también el continente y el
+templado, pero no ninguno de los otros, porque, en cierta manera, consisten en unos
+mismos deleites y molestias. Pero aunque en unas mismas cosas se emplean, no se
+emplean de una misma manera, sino los disolutos de su propria elección y voluntad,
+y los incontinentes sin elección. Por esto decimos ser más disoluto aquel que, sin
+incitarle sus deseos o, sin incitarle mucho, busca los extremos deleites y huye las
+molestias moderadas, que no el que lo hace acosado de sus deseos reciamente.
+Porque ¿qué hiciera este tal si un juvenil deseo le incitara, o alguna fuerte molestia
+le sucediera en la necesidad de las cosas necesariamente obligatorias? Pero
+por cuanto en las codicias y deleites hay unos de cosas que, en su género, son
+buenas y honestas, (porque de las cosas suaves algunas hay que naturalmente son
+cosas de escoger, y otras contrarias dellas, y otras medias, como en lo pasado
+dividimos, como son los dineros, la ganancia, la victoria, la honra), en todas las
+cosas semejantes y en las que son medias, no son vituperados los hombres ni por
+sufrillas, ni por deseallas, ni por amallas, sino por errar el cómo y exceder. Por
+esto, todos cuantos, fuera de razón, se dejan vencer o procuran alguna cosa de las
+que son naturalmente y de suyo honestas y buenas, son vituperados, como los que
+procuran más honra de la que les conviene, o procuran para sus hijos o para sus
+padres, porque éstas también son cosas buenas, y los que las procuran son alabados.
+Pero con todo eso hay en esto su exceso, como si uno por sus hijos pelease contra
+los dioses, como cuentan las fábulas de Niobe, o como aquel sátiro que tuvo por
+sobrenombre Filopator, que es amador de su padre, por el demasiado afecto de
+amor que mostró para con su padre; porque en aquello se mostraba muy necio. En
+estas cosas pues, por la razón que habemos dicho no hay maldad, porque cada cosa
+destas por sí misma es de apetecer naturalmente, pero lo que en ellas es malo y de
+aborrecer son los excesos. Pero la incontinencia no es de la misma manera, porque
+la incontinencia no solamente es de las cosas de que nos habemos de guardar, pero
+es también de las que vituperamos, aunque, por alguna manera de semejanza del
+afecto, suelen poner el nombre de la incontinencia a las demás cosas, como cuando
+dicen de uno que es mal médico o mal representante, del cual así, absolutamente,
+no dirían que es malo. Pues así como en esto, no porque cada cosa destas sea
+maldad, sino por tener alguna proporción de semejanza con las cosas malas, se dice
+mala, así también habemos de juzgar de la incontinencia, que la continencia y la
+incontinencia, propriamente, son las que se emplean en lo mismo que la templanza y
+la disolución; pero de la saña se dice por cierta semejanza, y por esto lo decimos con
+este aditamento: incontinente en la saña, o en la honra, o en la ganancia.
+
+Capítulo V
+
+Cómo en las cosas que de su propria naturaleza no son suaves, no se dice absolutamente la incontinencia, sino otra que se llama así por cierta manera de metáfora
+
+Por continuación de vicios y falta de doctrina vienen los hombres a olvidarse
+tanto de quién son y del parentesco que tienen con Dios de donde salieron, que se
+vienen a tornar bestias, como nuestro celestial poeta lírico lo canta, y aún vienen a
+hacer cosas que en realidad de verdad las bestias no las harían, como algunos que
+se encarnizan tanto en la venganza, que abren las entrañas del que quieren mal y le
+beben la sangre del corazón, no como lo hace el lobo o la comadreja por matar la
+hambre natural, sino por un endemoniado odio que dentro del alma tienen recocido.
+Otros toman gusto de ver atarse unos con otros, como lo hacían los romanos; en las
+fiestas que llamaban de los gladiatores en su lengua, dignos de ser a lo menos en
+esto gravemente reprendidos, de que gustasen de ver perecer su propria naturaleza
+allí miserablemente. Otros, dejadas las viandas naturales que Dios crió para el
+mantenimiento del hombre, se dan a comer carnes de su propria naturaleza, lo que
+ni aun las bestias crueles no lo hacen (porque el león come de un becerro o de un
+corzo, mas no de otro león, ni el lobo de otro lobo, ni el perro de otro perro) como
+lo hacen los caníbales en las Indias, y otras no sólo bárbaras, pero aún bestiales
+naciones. Otros, dejando el uso natural del macho con la hembra, se dan a bestiales
+deleites de machos con machos, lo cual ser de extrema malicia lo afirma San Pablo
+en la epístola que escribe a los Romanos. El abstenerse, pues, de tales brutalidades
+dice Aristóteles que no se ha de llamar continencia, ni caer en ellas incontinencia,
+sino por manera de metáfora, sino que su proprio nombre es bestialidad o
+brutalidad.
+
+Pero por cuanto hay algunas cosas de su propria naturaleza suaves, y déstas unas
+sencillamente suaves, y otras particularmente para algún género, así de animales
+como de hombres, y otras cosas hay que de su naturaleza no son suaves, sino que
+o por tener el seso lisiado, o por estar habituados a malas costumbres, o por ser de
+mala naturaleza de condición, las tienen algunos por suaves, en cada una déstas
+se puede hallar hábitos semejantes, digo hábitos y condiciones bestiales, como la
+de aquella mujer que dice que gustaba de abrir por medio las mujeres preñadas y
+comérseles las criaturas que llevaban en el vientre como son las cosas, de que dicen
+que gustan algunas gentes crueles que viven cerca del Ponto Euxinio, de los cuales
+unos comen las carnes crudas, otros humanas, otros por hacerse mucha fiesta se dan
+los unos a los otros sus proprios hijos a comer en los convites; o como lo que de
+aquel tirano Falaris se escribe. Tales cosas, pues, como éstas, son bestiales. Otras
+cosas acaecen a otros por algunas enfermedades, o por furia de cabeza, como aquel
+que ofreció a su propria madre en sacrificio y después se la comió, o el otro siervo
+que se comió los hígados de otro compañero suyo. Otros hábitos malos hay que
+proceden de enfermedades o de mala costumbre, como el arrancarse los cabellos o
+comerse las uñas, o comer carbones o tierra; asimismo el ajuntamiento de machos
+con machos. Porque estos tales vicios a unos les suceden por naturaleza, y a otros
+por costumbre, por haberse mal acostumbrado dende niños. Aquellos, pues, que
+tales cosas hacen por su mala naturaleza, ninguno cierto dirá que son incontinentes;
+de la misma manera que a las mujeres nadie las llamará continentes, porque en el
+carnal ajuntamiento no obren, pues es su naturaleza recebir. Ni tampoco aquellos
+que por mal hábito están ya como enfermos en aquello, porque el tener cada cosa
+destas ya excede los límites de la maldad o vicio, como la misma brutalidad. Y
+el que tales cosas tiene como éstas, vencer o ser vencido en ellas no se ha de
+decir absolutamente incontinencia, sino por cierta semejanza, como el que en lo
+que toca a la saña tiene semejante manera de afecto, no se llama absolutamente
+incontinente. Porque todo vicio que excede, y toda imprudencia, y toda cobardía,
+y toda disolución, y toda terriblez de condición, o procede de brutalidad, o de mal
+temperamento de cuerpo. Porque el que de su naturaleza es de tal condición, que
+de toda cosa tiembla aunque no sea sino de un chillido de ratón, es cobarde de una
+brutal cobardía. Otro había que de una enfermedad le había quedado este vicio,
+que tenía temor de una comadreja. Y entre los imprudentes, los que de su natural
+condición son ajenos de toda buena razón, y que sólo se rigen por el sentido, son
+brutales, como algunas naciones de aquellos bárbaros que vienen lejos de nosotros,
+pero los que son tales por algunas enfermedades, como son la epilepsia o mal de
+corazón, o la furia, son enfermizos. Acontece, pues, algunas veces que alguno
+solamente tenga semejante manera de afectos, pero que no sea vencido dellos,
+como si dijésemos agora que Falaris se abstuviese del deseo de comerse algún
+mochacho, o de algún brutal deleite en lo que toca a la carnal concupisciencia.
+Otras veces acaece que no sólo, lo tienen, pero aún son vencidos dél. De la misma
+manera, pues, que vicio absolutamente dicho se entiende de aquel que no excede
+los límites humanos, y cualquier otro se dice, con aditamento, vicio bestial o de
+enfermedad, pero, así absolutamente, no se dice vicio: está claro que de la misma
+manera la incontinencia, absolutamente dicha, sola aquella es que se emplea en lo
+mismo que la disolución humana, y que la otra se dirá incontinencia brutal o de
+enfermedad. Entendido, pues, está cómo la incontinencia y la continencia consisten
+solamente en las mismas cosas en que la disolución y la intemperancia, y que en
+las demás cosas es otra manera de incontinencia que se dice así, no absolutamente,
+sino por una manera de metáfora.
+
+Capítulo VI
+
+Cómo la incontinencia del enojo no es tan afrentosa como la de los deseos; de la diversidad de los deleites y vicios de los hombres
+
+Ha concluido y demostrado ya Aristóteles cómo propriamente hablando la
+conciencia y la incontinencia se dicen en los deleites, que no exceden el término
+de nuestra naturaleza, y que en las demás cosas no se dice sino con aditamento
+y por cierta manera de metáfora. Agora hace comparación entre la que se dice
+propriamente incontinencia y la incontinencia del enojo, porque es cosa más
+acelerada el enojo y que no aguarda del todo la consulta de la razón, y así no
+está tan en mano de las gentes, y también porque el movimiento de la cólera
+procede más de la naturaleza. Después, para mejor entender y declarar esto, torna
+a hacer división de los deleites.
+
+Cuán más afrentosa es la incontinencia de los deleites que no la de el enojo,
+disputaremos agora de presente. Porque el enojo parece que escucha a la razón,
+pero que no la percibe bien, como los criados que son demasiadamente prestos,
+que antes de percibir del todo lo que les mandan, corren a ponerlo por obra, y así
+después hierran lo que hacen. Los perros también, antes de considerar si el que
+entra es amigo, solamente haga ruido, luego ladran; de la misma manera la saña
+o enojo, por su calor y presteza natural percibiendo, aunque no lo que le mandan,
+acelera luego a la venganza, porque o la razón o la imaginación le representó que
+aquello es afrenta o menosprecio, y la ira o enojo, como cosa ya persuadida que
+conviene resistir a lo tal, altérase luego; pero el deseo, solamente la razón o el
+sentido le diga: esto es suave, determinadamente va luego a gozarlo. De manera,
+que la ira en alguna manera obedece a la razón, pero el deseo, no, y por esto es
+más vergonzoso. El que es, pues, incontinente en la ira, en alguna manera se puede
+decir que es vencido de la razón, pero el otro es vencido del deseo y no de la razón.
+A más desto, ser uno vencido de los apetitos naturales, más digno es de perdón,
+pues lo es el ser vencido de los deseos que a todos son comunes y en cuanto son
+comunes, y la ira es cosa más natural, y también la terriblez de condición, que no
+los deseos excesivos, y en ninguna manera necesarios, como el que se excusase
+de haber puesto las manos en su padre, diciendo que también su padre las había
+puesto en su agüelo y su agüelo en su bisagüelo, y así de allí arriba, y demostrando
+su hijo pequeñuelo, dijese: también éste cuando venga a ser varón las porná en
+mí, porque ya esto nos viene de linaje. Y otro, que arrastrándolo su hijo, cuando
+llegó a la puerta le mandó parar, diciendo que hasta allí no más había él arrastrado
+al suyo. Asimismo más injustos son los que a traición hacen el agravio, pero el
+colérico o airado no es hombre que se para mucho a pensar traiciones, ni la misma
+ira no es cosa oculta, sino harto manifiesta. Pero el deseo es urdidor de traiciones,
+como dicen que lo es la diosa del amor, como dice Homero que es la correa de la
+engañosa diosa de Chipre, en la cual hay tales engaños, que deciden muchas veces
+aun el entendimiento del prudente. De manera que, pues semejante incontinencia es
+más injusta que la de la ira, será más afrentosa, y será absolutamente incontinencia,
+y en alguna manera será vicio. También ninguno hace afrenta a otro movido de
+dolor, pero cualquiera que de airado hace alguna cosa, la hace movido de dolor;
+mas el que hace afrenta, hácela gustando de hacerla. Pues si aquellas cosas son
+más injustas, con las cuales enojarnos es más justo, será cierto la incontinencia en
+los deseos más injusta, porque en la ira no hay deleite. La incontinencia, pues, en
+los deseos, más afrentosa es que no la de la ira. Entendido, pues, y manifiesto está
+cómo la continencia y la incontinencia consisten en los deseos y deleites corporales,
+pero habemos de entender qué diferencias hay dellos. Porque, como ya lo dijimos
+al principio, unos deleites hay humanos y naturales, así en su género como en su
+cantidad, y otros hay brutales, y también otros que proceden de falta de juicio y de
+algunas enfermedades. En el primer género, pues, destos consisten la templanza
+y la disolución solamente. Y por esto a las bestias ni las llamamos templadas ni
+disolutas, sino por modo de metáfora, si acaso un género de animales difiere de otro
+en violencia, o en lujuria, o en el comer excesivamente, porque ni tienen elección,
+ni discurso de razón, sino que son movidos por su naturaleza, como los hombres
+que están locos, de manera, que la furia o ímpetu de las bestias menos es que el
+vicio, pero es más de temer, porque en las fieras no está depravado lo mejor como
+en los hombres, sino que faltó en ellas y no lo hay. Compararlas, pues, con el
+hombre, es de la misma manera que si uno comparase una cosa viva con otra que
+no tiene vida, y preguntase cuál dellas es peor. Porque la falta del que no tiene en
+sí principio, menos grave siempre es que la del que lo tiene, y el entendimiento es
+el principio. Hacer, pues, tal comparación es como comparar la injusticia con el
+hombre injusto, porque cada uno dellos en alguna manera es peor, pues un hombre
+malo hará muchos millares de males más que una fiera.
+
+Capítulo VII
+
+Del continente y del incontinente, del constante y afeminado
+
+Ya que ha mostrado cómo la verdadera continencia y la incontinencia consisten
+en los deleites corporales, compara agora el continente con el constante y el
+incontinente con el afeminado, y muestra cómo el continente y el incontinente
+tienen por propria materia los deleites y las cosas suaves: el uno para no derribarse
+a ellas, no siendo honestas, y el otro para derribarse. Pero el constante y el
+afeminado las contrarias: el uno para durar en sufrillas, y el otro para dejarse
+luego caer en el resistillas.
+
+Ya, pues, se ha tratado en lo pasado de los deleites del tacto y del gusto, y
+también de las molestias. Asimismo, de los deseos y abstinencias, en que consisten
+la disolución y la templanza. Acontece, pues, de tal manera uno estar dispuesto
+en ellas, que sea vencido de aquellas, en que los más de los hombres suelen
+vencer, y acontece también vencer en aquellas, en que los más de los hombres son
+vencidos. Destos dos géneros de hombres, el que en los deleites hace lo primero
+es incontinente, y el que lo postrero, continente. Pero el que en los dolores y cosas
+pesadas de sufrir, hace lo primero, es afeminado, y el que lo postrero, llámase
+constante. Entre estos dos contrarios están de por medio los hábitos de los más
+hombres, aunque suelen derribarse más alos peores. Pero por cuanto algunos de los
+deleites son necesariamente obligatorios, y otros no, y otros hasta cierto término
+lo son, pero los excesos dellos no, ni tampoco los defectos, y lo mismo es en los
+deseos y molestias, aquel que en las cosas deleitables, busca los extremos, o en
+cuanto son extremos, o de su propria voluntad y deliberación, y por causa dellos
+mismos, y no por otro fin que de allí resulte, este tal es el disoluto. Porque de
+necesidad este tal no se ha de arrepentir dellos, y por esto no tiene remedio, porque
+el que no se arrepiente, no es capaz de remedio. Contrario deste es el que falta,
+y el que guarda el medio este es el templado. De la misma manera el que rehúsa
+las molestias corporales, no por flaqueza de ánimo sino por elección determinada.
+Pero de los que lo hacen no por voluntad determinada, unos se dejan vencer del
+mismo deleite, otros por huir la molestia que les da el mismo deseo. De manera,
+que difieren estos los unos de los otros. Cualquiera, pues, juzgará ser peor el hacer
+las cosas feas, o no deseándolas, o deseándolas tibiamente, que no deseándolas
+con afición muy encendida. Y peor es herir a uno no estando airado, que herirlo
+estando encendido en cólera. Porque ¿qué haría éste tal si estuviese movido del
+afecto? Y por esto, es peor el disoluto que no el incontinente. Destos dos, pues,
+que habemos dicho, el primero tiene más muestra de afeminación de ánimo, pero
+el otro es disoluto. El continente, pues, es contrario del incontinente, y el constante
+del afeminado, porque la constancia consiste en el resistir y la continencia en el
+vencer, y el resistir es diferente del vencer, como el no ser vencido del alcanzar
+victoria. Y por esto, es mis de preciar la continencia que la constancia. Pero
+el que desmaya en las cosas en que los más resisten y salen con ello, este tal
+es afeminado y delicado, porque no es otra cosa delicadez sino afeminación de
+ánimo, como la del que por no sufrir la pesadumbre de levantar la capa, la deja ir
+rastrando, y pareciendo en la delicadez al enfermo, no le parece que es miserable,
+siendo tan semejante al que lo es. De la misma manera, pues es en la continencia
+y incontinencia. Porque no es de maravillar que uno sea vencido de deleites o
+pesadumbres fuertes y excesivas, antes es de perdonar y haber compasión dél, si
+resistiendo fue vencido, como aquel Filoctetes en la tragedia de Teodectes mordido
+de la víbora, o como aquel Cercion en la tragedia Alope de Carcino, y de la misma
+manera que los que procuran detener la risa, de un golpe la despiden, como le
+aconteció a Jenofanto. Pero es de maravillar cuando lo es en aquéllas en que los
+más pueden resistir, y él no es bastante a resistir, no por la naturaleza de su género
+ni por enfermedad, como acontece a los reyes de los Scitas, que ya de linaje les
+viene afeminados, o como es la naturaleza de la mujer comparada con la del varón.
+Parece también disoluto el que es demasiado en el decir gracias y donaires, pero
+no es sino afeminado, porque el decir donaires es relajación de ánimo, pues es
+manera de decanso, y el que es demasiado en el decir donaires, es uno de los
+que en el holgarse siguen exceso. Hay, pues, una manera de incontinencia que es
+una desenfrenada temeridad, y otra que es flaqueza. Porque unos, aunque hayan
+deliberado una cosa, no perseveran en lo que han deliberado, por la perturbación
+del ánimo, y otros, por no consultar bien lo que hacen, se dejanllevar donde los
+induce su perturbación. Porque así como los que primeramente se mueven, no son
+después molestados desta pasión, de la misma manera los que se previenen con
+el sentido, y miran las cosas primero, y despiertan a sí mismos y a su discurso de
+razón, no son vencidos de sus afectos, ora sean de deleites, ora de molestia. Pero los
+que más incontinentes son de desenfrenada incontinencia, son los repentinos y los
+melancólicos. Porque aquéllos por su presteza y estotros por la fortaleza del afecto,
+no escuchan razón, por ser muy prontos en seguir sus imaginaciones.
+
+Capítulo VIII
+
+En qué difieren el disoluto y el incontinente
+
+Ya que ha declarado Aristóteles cómo el disoluto y el incontinente consisten
+en una misma manera de ejercicios y deleites, pero el uno por elección y el otro
+por perturbación, compara agora estos dos géneros de afectos entre sí, y muestra
+cuán más malo es ser uno disoluto que ser incontinente. Porque el disoluto yerra
+en los principios y está persuadido que no hay otro bien sino el vivir sensualmente,
+y que los que no gozan de aquello no saben qué cosa es vivir, y como cuenta
+Macrobio de la disolución de Julia, hija del emperador Augusto, y por esto ni tiene
+arrepentimiento ni remedio, mientras no se desengañare. Pero el incontinente,
+como no se mueve por elección, sino por perturbación, pasada aquélla reconócese,
+y reprueba aquel hecho y lo aborrece, y tiene remedio con abstinencias, con
+evitar las ocasiones y no ir (como dicen) a ferias, do libre mal en ellas. Así
+compara Aristóteles a los incontinentes con los que tienen mal de corazón, que
+no les toma sino a tiempos, y a los disolutos con los hidrópicos o tísicos, que
+llevan el mal a la contina.
+
+El disoluto, pues, como habemos dicho, no es capaz de arrepentimiento, porque
+persevera en su deliberación. Pero el incontinente en alguna manera lo es. Por esto
+no es así como arriba disputamos, sino que el incontinente es fácil de remediar y
+curar, pero el disoluto no tiene medio, porque el vicio de la disolución parece al
+mal de hidropesía y a la enfermedad que padecen los que se hacen tísicos; pero la
+incontinencia es semejante al mal de corazón. Porque la disolución es mal que dura
+a la contina, pero la incontinencia a ciertos tiempos. Y, absolutamente hablando,
+es diferente género de mal la incontinencia que no el vicio, porque el vicio no se
+conoce, pero la incontinencia conócese. Y de los incontinentes, mejores son los que
+sin consideración se mueven, que los que alcanzando razón no perseveran en ella,
+porque a éstos menos perturbación los derribará, y no lo hacen sin consideración
+como los otros, porque el incontinente es semejante al que fácilmente y con poco
+vino se emborracha, o con menos que los que se emborrachan vulgarmente. Consta,
+pues, que la incontinencia no es, absolutamente hablando, vicio, sino enalguna
+manera por ventura, porque la incontinencia es fuera de elección, pero el vicio es
+por elección; pero, en cuanto a las obras, semejantes son como dijo Demodoco
+de los milesios: los milesios no son necios, pero hacen lo mismo que los necios.
+También los incontinentes no son, cierto, injustos, pero hacen sinjusticias. Pero por
+cuanto el incontinente es de tal calidad que sigue los excesivos deleites sensuales, no
+por estar persuadido, sino fuera del uso de su razón, pero el disoluto está persuadido
+que es cosa que conviene seguirlos; al incontinente puédesele fácilmente persuadir
+lo contrario, pero al disoluto no porque la verdad conserva el principio, y el vicio
+lo destruye; y en los negocios es el principio aquello por lo cual se tratan, como
+en las matemáticas las proposiciones. Porque ni en las matemáticas se demuestran
+los principios por razón, ni aquí tampoco, sino que la virtud, o natural o adquirida
+por costumbre, es la que enseña, a sentir bien de los principios. El templado, pues,
+es el que es tal cual habemos dicho, y el contrario dél es el disoluto. Pero hay otro
+que, fuera de la recta razón, le turba el afecto, al cual le vence el afecto hasta tanto
+que no obre conforme a recta razón, pero no, le vence de tal manera que venga a
+persuadirse que conviene así, a rienda suelta, darse a deleites semejantes; y este tal
+es el incontinente, y es mejor que no el disoluto, ni es absolutamente malo porque
+se conserva en él lo mejor, que es el principio. Hay también otro contrario déste,
+que es el que resiste y no se deja vencer por el afecto. De lo cual se colige que el
+hábito deste tal es bueno y el del otro malo.
+
+Capítulo IX
+
+En qué se parecen y en qué difieren el continente y el terco o porfiado
+
+Averiguado está que todo continente es constante, aunque difieren en el respecto
+el continente y el constante. Pero porque hay personas que en lo que no va conforme
+a razón, suelen ser tan porfiadas que antes les quitarán las vidas que les desarraiguen
+la persuasión, a los cuales solemos llamar tercos, o arrimados, o porfiados, pone
+aquí Aristóteles la diferencia que hay entre el porfiado y el constante, que el
+constante está firme en lo que le persuadió la buena razón, y el porfiado en lo que
+le dictó su imaginación. Y así, el constante sabe dar razón de su parecer, pero el
+porfiado no otra sino porque sí y porque no. Y así, semejante vicio dice Aristóteles
+ser proprio de hombres groseros, rudos y faltos de doctrina, y especialmente si con
+todas estas faltas están puestos en señorío, son intolerables, porque quieren con
+su poder ejecutar sus imaginaciones y que sea lo que a ellos les parece, aunque dé
+voces contra ellos la razón. Lo cual, vemos claramente en los desventurados que
+siguen la secta mahometana, que por nuestros pecados ha tanto ya que dura, que
+por su rudeza y ignorancia dan crédito firme a cosas más desvariadas que sueños
+de enfermos, y mueren por ellas y las defienden con la defensión no humana, que
+es la buena razón, que con ésta no se pueden defender desvaríos y torpedades
+semejantes, sino con la defensión bestial, que es la de las armas, con que cualquier
+cosa mala puede defenderse.
+
+¿Es verdad, pues, que cualquiera que en cualquiera razón y en cualquiera
+deliberación persevera es continente, o el que en la buena? ¿Y diremos que es
+incontinente cualquiera que no persevera en cualquiera manera de deliberación
+y de razón? ¿O el que persevera en falsa razón y no buena deliberación, como
+arriba lo dudamos? ¿O diremos que, accidentariamente, el continente persevera en
+cualquiera manera de deliberación y de razón, pero cuanto a su proprio parecer en
+la verdadera razón y buena elección y, por el contrario, el incontinente? Porque
+si uno escoge o procura tal cosa por respecto de tal, aquello por cuyo respecto
+la procura y la escoge, por sí mismo lo procura y escoge; pero lo otro no, sino
+accidentariamente, porque aquello decimos absolutamente tal, que es por sí mismo
+tal. De manera que puede acontecer que en cualquiera manera de parecer el
+continente esté firme y el incontinente vacile, pero absolutamente se dice tal el que
+lo hace en el verdadero parecer. Hay, pues, algunos que perseveran firme mente
+en su propósito, y hay otros, que vulgarmente los llaman arrimados a su proprio
+parecer, o porfiados, como gentes que dificultosamente creen, ni fácilmente se
+pueden mudar de su proprio parecer, los cuales parecen en algo al continente, de
+la misma manera que el pródigo al liberal, y el atrevido al que es osado; pero en
+muchas cosas son muy diferentes. Porque el continente no se derriba de su parecer
+por ningún afecto ni codicia (pues cuando conviniere escuchará razón y se dejará
+persuadir), pero el arrimado no deja su parecer por razón ninguna; pero deseos
+admítenlos y muchos dellos se dejan vencer de los deleites. Son, pues, arrimados
+o porfiados los que siguen su proprio parecer, y los que son faltos de doctrina, y
+los hombres rústicos. Y los que siguen su proprio parecer, hácenlo o por deleite
+o por molestia, porque se huelgan mucho cuando salen con su intención, si ya
+después no vienen a desengañarse, y se entristecen si no sale en efecto lo que
+ellos porfían, como si fuese ordinación. De manera que estos tales más semejantes
+son al incontinente que no al continente. Otros hay que no perseveran en lo que
+deliberaron, y no por eso son incontinentes, como aquel Neoptolemo, en la tragedia
+de Sófocles, llamada Filoctectes, no perseveró en lo que había deliberado, y esto
+por deleite, pero por deleite honesto; y Ulises habíale persuadido a que mintiese.
+Porque no todos los que por deleite hacen alguna cosa son disolutos, ni malos, ni
+incontinentes, sino los que lo hacen por deleites deshonestos. Y, pues, hay alguno
+de tal condición que se huelga menos de lo que conviene con las cosas corporales,
+y tal como éste no persevera en la razón, el continente será medio entre este tal y
+el incontinente. Porque el incontinente no persevera en la razón por alguna cosa
+demasiada, y estotro por alguna cosa de defecto; pero el continente persevera y no
+muda de parecer por otra cosa. Pues si la continencia cosa honesta y virtuosa es,
+de necesidad ambos a dos hábitos contrarios han de ser malos, como en realidad de
+verdad lo parecen ser. Pero por cuanto el que consista en defecto en pocos hombres
+y raras veces se halla; así como la templanza solamente parece contraria de la
+disolución, de la misma manera la continencia parece tener solamente por contraria
+a la incontinencia. Pero como muchas cosas se dicen tales `por alguna similitud,
+la continencia del templado también se dice continencia porque, así el continente
+como el templado, se dicen ser tales por no hacer cosa alguna fuera de la buena
+razón, en lo que toca a los deleites corporales. Pero el continente hácelo teniendo
+malos deseos, y el templado no teniéndolos. Y el templado es de tal condición,
+que no le da gusto el hacer las cosas fuera de razón; pero el continente halla
+deleite en ello, pero no se deja vencer. Son asimismo semejantes el disoluto y
+el incontinente, aunque son diversos, porque el uno y el otro siguen los deleites
+corporales, pero el disoluto síguelos persuadido que conviene seguirlos, mas el
+incontinente no persuadido.
+
+Capítulo X
+
+Cómo no es posible que un mismo hombre sea juntamente prudente y incontinente
+
+Llama el hombre prudentes a los que en lo que toca a las cosas dél, saben de tal
+manera regirse y granjear las cosas de sus intereses y pretensiones que les salgan
+como ellos desean. Pero esta más se ha de llamar astucia que prudencia, porque la
+verdadera prudencia es una de las virtudes, y ninguna virtud tiene compañía con
+los vicios, pero semejante sagacidad y astucia bien puede hallarse en gente falta
+de virtud. Y esta es la prudencia de los prudentes y la sabiduría de los sabios, que
+Dios por Esaías, capítulo treinta y tres, tiene amenazada, que ha de destruir. Porque
+si prudencia quiere decir providencia en las cosas por venir, ¿cómo son prudentes
+los que en el proveer las cosas venideras echan mano de lo que de hora en hora
+y de punto en punto lo van dejando, y no es dado cuando ya o es perdido o
+se va perdiendo, y se descuidan y tienen en poco aquello, que, so pena de ser
+peores que bestias, han de tener por cierto les ha de durar sin tiempo y sin
+haber fin eternalmente? Esto es, pues lo que Aristóteles trata en este capítulo, y
+prueba que ningún incontinente es prudente, coligiéndolo de las proposiciones
+ya arriba concedidas en la segunda manera de argumentar, desta suerte: Todo
+varón prudente es virtuoso, ningún incontinente es virtuoso, luego ningún
+incontinente es prudente.
+
+Pero no es posible que un mismo hombre sea juntamente prudente y incontinente,
+porque ya está demostrado que el que es prudente, es, juntamente, virtuoso en
+las costumbres. Asimismo, no se dice uno prudente sólo por entender las cosas,
+sino también por ponellas por obra. Pero el incontinente no pone por obra lo que
+entiende. Pero el que es pronto en entender las cosas, bien puede ser incontinente,
+y por esto parece algunas veces que algunos son prudentes y incontinentes, porque
+la prontitud difiere de la prudencia de la manera que habemos dicho en las pasadas
+razones, y en la razón son semejantes, pero en la elección difieren. Pero no difieren
+como el que sabe la cosa y el que la considera, sino como o el que duerme o está
+borracho, pero voluntariamente, porque en alguna manera entiende lo que hace y a
+qué fin, pero malo no es, porque su elección no es buena. De manera que será medio
+malo y no injusto, porque no hace mal sobre pensado. Porque de los incontinentes
+uno no persevera en lo que deliberó, y el otro, que es el melancólico, ni aun se
+puso a deliberar en alguna manera. Parece, pues, el incontinente a una ciudad que
+determina bien las cosas que conviene, y tiene buenas leyes, pero de ninguna dellas
+se sirve, como mordacemente dijo Anaxandrides:
+
+Consulta la ciudad lo que conviene,
+
+Y de la ley ningún cuidado tiene;
+
+pero el malo es semejante a la ciudad que se rige por leyes, pero malas y injustas.
+Consiste, pues, la incontinencia y la continencia en el exceso de los hábitos que
+entre los hombres se hallan comúnmente, porque el continente persevera más y
+el incontinente menos de lo que pueden perseverar los hombres comúnmente.
+De las especies, pues, que hay de incontinencia, más fácil es de curar la de los
+melancólicos que no la de los que deliberaron bien, pero no perseveran en ello,
+y más fáciles son de remediar los que son incontinentes de costumbre, que los
+que de su natural condición, porque más fácilmente se muda la costumbre que
+la naturaleza. Porque la costumbre por eso es dificultosa de mudar: porque es
+semejante a la naturaleza, como dice Eveno:
+
+La contemplación larga, amigo, digo
+
+Que dura, y con el uso confirmada
+
+Virtud ya de natura trae consigo.
+
+Ya, pues, queda tratado qué cosa es la continencia y qué la incontinencia, qué la
+perseverancia y qué la afeminación, y cómo se han éstos los unos con los otros.
+
+Capítulo XI
+
+De las cosas que se dicen del deleite para probar que no es cosa buena
+
+Como se ha mostrado consistir la continencia y la incontinencia, y también
+la templanza y disolución, en lo que toca a los deleites corporales, toma ocasión
+de aquí Aristóteles para tratar en los capítulos que restan deste libro del deleite,
+aunque en el último libro trata esta materia de propósito. Pone primero cómo
+toca al filósofo moral tratar del deleite. Después pone tres diversos pareceres
+que había acerca del deleite: uno que decía que ningún deleite era bueno, y otro
+que algunos lo eran aunque no todos, y el tercero, que dice no ser el deleite el
+sumo bien, y pone las razones en que se fundaban los que decían que ningún
+deleite era bueno.
+
+Toca también al filósofo que trata la disciplina de la república, tratar asimismo
+del deleite y pesadumbre, porque este es el artífice principal que considera el
+último fin, conforme a cuya consideración, a cada cosa absolutamente, o buena o
+mala la llamamos. A más desto es forzado haber de tratar dellos, porque habemos
+presupuesto que la virtud moral y el vicio consisten en pesadumbres y deleites.
+También el vulgo dice que la suma felicidad trae consigo deleite en compañía. Y
+de aquí dicen que el bienaventurado se dijo en griego, macarios, de cherin, que
+significa regocijarse. Hay, pues, algunos que son de opinión que ningún deleite es
+bueno, ni por sí mismo ni accidentariamente, porque no es todo uno bien y deleite.
+Otros confiesan que hay algunos deleites buenos, pero que los más son malos. La
+tercera opinión de otros es que, aunque todos los deleites fuesen buenos, con todo
+eso no puede ser el deleite el sumo bien. Los que dicen, pues, que ningún deleite
+hay bueno, fúndanse en estas razones: que todo deleite es sensible generación
+encaminada a la natura, porque ninguna generación es del mismo género que el fin,
+como ningún edificar es edificio. A más desto, el templado huye de los deleites.
+Terceramente, el prudente procura lo que no le de pena y no lo que le sea suave.
+Asimismo los deleites son estorbo de la prudencia, y cuanto mayor deleite dan
+mayor impedimento son, como el deleite de la carnal concupiscencia, en el cual el
+que está cebado, no puede entender cosa ninguna. Tras desto no hay arte ninguna
+que enseñe el deleite, pero todas las cosas buenas son obras de arte. Finalmente,
+los niños y las bestias siguen el deleite. Los que dicen que no todos los deleites
+son buenos, estriban en éstas: que hay algunos deleites vergonzosos y afrentosos,
+y otros perjudiciales, porque muchas cosas de las deleitables causan enfermedades.
+Pero los que dicenno ser el sumo bien el deleite, persuádense por esta razón:
+que el deleite no es fin sino generación. Lo que del deleite, pues, se dice, casi
+es esto en suma.
+
+Capítulo XII
+
+En el cual se responde y satisface a las sobredichas razones, y se demuestra cómo el deleite es cosa buena
+
+En este capítulo muestra Aristóteles cómo los de las opiniones sobredichas
+no argüían bien, ni colegían sus conclusiones rectamente, porque no distinguían
+lo bueno como se debe distinguir y como él aquí lo distingue; y el no saber bien
+distinguir las cosas, es causa de muchos errores en el tratar las sciencias.
+
+Pero que no se colija de aquellas razones que el deleite no es bueno ni qué es
+el sumo bien, entenderlo hemos por esto. Primeramente, pues, lo bueno se dice en
+dos maneras: uno, absolutamente bueno, y otro, bueno en respecto de alguno; por
+el consiguiente, también las naturalezas y los hábitos, y por la misma razón, los
+movimientos y las generaciones, se dirán de la misma manera. Y las que parecen
+malas, serán absolutamente malas, y para algunos no lo serán; antes, para aquel tal,
+les serán dignas de escoger. Otras habrá que ni aun a éste le serán, sino por algún
+rato y poco espacio de tiempo, pero cosas absolutamente de desear no serán. Otras
+habrá que ni aun deleites no serán, sino que lo parecerán, como las que se hacen
+con pena por la conservación de la salud, como las de los enfermos. Asimismo,
+pues, hay dos maneras de bienes: unos que son ejercicios, y otros que son hábitos;
+los ejercicios que ni inducen al hábito natural, accidentariamente son deleitosos.
+Es, pues, el ejercicio en los deseos proprio del hábito de naturaleza que tiene algún
+defecto, pues sin pena ni deseo se hallan algunos deleites, como los ejercicios en
+el contemplar las cosas de que la naturaleza no tiene necesidad. La prueba se vee
+por esto: que no se huelgan los hombres con una misma manera de cosas suaves
+cuando se va perficionando su naturaleza y cuando ya está perfecta. Porque cuando
+está perfeta huélganse con lo que es de veras suave; pero cuando se hincha y se
+va perficionando, también se huelgan con las cosas contrarias. Porque muchos
+se agradan de lo agro y de lo amargo, de lo cual ninguna cosa, ni natural ni
+absolutamente, es suave; y, por la misma razón, no lo serán los deleites dellos,
+porque de la misma manera que se han entre sí las cosas suaves, se han también
+los deleites que proceden dellas. A más desto no se colige, de necesidad, que haya
+de haber otra cosa mejor que el deleite, como algunos dicen que es el fin mejor
+que la generación, porque ni los deleites son generaciones, ni todos son anejos a
+generación; antes muchos dellos son ejercicios y fin, y se hallan, no en los que se
+hacen, sino en los que gozan; ni tampoco en todas es el fin diverso dellas, sino en
+aquellas que inducen a la perfición de la naturaleza. Por esto no se dice bien que
+el deleite es sensible generación, sino que habemos de decir que es ejercicio del
+hábito que tenemos conforme a naturaleza, y en lugar de decir sensible, habemos
+de decir no impedido. Y porque el deleite es propriamente bueno, por eso parece
+ser generación, porque les parece que el ejercicio es generación, siendo cosa
+diferente. Pero el decir que son malos los deleites porque algunas cosas deleitosas
+son perjudiciales a la salud, es lo mismo que decir que algunas cosas provechosas
+para la salud son perjudiciales para la bolsa. Desta manera, pues, son malas las
+unas y las otras; pero no por eso son absolutamente malas, pues el estudiar también
+algunas veces es perjudicial para la salud. De manera que ni impide la prudencia,
+ni tampoco otro hábito ninguno, el deleite que procede della, sino los deleites de
+cosas diferentes de aquellas, pues el deleite que da el estudiar y aprender da mayor
+gana de estudiar y aprender. Asimismo, el decir que el deleite no es obra de arte
+ninguna, es conforme a razón; porque ningún otro ejercicio tampoco es proprio de
+ningún arte, sino de la facultad, aunque el arte de los que hacen olores, y la de los
+cocineros, parece que es arte de deleite. Y a aquello de decir que el templado huye
+de los deleites, y que el prudente procura la vida libre de molestias, y que los niños
+y las bestias procuran los deleites, de la misma manera se responde a todo, porque,
+pues habemos dicho cómo todos los deleites en alguna manera son buenos, y
+en alguna no lo son, los niños y las bestias siguen los que en alguna manera
+no son buenos, y el prudente procura el carecer de la molestia destos deleites
+que andan acompañados de deseos y pesadumbres, y son deleites corporales
+(porque tales son todos éstos), y de los excesos dellos, por los cuales es disoluto el
+disoluto. Y por esto el templado huye de deleites semejantes, pues tiene también
+el templado sus deleites.
+
+Capítulo XIII
+
+En que se disputa que hay algún deleite que es el sumo bien
+
+En el capítulo treceno responde a los que decían, que el deleite no podía ser el
+sumo bien, y prueba que de necesidad ha de haber algún deleite que sea el sumo
+bien si hay sumo bien y vida que lo alcance. Porque el sumo bien sumo contento
+dará, y si sumo contento, sumo deleite, cual es el que gozan los bienaventurados
+viendo a Dios. Y así esta doctrina es conforme al Evangelio. Todo el hierro en
+esta materia dice Aristóteles y con mucha verdad, que nace de nuestra sensualidad,
+que en oír deleite luego nos abatimos al sentido y los deleites sensuales, como si
+aquellos, solos fuesen deleites y no lo fuesen más deleites y más ajenos de molestias
+los que a quien las ama dan las cosas del espíritu, como lo vemos palpablemente en
+los que estudian y en los que se dan a la contemplacióm que ni el daño de la salud
+del cuerpo, ni la pérdida de sus intereses, es parte para apartarlos del contento que
+reciben con aquellos ejercicios. Y esto mismo quiso significar Homero en la fábula
+de las sirenas, que con su dulce canto atraían los hombres a sí y después se los
+comían. Porque estas sirenas son las ciencias, que a los ingenios verdaderamente
+liberales de tal suerte emborrachan de dulzura, que les hacen permanecer toda
+la vida en su compañía y morir en ellas, que es el comérselos. De manera, que
+bien hay deleites, y muy grandes y muy aplacibles y muy quietos, fuera de
+los del sentido.
+
+Pero todos abiertamente confiesan que la molestia es cosa mala y digna de
+aborrecer. Porque algunas molestias son absolutamente malas, y otras hay que
+lo son por ser en alguna manera impedimento. Pues lo que es contrario a lo que
+es de aborrecer en cuanto es de aborrecer y malo, bueno será, de manera que, de
+necesidad el deleite ha de ser bien alguno, porque la solución que Speusipo daba,
+diciendo que el deleite era contrario de la molestia, como lo es lo mayor de lo
+menor, o de lo igual lo desigual, no vale nada. Porque ninguno dirá que el deleite
+es como una especie de lo malo. Y el haber algunos deleites malos no es bastante
+razón para negar que no hay algún deleite sumamente bueno, de la misma manera
+que el haber algunas sciencias malas no es bastante argumento para concluir que no
+hay ninguna buena. Antes por ventura de necesidad se coligirá que (pues en cada
+hábito hay sus proprios deleites, que al tal hábito no le hacen ningún estorbo), ora
+sea la felicidad ejercicio de todos los deleites, ora de alguno dellos no impedido,
+este tal será el más digno de escoger, y esto tal es deleite. De manera, que algún
+deleite habrá sumamente bueno, aunque digamos ser así, que haya muchos deleites
+absolutamente malos. Y por esto todos tienen por cierto que la vida del dichoso es
+vida muy suave, y con razón encierran el deleite y lo comprenden en la felicidad,
+porque ningún ejercicio impedido es perfeto, y la felicidad es una de las cosas
+perfectas. Por esto el dichoso tiene necesidad de los bienes corporales y de los
+externos, y también de la prosperidad de la fortuna, porque estas cosas no le
+impidan. Porque los que dicen que el que está puesto en tormentos, o le suceden
+muy grandes desventuras, es dichoso, si bueno es, ora lo digan voluntaria, ora
+forzosamente, no saben lo que dicen. Pero porque se añade la fortuna les parece
+a algunos, que felicidad y buena ventura es todo una misma cosa, no siéndolo,
+porque la buena ventura o buena dicha, si demasiada es estorbo para la felicidad,
+y que por ventura ya no es justo llamarla buena dicha, porque la definición de
+la buena dicha va dirigida a la felicidad. Y el ver que todos, así bestias como
+hombres, procuran el deleite, es alguna manera de argumento para entender que
+el sumo bien es deleite:
+
+Porque la fama puesta y celebrada
+
+Por muchos pueblos en jamás perece,
+
+Ni de memorias de hombres es borrada.
+
+Pero porque ni una misma naturaleza, ni un mismo hábito les es a todos el
+mejor, ni les parece, de aquí procede, que aunque todos procuran el deleite, no
+todos procuran una misma manera de deleite. Aunque por ventura procuran todos,
+no la que piensan, ni las que sabrían nombrar, sino todos una misma, porque todas
+las cosas tienen en sí un rastro de divinidad, sino que se han alzado con este nombre
+los deleites sensuales, porque encontramos con ellos muchas veces, y participamos
+todos dellos. Pues como de solos estos deleites se tiene vulgarmente noticia, por
+eso les parece a los hombres vulgarmente, que solos aquellos son deleites. Pero
+es cosa muy clara y manifiesta, que si el deleite no fuese cosa buena y también
+el ejercicio, que el que es bienaventurado no vivirá vida suave. Porque ¿para qué
+habría menester este tal al deleite, si no fuese cosa buena? Y aún acontecería
+que el bienaventurado viviese vida llena de molestias, pues la molestia ni es
+buena ni mala, pues tampoco lo es el deleite. Y si esto es así, ¿por qué huye
+de las pesadumbres? Ni aun la vida del bueno sería suave y deleitosa, si no lo
+fuesen también sus ejercicios.
+
+Capítulo XIV
+
+De los deleites corporales
+
+Ha mostrado ser el sumo bien cosa en extremo deleitosa, y que por esto se
+puede decir que el deleite es el sumo bien, aunque haya algunos deleites sensuales
+malos. Por esta ocasión trata en este último capítulo de los deleites sensuales, y
+declara una muy saludable filosofía, en que muestra de dónde procede que los
+deleites sensuales siendo malos así emborrachan, y muestra que este mal procede
+de una falsa aparencia de bien que traen consigo, con que engañan a los mozos mal
+experimentados, y que todo lo que reluce (como dicen) les parece oro, y también
+a los hombres melancólicos por su mal hábito de cuerpo, el cual piensan podrán
+remediar con los deleites corporales.
+
+Los que dicen, pues, que hay algunos deleites dignos de escoger en gran manera,
+como son los honestos, pero no los corporales y los que sigue el hombre disoluto,
+tienen obligación de tratar de los deleites corporales. ¿Por qué, pues, son malas las
+molestias contrarias de los deleites corporales? Porque a lo malo lo bueno le ha de
+ser contrario. ¿O diremos desta manera, que los deleites corporales necesarios son
+buenos, pues todo lo que es malo es bueno? ¿O hasta cuánta tasa diremos que son
+buenos? Porque cuando ni en los hábitos ni en los movimientos hay exceso en lo
+bueno, tampoco lo hay en el deleite dellos; pero cuando en aquéllos lo hay, también
+lo hay en su deleite. Pues en los bienes corporales hay exceso, y el ser uno malo
+procede de procurar demasiada y excesivamente los bienes corporales, y no por
+procurar las cosas necesarias, porque todos en alguna manera se alegran con
+el comer y con el beber y con los deleites de la carne, pero alégranse no como
+conviene. Pero en la pesadurnbre es al contrario, porque no sólo huye de la excesiva
+pesadumbre, pero generalmente de toda pesadumbre. Porque la pesadumbre no es
+contraria del exceso, sino del que procura el exceso. Pero por cuanto, no solamente
+conviene decir la verdad, pero también declarar la causa de la mentira (porque esto
+importa mucho para ganar crédito, pues cuando parece conforme a razón aquello,
+por donde lo que no es verdad parece serlo, es causa que a lo que es verdad se le
+dé más firme crédito), es bien que digamos qué es la causa por donde los deleites
+corporales parecen más dignos de escoger. Primeramente, pues, procuran los
+hombres el excesivo deleite y señaladamente el corporal, por excluir la pesadumbre
+y los extremos della, tomando al deleite, como por medicina para contra ellos.
+Son, pues, estas unas pesadas medicinas, y procúranlas, por parecerles al contrario
+desto. Y por estas dos causas el deleite parece ser cosa no buena, como habemos
+dicho, porque algunos dellos son ejercicios de mala naturaleza, que ya dende su
+nacimiento salió tal, como la de la bestia, o por costumbre, como los ejercicios de
+los hombres viciosos; y otros porque son medicinas de cosa falta, y el tener ya en
+ser una cosa, es mejor que no el hacerse, y otras suceden a las cosas ya perfetas; de
+manera, que accidentariamente son aquéllos buenos. Asimismo, como tales deleites,
+por ser terribles y subjetos a molestias, no los procuran sino los que no pueden gozar
+de otros, de manera que ellos mismos se procuran a sí mismos maneras para tener
+sed dellos, lo cual, cuando sin perjuicio se hace, no es de reprender, pero cuando
+con perjuicio, es malo, porque no tienen otras cosas con que puedan deleitarse,
+y el no tenerlas les es a muchos pesadumbre por su naturaleza. Porque como nos
+persuaden las razones de los filósofos naturales, siempre el animal padece; y dicen
+que el ver y el oír es cosa de pesadumbre, sino que no nos lo parece (según ellos
+dicen), porque estamos ya a ello habituados. De la misma manera los hombres, en la
+mocedad, por la crecida del cuerpo, tienen la misma disposición que los borrachos,
+y la misma juventud, de suyo es cosa deleitosa. Pero los que son naturalmente
+melancólicos, tienen siempre necesidad de medicina, porque el cuerpo destos tales,
+por su complexión, siempre está consumiendo, y tienen siempre fuerte el apetito, y
+el deleite, ora sea contrario, ora cualquiera, si es excesivo, despide la tristeza; y por
+esto los hombres se hacen malos y disolutos. Pero los deleites que no son anexos a
+molestia, no tienen exceso. Estos tales proceden de las cosas que, naturalmente y
+no accidentariamente, son suaves. Llamo accidentariamente suaves las que curan,
+porque de acaecer que el que sufre a la cosa medicinal que obra algo se cure, de aquí
+procede que parezca cosa suave. Pero las cosas naturalmente suaves son aquellas
+que hacen el ejercicio de tal naturaleza. Aunque una misma cosa no siempre no es
+dulce y aplacible, por no ser sencilla nuestra naturaleza, sino haber en ella cosas
+diversas, de donde procede ser nosotros corruptibles. De manera que si la una de
+nosotros hace algo, a la otra naturaleza le viene cuesta arriba, pero cuando a ambas
+igualmente cuadra, ni parece cosa aplacible la que se hace, ni pesada. Pues si la
+naturaleza de alguna cosa fuese sencilla, siempre una misma acción le sería muy
+suave y aplacible. Por esto Dios siempre goza de un mismo y sencillo deleite,
+porque no solamente el deleite es ejercicio de movimiento, pero aun también
+de quietud, y aun más consiste el deleite en quietud que en movimiento. Pero
+la mudanza de todas las cosas, como dice el poeta, es una cosa muy aplacible,
+por cierta imperfición y falta de natura. Porque así como el hombre malo es fácil
+de mudar de un parecer a otro, así también es mala naturaleza aquella que tiene
+necesidad de trastrocarse, porque ni es sencilla, ni moderada en su bondad. Dicho,
+pues, habemos de la continencia y de la incontinencia; asimismo del deleite y
+pesadumbre, qué cosa es cada una dellas, y cómo algunas cosas déstas son buenas
+y otras malas. Resta, pues, agora tratar de la amistad.
+
+Fin del libro séptimo

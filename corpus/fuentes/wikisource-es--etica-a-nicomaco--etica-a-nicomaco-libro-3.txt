@@ -1,0 +1,915 @@
+fuente: wikisource-es
+obra: Ética a Nicómaco
+url: https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_3
+recuperado: 2026-09-07
+---
+Ética a Nicómaco/Libro 3
+|título=[[Ética a Nicómaco]]
+|autor=[[Aristóteles]]
+obra> |título=Ética a Nicómaco
+obra> |autor=Aristóteles
+obra> |título={{Anclaje+|Índice}}
+---
+De los morales de Aristóteles, escritos a Nicomaco y por esto llamados nicomaquios
+
+Argumento del libro tercero
+
+Por cuanto en el precedente libro se ha probado ser la virtud acto voluntario y
+consistir en la elección y aceptación de nuestra voluntad, para que mejor se entienda
+esto, trata en el tercero de los actos de nuestra voluntad cuáles se hayan de decir
+libres y cuáles forzados, y si lo que se hace por temor es voluntario, o no, y en qué
+consiste la potestad del libre albedrío. Tras desto comienza de tratar, en particular,
+de cada género de virtud, y echa mano primero de las más estimadas, que es de
+la fortaleza o valerosidad; y tras della trata de la templanza, con las cosas que a
+ambas virtudes son anexas. En el primer capítulo propone la utilidad desta disputa.
+Después divide los actos forzosos en dos especies: unos que se hacen por violencia
+y otros por ignorancia; y propone sus diferencias. Disputa asimismo si las cosas
+que por temor de algunos males se hacen son voluntarias o forzosas, y prueba la
+acción dellas ser voluntaria, pues el principio dellas es la aceptación de nuestra
+voluntad; aunque si libre estuviese no las escogería, y por esto concluye ser acciones
+mezcladas de elección y violencia, y no ser del todo violentas. Porque si lo fuesen,
+no ternían alabanza ni reprehensión.
+
+Capítulo I
+
+Pues la virtud consiste en los afectos y en las obras, y las alabanzas y
+reprehensiones consisten asimismo en cosas voluntarias, y en las forzosas el perdón,
+y aun algunas veces duelo y compasión, por ventura que a los que tratan de cosa de
+virtud les es necesario definir cuáles cosas son forzosas y cuáles voluntarias. Esles
+asimismo útil a los legisladores para tasar las honras y castigos. Aquellas cosas,
+pues, parecen ser forzosas, que por violencia se hacen o por ignorancia. Violento
+es aquello cuyo principio procede de fuera, de tal suerte que no pone de suyo cosa
+alguna el que lo hace ni el que lo padece, como si el viento llevase algo a alguna
+parte, o los hombres que son señores dello. Mas las cosas que se hacen por temor
+de algunos males mayores, o por causa de algún bien, como si un tirano le mandase
+a uno que hiciese alguna cosa fea, teniéndole en rehenes sus padres y sus hijos, de
+tal suerte que si lo hace se librarán, y si no lo hace morirán, hay disputa si son cosas
+voluntarias o forzosas. En las cuales acontece lo mismo que en las tormentas y
+borrascas de la mar, cuando se alivian en ellas los navíos. Porque allí ninguno de su
+voluntad echa al hondo su hacienda, pero hácenlo todos los que buen seso tienen,
+por salvar su vida y las de los que van con ellos. Son, pues, los hechos semejantes
+mezclados, aunque más parecen voluntarios, porque cuando se hacen, consisten
+en nuestra mano y elección. Pero el fin de la obra consiste en la ocasión, y hase de
+decir así lo voluntario como lo forzoso cuando se hace. Y hacelo voluntariamente,
+pues las partes que son instrumento de aquel movimiento y su principio en las
+tales acciones, están en el mismo que lo hace, y cuando en el que lo hace está el
+principio del hacerlo, también está en mano del mismo el hacerlo o dejarlo de hacer.
+De manera que las tales obras son voluntarias. Aunque generalmente hablando,
+porventura son forzosas, pues ninguno por sí mismo aceptaría el hacer ninguna
+cosa como aquellas. Aunque en hechos semejantes algunas veces son alabados los
+que alguna cosa torpe o triste sufren, por causa de algunos grandes bienes, y si lo
+contrario hacen son reprehendidos. Porque sufrir cosas muy feas, si no es por razón
+de algún grande o mediano bien, es, cierto, hecho de ruines. Pero en algunos hechos
+déstos no alabamos a los que los hacen, antes nos dolemos dellos, cuando por causa
+desto hace uno lo que no debría, y lo que a la natura humana excede, y lo que, en
+fin, ninguno sufriría. Porque cosas hay a que los hombres no han de ser forzados,
+antes han de morir sufriendo los más graves tormentos del mundo. Porque en aquel
+Almeon de Eurípides son dignas de risa las cosas que dice que le habían forzado,
+a matar a su madre. Es, cierto, algunas veces cosa dificultosa juzgar cuál se ha de
+escoger antes que cual, y cuál antes que cual habemos de sufrir, y más dificultoso
+el sufrirlo después que se entiende. Porque por la mayor parte acontece que lo que
+nos parece hacedero sea cosa triste y pesada, y a lo que nos fuerzan cosa fea y
+afrentosa. De do procede que los que se dejan o no se dejan vencer, son vituperados
+o alabados. ¿Qué cosas, pues, habemos de confesar ser violentas? ¿Generalmente
+no diremos que lo son aquellas cuya causa viene de fuera, y el que las hace no
+pone nada de su casa? Pero las cosas que de suyo son forzosas y violentas, pero en
+comparación de otras son más de escoger, y cuyo principio está en mano de quien
+las hace, ¿no diremos que de suyo cierto son forzosas y que en respecto de otras
+son voluntarias? Aunque más parecen cierto voluntarias, porque los tales hechos
+consisten en cosas particulares, las cuales son voluntarias. No es, pues, fácil cosa
+determinar cuál cosa primero que cuál habemos de aceptar, porque en esto hay en
+las cosas particulares muy gran diversidad. Mas si alguno quiere decir que las cosas
+apacibles y buenas son forzosas, pues estando fuera del alma nos competen, estará
+obligado a confesar que por la misma razón todas las cosas son forzosas, porque
+todos los que algo hacen, lo hacen por alguno destos fines. Y los que por fuerza y
+contra su voluntad lo hacen, entristécense de aquello; mas los que obran lo malo,
+por razón de su dulzura, hácenlo con contentamiento. Es cosa, pues, de risa dar la
+culpa a las cosas de defuera, y no a sí mismo, de que así tan fácilmente se deje cazar
+de cosas semejantes de las cosas buenas por sí mismo y de las deshonestas por su
+suavidad. Aquello, pues, parece ser forzoso, cuyo principio y origen está defuera,
+no poniendo de suyo nada el que es forzado. Pero de las cosas que por ignorancia se
+hacen, no son todas voluntarias, mas aquellas en que el haberlas hecho da tristeza
+y causa arrepentimiento, son forzosas. Pero el que hace por ignorancia alguna cosa
+y de haberla hecho no se duele, no diremos que la hizo voluntariamente, pues no
+lo sabía, mas tampoco diremos que la hizo forzosamente, pues no le pesa dello. De
+manera que de lo que por ignorancia se hace, lo que causa arrepentimiento forzoso
+parece, mas el que no se arrepintió, pues es diferente déste, es no voluntario; porque,
+pues es diferente, mejor es que tenga su nombre proprio. Pero parece cosa diferente
+el hacer una cosa por ignorancia del hacerla ignorantemente. Porque el borracho o
+el colérico no parece que por ignorancia hacen lo que hacen, sino por alguna otra
+causa de las ya tratadas; pero tampoco lo hacen a sabiendas, sino ignorantemente.
+Cualquier malo, pues, ignora lo que hacer debe y de lo que le conviene guardarse, y
+por semejante error se hacen injustos y perversos. No se debe, pues, decir forzoso, si
+uno no entiende lo que le conviene, porque la ignorancia en la elección o aceptación
+no es causa de lo que es forzoso, sino de la perversidad y tacañería; ni tampoco la
+ignorancia universal (que también se vitupera), sino la que acontece en una cosa
+particular, en la cual y acerca de la cual se ha de emplear nuestro oficio. Porque en
+tales el que lo hace, más es digno de misericordia y de perdón, pues el que tal cosa
+ignora, la hace contra su voluntad y forzosamente. No es, pues, cosa por ventura
+la peor de todas tratar de todo esto, qué cosas son y qué, tan grandes, y quién, y
+qué, y acerca de qué, y en qué lo hace, y aun algunas veces con qué como con
+instrumento, y por qué, como por salvar la vida, y cómo, si despacio o con prisa y
+fervor. Todas, pues, estas cosas el que algún juicio tiene no las ignora, cuanto más
+el que las hace. Porque, ¿cómo ha de tener ignorancia de sí mismo? Pero puede
+acaecer que uno ignore lo que hace. Como los que oran suelen decir, o que se les
+escapó algo de la lengua, o que no sabían que aquello era cosa que se había de
+callar, como le aconteció a Esquilo en las ceremonias de Ceres, o que queriéndolo
+mostrar se le cayó o soltó, como el que suelta una ballesta. Alguno también habrá
+que a su proprio hijo lo tome por otro y piense que es su enemigo, como le acaeció
+a Merope; otro que le parezca que la lanza tiene la punta roma teniéndola aguda,
+o que la piedra es tosca; otro que hiriendo a uno, por curarle, lo mate; otro que
+quiriendo hacer de sí demostración, hiera, como acaece a los que luchan con las
+puntas de los dedos. Habiendo, pues, lugar de ignorancia en todas las cosas desta
+suerte en que haya obras, el que algo desto hizo no entendiéndolo, forzosamente
+parece haberlo hecho, y señaladamente en las más principales obras, cuales parecen
+ser aquellas en las cuales consiste la obra y el fin della. Pero aunque lo que por
+semejante ignorancia se haga, se diga ser forzoso conviene con todo eso que la
+obra le dé pena y se arrepienta de habella hecho. Si lo forzoso, pues, es lo que por
+violencia o ignorancia se hace, aquello se entenderá ser voluntario, cuyo principio y
+origen consiste en el mismo que lo hace, y que entiende particularmente las cosas,
+en que las tales obras consisten y se emplean. Porque no es por ventura bien decir
+que lo que por enojo o por codicia se hace, es forzoso y violento. Porque cuanto a
+lo primero, ninguno de los otros animales se puede decir, que obra de su voluntad,
+ni menos los mochachos, si no esto, ¿cómo diremos que obran? Pues ni tampoco se
+puede bien decir que lo que por codicia o por enojo hacemos, lo hacemos de nuestra
+voluntad. ¿Diremos, pues, que lo bueno hacemos de nuestro grado y voluntad, y lo
+malo por fuerza y contra voluntad? ¿O es hablar de gracia y sin fundamento decir
+esto, siendo una misma la causa? Cosa, pues, por ventura parece fuera de razón
+decir que las cosas que se han de desear son violentas y forzosas, y vemos que por
+algunas cosas conviene que nos enojemos, y que algunas cosas deseemos, como
+la salud y la doctrina. Asimismo parece que las cosas forzosas nos son tristes y
+pesadas, pero las que apetecemos sonnos suaves y aplacibles. Finalmente, ¿qué
+diferencia hay entre ser forzosas las cosas que se yerran por deliberación o las
+que se yerran por enojo, pues ambas a dos maneras de cosas son de aborrecer?
+Y pues las pasiones y afectos que son fuera de razón no menos parece que
+hayan de ser humanos que los otros, y las obras del hombre también proceden
+de enojo y de codicia, cosa, pues, es fuera, de razón decir que tales cosas sean
+violentas y forzosas.
+
+Ya que en el primer capítulo ha declarado cuál obra se ha de llamar forzosa y
+cuál voluntaria, y ha mostrado cuál manera de ignorancia hace la obra forzosa y
+cuál viciosa, y asimismo ha probado que lo que se hace por turbación de ánimo,
+no se puede llamar verdaderamente forzoso, en el capítulo II, por cuanto la virtud,
+como ya está dicho, consiste en elección y libre aceptación de nuestra voluntad,
+trata de la elección, que es lo que vulgarmente llamamos libre albedrío, y prueba
+ser éste proprio del hombre, y que no es todo uno ser voluntario y proceder de libre
+albedrío. Ítem que no es todo uno voluntad y elección.
+
+Capítulo II
+
+Ya que habemos determinado cuál cosa se ha de decir voluntaria y cuál forzosa,
+síguese el tratar de la elección o aceptación, porque más proprio oficio parece que
+es de la virtud juzgar de las costumbres, que no de las obras. La elección, pues, cosa
+clara es que consiste en las cosas voluntarias, pero no es lo mismo que ellas; antes
+lo voluntario es cosa más general. Porque los niños y los demás animales participan
+de las acciones voluntarias, pero no de la elección. Y las cosas que repentinamente
+hacemos y sin deliberación, bien decimos que son voluntarias, mas no decimos que
+proceden de elección. Los que dicen que la elección es codicia, o que es enojo, o
+querer a cierta opinión, no me parece que lo aciertan. Porque la elección no es cosa
+común a los hombres y a los animales que carecen de razón, y eslo la codicia y el
+enojo, y el disoluto hace sus obras con codicia, mas no con elección, y el templado,
+al contrario, obra con elección, mas no cierto con codicia. Y la codicia es contraria
+a la elección, mas una codicia a otra no es contraria. A más desto la codicia consiste
+en lo suave y en lo triste, pero la elección ni en lo triste ni en lo suave. Pero .menos
+es la elección enojo, porque lo que con enojo se hace, en ninguna manera parece
+ser hecho por elección. Mas ni tampoco es querer, aunque le parece mucho. Porque
+la elección no consiste en cosas imposibles, y si se entendiese que une, las elige,
+nos parecería que está fuera de juicio. Pero la voluntad bien puede desear cosas
+imposibles, como si desease ser inmortal. Asimismo la voluntad bien se puede
+emplear en las cosas que el mismo hombre no las hace, como si yo quiero que algún
+representante gane la joya, o algún luchador; pero tales cosas ninguno las elige,
+sino las cosas que entiende él mismo haberlas de hacer. Finalmente, la voluntad
+enderézase al fin más particularmente, pero la elección consiste en las cosas que
+pertenecen para el fin. Como el tener salud querémoslo, más las cosas con que
+conservemos la salud, escogémoslas. También el vivir prósperamente querémoslo
+y lo decimos así que lo queremos, mas no cuadra bien decir que lo escogemos. En
+fin, generalmente hablando, la elección parece que consiste en las cosas que están
+en nuestra mano. Tampoco es opinión la elección, porque la opinión en todas las
+cosas parece que se halla, y no menos en las cosas perpetuas y en las imposibles,
+que en las que están en nuestra mano. Y la opinión divídese en verdadera y falsa,
+y no en buena y mala, mas la elección más se distingue con estotras diferencias.
+Ninguno, pues, creo dirá ni creerá ser todo uno opinión y elección. Mas ni tampoco
+es la elección particular especie de opinión. Porque por razón de elegir lo bueno
+o lo malo somos tales o tales, mas por creerlo no lo somos. También la lección
+consiste en escoger una cosa o huir della, o en cosa como ésta, mas la opinión en el
+entender qué cosa es, o a quién le cumple, o de qué manera. Mas en el tomar o dejar
+no consiste tanto nuestra opinión. Asimismo la elección es alabada por ser hecha en
+lo que más conviene, o por ser bien hecha, más la opinión por: ser verdadera. Por
+la misma razón escogemos aquellas cosas que sabemos ser mejores, pero pensamos
+ser así lo que de cierto no sabemos. Parece también que no son todos unos los que
+eligen las cosas mejores y los que las creen ser tales, sino que algunos hay que
+juzgan bien dellas, y por su vicio eligen lo que no les cumple. Ni importa disputar
+si la opinión precede a la elección o si se sigue, porque aquí no consideramos eso,
+sino si es lo mismo elección que opinión particular. ¿Qué diremos, pues, que es,
+o qué tal es, pues ninguna cosa de las ya tratadas es? Cosa voluntaria ya se vee
+que, es, pero no toda cosa voluntaria es eligible, sino aquella que está primero
+consultada. Porque la elección con razón se hace y con entendimiento, lo cual
+el nombre que en griego tiene nos lo significa, porque prohereton quiere decir:
+cosa que es a otra preferida.
+
+Estas materias morales van unas de otras dependiendo. Porque de la felicidad
+dependió el inquirir la virtud. De ser la virtud hábito voluntario, dependió el
+inquerir qué cosas son voluntarias y qué forzosas. Del ser las cosas voluntarias,
+las que consisten en nuestra aceptación o elección, salió el tratar de la elección.
+Del decir que no toda cosa voluntaria tiene elección, sí no es primero consultada,
+nace agora el tratar de la consulta. Trata, pues, en este tercer capítulo Aristóteles de
+la consulta de nuestro entendimiento, y declara cuáles cosas vienen en consulta y
+cuáles hombres son aptos para consulta, y cómo la consulta es de cosas que pueden
+acaecer de varias maneras. Ítem que las consultas no son de los fines, sino de los
+medios, y cómo el verdadero consultar es inquirir primero el fin, y después buscar
+los medios para alcanzarlo; asimismo como sean de contraria manera la consulta y la
+ejecución; porque lo que en la consulta es lo primero, es en la ejecución lo postrero;
+y lo que allá lo postrero, en ésta lo primero, como se vee en el que edifica.
+
+Capítulo III
+
+Es de considerar si hay consulta en todas las cosas, y si se puede toda cosa
+consultar, o si hay algunas cosas que no admiten consulta. Aquello, pues, se ha de
+decir que cae en consulta, no lo que consulta un necio, ni lo que un furioso, sino lo
+que consultaría un hombre de juicio y entendimiento. Primeramente, pues, ninguno
+consulta de las cosas perpetuas, como digamos del mundo, o de cómo ternán
+proporción en un cuadrado el diámetro y el lado. Ni de las cosas que consisten
+en movimiento, y que siempre se hacen de una misma manera, ora por necesidad,
+ora por naturaleza, ora por otra cualquier causa como de los solsticios o términos
+del sol, o de sus salidas. Ni tampoco de las cosas que en diversas partes acaecen
+de diversas maneras, como de las sequedades o lluvias. Ni menos de las cosas
+que consisten en fortuna, como del hallarse un tesoro. Pero ni aun de todas las
+cosas humanas, como agora ningún lacedemonio consulta de qué manera los
+scitias gobernarían bien su república. Porque ninguna cosa déstas está a nuestra
+disposición ni gobierno. Consultamos, pues, o deliberamos de aquellas cosas que
+toca a nosotros el haberlas de hacer, porque éstas son las que restan por decir.
+Porque la naturaleza, y la necesidad, y la fortuna, y también el entendimiento,
+parecen tener ser de causas, y todo lo que tiene ser mediante el hombre, y cada cual
+de los hombres delibera de las cosas que a él toca el hacerlas y tratarlas. En las
+sciencias, pues, que son manifiestas, y que ellas para sí mismas son bastantes, no
+hay consulta; como en el escrebir de las letras (porque nunca disputarnos cómo se
+han de escrebir las letras), sino en aquellas que de nuestra deliberación dependen.
+Aunque no siempre destas cosas de una misma manera consultamos, como de las
+cosas de la medicina, o del arte de hacer moneda, y tanto más consultamos del arte
+de navegar que del arte de luchar, cuanto menos cierta es aquélla que ésta; y de las
+demás de la misma suerte. Y en las artes consultamos más que no en las sciencias;
+porque más dudamos en ellas que no en éstas, y el consultar acaece en las cosas que
+por la mayor parte son así, pero en alguna manera inciertas, y que, en fin, no hay en
+ellas cosa firme y cierta, y tomamos consejeros en las cosas graves, no confiando de
+nuestros proprios juicios como de no bastantes para entenderlo bien. Consultamos,
+pues, no de los fines, sino de las cosas que para ellos se requieren. Porque nunca el
+médico consulta si ha de sanar, ni el retórico si ha de persuadir, ni el gobernador
+de la república si ha de poner buenas leyes, ni, en fin, otro ninguno jamás consulta
+del fin, sino que, propuesto algún fin, consultan de qué manera y por qué medios
+lo alcanzarán. Y si parece que se puede alcanzar por muchos medios, deliberan por
+cuál medio más fácilmente y mejor se alcanzará, y si en un medio se resuelven,
+deliberan cómo se alcanzará por éste. Finalmente, aquella consulta, «¿por qué
+medio?» hasta tanto la. tratan, que lleguen a la primera causa, la cual en la invención
+era la postrera. Porque el que consulta, parece que inquiere y resuelve de la manera
+que está dicho, así como en la geometría una descripción. Pero parece que no
+toda cuestión es consulta, como las cuestiones matemáticas, mas toda consulta es
+cuestión, y lo que es lo último en la resolución, es lo primero en la ejecución. Y si
+en la consulta topan con alguna cosa imposible, no pasa adelante la consulta. Como
+si son menester dineros, y de ninguna parte se pueden haber. Mas si pareciere
+posible haberse, pónenlo por obra; llamo posible lo que podemos hacer nosotros,
+porque, lo que con favor de amigos hacemos, en cierta manera, nosotros mismos lo
+hacemos; pues el principio dello está en nuestra mano. Muchas veces consultamos
+de los instrumentos, y otras veces del uso dellos. Y de la misma manera en todo
+lo demás, unas veces se delibera por qué medio, otras de qué manera, y otras con
+cuyo favor. En todo lo cual, como habemos dicho, el hombre parece ser el principio
+de las obras, y la consulta es de lo que el hombre ha de hacer, y las obras siempre
+se hacen por otro fin. De manera que nunca el fin se pone en consulta, sino lo que
+conviene para alcanzar el fin. Tampoco se consultan las cosas particulares, como si
+esto es pan o si está cocido o hecho como debe. Porque estas cosas con el sentido se
+juzgan. Porque si siempre hubiésemos de estar consultando, sería nunca acabar; lo
+que se consulta, pues, y lo que se elige todo es una misma cosa; sino que lo que se
+elige ya es cosa determinada, porque lo que en la consulta se determina que se haga,
+aquello es lo que se escoge. Porque cuando uno reduce a si mismo el principio, y
+todo lo que precedió, para en él deliberar cómo lo ha de hacer, porque esto fue lo
+que escogió; véese esto claramente, por los antiguos gobiernos de república, que
+Homero imitó en sus poesías, en las cuales introduce a los reyes que dan razón al
+pueblo de las cosas en que se han determinado. Y, pues, lo que se elige es cosa
+que cae en consulta y deliberación, y que entre las cosas que a nuestro cargo y
+gobierno están, es digna de ser apetecida, la elección será un apetito consultado
+en las cosas que tocan a nosotros. Porque por haber desta manera juzgado en
+la consulta, sucede que apetecemos conforme a la consulta. Qué cosa es, pues,
+elección, y en qué cosas la hay, y cómo consiste en lo que pertenece para el fin,
+quede así sumariamente declarado.
+
+Porque en lo pasado se ha dicho que la elección no es voluntad, pues ya está
+tratado de la elección, trata brevemente en el capítulo IV de la voluntad; llamamos
+voluntad en romance, no sólo la potencia del querer, que en griego se llama
+thelema, sino el mismo acto también del querer, que los griegos llaman bulesin,
+y en nuestra lengua, por no tener tanta diferencia de vocablos, lo uno y lo otro,
+llamamos de una misma manera. Declara, pues, cómo el querer o voluntad tira
+al fin, y cómo todo lo que queremos lo queremos por razón de ser bueno, o a lo
+menos, por parecernos a nosotros ser tal.
+
+Capítulo IV
+
+Que la voluntad o querer sea proprio del fin, ya está dicho arriba. Pero hay
+algunos que tienen por opinión, que la voluntad va enderezada siempre a lo que
+es bueno, y otros que no, sino a lo que ella le parece bueno. Y los que dicen que
+a lo bueno, han de confesar de necesidad que no es querido lo que quiere el que
+buena elección no ha hecho. Porque si querido fuese, sería bueno, y era, si acaso
+así acaesció, malo. Mas los que dicen que lo que se quiere es lo que se tiene por
+bueno, han de confesar, que las cosas no son naturalmente amadas, sino que cada
+uno ama lo que bien le parece, y a uno le parece bien una cosa y a otro otra; y
+aun acaece parecer bien a unos lo uno y a otros lo contrario. Mas, en fin, no basta
+esto, sino que habemos de decir que, en general y en realidad de verdad, aquello
+es de amar, que es de su naturaleza bueno, pero que cada uno ama lo que le parece
+bien, y que el bueno ama lo que es de veras bueno, y el malo lo que le da gusto.
+Como acaece también en los cuerpos, en los cuales a los que bien dispuestos están
+y salud tienen, les son sanas las cosas que son de suyo tales; mas a los enfermizos
+las contrarias. De la misma manera lo amargo y lo dulce, lo caliente y lo pesado,
+y todas las cosas desta misma manera. Porque el bueno de todas las cosas juzga
+bien, y la verdad que en cada cosa hay, él la conoce, y en todo género de hábito
+hay cosas buenas y también cosas aplacibles. Y en esto difiere el bueno muy
+mucho de los demás: en que en todas las cosas entiende la verdad, y es como
+una regla y medida dellas. Pero en el vulgo parece que el contento es causa
+del error, porque el contento o regalo, no siendo bien, lo parece ser. De suerte
+que eligen el contento o regalo como cosa buena, y huyen de la pesadumbre y
+fatiga como de cosa mala.
+
+En el capítulo V demuestra Aristóteles en qué consiste la fuerza de la elección o
+libre albedrío, que es en tener facultad la voluntad de amar una cosa o su contraria,
+y seguir la una o la otra. Porque donde tal libertad no hay, no se dice haber libre
+albedrío. Como en el respirar no se dice tener libre albedrío, porque no está en
+nuestra mano el dejar de respirar. Pruébalo primero por razón, mostrando que
+no hay otra causa a quien atribuir estas obras sino la voluntad del hombre, y
+después por autoridad de los que hacen leyes, los cuales asignan premio para
+el bueno y castigo para el malo, en lo cual dan a entender ser obras libres la
+bondad y la malicia.
+
+Capítulo V
+
+Consistiendo, pues, el fin en la voluntad, y los medios que para él se requieren
+en la consulta y elección, las obras que acerca destos medios se hacen, conforme
+a elección serán, y voluntarias, en la cuales se emplea el ejercicio de las virtudes.
+Está asimismo en nuestra mano la virtud y también el vicio. Porque en las cosas
+donde en nuestra mano está el hacerlas, está también el dejarlas de hacer, y donde
+está el no, también el sí. De manera que si el hacer algo, siendo bueno, está, en
+nuestra mano, también estará en la misma el no hacerlo, siendo malo; y si el no
+hacer lo que es bueno está en nuestra mano, el hacer lo que es malo también estará
+en la misma. Y si en nuestra mano está el obrar bien y el obrar mal, y asimismo
+el dejarlo de obrar (pues en esto consiste el ser los hombres buenos o malos),
+también estará en nuestra mano ser buenos o malos. Y lo que algunos dicen que
+ninguno voluntariamente es malo, ni contra su voluntad próspero y dichoso, en
+parte parece falso y en parte verdadero. Porque verdad es que ninguno es dichoso o
+bienaventurado contra su voluntad. Pero el vicio cosa voluntaria es, o habemos de
+poner duda en lo que agora habemos dicho, y decir que el hombre no es el principio
+ni el padre de sus proprias obras como lo es de sus proprios hijos. Mas pues esto
+se vee claro ser verdad, y no tenemos otros principios a quien reducir las tales
+obras sino aquellos que en nuestra mano están, las obras, cuyos principios están
+en nuestra mano, también estarán en nuestra mano y serán voluntarias. Parece que
+conforma con esto lo que particularmente en cada una dellas cada uno juzga, y
+también lo que los legisladores han determinado, pues castigan, y dan la pena
+que merecen, a los que hacen las cosas ruines, si ya no las hacen por fuerza o por
+ignorancia, que no estuvo en su mano el remediarla; y a los que se ejercitan en
+buenas obras, hónranlos, casi exhortando a éstos y refrenando a aquéllos. Vemos,
+pues, que ninguno, exhorta a otro en las cosas que, ni están en nuestra mano, ni
+dependen de nuestra voluntad; porque superflua cosa sería persuadir a uno que
+no se caliente, o que no tenga dolor, o que no esté hambriento, o cosa alguna
+déstas, porque, no obstante la persuasión, lo padecerá. Y aun la misma ignorancia
+es castigada, si el mismo ignorante es causa della; como en los borrachos, a los
+cuales les ordenaron el castigo doblado. Porque el principio dello esta en su mano,
+pues pueden abstenerse del vino y borrachez, la cual les es causa de su ignorancia.
+Castigan asimismo a los que, de las leyes que están obligados a saber, ignoran algo,
+si ya no es muy dificultoso de saber, y lo mismo es en todas las otras cosas que
+parece que por descuido y negligencia se dejan de saber, pues esta en su mano no
+ignorarlas, siendo señores del considerarlo y poner en saberlo diligencia. Mas, por
+ventura, alguno es de tal calidad que no por no considerarlo es tal, sino que ellos
+mismos se son a sí mismos la causa de ser tales, viviendo disolutamente. Y de ser
+unos injustos o disolutos en la vida, es la causa elevarse los unos a hacer agravios,
+y los otros al comer y beber demasiado, y a cosas semejantes. Porque cada uno sale
+tal, cuales son las obras en que se emplea y ejercita. Lo cual se vee claro en los
+que se ejercitan en cualquier ejercicio de fuerzas corporales y en sus obras, en las
+cuales, con el ejercicio, vienen a hacerse perfetos. Es pues, de hombre harto falto
+de sentido no entender, que los hábitos proceden del ejercitarse en los particulares
+ejercicios. Asimismo es cosa fuera de razón decir que el que agravia no quiere
+agraviar, y que el que disolutamente vive no quiere ser disoluto. Y si el que hace
+agravio lo hace entendiendo lo que hace, de su propia voluntad es injusto. Mas el
+que una vez ya es injusto, aunque quiera, no se podrá abstener de hacer agravio
+y ser justo; de la misma manera que el que ha caído enfermo, aunque quiera,
+no puede estar sano, aunque sea verdad que de su voluntad haya caído enfermo
+viviendo disolutamente y no dejándose regir por el consejo de los médicos. Porque
+al principio estuvo en su mano el no enfermar, mas después que fue negligente en
+conservar su salud, ya no está en su mano; como el que arroja la piedra, ya no está,
+en su mano de detenerla; pero en su mano estuvo el echarla y arrojarla. Porque el
+principio dello en él estuvo. De la misma manera acontece al injusto y al disoluto:
+que al principio estuvo en su mano no ser tales, y por esto voluntariamente lo
+son tales; pero después que ya lo son, no está así en su mano dejarlo de ser. Ni
+solamente los vicios del alma son libres y voluntarios, mas aun, en algunos, los
+del cuerpo, a quien solemos reprender. Porque los que de su naturaleza son feos,
+ninguno los reprende, sino los que lo son por flojedad y descuido. Y lo mismo es en
+la flaqueza, debilitación de miembros y ceguedad. Porque del que naturalmente es
+ciego, o por enfermedad, o por algún golpe de desgracia, ninguno hay que se burle:
+antes se duelen de su infortunio todos. Mas al que por beber mucho, o por otra
+alguna disolución, viniese a cegar, todos, con muy justa razón, lo reprenderían.
+De manera que de las faltas o vicios, aquéllos son dignos de reprensión, que,
+acaecen por nuestra propria culpa; mas los que no suceden por culpa nuestra, no
+merecen ser reprendidos. Lo cual, si así es, también en las demás cosas los vicios
+que merecen reprensión estarán en nuestra mano. Y si alguno hobiere que diga
+que todos apetecen aquello que les parece ser bueno, y que ninguno es señor de
+su aparencia o imaginación, sino que a cada uno le parece tal el fin cual cada uno
+es, decirle hemos que pues cada uno es a sí mismo causa de sus hábitos en alguna
+manera, también en alguna manera será él mismo causa de su aparencia. Y si
+ninguno es a sí mismo causa de obrar mal, sino que lo hace por no entender el fin,
+pretendiendo que con estas cosas podrá alcanzar el sumo bien, y que el deseo del fin
+no es cosa fácil de quitar, sino que lo ha de tener como vista, con que juzgue bien
+y escoja el bien que en realidad de verdad lo sea, y que aquél es de su natural bien
+inclinado, que de su natural alcanzó esto perfectamente y cual conviene (porque
+aquello que es lo mejor y lo más perfeto, y que de otrie no se puede recebir ni
+menos aprender, halo de tener cada uno tal cual le cupo por su suerte), y que el
+alcanzar esto bien y perfetamente es la perfeta y verdaderamente buena inclinación:
+si alguno, en fin, hay que diga que todo esto es así, querría me dijese por qué más
+razón la virtud ha de ser voluntaria que no el vicio. Porque lo uno y lo otro tiene el
+fin de la misma manera, naturalmente, o de cualquier otra manera, puesto lo uno en
+lo bueno y el otro en lo malo; y todo lo demás que hacen, a este fin lo encaminan, de
+cualquiera manera que lo hagan. Ora pues el fin naturalmente no se les represente a
+cada uno tal, sino que sea algo que el en sí mismo tenga, ora sea el fin natural, y por
+hacer voluntariamente lo que al fin pertenece sea uno virtuoso, siempre la virtud
+será voluntaria, y por la misma razón lo será el vicio. Porque de la misma manera
+cuadra al malo tener facultad por sí mismo para las obras, que para conseguir su fin.
+Y pues si las virtudes, como se dice, son voluntarias (pues nosotros mismos somos,
+en alguna manera, causa de nuestros hábitos, y por ser tales nos proponemos tal
+fin), también serán los vicios voluntarios. Porque todo es de una misma manera.
+Habemos, pues, tratado hasta agora así, en general, de las virtudes, y propuesto su
+género casi como por ejemplos, diciendo que eran medianías y que eran hábitos,
+y de dónde procedían, y cómo se empleaban en los mismos ejercicios de donde
+procedían, y por sí mismas, y cómo consistían en nuestro libre albedrío, y cómo eran
+voluntarias, y cómo habían de ser tales cuales la recta y buena razón determinase.
+Aunque no son de la misma manera voluntarias las obras que los hábitos, porque
+de las obras, dende el principio hasta el fin, somos señores, entendiendo las cosas
+en particular y por menudo; mas de los hábitos no, sino al principio. Aunque el
+acrecentamiento de las particulares cosas no se echa de ver sensiblemente, de
+la misma manera que en las enfermedades. Mas porque estuvo en nuestra mano
+hacerlas desta manera o de la otra, por eso se dicen ser voluntarias. Tornándolas,
+pues, a tomar de propósito, tratemos en particular de cada una, qué cosa es, y qué
+tal y de qué manera, y juntamente se entenderán cuántas son. Y sea la primera de
+que tratemos la valerosidad o fortaleza.
+
+Todo lo que hasta agora Aristóteles de las virtudes ha tratado y propuesto, ha
+sido en común, como él mismo, en el epílogo que al fin del precedente capítulo ha
+hecho, lo ha mostrado. Pero porque las cosas así en común dichas y tratadas no dan
+entera certidumbre, si mas en particular no se declaran, agora en todo lo que resta
+de las Éticas o Morales, trata de cada virtud en particular lo que conviene entender
+della. Y primeramente echa mano de la más generosa y más importante de las
+virtudes, que es de la fortaleza de ánimo; llámole las más generosa, porque todos
+los que en el mundo son de veras generosos han comenzado por aquí, haciendo
+grandes hazañas en cosas de la guerra por la honra y libertad de su patria; de lo cual
+muchas naciones, pero señaladamente la española nación, puede dar ejemplos muy
+ilustres. Pues habiendo venido casi al cabo, como un enfermo ya de los médicos
+desconfiado, con el divino favor y sin ayuda de extranjeras naciones, no sólo tornó
+a cobrar su perdida tierra, pero ha extendido su poder hasta las más remotas partes
+del Oriente y del Poniente, descubriendo nuevas tierras y naciones, de que quedaran
+atónitos todos los pasados si hoy día fueran vivos. Declara, pues, cuál es la verdadera
+fortaleza de ánimo, y cuál no es fortaleza, sino atrevida necedad.
+
+Capítulo VI
+
+Que la fortaleza de ánimo, pues, sea una medianía entre los temores y los
+atrevimientos, ya está dicho en lo pasado (porque allí se mostró ya claramente).
+Tememos, pues, las cosas espantosas, las cuales, hablando así generalmente y en
+común, son cosas malas. Por lo cual, definiendo el temor, dicen desta manera:
+que es una aprensión del mal venidero. De manera que todas las cosas malas nos
+ponen temor: como son la infamia, la pobreza, la enfermedad, la falta de amigos,
+la muerte. Mas no en todas estas cosas parece que se emplea el hombre valeroso.
+Porque algunas cosas hay que las conviene temer, y el hacerlo así es honesto y
+el no hacerlo es afrenta, como la infamia. La cual el que la teme es hombre bien
+inclinado y de vergüenza, y el que no la teme es desvergonzado. Aunque a éste,
+algunos, como por metáfora, lo llaman valiente, porque tiene algo en que parece
+al hombre valeroso, pues también el hombre valeroso es ajeno de temor. Mas la
+pobreza ni la enfermedad no son cosas tanto de temer ni, generalmente hablando,
+todas aquellas cosas que, ni proceden de vicio, ni están en nuestra mano. Mas
+ni tampoco por no temer estas cosas se puede decir un hombre valeroso, aunque
+también a éste, por alguna manera de semejanza, lo llamamos valeroso. Porque bien
+hay algunos que en las cosas de la guerra y sus peligros son cobardes, y con todo
+eso son liberales y en cosa del gastar su dinero francos y animosos. Ni tampoco se
+puede decir uno cobarde por temer no le hagan alguna injuria y fuerza en hijos o
+en mujer, o que no le tengan envidia, y cosas desta manera. Ni menos será valeroso
+el que habiéndole de azotar muestra grande ánimo. ¿En qué cosas temerosas, pues,
+se muestra un hombre valeroso sino en las mayores?; pues ninguno hay que más
+aguarde que él las cosas terribles. La cosa más terrible de todas es la muerte, porque
+es el remate de todo, y parece que para el muerto no hay ya más bien alguno ni
+más mal. Parece, pues, que ni aun en todo género de muerte se muestra el hombre
+valeroso, como en el morir en la mar, o de enfermedad. ¿En cuál, pues?: en el
+más honroso, cual es el morir en la batalla, pues se muere en el mayor y más
+honroso peligro. Lo cual se muestra claro por las honras que a los tales les hacen
+las ciudades, y asimismo los reyes y monarcas. De manera que, propriamente
+hablando, aquél se dirá hombre valeroso, que en la honrosa muerte y en las cosas
+que a ella le son cercanas no se muestra temeroso, cuales son las cosas de la guerra.
+Aunque, con todo eso, el hombre valeroso, así en la mar como en las enfermedades,
+no mostrará cobardía. Aunque como lo son los marineros. Porque los valerosos ya
+tienen la esperanza de su salvación perdida y les pesa de morir de aquella manera,
+pero los marineros, por la experiencia que de las cosa de la mar tienen, están con
+esperanza de salvarse. A más desto, donde hay esperanza de valerse de sus fuerzas o
+donde es honrosa la muerte, anímanse más las gentes; de las cuales dos cosas, ni la
+una ni la otra se halla en el morir de tales géneros de muerte.
+
+En este, capítulo parece haber negado este filósofo la inmortalidad del alma,
+pues dice que no hay bien ni mal después de la muerte, y así ha de ser corregido
+con la regla de la verdad cristiana.
+
+En el séptimo capítulo declara las diferencias que hay entre los hechos del
+hombre valeroso y los del cobarde, y los del atrevido. Y muestra cómo el valeroso
+ha de encaminar siempre sus hechos a fin honesto, y que las cosas peligrosas se
+aguardan por el fin. Del cual el que falta o excede, ya pierde el nombre de valeroso,
+y cobra el de cobarde o atrevido.
+
+Capítulo VII
+
+Pero no a todos son unas mismas cosas temerosas y terribles, sino que decimos
+que hay cosas que exceden a las humanas fuerzas, las cuales las teme cualquier
+hombre de juicio. Mas las cosas que al hombre tocan, difieren en la cantidad y en
+el ser más o menos. Y de la misma manera las cosas de osadía. El hombre, pues,
+valeroso en cuanto hombre, no se espanta, pero teme las tales cosas como conviene
+y como le dicta la razón, y esto por causa de lo bueno, porque éste es el fin de la
+virtud. Y estas cosas puede acontecer que se teman más y menos, y también que,
+lo que no es de temer, se tema como si fuese cosa de temer. En las cuales cosas
+acontece errar unas veces porque se teme lo que no conviene, otras porque no como
+conviene, y otras porque no cuando conviene, y otras cosas desta manera. Y de la
+misma manera habemos de juzgar de cosas de osadía. Aquel, pues, que aguarda y
+que teme lo que conviene, y por lo que conviene, y como conviene, y de la misma
+manera osa cuando conviene, aquel tal se dice hombre valeroso. Porque el valeroso
+sufre y obra conforme a su honra, y conforme a lo que la buena razón le dicta y
+aconseja; y el fin de toda obra es alcanzar el hábito; y la valerosidad y fortaleza
+de ánimo del hombre valeroso es el bien, y por la misma razón el fin; porque cada
+cosa se define por el fin; y el valeroso, por causa del bien, sufre y hace lo que toca
+a su valor. Pero de los que exceden, el que excede en no temer no tiene nombre
+(y ya habemos dicho en lo pasado, que muchas cosas hay que no tienen proprio
+vocablo), mas puédese decir hombre loco y sin sentido, y tonto, el que ninguna
+cosa teme: ni el terremoto, ni las crecidas de las aguas, como dicen que lo hacen
+los franceses. Mas el que en las cosas de temer excede en el osar, dícese atrevido
+o arriscado. Parece, pues, el arriscado hombre fanfarrón, y que quiere mostrarse
+valeroso; porque de la misma manera que el valeroso se ha en las cosas de temer,
+desta misma quiere mostrarse el atrevido; de manera que lo imita en lo que puede.
+Y así hay muchos dellos juntamente arriscados y cobardes. Porque en semejantes
+cosas son atrevidos, y las cosas temerosas no las osan aguardar. Y el que en el
+temer excede llámase cobarde, porque le es anexo el temer lo que no conviene, y
+como no conviene, y todas las demás cosas deste género. Falta, pues, el cobarde en
+el osar, pero más se muestra exceder en las cosas de molestia. Es, pues, el cobarde
+un desesperado, porque todas las cosas teme; en lo cual es al revés el valeroso,
+porque el osar, de buena esperanza procede. De manera que así el cobarde como el
+atrevido, y también el valeroso, todos se emplean en unas mismas cosas; pero hanse
+en ellas de diferente manera, porque aquéllos o exceden o faltan; pero el valeroso
+trátase con medianía y como conviene. Y los atrevidos son demasiadamente
+anticipados, y que antes del peligro ya muestran querer estar en él, y cuando están
+en él retíranse. Mas los valerosos en el hacer son fuertes, y antes dél moderados y
+quietos. Es, pues, la valerosidad o fortaleza (como está dicho) una medianía en las
+cosas de osadía, y de temor en las cosas que están dichas, las cuales escoge y sufre
+por ser cosa honesta el hacerlo y afrentosa el dejarlo de hacer. Pero el matarse uno
+a sí mismo, por salir de necesidad y pobreza, o por amores, o por otra cualquier
+cosa triste, no es hecho de hombre valeroso, sino antes de cobarde. Porque es gran
+flaqueza de ánimo el huir las cosas de trabajo y muerte, no por ser cosa honrosa
+el morir, sino por huir del mal. Es pues, la fortaleza de ánimo tal cual aquí la
+habemos dibujado.
+
+Cosa es averiguada lo que Aristóteles dice en el principio de las Reprensiones
+de los sofistas, que unas cosas hay que de suyo son tales, y otras que, no siéndolo,
+quieren parecer ser tales. Como la mujer que de suyo no es hermosa, y con afeites
+quiere parecerlo. Y como el alatón, que no siendo oro, parece serlo, y como algunos
+hombres, que siendo bofos y de mal hábito de cuerpo, parece que están gordos. Y
+no sólo es esto verdad en las cosas exteriores, pero aun en las del ánimo; porque la
+malicia y astucia quiere imitar a la prudencia, y la crueldad a la justicia y otras cosas
+desta manera. Enseña, pues, Aristóteles en este octavo capítulo cómo discerniremos
+la verdadera fortaleza de ánimo de la que, no siendo, quiere parecerlo, y muestra
+no haberse de decir fuerte el que por temor es fuerte; como los que en la guerra
+temen de desamparar la orden militar por el castigo, o los que lo son por vergüenza,
+o los que con saña o cólera hacen cosas peligrosas. Todos éstos y los que desta
+manera fueren, no son fuerte, ni valerosos, porque no obran por elección ni lo
+hacen por fin honesto.
+
+Capítulo VIII
+
+Hay también cinco maneras de obras que se dicen tener nombre de fortaleza.
+La primera de las cuales es la fortaleza o valerosidad civil, la cual las parece
+más que otra ninguna a la verdadera fortaleza. Porque los ciudadanos parece que
+aguardan los peligros por las penas estatuidas por las leyes, y por las afrentas y
+honras. Por lo cual aquella nación se señala sobre todas las otras en fortaleza,
+donde los cobardes en ningún precio ni honra son tenidos, y los valerosos son
+muy estimados. Tales nos los pinta Homero en su poesía, como a Diómedes y
+a Héctor. Porque dice Héctor así:
+
+Porque haciendo eso, el mismo Polidamas
+
+Verná por me afrentar luego el primero.
+
+Y Diómedes, en el mismo Homero, desta manera:
+
+Héctor, que es el mejor de los Troyanos,
+
+Dirá, si eso yo hago, que a las naves
+
+Huigo por escaparme de sus manos.
+
+Es, pues, esta manera de fortaleza en esto muy semejante a la primera de
+que se ha tratado: en que procede de virtud; pues procede de vergüenza y de
+apetito o deseo de la honra, que es uno de los bienes, y del aborrecimiento de
+la afrenta, que es cosa vergonzosa. Contaría también entre éstos alguno a los
+que son forzados por los capitanes a ser fuertes. Mas éstos tanto peores son que
+aquéllos, cuanto no lo hacen de vergüenza, sino de temor, y quiriendo evitar, no
+la afrenta, sino el daño. Porque los fuerzan a hacerlo los que tienen el gobierno,
+como en Homero, Héctor:
+
+Al que ir de la batalla huyendo viere,
+
+Mostrando al enemigo cobardía,<ve>
+A los buitres y perros, si lo hiciere,<ve>
+Daré a comer sus carnes este día.
+
+Lo mismo hacen los que tienen el gobierno o oficio militar, hiriéndoles si se
+apartan de la orden; y los que delante de alguna cava, o algunos otros lugares
+semejantes, ordenan algún escuadrón; porque todos hacen, en fin, fuerza. Y el
+que ha de ser valeroso, no lo ha de ser por fuerza, sino porque el serlo es ilustre
+cosa. Pero parece que la experiencia de las particulares cosas es una manera de
+fortaleza. Por lo cual tuvo Sócrates por opinión que la fortaleza consistía en sciencia.
+Porque en otras cosas otros son tales, y en las cosas de la guerra los soldados,
+pues hay muchas cosas que comúnmente tocan a la guerra, en las cuales éstos más
+particularmente están ejercitados; y porque los otros no entienden qué tales son,
+por esto ellos parecen valerosos. A mas desto, por la destreza que ya tienen, pueden
+mejor acometer y defenderse, y guardarse, y herir; como saben mejor servirse de las
+armas, y las tienen más aventajadas para acometer y para defenderse. Pelean, pues,
+con los otros como armados con desarmados, y como esgrimidores con gente que
+no sabe de esgrima; pues en semejantes contiendas no los más valerosos son más
+aptos para pelear, sino los más ejercitados y los más sueltos de cuerpo. Hácense,
+pues, cobardes los soldados cuando el peligro es excesivo y se veen ser inferiores
+en número y en bagaje, y ellos son los primeros al huir. Mas la gente de la tierra
+muestra rostro y muere allí, como le acaeció a Hermeo en el pueblo Corone a
+de Beocia. Porque la gente de la tierra, teniéndolo por afrenta el huir, quieren
+más morir que con tal vergüenza salvarse. Pero los soldados, al principio, cuando
+pretenden que son más poderosos, acometen; mas después, entendiendo lo que
+pasa, huyen, temiendo más la muerte que la vergüenza. Mas el hombre valeroso
+no es desta manera. Otros hay que la cólera la atribuyen a la fortaleza, porque los
+airados y coléricos parece que son valientes, como las fieras, que se arremeten
+contra los que las han herido, y esto porque los hombres valerosos también son, en
+alguna manera, coléricos. Porque la cólera es una cosa arriscada para los peligros.
+Por lo cual dice Homero:
+
+Dio riendas a la cólera y esfuerzo
+
+Y despertó la ira adormecida.
+
+Y en otra parte:
+
+La furia reventó por las narices,
+
+La sangre se encendió con saña ardiente.
+
+Porque todo esto parece que quiere dar a entender el ímpetu y movimiento de
+la cólera. Los valerosos, pues, hacen las cosas por causa de lo honesto, y en el
+hacerlas acompáñales la cólera; pero las fieras hácenlo por el dolor, pues lo hacen
+o porque las han herido, o porque temen no las hieran. Pues vemos que estando
+en los bosques y espesuras no salen afuera. No son, pues, valerosas porque salgan
+al peligro movidas del dolor y de la cólera, ni advertiendo el peligro en que se
+ponen. Porque desa manera también serían los asnos, cuando están hambrientos,
+valerosos, pues no los pueden echar del pasto por muchos palos que les den. Y
+aun los adúlteros, por satisfacer a su mal deseo, se arriscan a hacer muchas cosas
+peligrosas. No son, pues, cosas valerosas las que por dolor o cólera se mueven
+al peligro. Mas aquella fortaleza que, juntamente con la cólera, hace elección, y
+considera el fin porque lo hace, aquélla parece ser la más natural de todas. Y los
+hombres, cuando están airados, sienten pena, y cuando se vengan, quedan muy
+contentos. Lo cual, los que lo hacen, hanse de llamar bregueros o cuistioneros,
+mas no cierto valerosos: porque no obran por causa de lo honesto, ni como les
+dicta la razón, sino como les incita la pasión. Casi lo mismo tienen los que por
+alguna esperanza son valientes; mas no por tener buena esperanza son los hombres
+valerosos. Porque los tales, por estar vezados a vencer a muchos y muchas veces,
+son osados en los peligros. Mas en esto parecen semejantes los unos y los otros
+a los valerosos, que los unos y los otros son osados. Pero los valerosos sonlo por
+las razones que están dichas; mas los otros, por presumir que son más poderosos,
+y que no les verná de allí mal ninguno, ni trabajo. Lo cual también acaece a los
+borrachos. Porque también éstos son gente confiada. Mas cuando el negocio no les
+sale como confiaban, luego huyen. Mas el oficio proprio del hombre valeroso era
+aguardar las cosas que al hombre le son y parecen espantosas, por ser el hacerlo
+cosa honesta, y vergonzosa el dejarlo de hacer. Por lo cual más valeroso hecho
+parece mostrarse uno animoso y quieto en los peligros que repentinamente se
+ofrecen, que no en los que ya estaban entendidos porque tanto más aquello procede
+de hábito, cuanto menos en ellos estaba apercebido. Porque las cosas manifiestas
+puede escogerlas uno por la consideración y uso de razón; mas las repentinas
+por el hábito. Los ignorantes también parecen valientes, y parecen mucho a los
+confiados, aunque en esto son peores, que no tienen ningún punto de honra, como
+los otros. Y así, los confiados, aguardan por algún espacio de tiempo; pero los
+que se han engañado, si saben o sospechan ser otra cosa, luego huyen. Como les
+aconteció a los argivos cuando dieron en manos de los lacedemonios creyendo ser
+los sicionios. Dicho, pues, habemos cuáles son los verdaderamente valerosos, y
+cuáles, no siéndolo, quieren parecerlo.
+
+En el capítulo nono hace comparación entre el osar y el temer, y muestra ser más
+propria materia suya las cosas de temor, que las de osadía.
+
+Capítulo IX
+
+Consiste, pues, la fortaleza en osadías y temores pero no en ambas cosas de una
+misma manera, sino que, principalmente en las cosas de temer. Porque el que en
+estas cosas no se altera, sino que muestra el rostro que conviene, más valeroso es
+que no el que lo hace en las cosas de osadía. Porque por aguardar las cosas tristes,
+como está dicho, se dicen ser los hombres valerosos. Y por esto la fortaleza es
+cosa penosa, y con mucha razón es alabada. Porque más dificultosa cosa es esperar
+las cosas tristes, que abstenerse de las aplacibles. Pero con todo esto, el fin de la
+fortaleza parece dulce, sino que lo escurecen las cosas que le estan a la redonda,
+como les acontece a los que se combaten en las fiestas; porque a los combatientes
+el fin porque se combaten dulce les parece, que es la corona y premios que les dan;
+pero el recebir los golpes, dolorosa y triste cosa les es, pues son de carne, a la cual
+le son pesados todos los trabajos. Y porque los trabajos son muchos y el premio
+por que se toman poco, parece que no contienen en sí ninguna suavidad. Y si lo
+mismo es en lo que toca a la virtud de la fortaleza, la muerte y las heridas cosa triste
+le serán, y contra su voluntad las recebirá; pero aguárdalas por ser cosa honesta
+el esperarlas, o porque el no hacerlo es cosa vergonzosa. Y cuanto más adornado
+estuviere de virtudes y más dichoso fuere, tanto más se entristecerá por la muerte.
+Porque éste tal vez era más digno de vivir, y éste sabe bien de cuán grandes bienes
+se aparta por la muerte. Esto, pues, es cosa triste; mas con todo eso no es menos
+valeroso; antes, por ventura, mas, pues en la guerra precia más lo honesto que no a
+ellos. Ni aun en ningún otro género de virtudes se alcanza el obrarlas con gusto y
+contento, hasta que se alcanza el fin en ellas. Pero bien puede ser que los que son
+tales no sean los mejores soldados de todos, sino otros que no son tan valerosos, y
+que otro bien ninguno no tengan sino éste. Porque estos tales son gente arriscada
+para todo peligro, y por bien pequeño provecho ponen sus vidas en peligro. Hasta
+aquí, pues, habemos tratado de la fortaleza, cuya propriedad fácilmente se puede
+entender como por ejemplo, por lo que está dicho.
+
+No poca falta le hizo al filósofo, para el tratar bien esta materia de la fortaleza,
+el no entender las cosas del siglo venidero, y de la inmortal vida, que por la luz de
+la fe los cristianos tenemos entendida. Porque si esto él entendiera, no dijera un tan
+grave error como arriba dijo: que después de la muerte no había bien ni mal alguno,
+ni ahora lo acrecentara diciendo que el hombre valeroso muere triste, entendiendo
+los bienes que deja; porque no los deja, antes los cobra por la muerte muy mayores;
+y así vemos que aquellos valerosos mártires iban a la muerte, no tristes, como
+este filósofo dice, sino como quien va a bodas, certificados por la fe de los bienes
+que por medio de aquella fortaleza de ánimo habían de alcanzar. Y así parece que
+en esto de la inmortalidad del alma y del premio de los buenos y castigo de los
+malos, este filósofo anduvo vacilando como hombre, y nunca dijo abiertamente
+su parecer. Más a la clara habló en esto su maestro Platón, y más conforme a la
+verdad cristiana, que en los libros de República confesó infierno y purgatorio,
+y cielo y premios eternos, aunque no tan claramente como nuestra religión
+cristiana nos lo enseña con doctrina celestial. Esto he querido añadir aquí, porque
+cuando el cristiano lector topare con cosas semejantes, lo atribuya a que no
+tenían aquéllos luz de Evangelios, y que su dotrina era, en fin, de hombres, y dé
+gracias al Señor, que esta cristiana filosofía así le quiso revelar: que entienda
+más desto un simple cristiano catequizado o instruido en la fe, que todos juntos
+los filósofos del mundo.
+
+Capítulo X
+
+De la templanza y disolución
+
+Declarada ya la materia de la fortaleza o valerosidad de ánimo, viene a tratar del
+segundo género de virtud, que es de la templanza, la cual es una manera de virtud
+muy importante para la quietud del mundo, pues los más de los males acaecen
+por falta della, apeteciendo muchos un contento y no pudiéndolo gozar todos, y
+moviendo, sobre quién lo gozará, grandes alborotos.Demuestra no consistir la
+templanza en todo género de contentamientos, sino en los corporales y que por el
+sentido se perciben. Después de haber tratado de la fortaleza, vengamos a tratar
+de la templanza; porque entendido está ser estas virtudes de aquellas partes que
+no usan de razón. Ya, pues, dijimos arriba que la templanza es medianía entre los
+placeres; porque menos, y no de la misma manera, consiste en las cosas de tristeza.
+En los mismos placeres parece que consiste también la disolución. Pero en cuáles
+placeres consistan, agora lo determinaremos. Dividamos, pues, los placeres desta
+manera, que digamos que unos dellos son espirituales y otros corporales, como el
+deseo de honra, o doctrina, porque cada uno déstos se huelga con aquello a que
+es aficionado, sin recebir dello el cuerpo ninguna alteración ni sentimiento, sino
+el entendimiento solamente. Los que en semejantes placeres se emplean, ni se
+dicen templados, ni tampoco disolutos, y lo mismo es en los demás pasatiempos y
+placeres que no son sensuales. Porque a los que son amigos de fábulas y de contar
+cuentos, y que de lo primero que a las manos les viene parlan todo el día, solémosles
+llamar vanos y parleros, mas no cierto disolutos. Ni tampoco a los que por causa
+de algunos intereses o amigos se entristecen. De manera que la templanza consiste
+en los placeres corporales, mas no en todos ellos. Porque los que, se huelgan
+con las cosas de la vista, como con los colores y figuras, y con la pintura, ni se
+dicen templados, ni tampoco disolutos, aunque parezca que se huelgan con ellos
+como conviene, o más o menos de lo que conviene. Y lo mismo acontece en
+las cosas del oído: porque a los que demasiadamente se huelgan con cantares
+o con representaciones, ninguno los llama disolutos, ni tampoco templados a
+los que se tratan en ello como deben; ni menos en lo que toca a los olores, sino
+accidentariamente; porque a los que se deleitan con los olores de las manzanas o
+de las rosas, o de los sahumerios, no los llamamos disolutos, sino a los que son
+amigos de almizcles y de olores de viandas. Porque los disolutos huélganse con
+olores semejantes, porque les traen a la memoria lo que ellos codician. Otros hay
+que, cuando tienen hambre, se agradan mucho de los olores de las buenas viandas,
+lo cual es proprio de hombres disolutos en comer; porque de ellos es proprio desear
+cosas semejantes; lo cual no vemos que acaezca en los demás animales, que con
+estos sentidos se deleiten, si no es accidentariamente. Porque ni aun los perros
+no se deleitan con oler las liebres, sino con comerlas, aunque el olor les dio el
+sentimiento dellas; ni menos el león se deleita con el bramido del buey, sino con
+comerlo. Pero dónde está sintiolo por el bramido, y por eso parece que se deleita
+con la voz. Y lo mismo es cuando vee un ciervo algún corzo: que no se deleita de
+verlos, sino de que terná con qué matar su hambre. Consiste, pues, la templanza,
+y asimismo la disolución, en aquellos deleites de que son también participantes
+los otros animales. Por lo cual parecen cosas serviles y bestiales; éstas son el tacto
+y también el gusto, aunque parece que del gusto poco o ninguna cosa se sirven.
+Porque el juzgar del gusto es proprio de los labrios, como lo vemos en los que
+gustan los vinos o guisan las viandas; de lo cual poco o no nada se huelgan los
+disolutos, si no han de gozar dello; lo cual consiste todo en el tacto, así en las
+viandas como en las bebidas, y también en lo que toca a los deleites de la carne.
+Por lo cual dice de un gran comedor, llamado Filoxeno Frigio, que deseaba tener
+el cuello más largo que una grulla, dando a entender que se deleitaba mucho con
+el tacto, el cual es el más universal de todos los sentidos y en quien consiste
+la disolución. Y así, con razón, parece ser de los sentidos el más digno de ser
+vituperado, pues lo tenemos, no en cuanto somos hombres, sino en cuanto somos
+animales. De manera que holgarse mucho con cosas semejantes y quererlas
+mucho, es cosa bestial. Porque los más ahidalgados deleites del tacto, como son
+los que consisten en los ejercicios de la lucha y en los baños, no entran en esta,
+cuenta. Porque el deleite y tacto del disoluto no consiste en todo, el cuerpo,
+sino en ciertas partes dél.
+
+Capítulo XI
+
+De la diferencia de los deseos
+
+En el capítulo onceno va distinguiendo los deleites, y mostrando cómo
+dellos hay que consisten en cosas naturales, y dellos en cosas vanas, y dellos
+en cosas necesarias para el vivir, y dellos en cosas que los hombres se han
+buscado sin forzarles necesidad ninguna. Y muestra pecarse más en lo vano
+que no en lo necesario.
+
+Mas entre los deseos, unos parece que hay comunes, y otros proprios y casi
+como sobrepuestos. Como el deseo del mantenimiento, que es natural, porque cada
+uno lo desea cuando dél tiene necesidad, ora sea seco, ora húmedo, y aun algunas
+veces el uno y el otro, y aun la cama (dice Homero) la apetece el gentil mozo y de
+floridos años. Pero tales o tales mantenimientos, ni todos los desean, ni los mismos.
+Por lo cual parece que depende de nuestra voluntad, aunque la naturaleza tiene
+también alguna parte en ello. Porque unas cosas son aplacibles a unos y otras a
+otros, y algunas cosas particulares agradan más a unos, que las que a otros agradan
+comúnmente. En los deseos, pues, naturales, pocos son los que pecan, y por la
+mayor parte en una cosa, que es en la demasía. Porque el comer uno todo cuanto le
+pongan delante, y beber hasta reventar, es exceder la tasa que la naturaleza puso,
+pues el natural apetito es henchir lo que hay necesidad. Y así, éstos se llaman
+comúnmente hinchevientres, como gentes que los cargan más de lo que sería
+menester. Esta es una condición de hombres serviles y de poca calidad. Pero en
+los particulares deleites muchos pecan, y de muy diversas maneras. Porque de los
+que a cosas particulares se dicen ser aficionados, pecan los que se deleitan en lo
+que no deben, o más de lo que deben, o como la vulgar gente se deleita, o no como
+debrían, o no con lo que debrían; pero los disolutos en toda cosa exceden, pues
+se deleitan con algunas cosas con que no debrían, pues son cosas de aborrecer. Y
+aunque se permita deleitarse con algunas dellas, deléitanse más de lo que debrían,
+y como se deleitaría la gente vulgar y de poca estofa. Bien entendido, pues, esta,
+que la disolución es exceso en las cosas del deleite, y cosa digna de reprensión.
+Mas en lo que toca a las cosas de molestia, no es como en lo de la fortaleza; porque
+no se dice uno templado por sufrirlas, ni disoluto por no hacerlo, sino que se dice
+uno disoluto por entristecerse más de lo que debría por no alcanzar lo que apetece,
+la cual tristeza el mismo deleite se la causa; y templado se dice por no entristecerse
+por carecer y abstenerse del deleite. El disoluto, pues, todas las cosas deleitosas
+apetece, o, a lo menos, las que mas deleitosas son; y de tal manera es esclavo de
+sus proprios deseos, que precia y escoge aquéllos más que todo el resto de las
+otras cosas; y por esto, como las desea, entristécese si no las alcanza, porque el
+deseo siempre anda en compañía de la tristeza. Aunque parece cosa ajena de razón
+entristecerse por el deleite. Pero faltos en el deleite y que se alegren con él menos
+de lo que conviene, no se hallan ansí, porque no consiente la naturaleza humana
+una tan grande tontedad, pues vemos que aun los demás animales disciernen los
+mantenimientos, y de unos se agradan y otros aborrecen; y pues si alguno hay que
+ninguna cosa le sea deleitosa, ni de unas cosas a otras haga diferencia, parece que
+este tal está lejos de ser hombre. De manera, que este tal no tiene nombre, porque
+tal cosa no se halla. Pero el templado, en esta cosas trátase con medianía, porque
+ni se deleita con las cosas con que se deleita mucho el disoluto, antes abomina
+dellas, ni en alguna manera se huelga con lo que no debe, ni con ninguna cosa
+demasiadamente; ni por carecer dello se entristece, ni desea sino moderadamente, ni
+se deleita con ninguna cosa más de lo que debe, ni cuando no debe, ni, generalmente
+hablando, con ninguna cosa déstas. Antes apetece las cosas que importan para
+la salud y para conservar elbuen hábito del cuerpo, si son cosas deleitosas, y
+esto moderadamente y como debe, y las demás cosas aplacibles, que no sean
+perjudiciales a éstas, ni menos estraguen la honestidad ni la hacienda. Porque el que
+disoluto es, más quiere sus deleites que toda la honra; mas el templado no es desta
+manera, sino como la buena razón le enseña que ha de ser.
+
+Capítulo XII
+
+Cómo la disolución es cosa más voluntaria que la cobardía
+
+En este último capítulo compara dos vicios de las dos virtudes, de que hasta
+agora ha tratado, el uno por exceso, que es la disolución, y el otro por defecto, que
+es la cobardía, de los cuales dos vicios la disolución es exceso de la temperancia, y
+la cobardía defecto de la fortaleza. Prueba, pues, la disolución tanto ser más digna
+de reprensión que no la cobardía, cuanto es más voluntaria y más puesta en nuestra
+libertad de albedrío. Porque la cobardía parece nacer de una escaseza o poquedad
+de ánimo, y la disolución de la misma voluntad.
+
+La disolución, cosa más voluntaria parece que no la cobardía: pues ésta nace del
+deleite, y aquélla de la tristeza, de las cuales dos cosas el deleite es cosa de amar, y
+la tristeza de aborrecer. Y la tristeza disipa y destruye la naturaleza del que la tiene,
+mas el deleite ninguna cosa de esas hace, antes procede más de nuestra elección, y
+por esto es digno de mayor reprensión; pues en semejantes cosas es más fácil cosa
+acostumbrarnos. Porque muchas cosas hay en la vida desta condición, en las cuales
+el acostumbrarse es cosa que está lejos de peligro, lo cual en las cosas de espanto
+es al revés. Aunque parece que la cobardía así en común tomada, no es de la misma
+manera voluntaria, que si en las cosas particulares la consideramos. Porque ella en
+sí carece de tristeza, mas las cosas particulares dan tanta pena, que fuerzan muchas
+veces a arrojar las armas, y a hacer otras cosas afrentosas, y por esto parece que
+son cosas violentas. Pero en el disoluto es al revés: que las cosas particulares le
+son voluntarias, como a hombre que desea y apetece; mas así en común no tanto,
+porque ninguno apetece así en común ser disoluto. Y el nombre de la disolución
+atribuímoslo a los hierros (esto es en griego conforme al nombre acolastos) de
+los niños, porque se parece mucho lo uno destos a lo otro. Aunque para nuestra
+presente disputa no hace al caso inquirir cuál tomó de cuál el nombre; pero cosa
+cierta es que lo tomó lo postrero de lo primero, y no parece que se hace mal la
+traslación de lo uno para lo otro. Porque todo lo que cosas torpes apetece y en esto
+crece mucho, ha de ser castigado, cuales son el apetito y el niño más que otra cosa
+alguna, porque también los niños viven conforme al apetito, y en ellos se vee más
+el apetito del deleite. De manera que si no está obediente a la parte que señorea y se
+subjeta a ella, crece sin término, porque es insaciable el apetito del deleite; y el no
+bien discreto de dondequiera lo apetece. Y el ejercitarse en satisfacer al apetito hace
+crecer las obras de su mismo jaez, las cuales si vienen a cobrar fuerza y arraigarse,
+cierran la puerta del todo a la razón. Por tanto, conviene que estos tales deleites
+sean moderados y pocos, y que a la razón en ninguna manera sean contrarios. A lo
+que desta manera es, llamámosle obediente y corregido. Porque así como el niño
+ha de vivir conforme al mandamiento de su ayo, de la misma manera en el hombre
+la parte apetitiva ha de regirse como le dicta la razón. Por lo cual, conviene que en
+el varón templado la parte del apetito concuerde con la razón: porque la una y la
+otra han de tener por blanco lo honesto, y el varón templado desea lo que conviene
+y como conviene y cuando conviene, porque así lo manda también el uso de razón.
+Esto, pues, es la suma de lo que habemos tratado de la virtud de la templanza.
+
+Fin del libro tercero

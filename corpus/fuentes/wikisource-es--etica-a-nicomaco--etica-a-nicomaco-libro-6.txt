@@ -1,0 +1,790 @@
+fuente: wikisource-es
+obra: Ética a Nicómaco
+url: https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_6
+recuperado: 2026-09-07
+---
+Ética a Nicómaco/Libro 6
+|título=[[Ética a Nicómaco]]
+|autor=[[Aristóteles]]
+obra> |título=Ética a Nicómaco
+obra> |autor=Aristóteles
+obra> |título={{Anclaje+|Índice}}
+---
+De los morales de Aristóteles, escritos a Nicomaco, su hijo, y por esta causa llamados nicomaquios
+
+Argumento del sexto libro
+
+Aristóteles, en el primer libro, anduvo inquiriendo en qué consistía la felicidad
+humana, y halló que en el vivir conforme a recta razón. Y porque el vivir conforme
+a recta razón requiere el vivir conforme a virtud, en el segundo anduvo inquiriendo
+qué cosa era virtud. Después hizo dos maneras de virtudes: unas morales, de las
+cuales ha tratado en el tercero, cuarto y quinto libro, y otras del entendimiento, de
+las cuales propone tratar en el presente. Pero por cuanto hasta aquí se ha hecho
+mucha mención de la recta razón, y hasta agora no se ha declarado qué cosa es,
+trata primero qué cosa es la recta razón y en que consiste; después trata de las partes
+del alma, para declarar cada virtud a qué parte del alma corresponde; tras desto
+trata de los hábitos del entendimiento, sciencia, arte, prudencia, entendimiento,
+sabiduría; de las partes de la prudencia, del buen consejo, del buen juicio, del buen
+parecer, de la utilidad de la sabiduría y prudencia: de la hermandad grande que
+entre sí tienen todas las virtudes.
+
+Capítulo I
+
+Cuál es la recta razón y cuál es su difinición
+
+En el primer capítulo declara ser la recta razón la que endereza las cosas al fin
+perfeto, y obrar conforme a recta razón ser obrar conforme a lo que se requiere
+para alcanzar el fin. Después propone las partes del alma, y declara ser una capaz
+de razón y otra que carece della; y que de la que carece no se trata aquí, pues se
+ha ya tratado en lo pasado; porque las virtudes morales consisten en esta parte que
+carece de razón. Divide asimismo la parte que consiste en razón, en una que no cae
+en consulta, que es la sciencia (porque ninguno consulta si dos veces dos hacen
+cuatro, pues es cosa cierta), y otra que cae en consulta, que es la opinión. Estas
+dos partes del ánimo no son así partes como la pierna y brazo son del cuerpo, pues
+siendo el ánimo espíritu, no tiene cantidad ni partes desa manera, sino que son dos
+facultades suyas, que se llaman partes por una manera de metáfora.
+Pero por cuanto habemos dicho en lo pasado, que habemos de elegir el medio,
+y no el exceso ni el defecto, y el medio es aquel que la recta razón dicta, conviene
+que lo dividamos esto. Porque en todos los hábitos de que arriba se ha tratado,
+hay alguna cosa puesta como por fin y blanco como en todas las demás, al cual,
+teniendo ojo el que tiene la razón, tira o afloja. Hay, pues, término en las medianías,
+que decimos que consisten entre el exceso y el defecto, y son regladas conforme a
+recta razón. Y el decir esto es decir verdad, aunque no se pueda dar la demostración
+dello. Porque en las demás consideraciones, de que tenemos sciencia, es verdad
+decir que no se ha de hacer ni mayor ejercicio ni menor, ni se ha de reposar más
+ni menos, sino que se ha de tomar el medio según que la recta razón aconsejare,
+porque con solo esto tener uno, no ternía más que saber. Como si se preguntase
+cuánto mantenimiento conviene dar al cuerpo, y respondiese uno que tanto cuanto
+manda la medicina y el hombre que en ella fuere docto. Por tanto, conviene que en
+los hábitos del alma no sólo sea así verdad esto que se ha dicho, pero aun también
+que se entienda clara y distinctamente cuál es la recta razón y cuál su difinición. Ya,
+pues, dividimos las virtudes del alma, y unas dijimos que eran de la costumbre y
+otras del entendimiento. De las morales, pues, ya habemos tratado. Tratemos, pues,
+agora de las otras, disputando primero del alma desta suerte. Cuanto a lo primero,
+pues, ya está, dicho cómo el alma tiene dos partes: una capaz de razón y otra que
+carece della. Agora, pues, tratemos por la misma orden de la parte que es capaz
+de razón, y presupongamos primero que hay dos maneras de cosas que consisten
+en razón: una de aquellas cosas que vemos ser de tal manera, que sus principios
+no pueden dejar de ser así, y otra de aquellas cuyos principios pueden ser de otra
+manera. Porque para entender cosas de género diverso, también es menester que
+haya parte de ánimo que sea de género diverso, y que sea conforme a lo que se ha
+de entender, pues han de alcanzar el conocimiento de las cosas conforme a cierta
+semejanza y propriedad que con ellas tengan. Llámese, pues, la una déstas scible
+y la otra disputable, porque el consultar y el disputar, todo es una misma cosa.
+Ninguno, pues, consulta lo que no puede ser de otra manera; de manera, que lo
+consultable es una parte de las cosas que consisten en razón. Consideremos, pues,
+cuál es el mejor hábito de cada parte destas, porque aquélla será su virtud, y la
+virtud es la que le inclina a su propria obra.
+
+Capítulo II
+
+Cómo hay tres cosas en el alma proprias del efecto, y de la verdad: el sentido, el entendimiento y el apetito
+
+Ha propuesto de tratar de las dos partes de nuestro entendimiento: la una cierta,
+en que consiste la sciencia, y la otra probable, en que se funda la opinión. Para
+mejor tratar dellas, declara en el capítulo segundo la origen de nuestro conocimiento
+y de nuestro obrar, y pone por origen de nuestro conocimiento los sentidos, y del
+obrar el entendimiento y el apetito. Porque si pusiésemos por caso que se viese un
+hombre falto de todos los sentidos, este tal ninguna noticia de cosas ternía en su
+entendimiento, sino que sería como es el del niño antes que venga a sentir en el
+vientre de la madre. Y en el obrar, cada uno se mueve o según entiende o según
+apetece. Compara después el entendimiento con el apetito, y muestra que lo mismo
+que es en el entendimiento verdad, es en el apetito rectitud; y lo que allí es mentira,
+aquí es depravación. De do sucede que, así como el entendimiento lo que tenía
+temerariamente por verdadero, tratándolo lo halla muchas veces falso, de la misma
+manera lo que sin consideración los hombres apetecen, alcanzado, desengaña y sale
+falso; y de aquí nace que nuestro apetito es tan inquieto, y que el consejo del hombre
+muy ejercitado en negocios es mejor quel del hombre mozo y poco exprimentado,
+porque le ha burlado más veces su apetito y el suceso de las cosas.
+Tres cosas, pues, hay en el alma, que son la origen de un hecho y de la verdad:
+el sentido, el entendimiento, el apetito. Destas tres cosas el sentido no es principio
+de hecho ninguno, lo cual se vee claramente en las fieras, las cuales, aunque tienen
+sentido, con todo eso ningún negocio tratan en común. Lo que es, pues, en el
+entendimiento la afirmación y negación, lo mismo es en el apetito el seguir y el
+rehusar. De manera que, pues la moral virtud es hábito escogido voluntariamente,
+y la elección voluntaria es apetito puesto en consulta, colígese de aquí que la razón
+ha de ser verdadera, y el apetito y deseo recto, si la elección ha de ser buena, y que
+de los dos la razón ha de ser cosa que se pueda decir, y el deseo cosa que se pueda
+seguir. Éste, pues, es el entendimiento y la verdad activa. Porque en la verdad
+que solamente es contemplativa, y no sirve para hacer ni tractar cosa ninguna, el
+decirse cómo es o al revés, es su verdad o su mentira, porque éste es el oficio de
+todo entendimiento. Pero la verdad de lo que se entiende para haberse de poner por
+obra, ha de ser conforme al recto y buen deseo. Es, pues, la elección el principio
+del hecho, de la cual procede también el movimiento, mas no el fin por que se hace.
+Pero el principio de la elección es el apetito o deseo, y la razón que por causa de
+otra cosa se da, de manera que nunca hay elección sin entendimiento y aprensión, ni
+tampoco sin moral deseo. Porque ni el negociar bien ni el negociar mal en cualquier
+hecho no puede acaecer sin entendimiento y costumbre. Aunque este entendimiento
+ninguna cosa mueve sino la que a otro fin se encamina, y es activo, porque éste
+es el que gobierna a la que obra, porque cualquier que obra, obra por fin alguno,
+ni es jamás lo que se obra el último y absoluto fin, sino particularmente de algo,
+y en respecto de algo, pero eslo la obra que se hace, porque el bien negociar y
+tratar las cosas es el fin, y el deseo a éste se endereza. Y por esto se dice que
+o el entendimiento apetitivo o el apetito que se entiende es la elección. Y tal
+principio como éste es el mismo hombre. Ninguna cosa, pues que ya haya pasado,
+cae en elección, como agora ninguno elige el haber tomado por armas a Troya,
+ni tampoco se consulta jamás de lo pasado, sino de lo porvenir y contingente,
+porque lo que ya es pasado, no puede ya dejar de haber sido. Y por eso dijo
+muy bien Agatón:
+
+A la potencia de Dios
+
+Sólo esto es defendido:
+
+El hacer que no haya sido
+
+Lo que ya pasó entre nos.
+
+El oficio, pues, de ambas las dos partes del entendimiento es entender la verdad,
+y así aquellos hábitos son dos virtudes de cada una destas partes, en los cuales
+más verdad halla cada una dellas.
+
+No entienda ninguno que es falta de la potencia de Dios lo que aquí dice
+Aristóteles. Porque no está la falta sino en la misma cosa, que contiene en
+sí repugnancia, y implica, como dicen los lógicos, contradicción, como estar
+uno juntamente vivo y muerto, sano y enfermo. Y el no poder hacer esto no
+es falta de potencia.
+
+Capítulo III
+
+De los cinco hábitos del entendimiento, y de las cosas de que se tiene sciencia, y de la misma sciencia
+
+Comienza ya, después que ha declarado la origen y principio de nuestro entender
+y obrar, a tratar de los hábitos del entendimiento. Propone cómo son cinco: arte,
+sciencia y prudencia, sabiduría, entendimiento. Trata primero, de la sciencia,
+declarando en qué genero de cosas consiste.
+
+Comenzando, pues, como de nuevo, tratemos destos hábitos del entendimiento.
+
+Cinco son, pues, las cosas en las cuales, o afirmando o negando, dice nuestro ánimo
+verdad: arte, sciencia, sabiduría, entendimiento. Porque en las cosas que consisten
+en parecer y opinión, puede acaecer decir mentira. De aquí, pues, se colige qué cosa
+es la sciencia, si claramente queremos hablar, y no seguir semejanzas y metáforas.
+Porque todos tenemos por cierto que aquello que sabemos no puede ser de otra
+manera. Porque las cosas que de otra manera pueden ser, cuando están apartadas
+de nuestra vista, no sabemos si son así o si no. De manera que lo que se sabe es
+cosa que necesariamente sucede, y por la misma razón es cosa perpetua. Porque
+las cosas que necesariamente son, todas, generalmente hablando, son perpetuas, y
+todo lo que es perpetuo jamás nació ni pereció. A más desto, toda sciencia parece
+que es apta para enseñar, y todo lo que se puede saber se puede aprender. Y toda
+sciencia, como dijimos ya en los libros Analíticos, procede de cosas primeramente
+entendidas. Porque unas cosas se saben por inducción, y otras por discurso de
+razón. Lo que se sabe por inducción son los primeros principios, y las cosas muy
+comunes y universales. Pero el discurso de razón procede de la universal. Aquellas
+proposiciones, pues, de donde procede el discurso de razón o silogismo, son los
+principios, los cuales no se pueden probar por discurso de razón, sino sólo por
+enumeración de cosas singulares, que llaman inducción. De manera que la sciencia
+es un hábito demostrativo, con todos los demás arrequives que propusimos en
+los libros Analíticos. Cuando uno, pues, en alguna manera cree una cosa, cuyos
+principios le fueren declarados, entonces se dice que la sabe. Porque si no entiende
+los principios, más de verás se dirá que sabe accidentariamente la conclusión. De
+la sciencia, pues, desta manera quede disputado.
+
+Esta materia, aunque aquí la pone Aristóteles, más es lógica que moral, como
+él mismo claramente lo confiesa. Y así, el que no fuere lógico, pase por ella
+ligeramente, como por cosa que para materia moral importa poco. Sólo entienda
+qué discurso de razón es cuando de unas verdades se sacan y coligen otras desta
+manera. Pues toda cosa compuesta de muchas cosas diferentes y contrarias, de
+necesidad ha de perecer por la contienda que las unas llevan con las otras, y vemos
+que todos los hombres son compuestos de cosas diferentes y contrarias: carne,
+hueso, calor y frío; colígese que todos los hombres de necesidad han de perecer.
+Inducción es cuando probamos ser verdad una cosa dicha en común, demostrando
+experiencia de muchas cosas singulares en favor de aquélla, como si probamos
+que todo hombre ha de morir, pues vemos que murió el emperador, nuestro señor
+Carlos V, y el príncipe, su nieto, y cada día vemos morir unos y otros, y no sabemos
+que haya hombre ninguno que siempre dure. Principios son unas verdades que
+no se pueden probar sino por estas particulares experiencias y inducciones, como
+en la geometría éstas: cualquier cosa entera es mayor que ninguna de las partes;
+de cualquier punto a otro cualquier punto se puede echar una línea recta. Destos
+principios y discursos y inducciones, puestos en un particular argumento y materia
+de cosas, se hacen las sciencias, como puestos en materia de enfermedades vienen
+a hacer la medicina. De todo esto tratamos claramente en la introducción que
+publicamos para la Lógica de Aristóteles, y muy largamente en los comentarios
+que sobre su lógica tenemos escritos, si a luz salieren algún día. Pero esto,
+como dije, para el filósofo moral, que para su utilidad lee esta materia, no
+importa mucho.
+
+Capítulo IV
+
+Del arte
+
+Arte entiéndela aquí Aristóteles como la entiende el vulgo cuando llama arte al
+oficio del zapatero, del sastre y del herrero, y así la distingue de la sciencia. Que, en
+realidad de verdad, arte es vocablo más general que sciencia, y cualquier sciencia
+es arte, aunque no cualquier arte sea sciencia. Hace dos maneras de artes: una, que
+consiste en solo el entendimiento, y obra con discurso de razón, como el arte de
+edificar o navegar, y otra, que está puesta toda en el obrar por sola la experiencia,
+como las artes que vulgarmente mecánicas llamamos. Siempre distingue Aristóteles
+el hacer y el obrar desta manera, que el hacer lo atribuye a los ejercicios del
+entendimiento, y el obrar a las cosas de defuera. Así distinguen en griego piin y
+prattin; en nuestra lengua no se guarda tan al vivo esa distinción.
+
+En las cosas que pueden suceder de otra manera, hay algo que las puede hacer y
+poner por obra. El hacer, pues, y el obrar son cosas diferentes, como ya en nuestras
+Vulgares Disputas lo probamos. De manera, que el hábito que obra conforme a
+razón es diferente del que hace conforme a razón, ni debajo de si el un hábito al otro
+comprende. Porque ni el obrar es hacer, ni el hacer obrar. Porque la arquitectura una
+de las artes es, y un hábito que hace conforme a uso de razón, ni hay arte ninguna
+que no sea hábito que hace conforme a uso de razón, ni por el contrario cosa que
+hábito sea, que haga conforme a uso de razón, que no sea arte. De manera, que toda
+es una misma cosa arte y hábito que conforme a verdadera razón hace. Toda arte,
+pues, se emplea, en hacer de nuevo alguna cosa, y en poner por orden y concierto,
+y considerar cómo se ha de hacer alguna cosa de las que no acaecen de necesidad, o
+en cómo ha de ser o dejar de ser, y cuyo principio está en mano del que las hace y no
+en la cosa que se hace. Porque el arte no se ejercita en las cosas que necesariamente
+se hacen o suceden de necesidad, ni tampoco en las que por naturaleza, porque
+todas estas en sí mismas tienen su principio. Y, pues, el hacer y el obrar son
+cosas diferentes, de necesidad el arte ha de ser de lo que se hace y no de lo que
+se obra. Y, en cierta manera, la fortuna y el arte consisten en una misma manera
+de cosas, como Agatón dice:
+
+De la fortuna el amor
+
+Requiere el arte tener;
+
+También ella ha menester
+
+Que le dé arte favor.
+
+Es, pues, el arte, como ya está dicho, un hábito que hace conforme a verdadera
+razón, y la ignorancia de arte, por el contrario, es un hábito que en las cosas que
+pueden suceder de otra manera, hace conforme a razón falsa.
+
+Capítulo V
+
+De la prudencia
+
+En el capítulo quinto trata de la prudencia, distinguiéndola de la sciencia y
+del arte en esto: que la sciencia considera las cosas en comunidad, porque de
+las cosas particulares, pues ni tiene cierto número, ni son ciertas, no se tiene
+sciencia; pero la prudencia requiérese en cosas particulares. Ítem, el arte trata las
+cosas que entre sí guardan cierta regla y concierto; pero las cosas que requieren
+prudencia, no tienen cierta regla ni concierto. Declara resplandecer esta virtud
+en dos géneros de cosas señaladamente en regir bien una familia, y gobernar
+bien una república.
+
+De la prudencia podremos tratar desta manera, considerando qué personas son
+las que solemos llamar prudentes. Parece, pues, que el proprio oficio del prudente
+es poder bien consultar de las cosas buenas y útiles para sí, no en alguna particular
+materia, como si dijésemos en lo que vale para conservar la salud o la fuerza, sino
+en qué cosas importan para vivir prósperamente. Lo cual fácilmente lo podemos
+entender de esto: que en alguna cosa particular decimos ser prudentes, los que en
+las cosas que no consisten en arte dan buena razón y la encaminan a algún buen
+fin. De manera, que generalmente hablando, aquél será prudente, que es apto para
+consultar con él las cosas. Ninguno, pues, consulta jamás las cosas que no pueden
+acaecer de otra manera, ni tampoco las cosas que no está en su mano hacerlas o
+dejarlas de hacer. De manera, que, pues la sciencia se alcanza con demostración,
+y las cosas cuyos principios pueden ser de otra manera no tienen demostración, y
+no se puede consultar de las cosas que de necesidad suceden, colígese de aquí que
+la prudencia, ni es sciencia, ni tampoco arte. No sciencia, porque aquello que trata
+puede suceder de otra manera, ni tampoco arte, porque el obrar y el hacer tienen los
+fines diferentes. Resta, pues, que la prudencia sea un hábito verdadero y práctico
+que conforme a razón trata los bienes y males de los hombres. Porque el hacer
+tiene el fin diverso, pero el obrar no, porque el proprio fin es el hacer bien aquella
+obra. Por eso a Pericles y a sus semejantes los juzgamos por prudentes, porque
+son personas suficientes para considerar lo que a sí mismos y a los demás hombres
+conviene. Tales como éstos nos damos a entender que son los que rigen bien sus
+casas y la república, y por esto, a la prudencia la llamamos en griego sofrosine, que
+en aquella lengua quiere decir cosa que conserva el entendimiento, porque conserva
+tal o tal parecer. Porque lo aplacible y lo molesto no todo parecer pervierten (que
+este parecer: todo triángulo tiene tresángulos iguales a dos rectos, o que no los
+tiene, no lo pervertirán), sino los pareceres que se dicen en el tratar de los negocios.
+Porque los principios de los negocios que se tratan es el fin porque se tratan; pero
+el que por contento o pesadumbre se destruye y gasta, no luego puede ver los
+principios, y así ni por consejo deste tal no conviene que se delibere ni trate cosa
+alguna, porque el vicio destruye los principios. De manera, que la prudencia de
+necesidad ha de ser hábito, que conforme a buena razón trata de los bienes y niales
+de los hombres. Pero el arte tiene alguna virtud, mas la prudencia no tiene, y en
+el arte, el que voluntariamente hierra, más perfeto es que el que por ignorancia, lo
+cual es al revés en la prudencia, así como en las virtudes. De do se colige que la
+prudencia es una especie de virtud, y no arte. Siendo, pues, dos las partes de aquella
+porción del ánimo que es capaz de razón, la prudencia será virtud de aquella parte,
+que consiste en opinión, porque así la opinión como la prudencia consiste en las
+cosas que pueden suceder de otra manera. Pero no solamente es hábito conforme
+a razón, lo cual con esta señal se entiende: que el hábito conforme a razón puede
+admitir olvido, pero la prudencia no puede.
+
+Capítulo VI
+
+Que sólo el entendimiento percibe los principios de las cosas que se saben
+Declarada el arte y la prudencia, trata del cuarto hábito del entendimiento, que
+por excelencia, o por falta de no tener otro vocablo, toma el nombre de la misma
+facultad y se llama entendimiento. Este hábito, pues, es aquella natural luz con
+que nuestro entendimiento se conforma con las primeras verdades, que son los
+principios de las sciencias, los cuales, por ser principios y no tener medios con
+qué probarse, y por ser una verdad clarísima, no tienen necesidad de otro sino de
+declarar qué significan aquellos vocablos; y declarado esto, el entendimiento, con
+su propria luz, sin argumento ni maestro, les da crédito. Como: cualquier cosa
+entera es mayor que cualquiera de sus partes, declarado qué es cosa entera, qué son
+partes, lo cree luego nuestro entendimiento; ni está en su mano el dejarlo de tener
+por verdad más que del ojo percebir el color, si impedimento no le ponen. De tales
+principios como éstos proceden las sciencias de las cosas.
+Pero por cuanto la sciencia es aprehensión de cosas generales y que proceden de
+necesidad, y las cosas que se demuestran y cualquiera sciencia tiene sus principios,
+pues procede la sciencia por discurso de razón, el entender los principios de la cosa
+que se demuestra, ni será sciencia, ni tampoco arte, ni prudencia, porque toda cosa
+de que se tiene sciencia es demostrable, y las artes y prudencia consisten en cosas
+que pueden suceder de otra manera. Tampoco es sabiduría el conocimiento de los
+principios, porque es proprio del sabio tener demostración de cada cosa. Pues si en
+las cosas que verdaderamente afirmamos ni jamás mentimos, ora consistan en lo
+que no puede ser, ora en lo que puede ser de otra manera, consisten la sciencia, la
+prudencia, la sabiduría, el entendimiento, y el conocimiento de los principios no
+puede ser de ninguno destos tres (llamo tres la prudencia, la sciencia, la sabiduría),
+resta que haya de ser entendimiento.
+
+Capítulo VII
+
+De la sabiduría
+
+De los cinco hábitos del entendimiento, sólo restaba por tratar de la sabiduría,
+de la cual trata en el capítulo presente, y demuestra que sabiduría es nombre de
+perfición, añadido sobre la sciencia y sobre el arte, y pruébalo por el común modo de
+hablar, pues decimos que uno es sabio pintor o entallador, cuando en aquella arte es
+muy acabado. En fin, concluye diciendo que la sabiduría consiste en entender muy
+bien los principios de las más graves cosas, y lo que dellos se colige.
+
+En las artes, pues, atribuimos la sabiduría a los que en ellas son más acabados,
+y así decimos que Fidias es un sculptor sabio y Policleto un sabio entallador,
+en lo cual no entendemos otra cosa por la sabiduría, sino la virtud y excelencia
+que tuvo cada uno dellos en su arte. También juzgamos a otros por sabios, así
+común y generalmente, y no en cosa alguna particular, como Homero escribe
+de Margites:
+
+A éste ni los dioses lo hicieron
+
+Sabio en cavar, ni en culturar la tierra,
+
+Ni otro saber alguno concedieron;
+
+de do se colige que la más perfecta sciencia de todas es la sabiduría. Conviene,
+pues, que el sabio no solamente entienda lo que de los principios se colige, pero
+que aun los mismos principios los tenga muy bien entendidos, y la verdad que
+tienen. De manera que el entendimiento y la sciencia juntos harán la sabiduría, y
+la sciencia de las más preciosas cosas será como cabeza de la sabiduría. Porque
+parece cosa del todo ajena de razón que uno tenga a la disciplina de la república y a
+la prudencia por la cosa de mayor, virtud, sin que el hombre sea la cosa mejor que
+haya en el mundo. Y si lo saludable y provechoso no es todo uno en los hombres
+y en los peces, y lo blanco y lo derecho siempre es todo uno, cosa cierta es que
+lo sabio todos dirán siempre que es uno, pero lo prudente diverso, porque aquello
+dirán ser prudente, que en cada cosa entiende qué es lo que le conviene, y a este
+tal le encomendarían las cosas. Y por esto de algunas fieras se dice bien que son
+prudentes, como de aquéllas que parece que tienen facultad de pronosticar lo que
+para la conservación de su propria vida les conviene. Consta, pues, que no es todo
+una misma cosa la disciplina de república y la sabiduría. Porque si llaman sabiduría
+la que considera las proprias utilidades, seguirse ha que hay muchas diferencias
+de sabiduría. Porque no es una sciencia la que considera todos los bienes de los
+animales, sino que cada bien tiene su particular sciencia; si no que queramos decir
+que todas cuantas cosas hay tienen una manera de medicina. Ni importaría nada que
+dijésemos que el hombre es el más principal de todos los animales, porque otras
+cosas hay que son de más divina naturaleza que no el hombre, como son estas tan
+ilustres de que el mundo está compuesto. Colígese, pues, de lo dicho claramente
+que la sabiduría es sciencia y entendimiento de las cosas, cuya naturaleza es del
+mayor precio y quilate. Y, por tanto, de Anaxágoras, y de Tales, y de otros varones
+semejantes, se dice que fueron sabios; pero no dijeran que eran prudentes, si vieran
+que lo que particularmente les convenía no lo entendían. De tales, pues, como éstos
+se dice que saben lo que es demasiado saber, y las cosas admirables, y dificultosas,
+y divinas, pero que no saben lo que les cumple, porque no procuran los humanos
+bienes ni intereses. Porque la prudencia consiste en cosas humanas y en aquéllas
+de que suelen los hombres consultar. Porque el más particular oficio del varón
+prudente decimos que es el aconsejar bien, y ninguno consulta jamás de las cosas
+que no pueden acaecer de otra manera, ni menos de las cosas que no tienen algún
+fin, que sea bien que pueda ponerse por obra. Y el que de veras ha de ser buen
+consejero, en lo que al hombre le es mejor, ha de ser hombre que, con discurso de
+buena razón, pueda conjecturar las cosas que se puedan hacer y poner por obra.
+Ni considera la prudencia las cosas generales solamente, sino que ha de entender
+también las particulares, pues es virtud de bien obrar, y las obras consisten en las
+cosas particulares. De aquí sucede que algunos que no entienden sciencia son más
+suficientes para tratar negocios que algunos que la saben, y en cualquier cosa los
+que tienen más experiencia. Porque si uno sabe así, comúnmente, que las carnes
+ligeras son de buena digestión y provechosas para el cuerpo, si no sabe qué carnes
+son ligeras, ninguna salud dará al cuerpo; pero el que entendiere que las carnes
+de las aves son ligeras y saludables, más salud le acarreará. Es, pues, la prudencia
+virtud de bien tratar negocios, y así conviene que tenga ambas a dos noticias o,
+sobre todo, la particular. Y en esto hay alguna parte que es como gobernadora
+de las otras.
+
+Capítulo VIII
+
+De las partes de la prudencia
+
+Ya está entendida la diferencia que hay entre la sciencia y la prudencia, que
+aquélla considera las cosas o contemplativas o activas así en común, pero la
+prudencia consiste en tratar bien los negocios en particular. Pues como todos los
+negocios, o sean comunes, o particulares, y los comunes sean sin comparación de
+mayor valor que los que a cada uno particularmente toca, Aristóteles, en el capítulo
+presente, propone las partes de la prudencia que son en los negocios particulares la
+disciplina de bien regir una casa, que se llama la Economía, y en los comunes pone
+tres partes: la prudencia en hacer buenas y saludables leyes para el buen gobierno
+de todos, a quien en su lengua llama nomothesia; la prudencia en juzgar bien las
+causas y contiendas que se ofrecen entre los ciudadanos, la cual parte se llama
+dicastice, que quiere decir judiciaria; la tercera, prudencia en el proveer las cosas
+tocantes al vivir y menesteres de la vida, la cual propriamente quedó con el nombre
+de disciplina de república. Estas tres partes bien regidas son las que conservan el
+estado de las ciudades, reinos y provincias, y las que las destruyen, no administradas
+como deben.
+
+Es, pues, la disciplina de la república y la prudencia un mismo hábito, aunque
+el estado de cada una dellas es diverso. En la prudencia, pues, que se emplea en
+el gobernar bien una república, la cabeza y principal parte es la que consiste en
+el hacer las leyes. Pero la que las particulares cosas considera, tiénese el nombre
+común y llámase disciplina de república, y esta misma es la que trata y consulta
+los negocios, porque las ordinaciones de los pueblos son casi lo último en el tratar
+de los negocios. Y así propriamente decimos que solos estos tales gobiernan la
+república, porque éstos son de la misma manera que aquellos que ponen las manos
+en la obra. Aunque parece que la prudencia más propriamente se dice de aquel
+que en sí mismo piensa solamente, y ésta es la que se usurpa el común nombre de
+prudencia. Pero de las otras, una se llama sciencia de bien gobernar una familia,
+otra de hacer leyes, otra de regir bien una república, y ésta tiene aún dos partes:
+una, que consiste en consultar las cosas, y otra que en juzgarlas. Parece, pues,
+que esta facultad tiene manera de sciencia, porque el que la tiene es hombre que
+entiende; pero hay mucha diferencia, porque el que sabe bien lo que le cumple
+y lo pone por obra, este tal parece que es prudente; pero los que son aptos para
+gobierno de república, son los que están curtidos en negocios. Y por esto dice
+muy bien Eurípides:
+
+¿Cómo puedo ser prudente,
+Pues nunca me he ejercitado
+En negocios, ni he tratado
+Lo que pasa entre la gente?
+Antes siempre entre soldados
+He vivido en compañía,
+Do igual parte me cabía
+'De los mejores bocados.
+
+Porque los que son nuevos en negocios siempre hacen demasías, porque procuran
+sus particulares provechos, y el hacerlo así les parece que es hacer lo que conviene.
+Desta opinión, pues, ha procedido lo que de los prudentes decimos. Aunque el
+particular bien no se puede por ventura alcanzar sin el bien de la familia, ni aun
+sin el de toda la república. A más desto, que no hay certidumbre en el cómo ha de
+procurar uno sus proprios intereses, y tiene necesidad de consulta. Lo cual, o por
+esta razón se entiende claramente, que los hombres mozos se hacen geómetras y
+matemáticos, y sabios en cosas semejantes, pero ninguno parece que por sciencia
+se haga prudente. Lo cual procede de que la prudencia consiste en negocios
+particulares, y éstos se entienden por la experiencia, y el hombre mozo no está
+experimentado, porque el mucho tiempo es el que causa la experiencia. Porque,
+¿podría alguno considerar qué es la causa que un niño puede ser matemático, y
+sabio ni filósofo natural no puede, sino porque las sciencias matemáticas alcánzanse
+considerando?; pero los principios de la sabiduría y sciencia natural proceden de la
+experiencia, y en las matemáticas los mancebos no tienen necesidad de creer cosa
+ninguna, antes ellos de suyo se las dicen; pero en las otras cosas el ser dellas es
+incierto y dificultoso de entender. Asimismo, en el consultar puede haber yerro, o
+en lo universal, o en lo particular. Porque puede errar uno diciendo que todas las
+aguas gruesas y pesadas son malas, o afirmando que esta particular agua es gruesa
+y pesada. Consta, pues, que la prudencia no es sciencia, porque, como habemos
+dicho, trata las postreras cosas, cuales son las que se tratan en negocios. Es, pues, la
+prudencia contraria del hábito que se llama entendimiento, porque el entendimiento
+considera los principios, para los cuales no hay dar razón, y la prudencia considera
+las cosas singulares y últimas, las cuales no se comprenden por sciencia, sino por el
+sentido; no por el particular de cada cosa, sino por tal sentido cual es el con que en
+las artes matemáticas juzgamos que esta última figura es triángulo. Porque también
+allí parará nuestro conocimiento. Aunque aquel tal conocimiento mejor se dice
+sentido que prudencia, y la otra ya es de otra especie.
+
+Capítulo IX
+
+De la buena consulta
+
+Una parte del gobierno de la república dijo Aristóteles que era la que trataba
+los negocios comunes, y que éstos se trataban consultando. Trata, pues, en este
+capítulo de la consulta, mostrando que no es sciencia, ni tampoco conjectura, ni
+menos discreción, sino reformación de consejo.
+
+El preguntar y el consultar son cosas diferentes, porque el consultar es una
+manera de preguntar. Habemos de entender, pues, de la buena consulta qué cosa
+es, y si es sciencia, o opinión, o buena conjectura, o algún otro género de cosas. No
+es, pues, la consulta sciencia, porque ninguno consulta lo que sabe, y la consulta
+buena es una especie de consulta, y el que consulta inquiere y colige por razón.
+Pero ni tampoco es conjectura, porque sin proponer razones se hace la conjectura,
+y repentinamente; pero la consulta requiere largo tiempo, y así dicen que lo
+consultado se ha de poner presto por obra, pero que ha de consultarse muy despacio.
+Asimismo, la discreción es diferente de la buena consulta, porque la discreción es
+una buena conjectura. Tampoco es opinión ninguna buena consulta, por cuanto el
+que mal consulta yerra, y el que bien consulta acierta, es cosa cierta que la buena
+consulta es una manera de reformación, pero no de sciencia, ni tampoco de opinión.
+Porque la sciencia no ha menester reformación, pues no yerra, y la reformación
+de la opinión es la verdad. Asimismo, todo aquello de que se tiene opinión, ya
+está dividido en diversos pareceres. Pero ni tampoco se hace la consulta sin uso de
+razón. Resta, pues, que ha de ser reformación del parecer, pues el parecer aún no
+es afirmación; pero la opinión no es ya pregunta, sino ya es afirmación. Pero el que
+consulta, ora consulte bien, ora consulte mal, inquiere algo y lo colige por razón.
+Es, pues, la buena consulta reformación de la consulta. Por esto, en la consulta, se
+ha de entender primero qué se consulta y sobre qué. Pero por cuanto la reformación
+se dice de muchas maneras, será cosa manifiesta que no toda reformación es buena
+consulta. Porque el disoluto y el malo, lo que propone saber, por discurso de
+razón lo sacará; de manera que consultará bien, pero pareciéndole que es un mal
+muy grande. Pero el bien consultar parece ser uno de los bienes, porque esta tal
+reformación de consulta es la buena consulta, la cual siempre acarrea lo bueno.
+Pero puédese hacer esto con discurso falso de razón, y decir uno lo que conviene
+que se haga, pero no acertará el por qué, sino errar el medio. De manera que ni esta
+tampoco será buena consulta, en la cual uno alcanza lo que se debe hacer, pero no la
+razón por qué es bien que se haga. Acaece asimismo que uno, en mucho espacio de
+tiempo, dé en la cuenta de lo que conviene que se haga, y otro en poco rato. No es,
+pues, tampoco aquélla la buena consulta, sino la reformación de lo que es útil y de
+lo que conviene, y como conviene, y cuando conviene. Puédese también consultar
+bien generalmente de toda cosa, y también acerca de algún fin particular. Es, pues,
+
+la buena consulta general la que reforma lo que para el supremo fin pertenece, y la
+particular, la que reforma lo que se encamina a algún fin particular. Y si de hombres
+prudentes es el bien consultar, será la buena consulta reformación de lo que para el
+fin conviene, de lo cual es la prudencia el verdadero parecer.
+Por los que no saben lógica me es forzado añadir esto aquí. Llama medio
+Aristóteles a la razón con que se prueba la cuestión, como si prueba uno que
+vale más una mediana paz que una muy justa guerra, porque la guerra estraga
+las vidas y haciendas de los hombres y pone en condición la libertad, esta razón
+es el medio, y cuando la razón es fuera de propósito y no concluye, llámase
+medio falso y argumento de solistas, como si dijese uno que es buena la guerra,
+porque muchos se hacen ricos con ella, es falsa razón y que no concluye nada,
+porque por la misma razón sería bueno el hurtar y dar dineros a usura, pues se
+enriquecen muchos por esta vía.
+
+Capítulo X
+
+Del buen juicio
+
+Al bien consultar es anexo el buen juicio, pues nunca hombre de mal juicio
+consultó bien cosa ninguna. Por esto trata aquí del buen y mal juicio qué cosa es, de
+la misma manera que trató de la consulta en el capítulo pasado.
+
+El bueno y mal juicio decimos ser aquellos conforme a los cuales decimos a
+unos que son de mucha capacidad y a otros de poca. Pero tampoco es el buen juicio
+lo mismo que sciencia ni opinión, porque todos fueran de buen juicio. Tampoco
+es alguna de las particulares sciencias, como la medicina, que trata de las cosas
+provechosas a la salud, y la geometría, que considera las grandezas de los cuerpos,
+porque el buen juicio no trata de las cosas que son perpetuas y inmovibles, ni de las
+cosas que a un quienquiera le acaecerían, sino de las cosas que cualquiera dudaría
+y consultaría. Y así consiste en las mismas cosas en que consiste la prudencia,
+pero no es lo mismo el buen juicio que la prudencia, porque la prudencia es virtud
+que manda, porque al fin a ella toca mandar lo que conviene que se haga, pero el
+buen juicio solamente tiene por oficio el juzgar o aprobar. Porque todo es una cosa
+juicio y buen juicio, pues es todo uno hombre de juicio y hombre de buen juicio.
+Tampoco es el buen juicio, lo mismo que tener o que alcanzar prudencia. Pero así
+como el aprender se dice entender cuando uno usa de las sciencias, de la misma
+manera en el usar de la opinión en el juzgar de aquellas cosas en que consistela
+prudencia cuando otro las dice, y juzgar bien, porque bien y convenientemente
+juzgar todo es una misma cosa. Y de allí vino en nombre griego sinesis, que
+quiere decir entendimiento, por el cual se llaman los hombres de buen juicio, del
+uso que tenemos deste vocablo en el aprender, porque al aprender lo llamamos
+entender muy muchas veces.
+
+Capítulo XI
+
+Del parecer
+
+Si algún lugar hay dificultoso de vertir de griego en otra lengua, es el capítulo
+presente, no por la sentencia de lo que se trata, que esa es fácil de entender, sino por
+la propriedad del decir y de los vocablos, la cual, como es diferente en cada lengua,
+quitada de su lengua natural, parece disparate y cosa dicha fuera de propósito.
+El parecer, en griego, dícese gnome, y la misericordia syggnome, pareciéndose
+mucho los vocablos; de esta paronomasia o semejanza de vocablos se aprovecha
+Aristóteles para probar que el buen parecer cuadra mucho al varón justo moderado.
+La cual sentencia, dicha en latín o en otra cualquier lengua, como no resplandece
+esta correspondencia de vocablos, parece fría y fuera de propósito. Por esto debe
+cualquiera que lee libro de una en otra lengua vertido, especialmente de griego,
+donde los más de los vocablos tienen cierta derivación y etimología, perdonar
+esta falta, que es sin remedio, cuando en la propriedad del decir está el no poderse
+vertir con la misma propriedad de los vocablos. Declara, pues, qué cosa es el
+parecer, y cómo el buen parecer y grave sentencia cuadra mucho al varón moderado
+y benigno. Después muestra cómo tienen una inseparable amistad y compañía
+estos hábitos: sentencia, entendimiento, buen juicio, prudencia, y que donde
+uno mora moran todos.
+
+Aquello llamamos sentencia o parecer, conforme al cual decimos que algunos
+son hombres de buen parecer, y que tienen buen parecer, no es otra cosa sino
+un recto juicio de lo bueno moderado. Lo cual, se entenderá de que del hombre
+moderado decimos que es benigno y misericordioso, y que lo bueno moderado
+no es otra cosa sino tener misericordia y perdonar en las particulares cosas. Y la
+misericordia o perdón es el recto juez de lo moderado, y aquel es recto juez, que
+juzga conforme a la verdad. Todos estos hábitos, pues, conforme a buena razón van
+a un mismo fin encaminados, porque llamamos parecer y buen juicio, y prudencia,
+y entendimiento, atribuyendo a unos mismos el tener buen parecer y entendimiento,
+y el ser hombres prudentes y de buen juicio. Todas estas facultades, pues, consisten
+en las cosas extremas y particulares, y en el ser uno apto para juzgar de las cosas,
+en que consiste el ser uno prudente, de buen juicio, de buen parecer. Porque las
+cosas buenas moderadas son comunes a todo género de bienes, en cuanto a otrie se
+refieren; y las cosas que se tratan en negocios, son cosas particulares y extremas, las
+cuales ha de tener entendidas el varón prudente, y en estas mismas consiste el buen
+juicio y parecer, y estas son las cosas últimas. Y el entendimiento a ambos extremos
+pertenece, pues así los términos primeros como los postreros se perciben con el
+hábito que llamamos entendimiento, y no por discurso de razón. Y aquella primera
+manera de entendimiento es propria de los principios de las demostraciones,
+que se hacen en las cosas que no pueden mudarse y son primeras, pero estotra
+consiste en los negocios y en las cosas últimas y contingentes, y también en
+una de las proposiciones, porque las cosas particulares son el principio de las
+proposiciones, por cuya causa la conclusión es verdadera, pues lo universal de
+las cosas particulares se colige, las cuales se han de percibir por el sentido, y este
+sentido es el entendimiento. Y así, estas cosas parecen naturales, pero ninguno
+es sabio naturalmente, aunque parecer, prudencia y entendimiento bien lo tiene
+naturalmente. Lo cual, con esta señal lo entenderemos, que tales cosas como
+éstas las tenemos por anexas a la edad, y tal edad tiene entendimiento y parecer
+casi declarándose la natura ser causa dello. Y por esto, el principio y el fin es el
+entendimiento, porque destos dos entendimientos proceden las demostraciones y
+en ellos paran. Y así conviene dar crédito a los experimentados y más ancianos, y
+a los prudentes, en las proposiciones que no se pueden demostrar, no menos que
+a las mismas demostraciones, porque como tienen ojos de experiencia, veen bien
+los principios. Qué cosa, pues, es la sabiduría y qué la prudencia, y en qué géneros
+de cosas consiste cada una dellas, y cómo la una y la otra son virtudes de la otra
+parte del alma, ya está declarado.
+
+Aunque Aristóteles parece se declara harto en esto de llamar las cosas universales
+primeras, y las particulares postreras, todavía por los que Metodológica no
+saben, tiene necesidad de un poco de más declaración. Llama, pues, las cosas
+universales primeras, y las particulares postreras en cuanto al ser; pues como ya en
+los comentarios sobre Porfirio lo mostramos, no son cosas diversas lo universal y
+lo particular, sino sólo en cuanto a nuestra consideración, ni es otra cesa universal
+sino los particulares debajo de una natural similitud considerados, y lo particular
+lo mismo considerado en uno solo, sino en o cuanto al modo del proceder, que
+pasamos primero por las noticias generales de las cosas, y venimos al fin a parar en
+las particulares; como se vee claro en una consulta de médicos, donde primeramente
+consideran qué género de enfermedad es, y después van particularizando hasta
+levantar resolución que es unta terciana pútrida que da pena a Sócrates en tal o tal
+hora, y que se ha de curar con este o con aquel remedio, y comiendo o bebiendo
+deste mantenimiento o deste vino o de aquel zumo. Y lo mismo es en cualquier
+género de cosas que se tratan en negocios. Por esto, pues, se llaman primeras las
+cosas universales, y postreras las particulares.
+
+Capítulo XII
+
+Para qué sirve la sabiduría y la prudencia
+
+El último fin del hombre probó al principio Aristóteles ser la felicidad, y que
+todo lo que se había de tratar había de ir encaminado a este fin. Parece, pues, que
+se ha divertido a cosas fuera deste propósito, como es a tratar destos hábitos del
+entendimiento, algunos de los cuales no sirven para negocios, sino que consisten
+en sola contemplación; declara pues agora, qué conexión tiene esta materia con
+la parte moral, y dice que pues el varón felice ha de ser perfecto, y estos hábitos
+perficionan la parte del alma que es capaz de razón, conviene también que se
+entiendan como las otras virtudes de la parte inferior que consisten en bien
+acostumbrarse. A más que, entendido esto, importa para mejor poner por obra
+los hábitos morales.
+
+Preguntar alguno por ventura, ¿qué provecho acarrean estos hábitos de que
+tratamos? Porque la sabiduría no considera cosas, de que felicidad ninguna al
+hombre le proceda, pues las cosas que trata ni nacen ni fenecen. Pues la prudencia,
+aunque tiene esto, qué necesidad tenemos della, pues consiste en las cosas que
+al hombre le son justas y buenas, y estas mismas son las que el buen varón debe
+hacer, y con sólo saberlas no nos hacemos más prontos en el ponerlas por la obra,
+pues son las virtudes hábitos, así como vemos que acaece en lo que toca a la salud
+y al tener buen hábito de cuerpo, lo cual no consiste en el tener hábito sino en el
+obrarlo? Porque el ser uno médico o hábil en la lucha, no le hace más ejercitado y
+pronto para conservar la salud y buen hábito de cuerpo. Y si decimos que, lo que
+toca a la prudencia, no por los tales se ha de proponer, sino por los que se han de
+hacer, a lo menos a los que ya lo son no les importará nada, y aun a los que no
+lo son, pues será todo uno o tener ellos la prudencia o dejarse regir por los que la
+tienen. Porque bastarnos ha en lo que toca a esto lo que nos basta en lo que toca
+a la salud, en la cual, aunque holgamos de vivir sanos, no por eso aprendemos la
+medicina. A más desto, parece cosa ajena de razón; que siendo la prudencia menos
+perfecta que la sabiduría, sea más poderosa que aquélla, porque la que hace es la
+que manda y ordena en cada cosa. Desto, pues, habemos de tratar, porque ésta es
+la primera duda que acerca desto se propone. Primeramente, pues, habemos de
+decir que estas virtudes de necesidad han de ser por su proprio valor escogidas y
+preciadas. Porque siendo las unas y las otras virtudes de las partes del alma, en
+cada una de la suya, aunque no sirviesen de nada, todas o cualesquiera dellas son
+dignas de preciar. Cuanto más que sirven de algo, no tanto cuanto la medicina para
+alcanzar la salud, sino como la salud es parte para alcanzar buen hábito de cuerpo,
+así también la sabiduría para alcanzar la felicidad, porque siendo parte de la general
+virtud, con su posesión y obrar hace dichoso al que la alcanza. Asimismo, la obra
+se perficiona conforme a la prudencia y a la moral virtud, porque la moral virtud
+propone el fin perfecto, y la prudencia los medios que para alcanzarlo se requieren.
+Pero la cuarta parte del alma, que es la que toca al mantenimiento, no tiene tal
+virtud como ésta, porque conforme a ella el alma ninguna cosa hace ni deja de
+hacer. Pero cuanto a lo que se decía de que por la prudencia no nos hacemos más
+prontos para tratar las cosas buenas y justas, habémoslo de tomar un poco de más
+lejos, tomando este principio. Porque así como decimos que algunos que hacen
+cosas justas no son aún por eso justos, como son los que hacen las cosas que están
+por leyes ordenadas, pero o por fuerza, o por imprudencia, o por otra alguna causa,
+y no por respecto dellas mismas, aunque hacen lo que conviene, y lo que debe hacer
+cualquier bueno, es pues necesario, según parece, para que uno sea bueno, que en
+el hacer de cada cosa esté de cierta manera dispuesto. Quiero decir, que las haga de
+su propria voluntad, y por sólo respecto de ellas mismas. De manera, que la buena
+y recta elección hace la virtud, pero lo que para alcanzar aquélla se ha de hacer,
+no toca a la virtud tratarlo, sino a otra facultad. Estas cosas, pues, habemos de
+tratar, dándolas a entender más claramente. Hay, pues, una facultad que la llaman
+comúnmente prontitud, la cual es de tal manera, que puede fácilmente hacer y
+alcanzar las cosas que a algún fin propuesto pertenezcan. Esta prontitud, si el fin
+propuesto es bueno, es cierto digna de alabanza, pero si malo, es mala maña. Y
+por esto decimos también de los prudentes, que son prontos y mañosos. No es,
+pues, esta prontitud la prudencia, pero no está sin ella la prudencia. Este tal hábito,
+pues, imprímese en los ojos del alma no sin la virtud, como habemos dicho y es
+cosa manifiesta. Porque los discursos de razón, que en los negocios se hacen, sus
+principios tienen, pues el fin y el sumo bien, sea cualquiera, ha de ser de tal o tal
+manera. Porque, pongamos por ejemplo que sea lo que primero a la mano nos venga;
+esto tal a solo el buen varón parecerá bueno, porque la maldad pervierte el juicio, y
+hace que se engañe acerca de los principios de las cosas que se traten. Muy claro,
+pues, está, que es imposible ser uno prudente sin ser bueno.
+
+Capítulo XIII
+
+De la natural virtud, y de la conexión y hermandad que hay entre las verdaderas virtudes y la prudencia
+
+Naturalmente hay en todos los hombres una inclinación a las cosas buenas, la
+cual Dios puso en nosotros cuando formó la naturaleza humana. De do procede
+que por malo que uno, se haya hecho con sus malos ejercicios, no puede dejar de
+parecerle bien lo bueno. Hay también otra inclinación a las cosas malas, que nos
+procedió de nuestro en la caída de la justicia original en que Dios crió los primeros
+hombres. Estas dos inclinaciones comúnmente se hallan en los hombres, pero en
+unos más vivas que en otros, y así unos con más facilidad que otros obran un acto
+de virtud o vicio, de la misma manera que unos son más dóciles que otros de su
+naturaleza. Estas inclinaciones son las que llama Aristóteles aquí virtudes naturales,
+y las contrarias también se dirán vicios naturales, no porque absolutamente sean
+las unas virtudes y las otras vicios, sino porque las unas inclinan a lo uno y las
+otras a lo otro. Estas inclinaciones no hacen al hombre digno de alabanza ni de
+vituperación, porque no proceden de propria elección, y se compadecen con los
+hábitos contrarios. Porque bien puede uno ser bien inclinado de suyo, y o con
+las ruines compañías, o con malos ejercicios, gastarse y hacerse malo. Y por el
+contrario, puede ser mal inclinado y con buen juicio, y forzando su mala inclinación
+y ejercitándose bien, ser muy virtuoso, y en este tal la virtud será de muy mayor
+quilate. Como se lee de Sócrates, que Zopiro, uno que se le entendía de fisiognomía,
+dijo que era mujeriego y que tenía otras muchas faltas, siendo un hombre de vida
+perfetísima, y él confesó tener aquellas inclinaciones naturales, pero que las había
+adormecido con los contrarios ejercicios. Y esto es lo que dicen comúnmente,
+que el sabio tiene más poder que las estrellas; destas, pues, trata en este capítulo
+Aristóteles, y de la diferencia que hay dellas a las que son hábitos.
+Otra vez, pues, habemos de tornar a tratar de la virtud. Porque la virtud casi
+se ha de la misma manera que la prudencia se ha con la prontitud, que no es lo
+mismo, pero parécele mucho. De la misma manera, pues, se ha la natural virtud con
+la que lo es propriamente, porque en todos los hombres parece que, naturalmente,
+en alguna manera cada un hábito consiste. Porque ya, desde nuestro nacimiento,
+parece que tenemos una manera de justicia, de templanza y fortaleza, y de los demás
+géneros de hábitos; pero con todo eso inquirimos otro que sea propriamente bien,
+y que estas inclinaciones de otra manera consisten en nosotros, porque los hábitos
+naturales en los niños y aun en las fieras los hallamos, pero éstas sin entendimiento
+parecen perjudiciales. Lo cual en esto parece que se vee manifiestamente, que así
+como acaece en un cuerpo robusto, que sin ver nada se mueve, que por faltarle la
+vista de necesidad ha de dar gran caída, de la misma manera en el ánimo acaece.
+Pero si entendimiento alcanzare, es diferente en el obrar. Pero el hábito que a
+esta le parece, será entonces propriamente virtud. De manera que, así como en la
+parte que consiste en opinión hay dos especies, prontitud y prudencia, de la misma
+manera en la parte moral hay otras dos: una que es virtud natural y otra que lo es
+propriamente, y ésta que lo es propriamente no se alcanza sin prudencia, y por esto
+dicen que todas las virtudes son prudencias. Y así Sócrates en parte decía bien, y
+en parte erraba: erraba en tener por opinión que todas las virtudes eran prudencias,
+y acertaba en decir que no se alcanzaban sin prudencia. Lo cual se conoce en esto:
+que hoy día, todos cuando difinen la virtud, añaden el hábito, y dicen a qué cosas
+conforme a razón recta pertenece, y la recta razón es la que juzga la prudencia. Y
+así parece que todos adevinan en cierta manera que semejante hábito es la virtud
+conforme a la prudencia. Y aún podemos extenderlo un poco más y decir que la
+virtud no solamente es hábito conforme, a recta razón, pero aun acompañado de
+recta razón, y la recta razón destas cosas es la prudencia. Sócrates pues, tenía por
+opinión que las virtudes eran razones, porque las hacía sciencias todas las virtudes,
+pero nosotros decimos que son hábitos acompañados de razón. Consta, pues, de las
+razones ya propuestas, que ninguno puede ser bueno propriamente sin prudencia,
+ni prudente sin la virtud moral. Y la razón, con que alguno podría pretender que las
+virtudes están apartadas las unas de las otras, podríase soltar desta manera. Que si
+dice que un mismo hombre no es igualmente apto para todas las virtudes, y así terná
+la una a que es más apto antes de haber alcanzado la a que no es tanto, diremos que
+eso acontece en las virtudes naturales, pero en aquellas por cuyo respecto se dice
+un hombre absolutamente bueno, no acaece.
+
+Porque siendo sola una la prudencia, han de estar con ella de necesidad. Y
+aunque la prudencia no fuera virtud activa, consta que el alma tenía necesidad della
+por ser virtud de una de sus partes, y porque no se puede hacer buena elección
+sin prudencia, ni menos sin virtud, porque la virtud propone el fin, y la prudencia
+pone por obra los medios que para alcanzarlo se requieren. Pero con todo eso,
+ni es propria de la sciencia, ni tampoco de la parte mejor del ánimo, así como
+tampoco la medicina es propria de la salud, porque la medicina no usa de la salud,
+sino que considera cómo se alcanzará. Manda, pues, la medicina y da preceptos
+por amor de la salud, pero no los da a la misma salud. Y es como si uno dijese
+que la disciplina de la república es el señorío de los dioses, porque manda todo
+lo que se ha de hacer en la ciudad.
+
+Fin del libro sexto

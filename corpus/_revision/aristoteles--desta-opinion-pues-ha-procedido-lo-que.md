@@ -1,0 +1,13 @@
+---
+texto: "Desta opinión, pues, ha procedido lo que de los prudentes decimos."
+autor: "aristoteles"
+slug: "aristoteles-desta-opinion-pues-ha-procedido-lo-que"
+procedencia:
+  obra: "Ética a Nicómaco"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_6"
+---

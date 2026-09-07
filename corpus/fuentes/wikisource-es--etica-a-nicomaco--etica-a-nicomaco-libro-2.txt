@@ -1,0 +1,544 @@
+fuente: wikisource-es
+obra: Ética a Nicómaco
+url: https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_2
+recuperado: 2026-09-07
+---
+Ética a Nicómaco/Libro 2
+|título=[[Ética a Nicómaco]]
+|autor=[[Aristóteles]]
+obra> |título=Ética a Nicómaco
+obra> |autor=Aristóteles
+obra> |título={{Anclaje+|Índice}}
+---
+De los morales de Aristóteles, escritos a Nicomaco
+
+Argumento del libro segundo
+
+En el libro primero ha mostrado Aristóteles ser el último fin de los hechos la
+felicidad, y consistir la verdadera felicidad en el vivir conforme a buen uso de
+razón, que es conforme a virtud perfecta, aunque para mejor ponerla en uso se
+requiere tener favor de las cosas de fortuna; y que toca a la disciplina de la república
+tratar de las virtudes, como de aquellas que son medio para alcanzar la felicidad,
+y que, pues son dos las partes del alma, una racional y otra apetitiva, que hay
+dos maneras de virtudes de que se ha de tratar, unas tocantes al entendimiento, y
+otras a los afectos y costumbres. En el segundo disputa y considera otras cosas
+tocantes en común a todas las virtudes, como es de dónde proceden las virtudes,
+qué es lo que las estraga y destruye, en qué materia consisten, cómo se alcanzan,
+y otras cosas como éstas.
+
+En el primer capítulo demuestra cómo las virtudes del entendimiento se
+alcanzan con doctrina, tiempo y ejercicio, y las morales con ejercicios de actos
+virtuosos.
+
+Capítulo I
+
+Habiendo, pues, dos maneras de virtudes, una del entendimiento y otra de las
+costumbres, la del entendimiento, por la mayor parte, nace de la doctrina y crece
+con la doctrina, por lo cual tiene necesidad de tiempo y experiencia; pero la moral
+procede de la costumbre, de lo cual tomó el nombre, casi derivándolo, en griego,
+deste nombre: ethos, que significa, en aquella lengua, costumbre. De do se colige
+que ninguna de las morales virtudes consiste en nosotros por naturaleza, porque
+ninguna cosa de las que son tales por naturaleza, puede, por costumbre, hacerse
+de otra suerte: como la piedra, la cual, naturalmente, tira para abajo, nunca se
+acostumbrará a subir de suyo para arriba, aunque mil veces uno la avece echándola
+hacia arriba; ni tampoco el fuego se avezará a bajar de suyo para abajo, ni ninguna
+otra cosa de las que de una manera son naturalmente hechas, se podrá acostumbrar
+de otra diferente. De manera que ni naturalmente ni contra natura están las virtudes
+en nosotros, sino que nosotros somos naturalmente aptos para recebirlas, y por
+costumbre después las confirmamos. A más desto, en todas las cosas que nos
+provienen por naturaleza primero recebimos sus facultades o potencias, y después
+hacemos los efectos, como se vee manifiestamente en los sentidos. Porque no de
+ver ni de oír muchas veces nos vino el tenor sentidos, antes al contrario, de tenerlos
+nos provino el usar dellos, y no del usar el tenerlos. Pero las virtudes recebímoslas
+obrando primero, como en las demás artes. Porque lo que habemos de hacer después
+de doctos, esto mismo haciéndolo aprendemos, como edificando se hacen albañires,
+y tañendo cítara tañedores della. De la misma manera, obrando cosas justas nos
+hacemos justos, y viviendo templadamente templados, y asimismo obrando cosas
+valerosas valerosos, lo cual se prueba por lo que se hace en las ciudades. Porque los
+que hacen las leyes, acostumbrando, hacen a los ciudadanos buenos, y la voluntad
+de cualquier legislador es esta misma, y todos cuantos esto no hacen bien, lo yerran
+del todo. Y en esto difiere una república de otra, digo la buena de la mala. Asimismo
+toda virtud con aquello mismo con que se alcanza se destruye, y cualquier arte de la
+misma suerte. Porque del tañer cítara proceden los buenos tañedores y los malos, y
+a proporción desto los albañires y todos los demás, porque de bien edificar saldrán
+buenos albañires o arquitectos, y de mal edificar malos. Porque si así no fuese, no
+habría necesidad de maestros, sino que todos serían buenos o malos. Y de la misma
+manera acaece en las virtudes, porque obrando en las contrataciones que tenemos
+con los hombres, nos hacemos unos justos y otros injustos; y obrando en las cosas
+peligrosas, y avezándose a temer o a osar, unos salen valerosos, y cobardes otros. Y
+lo mismo es en las codicias y en las iras, porque unos se hacen templados y mansos,
+y otros disolutos y alterados: los unos, de tratarse en aquéllas desta suerte, y los
+otros desta otra. Y, por concluir con una razón: los hábitos salen conformes a los
+actos. Por tanto, conviene declarar qué tales han de ser los actos, pues conforme a
+las diferencias dellos los hábitos se siguen. No importa, pues, poco, luego dende
+los tiernos años acostumbrarse desta manera o de la otra, sino que es la mayor
+parte, o, por mejor decir, el todo.
+
+En el capítulo II trata cómo las virtudes son medianias entre excesos y defectos,
+y pruébalo por analogía o proporción de las cosas corporales, pues vemos que, de
+exceso de demasiado mantenimiento, vienen a estragar los hombres su salud, y
+también de falta dél: y lo mismo es en las demás cosas.
+
+Capítulo II
+
+Pero por cuanto la presente disputa no se aprende por sólo saberla, como las otras
+sciencias (porque no por saber qué cosa es la virtud disputamos, sino por hacernos
+buenos, porque en otra manera no fuera útil la disputa), de necesidad habemos de
+considerar los actos cómo se han de hacer, porque, como habemos dicho, ellos
+son los señores y la causa de que sean tales o tales los hábitos. Presupongamos,
+pues, que el obrar conforme a recta razón es común de todas ellas. Porque después
+trataremos dello, y declararemos cuál es la recta razón y cómo se ha con las demás
+virtudes. Esto asimismo se ha de conceder, que toda disputa, donde se trate de los
+hechos, conviene que se trate por ejemplos, y no vendiendo el cabello, como ya
+dijimos al principio, porque las razones se han de pedir conforme a la materia que
+se trata, pues las cosas que consisten en acción y las cosas convenientes, ninguna
+certidumbre firme tienen, de la misma manera que las cosas que a la salud del
+cuerpo pertenecen. Y pues si lo que se trata así en común y generalmente es tal,
+menos certidumbre y firmeza terná lo que de las cosas en particular y por menudo
+se tratare, porque las cosas menudas y particulares no se comprehenden debajo de
+arte alguna ni preceptos, sino que los mismos que lo han de hacer han de considerar
+siempre la oportunidad, como se hace en la medicina y arte de navegar. Pero aunque
+esta disciplina sea desta manera, con todo esto se ha de procurar de darle todo el
+favor que posible fuere. Primeramente, pues, esto se ha de entender, que todas las
+cosas deste jaez se pueden gastar y errarse por defecto y por exceso (porque en lo
+que no se vee ocularmente conviene usar de ejemplos manifiestos), como vemos
+que acontece en la fuerza y la salud. Porque los demasiados ejercicios, y también la
+falta dellos, destruyen y debilitan nuestras fuerzas. De la misma manera el beber y
+el comer, siendo más o menos de lo que conviene, destruye y estraga la salud; pero
+tomados con regla y con medida, la dan y acrecientan, y conservan. Lo mismo,
+pues, acontece en la templanza y en la fortaleza, y en todas las otras maneras
+de virtudes. Porque el que de toda cosa huye y toda cosa teme y a ninguna cosa
+aguarda, hácese cobarde, y, por el contrario, el que del todo ninguna cosa teme, sino
+que todas cosas emprende, hácese arriscado y atrevido. De la misma manera, el que
+a todo regalo y pasatiempo se da, y no se abstiene de ninguno, es disoluto; pero el
+que de todo placer huye, como los rústicos, hácese un tonto sin sentido. Porque la
+templanza y la fortaleza destrúyese por exceso y por defecto, y consérvase con la
+medicina. Y no solamente el nacimiento y la crecida y la perdición dellas procede
+destas cosas y es causa dellas, pero aun los ejercicios mismos consisten en lo
+mismo, pues en las otras cosas más manifiestas acaece desta suerte, como vemos
+en las fuerzas, las cuales se alcanzan comiendo bien y ejercitándose en muchas
+cosas de trabajo, y el hombre robusto puédelo esto hacer muy fácilmente. Lo
+mismo, pues, acontece en las virtudes, porque absteniéndonos de los regalos y
+pasatiempos nos hacemos templados, y siendo templados nos podemos abstener
+dellos fácilmente. Y de la misma manera en la fortaleza, porque acostumbrándonos
+a tener en poco las cosas temerosas y esperarlas, nos hacemos valerosos, y siendo
+valerosos, podremos fácilmente aguardar las cosas temerosas.
+
+En el capítulo III propone la materia de los vicios y virtudes, la cual dice ser
+contentos y tristezas. Porque la misma acción que es pesada por su mal hábito al
+vicioso, y por la misma razón le causa tristeza, esta misma al virtuoso, por su buen
+hábito y costumbre, le es fácil y le da contento.
+
+Capítulo III
+
+Habemos de tener por cierta señal de los hábitos el contento o tristeza que en
+las obras se demuestra, porque el que se abstiene de los regalos y pasatiempos
+corporales, y halla contento en el abstenerse, es templado; pero el que del abstenerse
+se entristece, es disoluto. Y el que aguarda las cosas peligrosas y se huelga con
+aquello, o a lo menos no se entristece dello, es valeroso; pero el que se entristece,
+dícese cobarde. Porque la moral virtud en contentos y tristezas se ejercita, pues
+por el regalo hacemos cosas malas, y por la tristeza nos abstenemos de las buenas.
+Por lo cual conviene, como dice Platón, que luego dende la niñez se avecen los
+hombres a holgarse con lo, que es bien que se huelguen, y a entristecerse de lo
+que es bien que se entristezcan, porque ésta es la buena doctrina y crianza de los
+hombres. A más desto, si las virtudes consisten en las accioney afectos, y en toda
+acción y afecto se sigue contento o tristeza, colígese de aquí que la virtud consiste
+en contentos y tristezas. Veese claro esto por los castigos que por estas cosas se
+dan, los cuales son como unas curas, y las curas hanse de hacer por los contrarios.
+Asimismo cualquier hábito del alma, como poco antes dijimos, a las cosas que
+lo pueden hacer peor o mejor endereza su naturaleza y consiste en ellas, pues
+manifiesto está que por los halagos del regalo y temores de la tristeza se hacen cosas
+malas, por seguir o huir de las que no conviene, o cuando no conviene, o como
+no conviene, o de cualquier otra manera que la razón juzga destas cosas. Por esto
+difinen las virtudes ser unas seguridades de pasiones y sosiegos del espíritu, pero no
+bien, por hablar así generalmente y no añadir, como conviene, y como no conviene,
+y cuando conviene, y todas las demás cosas que se añaden. Presupónese, pues, que
+la virtud esta de que se trata, es cosa que en materia de contentos y tristezas nos
+inclina a quehagamos lo mejor, y que el vicio es lo que nos inclina a lo contrario.
+Pero por esto que diremos se entenderá más claro. Tres cosas hay que nos mueven
+a elegir una cosa: lo honesto, lo útil, lo suave, y sus tres contrarios a aborrecerla: lo
+deshonesto, lo dañoso, y lo pesado y enfadoso; en lo cual el bueno siempre acierta
+tanto cuanto yerra el malo, pero especialmente en lo que al contento toca y al
+regalo. Porque éste es común a todos los animales, y a todo lo que elección de cosas
+hace le es anejo. Porque lo honesto y lo útil también parece suave y aplacible. A
+más desto, base criado dende la niñez juntamente con nosotros, por lo cual es cosa
+dificultosa despedir de nosotros este afecto, si una vez en el alma está arraigado.
+Todos también, cuál más, cuál menos, reglamos nuestras obras con el contento y la
+tristeza, por lo cual hay necesidad que en esta disputa se trate destas cosas, por lo
+que no importa poco el alegrarse o entristecerse para el hacer las cosas bien o mal.
+Asimismo es más dificultoso resistir al regalo que a la ira, como dice Heráclito,
+y en las más dificultosas cosas se emplea siempre el arte y la virtud, porque el
+acertar en ellas es cosa más insigne. De manera que, siquiera por esto, ha de tratar
+curiosamente de los contentos y desabrimientos o tristezas, así la disciplina moral
+como también la de república, porque el que bien déstas usare, será bueno, y malo
+el que mal en ellas se empleare. Ya, pues, está declarado cómo la virtud consiste en
+contentos y tristezas, y cómo, lo mismo que la causa, la hace crecer y la destruye
+cuando de una misma manera no se hace, y también cómo en los mismos actos de
+donde nace, en aquellos mismos se ejercita.
+
+En el capítulo IV propone una objeción que parece que se colige de lo dicho, para
+probar que los hábitos no nacen de los actos. Porque si el que adquiere hábito de
+justicia ha de obrar cosas de justicia para adquirirlo, ya, pues obra justicia, será justo,
+y, por el consiguiente, terná hábito de justicia. Esta objeción, fácilmente se desata
+con decir que los actos del que no está aún habituado son imperfetos, como se vee
+en el que aprende a tañer vihuela o cualquier otro instrumento, y por esto no bastan a
+darle nombre de perfeto en aquel hábito o arte en que se ejercitare.
+
+Capítulo IV
+
+Dudará por ventura alguno cómo se compadece lo que decimos, que conviene
+que ejercitándose en cosas justas se hagan justos, y empleándose en cosas de
+templanza templados. Porque si en cosas justas y templadas se emplean, ya serán
+justos y templados, así como, si hacen las cosas de gramática y de música, serán
+ya gramáticos y músicos. O diremos que no pasa en las artes desta suerte, porque
+puede ser que acaso haga uno una cosa tocante a la gramática, o diciéndole otro
+cómo ha de hacerlo. Entonces, pues, será gramático, cuando como gramático hiciere
+alguna cosa tocante a la gramática. Quiero decir conforme a la gramática que en sí
+mismo tuviere. A más desto, no es todo de una manera en las artes y en las virtudes,
+porque lo que en las artes se hace, en sí mismo tiene su remate y perfición, de
+manera que basta que se haga como quiera que ello sea; pero lo que se hace en las
+cosas de virtud, no de cualquier manera que se haga, justa y templadamente estará
+hecho, sino que es menester que el que lo haga de cierta manera esté dispuesto,
+porque primeramente ha de entender lo que hace. A más desto halo de escoger de su
+propria voluntad y por sólo fin de aquello, y no por otra causa; terceramente, halo
+de hacer con firmeza y constancia. Todas estas cosas en las demás artes ni se miran
+ni se consideran, sino que basta sólo el entenderlas. Pero en las cosas de la virtud,
+lo que menos hace o nada al caso es el entenderlas, sino que lo más importante, o
+por mejor decir el todo, consiste en lo demás, pues del ejercitarse muchas veces
+en las cosas justas y templadas, proceden las virtudes. Entonces, pues, se dicen
+las cosas justas y templadas, cuando son tales, cuales las haría un hombre justo y
+templado en su vivir. Y aquél es justo y templado en su vivir, que no solamente
+hace estas obras, pero las hace como los hombres justos y moderados en el vivir
+las acostumbran hacer. Bien, pues, y conforme a razón se dice, que haciendo cosas
+justas se hace el hombre justo, y ejercitándose en cosas de templanza, templado
+en su vivir. Pero no ejercitándose, por mucho que lo considere, ninguno se hará
+bueno. Pero esto los más lo dejan de hacer, y contentándose con solo tratar las
+razones, les parece que son filósofos y que saldrán desta manera virtuosos. A los
+cuales les acaece lo mismo que a los enfermos, que escuchan lo que el médico
+dice atentamente, y después no hacen nada de lo que él les manda. Y así como
+aquéllos, curándose de aquella manera, jamás ternán el cuerpo sano ni de buen
+hábito dispuesto, de la misma manera éstos, filosofando desta manera, nunca
+ternán el alma bien dispuesta.
+
+Ya que Aristóteles ha declarado ser los buenos ejercicios la origen y fuente
+de donde nacen y manan las virtudes, inquiere agora la difinición de la virtud, y
+procura darnos a entender qué cosa es la virtud. Y como toda difinición consta
+de género y diferencia, como los lógicos lo enseñan, en el capítulo V prueba
+ser hábito el género de la virtud, y que las virtudes ni son facultades naturales
+ni tampoco son afectos, porque los afectos no nos dan nombres de buenos, ni
+malos, lo cual hacen las virtudes y los vicios, y la misma razón vale para probar
+que no son facultades naturales.
+
+Capítulo V
+
+Tras desto habemos de inquirir qué cosa es la virtud. Y pues en el alma hay tres
+géneros de cosas solamente: afectos, facultades y hábitos, la virtud de necesidad ha
+de ser de alguno destos tres géneros de cosas. Llamo afectos la la codicia, la ira, la
+saña, el temor, el atrevimiento, la envidia, el regocijo, el amor, el odio, el deseo, los
+celos, la compasión, y generalmente todo aquello a que es aneja tristeza o alegría.
+Y facultades, aquellas por cuya causa somos dichos ser capaces destas cosas,
+como aquellas que nos hacen aptos para enojarnos o entristecernos o dolernos.Pero
+hábitos digo aquellos conforme a los cuales, en cuanto a los afectos, estamos
+bien o mal dispuestos, como para enojarnos. Porque si mucho nos enojamos o
+remisamente, estamos mal dispuestos en esto, y bien si con rienda y medianía,
+y lo mismo es en todo lo demás. De manera que ni las virtudes ni los vicios son
+afectos, porque, por razón de los afectos, ni nos llamamos buenos ni malos, como
+nos llamamos por razón de las virtudes y vicios. Asimismo por razón de los afectos
+ni somos alabados ni vituperados, porque ni el que teme es alabado, ni el que se
+altera, ni tampoco cualquiera que se altera o enoja comúnmente así es reprehendido,
+sino el que de tal o de tal manera lo hace; pero por causa de las virtudes y los
+vicios somos alabados o reprehendidos. A más desto, en el enojarnos o temer no
+hacemos elección; pero las virtudes son elecciones o no, sin elección. Finalmente,
+por causa de los afectos decimos que nos alteramos o movemos; pero por causa
+de las virtudes o vicios no decimos que nos movemos, sino que estamos de
+cierta manera dispuestos. Por las mismas razones se prueba no ser tampoco
+facultades; pues por sólo poder hacer una cosa, ni buenos ni malos nos llamamos,
+ni tampoco somos por ello alabados ni reprehendidos. Asimismo las facultades,
+naturalmente las tenemos, pero buenos o malos no somos por naturaleza. Pero
+desto ya arriba se ha tratado. Pues si las virtudes ni son afectos ni tampoco
+facultades, resta que hayan de ser hábitos. Cuál sea, pues, el género de la virtud,
+desta manera está entendido.
+
+Ya que en el capítulo V ha demostrado ser el hábito género de la virtud, en
+el sexto demuestra cuál es su diferencia, para que la difinición de la virtud quede
+desta manera declarada. Prueba, pues, la diferencia de la virtud, ser perficionar al
+hombre para que su proprio oficio perfetamente haga, lo cual prueba por muchas
+virtudes y ejemplos.
+
+Capítulo VI
+
+No sólo, pues, conviene decir qué es hábito, sino también qué manera de hábito.
+Esto, pues, se ha de confesar ser verdad, que toda virtud hace que aquello cuya
+virtud es, si bien dispuesto está, se perficione y haga bien su proprio oficio. Como
+la virtud del ojo perficiona el ojo y el oficio dél, porque con la virtud del ojo vemos
+bien, de la misma manera la virtud del caballo hace al caballo bueno y apto para
+correr y llevar encima al caballero y aguardar a los enemigos. Y si esto en todas las
+cosas es así, la virtud del hombre será hábito que hace al hombre bueno y con el
+cual hace el hombre su oficio bien y perfetamente. Lo cual como haya de ser ya lo
+habemos dicho, y aun aquí se verá claro si consideramos qué tal es su naturaleza.
+En toda cosa continua y que puede dividirse, se puede tomar parte mayor y parte
+menor y parte igual, y esto, o en sí misma, o en respecto nuestro. Es igual lo que
+es medio entre el exceso y el defecto; llamo el medio de la cosa, el que igualmente
+dista de los dos extremos, el cual en todas las cosas es de una misma manera;
+pero el medio en respecto de nosotros es aquello que ni excede ni falta de lo que
+conviene, el cual ni es uno, ni el mismo en todas las cosas. Como agora si diez
+son muchos y dos pocos, en cuanto a la cosa será el medio seis, porque igualmente
+excede y es excedido, y éste, en la proporción aritmética, es el medio. Pero el medio
+en respecto nuestro no lo habemos de tomar desta manera, porque no porque sea
+mucho comerse cien ducados, y comerse veinte poco, por eso el que gobierna los
+cuerpos les dará a comer sesenta; porque por ventura esto es aún mucho o poco
+para el que lo ha de recibir. Porque para uno como Milón, poco sería, pero para el
+que comienza a ejercitarse, sería demasiado; y lo mismo es en los ejercicios de la
+corrida y de la lucha. Desta manera todo artífice huye del exceso y del defecto, y
+busca y escoge lo que consiste en medianía; digo el medio, no el de la cosa, sino lo
+que es medio en respecto nuestro. De manera que toda sciencia desta suerte hace lo
+que a ella toca perfetamente, considerando el medio y encaminando a él todas sus
+obras. Por lo cual suelen decir de todas las obras que están hechas como deben, que
+ni se les puede quitar ni añadir ninguna cosa; casi dando a entender que el exceso y
+el defecto estragan la perfición de la cosa, y la medianía la conserva. Y los buenos
+artífices, como poco antes decíamos, teniendo ojo a esto hacen sus obras. Pues la
+virtud, como más ilustre cosa y de mayor valor que toda cualquier arte, también
+inquire el medio como la naturaleza misma. Hablo de la virtud moral, porque ésta
+es la que se ejercita en los afectos y acciones, en las cuales hay exceso y defecto,
+y su medio, como son el temer y el osar, el codiciar y el enojarse, el dolerse, y
+generalmente el regocijarse y el entristecerse, en todo lo cual puede haber más
+y menos, y ninguno dellos ser bien. Pero el hacerlo cuando conviene y en lo que
+conviene y con los que conviene y por lo que conviene y como conviene, es el
+medio y lo mejor, lo cual es proprio de la virtud. Asimismo en las acciones o
+ejercicios hay su exceso y su defecto, y también su medianía; y la virtud en las
+acciones y afectos se ejercita, en las cuales el exceso es error y el defecto afrenta,
+y el tomar el medio es ganar honra y acertarlo; las cuales dos cosas son proprias
+de la virtud. De manera que la virtud es una medianía, pues siempre al medio se
+encamina. A más desto, que el errar una cosa, de varias maneras puede acaecer,
+porque lo malo es de las cosas que no tienen fin, como quisieron significar los
+pitagóricos; pero lo bueno tiene su remate, y para acertar las cosas no hay más de una
+manera. Por donde el errar las cosas es cosa muy fácil, y el acertarlas muy dificultosa.
+Porque cosa fácil es dar fuera del blanco, y acertar en él dificultosa. Y por esto el
+exceso y el defecto son proprios del vicio, y de la virtud la medianía:
+
+Porque para la virtud sólo un camino
+
+se halla; y los del vicio son sin tino.
+
+Es, pues, la virtud hábito voluntario, que en respecto nuestro consiste en una
+nuedianía tasada por la razón y como la tasaría un hombre dotado de prudencia;
+y es la medianía de dos extremos malos, el uno por exceso y el otro por defecto;
+asimismo por causa que los unos faltan y los otros exceden de lo que conviene en
+los afectos y también en las acciones; pero la virtud halla y escoge lo que es medio.
+Por tanto, la virtud, cuanto a lo que toca a su ser y a la difinición que declara lo que
+es medianía, es cierto la virtud, pero cuanto a ser bien y perfección, es extremo.
+Pero no todo hecho ni todo afecto es capaz de medio, porque, algunos, luego en
+oírlos nombrar los contamos entre los vicios, como el gozarse de los males ajenos,
+la desvergüenza, la envidia, y en los hechos el adulterio, el hurto, el homicidio.
+Porque todas estas cosas se llaman tales por ser ellas malas de suyo, y no por
+consistir en exceso ni en defecto. De manera que nunca en ellas se puede acertar,
+sino que siempre se ha de errar de necesidad. Ni en semejantes cosas consiste
+el bien o el mal en adulterar con la que conviene, ni cuando conviene, ni como
+conviene, sino que generalmente el hacer cualquier cosa déstas es errar. De la
+misma manera es el pretender que en el agraviar y en el cobardear y en el vivir
+disolutamente hay medio y exceso y asimismo defecto. Porque desta manera un
+exceso sería medio de otro exceso y un defecto medio de otro. Pues así como
+en la templanza y en la fortaleza no hay exceso ni defecto, por ser, en cierta
+manera, medio entre dos extremos, de la misma manera en aquellas cosas ni
+hay medio ni exceso ni defecto, sino que de cualquier manera que se hagan es
+errarlas. Porque, generalmente hablando, ningún exceso ni defecto tiene medio,
+ni ningún medio exceso ni defecto.
+Ya que en el capítulo VI ha sacado en limpio Aristóteles la definición de
+la virtud y ha mostrado consistir en la medianía que hay entre dos extremos
+viciosos, en el capítulo VII trata, más en particular, esto de la medianía, y
+especificándolo más en cada género de virtud, con ejemplos manifiestos lo da
+a entender más claramente.
+
+Capítulo VII
+
+Todo esto conviene que se trate, no solamente así en común, pero que se
+acomode también a las cosas en particular; porque en materia de hechos y negocios,
+lo que se dice ansí en común es más universal, pero lo que se trata en particular
+tiene la verdad más manifiesta. Porque los hechos en las cosas particulares acaecen.
+Conviene, pues, que la verdad cuadre también con éstas y concorde. Éstas, pues,
+hanse de tomar contándolas de una en una, por menudo. Es, pues, la fortaleza una
+medianía entre los temores y los atrevimientos. Pero de los que della exceden, el
+que excede en no temer no tiene vocablo proprio (y aun otras muchas cosas hay
+que no tienen proprio nombre); el que excede en osar llámase atrevido, mas el que
+excede en el temer y falta en el osar, llámase cobarde. Pero entre los placeres y
+tristezas no se halla siempre medio, porque solamente se halla en los placeres y
+pasatiempos del cuerpo; y entre éstos señaladamente en aquellos que consisten en
+el tacto, y en las molestias o tristezas no tanto. Es, pues, el medio entre éstos la
+templanza, y el exceso la disolución. Faltos en el tomar y gozar de los placeres, no
+se hallan así, y por esto ni éstos tampoco tienen nombre, pero llámense insensatos
+o gente falta de sentido. Asimismo en el dar y recebir dineros es el medio la
+liberalidad, y el exceso y defecto la prodigalidad y la escaseza. Estas dos se han
+contrariamente en el exceso y el defecto, porque el pródigo excede en el dar y falta
+en el recibir, pero el escaso, por el contrario, es falto en el dar y demasiado en el
+recibir. Tratamos desto agora así en suma y por ejemplos, pareciéndonos que para
+lo presente basta esto. Porque después se tratará de todo ello más de propósito y
+al largo. Hay asimismo en las cosas del interese y dinero otros afectos. Porque la
+generosidad es medianía, y difiere el generoso del liberal en esto: que el generoso
+es el que bien emplea su dinero en cosas graves, y el liberal el que hace lo mismo
+en cosas de no tanto tomo ni de tanta calidad. El exceso de la generosidad llámase,
+en griego, muy bien apirokalia, ques como si dijésemos ignorancia de lo que es
+perfeto o falta de experiencia de lo bueno, y también banausía, ques huequeza, y
+el defecto es vileza y poquedad de ánimo. Todas éstas difieren de las cosas que
+consisten en lo de la liberalidad, pero en qué difieran después lo trataremos. En
+lo de la honra y afrenta, la medianía es la magnanimidad o grandeza de ánimo, el
+exceso aquel vicio que llamamos hinchazón de ánimo, y el defecto abatimiento
+de ánimo. De la misma manera que dijimos que se había la liberalidad con la
+generosidad o magnificencia, que diferían en emplearse la una en cosas de más
+calidad y la otra en cosas de menos, de la misma se ha otra medianía que en honras
+pequeñas se emplea, con la magnanimidad, que consiste en honras de gran tomo.
+Porque acontece pretenderse una honra como conviene, y más y menos de lo que
+conviene. Y el que en los deseos de la honra excede, llámese ambicioso, y el que
+falta despreciador de honra, y el que entre éstos es medio, no tiene nombre proprio,
+ni menos lo tienen tampoco los afectos mismos, si no es la ambición del ambicioso.
+De do sucede que los extremos se usurpan el derecho del medio, y nosotros, al
+que en esto sigue el medio, algunas veces lo llamamos ambicioso, y otras veces
+despreciador de la honra, y unas veces alabamos al que pretende las honras, y otras
+al que las desprecia. Lo cual por qué razón lo hagamos, tratarse ha en lo de adelante.
+Agora tratemos de las que restan de la manera que habemos comenzado. En la ira
+hay también su exceso, su defecto y su medianía, y como casi todos carecen de
+nombres, pues al que en esto tiene el medio llamamos manso, la medianía dello
+llamarla hemos mansedumbre, y de los extremos el que excede llámese colérico y
+el vicio dello cólera, y el que falta simple, y el defecto simplicidad. Hay asimismo
+otras tres medíanías que se parecen mucho las unas a las otras, aunque difieren entre
+sí. Porque todas ellas consisten en obras y palabras, y en el uso dellas; pero difieren
+en que la una consiste en la verdad que en ellas hay, y las otras en la suavidad.
+Desto, parte consiste en la conversación, y parte en las demás cosas tocantes a la
+vida. Habemos, pues, de tratar también de todo esto, para que mejor entendamos
+cómo en todo es de alabar la medianía, y que los extremos ni son buenos ni dignos
+de alabanza, sino de reprehensión. Muchas, pues, destas cosas no tienen nombre
+proprio, pero habemos de probar cómo en lo demás de darles y fingirles nombres,
+por amor de su declaración y para que vaya bien continuada la materia. Pues en
+cuanto a la verdad, el que tiene la medianía llámase verdadero o hombre de crédito
+y verdad, y la medianía digamos que es la misma verdad, y la que la quiere remedar
+en lo que excede, fanfarronería, y el que della usa fanfarrón, y el que en lo que
+es menos la quiere remedar, disimulado, y el vicio disimulación. En lo que toca a
+cosas de suavidad, lo que es cosa de burlas o gracias, el que en ello guarda medianía
+llámase gracioso o cortesano, y el tal afecto cortesanía, pero el exceso truhanería, y
+el que la trata truhán, y el defecto grosería, y el que en él cae, rústico o grosero. En
+la tercera suavidad que hay en la vida, el que en lo que es bien da gusto y contento,
+dícese amigo, y la medianía en esto amistad. Pero el que excede, si por su proprio
+interese no lo hace, llámase halagero, y si por su proprio interese, lisongero, y
+el que falta y en ninguna cosa es amigo de dar contento a nadie, dícese terrible
+y incomportable. En los afectos también, y en las cosas a ellos anexas hay sus
+medianías. Porque la vergüenza no es cierto virtud, pero el que es vergonzoso es
+alabado. Pero déstos uno decimos que tiene el medio y otro que el extremo, casi
+notando de tonto al que de todas las cosas tiene empacho. Mas el que falta, o el
+que de ninguna cosa tiene vergüenza, es desvergonzado, y el que entre éstos tiene
+el medio, llámase vergonzoso. La indignación es también medio entre la invidia
+y el vicio del que de ajenos males se huelga. Consisten estas cosas en la tristeza
+y contento de las cosas que a los vecinos o conocidos acaecen. Porque el que se
+indigna, entristécese por los prósperos sucesos de los que dellos son dignos: el
+envidioso, excediendo a éste, de todos los bienes ajenos se entristece, pero el que
+de males ajenos se huelga, está tan lejos de entristecerse, que se alegra. Pero desto
+en otro lugar habrá mejor oportunidad para tratarlo. Mas de la justicia, pues, tiene
+varias partes su consideración; dividiéndola en seis partes, trataremos por sí de
+cada una, mostrando cómo son asimismo medianias. Y de la misma manera de las
+demás virtudes que tocan al entendimiento.
+
+En el capítulo VIII declara cómo son contrarias estas virtudes y estos vicios, y
+asimismo los afectos en que se ejercitan. Demuestra cómo cada una destas cosas
+tiene dos contrarios: el medio tiene por contrarios los extremos, y cada uno de los
+extremos tiene también por contrarios al otro extremo con el medio. Pero aquí no
+es el medio como en los contrarios naturales, que se hacen por participación de los
+extremos, como lo tibio, de participación de caliente y frío, sino que es como regla
+entre exceso y defecto, o como peso entre más y menos, o como el camino derecho
+entre los que se desinan a mano derecha o a la izquierda.
+
+Capítulo VIII
+
+Siendo, pues, tres estas disposiciones, dos de los vicios, la una por exceso y la
+otra por defecto, y una de la virtud, que es la medianía, las unas a las otras en cierta
+manera son contrarias. Porque los extremos son contrarios del medio y el uno del
+otro por lo mismo, y el medio también de los extremos. Porque así como lo igual
+es mayor que lo menor y menor que lo mayor, asimismo los hábitos, que consisten
+en el medio, en comparación de los defectos, son excesos, y en comparación de los
+excesos, son defectos, en los afectos y en las obras. Porque el valeroso, comparado
+con el cobarde, parece atrevido, y puesto al parangón con el atrevido, parece
+cobarde. De la misma manera el templado, conferido con el tonto y insensato,
+parece disoluto, y comparado con el disoluto, parece tonto y insensato. Y el liberal,
+comparado con el escaso, parece pródigo, y conferido con el pródigo, parece ser
+escaso. Por esto los extremos rempujan al medio, el uno para el otro, y el cobarde
+llama atrevido al valeroso, y el atrevido dícele cobarde, y por la misma proporción
+acaece en los demás. Siendo, pues, éstos desta manera contrarios en sí, mayor
+contrariedad tienen entre sí que con el medio los extremos. Porque más distancia
+hay del uno al otro, que de cualquiera dellos al medio, de la misma manera que
+lo grande dista más de lo pequeño, y lo pequeño de lo grande, que cualquiera
+de ellos de lo igual. A más desto, algunos de los extremos parece que tienen
+alguna semejanza y parentesco con el medio, como el atrevido con la valerosidad
+o fortaleza, y la prodigalidad con la liberalidad. Pero los extremos son entre sí muy
+diferentes; y aquéllos difinen ser contrarios, que tienen entre sí la mayor distancia;
+de manera que las cosas que entre sí mayor distancia tengan, más contrarias serán.
+Pero con el medio, en unos tiene mayor contrariedad el defecto, y en otros el exceso,
+como a la fortaleza no le es tan contrario el atrevimiento, siendo exceso, como la
+cobardía, que es defecto; pero a la templanza no le es tan contraria la tontedad,
+siendo defecto, corno la disolución, que es el exceso, lo cual acaece por dos causas:
+la una consiste en las mismas cosas, porque por ser el uno de los extremos más
+cercano y más semejante al medio, no aquél, sino el otro le asignamos antes por
+contrario, como agora, que porque el atrevimiento parece más a la fortaleza o
+valerosidad y le es más cercano, y la cobardía le es más diferente, se la asignamos
+más de veras por contrario, porque las cosas que del medio están más apartadas y
+remotas, más parecen ser contrarias. Una, pues, de las causas consiste en la misma
+cosa, pero la otra de nuestra parte procede. Porque aquellas cosas a que nosotros de
+nuestro, naturalmente, más somos inclinados, parecen ser del medio más contrarias.
+Como agora nosotros de nuestro más inclinados somos al regalo, y por esto, con
+facilidad nos dejamos caer en la disolución más que en la templanza. Aquellas cosas,
+pues, decimos ser más contrarias, en que más fácilmente nos acrecentamos. Y por
+esto la disolución, aunque es exceso, es más contraria a la templanza.
+
+En el nono y último capítulo da Aristóteles un muy prudente consejo para
+alcanzar la medianía en los hechos morales y de virtud, y es que, si no acertamos
+a tomar el medio perfetamente en nuestros hechos, nos arrimemos más al extremo
+con quien el medio menor contrariedad y diferencia tiene. Como antes a huir
+de todo pasatiempo, que a querer gozar de todos los regalos, y antes a osar las
+cosas arduas, que a temerlas.
+
+Capítulo IX
+
+Cumplidamente está ya declarado cómo la moral virtud es medianía, y de qué
+manera y cómo es medianía de dos vicios, el uno por exceso y el otro por defecto;
+asimismo cómo la virtud es desta calidad, por encaminarse siempre al medio en
+los afectos y en las obras. Por lo cual el proprio oficio del hombre es ser virtuoso
+en cada cosa, pues es su oficio buscar y tomar en cada cosa el medio. Como el
+hallar el medio en el círculo no es hecho de quien quiera, sino del que es docto en
+geometría, desta misma manera, el enojarse cosa es que quien quiera la hará y fácil,
+y asimismo el dar dineros y gastarlos, pero a quién, y cuánto, y cuándo, y por qué,
+y cómo, no es hecho de quien quiera ni fácil de hacer; y por esto el obrar bien es
+cosa rara y alabada y ilustre.Por tanto, al que al medio se quiere allegar, conviénele
+primeramente huir del extremo más contrario, de la misma manera que en Homero
+la nimfa Calipso exhorta a Ulises:
+
+Lejos del humo y de las ondas ata
+
+tu nave, do no así se desbarata.
+
+Porque de los extremos, uno es mayor yerro y otro no tan grave. Pero,
+pues, alcanzar el medio es negocio muy dificultoso, habemos de tomar en la no
+próspera navegación (como dicen vulgarmente) del mal lo menos, lo cual, sin duda,
+alcanzaremos de la manera que está dicho. También habemos de mirar a qué cosas
+nosotros de nuestro somos más inclinados; porque unos somos inclinados a uno,
+y otros a otro, y esto entenderlo hemos fácilmente del contento o tristeza que en
+nosotros se causare. Habemos, pues, de procurar de remar hacia la parte contraria,
+porque apartándonos lejos de lo que es errar, iremos al medio; como lo hacen los
+que enderezan los maderos que están tuertos. Sobre todo, en cualquier cosa que
+hiciéremos, nos habemos de guardar del cebo del regalo. Porque no juzgamos dél
+como jueces libres. Y hanos de acaecer lo mismo a nosotros con el regalo, que
+les aconteció a los senadores de Troya con Helena, y en todas las cosas servirnos
+del parecer y palabras dellos. Porque echándolo de nosotros desta suerte, menos
+erraremos. Haciendo, pues, esto (hablando así, en suma) muy bien podremos
+alcanzar el medio. Pero por ventura es esto cosa dificultosa, y más particularmente
+en cada cosa. Porque no es fácil cosa determinar cómo, y con quién, y en qué, y
+cuánto tiempo nos habemos de enojar; pues aun nosotros algunas veces alabamos
+a los que faltan en esto, y los llamamos mansos, y otras veces, a los que se enojan
+y sienten mucho las cosas, les decimos que son hombres de rostro y de valor. Pero
+lo que excede poco de lo que se debe hacer, no se reprehende, ora sea en exceso,
+ora en defecto, sino el que excede mucho, porque éste échase mucho de ver. Mas
+determinar con palabras hasta dónde y en cuánto es uno digno de reprehensión,
+no es cosa fácil de hacer, como el determinar cualquier otra cosa de las que con
+el sentido se perciben. Porque estas cosas en los negocios particulares y en la
+experiencia tienen su determinación. Esto a lo menos se muestraabiertamente,
+que en todas las cosas es de alabar el hábito que consiste en medianía, aunque
+de necesidad alguna vez nos habemos de derribar a la parte del exceso, y otras a
+la del defecto, porque desta manera muy fácilmente alcanzaremos el medio y lo
+que debemos hacer para ser buenos.
+
+Fin del libro segundo

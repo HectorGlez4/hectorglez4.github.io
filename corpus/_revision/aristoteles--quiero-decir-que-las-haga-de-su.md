@@ -1,0 +1,13 @@
+---
+texto: "Quiero decir, que las haga de su propria voluntad, y por sólo respecto de ellas mismas."
+autor: "aristoteles"
+slug: "aristoteles-quiero-decir-que-las-haga-de-su"
+procedencia:
+  obra: "Ética a Nicómaco"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_6"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Y lo que a cada uno le es de desear, esto ha de tener en sí, o será, en cuanto a aquella parte, falso."
+autor: "aristoteles"
+slug: "aristoteles-y-lo-que-a-cada-uno-le"
+procedencia:
+  obra: "Ética a Nicómaco"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/%C3%89tica_a_Nic%C3%B3maco/Libro_9"
+---
