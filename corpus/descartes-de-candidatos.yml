@@ -66,3 +66,9 @@ descartes:
     idDePagina: 15074
     nombre: "Fray Ambrosio Montesino"
     motivo: "Su única obra en Wikisource-es es el villancico «La noche Santa»: un estribillo y una copla, en verso y sin sentencia que se sostenga suelta. Es el defecto que la bitácora ya catalogó con la lírica breve."
+  - fecha: "2026-09-08"
+    epoca: "antigua-grecia"
+    candidato: "esopo"
+    idDePagina: 4671
+    nombre: "Esopo"
+    motivo: "Sus 80 fábulas en Wikisource-es se sirven con <pages index=…> sin autor=, y sin categoría de Autor: solo lo declara la página Index: del escaneo, que es la lectura que sigue sin decidirse. Los documentos se versionan mudos y FR-23 los para. Reabrir cuando se decida leer del Index:."
