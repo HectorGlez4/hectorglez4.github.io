@@ -1,0 +1,94 @@
+fuente: wikisource-es
+obra: Los diez libros de Diógenes Laercio: Tomo I
+url: https://es.wikisource.org/wiki/Los_diez_libros_de_Di%C3%B3genes_Laercio%3A_Euclides
+recuperado: 2026-09-13
+---
+Los diez libros de Diógenes Laercio: Euclides
+|titulo=[[Los diez libros de Diógenes Laercio: Tomo I]]
+|autor=Diógenes Laercio
+---
+E U C L I D E S.
+
+1. Euclides fue natural de Megara, ciudad cercana al istmo
+o, según algunos, de Gela, como dice Alejandro en las Sucesiones. Estudió las obras de Parménides, y los que siguieron sus dogmas se llamaron megáricos; luego disputadores, y ultimamente dialécticos. Dióles este nombre Dionisio de Cartago, porque sus discursos eran todos por preguntas y respuestas. Después de la muerte de Sócrates se retiraron Platón y los demás filósofos a casa de Euclides en Megara, como dice Hermodoro, temiendo la crueldad de los tiranos. Definía que sólo hay un bien, llamado con nombres diversos: unas veces sabiduría, otras dios, otras mente y semejantes. No admitía las cosas contrarias a este bien, negándoles la existencia. Sus demostraciones no eran por asunciones, sino por ilaciones o sacando consecuencias. Tampoco admitía las comparaciones en los argumentos
+, diciendo que el argumento o consta de cosas semejantes, o desemejantes
+; si consta de cosas semejantes, antes conviene examinar estas mismas cosas que no las que se le semejan. Pero si consta de cosas desemejantes, es ocioso la instancia o comparación. Esto dio motivo a Timón para hablar de él lo siguiente, mordiendo también a los demás socráticos:
+
+Pero yo no me cuido
+
+de estos y semejantes chocarreros.
+
+No me importa Fedón, sea quien fuere;
+
+ni el litigioso Euclides,
+
+que dio a los megarenses
+
+el rabioso furor de las disputas.
+
+Escribió seis diálogos, que son: Lampria, Fenicio, Critón, Alcibíades y Amatorio.
+
+2. De la secta de Euclides fue Eubúlides Milesio, el cual inventó en la dialéctica diversas formas de argumentos engañosos, como son: el mentiroso
+, el escondido
+, el electra
+, el encubierto
+, el sorites
+, el cornuto
+, y el calvo
+. De Eubúlides dice un poeta cómico:
+
+El fastuoso Eubúlides,
+
+embaucando los sabios oradores
+
+con sus córneas preguntas, y mentiras
+
+huecas y jactanciosas, ha partido
+
+locuaz, como Demóstenes voluble.
+
+Parece fue discípulo suyo Demóstenes, el cual apenas podía pronunciar la letra R; pero lo consiguió poco a poco con el ejercicio
+. Eubúlides fue enemigo de Aristóteles, y le contradijo en muchas cosas. Alexino Eleense fue uno de sus discípulos, hombre sumamente disputador; por cuya razón lo apellidaron Elexino
+. Disintió mucho de las opiniones de Zenón. Hermipo dice de él que, habiendo pasado de Élide a Olimpia, abrió allí escuela de filosofía, y que diciéndole los discípulos por qué se establecía allí, respondió quería fundar una secta que se llamase Olimpíaca. Mas ellos, obligados por la penuria de comestibles y de la insalubridad del sitio, lo abandonaron, de manera que se quedó a vivir allí solo con un criado. Bañándose después en el río Alfeo, se hirió con una caña y así murió. El epigrama que le he compuesto es el siguiente:
+
+No era falsa la voz que un infelice
+
+hallándose nadando, un clavo agudo
+
+un pie le traspasó; pues Alexîno,
+
+varón honesto y sabio,
+
+primero que el Alfeo atravesase,
+
+perdió la vida herido de una caña.
+
+Escribió no sólo contra Zenón, sino también otros libros y al historiador Eforo.
+
+3. De la escuela de Eubúlides salió también Eufanto Olintio, que escribió la historia de su tiempo. Compuso muchas tragedias, las cuales fueron bien recibidas en los certámenes. Fue preceptor del rey Antígono, y le dedicó un excelente tratado acerca del reinar. Hubo otros discípulos de Eubúlides, uno de los cuales fue Apolonio Cronos.
+
+↑ Al istmo, o estrecho de tierra entre dos mares, por el cual deja de ser isla el Peloponeso. Este Euclides es más antiguo que el geómetra de quien nos quedan los preciosos Elementos de Geometría.
+
+↑ διά παρα βολής λόγον. Acaso entiende los argumentos llamados à pari, o por paridad.
+
+↑ A las de la paridad.
+
+↑ τόν ψευδόμενον, El Mentiroso. Es un argumento capcioso, por el cual se demuestra falsa cualquiera respuesta que se dé: v. gr., pregúntase si miente o no uno que dice que miente. Si se dice que miente, responden que es falso, pues entonces no miente diciendo que miente. Si se dice que no miente, responden que también es falso, pues él mismo dice que miente. De esta falacia usa Cervantes en su Quijote, hallándose Sancho gobernador de la ínsula Barataria, donde había un puente y junto a él una horca en que era ahorcado todo pasajero que preguntado adónde iba se le hallaba en mentira. Llegó, dice, uno, y preguntado adónde iba, respondió que a que lo ahorcasen; de cuya inopinada respuesta se movió la duda de si debía o no ser ahorcado; pues si lo ahorcaban, el hombre había dicho verdad, y no debían ahorcarlo; si no lo ahorcaban, no había dicho verdad, y, por consiguiente, debían ahorcarlo.
+
+↑ El Escondido, διαλθάνων, latens, viene a ser la misma cosa que el Encubierto, έγχεχαλυμμένος, que explicaremos luego.
+
+↑ El Electra es un argumento así nombrado de Electra, hermana de Orestes, la cual, en la tragedia de Eurípides titulada Electra, conoció y no conoció a un mismo tiempo a dicho su hermano Orestes; pues preguntada si lo conocía, dijo que sí; pero no conoció que era Orestes el mismo que se lo preguntaba. Luciano. τ ερί Βιών πράσις.
+
+↑ El Encubierto, έγχεχαλυμμένος, se llamó así por el ejemplo que de él suele darse de un hombre encubierto, y preguntando a uno así: - ¿Conoces a tu padre? - Si. - ¿Conoces a éste que está aquí encubierto? - No - Pues éste es tu padre; y así, no conoces a tu padre. Luciano.
+
+↑ Sorites es el argumento llamado montón, derivado de υωρός, montón, también por el ejemplo que suele ponerse así: - ¿Dos granos de trigo son montón de trigo? - No. - ¿Y añadiendo otro grano? - Tampoco. - ¿Y añadiendo otro? - Tampoco. - Luego nunca habrá montón, por más granos que se añadan uno a otro; pues si añadiendo uno a los que no eran montón, no lo hace, nunca llegará el caso de hacerlo otro grano, que no tiene más fuerza que el primero que se puso.
+
+↑ El argumento llamado cornuto también toma el nombre del ejemplo puesto; y es: Lo que no has perdido lo tienes; no has perdido los cuernos, luego los tienes.
+
+↑ El Calvo, ψαλαχρός, parece asimismo proviene del ejemplo que suele ponerse, que es éste: Si a quien no es calvo se le arranca un pelo, no queda calvo: si se le quita otro, tampoco; porque si el quitarle un pelo no lo hace calvo, el segundo que se le quita tampoco es más que uno; y así nunca será calvo. Este argumento viene a ser en sustancia lo mismo que el sorites, éste por síntesis, digámoslo así, y aquél por análisis. También suele proponerse éste: Quien no tiene pelo es calvo; aquí el raído a navaja no tiene pelo; luego es calvo. Otros muchos argumentos hay de esta especie, que trata eruditamente el reverendísimo padre Feijoo.
+
+↑ Se fue, marchó, άπήλθον.
+
+↑ Χαί ρω βιαώτερος ών, παύσασθας. Es la lección y versión de Ambrosio, Estéfano, Aldobrandini, Meibomio, etc., como la más probable entre la diversidad de variantes acerca de la voz ρω βοστωμυλτθραν.
+
+↑ Que quiere decir disputador y contencioso de palabras.
