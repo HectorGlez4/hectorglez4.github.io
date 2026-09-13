@@ -1,0 +1,14 @@
+---
+texto: "FILOCLEÓN: (Designando al acusado.) Tengo idea de que ese individuo va a hacerlas mayores."
+autor: "aristofanes"
+slug: "aristofanes-filocleon-designando-al-acusado-tengo-idea-de"
+procedencia:
+  obra: "Las avispas"
+  año: 1881
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Las_avispas"
+---

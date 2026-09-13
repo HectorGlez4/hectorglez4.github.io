@@ -215,3 +215,12 @@ sesiones:
       citasPublicadas: 1744
       procedenciaCompleta: 25.5
       tradicionLatinoamericanaSobreHispanicos: 54.5
+  - fecha: "2026-09-13"
+    hora: "20:16"
+    clase: "epoca"
+    propuesto: "Agotar la época Antigua Grecia: le quedan 28 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 35 candidatos en la época Antigua Grecia: 6 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    resultado:
+      citasPublicadas: 1748
+      procedenciaCompleta: 25.6
+      tradicionLatinoamericanaSobreHispanicos: 54.5

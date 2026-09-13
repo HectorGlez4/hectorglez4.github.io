@@ -1,0 +1,14 @@
+---
+texto: "FILOCLEÓN: Pero, por mi vida, oye al menos lo que voy a decirte: quizá te agrade más."
+autor: "aristofanes"
+slug: "aristofanes-filocleon-pero-por-mi-vida-oye-al"
+procedencia:
+  obra: "Las avispas"
+  año: 1881
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Las_avispas"
+---
