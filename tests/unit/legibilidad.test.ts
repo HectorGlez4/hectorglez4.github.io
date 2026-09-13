@@ -193,6 +193,44 @@ describe('Historia 11.5 — la marca de cursiva no es una mancha', () => {
   });
 });
 
+/**
+ * Los ángulos con que el traductor marca lo que añade al original **no son daño de escáner** —
+ * 13/09/2026, las *Odas* de Horacio en la traducción de Salinas.
+ *
+ * Mismo caso que la cursiva de arriba y mismo remedio: la canaria saltó con el libro II a 1,208 %
+ * sin que el documento tuviera nada roto. Medido antes de tocar la señal: cero Citas publicadas y
+ * cero candidatas llevan `<` o `>`, así que no había ninguna en riesgo.
+ *
+ * Lo que estas pruebas fijan de verdad son los bordes: el par se reconoce **en la línea**, porque
+ * un suplemento de varias palabras deja cada ángulo suelto dentro de su palabra; lo de dentro se
+ * sigue midiendo; y el ángulo que queda solo sigue disparando.
+ */
+describe('Historia 11.5 — el suplemento del traductor no es una mancha', () => {
+  it('un suplemento de varias palabras entre ángulos no cuenta como daño', () => {
+    const linea =
+      'La hidropesía cruel se agrava con la bebida <al que es indulgente consigo mismo>, y no apaga la sed';
+    expect(medirLegibilidad(linea).señales['carácter-ajeno'] ?? 0).toBe(0);
+  });
+
+  it('ni uno de una sola palabra', () => {
+    expect(medirLegibilidad('a soportar <amigablemente> la ingrata pobreza').señales['carácter-ajeno'] ?? 0).toBe(0);
+  });
+
+  it('lo que va dentro se sigue midiendo como cualquier otra palabra', () => {
+    expect(medirLegibilidad('una frase <con coraz6n roto> dentro').señales['cifra-en-palabra'] ?? 0).toBeGreaterThan(0);
+  });
+
+  it('pero un ángulo suelto sigue disparando: eso sí puede ser un escáner', () => {
+    for (const roto of ['la mu<er moderna', 'palabra>', 'otra>cosa']) {
+      expect(medirLegibilidad(roto).señales['carácter-ajeno'] ?? 0, roto).toBeGreaterThan(0);
+    }
+  });
+
+  it('y un par que cruza de renglón no se toma por suplemento', () => {
+    expect(medirLegibilidad('abre <aquí\ny cierra> allá').señales['carácter-ajeno'] ?? 0).toBeGreaterThan(0);
+  });
+});
+
 describe('Historia 11.5 — ningún documento sano del Corpus queda condenado', () => {
   const fuentes = resolve(import.meta.dirname, '../../corpus/fuentes');
   const documentos = readdirSync(fuentes).filter((f) => f.endsWith('.txt'));

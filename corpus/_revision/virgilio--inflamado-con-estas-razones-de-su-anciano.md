@@ -1,0 +1,14 @@
+---
+texto: "Inflamado con estas razones de su anciano amigo, siente empero Eneas su ánimo combatido de graves cuidados."
+autor: "virgilio"
+slug: "virgilio-inflamado-con-estas-razones-de-su-anciano"
+procedencia:
+  obra: "La Eneida"
+  año: 1869
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_Eneida_%28Ochoa%29/Libro_V"
+---

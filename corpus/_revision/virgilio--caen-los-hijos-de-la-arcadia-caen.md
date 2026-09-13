@@ -1,0 +1,14 @@
+---
+texto: "Caen los hijos de la Arcadia, caen los Etruscos, y vosotros también ¡Oh Teucros, reliquias escapadas de los Griegos!"
+autor: "virgilio"
+slug: "virgilio-caen-los-hijos-de-la-arcadia-caen"
+procedencia:
+  obra: "La Eneida"
+  año: 1869
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_Eneida_%28Ochoa%29/Libro_X"
+---

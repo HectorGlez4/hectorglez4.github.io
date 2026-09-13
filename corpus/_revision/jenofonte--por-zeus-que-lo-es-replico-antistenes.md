@@ -1,0 +1,13 @@
+---
+texto: "-¡Por Zeus que lo es-replicó Antístenes-, la más indiscutible!"
+autor: "jenofonte"
+slug: "jenofonte-por-zeus-que-lo-es-replico-antistenes"
+procedencia:
+  obra: "El Banquete"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_banquete_%28Jenofonte%29"
+---

@@ -1,0 +1,13 @@
+---
+texto: "[26] Lelio: Esto es de todas todas utilizar la violencia."
+autor: "ciceron"
+slug: "ciceron-26-lelio-esto-es-de-todas-todas"
+procedencia:
+  obra: "Sobre la amistad"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Sobre_la_amistad"
+---

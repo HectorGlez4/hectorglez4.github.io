@@ -1,0 +1,13 @@
+---
+texto: "Aunque algunos me odian más que antes de recibir mi dinero."
+autor: "jenofonte"
+slug: "jenofonte-aunque-algunos-me-odian-mas-que-antes"
+procedencia:
+  obra: "El Banquete"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_banquete_%28Jenofonte%29"
+---

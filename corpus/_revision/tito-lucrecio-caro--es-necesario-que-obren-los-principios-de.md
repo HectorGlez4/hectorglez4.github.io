@@ -1,0 +1,13 @@
+---
+texto: "Es necesario que obren los principios De un modo clandestino e invisible; No sea que dominando demasiado Impidan a los cuerpos que se formen Conservar su específico carácter."
+autor: "tito-lucrecio-caro"
+slug: "tito-lucrecio-caro-es-necesario-que-obren-los-principios-de"
+procedencia:
+  obra: "De la naturaleza de las cosas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/De_la_naturaleza_de_las_cosas_%28Marchena_tr.%29/Libro_I"
+---

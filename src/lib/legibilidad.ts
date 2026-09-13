@@ -71,6 +71,10 @@ const EJEMPLOS = 6;
  *
  * `&` queda fuera a propósito: «&c.» por «etcétera» es abreviatura de época. `/` también:
  * separa versos cuando se cita poesía en línea.
+ *
+ * `<` y `>` siguen en la lista. Lo que se retira antes de mirarla es el **par** que abre y
+ * cierra en la misma línea (`SUPLEMENTO_ANGULAR`): eso es marcado del traductor. El ángulo que
+ * queda suelto sí puede ser una mancha, y dispara como siempre.
  */
 const AJENOS = /[*|\\^~=+#@<>{}$%`�]/u;
 
@@ -88,6 +92,34 @@ const AJENOS = /[*|\\^~=+#@<>{}$%`�]/u;
  */
 const CURSIVA = /_[^_\s][^_]*_|^_[^_]*_$/u;
 const GUION_BAJO = /_/u;
+
+/**
+ * Los ángulos con que el traductor marca **lo que añade al original** — 13/09/2026.
+ *
+ * Las *Odas* de Horacio en la traducción de Salinas escriben entre ángulos lo que no está en
+ * el latín: «se agrava con la bebida <al que es indulgente consigo mismo>», «a soportar
+ * <amigablemente> la ingrata pobreza». Es la convención de una edición crítica, no una mancha
+ * leída mal, y bastó para que el libro II midiera 1,208 % y saltara la canaria del margen: el
+ * mismo caso que la cursiva de Gutenberg, y se resuelve por el mismo camino, afinando la señal
+ * y no la canaria.
+ *
+ * Medido antes de tocarla: **0 de 1.794 Citas publicadas y 0 de 37.175 candidatas** llevan `<`
+ * o `>`, porque la puerta por sentencia ya las apartaba; ninguna Cita está en riesgo. En los 263
+ * documentos versionados hay **123 pares** —62, 32, 23 y 3 en los cuatro libros de las Odas, 2
+ * en la Ética a Nicómaco y 1 en La ciudad de Dios— y **51 ángulos sueltos** repartidos en 25
+ * documentos sanos, que siguen contando.
+ *
+ * **Por qué se reconoce en la línea y no en la palabra**, que es donde mira la cursiva: la
+ * medida va palabra a palabra, y un suplemento de varias palabras deja un `<` en la primera y un
+ * `>` en la última, cada uno suelto dentro de la suya. Una regla por palabra solo cubriría
+ * `<amigablemente>`. Por eso el par se retira del texto **antes** de trocearlo, y solo para
+ * contar: lo que va dentro se sigue midiendo como cualquier otra palabra, y la medida sigue sin
+ * devolver texto.
+ *
+ * Lo que queda fuera, a propósito: un par que cruza de renglón, o que encierra más de sesenta
+ * caracteres, no se toma por suplemento.
+ */
+const SUPLEMENTO_ANGULAR = /<([^<>\n]{1,60})>/gu;
 
 /** Guiones que parten una palabra al final de renglón. La raya (—) no es uno de ellos. */
 const GUIONES_DE_CORTE = /\p{L}[-‐‑­¬]$/u;
@@ -198,7 +230,8 @@ export function medirLegibilidad(texto: string): MedidaDeLegibilidad {
   };
   const ejemplos: string[] = [];
 
-  const crudas = texto.split(/\s+/).filter((t) => t !== '');
+  // El par de ángulos del traductor se retira antes de partir en palabras: ver SUPLEMENTO_ANGULAR.
+  const crudas = texto.replace(SUPLEMENTO_ANGULAR, '$1').split(/\s+/).filter((t) => t !== '');
   const conRaya = usaGuionComoRaya(crudas);
   let palabras = 0;
   let sospechosas = 0;

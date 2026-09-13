@@ -72,3 +72,57 @@ descartes:
     idDePagina: 4671
     nombre: "Esopo"
     motivo: "Sus 80 fábulas en Wikisource-es se sirven con <pages index=…> sin autor=, y sin categoría de Autor: solo lo declara la página Index: del escaneo, que es la lectura que sigue sin decidirse. Los documentos se versionan mudos y FR-23 los para. Reabrir cuando se decida leer del Index:."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "hesiodo"
+    idDePagina: 3266
+    nombre: "Hesíodo"
+    motivo: "Wikisource-es no tiene ninguna obra suya: ni «Los trabajos y los días» ni la «Teogonía» existen, y ninguna página lo declara autor. Solo aparece citado dentro de obras de otros."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "teognis"
+    idDePagina: 274221
+    nombre: "Teognis"
+    motivo: "Wikisource-es no tiene ninguna obra suya: sus elegías no existen con ningún título, y solo aparece nombrado dentro de Aristóteles, Jenofonte y el prólogo a Sófocles."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "demostenes"
+    idDePagina: 25152
+    nombre: "Demóstenes"
+    motivo: "Su ficha no enlaza ninguna obra, y ni las «Filípicas» ni «Sobre la corona» existen en Wikisource-es. Solo aparece como biografiado en las Vidas paralelas de Plutarco."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "luciano-de-samosata"
+    idDePagina: 43292
+    nombre: "Luciano de Samosata"
+    motivo: "Sus dos obras enlazadas, «Diálogos de los dioses» y «Diálogos de los muertos», no existen en Wikisource-es: son enlaces rojos en su ficha."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "teofrasto"
+    idDePagina: 282229
+    nombre: "Teofrasto"
+    motivo: "Sus «Caracteres morales» se sirven por capítulos con <pages index=…> sin autor= y sin categoría de Autor, y la obra madre no existe como página: los documentos se versionarían mudos y FR-23 los pararía."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "euripides"
+    idDePagina: 26012
+    nombre: "Eurípides"
+    motivo: "De cinco obras enlazadas, cuatro no existen; «El Cíclope» se sirve con <pages index=…> sin autor=, con la sola categoría «Traducciones del griego» y con el campo Autor del Índice vacío. No hay por dónde declararlo."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "epicteto"
+    idDePagina: 282160
+    nombre: "Epicteto"
+    motivo: "El «Enquiridión» existe por capítulos, pero ninguno declara autor: <pages index=…> sin autor= y sin categoría. Y «Las máximas de Epicteto» no son suyas: es un poema de Mauricio Bacarisse sobre él, que atribuirle sería exactamente lo que FR-23 impide."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "homero"
+    idDePagina: 2448
+    nombre: "Homero"
+    motivo: "La única edición de la Ilíada que declara autor en sus propias páginas es la de García Malo (1788), en verso: nueve libros y setecientas candidatas, de las que solo salen medios versos. Las de Segalá, Gironella y la de 1927 son mudas: el autor solo lo dice la página madre, y heredarlo es la inferencia que prohíbe la 11.1."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "pitagoras"
+    idDePagina: 119088
+    nombre: "Pitágoras"
+    motivo: "Su única obra, «Versos de oro», es un poema breve servido verso a verso: la extracción solo da fragmentos de línea que acaban en coma, y las dos únicas líneas completas son la ficha de la traducción y el enlace a Wikipedia."
