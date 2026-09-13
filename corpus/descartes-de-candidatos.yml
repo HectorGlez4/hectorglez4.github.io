@@ -468,3 +468,51 @@ descartes:
     idDePagina: 262593
     nombre: "Marco Juniano Justino"
     motivo: "Su obra en la Fuente es narración histórica: las candidatas cuentan hechos y ninguna se sostiene como sentencia suelta. Además, el libro segundo del «Epítome» no se pudo versionar: su nombre de documento colisiona al recortarse con el del primero."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "estacio"
+    idDePagina: 282277
+    nombre: "Estacio"
+    motivo: "Su ficha de autor en Wikisource-es no enlaza ninguna obra suya."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "marco-terencio-varron"
+    idDePagina: 222981
+    nombre: "Marco Terencio Varrón"
+    motivo: "Su ficha de autor en Wikisource-es no enlaza ninguna obra suya."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "quinto-curcio-rufo"
+    idDePagina: 355284
+    nombre: "Quinto Curcio Rufo"
+    motivo: "Su ficha de autor en Wikisource-es no enlaza ninguna obra suya."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "plinio-el-joven"
+    idDePagina: 122672
+    nombre: "Plinio el Joven"
+    motivo: "Su única obra enlazada, «Carta de Plinio el Joven a Trajano», no existe en Wikisource-es."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "tito-livio"
+    idDePagina: 127212
+    nombre: "Tito Livio"
+    motivo: "«Historia de Roma (Tito Livio)» no existe en Wikisource-es, y el resto de lo que enlaza su ficha son obras de Suetonio."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "tibulo"
+    idDePagina: 293263
+    nombre: "Tibulo"
+    motivo: "Su única obra es «Iniciación de Mesalino», un poema breve en la traducción de Caro, y su ficha no da ningún dato biográfico: el año de fallecimiento que exige la admisión solo se podría declarar inventándolo."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "julio-cesar"
+    idDePagina: 10696
+    nombre: "Julio César"
+    motivo: "De los «Comentarios de la guerra de las Galias» solo existen los libros 1 y 3, y son narración de campaña: ninguna candidata se sostiene suelta. Sus textos breves —el discurso a las tropas en África, «El viaje», el elogio de su tía Julia— son fragmentos citados por Suetonio, y lo que se extrae de ellos son versos partidos y las notas del editor de Wikisource."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "teocrito"
+    idDePagina: 125406
+    nombre: "Teócrito"
+    motivo: "Su único texto en la Fuente, el idilio I de «Poetas bucólicos griegos», da siete candidatas: el resumen del editor y medios versos con las llamadas de nota pegadas («¹8», «¹9»)."

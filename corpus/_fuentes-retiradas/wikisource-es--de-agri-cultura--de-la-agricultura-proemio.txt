@@ -1,0 +1,10 @@
+fuente: wikisource-es
+obra: De Agri Cultura
+url: https://es.wikisource.org/wiki/De_la_agricultura/Proemio
+recuperado: 2026-09-13
+---
+De la agricultura/Proemio
+|titulo = De Agri Cultura
+|autor = Catón el Viejo
+---
+Esta traducción persigue ofrecer al mundo hispanohablante una de las grandes obras clásicas básicas de la literatura de la Antigüedad con una traducción original que toma como fuentes varias publicaciones en latín, francés e inglés. La tarea de traducción parece ardua y comienza con este breve texto introductorio. Se espera que el trabajo encuentre el interés y la utilidad para el lector que consulta esta obra.
