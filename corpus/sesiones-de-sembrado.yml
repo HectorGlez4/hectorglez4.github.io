@@ -251,3 +251,14 @@ sesiones:
       citasPublicadas: 1829
       procedenciaCompleta: 25.6
       tradicionLatinoamericanaSobreHispanicos: 54.5
+  - fecha: "2026-09-13"
+    hora: "22:42"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Verificar las cuatro épocas de la Antigüedad"
+    motivo: "Paso de verificación de la Antigüedad (Épica 19): relectura de las 376 Citas de los Autores de tradición otra, 97 retiradas con motivo, 13 documentos cubiertos o retirados, Temas corregidos. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1740
+      procedenciaCompleta: 26.4
+      tradicionLatinoamericanaSobreHispanicos: 54.5
