@@ -1,0 +1,471 @@
+fuente: wikisource-es
+obra: Fábulas de Fedro
+url: https://es.wikisource.org/wiki/F%C3%A1bulas_de_Fedro
+recuperado: 2026-09-13
+---
+Fábulas de Fedro
+[[Categoría:Obras de Gayo Julio Fedro]]
+---
+catalàLatina
+
+i: i
+
+FÁBULAS
+
+DE FEDRO.
+
+LIBERTO DE AUGUSTO;
+
+TRADUCIDAS
+
+DE LATIN Á CASTELLANO,
+
+É ILUSTRADAS CON ALGUNAS NOTAS PARA EL USO DE
+
+LOS PRINCIPIANTES EN LAS ESCUELAS
+
+DE GRAMÁTICA.
+
+CORREGIDA POR DON JOSÉ CARRASCO,
+
+Ex-profesor de filosofía, y sagrada teología en la
+
+universidad Luliana de la isla de Mallorca.
+
+BARCELONA.
+
+IMPRENTA DE SIERRA Y MARTÍ.
+
+AÑO 1823.
+
+PRÓLOGO.
+
+Phædrum igitur habemus, Augusti Libertum, sive. Octaviani, sive Tiberii, qui & nomine ipso hilaritatem præ se fert, & profitetur libelli sui dote álteram é duabus esse, ut risum móveat, & fictis fábulis jocétur. Idem quám propriè de commúnibus, & quotidianis rebus, quas álii tractarunt scriptores nulli lóquitur! quám sincerè, & ab omni peregrinitâte, atque insolentiâ remótè! quâm pressè, nec molestè tamen! quám solûte, nec licénter! quàm emendátè, literatéque, ac benè, ut verbo dicam, latine! In quo génere quid posset, & agnovit ipse, & æquáles, qui œtâte vivébant eádem, cùm ejus verba in suas chartas transferrem, satis declarárunt. Mémini équidem Jacobum Sírmôndum narrâre mihi sólitum, cùm Petrus Píthæus hos Phædri Æsopiârum fabulárum quinque libellos Lutétiæ edidisset primùm, & ad se Romam pro véteri amicitia mûneri mississet; percúsos illicò Romanos novitâte volúminis, atque.... suspicari cœpisse num quîduam partus iste recens ac suppositítius esset, qui tanto intervâllo apparêret, tamque delituisset diù. Verúntamen libro perlécto toto, neminem dubitasse, quin ætatem redoléret Augústi, ac summam illam facilitátem stili, & scriptúræ & beâtam cópiam reprepiam representâret; tuncque vixisset auctor; cùm laus benè loquéndi témporum pótius, quám bominum fuit, ibîque étiam apud Cæsarem servisset, ubi sedem, ac domicilium eruditio collocasse viderétur; qua in domo filiæ, & neptes, intimi & familiares, servi, & liberti litteras egregiê dídicissent. Etenim memoriá suæ Phædrus rem memorábilem ait delâtam ad centum viros, de qua Divus Angustus ab iis ascitus judex quod ipsi satis verum non dispicerent, judicárit. Alio quodam loco Sejanum malé nescio quid de se mêritum significat. Unde colligitur hunc Octâvii temporibus extítisse, & Tibérii. P. Vavas, de Ludric. Diction, sert. 2. 5.
+
+Por éste hermoso elógio, que el P. Francisco Vavasor (hombre de tanto voto en estas materias) hace de Pheiro, se echa de ver no solo el dichoso siglo de la Latinidad en que floreció, sino tambien la pureza de su estilo, tan digna de que con ella empiecen los niños á aprender la lengua Latina. Y tuvo mucha razon Juan Jorge Walchio Hist. Crit. Lat. Ling. cap. 4. § XI. en decir: Páeris dandum est aliquid quod deléctat, apertum, planum perspicuum, dilûcidum, purum, usitâtum est. Hinc Phædri fabéllæ ætati primæ proponéndæ sunt, quia breves, elegantes, ac puræ sunt, & adjiciunt tèneros ánimos; quæ autem obsœnis verbis consriptæ, fácilé resecâri possunt. No nos hemos olvidado de este último aviso, y hemos suprimido todas aquellas fábulas, en que podia correr algun peligro la inocencia de los niños. Se debe sentir que una edicion, por otra parte tan buena cómo la Patavina, no haya sido mas recatada en este punto. La culebra aún entre flores y hierbas las mas hermosas, tiene veneno.
+
+Qui legitis flores, & humi nascéntia fragra, Frigidus, ó púeri! fúgíte hic, latet anguîs in berbâ. Virg. Ecl. 3. v. 393.
+
+Seria súpérfluo el empeñarnos en probar la utilidad, que de suyo traen las buenas fábulas. Las personas fingidas que en ellas se introducen, son como unos espejos, en que se vé lo malo para huirlo, y lo bueno para abrazarlo. Etenim bœc conficta árbitror á Poëtis esse, ut effictos nostros mores ¿n aliênis persónis, expressamque imáginem nostræ vitæ quotidianæ videremus. Cicer. pro Sex. Rosc. Amer. 16. Este dictámem de Cicerón lo ha sido tambien siempre de todos los Sábios; y por lo que toca en particular à los niños, la experiencia misma enseña, que no hay cosa con que mas se empiezan á cebar en el estudio, que con las Fábulas.
+
+Bien me persuado, que no faltará quien diga, que aunque es verdad que esto es asi, pero que sin andar introduciendo á Phedro, toda esta ventaja se logra con las fábulas de Esopo, que ya se usaban. Da lástima ciertamente el oír esta respuesta, y mucho mas el oírla de boca de algunos, como argumento sin réplica; estando los tales persuadidos á que Esopo fue autor latino; y tal vez se les escapará vergonzosamente la expresion de que es muy buen latin el de Esopo. El de Esopo no es muy buen latin, sino muy buen griego.
+
+El latin de las fábulas de Esopo, que ha corrido, no es sino una traduccion de Laurencio Valla, y otros intérpretes, que sin hacerlos injuria, están muy lejos de ser autores que se puedan contar entre los del siglo de oro.
+
+No andemos pues dando á los niños la latinidad de unos meros traductores en las fábulas que hasta aquí se han usado, pudiéndoles dar la de un autor original, cual es Fedro.
+
+Cuando en el prólogo de las cartas escogidas dijimos, que el primer autor que se debe dar á los niños es Ciceron, no quisimos decir, que no se les haya de dar tambien á Fedro, y para quitar toda equivocacion, desde luego declaramos, que al mismo tiempo se les deben dar ambos autores, mezclando uno con otro. Despues de haber hecho en varios niños la experiencia, podemos afirmar que es tiempo muy bien empleado el que gastan en aprender de memoria a Fedro: Itaque multa ab eo prudènter disputâta, multa etîam breviter, & commodè dicta, memoriæ mandabam. Cic. de Amic. i. Este cuidado, que en sus tiernos años tenia Ciceron de aprender de memoria las lecciones que le daba Scévola, es prueba de que cualquiera niño que haga otro tanto con Fedro, hallará en el mismo Fedro un Sábio de Scévola. Si Ciceron hubiera alcanzado las obras de nuestro Fedro, bien hubiera podido decir de él, lo que dijo del otro Fedro su maestro; Phædro nihil elegantîús, nihil humanitûs; de Nat. Deor. 1. i. 33. Tambien Fam. 13. i. vuelve á hacer memoria de lo que habia estimado á su Fedro desde niño: Cùm puêri essèmus. Nuestro Fedro nos dé testimonio de cuan impresas quedan hasta la ancianidad las cosas escogidas, que se aprenden en la niñez. Epilog. ad lib. 4.
+
+Ego quondam legi, quàm puer sentêntiam:
+
+Palàm mutíre plebéjo perículum est,
+
+Dum sánitas constábit; pulchrè meminero.
+
+En órden á la traduccion, volvemos á hacer profesion, como la hicimos en la de las epístolas familiares, de no aspirar á otra cosa, sino es á facilitar á los niños la inteligencia de la lengua latina. Una traduccion que no se ciñe á estos términos, pudiera sin duda ser mucho mejor; pero no tan útil para el fin que nos prometemos. En las notas hemos juzgado conveniente mezclar algunas locuciones de autores castizos, que frisen con las mismas expresiones ó pensamientos de Fedro, para que tenga este cebo mas la curiosidad de los niños. En el texto de Fedro no nos hemos aligado á ninguna edicion, y hemos tomado de cada una lo que nos ha parecido mejor. Aunque hay tantas y tan buenas ediciones de Fedro, la de Pedro Burmano suele ser la mas estimada; pero esta no es para niños, sino para maestros.
+
+En las epistolas de Ciceron Clas. 5, Ep. 6. pusimos con nota sobre los Sextercios Romanos; y remitimos al lector á una Fábula del lib. 4. de Fedro. Esta Fábula por algo indecente se omite en nuestra edicion, y consiguientemente la oportunidad de hablar con mas distincion los Sextercios. Este punto le trata el Padre Juvencio al fin de su Horacio con este título: Laterculum Sextertiôrum.
+
+ÍNDICE
+
+DE LAS FÁBULAS CONTENIDAS EN ESTE TOMO.
+
+LIBRO PRIMERO.
+
+Fábulas.
+
+paginas.
+
+Prólogo.
+
+11
+
+I. El lobo y el cordero.
+
+13
+
+II. Las ranas pidiendo un rey.
+
+15
+
+III. El grajo soberbio y el pavon.
+
+19
+
+IV. Un perro nadando con un pedazo de carne.
+
+21
+
+V. Una vaca, una cabra, la oveja y el leon.
+
+23
+
+VI. Las ranas contra el sol.
+
+25
+
+VII. La zorra á una máscara.
+
+27
+
+VIII. El lobo y la grulla.
+
+ibid.
+
+IX. Un gorrion y una liebre.
+
+29
+
+X. El lobo y la zorra, siendo juez el mono.
+
+31
+
+XI. Un borrico y un leon cazando.
+
+33
+
+XII. Un ciervo sobre una fuente.
+
+37
+
+XIII. La zorra y el cuervo.
+
+39
+
+XIV. El zapatero médico.
+
+41
+
+XV. Un asno á un viejo.
+
+43
+
+XVI. El ciervo y la oveja.
+
+45
+
+XVII. Una oveja, un perro y un lobo.
+
+47
+
+XVIII. Una perra de parto.
+
+49
+
+XIX. Unos perros hambrientos.
+
+51
+
+XX. Un leon consumido de vejez.
+
+ibid.
+
+XXI. La comadreja y un hombre.
+
+53
+
+XXII. El perro fiel.
+
+55
+
+XXIII. Una rana que reventó.
+
+57
+
+XXIV. Un perro y un cocodrilo.
+
+59
+
+XXV. La zorra y la cigüeña.
+
+61
+
+XXVI. Un perro en guarda de un tesoro y un buitre.
+
+63
+
+XXVII. Una zorra y un águila.
+
+65
+
+XXVIII. Una rana temerosa.
+
+67
+
+XXIX. El milano y las palomas.
+
+69
+
+LIBRO II.
+
+Prólogo.
+
+71
+
+I. Un becerro, un leon y un ladron.
+
+73
+
+II. Un hombre y un perro.
+
+75
+
+III. Una águila, una gata y un javalí.
+
+ibid.
+
+IV. El César á un criado.
+
+79
+
+V. Una águila, una corneja y un galápago.
+
+83
+
+VI. Unos machos y unos ladrones.
+
+87
+
+VII. Un ciervo y unos bueyes.
+
+89
+
+Epílogo.
+
+93
+
+LIBRO III.
+
+Prólogo á Eutico.
+
+97
+
+I. Una vieja y un cántaro.
+
+105
+
+II. Una onza y unos pastores.
+
+107
+
+III. La cabeza de un mono.
+
+109
+
+IV. Esopo y un insolente.
+
+111
+
+V. Una mosca y una mula.
+
+113
+
+VI. Un perro y un lobo.
+
+115
+
+VII. Un hermano y su hermana.
+
+117
+
+VIII. Sócrates á sus amigos.
+
+121
+
+IX. El poeta sobre creer, y no creer.
+
+123
+
+X. Un cojo á un mal hombre.
+
+131
+
+XI. Un pollo á una perla.
+
+ibid.
+
+XII. Las abejas y zánganos, siendo juez la abispa.
+
+133
+
+XIII. Esopo jugando.
+
+137
+
+XIV. Un perro a un cordero.
+
+139
+
+XV. Una cigarra y una lechuza.
+
+141
+
+XVI. Los árboles escogidos por los dioses.
+
+145
+
+XVII. El pavo real á Juno.
+
+147
+
+XVIII. Esopo á un hablador.
+
+149
+
+XIX. Un asno y los sacerdotes de Cybeles.
+
+151
+
+LIBRO IV.
+
+Prólogo.
+
+152
+
+I. La comadreja y los ratones.
+
+155
+
+II. Una zorra á unas uvas.
+
+157
+
+III. El caballo y el javalí.
+
+ibid.
+
+IV. Batallas de los ratones y comadrejas.
+
+159
+
+V. Fedro á los censores de sus fábulas.
+
+163
+
+VI. Una vívora y una lima.
+
+167
+
+VII Una zorra y un chivo.
+
+ibid.
+
+VIII. De los vicios de los hombres.
+
+169
+
+IX. Un ladron que robaba un altar.
+
+171
+
+X. Hércules y Pluton.
+
+175
+
+XI. Un leon reinante.
+
+177
+
+XII. Las cabras y los chivos.
+
+ibid.
+
+XIII. Un piloto y un marinero.
+
+179
+
+XIV. Un hombre y una culebra.
+
+181
+
+XV. Una zorra y un dragon.
+
+183
+
+XVI. Fedro de sus fábulas.
+
+187
+
+XVII. El naufragio de Simónides.
+
+189
+
+XVIII. Un monte en ademan de parir.
+
+193
+
+XIX. Simónides preservado por los dioses.
+
+ibid.
+
+Epílogo.
+
+197
+
+LIBRO V.
+
+Prólogo.
+
+203
+
+I. Demetrio y Menandro.
+
+205
+
+II. Unos caminantes y un ladron.
+
+209
+
+III. Un calvo y una mosca.
+
+213
+
+IV. Un hombre y un asno.
+
+215
+
+V. Un charlatan y un rústico.
+
+217
+
+VI. Dos calvos.
+
+221
+
+VII. Príncipe flautero.
+
+ibid.
+
+VIII. La ocasion pintada.
+
+227
+
+IX. Un toro y un becerro.
+
+229
+
+X. Un cazador y un perro.
+
+231
+
+Epílogo á Particulon.
+
+233
+
+APENDIX.
+
+I. Un milano enfermo.
+
+235
+
+II. Las liebres y las ranas.
+
+237
+
+III. Un leon y un raton.
+
+239
+
+IV. El hombre y los árboles.
+
+241

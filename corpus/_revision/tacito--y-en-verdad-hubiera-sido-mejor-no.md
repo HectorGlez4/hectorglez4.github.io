@@ -1,0 +1,14 @@
+---
+texto: "Y, en verdad, hubiera sido mejor no querellarse, que buscar la defensa."
+autor: "tacito"
+slug: "tacito-y-en-verdad-hubiera-sido-mejor-no"
+procedencia:
+  obra: "Diálogo de los oradores"
+  año: 1919
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Di%C3%A1logo_de_los_oradores"
+---

@@ -1,0 +1,13 @@
+---
+texto: "¡Hala!, que yo te mostraré a ti, si no me muero, cuán peligroso es engañar al amo, y a él el engañar a su padre."
+autor: "publio-terencio-africano"
+slug: "publio-terencio-africano-hala-que-yo-te-mostrare-a-ti"
+procedencia:
+  obra: "La Andriana"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_Andriana/Acto_V"
+---

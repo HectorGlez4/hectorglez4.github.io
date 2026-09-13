@@ -1,0 +1,13 @@
+---
+texto: "¿Hay alguien que hoy sea más dichoso que yo?"
+autor: "publio-terencio-africano"
+slug: "publio-terencio-africano-hay-alguien-que-hoy-sea-mas-dichoso"
+procedencia:
+  obra: "El Eunuco"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_Eunuco/06"
+---

@@ -1,0 +1,13 @@
+fuente: wikisource-es
+obra: Formión
+url: https://es.wikisource.org/wiki/Formi%C3%B3n/Pr%C3%B3logo
+recuperado: 2026-09-13
+---
+Formión/Prólogo
+|título=[[Formión]]
+|autor=Publio Terencio Africano
+obra> |título=Formión
+obra> |autor=Publio Terencio Africano
+obra> |título={{Anclaje+|Índice}}
+---
+Después que el poeta viejo1 ha visto que no puede apartar del teatro a nuestro autor, y condenarle a estar ocioso, procura quitarle con palabras injuriosas la gana de escribir, y anda por ahí diciendo que las comedias que hasta aquí ha compuesto son de bajo estilo y de argumentos ligeros, porque nunca ha representado cómo un mozo loco ve ir huyendo una cierva y los perros en su seguimiento, y cómo llora la cierva y le ruega que la ampare. Y si él considerase que, cuando esta comedia se estrenó, gustó más por la buena acción del representante que por la habilidad del autor, no tendría tantos bríos para ofender como ahora tiene. Y si ahora hay alguno que diga o piense que si el poeta viejo no le picara primero, el nuevo no hubiese podido escribir ningún Prólogo por no tener de quien decir mal, ese tal téngase por respuesta que la victoria brinda a todos los poetas con sus premios. Él ha procurado hacer morir de hambre a nuestro poeta, apartándole de este ejercicio; estotro ha procurado responderle, no herirle. Hablara él bien, y respondiéranle bien. Haga cuenta que como botó -314- , así le restaron. Pero quiero ya dejarme de tratar de él, pues él no se deja de ofenderse a sí mismo. Oídme, pues, ahora lo que os vengo a decir. Tráigoos una comedia nueva que llaman en griego el Epidicazómenos2, como si dijéramos, el Juzgado. En latín llámanla Formión, porque el que en ella hace las primeras partes es el parásito Formión, el cual representa lo principal de la acción. Si otorgareis vuestro favor al poeta, hacednos la merced de asistir con buena voluntad y de guardar silencio, porque no tengamos la misma desgracia que nos acaeció cuando nuestra compañía fue con grande alboroto echada de la escena. A la cual volvimos gracias al talento de nuestro primer actor, auxiliado por vuestra bondad y benignidad.

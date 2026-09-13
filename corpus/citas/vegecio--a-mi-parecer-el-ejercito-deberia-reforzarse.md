@@ -1,0 +1,15 @@
+---
+texto: "A mi parecer, el ejército debería reforzarse con reclutas del campo, pues teme menos la muerte quien ha conocido menos lujos en vida."
+autor: "vegecio"
+temas:
+  - "el-miedo"
+slug: "vegecio-a-mi-parecer-el-ejercito-deberia-reforzarse"
+procedencia:
+  obra: "Manual sobre el ejército"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Manual_sobre_el_ej%C3%A9rcito/Libro_I"
+---

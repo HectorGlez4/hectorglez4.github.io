@@ -1,0 +1,14 @@
+---
+texto: "Y esta liberalidad no tienen de qué hacerla, sino con guerra y robos."
+autor: "tacito"
+slug: "tacito-y-esta-liberalidad-no-tienen-de-que"
+procedencia:
+  obra: "Del Origen y del Territorio de los Germanos"
+  año: 1919
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Germania"
+---

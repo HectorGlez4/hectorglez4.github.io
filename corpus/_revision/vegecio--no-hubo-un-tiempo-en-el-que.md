@@ -1,0 +1,13 @@
+---
+texto: "¿No hubo un tiempo en el que las fuerzas del Épiro poseían la supremacía?"
+autor: "vegecio"
+slug: "vegecio-no-hubo-un-tiempo-en-el-que"
+procedencia:
+  obra: "Manual sobre el ejército"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Manual_sobre_el_ej%C3%A9rcito/Libro_I"
+---
