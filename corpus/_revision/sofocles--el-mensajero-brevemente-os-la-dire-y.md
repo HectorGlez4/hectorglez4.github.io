@@ -1,0 +1,13 @@
+---
+texto: "El Mensajero.—Brevemente os la diré y la sabréis: ha muerto la excelsa Yocasta."
+autor: "sofocles"
+slug: "sofocles-el-mensajero-brevemente-os-la-dire-y"
+procedencia:
+  obra: "Edipo, rey (Alemany y Bolufer tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Edipo%2C_rey_%28Alemany_y_Bolufer_tr.%29"
+---

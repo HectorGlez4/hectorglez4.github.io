@@ -285,6 +285,12 @@ development_status:
   # mudas: el Índice salva 2, el padre por la ruta salvaría 6 pero es inferencia
   # (prohibida por la 11.1 y falsa en antologías), y a 17 no las salva nada.
   19-9-el-autor-se-lee-del-indice-del-escaneo: backlog
+  # 19.10: cinco géneros más en la lista cerrada de categorías de Autor. Sófocles se
+  # versionaba mudo llevando «Tragedias de Sófocles» escrito. Medido el 13/09: 262
+  # categorías entre tragedias, comedias, fábulas, epístolas, teatro y sonetos, y
+  # cero que no sean persona. Fuera a propósito: traducciones (137), ilustraciones
+  # (55) y documentos (292), que nombran a quien no escribió.
+  19-10-los-generos-que-faltaban: in-review
   epic-19-retrospective: optional
 
 action_items:

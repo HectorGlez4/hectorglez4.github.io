@@ -1,0 +1,13 @@
+---
+texto: "El Mensajero.—¿Puede saberse, o no es licito que otro se entere?"
+autor: "sofocles"
+slug: "sofocles-el-mensajero-puede-saberse-o-no-es"
+procedencia:
+  obra: "Edipo, rey (Alemany y Bolufer tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Edipo%2C_rey_%28Alemany_y_Bolufer_tr.%29"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Nadie, ¡oh hijas!; sino que, sin duda ninguna, estériles y sin casaros es preciso que os marchitéis."
+autor: "sofocles"
+slug: "sofocles-nadie-oh-hijas-sino-que-sin-duda"
+procedencia:
+  obra: "Edipo, rey (Alemany y Bolufer tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Edipo%2C_rey_%28Alemany_y_Bolufer_tr.%29"
+---

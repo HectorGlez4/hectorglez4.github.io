@@ -783,9 +783,40 @@ export function firmaDeCabeceraDeWikitexto(wikitexto: string): string | undefine
  */
 const CATEGORIA_DE_WIKITEXTO = /\[\[\s*Categor[íi]a\s*:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]/giu;
 
-/** Los géneros con que Wikisource encabeza una categoría de Autor. */
+/**
+ * Los géneros con que Wikisource encabeza una categoría de Autor.
+ *
+ * La lista está **cerrada**, y crecer no la abre: cada género entra con su cifra medida
+ * contra la Fuente. Los cinco últimos son la Historia 19.10, y entraron porque las siete
+ * tragedias de Sófocles se versionaban mudas llevando escrito `Tragedias de Sófocles`.
+ *
+ * Medido el 13/09/2026, contando además cuántas pasan la guarda de la 19.8:
+ *
+ *   · `Tragedias de …`   2 categorías,   2 pasan — Sófocles, Shakespeare;
+ *   · `Comedias de …`    3,              3 — Fernando de Rojas, Molière, Shakespeare;
+ *   · `Fábulas de …`    16,             14 — Esopo, Fedro, Samaniego, Hartzenbusch;
+ *   · `Epístolas de …`  37,             37;
+ *   · `Teatro de …`     42,             42 — Aristófanes, Esquilo, Chéjov, Lorca;
+ *   · `Sonetos de …`   164,            164.
+ *
+ * **262 categorías y cero que no sean persona.** Las dos de «Fábulas» que no pasan son
+ * títulos de libro —«Esopo, filósofo moral, y de otros famosos autores»— y las para la
+ * guarda, no esta lista.
+ *
+ * ## Los tres que se midieron y NO entran
+ *
+ * Se nombran porque son los frecuentes, y porque sin esta nota alguien los añadirá mañana
+ * por simetría: **`Traducciones de …` (137), `Ilustraciones de …` (55) y `Documentos de …`
+ * (292)**. Los tres nombran a quien **no escribió** —el traductor, el ilustrador, el
+ * retratado—, y atribuirle la obra al que la tradujo es exactamente lo que FR-23 existe
+ * para impedir. Tampoco entra ninguno que nombre un lugar o un Estado: «Historia de
+ * Alemania», «Leyes de Chile», «Constituciones de …», «Tratados de …».
+ *
+ * Y por eso la lista no se convierte en «cualquier palabra seguida de *de*»: cubriría todo
+ * de una vez y se llevaría dentro esas 484.
+ */
 const GENERO_DE_CATEGORIA =
-  /^(?:obras|textos|escritos|discursos|ensayos|art[íi]culos|poemas|poes[íi]as?|cartas|novelas|cuentos|prosa)\s+de\s+(.+)$/iu;
+  /^(?:obras|textos|escritos|discursos|ensayos|art[íi]culos|poemas|poes[íi]as?|cartas|novelas|cuentos|prosa|tragedias|comedias|f[áa]bulas|ep[íi]stolas|teatro|sonetos)\s+de\s+(.+)$/iu;
 
 /**
  * Si lo que sigue a «de» puede ser el nombre de una persona.

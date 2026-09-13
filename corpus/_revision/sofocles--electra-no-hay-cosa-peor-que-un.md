@@ -1,0 +1,13 @@
+---
+texto: "Electra.—No hay cosa peor que un mal consejo."
+autor: "sofocles"
+slug: "sofocles-electra-no-hay-cosa-peor-que-un"
+procedencia:
+  obra: "Electra (Alemany y Bolufer tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Electra_%28Alemany_y_Bolufer_tr.%29"
+---

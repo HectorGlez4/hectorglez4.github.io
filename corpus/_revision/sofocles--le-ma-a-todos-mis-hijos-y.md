@@ -1,0 +1,13 @@
+---
+texto: "Le ma a todos mis hijos y hermanos tuyos; llama a la in."
+autor: "sofocles"
+slug: "sofocles-le-ma-a-todos-mis-hijos-y"
+procedencia:
+  obra: "Las traquinias (Alemany y Bolufer tr.)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Las_traquinias_%28Alemany_y_Bolufer_tr.%29"
+---
