@@ -15,6 +15,7 @@ import {
   marcarAptaParaPortada,
 } from '../../tools/lib/gestion.ts';
 import { leerCitas, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { temasPublicados, type Cita, type Tema } from '../../src/lib/publicado.ts';
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -567,6 +568,28 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
       expect(resultado.ok).toBe(false);
       for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+    });
+
+    /*
+     * Quitar el **último** Tema deja la Cita sin el campo: `aYaml` omite la lista vacía, que es
+     * la convención de la casa. El esquema lo admite —`temas` tiene `.default([])`—, pero las
+     * herramientas leían el frontmatter en bruto y `temasPublicados` recorría un `undefined`:
+     * `npm run huecos` y `npm run objetivo` se cayeron con «cita.temas is not iterable» el
+     * 2026-09-13. Quien lee Citas en `tools/` tiene que ver lo mismo que ve el build.
+     */
+    it('quitar el último Tema deja `temas` vacío al leer, como el esquema, y nadie se cae', async () => {
+      const { rutas, slugs } = await corpusConDosCitas();
+      const resultado = await quitarTema(rutas, 'el-tiempo', [slugs[0]!]);
+      expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+
+      const citas = await leerCitas(rutas.citas);
+      expect(citas.find((c) => c.slug === slugs[0])?.temas).toEqual([]);
+      expect(() =>
+        temasPublicados(
+          [{ slug: 'el-tiempo', nombre: 'El tiempo' }] as unknown as Tema[],
+          citas as unknown as Cita[],
+        ),
+      ).not.toThrow();
     });
   });
 

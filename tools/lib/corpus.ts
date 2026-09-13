@@ -12,7 +12,7 @@ import { appendFile, readFile, readdir, mkdir, writeFile, rename } from 'node:fs
 import { existsSync } from 'node:fs';
 import { basename, dirname, extname, join, relative } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
-import type { AutorAdmisible, CitaAdmisible } from '../../src/lib/admision.ts';
+import { citaAdmisible, type AutorAdmisible, type CitaAdmisible } from '../../src/lib/admision.ts';
 import type {
   ClaseDeObjetivo,
   ObjetivoDeTema,
@@ -422,7 +422,16 @@ export async function leerCitas(directorio: string): Promise<CitaEnCorpus[]> {
             `${fallo instanceof Error ? fallo.message : String(fallo)}`,
         );
       }
-      return datos ? { ...(datos as unknown as CitaAdmisible), ruta } : null;
+      if (!datos) return null;
+      /*
+       * Una Cita sin Temas no lleva el campo —`aYaml` omite la lista vacía— y el esquema lo
+       * admite con `.default([])`. El build ve `[]`; leído en bruto era `undefined`, y
+       * `temasPublicados` se cayó recorriéndolo al quitarle a una Cita su último Tema. El
+       * valor por omisión se le pide al esquema, que es su dueño, en vez de repetirlo aquí.
+       */
+      const temas =
+        datos.temas === undefined ? citaAdmisible.shape.temas.parse(undefined) : datos.temas;
+      return { ...(datos as unknown as CitaAdmisible), temas: temas as string[], ruta };
     }),
   );
   return leidas.filter((c): c is CitaEnCorpus => c !== null);
