@@ -279,6 +279,12 @@ development_status:
   # palabras y el clásico firma con una. Medido el 07/09 sobre 2.295 categorías:
   # 50 con nombre de una palabra en mayúscula, 48 personas y 2 que no.
   19-8-el-clasico-firma-con-un-solo-nombre: in-review
+  # 19.9: el Autor se lee del Índice del escaneo. OJO a lo medido antes de escribirla:
+  # vale el 8 %, no el 53 %. El Índice de Esopo y el de La República traen |Autor=
+  # vacío, así que NO arregla los dos casos que la motivaron. Sobre 25 subpáginas
+  # mudas: el Índice salva 2, el padre por la ruta salvaría 6 pero es inferencia
+  # (prohibida por la 11.1 y falsa en antologías), y a 17 no las salva nada.
+  19-9-el-autor-se-lee-del-indice-del-escaneo: backlog
   epic-19-retrospective: optional
 
 action_items:
