@@ -37,6 +37,31 @@ export function tituloDe(parte?: string): string {
 }
 
 /**
+ * El título de una Página de Autor en el resultado de búsqueda.
+ *
+ * La primera página no se llama «página 1»: ésa es una coordenada de implementación,
+ * no la consulta a la que responde. Search Console enseñó precisamente «Miguel de
+ * Unamuno» y sus variantes biográficas, así que el título nombra primero el contenido.
+ * Las siguientes sí conservan el número para no publicar títulos indistinguibles.
+ */
+export function tituloDeAutor(nombre: string, pagina = 1): string {
+  const tramo = pagina > 1 ? ` — página ${pagina}` : '';
+  return tituloDe(`Citas de ${nombre}${tramo}`);
+}
+
+/** La misma regla para el listado temático: intención primero, paginación después. */
+export function tituloDeTema(nombre: string, pagina = 1): string {
+  const tramo = pagina > 1 ? ` — página ${pagina}` : '';
+  return tituloDe(`Citas sobre ${nombre.toLocaleLowerCase('es')}${tramo}`);
+}
+
+/** Una Colección ya lleva su intención en el nombre; solo distingue páginas posteriores. */
+export function tituloDeColeccion(nombre: string, pagina = 1): string {
+  const tramo = pagina > 1 ? ` — página ${pagina}` : '';
+  return tituloDe(`${nombre}${tramo}`);
+}
+
+/**
  * El icono del sitio — las comillas angulares con las que empieza cada Cita.
  *
  * Aquí y no en `public/` porque un fichero estático no se puede derivar: el vector y los

@@ -8,6 +8,11 @@ import {
   TOPE_POR_AVISO,
   avisoDeIndexNow,
 } from '../../src/lib/buscadores.ts';
+import {
+  DIRECTORIOS_AVISABLES,
+  familiaDeFichero,
+  rutasAfectadas,
+} from '../../tools/lib/avisar.ts';
 
 /**
  * IndexNow — lo decidible sin salir a la red.
@@ -115,5 +120,96 @@ describe('el cuerpo del aviso', () => {
     const aviso = avisoDeIndexNow('https://ensayo.example/', ['/']);
     expect(aviso.host).toBe('ensayo.example');
     expect(aviso.keyLocation).toBe(`https://ensayo.example${RUTA_DE_LA_CLAVE}`);
+  });
+});
+
+describe('las cuatro familias del Corpus', () => {
+  const citas = [
+    { slug: 'seneca-la-vida', autor: 'seneca', temas: ['el-tiempo'] },
+    { slug: 'unamuno-la-libertad', autor: 'miguel-de-unamuno', temas: ['la-libertad'] },
+  ];
+  const colecciones = [
+    { slug: 'para-vivir-despacio', miembros: ['seneca-la-vida'] },
+  ];
+
+  it('comparte una sola declaración entre el filtro de git y el reconocimiento', () => {
+    expect(DIRECTORIOS_AVISABLES).toEqual([
+      ['corpus/citas', 'cita'],
+      ['corpus/autores', 'autor'],
+      ['corpus/temas', 'tema'],
+      ['corpus/colecciones', 'coleccion'],
+    ]);
+    for (const [directorio, familia] of DIRECTORIOS_AVISABLES) {
+      expect(familiaDeFichero(`${directorio}/ejemplo.md`)).toBe(familia);
+    }
+    expect(familiaDeFichero('corpus/indexacion.yml')).toBeUndefined();
+    expect(familiaDeFichero('corpus/sesiones-de-sembrado.yml')).toBeUndefined();
+  });
+
+  it('no avisa nada cuando el empujón solo toca metadato de indexación', () => {
+    expect(rutasAfectadas([], citas, colecciones)).toEqual([]);
+  });
+
+  it('una Cita avisa su forma anterior y nueva y las agregaciones afectadas', () => {
+    const rutas = rutasAfectadas(
+      [{
+        familia: 'cita',
+        slug: 'seneca-la-vida',
+        citaAntes: { slug: 'seneca-la-vida', autor: 'seneca', temas: ['el-tiempo'] },
+        citaDespues: {
+          slug: 'seneca-la-vida',
+          autor: 'miguel-de-unamuno',
+          temas: ['la-libertad'],
+        },
+      }],
+      citas,
+      colecciones,
+    );
+
+    expect(rutas).toEqual(expect.arrayContaining([
+      '/',
+      '/cita/seneca-la-vida/',
+      '/autor/seneca/',
+      '/autor/miguel-de-unamuno/',
+      '/tema/el-tiempo/',
+      '/tema/la-libertad/',
+      '/coleccion/para-vivir-despacio/',
+    ]));
+  });
+
+  it('un Autor avisa todas las superficies donde se reproduce su nombre', () => {
+    const rutas = rutasAfectadas(
+      [{ familia: 'autor', slug: 'seneca' }],
+      citas,
+      colecciones,
+    );
+
+    expect(rutas).toEqual(expect.arrayContaining([
+      '/',
+      '/autor/seneca/',
+      '/cita/seneca-la-vida/',
+      '/tema/el-tiempo/',
+      '/coleccion/para-vivir-despacio/',
+    ]));
+  });
+
+  it('un Tema avisa su listado y las Citas cuyos chips cambian', () => {
+    expect(rutasAfectadas(
+      [{ familia: 'tema', slug: 'la-libertad' }],
+      citas,
+      colecciones,
+    )).toEqual(expect.arrayContaining([
+      '/',
+      '/tema/la-libertad/',
+      '/cita/unamuno-la-libertad/',
+    ]));
+  });
+
+  it('una Colección avisa su página y la portada que la enumera', () => {
+    expect(rutasAfectadas(
+      [{ familia: 'coleccion', slug: 'para-vivir-despacio' }],
+      citas,
+      colecciones,
+    )).toEqual(['/', '/coleccion/para-vivir-despacio/']);
   });
 });

@@ -22,7 +22,7 @@ import {
   type Cita,
 } from '../../../lib/publicado.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
-import { tituloDe } from '../../../lib/marca.ts';
+import { tituloDeTema } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeTema } from '../../../lib/superficies.ts';
 
@@ -43,12 +43,11 @@ const { tema, autores } = Astro.props as { tema: { slug: string; nombre: string 
 const pagina = Astro.props.page as import('astro').Page<Cita>;
 
 const ruta = rutaDeTema(tema.slug, pagina.currentPage);
-const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 const canonica = new URL(ruta, Astro.site).href;
 ---
 
 <Armazon
-  titulo={tituloDe(`${tema.nombre}${sufijo}`)}
+  titulo={tituloDeTema(tema.nombre, pagina.currentPage)}
   descripcion={`Citas sobre ${tema.nombre.toLocaleLowerCase('es')}, de varios autores, con su procedencia documentada.`}
   tarjeta={`/tarjeta/tema/${tema.slug}.png`}
   ruta={ruta}

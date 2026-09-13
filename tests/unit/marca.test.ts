@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { MARCA, tituloDe } from '../../src/lib/marca.ts';
+import {
+  MARCA,
+  tituloDe,
+  tituloDeAutor,
+  tituloDeColeccion,
+  tituloDeTema,
+} from '../../src/lib/marca.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 
@@ -28,6 +34,22 @@ describe('Historia 6.1 — la marca tiene un dueño único', () => {
   it('el título sin parte es solo la marca, sin separador colgando', () => {
     expect(tituloDe()).toBe(MARCA);
     expect(tituloDe('')).toBe(MARCA);
+  });
+
+  it('nombra la intención del listado y no llama «página 1» a su entrada', () => {
+    expect(tituloDeAutor('Miguel de Unamuno')).toBe(
+      `Citas de Miguel de Unamuno | ${MARCA}`,
+    );
+    expect(tituloDeTema('La libertad')).toBe(`Citas sobre la libertad | ${MARCA}`);
+    expect(tituloDeColeccion('Refranes de Sancho')).toBe(
+      `Refranes de Sancho | ${MARCA}`,
+    );
+  });
+
+  it('distingue las páginas posteriores sin ensuciar la primera', () => {
+    expect(tituloDeAutor('Miguel de Unamuno', 2)).toContain('— página 2');
+    expect(tituloDeTema('La libertad', 3)).toContain('— página 3');
+    expect(tituloDeColeccion('Refranes de Sancho', 4)).toContain('— página 4');
   });
 });
 

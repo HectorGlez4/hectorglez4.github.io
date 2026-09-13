@@ -24,18 +24,20 @@
  *
  * ── Qué se avisa ─────────────────────────────────────────────────────────────────────
  *
- * La portada **siempre**: la Cita del Día rota cada jornada, así que cambia en todas las
- * reconstrucciones, incluidas las programadas donde no se toca ni un fichero.
+ * La portada en cada reconstrucción programada: la Cita del Día rota aunque no se toque
+ * ningún fichero. En un empujón con rango Git solo se incluye cuando cambia algo que la
+ * portada publica; un commit de la serie de indexación no modifica el sitio ni merece un
+ * aviso vacío.
  *
  * Y lo que este empujón haya cambiado, deducido del propio repositorio con `git diff` y
- * sin salir a la red: por cada fichero tocado de `corpus/citas/`, su Página de Cita, la
- * de su Autor y las de sus Temas, que son las tres superficies donde esa Cita aparece.
- * El slug se lee del frontmatter y **no** se deriva del nombre del fichero: no coinciden
- * —el fichero separa autor y texto con dos guiones y el slug lleva uno—, y confundirlos
- * anuncia 404 con cara de éxito. De una Cita retirada en este mismo rango se lee la
- * versión anterior con `git show`, que sigue sin ser salir a la red.
+ * sin salir a la red. Se observan las cuatro familias publicables —Cita, Autor, Tema y
+ * Colección— y se avisan también las superficies agregadas cuyo HTML reproduce el dato.
+ * En una Cita el slug se lee del frontmatter y **no** se deriva del nombre del fichero:
+ * no coinciden —el fichero separa autor y texto con dos guiones y el slug lleva uno—, y
+ * confundirlos anuncia 404 con cara de éxito. De una Cita retirada o editada en este mismo
+ * rango se lee también la versión anterior con `git show`, que sigue sin salir a la red.
  *
- * Avisar de las 688 cada día sería más fácil y peor: el protocolo pide avisar de lo que
+ * Avisar del sitemap entero cada día sería más fácil y peor: el protocolo pide avisar de lo que
  * cambia, y quien avisa de todo a diario enseña a los buscadores a no hacerle caso. Para
  * el caso legítimo en que sí toca —un cambio de plantilla que afecta a todas— está
  * `--todo`, que se pide a mano.
@@ -56,9 +58,22 @@ import { SITIO } from '../src/lib/dominio.ts';
  * final al migrar, y este aviso —que corre tras cada despliegue— pasó a entregar al
  * buscador la forma que redirige, que es justo lo que la migración venía a quitar.
  */
-import { rutaDeAutor, rutaDeCita, rutaDeTema } from '../src/lib/superficies.ts';
 import { opcion } from './lib/cli.ts';
-import { leerCitas, rutasDelCorpus, separarFrontmatter } from './lib/corpus.ts';
+import {
+  leerCitas,
+  leerColecciones,
+  rutasDelCorpus,
+  separarFrontmatter,
+  slugDeColeccion,
+  slugDeFichero,
+} from './lib/corpus.ts';
+import {
+  DIRECTORIOS_AVISABLES,
+  familiaDeFichero,
+  rutasAfectadas,
+  type CambioAvisable,
+  type CitaAvisable,
+} from './lib/avisar.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -77,7 +92,13 @@ export async function rutasTocadas(
 ): Promise<string[]> {
   const { stdout } = await ejecutar(
     'git',
-    ['diff', '--name-only', `${desde}..${hasta}`, '--', 'corpus/citas'],
+    [
+      'diff',
+      '--name-only',
+      `${desde}..${hasta}`,
+      '--',
+      ...DIRECTORIOS_AVISABLES.map(([directorio]) => directorio),
+    ],
     { cwd: raiz },
   );
 
@@ -99,40 +120,65 @@ export async function rutasTocadas(
    * ofrecer una página que ya da 404—, del propio git, con `git show`. Sigue sin salir a
    * la red: git es historia versionada, no un servicio.
    */
-  const rutas = new Set<string>();
-  const publicadas = await leerCitas(rutasDelCorpus(join(raiz, 'corpus')).citas);
+  const rutasCorpus = rutasDelCorpus(join(raiz, 'corpus'));
+  const publicadas = await leerCitas(rutasCorpus.citas);
   const porRuta = new Map(publicadas.map((c) => [resolve(c.ruta), c]));
+  const colecciones = await leerColecciones(rutasCorpus);
+  const cambios: CambioAvisable[] = [];
 
   for (const fichero of ficheros) {
-    const cita = porRuta.get(resolve(join(raiz, fichero)));
+    const familia = familiaDeFichero(fichero);
+    if (familia === undefined) continue;
 
-    if (cita !== undefined) {
-      rutas.add(rutaDeCita(cita.slug));
-      if (cita.autor) rutas.add(rutaDeAutor(cita.autor));
-      for (const tema of cita.temas ?? []) rutas.add(rutaDeTema(tema));
+    if (familia !== 'cita') {
+      const ruta = join(raiz, fichero);
+      const slug = familia === 'coleccion'
+        ? slugDeColeccion(rutasCorpus, ruta)
+        : slugDeFichero(ruta);
+      cambios.push({ familia, slug });
       continue;
     }
 
-    const retirada = await slugDeCitaRetirada(raiz, desde, fichero);
-    if (retirada !== undefined) rutas.add(rutaDeCita(retirada));
+    const despues = porRuta.get(resolve(join(raiz, fichero)));
+    const antes = await citaEnRevision(raiz, desde, fichero);
+    if (antes === undefined && despues === undefined) continue;
+    cambios.push({
+      familia: 'cita',
+      slug: despues?.slug ?? antes!.slug,
+      citaAntes: antes,
+      citaDespues: despues === undefined
+        ? undefined
+        : { slug: despues.slug, autor: despues.autor, temas: despues.temas ?? [] },
+    });
   }
 
-  return [...rutas];
+  return rutasAfectadas(
+    cambios,
+    publicadas.map((cita) => ({
+      slug: cita.slug,
+      autor: cita.autor,
+      temas: cita.temas ?? [],
+    })),
+    colecciones.map((coleccion) => ({
+      slug: coleccion.slug,
+      miembros: coleccion.miembros,
+    })),
+  );
 }
 
 /**
- * El slug de una Cita que este rango retiró, leído de la versión anterior en git.
+ * La forma anterior de una Cita tocada, leída de la revisión de partida en git.
  *
  * Se le pregunta al commit de partida porque en el de llegada el fichero ya no está. Si
- * tampoco estaba antes —un fichero que nació y murió dentro del rango, o una ruta que
+ * tampoco estaba antes —un fichero que nació dentro del rango, o una ruta que
  * nunca fue una Cita— no hay nada que avisar y se devuelve `undefined` en vez de romper:
  * esto corre después de desplegar y no puede tumbar una publicación que ya está en línea.
  */
-async function slugDeCitaRetirada(
+async function citaEnRevision(
   raiz: string,
   desde: string,
   fichero: string,
-): Promise<string | undefined> {
+): Promise<CitaAvisable | undefined> {
   try {
     const { stdout } = await ejecutar('git', ['show', `${desde}:${fichero}`], {
       cwd: raiz,
@@ -140,7 +186,16 @@ async function slugDeCitaRetirada(
     });
     const datos = separarFrontmatter(stdout);
     const slug = datos?.['slug'];
-    return typeof slug === 'string' && slug !== '' ? slug : undefined;
+    if (typeof slug !== 'string' || slug === '') return undefined;
+    const autor = datos?.['autor'];
+    const temas = datos?.['temas'];
+    return {
+      slug,
+      autor: typeof autor === 'string' && autor !== '' ? autor : undefined,
+      temas: Array.isArray(temas)
+        ? temas.filter((tema): tema is string => typeof tema === 'string')
+        : [],
+    };
   } catch {
     return undefined;
   }
@@ -179,8 +234,7 @@ async function principal(argumentos: string[]): Promise<number> {
   const desde = opcion(argumentos, '--desde');
   const hasta = opcion(argumentos, '--hasta') ?? 'HEAD';
 
-  // La portada siempre: la Cita del Día rota en cada reconstrucción, tocara o no un fichero.
-  const rutas = new Set<string>(['/']);
+  const rutas = new Set<string>();
 
   if (todo) {
     for (const url of await rutasDelSitemapConstruido(raiz)) rutas.add(url);
@@ -195,6 +249,14 @@ async function principal(argumentos: string[]): Promise<number> {
     } catch (error) {
       console.warn(`Aviso: no se pudo leer el rango ${desde}..${hasta} — ${String(error)}`);
     }
+  } else {
+    // Reconstrucción programada: aunque git no cambie, la Cita del Día sí cambia.
+    rutas.add('/');
+  }
+
+  if (rutas.size === 0) {
+    console.log('IndexNow — ningún cambio publicable que avisar.');
+    return 0;
   }
 
   const aviso = avisoDeIndexNow(SITIO, [...rutas]);

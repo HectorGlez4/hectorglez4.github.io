@@ -21,7 +21,7 @@ import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import { autoresPublicados, citasDeAutor, conjuntoPublicable, type Cita } from '../../../lib/publicado.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
-import { tituloDe } from '../../../lib/marca.ts';
+import { tituloDeAutor } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeAutor } from '../../../lib/superficies.ts';
 
@@ -42,7 +42,6 @@ const pagina = Astro.props.page as import('astro').Page<Cita>;
 
 const ruta = rutaDeAutor(autor.slug, pagina.currentPage);
 
-const sufijo = pagina.lastPage > 1 ? ` — página ${pagina.currentPage}` : '';
 const años =
   autor.añoNacimiento !== undefined
     ? `${autor.añoNacimiento}–${autor.añoFallecimiento}`
@@ -51,7 +50,7 @@ const canonica = new URL(ruta, Astro.site).href;
 ---
 
 <Armazon
-  titulo={tituloDe(`${autor.nombre}${sufijo}`)}
+  titulo={tituloDeAutor(autor.nombre, pagina.currentPage)}
   descripcion={`Citas de ${autor.nombre} con su procedencia documentada. ${autor.semblanza}`}
   tarjeta={`/tarjeta/autor/${autor.slug}.png`}
   ruta={ruta}
