@@ -262,3 +262,14 @@ sesiones:
       citasPublicadas: 1740
       procedenciaCompleta: 26.4
       tradicionLatinoamericanaSobreHispanicos: 54.5
+  - fecha: "2026-09-13"
+    hora: "22:56"
+    clase: "epoca"
+    propuesto: "Agotar la época Antigüedad: le queda 1 candidato por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 83 candidatos en la época Antigüedad: 14 ya sembrados y 68 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Verificar las cuatro épocas de la Antigüedad"
+    motivo: "Verificación de la Antigüedad, segunda tanda: 24 fichas de Autor corregidas contra la Fuente (8 años y 24 semblanzas) y 114 Citas aprobadas en la segunda pasada por la cola. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1854
+      procedenciaCompleta: 26.6
+      tradicionLatinoamericanaSobreHispanicos: 54.5
