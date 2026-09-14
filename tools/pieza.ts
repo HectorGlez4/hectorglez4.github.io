@@ -101,7 +101,6 @@ try {
         process.exit(2);
       }
       terminar(await componerPieza(rutas, sueltos.slice(1), red, opcion(argumentos, '--salida')));
-      break;
     }
 
     case 'coleccion': {
@@ -130,7 +129,6 @@ try {
       }
 
       terminar(await componerPiezaDeColeccion(rutas, slug, red, opcion(argumentos, '--salida')));
-      break;
     }
 
     default:

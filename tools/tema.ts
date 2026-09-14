@@ -28,7 +28,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await crearTema(rutas, nombre));
-    break;
   }
 
   case 'asignar': {
@@ -44,7 +43,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await asignarTema(rutas, slugTema, slugsDeCitas));
-    break;
   }
 
   case 'quitar': {
@@ -59,7 +57,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await quitarTema(rutas, slugTema, slugsDeCitas));
-    break;
   }
 
   case 'eliminar': {
@@ -69,7 +66,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await eliminarTema(rutas, slug));
-    break;
   }
 
   case 'listar': {

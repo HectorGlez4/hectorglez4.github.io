@@ -132,7 +132,6 @@ try {
   switch (orden) {
     case 'fijar':
       terminar(await fijarJornadas(rutas, paresDeLaOrden(), HOY));
-      break;
 
     case 'soltar': {
       const pedidas = sueltos.slice(1);
@@ -143,7 +142,6 @@ try {
         process.exit(2);
       }
       terminar(await soltarJornadas(rutas, pedidas));
-      break;
     }
 
     case 'listar': {

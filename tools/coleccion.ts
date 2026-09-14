@@ -119,28 +119,22 @@ try {
        * nombre —que es la URL— sin que nada se quejara, porque los dos son texto libre.
        */
       terminar(await crearColeccion(rutas, { nombre, criterio: opcion(argumentos, '--criterio') }));
-      break;
     }
 
     case 'asignar':
       terminar(await asignarCitas(rutas, slugDeLaOrden(), sueltos.slice(2)));
-      break;
 
     case 'quitar':
       terminar(await quitarCitas(rutas, slugDeLaOrden(), sueltos.slice(2)));
-      break;
 
     case 'estado':
       terminar(await estadoDeColeccion(rutas, slugDeLaOrden()));
-      break;
 
     case 'despublicar':
       terminar(await despublicarColeccion(rutas, slugDeLaOrden()));
-      break;
 
     case 'publicar':
       terminar(await publicarColeccion(rutas, slugDeLaOrden()));
-      break;
 
     case 'listar': {
       // Como en `tools/tema.ts listar`: la pregunta que uno se hace mirando la lista es

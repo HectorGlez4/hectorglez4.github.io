@@ -23,7 +23,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await marcarAptaParaPortada(rutas, slug, orden === 'marcar'));
-    break;
   }
 
   case 'listar': {

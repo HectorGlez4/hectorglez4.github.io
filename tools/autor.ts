@@ -125,7 +125,6 @@ if (noReconocidos.length > 0) {
 switch (orden) {
   case 'crear':
     terminar(await crearAutor(rutas, datosDe(argumentos)));
-    break;
 
   case 'editar': {
     const slug = argumentos[1];
@@ -134,7 +133,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await editarAutor(rutas, slug, datosDe(argumentos)));
-    break;
   }
 
   case 'listar': {
@@ -172,7 +170,6 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await retirarAutor(rutas, slug, motivo));
-    break;
   }
 
   default:
