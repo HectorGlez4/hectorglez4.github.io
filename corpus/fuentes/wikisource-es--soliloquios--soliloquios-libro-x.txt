@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_X
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro X
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO DÉCIMO.
 
 ¿Si llegaras alguna vez, oh alma mía

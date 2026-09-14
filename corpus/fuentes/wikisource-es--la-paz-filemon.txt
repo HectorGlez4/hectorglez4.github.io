@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: La paz (Filemón)
 url: https://es.wikisource.org/wiki/La_paz_%28Filem%C3%B3n%29
-recuperado: 2026-09-13
+recuperado: 2026-09-14
 ---
 La paz (Filemón)
 [[Categoría:Poesías de Filemón]]
 |autor=Filemón
 ---
-i: i
-
 I
 
 LA PAZ

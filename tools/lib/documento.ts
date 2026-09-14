@@ -169,6 +169,11 @@ function conClase(etiqueta: string, clase: string): RegExp {
   return new RegExp(`<${etiqueta}\\b[^>]*\\bclass\\s*=\\s*["'][^"']*\\b${clase}\\b[^"']*["'][^>]*>`, 'i');
 }
 
+/** La apertura de un elemento por su `id` exacto, para el cromo que no marca por clase. */
+function conId(etiqueta: string, id: string): RegExp {
+  return new RegExp(`<${etiqueta}\\b[^>]*\\bid\\s*=\\s*["']${id}["'][^>]*>`, 'i');
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // El año declarado
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1070,6 +1075,13 @@ const CROMO_MEDIAWIKI: readonly [string, RegExp][] = [
   ['table', conClase('table', 'header')],
   ['span', conClase('span', 'mw-editsection')],
   ['sup', conClase('sup', 'reference')],
+  /*
+   * El diccionario oculto del conversor de idiomas (`display:none`), que Wikisource-es pone
+   * antes del texto de toda página transcluida con <pages>: un único renglón «i: i». Marca
+   * por id, no por clase. Estaba en 54 documentos, y en una fábula corta su «i» bastaba para
+   * rozar la canaria de legibilidad de la 11.5.
+   */
+  ['div', conId('div', 'conv-idiomas')],
 ];
 
 const ETIQUETA_DE_AÑO_WIKISOURCE =

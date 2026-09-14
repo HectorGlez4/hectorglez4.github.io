@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_IX
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro IX
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO NOVENO.
 
 Quien peca contra justicia comete una impiedad; porque habi los hombres con la mira de que se diesen un socodo la Naturaleza del universo hecho á rro mutuo, de suerte que ayudándose los unos á los otros según su mérito no se hiciesen entre sí mal alguno, sin duda el que traspasa esta voluntad obra impíamente contra la más principal de las deidades, puesto que la Naturaleza universal es naturaleza de lo existente, y lo que realmente subsiste tiene una estrecha correlación con todo lo que es más principal. A más de esto, la misma Naturaleza se llama también verdad

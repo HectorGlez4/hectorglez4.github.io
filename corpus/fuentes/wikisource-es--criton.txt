@@ -1,24 +1,12 @@
 fuente: wikisource-es
 obra: Critón
 url: https://es.wikisource.org/wiki/Crit%C3%B3n
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Critón
 [[Categoría:Obras de Platón]]
 ---
 catalàΕλληνικάEnglishفارسیfrançaisfrançaisitalianoLatinaNederlands日本語norskpolskipolskipolskipolskiportuguêsрусскийрусскийsuomi
-
-i: i
-
-Platon: Platón
-
-Eutifron: Eutifrón
-
-Criton: Critón
-
-Alcibiades: Alcibíades
-
-Carmides: Cármides
 
 ARGUMENTO.
 

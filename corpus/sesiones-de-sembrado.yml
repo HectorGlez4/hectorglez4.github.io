@@ -273,3 +273,14 @@ sesiones:
       citasPublicadas: 1854
       procedenciaCompleta: 26.6
       tradicionLatinoamericanaSobreHispanicos: 54.5
+  - fecha: "2026-09-14"
+    hora: "09:37"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Verificar las cuatro épocas de la Antigüedad"
+    motivo: "Verificación de la Antigüedad, tercera tanda: revisados los descartes especiales contra la API; sembrado Gayo Julio Fedro (37 Citas en sus fábulas de Carrasco, 1823); corregidos 9 motivos de descarte; arreglado en recuperar el diccionario oculto del conversor de idiomas que se versionaba como texto, y regenerados los 54 documentos que lo llevaban. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1891
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 54.5

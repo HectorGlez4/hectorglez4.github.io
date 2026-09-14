@@ -1,17 +1,13 @@
 fuente: wikisource-es
 obra: El Octavio
 url: https://es.wikisource.org/wiki/El_Octavio
-recuperado: 2026-09-13
+recuperado: 2026-09-14
 ---
 El Octavio
 [[Categoría:Obras de Minucio Félix]]
 |autor=Minucio Felix
 ---
 Latina
-
-i: i
-
-Felix: Félix
 
 EL OCTAVIO
 

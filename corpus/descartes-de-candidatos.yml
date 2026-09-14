@@ -522,3 +522,57 @@ descartes:
     idDePagina: 124750
     nombre: "Diógenes Laercio"
     motivo: "Criterio de Héctor (13/09): sembrarlo y aprobar SOLO lo que Laercio dice por su cuenta, nunca los dichos que atribuye a otro filósofo. Se versionaron las 45 vidas que declaran autor y dieron 1.732 candidatas. Apartado el discurso referido, lo que queda son preceptos de los Siete Sabios contados sin verbo de decir, doxografía, testamentos y cartas que transcribe, y notas del traductor de 1792. Buscada su voz propia, solo 7 candidatas llevan primera persona, y ninguna es suya: transiciones de estructura, presentaciones de epigramas sin el epigrama, una nota del traductor y dos cartas de Quilón y Cleóbulo. Cero Citas: se retiran las 45 vidas. Reabrirlo solo tiene sentido con otra historia, la de publicar esos dichos firmados por quien los dijo."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "esopo"
+    idDePagina: 4671
+    nombre: "Esopo"
+    motivo: "Revisado contra la API el 13/09. Declaran a Esopo en su propia página 218 fábulas «(ed. desconocida)» con |autor=[[Esopo]], pero no son una edición identificable, que el Corpus exige. Otras 42 de «Fábulas de Esopo, filósofo moral, y de otros famosos autores» (1845) lo declaran por la categoría «Fábulas de Esopo», pero el libro mezcla autores y la categoría le atribuye fábulas ajenas —«La liebre y la perdiz» es de La Fontaine—, y sus moralejas son del editor («Significa esta fábula, que…», refranes añadidos). Las 161 de la edición de 1813 son <pages index=…> mudas, y el resto de la categoría son páginas de ediciones sin texto."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "suetonio"
+    idDePagina: 44295
+    nombre: "Suetonio"
+    motivo: "Revisado contra la API el 13/09. «Vidas de los doce césares (Wikisource tr.)» declara autor en 11 de sus 12 subpáginas, pero solo «Tito» tiene texto: narración incompleta de su vida, con marcas «(Latín)» tras cada capítulo y notas del traductor, sin ninguna sentencia que se sostenga suelta; las demás son la cabecera y la tabla de capítulos. «Vidas de los Doce Césares» es una página de ediciones, y «De grammaticis et rhetoribus» no existe."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "marco-valerio-marcial"
+    idDePagina: 19125
+    nombre: "Marco Valerio Marcial"
+    motivo: "Revisado contra la API el 13/09. Declaran autor en su propia página «Vida dichosa», epigrama breve que no da ninguna candidata, y el «Liber de spectaculis 1-33», que declara «Marcial» a secas —la puerta de FR-23 no lo casa con «Marco Valerio Marcial»— y es verso bilingüe latín-español. «Epigramas de Marcial» es una página de versiones sin texto."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "catulo"
+    idDePagina: 62181
+    nombre: "Catulo"
+    motivo: "Revisado contra la API el 13/09. Sus dos obras en Wikisource-es declaran autor —«Poemas (Catulo)» en tres subpáginas, 1-60, 61-68 y 69-116, y la «selección» bilingüe latín-español—, pero las dos son verso y la extracción solo da medios versos que empiezan en minúscula o acaban sin cerrar la frase."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "juvenal"
+    idDePagina: 249522
+    nombre: "Juvenal"
+    motivo: "Revisado contra la API el 13/09. Su única obra en Wikisource-es, «Sátira 1.1-171», declara autor, pero es verso bilingüe latín-español y la extracción solo da medios versos; «Sátiras de Juvenal» no existe."
+  - fecha: "2026-09-13"
+    epoca: "antigua-roma"
+    candidato: "epicteto"
+    idDePagina: 282160
+    nombre: "Epicteto"
+    motivo: "Revisado contra la API el 13/09. «Enquiridión» no existe como página: sus cuatro subpáginas («Prólogo», «Vida de Epicteto», «Noticias biográficas», «Máximas») son <pages index=…> sin autor= ni categoría. «Las máximas de Epicteto» declara a Mauricio Bacarisse: es un poema suyo sobre él, que atribuirle sería lo que FR-23 impide."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "teofrasto"
+    idDePagina: 282229
+    nombre: "Teofrasto"
+    motivo: "Revisado contra la API el 13/09. «Caracteres morales» no existe como página, y sus 30 subpáginas se sirven con <pages index=…> sin autor= ni categoría (miradas I, XV, XXVIII, el Proemio y el Prólogo del traductor). El «Teofrasto» de las Vidas de Diógenes Laercio es texto de Laercio."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "luciano-de-samosata"
+    idDePagina: 43292
+    nombre: "Luciano de Samosata"
+    motivo: "Revisado contra la API el 13/09. Sus dos obras enlazadas, «Diálogos de los dioses» y «Diálogos de los muertos», son enlaces rojos, y los otros títulos de su ficha no enlazan. Ninguna otra página es suya: «Epigrama de Luciano» declara a Marcelino Menéndez Pelayo, que lo tradujo de la Antología griega."
+  - fecha: "2026-09-13"
+    epoca: "antigua-grecia"
+    candidato: "homero"
+    idDePagina: 2448
+    nombre: "Homero"
+    motivo: "Revisado contra la API el 13/09. Declaran a Homero en sus propias páginas la Ilíada de García Malo (1788), quince cantos de la Odisea de Gironella (1851, del noveno al vigesimotercero) y la Batracomiomaquia de Alenda (1886), esta por la categoría «Obras de Homero». Las tres son verso con la mayúscula de cada verso a media frase, y solo dan medios versos: es el defecto por el que se retiró a Lucrecio, y ninguna Cita publicada del Corpus lo lleva. La Ilíada y la Odisea de Segalá y la Ilíada de 1927 son <pages index=…> mudas, que solo declaran autor en la página madre."

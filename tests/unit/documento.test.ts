@@ -123,6 +123,37 @@ describe('Historia 11.1 — la retirada de marcado deja la obra y no el cromo', 
   });
 });
 
+describe('Historia 11.1 — el diccionario oculto del conversor de idiomas es cromo', () => {
+  /*
+   * Toda página que Wikisource-es renderiza desde una transclusión <pages> lleva, antes del
+   * texto, un bloque oculto del conversor de idiomas: `<div id="conv-idiomas"
+   * style="display:none;">` con una lista cuyo único renglón es «i: i». No se ve y no es
+   * de la obra, pero marca por id y no por clase, así que la retirada de cromo no lo
+   * alcanzaba y se versionaba como primera línea del cuerpo.
+   *
+   * Medido el 2026-09-14: estaba en 54 documentos del Corpus, y esa «i» contaba como letra
+   * suelta en la medida de la 11.5. En una obra larga no se nota; en una fábula de cien
+   * palabras vale casi un 1 % ella sola y rompía la canaria.
+   */
+  const CON_CONVERSOR = WIKISOURCE.replace(
+    '<table class="header">',
+    '<div id="conv-idiomas" style="display:none;"><div id="dic-local-es-act">\n<ul><li>i: i</li></ul>\n</div></div>\n<table class="header">',
+  );
+  const derivado = derivarDocumento('wikisource-es', CON_CONVERSOR);
+  if (!derivado.ok) throw new Error(derivado.motivo);
+
+  it('no se lleva el renglón del conversor', () => {
+    expect(CON_CONVERSOR).toContain('conv-idiomas');
+    expect(derivado.cuerpo).not.toMatch(/^\s*i: i\s*$/m);
+    expect(derivado.cuerpo).not.toContain('i: i');
+  });
+
+  it('y conserva el texto de la obra', () => {
+    expect(derivado.cuerpo).toContain('No es que tengamos poco tiempo para vivir');
+    expect(derivado.cuerpo).toContain('La vida es larga si sabes usarla');
+  });
+});
+
 describe('Historia 11.1 — sin título no se versiona', () => {
   it('una página que no declara título se detiene y lo explica', () => {
     const sinTitulo = WIKISOURCE.replace(/<h1[\s\S]*?<\/h1>/, '').replace(/<title>[\s\S]*?<\/title>/, '');

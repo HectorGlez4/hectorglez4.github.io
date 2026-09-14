@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_VII
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro VII
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO SÉPTIMO.
 
 ¿Qué viene á ser la perversidad? es lo que has visto muchas veces: y así en todo acontecimiento ten á la mano esta reflexión, esto es lo que viste en varias ocasiones, Absolutamente desde el principio al fin hallarás los mismos sucesos, de los cuales están llenas las historias antiguas, las de la Edad Media y las de nuestros días, de los cuales, al presente abundan las ciudades y familias particulares, nada encontrarás de nuevo, todo es cosa trillada y de breve duración.

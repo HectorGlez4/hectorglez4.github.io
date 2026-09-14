@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_XII
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro XII
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO DUODÉCIMO.
 
 Ya puedes, si no te envidias á tí mismo, alcanzar todo aquello á que deseas llegar por rodeos. Sin duda sucederá esto, si dieres de mano á todo lo pasado, dejares también á la providencia lo venidero y sólo encaminares lo presente á un fin piadoso y justo. A la virtud de la piedad pertenece que abraces cuanto te fuere dispensado, puesto que la Naturaleza te lo envió y tú has nacido para ello: á la virtud de la justicia corresponde que digas al mismo tiempo lo que es conforme á la ley y según lo pida el mérito de la cosa. Por lo mismo, no te sirva de impedimento ni la maldad ajena, ni el concepto que formarán de tí, ni los discursos que harán sobre tu conducta, ni mucho menos la pasión de la carne que te estimula, porque allá se lo verá el paciente. Ahora pues, ya que casi estás al fin de la carrera, si tú, separándote de todos los otros cuidados, respetases solamente á tu espíritu y honrases esa divinidad que en tí tienes, ni temieses al mismo tiempo el morir alguna vez, sino el no haber empezado jamás á vivir conforme lo manda la Naturaleza, vendrías á ser un hombre digno de ese mundo

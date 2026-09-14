@@ -1,0 +1,15 @@
+---
+texto: "El que de repente se muestra liberal, se concilia los incautos; mas en vano arma lazos á los advertidos."
+autor: "gayo-julio-fedro"
+temas:
+  - "la-prudencia"
+slug: "gayo-julio-fedro-el-que-de-repente-se-muestra-liberal"
+procedencia:
+  obra: "El perro fiel (Fedro)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_perro_fiel_%28Fedro%29"
+---

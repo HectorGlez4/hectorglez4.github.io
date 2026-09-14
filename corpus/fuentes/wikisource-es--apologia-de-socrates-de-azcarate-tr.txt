@@ -1,24 +1,12 @@
 fuente: wikisource-es
 obra: Apología de Sócrates (de Azcárate tr.)
 url: https://es.wikisource.org/wiki/Apolog%C3%ADa_de_S%C3%B3crates_%28de_Azc%C3%A1rate_tr.%29
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Apología de Sócrates (de Azcárate tr.)
 [[Categoría:Obras de Platón]]
 ---
 Apología de Sócrates (Platón)catalàΕλληνικάΕλληνικάEnglishفارسیfrançaisitalianoLatinaNederlands日本語polskipolskipolskiрусскийрусскийсрпски / srpski
-
-i: i
-
-Platon: Platón
-
-Eutifron: Eutifrón
-
-Criton: Critón
-
-Alcibiades: Alcibíades
-
-Carmides: Cármides
 
 ARGUMENTO.
 

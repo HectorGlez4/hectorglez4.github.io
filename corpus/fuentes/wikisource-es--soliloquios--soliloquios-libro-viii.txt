@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_VIII
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro VIII
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO OCTAVO.
 
 Sirve también paraque no tengas vanidad el que en adelante no te puedes lisonjear de haber pasado filosóficamente toda la vida, ó por lo menos la que medió desde tu juventud hasta ahora; antes bien, has estado muy lejos de la Filosofía, como no ignoran otros muchos y á tí te es bien claro. Viviste, pues, distraído, de modo que en lo porvenir no te será fácil adquirir la gloria de filósofo, á lo cual también se opone tu manera de vivir. Ahora bien, si es que verdaderamente has conocido en qué consiste la vida filosófica, despreciando toda apariencia, conténtate con que vivas todo el tiempo que te queda, sea el que se fuere, según te dicte tu naturaleza; y así, piensa atentamente en lo que ella quiere, y no te distraiga otra cosa alguna; porque en cuantas cosas anduviste divertido, la experiencia te ha enseñado que en ninguna hallaste la felicidad de la vida; no en hacer silogismos, no en la posesión de riquezas, no en los aplausos, no en las delicias, por último, ni en parte alguna. Pues en qué consiste? En hacer lo que exige la naturaleza humana. Y esto cómo lo ejecutará uno? Después que tuvieres los dogmas por los cuales se regulan los deseos y las obras. Y cuáles son esos dogmas? Los que deciden del bien y del mal, de modo que no se repute por bien del hombre lo que no le hace justo, templado, fuerte y liberal; ni por nal lo que no cause los efectos contrarios á lo que acabamos de decir En cada una de tus acciones hazte la pregunta: -¿Cómo me va en esto? acaso me arrepentiré de ello después? Dentro de poco también yo habré muerto y todo se acabó para mí; luego qué más puedo pretender que el que la presente obra sea propia de un viviente raci por las mismas leyes

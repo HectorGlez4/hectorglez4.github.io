@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Protágoras
 url: https://es.wikisource.org/wiki/Prot%C3%A1goras
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Protágoras
 [[Categoría:Obras de Platón]]
@@ -11,8 +11,6 @@ Se está trabajando actualmente en este texto.
 Es posible que, a causa de ello, haya lagunas de contenido o deficiencias de formato. Por favor, antes de realizar correcciones mayores o reescrituras, contacta en la página de discusión del artículo.
 
 ΕλληνικάEnglishfrançaisfrançaisfrançaisLatinapolskipolskiрусскийрусский
-
-i: i
 
 ARGUMENTO.
 

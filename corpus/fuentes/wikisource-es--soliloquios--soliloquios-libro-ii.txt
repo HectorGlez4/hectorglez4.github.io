@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_II
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro II
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO SEGUNDO.
 
 Por la mañana no dejes de hacerte esta cuen ciendo: tropezaré hoy con algún curioso, con algún ingrato, con algún provocativo, con otro doloso, con otro envidioso, con otro intratable; todos estos vicios les vienen á ellos de la ignorancia

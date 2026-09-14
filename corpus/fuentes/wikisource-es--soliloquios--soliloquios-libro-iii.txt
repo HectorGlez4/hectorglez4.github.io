@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Soliloquios
 url: https://es.wikisource.org/wiki/Soliloquios/Libro_III
-recuperado: 2026-09-07
+recuperado: 2026-09-14
 ---
 Soliloquios/Libro III
 |titulo=[[Soliloquios]]
 |autor=Marco Aurelio
 |traductor=Jacinto Díaz de Miranda
 ---
-i: i
-
 LIBRO TERCERO.
 
 No se debe contentar
