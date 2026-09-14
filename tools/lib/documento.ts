@@ -914,11 +914,21 @@ export function autorDeLaFirma(linea: string): string | undefined {
  */
 export const MARCA_DE_LA_OBRA = 'obra>';
 
-/** Las líneas que declaró **la página**: todo lo que no viene marcado como de la obra. */
+/**
+ * La marca de las líneas que declaró **el índice del escaneo** — Historia 19.9.
+ *
+ * Aparte de la de la obra, y no es un matiz: la obra se alcanza por el `|título` de la página
+ * y aporta el año; el índice se alcanza por el `index=` de la etiqueta de escaneo y aporta,
+ * como último recurso, el Autor. Quien audite un documento tiene que poder ver de cuál de
+ * los dos salió cada línea, y con una sola marca no podría.
+ */
+export const MARCA_DEL_INDICE = 'índice>';
+
+/** Las líneas que declaró **la página**: todo lo que no viene marcado como de otra página. */
 function loQueDeclaraLaPagina(declaracion: string): string {
   return declaracion
     .split('\n')
-    .filter((linea) => !linea.startsWith(MARCA_DE_LA_OBRA))
+    .filter((linea) => !linea.startsWith(MARCA_DE_LA_OBRA) && !linea.startsWith(MARCA_DEL_INDICE))
     .join('\n');
 }
 
@@ -936,6 +946,146 @@ export function lineasDeLaObraDeclarada(encabezadoDeLaObra: string): string[] {
   return lineasDeEncabezadoDeWikitexto(encabezadoDeLaObra).map(
     (linea) => `${MARCA_DE_LA_OBRA} ${linea}`,
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El índice del escaneo — Historia 19.9
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * El índice que la página **nombra** en su etiqueta de escaneo, o nada.
+ *
+ *     <pages index="Rosario de sonetos líricos.djvu" include=7-12 header=1 />
+ *
+ * Medido el 08–09/09/2026: de las 18.043 páginas de Wikisource-es que se sirven así, **9.578 no escriben `autor=`** en
+ * la etiqueta, y lo único que lo declara es la página `Índice:` del escaneo. Se sigue ese
+ * nombre porque lo escribe la página: es una declaración suya, igual que el enlace de su
+ * `|título`. **Nunca la ruta**: cortar «Obra/Capítulo» por la barra sería la Procedencia
+ * inferida que la Historia 11.1 prohíbe, y en una antología prestaría el Autor a quien no le
+ * toca.
+ *
+ * Devuelve `undefined` —y no se pide nada— cuando no hay un índice y solo uno: una página que
+ * transcluye de dos escaneos distintos no declara cuál de los dos habla por ella. También
+ * cuando el nombre trae algo que no cabe en el nombre de un fichero de MediaWiki (`/`, `:`,
+ * `#`, `%`, marcado), porque componer una dirección con eso sería pedir otra página.
+ *
+ * El año que el nombre lleva dentro —«… (1888).pdf»— **no se lee aquí ni en ningún sitio**:
+ * sigue rigiendo el «Never» de la 19.7. El nombre sirve para pedir el índice, no para
+ * declarar nada.
+ */
+export function indiceDeclarado(wikitexto: string): string | undefined {
+  const cabeza = wikitexto.replace(/\r\n?/gu, '\n').slice(0, MAX_CARACTERES_DE_ENCABEZADO);
+  const nombrados = new Set<string>();
+
+  for (const etiqueta of cabeza.matchAll(ETIQUETA_DE_ESCANEO)) {
+    for (const atributo of (etiqueta[1] ?? '').matchAll(ATRIBUTO_DE_ESCANEO)) {
+      if (atributo[1].toLowerCase() !== 'index') continue;
+      const valor = (atributo[2] ?? atributo[3] ?? '').replace(/_/gu, ' ').replace(/\s+/gu, ' ').trim();
+      if (valor !== '') nombrados.add(valor);
+    }
+  }
+
+  if (nombrados.size !== 1) return undefined;
+  const [indice] = [...nombrados];
+  if (/[[\]{}<>|#%/\\:]/u.test(indice) || !/[\p{L}\p{N}]/u.test(indice)) return undefined;
+  return indice;
+}
+
+/** La plantilla con la que Wikisource-es escribe la ficha de un `Índice:`. */
+const PLANTILLA_DE_INDICE = /^\s*:?\s*MediaWiki\s*:\s*Proofreadpage[ _]index[ _]template\s*$/iu;
+
+/**
+ * Los campos del índice que se toman, y ninguno más.
+ *
+ * Autor, traductor y año. Tomar cualquier otro —editor, imprenta, prologuista— es un «Ask
+ * First» de la historia: el prologuista y el editor también son nombres de persona, y
+ * dejarlos entrar en la declaración sería acercarlos a la cadena de Autor.
+ */
+const CAMPO_DEL_INDICE = /^\s*(?:autor|traductor|a[ñn]o)\s*=/iu;
+
+/**
+ * Las líneas del índice que se versionan, **marcadas** y literales.
+ *
+ *     {{:MediaWiki:Proofreadpage_index_template
+ *     |Titulo=[[Rosario de sonetos líricos]]
+ *     |Autor=[[Autor:Miguel de Unamuno|Miguel de Unamuno]]
+ *     |Traductor=
+ *     |Ano=1911
+ *     …
+ *
+ * La ficha trae **un campo por renglón y los vacíos a docenas** —`|Autor=` a secas es lo que
+ * trae el índice de *La vida y fábulas del Esopo*—. El valor de un campo acaba en su renglón:
+ * un `|Autor=` vacío no puede quedarse con lo que venga debajo, y un campo que siguiera en el
+ * renglón siguiente no es una forma que la ficha use. Los campos se parten por sus `|` de
+ * primer nivel, así que el `|` de dentro de un enlace no corta nada.
+ *
+ * Solo se lee si la primera plantilla es la de la ficha: una página `Índice:` que no la trae
+ * no es una ficha que sepamos leer, y no se adivina.
+ */
+export function lineasDelIndiceDeclarado(wikitexto: string): string[] {
+  const campos = camposDeLaFichaDeIndice(wikitexto);
+  if (campos === undefined) return [];
+
+  const lineas: string[] = [];
+  for (const campo of campos) {
+    if (!CAMPO_DEL_INDICE.test(campo)) continue;
+    const renglon = campo.split('\n')[0] ?? '';
+    if (renglon.slice(renglon.indexOf('=') + 1).trim() === '') continue;
+    const linea = `${MARCA_DEL_INDICE} |${renglon.replace(/\s+/gu, ' ').trim()}`;
+    /*
+     * Una línea que no cabe **no se versiona recortada**: recortar `[[Autor:A|A]] y [[Autor:B|B]]`
+     * por dentro del segundo enlace dejaría un solo Autor legible, y un índice que declara dos
+     * acabaría declarando uno. Mejor sin declarar, que es un estado legítimo.
+     */
+    if (linea.length > MAX_CARACTERES_POR_LINEA) continue;
+    lineas.push(linea);
+  }
+  return lineas;
+}
+
+/** Los campos de la ficha del índice, o nada si el texto no trae la ficha que sabemos leer. */
+function camposDeLaFichaDeIndice(wikitexto: string): string[] | undefined {
+  const bloque = plantillaEquilibrada(wikitexto.replace(/\r\n?/gu, '\n'), 0);
+  if (bloque === undefined) return undefined;
+
+  const [nombre, ...campos] = segmentosDePlantilla(bloque.interior);
+  if (nombre === undefined || !PLANTILLA_DE_INDICE.test(nombre)) return undefined;
+  return campos;
+}
+
+/**
+ * Si el texto de un `Índice:` trae la ficha que sabemos leer.
+ *
+ * Es lo que deja a la recuperación distinguir «la ficha no declara Autor» de «esto no es una
+ * ficha»: una redirección u otra plantilla no dice nada del Autor, ni que sí ni que no.
+ */
+export function fichaDeIndiceReconocida(wikitexto: string): boolean {
+  return camposDeLaFichaDeIndice(wikitexto) !== undefined;
+}
+
+/** Las líneas que declaró **el índice**, ya sin la marca. */
+function loQueDeclaraElIndice(declaracion: string): string {
+  return declaracion
+    .split('\n')
+    .filter((linea) => linea.startsWith(MARCA_DEL_INDICE))
+    .map((linea) => linea.slice(MARCA_DEL_INDICE.length).trim())
+    .join('\n');
+}
+
+/**
+ * Lo que el índice declara en su campo de Autor, **tal cual**, antes de decidir si vale.
+ *
+ * Es aparte de la cadena de Autor para que la recuperación pueda decir en su informe por qué
+ * un índice que declara algo no declara el Autor de esta página: dos Autores, o un valor que
+ * no se sabe leer. La cadena solo acepta **uno**.
+ */
+export function autorDelIndice(declaracion: string): AutorDeLaFuente | undefined {
+  for (const linea of loQueDeclaraElIndice(declaracion).split('\n')) {
+    const encontrado = PARAMETRO_DE_AUTOR_WIKITEXTO.exec(linea);
+    if (encontrado === null) continue;
+    return autoresDeclarados(linea.slice(encontrado.index + encontrado[0].length));
+  }
+  return undefined;
 }
 
 /**
@@ -1019,6 +1169,10 @@ export interface LectorDeFuente {
    * la recuperación solo pide cuando la página no declara año. Sus líneas se guardan junto
    * a las de la página y **distinguibles** de ellas: la obra sale siempre de la página, y
    * solo el año puede caer a lo que declare la obra.
+   *
+   * `encabezadoDelIndice` es el texto de origen del `Índice:` que la página nombra en su
+   * etiqueta de escaneo, que la recuperación solo pide cuando la página no declara Autor
+   * (Historia 19.9). Sus líneas van marcadas aparte, y solo el Autor cae a ellas.
    */
   declaracion(
     bruto: string,
@@ -1026,6 +1180,7 @@ export interface LectorDeFuente {
     regionPlana: string,
     encabezado?: string,
     encabezadoDeLaObra?: string,
+    encabezadoDelIndice?: string,
   ): string;
   /** La obra que declara esa declaración. */
   obra(declaracion: string): string | undefined;
@@ -1140,7 +1295,7 @@ function paginaDeWikisource(declaracion: string): string | undefined {
   if (primera === '' || primera.startsWith('|')) return undefined;
   // Las líneas de la obra van detrás de las de la página y nunca las primeras, pero si
   // alguna llegara aquí sería el nombre del índice ocupando el de la página.
-  if (primera.startsWith(MARCA_DE_LA_OBRA)) return undefined;
+  if (primera.startsWith(MARCA_DE_LA_OBRA) || primera.startsWith(MARCA_DEL_INDICE)) return undefined;
   return ETIQUETA_DE_AÑO_WIKISOURCE.test(primera) ? undefined : primera;
 }
 
@@ -1197,7 +1352,7 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
      * El año sale de la **región ya limpia** (fix: antes salía de la página entera, y una
      * etiqueta de un navbox o de la cabecera del sitio ganaba a la de la obra).
      */
-    declaracion(bruto, _plano, regionPlana, encabezadoDeOrigen, encabezadoDeLaObra) {
+    declaracion(bruto, _plano, regionPlana, encabezadoDeOrigen, encabezadoDeLaObra, encabezadoDelIndice) {
       const encabezado = /<h1\b[^>]*\bid\s*=\s*["']firstHeading["'][^>]*>([\s\S]*?)<\/h1>/i.exec(bruto);
       const titulo =
         textoDeCaptura(encabezado?.[1]) ??
@@ -1239,6 +1394,8 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         // en la plantilla lo suyo y en la etiqueta lo del escaneo, y manda lo suyo.
         ...(encabezadoDeOrigen === undefined ? [] : lineasDeEtiquetaDeEscaneo(encabezadoDeOrigen)),
         ...(encabezadoDeLaObra === undefined ? [] : lineasDeLaObraDeclarada(encabezadoDeLaObra)),
+        // Y las del índice del escaneo, con su propia marca — Historia 19.9.
+        ...(encabezadoDelIndice === undefined ? [] : lineasDelIndiceDeclarado(encabezadoDelIndice)),
       ].join('\n');
     },
     /**
@@ -1326,6 +1483,18 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         const declarado = autoresDeclarados(categoria);
         if (declarado !== undefined) return declarado;
       }
+
+      /*
+       * Y detrás de todo, el índice del escaneo que la página nombra — Historia 19.9.
+       *
+       * **El último recurso, nunca una segunda opinión**: solo llega aquí lo que la página no
+       * declara por ninguna de sus cuatro vías. Y solo vale un Autor: un índice que declara
+       * dos no declara el de esta página, y uno que declara algo ilegible tampoco —la página
+       * no ha dicho nada, y el índice no puede bloquearla con lo que no sabe decir—. Las dos
+       * cosas se quedan sin declarar, que es un estado legítimo, y la recuperación lo cuenta.
+       */
+      const delIndice = autorDelIndice(declaracion);
+      if (delIndice !== undefined && delIndice.nombres.length === 1) return delIndice;
 
       return undefined;
     },
@@ -1560,6 +1729,7 @@ export function derivarDocumento(
   bruto: string,
   encabezado?: string,
   encabezadoDeLaObra?: string,
+  encabezadoDelIndice?: string,
 ): DerivacionDeDocumento {
   const lector = LECTORES_POR_FUENTE[idFuente];
   if (lector === undefined) {
@@ -1604,6 +1774,7 @@ export function derivarDocumento(
       cuerpo,
       encabezado,
       encabezadoDeLaObra,
+      encabezadoDelIndice,
     );
   } catch (fallo) {
     // Retirar el cromo puede rendirse; que se rinda es un error, no medio documento.

@@ -1102,6 +1102,250 @@ La cordura y la locura se reparten el imperio de la vida humana.`;
   });
 });
 
+describe('Historia 19.9 — el Autor se lee del Índice del escaneo', () => {
+  const URL_PAGINA = 'https://es.wikisource.org/wiki/Rosario_de_sonetos_l%C3%ADricos/Introducci%C3%B3n';
+  const CRUDA_PAGINA = cruda(URL_PAGINA);
+  // `Índice:`, no `Index:`: así se llama el espacio de nombres en Wikisource-es.
+  const CRUDA_INDICE =
+    'https://es.wikisource.org/wiki/%C3%8Dndice:Rosario_de_sonetos_l%C3%ADricos.djvu?action=raw';
+
+  const PAGINA_ESCANEADA = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Rosario de sonetos líricos/Introducción - Wikisource</title></head><body>
+<h1 id="firstHeading">Rosario de sonetos l&iacute;ricos/Introducci&oacute;n</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>Este es un libro de sonetos, y el soneto es la forma más dura de nuestra lengua.</p>
+</div></div></body></html>`;
+
+  const MUDA = '<pages index="Rosario de sonetos líricos.djvu" include=7-12 header=1 />';
+
+  const FICHA = (campos: string) =>
+    `{{:MediaWiki:Proofreadpage_index_template\n|Titulo=[[Rosario de sonetos líricos]]\n${campos}\n|Paginas=<pagelist />\n}}`;
+  const CON_AUTOR = FICHA(
+    '|Autor=[[Autor:Miguel de Unamuno|Miguel de Unamuno]]\n|Editor=\n|Traductor=\n|Ano=',
+  );
+
+  const RAW = (cuerpo: string): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'text/x-wiki; charset=UTF-8' },
+    cuerpo,
+  });
+
+  const elDocumento = async (t: { corpus: string }) => {
+    const [nombre, ...otros] = await readdir(join(t.corpus, 'fuentes'));
+    expect(otros).toEqual([]);
+    return readFile(join(t.corpus, 'fuentes', nombre), 'utf8');
+  };
+
+  const autorDe = async (t: { corpus: string }) => {
+    const { analizarDocumento, derivarDeLaDeclaracion } = await import('../../tools/lib/documento.ts');
+    const documento = analizarDocumento(await elDocumento(t));
+    expect(documento).toBeDefined();
+    return derivarDeLaDeclaracion('wikisource-es', documento!.declaracion).autor;
+  };
+
+  it('página muda, índice con Autor: el documento lo declara, marcado como del índice', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW(CON_AUTOR),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_PAGINA, CRUDA_PAGINA, CRUDA_INDICE]);
+    expect(await elDocumento(t)).toMatch(
+      /^índice> \|Autor=\[\[Autor:Miguel de Unamuno\|Miguel de Unamuno\]\]$/m,
+    );
+    expect((await autorDe(t))?.nombres).toEqual(['Miguel de Unamuno']);
+    expect(resultado.salida).toMatch(/Autor: Miguel de Unamuno \(lo declara «Índice:Rosario de sonetos líricos\.djvu»/);
+  });
+
+  it('el índice se pide al mismo anfitrión y con la misma identificación', async () => {
+    const t = await taller();
+    await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW(CON_AUTOR),
+    });
+
+    const [pagina, , indice] = await peticiones(t);
+    expect(new URL(indice.url).host).toBe(new URL(pagina.url).host);
+    expect(indice.cabeceras['user-agent']).toBe(pagina.cabeceras['user-agent']);
+  });
+
+  it('una página que ya declara Autor no pide el índice: cero peticiones nuevas', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA.replace('header=1', 'header=1 autor="Marco Aurelio"')),
+      // Si se pidiera, el doble lo registraría: está en el guion a propósito.
+      [CRUDA_INDICE]: RAW(CON_AUTOR),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_PAGINA, CRUDA_PAGINA]);
+    expect((await autorDe(t))?.nombres).toEqual(['Marco Aurelio']);
+    expect(await elDocumento(t)).not.toContain('índice>');
+  });
+
+  it('un índice con |Autor= vacío deja el documento sin Autor, y lo dice', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW(FICHA('|Autor=\n|Editor=[[Autor:Fulano de Tal|Fulano de Tal]]\n|Ano=')),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(await elDocumento(t)).not.toMatch(/^índice> \|Autor/m);
+    expect(resultado.salida).toMatch(/tampoco\. No se encadena más/);
+  });
+
+  it('un índice con dos Autores no declara ninguno, y el informe lo cuenta', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW(
+        FICHA('|Autor=[[Autor:Manuel Machado|Manuel Machado]] y [[Autor:Antonio Machado|Antonio Machado]]'),
+      ),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(resultado.salida).toMatch(/declara 2 Autores \(Manuel Machado; Antonio Machado\)/);
+    expect(resultado.salida).not.toMatch(/^Autor:/m);
+  });
+
+  it('si el índice no responde, se versiona sin Autor y se avisa', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: { lanza: 'getaddrinfo ENOTFOUND es.wikisource.org' },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(resultado.salida).toMatch(/no se pudo leer «Índice:Rosario de sonetos líricos\.djvu»/);
+  });
+
+  it('un 404 en el índice tampoco tira la recuperación', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: { estado: 404, cabeceras: { 'content-type': 'text/html' }, cuerpo: 'no' },
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(resultado.salida).toMatch(/no se pudo leer «Índice:Rosario de sonetos líricos\.djvu»/);
+  });
+
+  it('la petición del índice hereda la revalidación de anfitrión', async () => {
+    const t = await taller();
+    const fuera = 'https://metadatos.example.com/indice';
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: { estado: 302, cabeceras: { location: fuera } },
+      [fuera]: RAW(CON_AUTOR),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(await pedidas(t)).toEqual([URL_PAGINA, CRUDA_PAGINA, CRUDA_INDICE]);
+    expect(resultado.salida).toMatch(/no se pudo leer «Índice:Rosario de sonetos líricos\.djvu»/);
+    expect(await elDocumento(t)).not.toContain('índice>');
+  });
+
+  it('un Índice: sin la ficha que se sabe leer no se confunde con una ficha sin Autor', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW('#REDIRECCIÓN [[Índice:Otro escaneo.djvu]]'),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(resultado.salida).toMatch(
+      /«Índice:Rosario de sonetos líricos\.djvu» no trae la ficha del índice que se sabe leer/,
+    );
+    expect(resultado.salida).not.toMatch(/tampoco\. No se encadena más/);
+    // Un solo salto: la redirección no se sigue.
+    expect(await pedidas(t)).toEqual([URL_PAGINA, CRUDA_PAGINA, CRUDA_INDICE]);
+  });
+
+  it('un índice cuyo Autor no se sabe leer no declara ninguno, y lo dice', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW(FICHA('|Autor=Miguel de Unamuno<ref>nota</ref>')),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await autorDe(t)).toBeUndefined();
+    expect(resultado.salida).toMatch(
+      /«Índice:Rosario de sonetos líricos\.djvu» declara un Autor que no se sabe leer \(«Miguel de Unamuno<ref>nota<\/ref>»\)/,
+    );
+    expect(resultado.salida).not.toMatch(/^Autor:/m);
+  });
+
+  it('la obra y el índice encadenan juntos: la obra da el año y el índice el Autor', async () => {
+    const t = await taller();
+    const CRUDA_OBRA = 'https://es.wikisource.org/wiki/Rosario_de_sonetos_l%C3%ADricos?action=raw';
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(`{{Encabezado|título=[[Rosario de sonetos líricos]]}}\n${MUDA}`),
+      [CRUDA_OBRA]: RAW('{{Encabezado\n|título = Rosario de sonetos líricos\n|año = 1895\n}}'),
+      [CRUDA_INDICE]: RAW(CON_AUTOR),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_PAGINA, CRUDA_PAGINA, CRUDA_OBRA, CRUDA_INDICE]);
+    const documento = await elDocumento(t);
+    expect(documento).toMatch(/^año: 1895$/m);
+    expect(documento).toMatch(/^obra> \|año = 1895$/m);
+    expect(documento).toMatch(/^índice> \|Autor/m);
+    expect((await autorDe(t))?.nombres).toEqual(['Miguel de Unamuno']);
+  });
+
+  it('traductor y año del índice se conservan en la declaración', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW(MUDA),
+      [CRUDA_INDICE]: RAW(
+        FICHA('|Autor=[[Autor:Miguel de Unamuno|Miguel de Unamuno]]\n|Traductor=Jacinto Díaz de Miranda\n|Ano=1911'),
+      ),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const documento = await elDocumento(t);
+    expect(documento).toMatch(/^índice> \|Traductor=Jacinto Díaz de Miranda$/m);
+    expect(documento).toMatch(/^índice> \|Ano=1911$/m);
+    // Se conserva, no se deriva: la cabecera no gana un año por leer el índice.
+    expect(documento).not.toMatch(/^año:/m);
+  });
+
+  it('una página sin index= no tiene índice que pedir', async () => {
+    const t = await taller();
+    const resultado = await recuperar(URL_PAGINA, t, {
+      [URL_PAGINA]: OK(PAGINA_ESCANEADA),
+      [CRUDA_PAGINA]: RAW('<pages include=7-12 header=1 />'),
+      '*': RAW(CON_AUTOR),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_PAGINA, CRUDA_PAGINA]);
+    expect(await autorDe(t)).toBeUndefined();
+  });
+});
+
 describe('Historia 11.1 — lo que el Corpus ya retiró no se vuelve a descargar', () => {
   /*
    * `documentoConUrl` solo miraba `corpus/fuentes/`, así que un documento **retirado** —que

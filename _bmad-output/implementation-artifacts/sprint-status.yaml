@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 14-09-2026 14:37
+last_updated: 14-09-2026 18:56
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -284,7 +284,7 @@ development_status:
   # vacío, así que NO arregla los dos casos que la motivaron. Sobre 25 subpáginas
   # mudas: el Índice salva 2, el padre por la ruta salvaría 6 pero es inferencia
   # (prohibida por la 11.1 y falsa en antologías), y a 17 no las salva nada.
-  19-9-el-autor-se-lee-del-indice-del-escaneo: backlog
+  19-9-el-autor-se-lee-del-indice-del-escaneo: review  # construida el 14/09 por decisión de Héctor
   # 19.10: cinco géneros más en la lista cerrada de categorías de Autor. Sófocles se
   # versionaba mudo llevando «Tragedias de Sófocles» escrito. Medido el 13/09: 262
   # categorías entre tragedias, comedias, fábulas, epístolas, teatro y sonetos, y

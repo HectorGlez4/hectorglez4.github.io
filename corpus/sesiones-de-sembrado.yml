@@ -317,3 +317,14 @@ sesiones:
       citasPublicadas: 1891
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 56.2
+  - fecha: "2026-09-14"
+    hora: "19:03"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Historia 19.9: el Autor se lee del Índice del escaneo"
+    motivo: "Historia 19.9: recuperar lee el Autor del Índice: del escaneo cuando la página no lo declara y nombra su index=, marcado como del índice y como último recurso; comprobado en vivo con Rosario de sonetos líricos (Unamuno). Esopo sigue descartado: su índice trae el Autor vacío, y se añadió el descarte que lo dice. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1891
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 56.2

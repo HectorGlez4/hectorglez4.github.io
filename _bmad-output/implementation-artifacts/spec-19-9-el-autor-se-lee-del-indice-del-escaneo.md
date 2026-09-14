@@ -2,8 +2,8 @@
 title: 'Historia 19.9 — El Autor se lee del Índice del escaneo'
 type: 'feature'
 created: '2026-09-09'
-status: 'in-review'
-baseline_commit: 'cd9294d4354ef8799e79850507f9d83aa80f7071'
+status: 'done'
+baseline_commit: 'fbff954ff19a0c1c74dd23b07865f7273fc5c70e'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/LOOP-PROTOCOL-V5.md'
@@ -76,11 +76,11 @@ El espacio de nombres es `Índice:` en Wikisource-es, no `Index:`, aunque el atr
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `tools/recuperar.ts` -- pedir el índice **solo** si la página no declara Autor y nombra su `index=`.
-- [ ] `tools/lib/documento.ts` -- leer `Autor`, `Traductor` y `Ano` del template del índice, por líneas, sin saltar de campo.
-- [ ] Marcar en la declaración que esas líneas vienen del índice.
-- [ ] Pruebas de la matriz con la red simulada, incluidos el campo vacío y los dos Autores.
-- [ ] Corregir el motivo de descarte de Esopo: hoy dice «reabrir cuando se decida leer del Index:», y el índice lo trae vacío.
+- [x] `tools/recuperar.ts` -- pedir el índice **solo** si la página no declara Autor y nombra su `index=`.
+- [x] `tools/lib/documento.ts` -- leer `Autor`, `Traductor` y `Ano` del template del índice, por líneas, sin saltar de campo.
+- [x] Marcar en la declaración que esas líneas vienen del índice.
+- [x] Pruebas de la matriz con la red simulada, incluidos el campo vacío y los dos Autores.
+- [x] Corregir el motivo de descarte de Esopo: hoy dice «reabrir cuando se decida leer del Index:», y el índice lo trae vacío.
 
 **Acceptance Criteria:**
 - Given una página muda cuyo índice declara Autor, when se recupera, then el documento lo declara.
@@ -100,3 +100,40 @@ El espacio de nombres es `Índice:` en Wikisource-es, no `Index:`, aunque el atr
 - `npx tsx tools/recuperar.ts <una página muda con índice que declara>` -- expected: declara Autor.
 - `npx astro check` -- expected: 0 errores.
 - `npm test` -- expected: sin regresión.
+
+## Suggested Review Order
+
+**Cuándo se pide el índice**
+
+- Solo si la página no declara Autor por ninguna vía y nombra su `index=`.
+  [`recuperar.ts:198`](../../tools/recuperar.ts#L198)
+
+- La obra se repasa solo si se aceptó: el índice no puede empeorar lo ya derivado.
+  [`recuperar.ts:207`](../../tools/recuperar.ts#L207)
+
+- Mismo anfitrión, mismas guardas y reintentos que el encabezado de la obra.
+  [`recuperar.ts:579`](../../tools/recuperar.ts#L579)
+
+**Qué se lee del índice**
+
+- El índice sale del atributo que escribe la página, nunca de la ruta.
+  [`documento.ts:976`](../../tools/lib/documento.ts#L976)
+
+- Autor, traductor y año, por renglón; una línea que no cabe no se recorta.
+  [`documento.ts:1025`](../../tools/lib/documento.ts#L1025)
+
+- El Autor del índice, último eslabón de la cadena y solo si es uno.
+  [`documento.ts:1496`](../../tools/lib/documento.ts#L1496)
+
+**Lo que cuenta el informe**
+
+- Vacío, varios, ilegible, ficha no reconocida o índice caído: cada uno con su aviso.
+  [`recuperar.ts:365`](../../tools/recuperar.ts#L365)
+
+**Pruebas**
+
+- La matriz sin red: índice, ficha por campos y último recurso.
+  [`indice-del-escaneo.test.ts:44`](../../tests/unit/indice-del-escaneo.test.ts#L44)
+
+- El salto de red simulado, con obra e índice encadenados y los avisos.
+  [`recuperar-cli.test.ts:1105`](../../tests/unit/recuperar-cli.test.ts#L1105)

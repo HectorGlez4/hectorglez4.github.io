@@ -32,6 +32,13 @@
  * sería la Procedencia inferida que la Historia 11.1 prohíbe—, y es un solo salto: si la
  * obra tampoco declara año, se acabó.
  *
+ * Y una **cuarta, solo cuando la página no declara Autor** y nombra el escaneo del que se
+ * transcribe (Historia 19.9): el `Índice:` que escribe en su `<pages index="…">`. También un
+ * solo salto, al mismo anfitrión y con las mismas guardas. Lo que declara se versiona marcado
+ * como del índice, y su Autor es el último recurso: nunca gana a nada que diga la página.
+ * **Cubre poco, y está medido** (medido el 08–09/09/2026): sobre 25 subpáginas mudas, salva 2. El índice de *La vida y
+ * fábulas del Esopo* trae `|Autor=` vacío.
+ *
  * No acepta `--obra`, `--año` ni `--licencia`, y no es un descuido: el «So that» de la
  * historia es que nadie pueda teclear una Procedencia que la Fuente no dice.
  */
@@ -45,9 +52,12 @@ import { posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
 import { conReintentos, fuenteDeUrl, type Fuente } from './lib/fuentes.ts';
 import {
   analizarDocumento,
+  autorDelIndice,
   componerDocumento,
   derivarDeLaDeclaracion,
   derivarDocumento,
+  fichaDeIndiceReconocida,
+  indiceDeclarado,
   nombreDeDocumento,
   paginaDeLaObraDeclarada,
 } from './lib/documento.ts';
@@ -175,7 +185,41 @@ const encadenado =
 
 // Encadenar no puede empeorar lo que ya se tenía: si la derivación con el encabezado de la
 // obra fallara, se versiona lo que la página declaraba por su cuenta.
-const derivado = encadenado !== undefined && encadenado.ok ? encadenado : deLaPagina;
+const conLaObra = encadenado !== undefined && encadenado.ok ? encadenado : deLaPagina;
+
+// ── Y si la página no declara Autor, el índice del escaneo que ella nombra ───
+
+/*
+ * Historia 19.9. Solo cuando hace falta —una página que ya declara Autor, por la vía que sea,
+ * no gasta ninguna petición— y solo si la página **nombra** su índice en `<pages index=…>`.
+ * El índice nunca sale de la ruta. Y es un solo salto: si el índice tampoco lo declara, se
+ * acabó.
+ */
+const indice =
+  encabezado.texto !== undefined &&
+  derivarDeLaDeclaracion(fuente.id, conLaObra.declaracion).autor === undefined
+    ? indiceDeclarado(encabezado.texto)
+    : undefined;
+
+const elIndice =
+  indice === undefined ? {} : await encabezadoDelIndice(descarga.url, indice, fuente);
+
+const conElIndice =
+  elIndice.texto === undefined
+    ? undefined
+    : derivarDocumento(
+        fuente.id,
+        descarga.contenido,
+        encabezado.texto,
+        // Solo si la derivación con la obra se aceptó: si se cayó a lo de la página, volver a
+        // pasar la obra repetiría el fallo —y se perdería el Autor del índice— o metería
+        // líneas que ya se descartaron.
+        conLaObra === encadenado ? laObra.texto : undefined,
+        elIndice.texto,
+      );
+
+// Igual que con la obra: leer el índice no puede empeorar lo que ya se tenía.
+const derivado = conElIndice !== undefined && conElIndice.ok ? conElIndice : conLaObra;
 
 const nombre = nombreDeDocumento(fuente.id, derivado.obra, derivado.pagina);
 if (nombre === undefined) {
@@ -303,13 +347,61 @@ await writeFile(
  * Un metadato que falta no es un fallo, pero callarlo sí lo sería: quien siembra tiene que
  * poder distinguir «la Fuente no declara año» de «no se pudo leer lo que declara».
  */
-const avisos = [encabezado.aviso, laObra.aviso].filter((a): a is string => a !== undefined);
+const avisos = [encabezado.aviso, laObra.aviso, elIndice.aviso].filter(
+  (a): a is string => a !== undefined,
+);
 if (laObra.texto !== undefined && derivado.año === undefined) {
   avisos.push(
     `Aviso: «${laObra.obra}», la obra que esta página declara, tampoco declara año. ` +
       'No se encadena más: un solo salto, de la página a su obra.',
   );
 }
+
+/*
+ * Lo que el índice dijo del Autor, cuando se le preguntó. Un índice que declara dos Autores,
+ * o algo que no se sabe leer, no declara el de esta página —y el documento se versiona sin
+ * Autor—, pero callarlo haría que pareciera un índice vacío.
+ */
+const leidoDelIndice = derivado === conElIndice ? autorDelIndice(derivado.declaracion) : undefined;
+if (conElIndice !== undefined && !conElIndice.ok) {
+  avisos.push(
+    `Aviso: se leyó «Índice:${indice}», el índice del escaneo que esta página nombra, pero no ` +
+      `se pudo derivar el documento con él: ${conElIndice.motivo} El documento se versiona sin ` +
+      'Autor declarado.',
+  );
+} else if (elIndice.texto !== undefined && !fichaDeIndiceReconocida(elIndice.texto)) {
+  // No es lo mismo que una ficha con `|Autor=` vacío: aquí no se sabe lo que el índice dice.
+  avisos.push(
+    `Aviso: «Índice:${indice}» no trae la ficha del índice que se sabe leer ` +
+      '({{:MediaWiki:Proofreadpage_index_template}}): puede ser una redirección u otra ' +
+      'plantilla, y no se adivina. No se encadena más. El documento se versiona sin Autor declarado.',
+  );
+} else if (derivado === conElIndice) {
+  if (leidoDelIndice === undefined) {
+    avisos.push(
+      `Aviso: esta página no declara Autor, y «Índice:${indice}», el índice del escaneo que ` +
+        'ella nombra, tampoco. No se encadena más: un solo salto, de la página a su índice. ' +
+        'El documento se versiona sin Autor declarado.',
+    );
+  } else if (leidoDelIndice.nombres.length > 1) {
+    avisos.push(
+      `Aviso: «Índice:${indice}» declara ${leidoDelIndice.nombres.length} Autores ` +
+        `(${leidoDelIndice.nombres.join('; ')}), y un índice que declara varios no declara el ` +
+        'de esta página. El documento se versiona sin Autor declarado.',
+    );
+  } else if (leidoDelIndice.nombres.length === 0) {
+    avisos.push(
+      `Aviso: «Índice:${indice}» declara un Autor que no se sabe leer («${leidoDelIndice.crudo}»). ` +
+        'El documento se versiona sin Autor declarado.',
+    );
+  }
+}
+
+const autorPorElIndice =
+  leidoDelIndice !== undefined && leidoDelIndice.nombres.length === 1
+    ? `Autor: ${leidoDelIndice.nombres[0]} (lo declara «Índice:${indice}», el índice del escaneo ` +
+      'que esta página nombra; la página no declara ninguno)\n'
+    : '';
 
 const deDondeSaleElAño =
   derivado.año !== undefined && laObra.texto !== undefined
@@ -323,6 +415,7 @@ terminar({
     `Documento versionado: ${destino}\n` +
     `Obra: ${derivado.obra}\n` +
     `Año: ${derivado.año === undefined ? 'no consta exacto (la candidata quedará con obra y sin año)' : `${derivado.año}${deDondeSaleElAño}`}\n` +
+    autorPorElIndice +
     avisos.map((aviso) => `${aviso}\n`).join('') +
     `Licencia: ${fuente.licencia} (${fuente.nombre})`,
 });
@@ -469,6 +562,53 @@ async function encabezadoDeLaObra(
   }
 
   return { texto: descarga.contenido, obra };
+}
+
+/**
+ * El texto de origen del **`Índice:` que la página nombra**, cuando la página no declara
+ * Autor — Historia 19.9.
+ *
+ * Es el patrón de `encabezadoDeLaObra`, entero: la dirección se compone sobre el **mismo
+ * anfitrión** de la página, la petición pasa por las mismas guardas —tiempo máximo, techo,
+ * identificación y revalidación tras redirección— y, si no llega, la recuperación sigue
+ * adelante y lo dice.
+ *
+ * El espacio de nombres es `Índice:`, no `Index:`, aunque el atributo se escriba `index=`:
+ * así se llama en Wikisource-es.
+ */
+async function encabezadoDelIndice(
+  direccion: string,
+  indice: string,
+  fuente: Fuente,
+): Promise<{ texto?: string; aviso?: string }> {
+  let cruda: string;
+  try {
+    const destino = new URL(direccion);
+    destino.hash = '';
+    destino.search = '';
+    destino.pathname = `/wiki/Índice:${indice.replace(/ /gu, '_')}`;
+    destino.searchParams.set('action', 'raw');
+    cruda = destino.toString();
+  } catch {
+    return { aviso: `Aviso: no se pudo componer la dirección del índice «Índice:${indice}».` };
+  }
+
+  // Con reintento, por lo mismo que las otras dos: la Fuente limita la tasa por rachas.
+  const descarga = await conReintentos(
+    () => descargar(cruda, fuente, { tipos: TIPOS_DE_ENCABEZADO, acepta: 'text/x-wiki, text/plain' }),
+    (r) => r.ok || !esPasajero(r),
+  );
+
+  if (!descarga.ok) {
+    return {
+      aviso:
+        `Aviso: esta página no declara Autor y no se pudo leer «Índice:${indice}», el índice ` +
+        `del escaneo que ella nombra (${cruda}): ${descarga.motivos[0]} El documento se ` +
+        'versiona igual, sin Autor declarado.',
+    };
+  }
+
+  return { texto: descarga.contenido };
 }
 
 /** Dos rutas que designan la misma página, comparadas ya sin la codificación por ciento. */

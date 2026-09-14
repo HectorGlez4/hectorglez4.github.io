@@ -630,3 +630,9 @@ descartes:
     idDePagina: 3847
     nombre: "Fray Luis de León"
     motivo: "Sembrado el 07/09 con tres Citas de «La perfecta casada», retiradas el 13/09 porque las tres empezaban colgando de la frase anterior («Ni…», «Que…», «Y de los romanos…»); los tres capítulos versionados no tenían otra candidata y se retiraron. Su prosa no da sentencia suelta, como ya anotó la Historia 19.2. Su ficha pasa a corpus/_autores-retirados/. Descartado por decisión de Héctor el 14/09."
+  - fecha: "2026-09-14"
+    epoca: "antigua-grecia"
+    candidato: "esopo"
+    idDePagina: 4671
+    nombre: "Esopo"
+    motivo: "Revisado contra la API el 13/09. Declaran a Esopo en su propia página 218 fábulas «(ed. desconocida)» con |autor=[[Esopo]], pero no son una edición identificable, que el Corpus exige. Otras 42 de «Fábulas de Esopo, filósofo moral, y de otros famosos autores» (1845) lo declaran por la categoría «Fábulas de Esopo», pero el libro mezcla autores y la categoría le atribuye fábulas ajenas —«La liebre y la perdiz» es de La Fontaine—, y sus moralejas son del editor («Significa esta fábula, que…», refranes añadidos). Las 161 de la edición de 1813 son <pages index=…> mudas, y el resto de la categoría son páginas de ediciones sin texto. Leer del índice del escaneo (Historia 19.9, construida el 14/09) no las salva: «Índice:La Vida y fabulas del Esopo - IA bub gb 7B00lCkvX-0C.djvu» trae |Autor=, |Traductor= y |Ano= vacíos, comprobado contra la API el 14/09."

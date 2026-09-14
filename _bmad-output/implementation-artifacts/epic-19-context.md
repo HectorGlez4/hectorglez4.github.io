@@ -16,7 +16,7 @@ El Corpus (1.639 Citas de 35 Autores) está invertido respecto a la demanda: cre
 - Story 19.6: La cola de revisión se ordena por probabilidad, no por alfabeto
 - Story 19.7: El lector entiende la obra escaneada, que es donde viven los clásicos
 - Story 19.8: El clásico firma con un solo nombre
-- Story 19.9: El Autor se lee del Índice del escaneo (sin construir)
+- Story 19.9: El Autor se lee del Índice del escaneo
 - Story 19.10: Los géneros que faltaban en la categoría de Autor
 - Story 19.11: La numeración de verso del escaneo no se versiona
 
