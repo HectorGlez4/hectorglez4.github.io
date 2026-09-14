@@ -592,3 +592,4 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
 - source_spec: `_bmad-output/implementation-artifacts/spec-19-11-la-numeracion-de-verso-no-se-versiona.md`
   summary: epics.md no recoge las historias 19.5 a 19.11 de la Épica 19, así que el contexto compilado de la épica se queda en la 19.4 y con cifras viejas (1.639 Citas, 35 Autores).
   evidence: epic-19-context.md, compilado el 14/09 desde planning-artifacts, solo lista 19.1–19.4, mientras sprint-status.yaml ya tiene de la 19.5 a la 19.10 y specs de cada una; las historias nacieron de diagnósticos del bucle y no pasaron por bmad-create-epics-and-stories.
+  **RESUELTO el 14/09:** `epics.md` recoge ya de la 19.5 a la 19.11, escritas desde sus specs, con una nota en la épica que dice de dónde salieron y que la 19.9 sigue sin construir. La lista de historias de `epic-19-context.md` se puso al día a mano.

@@ -2259,6 +2259,7 @@ El Corpus está invertido respecto a la demanda: González Prada aporta 154 Cita
 
 **FRs covered:** FR-48, FR-49, FR-50
 **Notas de implementación:** la primera historia se especificó como puerta y **se suavizó el 2026-09-05**: la verificación de derechos ya la hace el conjunto cerrado de Fuentes —Wikisource solo aloja dominio público— y exigir además el año de cada traducción duplicaba esa comprobación un nivel más abajo y peor. Ya no bloquea a las demás. Las dos siguientes son operación —el bucle— y no producen FR nuevos: las herramientas son las de la Épica 9, ya construidas. La 19.4 es superficie nueva y va la última, con condición de indexación.
+**Historias 19.5 a 19.11 (añadidas aquí el 2026-09-14):** no salieron de la planificación sino de diagnósticos del bucle, y se especificaron directamente como spec en `implementation-artifacts/`. Ninguna produce FR nuevos: son operación del bucle (19.5, 19.6) y lectura de la Fuente (19.7 a 19.11). La 19.5 sustituye al listón numérico que la 19.2 dejaba pendiente. La 19.9 sigue sin construir: medida antes de escribirla, vale el 8 % de las páginas mudas y no el 53 %, y construirla es de Héctor.
 
 ### Story 19.1: De una obra traducida se conserva lo que la Fuente declare
 
@@ -2352,3 +2353,179 @@ So that pueda llegar sin saber a quién busco.
 **Given** la serie de indexación
 **When** ninguna familia pasa del 20 % indexado
 **Then** esta historia **no se construye todavía**: añadir superficies a un sitio que no se rastrea es gastar en la dirección contraria
+
+### Story 19.5: La época se declara desde la Fuente, y el hueco sale de ella
+
+As a editor que siembra clásicos,
+I want que la lista de a quién buscar salga de las categorías de la Fuente,
+So that el bucle tenga trabajo derivable y una condición de término que sea una cuenta y no un cansancio.
+
+**Acceptance Criteria:**
+
+**Given** las categorías de autores de Wikisource-es por época —Antigüedad, Antigua Grecia, Antigua Roma y católicos— y la marca `DP-Autores-100` de dominio público
+**When** se recupera una época
+**Then** la lista de candidatos se versiona como todo lo que el bucle consume
+**And** no vive en el repositorio como catálogo escrito a mano
+
+**Given** una época recuperada
+**When** se cruza con el Corpus
+**Then** dice cuántos candidatos hay, cuántos sembrados y cuántos descartados con motivo
+
+**Given** todos los candidatos de una época sembrados o descartados con motivo
+**When** se consulta el hueco
+**Then** esa época se declara terminada
+**And** un candidato que no da Citas se descarta con su motivo escrito, nunca se salta
+
+**Given** la Fuente sin responder
+**When** se consulta
+**Then** se trabaja con la lista versionada y se dice que no se actualizó
+
+**Given** un candidato con `DP-Autores-100`
+**When** se siembra
+**Then** pasa la puerta de admisión igual que cualquier otro: admitir sigue siendo del editor
+
+### Story 19.6: La cola de revisión se ordena por probabilidad, no por alfabeto
+
+As a editor,
+I want revisar primero las candidatas con más probabilidad de valer,
+So that agotar una época no sea leer 21.021 candidatas ordenadas por su primera palabra.
+
+**Acceptance Criteria:**
+
+**Given** 21.021 candidatas pendientes
+**When** se pide la cola
+**Then** el total sigue siendo 21.021 y el orden no es alfabético
+**And** ninguna candidata se oculta: un orden que esconde la cola es una puerta en secreto
+
+**Given** `--primeras 300`
+**When** se lista
+**Then** se enseñan 300 y se dice cuántas quedan debajo
+
+**Given** dos candidatas con la misma puntuación
+**When** se lista dos veces
+**Then** salen en el mismo orden
+
+**Given** una señal de orden
+**When** entra
+**Then** trae su cifra medida contra el Corpus publicado, escrita donde vive
+**And** convertirla en puerta es decisión aparte: como puerta muerde Citas publicadas
+
+### Story 19.7: El lector entiende la obra escaneada, que es donde viven los clásicos
+
+As a editor,
+I want que el Autor de una obra transcrita de un escaneo se lea de su etiqueta `<pages … autor="…" />`,
+So that los clásicos no se versionen mudos cuando la Fuente sí los declara.
+
+**Acceptance Criteria:**
+
+**Given** una página con `<pages … autor="Marco Aurelio" />`
+**When** se deriva
+**Then** declara a Marco Aurelio
+**And** la etiqueta se normaliza a las mismas líneas `|autor = …` de la plantilla, y de ahí para dentro nada cambia
+
+**Given** el nombre de fichero del índice con `(1888)`
+**When** se deriva el año
+**Then** no hay año: un nombre de fichero no es una declaración de la Fuente
+
+**Given** los doce libros de los *Soliloquios* recuperados de nuevo
+**When** corre la prueba de FR-23
+**Then** ninguno queda sin Autor declarado
+**And** ningún documento versionado se edita a mano
+
+### Story 19.8: El clásico firma con un solo nombre
+
+As a editor,
+I want que `[[Categoría:Obras de Platón]]` declare a Platón,
+So that la guarda calibrada con Autores de dos apellidos no deje mudo al clásico.
+
+**Acceptance Criteria:**
+
+**Given** `[[Categoría:Obras de Platón]]`
+**When** se deriva el Autor
+**Then** declara «Platón»: un nombre de una sola palabra cuenta si empieza en mayúscula
+
+**Given** `[[Categoría:Obras de teatro]]`
+**When** se deriva
+**Then** no declara nada
+
+**Given** la categoría
+**When** la página declara Autor por otra vía
+**Then** la categoría no la adelanta: sigue siendo el último eslabón de la cadena
+**And** los falsos positivos medidos van escritos junto a la regla
+
+**Given** los documentos de Platón recuperados de nuevo
+**When** corre la prueba de FR-23
+**Then** ninguno queda sin Autor declarado
+
+### Story 19.9: El Autor se lee del Índice del escaneo
+
+As a editor,
+I want que una página escaneada sin `autor=` tome el Autor de la página `Índice:` que ella misma nombra,
+So that se declare lo que la Fuente atribuye aunque no lo repita en cada subpágina.
+
+**Acceptance Criteria:**
+
+**Given** una página muda cuyo índice declara Autor
+**When** se recupera
+**Then** el documento lo declara, marcado como del índice
+
+**Given** una página que ya declara Autor
+**When** se recupera
+**Then** no se pide el índice
+
+**Given** un índice con `|Autor=` vacío
+**When** se recupera
+**Then** el documento sigue sin declarar Autor y no se inventa ninguno
+**And** nunca se deriva del padre por la ruta, que es la Procedencia inferida que prohíbe la 11.1
+
+**Given** el alcance medido antes de escribirla
+**When** se decide construirla
+**Then** consta que salva 2 de 25 subpáginas mudas, y no las de Esopo ni *La República*, cuyos índices traen el Autor vacío
+
+### Story 19.10: Los géneros que faltaban en la categoría de Autor
+
+As a editor,
+I want que `[[Categoría:Tragedias de Sófocles]]` declare a Sófocles,
+So that la lista cerrada de géneros no deje mudas las tragedias y el teatro de los clásicos.
+
+**Acceptance Criteria:**
+
+**Given** `[[Categoría:Tragedias de Sófocles]]`
+**When** se deriva
+**Then** declara «Sófocles»
+**And** la lista sigue cerrada: cada género entra con su cifra medida contra la Fuente
+
+**Given** `[[Categoría:Traducciones de Alejo García Moreno]]`
+**When** se deriva
+**Then** no declara Autor
+**And** «Traducciones de», «Ilustraciones de» y «Documentos de» quedan fuera a propósito, porque nombran a quien no escribió
+
+**Given** las tragedias recuperadas
+**When** corre la prueba de FR-23
+**Then** ninguna queda muda
+
+### Story 19.11: La numeración de verso del escaneo no se versiona
+
+As a editor,
+I want que la numeración de verso de un escaneo no se guarde como texto de la obra,
+So that «5Mucho padeció» no quede versionado como si lo hubiera escrito Virgilio.
+
+**Acceptance Criteria:**
+
+**Given** un `<sup>` sin atributos cuyo único texto son de una a cuatro cifras
+**When** se recupera de Wikisource-es
+**Then** se sustituye por un espacio, nunca por nada, para no pegar dos palabras
+**And** se conservan el `<sup>` con atributos, con letras o con marcado dentro
+
+**Given** La Eneida de Ochoa, libro I, recuperada de nuevo
+**When** se mide con `tools/peor-legible.ts`
+**Then** su cifra-en-palabra es 0
+**And** la declaración y el resto del cuerpo son idénticos a lo versionado
+
+**Given** los documentos regenerados
+**When** corre el cotejo del build
+**Then** toda Cita publicada sigue literal en su documento
+
+**Given** la canaria de legibilidad
+**When** se construye la historia
+**Then** no se toca: la numeración es aparato del escaneo, no margen de la canaria

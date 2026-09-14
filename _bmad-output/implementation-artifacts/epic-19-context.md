@@ -12,6 +12,15 @@ El Corpus (1.639 Citas de 35 Autores) está invertido respecto a la demanda: cre
 - Story 19.2: El bucle siembra clásicos con meta propia
 - Story 19.3: La profundidad por Autor llega a la obra y a la biografía
 - Story 19.4: La Época agrupa a los Autores que comparten tiempo y escuela
+- Story 19.5: La época se declara desde la Fuente, y el hueco sale de ella
+- Story 19.6: La cola de revisión se ordena por probabilidad, no por alfabeto
+- Story 19.7: El lector entiende la obra escaneada, que es donde viven los clásicos
+- Story 19.8: El clásico firma con un solo nombre
+- Story 19.9: El Autor se lee del Índice del escaneo (sin construir)
+- Story 19.10: Los géneros que faltaban en la categoría de Autor
+- Story 19.11: La numeración de verso del escaneo no se versiona
+
+De la 19.5 a la 19.11 salieron de diagnósticos del bucle; su detalle vive en cada `spec-19-*.md`. Las cifras del objetivo de arriba son las de la planificación: hoy el Corpus publica 1.891 Citas.
 
 ## Requirements & Constraints
 
