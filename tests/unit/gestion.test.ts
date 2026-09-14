@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
+import { RAIZ } from './ayuda/construir.js';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import {
   asignarTema,
@@ -308,6 +310,76 @@ describe('Historia 11.4 — la tradición del Autor se escribe con la herramient
     if (resultado.ok) return;
     expect(resultado.motivos.join(' ')).toMatch(/latinoamericana/);
     expect((await readdir(rutas.autores)).length).toBe(0);
+  });
+});
+
+/**
+ * Editar un Autor no se lleva por delante lo que el fichero ya tenía.
+ *
+ * Medido el 2026-09-13 (d06bc181): editar la semblanza de `siddhartha-gautama.yml` reescribió
+ * el fichero con los cinco campos que `editarAutor` sabía nombrar y borró
+ * `tituloEnFuente: "Buda Gautama"`, el alias con el que el cruce por época reconoce a
+ * «Autor:Buda Gautama». La Antigüedad dejó de estar terminada y la puerta de pruebas siguió en
+ * verde, porque ninguna prueba editaba un fichero con un campo que el esquema no nombra.
+ */
+describe('editar un Autor conserva los campos que el esquema no nombra', () => {
+  it('editar la semblanza conserva tituloEnFuente y cualquier otro campo del fichero', async () => {
+    const rutas = await corpusVacio();
+    await writeFile(
+      join(rutas.autores, 'siddhartha-gautama.yml'),
+      [
+        'nombre: "Siddhartha Gautama"',
+        'añoNacimiento: -563',
+        'añoFallecimiento: -483',
+        'semblanza: "El Buda."',
+        'tradicion: "otra"',
+        'tituloEnFuente: "Buda Gautama"',
+        'campoQueNadieNombra: "sigue aquí"',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+
+    const resultado = await editarAutor(rutas, 'siddhartha-gautama', {
+      semblanza: 'El Buda, fundador del budismo.',
+    });
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+    const escrito = parsearYaml(
+      await readFile(join(rutas.autores, 'siddhartha-gautama.yml'), 'utf8'),
+    ) as Record<string, unknown>;
+    expect(escrito).toEqual({
+      nombre: 'Siddhartha Gautama',
+      añoNacimiento: -563,
+      añoFallecimiento: -483,
+      semblanza: 'El Buda, fundador del budismo.',
+      tradicion: 'otra',
+      tituloEnFuente: 'Buda Gautama',
+      campoQueNadieNombra: 'sigue aquí',
+    });
+  });
+
+  it('editar sin cambios no altera los datos de ningún Autor del Corpus real', async () => {
+    /*
+     * La misma regla medida contra los ficheros de verdad, sobre una copia: lo que la prueba
+     * de arriba fija con un campo inventado, esta lo fija con los campos que el Corpus ya usa
+     * —hoy `tituloEnFuente` en Teresa— y con los que se añadan mañana sin avisar aquí.
+     */
+    const rutas = await corpusVacio();
+    await cp(resolve(RAIZ, 'corpus/autores'), rutas.autores, { recursive: true });
+
+    // `.gitkeep` también está en el directorio y no es una ficha de Autor.
+    const fichas = (await readdir(rutas.autores)).filter((f) => /\.ya?ml$/u.test(f));
+    expect(fichas.length).toBeGreaterThan(0);
+    for (const fichero of fichas) {
+      const ruta = join(rutas.autores, fichero);
+      const antes = parsearYaml(await readFile(ruta, 'utf8'));
+      const resultado = await editarAutor(rutas, fichero.replace(/\.ya?ml$/u, ''), {});
+      expect(resultado.ok, `${fichero}: ${resultado.ok ? '' : resultado.motivos.join(' ')}`).toBe(
+        true,
+      );
+      expect(parsearYaml(await readFile(ruta, 'utf8')), fichero).toEqual(antes);
+    }
   });
 });
 

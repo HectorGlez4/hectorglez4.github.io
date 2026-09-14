@@ -102,7 +102,17 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
   return { ok: true, ruta, mensaje: `Autor «${slug}» creado.` };
 }
 
-/** Edita un Autor existente. Los campos omitidos se conservan; los vacíos, se rechazan. */
+/**
+ * Edita un Autor existente. Los campos omitidos se conservan; los vacíos, se rechazan.
+ *
+ * **Se conserva el fichero entero, no los campos que esta función sabe nombrar.** La fusión
+ * se construía con los cinco del esquema y `escribirAutor` vuelca el fichero completo, así
+ * que todo lo demás se perdía en silencio. Medido el 2026-09-13 (d06bc181): editar la
+ * semblanza de `siddhartha-gautama.yml` borró `tituloEnFuente: "Buda Gautama"`, el alias
+ * que `slugsSembrados` lee, y la Antigüedad dejó de estar terminada con la puerta de pruebas
+ * en verde. Aquí no se nombra `tituloEnFuente`: su dueño es `AutorEnCorpus`, y así un campo
+ * que se añada mañana tampoco se pierde.
+ */
 export async function editarAutor(
   rutas: Rutas,
   slug: string,
@@ -112,12 +122,15 @@ export async function editarAutor(
   const actual = autores.find((a) => a.slug === slug);
   if (!actual) return { ok: false, motivos: [`El Autor «${slug}» no existe en el corpus.`] };
 
+  // Lo que el fichero declara, sin lo que `leerAutores` añade al leer y no está escrito en él.
+  const enFichero: Record<string, unknown> = { ...actual };
+  delete enFichero.slug;
+  delete enFichero.ruta;
+
+  // Solo pisa lo que la orden trae con valor: una bandera ausente llega como `undefined`.
   const fusion = {
-    nombre: cambios.nombre ?? actual.nombre,
-    añoNacimiento: cambios.añoNacimiento ?? actual.añoNacimiento,
-    añoFallecimiento: cambios.añoFallecimiento ?? actual.añoFallecimiento,
-    semblanza: cambios.semblanza ?? actual.semblanza,
-    tradicion: cambios.tradicion ?? actual.tradicion,
+    ...enFichero,
+    ...Object.fromEntries(Object.entries(cambios).filter(([, valor]) => valor !== undefined)),
   };
 
   const validado = autorAdmisible.safeParse(fusion);
