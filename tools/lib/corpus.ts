@@ -128,6 +128,16 @@ export interface Rutas {
    * de verdad, el directorio entra en el repositorio con su fichero dentro.
    */
   coleccionesRetiradas: string;
+  /**
+   * Donde va la ficha de un Autor retirado — AD-2, como las Fuentes y las Colecciones.
+   *
+   * Tiene que salir de `autores/` y no basta con marcarla: el cruce por época cuenta como
+   * sembrado a todo fichero de ahí dentro —`slugsSembrados`, «sembrado gana a descartado»—,
+   * así que un descarte de `epocas.ts --descartar` no surte efecto mientras la ficha siga en
+   * su sitio. Medido el 2026-09-14 con Fray Luis de León y Tito Lucrecio Caro, que hubo que
+   * mover a mano. Ninguna base de `src/content.config.ts` apunta aquí.
+   */
+  autoresRetirados: string;
   revision: string;
   /**
    * Los documentos de Fuente que produce `tools/recuperar.ts` (AD-23).
@@ -214,6 +224,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     colecciones: join(raizCorpus, 'colecciones'),
     coleccionesRetiradas: join(raizCorpus, '_colecciones-retiradas'),
     fuentesRetiradas: join(raizCorpus, '_fuentes-retiradas'),
+    autoresRetirados: join(raizCorpus, '_autores-retirados'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),

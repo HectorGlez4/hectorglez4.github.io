@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import { RAIZ } from './ayuda/construir.js';
 import { darDeAltaLote } from '../../tools/alta.ts';
+import { existsSync } from 'node:fs';
 import {
   asignarTema,
   quitarTema,
@@ -13,8 +14,17 @@ import {
   editarAutor,
   eliminarTema,
   marcarAptaParaPortada,
+  retirarAutor,
 } from '../../tools/lib/gestion.ts';
-import { leerCitas, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import {
+  leerAutores,
+  leerCitas,
+  registrarCandidatosPorEpoca,
+  registrarDescarteDeCandidato,
+  rutasDelCorpus,
+  type Rutas,
+} from '../../tools/lib/corpus.ts';
+import { slugsSembrados } from '../../tools/lib/epocas.ts';
 import { temasPublicados, type Cita, type Tema } from '../../src/lib/publicado.ts';
 
 const temporales: string[] = [];
@@ -593,4 +603,278 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     });
   });
 
+});
+
+/**
+ * AD-2 — retirar un Autor es una orden, no un `git mv` a mano.
+ *
+ * El 2026-09-14 Fray Luis de León y Tito Lucrecio Caro se descartaron de sus épocas con
+ * `epocas.ts --descartar`, y el descarte no surtió efecto: el cruce cuenta como sembrado a
+ * todo fichero de `corpus/autores/` —«sembrado gana a descartado»—, así que las dos épocas
+ * seguían contándolos hasta que sus fichas se movieron a mano a `corpus/_autores-retirados/`.
+ *
+ * Como `retirarFuente` y `despublicarColeccion`: **mueve y no borra**, y se niega mientras
+ * algo del Corpus apunte al Autor — una Cita publicada, una candidata en revisión, un miembro
+ * de Colección o una fijación de portada. Y sin motivo, no retira.
+ */
+describe('AD-2 — retirar un Autor mueve su ficha, y solo cuando nada apunta a él', () => {
+  const MOTIVO = 'Sembrado sin ninguna Cita que se sostenga.';
+
+  function ficha(nombre: string, extra: string[] = []): string {
+    return [
+      `nombre: "${nombre}"`,
+      'añoFallecimiento: 65',
+      'semblanza: "Una semblanza cualquiera."',
+      ...extra,
+      '',
+    ].join('\n');
+  }
+
+  function cita(slug: string, autor: string): string {
+    return [
+      '---',
+      `texto: "Una frase cualquiera con la longitud que hace falta, ${slug}."`,
+      `autor: "${autor}"`,
+      `slug: "${slug}"`,
+      'procedencia:',
+      '  obra: "Una obra"',
+      'estadoDerechos: "dominio-público"',
+      '---',
+      '',
+    ].join('\n');
+  }
+
+  /*
+   * Dos Autores cuyo slug empieza igual, a propósito: `seneca-` es prefijo de
+   * `seneca-el-viejo-…`, y una comprobación por prefijo que no lo sepa se negaría a retirar a
+   * Séneca por las Citas de su padre.
+   */
+  async function corpusConSeneca(): Promise<Rutas> {
+    const rutas = await corpusVacio();
+    await writeFile(
+      join(rutas.autores, 'seneca.yml'),
+      ficha('Séneca', ['tituloEnFuente: "Lucio Anneo Séneca"']),
+      'utf8',
+    );
+    await writeFile(join(rutas.autores, 'seneca-el-viejo.yml'), ficha('Séneca el Viejo'), 'utf8');
+    return rutas;
+  }
+
+  async function coleccion(directorio: string, slug: string, miembros: string[]) {
+    await mkdir(directorio, { recursive: true });
+    await writeFile(
+      join(directorio, `${slug}.yml`),
+      ['nombre: "Estoicos"', 'criterio: "Citas estoicas."', 'miembros:', ...miembros.map((m) => `  - "${m}"`), ''].join('\n'),
+      'utf8',
+    );
+  }
+
+  it('mueve la ficha a corpus/_autores-retirados/ tal cual, y el mensaje lleva el motivo', async () => {
+    const rutas = await corpusConSeneca();
+    const antes = await readFile(join(rutas.autores, 'seneca.yml'), 'utf8');
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(false);
+    expect(await readFile(join(rutas.autoresRetirados, 'seneca.yml'), 'utf8')).toBe(antes);
+    expect(resultado.ok && resultado.mensaje).toContain(MOTIVO);
+    // Retirar uno no toca al otro.
+    expect(existsSync(join(rutas.autores, 'seneca-el-viejo.yml'))).toBe(true);
+  });
+
+  it('sin motivo se niega y no mueve nada', async () => {
+    const rutas = await corpusConSeneca();
+
+    for (const motivo of ['', '   ']) {
+      const resultado = await retirarAutor(rutas, 'seneca', motivo);
+      expect(resultado.ok).toBe(false);
+      expect(!resultado.ok && resultado.motivos.join(' ')).toMatch(/motivo/);
+    }
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+    expect(existsSync(rutas.autoresRetirados)).toBe(false);
+  });
+
+  it('un Autor que no existe se rechaza nombrándolo', async () => {
+    const rutas = await corpusConSeneca();
+    const resultado = await retirarAutor(rutas, 'lucano', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos.join(' ')).toContain('lucano');
+  });
+
+  it('se niega si alguna Cita publicada lo tiene por autor, y dice cuántas', async () => {
+    const rutas = await corpusConSeneca();
+    await writeFile(
+      join(rutas.citas, 'seneca--la-vida-es-larga.md'),
+      cita('seneca-la-vida-es-larga', 'seneca'),
+      'utf8',
+    );
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos.join('\n')).toMatch(/1 Cita publicada/);
+    expect(!resultado.ok && resultado.motivos.join('\n')).toContain('seneca-la-vida-es-larga');
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+  });
+
+  it('se niega si alguna candidata de corpus/_revision/ lo tiene por autor', async () => {
+    const rutas = await corpusConSeneca();
+    await writeFile(
+      join(rutas.revision, 'seneca--no-hay-viento.md'),
+      cita('seneca-no-hay-viento', 'seneca'),
+      'utf8',
+    );
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos.join('\n')).toMatch(/1 candidata/);
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+  });
+
+  it('se niega si un miembro de una Colección apunta a una Cita suya', async () => {
+    const rutas = await corpusConSeneca();
+    await coleccion(rutas.colecciones, 'estoicos', ['seneca-la-vida-es-larga']);
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    const motivos = !resultado.ok ? resultado.motivos.join('\n') : '';
+    expect(motivos).toContain('estoicos');
+    expect(motivos).toContain('seneca-la-vida-es-larga');
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+  });
+
+  it('también si la Colección está despublicada: publicarla la traería de vuelta', async () => {
+    const rutas = await corpusConSeneca();
+    await coleccion(rutas.coleccionesRetiradas, 'estoicos', ['seneca-la-vida-es-larga']);
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    expect(!resultado.ok && resultado.motivos.join('\n')).toContain('estoicos');
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+  });
+
+  it('se niega si una fijación de corpus/portada.json apunta a una Cita suya', async () => {
+    const rutas = await corpusConSeneca();
+    await writeFile(
+      rutas.portada,
+      JSON.stringify({ _comentario: 'x', fijaciones: { '2026-10-01': 'seneca-la-vida-es-larga' } }),
+      'utf8',
+    );
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    const motivos = !resultado.ok ? resultado.motivos.join('\n') : '';
+    expect(motivos).toContain('2026-10-01');
+    expect(motivos).toContain('seneca-la-vida-es-larga');
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+  });
+
+  it('no confunde a un Autor con otro cuyo slug empieza igual', async () => {
+    const rutas = await corpusConSeneca();
+    await writeFile(
+      join(rutas.citas, 'seneca-el-viejo--la-fortuna.md'),
+      cita('seneca-el-viejo-la-fortuna', 'seneca-el-viejo'),
+      'utf8',
+    );
+    await writeFile(
+      join(rutas.revision, 'seneca-el-viejo--otra.md'),
+      cita('seneca-el-viejo-otra', 'seneca-el-viejo'),
+      'utf8',
+    );
+    // Un miembro que no resuelve a ninguna Cita, pero es del padre por su prefijo más largo.
+    await coleccion(rutas.colecciones, 'retoricos', ['seneca-el-viejo-no-publicada']);
+    await writeFile(
+      rutas.portada,
+      JSON.stringify({ fijaciones: { '2026-10-01': 'seneca-el-viejo-la-fortuna' } }),
+      'utf8',
+    );
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+  });
+
+  it('nunca sobrescribe una ficha ya retirada con el mismo nombre', async () => {
+    const rutas = await corpusConSeneca();
+    await mkdir(rutas.autoresRetirados, { recursive: true });
+    await writeFile(join(rutas.autoresRetirados, 'seneca.yml'), ficha('Otro Séneca'), 'utf8');
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+    expect(resultado.ok).toBe(false);
+    expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+    expect(await readFile(join(rutas.autoresRetirados, 'seneca.yml'), 'utf8')).toContain('Otro Séneca');
+  });
+
+  it('después de retirarlo, slugsSembrados deja de contarlo, alias incluido', async () => {
+    const rutas = await corpusConSeneca();
+    const antes = slugsSembrados(await leerAutores(rutas));
+    // Sin esto la prueba pasaría con un corpus que nunca lo contó.
+    expect(antes.has('seneca')).toBe(true);
+    expect(antes.has('lucio-anneo-seneca')).toBe(true);
+
+    const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+
+    const despues = slugsSembrados(await leerAutores(rutas));
+    expect(despues.has('seneca')).toBe(false);
+    expect(despues.has('lucio-anneo-seneca')).toBe(false);
+    expect(despues.has('seneca-el-viejo')).toBe(true);
+  });
+
+  describe('y dice qué queda por hacer en la lista por época', () => {
+    const ROMA = {
+      id: 'antigua-roma',
+      nombre: 'Antigua Roma',
+      recuperada: '2026-09-01',
+      candidatos: [
+        { nombre: 'Lucio Anneo Séneca', slug: 'lucio-anneo-seneca', idDePagina: 7, dominioPublico: true },
+      ],
+    };
+
+    it('si es candidato sin descartar, da la orden de descarte con su slug de candidato', async () => {
+      const rutas = await corpusConSeneca();
+      await registrarCandidatosPorEpoca(rutas, [ROMA]);
+
+      const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+      expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+      expect(resultado.ok && resultado.mensaje).toContain(
+        'npx tsx tools/epocas.ts --descartar lucio-anneo-seneca --motivo',
+      );
+    });
+
+    it('si ya consta descartado, lo dice y no pide otro descarte', async () => {
+      const rutas = await corpusConSeneca();
+      await registrarCandidatosPorEpoca(rutas, [ROMA]);
+      await registrarDescarteDeCandidato(rutas, {
+        epoca: 'antigua-roma',
+        candidato: 'lucio-anneo-seneca',
+        idDePagina: 7,
+        motivo: 'No da sentencia suelta.',
+      });
+
+      const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+      expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+      const mensaje = resultado.ok ? resultado.mensaje : '';
+      expect(mensaje).toMatch(/ya consta descartado/i);
+      expect(mensaje).not.toContain('--descartar lucio-anneo-seneca');
+    });
+
+    it('sin lista versionada, recuerda igualmente que el descarte va con epocas.ts y su motivo', async () => {
+      const rutas = await corpusConSeneca();
+
+      const resultado = await retirarAutor(rutas, 'seneca', MOTIVO);
+
+      expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+      expect(resultado.ok && resultado.mensaje).toMatch(/epocas\.ts --descartar \S+ --motivo/);
+    });
+  });
 });

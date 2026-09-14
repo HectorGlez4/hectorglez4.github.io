@@ -17,16 +17,27 @@ import { join } from 'node:path';
 import { autorAdmisible, nombre as nombreDeEntidad, tradicion } from '../../src/lib/admision.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
+  FICHERO_DE_CANDIDATOS,
+  FICHERO_DE_DESCARTES,
   escribirAutor,
   escribirCita,
   escribirTema,
+  fechaLocal,
   leerAutores,
+  leerCandidatosPorEpoca,
   leerCitas,
+  leerColecciones,
+  leerDescartesDeCandidatos,
+  leerPortada,
   leerTemas,
+  mover,
   nombreDeFicheroDeCita,
   separarFrontmatter,
+  type AutorEnCorpus,
   type Rutas,
 } from './corpus.ts';
+import { leerColeccionesRetiradas } from './curacion.ts';
+import { descartesPorCandidato, slugsSembrados } from './epocas.ts';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 
@@ -489,5 +500,250 @@ export async function retirarFuente(rutas: Rutas, fichero: string): Promise<Resu
     mensaje:
       `Documento retirado a ${rutas.fuentesRetiradas}: ${fichero}. ` +
       `Candidatas rechazadas con él: ${suyas.length}.`,
+  };
+}
+
+/** Hasta cinco slugs con viñeta, y cuántos quedan: el formato de las demás negativas. */
+function listaCorta(slugs: readonly string[]): string[] {
+  return [
+    ...slugs.slice(0, 5).map((s) => `  · ${s}`),
+    ...(slugs.length > 5 ? [`  · … y ${slugs.length - 5} más.`] : []),
+  ];
+}
+
+/**
+ * Si el slug de una Cita es de este Autor, sin que tenga que existir la Cita.
+ *
+ * Un miembro de Colección o una fijación de portada son slugs sueltos, no referencias de
+ * esquema, y lo que queda apuntando a un Autor sin Citas son justamente los que ya no
+ * resuelven. De esos solo dice de quién son el prefijo de `slugDeCita` —`{slug-autor}-…`— y
+ * el prefijo **más largo** gana: `seneca-el-viejo-la-fortuna` empieza por `seneca-` y no es de
+ * Séneca. Lo que sí resuelve a una Cita se juzga por el `autor` que ella declara.
+ */
+function esDelAutor(
+  slugCita: string,
+  slugAutor: string,
+  autorDeCita: ReadonlyMap<string, string>,
+  slugsDeAutores: readonly string[],
+): boolean {
+  const declarado = autorDeCita.get(slugCita);
+  if (declarado !== undefined) return declarado === slugAutor;
+  const dueño = slugsDeAutores
+    .filter((s) => slugCita.startsWith(`${s}-`))
+    .sort((a, b) => b.length - a.length)[0];
+  return dueño === slugAutor;
+}
+
+/**
+ * Lo que queda por hacer en la lista por época tras retirar la ficha.
+ *
+ * Retirar no descarta: el cruce deja de contar al Autor como sembrado y, si es candidato de
+ * una época, pasa a pendiente hasta que se escriba su descarte **con su motivo**. Esta orden
+ * no lo escribe por su cuenta porque el motivo de un descarte —por qué la Fuente no da
+ * Citas suyas— no es el de una retirada. Se busca por los mismos slugs con que el cruce lo
+ * reconoce, alias incluido.
+ */
+async function pendienteEnEpocas(rutas: Rutas, autor: AutorEnCorpus): Promise<string[]> {
+  const orden = (candidato: string) =>
+    `  npx tsx tools/epocas.ts --descartar ${candidato} --motivo "por qué no da Citas"`;
+
+  let versionadas;
+  let descartes;
+  try {
+    versionadas = await leerCandidatosPorEpoca(rutas);
+    descartes = await leerDescartesDeCandidatos(rutas);
+  } catch (fallo) {
+    return [
+      `No se ha podido leer la lista por época: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+      'Si es candidato de alguna época, sigue pendiente hasta descartarlo con su motivo:',
+      orden('<slug-de-candidato>'),
+    ];
+  }
+
+  const suyos = slugsSembrados([autor]);
+  const escritos = descartesPorCandidato(descartes);
+  const lineas: string[] = [];
+  for (const epoca of versionadas) {
+    for (const candidato of epoca.candidatos ?? []) {
+      if (!suyos.has(candidato.slug)) continue;
+      const deEpoca = `Candidato «${candidato.slug}» de ${epoca.nombre ?? epoca.id}`;
+      const descartado =
+        escritos.porSlug.has(candidato.slug) ||
+        (typeof candidato.idDePagina === 'number' && escritos.porIdDePagina.has(candidato.idDePagina));
+      lineas.push(
+        ...(descartado
+          ? [`${deEpoca}: ya consta descartado en ${FICHERO_DE_DESCARTES}.`]
+          : [
+              `${deEpoca}: deja de contar como sembrado y queda pendiente. Descártelo con su motivo:`,
+              orden(candidato.slug),
+            ]),
+      );
+    }
+  }
+
+  return lineas.length > 0
+    ? lineas
+    : [
+        `No figura como candidato en ${FICHERO_DE_CANDIDATOS}. Si una época lo propone, se descarta con su motivo:`,
+        orden(autor.slug),
+      ];
+}
+
+/**
+ * Retira un Autor: mueve su ficha a `corpus/_autores-retirados/` — AD-2.
+ *
+ * Faltaba, y se notó el 2026-09-14: Fray Luis de León y Tito Lucrecio Caro se descartaron de
+ * sus épocas con `epocas.ts --descartar` y el descarte no surtió efecto, porque el cruce
+ * cuenta como sembrado a todo fichero de `corpus/autores/` —«sembrado gana a descartado»—.
+ * Hubo que mover las dos fichas con `git mv`, que es el gesto a mano que estas órdenes
+ * existen para evitar.
+ *
+ * **Se niega**, sin mover nada y con todos los motivos a la vez, mientras algo del Corpus
+ * apunte al Autor:
+ *
+ *   · una Cita publicada suya — el build la referencia al Autor y se pararía;
+ *   · una candidata suya en `corpus/_revision/` — aprobarla publicaría una Cita sin Autor;
+ *   · un miembro de Colección, publicada o despublicada, o una fijación de
+ *     `corpus/portada.json` que sea Cita suya — publicar la Colección o llegar la jornada la
+ *     traerían de vuelta apuntando a nadie.
+ *
+ * **Mueve y no borra**, con `mover`, que nunca sobrescribe; y **sin motivo no retira**, como
+ * `retirarCita`: el motivo va en el mensaje y de ahí al del commit (AD-10).
+ */
+export async function retirarAutor(
+  rutas: Rutas,
+  slug: string,
+  motivo: string,
+): Promise<Resultado> {
+  if (motivo.trim() === '') {
+    return {
+      ok: false,
+      motivos: [
+        'Una retirada sin motivo no es una retirada: es una desaparición.',
+        `  npx tsx tools/autor.ts retirar ${slug} --motivo "<motivo>"`,
+      ],
+    };
+  }
+
+  const autores = await leerAutores(rutas);
+  const autor = autores.find((a) => a.slug === slug);
+  if (!autor) {
+    return {
+      ok: false,
+      motivos: [`El Autor «${slug}» no está en ${rutas.autores}. Véalos con «listar».`],
+    };
+  }
+
+  const publicadas = await leerCitas(rutas.citas);
+  const candidatas = await leerCitas(rutas.revision);
+  const retirados = await leerAutores({ ...rutas, autores: rutas.autoresRetirados });
+  const autorDeCita = new Map([...publicadas, ...candidatas].map((c) => [c.slug, c.autor]));
+  const slugsDeAutores = [...autores, ...retirados].map((a) => a.slug);
+  const suya = (slugCita: string) => esDelAutor(slugCita, slug, autorDeCita, slugsDeAutores);
+
+  const motivos: string[] = [];
+  const cuenta = (n: number, singular: string, plural: string) =>
+    `${n} ${n === 1 ? singular : plural}`;
+
+  const suyasPublicadas = publicadas.filter((c) => c.autor === slug).map((c) => c.slug);
+  if (suyasPublicadas.length > 0) {
+    motivos.push(
+      `Tiene ${cuenta(suyasPublicadas.length, 'Cita publicada', 'Citas publicadas')}: sin su ` +
+        'ficha el build no tiene a quién atribuirlas. Retírelas antes con documentar --retirar.',
+      ...listaCorta(suyasPublicadas),
+    );
+  }
+
+  const suyasCandidatas = candidatas.filter((c) => c.autor === slug).map((c) => c.slug);
+  if (suyasCandidatas.length > 0) {
+    motivos.push(
+      `Tiene ${cuenta(suyasCandidatas.length, 'candidata', 'candidatas')} en ${rutas.revision}: ` +
+        'aprobarlas después publicaría Citas sin Autor. Recháce' +
+        (suyasCandidatas.length === 1 ? 'la' : 'las') +
+        ' antes.',
+      ...listaCorta(suyasCandidatas),
+    );
+  }
+
+  const colecciones = [
+    ...(await leerColecciones(rutas)).map((c) => ({ ...c, estado: 'publicada' })),
+    ...(await leerColeccionesRetiradas(rutas)).map((c) => ({ ...c, estado: 'despublicada' })),
+  ];
+  for (const coleccion of colecciones) {
+    const miembros = coleccion.miembros.filter(suya);
+    if (miembros.length === 0) continue;
+    motivos.push(
+      `La Colección «${coleccion.slug}» (${coleccion.estado}) declara ` +
+        `${cuenta(miembros.length, 'Cita suya', 'Citas suyas')}. Quíte` +
+        (miembros.length === 1 ? 'la' : 'las') +
+        ' de la Colección antes.',
+      ...listaCorta(miembros),
+    );
+  }
+
+  try {
+    const { bruto } = await leerPortada(rutas);
+    const fijaciones =
+      bruto !== null && typeof bruto === 'object' && !Array.isArray(bruto)
+        ? (bruto as Record<string, unknown>).fijaciones
+        : undefined;
+    const suyas =
+      fijaciones !== null && typeof fijaciones === 'object' && !Array.isArray(fijaciones)
+        ? Object.entries(fijaciones).filter(
+            (par): par is [string, string] => typeof par[1] === 'string' && suya(par[1]),
+          )
+        : [];
+    if (suyas.length > 0) {
+      motivos.push(
+        `${rutas.portada} fija ${cuenta(suyas.length, 'jornada', 'jornadas')} en Citas suyas. ` +
+          'Suélte' +
+          (suyas.length === 1 ? 'la' : 'las') +
+          ' con «jornada soltar» antes.',
+        ...listaCorta(suyas.map(([jornada, cita]) => `${jornada} → ${cita}`)),
+      );
+    }
+  } catch (fallo) {
+    // Sin poder leer la portada no se puede afirmar que no apunte a él: se niega.
+    motivos.push(
+      `No se ha podido comprobar la portada: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+    );
+  }
+
+  if (motivos.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `No se retira «${slug}»: el Corpus todavía apunta a él.`,
+        ...motivos,
+        'No se ha movido nada.',
+      ],
+    };
+  }
+
+  // Antes de mover: después, `leerAutores` ya no lo encontraría y su alias se perdería.
+  const epocas = await pendienteEnEpocas(rutas, autor);
+
+  let destino: string;
+  try {
+    // `mover` nunca sobrescribe: una ficha retirada con el mismo nombre para la orden aquí.
+    destino = await mover(autor.ruta, rutas.autoresRetirados);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [fallo instanceof Error ? fallo.message : String(fallo), 'No se ha movido nada.'],
+    };
+  }
+
+  return {
+    ok: true,
+    ruta: destino,
+    mensaje: [
+      `Autor «${slug}» retirado a ${rutas.autoresRetirados} el ${fechaLocal(new Date())}.`,
+      `  Motivo: ${motivo.trim()}`,
+      'No se ha borrado nada: devolverlo es mover la ficha a corpus/autores/. El motivo va en ' +
+        'el mensaje del commit: git es el único almacén del contenido (AD-10).',
+      '',
+      ...epocas,
+    ].join('\n'),
   };
 }

@@ -6,6 +6,12 @@
  *                                 [--tradicion latinoamericana|peninsular|otra]
  *   npx tsx tools/autor.ts editar seneca --semblanza "…"
  *   npx tsx tools/autor.ts listar
+ *   npx tsx tools/autor.ts retirar seneca --motivo "por qué sale del Corpus"
+ *
+ * **Retirar mueve la ficha a `corpus/_autores-retirados/` y no borra nada** (AD-2), y se
+ * niega mientras algo del Corpus apunte al Autor. Existe porque el 2026-09-14 descartar a
+ * Fray Luis y a Lucrecio de sus épocas no surtió efecto hasta mover sus fichas a mano: el
+ * cruce por época cuenta como sembrado a todo lo que esté en `corpus/autores/`.
  *
  * **La tradición se teclea aquí o no se teclea en ninguna parte** (Historia 11.4). El
  * esquema la admite desde la v1 y de ella sale el suelo del 40 % de tradición
@@ -23,6 +29,7 @@ import {
   TRADICIONES,
   crearAutor,
   editarAutor,
+  retirarAutor,
   type DatosDeAutor,
   type Tradicion,
 } from './lib/gestion.ts';
@@ -51,8 +58,15 @@ const USO = [
   '  npx tsx tools/autor.ts editar <slug> [--nombre "…"] [--semblanza "…"]',
   '                               [--tradicion …]',
   '  npx tsx tools/autor.ts listar',
+  '  npx tsx tools/autor.ts retirar <slug> --motivo "…"',
   '',
 ].join('\n');
+
+/** Las opciones de `retirar`: ninguna de las de crear o editar tiene sentido al retirar. */
+const CON_VALOR_AL_RETIRAR = ['--corpus', '--motivo'] as const;
+
+/** Las órdenes que toman el slug del Autor como primer argumento suelto. */
+const CON_SLUG = ['editar', 'retirar'];
 
 /**
  * La tradición, comprobada contra el conjunto del esquema antes de llegar a él.
@@ -93,9 +107,15 @@ function datosDe(args: string[]): DatosDeAutor {
  * cualquier `--loquesea` sin rechistar, que es exactamente cómo `--tradicion` pasó de largo
  * durante toda la v2 sin que nadie se enterara.
  */
+const slugPosicional =
+  orden !== undefined && CON_SLUG.includes(orden) && argumentos[1] && !argumentos[1].startsWith('--')
+    ? [argumentos[1]]
+    : [];
 const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
-  solas: [orden ?? '', ...(orden === 'editar' && argumentos[1] ? [argumentos[1]] : [])],
-  conValor: CON_VALOR,
+  solas: [orden ?? '', ...slugPosicional],
+  // Cada orden admite las suyas: un `--motivo` en `crear` o un `--nombre` en `retirar` se
+  // rechazan igual que una bandera inventada, en vez de ignorarse.
+  conValor: orden === 'retirar' ? CON_VALOR_AL_RETIRAR : CON_VALOR,
 });
 if (noReconocidos.length > 0) {
   process.stderr.write(`${noReconocidos.join('\n')}\n\n${USO}`);
@@ -128,6 +148,30 @@ switch (orden) {
       const tradicion = a.tradicion ?? 'sin declarar';
       process.stdout.write(`${a.slug}\t${a.nombre}\t†${a.añoFallecimiento}\t${tradicion}\n`);
     }
+    break;
+  }
+
+  case 'retirar': {
+    const slug = argumentos[1];
+    if (!slug || slug.startsWith('--')) {
+      process.stderr.write(`Indique el slug del Autor a retirar.\n\n${USO}`);
+      process.exit(2);
+    }
+    const motivo = opcion(argumentos, '--motivo');
+    /*
+     * El motivo que falta es la forma de la invocación —código 2—, como en `documentar.ts
+     * --retirar`: la orden está incompleta. Un motivo en blanco sí llega a la función, que lo
+     * rechaza con 1 por lo que dice.
+     */
+    if (motivo === undefined) {
+      process.stderr.write(
+        `Indique el motivo por el que retira «${slug}» con --motivo "…".\n` +
+          'Una retirada sin motivo no es una retirada: es una desaparición.\n\n' +
+          USO,
+      );
+      process.exit(2);
+    }
+    terminar(await retirarAutor(rutas, slug, motivo));
     break;
   }
 

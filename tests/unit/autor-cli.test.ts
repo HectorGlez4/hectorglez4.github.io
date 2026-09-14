@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -160,5 +160,109 @@ describe('Historia 11.4 — la orden ya no se traga lo que no entiende', () => {
     expect(escrito).toContain('Ensayista y periodista uruguayo.');
     // Y la tradición sobrevive a una edición que no la menciona.
     expect(escrito).toContain('tradicion: "latinoamericana"');
+  });
+});
+
+/*
+ * AD-2 — `retirar` por la boca por la que se usa. La lógica y sus negativas están en
+ * `gestion.test.ts`; aquí, los códigos de salida y que las banderas de una orden no se cuelen
+ * en otra. El 2026-09-14 retirar a Fray Luis y a Lucrecio fue un `git mv` a mano.
+ */
+describe('AD-2 — autor.ts retirar', () => {
+  const RODO_YML = join('autores', 'jose-enrique-rodo.yml');
+  const RODO_RETIRADO = join('_autores-retirados', 'jose-enrique-rodo.yml');
+
+  it('mueve la ficha, sale con 0 y recuerda el descarte por época', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, RODO);
+
+    const hecho = await correr(corpus, [
+      'retirar',
+      'jose-enrique-rodo',
+      '--motivo',
+      'Ninguna Cita se sostiene.',
+    ]);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    await expect(readFile(join(corpus, RODO_YML), 'utf8')).rejects.toThrow();
+    expect(await readFile(join(corpus, RODO_RETIRADO), 'utf8')).toContain('José Enrique Rodó');
+    expect(hecho.salida).toContain('Ninguna Cita se sostiene.');
+    expect(hecho.salida).toMatch(/epocas\.ts --descartar/);
+  });
+
+  it('sin --motivo sale con 2 y no mueve nada', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, RODO);
+
+    const fallida = await correr(corpus, ['retirar', 'jose-enrique-rodo']);
+
+    expect(fallida.codigo).toBe(2);
+    expect(fallida.error).toMatch(/motivo/);
+    expect(await readFile(join(corpus, RODO_YML), 'utf8')).toContain('José Enrique Rodó');
+  });
+
+  it('sin slug sale con 2', async () => {
+    const corpus = await corpusVacio();
+
+    const fallida = await correr(corpus, ['retirar', '--motivo', 'x']);
+
+    expect(fallida.codigo).toBe(2);
+  });
+
+  it('con una Cita publicada suya sale con 1 y no mueve nada', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, RODO);
+    await writeFile(
+      join(corpus, 'citas', 'jose-enrique-rodo--reformarse-es-vivir.md'),
+      [
+        '---',
+        'texto: "Reformarse es vivir, y una frase con la longitud que hace falta."',
+        'autor: "jose-enrique-rodo"',
+        'slug: "jose-enrique-rodo-reformarse-es-vivir"',
+        'procedencia:',
+        '  obra: "Motivos de Proteo"',
+        'estadoDerechos: "dominio-público"',
+        '---',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+
+    const fallida = await correr(corpus, ['retirar', 'jose-enrique-rodo', '--motivo', 'x']);
+
+    expect(fallida.codigo).toBe(1);
+    expect(fallida.error).toContain('jose-enrique-rodo-reformarse-es-vivir');
+    expect(await readFile(join(corpus, RODO_YML), 'utf8')).toContain('José Enrique Rodó');
+  });
+
+  it('una bandera de otra orden no se cuela en retirar, ni --motivo en crear', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, RODO);
+
+    const retirando = await correr(corpus, [
+      'retirar',
+      'jose-enrique-rodo',
+      '--motivo',
+      'x',
+      '--nombre',
+      'Otro',
+    ]);
+    expect(retirando.codigo).toBe(2);
+    expect(retirando.error).toContain('--nombre');
+    expect(await readFile(join(corpus, RODO_YML), 'utf8')).toContain('José Enrique Rodó');
+
+    const creando = await correr(corpus, [
+      'crear',
+      '--nombre',
+      'Séneca',
+      '--fallecimiento',
+      '65',
+      '--semblanza',
+      'Filósofo estoico.',
+      '--motivo',
+      'x',
+    ]);
+    expect(creando.codigo).toBe(2);
+    expect(creando.error).toContain('--motivo');
   });
 });
