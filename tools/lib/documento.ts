@@ -1084,6 +1084,25 @@ const CROMO_MEDIAWIKI: readonly [string, RegExp][] = [
   ['div', conId('div', 'conv-idiomas')],
 ];
 
+/*
+ * La numeración de verso del escaneo: `<sup>` **sin atributos** cuyo único texto, quitados
+ * blancos y `&#160;`, son de una a cuatro cifras. Las obras en verso que Wikisource-es
+ * transcluye de un libro escaneado numeran así cada cinco versos, y la cifra se versionaba
+ * pegada a la palabra siguiente («1Canto», «5Mucho»): medido el 2026-09-14, 86 en La Eneida
+ * de Ochoa, libro I. Es aparato del escaneo, no de la obra, y se guardaba como si fuera texto
+ * de Virgilio.
+ *
+ * No va en `CROMO_MEDIAWIKI` porque aquello retira por la apertura, y esta apertura no
+ * distingue nada: no trae clase ni id. Lo que la distingue es el contenido.
+ *
+ * Se sustituye por un espacio y no por nada: el número va a veces entre dos palabras sin
+ * blanco, y borrarlo las pegaría sin que ningún cotejo lo viera; un espacio de más lo
+ * absorbe la normalización. El `<sup>` con atributos, con letras o con marcado dentro se
+ * conserva. El precio aceptado es el exponente sin atributos (`10<sup>6</sup>`): ninguna
+ * Cita publicada lleva cifra pegada a letra, y el Corpus es literario.
+ */
+const NUMERACION_DE_VERSO = /<sup\s*>(?:\s|&#160;)*\d{1,4}(?:\s|&#160;)*<\/sup\s*>/giu;
+
 const ETIQUETA_DE_AÑO_WIKISOURCE =
   /^\s*(?:a[ñn]o(?:\s+de\s+(?:publicaci[óo]n|edici[óo]n))?|fecha\s+de\s+publicaci[óo]n|publicaci[óo]n)\s*:/iu;
 
@@ -1157,6 +1176,7 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
           for (const [etiqueta, apertura] of CROMO_MEDIAWIKI) {
             region = quitarElementos(region, etiqueta, apertura);
           }
+          region = region.replace(NUMERACION_DE_VERSO, ' ');
           // Una región sin texto no es la región de contenido: es un envoltorio.
           if (region.replace(/<[^>]+>/gu, ' ').trim() === '') continue;
           return { ok: true, region };

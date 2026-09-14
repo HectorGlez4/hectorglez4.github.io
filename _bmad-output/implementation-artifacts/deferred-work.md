@@ -584,3 +584,10 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     de la muestra—, y tiene coste: hoy la entrada es un recuento por familia y pasaría a
     llevar del orden de decenas de rutas por jornada, en un fichero versionado que crece a
     diario. Decidir si eso vale el tamaño es de producto.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-19-11-la-numeracion-de-verso-no-se-versiona.md`
+  summary: Auditar en todos los documentos de Wikisource-es versionados si su página de la Fuente trae <sup> sin atributos de solo cifras, no solo en los que tienen una cifra pegada a inicio de palabra.
+  evidence: La regla de la 19.11 corre en toda recuperación de Wikisource-es, pero los documentos se eligieron por «cifra pegada a palabra»; un <sup>5</sup> seguido de espacio queda versionado como «5 texto» y ese criterio no lo ve. Hoy no cambia nada porque recuperar reutiliza lo ya versionado, pero una re-recuperación futura alteraría ese texto sin que nadie lo hubiera medido.
+- source_spec: `_bmad-output/implementation-artifacts/spec-19-11-la-numeracion-de-verso-no-se-versiona.md`
+  summary: epics.md no recoge las historias 19.5 a 19.11 de la Épica 19, así que el contexto compilado de la épica se queda en la 19.4 y con cifras viejas (1.639 Citas, 35 Autores).
+  evidence: epic-19-context.md, compilado el 14/09 desde planning-artifacts, solo lista 19.1–19.4, mientras sprint-status.yaml ya tiene de la 19.5 a la 19.10 y specs de cada una; las historias nacieron de diagnósticos del bucle y no pasaron por bmad-create-epics-and-stories.

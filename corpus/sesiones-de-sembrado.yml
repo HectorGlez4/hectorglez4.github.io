@@ -306,3 +306,14 @@ sesiones:
       citasPublicadas: 1891
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 56.2
+  - fecha: "2026-09-14"
+    hora: "14:45"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Historia 19.11: la numeración de verso no se versiona"
+    motivo: "Historia 19.11: la recuperación de Wikisource-es retira la numeración de verso del escaneo (<sup> sin atributos de solo cifras), que se versionaba como texto; medidos en la Fuente los documentos con cifra pegada, solo La Eneida de Ochoa, libro I, la traía (86) y se regeneró con recuperar. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1891
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 56.2

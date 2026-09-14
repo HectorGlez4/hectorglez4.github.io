@@ -154,6 +154,75 @@ describe('Historia 11.1 — el diccionario oculto del conversor de idiomas es cr
   });
 });
 
+describe('Historia 19.11 — la numeración de verso del escaneo no se versiona', () => {
+  /*
+   * Las obras en verso que Wikisource-es transcluye de un escaneo numeran cada cinco versos
+   * con un `<sup>` sin atributos cuyo único texto es la cifra. Solo se retiraba el
+   * `<sup class="reference">`, así que la cifra se versionaba pegada a la palabra siguiente
+   * («1Canto», «5Mucho»): en La Eneida de Ochoa, libro I, 86 veces.
+   *
+   * La regla mira el contenido y no la apertura, y sustituye por un espacio: un número
+   * entre dos palabras sin blanco, borrado a secas, las pegaría, y eso no lo ve ningún cotejo.
+   */
+  const CON_NUMERACION = WIKISOURCE.replace(
+    '<p>La vida es larga',
+    [
+      '<p>Canto a Juno. <sup>5</sup>Mucho padeció en la guerra.</p>',
+      '<p>Una palabra<sup>10</sup>siguiente sin blanco.</p>',
+      '<p>Verso final. <SUP> 15&#160;</SUP>Es de noche.</p>',
+      '<p>Marcado dentro <sup><span>25</span></sup>queda.</p>',
+      '<p>Ordinal 1<sup>o</sup> de la lista.</p>',
+      '<p>Con estilo <sup style="x">7</sup> queda.</p>',
+      '<p>Un millón es 10<sup>6</sup> unidades.</p>',
+      '<p>Cinco cifras <sup>12345</sup>quedan.</p>',
+      '<p>La vida es larga',
+    ].join('\n'),
+  );
+  const derivado = derivarDocumento('wikisource-es', CON_NUMERACION);
+  if (!derivado.ok) throw new Error(derivado.motivo);
+
+  it('el fixture lleva de verdad la numeración', () => {
+    // Sin esto, si WIKISOURCE cambiara y el reemplazo no casara, los not.* pasarían en vacío.
+    expect(CON_NUMERACION).toContain('<sup>5</sup>Mucho');
+    expect(CON_NUMERACION).toContain('<SUP> 15&#160;</SUP>Es');
+  });
+
+  it('retira la cifra que va tras un espacio', () => {
+    expect(derivado.cuerpo).toContain('Canto a Juno. Mucho padeció en la guerra.');
+    expect(derivado.cuerpo).not.toMatch(/5Mucho/u);
+  });
+
+  it('la sustituye por un espacio, y no pega las dos palabras', () => {
+    expect(derivado.cuerpo).toContain('Una palabra siguiente sin blanco.');
+    expect(derivado.cuerpo).not.toContain('palabrasiguiente');
+  });
+
+  it('en mayúsculas y con blancos o &#160; alrededor de la cifra', () => {
+    expect(derivado.cuerpo).toContain('Verso final. Es de noche.');
+    expect(derivado.cuerpo).not.toMatch(/Verso final\.\s*15|15\s*Es de noche/u);
+  });
+
+  it('conserva el <sup> con marcado dentro, el de letras y el que trae atributos', () => {
+    expect(derivado.cuerpo).toContain('Marcado dentro 25queda.');
+    expect(derivado.cuerpo).toContain('Ordinal 1o de la lista.');
+    expect(derivado.cuerpo).toContain('Con estilo 7 queda.');
+  });
+
+  it('conserva el <sup> sin atributos de más de cuatro cifras', () => {
+    expect(derivado.cuerpo).toContain('Cinco cifras 12345quedan.');
+  });
+
+  it('retira también el exponente sin atributos: riesgo aceptado', () => {
+    expect(derivado.cuerpo).toContain('Un millón es 10 unidades.');
+  });
+
+  it('la llamada de nota se sigue retirando, y el texto de la obra sigue ahí', () => {
+    expect(derivado.cuerpo).not.toContain('[1]');
+    expect(derivado.cuerpo).toContain('No es que tengamos poco tiempo para vivir');
+    expect(derivado.cuerpo).toContain('La vida es larga si sabes usarla');
+  });
+});
+
 describe('Historia 11.1 — sin título no se versiona', () => {
   it('una página que no declara título se detiene y lo explica', () => {
     const sinTitulo = WIKISOURCE.replace(/<h1[\s\S]*?<\/h1>/, '').replace(/<title>[\s\S]*?<\/title>/, '');
