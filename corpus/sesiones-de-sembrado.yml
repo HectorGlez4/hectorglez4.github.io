@@ -284,3 +284,14 @@ sesiones:
       citasPublicadas: 1891
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 54.5
+  - fecha: "2026-09-14"
+    hora: "09:48"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Verificar las cuatro épocas de la Antigüedad"
+    motivo: "Verificación de la Antigüedad, cuarta tanda: corregidos 7 motivos de descarte más tras revisar contra la API los 68 candidatos restantes (Aulo Hircio, Moisés, Tomás de Aquino, Julio César, Claudio Ptolomeo, Bartolache, Mosco), y pasada final por los seis bloques sin errores nuevos. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1891
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 54.5

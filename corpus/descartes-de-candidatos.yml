@@ -576,3 +576,45 @@ descartes:
     idDePagina: 2448
     nombre: "Homero"
     motivo: "Revisado contra la API el 13/09. Declaran a Homero en sus propias páginas la Ilíada de García Malo (1788), quince cantos de la Odisea de Gironella (1851, del noveno al vigesimotercero) y la Batracomiomaquia de Alenda (1886), esta por la categoría «Obras de Homero». Las tres son verso con la mayúscula de cada verso a media frase, y solo dan medios versos: es el defecto por el que se retiró a Lucrecio, y ninguna Cita publicada del Corpus lo lleva. La Ilíada y la Odisea de Segalá y la Ilíada de 1927 son <pages index=…> mudas, que solo declaran autor en la página madre."
+  - fecha: "2026-09-14"
+    epoca: "antigua-roma"
+    candidato: "aulo-hircio"
+    idDePagina: 78243
+    nombre: "Aulo Hircio"
+    motivo: "Revisado contra la API el 14/09. El libro octavo de los «Comentarios de la guerra de las Galias» en la edición Calpe de 1919 (tr. José Goya y Muniain) sí existe y lo declara en su propia página, por seccion-autor y por la categoría «Obras de Aulo Hircio». Leído su prólogo a Balbo y el comienzo del libro: es la excusa de continuar a César y narración de campaña, sin sentencia que se sostenga suelta, el mismo defecto que César y Apiano. La «Guerra Alejandrina» no existe, y el «Libro 8/Prólogo» de la traducción de Wikisource lo declara solo por categoría."
+  - fecha: "2026-09-14"
+    epoca: "antiguedad"
+    candidato: "moises"
+    idDePagina: 293257
+    nombre: "Moisés"
+    motivo: "Revisado contra la API el 14/09. «El paso del mar rojo», de las «Traducciones poéticas» de Miguel Antonio Caro, lo declara en su etiqueta <pages> con seccion-autor, pero es el Cantar del Éxodo vertido en tercetos, con la mayúscula de cada verso a media frase: solo daría medios versos, el defecto por el que se retiró a Lucrecio y se descartó a Homero. El resto de lo que enlaza su ficha son libros de ediciones de la Biblia que no lo declaran. Ojo al reabrirlo: «Risa y llanto» declara a Moisés Numa Castellanos, que no es él."
+  - fecha: "2026-09-14"
+    epoca: "catolicos"
+    candidato: "tomas-de-aquino"
+    idDePagina: 42863
+    nombre: "Tomás de Aquino"
+    motivo: "Revisado contra la API el 14/09. Su única página, «Verbum Supernum Prodiens», está en castellano y no en latín, pero es un himno breve en verso con los versos en minúscula, sin traductor ni edición identificable. La Summa Theologica no está en la Fuente."
+  - fecha: "2026-09-14"
+    epoca: "antigua-roma"
+    candidato: "julio-cesar"
+    idDePagina: 10696
+    nombre: "Julio César"
+    motivo: "Revisado contra la API el 14/09. De la traducción de Wikisource existen los libros 1 y 3 de la «Guerra de las Galias» y el libro 1 de los «Comentarios a la Guerra Civil»; la edición Calpe de 1919 trae los libros uno a siete, todos en <pages> mudos. Lo que declara es narración de campaña sin sentencia que se sostenga suelta, y sus textos breves —el discurso a las tropas en África, «El viaje», el elogio de su tía Julia— son fragmentos citados por Suetonio, de los que salen versos partidos y notas del editor de Wikisource."
+  - fecha: "2026-09-14"
+    epoca: "antigua-grecia"
+    candidato: "claudio-ptolomeo"
+    idDePagina: 196421
+    nombre: "Claudio Ptolomeo"
+    motivo: "Revisado contra la API el 14/09. El «Almagesto» existe y lo declara por su propia categoría «Obras de», pero la página es solo un índice y sus 159 subpáginas no declaran nada; el texto es la traducción de un usuario de Wikisource desde la versión inglesa de Toomer, marcada como no autorizada, y es un tratado de astronomía."
+  - fecha: "2026-09-14"
+    epoca: "catolicos"
+    candidato: "jose-ignacio-bartolache"
+    idDePagina: 134845
+    nombre: "José Ignacio Bartolache"
+    motivo: "Revisado contra la API el 14/09. Su única obra en la Fuente son las «Lecciones Matemáticas» (1769): prosa matemática sin sentencia suelta. La arenga protocolaria que citaba el motivo anterior no existe como página, y la única otra que lo menciona, la carta sobre el origen de la imagen de Guadalupe, declara a Joaquín García Icazbalceta."
+  - fecha: "2026-09-14"
+    epoca: "antigua-grecia"
+    candidato: "mosco"
+    idDePagina: 280887
+    nombre: "Mosco"
+    motivo: "Revisado contra la API el 14/09. Sus idilios en «Poetas bucólicos griegos» se sirven con <pages> que llevan seccion-autor=Mosco sin comillas, que el lector no toma por autor, y su categoría «Idilios de Mosco» no es de los géneros que declaran; son además verso breve."
