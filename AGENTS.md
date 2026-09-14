@@ -193,6 +193,39 @@ fichero a `corpus/_revision/` (AD-2) y lo saca del censo. No borra nada, y el mo
 el mensaje del commit — git es el único almacén (AD-10). Sin motivo la orden se niega, con
 código 2: una retirada sin motivo no es una retirada, es una desaparición.
 
+## Retirar un Autor
+
+Un Autor que sale del Corpus se retira con su orden, **nunca con un `git mv` a mano**:
+
+```
+npx tsx tools/autor.ts retirar <slug> --motivo "por qué sale del Corpus"
+```
+
+**Descartar no basta, y por eso existe la orden.** El cruce por época cuenta como sembrado a
+todo fichero de `corpus/autores/` —`slugsSembrados`, «sembrado gana a descartado»—, así que
+un `epocas.ts --descartar` no surte efecto mientras la ficha siga ahí. El 2026-09-14 Fray Luis
+de León y Tito Lucrecio Caro se descartaron y sus épocas los siguieron contando hasta mover
+las fichas a mano.
+
+La orden **mueve** la ficha a `corpus/_autores-retirados/` (AD-2): no borra, no sobrescribe
+una ficha retirada con el mismo nombre, y devolverla es moverla de vuelta. **Se niega**, con
+código 1 y sin mover nada, mientras algo del Corpus apunte al Autor, y lo dice todo a la vez:
+
+- una Cita publicada suya —el build no tendría a quién atribuirla—;
+- una candidata suya en `corpus/_revision/` —aprobarla publicaría una Cita sin Autor—;
+- un miembro de Colección, publicada o despublicada, o una fijación de `corpus/portada.json`,
+  que sea Cita suya. Estos son slugs sueltos que pueden no resolver ya a ninguna Cita, así que
+  se atribuyen por el prefijo del slug de Autor **más largo**: `seneca-el-viejo-…` no es de
+  `seneca`. Una portada ilegible también bloquea, porque no se puede afirmar que no apunte a él.
+
+Sin `--motivo` sale con código 2. El motivo va en el mensaje, y de ahí al del commit (AD-10).
+
+**Retirar no escribe el descarte por época.** El motivo de un descarte —por qué la Fuente no
+da Citas suyas— no es el de una retirada. La salida busca al Autor en
+`corpus/candidatos-por-epoca.yml` por su slug y por su `tituloEnFuente`, y dice si ya consta
+descartado o da la orden exacta que falta:
+`npx tsx tools/epocas.ts --descartar <slug-de-candidato> --motivo "…"`.
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:
