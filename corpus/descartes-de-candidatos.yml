@@ -618,3 +618,15 @@ descartes:
     idDePagina: 280887
     nombre: "Mosco"
     motivo: "Revisado contra la API el 14/09. Sus idilios en «Poetas bucólicos griegos» se sirven con <pages> que llevan seccion-autor=Mosco sin comillas, que el lector no toma por autor, y su categoría «Idilios de Mosco» no es de los géneros que declaran; son además verso breve."
+  - fecha: "2026-09-14"
+    epoca: "antigua-roma"
+    candidato: "tito-lucrecio-caro"
+    idDePagina: 34947
+    nombre: "Tito Lucrecio Caro"
+    motivo: "Sembrado el 13/09 y sin ninguna Cita que se sostenga. Su única obra en la Fuente, «De la naturaleza de las cosas» en la traducción de Marchena, es verso con la mayúscula de cada verso a media frase: las tres Citas publicadas se retiraron (colgaban de la frase anterior y unían versos) y de sus 447 candidatas solo 9 no unen versos, ninguna sentencia. Retirados sus seis libros, y su ficha pasa a corpus/_autores-retirados/. Descartado por decisión de Héctor el 14/09."
+  - fecha: "2026-09-14"
+    epoca: "catolicos"
+    candidato: "fray-luis-de-leon"
+    idDePagina: 3847
+    nombre: "Fray Luis de León"
+    motivo: "Sembrado el 07/09 con tres Citas de «La perfecta casada», retiradas el 13/09 porque las tres empezaban colgando de la frase anterior («Ni…», «Que…», «Y de los romanos…»); los tres capítulos versionados no tenían otra candidata y se retiraron. Su prosa no da sentencia suelta, como ya anotó la Historia 19.2. Su ficha pasa a corpus/_autores-retirados/. Descartado por decisión de Héctor el 14/09."
