@@ -36,7 +36,7 @@ epocas:
   - id: "antigua-grecia"
     nombre: "Antigua Grecia"
     categoria: "Categoría:Autores de la Antigua Grecia"
-    recuperada: "2026-09-14"
+    recuperada: "2026-09-20"
     candidatos:
       - nombre: "Apolodoro de Atenas"
         slug: "apolodoro-de-atenas"
@@ -216,7 +216,7 @@ epocas:
   - id: "antigua-roma"
     nombre: "Antigua Roma"
     categoria: "Categoría:Autores de la Antigua Roma"
-    recuperada: "2026-09-14"
+    recuperada: "2026-09-20"
     candidatos:
       - nombre: "Agustín de Hipona"
         slug: "agustin-de-hipona"
@@ -536,7 +536,7 @@ epocas:
   - id: "antiguedad"
     nombre: "Antigüedad"
     categoria: "Categoría:Autores de la Antigüedad"
-    recuperada: "2026-09-14"
+    recuperada: "2026-09-20"
     candidatos:
       - nombre: "Agustín de Hipona"
         slug: "agustin-de-hipona"
@@ -956,7 +956,7 @@ epocas:
   - id: "catolicos"
     nombre: "Autores católicos"
     categoria: "Categoría:Autores católicos"
-    recuperada: "2026-09-14"
+    recuperada: "2026-09-20"
     candidatos:
       - nombre: "Agustín de Hipona"
         slug: "agustin-de-hipona"
@@ -997,4 +997,79 @@ epocas:
         slug: "tomas-de-aquino"
         idDePagina: 42863
         pagina: "https://es.wikisource.org/wiki/Autor:Tom%C3%A1s_de_Aquino"
+        dominioPublico: true
+  - id: "novohispanos"
+    nombre: "Autores novohispanos"
+    categoria: "Categoría:Autores novohispanos"
+    recuperada: "2026-09-20"
+    candidatos:
+      - nombre: "Antonio de León y Gama"
+        slug: "antonio-de-leon-y-gama"
+        idDePagina: 190062
+        pagina: "https://es.wikisource.org/wiki/Autor:Antonio_de_Le%C3%B3n_y_Gama"
+        dominioPublico: true
+      - nombre: "Antonio del Rincón"
+        slug: "antonio-del-rincon"
+        idDePagina: 135028
+        pagina: "https://es.wikisource.org/wiki/Autor:Antonio_del_Rinc%C3%B3n"
+        dominioPublico: true
+      - nombre: "Catalina de Eslava"
+        slug: "catalina-de-eslava"
+        idDePagina: 218352
+        pagina: "https://es.wikisource.org/wiki/Autor:Catalina_de_Eslava"
+        dominioPublico: true
+      - nombre: "Diego de Villalobos y Benavides"
+        slug: "diego-de-villalobos-y-benavides"
+        idDePagina: 398752
+        pagina: "https://es.wikisource.org/wiki/Autor:Diego_de_Villalobos_y_Benavides"
+        dominioPublico: true
+      - nombre: "Fernán González de Eslava"
+        slug: "fernan-gonzalez-de-eslava"
+        idDePagina: 218001
+        pagina: "https://es.wikisource.org/wiki/Autor:Fern%C3%A1n_Gonz%C3%A1lez_de_Eslava"
+        dominioPublico: true
+      - nombre: "Francisco Antonio de Fuentes y Guzmán"
+        slug: "francisco-antonio-de-fuentes-y-guzman"
+        idDePagina: 179844
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Antonio_de_Fuentes_y_Guzm%C3%A1n"
+        dominioPublico: true
+      - nombre: "Joaquín Velázquez de León"
+        slug: "joaquin-velazquez-de-leon"
+        idDePagina: 230928
+        pagina: "https://es.wikisource.org/wiki/Autor:Joaqu%C3%ADn_Vel%C3%A1zquez_de_Le%C3%B3n"
+        dominioPublico: true
+      - nombre: "José Ignacio Bartolache"
+        slug: "jose-ignacio-bartolache"
+        idDePagina: 134845
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Ignacio_Bartolache"
+        dominioPublico: true
+      - nombre: "José Joaquín Fernández de Lizardi"
+        slug: "jose-joaquin-fernandez-de-lizardi"
+        idDePagina: 68232
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Joaqu%C3%ADn_Fern%C3%A1ndez_de_Lizardi"
+        dominioPublico: true
+      - nombre: "Juan Ruiz de Alarcón"
+        slug: "juan-ruiz-de-alarcon"
+        idDePagina: 26120
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Ruiz_de_Alarc%C3%B3n"
+        dominioPublico: true
+      - nombre: "Manuel Martínez de Navarrete"
+        slug: "manuel-martinez-de-navarrete"
+        idDePagina: 11615
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Mart%C3%ADnez_de_Navarrete"
+        dominioPublico: true
+      - nombre: "Miguel Venegas"
+        slug: "miguel-venegas"
+        idDePagina: 407000
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_Venegas"
+        dominioPublico: true
+      - nombre: "Sor Juana Inés de la Cruz"
+        slug: "sor-juana-ines-de-la-cruz"
+        idDePagina: 3832
+        pagina: "https://es.wikisource.org/wiki/Autor:Sor_Juana_In%C3%A9s_de_la_Cruz"
+        dominioPublico: true
+      - nombre: "Tomás de Rocamora"
+        slug: "tomas-de-rocamora"
+        idDePagina: 250688
+        pagina: "https://es.wikisource.org/wiki/Autor:Tom%C3%A1s_de_Rocamora"
         dominioPublico: true

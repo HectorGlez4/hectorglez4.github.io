@@ -593,3 +593,10 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
   summary: epics.md no recoge las historias 19.5 a 19.11 de la Épica 19, así que el contexto compilado de la épica se queda en la 19.4 y con cifras viejas (1.639 Citas, 35 Autores).
   evidence: epic-19-context.md, compilado el 14/09 desde planning-artifacts, solo lista 19.1–19.4, mientras sprint-status.yaml ya tiene de la 19.5 a la 19.10 y specs de cada una; las historias nacieron de diagnósticos del bucle y no pasaron por bmad-create-epics-and-stories.
   **RESUELTO el 14/09:** `epics.md` recoge ya de la 19.5 a la 19.11, escritas desde sus specs, con una nota en la épica que dice de dónde salieron y que la 19.9 sigue sin construir. La lista de historias de `epic-19-context.md` se puso al día a mano.
+
+- source_spec: none
+  summary: Los preliminares de una obra editada en el XIX —discursos, prólogos, advertencias— heredan el |autor= de la plantilla de la obra y se extraen como del autor antiguo, aunque los escribiera el editor.
+  evidence: Medido el 20/09 sembrando a Fuentes y Guzmán: «Recordación Florida/Discurso Preliminar» declara |autor=Francisco Antonio de Fuentes y Guzmán y su texto es del editor de 1882, que habla de él en tercera persona («escribió á fines del siglo XVII el capitán D. Francisco Antonio de Fuentes y Guzmán»). Dio 98 candidatas y se retiró el documento entero. FR-23 no puede verlo: la puerta compara lo que declara la página con el Corpus, y aquí la página declara, y declara mal.
+- source_spec: none
+  summary: El aviso de esbozo de Wikisource-es llega a candidata: no está en el aparato de la Fuente que la extracción descarta.
+  evidence: Medido el 20/09 en la obra de León y Gama: «Si quieres ayudar a expandirla, revisa el Manual de estilo o deja un comentario aquí.» entró entre las 35 candidatas. Es una plantilla del sitio, no texto de la obra, y volverá a salir en cualquier página marcada como esbozo.

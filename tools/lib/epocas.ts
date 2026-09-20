@@ -177,8 +177,14 @@ export interface Epoca {
  * Las épocas que la Fuente declara, medidas el 2026-09-06 contra su API.
  *
  * Antigüedad 83 autores, Antigua Roma 63, Antigua Grecia 35, católicos 8. Esto **no es un
- * catálogo de autores que haya que mantener**: son cuatro títulos de categoría, y la lista
- * de quién está en cada una la contesta la Fuente cada vez que se le pregunta.
+ * catálogo de autores que haya que mantener**: son títulos de categoría, y la lista de quién
+ * está en cada una la contesta la Fuente cada vez que se le pregunta.
+ *
+ * La quinta, **novohispanos** (14 autores, medidos el 2026-09-18), se abre cuando las cuatro
+ * primeras quedan agotadas —sembradas o descartadas con motivo— y el bucle se queda otra vez
+ * sin hueco del que derivar trabajo. La eligió Héctor entre las que la Fuente declara: es
+ * hispanoamericana, así que suma al suelo panhispánico en vez de gastarlo, y es la más
+ * pequeña, que es lo que permite agotarla de verdad.
  */
 export const EPOCAS: readonly Epoca[] = [
   {
@@ -200,6 +206,11 @@ export const EPOCAS: readonly Epoca[] = [
     id: 'catolicos',
     nombre: 'Autores católicos',
     categoria: 'Categoría:Autores católicos',
+  },
+  {
+    id: 'novohispanos',
+    nombre: 'Autores novohispanos',
+    categoria: 'Categoría:Autores novohispanos',
   },
 ];
 

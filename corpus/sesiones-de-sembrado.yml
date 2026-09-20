@@ -328,3 +328,14 @@ sesiones:
       citasPublicadas: 1891
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 56.2
+  - fecha: "2026-09-20"
+    hora: "19:32"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Abrir y agotar la época de los Autores novohispanos"
+    motivo: "Abierta la quinta época, Autores novohispanos (14 candidatos), por decisión de Héctor al quedar agotadas las cuatro primeras. Medidos los doce pendientes: cero Autores nuevos. Cuatro sin obra propia en la Fuente, tres solo con verso, dos con documentos mudos, y tres sembrados y medidos en cero (Fuentes y Guzmán 19 candidatas, León y Gama 35, Alarcón 80). Trece descartados con motivo escrito; la época queda terminada."
+    resultado:
+      citasPublicadas: 1891
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 56.2
