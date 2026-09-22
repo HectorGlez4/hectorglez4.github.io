@@ -600,3 +600,30 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
 - source_spec: none
   summary: El aviso de esbozo de Wikisource-es llega a candidata: no está en el aparato de la Fuente que la extracción descarta.
   evidence: Medido el 20/09 en la obra de León y Gama: «Si quieres ayudar a expandirla, revisa el Manual de estilo o deja un comentario aquí.» entró entre las 35 candidatas. Es una plantilla del sitio, no texto de la obra, y volverá a salir en cualquier página marcada como esbozo.
+- source_spec: none
+  summary: El descarte de Manuel Martínez de Navarrete (época novohispana, 20/09) se hizo por juicio y sin medir, y su página sí da candidatas: hay que deshacerlo en la próxima sesión de sembrado.
+  evidence: Se descartó con el motivo «sus tres páginas son poemas en verso», sin extraer. Medido el 20/09 contra la Fuente, «Influjo de amor» da 4 candidatas en ventana tal como está hoy, sin la regla de la 19.12: las estrofas del soneto salen enteras. El motivo escrito es falso como medida, aunque la conclusión pueda acabar siendo la misma tras revisarlas. Rehacerlo es sembrarlo, medirlo y, si no da Cita, descartarlo otra vez con el motivo medido.
+- source_spec: `_bmad-output/implementation-artifacts/spec-19-12-el-verso-se-lee-por-frase.md`
+  summary: La clase `poem` de Wikisource-es no siempre envuelve verso, y en La ciudad de Dios envuelve prosa: su índice de capítulos entra ahora en la cola como candidatas.
+  evidence: |-
+    Los 22 libros de La ciudad de Dios meten el libro entero —prosa— dentro de un único
+    `<div class="poem">` y separan los párrafos con un solo `<br>`, así que la regla de la
+    19.12 los une. Medido el 22/09: el índice de capítulos del comienzo, que va dentro del
+    mismo `poem`, pasa de treinta párrafos a uno, y como sus renglones no acaban en punto se
+    pegan al siguiente —32 candidatas del tipo «De lo que se ha dicho en el libro primero
+    CAPITULO II.» solo en el libro IV—. Los libros ya están sembrados y sus Citas cotejan
+    igual, así que no urge; pero antes de volver a extraer de La ciudad de Dios hay que
+    mirar el índice. No se arregla dentro de la 19.12: lo único que distinguiría esa prosa
+    del verso es la forma del renglón, y adivinar por la forma es lo que la historia prohíbe.
+- source_spec: `_bmad-output/implementation-artifacts/spec-19-12-el-verso-se-lee-por-frase.md`
+  summary: La ventana de `recorteDeEtiqueta` guarda texto de la obra dentro de la declaración del documento, y la 19.12 la ensancha de un renglón a dos.
+  evidence: |-
+    `recorteDeEtiqueta` conserva tres líneas desde la etiqueta —quitando solo las vacías del
+    final— porque una etiqueta renderizada puede declarar su valor debajo. Cuando la etiqueta
+    va **dentro** de un bloque de verso, esas líneas son versos: medido el 22/09 con la
+    etiqueta `Año de publicación: 1877` seguida de una canción, la declaración guardaba un
+    verso antes de la 19.12 y guarda dos después. Lo derivado no cambia —el año sale de la
+    propia línea de la etiqueta— y ningún documento del Corpus está afectado, pero la
+    declaración es la zona que se supone «solo lo que la Fuente declara» y ahí hay obra.
+    Arreglarlo es estrechar la ventana cuando la línea de la etiqueta ya trae valor, y eso es
+    de `recorteDeEtiqueta`: la 19.12 tiene prohibido tocar nada fuera de su regla.

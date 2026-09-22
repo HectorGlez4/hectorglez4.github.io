@@ -2,7 +2,7 @@ fuente: wikisource-es
 obra: Tradiciones peruanas
 año: 1893
 url: https://es.wikisource.org/wiki/Predestinaci%C3%B3n
-recuperado: 2026-08-23
+recuperado: 2026-09-22
 ---
 Predestinación
 |título=[[Tradiciones peruanas]]
@@ -22,17 +22,11 @@ En una de las tabernas de la universitaria ciudad hallábanse congregados, al ol
 La muchacha tosió dos veces para limpiarse los arrabales de la garganta, el ciego rasqueó de lo lindo y, suspendiéndose por un rato el general batiburrillo, se hizo la chusma toda oídos para atender a lo sentencioso del cantar:
 
 «Las monjas en el coro
-
 dicen cantando:
-
 entre tantas hermanas
-
 no hay un hermano.
-
 ¡Y al estribillo!
-
 ¿quién vio chocolatera
-
 sin molinillo?».
 
 -¡Víctor por la real moza! -exclamó en coro la estudiantina, echando al aire los chafados sombreros.
@@ -56,19 +50,12 @@ Con el nuevo proscenio, los habitantes de Lima no sólo habían ganado en locali
 En el telón del teatro de Lima veíase pintado el Parnaso, y hasta 1824 se leía en él la siguiente octava, original del conde de las Torres, literato de pobre literatura, a juzgar por la octava que de él conocemos y que, sin lisonja, es de lo malo lo mejorcito:
 
 Útiles de este Pindo refulgente
-
 Son auxilio a hospitálica indigencia
-
 Que Apolo, como médico excelente,
-
 Si aquí da el metro, allá la Providencia.
-
 Mi farsa es una acción grave y decente
-
 De honorosa política e influencia,
-
 Y el que otro viso hallare en el que inflama
-
 Aproveche la luz, deje la llama.
 
 ¿Has entendido, lector? Pues yo tampoco.
@@ -114,25 +101,16 @@ Era el 2 de agosto de 1814 y el pueblo se dirigía en tropel a la Alameda de los
 Ni la iglesia ni el convento con su espaciosa huerta, que mide más de cinco fanegadas, ofrecen gran cosa que admirar. En uno de los claustros están la celda que durante algún tiempo ocupó San Francisco Solano, que fue el primer guardián que tuvo el convento, y la que en 1830 habitara el padre Guatemala, que murió en Ica, nueve años más tarde, en olor de santidad. En la portería y bajo un lienzo que representa el misterio de la Concepción de la Virgen, se leen estas palabras apenas comprensibles para los profanos en teología:
 
 Potuit,
-
 Decuit,
-
 Ergo fecit.
 
 ¿Pudo el Omnipotente
-
 a su Madre preservar?
-
 Hízolo: era muy decente.
-
 O quiso y no pudo Dios,
-
 o pudo Dios y no quiso.
-
 Si quiso y no pudo, no es Dios;
-
 ni hijo, si pudo y no quiso.
-
 Digan, pues, que pudo y quiso.
 
 Aquella tarde tenía lugar la fiesta de la Porciúncula, y desde las doce de la mañana estaban ocupados los bancos por esas huríes veladas, que la imitación de costumbres europeas ha desterrado -hablamos de las tapadas-. ¡Dolorosa observación! La saya y manto ha desaparecido llevándose consigo la sal epigramática, la espiritual travesura de la limeña. ¿Estará condenado nuestro pueblo a perder de día en día todo lo que lleva un sello de nacionalismo?
@@ -168,31 +146,18 @@ Y seis veces clavó su puñal en el cuerpo de la desventurada joven...
 Tres días después circulaba este soneto en honor de María Moreno, y que es atribuido a D. Bernardino Ruiz, literato de esa época en que brillaban D. Hipólito Unánue, Valdez y el festivo clérigo Larriva.
 
 «Lloren las musas con acerbo llanto
-
 el desgraciado fin de la que un día,
-
 a Melpomene grata y a Talía,
-
 de nuestra escena fue lustre y encanto.
-
 Su primor y despejo pudo tanto
-
 para darla opinión y nombradía,
-
 que el culto espectador ya se creía
-
 pasar desde el placer hasta el espanto.
-
 En la flor de su edad encantadora,
-
 osó en vano apagarle su luz pura
-
 y el sepulcro le abrió mano traidora.
-
 Pues, por vengarla, de esta losa dura
-
 labró el genio un altar en donde mora
-
 el talento, la gracia y la hermosura».
 
 El soneto no es, en verdad, la octava maravilla; pero lo consignamos a guisa de comprobante histórico.
@@ -210,7 +175,6 @@ García se dirigió sin vacilar a casa de D. Juan Bautista de Lavalle y le denun
 D. Juan Bautista de Lavalle fue el primer alcalde ordinario que tuvo Lima por elección del pueblo. La Constitución dictada por las Cortes españolas en 1812, otorgó a las colonias esta liberal prerrogativa. Encomendada la causa al Sr. de Lavalle, éste desplegó gran celo y actividad para su pronta terminación; y cuatro meses más tarde la Real Audiencia aprobaba y mandaba ejecutar la sentencia. Vanos fueron los argumentos que en su favor expuso el reo, a quien por primera vez en Lima se permitió hablar ante los tribunales. La conciencia pública, en la que domina una mayoría de partidarios de la ley del talión, exigía el castigo del asesino; y cuando se temió que la influencia y el indisputable talento de D. Jerónimo Vivar, abogado chileno y defensor del reo, hicieran vacilar a los jueces, empezaron a aparecer pasquines en las fachadas del cabildo y del palacio. He aquí uno de ellos:
 
 «¿Sabes qué harán con Cebada?
-
 ¡Nada! ¡Nada! ¡Nada! ¡Nada!».
 
 La defensa de Vivar, que corre impresa, basta por sí sola para formar la reputación literaria de un hombre. Es una pieza elocuente y galana en la forma.
@@ -218,31 +182,22 @@ La defensa de Vivar, que corre impresa, basta por sí sola para formar la reputa
 Copiemos otro de los pasquines que tuvimos la fortuna de hallar en el curioso archivo del Sr. Odriozola:
 
 «Si una traición desvelada
-
 contra inocencia dormida
-
 en tiempo no es castigada,
-
 muy lejos de arrepentida
-
 siempre quedará... cebada».
 
 En el mismo sitio en que apareció el anterior, los amigos del reo, para despertar la clemencia de los jueces, colocaron otra quintilla de iguales consonantes:
 
 «La justicia desvelada
-
 por la inocencia dormida,
-
 no quiere sea castigada
-
 la culpa, si arrepentida
-
 puede quedar no cebada.»
 
 Y por fin en la pared de uno de los corredores de palacio se leía este pareado, escrito con carbón:
 
 «¡Abascal! ¡Abascal!
-
 Si ahorcas a Cebada te irá mal».
 
 Cuentan que la última comedia que representara Rafael en nuestro coliseo fue la titulada El juez compasivo, y que aludiendo a ella el señor de Lavalle, al tomar al reo la declaración instructiva le dijo: «Vengo a representar, a la de veras, el último papel que hizo usted en el teatro».

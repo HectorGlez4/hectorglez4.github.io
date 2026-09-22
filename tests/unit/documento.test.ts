@@ -24,6 +24,7 @@ import {
   tokensDeNombreDeAutor,
   ultimoAñoPosible,
 } from '../../tools/lib/documento.ts';
+import { extraerCandidatas } from '../../tools/lib/extraccion.ts';
 
 /**
  * Historia 11.1 — lo decidible sin red.
@@ -220,6 +221,401 @@ describe('Historia 19.11 — la numeración de verso del escaneo no se versiona'
     expect(derivado.cuerpo).not.toContain('[1]');
     expect(derivado.cuerpo).toContain('No es que tengamos poco tiempo para vivir');
     expect(derivado.cuerpo).toContain('La vida es larga si sabes usarla');
+  });
+});
+
+/**
+ * Historia 19.12 — el verso se lee por frase, no por renglón.
+ *
+ * El marcado es el de Wikisource-es, copiado de sus páginas: `<div class="poem">` con un
+ * `<p>` dentro y cada renglón cerrado con `<br />` **y un salto real detrás**; el renglón
+ * sangrado va en un `<span class="mw-poem-indented">`; y el verso que ya viene en renglones
+ * —el de Navarrete— va en `<div class="verse">` con un `<pre>` y ningún `<br>`.
+ */
+const VERSO = `<!DOCTYPE html>
+<html lang="es"><head><title>Canci&oacute;n divina - Wikisource</title></head>
+<body>
+<h1 id="firstHeading" class="firstHeading">Canci&oacute;n divina</h1>
+<div id="mw-content-text" class="mw-body-content">
+<div class="mw-content-ltr mw-parser-output" lang="es" dir="ltr">
+<div class="poem">
+<p><span class="mw-poem-indented" style="display: inline-block;">Diestras, pudieras decir </span><br />
+en la herida del pedir, <br />
+que es su primera intenci&oacute;n. <br />
+<br />
+<b>DON IUAN</b> La pobreza es tan medrosa, <br />
+que en todo mira peligro y siempre <br />
+sospecha que la persiguen. <br />
+</p>
+<div class="ws-div" style="text-align:center;"><b>ACTO I</b></div><br />
+<p>Y a fe que lo ver&agrave;n. 25 Se&ntilde;or, si quieres ser rico<br />
+no juntes hacienda alguna, mas bien reparte la tuya<br />
+</p>
+</div>
+<div class="verse"><pre> C&eacute;lebres calles de la corte indiana,
+ grandes plazas, soberbios edificios de piedra.
+
+ Altos palacios de la gloria humana,
+ fuentes de primorosos artificios de agua.
+</pre></div>
+<div class="poem">
+<p>Un poema sin puntuaci&oacute;n ninguna que sigue<br />
+y sigue sin punto ni coma que lo corte<br />
+y sigue todav&iacute;a un renglon m&aacute;s sin acabar<br />
+y otro renglon m&aacute;s que tampoco acaba nunca<br />
+y un renglon m&aacute;s que se alarga sin decidirse a terminar<br />
+y un &uacute;ltimo renglon con el que el poema pasa de los doscientos cuarenta<br />
+</p>
+</div>
+<div class="verse">
+<p>La verdad se sostiene sola,<br />
+y no necesita que nadie la defienda.</p>
+</div>
+<div class="mw-poem-indented">
+<p>La prudencia es la medida,<br />
+y la medida es la virtud del que gobierna.</p>
+</div>
+<div class=poem>
+<p>Sin comillas la clase, y aun as&iacute;<br />
+la Fuente declara que esto es verso.</p>
+</div>
+<div class="poem">
+<p>El salto va delante del corte
+<br />y el rengl&oacute;n sigue siendo del mismo p&aacute;rrafo.</p>
+</div>
+<div class="poem">
+<p>Primer parlamento del acto, que es de uno.<br /><br />Segundo parlamento del acto, que es de otro.</p>
+</div>
+<div class="poem">
+<p>Tantas veces se ha dicho que la virtud es su propio premio y que nadie<br />
+la practica esperando de los hombres el aplauso que no llega,<br />
+que repetirlo ahora parecer&iacute;a una necedad impropia de quien escribe,<br />
+si no fuera porque el mundo insiste en demostrar cada d&iacute;a lo contrario.</p>
+</div>
+<div class="poemas">No es verso, es la lista de poemas de la casa.<br />
+Segundo rengl&oacute;n de la lista, que sigue siendo prosa.</div>
+<p class="poem-title">Tampoco es verso este r&oacute;tulo de la casa.<br />
+Y su segundo rengl&oacute;n, que tampoco lo es.</p>
+<div data-class="poem">
+<p>El atributo no se llama clase de verdad.<br />
+Y su segundo rengl&oacute;n sigue en p&aacute;rrafo propio.</p>
+</div>
+<p>La prosa de siempre no cambia de sitio.</p>
+</div>
+</div>
+</body></html>`;
+
+describe('Historia 19.12 — el verso se lee por frase, no por renglón', () => {
+  const derivado = derivarDocumento('wikisource-es', VERSO);
+  if (!derivado.ok) throw new Error(derivado.motivo);
+
+  const candidatas = (cuerpo: string, obra: string): string[] => {
+    const extraido = extraerCandidatas(
+      { fuente: 'wikisource-es', obra, url: 'https://es.wikisource.org/wiki/X', texto: cuerpo },
+      'autor-de-prueba',
+    );
+    if (!extraido.ok) throw new Error(extraido.motivo);
+    return extraido.candidatas.map((c) => c.texto);
+  };
+  const deLaObra = candidatas(derivado.cuerpo, derivado.obra);
+
+  it('el fixture trae de verdad el marcado de la Fuente', () => {
+    // Sin esto, si el fixture perdiera los <br> las comprobaciones pasarían en vacío.
+    expect(VERSO).toContain('pudieras decir </span><br />\n');
+    expect(VERSO).toContain('<div class="verse"><pre>');
+  });
+
+  it('dentro de un bloque de verso el salto de renglón no abre párrafo', () => {
+    expect(derivado.cuerpo).toContain(
+      'Diestras, pudieras decir\nen la herida del pedir,\nque es su primera intención.',
+    );
+  });
+
+  it('y por eso la sentencia repartida en tres versos sale entera', () => {
+    // Antes salía en tres fragmentos de 22, 24 y 31 caracteres, y los tres caían por debajo
+    // del mínimo de 40. Ninguno llegaba a candidata.
+    expect(deLaObra).toContain(
+      'Diestras, pudieras decir en la herida del pedir, que es su primera intención.',
+    );
+  });
+
+  it('el renglón sangrado va dentro y se lee igual que su contenedor', () => {
+    expect(VERSO).toContain('class="mw-poem-indented"');
+    expect(derivado.cuerpo).not.toMatch(/Diestras, pudieras decir\s*\n\s*\n/u);
+  });
+
+  it('dos <br> seguidos siguen separando: es como la Fuente separa dos parlamentos', () => {
+    expect(derivado.cuerpo).toContain('que es su primera intención.\n\nDON IUAN');
+  });
+
+  it('el rótulo que vive en su propio bloque sigue siendo párrafo — la regla del epígrafe', () => {
+    // Si «ACTO I» se pegara al verso siguiente, sería el defecto del epígrafe otra vez.
+    expect(derivado.cuerpo).toMatch(/\n\s*\nACTO I\n\s*\n/u);
+  });
+
+  it('el verso que ya viene en renglones, dentro de un <pre>, no cambia', () => {
+    // Su estrofa se separa con una línea en blanco de verdad, y colapsarla las pegaría.
+    expect(derivado.cuerpo).toContain(
+      'Célebres calles de la corte indiana,\ngrandes plazas, soberbios edificios de piedra.',
+    );
+    expect(derivado.cuerpo).toContain(
+      'edificios de piedra.\n\nAltos palacios de la gloria humana,',
+    );
+  });
+
+  it('un poema sin puntuación queda en un párrafo largo y cae por longitud', () => {
+    // No se inventa ningún corte: o hay puntuación, o la frase no se parte.
+    expect(derivado.cuerpo).toContain(
+      'Un poema sin puntuación ninguna que sigue\ny sigue sin punto ni coma que lo corte',
+    );
+    expect(deLaObra.some((t) => t.startsWith('Un poema sin puntuación'))).toBe(false);
+  });
+
+  it('el nombre del personaje sigue delante de la frase: no es de esta historia', () => {
+    expect(deLaObra).toContain(
+      'DON IUAN La pobreza es tan medrosa, que en todo mira peligro y siempre sospecha que la persiguen.',
+    );
+  });
+
+  it('el número de verso que la edición imprime dentro del renglón se conserva', () => {
+    // No es el <sup> de la 19.11, que sí es aparato del escaneo.
+    expect(derivado.cuerpo).toContain('Y a fe que lo veràn. 25 Señor, si quieres ser rico');
+  });
+
+  it('una clase que solo se parece no es verso', () => {
+    for (const parecida of ['No es verso, es la lista de poemas de la casa.', 'Tampoco es verso este rótulo de la casa.']) {
+      expect(derivado.cuerpo, parecida).toContain(`${parecida}\n\n`);
+    }
+  });
+
+  it('un atributo que solo se parece a `class` tampoco declara verso', () => {
+    // `-` y `:` no son caracteres de palabra, así que un `\bclass` casaría con `data-class`
+    // y con `mw:class`: es la misma trampa que `\bpoem\b` con `poem-title`.
+    expect(VERSO).toContain('<div data-class="poem">');
+    expect(derivado.cuerpo).toContain(
+      'El atributo no se llama clase de verdad.\n\nY su segundo renglón sigue en párrafo propio.',
+    );
+  });
+
+  it('`verse` declara verso por su cuenta, sin `pre` y con `<br>`', () => {
+    // Sin esto, reducir CLASES_DE_VERSO a `poem` dejaba la suite entera en verde.
+    expect(derivado.cuerpo).toContain(
+      'La verdad se sostiene sola,\ny no necesita que nadie la defienda.',
+    );
+    expect(deLaObra).toContain('La verdad se sostiene sola, y no necesita que nadie la defienda.');
+  });
+
+  it('`mw-poem-indented` declara verso aunque no esté dentro de un `poem`', () => {
+    expect(derivado.cuerpo).toContain(
+      'La prudencia es la medida,\ny la medida es la virtud del que gobierna.',
+    );
+    expect(deLaObra).toContain('La prudencia es la medida, y la medida es la virtud del que gobierna.');
+  });
+
+  it('la clase sin comillas también declara verso', () => {
+    // Una página que escriba `class=poem` a secas quedaría sin tratar, y en silencio.
+    expect(VERSO).toContain('<div class=poem>');
+    expect(derivado.cuerpo).toContain(
+      'Sin comillas la clase, y aun así\nla Fuente declara que esto es verso.',
+    );
+  });
+
+  it('el salto real cuenta igual delante del `<br>` que detrás', () => {
+    // `verso<br />\nverso` es lo que produce la etiqueta <poem>; `verso\n<br />verso` lo
+    // escribe quien teclea el marcado a mano. Tratar solo una forma deja la otra rota.
+    expect(VERSO).toContain('del corte\n<br />y el rengl&oacute;n');
+    expect(derivado.cuerpo).toContain(
+      'El salto va delante del corte\ny el renglón sigue siendo del mismo párrafo.',
+    );
+  });
+
+  it('dos <br> pegados, sin salto real en medio, siguen dando párrafo', () => {
+    expect(VERSO).toContain('de uno.<br /><br />Segundo');
+    expect(derivado.cuerpo).toContain(
+      'Primer parlamento del acto, que es de uno.\n\nSegundo parlamento del acto, que es de otro.',
+    );
+  });
+
+  it('la sentencia que al unirse pasa de 240 cae por longitud: se pierde una candidata', () => {
+    // La matriz lo cuenta como precio: repartida en cuatro versos, cada renglón pasaba del
+    // mínimo y salía troceado; unida es una sola frase de 269 y se cae de la ventana.
+    expect(derivado.cuerpo).toContain(
+      'Tantas veces se ha dicho que la virtud es su propio premio y que nadie\n' +
+        'la practica esperando de los hombres el aplauso que no llega,',
+    );
+    expect(deLaObra.some((t) => t.includes('Tantas veces se ha dicho'))).toBe(false);
+  });
+});
+
+describe('Historia 19.12 — un documento sin verso declarado se versiona igual', () => {
+  it('el cuerpo de una página en prosa es el de siempre, byte a byte', () => {
+    const derivado = derivarDocumento('wikisource-es', WIKISOURCE);
+    if (!derivado.ok) throw new Error(derivado.motivo);
+    expect(derivado.cuerpo).toBe(
+      'Año de publicación: 49\n\n' +
+        'No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.\n\n' +
+        'La vida es larga si sabes usarla y aprovecharla como es debido cada jornada.',
+    );
+  });
+
+  it('un <br> fuera de un bloque de verso sigue abriendo párrafo', () => {
+    // La regla es del contenedor, no del `<br>`: fuera de él no cambia nada.
+    const conSalto = WIKISOURCE.replace(
+      '<p>La vida es larga',
+      '<p>Primera mitad de la prosa.<br />\nSegunda mitad de la prosa.</p>\n<p>La vida es larga',
+    );
+    const derivado = derivarDocumento('wikisource-es', conSalto);
+    if (!derivado.ok) throw new Error(derivado.motivo);
+    expect(derivado.cuerpo).toContain(
+      'Primera mitad de la prosa.\n\nSegunda mitad de la prosa.',
+    );
+  });
+});
+
+describe('Historia 19.12 — un contenedor de verso sin cerrar no se trata', () => {
+  /*
+   * `elementoEquilibrado` no encuentra el cierre y devuelve **el resto de la región**. Si la
+   * regla tratara ese trozo, toda la prosa de detrás se leería como verso: el defecto del
+   * epígrafe con otra cara.
+   *
+   * Preguntarle al trozo si acaba en `</div>` no basta, y por eso no se hace: aquí el último
+   * hijo del contenedor sin cerrar **sí** cierra, así que el trozo acaba exactamente igual que
+   * uno bien formado. Lo que lo distingue es que la profundidad no volvió nunca a cero.
+   */
+  const SIN_CERRAR = `<!DOCTYPE html>
+<html lang="es"><head><title>Obra sin cerrar - Wikisource</title></head><body>
+<h1 id="firstHeading" class="firstHeading">Obra sin cerrar</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<div class="poem">
+<p>Verso primero del poema,<br />
+verso segundo del poema.</p>
+<p>Prosa primera, que es un párrafo entero y suyo.<br />
+Prosa segunda, que es otro párrafo entero y suyo.</p>
+<div class="ws-div">Pie de la sección</div>`;
+
+  const derivado = derivarDocumento('wikisource-es', SIN_CERRAR);
+  if (!derivado.ok) throw new Error(derivado.motivo);
+
+  it('el fixture deja de verdad el contenedor sin cerrar y acabado en </div>', () => {
+    // Cuatro `<div>` y un solo `</div>`, que es el del hijo. Un cierre de más convertiría la
+    // prueba en otra cosa, y que la página acabe ahí es lo que hace que el trozo del `poem`
+    // termine en `</div>`: justo la forma que engañaría a la comprobación por sufijo.
+    expect(SIN_CERRAR.match(/<div\b/gu)?.length).toBe(4);
+    expect(SIN_CERRAR.match(/<\/div>/gu)?.length).toBe(1);
+    expect(SIN_CERRAR.endsWith('</div>')).toBe(true);
+  });
+
+  it('la prosa de detrás conserva su salto de párrafo', () => {
+    expect(derivado.cuerpo).toContain(
+      'Prosa primera, que es un párrafo entero y suyo.\n\nProsa segunda, que es otro párrafo entero y suyo.',
+    );
+  });
+
+  it('y el verso de dentro tampoco se toca: no se trata medio contenedor', () => {
+    expect(derivado.cuerpo).toContain('Verso primero del poema,\n\nverso segundo del poema.');
+  });
+});
+
+describe('Historia 19.12 — la regla también reescribe lo que lee la declaración', () => {
+  /*
+   * `region()` entrega el mismo texto a `aTextoPlano` para el cuerpo y a `declaracion()` para
+   * el metadato, así que unir renglones cambia también la ventana que mira
+   * `recorteDeEtiqueta`: tres líneas desde la etiqueta, quitando las vacías del final.
+   *
+   * **El texto de la obra ya se colaba ahí antes de esta historia**, y estas dos pruebas están
+   * para enseñarlo: fuera del `poem`, la ventana ya guardaba el primer verso detrás de una
+   * línea en blanco. Dentro, guarda dos versos en vez de uno. Lo que se **deriva** no cambia
+   * —el año sale de la propia línea de la etiqueta—, pero la fuga es real y está reportada.
+   */
+  const conEtiquetas = (dentroDelPoema: boolean): string => `<!DOCTYPE html>
+<html lang="es"><head><title>Obra en verso - Wikisource</title></head><body>
+<h1 id="firstHeading" class="firstHeading">Obra en verso</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+${dentroDelPoema ? '<div class="poem">' : ''}
+<p>Autor: Fern&aacute;n Gonz&aacute;lez de Eslava<br />
+A&ntilde;o de publicaci&oacute;n: 1877<br />
+&iquest;Por qu&eacute;, mi Dios, me soltais,<br />
+Y soltando me prendeis?<br />
+Porque suelto no perdais<br />
+Lo que preso ganar&eacute;is.</p>
+${dentroDelPoema ? '</div>' : ''}
+</div></div></body></html>`;
+
+  const fuera = derivarDocumento('wikisource-es', conEtiquetas(false));
+  const dentro = derivarDocumento('wikisource-es', conEtiquetas(true));
+  if (!fuera.ok) throw new Error(fuera.motivo);
+  if (!dentro.ok) throw new Error(dentro.motivo);
+
+  it('fuera del bloque de verso la ventana ya guardaba un renglón de la obra', () => {
+    expect(fuera.declaracion).toBe(
+      'Obra en verso\nAutor: Fernán González de Eslava\nAño de publicación: 1877\n\n¿Por qué, mi Dios, me soltais,',
+    );
+  });
+
+  it('dentro del bloque guarda dos, porque ya no media la línea en blanco', () => {
+    expect(dentro.declaracion).toBe(
+      'Obra en verso\nAutor: Fernán González de Eslava\nAño de publicación: 1877\n¿Por qué, mi Dios, me soltais,\nY soltando me prendeis?',
+    );
+  });
+
+  it('lo derivado no cambia: el año sale de la línea de la etiqueta, no de la ventana', () => {
+    expect(fuera.año).toBe(1877);
+    expect(dentro.año).toBe(1877);
+    expect(dentro.obra).toBe(fuera.obra);
+  });
+});
+
+describe('Historia 19.12 — prosa envuelta en class="poem": la consecuencia aceptada', () => {
+  /*
+   * La forma de La ciudad de Dios, que mete el libro entero —prosa— en un solo
+   * `<div class="poem">` y separa los párrafos con un `<br>`. La regla los une, porque la
+   * Fuente **declara** verso y la regla no juzga la forma del renglón.
+   *
+   * Esta prueba fija la salida de hoy **como consecuencia aceptada**, no como acierto: está
+   * medida y anotada en `_bmad-output/implementation-artifacts/deferred-work.md`. Si alguna
+   * vez se estrecha la regla, esta prueba se pone roja y el cambio se ve; sin ella, estrechar
+   * o ensanchar pasarían en silencio.
+   */
+  const PROSA_EN_POEMA = `<!DOCTYPE html>
+<html lang="es"><head><title>La ciudad de Dios - Wikisource</title></head><body>
+<h1 id="firstHeading" class="firstHeading">La ciudad de Dios</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<div class="poem">
+<p><small><br />
+PROEMIO<br />
+CAPITULO PRIMERO. Que la felicidad del imperio romano no es casual.<br />
+CAPITULO II. De la disposici&oacute;n semejante y desemejante de dos mellizos<br />
+CAPITULO III. Del argumento que Nigidio tom&oacute; de la rueda del ollero.<br />
+</small></p>
+</div></div></div></body></html>`;
+
+  const derivado = derivarDocumento('wikisource-es', PROSA_EN_POEMA);
+  if (!derivado.ok) throw new Error(derivado.motivo);
+
+  it('el índice de capítulos queda en un solo párrafo', () => {
+    expect(derivado.cuerpo).toContain(
+      'PROEMIO\nCAPITULO PRIMERO. Que la felicidad del imperio romano no es casual.\n' +
+        'CAPITULO II. De la disposición semejante y desemejante de dos mellizos\n' +
+        'CAPITULO III. Del argumento que Nigidio tomó de la rueda del ollero.',
+    );
+  });
+
+  it('y el renglón sin punto final se pega al siguiente: cola envenenada, y medida', () => {
+    const extraido = extraerCandidatas(
+      {
+        fuente: 'wikisource-es',
+        obra: derivado.obra,
+        url: 'https://es.wikisource.org/wiki/X',
+        texto: derivado.cuerpo,
+      },
+      'autor-de-prueba',
+    );
+    if (!extraido.ok) throw new Error(extraido.motivo);
+    // El renglón del capítulo II no acaba en punto, así que se lleva por delante el rótulo
+    // del III: una candidata que nadie puede publicar y que alguien tiene que descartar.
+    expect(extraido.candidatas.map((c) => c.texto)).toContain(
+      'De la disposición semejante y desemejante de dos mellizos CAPITULO III.',
+    );
   });
 });
 

@@ -102,12 +102,17 @@ export function aTextoPlano(marcado: string): string {
  *
  * Un `indexOf('</div>')` cortaría en el primer div anidado, y en MediaWiki la región de
  * contenido tiene decenas.
+ *
+ * `cerrado` dice si la profundidad volvió a cero de verdad —o sea, si el elemento tenía
+ * cierre— o si se acabó el texto buscándolo. Sin ese dato, quien llama solo puede
+ * **adivinarlo** mirando si el trozo acaba en `</etiqueta>`, y un elemento sin cerrar cuyo
+ * último hijo sí cierra engaña a esa comprobación: el trozo acaba en `</div>` y no es el suyo.
  */
 function elementoEquilibrado(
   html: string,
   desde: number,
   etiqueta: string,
-): { fin: number; interior: string } {
+): { fin: number; interior: string; cerrado: boolean } {
   const patron = new RegExp(`<\\/?${etiqueta}\\b[^>]*>`, 'gi');
   patron.lastIndex = desde;
   let profundidad = 0;
@@ -126,6 +131,7 @@ function elementoEquilibrado(
         return {
           fin: encontrado.index + encontrado[0].length,
           interior: html.slice(inicioInterior, encontrado.index),
+          cerrado: true,
         };
       }
     } else if (!encontrado[0].endsWith('/>')) {
@@ -133,7 +139,7 @@ function elementoEquilibrado(
     }
   }
 
-  return { fin: html.length, interior: html.slice(inicioInterior) };
+  return { fin: html.length, interior: html.slice(inicioInterior), cerrado: false };
 }
 
 /**
@@ -1258,6 +1264,130 @@ const CROMO_MEDIAWIKI: readonly [string, RegExp][] = [
  */
 const NUMERACION_DE_VERSO = /<sup\s*>(?:\s|&#160;)*\d{1,4}(?:\s|&#160;)*<\/sup\s*>/giu;
 
+/*
+ * ───────────────────────────────────────────────────────────────────────────
+ * El verso se lee por frase, no por renglón — Historia 19.12
+ * ───────────────────────────────────────────────────────────────────────────
+ *
+ * **Qué declara la Fuente.** Wikisource-es envuelve el verso en un contenedor con clase:
+ * `<div class="poem">` es lo que produce la etiqueta `<poem>`, `<div class="verse">` lo que
+ * escriben las plantillas de poesía y `mw-poem-indented` lo que marca el renglón sangrado.
+ * Dentro de `poem` cada renglón acaba en `<br />` **y un salto real detrás**:
+ *
+ *     <p>Diestras, pudieras decir<br />
+ *     en la herida del pedir,<br />
+ *     que es su primera intención.<br />
+ *
+ * `BLOQUES` convierte el `<br>` en `\n` y el salto real suma el segundo, así que cada verso
+ * quedaba en párrafo propio. El troceador parte por párrafo —una frase no cruza un párrafo,
+ * que es lo que protege los epígrafes—, de modo que cada renglón se juzgaba como frase entera
+ * y casi ninguno llegaba al mínimo de 40 caracteres: la sentencia de arriba salía en tres
+ * fragmentos de 22, 24 y 31, y se descartaban los tres.
+ *
+ * **La cifra medida**, en candidatas de `extraer` y sobre los 306 documentos de Wikisource-es
+ * versionados (22/09/2026): 54 traen verso declarado y en ellos 8.269 → 8.508, con 1.117 de
+ * las 1.130 ganadas con forma de frase entera y 684 de las 891 perdidas que eran medio verso.
+ * «Los favores del mundo» de Alarcón, 73 → 761; la «Canción divina» de González de Eslava,
+ * 1 → 9; los tres «Versos sencillos» de Martí, de **cero** a 19, 12 y 2. (La historia se
+ * escribió sobre una proyección del 20/09 que contaba frases dentro de la ventana de 40 a 240
+ * y no candidatas: 9 → 232 y 1 → 14. Son otra magnitud, no otro resultado.) De aquel defecto
+ * salieron descartes de Autores enteros «porque su obra solo da medios versos».
+ *
+ * **Por qué no va en el troceador.** `sentencias()` recibe el texto ya versionado y no ve
+ * marcado: para unir versos ahí habría que adivinar qué es verso por la forma del renglón
+ * —corto, sin punto—, y eso es exactamente lo que rompería el arreglo del epígrafe, que cuesta
+ * 42 candidatas envenenadas en un solo libro. Aquí, en cambio, no se adivina nada: se lee lo
+ * que la Fuente **declara** en el marcado, antes de retirarlo.
+ *
+ * **Lo que la regla no puede saber**, y conviene no olvidar: que un contenedor declarado
+ * `poem` contenga verso lo decide quien transcribe. Los 22 libros de La ciudad de Dios meten
+ * el libro entero —prosa— en un solo `<div class="poem">` con un `<br>` entre párrafos, así
+ * que aquí se unen. Está medido y anotado en `deferred-work.md`; no se arregla estrechando
+ * esto, porque lo único que distinguiría esa prosa del verso es la forma del renglón.
+ */
+
+/**
+ * Las clases con las que Wikisource-es declara que un bloque es verso.
+ *
+ * Por **identificador exacto**, nunca por subcadena: `poemas` y `poem-title` no son verso, y
+ * un `\bpoem\b` casaría con el segundo porque el guion no es carácter de palabra.
+ */
+const CLASES_DE_VERSO: ReadonlySet<string> = new Set(['poem', 'verse', 'mw-poem-indented']);
+
+/**
+ * La apertura de cualquier elemento con `class`, para mirarle las clases una a una.
+ *
+ * El nombre del atributo va anclado a un blanco y **no** a `\b`: `-` y `:` no son caracteres
+ * de palabra, así que un `\bclass` casaría con `data-class="poem"` y con `mw:class="poem"`,
+ * que es la misma trampa que el comentario de arriba señala para `\bpoem\b`.
+ *
+ * Las tres formas del valor —comillas dobles, simples y **sin comillas**— porque una página
+ * que declarara `class=poem` a secas quedaría sin tratar y en silencio.
+ */
+const APERTURA_CON_CLASE =
+  /<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*\sclass\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))[^>]*>/giu;
+
+function declaraVerso(clases: string): boolean {
+  return clases.split(/\s+/u).some((clase) => CLASES_DE_VERSO.has(clase));
+}
+
+/**
+ * El salto de renglón de un bloque de verso: el `<br>` **y el salto real que lo acompaña**.
+ *
+ * El salto real se consume a los dos lados porque las dos formas existen —`verso<br />\nverso`
+ * es la de la etiqueta `<poem>`, y `verso\n<br />verso` la escribe quien teclea el marcado a
+ * mano—, y tratar solo una dejaría la otra con un párrafo por renglón.
+ *
+ * **Uno a cada lado y solo el horizontal en medio**: así `<br /><br />` —que es como la Fuente
+ * separa dos parlamentos y dos estrofas— sigue dando dos saltos, o sea un párrafo. Y la línea
+ * en blanco de verdad sobrevive: el verso que ya viene en renglones dentro de un `<pre>`
+ * separa sus estrofas con una, y colapsarla las pegaría.
+ */
+const SALTO_DE_RENGLON_EN_VERSO = /\n?[^\S\n]*<br\b[^>]*>[^\S\n]*\n?/giu;
+
+/**
+ * Dentro de un bloque que la Fuente declara verso, el salto de renglón vale por uno.
+ *
+ * Las palabras no cambian: cambia dónde hay salto de párrafo. Un documento sin verso
+ * declarado sale byte a byte igual, porque fuera de esos contenedores no se toca nada.
+ *
+ * Lo que queda **fuera** del alcance a propósito: los `<p>` y los `<div>` de dentro del
+ * contenedor siguen abriendo párrafo. En una comedia, el rótulo «ACTO I» vive en su propio
+ * `<div>` dentro del `poem`, y pegarlo al primer verso sería el defecto del epígrafe otra vez.
+ */
+function versoEnUnSoloParrafo(region: string): string {
+  const patron = new RegExp(APERTURA_CON_CLASE.source, APERTURA_CON_CLASE.flags);
+  let salida = '';
+  let copiado = 0;
+  let encontrado: RegExpExecArray | null;
+
+  while ((encontrado = patron.exec(region)) !== null) {
+    if (!declaraVerso(encontrado[2] ?? encontrado[3] ?? encontrado[4] ?? '')) continue;
+
+    const { fin, cerrado } = elementoEquilibrado(region, encontrado.index, encontrado[1]);
+    /*
+     * Un contenedor **sin cierre** no se sabe dónde acaba: `elementoEquilibrado` devuelve
+     * entonces el resto de la región, y tratarlo entero aplicaría la regla del verso a la
+     * prosa que viniera después —el defecto del epígrafe con otra cara—. Se deja intacto,
+     * que es el estado de antes de esta historia.
+     *
+     * Se pregunta por `cerrado` y no por si el trozo acaba en `</etiqueta>`: un contenedor
+     * sin cerrar cuyo último hijo sí cierra acaba igual que uno bien formado, y esa
+     * comprobación lo daría por bueno.
+     */
+    if (!cerrado) continue;
+
+    // Un contenedor dentro de otro ya tratado no se vuelve a mirar: `lastIndex` salta el
+    // bloque entero, y su `<br>` ya se leyó con el de fuera.
+    salida += region.slice(copiado, encontrado.index);
+    salida += region.slice(encontrado.index, fin).replace(SALTO_DE_RENGLON_EN_VERSO, '\n');
+    copiado = fin;
+    patron.lastIndex = fin;
+  }
+
+  return salida + region.slice(copiado);
+}
+
 const ETIQUETA_DE_AÑO_WIKISOURCE =
   /^\s*(?:a[ñn]o(?:\s+de\s+(?:publicaci[óo]n|edici[óo]n))?|fecha\s+de\s+publicaci[óo]n|publicaci[óo]n)\s*:/iu;
 
@@ -1332,6 +1462,8 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
             region = quitarElementos(region, etiqueta, apertura);
           }
           region = region.replace(NUMERACION_DE_VERSO, ' ');
+          // Sobre el marcado y antes de retirarlo: aquí todavía consta qué declara verso.
+          region = versoEnUnSoloParrafo(region);
           // Una región sin texto no es la región de contenido: es un envoltorio.
           if (region.replace(/<[^>]+>/gu, ' ').trim() === '') continue;
           return { ok: true, region };

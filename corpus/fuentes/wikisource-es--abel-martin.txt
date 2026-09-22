@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Abel Martín
 url: https://es.wikisource.org/wiki/Abel_Mart%C3%ADn
-recuperado: 2026-08-25
+recuperado: 2026-09-22
 ---
 Abel Martín
 [[Categoría:Ensayos de Antonio Machado]]
@@ -156,19 +156,14 @@ Consejos, coplas, apuntes
 1
 
 Tengo dentro de un herbario
-
 una tarde disecada,
-
 lila, violeta y dorada.
-
 Caprichos de solitario.
 
 2
 
 Y en la página siguiente,
-
 los ojos de Guadalupe,
-
 cuyo color nunca supe.
 
 3
@@ -178,107 +173,74 @@ Y una frente...
 4
 
 Calidoscopio infantil.
-
 Una damita, al piano.
-
 Do, re, mi.
-
 Otra se pinta al espejo
-
 los labios de colorín.
 
 5
 
 Y rosas en un balcón
-
 a la vuelta de una esquina,
-
 calle de Válgame Dios.
 
 6
 
 Amores por el atajo,
-
 de los de “Vente conmigo”
-
 ...”Que vuelvas pronto serrano”
 
 7
 
 En el mar de la mujer
-
 pocos naufragan de noche;
-
 muchos, al amanecer.
 
 8
 
 Siempre que nos vemos
-
 es cita para mañana.
-
 Nunca nos encontraremos
 
 9
 
 La plaza tiene una torre,
-
 la torre tiene un balcón,
-
 el balcón tiene una dama,
-
 la dama una blanca flor.
-
 Ha pasado un caballero,
-
 —¡quién sabe por qué pasó!—,
-
 y se ha llevado la plaza
-
 con su torre y su balcón,
-
 con su balcón y su dama,
-
 su dama y su blanca flor.
 
 10
 
 Por la calle de mis celos
-
 en veinte rejas con otro
-
 hablando siempre te veo.
 
 11
 
 Malos sueños he.
-
 Me despertaré.
 
 12
 
 Me despertarán
-
 campanas del alba
-
 que sonando están.
 
 13
 
 Para tu ventana
-
 un ramo de rosas me dio la mañana.
-
 Por un laberinto, de calle en calleja,
-
 buscando, he corrido tu casa y tu reja.
-
 Y en un laberinto me encuentro perdido
-
 en esta mañana de mayo florido.
-
 Dime donde estás.
-
 Vueltas y revueltas. Ya no puedo más.
 
 (Los Complementarios)

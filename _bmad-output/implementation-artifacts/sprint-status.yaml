@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 14-09-2026 18:56
+last_updated: 22-09-2026 10:58
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -295,6 +295,11 @@ development_status:
   # versionaba como texto. Medido el 14/09: 86 en La Eneida de Ochoa, libro I, y cero en
   # los demás documentos con cifra pegada, que es OCR. No le da margen a la canaria.
   19-11-la-numeracion-de-verso-no-se-versiona: review
+  # 19.12: el verso declarado por la Fuente (class="poem") se versionaba con un párrafo por
+  # renglón, así que el troceador juzgaba cada verso como frase y casi ninguno llegaba a los
+  # 40 caracteres. Medido el 20/09: González de Eslava 1 candidata en ventana y debería dar
+  # 14. El teatro queda fuera de lo que promete: sembrarlo enterraría la cola.
+  19-12-el-verso-se-lee-por-frase: review
   epic-19-retrospective: optional
 
 action_items:

@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Una oveja, un perro y un lobo
 url: https://es.wikisource.org/wiki/Una_oveja%2C_un_perro_y_un_lobo
-recuperado: 2026-09-14
+recuperado: 2026-09-22
 ---
 Una oveja, un perro y un lobo
 [[Categoría:Fábulas de Gayo Julio Fedro]]
@@ -25,7 +25,5 @@ Ovis. Otros leen Bidens.
 Jacentem. Algunos dicen, que aquí jacentem significa estar muerto. Los labradores armaban trampas á los lobos. Silio Italico lib. 6 dijo:
 
 ———Stàbulis procurans otia pastor
-
 In foveam parvo tectam velamine frondis
-
 Ducit mete lupus positæ balatibus agnæ.

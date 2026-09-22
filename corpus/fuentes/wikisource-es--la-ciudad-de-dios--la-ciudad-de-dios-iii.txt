@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: La ciudad de Dios
 url: https://es.wikisource.org/wiki/La_ciudad_de_Dios/III
-recuperado: 2026-09-07
+recuperado: 2026-09-22
 ---
 La ciudad de Dios/III
 |título=[[La ciudad de Dios]]
@@ -17,65 +17,35 @@ Libro Tercero.
 Calamidades de Roma antes de Cristo
 
 CAPITULO PRIMERO. De las adversidades que sólo temen los malos, y que siempre ha padecido el mundo mientras adoraba a los dioses
-
 CAPITULO II. Si los dioses a quienes los romanos y griegos adoraban de un mismo modo tuvieron causas para permitir la destrucción de Troya
-
 CAPITULO III. Que no fue posible que se ofendiesen los dioses con el adulterio de Paris, siendo cosa muy usada entre ellos, como dicen
-
 CAPITULO IV. Del parecer de Varrón, que dijo era útil se finjan los hombres nacidos de los dioses
-
 CAPITULO V. Que no se prueba que los dioses castigaron el adulterio de Paris, pues en la madre de Rómulo le dejaron sin castigo
-
 CAPITULO VI. Del parricidio de Rómulo, no vengado por los dioses
-
 CAPITULO VII. De la destrucción de Ilion, asolada por Fimbria, capitán de Mario
-
 CAPITULO VIII. Si fue prudente encomendarse Roma a los dioses de Troya
-
 CAPITULO IX. Si la paz que hubo en tiempo de Numa se debe creer que fue obra de los dioses
-
 CAPITULO X. Si se debió desear que el imperio romano creciese con tan rabiosas guerras, pudiendo estar seguro, con lo que creció en tiempo de Numa
-
 CAPITULO XI. De la estatua de Apolo Cumano, cuyas lágrimas se creyó que pronosticaron la destrucción de los griegos por no poderles ayudar
-
 CAPITULO XII. Cuántos dioses añadieron los romanos, fuera de los que hizo Numa, cuya multitud no les ayudó ni sirvió de nada
-
 CAPITULO XIII. Con que derecho y capitulaciones alcanzaron los romanos las primeras mujeres en casamiento
-
 CAPITULO XIV. De la injusta guerra que los romanos hicieron a los albanos y de la victoria que alcanzaron por codicia de reinar
-
 CAPITULO XV. Cuál fue la vida y el fin que tuvieron los reyes de los romanos
-
 CAPITULO XVI. De los primeros cónsules que tuvieron los romanos; cómo el uno de ellos echó al otro de su patria, y después de haber cometido en Roma enormes, parricidios, murió dando la muerte a su enemigo
-
 CAPITULO XVII. De las calamidades que padeció la República romana después que comenzó el imperio de los cónsules, sin que la favoreciesen los dioses que adoraba
-
 CAPITULO XVIII. Cuán graves calamidades afligieron a los romanos en tiempo de las guerras púnicas, habiendo deseado y pedido en balde el auxilio y favor de sus dioses
-
 CAPITULO XIX. De los trabajos de la segunda guerra púnica, en que gastaron las fuerzas de una y otra parte
-
 CAPITULO XX. De la destrucción de los saguntinos, a los cuales, muriendo por conservar la amistad de los romanos, no les socorrían los dioses de los romanos
-
 CAPITULO XXI. De la ingratitud que usó Roma con Escipión, su libertador, y las costumbres que hubo en ella, cuando cuenta Salustio que era muy buena
-
 CAPITULO XXII. Del edicto del rey Mitrídates, en que mandó matar a todos los ciudadanos romanos que se hallasen en Asia
-
 CAPITULO XXIII. De los males interiores que padeció la República romana con un prodigio que precedió, que fue rabiar todos los animales de que se sirve ordinariamente el hombre
-
 CAPITULO XXIV. De la discordia civil causada por las sediciones de los gracos
-
 CAPITULO XXV. Del templo que edificaron por decreto del Senado a la Concordia en el lugar donde las sediciones y muertes tuvieron lugar
-
 CAPITULO XXVI. De las diversas suertes de guerras que se siguieron después que edificaron el templo de la Concordia
-
 CAPITULO XXVII. De las guerras civiles entre Mario y Sila
-
 CAPITULO XXVIII. Cuál fue la victoria de Sila, que fue la que vengó la crueldad de Mario
-
 CAPITULO XXIX. Compara la entrada de los godos con las calamidades que padecieron los romanos, así de los galos como de los autores y caudillos de las guerras civiles
-
 CAPITULO XXX. De la conexión de muchas guerras que precedieron antes de la venida de Jesucristo
-
 CAPITULO XXXI. Con qué poco pudor imputan a Cristo los presentes desastres aquellos a quienes no se les permite que adores a sus dioses, habiendo habido tantas calamidades en el tiempo que los adoraban
 
 CAPITULO PRIMERO. De las adversidades que sólo temen los malos, y que siempre ha padecido el mundo mientras adoraba a los dioses

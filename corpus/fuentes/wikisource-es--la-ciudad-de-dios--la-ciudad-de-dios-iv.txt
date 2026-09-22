@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: La ciudad de Dios
 url: https://es.wikisource.org/wiki/La_ciudad_de_Dios/IV
-recuperado: 2026-09-07
+recuperado: 2026-09-22
 ---
 La ciudad de Dios/IV
 |título=[[La ciudad de Dios]]
@@ -17,71 +17,38 @@ Libro Cuarto.
 La grandeza de Roma es don de Dios
 
 CAPITULO PRIMERO. De lo que se ha dicho en el libro primero
-
 CAPITULO II. De lo que se contiene en el libro segundo y tercero
-
 CAPITULO III. Si la grandeza del Imperio que no se alcanza sino con la guerra, se debe contar entre los bienes que llaman, así de los felices como de los sabios
-
 CAPITULO IV. Cuán semejante a los latrocinios son los reinos sin justicia
-
 CAPITULO V. De los gladiadores fugitivos, cuyo poder vino a ser semejante a la dignidad real
-
 CAPITULO VI. De la codicia del rey Nino, que por extender su dominio fue el primero que movió guerra a sus vecinos
-
 CAPITULO VII. Si los dioses han dado o dejado de dar su ayuda a los reinos de la tierra para su esplendor y decadencia
-
 CAPITULO VIII. Qué dioses piensan los romanos que les han acrecentado y conservado su imperio, habiéndoles parecido que apenas se podía encomendar a estos dioses, y cada uno de por si, el amparo de una sola cosa
-
 CAPITULO IX. Si la grandeza del imperio romano y el haber durado tanto se debe atribuir a Júpiter, a quien sus adoradores tienen por el supremo de los dioses
-
 CAPITULO X. Las opiniones que siguieron los que pusieron diferentes dioses en diversas partes del mundo
-
 CAPITULO XI. De muchos dioses que los maestros y doctores de los paganos defienden que son un mismo Júpiter
-
 CAPITULO XII. De la opinión de los que pensaron que Dios era el alma del mundo y que el mundo era el cuerpo de Dios
-
 CAPITULO XIII. De los que dicen que sólo los animales racionales son parte del que es un solo Dios
-
 CAPITULO XIV. Que sin razón atribuyen a Júpiter el aumento de los reinos, pues si, como dicen, la victoria es odiosa, ella sola bastará para este negocio
-
 CAPITULO XV. Si conviene a los buenos querer extender su reino
-
 CAPITULO XVI. Cuál fue la causa por que, atribuyendo los romanos a cada cosa y a cada movimiento su dios, pusieron el templo de la Quietud fuera de las puertas de Roma
-
 CAPITULO XVII. Pregúntase si, teniendo Júpiter el poder supremo, se debió tener por diosa a la Victoria
-
 CAPITULO XVIII. Por qué tuvieron por dioses distintos a la Felicidad y a la Fortuna
-
 CAPITULO XIX. De la Fortuna femenil
-
 CAPITULO XX. De la virtud y fe, a quienes los paganos honraron con templos y sacrificios, dejándose otras cosas buenas que asimismo debían adorar, si se concedía rectamente a las otras la divinidad
-
 CAPITULO XXI. Que los que no conocían un solo Dios, por lo menos se debieran contentar con la virtud y con la felicidad
-
 CAPITULO XXII. De la ciencia del culto de los dioses, la cual se gloria Varrón haberla el enseñado a los romanos
-
 CAPITULO XXIII. De la Felicidad, a quien los romanos, con tener a muchos dioses, en mucho tiempo no adoraron con culto divino, siendo ella sola bastante en lugar de todos
-
 CAPITULO XXIV. Cómo defienden los paganos el adorar por dioses a los mismos dones de Dios
-
 CAPITULO XXV. Que se debe adorar a un solo Dios, cuyo nombre, aunque no se sepa, con todo, se ve que es dador de la felicidad
-
 CAPITULO XXVI. Que se debe adorar a un solo Dios, cuyo nombre, aunque no se sepa, con todo, se ve que es dador de la felicidad
-
 CAPITULO XXVII. De tres géneros de dioses de que habló el pontífice Escévola
-
 CAPITULO XXVIII. Si para alcanzar y dilatar el Imperio les aprovechó a los romanos el culto de sus dioses
-
 CAPITULO XXIX. De la falsedad del agüero que pareció haber pronosticado la fortaleza y estabilidad del imperio romano
-
 CAPITULO XXX. Qué opinan los gentiles de los dioses que adoran
-
 CAPITULO XXXI. De las opiniones de Varrón, que, aunque reprueba la persuasión que tenía el pueblo, y no llega a alcanzar la noticia del verdadero Dios, con todo, es de parecer que se debía adorar un solo Dios
-
 CAPITULO XXXII. Con qué pretexto quisieron los príncipes gentiles que perseverasen entre sus vasallos las falsas religiones
-
 CAPITULO XXXIII. Que todos los reyes y reinos están dispuestos y ordenados por el decreto y potestad del verdadero Dios
-
 CAPITULO XXXIV. Del reino de los judíos, el cual instituyó y conservó¿ el que es sólo y verdadero Dios, mientras que ellos perseveraron en la verdadera religión
 
 CAPITULO PRIMERO. De lo que se ha dicho en el libro primero
@@ -127,7 +94,6 @@ Y ¿por qué ponen a su lado también a su esposa, Juno, y permiten que ésta se
 CAPITULO XI. De muchos dioses que los maestros y doctores de los paganos defienden que son un mismo Júpiter
 
 Por más razones y argumentos filosóficos que quieran alegar, jamás podrán sostener que Júpiter es ya el alma de este mundo corpóreo que llena y mueve toda esta máquina, fabricada y compuesta de los cuatro elementos o de cuantos quisieren añadir; con tal que ceda su parte a su hermana y hermanos, ya sea el Cielo, de modo que tenga abrazada por encima a Juno, que es el aire y tiene debajo de sí; ya sea todo el Cielo, juntamente con el aire, y fertilice con fecundas lluvias y semillas la tierra, como a su mujer, y a la misma como a su madre; supuesto que tan extraña mezcla de parentescos en los dioses no se tiene por acción criminal; ya porque no sea necesario discurrir particularmente por todas sus cualidades si es un solo dios, de quien creen algunos habló el poeta cuando dijo <que Dios se difunde por todas las tierras, por todos los golfos y senos del mar, y por toda la profunda máquina del Cielo>. Pues bien; el que en el Cielo es Júpiter; en el aire, Juno; en el mar, Neptuno; en las partes inferiores del mar, Salacia; en la tierra, Plutón; en la parte inferior de la tierra, Proserpina; en los domésticos hogares, Vesta en las fraguas de los herreros, Vulcano; en los astros, el Sol, Luna y Estrellas; en los adivinos, Apolo; en las mercaderías, Mercurio; en Jano, el que comienza; en Término, el que acaba; en el tiempo, Saturno; Marte y Belona, en las guerras; Uber, en las viñas; Ceres, en las mieses; Diana, en las selvas; Minerva, en los ingenios; finalmente, sea Júpiter también la turba de dioses plebeyos; él sea el que preside, con el nombre de Libero, a la semilla o virtud generativa de los varones, y con nombre dc Ubera, a la de las mujeres; él sea Diespiter, el que lleva a feliz término los nacimientos; él sea la diosa Mena, a quien encargaron los menstruos de las mujeres; él sea Lucina, a quien invocan las que paren; él sea el que ayuda a los que nacen, recibiéndolos en el regazo de la tierra, y llámese Opis, el que en los llantos de las criaturas les abra la boca, y Ilámese dios Vaticano el que las levante de la tierra, y llámese la diosa Levana; el que tenga cuenta de las cunas, llámese diosa Cunina; no sea otro sino sea el mismo en aquellas diosas que dicen su suerte a, los que nacen, y se llaman Carmentes; tenga cargo de los sucesos fortuitos, y llámese Fortuna; ya representando a la diosa Ruma, dé leche a las criaturas, porque los antiguos al pecho llamaban ruma; en la diosa Potina, dé de beber bebida; en la diosa Educa, la comida; del pavor de los niños llámese Pavencia; de la esperanza que viene, Venilla; del deleite, Volupia; del acto generativo, Agenoria; de los estímulos con que se mueve el hombre con exceso al acto sexual llámese la diosa Estímula; sea la diosa Estrenua haciéndole estrenuo y diligente; Numeria, que le enseñe a numerar y contar; Camena, a cantar; él sea el dios Conso dándole consejos, los que particularmente no son adorados, ¿cómo no temen, habiendo aplacado a tan pocos, vivir teniendo airado contra si a todo el Cielo? Y si adoran y tributan culto a todas las estrellas, porque están contenidas en Júpiter, a quien reverencian, con este atajo pudieran en él solo venerar a todos, pues así ninguna se enojara, pues que, en sólo Júpiter se rogaba a todas, y ninguna era despreciada; mas adorando a unas se daría justa causa a otras de enojarse por ser adoradas las cuales son muchas más, sin comparación, mayormente cuando estando ellas resplandecientes desde su elevado asiento, se les prefiera hasta el mismo Príapo desnudo y torpemente
-
 armado.
 
 CAPITULO XII. De la opinión de los que pensaron que Dios era el alma del mundo y que el mundo era el cuerpo de Dios

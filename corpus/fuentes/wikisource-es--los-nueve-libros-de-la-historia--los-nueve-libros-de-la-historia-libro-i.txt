@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Los nueve libros de la historia
 url: https://es.wikisource.org/wiki/Los_nueve_libros_de_la_historia/Libro_I
-recuperado: 2026-09-13
+recuperado: 2026-09-22
 ---
 Los nueve libros de la historia/Libro I
 |título=[[Los nueve libros de la historia]]

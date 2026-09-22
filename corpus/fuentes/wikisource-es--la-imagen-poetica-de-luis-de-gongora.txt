@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: La imagen poética de Luis de Góngora
 url: https://es.wikisource.org/wiki/La_imagen_po%C3%A9tica_de_Luis_de_G%C3%B3ngora
-recuperado: 2026-08-26
+recuperado: 2026-09-22
 ---
 La imagen poética de Luis de Góngora
 [[Categoría:Ensayos de Federico García Lorca]]
@@ -29,23 +29,14 @@ Empieza a soplar el fresco aire de Italia.
 Las madres de Garcilaso y de Boscán cortan el azahar de sus bodas; pero ya se canta en todas partes y era clásico aquello de:
 
 Al alba venid. buen amigo;
-
 al alba venid.
-
 Amigo el que más quería.
-
 venid a la luz del día.
-
 Amigo el que más amaba,
-
 venid a la luz del alba,
-
 venid a la luz del día,
-
 non trayáis compañia.
-
 Venid a la luz del alba,
-
 non trayáis gran compaña.
 
 Y cuando Garcilaso nos trae el endecasílabo con sus guantes perfumados, viene la música en ayuda de los popularistas. Se publica el Cancionero musical de Palacio y se pone de moda lo popular. Los músicos recogen entonces de la tradición oral bellas canciones amatorias, pastoriles y caballerescas. Se oyen en las páginas hechas para ojos aristocráticos las voces de rufianes en las tabernas o de las serranas de Avila, el romance del moro de largas barbas, dulces cantos de amigo, monótonas oraciones de ciego, el canto del caballero perdido en la espesura o la queja exquisita de la plebeya burlada. Un fino y exacto paisaje de lo pintoresco y espiritual español.
@@ -83,23 +74,14 @@ Mientras que todos piden el pan, él pide la piedra preciosa de cada día. Sin s
 Un poeta tiene que ser profesor en los cinco sentidos corporales. Los cinco sentidos corporales, en este orden: vista, tacto, oído, olfato y gusto. Para poder ser dueño de las más bellas imágenes tiene que abrir puertas de comunicación en todos ellos y con mucha frecuencia ha de superponer sus sensaciones y aun de disfrazar sus naturalezas. Así puede decir Góngora en su Soledad primera:
 
 Pintadas aves, cítaras de pluma,
-
 coronaban la bárbara capilla,
-
 mientras el arroyuelo para oílla
-
 hace de blanca espuma
-
 tantas orejas cuantas guijas lava.
-
 Y puede decir, describiendo una zagala:
-
 Del verde margen otra, las mejores
-
 rosas traslada y lirios al cabello,
-
 o por lo matizado, o por lo bello
-
 si aurora no con rayos, sol con flores.
 
 O:
@@ -113,7 +95,6 @@ verdes voces
 o:
 
 voz pintada, canto alado,
-
 órgano de pluma.
 
 Para que una metáfora tenga vida necesita dos condiciones esenciales: forma y radio de acción. Su núcleo central y una redonda perspectiva en torno de él. El núcleo se abre como una flor que nos sorprende por lo desconocida, pero en el radio de luz que lo rodea hallamos el nombre de la flor y conocemos su perfume. La metáfora está siempre regida por la vista (a veces por una vista sublimada), pero es la vista la que la hace limitada y le da su realidad. Aun los más evanescentes poetas ingleses, como Keats, tienen necesidad de dibujar y limitar sus metáforas y figuraciones, y Keats se salva por su plasticidad admirable del peligroso mundo poético de las visiones. Después ha de exclamar naturalmente: "Sólo la Poesía puede narrar sus sueños". La vista no deja que la sombra enturbie el contorno de la imagen que se ha dibujado delante de ella.
@@ -139,27 +120,18 @@ Armoniza y hace plásticos, de una manera a veces hasta violenta, los mundos mas
 En su Soledad primera dice (versos 34 a 41):
 
 Desnudo el joven, cuando ya el vestido
-
 océano ha bebido,
-
 restituir le hace a las arenas;
-
 y al sol le extiende luego
-
 que, lamiéndole apenas,
-
 su dulce lengua de templado fuego
-
 lento le embiste y con suave estilo
-
 la menor onda chupa al menor hilo.
 
 ¡Con qué juicioso tacto está armonizado el Océano, ese dragón de oro del Sol embistiendo con su tibia lengua, y ese traje mojado del joven, donde la ciega cabeza del astro "la menor onda chupa al menor hilo". En estos ocho versos hay más matices que en cincuenta octavas de la Gerusalemme liberata, del Tasso. Porque están todos los detalles estudiados y sentidos como en una joya de orfebrería. No hay nada que dé la sensación del Sol que cae, pero no pesa, como esos versos:
 
 que, lamiéndole apenas,
-
 ........................................
-
 lento le embiste ..............
 
 Como lleva la imaginación atada, la detiene cuando quiere y no se deja arrastrar por las oscuras fuerzas naturales de la ley de inercia ni por los fugaces espejismos donde mueren los poetas incautos como mariposas en el farol. Hay momentos en las Soledades que resultan increíbles. No se puede imaginar cómo el poeta juega con grandes masas y términos geográficos sin caer en lo monstruoso ni en lo hiperbólico desagradable.
@@ -167,51 +139,32 @@ Como lleva la imaginación atada, la detiene cuando quiere y no se deja arrastra
 En la primera inagotable Soledad dice, refiriéndose al istmo de Suez:
 
 el istmo que al Océano divide
-
 y, sierpe de cristal, juntar le impide
-
 la cabeza del Norte coronada
-
 con la que ilustra el Sur, cola escamada
-
 de antárticas estrellas.
-
 Recuerden el ala izquierda del mapamundi.
-
 O dibuja estos dos vientos con mano segura y exactas proporciones:
-
 para el Austro de alas nunca enjutas,
-
 para el Cierzo expirante por cien bocas.
 
 O dice de un estrecho (el de Magallanes) esta definición poética tan justa:
 
 cuando halló de fugitiva plata
-
 la bisagra, aunque estrecha, abrazadora
-
 de un Océano y otro siempre uno,
-
 O llamar al mar:
-
 Bárbaro observador, mas diligente
-
 de las inciertas formas de la Luna.
 
 Y, en fin, en la Soledad primera compara las islas de Oceanía con las ninfas de Diana cazadora en los remansos del río Eurotas:
 
 De firmes islas no la inmóvil flota
-
 de aquel mar del Alba te describo,
-
 cuyo número, ya que no lascivo,
-
 por lo bello agradable y por lo vario
-
 la dulce confusión hacer podía
-
 que en los blancos estanques del Eurota
-
 la virginal desnuda montería...
 
 Pero lo interesante es que, tratando formas y objetos de pequeño tamaño, lo haga con el mismo amor y la misma grandeza poética. Para él, una manzana es tan intensa como el mar, y una abeja, tan sorprendente como un bosque. Se sitúa frente a la Naturaleza con ojos penetrantes y admira la idéntica belleza que tienen por igual todas las formas. Entra en lo que se puede llamar mundo de cada cosa, y allí proporciona su sentimiento a los sentimientos que le rodean. Por eso le da lo mismo una manzana que un mar, porque sabe que la manzana en su mundo es tan infinita como el mar en el suyo. La vida de una manzana desde que es tenue flor hasta que, dorada, cae del árbol a la hierba, es tan misteriosa y tan grande como el ritmo periódico de las mareas. Y un poeta debe saber esto. La grandeza de una poesía no depende de la magnitud del tema, ni de sus proporciones ni sentimientos. Se puede hacer un poema épico de la lucha que sostienen los leucocitos en el ramaje aprisionado de las venas, y se puede dar una inacabable impresión de infinito con la forma y olor de una rosa tan sólo.
@@ -221,9 +174,7 @@ Góngora trata con la misma medida todas sus materias. y así como maneja mares 
 En la octava real número diez de la fábula de Polifemo y Galatea dice:
 
 la pera, de quien fué cuna dorada
-
 la rubia paja y, pálida tutora,
-
 la niega avara y pródiga la dora.
 
 Llama a la paja pálida tutora de la fruta, puesto que en su seno se termina de madurar desprendida todavía verde de su madre la rama. Pálida tutora que la niega avara y pródiga la dora, puesto que la esconde a la contemplación de la gente para ponerle un vestido de oro.
@@ -231,39 +182,26 @@ Llama a la paja pálida tutora de la fruta, puesto que en su seno se termina de 
 Otra vez escribe:
 
 montecillo, las sienes laureado,
-
 traviesos despidiendo moradores
-
 de sus confusos senos,
-
 conejuelos que, el viento consultado,
-
 salieron retozando a pisar flores.
 
 Está expresado con verdadera gracia esa parada seca y ese mohín que hace el hocico del animal al salir de la madriguera:
 
 conejuelos que, el viento consultado,
-
 salieron retozando a pisar flores.
 
 Pero más significativos son estos versos sobre una colmena en el tronco de un árbol, del cual dice Góngora que era alcázar de aquélla (la abeja)
 
 que sin corona vuela y sin espada,
-
 susurrante amazona, Dido alada,
-
 de ejército más casto, de más bella
-
 República, ceñida, en vez de muros,
-
 de cortezas; en esta, pues, Cartago,
-
 reina la abeja, oro brillando vago,
-
 o el jugo bebe de los aires puros,
-
 o el sudor de los cielos, cuando liba
-
 de las mudas estrellas la saliva.
 
 Esto tiene una grandeza casi épica. Y es de una abeja y su colmena de quien habla el poeta. "República ceñida, en vez de muros, de corzas" llama a la colmena silvestre. Afirma que la abeja, "susurrante amazona", bebe el jugo de los aires puros, y llama al río "sudor de los cielos", y al néctar "saliva" de las flores, a quienes llama "estrellas mudas". ¿No tiene aquí la misma grandeza que cuando nos habla del mar, del alba y usa términos astronómicos? Dobla y triplica la imagen para llevarnos a planos diferentes que necesita para redondear la sensación y comunicarla con todos sus aspectos. Nada más sorprendente de poesía pura.

@@ -339,3 +339,14 @@ sesiones:
       citasPublicadas: 1891
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 56.2
+  - fecha: "2026-09-22"
+    hora: "11:59"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Historia 19.12: el verso se lee por frase, no por renglón"
+    motivo: "Historia 19.12: el verso que la Fuente declara (class poem, verse, mw-poem-indented) deja de versionarse con un párrafo por renglón, así que una sentencia repartida en varios versos llega entera a candidata. Medido sobre los 306 documentos: 54 traen verso declarado, y en ellos las candidatas pasan de 8.269 a 8.508 (1.130 ganadas, 891 perdidas, 684 de ellas medio verso). Regenerados 50 documentos de uno en uno, 4 restituidos porque ganaban una línea de categoría ajena a la historia. No hubo hueco que sembrar: sembrar a los Eslava y a Navarrete es la sesión siguiente."
+    resultado:
+      citasPublicadas: 1891
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 56.2

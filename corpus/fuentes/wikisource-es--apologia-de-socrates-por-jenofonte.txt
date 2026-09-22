@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Apología de Sócrates por Jenofonte
 url: https://es.wikisource.org/wiki/Apolog%C3%ADa_de_S%C3%B3crates_por_Jenofonte
-recuperado: 2026-09-13
+recuperado: 2026-09-22
 ---
 Apología de Sócrates por Jenofonte
 [[Categoría:Obras de Jenofonte]]
@@ -25,9 +25,7 @@ de 2.ª enseñanza de Almeria.
 APOLOGÍA DE SÓCRATES POR JENOFONTE.
 
 ALMERIA:—1871.
-
 Imprenta de Alvarez hermanos.
-
 calle de las tiendas, núm. 19.
 
 INTRODUCCION.

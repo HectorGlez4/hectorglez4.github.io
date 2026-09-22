@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: El cadiceño
 url: https://es.wikisource.org/wiki/El_cadiceño
-recuperado: 2026-08-26
+recuperado: 2026-09-22
 ---
 El cadiceño
 [[Categoría:Obras de Rosalía de Castro]]
@@ -104,11 +104,8 @@ El cuarto baúl, que pesa como si se hallase lleno de piedras, tiene un secreto 
 No hay uno en la casa que al ver tal no se contemple rico y feliz, y mucho más cuando, en medio de la alegría que reina en la casa, oyen cantar al cadiceño, que tiene los cascos calientes con el vino:
 
 Nadie se meta conmigo,
-
 que soy un lobo de Seví
-
 y hasta la tierra que piso
-
 me parece una pesoña.
 
 Al otro día de la llegada del cadiceño, en el cuarto más retirado de la casa, es cuando, al fin, apenas rompe el día, se abre el baúl, que tiene dos cerraduras de secreto y, además, el secreto de por dentro.

@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: El César á un criado
 url: https://es.wikisource.org/wiki/El_C%C3%A9sar_%C3%A1_un_criado
-recuperado: 2026-09-14
+recuperado: 2026-09-22
 ---
 El César á un criado
 [[Categoría:Fábulas de Gayo Julio Fedro]]
@@ -25,7 +25,6 @@ Verâ fabellâ. Este es un verdadero suceso, y por tanto no se puede llamar fáb
 Neapolim. Ciudad marítima de la campania, y córte del reino de nápoles: llamdbase Parthenope: en ella estudió Virgilio, y quiso que se llevase á enterrar en ella sus huesos, segun el epitafio que él mismo hizo para su sepulcro
 
 Mantua me genuit: calabri rapuere: tenet
-
 Parthenope: cecini pascua, rura, duces (nunc).
 
 Misenénsem. Casa de placer del emperador Tiberio, llamada así por haber sido en aquel campo enterrado Miseno, famoso Clarinero de Eneas. Virgil. Eneid. 6, vers. 234.

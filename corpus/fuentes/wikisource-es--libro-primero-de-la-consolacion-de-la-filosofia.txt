@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Libro primero de La Consolación de la Filosofía
 url: https://es.wikisource.org/wiki/Libro_primero_de_la_consolaci%C3%B3n_de_la_filosof%C3%ADa
-recuperado: 2026-09-13
+recuperado: 2026-09-22
 ---
 Libro primero de la consolación de la filosofía
 |título= Libro primero de [[La_Consolación_de_la_Filosofía|La Consolación de la Filosofía]]
@@ -11,45 +11,25 @@ Libro primero de la consolación de la filosofía
 Lamento inicial
 
 «Un poema antaño iniciado con una floreciente pasión,
-
 me veo obligado, ay, a llevarlo a un ritmo triste y plañidero.
-
 Unas musas mutiladas me dictan lo que debo escribir
-
 y empapan mi rostro con el llanto de una vera elegía.
-
 A ellas ningún temor las ha podido derrotar nunca,
-
 para evitar que nos acompañen en nuestro camino.
-
 Ellas, la gloria de una juventud antes feliz y vigorosa,
-
 son el solaz frente al hado de este triste anciano.
-
 Ha llegado, veloz e inesperada, mi vejez con sus males
-
 y el dolor me impuso sus tiempos.
-
 Unas prematuras canas se derraman sobre mis sienes
-
 y tremola sobre un cuerpo agotado mi laxa tez.
-
 ¡En buena hora llega a los hombres la muerte que no interrumpe
-
 los dulces años sino a los desolados que la invocan una y otra vez!
-
 Ay, con qué sordera aparta sus oídos de los miserables y
-
 con qué crueldad se niega a cerrar los ojos de los llorosos.
-
 Cuando la poco fiable fortuna me favorecía con vanas bondades,
-
 apenas fue una sola triste hora que anegó mi persona;
-
 ahora, que enseñó, neblinosa, su mendaz rostro
-
 extiende mi desdichada vida con ingratas demoras.
-
 ¿Por qué tanto me elogiasteis, amigos, cuando era afortunado?
 
 Aquel hombre cayó, no tenía un firme asiento.»
@@ -65,58 +45,33 @@ Cuando vio a las musas de la poesía a alrededor de mi lecho, dictándome sus pa
 Aquel coro recibió estos reproches con gran tristeza mientras miraba al suelo y, tristes, abandonaron la sala ruborizadas de vergüenza. Sin embargo, yo, que tenía mis ojos anegados de lágrimas y no era capaz de reconocer quién era esa mujer de tan dictatorial autoridad, me quedé estupefacto, clavé mi mirada en el suelo y empecé a aguardar su siguiente acción. Entonces ella se acercó a mi lecho y, tras sentarse en un extremo, observó mi rostro, hinchado de pena, hundido de tristeza, y lamentó el estado de mi alma turbada con estos versos:
 
 «¡Ay, en qué escarpado abismo, embotada,
-
 se ha hundido tu mente que, abandonada
-
 su propia luz, se encamina hacia ajenas tinieblas,
-
 mientras crecen dañosas tus cuitas,
-
 hasta la enormidad aumentadas por terrenales vientos!
-
 Este, antaño un cielo despejado, habituado
-
 a recorrer los caminos del éter
 ,
-
 libre contemplaba las luces del sol rosado,
-
 examinaba las noches de la gélida luna
-
 y capturó triunfal con sus números
-
 cuantas errantes órbitas las estrellas
-
 recorren por esferas diversas
 ,
-
 así como las causas por las que los sonoros
-
 vientos revuelven los llanos del mar.
-
 ¿Qué brisa sobrevuela el mundo firme?
-
 ¿Por qué el astro que se eleva de una rutilante
-
 aurora se ha de hundir en las aguas hesperias
 ?
-
 ¿Por qué se templan las horas de la plácida primavera
-
 para engalanar la tierra de rosadas flores?
-
 ¿Quién hizo que el feraz otoño, completo
-
 el año, se derrame en repletas uvas?
-
 Este acostumbraba a hozar las causas,
-
 variadas y ocultas, de la naturaleza, a exponerlas.
-
 Ahora, agotado el brillo de su mente, yace,
-
 ahogado por pesadas cadenas que ciñen su cuello,
-
 y se ve obligado a estudiar, ay, la tosca tierra
 
 por el peso que abate su cabeza.»
@@ -124,23 +79,15 @@ por el peso que abate su cabeza.»
 «Pero es el momento de la cura, no del lamento» dijo mientras fijaba en mi sus pupilas. «¿No eres tú, criado por mis yantares, el niño al que la leche que amamantaste de mí llevó hasta el vigor de un hombre adulto? ¿No te ofrecí unas armas que, si no las hubieses depuesto, te habrían ofrecido una invencible protección? ¿Me reconoces? ¿Por qué estás en silencio? ¿Te silenció la vergüenza o el asombro? Preferiría la vergüenza pero, por lo que veo, es el asombro.» Al verme no ya callado, sino incluso mudo y sin lengua, acercó suavemente la mano a mi pecho: «No hay ningún peligro. Sufre de letargo, una afección habitual de las mentes engañadas, y se ha olvidado de sí mismo poco a poco. Será más fácil que se acuerde si antes nos reconoce; para que pueda, vamos a limpiar sus ojos de la bruma de asuntos pasajeros que los oscurecen.» Así habló y arrugó una parte de su manto para secar mis ojos inundados de llanto.
 
 Apartada entonces la noche, me abandonaron las tinieblas
-
 y volvió a mis ojos su antigua fuerza,
-
 como cuando el precipitado Coro
 amontona las nubes
-
 y la bóveda celestial queda por encima de nubosas lluvias,
-
 el sol se oculta y, aunque la noche se derrame abajo hacia
-
 la tierra, las estrellas no vienen al cielo;
-
 pero si el Bóreas
 , brotando desde su cueva tracia,
-
 la azota y desencapota el día cubierto,
-
 brilla entonces Febo de repente, vibrante de luz,
 
 y con sus rayos hiere los sorprendidos ojos.
@@ -156,38 +103,22 @@ Como si se hubiera disipado la neblina de la tristeza, bebí del cielo y pude pa
 Así las cosas, no tienes que sorprenderte porque en la alta mar de la vida nos zarandeen vientos tempestuosos a quienes nos hemos propuesto como mayor objetivo disgustar los de peor calaña. En efecto, aunque su número sea el de un ejército, no importa, porque carecen de dirección y tan solo los agita un ciego y totalmente insano error. Y en el caso de que alguno de estos ejércitos reúna el suficiente valor como para enfrentarse a nosotros, nuestra líder solamente retirará sus tropas a la fortaleza, mientras que ellos se entretendrán destruyendo las inútiles y despreciables posesiones que haya alrededor. Entretanto, nosotros nos burlaremos desde la seguridad de nuestras murallas de esa multitud furiosa que saquea todo lo de menor valor, protegidos por una muralla que a la destructiva estupidez no le es lícito ni siquiera aspirar a alcanzar.
 
 A todo aquel que, sereno, a una edad considerable,
-
 ha pisoteado el soberbio destino
-
 y ha podido sostener la mirada invicto,
-
 sin apartarla de ambas fortunas
 ,
-
 a él no lo alterarán ni las amenazas de un mar
-
 al que la tempestad ha alterado desde el fondo
-
 ni los humeantes fuegos que el errático Vesuvio
-
 expulsa cada vez que estallan sus hornos
-
 ni el recorrido del ardiente rayo que acostumbra
-
 a golpear las descollantes torres.
-
 ¿Por qué, desgraciados, nos amilanamos tanto
-
 ante unos crueles tiranos que sin fuerza se enfurecen?
-
 Ni esperes nada ni lo temas:
-
 así habrás desarmado la ira del hombre débil.
-
 Por contra, el que, agitado, siente miedo o anhelo,
-
 como no es firme ni independiente
-
 ha abandonado su escudo y su puesto; se ata
 
 a una cadena con la que pueden arrastrarlo.
@@ -214,100 +145,54 @@ como tú misma nos defienden de toda sospecha de este crimen. ¡Qué horror! Tu 
 A mí, desde luego, me han apartado de mis bienes, me han privado de mis cargos, me han afeado la reputación, y todo este castigo lo he sufrido por mi bondad. Me parece que puedo ver a los malvados en sus nefastos talleres, rebosando gozo y alegría, a las más viles personas planeando nuevas falsas delaciones, a los buenos hombres postrados de terror ante el resultado de mi juicio, a los perversos atreviéndose a acometer cualquier crimen no ya con impunidad sino con el aliciente de una recompensa, a los inocentes privados no solo de su seguridad sino incluso de defensa. Así pues, tengo que clamar lo siguiente:
 
 Oh, fundador del estrellado mundo,
-
 quien, reposando desde tu eterno trono,
-
 revuelves el cielo en un veloz torbellino
-
 y obligas a cumplir la ley a las estrellas,
-
 para que relumbrante en cuarto repleto,
-
 al paso de todas las llamas de su hermano,
-
 ora la luna oculte las estrellas menores,
-
 ora pálida, en cuarto oscuro,
-
 más cerca de Febo, pierda su luz;
-
 para que, en el primer tiempo de la noche,
-
 el lucero del atardecer guíe los helados amaneceres
-
 y, luego, en la pálida alba, para el nacimiento
-
 del Sol cambie sus riendas.
-
 Tú, en el frío de las brumas hojicaducas
 ,
-
 limitas la luz a un tiempo menor;
-
 tú, cuando ha llegado el fervoroso verano,
-
 ágiles
 divides las horas de la noche.
-
 Tu fuerza templa el varioso año,
-
 para que el follaje, que el soplo del Bóreas
-
 priva, el dulce Céfiro lo devuelva;
-
 para que los altos campos que Arturo
-
 vio como semillas Sirio los calcine
 .
-
 Nada se libra de esta antigua ley
-
 ni abandona su propio puesto.
-
 Tú, que todo lo timoneas con un determinado fin,
-
 tú, gobernante, solamente rechazas coartar
-
 acordes a una merecida ley los actos de los hombres.
-
 ¿Por qué, pues, tantas veces la resbaladiza
-
 fortuna se enrevesa? Oprime a los inocentes
-
 el dañoso castigo debido al crimen,
-
 mientras las perversas costumbres reposan
-
 en un elevado trono; perjudican, pisotean
-
 injustamente los cuellos de los respetuosos.
-
 Se oculta, escondida, en oscuras tinieblas
-
 la ilustre virtud y el justo soporta
-
 el crimen del injusto.
-
 En nada los menoscaba la perfidia, en nada
-
 el engaño, disimulado con mendaz artimaña.
-
 Y cuando les apetece usar la fuerza,
-
 se complacen en derrocar a poderosos reyes
-
 a los que innumerables pueblos temen.
-
 Quien seas que entretejes los pactos de la naturaleza,
-
 ¡observa ya la mísera tierra!
-
 A los hombres, una parte no pequeña de tan magna obra,
-
 zarandea la alta mar de la fortuna.
-
 Director, controla estas rápidas mareas
-
 y asienta y reafirma las tierras con la ley
 
 con la que riges el inmenso cielo.»
@@ -322,46 +207,26 @@ Mientras me desgañitaba con este incesante dolor, ella me contemplaba con apaci
 Dijiste la verdad sobre tus meritorias acciones en defensa del bien común, pero poco hablaste de tus acciones en defensa de la multitud. Has recordado lo que todos saben sobre la verdad o mentira de tus acusaciones; has pensado, correctamente, en tocar superficialmente los crímenes y engaños de tus delatores, ya que todos ellos son la comidilla, con todo lujo de detalles, del pueblo. También has increpado con vehemencia la injusticia que cometió el Senado contra ti, te lamentaste por nuestra incriminación y lloraste el perjuicio al que sometieron mi nombre. Al final, tu dolor se encendió contra la fortuna, de la que te quejaste porque no compensa según lo merecido, y al final de tu rabiosa diatriba formulaste el deseo de que reinara sobre las tierras la misma paz que rige los cielos. Sin embargo, como todavía incubas una tumultuosa multitud de pasiones en tu interior y el dolor y la ira dividen tu atención, en tu actual estado mental todavía no te convienen remedios más fuertes. Así pues, empezaremos poco a poco, por lo más flojo, como cuando una parte del cuerpo enferma se hincha y endurece y es necesario, con cuidado, reblandecerla para que pueda recibir un tratamiento más fuerte.
 
 Cuando la estrella de Cáncer,
-
 afectada por los rayos del Sol, se quema
 ,
-
 el que su longeva simiente
-
 confió a los vedados campos,
-
 engañado en su fe en Ceres,
-
 se debe alimentar de bellotas.
-
 Si vas a coger violetas, nunca
-
 busques la purpúrea floresta
-
 mientras silba por los campos erizados
-
 el cruel Aquilón.
-
 No quieras podar, ávido,
-
 los primaverales zarcillos,
-
 si deseas disfrutar de las uvas:
-
 ya en otoño, Baco
-
 ofrecerá sus dones.
-
 Un dios ajusta y señala los tiempos
-
 apropiados para cada tarea;
-
 tal y como él los acotó,
-
 no tolera que nadie los mezcle.
-
 Así, si algo por un escarpada vía
-
 abandonó el certero orden,
 
 no tendrá un final feliz.
@@ -385,63 +250,34 @@ no tendrá un final feliz.
 -Ya sé cuál es otro de los motivos de tu enfermedad, quizá el mayor: has dejado de saber qué eres. He encontrado, de pleno, cuál es el motivo de tu enfermedad y la forma de recuperar tu salud: dado que el olvido de tu ser te confunde, te duele el exilio y expolio de tus posesiones; dado que desconoces el final de todo, piensas que solo los hombres malvados y perversos son poderosos y afortunados; dado que has olvidado por qué medios se rige el mundo, crees que los giros de la fortuna fluyen sin control. Todo esto podría causar no ya una importante enfermedad sino incluso de la muerte. Pero dale las gracias al creador de tu salud, porque la naturaleza todavía no te ha abandonado del todo. Todavía tenemos una gran ascua para reavivar tu salvación: tu acertada opinión sobre cómo se rige el mundo, ya que crees que lo gobierna no el azar casual sino la razón divina. Así pues, no temas, pues de esa pequeña chispita brillará de nuevo el calor de la vida. Con todo, todavía no es el momento para servirnos de remedios más severos: es evidente que las mentes tienen tal naturaleza que se visten con falsas opiniones cada vez que se quitan una verdad y que de esas falsas opiniones surge una perturbación que nubla y confunde la mirada verdadera. Por tanto, intentaré atenuar esa neblina con curas suaves y mesuradas, para que, una vez apartadas las tinieblas de esas afecciones falaces, puedas reconocer el esplendor de la verdadera luz.
 
 Por nubes negras
-
 ocultos, ninguna luz
-
 pueden derramar
-
 los astros.
-
 Si revolviendo la mar
-
 el turbulento Austro
-
 agita las mareas,
-
 la hace poco lúcida
-
 y también serena
-
 ola durante días,
-
 ahora, disuelto el
-
 fango, se muestra
-
 sucia a la vista
-
 Si el descendente río,
-
 errabundo desde
-
 altas montañas,
-
 a menudo se frena
-
 ante la barrera de unas rocas
-
 caídas de un risco;
-
 si deseas tú también
-
 con luz clara
-
 divisar la verdad,
-
 con recto sendero
-
 tomar el camino,
-
 aparta el gozo,
-
 el temor aparta,
-
 la esperanza rehúye
-
 y que no haya dolor:
-
 nublada y refrenada
-
 está la mente, donde
 
 esas pasiones reinan.
