@@ -350,3 +350,14 @@ sesiones:
       citasPublicadas: 1891
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 56.2
+  - fecha: "2026-09-24"
+    hora: "21:17"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Resembrar el verso que la 19.12 desbloqueó"
+    motivo: "Resiembra de los Autores que la Historia 19.12 desbloqueó. Sembrados Fernán González de Eslava (1 Cita del coloquio, la-libertad) y José Manuel de Navarrete (2 Citas de sus sonetos, la-patria y el-amor); 21 candidatas miradas una a una y 18 rechazadas por colgar de la frase anterior o ser descripción sin Tema. Catalina de Eslava queda descartada con motivo nuevo: su soneto se versiona mudo. Retirados el documento mudo y «Recuerdos tristes», que no sostenía ninguna Cita. Hallazgo: de los Coloquios solo se puede versionar una de sus 21 páginas porque el nombre del documento se recorta y todas chocan."
+    resultado:
+      citasPublicadas: 1894
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 55.9

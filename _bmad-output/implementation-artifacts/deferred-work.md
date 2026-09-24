@@ -627,3 +627,6 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     declaración es la zona que se supone «solo lo que la Fuente declara» y ahí hay obra.
     Arreglarlo es estrechar la ventana cuando la línea de la etiqueta ya trae valor, y eso es
     de `recorteDeEtiqueta`: la 19.12 tiene prohibido tocar nada fuera de su regla.
+- source_spec: none
+  summary: El nombre del documento se recorta y todas las subpáginas de una obra de título largo chocan en el mismo fichero, así que solo se puede versionar una de ellas.
+  evidence: Medido el 24/09 sembrando a Fernán González de Eslava. «Coloquios espirituales y sacramentales y poesías sagradas» tiene 21 subpáginas en Wikisource-es; al recuperar la segunda, recuperar.ts se niega —«comparten nombre de documento (wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas.txt). El nombre se recorta, y estas dos coinciden al recortarlo»— y no versiona nada. La negativa es correcta (evita que una página pise a otra, que es lo que arregló nombreDeDocumento), pero deja la obra inaccesible: de las 21 páginas solo se pudo sembrar una, y las otras veinte quedan fuera del Corpus sin que ningún registro lo diga. Afecta a cualquier obra cuyo slug de obra ya agote el largo del nombre.

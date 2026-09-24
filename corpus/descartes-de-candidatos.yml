@@ -708,3 +708,9 @@ descartes:
     idDePagina: 11615
     nombre: "Manuel Martínez de Navarrete"
     motivo: "Revisado contra la API el 20/09. Sus tres páginas en la Fuente —«Influjo de amor», «La triste ausencia» y «Recuerdos tristes»— son poemas en verso; además la Fuente las firma «José Manuel de Navarrete», que no es el nombre del candidato."
+  - fecha: "2026-09-24"
+    epoca: "novohispanos"
+    candidato: "catalina-de-eslava"
+    idDePagina: 218352
+    nombre: "Catalina de Eslava"
+    motivo: "Sembrada y medida el 24/09, después de la Historia 19.12. Su única obra en la Fuente, el soneto «El sagrado laurel ciña tu frente», se sirve por transclusión de un escaneo y el documento se versiona MUDO: ni la página ni su Índice: declaran Autor, así que FR-23 lo para. El motivo del 20/09 decía «lírica breve en verso», que ya no es la razón: con la 19.12 los tercetos salen enteros. Reabrir si la Fuente llega a declarar su autoría en la página."
