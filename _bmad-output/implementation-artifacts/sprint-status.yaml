@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 22-09-2026 10:58
+last_updated: 02-10-2026 15:16
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -300,6 +300,11 @@ development_status:
   # 40 caracteres. Medido el 20/09: González de Eslava 1 candidata en ventana y debería dar
   # 14. El teatro queda fuera de lo que promete: sembrarlo enterraría la cola.
   19-12-el-verso-se-lee-por-frase: review
+  # 19.13: el nombre del documento acota cada segmento a 60 caracteres, así que una obra de
+  # título largo deja a todas sus subpáginas con el mismo nombre y solo se puede versionar
+  # una. Medido el 02/10: bloquea 20 de las 21 páginas de los Coloquios de Eslava, y hoy hay
+  # un solo documento con el nombre colapsado por esta causa.
+  19-13-el-titulo-largo-no-deja-sin-nombre-a-sus-paginas: in-progress
   epic-19-retrospective: optional
 
 action_items:
