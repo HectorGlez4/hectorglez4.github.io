@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 02-10-2026 15:16
+last_updated: 02-10-2026 16:10
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -304,7 +304,7 @@ development_status:
   # título largo deja a todas sus subpáginas con el mismo nombre y solo se puede versionar
   # una. Medido el 02/10: bloquea 20 de las 21 páginas de los Coloquios de Eslava, y hoy hay
   # un solo documento con el nombre colapsado por esta causa.
-  19-13-el-titulo-largo-no-deja-sin-nombre-a-sus-paginas: in-progress
+  19-13-el-titulo-largo-no-deja-sin-nombre-a-sus-paginas: review
   epic-19-retrospective: optional
 
 action_items:

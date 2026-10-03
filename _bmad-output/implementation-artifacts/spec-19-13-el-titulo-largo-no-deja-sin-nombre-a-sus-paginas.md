@@ -2,7 +2,7 @@
 title: 'Historia 19.13 — Un título largo no deja sin nombre a las páginas de su obra'
 type: 'bugfix'
 created: '2026-10-02'
-status: 'in-progress'
+status: 'done'
 baseline_commit: '91845c3af8deacb774e9675483193323e4edc8b2'
 review_loop_iteration: 0
 context: []
@@ -57,16 +57,37 @@ context: []
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `tests/unit/documento.test.ts` -- pruebas de la matriz, que fallen antes del cambio.
-- [ ] `tools/lib/documento.ts` -- la regla en `nombreDeDocumento`, con comentario: qué distingue a la página, por qué de su título declarado y no de la ruta, y la cifra medida.
-- [ ] `_bmad-output/specs/spec-brainlySabiduria/.memlog.md` -- hallazgo y decisión.
+- [x] `tests/unit/documento.test.ts` -- pruebas de la matriz, que fallen antes del cambio.
+- [x] `tools/lib/documento.ts` -- la regla en `nombreDeDocumento`, con comentario: qué distingue a la página, por qué de su título declarado y no de la ruta, y la cifra medida.
+- [x] `_bmad-output/specs/spec-brainlySabiduria/.memlog.md` -- hallazgo y decisión.
 
 **Acceptance Criteria:**
 - Given dos subpáginas cualesquiera de los Coloquios, when se piden sus nombres, then son distintos entre sí y distintos del de la obra.
 - Given los 309 documentos de Wikisource-es ya versionados, when se recalculan sus nombres, then ninguno cambia salvo el de los Coloquios.
 - Given una página que es su propia obra, when se pide su nombre, then sigue teniendo un solo segmento.
+- Given una página cuya **obra derivada es su propio título con barra** —«Fábulas de Fedro/Epílogo Libro IV», «Del sentimiento trágico de la vida/I», que no declaran `|título`—, when se pide su nombre, then sigue teniendo un solo segmento y es el que su documento ya lleva escrito. (Añadido en revisión: la implementación lo descubrió y la regla literal del Code Map lo habría renombrado.)
+- Given una subpágina de **más de un tramo** —«Obra/Libro I/Capítulo I» y «Obra/Libro II/Capítulo I»—, when se piden sus nombres, then son distintos entre sí: la cola son todos los tramos que quedan, no el último. (Añadido en revisión.)
+- Given una subpágina cuya cola da el **mismo slug que la obra**, when se pide su nombre, then sigue teniendo dos segmentos y **no** es el nombre del documento de la obra entera: una subpágina no reclama el documento de su obra. (Añadido en revisión.)
 
 ## Spec Change Log
+
+- 02/10, al implementar: la condición de la regla se afina. El Code Map la planteaba como
+  «cuando el recorte deje el segmento de página igual al de la obra», y comprobar solo esa
+  igualdad **renombraba tres documentos ya versionados**: «Fábulas de Fedro/Epílogo Libro
+  IV», «Fábulas de Fedro/Prólogo Libro IV» y «Del sentimiento trágico de la vida/I» no
+  declaran `|título`, así que su obra derivada es su propio título entero —barra incluida—
+  y la cola les habría dado un segundo segmento. La cola se mira solo cuando
+  `slugDeObra(pagina) !== slugDeObra(obra)`: si los dos títulos canonizan igual, nombran lo
+  mismo —la página **es** la obra, o difieren solo en mayúsculas— y el colapso es correcto.
+  Los «otros cuatro» que el Code Map cuenta son exactamente los de mayúsculas.
+- 02/10, revisión: tres correcciones de la regla, ninguna de ellas en el bloque congelado.
+  (a) La cola se construye con **todos los tramos** que el título declarado trae detrás del
+  título de la obra, no con el último: quedarse con el último repetía el defecto un nivel
+  más abajo en una obra por libros. (b) Los tramos vacíos —título acabado en «/», o «//» en
+  medio— se descartan, así que no cuelgan un sufijo vacío ni parten la cola. (c) Cuando la
+  cola existe, el nombre lleva **siempre** dos segmentos, aunque la cola dé el mismo slug
+  que la obra: con uno solo, la subpágina se llamaría igual que el documento de la obra
+  entera y podría reclamarlo, que es peor que dos subpáginas chocando entre sí.
 
 ## Verification
 
@@ -75,3 +96,67 @@ context: []
 - `npx tsx tools/recuperar.ts "<dos subpáginas de los Coloquios>" --corpus <corpus de prueba>` -- expected: dos ficheros con nombre propio, sin rechazo.
 - `npx astro check` -- expected: 0 errores.
 - `npm test` -- expected: sin regresión, salida en fichero y código de salida 0.
+
+**Evidence (2026-10-02, tras aplicar la ronda de revisión):**
+
+| Comando | Código | Resultado |
+|---------|--------|-----------|
+| `npx vitest run tests/unit/documento.test.ts` | 0 | 220 pruebas, 1 fichero, todo en verde. Antes del cambio, 5 de las nuevas en rojo. |
+| `npx tsx tools/recuperar.ts <4 subpáginas de los Coloquios> --corpus <corpus de prueba>` | 0 ×4 | Cuatro ficheros con nombre propio —`…--cancion-divina`, `…--el-obraje-divino`, `…--ensalada-del-gachopin`, `…--cancion-a-san-hieronimo`— y ningún rechazo. Antes competían por `wikisource-es--coloquios-…-sagradas.txt`. |
+| `npx astro check` | 0 | 0 errores, 0 avisos, 16 pistas (las de siempre). |
+| `npm test` | 0 | 104 ficheros, 2993 pruebas, todo en verde. |
+
+Y la medida que sostiene el criterio de los 309, recalculada tras la revisión: de los 324
+documentos versionados, **uno solo** cambia de nombre —el de los Coloquios—; los otros 323,
+ninguno.
+
+**Hecho el 2026-10-02 por decisión de Héctor, y era el Ask First de la historia:** renombrar
+el documento de los Coloquios ya versionado, con `git mv` para que conserve su historia. Con
+el nombre viejo `extraer` y `documentar` lo rechazaban por nombre, y `recuperar` lo daba por
+«ya versionado»: quedaba versionado e inerte. El nombre de destino no se teclea, se deriva: para
+`corpus/fuentes/wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas.txt`,
+`nombreDeDocumento` implica hoy
+`wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas--cancion-divina`.
+Comprobado por adelantado, sin tocar el Corpus, que el renombrado no rompe nada aguas abajo:
+
+- `documentosDeCita` resuelve la Cita «¿Por qué, mi Dios, me soltais…» contra el documento
+  con **cualquiera** de los dos nombres —busca el nombre corto y todos los `…--<página>`—,
+  así que el cotejo del build sigue verde;
+- `npx tsx tools/extraer.ts <copia bajo el nombre nuevo> --autor fernan-gonzalez-de-eslava --corpus <corpus de prueba> --seco`
+  sale con **código 0**: pasa la puerta del nombre y coteja el Autor. Hoy, con el nombre
+  colapsado, esa puerta lo rechaza.
+
+Hecho el renombrado, la prueba que recorre los documentos versionados espera lista **vacía**:
+ya no admite ninguna excepción.
+
+## Suggested Review Order
+
+**La regla**
+
+- Dónde entra: el nombre de un solo segmento, calculado una vez y usado en todas las salidas.
+  [`documento.ts:2114`](../../tools/lib/documento.ts#L2114)
+
+- La guarda: si los dos títulos canonizan igual, la página es la obra y el colapso es correcto.
+  [`documento.ts:2154`](../../tools/lib/documento.ts#L2154)
+
+- La cola sale del título declarado, con todos sus tramos tras la obra, nunca de la ruta.
+  [`documento.ts:2185`](../../tools/lib/documento.ts#L2185)
+
+**El documento renombrado**
+
+- Los Coloquios, con `git mv` y contenido intacto: el Ask First, decidido por Héctor.
+  [`…--cancion-divina.txt`](../../corpus/fuentes/wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas--cancion-divina.txt)
+
+**Pruebas**
+
+- La matriz: obra larga, página que es la obra, mayúsculas, colas que chocan, Gutenberg.
+  [`documento.test.ts:1405`](../../tests/unit/documento.test.ts#L1405)
+
+- Subpáginas de dos niveles: «Libro I/Capítulo I» y «Libro II/Capítulo I» ya no chocan.
+  [`documento.test.ts:1438`](../../tests/unit/documento.test.ts#L1438)
+
+- Una cola que repite a la obra no reclama el documento de la obra entera.
+  [`documento.test.ts:1456`](../../tests/unit/documento.test.ts#L1456)
+
+- El barrido de los 309: reproduce la puerta de `extraer` y ya no admite excepciones.
+  [`documento.test.ts:1553`](../../tests/unit/documento.test.ts#L1553)

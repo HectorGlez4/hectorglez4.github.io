@@ -629,4 +629,23 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     de `recorteDeEtiqueta`: la 19.12 tiene prohibido tocar nada fuera de su regla.
 - source_spec: none
   summary: El nombre del documento se recorta y todas las subpáginas de una obra de título largo chocan en el mismo fichero, así que solo se puede versionar una de ellas.
-  evidence: Medido el 24/09 sembrando a Fernán González de Eslava. «Coloquios espirituales y sacramentales y poesías sagradas» tiene 21 subpáginas en Wikisource-es; al recuperar la segunda, recuperar.ts se niega —«comparten nombre de documento (wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas.txt). El nombre se recorta, y estas dos coinciden al recortarlo»— y no versiona nada. La negativa es correcta (evita que una página pise a otra, que es lo que arregló nombreDeDocumento), pero deja la obra inaccesible: de las 21 páginas solo se pudo sembrar una, y las otras veinte quedan fuera del Corpus sin que ningún registro lo diga. Afecta a cualquier obra cuyo slug de obra ya agote el largo del nombre.
+  evidence: |-
+    Medido el 24/09 sembrando a Fernán González de Eslava. «Coloquios espirituales y sacramentales y poesías sagradas» tiene 21 subpáginas en Wikisource-es; al recuperar la segunda, recuperar.ts se niega —«comparten nombre de documento (wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas.txt). El nombre se recorta, y estas dos coinciden al recortarlo»— y no versiona nada. La negativa es correcta (evita que una página pise a otra, que es lo que arregló nombreDeDocumento), pero deja la obra inaccesible: de las 21 páginas solo se pudo sembrar una, y las otras veinte quedan fuera del Corpus sin que ningún registro lo diga. Afecta a cualquier obra cuyo slug de obra ya agote el largo del nombre.
+
+    **RESUELTO el 2026-10-02 por la Historia 19.13**
+    (`_bmad-output/implementation-artifacts/spec-19-13-el-titulo-largo-no-deja-sin-nombre-a-sus-paginas.md`).
+    Cuando el recorte deja el segmento de página igual al de la obra, ese segmento se
+    construye ahora con lo que la Fuente escribe en su título declarado **detrás del título
+    de la obra** —todos los tramos que quedan, no solo el último—. Medido el 2026-10-02
+    sobre los 309 documentos de Wikisource-es versionados: **uno solo** tenía el nombre
+    colapsado por esta causa, el de los Coloquios, y ninguno de los otros 308 cambia de
+    nombre al recalcularlo. Comprobado contra la Fuente con un corpus de prueba: cuatro
+    subpáginas de los Coloquios —«Canción divina», «El obraje divino», «Ensalada del
+    gachopín», «Canción a San Hierónimo»— se versionan en cuatro ficheros con nombre propio
+    y sin un solo rechazo.
+
+    Queda **un fleco, y es el Ask First de la historia**: el documento de los Coloquios ya
+    versionado conserva su nombre colapsado, así que es el único fichero del Corpus cuyo
+    nombre no coincide con el que su declaración implica. Mientras siga así, `extraer` y
+    `documentar` lo rechazan, y volver a recuperar su URL escribiría un segundo fichero en
+    vez de reutilizarlo. Renombrarlo es decisión de Héctor.
