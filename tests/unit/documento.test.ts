@@ -1393,6 +1393,217 @@ describe('Fix 11.1b — el nombre del documento distingue las páginas de una ob
 });
 
 /**
+ * Historia 19.13 — un título largo no deja sin nombre a las páginas de su obra.
+ *
+ * El segmento de página se acota a `MAX_CARACTERES_SLUG_DE_OBRA` sin partir palabra, y en
+ * Wikisource el título que la página declara es «Obra/Subpágina» entero. Cuando el título
+ * de la obra ya agota ese largo, el recorte se come la subpágina y deja el segmento
+ * **idéntico** al de la obra: el nombre colapsa y las 21 subpáginas de «Coloquios
+ * espirituales y sacramentales y poesías sagradas» compiten por un solo fichero. Medido el
+ * 2026-09-24: de la obra entera solo se pudo versionar una página.
+ */
+describe('Historia 19.13 — la cola del título declarado distingue a la subpágina', () => {
+  const COLOQUIOS = 'Coloquios espirituales y sacramentales y poesías sagradas';
+  const DE_LA_OBRA = 'wikisource-es--coloquios-espirituales-y-sacramentales-y-poesias-sagradas';
+  const fuentes = join(resolve(import.meta.dirname, '../..'), 'corpus/fuentes');
+
+  it('una subpágina de obra larga toma el nombre de lo que la Fuente escribe tras la barra', () => {
+    expect(nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/Canción divina`)).toBe(
+      `${DE_LA_OBRA}--cancion-divina`,
+    );
+  });
+
+  it('dos subpáginas cualesquiera de los Coloquios se llaman distinto, y distinto de la obra', () => {
+    const nombres = [
+      'Canción divina',
+      'Coloquio primero',
+      'Entremés entre dos rufianes',
+      'Villancico al Santísimo Sacramento',
+    ].map((cola) => nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/${cola}`));
+
+    expect(new Set(nombres).size).toBe(nombres.length);
+    for (const nombre of nombres) {
+      expect(nombre).toBeDefined();
+      expect(nombre).not.toBe(DE_LA_OBRA);
+    }
+  });
+
+  it('la cola son todos los tramos que quedan, no el último', () => {
+    /*
+     * Una obra por libros declara «Obra/Libro I/Capítulo I» y «Obra/Libro II/Capítulo I».
+     * Quedarse con el último tramo las llamaría igual a las dos: sería el defecto que esta
+     * historia arregla, un nivel más abajo.
+     */
+    const uno = nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/Libro I/Capítulo I`);
+    const otro = nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/Libro II/Capítulo I`);
+
+    expect(uno).toBe(`${DE_LA_OBRA}--libro-i-capitulo-i`);
+    expect(otro).toBe(`${DE_LA_OBRA}--libro-ii-capitulo-i`);
+    expect(uno).not.toBe(otro);
+  });
+
+  it('los tramos vacíos no cuentan: ni el de un título que acaba en barra, ni el de «//»', () => {
+    // Un título que acaba en «/» no declara un tramo sin nombre: no hay cola, y el nombre
+    // se queda en un segmento en vez de colgar un sufijo vacío.
+    expect(nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/`)).toBe(DE_LA_OBRA);
+    expect(nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}///`)).toBe(DE_LA_OBRA);
+    // Y un hueco en medio no parte la cola en dos ni mete un guion de más.
+    expect(nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}//Canción divina`)).toBe(
+      `${DE_LA_OBRA}--cancion-divina`,
+    );
+  });
+
+  it('una cola que repite a la obra sigue dando dos segmentos: no reclama el nombre de su obra', () => {
+    /*
+     * Con un segmento, la subpágina se llamaría igual que el documento de la obra entera:
+     * `recuperar` la tomaría por «ya versionado» o rechazaría la obra por culpa de su
+     * página. Dos subpáginas chocando entre sí es la colisión que esta historia no afloja;
+     * una subpágina reclamando el documento de su obra es otra cosa, y no se admite.
+     */
+    const nombre = nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/${COLOQUIOS}`);
+    expect(nombre).toBe(`${DE_LA_OBRA}--coloquios-espirituales-y-sacramentales-y-poesias-sagradas`);
+    expect(nombre).not.toBe(DE_LA_OBRA);
+  });
+
+  it('una página que es su propia obra sigue colapsando a un solo segmento', () => {
+    expect(nombreDeDocumento('wikisource-es', 'El sable', 'El sable')).toBe('wikisource-es--el-sable');
+    expect(nombreDeDocumento('wikisource-es', COLOQUIOS, COLOQUIOS)).toBe(DE_LA_OBRA);
+  });
+
+  it('una página cuya obra derivada es su propio título con barra no gana segmento', () => {
+    /*
+     * «Fábulas de Fedro/Epílogo Libro IV» no declara `|título`, así que la obra derivada
+     * es su propio título entero, barra incluida: la página **es** la obra y su documento
+     * ya está versionado con un solo segmento. Sacarle cola lo renombraría, y el nombre
+     * de un fichero del Corpus es su identidad.
+     */
+    const comoSeLlaman: [string, string][] = [
+      ['Fábulas de Fedro/Epílogo Libro IV', 'wikisource-es--fabulas-de-fedro-epilogo-libro-iv'],
+      ['Fábulas de Fedro/Prólogo Libro IV', 'wikisource-es--fabulas-de-fedro-prologo-libro-iv'],
+      ['Del sentimiento trágico de la vida/I', 'wikisource-es--del-sentimiento-tragico-de-la-vida-i'],
+    ];
+    for (const [titulo, nombre] of comoSeLlaman) {
+      expect(nombreDeDocumento('wikisource-es', titulo, titulo), titulo).toBe(nombre);
+      expect(existsSync(join(fuentes, `${nombre}.txt`)), nombre).toBe(true);
+    }
+  });
+
+  it('obra y página que difieren solo en mayúsculas siguen dando un solo segmento', () => {
+    expect(
+      nombreDeDocumento('wikisource-es', 'Respuesta a Sor Filotea', 'Respuesta a sor Filotea'),
+    ).toBe('wikisource-es--respuesta-a-sor-filotea');
+  });
+
+  it('dos colas que coinciden al acotar siguen compartiendo nombre: no se numeran', () => {
+    // La historia no afloja la puerta de `recuperar`: dos páginas que siguen coincidiendo
+    // al acotar siguen chocando, y el rechazo es lo que lo dice.
+    const uno = nombreDeDocumento(
+      'wikisource-es',
+      COLOQUIOS,
+      `${COLOQUIOS}/Canción divina contrahecha de otra humana muy devota y antigua`,
+    );
+    const otro = nombreDeDocumento(
+      'wikisource-es',
+      COLOQUIOS,
+      `${COLOQUIOS}/Canción divina contrahecha de otra humana muy devota y moderna`,
+    );
+    expect(uno).toBeDefined();
+    expect(uno).toBe(otro);
+    expect(uno).not.toBe(DE_LA_OBRA);
+  });
+
+  it('una cola sin ninguna letra cae al nombre de un solo segmento', () => {
+    expect(nombreDeDocumento('wikisource-es', COLOQUIOS, `${COLOQUIOS}/···`)).toBe(DE_LA_OBRA);
+  });
+
+  it('la obra corta con subpágina no se renombra: su segmento ya la distinguía', () => {
+    // El segmento de página es el título declarado entero —así se llaman los ocho
+    // documentos de «Ariel» ya versionados—, y aquí cabe sin recortar: la regla nueva no
+    // llega a mirarlo porque no coincide con el de la obra.
+    expect(
+      nombreDeDocumento('wikisource-es', 'Los jardines interiores', 'Los jardines interiores/Triste'),
+    ).toBe('wikisource-es--los-jardines-interiores--los-jardines-interiores-triste');
+  });
+
+  it('una Fuente que no pagina sigue sin pasar de un segmento', () => {
+    expect(nombreDeDocumento('gutenberg', 'Del sentimiento trágico de la vida')).toBe(
+      'gutenberg--del-sentimiento-tragico-de-la-vida',
+    );
+  });
+
+  it('el segmento de la cola también se acota, y nunca parte una palabra', () => {
+    const nombre = nombreDeDocumento(
+      'wikisource-es',
+      COLOQUIOS,
+      `${COLOQUIOS}/Coloquio séptimo que trata de la libertad y del libre albedrío del hombre`,
+    );
+    expect(nombre).toBeDefined();
+
+    const segmentos = nombre!.slice('wikisource-es--'.length).split('--');
+    expect(segmentos).toHaveLength(2);
+
+    const [deLaObra, deLaCola] = segmentos as [string, string];
+    expect(deLaObra).toBe(DE_LA_OBRA.slice('wikisource-es--'.length));
+    expect(deLaCola).not.toBe('');
+    expect(deLaCola).not.toBe(deLaObra);
+    expect(deLaCola.length).toBeLessThanOrEqual(MAX_CARACTERES_SLUG_DE_OBRA);
+    expect(deLaCola).not.toMatch(/^-|-$/);
+  });
+
+  it('ningún documento de Wikisource-es ya versionado tiene un nombre distinto del que implica', () => {
+    /*
+     * Medido el 2026-10-02 sobre los 309 documentos de Wikisource-es versionados: uno solo
+     * tenía el nombre colapsado por esta causa, el de los Coloquios, y se renombró con
+     * `git mv` —el Ask First de la historia, decidido por Héctor el 2026-10-02— porque con
+     * el nombre viejo `extraer` y `documentar` lo rechazaban por nombre y `recuperar` lo
+     * daba por «ya versionado». Desde entonces no se admite ninguna excepción.
+     *
+     * **Esta prueba está atada al estado del Corpus y puede ponerse roja por buenas
+     * razones.** Si aparece algo en `cambian`, mírelo antes de tocar la regla:
+     *
+     *   · si es una subpágina sembrada **antes** de esta historia cuyo nombre colapsó por
+     *     el recorte, es un hallazgo del mismo defecto y lo que toca es renombrar su
+     *     fichero con `git mv`, como se hizo con los Coloquios;
+     *   · si es un documento sembrado **después**, es un defecto de la regla: `recuperar`
+     *     escribe el nombre que esta función calcula, así que no debería poder diferir.
+     *
+     * La comprobación reproduce **la puerta de producción**, no una aproximación:
+     * `tools/extraer.ts` y `tools/lib/documentacion.ts` derivan la obra de la declaración
+     * y **rechazan** el documento cuando no sale ninguna, sin caer a `cabecera.obra`. Por
+     * eso un documento sin obra derivada se cuenta aparte y también pone la prueba roja.
+     */
+    const cambian: string[] = [];
+    const sinObraDerivada: string[] = [];
+    let mirados = 0;
+
+    for (const fichero of readdirSync(fuentes).filter((f) => f.endsWith('.txt')).sort()) {
+      const analizado = analizarDocumento(readFileSync(join(fuentes, fichero), 'utf8'));
+      if (analizado === undefined) continue;
+      if (analizado.cabecera.fuente !== 'wikisource-es') continue;
+
+      mirados += 1;
+      const derivado = derivarDeLaDeclaracion(analizado.cabecera.fuente, analizado.declaracion);
+      if (derivado.obra === undefined) {
+        sinObraDerivada.push(fichero);
+        continue;
+      }
+
+      const nombre = nombreDeDocumento(
+        analizado.cabecera.fuente,
+        derivado.obra,
+        derivado.pagina,
+      );
+      expect(nombre, fichero).toBeDefined();
+      if (`${nombre}.txt` !== fichero) cambian.push(fichero);
+    }
+
+    expect(mirados).toBeGreaterThanOrEqual(309);
+    expect(sinObraDerivada).toEqual([]);
+    expect(cambian).toEqual([]);
+  });
+});
+
+/**
  * Fix 11.1c — cuando la página no declara el año, lo declara su obra.
  *
  * En Wikisource **la obra declara el año y la página declara el texto**, y casi nunca son

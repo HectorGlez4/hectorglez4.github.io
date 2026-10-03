@@ -361,3 +361,14 @@ sesiones:
       citasPublicadas: 1894
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 55.9
+  - fecha: "2026-10-03"
+    hora: "11:31"
+    clase: "ninguno"
+    propuesto: "No hay hueco que cerrar."
+    hueco: "Ningún Tema por debajo del umbral de 15 Citas, la tradición latinoamericana alcanza el suelo del 40 % sobre los Autores que cuentan para él —todos menos los de tradición otra—, y ninguna época versionada tiene candidatos pendientes. Una época sin recuperar no cuenta como agotada: npm run epocas:registrar"
+    elegido: "Historia 19.13: un título largo no deja sin nombre a las páginas de su obra"
+    motivo: "Historia 19.13: el nombre de un documento ya no colapsa cuando el título de la obra agota los 60 caracteres del segmento; la subpágina conserva lo que su título declarado escribe tras la obra, con todos sus tramos. Desbloquea las 20 páginas de los Coloquios de Eslava que no se podían versionar. Renombrado con git mv, por decisión de Héctor, el único documento que tenía el nombre colapsado. No hubo hueco que sembrar."
+    resultado:
+      citasPublicadas: 1894
+      procedenciaCompleta: 26.1
+      tradicionLatinoamericanaSobreHispanicos: 55.9

@@ -2083,6 +2083,33 @@ function segmentoDeNombre(texto: string): string | undefined {
  * Cuando la página **es** la obra —«El estado», «El sable»— el nombre se colapsa a
  * `{id-de-fuente}--{slug-de-obra}`, que es el de siempre: el caso que ya funcionaba no se
  * renombra. Y Gutenberg, que no pagina, no pasa nunca de un segmento.
+ *
+ * Historia 19.13 — **un título de obra largo no deja sin nombre a sus páginas.** En
+ * Wikisource el título que la página declara es «Obra/Subpágina» entero, y cada segmento
+ * se acota a `MAX_CARACTERES_SLUG_DE_OBRA` sin partir palabra. Cuando el título de la obra
+ * ya agota ese largo, el recorte se come la subpágina y deja el segmento de página
+ * **idéntico** al de la obra: el nombre colapsa y todas las subpáginas compiten por un
+ * solo fichero. Las 21 de «Coloquios espirituales y sacramentales y poesías sagradas»
+ * lo hicieron el 2026-09-24, `recuperar` se negó con razón y de la obra entera solo se
+ * versionó una página.
+ *
+ * Entonces, y solo entonces, el segmento se construye con **lo que distingue a esa
+ * página**: lo que la Fuente escribe en su **título declarado** detrás del título de la
+ * obra. Es declaración suya, no inferencia de ruta: la URL y el nombre del índice del
+ * escaneo quedan fuera por lo mismo que `paginaDeLaObraDeclarada` solo encadena por enlace
+ * absoluto —derivar de la ruta sería una frase nuestra, no de la Fuente—.
+ *
+ * **La cola son todos los tramos que quedan, no el último.** Una obra por libros declara
+ * «Obra/Libro I/Capítulo I» y «Obra/Libro II/Capítulo I»: quedarse con el último tramo
+ * repetiría el defecto que esta historia arregla, un nivel más abajo.
+ *
+ * Lo que la regla **no** hace: no renumera ni inventa sufijos. Dos colas que sigan
+ * coincidiendo al acotar siguen dando el mismo nombre, y el rechazo de `recuperar` es
+ * quien lo dice. Y no renombra nada de lo que ya hay: medido el 2026-10-02 sobre los 309
+ * documentos de Wikisource-es versionados, uno solo tiene hoy el nombre colapsado por esta
+ * causa —el de los Coloquios—. De los demás que colapsan, cuatro lo hacen porque obra y
+ * página solo difieren en mayúsculas —«Filosofía de la historia» / «…de la Historia»— y el
+ * resto porque los dos títulos son la misma cadena.
  */
 export function nombreDeDocumento(
   idFuente: string,
@@ -2094,8 +2121,82 @@ export function nombreDeDocumento(
   const deLaObra = segmentoDeNombre(obra);
   if (deLaObra === undefined) return undefined;
 
-  const deLaPagina = pagina === undefined ? undefined : segmentoDeNombre(pagina);
-  if (deLaPagina === undefined || deLaPagina === deLaObra) return `${idFuente}--${deLaObra}`;
+  /** El nombre de un segmento: el del documento de la obra entera. */
+  const soloLaObra = `${idFuente}--${deLaObra}`;
+  if (pagina === undefined) return soloLaObra;
 
-  return `${idFuente}--${deLaObra}--${deLaPagina}`;
+  const deLaPagina = segmentoDeNombre(pagina);
+  if (deLaPagina !== undefined && deLaPagina !== deLaObra) {
+    return `${soloLaObra}--${deLaPagina}`;
+  }
+
+  /*
+   * El segmento de página no distinguió nada, y hay **tres** razones distintas para eso:
+   *
+   *   1. la página **es** la obra —«El sable» y «El sable», o «Fábulas de Fedro/Epílogo
+   *      Libro IV», cuya página no declara `|título` y cuya obra derivada es por eso su
+   *      propio título entero, barra incluida—;
+   *   2. el recorte los igualó, que es la razón de esta historia;
+   *   3. el título de la página no deja ni una letra al canonizarlo —«···»—, así que no
+   *      hay segmento de página que valga.
+   *
+   * Solo 2 y 3 pueden tener cola. En 1 no hay nada que distinguir, y el nombre de un
+   * segmento es el que esos documentos ya llevan escrito.
+   *
+   * Que estamos en 1 se decide porque los dos títulos canonizan al mismo slug, y eso es
+   * una **suposición aceptada, no un hecho**: el slug pierde información, y «Fábulas de
+   * Fedro-Epílogo Libro IV» y «Fábulas de Fedro/Epílogo Libro IV» son títulos distintos
+   * con el mismo slug. Se acepta por lo mismo que se acepta el caso de las mayúsculas
+   * —«Respuesta a Sor Filotea» y «Respuesta a sor Filotea» entran aquí y colapsan, como
+   * entraban antes—: dos títulos que canonizan igual ya producían el mismo nombre antes
+   * de esta historia, así que tratarlos como el mismo no añade ninguna colisión.
+   */
+  if (slugDeObra(pagina) === slugDeObra(obra)) return soloLaObra;
+
+  /*
+   * Queda la cola. Y cuando la hay, el nombre lleva **siempre** dos segmentos, aunque la
+   * cola acabe dando el mismo slug que la obra: con un solo segmento la subpágina se
+   * llamaría igual que el documento de la obra entera, y eso es peor que dos subpáginas
+   * chocando entre sí —la subpágina reclamaría el nombre de su obra, y `recuperar` lo
+   * tomaría por «ya versionado» o rechazaría la obra por culpa de su página—. Que dos
+   * colas sigan coincidiendo entre ellas es la colisión que esta historia **no** afloja.
+   *
+   * Sin cola —no quedan tramos, o los que quedan no dejan ni una letra— el nombre colapsa
+   * como siempre: ausencia antes que un sufijo inventado.
+   */
+  const cola = colaDelTituloDeclarado(obra, pagina);
+  const deLaCola = cola === undefined ? undefined : segmentoDeNombre(cola);
+  return deLaCola === undefined ? soloLaObra : `${soloLaObra}--${deLaCola}`;
+}
+
+/**
+ * Lo que el título declarado de la página escribe **detrás del título de la obra**.
+ *
+ * Los tramos salen de partir por la barra el título que la página declara, y los vacíos
+ * se tiran: un título que acaba en «/», o que trae «//» en medio, no declara un tramo sin
+ * nombre. Cuando los primeros tramos son los de la obra, la cola es todo lo que viene
+ * detrás; cuando no lo son —la obra se declara con otro título, como «Ariel» frente a
+ * «Ariel (Rodó)/Capítulo I»— la cola es todo menos el primer tramo, que es el que ocupa
+ * el sitio de la obra.
+ *
+ * `undefined` cuando no queda ningún tramo: un título de un solo tramo no tiene cola, y
+ * sin cola el nombre se queda en un segmento.
+ */
+function colaDelTituloDeclarado(obra: string, pagina: string): string | undefined {
+  const tramos = (texto: string) =>
+    texto
+      .split('/')
+      .map((tramo) => tramo.trim())
+      .filter((tramo) => tramo !== '');
+
+  const deLaPagina = tramos(pagina);
+  const deLaObra = tramos(obra);
+
+  const laObraVaDelante =
+    deLaObra.length > 0 &&
+    deLaObra.length < deLaPagina.length &&
+    deLaObra.every((tramo, i) => slugDeObra(tramo) === slugDeObra(deLaPagina[i] ?? ''));
+
+  const cola = laObraVaDelante ? deLaPagina.slice(deLaObra.length) : deLaPagina.slice(1);
+  return cola.length === 0 ? undefined : cola.join('/');
 }
