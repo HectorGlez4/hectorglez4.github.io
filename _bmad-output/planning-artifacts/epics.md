@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas
+stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
@@ -9,6 +9,9 @@ inputDocuments:
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md
   - _bmad-output/specs/spec-brainlySabiduria/SPEC.md
+  - docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md
+  - docs/superpowers/specs/2026-10-04-fase-siguiente-borrador.md
+  - docs/superpowers/specs/2026-10-03-datos-recogidos.md
 ---
 
 # Sabiduría de Bolsillo - Epic Breakdown
@@ -2529,3 +2532,393 @@ So that «5Mucho padeció» no quede versionado como si lo hubiera escrito Virgi
 **Given** la canaria de legibilidad
 **When** se construye la historia
 **Then** no se toca: la numeración es aparato del escaneo, no margen de la canaria
+
+---
+
+# Sabiduría de Bolsillo — Épicas de la v7 (ciclo 1)
+
+Las Épicas 1 a 5 son la v1, las 6 a 10 la v2, las 11 a 14 la v3, las 16 a 18 la v5 y la 19 la v6. Esta parte abre la v7, que es la fase planificada el 2026-10-04 a partir de los primeros datos con volumen de Search Console y del panel de Facebook. La fase entera son seis épicas candidatas, escritas en `docs/superpowers/specs/2026-10-04-fase-siguiente-borrador.md`; **aquí entra solo su primer ciclo**, el único con diseño aprobado: medir antes de mover, y conectar el canal propio al sitio.
+
+**Lo que esta parte no trae, y por qué.** El ciclo **no añade ningún FR al PRD**: realiza FR que ya existen y añade capacidad de medición que el diseño aprobado deriva de ellos. Por eso el inventario distingue los FR realizados de los *requisitos derivados del diseño*, numerados D-1 a D-7. Si la skill de arquitectura juzga que AD-24 debe nombrar las dos series nuevas, el PRD y la espina se regeneran por sus skills; ninguna línea de este documento los sustituye.
+
+**La puerta que gobierna el ciclo.** Nada de lo que aquí se construye se juzga sin series: la de indexación lleva una sola lectura, la de tráfico y la de demanda no existen, y D1 no se ha leído desde este equipo. La Épica 20 va primera por eso, y la 21 publica desde el mismo día sabiendo que, hasta que la 20.1 esté desplegada, solo los enlaces a una Página de Cita dejan fila.
+
+## Requirements Inventory — v7
+
+### Functional Requirements
+
+Los FR del PRD que el ciclo realiza o completa. Ninguno es nuevo; se reenuncian por lo que este ciclo les añade.
+
+FR-9 *(realizado de nuevo)*: la Cita del Día rota por el conjunto de aptas sin repetir ninguna hasta agotarlo, es la misma para todos los visitantes de una jornada y no depende del orden en que el build leyó el disco. El ciclo cambia el **orden de recorrido** —en rondas por Autor— y conserva las tres propiedades.
+FR-15 *(realizado de nuevo)*: marcar una Cita como apta para portada es un acto editorial que pasa por la orden, nunca por editar el fichero. El ciclo lleva el conjunto de 16 a 120 o más con una regla escrita en el commit.
+FR-22 *(completado)*: el enlace de cada publicación distingue la red de destino con una marca de origen, la página de destino es siempre la URL canónica y la marca no altera lo que ve el visitante. Hoy la marca solo cuenta cuando aterriza en una Página de Cita; el ciclo la hace contar también en portada, Autor, Tema y Colección, que es donde aterrizan las Piezas.
+FR-38 *(criterio pendiente)*: el aviso de cambio llega a los índices que lo aceptan y **su efecto se mide aparte del de Google**. El aviso está construido desde agosto (`tools/avisar.ts`); lo que falta es la lectura de Bing, que cierra el criterio y pasa la 16.2 a revisión.
+FR-40 *(operación)*: la indexación se lee por familia, con fecha, y sin número cuando la fuente no está. La serie vuelve a medir en cuanto exista la credencial, con presupuesto corto y commit aparte.
+FR-44 *(realizado)*: existen señales hacia el sitio desde fuera, cada una registrada con su fecha para cruzarla con la serie de indexación; nunca compradas ni intercambiadas. El ciclo construye el registro y distingue la señal **propia** —una bio, un Linktree, una descripción de vídeo del proyecto— de la **ajena**; solo la ajena cierra la 18.1.
+FR-45 *(realizado)*: la publicación en las cuentas propias enlaza a la URL canónica con su marca, se cuenta como señal, y su cadencia **se sostiene y se mide**. El ciclo construye el registro de publicaciones y fija la plantilla semanal; al Kit no se le añade nada, como la 18.2 exige.
+FR-29, FR-30, FR-32 *(operación)*: el lote, la Pieza de varias Citas y la Pieza de Colección se usan tal como están en la plantilla semanal. No cambian.
+
+### Requisitos derivados del diseño aprobado
+
+Salen de `docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md` §4 y §5. Cada uno es comprobable y ninguno pide un FR nuevo.
+
+D-1 — **El evento de vista en las superficies de agregación.** El vocabulario cerrado de `src/lib/medicion.ts` gana `vista-de-superficie`; lo emiten la portada, la Página de Autor, la de Tema y la de Colección, y no lo emiten `/buscar`, `/404`, `/kit` ni `/lote`. Sin identificador, cookie, sesión ni referente; `datos` y `destino` siguen vedados fuera de sus eventos. El receptor lo acepta por importar el vocabulario y no hay migración de esquema; el Worker se redespliega el mismo día que el sitio. El guion en línea sigue dentro de `MAX_BYTES_DE_GUION`.
+D-2 — **La serie de tráfico orgánico.** Una orden de `tools/` lee el rendimiento Web de Search Analytics con la credencial y el alcance de la serie de indexación y escribe `corpus/serie-de-trafico.yml`: por mes, total y reparto por familia, clics, impresiones, CTR y posición; idempotente por mes; mes parcial marcado; sin credencial código 2 y nada escrito; lectura fallida código 1 y nada escrito; un mes que no se pudo leer se omite y nunca se escribe como cero. Ningún módulo de `src/lib/` la lee.
+D-3 — **La serie de demanda por página.** Misma credencial, dimensión página, ventana de 28 días —16 meses en la primera lectura—, agregada por slug de Autor con el prefijo más largo y por Cita, con mínimo de cinco impresiones por fila; `corpus/serie-de-demanda.yml` idempotente por fecha. Informa; **no entra** en `src/lib/objetivo.ts` en este ciclo.
+D-4 — **La rotación en rondas por Autor.** `citaDelDia` agrupa las aptas por Autor, ordena Autores y Citas por slug, y recorre primero la primera de cada Autor, luego la segunda de cada uno. Es una permutación de las aptas: FR-9 y AD-12 se conservan; las fijaciones de `corpus/portada.json` siguen mandando; dos jornadas consecutivas no comparten Autor mientras la ronda tenga al menos dos.
+D-5 — **La regla de las aptas.** Texto de 160 caracteres o menos, `procedencia.obra` presente, una o dos Citas por Autor, los 24 Temas cubiertos, prioridad a los Autores con demanda medida. El agente propone la lista entera, Héctor tacha en bloque, se aplica con la orden existente y queda en un solo commit con la regla en el mensaje.
+D-6 — **El registro de publicaciones de canal.** `corpus/publicaciones-de-canal.yml` solo añade: fecha, red del conjunto cerrado, formato (`foto`, `reel`, `pieza`, `historia`), ruta enlazada sin dominio o ninguna, nota opcional. Su orden lista por semana ISO y por red, y anota; rechaza red desconocida, ruta no publicable y fecha futura. Código 1 lo que la invocación dice, 2 su forma.
+D-7 — **El registro de señales externas.** `corpus/senales-externas.yml` solo añade: fecha, URL de origen, ruta de destino, `tipo: propia | ajena`, nota. Misma orden, misma lista. Solo `ajena` cierra la 18.1.
+
+### NonFunctional Requirements
+
+Los NFR-1…NFR-13 siguen vinculando y no se reenuncian. Los que el ciclo pone a prueba de forma nueva:
+
+- **NFR-10, NFR-11** — el evento nuevo no introduce visitante, sesión, cookie ni referente; la razón `vista-de-cita / vista-de-superficie` es un agregado por jornada, no una sesión.
+- **NFR-6** — el Kit y el lote siguen siendo superficies internas: no emiten el evento y no entran en ninguna serie.
+- **NFR-7** — el guion en línea crece unos veinte bytes en toda página; lo decide la prueba de presupuesto, nunca subiendo el tope.
+- **NFR-12** — la plantilla semanal publica el texto literal del Corpus con obra y año; ninguna Cita se redacta de nuevo para el canal.
+
+### Additional Requirements
+
+De la espina de arquitectura y de las convenciones del repositorio:
+
+- **AD-13 — vocabulario cerrado, ampliado por su módulo.** Añadir `vista-de-superficie` exige tocar `src/lib/medicion.ts`, que es la fricción que el AD diseña; el receptor importa el vocabulario y no lo copia.
+- **AD-14 — el plano de medición es de un solo sentido.** El sitio no lee D1 ni las series nuevas; quien lee es `tools/` y Héctor.
+- **AD-24 — series versionadas que el sitio no toca**, extendido por el mismo motivo a `serie-de-trafico.yml` y `serie-de-demanda.yml`: se componen en `tools/`, viven en la raíz de `corpus/` como metadato y ninguna colección de `src/content.config.ts` apunta a ellas.
+- **AD-22 — la red solo en la cáscara de `tools/`.** Las dos series y la lectura de Bing hacen peticiones desde la orden; `tools/lib/` y `src/lib/` siguen puros.
+- **AD-12 y AD-10 — rotación determinista y sin estado.** El orden nuevo deriva de la fecha del build y del conjunto de aptas; nada recuerda qué salió.
+- **AD-15 — las Piezas se componen en `tools/` y su salida no se versiona.** La plantilla las consume tal cual.
+- **AD-27 — anunciar no es construir.** La lectura de Bing mide el aviso; no se construye nada para avisar.
+- **Convención de `tools/`:** código de salida 2 para la forma de la invocación, 1 para lo que la invocación dice; «ausencia antes que cero» en toda serie; una **serie** reemplaza por fecha o por mes porque mide un estado, y un **registro** solo añade porque anota actos — es la misma distinción que separa `serie-de-indexacion.yml` de `peticiones-de-rastreo.yml`.
+- **Sin tecnología nueva.** Las dos series reutilizan `googleapis` y la credencial de la Historia 16.1; los registros reutilizan el patrón de `tools/rastreo.ts`.
+
+### UX Design Requirements
+
+Ningún UX-DR nuevo: el ciclo no añade ni cambia superficie visible. UX-DR17 y UX-DR34 —las rutas de salida de la Página de Cita y el chip de Colección— quedan a propósito para el ciclo siguiente, con su pasada acotada de `bmad-ux` antes de tocar código.
+
+### FR Coverage Map — v7
+
+FR-9: **Épica 21** — la rotación de la Cita del Día pasa a rondas por Autor y conserva «todas antes de repetir» (21.1).
+FR-15: **Épica 21** — el conjunto de aptas pasa de 16 a 120 o más por la orden, con la regla en el commit (21.2).
+FR-22: **Épica 20** — la marca de origen cuenta también en portada, Autor, Tema y Colección, que es donde aterrizan las Piezas (20.1).
+FR-29, FR-30, FR-32: **Épica 21, en operación** — el lote y las Piezas se usan tal cual en la plantilla semanal; no cambian.
+FR-38: **Épica 20** — la lectura de Bing cierra «el efecto se mide aparte» y pasa la 16.2 a revisión (20.4).
+FR-40: **Épica 20** — la serie de indexación vuelve a medir en cuanto exista la credencial (20.4).
+FR-44: **Épica 21** — el registro de señales externas, propia o ajena; solo la ajena cierra la 18.1 (21.4).
+FR-45: **Épica 21** — el registro de publicaciones de canal y la plantilla semanal, que es el trabajo de la 18.2 (21.3).
+D-1, D-2, D-3: **Épica 20** — evento de vista en agregación, serie de tráfico, serie de demanda (20.1, 20.2, 20.3).
+D-4, D-5, D-6, D-7: **Épica 21** — rotación dispersa, regla de aptas, registro de publicaciones, registro de señales (21.1 a 21.4).
+
+**Cobertura no-FR.** SM-8 completo y SM-2 medible salen de la Épica 20; la línea base de SM-5, SM-6 y SM-7 de la 20.4; el proxy de profundidad `vista-de-cita / vista-de-superficie` de la 20.1. Las donaciones (FR-34) siguen apagadas por decisión de Héctor del 2026-10-04 y no entran; el `.com` se deja caducar y solo se corrige la bio de TikTok.
+
+## Epic List — v7
+
+### Épica 20: Se mide antes de mover
+
+Héctor lee, desde series versionadas en el Corpus y no desde un panel ajeno, qué red trae visitas a cualquier superficie, cuánto tráfico orgánico llega cada mes y a qué familia, qué páginas se buscan, y cuántas páginas de cada familia indexa Google. Va primera porque todo lo demás de la fase se juzga con estas series, y hoy la de indexación tiene una lectura, las otras dos no existen y D1 no se ha leído desde este equipo.
+
+**FRs covered:** FR-22 *(completado)*, FR-38 *(criterio de medición aparte)*, FR-40 *(operación)*; D-1, D-2, D-3.
+**Notas de implementación:** tres historias de repositorio y una operativa. La 20.1 amplía el vocabulario cerrado **por su módulo** (AD-13): `src/lib/medicion.ts` gana el evento, `Medicion.astro` y `Armazon.astro` lo propagan, las cuatro páginas de agregación lo piden, el receptor lo acepta por importar el vocabulario y no hay migración de esquema; lo que sí hay es un redespliegue del Worker el mismo día, porque hasta entonces el receptor lo descarta en silencio. La 20.2 y la 20.3 son clientes de Search Analytics al patrón de `tools/indexacion.ts` —misma credencial, mismo alcance, misma propiedad derivada de `public/CNAME`, red solo en la cáscara (AD-22)— que escriben dos series en la raíz de `corpus/` que ningún módulo de `src/lib/` lee (AD-24). La 20.4 es la semana manual: credenciales, D1, paneles del canal, inspección de la canónica de Unamuno y Gracián, Bing; existe como historia para que el tablero la cuente, que es lo que no pasó con la 18.3. Restricción que las historias heredan: los clics por consulta de Search Console vienen anonimizados, así que la demanda se agrega **por página**, no por consulta.
+
+### Épica 21: El canal propio lleva al sitio
+
+Quien sigue a Sabiduría de Bolsillo en una red tiene un camino al sitio; lo que se publica es el texto literal del Corpus con su enlace marcado por red; la portada y el canal no repiten una Cita en cuatro meses; y cada publicación y cada señal quedan anotadas para saber, a los 90 días, si la página trae visitas o no la trae. Cierra la 18.2 y deja la 18.1 abierta hasta la primera señal ajena.
+
+**FRs covered:** FR-9, FR-15, FR-44, FR-45; FR-29, FR-30, FR-32 *(en operación)*; D-4, D-5, D-6, D-7.
+**Notas de implementación:** dos historias de repositorio sobre la Cita del Día y dos registros. La 21.1 cambia una decisión de implementación —el orden por slug de `citaDelDia`, que agrupa por Autor— por un recorrido en rondas por Autor; es una permutación de las aptas, así que FR-9 y AD-12 se conservan y el RSS y el Kit lo heredan sin tocarse; al desplegar, la Cita de ese día cambia, y se despliega un día sin jornada fijada o se fija la de ese día. La 21.2 no es código: es una lista propuesta por el agente con la regla de D-5, tachada en bloque por Héctor y aplicada con `tools/portada.ts marcar` en un solo commit. La 21.3 y la 21.4 son una orden nueva, `tools/canal.ts`, al patrón de `tools/rastreo.ts`: dos ficheros que **solo añaden** y que ningún módulo de `src/lib/` lee. La plantilla semanal y el camino del enlace —bios, Linktree, campo web de Facebook, el pie con regla de caída— son el trabajo de la 18.2 y no piden nada nuevo al Kit; la Épica 21 les da el registro que les faltaba. Publicar no depende de la Épica 20; medirlo entero, sí: hasta que la 20.1 esté desplegada, solo los enlaces a una Página de Cita dejan fila.
+
+## Epic 20: Se mide antes de mover
+
+Héctor lee, desde series versionadas en el Corpus y no desde un panel ajeno, qué red trae visitas a cualquier superficie, cuánto tráfico orgánico llega cada mes y a qué familia, qué páginas se buscan, y cuántas páginas de cada familia indexa Google. Hoy la serie de indexación tiene una lectura del 4 de septiembre, las de tráfico y demanda no existen, y D1 no se ha leído desde este equipo: todo lo demás de la fase se juzgaría con series que no están.
+
+**FRs covered:** FR-22 *(completado)*, FR-38 *(criterio de medición aparte)*, FR-40 *(operación)*; D-1, D-2, D-3.
+**Notas de implementación:** el diseño aprobado está en `docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md` §4 y las notas largas en la lista de épicas de arriba. Lo que las cuatro historias comparten: nada de lo que escriben lo lee el sitio (AD-14, AD-24), la red vive solo en la cáscara de `tools/` (AD-22), y «ausencia antes que cero» rige en toda serie. La 20.4 es manual y va numerada la última, pero sus gestos empiezan el primer día y en paralelo: la 20.2 y la 20.3 se prueban con respuestas fijas y solo se *corren* con la credencial.
+
+### Story 20.1: La vista de una superficie de agregación deja fila
+
+As a editor que publica Piezas que aterrizan en la portada y en las Páginas de Colección,
+I want que esas vistas lleguen al receptor con su marca de origen,
+So that SM-8 cuente todo lo que el canal trae y no solo lo que enlaza a una Cita.
+
+**Acceptance Criteria:**
+
+**Given** el vocabulario cerrado de `src/lib/medicion.ts`
+**When** se construye el sitio con `MEDICION_ENDPOINT` definido
+**Then** la portada, la Página de Autor, la de Tema y la de Colección emiten `vista-de-superficie` una sola vez
+**And** la Página de Cita sigue emitiendo `vista-de-cita` y no emite el nuevo
+**And** `/buscar`, `/404`, `/kit` y `/lote` no lo emiten
+
+**Given** una baliza `vista-de-superficie` con `origen` del conjunto cerrado
+**When** la interpreta el receptor
+**Then** se registra con jornada, ruta y origen
+**And** `destino` y `datos` se descartan en ese evento sin descartar el evento
+**And** una carga con campos de más se registra sin ellos
+
+**Given** `medicion/esquema.sql`
+**When** se despliega la historia
+**Then** no hay migración, porque la columna `evento` admite el nombre nuevo
+**And** el Worker se redespliega el mismo día que el sitio
+**And** una baliza manual de comprobación aparece en el recuento por evento de D1
+
+**Given** `MEDICION_ENDPOINT` sin definir
+**When** se construye
+**Then** `dist/` es idéntico byte a byte al anterior a la historia
+
+**Given** el guion en línea con el evento nuevo
+**When** corre la prueba de presupuesto
+**Then** sigue por debajo de `MAX_BYTES_DE_GUION`
+**And** si no cupiera, se abrevia el guion y nunca se sube el tope
+
+**Given** DESPLIEGUE.md §3
+**When** se cierra la historia
+**Then** documenta las consultas nuevas: SM-8 por origen y evento, y la razón `vista-de-cita / vista-de-superficie` por jornada
+**And** la razón se declara como agregado por jornada y no como sesión
+
+### Story 20.2: La serie de tráfico orgánico se versiona desde Search Console
+
+As a editor,
+I want una serie mensual de clics e impresiones orgánicos, total y por familia, versionada en el Corpus,
+So that SM-2 tenga cifra propia y los Umbrales tengan algún día contra qué medirse.
+
+**Acceptance Criteria:**
+
+**Given** `SEARCH_CONSOLE_CREDENCIALES` ausente
+**When** `npm run trafico`
+**Then** nombra lo que falta, no escribe nada y sale con código 2
+
+**Given** la credencial
+**When** `npm run trafico`
+**Then** informa por mes clics, impresiones, CTR y posición, en total y por familia
+**And** no escribe nada
+
+**Given** `npm run trafico:registrar`
+**When** termina
+**Then** `corpus/serie-de-trafico.yml` tiene una entrada por mes, con `leidoEl` y `parcial: true` en el mes en curso
+**And** una segunda lectura del mismo mes la reemplaza
+
+**Given** una lectura que falla en un mes o una familia
+**When** se registra
+**Then** ese mes o familia se omite y aparece en `sinLeer` con su motivo
+**And** jamás se escribe un cero
+**And** si no se pudo leer nada, código 1
+
+**Given** la red
+**When** corre la orden
+**Then** solo `tools/trafico.ts` hace peticiones y `tools/lib/trafico.ts` es puro, probado con respuestas fijas
+**And** ningún módulo de `src/lib/` importa la serie y ninguna colección de `src/content.config.ts` apunta a ella
+
+**Given** la propiedad
+**When** se deriva
+**Then** sale de `public/CNAME`, como en la serie de indexación
+**And** la cabecera del fichero explica qué mide y por qué reemplaza por mes
+
+### Story 20.3: La demanda medida se versiona por página
+
+As a editor que decide a quién sembrar,
+I want saber qué Autores y qué Citas reciben impresiones y clics,
+So that la prioridad por demanda de FR-49 tenga un dato versionado en vez de una lectura a ojo.
+
+**Acceptance Criteria:**
+
+**Given** la credencial
+**When** `npm run demanda`
+**Then** lee la dimensión página de los últimos 28 días, y de 16 meses por mes en la primera lectura
+**And** agrega por slug de Autor, atribuyendo cada ruta de Cita por el prefijo de Autor más largo, y por Cita
+
+**Given** filas con menos de cinco impresiones
+**When** se agregan
+**Then** no se versionan una a una y se suman en un resto declarado
+
+**Given** `npm run demanda:registrar`
+**When** termina
+**Then** escribe `corpus/serie-de-demanda.yml`, idempotente por fecha
+**And** la lectura informa Autores por impresiones, Citas con clic y reparto por familia
+**And** `sinLeer`, códigos y ausencia antes que cero como en la 20.2
+
+**Given** un prefijo que no corresponde a ningún Autor del Corpus
+**When** se atribuye
+**Then** la ruta se cuenta en «sin Autor» y se dice; no se descarta
+
+**Given** `src/lib/objetivo.ts`
+**When** corre `npm run huecos`
+**Then** no lee la serie: la política no cambia en esta historia
+**And** una prueba sostiene que ningún módulo de `src/lib/` la importa
+
+### Story 20.4: La semana cero se lee y se anota
+
+As a dueño del sitio,
+I want leer las tres fuentes la misma semana y dejar anotado qué decían,
+So that el ciclo tenga línea base y ninguna decisión se tome con la serie de septiembre.
+
+**Acceptance Criteria:**
+
+**Given** este equipo
+**When** `cd medicion && npx wrangler whoami`
+**Then** hay sesión
+**And** las consultas de DESPLIEGUE.md §3 se corren y su resultado queda anotado con fecha junto al informe de datos
+
+**Given** la cuenta de servicio como Propietaria
+**When** `npm run indexacion:registrar -- --presupuesto 200`
+**Then** la serie gana una lectura, commiteada aparte
+**And** gana una segunda en la misma semana
+
+**Given** Search Console
+**When** se inspeccionan las dos Páginas de Autor con demanda con y sin barra
+**Then** queda anotada la canónica elegida y a qué URL corresponden las 5 «con redirección» y las 2 «duplicadas»
+**And** si la canónica es la forma sin barra, se abre una historia antes de tocar la familia Autor
+
+**Given** Bing Webmaster Tools
+**When** se consulta
+**Then** queda anotado si el sitio está y con cuántas URL
+**And** la 16.2 pasa a revisión con esa cifra
+
+**Given** los paneles de Facebook, YouTube Studio, TikTok Creator y Spring
+**When** se leen
+**Then** sus cifras de ingreso y elegibilidad quedan anotadas con fecha, fuera de `corpus/`
+
+## Epic 21: El canal propio lleva al sitio
+
+Quien sigue a Sabiduría de Bolsillo en una red tiene un camino al sitio; lo que se publica es el texto literal del Corpus con su enlace marcado por red; la portada y el canal no repiten una Cita en cuatro meses; y cada publicación y cada señal quedan anotadas para saber, a los 90 días, si la página trae visitas o no la trae. Hoy 27.722 seguidores en Facebook, 19.700 en TikTok y 19.800 en YouTube no tienen un solo camino comprobado al sitio, y la marca de origen que el Kit compone desde la v2 no la pisa nadie.
+
+**FRs covered:** FR-9, FR-15, FR-44, FR-45; FR-29, FR-30, FR-32 *(en operación)*; D-4, D-5, D-6, D-7.
+**Notas de implementación:** el diseño aprobado está en `docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md` §5. La plantilla semanal y el camino del enlace —bio de TikTok al `.net`, el sitio primero en el Linktree, el campo «Sitio web» de la página de Facebook, el pie con regla de caída: Cita publicada, si no Página de Autor, si no portada, siempre con `?de=<red>`— son el trabajo de la 18.2 y no piden nada nuevo al Kit; estas cuatro historias le dan la rotación que no repite, las aptas que la sostienen y el registro que le faltaba. Publicar no depende de la Épica 20; medirlo entero, sí: hasta que la 20.1 esté desplegada, solo los enlaces a una Página de Cita dejan fila. Las donaciones siguen apagadas y el `.com` se deja caducar, por decisión del 2026-10-04.
+
+### Story 21.1: La Cita del Día recorre las aptas en rondas por Autor
+
+As a visitante que vuelve a la portada varios días seguidos,
+I want que la Cita del Día no me enseñe tres días seguidos al mismo Autor,
+So that volver tenga sentido aunque el conjunto de aptas sea pequeño.
+
+**Acceptance Criteria:**
+
+**Given** el conjunto de aptas
+**When** `citaDelDia` ordena
+**Then** agrupa por Autor, ordena Autores y Citas por slug, y recorre primero la primera de cada Autor, luego la segunda de cada uno, hasta agotar
+**And** el índice sigue siendo los días desde la época módulo el tamaño del conjunto
+
+**Given** dos jornadas consecutivas
+**When** la ronda en curso tiene al menos dos Autores
+**Then** no comparten Autor
+**And** con un solo Autor apto se comporta como hoy
+
+**Given** el recorrido
+**When** se mide sobre el conjunto entero
+**Then** es una permutación de las aptas: ninguna se repite antes de agotar todas
+**And** dos builds del mismo día dan la misma Cita
+
+**Given** una fijación en `corpus/portada.json`
+**When** la jornada coincide
+**Then** manda sobre la rotación
+**And** una fijación a una Cita no apta se ignora y rota
+
+**Given** el RSS y el Kit
+**When** se construyen
+**Then** heredan el orden sin tocarse
+**And** `sindicacion.test.ts` y `kit.test.ts` siguen verdes
+
+**Given** el despliegue de la historia
+**When** se publica
+**Then** la Cita de ese día cambia: se despliega un día sin jornada fijada o se fija la de ese día
+**And** el commit lo dice
+
+### Story 21.2: De 16 Citas aptas a 120 o más, con la regla en el commit
+
+As a editor,
+I want ampliar las aptas con una regla escrita,
+So that la portada, el RSS y el canal no repitan Cita en cuatro meses.
+
+**Acceptance Criteria:**
+
+**Given** la regla D-5
+**When** el agente propone
+**Then** la lista entera, con slug, Autor, Tema y caracteres, va en un fichero fuera del repositorio
+**And** toda Cita propuesta tiene 160 caracteres o menos y obra declarada
+**And** ningún Autor suma más de dos nuevas, ni queda sin una si tiene alguna que cumpla
+
+**Given** la lista
+**When** Héctor tacha en bloque
+**Then** solo lo no tachado se marca, con `npx tsx tools/portada.ts marcar <slug>` una a una desde un bucle
+**And** `npx tsx tools/portada.ts listar` da 120 aptas o más
+**And** los 24 Temas tienen al menos una apta
+
+**Given** las 16 aptas de hoy
+**When** se aplica la lista
+**Then** se conservan
+
+**Given** el commit
+**When** se escribe
+**Then** es uno solo, `feat(portada)`, y su cuerpo lleva la regla literal y el recuento por Autor y por Tema
+
+**Given** el RSS de 30 jornadas
+**When** se construye con las aptas nuevas
+**Then** no repite ninguna Cita
+**And** el Kit no repite en 120 días
+
+### Story 21.3: Cada publicación del canal queda anotada
+
+As a editor que publica a diario en varias cuentas,
+I want anotar qué publiqué, dónde y con qué enlace,
+So that a los 90 días se distinga «la página no trae visitas» de «se publicó la mitad de las semanas».
+
+**Acceptance Criteria:**
+
+**Given** `npm run canal -- anotar <red> <formato> <ruta|-> [--fecha AAAA-MM-DD]`
+**When** la red está en el conjunto cerrado de `src/lib/redes.ts`, el formato es `foto`, `reel`, `pieza` o `historia`, la ruta es publicable según `src/lib/superficies.ts` o es «-», y la fecha no es futura
+**Then** se añade al final de `corpus/publicaciones-de-canal.yml`, con la fecha de hoy si no se dio
+**And** nada anterior se reescribe
+
+**Given** una red fuera del conjunto, una ruta que el sitio no publica o una fecha futura
+**When** se intenta anotar
+**Then** no escribe y sale con 1
+**And** una bandera desconocida o argumentos de menos, con 2
+
+**Given** `npm run canal`
+**When** se consulta
+**Then** lista por semana ISO y red: publicaciones, cuántas enlazan a Cita, Autor, Colección o portada, y cuántas no enlazan
+**And** no escribe nada
+
+**Given** el fichero
+**When** se lee su cabecera
+**Then** dice qué registra, por qué solo añade y qué lo distingue de las series
+**And** ninguna colección de `src/content.config.ts` lo carga y ningún módulo de `src/lib/` lo lee
+
+**Given** la 18.2
+**When** se juzga si está hecha
+**Then** se cierra cuando el registro muestre cuatro semanas ISO seguidas con la foto diaria y el enlace marcado
+
+**Given** la suite
+**When** corre
+**Then** una prueba cubre altas, los tres rechazos y la lista por semana
+
+### Story 21.4: Cada señal externa queda anotada, propia o ajena
+
+As a dueño del sitio,
+I want anotar cada enlace hacia el sitio desde fuera, diciendo si lo puse yo o lo puso otro,
+So that cuando la serie de indexación se mueva se sepa si fue por una señal y de qué clase.
+
+**Acceptance Criteria:**
+
+**Given** `npm run canal -- senal <url-origen> <ruta-destino> --tipo propia|ajena [--fecha] [--nota]`
+**When** la URL de origen no es del propio dominio, la ruta es publicable y el tipo es uno de los dos
+**Then** se añade al final de `corpus/senales-externas.yml`
+**And** sin `--tipo` sale con 2
+
+**Given** una URL de origen del propio dominio
+**When** se intenta anotar
+**Then** se rechaza con 1: una señal interna no es externa
+
+**Given** `npm run canal`
+**When** se consulta
+**Then** separa señales propias de ajenas, con fecha y destino por familia
+**And** dice si existe alguna ajena
+
+**Given** la 18.1
+**When** se juzga si está hecha
+**Then** no se cierra con señales propias; se cierra con la primera ajena
+**And** las propias de la semana del ciclo —bio de TikTok, Linktree, campo web de Facebook, bio de Instagram— se anotan el día que se pongan
+
+**Given** el informe de enlaces de Search Console
+**When** pasan dos semanas desde la primera señal propia
+**Then** queda anotado si figura como dominio de referencia
+**And** esa lectura decide si las señales propias cuentan para algo más que SM-8
