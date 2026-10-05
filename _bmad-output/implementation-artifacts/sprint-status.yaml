@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 02-10-2026 16:10
+last_updated: 10-05-2026 10:26
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -209,6 +209,8 @@ development_status:
   16-1-el-estado-de-indexación-se-lee-por-familia-y-se-versiona: review
   # Reenfocada el 04/09: pierde su premisa —Google ya conoce las 1.715 URL— y se queda
   # solo por su motivo propio, los índices que sí aceptan aviso.
+  # 04/10: la v7 le pone el criterio que le faltaba —la lectura de Bing, gesto de la 20.4— y con
+  # esa cifra pasa a revisión. No se construye nada más para avisar (AD-27).
   16-2-el-sitio-anuncia-lo-que-cambia-y-las-cuatro-familias-cuentan: backlog
   # APLAZADA el 04/09: reparte enlace «desde superficies indexadas» y hay dos en todo el
   # sitio. Se reabre cuando una familia pase del 20 % indexado en la serie.
@@ -227,7 +229,11 @@ development_status:
   # 2 indexadas de 80 y demostró que las Épicas 16 y 17 atacaban la causa equivocada.
   # Casi nada es código: es trabajo editorial y de canal.
   epic-18: in-progress
+  # 04/10: la v7 la deja abierta a propósito. Se cierra con la primera señal AJENA anotada por
+  # la 21.4; una bio, un Linktree o un campo web propios se anotan pero no la cierran.
   18-1-el-sitio-deja-de-tener-cero-enlaces-entrantes: backlog
+  # 04/10: la v7 la cierra desde la 21.3 —cuatro semanas ISO seguidas con la foto diaria y el
+  # enlace marcado en el registro— y la 21.4. Al Kit no se le añade nada.
   18-2-el-canal-propio-se-usa-como-fuente-de-rastreo: backlog
   # 18-3: dos URL pedidas a mano el 04/09 —las dos únicas con impresiones, Unamuno y
   # Gracián—. Quedan seis del lote elegido y faltaba el registro que la historia exige.
@@ -268,17 +274,17 @@ development_status:
   # 19.6 sale del diagnóstico del 07/09: el bucle no rinde por falta de candidatas —hay
   # 21.021 en corpus/_revision/— sino porque loteEnRevision las ordena por slug, que
   # respecto a si valen es azar. Cinco señales medidas separan; la longitud no.
-  19-6-la-cola-de-revision-se-ordena: in-review
+  19-6-la-cola-de-revision-se-ordena: review
   # 19.7 sale de la 19.6: al publicar las primeras Citas de Marco Aurelio, FR-23 nombró
   # doce documentos sin Autor declarado. La causa no es la Fuente: Wikisource declara el
   # Autor de lo escaneado con <pages index=… autor="…" /> y el lector solo entiende
   # {{Encabezado|autor=}}. Medido el 07/09: 18.040 páginas contra 40.923, el 31 %.
-  19-7-el-lector-entiende-la-obra-escaneada: in-review
+  19-7-el-lector-entiende-la-obra-escaneada: review
   # 19.8 sale de la 19.7: los documentos de Platón se versionaron mudos llevando
   # [[Categoría:Obras de Platón]] escrito, porque pareceNombreDePersona exigía dos
   # palabras y el clásico firma con una. Medido el 07/09 sobre 2.295 categorías:
   # 50 con nombre de una palabra en mayúscula, 48 personas y 2 que no.
-  19-8-el-clasico-firma-con-un-solo-nombre: in-review
+  19-8-el-clasico-firma-con-un-solo-nombre: review
   # 19.9: el Autor se lee del Índice del escaneo. OJO a lo medido antes de escribirla:
   # vale el 8 %, no el 53 %. El Índice de Esopo y el de La República traen |Autor=
   # vacío, así que NO arregla los dos casos que la motivaron. Sobre 25 subpáginas
@@ -290,7 +296,7 @@ development_status:
   # categorías entre tragedias, comedias, fábulas, epístolas, teatro y sonetos, y
   # cero que no sean persona. Fuera a propósito: traducciones (137), ilustraciones
   # (55) y documentos (292), que nombran a quien no escribió.
-  19-10-los-generos-que-faltaban: in-review
+  19-10-los-generos-que-faltaban: review
   # 19.11: la numeración de verso del escaneo (`<sup>` sin atributos de solo cifras) se
   # versionaba como texto. Medido el 14/09: 86 en La Eneida de Ochoa, libro I, y cero en
   # los demás documentos con cifra pegada, que es OCR. No le da margen a la canaria.
@@ -306,6 +312,37 @@ development_status:
   # un solo documento con el nombre colapsado por esta causa.
   19-13-el-titulo-largo-no-deja-sin-nombre-a-sus-paginas: review
   epic-19-retrospective: optional
+
+  # Épicas 20 y 21 — la v7. Salen de los datos del 03/10 (docs/superpowers/specs/2026-10-03-datos-recogidos.md:
+  # 11 clics y 421 impresiones en 43 días, 1.050 indexadas de 2.000, Autor 18 de 65, cero enlaces entrantes,
+  # 52.690 seguidores sin un camino comprobado al sitio) y del diseño del ciclo 1 aprobado por Héctor el 04/10
+  # (docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md). Ningún FR nuevo: D-1…D-7 son derivados.
+  # El orden lo manda el ciclo: la 20 va primera porque todo lo demás se juzga con sus series. Publicar (21) no
+  # depende de medir (20); medirlo entero, sí. La 20.4 y la 21.2 son de Héctor y no de un agente: credenciales,
+  # wrangler, Bing, paneles, y el tachado en bloque de las aptas. Decisiones del 04/10 que acotan el ciclo:
+  # donaciones apagadas, el .com se deja caducar, Citas del Corpus con un hueco semanal de historia, ~6 h/semana.
+  # Éxito a 90 días: ≥400 vistas/mes con origen=facebook; <100 es fracaso. Cierra la 18.2; la 18.1 queda abierta
+  # hasta la primera señal ajena; la 16.2 pasa a revisión con la lectura de Bing.
+  # Puerta de preparación (bmad-sprint-planning, 04/10 → 05/10): CONCERNS. Ninguna historia exige inventar;
+  # los huecos que conviene registrar antes de la 20.1 están en planning-artifacts/implementation-readiness.md.
+  epic-20: backlog
+  20-1-la-vista-de-una-superficie-de-agregación-deja-fila: backlog
+  # 20.2 y 20.3 se prueban con respuestas fijas y solo se CORREN con la credencial (DESPLIEGUE.md §5).
+  20-2-la-serie-de-tráfico-orgánico-se-versiona-desde-search-consol: backlog
+  20-3-la-demanda-medida-se-versiona-por-página: backlog
+  # 20.4 es la semana manual de Héctor; existe como historia para que el tablero la cuente, que es lo que
+  # no pasó con la 18.3.
+  20-4-la-semana-cero-se-lee-y-se-anota: backlog
+  epic-20-retrospective: optional
+
+  epic-21: backlog
+  # 21.1: al desplegar, la Cita de ese día cambia; se despliega un día sin jornada fijada o se fija la de ese día.
+  21-1-la-cita-del-día-recorre-las-aptas-en-rondas-por-autor: backlog
+  # 21.2 no es código: lista propuesta con la regla D-5, tachado en bloque de Héctor, un solo commit feat(portada).
+  21-2-de-16-citas-aptas-a-120-o-más-con-la-regla-en-el-commit: backlog
+  21-3-cada-publicación-del-canal-queda-anotada: backlog
+  21-4-cada-señal-externa-queda-anotada-propia-o-ajena: backlog
+  epic-21-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
