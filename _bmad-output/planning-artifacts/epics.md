@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4
+stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4; 2026-10-05: documentación retroactiva de la Épica 15 (v4) y de las historias 11.5, 11.6, 19.12 y 19.13, ya construidas
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
@@ -1470,6 +1470,8 @@ El Corpus pasa de 38 Citas a un volumen donde hay cola larga que capturar y Tema
 
 **Punto de partida medido (2026-08-18):** 38 Citas, 12 Autores, 8 Temas. Solo `la-vida` (17) y `el-saber` (15) superan `MIN_CITAS_POR_TEMA`. Por debajo: `la-virtud` 11, `el-tiempo` 8, `la-palabra` 7, `la-adversidad` 6, `la-libertad` 5, `la-amistad` 1. Tradición: 9 peninsulares, 2 latinoamericanos, 1 otra — un 16,7 % frente al suelo del 40 %.
 
+**Historias 11.5 y 11.6 (añadidas aquí el 2026-10-05):** no salieron del PRD sino de la primera sesión de sembrado real de la 11.4, y se especificaron directamente como spec en `implementation-artifacts/` (`spec-11-5-el-documento-ilegible-no-siembra.md`, `spec-11-6-documentar-una-cita-publicada.md`). Las dos se construyeron el 2026-08-21 y están `done`. Ninguna produce FR nuevos: son dos salvaguardas más de la misma tubería —una puerta de legibilidad entre recuperar y proponer, y la orden que documenta una Cita anterior a la v3 contra su documento—. Se escriben aquí tal como se construyeron, para que el tablero las encuentre; no son planificación nueva.
+
 ### Story 11.1: La Fuente se recupera, y su metadato sale del documento
 
 As a quien siembra el Corpus —el editor o un agente—,
@@ -1587,6 +1589,97 @@ So that no aterrice en una página vacía y me vaya para no volver.
 **When** la reviso
 **Then** se considera fallida aunque haya sumado Citas
 **And** las Citas sin Procedencia completa se mueven a `corpus/_revision/`
+
+### Story 11.5: Un documento ilegible no siembra
+
+As a quien revisa candidatas —el editor o un agente—,
+I want que un documento con el OCR roto no proponga ninguna candidata, y que uno sano con párrafos rotos proponga solo lo sano,
+So that una Cita mutilada no llegue a publicarse bajo la firma de su Autor, con la Procedencia correcta y el cotejo en verde.
+
+**Nota de origen:** la primera sesión de sembrado real recuperó el *Apéndice a Mis últimas tradiciones peruanas* de Ricardo Palma y extrajo 61 candidatas con texto corrupto —«enseiia», «For- mabalo», «6» donde va «ó»— que el cotejo de la 11.2 daba por buenas, porque la basura está literal en su documento. Solo las paró que una persona las leyera una a una. Construida el 2026-08-21; la señal de puntuación rota se le añadió el 2026-08-28, medida contra las 1.632 Citas publicadas para que no mordiera ninguna.
+
+**Acceptance Criteria:**
+
+**Given** un documento con el OCR roto —el *Apéndice* de Palma: 82 de 2.292 palabras con señales de OCR, un 3,6 % sobre el 2 % admitido—
+**When** lo extraigo
+**Then** ninguna candidata llega a `corpus/_revision/`
+**And** la orden sale con código distinto de 0 y dice por qué, con la medida y las palabras que la dispararon delante
+
+**Given** un documento sano con algunos párrafos rotos
+**When** lo extraigo
+**Then** las candidatas afectadas se descartan y se cuentan en el informe, junto a las descartadas por longitud y por idioma
+**And** las sanas entran
+
+**Given** un texto con arcaísmos, latín, nombres propios extranjeros, poesía con guiones y elisiones, cursiva marcada con guiones bajos o un suplemento del traductor entre ángulos
+**When** lo extraigo
+**Then** no se descarta nada por legibilidad: la señal es de OCR, no de vocabulario
+**And** los documentos reales del Corpus pasan con cero descartes, y el peor no llega a la mitad del umbral
+
+**Given** cualquier documento
+**When** la puerta actúa
+**Then** no se modifica ni un carácter de ningún texto: la medida devuelve números, nunca texto corregido
+
+**Given** la puerta
+**When** reviso dónde vive
+**Then** está en la extracción, entre recuperar y proponer, y no en el cotejo de la 11.2, que no se relaja
+**And** mide sin diccionario ni servicio externo, y su umbral vive en `src/lib/umbrales.ts` declarado como provisional
+
+**Given** la puntuación rota del escaneo —un punto intruso a mitad de frase con cuatro letras o más delante, o un espacio antes de coma, punto o punto y coma—
+**When** se mide contra las Citas ya publicadas
+**Then** ninguna publicada queda mordida, y la señal actúa en la extracción y en la aprobación
+**And** deja pasar las abreviaturas, los puntos suspensivos con espacio delante propios del XIX y el punto seguido que abre en mayúscula
+
+**Given** una palabra rota que solo un léxico distinguiría —«indivicluo», «porpue», «laspocas»—
+**When** pasa la puerta
+**Then** sigue pasando, y queda escrito en `deferred-work.md`: el léxico es una decisión de producto, no del bucle
+
+### Story 11.6: Documentar una Cita publicada
+
+As a editor que coteja las Citas anteriores a la v3,
+I want documentar una Cita ya publicada contra un documento recuperado, restituir su texto literal cuando la edición dice lo mismo con otros signos, y retirar con motivo la que no supera el cotejo,
+So that el censo de pendientes de cotejo mengüe sin editar un `.md` a mano, y ninguna Cita salga del censo sin haberse cotejado.
+
+**Nota de origen:** era el último criterio abierto de la 11.4 —el censo de 38 no podía menguar porque no había orden que documentara una Cita publicada—, y al cotejar a Gracián contra su edición de 1647 aparecieron dos Citas publicadas desde la v1 que no son suyas. Se construyó el 2026-08-21 como `npm run documentar`, y el censo pasó de 38 a 29 ese mismo día: dos retiradas, tres corregidas contra su edición, cuatro documentadas. El cotejo de Autor (FR-23) se le añadió el 2026-08-23. Lo que no puede saldar, y queda dicho: las cinco de Séneca, porque la Fuente aloja otra traducción y para un autor traducido no existe «la edición».
+
+**Acceptance Criteria:**
+
+**Given** una Cita publicada cuyo texto aparece literal en un documento ya recuperado
+**When** la documento con `npm run documentar -- <slug> corpus/fuentes/<documento>.txt`
+**Then** se escriben su `fuente` y su Procedencia derivadas del documento —obra y año salen de la declaración; no hay banderas `--obra` ni `--año`—
+**And** sale del censo en el mismo gesto, el fichero del censo conserva su cabecera y sus comentarios, y el build sigue en verde
+
+**Given** una Cita cuyo texto no aparece en el documento
+**When** intento documentarla
+**Then** se rechaza con código 1 nombrando el documento y las dos salidas —corregir contra la edición o retirar—
+**And** no se toca ni la Cita ni el censo
+
+**Given** una Cita cuya edición dice lo mismo con otros signos
+**When** la documento con `--texto "<el texto literal de la edición>"`
+**Then** el texto nuevo tiene que aparecer literal en el documento y parecerse al publicado por encima de `MIN_PARECIDO_PARA_CORREGIR` (0,85 sobre la forma canónica de AD-3)
+**And** se dice el antes y el después antes de escribir, y el slug no se recalcula (AD-4)
+
+**Given** `--texto` con algo que el documento no dice, o con otro pasaje del mismo documento
+**When** intento documentar
+**Then** se rechaza con código 1 —nombrando el parecido y el umbral en el segundo caso—
+**And** no quedan tocados ni la Cita, ni el censo, ni el fichero
+
+**Given** una Cita que no supera el cotejo
+**When** la retiro con `--retirar <slug> "<motivo>"`
+**Then** el fichero se mueve a `corpus/_revision/` y sale del censo si estaba; no se borra nada (AD-2)
+**And** sin motivo la orden se niega con código 2
+
+**Given** una Cita que ya declara `fuente`, un slug con errata, una Cita en revisión, o un documento que no está o no tiene la forma de la recuperación
+**When** intento documentar
+**Then** se rechaza con código 1 nombrando lo que falla
+
+**Given** una Cita documentada cuya línea se repone a mano en el censo
+**When** se construye el sitio
+**Then** el build falla: documentar y salir del censo van juntos porque el estado intermedio no puede existir
+
+**Given** un documento firmado por un Autor distinto del que la Cita declara
+**When** intento documentarla
+**Then** se rechaza con código 1 poniendo delante las dos partes, y la Cita sigue censada como no verificada
+**And** un documento sin autor declarado, o firmado «Anónimo», documenta igual y el parte dice «Autor: sin cotejar»
 
 ---
 
@@ -1863,6 +1956,221 @@ So that exista la opción sin que se convierta en un peaje.
 **Given** el Umbral de Activación de las donaciones
 **When** compruebo si puede encenderse
 **Then** basta con que LC-1…LC-4 estén verificadas
+
+---
+
+## Epic 15: Meta de Corpus
+
+El bucle autónomo vuelve a tener de qué tirar después de cumplir la 11.4: el Corpus pasa de 252 Citas, 8 Temas, 17 Autores y ninguna Colección a mil Citas, veinticuatro Temas, treinta y cinco Autores y doce Colecciones, con el Autor más representado por debajo del 15 % del Corpus. No construye tubería: explota la que dejaron las Épicas 9, 11, 12 y 13.
+
+**FRs covered:** ninguno nuevo. Ejercita FR-23, FR-24 y FR-25 —la tubería de sembrado de la Épica 11—, FR-6 —la Página de Tema con su umbral— y FR-26, FR-27 —la Colección y su curación—.
+**Condiciones cubiertas:** ninguna nueva; amplía lo que la 11.4 dejó medido.
+**Notas de implementación:** **esta épica no salió de un PRD** (añadida aquí el 2026-10-05, con la épica ya cerrada). Nació el 2026-08-24 de que los criterios medibles de la 11.4 quedaron cumplidos —ningún Tema bajo el umbral, tradición latinoamericana en el 41,2 %— y `npm run huecos` cerraba con «No hay hueco que cerrar», con 59 documentos de Fuente y 489.690 palabras versionadas sin exprimir. La decidió Héctor ese día y su protocolo es `implementation-artifacts/LOOP-PROTOCOL-V4.md`. La Meta son cuatro números y un techo en `src/lib/umbrales.ts` (AD-9), cruzados con el estado por `src/lib/meta.ts`, su único dueño; va aparte de `objetivo.ts` porque el suelo de publicación es una regla del producto y la meta, una ambición. El orden de las historias 15.2 a 15.6 es el escalonado de `objetivoDeMeta` —por coste y no por importancia: Colecciones, concentración, Autores, Temas, volumen— y el bucle no elige tramo: lee el que la política declara. Lo que el bucle no decidió: no bajó ningún umbral para alcanzar una meta, no inventó Fuente ni Colecciones de relleno, y a quién se admite siguió reservado a Héctor hasta que lo delegó el 2026-08-26. **Cerrada el 2026-08-27:** `npm run huecos` declaró «Meta de Corpus alcanzada» por su cuenta —1.632 Citas, 24 Temas, 35 Autores, 16 Colecciones— con el Autor más representado en el 11,1 % y ningún umbral bajado. La 19.5 añadió después la cobertura por época a lo que «alcanzada» significa.
+
+### Story 15.1: El listón agresivo tiene nombre, y lo cruza un solo módulo
+
+As a bucle que deriva su trabajo del hueco,
+I want que la Meta de Corpus tenga cifras con dueño y que la política declare a qué tramo se dedica la sesión,
+So that cuando el suelo de publicación esté cumplido siga habiendo trabajo derivable sin que nadie lo invente.
+
+**Nota de ejecución:** construida y cerrada el 2026-08-24, sin tocar una línea de las 96 pruebas de la 11.3.
+
+**Acceptance Criteria:**
+
+**Given** las cuatro cifras de la Meta —1.000 Citas, 24 Temas, 35 Autores, 12 Colecciones— y el techo de concentración del 15 %
+**When** reviso dónde viven
+**Then** están en `src/lib/umbrales.ts` y en ningún otro sitio (AD-9), aparte de los umbrales de publicación y documentadas como ambición y no como umbral
+**And** las cruza con el estado `src/lib/meta.ts`, su único dueño, sin tocar `objetivo.ts`
+
+**Given** el estado del Corpus
+**When** `npm run huecos` lo informa
+**Then** cierra con un bloque «Meta de Corpus» detrás del «Objetivo de la sesión», con cada tramo como alcanzado, meta y faltan
+**And** `faltan` nunca es negativo, y los Temas y las Colecciones se cuentan publicados —restando los que `verHuecos` dejó por debajo de su umbral— sin volver a aplicar el umbral
+
+**Given** el escalonado
+**When** `objetivoDeMeta` elige tramo
+**Then** va por coste —Colecciones, concentración, Autores, Temas, volumen— y declara «alcanzada» cuando los cuatro tramos están y el reparto no excede el techo
+**And** cada objetivo declara de qué tramo sale, con la cifra alcanzada y la meta delante, y el mismo estado da el mismo texto palabra por palabra
+
+**Given** el techo de concentración
+**When** un Autor pasa del 15 % del Corpus
+**Then** el hueco se mide en Citas de otros Autores que faltan para bajarlo —diluyendo, nunca despublicando—
+**And** el techo se compara con la razón exacta en enteros, no con el porcentaje redondeado
+
+**Given** la regla de la Historia 9.3
+**When** el informe habla del tramo de concentración
+**Then** dice «el Autor más representado» y jamás su nombre; el slug viaja solo en el `--json`
+**And** lo único que el informe entrecomilla sigue siendo nombres de Tema
+
+**Given** el suelo de publicación
+**When** `objetivoDeSesion` declara un hueco
+**Then** ese hueco va antes que cualquier tramo de la Meta
+
+### Story 15.2: Doce Colecciones sobre lo ya publicado
+
+As a visitante que llega buscando un criterio y no un asunto,
+I want doce Páginas de Colección publicadas, curadas sobre Citas ya publicadas,
+So that el sitio gane doce superficies indexables sin sembrar una Cita ni correr riesgo editorial.
+
+**Nota de ejecución:** es el tramo más barato de la Meta y el que llevaba dos épicas construido sin estrenar. Cerrada el 2026-08-24: 12 de 12 en dos sesiones.
+
+**Acceptance Criteria:**
+
+**Given** las Épicas 12 y 13 construidas y `corpus/colecciones/` con su `.gitkeep` y nada más
+**When** se curan las Colecciones con `npm run coleccion`
+**Then** no se siembra ninguna Cita ni se recupera ningún documento
+**And** cada Colección es un criterio editorial que merece página, con nombre y criterio, y ninguna es relleno para llegar a doce
+
+**Given** una Colección curada
+**When** se publica
+**Then** alcanza `MIN_CITAS_POR_COLECCION` con miembros resueltos contra el conjunto publicable (AD-18)
+**And** puede solaparse con un Tema: un Tema es un asunto y una Colección es un criterio, y de no canibalizar a la Cita se ocupa la canónica (12.3)
+
+**Given** el tramo cerrado
+**When** se mide
+**Then** hay 12 Colecciones de 12, el sitio pasa de 277 a 289 páginas, 204 de las 252 Citas (81 %) pertenecen a alguna, y diez de las doce mezclan Autores
+**And** `objetivoDeMeta` pasa por su cuenta al tramo siguiente, declarando cuántas Citas de otros Autores faltan
+
+**Given** las Páginas de Colección desplegadas
+**When** se verifican en vivo
+**Then** responden 200, están en el sitemap y la canónica de cada una apunta a sí misma
+
+**Given** que la siembra avanza después de curarlas
+**When** se revisan contra el Corpus que creció debajo
+**Then** los miembros se vuelven a curar —las dieciséis, de 297 a 390 miembros— porque son listas escritas a mano que no se actualizan solas
+
+### Story 15.3: Ningún Autor pasa del techo de concentración
+
+As a lector que no quiere la antología de un solo Autor,
+I want que ningún Autor aporte más del 15 % de las Citas del Corpus,
+So that el volumen no se alcance por el camino fácil de minar más al que más rinde.
+
+**Nota de ejecución:** cerrada el 2026-08-25. Se cerró diluyendo, sin despublicar ninguna Cita, como manda la política.
+
+**Acceptance Criteria:**
+
+**Given** Gracián con 114 de 252 Citas —el 45,2 %— al abrir la épica
+**When** se cierra el tramo
+**Then** el Autor más representado queda por debajo del techo: 114 sobre 761, el 14,98 %
+**And** ese Autor conserva exactamente las 114 que tenía
+
+**Given** una sesión de siembra con el techo cerca
+**When** se planea el reparto
+**Then** se calcula con la aritmética antes de sembrar, sobre el Corpus final, para que ningún Autor cruce el techo al llegar
+**And** no se apoya en el redondeo
+
+**Given** el techo vigilando solo al primero
+**When** once sesiones diluyendo al más representado llevaron al segundo a seis Citas del techo sin aviso
+**Then** la política cuenta cuántos Autores pasan del techo, no solo si alguno pasa, y las Citas que faltan salen del Autor que más dilución exige
+**And** el informe dice cuántas Citas propias caben todavía bajo el techo, sin nombrar a nadie
+
+**Given** la regla de que a quién se admite no lo decide el bucle
+**When** el tramo parece bloqueado por falta de Autores
+**Then** ampliar un Autor ya representado con otra de sus obras es trabajo del bucle, y así entraron los documentos que lo cerraron
+**And** lo que sigue reservado es admitir Autores nuevos, que es la 15.4
+
+**Given** documentos recuperados para diluir
+**When** no declaran Autor, declaran dos firmantes, o no dan ninguna Cita
+**Then** no se siembran, y el que no da Cita se retira
+
+### Story 15.4: El censo llega a treinta y cinco Autores
+
+As a visitante que busca a un Autor concreto,
+I want un censo de treinta y cinco Autores que publican,
+So that el techo de concentración sea sostenible y el Corpus no sea el de nadie.
+
+**Nota de ejecución:** el tramo estuvo reservado a Héctor —a quién se admite era lo único que el producto no delegaba— y lo delegó el 2026-08-26, con lo que pasó de ser una puerta a ser un procedimiento. Puesta el 2026-08-27: 35 de 35, sin bajar ningún umbral.
+
+**Acceptance Criteria:**
+
+**Given** un candidato a Autor
+**When** se evalúa antes de recuperar nada
+**Then** murió en 1946 o antes, y si es traducción la edición declara año; sin año declarado no entra, porque no hay con qué respaldar el `estadoDerechos` de cada Cita
+**And** se elige por género medido —prosa doctrinal y aforística— y no por fama
+
+**Given** la Fuente
+**When** se buscan candidatos
+**Then** se lista la categoría del catálogo —ensayos por Autor, o materia en Gutenberg—, no palabras del título ni nombres pensados
+**And** se ordena por tamaño de cada obra, nunca por la suma del Autor; los dos catálogos en castellano se contaron enteros, 144 y 143 firmas admisibles
+
+**Given** la Meta
+**When** cuenta Autores
+**Then** cuenta los que publican, no los declarados: admitir es recuperar, versionar, extraer, leer y publicar
+**And** una firma admitida que no publica no se queda: en la última tirada entraron cinco firmas y se retiraron cinco obras que no daban dos Citas
+
+**Given** el nombre del Autor
+**When** se crea su ficha
+**Then** se copia del documento, no se completa: `extraer` se niega ante unas iniciales desplegadas
+**And** el suelo del 40 % de tradición latinoamericana se mide sobre los admitidos y se respeta
+
+**Given** el tramo cerrado
+**When** se mide
+**Then** 35 de 35, sin bajar ningún umbral y con el techo respetado
+
+### Story 15.5: Veinticuatro Temas publicados
+
+As a visitante que llega por una consulta con forma de asunto,
+I want veinticuatro Páginas de Tema publicadas con sus quince Citas cada una,
+So that la red de cola larga del sitio triplique su anchura.
+
+**Nota de ejecución:** puesta el 2026-08-27, 24 de 24, sin bajar ningún umbral. Es la historia que cerró la épica: `npm run huecos` declaró «Meta de Corpus alcanzada» ese día.
+
+**Acceptance Criteria:**
+
+**Given** un asunto candidato a Tema
+**When** se decide si abrirlo
+**Then** se hacen tres preguntas en este orden: si otro Tema publicado ya posee la mitad de sus Citas, es ese Tema; cuántos sentidos tiene la palabra que lo cuenta; y solo entonces si hay cantera, medida con `npm run asuntos -- --cantera` sobre las candidatas y no sobre lo publicado
+**And** un Tema nuevo necesita quince Citas sobre un asunto que ninguno de los existentes cubra, y `MIN_CITAS_POR_TEMA` no se toca
+
+**Given** la cuenta por asunto
+**When** se mide
+**Then** vive en `tools/asuntos.ts` y no en un grep distinto cada sesión, con los defectos conocidos catalogados en la cabecera del módulo —razón/corazón, ira/irá, error/terror—
+**And** una sonda nueva se escribe mirando ese catálogo
+
+**Given** un Tema que puede salir de Citas ya publicadas
+**When** se abre con `tema asignar` y `tema quitar`
+**Then** no se despublica nada, y se dice que organiza el Corpus en vez de agrandarlo
+
+**Given** el Tema «El error» publicado
+**When** cuatro pruebas E2E del 404 y de la búsqueda vacía caen por casar su nombre con un patrón de jerga técnica
+**Then** no se renombra el Tema para devolver el verde: se aprieta el alcance de la aserción a la prosa de la página, con el razonamiento escrito dentro de la prueba
+
+**Given** el tramo cerrado
+**When** se mide
+**Then** 24 de 24, ningún Tema por debajo del umbral, y los dos últimos —«el deber» y «el error»— salieron solo después de arreglar sus familias de palabras
+
+### Story 15.6: Mil Citas publicadas
+
+As a visitante que busca una Cita concreta,
+I want mil Citas publicadas con Procedencia cotejada,
+So that la cola larga tenga volumen y el sitio no sea la antología de un libro.
+
+**Nota de ejecución:** puesta el 2026-08-26 —1.000 de 1.000, 73.ª sesión del bucle— con el techo respetado en todo momento: el más representado en 149, el 14,9 %. El bucle siguió sembrando hasta las 1.632 con las que se cerró la épica.
+
+**Acceptance Criteria:**
+
+**Given** una Cita que se publica
+**When** pasa por la tubería
+**Then** tiene documento versionado, pasa el cotejo literal de la 11.2 y la puerta de legibilidad de la 11.5, y su Autor concuerda con el que declara el documento (FR-23)
+**And** no se inventa Fuente ni se baja ningún umbral
+
+**Given** las tres canteras con obra extraíble y el techo del 15 %
+**When** se reparten las últimas treinta y tres
+**Then** el reparto sale de la aritmética del techo sobre el Corpus final, hecha antes de leer
+**And** ninguna sesión rompe el techo
+
+**Given** una obra candidata
+**When** se elige
+**Then** se elige obra y no firma: el rendimiento es del género y del modo retórico de la obra concreta, y una obra tiene tramos
+**And** antes de recuperar se mira `corpus/_fuentes-retiradas/`, y la orden se niega sobre un documento ya retirado
+
+**Given** la segunda Fuente admitida, Project Gutenberg, con un solo documento de 143 versionados
+**When** se abre
+**Then** da libros enteros donde Wikisource da capítulos, y se busca en ella por materia y no por género
+
+**Given** el tramo cerrado
+**When** se mide
+**Then** 1.000 de 1.000, sin bajar ningún umbral; mil Citas es un hito y no la Meta, que solo se declara cuando los cuatro tramos están
 
 ---
 
@@ -2263,6 +2571,7 @@ El Corpus está invertido respecto a la demanda: González Prada aporta 154 Cita
 **FRs covered:** FR-48, FR-49, FR-50
 **Notas de implementación:** la primera historia se especificó como puerta y **se suavizó el 2026-09-05**: la verificación de derechos ya la hace el conjunto cerrado de Fuentes —Wikisource solo aloja dominio público— y exigir además el año de cada traducción duplicaba esa comprobación un nivel más abajo y peor. Ya no bloquea a las demás. Las dos siguientes son operación —el bucle— y no producen FR nuevos: las herramientas son las de la Épica 9, ya construidas. La 19.4 es superficie nueva y va la última, con condición de indexación.
 **Historias 19.5 a 19.11 (añadidas aquí el 2026-09-14):** no salieron de la planificación sino de diagnósticos del bucle, y se especificaron directamente como spec en `implementation-artifacts/`. Ninguna produce FR nuevos: son operación del bucle (19.5, 19.6) y lectura de la Fuente (19.7 a 19.11). La 19.5 sustituye al listón numérico que la 19.2 dejaba pendiente. La 19.9 se construyó el 2026-09-14 por decisión de Héctor, sabiendo lo medido antes de escribirla: vale el 8 % de las páginas mudas y no el 53 %, y no salva a Esopo ni a *La República*.
+**Historias 19.12 y 19.13 (añadidas aquí el 2026-10-05):** de la misma clase que las siete anteriores —lectura de la Fuente, diagnosticadas por el bucle y especificadas directamente como spec en `implementation-artifacts/`—, y ninguna produce FR nuevos. La 19.12 se construyó el 2026-09-22 y la 19.13 el 2026-10-02; las dos están en `review`.
 
 ### Story 19.1: De una obra traducida se conserva lo que la Fuente declare
 
@@ -2533,11 +2842,87 @@ So that «5Mucho padeció» no quede versionado como si lo hubiera escrito Virgi
 **When** se construye la historia
 **Then** no se toca: la numeración es aparato del escaneo, no margen de la canaria
 
+### Story 19.12: El verso se lee por frase, no por renglón
+
+As a editor que siembra verso declarado por la Fuente,
+I want que dentro de un bloque que la Fuente declara como verso el salto de renglón se versione como salto simple y no como párrafo,
+So that una sentencia repartida en varios versos llegue entera al troceador, en vez de salir como tres fragmentos que no alcanzan los 40 caracteres.
+
+**Nota de origen:** medido el 2026-09-20: la «Canción divina» de González de Eslava daba 1 candidata en ventana y debía dar 14, y de ahí salieron descartes de Autores enteros «porque su obra solo da medios versos». Construida el 2026-09-22 y medida sobre los 306 documentos de Wikisource-es versionados: 54 traen verso declarado, y en ellos las candidatas pasan de 8.269 a 8.508 —1.130 ganadas, 891 perdidas, 684 de ellas medio verso—.
+
+**Acceptance Criteria:**
+
+**Given** un `<div class="poem">`, `verse` o `mw-poem-indented` —por identificador exacto de clase, nunca por subcadena ni por heurística de longitud—
+**When** se recupera de Wikisource-es
+**Then** el bloque es un párrafo y sus frases se parten por puntuación, como en la prosa
+**And** `<br><br>` sigue dando párrafo, un contenedor sin cerrar se deja intacto, y `data-class` no declara verso
+
+**Given** un documento sin verso declarado
+**When** se recupera otra vez
+**Then** su cuerpo es idéntico byte a byte salvo la fecha de recuperación
+**And** ni el troceador, ni `MIN_CARACTERES_CANDIDATA`, ni el cotejo ni la canaria de legibilidad se tocan
+
+**Given** la «Canción divina» recuperada de nuevo
+**When** se extraen y se revisan sus candidatas una a una
+**Then** al menos una es Cita publicable; la cifra de candidatas en cola no es criterio de nada
+
+**Given** los documentos ya versionados con verso declarado
+**When** se regeneran con `tools/recuperar.ts`, de uno en uno y comparando palabra a palabra
+**Then** solo cambia el espaciado, y si cambia algo más se restituye el viejo —50 regenerados y 4 restituidos—
+**And** se anota por documento si pierde candidatas en ventana, porque unir versos puede pasar una frase de 240 caracteres
+
+**Given** los documentos regenerados
+**When** corre el cotejo del build
+**Then** toda Cita publicada sigue literal en su documento
+
+**Given** el teatro, con el nombre del personaje delante de cada frase, y la clase `poem` envolviendo prosa en *La ciudad de Dios*
+**When** se juzga el alcance
+**Then** no entran: lo primero espera a saber separar el nombre, y lo segundo queda anotado en `deferred-work.md` porque distinguirlo exigiría adivinar por la forma del renglón
+
+### Story 19.13: Un título largo no deja sin nombre a las páginas de su obra
+
+As a editor que versiona una obra por subpáginas,
+I want que cada subpágina de una obra de título largo tenga nombre propio de documento,
+So that las veintiuna páginas de los *Coloquios* de González de Eslava no compitan por un solo fichero y se pueda versionar más de una.
+
+**Nota de origen:** medido el 2026-09-24 y el 2026-10-02: el nombre `{fuente}--{slug-de-obra}--{slug-de-página}` acota cada segmento a 60 caracteres, y cuando la obra agota ese largo el segmento de página queda idéntico al de la obra y el nombre colapsa. De los 309 documentos de Wikisource-es versionados, uno solo tenía el nombre colapsado por esta causa. Construida el 2026-10-02.
+
+**Acceptance Criteria:**
+
+**Given** dos subpáginas cualesquiera de los *Coloquios*
+**When** se piden sus nombres
+**Then** son distintos entre sí y distintos del de la obra: el segmento sale de lo que la Fuente escribe en su título declarado detrás del título de la obra, con todos los tramos que quedan, nunca de la URL ni del índice del escaneo
+
+**Given** los 309 documentos de Wikisource-es ya versionados
+**When** se recalculan sus nombres
+**Then** ninguno cambia salvo el de los *Coloquios*
+
+**Given** una página que es su propia obra, o que difiere de ella solo en mayúsculas, o cuya obra derivada es su propio título con barra por no declarar `|título`
+**When** se pide su nombre
+**Then** sigue teniendo un solo segmento, el que su documento ya lleva escrito
+**And** Gutenberg sigue con uno
+
+**Given** una subpágina de más de un tramo —«Obra/Libro I/Capítulo I» y «Obra/Libro II/Capítulo I»—
+**When** se piden sus nombres
+**Then** son distintos entre sí
+
+**Given** una subpágina cuya cola da el mismo slug que la obra
+**When** se pide su nombre
+**Then** lleva dos segmentos y no reclama el documento de la obra entera
+
+**Given** dos subpáginas que siguen coincidiendo al acotar
+**When** se recuperan
+**Then** `recuperar` sigue negándose: no se numera ni se desambigua con un sufijo inventado
+
+**Given** el documento de los *Coloquios* ya versionado con el nombre colapsado
+**When** se renombra con `git mv` al nombre que `nombreDeDocumento` deriva, por decisión de Héctor del 2026-10-02
+**Then** el cotejo del build sigue en verde, `extraer` pasa la puerta del nombre con código 0, y la prueba que recorre los documentos versionados ya no admite excepciones
+
 ---
 
 # Sabiduría de Bolsillo — Épicas de la v7 (ciclo 1)
 
-Las Épicas 1 a 5 son la v1, las 6 a 10 la v2, las 11 a 14 la v3, las 16 a 18 la v5 y la 19 la v6. Esta parte abre la v7, que es la fase planificada el 2026-10-04 a partir de los primeros datos con volumen de Search Console y del panel de Facebook. La fase entera son seis épicas candidatas, escritas en `docs/superpowers/specs/2026-10-04-fase-siguiente-borrador.md`; **aquí entra solo su primer ciclo**, el único con diseño aprobado: medir antes de mover, y conectar el canal propio al sitio.
+Las Épicas 1 a 5 son la v1, las 6 a 10 la v2, las 11 a 14 la v3, la 15 la v4, las 16 a 18 la v5 y la 19 la v6. Esta parte abre la v7, que es la fase planificada el 2026-10-04 a partir de los primeros datos con volumen de Search Console y del panel de Facebook. La fase entera son seis épicas candidatas, escritas en `docs/superpowers/specs/2026-10-04-fase-siguiente-borrador.md`; **aquí entra solo su primer ciclo**, el único con diseño aprobado: medir antes de mover, y conectar el canal propio al sitio.
 
 **Lo que esta parte no trae, y por qué.** El ciclo **no añade ningún FR al PRD**: realiza FR que ya existen y añade capacidad de medición que el diseño aprobado deriva de ellos. Por eso el inventario distingue los FR realizados de los *requisitos derivados del diseño*, numerados D-1 a D-7. Si la skill de arquitectura juzga que AD-24 debe nombrar las dos series nuevas, el PRD y la espina se regeneran por sus skills; ninguna línea de este documento los sustituye.
 
