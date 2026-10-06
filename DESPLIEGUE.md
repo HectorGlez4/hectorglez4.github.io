@@ -73,10 +73,13 @@ Con el ápice como dominio propio, GitHub Pages redirige `www` al ápice por su 
 hay nada que configurar en el sitio para eso.
 
 El dominio es `.net`. No afecta al posicionamiento —los gTLD se tratan por igual—, pero sí
-al reconocimiento: si el `.com` sigue libre, conviene registrarlo y redirigirlo desde el
-registrador al `.net`, para que nadie se instale ahí con este nombre. Esa redirección se
-hace en el registrador y **no** en el sitio: una segunda entrada en `public/CNAME` no es
-posible, y GitHub Pages sirve un solo dominio propio.
+al reconocimiento. El `.com` no está libre: es del propio proyecto, responde 402 y caduca en
+julio de 2027. **Se deja caducar**, por decisión del 2026-10-04
+(`docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md` §2.4): ni se renueva ni
+se redirige al `.net`; lo único que se corrige es la bio de TikTok, que todavía apunta al
+`.com`. Redirigirlo tampoco sería cosa del sitio —una segunda entrada en `public/CNAME` no es
+posible, y GitHub Pages sirve un solo dominio propio—, así que la decisión no deja nada
+pendiente en el repositorio.
 
 Cómo comprobar que quedó bien, sin entrar en ningún panel:
 
