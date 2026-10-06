@@ -2,7 +2,7 @@
 title: Sabiduría de Bolsillo
 status: final
 created: 2026-08-10
-updated: 2026-09-02
+updated: 2026-10-06
 ---
 
 # PRD: Sabiduría de Bolsillo
@@ -52,7 +52,7 @@ El motor de crecimiento no es una campaña: es la propia estructura del sitio. C
   Diego, 24 años, busca material para su historia de Instagram. Llega a una Página de Cita desde una búsqueda por tema. Le gusta la frase pero no va a copiar texto plano. Pulsa "compartir imagen", elige entre unos pocos diseños y, en lugar de recibir un fichero en la carpeta de descargas, **se le abre la hoja de compartir de su móvil con la Imagen de Cita ya adjunta**. Toca el icono de Instagram, escribe dos palabras y publica. **Clímax:** ha publicado sin salir del navegador, sin abrir la galería y sin buscar dónde ha caído el fichero. **Resolución:** la imagen lleva la marca, así que su publicación es la que trae al siguiente visitante. **Caso límite:** en el escritorio no existe hoja del sistema; la misma acción descarga el fichero, que es el comportamiento de la v1 y sigue siendo correcto.
 
 - **UJ-3. Marisol llegó por una frase y se quedó una hora.**
-  Marisol, profesora de literatura, busca una cita concreta de un autor clásico. Desde la Página de Cita pulsa el nombre del autor y aterriza en la **Página de Autor**: una semblanza breve y el resto de citas de esa persona en el catálogo. Desde ahí salta a un **Tema** que le interesa y descubre a un autor latinoamericano que no conocía. **Clímax:** cuatro páginas después sigue leyendo. **Resolución:** vuelve por su cuenta días después, directamente al dominio.
+  Marisol, profesora de literatura, busca una cita concreta de un autor clásico. Desde la Página de Cita pulsa la obra de la que procede y lee juntas, en la **Página de Obra**, las demás citas de ese libro *(v7.1)*; de ahí pulsa el nombre del autor y aterriza en la **Página de Autor**: una semblanza breve y el resto de citas de esa persona en el catálogo. Desde ahí salta a un **Tema** que le interesa y descubre a un autor latinoamericano que no conocía. **Clímax:** cuatro páginas después sigue leyendo. **Resolución:** vuelve por su cuenta días después, directamente al dominio.
 
 - **UJ-4. Héctor incorpora cincuenta citas nuevas sin romper la promesa del sitio.**
   Héctor, único editor, tiene un lote de citas de un autor recién entrado en dominio público. El lote entra por la herramienta interna — lo lanza él o un agente por él; la puerta es la misma. El sistema rechaza las que no traen **Procedencia** y las que pertenecen a un **Autor** sin año de fallecimiento registrado, dejándolas en estado de revisión en lugar de publicarlas. Él completa lo que falta y publica el resto. **Clímax:** el catálogo crece sin que baje el porcentaje de citas verificadas. **Caso límite:** si una cita duplica una ya publicada, el sistema lo señala antes de aceptarla.
@@ -64,39 +64,44 @@ El motor de crecimiento no es una campaña: es la propia estructura del sitio. C
 
 Los flujos aguas abajo deben usar estos términos exactamente. Introducir un sinónimo en cualquier parte del documento es una violación de disciplina.
 
-- **Cita** — Unidad atómica de contenido: un texto textual atribuido a un Autor. Tiene exactamente un Autor, cero o más Temas, una Procedencia y un Estado de Derechos. Es la única entidad con página propia indexable individualmente.
+- **Cita** — Unidad atómica de contenido: un texto textual atribuido a un Autor. Tiene exactamente un Autor, cero o más Temas, una Procedencia y un Estado de Derechos. Las demás páginas del sitio la agregan, y su canónica es siempre su Página de Cita (NFR-13). *(v7.1 — antes decía «la única entidad con página propia indexable individualmente».)*
 - **Autor** — Persona a quien se atribuyen una o más Citas. Registra nombre, semblanza, nacionalidad y año de fallecimiento. El año de fallecimiento es obligatorio: sin él, ninguna Cita del Autor puede publicarse.
 - **Semblanza** *(v5)* — Texto que sitúa al Autor en su Página de Autor. Hasta la v5 se definía por su brevedad; ahora por su contenido y su fuente (FR-4 y FR-41).
-- **Obra** *(v5)* — Título del que procede al menos una Cita publicada, según su Procedencia. No es una entidad que se dé de alta: se **deriva** del Corpus, y por eso la bibliografía de un Autor es la de sus Citas publicadas y no la de su vida. Distinta de la Procedencia, que es el campo de una Cita; la Obra **agrupa** las Citas que comparten ese campo.
+- **Obra** *(v5; redefinida en la v7.1)* — Una obra de un Autor de la que procede al menos una Cita publicada. Su identidad es la del Autor junto con el título que declaran las Procedencias de sus Citas, sin distinguir mayúsculas, tildes ni signos: el ámbito es el Autor, y dos Autores pueden tener cada uno sus «Odas». No se da de alta: se **deriva** del Corpus, y por eso la bibliografía de un Autor es la de sus Citas publicadas y no la de su vida. Distinta de la Procedencia, que es el campo de una Cita: la Obra **agrupa** las Citas cuyas Procedencias la nombran, en cualquiera de las grafías de la misma obra que reúne su Ficha de Obra. Hasta la v7.1 no tenía página; ahora tiene Página de Obra (§4.19).
+- **Ficha de Obra** *(v7.1)* — Registro versionado de una Obra que fija lo que de ella no se puede derivar: su URL, que no cambia aunque cambie el título; el título con que el sitio la nombra en todas partes, que es siempre una de las grafías que declaran sus Procedencias; y qué grafías de la Procedencia reúne. La crea el sistema cuando llega una Obra nueva, sin decidir nada. Lo que en ella se decide lo decide una persona: qué grafía es el título, reunir o separar grafías de una misma obra, las **ediciones en venta** de la obra —impresas o electrónicas, y nunca en lugar de la edición cotejada de su Fuente— y una **nota** de hasta 160 caracteres que describe la obra o su edición cotejada sin calificarla. No es la «ficha» de la Página de Autor de FR-4, que es la cabecera de esa página.
 - **Tema** — Etiqueta transversal que agrupa Citas de distintos Autores (por ejemplo, el amor, el tiempo, el esfuerzo). Una Cita puede pertenecer a varios Temas.
-- **Procedencia** — Origen documentado de una Cita: obra, año o referencia. Distinta de la atribución, que es solo el nombre del Autor. Una Cita puede tener Procedencia completa, parcial o ausente.
+- **Procedencia** — Origen documentado de una Cita: obra, año o referencia, tal como lo declara su Fuente. Distinta de la atribución, que dice quién dijo la Cita; la Procedencia dice de dónde sale. Una Cita puede tener Procedencia completa, parcial o ausente. *(v7.1)* La obra de una Procedencia no se reescribe para publicarla: el sitio la nombra con el título de su Obra, que fija su Ficha de Obra.
 - **Estado de Derechos** — Campo de la Cita que registra bajo qué criterio es publicable. En la v1 solo se publica el valor `dominio-público`. El campo existe para admitir otros criterios sin rehacer la ingesta.
 - **Estado de Publicación** — Campo de la Cita: `publicada` (visible e indexable) o `en-revisión` (no visible, no indexable).
 - **Corpus** — Conjunto de todas las Citas del sistema, publicadas o en revisión.
 - **Cita del Día** — La Cita destacada en la portada durante una jornada. Se selecciona del Corpus publicado.
 - **Imagen de Cita** — Representación gráfica descargable de una Cita, generada por el sistema.
-- **Página de Cita / Página de Autor / Página de Tema** — Las tres superficies indexables del sitio, una por entidad del mismo nombre.
-- **Tarjeta Social** — Representación de una Página de Cita que muestran las redes cuando alguien pega su enlace. La compone el sistema; no es la Imagen de Cita, aunque se le parezca. Existe para toda Cita publicada, incluidas las que no admiten Imagen de Cita.
+- **Página de Cita / de Autor / de Tema / de Colección / de Obra** — La página propia de cada entidad del mismo nombre *(la de Colección desde la v3, la de Obra desde la v7.1)*. Toda página publicada es rastreable, pero no toda es indexable: las páginas 2 y siguientes de un listado (FR-5) y la Página de Obra que no cumple la regla de FR-52 existen sin indexarse.
+- **Superficie de lectura** *(v7.1)* — La Página de Cita, la de Colección y la de Obra: las páginas donde el visitante lee Citas. Ninguna admite donaciones ni publicidad; la de Obra es la única que admite la afiliación.
+- **Tarjeta Social** — Representación de una Página de Cita o, desde la v7.1, de una Página de Obra, que muestran las redes cuando alguien pega su enlace. La compone el sistema; no es la Imagen de Cita, aunque se le parezca. Existe para toda Cita publicada, incluidas las que no admiten Imagen de Cita. La de una Obra solo lleva hechos, nunca la nota de su Ficha de Obra (FR-51).
 - **Destino de Compartición** — Aplicación o red a la que va a parar una Cita compartida. Puede ser **conocido** (el visitante eligió un destino concreto en el sitio) o **opaco** (el visitante usó la hoja del sistema, que no revela su elección).
 - **Hoja del Sistema** — Selector de aplicaciones que ofrece el sistema operativo del visitante al compartir. Es el único camino hacia las redes que no admiten compartición desde la web.
 - **Kit Diario** — Material de publicación que el sistema deja compuesto cada jornada para las cuentas propias: la Imagen de la Cita del Día, su pie con atribución y su enlace marcado por red. Superficie interna, no indexable.
-- **Fuente** — Origen documental del que se extrae una Cita candidata durante el sembrado: una obra concreta en una edición concreta. Distinta de la Procedencia, que es lo que la Cita publica; la Fuente es de dónde lo sacó el editor y bajo qué licencia.
+- **Fuente** — Origen documental del que se extrae una Cita candidata durante el sembrado: una obra concreta en una edición concreta. Distinta de la Procedencia, que es lo que la Cita publica; la Fuente es de dónde lo sacó el editor y bajo qué licencia. *(v7.1)* También se muestra al visitante: la Página de Obra dice de qué Fuente, y bajo qué licencia, se tomó su texto. Cuando hay documento contra el que cotejarlo, esa Fuente es la **edición cotejada**, que es distinta de las ediciones en venta de una Ficha de Obra.
 - **Colección** *(v3)* — Agrupación editorial de Citas escogidas por un criterio que no es el Autor ni el Tema («frases cortas», «para dedicar», «para empezar el año»). Transversal a ambos: una Cita puede estar en varias Colecciones sin que cambie su Tema ni su Autor. Tiene página propia indexable y umbral mínimo de publicación, como el Tema. A diferencia del Tema, su criterio es editorial y su conjunto es abierto.
 - **Pieza de Canal** *(v3)* — Unidad publicable en una cuenta propia. La v2 producía una sola por jornada (la Imagen de la Cita del Día, dentro del Kit Diario); la v3 admite además piezas de varias Citas y piezas en movimiento. Es material de salida, nunca una superficie indexable.
 - **Modelo de Ingreso** *(v3)* — Una de las cuatro vías por las que el producto puede producir ingreso: donaciones, afiliación de libros, producto propio o publicidad. Cada uno tiene su Umbral de Activación.
-- **Umbral de Activación** *(v3)* — Cifra de tráfico orgánico medido por encima de la cual un Modelo de Ingreso puede encenderse. Se mide en el receptor de LC-4. Por debajo del umbral, el Modelo está diseñado pero apagado.
+- **Umbral de Activación** *(v3; precisado en la v7.1)* — Cifra de tráfico orgánico medido que autoriza el primer acto de un Modelo de Ingreso. En la mayoría ese acto es encenderlo; en la afiliación de libros es **solicitar** la cuenta de cada programa que imponga un plazo de ventas mínimas, porque solicitarla arranca ese plazo, y encender viene después (FR-35). Cruzarlo no enciende nada por sí solo. Se mide en el receptor de LC-4. Por debajo del umbral, el Modelo está diseñado pero apagado.
 
 ## 4. Features
 
-Veinte features repartidas en cinco rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
+Diecinueve features repartidas en seis rondas de PRD. Desde la v2, la etiqueta de versión va también en cada encabezado:
 
 - **v1 — §4.1…§4.8.** El producto: las cuatro superficies públicas, la búsqueda, la Imagen de Cita y la herramienta de curación.
 - **v2 — §4.9…§4.11.** Ponerlo delante de personas: compartición, canal propio y sembrado del Corpus.
 - **v3 — §4.12…§4.14.** Que crezca y se sostenga: Colecciones, ampliación del canal y monetización por umbral.
-- **v6 — §4.18.** Que el catálogo deje de estar invertido respecto a la demanda: clásicos y teología, en profundidad por Autor, con la Época como eje nuevo.
 - **v5 — §4.15…§4.17.** Que lo encuentren: entrar en el índice, darle a la Página de Autor el contenido que su consulta pide, y **conseguir que el buscador gaste rastreo en el sitio** — esta última añadida el 2026-09-04, cuando la primera medición demostró que las otras dos atacaban la causa equivocada.
+- **v6 — §4.18.** Que el catálogo deje de estar invertido respecto a la demanda: clásicos y teología, en profundidad por Autor, con la Época como eje nuevo.
+- **v7.1 — §4.19.** Que la obra tenga página: una URL por obra que capta su consulta, deja leer juntas sus Citas y es el único sitio del enlace de afiliación.
 
 **No hay v4 en este documento, y no es un salto por error.** La v4 fue la Meta de Corpus —1.639 Citas, 24 Temas, 35 Autores— y no salió de aquí: salió de que el bucle de sembrado agotó el hueco del que derivaba trabajo (FR-25). Se numera igual que las demás para que el histórico no mienta.
+
+**La v7 tampoco pasó por este documento.** Su primer ciclo —medir antes de mover, y que el canal propio lleve al sitio— se escribió directamente en épicas sobre FR existentes. Por eso esta ronda es la v7.1.
 
 ### 4.1 Página de Cita
 
@@ -120,9 +125,10 @@ El visitante puede ver quién dijo la Cita y de dónde procede, sin abandonar la
 
 **Consecuencias (verificables):**
 - Se muestra el nombre del Autor, enlazado a su Página de Autor.
-- Cuando la Cita tiene Procedencia, se muestra la obra y el año disponibles.
+- Cuando la Cita procede de una Obra, se muestra el título de esa Obra —el que fija su Ficha de Obra—, enlazado a su Página de Obra, y el año que declare su Procedencia. *(v7.1 — antes la obra se mostraba con el literal de la Procedencia y sin enlace.)*
+- Cuando la Procedencia no nombra obra, se muestra lo que declare —año o referencia—, sin enlace. *(v7.1)*
 - Cuando la Procedencia está ausente, la página lo indica explícitamente en lugar de omitir el bloque en silencio.
-- El sistema nunca muestra una Procedencia inferida o aproximada.
+- El sistema nunca muestra una Procedencia inferida o aproximada. El título de la Obra no es una inferencia: es una de las grafías que declaran sus Procedencias, elegida por una persona en la Ficha de Obra, y la Procedencia de cada Cita conserva su literal.
 
 #### FR-3: Copiado con atribución
 
@@ -195,7 +201,7 @@ Cualquier visitante puede buscar Citas por fragmento de texto, por nombre de Aut
 - La búsqueda devuelve resultados equivalentes con y sin acentos ("Machado" y "machado", "corazon" y "corazón").
 - La búsqueda es insensible a mayúsculas y minúsculas.
 - Un fragmento de tres o más palabras consecutivas de una Cita publicada la devuelve entre los resultados.
-- Los resultados distinguen visualmente si la coincidencia es de Cita, de Autor o de Tema.
+- Los resultados distinguen visualmente si la coincidencia es de Cita, de Autor, de Tema o de Obra; de Obra solo entran las indexables (FR-52). *(v7.1)*
 
 #### FR-8: Resultado vacío productivo
 
@@ -272,7 +278,8 @@ Desde cualquier Página de Cita, el visitante encuentra al menos una ruta a cont
 - Se ofrecen otras Citas del mismo Autor.
 - Se ofrecen Citas de los mismos Temas.
 - Ninguna Página de Cita publicada queda sin enlaces salientes internos.
-- La relación se deriva de Autor y Tema; no hay motor de recomendación. `[NON-GOAL for MVP]`
+- Toda Cita que procede de una Obra lleva a su Página de Obra desde la atribución (FR-2). *(v7.1)*
+- La relación se deriva de Autor, Obra y Tema; no hay motor de recomendación. `[NON-GOAL for MVP]`
 
 ---
 
@@ -551,7 +558,7 @@ Una Colección publicada produce su propia Pieza de Canal.
 
 **Por qué umbrales y no una fecha.** Un calendario monetiza un sitio que quizá no tenga visitantes; un umbral solo se cruza si los hay. Además convierte cada Modelo en una decisión reversible: si el tráfico baja del umbral, el Modelo se apaga sin haber comprometido el diseño del producto.
 
-**La restricción que gobierna toda la sección.** NFR-10 (sin muro de entrada) tiene prioridad sobre cualquier Modelo de Ingreso, y §11 identifica «publicidad intercalada en el contenido» como anti-referencia declarada del producto. **Ninguna unidad publicitaria** puede aparecer en la Página de Cita ni en la de Colección, que son el punto de entrada real desde buscadores y las superficies donde el producto cumple su promesa. Un Modelo sin coste de superficie sí puede nacer de lo que la página ya publica —es el caso de FR-35, cuyo enlace sale de la Procedencia—, siempre que la atribución se lea igual con el Modelo encendido que apagado.
+**La restricción que gobierna toda la sección.** NFR-10 (sin muro de entrada) tiene prioridad sobre cualquier Modelo de Ingreso, y §11 identifica «publicidad intercalada en el contenido» como anti-referencia declarada del producto. **Ninguna unidad publicitaria** puede aparecer en la Página de Cita, en la de Colección ni, desde la v7.1, en la de Obra: son el punto de entrada real desde buscadores y las superficies donde el producto cumple su promesa. La restricción veda unidades publicitarias, no todo Modelo: un Modelo de coste bajo sobre la superficie es admisible donde su FR lo sitúe, siempre que la lectura de esa superficie no cambie con el Modelo encendido o apagado. El de FR-35 vive en la Página de Obra, debajo de la edición cotejada, y no en la Página de Cita porque se le eligió otro sitio, no porque esta restricción lo prohíba. *(v7.1 — antes decía que su enlace salía de la Procedencia que la Página de Cita muestra.)*
 
 **Requisitos Funcionales:**
 
@@ -563,7 +570,8 @@ Ningún Modelo de Ingreso se enciende antes de que su Umbral de Activación se m
 - El umbral se comprueba contra tráfico orgánico medido, no estimado ni proyectado.
 - Cada Modelo se enciende y se apaga por separado, sin afectar a los demás.
 - Un Modelo apagado no deja hueco reservado ni espacio en blanco en ninguna superficie, por §12.
-- El estado de cada Modelo (activo o apagado, y contra qué cifra) es consultable sin exportar datos, como en FR-16.
+- Cada Modelo declara qué acto dispara su Umbral; ninguno se enciende solo por cruzarlo. En la afiliación, el acto es solicitar la cuenta (FR-35). *(v7.1)*
+- El estado de cada Modelo (activo o apagado, contra qué cifra y qué acto dispara) es consultable sin exportar datos, como en FR-16.
 
 #### FR-34: Donaciones
 
@@ -572,21 +580,25 @@ El visitante que quiere sostener el sitio encuentra cómo, sin que se le pida.
 **Umbral de Activación:** desde que LC-1…LC-4 estén verificadas. Es un enlace; su coste es cero.
 
 **Consecuencias (verificables):**
-- La invitación no aparece en la Página de Cita ni interrumpe ninguna lectura.
+- La invitación no aparece en ninguna superficie de lectura —la Página de Cita, la de Colección y, desde la v7.1, la de Obra— ni interrumpe ninguna lectura.
 - No introduce JavaScript de terceros en ninguna superficie pública.
 - Rechazar o ignorar la invitación no degrada ninguna funcionalidad.
 
-#### FR-35: Afiliación de libros
+#### FR-35: Afiliación de libros *(reescrito en la v7.1)*
 
-La Procedencia de una Cita puede llevar a la edición de la que salió.
+Una Obra puede llevar a ediciones en venta de ella, elegidas por una persona, desde su Página de Obra y desde ningún otro sitio.
 
-**Umbral de Activación:** 2.000 sesiones orgánicas/mes.
+**Umbral de Activación:** 2.000 sesiones orgánicas/mes. Cruzarlo dispara **solicitar** la cuenta de cada programa que imponga un plazo de ventas mínimas, no encender: las ediciones se curan antes de solicitarla, porque solicitar arranca ese plazo, y por no cumplirlo ya se cerró una vez la cuenta del proyecto. Una tienda sin plazo se da de alta cuando se curen sus ediciones. Encender es un commit posterior.
 
 **Consecuencias (verificables):**
-- El enlace sale de la Procedencia ya publicada (FR-2); no se inventa una obra para poder enlazar.
-- Una Cita sin Procedencia completa no produce enlace de afiliación, nunca uno aproximado.
-- La relación comercial se declara donde el enlace aparece.
-- La atribución y la Procedencia se leen igual con el Modelo apagado que encendido.
+- El enlace vive solo en la Página de Obra, en el bloque de FR-54 y debajo de la edición cotejada. No aparece en la Página de Cita ni en la lista de obras del Autor. Aparece también en la Página de Obra que no se indexa (FR-52): la regla decide qué ve el buscador, no qué ve quien llega desde la atribución. *(v7.1 — antes decía «El enlace sale de la Procedencia ya publicada (FR-2)», y sus superficies eran la Página de Cita y la de Autor.)*
+- La edición en venta la elige una persona, obra por obra, en la Ficha de Obra. Sin ficha con ediciones no hay enlace, nunca uno aproximado; y no se inventa una obra para poder enlazar: solo tiene página —y por tanto enlace— la Obra con Citas publicadas (FR-51).
+- Una Obra sin edición cotejada no muestra ediciones en venta: la de venta nunca va sola (FR-54).
+- Admite ediciones impresas y electrónicas; la ficha declara cuál es cada una. La electrónica es lo único entregable en buena parte del público.
+- Admite varias tiendas de un conjunto cerrado, porque ningún programa por sí solo cubre todos los países del público. Añadir una tienda es un cambio declarado, y una tienda da una URL, nunca un guion de tercero.
+- La marca de afiliado pertenece al Modelo, no a la obra: la URL de una edición se declara limpia, y una que ya traiga marca o sea de otra tienda se rechaza.
+- La relación comercial se declara en la misma línea que cada enlace.
+- La edición cotejada, la atribución de cada Cita y su Procedencia se leen igual con el Modelo apagado que encendido.
 
 #### FR-36: Producto propio
 
@@ -606,7 +618,7 @@ La publicidad, si se enciende, vive donde no está la Cita.
 **Umbral de Activación:** 25.000 sesiones orgánicas/mes — la meta de SM-2 al mes 12. Es el último en encenderse porque es el único que cuesta algo al producto.
 
 **Consecuencias (verificables):**
-- **La Página de Cita queda excluida.** También la Página de Colección, que es superficie de lectura. Admiten publicidad la portada, los resultados de búsqueda y la página 404.
+- **La Página de Cita queda excluida.** También la Página de Colección y, desde la v7.1, la Página de Obra, que son superficies de lectura. Admiten publicidad la portada, los resultados de búsqueda y la página 404.
 - Ninguna unidad publicitaria se intercala entre el contenido, por §11.
 - No degrada NFR-7: el contenido principal sigue visible en móvil con 4G en menos de 2,5 s, medido con el Modelo encendido.
 - No introduce muro, modal ni aviso previo al contenido, por NFR-10.
@@ -616,7 +628,7 @@ La publicidad, si se enciende, vive donde no está la Cita.
 
 ### 4.15 Estar en el índice, no solo ser indexable *(v5)*
 
-**Descripción:** El sitio cumple NFR-1 —toda página publicada es rastreable e indexable, con canónica y presencia en el sitemap— y aun así **Google ha indexado 8 de 1.715 URL**.
+**Descripción:** El sitio cumple NFR-1 —toda página publicada es rastreable, y la indexable lleva canónica y presencia en el sitemap— y aun así, el 2026-09-02, **Google había indexado 8 de 1.715 URL**.
 
 **Corregido el 2026-09-04, con la primera lectura por familia de FR-40.** Esta feature se escribió culpando al contenido —«páginas finas y casi idénticas»— y esa hipótesis está descartada: sobre 80 URL inspeccionadas hay 2 indexadas y **45 que Google declara desconocidas**, sin diferencia entre familias. Con el sitemap leído y sus 1.715 páginas descubiertas, Google **conoce** las URL y **no las rastrea**. No es un juicio sobre lo que dicen: no ha llegado a leerlas. Lo que queda de esta feature es el instrumento —FR-40— y lo que se va a §4.17 es el remedio. *Ser* indexable es una propiedad del sitio; *estar* indexado es una decisión del buscador, y hasta la v5 el PRD exigía la primera y medía la segunda sin nada en medio. SM-1 llevaba razón al llamarse «el indicador temprano»: su primera lectura la deja entre el 0 % y el 0,5 % —§7 explica por qué el agregado del panel no es la métrica— frente a una meta del 90 %, y por debajo de ella ninguna otra métrica llega a existir. Esta feature es lo que faltaba entre el requisito y la métrica.
 
@@ -629,7 +641,7 @@ El sistema notifica cada publicación o modificación de una superficie a los bu
 **Lo primero que hay que decir es lo que este FR *no* arregla.** **Google no acepta aviso de cambio** —no participa en IndexNow; sus canales son el sitemap y su propio rastreo—, y las 1.534 páginas descartadas están en *su* índice, que es el que mide SM-1. Así que FR-38 **no es el remedio de SM-1**: quien ataca SM-1 son FR-39 y §4.16, por la vía del enlace interno y del contenido por página. FR-38 se sostiene por un motivo propio y distinto, registrado en la investigación de la v3.2: el aviso llega a Bing, y **Bing es el índice del que se sirve ChatGPT Search**, de modo que dejar de ser residual ahí es la puerta a la búsqueda por IA. Confundir las dos cosas sería poner primero lo que no mueve la métrica.
 
 **Consecuencias (verificables):**
-- Publicar una Cita, un Autor, un Tema o una Colección emite un aviso de cambio por un canal abierto y compartido, sin exigir el panel de un proveedor concreto.
+- Publicar una Cita, un Autor, un Tema, una Colección o una Obra indexable emite un aviso de cambio por un canal abierto y compartido, sin exigir el panel de un proveedor concreto. *(v7.1: la Obra)*
 - El aviso se emite desde la reconstrucción, no a mano: una jornada sin editor lo emite igual.
 - El sitemap sigue siendo el catálogo; el aviso es el canal de cambios. Ninguno sustituye al otro.
 - El sistema registra qué envió y qué respondió el receptor. Que un buscador acepte el aviso **no se cuenta como indexación**: eso solo lo dice FR-40.
@@ -650,7 +662,7 @@ Lo que este FR añade a NFR-5 es el **origen** del enlace. NFR-5 exige que ningu
 **Consecuencias (verificables):**
 - El sistema distingue, para cada superficie publicada, cuántos enlaces entrantes le llegan **desde superficies indexadas** y cuántos desde el resto. NFR-5 cuenta saltos; esto cuenta procedencia.
 - Existe una lista consultable de superficies publicadas con cero enlaces entrantes desde una indexada, ordenada por familia.
-- Las superficies de agregación —Autor, Tema, Colección— reparten enlace hacia las Citas que agregan. Son 75 páginas —35 de Autor, 24 de Tema, 16 de Colección— frente a 1.639 de Cita, así que su capacidad de reparto es limitada por aritmética y el informe la expresa como cifra, no como intención.
+- Las superficies de agregación —Autor, Tema, Colección y, desde la v7.1, la Obra indexable— reparten enlace hacia las Citas que agregan. Eran 75 páginas en septiembre de 2026 —35 de Autor, 24 de Tema, 16 de Colección— frente a 1.639 de Cita, así que su capacidad de reparto es limitada por aritmética y el informe la expresa como cifra, no como intención.
 
 #### FR-40: La indexación se lee por familia, no como un total
 
@@ -659,7 +671,8 @@ El editor puede saber qué proporción de cada familia de superficies está inde
 **El dato de origen es de Google y no hay alternativa**: solo el buscador sabe qué ha indexado, y Search Console es la única vía. Lo que este FR exige no es prescindir de esa fuente —sería fingir— sino **dejar de leerla a ojo**: traerla de forma reproducible y agruparla como el producto la necesita, que es por familia.
 
 **Consecuencias (verificables):**
-- El informe distingue Cita, Autor, Tema y Colección. El panel da un total y el total engaña: el remedio no es el mismo para 1.639 páginas de una frase que para las 75 de agregación, y un porcentaje global no dice cuál de las dos falla.
+- El informe distingue Cita, Autor, Tema, Colección y Obra. El panel da un total y el total engaña: el remedio no es el mismo para las páginas de una frase que para las de agregación, y un porcentaje global no dice cuál de las dos falla.
+- La familia Obra cuenta solo sus páginas indexables (FR-52): una página que no puede indexarse, contada como no indexada, fabricaría un cero. *(v7.1)*
 - La cifra que se compara con SM-1 es la de la familia Cita, no el agregado del sitio.
 - El informe registra su fecha de lectura. Un dato de indexación sin fecha es inútil: el índice cambia y la comparación con la meta es temporal.
 - Cuando la fuente no está disponible, el informe lo dice y no publica un número, igual que hace §4.14 con la medición.
@@ -685,25 +698,24 @@ La Página de Autor presenta una semblanza que dice cuándo vivió el Autor, en 
 
 #### FR-42: La Página de Autor enumera su obra
 
-La página lista las obras del Autor de las que este Corpus publica Citas, cada una enlazada a las Citas que proceden de ella.
+La página lista las obras del Autor de las que este Corpus publica Citas, cada una enlazada a su Página de Obra. *(v7.1 — antes «enlazada a las Citas que proceden de ella».)*
 
 **Consecuencias (verificables):**
-- La lista se **deriva** de las Procedencias publicadas; no es una lista escrita a mano que pueda divergir del Corpus.
-- Cada obra muestra cuántas Citas publicadas proceden de ella y enlaza a ellas.
+- La lista se **deriva** de las Procedencias publicadas, y ninguna Ficha de Obra puede añadir a ella una obra sin Citas publicadas. Lo que la ficha decide es el título con que se nombra y qué grafías reúne, no qué obras hay. *(v7.1)*
+- Cada obra muestra cuántas Citas publicadas proceden de ella y enlaza a su Página de Obra, que es donde se leen juntas. *(v7.1)*
 - Una obra de la que no se publica ninguna Cita no aparece: la bibliografía es la del Corpus, no la del Autor. La página lo dice de sí misma, para no aparentar una completitud que no tiene.
-- Cuando la Procedencia declara año, se muestra; cuando no, se omite el campo y no se infiere. Hoy solo el 26,8 % de las Citas declara año.
+- El año de una obra se muestra cuando las Citas que lo declaran coinciden en él; si discrepan, o ninguna lo declara, se omite el campo y no se infiere. Hoy consta en 31 de 182 obras. *(v7.1 — antes se medía por Cita: el 26,8 % declaraba año.)*
 
-#### FR-43: La obra es la superficie natural del enlace de afiliación
+#### FR-43: La lista de obras lleva a la Página de Obra *(reescrito en la v7.1)*
 
-La lista de obras es el lugar donde un Modelo de Ingreso de afiliación puede aparecer cuando su Umbral lo autorice, sin rediseñar la página.
+La lista de obras de la Página de Autor lleva a la Página de Obra de cada una, que es donde vive el enlace de afiliación; la lista no lo aloja. *(v7.1 — antes decía «La lista de obras es el lugar donde un Modelo de Ingreso de afiliación puede aparecer».)*
 
 **Consecuencias (verificables):**
-- La lista de obras **se publica con el Modelo de afiliación apagado** y no cambia de forma al encenderse: lo que aparece es el enlace, no la sección. Se comprueba construyendo el sitio en los dos estados.
-- Todo enlace de afiliación de una obra se deriva de una Procedencia ya publicada. Una obra sin Citas publicadas no aparece, luego no puede llevar enlace: la regla de FR-42 lo garantiza sin necesidad de una regla nueva.
-- La Página de Autor pasa a ser superficie admitida del Modelo de afiliación, **que se suma a la Página de Cita y no la sustituye**: §5 veda *unidades publicitarias* en la Página de Cita, no todo Modelo, y §4.14 ya declara admisible el enlace de FR-35 por nacer de la Procedencia que la Página de Cita muestra.
+- La lista se publica igual con el Modelo de afiliación apagado que encendido, porque no aloja enlace comercial. Se comprueba construyendo el sitio en los dos estados.
+- Ni la Página de Autor ni la de Cita son superficies admitidas del Modelo de afiliación. **No es porque §5 lo vede** —§5 veda unidades publicitarias, no todo Modelo—: es que el enlace tiene un solo sitio, la Página de Obra (FR-35, FR-54).
 - Lo de §4.14 rige sin excepción: apagado hasta su Umbral, sin guion de tercero, y encender es un commit.
 
-**Fuera de alcance:** decidir qué edición se enlaza, y si la afiliación de libros es viable. Es la pregunta 7 de §14 y esta feature no la resuelve; la asume. `[NON-GOAL]`
+**Fuera de alcance:** si la afiliación de libros es viable. Es la mitad de la pregunta 7 de §14 que sigue abierta; la otra mitad —qué edición se enlaza— la contesta FR-35. `[NON-GOAL]`
 
 ---
 
@@ -798,6 +810,80 @@ El visitante puede recorrer el catálogo por época —filosofía antigua, patr�
 
 ---
 
+### 4.19 La Obra tiene página *(v7.1, 2026-10-05)*
+
+**Descripción:** Una página por obra, con URL propia, que hace tres cosas: capta la consulta por obra —«frases del Oráculo manual» es otra búsqueda que «frases de Gracián»—, deja leer juntas las Citas de una misma obra, y es el único sitio donde vive el enlace de afiliación de FR-35. Lo que la distingue de la Página de Autor es su sujeto: una obra, con la Fuente y la licencia de las que se tomó su texto, los Temas que tocan sus Citas y dónde leerla entera; ninguno de esos datos está en la Página de Autor.
+
+**Existir y ser indexable son dos cosas.** Toda Obra con al menos una Cita publicada tiene página, porque es el destino del enlace de la atribución de sus Citas y de la lista de obras de su Autor. Indexable solo es la que no repite otra página (FR-52): por eso capta la consulta por obra cuando la obra no es casi todo su Autor, y si lo es, la recoge la Página de Autor. Es una forma de umbral distinta de la del Tema y la de la Colección, que no se publican por debajo del suyo.
+
+**El riesgo que esta feature introduce, y su freno.** Añade 182 Obras con página, 82 de ellas indexables (medido el 2026-10-05), a un sitio cuyo índice deja fuera casi la mitad de sus páginas —1.050 de 2.000 en la lectura del panel de Search Console del 2026-10-03, fuera de la serie de FR-40—, y se abre sin que las Páginas de Autor estén indexadas (18 de 65 en esa misma lectura), que era la condición que la arquitectura le había puesto. A diferencia de la Época (FR-50), no espera a que una familia cruce un umbral de indexación: se eligió medir y parar en vez de precondicionar. El freno es que la familia se mide aparte desde su primer despliegue y tiene criterio de parada (SM-11), y que, si aparecen duplicados, se baja el tope de FR-52 y nunca se parchea una página.
+
+**Requisitos Funcionales:**
+
+#### FR-51: La Página de Obra
+
+Toda Obra con al menos una Cita publicada tiene una página propia que reúne sus Citas y dice de qué obra salen. Realiza UJ-3. Valida SM-11.
+
+**Consecuencias (verificables):**
+- Existe para toda Obra con al menos una Cita publicada, sin umbral que la excluya. Una Obra sin Citas publicadas no tiene página.
+- Muestra el título de la Obra y su Autor, enlazado a su Página de Autor. El año sigue la regla de la lista de obras (FR-42); si las Citas que lo declaran discrepan, además se avisa.
+- Lista sus Citas con la misma tarjeta que los demás listados, cada una enlazada a su Página de Cita. La canónica de cada Cita sigue siendo su Página de Cita, y la de la Página de Obra es la propia, nunca otra URL (NFR-13).
+- Muestra los Temas que tocan sus Citas.
+- Pagina como el listado de Autor (FR-5); las páginas 2 y siguientes llevan solo título, Autor y listado.
+- No compone prosa: ni sinopsis, ni contexto, ni adjetivos (§5). Todo lo que dice sale de hechos derivados del Corpus, salvo la nota de su Ficha de Obra, que escribe una persona y se muestra después de dónde leerla (FR-54).
+- Es superficie de lectura, como la Página de Cita y la de Colección, y por eso nunca admite donaciones ni publicidad (FR-34, FR-37). A diferencia de ellas, admite la afiliación (FR-35), que es el único Modelo que aloja.
+- Se alcanza desde la atribución de cada Cita de la Obra (FR-2) y desde la lista de obras de su Autor (FR-42), también cuando no es indexable (NFR-5).
+- Emite la misma vista que las demás agregaciones, con su marca de origen (FR-22), para que la familia se mida como las otras.
+- Tiene Tarjeta Social con hechos —cuántas Citas, de qué Autor y el año si consta—, nunca con la nota.
+- Expone datos estructurados que la identifican como la misma obra que nombran sus Citas (NFR-3).
+- La fecha de su último cambio es la más reciente entre su Ficha de Obra y sus Citas (FR-47).
+- Cumple NFR-8…NFR-10 como el resto de superficies públicas, sea indexable o no.
+
+#### FR-52: La Obra se indexa por lo que contiene, no por existir
+
+Una Página de Obra es indexable solo cuando no repite otra página del sitio; si la repite, existe sin indexarse.
+
+**Regla de indexación:** al menos 2 Citas publicadas, y menos del 90 % de las Citas publicadas de su Autor.
+
+**Consecuencias (verificables):**
+- Con una sola Cita, la página repetiría esa Cita y competiría con su canónica; con el 90 % o más de su Autor, listaría lo mismo que su Página de Autor con otra cabecera. En los dos casos la página existe, es rastreable y transmite enlace (`noindex, follow`), y queda fuera del sitemap y de la búsqueda interna: es el mismo estado de las páginas 2 y siguientes de FR-5, aplicado por contenido.
+- Es una sola regla y la consultan igual todos los que la necesitan: la página, el sitemap —que anuncia exactamente las Páginas de Obra indexables, ni una más—, la búsqueda interna (FR-7), el aviso de cambio (FR-38) y el informe de indexación (FR-40). Ninguno discrepa de otro, y se comprueba sobre el sitio construido.
+- Se recalcula en cada construcción y se corrige sola en los dos sentidos: cuando las demás obras de un Autor llegan al 10 % de sus Citas, la que era casi todo su Autor pasa a indexarse sin tocar nada; y una Obra indexada que deja de cumplir la regla sale del sitemap.
+- Mientras la familia está congelada por el criterio de parada de SM-11, la Obra que nace no se indexa hasta que se levante la congelación.
+- Si dos lecturas seguidas de FR-40 muestran Páginas de Obra que el buscador declara duplicadas, se baja el tope del 90 %; nunca se corrige una página suelta.
+
+#### FR-53: La Ficha de Obra fija la URL y el título
+
+Cada Obra tiene una Ficha de Obra que fija su URL y el título que el sitio publica, y en la que una persona decide lo que no se puede derivar.
+
+**Consecuencias (verificables):**
+- La URL de una Obra es legible, lleva el Autor y la obra, y no cambia aunque se corrija el título (NFR-4).
+- Ninguna Obra con Citas publicadas se publica sin su ficha; si falta, la construcción se detiene y dice cómo crearla. La crea el sistema al publicarse la primera Cita de una Obra nueva, sin decidir nada; nadie la crea a mano.
+- Una ficha cuya Obra se queda sin Citas publicadas avisa y no detiene la construcción: retirar una Cita no puede tumbar el sitio.
+- El título es siempre una de las grafías que declaran sus Procedencias: corregirlo es elegir otra de ellas, nunca escribir una nueva. Es el único con que el sitio nombra la Obra, en toda superficie y en todo material de salida.
+- Reunir dos grafías de una misma obra, o declarar que dos títulos parecidos son obras distintas, se decide en la ficha. La ficha reúne grafías de una misma obra, no partes de ella: un capítulo o una fábula que la Fuente publica como obra propia sigue siéndolo.
+- Una grafía la reclama a lo sumo una ficha; si dos la reclaman, la construcción se detiene.
+- Dos títulos del mismo Autor en que uno empieza por el otro producen un aviso, no una parada, y decidirlo en la ficha lo silencia.
+- Dos grafías de Citas del mismo Autor que solo difieren en mayúsculas, tildes o signos detienen la construcción hasta que la discrepante se restituye al literal de su Fuente, documentándola (FR-24). Si las dos son literales de su Fuente, el título lo elige una persona en la ficha.
+- **Nunca se reescribe la Procedencia de una Cita para reunir o separar grafías**, porque la Procedencia es lo que dice la Fuente (FR-23); la única excepción es restituir el literal que declara su Fuente, que es lo que hace documentar una Cita (FR-24).
+- Las ediciones en venta, la nota, la elección del título y reunir o separar grafías solo las decide una persona, nunca un agente. La nota tiene como máximo 160 caracteres, describe la obra o su edición cotejada y no la califica (§5, §11).
+- Reunir dos Obras ya publicadas retira la URL de la absorbida. Hasta que exista la redirección es una ruptura declarada de NFR-4, y se avisa.
+
+**Fuera de alcance:** redirigir la URL de una Obra fusionada o retirada. Se aplaza hasta que haya una Página de Obra indexada. `[NON-GOAL]`
+
+#### FR-54: Dónde leer esta obra
+
+La Página de Obra dice, al pie, dónde leer la obra entera: la edición cotejada, que es gratuita, y, con el Modelo de afiliación encendido, las ediciones en venta debajo de ella.
+
+**Consecuencias (verificables):**
+- Muestra las Fuentes de las que se tomaron sus Citas, con su licencia, y, cuando hay edición cotejada, al menos un enlace a ella: el documento, si es uno, o la entrada de la obra en su Fuente, si son varios.
+- Nunca afirma un cotejo que no ocurrió: si alguna Cita de la Obra no tiene documento, dice cuántas; una Obra sin ninguna Cita cotejada lo dice y no enlaza ninguna edición.
+- Va en la primera página, después de las Citas y nunca entre ellas (§11, NFR-10).
+- Las ediciones en venta aparecen **debajo** de la edición cotejada, nunca en su lugar: el visitante ve la edición que se verificó y, al lado, la que se puede comprar (FR-35). Una Obra sin edición cotejada no muestra ediciones en venta.
+- Con el Modelo apagado, o sin ediciones en la ficha, el bloque es solo la edición cotejada: no queda línea, hueco ni contenedor de las ediciones. Con el Modelo apagado, la página se construye idéntica con y sin ediciones declaradas (FR-33). Se comprueba construyendo el sitio en los dos estados.
+
+---
+
 ## 5. No-Objetivos (Explícitos)
 
 - **No somos una red social.** Sin cuentas, sin perfiles, sin comentarios, sin votos.
@@ -807,8 +893,8 @@ El visitante puede recorrer el catálogo por época —filosofía antigua, patr�
 - **No aspiramos al volumen en la v1.** Un catálogo pequeño y verificado, no uno grande y dudoso.
 - **No traducimos.** El producto es en español y las Citas se publican en español.
 - **No monetizamos antes de su umbral.** La v1 se diseñó sin ingreso alguno. La v3 no deroga esa regla: diseña los cuatro Modelos de Ingreso y los deja apagados hasta que el tráfico medido cruce el Umbral de Activación de cada uno (§4.14, §12). Lo que se adelanta es el diseño, nunca el cobro.
-- **No ponemos publicidad donde se lee.** Ninguna unidad publicitaria aparece en la Página de Cita ni en la Página de Colección: son las superficies donde el producto cumple su promesa y el punto de entrada real desde buscadores. §11 y NFR-10 tienen prioridad sobre cualquier ingreso.
-- **No inventamos texto y lo presentamos como real.** El sistema no crea ni parafrasea el texto de una Cita, ni compone prosa nueva sobre una persona real y la publica como si estuviera documentada. Seleccionar y transcribir literalmente de una edición identificable **sí** es admisible, y es exactamente lo que hace el sembrado de §4.11, lo ejecute el editor o un agente. La distinción es entre *escoger lo que alguien escribió* y *escribir en su lugar*. **La semblanza de un Autor entra en la prohibición**: es prosa nueva sobre una persona real, así que o procede de una fuente citable o la escribe una persona que responde de ella.
+- **No ponemos publicidad donde se lee.** Ninguna unidad publicitaria aparece en la Página de Cita, en la de Colección ni, desde la v7.1, en la de Obra: son las superficies donde el producto cumple su promesa y el punto de entrada real desde buscadores. §11 y NFR-10 tienen prioridad sobre cualquier ingreso.
+- **No inventamos texto y lo presentamos como real.** El sistema no crea ni parafrasea el texto de una Cita, ni compone prosa nueva sobre una persona real **ni sobre una obra** —sinopsis, contexto o valoración— y la publica como si estuviera documentada. Seleccionar y transcribir literalmente de una edición identificable **sí** es admisible, y es exactamente lo que hace el sembrado de §4.11, lo ejecute el editor o un agente. La distinción es entre *escoger lo que alguien escribió* y *escribir en su lugar*. **La semblanza de un Autor entra en la prohibición**: es prosa nueva sobre una persona real, así que o procede de una fuente citable o la escribe una persona que responde de ella. **La nota de una Ficha de Obra también** *(ampliado en la v7.1)*: la escribe una persona que responde de ella, o no existe, y nunca un agente.
 
 ## 6. Alcance
 
@@ -900,14 +986,41 @@ La v2 quiso poner el producto delante de personas y no llegó a hacerlo: lo cons
 
 - **FR-38** (anunciar cambios) se queda **solo por su motivo propio** —los índices que sí aceptan aviso, y con ellos la búsqueda por IA—, nunca como remedio de SM-1. Google conoce ya las 1.715 URL: no hay nada que anunciarle.
 - **FR-39** (repartir enlace desde superficies indexadas) queda **aplazado**: hay dos superficies indexadas en todo el sitio, así que no hay desde dónde repartir.
-- **§4.16 va después de §4.17.** Enriquecer 35 páginas de las que Google conoce 11 e indexa 1 no produce visitas mientras nadie las rastree. El contenido no sobra: llega tarde si va antes.
+- **§4.16 va después de §4.17.** Enriquecer 35 páginas de las que Google conoce 11 e indexa 1 no produce visitas mientras nadie las rastree. El contenido no sobra: llega tarde si va antes. **Enmendado el 2026-10-05:** FR-42 —con FR-43, que solo dice adónde lleva su lista— se construye con la Página de Obra (§6.6) sin esperar a que cierre §4.17. La semblanza de FR-41 sigue detrás de §4.17 hasta que se decida el orden de la Épica 17 entera; la premisa original ya no basta para sostenerlo, porque la lectura del panel del 2026-10-03 da 18 Páginas de Autor indexadas de 65.
 
 **Fuera de la v5, y por qué:**
 
-- **Encender la afiliación de libros.** FR-43 construye la superficie; encenderla es FR-35 y su Umbral, y la pregunta 7 de §14 dice por qué eso está más lejos de lo que parecía. La lista de obras se construye por su valor propio y no queda inservible si la afiliación no llega nunca.
-- **Elegir qué edición se enlaza.** La tensión de §14 sigue sin resolver y esta ronda no la resuelve.
+- **Encender la afiliación de libros.** FR-43 construye la superficie *(v7.1: la superficie del enlace es ahora la Página de Obra, FR-54)*; encenderla es FR-35 y su Umbral, y la pregunta 7 de §14 dice por qué eso está más lejos de lo que parecía. La lista de obras se construye por su valor propio y no queda inservible si la afiliación no llega nunca.
+- ~~**Elegir qué edición se enlaza.**~~ **CONTESTADA el 2026-10-05:** la elige una persona en la Ficha de Obra, debajo de la edición cotejada (FR-35, FR-54).
 - **Sembrar obra que el Corpus no publica.** La bibliografía es la del Corpus, no la del Autor. Completarla sería inventar cobertura, que es justo lo que §5 sigue descartando.
 - **Cobertura biográfica enciclopédica.** Estrechar el no-objetivo de §5 no lo deroga: sigue fuera la vida entera, la polémica y la recepción crítica.
+
+### 6.6 Alcance de la v7.1
+
+**El origen es una petición, medida.** El 2026-10-05 Héctor pidió una página por obra que capte su consulta, deje leer juntas sus Citas y sea el sitio del enlace de afiliación. Se abre sabiendo que el buscador aún no indexa todas las Páginas de Autor, y por eso con medición propia y criterio de parada.
+
+**Dentro:**
+
+- **La Obra tiene página** (FR-51…FR-54): la página, la regla de indexación por contenido, la ficha que fija URL y título, y dónde leer la obra entera.
+- **Enmiendas con trabajo de construcción:**
+  - FR-2: la atribución nombra la Obra con su título y lleva a ella, también en lo copiado y en el material de salida, por FR-53.
+  - FR-7: la Obra en la búsqueda interna.
+  - FR-33 y FR-35: el enlace de afiliación se muda a la Página de Obra, con el acto que dispara su Umbral.
+  - FR-38: el aviso de la Obra indexable.
+  - FR-40: la familia Obra en el informe.
+  - FR-42 y FR-43: la lista de obras del Autor lleva a ella.
+- **Enmiendas sin trabajo nuevo:** FR-12, FR-34, FR-37, NFR-1, NFR-3, NFR-13, SM-C2 y SM-C4, que añaden la Obra a una regla o a una exclusión.
+
+**El orden importa.** Se construye después de las Historias 20.1–20.3 y con la serie de indexación leyendo de nuevo (Historia 20.4), para que la familia se mida desde su primer despliegue (SM-11). La ficha va antes que la página. Antes de publicar ninguna URL de Obra se fija la regla de indexación y se deciden las reuniones y separaciones de obras ya conocidas —«Del sentimiento trágico de la vida/I», «Sobre la brevedad de la vida» frente a «De la brevedad de la vida», los dos «Proverbios y cantares» y la grafía «Sor/sor Filotea»—, porque reunir después rompe una URL. El enlace de afiliación nace apagado.
+
+**Fuera de la v7.1, y por qué:**
+
+- **Solicitar la cuenta y encender la afiliación.** Son actos de una persona con su Umbral (FR-35), no construcción.
+- **Qué tiendas entran.** Es la pregunta 6 de §14.
+- **Sinopsis o contexto de la obra.** Lo veda §5.
+- **Redirigir la URL de una Obra fusionada o retirada.** Se aplaza hasta la primera Página de Obra indexada.
+- **Sembrar obra que el Corpus no publica.** Sigue fuera por §6.5.
+- **La pasada de métricas.** Las series de tráfico y demanda, su relación con los Umbrales y la revisión de SM-2 son otra señal y no entran. `[NOTE FOR PM]` Dueño: Héctor; se reabre en su propia pasada del PRD. Cuando entre, debe incluir la familia Obra: hasta entonces SM-11 es su única medida.
 
 ## 7. Métricas de Éxito
 
@@ -936,25 +1049,26 @@ La v2 quiso poner el producto delante de personas y no llegó a hacerlo: lo cons
 - **SM-9 — Cobertura de la cola larga.** Sesiones orgánicas que aterrizan en una Página de Colección, como proporción del total orgánico. Valida FR-26. Sin objetivo numérico en la primera pasada: la pregunta es si la superficie captura consultas que las otras cuatro no capturaban, y eso se responde comparando las consultas de entrada, no un porcentaje.
 - **SM-10 — Ingreso por Modelo.** Ingreso mensual atribuido a cada Modelo de Ingreso activo, junto al tráfico que lo produjo. Valida FR-33…FR-37. Se mide por Modelo y no agregado a propósito: la decisión que informa es cuál merece seguir encendido, y un total no la responde.
 - **SM-8 — Rendimiento del canal propio.** Visitas atribuidas a cada cuenta de Sabiduría de Bolsillo, por red y por jornada. Valida FR-21, FR-22. No lleva objetivo numérico: en la v2 la pregunta no es cuánto trae, sino **cuál de las cuatro redes trae**, porque de eso depende dónde se invierte el tiempo del mes siguiente.
+- **SM-11 — Indexación de la familia Obra** *(v7.1)*. Proporción indexada de las Páginas de Obra indexables, leída por familia con FR-40 y comparada con la de Autor. No lleva objetivo numérico: el listón es relativo. Las dos familias se leen la misma jornada y enteras. **Criterio de parada:** si a las 8 semanas del primer despliegue es peor que la de Autor, se congela la familia hasta entender por qué: no se curan ediciones en venta, no se pide rastreo de sus páginas, no se publican Piezas que enlacen a ella, no se enciende en ella la afiliación, y las Obras que nazcan desde entonces lo hacen sin indexarse. Las páginas siguen naciendo de las Citas, porque son el destino de su atribución. Valida FR-51, FR-52.
 
 **Contra-métricas (no optimizar)**
 
 - **SM-C1 — Procedencia verificada.** Porcentaje de Citas publicadas con Procedencia completa. Contrapesa SM-2: el tráfico crece publicando más Citas, y la vía barata de publicar más es relajar la verificación. Si SM-C1 baja mientras SM-2 sube, el producto está destruyendo su único diferenciador defendible. Valida FR-13, FR-16.
-- **SM-C2 — Densidad de las páginas de agregación.** Número mediano de Citas por Tema publicado **y por Colección publicada**. Contrapesa SM-1: la vía barata de multiplicar páginas indexables es crear Temas con tres Citas cada uno, que es exactamente el defecto de los competidores. **Extendida en la v3:** las Colecciones son agregación igual que los Temas y fallan igual, así que entran en la misma contra-métrica en vez de tener una propia — una contra-métrica repartida en dos no frena en ninguna de las dos. Valida FR-6, FR-25, FR-26.
-- **SM-C4 — Coste de la monetización sobre la experiencia.** SM-3 (rebote en Página de Cita) y NFR-7 (tiempo hasta el contenido en 4G) medidos antes y después de encender cada Modelo de Ingreso. Contrapesa SM-10: la vía barata de subir el ingreso es ocupar más superficie y aceptar que el sitio empeore un poco cada vez. Si SM-10 sube mientras SM-3 o NFR-7 se degradan, el Modelo se apaga — está comprándose ingreso con el activo que lo produce. Valida FR-33, FR-37.
+- **SM-C2 — Densidad de las páginas de agregación.** Número mediano de Citas por Tema publicado **y por Colección publicada**. Contrapesa SM-1: la vía barata de multiplicar páginas indexables es crear Temas con tres Citas cada uno, que es exactamente el defecto de los competidores. **Extendida en la v3:** las Colecciones son agregación igual que los Temas y fallan igual, así que entran en la misma contra-métrica en vez de tener una propia — una contra-métrica repartida en dos no frena en ninguna de las dos. **La Obra no entra en esta mediana** *(v7.1)*: 82 Obras indexables junto a 24 Temas y 16 Colecciones harían que la mediana midiera obras. Y la Obra no tiene la vía barata que esta métrica vigila: no se crea por elección editorial, nace de las Citas. Valida FR-6, FR-25, FR-26.
+- **SM-C4 — Coste de la monetización sobre la experiencia.** SM-3 (rebote en Página de Cita) y NFR-7 (tiempo hasta el contenido en 4G), medidos antes y después de encender cada Modelo; para la afiliación, además, el tiempo hasta el contenido de la Página de Obra, medido igual y con el listón de NFR-7. El rebote por superficie entra con la pasada de métricas. *(v7.1 — antes medía solo la Página de Cita.)* Contrapesa SM-10: la vía barata de subir el ingreso es ocupar más superficie y aceptar que el sitio empeore un poco cada vez. Si SM-10 sube mientras SM-3 o NFR-7 se degradan, el Modelo se apaga — está comprándose ingreso con el activo que lo produce. Valida FR-33, FR-35, FR-37.
 - **SM-C3 — Sustitución del circuito privado.** Suma de copiados y descargas (SM-5) medida junto a SM-7. Contrapesa SM-7: la vía barata de subir la compartición es hacer que compartir estorbe menos que copiar. Si SM-7 sube mientras SM-5 baja en proporción parecida, la v2 no ha ampliado el alcance del sitio — ha movido un botón de sitio. Valida FR-3, FR-17.
 
 ## 8. SEO y Descubribilidad *(preocupación transversal)*
 
 En este producto el SEO no es una optimización posterior: es el mecanismo por el que el producto encuentra a sus usuarios. Se documenta como sección propia porque sus requisitos atraviesan todas las features y ninguna de ellas los contiene.
 
-- **NFR-1.** Toda Página de Cita, Autor y Tema publicada es rastreable e indexable, con etiqueta canónica propia y presencia en el sitemap.
+- **NFR-1.** Toda página publicada es rastreable. Son indexables —con etiqueta canónica propia y presencia en el sitemap— la portada, toda Página de Cita, de Autor, de Tema y de Colección publicada, y la Página de Obra que cumple FR-52. Las páginas 2 y siguientes de un listado (FR-5) y la Página de Obra que no cumple FR-52 son rastreables, no indexables, y quedan fuera del sitemap. *(v7.1 — antes enumeraba solo Cita, Autor y Tema, y daba por indexable toda página publicada.)*
 - **NFR-2.** El contenido principal de cada página está disponible en el HTML inicial, sin requerir ejecución de JavaScript para ser leído por un rastreador.
-- **NFR-3.** Cada Página de Cita expone datos estructurados de cita con su autor.
+- **NFR-3.** Cada Página de Cita expone datos estructurados de cita con su autor y, desde la v7.1, con la obra de la que procede, con la misma identidad que su Página de Obra.
 - **NFR-4.** Las URL son legibles, estables y en español, sin identificadores opacos.
 - **NFR-5.** Ninguna página publicada queda huérfana: toda página es alcanzable por enlaces internos desde la portada en un número acotado de saltos.
 - **NFR-6.** El contenido en estado `en-revisión` no es rastreable, indexable ni alcanzable por URL adivinable.
-- **NFR-13** *(v3)*. Ninguna superficie de agregación canibaliza a la Cita. La canónica de una Cita es siempre su Página de Cita, esté en cuantos Temas y Colecciones esté; una Cita presente en varias agregaciones no genera contenido duplicado indexable. Es la condición para que multiplicar agregación sume superficie en vez de repartir la misma señal entre más URL.
+- **NFR-13** *(v3)*. Ninguna superficie de agregación canibaliza a la Cita. La canónica de una Cita es siempre su Página de Cita, esté en cuantos Temas, Colecciones y Obras esté; una Cita presente en varias agregaciones no genera contenido duplicado indexable. Es la condición para que multiplicar agregación sume superficie en vez de repartir la misma señal entre más URL. *(Ampliado en la v7.1.)* Tampoco una agregación indexable repite a otra; la Página de Obra que lista casi todo su Autor no se indexa (FR-52).
 
 ## 9. NFR Transversales
 
@@ -967,17 +1081,18 @@ En este producto el SEO no es una optimización posterior: es el mecanismo por e
 
 ## 10. Arquitectura de la Información
 
-Cinco superficies públicas y dos internas *(la Colección y el Kit Diario se añaden en la v3 y en la v2 respectivamente)*:
+Seis superficies públicas y dos internas *(la Colección y el Kit Diario se añaden en la v3 y en la v2 respectivamente, y la Obra en la v7.1)*:
 
 - **Portada** — Cita del Día, acceso a la búsqueda, entradas a Temas destacados.
 - **Página de Cita** — hoja del árbol y principal punto de entrada real desde buscadores.
 - **Página de Autor** — agregación por persona; enlaza a sus Citas.
 - **Página de Tema** — agregación transversal por clasificación; enlaza a Citas de varios Autores.
 - **Página de Colección** *(v3)* — agregación transversal por criterio editorial; cruza Tema y Autor sin sustituir a ninguno.
+- **Página de Obra** *(v7.1)* — agregación por obra dentro de un Autor, no transversal; existe para toda Obra con Citas y se indexa solo cuando no repite su Página de Autor ni una sola Cita (FR-52).
 - **Herramienta de curación** — interna, no indexable, un solo operador.
 - **Kit Diario y lote de composición** — internos, no indexables, un solo operador.
 
-La navegación real del visitante es lateral, no jerárquica: entra por una hoja y se mueve entre hojas a través de Autor, Tema y Colección. La portada es identidad y retorno, no puerta de entrada.
+La navegación real del visitante es lateral, no jerárquica: entra por una hoja y se mueve entre hojas a través de Autor, Obra, Tema y Colección. La portada es identidad y retorno, no puerta de entrada.
 
 **Por qué dos agregaciones transversales y no una.** El Tema y la Colección se parecen y hacen cosas distintas. El Tema **clasifica** —responde a qué trata la Cita, su conjunto es cerrado, y cambiarlo reordena el Corpus—. La Colección **escoge** —responde a para qué se busca la Cita, su conjunto es abierto, y crear una no toca ninguna Cita existente—. Fundirlas obligaría a abrir el conjunto de Temas, y con él se iría el umbral de FR-6 que sostiene SM-C2.
 
@@ -985,7 +1100,7 @@ La navegación real del visitante es lateral, no jerárquica: entra por una hoja
 
 - **Referencias:** el contenido manda sobre el continente. Tipografía grande y legible, mucho aire, cero adornos que compitan con la Cita.
 - **Anti-referencias:** los sitios de citas en español actuales — fondos con textura, publicidad intercalada en el contenido, tipografía pequeña, listados densos sin jerarquía.
-- **Sobre la publicidad, tras la v3.** Esta anti-referencia sigue vigente sin matices y es la razón de la forma exacta de FR-37: la publicidad no puede aparecer donde el visitante lee, ni en la Página de Cita ni en la de Colección. Que un Modelo de Ingreso rinda no es argumento para relajar esta línea — si alguna vez lo fuera, el producto habría dejado de tener la ventaja por la que existe.
+- **Sobre la publicidad, tras la v3.** Esta anti-referencia sigue vigente sin matices y es la razón de la forma exacta de FR-37: la publicidad no puede aparecer donde el visitante lee, ni en la Página de Cita, ni en la de Colección, ni en la de Obra *(v7.1)*. Que un Modelo de Ingreso rinda no es argumento para relajar esta línea — si alguna vez lo fuera, el producto habría dejado de tener la ventaja por la que existe.
 - **Voz del producto:** sobria y sin solemnidad impostada. El sitio no comenta las Citas ni las adjetiva ("¡una frase increíble!"). Presenta y se aparta.
 - **La marca en la Imagen de Cita** está presente pero subordinada: se lee, no se impone sobre la frase.
 
@@ -1001,15 +1116,15 @@ La regla de la v1 se conserva y se hace operable. No se sustituye por una fecha 
 | Modelo | Umbral de Activación | Anclaje | Coste sobre la experiencia |
 |---|---|---|---|
 | **Donaciones** (FR-34) | LC-1…LC-4 verificadas | Es un enlace; no tiene coste que amortizar | Ninguno — fuera del flujo de lectura, sin JS de terceros |
-| **Afiliación de libros** (FR-35) | 2.000 sesiones orgánicas/mes | Primer tráfico con volumen suficiente para que un porcentaje signifique algo | Bajo — nace de la Procedencia ya publicada (FR-2) |
+| **Afiliación de libros** (FR-35) | 2.000 sesiones orgánicas/mes — dispara solicitar la cuenta, no encender | Primer tráfico con volumen suficiente para que un porcentaje signifique algo | Bajo — solo en la Página de Obra, debajo de la edición cotejada gratuita, con ediciones elegidas por una persona *(v7.1)* |
 | **Producto propio** (FR-36) | 5.000 sesiones orgánicas/mes | La meta de SM-2 al mes 6 | Ninguno sobre las páginas públicas |
-| **Publicidad acotada** (FR-37) | 25.000 sesiones orgánicas/mes | La meta de SM-2 al mes 12 | **Alto** — el único que degrada superficie; por eso el umbral más exigente y la exclusión de la Página de Cita y de Colección |
+| **Publicidad acotada** (FR-37) | 25.000 sesiones orgánicas/mes | La meta de SM-2 al mes 12 | **Alto** — el único que degrada superficie; por eso el umbral más exigente y la exclusión de la Página de Cita, de Colección y de Obra |
 
 **Por qué el orden de los umbrales es ese.** No es por ingreso esperado, es por **coste sobre el producto**. Se enciende primero lo que no cuesta nada y último lo que cuesta más, de modo que el sitio solo acepta degradarse cuando ya tiene tráfico bastante para que compense — y aun entonces, solo donde no se lee.
 
 **Ningún Modelo reserva espacio mientras está apagado.** Un hueco en blanco esperando publicidad es exactamente el obstáculo que la regla de la v1 prohibía crear. Un Modelo apagado es invisible, no latente.
 
-**Ningún Modelo sobrevive a su contra-métrica.** SM-C4 mide rebote y tiempo hasta el contenido antes y después de cada encendido. Un Modelo que suba SM-10 degradando SM-3 o NFR-7 se apaga: estaría comprando ingreso con el activo que lo produce.
+**Ningún Modelo sobrevive a su contra-métrica.** SM-C4 mide rebote y tiempo hasta el contenido antes y después de cada encendido. Un Modelo que suba SM-10 degradando SM-3, NFR-7 o el tiempo hasta el contenido de la superficie donde vive se apaga: estaría comprando ingreso con el activo que lo produce.
 
 ## 13. Condiciones de Lanzamiento
 
@@ -1026,7 +1141,7 @@ No son features y no producen FR: son las puertas que deben estar abiertas para 
 
 ## 14. Preguntas Abiertas
 
-Las seis preguntas abiertas de la primera redacción se resolvieron en aquella pasada; las decisiones están incorporadas a los FR y registradas en `.memlog.md`. Quedan tres, ninguna bloqueante para UX ni para Arquitectura:
+Las seis preguntas abiertas de la primera redacción se resolvieron en aquella pasada; las decisiones están incorporadas a los FR y registradas en `.memlog.md`. Quedaron tres, ninguna bloqueante para UX ni para Arquitectura:
 
 1. **Marca registrada.** Búsqueda en OEPM y EUIPO para "Sabiduría de Bolsillo". El dominio está contratado, que es cosa distinta. No bloquea el desarrollo, sí el gasto en identidad visual.
 2. **Umbral de reducción tipográfica.** FR-10 fija los tramos por longitud y el corte en 300 caracteres, pero los valores concretos de cada tramo salen de probar plantillas reales. Corresponde a UX, no a producto.
@@ -1036,11 +1151,17 @@ Las seis preguntas abiertas de la primera redacción se resolvieron en aquella p
 
 4. **Umbral mínimo de una Colección.** FR-26 exige que exista; no fija el número. El Tema usa 15 (FR-6), pero una Colección se lee de otra forma —«frases cortas» con 15 puede quedarse pobre y «para dedicar» con 15 puede sobrar— así que el valor sale de curar las tres o cuatro primeras, no de decidirlo ahora.
 5. **Qué es el producto propio.** FR-36 fija el umbral de 5.000 sesiones/mes y aplaza el contenido. Decidir entre lámina, antología y recurrencia antes de saber quién visita el sitio sería exactamente el supuesto que §12 existe para evitar.
-6. **Programa de afiliación concreto.** FR-35 fija la capacidad y el umbral; qué programa se usa depende de la disponibilidad de las ediciones en dominio público que el Corpus cita, y varias no tendrán edición en venta. Se resuelve al acercarse el umbral.
+6. ~~**Programa de afiliación concreto.**~~ **Replanteada en la v7.1: qué tiendas entran.** Ya no es elegir un programa, porque FR-35 admite un conjunto cerrado de tiendas. Cuáles entran, y si tienen programa en México, Colombia y Perú, se decide cuando llegue su historia; añadir una es un cambio declarado. Una obra sin edición en venta no lleva enlace. Cuándo se solicita la cuenta lo dispara su Umbral, y la fecha la pone una persona con las ediciones ya curadas.
+
+   *Redacción original, que se conserva:* FR-35 fija la capacidad y el umbral; qué programa se usa depende de la disponibilidad de las ediciones en dominio público que el Corpus cita, y varias no tendrán edición en venta. Se resuelve al acercarse el umbral.
 
 **Añadidas en la v5:**
 
-7. **Qué edición se enlaza, y si la afiliación de libros es viable siquiera.** La pregunta 6 daba por hecho que era cuestión de elegir programa. La investigación de la v3.2 —registrada en `.memlog.md`— dice algo más incómodo, y FR-43 hereda la pregunta sin resolverla: el libro físico paga el 4,5 %, las 103 obras del Corpus son de dominio público y su edición cotejada suele tener versión electrónica gratuita o de ~1 €. Enlazar **la edición que se cotejó** respeta FR-24 y no ingresa nada; enlazar **una edición moderna anotada** ingresa y erosiona el principio de que la Procedencia es la que se verificó y no la que conviene vender. A eso se suma la cobertura: el programa no existe en Argentina, Chile, Colombia ni Perú, lo que choca con el suelo del 40 % de tradición latinoamericana. **Consecuencia asumida en la v5:** FR-43 construye la superficie por su valor propio —contenido e intención de Autor— y no la condiciona a que esta pregunta tenga buena respuesta.
+7. ~~**Qué edición se enlaza**~~ **CONTESTADA el 2026-10-05 en su mitad editorial**, y **si la afiliación de libros es viable siquiera**, que sigue abierta.
+
+   No se elige entre la edición cotejada y una moderna: se muestran las dos. La cotejada, gratuita, siempre; la de venta, elegida por una persona en la Ficha de Obra, debajo y nunca en su lugar (FR-35, FR-54). La Procedencia sigue siendo la que se verificó, y lo que se vende se declara como tal en su propia línea. La viabilidad sigue abierta: el libro físico paga el 4,5 %, el programa no existe en varios de los países del público, el plazo de ventas mínimas empieza al solicitar la cuenta, y la edición gratuita al lado baja la conversión a propósito. La Página de Obra se construye por su valor propio y no depende de que el enlace llegue. Por ese mismo plazo, las primeras ediciones se curan en Obras indexables: el Quijote, única obra de Cervantes en el Corpus, no se indexa, y su enlace no tendría tráfico de buscador.
+
+   *Redacción de la v5, que se conserva:* La pregunta 6 daba por hecho que era cuestión de elegir programa. La investigación de la v3.2 —registrada en `.memlog.md`— dice algo más incómodo, y FR-43 hereda la pregunta sin resolverla: el libro físico paga el 4,5 %, las 103 obras del Corpus son de dominio público y su edición cotejada suele tener versión electrónica gratuita o de ~1 €. Enlazar **la edición que se cotejó** respeta FR-24 y no ingresa nada; enlazar **una edición moderna anotada** ingresa y erosiona el principio de que la Procedencia es la que se verificó y no la que conviene vender. A eso se suma la cobertura: el programa no existe en Argentina, Chile, Colombia ni Perú, lo que choca con el suelo del 40 % de tradición latinoamericana. **Consecuencia asumida en la v5:** FR-43 construye la superficie por su valor propio —contenido e intención de Autor— y no la condiciona a que esta pregunta tenga buena respuesta.
 
 8. ~~**Por qué el buscador descarta 1.534 páginas.**~~ **CONTESTADA el 2026-09-04, y con el «no» que no se esperaba.**
 
@@ -1052,7 +1173,7 @@ Las seis preguntas abiertas de la primera redacción se resolvieron en aquella p
 
 ## 15. Índice de Supuestos
 
-Los supuestos etiquetados en la primera redacción se convirtieron en decisiones (§14). Permanecen dos, ambos de capacidad y no de preferencia:
+Los supuestos etiquetados en la primera redacción se convirtieron en decisiones (§14). Permanecen los de capacidad, no de preferencia:
 
 - **§8 / NFR-2** — El sitio se sirve con HTML renderizado en servidor o pregenerado. Es un supuesto de capacidad, no una elección de tecnología: la indexación fiable de ~2.000 páginas lo requiere. La elección concreta corresponde a Arquitectura.
 - **§6.1** — El Corpus de arranque de ~2.000 Citas es alcanzable por un solo editor antes del lanzamiento. Es el supuesto con más riesgo de plan del documento: si resulta falso, la palanca es reducir el Corpus, nunca relajar FR-13. **Revisado en la v2:** resultó falso en su forma original. El lanzamiento no espera a las 2.000 Citas; sale con lo que haya y el Corpus crece publicado, mediante §4.11. Lo que no se toca es FR-13, exactamente como el supuesto preveía.
@@ -1073,3 +1194,9 @@ Los supuestos etiquetados en la primera redacción se convirtieron en decisiones
 
 - **§4.16 / FR-41** — Existe una fuente citable con licencia admisible que sostenga una semblanza de cada uno de los 35 Autores. Es un supuesto de disponibilidad, no de preferencia: Wikipedia es CC BY-SA 4.0, la misma licencia con la que Wikisource-es ya aporta 1.275 Citas, así que la postura de licencia no es nueva. **Consecuencia asumida:** una semblanza derivada de una fuente CC BY-SA queda bajo esa misma licencia y no es propiedad exclusiva del sitio. Alcanza al texto derivado, no al Corpus ni al resto del sitio. Si un Autor no tiene fuente citable, se queda con la semblanza que ya tiene antes que componérsela — §5 no admite excepción.
 - ~~**§4.15**~~ — **FALSADO el 2026-09-04, dos días después de escribirlo.** Decía que anunciar los cambios y repartir enlace interno movería la indexación. Las dos mitades cayeron por separado: **anunciar no sirve** porque Google ya conoce las 1.715 URL —sitemap leído el 2/09, con las páginas descubiertas—, y **repartir enlace desde superficies indexadas** no se puede hacer cuando hay dos superficies indexadas en todo el sitio. La palanca que queda no es de código: un sitio nuevo sin señales externas no recibe presupuesto de rastreo. Se falsó el mismo día y por una tarde de trabajo, que es exactamente para lo que se escribió como supuesto y no como certeza.
+
+**Añadidos en la v7.1:**
+
+- **§4.19** — Existe una consulta por obra que la Página de Autor no capta. Es el supuesto que justifica una superficie nueva entera, y SM-11 no lo pone a prueba: mide indexación, no demanda. Se falsa con las impresiones y consultas que aterricen en la Página de Obra, que llegan con la pasada de métricas.
+- **§4.19 / SM-11** — El buscador indexará la familia Obra aunque no indexe aún todas las Páginas de Autor. Se abre sin la condición de reapertura que la arquitectura le había puesto, y se falsa barato: SM-11 a las 8 semanas. Si resulta falso, la palanca es congelar la familia (SM-11), nunca relajar la regla de FR-52 para tener más páginas.
+- **§4.19 / FR-52** — Por debajo del 90 % de su Autor, el buscador no trata una Página de Obra como duplicada de la Página de Autor. Se falsa en la serie de indexación si la familia acumula páginas declaradas duplicadas. Si resulta falso, la palanca es bajar el tope, nunca parchear una página.
