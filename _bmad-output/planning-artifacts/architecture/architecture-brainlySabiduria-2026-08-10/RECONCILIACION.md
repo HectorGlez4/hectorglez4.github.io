@@ -46,4 +46,4 @@ Estas cuatro divergencias estaban **dentro** de la espina y quedaron resueltas a
 
 ## 5. Un cabo suelto que no es de nadie
 
-`DESPLIEGUE.md` señala que si `sabiduriadebolsillo.com` sigue libre conviene registrarlo y redirigirlo al `.net` desde el registrador. No es arquitectura ni producto: es una tarea tuya con fecha de caducidad, porque el nombre queda expuesto en cuanto el sitio se publique y empiece a circular por las cuentas.
+*(Cerrado el 2026-10-04.)* Esta sección decía que, si `sabiduriadebolsillo.com` seguía libre, convenía registrarlo y redirigirlo al `.net`. No estaba libre: es del propio proyecto, responde 402 y caduca en julio de 2027. Héctor decidió dejarlo caducar sin renovarlo ni redirigirlo (`docs/superpowers/specs/2026-10-04-ciclo-1-medir-y-canal-design.md` §2.4), y lo único que se corrige es la bio de TikTok, fuera del repositorio. `DESPLIEGUE.md` §1 ya lo dice así. No queda ningún cabo suelto.

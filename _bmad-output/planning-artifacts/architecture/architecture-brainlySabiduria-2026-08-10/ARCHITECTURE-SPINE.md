@@ -4,11 +4,11 @@ type: architecture-spine
 purpose: build-substrate
 altitude: feature
 paradigm: 'Content pipeline (canalización de contenido en tiempo de build) + plano de medición de un solo sentido'
-scope: 'v1, v2 y v3: sitio público, corpus, ingesta, canal propio, medición, colecciones y monetización por umbral'
+scope: 'v1 a v7.1: sitio público, corpus, ingesta, canal propio, medición, colecciones, monetización por umbral, indexación, Página de Autor y Página de Obra'
 status: final
 created: '2026-08-10'
-updated: 2026-09-02
-binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, FR-28, FR-29, FR-30, FR-31, FR-32, FR-33, FR-34, FR-35, FR-36, FR-37, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-13]
+updated: 2026-10-07
+binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, FR-28, FR-29, FR-30, FR-31, FR-32, FR-33, FR-34, FR-35, FR-36, FR-37, FR-38, FR-39, FR-40, FR-41, FR-42, FR-43, FR-51, FR-52, FR-53, FR-54, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-13]
 sources:
   - '{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md'
   - '{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/addendum.md'
@@ -33,7 +33,7 @@ Las etapas se corresponden con espacios de nombres:
 | Etapa | Vive en | Responsabilidad |
 |---|---|---|
 | Recuperación | `tools/` (capa exterior) | Descarga la Fuente y versiona su documento. **La única etapa con red.** |
-| Fuente | `corpus/` | Citas, Autores, Temas y Colecciones como ficheros. Verdad única. |
+| Fuente | `corpus/` | Citas, Autores, Temas, Colecciones y Fichas de Obra como ficheros. Verdad única. |
 | Validación | `src/content.config.ts` | Esquema. La puerta de admisión. |
 | Derivación | `src/lib/` | Normalización, slugs, tramos, umbrales, agregaciones. Puro. |
 | Presentación | `src/pages/`, `src/components/` | HTML. Consume derivación; nunca lee `corpus/` directamente. |
@@ -122,10 +122,11 @@ graph LR
 
 ### AD-11 — El conjunto publicable tiene un solo dueño
 
-- **Binds:** FR-1, FR-4, FR-6, FR-12, FR-26, NFR-1, NFR-5, NFR-6
+- **Binds:** FR-1, FR-4, FR-6, FR-12, FR-26, FR-51, FR-52, NFR-1, NFR-5, NFR-6
 - **Prevents:** la divergencia que AD-9 **no** cierra. Que el umbral sea una constante con nombre no dice *quién lo aplica*: quien genera las rutas de Tema y quien genera el sitemap pueden leer el mismo `MIN_CITAS_POR_TEMA` y aun así discrepar sobre un Tema de 14 Citas — página sin sitemap, o chip que enlaza a un 404.
 - **Rule:** `src/lib/publicado.ts` expone las funciones que devuelven el conjunto de Citas, Autores, Temas **y Colecciones** publicables. **Toda** superficie que enumere contenido —rutas, sitemap, índice de Pagefind, chips, listados, descubrimiento, Tarjetas Sociales, Piezas de Canal— deriva de ellas. Ningún módulo aplica un umbral por su cuenta ni filtra colecciones directamente.
 - **Extendido en la v3 — publicable y alcanzable son el mismo conjunto.** AD-11 fijaba *qué se publica* y nadie fijaba *qué se enlaza*, que son dos preguntas distintas: una Colección podía quedar publicada, en el sitemap y **huérfana**, incumpliendo NFR-5 y FR-26 sin que fallara nada. El mismo módulo posee ahora la enumeración de descubrimiento, de modo que una superficie no puede ser publicable y no ser alcanzable desde la portada. El agujero solo aparece al existir un tipo nuevo de agregación — por eso la v1 no lo vio.
+- **Extendido en la v7.1 — la Obra.** El conjunto publicable incluye las Obras con Citas publicadas —todas existen y todas son alcanzables— y es dueño de la regla que decide cuáles se indexan (AD-17, AD-25). `rutasPublicadas` **sigue significando «existe y es alcanzable»** (NFR-5) y enumera todas las rutas de Obra. El mismo módulo expone **`rutasIndexables`**, y todo consumidor que anuncia o mide la usa: el rastreo, el informe de AD-24, el aviso de AD-27 y la prueba del sitemap. Indexable es un subconjunto de publicable con el mismo dueño, nunca un segundo conjunto con otro.
 
 ### AD-12 — La jornada de la Cita del Día la fija el build, no el visitante
 
@@ -161,12 +162,20 @@ graph LR
 - **Binds:** FR-19, NFR-7, §6.4 del PRD, SM-C1
 - **Prevents:** que el crecimiento del Corpus —que es el objetivo declarado de la v3— convierta el build en un cuello de botella sin que nadie lo vea venir. Hoy se rasterizan 38 Tarjetas; a las ~2.000 Citas de §6.1 son unas 53 veces la misma faena, en cada construcción, y hay al menos dos al día (push y reconstrucción de AD-12). La divergencia que cierra mira hacia adelante: sin esta regla, la v3 puede añadir un segundo artefacto por Cita que se reconstruya entero cada día, y el coste se dobla sin que aparezca en ninguna revisión.
 - **Rule:** **una construcción no rasteriza un artefacto por Cita cuya entrada no ha cambiado.** La regla vincula a la clase entera —todo artefacto pregenerado por Cita, no solo la Tarjeta—, y la entrada incluye la versión de la plantilla, para que un cambio de diseño sí lo regenere todo. El mecanismo concreto de caché lo elige el código.
+- **Extendido en la v7.1:** la invariante alcanza a los artefactos pregenerados por Obra, como su Tarjeta Social. Su entrada es la Ficha de Obra y las Citas que la componen.
 
 ### AD-17 — El carácter publicable de una superficie tiene un solo dueño
 
-- **Binds:** NFR-1, NFR-5, NFR-6, NFR-8, NFR-9, FR-21, FR-26, FR-29
-- **Prevents:** que una superficie interna acabe indexada por olvido, y que una superficie pública nueva se quede fuera del barrido de calidad. Hoy el `noindex` se declara en la página y la exclusión del sitemap en una lista de expresiones regulares mantenida a mano en `astro.config.mjs`: dos sitios que recordar, y el fallo es silencioso —la superficie se anuncia, nadie recibe un error, y se descubre semanas después en Search Console—. Es el filtro-que-se-olvida de AD-2, aplicado a superficies en vez de a contenido. La v3 añade una de cada: el lote interno de FR-29 y la Página de Colección pública.
-- **Rule:** una superficie declara **en un solo sitio** si es publicable, y todo lo demás **deriva** de esa declaración en vez de mantener su propia lista: la inclusión en el sitemap, el `noindex`, y el barrido automatizado de accesibilidad y móvil que exigen NFR-8 y NFR-9 sobre las superficies públicas. Un dueño, tres consecuencias. Añadir una superficie no puede requerir acordarse de un segundo fichero — ni para ocultarla, ni para someterla a las mismas pruebas que las demás.
+- **Binds:** NFR-1, NFR-5, NFR-6, NFR-8, NFR-9, FR-21, FR-26, FR-29, FR-52
+- **Prevents:** que una superficie interna acabe indexada por olvido, y que una superficie pública nueva se quede fuera del barrido de calidad. Hasta la Historia 12.1 el `noindex` se declaraba en la página y la exclusión del sitemap en una lista de expresiones regulares mantenida a mano en `astro.config.mjs`: dos sitios que recordar, y el fallo es silencioso —la superficie se anuncia, nadie recibe un error, y se descubre semanas después en Search Console—. Es el filtro-que-se-olvida de AD-2, aplicado a superficies en vez de a contenido. La v3 añade una de cada: el lote interno de FR-29 y la Página de Colección pública.
+- **Rule:** una superficie declara **en un solo sitio** si es publicable, y todo lo demás **deriva** de esa declaración en vez de mantener su propia lista: la inclusión en el sitemap, el `noindex`, y el barrido automatizado de accesibilidad y móvil que exigen NFR-8 y NFR-9 sobre las superficies públicas. Un dueño, cuatro consecuencias: desde la Historia 12.1 también el índice de Pagefind deriva de la misma declaración. Añadir una superficie no puede requerir acordarse de un segundo fichero — ni para ocultarla, ni para someterla a las mismas pruebas que las demás.
+- **Enmendado en la v7.1 — servicio por contenido.** Hasta la v5 una ruta era servicio solo por su **forma**: las páginas 2+ de un listado. La Página de Obra lo es además por **contenido**: la primera página de una Obra que FR-52 no indexa. La regla no se mueve a `superficies.ts`, que es puro y no sabe cuántas Citas tiene una Obra: vive en el dueño del contenido (AD-11). Seis precisiones, porque sin ellas dos lectores divergen:
+  - **`superficies.ts` recibe la lista positiva de rutas indexables**, con la clave de `rutaNormalizada`, y no la calcula. Fuera de la lista es servicio.
+  - **Falla cerrado.** Preguntar por el carácter de una superficie declarada servicio por contenido sin la lista, o con una lista aún sin calcular —que no es lo mismo que vacía—, lanza un error; nunca la da por producto.
+  - **`superficies.ts` expone la causa del servicio**, forma o contenido, para que AD-20 lea la forma. Las cuatro consecuencias de AD-17 salen del carácter; la admisión de un Modelo, de la causa.
+  - **Una sola entrada.** La función recibe las Citas y las Fichas de Obra **después de la puerta de admisión**: todo lector que no pase por la colección de contenido analiza las fichas con el mismo esquema exportado, nunca como YAML crudo, y ningún valor por omisión vive fuera del esquema.
+  - **El filtro del sitemap, que es síncrono, recibe la lista de una integración que la calcula en `astro:build:start`**, como el cotejo, y nunca con una promesa que se resuelva después.
+  - **Una comprobación en cada construcción, sobre el `dist/` real**, en `astro:build:done`: el sitemap anuncia exactamente las rutas sin `noindex`, y el índice interno, las mismas. Si no coinciden, rompe el build. El aviso (AD-27) y el informe (AD-24) no recalculan la lista: la leen del sitemap construido o publicado.
 
 ### AD-18 — La pertenencia a una Colección se declara en la Colección, y es blanda
 
@@ -176,18 +185,26 @@ graph LR
 
 ### AD-19 — Ninguna agregación reproduce la Cita
 
-- **Binds:** NFR-13, FR-28, FR-6, FR-5
+- **Binds:** NFR-13, FR-28, FR-6, FR-5, FR-51, FR-52
 - **Prevents:** que multiplicar superficies de agregación reparta la señal en lugar de sumarla. Con dos agregaciones transversales —Tema y Colección— más los listados de Autor, el mismo texto puede acabar indexable en cuatro URL, y entonces la Colección no captura cola larga: canibaliza a la Cita que debía alimentar.
 - **Rule:** toda **superficie indexable del sitio** que enumere Citas las presenta a través del **mismo componente de tarjeta**, que muestra fragmento acotado, atribución y enlace. Ninguna agregación reproduce el texto íntegro de una Cita ni declara una canónica distinta de la Página de Cita. La Colección reutiliza ese componente; no compone el suyo.
 - **Alcance, para que no bloquee FR-30:** esto vincula a superficies indexables, no a material de salida. Una Pieza de Canal reúne Citas íntegras a propósito y no es una superficie: NFR-13 habla de canibalización en buscadores, y una imagen publicada en una cuenta no compite por la canónica de nada.
+- **Extendido en la v7.1:** la Página de Obra es agregación y usa la misma tarjeta; su canónica es la propia, y la de cada Cita sigue en su Página de Cita. Que una agregación indexable no repita a otra —la Obra que es casi todo su Autor— no lo resuelve una canónica cruzada, que es una pista que el buscador puede ignorar, sino FR-52 por la vía de AD-17: la que repite no se indexa.
 
 ### AD-20 — Ningún guion de tercero, y el Modelo de Ingreso no es una excepción
 
-- **Binds:** FR-34, FR-35, FR-37, NFR-7, NFR-10, NFR-11, §11 del PRD
+- **Binds:** FR-34, FR-35, FR-37, FR-43, FR-54, NFR-7, NFR-10, NFR-11, §11 del PRD
 - **Prevents:** que la monetización entre por la única puerta que el producto no tiene cerrada. AD-6 fija el tope de guion pero no dice nada de terceros, y un Modelo de Ingreso llega con el guion del proveedor bajo el brazo: cumple el tope de la página propia y aun así carga 300 KB ajenos, cookies incluidas, incumpliendo NFR-11 sin que nadie lo haya decidido.
 - **Rule:** ninguna superficie carga guion de tercero, y `MAX_BYTES_DE_GUION` cubre también lo que traiga un Modelo de Ingreso. La propiedad se garantiza **por construcción, no por la casilla de configuración del proveedor** — el mismo criterio con el que AD-13 resolvió la medición. Consecuencia deliberada: un proveedor que exija su propio guion en la página **no cumple FR-37 y no se enciende**, por rentable que sea.
 - **Qué superficie admite qué Modelo tiene su propio dueño**, declarado junto al estado de encendido de AD-21, y **el armazón compartido no aloja ningún Modelo**.
 - **Enmendado en la v5, al admitir la Página de Autor (FR-43).** La admisión se declaraba por **fichero de página** mientras la publicabilidad se decide por **ruta**, y ninguna de las dos preguntas casaba con la otra: las páginas 2+ de un listado son `noindex` por AD-17 y aun así habrían alojado enlace comercial. La admisión se declara **sobre el mismo predicado de ruta con el que AD-17 decide la publicabilidad**, y la revisión de la declaración rechaza un Modelo admitido en rutas que la superficie declara no publicables. Y el tope de bytes **se mide en toda superficie que admita un Modelo**, no solo en la Página de Cita: hasta la v5 la afirmación de que este AD cubre lo que traiga un Modelo era cierta sobre el papel y no la comprobaba nadie fuera de la Cita. No se delega en AD-11: el conjunto publicable es dueño del *contenido* que se enumera, no de qué superficie puede alojar un ingreso, y confundirlos deja la invitación de donación en el armazón común — es decir, en la Página de Cita, que es lo primero que FR-34 prohíbe.
+- **Enmendado en la v7.1, al mudar la afiliación a la Página de Obra.** Seis precisiones:
+  - **La admisión se restringe solo por forma.** El servicio por forma —las páginas 2+ de un listado— no admite ningún Modelo. El servicio por contenido —la primera página de una Obra que FR-52 no indexa— **sí** admite la afiliación: el `noindex` decide qué ve el buscador, no qué ve quien llega desde la atribución de una Cita. Ni la revisión de la declaración ni la prueba sobre el sitio construido consultan el carácter por contenido. La historia que admita la afiliación en la Página de Obra —la primera superficie paginada con un Modelo— construye la admisión por predicado de ruta que esta regla declaró en la v5, para que `/obra/a/b/2/` no herede el enlace.
+  - **La afiliación solo en la Página de Obra.** La revisión de la declaración la rechaza en cualquier otra superficie. Queda revocada la excepción registrada en la v5 para la Página de Cita y la admisión en la Página de Autor (FR-35, FR-43).
+  - **La Página de Obra es superficie de lectura**, con la de Cita y la de Colección: la revisión rechaza en ella donaciones y publicidad.
+  - **Las tiendas son un conjunto cerrado** declarado junto al estado del Modelo, cada una con su dominio y su marca de afiliado. La Ficha de Obra declara la URL limpia de cada edición y una función pura compone la final en el build. **La forma de una edición es puerta del esquema** de la colección de fichas (AD-1): tienda del conjunto, dominio de esa tienda y sin marca pegada, con el Modelo encendido o apagado. La orden de `tools/` lo repite por comodidad.
+  - **La edición en venta nunca va sola.** Se pinta solo dentro del bloque de la edición cotejada y debajo de ella; una Obra sin ninguna Cita cotejada no la pinta, encendido o apagado, y declararla en su ficha avisa. Que una Obra tiene edición cotejada lo deriva el mismo módulo que deriva la Obra (AD-25).
+  - **En el sitio construido, lo marcado con `data-ingreso` es un subconjunto** de lo encendido y admitido en esa ruta. Lo que el Modelo pinte vive dentro de su marca, con la presentación en atributos `style`, para que apagado no deje ni una regla CSS en ninguna página.
 
 ### AD-21 — Encender un Modelo de Ingreso es un commit, no una medición
 
@@ -203,12 +220,14 @@ graph LR
 
 ### AD-23 — El cotejo corre en el build, contra el documento versionado
 
-- **Binds:** FR-23, FR-24, AD-1, AD-2, AD-10, SM-C1
+- **Binds:** FR-23, FR-24, FR-53, AD-1, AD-2, AD-10, SM-C1
 - **Prevents:** la única vía por la que el sembrado ejecutado por agentes puede destruir lo único que el producto tiene. AD-1 comprueba que la Procedencia **exista**, no que sea **cierta**, y a volumen esa diferencia deja de ser teórica: una obra plausible y un año plausible pasan la puerta igual que los verdaderos. Si el cotejo viviera solo en `tools/`, un fichero escrito a mano lo esquivaría — exactamente el fallo que AD-1 existe para cerrar.
 - **Rule:** el documento de la Fuente se versiona en `corpus/fuentes/`, que **no es una colección** y sí lo lee el build — carácter propio, distinto tanto de `corpus/citas/` como de `corpus/semilla/`, cuyo registro sigue siendo puramente auditable e invisible al build. Cada Cita referencia su documento, y **el cotejo corre en el build sin que ningún camino lo esquive**: una Cita cuyo texto no se localice literalmente en su documento **rompe el build**, con la ruta del fichero y la regla incumplida. Cuatro precisiones que la regla fija porque sin ellas dos builders divergen:
   - **Dónde corre el cotejo lo elige el código**, con una condición: fuera de `src/lib/`, que por AD-5 no lee el sistema de ficheros. Cargador, refinamiento del esquema o paso de validación propio son todos válidos; lo invariante es que corra en el build y no se pueda saltar. AD-1 nunca exigió que la puerta fuera el esquema — exigió que no viviera solo en `tools/` y que un fichero escrito a mano no la esquivara.
-  - **Un documento por par (Fuente, obra).** Recuperar una obra ya presente reutiliza su documento en vez de añadir otra copia, y el documento se nombra `{id-de-fuente}--{slug-de-obra}`; la Cita lo referencia por ese mismo identificador. Sin esto, dos sesiones de sembrado dejan dos copias y esquemas de referencia incompatibles.
+  - **Un documento por par (Fuente, obra).** Recuperar una obra ya presente reutiliza su documento en vez de añadir otra copia, y el documento se nombra `{id-de-fuente}--{slug-de-obra}`; la Cita lo referencia por ese mismo identificador. Sin esto, dos sesiones de sembrado dejan dos copias y esquemas de referencia incompatibles. *(Corregido en la v7.1, contra el código: desde el 2026-08-20 el documento es uno por página —`{id-de-fuente}--{slug-de-obra}--{slug-de-pagina}` cuando la obra tiene varias— y la obra es el conjunto de sus documentos. Lo invariante es que una página no se versiona dos veces.)*
   - **Enmendado en la v5:** ese nombre es una **proyección con pérdida y no la identidad** — el slug de obra trunca, y dos tomos de un título largo colapsan en la misma clave, con lo que `recuperar` contesta «ya versionado» y las Citas del segundo se cotejan contra el texto del primero. Al reutilizar, se **compara la obra declarada en la cabecera del documento** con la pedida y se **rechaza la reutilización cuando difieren**, en vez de darla por buena. La cabecera ya lleva ese dato y nadie lo miraba. AD-25 convierte esa diferencia en dos entradas visibles al visitante, así que deja de ser interna.
+  - **Precisado en la v7.1:** como el nombre del documento sale de la obra de la Procedencia, ninguna operación sobre la Obra reescribe esa Procedencia para reunir grafías o retitular: eso lo declara la Ficha de Obra (AD-25). La única reescritura admitida es **restituir el literal de la Fuente**: lo hace documentar una Cita, y en una Cita del censo, todavía sin documento, también igualar su grafía de obra a la que declara la cabecera de un documento versionado de esa misma obra. Una grafía es literal cuando coincide con esa cabecera, colapsando espacios y nada más.
+  - **Lo que una página publica de una Fuente** sale de los campos de Fuente de las Citas y de la declaración pura del conjunto cerrado de Fuentes. `corpus/fuentes/` se lee para cotejar, nunca para publicar.
   - El documento se versiona como **texto plano**, con el marcado retirado al recuperarlo. Guardar el HTML de origen en un caso y el texto extraído en otro hace que el mismo cotejo pase contra uno y falle contra el otro.
   - El cotejo compara **colapsando espacios y nada más**. No pasa por `normalizar.ts`: quitar diacríticos haría coincidir «cafe» con «café», y una Cita que difiere en un acento de su edición es justo el defecto que NFR-12 y SM-C1 quieren cazar.
 
@@ -216,26 +235,30 @@ graph LR
 
 - **Binds:** FR-38, FR-39, FR-40, SM-1, `tools/`, `corpus/`, `src/lib/publicado.ts`, AD-5, AD-11, AD-12, AD-14, AD-22, AD-27
 - **Prevents:** que la única métrica que decide si el producto existe se lea a ojo en un panel, y que el instrumento de medirla contamine lo medido. Sin regla: un builder consulta en vivo y otro guarda un total, y ninguno responde §14.8 del PRD, que solo se contesta comparando **el reparto por familia a lo largo del tiempo**. Peor: la vía automática obvia —que CI lea y commitee— dispara `on: push`, y con él el aviso de AD-27, anunciando una jornada en la que no cambió un byte; `tools/avisar.ts` ya deja escrito por qué eso es dañino. Y si el estado de indexación entrara en `src/lib/`, `dist/` pasaría a ser función de lo que Google opinó ayer: dos construcciones del mismo commit dejarían de dar el mismo sitio, que es el modo de fallo que AD-14 previó para la medición.
-- **Rule:** la lectura se **versiona como serie** en `corpus/`, con su fecha, su reparto por familia —Cita, Autor, Tema, Colección— y **el estado de lectura de cada familia**, imitando `corpus/sesiones-de-sembrado.yml`. Cinco cláusulas que sin escribir divergen:
+- **Rule:** la lectura se **versiona como serie** en `corpus/`, con su fecha, su reparto por familia —Cita, Autor, Tema, Colección y, desde la v7.1, Obra— y **el estado de lectura de cada familia**, imitando `corpus/sesiones-de-sembrado.yml`. Cinco cláusulas que sin escribir divergen:
   - **Se compone URL a URL, no de un informe.** La API de Search Console **no expone cobertura ni indexación agregada**: solo `URL Inspection`, una URL por petición, con techo de 2.000 al día y 600 por minuto por propiedad.
   - **El techo real no es la cuota: es el reloj.** *(Corregido el 2026-09-04, con la primera ejecución real.)* Esta regla decía que las ~1.716 URL cabían al 86 % de la cuota diaria. Caben en cuota y **no caben en tiempo**: medido contra la propiedad, el token tarda 25 s y cada inspección entre 6,6 y 16,3 s, así que una pasada completa son entre tres y siete horas. La consecuencia no es un número — **el muestreo por familia deja de ser la previsión para cuando el Corpus crezca y pasa a ser el único modo posible desde el primer día**, y el tamaño de muestra se escribe en la entrada para que una comparación entre jornadas sepa qué compara. El dato es el del último rastreo de Google, no el de ahora: la serie mide con retardo y lo dice.
   - **Idempotente por fecha.** La de sembrado mide sesiones y dos el mismo día son dos hechos; ésta mide un estado y dos lecturas el mismo día son una contradicción. Una segunda lectura de la misma jornada **reemplaza**, no añade.
   - **Una familia que no se pudo leer se omite; jamás se escribe cero.** El fallo real de esa API es parcial —cuota agotada, espera vencida en una de cuatro consultas—, y un cero fabricado es indistinguible del cero real, que es casi el estado de hoy. Es la convención de ausencia que la espina ya declara para el corpus, aquí donde una serie numérica invita al centinela.
   - **La escribe una orden de `tools/`, y ningún paso de CI la commitea a `main`.** Si CI la produce, abre una propuesta de cambio. Y un commit que solo toca la serie **no emite aviso** de AD-27.
   - **Ninguna función de `src/lib/` acepta el estado de indexación, ni siquiera por parámetro.** El grafo de enlace entrante que pide FR-39 se cruza con lo indexado **en `tools/`**, consumiendo de `publicado.ts` lo que AD-11 posee. `publicado.ts` sigue siendo dueño de «publicable y alcanzable»; «alcanzable desde una indexada» vive fuera del sitio.
+  - **Ampliado en la v7.1.** El censo de cada familia es `rutasIndexables` (AD-11): la familia Obra cuenta solo sus páginas indexables, porque una página con `noindex` no puede indexarse y contarla fabricaría un cero. El **estado de indexación** —lo que opina Google— es esta serie; la **indexabilidad** —la regla propia de FR-52— es de `publicado.ts`, y ninguna de las dos se deriva de la otra. Mientras rija SM-11, **Autor y Obra se leen enteras** la misma jornada —unas 147 URL, dentro de cuota y de reloj— y el muestreo se aplica solo a las demás familias. La entrada anota qué conjunto midió.
 
-### AD-25 — La Obra se deriva de la Procedencia, su identidad es el par (Autor, forma canónica), y no es superficie
+### AD-25 — La Obra se deriva de la Procedencia, una ficha ancla su URL, y lo que contiene decide si se indexa *(reescrito en la v7.1)*
 
-- **Binds:** FR-42, FR-43, AD-1, AD-3, AD-11, AD-18, AD-19, AD-23, NFR-13, `src/lib/publicado.ts`
-- **Prevents:** cuatro divergencias, dos de ellas ya vivas en el corpus. La ortográfica está **medida**: conviven «Respuesta a Sor Filotea de la Cruz» y «Respuesta a sor Filotea de la Cruz» —103 literales para 102 obras—, así que la Página de Autor de Sor Juana publicaría la misma obra dos veces. La peor es la contraria: *Proverbios y cantares* de Machado son **dos secuencias distintas** —una en *Campos de Castilla*, otra en *Nuevas canciones*— y hoy conviven bajo una sola grafía; una identidad ingenua las funde, FR-42 miente en el recuento y FR-43 enlaza a un libro que no contiene la mitad de esas Citas. Además, sin fijar el ámbito, «Poesías» u «Obras completas» de dos Autores distintos colisionan entre sí; y sin fijar el dueño, un builder pone la derivación donde solo la invoca la Página de Autor y el gate no corre para un Autor sin página publicada —que hoy existe—, o sea una puerta que un camino esquiva, el fallo que AD-1 cierra.
-- **Rule:** la Obra **no se da de alta**: se deriva del campo `obra` de las Procedencias publicadas. Cinco precisiones:
-  - **Su identidad es el par (Autor, forma canónica)**, con la normalización única de **AD-3** y nombrando la función, no la familia: dos funciones del mismo módulo dan claves distintas para un título que empieza o acaba en signos. El ámbito es el Autor, nunca global.
-  - **Dos grafías del mismo Autor que normalicen igual rompen el build**, nombrando los ficheros y las dos formas. Elegir una publicaría una grafía que ningún editor decidió; callarse publicaría la obra dos veces.
-  - **Dos formas canónicas del mismo Autor en que una es prefijo de la otra se avisan, no rompen** —«Oráculo manual» frente a «Oráculo manual y arte de prudencia» son el mismo libro; otras dos pueden ser legítimas—. El gate ortográfico caza la variante barata; ésta caza la cara.
-  - **Dos obras distintas con el mismo título se desambiguan explícitamente en la Procedencia.** Hoy no hay forma de escribir que son dos, y por eso se funden en silencio.
-  - **El dueño de la enumeración de Obras es `publicado.ts`**, junto al resto del conjunto publicable, y **el gate corre sobre el corpus entero en el build**, no sobre lo que una página pida.
-- **Y no es superficie en la v5:** no entra en `superficies.ts`, no genera URL, sitemap ni entrada de Pagefind. **La sección enumera Obras, no Citas** —su unidad de listado es la obra, con su recuento, y el enlace por Cita apunta a la canónica `/cita/{slug}/`—: enumerarlas dentro reproduciría cada Cita dos veces en la misma URL y chocaría con AD-19 y con la paginación de FR-5. Vive **solo en la primera página** del listado; las páginas 2+ son otra superficie por AD-17.
-
+- **Binds:** FR-2, FR-3, FR-35, FR-42, FR-43, FR-51, FR-52, FR-53, FR-54, NFR-3, NFR-4, NFR-13, AD-1, AD-3, AD-4, AD-11, AD-17, AD-18, AD-19, AD-20, AD-23, `src/lib/publicado.ts`, `src/lib/obras.ts`, `corpus/obras/`
+- **Prevents:** las divergencias de la v5 —la ortográfica, viva hoy en «Respuesta a Sor/sor Filotea de la Cruz» (20 contra 1); la colisión entre Autores, prevista para unas «Odas» de dos; y la puerta que un camino esquiva— y cinco que abre tener página. **La URL**: derivada del título en cada construcción, corregir una tilde la mueve, que es lo que AD-4 existe para impedir. **La reunión**: unir dos grafías de una misma obra reescribiendo la Procedencia deja a la Cita sin documento, porque su nombre sale de esa obra (AD-23). **El título**: hoy cinco componentes leen la obra de la Procedencia cada uno por su cuenta, así que la misma obra se publicaría con dos nombres. **La ficha**: tres órdenes publican Citas por caminos distintos, y cada una crearía la ficha a su manera. **La congelación**: el criterio de parada de SM-11 sin dato ni dueño lo aplicaría cada lector a su modo. La fusión de los dos «Proverbios y cantares» ya no está viva, porque sus Procedencias difieren en el literal; la vigila el aviso de prefijo.
+- **Rule:** la Obra **no se da de alta a mano**: se deriva del campo `obra` de las Procedencias publicadas, y lo que no se puede derivar lo ancla una **Ficha de Obra** que crea el sistema. Nueve precisiones:
+  - **Identidad: el par (Autor, forma canónica)**, con `normalizar` de `src/lib/normalizar.ts` (AD-3). El ámbito es el Autor, nunca global. Una ficha reclama **exactamente las formas de su lista**, escrita explícita y completa por quien la crea, sin valor por omisión; el título nunca interviene en la identidad. Una forma la reclama a lo sumo una ficha; si dos la reclaman, el build rompe.
+  - **La ficha ancla la URL.** Vive en `corpus/obras/{slug-autor}--{slug-obra}.yml`, con `slugDeObra` de `src/lib/slug.ts` **sin la truncación del documento**; su nombre es el slug y **no se recalcula nunca** (AD-4). El build casa ficha y Obra por la identidad, no por el nombre, y exige que el prefijo de Autor del nombre coincida con su campo de Autor.
+  - **Una sola función de `tools/lib/` crea la ficha**: busca la forma entre las fichas activas y las retiradas, restaura la retirada, nunca sobrescribe y se niega ante una colisión de nombre. La llaman, en el mismo gesto, las tres órdenes que dejan una Cita publicada con una obra sin ficha —aprobar, dar de alta y documentar—, y ninguna otra; escribir una Cita a secas no, porque también escribe en `corpus/_revision/`.
+  - **Puertas.** Una Obra con Citas publicadas sin ficha **rompe el build** con la orden que la crea (AD-1). Una ficha cuya Obra se queda sin Citas **avisa y no rompe**, porque retirar una Cita no puede tumbar el sitio (AD-18). Retirar una ficha la mueve a `corpus/_obras-retiradas/` (AD-2), y se niega mientras una Cita publicada o candidata la resuelva; retirar un Autor se bloquea igual por sus fichas.
+  - **Grafías, nunca partes.** La ficha reúne grafías de una misma obra; un capítulo o una fábula que la Fuente publica como obra propia sigue siéndolo. **Reunir nunca reescribe la Procedencia** (AD-23).
+  - **La puerta ortográfica rompe mientras un grupo de grafías equivalentes del mismo Autor contenga alguna que no sea literal de su Fuente** (AD-23); una Cita sin documento no es literal. Cuando todas lo son, no rompe y publica el título de la ficha. **Dos formas en que una es prefijo de otra avisan, no rompen**, y reunirlas o declararlas distintas en la ficha silencia el aviso.
+  - **El título publicado es siempre una grafía literal de una Procedencia** de la Obra. Si deja de serlo —porque se retiró o se documentó la Cita que lo sostenía—, avisa y no rompe, y se publica la grafía por omisión de una regla fija de `obras.ts`, la misma que usa quien crea la ficha. Las órdenes de retirar y documentar actualizan la ficha en el mismo gesto.
+  - **`obras.ts` resuelve cada Cita a su Obra y es dueño de sus atributos derivados**: título publicado, año cuando las Citas que lo declaran coinciden, Fuentes y si hay edición cotejada, Temas y recuento. `atribucion.ts` compone a partir de la Obra ya resuelta. **Toda superficie, dato estructurado o artefacto que nombre una Obra la consume, y ninguno lee la Procedencia para mostrarla.** Es una migración: hoy componen la obra por su cuenta la Atribución, los datos estructurados de la Página de Cita, la Tarjeta Social, la Imagen de Cita y la Imagen del Kit. El `isPartOf` de cada Cita y el `about` de su Página de Obra comparten `@id`: la URL canónica de la Página de Obra, también cuando no se indexa (NFR-3).
+  - **La congelación de SM-11 es una declaración versionada con un solo dueño**, junto a los números de FR-52 en `umbrales.ts`: fija la lista de identidades de Obra indexables en el momento de congelar. Mientras exista, **ninguna Obra entra en el conjunto indexable**, ni nueva ni existente; las que dejen de cumplir la regla salen igual. Entra en la función de indexabilidad como dato del corpus, **nunca como lectura de la serie de AD-24**, y el rastreo, las ediciones y las Piezas consultan la misma declaración. Congelar y levantar son commits (AD-21).
+- **Y es superficie desde la v7.1.** `/obra/{slug-autor}/{slug-obra}/`, de dos segmentos para que el ámbito de Autor esté en la ruta y una obra de título numérico no se confunda con una página del listado, declarada en `superficies.ts` como servicio por contenido (AD-17). **Existe** toda Obra con al menos una Cita publicada, porque es el destino del enlace de la atribución y de la lista de obras del Autor. **Se indexa** solo la que no repite otra página (FR-52: al menos 2 Citas y menos del 90 % de las de su Autor, los dos números en `umbrales.ts`). **La indexabilidad no se declara**: ninguna ficha lleva un campo que la fije ni la excepcione, y ante duplicados la única palanca es el tope de `umbrales.ts`. La lista de obras de la Página de Autor enumera Obras, no Citas, enlaza a cada Página de Obra y vive solo en la primera página del listado.
 ### AD-26 — La semblanza se cita por el origen de una revisión, y su documento no comparte espacio con las obras
 
 - **Binds:** FR-41, AD-1, AD-3, AD-22, AD-23, AD-28, `corpus/autores/`, `corpus/fuentes/`, `tools/lib/fuentes.ts`, `tools/lib/cotejo.ts`, `tools/lib/documento.ts`, `tools/recuperar.ts`, §5 del PRD
@@ -249,9 +272,10 @@ graph LR
 
 ### AD-27 — Anunciar no es construir, y lo anunciado tiene un solo dueño
 
-- **Binds:** FR-38, AD-12, AD-17, AD-22, AD-24, `.github/workflows/publicar.yml`, `tools/avisar.ts`
+- **Binds:** FR-38, FR-47, FR-51, AD-12, AD-17, AD-22, AD-24, AD-25, `.github/workflows/publicar.yml`, `tools/avisar.ts`, `tools/lib/cambios.ts`
 - **Prevents:** el conflicto que FR-38 crea con AD-22 —que exige que ningún paso del build dependa de un servidor ajeno—, y el fallo silencioso que ya está en el código: el aviso deduce lo cambiado mirando solo `corpus/citas/`, así que editar la semblanza de un Autor —la única familia que hoy recibe impresiones, y el motivo entero de §4.16— no se anuncia a nadie y nada falla. Con `corpus/autores/`, `corpus/temas/` y `corpus/colecciones/` en juego son cuatro mapeos que divergirán.
-- **Rule:** **construir y publicar son pasos distintos.** El aviso es efecto de publicar y nunca condición de construir: se emite después de que el artefacto exista, su fallo **no** falla el despliegue, y queda registrado con lo que se envió y lo que respondió el receptor. **El mapeo de fichero del corpus a rutas afectadas tiene un solo dueño** y cubre las cuatro familias, no una. Y lo que el aviso consigue no se confunde con indexación: **por construcción no puede mover la cifra de AD-24**, porque el buscador que la mide no acepta aviso de cambio. Su valor está en los índices que sí lo aceptan, y se mide aparte.
+- **Rule:** **construir y publicar son pasos distintos.** El aviso es efecto de publicar y nunca condición de construir: se emite después de que el artefacto exista, su fallo **no** falla el despliegue, y queda registrado con lo que se envió y lo que respondió el receptor. **El mapeo de fichero del corpus a rutas afectadas tiene un solo dueño** y cubre todas las familias, no una. Y lo que el aviso consigue no se confunde con indexación: **por construcción no puede mover la cifra de AD-24**, porque el buscador que la mide no acepta aviso de cambio. Su valor está en los índices que sí lo aceptan, y se mide aparte.
+- **Ampliado en la v7.1.** Son cinco familias, y el aviso y el `lastmod` de FR-47 derivan de **una sola relación —de cada superficie a los ficheros que renderiza—**, con un dueño y dos lecturas: rutas a avisar y ficheros que componen cada ruta. Hoy viven en dos módulos, y una prueba las fija como inversas. La Página de Obra se compone de su ficha, sus Citas y el fichero de su Autor; su `lastmod` sale solo de ahí. **Las hermanas cuentan solo cuando cambia su indexabilidad**, y eso se detecta comparando la lista indexable de antes y de después, nunca mapeando cada Cita a todas las Obras de su Autor. Se anuncia toda ruta de Obra cuyo estado anunciable cambió en cualquier sentido, incluida la que desaparece —absorbida, retirada, sin Citas o que pasa a `noindex`—; las que no cambiaron se anuncian solo si son indexables. El aviso toma las rutas indexables del sitemap construido del commit que anuncia.
 
 ### AD-28 — La licencia de un texto ajeno es obligación de la superficie que lo reproduce
 
@@ -263,19 +287,19 @@ graph LR
 
 | Concern | Convention |
 |---|---|
-| Nombres de entidades | Español, en singular, exactamente como el glosario del PRD: `Cita`, `Autor`, `Tema`, `Procedencia`, `Colección`, `Pieza de Canal`, `Modelo de Ingreso`. Ni `quote`, ni `frase`, ni `author`. Los identificadores de código siguen el glosario. |
-| Ficheros del corpus | `corpus/citas/{slug-autor}--{fragmento}.md` · `corpus/autores/{slug-autor}.yml` · `corpus/temas/{slug-tema}.yml` · `corpus/colecciones/{slug-coleccion}.yml`. En revisión: `corpus/_revision/`. Documentos de Fuente: `corpus/fuentes/{id-de-fuente}--{slug-de-obra}.txt`. |
-| Rutas públicas | `/cita/{slug}` · `/autor/{slug}` · `/tema/{slug}` · `/coleccion/{slug}` · `/buscar`. En español, minúsculas, sin diacríticos, sin identificadores opacos (NFR-4). |
+| Nombres de entidades | Español, en singular, exactamente como el glosario del PRD: `Cita`, `Autor`, `Tema`, `Procedencia`, `Colección`, `Obra`, `Ficha de Obra`, `Pieza de Canal`, `Modelo de Ingreso`. Ni `quote`, ni `frase`, ni `author`. Los identificadores de código siguen el glosario. |
+| Ficheros del corpus | `corpus/citas/{slug-autor}--{fragmento}.md` · `corpus/autores/{slug-autor}.yml` · `corpus/temas/{slug-tema}.yml` · `corpus/colecciones/{slug-coleccion}.yml` · `corpus/obras/{slug-autor}--{slug-obra}.yml`. En revisión: `corpus/_revision/`; Fichas de Obra retiradas: `corpus/_obras-retiradas/`. Documentos de Fuente, uno por página: `corpus/fuentes/{id-de-fuente}--{slug-de-obra}[--{slug-de-pagina}].txt`. |
+| Rutas públicas | `/cita/{slug}/` · `/autor/{slug}/` · `/tema/{slug}/` · `/coleccion/{slug}/` · `/obra/{slug-autor}/{slug-obra}/` · `/buscar/`. Con barra final, en español, minúsculas, sin diacríticos, sin identificadores opacos (NFR-4). |
 | Fechas y años | El año de fallecimiento es un entero. Las fechas completas y las jornadas, ISO 8601. |
 | Ausencia de datos | Un campo opcional ausente se omite del fichero; **nunca** cadena vacía ni `null`. La distinción entre Procedencia completa, parcial y ausente es de presencia de campos, no de valores centinela. |
 | Errores de contenido | Un fallo de validación es un fallo de build con la ruta del fichero y la regla incumplida (FR-13). No se degrada a aviso. |
 | Estilos | Tokens de `DESIGN.md` como propiedades personalizadas de CSS, definidas una vez. Ningún valor de color o tipografía en un componente. |
-| Tokens serif | La familia serif se aplica exclusivamente a texto de Cita, nombre de Autor, nombre de Tema y nombre de Colección. Cualquier otro uso es un error. |
-| Conjuntos cerrados | Eventos de medición, destinos de compartición, redes de origen y Modelos de Ingreso son conjuntos cerrados con nombre. Ampliarlos exige tocar su módulo, y ese coste es deliberado. |
+| Tokens serif | La familia serif se aplica exclusivamente a texto de Cita, nombre de Autor, nombre de Tema y nombre de Colección. Cualquier otro uso es un error; el título de una Obra va en la familia de la interfaz. |
+| Conjuntos cerrados | Eventos de medición, destinos de compartición, redes de origen, Modelos de Ingreso, tiendas de afiliación y familias de superficie son conjuntos cerrados con nombre. Las familias tienen su dueño en `superficies.ts`, y las listas que hoy las repiten en otros módulos se fijan contra él con una prueba. Ampliarlos exige tocar su módulo, y ese coste es deliberado. |
 
 ## Stack
 
-Ratificado el 2026-08-17 **desde `package.json`**, aplicando lo que esta espina prescribió en la v1: el código es el dueño en cuanto existe. La v3 no introduce tecnología nueva.
+Ratificado el 2026-08-17 **desde `package.json`**, aplicando lo que esta espina prescribió en la v1: el código es el dueño en cuanto existe. Ni la v3 ni la v7.1 introducen tecnología nueva; la v5 añadió la biblioteca de Google para la serie de indexación, solo en `tools/`.
 
 | Name | Version |
 |---|---|
@@ -286,6 +310,9 @@ Ratificado el 2026-08-17 **desde `package.json`**, aplicando lo que esta espina 
 | Pagefind | ^1.5.2 |
 | `@astrojs/sitemap` | ^3.7.3 |
 | `sharp` (Tarjeta Social) | ^0.35.3 |
+| `googleapis` (serie de indexación, solo en `tools/`, AD-22, AD-24) | 178.0.0, fijada a propósito; la vigente el 2026-10-06 es la 183.0.0 |
+| `yaml` (lectura del corpus en `tools/` y en las integraciones) | ^2.9.0 |
+| `tsx` (órdenes de `tools/`) | ^4.23.12 |
 | Vitest · Playwright · axe | ^4.1.10 · ^1.62.1 · ^4.12.1 |
 | Source Serif 4 · Inter | vía Fonts API de Astro |
 | Hosting del sitio | GitHub Pages, estático, publicado por Actions |
@@ -301,14 +328,17 @@ sabiduria-de-bolsillo/
     autores/
     temas/
     colecciones/     # AD-18: la Colección declara sus miembros, en blando
+    obras/           # AD-25: la Ficha de Obra ancla la URL; la crea el sistema
     portada.json     # AD-12: fijaciones de jornada; también las del lote (FR-29)
     fuentes/         # AD-23: documentos de Fuente. Los lee el build; NO es colección
     semilla/         # registro auditable de la siembra inicial; el build no lo lee
     _revision/       # AD-2: el build NO carga este directorio
+    _obras-retiradas/  # AD-2: fichas retiradas; el build no las carga
   src/
     content.config.ts  # AD-1: la puerta de admisión
     lib/               # AD-5: derivación pura
       publicado.ts     # AD-11: dueño único del conjunto publicable
+      obras.ts         # AD-25: derivación de la Obra y regla de indexación (AD-17)
       umbrales.ts      # AD-9: todo literal de regla de negocio
       medicion.ts      # AD-13: único emisor, vocabulario cerrado
       citaDelDia.ts    # AD-12
@@ -319,9 +349,13 @@ sabiduria-de-bolsillo/
     pages/
       cita/[slug].astro · autor/[slug]/[...page].astro · tema/[slug]/[...page].astro
       coleccion/[slug]/[...page].astro     # v3
+      obra/[autor]/[slug]/[...page].astro  # v7.1: servicio por contenido (AD-17)
       tarjeta/[slug].png.ts                # AD-15 build · AD-16 incremental
+      tarjeta/obra/[autor]/[slug].png.ts   # v7.1: Tarjeta de Obra, solo hechos (AD-28)
       buscar.astro · index.astro · 404.astro · robots.txt.ts
       kit.astro                            # AD-17: interna
+  integraciones/       # pasos del build que leen el corpus entero: cotejo (AD-23), colecciones, cobertura,
+                       # historial (lastmod, AD-27) y Obras (AD-25, AD-17)
   tools/               # AD-15: composición del editor. Ingesta, auditoría y lote
   medicion/            # AD-14: escribe y no se lee. receptor.ts + adaptador + esquema.sql
 ```
@@ -335,6 +369,9 @@ erDiagram
   CITA_DEL_DIA }o--|| CITA : "destaca"
   PIEZA_DE_CANAL }o--o{ CITA : "compone"
   PIEZA_DE_CANAL }o--o| COLECCION : "anuncia"
+  AUTOR ||--o{ OBRA : "escribió — derivado"
+  OBRA ||--o{ CITA : "agrupa — por la Procedencia"
+  FICHA_DE_OBRA ||--|| OBRA : "ancla la URL"
 ```
 
 **Entorno operativo.** Dos artefactos desplegables y ningún entorno de ensayo. El sitio es una carpeta de HTML publicada en GitHub Pages por Actions, con doble disparador: cada push a la rama principal y una reconstrucción programada diaria (AD-12). El receptor de medición se despliega **por separado** y con su propio ciclo — es la propiedad que AD-14 protege: un cambio en uno no obliga a redesplegar el otro. No hay staging porque no hay estado que migrar; la reversión es volver a desplegar un commit anterior, y la copia de seguridad es el repositorio. El dominio propio se declara en `public/CNAME`, del que `src/lib/dominio.ts` deriva canónicas y sitemap.
@@ -343,31 +380,37 @@ erDiagram
 
 | Capacidad | Vive en | Gobernada por |
 |---|---|---|
-| FR-1…FR-3 Página de Cita | `pages/cita/[slug].astro` | AD-4, AD-6, AD-8 |
+| FR-1…FR-3 Página de Cita | `pages/cita/[slug].astro` | AD-4, AD-6, AD-8, AD-25 |
 | FR-4, FR-5, FR-41, FR-42 Página de Autor | `pages/autor/[slug]/` | AD-9, AD-19, AD-25, AD-26, AD-28 |
-| FR-38 Aviso de cambio a buscadores | paso de publicación de `publicar.yml` | AD-22, AD-27 |
+| FR-38 Aviso de cambio a buscadores | paso de publicación de `publicar.yml` | AD-22, AD-27, AD-25 |
 | FR-39, FR-40 Estado de indexación | `tools/`, serie en `corpus/` | AD-11, AD-14, AD-22, AD-24 |
-| FR-43 Obra como superficie de afiliación | sección de `pages/autor/[slug]/` | AD-20, AD-21, AD-25 |
+| FR-43 Lista de obras, que lleva a la Página de Obra | sección de `pages/autor/[slug]/` | AD-25, AD-17 |
+| **FR-51…FR-54 Página de Obra** | `corpus/obras/` + `pages/obra/` + `lib/obras.ts` | **AD-25**, **AD-17**, AD-11, AD-19, AD-20, AD-4, AD-23, AD-24, AD-27, AD-21, AD-13 |
 | FR-6 Página de Tema | `pages/tema/[slug]/` | AD-9, AD-11, AD-19 |
-| FR-7, FR-8 Búsqueda | Pagefind + isla | AD-3, AD-6, AD-11 |
+| FR-7, FR-8 Búsqueda | Pagefind + isla | AD-3, AD-6, AD-11, AD-17 |
 | FR-9 Cita del Día | `lib/citaDelDia.ts` + `index.astro` | AD-5, AD-12 |
 | FR-10, FR-11 Imagen de Cita | `islands/` | AD-7, AD-8, AD-15 |
 | FR-12 Descubrimiento | `lib/` agregaciones | AD-5 |
 | FR-13…FR-16 Ingesta y curación | `tools/` + `content.config.ts` | AD-1, AD-2, AD-3, AD-10 |
 | FR-17, FR-18, FR-20 Compartición | `islands/` + `lib/compartir.ts` | AD-6, AD-13 |
-| FR-19 Tarjeta Social | `pages/tarjeta/[slug].png.ts` | **AD-15**, **AD-16**, AD-11 |
+| FR-19 Tarjeta Social | `pages/tarjeta/` (Cita y Obra) | **AD-15**, **AD-16**, AD-11, AD-25 |
 | FR-21, FR-22 Kit Diario | `kit.astro` + `lib/kit.ts` | AD-15, **AD-17**, AD-12 |
 | FR-23…FR-25 Sembrado | `tools/` + `content.config.ts` | **AD-22**, **AD-23**, AD-1, AD-10 |
 | **FR-26…FR-28 Colecciones** | `corpus/colecciones/` + `pages/coleccion/` | **AD-18**, **AD-19**, AD-11, AD-4 |
 | **FR-29…FR-32 Piezas de Canal** | `tools/` | **AD-15**, AD-12, AD-8 |
 | **FR-33…FR-37 Modelos de Ingreso** | configuración versionada + `tools/` | **AD-21**, **AD-20**, **AD-14**, AD-9 |
 | NFR-1…NFR-6 SEO | build + `pages/` | AD-2, AD-6, AD-11, **AD-17** |
-| **NFR-13 No canibalización** | componente de tarjeta único | **AD-19** |
+| **NFR-13 No canibalización** | componente de tarjeta único | **AD-19**, AD-25 |
 | LC-4 Medición | `medicion/` | **AD-14**, AD-13 |
 
 ## Deferred
 
-- **La Obra como superficie propia (AD-25).** 103 Páginas de Obra indexables es la alternativa que se consideró y se aplazó, no una que no se viera. Se aplaza porque añadir 103 páginas mientras el buscador se niega a indexar 1.534 gasta en la dirección contraria, y porque una Página de Obra es agregación que se parece a la de Autor mucho más que un Tema —AD-19 y NFR-13 la miran de cerca—. **Condición de reapertura, medible y sin interpretación:** que las 35 Páginas de Autor estén indexadas. Si entran ellas y las Citas no, la causa está en la Página de Cita (§14.8 del PRD) y la superficie nueva deja de ser una apuesta.
+- ~~**La Obra como superficie propia (AD-25).**~~ **Reabierta el 2026-10-05 por decisión de Héctor**, con su condición —que las Páginas de Autor estuvieran indexadas— sin cumplir: 18 de 65 en la lectura del panel del 2026-10-03. Se abre midiendo en vez de precondicionar: la familia se lee aparte desde su primer despliegue y tiene criterio de parada (SM-11 del PRD). La regla vive ahora en AD-25.
+- **Redirigir la URL de una Obra fusionada o retirada.** Hoy una reunión posterior a la publicación retira la URL de la absorbida y deja un 404 declarado. Se construye cuando haya una Página de Obra indexada, no antes: hasta entonces no hay enlace entrante que perder.
+- **Dos obras distintas del mismo Autor con el mismo literal de Fuente.** No son representables: la identidad (Autor, forma canónica) las funde. Hoy no existe ninguna. El día que aparezca la primera, la identidad cede a (Autor, documento de Fuente).
+- **La Época (FR-50).** Sigue con la condición del PRD: no se construye hasta que la serie de indexación muestre una familia por encima del 20 %.
+- **FR-44…FR-49 no se vinculan en esta espina.** Son operación y sembrado sin invariante nuevo; la única excepción, FR-47, la cubre AD-27.
+- **Derivar el sitemap del HTML construido.** Es la alternativa más limpia a los cinco lectores de AD-17 —un solo cálculo, leído del `noindex` ya renderizado— y se aplazó porque cambia cómo se produce el sitemap de todas las familias. Se reabre si la prueba sobre `dist/` no caza una divergencia real entre lectores.
 - **Qué se hace con las 1.639 Páginas de Cita si la hipótesis de §14.8 resulta falsa.** AD-24 da el instrumento para saberlo y AD-25 no lo prejuzga. Si al enriquecer la Página de Autor esas entran en el índice y las Citas siguen fuera, la palanca pasa a ser la Página de Cita misma, y eso es una decisión de producto antes que de arquitectura.
 
 - **Motor de vídeo (FR-31).** Sin encoder elegido, y es deliberado: su propia puerta —ninguna cuenta de imagen fija demostrando visitas, ningún motor— hace que elegirlo hoy sea vincular una versión que caducará antes de usarse. Lo que **sí** queda decidido es dónde vive (AD-15: `tools/`), y por eso se recorta sin tocar nada más. Se decide cuando SM-8 dé señal.
