@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Búsqueda: pantalla clave</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta pantalla. Si algo de aquí discrepa de las espinas, mandan ellas.
+       EXPERIENCE.md § Information Architecture  (Resultados de búsqueda: por fragmento,
+                                                  Autor, Tema u Obra; de Obra, solo las
+                                                  indexables)
+       EXPERIENCE.md § Voice and Tone            («No encontramos esa frase.»: nombra lo
+                                                  escrito, no la entidad)
+       EXPERIENCE.md § Component Patterns        (Campo de búsqueda, Resultado de búsqueda,
+                                                  Chip de Tema, Chip de Colección)
+       EXPERIENCE.md § State Patterns            (Búsqueda sin resultados, Carga del índice,
+                                                  Índice que no carga)
+       EXPERIENCE.md § Accessibility Floor       (foco visible siempre, mensajes de estado)
+       DESIGN.md § Typography                    (el título de una Obra en Inter, también
+                                                  en un resultado)
+       DESIGN.md § Colors                        (siena = actuar o salir: «Buscar» y el
+                                                  anillo de foco)
+       DESIGN.md § Components                    (Campo de búsqueda, Resultado de búsqueda,
+                                                  Chip de Tema, Chip de Colección)
+     Lo que las espinas no describen —el h1 «Buscar», la etiqueta del campo y su texto de
+     ejemplo— sale de src/pages/buscar.astro tal como está construido.
+     Sin red y sin JavaScript: si Inter y Source Serif 4 no están instaladas, salen las
+     familias de reserva del código y los saltos de línea pueden moverse un poco.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: no es el sitio. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --mesa-tinta:#1c2027; --mesa-suave:#59616e; --mesa-marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#d9b56a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--mesa-tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1320px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:78ch;color:var(--mesa-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);letter-spacing:.02em;max-width:110ch;}
+  .meta b{color:var(--mesa-tinta);font-weight:600;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-size:12px;color:var(--mesa-suave);}
+  .leyenda span{display:inline-flex;align-items:center;gap:8px;}
+  .muestra{display:inline-block;width:22px;height:12px;border-radius:2px;}
+  .muestra.azul{background:#eaf0f7;border:1px dashed #8fa9c6;}
+  .muestra.ambar{background:#fdf4e3;border:1px dashed #c99a3a;}
+
+  section.bloque-mesa{margin-top:56px;}
+  .bloque-mesa > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;line-height:1.2;margin:0 0 8px;}
+  .bloque-mesa > .regla{margin:0;max-width:92ch;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  .bloque-mesa > .regla b{color:var(--mesa-tinta);font-weight:600;}
+
+  .fila{display:flex;flex-wrap:wrap;gap:36px 32px;margin-top:26px;align-items:flex-start;}
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:10px;width:380px;flex:none;}
+  figure.tel > figcaption{font-size:13px;line-height:1.5;color:var(--mesa-suave);}
+  figure.tel > figcaption b{color:var(--mesa-tinta);font-weight:600;}
+  .etiqueta{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--mesa-marca);margin-bottom:4px;}
+  ul.notas{margin:0;padding:0 0 0 16px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);}
+  ul.notas li{margin:0 0 5px;}
+  .columna-notas{flex:1 1 360px;max-width:520px;padding-top:58px;}
+  .columna-notas ul.notas{font-size:13px;}
+  .columna-notas ul.notas li{margin-bottom:8px;}
+  ul.notas b{color:var(--mesa-tinta);font-weight:600;}
+  ul.notas li.pend{list-style:none;margin-left:-16px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;}
+  ul.notas li.pend b{color:var(--aviso-tinta);}
+
+  footer.fin{margin-top:64px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--mesa-suave);max-width:96ch;}
+  footer.fin b{color:var(--mesa-tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--mesa-tinta);margin:26px 0 8px;font-weight:600;}
+  footer.fin h2:first-child{margin-top:0;}
+  footer.fin ul{margin:6px 0 0;padding-left:18px;} footer.fin li{margin:3px 0;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--mesa-alta);
+       border:1px solid var(--mesa-linea);border-radius:3px;padding:1px 5px;}
+
+  /* ---- El teléfono: carcasa y barra del navegador, que no son el sitio ---- */
+  .telefono{width:380px;background:#17181c;border-radius:38px;padding:12px 10px 22px;border:1px solid #2b2d33;}
+  .navegador{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .navegador span{width:300px;text-align:center;background:#2a2c32;color:#d6d9df;border-radius:10px;
+       font:12.5px/1 system-ui,-apple-system,sans-serif;padding:8px 12px;letter-spacing:.01em;}
+  .navegador span::before{content:"";display:inline-block;width:7px;height:8px;margin-right:7px;border:1.5px solid #9ea3ad;border-radius:2px;vertical-align:-1px;}
+  .pantalla{width:360px;overflow:hidden;border-radius:3px 3px 26px 26px;}
+  .telefono.corto .pantalla{border-radius:3px;}
+
+  /* ===========================================================================
+     EL SITIO. 360 px de viewport. Tokens con los nombres de CSS de la tabla de
+     DESIGN.md § Typography; cada regla imita src/pages/buscar.astro y Armazon.astro.
+     =========================================================================== */
+  .lienzo{
+    --papel:#faf7f0; --papel-tenue:#efe9dd; --papel-claro:#fffdf8;
+    --contenedor-minimo:#ffffff; --contenedor-bajo:#f6f2ea; --contenedor:#f1ece2;
+    --contenedor-alto:#eae4d8; --contenedor-maximo:#e3dccf;
+    --tinta:#1f1b16; --tinta-apagada:#5a5147;
+    --contorno:#8a7f72; --filete:#ddd5c7;
+    --siena:#8c4a2f; --sobre-siena:#ffffff;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --titular-md:30px; --titular-sm:21px;
+    --cuerpo-lg:17px; --cuerpo-md:15px; --autor:13px; --pie:13px;
+    --unidad:8px; --canal:24px; --margen:20px; --respiracion:40px;
+    --radio:3px; --radio-tarjeta:6px; --grosor-filete:1px;
+    --medida-prosa:68ch; --zona-de-toque:44px;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+    --pend:#6b4e12; --pend-fondo:#fdf4e3; --pend-linea:#c99a3a;
+
+    position:relative;width:360px;background:var(--papel);color:var(--tinta);
+    font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.65;overflow:hidden;
+  }
+  .lienzo a{color:var(--siena);text-underline-offset:.2em;}
+  .oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+
+  .s-cab{display:flex;align-items:center;justify-content:space-between;gap:var(--canal);
+         padding:calc(var(--unidad) * 2) var(--margen);border-bottom:var(--grosor-filete) solid var(--filete);}
+  .s-marca{font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;line-height:1.4;
+           color:var(--tinta) !important;text-decoration:none;display:flex;align-items:center;min-height:var(--zona-de-toque);}
+  .s-buscar{font-size:var(--cuerpo-md);text-decoration:none;display:flex;align-items:center;
+            min-height:var(--zona-de-toque);padding-inline:var(--unidad);}
+  .s-pie{margin:calc(var(--respiracion) * 2) var(--margen) 0;padding:calc(var(--unidad) * 3) 0;
+         border-top:var(--grosor-filete) solid var(--filete);color:var(--tinta-apagada);font-size:var(--pie);line-height:1.65;}
+  .s-pie p{margin:0;}
+  .s-pie ul{display:flex;flex-wrap:wrap;gap:calc(var(--unidad) * 2);margin:calc(var(--unidad) * 2) 0 0;padding:0;list-style:none;}
+  .s-pie a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--pie);text-decoration:none;}
+
+  /* ---- /buscar/: lo construido ---- */
+  .pagina{padding:var(--respiracion) var(--margen);max-width:var(--medida-prosa);}
+  .buscar-h1{margin:0;font-family:var(--sans);font-size:var(--titular-md);font-weight:600;}
+  .formulario{margin-top:calc(var(--unidad) * 3);}
+  .etiqueta-campo{display:block;font-size:var(--pie);color:var(--tinta-apagada);margin-bottom:var(--unidad);}
+  /* El <input type="search">: filete inferior en contorno, sin caja ni icono. Solo lectura en la maqueta. */
+  .campo{display:block;width:100%;min-height:var(--zona-de-toque);padding:var(--unidad) 0;margin:0;
+         font-family:var(--serif);font-size:var(--titular-sm);line-height:1.3;color:var(--tinta);
+         background:transparent;border:0;border-bottom:var(--grosor-filete) solid var(--contorno);border-radius:0;
+         -webkit-appearance:none;appearance:none;}
+  .campo:focus{outline:none;}
+  /* Con foco: el anillo global de 2 px en siena, separado 2 px (Accessibility Floor). */
+  .campo.foco,.campo.foco:focus{outline:2px solid var(--siena);outline-offset:2px;border-radius:var(--radio);}
+  .estado{margin:calc(var(--unidad) * 3) 0 0;font-size:var(--pie);color:var(--tinta-apagada);}
+  .resultados{list-style:none;margin:calc(var(--unidad) * 2) 0 0;padding:0;}
+  .resultado{position:relative;border-bottom:var(--grosor-filete) solid var(--filete);}
+  .resultado a{display:flex;flex-direction:column;gap:var(--unidad);min-height:var(--zona-de-toque);
+               padding-block:calc(var(--unidad) * 2);text-decoration:none;color:inherit;}
+  .clase{font-family:var(--sans);font-size:var(--pie);letter-spacing:.09em;text-transform:uppercase;color:var(--tinta-apagada);}
+  .titulo{font-family:var(--serif);font-size:var(--titular-sm);color:var(--tinta);}
+  /* Resultado de Obra (v7.1): el título en Inter, mismo cuerpo y peso; solo cambia la familia. */
+  .titulo.de-obra{font-family:var(--sans);}
+  .r-autor{font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;
+           line-height:1.4;text-transform:uppercase;color:var(--tinta-apagada);}
+
+  /* ---- La salida de FR-8, como está construida ---- */
+  .salida{margin-top:calc(var(--unidad) * 5);}
+  .sugerencia{margin:0;font-size:var(--cuerpo-lg);}
+  .salida section{margin-top:calc(var(--unidad) * 4);}
+  .salida h2{margin:0 0 calc(var(--unidad) * 2);font-family:var(--sans);font-size:var(--autor);font-weight:600;
+             letter-spacing:.09em;text-transform:uppercase;color:var(--tinta-apagada);}
+  .chips{list-style:none;display:flex;flex-wrap:wrap;gap:var(--unidad);margin:0;padding:0;}
+  .chip{display:flex;align-items:center;min-height:var(--zona-de-toque);padding-inline:calc(var(--unidad) * 2);
+        background:var(--contenedor);border-radius:var(--radio-tarjeta);font-family:var(--serif);
+        font-size:var(--cuerpo-md);line-height:1.3;color:var(--tinta) !important;text-decoration:none;}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. Azul = recorte o ilustración. Ámbar = [sin decidir].
+     =========================================================================== */
+  .tijera{margin:0 calc(var(--margen) * -1);padding:8px var(--margen);list-style:none;
+          border-top:1px dashed var(--anot-linea);border-bottom:1px dashed var(--anot-linea);background:var(--anot-fondo);
+          color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .tijera.en-chips{margin:var(--unidad) calc(var(--margen) * -1) 0;}
+  .tijera.abajo{margin-top:20px;margin-bottom:calc(var(--respiracion) * -1);border-bottom:0;}
+  .marca-anot{position:absolute;right:0;top:14px;padding:1px 6px;border:1px dashed var(--anot-linea);background:var(--anot-fondo);
+        color:var(--anot);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;}
+  .marca-pend{position:absolute;right:0;top:14px;padding:1px 6px;border:1px dashed var(--pend-linea);background:var(--pend-fondo);
+        color:var(--pend);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;}
+  .estado-pend{position:relative;}
+  .estado-pend .marca-pend{top:0;}
+  .vacio-anot{margin:calc(var(--unidad) * 3) 0 0;padding:14px 10px;border:1px dotted var(--anot);text-align:center;
+        color:var(--anot);font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .vacio-anot.pend{border-color:var(--pend-linea);background:var(--pend-fondo);color:var(--pend);border-style:dashed;text-align:left;}
+  .pliegue{position:absolute;left:0;right:0;top:640px;border-top:1px dashed var(--anot);pointer-events:none;z-index:1;}
+  .pliegue span{position:absolute;right:6px;top:2px;padding:0 4px;background:var(--anot-fondo);color:var(--anot);
+                font:10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header class="top">
+    <h1>Búsqueda: pantalla clave</h1>
+    <p class="sub"><code>/buscar/</code> con la consulta «prudencia», con un resultado de tipo Obra entre los demás, y los tres estados que escriben las espinas: carga del índice, sin resultados y fallo del índice. A 360&nbsp;px, con lo construido en <code>src/pages/buscar.astro</code> y las reglas de la v7.1. Mandan las espinas: si algo de aquí discrepa de <code>DESIGN.md</code> o <code>EXPERIENCE.md</code>, el error está aquí.</p>
+    <p class="meta"><b>De dónde salen los resultados:</b> la consulta se corrió sobre el índice de Pagefind del último build local (14/09, 1.891 Citas; hoy hay 1.894) y da 141 coincidencias. Los de Cita y de Tema son los reales, en su orden. <b>El de Obra no existe todavía en el índice</b>: se añade con los datos del Corpus, y su posición es supuesta.</p>
+    <div class="leyenda">
+      <span><i class="muestra azul"></i>Anotación de la maqueta: lo recortado, lo supuesto. No es el sitio.</span>
+      <span><i class="muestra ambar"></i>[sin decidir en las espinas]: se dibuja de lo construido, y no es contrato.</span>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       1 — Resultados
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>Resultados para «prudencia»</h2>
+    <p class="regla">Una fila por resultado, con su rótulo de tipo encima del título; toda la fila es el enlace. La consulta llega en la dirección —<code>/buscar/?q=prudencia</code>—, así que la búsqueda corre al cargar la página y el campo no tiene el foco.</p>
+
+    <div class="fila">
+      <figure class="tel">
+        <figcaption><span class="etiqueta">CON RESULTADOS</span><br><b>Citas, un Tema y una Obra</b>, mezclados en el orden que decide Pagefind.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <main class="pagina">
+                <h1 class="buscar-h1">Buscar</h1>
+                <form class="formulario" role="search" action="#">
+                  <label class="etiqueta-campo" for="consulta-1">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="consulta-1" name="q" type="search" value="prudencia" readonly>
+                </form>
+                <p class="estado estado-pend" role="status">30 resultados.<span class="marca-pend" aria-hidden="true">[sin decidir] tope de 30</span></p>
+                <ul class="resultados">
+                  <li class="resultado"><a href="#"><span class="clase">Cita</span><span class="titulo">«Con el valor se consiguen las coronas, y con la prudencia se establecen.»</span></a></li>
+                  <li class="resultado"><a href="#"><span class="clase">Cita</span><span class="titulo">«El determinado César triunfó con su mucha audacia de la mucha prudencia del Senado.»</span></a></li>
+                  <li class="resultado"><a href="#"><span class="clase">Cita</span><span class="titulo">«No fue afortunado Fernando, sino prudente, que la prudencia es madre de la buena dicha.»</span></a></li>
+                  <li class="resultado"><a href="#"><span class="clase">Cita</span><span class="titulo">«Las determinaciones grandes quieren que prevenga la prudencia propia a la malicia ajena.»</span></a></li>
+                  <li class="tijera">Recortados los resultados 5 a 15: once Citas más de Gracián, Quevedo, Larra y Horacio.</li>
+                  <li class="resultado"><a href="#"><span class="clase">Tema</span><span class="titulo">La prudencia</span></a></li>
+                  <li class="resultado"><a href="#" aria-label="Obra: Oráculo manual y arte de prudencia, de Baltasar Gracián"><span class="clase">Obra</span><span class="titulo de-obra">Oráculo manual y arte de prudencia</span><span class="r-autor">Baltasar Gracián</span></a><span class="marca-anot" aria-hidden="true">posición supuesta</span></li>
+                  <li class="tijera">Recortados los demás hasta el 30: Citas del Oráculo manual que coinciden por su Procedencia.</li>
+                </ul>
+              </main>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <div class="columna-notas">
+        <ul class="notas">
+          <li><b>El rótulo de tipo</b> —«Cita», «Autor», «Tema», «Colección» u «Obra»— va en mayúsculas con el espaciado de <code>author</code>, al cuerpo y peso de <code>caption</code>, en tinta apagada. Un resultado sin tipo reconocido se rotula «Cita».</li>
+          <li><b>El de Obra</b> lleva el título en Inter —los demás, en la serif— con el mismo cuerpo y peso, y debajo el nombre del Autor en <code>author</code>, como en la Tarjeta de Cita. Se lee «Obra: Oráculo manual y arte de prudencia, de Baltasar Gracián». La línea del Autor pide un metadato nuevo en el índice, porque Pagefind toma el título del <code>h1</code>.</li>
+          <li><b>Solo entran las Obras indexables.</b> El Oráculo manual reúne 114 de las 163 Citas de Gracián, el 70&nbsp;%: está por encima de una Cita y por debajo del 90&nbsp;%.</li>
+          <li><b>Posición supuesta.</b> En la búsqueda real, los puestos 17 a 30 son Citas del Oráculo manual que solo coinciden por la Procedencia de su página; la de Obra iría entre resultados de agregación. El Autor, «Baltasar Gracián», sale en el puesto 139 de 141 y no entra entre los 30 que se pintan.</li>
+          <li><b>El recuento</b> se anuncia por una región <code>role="status"</code> presente desde la carga (WCAG 4.1.3). Hoy no hay ninguna en el sitio: defecto anotado.</li>
+          <li class="pend"><b>[sin decidir en las espinas]</b> El tope de 30: el recuento dice «30 resultados.» y la búsqueda encontró 141. La bitácora lo deja entre los estados de <code>/buscar/</code> por decidir.</li>
+          <li class="pend"><b>[sin decidir en las espinas]</b> La etiqueta del campo dice «Escribe un fragmento, un autor o un tema.» y no nombra la obra, que desde la v7.1 también se busca.</li>
+          <li class="pend"><b>[sin decidir en las espinas]</b> El texto tecleado va en la serif, como está construido: choca con «Dos familias, sin excepciones» y la bitácora lo deja sin decidir.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       2 — Estados
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>Estados, tal como los escriben las espinas</h2>
+    <p class="regla">Teléfonos recortados por abajo: lo que cambia está entre el campo y el pie. La cabecera, el <code>h1</code> y la etiqueta son los de arriba.</p>
+
+    <div class="fila">
+
+      <!-- ===== Carga del índice ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">CARGA DEL ÍNDICE</span><br><b>Se ha escrito «prudencia» y el índice todavía está llegando.</b></figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <main class="pagina">
+                <h1 class="buscar-h1">Buscar</h1>
+                <form class="formulario" role="search" action="#">
+                  <label class="etiqueta-campo" for="consulta-2">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo foco" id="consulta-2" name="q" type="search" value="prudencia" readonly>
+                </form>
+                <p class="estado" role="status"></p>
+                <p class="vacio-anot">Nada bajo el campo, sin indicador de carga. Lo escrito se busca cuando llega el índice.</p>
+                <p class="tijera abajo">Sigue el pie del sitio.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>El índice se descarga al enfocar el campo</b>, no antes (AD-6), y lo escrito se busca cuando llega.</li>
+          <li><b>Sin indicador de carga.</b> Con la consulta en la dirección, la búsqueda corre al cargar la página.</li>
+          <li><b>El foco</b> lleva el anillo global: 2&nbsp;px en siena, separado 2&nbsp;px. Hoy el campo lo suprime y en su lugar engruesa el filete en siena: defecto anotado.</li>
+          <li class="pend"><b>[sin decidir en las espinas]</b> Si el filete siena de 2&nbsp;px que pone hoy el foco se queda junto al anillo. Se dibuja el filete en reposo.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== Sin resultados ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">SIN RESULTADOS</span><br><b>«autoestima»</b>: cero coincidencias en la búsqueda real. Sale la salida de FR-8, como está construida.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <main class="pagina">
+                <h1 class="buscar-h1">Buscar</h1>
+                <form class="formulario" role="search" action="#">
+                  <label class="etiqueta-campo" for="consulta-3">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="consulta-3" name="q" type="search" value="autoestima" readonly>
+                </form>
+                <div class="salida">
+                  <p class="sugerencia" role="status">No encontramos esa frase. Prueba con menos palabras.</p>
+                  <section aria-labelledby="sal-temas">
+                    <h2 id="sal-temas">Temas</h2>
+                    <ul class="chips">
+                      <li><a class="chip" href="#">El amor</a></li><li><a class="chip" href="#">El deber</a></li><li><a class="chip" href="#">El error</a></li><li><a class="chip" href="#">El miedo</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">El trabajo</a></li><li><a class="chip" href="#">La adversidad</a></li>
+                    </ul>
+                    <p class="tijera en-chips">Recortados 16 Temas más: los 24 publicados, por orden alfabético.</p>
+                  </section>
+                  <section aria-labelledby="sal-colecciones">
+                    <h2 id="sal-colecciones">Colecciones</h2>
+                    <ul class="chips">
+                      <li><a class="chip" href="#">Achaques de necedad</a></li><li><a class="chip" href="#">Amigos de los que fiarse</a></li><li><a class="chip" href="#">Cada uno es hijo de sus obras</a></li>
+                    </ul>
+                    <p class="tijera en-chips">Recortadas 13 Colecciones más: las 16 publicadas, por orden alfabético.</p>
+                  </section>
+                  <section aria-labelledby="sal-autores">
+                    <h2 id="sal-autores">Autores</h2>
+                    <ul class="chips">
+                      <li><a class="chip" href="#">Agustín Álvarez</a></li><li><a class="chip" href="#">Agustín de Hipona</a></li><li><a class="chip" href="#">Alberto Masferrer</a></li><li><a class="chip" href="#">Amado Nervo</a></li><li><a class="chip" href="#">Andrés Bello</a></li><li><a class="chip" href="#">Antonio Machado</a></li><li><a class="chip" href="#">Apuleyo</a></li><li><a class="chip" href="#">Aristófanes</a></li>
+                    </ul>
+                  </section>
+                </div>
+                <p class="tijera abajo">Sigue el pie del sitio.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>«No encontramos esa frase. Prueba con menos palabras.»</b> «frase» nombra lo que se escribió, no la entidad, y se queda como está. Debajo, la salida: nunca un callejón sin salida (FR-8).</li>
+          <li><b>Sin recuento.</b> El mensaje se anuncia por <code>role="status"</code>; hoy no: defecto anotado.</li>
+          <li><b>Como está construido:</b> todos los Temas publicados (24), todas las Colecciones publicadas (16) y los ocho primeros Autores por orden alfabético, con el Chip de Tema. Sin Colecciones publicadas, su sección no existe.</li>
+          <li class="pend"><b>[sin decidir en las espinas]</b> State Patterns dice «Temas destacados + Autores destacados»: no nombra las Colecciones, que lo construido ofrece desde la Historia 12.3, ni dice cómo se eligen los destacados.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== Índice que no carga ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">ÍNDICE QUE NO CARGA</span><br><b>Se ha escrito «prudencia» y el índice no llega nunca.</b> Lo construido no lo trata.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <main class="pagina">
+                <h1 class="buscar-h1">Buscar</h1>
+                <form class="formulario" role="search" action="#">
+                  <label class="etiqueta-campo" for="consulta-4">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo foco" id="consulta-4" name="q" type="search" value="prudencia" readonly>
+                </form>
+                <p class="estado" role="status"></p>
+                <p class="vacio-anot pend"><b>[sin decidir en las espinas]</b> Nada bajo el campo, ni resultados ni la salida de FR-8. Igual que la carga, y así se queda.</p>
+                <p class="tijera abajo">Sigue el pie del sitio.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Las espinas escriben lo construido:</b> bajo el campo no aparece nada, ni resultados ni la salida de FR-8.</li>
+          <li><b>Se ve igual que la carga</b>, y no cambia: el visitante no sabe si esperar o irse.</li>
+          <li class="pend"><b>[sin decidir en las espinas] Hallazgo abierto de FR-8.</b> El índice que no carga deja un callejón sin salida, justo lo que FR-8 prohíbe; la bitácora lo deja para otra pasada. La salida ya está en el HTML inicial, oculta: es la que se muestra sin resultados.</li>
+        </ul>
+      </figure>
+
+    </div>
+  </section>
+
+  <footer class="fin">
+    <h2>Lo que enseña</h2>
+    <ul>
+      <li><b>Component Patterns:</b> Campo de búsqueda, Resultado de búsqueda —con el de Obra, v7.1—, Chip de Tema y Chip de Colección.</li>
+      <li><b>State Patterns:</b> Búsqueda sin resultados, Carga del índice e Índice que no carga.</li>
+      <li><b>Accessibility Floor:</b> foco visible siempre, también en el campo; recuento y mensaje sin resultados por <code>role="status"</code>.</li>
+    </ul>
+
+    <h2>[sin decidir en las espinas]</h2>
+    <ul>
+      <li>El tope de 30 y su recuento, que no dice cuántas coincidencias hay.</li>
+      <li>Si la etiqueta del campo nombra la obra.</li>
+      <li>La familia del texto tecleado en el campo, hoy la serif.</li>
+      <li>Si el filete siena de 2&nbsp;px del foco se queda junto al anillo.</li>
+      <li>Qué salida se ofrece sin resultados: la espina dice Temas y Autores destacados, y lo construido da todos los Temas, todas las Colecciones y ocho Autores.</li>
+      <li>El índice que no carga, que deja un callejón contra FR-8.</li>
+      <li>Dos estados que no se dibujan, por la misma razón: la consulta vacía y la página sin JavaScript.</li>
+    </ul>
+
+    <h2>Lo que no dibuja</h2>
+    <ul>
+      <li>La Invitación de donación: el Modelo está apagado y apagado es invisible. Encendido iría al final de la columna, fuera de la salida de FR-8.</li>
+    </ul>
+  </footer>
+
+</div>
+</body>
+</html>

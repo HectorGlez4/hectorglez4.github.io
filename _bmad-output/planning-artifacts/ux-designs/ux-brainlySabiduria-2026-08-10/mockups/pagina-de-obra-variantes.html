@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página de Obra: variantes</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta maqueta. Si algo de aquí discrepa de las espinas, mandan ellas.
+       EXPERIENCE.md § Information Architecture  (la Página de Obra en la IA)
+       EXPERIENCE.md § Component Patterns        (Cabecera de Obra, Dónde leer esta
+                                                  obra, Atribución)
+       EXPERIENCE.md § State Patterns            (una sola URL, Cita sin documento,
+                                                  ninguna cotejada, página 2+)
+       DESIGN.md § Typography                    (el título de la Obra va en Inter;
+                                                  serif solo en Cita, Autor, Tema y
+                                                  Colección)
+       DESIGN.md § Components                    (Bloque de Cita, Atribución, Tarjeta
+                                                  de Cita, Chip de Tema)
+       DESIGN.md § Colors                        (papel, tinta, tinta apagada, siena,
+                                                  filete; siena con avaricia)
+     Sin red y sin JavaScript: las fuentes son las del sistema si Inter y Source Serif 4
+     no están instaladas, así que los saltos de línea pueden moverse un poco respecto
+     del sitio. Las líneas que dicen las notas se midieron con la Inter del sitio.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: el sitio es papel cálido,
+         y la mesa no debe confundirse con él. Heredado de la maqueta de Autor. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --tinta:#1c2027; --tinta-suave:#59616e; --marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#e0c88a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --tinta:#e6e8ec; --tinta-suave:#98a1af; --marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --tinta:#e6e8ec; --tinta-suave:#98a1af; --marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  /* ---- Tokens del sitio, literales de DESIGN.md. No se adaptan al tema:
+         «Papel y Tinta» es un diseño claro por decisión, y esto son pruebas de él.
+         Las anotaciones que van DENTRO del papel usan su propio azul fijo, para que
+         nadie las confunda con el sitio. ---- */
+  .lienzo{
+    --surface:#faf7f0; --on-surface:#1f1b16; --tinta-apagada:#5a5147;
+    --primary:#8c4a2f; --filete:#ddd5c7; --outline:#8a7f72;
+    --surface-container:#f1ece2; --surface-container-low:#f6f2ea;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1280px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;margin-bottom:10px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:72ch;color:var(--tinta-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;color:var(--tinta-suave);letter-spacing:.03em;}
+  .meta b{color:var(--tinta);font-weight:600;}
+
+  .aviso{background:var(--aviso-fondo);border:1px solid var(--aviso-linea);color:var(--aviso-tinta);
+         border-radius:3px;padding:14px 16px;margin:26px 0 0;font-size:13.5px;line-height:1.6;}
+  .aviso b{font-weight:600;}
+  .aviso ul{margin:8px 0 0;padding-left:18px;} .aviso li{margin:4px 0;}
+
+  /* ---- Una decisión: título, regla fija y sus variantes ---- */
+  section.decision{margin-top:56px;}
+  .decision > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;
+                 line-height:1.2;margin:0 0 8px;}
+  .decision > .regla{margin:0;max-width:86ch;font-size:13.5px;line-height:1.6;color:var(--tinta-suave);}
+  .decision > .regla b{color:var(--tinta);font-weight:600;}
+
+  .rejilla{display:grid;gap:28px;margin-top:24px;grid-template-columns:1fr;align-items:start;}
+  .rejilla.tres{gap:20px;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));}
+  .rejilla.tres .marco{padding-inline:9px;}
+
+  .prueba{display:flex;flex-direction:column;background:var(--mesa-alta);
+          border:1px solid var(--mesa-linea);border-radius:4px;overflow:hidden;}
+  .prueba > .cab{padding:16px 18px 14px;border-bottom:1px solid var(--mesa-linea);}
+  .letra{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;
+         color:var(--marca);margin-bottom:6px;}
+  .prueba h3.nombre{font-family:"Source Serif 4",Georgia,serif;font-size:19px;font-weight:600;
+             margin:0 0 6px;line-height:1.25;}
+  .prueba .que{margin:0;font-size:13px;line-height:1.55;color:var(--tinta-suave);}
+
+  /* El marco junta varios teléfonos de la misma variante, uno al lado del otro. */
+  .marco{padding:20px 18px 22px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:flex-start;}
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:8px;}
+  figure.tel > figcaption{font-size:12px;line-height:1.45;color:var(--tinta-suave);max-width:362px;}
+  figure.tel > figcaption b{color:var(--tinta);font-weight:600;}
+
+  .nota{padding:0 18px 18px;font-size:12.5px;line-height:1.6;color:var(--tinta-suave);}
+  .nota p{margin:0 0 6px;} .nota p:last-child{margin:0;}
+  .nota b{color:var(--tinta);font-weight:600;}
+
+  footer.fin{margin-top:56px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--tinta-suave);max-width:86ch;}
+  footer.fin b{color:var(--tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--tinta);
+                margin:0 0 10px;font-weight:600;}
+  footer.fin ul{margin:6px 0 0;padding-left:18px;} footer.fin li{margin:3px 0;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;
+       background:var(--mesa-alta);border:1px solid var(--mesa-linea);
+       border-radius:3px;padding:1px 5px;}
+
+  /* ===========================================================================
+     EL SITIO. 360 px de viewport, que es el que manda por NFR-8. Cada regla imita el
+     componente real de src/components/ (Armazon, TarjetaDeCita, BloqueDeCita,
+     Atribucion, Fuente, RutasDeSalida) con los valores de src/styles/tokens.css.
+     =========================================================================== */
+  /* 362 = 360 de viewport + 1 px de borde a cada lado: dentro quedan 360, y 320 de texto. */
+  .lienzo{width:362px;flex:none;background:var(--surface);color:var(--on-surface);
+          border:1px solid var(--filete);border-radius:2px;
+          font-family:var(--sans);font-size:17px;line-height:1.65;overflow:hidden;}
+  .lienzo a{color:var(--primary);text-underline-offset:.2em;}
+
+  /* Armazon — la cabecera lleva solo la marca y «Buscar». */
+  .s-cab{display:flex;align-items:center;justify-content:space-between;gap:24px;
+         padding:16px 20px;border-bottom:1px solid var(--filete);}
+  .s-marca{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+           color:var(--on-surface) !important;text-decoration:none;display:flex;align-items:center;min-height:44px;line-height:1.4;}
+  .s-buscar{font-size:15px;text-decoration:none;display:flex;align-items:center;min-height:44px;padding-inline:8px;}
+  .s-pag{padding:40px 20px;}
+  .s-pag.cola{padding-top:24px;}
+  .s-pie{margin:80px 20px 0;padding:24px 0;border-top:1px solid var(--filete);
+         color:var(--tinta-apagada);font-size:13px;line-height:1.65;}
+  .s-pie p{margin:0;}
+  .s-pie ul{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0 0;padding:0;list-style:none;}
+  .s-pie a{display:flex;align-items:center;min-height:44px;font-size:13px;text-decoration:none;}
+
+  /* ---- Cabecera de Obra: tres trazos ---- */
+  .obra-h1{margin:0;font-family:var(--sans);color:var(--on-surface);text-wrap:balance;}
+  .de{margin:8px 0 0;color:var(--tinta-apagada);}
+  .de a{color:var(--on-surface);text-decoration:underline;text-decoration-thickness:1px;}
+
+  .v-a .obra-h1{font-weight:600;font-size:26px;line-height:1.25;}
+  .v-a .de{font-size:15px;line-height:1.6;}
+
+  .v-b .obra-h1{font-weight:600;font-size:21px;line-height:1.3;}
+  .v-b .de{font-size:13px;line-height:1.5;}
+  .v-b .de a{font-weight:600;letter-spacing:.09em;text-transform:uppercase;text-decoration:none;}
+
+  .v-c .obra-h1{font-weight:400;font-size:26px;line-height:1.25;}
+  .v-c .de{font-size:13px;line-height:1.5;}
+
+  /* ---- Listado: TarjetaDeCita sin el nombre del Autor, como en la Página de Autor ---- */
+  .listado{list-style:none;margin:32px 0 0;padding:0;border-top:1px solid var(--filete);}
+  .tarjeta{border-bottom:1px solid var(--filete);}
+  .tarjeta a{display:flex;flex-direction:column;gap:8px;min-height:44px;padding:16px 8px;margin-inline:-8px;
+             text-decoration:none;color:inherit;}
+  .fragmento{font-family:var(--serif);font-size:21px;font-weight:600;line-height:1.3;
+             color:var(--on-surface);text-wrap:pretty;}
+  .t-autor{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+           color:var(--tinta-apagada);line-height:1.4;}
+
+  /* ---- Rótulo de sección (RutasDeSalida): token author en tinta apagada ---- */
+  .rotulo{margin:0;font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.09em;
+          line-height:1.4;text-transform:uppercase;color:var(--tinta-apagada);}
+  .temas{margin-top:40px;}
+  .chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0;padding:0;}
+  .chip{display:flex;align-items:center;min-height:44px;padding-inline:16px;background:var(--surface-container);
+        border-radius:6px;font-family:var(--serif);font-size:15px;line-height:1.3;color:var(--on-surface) !important;text-decoration:none;}
+
+  /* ---- Dónde leer esta obra ---- */
+  .donde{margin-top:32px;}
+  .dl{margin:16px 0 0;font-size:13px;line-height:1.5;color:var(--tinta-apagada);max-width:68ch;}
+  .dl + .dl{margin-top:8px;}
+  .dl a{color:var(--primary);text-decoration:underline;}
+  /* D2: rótulos pequeños en caption y en tinta, encima de sus líneas */
+  .sub-rot{margin:16px 0 0;font-family:var(--sans);font-size:13px;font-weight:400;line-height:1.5;color:var(--on-surface);}
+  .sub-rot + .dl{margin-top:0;}
+  .nota-ficha{margin:0;font-size:13px;line-height:1.5;color:var(--tinta-apagada);max-width:68ch;}
+
+  /* ---- Bloque de Cita (Página de Cita, móvil: tramo xl baja a 36 px) ---- */
+  .bloque{margin:0;max-width:34ch;}
+  .bloque blockquote{margin:0;border:0;padding:0;}
+  .cita-h1{margin:0;font-family:var(--serif);font-weight:400;font-size:36px;line-height:1.3;
+           letter-spacing:-.01em;color:var(--on-surface);text-wrap:pretty;}
+  .bloque figcaption{margin-top:24px;padding-top:24px;position:relative;}
+  .bloque figcaption::before{content:"";position:absolute;top:0;left:0;width:48px;height:1px;background:var(--filete);}
+  .at-autor{margin:0;font-size:13px;font-weight:600;letter-spacing:.09em;line-height:1.4;text-transform:uppercase;}
+  .at-autor a{color:var(--on-surface);text-decoration:none;}
+  .procedencia{margin:8px 0 0;font-size:13px;line-height:1.5;color:var(--tinta-apagada);}
+  .fuente{margin:8px 0 0;font-size:13px;line-height:1.5;color:var(--tinta-apagada);}
+  .fuente a{color:var(--primary);}
+  /* Las tres variantes del enlace de la Obra. Subrayado siempre: no hay hover en móvil. */
+  .e1 .procedencia a{color:var(--tinta-apagada);text-decoration:underline;}
+  .e2 .procedencia a{color:var(--on-surface);text-decoration:underline;}
+  .e3 .procedencia a{color:var(--primary);text-decoration:underline;}
+  .acciones{margin-top:32px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;}
+  .boton{font-family:var(--sans);font-size:15px;color:var(--primary);background:transparent;
+         border:1px solid var(--primary);border-radius:3px;min-height:44px;padding:0 24px;
+         display:inline-flex;align-items:center;}
+
+  /* ---- /buscar/ ---- */
+  .buscar-h1{margin:0;font-family:var(--sans);font-size:30px;font-weight:600;line-height:1.65;}
+  .etiqueta-campo{display:block;margin:24px 0 8px;font-size:13px;color:var(--tinta-apagada);line-height:1.65;}
+  .campo{min-height:44px;font-family:var(--serif);font-size:21px;color:var(--on-surface);
+         border-bottom:1px solid var(--outline);padding:8px 0;line-height:1.3;}
+  .resultados{list-style:none;margin:16px 0 0;padding:0;}
+  .resultado{border-bottom:1px solid var(--filete);}
+  .resultado a{display:flex;flex-direction:column;gap:8px;min-height:44px;padding:16px 0;text-decoration:none;color:inherit;}
+  .clase{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--tinta-apagada);line-height:1.65;}
+  .titulo{font-family:var(--serif);font-size:21px;color:var(--on-surface);line-height:1.65;}
+  .titulo.en-inter{font-family:var(--sans);font-weight:400;line-height:1.35;}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. Azul fijo y monoespaciada: no son el sitio.
+     =========================================================================== */
+  .recorte{margin:0 0 24px;padding:6px 10px;border:1px dashed var(--anot-linea);background:var(--anot-fondo);
+           color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .corte{margin:20px -20px -40px;padding:8px 20px 10px;border-top:1px dashed var(--anot-linea);background:var(--anot-fondo);
+         color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .encendido{margin:16px -11.5px 0;padding:10px;border:1.5px dashed var(--anot);}
+  .encendido > .anot,.anotada > .anot{display:block;margin:0 0 4px;color:var(--anot);
+           font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .encendido > .anot b{font-weight:700;}
+  .encendido > .sub-rot:first-of-type{margin-top:6px;}
+  .encendido > .anot + .dl{margin-top:6px;}
+  .anotada{margin:24px -11px 0;padding:10px;border:1px dotted var(--anot);}
+  .hueco{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--anot);}
+  /* El pliegue de 360×640: lo que queda por encima es la primera pantalla (FR-1). */
+  .lienzo.con-pliegue{position:relative;}
+  .pliegue{position:absolute;left:0;right:0;top:640px;border-top:1px dashed var(--anot);pointer-events:none;}
+  .pliegue span{position:absolute;right:6px;top:-17px;padding:0 4px;background:var(--anot-fondo);color:var(--anot);
+                font:10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header class="top">
+    <h1>Página de Obra: cabecera, dónde leerla y su enlace</h1>
+    <p class="sub">La v7.1 da página propia a la Obra. Quedan tres decisiones de presentación, y aquí están con datos reales del Corpus a 360&nbsp;px: cómo se compone la cabecera, cómo se dice dónde leer la obra entera y cómo enlaza su título la Atribución de la Página de Cita. Al final, dos piezas que ya están fijadas, solo para que se vean.</p>
+    <p class="meta">Tokens de <b>DESIGN.md</b> · <b>Oráculo manual y arte de prudencia</b>: 114 Citas de las 163 de Gracián, todas de 1647, cotejadas en 12 páginas de Wikisource · sin red y sin JavaScript</p>
+  </header>
+
+  <div class="aviso">
+    <b>Tres cosas que salieron al montar esto con el código de hoy delante, y que ninguna variante resuelve sola:</b>
+    <ul>
+      <li><b>La Página de Cita ya lleva siena en cinco sitios de la primera pantalla de 360×640</b> (el último botón acaba justo en el borde): «Buscar», el enlace de la Fuente y los tres botones de acción (Copiar, Descargar como imagen, Compartir), que son secundarios con filete siena; no hay acción primaria sólida. La regla de DESIGN.md —«más de dos sitios»— ya no se cumple hoy, con o sin E3.</li>
+      <li><b>En <code>/buscar/</code>, el título de todo resultado va en serif</b> (<code>.titulo</code>, 21&nbsp;px). Un resultado de Obra no puede heredar esa regla, porque el título de la Obra va siempre en Inter. Y Pagefind toma el título del <code>h1</code>: el nombre del Autor debajo de un resultado de Obra no existe hoy y pide un metadato nuevo.</li>
+      <li><b>El cuerpo de la tarjeta del listado es 21&nbsp;px</b> (serif 600, <code>headline-sm</code>). Cualquier titular de Obra se mide contra eso, porque la primera tarjeta va justo debajo.</li>
+    </ul>
+  </div>
+
+  <!-- =====================================================================
+       DECISIÓN 1 — Cabecera de Obra
+       ===================================================================== -->
+  <section class="decision">
+    <h2>Decisión 1 — Cabecera de Obra</h2>
+    <p class="regla"><b>Fijo:</b> tres líneas como máximo. Primero el título (<code>h1</code>, en Inter), debajo «de {Autor}» con el Autor enlazado a su Página de Autor en tinta, no en siena, y el año solo si consta —Arenal no lo tiene—. Cada variante en dos teléfonos: el título de Gracián y el título largo de Concepción Arenal. Se ve solo la cabecera y la primera tarjeta, para que se vea dónde empieza el contenido.</p>
+
+    <div class="rejilla">
+
+      <!-- A -->
+      <section class="prueba v-a">
+        <div class="cab">
+          <span class="letra">VARIANTE A</span>
+          <h3 class="nombre">Titular grande</h3>
+          <p class="que">Título en Inter 600, 26&nbsp;px / 1,25. Debajo, «de Baltasar Gracián · 1647» en <code>body-md</code> (Inter 15&nbsp;px), en tinta apagada con el nombre enlazado en tinta.</p>
+        </div>
+        <div class="marco">
+          <figure class="tel">
+            <figcaption><b>Título corto.</b> 34 caracteres, con año.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag">
+                <h1 class="obra-h1">Oráculo manual y arte de prudencia</h1>
+                <p class="de">de <a href="#">Baltasar Gracián</a> · 1647</p>
+                <ul class="listado">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«A los primeros siete entra la razón; entre después, a cada lustro, una nueva perfección.»</span></a></li>
+                </ul>
+                <div class="corte">Corte: sigue el listado.</div>
+              </div>
+            </div>
+          </figure>
+          <figure class="tel">
+            <figcaption><b>Título largo.</b> 62 caracteres, sin año.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag">
+                <h1 class="obra-h1">La Igualdad Social y Política y sus Relaciones con la Libertad</h1>
+                <p class="de">de <a href="#">Concepción Arenal</a></p>
+                <ul class="listado">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«A los desórdenes que una desigualdad exagerada, depravando los sentimientos, introduce en el mundo moral, hay que añadi…»</span></a></li>
+                </ul>
+                <div class="corte">Corte: sigue el listado.</div>
+              </div>
+            </div>
+          </figure>
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> el título manda en la cabecera como manda el nombre en la de Autor, y es el trato que ya lleva el <code>h1</code> de <code>/buscar/</code> (Inter 600). Gracián: 2 líneas de título más la del Autor, 3.</p>
+          <p><b>Cuesta:</b> el título de Arenal ocupa <b>3 líneas</b> a 360&nbsp;px con 20&nbsp;px de margen; con la del Autor, la cabecera tiene <b>4 y pasa de tres</b>. No es el único: 11 de los 183 títulos que declaran hoy las Procedencias ocupan 3 líneas o más, y «Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo», 4.</p>
+        </div>
+      </section>
+
+      <!-- B -->
+      <section class="prueba v-b">
+        <div class="cab">
+          <span class="letra">VARIANTE B</span>
+          <h3 class="nombre">Titular contenido</h3>
+          <p class="que">Título en Inter 600, 21&nbsp;px / 1,3. Debajo, el nombre en el token <code>author</code> (Inter 13&nbsp;px, 600, mayúsculas y espaciado .09em, como en la Atribución) y el año en <code>caption</code>, en tinta apagada, en la misma línea.</p>
+        </div>
+        <div class="marco">
+          <figure class="tel">
+            <figcaption><b>Título corto.</b> 34 caracteres, con año.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag">
+                <h1 class="obra-h1">Oráculo manual y arte de prudencia</h1>
+                <p class="de">de <a href="#">Baltasar Gracián</a> · 1647</p>
+                <ul class="listado">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«A los primeros siete entra la razón; entre después, a cada lustro, una nueva perfección.»</span></a></li>
+                </ul>
+                <div class="corte">Corte: sigue el listado.</div>
+              </div>
+            </div>
+          </figure>
+          <figure class="tel">
+            <figcaption><b>Título largo.</b> 62 caracteres, sin año.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag">
+                <h1 class="obra-h1">La Igualdad Social y Política y sus Relaciones con la Libertad</h1>
+                <p class="de">de <a href="#">Concepción Arenal</a></p>
+                <ul class="listado">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«A los desórdenes que una desigualdad exagerada, depravando los sentimientos, introduce en el mundo moral, hay que añadi…»</span></a></li>
+                </ul>
+                <div class="corte">Corte: sigue el listado.</div>
+              </div>
+            </div>
+          </figure>
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> la cabecera más baja de las tres, y el Autor con el mismo trato que en la Atribución de la Página de Cita: se distingue por las versalitas, no por el color. Arenal cabe en <b>2 líneas</b> de título más la del Autor, 3, con 12&nbsp;px de holgura en la segunda. Solo 3 de los 183 títulos del Corpus pasan a 3 líneas.</p>
+          <p><b>Cuesta:</b> 21&nbsp;px es el cuerpo del fragmento de la tarjeta que va debajo (serif 600): el titular y la primera Cita miden lo mismo, y la jerarquía queda a cargo de la familia y del filete. El «de» en minúscula delante de las versalitas es una mezcla que hoy no está en el sitio.</p>
+        </div>
+      </section>
+
+      <!-- C -->
+      <section class="prueba v-c">
+        <div class="cab">
+          <span class="letra">VARIANTE C</span>
+          <h3 class="nombre">Titular ligero</h3>
+          <p class="que">Título en Inter 400, 26&nbsp;px / 1,25. Debajo, «de Baltasar Gracián · 1647» en <code>caption</code> y tinta apagada, con el nombre enlazado en tinta.</p>
+        </div>
+        <div class="marco">
+          <figure class="tel">
+            <figcaption><b>Título corto.</b> 34 caracteres, con año.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag">
+                <h1 class="obra-h1">Oráculo manual y arte de prudencia</h1>
+                <p class="de">de <a href="#">Baltasar Gracián</a> · 1647</p>
+                <ul class="listado">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«A los primeros siete entra la razón; entre después, a cada lustro, una nueva perfección.»</span></a></li>
+                </ul>
+                <div class="corte">Corte: sigue el listado.</div>
+              </div>
+            </div>
+          </figure>
+          <figure class="tel">
+            <figcaption><b>Título largo.</b> 62 caracteres, sin año.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag">
+                <h1 class="obra-h1">La Igualdad Social y Política y sus Relaciones con la Libertad</h1>
+                <p class="de">de <a href="#">Concepción Arenal</a></p>
+                <ul class="listado">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«A los desórdenes que una desigualdad exagerada, depravando los sentimientos, introduce en el mundo moral, hay que añadi…»</span></a></li>
+                </ul>
+                <div class="corte">Corte: sigue el listado.</div>
+              </div>
+            </div>
+          </figure>
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> el título se lee como el nombre de un libro y no como un rótulo, y la línea del Autor pasa a segundo plano con el mismo cuerpo y color que la Procedencia. Gracián: 2 líneas de título más la del Autor, 3.</p>
+          <p><b>Cuesta:</b> Inter 400 a 26&nbsp;px pesa menos que el fragmento serif 600 de la tarjeta de debajo, y la jerarquía depende solo del tamaño. El título de Arenal ocupa <b>3 líneas</b>; con la del Autor, la cabecera tiene <b>4 y pasa de tres</b>, igual que con 10 de los 183 títulos del Corpus.</p>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 2 — Dónde leer esta obra
+       ===================================================================== -->
+  <section class="decision">
+    <h2>Decisión 2 — «Dónde leer esta obra»</h2>
+    <p class="regla"><b>Fijo (FR-54):</b> va al pie, después del listado y de los Temas. Siempre la Fuente con su licencia. Con un solo documento se enlaza el documento; con varios, se dice cuántas páginas y se enlaza la entrada de la obra en su Fuente. Si alguna Cita no tiene documento, se dice cuántas; sin ninguna cotejada, se dice y no se enlaza nada. Las ediciones en venta van <b>debajo</b> de la cotejada y nunca solas. La nota de la ficha va después, en <code>caption</code> y tinta apagada. Los enlaces a la Fuente, en siena subrayado, como en <code>Fuente.astro</code>. Cada teléfono empieza recortado por arriba.</p>
+
+    <div class="rejilla">
+
+      <!-- D1 -->
+      <section class="prueba">
+        <div class="cab">
+          <span class="letra">VARIANTE D1</span>
+          <h3 class="nombre">En prosa</h3>
+          <p class="que">Frases seguidas bajo el <code>h2</code>, en <code>caption</code> y tinta apagada —el trato de la Procedencia y del Criterio de Colección, la otra prosa propia que comparte página con Citas—, y un enlace en su propia línea.</p>
+        </div>
+        <div class="marco">
+
+          <figure class="tel">
+            <figcaption><b>Oráculo manual.</b> Varias páginas, con el Modelo de afiliación encendido y la nota de ejemplo.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag cola">
+                <p class="recorte">Recortado por arriba: la cabecera y las tarjetas 1 a 49. Entre la tarjeta 50 y los Temas va la paginación (página 1 de 3), que aquí no se dibuja.</p>
+                <ul class="listado" style="margin-top:0">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«Conciben todos altamente de sí, y más los que menos son.»</span></a></li>
+                </ul>
+                <section class="temas">
+                  <h2 class="rotulo">Temas</h2>
+                  <ul class="chips">
+                    <li><a class="chip" href="#">La amistad</a></li><li><a class="chip" href="#">La palabra</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">La adversidad</a></li><li><a class="chip" href="#">La prudencia</a></li><li><a class="chip" href="#">La libertad</a></li><li><a class="chip" href="#">La virtud</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La felicidad</a></li><li><a class="chip" href="#">La razón</a></li><li><a class="chip" href="#">La verdad</a></li><li><a class="chip" href="#">La vida</a></li><li><a class="chip" href="#">La envidia</a></li><li><a class="chip" href="#">El error</a></li><li><a class="chip" href="#">La gloria</a></li><li><a class="chip" href="#">La justicia</a></li>
+                  </ul>
+                </section>
+                <section class="donde">
+                  <h2 class="rotulo">Dónde leer esta obra</h2>
+                  <p class="dl">El texto se cotejó con la edición de Wikisource en español, repartida en 12 páginas. Licencia CC BY-SA 4.0.</p>
+                  <p class="dl"><a href="https://es.wikisource.org/wiki/Or%C3%A1culo_manual_y_arte_de_prudencia" rel="noopener nofollow">Leer la obra en Wikisource en español</a>.</p>
+                  <div class="encendido">
+                    <span class="anot"><b>data-ingreso="afiliacion-de-libros"</b><br>Modelo de afiliación encendido — hoy apagado: no existe ni línea, ni hueco, ni contenedor.</span>
+                    <p class="dl"><a href="#" rel="sponsored noopener">Edición impresa en Amazon México</a>: Cátedra, 2015. Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.</p>
+                    <p class="dl"><a href="#" rel="sponsored noopener">Edición electrónica en <span class="hueco">{tienda}</span></a>: <span class="hueco">{editorial}</span>, <span class="hueco">{año}</span>. Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.</p>
+                  </div>
+                </section>
+                <div class="anotada">
+                  <span class="anot">[ejemplo de nota: la escribe Héctor, 160 caracteres como máximo]</span>
+                  <p class="nota-ficha">Trescientos aforismos comentados, publicados en Huesca en 1647 con el nombre de Lorenzo Gracián.</p>
+                </div>
+              </div>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </figure>
+
+          <figure class="tel">
+            <figcaption><b>Proverbios y cantares</b>, de Antonio Machado. Una sola URL; 26 de sus 27 Citas con documento.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag cola">
+                <p class="recorte">Recortado por arriba: la cabecera y las tarjetas 1 a 26. Una sola página: sin paginación.</p>
+                <ul class="listado" style="margin-top:0">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«Yo vivo en paz con los hombres y en guerra con mis entrañas.»</span></a></li>
+                </ul>
+                <section class="temas">
+                  <h2 class="rotulo">Temas</h2>
+                  <ul class="chips">
+                    <li><a class="chip" href="#">La vida</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La virtud</a></li><li><a class="chip" href="#">La palabra</a></li><li><a class="chip" href="#">La verdad</a></li><li><a class="chip" href="#">La razón</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">La adversidad</a></li><li><a class="chip" href="#">La humildad</a></li>
+                  </ul>
+                </section>
+                <section class="donde">
+                  <h2 class="rotulo">Dónde leer esta obra</h2>
+                  <p class="dl">El texto se cotejó con la edición de Wikisource en español. Licencia CC BY-SA 4.0.</p>
+                  <p class="dl"><a href="https://es.wikisource.org/wiki/Proverbios_y_cantares_%28Campos_de_Castilla%29" rel="noopener nofollow">Leer la obra en Wikisource en español</a>.</p>
+                  <p class="dl">Una de sus 27 citas no tiene documento cotejado.</p>
+                </section>
+              </div>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </figure>
+
+          <figure class="tel">
+            <figcaption><b>(caso ilustrativo)</b> Obra X, de Autor Y — ninguna de sus Citas tiene documento.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag cola">
+                <p class="recorte">(caso ilustrativo) Recortado por arriba: la cabecera, el listado y los Temas de una Obra X, de Autor Y. No se enlaza ninguna edición y no hay ediciones en venta.</p>
+                <section class="donde" style="margin-top:0">
+                  <h2 class="rotulo">Dónde leer esta obra</h2>
+                  <p class="dl">Ninguna de sus citas tiene todavía documento cotejado.</p>
+                </section>
+              </div>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </figure>
+
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> se lee de corrido y dice el cotejo con las mismas palabras en los tres casos; sin cotejo es una sola frase, sin estructura vacía alrededor. Con el Modelo apagado no queda nada que delate que podría haber ventas.</p>
+          <p><b>Cuesta:</b> con el Modelo encendido, la venta es un párrafo más bajo la edición gratuita, y lo único que marca el cambio de naturaleza es su declaración comercial. El bloque llega a tres enlaces siena seguidos —la obra y dos ediciones— que no dicen a simple vista cuál es gratis.</p>
+        </div>
+      </section>
+
+      <!-- D2 -->
+      <section class="prueba">
+        <div class="cab">
+          <span class="letra">VARIANTE D2</span>
+          <h3 class="nombre">Con rótulos</h3>
+          <p class="que">Dos rótulos pequeños en <code>caption</code> y en tinta —«Edición cotejada, gratuita» y «Ediciones en venta»—, cada uno con sus líneas debajo. El mismo contenido que D1, repartido en las dos partes; con el Modelo apagado, el segundo rótulo no existe.</p>
+        </div>
+        <div class="marco">
+
+          <figure class="tel">
+            <figcaption><b>Oráculo manual.</b> Varias páginas, con el Modelo de afiliación encendido y la nota de ejemplo.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag cola">
+                <p class="recorte">Recortado por arriba: la cabecera y las tarjetas 1 a 49. Entre la tarjeta 50 y los Temas va la paginación (página 1 de 3), que aquí no se dibuja.</p>
+                <ul class="listado" style="margin-top:0">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«Conciben todos altamente de sí, y más los que menos son.»</span></a></li>
+                </ul>
+                <section class="temas">
+                  <h2 class="rotulo">Temas</h2>
+                  <ul class="chips">
+                    <li><a class="chip" href="#">La amistad</a></li><li><a class="chip" href="#">La palabra</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">La adversidad</a></li><li><a class="chip" href="#">La prudencia</a></li><li><a class="chip" href="#">La libertad</a></li><li><a class="chip" href="#">La virtud</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La felicidad</a></li><li><a class="chip" href="#">La razón</a></li><li><a class="chip" href="#">La verdad</a></li><li><a class="chip" href="#">La vida</a></li><li><a class="chip" href="#">La envidia</a></li><li><a class="chip" href="#">El error</a></li><li><a class="chip" href="#">La gloria</a></li><li><a class="chip" href="#">La justicia</a></li>
+                  </ul>
+                </section>
+                <section class="donde">
+                  <h2 class="rotulo">Dónde leer esta obra</h2>
+                  <h3 class="sub-rot">Edición cotejada, gratuita</h3>
+                  <p class="dl"><a href="https://es.wikisource.org/wiki/Or%C3%A1culo_manual_y_arte_de_prudencia" rel="noopener nofollow">Wikisource en español</a>, repartida en 12 páginas. Licencia CC BY-SA 4.0.</p>
+                  <div class="encendido">
+                    <span class="anot"><b>data-ingreso="afiliacion-de-libros"</b><br>Modelo de afiliación encendido — hoy apagado: no existe ni línea, ni hueco, ni contenedor.</span>
+                    <h3 class="sub-rot">Ediciones en venta</h3>
+                    <p class="dl"><a href="#" rel="sponsored noopener">Edición impresa en Amazon México</a>: Cátedra, 2015. Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.</p>
+                    <p class="dl"><a href="#" rel="sponsored noopener">Edición electrónica en <span class="hueco">{tienda}</span></a>: <span class="hueco">{editorial}</span>, <span class="hueco">{año}</span>. Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.</p>
+                  </div>
+                </section>
+                <div class="anotada">
+                  <span class="anot">[ejemplo de nota: la escribe Héctor, 160 caracteres como máximo]</span>
+                  <p class="nota-ficha">Trescientos aforismos comentados, publicados en Huesca en 1647 con el nombre de Lorenzo Gracián.</p>
+                </div>
+              </div>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </figure>
+
+          <figure class="tel">
+            <figcaption><b>Proverbios y cantares</b>, de Antonio Machado. Una sola URL; 26 de sus 27 Citas con documento.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag cola">
+                <p class="recorte">Recortado por arriba: la cabecera y las tarjetas 1 a 26. Una sola página: sin paginación.</p>
+                <ul class="listado" style="margin-top:0">
+                  <li class="tarjeta"><a href="#"><span class="fragmento">«Yo vivo en paz con los hombres y en guerra con mis entrañas.»</span></a></li>
+                </ul>
+                <section class="temas">
+                  <h2 class="rotulo">Temas</h2>
+                  <ul class="chips">
+                    <li><a class="chip" href="#">La vida</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La virtud</a></li><li><a class="chip" href="#">La palabra</a></li><li><a class="chip" href="#">La verdad</a></li><li><a class="chip" href="#">La razón</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">La adversidad</a></li><li><a class="chip" href="#">La humildad</a></li>
+                  </ul>
+                </section>
+                <section class="donde">
+                  <h2 class="rotulo">Dónde leer esta obra</h2>
+                  <h3 class="sub-rot">Edición cotejada, gratuita</h3>
+                  <p class="dl"><a href="https://es.wikisource.org/wiki/Proverbios_y_cantares_%28Campos_de_Castilla%29" rel="noopener nofollow">Wikisource en español</a>. Licencia CC BY-SA 4.0.</p>
+                  <p class="dl">Una de sus 27 citas no tiene documento cotejado.</p>
+                </section>
+              </div>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </figure>
+
+          <figure class="tel">
+            <figcaption><b>(caso ilustrativo)</b> Obra X, de Autor Y — ninguna de sus Citas tiene documento.</figcaption>
+            <div class="lienzo">
+              <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+              <div class="s-pag cola">
+                <p class="recorte">(caso ilustrativo) Recortado por arriba: la cabecera, el listado y los Temas de una Obra X, de Autor Y. No se enlaza ninguna edición y no hay ediciones en venta.</p>
+                <section class="donde" style="margin-top:0">
+                  <h2 class="rotulo">Dónde leer esta obra</h2>
+                  <h3 class="sub-rot">Edición cotejada, gratuita</h3>
+                  <p class="dl">Ninguna de sus citas tiene todavía documento cotejado.</p>
+                </section>
+              </div>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </figure>
+
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> lo gratuito y lo que se vende los separa un rótulo y no solo la posición; con el Modelo encendido, el visitante sabe qué es cada línea antes de leerla, y el enlace de la edición cotejada es el propio nombre de la Fuente, como en la Página de Cita.</p>
+          <p><b>Cuesta:</b> con el Modelo apagado —hoy, y siempre en una Obra sin ediciones— queda un rótulo único sobre un único bloque, y «gratuita» contrasta con nada. Sin cotejo, el rótulo encabeza una ausencia: «Edición cotejada» seguido de que no la hay.</p>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 3 — el título de la Obra enlazado en la Atribución
+       ===================================================================== -->
+  <section class="decision">
+    <h2>Decisión 3 — El título de la Obra, enlazado en la Atribución</h2>
+    <p class="regla"><b>Fijo (FR-2, v7.1):</b> el título que fija la Ficha de Obra enlaza a su Página de Obra; hasta ahora la Procedencia no se enlazaba. La línea sigue en <code>caption</code> y tinta apagada. Las tres variantes llevan <b>subrayado siempre visible</b>: en móvil no hay hover, y un enlace que solo se distingue por el color no se reconoce y choca con WCAG 1.4.1. La Cita tiene 55 caracteres (≤ 80, tramo <code>quote-xl</code>), así que en móvil baja un escalón: 36&nbsp;px.</p>
+
+    <div class="rejilla tres">
+
+      <!-- E1 -->
+      <section class="prueba e1">
+        <div class="cab">
+          <span class="letra">VARIANTE E1</span>
+          <h3 class="nombre">Tinta apagada subrayada</h3>
+          <p class="que">El mismo color que el resto de la línea; solo cambia el subrayado.</p>
+        </div>
+        <div class="marco">
+          <div class="lienzo con-pliegue">
+            <div class="pliegue"><span>pliegue 360×640</span></div>
+            <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+            <article class="s-pag">
+              <figure class="bloque">
+                <blockquote><h1 class="cita-h1">«A muchos les sobra la vida y se les acaba la felicidad.»</h1></blockquote>
+                <figcaption>
+                  <p class="at-autor"><a href="#">Baltasar Gracián</a></p>
+                  <p class="procedencia"><a href="#">Oráculo manual y arte de prudencia</a>, 1647.</p>
+                </figcaption>
+              </figure>
+              <p class="fuente">Texto tomado de <a href="https://es.wikisource.org/wiki/Or%C3%A1culo_manual_y_arte_de_prudencia/Aforismos_(151-175)" rel="noopener nofollow">Wikisource en español</a>. CC BY-SA 4.0.</p>
+              <div class="acciones"><span class="boton">Copiar la cita</span><span class="boton">Descargar como imagen</span><span class="boton">Compartir la cita</span></div>
+            </article>
+          </div>
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> la línea de la Procedencia no cambia de tono; el subrayado es lo único nuevo en la página.</p>
+          <p><b>Cuesta:</b> el subrayado es lo único que lo delata, y se lee con el mismo esfuerzo que el texto de alrededor. Sin él, nada lo distinguiría (WCAG 1.4.1).</p>
+        </div>
+      </section>
+
+      <!-- E2 -->
+      <section class="prueba e2">
+        <div class="cab">
+          <span class="letra">VARIANTE E2</span>
+          <h3 class="nombre">Tinta subrayada</h3>
+          <p class="que">En tinta, más oscuro que el resto de la línea, como el nombre del Autor: es información, no una acción.</p>
+        </div>
+        <div class="marco">
+          <div class="lienzo con-pliegue">
+            <div class="pliegue"><span>pliegue 360×640</span></div>
+            <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+            <article class="s-pag">
+              <figure class="bloque">
+                <blockquote><h1 class="cita-h1">«A muchos les sobra la vida y se les acaba la felicidad.»</h1></blockquote>
+                <figcaption>
+                  <p class="at-autor"><a href="#">Baltasar Gracián</a></p>
+                  <p class="procedencia"><a href="#">Oráculo manual y arte de prudencia</a>, 1647.</p>
+                </figcaption>
+              </figure>
+              <p class="fuente">Texto tomado de <a href="https://es.wikisource.org/wiki/Or%C3%A1culo_manual_y_arte_de_prudencia/Aforismos_(151-175)" rel="noopener nofollow">Wikisource en español</a>. CC BY-SA 4.0.</p>
+              <div class="acciones"><span class="boton">Copiar la cita</span><span class="boton">Descargar como imagen</span><span class="boton">Compartir la cita</span></div>
+            </article>
+          </div>
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> se ve como enlace sin estrenar color: es la tinta del nombre del Autor, una línea más arriba, y las dos entidades se enlazan igual.</p>
+          <p><b>Cuesta:</b> la línea queda partida en dos tonos, y el título pesa más que el año que lo acompaña. El subrayado sigue haciendo falta (WCAG 1.4.1).</p>
+        </div>
+      </section>
+
+      <!-- E3 -->
+      <section class="prueba e3">
+        <div class="cab">
+          <span class="letra">VARIANTE E3</span>
+          <h3 class="nombre">Siena subrayada</h3>
+          <p class="que">Como el enlace de la Fuente, una línea más abajo.</p>
+        </div>
+        <div class="marco">
+          <div class="lienzo con-pliegue">
+            <div class="pliegue"><span>pliegue 360×640</span></div>
+            <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+            <article class="s-pag">
+              <figure class="bloque">
+                <blockquote><h1 class="cita-h1">«A muchos les sobra la vida y se les acaba la felicidad.»</h1></blockquote>
+                <figcaption>
+                  <p class="at-autor"><a href="#">Baltasar Gracián</a></p>
+                  <p class="procedencia"><a href="#">Oráculo manual y arte de prudencia</a>, 1647.</p>
+                </figcaption>
+              </figure>
+              <p class="fuente">Texto tomado de <a href="https://es.wikisource.org/wiki/Or%C3%A1culo_manual_y_arte_de_prudencia/Aforismos_(151-175)" rel="noopener nofollow">Wikisource en español</a>. CC BY-SA 4.0.</p>
+              <div class="acciones"><span class="boton">Copiar la cita</span><span class="boton">Descargar como imagen</span><span class="boton">Compartir la cita</span></div>
+            </article>
+          </div>
+        </div>
+        <div class="nota">
+          <p><b>Gana:</b> es el color con que el sitio ya dice «por aquí se sigue», y el enlace no necesita explicarse.</p>
+          <p><b>Cuesta:</b> siena ya está en «Buscar», en la Fuente y en los tres botones de esta pantalla, y DESIGN.md dice que en más de dos sitios «algo está mal»; esta sería la sexta. Y la obra (dentro del sitio) y la Fuente (fuera) quedan vestidas igual.</p>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       BANDA — Ya fijado, no se elige
+       ===================================================================== -->
+  <section class="decision">
+    <h2>Ya fijado, no se elige</h2>
+    <p class="regla">Dos piezas que no esperan decisión de presentación y que conviene ver junto a las otras: la página 2 de una Obra, que lleva solo título, Autor y listado; y un resultado de <code>/buscar/</code> de tipo Obra, rotulado como los de Cita, Autor, Tema y Colección. Solo entran en la búsqueda las Obras indexables; Oráculo manual lo es: 114 Citas son el 70&nbsp;% de las de Gracián, por debajo del 90&nbsp;%.</p>
+
+    <div class="rejilla tres">
+
+      <section class="prueba v-a">
+        <div class="cab">
+          <span class="letra">PÁGINA 2</span>
+          <h3 class="nombre">Oráculo manual, página 2 de 3</h3>
+          <p class="que">Título, Autor y listado (Citas 51 a 100). Sin Temas, sin «Dónde leer», sin nota. Lleva <code>noindex</code>, como toda página 2+.</p>
+        </div>
+        <div class="marco">
+          <div class="lienzo">
+            <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+            <div class="s-pag">
+              <p class="recorte">La cabecera se dibuja con el trazo de A; vale la que se elija.</p>
+              <h1 class="obra-h1">Oráculo manual y arte de prudencia</h1>
+              <p class="de">de <a href="#">Baltasar Gracián</a> · 1647</p>
+              <ul class="listado">
+                <li class="tarjeta"><a href="#"><span class="fragmento">«Confiar de los amigos hoy como enemigos mañana, y los peores; y pues pasa en la realidad, pase en la prevención.»</span></a></li>
+                <li class="tarjeta"><a href="#"><span class="fragmento">«Conocer el día aciago, que los hay: nada saldrá bien; y, aunque se varíe el juego, pero no la mala suerte.»</span></a></li>
+                <li class="tarjeta"><a href="#"><span class="fragmento">«Conocer las cosas en su punto, en su sazón, y saberlas lograr.»</span></a></li>
+              </ul>
+              <div class="corte">Corte: siguen las tarjetas hasta la 100 y la paginación. Nada más.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="prueba">
+        <div class="cab">
+          <span class="letra">BÚSQUEDA</span>
+          <h3 class="nombre">Un resultado de tipo Obra en /buscar/</h3>
+          <p class="que">Rótulo «Obra» con el mismo trato que «Cita», «Autor», «Tema» y «Colección». El título, en Inter; el Autor, debajo, como en la tarjeta.</p>
+        </div>
+        <div class="marco">
+          <div class="lienzo">
+            <header class="s-cab"><a class="s-marca" href="#">Sabiduría de Bolsillo</a><a class="s-buscar" href="#">Buscar</a></header>
+            <div class="s-pag">
+              <h1 class="buscar-h1">Buscar</h1>
+              <span class="etiqueta-campo">Escribe un fragmento, un autor o un tema.</span>
+              <div class="campo">oráculo manual</div>
+              <ul class="resultados">
+                <li class="resultado"><a href="#"><span class="clase">Obra</span><span class="titulo en-inter">Oráculo manual y arte de prudencia</span><span class="t-autor">Baltasar Gracián</span></a></li>
+                <li class="resultado"><a href="#"><span class="clase">Cita</span><span class="titulo">«A los primeros siete entra la razón; entre después, a cada lustro, una nueva perfección.»</span></a></li>
+              </ul>
+              <div class="corte">Corte: se omiten el recuento y el resto de la lista. El orden lo decide Pagefind; aquí solo importa cómo se rotula cada tipo.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <footer class="fin">
+    <h2>Lo que queda fijo, se elija lo que se elija</h2>
+    <ul>
+      <li>El título de la Obra va en Inter en toda superficie: cabecera, Atribución, lista de obras del Autor y resultado de búsqueda.</li>
+      <li>«de {Autor}» enlaza a la Página de Autor en tinta; el año solo aparece si todas las Citas que lo declaran coinciden.</li>
+      <li>El listado usa la Tarjeta de Cita sin repetir el nombre del Autor. Después van los Temas, «Dónde leer esta obra» y la nota, solo en la primera página.</li>
+      <li>Con el Modelo de afiliación apagado, la página es idéntica con y sin ediciones declaradas: no queda línea, hueco ni contenedor.</li>
+      <li>Las tres decisiones se eligen por separado: ninguna variante de una obliga a una de otra.</li>
+    </ul>
+  </footer>
+
+</div>
+</body>
+</html>

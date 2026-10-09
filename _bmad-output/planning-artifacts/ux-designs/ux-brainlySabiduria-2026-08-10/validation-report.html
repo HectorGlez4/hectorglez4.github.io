@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validación UX: brainlySabiduria</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+
+  .severity-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .severity-summary .badge { font-size: 12px; padding: 4px 10px; }
+  .severity-summary .total { margin-left: 4px; }
+  .finding-note p, .finding-fix p { margin: 0 0 8px; }
+  .finding-note p:last-child { margin-bottom: 0; }
+  .finding-note ul, .dim-judgment ul, .mechanical ul ul { margin: 6px 0 8px; padding-left: 20px; }
+  .finding-note li { margin-bottom: 3px; }
+  .tabla { overflow-x: auto; margin: 8px 0; }
+  .tabla table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  .tabla th, .tabla td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; vertical-align: top; }
+  .tabla th { background: var(--bg); font-weight: 600; }
+  code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.88em;
+    background: #f5f5f4;
+    border-radius: 3px;
+    padding: 0 3px;
+    overflow-wrap: anywhere;
+  }
+  .tag {
+    font-size: 10.5px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .reviewer-method { color: var(--muted); font-size: 13.5px; }
+  .bien { margin-top: 12px; }
+  .bien h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .bien ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .bien li { margin-bottom: 4px; }
+  .mechanical li p { margin: 0; }
+  @media (max-width: 600px) {
+    .container { padding: 24px 16px 48px; }
+    header.report-header { flex-direction: column; }
+    section summary { flex-wrap: wrap; padding: 12px 14px; }
+    .dim-body, .findings-list { padding-left: 14px; padding-right: 14px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>brainlySabiduria — Informe de validación UX</h1>
+        <div class="subtitle">_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md<br>_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md</div>
+      </div>
+    </header>
+
+    <div class="synthesis">
+      <p>Como contrato de la <strong>Página de Obra</strong>, el par aguanta. La v7.1 la cubre con su fila de la IA, la Cabecera, «Dónde leer esta obra», las ediciones en venta, once estados, la sección de Obra traducida y la microcopia de pestaña y descripción, y todas las referencias de token resuelven. Lo que impide extraer limpio está <strong>fuera del núcleo nuevo</strong>: un componente del que dependen cuatro filas —la línea de la Fuente de la Página de Cita— no existe en ninguna de las dos espinas; la Tarjeta Social de Obra no tiene especificación visual, y reutilizar la plantilla que sí está descrita rompe la regla de la serif; y las dos espinas se contradicen entre sí en componentes ya construidos: la búsqueda de la cabecera, las acciones, el chip y la iconografía. También quedan dentro del contrato decisiones que el propio texto declara abiertas —la hoja del sistema en el Kit, el progreso de la imagen, los cuerpos de la Lista de Obras y la Tarjeta Social de Autor—, y EXPERIENCE.md arrastra mucha historia de decisiones que pertenece a la bitácora. Hay 21 <code>[ASSUMPTION]</code> pendientes de Héctor (6 en DESIGN.md y 15 en EXPERIENCE.md); están bien marcadas y no cuentan como hallazgo.</p><p>La lente de accesibilidad cambia el cuadro: <strong>el suelo WCAG 2.1 AA que declaran las espinas no se cumple hoy, y no se cumpliría aunque se reconstruyera todo desde ellas.</strong> No hay en el sitio una sola región viva. En <code>/buscar/</code> el recuento de resultados y la frase de «sin resultados» aparecen sin anunciarse, «Copiado.» solo cambia el rótulo del botón enfocado y la imagen lista llega en silencio, y el Accessibility Floor no menciona los mensajes de estado (4.1.3, AA). Es el único hallazgo high de la lente; otros dos tocan criterios de nivel A en lo construido —2.4.4 en los destinos de compartir y 4.1.2 en el nombre del diálogo de imagen— con severidad media. El resto es contrato sin escribir: ninguna pareja de la paleta separa un enlace del texto de su línea por color (todas por debajo de 3:1), así que el subrayado tiene que ser regla general y no caso por caso; falta una política de enlaces que salen del sitio y el nombre accesible de los enlaces de compartir y de afiliado; y la exención de zona de toque está mal aplicada al título de la Obra en la Atribución. La v7.1 decide bien lo gordo —subrayado siempre en la Página de Obra, estructura en «Dónde leer», nada recortado—, y el arreglo del high es corto: una regla en el Accessibility Floor y una región <code>role="status"</code> en <code>/buscar/</code> y en Copiar.</p>
+    </div>
+
+    <div class="severity-summary" aria-label="Hallazgos por severidad">
+      <span class="badge badge-sev-critical">Critical 0</span><span class="badge badge-sev-high">High 4</span><span class="badge badge-sev-medium">Medium 18</span><span class="badge badge-sev-low">Low 30</span>
+      <span class="total">52 hallazgos: 35 de la rúbrica y 17 de la lente de accesibilidad</span>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Cobertura de flujos</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adecuado</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Completitud de tokens</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adecuado</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Cobertura de componentes</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">flojo</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Cobertura de estados</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adecuado</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Referencias visuales</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adecuado</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Hinchazón y sobreespecificación</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">flojo</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Disciplina de herencia</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adecuado</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Ajuste de forma</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">sólido</div>
+      </div>
+    </div>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Cobertura de flujos</h2>
+          <span class="verdict-pill verdict-adequate">adecuado</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Los cinco UJ del PRD §2.3 tienen cada uno su Key Flow, y los cinco cumplen la forma: protagonista con nombre, pasos numerados, clímax marcado y fallo posible. FR-51 dice que «realiza UJ-3», y UJ-3 recoge la Página de Obra en su paso 3. En la estructura no falta nada; los problemas están en el contenido.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">UJ-5 lleva dentro del contrato una decisión que él mismo declara sin tomar</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:219-227</span>
+            </header>
+            <div class="finding-note"><p>El paso 4 describe compartir desde la hoja del sistema, y la nota «Desfase abierto, sin decidir» reconoce que el Kit construido solo descarga y que FR-21 no lo exige. Quien implemente historias no puede saber si debe construir la hoja en el Kit. Además, el paso 1 nombra cinco cuentas y el clímax dice «cuatro redes»; esa incoherencia ya viene del PRD.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> que Héctor decida. Si el Kit sigue descargando, el paso 4 se reescribe como está construido y la hoja pasa a <code>[NOTE FOR PM]</code>. Si no, se compromete como requisito y se añade un patrón de componente del Kit. La cifra de redes se corrige en el PRD.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El paso 2 de UJ-2 promete varios diseños compuestos a la vez</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:196 frente a :89 y DESIGN.md:189</span>
+            </header>
+            <div class="finding-note"><p>Dice «con unos pocos diseños y su Cita ya compuesta en cada uno». El Diálogo de Imagen, en las dos espinas, tiene una sola previsualización, tres botones de plantilla y Papel elegida al abrir.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> «elige entre Papel, Tinta y Siena; la previsualización muestra la elegida».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El clímax de UJ-1 no es el del PRD</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:189-191</span>
+            </header>
+            <div class="finding-note"><p>El PRD lo pone en tener la Cita pegada, con su atribución, en menos de 30 s. La espina lo pone en «confía en lo que va a citar» (paso 3) y deja los 30 s en el paso 5, sin marca de clímax.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> marcar el clímax del PRD, o declarar la reinterpretación.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">UJ-4 remite a un panel y a una herramienta que no existen</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:37, :213, :216</span>
+            </header>
+            <div class="finding-note"><p>El clímax dice «visible en el propio panel (FR-16)», y la IA afirma que «No hay panel autenticado en producción». El paso 1 habla de «la herramienta de Curación», cuando la puerta real son tres órdenes: <code>recuperar</code>, <code>extraer</code> y <code>revisar</code>.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> «visible en el informe de salud del Corpus, en la terminal».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Ningún flujo cubre la entrada directa a una Página de Obra desde el buscador externo</h3>
+              
+              <span class="finding-location">EXPERIENCE.md § Key Flows</span>
+            </header>
+            <div class="finding-note"><p>La entrada desde el buscador externo («frases del Oráculo manual») es la primera razón de ser de §4.19, y tampoco hay flujo para el paso de «Dónde leer» a la edición cotejada. El PRD no tiene UJ para eso, así que la rúbrica no lo cuenta como falta.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> si se quiere el flujo, pedir al PM una variante de UJ-3. La espina no debe inventar un UJ.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Completitud de tokens</h2>
+          <span class="verdict-pill verdict-adequate">adecuado</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>El frontmatter de DESIGN.md define 54 tokens: 29 de color, 11 de tipografía, 5 de radio, 5 de espaciado y 4 en <code>components</code>. Las 28 referencias <code>{…}</code> de DESIGN.md y las 13 de EXPERIENCE.md resuelven todas; la única que no, <code>{ruta.al.token}</code> (EXPERIENCE.md:14), es el ejemplo de la sintaxis. Todos los colores llevan hex. Hay contraste declarado para tres pares.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Faltan los contrastes de los pares que cargan peso</h3>
+              
+              <span class="finding-location">DESIGN.md:131-133, :188, :193</span>
+            </header>
+            <div class="finding-note"><p>Calculados por la rúbrica:</p><div class="tabla"><table><thead><tr><th>Par</th><th>Contraste</th><th>Dónde se usa</th><th>Situación</th></tr></thead><tbody><tr><td><code>on-primary</code> sobre <code>primary</code></td><td>6,7:1</td><td>botón primario, relleno al pasar el cursor, plantilla elegida, plantilla Siena</td><td>pasa, sin declarar</td></tr><tr><td>texto del Chip de Tema</td><td>—</td><td>chip</td><td>el color no está asignado (solo <code>caption</code> y el fondo <code>surface-container</code>)</td></tr><tr><td>campo de copia manual</td><td>1,3:1 el filete <code>outline-variant</code> sobre <code>surface-container-low</code>; 1,04:1 el relleno frente a <code>surface</code></td><td>campo de copia</td><td>nada lo identifica como campo (WCAG 1.4.11 pide 3:1)</td></tr><tr><td><code>outline</code> del campo de búsqueda</td><td>3,66:1</td><td>campo de búsqueda</td><td>pasa, sin declarar</td></tr></tbody></table></div><p>Dos de las cifras declaradas no cuadran: la tinta da 16,0:1, no 15,8:1, y la tinta apagada da 7,26:1, no 7,4:1.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una tabla de contraste con esos pares, asignar color al texto del chip y darle al campo de copia un filete que llegue a 3:1 (<code>outline</code>).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Hay composiciones fuera de la escala de tokens</h3>
+              
+              <span class="finding-location">DESIGN.md:163, :194, :200, :201, :206</span>
+            </header>
+            <div class="finding-note"><p>La convención de la espina de arquitectura dice que los estilos son tokens definidos una sola vez.</p><ul><li>las Citas hermanas van en «Source Serif al tamaño de <code>{typography.body-lg}</code>», que es un token Inter;</li><li>el resultado de Obra va en «Inter al cuerpo y peso de <code>headline-sm</code>», que es un token serif;</li><li>la Lista de Obras deja «los cuerpos del título y del recuento… sin fijar», y eso bloquea la historia de la Épica 17;</li><li>la respiración móvil de 40 px es un literal sin token, aunque el código ya lo tiene;</li><li>las Tarjetas Sociales usan «píxeles del lienzo».</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> añadir tokens —por ejemplo uno serif de 17 px para las Citas hermanas, <code>title-sm</code> en Inter 21/600 y <code>quote-breathing</code> para móvil— y fijar los cuerpos de la Lista de Obras.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Cobertura de componentes</h2>
+          <span class="verdict-pill verdict-thin">flojo</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Hay 25 filas en DESIGN.md § Components y 28 en EXPERIENCE.md § Component Patterns, cruzadas una a una. Listado de Colección y Listado de Obra quedan cubiertos por la Tarjeta de Cita, y Acción Copiar, Imagen y Compartir la cita por «Acciones de la Página de Cita». Botones, Filete divisorio e Iconografía solo están en DESIGN, y es razonable porque son primitivas. Lo que falla es un componente construido del que dependen cinco pasajes y que no existe en ninguna espina, una Tarjeta Social sin especificación visual y cuatro contradicciones entre los dos ficheros.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">La línea de la Fuente de la Página de Cita no tiene fila en ninguna de las dos espinas</h3>
+              
+              <span class="finding-location">DESIGN.md:133, :188, :199, :203; EXPERIENCE.md:166</span>
+            </header>
+            <div class="finding-note"><p>Está construida (<code>src/components/Fuente.astro</code>, 2026-08-26) y cinco pasajes se definen contra ella:</p><ul><li>el siena de § Colors;</li><li>«Semblanza», «como el enlace de la Fuente en la Página de Cita»;</li><li>«Dónde leer esta obra», con la misma frase;</li><li>la exención de zona de toque;</li><li>las «Acciones», que van «debajo de la Atribución y de la línea de la Fuente».</li></ul><p>Su comportamiento solo vive en el código: el rótulo es el nombre de la Fuente o su anfitrión, nunca la URL desnuda; lleva la licencia si consta; <strong>no afirma el cotejo</strong>; y no se pinta sin Fuente. Lo que FR-54 pide a «Dónde leer» se define por analogía con ella.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una fila en cada espina, escrita como está construida.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">La Tarjeta Social de Obra (FR-51) no tiene especificación visual en DESIGN.md</h3>
+              
+              <span class="finding-location">DESIGN.md:201; EXPERIENCE.md:111</span>
+            </header>
+            <div class="finding-note"><p>Tiene fila en EXPERIENCE.md y no en DESIGN.md. La única especificación visual disponible es la «plantilla común de las Tarjetas Sociales de listado», que pone el nombre <strong>en serif</strong> y añade una banda siena decorativa. Reutilizarla para la Obra pone el título en serif, contra el Don't y contra la convención de la espina de arquitectura, y hereda un uso del siena que choca con «siena = actuar o salir». El <code>[DERIVADO]</code> «título de la Obra en Inter» de la bitácora (.memlog.md:63) no llegó a DESIGN.md. Quedan también abiertas la composición de la Tarjeta Social de Autor de la v5 («ni la maqueta ni la bitácora fijan su composición») y la Tarjeta Social de Cita (FR-19), que no tiene fila.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una fila «Tarjeta Social» en DESIGN.md, con sus variantes de Cita, listado, Autor y Obra, el título de la Obra en Inter y una decisión sobre la banda siena.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Las dos espinas se contradicen entre sí en componentes construidos</h3>
+              
+              <span class="finding-location">DESIGN.md:133, :188, :190, :193, :209; EXPERIENCE.md:34, :92, :114, :235-236</span>
+            </header>
+            <div class="finding-note"><p>Son divergencias ya conocidas (.memlog.md:79), pero aquí no es solo la espina contra el código, sino un documento contra el otro, y quien implemente recibe dos respuestas. Gravedad de cada una:</p><div class="tabla"><table><thead><tr><th>Componente</th><th>Qué dice cada sitio</th><th>Gravedad</th></tr></thead><tbody><tr><td>Campo de búsqueda</td><td>Las dos filas lo ponen «en la cabecera, todas las superficies públicas». DESIGN § Colors cuenta «Buscar» como enlace siena, y la nota de la maqueta de EXPERIENCE.md dice que lo construido es el enlace «Buscar». Afecta a la cabecera de todas las páginas (DESIGN.md:133, :190; EXPERIENCE.md:34, :92, :114).</td><td>high</td></tr><tr><td>Acciones</td><td>DESIGN.md dice «cada una en su propia línea», como está construido. EXPERIENCE § Responsive dice «a ancho completo apiladas» por debajo de 600 px y «en línea» de 600 a 1024 (DESIGN.md:188; EXPERIENCE.md:235-236).</td><td>medium</td></tr><tr><td>Chip de Tema</td><td>DESIGN.md lo pone en <code>caption</code> (Inter 13), con <code>rounded.md</code> y sin alto mínimo. La nota de la maqueta de EXPERIENCE.md trata «chips de Tema en Inter y por debajo de <code>tap-target-min</code>» como divergencia respecto de lo construido, que es serif a 44 px (DESIGN.md:193; EXPERIENCE.md:114).</td><td>medium</td></tr><tr><td>Iconografía</td><td>DESIGN.md dice que los iconos se usan «exclusivamente para copiar, buscar y descargar», y el mismo DESIGN.md dice «Sin icono» en las Acciones y en el Campo de búsqueda (DESIGN.md:188, :190, :209).</td><td>medium</td></tr></tbody></table></div></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> que Héctor haga el triaje y que cada caso quede en una sola frase idéntica en las dos espinas, antes de que ninguna historia toque la Página de Cita o la cabecera.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Al Resultado de búsqueda le falta la base en DESIGN.md</h3>
+              
+              <span class="finding-location">DESIGN.md:206; EXPERIENCE.md:110</span>
+            </header>
+            <div class="finding-note"><p>Solo existe «Resultado de búsqueda de tipo Obra», que se define por diferencia («el mismo trato que "Cita"…», «el mismo cuerpo y peso que ellos») contra una especificación base que no está escrita en ningún sitio. Lo construido es un rótulo de tipo y el título en serif de 21 px. Los nombres tampoco coinciden entre los dos ficheros.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una fila «Resultado de búsqueda» con la base y la variante de Obra.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Al pie de la Página de Obra le falta la especificación visual</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:106-109; DESIGN.md:194, :203</span>
+            </header>
+            <div class="finding-note"><p>«Temas de la Obra» no tiene fila en DESIGN.md, y no está fijado el ritmo vertical de la secuencia listado → paginación → Temas → Dónde leer → Nota, cuando las Rutas de salida lo tienen al detalle. Tampoco está fijado el nivel de encabezado de «Temas», mientras que «Dónde leer» sí fija su <code>h2</code> y sus <code>h3</code>.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una fila para el pie de la Página de Obra que reutilice el ritmo de las Rutas de salida, con «Temas» como <code>h2</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Hay componentes construidos que no aparecen en ninguna espina</h3>
+              
+              <span class="finding-location">DESIGN.md § Components; EXPERIENCE.md § Component Patterns</span>
+            </header>
+            <div class="finding-note"><p>Aunque esta pasada quería ponerse al día con lo construido, faltan:</p><ul><li>«Dónde seguirnos», en el pie del armazón (<code>DondeSeguirnos.astro</code>), que está en todas las páginas, también en las de lectura;</li><li>la cabecera del sitio, con la marca y «Buscar»;</li><li>la Cita del Día de la portada;</li><li>el material del Kit y del Lote (<code>MaterialParaPublicar.astro</code>).</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> añadirles fila, o declararlos expresamente fuera del contrato.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">La fila de la Tarjeta de Cita no recoge la excepción sin nombre de Autor</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:93 frente a :105 y DESIGN.md:191</span>
+            </header>
+            <div class="finding-note"><p>Sigue diciendo «Fragmento + autor» para los listados de Autor y de Obra, sin la excepción que sí fijan DESIGN.md y la fila del Listado de Obra: sin el nombre del Autor.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> añadir la excepción en esa fila.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Cobertura de estados</h2>
+          <span class="verdict-pill verdict-adequate">adecuado</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Se recorrieron las once superficies de la IA. La Página de Obra está muy bien cubierta: <code>noindex</code>, una sola Cita, sin Citas, sin cotejo, cotejo parcial, año que discrepa, páginas 2+, afiliación apagada, Obra absorbida y traductor. Los huecos están en superficies anteriores o en interacciones del cliente.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">«Carga normal… no hay nada que esperar» es falso para /buscar/</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:136, :141</span>
+            </header>
+            <div class="finding-note"><p>Los resultados llegan de Pagefind en el navegador: <code>buscar.astro</code> lo importa al enfocar el campo. Hay estados sin cubrir:</p><ul><li>la consulta vacía, en la que no se muestra nada;</li><li>la carga del índice;</li><li>un índice que no carga: el error no se trata y la página se queda en blanco;</li><li>sin JavaScript: el formulario hace GET a <code>/buscar/?q=</code> y no aparece nada;</li><li>el tope de 30 resultados.</li></ul><p>Además, la salida de «sin resultados» construida enseña Temas, Colecciones y <strong>todos</strong> los Autores, y la espina dice «Temas destacados + Autores destacados». Pesa ahora porque la v7.1 añade el tipo Obra a esta superficie.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una fila por cada estado, como está construido o como se decida.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">«Generando imagen» no decide el progreso ni cubre el fallo del generador</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:156</span>
+            </header>
+            <div class="finding-note"><p>El estado deja sin decidir si sigue haciendo falta el indicador de progreso que pedía la v1: lo anota y no lo resuelve. Tampoco hay estado para un generador que no llega a cargar, por ejemplo sin red después de cargar la página; hoy la previsualización se queda vacía indefinidamente.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> decidir lo del progreso y añadir el fallo, por ejemplo «No se pudo preparar la imagen.», con Copiar disponible.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Dos estados de la Lista de Obras se han quedado viejos frente a la v7.1</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:139-140; DESIGN.md:198</span>
+            </header>
+            <div class="finding-note"><ul><li>«Dos obras que son la misma partida por la Fuente — No se publican dos entradas» contradice AD-25 v7.1, que dice «grafías, nunca partes», que dos títulos donde uno es prefijo del otro avisan y no rompen, y que se decide en la Ficha de Obra. Hoy esos dos títulos serían dos Páginas de Obra hasta que la ficha las reúna.</li><li>«Cita sin obra declarada — … el recuento lo dice» se apoya en un recuento que DESIGN.md declara inexistente («Citas documentadas», sin recuento).</li></ul><p>La Épica 17 hereda los dos.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> reescribir los dos estados contra AD-25 y FR-53, y decidir si hay recuento y dónde va.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Una Obra cuyas Citas no tocan ningún Tema publicado no tiene estado</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:106</span>
+            </header>
+            <div class="finding-note"><p>Con todos sus Temas por debajo de 15, no se sabe si el rótulo «Temas» se pinta vacío.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> «Sin Temas publicados, el bloque no existe».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Los estados construidos del Kit y del Lote no figuran en State Patterns</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:35-36</span>
+            </header>
+            <div class="finding-note"><p>La fila del Lote dice que se documenta «como está construido», y faltan:</p><ul><li>«Hoy no hay ninguna Cita apta para portada.»;</li><li>el lote vacío;</li><li>una fijación muda;</li><li>la alternativa con Imagen.</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> filas de estado para los dos.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Quedan dos estados vacíos sin cubrir</h3>
+              
+              <span class="finding-location">EXPERIENCE.md § State Patterns</span>
+            </header>
+            <div class="finding-note"><ul><li>la portada sin ninguna Colección publicada, que es el estado real de hoy porque <code>corpus/colecciones/</code> está vacío;</li><li>una Página de Autor cuyas Citas no declaran obra, con la Lista de Obras vacía (¿se pinta el rótulo?).</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una fila para cada uno.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Referencias visuales</h2>
+          <span class="verdict-pill verdict-adequate">adecuado</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p><code>mockups/</code> tiene tres ficheros; no existen <code>wireframes/</code> ni <code>imports/</code>, y <code>.working/</code> está vacío. Los tres se enlazan en línea en EXPERIENCE.md § Component Patterns, con lo que ilustran y sus divergencias enumeradas (cinco en la de la Página de Cita y tres en la de la Página de Obra); las comprobadas al azar se sostienen. No hay huérfanos, y «Mandan las espinas» está dicho en la cabecera de EXPERIENCE.md.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">DESIGN.md cita maquetas sin nombrarlas ni enlazarlas</h3>
+              
+              <span class="finding-location">DESIGN.md:198-203</span>
+            </header>
+            <div class="finding-note"><ul><li>«la maqueta del orden B»;</li><li>«La maqueta»;</li><li>«Es la variante A» y «variante D2»;</li><li>«la bitácora», que es <code>.memlog.md</code> y no es una fuente para quien consume las espinas.</li></ul><p>Con tres maquetas, «la maqueta» es ambigua.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> enlazar <code>mockups/pagina-de-autor-tres-ordenes.html</code> y <code>mockups/pagina-de-obra-variantes.html</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">«Mandan las espinas» se repite cuatro veces, y la nota de la Página de Autor niega una divergencia que ya existe</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:116; DESIGN.md:198-199</span>
+            </header>
+            <div class="finding-note"><p>Está en la cabecera y en tres notas. La nota de la maqueta de la Página de Autor dice además «si algún día divergen», cuando ya divergen en tres puntos que DESIGN.md enumera: la región junto a los años, el recuento en el rótulo y la semblanza a un cuerpo menor.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> dejar una sola declaración y listar esas tres divergencias en la nota.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Hinchazón y sobreespecificación</h2>
+          <span class="verdict-pill verdict-thin">flojo</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>EXPERIENCE.md lleva en la prosa historia de decisiones, alternativas descartadas y mediciones que ya están en la bitácora, con filas de 150 a 250 palabras donde la regla cabe en una frase. DESIGN.md mezcla el estado de implementación con el contrato, conserva citada la regla retirada del siena y declara tokens que ninguna espina usa.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">La prosa de EXPERIENCE.md arrastra historia de decisiones, alternativas descartadas y mediciones</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:58-60, :99, :104, :106, :166</span>
+            </header>
+            <div class="finding-note"><p>La rúbrica pide que no lleve voz editorial:</p><ul><li>Cabecera de Obra: «el diseño del 05/10 traía tres…», «11 de los 183», «llega a cinco» y el segundo tramo descartado;</li><li>Paginación: la historia de NFR-5;</li><li>«Frases» y «citas»: el porqué y el coste aceptado;</li><li>el título de pestaña: las alternativas descartadas;</li><li>las Zonas de toque: el párrafo sobre WCAG;</li><li>«Medido: los 16 del Oráculo…».</li></ul><p>Hay filas de 150 a 250 palabras en las que la regla cabe en una frase.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> dejar en la espina la regla y su referencia (FR o AD), y llevar el porqué a la bitácora, donde ya está.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">La regla retirada del siena sigue citada literalmente dentro de la regla vigente</h3>
+              
+              <span class="finding-location">DESIGN.md:133, :216</span>
+            </header>
+            <div class="finding-note"><p>«si aparece en más de dos sitios de una pantalla, algo está mal» sigue en § Colors y en el Do. Fuera del alcance de UX, el comentario de <code>src/styles/tokens.css</code> la sigue enunciando como vigente. Quien busque «siena» encontrará la regla vieja dos veces, una de ellas en el código.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> quitar la cita de la espina y avisar del comentario a la próxima historia que toque <code>tokens.css</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El estado de implementación está mezclado con el contrato</h3>
+              
+              <span class="finding-location">DESIGN.md:188-207</span>
+            </header>
+            <div class="finding-note"><ul><li>«(recoge lo construido)», «Construido:», «Sin construir (Épica 17)», «hoy se pinta también en las 2+»;</li><li>una marca de versión (v5, v7.1…) en casi cada fila.</li></ul><p>Todo eso caduca con cada historia.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> un único marcador «Estado» por fila, o llevarlo a <code>sprint-status.yaml</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Hay 21 tokens que ninguna espina referencia</h3>
+              
+              <span class="finding-location">DESIGN.md:136; EXPERIENCE.md:37</span>
+            </header>
+            <div class="finding-note"><p>La paleta <code>error-*</code>, <code>inverse-*</code>, <code>surface-dim</code> y <code>surface-bright</code>, <code>surface-container-high</code> y <code>-highest</code>, <code>on-*-container</code>, <code>rounded.sm</code> y <code>rounded.full</code>. La paleta de error contradice que no exista ningún estado visual de error. Y <code>secondary</code> está reservado a una herramienta de curación que EXPERIENCE.md declara de terminal.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> quitarlos o marcarlos como reservados.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Hay literales en píxeles donde ya existe un token</h3>
+              
+              <span class="finding-location">DESIGN.md:185, :187; EXPERIENCE.md:166</span>
+            </header>
+            <div class="finding-note"><ul><li>«Botones — texto en Inter 15px» (<code>body-md</code>);</li><li>«filete corto (48px, 1px…)» (<code>rule-width</code>);</li><li>«8px de separación» (<code>spacing.unit</code>).</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> citar los tokens.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Las anti-referencias están duplicadas</h3>
+              
+              <span class="finding-location">DESIGN.md:124; EXPERIENCE.md:245-253</span>
+            </header>
+            <div class="finding-note"><p>Texturas, publicidad intercalada y botoneras de ocho redes aparecen en DESIGN.md § Brand &amp; Style y en EXPERIENCE.md § Inspiration &amp; Anti-patterns.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> dejarlas en un solo sitio.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Disciplina de herencia</h2>
+          <span class="verdict-pill verdict-adequate">adecuado</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Los identificadores UJ-N son estables y la trazabilidad no se rompe. El choque de fondo está en los nombres de token, que usan los nombres de entidad en inglés que veda la convención del repositorio; lo demás son desajustes de literalidad con el PRD, de <code>sources</code>, de nombres de componente y de glosario.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Los nombres de token chocan con la convención del repositorio</h3>
+              
+              <span class="finding-location">DESIGN.md:38-113</span>
+            </header>
+            <div class="finding-note"><p><code>quote-*</code>, <code>author</code>, <code>quote-max-measure</code> y <code>quote-breathing</code> usan los nombres de entidad en inglés que vedan la convención de nombres de la espina de arquitectura y AGENTS.md («Ni <code>quote</code>… ni <code>author</code>»). El código los tradujo en <code>src/styles/tokens.css</code> (<code>--cita-xl</code>, <code>--autor</code>, <code>--siena</code>, <code>--titular-md</code>…), y esa correspondencia solo vive allí. El <code>title-lg</code> nuevo todavía no tiene nombre en español, y el obvio, <code>--titular-lg</code>, se confundiría con <code>--titular-md</code> y <code>--titular-sm</code>, que son serif.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una tabla «token de DESIGN.md → propiedad CSS» en DESIGN.md con el nombre de <code>title-lg</code> ya fijado, o renombrar los tokens en español.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">«Nombres heredados verbatim del PRD §2.3» no es cierto en tres de los cinco UJ</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:184</span>
+            </header>
+            <div class="finding-note"><ul><li>UJ-1 pierde «, y la necesita ahora»;</li><li>UJ-3 pierde «una hora»;</li><li>UJ-4 pierde «nuevas» y «del sitio».</li></ul><p>Los identificadores UJ-N son estables, así que la trazabilidad no se rompe.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> copiar los títulos literales.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El <code>sources</code> de DESIGN.md omite el encargo de la Página de Obra y mezcla tres bases de ruta</h3>
+              
+              <span class="finding-location">DESIGN.md:4-6; EXPERIENCE.md:4-8</span>
+            </header>
+            <div class="finding-note"><p>No incluye <code>docs/superpowers/specs/2026-10-05-pagina-de-obra-design.md</code>, aunque sus filas de la v7.1 (<code>title-lg</code>, cabecera A, D2, E2) responden a ese encargo. Además, <code>sources</code> mezcla <code>{planning_artifacts}/…</code>, <code>docs/…</code> relativa al repositorio y <code>DESIGN.md</code> relativa al espacio.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> añadir la fuente y unificar las bases.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Los nombres de componente no son idénticos entre secciones y ficheros</h3>
+              
+              <span class="finding-location">DESIGN.md y EXPERIENCE.md, varias secciones</span>
+            </header>
+            <div class="finding-note"><ul><li>«Rutas de Salida» (dos veces en DESIGN.md) frente a «Rutas de salida»;</li><li>«Tarjeta de Cita (listados)» frente a «Tarjeta de Cita»;</li><li>«Acciones de la Página de Cita» frente a «Acción Copiar», «Acción Imagen» y «Acción Compartir la cita»;</li><li>«Resultado de búsqueda de tipo Obra» frente a «Resultado de búsqueda»;</li><li>«diálogo de Imagen» y «Diálogo» frente a «Diálogo de Imagen»;</li><li>«Nota de la ficha», ambigua porque hay dos fichas en superficies vecinas, la de Obra y la de Autor.</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> un único nombre por componente, y «Nota de la Ficha de Obra».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Tres desajustes con el glosario y con las fuentes</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:108, :112, :153</span>
+            </header>
+            <div class="finding-note"><ul><li>«hoja del sistema» va en minúsculas en todo el texto, y el glosario dice «Hoja del Sistema»;</li><li>UX-DR35 se cita tres veces, y es un identificador definido en <code>epics.md</code>, que está aguas abajo de estas espinas y fuera de sus fuentes;</li><li>«Curación» y «Lote» se usan como nombres de superficie y no están en el glosario.</li></ul></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> respetar la mayúscula del glosario y citar FR-33 y AD-20 en lugar de UX-DR35.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Ajuste de forma</h2>
+          <span class="verdict-pill verdict-strong">sólido</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>DESIGN.md sigue el orden canónico, de Brand &amp; Style a Do's and Don'ts, y EXPERIENCE.md tiene todas las secciones obligatorias. Las dos secciones inventadas se ganan el sitio: «Tipografía adaptativa» resuelve la pregunta que FR-10 delegó en UX, y «Obra traducida» reúne cinco reglas que atraviesan cinco componentes.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">La clave <code>components</code> del frontmatter guarda dimensiones sueltas, y falta <code>description</code></h3>
+              
+              <span class="finding-location">DESIGN.md:109-113</span>
+            </header>
+            <div class="finding-note"><p>Guarda cuatro dimensiones (<code>rule-width</code>, las dos medidas y <code>tap-target-min</code>). La especificación de DESIGN.md reserva esa clave para objetos de componente, así que un resolvedor leería <code>rule-width</code> como un componente. Al frontmatter le falta además <code>description</code>.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> mover esas dimensiones a <code>spacing</code> o a un grupo propio, y añadir <code>description</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">«Obra traducida» termina con una nota para el PM</h3>
+              
+              <span class="finding-location">EXPERIENCE.md:130</span>
+            </header>
+            <div class="finding-note"><p>«Aviso, no regla» es una nota para el PM sobre el modelo de datos y ya está en la bitácora (.memlog.md:55).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> dejarlo en una línea: «Abierto en datos: ver FR-48».</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Lente de accesibilidad</h2>
+          <span class="reviewer-source">review-accesibilidad.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p class="reviewer-method"><em>Lente ad hoc de accesibilidad de la puerta de bmad-ux, pasada v7.1. Contrastes calculados con la fórmula de luminancia relativa de WCAG sobre los hex de <code>DESIGN.md</code>. Mediciones de lo construido hechas sobre <code>dist/</code> (build del 14/09, posterior al último cambio de <code>Atribucion</code>, <code>Paginacion</code>, <code>Armazon</code> y <code>tokens.css</code>) con la Inter y la Source Serif 4 del sitio, a 320 px CSS. La Página de Obra no está construida: lo que se dice de ella se juzga contra las espinas y la maqueta <code>mockups/pagina-de-obra-variantes.html</code> (A, D2, E2).</em></p>
+            <p>El suelo declarado no se cumple hoy y las espinas no lo exigirían aunque se reconstruyera todo desde ellas: no hay en el sitio una sola región viva, y <code>/buscar/</code> falla 4.1.3 (AA) para cualquiera que use lector de pantalla. La v7.1 decide bien lo gordo (subrayado siempre, estructura en «Dónde leer», nada recortado), pero aplica la exención en línea donde no toca, deja sin contrato el nombre accesible y la declaración comercial de los enlaces de afiliado, y justifica el enlace del Autor con unas versalitas que el propio sistema usa en rótulos que no enlazan. Ninguna pareja de la paleta separa un enlace del texto de alrededor por color (todas por debajo de 3:1), y la espina sigue escribiendo el subrayado caso por caso en vez de como regla.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Ningún mensaje de estado se anuncia</h3>
+              <span class="tag">espina</span><span class="tag">construido</span>
+              <span class="finding-location">EXPERIENCE.md § Accessibility Floor; src/pages/buscar.astro:64, :69</span>
+            </header>
+            <div class="finding-note"><p>En <code>/buscar/</code>, el recuento («12 resultados.») y «No encontramos esa frase. Prueba con menos palabras.» aparecen al teclear sin <code>role="status"</code> ni <code>aria-live</code> (<code>src/pages/buscar.astro:64</code> y <code>:69</code>; un <code>grep</code> de <code>aria-live|role="status"</code> en <code>src/</code> da cero). Quien busca con lector de pantalla teclea y no oye nada: ni que hay resultados, ni cuántos, ni que no hay ninguno. La salida de FR-8, «nunca un callejón sin salida», es un callejón mudo. «Copiado.» (<code>src/islands/CopiarCita.astro:82</code>) solo cambia el texto del botón enfocado, y VoiceOver en iOS, que es el público mayoritario (móvil), muchas veces no anuncia ese cambio. La espina no lo pide en ninguna parte: <code>EXPERIENCE.md § Accessibility Floor</code> no menciona mensajes de estado, y la fila «Resultado de búsqueda <em>(recoge lo construido)</em>» (L110) documenta lo construido sin ellos. Lo mismo vale para «Generando imagen» (L156): la previsualización llega en silencio. — WCAG 4.1.3 Mensajes de estado (AA).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> añadir al Accessibility Floor: «Todo mensaje de estado —recuento de resultados, búsqueda sin resultados, “Copiado.”, imagen lista— se anuncia por una región <code>role="status"</code> que existe en el marcado desde la carga, vacía y no <code>hidden</code>; el cambio es de contenido, no de visibilidad». En <code>buscar.astro</code>, quitar <code>hidden</code> de <code>.estado</code>, darle <code>role="status"</code> y escribir ahí también la frase de sin resultados. En <code>CopiarCita</code>, un hermano solo para lectores con <code>role="status"</code> que recibe «Copiado.».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">El enlace de una edición en venta se queda sin propósito ni declaración para quien navega por enlaces</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">EXPERIENCE.md L108, L118; DESIGN.md L204</span>
+            </header>
+            <div class="finding-note"><p>La espina fija que el enlace sea <strong>solo</strong> el nombre de la tienda, y corrige a propósito la maqueta, que enlazaba «Edición impresa en Amazon México» (L118). En la lista de enlaces del lector queda «Amazon México», y con dos ediciones en la misma tienda quedan dos «Amazon México» iguales que van a sitios distintos. La declaración «Enlace de afiliado: si compras…» va detrás, en la misma línea, pero no está asociada al enlace, así que FR-35 («en la misma línea que cada enlace») se cumple a la vista y no para quien navega por enlaces o tabula. Además: <code>rel="sponsored noopener"</code> presupone <code>target="_blank"</code> y la espina no dice si se abre en pestaña nueva; tampoco fija el elemento del bloque <code>data-ingreso</code>. Si se copia el patrón de <code>Sostener</code> (<code>&lt;aside aria-label&gt;</code>), queda una región complementaria metida dentro de «Dónde leer», dentro de <code>main</code>. — WCAG 2.4.4 Propósito de los enlaces (A: se salva por contexto de párrafo, pero ese contexto no llega por la lista de enlaces), 1.3.1.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> que el texto del enlace sea «Edición impresa en {tienda}» / «Edición electrónica en {tienda}», como en la maqueta, y que la declaración vaya en un <code>&lt;span id&gt;</code> referenciado con <code>aria-describedby</code> desde su enlace. Decidir y escribir si abre pestaña nueva; si la abre, el aviso va dentro del nombre accesible, como en <code>Sostener</code>. Las ediciones van en <code>&lt;ul&gt;</code>, una por <code>&lt;li&gt;</code>, dentro de un <code>&lt;div data-ingreso&gt;</code> con su <code>h3</code>, y nunca en un <code>aside</code>. Escribir «subrayado» explícitamente (ver el hallazgo de la regla del subrayado).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Los destinos de «Compartir la cita» no dicen que comparten</h3>
+              <span class="tag">espina</span><span class="tag">construido</span>
+              <span class="finding-location">EXPERIENCE.md L90; DESIGN.md L188; src/islands/CompartirEnlace.astro:47-60</span>
+            </header>
+            <div class="finding-note"><p>Sin hoja del sistema (Firefox de escritorio, por ejemplo), lo que se ve y lo que se lee es una fila de enlaces «WhatsApp», «Telegram», «X» y «Correo» sin rótulo visible ni programático: el botón «Compartir la cita» desaparece justo entonces (<code>DESIGN.md</code> L188: «se sustituye por los destinos»), y la lista no lleva <code>aria-label</code> ni encabezado. Con NVDA, «enlace WhatsApp» se oye como el WhatsApp del sitio, y el día que la cuenta de X exista, el pie (<code>DondeSeguirnos</code>) y los destinos tendrán dos «X» con propósitos opuestos. — WCAG 2.4.4 Propósito de los enlaces (en contexto) (A): no hay frase, párrafo ni encabezado previo que dé el contexto.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> en la espina (<code>EXPERIENCE.md</code> L90, <code>DESIGN.md</code> L188), que cada destino diga «Compartir en {destino}», o como mínimo «Compartir en» oculto y solo para lectores dentro del enlace, con el aviso de pestaña nueva al final (siguiente hallazgo).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">No hay una política de enlaces que salen del sitio, y lo construido hace tres cosas distintas</h3>
+              <span class="tag">espina</span><span class="tag">construido</span>
+              <span class="finding-location">EXPERIENCE.md § Interaction Primitives; DESIGN.md L133</span>
+            </header>
+            <div class="finding-note"><p>La Fuente abre en la misma pestaña (<code>Fuente.astro</code>). «Apoyar el sitio» abre pestaña nueva y lo anuncia dentro de su nombre accesible (<code>Sostener.astro</code>). Los destinos de compartir (<code>CompartirEnlace.astro:51</code>) y las cuentas del pie (<code>DondeSeguirnos.astro:36</code>, en todas las páginas) abren pestaña nueva <strong>sin avisar</strong>. Las ediciones en venta, sin decidir. En móvil, una pestaña nueva silenciosa rompe el gesto de volver, y quien no ve la pantalla no sabe por qué. La regla «siena = actuar o salir» (<code>DESIGN.md</code> L133) añade otro problema: confía al color la diferencia entre dentro y fuera. El rechazo de E3 («vestía igual la obra, dentro del sitio, que la Fuente, fuera») da por hecho que el color distingue, y siena sobre tinta es 2,56:1, que para protanopía o deuteranopía es el mismo marrón oscuro. — WCAG 3.2.5 (AAA) y técnica G201; 1.4.1 si el color es la única señal de «sale».</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> una línea en <code>EXPERIENCE.md § Interaction Primitives</code> que diga qué enlaces abren pestaña nueva (propuesta: ninguno salvo los que entregan a un tercero con estado —donar, compartir, comprar—) y que todo enlace que la abre lo anuncia dentro de su nombre accesible con el patrón de <code>Sostener</code>. Añadir que el siena <strong>nunca</strong> es la única señal de salida: la salida la dice también el texto, como ya hace «Texto tomado de…». Arreglar <code>CompartirEnlace</code> y <code>DondeSeguirnos</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">La exención en línea está mal aplicada al título de la Obra en la Atribución, y «de {Autor}» no tiene regla de zona de toque</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">EXPERIENCE.md L166, L104; DESIGN.md L202; src/components/Atribucion.astro:77</span>
+            </header>
+            <div class="finding-note"><p>El título no va «a mitad de oración»: abre la línea y casi <strong>es</strong> la línea («Oráculo manual y arte de prudencia, 1647.»). Lo que de verdad limita su altura no es el interlineado ajeno, sino que nadie le ha dado relleno. Medido en la Página de Cita a 320 px: la caja de la línea de Procedencia mide 19,5 px y la del texto 16 px. El enlace del Autor ya crece a 44 px con <code>padding-block: 13px</code> y margen negativo (<code>src/components/Atribucion.astro:77</code>) y <strong>se mete 5 px en la línea de la Procedencia</strong> (473,9–518,1 frente a 513,1); <code>elementFromPoint</code> sobre el hueco de esa línea devuelve ya el enlace del Autor. El de la Fuente queda 11,5 px por debajo, con 16 px de alto. Así que E2 apila tres objetivos en unos 84 px, y el del medio, de 16 px, solapa el área del de arriba. No pasaría ni la excepción de espaciado de 2.5.8, porque el círculo de 24 px centrado en el título corta la zona del Autor. Con el foco en el Autor, su anillo tacha además el título de la Obra. La Cabecera de Obra no dice nada del objetivo de «de {Autor}» (<code>DESIGN.md</code> L202, <code>EXPERIENCE.md</code> L104), que es el paso 4 de UJ-3. Aquí no hay nada interactivo en 8 px alrededor: el <code>h1</code> no enlaza y el listado empieza 32 px más abajo. — WCAG 2.5.8 (AA de 2.2) y 2.5.5 (AAA); la regla de producto de 44 px con 8 px (L166).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> retirar la [ASSUMPTION] de L166 para el título de la Obra y escribir que lleva al menos 24 px de zona efectiva sin solapar ninguna otra (relleno vertical con margen negativo, como el Autor) y que la zona ampliada del Autor no invade la línea siguiente: menos relleno inferior, o 2 × <code>{spacing.unit}</code> entre Autor y Procedencia. Para «de {Autor}», 44 px por el mismo procedimiento que el nombre en la Atribución. La exención se queda para la Fuente («Texto tomado de [Wikisource]»), que sí va dentro de una frase.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">El subrayado se escribe caso por caso, pero la paleta exige que sea regla general</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">DESIGN.md § Colors L133, L204; EXPERIENCE.md L177</span>
+            </header>
+            <div class="finding-note"><p>Ninguna pareja de color de enlace llega a 3:1 frente al texto de su línea: tinta/tinta apagada <strong>2,20:1</strong>, siena/tinta apagada <strong>1,16:1</strong> (prácticamente la misma luminancia), siena/tinta <strong>2,56:1</strong>. Así que <strong>ningún</strong> enlace dentro de un texto se distingue por color en este sistema. <code>DESIGN.md § Colors</code> (L133) justifica el siena con «6,3:1 sobre papel: pasa AA también como texto de enlace», que es la comparación equivocada para 1.4.1. El Accessibility Floor (L177) enumera solo dos casos subrayados (título de la Obra y «de {Autor}»), y las ediciones en venta (<code>DESIGN.md</code> L204) no dicen «subrayado». Hoy sale subrayado por el estilo por omisión del navegador, y deja de salir en cuanto alguien escriba <code>text-decoration: none</code> en un atributo <code>style</code>, como ya llevan el siena de «Buscar» y la paginación. Las cifras declaradas tampoco son exactas: tinta/papel es 16,0 (no 15,8) y tinta apagada/papel 7,26 (no 7,4). Ninguna cambia de nivel. — WCAG 1.4.1 Uso del color (A); regla axe <code>link-in-text-block</code>.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> sustituir L177 por la regla general: «Todo enlace que comparte línea con texto que no enlaza va subrayado siempre, sea tinta o siena; ninguna pareja de la paleta llega a 3:1 entre enlace y texto». Publicar en <code>§ Colors</code> las tres razones enlace/texto junto a las de texto/fondo, y corregir 15,8 → 16,0 y 7,4 → 7,26.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Las versalitas no distinguen el nombre del Autor como enlace, porque el sistema las usa para lo que no enlaza</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">DESIGN.md L133, L186; EXPERIENCE.md L177</span>
+            </header>
+            <div class="finding-note"><p>El token <code>author</code> (mayúsculas espaciadas) viste también los <code>h2</code> «TEMAS», «MÁS DE…», «DÓNDE LEER ESTA OBRA» y «CITAS DOCUMENTADAS», el rótulo de tipo «OBRA» de <code>/buscar/</code> y el nombre del Autor que va <em>dentro</em> de la tarjeta sin ser enlace propio. En la Página de Cita, el nombre en versalitas y sin subrayado no tiene ninguna señal visual de que lleva a algún sitio. Y el mismo destino, la Página de Autor, va subrayado en la Cabecera de Obra y sin subrayar en la Atribución. Las Rutas de salida no lo compensan: «Más de {Autor}» es un <code>h2</code>, no un enlace. No es un fallo estricto de 1.4.1 (el nombre ocupa su propia línea), pero el razonamiento de L133, L186 y L177 es falso y una historia lo heredaría como verdad. Quien más lo nota es la persona con baja visión o con dificultades cognitivas, que no descubre el enlace. — WCAG 3.2.4 Identificación coherente (AA, en el espíritu) y 1.4.1 por analogía.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> subrayar siempre también el nombre del Autor en la Atribución. Si se decide no hacerlo, que la espina lo registre como coste aceptado, con su motivo real, y retire «se distingue por sus versalitas».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">El diálogo de imagen se anuncia como «Descargar la cita como imagen» donde la acción es compartir</h3>
+              <span class="tag">construido</span>
+              <span class="finding-location">src/islands/ImagenDeCita.astro:85; EXPERIENCE.md L88; DESIGN.md L189</span>
+            </header>
+            <div class="finding-note"><p>En móvil, donde la acción es compartir, son casi todos los dispositivos. El nombre está escrito en el marcado (<code>src/islands/ImagenDeCita.astro:85</code>), y el guion cambia el texto de los dos botones a «Compartir como imagen» y «Compartir», pero no toca el <code>aria-label</code>. El título visible, «Elige un diseño.», no está asociado al diálogo, así que quien ve y quien oye reciben dos nombres distintos. Rompe la regla de la propia espina («Su rótulo dice adónde irá la imagen», <code>EXPERIENCE.md</code> L88), que no dice cómo se nombra el diálogo. — WCAG 4.1.2 Nombre, función, valor (A) y 2.4.6 (AA).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> <code>aria-labelledby</code> hacia el título visible y un <code>aria-describedby</code> que diga «Compartir» o «Descargar» según la capacidad, o actualizar el <code>aria-label</code> en el mismo punto del guion que cambia los rótulos. En <code>DESIGN.md</code> L189, una frase: «el nombre accesible del diálogo sigue al rótulo de la acción».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">La Nota de la ficha cae, en la estructura, bajo el último h3 de «Dónde leer esta obra»</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">EXPERIENCE.md L109; DESIGN.md L205</span>
+            </header>
+            <div class="finding-note"><p>Con el Modelo encendido ese <code>h3</code> es «Ediciones en venta», y quien navega por encabezados, o lee de corrido, oye «Trescientos aforismos comentados, publicados en Huesca en 1647…» como si fuera parte de la oferta comercial. La nota no tiene encabezado ni sección propia. — WCAG 1.3.1 Información y relaciones (A).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> «Dónde leer esta obra» como <code>&lt;section aria-labelledby="{id del h2}"&gt;</code>, con la nota <strong>fuera</strong> de esa sección, y con un rótulo propio (<code>h2</code> con el trato del rótulo, por ejemplo «Sobre esta obra») o como <code>&lt;p&gt;</code> precedido del filete. Escribirlo en la fila de la Nota.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El recuento de la Lista de Obras es un número sin unidad</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">DESIGN.md L200; EXPERIENCE.md L102</span>
+            </header>
+            <div class="finding-note"><p>La espina fija «el recuento de sus Citas a la derecha… con cifras tabulares», y la maqueta del orden B lo dibuja como <code>&lt;span&gt;34&lt;/span&gt;</code> fuera del enlace. Con lector se oye «enlace, Del sentimiento trágico de la vida… 34». Tampoco se fija si la fila entera es el enlace (con 44 px, la fila lo pide) ni el nivel del rótulo «Su obra en este Corpus». — WCAG 1.3.1 y 2.4.4.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> que la fila entera sea el enlace, con «citas» oculto solo para lectores tras la cifra («34 citas»), y que el rótulo sea <code>h2</code>, como «Citas documentadas» en lo construido.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Microcopia leída en voz alta</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">DESIGN.md L206; EXPERIENCE.md L110</span>
+            </header>
+            <div class="finding-note"><p>En «de Baltasar Gracián · 1647», el punto medio se lee «punto», «punto medio» o nada según el lector y su nivel de puntuación; en el último caso queda «de Baltasar Gracián 1647», sin pausa ni pista de que el número es un año. La Atribución resuelve lo mismo con coma («…, 1647.»). En <code>/buscar/</code>, el nombre de la fila de un resultado de Obra se compone sin puntuación: «Obra Oráculo manual y arte de prudencia Baltasar Gracián». — WCAG 1.3.1 y 2.4.4 (calidad, no fallo).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> el punto medio con <code>aria-hidden="true"</code> y una coma oculta solo para lectores (sin añadir «publicada en», que afirmaría un dato que la Procedencia no asegura). En el resultado, «Obra:» y «, de {Autor}» como texto solo para lectores.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Jerarquía de encabezados de la Página de Obra a medio fijar</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">EXPERIENCE.md L106</span>
+            </header>
+            <div class="finding-note"><p>El nivel del rótulo «Temas» no está escrito (L106 dice «bajo el rótulo»), mientras que «Dónde leer esta obra» es <code>h2</code> y sus partes <code>h3</code>. Visualmente, los <code>h3</code> («Edición cotejada, gratuita», <code>caption</code> 400 en tinta) pesan <strong>menos</strong> que el <code>h2</code> y que nada de su entorno, y se separan de las líneas que encabezan solo por el color: tinta frente a tinta apagada, 2,20:1, al mismo cuerpo y peso. Para quien ve poco, rótulo y contenido son la misma línea. — WCAG 1.3.1 y 1.4.1.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> «Temas» como <code>h2</code>, como en las Rutas de salida. Los <code>h3</code> de «Dónde leer» en <code>caption</code> 600, para que la jerarquía tenga una señal que no sea el color.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">La paginación separa los números 4 px, no los 8 px de la regla</h3>
+              <span class="tag">construido</span>
+              <span class="finding-location">src/components/Paginacion.astro:124; EXPERIENCE.md L166</span>
+            </header>
+            <div class="finding-note"><p>Medido a 320 px en <code>/autor/baltasar-gracian/2/</code>: no hay desplazamiento horizontal (<code>scrollWidth</code> 320), pero la fila se descompone. «Página 2 de 4» se parte en dos líneas, los cuatro números se apilan en <strong>una columna vertical</strong> de 44 px a 4 px entre sí (188 px de alto), y «Siguiente» acaba en 301 px, 1 px dentro del margen. Pasa 2.5.8 por tamaño; incumple la regla de producto y deja los números apilados casi pegados para quien tiene temblor. — WCAG 1.4.10 (pasa por poco) y regla de producto de 8 px.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> <code>gap: var(--unidad)</code> en <code>.numeros</code>, y en anchos estrechos la fila de números en su propia línea (por ejemplo, <code>flex-wrap: wrap</code> en <code>.paginacion</code> con los números a ancho completo) en lugar de una columna.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El reflow de la Cabecera A aguanta hoy, pero por casualidad</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">Fila de la Cabecera de Obra (DESIGN.md L202, EXPERIENCE.md L104)</span>
+            </header>
+            <div class="finding-note"><p>Medido con la Inter del sitio sobre 133 de los 183 títulos, todos los largos incluidos. A 320 px (280 de texto), ningún título desborda; 16 ocupan tres líneas o más y 4 llegan a cuatro. Con el espaciado de 1.4.12, uno llega a seis. La palabra más ancha, «Librepensamiento», mide 226 px, y <strong>276 px con el espaciado de 1.4.12: 4 px de holgura</strong>. Los títulos son texto libre que escribe una persona en la Ficha (FR-53). Cualquier palabra de unas 17 letras o más («Hispanoamericanos», «Constitucionalismo») produce desplazamiento horizontal, y NFR-12 prohíbe encoger para remediarlo. La espina no dice cómo se parte una palabra que no cabe. — WCAG 1.4.10 Reflow y 1.4.12 Espaciado del texto (AA).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> en la fila de la Cabecera de Obra, «el título parte palabras antes que desbordar: <code>overflow-wrap: break-word</code> y <code>hyphens: auto</code> con el <code>lang</code> del documento». Es la única salida compatible con NFR-12.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">El foco del campo de búsqueda contradice el suelo y es débil</h3>
+              <span class="tag">espina</span><span class="tag">construido</span>
+              <span class="finding-location">EXPERIENCE.md L174; DESIGN.md L190; src/pages/buscar.astro:296, :303</span>
+            </header>
+            <div class="finding-note"><p>El Accessibility Floor dice «anillo de 2px en primary… Nunca se suprime» (L174), y <code>DESIGN.md</code> L190 da al campo otro indicador: un filete inferior que pasa de 1 px en <code>outline</code> a 2 px en siena. Lo construido escribe <code>outline: none</code> dos veces (<code>src/pages/buscar.astro:296</code> y <code>:303</code>), aunque <code>tokens.css:115</code> afirme que no existe ninguna regla así. El cambio de estado es 1 → 2 px con un cambio de color de <strong>1,71:1</strong> (contorno → siena), que con baja visión casi no se ve. — WCAG 2.4.7 Foco visible (AA: pasa) y 2.4.13 (AAA).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> reconciliar las espinas (o anillo también en el campo, o el filete de foco a 2 px <strong>y</strong> que el estado enfocado se distinga del no enfocado por al menos 3:1) y corregir el comentario de <code>tokens.css</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Idioma de partes en los títulos que no son castellanos</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">EXPERIENCE.md L180</span>
+            </header>
+            <div class="finding-note"><p>«De Agri Cultura» (Catón, 2 Citas: tiene página) está en latín, y FR-48 abrirá la puerta a más títulos no castellanos. La Ficha de Obra no tiene campo de idioma, y la espina solo declara <code>lang="es"</code> en el documento (L180). La excepción de nombres propios de 3.1.2 probablemente cubre un título, por eso es baja. — WCAG 3.1.2 Idioma de las partes (AA).</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> un campo opcional de idioma del título en la Ficha, que se vuelque como <code>lang</code> en el <code>h1</code>, en la Atribución, en la Lista de Obras y en el resultado de búsqueda.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">La fila del Chip de Tema no lleva la zona de toque ni el cuerpo construidos</h3>
+              <span class="tag">espina</span>
+              <span class="finding-location">DESIGN.md L193</span>
+            </header>
+            <div class="finding-note"><p>No lleva <code>{components.tap-target-min}</code> y fija el texto en <code>caption</code> (13 px). Lo construido mide 44 px con texto de 15 px (divergencia ya anotada en la bitácora). Si la historia de triaje alinea lo construido con la espina, los 16 chips del Oráculo manual pierden la zona de toque y bajan de cuerpo. El fondo del chip contra el papel es 1,10:1, así que el chip tampoco se reconoce como control por su forma. — WCAG 2.5.8, y legibilidad.</p></div>
+            <div class="finding-fix"><strong>Arreglo:</strong> recoger lo construido en la espina (texto de 15 px y alto mínimo de 44 px) antes de cualquier triaje.</div>
+          </article>
+        </div>
+        <div class="dim-body bien">
+          <h3>Lo que está bien y no hay que tocar</h3>
+          <ul><li><strong>Contraste de texto, calculado:</strong> tinta/papel 16,0:1; tinta apagada/papel 7,26:1, que se queda en 6,96 sobre <code>surface-container-low</code> (fondo de la tarjeta al pasar el cursor) y en 6,60 sobre <code>surface-container</code>; siena/papel 6,26:1 (6,00 al pasar el cursor); blanco/siena 6,70:1; tinta/chip 14,5:1. Todo pasa AA a 13 px, y casi todo AAA. El filete de búsqueda (<code>outline</code>) llega a 3,66:1 frente al papel (1.4.11).</li><li><strong>Subrayado siempre</strong> del título de la Obra y de «de {Autor}», con el porqué escrito (en móvil no hay hover). E1 se descartó con la razón correcta.</li><li><strong>D2 sobre D1:</strong> la diferencia entre lo gratuito y lo que se vende la dice la estructura (<code>h2</code> y <code>h3</code>), no tres enlaces siena seguidos. Sin ninguna Cita cotejada, no hay rótulo que afirme un cotejo.</li><li><strong>Un solo <code>h1</code> por página.</strong> En la Página de Obra es el título, y las páginas 2+ lo repiten con «— página N» en la pestaña. El orden del marcado coincide con el de lectura (cabecera, listado, paginación, Temas, Dónde leer, nota): nada se reordena por CSS.</li><li><strong>Nada se recorta ni se encoge</strong>, sin máximo de líneas, y sin desplazamiento horizontal medido a 320 px.</li><li><strong>Apagado es invisible y no latente:</strong> sin hueco, sin contenedor y sin hoja.</li><li><strong>Ya construido y correcto:</strong> paginación como <code>nav</code> con nombre, <code>aria-current</code> y «Página N» solo para lectores; enlace de salto al contenido; anillo de foco global de 2 px en siena separado 2 px; <code>prefers-reduced-motion</code> que elimina las transiciones; ni gestos ocultos ni animación de entrada; <code>&lt;dialog&gt;</code> nativo; <code>figure</code>/<code>blockquote</code>/<code>figcaption</code> en la Cita; y en <code>Sostener</code>, el aviso de pestaña nueva dentro del nombre accesible, que es el patrón que hay que extender al resto.</li></ul>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Notas mecánicas (rúbrica)</h3>
+      <ul><li><p><code>{ruta.al.token}</code> (EXPERIENCE.md:14) es el ejemplo de la sintaxis, no una referencia. Todas las demás resuelven.</p></li><li><p>DESIGN.md usa <code>headline-sm</code> y <code>quote-*</code> sin llaves (DESIGN.md:147, :185, :191). Las demás referencias van en la forma <code>{typography.…}</code>.</p></li><li><p>«Sin obra documentada» lleva punto final en la tabla de Voice and Tone (EXPERIENCE.md:50) y va sin él en Atribución y en State Patterns (:86, :137). Conviene unificarlo con lo que emite <code>Atribucion.astro</code>.</p></li><li><p>En § Responsive, de 600 a 1024 px, dice «medida limitada a <code>{components.quote-max-measure}</code>» para toda la columna (EXPERIENCE.md:236). DESIGN.md reserva 34ch para la Cita y 68ch para la prosa, y el código usa una columna de 45rem.</p></li><li><p>El formato base de lo copiado (FR-3), sin traductor, no está escrito en ningún sitio. Solo se deduce del ejemplo de § Obra traducida. La fila de la Acción Copiar debería decir que usa el título de la Ficha de Obra (FR-53).</p></li><li><p>Accessibility Floor dice «navegación al final» del orden de tabulación de la Página de Cita, y la cabecera (marca y «Buscar») va antes del contenido (EXPERIENCE.md:175). La rúbrica lo deja a la lente de accesibilidad.</p></li><li><p>Divergencias conocidas solo entre la espina y el código (.memlog.md:79), con la gravedad que les da la rúbrica:</p><div class="tabla"><table><thead><tr><th>Divergencia</th><th>Gravedad</th><th>Por qué</th></tr></thead><tbody><tr><td>4 px entre los números de página frente a los 8 px de las zonas de toque</td><td>medium</td><td>rompe una regla del suelo</td></tr><tr><td>banda siena decorativa en las Tarjetas Sociales</td><td>medium</td><td>la heredaría la Tarjeta Social de Obra; ver §3</td></tr><tr><td><code>aria-label</code> del diálogo que dice «Descargar» también al compartir</td><td>medium</td><td>toca a la accesibilidad</td></tr><tr><td>progreso de la imagen sin construir</td><td>medium</td><td>ver §4</td></tr><tr><td>serif rasterizada en Georgia frente a «dos familias, sin excepciones»</td><td>low</td><td>—</td></tr></tbody></table></div></li></ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rúbrica: _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/review-rubric.md</span>
+        <span>Accesibilidad: _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/review-accesibilidad.md</span>
+        <span>Generado: 2026-10-09T07:58:13+02:00</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
