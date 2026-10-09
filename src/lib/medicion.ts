@@ -28,6 +28,16 @@ import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS } from './redes.ts';
 export const EVENTOS = {
   /** SM-2, SM-3 — una Página de Cita se ha mostrado. */
   vistaDeCita: 'vista-de-cita',
+  /**
+   * SM-8, FR-22 — una superficie de agregación de producto (portada, página 1 de Autor,
+   * Tema o Colección) se ha mostrado. Cuenta lo que el Canal trae fuera de la Página de
+   * Cita, con la misma marca de origen. Nunca la emite una superficie de servicio —las
+   * páginas 2+ de un listado, `/buscar`, `/404`—, ni una interna —`/kit`, `/lote`—, ni la
+   * Página de Cita, que ya emite el suyo; el carácter de cada ruta lo declara
+   * `src/lib/superficies.ts`. La razón `vista-de-cita / vista-de-superficie` es un
+   * agregado por jornada, no una sesión.
+   */
+  vistaDeSuperficie: 'vista-de-superficie',
   /** SM-5, junto con la descarga — el visitante se ha llevado la Cita. */
   copiado: 'copiado',
   /** SM-5, junto con el copiado — Historia 5.1. */
@@ -49,6 +59,17 @@ export const EVENTOS = {
 export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
 
 export const EVENTOS_VALIDOS: readonly Evento[] = Object.values(EVENTOS);
+
+/**
+ * Qué vista puede pedir una página. Es **una** y no dos booleanos: así una página no
+ * puede emitir `vista-de-cita` y `vista-de-superficie` a la vez (Historia 20.1).
+ */
+export type Vista = 'cita' | 'superficie';
+
+export const EVENTO_DE_VISTA: Readonly<Record<Vista, Evento>> = {
+  cita: EVENTOS.vistaDeCita,
+  superficie: EVENTOS.vistaDeSuperficie,
+};
 
 export function esEventoValido(nombre: string): nombre is Evento {
   return (EVENTOS_VALIDOS as readonly string[]).includes(nombre);

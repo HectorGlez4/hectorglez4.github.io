@@ -10,6 +10,7 @@
  */
 import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
+import type { Vista } from '../lib/medicion.ts';
 import DondeSeguirnos from './DondeSeguirnos.astro';
 import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
 import { consecuenciasDe } from '../lib/superficies.ts';
@@ -29,8 +30,14 @@ interface Props {
    * Esto **no** decide si la página se indexa: eso sale entero de `src/lib/superficies.ts`.
    */
   tipo?: TipoDeResultado;
-  /** La Página de Cita emite además el evento de vista (AD-13, SM-2). */
-  vistaDeCita?: boolean;
+  /**
+   * El evento de vista que emite la página (AD-13): `cita` en la Página de Cita (SM-2),
+   * `superficie` en la portada y la página 1 de Autor, Tema y Colección (SM-8, FR-22).
+   * Una sola prop y no dos booleanos, para que las dos vistas a la vez no puedan pedirse.
+   * No la piden las de servicio —páginas 2+, `/buscar`, `/404`— ni las internas —`/kit`,
+   * `/lote`—: el carácter de cada ruta está declarado en `src/lib/superficies.ts`.
+   */
+  vista?: Vista;
   descripcion: string;
   /**
    * Ruta de la página, sin dominio. Compone la canónica de NFR-1 **y** es lo que decide
@@ -53,7 +60,7 @@ interface Props {
   tarjeta?: string;
 }
 
-const { titulo, descripcion, ruta, vistaDeCita = false, tipo, tarjeta } = Astro.props;
+const { titulo, descripcion, ruta, vista, tipo, tarjeta } = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
 
 /*
@@ -141,7 +148,7 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     <Font cssVariable="--fuente-serif" preload />
     <Font cssVariable="--fuente-sans" preload />
     <slot name="cabeza" />
-    <Medicion vistaDeCita={vistaDeCita} />
+    <Medicion vista={vista} />
   </head>
   <body>
     <a class="saltar" href="#contenido">Saltar al contenido.</a>

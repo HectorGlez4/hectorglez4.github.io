@@ -158,3 +158,27 @@ describe('Historia 7.3 — el receptor caído no rompe nada', () => {
     expect(worker).toMatch(/catch\s*{/);
   });
 });
+
+describe('Historia 20.1 — la vista de una superficie deja fila con su origen', () => {
+  it('registra jornada, ruta y origen, y descarta destino, datos y lo que sobre', () => {
+    const registro = interpretar(
+      baliza({
+        evento: EVENTOS.vistaDeSuperficie,
+        ruta: '/',
+        origen: 'facebook',
+        destino: 'whatsapp',
+        datos: 'x',
+        extra: 1,
+      }),
+      INSTANTE,
+    );
+    expect(registro).toEqual({
+      jornada: '2026-08-12',
+      evento: 'vista-de-superficie',
+      ruta: '/',
+      origen: 'facebook',
+      destino: null,
+      consulta: null,
+    });
+  });
+});

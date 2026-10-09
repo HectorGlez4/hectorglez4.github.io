@@ -329,8 +329,8 @@ development_status:
   # hasta la primera señal ajena; la 16.2 pasa a revisión con la lectura de Bing.
   # Puerta de preparación (bmad-sprint-planning, 04/10 → 05/10): CONCERNS. Ninguna historia exige inventar;
   # los huecos que conviene registrar antes de la 20.1 están en planning-artifacts/implementation-readiness.md.
-  epic-20: backlog
-  20-1-la-vista-de-una-superficie-de-agregación-deja-fila: backlog
+  epic-20: in-progress
+  20-1-la-vista-de-una-superficie-de-agregación-deja-fila: review  # falta redesplegar el Worker y la baliza en D1 (Héctor)
   # 20.2 y 20.3 se prueban con respuestas fijas y solo se CORREN con la credencial (DESPLIEGUE.md §5).
   20-2-la-serie-de-tráfico-orgánico-se-versiona-desde-search-consol: backlog
   20-3-la-demanda-medida-se-versiona-por-página: backlog

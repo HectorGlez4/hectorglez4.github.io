@@ -2,14 +2,21 @@
 title: 'Historia 20.1 — La vista de una superficie de agregación deja fila'
 type: 'feature'
 created: '2026-10-09'
-status: 'in-review'
+status: 'done'
 baseline_revision: 'c029cb046d6eb7085fa7ad2b4fc4713dcbdc846f'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-20-context.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      Ninguna prueba obliga a que una superficie de producto nueva (la Página de Obra, Épica 22) emita vista-de-superficie.
+    evidence: |-
+      La emisión depende de pasar `vista` a Armazon; la prueba de coherencia de la 20.1 recorre una lista fija de rutas, no todas las superficies de producto de superficies.ts.
+    location: >-
+      tests/unit/medicion.test.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -76,6 +83,18 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-09 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 3, low 9)
+- defer: 1 (low 1)
+- reject: 4
+- addressed_findings:
+  - `[medium]` `[patch]` Sin construcción sin endpoint para las superficies nuevas, y el literal muerto `'__medir = function'` → construcción sin endpoint añadida y literal corregido.
+  - `[medium]` `[patch]` `currentPage === 1` sin atar a `superficies.ts` → prueba de coherencia con `caracterDe`.
+  - `[medium]` `[patch]` DESPLIEGUE no fijaba el orden → primero el Worker y luego el sitio; el hueco pierde eventos en silencio.
+  - `[low]` `[patch]` Cadena suelta con cualquier comilla y en los dos eventos; `vistas()` derivado de `emitir`; el instalador presente en buscar/404/kit/lote; el presupuesto en la página 1 de los tres listados; limpieza si la construcción falla; curl contra `$MEDICION_ENDPOINT` y DELETE de la baliza; razón por fecha y por con/sin origen; subrecuento de las 2+; comentarios con /kit y /lote.
+
 ## Design Notes
 
 Páginas 2+: la readiness lo dejó abierto (arq-5, pm-3). Se resuelve con el criterio que ya existe: `superficies.ts` declara las 2+ como `servicio`, y el AC excluye del evento las superficies de servicio (`/buscar`, `/404`). Las Piezas enlazan a la página 1. La prop única `vista` cierra además la otra pregunta: con ella no pueden llegar `vistaDeCita` y `vistaDeSuperficie` a la vez.
@@ -86,3 +105,17 @@ Páginas 2+: la readiness lo dejó abierto (arq-5, pm-3). Se resuelve con el cri
 - `npx vitest run tests/unit/medicion.test.ts tests/unit/receptor.test.ts tests/unit/comparticion.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `vista-de-superficie` entra en el vocabulario cerrado. La emiten la portada y la página 1 de Autor, Tema y Colección; la Página de Cita sigue con `vista-de-cita`, y las páginas 2+, `/buscar`, `/404`, `/kit` y `/lote` no emiten vista. La prop única `vista` de `Armazon`/`Medicion` impide emitir las dos a la vez.
+
+**Ficheros:** `src/lib/medicion.ts` (evento, `Vista` y `EVENTO_DE_VISTA`); `src/components/{Medicion,Armazon}.astro` (prop `vista`); `src/pages/index.astro`, `cita/[slug].astro` y `{autor,tema,coleccion}/[slug]/[...page].astro` (piden su vista); `tests/unit/medicion.test.ts` (matriz con y sin endpoint, coherencia con `caracterDe`, presupuesto en cinco páginas); `tests/unit/receptor.test.ts` (fila del receptor); `DESPLIEGUE.md` §3 (SM-8 por origen y evento, razón por jornada, orden Worker→sitio, baliza manual y su borrado); `sprint-status.yaml`.
+
+**Revisión:** 12 parches aplicados, 1 diferido y 4 rechazados (guarda en tiempo de ejecución de `vista`, cuyo tipo ya cubre astro check; camino Worker/D1 y despliegue vivo, actos de Héctor; la ambigüedad de las 2+, resuelta por superficies.ts). Seguimiento recomendado: 3×3 medium = 9 ≥ 5 → true.
+
+**Verificación:** vitest de los tres ficheros, 163/163; `npx astro check`, 0 errores; `npm run build`, código 0; `dist/` sin endpoint comparado con `diff -rq` contra una construcción de c029cb04 con la misma `FECHA_JORNADA`: idéntico.
+
+**Riesgo residual:** hasta que Héctor redespliegue el Worker (antes que el sitio, o el mismo día), el receptor vivo descarta `vista-de-superficie` con un 204.

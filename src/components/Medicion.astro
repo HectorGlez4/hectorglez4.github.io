@@ -6,14 +6,18 @@
  * de telemetría en desarrollo ni en las pruebas, y la Página de Cita sigue sin descargar
  * ningún fichero de script.
  */
-import { EVENTOS, guionDeMedicion, puntoFinal, emitir } from '../lib/medicion.ts';
+import { EVENTO_DE_VISTA, guionDeMedicion, puntoFinal, emitir, type Vista } from '../lib/medicion.ts';
 
 interface Props {
-  /** Se emite `vista-de-cita` solo desde la Página de Cita. */
-  vistaDeCita?: boolean;
+  /**
+   * El evento de vista que emite la página, si emite alguno: `cita` solo desde la Página
+   * de Cita, `superficie` solo desde una superficie de agregación de producto. Una sola
+   * prop, así que las dos vistas a la vez son imposibles por tipo.
+   */
+  vista?: Vista;
 }
 
-const { vistaDeCita = false } = Astro.props;
+const { vista } = Astro.props;
 // Se lee de `process.env` y no de `import.meta.env`: Astro solo expone en esta última
 // las variables con prefijo público, y el punto final no debe serlo. El frontmatter se
 // evalúa en Node durante el build, así que `process.env` es el sitio correcto.
@@ -25,7 +29,7 @@ const guion = url === null ? null : guionDeMedicion(url);
   guion !== null && (
     <script
       is:inline
-      set:html={vistaDeCita ? `${guion}\n${emitir(EVENTOS.vistaDeCita)}` : guion}
+      set:html={vista === undefined ? guion : `${guion}\n${emitir(EVENTO_DE_VISTA[vista])}`}
     />
   )
 }

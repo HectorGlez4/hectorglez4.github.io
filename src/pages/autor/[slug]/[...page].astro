@@ -55,6 +55,7 @@ const canonica = new URL(ruta, Astro.site).href;
   tarjeta={`/tarjeta/autor/${autor.slug}.png`}
   ruta={ruta}
   tipo="autor"
+  vista={pagina.currentPage === 1 ? 'superficie' : undefined}
 >
   <DatosDeAutor
     slot="cabeza"

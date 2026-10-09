@@ -5,15 +5,19 @@ import { join, resolve } from 'node:path';
 import {
   EVENTOS,
   EVENTOS_VALIDOS,
+  emitir,
   esEventoValido,
   guionDeMedicion,
   puntoFinal,
 } from '../../src/lib/medicion.ts';
-import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
+import { caracterDe, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import {
   AUTOR_VALIDO,
+  TEMA_VALIDO,
   citaValida,
+  coleccionValida,
   construirConCorpus,
   limpiar,
   paginaConstruida,
@@ -21,6 +25,17 @@ import {
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 const aLimpiar: string[] = [];
+
+/** Los `.ts` y `.astro` de `src/`, salvo el propio módulo de medición. */
+function fuentesDeSrc(): string[] {
+  return (function recorrer(dir: string): string[] {
+    return readdirSync(dir).flatMap((entrada) => {
+      const ruta = join(dir, entrada);
+      if (statSync(ruta).isDirectory()) return recorrer(ruta);
+      return /\.(ts|astro)$/.test(entrada) ? [ruta] : [];
+    });
+  })(resolve(RAIZ, 'src')).filter((f) => !f.endsWith('lib/medicion.ts'));
+}
 afterAll(async () => {
   await Promise.all(aLimpiar.map(limpiar));
 });
@@ -30,7 +45,7 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
     /*
      * La lista crece solo cuando una historia lo decide, y que haya que tocar esta prueba
      * para ampliarla es el punto: los cuatro primeros son de la v1 y los dos de
-     * compartición los añadió la Historia 10.4.
+     * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1.
      */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
@@ -40,6 +55,7 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
         'copiado',
         'descarga-de-imagen',
         'vista-de-cita',
+        'vista-de-superficie',
       ].sort(),
     );
   });
@@ -101,13 +117,7 @@ describe('Historia 2.9 — sin cookies y sin identificar al visitante', () => {
 });
 
 describe('Historia 2.9 — el módulo es el único emisor', () => {
-  const fuentes = (function recorrer(dir: string): string[] {
-    return readdirSync(dir).flatMap((entrada) => {
-      const ruta = join(dir, entrada);
-      if (statSync(ruta).isDirectory()) return recorrer(ruta);
-      return /\.(ts|astro)$/.test(entrada) ? [ruta] : [];
-    });
-  })(resolve(RAIZ, 'src')).filter((f) => !f.endsWith('lib/medicion.ts'));
+  const fuentes = fuentesDeSrc();
 
   it.each(fuentes)('%s no habla con el proveedor', (ruta) => {
     const codigo = readFileSync(ruta, 'utf8');
@@ -154,9 +164,142 @@ describe('Historia 2.9 — sin configurar, el sitio no envía nada', () => {
      * de la isla sí aparece siempre, y debe aparecer: es lo que hace que copiar funcione
      * igual con la medición apagada.
      */
-    expect(html).not.toContain('__medir = function');
+    expect(html).not.toContain('window.__medir=function');
     expect(html).not.toContain('sendBeacon');
   });
+});
+
+/*
+ * Un sitio construido **con** la medición configurada, que comparten la matriz de la
+ * Historia 20.1 y el presupuesto de la retro de la épica 7. Lleva una Cita más de las que
+ * caben en una página, todas del mismo Autor, del mismo Tema y de la misma Colección, para
+ * que los tres listados tengan página 2: la que es `servicio` y no debe emitir la vista.
+ * El mismo corpus se construye además **sin** punto final, para ver que entonces no sale
+ * nada en ninguna de las superficies que con él emiten.
+ */
+const ENDPOINT = 'https://medicion.ejemplo.workers.dev/e';
+const SLUGS = Array.from(
+  { length: CITAS_POR_PAGINA + 1 },
+  (_, i) => `seneca-frase-${String(i).padStart(3, '0')}`,
+);
+const CORPUS_MEDIDO: Record<string, string> = {
+  'autores/seneca.yml': AUTOR_VALIDO,
+  'temas/el-tiempo.yml': TEMA_VALIDO,
+  'colecciones/frases-cortas.yml': coleccionValida({ miembros: SLUGS }),
+  ...Object.fromEntries(
+    SLUGS.map((slug, i) => [
+      `citas/${slug}.md`,
+      citaValida({ texto: `Frase número ${i} del catálogo de prueba.`, slug }),
+    ]),
+  ),
+};
+
+/** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */
+function construccionUnica(entorno: Record<string, string>): () => Promise<string> {
+  let construccion: Promise<string> | undefined;
+  return () => {
+    construccion ??= construirConCorpus(CORPUS_MEDIDO, { entorno }).then((resultado) => {
+      // Se apunta **antes** de afirmar: un build fallido también deja su proyecto temporal.
+      aLimpiar.push(resultado.proyecto);
+      expect(resultado.codigo, resultado.salida).toBe(0);
+      return resultado.proyecto;
+    });
+    return construccion;
+  };
+}
+const sitioMedido = construccionUnica({ MEDICION_ENDPOINT: ENDPOINT });
+const sitioSinMedir = construccionUnica({});
+
+const leerMedida = async (ruta: string) =>
+  readFile(paginaConstruida(await sitioMedido(), ruta), 'utf8');
+const leerSinMedir = async (ruta: string) =>
+  readFile(paginaConstruida(await sitioSinMedir(), ruta), 'utf8');
+
+/** Cuántas veces emite la página el evento, contado sobre el texto que produce `emitir`. */
+const vistas = (html: string, evento: (typeof EVENTOS)[keyof typeof EVENTOS]) =>
+  html.split(emitir(evento)).length - 1;
+
+const CITA = `/cita/${SLUGS[0]}/`;
+const PAGINAS_1 = ['/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/frases-cortas/'];
+const PAGINAS_2 = ['/autor/seneca/2/', '/tema/el-tiempo/2/', '/coleccion/frases-cortas/2/'];
+const SIN_VISTA = ['/buscar/', '/404', '/kit/', '/lote/'];
+
+describe('Historia 20.1 — la vista de una superficie de agregación deja fila', () => {
+  it.each(PAGINAS_1)(
+    '%s lleva el instalador y una sola vista de superficie, ninguna de Cita',
+    async (ruta) => {
+      const html = await leerMedida(ruta);
+      expect(html).toContain('window.__medir=function');
+      expect(vistas(html, EVENTOS.vistaDeSuperficie)).toBe(1);
+      expect(vistas(html, EVENTOS.vistaDeCita)).toBe(0);
+    },
+    240_000,
+  );
+
+  it.each(PAGINAS_2)(
+    '%s, página de servicio, lleva el instalador sin llamada de vista',
+    async (ruta) => {
+      const html = await leerMedida(ruta);
+      expect(html).toContain('window.__medir=function');
+      expect(vistas(html, EVENTOS.vistaDeSuperficie)).toBe(0);
+      expect(vistas(html, EVENTOS.vistaDeCita)).toBe(0);
+    },
+    240_000,
+  );
+
+  it('la Página de Cita emite su vista y ninguna de superficie', async () => {
+    const html = await leerMedida(CITA);
+    expect(html).toContain('window.__medir=function');
+    expect(vistas(html, EVENTOS.vistaDeCita)).toBe(1);
+    expect(vistas(html, EVENTOS.vistaDeSuperficie)).toBe(0);
+  }, 240_000);
+
+  it.each(SIN_VISTA)(
+    '%s lleva el instalador y no emite ninguna vista',
+    async (ruta) => {
+      const html = await leerMedida(ruta);
+      expect(html).toContain('window.__medir=function');
+      expect(vistas(html, EVENTOS.vistaDeSuperficie)).toBe(0);
+      expect(vistas(html, EVENTOS.vistaDeCita)).toBe(0);
+    },
+    240_000,
+  );
+
+  /*
+   * Las páginas deciden la vista con `currentPage === 1`; esto ata esa decisión a la
+   * declaración única de `src/lib/superficies.ts`: emite `vista-de-superficie` si y solo
+   * si la ruta es de producto y no es una Página de Cita, que emite la suya.
+   */
+  it.each([...PAGINAS_1, ...PAGINAS_2, CITA, ...SIN_VISTA])(
+    '%s emite vista de superficie si y solo si es de producto y no es Cita',
+    async (ruta) => {
+      const html = await leerMedida(ruta);
+      const esCita = superficieDeclaradaDe(ruta)?.pagina.startsWith('cita/') ?? false;
+      const debe = caracterDe(ruta) === 'producto' && !esCita;
+      expect(vistas(html, EVENTOS.vistaDeSuperficie)).toBe(debe ? 1 : 0);
+    },
+    240_000,
+  );
+
+  it('ninguna superficie escribe el nombre de una vista como cadena suelta', () => {
+    const suelta = /["'`]vista-de-(cita|superficie)["'`]/;
+    for (const fuente of fuentesDeSrc()) {
+      expect(readFileSync(fuente, 'utf8'), fuente).not.toMatch(suelta);
+    }
+  });
+});
+
+describe('Historia 20.1 — sin punto final, ninguna superficie mide', () => {
+  it.each([...PAGINAS_1, CITA])(
+    '%s no lleva instalador ni llamada de vista',
+    async (ruta) => {
+      const html = await leerSinMedir(ruta);
+      expect(html).not.toContain('window.__medir=function');
+      expect(vistas(html, EVENTOS.vistaDeSuperficie)).toBe(0);
+      expect(vistas(html, EVENTOS.vistaDeCita)).toBe(0);
+    },
+    240_000,
+  );
 });
 
 describe('Retro épica 7 — el presupuesto de guion también con la medición encendida', () => {
@@ -170,32 +313,23 @@ describe('Retro épica 7 — el presupuesto de guion también con la medición e
    * Se construye aquí un sitio **con** la medición configurada y se mide lo que de
    * verdad se sirve.
    */
-  it('la Página de Cita con medición configurada cabe en el presupuesto', async () => {
-    const resultado = await construirConCorpus(
-      {
-        'autores/seneca.yml': AUTOR_VALIDO,
-        'citas/seneca--una.md': citaValida({ temas: [] }),
-      },
-      { entorno: { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' } },
-    );
-    aLimpiar.push(resultado.proyecto);
-    expect(resultado.codigo, resultado.salida).toBe(0);
+  it.each([CITA, ...PAGINAS_1])(
+    '%s con medición configurada cabe en el presupuesto',
+    async (ruta) => {
+      const html = await leerMedida(ruta);
 
-    const html = await readFile(
-      paginaConstruida(resultado.proyecto, '/cita/seneca-no-es-que-tengamos-poco-tiempo/'),
-      'utf8',
-    );
+      // El instalador tiene que estar: si no, esto no mide nada.
+      expect(html).toContain('window.__medir=function');
 
-    // El instalador tiene que estar: si no, esto no mide nada.
-    expect(html).toContain('window.__medir=function');
+      const guiones = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
+        .filter((m) => !m[1].includes('application/ld+json'))
+        .map((m) => m[2]);
+      const bytes = guiones.reduce((n, g) => n + g.length, 0);
 
-    const guiones = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
-      .filter((m) => !m[1].includes('application/ld+json'))
-      .map((m) => m[2]);
-    const bytes = guiones.reduce((n, g) => n + g.length, 0);
-
-    expect(bytes, `${bytes} bytes de guion en línea con la medición encendida`).toBeLessThan(
-      MAX_BYTES_DE_GUION,
-    );
-  });
+      expect(bytes, `${bytes} bytes de guion en línea con la medición encendida`).toBeLessThan(
+        MAX_BYTES_DE_GUION,
+      );
+    },
+    240_000,
+  );
 });

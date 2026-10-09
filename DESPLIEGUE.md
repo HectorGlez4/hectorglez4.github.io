@@ -331,19 +331,92 @@ en la plataforma, no una comprobación que aparenta seguridad.
 
 ### Consultar el canal propio — SM-8
 
-```bash
-# Cuál de las cinco redes trae visitas, por jornada.
-npx wrangler d1 execute medicion --remote --command \
-  "SELECT jornada, origen, COUNT(*) visitas FROM eventos \
-   WHERE evento='vista-de-cita' AND origen IS NOT NULL \
-   GROUP BY jornada, origen ORDER BY jornada DESC, visitas DESC"
+Desde la Historia 20.1 hay **dos** eventos de vista, y los dos llevan la marca de origen:
+`vista-de-cita`, que emite solo la Página de Cita, y `vista-de-superficie`, que emiten una
+sola vez la portada y la página 1 de Autor, Tema y Colección. Las páginas 2+ de un listado,
+`/buscar`, `/404`, `/kit` y `/lote` no emiten vista: son superficies de servicio o
+internas (lo declara `src/lib/superficies.ts`), y las Piezas del Canal enlazan a la
+página 1. Contar solo `vista-de-cita` dejaba fuera todo lo que el Canal trae a las
+superficies de agregación.
 
-# El mes entero, para decidir dónde va el tiempo del siguiente.
+**Las llegadas a una página 2+ no cuentan.** Es un subrecuento conocido y aceptado: quien
+entra por un enlace a `/autor/<slug>/2/` no deja fila de vista.
+
+```bash
+# Cuál de las cinco redes trae visitas, por jornada y por evento.
 npx wrangler d1 execute medicion --remote --command \
-  "SELECT origen, COUNT(*) visitas FROM eventos \
-   WHERE evento='vista-de-cita' AND origen IS NOT NULL AND jornada >= date('now','-30 days') \
-   GROUP BY origen ORDER BY visitas DESC"
+  "SELECT jornada, origen, evento, COUNT(*) visitas FROM eventos \
+   WHERE evento IN ('vista-de-cita','vista-de-superficie') AND origen IS NOT NULL \
+   GROUP BY jornada, origen, evento ORDER BY jornada DESC, visitas DESC"
+
+# El mes entero, por origen y evento, para decidir dónde va el tiempo del siguiente.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT origen, evento, COUNT(*) visitas FROM eventos \
+   WHERE evento IN ('vista-de-cita','vista-de-superficie') AND origen IS NOT NULL \
+   AND jornada >= date('now','-30 days') \
+   GROUP BY origen, evento ORDER BY visitas DESC"
+
+# Recuento por evento, todos los orígenes — aquí aparecería también una baliza de
+# comprobación que no se hubiera borrado.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT evento, ruta = '/__comprobacion/' comprobacion, COUNT(*) n FROM eventos \
+   GROUP BY evento, comprobacion ORDER BY evento"
+
+# Proxy de profundidad: vista-de-cita / vista-de-superficie, POR JORNADA, últimos 30 días.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT jornada, \
+     SUM(evento='vista-de-cita') citas, \
+     SUM(evento='vista-de-superficie') superficies, \
+     ROUND(1.0 * SUM(evento='vista-de-cita') / NULLIF(SUM(evento='vista-de-superficie'),0), 2) razon \
+   FROM eventos WHERE ruta <> '/__comprobacion/' AND jornada >= date('now','-30 days') \
+   GROUP BY jornada ORDER BY jornada DESC"
+
+# La misma razón, separando lo que llega con marca de origen (el Canal) de lo que no.
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT jornada, origen IS NOT NULL con_origen, \
+     SUM(evento='vista-de-cita') citas, \
+     SUM(evento='vista-de-superficie') superficies, \
+     ROUND(1.0 * SUM(evento='vista-de-cita') / NULLIF(SUM(evento='vista-de-superficie'),0), 2) razon \
+   FROM eventos WHERE ruta <> '/__comprobacion/' AND jornada >= date('now','-30 days') \
+   GROUP BY jornada, con_origen ORDER BY jornada DESC, con_origen DESC"
 ```
+
+**La razón es un agregado por jornada, no una sesión.** No hay identificador de visitante
+ni lo habrá (AD-13), así que no se puede decir que *esta* visita a la portada siguió a
+*esas* Citas: solo que ese día hubo tantas vistas de Cita por cada vista de superficie. Una
+razón alta puede ser profundidad o puede ser tráfico que entra directo a la Cita sin pasar
+por ninguna superficie; la cifra no distingue las dos cosas, y leerla como «páginas por
+sesión» sería inventar el dato que la medición se niega a recoger. `NULL` en `razon` es
+una jornada sin vistas de superficie, no un cero.
+
+**No hay migración, pero hay orden: primero el Worker, después el sitio.**
+`medicion/esquema.sql` no lleva `CHECK` sobre `evento`, así que la tabla acepta el evento
+nuevo tal cual. El receptor, en cambio, importa el vocabulario de `src/lib/medicion.ts` al
+empaquetarse: se redespliega **antes** que el sitio (`cd medicion && npx wrangler deploy`).
+En el hueco entre los dos despliegues —o si el Worker no se redespliega—, cada
+`vista-de-superficie` se pierde en silencio: el receptor contesta 204 y no escribe nada.
+
+**Comprobar a mano que el Worker desplegado acepta el evento.** Una baliza manual deja en
+D1 una fila indistinguible de una visita, así que va **sin `origen`** —no cuenta en SM-8,
+que filtra `origen IS NOT NULL`— y con una ruta que el sitio no publica, y se borra en
+cuanto se ha visto:
+
+```bash
+# La misma URL que el secreto MEDICION_ENDPOINT del repositorio.
+curl -s -o /dev/null -w '%{http_code}\n' -X POST \
+  --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' \
+  "$MEDICION_ENDPOINT"
+# 204 siempre — el código no dice nada. Lo que lo dice es la fila:
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT jornada, evento, ruta, origen FROM eventos WHERE ruta='/__comprobacion/'"
+# Vista la fila, se borra para que no se acumule:
+npx wrangler d1 execute medicion --remote --command \
+  "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
+```
+
+Si la fila no aparece, el Worker desplegado es anterior a la 20.1: redesplegarlo y repetir.
+Una baliza que se quedara sin borrar sale en el recuento por evento de arriba, y la razón
+por jornada la excluye.
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
