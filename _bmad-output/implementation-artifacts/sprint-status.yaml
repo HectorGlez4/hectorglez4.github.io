@@ -336,7 +336,7 @@ development_status:
   20-3-la-demanda-medida-se-versiona-por-página: review  # la primera lectura real la corre Héctor con la credencial (20.4)
   # 20.4 es la semana manual de Héctor; existe como historia para que el tablero la cuente, que es lo que
   # no pasó con la 18.3.
-  20-4-la-semana-cero-se-lee-y-se-anota: backlog
+  20-4-la-semana-cero-se-lee-y-se-anota: backlog  # bloqueada: semana manual de Héctor (wrangler, credencial de Search Console, Bing, paneles)
   epic-20-retrospective: optional
 
   epic-21: backlog
