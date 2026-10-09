@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-persuadete-que-todo-es-una-aprension-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

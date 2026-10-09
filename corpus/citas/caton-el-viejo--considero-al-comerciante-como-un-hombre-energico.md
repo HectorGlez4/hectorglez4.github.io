@@ -6,6 +6,8 @@ temas:
 slug: "caton-el-viejo-considero-al-comerciante-como-un-hombre-energico"
 procedencia:
   obra: "De Agri Cultura"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

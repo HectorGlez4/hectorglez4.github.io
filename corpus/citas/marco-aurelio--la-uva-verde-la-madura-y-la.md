@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-la-uva-verde-la-madura-y-la"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

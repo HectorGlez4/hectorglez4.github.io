@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-el-mejor-modo-de-vengar-la-injuria"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

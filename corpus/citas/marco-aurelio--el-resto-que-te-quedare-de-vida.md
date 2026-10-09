@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-el-resto-que-te-quedare-de-vida"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

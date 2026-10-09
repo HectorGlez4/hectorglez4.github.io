@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-contra-el-odio-implacable-sirve-de-gran"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

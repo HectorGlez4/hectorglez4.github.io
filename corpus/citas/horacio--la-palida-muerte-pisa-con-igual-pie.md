@@ -6,7 +6,9 @@ temas:
 slug: "horacio-la-palida-muerte-pisa-con-igual-pie"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

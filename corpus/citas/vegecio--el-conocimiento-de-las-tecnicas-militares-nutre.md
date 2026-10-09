@@ -6,6 +6,8 @@ temas:
 slug: "vegecio-el-conocimiento-de-las-tecnicas-militares-nutre"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

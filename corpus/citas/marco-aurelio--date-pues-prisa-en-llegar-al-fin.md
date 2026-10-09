@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-date-pues-prisa-en-llegar-al-fin"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-es-propio-de-un-espiritu-bien-formado"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

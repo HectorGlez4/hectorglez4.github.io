@@ -6,6 +6,8 @@ temas:
 slug: "vegecio-como-encontrar-por-tanto-a-quien-pueda"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

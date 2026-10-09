@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-todo-lo-breve-resulta-mas-soportable-por"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

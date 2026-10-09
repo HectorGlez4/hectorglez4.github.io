@@ -6,6 +6,8 @@ temas:
 slug: "longo-me-falta-el-aliento-el-corazon-me"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

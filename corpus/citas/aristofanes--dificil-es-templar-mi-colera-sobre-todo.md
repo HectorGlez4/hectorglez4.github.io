@@ -6,7 +6,9 @@ temas:
 slug: "aristofanes-dificil-es-templar-mi-colera-sobre-todo"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

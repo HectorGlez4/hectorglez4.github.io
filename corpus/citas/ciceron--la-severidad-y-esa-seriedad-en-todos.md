@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-la-severidad-y-esa-seriedad-en-todos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

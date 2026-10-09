@@ -6,6 +6,8 @@ temas:
 slug: "tacito-el-miedo-y-el-terror-son-unos"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

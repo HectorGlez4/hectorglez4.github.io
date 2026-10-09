@@ -6,7 +6,9 @@ temas:
 slug: "horacio-audaz-el-linaje-humano-se-precipita-en"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

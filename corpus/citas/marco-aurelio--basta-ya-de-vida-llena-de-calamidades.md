@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-basta-ya-de-vida-llena-de-calamidades"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

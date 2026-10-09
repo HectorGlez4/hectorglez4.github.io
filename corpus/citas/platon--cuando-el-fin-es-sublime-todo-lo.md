@@ -6,7 +6,9 @@ temas:
 slug: "platon-cuando-el-fin-es-sublime-todo-lo"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

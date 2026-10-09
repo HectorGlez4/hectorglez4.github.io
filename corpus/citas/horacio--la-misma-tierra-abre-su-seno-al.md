@@ -6,7 +6,9 @@ temas:
 slug: "horacio-la-misma-tierra-abre-su-seno-al"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

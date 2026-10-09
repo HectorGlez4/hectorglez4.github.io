@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-las-experiencias-con-una-amistad-son-muchas"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

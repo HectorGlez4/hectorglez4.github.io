@@ -6,6 +6,8 @@ temas:
 slug: "agustin-de-hipona-quien-hay-por-acaso-que-desee-alcanzar"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

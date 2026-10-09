@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-como-se-disfrutaria-tanto-en-la-prosperidad"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

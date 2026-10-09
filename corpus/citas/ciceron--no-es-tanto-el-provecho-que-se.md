@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-no-es-tanto-el-provecho-que-se"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

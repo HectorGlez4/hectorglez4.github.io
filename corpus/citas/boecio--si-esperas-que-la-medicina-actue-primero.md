@@ -6,6 +6,8 @@ temas:
 slug: "boecio-si-esperas-que-la-medicina-actue-primero"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

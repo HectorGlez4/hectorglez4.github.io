@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-el-tiempo-que-te-resta-de-vida"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

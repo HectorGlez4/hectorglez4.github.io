@@ -6,6 +6,8 @@ temas:
 slug: "caton-el-viejo-recuerde-que-una-finca-es-como-un"
 procedencia:
   obra: "De Agri Cultura"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

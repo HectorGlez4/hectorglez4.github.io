@@ -6,7 +6,9 @@ temas:
 slug: "horacio-persigue-siempre-objetos-dignos-de-ti-huye"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

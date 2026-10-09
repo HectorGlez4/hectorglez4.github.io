@@ -6,7 +6,9 @@ temas:
 slug: "horacio-el-silencio-fiel-tiene-asimismo-su-premio"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

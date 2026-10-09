@@ -6,6 +6,8 @@ temas:
 slug: "jenofonte-cuando-yo-era-rico-tambien-me-criticaban"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

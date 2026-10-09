@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-el-pepino-es-amargo-dejalo-hay-zarzas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

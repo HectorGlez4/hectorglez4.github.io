@@ -6,7 +6,9 @@ temas:
 slug: "horacio-a-que-vienen-las-tristes-lamentaciones-si"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

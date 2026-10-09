@@ -6,7 +6,9 @@ temas:
 slug: "horacio-el-animo-bien-preparado-a-las-alternativas"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

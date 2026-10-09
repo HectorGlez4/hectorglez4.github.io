@@ -6,6 +6,8 @@ temas:
 slug: "agustin-de-hipona-quien-pondra-en-tela-de-juicio-que"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

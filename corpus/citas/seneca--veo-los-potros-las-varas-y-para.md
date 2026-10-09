@@ -6,7 +6,9 @@ temas:
 slug: "seneca-veo-los-potros-las-varas-y-para"
 procedencia:
   obra: "Consolación a Marcia"
-  año: 1884
+  traduccion:
+    traductor: "Francisco Navarro y Calvo"
+    año: 1884
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

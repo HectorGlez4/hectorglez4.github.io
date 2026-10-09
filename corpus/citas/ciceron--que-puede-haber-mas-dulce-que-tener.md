@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-que-puede-haber-mas-dulce-que-tener"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

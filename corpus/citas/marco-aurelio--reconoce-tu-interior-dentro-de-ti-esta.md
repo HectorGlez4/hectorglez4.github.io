@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-reconoce-tu-interior-dentro-de-ti-esta"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -6,7 +6,9 @@ temas:
 slug: "horacio-muestrate-firme-y-animoso-en-la-desgracia"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

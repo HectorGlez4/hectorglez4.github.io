@@ -6,7 +6,9 @@ temas:
 slug: "aristofanes-no-nos-cuidabamos-entonces-de-perorar-elegantemente"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

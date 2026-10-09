@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-el-ir-tras-de-imposibles-es-propio"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

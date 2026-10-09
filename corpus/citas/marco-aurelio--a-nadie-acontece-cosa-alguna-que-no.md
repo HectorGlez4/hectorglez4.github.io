@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-a-nadie-acontece-cosa-alguna-que-no"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

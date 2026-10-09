@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-es-propio-de-un-loco-buscar-higos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

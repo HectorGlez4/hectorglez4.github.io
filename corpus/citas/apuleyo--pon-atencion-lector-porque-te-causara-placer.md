@@ -6,6 +6,8 @@ temas:
 slug: "apuleyo-pon-atencion-lector-porque-te-causara-placer"
 procedencia:
   obra: "Metamorfosis o el Asno de Oro, 1. 1-15"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-cuantos-de-aquellos-con-quienes-entre-en"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

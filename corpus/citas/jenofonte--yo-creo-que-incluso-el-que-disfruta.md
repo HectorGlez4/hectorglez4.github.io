@@ -6,6 +6,8 @@ temas:
 slug: "jenofonte-yo-creo-que-incluso-el-que-disfruta"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

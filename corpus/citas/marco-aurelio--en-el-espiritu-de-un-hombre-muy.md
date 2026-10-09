@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-en-el-espiritu-de-un-hombre-muy"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

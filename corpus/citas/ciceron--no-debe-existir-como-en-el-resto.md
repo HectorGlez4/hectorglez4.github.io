@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-no-debe-existir-como-en-el-resto"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

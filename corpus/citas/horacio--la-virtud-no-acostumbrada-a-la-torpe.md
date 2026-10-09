@@ -6,7 +6,9 @@ temas:
 slug: "horacio-la-virtud-no-acostumbrada-a-la-torpe"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"
