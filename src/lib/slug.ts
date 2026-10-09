@@ -60,7 +60,10 @@ export function slugDeTema(nombre: string): string {
 
 /**
  * Slug de una obra. Nombra el documento de Fuente de la Historia 11.1
- * (`{id-de-fuente}--{slug-de-obra}.txt`) y no participa en ninguna ruta del sitio.
+ * (`{id-de-fuente}--{slug-de-obra}.txt`, acotado allí a 60 caracteres) y, desde la Historia
+ * 22.1, la Ficha de Obra (`corpus/obras/{slug-autor}--{slug-de-obra}.yml`, **sin** esa
+ * truncación; ver `nombreDeFichaDeObra` en `src/lib/obras.ts`). El de la ficha se deriva una
+ * sola vez, al crearla, y será la URL de la Obra: no se recalcula aunque el título cambie.
  */
 export function slugDeObra(nombre: string): string {
   return slugDeNombre(nombre);

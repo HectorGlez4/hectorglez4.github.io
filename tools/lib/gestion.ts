@@ -28,6 +28,8 @@ import {
   leerCitas,
   leerColecciones,
   leerDescartesDeCandidatos,
+  leerFichasDeObra,
+  leerFichasDeObraRetiradas,
   leerPortada,
   leerTemas,
   mover,
@@ -602,6 +604,7 @@ async function pendienteEnEpocas(rutas: Rutas, autor: AutorEnCorpus): Promise<st
  *
  *   · una Cita publicada suya — el build la referencia al Autor y se pararía;
  *   · una candidata suya en `corpus/_revision/` — aprobarla publicaría una Cita sin Autor;
+ *   · una Ficha de Obra suya en `corpus/obras/` — su Autor dejaría de existir (Historia 22.1);
  *   · un miembro de Colección, publicada o despublicada, o una fijación de
  *     `corpus/portada.json` que sea Cita suya — publicar la Colección o llegar la jornada la
  *     traerían de vuelta apuntando a nadie.
@@ -661,6 +664,35 @@ export async function retirarAutor(
         (suyasCandidatas.length === 1 ? 'la' : 'las') +
         ' antes.',
       ...listaCorta(suyasCandidatas),
+    );
+  }
+
+  /*
+   * Historia 22.1 — sus Fichas de Obra (AD-25). Una ficha cuyo `autor` no existe rompe el
+   * build, así que retirar al Autor con fichas suyas dentro lo tumbaría.
+   */
+  /*
+   * Las retiradas cuentan igual, como las Colecciones despublicadas: publicar una Cita suya
+   * la restauraría apuntando a un Autor que ya no existe.
+   */
+  try {
+    const fichas = [
+      ...(await leerFichasDeObra(rutas)).map((f) => ({ ...f, estado: 'activa' })),
+      ...(await leerFichasDeObraRetiradas(rutas)).map((f) => ({ ...f, estado: 'retirada' })),
+    ].filter((f) => f.autor === slug);
+    if (fichas.length > 0) {
+      motivos.push(
+        `Tiene ${cuenta(fichas.length, 'Ficha de Obra', 'Fichas de Obra')}, activas o retiradas: ` +
+          'una ficha cuyo Autor no existe rompe el build, y una retirada volvería al publicar. ' +
+          'Las activas se retiran antes con «npm run obra -- retirar»; las de ' +
+          `${rutas.obrasRetiradas} siguen apuntando a él.`,
+        ...listaCorta(fichas.map((f) => `${f.nombre} (${f.estado})`)),
+      );
+    }
+  } catch (fallo) {
+    // Sin poder leer las fichas no se puede afirmar que ninguna sea suya: se niega.
+    motivos.push(
+      `No se han podido comprobar las Fichas de Obra: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
     );
   }
 

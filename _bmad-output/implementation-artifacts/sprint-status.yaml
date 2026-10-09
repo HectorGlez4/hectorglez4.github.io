@@ -354,9 +354,9 @@ development_status:
   # Orden en el tablero: 20.1–20.3 → 19.1 → 22.1–22.3 → 22.4 → 17.3 → el resto; la 17.5 antes de la 22.9.
   # Ningún agente escribe ediciones en venta, notas, títulos ni reuniones: los propone y los decide Héctor.
   # Puerta de preparación (bmad-sprint-planning, 09/10): PASS para la Épica 22; el orden entre épicas está escrito.
-  epic-22: backlog
+  epic-22: in-progress
   # 22.1–22.3 no publican ninguna URL nueva: la ficha va antes que la URL (AD-25).
-  22-1-cada-obra-tiene-ficha-antes-de-tener-url: backlog
+  22-1-cada-obra-tiene-ficha-antes-de-tener-url: review  # las reuniones de grafías (1 grupo, 2 prefijos) las decide Héctor en la 22.2
   # 22.2: las reuniones de obras conocidas las decide Héctor, en commit propio, antes de la 22.4.
   22-2-una-obra-un-nombre-las-grafías-se-deciden-en-la-ficha: backlog
   22-3-la-obra-se-llama-igual-en-todas-partes: backlog

@@ -30,6 +30,7 @@ import {
   rutasDelCorpus,
   type Rutas,
 } from './lib/corpus.ts';
+import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
 
 /** Una entrada del lote, tal como la escribe el editor. Sin slug: lo genera el alta. */
 export interface EntradaDeLote {
@@ -78,6 +79,12 @@ export interface InformeDeAlta {
   /** Autores citados en el lote que no existen en el corpus. No se crean (FR-15). */
   autoresDesconocidos: string[];
   /**
+   * Publicadas cuya Ficha de Obra, resuelta antes de escribir la Cita, no se pudo escribir
+   * después —un fallo de disco entre medias—. `npm run obra -- sembrar` la completa
+   * (Historia 22.1). Vacío casi siempre.
+   */
+  fichasSinAsegurar?: { slug: string; motivos: string[] }[];
+  /**
    * Señaladas antes de escribirlas — FR-14. No se descartan: quedan aquí para que el
    * editor decida, y se incorporan tal cual si vuelve a ejecutar con `--con-duplicados`.
    */
@@ -103,6 +110,10 @@ export async function darDeAltaLote(
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
   const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
+  // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
+  const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+    ...yaPublicadas,
+  ];
 
   // FR-14 — el índice de comparación usa la forma canónica de AD-3, la misma que la
   // búsqueda. Ese es justo el punto: si duplicados y búsqueda usaran criterios distintos,
@@ -213,6 +224,29 @@ export async function darDeAltaLote(
 
     const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
 
+    /*
+     * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
+     *
+     * Solo para lo que se va a publicar: una candidata que va a revisión no crea ficha. Se
+     * **resuelve** en solo lectura antes de escribir la Cita —también en seco, para que el
+     * seco y el real no discrepen ante una colisión—, y se escribe justo **después** de que
+     * la Cita esté escrita. Si no se puede asegurar sin decidir, la Cita va a revisión con
+     * el motivo, porque publicada sin ficha rompería la construcción siguiente.
+     */
+    const obraDeclarada = validada.success ? validada.data.procedencia?.obra : undefined;
+    let plan: PlanDeFicha | undefined;
+    if (motivos.length === 0 && validada.success && typeof obraDeclarada === 'string') {
+      plan = await resolverFichaDeObra(rutas, {
+        autor: slugAutor,
+        obra: obraDeclarada,
+        citasPublicadas: [
+          ...publicadasParaObra,
+          { autor: slugAutor, procedencia: { obra: obraDeclarada } },
+        ],
+      });
+      if (!plan.ok) motivos.push(...plan.motivos);
+    }
+
     if (motivos.length > 0 || !validada.success) {
       // A revisión con lo que se sepa. El fichero conserva el trabajo hecho para que
       // completarlo sea rellenar un campo, no volver a teclear la Cita.
@@ -230,6 +264,19 @@ export async function darDeAltaLote(
       ? ''
       : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
     slugsOcupados.add(candidata.slug);
+    if (!opciones.seco) {
+      // Solo lo que de verdad se publicó cuenta para la grafía por omisión.
+      publicadasParaObra.push({ autor: slugAutor, procedencia: validada.data.procedencia });
+      if (plan !== undefined) {
+        const ficha = await aplicarFichaDeObra(rutas, plan);
+        if (!ficha.ok) {
+          informe.fichasSinAsegurar = [
+            ...(informe.fichasSinAsegurar ?? []),
+            { slug: candidata.slug, motivos: ficha.motivos },
+          ];
+        }
+      }
+    }
     // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
     // detecta igual que si la segunda llegara mañana en otro lote.
     yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
@@ -278,6 +325,15 @@ export function formatearInforme(informe: InformeDeAlta): string {
   for (const c of informe.enRevision) {
     lineas.push(`  · «${recortar(c.texto)}»`);
     for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
+  }
+
+  for (const pendiente of informe.fichasSinAsegurar ?? []) {
+    lineas.push(
+      '',
+      `${pendiente.slug}: publicada, pero su Ficha de Obra no se escribió. Corra ` +
+        '«npm run obra -- sembrar» antes de construir.',
+      ...pendiente.motivos.map((m) => `  ${m}`),
+    );
   }
 
   if (informe.posiblesDuplicados.length > 0) {

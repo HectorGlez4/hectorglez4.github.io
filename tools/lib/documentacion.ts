@@ -36,7 +36,7 @@
  * fichero ya versionado.
  */
 
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import {
@@ -55,6 +55,7 @@ import {
   leerCensoDeCotejo,
   leerCitas,
   leerDocumentosDeclarados,
+  leerFichasDeObra,
   mover,
   separarFrontmatter,
   type CitaEnCorpus,
@@ -70,6 +71,8 @@ import {
 } from './documento.ts';
 import type { Traduccion } from '../../src/lib/admision.ts';
 import { fuenteUtilizable } from './extraccion.ts';
+import { aplicarFichaDeObra, describirPlan, resolverFichaDeObra, type PlanDeFicha } from './obras.ts';
+import { formaDeObra } from '../../src/lib/obras.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 
@@ -580,6 +583,65 @@ export async function documentarCita(
     );
   }
 
+  // ── La Ficha de Obra, si la obra cambia — Historia 22.1 (AD-25) ───────────
+  /*
+   * Se **resuelve** antes de escribir nada, en solo lectura: si la ficha de la obra nueva no
+   * se puede asegurar sin decidir, la Cita no se toca. Se escribe después de la Cita, y entra
+   * en la vuelta atrás: si falla, la Cita y el censo vuelven a como estaban. El conjunto
+   * publicado que se pasa es el de después, con esta Cita ya en su obra nueva.
+   */
+  let plan: PlanDeFicha | undefined;
+  const avisosDeFicha: string[] = [];
+  if (obraDeclarada !== documento.obra) {
+    const publicadas = await leerCitas(rutas.citas);
+    plan = await resolverFichaDeObra(rutas, {
+      autor: cita.autor,
+      obra: documento.obra,
+      citasPublicadas: publicadas.map((c) =>
+        c.slug === cita.slug ? { autor: c.autor, procedencia: { obra: documento.obra } } : c,
+      ),
+    });
+    if (!plan.ok) {
+      return {
+        ok: false,
+        motivos: [...plan.motivos, 'No se ha escrito nada: ni la Cita ni el censo.'],
+      };
+    }
+    const descrito = describirPlan(plan);
+    if (descrito !== undefined) cambios.push(descrito);
+
+    /*
+     * Y la ficha de la obra de antes, si se queda sin Citas: avisa en el build, y la orden
+     * que la retira se dice aquí, que es donde se sabe por qué.
+     */
+    const formaAnterior = obraDeclarada === undefined ? '' : formaDeObra(obraDeclarada);
+    if (formaAnterior !== '' && formaAnterior !== formaDeObra(documento.obra)) {
+      try {
+        const anterior = (await leerFichasDeObra(rutas)).find(
+          (f) => f.autor === cita.autor && f.formas.includes(formaAnterior),
+        );
+        const sigueResuelta =
+          anterior !== undefined &&
+          publicadas.some(
+            (c) =>
+              c.slug !== cita.slug &&
+              c.autor === anterior.autor &&
+              typeof c.procedencia?.obra === 'string' &&
+              anterior.formas.includes(formaDeObra(c.procedencia.obra)),
+          );
+        if (anterior !== undefined && !sigueResuelta) {
+          avisosDeFicha.push(
+            `La Ficha de Obra ${anterior.ruta} se queda sin Citas publicadas: el build avisará. ` +
+              'Si la Obra salió del Corpus, retírela con',
+            `  npm run obra -- retirar ${anterior.nombre} --motivo "<motivo>"`,
+          );
+        }
+      } catch {
+        // Si las fichas no se dejan leer, la puerta del build lo dirá; aquí solo se avisa.
+      }
+    }
+  }
+
   for (const linea of cambios) avisar(linea);
 
   // ── Escribir: la Cita y el censo, o ninguno de los dos ────────────────────
@@ -642,6 +704,25 @@ export async function documentarCita(
       ],
     };
   }
+
+  // La ficha, después de la Cita y dentro de la vuelta atrás (Historia 22.1).
+  if (plan !== undefined) {
+    const ficha = await aplicarFichaDeObra(rutas, plan);
+    if (!ficha.ok) {
+      await writeFile(cita.ruta, bruto, 'utf8');
+      if (censoAntes !== undefined && censoDespues !== undefined) {
+        await escribirCenso(rutas, censoAntes);
+      }
+      return {
+        ok: false,
+        motivos: [
+          ...ficha.motivos,
+          'La Cita y el censo se han dejado como estaban.',
+        ],
+      };
+    }
+  }
+  for (const linea of avisosDeFicha) avisar(linea);
 
   const pendientes = (await leerCensoDeCotejo(rutas)).length;
 

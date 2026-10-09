@@ -7,6 +7,7 @@ import { fechaDeLaEntrada } from './tools/lib/cambios.ts';
 import historialDelCorpus, { fechasDelSitemap } from './integraciones/historial.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
+import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
@@ -80,6 +81,14 @@ export default defineConfig({
      * una relación entre ficheros, que sin puerta se pierde en silencio.
      */
     formaDeLasColecciones(),
+
+    /*
+     * Historia 22.1 — toda Obra publicada tiene Ficha de Obra (AD-25).
+     *
+     * Rompe por una Obra sin ficha, una forma reclamada dos veces, un prefijo de Autor que
+     * no casa o un Autor que no existe; avisa por una ficha sin Citas.
+     */
+    fichasDeObra(),
 
     /*
      * Ninguna página se publica con un carácter que las fuentes declaradas abajo no sepan

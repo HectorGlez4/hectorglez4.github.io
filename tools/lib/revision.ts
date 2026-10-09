@@ -22,6 +22,7 @@ import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
 import { leerCitas, leerTemas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
+import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 
 export interface CandidataEnRevision {
   slug: string;
@@ -29,6 +30,11 @@ export interface CandidataEnRevision {
   /** Slug del Autor: compone el nombre del fichero al publicar. */
   autor: string;
   ruta: string;
+  /**
+   * La obra que declara su Procedencia, si declara alguna — Historia 22.1. Aprobarla
+   * asegura la Ficha de Obra de (Autor, obra) en el mismo gesto en que publica.
+   */
+  obra?: string;
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
@@ -127,6 +133,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       texto: candidata.texto,
       autor: candidata.autor,
       ruta: candidata.ruta,
+      ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
@@ -194,6 +201,18 @@ export interface ResultadoDeDecision {
   renombradas: { de: string; a: string }[];
   /** Aprobadas que la puerta de admisión no deja pasar, con lo que les falta. */
   rechazadasPorAdmision: { slug: string; motivos: string[] }[];
+  /**
+   * Aprobadas que cumplen la admisión pero cuya Ficha de Obra no se puede asegurar sin
+   * decidir —una colisión de nombre, una restauración en conflicto—. Siguen en revisión:
+   * publicadas sin ficha romperían la construcción siguiente (Historia 22.1).
+   */
+  rechazadasPorFicha: { slug: string; motivos: string[] }[];
+  /**
+   * Publicadas cuya ficha, resuelta antes de publicar, no se pudo escribir después —un
+   * fallo de disco entre medias—. La Cita está publicada; `npm run obra -- sembrar` la
+   * completa.
+   */
+  fichasSinAsegurar: { slug: string; motivos: string[] }[];
   rechazadas: string[];
   noEncontradas: string[];
 }
@@ -215,6 +234,8 @@ export async function aprobar(
     publicadas: [],
     renombradas: [],
     rechazadasPorAdmision: [],
+    rechazadasPorFicha: [],
+    fichasSinAsegurar: [],
     rechazadas: [],
     noEncontradas: [],
   };
@@ -237,7 +258,12 @@ export async function aprobar(
 
   // Los slugs que no se pueden pisar: los publicados, más los que esta misma ejecución
   // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
-  const ocupados = new Set((await leerCitas(rutas.citas)).map((c) => c.slug));
+  const yaPublicadas = await leerCitas(rutas.citas);
+  const ocupados = new Set(yaPublicadas.map((c) => c.slug));
+  // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
+  const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+    ...yaPublicadas,
+  ];
 
   for (const slug of slugs) {
     const candidata = lote.find((c) => c.slug === slug);
@@ -251,6 +277,31 @@ export async function aprobar(
       continue;
     }
 
+    /*
+     * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
+     *
+     * Primero se **resuelve**, en solo lectura: si no se puede asegurar sin decidir —una
+     * colisión de nombre—, la Cita no se publica. La ficha se escribe justo **después** de
+     * mover la Cita, así que ningún fallo deja una ficha sin Citas.
+     */
+    const obra = candidata.obra;
+    const comoPublicada = {
+      autor: candidata.autor,
+      ...(obra !== undefined ? { procedencia: { obra } } : {}),
+    };
+    const plan =
+      obra === undefined
+        ? undefined
+        : await resolverFichaDeObra(rutas, {
+            autor: candidata.autor,
+            obra,
+            citasPublicadas: [...publicadasParaObra, comoPublicada],
+          });
+    if (plan !== undefined && !plan.ok) {
+      resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
+      continue;
+    }
+
     const definitivo = slugLibre(candidata.slug, ocupados);
     ocupados.add(definitivo);
 
@@ -261,6 +312,12 @@ export async function aprobar(
       if (definitivo !== candidata.slug) {
         resultado.renombradas.push({ de: candidata.slug, a: definitivo });
       }
+    }
+    publicadasParaObra.push(comoPublicada);
+
+    if (plan !== undefined) {
+      const ficha = await aplicarFichaDeObra(rutas, plan);
+      if (!ficha.ok) resultado.fichasSinAsegurar.push({ slug, motivos: ficha.motivos });
     }
 
     resultado.publicadas.push(slug);
@@ -355,6 +412,8 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     publicadas: [],
     renombradas: [],
     rechazadasPorAdmision: [],
+    rechazadasPorFicha: [],
+    fichasSinAsegurar: [],
     rechazadas: [],
     noEncontradas: [],
   };

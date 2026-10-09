@@ -319,6 +319,8 @@ código 1 y sin mover nada, mientras algo del Corpus apunte al Autor, y lo dice 
 
 - una Cita publicada suya —el build no tendría a quién atribuirla—;
 - una candidata suya en `corpus/_revision/` —aprobarla publicaría una Cita sin Autor—;
+- una Ficha de Obra suya, activa en `corpus/obras/` —una ficha cuyo Autor no existe rompe el
+  build; se retira antes con `npm run obra -- retirar`— o retirada en `corpus/_obras-retiradas/`;
 - un miembro de Colección, publicada o despublicada, o una fijación de `corpus/portada.json`,
   que sea Cita suya. Estos son slugs sueltos que pueden no resolver ya a ninguna Cita, así que
   se atribuyen por el prefijo del slug de Autor **más largo**: `seneca-el-viejo-…` no es de
@@ -331,6 +333,44 @@ da Citas suyas— no es el de una retirada. La salida busca al Autor en
 `corpus/candidatos-por-epoca.yml` por su slug y por su `tituloEnFuente`, y dice si ya consta
 descartado o da la orden exacta que falta:
 `npx tsx tools/epocas.ts --descartar <slug-de-candidato> --motivo "…"`.
+
+## Las fichas de Obra
+
+Cada Obra con Citas publicadas tiene una **Ficha de Obra** en
+`corpus/obras/{slug-autor}--{slug-obra}.yml`, con `autor`, `titulo` y `formas` (Historia
+22.1, AD-25). La identidad de la Obra es el par (Autor, forma canónica de `normalizar`); el
+título es presentación. El nombre del fichero sale del título **una sola vez**, al crear la
+ficha, sin la truncación de los documentos de Fuente, y no se recalcula nunca: será la URL
+de la Página de Obra.
+
+```
+npm run obra -- sembrar                                      # crea las que falten. Idempotente.
+npm run obra -- retirar <nombre-de-ficha> --motivo "…"       # la mueve a corpus/_obras-retiradas/
+```
+
+**Nadie escribe ni borra fichas a mano.** En `tools/lib/obras.ts` una sola función decide
+qué ficha hace falta, en solo lectura (`resolverFichaDeObra`), y una sola la escribe
+(`aplicarFichaDeObra`). `revisar` al aprobar, el alta y `documentar` cuando cambia la obra
+**resuelven antes** de publicar la Cita —una colisión deja la Cita sin publicar, también en
+el alta en seco— y **escriben la ficha después** de que la Cita esté escrita; `documentar` la
+mete en su vuelta atrás. Busca la forma entre las activas y las retiradas, restaura la
+retirada en vez de crear otra (salvo que una activa ya reclame alguna de sus formas), nunca
+sobrescribe y se niega ante una colisión de nombre. Una obra cuya forma canónica es vacía
+—«…»— no necesita ficha. Escribir una candidata en `_revision/` no crea ficha. El título de una ficha nueva es la grafía literal que más Citas usan (empate: la
+primera alfabética), la regla `grafiaPorOmision` de `src/lib/obras.ts`.
+
+El build (`integraciones/obras.ts`) **rompe** por una Obra publicada sin ficha —con la orden
+que la crea—, por una forma reclamada por dos fichas, por un nombre sin forma de slug o
+repetido (`.yml` y `.yaml`, o anidado), por un nombre cuyo prefijo no es su `autor` y por un
+`autor` que no existe; una ficha sin Citas publicadas **avisa** y no rompe.
+Retirar se niega, con código 1 y sin mover nada, mientras una Cita publicada o una candidata
+la resuelva —una candidata ilegible también bloquea—; sin nombre o con el motivo ausente o en
+blanco sale con 2. Cuando `documentar` deja sin Citas la ficha de la obra anterior, lo dice y
+da la orden de retirarla.
+
+`sembrar` informa además de los grupos de grafías equivalentes y de los pares en que una
+forma es prefijo de otra del mismo Autor. **Reunirlas no lo decide la orden ni ningún
+agente**: es la Historia 22.2, y lo decide Héctor.
 
 ## Curar una Colección
 

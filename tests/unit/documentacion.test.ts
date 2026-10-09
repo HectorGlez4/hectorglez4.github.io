@@ -272,6 +272,76 @@ describe('Historia 11.6 — documentar una Cita publicada', () => {
     expect((await frontmatterDe(ruta)).procedencia).toMatchObject({ obra: OBRA });
   });
 
+  it('Historia 22.1 — si la obra cambia, asegura la Ficha de Obra de la nueva', async () => {
+    const rutas = await corpusDocumentable();
+    const avisos: string[] = [];
+
+    const resultado = await documentarCita(
+      rutas,
+      SLUG,
+      join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt'),
+      { avisar: (linea) => avisos.push(linea) },
+    );
+    expect(resultado.ok).toBe(true);
+
+    expect(await readdir(rutas.obras)).toEqual(['teresa-de-jesus--nada-te-turbe.yml']);
+    const ficha = await readFile(join(rutas.obras, 'teresa-de-jesus--nada-te-turbe.yml'), 'utf8');
+    expect(ficha).toContain(`titulo: "${OBRA}"`);
+    expect(avisos.join('\n')).toContain('Ficha de Obra a crear');
+  });
+
+  it('Historia 22.1 — con colisión de ficha se niega y no toca ni la Cita ni el censo', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+      'obras/teresa-de-jesus--nada-te-turbe.yml':
+        'autor: "teresa-de-jesus"\ntitulo: "Nada te turbe"\nformas:\n  - "otra forma"\n',
+    });
+    const antes = await corpusEnDisco(rutas);
+
+    const resultado = await documentarCita(rutas, SLUG, join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt'));
+    expect(resultado.ok).toBe(false);
+    expect(await corpusEnDisco(rutas)).toEqual(antes);
+  });
+
+  it('Historia 22.1 — restaura la ficha retirada de la obra nueva', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+      '_obras-retiradas/teresa-de-jesus--nada-te-turbe.yml':
+        'autor: "teresa-de-jesus"\ntitulo: "Nada te turbe"\nformas:\n  - "nada te turbe"\n',
+    });
+
+    const resultado = await documentarCita(rutas, SLUG, join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt'));
+    expect(resultado.ok).toBe(true);
+    expect(await readdir(rutas.obras)).toEqual(['teresa-de-jesus--nada-te-turbe.yml']);
+    expect(await readdir(rutas.obrasRetiradas)).toEqual([]);
+  });
+
+  it('Historia 22.1 — si la ficha de la obra anterior se queda sin Citas, lo dice', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+      'obras/teresa-de-jesus--poesias.yml':
+        'autor: "teresa-de-jesus"\ntitulo: "Poesías"\nformas:\n  - "poesias"\n',
+    });
+    const avisos: string[] = [];
+
+    const resultado = await documentarCita(
+      rutas,
+      SLUG,
+      join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt'),
+      { avisar: (linea) => avisos.push(linea) },
+    );
+    expect(resultado.ok).toBe(true);
+    const dicho = avisos.join('\n');
+    expect(dicho).toContain('teresa-de-jesus--poesias.yml');
+    expect(dicho).toContain('npm run obra -- retirar teresa-de-jesus--poesias');
+  });
+
   it('rechaza una Cita que ya declara Fuente: para cambiarla, primero se retira', async () => {
     const rutas = await enDisco({
       ...CORPUS_BASE,

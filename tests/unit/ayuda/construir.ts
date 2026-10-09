@@ -4,9 +4,17 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname, sep } from 'node:path';
 import { promisify } from 'node:util';
-import { separarFrontmatter } from '../../../tools/lib/corpus.ts';
+import { aYaml as aYamlDelCorpus, separarFrontmatter } from '../../../tools/lib/corpus.ts';
 import { FICHERO_DEL_CENSO } from '../../../tools/lib/cotejo.ts';
 import { componerDocumento, nombreDeDocumento } from '../../../tools/lib/documento.ts';
+import {
+  nombreDeFichaDeObra,
+  obrasDeCitas,
+  grafiaPorOmision,
+  type CitaConObra,
+} from '../../../src/lib/obras.ts';
+import { parse as parsearYaml } from 'yaml';
+import { obraAdmisible } from '../../../src/lib/admision.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -137,8 +145,19 @@ export async function construirConCorpus(
      *     afirmando en verde lo contrario de lo que cree medir.
      */
     ficheros?: Record<string, string>;
+    /**
+     * `false` para no sembrar las Fichas de Obra que falten — Historia 22.1.
+     *
+     * Por omisión el andamio escribe la ficha de cada Obra publicada del fixture que no
+     * reclame ya una ficha dada por la prueba, como hace con los documentos de Fuente: las
+     * pruebas de build que no miden la Obra no tienen por qué saber que existe su puerta.
+     * Las que la miden —una Obra sin ficha— lo apagan.
+     */
+    sembrarObras?: boolean;
   } = {},
 ): Promise<ResultadoBuild> {
+  // Antes de copiar nada: una ficha de prueba ilegible lanza aquí sin dejar un proyecto huérfano.
+  const fichasSembradas = opciones.sembrarObras === false ? {} : fichasDeObraDe(corpus);
   const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-build-'));
 
   await enlazarDependencias(proyecto);
@@ -156,7 +175,7 @@ export async function construirConCorpus(
   // Las carpetas siempre existen: una colección cuya base no existe emite un aviso que
   // enturbiaría la lectura del fallo que sí importa. `colecciones/` entra en la lista
   // desde la Historia 12.2, por el mismo motivo y no por comodidad.
-  for (const dir of ['citas', 'autores', 'temas', 'colecciones', '_revision', 'fuentes']) {
+  for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras', '_revision', 'fuentes']) {
     await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
   }
 
@@ -175,6 +194,10 @@ export async function construirConCorpus(
   }
 
   for (const [ruta, contenido] of Object.entries(documentosDeFuenteDe(corpus))) {
+    await writeFile(join(proyecto, 'corpus', ruta), contenido, 'utf8');
+  }
+
+  for (const [ruta, contenido] of Object.entries(fichasSembradas)) {
     await writeFile(join(proyecto, 'corpus', ruta), contenido, 'utf8');
   }
 
@@ -359,6 +382,68 @@ function documentosDeFuenteDe(corpus: CorpusDePrueba): Record<string, string> {
     );
   }
   return documentos;
+}
+
+/**
+ * Las Fichas de Obra que faltan a las Citas publicadas de un fixture — Historia 22.1.
+ *
+ * Con las mismas reglas que la siembra real —forma, grafía por omisión y nombre salen de
+ * `src/lib/obras.ts`—, y sin pisar ni duplicar lo que la prueba ya da: una Obra cuya forma
+ * reclama una ficha del fixture no recibe otra. Un frontmatter o una ficha que no se dejan
+ * analizar se saltan: es lo que mide alguna prueba de admisión, no un fallo del andamio.
+ */
+function fichasDeObraDe(corpus: CorpusDePrueba): Record<string, string> {
+  const citas: CitaConObra[] = [];
+  const reclamadas = new Set<string>();
+
+  for (const [ruta, contenido] of Object.entries(corpus)) {
+    if (ruta.startsWith('obras/')) {
+      let bruto: unknown;
+      try {
+        bruto = parsearYaml(contenido);
+      } catch (fallo) {
+        // Una ficha que no se deja analizar es un fixture roto, no un caso que medir: si se
+        // saltara, el andamio sembraría otra para la misma Obra y la prueba mediría otra cosa.
+        throw new Error(
+          `La ficha de prueba «${ruta}» no es YAML: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        );
+      }
+      // Por el esquema, nunca como YAML crudo: una ficha que no lo cumple no reclama nada.
+      const ficha = obraAdmisible.safeParse(bruto);
+      if (ficha.success) {
+        for (const forma of ficha.data.formas) reclamadas.add(`${ficha.data.autor}\u0000${forma}`);
+      }
+      continue;
+    }
+    if (!ruta.startsWith('citas/') || !ruta.endsWith('.md')) continue;
+    let datos: Record<string, unknown> | null = null;
+    try {
+      datos = separarFrontmatter(contenido);
+    } catch {
+      continue;
+    }
+    if (datos === null || typeof datos.autor !== 'string') continue;
+    const procedencia = datos.procedencia as { obra?: unknown } | null | undefined;
+    if (!procedencia || typeof procedencia.obra !== 'string') continue;
+    citas.push({
+      slug: typeof datos.slug === 'string' ? datos.slug : ruta,
+      autor: datos.autor,
+      procedencia: { obra: procedencia.obra },
+    });
+  }
+
+  const fichas: Record<string, string> = {};
+  for (const obra of obrasDeCitas(citas)) {
+    if (reclamadas.has(`${obra.autor}\u0000${obra.forma}`)) continue;
+    const titulo = grafiaPorOmision(obra.grafias);
+    const nombre = nombreDeFichaDeObra(obra.autor, titulo);
+    if (nombre === undefined) continue;
+    const ruta = `obras/${nombre}.yml`;
+    if (ruta in corpus || ruta in fichas) continue;
+    // Con el mismo serializador que `escribirFichaDeObra`: el fixture es el fichero real.
+    fichas[ruta] = aYamlDelCorpus({ autor: obra.autor, titulo, formas: [obra.forma] });
+  }
+  return fichas;
 }
 
 export async function limpiar(proyecto: string): Promise<void> {

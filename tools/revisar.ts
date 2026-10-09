@@ -123,6 +123,20 @@ if (aAprobar.length > 0) {
     lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión:`);
     for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
   }
+  for (const rechazada of resultado.rechazadasPorFicha) {
+    // Historia 22.1: cumple la admisión, pero su Ficha de Obra no se asegura sin decidir.
+    fallo = true;
+    lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión: su Ficha de Obra no se puede asegurar.`);
+    for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
+  }
+  for (const pendiente of resultado.fichasSinAsegurar) {
+    fallo = true;
+    lineas.push(
+      `  ! ${pendiente.slug} — publicada, pero su Ficha de Obra no se escribió. Corra ` +
+        '«npm run obra -- sembrar» antes de construir:',
+    );
+    for (const motivo of pendiente.motivos) lineas.push(`      ${motivo}`);
+  }
   for (const slug of resultado.noEncontradas) {
     fallo = true;
     lineas.push(`  ? ${slug} — no está entre las candidatas pendientes.`);

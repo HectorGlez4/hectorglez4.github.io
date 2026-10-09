@@ -15,6 +15,7 @@
 
 import { z } from 'astro/zod';
 import { MAX_CARACTERES_CRITERIO } from './umbrales.ts';
+import { normalizar } from './normalizar.ts';
 
 /**
  * Un año como entero. Ni fechas completas ni cadenas: el modelo dice entero.
@@ -439,3 +440,75 @@ export const coleccionAdmisible = z
   .strict();
 
 export type ColeccionAdmisible = z.infer<typeof coleccionAdmisible>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La Ficha de Obra — Historia 22.1, AD-25
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Una forma canónica de obra: la cadena tal como la deja `normalizar` (AD-3).
+ *
+ * Se exige que **ya** sea canónica en vez de canonizarla al leer: la identidad de una Obra
+ * es el par (Autor, forma), y una forma escrita con tildes o mayúsculas sería una forma
+ * que ninguna Cita resuelve, aunque lo parezca a la vista.
+ */
+export const formaDeObraAdmisible = z
+  .string({ message: 'Regla incumplida: cada forma de una Ficha de Obra es una cadena.' })
+  .refine((forma) => forma !== '' && normalizar(forma) === forma, {
+    message:
+      'Regla incumplida: una forma de Ficha de Obra se escribe en forma canónica —minúsculas, ' +
+      'sin diacríticos ni puntuación y con los espacios colapsados—, que es como la compara ' +
+      'el build con la obra de cada Procedencia (AD-3).',
+  });
+
+/**
+ * La forma del fichero de una Ficha de Obra — Historia 22.1, AD-25.
+ *
+ * La ficha ancla la identidad y la URL futura de una Obra: `autor` y `formas` son la
+ * identidad, `titulo` es presentación. **Estricto y sin valores por omisión**: una ficha que
+ * reclama formas por omisión reclamaría Citas que nadie decidió reunir, y un campo mal
+ * tecleado se descartaría en silencio.
+ *
+ * Los campos de las épicas siguientes —`distintaDe`, `nota`, `ediciones`— no se declaran
+ * todavía: el `.strict()` los rechaza hasta que una historia los construya.
+ *
+ * La comparten la colección de `src/content.config.ts` y todo lector de `tools/`, que la
+ * aplica en vez de leer YAML crudo (AD-17: una sola entrada).
+ */
+export const obraAdmisible = z
+  .object(
+    {
+      autor: z
+        .string({ message: 'Regla incumplida: falta el Autor de la Ficha de Obra.' })
+        .regex(
+          /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+          'Regla incumplida: el Autor de una Ficha de Obra es el slug de un Autor: ' +
+            'minúsculas, dígitos y guiones, sin diacríticos.',
+        ),
+      titulo: z
+        .string({ message: 'Regla incumplida: falta el título de la Ficha de Obra.' })
+        .regex(
+          /\S/,
+          'Regla incumplida: el título de una Ficha de Obra no puede estar vacío ni ser solo ' +
+            'espacios.',
+        ),
+      formas: z
+        .array(formaDeObraAdmisible, {
+          error: 'Regla incumplida: «formas» es la lista de formas canónicas que reclama la ficha.',
+        })
+        .min(1, 'Regla incumplida: una Ficha de Obra reclama al menos una forma.')
+        .refine((formas) => new Set(formas).size === formas.length, {
+          message: 'Regla incumplida: una Ficha de Obra no repite ninguna forma.',
+        }),
+    },
+    {
+      error: (problema) =>
+        problema.code === 'unrecognized_keys'
+          ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
+            `«${problema.keys.join('», «')}». Sus campos son autor, titulo y formas.`
+          : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas.',
+    },
+  )
+  .strict();
+
+export type ObraAdmisible = z.infer<typeof obraAdmisible>;

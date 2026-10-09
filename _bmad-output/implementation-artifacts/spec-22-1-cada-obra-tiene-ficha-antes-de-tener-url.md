@@ -2,10 +2,10 @@
 title: 'Historia 22.1 — Cada Obra tiene ficha antes de tener URL'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'c75dc93c2a76300b01c502c0c7c25dbf99fc1be4'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-22-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -123,6 +123,21 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17 (high 0, medium 6, low 11)
+- defer: 0
+- reject: 3
+- addressed_findings:
+  - `[medium]` `[patch]` Fichas creadas antes del gesto que aún podía fallar (huérfanas) → resolver en solo lectura, publicar y luego escribir; `documentar` lo mete en su retroceso.
+  - `[medium]` `[patch]` Forma vacía y título sin letras latinas → coherentes con la puerta del build.
+  - `[medium]` `[patch]` Restaurar con una forma ya reclamada → se niega.
+  - `[medium]` `[patch]` Nombre de ficha sin forma de slug o duplicado (.yml/.yaml) → el build rompe.
+  - `[medium]` `[patch]` Las candidatas ilegibles colaban una retirada → lector tolerante y bloqueo.
+  - `[medium]` `[patch]` Faltaban las ramas de fallo del alta y de documentar → pruebas.
+  - `[low]` `[patch]` Seco igual que real; `rechazadasPorFicha`; contabilidad; servidor de desarrollo; fichas retiradas en `retirarAutor`; motivo vacío con 2; posicionales; aviso de la ficha anterior; desempate literal; andamio de pruebas con `aYaml`; pruebas de la CLI y del build.
+
 ## Design Notes
 
 La ficha es identidad y URL futura; el título es presentación. Por eso el nombre sale del título **una sola vez**, al crear la ficha, y nunca se recalcula: la 22.2 puede cambiar `titulo` y `formas` sin mover la URL. Ejemplo:
@@ -140,3 +155,13 @@ formas:
 - `npx vitest run tests/unit/obras.test.ts tests/unit/obras-build.test.ts tests/unit/obra-cli.test.ts tests/unit/revision.test.ts tests/unit/gestion.test.ts tests/unit/documentacion.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** colección `corpus/obras/` con fichas `{autor}--{slug-obra}.yml` (`autor`, `titulo`, `formas`). La puerta del build rompe ante una Obra publicada sin ficha, una forma reclamada dos veces, un prefijo o un nombre erróneos o un Autor inexistente, y una ficha huérfana solo avisa. La función única resuelve y luego aplica, y la usan `aprobar`, el alta y `documentar`. `npm run obra -- sembrar` creó 182 fichas: 1 grupo de grafías (Sor Juana) y 2 pares de prefijo (Machado y Unamuno) para la 22.2. `npm run obra -- retirar` y `retirarAutor` las cuentan.
+
+**Revisión:** 17 parches aplicados, 0 diferidos y 3 rechazados (la orden de la puerta es la general `sembrar`, que es la que crea la ficha; la reapertura de `documentar` cuando la obra no cambia, porque la siembra cubre lo existente; la prueba de `dist/` idéntico, que se verifica por comparación). Seguimiento: 3×6 = 18 → true.
+
+**Verificación:** suite 111 ficheros, 3233 pruebas; astro check, 0 errores; build en verde; `diff -rq` del `dist/` contra c75dc93c con `FECHA_JORNADA=2026-10-10`, idéntico; segunda `sembrar`, 0 creadas.

@@ -12,7 +12,14 @@ import { appendFile, readFile, readdir, mkdir, writeFile, rename } from 'node:fs
 import { existsSync } from 'node:fs';
 import { basename, dirname, extname, join, relative } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
-import { citaAdmisible, type AutorAdmisible, type CitaAdmisible } from '../../src/lib/admision.ts';
+import {
+  citaAdmisible,
+  obraAdmisible,
+  type AutorAdmisible,
+  type CitaAdmisible,
+  type ObraAdmisible,
+} from '../../src/lib/admision.ts';
+import type { FichaDeObra } from '../../src/lib/obras.ts';
 import type {
   ClaseDeObjetivo,
   ObjetivoDeTema,
@@ -169,6 +176,20 @@ export interface Rutas {
    * mover a mano. Ninguna base de `src/content.config.ts` apunta aquí.
    */
   autoresRetirados: string;
+  /**
+   * Las Fichas de Obra — Historia 22.1, AD-25.
+   *
+   * Colección de Astro con esta misma base en `src/content.config.ts`. Las crea el sistema
+   * (`tools/lib/obras.ts`), nunca una persona a mano.
+   */
+  obras: string;
+  /**
+   * Donde va una Ficha de Obra retirada — AD-2, como los Autores y las Colecciones.
+   *
+   * Ninguna base de `src/content.config.ts` apunta aquí. No se versiona vacío: lo crea
+   * `mover` la primera vez que se retira una ficha.
+   */
+  obrasRetiradas: string;
   revision: string;
   /**
    * Los documentos de Fuente que produce `tools/recuperar.ts` (AD-23).
@@ -270,6 +291,8 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     coleccionesRetiradas: join(raizCorpus, '_colecciones-retiradas'),
     fuentesRetiradas: join(raizCorpus, '_fuentes-retiradas'),
     autoresRetirados: join(raizCorpus, '_autores-retirados'),
+    obras: join(raizCorpus, 'obras'),
+    obrasRetiradas: join(raizCorpus, '_obras-retiradas'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
@@ -455,6 +478,79 @@ export async function leerColecciones(rutas: Rutas): Promise<ColeccionEnCorpus[]
   );
 }
 
+/**
+ * Las Fichas de Obra de un directorio, **admitidas por `obraAdmisible`** — Historia 22.1.
+ *
+ * No se leen como YAML crudo: el esquema es la única entrada (AD-17), el mismo que aplica la
+ * colección del build. Una ficha que no lo cumple, o que no se deja analizar, se rechaza
+ * nombrando el fichero; leerla a medias daría una resolución que miente.
+ */
+async function leerFichasDe(directorio: string): Promise<FichaDeObra[]> {
+  const ficheros = await ficherosDe(directorio, ['.yml', '.yaml']);
+  return Promise.all(
+    ficheros.map(async (ruta) => {
+      let bruto: unknown;
+      try {
+        bruto = parsearYaml(await readFile(ruta, 'utf8'));
+      } catch (fallo) {
+        throw new Error(
+          `${ruta} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        );
+      }
+      const admitida = obraAdmisible.safeParse(bruto);
+      if (!admitida.success) {
+        throw new Error(
+          `${ruta} no es una Ficha de Obra admisible: ` +
+            admitida.error.issues
+              .map((i) => (i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message))
+              .join(' '),
+        );
+      }
+      const datos: ObraAdmisible = admitida.data;
+      // El nombre es la ruta dentro del directorio sin extensión, como el identificador de
+      // Astro: una ficha anidada lleva su barra, y la puerta del build la rechaza por eso.
+      const relativa = relative(directorio, ruta).split('\\').join('/');
+      return { ...datos, nombre: relativa.slice(0, relativa.length - extname(relativa).length), ruta };
+    }),
+  );
+}
+
+/** Las Fichas de Obra activas, de `corpus/obras/`. */
+export function leerFichasDeObra(rutas: Rutas): Promise<FichaDeObra[]> {
+  return leerFichasDe(rutas.obras);
+}
+
+/** Las Fichas de Obra retiradas, de `corpus/_obras-retiradas/` (AD-2). */
+export function leerFichasDeObraRetiradas(rutas: Rutas): Promise<FichaDeObra[]> {
+  return leerFichasDe(rutas.obrasRetiradas);
+}
+
+/**
+ * Escribe una Ficha de Obra **nueva** — Historia 22.1.
+ *
+ * Nunca sobrescribe, como `mover`: el nombre es la URL futura de la Obra, y pisar una ficha
+ * existente cambiaría a qué Obra apunta. Se valida con `obraAdmisible` antes de escribir,
+ * para no dejar en el corpus una ficha que el build rechazaría.
+ */
+export async function escribirFichaDeObra(
+  rutas: Rutas,
+  nombre: string,
+  ficha: ObraAdmisible,
+): Promise<string> {
+  const admitida = obraAdmisible.parse(ficha);
+  await mkdir(rutas.obras, { recursive: true });
+  const ruta = join(rutas.obras, `${nombre}.yml`);
+  if (existsSync(ruta) || existsSync(join(rutas.obras, `${nombre}.yaml`))) {
+    throw new Error(`No se escribe ${ruta}: ya existe una Ficha de Obra con ese nombre.`);
+  }
+  await writeFile(
+    ruta,
+    aYaml({ autor: admitida.autor, titulo: admitida.titulo, formas: admitida.formas }),
+    { encoding: 'utf8', flag: 'wx' },
+  );
+  return ruta;
+}
+
 export interface CitaEnCorpus extends CitaAdmisible {
   ruta: string;
 }
@@ -493,6 +589,34 @@ export async function leerCitas(directorio: string): Promise<CitaEnCorpus[]> {
     }),
   );
   return leidas.filter((c): c is CitaEnCorpus => c !== null);
+}
+
+/**
+ * Las Citas de un directorio **sin abortar por un fichero ilegible** — Historia 22.1.
+ *
+ * `leerCitas` lanza ante el primer frontmatter que no se deja analizar, que es lo correcto
+ * para quien publica. Quien tiene que **afirmar que nada apunta a algo** —retirar una Ficha
+ * de Obra— necesita lo contrario: seguir leyendo y contar el ilegible aparte, porque de un
+ * fichero que no se puede leer no se puede afirmar que no la resuelva.
+ */
+export async function leerCitasTolerante(
+  directorio: string,
+): Promise<{ citas: CitaEnCorpus[]; ilegibles: { ruta: string; motivo: string }[] }> {
+  const citas: CitaEnCorpus[] = [];
+  const ilegibles: { ruta: string; motivo: string }[] = [];
+  for (const ruta of await ficherosDe(directorio, ['.md'])) {
+    try {
+      const datos = separarFrontmatter(await readFile(ruta, 'utf8'));
+      if (datos === null) {
+        ilegibles.push({ ruta, motivo: 'no tiene frontmatter' });
+        continue;
+      }
+      citas.push({ ...(datos as unknown as CitaAdmisible), ruta });
+    } catch (fallo) {
+      ilegibles.push({ ruta, motivo: fallo instanceof Error ? fallo.message : String(fallo) });
+    }
+  }
+  return { citas, ilegibles };
 }
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;

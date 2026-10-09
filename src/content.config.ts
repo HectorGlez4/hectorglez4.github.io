@@ -6,6 +6,7 @@ import {
   coleccionAdmisible,
   estadoDerechos,
   fuenteDeCita,
+  obraAdmisible,
   nombre,
   procedencia,
   semblanza,
@@ -167,4 +168,21 @@ const colecciones = defineCollection({
   schema: coleccionAdmisible,
 });
 
-export const collections = { citas, autores, temas, colecciones };
+/*
+ * La Ficha de Obra — Historia 22.1, AD-25.
+ *
+ * Como la Colección, el esquema es literalmente el de `admision.ts`, y por lo mismo: no
+ * tiene referencias de Astro. El `autor` es un slug y no un `reference('autores')` a
+ * propósito: la puerta que lo casa con `corpus/autores/` es `integraciones/obras.ts`, que
+ * además exige que el prefijo del nombre del fichero coincida, y lo dice en una sola
+ * lista con las demás relaciones entre ficheros.
+ *
+ * Las fichas retiradas viven en `corpus/_obras-retiradas/`, que no es la base de ninguna
+ * colección (AD-2).
+ */
+const obras = defineCollection({
+  loader: glob({ pattern: '**/*.{yml,yaml}', base: './corpus/obras' }),
+  schema: obraAdmisible,
+});
+
+export const collections = { citas, autores, temas, colecciones, obras };

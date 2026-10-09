@@ -129,6 +129,6 @@ describe('Historia 1.3 — la ausencia es estructural, no condicional', () => {
     // entra en la lista desde la Historia 12.2: sí es colección, a diferencia de
     // `fuentes/`, y por eso el esquema de Colección es una puerta del build.
     const bases = [...esquema.matchAll(/base:\s*'\.\/corpus\/([a-z]+)'/g)].map((m) => m[1]);
-    expect(bases.sort()).toEqual(['autores', 'citas', 'colecciones', 'temas']);
+    expect(bases.sort()).toEqual(['autores', 'citas', 'colecciones', 'obras', 'temas']);
   });
 });
