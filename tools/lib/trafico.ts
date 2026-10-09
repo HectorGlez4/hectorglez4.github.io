@@ -166,11 +166,20 @@ export function peticionDeTotal(mes: MesALeer): PeticionDeTrafico {
   };
 }
 
+/**
+ * Un rango de días que pedir: un mes de esta serie o una ventana de la de demanda
+ * (Historia 20.3). La consulta por página solo necesita los dos extremos.
+ */
+export interface RangoDeDias {
+  desde: string;
+  hasta: string;
+}
+
 /** Una página de la consulta por `page`. Nunca por consulta: esos clics vienen anonimizados. */
-export function peticionPorPagina(mes: MesALeer, startRow: number): PeticionDeTrafico {
+export function peticionPorPagina(rango: RangoDeDias, startRow: number): PeticionDeTrafico {
   return {
-    startDate: mes.desde,
-    endDate: mes.hasta,
+    startDate: rango.desde,
+    endDate: rango.hasta,
     dataState: ESTADO_DE_LOS_DATOS,
     type: TIPO_DE_BUSQUEDA,
     aggregationType: 'byPage',
@@ -453,7 +462,8 @@ export function componerLecturaDeTrafico(entrada: {
   };
 }
 
-function lineaDeMetricas(m: Metricas): string {
+/** Una línea de informe con las cuatro cifras. La comparte la demanda (Historia 20.3). */
+export function lineaDeMetricas(m: Metricas): string {
   const ctr = m.ctr === undefined ? '—' : `${(m.ctr * 100).toFixed(2)} %`;
   const posicion = m.posicion === undefined ? '—' : m.posicion.toFixed(1);
   return `${m.clics} clics, ${m.impresiones} impresiones, CTR ${ctr}, posición ${posicion}`;
@@ -511,18 +521,30 @@ export function lineasDeTrafico(lectura: LecturaDeTrafico): string[] {
 
 /**
  * Lo que se dice cuando falta la credencial, **sin repetir su valor**. El equivalente de
- * `MOTIVOS_SIN_CREDENCIALES` de la indexación, que habla de otra lectura.
+ * `MOTIVOS_SIN_CREDENCIALES` de la indexación, que habla de otra lectura, generalizado para
+ * que la serie de demanda (Historia 20.3) diga lo mismo de lo suyo sin copiarlo.
+ *
+ * `queSeLee` es lo que no se puede preguntar («el tráfico orgánico»); `unidad`, lo que se
+ * escribiría sin leer («un mes»).
  */
-export const MOTIVOS_SIN_CREDENCIALES_DE_TRAFICO: readonly string[] = [
-  `Falta ${VARIABLE_DE_CREDENCIALES}: no hay con qué preguntar por el tráfico orgánico.`,
-  '',
-  'No se ha escrito nada. Escribir un mes sin haberlo leído sería un cero fabricado, y',
-  'la serie dejaría de significar lo que dice que significa.',
-  '',
-  'Es la misma credencial que la de `npm run indexacion`, y el paso manual está en',
-  'DESPLIEGUE.md §5:',
-  '  · una cuenta de servicio de Google con la API de Search Console habilitada;',
-  `  · su clave JSON en ${VARIABLE_DE_CREDENCIALES} —el JSON entero, o la ruta del fichero—;`,
-  '  · y la cuenta dada de alta como PROPIETARIA de la propiedad en Search Console, igual',
-  '    que para la indexación.',
-];
+export function motivosSinCredenciales(queSeLee: string, unidad: string): readonly string[] {
+  return [
+    `Falta ${VARIABLE_DE_CREDENCIALES}: no hay con qué preguntar por ${queSeLee}.`,
+    '',
+    `No se ha escrito nada. Escribir ${unidad} sin leer sería un cero fabricado, y`,
+    'la serie dejaría de significar lo que dice que significa.',
+    '',
+    'Es la misma credencial que la de `npm run indexacion`, y el paso manual está en',
+    'DESPLIEGUE.md §5:',
+    '  · una cuenta de servicio de Google con la API de Search Console habilitada;',
+    `  · su clave JSON en ${VARIABLE_DE_CREDENCIALES} —el JSON entero, o la ruta del fichero—;`,
+    '  · y la cuenta dada de alta como PROPIETARIA de la propiedad en Search Console, igual',
+    '    que para la indexación.',
+  ];
+}
+
+/** Lo que dice la serie de tráfico cuando falta la credencial. */
+export const MOTIVOS_SIN_CREDENCIALES_DE_TRAFICO: readonly string[] = motivosSinCredenciales(
+  'el tráfico orgánico',
+  'un mes',
+);

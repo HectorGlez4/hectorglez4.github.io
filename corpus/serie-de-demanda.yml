@@ -1,0 +1,60 @@
+# Serie de demanda por página — Historia 20.3, Épica 20, FR-49
+#
+# QUÉ MIDE. Por cada ventana de días, qué Autores y qué Citas reciben impresiones y clics
+# en la búsqueda web de Search Console, y su reparto por familia. FR-49 prioriza el
+# sembrado por demanda, y hasta ahora eso solo se leía a ojo en el panel de la fuente.
+#
+#   npx tsx tools/demanda.ts              # consulta e informa. NO escribe nada.
+#   npx tsx tools/demanda.ts --registrar  # además anota las ventanas leídas.
+#   npx tsx tools/demanda.ts --registrar --rellenar  # y los meses cerrados que falten.
+#
+# POR PÁGINA Y NO POR CONSULTA. La fuente ANONIMIZA las consultas poco frecuentes: sus
+# clics no llegan con la consulta, y agregar por consulta perdería justo la cola larga de
+# la que vive un sitio de Citas. Por página (`dimensions: [page]`, `aggregationType:
+# byPage`, `dataState: final`, `type: web`) las filas llegan enteras.
+#
+# LA REGLA DEL PREFIJO. Una ruta es de Cita si, normalizada, es `/cita/<slug>` del host
+# canónico (decodificada y en minúsculas), esté la Cita publicada o ya retirada. Su Autor
+# es el slug de corpus/autores/ que, seguido de guion, sea el PREFIJO MÁS LARGO del slug
+# de la Cita —uno igual al del Autor no es suyo—: `seneca-el-viejo-la-fortuna` es de
+# `seneca-el-viejo`, no de `seneca`. `autores` suma TODAS las filas de sus Citas, por
+# impresiones descendentes; la Página de Autor no suma aquí, cuenta en la familia Autor.
+#
+# `resto` Y `sinAutor`. Una Cita con menos de 5 impresiones en la ventana no se versiona
+# en `citas`: se suma en `resto` —`filas` cuenta CITAS, con las formas con y sin barra de
+# una ruta ya fundidas, no filas de la fuente—, y sí cuenta en su Autor, así
+# que Σ citas + resto = Σ autores. Una ruta de Cita sin ningún prefijo de Autor del Corpus
+# va a `sinAutor` (rutas, clics, impresiones) y el informe la nombra: nunca se descarta en
+# silencio. El reparto por familia es el de la serie de tráfico: sale del censo de HOY, y
+# lo que no casa —portada, páginas 2+, Citas retiradas, otro host— va a `fueraDelCenso`.
+#
+# LA CLAVE DE REEMPLAZO es el par `desde`–`hasta`: una entrada por ventana, con `clase`
+# "28-dias" o "mes" y `leidoEl`. La ventana de 28 días termina en el último día con datos
+# definitivos (hoy menos 3 días de retardo) y empieza 27 días antes, así que dos lecturas
+# del mismo día dan la misma ventana y la segunda REEMPLAZA a la primera: es idempotente
+# por fecha. Lecturas de días distintos dan ventanas distintas y se acumulan.
+# LAS VENTANAS DE 28 DÍAS SE SOLAPAN y NO SE SUMAN entre sí ni con las mensuales: cada
+# entrada es una foto de su ventana, y sumarlas contaría los mismos días varias veces.
+# Las fechas de la fuente van en HORA DEL PACÍFICO, y la ventana se calcula con el
+# calendario local de quien ejecuta: un extremo puede quedar a un día de lo vivido aquí.
+#
+# LA PRIMERA LECTURA es la de una serie sin ninguna entrada `clase: "mes"`: entonces se
+# leen además, una entrada cada uno, los meses CERRADOS de los 16 que conserva la fuente
+# —sin el mes en curso y sin un mes cuyo último día caiga dentro del retardo—. Las
+# lecturas siguientes solo leen la ventana de 28 días: tras la primera, la serie mensual
+# SOLO CRECE CON `--rellenar`, que pide los meses cerrados de los 16 que falten en ella.
+# Es también la vuelta atrás de un mes que falló en la primera lectura.
+#
+# AUSENCIA ANTES QUE CERO. Una ventana cuya consulta falló, o cuyo reparto no se pudo
+# componer, no se escribe —si ya tenía entrada se conserva la anterior— y sale nombrada,
+# con su motivo, en el `sinLeer` del informe. Una ventana que llega SIN NINGUNA FILA sí es
+# una lectura —toda ventana que se pide ya salió del retardo de los datos definitivos— y
+# se escribe sin Autores y con `vacia: true`: «sin demanda» no es «no leído».
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,
+# junto a `serie-de-trafico.yml`, y ninguna base de `src/content.config.ts` apunta aquí.
+# Además NINGÚN módulo de `src/` lo lee, ni siquiera por parámetro (AD-24) —tampoco
+# `src/lib/objetivo.ts` ni `npm run huecos` en este ciclo—: si el sitio lo leyera, dos
+# construcciones del mismo commit dejarían de dar el mismo `dist/`.
+
+lecturas:

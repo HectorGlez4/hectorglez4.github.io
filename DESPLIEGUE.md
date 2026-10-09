@@ -654,6 +654,13 @@ Analytics los clics, impresiones, CTR y posición por mes y familia y, con
 igual con código **2** sin escribir nada. La cuenta dada de alta para la indexación no
 necesita ninguna alta más.
 
+**Y también sirve para `npm run demanda`** (Historia 20.3), que lee de Search Analytics las
+impresiones y los clics **por página** de la ventana de 28 días —y, la primera vez, de los
+meses cerrados que conserva la fuente— y los reparte por Autor, por Cita y por familia; con
+`npm run demanda:registrar` los anota en `corpus/serie-de-demanda.yml`. Mismo alcance, misma
+propiedad y misma variable, sin ninguna alta más; sin la variable sale con código **2** y no
+escribe nada.
+
 ## 6. Pedir rastreo de unas pocas URL, y anotarlo — Historia 18.3 (FR-46)
 
 Google conoce las 1.715 URL —el sitemap se lee, §2— y aun así indexa 2 de cada 80. No es un

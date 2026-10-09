@@ -33,6 +33,18 @@ import type { LecturaDeFamilia, LecturaDeIndexacion, RepartoDeEstado } from './i
 import type { PeticionDeRastreo } from './rastreo.ts';
 /* Y con la serie de tráfico (20.2): quién agrega es `tools/lib/trafico.ts`, que es puro. */
 import type { LecturaDeMes, LecturaDeTrafico } from './trafico.ts';
+/*
+ * Y con la serie de demanda (20.3): quién agrega es `tools/lib/demanda.ts`, que es puro. De
+ * él salen también qué es una jornada, qué clases de ventana hay y la clave de reemplazo,
+ * para que la relectura no tenga su propia copia de las tres reglas.
+ */
+import {
+  CLASES_DE_VENTANA,
+  claveDeVentana,
+  esJornadaDeSerie,
+  type LecturaDeDemanda,
+  type LecturaDeVentana,
+} from './demanda.ts';
 
 /**
  * El registro de sesiones de sembrado — Historia 11.3. Su nombre tiene un solo dueño,
@@ -67,6 +79,14 @@ export const FICHERO_DE_INDEXACION = 'serie-de-indexacion.yml';
  * reemplazan en vez de añadir, por clave distinta: aquélla por fecha, ésta por **mes**.
  */
 export const FICHERO_DE_TRAFICO = 'serie-de-trafico.yml';
+
+/**
+ * La serie de demanda por página — Historia 20.3. Su nombre tiene un solo dueño.
+ *
+ * Vecina de la de tráfico y de la misma clase: metadato del Corpus, no colección. También
+ * reemplaza, y por una clave compuesta: el par `desde`–`hasta` de cada ventana.
+ */
+export const FICHERO_DE_DEMANDA = 'serie-de-demanda.yml';
 
 /**
  * El registro de peticiones de rastreo — Historia 18.3. Su nombre tiene un solo dueño.
@@ -194,6 +214,13 @@ export interface Rutas {
    */
   serieDeTrafico: string;
   /**
+   * La serie de demanda por página — Historia 20.3.
+   *
+   * Metadato del Corpus con el mismo aislamiento que sus vecinas (AD-24): ninguna base de
+   * `src/content.config.ts` apunta aquí y ningún módulo de `src/` lo lee.
+   */
+  serieDeDemanda: string;
+  /**
    * El registro de peticiones de rastreo — Historia 18.3, FR-46.
    *
    * Metadato del Corpus como sus vecinos y con el mismo aislamiento (AD-24): ninguna base
@@ -249,6 +276,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
     serieDeTrafico: join(raizCorpus, FICHERO_DE_TRAFICO),
+    serieDeDemanda: join(raizCorpus, FICHERO_DE_DEMANDA),
     peticionesDeRastreo: join(raizCorpus, FICHERO_DE_PETICIONES),
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
@@ -1208,10 +1236,13 @@ function analizarSerie<T = LecturaRegistrada>(
   contenido: string,
   /**
    * La clave por la que la serie reemplaza: `fecha` en la de indexación, `mes` en la de
-   * tráfico (Historia 20.2). Es lo único que cambia entre las dos al releerlas.
+   * tráfico (Historia 20.2) y `ventana` —el par `desde`–`hasta`— en la de demanda (20.3).
+   * Es lo único que cambia entre ellas al releerlas.
    */
-  clave: 'fecha' | 'mes' = 'fecha',
+  clave: 'fecha' | 'mes' | 'ventana' = 'fecha',
 ): T[] {
+  const campos = clave === 'ventana' ? ['desde', 'hasta'] : [clave];
+  const nombreDeClave = clave === 'ventana' ? '«desde», «hasta»' : `«${clave}»`;
   let leido: unknown;
   try {
     leido = parsearYaml(contenido);
@@ -1245,7 +1276,7 @@ function analizarSerie<T = LecturaRegistrada>(
     throw new Error(
       `${nombre}: «${CLAVE_DE_LECTURAS}» tiene que ser una lista de lecturas, y es ` +
         `${typeof lecturas}. Escríbala como «${CLAVE_DE_LECTURAS}:» y una entrada ` +
-        `«  - ${clave}: …» por entrada.`,
+        `«  - ${campos[0]}: …» por entrada.`,
     );
   }
 
@@ -1253,15 +1284,60 @@ function analizarSerie<T = LecturaRegistrada>(
     if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
       throw new Error(
         `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no es una lectura ` +
-          `(${JSON.stringify(entrada)}). Cada entrada lleva al menos ${clave} y propiedad.`,
+          `(${JSON.stringify(entrada)}). Cada entrada lleva al menos ${nombreDeClave} y «propiedad».`,
       );
     }
-    if (typeof (entrada as Record<string, unknown>)[clave] !== 'string') {
-      throw new Error(
-        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no declara «${clave}». La ` +
-          `serie reemplaza por ${clave}, así que sin ella no se sabe a cuál de las ` +
-          'entradas sustituye una lectura nueva.',
-      );
+    for (const campo of campos) {
+      if (typeof (entrada as Record<string, unknown>)[campo] !== 'string') {
+        throw new Error(
+          `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no declara «${campo}». La ` +
+            `serie reemplaza por ${nombreDeClave}, así que sin ella no se sabe a cuál de las ` +
+            'entradas sustituye una lectura nueva.',
+        );
+      }
+    }
+  }
+
+  /*
+   * La serie de demanda reemplaza por el par `desde`–`hasta` (20.3). Un extremo que no tiene
+   * la forma `AAAA-MM-DD` no casaría nunca con el de una lectura nueva, una clase
+   * desconocida haría que una entrada mensual no contara como tal —y la orden volvería a
+   * pedir los 16 meses—, y una ventana repetida ya es el estado que el reemplazo impide.
+   */
+  if (clave === 'ventana') {
+    const vistas = new Set<string>();
+    for (const [i, entrada] of lecturas.entries()) {
+      const { desde, hasta, clase } = entrada as Record<string, unknown>;
+      for (const [campo, valor] of [['desde', desde], ['hasta', hasta]] as const) {
+        if (!esJornadaDeSerie(valor)) {
+          throw new Error(
+            `${nombre}: la entrada ${i + 1} declara «${campo}: ${String(valor)}», que no es un ` +
+              'día AAAA-MM-DD que exista. La serie reemplaza por ventana y esa clave no casaría ' +
+              'con ninguna lectura.',
+          );
+        }
+      }
+      if ((desde as string) > (hasta as string)) {
+        throw new Error(
+          `${nombre}: la entrada ${i + 1} declara la ventana ${String(desde)}–${String(hasta)}, ` +
+            'que empieza después de terminar.',
+        );
+      }
+      if (!(CLASES_DE_VENTANA as readonly unknown[]).includes(clase)) {
+        throw new Error(
+          `${nombre}: la entrada ${i + 1} declara «clase: ${String(clase)}», y una ventana es ` +
+            `${CLASES_DE_VENTANA.map((c) => `«${c}»`).join(' o ')}. De esa clase sale si la ` +
+            'siguiente lectura es la primera.',
+        );
+      }
+      const par = claveDeVentana({ desde, hasta });
+      if (vistas.has(par)) {
+        throw new Error(
+          `${nombre}: la ventana ${par} aparece dos veces, y esta serie lleva una entrada por ` +
+            'ventana. Deje solo una y vuelva a intentarlo.',
+        );
+      }
+      vistas.add(par);
     }
   }
 
@@ -1637,11 +1713,214 @@ export async function registrarLecturaDeTrafico(
 }
 
 /**
+ * La cabecera de la serie de demanda por página — Historia 20.3.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que sus vecinas: un corpus de
+ * pruebas, o un clon al que le falte el fichero, tiene que poder anotar su primera lectura
+ * sin que nadie escriba la cabecera a mano.
+ */
+export const CABECERA_DE_DEMANDA = [
+  '# Serie de demanda por página — Historia 20.3, Épica 20, FR-49',
+  '#',
+  '# QUÉ MIDE. Por cada ventana de días, qué Autores y qué Citas reciben impresiones y clics',
+  '# en la búsqueda web de Search Console, y su reparto por familia. FR-49 prioriza el',
+  '# sembrado por demanda, y hasta ahora eso solo se leía a ojo en el panel de la fuente.',
+  '#',
+  '#   npx tsx tools/demanda.ts              # consulta e informa. NO escribe nada.',
+  '#   npx tsx tools/demanda.ts --registrar  # además anota las ventanas leídas.',
+  '#   npx tsx tools/demanda.ts --registrar --rellenar  # y los meses cerrados que falten.',
+  '#',
+  '# POR PÁGINA Y NO POR CONSULTA. La fuente ANONIMIZA las consultas poco frecuentes: sus',
+  '# clics no llegan con la consulta, y agregar por consulta perdería justo la cola larga de',
+  '# la que vive un sitio de Citas. Por página (`dimensions: [page]`, `aggregationType:',
+  '# byPage`, `dataState: final`, `type: web`) las filas llegan enteras.',
+  '#',
+  '# LA REGLA DEL PREFIJO. Una ruta es de Cita si, normalizada, es `/cita/<slug>` del host',
+  '# canónico (decodificada y en minúsculas), esté la Cita publicada o ya retirada. Su Autor',
+  '# es el slug de corpus/autores/ que, seguido de guion, sea el PREFIJO MÁS LARGO del slug',
+  '# de la Cita —uno igual al del Autor no es suyo—: `seneca-el-viejo-la-fortuna` es de',
+  '# `seneca-el-viejo`, no de `seneca`. `autores` suma TODAS las filas de sus Citas, por',
+  '# impresiones descendentes; la Página de Autor no suma aquí, cuenta en la familia Autor.',
+  '#',
+  '# `resto` Y `sinAutor`. Una Cita con menos de 5 impresiones en la ventana no se versiona',
+  '# en `citas`: se suma en `resto` —`filas` cuenta CITAS, con las formas con y sin barra de',
+  '# una ruta ya fundidas, no filas de la fuente—, y sí cuenta en su Autor, así',
+  '# que Σ citas + resto = Σ autores. Una ruta de Cita sin ningún prefijo de Autor del Corpus',
+  '# va a `sinAutor` (rutas, clics, impresiones) y el informe la nombra: nunca se descarta en',
+  '# silencio. El reparto por familia es el de la serie de tráfico: sale del censo de HOY, y',
+  '# lo que no casa —portada, páginas 2+, Citas retiradas, otro host— va a `fueraDelCenso`.',
+  '#',
+  '# LA CLAVE DE REEMPLAZO es el par `desde`–`hasta`: una entrada por ventana, con `clase`',
+  '# "28-dias" o "mes" y `leidoEl`. La ventana de 28 días termina en el último día con datos',
+  '# definitivos (hoy menos 3 días de retardo) y empieza 27 días antes, así que dos lecturas',
+  '# del mismo día dan la misma ventana y la segunda REEMPLAZA a la primera: es idempotente',
+  '# por fecha. Lecturas de días distintos dan ventanas distintas y se acumulan.',
+  '# LAS VENTANAS DE 28 DÍAS SE SOLAPAN y NO SE SUMAN entre sí ni con las mensuales: cada',
+  '# entrada es una foto de su ventana, y sumarlas contaría los mismos días varias veces.',
+  '# Las fechas de la fuente van en HORA DEL PACÍFICO, y la ventana se calcula con el',
+  '# calendario local de quien ejecuta: un extremo puede quedar a un día de lo vivido aquí.',
+  '#',
+  '# LA PRIMERA LECTURA es la de una serie sin ninguna entrada `clase: "mes"`: entonces se',
+  '# leen además, una entrada cada uno, los meses CERRADOS de los 16 que conserva la fuente',
+  '# —sin el mes en curso y sin un mes cuyo último día caiga dentro del retardo—. Las',
+  '# lecturas siguientes solo leen la ventana de 28 días: tras la primera, la serie mensual',
+  '# SOLO CRECE CON `--rellenar`, que pide los meses cerrados de los 16 que falten en ella.',
+  '# Es también la vuelta atrás de un mes que falló en la primera lectura.',
+  '#',
+  '# AUSENCIA ANTES QUE CERO. Una ventana cuya consulta falló, o cuyo reparto no se pudo',
+  '# componer, no se escribe —si ya tenía entrada se conserva la anterior— y sale nombrada,',
+  '# con su motivo, en el `sinLeer` del informe. Una ventana que llega SIN NINGUNA FILA sí es',
+  '# una lectura —toda ventana que se pide ya salió del retardo de los datos definitivos— y',
+  '# se escribe sin Autores y con `vacia: true`: «sin demanda» no es «no leído».',
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,',
+  '# junto a `serie-de-trafico.yml`, y ninguna base de `src/content.config.ts` apunta aquí.',
+  '# Además NINGÚN módulo de `src/` lo lee, ni siquiera por parámetro (AD-24) —tampoco',
+  '# `src/lib/objetivo.ts` ni `npm run huecos` en este ciclo—: si el sitio lo leyera, dos',
+  '# construcciones del mismo commit dejarían de dar el mismo `dist/`.',
+  '',
+  'lecturas:',
+  '',
+].join('\n');
+
+/** Una entrada ya escrita en la serie de demanda, tal y como se relee. */
+export type LecturaDeVentanaRegistrada = Omit<
+  LecturaDeVentana,
+  'autores' | 'citas' | 'familias' | 'slugsSinAutor' | 'citasConClic'
+> & {
+  /** Ausentes cuando están vacías: `aYaml` omite una lista o un objeto sin elementos. */
+  autores?: LecturaDeVentana['autores'];
+  citas?: LecturaDeVentana['citas'];
+  familias?: LecturaDeVentana['familias'];
+};
+
+/** La serie de demanda ya registrada. Una serie que no existe se lee como serie vacía. */
+export async function leerSerieDeDemanda(rutas: Rutas): Promise<LecturaDeVentanaRegistrada[]> {
+  if (!existsSync(rutas.serieDeDemanda)) return [];
+  return analizarSerie<LecturaDeVentanaRegistrada>(
+    `corpus/${FICHERO_DE_DEMANDA}`,
+    await readFile(rutas.serieDeDemanda, 'utf8'),
+    'ventana',
+  );
+}
+
+/**
+ * Anota las ventanas leídas, **reemplazando** la entrada que ya hubiera de cada una.
+ *
+ * Es `registrarLecturaDeTrafico` con la clave compuesta `desde`–`hasta`: creación con `wx`,
+ * cabecera conservada del fichero, re-análisis de lo compuesto, verificación de lo que va a
+ * disco y `rename` atómico. Las ventanas que no se leyeron no están en `lectura.ventanas`,
+ * así que su entrada anterior se conserva tal cual. Las entradas quedan ordenadas por `desde`
+ * y luego por `hasta`. Lo que es solo del informe —los slugs sin Autor y las Citas con clic
+ * bajo el umbral— no se escribe.
+ */
+export async function registrarLecturaDeDemanda(
+  rutas: Rutas,
+  lectura: LecturaDeDemanda,
+): Promise<string> {
+  const ruta = rutas.serieDeDemanda;
+  const nombre = `corpus/${FICHERO_DE_DEMANDA}`;
+
+  if (lectura.ventanas.length === 0) {
+    throw new Error(
+      `${nombre}: la lectura no trae ninguna ventana leída. No hay nada que anotar, y anotar ` +
+        'una ventana sin leerla sería un cero fabricado. No se ha escrito nada.',
+    );
+  }
+  const nuevas = new Set(lectura.ventanas.map(claveDeVentana));
+  if (nuevas.size !== lectura.ventanas.length) {
+    throw new Error(
+      `${nombre}: la lectura trae la misma ventana dos veces y la serie reemplaza por ventana. ` +
+        'No se ha escrito nada.',
+    );
+  }
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      await writeFile(ruta, CABECERA_DE_DEMANDA, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const habia = analizarSerie<LecturaDeVentanaRegistrada>(nombre, anterior, 'ventana');
+  const cabecera = cabeceraDeSerie(nombre, anterior);
+
+  const conservadas = habia.filter((entrada) => !nuevas.has(claveDeVentana(entrada)));
+  const entradas: Record<string, unknown>[] = [
+    ...conservadas.map((e) => e as unknown as Record<string, unknown>),
+    ...lectura.ventanas.map((v) => ({
+      desde: v.desde,
+      hasta: v.hasta,
+      clase: v.clase,
+      leidoEl: v.leidoEl,
+      propiedad: v.propiedad,
+      vacia: v.vacia,
+      autores: v.autores,
+      citas: v.citas,
+      sinAutor: v.sinAutor,
+      resto: v.resto,
+      familias: v.familias,
+      fueraDelCenso: v.fueraDelCenso,
+    })),
+  ].sort(
+    (a, b) =>
+      String(a.desde).localeCompare(String(b.desde)) || String(a.hasta).localeCompare(String(b.hasta)),
+  );
+
+  const contenido = cabecera + entradas.map(bloqueDeLectura).join('');
+
+  const quedaria = analizarSerie<LecturaDeVentanaRegistrada>(nombre, contenido, 'ventana');
+  if (quedaria.length !== conservadas.length + lectura.ventanas.length) {
+    throw new Error(
+      `${nombre}: la serie recompuesta no tiene las entradas que debería ` +
+        `(había ${habia.length}, se conservan ${conservadas.length}, se leen ` +
+        `${lectura.ventanas.length} y quedarían ${quedaria.length}). No se ha escrito nada.`,
+    );
+  }
+
+  // Lo leído, reafirmado sobre lo que va a disco: nada se queda por el camino.
+  for (const leida of lectura.ventanas) {
+    const clave = claveDeVentana(leida);
+    const escritas = quedaria.filter((e) => claveDeVentana(e) === clave);
+    if (escritas.length !== 1) {
+      throw new Error(
+        `${nombre}: la ventana ${clave} quedaría con ${escritas.length} entradas y esta serie ` +
+          'reemplaza por ventana. No se ha escrito nada.',
+      );
+    }
+    const [escrita] = escritas;
+    const problemas: string[] = [];
+    if (escrita.clase !== leida.clase) problemas.push('la clase');
+    if ((escrita.vacia === true) !== (leida.vacia === true)) problemas.push('la marca «vacia»');
+    if ((escrita.autores ?? []).length !== leida.autores.length) problemas.push('los Autores');
+    if ((escrita.citas ?? []).length !== leida.citas.length) problemas.push('las Citas');
+    if (escrita.sinAutor === undefined) problemas.push('«sinAutor»');
+    if (escrita.resto === undefined) problemas.push('«resto»');
+    if (escrita.fueraDelCenso === undefined) problemas.push('«fueraDelCenso»');
+    for (const familia of Object.keys(leida.familias)) {
+      if (!Object.keys(escrita.familias ?? {}).includes(familia)) problemas.push(`la familia «${familia}»`);
+    }
+    if (problemas.length > 0) {
+      throw new Error(
+        `${nombre}: de la ventana ${clave} no han llegado al fichero como se leyeron ` +
+          `${problemas.join(', ')}. No se ha escrito nada.`,
+      );
+    }
+  }
+
+  await escribirSerieAtomica(ruta, contenido);
+  return ruta;
+}
+
+/**
  * Lo que hay por encima de la línea «lecturas:», ella incluida — la cabecera que se conserva.
  *
  * Se busca al principio de línea y sin sangrar: «  lecturas:» dentro de una entrada no es la
  * clave de la raíz, y cortar por ahí habría partido el fichero por la mitad. La comparten
- * las dos series que reemplazan (indexación y tráfico).
+ * las series que reemplazan (indexación, tráfico y demanda).
  */
 function cabeceraDeSerie(nombre: string, anterior: string): string {
   const marca = anterior.match(/^lecturas:[^\S\n]*$/m);

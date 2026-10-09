@@ -125,14 +125,17 @@ export async function clienteDeSearchAnalytics(
   };
 }
 
-/** Todas las filas por página de un mes, pidiendo hasta recibir menos de `rowLimit`. */
-async function filasPorPagina(
+/**
+ * Todas las filas por página de un rango —un mes aquí, una ventana en la demanda (20.3)—,
+ * pidiendo hasta recibir menos de `rowLimit`.
+ */
+export async function filasPorPagina(
   consultar: Consultar,
-  mes: Parameters<typeof peticionPorPagina>[0],
+  rango: Parameters<typeof peticionPorPagina>[0],
 ): Promise<FilaDeTrafico[]> {
   const filas: FilaDeTrafico[] = [];
   for (let pagina = 0; pagina < PAGINAS_MAXIMAS_POR_MES; pagina += 1) {
-    const recibidas = await consultar(peticionPorPagina(mes, pagina * FILAS_POR_PAGINA));
+    const recibidas = await consultar(peticionPorPagina(rango, pagina * FILAS_POR_PAGINA));
     filas.push(...recibidas);
     if (recibidas.length < FILAS_POR_PAGINA) return filas;
   }

@@ -164,6 +164,54 @@ Sin ella no escribe nada y sale con **código 2**, igual que con una bandera des
 `--meses` mal formado; sale con **1** si no pudo leer el corpus o la serie, si no pudo leer
 ningún mes o si falla la escritura, y en esos casos tampoco escribe nada. Ningún módulo de `src/` lee la serie (AD-24).
 
+## Leer la demanda por página
+
+FR-49 prioriza el sembrado por demanda, y la demanda sale de Search Console **por página** —
+nunca por consulta, que llega anonimizada—, repartida por Autor, por Cita y por familia:
+
+```
+npm run demanda              # lee la ventana de 28 días e informa. NO escribe nada.
+npm run demanda:registrar    # además anota las ventanas leídas en la serie.
+npm run demanda:registrar -- --rellenar   # y los meses cerrados de los 16 que falten.
+```
+
+La serie vive en `corpus/serie-de-demanda.yml`, **una entrada por ventana** con `desde`,
+`hasta`, `clase` (`"28-dias"` o `"mes"`) y `leidoEl`; la clave de reemplazo es el par
+`desde`–`hasta`. La ventana de 28 días termina en el último día con datos definitivos —hoy
+menos los 3 de retardo de `dataState: final`— y empieza 27 antes, así que dos lecturas del
+mismo día dan la misma ventana y la segunda **reemplaza** a la primera. La **primera lectura**
+—la serie no tiene ninguna entrada `mes`— lee además, una entrada cada uno, los meses
+**cerrados** de los 16 que conserva la fuente; las siguientes, solo la de 28 días. **Tras la
+primera lectura, la serie mensual solo crece con `--rellenar`**, que pide además los meses
+cerrados de los 16 que falten en la serie: es la vuelta atrás de un mes que falló en la primera
+lectura y la forma de añadir cada mes que se cierra después. Sin la bandera, ninguno se pide.
+
+**Las ventanas de 28 días se solapan y no se suman** entre sí ni con las mensuales: cada una es
+una foto de su ventana. Las fechas de la fuente van en hora del Pacífico, y la ventana se
+calcula con el calendario local de quien ejecuta la orden.
+
+**Atribución por el prefijo más largo.** Una ruta es de Cita si, normalizada, es
+`/cita/<slug>` del host canónico —decodificada y en minúsculas—, esté publicada o retirada.
+Su Autor es el slug de `corpus/autores/` que, seguido de guion, sea el prefijo más largo del
+slug —`seneca-el-viejo-…` no es de `seneca`, y un slug igual al del Autor no es suyo—, por `autorPorPrefijo` de `tools/lib/autoria.ts`, el mismo dueño que usa retirar un
+Autor. Una ruta de Cita sin prefijo de Autor va a `sinAutor` y el informe la nombra. Una Cita
+con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas`: se suma en
+`resto` —cuyo `filas` cuenta Citas, no filas de la fuente—, y sí cuenta en su Autor. El reparto por familia es el de la serie de tráfico
+(`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
+por familia, fuera del censo.
+
+**Ausencia antes que cero.** Una ventana cuya consulta falla, o cuyo reparto no se puede
+componer, no se escribe —se conserva la entrada anterior si la había— y sale en el `sinLeer`
+del informe con su motivo. Una ventana que llega **sin ninguna fila** sí es una lectura —toda
+ventana que se pide ya salió del retardo de los datos definitivos— y se escribe sin Autores y
+con `vacia: true`: «sin demanda» no es «no leído». La serie **no entra** en `src/lib/objetivo.ts` ni en `npm run huecos` en este ciclo,
+y ningún módulo de `src/` la lee (AD-24).
+
+Misma credencial que la indexación y el tráfico, `SEARCH_CONSOLE_CREDENCIALES`, con la cuenta
+dada de alta **como propietaria** (`DESPLIEGUE.md` §5). Sin ella no escribe nada y sale con
+**código 2**, igual que con una bandera desconocida; sale con **1** si no pudo leer el corpus o
+la serie, si no pudo leer ninguna ventana o si falla la escritura, y entonces no escribe nada.
+
 ## Pedir rastreo de unas pocas URL, y anotarlo
 
 Google conoce las 1.715 URL y aun así indexa 2 de cada 80: no es descubrimiento, es que un

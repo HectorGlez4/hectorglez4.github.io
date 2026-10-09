@@ -2,10 +2,10 @@
 title: 'Historia 20.3 — La demanda medida se versiona por página'
 type: 'feature'
 created: '2026-10-09'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '74f13a8ec4af8a74ef2c4e7ddd8478b7f39f5155'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-20-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-20-2-la-serie-de-trafico-organico-se-versiona.md'
@@ -125,6 +125,18 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-09 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 16 (high 0, medium 3, low 13)
+- defer: 0
+- reject: 5
+- addressed_findings:
+  - `[medium]` `[patch]` Un mes que fallaba en la primera lectura no se volvía a pedir, y los meses cerrados después nunca entraban → bandera `--rellenar` (los meses cerrados que faltan), con la regla por omisión intacta.
+  - `[medium]` `[patch]` Una ventana vacía se trataba como no leída (un cero real convertido en ausencia permanente) → entrada con `vacia: true`.
+  - `[medium]` `[patch]` Un fallo de composición tiraba todas las ventanas → esa ventana va a sinLeer y las demás siguen.
+  - `[low]` `[patch]` Prefijo estricto restituido; ruta decodificada y en minúsculas; `resto.filas` cuenta Citas; mensajes de principal; renombre a `rango`; validación de ventana con `esJornadaDeSerie`, `CLASES_DE_VENTANA` y `desde<=hasta`; textos de solapes y hora del Pacífico; seis pruebas nuevas.
+
 ## Design Notes
 
 Entrada:
@@ -150,3 +162,17 @@ Entrada:
 - `npx vitest run tests/unit/demanda.test.ts tests/unit/trafico.test.ts tests/unit/andamiaje.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `env -u SEARCH_CONSOLE_CREDENCIALES npm run demanda; echo $?` -- expected: 2
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `npm run demanda` y `npm run demanda:registrar` leen la dimensión página por ventanas (28 días; los meses cerrados en la primera lectura o con `--rellenar`) y agregan por Autor, con el prefijo más largo y la nueva `tools/lib/autoria.ts`, por Cita (≥5 impresiones; el resto declarado) y por familia. Escriben `corpus/serie-de-demanda.yml` con reemplazo por ventana. `src/` no lee la serie.
+
+**Ficheros:** `tools/lib/autoria.ts` (nuevo); `tools/lib/demanda.ts` (puro); `tools/demanda.ts` (cáscara, con la red del cliente de tráfico); `tools/lib/trafico.ts` y `tools/trafico.ts` (rango de días, exportaciones, mensaje de credencial compartido); `tools/lib/gestion.ts` (usa `autoria`); `tools/lib/corpus.ts` (serie de demanda y clave `ventana`); `corpus/serie-de-demanda.yml`; `package.json`; `AGENTS.md`; `DESPLIEGUE.md` §5; `tests/unit/demanda.test.ts` (41 pruebas); `tests/unit/andamiaje.test.ts`.
+
+**Revisión:** 16 parches aplicados, 0 diferidos y 5 rechazados (sinLeer solo en el informe, decisión del spec; arranque con `pathToFileURL`, patrón existente; comparación de valores antes de escribir; 15 meses en vez de 16, que el spec fijó como cerrados; correr `npm run huecos` en la prueba, que queda cubierto por el aislamiento estático). Seguimiento: 3×3 = 9 ≥ 5 → true.
+
+**Verificación:** vitest de demanda, trafico, andamiaje, gestion, autor-cli, retirar-fuente e indexacion, 247/247; suite completa, astro check y build antes del commit; sin credencial, código 2.
+
+**Riesgo residual:** sin lectura real hasta la 20.4 (Héctor).

@@ -156,7 +156,8 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     importa `googleapis` como su hermana, con el mismo `import()` diferido, y le pide a
  *     Search Analytics los clics por mes. Lo que decide qué se pide y cómo se agrega vive en
  *     `tools/lib/trafico.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
- *     ejecuta.
+ *     ejecuta. La serie de demanda —`tools/demanda.ts`, Historia 20.3— pide por este mismo
+ *     cliente, que importa en vez de copiar, y por eso no es una excepción más.
  *   · `tools/epocas.ts` es la cáscara de la cobertura por época —Historia 19.5—: le pide a
  *     Wikisource-es los miembros de sus categorías de autores para derivar de ahí la lista de
  *     candidatos, en vez de escribirla a mano en el repositorio. Lo que decide qué se pide,
@@ -326,6 +327,26 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'tools/recuperar.ts',
       'tools/trafico.ts',
     ]);
+  });
+
+  it('tools/demanda.ts pide por la red solo a través del cliente de tools/trafico.ts', () => {
+    /*
+     * Historia 20.3 — la serie de demanda hace sus peticiones desde su cáscara,
+     * `tools/demanda.ts`, pero no construye otro cliente de Search Analytics: reutiliza el de
+     * `tools/trafico.ts`, que ya es excepción. Por eso no es una octava excepción —el
+     * guardián no ve en ella ninguna llamada de red y la daría por innecesaria—, y lo que se
+     * fija aquí es lo que sí tiene que seguir siendo cierto: que la red le llega por ese
+     * cliente y por ningún otro sitio, y que su hermana pura no lo importa.
+     */
+    const cascara = readFileSync(resolve(raiz, 'tools/demanda.ts'), 'utf8');
+    expect(cascara).toMatch(
+      /import\s*\{[^}]*\bclienteDeSearchAnalytics\b[^}]*\}\s*from\s*'\.\/trafico\.ts'/,
+    );
+    expect(tieneLlamadaDeRed(cascara)).toBe(false);
+
+    const pura = readFileSync(resolve(raiz, 'tools/lib/demanda.ts'), 'utf8');
+    expect(tieneLlamadaDeRed(pura)).toBe(false);
+    expect(pura).not.toMatch(/from\s*'\.\.\/(?:trafico|demanda)\.ts'/);
   });
 
   it('el guardián detecta una llamada de red inyectada', () => {

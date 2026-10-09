@@ -36,6 +36,7 @@ import {
   type AutorEnCorpus,
   type Rutas,
 } from './corpus.ts';
+import { autorPorPrefijo } from './autoria.ts';
 import { leerColeccionesRetiradas } from './curacion.ts';
 import { descartesPorCandidato, slugsSembrados } from './epocas.ts';
 import { readFile } from 'node:fs/promises';
@@ -518,7 +519,8 @@ function listaCorta(slugs: readonly string[]): string[] {
  * esquema, y lo que queda apuntando a un Autor sin Citas son justamente los que ya no
  * resuelven. De esos solo dice de quién son el prefijo de `slugDeCita` —`{slug-autor}-…`— y
  * el prefijo **más largo** gana: `seneca-el-viejo-la-fortuna` empieza por `seneca-` y no es de
- * Séneca. Lo que sí resuelve a una Cita se juzga por el `autor` que ella declara.
+ * Séneca. Lo que sí resuelve a una Cita se juzga por el `autor` que ella declara. La regla
+ * del prefijo vive en `tools/lib/autoria.ts`, que comparte con la demanda (Historia 20.3).
  */
 function esDelAutor(
   slugCita: string,
@@ -528,10 +530,7 @@ function esDelAutor(
 ): boolean {
   const declarado = autorDeCita.get(slugCita);
   if (declarado !== undefined) return declarado === slugAutor;
-  const dueño = slugsDeAutores
-    .filter((s) => slugCita.startsWith(`${s}-`))
-    .sort((a, b) => b.length - a.length)[0];
-  return dueño === slugAutor;
+  return autorPorPrefijo(slugCita, slugsDeAutores) === slugAutor;
 }
 
 /**
