@@ -12,6 +12,7 @@
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
+import { fraseDeTraduccion } from '../lib/atribucion.ts';
 
 interface Props {
   cita: Cita;
@@ -19,7 +20,7 @@ interface Props {
 }
 
 const { cita, autor } = Astro.props;
-const { obra, año, referencia } = cita.procedencia;
+const { obra, año, referencia, traduccion } = cita.procedencia;
 
 /**
  * La línea de procedencia. Se compone con lo que consta y solo con lo que consta.
@@ -29,9 +30,19 @@ const { obra, año, referencia } = cita.procedencia;
 const frases: string[] = [];
 
 if (obra !== undefined && año !== undefined) frases.push(`${obra}, ${año}`);
+// Historia 19.1 — con traducción, que falte el año de la Obra no se anuncia: el año que
+// hay es el de la traducción, y va con el traductor, nunca junto al título.
+else if (obra !== undefined && traduccion !== undefined) frases.push(obra);
 else if (obra !== undefined) frases.push(obra, 'Sin año documentado');
 else if (año !== undefined) frases.push('Sin obra documentada', `Año ${año}`);
 else frases.push('Sin obra documentada');
+
+/*
+ * UX-DR51 — la traducción es una frase propia: «Odas. Traducción de Germán Salinas, 1909.»
+ * El año de la traducción va con el traductor y jamás se presenta como el de la Obra.
+ */
+const deLaTraduccion = fraseDeTraduccion(cita, 'Traducción de');
+if (deLaTraduccion !== undefined) frases.push(deLaTraduccion);
 
 if (referencia !== undefined) frases.push(referencia);
 

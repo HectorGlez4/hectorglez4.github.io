@@ -6,6 +6,8 @@ import { dirname, join } from 'node:path';
 import {
   documentarCita,
   parecidoDeTextos,
+  restitucionDeTraduccion,
+  restituirTraducciones,
   retirarCita,
   MIN_PARECIDO_PARA_CORREGIR,
 } from '../../tools/lib/documentacion.ts';
@@ -777,5 +779,212 @@ citas:
     expect(await leerCensoDeCotejo(rutas)).toContain(SLUG_DE_MONTALVO);
     expect(await frontmatterDe(join(rutas.citas, 'juan-montalvo--el-habito-no-hace-al-monje-pero-la.md')))
       .not.toHaveProperty('fuente');
+  });
+});
+
+/**
+ * Historia 19.1 — restituir la traducción de lo ya publicado, leyendo el documento.
+ */
+describe('Historia 19.1 — restituir la traducción', () => {
+  const ODAS_TEXTO = 'Feliz quien lejos de negocios vive.';
+  const ODAS_SLUG = 'horacio-feliz-quien-lejos-de-negocios-vive';
+  const ODAS_FICHERO = 'citas/horacio--feliz-quien-lejos-de-negocios-vive.md';
+  const ODAS_DOCUMENTO = 'fuentes/wikisource-es--odas--odas-horacio-salinas-tr-i.txt';
+  const FICHA_DE_HORACIO = 'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta lírico latino.\ntradicion: otra\n';
+
+  function documentoDeOdas(declaracion: string[]): string {
+    return componerDocumento(
+      {
+        fuente: 'wikisource-es',
+        obra: 'Odas',
+        año: 1909,
+        url: 'https://es.wikisource.org/wiki/Odas_%28Horacio%2C_Salinas_tr.%29/I',
+        recuperado: '2026-09-13',
+      },
+      declaracion.join('\n'),
+      `Oda primera.\n${ODAS_TEXTO}\nY nada más.`,
+    );
+  }
+
+  const DECLARACION_DE_ODAS = [
+    'Odas (Horacio, Salinas tr.)/I',
+    '|título=Odas',
+    '|autor=[[Horacio]]',
+    '|traductor=[[Germán Salinas]]',
+    '|año=1909',
+  ];
+
+  function citaDeOdas(procedencia: Record<string, unknown>): string {
+    return citaValida({
+      autor: 'horacio',
+      temas: [],
+      slug: ODAS_SLUG,
+      texto: ODAS_TEXTO,
+      procedencia,
+      fuente: {
+        id: 'wikisource-es',
+        nombre: 'Wikisource en español',
+        licencia: 'CC BY-SA 4.0',
+        url: 'https://es.wikisource.org/wiki/Odas_%28Horacio%2C_Salinas_tr.%29/I',
+      },
+    });
+  }
+
+  async function corpusDeOdas(procedencia: Record<string, unknown>, declaracion = DECLARACION_DE_ODAS) {
+    return enDisco({
+      'autores/horacio.yml': FICHA_DE_HORACIO,
+      [ODAS_FICHERO]: citaDeOdas(procedencia),
+      [ODAS_DOCUMENTO]: documentoDeOdas(declaracion),
+    });
+  }
+
+  it('el año publicado pasa a ser el de la traducción, y se añade el traductor', async () => {
+    const rutas = await corpusDeOdas({ obra: 'Odas', año: 1909 });
+
+    const resultado = await restituirTraducciones(rutas);
+    expect(resultado.ok).toBe(true);
+    const datos = await frontmatterDe(join(rutas.raiz, ODAS_FICHERO));
+    expect(datos.procedencia).toEqual({
+      obra: 'Odas',
+      traduccion: { traductor: 'Germán Salinas', año: 1909 },
+    });
+    // Ni el texto ni el slug.
+    expect(datos.texto).toBe(ODAS_TEXTO);
+    expect(datos.slug).toBe(ODAS_SLUG);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Odas: 1 \(1 con el año movido\)/);
+  });
+
+  it('es idempotente: una segunda pasada no cambia nada', async () => {
+    const rutas = await corpusDeOdas({ obra: 'Odas', año: 1909 });
+    await restituirTraducciones(rutas);
+    const antes = await instantanea(rutas.citas);
+
+    const segunda = await restituirTraducciones(rutas);
+    expect(segunda.ok && segunda.mensaje).toMatch(/Traducción restituida en 0 Citas publicadas\./);
+    expect(segunda.ok && segunda.mensaje).toMatch(/Ya restituidas, sin cambios: 1\./);
+    expect(await instantanea(rutas.citas)).toEqual(antes);
+  });
+
+  it('sin año declarado, solo el traductor', () => {
+    const restitucion = restitucionDeTraduccion(
+      {
+        slug: 'agustin-una',
+        texto: ODAS_TEXTO,
+        fuente: { id: 'wikisource-es' },
+        procedencia: { obra: 'La ciudad de Dios' },
+      },
+      new Map([
+        [
+          'wikisource-es--la-ciudad-de-dios--la-ciudad-de-dios-i',
+          {
+            fuente: 'wikisource-es',
+            declaracion: [
+              'La ciudad de Dios/I',
+              '|título=[[La ciudad de Dios]]',
+              '|traductor=José Cayetano Díaz de Beyral',
+            ].join('\n'),
+            cuerpo: ODAS_TEXTO,
+          },
+        ],
+      ]),
+    );
+    expect(restitucion).toEqual({
+      tipo: 'cambia',
+      obra: 'La ciudad de Dios',
+      procedencia: {
+        obra: 'La ciudad de Dios',
+        traduccion: { traductor: 'José Cayetano Díaz de Beyral' },
+      },
+      añoMovido: false,
+    });
+  });
+
+  it('un año publicado distinto del de la traducción no se toca: se lista', async () => {
+    const rutas = await corpusDeOdas({ obra: 'Odas', año: 1900 });
+    const antes = await instantanea(rutas.citas);
+
+    const resultado = await restituirTraducciones(rutas);
+    expect(resultado.ok).toBe(true);
+    expect(resultado.ok && resultado.mensaje).toContain(ODAS_SLUG);
+    expect(resultado.ok && resultado.mensaje).toMatch(/publica el año 1900/);
+    expect(await instantanea(rutas.citas)).toEqual(antes);
+  });
+
+  it('una Cita cuyo documento no declara traductor no cambia', async () => {
+    const rutas = await corpusDeOdas(
+      { obra: 'Odas', año: 1909 },
+      ['Odas (Horacio, Salinas tr.)/I', '|título=Odas', '|autor=[[Horacio]]', '|año=1909'],
+    );
+    const antes = await instantanea(rutas.citas);
+    await restituirTraducciones(rutas);
+    expect(await instantanea(rutas.citas)).toEqual(antes);
+  });
+
+  it('no toca ninguna Cita sin documento', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente(),
+    });
+    const antes = await instantanea(rutas.citas);
+    const resultado = await restituirTraducciones(rutas);
+    expect(resultado.ok).toBe(true);
+    expect(await instantanea(rutas.citas)).toEqual(antes);
+  });
+
+  it('una Cita con otra traducción declarada se lista sin tocarla', async () => {
+    const rutas = await corpusDeOdas({
+      obra: 'Odas',
+      traduccion: { traductor: 'Otro Traductor', año: 1909 },
+    });
+    const antes = await instantanea(rutas.citas);
+    const resultado = await restituirTraducciones(rutas);
+    expect(resultado.ok && resultado.mensaje).toMatch(/No se han tocado 1 Cita,/);
+    expect(resultado.ok && resultado.mensaje).toMatch(/ya declara la traducción «Otro Traductor»/);
+    expect(await instantanea(rutas.citas)).toEqual(antes);
+  });
+
+  it('restituye también las candidatas de revisión, y las cuenta aparte', async () => {
+    const rutas = await enDisco({
+      'autores/horacio.yml': FICHA_DE_HORACIO,
+      ['_revision/horacio--feliz-quien-lejos-de-negocios-vive.md']: citaDeOdas({ obra: 'Odas', año: 1909 }),
+      [ODAS_DOCUMENTO]: documentoDeOdas(DECLARACION_DE_ODAS),
+    });
+    const resultado = await restituirTraducciones(rutas);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Traducción restituida en 0 Citas publicadas\./);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Candidatas de revisión restituidas: 1 \(1 con el año movido\)\./);
+    const datos = await frontmatterDe(join(rutas.revision, 'horacio--feliz-quien-lejos-de-negocios-vive.md'));
+    expect(datos.procedencia).toEqual({
+      obra: 'Odas',
+      traduccion: { traductor: 'Germán Salinas', año: 1909 },
+    });
+  });
+
+  it('concuerda en número: «1 Cita publicada»', async () => {
+    const rutas = await corpusDeOdas({ obra: 'Odas', año: 1909 });
+    const resultado = await restituirTraducciones(rutas);
+    expect(resultado.ok && resultado.mensaje).toMatch(/Traducción restituida en 1 Cita publicada,/);
+  });
+
+  it('documentar escribe la traducción desde la derivación', async () => {
+    const rutas = await enDisco({
+      'autores/horacio.yml': FICHA_DE_HORACIO,
+      [ODAS_FICHERO]: citaValida({
+        autor: 'horacio',
+        temas: [],
+        slug: ODAS_SLUG,
+        texto: ODAS_TEXTO,
+        procedencia: { obra: 'Odas', año: 1909 },
+        fuente: undefined,
+      }),
+      [ODAS_DOCUMENTO]: documentoDeOdas(DECLARACION_DE_ODAS),
+    });
+
+    const resultado = await documentarCita(rutas, ODAS_SLUG, join(rutas.fuentes, 'wikisource-es--odas--odas-horacio-salinas-tr-i.txt'));
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    const datos = await frontmatterDe(join(rutas.citas, 'horacio--feliz-quien-lejos-de-negocios-vive.md'));
+    expect(datos.procedencia).toEqual({
+      obra: 'Odas',
+      traduccion: { traductor: 'Germán Salinas', año: 1909 },
+    });
   });
 });

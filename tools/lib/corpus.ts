@@ -740,6 +740,30 @@ export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDe
 }
 
 /**
+ * Los documentos de Fuente con su **declaración**, por nombre sin extensión — Historia 19.1.
+ *
+ * Aparte de `leerDocumentosDeFuente`, que da solo el cuerpo porque es lo único contra lo que
+ * se coteja: restituir la traducción necesita además lo que la Fuente declara. Un fichero que
+ * no se deja analizar no entra; no declara nada que restituir.
+ */
+export async function leerDocumentosDeclarados(
+  rutas: Rutas,
+): Promise<Map<string, { fuente: string; declaracion: string; cuerpo: string }>> {
+  const ficheros = await ficherosDe(rutas.fuentes, ['.txt']);
+  const documentos = new Map<string, { fuente: string; declaracion: string; cuerpo: string }>();
+  for (const ruta of ficheros) {
+    const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
+    if (analizado === undefined) continue;
+    documentos.set(slugDeFichero(ruta), {
+      fuente: analizado.cabecera.fuente,
+      declaracion: analizado.declaracion,
+      cuerpo: analizado.cuerpo,
+    });
+  }
+  return documentos;
+}
+
+/**
  * El censo tal y como está escrito — Historia 11.6.
  *
  * Darle de baja a una Cita es borrar **una línea** de un fichero que es dos tercios

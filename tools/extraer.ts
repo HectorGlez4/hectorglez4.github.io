@@ -63,6 +63,7 @@ import {
 import {
   analizarDocumento,
   derivarDeLaDeclaracion,
+  procedenciaDeLaDerivacion,
   esElMismoAutor,
   nombreDeDocumento,
 } from './lib/documento.ts';
@@ -350,12 +351,16 @@ if (
 
 // ── A partir de aquí, la extracción de la 9.1 tal cual ───────────────────────
 
+const traduccionDerivada = procedenciaDeLaDerivacion(derivado).traduccion;
+
 const documento: DocumentoDeFuente = {
   fuente: cabecera.fuente,
   obra: derivado.obra,
   url: cabecera.url,
   texto: cuerpo,
   ...(derivado.año !== undefined ? { año: derivado.año } : {}),
+  // Historia 19.1: si la Fuente declara traductor, el año que trae es el de la traducción.
+  ...(traduccionDerivada !== undefined ? { traduccion: traduccionDerivada } : {}),
 };
 
 const resultado = extraerCandidatas(documento, autor);

@@ -51,6 +51,31 @@ describe('Historia 9.1 — la obra y el año vienen de la Fuente', () => {
   });
 });
 
+describe('Historia 19.1 — la candidata lleva la traducción que declara la Fuente', () => {
+  it('con traductor, la Procedencia lleva traduccion y no año de la Obra', () => {
+    const { año: _sinAño, ...sinAño } = documento();
+    const resultado = extraerCandidatas(
+      { ...sinAño, traduccion: { traductor: 'Germán Salinas', año: 1909 } },
+      'seneca',
+    );
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    for (const candidata of resultado.candidatas) {
+      expect(candidata.procedencia).toEqual({
+        obra: 'Sobre la brevedad de la vida',
+        traduccion: { traductor: 'Germán Salinas', año: 1909 },
+      });
+    }
+  });
+
+  it('sin traducción declarada, la Procedencia no lleva el campo', () => {
+    const resultado = extraerCandidatas(documento(), 'seneca');
+    if (!resultado.ok) throw new Error('no hubo candidatas');
+    for (const candidata of resultado.candidatas) {
+      expect(candidata.procedencia).not.toHaveProperty('traduccion');
+    }
+  });
+});
+
 describe('Historia 9.1 — ninguna Procedencia aproximada', () => {
   it.each([
     ['c. 1615', undefined],

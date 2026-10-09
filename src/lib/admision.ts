@@ -37,6 +37,31 @@ export const MENSAJE_PROCEDENCIA_VACIA =
   'referencia. Una Cita cuya procedencia se desconoce no se publica: va a corpus/_revision/.';
 
 /**
+ * La traducción de la que sale una Cita — Historia 19.1.
+ *
+ * Lo que la Fuente declara de su edición —quién tradujo y cuándo— es dato de la
+ * **edición**, no de la Obra: las Odas no son de 1909, la traducción de Germán Salinas sí.
+ * Por eso vive aparte de `procedencia.año`, que es solo el año de la Obra y se omite si la
+ * Fuente no lo da (nunca se infiere).
+ *
+ * `traductor` es obligatorio cuando el campo se declara: una traducción de la que solo
+ * consta un año no dice nada que se pueda publicar como «Traducción de…». `año` es el de
+ * la traducción y es opcional; sin valor se omite. No es una puerta de publicación: una
+ * Cita de obra traducida sin este campo se publica igual (la salud la cuenta).
+ */
+export const traduccionDeclarada = z
+  .object({
+    traductor: z
+      .string({ message: 'Regla incumplida: la traducción declara su traductor, que es obligatorio.' })
+      .trim()
+      .min(1, 'Regla incumplida: el traductor no puede estar vacío ni ser solo espacios.'),
+    año: añoEntero('El año de la traducción debe ser un número entero.').optional(),
+  })
+  .strict();
+
+export type Traduccion = z.infer<typeof traduccionDeclarada>;
+
+/**
  * Procedencia — origen documentado de una Cita.
  *
  * El campo es obligatorio y debe documentar algo. El PRD lo cierra sin ambigüedad:
@@ -57,6 +82,7 @@ export const procedenciaDeclarada = z
         .string()
         .min(1, 'La referencia, si se declara, no puede estar vacía.')
         .optional(),
+      traduccion: traduccionDeclarada.optional(),
     },
     {
       // Sin esto, omitir el campo entero da «expected object, received undefined» —

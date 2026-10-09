@@ -2,15 +2,29 @@
 title: 'Historia 19.1 — De una obra traducida se conserva lo que la Fuente declare'
 type: 'feature'
 created: '2026-10-09'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '80220616addfbb70c68e63b474d6192e8d0190bd'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-19-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      El traductor solo se lee de wikisource-es; las obras traducidas de Gutenberg siguen publicando el año de la edición como de la Obra.
+    evidence: |-
+      `traduccion?` es opcional en LectorDeFuente y solo lo implementa el lector de Wikisource.
+    location: >-
+      tools/lib/documento.ts
+    severity: low
+  - summary: >-
+      La cifra de salud «traducidas sin traducción» usa la tradición `otra` como indicio y cuenta a José Rizal, que escribía en español.
+    evidence: |-
+      No hay en el Corpus una marca explícita de obra traducida.
+    location: >-
+      src/lib/salud.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -120,6 +134,19 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-09 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 1, medium 3, low 8)
+- defer: 2 (low 2)
+- reject: 6
+- addressed_findings:
+  - `[high]` `[patch]` El año pasaba a ser de traducción aunque viniera de otro bloque que el traductor → reclasificación solo dentro del mismo bloque.
+  - `[medium]` `[patch]` Las candidatas de `_revision/` quedaban con el año de la traducción como de la Obra → la restitución las recorre (10.222, 3.413 con el año movido).
+  - `[medium]` `[patch]` La cabecera perdía el año de la traducción → `añoDeTraduccion:`.
+  - `[medium]` `[patch]` Faltaban pruebas de CLI de extraer, recuperar y auditoría → añadidas.
+  - `[low]` `[patch]` Traductores desconocidos y plantillas; traducción distinta listada; calcular y luego escribir; concordancia de número; ayudante único `fraseDeTraduccion`; trim del traductor; la cifra de salud solo con documento y desglosada por Autor; AGENTS.md.
+
 ## Design Notes
 
 Por qué «año junto al traductor = año de la traducción» no es inferir: en los documentos medidos, el único `|año=` declarado está en el mismo bloque que `|traductor=`, y la épica fija que «el año que hoy publican como de la obra pasa a ser el de la traducción». Lo que **sería** inferir es inventarle a la Obra un año; por eso queda omitido.
@@ -130,3 +157,15 @@ Por qué «año junto al traductor = año de la traducción» no es inferir: en 
 - `npx vitest run tests/unit/documento.test.ts tests/unit/documentacion.test.ts tests/unit/documentar-cli.test.ts tests/unit/extraccion.test.ts tests/unit/puerta-de-admision.test.ts tests/unit/salud.test.ts tests/unit/compartir.test.ts` (y los ficheros nuevos) -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** la Procedencia gana `traduccion: {traductor, año?}`. La derivación lee el traductor de la declaración literal, y el año de su mismo bloque es el de la traducción. `documentar --restituir-traduccion` restituyó 131 Citas publicadas, 65 de ellas con el año movido (Odas 35, Consolación a Marcia 14, La Eneida 8, Fedro 6 y Las avispas 2), y 10.222 candidatas de revisión. La Atribución dice «Odas. Traducción de Germán Salinas, 1909.», lo copiado lleva «trad. de…», y la Imagen, la Tarjeta, la Pieza y el JSON-LD no nombran al traductor.
+
+**Revisión:** 12 parches aplicados, 2 diferidos y 6 rechazados (pedir la página de la obra cuando el traductor solo está en ella; código de salida distinto de 0 cuando hay listadas; «Sin año documentado» junto a la traducción, que UX-DR51 no pide; el formato de año negativo, que ya existía; el `translator` del JSON-LD, que UX quiere mínimo; reconciliar las cabeceras viejas, que no se reescriben). Seguimiento: high 1 → true.
+
+**Verificación:** suite completa 108 ficheros y 3162 pruebas; astro check, 0 errores; build, código 0; restitución idempotente en la tercera pasada.
+
+**Riesgo residual:** la rama de fallo a media escritura no tiene prueba; la cifra de salud es heurística.

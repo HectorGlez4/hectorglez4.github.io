@@ -174,7 +174,11 @@ if (!deLaPagina.ok) terminar({ ok: false, motivos: [deLaPagina.motivo] });
  * salto**: si la obra tampoco lo declara, se acabó.
  */
 const laObra =
-  deLaPagina.año === undefined && encabezado.texto !== undefined
+  // Un año declarado junto al traductor también es un año que la página ya trae
+  // (Historia 19.1): pedir la obra por él gastaría una petición sin necesidad.
+  deLaPagina.año === undefined &&
+  deLaPagina.añoDeTraduccion === undefined &&
+  encabezado.texto !== undefined
     ? await encabezadoDeLaObra(descarga.url, encabezado.texto, fuente)
     : {};
 
@@ -332,6 +336,10 @@ await writeFile(
       fuente: fuente.id,
       obra: derivado.obra,
       ...(derivado.año !== undefined ? { año: derivado.año } : {}),
+      ...(derivado.traductor !== undefined ? { traductor: derivado.traductor } : {}),
+      ...(derivado.traductor !== undefined && derivado.añoDeTraduccion !== undefined
+        ? { añoDeTraduccion: derivado.añoDeTraduccion }
+        : {}),
       url: descarga.url,
       // Solo cuando hubo redirección: si no, sería la misma línea dos veces.
       ...(descarga.url !== url ? { pedido: url } : {}),
@@ -350,7 +358,11 @@ await writeFile(
 const avisos = [encabezado.aviso, laObra.aviso, elIndice.aviso].filter(
   (a): a is string => a !== undefined,
 );
-if (laObra.texto !== undefined && derivado.año === undefined) {
+if (
+  laObra.texto !== undefined &&
+  derivado.año === undefined &&
+  derivado.añoDeTraduccion === undefined
+) {
   avisos.push(
     `Aviso: «${laObra.obra}», la obra que esta página declara, tampoco declara año. ` +
       'No se encadena más: un solo salto, de la página a su obra.',
@@ -404,7 +416,8 @@ const autorPorElIndice =
     : '';
 
 const deDondeSaleElAño =
-  derivado.año !== undefined && laObra.texto !== undefined
+  (derivado.año !== undefined || derivado.añoDeTraduccion !== undefined) &&
+  laObra.texto !== undefined
     ? ` (lo declara «${laObra.obra}», la obra a la que esta página dice pertenecer)`
     : '';
 
@@ -415,6 +428,11 @@ terminar({
     `Documento versionado: ${destino}\n` +
     `Obra: ${derivado.obra}\n` +
     `Año: ${derivado.año === undefined ? 'no consta exacto (la candidata quedará con obra y sin año)' : `${derivado.año}${deDondeSaleElAño}`}\n` +
+    // Historia 19.1: el año declarado junto al traductor es el de la traducción, no el de la Obra.
+    (derivado.traductor === undefined
+      ? ''
+      : `Traducción: ${derivado.traductor}` +
+        `${derivado.añoDeTraduccion === undefined ? ', sin año declarado' : `, ${derivado.añoDeTraduccion}${deDondeSaleElAño}`}\n`) +
     autorPorElIndice +
     avisos.map((aviso) => `${aviso}\n`).join('') +
     `Licencia: ${fuente.licencia} (${fuente.nombre})`,

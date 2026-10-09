@@ -3,6 +3,7 @@
  *
  *   npx tsx tools/documentar.ts <slug> <corpus/fuentes/documento.txt> [--texto "<literal>"]
  *   npx tsx tools/documentar.ts --retirar <slug> "<motivo>"
+ *   npx tsx tools/documentar.ts --restituir-traduccion
  *
  * Un interruptor fino sobre `tools/lib/documentacion.ts`, con el patrón de
  * `tools/coleccion.ts`: aquí se leen argumentos y se escribe la salida, y toda la lógica
@@ -21,7 +22,7 @@
  * 0 dejaría a un guion de ingesta creyendo que la Cita quedó documentada.
  */
 
-import { documentarCita, retirarCita } from './lib/documentacion.ts';
+import { documentarCita, restituirTraducciones, retirarCita } from './lib/documentacion.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import {
   motivosDeArgumentosNoReconocidos,
@@ -38,12 +39,17 @@ const USO = [
   'Uso:',
   '  npx tsx tools/documentar.ts <slug> <corpus/fuentes/documento.txt> [--texto "<literal>"]',
   '  npx tsx tools/documentar.ts --retirar <slug> "<motivo>"',
+  '  npx tsx tools/documentar.ts --restituir-traduccion',
   '',
   'Documentar escribe la Fuente y la Procedencia derivadas del documento, y saca la Cita',
   'del censo de pendientes de cotejo. Solo si su texto aparece literal en el documento.',
   '',
   '--texto restituye el texto literal de la edición cuando el publicado difiere en signos.',
   'El texto nuevo también tiene que aparecer literal, y ser la misma Cita.',
+  '',
+  '--restituir-traduccion escribe en las Citas publicadas la traducción que declara su',
+  'documento (traductor y año), y el año publicado igual al de la traducción deja de ser',
+  'el de la Obra. Idempotente; lo que no puede restituir sin inventar lo lista.',
   '',
   'Toda orden admite --corpus <ruta>.',
   '',
@@ -58,6 +64,7 @@ const argumentos = process.argv.slice(2);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 const sueltos = posicionales(argumentos, CON_VALOR);
 const retirando = argumentos.includes('--retirar');
+const restituyendo = argumentos.includes('--restituir-traduccion');
 
 /*
  * Una bandera con errata no es «lo mismo pero sin ella», y aquí menos que en ninguna otra
@@ -68,12 +75,20 @@ const retirando = argumentos.includes('--retirar');
  * `posicionales`— y lo que sobra es cualquier opción que esta orden no tenga.
  */
 const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
-  solas: [...sueltos, '--retirar'],
-  conValor: retirando ? (['--corpus'] as const) : CON_VALOR,
+  solas: [...sueltos, '--retirar', '--restituir-traduccion'],
+  conValor: retirando || restituyendo ? (['--corpus'] as const) : CON_VALOR,
 });
 if (noReconocidos.length > 0) porLaForma(...noReconocidos);
 
 try {
+  if (restituyendo) {
+    if (retirando) porLaForma('--restituir-traduccion y --retirar son órdenes distintas.');
+    if (sueltos.length > 0) {
+      porLaForma(`--restituir-traduccion no admite argumentos: sobran «${sueltos.join('», «')}».`);
+    }
+    terminar(await restituirTraducciones(rutas));
+  }
+
   if (retirando) {
     const [slug, motivo, ...sobrantes] = sueltos;
     if (slug === undefined) porLaForma('Indique el slug de la Cita que retira.');

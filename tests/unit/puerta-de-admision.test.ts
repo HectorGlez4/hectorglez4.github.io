@@ -92,6 +92,17 @@ describe('Historia 1.2 — el criterio de admisión rompe el build', () => {
     expect(salida).toMatch(/estadoDerechos|dominio-público/);
   });
 
+  it('Historia 19.1 — una traducción sin traductor rompe el build', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      'citas/seneca--el-tiempo.md': citaValida({
+        procedencia: { obra: 'Sobre la brevedad de la vida', traduccion: { año: 1909 } },
+      }),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toMatch(/traductor/);
+  });
+
   it('una Cita sin texto rompe el build', async () => {
     const { codigo } = await construir({
       ...CORPUS_BASE,

@@ -279,6 +279,21 @@ parecerse al publicado por encima de `MIN_PARECIDO_PARA_CORREGIR` (0,85 sobre la
 canónica de AD-3), que es lo que impide cambiar una Cita por otra de la misma página. El
 slug **no** se recalcula aunque el texto cambie: es la URL (AD-4).
 
+**De una obra traducida se conserva lo que la Fuente declara** (Historia 19.1). `recuperar`
+registra el traductor en la cabecera del documento (`traductor:` y, si consta,
+`añoDeTraduccion:`), y `extraer` y `documentar` escriben ya `procedencia.traduccion`
+—traductor y, si consta, año—. El año es de la traducción **solo si sale del mismo bloque
+que el traductor** (la página, la obra declarada o el índice); el de otro bloque sigue siendo
+el de la Obra. Lo ya publicado se restituye con
+`npm run documentar -- --restituir-traduccion`, que lee la declaración de cada documento
+versionado sin reescribirlo, recorre también las candidatas de `corpus/_revision/` (las
+cuenta aparte) y es idempotente. Lista sin tocarla la Cita cuyo año publicado no casa con el
+declarado junto al traductor, la que ya trae una traducción distinta y la que aparece en
+páginas que declaran traducciones distintas. Una Cita cuyo único año era el de la traducción
+pasa a procedencia «parcial», y es lo cierto. `npx tsx tools/auditoria.ts` da la cifra de
+Citas con documento de Autor `otra` sin traducción (con desglose por Autor en `--json`).
+El traductor de Gutenberg no se lee todavía.
+
 Lo que no es la misma Cita se retira, siempre con su motivo: `--retirar` **mueve** el
 fichero a `corpus/_revision/` (AD-2) y lo saca del censo. No borra nada, y el motivo va en
 el mensaje del commit — git es el único almacén (AD-10). Sin motivo la orden se niega, con

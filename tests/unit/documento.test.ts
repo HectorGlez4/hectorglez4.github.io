@@ -22,6 +22,7 @@ import {
   resolverEntidades,
   tituloDeclarado,
   tokensDeNombreDeAutor,
+  traductorDeclarado,
   ultimoAñoPosible,
 } from '../../tools/lib/documento.ts';
 import { extraerCandidatas } from '../../tools/lib/extraccion.ts';
@@ -2272,5 +2273,172 @@ describe('FR-23 — el Autor también se lee de la línea que la página imprime
 
     const { autor } = derivarDeLaDeclaracion('wikisource-es', derivado.declaracion);
     expect(autor?.nombres).toEqual(['Manuel González Prada']);
+  });
+});
+
+/**
+ * Historia 19.1 — de una obra traducida se conserva lo que la Fuente declare.
+ *
+ * Las declaraciones son las de los documentos versionados, copiadas tal cual.
+ */
+describe('Historia 19.1 — el traductor y el año de la traducción', () => {
+  const ODAS = [
+    'Odas (Horacio, Salinas tr.)/I',
+    '|título=Odas',
+    '|autor=[[Horacio]]',
+    '|traductor=[[Germán Salinas]]',
+    '|año=1909',
+  ].join('\n');
+
+  const ENEIDA = [
+    'La Eneida (Ochoa)/Libro I',
+    '|título=[[La Eneida (Ochoa)|La Eneida]]',
+    '|autor=Virgilio',
+    `${MARCA_DE_LA_OBRA} |título=La Eneida`,
+    `${MARCA_DE_LA_OBRA} |autor=Virgilio`,
+    `${MARCA_DE_LA_OBRA} |año=1869`,
+    `${MARCA_DE_LA_OBRA} |traductor=Eugenio de Ochoa`,
+  ].join('\n');
+
+  it('Odas: el año declarado junto al traductor es el de la traducción, no el de la Obra', () => {
+    const derivado = derivarDeLaDeclaracion('wikisource-es', ODAS);
+    expect(derivado).toMatchObject({
+      obra: 'Odas',
+      traductor: 'Germán Salinas',
+      añoDeTraduccion: 1909,
+    });
+    expect(derivado).not.toHaveProperty('año');
+  });
+
+  it('La Eneida: traductor y año que solo declara la obra', () => {
+    const derivado = derivarDeLaDeclaracion('wikisource-es', ENEIDA);
+    expect(derivado.obra).toBe('La Eneida');
+    expect(derivado.traductor).toBe('Eugenio de Ochoa');
+    expect(derivado.añoDeTraduccion).toBe(1869);
+    expect(derivado).not.toHaveProperty('año');
+  });
+
+  it('admite «|traductor =» con espacios', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Las avispas', '|titulo =Las avispas', '|año =1881', '|traductor =Federico Baráibar'].join('\n'),
+    );
+    expect(derivado.traductor).toBe('Federico Baráibar');
+    expect(derivado.añoDeTraduccion).toBe(1881);
+  });
+
+  it('el traductor del índice del escaneo, en último lugar', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Obra/Uno', '|título=Obra', 'índice> |Traductor=[[Autor:Ana Pérez|Ana Pérez]]'].join('\n'),
+    );
+    expect(derivado.traductor).toBe('Ana Pérez');
+  });
+
+  it('el de la página manda sobre el de la obra', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['P', '|título=P', '|traductor=Uno', `${MARCA_DE_LA_OBRA} |traductor=Otro`].join('\n'),
+    );
+    expect(derivado.traductor).toBe('Uno');
+  });
+
+  it('sin traductor, nada cambia: el año es el de la Obra', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Ariel', '|título=Ariel', '|año=1898'].join('\n'),
+    );
+    expect(derivado.año).toBe(1898);
+    expect(derivado).not.toHaveProperty('traductor');
+    expect(derivado).not.toHaveProperty('añoDeTraduccion');
+  });
+
+  it('«Wikisource» es un traductor declarado y se conserva literal', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['De la agricultura', '|titulo = De Agri Cultura', '|traductor = Wikisource'].join('\n'),
+    );
+    expect(derivado.traductor).toBe('Wikisource');
+    expect(derivado).not.toHaveProperty('añoDeTraduccion');
+  });
+
+  it('un traductor vacío no declara a nadie', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Ariel', '|título=Ariel', '|traductor=', '|año=1898'].join('\n'),
+    );
+    expect(derivado.año).toBe(1898);
+    expect(derivado).not.toHaveProperty('traductor');
+  });
+
+  it('año en la página y traductor en el índice: el año sigue siendo de la Obra', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Obra/Uno', '|título=Obra', '|año=1890', 'índice> |Traductor=Ana Pérez'].join('\n'),
+    );
+    expect(derivado.año).toBe(1890);
+    expect(derivado.traductor).toBe('Ana Pérez');
+    expect(derivado).not.toHaveProperty('añoDeTraduccion');
+  });
+
+  it('traductor en la página y año en una obra que no declara traductor: año de la Obra', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Obra/Uno', '|título=Obra', '|traductor=Ana Pérez', `${MARCA_DE_LA_OBRA} |año=1890`].join('\n'),
+    );
+    expect(derivado.año).toBe(1890);
+    expect(derivado.traductor).toBe('Ana Pérez');
+    expect(derivado).not.toHaveProperty('añoDeTraduccion');
+  });
+
+  it('el año del índice es de la traducción si el índice declara al mismo traductor', () => {
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Obra/Uno', '|título=Obra', 'índice> |Traductor=Ana Pérez', 'índice> |Ano=1911'].join('\n'),
+    );
+    expect(derivado.traductor).toBe('Ana Pérez');
+    expect(derivado.añoDeTraduccion).toBe(1911);
+    expect(derivado).not.toHaveProperty('año');
+  });
+
+  it('un autor desconocido o una plantilla no declaran traductor; «Wikisource» sí', () => {
+    for (const valor of ['Anónimo', 'Desconocido', 'Varios', '[[Autor:Anónimo|Anónimo]]', '{{Traductor}}']) {
+      expect(traductorDeclarado(valor), valor).toBeUndefined();
+    }
+    expect(traductorDeclarado('Wikisource')).toBe('Wikisource');
+    const derivado = derivarDeLaDeclaracion(
+      'wikisource-es',
+      ['Obra', '|título=Obra', '|traductor=Anónimo', '|año=1890'].join('\n'),
+    );
+    expect(derivado.año).toBe(1890);
+    expect(derivado).not.toHaveProperty('traductor');
+  });
+
+  it('se quita el marcado: [[X]] y [[X|Y]]', () => {
+    expect(traductorDeclarado('[[Germán Salinas]]')).toBe('Germán Salinas');
+    expect(traductorDeclarado('[[Autor:Germán Salinas|G. Salinas]]')).toBe('G. Salinas');
+    expect(traductorDeclarado('[[Autor:Germán Salinas]]')).toBe('Germán Salinas');
+    expect(traductorDeclarado('  ')).toBeUndefined();
+  });
+
+  it('la cabecera lleva el traductor, y se lee de vuelta', () => {
+    const documento = componerDocumento(
+      {
+        fuente: 'wikisource-es',
+        obra: 'Odas',
+        traductor: 'Germán Salinas',
+        añoDeTraduccion: 1909,
+        url: 'https://es.wikisource.org/wiki/Odas',
+        recuperado: '2026-10-09',
+      },
+      ODAS,
+      'Texto.',
+    );
+    expect(documento).toContain('\ntraductor: Germán Salinas\nañoDeTraduccion: 1909\n');
+    expect(documento).not.toMatch(/^año:/m);
+    const cabecera = analizarDocumento(documento)?.cabecera;
+    expect(cabecera?.traductor).toBe('Germán Salinas');
+    expect(cabecera?.añoDeTraduccion).toBe(1909);
+    expect(cabecera).not.toHaveProperty('año');
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { auditar, type CitaParaAuditar } from '../../src/lib/salud.ts';
+import { auditar, sinTraduccionDeclarada, type CitaParaAuditar } from '../../src/lib/salud.ts';
 import { gradoDeProcedencia } from '../../src/lib/admision.ts';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -143,5 +143,33 @@ describe('Historia 1.8 — la derivación es pura (AD-5)', () => {
     const codigo = readFileSync(resolve(RAIZ, 'src/lib/salud.ts'), 'utf8');
     expect(codigo).toMatch(/gradoDeProcedencia/);
     expect(codigo).toMatch(/from '\.\/admision\.ts'/);
+  });
+});
+
+describe('Historia 19.1 — la salud cuenta las traducidas sin traducción', () => {
+  it('cuenta las Citas de Autor de tradición «otra» que no declaran traducción', () => {
+    const fuente = { id: 'wikisource-es' };
+    const citas: CitaParaAuditar[] = [
+      { slug: 'seneca-a', autor: 'seneca', fuente, procedencia: { obra: 'Consolación a Marcia' } },
+      // Sin documento no puede traer traducción: no cuenta.
+      { slug: 'seneca-b', autor: 'seneca', procedencia: { obra: 'Cartas a Lucilio' } },
+      {
+        slug: 'horacio-a',
+        autor: 'horacio',
+        fuente,
+        procedencia: { obra: 'Odas', traduccion: { traductor: 'Germán Salinas', año: 1909 } },
+      },
+      { slug: 'palma-a', autor: 'ricardo-palma', fuente, procedencia: { obra: 'Tradiciones', año: 1872 } },
+    ];
+    expect(sinTraduccionDeclarada(citas, new Set(['seneca', 'horacio']))).toEqual({
+      total: 1,
+      porAutor: [{ autor: 'seneca', citas: 1 }],
+    });
+  });
+
+  it('es una cifra y no cambia el grado de procedencia', () => {
+    expect(
+      gradoDeProcedencia({ obra: 'Odas', traduccion: { traductor: 'Germán Salinas', año: 1909 } }),
+    ).toBe('parcial');
   });
 });

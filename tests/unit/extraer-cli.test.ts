@@ -62,6 +62,7 @@ const AUTORES: Readonly<Record<string, { nombre: string; añoFallecimiento: numb
   'juan-montalvo': { nombre: 'Juan Montalvo', añoFallecimiento: 1889 },
   'miguel-de-cervantes': { nombre: 'Miguel de Cervantes', añoFallecimiento: 1616 },
   'teresa-de-jesus': { nombre: 'Teresa de Jesús', añoFallecimiento: 1582 },
+  horacio: { nombre: 'Horacio', añoFallecimiento: -8 },
 };
 
 /** La ficha de un Autor tal y como la escribiría el alta, admisible para el esquema. */
@@ -1235,5 +1236,41 @@ describe('FR-23 — un documento con dos firmantes no se siembra', () => {
 
     expect(error).toContain('Séneca');
     expect(error).toContain('Amado Nervo');
+  });
+});
+
+describe('Historia 19.1 — la candidata lleva la traducción que el documento declara', () => {
+  it('|traductor=[[Germán Salinas]] y |año=1909: traduccion con su año, y sin año de la Obra', async () => {
+    const { corpus } = await corpusConAutores();
+    const ruta = await documento(
+      corpus,
+      {
+        fuente: 'wikisource-es',
+        obra: 'Odas',
+        traductor: 'Germán Salinas',
+        añoDeTraduccion: 1909,
+        url: 'https://es.wikisource.org/wiki/Odas',
+        recuperado: '2026-09-13',
+      },
+      {
+        nombre: 'wikisource-es--odas.txt',
+        declaracion: ['Odas', '|título=Odas', '|autor=[[Horacio]]', '|traductor=[[Germán Salinas]]', '|año=1909'].join('\n'),
+        texto:
+          'Feliz aquel que lejos de negocios, como la antigua raza de los mortales, labra los campos paternos con sus bueyes.',
+      },
+    );
+
+    const resultado = await extraer(ruta, corpus, [], 'horacio');
+    expect(resultado.codigo, resultado.error).toBe(0);
+
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const datos = await frontmatterDe(corpus, fichero);
+      expect(datos.procedencia).toEqual({
+        obra: 'Odas',
+        traduccion: { traductor: 'Germán Salinas', año: 1909 },
+      });
+    }
   });
 });

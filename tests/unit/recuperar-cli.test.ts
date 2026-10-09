@@ -980,6 +980,27 @@ La cordura y la locura se reparten el imperio de la vida humana.`;
     expect(await elDocumento(t)).toContain('año: 1895');
   });
 
+  it('Historia 19.1 — con |traductor= y |año=: la cabecera lleva la traducción y no se pide la obra', async () => {
+    const t = await taller();
+    const traducida = WIKITEXTO_CAPITULO.replace(
+      '|autor = Juan Montalvo',
+      '|autor = Juan Montalvo\n|traductor = [[Germán Salinas]]\n|año = 1909',
+    );
+    const resultado = await recuperar(URL_CAPITULO, t, {
+      [URL_CAPITULO]: OK(PAGINA_CAPITULO),
+      [CRUDA_CAPITULO]: RAW(traducida),
+      [CRUDA_OBRA]: RAW(WIKITEXTO_OBRA),
+    });
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([URL_CAPITULO, CRUDA_CAPITULO]);
+    const documento = await elDocumento(t);
+    expect(documento).toMatch(/^traductor: Germán Salinas$/m);
+    expect(documento).toMatch(/^añoDeTraduccion: 1909$/m);
+    expect(documento).not.toMatch(/^año: /m);
+    expect(resultado.salida).toContain('Traducción: Germán Salinas, 1909');
+  });
+
   it('un `|título` relativo no encadena: queda sin año y sin error', async () => {
     // «Ariel/Capítulo III» declara `|título = [[../`. Reconstruir «Ariel» de la ruta sería
     // derivar el padre de la URL, que es lo que la Historia 11.1 prohíbe.

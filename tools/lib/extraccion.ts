@@ -33,6 +33,11 @@ export interface DocumentoDeFuente {
   /** Año declarado por la Fuente. Puede venir aproximado; ver `añoExacto`. */
   año?: string | number;
   /**
+   * La traducción que la Fuente declara — Historia 19.1. Su año es el de la traducción y
+   * nunca se presenta como el de la Obra.
+   */
+  traduccion?: { traductor: string; año?: number };
+  /**
    * Dirección concreta del documento, para poder volver a él.
    *
    * Obligatoria desde la Historia 11.2: `fuenteDeCita` la exige en el esquema, así que
@@ -46,7 +51,7 @@ export interface DocumentoDeFuente {
 export interface Candidata {
   texto: string;
   autor: string;
-  procedencia: { obra: string; año?: number };
+  procedencia: { obra: string; año?: number; traduccion?: { traductor: string; año?: number } };
   /** De dónde salió el texto y bajo qué licencia — el criterio lo exige por candidata. */
   fuente: { id: string; nombre: string; licencia: string; url: string };
 }
@@ -756,7 +761,11 @@ export function extraerCandidatas(
     candidatas.push({
       texto: sentencia,
       autor,
-      procedencia: año === undefined ? { obra: documento.obra } : { obra: documento.obra, año },
+      procedencia: {
+        obra: documento.obra,
+        ...(año !== undefined ? { año } : {}),
+        ...(documento.traduccion !== undefined ? { traduccion: documento.traduccion } : {}),
+      },
       fuente: {
         id: fuente.id,
         nombre: fuente.nombre,

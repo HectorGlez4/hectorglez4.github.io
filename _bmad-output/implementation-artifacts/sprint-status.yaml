@@ -265,7 +265,7 @@ development_status:
   epic-19: in-progress
   # 19.1 reescrita en la v7.1 y adelantada: va ANTES de la 22.4. Medido el 09/10, 63 Citas de 4 Obras
   # (Odas 35, Consolación a Marcia 14, Eneida 8, Fedro 6) publican el año de su traducción como el de la obra.
-  19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: backlog
+  19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: review
   19-2-el-bucle-siembra-clasicos-con-meta-propia: review  # falta el listón, que lo pone Héctor
   19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog
   # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie

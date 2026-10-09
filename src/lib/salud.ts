@@ -16,6 +16,8 @@ export interface CitaParaAuditar {
   slug: string;
   autor: string;
   procedencia?: Procedencia;
+  /** La Fuente declarada, si la hay: solo importa su presencia (Historia 19.1). */
+  fuente?: unknown;
 }
 
 export interface Recuento {
@@ -70,5 +72,37 @@ export function auditar(citas: CitaParaAuditar[]): AuditoriaDelCorpus {
           a.porcentajeCompleta - b.porcentajeCompleta || b.total - a.total ||
           a.autor.localeCompare(b.autor, 'es'),
       ),
+  };
+}
+
+/**
+ * Cuántas Citas de Autor de tradición `otra` no declaran traducción — Historia 19.1.
+ *
+ * Es una **cifra y no un error**: la traducción es visibilidad, no una puerta de
+ * publicación. Una Cita de obra traducida sin traductor ni año se publica igual, porque el
+ * dato vive en la edición y la Fuente no siempre lo da —Fedón lo declara y Critón, de la
+ * misma edición, no—. Contarla es lo que deja ver cuánto falta, Séneca incluido.
+ *
+ * La tradición la declara la ficha del Autor; quien llama pasa el conjunto de los de `otra`,
+ * para que esto siga sin leer nada (AD-5).
+ */
+export function sinTraduccionDeclarada(
+  citas: readonly CitaParaAuditar[],
+  autoresDeTradicionOtra: ReadonlySet<string>,
+): { total: number; porAutor: { autor: string; citas: number }[] } {
+  const porAutor = new Map<string, number>();
+  for (const c of citas) {
+    // Solo las que tienen documento: una Cita sin Fuente no puede traer la traducción que
+    // su documento declararía, y contarla mezclaría dos deudas distintas.
+    if (c.fuente === undefined || c.fuente === null) continue;
+    if (!autoresDeTradicionOtra.has(c.autor)) continue;
+    if (c.procedencia?.traduccion !== undefined) continue;
+    porAutor.set(c.autor, (porAutor.get(c.autor) ?? 0) + 1);
+  }
+  return {
+    total: [...porAutor.values()].reduce((suma, n) => suma + n, 0),
+    porAutor: [...porAutor.entries()]
+      .map(([autor, n]) => ({ autor, citas: n }))
+      .sort((a, b) => b.citas - a.citas || a.autor.localeCompare(b.autor, 'es')),
   };
 }

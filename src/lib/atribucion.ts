@@ -38,10 +38,36 @@ export function procedenciaCompuesta(cita: Cita): string | undefined {
  * presentación: comillas angulares, raya, Autor, y la procedencia que conste. Lo que no
  * consta no se escribe — nunca una obra inferida (FR-2).
  */
-export function textoParaCopiar(cita: Cita, autor: Autor): string {
-  const fuente = procedenciaCompuesta(cita);
+/**
+ * La frase de la traducción —traductor y, si consta, su año—, con el arranque que cada
+ * superficie pide: «Traducción de» en la Atribución, «trad. de» en lo copiado — Historia
+ * 19.1, UX-DR51. Un solo dueño para que las dos digan lo mismo hasta la coma. `undefined`
+ * cuando la Cita no declara traducción.
+ */
+export function fraseDeTraduccion(
+  cita: Cita,
+  forma: 'Traducción de' | 'trad. de',
+): string | undefined {
+  const traduccion = cita.procedencia?.traduccion;
+  if (traduccion === undefined) return undefined;
+  return (
+    `${forma} ${traduccion.traductor}` +
+    (traduccion.año !== undefined ? `, ${traduccion.año}` : '')
+  );
+}
 
-  return fuente === undefined
-    ? `«${cita.texto}» — ${autor.nombre}.`
-    : `«${cita.texto}» — ${autor.nombre}, ${fuente}.`;
+export function textoParaCopiar(cita: Cita, autor: Autor): string {
+  const partes = [autor.nombre];
+  const fuente = procedenciaCompuesta(cita);
+  if (fuente !== undefined) partes.push(fuente);
+
+  /*
+   * Historia 19.1, UX-DR51 — la traducción va detrás de la obra y con su propio año:
+   * «— Horacio, Odas, trad. de Germán Salinas, 1909.» Solo lo copiado y la Atribución la
+   * nombran; `procedenciaCompuesta`, que es lo que rasterizan la Imagen y la Pieza, no.
+   */
+  const traduccion = fraseDeTraduccion(cita, 'trad. de');
+  if (traduccion !== undefined) partes.push(traduccion);
+
+  return `«${cita.texto}» — ${partes.join(', ')}.`;
 }

@@ -42,6 +42,7 @@ import { normalizar } from '../../src/lib/normalizar.ts';
 import {
   apareceEnDocumento,
   censoSinLaCita,
+  documentosDeCita,
   FICHERO_DEL_CENSO,
   huellaDeTexto,
 } from './cotejo.ts';
@@ -53,6 +54,7 @@ import {
   leerCensoBruto,
   leerCensoDeCotejo,
   leerCitas,
+  leerDocumentosDeclarados,
   mover,
   separarFrontmatter,
   type CitaEnCorpus,
@@ -63,8 +65,10 @@ import {
   derivarDeLaDeclaracion,
   esElMismoAutor,
   nombreDeDocumento,
+  procedenciaDeLaDerivacion,
   type AutorDeLaFuente,
 } from './documento.ts';
+import type { Traduccion } from '../../src/lib/admision.ts';
 import { fuenteUtilizable } from './extraccion.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
@@ -192,7 +196,10 @@ async function localizarPublicada(rutas: Rutas, slug: string): Promise<Localizad
 
 interface DocumentoLeido {
   obra: string;
+  /** El año de la Obra. Ausente cuando la Fuente declara traductor (Historia 19.1). */
   año?: number;
+  /** La traducción que declara la Fuente, con el año que trae junto al traductor. */
+  traduccion?: Traduccion;
   /**
    * Quién firma, según la declaración literal del documento.
    *
@@ -307,11 +314,15 @@ async function leerDocumento(
     };
   }
 
+  const { traduccion } = procedenciaDeLaDerivacion(derivado);
+
   return {
     ok: true,
     documento: {
       obra: derivado.obra,
       ...(derivado.año !== undefined ? { año: derivado.año } : {}),
+      // Historia 19.1: con traductor, el año que trae la Fuente es el de la traducción.
+      ...(traduccion !== undefined ? { traduccion } : {}),
       ...(derivado.autor !== undefined ? { autor: derivado.autor } : {}),
       url: cabecera.url,
       idFuente: utilizable.fuente.id,
@@ -549,6 +560,14 @@ export async function documentarCita(
     );
   }
 
+  const traduccionDeclarada = cita.procedencia?.traduccion;
+  if (!mismaTraduccion(traduccionDeclarada, documento.traduccion)) {
+    cambios.push(
+      `La traducción cambia: declaraba ${describirTraduccion(traduccionDeclarada)} y el ` +
+        `documento declara ${describirTraduccion(documento.traduccion)}.`,
+    );
+  }
+
   if (textoFinal !== cita.texto) {
     cambios.push(
       `El texto se corrige contra la edición (se parecen ${parecido.toFixed(2)}):`,
@@ -584,6 +603,8 @@ export async function documentarCita(
     obra: documento.obra,
     ...(documento.año !== undefined ? { año: documento.año } : {}),
     ...(typeof previa.referencia === 'string' ? { referencia: previa.referencia } : {}),
+    // Historia 19.1: lo que la Fuente declara de su traducción, aparte del año de la Obra.
+    ...(documento.traduccion !== undefined ? { traduccion: documento.traduccion } : {}),
   };
 
   datos.fuente = {
@@ -636,6 +657,9 @@ export async function documentarCita(
       `«${slug}» queda documentada contra ${rutaDelDocumento}.`,
       `  Fuente:      ${documento.nombreDeLaFuente} (${documento.licencia})`,
       `  Procedencia: ${documento.obra}${documento.año !== undefined ? `, ${documento.año}` : ''}`,
+      ...(documento.traduccion !== undefined
+        ? [`  Traducción:  ${describirTraduccion(documento.traduccion)}`]
+        : []),
       // Que se vea de qué lado quedó la puerta del Autor, y sobre todo cuándo **no**
       // actuó: una puerta muda que no se disparó se parece demasiado a una que aprobó.
       declarado === undefined
@@ -725,6 +749,278 @@ export async function retirarCita(
         : `Sale del censo de ${FICHERO_DEL_CENSO}: quedan ${pendientes} pendientes de cotejo.`,
       'No se ha borrado nada. El motivo va en el mensaje del commit: git es el único ' +
         'almacén del contenido (AD-10).',
+    ].join('\n'),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Restituir la traducción — Historia 19.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Si dos traducciones declaran lo mismo. Dos ausentes son la misma. */
+export function mismaTraduccion(a: Traduccion | undefined, b: Traduccion | undefined): boolean {
+  if (a === undefined || b === undefined) return a === b;
+  return a.traductor === b.traductor && a.año === b.año;
+}
+
+/** La traducción como se dice en un parte: «Germán Salinas», 1909, o «ninguna». */
+export function describirTraduccion(traduccion: Traduccion | undefined): string {
+  if (traduccion === undefined) return 'ninguna';
+  return `«${traduccion.traductor}»${traduccion.año !== undefined ? `, ${traduccion.año}` : ', sin año'}`;
+}
+
+/** «1 Cita», «2 Citas»: el parte concuerda en número. */
+export function citas(n: number, singular = 'Cita', plural = 'Citas'): string {
+  return `${n} ${n === 1 ? singular : plural}`;
+}
+
+/** Lo que la restitución lee de un documento versionado. */
+export interface DocumentoDeclarado {
+  fuente: string;
+  declaracion: string;
+  cuerpo: string;
+}
+
+/** Lo que la restitución lee de una Cita, publicada o candidata. */
+export interface CitaParaRestituir {
+  slug: string;
+  texto: string;
+  fuente?: { id: string } | null;
+  procedencia?: {
+    obra?: string;
+    año?: number;
+    referencia?: string;
+    traduccion?: Traduccion;
+  } | null;
+}
+
+export type RestitucionDeTraduccion =
+  /** Sin documento, o su documento no declara traductor: no hay nada que restituir. */
+  | { tipo: 'nada' }
+  /** Ya declara lo que el documento declara: una segunda pasada no cambia nada. */
+  | { tipo: 'igual' }
+  | {
+      tipo: 'cambia';
+      obra: string;
+      procedencia: {
+        obra: string;
+        año?: number;
+        referencia?: string;
+        traduccion: Traduccion;
+      };
+      /** Si el año publicado pasó a ser el de la traducción. */
+      añoMovido: boolean;
+    }
+  /** Block If de la historia: no se toca, se lista y la orden sigue. */
+  | { tipo: 'omitida'; obra: string; motivo: string };
+
+/**
+ * Qué le toca a una Cita al restituir su traducción. **Puro**: no lee ni escribe.
+ *
+ * El documento es el de su obra (`documentosDeCita`, el mismo que coteja el build) en el que
+ * su texto aparece literal: una obra paginada tiene un documento por página, y la traducción
+ * se lee de la página de la que salió. Se lista sin tocarla, y la orden sigue:
+ *
+ *   · la Cita cuyo texto aparece en varias páginas que declaran traducciones distintas;
+ *   · la que ya trae una traducción distinta de la que declara el documento —nunca se
+ *     sobrescribe lo que alguien escribió—;
+ *   · la que publica un año distinto del que el documento declara junto al traductor.
+ *
+ * El año publicado igual al de la traducción deja de ser el de la Obra. Cuando el documento
+ * no declara año de traducción, el que la Cita trae se conserva. Nunca se infiere nada.
+ */
+export function restitucionDeTraduccion(
+  cita: CitaParaRestituir,
+  documentos: ReadonlyMap<string, DocumentoDeclarado>,
+): RestitucionDeTraduccion {
+  const procedencia = cita.procedencia ?? undefined;
+  const obra = procedencia?.obra;
+  const fuente = cita.fuente ?? undefined;
+  if (fuente === undefined || obra === undefined) return { tipo: 'nada' };
+
+  const suyos = documentosDeCita(fuente, obra, documentos)
+    .map((nombre) => documentos.get(nombre))
+    .filter((d): d is DocumentoDeclarado => d !== undefined && apareceEnDocumento(cita.texto, d.cuerpo));
+  if (suyos.length === 0) return { tipo: 'nada' };
+
+  const declaradas = suyos.map(
+    (d) => procedenciaDeLaDerivacion(derivarDeLaDeclaracion(d.fuente, d.declaracion)).traduccion,
+  );
+  const [primera] = declaradas;
+  if (!declaradas.every((t) => mismaTraduccion(t, primera))) {
+    return {
+      tipo: 'omitida',
+      obra,
+      motivo:
+        `su texto aparece en ${suyos.length} documentos de «${obra}» que no declaran la misma ` +
+        `traducción (${declaradas.map(describirTraduccion).join('; ')}).`,
+    };
+  }
+  if (primera === undefined) return { tipo: 'nada' };
+
+  const previa = procedencia?.traduccion;
+  if (previa !== undefined && !mismaTraduccion(previa, primera)) {
+    return {
+      tipo: 'omitida',
+      obra,
+      motivo:
+        `ya declara la traducción ${describirTraduccion(previa)} y su documento declara ` +
+        `${describirTraduccion(primera)}. No se sobrescribe.`,
+    };
+  }
+
+  const publicado = procedencia?.año;
+  if (publicado !== undefined && primera.año !== undefined && publicado !== primera.año) {
+    return {
+      tipo: 'omitida',
+      obra,
+      motivo:
+        `publica el año ${publicado} y su documento declara ${primera.año} junto al traductor ` +
+        `«${primera.traductor}». No se sabe de qué es el publicado, así que no se toca.`,
+    };
+  }
+
+  const añoMovido = publicado !== undefined && publicado === primera.año;
+  if (!añoMovido && previa !== undefined) return { tipo: 'igual' };
+
+  return {
+    tipo: 'cambia',
+    obra,
+    procedencia: {
+      obra,
+      ...(publicado !== undefined && !añoMovido ? { año: publicado } : {}),
+      ...(procedencia?.referencia !== undefined ? { referencia: procedencia.referencia } : {}),
+      traduccion: primera,
+    },
+    añoMovido,
+  };
+}
+
+/** Lo que se hizo con una obra, para el parte. */
+export interface InformeDeObra {
+  obra: string;
+  cambiadas: number;
+  conAñoMovido: number;
+}
+
+interface Pendiente {
+  ruta: string;
+  slug: string;
+  obra: string;
+  añoMovido: boolean;
+  datos: Record<string, unknown>;
+  enRevision: boolean;
+}
+
+/**
+ * Restituye la traducción de las Citas publicadas **y de las candidatas de revisión** cuyo
+ * documento la declara.
+ *
+ * Las candidatas entran porque se extrajeron antes de la 19.1 con el año de la traducción
+ * como año de la Obra, y aprobarlas así lo publicaría. Se cuentan aparte.
+ *
+ * No toca ninguna Cita sin documento, ni el texto, ni el slug: reescribe la Procedencia y
+ * nada más. **Primero se decide todo y después se escribe**, así que un rechazo no deja nada
+ * a medias; si una escritura falla, el parte dice cuáles se escribieron. Es idempotente.
+ */
+export async function restituirTraducciones(rutas: Rutas): Promise<Resultado> {
+  const [publicadas, candidatas, documentos] = await Promise.all([
+    leerCitas(rutas.citas),
+    leerCitas(rutas.revision),
+    leerDocumentosDeclarados(rutas),
+  ]);
+
+  const pendientes: Pendiente[] = [];
+  const omitidas: string[] = [];
+  let iguales = 0;
+
+  for (const [lote, enRevision] of [
+    [publicadas, false],
+    [candidatas, true],
+  ] as const) {
+    for (const cita of lote) {
+      const restitucion = restitucionDeTraduccion(cita as CitaParaRestituir, documentos);
+      if (restitucion.tipo === 'nada') continue;
+      if (restitucion.tipo === 'igual') {
+        iguales += 1;
+        continue;
+      }
+      const donde = enRevision ? ' (candidata)' : '';
+      if (restitucion.tipo === 'omitida') {
+        omitidas.push(`  ${cita.slug}${donde}: ${restitucion.motivo}`);
+        continue;
+      }
+
+      const datos = separarFrontmatter(await readFile(cita.ruta, 'utf8'));
+      if (datos === null) {
+        omitidas.push(`  ${cita.slug}${donde}: ${cita.ruta} no tiene frontmatter.`);
+        continue;
+      }
+      datos.procedencia = restitucion.procedencia;
+      pendientes.push({
+        ruta: cita.ruta,
+        slug: cita.slug,
+        obra: restitucion.obra,
+        añoMovido: restitucion.añoMovido,
+        datos,
+        enRevision,
+      });
+    }
+  }
+
+  const escritas: Pendiente[] = [];
+  for (const pendiente of pendientes) {
+    try {
+      await escribirCita(dirname(pendiente.ruta), basename(pendiente.ruta, '.md'), pendiente.datos);
+      escritas.push(pendiente);
+    } catch (fallo) {
+      return {
+        ok: false,
+        motivos: [
+          `No se pudo escribir ${pendiente.ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+          escritas.length === 0
+            ? 'No se había escrito ninguna antes.'
+            : `Ya se habían escrito ${citas(escritas.length)}:`,
+          ...escritas.map((e) => `  ${e.ruta}`),
+          'Volver a correr la orden termina lo que falta: es idempotente.',
+        ],
+      };
+    }
+  }
+
+  const porObra = new Map<string, InformeDeObra>();
+  for (const e of escritas.filter((p) => !p.enRevision)) {
+    const informe = porObra.get(e.obra) ?? { obra: e.obra, cambiadas: 0, conAñoMovido: 0 };
+    informe.cambiadas += 1;
+    if (e.añoMovido) informe.conAñoMovido += 1;
+    porObra.set(e.obra, informe);
+  }
+  const informe = [...porObra.values()].sort(
+    (a, b) => b.cambiadas - a.cambiadas || a.obra.localeCompare(b.obra, 'es'),
+  );
+  const total = informe.reduce((suma, o) => suma + o.cambiadas, 0);
+  const movidas = informe.reduce((suma, o) => suma + o.conAñoMovido, 0);
+  const deRevision = escritas.filter((p) => p.enRevision);
+  const deRevisionMovidas = deRevision.filter((p) => p.añoMovido).length;
+
+  return {
+    ok: true,
+    ruta: rutas.citas,
+    mensaje: [
+      `Traducción restituida en ${citas(total, 'Cita publicada', 'Citas publicadas')}` +
+        (total === 0 ? '.' : `, ${movidas} con el año publicado movido a la traducción:`),
+      ...informe.map(
+        (o) =>
+          `  ${o.obra}: ${o.cambiadas}` +
+          (o.conAñoMovido > 0 ? ` (${o.conAñoMovido} con el año movido)` : ''),
+      ),
+      `Candidatas de revisión restituidas: ${deRevision.length}` +
+        (deRevisionMovidas > 0 ? ` (${deRevisionMovidas} con el año movido).` : '.'),
+      ...(iguales > 0 ? [`Ya restituidas, sin cambios: ${iguales}.`] : []),
+      ...(omitidas.length > 0
+        ? [`No se han tocado ${citas(omitidas.length)}, y hay que mirarlas:`, ...omitidas]
+        : []),
+      'Ni el texto ni el slug han cambiado. El cambio del corpus va en un commit propio.',
     ].join('\n'),
   };
 }

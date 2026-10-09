@@ -220,7 +220,8 @@ export function documentoDeCita(
 export function documentosDeCita(
   fuente: { id: string } | undefined,
   obra: string | undefined,
-  documentos: DocumentosDeFuente,
+  // Solo se miran los nombres: vale cualquier mapa de documentos por nombre.
+  documentos: ReadonlyMap<string, unknown>,
 ): string[] {
   const corto = documentoDeCita(fuente, obra);
   if (corto === undefined) return [];

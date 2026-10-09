@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { DESTINOS, textoParaCompartir } from '../../src/lib/compartir.ts';
-import { textoParaCopiar } from '../../src/lib/atribucion.ts';
+import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
+import { citaEnPieza } from '../../src/lib/pieza.ts';
 import type { Cita, Autor } from '../../src/lib/publicado.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
@@ -98,5 +99,41 @@ describe('Historia 10.3 — la isla no construye direcciones en el cliente', () 
     // enlace, que es justo lo que sabe hacer el navegador que no admite ficheros.
     expect(guion).toContain('navigator.share');
     expect(guion).not.toContain('canShare');
+  });
+});
+
+describe('Historia 19.1 — lo copiado nombra la traducción', () => {
+  const ODA = {
+    slug: 'horacio-una',
+    texto: 'Feliz quien lejos de negocios vive.',
+    autor: 'horacio',
+    temas: [],
+    procedencia: { obra: 'Odas', traduccion: { traductor: 'Germán Salinas', año: 1909 } },
+  } as unknown as Cita;
+  const HORACIO = { slug: 'horacio', nombre: 'Horacio' } as unknown as Autor;
+
+  it('«… — Horacio, Odas, trad. de Germán Salinas, 1909.»', () => {
+    expect(textoParaCopiar(ODA, HORACIO)).toBe(
+      '«Feliz quien lejos de negocios vive.» — Horacio, Odas, trad. de Germán Salinas, 1909.',
+    );
+  });
+
+  it('con año de la Obra y traducción sin año', () => {
+    const cita = {
+      ...ODA,
+      procedencia: { obra: 'Odas', año: -23, traduccion: { traductor: 'Wikisource' } },
+    } as unknown as Cita;
+    expect(textoParaCopiar(cita, HORACIO)).toBe(
+      '«Feliz quien lejos de negocios vive.» — Horacio, Odas, -23, trad. de Wikisource.',
+    );
+  });
+
+  it('procedenciaCompuesta, que es lo que rasterizan la Imagen y la Pieza, no la nombra', () => {
+    expect(procedenciaCompuesta(ODA)).toBe('Odas');
+    expect(citaEnPieza(ODA, HORACIO)).toEqual({
+      texto: 'Feliz quien lejos de negocios vive.',
+      autor: 'Horacio',
+      procedencia: 'Odas',
+    });
   });
 });

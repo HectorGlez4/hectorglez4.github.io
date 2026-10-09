@@ -9,8 +9,8 @@
  */
 
 import { porcentajeEnEspañol } from '../src/lib/formato.ts';
-import { auditar, type CitaParaAuditar } from '../src/lib/salud.ts';
-import { leerCensoDeCotejo, leerCitas, rutasDelCorpus } from './lib/corpus.ts';
+import { auditar, sinTraduccionDeclarada, type CitaParaAuditar } from '../src/lib/salud.ts';
+import { leerAutores, leerCensoDeCotejo, leerCitas, rutasDelCorpus } from './lib/corpus.ts';
 import { resumenDeCotejo } from './lib/cotejo.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 
@@ -36,6 +36,19 @@ const informe = auditar(publicadas as unknown as CitaParaAuditar[]);
  */
 const cotejo = resumenDeCotejo(publicadas, await leerCensoDeCotejo(rutas));
 
+/*
+ * Historia 19.1 — las Citas de obra traducida que no declaran traducción. Una cifra, no un
+ * error: se publican igual. Se toma por traducida toda Cita de Autor de tradición `otra`, y
+ * solo cuentan las que tienen documento. En `--json` va con su desglose por Autor.
+ */
+const deTradicionOtra = new Set(
+  (await leerAutores(rutas)).filter((a) => a.tradicion === 'otra').map((a) => a.slug),
+);
+const traducidasSinTraduccion = sinTraduccionDeclarada(
+  publicadas as unknown as CitaParaAuditar[],
+  deTradicionOtra,
+);
+
 if (argumentos.includes('--json')) {
   process.stdout.write(
     `${JSON.stringify(
@@ -43,6 +56,7 @@ if (argumentos.includes('--json')) {
         ...informe,
         enRevision: enRevision.length,
         cotejo,
+        traducidasSinTraduccion,
       },
       null,
       2,
@@ -86,6 +100,7 @@ if (argumentos.includes('--json')) {
     cotejo.pendientes === 0
       ? 'Ninguna Cita publicada queda sin cotejar: el censo está vacío.'
       : 'Son las anteriores a la v3, sin documento de Fuente. Las saca del censo la 11.4.',
+    `Traducidas sin traducción:   ${traducidasSinTraduccion.total}  (con documento, de Autor de tradición «otra»; una cifra, no un error)`,
     '',
     'Por Autor — de peor a mejor salud',
     '─────────────────────────────────',

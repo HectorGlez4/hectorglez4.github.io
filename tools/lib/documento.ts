@@ -355,6 +355,14 @@ const PARAMETRO_DE_TITULO_WIKITEXTO = /^\s*\|\s*(?:t[íi]tulo|title)\s*=/iu;
 /** El parámetro del que sale el Autor que la Fuente declara. */
 const PARAMETRO_DE_AUTOR_WIKITEXTO = /^\s*\|\s*(?:autor|author)\s*=/iu;
 
+/**
+ * El parámetro del que sale el traductor que la Fuente declara — Historia 19.1.
+ *
+ * Admite los espacios que la Fuente escribe —`|traductor =Federico Baráibar`— y la forma
+ * inglesa, igual que el resto de parámetros del encabezado.
+ */
+export const PARAMETRO_DE_TRADUCTOR_WIKITEXTO = /^\s*\|\s*(?:traductor|translator)\s*=/iu;
+
 const ENLACE_CON_TEXTO = /\[\[[^[\]|]*\|([^[\]|]*)\]\]/gu;
 const ENLACE_SIMPLE = /\[\[([^[\]|]*)\]\]/gu;
 
@@ -394,6 +402,39 @@ export function tituloDeclarado(valor: string): string | undefined {
 
 /** El espacio de nombres con el que Wikisource enlaza a la página de un Autor. */
 const ESPACIO_DE_AUTOR = /^(?:autor|author)\s*:\s*/iu;
+
+/**
+ * El traductor que declara un parámetro del encabezado, sin el marcado de la Fuente, o nada.
+ *
+ * `[[Germán Salinas]]` queda «Germán Salinas» y `[[Autor:X|Y]]` queda «Y»: el mismo
+ * tratamiento que el título, porque es la misma forma de enlace. Lo que se declara se
+ * conserva **literal** —«Wikisource» es un traductor declarado y se queda tal cual—; lo que
+ * no se sabe leer no se adivina.
+ */
+export function traductorDeclarado(valor: string): string | undefined {
+  // Una plantilla sin expandir no es un nombre: `tituloDeclarado` la rechaza por el marcado
+  // que deja dentro, y aquí se rechaza también la que llega entera.
+  if (/\{\{/u.test(valor)) return undefined;
+  const limpio = tituloDeclarado(valor);
+  if (limpio === undefined) return undefined;
+  const sinEspacio = limpio.replace(ESPACIO_DE_AUTOR, '').trim();
+  if (!/[\p{L}]/u.test(sinEspacio)) return undefined;
+  // «Anónimo», «Desconocido», «Varios»: la misma lista con que el cotejo de Autor reconoce
+  // que una Fuente firma «sin firma». No nombran a nadie, así que no declaran traductor.
+  if (SIN_FIRMA.has(normalizar(sinEspacio))) return undefined;
+  return sinEspacio;
+}
+
+/** El primer traductor que declaran las líneas dadas, o nada. */
+function traductorDeParametro(lineas: string): string | undefined {
+  for (const linea of lineas.split('\n')) {
+    const encontrado = PARAMETRO_DE_TRADUCTOR_WIKITEXTO.exec(linea);
+    if (encontrado === null) continue;
+    const declarado = traductorDeclarado(linea.slice(encontrado.index + encontrado[0].length));
+    if (declarado !== undefined) return declarado;
+  }
+  return undefined;
+}
 
 /** Un enlace entero de wikitexto, con su interior: `[[destino]]` o `[[destino|visible]]`. */
 const ENLACE_ENTERO = /\[\[([^[\]]*)\]\]/gu;
@@ -1214,6 +1255,19 @@ export interface LectorDeFuente {
   pagina(declaracion: string): string | undefined;
   /** El año de la obra, solo si consta exacto en esa declaración. */
   año(declaracion: string): number | undefined;
+  /**
+   * El traductor y, por bloques, a quién pertenece el año — Historia 19.1.
+   *
+   * Opcional: una Fuente cuyo lector no lo sabe leer —hoy Gutenberg— no declara traductor,
+   * y eso no es un fallo. Nunca se infiere.
+   *
+   * Un año es el de la traducción **solo si sale del mismo bloque** —la página, la obra
+   * declarada o el índice del escaneo— que declara al traductor. Uno de otro bloque sigue
+   * siendo el de la Obra. `undefined` cuando no hay traductor declarado.
+   */
+  traduccion?(
+    declaracion: string,
+  ): { traductor: string; añoDeTraduccion?: number; añoDeLaObra?: number } | undefined;
 }
 
 function textoDeCaptura(captura: string | undefined): string | undefined {
@@ -1652,6 +1706,56 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
         añoDeParametro(loQueDeclaraLaObra(declaracion), PARAMETRO_DE_AÑO_WIKITEXTO)
       );
     },
+    /**
+     * El traductor, con el mismo orden de búsqueda que el año: la página, después la obra
+     * que declara y en último lugar el índice del escaneo.
+     *
+     * Cada bloque —página, obra, índice— con su traductor y su año, y el año se reparte por
+     * bloque: el de un bloque que declara al traductor es el de la traducción; el de uno que
+     * no lo declara, el de la Obra. El año de la Obra se busca como en `año()` —la página y
+     * después la obra—; el índice solo aporta año de traducción, y solo si declara al mismo
+     * traductor, porque `año()` nunca lo ha leído como año de la Obra.
+     */
+    traduccion(declaracion) {
+      const pagina = loQueDeclaraLaPagina(declaracion);
+      const obra = loQueDeclaraLaObra(declaracion);
+      const indice = loQueDeclaraElIndice(declaracion);
+      const bloques = [
+        {
+          traductor: traductorDeParametro(pagina),
+          año:
+            añoJuntoAEtiqueta(pagina, ETIQUETA_DE_AÑO_WIKISOURCE) ??
+            añoDeParametro(pagina, PARAMETRO_DE_AÑO_WIKITEXTO),
+        },
+        { traductor: traductorDeParametro(obra), año: añoDeParametro(obra, PARAMETRO_DE_AÑO_WIKITEXTO) },
+      ];
+      const delIndice = {
+        traductor: traductorDeParametro(indice),
+        año: añoDeParametro(indice, PARAMETRO_DE_AÑO_WIKITEXTO),
+      };
+
+      const traductor = [...bloques, delIndice].find((b) => b.traductor !== undefined)?.traductor;
+      if (traductor === undefined) return undefined;
+
+      let añoDeTraduccion: number | undefined;
+      let añoDeLaObra: number | undefined;
+      const conAño = bloques.find((b) => b.año !== undefined);
+      if (conAño !== undefined) {
+        if (conAño.traductor === undefined) añoDeLaObra = conAño.año;
+        // Un año junto a **otro** traductor es el de otra traducción: ni de esta ni de la
+        // Obra. No se atribuye a nadie.
+        else if (conAño.traductor === traductor) añoDeTraduccion = conAño.año;
+      }
+      if (añoDeTraduccion === undefined && delIndice.traductor === traductor) {
+        añoDeTraduccion = delIndice.año;
+      }
+
+      return {
+        traductor,
+        ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
+        ...(añoDeLaObra !== undefined ? { añoDeLaObra } : {}),
+      };
+    },
   },
 
   gutenberg: {
@@ -1739,18 +1843,66 @@ export const LECTORES_POR_FUENTE: Readonly<Record<string, LectorDeFuente>> = {
  * La **página** sale de aquí por el mismo motivo que la obra y el año: el nombre del
  * fichero la lleva dentro, y la puerta de la extracción lo compara contra lo derivado.
  */
+export interface DerivacionDeLaDeclaracion {
+  obra?: string;
+  pagina?: string;
+  autor?: AutorDeLaFuente;
+  /** El año **de la Obra**. Ausente cuando la declaración trae traductor (Historia 19.1). */
+  año?: number;
+  /** El traductor que la Fuente declara, literal y sin marcado. */
+  traductor?: string;
+  /** El año declarado junto al traductor: es el de la traducción, no el de la Obra. */
+  añoDeTraduccion?: number;
+}
+
+/**
+ * La Procedencia que una derivación sostiene: obra, año de la Obra y traducción.
+ *
+ * Un solo sitio para componerla, para que extraer y documentar no la escriban cada uno a su
+ * manera. Un campo sin valor se omite.
+ */
+export function procedenciaDeLaDerivacion(derivado: DerivacionDeLaDeclaracion): {
+  obra?: string;
+  año?: number;
+  traduccion?: { traductor: string; año?: number };
+} {
+  return {
+    ...(derivado.obra !== undefined ? { obra: derivado.obra } : {}),
+    ...(derivado.año !== undefined ? { año: derivado.año } : {}),
+    ...(derivado.traductor !== undefined
+      ? {
+          traduccion: {
+            traductor: derivado.traductor,
+            ...(derivado.añoDeTraduccion !== undefined ? { año: derivado.añoDeTraduccion } : {}),
+          },
+        }
+      : {}),
+  };
+}
+
+/**
+ * Historia 19.1 — **el año que sale del mismo bloque que el traductor es el de la
+ * traducción**: las Odas no son de 1909, la traducción de Salinas sí. El de un bloque sin
+ * traductor sigue siendo el de la Obra. Lo que no se declara queda sin declarar; inventarle
+ * a la Obra un año sería inferir.
+ */
 export function derivarDeLaDeclaracion(
   idFuente: string,
   declaracion: string,
-): { obra?: string; pagina?: string; autor?: AutorDeLaFuente; año?: number } {
+): DerivacionDeLaDeclaracion {
   const lector = LECTORES_POR_FUENTE[idFuente];
   if (lector === undefined) return {};
 
   const obra = lector.obra(declaracion)?.trim();
   const pagina = lector.pagina(declaracion)?.trim();
   const autor = lector.autor(declaracion);
-  const año = lector.año(declaracion);
+  const traduccion = lector.traduccion?.(declaracion);
+  const traductor = traduccion?.traductor;
+  const año = traduccion === undefined ? lector.año(declaracion) : traduccion.añoDeLaObra;
+  const añoDeTraduccion = traduccion?.añoDeTraduccion;
   return {
+    ...(traductor !== undefined ? { traductor } : {}),
+    ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
     ...(obra !== undefined && obra !== '' ? { obra } : {}),
     ...(pagina !== undefined && pagina !== '' ? { pagina } : {}),
     // Ausente cuando el documento no declara a nadie: no es un documento roto, y la
@@ -1835,7 +1987,11 @@ export type DerivacionDeDocumento =
       obra: string;
       /** La página de la obra de la que salió el cuerpo, si la obra tiene más de una. */
       pagina?: string;
+      /** El año de la Obra. Ausente cuando la declaración trae traductor. */
       año?: number;
+      traductor?: string;
+      /** El año declarado junto al traductor. */
+      añoDeTraduccion?: number;
       declaracion: string;
       cuerpo: string;
     }
@@ -1913,7 +2069,10 @@ export function derivarDocumento(
     return { ok: false, motivo: fallo instanceof Error ? fallo.message : String(fallo) };
   }
 
-  const { obra, pagina, año } = derivarDeLaDeclaracion(idFuente, declaracion);
+  const { obra, pagina, año, traductor, añoDeTraduccion } = derivarDeLaDeclaracion(
+    idFuente,
+    declaracion,
+  );
   if (obra === undefined) {
     return {
       ok: false,
@@ -1934,6 +2093,8 @@ export function derivarDocumento(
     cuerpo,
     ...(pagina !== undefined ? { pagina } : {}),
     ...(año !== undefined ? { año } : {}),
+    ...(traductor !== undefined ? { traductor } : {}),
+    ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
   };
 }
 
@@ -1942,6 +2103,13 @@ export interface CabeceraDeDocumento {
   obra: string;
   /** Se omite cuando no consta exacto. Nunca se escribe vacío. */
   año?: number;
+  /**
+   * El traductor que la Fuente declara — Historia 19.1. Registro de auditoría, como el resto
+   * de la cabecera: lo que llega a una Procedencia sale de la declaración.
+   */
+  traductor?: string;
+  /** El año declarado junto al traductor. Nunca se escribe como `año:`, que es el de la Obra. */
+  añoDeTraduccion?: number;
   /** La dirección de la que llegó el documento, ya resueltas las redirecciones. */
   url: string;
   /**
@@ -1981,6 +2149,10 @@ export function componerDocumento(
 ): string {
   const lineas = [`fuente: ${unaLinea(cabecera.fuente)}`, `obra: ${unaLinea(cabecera.obra)}`];
   if (cabecera.año !== undefined) lineas.push(`año: ${cabecera.año}`);
+  if (cabecera.traductor !== undefined) lineas.push(`traductor: ${unaLinea(cabecera.traductor)}`);
+  if (cabecera.traductor !== undefined && cabecera.añoDeTraduccion !== undefined) {
+    lineas.push(`añoDeTraduccion: ${cabecera.añoDeTraduccion}`);
+  }
   lineas.push(`url: ${unaLinea(cabecera.url)}`);
   if (cabecera.pedido !== undefined) lineas.push(`pedido: ${unaLinea(cabecera.pedido)}`);
   lineas.push(`recuperado: ${unaLinea(cabecera.recuperado)}`);
@@ -2026,6 +2198,16 @@ export function analizarDocumento(
   if (declarado !== undefined && declarado !== '' && año === undefined) return undefined;
 
   const pedido = campos.get('pedido');
+  const traductor = campos.get('traductor');
+  const declaradoDeTraduccion = campos.get('añodetraduccion');
+  const añoDeTraduccion = añoExacto(declaradoDeTraduccion);
+  if (
+    declaradoDeTraduccion !== undefined &&
+    declaradoDeTraduccion !== '' &&
+    añoDeTraduccion === undefined
+  ) {
+    return undefined;
+  }
 
   return {
     cabecera: {
@@ -2035,6 +2217,8 @@ export function analizarDocumento(
       recuperado,
       ...(año !== undefined ? { año } : {}),
       ...(pedido !== undefined && pedido !== '' ? { pedido } : {}),
+      ...(traductor !== undefined && traductor !== '' ? { traductor } : {}),
+      ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
     },
     declaracion: lineas.slice(primero + 1, segundo).join('\n').trim(),
     cuerpo: lineas.slice(segundo + 1).join('\n'),

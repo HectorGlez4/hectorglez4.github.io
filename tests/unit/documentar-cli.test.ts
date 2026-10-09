@@ -409,3 +409,22 @@ describe('FR-23 — documentar no ata una Cita a un documento firmado por otro',
     expect(verde.salida).toContain('1 Cita cotejada');
   });
 });
+
+describe('Historia 19.1 — --restituir-traduccion', () => {
+  it('sin nada que restituir sale con 0 y no toca el corpus', async () => {
+    const corpus = await enDisco(CORPUS);
+    const hecho = await correr(corpus, ['--restituir-traduccion']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toContain('Traducción restituida en 0 Citas publicadas.');
+    expect(await readFile(join(corpus, FICHERO), 'utf8')).toBe(CITA_CENSADA);
+  });
+
+  it('con argumentos de más, o junto a --retirar, sale con código 2', async () => {
+    const corpus = await enDisco(CORPUS);
+    const conSobra = await correr(corpus, ['--restituir-traduccion', SLUG]);
+    expect(conSobra.codigo).toBe(2);
+    const conRetirar = await correr(corpus, ['--restituir-traduccion', '--retirar', SLUG, 'motivo']);
+    expect(conRetirar.codigo).toBe(2);
+    expect(await readFile(join(corpus, FICHERO), 'utf8')).toBe(CITA_CENSADA);
+  });
+});
