@@ -98,6 +98,8 @@ export interface FichaDeObra {
   autor: string;
   titulo: string;
   formas: readonly string[];
+  /** Formas de otras Obras del mismo Autor de las que esta se declara distinta (22.2). */
+  distintaDe?: readonly string[];
 }
 
 /** Lo que de una Cita importa para resolver su Obra. */
@@ -105,6 +107,8 @@ export interface CitaConObra {
   slug: string;
   autor: string;
   procedencia?: { obra?: string } | null;
+  /** Ruta legible del fichero, para que la puerta ortográfica lo nombre (22.2). */
+  ruta?: string;
 }
 
 /** La forma de la obra de una Cita, o `undefined` si no declara obra. */
@@ -115,8 +119,8 @@ function formaDeCita(cita: CitaConObra): string | undefined {
   return forma === '' ? undefined : forma;
 }
 
-/** Clave del par (Autor, forma). */
-function clave(autor: string, forma: string): string {
+/** Clave del par (Autor, forma): la identidad de una Obra. */
+export function clave(autor: string, forma: string): string {
   return `${autor}\u0000${forma}`;
 }
 
@@ -219,7 +223,9 @@ export function prefijosDeFormas(
  *   · una Cita publicada cuya obra no reclama ninguna ficha de su Autor;
  *   · una forma reclamada por dos fichas del mismo Autor;
  *   · un nombre de fichero cuyo prefijo de Autor no es su campo `autor`;
- *   · una ficha cuyo `autor` no existe en el Corpus.
+ *   · una ficha cuyo `autor` no existe en el Corpus;
+ *   · una Obra publicada con dos o más grafías de la misma forma, si alguna no es literal de
+ *     su Fuente (la puerta ortográfica de la Historia 22.2, `fallosOrtograficos`).
  *
  * Una ficha sin Citas publicadas no está aquí: avisa y no rompe (`avisosDeObras`), porque
  * retirar una Cita no puede tumbar el sitio (AD-18).
@@ -228,6 +234,7 @@ export function fallosDeObras(
   fichas: readonly FichaDeObra[],
   citas: readonly CitaConObra[],
   autores: Iterable<string>,
+  documentos: DocumentosDeObras = SIN_DOCUMENTOS,
 ): string[] {
   const fallos: string[] = [];
   const conocidos = new Set(autores);
@@ -301,25 +308,53 @@ export function fallosDeObras(
     );
   }
 
+  fallos.push(...fallosOrtograficos(citas, documentos));
+
   return fallos;
 }
 
-/** Las fichas que no resuelve ninguna Cita publicada: avisan y no rompen. */
+/**
+ * Lo que avisa y no rompe, ya redactado:
+ *
+ *   · una ficha que no resuelve ninguna Cita publicada (22.1);
+ *   · dos formas del mismo Autor en fichas distintas, una prefijo de palabra de la otra,
+ *     salvo que alguna de las dos declare a la otra en `distintaDe` (22.2);
+ *   · un `distintaDe` que nombra una forma que no reclama ninguna ficha activa del mismo
+ *     Autor: una declaración rancia, que ya no separa nada (22.2);
+ *   · un título que ya no es una grafía declarada por ninguna Cita publicada de la Obra: la
+ *     grafía efectiva pasa a ser la de `grafiaPorOmision` (22.2, `tituloEfectivo`).
+ */
 export function avisosDeObras(
   fichas: readonly FichaDeObra[],
   citas: readonly CitaConObra[],
 ): string[] {
-  const reclamadas = new Set(
-    obrasDeCitas(citas).map((o) => clave(o.autor, o.forma)),
-  );
-  return [...fichas]
-    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-    .filter((ficha) => !ficha.formas.some((forma) => reclamadas.has(clave(ficha.autor, forma))))
-    .map(
-      (ficha) =>
-        `  · ${ficha.ruta} → ninguna Cita publicada resuelve esta ficha. Si la Obra salió del ` +
-          'Corpus, retírela con «npm run obra -- retirar».',
+  const ordenadas = [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  const reclamadas = new Set(obrasDeCitas(citas).map((o) => clave(o.autor, o.forma)));
+  const avisos: string[] = [];
+
+  for (const ficha of ordenadas) {
+    if (ficha.formas.some((forma) => reclamadas.has(clave(ficha.autor, forma)))) continue;
+    avisos.push(
+      `  · ${ficha.ruta} → ninguna Cita publicada resuelve esta ficha. Si la Obra salió del ` +
+        'Corpus, retírela con «npm run obra -- retirar».',
     );
+  }
+
+  avisos.push(...avisosDePrefijo(ordenadas));
+  avisos.push(...avisosDeDistintaRancia(ordenadas));
+
+  const grafias = grafiasPorFicha(ordenadas, citas);
+  for (const ficha of ordenadas) {
+    const suyas = grafias.get(ficha.nombre) ?? [];
+    if (suyas.length === 0 || suyas.some((g) => mismaGrafia(g.literal, ficha.titulo))) continue;
+    avisos.push(
+      `  · ${ficha.ruta} → su título «${ficha.titulo}» ya no lo declara ninguna Cita ` +
+        `publicada de la Obra; la grafía efectiva es «${grafiaPorOmision(suyas)}». ` +
+        'Elíjalo con «npm run obra -- titular <ficha> "<grafía>"».',
+    );
+  }
+
+  return avisos;
 }
 
 /** El texto que detiene la construcción. El detalle va aparte, por el registro. */
@@ -334,7 +369,229 @@ export function formatearFallosDeObras(fallos: readonly string[]): string {
 }
 
 export function formatearAvisosDeObras(avisos: readonly string[]): string {
-  return ['Fichas de Obra sin ninguna Cita publicada (avisa, no rompe):', ...avisos, ''].join(
-    '\n',
+  return ['Fichas de Obra (avisa, no rompe):', ...avisos, ''].join('\n');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Una obra, un nombre — Historia 22.2
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** La orden que restituye la grafía de una Cita del censo a la cabecera de su documento. */
+export const ORDEN_DE_RESTITUIR_GRAFIA = 'npm run obra -- restituir-grafia';
+
+/** La orden que da documento a una Cita ya publicada. */
+export const ORDEN_DE_DOCUMENTAR = 'npm run documentar';
+
+/**
+ * Lo que la puerta ortográfica sabe de los documentos de `corpus/fuentes/`, ya leído.
+ *
+ * Lo compone quien lee disco —`integraciones/obras.ts`— para que esto siga siendo puro: la
+ * regla de qué documento es de qué Cita (`documentosDeCita`) vive en `tools/lib/` y
+ * aquí solo llega su resultado.
+ */
+export interface DocumentosDeObras {
+  /**
+   * Por slug de Cita, la `obra:` de la cabecera de **cada** documento suyo: uno por página
+   * si la Obra está paginada. Una Cita sin documento no está, o está con la lista vacía.
+   */
+  cabecerasDeCita: ReadonlyMap<string, readonly string[]>;
+  /**
+   * Los pares (Autor, forma) —con `clave`— de los documentos versionados: la forma de su
+   * `obra:` de cabecera y cada Autor del Corpus que concuerda con quien firma el documento.
+   * Un documento que no declara autor, o que declara uno que no concuerda con ninguno, no
+   * entra: no se puede afirmar de quién es.
+   */
+  formasConDocumento: ReadonlySet<string>;
+  /** Los slugs del censo de Citas sin documento: solo a ellos se aplica `restituir-grafia`. */
+  censo: ReadonlySet<string>;
+}
+
+const SIN_DOCUMENTOS: DocumentosDeObras = {
+  cabecerasDeCita: new Map(),
+  formasConDocumento: new Set(),
+  censo: new Set(),
+};
+
+/** Colapsa espacios y nada más: es toda la holgura que admite «literal». */
+export function colapsar(texto: string): string {
+  return texto.replace(/\s+/gu, ' ').trim();
+}
+
+/** Si dos grafías son la misma, colapsando espacios y nada más. */
+export function mismaGrafia(a: string, b: string): boolean {
+  return colapsar(a) === colapsar(b);
+}
+
+/**
+ * Si una grafía es **literal de su Fuente**: igual, colapsando espacios y nada más, a la
+ * `obra:` de la cabecera de alguno de sus documentos. Sin documentos no es literal: una
+ * grafía tecleada no la respalda nadie.
+ */
+export function esGrafiaLiteral(obra: string, cabeceras: readonly string[]): boolean {
+  const buscada = colapsar(obra);
+  return buscada !== '' && cabeceras.some((cabecera) => colapsar(cabecera) === buscada);
+}
+
+/**
+ * La puerta ortográfica. Para cada (Autor, forma) con dos o más grafías distintas entre sus
+ * Citas publicadas, si alguna de esas Citas no tiene una grafía literal de su Fuente, rompe:
+ * dos nombres para la misma Obra solo se admiten cuando los dos los escribe una Fuente.
+ *
+ * Cada línea nombra la forma, las grafías con su recuento, y cada fichero no literal con la
+ * orden que lo arregla, y solo una que vaya a funcionar: `restituir-grafia` si la Cita está
+ * en el censo y hay un documento versionado de su mismo Autor con esa forma —exactamente lo
+ * que esa orden exige—, y `documentar` en cualquier otro caso.
+ */
+export function fallosOrtograficos(
+  citas: readonly CitaConObra[],
+  documentos: DocumentosDeObras = SIN_DOCUMENTOS,
+): string[] {
+  const fallos: string[] = [];
+  const porSlug = new Map(citas.map((c) => [c.slug, c]));
+
+  for (const obra of obrasDeCitas(citas)) {
+    if (obra.grafias.length < 2) continue;
+    const noLiterales = obra.citas
+      .map((slug) => porSlug.get(slug))
+      .filter((c): c is CitaConObra => c !== undefined)
+      .filter(
+        (c) =>
+          !esGrafiaLiteral(
+            c.procedencia?.obra as string,
+            documentos.cabecerasDeCita.get(c.slug) ?? [],
+          ),
+      )
+      .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
+    if (noLiterales.length === 0) continue;
+
+    const hayDocumento = documentos.formasConDocumento.has(clave(obra.autor, obra.forma));
+    const lineas = noLiterales.map((c) => {
+      const orden =
+        hayDocumento && documentos.censo.has(c.slug)
+          ? `${ORDEN_DE_RESTITUIR_GRAFIA} ${c.slug}`
+          : `${ORDEN_DE_DOCUMENTAR} -- ${c.slug} corpus/fuentes/<documento>.txt`;
+      return (
+        `      ${c.ruta ?? c.slug} declara «${c.procedencia?.obra}», que no es literal de su ` +
+        `Fuente → «${orden}»`
+      );
+    });
+    fallos.push(
+      `  · La Obra de forma «${obra.forma}» de ${obra.autor} se publica con ` +
+        `${obra.grafias.length} grafías: ` +
+        obra.grafias.map((g) => `«${g.literal}» ×${g.citas}`).join(', ') +
+        '. Dos grafías solo se admiten si las dos son literales de su Fuente, y estas no:\n' +
+        lineas.join('\n') +
+        (hayDocumento
+          ? ''
+          : '\n      No hay ningún documento versionado de esta Obra de este Autor: recupérelo con ' +
+            '«npx tsx tools/recuperar.ts <url>» antes de documentar.'),
+    );
+  }
+
+  return fallos;
+}
+
+/** Las grafías declaradas por las Citas publicadas que resuelven cada ficha, por nombre. */
+function grafiasPorFicha(
+  fichas: readonly FichaDeObra[],
+  citas: readonly CitaConObra[],
+): Map<string, GrafiaDeObra[]> {
+  const indice = indiceDeFichas(fichas);
+  const cuentas = new Map<string, Map<string, number>>();
+  for (const cita of citas) {
+    const ficha = fichaDeCita(cita, indice);
+    if (ficha === undefined) continue;
+    const obra = cita.procedencia?.obra as string;
+    const cuenta = cuentas.get(ficha.nombre) ?? new Map<string, number>();
+    cuenta.set(obra, (cuenta.get(obra) ?? 0) + 1);
+    cuentas.set(ficha.nombre, cuenta);
+  }
+  return new Map(
+    [...cuentas].map(([nombre, cuenta]) => [
+      nombre,
+      [...cuenta].map(([literal, n]) => ({ literal, citas: n })),
+    ]),
   );
+}
+
+/** Las grafías que declaran las Citas publicadas que resuelven una ficha. */
+export function grafiasDeFicha(
+  ficha: FichaDeObra,
+  fichas: readonly FichaDeObra[],
+  citas: readonly CitaConObra[],
+): GrafiaDeObra[] {
+  return grafiasPorFicha(fichas, citas).get(ficha.nombre) ?? [];
+}
+
+/**
+ * El título que la Obra publica: el de su ficha mientras alguna Cita publicada lo declare, y
+ * si no, el de `grafiaPorOmision`. `undefined` si ninguna Cita resuelve la ficha. Lo publica
+ * la 22.3; aquí solo se decide.
+ */
+export function tituloEfectivo(
+  ficha: FichaDeObra,
+  fichas: readonly FichaDeObra[],
+  citas: readonly CitaConObra[],
+): string | undefined {
+  const grafias = grafiasDeFicha(ficha, fichas, citas);
+  if (grafias.length === 0) return undefined;
+  return grafias.some((g) => mismaGrafia(g.literal, ficha.titulo))
+    ? ficha.titulo
+    : grafiaPorOmision(grafias);
+}
+
+/** Si una de las dos fichas declara a la otra distinta. */
+export function declaradasDistintas(a: FichaDeObra, b: FichaDeObra): boolean {
+  const declara = (x: FichaDeObra, y: FichaDeObra) =>
+    (x.distintaDe ?? []).some((forma) => y.formas.includes(forma));
+  return declara(a, b) || declara(b, a);
+}
+
+/**
+ * Los pares de formas del mismo Autor, en fichas distintas, en que una es prefijo de palabra
+ * de la otra —«proverbios y cantares» y «proverbios y cantares nuevas canciones»—. Pueden ser
+ * la misma Obra o dos; decidirlo es de una persona, con `reunir` o `separar`, y el aviso se
+ * calla en cuanto se decide.
+ */
+export function avisosDePrefijo(fichas: readonly FichaDeObra[]): string[] {
+  const avisos: string[] = [];
+  const ordenadas = [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  for (const corta of ordenadas) {
+    for (const larga of ordenadas) {
+      if (corta === larga || corta.autor !== larga.autor) continue;
+      if (declaradasDistintas(corta, larga)) continue;
+      for (const fc of corta.formas) {
+        const fl = larga.formas.find((f) => f.startsWith(`${fc} `));
+        if (fl === undefined) continue;
+        avisos.push(
+          `  · ${corta.autor}: «${fc}» (${corta.ruta}) es prefijo de «${fl}» (${larga.ruta}). ` +
+            `Si son la misma Obra: «npm run obra -- reunir ${corta.nombre} ${larga.nombre}» ` +
+            '(la primera es la que queda; al revés si debe quedar la otra); si no: ' +
+            `«npm run obra -- separar ${corta.nombre} ${larga.nombre}».`,
+        );
+        break;
+      }
+    }
+  }
+  return avisos;
+}
+
+/**
+ * Los `distintaDe` rancios: formas que ninguna ficha activa del mismo Autor reclama. La
+ * declaración ya no separa nada —la otra ficha se retiró o se reunió en otra— y conviene
+ * saberlo antes de que una forma nueva la herede sin que nadie la haya decidido.
+ */
+export function avisosDeDistintaRancia(fichas: readonly FichaDeObra[]): string[] {
+  const reclamadas = new Set(fichas.flatMap((f) => f.formas.map((forma) => clave(f.autor, forma))));
+  const avisos: string[] = [];
+  for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
+    for (const forma of ficha.distintaDe ?? []) {
+      if (reclamadas.has(clave(ficha.autor, forma))) continue;
+      avisos.push(
+        `  · ${ficha.ruta} → se declara distinta de «${forma}», y ninguna ficha activa de ` +
+          `${ficha.autor} reclama esa forma: es una declaración rancia, que ya no separa nada.`,
+      );
+    }
+  }
+  return avisos;
 }

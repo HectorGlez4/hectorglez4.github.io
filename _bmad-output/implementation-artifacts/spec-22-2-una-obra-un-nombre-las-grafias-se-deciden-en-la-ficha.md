@@ -2,15 +2,29 @@
 title: 'Historia 22.2 — Una obra, un nombre: las grafías se deciden en la ficha'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'f567f890efa7280cd174c8e44a7bf901026b404f'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-22-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-22-1-cada-obra-tiene-ficha-antes-de-tener-url.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Un título elegido con `titular` puede caer solo a la grafía por omisión al retirarse la Cita que lo sostenía; no hay forma de fijarlo.
+    evidence: |-
+      ajustarTitulosDeObra reescribe el título cuando ninguna Cita publicada lo declara (caso Unamuno de la propuesta).
+    location: >-
+      tools/lib/obras.ts
+    severity: low
+  - summary: >-
+      Ninguna orden detecta pares del mismo Autor parecidos que no son prefijo («Sobre/De la brevedad de la vida»).
+    evidence: |-
+      avisosDePrefijo solo ve prefijos de palabra; el par de Séneca salió a mano.
+    location: >-
+      src/lib/obras.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -119,9 +133,31 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 3, low 9)
+- defer: 2 (low 2)
+- reject: 2
+- addressed_findings:
+  - `[medium]` `[patch]` La puerta sugería `restituir-grafia` donde iba a fallar → solo si la Cita está en el censo y hay documento del mismo Autor; si no, `documentar`.
+  - `[medium]` `[patch]` La prueba «dos literales» no escribía documentos → los escribe, con su gemela que rompe.
+  - `[medium]` `[patch]` Retrocesos de reunir y separar no atómicos y sin try/catch → `restaurarFichaDeObra`.
+  - `[low]` `[patch]` distintaDe rancio avisa; `colapsar` en todo el título; orden exacta de reunir en el aviso; reunir hereda distintaDe y nombra terceras; `--` y return en la CLI; mensaje del esquema; pruebas de título, retroceso, autorreunión y CLI; consecuencias en la propuesta; AGENTS.md.
+
 ## Verification
 
 **Commands:**
 - `npx vitest run tests/unit/obras.test.ts tests/unit/obras-build.test.ts tests/unit/obra-cli.test.ts tests/unit/documentacion.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** puerta ortográfica (un grupo de grafías equivalentes con alguna no literal rompe y sugiere la orden que funcionará); aviso de prefijo con las órdenes exactas; `distintaDe` en la ficha; las órdenes `restituir-grafia`, `reunir`, `separar` y `titular`; el título se ajusta en el mismo gesto al documentar, retirar o restituir. Corpus: `restituir-grafia` igualó la Cita de Sor Juana a «Respuesta a Sor Filotea de la Cruz» y sigue en el censo. **Ninguna reunión aplicada:** la propuesta para Héctor está en `propuesta-reuniones-de-obra.md` (reunir Unamuno; reunir Séneca, con reservas; separar Machado).
+
+**Revisión:** 12 parches aplicados, 2 diferidos y 2 rechazados (la puerta agrupa por forma y no por ficha, que es lo que dice el AC; un guarda contra reunir partes, que es política de quien decide). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 111 ficheros y 3286 pruebas; astro check, 0 errores; build en verde con solo los avisos de prefijo de Machado y Unamuno; `dist/` idéntico a la base salvo la Cita restituida («sor» → «Sor»).

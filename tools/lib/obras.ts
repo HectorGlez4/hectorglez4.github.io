@@ -14,10 +14,15 @@
  */
 
 import { existsSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { basename, dirname, join } from 'node:path';
 import {
+  colapsar,
+  esGrafiaLiteral,
   formaDeObra,
   grafiaPorOmision,
+  grafiasDeFicha,
+  mismaGrafia,
   nombreDeFichaDeObra,
   obrasDeCitas,
   prefijosDeFormas,
@@ -26,14 +31,23 @@ import {
   type GrafiaDeObra,
 } from '../../src/lib/obras.ts';
 import {
+  escribirCita,
   escribirFichaDeObra,
+  leerAutores,
+  leerCensoDeCotejo,
   leerCitas,
   leerCitasTolerante,
+  leerDocumentosDeclarados,
   leerFichasDeObra,
   leerFichasDeObraRetiradas,
   mover,
+  reescribirFichaDeObra,
+  restaurarFichaDeObra,
+  separarFrontmatter,
   type Rutas,
 } from './corpus.ts';
+import { FICHERO_DEL_CENSO } from './cotejo.ts';
+import { derivarDeLaDeclaracion, esElMismoAutor } from './documento.ts';
 import type { Resultado } from './gestion.ts';
 
 /** Lo que hay que hacer para que la Obra tenga ficha activa, decidido en solo lectura. */
@@ -412,6 +426,538 @@ export async function retirarFichaDeObra(
       `  Motivo: ${motivo.trim()}`,
       'No se ha borrado nada: si una Cita vuelve a resolverla, la siguiente publicación la ' +
         'restaura. El motivo va en el mensaje del commit (AD-10).',
+    ].join('\n'),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Una obra, un nombre — Historia 22.2
+// ─────────────────────────────────────────────────────────────────────────────
+/*
+ * Las órdenes de esta sección **deciden sobre la ficha y nunca sobre las Citas**: reunir,
+ * separar y titular reescriben una ficha y no tocan ninguna Procedencia. La única que toca una
+ * Cita es `restituirGrafia`, y solo para igualar la grafía de una Cita del censo a la cabecera
+ * literal de un documento versionado de su Obra: restituir el literal de la Fuente es la única
+ * excepción a «nunca se reescribe la Procedencia».
+ */
+
+/** La orden que reúne dos fichas. */
+export const ORDEN_DE_REUNIR = 'npm run obra -- reunir';
+
+/** Una ficha activa por su nombre (sin extensión), o el motivo de no encontrarla. */
+async function fichaActiva(
+  rutas: Rutas,
+  nombre: string,
+): Promise<{ ok: true; ficha: FichaDeObra; fichas: FichaDeObra[] } | { ok: false; motivos: string[] }> {
+  const buscado = nombre.replace(/\.ya?ml$/u, '');
+  let fichas: FichaDeObra[];
+  try {
+    fichas = await leerFichasDeObra(rutas);
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se pueden leer las Fichas de Obra: ${texto(fallo)}`] };
+  }
+  const ficha = fichas.find((f) => f.nombre === buscado);
+  if (ficha === undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `No hay ninguna Ficha de Obra «${buscado}» en ${rutas.obras}. El nombre es el del ` +
+          'fichero sin extensión, como «seneca--cartas-a-lucilio».',
+      ],
+    };
+  }
+  return { ok: true, ficha, fichas };
+}
+
+/** La ficha tal como se escribe: sin nombre ni ruta, y sin `distintaDe` vacío. */
+function datosDeFicha(ficha: FichaDeObra) {
+  return {
+    autor: ficha.autor,
+    titulo: ficha.titulo,
+    formas: [...ficha.formas],
+    ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
+      ? { distintaDe: [...ficha.distintaDe] }
+      : {}),
+  };
+}
+
+/**
+ * La forma principal de una ficha: la de su título si la reclama, y si no, la primera. Es la
+ * que `separar` escribe en el `distintaDe` de la otra.
+ */
+export function formaPrincipal(ficha: Pick<FichaDeObra, 'titulo' | 'formas'>): string {
+  const delTitulo = formaDeObra(ficha.titulo);
+  return ficha.formas.includes(delTitulo) ? delTitulo : ficha.formas[0];
+}
+
+const NADA_ESCRITO = 'No se ha escrito nada.';
+
+/**
+ * Reúne la ficha `absorbida` en `destino`: las formas de la absorbida pasan a la destino, y la
+ * absorbida se **mueve** a `corpus/_obras-retiradas/` (AD-2) con el motivo «reunida en …».
+ *
+ * No mueve ninguna Cita ni ningún documento: las Citas de la absorbida pasan a resolver la
+ * destino porque ahora es ella quien reclama su forma. Se niega si son de Autores distintos o
+ * si son la misma ficha. Y avisa siempre de que la URL de la absorbida dará 404 cuando las
+ * Obras tengan página (NFR-4, UX-DR50 f): su nombre era su URL y ya no resuelve a nadie.
+ *
+ * Los `distintaDe` de las dos se unen en la reunida, sin las formas que pasan a ser suyas: si
+ * una había declarado distinta a la otra, reunir es la decisión contraria, y la posterior
+ * manda. El parte lo dice, y nombra las terceras fichas que se declaraban distintas de una
+ * forma de la absorbida, porque desde ahora lo son de la reunida.
+ *
+ * Si la absorbida no se puede mover, la destino vuelve a su contenido de antes; si ni eso se
+ * puede, el parte lo dice. No lanza.
+ */
+export async function reunirFichas(
+  rutas: Rutas,
+  nombreDestino: string,
+  nombreAbsorbida: string,
+): Promise<Resultado> {
+  const destino = await fichaActiva(rutas, nombreDestino);
+  if (!destino.ok) return { ok: false, motivos: [...destino.motivos, NADA_ESCRITO] };
+  const absorbida = await fichaActiva(rutas, nombreAbsorbida);
+  if (!absorbida.ok) return { ok: false, motivos: [...absorbida.motivos, NADA_ESCRITO] };
+  const a = destino.ficha;
+  const b = absorbida.ficha;
+
+  if (a.nombre === b.nombre) {
+    return { ok: false, motivos: [`«${a.nombre}» es la misma ficha: no hay nada que reunir.`, NADA_ESCRITO] };
+  }
+  if (a.autor !== b.autor) {
+    return {
+      ok: false,
+      motivos: [
+        `«${a.nombre}» es de ${a.autor} y «${b.nombre}» es de ${b.autor}. Una Obra es de un ` +
+          'Autor: reunir fichas de Autores distintos atribuiría Citas a quien no las firmó.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const formas = [...a.formas, ...b.formas.filter((f) => !a.formas.includes(f))];
+  // Los `distintaDe` de las dos, sin las formas que pasan a ser propias de la reunida.
+  const declaradas = [...(a.distintaDe ?? []), ...(b.distintaDe ?? [])];
+  const distintaDe = [...new Set(declaradas)].filter((f) => !formas.includes(f));
+  const dejanDeSerDistintas = [...new Set(declaradas)].filter((f) => formas.includes(f));
+  const heredadas = (b.distintaDe ?? []).filter(
+    (f) => !formas.includes(f) && !(a.distintaDe ?? []).includes(f),
+  );
+  const nueva = {
+    autor: a.autor,
+    titulo: a.titulo,
+    formas,
+    ...(distintaDe.length > 0 ? { distintaDe } : {}),
+  };
+
+  // Terceras fichas que se declaraban distintas de una forma de la absorbida: ahora lo son de
+  // la reunida, y eso no lo decidió nadie al reunir. Se nombran para que se revise.
+  const terceras = destino.fichas.filter(
+    (f) =>
+      f.nombre !== a.nombre &&
+      f.nombre !== b.nombre &&
+      f.autor === a.autor &&
+      (f.distintaDe ?? []).some((forma) => b.formas.includes(forma)),
+  );
+
+  let original: string;
+  try {
+    original = await readFile(a.ruta, 'utf8');
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se pudo leer ${a.ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
+  }
+  try {
+    await reescribirFichaDeObra(a.ruta, nueva);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+
+  let movida: string;
+  try {
+    movida = await mover(b.ruta, rutas.obrasRetiradas);
+  } catch (fallo) {
+    const vuelta = await restaurar(a.ruta, original);
+    return { ok: false, motivos: [texto(fallo), vuelta] };
+  }
+
+  return {
+    ok: true,
+    ruta: a.ruta,
+    mensaje: [
+      `«${b.nombre}» reunida en «${a.nombre}».`,
+      `  Formas de ${a.ruta}: ${formas.map((f) => `«${f}»`).join(', ')}`,
+      ...(dejanDeSerDistintas.length > 0
+        ? [
+            '  Deja de declararse distinta de lo que ahora reclama: ' +
+              dejanDeSerDistintas.map((f) => `«${f}»`).join(', '),
+          ]
+        : []),
+      ...(heredadas.length > 0
+        ? [`  Hereda de la absorbida su distintaDe: ${heredadas.map((f) => `«${f}»`).join(', ')}`]
+        : []),
+      ...(distintaDe.length > 0
+        ? [`  distintaDe de la reunida: ${distintaDe.map((f) => `«${f}»`).join(', ')}`]
+        : []),
+      `  ${b.ruta} → ${movida}`,
+      `  Motivo: reunida en ${a.nombre}`,
+      ...(terceras.length > 0
+        ? [
+            'Estas fichas se declaraban distintas de una forma de la absorbida, y ahora lo son de ' +
+              `«${a.nombre}»; revise si sigue siendo verdad:`,
+            ...terceras.map(
+              (f) =>
+                `  ${f.ruta}: distinta de ${(f.distintaDe ?? [])
+                  .filter((forma) => b.formas.includes(forma))
+                  .map((forma) => `«${forma}»`)
+                  .join(', ')}`,
+            ),
+          ]
+        : []),
+      'Ninguna Cita ni ningún documento se ha movido; ninguna Procedencia ha cambiado.',
+      `Aviso: la URL de «${b.nombre}» dará 404 cuando las Obras tengan página (NFR-4, ` +
+        'UX-DR50 f). Su nombre era su URL, y ya no resuelve a ninguna Obra.',
+      'El motivo va en el mensaje del commit (AD-10).',
+    ].join('\n'),
+  };
+}
+
+/**
+ * Devuelve una ficha a su contenido de antes, sin lanzar nunca: la vuelta atrás de `reunir` y
+ * `separar`. Devuelve la línea del parte que dice si lo consiguió.
+ */
+async function restaurar(ruta: string, contenido: string): Promise<string> {
+  try {
+    await restaurarFichaDeObra(ruta, contenido);
+    return `${ruta} se ha dejado como estaba. ${NADA_ESCRITO}`;
+  } catch (fallo) {
+    return (
+      `Y no se pudo devolver ${ruta} a como estaba: ${texto(fallo)}. Revíselo con ` +
+      '«git diff corpus/obras/» antes de construir.'
+    );
+  }
+}
+
+/**
+ * Declara dos fichas del mismo Autor **distintas**: añade a cada una la forma principal de la
+ * otra en `distintaDe`. Calla el aviso de prefijo entre las dos. Es idempotente.
+ */
+export async function separarFichas(
+  rutas: Rutas,
+  nombreUna: string,
+  nombreOtra: string,
+): Promise<Resultado> {
+  const una = await fichaActiva(rutas, nombreUna);
+  if (!una.ok) return { ok: false, motivos: [...una.motivos, NADA_ESCRITO] };
+  const otra = await fichaActiva(rutas, nombreOtra);
+  if (!otra.ok) return { ok: false, motivos: [...otra.motivos, NADA_ESCRITO] };
+  const a = una.ficha;
+  const b = otra.ficha;
+
+  if (a.nombre === b.nombre) {
+    return { ok: false, motivos: [`«${a.nombre}» es la misma ficha: no se separa de sí misma.`, NADA_ESCRITO] };
+  }
+  if (a.autor !== b.autor) {
+    return {
+      ok: false,
+      motivos: [
+        `«${a.nombre}» es de ${a.autor} y «${b.nombre}» es de ${b.autor}: Obras de Autores ` +
+          'distintos ya son distintas, y `distintaDe` solo nombra formas del mismo Autor.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const conDistinta = (x: FichaDeObra, forma: string) => {
+    const lista = x.distintaDe ?? [];
+    return lista.includes(forma) ? undefined : { ...datosDeFicha(x), distintaDe: [...lista, forma] };
+  };
+  const nuevaA = conDistinta(a, formaPrincipal(b));
+  const nuevaB = conDistinta(b, formaPrincipal(a));
+
+  let originalA: string;
+  try {
+    originalA = await readFile(a.ruta, 'utf8');
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se pudo leer ${a.ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
+  }
+  let escritaA = false;
+  try {
+    if (nuevaA !== undefined) {
+      await reescribirFichaDeObra(a.ruta, nuevaA);
+      escritaA = true;
+    }
+    if (nuevaB !== undefined) await reescribirFichaDeObra(b.ruta, nuevaB);
+  } catch (fallo) {
+    const vuelta = escritaA ? await restaurar(a.ruta, originalA) : NADA_ESCRITO;
+    return { ok: false, motivos: [texto(fallo), vuelta] };
+  }
+
+  return {
+    ok: true,
+    ruta: a.ruta,
+    mensaje: [
+      nuevaA === undefined && nuevaB === undefined
+        ? `«${a.nombre}» y «${b.nombre}» ya estaban declaradas distintas: nada que cambiar.`
+        : `«${a.nombre}» y «${b.nombre}» quedan declaradas Obras distintas.`,
+      `  ${a.ruta}: distinta de «${formaPrincipal(b)}»`,
+      `  ${b.ruta}: distinta de «${formaPrincipal(a)}»`,
+      'Ninguna Cita ha cambiado. El aviso de prefijo entre las dos deja de salir.',
+    ].join('\n'),
+  };
+}
+
+/**
+ * Elige el título de una ficha. Solo admite una grafía que declare **alguna Cita publicada**
+ * de la Obra, tal cual: una escrita de nuevo se rechaza, porque el título nunca se inventa.
+ */
+export async function titularFicha(
+  rutas: Rutas,
+  nombre: string,
+  grafia: string,
+): Promise<Resultado> {
+  const leida = await fichaActiva(rutas, nombre);
+  if (!leida.ok) return { ok: false, motivos: [...leida.motivos, NADA_ESCRITO] };
+  const { ficha, fichas } = leida;
+
+  let publicadas: Awaited<ReturnType<typeof leerCitas>>;
+  try {
+    publicadas = await leerCitas(rutas.citas);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [`No se pueden leer las Citas publicadas: ${texto(fallo)}`, NADA_ESCRITO],
+    };
+  }
+  const grafias = grafiasDeFicha(ficha, fichas, publicadas);
+  const declarada = grafias.find((g) => mismaGrafia(g.literal, grafia));
+  if (declarada === undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `«${grafia}» no la declara ninguna Cita publicada de «${ficha.nombre}». El título de ` +
+          'una Obra es siempre una grafía de alguna de sus Procedencias, y nunca se escribe de ' +
+          'nuevo.',
+        grafias.length === 0
+          ? 'Ninguna Cita publicada resuelve esta ficha.'
+          : `Las que declaran sus Citas: ${grafias
+              .sort((x, y) => y.citas - x.citas || x.literal.localeCompare(y.literal, 'es'))
+              .map((g) => `«${g.literal}» ×${g.citas}`)
+              .join(', ')}.`,
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  // Se escribe la grafía tal como la declara la Cita, no como se tecleó en la orden.
+  const titulo = declarada.literal;
+  if (ficha.titulo === titulo) {
+    return { ok: true, ruta: ficha.ruta, mensaje: `«${ficha.nombre}» ya se titula «${titulo}».` };
+  }
+
+  try {
+    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), titulo });
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `«${ficha.nombre}» se titula ahora «${titulo}» (antes «${ficha.titulo}»).`,
+      `El nombre del fichero no cambia: es la URL de la Obra (AD-4).`,
+    ].join('\n'),
+  };
+}
+
+/**
+ * Pone al día el título de las fichas de un Autor que reclaman alguna de `formas`, si ha
+ * dejado de sostenerse: cuando ya no lo declara ninguna Cita publicada de la Obra, pasa a ser
+ * el de `grafiaPorOmision`. Lo llaman, en el mismo gesto, quien cambia o retira una
+ * Procedencia: `documentar`, `documentar --retirar` y `restituir-grafia`.
+ *
+ * Lee las Citas **ya escritas**. Una ficha que se queda sin Citas no se toca: eso avisa en el
+ * build por sí solo. No lanza: devuelve las líneas del parte, y un fallo es una línea más.
+ */
+export async function ajustarTitulosDeObra(
+  rutas: Rutas,
+  autor: string,
+  formas: readonly string[],
+): Promise<string[]> {
+  const lineas: string[] = [];
+  try {
+    const fichas = await leerFichasDeObra(rutas);
+    const citas = await leerCitas(rutas.citas);
+    for (const ficha of fichas) {
+      if (ficha.autor !== autor || !ficha.formas.some((f) => formas.includes(f))) continue;
+      const grafias = grafiasDeFicha(ficha, fichas, citas);
+      if (grafias.length === 0 || grafias.some((g) => mismaGrafia(g.literal, ficha.titulo))) {
+        continue;
+      }
+      const titulo = grafiaPorOmision(grafias);
+      await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), titulo });
+      lineas.push(
+        `El título de ${ficha.ruta} ya no lo declaraba ninguna Cita publicada: pasa de ` +
+          `«${ficha.titulo}» a «${titulo}», la grafía por omisión.`,
+      );
+    }
+  } catch (fallo) {
+    lineas.push(
+      `No se pudo poner al día el título de la Ficha de Obra: ${texto(fallo)}. El build ` +
+        'avisará; elíjalo con «npm run obra -- titular».',
+    );
+  }
+  return lineas;
+}
+
+/**
+ * Restituye la grafía de una Cita **del censo** a la de la cabecera de un documento versionado
+ * de su Obra — la única reescritura de una Procedencia que hace esta orden.
+ *
+ * Aplica solo cuando:
+ *   · la Cita está publicada y en `pendientes-de-cotejo.yml` (no tiene documento propio);
+ *   · hay documentos versionados cuya `obra:` normaliza igual que su grafía y cuya declaración
+ *     firma su mismo Autor —con la comparación de `documentar` y `extraer`—;
+ *   · todos esos documentos escriben la obra igual, y distinto de como la escribe la Cita.
+ *
+ * Iguala `procedencia.obra` y nada más: ni el texto, ni el año, ni el censo. Fuera de ese caso
+ * se niega, diciendo por qué.
+ */
+export async function restituirGrafia(rutas: Rutas, slug: string): Promise<Resultado> {
+  const publicadas = await leerCitas(rutas.citas);
+  const cita = publicadas.find((c) => c.slug === slug);
+  if (cita === undefined) {
+    const enRevision = (await leerCitasTolerante(rutas.revision)).citas.some((c) => c.slug === slug);
+    return {
+      ok: false,
+      motivos: [
+        enRevision
+          ? `«${slug}» no está publicada: está en ${rutas.revision}, y su Procedencia sale del ` +
+            'documento al aprobarla.'
+          : `No hay ninguna Cita publicada con el slug «${slug}» en ${rutas.citas}.`,
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const censo = await leerCensoDeCotejo(rutas);
+  if (!censo.includes(slug)) {
+    return {
+      ok: false,
+      motivos: [
+        `«${slug}» no está en el censo de ${FICHERO_DEL_CENSO}.`,
+        cita.fuente !== undefined && cita.fuente !== null
+          ? 'Ya tiene documento: su obra la declara el documento, y lo que difiera se corrige ' +
+            'retirándola y aprobándola de nuevo desde el documento, no aquí.'
+          : 'Restituir la grafía es solo para las Citas anteriores a la v3 que siguen sin ' +
+            'documento.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const obra = cita.procedencia?.obra;
+  if (typeof obra !== 'string' || formaDeObra(obra) === '') {
+    return {
+      ok: false,
+      motivos: [`«${slug}» no declara obra: no hay grafía que restituir.`, NADA_ESCRITO],
+    };
+  }
+  const forma = formaDeObra(obra);
+
+  const nombreDelAutor = (await leerAutores(rutas)).find((a) => a.slug === cita.autor)?.nombre?.trim();
+  if (nombreDelAutor === undefined || nombreDelAutor === '') {
+    return {
+      ok: false,
+      motivos: [
+        `La ficha de «${cita.autor}» no está en ${rutas.autores} o no declara nombre, y sin él ` +
+          'no se puede cotejar quién firma el documento.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const documentos = await leerDocumentosDeclarados(rutas);
+  const deLaObra = [...documentos].filter(([, d]) => formaDeObra(d.obra) === forma);
+  const suyos: { nombre: string; obra: string }[] = [];
+  const ajenos: string[] = [];
+  for (const [nombre, d] of deLaObra) {
+    const firma = derivarDeLaDeclaracion(d.fuente, d.declaracion).autor;
+    if (firma !== undefined && firma.nombres.some((n) => esElMismoAutor(n, nombreDelAutor))) {
+      suyos.push({ nombre, obra: d.obra });
+    } else {
+      ajenos.push(
+        `  corpus/fuentes/${nombre}.txt — ` +
+          (firma === undefined || firma.nombres.length === 0
+            ? 'no declara un autor que se pueda cotejar'
+            : `firma «${firma.nombres.join('» y «')}»`),
+      );
+    }
+  }
+
+  if (suyos.length === 0) {
+    return {
+      ok: false,
+      motivos: [
+        `No hay ningún documento versionado de «${obra}» firmado por ${nombreDelAutor}.`,
+        ...(ajenos.length > 0
+          ? ['Los de esa obra que hay no sirven, porque no se puede afirmar que sean suyos:', ...ajenos]
+          : []),
+        'Recupérelo con «npx tsx tools/recuperar.ts <url>» y documéntela con ' +
+          `«npm run documentar -- ${slug} corpus/fuentes/<documento>.txt».`,
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const grafias = [...new Set(suyos.map((d) => colapsar(d.obra)))];
+  if (grafias.length > 1) {
+    return {
+      ok: false,
+      motivos: [
+        `Los documentos de «${obra}» de ${nombreDelAutor} no escriben la obra igual, y no se ` +
+          'elige entre ellos:',
+        ...suyos.map((d) => `  corpus/fuentes/${d.nombre}.txt — «${d.obra}»`),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  const [cabecera] = grafias;
+  if (esGrafiaLiteral(obra, [cabecera])) {
+    return {
+      ok: false,
+      motivos: [
+        `«${slug}» ya declara «${obra}», que es como lo escribe su documento: nada que restituir.`,
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const datos = separarFrontmatter(await readFile(cita.ruta, 'utf8'));
+  if (datos === null) {
+    return { ok: false, motivos: [`El fichero ${cita.ruta} no tiene frontmatter.`, NADA_ESCRITO] };
+  }
+  const procedencia = (datos.procedencia ?? {}) as Record<string, unknown>;
+  datos.procedencia = { ...procedencia, obra: cabecera };
+  try {
+    await escribirCita(dirname(cita.ruta), basename(cita.ruta, '.md'), datos);
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se pudo escribir ${cita.ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
+  }
+
+  const titulos = await ajustarTitulosDeObra(rutas, cita.autor, [forma]);
+
+  return {
+    ok: true,
+    ruta: cita.ruta,
+    mensaje: [
+      `«${slug}» restituida a la grafía de su documento.`,
+      `  antes:   «${obra}»`,
+      `  después: «${cabecera}»`,
+      `  Documento: ${suyos.map((d) => `corpus/fuentes/${d.nombre}.txt`).join(', ')}`,
+      `Sigue en el censo de ${FICHERO_DEL_CENSO}: tener la grafía de un documento no es estar ` +
+        'cotejada contra él.',
+      ...titulos,
+      'Ni el texto, ni el año, ni el slug han cambiado.',
     ].join('\n'),
   };
 }

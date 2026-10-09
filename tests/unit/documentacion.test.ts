@@ -1058,3 +1058,92 @@ describe('Historia 19.1 — restituir la traducción', () => {
     });
   });
 });
+
+describe('Historia 22.2 — el título de la ficha se pone al día en el mismo gesto', () => {
+  const FICHA = 'obras/teresa-de-jesus--nada-te-turbe.yml';
+  const fichaCon = (titulo: string, forma: string) =>
+    `autor: "teresa-de-jesus"\ntitulo: ${JSON.stringify(titulo)}\nformas:\n  - ${JSON.stringify(forma)}\n`;
+
+  it('documentar cambia el título que solo sostenía la grafía de antes', async () => {
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente({ procedencia: { obra: 'Nada te turbe.' } }),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+      [FICHA]: fichaCon('Nada te turbe.', 'nada te turbe'),
+    });
+
+    const avisos: string[] = [];
+    const resultado = await documentarCita(rutas, SLUG, join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt'), {
+      avisar: (l) => avisos.push(l),
+    });
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect(await readFile(join(rutas.raiz, FICHA), 'utf8')).toContain('titulo: "Nada te turbe"\n');
+    expect(avisos.join('\n')).toContain('pasa de «Nada te turbe.» a «Nada te turbe»');
+  });
+
+  it('documentar que pasa la Cita a otra forma ajusta el título de la ficha de antes', async () => {
+    const OTRA = 'teresa-de-jesus-la-paciencia-todo-lo-alcanza';
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente({ procedencia: { obra: 'Poesías' } }),
+      'citas/teresa-de-jesus--la-paciencia-todo-lo-alcanza.md': citaSinFuente({
+        slug: OTRA,
+        texto: 'La paciencia todo lo alcanza.',
+        procedencia: { obra: 'poesías' },
+      }),
+      [DOCUMENTO]: documentoDePrueba(CUERPO),
+      'obras/teresa-de-jesus--poesias.yml': fichaCon('Poesías', 'poesias'),
+    });
+
+    const avisos: string[] = [];
+    const resultado = await documentarCita(rutas, SLUG, join(rutas.fuentes, 'wikisource-es--nada-te-turbe.txt'), {
+      avisar: (l) => avisos.push(l),
+    });
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    // La Cita está ahora en «Nada te turbe»: la ficha de «Poesías» la sostiene solo la otra.
+    expect(await readFile(join(rutas.raiz, 'obras/teresa-de-jesus--poesias.yml'), 'utf8')).toContain(
+      'titulo: "poesías"\n',
+    );
+    expect(avisos.join('\n')).toContain('pasa de «Poesías» a «poesías»');
+    expect(existsSync(join(rutas.raiz, 'obras/teresa-de-jesus--nada-te-turbe.yml'))).toBe(true);
+  });
+
+  it('documentar --retirar cambia el título si era la Cita retirada la que lo daba', async () => {
+    const OTRA = 'teresa-de-jesus-la-paciencia-todo-lo-alcanza';
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente({ procedencia: { obra: 'Poesías' } }),
+      'citas/teresa-de-jesus--la-paciencia-todo-lo-alcanza.md': citaSinFuente({
+        slug: OTRA,
+        texto: 'La paciencia todo lo alcanza.',
+        procedencia: { obra: 'poesías' },
+      }),
+      'obras/teresa-de-jesus--poesias.yml': fichaCon('Poesías', 'poesias'),
+    });
+
+    const resultado = await retirarCita(rutas, SLUG, 'No aparece en la edición.');
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    if (resultado.ok) expect(resultado.mensaje).toContain('pasa de «Poesías» a «poesías»');
+    expect(await readFile(join(rutas.raiz, 'obras/teresa-de-jesus--poesias.yml'), 'utf8')).toContain(
+      'titulo: "poesías"\n',
+    );
+  });
+
+  it('documentar --retirar no toca un título que otra Cita sigue sosteniendo', async () => {
+    const OTRA = 'teresa-de-jesus-la-paciencia-todo-lo-alcanza';
+    const ficha = fichaCon('Poesías', 'poesias');
+    const rutas = await enDisco({
+      ...CORPUS_BASE,
+      [FICHERO]: citaSinFuente({ procedencia: { obra: 'Poesías' } }),
+      'citas/teresa-de-jesus--la-paciencia-todo-lo-alcanza.md': citaSinFuente({
+        slug: OTRA,
+        texto: 'La paciencia todo lo alcanza.',
+        procedencia: { obra: 'Poesías' },
+      }),
+      'obras/teresa-de-jesus--poesias.yml': ficha,
+    });
+
+    expect((await retirarCita(rutas, SLUG, 'No aparece en la edición.')).ok).toBe(true);
+    expect(await readFile(join(rutas.raiz, 'obras/teresa-de-jesus--poesias.yml'), 'utf8')).toBe(ficha);
+  });
+});

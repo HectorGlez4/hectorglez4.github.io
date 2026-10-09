@@ -469,8 +469,12 @@ export const formaDeObraAdmisible = z
  * reclama formas por omisión reclamaría Citas que nadie decidió reunir, y un campo mal
  * tecleado se descartaría en silencio.
  *
- * Los campos de las épicas siguientes —`distintaDe`, `nota`, `ediciones`— no se declaran
- * todavía: el `.strict()` los rechaza hasta que una historia los construya.
+ * `distintaDe` (Historia 22.2) es opcional: la lista de formas canónicas de **otras** Obras del
+ * mismo Autor de las que esta se declara distinta, y silencia el aviso de prefijo. Sin valor
+ * se omite; nunca lista vacía. Lo escribe `npm run obra -- separar`, nunca una persona.
+ *
+ * Los campos de las épicas siguientes —`nota`, `ediciones`— no se declaran todavía: el
+ * `.strict()` los rechaza hasta que una historia los construya.
  *
  * La comparten la colección de `src/content.config.ts` y todo lector de `tools/`, que la
  * aplica en vez de leer YAML crudo (AD-17: una sola entrada).
@@ -500,15 +504,40 @@ export const obraAdmisible = z
         .refine((formas) => new Set(formas).size === formas.length, {
           message: 'Regla incumplida: una Ficha de Obra no repite ninguna forma.',
         }),
+      distintaDe: z
+        .array(formaDeObraAdmisible, {
+          error:
+            'Regla incumplida: «distintaDe» es la lista de formas canónicas de las Obras de ' +
+            'las que esta se declara distinta.',
+        })
+        .min(
+          1,
+          'Regla incumplida: «distintaDe» sin ninguna forma se omite; no se escribe vacío.',
+        )
+        .refine((formas) => new Set(formas).size === formas.length, {
+          message: 'Regla incumplida: «distintaDe» no repite ninguna forma.',
+        })
+        .optional(),
     },
     {
       error: (problema) =>
         problema.code === 'unrecognized_keys'
           ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
-            `«${problema.keys.join('», «')}». Sus campos son autor, titulo y formas.`
-          : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas.',
+            `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas y ` +
+            'distintaDe.'
+          : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
+            'opcionalmente distintaDe.',
     },
   )
-  .strict();
+  .strict()
+  .refine(
+    (ficha) => !(ficha.distintaDe ?? []).some((forma) => ficha.formas.includes(forma)),
+    {
+      message:
+        'Regla incumplida: una Ficha de Obra no se declara distinta de una forma que ella ' +
+        'misma reclama.',
+      path: ['distintaDe'],
+    },
+  );
 
 export type ObraAdmisible = z.infer<typeof obraAdmisible>;

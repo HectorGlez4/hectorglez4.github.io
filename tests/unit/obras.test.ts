@@ -5,8 +5,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { obraAdmisible } from '../../src/lib/admision.ts';
 import {
+  avisosDeDistintaRancia,
   avisosDeObras,
+  avisosDePrefijo,
+  clave,
+  esGrafiaLiteral,
   fallosDeObras,
+  tituloEfectivo,
   fichaDeCita,
   formaDeObra,
   grafiaPorOmision,
@@ -17,6 +22,7 @@ import {
 } from '../../src/lib/obras.ts';
 import {
   escribirCita,
+  leerCitas,
   leerFichasDeObra,
   mover,
   rutasDelCorpus,
@@ -24,9 +30,14 @@ import {
 } from '../../tools/lib/corpus.ts';
 import {
   asegurarFichaDeObra,
+  restituirGrafia,
   retirarFichaDeObra,
+  reunirFichas,
   sembrarFichasDeObra,
+  separarFichas,
+  titularFicha,
 } from '../../tools/lib/obras.ts';
+import { componerDocumento } from '../../tools/lib/documento.ts';
 import { aprobar } from '../../tools/lib/revision.ts';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import { retirarAutor } from '../../tools/lib/gestion.ts';
@@ -57,6 +68,13 @@ describe('el esquema de la Ficha de Obra', () => {
     ).toBe(true);
   });
 
+  it('admite distintaDe con formas canónicas de otras Obras', () => {
+    expect(
+      obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x i'] })
+        .success,
+    ).toBe(true);
+  });
+
   it.each([
     ['sin formas', { autor: 'seneca', titulo: 'X' }],
     ['formas vacías', { autor: 'seneca', titulo: 'X', formas: [] }],
@@ -65,6 +83,9 @@ describe('el esquema de la Ficha de Obra', () => {
     ['título en blanco', { autor: 'seneca', titulo: '  ', formas: ['x'] }],
     ['autor que no es slug', { autor: 'Séneca', titulo: 'X', formas: ['x'] }],
     ['campo de una épica siguiente', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 'n' }],
+    ['distintaDe vacío', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: [] }],
+    ['distintaDe no canónico', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['Y'] }],
+    ['distintaDe de su propia forma', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x'] }],
   ])('rechaza %s', (_caso, datos) => {
     expect(obraAdmisible.safeParse(datos).success).toBe(false);
   });
@@ -469,5 +490,412 @@ describe('los enganches que publican', () => {
     expect(hecho.ok).toBe(false);
     if (!hecho.ok) expect(hecho.motivos.join('\n')).toContain('seneca--x');
     expect(existsSync(join(rutas.autores, 'seneca.yml'))).toBe(true);
+  });
+});
+
+// ─── Historia 22.2 — una obra, un nombre ─────────────────────────────────────
+
+function citaEn(slug: string, autor: string, obra: string) {
+  return { slug, autor, procedencia: { obra }, ruta: `corpus/citas/${slug}.md` };
+}
+
+describe('22.2 — la regla de literalidad', () => {
+  it('literal es igual a una cabecera colapsando espacios, y nada más', () => {
+    expect(esGrafiaLiteral('Respuesta a  Sor Filotea', ['Respuesta a Sor Filotea'])).toBe(true);
+    expect(esGrafiaLiteral('Respuesta a sor Filotea', ['Respuesta a Sor Filotea'])).toBe(false);
+    expect(esGrafiaLiteral('Respuesta a Sor Filotea', ['Otra página', 'Respuesta a Sor Filotea'])).toBe(true);
+    expect(esGrafiaLiteral('Respuesta a Sor Filotea', [])).toBe(false);
+  });
+});
+
+describe('22.2 — la puerta ortográfica, pura', () => {
+  const autores = ['sor-juana'];
+  const fichas = [ficha('sor-juana--respuesta', 'sor-juana', 'Respuesta a Sor Filotea', ['respuesta a sor filotea'])];
+
+  it('un grupo con una grafía sin documento rompe, nombra fichero, grafías y forma, y da restituir-grafia', () => {
+    const citas = [
+      citaEn('sor-juana-a', 'sor-juana', 'Respuesta a Sor Filotea'),
+      citaEn('sor-juana-b', 'sor-juana', 'Respuesta a sor Filotea'),
+    ];
+    const fallos = fallosDeObras(fichas, citas, autores, {
+      cabecerasDeCita: new Map([['sor-juana-a', ['Respuesta a Sor Filotea']]]),
+      formasConDocumento: new Set([clave('sor-juana', 'respuesta a sor filotea')]),
+      censo: new Set(['sor-juana-b']),
+    });
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('corpus/citas/sor-juana-b.md');
+    expect(fallos[0]).not.toContain('corpus/citas/sor-juana-a.md');
+    expect(fallos[0]).toContain('«Respuesta a Sor Filotea» ×1');
+    expect(fallos[0]).toContain('«Respuesta a sor Filotea» ×1');
+    expect(fallos[0]).toContain('respuesta a sor filotea');
+    expect(fallos[0]).toContain('npm run obra -- restituir-grafia sor-juana-b');
+  });
+
+  it.each([
+    ['la Cita no está en el censo', clave('sor-juana', 'respuesta a sor filotea'), new Set<string>()],
+    ['el documento es de otro Autor', clave('otro-autor', 'respuesta a sor filotea'), new Set(['sor-juana-b'])],
+  ])('da documentar, y no restituir-grafia, cuando %s', (_caso, documentado, censo) => {
+    const citas = [
+      citaEn('sor-juana-a', 'sor-juana', 'Respuesta a Sor Filotea'),
+      citaEn('sor-juana-b', 'sor-juana', 'Respuesta a sor Filotea'),
+    ];
+    const fallos = fallosDeObras(fichas, citas, autores, {
+      cabecerasDeCita: new Map([['sor-juana-a', ['Respuesta a Sor Filotea']]]),
+      formasConDocumento: new Set([documentado]),
+      censo,
+    });
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('npm run documentar -- sor-juana-b');
+    expect(fallos[0]).not.toContain('restituir-grafia');
+  });
+
+  it('sin documento de la Obra, da documentar', () => {
+    const citas = [
+      citaEn('sor-juana-a', 'sor-juana', 'Respuesta a Sor Filotea'),
+      citaEn('sor-juana-b', 'sor-juana', 'Respuesta a sor Filotea'),
+    ];
+    const fallos = fallosDeObras(fichas, citas, autores);
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('npm run documentar -- sor-juana-a');
+    expect(fallos[0]).toContain('npm run documentar -- sor-juana-b');
+    expect(fallos[0]).not.toContain('restituir-grafia');
+  });
+
+  it('un grupo con todas las grafías literales no rompe', () => {
+    const citas = [
+      citaEn('sor-juana-a', 'sor-juana', 'Respuesta a Sor Filotea'),
+      citaEn('sor-juana-b', 'sor-juana', 'Respuesta a sor Filotea'),
+    ];
+    expect(
+      fallosDeObras(fichas, citas, autores, {
+        cabecerasDeCita: new Map([
+          ['sor-juana-a', ['Respuesta a Sor Filotea']],
+          ['sor-juana-b', ['Respuesta a sor Filotea']],
+        ]),
+        formasConDocumento: new Set([clave('sor-juana', 'respuesta a sor filotea')]),
+        censo: new Set(),
+      }),
+    ).toEqual([]);
+  });
+
+  it('una sola grafía sin documento no rompe', () => {
+    expect(
+      fallosDeObras(fichas, [citaEn('sor-juana-b', 'sor-juana', 'Respuesta a Sor Filotea')], autores),
+    ).toEqual([]);
+  });
+});
+
+describe('22.2 — los avisos de prefijo y de título', () => {
+  const corta = ficha('antonio-machado--proverbios-y-cantares', 'antonio-machado', 'Proverbios y cantares', [
+    'proverbios y cantares',
+  ]);
+  const larga = ficha(
+    'antonio-machado--proverbios-y-cantares-nuevas-canciones',
+    'antonio-machado',
+    'Proverbios y cantares (Nuevas canciones)',
+    ['proverbios y cantares nuevas canciones'],
+  );
+
+  it('dos formas en fichas distintas, una prefijo de palabra de la otra, avisan', () => {
+    const avisos = avisosDePrefijo([corta, larga]);
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0]).toContain('antonio-machado');
+    expect(avisos[0]).toContain('npm run obra -- separar');
+  });
+
+  it('un prefijo que no es de palabra entera no avisa, ni uno de otro Autor', () => {
+    const otra = ficha('antonio-machado--proverbiosa', 'antonio-machado', 'P', ['proverbios y cantaresx']);
+    const ajena = ficha('miguel-de-unamuno--p', 'miguel-de-unamuno', 'P', ['proverbios y cantares i']);
+    expect(avisosDePrefijo([corta, otra, ajena])).toEqual([]);
+  });
+
+  it('distintaDe en cualquiera de las dos lo calla', () => {
+    expect(avisosDePrefijo([{ ...corta, distintaDe: ['proverbios y cantares nuevas canciones'] }, larga])).toEqual([]);
+    expect(avisosDePrefijo([corta, { ...larga, distintaDe: ['proverbios y cantares'] }])).toEqual([]);
+  });
+
+  it('el aviso de prefijo da las dos órdenes exactas', () => {
+    const [aviso] = avisosDePrefijo([corta, larga]);
+    expect(aviso).toContain(`npm run obra -- reunir ${corta.nombre} ${larga.nombre}`);
+    expect(aviso).toContain(`npm run obra -- separar ${corta.nombre} ${larga.nombre}`);
+  });
+
+  it('un distintaDe que no reclama ninguna ficha activa del Autor avisa de rancio', () => {
+    const rancia = { ...corta, distintaDe: ['proverbios y cantares retirados'] };
+    const avisos = avisosDeDistintaRancia([rancia, larga]);
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0]).toContain('rancia');
+    expect(avisos[0]).toContain('proverbios y cantares retirados');
+    expect(avisosDeObras([rancia, larga], [])).toEqual(expect.arrayContaining([avisos[0]]));
+    expect(avisosDeDistintaRancia([{ ...corta, distintaDe: ['proverbios y cantares nuevas canciones'] }, larga])).toEqual([]);
+  });
+
+  it('el título se compara colapsando espacios', () => {
+    const f = ficha('seneca--x', 'seneca', 'Sobre  la vida', ['sobre la vida']);
+    const citas = [citaEn('a', 'seneca', 'Sobre la vida')];
+    expect(avisosDeObras([f], citas)).toEqual([]);
+    expect(tituloEfectivo(f, [f], citas)).toBe('Sobre  la vida');
+  });
+
+  it('reunidas en una sola ficha, no avisa', () => {
+    expect(avisosDePrefijo([{ ...corta, formas: [...corta.formas, ...larga.formas] }])).toEqual([]);
+  });
+
+  it('un título que ya no declara ninguna Cita avisa y cae a la grafía por omisión', () => {
+    const f = ficha('seneca--x', 'seneca', 'Sobre la vida', ['sobre la vida']);
+    const citas = [citaEn('a', 'seneca', 'sobre la vida'), citaEn('b', 'seneca', 'sobre la vida')];
+    const avisos = avisosDeObras([f], citas);
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0]).toContain('«Sobre la vida»');
+    expect(avisos[0]).toContain('la grafía efectiva es «sobre la vida»');
+    expect(tituloEfectivo(f, [f], citas)).toBe('sobre la vida');
+    expect(tituloEfectivo(f, [f], [...citas, citaEn('c', 'seneca', 'Sobre la vida')])).toBe('Sobre la vida');
+  });
+});
+
+describe('22.2 — restituir la grafía', () => {
+  const SLUG = 'sor-juana-ines-de-la-cruz-yo-no-estudio-para-saber-mas-sino';
+  const FICHERO = 'sor-juana-ines-de-la-cruz--yo-no-estudio-para-saber-mas-sino';
+  const CABECERA = 'Respuesta a Sor Filotea de la Cruz';
+
+  function documento(obra: string, autor: string | null = 'Sor Juana Inés de la Cruz') {
+    return componerDocumento(
+      {
+        fuente: 'wikisource-es',
+        obra,
+        url: 'https://es.wikisource.org/wiki/Respuesta_a_sor_Filotea_de_la_Cruz',
+        recuperado: '2026-08-21',
+      },
+      [obra, ...(autor === null ? [] : [`|autor=${autor}`])].join('\n'),
+      'Cuerpo de la carta.',
+    );
+  }
+
+  async function corpusDeSorJuana(opciones: { censada?: boolean; doc?: string | null; conFuente?: boolean } = {}) {
+    const rutas = await corpusTemporal();
+    await mkdir(rutas.fuentes, { recursive: true });
+    await writeFile(
+      join(rutas.autores, 'sor-juana-ines-de-la-cruz.yml'),
+      'nombre: Sor Juana Inés de la Cruz\nañoFallecimiento: 1695\nsemblanza: Poeta novohispana.\n',
+      'utf8',
+    );
+    await escribirCita(rutas.citas, FICHERO, {
+      texto: 'Yo no estudio para saber más, sino para ignorar menos.',
+      autor: 'sor-juana-ines-de-la-cruz',
+      slug: SLUG,
+      procedencia: { obra: 'Respuesta a sor Filotea de la Cruz', año: 1691 },
+      estadoDerechos: 'dominio-público',
+      ...(opciones.conFuente
+        ? { fuente: { ...FUENTE, url: 'https://es.wikisource.org/wiki/Respuesta_a_sor_Filotea_de_la_Cruz' } }
+        : {}),
+    });
+    await writeFile(
+      rutas.pendientesDeCotejo,
+      `# Censo\ncitas:\n${opciones.censada === false ? '' : `  - ${SLUG}\n`}`,
+      'utf8',
+    );
+    const doc = opciones.doc === undefined ? documento(CABECERA) : opciones.doc;
+    if (doc !== null) {
+      await writeFile(join(rutas.fuentes, 'wikisource-es--respuesta-a-sor-filotea-de-la-cruz.txt'), doc, 'utf8');
+    }
+    return rutas;
+  }
+
+  const rutaDeLaCita = (rutas: Rutas) => join(rutas.citas, `${FICHERO}.md`);
+
+  it('iguala la obra a la cabecera, la deja en el censo y no toca nada más', async () => {
+    const rutas = await corpusDeSorJuana();
+    const antes = await readFile(rutaDeLaCita(rutas), 'utf8');
+    const censoAntes = await readFile(rutas.pendientesDeCotejo, 'utf8');
+
+    const hecho = await restituirGrafia(rutas, SLUG);
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+
+    const despues = await readFile(rutaDeLaCita(rutas), 'utf8');
+    expect(despues).toBe(antes.replace('"Respuesta a sor Filotea de la Cruz"', `"${CABECERA}"`));
+    expect(despues).not.toBe(antes);
+    expect(await readFile(rutas.pendientesDeCotejo, 'utf8')).toBe(censoAntes);
+  });
+
+  it('pone al día el título que solo sostenía la grafía vieja, y lo dice', async () => {
+    const rutas = await corpusDeSorJuana();
+    await writeFile(
+      join(rutas.obras, 'sor-juana-ines-de-la-cruz--respuesta-a-sor-filotea-de-la-cruz.yml'),
+      'autor: "sor-juana-ines-de-la-cruz"\ntitulo: "Respuesta a sor Filotea de la Cruz"\n' +
+        'formas:\n  - "respuesta a sor filotea de la cruz"\n',
+      'utf8',
+    );
+    const hecho = await restituirGrafia(rutas, SLUG);
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    if (hecho.ok) expect(hecho.mensaje).toContain(`a «${CABECERA}», la grafía por omisión`);
+    const [leida] = await leerFichasDeObra(rutas);
+    expect(leida.titulo).toBe(CABECERA);
+  });
+
+  it.each([
+    ['ya tiene documento y no está en el censo', { censada: false, conFuente: true }, 'no está en el censo'],
+    ['no hay documento equivalente', { doc: null }, 'No hay ningún documento'],
+    ['el documento es de otro Autor', { doc: documento(CABECERA, 'Manuel González Prada') }, 'González Prada'],
+    ['el documento ya escribe igual', { doc: documento('Respuesta a sor Filotea de la Cruz') }, 'nada que restituir'],
+  ])('se niega cuando %s, sin escribir nada', async (_caso, opciones, dicho) => {
+    const rutas = await corpusDeSorJuana(opciones);
+    const antes = await readFile(rutaDeLaCita(rutas), 'utf8');
+    const hecho = await restituirGrafia(rutas, SLUG);
+    expect(hecho.ok).toBe(false);
+    if (!hecho.ok) expect(hecho.motivos.join('\n')).toContain(dicho);
+    expect(await readFile(rutaDeLaCita(rutas), 'utf8')).toBe(antes);
+  });
+});
+
+describe('22.2 — reunir, separar y titular', () => {
+  async function dosFichasDeSeneca() {
+    const rutas = await corpusTemporal();
+    await publicar(rutas, citaCompleta('seneca-a', 'De la brevedad de la vida'));
+    await publicar(rutas, citaCompleta('seneca-b', 'De la brevedad de la vida'));
+    await publicar(rutas, citaCompleta('seneca-c', 'Sobre la brevedad de la vida'));
+    await sembrarFichasDeObra(rutas);
+    return rutas;
+  }
+
+  it('reunir une las formas, retira la absorbida, no toca las Citas y avisa del 404', async () => {
+    const rutas = await dosFichasDeSeneca();
+    const citasAntes = await Promise.all((await readdir(rutas.citas)).map((f) => readFile(join(rutas.citas, f), 'utf8')));
+
+    const hecho = await reunirFichas(rutas, 'seneca--de-la-brevedad-de-la-vida', 'seneca--sobre-la-brevedad-de-la-vida');
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    if (hecho.ok) {
+      expect(hecho.mensaje).toContain('404');
+      expect(hecho.mensaje).toContain('reunida en seneca--de-la-brevedad-de-la-vida');
+    }
+
+    const fichas = await leerFichasDeObra(rutas);
+    expect(fichas).toHaveLength(1);
+    expect(fichas[0]).toMatchObject({
+      titulo: 'De la brevedad de la vida',
+      formas: ['de la brevedad de la vida', 'sobre la brevedad de la vida'],
+    });
+    expect(await readdir(rutas.obrasRetiradas)).toEqual(['seneca--sobre-la-brevedad-de-la-vida.yml']);
+    const citasDespues = await Promise.all((await readdir(rutas.citas)).map((f) => readFile(join(rutas.citas, f), 'utf8')));
+    expect(citasDespues).toEqual(citasAntes);
+    expect(fallosDeObras(fichas, await leerCitas(rutas.citas), ['seneca'])).toEqual([]);
+  });
+
+  it('reunir fichas de Autores distintos se niega sin escribir nada', async () => {
+    const rutas = await dosFichasDeSeneca();
+    await writeFile(
+      join(rutas.autores, 'horacio.yml'),
+      'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\n',
+      'utf8',
+    );
+    await publicar(rutas, citaCompleta('horacio-a', 'Odas', 'horacio'));
+    await sembrarFichasDeObra(rutas);
+    const antes = await readFile(join(rutas.obras, 'seneca--de-la-brevedad-de-la-vida.yml'), 'utf8');
+
+    const hecho = await reunirFichas(rutas, 'seneca--de-la-brevedad-de-la-vida', 'horacio--odas');
+    expect(hecho.ok).toBe(false);
+    expect(await readFile(join(rutas.obras, 'seneca--de-la-brevedad-de-la-vida.yml'), 'utf8')).toBe(antes);
+    expect(existsSync(join(rutas.obras, 'horacio--odas.yml'))).toBe(true);
+  });
+
+  it('separar declara a cada una distinta de la otra y es idempotente', async () => {
+    const rutas = await dosFichasDeSeneca();
+    const hecho = await separarFichas(rutas, 'seneca--de-la-brevedad-de-la-vida', 'seneca--sobre-la-brevedad-de-la-vida');
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    const otra = await separarFichas(rutas, 'seneca--sobre-la-brevedad-de-la-vida', 'seneca--de-la-brevedad-de-la-vida');
+    expect(otra.ok).toBe(true);
+
+    const porNombre = new Map((await leerFichasDeObra(rutas)).map((f) => [f.nombre, f]));
+    expect(porNombre.get('seneca--de-la-brevedad-de-la-vida')?.distintaDe).toEqual(['sobre la brevedad de la vida']);
+    expect(porNombre.get('seneca--sobre-la-brevedad-de-la-vida')?.distintaDe).toEqual(['de la brevedad de la vida']);
+  });
+
+  it('reunir con colisión en _obras-retiradas se niega y deja las dos fichas como estaban', async () => {
+    const rutas = await dosFichasDeSeneca();
+    await mkdir(rutas.obrasRetiradas, { recursive: true });
+    await writeFile(
+      join(rutas.obrasRetiradas, 'seneca--sobre-la-brevedad-de-la-vida.yml'),
+      'autor: "seneca"\ntitulo: "Otra"\nformas:\n  - "otra"\n',
+      'utf8',
+    );
+    const destino = join(rutas.obras, 'seneca--de-la-brevedad-de-la-vida.yml');
+    const antes = await readFile(destino, 'utf8');
+
+    const hecho = await reunirFichas(rutas, 'seneca--de-la-brevedad-de-la-vida', 'seneca--sobre-la-brevedad-de-la-vida');
+    expect(hecho.ok).toBe(false);
+    if (!hecho.ok) expect(hecho.motivos.join('\n')).toContain('se ha dejado como estaba');
+    expect(await readFile(destino, 'utf8')).toBe(antes);
+    expect(existsSync(join(rutas.obras, 'seneca--sobre-la-brevedad-de-la-vida.yml'))).toBe(true);
+    expect(await readdir(rutas.obras)).toHaveLength(2);
+  });
+
+  it('reunir y separar una ficha consigo misma, o separar entre Autores, se niegan', async () => {
+    const rutas = await dosFichasDeSeneca();
+    await writeFile(
+      join(rutas.autores, 'horacio.yml'),
+      'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\n',
+      'utf8',
+    );
+    await publicar(rutas, citaCompleta('horacio-a', 'Odas', 'horacio'));
+    await sembrarFichasDeObra(rutas);
+    const antes = await Promise.all((await readdir(rutas.obras)).map((f) => readFile(join(rutas.obras, f), 'utf8')));
+
+    const misma = 'seneca--de-la-brevedad-de-la-vida';
+    expect((await reunirFichas(rutas, misma, misma)).ok).toBe(false);
+    expect((await separarFichas(rutas, misma, misma)).ok).toBe(false);
+    expect((await separarFichas(rutas, misma, 'horacio--odas')).ok).toBe(false);
+    const despues = await Promise.all((await readdir(rutas.obras)).map((f) => readFile(join(rutas.obras, f), 'utf8')));
+    expect(despues).toEqual(antes);
+  });
+
+  it('reunir cuando la destino declaraba distinta a la absorbida: la declaración sale y se dice', async () => {
+    const rutas = await dosFichasDeSeneca();
+    await writeFile(
+      join(rutas.obras, 'seneca--de-la-ira.yml'),
+      'autor: "seneca"\ntitulo: "De la ira"\nformas:\n  - "de la ira"\n' +
+        'distintaDe:\n  - "sobre la brevedad de la vida"\n',
+      'utf8',
+    );
+    await separarFichas(rutas, 'seneca--de-la-brevedad-de-la-vida', 'seneca--sobre-la-brevedad-de-la-vida');
+    // La absorbida trae además su propia declaración, que la reunida hereda.
+    const absorbida = join(rutas.obras, 'seneca--sobre-la-brevedad-de-la-vida.yml');
+    await writeFile(
+      absorbida,
+      (await readFile(absorbida, 'utf8')) + '  - "de la ira"\n',
+      'utf8',
+    );
+
+    const hecho = await reunirFichas(rutas, 'seneca--de-la-brevedad-de-la-vida', 'seneca--sobre-la-brevedad-de-la-vida');
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    if (hecho.ok) {
+      expect(hecho.mensaje).toContain('Deja de declararse distinta');
+      expect(hecho.mensaje).toContain('Hereda de la absorbida su distintaDe: «de la ira»');
+      // La tercera ficha que se declaraba distinta de la absorbida se nombra.
+      expect(hecho.mensaje).toContain('seneca--de-la-ira.yml');
+    }
+    const reunida = (await leerFichasDeObra(rutas)).find((f) => f.nombre === 'seneca--de-la-brevedad-de-la-vida');
+    expect(reunida?.formas).toEqual(['de la brevedad de la vida', 'sobre la brevedad de la vida']);
+    expect(reunida?.distintaDe).toEqual(['de la ira']);
+  });
+
+  it('titular admite una grafía que declara una Cita publicada', async () => {
+    const rutas = await corpusTemporal();
+    await publicar(rutas, citaCompleta('seneca-a', 'De la brevedad de la vida'));
+    await publicar(rutas, citaCompleta('seneca-b', 'De la brevedad de la vida'));
+    await publicar(rutas, citaCompleta('seneca-c', 'De la Brevedad de la Vida'));
+    await sembrarFichasDeObra(rutas);
+
+    const hecho = await titularFicha(rutas, 'seneca--de-la-brevedad-de-la-vida', 'De la Brevedad de la Vida');
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    const [leida] = await leerFichasDeObra(rutas);
+    expect(leida.titulo).toBe('De la Brevedad de la Vida');
+    expect(leida.nombre).toBe('seneca--de-la-brevedad-de-la-vida');
+  });
+
+  it('titular rechaza una grafía inventada', async () => {
+    const rutas = await dosFichasDeSeneca();
+    const antes = await readFile(join(rutas.obras, 'seneca--de-la-brevedad-de-la-vida.yml'), 'utf8');
+    const hecho = await titularFicha(rutas, 'seneca--de-la-brevedad-de-la-vida', 'Obras de Séneca');
+    expect(hecho.ok).toBe(false);
+    expect(await readFile(join(rutas.obras, 'seneca--de-la-brevedad-de-la-vida.yml'), 'utf8')).toBe(antes);
   });
 });

@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { mkdtemp, mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { RAIZ } from './ayuda/construir.js';
 import { escribirCita } from '../../tools/lib/corpus.ts';
+import { componerDocumento } from '../../tools/lib/documento.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -43,11 +44,15 @@ async function corpusConCita(): Promise<string> {
   return corpus;
 }
 
-async function correr(corpus: string, argumentos: string[]) {
+async function correr(corpus: string, argumentos: string[], corpusDelante = false) {
+  // Con un «--» en los argumentos, `--corpus` tiene que ir delante: detrás sería posicional.
+  const conCorpus = corpusDelante
+    ? [argumentos[0], '--corpus', corpus, ...argumentos.slice(1)]
+    : [...argumentos, '--corpus', corpus];
   try {
     const { stdout, stderr } = await ejecutar(
       'npx',
-      ['tsx', join(RAIZ, 'tools/obra.ts'), ...argumentos, '--corpus', corpus],
+      ['tsx', join(RAIZ, 'tools/obra.ts'), ...conCorpus],
       { cwd: RAIZ },
     );
     return { codigo: 0, salida: stdout, error: stderr };
@@ -108,6 +113,98 @@ describe('Historia 22.1 — npm run obra', () => {
     ['con dos nombres', ['retirar', 'a--b', 'c--d', '--motivo', 'x']],
     ['con una bandera que no existe', ['sembrar', '--seco']],
     ['sin suborden', []],
+  ])('%s sale con 2', async (_caso, argumentos) => {
+    const corpus = await corpusConCita();
+    const hecho = await correr(corpus, argumentos);
+    expect(hecho.codigo).toBe(2);
+  });
+
+  it('titular una grafía inventada sale con 1 y una declarada con 0', async () => {
+    const corpus = await corpusConCita();
+    await correr(corpus, ['sembrar']);
+
+    const inventada = await correr(corpus, ['titular', 'seneca--cartas-a-lucilio', 'Obras de Séneca']);
+    expect(inventada.codigo).toBe(1);
+    expect(inventada.error).toContain('no la declara ninguna Cita publicada');
+
+    const declarada = await correr(corpus, ['titular', 'seneca--cartas-a-lucilio', 'Cartas a Lucilio']);
+    expect(declarada.codigo, declarada.error).toBe(0);
+  });
+
+  it('reunir fichas de Autores distintos sale con 1', async () => {
+    const corpus = await corpusConCita();
+    await correr(corpus, ['sembrar']);
+    await writeFile(
+      join(corpus, 'obras', 'horacio--odas.yml'),
+      'autor: "horacio"\ntitulo: "Odas"\nformas:\n  - "odas"\n',
+      'utf8',
+    );
+    const hecho = await correr(corpus, ['reunir', 'seneca--cartas-a-lucilio', 'horacio--odas']);
+    expect(hecho.codigo).toBe(1);
+    expect(await readdir(join(corpus, 'obras'))).toEqual(['horacio--odas.yml', 'seneca--cartas-a-lucilio.yml']);
+  });
+
+  it('restituir-grafia sobre una Cita fuera del censo sale con 1', async () => {
+    const corpus = await corpusConCita();
+    const hecho = await correr(corpus, ['restituir-grafia', 'seneca-a']);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toContain('no está en el censo');
+  });
+
+  it('separar dos fichas del mismo Autor sale con 0 y escribe distintaDe', async () => {
+    const corpus = await corpusConCita();
+    await correr(corpus, ['sembrar']);
+    await writeFile(
+      join(corpus, 'obras', 'seneca--cartas-a-lucilio-i.yml'),
+      'autor: "seneca"\ntitulo: "Cartas a Lucilio I"\nformas:\n  - "cartas a lucilio i"\n',
+      'utf8',
+    );
+    const hecho = await correr(corpus, ['separar', 'seneca--cartas-a-lucilio', 'seneca--cartas-a-lucilio-i']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await readFile(join(corpus, 'obras', 'seneca--cartas-a-lucilio.yml'), 'utf8')).toContain(
+      'distintaDe:\n  - "cartas a lucilio i"\n',
+    );
+  });
+
+  it('restituir-grafia sobre una Cita del censo con documento sale con 0', async () => {
+    const corpus = await corpusConCita();
+    await mkdir(join(corpus, 'fuentes'), { recursive: true });
+    await writeFile(join(corpus, 'pendientes-de-cotejo.yml'), 'citas:\n  - seneca-a\n', 'utf8');
+    await writeFile(
+      join(corpus, 'fuentes', 'wikisource-es--cartas-a-lucilio.txt'),
+      componerDocumento(
+        {
+          fuente: 'wikisource-es',
+          obra: 'Cartas a  lucilio',
+          url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio',
+          recuperado: '2026-08-21',
+        },
+        'Cartas a lucilio\n|autor=Séneca',
+        'Cuerpo.',
+      ),
+      'utf8',
+    );
+    const hecho = await correr(corpus, ['restituir-grafia', 'seneca-a']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await readFile(join(corpus, 'citas', 'seneca--a.md'), 'utf8')).toContain('obra: "Cartas a lucilio"');
+  });
+
+  it('todo lo que va detrás de un «--» es posicional', async () => {
+    const corpus = await corpusConCita();
+    await correr(corpus, ['sembrar']);
+    // «--Cartas» sería una bandera desconocida (2); detrás de «--» es la grafía, y se rechaza (1).
+    const hecho = await correr(corpus, ['titular', 'seneca--cartas-a-lucilio', '--', '--Cartas'], true);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toContain('«--Cartas» no la declara ninguna Cita publicada');
+  });
+
+  it.each([
+    ['restituir-grafia sin slug', ['restituir-grafia']],
+    ['restituir-grafia con dos slugs', ['restituir-grafia', 'a', 'b']],
+    ['reunir con una sola ficha', ['reunir', 'seneca--a']],
+    ['separar con tres fichas', ['separar', 'a--b', 'c--d', 'e--f']],
+    ['titular sin grafía', ['titular', 'seneca--cartas-a-lucilio']],
+    ['titular con una bandera que no existe', ['titular', 'a--b', 'X', '--forzar']],
   ])('%s sale con 2', async (_caso, argumentos) => {
     const corpus = await corpusConCita();
     const hecho = await correr(corpus, argumentos);

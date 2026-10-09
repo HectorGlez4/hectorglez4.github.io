@@ -337,11 +337,11 @@ descartado o da la orden exacta que falta:
 ## Las fichas de Obra
 
 Cada Obra con Citas publicadas tiene una **Ficha de Obra** en
-`corpus/obras/{slug-autor}--{slug-obra}.yml`, con `autor`, `titulo` y `formas` (Historia
-22.1, AD-25). La identidad de la Obra es el par (Autor, forma canónica de `normalizar`); el
-título es presentación. El nombre del fichero sale del título **una sola vez**, al crear la
-ficha, sin la truncación de los documentos de Fuente, y no se recalcula nunca: será la URL
-de la Página de Obra.
+`corpus/obras/{slug-autor}--{slug-obra}.yml`, con `autor`, `titulo`, `formas` y, opcional,
+`distintaDe` (Historias 22.1 y 22.2, AD-25). La identidad de la Obra es el par (Autor, forma
+canónica de `normalizar`); el título es presentación. El nombre del fichero sale del título
+**una sola vez**, al crear la ficha, sin la truncación de los documentos de Fuente, y no se
+recalcula nunca: será la URL de la Página de Obra.
 
 ```
 npm run obra -- sembrar                                      # crea las que falten. Idempotente.
@@ -369,8 +369,41 @@ blanco sale con 2. Cuando `documentar` deja sin Citas la ficha de la obra anteri
 da la orden de retirarla.
 
 `sembrar` informa además de los grupos de grafías equivalentes y de los pares en que una
-forma es prefijo de otra del mismo Autor. **Reunirlas no lo decide la orden ni ningún
-agente**: es la Historia 22.2, y lo decide Héctor.
+forma es prefijo de otra del mismo Autor.
+
+### Una obra, un nombre (Historia 22.2)
+
+```
+npm run obra -- restituir-grafia <slug-de-cita>          # iguala la obra de una Cita del censo a la de su documento
+npm run obra -- reunir <ficha-destino> <ficha-absorbida>  # una sola Obra: une formas, retira la absorbida
+npm run obra -- separar <ficha> <ficha-otra>             # dos Obras distintas: distintaDe en las dos
+npm run obra -- titular <ficha> "<grafía>"               # elige el título entre las grafías publicadas
+```
+
+**Literal** es una grafía de `procedencia.obra` igual —colapsando espacios y nada más— a la
+`obra:` de la cabecera de **su** documento (`documentosDeCita`; con varias páginas basta una).
+Una Cita sin documento no es literal. El build **rompe** cuando una Obra (Autor, forma) se
+publica con dos o más grafías y alguna no es literal, nombrando los ficheros, las grafías, la
+forma y la orden: `restituir-grafia` si hay un documento versionado de esa Obra, `documentar`
+si no. **Avisa** de dos formas del mismo Autor en fichas distintas cuando una es prefijo de
+palabra de la otra —se calla con `separar` (`distintaDe`) o reuniendo— y de un `titulo` que
+ya no declara ninguna Cita publicada (la grafía efectiva pasa a ser la de `grafiaPorOmision`).
+
+De las cuatro órdenes, **solo `restituir-grafia` reescribe una Procedencia**, y fuera de ellas
+solo lo hace `documentar`. Lo hace solo sobre una Cita **del censo**, solo para igualarla a la
+cabecera de un documento versionado del mismo Autor (cotejado como en `documentar`) con la
+misma forma, **sin sacarla del censo**, y pone al día el `titulo` de la ficha en el mismo gesto
+si deja de sostenerse. La puerta solo la sugiere cuando se dan esas condiciones; si no, sugiere
+`documentar`. `reunir` no mueve ninguna Cita ni ningún documento,
+se niega entre Autores distintos y avisa siempre de que la URL de la absorbida dará 404 cuando
+las Obras tengan página. `titular` solo admite una grafía que declare alguna Cita publicada de
+la Obra, tal cual. `documentar` y `documentar --retirar` también ponen al día el `titulo` en
+el mismo gesto si deja de sostenerse. Un `distintaDe` que ya no nombra la forma de ninguna
+ficha activa del Autor avisa como declaración rancia. Códigos: 2 es la forma de la invocación, 1 lo que dice.
+
+**Reunir o separar no lo decide la orden ni ningún agente: lo decide Héctor.** Las reuniones
+conocidas están propuestas, con sus datos y la orden exacta, en
+`_bmad-output/implementation-artifacts/propuesta-reuniones-de-obra.md`.
 
 ## Curar una Colección
 

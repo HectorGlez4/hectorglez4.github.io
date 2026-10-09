@@ -8,7 +8,7 @@
  * AD-10 — no hay otro almacén que git. Estas funciones escriben ficheros y nada más.
  */
 
-import { appendFile, readFile, readdir, mkdir, writeFile, rename } from 'node:fs/promises';
+import { appendFile, readFile, readdir, mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { basename, dirname, extname, join, relative } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
@@ -543,12 +543,64 @@ export async function escribirFichaDeObra(
   if (existsSync(ruta) || existsSync(join(rutas.obras, `${nombre}.yaml`))) {
     throw new Error(`No se escribe ${ruta}: ya existe una Ficha de Obra con ese nombre.`);
   }
-  await writeFile(
-    ruta,
-    aYaml({ autor: admitida.autor, titulo: admitida.titulo, formas: admitida.formas }),
-    { encoding: 'utf8', flag: 'wx' },
-  );
+  await writeFile(ruta, yamlDeFicha(admitida), { encoding: 'utf8', flag: 'wx' });
   return ruta;
+}
+
+/** El YAML de una ficha, con sus campos siempre en el mismo orden. Lo opcional sin valor se omite. */
+function yamlDeFicha(ficha: ObraAdmisible): string {
+  return aYaml({
+    autor: ficha.autor,
+    titulo: ficha.titulo,
+    formas: ficha.formas,
+    ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
+      ? { distintaDe: ficha.distintaDe }
+      : {}),
+  });
+}
+
+/**
+ * Reescribe una Ficha de Obra **que ya existe** — Historia 22.2.
+ *
+ * Es la otra mitad de `escribirFichaDeObra`, y la usan solo las órdenes que deciden sobre
+ * una ficha ya creada: `reunir`, `separar`, `titular` y el ajuste del título al documentar o
+ * retirar una Cita. El nombre no cambia nunca —es la URL de la Obra (AD-4)—, así que se
+ * escribe sobre la misma ruta, validada con `obraAdmisible` y a un temporal que se renombra:
+ * una ficha cortada a media escritura rompería el build.
+ */
+export async function reescribirFichaDeObra(ruta: string, ficha: ObraAdmisible): Promise<string> {
+  const admitida = obraAdmisible.parse(ficha);
+  if (!existsSync(ruta)) {
+    throw new Error(`No se reescribe ${ruta}: no existe. Las fichas nuevas las crea escribirFichaDeObra.`);
+  }
+  const temporal = `${ruta}.escribiendo`;
+  await writeFile(temporal, yamlDeFicha(admitida), 'utf8');
+  try {
+    await rename(temporal, ruta);
+  } catch (fallo) {
+    // Un temporal huérfano no rompe nada, pero ensucia `corpus/obras/` y confunde a quien mira.
+    await rm(temporal, { force: true }).catch(() => {});
+    throw fallo;
+  }
+  return ruta;
+}
+
+/**
+ * Devuelve una Ficha de Obra a un contenido **ya leído**, a un temporal y renombrando — 22.2.
+ *
+ * Es la vuelta atrás de `reunir` y `separar`: el contenido es el que había antes de tocarla,
+ * así que no se valida de nuevo, pero se escribe con la misma cautela que
+ * `reescribirFichaDeObra` para que una restauración interrumpida no deje la ficha cortada.
+ */
+export async function restaurarFichaDeObra(ruta: string, contenido: string): Promise<void> {
+  const temporal = `${ruta}.restaurando`;
+  await writeFile(temporal, contenido, 'utf8');
+  try {
+    await rename(temporal, ruta);
+  } catch (fallo) {
+    await rm(temporal, { force: true }).catch(() => {});
+    throw fallo;
+  }
 }
 
 export interface CitaEnCorpus extends CitaAdmisible {
@@ -872,14 +924,21 @@ export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDe
  */
 export async function leerDocumentosDeclarados(
   rutas: Rutas,
-): Promise<Map<string, { fuente: string; declaracion: string; cuerpo: string }>> {
+): Promise<
+  Map<string, { fuente: string; obra: string; declaracion: string; cuerpo: string }>
+> {
   const ficheros = await ficherosDe(rutas.fuentes, ['.txt']);
-  const documentos = new Map<string, { fuente: string; declaracion: string; cuerpo: string }>();
+  const documentos = new Map<
+    string,
+    { fuente: string; obra: string; declaracion: string; cuerpo: string }
+  >();
   for (const ruta of ficheros) {
     const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
     if (analizado === undefined) continue;
     documentos.set(slugDeFichero(ruta), {
       fuente: analizado.cabecera.fuente,
+      // La `obra:` de la cabecera: contra ella se juzga si una grafía es literal (22.2).
+      obra: analizado.cabecera.obra,
       declaracion: analizado.declaracion,
       cuerpo: analizado.cuerpo,
     });

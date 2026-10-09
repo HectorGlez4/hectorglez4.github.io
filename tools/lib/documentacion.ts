@@ -71,7 +71,13 @@ import {
 } from './documento.ts';
 import type { Traduccion } from '../../src/lib/admision.ts';
 import { fuenteUtilizable } from './extraccion.ts';
-import { aplicarFichaDeObra, describirPlan, resolverFichaDeObra, type PlanDeFicha } from './obras.ts';
+import {
+  ajustarTitulosDeObra,
+  aplicarFichaDeObra,
+  describirPlan,
+  resolverFichaDeObra,
+  type PlanDeFicha,
+} from './obras.ts';
 import { formaDeObra } from '../../src/lib/obras.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
@@ -724,6 +730,17 @@ export async function documentarCita(
   }
   for (const linea of avisosDeFicha) avisar(linea);
 
+  /*
+   * Historia 22.2 — el título de la ficha, en el mismo gesto: si la grafía que lo sostenía
+   * era la de esta Cita y ya no la declara nadie, pasa a la grafía por omisión. Se mira la
+   * ficha de antes y la de ahora, que son la misma cuando solo cambia la grafía.
+   */
+  if (obraDeclarada !== documento.obra) {
+    const formas = [formaDeObra(documento.obra)];
+    if (obraDeclarada !== undefined) formas.push(formaDeObra(obraDeclarada));
+    for (const linea of await ajustarTitulosDeObra(rutas, cita.autor, formas)) avisar(linea);
+  }
+
   const pendientes = (await leerCensoDeCotejo(rutas)).length;
 
   return {
@@ -816,6 +833,13 @@ export async function retirarCita(
     };
   }
 
+  // Historia 22.2 — si esta Cita era la que sostenía el título de su ficha, se pone al día.
+  const obraRetirada = cita.procedencia?.obra;
+  const titulos =
+    typeof obraRetirada === 'string' && formaDeObra(obraRetirada) !== ''
+      ? await ajustarTitulosDeObra(rutas, cita.autor, [formaDeObra(obraRetirada)])
+      : [];
+
   const pendientes = (await leerCensoDeCotejo(rutas)).length;
 
   return {
@@ -828,6 +852,7 @@ export async function retirarCita(
       censoDespues === undefined
         ? `No estaba en el censo de ${FICHERO_DEL_CENSO}; siguen ${pendientes} pendientes.`
         : `Sale del censo de ${FICHERO_DEL_CENSO}: quedan ${pendientes} pendientes de cotejo.`,
+      ...titulos,
       'No se ha borrado nada. El motivo va en el mensaje del commit: git es el único ' +
         'almacén del contenido (AD-10).',
     ].join('\n'),
