@@ -3,7 +3,7 @@ title: 'Historia 20.2 — La serie de tráfico orgánico se versiona desde Searc
 type: 'feature'
 created: '2026-10-09'
 status: 'in-progress'
-baseline_revision: 'ee39cc86edeab9dd689ec501bf55d90e4ec8d7f6'
+baseline_revision: '3de13cde0dd46d0f3f9ef6f0f6c3585919b74abc'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
