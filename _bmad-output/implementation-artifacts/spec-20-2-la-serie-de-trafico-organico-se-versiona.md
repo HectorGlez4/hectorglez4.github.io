@@ -2,14 +2,21 @@
 title: 'Historia 20.2 — La serie de tráfico orgánico se versiona desde Search Console'
 type: 'feature'
 created: '2026-10-09'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '3de13cde0dd46d0f3f9ef6f0f6c3585919b74abc'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-20-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Cuando la Épica 22 publique /obra/, sus clics caerán en fueraDelCenso sin aviso hasta que la familia Obra entre en FAMILIAS.
+    evidence: |-
+      La familia sale del censo de tools/lib/indexacion.ts, que hoy tiene cuatro familias; nada avisa de una ruta de producto nueva que no esté en ninguna.
+    location: >-
+      tools/lib/trafico.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -130,6 +137,20 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-09 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 16 (high 1, medium 4, low 11)
+- defer: 1 (low 1)
+- reject: 6
+- addressed_findings:
+  - `[high]` `[patch]` Un mes sin filas (sin datos definitivos) se escribía como cero → va a sinLeer y no se escribe.
+  - `[medium]` `[patch]` El mes anterior dentro del retardo final se guardaba cerrado → `parcial` también dentro de los 3 días de retardo.
+  - `[medium]` `[patch]` Un fallo por página machacaba familias ya leídas → se conserva la entrada previa.
+  - `[medium]` `[patch]` La prueba «fichero exactamente la cabecera» se rompía con la primera lectura real → «empieza por la cabecera».
+  - `[medium]` `[patch]` Hosts ajenos (www., http:) contados como canónicos → a fueraDelCenso.
+  - `[low]` `[patch]` posición nula; try/catch en principal; type web y byPage; familias sin publicar omitidas; validación de `mes` y duplicados; verificación de fueraDelCenso y parcial; texto de propietaria; textos de SM-2, total frente a suma, reatribución y cuándo registrar; pruebas de la línea «sin leer», de la serie corrupta y de --ayuda.
+
 ## Design Notes
 
 Clave de reemplazo `mes` (`AAAA-MM`), y no la fecha de lectura: la serie mide meses, y releer agosto en septiembre tiene que corregir agosto, no añadir otra fila de agosto. Leer los 16 meses en cada pasada hace que la primera lectura rellene el pasado sin una orden aparte. Para el total se usa la consulta **sin dimensiones**, porque la suma por página omite filas anonimizadas: así total ≠ Σ familias + `fueraDelCenso`, y la diferencia es real y se documenta en la cabecera.
@@ -151,3 +172,17 @@ Forma de la entrada:
 - `npx vitest run tests/unit/trafico.test.ts tests/unit/indexacion.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run trafico; echo $?` (sin credencial) -- expected: 2 y ningún fichero escrito
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `npm run trafico` y `npm run trafico:registrar` leen de Search Analytics, mes a mes, los clics, impresiones, CTR y posición en total y por familia del censo, y escriben `corpus/serie-de-trafico.yml` reemplazando por mes. Nunca escriben un cero por un fallo. El código 2 es para la falta de credencial y la forma de la invocación; el 1, para cuando no se lee nada o falla la escritura.
+
+**Ficheros:** `tools/lib/trafico.ts` (puro); `tools/trafico.ts` (cáscara con red); `tools/lib/corpus.ts` (serie de tráfico; `analizarSerie` parametrizado por clave y escritura atómica compartida con la indexación); `corpus/serie-de-trafico.yml` (cabecera); `package.json`; `AGENTS.md` («Leer el tráfico orgánico»); `DESPLIEGUE.md` §5; `tests/unit/trafico.test.ts` (38 pruebas); `tests/unit/andamiaje.test.ts` (séptima excepción de red, AD-22).
+
+**Revisión:** 16 parches aplicados, 1 diferido y 6 rechazados (cerrojo de escritura concurrente; punto de entrada con `pathToFileURL`, patrón ya existente; grep de aislamiento amplio; reescritura completa en cada pasada; el mes fallido solo en el informe, que es decisión del spec; una sola consulta por página). Seguimiento: high 1 → true.
+
+**Verificación:** vitest de trafico, indexacion y andamiaje 141/141; suite completa, astro check y build antes del commit; `env -u SEARCH_CONSOLE_CREDENCIALES npm run trafico` → 2, sin escribir.
+
+**Riesgo residual:** la orden no se ha corrido contra la API real (no hay credencial en este equipo); la primera lectura es de Héctor (20.4).

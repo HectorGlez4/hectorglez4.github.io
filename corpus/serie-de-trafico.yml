@@ -1,0 +1,55 @@
+# Serie de tráfico orgánico por mes y familia — Historia 20.2, Épica 20
+#
+# QUÉ MIDE. Por cada mes, los clics, las impresiones, el CTR y la posición media que
+# Search Console atribuye al sitio en la búsqueda web: en total y repartidos por familia
+# —Cita, Autor, Tema, Colección—. Hasta ahora solo se veía en el panel de Search Console,
+# sin versionar ni comparar en el tiempo.
+#
+# NO SON SESIONES. La cifra son CLICS DE SEARCH CONSOLE, no las sesiones de SM-2: son un
+# SUSTITUTO de SM-2, no su cifra. Un clic es una visita que la fuente atribuye a un
+# resultado de búsqueda, sin saber qué pasó después. Se comparan entre meses de esta serie,
+# nunca contra una cifra de sesiones.
+#
+#   npx tsx tools/trafico.ts              # consulta e informa. NO escribe nada.
+#   npx tsx tools/trafico.ts --registrar  # además anota los meses leídos.
+#
+# POR QUÉ REEMPLAZA POR MES. Una entrada por mes (`mes: "AAAA-MM"`), y una segunda lectura
+# del mismo mes SUSTITUYE a la primera: la serie mide meses, y releer agosto en septiembre
+# tiene que corregir agosto, no añadir otra fila de agosto. `leidoEl` dice cuándo se leyó.
+# Cada pasada lee los 16 meses que conserva la fuente, así que la primera rellena el pasado.
+# El mes en curso lleva `parcial: true` hasta que una lectura posterior lo cierre, y
+# también el anterior mientras su último día caiga dentro del retardo de los datos
+# definitivos (3 días). CUÁNDO REGISTRAR: a partir del día 4 de cada mes, que es cuando el
+# mes anterior queda cerrado.
+#
+# CADA PASADA REATRIBUYE EL PASADO. La familia de cada URL se decide con el censo de HOY,
+# también para los meses pasados: una Cita retirada desde entonces pasa a `fueraDelCenso`
+# y una página nueva cuenta en su familia aunque no existiera aquel mes.
+#
+# `dataState: final`. Solo se piden datos definitivos: los de los últimos dos o tres días
+# todavía los corrige la fuente, y escribirlos cambiaría cifras pasadas sin que nada
+# hubiera pasado en el sitio. Por eso el mes en curso llega algo más corto.
+#
+# LA FAMILIA SALE DEL CENSO de lo publicado, nunca del prefijo de la ruta. Lo que no casa
+# con ninguna URL publicada —la portada, las páginas 2 y siguientes de un listado, una Cita
+# retirada, una forma que el sitio no publica— se suma en `fueraDelCenso` y se escribe:
+# nunca se descarta en silencio; tampoco las URL de otro host de la propiedad (`www.`,
+# `http:`). La familia Obra no se cuenta todavía, ni una familia sin URL publicadas. El
+# `total` sale de una consulta sin dimensiones y NO es la suma de familias y
+# `fueraDelCenso`, y difieren en los dos sentidos: la consulta por página omite las filas
+# anonimizadas (la suma queda por debajo) y agrega por página donde el total agrega por
+# propiedad (la suma puede quedar por encima). Las dos diferencias son reales.
+#
+# AUSENCIA ANTES QUE CERO. Un mes cuya consulta falló, o cuyo total llegó sin filas —la
+# fuente aún no tiene datos definitivos—, no se escribe, y si ya tenía entrada se conserva
+# la anterior. Una familia cuya consulta por página falló se omite de `familias` y aparece
+# en `sinLeer` con su motivo; si el mes ya tenía familias registradas, la entrada anterior
+# se conserva entera. Jamás se escribe cero por un fallo; una familia leída sin ninguna
+# fila sí es un cero real, y se escribe.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,
+# junto a `serie-de-indexacion.yml`, y ninguna base de `src/content.config.ts` apunta
+# aquí. Además NINGÚN módulo de `src/lib/` lo lee, ni siquiera por parámetro (AD-24): si
+# el sitio lo leyera, dos construcciones del mismo commit dejarían de dar el mismo `dist/`.
+
+lecturas:

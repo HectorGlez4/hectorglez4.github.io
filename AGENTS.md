@@ -121,6 +121,49 @@ minuto por propiedad, se pide una URL por petición y se van espaciando. Al pasa
 publicadas la lectura pasa sola a **muestreo por familia**, con el tamaño de muestra escrito en
 cada entrada.
 
+## Leer el tráfico orgánico
+
+Un sustituto de SM-2 sale de Search Console por mes, y se versiona igual que la indexación:
+
+```
+npm run trafico              # lee los 16 meses que conserva la fuente e informa. NO escribe nada.
+npm run trafico:registrar    # además anota los meses leídos en la serie.
+npm run trafico -- --meses 2 # solo los dos últimos (1–16), incluido el mes en curso.
+```
+
+La serie vive en `corpus/serie-de-trafico.yml`, **una entrada por mes** (`mes: "AAAA-MM"`) con
+`leidoEl`, clics, impresiones, CTR y posición en total y por familia. Una segunda lectura del
+mismo mes **reemplaza** a la primera: releer agosto en septiembre corrige agosto, no añade otra
+fila. Se piden solo datos definitivos (`dataState: final`), que llegan con unos 3 días de
+retardo: lleva `parcial: true` el mes en curso y también el anterior mientras su último día
+caiga dentro de ese retardo. **Registra a partir del día 4 de cada mes**, que es cuando el
+anterior queda cerrado. Un total que llega sin filas no es un cero: la fuente aún no tiene
+datos definitivos, y el mes no se escribe.
+
+**Son clics de Search Console, un sustituto de SM-2 y no sus sesiones.** Se comparan entre
+meses de esta serie, nunca contra una cifra de sesiones. Y el `total` sale de una consulta sin
+dimensiones, que no es la suma de las familias y difiere en los dos sentidos: la consulta por
+página omite las filas anonimizadas (la suma queda por debajo) y agrega por página donde el
+total agrega por propiedad (la suma puede quedar por encima).
+
+La familia de una URL sale **del censo de lo publicado**, nunca del prefijo de la ruta. Lo que no
+casa —la portada, páginas 2+, Citas retiradas, otro host como `www.`— se suma en
+`fueraDelCenso`, que se escribe y se informa: nunca se descarta en silencio. La familia Obra no
+se cuenta todavía, ni una familia sin URL publicadas. **Cada pasada reatribuye los meses
+pasados con el censo de hoy**: una Cita retirada desde entonces pasa a `fueraDelCenso`.
+
+**Ausencia antes que cero.** Un mes cuya consulta falla no se escribe y conserva su entrada
+anterior; sale nombrado en `sinLeer` del informe con su motivo. Una familia cuya consulta por
+página falla va a `sinLeer` de la entrada, salvo que el mes ya tuviera familias registradas: entonces
+el mes entero se trata como sin leer y la entrada previa se conserva. Jamás se escribe cero por
+un fallo; una familia leída sin filas sí es un cero real.
+
+Usa la misma credencial que la indexación, `SEARCH_CONSOLE_CREDENCIALES`, con la cuenta dada de
+alta **como propietaria** (`DESPLIEGUE.md` §5).
+Sin ella no escribe nada y sale con **código 2**, igual que con una bandera desconocida o un
+`--meses` mal formado; sale con **1** si no pudo leer el corpus o la serie, si no pudo leer
+ningún mes o si falla la escritura, y en esos casos tampoco escribe nada. Ningún módulo de `src/` lee la serie (AD-24).
+
 ## Pedir rastreo de unas pocas URL, y anotarlo
 
 Google conoce las 1.715 URL y aun así indexa 2 de cada 80: no es descubrimiento, es que un

@@ -332,7 +332,7 @@ development_status:
   epic-20: in-progress
   20-1-la-vista-de-una-superficie-de-agregación-deja-fila: review  # falta redesplegar el Worker y la baliza en D1 (Héctor)
   # 20.2 y 20.3 se prueban con respuestas fijas y solo se CORREN con la credencial (DESPLIEGUE.md §5).
-  20-2-la-serie-de-tráfico-orgánico-se-versiona-desde-search-consol: backlog
+  20-2-la-serie-de-tráfico-orgánico-se-versiona-desde-search-consol: review  # la primera lectura real la corre Héctor con la credencial (20.4)
   20-3-la-demanda-medida-se-versiona-por-página: backlog
   # 20.4 es la semana manual de Héctor; existe como historia para que el tablero la cuente, que es lo que
   # no pasó con la 18.3.

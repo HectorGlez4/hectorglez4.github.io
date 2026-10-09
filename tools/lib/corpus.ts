@@ -31,6 +31,8 @@ import type { LecturaDeFamilia, LecturaDeIndexacion, RepartoDeEstado } from './i
  * es `tools/lib/rastreo.ts`, que es puro. Esta capa escribe lo que le den.
  */
 import type { PeticionDeRastreo } from './rastreo.ts';
+/* Y con la serie de tráfico (20.2): quién agrega es `tools/lib/trafico.ts`, que es puro. */
+import type { LecturaDeMes, LecturaDeTrafico } from './trafico.ts';
 
 /**
  * El registro de sesiones de sembrado — Historia 11.3. Su nombre tiene un solo dueño,
@@ -56,6 +58,15 @@ export const FICHERO_DE_PORTADA = 'portada.json';
  * cabecera, unas líneas más abajo.
  */
 export const FICHERO_DE_INDEXACION = 'serie-de-indexacion.yml';
+
+/**
+ * La serie de tráfico orgánico por mes y familia — Historia 20.2. Su nombre tiene un solo
+ * dueño.
+ *
+ * Vecina de la de indexación y de la misma clase: metadato del Corpus, no colección. Las dos
+ * reemplazan en vez de añadir, por clave distinta: aquélla por fecha, ésta por **mes**.
+ */
+export const FICHERO_DE_TRAFICO = 'serie-de-trafico.yml';
 
 /**
  * El registro de peticiones de rastreo — Historia 18.3. Su nombre tiene un solo dueño.
@@ -176,6 +187,13 @@ export interface Rutas {
    */
   serieDeIndexacion: string;
   /**
+   * La serie de tráfico orgánico por mes y familia — Historia 20.2.
+   *
+   * Metadato del Corpus con el mismo aislamiento que la de indexación (AD-24): ninguna base
+   * de `src/content.config.ts` apunta aquí y ningún módulo de `src/lib/` lo lee.
+   */
+  serieDeTrafico: string;
+  /**
    * El registro de peticiones de rastreo — Historia 18.3, FR-46.
    *
    * Metadato del Corpus como sus vecinos y con el mismo aislamiento (AD-24): ninguna base
@@ -230,6 +248,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
+    serieDeTrafico: join(raizCorpus, FICHERO_DE_TRAFICO),
     peticionesDeRastreo: join(raizCorpus, FICHERO_DE_PETICIONES),
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
@@ -1184,7 +1203,15 @@ export interface LecturaRegistrada {
  * mal lo que había no dejaría una lista huérfana, que es reparable — dejaría la serie
  * anterior fuera del fichero nuevo. Nada se escribe hasta que esto entiende lo que hay.
  */
-function analizarSerie(nombre: string, contenido: string): LecturaRegistrada[] {
+function analizarSerie<T = LecturaRegistrada>(
+  nombre: string,
+  contenido: string,
+  /**
+   * La clave por la que la serie reemplaza: `fecha` en la de indexación, `mes` en la de
+   * tráfico (Historia 20.2). Es lo único que cambia entre las dos al releerlas.
+   */
+  clave: 'fecha' | 'mes' = 'fecha',
+): T[] {
   let leido: unknown;
   try {
     leido = parsearYaml(contenido);
@@ -1218,7 +1245,7 @@ function analizarSerie(nombre: string, contenido: string): LecturaRegistrada[] {
     throw new Error(
       `${nombre}: «${CLAVE_DE_LECTURAS}» tiene que ser una lista de lecturas, y es ` +
         `${typeof lecturas}. Escríbala como «${CLAVE_DE_LECTURAS}:» y una entrada ` +
-        '«  - fecha: …» por jornada.',
+        `«  - ${clave}: …» por entrada.`,
     );
   }
 
@@ -1226,19 +1253,44 @@ function analizarSerie(nombre: string, contenido: string): LecturaRegistrada[] {
     if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
       throw new Error(
         `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no es una lectura ` +
-          `(${JSON.stringify(entrada)}). Cada entrada lleva al menos fecha y propiedad.`,
+          `(${JSON.stringify(entrada)}). Cada entrada lleva al menos ${clave} y propiedad.`,
       );
     }
-    if (typeof (entrada as Record<string, unknown>).fecha !== 'string') {
+    if (typeof (entrada as Record<string, unknown>)[clave] !== 'string') {
       throw new Error(
-        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no declara «fecha». La ` +
-          'serie es idempotente por fecha, así que sin ella no se sabe a cuál de las ' +
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_LECTURAS}» no declara «${clave}». La ` +
+          `serie reemplaza por ${clave}, así que sin ella no se sabe a cuál de las ` +
           'entradas sustituye una lectura nueva.',
       );
     }
   }
 
-  return lecturas as LecturaRegistrada[];
+  /*
+   * La serie de tráfico reemplaza por mes: un `mes` que no tiene la forma `AAAA-MM` no casa
+   * nunca con el de una lectura nueva —«2026-9» no es «2026-09»— y dejaría dos entradas del
+   * mismo mes; y un mes repetido ya es ese estado. Ninguno de los dos se reescribe.
+   */
+  if (clave === 'mes') {
+    const vistos = new Set<string>();
+    for (const [i, entrada] of lecturas.entries()) {
+      const mes = (entrada as Record<string, unknown>).mes as string;
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(mes)) {
+        throw new Error(
+          `${nombre}: la entrada ${i + 1} declara «mes: ${mes}», que no tiene la forma ` +
+            'AAAA-MM. La serie reemplaza por mes y esa clave no casaría con ninguna lectura.',
+        );
+      }
+      if (vistos.has(mes)) {
+        throw new Error(
+          `${nombre}: el mes ${mes} aparece dos veces, y esta serie lleva una entrada por mes. ` +
+            'Deje solo una y vuelva a intentarlo.',
+        );
+      }
+      vistos.add(mes);
+    }
+  }
+
+  return lecturas as T[];
 }
 
 /**
@@ -1302,21 +1354,8 @@ export async function registrarLecturaDeIndexacion(
   const momento = lectura.momento ?? new Date();
   const fecha = fechaLocal(momento);
 
-  /*
-   * La cabecera es lo que hay por encima de la línea «lecturas:», ella incluida. Se busca
-   * al principio de línea y sin sangrar: «  lecturas:» dentro de una entrada no es la clave
-   * de la raíz, y cortar por ahí habría partido el fichero por la mitad.
-   */
-  const marca = anterior.match(/^lecturas:[^\S\n]*$/m);
-  if (marca?.index === undefined) {
-    throw new Error(
-      `${nombre}: no se encuentra la línea «${CLAVE_DE_LECTURAS}:» de la que cuelgan las ` +
-        'entradas. La serie se reescribe entera en cada lectura y esa línea es la frontera ' +
-        'entre la cabecera —que se conserva— y las entradas —que se vuelven a volcar—. ' +
-        'No se ha escrito nada.',
-    );
-  }
-  const cabecera = anterior.slice(0, marca.index + marca[0].length) + '\n';
+  // Se conserva el texto que el fichero tenga por encima de «lecturas:», no la constante.
+  const cabecera = cabeceraDeSerie(nombre, anterior);
 
   const conservadas = habia.filter((entrada) => entrada.fecha !== fecha);
   const nueva: Record<string, unknown> = {
@@ -1392,17 +1431,242 @@ export async function registrarLecturaDeIndexacion(
     );
   }
 
-  /*
-   * El temporal lleva el PID. Con un nombre fijo, dos ejecuciones a la vez se pisaban el
-   * fichero intermedio, y el que muriera entre el volcado y el `rename` dejaba un
-   * `serie-de-indexacion.yml.nueva` huérfano que nadie sigue — y que el criterio de la
-   * historia, un `git status --short` limpio, no perdona. El patrón está en `.gitignore`
-   * por si aun así queda uno.
-   */
+  await escribirSerieAtomica(ruta, contenido);
+  return ruta;
+}
+
+/**
+ * La cabecera de la serie de tráfico orgánico — Historia 20.2.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que la de indexación: un
+ * corpus de pruebas, o un clon al que le falte el fichero, tiene que poder anotar su
+ * primera lectura sin que nadie escriba la cabecera a mano.
+ */
+export const CABECERA_DE_TRAFICO = [
+  '# Serie de tráfico orgánico por mes y familia — Historia 20.2, Épica 20',
+  '#',
+  '# QUÉ MIDE. Por cada mes, los clics, las impresiones, el CTR y la posición media que',
+  '# Search Console atribuye al sitio en la búsqueda web: en total y repartidos por familia',
+  '# —Cita, Autor, Tema, Colección—. Hasta ahora solo se veía en el panel de Search Console,',
+  '# sin versionar ni comparar en el tiempo.',
+  '#',
+  '# NO SON SESIONES. La cifra son CLICS DE SEARCH CONSOLE, no las sesiones de SM-2: son un',
+  '# SUSTITUTO de SM-2, no su cifra. Un clic es una visita que la fuente atribuye a un',
+  '# resultado de búsqueda, sin saber qué pasó después. Se comparan entre meses de esta serie,',
+  '# nunca contra una cifra de sesiones.',
+  '#',
+  '#   npx tsx tools/trafico.ts              # consulta e informa. NO escribe nada.',
+  '#   npx tsx tools/trafico.ts --registrar  # además anota los meses leídos.',
+  '#',
+  '# POR QUÉ REEMPLAZA POR MES. Una entrada por mes (`mes: "AAAA-MM"`), y una segunda lectura',
+  '# del mismo mes SUSTITUYE a la primera: la serie mide meses, y releer agosto en septiembre',
+  '# tiene que corregir agosto, no añadir otra fila de agosto. `leidoEl` dice cuándo se leyó.',
+  '# Cada pasada lee los 16 meses que conserva la fuente, así que la primera rellena el pasado.',
+  '# El mes en curso lleva `parcial: true` hasta que una lectura posterior lo cierre, y',
+  '# también el anterior mientras su último día caiga dentro del retardo de los datos',
+  '# definitivos (3 días). CUÁNDO REGISTRAR: a partir del día 4 de cada mes, que es cuando el',
+  '# mes anterior queda cerrado.',
+  '#',
+  '# CADA PASADA REATRIBUYE EL PASADO. La familia de cada URL se decide con el censo de HOY,',
+  '# también para los meses pasados: una Cita retirada desde entonces pasa a `fueraDelCenso`',
+  '# y una página nueva cuenta en su familia aunque no existiera aquel mes.',
+  '#',
+  '# `dataState: final`. Solo se piden datos definitivos: los de los últimos dos o tres días',
+  '# todavía los corrige la fuente, y escribirlos cambiaría cifras pasadas sin que nada',
+  '# hubiera pasado en el sitio. Por eso el mes en curso llega algo más corto.',
+  '#',
+  '# LA FAMILIA SALE DEL CENSO de lo publicado, nunca del prefijo de la ruta. Lo que no casa',
+  '# con ninguna URL publicada —la portada, las páginas 2 y siguientes de un listado, una Cita',
+  '# retirada, una forma que el sitio no publica— se suma en `fueraDelCenso` y se escribe:',
+  '# nunca se descarta en silencio; tampoco las URL de otro host de la propiedad (`www.`,',
+  '# `http:`). La familia Obra no se cuenta todavía, ni una familia sin URL publicadas. El',
+  '# `total` sale de una consulta sin dimensiones y NO es la suma de familias y',
+  '# `fueraDelCenso`, y difieren en los dos sentidos: la consulta por página omite las filas',
+  '# anonimizadas (la suma queda por debajo) y agrega por página donde el total agrega por',
+  '# propiedad (la suma puede quedar por encima). Las dos diferencias son reales.',
+  '#',
+  '# AUSENCIA ANTES QUE CERO. Un mes cuya consulta falló, o cuyo total llegó sin filas —la',
+  '# fuente aún no tiene datos definitivos—, no se escribe, y si ya tenía entrada se conserva',
+  '# la anterior. Una familia cuya consulta por página falló se omite de `familias` y aparece',
+  '# en `sinLeer` con su motivo; si el mes ya tenía familias registradas, la entrada anterior',
+  '# se conserva entera. Jamás se escribe cero por un fallo; una familia leída sin ninguna',
+  '# fila sí es un cero real, y se escribe.',
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/`,',
+  '# junto a `serie-de-indexacion.yml`, y ninguna base de `src/content.config.ts` apunta',
+  '# aquí. Además NINGÚN módulo de `src/lib/` lo lee, ni siquiera por parámetro (AD-24): si',
+  '# el sitio lo leyera, dos construcciones del mismo commit dejarían de dar el mismo `dist/`.',
+  '',
+  'lecturas:',
+  '',
+].join('\n');
+
+/** Una entrada ya escrita en la serie de tráfico, tal y como se relee. */
+export type LecturaDeMesRegistrada = Omit<LecturaDeMes, 'sinLeer' | 'familias'> & {
+  /** Ausente cuando no se leyó ninguna familia: `aYaml` omite un objeto vacío. */
+  familias?: LecturaDeMes['familias'];
+  sinLeer?: Record<string, string>;
+};
+
+/** La serie de tráfico ya registrada. Una serie que no existe se lee como serie vacía. */
+export async function leerSerieDeTrafico(rutas: Rutas): Promise<LecturaDeMesRegistrada[]> {
+  if (!existsSync(rutas.serieDeTrafico)) return [];
+  return analizarSerie<LecturaDeMesRegistrada>(
+    `corpus/${FICHERO_DE_TRAFICO}`,
+    await readFile(rutas.serieDeTrafico, 'utf8'),
+    'mes',
+  );
+}
+
+/**
+ * Anota los meses leídos, **reemplazando** la entrada que ya hubiera de cada uno.
+ *
+ * Es `registrarLecturaDeIndexacion` con la clave `mes`: creación con `wx`, cabecera
+ * conservada del fichero, re-análisis de lo compuesto, verificación de lo que va a disco y
+ * `rename` atómico. Los meses que no se leyeron en esta pasada no están en `lectura.meses`,
+ * así que su entrada anterior se conserva tal cual. Las entradas quedan ordenadas por mes.
+ */
+export async function registrarLecturaDeTrafico(
+  rutas: Rutas,
+  lectura: LecturaDeTrafico,
+): Promise<string> {
+  const ruta = rutas.serieDeTrafico;
+  const nombre = `corpus/${FICHERO_DE_TRAFICO}`;
+
+  if (lectura.meses.length === 0) {
+    throw new Error(
+      `${nombre}: la lectura no trae ningún mes leído. No hay nada que anotar, y anotar un ` +
+        'mes sin leerlo sería un cero fabricado. No se ha escrito nada.',
+    );
+  }
+  const nuevos = new Set(lectura.meses.map((m) => m.mes));
+  if (nuevos.size !== lectura.meses.length) {
+    throw new Error(
+      `${nombre}: la lectura trae el mismo mes dos veces y la serie reemplaza por mes. ` +
+        'No se ha escrito nada.',
+    );
+  }
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      await writeFile(ruta, CABECERA_DE_TRAFICO, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const habia = analizarSerie<LecturaDeMesRegistrada>(nombre, anterior, 'mes');
+  const cabecera = cabeceraDeSerie(nombre, anterior);
+
+  const conservadas = habia.filter((entrada) => !nuevos.has(entrada.mes));
+  const entradas: Record<string, unknown>[] = [
+    ...conservadas.map((e) => e as unknown as Record<string, unknown>),
+    ...lectura.meses.map((m) => ({
+      mes: m.mes,
+      leidoEl: m.leidoEl,
+      propiedad: m.propiedad,
+      parcial: m.parcial,
+      total: m.total,
+      familias: m.familias,
+      fueraDelCenso: m.fueraDelCenso,
+      // `aYaml` omite un objeto sin claves: sin fallos, «sinLeer» no se escribe.
+      sinLeer: m.sinLeer,
+    })),
+  ].sort((a, b) => String(a.mes).localeCompare(String(b.mes)));
+
+  const contenido = cabecera + entradas.map(bloqueDeLectura).join('');
+
+  const quedaria = analizarSerie<LecturaDeMesRegistrada>(nombre, contenido, 'mes');
+  if (quedaria.length !== conservadas.length + lectura.meses.length) {
+    throw new Error(
+      `${nombre}: la serie recompuesta no tiene las entradas que debería ` +
+        `(había ${habia.length}, se conservan ${conservadas.length}, se leen ` +
+        `${lectura.meses.length} y quedarían ${quedaria.length}). No se ha escrito nada.`,
+    );
+  }
+
+  // «Ausencia antes que cero», reafirmada sobre lo que va a disco.
+  for (const leido of lectura.meses) {
+    const escritas = quedaria.filter((e) => e.mes === leido.mes);
+    if (escritas.length !== 1) {
+      throw new Error(
+        `${nombre}: el mes ${leido.mes} quedaría con ${escritas.length} entradas y esta serie ` +
+          'reemplaza por mes. No se ha escrito nada.',
+      );
+    }
+    const escrita = escritas[0];
+    const familiasEnDisco = Object.keys(escrita.familias ?? {});
+    const sinLeerEnDisco = Object.keys(escrita.sinLeer ?? {});
+    for (const familia of Object.keys(leido.familias)) {
+      if (!familiasEnDisco.includes(familia)) {
+        throw new Error(
+          `${nombre}: la familia «${familia}» de ${leido.mes} se leyó y no ha llegado al ` +
+            'fichero. No se ha escrito nada.',
+        );
+      }
+    }
+    for (const familia of Object.keys(leido.sinLeer)) {
+      if (!sinLeerEnDisco.includes(familia)) {
+        throw new Error(
+          `${nombre}: la familia «${familia}» de ${leido.mes} no se leyó y su motivo no ha ` +
+            'llegado al fichero. No se ha escrito nada.',
+        );
+      }
+    }
+    if (escrita.total === undefined) {
+      throw new Error(`${nombre}: el total de ${leido.mes} no ha llegado al fichero. No se ha escrito nada.`);
+    }
+    if ((leido.fueraDelCenso === undefined) !== (escrita.fueraDelCenso === undefined)) {
+      throw new Error(
+        `${nombre}: «fueraDelCenso» de ${leido.mes} no ha llegado al fichero como se leyó. ` +
+          'Lo que no casa con el censo no se descarta en silencio. No se ha escrito nada.',
+      );
+    }
+    if ((leido.parcial === true) !== (escrita.parcial === true)) {
+      throw new Error(
+        `${nombre}: la marca «parcial» de ${leido.mes} no ha llegado al fichero como se leyó. ` +
+          'Un mes incompleto sin marcar se leería como cerrado. No se ha escrito nada.',
+      );
+    }
+  }
+
+  await escribirSerieAtomica(ruta, contenido);
+  return ruta;
+}
+
+/**
+ * Lo que hay por encima de la línea «lecturas:», ella incluida — la cabecera que se conserva.
+ *
+ * Se busca al principio de línea y sin sangrar: «  lecturas:» dentro de una entrada no es la
+ * clave de la raíz, y cortar por ahí habría partido el fichero por la mitad. La comparten
+ * las dos series que reemplazan (indexación y tráfico).
+ */
+function cabeceraDeSerie(nombre: string, anterior: string): string {
+  const marca = anterior.match(/^lecturas:[^\S\n]*$/m);
+  if (marca?.index === undefined) {
+    throw new Error(
+      `${nombre}: no se encuentra la línea «${CLAVE_DE_LECTURAS}:» de la que cuelgan las ` +
+        'entradas. La serie se reescribe entera en cada lectura y esa línea es la frontera ' +
+        'entre la cabecera —que se conserva— y las entradas —que se vuelven a volcar—. ' +
+        'No se ha escrito nada.',
+    );
+  }
+  return anterior.slice(0, marca.index + marca[0].length) + '\n';
+}
+
+/**
+ * Escribe a un temporal y lo renombra, que en el mismo sistema de ficheros es atómico.
+ *
+ * El temporal lleva el PID: con un nombre fijo, dos ejecuciones a la vez se pisaban el
+ * fichero intermedio. El patrón `corpus/*.nueva` está en `.gitignore` por si aun así queda
+ * uno.
+ */
+async function escribirSerieAtomica(ruta: string, contenido: string): Promise<void> {
   const temporal = `${ruta}.${process.pid}.nueva`;
   await writeFile(temporal, contenido, 'utf8');
   await rename(temporal, ruta);
-  return ruta;
 }
 
 /**

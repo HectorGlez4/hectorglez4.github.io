@@ -647,6 +647,13 @@ Lo que conviene saber antes de leer la serie:
   2.000, así que el presupuesto por omisión las lee todas. Al pasar de ~2.000 dejará de caber
   sin que nadie toque nada: la orden muestreará por familia y lo dirá en la entrada.
 
+**La misma credencial sirve para `npm run trafico`** (Historia 20.2), que lee de Search
+Analytics los clics, impresiones, CTR y posición por mes y familia y, con
+`npm run trafico:registrar`, los anota en `corpus/serie-de-trafico.yml`. El alcance
+(`webmasters.readonly`), la propiedad y la variable son los mismos, y sin la variable sale
+igual con código **2** sin escribir nada. La cuenta dada de alta para la indexación no
+necesita ninguna alta más.
+
 ## 6. Pedir rastreo de unas pocas URL, y anotarlo — Historia 18.3 (FR-46)
 
 Google conoce las 1.715 URL —el sitemap se lee, §2— y aun así indexa 2 de cada 80. No es un

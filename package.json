@@ -28,6 +28,8 @@
     "epocas:registrar": "tsx tools/epocas.ts --registrar",
     "indexacion": "tsx tools/indexacion.ts",
     "indexacion:registrar": "tsx tools/indexacion.ts --registrar",
+    "trafico": "tsx tools/trafico.ts",
+    "trafico:registrar": "tsx tools/trafico.ts --registrar",
     "rastreo": "tsx tools/rastreo.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",

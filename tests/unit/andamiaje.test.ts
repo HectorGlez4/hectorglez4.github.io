@@ -137,7 +137,7 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Seis excepciones, las seis escritas y con nombre. Una excepción escrita se revisa; un
+ * Siete excepciones, las siete escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
@@ -147,11 +147,16 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     informa**. Lo que hace con la respuesta vive en `tools/lib/ingresos.ts`, que no pide
  *     nada, igual que `tools/lib/documento.ts` respecto de `tools/recuperar.ts`.
  *   · `tools/indexacion.ts` es la cáscara de la lectura del estado de indexación —Historia
- *     16.1—: es la única que importa `googleapis`, y lo hace con un `import()` diferido para
+ *     16.1—: importa `googleapis` —como `tools/trafico.ts`, Historia 20.2—, y lo hace con un `import()` diferido para
  *     que `--ayuda` no cargue el SDK. Lo que decide qué se mide y cómo se agrega vive en
  *     `tools/lib/indexacion.ts`, que no pide nada, igual que `tools/lib/ingresos.ts` respecto
  *     de `tools/ingreso.ts`. El build no la invoca: la corre una persona, y ningún paso de CI
  *     la ejecuta ni commitea lo que escribe.
+ *   · `tools/trafico.ts` es la cáscara de la serie de tráfico orgánico —Historia 20.2—:
+ *     importa `googleapis` como su hermana, con el mismo `import()` diferido, y le pide a
+ *     Search Analytics los clics por mes. Lo que decide qué se pide y cómo se agrega vive en
+ *     `tools/lib/trafico.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
+ *     ejecuta.
  *   · `tools/epocas.ts` es la cáscara de la cobertura por época —Historia 19.5—: le pide a
  *     Wikisource-es los miembros de sus categorías de autores para derivar de ahí la lista de
  *     candidatos, en vez de escribirla a mano en el repositorio. Lo que decide qué se pide,
@@ -187,7 +192,11 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     ],
     [
       'tools/indexacion.ts',
-      'la cáscara de la lectura del estado de indexación: la única que importa googleapis, y el build no la invoca — la corre una persona y ningún paso de CI la ejecuta (AD-24)',
+      'la cáscara de la lectura del estado de indexación: importa googleapis, y el build no la invoca — la corre una persona y ningún paso de CI la ejecuta (AD-24)',
+    ],
+    [
+      'tools/trafico.ts',
+      'la cáscara de la serie de tráfico orgánico: importa googleapis como su hermana, y el build no la invoca — la corre una persona y ningún paso de CI la ejecuta (AD-24)',
     ],
     [
       'tools/epocas.ts',
@@ -306,8 +315,8 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas seis', () => {
-    // Añadir una séptima tiene que ser un cambio deliberado de esta prueba.
+  it('no hay más excepciones que esas siete', () => {
+    // Añadir una octava tiene que ser un cambio deliberado de esta prueba.
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
       'tools/avisar.ts',
@@ -315,6 +324,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'tools/indexacion.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',
+      'tools/trafico.ts',
     ]);
   });
 
@@ -368,6 +378,9 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
      *   build no lo llama** y ningún paso de CI lo ejecuta ni commitea lo que escribe: si lo
      *   hiciera, el `push` dispararía el flujo de publicación y con él el aviso, anunciando
      *   una jornada en la que no cambió un byte.
+     * - `tools/trafico.ts` lee de Search Analytics el tráfico orgánico por mes con
+     *   `googleapis`. **El build no lo llama** y ningún paso de CI lo ejecuta, por lo mismo
+     *   que la indexación.
      * - `tools/epocas.ts` le pide a Wikisource-es los miembros de sus categorías de época,
      *   que es de donde sale la lista de candidatos del bucle. **El build no lo llama**: la
      *   lista vive versionada en `corpus/` y `npm run huecos` la lee de ahí, sin red.
@@ -387,6 +400,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'tools/indexacion.ts',
       'tools/ingreso.ts',
       'tools/recuperar.ts',
+      'tools/trafico.ts',
     ]);
   });
 });
