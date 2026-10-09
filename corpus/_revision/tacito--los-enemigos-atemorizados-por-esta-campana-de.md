@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-los-enemigos-atemorizados-por-esta-campana-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

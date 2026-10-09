@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-es-justo-reconocer-que-una-riqueza"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

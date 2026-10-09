@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-os-parece-que-lo-que-digo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "agustin-de-hipona"
 slug: "agustin-de-hipona-se-dice-inmortal-porque-en-cierto-modo"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

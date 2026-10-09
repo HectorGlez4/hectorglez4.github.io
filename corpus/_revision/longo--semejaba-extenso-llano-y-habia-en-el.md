@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-semejaba-extenso-llano-y-habia-en-el"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

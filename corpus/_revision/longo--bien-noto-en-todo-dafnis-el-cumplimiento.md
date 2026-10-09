@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-bien-noto-en-todo-dafnis-el-cumplimiento"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

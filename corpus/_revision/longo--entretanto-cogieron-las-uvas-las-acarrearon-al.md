@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-entretanto-cogieron-las-uvas-las-acarrearon-al"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

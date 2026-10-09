@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-de-aqui-es-que-solo-porque-no"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

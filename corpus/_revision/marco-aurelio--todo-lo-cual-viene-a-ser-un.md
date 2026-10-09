@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-todo-lo-cual-viene-a-ser-un"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

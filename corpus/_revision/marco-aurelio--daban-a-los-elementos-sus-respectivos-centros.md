@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-daban-a-los-elementos-sus-respectivos-centros"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-este-libro-entretanto-esta-dedicado-en-honor"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

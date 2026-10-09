@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-de-que-lugares-hay-que-elegir-a"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

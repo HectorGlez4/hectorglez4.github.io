@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-sin-intencion-dejo-escapar-dryas-estas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

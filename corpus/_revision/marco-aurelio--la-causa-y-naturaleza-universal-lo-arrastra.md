@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-la-causa-y-naturaleza-universal-lo-arrastra"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

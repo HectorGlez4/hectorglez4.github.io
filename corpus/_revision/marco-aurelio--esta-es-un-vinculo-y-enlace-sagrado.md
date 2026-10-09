@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esta-es-un-vinculo-y-enlace-sagrado"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

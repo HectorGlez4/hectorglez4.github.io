@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dicho-esto-lamon-se-callo-y-derramo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

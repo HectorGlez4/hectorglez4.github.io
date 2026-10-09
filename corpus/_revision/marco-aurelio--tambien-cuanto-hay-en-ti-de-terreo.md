@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tambien-cuanto-hay-en-ti-de-terreo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

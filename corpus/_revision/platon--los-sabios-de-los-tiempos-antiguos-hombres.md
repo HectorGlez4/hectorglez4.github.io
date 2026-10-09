@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-los-sabios-de-los-tiempos-antiguos-hombres"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

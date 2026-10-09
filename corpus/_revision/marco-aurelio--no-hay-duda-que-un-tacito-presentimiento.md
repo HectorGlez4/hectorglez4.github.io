@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-no-hay-duda-que-un-tacito-presentimiento"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

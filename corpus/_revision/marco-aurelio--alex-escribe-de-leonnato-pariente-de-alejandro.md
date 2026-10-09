@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-alex-escribe-de-leonnato-pariente-de-alejandro"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

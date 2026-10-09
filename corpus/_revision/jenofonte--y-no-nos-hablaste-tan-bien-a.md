@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-no-nos-hablaste-tan-bien-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

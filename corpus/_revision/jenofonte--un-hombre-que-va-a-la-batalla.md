@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-un-hombre-que-va-a-la-batalla"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

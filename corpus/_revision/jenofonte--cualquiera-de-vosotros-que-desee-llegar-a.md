@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cualquiera-de-vosotros-que-desee-llegar-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

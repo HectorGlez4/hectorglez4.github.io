@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-cuando-murio-me-dirigi-al-pontifice-escevola"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

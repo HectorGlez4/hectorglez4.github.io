@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-testimonio-de-la-verdad-de-lo-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

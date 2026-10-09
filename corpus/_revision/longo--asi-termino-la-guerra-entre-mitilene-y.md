@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-termino-la-guerra-entre-mitilene-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

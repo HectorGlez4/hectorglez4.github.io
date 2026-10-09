@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ciertamente-es-un-remedio-vulgar-pero-sin"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

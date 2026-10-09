@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-fue-que-los-ocho-mejores-becerros"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

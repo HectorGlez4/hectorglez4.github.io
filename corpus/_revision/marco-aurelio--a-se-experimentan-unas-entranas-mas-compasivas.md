@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-a-se-experimentan-unas-entranas-mas-compasivas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

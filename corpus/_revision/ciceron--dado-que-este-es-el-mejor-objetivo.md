@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-dado-que-este-es-el-mejor-objetivo"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

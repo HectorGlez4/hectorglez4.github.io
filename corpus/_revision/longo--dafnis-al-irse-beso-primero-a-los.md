@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-al-irse-beso-primero-a-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

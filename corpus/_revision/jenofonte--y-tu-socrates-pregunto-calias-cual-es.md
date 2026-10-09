@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-tu-socrates-pregunto-calias-cual-es"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

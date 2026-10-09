@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-era-lucilla-hija-de-nuestro-emperador-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

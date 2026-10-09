@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-como-carecian-de-soga-o-cuerda"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-como-aquellos-hombres-eran-de-lo-mas"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

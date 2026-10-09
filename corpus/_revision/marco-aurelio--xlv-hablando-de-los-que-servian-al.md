@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-xlv-hablando-de-los-que-servian-al"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

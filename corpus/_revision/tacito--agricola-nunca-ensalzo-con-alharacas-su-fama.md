@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-agricola-nunca-ensalzo-con-alharacas-su-fama"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-despues-reflexionandolo-mejor-cobraba-animo-y-resolvia"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

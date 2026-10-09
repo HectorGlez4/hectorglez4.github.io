@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-para-mi-es-tan-facil-dedicarme-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

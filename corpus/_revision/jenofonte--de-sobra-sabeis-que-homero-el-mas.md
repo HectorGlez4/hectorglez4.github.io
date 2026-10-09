@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-de-sobra-sabeis-que-homero-el-mas"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

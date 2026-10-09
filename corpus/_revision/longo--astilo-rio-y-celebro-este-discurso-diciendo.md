@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-astilo-rio-y-celebro-este-discurso-diciendo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

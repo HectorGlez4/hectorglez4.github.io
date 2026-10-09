@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-no-desprecies-la-muerte-antes-bien-recibela"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

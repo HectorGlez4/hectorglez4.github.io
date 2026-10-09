@@ -4,6 +4,8 @@ autor: "agustin-de-hipona"
 slug: "agustin-de-hipona-sin-embargo-la-otra-que-es-fabula"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-porque-un-hombre-de-esta-clase-debiendo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-admitamos-que-puede-ser-asi-pero-ellos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

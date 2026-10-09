@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-oh-principe-el-mas-egregio-de-cuantos"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-y-no-se-debe-pensar-que-es"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

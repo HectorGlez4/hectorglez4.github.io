@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-no-tenia-que-arguir-contra-lo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

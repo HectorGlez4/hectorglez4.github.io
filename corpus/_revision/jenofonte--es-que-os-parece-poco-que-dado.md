@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-es-que-os-parece-poco-que-dado"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

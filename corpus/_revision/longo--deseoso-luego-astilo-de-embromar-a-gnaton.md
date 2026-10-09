@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-deseoso-luego-astilo-de-embromar-a-gnaton"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

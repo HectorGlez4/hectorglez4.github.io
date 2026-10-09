@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-entonces-piensas-convencernos-de-que-con"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

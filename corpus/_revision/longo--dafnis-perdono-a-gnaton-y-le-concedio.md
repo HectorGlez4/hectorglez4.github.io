@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-perdono-a-gnaton-y-le-concedio"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

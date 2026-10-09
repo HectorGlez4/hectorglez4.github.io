@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-tras-decir-que-estaban-de-acuerdo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

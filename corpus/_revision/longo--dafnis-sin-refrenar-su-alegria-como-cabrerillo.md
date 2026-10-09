@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-sin-refrenar-su-alegria-como-cabrerillo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

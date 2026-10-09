@@ -4,6 +4,8 @@ autor: "agustin-de-hipona"
 slug: "agustin-de-hipona-quien-de-su-enemigo-o-de-quien"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

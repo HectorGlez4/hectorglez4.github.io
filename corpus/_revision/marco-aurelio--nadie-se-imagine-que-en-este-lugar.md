@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-nadie-se-imagine-que-en-este-lugar"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

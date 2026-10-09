@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-estos-dioses-que-todo-lo-saben-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

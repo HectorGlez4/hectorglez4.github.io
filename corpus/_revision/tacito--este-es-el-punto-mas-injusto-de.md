@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-este-es-el-punto-mas-injusto-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

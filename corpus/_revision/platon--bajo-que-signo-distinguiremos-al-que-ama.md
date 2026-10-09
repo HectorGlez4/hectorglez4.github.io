@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-bajo-que-signo-distinguiremos-al-que-ama"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

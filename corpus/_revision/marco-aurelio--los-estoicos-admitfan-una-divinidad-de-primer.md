@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-los-estoicos-admitfan-una-divinidad-de-primer"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

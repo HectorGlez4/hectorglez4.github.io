@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-sentandose-despues-con-astilo-al-lado-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

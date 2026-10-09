@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-y-dime-a-quien-de-los-ri­cos"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

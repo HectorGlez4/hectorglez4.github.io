@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-entretanto-bajaron-las-cabras-de-este-mozuelo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

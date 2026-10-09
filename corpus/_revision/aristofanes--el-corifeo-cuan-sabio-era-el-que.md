@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-el-corifeo-cuan-sabio-era-el-que"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

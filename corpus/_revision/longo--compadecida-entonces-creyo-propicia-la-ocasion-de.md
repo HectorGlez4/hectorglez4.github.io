@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-compadecida-entonces-creyo-propicia-la-ocasion-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

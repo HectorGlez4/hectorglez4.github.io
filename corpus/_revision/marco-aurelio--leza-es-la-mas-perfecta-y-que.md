@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-leza-es-la-mas-perfecta-y-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

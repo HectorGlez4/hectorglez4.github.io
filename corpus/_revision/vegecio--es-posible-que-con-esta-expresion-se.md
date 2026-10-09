@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-es-posible-que-con-esta-expresion-se"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

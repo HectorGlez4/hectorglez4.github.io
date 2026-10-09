@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-5-su-primer-contacto-con-el-ejercito"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

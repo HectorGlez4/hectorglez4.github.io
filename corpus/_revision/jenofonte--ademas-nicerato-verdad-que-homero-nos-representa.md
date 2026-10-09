@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ademas-nicerato-verdad-que-homero-nos-representa"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

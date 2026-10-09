@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-si-en-todo-esto-me-aventajo-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

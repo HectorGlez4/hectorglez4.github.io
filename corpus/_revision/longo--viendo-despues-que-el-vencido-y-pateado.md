@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-viendo-despues-que-el-vencido-y-pateado"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

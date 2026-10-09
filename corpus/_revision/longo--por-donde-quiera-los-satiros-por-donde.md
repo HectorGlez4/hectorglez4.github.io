@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-donde-quiera-los-satiros-por-donde"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

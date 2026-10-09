@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-por-esto-es-menester-comprender-que-un"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

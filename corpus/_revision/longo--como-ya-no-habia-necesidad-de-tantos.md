@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-como-ya-no-habia-necesidad-de-tantos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

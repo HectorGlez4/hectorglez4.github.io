@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-llevasteis-la-guerra-a-los-campos-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

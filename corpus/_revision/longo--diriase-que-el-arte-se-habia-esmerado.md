@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-diriase-que-el-arte-se-habia-esmerado"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

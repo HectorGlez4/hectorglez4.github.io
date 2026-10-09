@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-sentencia-muy-celebrada-entre-los-filosofos-despues"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

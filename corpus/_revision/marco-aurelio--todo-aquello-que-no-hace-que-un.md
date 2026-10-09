@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-todo-aquello-que-no-hace-que-un"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

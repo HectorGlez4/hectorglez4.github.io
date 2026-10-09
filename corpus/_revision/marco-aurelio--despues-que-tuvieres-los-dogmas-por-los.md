@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-despues-que-tuvieres-los-dogmas-por-los"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

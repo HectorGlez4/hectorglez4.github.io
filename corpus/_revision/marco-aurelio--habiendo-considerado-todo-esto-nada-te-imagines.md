@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-habiendo-considerado-todo-esto-nada-te-imagines"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

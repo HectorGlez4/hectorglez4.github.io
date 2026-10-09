@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pende-de-tu-voluntad-el-que-pases"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

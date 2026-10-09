@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-alejandro-el-gramatico-hizo-con-su-ejemplo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

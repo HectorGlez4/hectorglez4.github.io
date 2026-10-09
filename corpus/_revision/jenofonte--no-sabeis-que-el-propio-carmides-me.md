@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-sabeis-que-el-propio-carmides-me"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

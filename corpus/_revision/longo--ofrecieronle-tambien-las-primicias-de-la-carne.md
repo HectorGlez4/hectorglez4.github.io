@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ofrecieronle-tambien-las-primicias-de-la-carne"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

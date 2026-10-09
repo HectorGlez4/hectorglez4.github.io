@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-media-en-longitud-mas-de-un-estadio"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

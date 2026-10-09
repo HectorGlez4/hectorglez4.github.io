@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-en-general-la-retorica-no-es-el"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

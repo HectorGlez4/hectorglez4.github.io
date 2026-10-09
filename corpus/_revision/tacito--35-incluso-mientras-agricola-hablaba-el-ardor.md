@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-35-incluso-mientras-agricola-hablaba-el-ardor"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

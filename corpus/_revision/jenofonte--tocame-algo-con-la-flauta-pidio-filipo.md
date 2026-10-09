@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tocame-algo-con-la-flauta-pidio-filipo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

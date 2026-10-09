@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-no-ten-bien-entendido-que-los-hombres"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

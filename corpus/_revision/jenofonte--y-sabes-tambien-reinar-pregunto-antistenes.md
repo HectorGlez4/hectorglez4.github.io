@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-sabes-tambien-reinar-pregunto-antistenes"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

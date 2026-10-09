@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-sin-duda-dijo-socrates-pero-corremos-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

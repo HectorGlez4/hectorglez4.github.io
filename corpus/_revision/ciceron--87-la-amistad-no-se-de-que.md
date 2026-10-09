@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-87-la-amistad-no-se-de-que"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

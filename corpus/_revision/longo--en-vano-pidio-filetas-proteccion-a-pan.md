@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-vano-pidio-filetas-proteccion-a-pan"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

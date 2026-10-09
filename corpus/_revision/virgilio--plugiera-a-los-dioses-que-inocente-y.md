@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-plugiera-a-los-dioses-que-inocente-y"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

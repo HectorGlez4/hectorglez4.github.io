@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-caballeros-va-a-entrar-ariadna-a-su"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-aurelio-intenta-reprimir-por-lo-cual-he"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

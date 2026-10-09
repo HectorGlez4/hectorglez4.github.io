@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-naturaleza-misma-enseno-a-dafnis-lo-demas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-esta-claro-no-que-tanto-los-griegos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

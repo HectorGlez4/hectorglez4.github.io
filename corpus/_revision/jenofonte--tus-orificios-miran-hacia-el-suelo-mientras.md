@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tus-orificios-miran-hacia-el-suelo-mientras"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

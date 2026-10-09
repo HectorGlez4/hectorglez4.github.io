@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-los-dos-dias-vino-el-mensajero"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

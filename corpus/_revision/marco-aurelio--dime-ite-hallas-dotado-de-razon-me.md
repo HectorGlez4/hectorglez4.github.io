@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-dime-ite-hallas-dotado-de-razon-me"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

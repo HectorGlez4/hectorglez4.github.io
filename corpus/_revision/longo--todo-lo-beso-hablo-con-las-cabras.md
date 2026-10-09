@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-todo-lo-beso-hablo-con-las-cabras"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

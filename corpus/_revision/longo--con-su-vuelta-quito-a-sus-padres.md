@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-con-su-vuelta-quito-a-sus-padres"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

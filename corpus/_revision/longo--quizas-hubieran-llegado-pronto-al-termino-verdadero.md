@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quizas-hubieran-llegado-pronto-al-termino-verdadero"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

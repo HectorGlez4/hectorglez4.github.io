@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pero-no-por-eso-nuestro-emperador-dejados"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

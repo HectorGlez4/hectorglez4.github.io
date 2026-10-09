@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-costeando-de-esta-suerte-saltaban-de-diario"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

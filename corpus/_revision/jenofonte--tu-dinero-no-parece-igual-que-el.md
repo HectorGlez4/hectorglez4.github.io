@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tu-dinero-no-parece-igual-que-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

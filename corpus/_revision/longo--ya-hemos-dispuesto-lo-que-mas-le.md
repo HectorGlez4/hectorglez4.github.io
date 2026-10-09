@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ya-hemos-dispuesto-lo-que-mas-le"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

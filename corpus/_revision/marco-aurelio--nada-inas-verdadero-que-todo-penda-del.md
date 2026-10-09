@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-nada-inas-verdadero-que-todo-penda-del"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

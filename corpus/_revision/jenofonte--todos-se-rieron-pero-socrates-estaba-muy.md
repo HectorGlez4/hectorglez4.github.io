@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-todos-se-rieron-pero-socrates-estaba-muy"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

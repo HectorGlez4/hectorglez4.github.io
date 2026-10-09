@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-cree-la-mayoria-que-los-militares-carecen"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

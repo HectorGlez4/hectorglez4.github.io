@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-riose-el-muchacho-al-oirme-con-risa"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

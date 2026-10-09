@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-pronto-cloe-hubiera-sido-mujer-si-la"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

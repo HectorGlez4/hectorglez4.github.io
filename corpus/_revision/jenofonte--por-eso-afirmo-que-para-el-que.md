@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-eso-afirmo-que-para-el-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

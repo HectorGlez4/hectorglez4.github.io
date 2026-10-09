@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-en-tanto-tomo-la-mejor-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

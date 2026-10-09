@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-no-obstante-si-te-afliges-a-causa"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

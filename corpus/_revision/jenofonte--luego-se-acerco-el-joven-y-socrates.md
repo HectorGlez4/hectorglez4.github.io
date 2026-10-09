@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-luego-se-acerco-el-joven-y-socrates"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

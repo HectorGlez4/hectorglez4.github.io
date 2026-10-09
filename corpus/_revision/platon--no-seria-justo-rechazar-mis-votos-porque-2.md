@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-no-seria-justo-rechazar-mis-votos-porque-2"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

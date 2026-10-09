@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-hermosos-cantares-se-cantaron-alli-en-loor"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

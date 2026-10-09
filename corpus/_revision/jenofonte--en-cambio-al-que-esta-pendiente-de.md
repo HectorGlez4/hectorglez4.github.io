@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-en-cambio-al-que-esta-pendiente-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

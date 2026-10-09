@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pretende-pues-corregir-la-idea-que-atribuya"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-bien-y-cual-de-nuestras-narices-es"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

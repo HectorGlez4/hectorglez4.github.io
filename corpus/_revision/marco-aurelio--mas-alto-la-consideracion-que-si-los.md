@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mas-alto-la-consideracion-que-si-los"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

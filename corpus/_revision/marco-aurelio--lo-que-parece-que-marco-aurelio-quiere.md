@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-lo-que-parece-que-marco-aurelio-quiere"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

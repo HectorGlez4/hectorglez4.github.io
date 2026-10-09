@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-siendo-mirtale-del-mismo-parecer-ocultaron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-casi-fue-menester-perseguirlas-y-buscarlas-por"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

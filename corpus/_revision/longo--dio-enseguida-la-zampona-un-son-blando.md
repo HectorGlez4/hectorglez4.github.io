@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dio-enseguida-la-zampona-un-son-blando"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

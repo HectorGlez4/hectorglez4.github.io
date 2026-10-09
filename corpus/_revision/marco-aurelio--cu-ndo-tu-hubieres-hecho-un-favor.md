@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cu-ndo-tu-hubieres-hecho-un-favor"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

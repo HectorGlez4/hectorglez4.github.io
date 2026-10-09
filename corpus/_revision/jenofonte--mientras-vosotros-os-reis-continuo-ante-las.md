@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-mientras-vosotros-os-reis-continuo-ante-las"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

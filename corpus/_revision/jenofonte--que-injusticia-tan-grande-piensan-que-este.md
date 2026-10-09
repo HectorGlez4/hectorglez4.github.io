@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-que-injusticia-tan-grande-piensan-que-este"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

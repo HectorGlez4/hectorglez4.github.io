@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pasar-felices-el-tiempo-cuando-lo-comparten"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

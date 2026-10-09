@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tu-mal-no-proviene-de-otro-espiritu"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

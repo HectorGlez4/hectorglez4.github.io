@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-procuraron-no-obstante-tenerse-firmes-se-saludaron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

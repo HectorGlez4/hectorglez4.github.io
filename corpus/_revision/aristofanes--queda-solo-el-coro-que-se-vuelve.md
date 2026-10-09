@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-queda-solo-el-coro-que-se-vuelve"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-diversas-tribus-fueron-sometidas-algunos-reyes-fueron"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

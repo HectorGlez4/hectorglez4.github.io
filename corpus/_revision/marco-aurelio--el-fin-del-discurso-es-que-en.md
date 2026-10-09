@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-el-fin-del-discurso-es-que-en"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

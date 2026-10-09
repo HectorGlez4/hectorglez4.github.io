@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-y-la-voz-de-ese-monstruo-era"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

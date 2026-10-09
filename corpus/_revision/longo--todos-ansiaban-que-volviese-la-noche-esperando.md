@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-todos-ansiaban-que-volviese-la-noche-esperando"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

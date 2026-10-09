@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-es-cuerdo-quien-muere-por-el-bien"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

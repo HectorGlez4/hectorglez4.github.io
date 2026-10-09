@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-y-lo-que-mas-es-yo-le"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-acudieron-estos-que-eran-dos-viejos-recios"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

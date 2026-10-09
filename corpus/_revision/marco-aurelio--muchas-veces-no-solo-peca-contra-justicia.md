@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-muchas-veces-no-solo-peca-contra-justicia"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

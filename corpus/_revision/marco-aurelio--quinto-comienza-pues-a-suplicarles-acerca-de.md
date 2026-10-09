@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-quinto-comienza-pues-a-suplicarles-acerca-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

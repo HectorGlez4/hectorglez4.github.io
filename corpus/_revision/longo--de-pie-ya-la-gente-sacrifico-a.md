@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-de-pie-ya-la-gente-sacrifico-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

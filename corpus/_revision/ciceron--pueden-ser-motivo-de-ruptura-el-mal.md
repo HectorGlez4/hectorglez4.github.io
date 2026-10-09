@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pueden-ser-motivo-de-ruptura-el-mal"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

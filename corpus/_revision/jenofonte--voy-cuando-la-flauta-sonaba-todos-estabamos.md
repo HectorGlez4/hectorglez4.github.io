@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-voy-cuando-la-flauta-sonaba-todos-estabamos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-confieso-senor-que-conservo-aun-dichas-alhajas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

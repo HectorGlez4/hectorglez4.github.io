@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-aurelio-oc-o-ewxparnc-ehrye-haciendo-relacion"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

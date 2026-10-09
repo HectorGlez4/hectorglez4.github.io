@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-y-luego-piensa-para-contigo-con-cuantocuidado"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

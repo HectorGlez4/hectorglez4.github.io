@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-la-tierra-arida-desea-la-lluvia-el"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

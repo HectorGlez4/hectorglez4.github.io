@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-para-entonces-seran-marido-y-mujer-amense"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

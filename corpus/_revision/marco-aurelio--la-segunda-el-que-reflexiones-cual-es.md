@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-la-segunda-el-que-reflexiones-cual-es"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

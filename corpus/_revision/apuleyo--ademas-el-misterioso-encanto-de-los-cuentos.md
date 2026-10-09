@@ -4,6 +4,8 @@ autor: "apuleyo"
 slug: "apuleyo-ademas-el-misterioso-encanto-de-los-cuentos"
 procedencia:
   obra: "Metamorfosis o el Asno de Oro, 1. 1-15"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

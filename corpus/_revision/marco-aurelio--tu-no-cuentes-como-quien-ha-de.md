@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tu-no-cuentes-como-quien-ha-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

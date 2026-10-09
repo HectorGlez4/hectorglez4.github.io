@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-si-dafnis-es-bello-las-flores-lo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

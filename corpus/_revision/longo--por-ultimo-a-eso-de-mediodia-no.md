@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-ultimo-a-eso-de-mediodia-no"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

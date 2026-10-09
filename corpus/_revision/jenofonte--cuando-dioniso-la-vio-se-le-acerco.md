@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cuando-dioniso-la-vio-se-le-acerco"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

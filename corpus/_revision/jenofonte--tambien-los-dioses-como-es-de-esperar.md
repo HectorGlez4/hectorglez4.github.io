@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-los-dioses-como-es-de-esperar"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

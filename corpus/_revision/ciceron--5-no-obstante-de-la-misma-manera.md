@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-5-no-obstante-de-la-misma-manera"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

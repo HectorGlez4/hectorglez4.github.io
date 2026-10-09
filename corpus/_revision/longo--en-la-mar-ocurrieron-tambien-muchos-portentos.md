@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-la-mar-ocurrieron-tambien-muchos-portentos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

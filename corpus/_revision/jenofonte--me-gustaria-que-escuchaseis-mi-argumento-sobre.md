@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-me-gustaria-que-escuchaseis-mi-argumento-sobre"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

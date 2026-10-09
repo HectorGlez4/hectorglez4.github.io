@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-cuando-observes-estas-senales-en-un-recluta"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

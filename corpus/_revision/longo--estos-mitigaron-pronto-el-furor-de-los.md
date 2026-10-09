@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-estos-mitigaron-pronto-el-furor-de-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

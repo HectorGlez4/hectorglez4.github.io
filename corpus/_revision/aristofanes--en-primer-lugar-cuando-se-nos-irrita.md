@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-en-primer-lugar-cuando-se-nos-irrita"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

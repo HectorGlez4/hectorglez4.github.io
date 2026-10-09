@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-como-fortificar-el-campamento-cuando-el-enemigo"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

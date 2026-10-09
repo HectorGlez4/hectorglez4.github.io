@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-vendra-la-primavera-y-no-renaceran-mis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

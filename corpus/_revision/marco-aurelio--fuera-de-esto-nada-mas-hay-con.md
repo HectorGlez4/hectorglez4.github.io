@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-fuera-de-esto-nada-mas-hay-con"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

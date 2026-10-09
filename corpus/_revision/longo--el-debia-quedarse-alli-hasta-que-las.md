@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-debia-quedarse-alli-hasta-que-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

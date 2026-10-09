@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quien-tan-insensible-al-amor-que-no"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

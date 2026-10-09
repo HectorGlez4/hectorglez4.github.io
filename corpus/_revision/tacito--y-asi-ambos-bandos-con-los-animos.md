@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-y-asi-ambos-bandos-con-los-animos"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

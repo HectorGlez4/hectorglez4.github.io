@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-onomacrito-anadia-uno-mas-fuego-y-einpedocles"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

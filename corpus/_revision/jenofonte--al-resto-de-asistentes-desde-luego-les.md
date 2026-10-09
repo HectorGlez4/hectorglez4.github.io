@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-al-resto-de-asistentes-desde-luego-les"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

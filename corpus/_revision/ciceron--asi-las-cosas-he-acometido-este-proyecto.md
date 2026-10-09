@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-asi-las-cosas-he-acometido-este-proyecto"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

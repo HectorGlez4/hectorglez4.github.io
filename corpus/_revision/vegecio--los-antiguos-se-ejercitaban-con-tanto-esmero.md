@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-los-antiguos-se-ejercitaban-con-tanto-esmero"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

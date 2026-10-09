@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cloe-se-complacio-con-la-idea-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-desembarco-tambien-donde-dafnis-y-cloe-apacentaban"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

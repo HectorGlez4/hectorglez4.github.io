@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-epicteto-anade-mas-aunque-hubieres-de-perder"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

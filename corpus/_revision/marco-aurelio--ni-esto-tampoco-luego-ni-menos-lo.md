@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ni-esto-tampoco-luego-ni-menos-lo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

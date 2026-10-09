@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-no-disfrutaba-con-las-grandes-riquezas-aunque"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-de-voleso-messala-trata-tacito-lib-111"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-haz-que-se-cumpla-ese-prospero-aguero"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

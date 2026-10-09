@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tanto-puede-que-jupiter-no-puede-mas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

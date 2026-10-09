@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-creo-que-sin-sonar-todos-decimos-hoy"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

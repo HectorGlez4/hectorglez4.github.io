@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-hoy-que-se-te-aparece-un-dios"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-de-hecho-temo-mucho-por-el-se"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

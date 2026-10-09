@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-del-mismo-modo-piensa-que-no-debe"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

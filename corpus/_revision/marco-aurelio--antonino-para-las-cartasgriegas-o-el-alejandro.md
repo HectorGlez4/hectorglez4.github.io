@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-antonino-para-las-cartasgriegas-o-el-alejandro"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

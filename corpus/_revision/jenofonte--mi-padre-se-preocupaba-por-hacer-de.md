@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-mi-padre-se-preocupaba-por-hacer-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

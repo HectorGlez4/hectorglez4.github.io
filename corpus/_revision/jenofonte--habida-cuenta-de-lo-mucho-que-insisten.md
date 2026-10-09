@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-habida-cuenta-de-lo-mucho-que-insisten"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

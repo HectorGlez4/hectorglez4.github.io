@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-poquito-a-poco-fue-luego-mitigando-aquella"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

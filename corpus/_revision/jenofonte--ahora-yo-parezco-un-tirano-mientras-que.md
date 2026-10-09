@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ahora-yo-parezco-un-tirano-mientras-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

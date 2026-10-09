@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tu-esta-claro-le-dijo-licon-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

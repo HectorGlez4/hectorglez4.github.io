@@ -4,6 +4,8 @@ autor: "caton-el-viejo"
 slug: "caton-el-viejo-cuando-visite-la-finca-deseada-preste-atencion"
 procedencia:
   obra: "De Agri Cultura"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

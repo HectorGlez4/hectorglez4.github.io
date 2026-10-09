@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-chico-solto-la-ropa-que-le"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

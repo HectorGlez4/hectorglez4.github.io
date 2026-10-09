@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-se-cantan-las-grandiosas-y-hermosisimas-hazanas"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

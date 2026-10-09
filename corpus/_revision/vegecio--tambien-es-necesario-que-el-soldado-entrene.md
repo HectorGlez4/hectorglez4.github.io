@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-tambien-es-necesario-que-el-soldado-entrene"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-de-aqui-el-general-sobresalto-el-correr"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

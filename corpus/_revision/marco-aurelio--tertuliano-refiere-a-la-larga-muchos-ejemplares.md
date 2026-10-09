@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tertuliano-refiere-a-la-larga-muchos-ejemplares"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

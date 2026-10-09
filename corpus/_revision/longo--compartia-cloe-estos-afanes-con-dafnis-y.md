@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-compartia-cloe-estos-afanes-con-dafnis-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

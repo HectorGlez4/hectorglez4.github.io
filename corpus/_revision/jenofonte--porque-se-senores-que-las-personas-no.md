@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-se-senores-que-las-personas-no"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

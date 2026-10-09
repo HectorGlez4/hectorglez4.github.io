@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-con-todo-el-recluta-seleccionado-no-debe"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

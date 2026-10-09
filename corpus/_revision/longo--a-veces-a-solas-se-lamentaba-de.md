@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-veces-a-solas-se-lamentaba-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

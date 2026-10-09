@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-petu-de-las-pasiones-contrarias-a-la"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

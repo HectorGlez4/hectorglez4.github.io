@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-aquel-llano-los-parecio-muy-a-proposito"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

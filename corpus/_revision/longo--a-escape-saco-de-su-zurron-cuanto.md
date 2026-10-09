@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-escape-saco-de-su-zurron-cuanto"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

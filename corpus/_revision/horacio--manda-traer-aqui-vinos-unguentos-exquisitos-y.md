@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-manda-traer-aqui-vinos-unguentos-exquisitos-y"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

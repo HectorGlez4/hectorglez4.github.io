@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-silencio-y-escuchame-porque-en-verdad-este"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

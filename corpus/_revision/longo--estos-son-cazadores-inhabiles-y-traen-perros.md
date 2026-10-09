@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-estos-son-cazadores-inhabiles-y-traen-perros"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

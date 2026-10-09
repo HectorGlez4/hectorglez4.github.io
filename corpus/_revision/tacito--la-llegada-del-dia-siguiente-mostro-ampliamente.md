@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-la-llegada-del-dia-siguiente-mostro-ampliamente"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

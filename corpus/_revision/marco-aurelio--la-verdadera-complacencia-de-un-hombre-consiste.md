@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-la-verdadera-complacencia-de-un-hombre-consiste"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

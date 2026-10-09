@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-mientras-nape-amasaba-el-pan-y-dryas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

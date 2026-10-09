@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-es-en-efecto-un-arte-poderoso-socrates"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-sin-embargo-cuando-lelio-anuncio-que-se"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

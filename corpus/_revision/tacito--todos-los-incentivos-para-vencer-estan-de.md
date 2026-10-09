@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-todos-los-incentivos-para-vencer-estan-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

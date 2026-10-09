@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dos-anos-despues-otro-pastor-de-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

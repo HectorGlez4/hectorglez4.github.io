@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-y-es-bien-facil-ver-que-aquellos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

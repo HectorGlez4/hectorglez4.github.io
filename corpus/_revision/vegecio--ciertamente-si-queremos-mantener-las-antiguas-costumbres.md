@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ciertamente-si-queremos-mantener-las-antiguas-costumbres"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

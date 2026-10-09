@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-socrates-lo-miro-y-le-respondio-en"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

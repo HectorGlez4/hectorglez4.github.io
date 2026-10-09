@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-ahora-le-tenemos-encerrado-con-cerrojos-para"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-o-por-ventura-te-parece-que-aquello"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

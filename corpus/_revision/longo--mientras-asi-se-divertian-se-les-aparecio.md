@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-mientras-asi-se-divertian-se-les-aparecio"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-entretanto-dionisofanes-despues-de-mucho-cavilar-se"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

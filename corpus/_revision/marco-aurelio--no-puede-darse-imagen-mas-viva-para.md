@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-no-puede-darse-imagen-mas-viva-para"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

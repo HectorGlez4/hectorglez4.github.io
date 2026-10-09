@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-tardo-este-en-conocer-tambien-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

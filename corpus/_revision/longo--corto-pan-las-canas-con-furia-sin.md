@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-corto-pan-las-canas-con-furia-sin"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

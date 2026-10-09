@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pues-si-por-zeus-si-con-una"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

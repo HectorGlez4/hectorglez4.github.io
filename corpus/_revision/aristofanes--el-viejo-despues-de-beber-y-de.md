@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-el-viejo-despues-de-beber-y-de"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

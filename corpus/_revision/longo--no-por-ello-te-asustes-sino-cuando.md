@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-por-ello-te-asustes-sino-cuando"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

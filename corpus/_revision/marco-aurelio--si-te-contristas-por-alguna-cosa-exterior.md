@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-si-te-contristas-por-alguna-cosa-exterior"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

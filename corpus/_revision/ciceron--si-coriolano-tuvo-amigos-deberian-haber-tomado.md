@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-si-coriolano-tuvo-amigos-deberian-haber-tomado"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

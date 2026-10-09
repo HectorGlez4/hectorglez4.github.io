@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-toco-por-ultimo-llamada-y-saliendo-del"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

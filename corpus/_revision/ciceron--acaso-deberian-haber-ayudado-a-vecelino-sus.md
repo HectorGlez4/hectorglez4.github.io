@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-acaso-deberian-haber-ayudado-a-vecelino-sus"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

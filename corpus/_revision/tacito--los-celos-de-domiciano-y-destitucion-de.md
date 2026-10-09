@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-los-celos-de-domiciano-y-destitucion-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-lamon-se-sostuvo-en-lo-dicho-lo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

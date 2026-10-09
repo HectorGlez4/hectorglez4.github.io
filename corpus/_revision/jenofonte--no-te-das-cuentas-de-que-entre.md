@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-te-das-cuentas-de-que-entre"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

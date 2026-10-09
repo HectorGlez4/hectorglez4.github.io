@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-15-por-esto-como-ya-he-dicho"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

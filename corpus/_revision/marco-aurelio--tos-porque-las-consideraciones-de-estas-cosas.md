@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tos-porque-las-consideraciones-de-estas-cosas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

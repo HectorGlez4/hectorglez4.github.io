@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-mira-que-no-me-atrevo-a-entrar"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

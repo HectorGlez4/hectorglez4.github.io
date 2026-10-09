@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-jamas-se-quejo-labrador-de-estos-contornos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-digo-pues-hablando-con-el-mundo-yo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

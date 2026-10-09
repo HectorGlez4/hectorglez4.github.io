@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-por-esto-temo-que-entristecerse-por-su"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

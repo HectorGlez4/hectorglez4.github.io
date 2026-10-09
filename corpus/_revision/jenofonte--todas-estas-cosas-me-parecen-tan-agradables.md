@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-todas-estas-cosas-me-parecen-tan-agradables"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

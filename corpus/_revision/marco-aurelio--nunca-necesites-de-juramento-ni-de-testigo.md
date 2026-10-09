@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-nunca-necesites-de-juramento-ni-de-testigo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

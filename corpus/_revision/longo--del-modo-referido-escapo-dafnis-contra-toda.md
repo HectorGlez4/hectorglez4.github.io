@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-del-modo-referido-escapo-dafnis-contra-toda"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

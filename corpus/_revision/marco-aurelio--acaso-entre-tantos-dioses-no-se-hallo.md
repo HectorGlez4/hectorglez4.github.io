@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-acaso-entre-tantos-dioses-no-se-hallo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

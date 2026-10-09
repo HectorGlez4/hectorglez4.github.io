@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-fruta-habia-caida-por-el-suelo-otra"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

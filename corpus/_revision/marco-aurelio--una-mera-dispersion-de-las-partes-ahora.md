@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-una-mera-dispersion-de-las-partes-ahora"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

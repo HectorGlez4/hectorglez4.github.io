@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-las-plantas-que-daban-fruta-estaban-en"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

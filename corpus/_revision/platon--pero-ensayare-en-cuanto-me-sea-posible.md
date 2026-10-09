@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-pero-ensayare-en-cuanto-me-sea-posible"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

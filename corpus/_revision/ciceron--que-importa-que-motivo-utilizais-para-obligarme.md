@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-que-importa-que-motivo-utilizais-para-obligarme"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-a-quien-apenas-apuntaba-el-bozo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

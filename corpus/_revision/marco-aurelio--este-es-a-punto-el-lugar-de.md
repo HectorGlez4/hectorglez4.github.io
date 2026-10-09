@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-este-es-a-punto-el-lugar-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

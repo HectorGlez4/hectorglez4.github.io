@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-cuando-antistenes-interroga-a-alguien-en"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

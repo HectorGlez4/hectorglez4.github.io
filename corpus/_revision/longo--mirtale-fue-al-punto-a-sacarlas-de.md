@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-mirtale-fue-al-punto-a-sacarlas-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

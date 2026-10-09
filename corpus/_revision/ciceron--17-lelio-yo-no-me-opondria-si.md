@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-17-lelio-yo-no-me-opondria-si"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

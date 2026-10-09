@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cuidaba-cabras-jugaba-con-las-ninfas-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

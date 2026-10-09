@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-lo-cierto-es-que-platon-habiendo-formado"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cuantos-deleites-suelen-percibir-y-gozar-los"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-suma-nadie-hablaba-en-la-ciudad"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

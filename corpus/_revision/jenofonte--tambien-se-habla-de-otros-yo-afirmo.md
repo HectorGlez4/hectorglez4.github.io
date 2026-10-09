@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-se-habla-de-otros-yo-afirmo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

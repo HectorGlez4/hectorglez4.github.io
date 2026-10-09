@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-a-el-no-lo-alteraran-ni-las"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

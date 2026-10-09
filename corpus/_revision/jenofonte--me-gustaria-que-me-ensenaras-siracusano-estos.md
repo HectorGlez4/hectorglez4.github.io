@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-me-gustaria-que-me-ensenaras-siracusano-estos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

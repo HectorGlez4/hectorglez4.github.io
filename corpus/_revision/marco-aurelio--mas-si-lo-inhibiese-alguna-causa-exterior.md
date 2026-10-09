@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mas-si-lo-inhibiese-alguna-causa-exterior"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

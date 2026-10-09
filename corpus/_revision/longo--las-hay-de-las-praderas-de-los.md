@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-las-hay-de-las-praderas-de-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

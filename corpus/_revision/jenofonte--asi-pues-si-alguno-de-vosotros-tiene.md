@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-pues-si-alguno-de-vosotros-tiene"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

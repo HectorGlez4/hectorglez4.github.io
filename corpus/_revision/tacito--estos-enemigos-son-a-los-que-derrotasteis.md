@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-estos-enemigos-son-a-los-que-derrotasteis"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-si-al-cabo-empezaras-a-tener-gusto"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

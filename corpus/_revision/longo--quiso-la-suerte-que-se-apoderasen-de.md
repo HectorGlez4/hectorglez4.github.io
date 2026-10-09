@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quiso-la-suerte-que-se-apoderasen-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dorcon-huyo-afligido-en-busca-de-nuevos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

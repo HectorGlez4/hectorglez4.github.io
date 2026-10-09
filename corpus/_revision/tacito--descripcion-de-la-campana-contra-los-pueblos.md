@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-descripcion-de-la-campana-contra-los-pueblos"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

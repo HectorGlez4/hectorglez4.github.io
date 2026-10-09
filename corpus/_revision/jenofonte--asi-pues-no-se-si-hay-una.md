@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-pues-no-se-si-hay-una"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -6,6 +6,8 @@ temas:
 slug: "agustin-de-hipona-de-aqui-nace-una-profunda-melancolia-para"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

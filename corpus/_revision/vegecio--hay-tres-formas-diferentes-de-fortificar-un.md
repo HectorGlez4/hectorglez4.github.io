@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-hay-tres-formas-diferentes-de-fortificar-un"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

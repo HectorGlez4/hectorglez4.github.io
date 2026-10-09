@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-las-musas-por-ultimo-decretaron-que-lo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

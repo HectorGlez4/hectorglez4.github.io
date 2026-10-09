@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-toda-nues­tra-ambicion-se-cifraba-en-ser"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

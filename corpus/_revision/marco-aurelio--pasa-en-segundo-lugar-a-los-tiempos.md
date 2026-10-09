@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pasa-en-segundo-lugar-a-los-tiempos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

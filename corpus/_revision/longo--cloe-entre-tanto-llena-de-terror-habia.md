@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cloe-entre-tanto-llena-de-terror-habia"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

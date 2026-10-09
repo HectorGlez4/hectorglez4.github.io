@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-homero-hablando-de-ulises-puesto-al-frente"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

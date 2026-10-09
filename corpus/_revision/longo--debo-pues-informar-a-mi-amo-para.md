@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-debo-pues-informar-a-mi-amo-para"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

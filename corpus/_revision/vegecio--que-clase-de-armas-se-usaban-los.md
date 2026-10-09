@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-que-clase-de-armas-se-usaban-los"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

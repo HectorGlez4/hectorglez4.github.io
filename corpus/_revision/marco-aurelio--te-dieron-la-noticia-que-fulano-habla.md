@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-te-dieron-la-noticia-que-fulano-habla"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-son-los-unicos-que-desean-las-tierras"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

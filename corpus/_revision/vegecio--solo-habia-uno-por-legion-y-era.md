@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-solo-habia-uno-por-legion-y-era"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

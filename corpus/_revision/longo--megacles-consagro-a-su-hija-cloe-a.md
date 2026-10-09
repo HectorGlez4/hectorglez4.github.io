@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-megacles-consagro-a-su-hija-cloe-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ellos-son-ricos-pero-quieren-novios-ricos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

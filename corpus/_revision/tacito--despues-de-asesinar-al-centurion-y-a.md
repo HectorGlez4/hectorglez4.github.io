@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-despues-de-asesinar-al-centurion-y-a"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

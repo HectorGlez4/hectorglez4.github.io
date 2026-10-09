@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-aqui-critobulo-ademas-aprovecha-para-bromear-con"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

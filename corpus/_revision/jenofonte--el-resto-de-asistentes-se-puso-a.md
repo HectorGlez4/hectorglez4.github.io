@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-el-resto-de-asistentes-se-puso-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-mi-hijo-mayor-y-tambien-mi-hija"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

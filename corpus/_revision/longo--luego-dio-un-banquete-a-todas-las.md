@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-luego-dio-un-banquete-a-todas-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

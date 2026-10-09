@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-con-cualquiera-que-te-encontrares-al-instante"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

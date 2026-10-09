@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cuando-te-vieres-ofendido-con-la-insolencia"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

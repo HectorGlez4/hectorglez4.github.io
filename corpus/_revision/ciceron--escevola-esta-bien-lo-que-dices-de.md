@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-escevola-esta-bien-lo-que-dices-de"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

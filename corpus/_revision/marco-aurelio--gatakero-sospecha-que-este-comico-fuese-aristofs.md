@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-gatakero-sospecha-que-este-comico-fuese-aristofs"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

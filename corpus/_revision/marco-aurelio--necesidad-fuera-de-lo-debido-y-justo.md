@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-necesidad-fuera-de-lo-debido-y-justo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

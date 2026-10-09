@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-como-ya-iba-yendose-el-verano"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

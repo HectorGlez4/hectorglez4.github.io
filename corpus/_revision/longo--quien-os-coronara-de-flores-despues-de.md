@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quien-os-coronara-de-flores-despues-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

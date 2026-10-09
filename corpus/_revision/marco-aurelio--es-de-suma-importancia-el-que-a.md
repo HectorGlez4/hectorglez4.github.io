@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-es-de-suma-importancia-el-que-a"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

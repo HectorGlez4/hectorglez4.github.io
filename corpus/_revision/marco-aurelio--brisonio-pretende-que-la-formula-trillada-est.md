@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-brisonio-pretende-que-la-formula-trillada-est"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

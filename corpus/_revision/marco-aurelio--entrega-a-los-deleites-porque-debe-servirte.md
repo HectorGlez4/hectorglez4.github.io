@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-entrega-a-los-deleites-porque-debe-servirte"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

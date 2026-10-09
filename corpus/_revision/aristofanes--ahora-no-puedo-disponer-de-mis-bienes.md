@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-ahora-no-puedo-disponer-de-mis-bienes"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

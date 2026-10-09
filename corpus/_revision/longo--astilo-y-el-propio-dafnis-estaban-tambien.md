@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-astilo-y-el-propio-dafnis-estaban-tambien"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

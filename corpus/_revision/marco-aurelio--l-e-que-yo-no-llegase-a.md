@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-l-e-que-yo-no-llegase-a"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

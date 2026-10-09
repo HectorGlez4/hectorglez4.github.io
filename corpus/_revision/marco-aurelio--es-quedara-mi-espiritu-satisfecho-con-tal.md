@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-es-quedara-mi-espiritu-satisfecho-con-tal"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

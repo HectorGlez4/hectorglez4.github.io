@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-o-por-fin-como-quien-amonesta-con"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

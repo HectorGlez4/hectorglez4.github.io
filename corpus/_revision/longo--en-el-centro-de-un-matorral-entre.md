@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-el-centro-de-un-matorral-entre"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

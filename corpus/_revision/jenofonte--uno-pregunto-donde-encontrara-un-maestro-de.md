@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-uno-pregunto-donde-encontrara-un-maestro-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

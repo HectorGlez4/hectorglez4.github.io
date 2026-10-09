@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-de-la-virtud-y-poder-de-mis"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

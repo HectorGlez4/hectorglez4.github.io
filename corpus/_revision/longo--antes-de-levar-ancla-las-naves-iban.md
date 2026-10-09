@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-antes-de-levar-ancla-las-naves-iban"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

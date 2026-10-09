@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-luego-comio-un-bocadillo-y-se-fue"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

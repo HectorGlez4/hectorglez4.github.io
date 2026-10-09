@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-carnuto-pueblo-de-la-antigua-pannonia-o"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

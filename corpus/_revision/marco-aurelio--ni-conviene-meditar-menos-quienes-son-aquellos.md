@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ni-conviene-meditar-menos-quienes-son-aquellos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

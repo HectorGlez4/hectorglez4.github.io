@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-muy-confiado-estaba-dafnis-en-que-alcanzaria"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pues-cuando-se-habria-fortalecido-nuestra-relacion"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

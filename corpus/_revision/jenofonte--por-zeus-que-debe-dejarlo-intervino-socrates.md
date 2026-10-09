@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-zeus-que-debe-dejarlo-intervino-socrates"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

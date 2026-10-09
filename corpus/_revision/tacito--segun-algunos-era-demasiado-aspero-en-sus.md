@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-segun-algunos-era-demasiado-aspero-en-sus"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

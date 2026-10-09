@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pues-por-mas-que-yo-haga-vendra"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

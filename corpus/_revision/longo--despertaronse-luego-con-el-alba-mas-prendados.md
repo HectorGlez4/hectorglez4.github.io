@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-despertaronse-luego-con-el-alba-mas-prendados"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

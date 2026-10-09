@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ve-aqui-una-paradoja-ensenada-por-los"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

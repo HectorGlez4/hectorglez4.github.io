@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-y-seria-dificil-soportar-la-adversidad-sin"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-filocleon-mira-como-las-articulaciones-de-mis"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

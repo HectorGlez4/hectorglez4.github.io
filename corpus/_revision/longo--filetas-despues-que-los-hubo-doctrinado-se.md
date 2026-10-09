@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-filetas-despues-que-los-hubo-doctrinado-se"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

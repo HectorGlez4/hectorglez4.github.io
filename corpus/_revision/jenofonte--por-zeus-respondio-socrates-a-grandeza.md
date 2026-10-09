@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-zeus-respondio-socrates-a-grandeza"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

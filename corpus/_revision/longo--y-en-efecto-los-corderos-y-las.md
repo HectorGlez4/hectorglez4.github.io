@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-en-efecto-los-corderos-y-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

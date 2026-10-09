@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-jamas-lobo-me-robo-una-sola-cabra"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

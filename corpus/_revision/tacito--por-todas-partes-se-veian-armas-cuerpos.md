@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-por-todas-partes-se-veian-armas-cuerpos"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

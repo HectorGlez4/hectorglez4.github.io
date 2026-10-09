@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-12-y-por-ultimo-movido-de-una"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

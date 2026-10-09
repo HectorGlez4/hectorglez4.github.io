@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-30-convino-con-ella-en-callar-aun"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-como-ya-comentamos-previamente-la-combinacion-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

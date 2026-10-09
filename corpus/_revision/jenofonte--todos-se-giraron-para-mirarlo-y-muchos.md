@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-todos-se-giraron-para-mirarlo-y-muchos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

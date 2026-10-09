@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-decia-el-raismo-epicteto-que-debia-uno"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

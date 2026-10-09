@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-que-en-ello-tenga-parte-la-alabanza"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

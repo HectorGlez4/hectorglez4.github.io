@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-se-fueron-por-ultimo-a-mitilene-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

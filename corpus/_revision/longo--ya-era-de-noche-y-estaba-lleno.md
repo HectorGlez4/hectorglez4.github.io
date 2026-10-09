@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ya-era-de-noche-y-estaba-lleno"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

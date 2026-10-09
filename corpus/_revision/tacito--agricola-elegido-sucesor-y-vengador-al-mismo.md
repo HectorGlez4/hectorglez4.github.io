@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-agricola-elegido-sucesor-y-vengador-al-mismo"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

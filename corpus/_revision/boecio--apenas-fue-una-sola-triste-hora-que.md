@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-apenas-fue-una-sola-triste-hora-que"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-para-no-entrar-en-detalles-que-duro"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

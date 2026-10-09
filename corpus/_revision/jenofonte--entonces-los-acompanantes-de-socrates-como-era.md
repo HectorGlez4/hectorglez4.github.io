@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-entonces-los-acompanantes-de-socrates-como-era"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

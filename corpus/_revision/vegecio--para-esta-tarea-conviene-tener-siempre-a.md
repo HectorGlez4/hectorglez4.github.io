@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-para-esta-tarea-conviene-tener-siempre-a"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-delfin-no-olia-bien-y-su"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

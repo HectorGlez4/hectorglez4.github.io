@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-cuando-la-flota-romana-rodeo-el-litoral"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

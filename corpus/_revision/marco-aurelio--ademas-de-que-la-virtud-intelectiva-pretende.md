@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ademas-de-que-la-virtud-intelectiva-pretende"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-aquella-estacion-se-presento-para-cloe"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

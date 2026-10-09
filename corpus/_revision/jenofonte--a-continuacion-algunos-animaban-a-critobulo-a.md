@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-a-continuacion-algunos-animaban-a-critobulo-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

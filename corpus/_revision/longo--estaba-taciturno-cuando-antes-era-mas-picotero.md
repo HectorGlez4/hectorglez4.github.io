@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-estaba-taciturno-cuando-antes-era-mas-picotero"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

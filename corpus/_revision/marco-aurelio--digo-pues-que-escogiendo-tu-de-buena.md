@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-digo-pues-que-escogiendo-tu-de-buena"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

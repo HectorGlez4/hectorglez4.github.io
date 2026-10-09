@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-a-la-manera-que-los-miembros-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

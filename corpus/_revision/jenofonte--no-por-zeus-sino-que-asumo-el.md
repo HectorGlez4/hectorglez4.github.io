@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-por-zeus-sino-que-asumo-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

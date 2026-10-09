@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-sol-calentaba-mas-cada-dia-porque"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-girad-formando-redondeles-golpeaos-el-vientre-convertios"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

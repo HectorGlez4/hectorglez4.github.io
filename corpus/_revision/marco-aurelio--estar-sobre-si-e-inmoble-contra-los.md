@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-estar-sobre-si-e-inmoble-contra-los"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

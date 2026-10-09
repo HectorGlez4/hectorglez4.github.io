@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-tan-ciega-y-corrupta-estaba-su-mente"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

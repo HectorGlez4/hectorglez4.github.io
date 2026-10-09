@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-29-al-inicio-del-siguiente-verano-agricola"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

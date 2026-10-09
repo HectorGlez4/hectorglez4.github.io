@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cuando-el-cumplio-quince-anos-y-ella"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

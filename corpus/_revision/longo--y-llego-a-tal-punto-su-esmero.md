@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-llego-a-tal-punto-su-esmero"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

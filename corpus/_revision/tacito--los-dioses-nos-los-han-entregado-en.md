@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-los-dioses-nos-los-han-entregado-en"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

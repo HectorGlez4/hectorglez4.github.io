@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-otros-padres-le-expusieron-cuando-pequenuelo-por"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

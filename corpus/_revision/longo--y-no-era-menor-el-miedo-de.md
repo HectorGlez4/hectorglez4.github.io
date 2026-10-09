@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-no-era-menor-el-miedo-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

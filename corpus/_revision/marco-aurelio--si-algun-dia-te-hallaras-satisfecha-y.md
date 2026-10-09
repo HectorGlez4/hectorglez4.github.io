@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-si-algun-dia-te-hallaras-satisfecha-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

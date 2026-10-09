@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-entonces-se-giro-para-mirar-a-filipo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-piensas-que-se-comporta-asi-desde-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-nosotras-te-daremos-con-que-ablandar-dryas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

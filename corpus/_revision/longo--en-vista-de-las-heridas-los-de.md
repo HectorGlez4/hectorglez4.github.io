@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-vista-de-las-heridas-los-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

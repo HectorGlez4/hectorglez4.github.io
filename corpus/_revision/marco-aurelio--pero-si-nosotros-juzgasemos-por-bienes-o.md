@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pero-si-nosotros-juzgasemos-por-bienes-o"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-la-dejareis-dormir-con-vuestros-chirridos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

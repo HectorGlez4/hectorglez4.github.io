@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-todos-le-abrazaron-y-le-besaron-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

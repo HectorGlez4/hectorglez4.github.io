@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-nosotros-damos-en-la-version-la-suma"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

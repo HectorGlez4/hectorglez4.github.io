@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ahora-vengo-a-vosotros-para-contaros-lo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

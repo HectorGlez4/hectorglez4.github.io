@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-este-es-chiquitin-lampino-como-las-mujeres"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-las-abejas-revolaban-en-torno-y-sonaba"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-25-fanio-nosotros-preferimos-preguntartelas-a-ti"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

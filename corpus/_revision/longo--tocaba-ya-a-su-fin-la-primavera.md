@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tocaba-ya-a-su-fin-la-primavera"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

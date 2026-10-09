@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-se-expusieron-a-la-verdad-esas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

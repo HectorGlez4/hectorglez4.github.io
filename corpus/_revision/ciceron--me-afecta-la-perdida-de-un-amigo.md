@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-me-afecta-la-perdida-de-un-amigo"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

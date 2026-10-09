@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-asi-pues-en-que-le-podria-haber"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

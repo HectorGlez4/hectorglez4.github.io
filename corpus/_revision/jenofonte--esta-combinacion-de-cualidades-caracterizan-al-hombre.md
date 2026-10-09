@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-esta-combinacion-de-cualidades-caracterizan-al-hombre"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

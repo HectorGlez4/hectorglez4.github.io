@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-lo-siguiente-es-que-averiguemos-de-que"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

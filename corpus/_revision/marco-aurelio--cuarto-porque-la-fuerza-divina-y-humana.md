@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cuarto-porque-la-fuerza-divina-y-humana"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

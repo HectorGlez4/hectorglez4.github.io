@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-al-paso-de-marcha-los-soldados-deben"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

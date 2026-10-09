@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-los-cefiros-templan-el-rigor-del-invierno"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

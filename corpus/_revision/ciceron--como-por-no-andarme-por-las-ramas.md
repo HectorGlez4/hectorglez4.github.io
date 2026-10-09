@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-como-por-no-andarme-por-las-ramas"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

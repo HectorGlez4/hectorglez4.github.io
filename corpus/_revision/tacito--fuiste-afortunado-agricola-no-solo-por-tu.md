@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-fuiste-afortunado-agricola-no-solo-por-tu"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

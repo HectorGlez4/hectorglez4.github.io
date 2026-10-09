@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-sujetadle-y-no-le-solteis-por-nada"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

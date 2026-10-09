@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ademas-lo-practicaban-con-gran-frecuencia-de"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

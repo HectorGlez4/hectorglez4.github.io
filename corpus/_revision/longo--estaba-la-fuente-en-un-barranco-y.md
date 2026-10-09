@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-estaba-la-fuente-en-un-barranco-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

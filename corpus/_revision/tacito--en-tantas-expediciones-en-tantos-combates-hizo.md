@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-en-tantas-expediciones-en-tantos-combates-hizo"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

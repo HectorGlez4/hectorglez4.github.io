@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pues-vale-pero-dime-a-que-distancia"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

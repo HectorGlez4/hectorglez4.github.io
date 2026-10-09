@@ -4,7 +4,9 @@ autor: "seneca"
 slug: "seneca-has-derramado-todas-las-lagrimas-que-debias"
 procedencia:
   obra: "Consolación a Marcia"
-  año: 1884
+  traduccion:
+    traductor: "Francisco Navarro y Calvo"
+    año: 1884
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

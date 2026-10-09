@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-las-cabras-mismas-pacian-alli-cerca-como"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

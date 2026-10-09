@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esto-es-sin-duda-porque-un-sabio"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

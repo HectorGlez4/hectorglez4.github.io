@@ -4,6 +4,8 @@ autor: "caton-el-viejo"
 slug: "caton-el-viejo-atento-a-como-los-aledanos-hacen-el"
 procedencia:
   obra: "De Agri Cultura"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

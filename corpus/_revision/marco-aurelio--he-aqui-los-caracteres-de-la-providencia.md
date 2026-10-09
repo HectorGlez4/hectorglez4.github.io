@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-he-aqui-los-caracteres-de-la-providencia"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

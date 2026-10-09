@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-tambien-cuando-nosotros-bebemos-demasiado-enseguida"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

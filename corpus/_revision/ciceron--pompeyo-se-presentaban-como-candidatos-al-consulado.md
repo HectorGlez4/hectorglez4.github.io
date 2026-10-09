@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pompeyo-se-presentaban-como-candidatos-al-consulado"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

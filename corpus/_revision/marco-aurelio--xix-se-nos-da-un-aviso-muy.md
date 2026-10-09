@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-xix-se-nos-da-un-aviso-muy"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-los-tuyos-solo-miran-al-recto"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

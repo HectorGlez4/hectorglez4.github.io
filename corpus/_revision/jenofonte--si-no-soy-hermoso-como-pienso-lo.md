@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-no-soy-hermoso-como-pienso-lo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-tendremos-que-escuchar-tus-argumentos-dijo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ni-dafnis-se-atrevia-a-proponerlo-ni"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-te-doy-la-razon-en-la-boca"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

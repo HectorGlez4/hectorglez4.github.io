@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-viendo-no-obstante-que-el-la-importunaba"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

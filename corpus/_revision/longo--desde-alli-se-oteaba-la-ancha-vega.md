@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-desde-alli-se-oteaba-la-ancha-vega"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

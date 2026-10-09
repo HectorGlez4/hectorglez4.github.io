@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-aurelio-habla-de-una-penitencia-natural-pues"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

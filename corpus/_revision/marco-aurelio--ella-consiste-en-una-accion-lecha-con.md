@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ella-consiste-en-una-accion-lecha-con"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

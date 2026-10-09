@@ -4,6 +4,8 @@ autor: "caton-el-viejo"
 slug: "caton-el-viejo-deberia-estar-ubicada-entre-el-tipo-de"
 procedencia:
   obra: "De Agri Cultura"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

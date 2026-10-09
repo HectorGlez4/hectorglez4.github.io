@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-el-uso-de-confrontar-las-ideas-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

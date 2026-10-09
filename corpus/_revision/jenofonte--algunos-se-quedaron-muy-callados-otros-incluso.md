@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-algunos-se-quedaron-muy-callados-otros-incluso"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

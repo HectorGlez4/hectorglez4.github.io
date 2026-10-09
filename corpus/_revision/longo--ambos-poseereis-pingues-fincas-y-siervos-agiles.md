@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ambos-poseereis-pingues-fincas-y-siervos-agiles"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

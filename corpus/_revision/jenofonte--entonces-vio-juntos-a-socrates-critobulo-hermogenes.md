@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-entonces-vio-juntos-a-socrates-critobulo-hermogenes"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

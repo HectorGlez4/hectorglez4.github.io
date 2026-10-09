@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-tu-astilo-no-aflijas-de-contar"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-acostumbrate-estar-con-atencion-a-lo-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

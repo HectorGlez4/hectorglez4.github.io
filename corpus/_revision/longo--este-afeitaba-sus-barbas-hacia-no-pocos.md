@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-este-afeitaba-sus-barbas-hacia-no-pocos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

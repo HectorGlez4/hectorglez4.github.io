@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-que-dire-de-cada-astro-en-particular"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

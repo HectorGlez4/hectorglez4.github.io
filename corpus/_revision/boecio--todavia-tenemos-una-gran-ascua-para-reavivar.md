@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-todavia-tenemos-una-gran-ascua-para-reavivar"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

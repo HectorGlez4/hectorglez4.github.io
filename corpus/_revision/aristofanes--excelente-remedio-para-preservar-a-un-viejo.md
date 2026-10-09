@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-excelente-remedio-para-preservar-a-un-viejo"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-solo-vive-feliz-y-dueno-de-si"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

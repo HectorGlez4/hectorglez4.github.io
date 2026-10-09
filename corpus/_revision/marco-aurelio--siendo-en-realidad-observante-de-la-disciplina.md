@@ -6,6 +6,8 @@ temas:
 slug: "marco-aurelio-siendo-en-realidad-observante-de-la-disciplina"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

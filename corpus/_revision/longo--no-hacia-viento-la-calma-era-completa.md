@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-hacia-viento-la-calma-era-completa"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

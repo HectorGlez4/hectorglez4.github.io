@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-recogete-dentro-de-ti-mismo-supuesto-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

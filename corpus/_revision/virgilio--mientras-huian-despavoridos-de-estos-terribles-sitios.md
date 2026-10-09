@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-mientras-huian-despavoridos-de-estos-terribles-sitios"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

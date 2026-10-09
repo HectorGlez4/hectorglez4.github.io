@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-poco-llego-cloe-a-la-fuente"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

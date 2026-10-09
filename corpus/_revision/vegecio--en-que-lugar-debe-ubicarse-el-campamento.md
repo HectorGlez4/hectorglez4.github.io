@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-en-que-lugar-debe-ubicarse-el-campamento"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

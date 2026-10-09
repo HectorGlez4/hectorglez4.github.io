@@ -4,6 +4,8 @@ autor: "apuleyo"
 slug: "apuleyo-pero-tambien-es-cierto-que-este-mismo"
 procedencia:
   obra: "Metamorfosis o el Asno de Oro, 1. 1-15"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

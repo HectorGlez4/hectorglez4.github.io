@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-esto-es-cuanto-tenia-que-decir-sobre"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

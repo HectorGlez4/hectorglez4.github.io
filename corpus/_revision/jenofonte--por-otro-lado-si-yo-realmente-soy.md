@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-otro-lado-si-yo-realmente-soy"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

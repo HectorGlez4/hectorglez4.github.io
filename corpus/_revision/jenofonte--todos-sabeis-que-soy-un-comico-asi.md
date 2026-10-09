@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-todos-sabeis-que-soy-un-comico-asi"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

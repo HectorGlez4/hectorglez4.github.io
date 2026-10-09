@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-como-reconocer-durante-la-seleccion-cuales-podrian"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

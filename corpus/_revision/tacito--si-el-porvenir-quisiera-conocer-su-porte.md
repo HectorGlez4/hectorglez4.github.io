@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-si-el-porvenir-quisiera-conocer-su-porte"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

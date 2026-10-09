@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-calias-esta-por-tanto-cortejando-a-un"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

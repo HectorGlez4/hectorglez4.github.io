@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-hubo-ninguno-de-los-que-miraba"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

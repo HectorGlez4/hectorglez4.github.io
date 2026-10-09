@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-despues-la-razon-y-la-edad-habian"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

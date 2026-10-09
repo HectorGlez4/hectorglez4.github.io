@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-dejadme-no-me-aterreis-mas-impuras-aves"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

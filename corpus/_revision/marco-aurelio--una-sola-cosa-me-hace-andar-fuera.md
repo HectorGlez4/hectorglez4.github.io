@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-una-sola-cosa-me-hace-andar-fuera"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-y-esto-se-hizo-cuando-yo-era"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

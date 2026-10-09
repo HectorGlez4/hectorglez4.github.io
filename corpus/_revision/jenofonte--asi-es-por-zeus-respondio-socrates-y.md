@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-es-por-zeus-respondio-socrates-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

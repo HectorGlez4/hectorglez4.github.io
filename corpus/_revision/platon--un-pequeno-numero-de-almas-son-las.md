@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-un-pequeno-numero-de-almas-son-las"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

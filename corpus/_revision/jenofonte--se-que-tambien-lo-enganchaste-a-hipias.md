@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-se-que-tambien-lo-enganchaste-a-hipias"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-algo-acalorados-con-esto-y-creciendo-tambien"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

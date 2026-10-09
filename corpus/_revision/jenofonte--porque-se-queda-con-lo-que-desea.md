@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-se-queda-con-lo-que-desea"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

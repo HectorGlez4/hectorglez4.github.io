@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-como-esto-es-discutible-intervino-socrates-vamos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

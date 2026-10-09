@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-acciones-que-ejecuta-asi-como-su-virtud"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

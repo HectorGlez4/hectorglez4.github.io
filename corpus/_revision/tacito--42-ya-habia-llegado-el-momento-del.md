@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-42-ya-habia-llegado-el-momento-del"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

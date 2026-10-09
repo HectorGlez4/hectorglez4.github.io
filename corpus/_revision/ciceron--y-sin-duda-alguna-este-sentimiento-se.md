@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-y-sin-duda-alguna-este-sentimiento-se"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

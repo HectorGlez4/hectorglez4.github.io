@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-nieremberg-en-su-temistocles-y-eterno-lib"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

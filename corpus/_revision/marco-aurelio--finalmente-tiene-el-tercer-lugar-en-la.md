@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-finalmente-tiene-el-tercer-lugar-en-la"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

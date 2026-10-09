@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-grandeza-si-es-que-la-honradez-forma"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

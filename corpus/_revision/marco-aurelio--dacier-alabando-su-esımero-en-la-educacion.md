@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-dacier-alabando-su-esımero-en-la-educacion"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

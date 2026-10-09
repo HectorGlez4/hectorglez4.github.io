@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-entonces-cloe-desato-la-cinta-de-sus"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

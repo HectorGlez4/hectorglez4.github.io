@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tu-les-pagas-mucho-dinero-a-estesimbroto"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

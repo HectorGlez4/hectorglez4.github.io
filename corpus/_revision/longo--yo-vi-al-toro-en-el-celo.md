@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-yo-vi-al-toro-en-el-celo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

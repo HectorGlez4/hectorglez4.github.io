@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-algunos-aldeanos-se-reunieron-con-este-motivo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

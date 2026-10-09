@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-desprevenido-levanta-en-formacion-su-campamento"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

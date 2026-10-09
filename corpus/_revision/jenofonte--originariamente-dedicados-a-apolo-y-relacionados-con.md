@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-originariamente-dedicados-a-apolo-y-relacionados-con"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

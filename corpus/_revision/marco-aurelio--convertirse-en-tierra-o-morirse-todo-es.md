@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-convertirse-en-tierra-o-morirse-todo-es"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

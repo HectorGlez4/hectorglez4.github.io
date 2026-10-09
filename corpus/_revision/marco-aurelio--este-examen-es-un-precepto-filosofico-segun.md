@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-este-examen-es-un-precepto-filosofico-segun"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

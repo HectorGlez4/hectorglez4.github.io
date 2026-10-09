@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-segundo-que-dios-una-vez-hechas-las"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

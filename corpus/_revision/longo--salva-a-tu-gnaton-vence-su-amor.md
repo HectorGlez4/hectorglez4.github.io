@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-salva-a-tu-gnaton-vence-su-amor"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-y-tu-comprenderas-ser-asi-observando-lo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

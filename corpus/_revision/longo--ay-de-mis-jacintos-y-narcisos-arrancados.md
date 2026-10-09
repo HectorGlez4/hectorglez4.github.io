@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ay-de-mis-jacintos-y-narcisos-arrancados"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

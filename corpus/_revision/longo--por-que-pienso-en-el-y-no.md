@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-que-pienso-en-el-y-no"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

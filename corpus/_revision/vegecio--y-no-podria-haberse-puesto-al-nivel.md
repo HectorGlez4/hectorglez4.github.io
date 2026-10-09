@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-y-no-podria-haberse-puesto-al-nivel"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

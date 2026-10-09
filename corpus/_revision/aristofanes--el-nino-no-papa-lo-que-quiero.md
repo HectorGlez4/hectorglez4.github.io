@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-el-nino-no-papa-lo-que-quiero"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

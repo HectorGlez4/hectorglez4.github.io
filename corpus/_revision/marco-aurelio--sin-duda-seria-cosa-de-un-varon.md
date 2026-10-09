@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-sin-duda-seria-cosa-de-un-varon"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

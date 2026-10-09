@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-de-una-frase-semejante-se-valio-san"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

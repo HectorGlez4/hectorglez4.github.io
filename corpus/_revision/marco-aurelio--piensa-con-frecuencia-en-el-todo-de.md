@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-piensa-con-frecuencia-en-el-todo-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

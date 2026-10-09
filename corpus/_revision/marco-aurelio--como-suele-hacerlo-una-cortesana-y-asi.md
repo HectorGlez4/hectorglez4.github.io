@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-como-suele-hacerlo-una-cortesana-y-asi"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

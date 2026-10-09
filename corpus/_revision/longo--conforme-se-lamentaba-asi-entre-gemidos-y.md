@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-conforme-se-lamentaba-asi-entre-gemidos-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

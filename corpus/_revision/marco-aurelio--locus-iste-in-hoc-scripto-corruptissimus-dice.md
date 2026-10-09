@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-locus-iste-in-hoc-scripto-corruptissimus-dice"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

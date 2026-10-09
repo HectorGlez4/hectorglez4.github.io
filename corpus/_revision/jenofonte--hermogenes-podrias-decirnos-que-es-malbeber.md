@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-hermogenes-podrias-decirnos-que-es-malbeber"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

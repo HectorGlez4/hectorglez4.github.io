@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-a-su-vez-los-ya-ancianos-tambien"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

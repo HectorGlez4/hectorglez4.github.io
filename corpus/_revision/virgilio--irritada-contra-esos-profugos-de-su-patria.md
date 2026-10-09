@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-irritada-contra-esos-profugos-de-su-patria"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

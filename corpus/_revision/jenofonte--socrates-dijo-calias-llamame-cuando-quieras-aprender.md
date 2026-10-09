@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-socrates-dijo-calias-llamame-cuando-quieras-aprender"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

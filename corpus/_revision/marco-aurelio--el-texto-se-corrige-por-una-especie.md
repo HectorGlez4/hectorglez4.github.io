@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-el-texto-se-corrige-por-una-especie"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

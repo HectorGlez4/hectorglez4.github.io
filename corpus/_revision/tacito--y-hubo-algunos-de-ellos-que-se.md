@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-y-hubo-algunos-de-ellos-que-se"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

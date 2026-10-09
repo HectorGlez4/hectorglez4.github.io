@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-respecto-a-este-punto-se-que-tres"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

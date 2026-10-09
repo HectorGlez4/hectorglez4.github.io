@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-hubo-alguien-mas-famoso-o-mas-poderoso"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

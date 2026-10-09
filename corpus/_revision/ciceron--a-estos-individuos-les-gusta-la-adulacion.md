@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-a-estos-individuos-les-gusta-la-adulacion"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

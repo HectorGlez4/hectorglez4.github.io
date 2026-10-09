@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ahora-pareces-precisamente-un-incordiador-cuando-dices"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

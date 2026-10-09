@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-quien-cantara-dignamente-a-marte-protegido-por"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

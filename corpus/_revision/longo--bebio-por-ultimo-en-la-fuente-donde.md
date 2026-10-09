@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-bebio-por-ultimo-en-la-fuente-donde"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

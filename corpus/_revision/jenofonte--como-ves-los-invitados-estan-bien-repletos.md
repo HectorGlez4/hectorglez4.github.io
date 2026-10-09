@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-como-ves-los-invitados-estan-bien-repletos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

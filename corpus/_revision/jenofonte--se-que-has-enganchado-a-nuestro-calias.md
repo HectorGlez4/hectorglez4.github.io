@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-se-que-has-enganchado-a-nuestro-calias"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

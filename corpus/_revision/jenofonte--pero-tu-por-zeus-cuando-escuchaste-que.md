@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pero-tu-por-zeus-cuando-escuchaste-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

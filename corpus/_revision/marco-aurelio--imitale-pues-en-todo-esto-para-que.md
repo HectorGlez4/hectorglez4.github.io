@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-imitale-pues-en-todo-esto-para-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

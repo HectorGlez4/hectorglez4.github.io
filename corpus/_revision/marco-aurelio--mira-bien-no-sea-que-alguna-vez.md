@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mira-bien-no-sea-que-alguna-vez"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

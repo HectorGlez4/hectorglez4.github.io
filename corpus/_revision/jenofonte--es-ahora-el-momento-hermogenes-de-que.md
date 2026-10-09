@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-es-ahora-el-momento-hermogenes-de-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

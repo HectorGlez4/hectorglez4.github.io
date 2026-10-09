@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-una-eternidad-lo-dispone-y-lo-gobierna"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

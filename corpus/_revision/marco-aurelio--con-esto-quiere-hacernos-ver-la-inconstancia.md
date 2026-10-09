@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-con-esto-quiere-hacernos-ver-la-inconstancia"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

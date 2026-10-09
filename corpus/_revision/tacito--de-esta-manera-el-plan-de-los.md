@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-de-esta-manera-el-plan-de-los"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

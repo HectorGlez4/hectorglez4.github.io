@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-poco-despues-britania-recibio-como-gobernador-a"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

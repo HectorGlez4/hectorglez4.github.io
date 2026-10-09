@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-sabes-de-algo-mas-celestial-que-los"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

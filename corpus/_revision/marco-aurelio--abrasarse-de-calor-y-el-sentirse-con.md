@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-abrasarse-de-calor-y-el-sentirse-con"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

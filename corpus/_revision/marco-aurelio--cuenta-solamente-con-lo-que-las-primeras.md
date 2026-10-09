@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cuenta-solamente-con-lo-que-las-primeras"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

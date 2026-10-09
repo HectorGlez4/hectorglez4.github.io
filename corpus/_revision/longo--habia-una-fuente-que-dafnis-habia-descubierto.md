@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-habia-una-fuente-que-dafnis-habia-descubierto"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

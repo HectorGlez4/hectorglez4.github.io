@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-tales-discursos-acabaron-por-dormirse-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

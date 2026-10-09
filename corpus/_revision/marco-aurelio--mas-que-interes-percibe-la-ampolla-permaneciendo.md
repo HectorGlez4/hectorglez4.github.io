@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mas-que-interes-percibe-la-ampolla-permaneciendo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

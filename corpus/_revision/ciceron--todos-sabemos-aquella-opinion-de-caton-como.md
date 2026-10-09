@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-todos-sabemos-aquella-opinion-de-caton-como"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

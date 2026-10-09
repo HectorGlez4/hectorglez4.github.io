@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ella-parecia-sentir-pudor-pero-igualmente-le"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

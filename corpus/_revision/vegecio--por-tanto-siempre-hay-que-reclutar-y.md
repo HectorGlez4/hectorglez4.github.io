@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-por-tanto-siempre-hay-que-reclutar-y"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

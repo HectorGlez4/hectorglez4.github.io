@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-xenofonte-puede-ser-uno-de-los-tres"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

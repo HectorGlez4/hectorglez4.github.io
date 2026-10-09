@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-apenas-volvio-en-si-merced-a-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

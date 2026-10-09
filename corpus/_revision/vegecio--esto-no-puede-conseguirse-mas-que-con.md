@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-esto-no-puede-conseguirse-mas-que-con"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

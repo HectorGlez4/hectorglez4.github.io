@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-acudia-pues-alli-multitud-de-pajaros-invernizos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

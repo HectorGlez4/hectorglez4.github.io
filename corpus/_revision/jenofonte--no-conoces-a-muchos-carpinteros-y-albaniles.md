@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-conoces-a-muchos-carpinteros-y-albaniles"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

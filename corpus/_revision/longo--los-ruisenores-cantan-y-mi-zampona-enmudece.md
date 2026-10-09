@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-los-ruisenores-cantan-y-mi-zampona-enmudece"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

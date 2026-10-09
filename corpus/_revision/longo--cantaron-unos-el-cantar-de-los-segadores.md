@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cantaron-unos-el-cantar-de-los-segadores"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-en-el-nombre-de-los-de-los"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

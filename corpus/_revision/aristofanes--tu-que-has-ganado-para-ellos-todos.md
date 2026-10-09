@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-tu-que-has-ganado-para-ellos-todos"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

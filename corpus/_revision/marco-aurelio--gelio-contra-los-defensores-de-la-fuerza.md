@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-gelio-contra-los-defensores-de-la-fuerza"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

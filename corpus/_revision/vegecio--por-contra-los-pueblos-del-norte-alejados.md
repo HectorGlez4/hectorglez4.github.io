@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-por-contra-los-pueblos-del-norte-alejados"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

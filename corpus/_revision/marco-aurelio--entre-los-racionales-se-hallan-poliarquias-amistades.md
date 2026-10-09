@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-entre-los-racionales-se-hallan-poliarquias-amistades"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

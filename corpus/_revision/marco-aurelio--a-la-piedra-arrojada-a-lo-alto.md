@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-a-la-piedra-arrojada-a-lo-alto"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

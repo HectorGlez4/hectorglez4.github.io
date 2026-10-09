@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-un-ejercito-que-ha-dejado-de-lado"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

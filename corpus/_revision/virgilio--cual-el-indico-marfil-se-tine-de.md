@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-cual-el-indico-marfil-se-tine-de"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ya-te-maten-hagan-tajadas-y-provoquen"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

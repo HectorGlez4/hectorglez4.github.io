@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-la-puerta-llamada-decumana-estara-en-el"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

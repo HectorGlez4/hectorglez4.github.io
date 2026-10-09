@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-por-ultimo-toda-la-tierra-se-reputa"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

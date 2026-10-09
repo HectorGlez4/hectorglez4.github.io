@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cuando-quiso-ser-el-vencedor-del-pancracio"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

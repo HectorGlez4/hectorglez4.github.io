@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-con-mas-justicia-respondio-que-calipides"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

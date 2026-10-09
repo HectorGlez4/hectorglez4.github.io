@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esto-es-aquel-consejo-de-pitagoras-eloo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

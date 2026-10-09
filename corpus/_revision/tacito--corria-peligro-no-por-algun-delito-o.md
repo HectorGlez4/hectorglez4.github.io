@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-corria-peligro-no-por-algun-delito-o"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

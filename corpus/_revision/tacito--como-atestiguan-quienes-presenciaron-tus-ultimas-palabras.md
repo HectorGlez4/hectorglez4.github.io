@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-como-atestiguan-quienes-presenciaron-tus-ultimas-palabras"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

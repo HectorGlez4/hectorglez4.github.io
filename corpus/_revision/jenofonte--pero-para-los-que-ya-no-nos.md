@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pero-para-los-que-ya-no-nos"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

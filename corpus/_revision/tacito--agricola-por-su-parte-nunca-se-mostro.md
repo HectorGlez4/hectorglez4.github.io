@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-agricola-por-su-parte-nunca-se-mostro"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

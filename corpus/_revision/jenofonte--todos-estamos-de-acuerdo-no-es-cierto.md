@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-todos-estamos-de-acuerdo-no-es-cierto"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

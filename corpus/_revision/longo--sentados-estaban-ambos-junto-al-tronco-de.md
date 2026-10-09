@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-sentados-estaban-ambos-junto-al-tronco-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

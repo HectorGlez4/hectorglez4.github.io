@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-tras-ellos-didio-galo-mantuvo-los-territorios"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

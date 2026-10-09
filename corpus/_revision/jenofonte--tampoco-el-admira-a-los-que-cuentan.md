@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tampoco-el-admira-a-los-que-cuentan"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

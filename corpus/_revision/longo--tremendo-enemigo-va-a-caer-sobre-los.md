@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tremendo-enemigo-va-a-caer-sobre-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

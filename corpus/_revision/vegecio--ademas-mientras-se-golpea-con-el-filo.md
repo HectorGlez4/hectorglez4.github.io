@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ademas-mientras-se-golpea-con-el-filo"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

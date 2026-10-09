@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-critobulo-no-te-vas-a-enfrentar-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

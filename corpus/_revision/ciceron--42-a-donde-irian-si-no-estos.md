@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-42-a-donde-irian-si-no-estos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

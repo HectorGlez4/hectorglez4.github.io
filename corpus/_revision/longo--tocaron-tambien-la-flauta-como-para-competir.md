@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tocaron-tambien-la-flauta-como-para-competir"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

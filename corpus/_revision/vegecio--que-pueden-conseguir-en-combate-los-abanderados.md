@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-que-pueden-conseguir-en-combate-los-abanderados"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

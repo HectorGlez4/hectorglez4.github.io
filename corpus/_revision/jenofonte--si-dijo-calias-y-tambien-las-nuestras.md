@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-dijo-calias-y-tambien-las-nuestras"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

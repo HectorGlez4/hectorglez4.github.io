@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-para-nada-provoca-envidias-para-nada-provoca"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

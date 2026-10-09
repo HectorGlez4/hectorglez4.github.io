@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-derivaba-sin-dificultad-el-agua-por-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

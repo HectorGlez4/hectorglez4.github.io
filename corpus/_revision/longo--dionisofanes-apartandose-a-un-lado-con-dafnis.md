@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dionisofanes-apartandose-a-un-lado-con-dafnis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-quieres-decir-el-resumen-que-se-hace"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

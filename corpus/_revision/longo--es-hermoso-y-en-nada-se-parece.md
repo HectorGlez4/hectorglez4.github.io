@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-es-hermoso-y-en-nada-se-parece"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

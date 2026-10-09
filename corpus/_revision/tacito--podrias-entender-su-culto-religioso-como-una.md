@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-podrias-entender-su-culto-religioso-como-una"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

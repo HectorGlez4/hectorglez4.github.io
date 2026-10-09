@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-como-la-noche-venia-ya-cloe-condujo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

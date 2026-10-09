@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-claro-que-os-la-mostrare-si-cada"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-los-mismos-dispusieron-que-yo-se-duda"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-por-tanto-de-esta-manera-nos-complaceras"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -6,6 +6,8 @@ temas:
 slug: "longo-aunque-llegaron-a-ser-poseedores-de-mucho"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

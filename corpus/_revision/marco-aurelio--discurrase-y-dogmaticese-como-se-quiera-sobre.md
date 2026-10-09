@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-discurrase-y-dogmaticese-como-se-quiera-sobre"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

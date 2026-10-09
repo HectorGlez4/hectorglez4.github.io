@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-padecia-asi-se-lamentaba-cloe-procurando"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

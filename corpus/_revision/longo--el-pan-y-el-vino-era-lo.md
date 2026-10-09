@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-pan-y-el-vino-era-lo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

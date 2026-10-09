@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-borra-pues-esa-imaginacion-cuando-quieras-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-que-esperanza-te-tiene-fija-en-esta"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

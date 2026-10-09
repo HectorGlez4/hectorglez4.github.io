@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-recostados-los-circunstantes-oian-la-musica-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

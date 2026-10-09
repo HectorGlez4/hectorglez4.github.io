@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-despues-llevaron-a-la-fuente-a-dorcon"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-su-hermosura-distaba-mucho-de-parecer-rustica"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

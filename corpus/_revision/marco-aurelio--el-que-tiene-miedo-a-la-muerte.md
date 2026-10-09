@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-el-que-tiene-miedo-a-la-muerte"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

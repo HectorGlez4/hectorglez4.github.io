@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-seria-mejor-el-que-ensenara-como"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ella-estaba-bailando-mientras-los-cogia-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

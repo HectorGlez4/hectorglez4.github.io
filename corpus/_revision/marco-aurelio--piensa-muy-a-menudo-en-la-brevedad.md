@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-piensa-muy-a-menudo-en-la-brevedad"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

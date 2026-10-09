@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-y-de-la-naturaleza-universal-reflexiona-tambien"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

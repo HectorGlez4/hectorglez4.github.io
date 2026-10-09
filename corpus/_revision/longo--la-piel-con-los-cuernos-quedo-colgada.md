@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-la-piel-con-los-cuernos-quedo-colgada"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-aquella-noche-llego-eudromo-con-la-noticia"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

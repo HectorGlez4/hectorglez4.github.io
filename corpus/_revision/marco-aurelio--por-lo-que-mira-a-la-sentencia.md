@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-por-lo-que-mira-a-la-sentencia"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

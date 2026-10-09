@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-a-un-divieso-cubierto-de-un-emplasto"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-pues-no-hay-temor-de-que-merezca"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

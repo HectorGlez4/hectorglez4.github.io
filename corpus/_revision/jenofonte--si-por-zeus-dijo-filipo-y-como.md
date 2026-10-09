@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-por-zeus-dijo-filipo-y-como"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

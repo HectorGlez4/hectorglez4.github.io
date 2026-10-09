@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-poseo-un-huerto-que-desde-que-me"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

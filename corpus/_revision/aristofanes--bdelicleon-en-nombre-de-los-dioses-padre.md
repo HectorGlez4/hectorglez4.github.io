@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-bdelicleon-en-nombre-de-los-dioses-padre"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

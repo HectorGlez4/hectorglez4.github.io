@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-os-digo-pues-que-considero-mi-mayor"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-gatakero-pretende-leer-no-temera-sino-necesitara"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

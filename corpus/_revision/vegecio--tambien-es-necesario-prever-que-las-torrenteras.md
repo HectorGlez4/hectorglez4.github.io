@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-tambien-es-necesario-prever-que-las-torrenteras"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

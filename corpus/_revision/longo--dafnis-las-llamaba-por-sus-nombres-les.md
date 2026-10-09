@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-las-llamaba-por-sus-nombres-les"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

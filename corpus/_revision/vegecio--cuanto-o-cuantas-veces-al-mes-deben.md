@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-cuanto-o-cuantas-veces-al-mes-deben"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

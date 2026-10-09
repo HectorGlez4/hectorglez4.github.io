@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-para-seguir-un-orden-adecuado-en-primer"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-en-otro-lugar-dice-πυκινα-φρεσι"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

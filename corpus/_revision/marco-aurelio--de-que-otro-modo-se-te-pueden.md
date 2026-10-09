@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-de-que-otro-modo-se-te-pueden"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

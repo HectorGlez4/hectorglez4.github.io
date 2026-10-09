@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-que-lo-oye-por-zeus-dijo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

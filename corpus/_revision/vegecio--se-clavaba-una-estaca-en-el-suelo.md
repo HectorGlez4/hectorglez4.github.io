@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-se-clavaba-una-estaca-en-el-suelo"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

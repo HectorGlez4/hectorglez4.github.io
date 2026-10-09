@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-si-ella-amase-a-otro-en"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

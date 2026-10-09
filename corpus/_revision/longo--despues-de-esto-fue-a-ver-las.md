@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-despues-de-esto-fue-a-ver-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

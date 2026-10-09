@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-este-es-un-modo-de-hablar-proverbialmente"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

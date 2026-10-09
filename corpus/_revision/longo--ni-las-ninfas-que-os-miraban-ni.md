@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ni-las-ninfas-que-os-miraban-ni"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

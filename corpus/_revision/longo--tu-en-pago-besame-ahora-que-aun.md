@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tu-en-pago-besame-ahora-que-aun"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-manual-sobre-el-ejercito-de-flavio-vegecio"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

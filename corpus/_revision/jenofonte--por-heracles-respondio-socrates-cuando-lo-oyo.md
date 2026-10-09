@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-heracles-respondio-socrates-cuando-lo-oyo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

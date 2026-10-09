@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-como-ha-de-inventar-un-rustico-tan"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

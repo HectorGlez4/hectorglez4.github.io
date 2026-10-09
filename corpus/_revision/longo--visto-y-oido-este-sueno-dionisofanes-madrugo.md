@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-visto-y-oido-este-sueno-dionisofanes-madrugo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

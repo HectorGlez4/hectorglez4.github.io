@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-segun-usanza-de-esta-fiesta-de-baco"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

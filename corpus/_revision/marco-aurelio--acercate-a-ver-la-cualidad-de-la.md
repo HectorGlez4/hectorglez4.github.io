@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-acercate-a-ver-la-cualidad-de-la"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

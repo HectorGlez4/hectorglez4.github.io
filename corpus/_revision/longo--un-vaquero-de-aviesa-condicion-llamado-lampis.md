@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-un-vaquero-de-aviesa-condicion-llamado-lampis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

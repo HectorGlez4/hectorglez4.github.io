@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-ejemplo-por-que-una-lampara-da"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

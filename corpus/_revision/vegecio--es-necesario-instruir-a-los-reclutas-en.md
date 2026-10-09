@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-es-necesario-instruir-a-los-reclutas-en"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dispuso-luego-lechos-de-hojas-verdes-para"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

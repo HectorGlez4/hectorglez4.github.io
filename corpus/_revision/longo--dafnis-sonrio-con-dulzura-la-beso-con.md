@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-sonrio-con-dulzura-la-beso-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

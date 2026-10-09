@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-todo-consternado-se-desperto-con-esto-briaxis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

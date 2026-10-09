@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-es-evidente-que-creemos-que-son"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

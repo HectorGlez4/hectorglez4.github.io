@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cloe-que-vio-de-lejos-lo-sucedido"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

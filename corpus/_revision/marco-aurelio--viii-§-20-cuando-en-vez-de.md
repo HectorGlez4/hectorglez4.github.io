@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-viii-§-20-cuando-en-vez-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

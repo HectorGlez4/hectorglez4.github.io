@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pues-entonces-ya-estaria-claro-que-mis"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cualquier-otra-afrenta-la-puedo-tolerar-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

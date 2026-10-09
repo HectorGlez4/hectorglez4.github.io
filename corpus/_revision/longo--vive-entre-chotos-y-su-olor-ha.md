@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-vive-entre-chotos-y-su-olor-ha"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

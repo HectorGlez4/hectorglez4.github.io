@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-finalmente-una-verdad-puesto-que-es-una"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

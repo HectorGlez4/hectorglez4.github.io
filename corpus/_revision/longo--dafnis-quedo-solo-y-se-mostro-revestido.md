@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-quedo-solo-y-se-mostro-revestido"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-creas-sin-embargo-que-me-duele"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

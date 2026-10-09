@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-como-entrenar-a-los-reclutas-para-que"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

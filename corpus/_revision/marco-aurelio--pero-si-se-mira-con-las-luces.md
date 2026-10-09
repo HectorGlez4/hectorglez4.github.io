@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pero-si-se-mira-con-las-luces"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-nada-de-comun-tiene-ella-con-los"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

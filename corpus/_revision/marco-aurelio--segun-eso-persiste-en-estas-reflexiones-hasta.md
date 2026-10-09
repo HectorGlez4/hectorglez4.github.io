@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-segun-eso-persiste-en-estas-reflexiones-hasta"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

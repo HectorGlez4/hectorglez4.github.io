@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-combinado-con-una-libacion-se-puede-comprobar"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

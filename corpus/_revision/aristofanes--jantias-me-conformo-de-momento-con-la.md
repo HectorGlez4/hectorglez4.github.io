@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-jantias-me-conformo-de-momento-con-la"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

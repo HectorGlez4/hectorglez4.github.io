@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-por-zeus-todas-las-noches-enteras"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

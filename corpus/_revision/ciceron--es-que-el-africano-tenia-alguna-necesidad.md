@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-es-que-el-africano-tenia-alguna-necesidad"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

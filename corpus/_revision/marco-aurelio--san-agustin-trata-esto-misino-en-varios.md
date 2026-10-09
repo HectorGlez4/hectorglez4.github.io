@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-san-agustin-trata-esto-misino-en-varios"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

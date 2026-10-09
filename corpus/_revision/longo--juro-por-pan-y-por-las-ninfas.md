@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-juro-por-pan-y-por-las-ninfas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-comia-de-dia-velaba-de-noche"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

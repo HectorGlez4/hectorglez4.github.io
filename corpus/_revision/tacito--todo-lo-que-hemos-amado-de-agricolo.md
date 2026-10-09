@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-todo-lo-que-hemos-amado-de-agricolo"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

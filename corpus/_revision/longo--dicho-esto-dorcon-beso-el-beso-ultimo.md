@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dicho-esto-dorcon-beso-el-beso-ultimo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

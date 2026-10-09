@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-esos-inicuos-piratas-me-han-destrozado-como"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

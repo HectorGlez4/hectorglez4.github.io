@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-hay-que-ensenar-a-los-reclutas-el"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

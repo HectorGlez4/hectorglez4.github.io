@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-porque-segun-los-sumos-pontifices-que-condenaron"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-bdelicleon-como-acusador-oid-el-acta-de"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

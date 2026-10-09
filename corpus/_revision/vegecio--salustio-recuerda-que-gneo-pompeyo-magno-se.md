@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-salustio-recuerda-que-gneo-pompeyo-magno-se"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

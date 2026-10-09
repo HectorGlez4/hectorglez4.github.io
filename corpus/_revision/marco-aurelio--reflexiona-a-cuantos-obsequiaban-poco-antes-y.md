@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-reflexiona-a-cuantos-obsequiaban-poco-antes-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

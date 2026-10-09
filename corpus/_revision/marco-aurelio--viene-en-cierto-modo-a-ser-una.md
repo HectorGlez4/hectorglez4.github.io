@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-viene-en-cierto-modo-a-ser-una"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

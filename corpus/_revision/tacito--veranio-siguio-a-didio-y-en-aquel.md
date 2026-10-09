@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-veranio-siguio-a-didio-y-en-aquel"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

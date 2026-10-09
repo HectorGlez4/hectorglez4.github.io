@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-era-ademas-rico-como-pocos-y-muy"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

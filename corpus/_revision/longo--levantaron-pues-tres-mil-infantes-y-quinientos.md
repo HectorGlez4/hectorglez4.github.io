@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-levantaron-pues-tres-mil-infantes-y-quinientos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

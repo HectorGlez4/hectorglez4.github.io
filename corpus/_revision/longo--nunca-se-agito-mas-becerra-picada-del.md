@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-nunca-se-agito-mas-becerra-picada-del"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

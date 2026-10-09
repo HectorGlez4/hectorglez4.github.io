@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-devolvieronle-ademas-los-tordos-y-las-palomas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-especialmente-hallandose-en-el-las-cosas-asi"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

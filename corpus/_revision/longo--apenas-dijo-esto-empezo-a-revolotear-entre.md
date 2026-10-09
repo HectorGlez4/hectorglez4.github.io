@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-apenas-dijo-esto-empezo-a-revolotear-entre"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

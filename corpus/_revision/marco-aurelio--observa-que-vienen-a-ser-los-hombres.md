@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-observa-que-vienen-a-ser-los-hombres"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

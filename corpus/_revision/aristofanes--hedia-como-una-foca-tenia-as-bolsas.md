@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-hedia-como-una-foca-tenia-as-bolsas"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

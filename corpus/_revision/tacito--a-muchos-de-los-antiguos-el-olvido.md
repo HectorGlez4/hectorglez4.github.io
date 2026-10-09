@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-a-muchos-de-los-antiguos-el-olvido"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-en-cambio-a-casi-500-millas-de"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-antes-bien-procurase-con-mana-sustituir-aquellosolo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

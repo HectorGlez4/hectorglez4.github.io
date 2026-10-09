@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-anfiarao-se-vale-de-estos-versos-para"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

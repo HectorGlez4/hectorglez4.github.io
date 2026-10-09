@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-no-podria-si-volvemos-a-las-leyendas"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-la-recogio-la-guardo-en-el-zurron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

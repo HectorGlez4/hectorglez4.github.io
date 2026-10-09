@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-a-partir-de-esto-se-puede-juzgar"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

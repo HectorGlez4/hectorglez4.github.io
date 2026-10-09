@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-yo-me-muero-queridas-ninfas-como-no"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

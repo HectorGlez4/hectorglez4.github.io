@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-los-cobardes-simulando-prudencia-le-aconsejaban-volver"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

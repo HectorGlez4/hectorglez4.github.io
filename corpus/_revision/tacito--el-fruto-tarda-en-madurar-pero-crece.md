@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-el-fruto-tarda-en-madurar-pero-crece"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

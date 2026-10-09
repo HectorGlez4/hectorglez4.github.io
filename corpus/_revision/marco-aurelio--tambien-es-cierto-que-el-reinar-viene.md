@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tambien-es-cierto-que-el-reinar-viene"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

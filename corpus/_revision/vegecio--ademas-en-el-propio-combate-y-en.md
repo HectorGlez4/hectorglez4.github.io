@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ademas-en-el-propio-combate-y-en"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

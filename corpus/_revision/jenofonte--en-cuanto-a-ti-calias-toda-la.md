@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-en-cuanto-a-ti-calias-toda-la"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

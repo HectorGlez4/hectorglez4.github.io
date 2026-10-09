@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-amaos-pues-mis-hijos-y-en-cuanto"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

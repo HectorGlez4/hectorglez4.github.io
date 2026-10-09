@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-lo-primero-que-hizo-el-dia-en"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

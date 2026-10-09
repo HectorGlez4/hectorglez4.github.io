@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-primero-pongamonos-todos-de-acuerdo-en-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-todas-las-cosas-estan-trabadas-y-encadenadas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

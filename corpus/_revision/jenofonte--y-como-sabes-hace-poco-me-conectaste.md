@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-como-sabes-hace-poco-me-conectaste"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-el-aspero-romano-cuando-con-las-armas"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

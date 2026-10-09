@@ -4,6 +4,8 @@ autor: "caton-el-viejo"
 slug: "caton-el-viejo-cuando-se-piensa-en-adquirir-una-finca"
 procedencia:
   obra: "De Agri Cultura"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

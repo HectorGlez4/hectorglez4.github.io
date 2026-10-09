@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-al-saber-estas-cosas-tuvo-cloe-gran"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

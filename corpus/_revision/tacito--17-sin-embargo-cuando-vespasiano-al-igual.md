@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-17-sin-embargo-cuando-vespasiano-al-igual"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-habia-cosa-que-no-estuviese-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-zeus-que-lo-es-replico-antistenes"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

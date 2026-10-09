@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-lo-nono-que-la-muchedumbre-si-fuere"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

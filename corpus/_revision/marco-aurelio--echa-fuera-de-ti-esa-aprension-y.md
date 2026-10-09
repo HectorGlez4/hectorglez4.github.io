@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-echa-fuera-de-ti-esa-aprension-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

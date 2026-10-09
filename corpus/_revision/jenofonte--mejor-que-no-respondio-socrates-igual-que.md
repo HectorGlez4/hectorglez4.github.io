@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-mejor-que-no-respondio-socrates-igual-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

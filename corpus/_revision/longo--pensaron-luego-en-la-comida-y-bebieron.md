@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-pensaron-luego-en-la-comida-y-bebieron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

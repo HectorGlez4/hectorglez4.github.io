@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-suma-todo-asemejaba-renido-combate-nocturno"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

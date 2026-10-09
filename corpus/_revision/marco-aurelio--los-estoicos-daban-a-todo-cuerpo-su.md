@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-los-estoicos-daban-a-todo-cuerpo-su"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-el-pecado-original-no-es-un-ente"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-digo-pues-resumiendo-que-en-el-trato"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

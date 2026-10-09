@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ni-apolo-cuando-estuvo-de-pastor-al"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

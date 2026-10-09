@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-en-los-escritos-de-epicuro-se-hallaba"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

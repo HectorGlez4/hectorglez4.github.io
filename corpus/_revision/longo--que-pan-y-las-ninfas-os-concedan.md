@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-que-pan-y-las-ninfas-os-concedan"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

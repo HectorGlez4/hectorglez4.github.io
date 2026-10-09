@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pero-volviendo-a-hablar-de-mi-recordais"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-debido-a-su-capacidad-de-prediccion-me"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

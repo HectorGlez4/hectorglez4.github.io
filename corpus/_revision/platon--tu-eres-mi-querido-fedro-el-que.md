@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-tu-eres-mi-querido-fedro-el-que"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

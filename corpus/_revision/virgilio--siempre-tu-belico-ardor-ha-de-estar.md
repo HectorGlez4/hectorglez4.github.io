@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-siempre-tu-belico-ardor-ha-de-estar"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

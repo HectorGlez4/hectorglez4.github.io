@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-alli-engendro-una-hija-para-ayuda-y"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

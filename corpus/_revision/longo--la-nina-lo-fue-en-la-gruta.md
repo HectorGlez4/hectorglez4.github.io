@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-la-nina-lo-fue-en-la-gruta"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

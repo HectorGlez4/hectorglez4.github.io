@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-51-por-otro-lado-a-mi-aquellos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

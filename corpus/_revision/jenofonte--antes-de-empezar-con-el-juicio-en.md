@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-antes-de-empezar-con-el-juicio-en"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

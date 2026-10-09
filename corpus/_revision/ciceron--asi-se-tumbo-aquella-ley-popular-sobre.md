@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-asi-se-tumbo-aquella-ley-popular-sobre"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

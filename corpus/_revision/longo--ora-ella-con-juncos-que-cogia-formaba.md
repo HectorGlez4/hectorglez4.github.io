@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ora-ella-con-juncos-que-cogia-formaba"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

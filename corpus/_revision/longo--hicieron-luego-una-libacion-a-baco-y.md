@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-hicieron-luego-una-libacion-a-baco-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

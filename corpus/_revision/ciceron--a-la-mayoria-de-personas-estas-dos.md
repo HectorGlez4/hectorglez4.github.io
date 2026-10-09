@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-a-la-mayoria-de-personas-estas-dos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

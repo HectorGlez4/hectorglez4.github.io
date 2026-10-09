@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-porque-ademas-de-que-toda-la-tierra"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-aborrezco-la-noche-y-el-sueno-porque"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

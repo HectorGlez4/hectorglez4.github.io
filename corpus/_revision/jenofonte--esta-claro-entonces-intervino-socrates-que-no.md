@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-esta-claro-entonces-intervino-socrates-que-no"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

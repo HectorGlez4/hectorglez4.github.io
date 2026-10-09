@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-por-zeus-si-llegan-a-ver"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

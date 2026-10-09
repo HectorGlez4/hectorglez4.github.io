@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-por-esto-mismo-volvamos-a-aquellas-primeras"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

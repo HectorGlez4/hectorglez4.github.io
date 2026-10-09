@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ni-faltaba-alli-pan-quien-sentado-sobre"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

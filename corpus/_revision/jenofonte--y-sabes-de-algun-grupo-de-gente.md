@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-sabes-de-algun-grupo-de-gente"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

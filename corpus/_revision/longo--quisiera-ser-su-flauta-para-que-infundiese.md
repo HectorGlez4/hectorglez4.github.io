@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quisiera-ser-su-flauta-para-que-infundiese"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-el-mirto-te-sienta-muy-bien-al"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

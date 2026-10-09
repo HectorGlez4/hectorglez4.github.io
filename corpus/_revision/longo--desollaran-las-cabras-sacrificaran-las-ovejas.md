@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-desollaran-las-cabras-sacrificaran-las-ovejas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

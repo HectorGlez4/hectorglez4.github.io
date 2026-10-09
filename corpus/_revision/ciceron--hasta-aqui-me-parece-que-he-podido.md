@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-hasta-aqui-me-parece-que-he-podido"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

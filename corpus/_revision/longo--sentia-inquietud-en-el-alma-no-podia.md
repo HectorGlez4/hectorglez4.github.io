@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-sentia-inquietud-en-el-alma-no-podia"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

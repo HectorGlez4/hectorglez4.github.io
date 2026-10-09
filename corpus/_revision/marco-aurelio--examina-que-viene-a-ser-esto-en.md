@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-examina-que-viene-a-ser-esto-en"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

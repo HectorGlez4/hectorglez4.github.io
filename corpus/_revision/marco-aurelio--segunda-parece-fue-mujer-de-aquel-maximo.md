@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-segunda-parece-fue-mujer-de-aquel-maximo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

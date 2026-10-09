@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-como-sabes-con-evidencia-que-ningun-otro"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "apuleyo"
 slug: "apuleyo-a-decir-verdad-me-acordaba-de-que"
 procedencia:
   obra: "Metamorfosis o el Asno de Oro, 1. 1-15"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

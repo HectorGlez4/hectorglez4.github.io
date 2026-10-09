@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-beber-senores-intervino-de-nuevo-socrates-me"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

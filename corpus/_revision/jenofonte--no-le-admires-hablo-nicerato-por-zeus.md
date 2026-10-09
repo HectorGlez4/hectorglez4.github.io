@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-le-admires-hablo-nicerato-por-zeus"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

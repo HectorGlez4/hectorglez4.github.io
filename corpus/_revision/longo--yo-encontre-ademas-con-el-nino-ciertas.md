@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-yo-encontre-ademas-con-el-nino-ciertas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

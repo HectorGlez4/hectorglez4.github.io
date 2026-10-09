@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-incluso-ahora-seria-capaz-de-recitar-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

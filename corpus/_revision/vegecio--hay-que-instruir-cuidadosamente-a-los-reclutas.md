@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-hay-que-instruir-cuidadosamente-a-los-reclutas"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

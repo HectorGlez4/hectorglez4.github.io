@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-es-necesario-entrenar-y-practicar-cada-dia"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

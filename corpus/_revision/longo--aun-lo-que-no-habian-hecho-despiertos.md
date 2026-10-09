@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-aun-lo-que-no-habian-hecho-despiertos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

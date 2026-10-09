@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ahora-os-revelare-como-es-mas-esclava"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

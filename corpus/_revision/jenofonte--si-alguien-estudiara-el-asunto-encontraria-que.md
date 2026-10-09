@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-alguien-estudiara-el-asunto-encontraria-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

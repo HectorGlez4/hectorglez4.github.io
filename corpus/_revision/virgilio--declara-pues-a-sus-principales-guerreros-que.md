@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-declara-pues-a-sus-principales-guerreros-que"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

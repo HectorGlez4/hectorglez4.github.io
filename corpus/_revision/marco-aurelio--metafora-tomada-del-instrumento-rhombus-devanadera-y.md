@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-metafora-tomada-del-instrumento-rhombus-devanadera-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

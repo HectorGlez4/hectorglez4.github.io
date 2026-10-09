@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-aqui-hubo-division-de-respuestas-algunos-respondieron"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

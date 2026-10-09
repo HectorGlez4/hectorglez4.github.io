@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-se-fue-pues-a-la-ciudad-muy"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

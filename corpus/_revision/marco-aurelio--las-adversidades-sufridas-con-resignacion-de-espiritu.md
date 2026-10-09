@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-las-adversidades-sufridas-con-resignacion-de-espiritu"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

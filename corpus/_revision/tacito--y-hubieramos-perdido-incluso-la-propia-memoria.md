@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-y-hubieramos-perdido-incluso-la-propia-memoria"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

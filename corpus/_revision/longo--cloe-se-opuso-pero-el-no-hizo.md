@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cloe-se-opuso-pero-el-no-hizo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

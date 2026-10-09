@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pero-con-esto-ya-hemos-tratado-bastante"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

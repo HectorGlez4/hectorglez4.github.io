@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ademas-hay-que-vigilar-que-no-haya"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

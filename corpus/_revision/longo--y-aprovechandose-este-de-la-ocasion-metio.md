@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-aprovechandose-este-de-la-ocasion-metio"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

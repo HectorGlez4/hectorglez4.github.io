@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-rogaban-tambien-a-los-dioses-que-cloe"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

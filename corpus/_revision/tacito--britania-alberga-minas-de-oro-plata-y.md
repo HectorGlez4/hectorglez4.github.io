@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-britania-alberga-minas-de-oro-plata-y"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cuando-acabaron-le-llevaron-una-rueda-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

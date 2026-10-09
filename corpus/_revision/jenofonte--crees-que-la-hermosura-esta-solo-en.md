@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-crees-que-la-hermosura-esta-solo-en"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

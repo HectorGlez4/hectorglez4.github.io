@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dueno-de-los-tres-mil-dracmas-nada"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

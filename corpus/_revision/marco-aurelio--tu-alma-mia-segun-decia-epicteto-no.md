@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tu-alma-mia-segun-decia-epicteto-no"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

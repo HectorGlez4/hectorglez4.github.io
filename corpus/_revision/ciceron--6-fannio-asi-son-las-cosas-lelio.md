@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-6-fannio-asi-son-las-cosas-lelio"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

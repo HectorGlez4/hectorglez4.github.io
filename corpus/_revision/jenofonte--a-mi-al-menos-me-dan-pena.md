@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-a-mi-al-menos-me-dan-pena"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

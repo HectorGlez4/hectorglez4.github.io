@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-otro-lado-el-olor-a-aceite"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

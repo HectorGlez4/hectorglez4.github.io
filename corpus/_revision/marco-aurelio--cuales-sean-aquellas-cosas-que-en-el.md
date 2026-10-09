@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cuales-sean-aquellas-cosas-que-en-el"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

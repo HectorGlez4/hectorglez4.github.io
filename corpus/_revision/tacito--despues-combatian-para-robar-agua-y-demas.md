@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-despues-combatian-para-robar-agua-y-demas"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

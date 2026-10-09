@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-primero-empezo-controlandose-a-si-mismo-y"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

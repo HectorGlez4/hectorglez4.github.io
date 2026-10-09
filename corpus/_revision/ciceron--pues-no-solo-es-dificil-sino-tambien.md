@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pues-no-solo-es-dificil-sino-tambien"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

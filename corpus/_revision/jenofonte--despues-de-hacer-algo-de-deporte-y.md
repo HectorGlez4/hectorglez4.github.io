@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-despues-de-hacer-algo-de-deporte-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

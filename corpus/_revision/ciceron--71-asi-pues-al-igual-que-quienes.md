@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-71-asi-pues-al-igual-que-quienes"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-limpio-las-fuentes-para-que-el-agua"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

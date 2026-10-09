@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-nadie-te-impedira-el-que-vivas-segun"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

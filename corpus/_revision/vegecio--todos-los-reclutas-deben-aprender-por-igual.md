@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-todos-los-reclutas-deben-aprender-por-igual"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-pero-lo-que-mas-me-encanta-son"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

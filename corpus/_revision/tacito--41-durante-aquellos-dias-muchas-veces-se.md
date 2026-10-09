@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-41-durante-aquellos-dias-muchas-veces-se"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

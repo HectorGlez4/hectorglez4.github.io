@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-el-siracusano-salio-de-la-sala-entre"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

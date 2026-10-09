@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-6-de-alli-volvio-a-roma-para"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

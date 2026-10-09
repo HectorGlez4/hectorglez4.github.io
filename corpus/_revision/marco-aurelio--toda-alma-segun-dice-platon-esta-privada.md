@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-toda-alma-segun-dice-platon-esta-privada"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

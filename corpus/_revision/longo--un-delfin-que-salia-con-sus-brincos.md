@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-un-delfin-que-salia-con-sus-brincos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

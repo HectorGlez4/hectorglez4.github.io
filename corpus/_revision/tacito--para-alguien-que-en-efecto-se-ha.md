@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-para-alguien-que-en-efecto-se-ha"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-se-hace-por-eso-menos-apreciable-el"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-considera-tambien-la-vida-que-antiguamente-se"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-buscaron-flores-para-coronar-a-las-ninfas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

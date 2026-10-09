@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-un-extrano-si-hubiera-pasado-por-alli"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

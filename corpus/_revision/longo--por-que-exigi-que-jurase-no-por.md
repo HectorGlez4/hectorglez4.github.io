@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-que-exigi-que-jurase-no-por"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

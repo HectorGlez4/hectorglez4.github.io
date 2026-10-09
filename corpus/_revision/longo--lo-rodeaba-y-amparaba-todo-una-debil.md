@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-lo-rodeaba-y-amparaba-todo-una-debil"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

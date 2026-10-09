@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ademas-hay-una-especie-de-hartazago-con"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-eso-flores-y-plantas-estan-lozanas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

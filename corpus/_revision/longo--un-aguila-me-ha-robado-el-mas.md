@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-un-aguila-me-ha-robado-el-mas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

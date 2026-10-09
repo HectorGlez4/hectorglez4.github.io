@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tal-y-como-esta-joven-nos-demuestra"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-se-procuro-barrenos-y-tarros-nuevos-muchas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

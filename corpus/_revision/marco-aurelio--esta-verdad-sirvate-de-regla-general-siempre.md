@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esta-verdad-sirvate-de-regla-general-siempre"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

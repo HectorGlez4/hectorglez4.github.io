@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-para-que-los-usaras-pregunto-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

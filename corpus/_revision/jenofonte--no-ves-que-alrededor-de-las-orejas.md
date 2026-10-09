@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-ves-que-alrededor-de-las-orejas"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

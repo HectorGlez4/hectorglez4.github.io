@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-los-adivinos-son-capaces-de-predecir"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

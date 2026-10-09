@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-tengo-una-anfora-de-vino-de-alba"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

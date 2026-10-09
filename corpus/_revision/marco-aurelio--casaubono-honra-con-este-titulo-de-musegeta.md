@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-casaubono-honra-con-este-titulo-de-musegeta"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

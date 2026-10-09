@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-criton-es-aquel-grande-amigo-de-socrates"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

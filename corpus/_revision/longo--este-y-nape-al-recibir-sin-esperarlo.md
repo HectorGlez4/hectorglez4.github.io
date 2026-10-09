@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-este-y-nape-al-recibir-sin-esperarlo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-unas-veces-te-pones-a-hablar-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

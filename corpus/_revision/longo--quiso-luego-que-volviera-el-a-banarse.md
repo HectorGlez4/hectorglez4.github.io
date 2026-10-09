@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quiso-luego-que-volviera-el-a-banarse"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-asi-cobrad-animos-en-nuestra-situacion-desesperada"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

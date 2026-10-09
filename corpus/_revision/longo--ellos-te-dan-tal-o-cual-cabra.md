@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ellos-te-dan-tal-o-cual-cabra"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

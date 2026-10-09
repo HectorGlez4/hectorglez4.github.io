@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pareceria-que-segun-tus-palabras-tengo-una"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

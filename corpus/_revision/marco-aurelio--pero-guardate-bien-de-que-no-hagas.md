@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pero-guardate-bien-de-que-no-hagas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

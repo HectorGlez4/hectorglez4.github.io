@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-acontecia-a-veces-que-ella-a-sus"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

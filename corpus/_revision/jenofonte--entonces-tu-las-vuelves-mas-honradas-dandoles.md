@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-entonces-tu-las-vuelves-mas-honradas-dandoles"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-los-troncos-separados-de-los-troncos-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

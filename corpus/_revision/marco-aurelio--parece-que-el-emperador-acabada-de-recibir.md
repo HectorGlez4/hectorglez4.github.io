@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-parece-que-el-emperador-acabada-de-recibir"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

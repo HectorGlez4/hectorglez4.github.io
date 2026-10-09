@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-alejandro-pompeyo-y-cayo-cesar-habiendo-tantas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

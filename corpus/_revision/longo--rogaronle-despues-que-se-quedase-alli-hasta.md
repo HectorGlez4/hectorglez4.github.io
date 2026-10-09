@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-rogaronle-despues-que-se-quedase-alli-hasta"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-traducimos-el-texto-corregido-por-el-gatakero"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

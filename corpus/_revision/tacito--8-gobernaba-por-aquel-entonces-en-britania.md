@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-8-gobernaba-por-aquel-entonces-en-britania"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

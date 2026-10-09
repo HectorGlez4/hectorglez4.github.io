@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cuando-cada-uno-de-vosotros-haya-dicho"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

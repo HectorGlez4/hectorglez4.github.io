@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-vii-arte-de-saber-dar-o-retener"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-culpados-eran-la-mar-y-el-viento"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

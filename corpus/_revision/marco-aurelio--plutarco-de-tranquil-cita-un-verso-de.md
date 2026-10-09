@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-plutarco-de-tranquil-cita-un-verso-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

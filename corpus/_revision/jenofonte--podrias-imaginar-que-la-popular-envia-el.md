@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-podrias-imaginar-que-la-popular-envia-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

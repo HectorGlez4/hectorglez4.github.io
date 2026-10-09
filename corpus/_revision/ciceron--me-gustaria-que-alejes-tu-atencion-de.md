@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-me-gustaria-que-alejes-tu-atencion-de"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

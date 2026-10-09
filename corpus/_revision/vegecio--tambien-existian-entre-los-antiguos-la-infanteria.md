@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-tambien-existian-entre-los-antiguos-la-infanteria"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

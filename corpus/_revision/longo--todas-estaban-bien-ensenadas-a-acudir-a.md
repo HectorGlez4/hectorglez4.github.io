@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-todas-estaban-bien-ensenadas-a-acudir-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

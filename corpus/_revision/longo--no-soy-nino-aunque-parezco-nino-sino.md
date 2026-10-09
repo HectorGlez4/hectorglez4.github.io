@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-soy-nino-aunque-parezco-nino-sino"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-enseguida-petilio-cerial-infundio-terror-atacando-a"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

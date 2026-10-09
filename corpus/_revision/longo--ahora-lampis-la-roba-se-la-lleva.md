@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ahora-lampis-la-roba-se-la-lleva"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

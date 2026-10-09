@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-porque-lo-mismo-sera-acordarte-que-no"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esta-consideracion-se-te-imprimira-mas-altamente"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

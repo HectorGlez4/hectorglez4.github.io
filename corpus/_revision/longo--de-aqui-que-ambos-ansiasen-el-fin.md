@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-de-aqui-que-ambos-ansiasen-el-fin"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

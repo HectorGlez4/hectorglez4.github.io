@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-pero-ahora-para-narrar-la-vida-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

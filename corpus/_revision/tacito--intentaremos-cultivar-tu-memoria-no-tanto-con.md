@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-intentaremos-cultivar-tu-memoria-no-tanto-con"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

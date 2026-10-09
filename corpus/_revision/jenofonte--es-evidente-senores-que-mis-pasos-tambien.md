@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-es-evidente-senores-que-mis-pasos-tambien"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

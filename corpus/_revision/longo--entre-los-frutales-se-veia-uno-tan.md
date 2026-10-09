@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-entre-los-frutales-se-veia-uno-tan"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

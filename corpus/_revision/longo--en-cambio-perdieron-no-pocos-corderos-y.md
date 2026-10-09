@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-cambio-perdieron-no-pocos-corderos-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-me-des-mas-trabajo-ahora-no"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

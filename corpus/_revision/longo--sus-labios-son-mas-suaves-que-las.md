@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-sus-labios-son-mas-suaves-que-las"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

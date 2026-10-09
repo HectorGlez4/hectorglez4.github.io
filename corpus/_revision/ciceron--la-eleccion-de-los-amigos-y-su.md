@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-la-eleccion-de-los-amigos-y-su"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

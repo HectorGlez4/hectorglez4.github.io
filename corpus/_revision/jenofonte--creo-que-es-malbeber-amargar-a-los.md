@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-creo-que-es-malbeber-amargar-a-los"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-veo-que-los-que-desean-ser"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

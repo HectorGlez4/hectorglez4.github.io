@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-aprendi-de-mi-abuelo-vero-el-ser"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

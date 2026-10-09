@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-en-este-entrenamiento-se-intentaba-prevenir-para"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

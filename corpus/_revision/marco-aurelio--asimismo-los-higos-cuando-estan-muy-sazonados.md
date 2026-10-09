@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-asimismo-los-higos-cuando-estan-muy-sazonados"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-este-consejo-es-de-ciceron-off-lib"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

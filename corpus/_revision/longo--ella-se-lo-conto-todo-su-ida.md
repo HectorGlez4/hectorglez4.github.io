@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ella-se-lo-conto-todo-su-ida"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

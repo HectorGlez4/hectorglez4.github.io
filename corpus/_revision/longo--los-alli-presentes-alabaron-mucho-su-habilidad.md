@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-los-alli-presentes-alabaron-mucho-su-habilidad"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

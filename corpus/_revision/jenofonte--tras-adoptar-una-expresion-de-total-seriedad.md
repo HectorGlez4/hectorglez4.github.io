@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tras-adoptar-una-expresion-de-total-seriedad"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

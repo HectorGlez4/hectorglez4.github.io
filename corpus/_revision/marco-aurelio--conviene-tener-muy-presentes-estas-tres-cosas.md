@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-conviene-tener-muy-presentes-estas-tres-cosas"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-su-propio-nombre-lo-testimonia-homero-dice"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

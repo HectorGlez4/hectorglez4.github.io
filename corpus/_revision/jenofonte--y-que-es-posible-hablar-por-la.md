@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-que-es-posible-hablar-por-la"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-bdelicleon-quitartela-y-llevarmela-pues-presumo-que"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

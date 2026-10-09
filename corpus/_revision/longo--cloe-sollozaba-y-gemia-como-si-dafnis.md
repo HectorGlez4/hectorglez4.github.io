@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cloe-sollozaba-y-gemia-como-si-dafnis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

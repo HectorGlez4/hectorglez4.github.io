@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-durante-la-caza-fue-aquello-un-no"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

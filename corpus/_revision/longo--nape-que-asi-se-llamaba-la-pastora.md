@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-nape-que-asi-se-llamaba-la-pastora"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

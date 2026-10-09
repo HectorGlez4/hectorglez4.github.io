@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-entonces-socrates-llamo-a-antistenes-y-dijo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

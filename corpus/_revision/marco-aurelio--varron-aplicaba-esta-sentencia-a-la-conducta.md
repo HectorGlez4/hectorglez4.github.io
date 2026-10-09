@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-varron-aplicaba-esta-sentencia-a-la-conducta"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-incluso-cuando-me-apetece-darme-un-capricho"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

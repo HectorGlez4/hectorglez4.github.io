@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-recuperate-y-recapacitate-un-poco-y-despues"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-lo-mismo-que-te-sucedio-a-ti"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

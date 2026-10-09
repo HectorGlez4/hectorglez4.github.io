@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-niendo-a-mano-el-averiguar-bien-lo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

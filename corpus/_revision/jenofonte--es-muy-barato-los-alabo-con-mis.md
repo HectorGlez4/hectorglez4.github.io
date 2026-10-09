@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-es-muy-barato-los-alabo-con-mis"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

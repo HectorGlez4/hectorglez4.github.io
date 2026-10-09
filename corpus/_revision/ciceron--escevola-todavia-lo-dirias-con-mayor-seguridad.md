@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-escevola-todavia-lo-dirias-con-mayor-seguridad"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

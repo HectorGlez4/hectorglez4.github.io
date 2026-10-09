@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-date-pues-de-continuo-a-este-retiro"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

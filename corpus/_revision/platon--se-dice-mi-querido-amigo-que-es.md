@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-se-dice-mi-querido-amigo-que-es"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

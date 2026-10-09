@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-no-crees-que-un-beso-tuyo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

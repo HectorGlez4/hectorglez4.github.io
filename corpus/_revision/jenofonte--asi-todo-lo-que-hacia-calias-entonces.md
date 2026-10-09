@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-todo-lo-que-hacia-calias-entonces"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

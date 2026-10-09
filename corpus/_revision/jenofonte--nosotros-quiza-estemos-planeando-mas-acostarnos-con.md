@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-nosotros-quiza-estemos-planeando-mas-acostarnos-con"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

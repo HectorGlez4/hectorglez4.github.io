@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-en-cuanto-a-la-primera-parte-del"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

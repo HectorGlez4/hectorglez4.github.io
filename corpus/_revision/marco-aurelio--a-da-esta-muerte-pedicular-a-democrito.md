@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-a-da-esta-muerte-pedicular-a-democrito"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

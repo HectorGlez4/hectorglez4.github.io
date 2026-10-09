@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-nosotros-se-que-pensamos-que-somos-mucho"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

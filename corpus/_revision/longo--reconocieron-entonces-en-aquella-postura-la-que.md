@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-reconocieron-entonces-en-aquella-postura-la-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

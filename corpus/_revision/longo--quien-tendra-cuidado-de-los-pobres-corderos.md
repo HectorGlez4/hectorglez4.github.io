@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quien-tendra-cuidado-de-los-pobres-corderos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

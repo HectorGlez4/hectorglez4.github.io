@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-pedia-pues-a-cloe-que-se-prestase"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-un-recluta-instruido-asi-no-tendra-miedo"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

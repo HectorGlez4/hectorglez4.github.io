@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-filoclfon-ya-esta-roido-pero-no-griteis"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

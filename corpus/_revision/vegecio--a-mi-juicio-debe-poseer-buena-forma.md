@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-a-mi-juicio-debe-poseer-buena-forma"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cita-alguna-fabula-que-un-viejo-para"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

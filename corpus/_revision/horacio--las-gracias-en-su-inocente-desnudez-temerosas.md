@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-las-gracias-en-su-inocente-desnudez-temerosas"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

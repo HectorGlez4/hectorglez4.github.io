@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-yo-desde-luego-se-que-las-riquezas"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

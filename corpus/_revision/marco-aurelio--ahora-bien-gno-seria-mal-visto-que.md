@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ahora-bien-gno-seria-mal-visto-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

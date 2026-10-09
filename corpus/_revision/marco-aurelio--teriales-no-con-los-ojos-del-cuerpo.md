@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-teriales-no-con-los-ojos-del-cuerpo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

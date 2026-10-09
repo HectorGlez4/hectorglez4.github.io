@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pasate-despues-a-otros-no-considerando-la"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

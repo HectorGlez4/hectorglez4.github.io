@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-le-dolia-el-corazon-como-si-hubiese"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

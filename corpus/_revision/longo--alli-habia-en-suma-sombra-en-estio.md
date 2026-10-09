@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-alli-habia-en-suma-sombra-en-estio"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

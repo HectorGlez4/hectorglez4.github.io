@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-socrates-lo-llamo-por-su-nombre-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

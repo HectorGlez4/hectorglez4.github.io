@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-y-que-decir-de-sus-costumbres-las"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

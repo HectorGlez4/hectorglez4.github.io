@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-100-pues-incluso-en-los-cuentos-el"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

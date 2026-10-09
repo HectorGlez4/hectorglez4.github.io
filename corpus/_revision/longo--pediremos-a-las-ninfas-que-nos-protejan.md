@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-pediremos-a-las-ninfas-que-nos-protejan"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

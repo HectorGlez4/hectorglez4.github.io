@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-hice-algun-beneficio-en-pro-de-la"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-hipocrates-habiendo-curado-a-muchos-de-grandes"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

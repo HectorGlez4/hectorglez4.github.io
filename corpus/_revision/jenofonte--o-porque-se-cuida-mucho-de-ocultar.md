@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-o-porque-se-cuida-mucho-de-ocultar"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

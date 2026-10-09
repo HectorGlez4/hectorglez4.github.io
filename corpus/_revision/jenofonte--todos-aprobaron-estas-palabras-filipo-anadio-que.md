@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-todos-aprobaron-estas-palabras-filipo-anadio-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

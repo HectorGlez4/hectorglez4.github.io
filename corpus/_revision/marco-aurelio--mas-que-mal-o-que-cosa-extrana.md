@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mas-que-mal-o-que-cosa-extrana"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

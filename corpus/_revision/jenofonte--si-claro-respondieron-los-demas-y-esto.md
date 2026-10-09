@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-claro-respondieron-los-demas-y-esto"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

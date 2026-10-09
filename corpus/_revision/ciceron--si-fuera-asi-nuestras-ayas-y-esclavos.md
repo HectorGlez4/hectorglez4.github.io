@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-si-fuera-asi-nuestras-ayas-y-esclavos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

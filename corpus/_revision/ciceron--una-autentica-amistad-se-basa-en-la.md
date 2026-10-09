@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-una-autentica-amistad-se-basa-en-la"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

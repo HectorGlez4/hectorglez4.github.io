@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-filocleon-no-tengo-con-el-ni-para"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

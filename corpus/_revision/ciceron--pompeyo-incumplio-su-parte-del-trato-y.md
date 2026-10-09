@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pompeyo-incumplio-su-parte-del-trato-y"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

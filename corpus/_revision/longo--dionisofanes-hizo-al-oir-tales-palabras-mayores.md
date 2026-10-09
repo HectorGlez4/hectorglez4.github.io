@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dionisofanes-hizo-al-oir-tales-palabras-mayores"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-yo-te-vi-justo-a-ti"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

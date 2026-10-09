@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dos-veces-al-dia-las-llevaba-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

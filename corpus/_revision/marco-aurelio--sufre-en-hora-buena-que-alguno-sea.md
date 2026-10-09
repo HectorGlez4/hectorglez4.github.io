@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-sufre-en-hora-buena-que-alguno-sea"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

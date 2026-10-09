@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-siempre-se-ha-exigido-a-los-reclutas"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

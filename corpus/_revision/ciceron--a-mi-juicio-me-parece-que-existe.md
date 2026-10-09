@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-a-mi-juicio-me-parece-que-existe"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

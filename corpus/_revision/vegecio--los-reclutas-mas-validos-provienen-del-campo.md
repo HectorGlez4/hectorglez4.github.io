@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-los-reclutas-mas-validos-provienen-del-campo"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

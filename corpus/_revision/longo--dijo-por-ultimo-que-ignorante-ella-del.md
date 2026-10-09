@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dijo-por-ultimo-que-ignorante-ella-del"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

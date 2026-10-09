@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-para-que-esto-no-suceda-hay-que"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

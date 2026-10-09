@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-enseguida-la-hallaron-porque-estaba-sentada-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-soltaron-luego-los-perros-para-que-olfatearan"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

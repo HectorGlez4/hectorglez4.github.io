@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-pueril-estolido-fingido-truan-perfido-y-tirano"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

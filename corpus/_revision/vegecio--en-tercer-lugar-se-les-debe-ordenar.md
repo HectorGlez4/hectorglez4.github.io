@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-en-tercer-lugar-se-les-debe-ordenar"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

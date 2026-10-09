@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-como-sobrevivieron-su-mujer-e-hija-puede"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

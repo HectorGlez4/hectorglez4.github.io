@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-largo-tiempo-me-llevaria-si-intentara-enumerar"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

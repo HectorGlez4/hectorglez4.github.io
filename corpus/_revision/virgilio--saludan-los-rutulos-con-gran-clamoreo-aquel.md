@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-saludan-los-rutulos-con-gran-clamoreo-aquel"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

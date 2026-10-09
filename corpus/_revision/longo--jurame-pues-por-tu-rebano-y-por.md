@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-jurame-pues-por-tu-rebano-y-por"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

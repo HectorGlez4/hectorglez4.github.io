@@ -4,7 +4,9 @@ autor: "seneca"
 slug: "seneca-cuantas-veces-ocupen-tu-animo-otros-cuidados"
 procedencia:
   obra: "Consolación a Marcia"
-  año: 1884
+  traduccion:
+    traductor: "Francisco Navarro y Calvo"
+    año: 1884
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

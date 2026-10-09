@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-pero-no-sabria-decir-si-no-es"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

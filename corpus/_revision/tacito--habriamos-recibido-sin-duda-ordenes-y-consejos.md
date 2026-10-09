@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-habriamos-recibido-sin-duda-ordenes-y-consejos"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

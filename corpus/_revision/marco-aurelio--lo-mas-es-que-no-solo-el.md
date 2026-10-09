@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-lo-mas-es-que-no-solo-el"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

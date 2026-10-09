@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-su-beso-pica-en-el-corazon-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

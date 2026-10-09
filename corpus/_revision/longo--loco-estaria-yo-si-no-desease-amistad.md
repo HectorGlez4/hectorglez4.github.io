@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-loco-estaria-yo-si-no-desease-amistad"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

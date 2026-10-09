@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-sosias-pues-si-es-preciso-los-apedreamos"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

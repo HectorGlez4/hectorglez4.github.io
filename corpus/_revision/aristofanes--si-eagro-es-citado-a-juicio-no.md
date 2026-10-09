@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-si-eagro-es-citado-a-juicio-no"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

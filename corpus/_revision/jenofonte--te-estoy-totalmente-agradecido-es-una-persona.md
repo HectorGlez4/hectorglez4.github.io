@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-te-estoy-totalmente-agradecido-es-una-persona"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

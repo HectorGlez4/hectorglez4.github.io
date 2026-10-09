@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-por-causa-mia-escipion-rompio-su-amistad"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

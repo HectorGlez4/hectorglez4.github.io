@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-por-tanto-una-hora-de-verano-era"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

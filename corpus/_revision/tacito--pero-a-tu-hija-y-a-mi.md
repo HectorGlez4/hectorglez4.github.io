@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-pero-a-tu-hija-y-a-mi"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

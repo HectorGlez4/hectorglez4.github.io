@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-sus-tierras-y-su-clima-el-caracter"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

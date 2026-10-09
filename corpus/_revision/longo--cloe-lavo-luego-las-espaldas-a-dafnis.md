@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cloe-lavo-luego-las-espaldas-a-dafnis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

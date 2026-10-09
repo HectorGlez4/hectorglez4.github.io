@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ruegote-oh-dionisofanes-que-me-digas-donde"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

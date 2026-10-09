@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ve-no-obstante-convence-a-cloe-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-no-pudo-menos-de-convenir-en"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

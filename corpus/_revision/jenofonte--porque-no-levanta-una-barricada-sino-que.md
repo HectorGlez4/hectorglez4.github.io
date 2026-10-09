@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-no-levanta-una-barricada-sino-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

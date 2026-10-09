@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-vino-este-otro-despues-de-todos-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

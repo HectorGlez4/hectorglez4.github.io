@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-fanio-facil-lo-tuvo-el-hombre-mas"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

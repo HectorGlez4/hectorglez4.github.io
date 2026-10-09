@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-la-noche-aquella-le-parecio-la-mas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

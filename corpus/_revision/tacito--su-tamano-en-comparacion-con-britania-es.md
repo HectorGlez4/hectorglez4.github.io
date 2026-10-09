@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-su-tamano-en-comparacion-con-britania-es"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

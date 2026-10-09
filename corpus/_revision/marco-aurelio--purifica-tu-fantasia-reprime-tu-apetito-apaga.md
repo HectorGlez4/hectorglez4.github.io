@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-purifica-tu-fantasia-reprime-tu-apetito-apaga"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

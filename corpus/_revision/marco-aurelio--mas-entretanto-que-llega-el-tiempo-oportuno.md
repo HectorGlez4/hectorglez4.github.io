@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mas-entretanto-que-llega-el-tiempo-oportuno"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

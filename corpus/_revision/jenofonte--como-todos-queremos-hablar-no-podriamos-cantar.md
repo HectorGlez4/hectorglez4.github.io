@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-como-todos-queremos-hablar-no-podriamos-cantar"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

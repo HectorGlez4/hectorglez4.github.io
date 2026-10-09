@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mira-pues-con-atencion-lo-que-crates"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

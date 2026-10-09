@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-sas-si-sabes-proceder-con-rectitud-y"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

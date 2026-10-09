@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-veo-que-tambien-puedes-realizar-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

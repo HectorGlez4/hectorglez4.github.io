@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-conservad-sus-pensamientos-y-apre­tadlos-en-vuestros"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

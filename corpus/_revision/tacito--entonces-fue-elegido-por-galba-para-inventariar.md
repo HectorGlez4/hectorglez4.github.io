@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-entonces-fue-elegido-por-galba-para-inventariar"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

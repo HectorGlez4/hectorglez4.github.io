@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-la-tierra-los-escondio-en-su"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

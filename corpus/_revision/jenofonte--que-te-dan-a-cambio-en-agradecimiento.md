@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-que-te-dan-a-cambio-en-agradecimiento"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

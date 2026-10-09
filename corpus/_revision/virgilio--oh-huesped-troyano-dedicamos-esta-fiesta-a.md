@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-oh-huesped-troyano-dedicamos-esta-fiesta-a"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

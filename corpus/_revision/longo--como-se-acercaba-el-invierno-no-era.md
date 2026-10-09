@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-como-se-acercaba-el-invierno-no-era"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

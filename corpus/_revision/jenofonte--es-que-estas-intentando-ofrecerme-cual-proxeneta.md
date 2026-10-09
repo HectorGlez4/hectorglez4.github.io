@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-es-que-estas-intentando-ofrecerme-cual-proxeneta"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

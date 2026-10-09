@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-sin-embargo-padecimos-insubordinaciones-cuando-los-ociosos"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

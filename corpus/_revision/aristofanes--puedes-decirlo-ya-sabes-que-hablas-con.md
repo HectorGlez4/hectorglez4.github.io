@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-puedes-decirlo-ya-sabes-que-hablas-con"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

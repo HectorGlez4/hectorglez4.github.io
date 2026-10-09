@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-contigo-que-se-yo-si-eso-ha"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

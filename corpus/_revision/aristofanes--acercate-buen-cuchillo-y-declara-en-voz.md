@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-acercate-buen-cuchillo-y-declara-en-voz"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

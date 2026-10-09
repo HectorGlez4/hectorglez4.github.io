@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-de-que-sirve-esa-ausencia-de-preocupaciones"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

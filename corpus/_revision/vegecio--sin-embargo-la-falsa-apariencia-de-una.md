@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-sin-embargo-la-falsa-apariencia-de-una"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

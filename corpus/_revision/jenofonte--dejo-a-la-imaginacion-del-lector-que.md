@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-dejo-a-la-imaginacion-del-lector-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

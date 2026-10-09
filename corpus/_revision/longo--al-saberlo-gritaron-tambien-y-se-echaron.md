@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-al-saberlo-gritaron-tambien-y-se-echaron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

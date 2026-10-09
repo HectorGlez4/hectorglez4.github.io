@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-o-el-mundo-es-un-conjunto-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-los-primeros-en-usar-las-hondas-fueron"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

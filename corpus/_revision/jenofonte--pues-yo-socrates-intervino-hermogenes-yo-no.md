@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pues-yo-socrates-intervino-hermogenes-yo-no"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

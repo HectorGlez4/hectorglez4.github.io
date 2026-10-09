@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-escuchad-en-tanto-innumerables-espectadores-nuestros-prudentes"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

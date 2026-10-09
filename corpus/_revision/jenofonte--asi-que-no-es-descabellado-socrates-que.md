@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-que-no-es-descabellado-socrates-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

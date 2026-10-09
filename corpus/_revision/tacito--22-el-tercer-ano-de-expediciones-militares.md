@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-22-el-tercer-ano-de-expediciones-militares"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-propios-limites-dieres-en-cara-a-tu"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

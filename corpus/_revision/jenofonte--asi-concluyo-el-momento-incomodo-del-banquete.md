@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-concluyo-el-momento-incomodo-del-banquete"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

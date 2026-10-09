@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-tambien-nicerato-por-lo-que-se-esta"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

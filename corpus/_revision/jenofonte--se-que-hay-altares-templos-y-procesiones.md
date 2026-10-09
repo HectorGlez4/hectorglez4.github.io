@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-se-que-hay-altares-templos-y-procesiones"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

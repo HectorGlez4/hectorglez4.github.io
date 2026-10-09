@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-siendo-esto-o-una-desunion-del-enlace"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

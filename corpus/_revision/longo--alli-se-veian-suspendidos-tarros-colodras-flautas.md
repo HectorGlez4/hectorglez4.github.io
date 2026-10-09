@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-alli-se-veian-suspendidos-tarros-colodras-flautas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

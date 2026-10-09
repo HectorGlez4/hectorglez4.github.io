@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-el-coro-como-se-atreve-a-tanto"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-la-vio-gnaton-y-quedo-al-punto"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

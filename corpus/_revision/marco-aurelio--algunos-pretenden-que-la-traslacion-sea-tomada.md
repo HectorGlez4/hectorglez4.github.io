@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-algunos-pretenden-que-la-traslacion-sea-tomada"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-para-que-pues-he-de-tenderme-contigo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

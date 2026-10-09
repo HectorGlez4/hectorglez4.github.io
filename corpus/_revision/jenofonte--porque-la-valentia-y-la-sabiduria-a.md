@@ -6,6 +6,8 @@ temas:
 slug: "jenofonte-porque-la-valentia-y-la-sabiduria-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

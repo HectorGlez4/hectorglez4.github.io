@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-quedate-pues-en-tercer-lugar-la-mente"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

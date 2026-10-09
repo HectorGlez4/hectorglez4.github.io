@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-implorar-por-alguien-indigno-suplicar-entrarle-a"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

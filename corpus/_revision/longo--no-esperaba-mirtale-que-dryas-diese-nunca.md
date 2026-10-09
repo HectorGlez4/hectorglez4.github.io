@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-esperaba-mirtale-que-dryas-diese-nunca"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

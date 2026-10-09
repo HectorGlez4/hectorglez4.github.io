@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-alude-a-un-dicho-de-los-medicos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

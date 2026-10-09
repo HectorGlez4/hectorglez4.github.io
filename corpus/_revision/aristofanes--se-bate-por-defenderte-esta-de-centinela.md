@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-se-bate-por-defenderte-esta-de-centinela"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

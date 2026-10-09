@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-oyeronla-las-vacas-reconocieron-al-punto-el"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

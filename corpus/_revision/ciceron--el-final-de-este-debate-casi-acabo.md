@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-el-final-de-este-debate-casi-acabo"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

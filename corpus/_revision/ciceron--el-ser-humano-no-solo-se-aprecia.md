@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-el-ser-humano-no-solo-se-aprecia"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

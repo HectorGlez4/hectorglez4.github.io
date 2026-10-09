@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-pitis-amada-de-pan-y-de-boreas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

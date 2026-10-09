@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-nadie-se-opone-a-decir-que-considera"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-que-su-alma-se-conserve-en-tal"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

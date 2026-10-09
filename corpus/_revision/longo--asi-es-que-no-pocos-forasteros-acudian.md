@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-es-que-no-pocos-forasteros-acudian"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

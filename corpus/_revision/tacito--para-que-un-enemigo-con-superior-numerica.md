@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-para-que-un-enemigo-con-superior-numerica"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-no-por-zeus-respondio-autolico-enrojeciendo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

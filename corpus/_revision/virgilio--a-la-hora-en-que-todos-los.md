@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-a-la-hora-en-que-todos-los"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-acaso-esculapio-pretende-hacer-lo-que-es"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

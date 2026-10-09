@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cogieron-por-ultimo-flores-de-las-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

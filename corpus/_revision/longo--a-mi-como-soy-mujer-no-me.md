@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-mi-como-soy-mujer-no-me"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

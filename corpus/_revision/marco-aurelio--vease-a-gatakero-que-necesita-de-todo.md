@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-vease-a-gatakero-que-necesita-de-todo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

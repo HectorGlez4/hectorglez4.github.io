@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esto-es-casi-lo-mismo-que-si"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

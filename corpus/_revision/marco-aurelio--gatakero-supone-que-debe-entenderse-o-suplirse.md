@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-gatakero-supone-que-debe-entenderse-o-suplirse"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

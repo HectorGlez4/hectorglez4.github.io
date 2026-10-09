@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-al-final-llegaron-a-causa-de-su"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

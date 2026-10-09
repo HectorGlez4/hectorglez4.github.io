@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-luego-que-salto-en-tierra-y-hallo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

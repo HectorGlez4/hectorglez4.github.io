@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-este-articulo-se-halla-sumamente-viciado"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

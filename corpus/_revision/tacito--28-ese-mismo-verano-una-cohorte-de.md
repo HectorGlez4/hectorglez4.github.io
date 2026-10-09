@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-28-ese-mismo-verano-una-cohorte-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

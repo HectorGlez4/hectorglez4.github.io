@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-entonces-agricola-que-se-temia-que-la"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

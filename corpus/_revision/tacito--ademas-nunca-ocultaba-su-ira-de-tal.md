@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-ademas-nunca-ocultaba-su-ira-de-tal"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-en-un-abrir-y-cerrar-de-ojos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

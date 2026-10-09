@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-las-personas-calias-replico-antistenes-alzandose-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

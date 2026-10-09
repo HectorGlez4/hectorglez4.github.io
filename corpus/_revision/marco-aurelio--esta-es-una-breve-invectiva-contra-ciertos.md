@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-esta-es-una-breve-invectiva-contra-ciertos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

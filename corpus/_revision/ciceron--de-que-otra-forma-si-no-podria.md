@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-de-que-otra-forma-si-no-podria"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

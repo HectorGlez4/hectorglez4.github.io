@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-mirandolo-todo-como-es-en-si-puedo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

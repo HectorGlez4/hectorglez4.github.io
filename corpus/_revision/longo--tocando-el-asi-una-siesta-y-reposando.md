@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tocando-el-asi-una-siesta-y-reposando"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

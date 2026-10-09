@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-de-cerca-le-sigue-el-arrogante-anco"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

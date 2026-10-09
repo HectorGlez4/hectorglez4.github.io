@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-bailo-pues-imitando-ora-que-vendimiaba-ora"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

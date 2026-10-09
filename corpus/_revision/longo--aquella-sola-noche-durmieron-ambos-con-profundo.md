@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-aquella-sola-noche-durmieron-ambos-con-profundo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-hubo-muchos-combates-a-veces-no-poco"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

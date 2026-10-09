@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-las-cosas-del-mundo-son-siempre-las"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

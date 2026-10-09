@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-venus-ha-dejado-a-chipre-por-precipitarse"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-se-salvo-dafnis-de-aquel-peligro"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

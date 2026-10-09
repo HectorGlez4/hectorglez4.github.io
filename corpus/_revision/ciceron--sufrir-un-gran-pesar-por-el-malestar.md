@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-sufrir-un-gran-pesar-por-el-malestar"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

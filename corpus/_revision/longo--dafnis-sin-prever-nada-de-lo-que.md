@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dafnis-sin-prever-nada-de-lo-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

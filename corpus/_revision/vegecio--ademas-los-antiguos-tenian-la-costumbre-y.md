@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ademas-los-antiguos-tenian-la-costumbre-y"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

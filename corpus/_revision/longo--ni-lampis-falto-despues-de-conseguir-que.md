@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ni-lampis-falto-despues-de-conseguir-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

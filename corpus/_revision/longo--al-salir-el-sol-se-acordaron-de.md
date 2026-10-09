@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-al-salir-el-sol-se-acordaron-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

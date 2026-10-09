@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-acaso-hubo-pues-de-disponerlo-todo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

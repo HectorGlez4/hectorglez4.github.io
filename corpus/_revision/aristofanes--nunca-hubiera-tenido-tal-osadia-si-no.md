@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-nunca-hubiera-tenido-tal-osadia-si-no"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

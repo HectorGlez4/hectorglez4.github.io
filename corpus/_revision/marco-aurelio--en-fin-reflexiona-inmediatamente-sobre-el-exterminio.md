@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-en-fin-reflexiona-inmediatamente-sobre-el-exterminio"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

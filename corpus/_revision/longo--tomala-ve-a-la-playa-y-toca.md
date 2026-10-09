@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tomala-ve-a-la-playa-y-toca"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

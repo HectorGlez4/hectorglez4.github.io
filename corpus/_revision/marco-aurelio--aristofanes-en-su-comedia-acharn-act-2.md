@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-aristofanes-en-su-comedia-acharn-act-2"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

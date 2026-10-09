@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-como-no-era-desconocedor-de-que-tenia"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

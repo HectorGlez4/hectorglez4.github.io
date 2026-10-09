@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-al-varon-le-pusieron-por-nombre-filopoemen"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

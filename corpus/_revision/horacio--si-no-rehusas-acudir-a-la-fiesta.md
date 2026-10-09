@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-si-no-rehusas-acudir-a-la-fiesta"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

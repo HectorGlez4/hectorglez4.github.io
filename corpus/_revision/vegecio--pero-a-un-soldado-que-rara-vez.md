@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-pero-a-un-soldado-que-rara-vez"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

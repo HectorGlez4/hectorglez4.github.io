@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-era-ya-la-hora-en-que-se"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

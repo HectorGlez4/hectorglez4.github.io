@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-hasta-que-punto-no-se-hallara-en"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

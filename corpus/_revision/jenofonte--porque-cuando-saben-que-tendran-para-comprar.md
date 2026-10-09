@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-cuando-saben-que-tendran-para-comprar"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

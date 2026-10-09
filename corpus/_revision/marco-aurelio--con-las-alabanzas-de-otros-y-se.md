@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-con-las-alabanzas-de-otros-y-se"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

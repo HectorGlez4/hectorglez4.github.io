@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-pero-en-esta-parte-se-ha-perdido"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

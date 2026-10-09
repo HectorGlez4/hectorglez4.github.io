@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-de-cloe-no-hay-mas-que-pedir"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

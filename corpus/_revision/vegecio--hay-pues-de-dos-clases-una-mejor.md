@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-hay-pues-de-dos-clases-una-mejor"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

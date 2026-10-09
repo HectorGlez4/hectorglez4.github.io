@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-en-este-punto-el-instructor-vigilara-que"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

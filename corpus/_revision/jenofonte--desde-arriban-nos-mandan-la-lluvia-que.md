@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-desde-arriban-nos-mandan-la-lluvia-que"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

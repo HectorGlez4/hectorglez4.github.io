@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-por-tanto-suelen-preguntarme-y-creo-que"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

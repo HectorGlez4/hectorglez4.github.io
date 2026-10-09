@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-luego-convido-a-su-mesa-a-todos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

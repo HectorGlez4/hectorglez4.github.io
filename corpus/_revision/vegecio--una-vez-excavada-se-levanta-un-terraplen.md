@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-una-vez-excavada-se-levanta-un-terraplen"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

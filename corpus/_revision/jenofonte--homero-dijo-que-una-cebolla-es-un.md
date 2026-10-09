@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-homero-dijo-que-una-cebolla-es-un"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

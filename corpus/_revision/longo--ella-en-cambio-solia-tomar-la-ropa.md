@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ella-en-cambio-solia-tomar-la-ropa"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

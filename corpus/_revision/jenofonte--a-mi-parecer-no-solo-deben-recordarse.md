@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-a-mi-parecer-no-solo-deben-recordarse"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

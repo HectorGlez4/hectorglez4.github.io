@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-teorias-sobre-la-finalidad-y-los-limites"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

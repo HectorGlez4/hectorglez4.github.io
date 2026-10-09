@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-me-pides-un-resumen-de-los-cargos"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

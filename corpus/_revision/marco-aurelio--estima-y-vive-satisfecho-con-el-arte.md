@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-estima-y-vive-satisfecho-con-el-arte"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

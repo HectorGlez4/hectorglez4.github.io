@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-verlo-me-puede-elevar-el-animo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

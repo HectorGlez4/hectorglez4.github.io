@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-habria-cloe-tomado-veneno-antes-de-besarme"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

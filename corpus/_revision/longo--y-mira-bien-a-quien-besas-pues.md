@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-mira-bien-a-quien-besas-pues"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

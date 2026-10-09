@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-primero-llego-ariadna-arreglada-como-una-joven"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

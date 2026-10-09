@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-y-es-que-la-justicia-la-sabiduria"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

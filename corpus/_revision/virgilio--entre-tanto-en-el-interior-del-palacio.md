@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-entre-tanto-en-el-interior-del-palacio"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

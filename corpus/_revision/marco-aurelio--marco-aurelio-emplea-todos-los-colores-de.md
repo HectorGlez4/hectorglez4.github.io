@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-marco-aurelio-emplea-todos-los-colores-de"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

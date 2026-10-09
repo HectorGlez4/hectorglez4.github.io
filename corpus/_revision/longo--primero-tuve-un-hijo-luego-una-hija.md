@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-primero-tuve-un-hijo-luego-una-hija"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

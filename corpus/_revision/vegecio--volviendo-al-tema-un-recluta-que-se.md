@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-volviendo-al-tema-un-recluta-que-se"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

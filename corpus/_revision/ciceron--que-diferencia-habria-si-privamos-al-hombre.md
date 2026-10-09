@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-que-diferencia-habria-si-privamos-al-hombre"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

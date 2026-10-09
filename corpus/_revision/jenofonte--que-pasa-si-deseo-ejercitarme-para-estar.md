@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-que-pasa-si-deseo-ejercitarme-para-estar"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

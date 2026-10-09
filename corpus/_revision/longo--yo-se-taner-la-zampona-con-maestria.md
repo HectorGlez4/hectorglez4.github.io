@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-yo-se-taner-la-zampona-con-maestria"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

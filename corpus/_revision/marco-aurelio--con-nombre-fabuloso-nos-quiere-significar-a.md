@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-con-nombre-fabuloso-nos-quiere-significar-a"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

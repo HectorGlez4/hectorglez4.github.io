@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-el-cuarto-libro-expone-todos-los-artilugios"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

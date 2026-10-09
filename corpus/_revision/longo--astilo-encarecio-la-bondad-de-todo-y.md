@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-astilo-encarecio-la-bondad-de-todo-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-m-dacier-asegura-que-la-comedia-vieja"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

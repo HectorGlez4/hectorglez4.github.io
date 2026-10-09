@@ -4,6 +4,8 @@ autor: "apuleyo"
 slug: "apuleyo-en-aquel-momento-recuerdo-que-vi-a"
 procedencia:
   obra: "Metamorfosis o el Asno de Oro, 1. 1-15"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

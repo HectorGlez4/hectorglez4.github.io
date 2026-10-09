@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-o-si-asi-disfruto-mas-de-la"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

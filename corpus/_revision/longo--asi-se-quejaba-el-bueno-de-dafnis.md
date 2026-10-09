@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-se-quejaba-el-bueno-de-dafnis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

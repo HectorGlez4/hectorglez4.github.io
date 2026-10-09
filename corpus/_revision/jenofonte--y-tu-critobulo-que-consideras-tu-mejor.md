@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-tu-critobulo-que-consideras-tu-mejor"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

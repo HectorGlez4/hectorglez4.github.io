@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-so-color-de-cazar-estos-pajaros-dafnis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

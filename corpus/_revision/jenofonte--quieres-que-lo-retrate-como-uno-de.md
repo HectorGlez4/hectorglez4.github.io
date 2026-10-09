@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-quieres-que-lo-retrate-como-uno-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

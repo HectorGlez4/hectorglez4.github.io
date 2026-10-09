@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-por-lo-que-a-mi-respecta-consideradme"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

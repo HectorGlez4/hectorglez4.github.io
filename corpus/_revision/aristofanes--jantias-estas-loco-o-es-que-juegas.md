@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-jantias-estas-loco-o-es-que-juegas"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

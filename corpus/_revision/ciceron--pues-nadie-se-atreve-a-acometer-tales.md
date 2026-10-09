@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-pues-nadie-se-atreve-a-acometer-tales"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

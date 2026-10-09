@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-dispuso-a-sus-aguerridas-y-dispuestas-tropas"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

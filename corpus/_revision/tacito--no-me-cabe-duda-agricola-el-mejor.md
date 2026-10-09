@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-no-me-cabe-duda-agricola-el-mejor"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

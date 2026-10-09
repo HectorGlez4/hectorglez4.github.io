@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-unicamente-con-cloe-o-pensando-en-cloe"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-me-parece-que-ya-puedo-ver-al"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

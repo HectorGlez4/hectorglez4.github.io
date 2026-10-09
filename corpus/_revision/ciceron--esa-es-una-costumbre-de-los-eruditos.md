@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-esa-es-una-costumbre-de-los-eruditos"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

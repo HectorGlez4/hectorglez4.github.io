@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-yo-mismo-cuando-mozo-amaba-a-amarilis"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ahora-bien-si-reina-una-necesidad-insuperable"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

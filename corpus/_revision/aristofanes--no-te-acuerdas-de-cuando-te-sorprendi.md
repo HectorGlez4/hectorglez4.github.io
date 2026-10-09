@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-no-te-acuerdas-de-cuando-te-sorprendi"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

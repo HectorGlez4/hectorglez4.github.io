@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ninguno-ignora-que-realmente-en-estas-representaciones"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-su-pretura-siguio-el-mismo-guion-y"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

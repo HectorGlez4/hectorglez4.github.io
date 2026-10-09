@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-11-por-lo-demas-poco-es-lo"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

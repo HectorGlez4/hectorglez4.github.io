@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-por-esta-causa-fanio-y-escevola-debe"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-asi-lo-crees-socrates-replico-antistenes"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

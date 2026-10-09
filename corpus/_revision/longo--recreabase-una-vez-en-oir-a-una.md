@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-recreabase-una-vez-en-oir-a-una"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

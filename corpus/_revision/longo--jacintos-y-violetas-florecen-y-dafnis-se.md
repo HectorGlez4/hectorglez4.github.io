@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-jacintos-y-violetas-florecen-y-dafnis-se"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

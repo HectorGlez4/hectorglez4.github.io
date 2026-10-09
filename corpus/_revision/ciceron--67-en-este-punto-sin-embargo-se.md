@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-67-en-este-punto-sin-embargo-se"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

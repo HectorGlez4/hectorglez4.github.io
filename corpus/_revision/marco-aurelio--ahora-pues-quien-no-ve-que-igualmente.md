@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ahora-pues-quien-no-ve-que-igualmente"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

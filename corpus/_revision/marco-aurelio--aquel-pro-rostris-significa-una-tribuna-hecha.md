@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-aquel-pro-rostris-significa-una-tribuna-hecha"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

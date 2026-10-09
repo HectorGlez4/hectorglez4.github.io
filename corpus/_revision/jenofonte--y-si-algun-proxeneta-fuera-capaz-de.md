@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-si-algun-proxeneta-fuera-capaz-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

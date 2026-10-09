@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-por-que-unos-pocos-romanos-se-impusieron"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

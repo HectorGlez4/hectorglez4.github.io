@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-fronton-el-orador-no-frontino-el-retorico"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

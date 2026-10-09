@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-entonces-estas-diciendo-que-un-cangrejo-es"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

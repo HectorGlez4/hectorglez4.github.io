@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-pero-su-aspecto-fisico-presenta-diversas-apariencias"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

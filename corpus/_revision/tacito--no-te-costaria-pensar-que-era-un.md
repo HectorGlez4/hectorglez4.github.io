@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-no-te-costaria-pensar-que-era-un"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

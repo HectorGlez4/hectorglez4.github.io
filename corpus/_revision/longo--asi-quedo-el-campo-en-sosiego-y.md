@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-quedo-el-campo-en-sosiego-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

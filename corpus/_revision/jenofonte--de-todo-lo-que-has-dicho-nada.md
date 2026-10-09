@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-de-todo-lo-que-has-dicho-nada"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

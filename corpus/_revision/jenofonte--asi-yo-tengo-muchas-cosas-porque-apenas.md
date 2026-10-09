@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-asi-yo-tengo-muchas-cosas-porque-apenas"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

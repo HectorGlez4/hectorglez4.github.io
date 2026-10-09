@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-ti-hago-presente-de-esta-flauta"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

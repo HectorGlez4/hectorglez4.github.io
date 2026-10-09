@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-huyo-siringa-de-pan-y-de-su"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

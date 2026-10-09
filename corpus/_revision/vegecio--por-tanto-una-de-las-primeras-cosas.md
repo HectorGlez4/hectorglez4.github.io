@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-por-tanto-una-de-las-primeras-cosas"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

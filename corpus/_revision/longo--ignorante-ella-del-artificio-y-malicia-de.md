@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-ignorante-ella-del-artificio-y-malicia-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

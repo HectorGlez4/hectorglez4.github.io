@@ -6,6 +6,8 @@ temas:
 slug: "ciceron-en-estos-casos-cuando-el-uno-no"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

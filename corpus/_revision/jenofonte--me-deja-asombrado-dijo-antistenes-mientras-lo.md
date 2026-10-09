@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-me-deja-asombrado-dijo-antistenes-mientras-lo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

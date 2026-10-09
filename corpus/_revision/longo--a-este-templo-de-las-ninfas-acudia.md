@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-este-templo-de-las-ninfas-acudia"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

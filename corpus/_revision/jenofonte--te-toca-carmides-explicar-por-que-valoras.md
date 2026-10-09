@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-te-toca-carmides-explicar-por-que-valoras"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

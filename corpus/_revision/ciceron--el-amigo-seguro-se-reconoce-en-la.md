@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-el-amigo-seguro-se-reconoce-en-la"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

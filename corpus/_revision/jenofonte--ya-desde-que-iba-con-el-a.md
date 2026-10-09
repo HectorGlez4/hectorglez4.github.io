@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ya-desde-que-iba-con-el-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

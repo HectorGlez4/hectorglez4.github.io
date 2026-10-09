@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-tambien-conduce-mucho-el-que-al-punto"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

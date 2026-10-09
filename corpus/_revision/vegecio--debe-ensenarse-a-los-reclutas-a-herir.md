@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-debe-ensenarse-a-los-reclutas-a-herir"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

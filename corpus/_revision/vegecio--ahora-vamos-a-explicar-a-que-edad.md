@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ahora-vamos-a-explicar-a-que-edad"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

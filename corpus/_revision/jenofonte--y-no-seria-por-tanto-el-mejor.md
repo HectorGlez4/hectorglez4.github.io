@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-no-seria-por-tanto-el-mejor"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

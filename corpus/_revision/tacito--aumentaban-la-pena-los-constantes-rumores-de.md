@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-aumentaban-la-pena-los-constantes-rumores-de"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-si-alguien-pudiera-conseguir-eso-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

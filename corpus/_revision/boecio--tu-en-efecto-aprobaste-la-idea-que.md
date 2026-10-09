@@ -4,6 +4,8 @@ autor: "boecio"
 slug: "boecio-tu-en-efecto-aprobaste-la-idea-que"
 procedencia:
   obra: "Libro primero de La Consolación de la Filosofía"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-despues-todos-se-fueron-a-la-quinta"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

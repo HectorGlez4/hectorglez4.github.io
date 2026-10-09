@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-en-un-mismo-lugar-tenemos-disponibles-nuestra"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

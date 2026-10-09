@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-sentaronse-entonces-sobre-el-tronco-de-una"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

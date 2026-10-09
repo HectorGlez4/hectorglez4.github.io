@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-una-sola-fuente-alimentaba-arboles-y-flores"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

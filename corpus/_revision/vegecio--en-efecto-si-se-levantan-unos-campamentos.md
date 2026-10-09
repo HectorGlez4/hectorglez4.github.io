@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-en-efecto-si-se-levantan-unos-campamentos"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-oian-cantar-a-los-pajaros-y-cantaban"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

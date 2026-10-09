@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-en-ella-halle-un-comun-parecer-sobre"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

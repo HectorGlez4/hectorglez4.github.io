@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-si-alguien-trae-un-cebolla-enseguida-podreis"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-si-gana-un-flautista-el-pleito-en"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

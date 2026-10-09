@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-los-dias-siguientes-inspecciono-los-trabajos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

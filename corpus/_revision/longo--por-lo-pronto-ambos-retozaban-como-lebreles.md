@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-lo-pronto-ambos-retozaban-como-lebreles"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

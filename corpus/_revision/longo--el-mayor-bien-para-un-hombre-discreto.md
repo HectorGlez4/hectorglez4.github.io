@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-mayor-bien-para-un-hombre-discreto"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

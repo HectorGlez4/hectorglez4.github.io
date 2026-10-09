@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-la-tristeza-ante-su-muerte-nos-ha"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

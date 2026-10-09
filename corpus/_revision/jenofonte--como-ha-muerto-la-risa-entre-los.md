@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-como-ha-muerto-la-risa-entre-los"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

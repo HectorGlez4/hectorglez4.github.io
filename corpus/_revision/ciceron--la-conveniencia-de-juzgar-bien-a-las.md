@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-la-conveniencia-de-juzgar-bien-a-las"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

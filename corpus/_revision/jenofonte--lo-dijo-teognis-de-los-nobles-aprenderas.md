@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-lo-dijo-teognis-de-los-nobles-aprenderas"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

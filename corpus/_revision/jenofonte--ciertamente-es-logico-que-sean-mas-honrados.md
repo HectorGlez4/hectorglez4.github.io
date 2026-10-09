@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-ciertamente-es-logico-que-sean-mas-honrados"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

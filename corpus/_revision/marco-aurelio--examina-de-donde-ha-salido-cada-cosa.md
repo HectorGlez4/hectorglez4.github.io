@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-examina-de-donde-ha-salido-cada-cosa"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

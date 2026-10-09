@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-estoy-viendo-a-la-acrobata-de-pie"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

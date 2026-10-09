@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-mirad-que-hermoso-es-ese-joven-y"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

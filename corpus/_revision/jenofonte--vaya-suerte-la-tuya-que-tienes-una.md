@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-vaya-suerte-la-tuya-que-tienes-una"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

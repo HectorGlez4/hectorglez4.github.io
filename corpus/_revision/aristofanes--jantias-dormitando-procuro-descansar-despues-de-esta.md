@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-jantias-dormitando-procuro-descansar-despues-de-esta"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

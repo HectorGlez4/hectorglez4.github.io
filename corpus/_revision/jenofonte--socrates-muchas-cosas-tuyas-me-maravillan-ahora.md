@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-socrates-muchas-cosas-tuyas-me-maravillan-ahora"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

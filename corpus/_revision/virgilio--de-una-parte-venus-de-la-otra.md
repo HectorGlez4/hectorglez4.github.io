@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-de-una-parte-venus-de-la-otra"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

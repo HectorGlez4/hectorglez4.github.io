@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-que-pastor-guardo-por-dicha-estas-prendas"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

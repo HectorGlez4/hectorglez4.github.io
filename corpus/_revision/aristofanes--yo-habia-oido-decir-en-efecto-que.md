@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-yo-habia-oido-decir-en-efecto-que"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

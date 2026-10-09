@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-los-estoicos-negaban-que-en-los-animales"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

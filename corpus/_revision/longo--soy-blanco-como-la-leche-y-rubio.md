@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-soy-blanco-como-la-leche-y-rubio"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

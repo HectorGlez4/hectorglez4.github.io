@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-repasa-ahora-las-edades-de-tu-vida"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

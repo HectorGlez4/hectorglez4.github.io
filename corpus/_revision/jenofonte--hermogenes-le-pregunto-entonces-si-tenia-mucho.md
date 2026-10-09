@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-hermogenes-le-pregunto-entonces-si-tenia-mucho"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

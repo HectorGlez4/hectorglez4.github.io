@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-e-incluso-si-amases-ambos-la-flor"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

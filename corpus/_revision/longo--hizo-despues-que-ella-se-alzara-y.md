@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-hizo-despues-que-ella-se-alzara-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

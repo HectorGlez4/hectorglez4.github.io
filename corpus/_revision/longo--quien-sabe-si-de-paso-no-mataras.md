@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-quien-sabe-si-de-paso-no-mataras"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

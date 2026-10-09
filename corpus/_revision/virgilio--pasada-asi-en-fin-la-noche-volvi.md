@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-pasada-asi-en-fin-la-noche-volvi"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

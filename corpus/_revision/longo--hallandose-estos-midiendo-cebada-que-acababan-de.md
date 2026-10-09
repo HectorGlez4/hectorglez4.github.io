@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-hallandose-estos-midiendo-cebada-que-acababan-de"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

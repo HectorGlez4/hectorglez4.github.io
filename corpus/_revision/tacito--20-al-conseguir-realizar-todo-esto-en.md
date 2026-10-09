@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-20-al-conseguir-realizar-todo-esto-en"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

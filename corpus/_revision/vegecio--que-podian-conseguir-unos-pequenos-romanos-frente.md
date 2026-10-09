@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-que-podian-conseguir-unos-pequenos-romanos-frente"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

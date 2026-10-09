@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-sin-duda-que-esta-picadura-de-ahora"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

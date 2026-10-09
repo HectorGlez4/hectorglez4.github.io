@@ -6,6 +6,8 @@ temas:
 slug: "agustin-de-hipona-pues-asi-como-al-cuerpo-le-lleva"
 procedencia:
   obra: "La ciudad de Dios"
+  traduccion:
+    traductor: "José Cayetano Díaz de Beyral"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

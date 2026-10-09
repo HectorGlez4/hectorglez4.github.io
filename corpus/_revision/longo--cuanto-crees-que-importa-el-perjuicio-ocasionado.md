@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-cuanto-crees-que-importa-el-perjuicio-ocasionado"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

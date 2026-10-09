@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-sin-disputa-alguna-hallaras-ser-verdad-lo"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

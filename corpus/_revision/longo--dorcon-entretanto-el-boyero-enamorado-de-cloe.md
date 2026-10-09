@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-dorcon-entretanto-el-boyero-enamorado-de-cloe"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

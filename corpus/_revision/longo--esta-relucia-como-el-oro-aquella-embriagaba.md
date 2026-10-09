@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-esta-relucia-como-el-oro-aquella-embriagaba"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-me-parece-que-todos-estariamos-de-acuerdo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

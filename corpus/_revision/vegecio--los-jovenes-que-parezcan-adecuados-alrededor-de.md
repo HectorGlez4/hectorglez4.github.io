@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-los-jovenes-que-parezcan-adecuados-alrededor-de"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

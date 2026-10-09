@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-si-los-reclutas-asimilan-estas-formaciones-en"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

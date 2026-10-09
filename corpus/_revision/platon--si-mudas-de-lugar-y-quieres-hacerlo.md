@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-si-mudas-de-lugar-y-quieres-hacerlo"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

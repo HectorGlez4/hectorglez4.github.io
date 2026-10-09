@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-el-que-comercia-con-su-belleza"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

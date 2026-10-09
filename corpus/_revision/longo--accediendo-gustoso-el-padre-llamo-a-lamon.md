@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-accediendo-gustoso-el-padre-llamo-a-lamon"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

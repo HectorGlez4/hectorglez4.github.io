@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-muy-pocos-jovenes-oiran-las-guerras-provocadas"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-prometiole-pues-que-pediria-a-dafnis-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

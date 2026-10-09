@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-las-carnes-asadas-y-cocidas-las-pusieron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-23-el-cuarto-verano-se-consumio-cimentando"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

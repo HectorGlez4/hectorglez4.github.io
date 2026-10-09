@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-hoy-en-dia-casi-todos-nuestros-soldados"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

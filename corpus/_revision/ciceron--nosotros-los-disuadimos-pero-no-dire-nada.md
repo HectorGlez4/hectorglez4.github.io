@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-nosotros-los-disuadimos-pero-no-dire-nada"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

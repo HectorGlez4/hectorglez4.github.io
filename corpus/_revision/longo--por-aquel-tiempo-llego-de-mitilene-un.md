@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-aquel-tiempo-llego-de-mitilene-un"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

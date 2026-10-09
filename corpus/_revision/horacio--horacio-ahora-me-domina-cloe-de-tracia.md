@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-horacio-ahora-me-domina-cloe-de-tracia"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

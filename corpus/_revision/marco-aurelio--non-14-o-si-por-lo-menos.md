@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-non-14-o-si-por-lo-menos"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

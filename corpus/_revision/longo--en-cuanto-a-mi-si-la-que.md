@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-en-cuanto-a-mi-si-la-que"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

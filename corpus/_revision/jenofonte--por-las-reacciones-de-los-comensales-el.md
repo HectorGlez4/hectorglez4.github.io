@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-las-reacciones-de-los-comensales-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

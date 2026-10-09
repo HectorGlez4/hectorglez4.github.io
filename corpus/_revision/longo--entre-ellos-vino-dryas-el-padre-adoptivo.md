@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-entre-ellos-vino-dryas-el-padre-adoptivo"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

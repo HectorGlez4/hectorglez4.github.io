@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-pronto-lide-saca-el-oculto-cecubo-y"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

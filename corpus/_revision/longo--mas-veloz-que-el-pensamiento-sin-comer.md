@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-mas-veloz-que-el-pensamiento-sin-comer"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

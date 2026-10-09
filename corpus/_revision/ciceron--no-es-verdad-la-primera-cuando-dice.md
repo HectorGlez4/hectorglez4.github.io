@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-no-es-verdad-la-primera-cuando-dice"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

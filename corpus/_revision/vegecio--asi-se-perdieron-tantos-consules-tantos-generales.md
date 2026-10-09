@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-asi-se-perdieron-tantos-consules-tantos-generales"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

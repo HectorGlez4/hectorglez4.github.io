@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-a-continuacion-nos-cuestionaremos-si-un-recluta"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

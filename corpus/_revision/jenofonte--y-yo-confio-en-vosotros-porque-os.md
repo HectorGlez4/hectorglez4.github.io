@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-yo-confio-en-vosotros-porque-os"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

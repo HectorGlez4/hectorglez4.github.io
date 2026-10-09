@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tomemos-los-remedios-de-que-el-hablaba"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

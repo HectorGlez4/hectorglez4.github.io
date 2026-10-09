@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-mas-si-quereis-saberlo-callad-y-yo"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

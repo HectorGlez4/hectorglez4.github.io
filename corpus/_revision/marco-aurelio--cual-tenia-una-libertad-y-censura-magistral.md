@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-cual-tenia-una-libertad-y-censura-magistral"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

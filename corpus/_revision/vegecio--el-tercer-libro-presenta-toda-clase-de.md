@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-el-tercer-libro-presenta-toda-clase-de"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

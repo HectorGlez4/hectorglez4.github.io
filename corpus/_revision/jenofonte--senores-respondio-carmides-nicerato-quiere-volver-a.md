@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-senores-respondio-carmides-nicerato-quiere-volver-a"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

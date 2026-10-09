@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tomala-con-las-prendas-y-al-tomarla"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

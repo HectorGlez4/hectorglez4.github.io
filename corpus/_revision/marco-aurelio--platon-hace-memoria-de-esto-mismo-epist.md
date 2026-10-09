@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-platon-hace-memoria-de-esto-mismo-epist"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

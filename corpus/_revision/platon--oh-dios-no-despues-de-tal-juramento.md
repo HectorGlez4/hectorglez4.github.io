@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-oh-dios-no-despues-de-tal-juramento"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

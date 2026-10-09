@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-no-pensamos-que-haya-otra-cosa-que"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

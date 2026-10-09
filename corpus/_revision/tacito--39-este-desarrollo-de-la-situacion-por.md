@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-39-este-desarrollo-de-la-situacion-por"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

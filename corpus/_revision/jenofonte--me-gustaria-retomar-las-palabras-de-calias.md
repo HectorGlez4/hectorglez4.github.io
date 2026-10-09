@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-me-gustaria-retomar-las-palabras-de-calias"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

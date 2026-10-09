@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-toma-tu-esta-por-galardon-de-igual"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

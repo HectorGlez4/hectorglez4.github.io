@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-a-este-banquete-el-unico-que-falto"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

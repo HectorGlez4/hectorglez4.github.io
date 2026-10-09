@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-despues-aprendian-a-herir-con-la-punta"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-pero-ahora-critobulo-con-todos-estos-por"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

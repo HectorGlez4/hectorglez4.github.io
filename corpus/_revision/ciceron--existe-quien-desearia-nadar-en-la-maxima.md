@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-existe-quien-desearia-nadar-en-la-maxima"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-despues-hay-que-ordenarles-que-doblen-la"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asistieron-lamon-y-mirtale-dryas-y-nape"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

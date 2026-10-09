@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-la-adulacion-engendra-amigos-la-verdad-odio"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

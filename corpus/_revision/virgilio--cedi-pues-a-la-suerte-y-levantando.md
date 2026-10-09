@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-cedi-pues-a-la-suerte-y-levantando"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-el-por-su-parte-estuvo-carinoso-con"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

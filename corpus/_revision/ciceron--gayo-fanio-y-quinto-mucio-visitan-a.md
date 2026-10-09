@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-gayo-fanio-y-quinto-mucio-visitan-a"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-viene-que-yo-sea-esmeralda-y-que"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

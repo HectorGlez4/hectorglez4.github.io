@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-asi-es-que-el-invierno-se-les"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

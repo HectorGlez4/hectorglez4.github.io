@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-luego-cuando-supiera-que-ama-las"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

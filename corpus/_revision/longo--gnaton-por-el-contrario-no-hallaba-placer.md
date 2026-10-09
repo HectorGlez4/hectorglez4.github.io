@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-gnaton-por-el-contrario-no-hallaba-placer"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

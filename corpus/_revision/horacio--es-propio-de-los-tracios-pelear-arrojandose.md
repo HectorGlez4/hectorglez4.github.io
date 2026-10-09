@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-es-propio-de-los-tracios-pelear-arrojandose"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

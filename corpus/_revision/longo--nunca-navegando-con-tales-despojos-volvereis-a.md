@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-nunca-navegando-con-tales-despojos-volvereis-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

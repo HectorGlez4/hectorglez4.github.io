@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-tales-escenas-cuya-vista-hubiera-remozado-y"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

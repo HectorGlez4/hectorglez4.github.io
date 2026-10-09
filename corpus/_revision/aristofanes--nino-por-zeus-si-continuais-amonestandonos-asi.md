@@ -4,7 +4,9 @@ autor: "aristofanes"
 slug: "aristofanes-nino-por-zeus-si-continuais-amonestandonos-asi"
 procedencia:
   obra: "Las avispas"
-  año: 1881
+  traduccion:
+    traductor: "Federico Baráibar"
+    año: 1881
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

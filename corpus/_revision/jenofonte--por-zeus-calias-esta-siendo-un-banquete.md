@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-por-zeus-calias-esta-siendo-un-banquete"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

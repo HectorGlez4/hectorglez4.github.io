@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-asi-tambien-conviene-que-el-alma-sana"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

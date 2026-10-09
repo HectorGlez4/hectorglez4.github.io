@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-decidiose-con-todo-a-pedir-a-cloe"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

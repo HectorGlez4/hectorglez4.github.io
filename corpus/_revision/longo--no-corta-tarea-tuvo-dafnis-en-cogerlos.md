@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-no-corta-tarea-tuvo-dafnis-en-cogerlos"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

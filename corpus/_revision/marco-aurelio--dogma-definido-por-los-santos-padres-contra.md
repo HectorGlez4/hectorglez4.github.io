@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-dogma-definido-por-los-santos-padres-contra"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

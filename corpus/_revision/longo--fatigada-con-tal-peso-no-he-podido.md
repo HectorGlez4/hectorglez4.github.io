@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-fatigada-con-tal-peso-no-he-podido"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

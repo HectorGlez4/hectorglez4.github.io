@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-que-hay-palabras-que-provocan-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

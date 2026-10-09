@@ -4,7 +4,9 @@ autor: "horacio"
 slug: "horacio-enhorabuena-que-diga-el-hermano-de-megila"
 procedencia:
   obra: "Odas"
-  año: 1909
+  traduccion:
+    traductor: "Germán Salinas"
+    año: 1909
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

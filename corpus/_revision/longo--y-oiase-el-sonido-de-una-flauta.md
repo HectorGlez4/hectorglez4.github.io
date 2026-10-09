@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-y-oiase-el-sonido-de-una-flauta"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

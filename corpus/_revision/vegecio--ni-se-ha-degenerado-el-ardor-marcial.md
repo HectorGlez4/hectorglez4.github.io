@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-ni-se-ha-degenerado-el-ardor-marcial"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

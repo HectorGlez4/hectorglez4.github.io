@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-porque-como-sabes-homero-ensalzo-al-propio"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-levantate-pues-y-pon-en-tierra-a"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

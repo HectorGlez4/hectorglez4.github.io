@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-desde-luego-senores-intervino-de-nuevo-socrates"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

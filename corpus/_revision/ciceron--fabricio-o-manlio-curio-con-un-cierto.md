@@ -4,6 +4,8 @@ autor: "ciceron"
 slug: "ciceron-fabricio-o-manlio-curio-con-un-cierto"
 procedencia:
   obra: "Sobre la amistad"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

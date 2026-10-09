@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-como-podria-no-haberme-dado-cuenta-si"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

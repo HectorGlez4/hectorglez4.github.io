@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-asi-esta-ronda-de-conversaciones-finalizo"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

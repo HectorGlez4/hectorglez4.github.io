@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-pocos-dias-pasaron-y-las-vinas-quedaron"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-tambien-para-mi-padre-hubo-presentes-a"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

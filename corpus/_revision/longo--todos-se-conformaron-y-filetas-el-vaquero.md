@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-todos-se-conformaron-y-filetas-el-vaquero"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

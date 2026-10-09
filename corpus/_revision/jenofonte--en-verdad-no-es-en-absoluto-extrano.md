@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-en-verdad-no-es-en-absoluto-extrano"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

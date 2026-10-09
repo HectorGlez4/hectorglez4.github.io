@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-que-un-joven-perfectamente-adiestrado-se-queje"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

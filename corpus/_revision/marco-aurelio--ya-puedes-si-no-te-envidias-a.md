@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-ya-puedes-si-no-te-envidias-a"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

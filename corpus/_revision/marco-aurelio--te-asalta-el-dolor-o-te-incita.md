@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-te-asalta-el-dolor-o-te-incita"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

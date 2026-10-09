@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-parece-que-alabas-a-su-maestro-de"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

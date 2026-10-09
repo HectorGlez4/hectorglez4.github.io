@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-cuando-calias-escucho-esto-dijo-bueno-senores"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

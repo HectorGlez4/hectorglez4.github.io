@@ -4,7 +4,9 @@ autor: "platon"
 slug: "platon-lo-que-importa-es-que-hables-y"
 procedencia:
   obra: "Fedro"
-  año: 1871
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

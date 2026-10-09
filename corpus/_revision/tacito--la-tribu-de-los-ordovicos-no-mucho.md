@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-la-tribu-de-los-ordovicos-no-mucho"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

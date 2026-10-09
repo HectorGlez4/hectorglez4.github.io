@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-estaba-ya-en-su-fuerza-el-otono"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-lo-mas-probable-es-que-se-refiera"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

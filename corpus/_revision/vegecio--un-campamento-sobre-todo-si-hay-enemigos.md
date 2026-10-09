@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-un-campamento-sobre-todo-si-hay-enemigos"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

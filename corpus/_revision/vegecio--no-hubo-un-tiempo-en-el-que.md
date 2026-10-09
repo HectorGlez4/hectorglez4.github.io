@@ -4,6 +4,8 @@ autor: "vegecio"
 slug: "vegecio-no-hubo-un-tiempo-en-el-que"
 procedencia:
   obra: "Manual sobre el ejército"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

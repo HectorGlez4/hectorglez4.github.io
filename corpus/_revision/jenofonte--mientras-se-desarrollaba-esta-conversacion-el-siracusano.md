@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-mientras-se-desarrollaba-esta-conversacion-el-siracusano"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-finalmente-separandose-de-todas-las-otras-ocupaciones"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

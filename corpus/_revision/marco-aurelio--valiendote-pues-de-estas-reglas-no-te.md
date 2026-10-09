@@ -4,6 +4,8 @@ autor: "marco-aurelio"
 slug: "marco-aurelio-valiendote-pues-de-estas-reglas-no-te"
 procedencia:
   obra: "Soliloquios"
+  traduccion:
+    traductor: "Jacinto Díaz de Miranda"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

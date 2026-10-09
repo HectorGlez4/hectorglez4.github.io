@@ -4,7 +4,9 @@ autor: "virgilio"
 slug: "virgilio-en-tanto-ya-eneas-con-su-armada"
 procedencia:
   obra: "La Eneida"
-  año: 1869
+  traduccion:
+    traductor: "Eugenio de Ochoa"
+    año: 1869
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

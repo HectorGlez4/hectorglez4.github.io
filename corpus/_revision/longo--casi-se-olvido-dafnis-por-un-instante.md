@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-casi-se-olvido-dafnis-por-un-instante"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

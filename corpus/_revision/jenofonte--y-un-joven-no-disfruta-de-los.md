@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-y-un-joven-no-disfruta-de-los"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

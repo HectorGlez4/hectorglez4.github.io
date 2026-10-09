@@ -4,6 +4,8 @@ autor: "tacito"
 slug: "tacito-enseguida-le-asignaron-el-gobierno-de-britania"
 procedencia:
   obra: "La vida de Julio Agrícola"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-por-la-manana-los-mancebos-de-metimna"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-nadie-pues-llevaba-a-pacer-el-ganado"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

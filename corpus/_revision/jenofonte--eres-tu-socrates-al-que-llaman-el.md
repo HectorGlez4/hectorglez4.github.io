@@ -4,6 +4,8 @@ autor: "jenofonte"
 slug: "jenofonte-eres-tu-socrates-al-que-llaman-el"
 procedencia:
   obra: "El Banquete"
+  traduccion:
+    traductor: "Wikisource"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"

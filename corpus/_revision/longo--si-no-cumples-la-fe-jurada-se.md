@@ -4,6 +4,8 @@ autor: "longo"
 slug: "longo-si-no-cumples-la-fe-jurada-se"
 procedencia:
   obra: "Dafnis y Cloe"
+  traduccion:
+    traductor: "Juan Valera"
 estadoDerechos: "dominio-público"
 fuente:
   id: "wikisource-es"
