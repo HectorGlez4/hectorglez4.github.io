@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-05-2026 10:26
+last_updated: 10-09-2026 12:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -220,6 +220,8 @@ development_status:
   epic-17: backlog
   17-1-una-fuente-mutable-entra-por-revisión-y-su-documento-no-comp: backlog
   17-2-la-semblanza-sitúa-al-autor-publica-su-atribución-y-sale-de: backlog
+  # 17.3 y 17.5 se reescribieron en su sitio en la v7.1 (epics.md, fc694747); la clave no cambia.
+  # La 17.3 se construye DESPUÉS de la 22.4; la 17.5, ANTES de la 22.9.
   17-3-la-página-de-autor-enumera-su-obra: backlog
   17-4-la-ficha-abre-la-página-y-solo-la-primera: backlog
   17-5-un-modelo-se-admite-por-ruta-y-el-tope-de-guion-se-mide-dond: backlog
@@ -261,6 +263,8 @@ development_status:
   # la hace el conjunto cerrado de Fuentes —Wikisource solo aloja dominio público— y la sonda
   # enseñó que el año vive en la EDICIÓN y no en la obra. Ya no bloquea a las demás.
   epic-19: in-progress
+  # 19.1 reescrita en la v7.1 y adelantada: va ANTES de la 22.4. Medido el 09/10, 63 Citas de 4 Obras
+  # (Odas 35, Consolación a Marcia 14, Eneida 8, Fedro 6) publican el año de su traducción como el de la obra.
   19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: backlog
   19-2-el-bucle-siembra-clasicos-con-meta-propia: review  # falta el listón, que lo pone Héctor
   19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog
@@ -343,6 +347,32 @@ development_status:
   21-3-cada-publicación-del-canal-queda-anotada: backlog
   21-4-cada-señal-externa-queda-anotada-propia-o-ajena: backlog
   epic-21-retrospective: optional
+
+  # Épica 22 — la v7.1: la Obra tiene página. Diseño aprobado por Héctor el 05/10
+  # (docs/superpowers/specs/2026-10-05-pagina-de-obra-design.md); PRD v7.1 (FR-51…FR-54, SM-11), espina v7.1
+  # (AD-25 reescrito), UX v7.1 (5fb17e84), SPEC v7.1 (32559fa1), épica en epics.md (fc694747).
+  # Orden en el tablero: 20.1–20.3 → 19.1 → 22.1–22.3 → 22.4 → 17.3 → el resto; la 17.5 antes de la 22.9.
+  # Ningún agente escribe ediciones en venta, notas, títulos ni reuniones: los propone y los decide Héctor.
+  # Puerta de preparación (bmad-sprint-planning, 09/10): PASS para la Épica 22; el orden entre épicas está escrito.
+  epic-22: backlog
+  # 22.1–22.3 no publican ninguna URL nueva: la ficha va antes que la URL (AD-25).
+  22-1-cada-obra-tiene-ficha-antes-de-tener-url: backlog
+  # 22.2: las reuniones de obras conocidas las decide Héctor, en commit propio, antes de la 22.4.
+  22-2-una-obra-un-nombre-las-grafías-se-deciden-en-la-ficha: backlog
+  22-3-la-obra-se-llama-igual-en-todas-partes: backlog
+  # 22.4 detrás de la 19.1. La indexabilidad nace con la página: sin rutas de Obra, su prueba sobre dist/ pasa en vacío.
+  22-4-la-obra-tiene-página-y-solo-se-indexa-si-no-repite-otra: backlog
+  # 22.5 lleva los dos defectos de UX de la Atribución (título E2 y Autor subrayado viajan juntos).
+  22-5-la-atribución-dice-de-qué-obra-sale-y-se-ve-que-es-un-enlace: backlog
+  22-6-dónde-leer-esta-obra: backlog
+  # 22.7 decide que el fichero del Autor entra en la Tarjeta de Obra (AD-16), pendiente del visto bueno de Héctor.
+  22-7-la-obra-se-encuentra-en-el-buscador-del-sitio-y-se-ve-al-com: backlog
+  22-8-lo-que-cambia-en-una-obra-se-anuncia-y-la-familia-se-mide-ap: backlog
+  # 22.9: construidas y APAGADAS, detrás de la 17.5.
+  22-9-las-ediciones-en-venta-construidas-y-apagadas: backlog
+  # 22.10: los «Defectos anotados» de EXPERIENCE.md que no van en la 22.5 (mensajes de estado 4.1.3, entre otros).
+  22-10-lo-construido-cumple-las-espinas-de-ux: backlog
+  epic-22-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
