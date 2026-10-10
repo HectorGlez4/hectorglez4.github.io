@@ -59,6 +59,17 @@ export interface Superficie {
    * lo hubiera decidido.
    */
   noPublicableEn?: RegExp;
+  /**
+   * Publicabilidad **por contenido** — FR-52, Historia 22.4.
+   *
+   * La página 1 de esta superficie es `producto` solo si su ruta está en la lista de rutas
+   * indexables que el dueño del conjunto publicable declara (`declararRutasIndexables`); si no
+   * está, es `servicio`. Es la segunda condicionalidad que existe, y se distingue de la de
+   * forma (`noPublicableEn`) porque una se lee en la ruta y la otra no: depende del Corpus de
+   * ese día. Este módulo no la calcula —no lee disco (AD-5)—, la **recibe**, y sin ella
+   * declarada falla cerrado.
+   */
+  indexablePorContenido?: true;
 }
 
 /**
@@ -110,6 +121,19 @@ export const SUPERFICIES: readonly Superficie[] = [
     // slugs admite uno enteramente numérico, así que `/coleccion/1984` es una Colección y no
     // la página 1984 de nada.
     noPublicableEn: /^\/coleccion\/[^/]+\/\d+$/,
+  },
+  {
+    nombre: 'la Página de Obra',
+    pagina: 'obra/[autor]/[slug]/[...page].astro',
+    reconoce: /^\/obra\/[^/]+\/[^/]+(?:\/\d+)?$/,
+    // Historia 22.4 — toda Obra con al menos una Cita publicada tiene página, pero solo se
+    // indexa la que no repite otra (FR-52). Esa mitad la decide el Corpus, no la ruta: llega
+    // por `declararRutasIndexables`, y sin ella `caracterDe` rompe en vez de adivinar.
+    caracter: 'producto',
+    indexablePorContenido: true,
+    // Anclada a la ruta entera, como Autor y Tema. Un slug de obra enteramente numérico no
+    // llega a existir: `fallosDeObras` rompe el build antes, porque esta forma no lo vería.
+    noPublicableEn: /^\/obra\/[^/]+\/[^/]+\/\d+$/,
   },
   {
     nombre: 'la búsqueda',
@@ -219,6 +243,17 @@ export function rutaDeColeccion(slug: string, pagina = 1): string {
   return rutaDeListado('coleccion', slug, pagina);
 }
 
+/**
+ * La ruta de una Página de Obra — Historia 22.4.
+ *
+ * Dos segmentos y no uno: `{slug-autor}/{slug-obra}`, que salen del nombre de la ficha partido
+ * por su primer `--` (`rutaDeLaObra`, en `src/lib/obras.ts`). La primera página no lleva número,
+ * como en el resto de listados.
+ */
+export function rutaDeObra(autor: string, slugObra: string, pagina = 1): string {
+  return rutaDePagina(`/obra/${autor}/${slugObra}/`, pagina);
+}
+
 /** Las cuatro consecuencias de declarar una superficie. */
 export interface Consecuencias {
   /** Se anuncia en el sitemap. */
@@ -302,8 +337,8 @@ export function rutaNormalizada(rutaOUrl: string): string {
  * La superficie a la que pertenece una ruta, o `undefined` si nadie la ha declarado.
  *
  * `superficies` existe para las pruebas de `src/lib/ingreso.ts`, que tienen que poder juzgar
- * una admisión en una superficie que todavía no existe —la Página de Obra— con **este mismo
- * predicado** y no con una copia suya. El sitio nunca lo pasa.
+ * una admisión en un censo inventado —una Página de Obra con otra forma de fichero, por
+ * ejemplo— con **este mismo predicado** y no con una copia suya. El sitio nunca lo pasa.
  */
 export function superficieDeclaradaDe(
   rutaOUrl: string,
@@ -334,16 +369,78 @@ export function esServicioPorForma(
   return superficieDeclaradaDe(ruta, superficies)?.noPublicableEn?.test(ruta) ?? false;
 }
 
-/**
- * El carácter de una ruta concreta, con la publicabilidad condicional ya aplicada.
+/*
+ * La lista de rutas indexables — Historia 22.4, FR-52.
  *
- * **Rompe** si la ruta no está declarada, y es deliberado: una superficie sin declaración
- * no puede pasar desapercibida. Como el armazón llama a esto para toda página, añadir una
- * a `src/pages/` sin declararla aquí detiene la construcción con el fichero que hay que
- * tocar escrito en el mensaje.
+ * Estado del módulo, y a propósito: el filtro del sitemap es una función síncrona de una sola
+ * dirección, y no hay forma de pasarle nada más. Quien declara la lista es quien sabe calcularla
+ * —`rutasIndexables` de `src/lib/publicado.ts`, con la regla pura `esObraIndexable`—, y lo hace
+ * en **cada** instancia de este módulo: la configuración de Astro y el empaquetado de las
+ * páginas cargan copias distintas, así que la declaran `integraciones/indexables.ts` (en
+ * `astro:build:start`) y `Armazon.astro` (antes de `consecuenciasDe`). Las dos con la misma
+ * función: no hay dos reglas.
+ *
+ * Sin declarar, una ruta que depende del contenido **no** cae en ningún lado por omisión:
+ * `caracterDe` rompe. Un valor por omisión aquí —«indexable» o «no indexable»— sería decidir
+ * por el Corpus sin haberlo leído.
  */
-export function caracterDe(rutaOUrl: string): Caracter {
+let rutasIndexablesDeclaradas: ReadonlySet<string> | undefined;
+
+/**
+ * Declara qué rutas de producto se indexan. Se normalizan al guardarlas, así que da igual que
+ * lleguen con barra final o sin ella. Declarar otra vez reemplaza la lista anterior.
+ */
+export function declararRutasIndexables(lista: Iterable<string>): void {
+  rutasIndexablesDeclaradas = new Set([...lista].map(rutaNormalizada));
+}
+
+/** Olvida la lista declarada. Solo lo usan las pruebas, para ver el fallo cerrado. */
+export function olvidarRutasIndexables(): void {
+  rutasIndexablesDeclaradas = undefined;
+}
+
+/**
+ * Si una ruta de una superficie que depende del contenido está en la lista declarada. Rompe
+ * sin lista, nombrando a quién le toca declararla.
+ */
+function indexablePorContenido(ruta: string, superficie: Superficie): boolean {
+  if (rutasIndexablesDeclaradas === undefined) {
+    throw new Error(
+      [
+        `La lista de rutas indexables no se ha declarado, y «${ruta}» es ${superficie.nombre},`,
+        'que solo se indexa si el Corpus lo permite (FR-52).',
+        'La declara `declararRutasIndexables(rutasIndexables(conjunto))` —`Armazon.astro` en las',
+        'páginas, `integraciones/indexables.ts` en la configuración— antes de preguntar por su',
+        'carácter. Sin ella no se decide por omisión.',
+      ].join(' '),
+    );
+  }
+  return rutasIndexablesDeclaradas.has(ruta);
+}
+
+/**
+ * Por qué una ruta de producto se sirve como `servicio`, o `undefined` si no es el caso:
+ *
+ *   · `forma` — es una página 2+ de un listado (`noPublicableEn`). Se lee en la ruta.
+ *   · `contenido` — es la página 1 de una superficie que depende del contenido y no está en la
+ *     lista de rutas indexables: una Obra que repite otra página (FR-52).
+ *
+ * Una superficie que es `servicio` por declaración —`/buscar`, `/404`— no tiene causa: no es
+ * un producto degradado, es lo que es. Rompe, como `caracterDe`, si la ruta no está declarada o
+ * si la causa depende de una lista que no se ha declarado.
+ */
+export function causaDelServicio(rutaOUrl: string): 'forma' | 'contenido' | undefined {
   const ruta = rutaNormalizada(rutaOUrl);
+  const superficie = superficieDeclarada(ruta);
+  if (esServicioPorForma(ruta)) return 'forma';
+  if (superficie.indexablePorContenido === true && !indexablePorContenido(ruta, superficie)) {
+    return 'contenido';
+  }
+  return undefined;
+}
+
+/** La superficie de una ruta ya normalizada, o rompe con el fichero que hay que tocar. */
+function superficieDeclarada(ruta: string): Superficie {
   const superficie = superficieDeclaradaDe(ruta);
 
   if (superficie === undefined) {
@@ -358,7 +455,23 @@ export function caracterDe(rutaOUrl: string): Caracter {
     );
   }
 
-  return esServicioPorForma(ruta) ? 'servicio' : superficie.caracter;
+  return superficie;
+}
+
+/**
+ * El carácter de una ruta concreta, con la publicabilidad condicional ya aplicada.
+ *
+ * **Rompe** si la ruta no está declarada, y es deliberado: una superficie sin declaración
+ * no puede pasar desapercibida. Rompe también ante la página 1 de una superficie
+ * `indexablePorContenido` —la Página de Obra— si nadie ha declarado la lista de rutas
+ * indexables: ver `declararRutasIndexables`. Como el armazón llama a esto para toda página, añadir una
+ * a `src/pages/` sin declararla aquí detiene la construcción con el fichero que hay que
+ * tocar escrito en el mensaje.
+ */
+export function caracterDe(rutaOUrl: string): Caracter {
+  const ruta = rutaNormalizada(rutaOUrl);
+  const superficie = superficieDeclarada(ruta);
+  return causaDelServicio(ruta) === undefined ? superficie.caracter : 'servicio';
 }
 
 /** Las cuatro consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`. */

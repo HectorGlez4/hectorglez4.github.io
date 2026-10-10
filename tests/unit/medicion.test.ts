@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -12,7 +12,12 @@ import {
 } from '../../src/lib/medicion.ts';
 import { CITAS_POR_PAGINA, MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 import { bytesDeGuionEnLinea } from './ayuda/guion.js';
-import { caracterDe, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import {
+  caracterDe,
+  declararRutasIndexables,
+  olvidarRutasIndexables,
+  superficieDeclaradaDe,
+} from '../../src/lib/superficies.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import {
   AUTOR_VALIDO,
@@ -193,6 +198,23 @@ const CORPUS_MEDIDO: Record<string, string> = {
       citaValida({ texto: `Frase número ${i} del catálogo de prueba.`, slug }),
     ]),
   ),
+  /*
+   * Historia 22.4 — dos Citas de otra obra, para que haya una Obra indexable («Cartas a
+   * Lucilio», 2 de 53) junto a una que no lo es («Sobre la brevedad de la vida», 51 de 53, y
+   * paginada). Fuera de la Colección y del Tema, para no tocar sus listados.
+   */
+  ...Object.fromEntries(
+    [0, 1].map((i) => [
+      `citas/seneca-carta-${i}.md`,
+      citaValida({
+        texto: `Carta número ${i} del catálogo de prueba.`,
+        slug: `seneca-carta-${i}`,
+        temas: [],
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+      }),
+    ]),
+  ),
 };
 
 /** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */
@@ -224,6 +246,13 @@ const CITA = `/cita/${SLUGS[0]}/`;
 const PAGINAS_1 = ['/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/frases-cortas/'];
 const PAGINAS_2 = ['/autor/seneca/2/', '/tema/el-tiempo/2/', '/coleccion/frases-cortas/2/'];
 const SIN_VISTA = ['/buscar/', '/404', '/kit/', '/lote/'];
+/** Historia 22.4 — la Obra indexable emite; la que repite su Autor y su página 2, no. */
+const OBRA_INDEXABLE = '/obra/seneca/cartas-a-lucilio/';
+const OBRAS = [
+  OBRA_INDEXABLE,
+  '/obra/seneca/sobre-la-brevedad-de-la-vida/',
+  '/obra/seneca/sobre-la-brevedad-de-la-vida/2/',
+];
 
 describe('Historia 20.1 — la vista de una superficie de agregación deja fila', () => {
   it.each(PAGINAS_1)(
@@ -271,7 +300,16 @@ describe('Historia 20.1 — la vista de una superficie de agregación deja fila'
    * declaración única de `src/lib/superficies.ts`: emite `vista-de-superficie` si y solo
    * si la ruta es de producto y no es una Página de Cita, que emite la suya.
    */
-  it.each([...PAGINAS_1, ...PAGINAS_2, CITA, ...SIN_VISTA])(
+  // La lista de rutas indexables que FR-52 da para este corpus; sin ella `caracterDe` no
+  // sabe qué es una Obra. Que el build decidió lo mismo lo dice la propia matriz.
+  beforeEach(() => {
+    declararRutasIndexables([OBRA_INDEXABLE]);
+  });
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it.each([...PAGINAS_1, ...PAGINAS_2, CITA, ...SIN_VISTA, ...OBRAS])(
     '%s emite vista de superficie si y solo si es de producto y no es Cita',
     async (ruta) => {
       const html = await leerMedida(ruta);

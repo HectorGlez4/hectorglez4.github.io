@@ -219,7 +219,7 @@ describe('Historia 14.1 — qué superficie admite qué Modelo', () => {
     expect([...MODELOS_VEDADOS_EN_LECTURA].sort()).toEqual(['donaciones', 'publicidad-acotada']);
   });
 
-  it('las dos superficies de lectura son las que declara superficies.ts', () => {
+  it('las superficies de lectura son las que declara superficies.ts', () => {
     // Sin esto, un renombrado de la Página de Colección dejaría la exclusión apuntando a un
     // fichero que ya no existe y la superficie de verdad, admitida sin que nadie lo decidiera.
     const declaradas = SUPERFICIES.map((s) => s.pagina);
@@ -610,13 +610,24 @@ describe('Historia 17.5 — la afiliación solo en la Página de Obra', () => {
     }
   });
 
-  it('y como hoy no existe ninguna Página de Obra, no la admite ninguna superficie', () => {
-    // Sin el censo inventado, la Obra no es ninguna superficie declarada: falla por eso, y por
-    // nada más. Ninguna superficie real cumple `esPaginaDeObra`.
-    const fallos = revisarDeclaracionDeIngreso([afiliacion([OBRAS[0]])]);
-    expect(fallos).toHaveLength(1);
-    expect(fallos[0]).toContain('no es ninguna superficie declarada');
-    expect(SUPERFICIES.filter((s) => esPaginaDeObra(s.pagina))).toEqual([]);
+  it('desde la 22.4 la Página de Obra existe, y es la única superficie real que cumple la regla', () => {
+    // Antes de la 22.4 ninguna superficie real cumplía `esPaginaDeObra` y esta prueba lo fijaba.
+    // Ahora la Obra está declarada: admitir ahí la afiliación no falla por ninguna regla, y lo
+    // que la mantiene fuera es su `admitidoEn`, que la 22.9 tocará.
+    expect(SUPERFICIES.filter((s) => esPaginaDeObra(s.pagina)).map((s) => s.pagina)).toEqual([
+      OBRAS[0],
+    ]);
+    expect(revisarDeclaracionDeIngreso([afiliacion([OBRAS[0]])])).toEqual([]);
+    expect(modeloDe('afiliacion-de-libros')?.admitidoEn).toEqual([]);
+  });
+
+  it('la Página de Obra es de lectura: donaciones y publicidad se rechazan ahí — 22.4', () => {
+    expect(SUPERFICIES_DE_LECTURA).toContain(OBRAS[0]);
+    for (const id of MODELOS_VEDADOS_EN_LECTURA) {
+      const fallos = revisarDeclaracionDeIngreso([modeloDePrueba({ id, admitidoEn: [OBRAS[0]] })]);
+      expect(fallos.length, id).toBeGreaterThan(0);
+      expect(fallos.join('\n'), id).toContain('superficie de lectura');
+    }
   });
 
   it('esPaginaDeObra reconoce lo que genera src/pages/obra/ y nada más', () => {

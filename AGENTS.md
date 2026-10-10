@@ -34,7 +34,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Known pitfalls
 
-- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind y el barrido de accesibilidad. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1).
+- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind y el barrido de accesibilidad. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Un guion o una prueba que pregunte por una ruta de Obra la declara antes (y la olvida después).
 - No traigas `@cloudflare/workers-types`: sus globales redefinen `Buffer` y descompilan las pruebas que leen cabeceras PNG. Declara en `medicion/worker.ts` solo la superficie de D1 que uses.
 
 <!-- /bmad:context -->
@@ -547,6 +547,35 @@ se omite, nunca se elige uno ni se infiere, y el año de una traducción nunca c
 y **todavía no se puede silenciar**. Decidir el año de la Obra —o corregir la Cita mal
 fechada— queda para cuando la Obra tenga página.
 
+### La Página de Obra (Historia 22.4)
+
+Toda Obra con al menos una Cita publicada tiene página en `/obra/{slug-autor}/{slug-obra}/`
+—los dos segmentos salen del nombre de su ficha partido por el primer `--` (`segmentosDeObra`),
+y la ruta la compone `rutaDeObra` en `src/lib/superficies.ts`; `rutaDeLaObra` hace las dos cosas
+desde una Obra resuelta—,
+y el título de la Atribución enlaza a ella. **Existir no es indexarse** (FR-52): solo se
+indexa con al menos `MIN_CITAS_OBRA_INDEXABLE` Citas y **menos** de
+`MAX_PROPORCION_OBRA_DEL_AUTOR` de las de su Autor (los dos en `src/lib/umbrales.ts`; la regla,
+`esObraIndexable` en `src/lib/obras.ts`). La que no se indexa es la misma página, sin marca,
+con `noindex, follow`, fuera del sitemap y de Pagefind. **Nunca se declara en una ficha**: se
+recalcula en cada build con el Corpus del día, y se corrige sola en los dos sentidos. Ante
+duplicados se baja el tope; no se parchea una página.
+
+`src/lib/superficies.ts` no calcula la lista: la recibe por `declararRutasIndexables` y, sin
+ella, `caracterDe` **rompe** ante una Obra en vez de adivinar (`causaDelServicio` distingue
+`forma` —páginas 2+— de `contenido`). Hay dos instancias de ese módulo y las dos la declaran
+con la misma función: `Armazon.astro` en las páginas e `integraciones/indexables.ts` en la
+configuración, que además escribe «N Obras publicadas, M indexables» y, en
+`astro:build:done`, **rompe** si el sitemap, las páginas sin `noindex` y las que llevan
+`data-pagefind-body` no son el mismo conjunto. Un script que pregunte `caracterDe` por una
+ruta de Obra tiene que declarar antes la lista. Un slug de obra solo numérico rompe el build.
+
+La vista de superficie (20.1) sale solo de la página 1 de una Obra **indexable**: «sí y solo
+si producto». `npm run rastreo -- --registrar` juzga contra las rutas indexables y rechaza
+una Obra con `noindex`; `npm run canal` acepta cualquier Obra publicada, porque una
+publicación puede enlazarla. En el sitemap, la Obra lleva `lastmod` con el criterio de las
+demás agregaciones: lo más reciente de su ficha, sus Citas y el fichero de su Autor.
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:
@@ -832,7 +861,7 @@ o leerla con `npx wrangler d1 execute`. La orden lo dice así en vez de fingir u
 
 **Junto al estado vive qué superficie admite qué Modelo**, en el mismo fichero y con la misma
 identidad con la que se declaran en `src/lib/superficies.ts`. Las superficies de **lectura**
-—la Página de Cita y la Página de Colección— tienen dos Modelos vedados, y la declaración los
+—la Página de Cita, la Página de Colección y, desde la 22.4, la Página de Obra— tienen dos Modelos vedados, y la declaración los
 rechaza: **donaciones y publicidad acotada**. La exclusión nace de la invitación de donación,
 que vive en portada, búsqueda y 404, y aguas arriba se estrechó a la publicidad, el único
 Modelo que degrada la superficie que produce el ingreso.
@@ -849,7 +878,9 @@ página 2» en `admitidoEn`, y la prueba de `dist/` juzga cada ruta, no cada fic
 **La Página de Autor no admite ningún Modelo, y la afiliación solo la Página de Obra** (AD-20
 v7.1). `revisarDeclaracionDeIngreso` rechaza las dos cosas. La excepción que tenía la
 afiliación en la Página de Cita se revocó: su enlace nacerá de la Procedencia en la Página de
-Obra (Historia 22.9), que todavía no existe, así que hoy no la admite ninguna superficie. Falta
+Obra, que existe desde la 22.4 y es superficie de lectura —rechaza donaciones y publicidad—.
+Es la **única** donde la afiliación puede admitirse, y aún no la admite: lo hará la 22.9 con
+una línea en `admitidoEn`, así que hoy no la admite ninguna superficie. Falta
 además decidir **qué edición se enlaza**, y eso se decide con la cuenta delante.
 
 **El tope de guion se mide donde se admite.** `tests/unit/ingreso-construido.test.ts` construye

@@ -19,6 +19,8 @@
 
 import { normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
+import { rutaDeObra } from './superficies.ts';
+import { MAX_PROPORCION_OBRA_DEL_AUTOR, MIN_CITAS_OBRA_INDEXABLE } from './umbrales.ts';
 
 /** La orden que crea las fichas que faltan. Se nombra una vez y la citan los mensajes. */
 export const ORDEN_DE_SEMBRAR_OBRAS = 'npm run obra -- sembrar';
@@ -84,6 +86,51 @@ export function slugDeFichaDeObra(titulo: string): string | undefined {
 export function nombreDeFichaDeObra(autor: string, titulo: string): string | undefined {
   const slug = slugDeFichaDeObra(titulo);
   return slug === undefined ? undefined : `${autor}${SEPARADOR}${slug}`;
+}
+
+/**
+ * Los dos segmentos de la URL de una Obra, sacados del nombre de su ficha partido por el
+ * **primer** `--`: el slug de Autor y el de la obra (Historia 22.4).
+ *
+ * El primero y no el último porque el slug de Autor no puede llevar `--` (su esquema solo
+ * admite guiones sueltos) y el de la obra tampoco, así que en un nombre bien formado hay uno
+ * solo; partir por el primero es lo que no depende de esa segunda garantía.
+ */
+export function segmentosDeObra(nombre: string): { autor: string; obra: string } {
+  const corte = nombre.indexOf(SEPARADOR);
+  if (corte <= 0 || corte + SEPARADOR.length >= nombre.length) {
+    throw new Error(
+      `«${nombre}» no tiene forma de nombre de Ficha de Obra («{slug-autor}--{slug-obra}»): ` +
+        'no se le puede dar URL.',
+    );
+  }
+  return { autor: nombre.slice(0, corte), obra: nombre.slice(corte + SEPARADOR.length) };
+}
+
+/**
+ * La ruta de la Página de Obra de una Obra resuelta. El constructor es `rutaDeObra`, en
+ * `src/lib/superficies.ts`; esto solo le da los dos segmentos que salen del nombre de la ficha.
+ */
+export function rutaDeLaObra(obra: Pick<ObraResuelta, 'nombre'>, pagina = 1): string {
+  const { autor, obra: slug } = segmentosDeObra(obra.nombre);
+  return rutaDeObra(autor, slug, pagina);
+}
+
+/**
+ * Si la página de una Obra se indexa — FR-52, Historia 22.4.
+ *
+ * Al menos `MIN_CITAS_OBRA_INDEXABLE` Citas publicadas y **menos** de
+ * `MAX_PROPORCION_OBRA_DEL_AUTOR` de las Citas publicadas de su Autor. Una Obra de una sola
+ * Cita repite esa Cita; una que reúne casi todo su Autor repite la Página de Autor.
+ *
+ * Es la única regla, y pura: la consultan el armazón (por la lista de rutas indexables), el
+ * filtro del sitemap y la comprobación del build. No se declara en ninguna ficha: se recalcula
+ * en cada construcción y por eso se corrige sola en los dos sentidos.
+ */
+export function esObraIndexable(recuento: number, citasDelAutor: number): boolean {
+  if (recuento < MIN_CITAS_OBRA_INDEXABLE) return false;
+  if (citasDelAutor <= 0) return false;
+  return recuento / citasDelAutor < MAX_PROPORCION_OBRA_DEL_AUTOR;
 }
 
 /** Una ficha ya admitida, vista con el nombre de su fichero. */
@@ -265,6 +312,19 @@ export function fallosDeObras(
   }
 
   for (const ficha of ordenadas) {
+    /*
+     * Historia 22.4 — un slug de obra enteramente numérico chocaría con «la página N» de
+     * otra Obra del mismo Autor: `/obra/orwell/1984/` sería a la vez una Obra y la página
+     * 1984 de nada. La URL no se recalcula, así que se para aquí y no se adivina.
+     */
+    const slugDeLaObra = ficha.nombre.split('/').pop()?.split(SEPARADOR).slice(1).join(SEPARADOR);
+    if (slugDeLaObra !== undefined && /^\d+$/u.test(slugDeLaObra)) {
+      fallos.push(
+        `  · ${ficha.ruta} → el slug de obra «${slugDeLaObra}» es solo un número, y en la URL ` +
+          'de la Obra se confundiría con una página del listado. Renombre la ficha con un slug ' +
+          'que lleve alguna letra.',
+      );
+    }
     const prefijo = `${ficha.autor}${SEPARADOR}`;
     if (!ficha.nombre.startsWith(prefijo) || ficha.nombre.length === prefijo.length) {
       fallos.push(

@@ -27,6 +27,7 @@ afterAll(async () => {
 const TITULO = 'De la brevedad de la vida';
 const JORNADA = '2026-10-10';
 const OTRA_GRAFIA = 'Sobre la brevedad de la vida';
+const RUTA_DE_OBRA = '/obra/seneca/de-la-brevedad-de-la-vida/';
 
 const FICHA = [
   'autor: seneca',
@@ -110,8 +111,11 @@ describe('Historia 22.3 — una Obra reunida se llama igual en todas las superfi
       });
 
       it('la Atribución dice el título con el año de esta Cita', async () => {
+        // Historia 22.4 — el título enlaza a la Página de Obra; el año queda fuera del enlace.
         expect(await html()).toMatch(
-          new RegExp(`<p class="procedencia"[^>]*>${TITULO}, ${cita.año}\\.</p>`),
+          new RegExp(
+            `<p class="procedencia"[^>]*><a href="${RUTA_DE_OBRA}"[^>]*>${TITULO}</a>, ${cita.año}\\.</p>`,
+          ),
         );
       });
 
@@ -130,13 +134,19 @@ describe('Historia 22.3 — una Obra reunida se llama igual en todas las superfi
           ...(await html()).matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
         ].map((m) => JSON.parse(m[1]) as { '@type'?: string; isPartOf?: unknown });
         const cita_ = bloques.find((b) => b['@type'] === 'Quotation');
-        expect(cita_?.isPartOf).toEqual({ '@type': 'CreativeWork', name: TITULO });
+        // Historia 22.4 — con el `@id` de la Página de Obra, el mismo que su `about`.
+        expect(cita_?.isPartOf).toEqual({
+          '@type': 'Book',
+          '@id': `https://sabiduriadebolsillo.net${RUTA_DE_OBRA}`,
+          name: TITULO,
+        });
       });
 
-      it('el título no enlaza a nada en la línea de la Atribución', async () => {
-        const linea = /<p class="procedencia"[^>]*>([\s\S]*?)<\/p>/.exec(await html())?.[1];
-        expect(linea).toBe(`${TITULO}, ${cita.año}.`);
-        expect(linea).not.toContain('<a');
+      it('en la línea de la Atribución solo el título es enlace — 22.4', async () => {
+        const linea = /<p class="procedencia"[^>]*>([\s\S]*?)<\/p>/.exec(await html())?.[1] ?? '';
+        expect(linea.replace(/<[^>]+>/g, '')).toBe(`${TITULO}, ${cita.año}.`);
+        expect([...linea.matchAll(/<a\b/g)]).toHaveLength(1);
+        expect(linea).toMatch(new RegExp(`>${TITULO}</a>, ${cita.año}\\.$`));
       });
     });
   }

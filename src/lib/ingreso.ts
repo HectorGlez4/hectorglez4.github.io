@@ -152,6 +152,9 @@ export interface Modelo {
 export const SUPERFICIES_DE_LECTURA: readonly string[] = [
   'cita/[slug].astro',
   'coleccion/[slug]/[...page].astro',
+  // Historia 22.4 — la Página de Obra es de lectura: rechaza donaciones y publicidad. La
+  // afiliación tiene su propia regla (`esPaginaDeObra`) y la admite la 22.9.
+  'obra/[autor]/[slug]/[...page].astro',
 ];
 
 /**
@@ -200,12 +203,10 @@ export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...pag
  * Si un fichero de página es la Página de Obra — la única superficie que puede admitir la
  * afiliación de libros (AD-20 v7.1, FR-35).
  *
- * Hoy no existe ninguna Página de Obra, así que la regla no la cumple ninguna superficie
- * declarada y la afiliación no se puede admitir en ninguna parte. Se escribe ya, con la
- * identidad que tendrá —todo lo que genere `src/pages/obra/`—, para que la Historia 22.9 la
- * admita con una línea en `admitidoEn` y no con una renegociación de la regla. Por prefijo y
- * no por el nombre exacto del fichero: la forma de la ruta de la Obra es de la Épica 22, y
- * esta regla no tiene por qué fijarla antes que ella.
+ * Desde la Historia 22.4 la Página de Obra existe —`obra/[autor]/[slug]/[...page].astro`— y
+ * es la única superficie declarada que cumple esta regla; la afiliación sigue sin admitirse
+ * en ella hasta la Historia 22.9, que lo hará con una línea en `admitidoEn`. Por prefijo y no
+ * por el nombre exacto del fichero: todo lo que genere `src/pages/obra/` es la Página de Obra.
  */
 export function esPaginaDeObra(pagina: string): boolean {
   if (!pagina.startsWith('obra/') || !pagina.endsWith('.astro')) return false;
@@ -267,7 +268,7 @@ export const MODELOS: readonly Modelo[] = [
      * Ninguna todavía, y no por descuido. El enlace de afiliación nacería de la Procedencia
      * ya publicada (sin PA-API: exige 3 ventas en 180 días para entrar y 10 cualificadas en
      * 30 días por marketplace para conservarse), y desde AD-20 v7.1 **solo puede admitirse
-     * en la Página de Obra** (`esPaginaDeObra`), que todavía no existe: la Historia 22.9 la
+     * en la Página de Obra** (`esPaginaDeObra`), que existe desde la 22.4: la Historia 22.9 la
      * admitirá ahí. Encima queda abierto **qué edición se enlaza**: la cotejada suele tener
      * versión gratuita y no ingresa nada, y una moderna anotada ingresa y erosiona el «no se
      * inventa una obra para poder enlazar».
@@ -424,8 +425,8 @@ export function modelosMarcadosEn(html: string): string[] {
  * admisión se nombra por superficie y la exclusión por forma la aplica `modelosEnRuta` a toda
  * ruta, así que no hay forma de escribir en `admitidoEn` «también la página 2».
  *
- * `superficies` es para las pruebas: la Página de Obra todavía no existe, y la regla de la
- * afiliación solo se puede ejercitar sobre un censo que la declare.
+ * `superficies` es para las pruebas: ejercitan la regla de la afiliación sobre censos
+ * inventados, con otras formas de fichero de la Página de Obra.
  */
 export function revisarDeclaracionDeIngreso(
   modelos: readonly Modelo[] = MODELOS,

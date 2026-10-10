@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { caracterDe, rutaNormalizada } from '../../src/lib/superficies.ts';
+import { caracterDe, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
 
 /** Historia 8.1 — el Kit Diario de Publicación. */
 
@@ -112,6 +112,7 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
      * al Kit seguiría poniendo esto en rojo.
      */
     const enlazan: string[] = [];
+    let examinadasDeObra = 0;
 
     (function recorrer(dir: string) {
       for (const entrada of readdirSync(dir)) {
@@ -124,14 +125,15 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
 
         const relativa = ruta.slice(dist.length).replace(/\.html$/, '').replace(/\/index$/, '/');
         // Lo que el build genera y nadie declara —una sonda de otra prueba— no es una
-        // superficie del sitio y no se juzga aquí.
-        let ajena = false;
-        try {
-          ajena = caracterDe(rutaNormalizada(relativa)) === 'ajena';
-        } catch {
-          continue;
-        }
-        if (ajena) continue;
+        // superficie del sitio y no se juzga aquí. **Solo** eso se salta: el carácter `ajena`
+        // se lee en la declaración, que no depende de la lista de rutas indexables, así que una
+        // Página de Obra se examina como cualquier otra (Historia 22.4). Antes se preguntaba a
+        // `caracterDe` dentro de un `try`, y una Obra —que sin la lista declarada lanza— se
+        // habría saltado en silencio.
+        const superficie = superficieDeclaradaDe(rutaNormalizada(relativa));
+        if (superficie === undefined) continue;
+        if (superficie.caracter === 'ajena') continue;
+        if (superficie.pagina.startsWith('obra/')) examinadasDeObra += 1;
 
         // La barra final es opcional en el patrón a propósito: escrito solo contra la forma
         // vieja, este guardia dejó de casar con nada al migrar y pasó a estar siempre verde.
@@ -140,6 +142,8 @@ test.describe('Historia 8.1 — el Kit no es una superficie del sitio', () => {
     })(dist);
 
     expect(enlazan, 'páginas del producto que enlazan al Kit').toEqual([]);
+    // Y que la Página de Obra entró de verdad en el recorrido.
+    expect(examinadasDeObra, 'Páginas de Obra examinadas').toBeGreaterThan(0);
   });
 
   test('y el enlace que sí existe sale de una superficie que tampoco es alcanzable', () => {

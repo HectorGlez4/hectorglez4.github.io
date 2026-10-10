@@ -209,6 +209,41 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
  * «fecha indeterminable». Sin este juicio, la historia entera puede quedarse en nada con
  * todas las pruebas en verde.
  */
+describe('Historia 22.4 — la Página de Obra lleva `lastmod`, como las demás agregaciones', () => {
+  const CON_OBRAS: CorpusParaFechar = {
+    ...CORPUS,
+    citas: CORPUS.citas.map((cita) =>
+      cita.autor === 'seneca' ? { ...cita, obra: 'seneca--cartas-a-lucilio' } : cita,
+    ),
+    obras: [
+      { nombre: 'seneca--cartas-a-lucilio', autor: 'seneca', ruta: 'obras/seneca--cartas.yml' },
+      // Sin Citas: no tiene página y no se declara.
+      { nombre: 'seneca--de-la-ira', autor: 'seneca', ruta: 'obras/seneca--ira.yml' },
+    ],
+  };
+
+  it('agrega su ficha, sus Citas y el fichero de su Autor', () => {
+    expect(ficherosPorSuperficie(CON_OBRAS).get('/obra/seneca/cartas-a-lucilio')?.sort()).toEqual(
+      ['obras/seneca--cartas.yml', 'citas/a.md', 'citas/b.md', 'autores/seneca.yml'].sort(),
+    );
+    expect(ficherosPorSuperficie(CON_OBRAS).has('/obra/seneca/de-la-ira')).toBe(false);
+  });
+
+  it('su fecha es la más reciente de sus Citas, y la de la entrada del sitemap', () => {
+    const fechas = new Map([
+      ['obras/seneca--cartas.yml', '2026-01-01T00:00:00.000Z'],
+      ['citas/a.md', '2026-02-01T00:00:00.000Z'],
+      ['citas/b.md', '2026-03-01T00:00:00.000Z'],
+      ['citas/c.md', '2026-09-01T00:00:00.000Z'],
+    ]);
+    const porSuperficie = fechasPorSuperficie(CON_OBRAS, fechas);
+    expect(porSuperficie.get('/obra/seneca/cartas-a-lucilio')).toBe('2026-03-01T00:00:00.000Z');
+    expect(
+      fechaDeLaEntrada(porSuperficie, 'https://sabiduriadebolsillo.net/obra/seneca/cartas-a-lucilio/'),
+    ).toBe('2026-03-01T00:00:00.000Z');
+  });
+});
+
 describe('Historia 18.4 — cuándo el historial no fechó lo que debía', () => {
   const TODAS = new Map(
     [

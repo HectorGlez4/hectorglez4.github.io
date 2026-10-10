@@ -11,6 +11,7 @@
  */
 
 import type { Cita, Autor } from './publicado.ts';
+import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
 
 /**
@@ -206,4 +207,68 @@ export function descripcionDeAutor(
   // «65–8 a. C.» ya acaba en punto: otro sería «a. C..».
   const años = añosDeAutor(autor);
   return `${prefijo} ${años}${años.endsWith('.') ? '' : '.'}${cotejadas}`;
+}
+
+/**
+ * El `<meta description>` de una Página de Obra — UX-DR49, Historia 22.4:
+ * «{n} frases de {Autor} en {Título} ({año}), con su procedencia documentada.», con «1 frase»
+ * en singular y sin paréntesis si la Obra no tiene año (`obra.año`, que ya se omite si sus
+ * Citas discrepan y nunca es el de una traducción).
+ *
+ * Solo hechos del Corpus —recuento, nombre, título, año—: ni sinopsis ni adjetivos (FR-51).
+ * «Frases» solo aquí y en la pestaña; el cuerpo de la página dice «citas».
+ */
+export function descripcionDeObra(
+  autor: Pick<Autor, 'nombre'>,
+  obra: Pick<ObraResuelta, 'titulo' | 'año' | 'recuento'>,
+  pagina = 1,
+): string {
+  const cuantas = `${obra.recuento} ${obra.recuento === 1 ? 'frase' : 'frases'}`;
+  const año = obra.año === undefined ? '' : ` (${obra.año})`;
+  // Las páginas 2+ dicen cuál son, como su título: si no, las descripciones serían idénticas.
+  const tramo = pagina > 1 ? ` Página ${pagina}.` : '';
+  return `${cuantas} de ${autor.nombre} en ${obra.titulo}${año}, con su procedencia documentada.${tramo}`;
+}
+
+/**
+ * La línea de procedencia de la Atribución, en piezas — UX-DR8, FR-2, Historia 22.4.
+ *
+ * `titulo` es el título de la Obra resuelta, si consta, y `resto` todo lo que va detrás en la
+ * misma línea —o la línea entera, sin Obra—. Van separados para que la Atribución enlace
+ * **siempre** el título, y solo el título, sin tener que buscarlo dentro de un texto ya
+ * compuesto. Leídos seguidos, `titulo + resto` es la línea de siempre:
+ *
+ *   · «{Obra}, {año}.» con año; «{Obra}.» con traducción y sin año (19.1: el año que hay es el
+ *     de la traducción, y va con el traductor); «{Obra}. Sin año documentado.» sin ninguno;
+ *   · sin Obra, «Sin obra documentada. Año {año}.» o «Sin obra documentada.» —la ausencia se
+ *     dice, nunca se omite—;
+ *   · detrás, la traducción («Traducción de Germán Salinas, 1909.», UX-DR51) y la referencia.
+ *
+ * UX-DR21 — frases completas con punto final, que se añade aquí y no se escribe en el corpus.
+ */
+export function lineaDeProcedencia(cita: Cita): { titulo?: string; resto: string } {
+  const { año, referencia, traduccion } = cita.procedencia;
+  const titulo = cita.obra?.titulo;
+  const conPunto = (frase: string) => (/[.?!]$/.test(frase) ? frase : `${frase}.`);
+
+  const frases: string[] = [];
+  let trasElTitulo = '';
+  if (titulo !== undefined) {
+    // La primera frase es el título con lo que lo acompaña; su punto va detrás de eso.
+    const primera = año !== undefined ? `, ${año}` : '';
+    trasElTitulo = conPunto(`${titulo}${primera}`).slice(titulo.length);
+    if (año === undefined && traduccion === undefined) frases.push('Sin año documentado');
+  } else if (año !== undefined) {
+    frases.push('Sin obra documentada', `Año ${año}`);
+  } else {
+    frases.push('Sin obra documentada');
+  }
+
+  const deLaTraduccion = fraseDeTraduccion(cita, 'Traducción de');
+  if (deLaTraduccion !== undefined) frases.push(deLaTraduccion);
+  if (referencia !== undefined) frases.push(referencia);
+
+  const siguientes = frases.map(conPunto).join(' ');
+  if (titulo === undefined) return { resto: siguientes };
+  return { titulo, resto: siguientes === '' ? trasElTitulo : `${trasElTitulo} ${siguientes}` };
 }

@@ -33,7 +33,8 @@
  * con código 0 dejaría al guion creyendo que la petición quedó anotada.
  */
 
-import { rutasPublicadas } from '../src/lib/publicado.ts';
+import { rutasIndexables, rutasPublicadas } from '../src/lib/publicado.ts';
+import { declararRutasIndexables } from '../src/lib/superficies.ts';
 import { censoPorFamilia } from './lib/indexacion.ts';
 import {
   TOPE_DE_LA_PETICION,
@@ -140,6 +141,13 @@ export async function principal(
   // registro para decidir qué se puede pedir. La portada entra en él: se publica y se puede
   // pedir, aunque no sea de ninguna familia y el cruce la cuente aparte.
   const publicadas = rutasPublicadas(conjunto);
+  /*
+   * Historia 22.4 — qué Obras se indexan lo dice la lista del dueño del conjunto publicable, y
+   * `superficies.ts` la recibe antes de que nadie pregunte por una ruta de Obra. Pedir rastreo
+   * se juzga contra ella: una Obra con `noindex` existe y no se puede pedir.
+   */
+  const indexables = rutasIndexables(conjunto);
+  declararRutasIndexables(indexables);
   const anteriores = await leerPeticionesDeRastreo(rutas);
   const serie = await leerSerieDeIndexacion(rutas);
 
@@ -164,6 +172,7 @@ export async function principal(
   const seleccion = componerPeticiones({
     seleccion: sueltos,
     publicadas,
+    indexables,
     fecha: opcion(argumentos, '--fecha')?.trim() ?? fechaLocal(ahora),
     hoy: fechaLocal(ahora),
     // Lo ya anotado, para que la misma URL del mismo día no entre dos veces por ejecutar la

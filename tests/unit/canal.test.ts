@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { formaDeObra } from '../../src/lib/obras.ts';
+import { olvidarRutasIndexables } from '../../src/lib/superficies.ts';
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -102,6 +104,43 @@ async function corpusConCitas(cuantas: number, { conColeccion = false } = {}): P
     );
   }
   return corpus;
+}
+
+/**
+ * Historia 22.4 — dos Obras sobre un corpus de `corpusConCitas`: «Oráculo», con 3 Citas de las
+ * 19 de su Autor, se indexa; «Criticón», con una sola, se publica con `noindex`.
+ */
+async function anadirObras(corpus: string): Promise<void> {
+  await mkdir(join(corpus, 'obras'), { recursive: true });
+  const obras = [
+    { slug: 'oraculo', titulo: 'Oráculo', citas: 3 },
+    { slug: 'criticon', titulo: 'Criticón', citas: 1 },
+  ];
+  for (const obra of obras) {
+    await writeFile(
+      join(corpus, 'obras', `autor-0--${obra.slug}.yml`),
+      `autor: autor-0\ntitulo: ${obra.titulo}\nformas:\n  - ${formaDeObra(obra.titulo)}\n`,
+      'utf8',
+    );
+    for (let i = 0; i < obra.citas; i += 1) {
+      await writeFile(
+        join(corpus, 'citas', `${obra.slug}-${i}.md`),
+        [
+          '---',
+          `slug: "${obra.slug}-${i}"`,
+          `texto: "Texto de ${obra.slug} ${i}."`,
+          'autor: "autor-0"',
+          'temas:',
+          '  - la-vida',
+          'procedencia:',
+          `  obra: "${obra.titulo}"`,
+          '---',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+    }
+  }
 }
 
 function capturarSalida() {
@@ -1277,5 +1316,35 @@ describe('los códigos de «senal» tienen una sola redacción', () => {
     const fuente = readFileSync(resolve(RAIZ, 'tools/canal.ts'), 'utf8');
     const docblock = fuente.slice(0, fuente.indexOf('*/')).replace(/^ \* ?/gm, '');
     expect(normalizar(docblock)).toContain(codigos);
+  });
+});
+
+describe('Historia 22.4 — anotar una publicación que enlaza una Página de Obra', () => {
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it.each([
+    ['indexable', '/obra/autor-0/oraculo/'],
+    // Una publicación puede enlazar una Obra con `noindex`: es un enlace al sitio igual.
+    ['con noindex', '/obra/autor-0/criticon/'],
+  ])('la %s se anota', async (_caso, ruta) => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await anadirObras(corpus);
+    capturarSalida();
+    expect(await principal(['--corpus', corpus, 'anotar', 'facebook', 'foto', ruta], AHORA)).toBe(0);
+    expect(await leerPublicacionesDeCanal(rutasDelCorpus(corpus))).toEqual([
+      { fecha: HOY, red: 'facebook', formato: 'foto', ruta, marcado: false },
+    ]);
+  });
+
+  it('una que no existe se rechaza con 1, sin lanzar', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await anadirObras(corpus);
+    const salida = capturarSalida();
+    expect(
+      await principal(['--corpus', corpus, 'anotar', 'facebook', 'foto', '/obra/autor-0/no-existe/'], AHORA),
+    ).toBe(1);
+    expect(salida.join('')).toMatch(/no la publica el sitio/);
   });
 });

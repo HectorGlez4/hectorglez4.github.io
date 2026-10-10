@@ -1,0 +1,54 @@
+---
+/**
+ * Datos estructurados de la Página de Obra — Historia 22.4.
+ *
+ * `CollectionPage` *acerca de* un `Book`, como la Página de Autor lo es de una `Person`: lo que
+ * el visitante viene a ver es el listado de Citas de esa obra. El `Book` lleva como `@id` la
+ * canónica de la **página 1** de la Obra, que es el mismo `@id` que el `isPartOf` de cada una de
+ * sus Citas (`DatosEstructurados.astro`): las dos declaraciones hablan de la misma obra y no de
+ * dos homónimas. El autor apunta al `@id` de la Persona que declara su Página de Autor.
+ *
+ * Solo lo que consta (FR-2, FR-51): `datePublished` solo si la Obra tiene año —que ya se omite
+ * si sus Citas discrepan y nunca es el de una traducción—, y ninguna descripción compuesta.
+ *
+ * `application/ld+json` no es JavaScript ejecutable: no toca AD-6.
+ */
+import type { Autor, Cita } from '../lib/publicado.ts';
+import type { ObraResuelta } from '../lib/obras.ts';
+import { rutaDeLaObra } from '../lib/obras.ts';
+import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
+import { rutaDeAutor } from '../lib/superficies.ts';
+
+interface Props {
+  obra: ObraResuelta;
+  autor: Autor;
+  /** Las Citas de **esta** página, no las de la Obra entera. */
+  citas: readonly Cita[];
+  canonica: string;
+  tramo: TramoDeLaLista;
+}
+
+const { obra, autor, citas, canonica, tramo } = Astro.props;
+
+// La página 1 sin número, también desde la 2+: la obra es la misma en todas sus páginas.
+const idDeLaObra = new URL(rutaDeLaObra(obra), canonica).href;
+const idDeLaPersona = new URL(`${rutaDeAutor(autor.slug)}#persona`, canonica).href;
+
+const datos = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': canonica,
+  url: canonica,
+  inLanguage: 'es',
+  about: {
+    '@type': 'Book',
+    '@id': idDeLaObra,
+    name: obra.titulo,
+    author: { '@id': idDeLaPersona },
+    ...(obra.año !== undefined ? { datePublished: String(obra.año) } : {}),
+  },
+  mainEntity: listaDeCitas(citas, canonica, tramo),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(datos)} is:inline />

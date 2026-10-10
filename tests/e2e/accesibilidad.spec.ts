@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { superficiesDelBarrido } from '../../src/lib/superficies.ts';
 
@@ -43,7 +43,90 @@ function rutasConstruidas(): string[] {
  * de cargar los ficheros de prueba, así que lo que se lee aquí es el `dist/` recién
  * construido.
  */
-const SUPERFICIES = superficiesDelBarrido(rutasConstruidas());
+const DERIVADAS = superficiesDelBarrido(rutasConstruidas());
+
+/**
+ * Historia 22.4 — cuatro Páginas de Obra además de la muestra derivada, sacadas también del
+ * `dist/` construido y no escritas a mano: así el barrido no depende de qué Obras tenga hoy el
+ * Corpus.
+ *
+ * La derivación toma una ruta por familia, y la Página de Obra tiene cuatro caras que no se
+ * parecen entre sí en lo que se barre: la indexable, la que lleva `noindex` (la misma página,
+ * que se barre igual: accesibilidad y móvil no dependen de que el buscador la quiera), la
+ * página 2+ (sin Temas) y la del título más largo del Corpus, que es la que puede desbordar
+ * los 360 px si la Cabecera deja de partir palabras.
+ */
+function obrasDelBarrido(): { indexable: string; noIndexable: string; segunda: string; tituloLargo: string } {
+  const obras = rutasConstruidas()
+    .filter((ruta) => ruta.startsWith('/obra/'))
+    .sort((a, b) => a.localeCompare(b, 'es'))
+    .map((ruta) => {
+      const html = readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8');
+      return {
+        ruta,
+        segunda: /^\/obra\/[^/]+\/[^/]+\/\d+\/$/.test(ruta),
+        noindex: /<meta name="robots" content="noindex/.test(html),
+        titulo: /<h1[^>]*>([^<]*)<\/h1>/.exec(html)?.[1] ?? '',
+      };
+    });
+  const primeras = obras.filter((o) => !o.segunda);
+  const exigir = (ruta: string | undefined, cara: string) => {
+    if (ruta === undefined) throw new Error(`El dist/ no trae ninguna Página de Obra ${cara}.`);
+    return ruta;
+  };
+  return {
+    indexable: exigir(primeras.find((o) => !o.noindex)?.ruta, 'indexable'),
+    noIndexable: exigir(primeras.find((o) => o.noindex)?.ruta, 'con noindex'),
+    segunda: exigir(obras.find((o) => o.segunda)?.ruta, 'de página 2+'),
+    tituloLargo: exigir(
+      [...primeras].sort((a, b) => b.titulo.length - a.titulo.length || a.ruta.localeCompare(b.ruta, 'es'))[0]
+        ?.ruta,
+      'con título',
+    ),
+  };
+}
+
+const OBRAS = obrasDelBarrido();
+const OBRAS_DEL_BARRIDO = [OBRAS.indexable, OBRAS.noIndexable, OBRAS.segunda, OBRAS.tituloLargo];
+
+const SUPERFICIES = [...new Set([...DERIVADAS, ...OBRAS_DEL_BARRIDO])];
+
+test('las cuatro Páginas de Obra del barrido salen del dist/, cada una con su cara', () => {
+  const noindex = (ruta: string) =>
+    /<meta name="robots" content="noindex/.test(
+      readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8'),
+    );
+  expect(noindex(OBRAS.indexable), 'la indexable').toBe(false);
+  expect(noindex(OBRAS.noIndexable), 'la que no se indexa').toBe(true);
+  expect(noindex(OBRAS.segunda), 'la página 2').toBe(true);
+});
+
+test('el título más largo parte en varias líneas a 360 px, sin desplazamiento horizontal', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto(OBRAS.tituloLargo);
+  // Se mide con la Inter del sitio y no con la de reserva, que es más estrecha y parte menos.
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  const medida = await page.evaluate(() => {
+    const h1 = document.querySelector('h1') as HTMLElement;
+    return {
+      alto: h1.getBoundingClientRect().height,
+      linea: parseFloat(getComputedStyle(h1).lineHeight),
+      desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  /*
+   * Varias líneas, sin un número fijo: con la Inter del sitio, a 320 px de texto, los dos
+   * títulos más largos del Corpus de hoy (Alberdi, Ingenieros) salen en tres líneas de 32,5 px.
+   * Lo que se vigila es que el título parta en vez de desbordar o encogerse, no cuántas líneas
+   * le tocan a un texto concreto.
+   */
+  expect(medida.alto, OBRAS.tituloLargo).toBeGreaterThanOrEqual(medida.linea * 2 - 1);
+  expect(medida.desborda, OBRAS.tituloLargo).toBe(false);
+});
 
 test('el barrido cubre las superficies del sitio y no el Kit', () => {
   // Sin esto, una derivación que devolviera la lista vacía dejaría el barrido entero sin

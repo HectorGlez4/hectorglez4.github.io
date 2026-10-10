@@ -13,7 +13,8 @@ import Medicion from './Medicion.astro';
 import type { Vista } from '../lib/medicion.ts';
 import DondeSeguirnos from './DondeSeguirnos.astro';
 import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
-import { consecuenciasDe } from '../lib/superficies.ts';
+import { consecuenciasDe, declararRutasIndexables } from '../lib/superficies.ts';
+import { conjuntoPublicable, rutasIndexables } from '../lib/publicado.ts';
 import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
 import { PALETA } from '../lib/lienzo.ts';
@@ -68,6 +69,14 @@ const canonica = new URL(ruta, Astro.site).href;
  * **rompe el build** si nadie ha declarado esta superficie: una página nueva sin
  * declaración no pasa desapercibida, se para aquí y el mensaje dice qué fichero tocar.
  */
+/*
+ * Historia 22.4 — si una Página de Obra se indexa depende del Corpus (FR-52), y
+ * `superficies.ts` no lo calcula: lo recibe. El empaquetado de las páginas carga su propia
+ * instancia de ese módulo —la de la configuración la declara `integraciones/indexables.ts`—, así
+ * que aquí se le declara la lista antes de preguntar. Sin ella, `consecuenciasDe` rompe ante una
+ * Obra en vez de adivinar. La lista se calcula una vez por conjunto.
+ */
+declararRutasIndexables(rutasIndexables(await conjuntoPublicable()));
 const { noIndexar, enLaBusquedaPropia } = consecuenciasDe(ruta);
 // Absoluta y no relativa: una previsualización se resuelve en el servidor de la red, que
 // no tiene la página delante para completar la ruta.

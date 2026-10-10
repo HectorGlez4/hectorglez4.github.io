@@ -68,7 +68,15 @@ import { fileURLToPath } from 'node:url';
 import { realpath } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
 import type { AstroIntegration } from 'astro';
-import { leerAutores, leerCitas, leerColecciones, leerTemas, rutasDelCorpus } from '../tools/lib/corpus.ts';
+import {
+  leerAutores,
+  leerCitas,
+  leerColecciones,
+  leerFichasDeObra,
+  leerTemas,
+  rutasDelCorpus,
+} from '../tools/lib/corpus.ts';
+import { colgarObras } from '../src/lib/obras.ts';
 import {
   coberturaInsuficiente,
   fechasPorSuperficie,
@@ -250,17 +258,21 @@ export async function fechasDeLosFicheros(
  */
 export async function corpusParaFechar(raiz: string): Promise<CorpusParaFechar> {
   const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-  const [citas, autores, temas, colecciones] = await Promise.all([
+  const [leidas, autores, temas, colecciones, fichas] = await Promise.all([
     leerCitas(rutas.citas),
     leerAutores(rutas),
     leerTemas(rutas),
     leerColecciones(rutas),
+    leerFichasDeObra(rutas),
   ]);
+  // Historia 22.4 — la Obra de cada Cita, resuelta como la resuelve el sitio.
+  const citas = colgarObras(leidas, fichas);
 
   return {
     citas: citas.map((cita) => ({
       slug: cita.slug,
       autor: cita.autor,
+      ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
       // El frontmatter se lee crudo, sin el `default([])` del esquema: una Cita sin `temas`
       // llega con el campo ausente y no con la lista vacía.
       temas: cita.temas ?? [],
@@ -272,6 +284,11 @@ export async function corpusParaFechar(raiz: string): Promise<CorpusParaFechar> 
       slug: coleccion.slug,
       miembros: coleccion.miembros,
       ruta: resolve(coleccion.ruta),
+    })),
+    obras: fichas.map((ficha) => ({
+      nombre: ficha.nombre,
+      autor: ficha.autor,
+      ruta: resolve(ficha.ruta),
     })),
   };
 }

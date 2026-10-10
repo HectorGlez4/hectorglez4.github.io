@@ -12,6 +12,7 @@
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
+import { rutaDeLaObra } from '../lib/obras.ts';
 
 interface Props {
   cita: Cita;
@@ -64,7 +65,15 @@ if (cita.fuente !== undefined) {
 
 if (obra !== undefined) {
   datos.isPartOf = {
-    '@type': 'CreativeWork',
+    // El mismo tipo que el `about` de la Página de Obra (`DatosDeObra.astro`): con el mismo
+    // `@id`, dos tipos distintos describirían la misma obra de dos maneras.
+    '@type': 'Book',
+    /*
+     * Historia 22.4 — el mismo `@id` que el `about` de la Página de Obra: la canónica de su
+     * página 1, también si no se indexa. Así las dos declaraciones hablan de la misma obra.
+     * La canónica de esta Cita sigue siendo su Página de Cita (NFR-13).
+     */
+    '@id': new URL(rutaDeLaObra(obra), canonica).href,
     name: obra.titulo,
     ...(obra.año !== undefined ? { datePublished: String(obra.año) } : {}),
   };

@@ -209,6 +209,12 @@ export type CensoPorFamilia = Readonly<Record<Familia, readonly string[]>>;
  * `tests/unit/indexacion.test.ts` compara la unión de las cuatro familias con
  * `rutasPublicadas`, así que una familia nueva no puede desaparecer de esta serie en
  * silencio.
+ *
+ * **La Obra no se cuenta todavía, y es a propósito** (Historia 22.4). `rutasPublicadas`
+ * enumera las Páginas de Obra desde la 22.4, pero la serie no mide esa familia hasta la pasada
+ * de métricas (22.8), que la leerá aparte y solo con las indexables del sitemap. La prueba que
+ * iguala la unión con `rutasPublicadas` excluye las rutas de Obra por su nombre: la exclusión
+ * está escrita, no es un olvido.
  */
 export function censoPorFamilia(conjunto: ConjuntoPublicable): CensoPorFamilia {
   return {

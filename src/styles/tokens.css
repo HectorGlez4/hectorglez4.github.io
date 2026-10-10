@@ -41,6 +41,12 @@
 
   --titular-md: 30px;
   --titular-sm: 21px;
+  /*
+   * title-lg — el título de una Obra en su Cabecera (UX-DR39). Inter siempre, nunca la serif:
+   * el título de una Obra no es nombre de Autor ni de Tema. Sin segundo tamaño ni máximo de
+   * líneas; un título largo parte palabras antes que desbordar.
+   */
+  --titular-obra: 26px;
   --cuerpo-lg: 17px;
   --cuerpo-md: 15px;
   --autor: 13px;

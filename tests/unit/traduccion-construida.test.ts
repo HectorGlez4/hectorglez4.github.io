@@ -67,7 +67,11 @@ describe('Historia 19.1 — la traducción en el sitio construido', () => {
 
   it('la Atribución dice «Odas. Traducción de Germán Salinas, 1909.»', async () => {
     const html = await readFile(paginaConstruida(proyecto, `/cita/${SLUG}/`), 'utf8');
-    expect(html).toContain('Odas. Traducción de Germán Salinas, 1909.');
+    // Historia 22.4 — el título enlaza a su Página de Obra: se lee el texto de la línea.
+    const linea = /<p class="procedencia"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1] ?? '';
+    expect(linea.replace(/<[^>]+>/g, '')).toBe('Odas. Traducción de Germán Salinas, 1909.');
+    // Y la traducción queda fuera del enlace: solo el título lo es.
+    expect(linea).toMatch(/>Odas<\/a>\. Traducción de Germán Salinas, 1909\.$/);
     expect(html).not.toContain('Sin año documentado');
     expect(html).not.toContain('Odas, 1909');
   });

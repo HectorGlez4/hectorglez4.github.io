@@ -23,7 +23,14 @@ import {
   MIN_CITAS_POR_TEMA,
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia } from './admision.ts';
-import { colgarObras, type FichaDeObra, type ObraResuelta } from './obras.ts';
+import {
+  colgarObras,
+  esObraIndexable,
+  rutaDeLaObra,
+  type CitaParaObra,
+  type FichaDeObra,
+  type ObraResuelta,
+} from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
 
@@ -171,6 +178,28 @@ export function citasDeTema(citas: Cita[], slugTema: string): Cita[] {
 export function temasDeLaCita(cita: Cita, publicados: Tema[]): Tema[] {
   const porSlug = new Map(publicados.map((t) => [t.slug, t]));
   return cita.temas.map((s) => porSlug.get(s)).filter((t): t is Tema => t !== undefined);
+}
+
+/**
+ * Los Temas de una Obra en su página — UX-DR41, Historia 22.4.
+ *
+ * Solo los **publicados** —un Tema por debajo de su umbral no tiene página y su chip enlazaría
+ * a un 404—, de más a menos Citas **de la Obra** y por nombre a igualdad. Sin recuento visible:
+ * el orden es lo único que se deriva del número.
+ */
+export function temasDeLaObra(citas: readonly Cita[], publicados: readonly Tema[]): Tema[] {
+  const cuenta = new Map<string, number>();
+  for (const cita of citas) {
+    // Una vez por Cita, aunque la Cita repita el Tema en su lista.
+    for (const tema of new Set(cita.temas)) cuenta.set(tema, (cuenta.get(tema) ?? 0) + 1);
+  }
+  return publicados
+    .filter((tema) => cuenta.has(tema.slug))
+    .sort(
+      (a, b) =>
+        (cuenta.get(b.slug) ?? 0) - (cuenta.get(a.slug) ?? 0) ||
+        a.nombre.localeCompare(b.nombre, 'es'),
+    );
 }
 
 // ─── La Colección: pertenencia declarada y resolución blanda (Historia 12.2) ─
@@ -402,8 +431,113 @@ export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
     ...conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
+    // Historia 22.4 — **todas** las Obras, indexables o no: existir no es indexarse (AD-11).
+    ...obrasPublicadas(conjunto).map((o) => rutaDeLaObra(o)),
   ];
 }
+
+// ─── La Obra: existir no es indexarse (Historia 22.4, FR-52) ─────────────────
+
+/** Lo que de una Cita hace falta para saber sus Obras y si se indexan. */
+type CitaConSuObra = Pick<Cita, 'autor'> & { obra?: ObraResuelta };
+
+/**
+ * Las Obras de unas Citas publicadas, una vez cada una y por nombre de ficha.
+ *
+ * Solo las que alguna Cita resuelve, así que todas tienen `recuento > 0`: una ficha sin Citas
+ * publicadas no tiene página (avisa y no rompe, 22.1). Se exporta aparte de `obrasPublicadas`
+ * porque `integraciones/indexables.ts` la llama con las Citas leídas de disco, sin el resto
+ * del conjunto publicable.
+ */
+export function obrasDeLasCitas(citas: readonly CitaConSuObra[]): ObraResuelta[] {
+  const porNombre = new Map<string, ObraResuelta>();
+  for (const cita of citas) {
+    if (cita.obra !== undefined && cita.obra.recuento > 0) porNombre.set(cita.obra.nombre, cita.obra);
+  }
+  return [...porNombre.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+/** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
+export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores'>): ObraResuelta[] {
+  return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;
+}
+
+/** Las Obras con página y las que se indexan, sobre Citas que ya llevan su Obra colgada. */
+export interface ObrasDelSitio {
+  publicadas: ObraResuelta[];
+  indexables: ObraResuelta[];
+}
+
+/**
+ * Las Obras del sitio sobre Citas que ya llevan su Obra colgada: solo las de un Autor
+ * publicado —el mismo filtro que `conjuntoPublicable`, donde la integridad referencial lo
+ * garantiza—, y de ellas, las que FR-52 deja indexar. Es la parte común de los dos caminos que
+ * calculan la lista: el de las páginas (`rutasIndexables`, sobre el conjunto publicable) y el
+ * de la configuración (`obrasDeLosDatos`, sobre lo leído de disco).
+ */
+export function obrasDelConjunto(
+  citas: readonly CitaConSuObra[],
+  autores: readonly Pick<Autor, 'slug'>[],
+): ObrasDelSitio {
+  // Un Autor publicado es uno del Corpus con alguna Cita publicada (`autoresPublicados`): las
+  // Citas de aquí ya son publicadas, así que basta con que su Autor exista.
+  const delSitio = new Set(autores.map((a) => a.slug));
+  const publicadas = citas.filter((cita) => delSitio.has(cita.autor));
+  return { publicadas: obrasDeLasCitas(publicadas), indexables: obrasIndexables(publicadas) };
+}
+
+/**
+ * De los datos ya leídos —Citas publicadas, Autores y fichas admitidas— a las Obras del sitio,
+ * con los mismos pasos que `conjuntoPublicable`: colgar la Obra de cada Cita (`colgarObras`) y
+ * `obrasDelConjunto`. La usa `integraciones/indexables.ts`, que no tiene `astro:content` y lee
+ * de disco; una prueba de build fija que su lista y la del armazón coinciden.
+ */
+export function obrasDeLosDatos(datos: {
+  citas: readonly CitaParaObra[];
+  autores: readonly Pick<Autor, 'slug'>[];
+  fichas: readonly FichaDeObra[];
+}): ObrasDelSitio {
+  return obrasDelConjunto(colgarObras(datos.citas, datos.fichas), datos.autores);
+}
+
+/**
+ * Las Obras cuya página se indexa, con la regla pura `esObraIndexable` sobre el recuento de la
+ * Obra y el de su Autor —las Citas publicadas de ese Autor—. Es la única aplicación de la
+ * regla: la usan `rutasIndexables` y `integraciones/indexables.ts`.
+ */
+export function obrasIndexables(citas: readonly CitaConSuObra[]): ObraResuelta[] {
+  const porAutor = new Map<string, number>();
+  for (const cita of citas) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
+  return obrasDeLasCitas(citas).filter((obra) =>
+    esObraIndexable(obra.recuento, porAutor.get(obra.autor) ?? 0),
+  );
+}
+
+/**
+ * Las rutas de producto que se indexan — Historia 22.4.
+ *
+ * Son las de `rutasPublicadas` salvo las Obras que no cumplen FR-52, así que es siempre un
+ * subconjunto suyo. Es la lista que `src/lib/superficies.ts` recibe por
+ * `declararRutasIndexables`: aquel módulo no la calcula, y sin ella falla cerrado. No se
+ * declara en ninguna ficha; se recalcula con el Corpus de cada construcción.
+ */
+export function rutasIndexables(conjunto: ConjuntoPublicable): readonly string[] {
+  // El armazón la pide en cada página con el mismo conjunto memorizado: se calcula una vez.
+  const memorizada = rutasIndexablesPorConjunto.get(conjunto);
+  if (memorizada !== undefined) return memorizada;
+  const obras = obrasDelConjunto(conjunto.citas, conjunto.autores);
+  const indexables = new Set(obras.indexables.map((o) => rutaDeLaObra(o)));
+  const noIndexables = new Set(
+    obras.publicadas
+      .map((o) => rutaDeLaObra(o))
+      .filter((ruta) => !indexables.has(ruta)),
+  );
+  const rutas = rutasPublicadas(conjunto).filter((ruta) => !noIndexables.has(ruta));
+  rutasIndexablesPorConjunto.set(conjunto, rutas);
+  return rutas;
+}
+
+const rutasIndexablesPorConjunto = new WeakMap<ConjuntoPublicable, readonly string[]>();
 
 /**
  * Las superficies publicadas a las que no llega ningún enlace interno — NFR-5.

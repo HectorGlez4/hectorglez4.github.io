@@ -1,11 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   SUPERFICIES,
   anunciableEnElSitemap,
   caracterDe,
   consecuenciasDe,
   consecuenciasDelCaracter,
+  declararRutasIndexables,
   esServicioPorForma,
+  olvidarRutasIndexables,
   rutaNormalizada,
   superficieDeclaradaDe,
   superficiesDelBarrido,
@@ -37,7 +39,24 @@ const MUESTRAS = [
   '/404',
   '/kit',
   '/lote',
+  // Historia 22.4 — la Obra, indexable y no indexable (la lista se declara abajo) y su 2+.
+  '/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia',
+  '/obra/baltasar-gracian/el-criticon',
+  '/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/2',
 ];
+
+/*
+ * La Página de Obra solo sabe si se indexa con la lista que declara el dueño del conjunto
+ * publicable (FR-52). Aquí se declara una, con una Obra dentro y otra fuera, para que la matriz
+ * de abajo recorra los dos casos. El fallo cerrado sin lista se prueba en
+ * `obra-indexable.test.ts`.
+ */
+beforeEach(() => {
+  declararRutasIndexables(['/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/']);
+});
+afterEach(() => {
+  olvidarRutasIndexables();
+});
 
 describe('Historia 12.1 — las cuatro consecuencias salen de una sola declaración', () => {
   it.each(MUESTRAS)('%s no puede ser noindex fuera y visible dentro', (ruta) => {

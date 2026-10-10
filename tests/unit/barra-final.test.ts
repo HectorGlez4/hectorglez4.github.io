@@ -6,6 +6,7 @@ import {
   rutaDeAutor,
   rutaDeCita,
   rutaDeColeccion,
+  rutaDeObra,
   rutaDePagina,
   rutaDeTema,
   superficieDeclaradaDe,
@@ -30,6 +31,7 @@ describe('la ruta canónica lleva barra final', () => {
     expect(rutaDeAutor('seneca')).toBe('/autor/seneca/');
     expect(rutaDeTema('la-vida')).toBe('/tema/la-vida/');
     expect(rutaDeColeccion('refranes-de-sancho')).toBe('/coleccion/refranes-de-sancho/');
+    expect(rutaDeObra('cervantes', 'el-quijote')).toBe('/obra/cervantes/el-quijote/');
   });
 
   it('la primera página de un listado no lleva número', () => {
@@ -44,6 +46,7 @@ describe('la ruta canónica lleva barra final', () => {
     expect(rutaDeTema('la-vida', 2)).toBe('/tema/la-vida/2/');
     expect(rutaDeAutor('seneca', 3)).toBe('/autor/seneca/3/');
     expect(rutaDeColeccion('cuatro-mujeres', 2)).toBe('/coleccion/cuatro-mujeres/2/');
+    expect(rutaDeObra('cervantes', 'el-quijote', 2)).toBe('/obra/cervantes/el-quijote/2/');
   });
 
   it('la paginación numera sobre una base que ya acaba en barra', () => {
@@ -68,6 +71,8 @@ describe('la ruta canónica lleva barra final', () => {
       rutaDeTema('la-vida', 2),
       rutaDeColeccion('cuatro-mujeres'),
       rutaDeColeccion('cuatro-mujeres', 2),
+      rutaDeObra('cervantes', 'el-quijote'),
+      rutaDeObra('cervantes', 'el-quijote', 2),
     ]) {
       expect(superficieDeclaradaDe(ruta), ruta).toBeDefined();
     }
@@ -114,7 +119,7 @@ describe('nada compone una ruta interna a mano', () => {
      * cierra es de escritura: `href={`/cita/${cita.slug}`}` construye la forma sin barra,
      * responde con un 301 y nadie falla. Eran quince plantillas y tres módulos del núcleo.
      */
-    const aMano = /[`'"]\/(cita|autor|tema|coleccion)\/\$\{/;
+    const aMano = /[`'"]\/(cita|autor|tema|coleccion|obra)\/\$\{/;
     const culpables = FUENTES.flatMap(fuentesQueEnlazan)
       .filter((camino) => aMano.test(readFileSync(camino, 'utf8')))
       .map((camino) => camino.slice(raiz.length + 1));

@@ -25,8 +25,38 @@ export const MIN_CITAS_POR_TEMA = 15;
  */
 export const MAX_CARACTERES_IMAGEN = 300;
 
-/** Entradas por página en los listados de Autor y de Tema — FR-5. */
+/**
+ * Entradas por página en los listados de Autor, de Tema, de Colección y de Obra — FR-5.
+ *
+ * La Página de Obra (Historia 22.4) pagina con este mismo número y la misma `Paginacion`: un
+ * listado de la Obra no tiene por qué cortarse en otro sitio que el de su Autor.
+ */
 export const CITAS_POR_PAGINA = 50;
+
+/**
+ * Citas publicadas que necesita una Obra para que su página se **indexe** — FR-52.
+ *
+ * Existir no es indexarse: toda Obra con al menos una Cita publicada tiene página (es el
+ * destino del título en la Atribución), pero una Obra de una sola Cita repite la Página de
+ * esa Cita con otro título, y el buscador la leería como contenido duplicado. Con menos de
+ * esto la página se sirve con `noindex, follow`, fuera del sitemap y del índice de Pagefind.
+ *
+ * Quien lo aplica es `esObraIndexable` (`src/lib/obras.ts`), y nadie más.
+ */
+export const MIN_CITAS_OBRA_INDEXABLE = 2;
+
+/**
+ * Proporción de las Citas de su Autor a partir de la cual una Obra **no** se indexa — FR-52.
+ *
+ * **Excluyente**: una Obra con el 90 % exacto de las Citas de su Autor ya no se indexa. Una
+ * Obra que reúne casi todo su Autor repite su Página de Autor con otro título, y competir
+ * contra uno mismo por la misma consulta es justo lo que la regla existe para impedir.
+ *
+ * Se recalcula en cada construcción con el Corpus de ese día, así que se corrige sola en los
+ * dos sentidos: el día que el Autor gana Citas de otra obra, esta pasa a indexarse sin tocar
+ * su ficha. Ante duplicados, se baja este tope; nunca se parchea una página (épica 22).
+ */
+export const MAX_PROPORCION_OBRA_DEL_AUTOR = 0.9;
 
 /** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
 export const MAX_CITAS_RELACIONADAS = 4;

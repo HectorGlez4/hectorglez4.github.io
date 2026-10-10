@@ -9,6 +9,7 @@ import cotejoDeCitas from './integraciones/cotejo.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
 import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
+import rutasIndexablesDelCorpus from './integraciones/indexables.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -169,6 +170,18 @@ export default defineConfig({
         return fecha === undefined ? entrada : { ...entrada, lastmod: fecha };
       },
     }),
+
+    /*
+     * Historia 22.4 — qué Obras se indexan (FR-52), y la comprobación de que el sitemap, los
+     * `noindex` y Pagefind coinciden.
+     *
+     * Va **después** de `sitemap()` a propósito, y el orden es parte de la regla: en
+     * `astro:build:start` declara la lista de rutas indexables en la instancia de
+     * `src/lib/superficies.ts` que lee el `filter` de arriba —sin ella, el filtro rompe ante
+     * una Obra en vez de adivinar—, y en `astro:build:done` lee el sitemap que la integración
+     * de arriba acaba de escribir en ese mismo gancho.
+     */
+    rutasIndexablesDelCorpus(),
   ],
 
   /*

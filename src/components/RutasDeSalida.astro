@@ -16,6 +16,7 @@
  */
 import type { Cita, Autor, Tema } from '../lib/publicado.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
+import Chips from './Chips.astro';
 
 interface Props {
   autor: Autor;
@@ -59,15 +60,9 @@ const fragmento = (texto: string) =>
     temasAMostrar.length > 0 && (
       <section>
         <h2>{sinSalidaPropia ? 'Explorar por tema' : 'Temas'}</h2>
-        <ul class="chips">
-          {temasAMostrar.map((tema) => (
-            <li>
-              <a class="chip" href={rutaDeTema(tema.slug)}>
-                {tema.nombre}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <Chips
+          enlaces={temasAMostrar.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))}
+        />
       </section>
     )
   }
@@ -81,13 +76,7 @@ const fragmento = (texto: string) =>
     sinSalidaPropia && temasAMostrar.length === 0 && (
       <section>
         <h2>Seguir leyendo</h2>
-        <ul class="chips">
-          <li>
-            <a class="chip" href={rutaDeAutor(autor.slug)}>
-              Sobre {autor.nombre}
-            </a>
-          </li>
-        </ul>
+        <Chips enlaces={[{ href: rutaDeAutor(autor.slug), nombre: `Sobre ${autor.nombre}` }]} />
       </section>
     )
   }
@@ -140,34 +129,5 @@ const fragmento = (texto: string) =>
 
   .hermanas a:hover {
     text-decoration: underline;
-  }
-
-  .chips {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    /* UX-DR22 — 8px de separación entre zonas de toque. */
-    gap: var(--unidad);
-    margin: calc(var(--unidad) * 2) 0 0;
-    padding: 0;
-  }
-
-  /* UX-DR12 — fondo `surface-container`, radio 6px, nunca en siena. */
-  .chip {
-    display: flex;
-    align-items: center;
-    min-height: var(--zona-de-toque);
-    padding-inline: calc(var(--unidad) * 2);
-    background: var(--contenedor);
-    border-radius: var(--radio-tarjeta);
-    font-family: var(--serif);
-    font-size: var(--cuerpo-md);
-    color: var(--tinta);
-    text-decoration: none;
-    transition: background-color 150ms;
-  }
-
-  .chip:hover {
-    background: var(--contenedor-alto);
   }
 </style>

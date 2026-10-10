@@ -2,10 +2,10 @@
 title: 'Historia 22.4 — La obra tiene página, y solo se indexa si no repite otra'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '190c7b85687ba63fc6c0425b3aab54e4f6801f09'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-22-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-22-3-la-obra-se-llama-igual-en-todas-partes.md'
@@ -202,7 +202,23 @@ deferred: []
 
 ## Spec Change Log
 
+### 2026-10-10 — el título largo
+- **Hallazgo:** el barrido pedía un título «que parte en cinco líneas a 360 px». Con Inter cargada, el título más largo del Corpus ocupa 3 líneas.
+- **Cambio:** la prueba e2e exige que parta en varias líneas y que no haya desplazamiento horizontal; la cifra de cinco era de la maqueta.
+
 ## Review Triage Log
+
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13 (high 0, medium 3, low 10)
+- defer: 0
+- reject: 1
+- addressed_findings:
+  - `[medium]` `[patch]` La baliza de vista salía en Obras `noindex` (servicio) → solo si la ruta es producto, como manda la 20.1.
+  - `[medium]` `[patch]` La integración y las páginas calculaban la lista desde entradas distintas → `obrasDelConjunto`, una sola función, con prueba de igualdad.
+  - `[medium]` `[patch]` `rastreo` y `canal` reventaban con una ruta de Obra y aceptaban pedir rastreo de una página `noindex` → declaran la lista; `rastreo` juzga contra las indexables.
+  - `[low]` `[patch]` `kit.spec` examina las Obras; Autor de la Cabecera publicado; `Book` en los dos `@id`; título siempre enlazado; barrido derivado de `dist/`; `lastmod` de Obra; meta de las 2+; declaración que siempre reemplaza; Temas por Cita; tipos; AGENTS.md.
 
 ## Verification
 
@@ -210,3 +226,13 @@ deferred: []
 - `npx vitest run tests/unit/superficies.test.ts tests/unit/publicado.test.ts tests/unit/publicable-y-alcanzable.test.ts tests/unit/ingreso.test.ts tests/unit/indexacion.test.ts tests/unit/obras.test.ts tests/unit/obra-construida.test.ts` (y los nuevos) -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0, con el informe de Obras
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** toda Obra con Citas publicadas tiene página en `/obra/{autor}/{obra}/`, con Cabecera (`--titular-obra`), Listado paginado y Temas. FR-52 (≥2 Citas y <90 % de su Autor) decide `noindex`, sitemap y Pagefind; se recalcula en cada build, y una comprobación en `build:done` rompe si los tres no coinciden. La Atribución enlaza el título y el JSON-LD comparte `@id`. La Obra es superficie de lectura (sin donaciones ni publicidad). Corpus real: 180 Obras publicadas, 81 indexables; 2.081 rutas indexables coinciden.
+
+**Revisión:** 13 parches aplicados y 1 rechazado (contar contra el índice real de Pagefind, que corre después de Astro: se compara su marca). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 118 ficheros y 3750 pruebas; astro check, 0 errores; build en verde con el informe; Playwright de accesibilidad y Kit en escritorio, 40/40.

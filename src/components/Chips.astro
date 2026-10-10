@@ -1,0 +1,60 @@
+---
+/**
+ * Chips de navegación — UX-DR12.
+ *
+ * La lista de chips que llevan a un Tema (o, como último recurso de las Rutas de salida, a un
+ * Autor). Vive aparte desde la Historia 22.4 porque la usan dos superficies —las Rutas de
+ * salida de la Página de Cita y los Temas de la Página de Obra— y con el CSS copiado en las dos
+ * el chip acabaría teniendo dos aspectos a la primera corrección.
+ *
+ * Solo la lista: el rótulo que la precede y la sección que la envuelve son de quien la usa.
+ */
+interface Props {
+  enlaces: readonly { href: string; nombre: string }[];
+}
+
+const { enlaces } = Astro.props;
+---
+
+<ul class="chips">
+  {
+    enlaces.map((enlace) => (
+      <li>
+        <a class="chip" href={enlace.href}>
+          {enlace.nombre}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    /* UX-DR22 — 8px de separación entre zonas de toque. */
+    gap: var(--unidad);
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  /* UX-DR12 — fondo `surface-container`, radio 6px, nunca en siena. */
+  .chip {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 2);
+    background: var(--contenedor);
+    border-radius: var(--radio-tarjeta);
+    font-family: var(--serif);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: none;
+    transition: background-color 150ms;
+  }
+
+  .chip:hover {
+    background: var(--contenedor-alto);
+  }
+</style>

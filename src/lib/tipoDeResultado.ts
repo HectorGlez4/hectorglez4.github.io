@@ -22,6 +22,9 @@ export const ETIQUETAS_DE_RESULTADO = {
   autor: 'Autor',
   tema: 'Tema',
   coleccion: 'Colección',
+  // Historia 22.4 — las Obras indexables entran en Pagefind con su tipo. El resultado completo
+  // —título en Inter, Autor debajo— es de la 22.7.
+  obra: 'Obra',
 } as const;
 
 /** Los tipos que existen, derivados de la tabla y no declarados aparte. */

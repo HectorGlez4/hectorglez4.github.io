@@ -38,7 +38,11 @@ import { esJornada } from '../../src/lib/citaDelDia.ts';
  * al dominio anterior, y aquí eso admitiría URL de otra propiedad como si fueran del sitio.
  */
 import { DOMINIO } from '../../src/lib/dominio.ts';
-import { caracterDe, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import {
+  esServicioPorForma,
+  rutaNormalizada,
+  superficieDeclaradaDe,
+} from '../../src/lib/superficies.ts';
 import { FAMILIAS, NOMBRE_DE_FAMILIA, type CensoPorFamilia, type Familia } from './indexacion.ts';
 
 /**
@@ -127,6 +131,13 @@ export type Seleccion =
 export function componerPeticiones(entrada: {
   seleccion: readonly string[];
   publicadas: readonly string[];
+  /**
+   * Las rutas que se indexan — `rutasIndexables` del mismo dueño (Historia 22.4). Es contra
+   * esto contra lo que se juzga: una Obra publicada con `noindex` existe y no se puede pedir,
+   * porque pedir su rastreo gasta la petición en algo que el buscador no va a indexar. Por
+   * omisión, todas las publicadas.
+   */
+  indexables?: readonly string[];
   fecha: string;
   /** La jornada de hoy, para negarse a anotar una petición que aún no se ha cursado. */
   hoy: string;
@@ -195,7 +206,10 @@ export function componerPeticiones(entrada: {
    * fuente exige: preguntar por la forma que redirige devuelve «desconocida para Google».
    */
   const canonica = new Map<string, string>();
-  for (const ruta of entrada.publicadas) canonica.set(rutaNormalizada(ruta), ruta);
+  for (const ruta of entrada.indexables ?? entrada.publicadas) {
+    canonica.set(rutaNormalizada(ruta), ruta);
+  }
+  const publicadas = new Set(entrada.publicadas.map(rutaNormalizada));
 
   const peticiones: PeticionDeRastreo[] = [];
   const vistas = new Set<string>();
@@ -234,8 +248,25 @@ export function componerPeticiones(entrada: {
        * no publicable» se arreglan de maneras distintas. Consultar la declaración para
        * decidir sería un segundo criterio de publicabilidad, y eso no ocurre.
        */
+      if (publicadas.has(normalizada)) {
+        // Historia 22.4 — existe y se sirve, pero con `noindex`: una Obra que repite otra página.
+        motivos.push(
+          `«${dada}» se publica con «noindex»: es una Página de Obra que repite otra página ` +
+            '—una sola Cita o casi todas las de su Autor (FR-52)—, así que queda fuera del ' +
+            'sitemap. Pedir su rastreo gasta la petición en algo que el buscador no va a indexar.',
+        );
+        continue;
+      }
+      /*
+       * Sin preguntar a `caracterDe`: la página 1 de una Obra depende de la lista de rutas
+       * indexables, y una Obra que no existe tiene que salir por «no la publica el sitio», no
+       * por un fallo. Lo no publicable **por declaración** —servicio, ajena o página 2+— se lee
+       * en la declaración sola.
+       */
       const declarada = superficieDeclaradaDe(normalizada);
-      const noPublicable = declarada !== undefined && caracterDe(normalizada) !== 'producto';
+      const noPublicable =
+        declarada !== undefined &&
+        (declarada.caracter !== 'producto' || esServicioPorForma(normalizada));
       motivos.push(
         noPublicable
           ? `«${dada}» es ${declarada.nombre} y el sitio la declara no publicable en ` +

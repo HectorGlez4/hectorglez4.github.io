@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -18,6 +18,8 @@ import {
   anunciableEnElSitemap,
   caracterDe,
   consecuenciasDelCaracter,
+  declararRutasIndexables,
+  olvidarRutasIndexables,
   rutaNormalizada,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
@@ -192,6 +194,22 @@ const SLUGS_DE_CITA = Array.from(
   (_, i) => `seneca-fragmento-${i + 1}`,
 );
 
+/*
+ * Historia 22.4 — dos Obras, para que la familia entre en los dos lazos con sus dos caras. Las
+ * 51 Citas de arriba son de «Sobre la brevedad de la vida»: 51 de las 53 del Autor, casi todo
+ * él, así que esa Obra tiene página y **no** se indexa —y además pagina: su `/2` es servicio
+ * por forma—. Estas dos son de «Cartas a Lucilio»: 2 de 53, que sí se indexa.
+ */
+const CITAS_DE_CARTAS = [
+  'seneca-cartas-uno',
+  'seneca-cartas-dos',
+];
+const OBRA_INDEXABLE = '/obra/seneca/cartas-a-lucilio';
+const OBRA_NO_INDEXABLE = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+
+/** Las páginas 2+ de un listado, también las de Obra, que tienen dos segmentos. */
+const PAGINA_SEGUNDA = /^\/(?:(?:autor|tema|coleccion)\/[^/]+|obra\/[^/]+\/[^/]+)\/\d+$/;
+
 const CORPUS_COMPLETO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -214,6 +232,17 @@ const CORPUS_COMPLETO: Record<string, string> = {
       }),
     ]),
   ),
+  ...Object.fromEntries(
+    CITAS_DE_CARTAS.map((slug, i) => [
+      `citas/${slug.replace('seneca-', 'seneca--')}.md`,
+      citaValida({
+        slug,
+        texto: `Carta ${i + 1}: nadie se hace sabio por casualidad, y hay que aprenderlo.`,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+      }),
+    ]),
+  ),
 };
 
 describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
@@ -223,6 +252,20 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     const resultado = await construirConCorpus(CORPUS_COMPLETO);
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
+    /*
+     * Historia 22.4 — `caracterDe` y el filtro del sitemap preguntan por la Obra a la lista de
+     * rutas indexables, y en este proceso no la ha declarado nadie. Se declara la que FR-52 da
+     * para este corpus; que el build decidió lo mismo lo comprueba «la Obra sigue a FR-52».
+     */
+    expect(resultado.salida).toContain('2 Obras publicadas, 1 indexable.');
+  });
+
+  beforeEach(() => {
+    declararRutasIndexables([OBRA_INDEXABLE]);
+  });
+
+  afterEach(() => {
+    olvidarRutasIndexables();
   });
 
   afterAll(async () => {
@@ -293,13 +336,14 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         '/lote',
         '/tema/el-tiempo',
         '/coleccion/frases-cortas',
+        OBRA_INDEXABLE,
+        OBRA_NO_INDEXABLE,
+        `${OBRA_NO_INDEXABLE}/2`,
       ]) {
         expect(rutas, exigida).toContain(exigida);
       }
       expect(rutas.some((r) => r.startsWith('/cita/'))).toBe(true);
-      expect(
-        rutas.filter((r) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(r)).length,
-      ).toBeGreaterThan(0);
+      expect(rutas.filter((r) => PAGINA_SEGUNDA.test(r)).length).toBeGreaterThan(0);
     });
   });
 
@@ -349,9 +393,10 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
 
     it('la muestra de un listado paginado es la primera página, no la segunda', async () => {
       const barrido = superficiesDelBarrido(await rutasConstruidas());
-      expect(
-        barrido.filter((ruta) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(ruta)),
-      ).toEqual([]);
+      expect(barrido.filter((ruta) => PAGINA_SEGUNDA.test(ruta))).toEqual([]);
+      // La regla acepta también la forma de dos segmentos de la Obra.
+      expect(PAGINA_SEGUNDA.test('/obra/a/b/2')).toBe(true);
+      expect(PAGINA_SEGUNDA.test('/obra/a/b')).toBe(false);
     });
 
     it('la Colección entra en el barrido sin que se la añada a ninguna lista', async () => {
@@ -438,7 +483,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       for (const fuera of ['/buscar', '/kit', '/lote', '/404']) {
         expect(rutas, fuera).not.toContain(fuera);
       }
-      expect(rutas.filter((r) => /^\/(autor|tema|coleccion)\/[^/]+\/\d+$/.test(r))).toEqual([]);
+      expect(rutas.filter((r) => PAGINA_SEGUNDA.test(r))).toEqual([]);
+      // Historia 22.4 — ni la Obra que repite su Autor.
+      expect(rutas).not.toContain(OBRA_NO_INDEXABLE);
     });
 
     it('sí anuncia la portada, las Citas, los Autores, los Temas y las Colecciones', async () => {
@@ -448,7 +495,22 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(rutas).toContain('/tema/el-tiempo');
       // Historia 12.3 — sale de la misma declaración que el `noindex` y el barrido.
       expect(rutas).toContain('/coleccion/frases-cortas');
-      expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBe(CITAS_POR_PAGINA + 1);
+      // Historia 22.4 — la Obra que no repite otra página.
+      expect(rutas).toContain(OBRA_INDEXABLE);
+      expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBe(
+        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length,
+      );
+    });
+
+    it('la Obra sigue a FR-52 en la página construida, no solo en el sitemap', async () => {
+      const indexable = await readFile(paginaConstruida(proyecto, `${OBRA_INDEXABLE}/`), 'utf8');
+      expect(indexable).not.toMatch(/<meta name="robots" content="noindex/);
+      expect(indexable).toMatch(/<main[^>]*data-pagefind-body/);
+      for (const ruta of [OBRA_NO_INDEXABLE, `${OBRA_NO_INDEXABLE}/2`]) {
+        const html = await readFile(paginaConstruida(proyecto, `${ruta}/`), 'utf8');
+        expect(html, ruta).toMatch(/<meta name="robots" content="noindex, follow"/);
+        expect(html, ruta).not.toContain('data-pagefind-body');
+      }
     });
 
     it('nada de lo que anuncia se declara `noindex`: las consecuencias no discrepan', async () => {

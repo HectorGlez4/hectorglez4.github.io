@@ -24,7 +24,7 @@
 import { esJornada } from '../../src/lib/citaDelDia.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS, esRedValida, type Red } from '../../src/lib/redes.ts';
-import { caracterDe, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import { esServicioPorForma, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
 import type { CensoPorFamilia } from './indexacion.ts';
 import { PRIMERA_JORNADA_ANOTABLE, familiaDeRuta, hostAjeno } from './rastreo.ts';
 
@@ -141,8 +141,15 @@ function rutaPublicadaDe(
   const publicada = canonica.get(normalizada);
   if (publicada !== undefined) return { ok: true, ruta: publicada };
 
+  /*
+   * Sin `caracterDe`: la página 1 de una Obra depende de la lista de rutas indexables, y una
+   * publicación puede enlazar una Obra con `noindex` —está en `publicadas`, así que ya salió
+   * arriba—. Lo que llega aquí no se publica; lo no publicable por declaración (servicio, ajena
+   * o página 2+) se lee en la declaración sola, y una Obra inexistente cae en «no la publica».
+   */
   const declarada = superficieDeclaradaDe(normalizada);
-  const noPublicable = declarada !== undefined && caracterDe(normalizada) !== 'producto';
+  const noPublicable =
+    declarada !== undefined && (declarada.caracter !== 'producto' || esServicioPorForma(normalizada));
   return {
     ok: false,
     motivo: noPublicable

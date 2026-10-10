@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { formaDeObra } from '../../src/lib/obras.ts';
+import { olvidarRutasIndexables } from '../../src/lib/superficies.ts';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -83,6 +85,43 @@ async function corpusConCitas(cuantas: number): Promise<string> {
     );
   }
   return corpus;
+}
+
+/**
+ * Historia 22.4 — dos Obras sobre un corpus de `corpusConCitas`: «Oráculo», con 3 Citas de las
+ * 19 de su Autor, se indexa; «Criticón», con una sola, se publica con `noindex`.
+ */
+async function anadirObras(corpus: string): Promise<void> {
+  await mkdir(join(corpus, 'obras'), { recursive: true });
+  const obras = [
+    { slug: 'oraculo', titulo: 'Oráculo', citas: 3 },
+    { slug: 'criticon', titulo: 'Criticón', citas: 1 },
+  ];
+  for (const obra of obras) {
+    await writeFile(
+      join(corpus, 'obras', `autor-0--${obra.slug}.yml`),
+      `autor: autor-0\ntitulo: ${obra.titulo}\nformas:\n  - ${formaDeObra(obra.titulo)}\n`,
+      'utf8',
+    );
+    for (let i = 0; i < obra.citas; i += 1) {
+      await writeFile(
+        join(corpus, 'citas', `${obra.slug}-${i}.md`),
+        [
+          '---',
+          `slug: "${obra.slug}-${i}"`,
+          `texto: "Texto de ${obra.slug} ${i}."`,
+          'autor: "autor-0"',
+          'temas:',
+          '  - la-vida',
+          'procedencia:',
+          `  obra: "${obra.titulo}"`,
+          '---',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+    }
+  }
 }
 
 /** Silencia y recoge lo que la orden imprime, para poder afirmar sobre ello. */
@@ -726,5 +765,53 @@ describe('el aislamiento del sitio (AD-24)', () => {
         componerPeticiones({ seleccion: [ruta], publicadas: rutasPublicadas(conjunto), fecha: HOY, hoy: HOY }).ok,
       ).toBe(true);
     }
+  });
+});
+
+describe('Historia 22.4 — pedir rastreo de una Página de Obra', () => {
+  // La orden declara la lista de rutas indexables en el módulo; no se arrastra a otra prueba.
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it('la indexable se anota', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await anadirObras(corpus);
+    capturarSalida();
+    expect(await principal(['--corpus', corpus, '--registrar', '/obra/autor-0/oraculo/'])).toBe(0);
+    expect(await leerPeticionesDeRastreo(rutasDelCorpus(corpus))).toEqual([
+      { fecha: fechaLocal(new Date()), ruta: '/obra/autor-0/oraculo/' },
+    ]);
+  });
+
+  it('la que lleva `noindex` se rechaza con 1, y el motivo lo dice', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await anadirObras(corpus);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, '--registrar', '/obra/autor-0/criticon/'])).toBe(1);
+    expect(salida.join('')).toMatch(/se publica con «noindex»/);
+    expect(existsSync(join(corpus, FICHERO_DE_PETICIONES))).toBe(false);
+  });
+
+  it('una que no existe se rechaza con 1, sin lanzar', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await anadirObras(corpus);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, '--registrar', '/obra/autor-0/no-existe/'])).toBe(1);
+    expect(salida.join('')).toMatch(/no la publica el sitio/);
+    expect(existsSync(join(corpus, FICHERO_DE_PETICIONES))).toBe(false);
+  });
+
+  it('el juicio puro: contra las indexables, con el motivo según el caso', () => {
+    const publicadas = ['/obra/a/b/', '/obra/a/c/'];
+    const juzgar = (ruta: string) =>
+      componerPeticiones({ seleccion: [ruta], publicadas, indexables: ['/obra/a/b/'], fecha: HOY, hoy: HOY });
+    expect(juzgar('/obra/a/b/').ok).toBe(true);
+    const noindex = juzgar('/obra/a/c/');
+    expect(noindex.ok).toBe(false);
+    expect(noindex.ok ? '' : noindex.motivos.join()).toMatch(/noindex/);
+    // Sin lista declarada en `superficies.ts`, tampoco lanza.
+    expect(() => juzgar('/obra/a/z/')).not.toThrow();
+    expect(() => juzgar('/obra/a/b/2/')).not.toThrow();
   });
 });

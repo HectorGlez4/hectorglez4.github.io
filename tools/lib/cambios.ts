@@ -72,6 +72,7 @@ import {
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
+import { rutaDeLaObra } from '../../src/lib/obras.ts';
 
 /**
  * El instante de un cambio, en ISO 8601 y **siempre en UTC** — lo que `Date#toISOString`
@@ -100,7 +101,19 @@ export interface CitaParaFechar {
   slug: string;
   autor: string;
   temas?: readonly string[];
+  /**
+   * El nombre de la Ficha de Obra que la resuelve, si alguna la resuelve — Historia 22.4. Lo
+   * pone quien lee el corpus, con `colgarObras`: aquí no se resuelve ninguna Obra.
+   */
+  obra?: string;
   /** El fichero del que salió, tal como lo nombra quien leyó el corpus. */
+  ruta: string;
+}
+
+/** Una Ficha de Obra: su nombre compone la ruta, y su fichero —el título— una fecha. */
+export interface ObraParaFechar {
+  nombre: string;
+  autor: string;
   ruta: string;
 }
 
@@ -129,6 +142,8 @@ export interface CorpusParaFechar {
   autores: readonly EntidadParaFechar[];
   temas: readonly EntidadParaFechar[];
   colecciones: readonly ColeccionParaFechar[];
+  /** Las Fichas de Obra — Historia 22.4. Opcional: un corpus sin Obras no la trae. */
+  obras?: readonly ObraParaFechar[];
 }
 
 /**
@@ -148,8 +163,11 @@ export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, str
   const deTema = new Map<string, string[]>();
   const deCita = new Map<string, CitaParaFechar>();
 
+  const deObra = new Map<string, string[]>();
+
   for (const cita of corpus.citas) {
     deCita.set(cita.slug, cita);
+    if (cita.obra !== undefined) apilar(deObra, cita.obra, cita.ruta);
     apilar(citasDeAutor, cita.autor, cita.ruta);
     for (const tema of cita.temas ?? []) {
       apilar(deTema, tema, cita.ruta);
@@ -192,6 +210,17 @@ export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, str
         return cita === undefined ? [] : [cita.ruta, ficheroDeAutor.get(cita.autor)];
       }),
     ]);
+  }
+
+  /*
+   * Historia 22.4 — la Página de Obra, con el mismo criterio que las demás agregaciones: lo
+   * más reciente de lo que compone. Son su ficha —el título—, sus Citas y el fichero de su
+   * Autor, cuyo nombre lleva la Cabecera. Una ficha sin Citas no tiene página: no se declara.
+   */
+  for (const obra of corpus.obras ?? []) {
+    const citas = deObra.get(obra.nombre);
+    if (citas === undefined) continue;
+    declarar(rutaDeLaObra(obra), [obra.ruta, ...citas, ficheroDeAutor.get(obra.autor)]);
   }
 
   /*
@@ -261,6 +290,7 @@ export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
       ...corpus.autores.map((autor) => autor.ruta),
       ...corpus.temas.map((tema) => tema.ruta),
       ...corpus.colecciones.map((coleccion) => coleccion.ruta),
+      ...(corpus.obras ?? []).map((obra) => obra.ruta),
     ]),
   ];
 }

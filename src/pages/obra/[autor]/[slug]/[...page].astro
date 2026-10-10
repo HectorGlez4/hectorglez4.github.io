@@ -1,0 +1,226 @@
+---
+/**
+ * Página de Obra — Historia 22.4, UX-DR38 a UX-DR41, UX-DR49 y UX-DR50.
+ *
+ * Toda Obra con al menos una Cita publicada tiene página: es el destino del título en la
+ * Atribución. Si además **se indexa** no lo decide esta página, ni ninguna ficha: lo decide
+ * FR-52 (`esObraIndexable`) sobre el Corpus de cada construcción, y llega a `Armazon.astro` por
+ * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
+ * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
+ *
+ * Página 1: Cabecera, Listado y Temas. Páginas 2+: solo Cabecera y Listado, y `noindex` por
+ * forma. Nada de prosa compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se
+ * dice sale de hechos del Corpus.
+ *
+ * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
+ * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
+ */
+import Armazon from '../../../../components/Armazon.astro';
+import Chips from '../../../../components/Chips.astro';
+import DatosDeObra from '../../../../components/DatosDeObra.astro';
+import Paginacion from '../../../../components/Paginacion.astro';
+import TarjetaDeCita from '../../../../components/TarjetaDeCita.astro';
+import {
+  autoresPublicados,
+  conjuntoPublicable,
+  obrasPublicadas,
+  rutasIndexables,
+  temasDeLaObra,
+  temasPublicados,
+  type Cita,
+} from '../../../../lib/publicado.ts';
+import { rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
+import { descripcionDeObra } from '../../../../lib/atribucion.ts';
+import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
+import { tituloDeObra } from '../../../../lib/marca.ts';
+import {
+  caracterDe,
+  declararRutasIndexables,
+  rutaDeAutor,
+  rutaDeTema,
+} from '../../../../lib/superficies.ts';
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const conjunto = await conjuntoPublicable();
+  // El Autor de la Cabecera es uno **publicado**: su nombre enlaza a su página.
+  const autores = new Map(
+    autoresPublicados(conjunto.autores, conjunto.citas).map((a) => [a.slug, a]),
+  );
+  const publicados = temasPublicados(conjunto.temas, conjunto.citas);
+
+  // Las Citas de cada Obra, agrupadas una sola vez y en el orden de la Página de Autor (por slug).
+  const porObra = new Map<string, Cita[]>();
+  for (const cita of [...conjunto.citas].sort((a, b) => a.slug.localeCompare(b.slug, 'es'))) {
+    if (cita.obra === undefined) continue;
+    porObra.set(cita.obra.nombre, [...(porObra.get(cita.obra.nombre) ?? []), cita]);
+  }
+
+  return obrasPublicadas(conjunto).flatMap((obra) => {
+    const autor = autores.get(obra.autor);
+    // No debería pasar —la integridad del conjunto y la puerta de las fichas lo impiden—, pero
+    // si pasara, la Cabecera enlazaría a un 404 sin que nada lo dijera: el build se para aquí.
+    if (autor === undefined) {
+      throw new Error(
+        `La Obra «${obra.nombre}» es de «${obra.autor}», que no tiene Página de Autor publicada: ` +
+          'su Cabecera enlazaría a un 404.',
+      );
+    }
+    const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
+    const citas = porObra.get(obra.nombre) ?? [];
+    return paginate(citas, {
+      params: { autor: segmentoDeAutor, slug: segmentoDeObra },
+      props: { obra, autor, temas: temasDeLaObra(citas, publicados) },
+      pageSize: CITAS_POR_PAGINA,
+    });
+  });
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { obra, autor, temas, page: pagina } = Astro.props;
+
+const ruta = rutaDeLaObra(obra, pagina.currentPage);
+const canonica = new URL(ruta, Astro.site).href;
+const primera = pagina.currentPage === 1;
+
+/*
+ * Historia 20.1 — la vista de superficie sale si y solo si la ruta es de producto: la página 1
+ * de una Obra **indexable**. Una Obra con `noindex` es servicio por contenido y no la emite,
+ * igual que una página 2+. La lista se declara aquí porque esta pregunta llega antes que el
+ * armazón, que la declara también.
+ */
+declararRutasIndexables(rutasIndexables(await conjuntoPublicable()));
+const emiteVista = caracterDe(ruta) === 'producto';
+---
+
+<Armazon
+  titulo={tituloDeObra(autor.nombre, obra.titulo, pagina.currentPage)}
+  descripcion={descripcionDeObra(autor, obra, pagina.currentPage)}
+  ruta={ruta}
+  tipo="obra"
+  vista={emiteVista ? 'superficie' : undefined}
+>
+  <DatosDeObra
+    slot="cabeza"
+    obra={obra}
+    autor={autor}
+    citas={pagina.data}
+    canonica={canonica}
+    tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
+  />
+  <div class="pagina contenedor">
+    <header class="cabecera-de-obra">
+      <h1>{obra.titulo}</h1>
+      {/*
+        * «de {Autor} · {año}». El año es el de la Obra —omitido si sus Citas discrepan o no lo
+        * dicen, y nunca el de una traducción (UX-DR51)—; el traductor no se nombra aquí. El
+        * punto medio es decoración: quien usa lector de pantalla oye una coma.
+        */}
+      <p class="de">
+        de <a href={rutaDeAutor(autor.slug)}>{autor.nombre}</a>{
+          obra.año !== undefined && (
+            <>
+              <span aria-hidden="true"> · </span><span class="oculto">, </span>{obra.año}
+            </>
+          )
+        }
+      </p>
+    </header>
+
+    {/* UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor, que ya dice la Cabecera. */}
+    <ul class="listado">
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={undefined} />)}
+    </ul>
+
+    <Paginacion pagina={pagina} />
+
+    {
+      primera && temas.length > 0 && (
+        <section class="temas" aria-labelledby="temas-de-la-obra">
+          <h2 class="rotulo" id="temas-de-la-obra">
+            Temas
+          </h2>
+          <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} />
+        </section>
+      )
+    }
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  /*
+   * UX-DR38, UX-DR39 — el título de una Obra va en Inter, nunca en la serif, con su propio
+   * token. Sin máximo de líneas ni segundo tamaño: un título largo parte palabras antes que
+   * desbordar los 360 px.
+   */
+  h1 {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--titular-obra);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--tinta);
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .de {
+    margin: var(--unidad) 0 0;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: 1.6;
+    color: var(--tinta-apagada);
+  }
+
+  /*
+   * El nombre es información y no una acción: en tinta, subrayado siempre. La zona de toque
+   * llega a 44 px con relleno y se devuelve con margen negativo, como el nombre en la
+   * Atribución, para que el ritmo vertical no se mueva.
+   */
+  .de a {
+    color: var(--tinta);
+    text-decoration: underline;
+    text-decoration-thickness: var(--grosor-filete);
+    display: inline-block;
+    padding-block: 10px;
+    margin-block: -10px;
+  }
+
+  /* Sin clase global para esto: es la misma regla que `Paginacion.astro` declara para sí. */
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .listado {
+    list-style: none;
+    margin: calc(var(--unidad) * 4) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .temas {
+    margin-top: var(--respiracion);
+  }
+
+  /* El rótulo de sección de las Rutas de salida y la Página de Autor, que tampoco es global. */
+  .rotulo {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+</style>

@@ -43,7 +43,8 @@
  */
 
 import { esJornada } from '../src/lib/citaDelDia.ts';
-import { rutasPublicadas } from '../src/lib/publicado.ts';
+import { rutasIndexables, rutasPublicadas } from '../src/lib/publicado.ts';
+import { declararRutasIndexables } from '../src/lib/superficies.ts';
 import { REDES_VALIDAS } from '../src/lib/redes.ts';
 import { censoPorFamilia } from './lib/indexacion.ts';
 import {
@@ -267,6 +268,12 @@ export async function principal(
   }
   const censo = censoPorFamilia(conjunto);
   const publicadas = rutasPublicadas(conjunto);
+  /*
+   * Historia 22.4 — la lista de rutas indexables, declarada antes de validar nada. El canal
+   * sigue aceptando cualquier ruta **publicada**: una publicación puede enlazar una Obra con
+   * `noindex`, y eso es un enlace al sitio igual.
+   */
+  declararRutasIndexables(rutasIndexables(conjunto));
 
   if (!anota && !senala) {
     return consultar(

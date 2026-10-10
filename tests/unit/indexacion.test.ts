@@ -108,7 +108,27 @@ function conjuntoDe(cuantasCitas: number): ConjuntoPublicable {
 
 describe('el censo por familia', () => {
   it('reparte exactamente lo que el conjunto publicable publica, sin la portada', () => {
-    const conjunto = conjuntoDe(MIN_CITAS_POR_TEMA);
+    const base = conjuntoDe(MIN_CITAS_POR_TEMA);
+    // Una Cita con Obra, para que la exclusión de abajo excluya algo de verdad.
+    const conjunto: ConjuntoPublicable = {
+      ...base,
+      citas: base.citas.map((c, i) =>
+        i === 0
+          ? ({
+              ...c,
+              obra: {
+                nombre: `${c.autor}--una-obra`,
+                autor: c.autor,
+                titulo: 'Una obra',
+                fuentes: [],
+                edicionCotejada: false,
+                temas: [],
+                recuento: 1,
+              },
+            } as Cita)
+          : c,
+      ),
+    };
     const censo = censoPorFamilia(conjunto);
 
     const delCenso = FAMILIAS.flatMap((f) => [...censo[f]]).sort();
@@ -116,11 +136,17 @@ describe('el censo por familia', () => {
      * La comparación con `rutasPublicadas` es la puerta de AD-11: si mañana se añade una
      * quinta familia al dueño del conjunto publicable y nadie la añade al censo, esta
      * afirmación cae en vez de dejar que la familia desaparezca de la serie en silencio.
+     *
+     * Historia 22.4 — la Obra es la excepción escrita: `rutasPublicadas` la enumera, y la serie
+     * no la cuenta hasta la pasada de métricas (22.8). Se excluye aquí por su nombre.
      */
     const publicadas = rutasPublicadas(conjunto)
       .filter((r) => r !== '/')
+      .filter((r) => !r.startsWith('/obra/'))
       .sort();
 
+    expect(rutasPublicadas(conjunto)).toContain('/obra/autor-0/una-obra/');
+    expect(delCenso.filter((r) => r.startsWith('/obra/'))).toEqual([]);
     expect(delCenso).toEqual(publicadas);
     // La portada no es de ninguna familia y se queda fuera a propósito: es una URL suelta
     // y lo que esta serie compara es el reparto por familia.

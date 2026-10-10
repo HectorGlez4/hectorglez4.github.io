@@ -69,10 +69,12 @@ import {
   type LecturaDeIndexacion,
   type PlanDeInspeccion,
 } from './lib/indexacion.ts';
+import { colgarObras } from '../src/lib/obras.ts';
 import {
   leerAutores,
   leerCitas,
   leerColecciones,
+  leerFichasDeObra,
   leerTemas,
   registrarLecturaDeIndexacion,
   rutasDelCorpus,
@@ -205,7 +207,15 @@ export async function inspectorDeSearchConsole(credencial: Credencial): Promise<
  * `src/lib/publicado.ts` y nadie más.
  */
 export async function conjuntoDelCorpus(rutas: Rutas): Promise<ConjuntoPublicable> {
-  const citas = (await leerCitas(rutas.citas)) as unknown as Cita[];
+  /*
+   * Historia 22.4 — con su Obra colgada, como en `conjuntoPublicable`: sin ella,
+   * `rutasPublicadas` no enumeraría ninguna Página de Obra y `rastreo` y `canal` las
+   * rechazarían todas como inexistentes.
+   */
+  const citas = colgarObras(
+    (await leerCitas(rutas.citas)) as unknown as Cita[],
+    await leerFichasDeObra(rutas),
+  );
   return {
     citas,
     autores: (await leerAutores(rutas)) as unknown as ConjuntoPublicable['autores'],

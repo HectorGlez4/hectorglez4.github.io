@@ -55,6 +55,15 @@ export function tituloDeTema(nombre: string, pagina = 1): string {
   return tituloDe(`Citas sobre ${nombre.toLocaleLowerCase('es')}${tramo}`);
 }
 
+/**
+ * La Página de Obra — UX-DR49: «Frases de {Autor} en {Título}», y en las 2+ con su número.
+ * «Frases» solo en la pestaña y en la descripción; el cuerpo de la página dice «citas».
+ */
+export function tituloDeObra(autor: string, titulo: string, pagina = 1): string {
+  const tramo = pagina > 1 ? ` — página ${pagina}` : '';
+  return tituloDe(`Frases de ${autor} en ${titulo}${tramo}`);
+}
+
 /** Una Colección ya lleva su intención en el nombre; solo distingue páginas posteriores. */
 export function tituloDeColeccion(nombre: string, pagina = 1): string {
   const tramo = pagina > 1 ? ` — página ${pagina}` : '';
