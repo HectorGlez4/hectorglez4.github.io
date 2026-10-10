@@ -12,7 +12,8 @@
  */
 
 import { createHash } from 'node:crypto';
-import { nombreDeDocumento } from './documento.ts';
+import { CLASE_BIOGRAFIA, nombreDeBiografia, nombreDeDocumento } from './documento.ts';
+import { fuenteDe, revisionExacta } from './fuentes.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // La comparación
@@ -220,13 +221,21 @@ export function documentoDeCita(
 export function documentosDeCita(
   fuente: { id: string } | undefined,
   obra: string | undefined,
-  // Solo se miran los nombres: vale cualquier mapa de documentos por nombre.
+  // Se miran los nombres y, de los valores, solo si declaran ser de biografía: vale
+  // cualquier mapa de documentos por nombre.
   documentos: ReadonlyMap<string, unknown>,
 ): string[] {
   const corto = documentoDeCita(fuente, obra);
   if (corto === undefined) return [];
   const conPagina = `${corto}--`;
-  return [...documentos.keys()]
+  return [...documentos.entries()]
+    /*
+     * Historia 17.1 — un documento que declara `clase: biografia` no es de ninguna Cita,
+     * aunque esté mal colocado en `corpus/fuentes/`: así una obra cuyo identificador
+     * coincida con el slug de un Autor no se traga su biografía por prefijo.
+     */
+    .filter(([, valor]) => !esDeBiografia(valor))
+    .map(([nombre]) => nombre)
     .filter((nombre) => nombre === corto || nombre.startsWith(conPagina))
     .sort((a, b) => (a === corto ? -1 : b === corto ? 1 : a.localeCompare(b, 'es')));
 }
@@ -294,7 +303,24 @@ export interface CitaParaCotejar {
  * `null` es un fichero que ocupa el nombre pero no se deja analizar: no es lo mismo que
  * no estar, y el mensaje que merece es otro.
  */
-export type DocumentosDeFuente = ReadonlyMap<string, string | null>;
+export type DocumentosDeFuente = ReadonlyMap<string, string | null | typeof BIOGRAFIA_MAL_COLOCADA>;
+
+/**
+ * Historia 17.1 — lo que ocupa el sitio de un documento de `corpus/fuentes/` que declara
+ * `clase: biografia`. No trae cuerpo a propósito: una biografía no se coteja con ninguna Cita.
+ */
+export const BIOGRAFIA_MAL_COLOCADA: { readonly clase: typeof CLASE_BIOGRAFIA } = Object.freeze({
+  clase: CLASE_BIOGRAFIA,
+});
+
+/** Si el valor de un mapa de documentos declara ser de biografía. */
+function esDeBiografia(valor: unknown): boolean {
+  return (
+    typeof valor === 'object' &&
+    valor !== null &&
+    (valor as { clase?: unknown }).clase === CLASE_BIOGRAFIA
+  );
+}
 
 export interface EntradaDeCotejo {
   citas: readonly CitaParaCotejar[];
@@ -414,6 +440,24 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
       continue;
     }
 
+    /*
+     * Historia 17.1 — una Fuente mutable no sostiene Citas. Su documento es una biografía en
+     * `corpus/biografias/`, que este cotejo no lee, así que sin esta regla la Cita fallaría
+     * con «falta el documento» y la salida pediría recuperarlo: justo lo que no se arregla
+     * recuperando.
+     */
+    if (fuenteDe(cita.fuente.id)?.mutable === true) {
+      fallos.push({
+        ruta: cita.ruta,
+        regla:
+          `Regla incumplida: una Fuente mutable no sostiene Citas. «${cita.fuente.id}» cambia ` +
+          'cada día y su documento es una biografía, que no se coteja con ninguna Cita: ' +
+          'documente la Cita con la edición de la obra de la que sale, o retírela a ' +
+          'corpus/_revision/.',
+      });
+      continue;
+    }
+
     if (cita.obra === undefined || cita.obra.trim() === '') {
       fallos.push({
         ruta: cita.ruta,
@@ -492,11 +536,17 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
  * Decirlo en los dos sitios lo imprimía dos veces y hacía leer la lista dos veces para
  * comprobar que era la misma.
  */
-export function titularDeFallos(cuantos: number): string {
+export function titularDeFallos(cuantos: number, deBiografias = 0): string {
+  // Historia 17.1 — las biografías cuentan en el mismo recuento, y el titular las nombra.
+  const biografias =
+    deBiografias === 0
+      ? ''
+      : ` (${deBiografias === cuantos ? (cuantos === 1 ? 'es' : 'todos son') : `${deBiografias}`} ` +
+        `de ${deBiografias === 1 ? 'la biografía de un Autor' : 'biografías de Autor'})`;
   return (
     `El cotejo detiene la construcción: ${cuantos} ` +
-    `${cuantos === 1 ? 'incumplimiento' : 'incumplimientos'}. El detalle, con la ruta de ` +
-    'cada fichero y la regla incumplida, está justo encima.'
+    `${cuantos === 1 ? 'incumplimiento' : 'incumplimientos'}${biografias}. El detalle, con la ` +
+    'ruta de cada fichero y la regla incumplida, está justo encima.'
   );
 }
 
@@ -554,4 +604,122 @@ export function resumenDeCotejo(
     rancias: [...enCenso].filter((slug) => !publicados.has(slug)).length,
     tope,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La biografía que declara un Autor — Historia 17.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Un Autor tal y como lo necesita la puerta: dónde está y qué biografía declara. */
+export interface AutorParaCotejar {
+  /** El fichero del Autor, como se teclea. */
+  ruta: string;
+  biografia?: { documento: string; revision: number };
+}
+
+/**
+ * Comprueba que la biografía que declara cada Autor es **la revisión versionada**.
+ *
+ * Una Fuente mutable cambia, y la revisión es lo único fijo de ella. Sin esta puerta,
+ * actualizar la revisión en el Autor seguiría apoyándose en el documento viejo y publicaría
+ * una procedencia falsa sin que nada fallara. Rompe cuando el Autor declara `biografia` y:
+ *
+ *   · el documento no está en `corpus/biografias/`, o está y no se deja analizar;
+ *   · el documento no es de una Fuente mutable, o no es una biografía;
+ *   · la revisión de su cabecera —o la de su nombre— no es la declarada.
+ *
+ * Cada fallo nombra el fichero del Autor, el documento y las dos revisiones.
+ */
+export function cotejarBiografias(
+  autores: readonly AutorParaCotejar[],
+  // `unknown` a propósito: lo que haya en el mapa se valida antes de usarlo.
+  documentos: ReadonlyMap<string, unknown>,
+  carpeta = 'corpus/biografias',
+): FalloDeCotejo[] {
+  const fallos: FalloDeCotejo[] = [];
+
+  for (const autor of autores) {
+    const declarada = autor.biografia;
+    if (declarada === undefined) continue;
+
+    const ruta = `${carpeta}/${declarada.documento}.txt`;
+    const regla = (detalle: string) => ({ ruta: autor.ruta, regla: `Regla incumplida: ${detalle}` });
+    const delante = `el Autor declara la biografía ${ruta} (revisión ${declarada.revision}) y`;
+
+    if (!documentos.has(declarada.documento)) {
+      fallos.push(
+        regla(
+          `${delante} ese documento no existe. Recupere esa revisión con: npx tsx ` +
+            'tools/recuperar.ts "<enlace permanente con oldid>", y declárela con: npx tsx ' +
+            'tools/autor.ts biografia <slug> <documento>.',
+        ),
+      );
+      continue;
+    }
+
+    const cabecera = cabeceraDeBiografia(documentos.get(declarada.documento));
+    if (cabecera === 'ilegible') {
+      fallos.push(
+        regla(
+          `${delante} ese documento no tiene la forma que produce la recuperación, así que no ` +
+            'se sabe de qué revisión es.',
+        ),
+      );
+      continue;
+    }
+
+    if (cabecera.clase !== CLASE_BIOGRAFIA || fuenteDe(cabecera.fuente)?.mutable !== true) {
+      fallos.push(
+        regla(
+          `${delante} ese documento no es la biografía de una Fuente mutable (fuente ` +
+            `«${cabecera.fuente}»${cabecera.clase === CLASE_BIOGRAFIA ? '' : ', sin «clase: biografia»'}).`,
+        ),
+      );
+      continue;
+    }
+
+    if (cabecera.revision !== declarada.revision) {
+      fallos.push(
+        regla(
+          `el Autor declara la revisión ${declarada.revision} de su biografía y ${ruta} es ` +
+            `la revisión ${cabecera.revision}. Una revisión distinta es otro documento: ` +
+            'recupérela, o declare la que está versionada.',
+        ),
+      );
+      continue;
+    }
+
+    // El nombre entero, con el segmento de Fuente: es lo que la recuperación escribe.
+    const esperado = nombreDeBiografia(cabecera.fuente, cabecera.titulo, cabecera.revision);
+    if (esperado !== declarada.documento) {
+      fallos.push(
+        regla(
+          `${delante} su cabecera (fuente «${cabecera.fuente}», «${cabecera.titulo}», revisión ` +
+            `${cabecera.revision}) corresponde a ${esperado === undefined ? 'ningún nombre utilizable' : `${carpeta}/${esperado}.txt`}: ` +
+            'el nombre y la cabecera del documento tienen que decir lo mismo.',
+        ),
+      );
+    }
+  }
+
+  return fallos;
+}
+
+/**
+ * La cabecera de un valor del mapa, validada en su forma: un objeto con `fuente`, y si dice
+ * ser biografía, `titulo` y una revisión entera segura. Lo demás es `'ilegible'`.
+ */
+function cabeceraDeBiografia(
+  valor: unknown,
+):
+  | { clase: typeof CLASE_BIOGRAFIA; fuente: string; titulo: string; revision: number }
+  | { clase: undefined; fuente: string }
+  | 'ilegible' {
+  if (typeof valor !== 'object' || valor === null) return 'ilegible';
+  const { clase, fuente, titulo, revision } = valor as Record<string, unknown>;
+  if (typeof fuente !== 'string' || fuente === '') return 'ilegible';
+  if (clase === undefined) return { clase: undefined, fuente };
+  if (clase !== CLASE_BIOGRAFIA || typeof titulo !== 'string' || titulo === '') return 'ilegible';
+  if (typeof revision !== 'number' || revisionExacta(revision) === undefined) return 'ilegible';
+  return { clase, fuente, titulo, revision };
 }

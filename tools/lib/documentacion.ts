@@ -63,6 +63,7 @@ import {
 } from './corpus.ts';
 import {
   analizarDocumento,
+  CLASE_BIOGRAFIA,
   derivarDeLaDeclaracion,
   esElMismoAutor,
   nombreDeDocumento,
@@ -273,6 +274,18 @@ async function leerDocumento(
       motivos: [
         `«${rutaDelDocumento}» no tiene la forma de un documento de Fuente ` +
           '(cabecera, «---», declaración de la Fuente, «---» y cuerpo debajo).',
+        ...enSuLugar,
+      ],
+    };
+  }
+
+  // Historia 17.1 — una Cita no se ata nunca a una biografía, aunque esté mal colocada.
+  if (analizado.cabecera.clase === CLASE_BIOGRAFIA) {
+    return {
+      ok: false,
+      motivos: [
+        `«${rutaDelDocumento}» es un documento de biografía (clase: biografia): no documenta ` +
+          'ninguna Cita. Su sitio es corpus/biografias/.',
         ...enSuLugar,
       ],
     };

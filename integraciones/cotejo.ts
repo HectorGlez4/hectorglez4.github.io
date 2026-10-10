@@ -17,6 +17,12 @@
  * construcciones. Una Cita escrita a mano directamente en `corpus/citas/`, sin pasar por
  * el sembrado, cruza exactamente esta misma puerta.
  *
+ * Historia 17.1 — y comprueba, con el mismo corte, que la biografía que declara un Autor
+ * es **la revisión versionada** en `corpus/biografias/`. Va en la misma puerta porque es la
+ * misma regla —lo publicado se apoya en el documento que dice— y porque así sus fallos se
+ * leen en el mismo informe, con la ruta del fichero de Autor delante. Las dos lecturas son
+ * disjuntas: el cotejo de Citas no lee `corpus/biografias/`.
+ *
  * AD-22 — no pide nada por la red. Todo lo que lee está versionado en el repositorio.
  */
 
@@ -24,13 +30,16 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import type { AstroIntegration } from 'astro';
 import {
+  leerAutores,
   leerCensoDeCotejo,
   leerCitas,
+  leerDocumentosDeBiografia,
   leerDocumentosDeFuente,
   rutasDelCorpus,
 } from '../tools/lib/corpus.ts';
 import {
   cotejar,
+  cotejarBiografias,
   formatearFallos,
   resumenDelBuild,
   titularDeFallos,
@@ -58,7 +67,7 @@ function relativaALaRaiz(raiz: string, ruta: string): string {
 export default function cotejoDeCitas(): AstroIntegration {
   let raiz = process.cwd();
 
-  async function cotejarElCorpus(): Promise<ResultadoDeCotejo> {
+  async function cotejarElCorpus(): Promise<ResultadoDeCotejo & { deBiografias: number }> {
     const rutas = rutasDelCorpus(join(raiz, 'corpus'));
 
     const publicadas = await leerCitas(rutas.citas);
@@ -73,12 +82,29 @@ export default function cotejoDeCitas(): AstroIntegration {
       ...(cita.fuente !== undefined ? { fuente: cita.fuente } : {}),
     }));
 
-    return cotejar({
+    const deCitas = cotejar({
       citas,
       documentos,
       censo,
       rutaDelCenso: relativaALaRaiz(raiz, rutas.pendientesDeCotejo),
     });
+
+    const autores = (await leerAutores(rutas)).map((autor) => ({
+      ruta: relativaALaRaiz(raiz, autor.ruta),
+      ...(autor.biografia !== undefined ? { biografia: autor.biografia } : {}),
+    }));
+    const deBiografias = cotejarBiografias(
+      autores,
+      await leerDocumentosDeBiografia(rutas),
+      relativaALaRaiz(raiz, rutas.biografias),
+    );
+
+    /*
+     * Los fallos de biografía entran en el **mismo** recuento y en el mismo veredicto: un build
+     * roto solo por biografías no puede imprimir el resumen limpio del cotejo de Citas.
+     */
+    const fallos = [...deCitas.fallos, ...deBiografias];
+    return { ...deCitas, ok: fallos.length === 0, fallos, deBiografias: deBiografias.length };
   }
 
   return {
@@ -106,7 +132,7 @@ export default function cotejoDeCitas(): AstroIntegration {
            * casi cada línea. La pista sería ruido que despista a quien lee el fallo.
            */
           logger.error(`\n${formatearFallos(resultado.fallos)}`);
-          throw new Error(titularDeFallos(resultado.fallos.length));
+          throw new Error(titularDeFallos(resultado.fallos.length, resultado.deBiografias));
         }
 
         logger.info(
@@ -136,8 +162,7 @@ export default function cotejoDeCitas(): AstroIntegration {
         if (resultado.ok) return;
         logger.warn(
           `\n${formatearFallos(resultado.fallos)}` +
-            `El build no dejará publicar esto: ${resultado.fallos.length} ` +
-            `${resultado.fallos.length === 1 ? 'incumplimiento' : 'incumplimientos'}.\n`,
+            `El build no dejará publicar esto: ${titularDeFallos(resultado.fallos.length, resultado.deBiografias)}\n`,
         );
       },
     },

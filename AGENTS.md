@@ -87,6 +87,32 @@ distingue a un Autor del homónimo que el Corpus no desambigua —«Séneca» co
 Cuando el documento no declara autor —o firma «Anónimo», que es lo mismo—, el informe de
 `extraer` lo dice —«Autor sin cotejar»— para que se vea que la puerta no actuó.
 
+**Las biografías no son obras, y no se siembran.** La semblanza de un Autor sale de una Fuente
+**mutable** —Wikipedia en español—, que solo entra por revisión: la misma orden, con el enlace
+permanente de una revisión (`oldid=N`), y sin él se niega con código 1 sin pedir nada:
+
+```
+npx tsx tools/recuperar.ts "https://es.wikipedia.org/w/index.php?title=<Artículo>&oldid=<N>"
+```
+
+El título del artículo y la fecha de la revisión no salen de la URL tecleada: los **declara la
+Fuente** (su API, por `revids=N`), y si la URL trae otro título la orden se niega nombrando los
+dos. Descarga solo el wikitexto de esa revisión —nunca la página renderizada ni la dirección
+viva— y lo versiona en `corpus/biografias/{fuente}--{titulo}--r{N}.txt`, con la revisión en el
+nombre y en la cabecera, y la licencia **de esa revisión** (CC BY-SA 3.0 antes del 2023-06-29,
+4.0 desde entonces): otra revisión es otro documento y no reemplaza al anterior. **El cotejo de
+Citas no lee `corpus/biografias/`**, así que de una biografía no sale ninguna candidata ni se
+documenta ninguna Cita, y una Cita cuya Fuente es mutable rompe el build.
+
+El Autor declara su biografía con una orden, **nunca tecleando el campo**: lee la revisión de
+la cabecera, comprueba que el documento es la biografía de una Fuente mutable y escribe
+`biografia: { documento, revision }` en la ficha. El build rompe si el documento falta, no se
+deja leer, no es de una Fuente mutable o no es esa revisión.
+
+```
+npx tsx tools/autor.ts biografia <slug-de-autor> <documento de corpus/biografias/>
+```
+
 ## Leer el estado de indexación
 
 El sitio cumple desde hace tiempo la exigencia de *ser* indexable y aun así el buscador ha

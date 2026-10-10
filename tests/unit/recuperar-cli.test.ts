@@ -1453,3 +1453,343 @@ describe('Historia 11.1 — lo que el Corpus ya retiró no se vuelve a descargar
     expect(existsSync(join(t.corpus, '_fuentes-retiradas'))).toBe(false);
   });
 });
+
+describe('Historia 17.1 — una Fuente mutable entra por revisión, a corpus/biografias/', () => {
+  const WIKITEXTO = [
+    '{{Ficha de persona',
+    '| nombre = Lucio Anneo Séneca',
+    '| fecha de nacimiento = {{fecha|4|a. C.}}',
+    '}}',
+    "'''Lucio Anneo Séneca''' fue un [[Filosofía|filósofo]], político y escritor " +
+      '[[Hispania|hispanorromano]].<ref>{{cita libro|título=X}}</ref>',
+    '',
+    '== Vida ==',
+    "Nació en [[Córdoba (España)|Corduba]] y escribió ''Sobre la brevedad de la vida''.",
+    '',
+    '[[Categoría:Filósofos de la Antigua Roma]]',
+  ].join('\n');
+
+  const RAW = (cuerpo = WIKITEXTO): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'text/x-wiki; charset=UTF-8' },
+    cuerpo,
+  });
+
+  /** Lo que la Fuente declara de la revisión: el artículo y su fecha. */
+  const API = (revid: number, titulo = 'Séneca', timestamp = '2024-05-01T10:00:00Z'): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'application/json; charset=utf-8' },
+    cuerpo: JSON.stringify({
+      batchcomplete: '',
+      query: { pages: { '42': { pageid: 42, ns: 0, title: titulo, revisions: [{ revid, parentid: 1, timestamp }] } } },
+    }),
+  });
+
+  const origen = (n: number) => `https://es.wikipedia.org/w/index.php?oldid=${n}&action=raw`;
+  const api = (n: number) =>
+    `https://es.wikipedia.org/w/api.php?action=query&prop=revisions|info&revids=${n}&rvprop=timestamp|ids&format=json`;
+  const PERMANENTE = 'https://es.wikipedia.org/w/index.php?title=Séneca&oldid=123';
+  const GUION_123 = { [api(123)]: API(123), [origen(123)]: RAW() };
+
+  async function conBiografias() {
+    const t = await taller();
+    await mkdir(join(t.corpus, 'biografias'), { recursive: true });
+    return t;
+  }
+
+  it('sin oldid se niega con código 1, explica el enlace permanente y no pide nada', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar('https://es.wikipedia.org/wiki/Séneca', t, { '*': RAW() });
+
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/no pide ninguna revisión/);
+    expect(resultado.error).toMatch(/Enlace permanente/);
+    expect(resultado.error).toMatch(/oldid=/);
+    expect(await pedidas(t)).toEqual([]);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([]);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([]);
+  });
+
+  it.each([
+    'https://es.wikipedia.org/w/index.php?title=Séneca&diff=124&oldid=123',
+    'https://es.wikipedia.org/w/index.php?title=Séneca&oldid=123&direction=next',
+  ])('%s no es un enlace permanente: se niega sin pedir nada', async (url) => {
+    const t = await conBiografias();
+    const resultado = await recuperar(url, t, { '*': RAW() });
+    expect(resultado.codigo).toBe(1);
+    expect(await pedidas(t)).toEqual([]);
+  });
+
+  it('con oldid pide lo que la Fuente declara y el origen de la revisión, y escribe la biografía', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(PERMANENTE, t, GUION_123);
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    // Ni la página renderizada ni la dirección viva: la declaración y el origen.
+    expect(await pedidas(t)).toEqual([api(123), origen(123)]);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([
+      'wikipedia-es--seneca--r123.txt',
+    ]);
+    // Y nada en el espacio de las obras.
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([]);
+
+    const documento = await readFile(
+      join(t.corpus, 'biografias', 'wikipedia-es--seneca--r123.txt'),
+      'utf8',
+    );
+    expect(documento).toContain('fuente: wikipedia-es');
+    expect(documento).toContain('clase: biografia');
+    expect(documento).toContain('titulo: Séneca');
+    expect(documento).toContain('revision: 123');
+    expect(documento).toContain('fechaDeRevision: 2024-05-01');
+    expect(documento).toContain('licencia: CC BY-SA 4.0');
+    expect(documento).toContain(
+      'url: https://es.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=123',
+    );
+    expect(documento).toMatch(/^recuperado: \d{4}-\d{2}-\d{2}$/m);
+    expect(documento).not.toMatch(/^obra:/m);
+    expect(documento).toContain('Lucio Anneo Séneca fue un filósofo, político y escritor hispanorromano.');
+    expect(documento).toContain('Nació en Corduba y escribió Sobre la brevedad de la vida.');
+    expect(documento).not.toMatch(/\{\{|\}\}|\[\[|<ref|'''|Categoría|== Vida ==/);
+    expect(resultado.salida).toMatch(/Licencia: CC BY-SA 4\.0/);
+  });
+
+  it('una revisión anterior al 2023-06-29 es CC BY-SA 3.0, y el mensaje lo dice', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(PERMANENTE, t, {
+      [api(123)]: API(123, 'Séneca', '2023-06-28T23:59:59Z'),
+      [origen(123)]: RAW(),
+    });
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(resultado.salida).toMatch(/Licencia: CC BY-SA 3\.0/);
+    expect(resultado.salida).not.toMatch(/4\.0/);
+    const documento = await readFile(
+      join(t.corpus, 'biografias', 'wikipedia-es--seneca--r123.txt'),
+      'utf8',
+    );
+    expect(documento).toContain('licencia: CC BY-SA 3.0');
+    expect(documento).toContain('fechaDeRevision: 2023-06-28');
+  });
+
+  it('el título lo dice la Fuente: si la URL teclea otro, se niega nombrando los dos', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(
+      'https://es.wikipedia.org/w/index.php?title=Platón&oldid=123',
+      t,
+      GUION_123,
+    );
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain('«Platón»');
+    expect(resultado.error).toContain('«Séneca»');
+    expect(await pedidas(t)).toEqual([api(123)]);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([]);
+  });
+
+  it('espacios y guiones bajos no son otro título', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(
+      'https://es.wikipedia.org/wiki/Lucio_Anneo_S%C3%A9neca?oldid=123',
+      t,
+      { [api(123)]: API(123, 'Lucio Anneo Séneca'), [origen(123)]: RAW() },
+    );
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([
+      'wikipedia-es--lucio-anneo-seneca--r123.txt',
+    ]);
+  });
+
+  it('sin título en la dirección, el de la Fuente basta', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar('https://es.wikipedia.org/w/index.php?oldid=123', t, GUION_123);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([
+      'wikipedia-es--seneca--r123.txt',
+    ]);
+  });
+
+  it.each([
+    'https://es.wikipedia.org/wiki/Especial:EnlacePermanente/123',
+    'https://es.wikipedia.org/wiki/Special:PermanentLink/123',
+    'https://es.m.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=123',
+  ])('%s vale, y pide lo mismo al anfitrión de siempre', async (url) => {
+    const t = await conBiografias();
+    const resultado = await recuperar(url, t, GUION_123);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([api(123), origen(123)]);
+    const documento = await readFile(
+      join(t.corpus, 'biografias', 'wikipedia-es--seneca--r123.txt'),
+      'utf8',
+    );
+    expect(documento).toContain(`pedido: ${url}`);
+  });
+
+  it('una revisión que la Fuente no reconoce se niega sin pedir el origen', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(PERMANENTE, t, {
+      [api(123)]: {
+        estado: 200,
+        cabeceras: { 'content-type': 'application/json' },
+        cuerpo: JSON.stringify({ query: { badrevids: { '123': { revid: 123, missing: '' } } } }),
+      },
+      [origen(123)]: RAW(),
+    });
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/no reconoce la revisión 123/);
+    expect(await pedidas(t)).toEqual([api(123)]);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([]);
+  });
+
+  it('el origen solo se acepta como wikitexto o texto plano, nunca HTML', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(PERMANENTE, t, {
+      [api(123)]: API(123),
+      [origen(123)]: OK('<html><body>Séneca</body></html>'),
+    });
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/text\/html/);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([]);
+  });
+
+  it('la misma revisión otra vez: «Ya versionado», sin descargar', async () => {
+    const t = await conBiografias();
+    await recuperar(PERMANENTE, t, GUION_123);
+    const antes = (await pedidas(t)).length;
+
+    const segunda = await recuperar('https://es.wikipedia.org/w/index.php?oldid=123', t, {
+      [api(123)]: API(123),
+      [origen(123)]: RAW('otra cosa'),
+    });
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect(segunda.salida).toMatch(/Ya versionado/);
+    expect(await pedidas(t)).toHaveLength(antes);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([
+      'wikipedia-es--seneca--r123.txt',
+    ]);
+  });
+
+  it('la reutilización coteja el título de la cabecera con el tecleado', async () => {
+    const t = await conBiografias();
+    await recuperar(PERMANENTE, t, GUION_123);
+    const antes = (await pedidas(t)).length;
+
+    const segunda = await recuperar(
+      'https://es.wikipedia.org/w/index.php?title=Platón&oldid=123',
+      t,
+      GUION_123,
+    );
+    expect(segunda.codigo).toBe(1);
+    expect(segunda.error).toContain('«Platón»');
+    expect(segunda.error).toContain('«Séneca»');
+    expect(segunda.salida).not.toMatch(/Ya versionado/);
+    expect(await pedidas(t)).toHaveLength(antes);
+  });
+
+  it('otra revisión es otro documento, y el anterior sigue', async () => {
+    const t = await conBiografias();
+    await recuperar(PERMANENTE, t, GUION_123);
+    const segunda = await recuperar(
+      'https://es.wikipedia.org/w/index.php?title=Séneca&oldid=124',
+      t,
+      {
+        [api(124)]: API(124),
+        [origen(124)]: RAW(`${WIKITEXTO}\nUna frase añadida en la revisión siguiente.`),
+      },
+    );
+
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect((await readdir(join(t.corpus, 'biografias'))).sort()).toEqual([
+      'wikipedia-es--seneca--r123.txt',
+      'wikipedia-es--seneca--r124.txt',
+    ]);
+    expect(
+      await readFile(join(t.corpus, 'biografias', 'wikipedia-es--seneca--r123.txt'), 'utf8'),
+    ).not.toContain('Una frase añadida');
+  });
+
+  it('un fichero que ocupa el nombre sin ser esa revisión no se sobrescribe', async () => {
+    const t = await conBiografias();
+    const ocupado = join(t.corpus, 'biografias', 'wikipedia-es--seneca--r123.txt');
+    await writeFile(ocupado, 'escrito a mano\n', 'utf8');
+    const resultado = await recuperar(PERMANENTE, t, GUION_123);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/No se ha sobrescrito/);
+    expect(await readFile(ocupado, 'utf8')).toBe('escrito a mano\n');
+  });
+
+  it('la redirección de la declaración se revalida: si lleva fuera, no se versiona nada', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(PERMANENTE, t, {
+      [api(123)]: { estado: 302, cabeceras: { location: 'https://wiki.example.com/api' } },
+      'https://wiki.example.com/api': API(123),
+      [origen(123)]: RAW(),
+    });
+    expect(resultado.codigo).not.toBe(0);
+    expect(resultado.error).toMatch(/no es de Wikipedia en español/);
+    expect(await pedidas(t)).toEqual([api(123)]);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([]);
+  });
+
+  it('la redirección del origen se revalida igual', async () => {
+    const t = await conBiografias();
+    const resultado = await recuperar(PERMANENTE, t, {
+      [api(123)]: API(123),
+      [origen(123)]: { estado: 302, cabeceras: { location: 'https://wiki.example.com/raw' } },
+      'https://wiki.example.com/raw': RAW(),
+    });
+    expect(resultado.codigo).not.toBe(0);
+    expect(resultado.error).toMatch(/no es de Wikipedia en español/);
+    expect(await pedidas(t)).toEqual([api(123), origen(123)]);
+    expect(await readdir(join(t.corpus, 'biografias'))).toEqual([]);
+  });
+});
+
+describe('Historia 17.1 — reutilizar una obra compara también la obra de su cabecera', () => {
+  it('dos obras que truncan igual y cabeceras distintas: «comparten nombre», no «ya versionado»', async () => {
+    const t = await taller();
+    const comun =
+      'Historia general de las cosas de Nueva España escrita por Fray Bernardino';
+    const pagina = (titulo: string) => `<!DOCTYPE html><html><head>
+<title>${titulo} - Wikisource</title></head><body>
+<h1 id="firstHeading">${titulo}</h1>
+<div class="mw-parser-output">
+<p>No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él.</p>
+</div></body></html>`;
+
+    // La obra A, versionada.
+    const obraA = `${comun} de Sahagún`;
+    const primeraUrl = 'https://es.wikisource.org/wiki/A';
+    expect((await recuperar(primeraUrl, t, { [primeraUrl]: OK(pagina(obraA)) })).codigo).toBe(0);
+    const [nombre] = await readdir(join(t.corpus, 'fuentes'));
+
+    /*
+     * El fichero que ocupa el nombre declara en su cabecera **otra** obra B que trunca igual,
+     * aunque su declaración derive la misma que la pedida: lo que deja un documento anterior
+     * a una corrección del lector. La derivada coincide; la cabecera no.
+     */
+    const obraB = `${comun} de Sahagún, tomo segundo`;
+    const ruta = join(t.corpus, 'fuentes', nombre);
+    await writeFile(
+      ruta,
+      (await readFile(ruta, 'utf8')).replace(`obra: ${obraA}\n`, `obra: ${obraB}\n`),
+      'utf8',
+    );
+
+    const otraUrl = 'https://es.m.wikisource.org/wiki/A';
+    const segunda = await recuperar(otraUrl, t, { [otraUrl]: OK(pagina(obraA)) });
+
+    expect(segunda.codigo).toBe(1);
+    expect(segunda.error).toMatch(/comparten nombre de documento/);
+    expect(segunda.error).toContain(obraB);
+    expect(segunda.salida).not.toMatch(/Ya versionado/);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([nombre]);
+  });
+
+  it('con la cabecera igual a la obra pedida sigue reutilizando', async () => {
+    const t = await taller();
+    await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PAGINA) });
+    const otra = 'https://es.m.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida';
+    const segunda = await recuperar(otra, t, { [otra]: OK(PAGINA) });
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect(segunda.salida).toMatch(/Ya versionado/);
+  });
+});

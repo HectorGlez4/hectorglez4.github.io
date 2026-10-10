@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { FUENTES, fuenteDe, fuenteDeUrl } from '../../tools/lib/fuentes.ts';
-import { LECTORES_POR_FUENTE } from '../../tools/lib/documento.ts';
+import { FUENTES, fuenteDe, fuenteDeUrl, fuentesMalDeclaradas } from '../../tools/lib/fuentes.ts';
+import { LECTORES_DE_BIOGRAFIA, LECTORES_POR_FUENTE } from '../../tools/lib/documento.ts';
 import {
   MAX_CARACTERES_CANDIDATA,
   MIN_CARACTERES_CANDIDATA,
@@ -166,16 +166,49 @@ describe('Historia 11.1 — FUENTES y las tablas por Fuente no se desincronizan'
    * siquiera reconocería su propia dirección, y la suite seguiría en verde.
    */
   it.each(FUENTES.filter((f) => f.permiteReutilizacion).map((f) => [f.id, f] as const))(
-    '«%s» declara anfitriones y tiene lector de obra',
+    '«%s» declara anfitriones y tiene su lector: de obra si es fija, de biografía si es mutable',
     (id, fuente) => {
       expect(fuente.anfitriones.length).toBeGreaterThan(0);
       for (const anfitrion of fuente.anfitriones) {
         expect(anfitrion).toMatch(/^[a-z0-9.-]+\.[a-z]{2,}$/);
         expect(fuenteDeUrl(`https://${anfitrion}/loquesea`)?.id).toBe(id);
       }
-      expect(LECTORES_POR_FUENTE[id], `falta el lector de ${id}`).toBeDefined();
+      if (fuente.mutable === true) {
+        // Historia 17.1 — de una Fuente mutable no sale ninguna Cita: no tiene lector de obra.
+        expect(LECTORES_DE_BIOGRAFIA[id], `falta el lector de biografía de ${id}`).toBeDefined();
+        expect(LECTORES_POR_FUENTE[id], `${id} es mutable y tiene lector de obra`).toBeUndefined();
+      } else {
+        expect(LECTORES_POR_FUENTE[id], `falta el lector de ${id}`).toBeDefined();
+      }
     },
   );
+
+  it('Historia 17.1 — toda Fuente mutable declara cómo se extrae la revisión de su URL', () => {
+    expect(fuentesMalDeclaradas()).toEqual([]);
+    for (const fuente of FUENTES.filter((f) => f.mutable === true)) {
+      expect(fuente.revision, fuente.id).toBeDefined();
+    }
+  });
+
+  it('Historia 17.1 — una Fuente mutable sin revisión no entra en el conjunto', () => {
+    const sinRevision = {
+      id: 'mutable-sin-revision',
+      nombre: 'Mutable sin revisión',
+      licencia: 'CC BY-SA 4.0',
+      permiteReutilizacion: true,
+      anfitriones: ['mutable.example'],
+      mutable: true as const,
+    };
+    expect(fuentesMalDeclaradas([...FUENTES, sinRevision]).map((f) => f.id)).toEqual([
+      'mutable-sin-revision',
+    ]);
+  });
+
+  it('ningún lector de biografía sobra: cada uno es de una Fuente mutable', () => {
+    for (const id of Object.keys(LECTORES_DE_BIOGRAFIA)) {
+      expect(fuenteDe(id)?.mutable, id).toBe(true);
+    }
+  });
 
   it('toda Fuente del conjunto reconoce sus propias direcciones', () => {
     for (const fuente of FUENTES) {

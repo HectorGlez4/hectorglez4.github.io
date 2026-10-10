@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { RAIZ } from './ayuda/construir.js';
 import { TRADICIONES } from '../../tools/lib/gestion.ts';
+import { componerBiografia } from '../../tools/lib/documento.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -264,5 +265,83 @@ describe('AD-2 — autor.ts retirar', () => {
     ]);
     expect(creando.codigo).toBe(2);
     expect(creando.error).toContain('--motivo');
+  });
+});
+
+describe('Historia 17.1 — la biografía se declara con la orden, no se teclea', () => {
+  const FICHA = 'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\ntradicion: "otra"\n';
+
+  function biografia(campos: { fuente?: string; titulo?: string; revision?: number } = {}) {
+    return componerBiografia(
+      {
+        fuente: campos.fuente ?? 'wikipedia-es',
+        titulo: campos.titulo ?? 'Séneca',
+        revision: campos.revision ?? 123,
+        fechaDeRevision: '2022-01-01',
+        licencia: 'CC BY-SA 3.0',
+        url: 'https://es.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=123',
+        recuperado: '2026-10-10',
+      },
+      campos.titulo ?? 'Séneca',
+      'Lucio Anneo Séneca fue un filósofo.',
+    );
+  }
+
+  async function conSeneca(documentos: Record<string, string>) {
+    const corpus = await corpusVacio();
+    await writeFile(join(corpus, 'autores', 'seneca.yml'), FICHA, 'utf8');
+    await mkdir(join(corpus, 'biografias'), { recursive: true });
+    for (const [nombre, contenido] of Object.entries(documentos)) {
+      await writeFile(join(corpus, 'biografias', nombre), contenido, 'utf8');
+    }
+    return corpus;
+  }
+
+  it('lee la revisión de la cabecera y la escribe en la ficha, sin perder nada', async () => {
+    const corpus = await conSeneca({ 'wikipedia-es--seneca--r123.txt': biografia() });
+    const hecho = await correr(corpus, ['biografia', 'seneca', 'wikipedia-es--seneca--r123']);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toMatch(/revisión 123, CC BY-SA 3\.0/);
+    const ficha = await readFile(join(corpus, 'autores', 'seneca.yml'), 'utf8');
+    expect(ficha).toMatch(/biografia:\n\s+documento: "wikipedia-es--seneca--r123"\n\s+revision: 123/);
+    expect(ficha).toContain('tradicion: "otra"');
+  });
+
+  it('acepta el nombre con .txt', async () => {
+    const corpus = await conSeneca({ 'wikipedia-es--seneca--r123.txt': biografia() });
+    const hecho = await correr(corpus, ['biografia', 'seneca', 'wikipedia-es--seneca--r123.txt']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+  });
+
+  it.each([
+    ['un documento que no existe', {}, /No hay ningún documento/],
+    [
+      'un documento ilegible',
+      { 'wikipedia-es--seneca--r123.txt': 'no es un documento\n' },
+      /no tiene la forma/,
+    ],
+    [
+      'la biografía de una Fuente no mutable',
+      { 'wikipedia-es--seneca--r123.txt': biografia({ fuente: 'wikisource-es' }) },
+      /no es la biografía de una Fuente mutable/,
+    ],
+    [
+      'un nombre que no es el de su cabecera',
+      { 'wikipedia-es--seneca--r123.txt': biografia({ revision: 124 }) },
+      /tendría que llamarse wikipedia-es--seneca--r124\.txt/,
+    ],
+  ])('se niega con %s, y no toca la ficha', async (_caso, documentos, mensaje) => {
+    const corpus = await conSeneca(documentos as Record<string, string>);
+    const hecho = await correr(corpus, ['biografia', 'seneca', 'wikipedia-es--seneca--r123']);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toMatch(mensaje);
+    expect(await readFile(join(corpus, 'autores', 'seneca.yml'), 'utf8')).toBe(FICHA);
+  });
+
+  it('un Autor que no existe se rechaza, y sin documento es la forma de la invocación', async () => {
+    const corpus = await conSeneca({ 'wikipedia-es--seneca--r123.txt': biografia() });
+    expect((await correr(corpus, ['biografia', 'nadie', 'wikipedia-es--seneca--r123'])).codigo).toBe(1);
+    expect((await correr(corpus, ['biografia', 'seneca'])).codigo).toBe(2);
   });
 });

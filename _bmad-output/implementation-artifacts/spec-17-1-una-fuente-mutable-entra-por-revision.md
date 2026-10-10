@@ -2,14 +2,28 @@
 title: 'Historia 17.1 — Una Fuente mutable entra por revisión, y su documento no comparte espacio con las obras'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '6a5942ef4834748f6891eebdeed6379cb0194b50'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-17-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      No hay ciclo de vida de corpus/biografias/: ni aviso de biografías sin Autor que las declare, ni _biografias-retiradas para una revisión superada, ni mención en autor retirar.
+    evidence: |-
+      La 17.1 solo crea y coteja; retirar y reemplazar revisiones no tiene orden.
+    location: >-
+      tools/lib/gestion.ts
+    severity: low
+  - summary: >-
+      La puerta no comprueba que la biografía trate del Autor que la declara (titulo frente a nombre).
+    evidence: |-
+      seneca.yml podría apuntar a wikipedia-es--platon--r5; lo natural es cerrarlo con la 17.2, que publica la semblanza.
+    location: >-
+      tools/lib/cotejo.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -126,9 +140,33 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13 (high 1, medium 4, low 8)
+- defer: 2 (low 2)
+- reject: 2
+- addressed_findings:
+  - `[high]` `[patch]` El título salía de la URL tecleada y no de la revisión descargada (Séneca guardado como Platón) → título y fecha de la API de MediaWiki para esa revisión, cotejados con la URL.
+  - `[medium]` `[patch]` Licencia fija en 4.0 → por la fecha de la revisión, en la cabecera.
+  - `[medium]` `[patch]` Una Cita de Fuente mutable recibía «falta el documento» → regla propia.
+  - `[medium]` `[patch]` Las negativas de extraer y documentar sin prueba → pruebas.
+  - `[medium]` `[patch]` La biografía se declaraba a mano → `autor.ts biografia`.
+  - `[low]` `[patch]` direction y enlaces permanentes y móviles; tipos del origen en bruto; `wx` y lectura no recursiva; `cuerpoDeWikitexto` que se niega; un solo analizador de revisión y `unaLinea`; forma de `biografia` en el esquema; validación y nombre exacto en `cotejarBiografias`; titular con las biografías.
+
 ## Verification
 
 **Commands:**
 - `npx vitest run tests/unit/recuperar-cli.test.ts tests/unit/cotejo.test.ts tests/unit/documento.test.ts tests/unit/extraccion.test.ts tests/unit/andamiaje.test.ts tests/unit/puerta-de-admision.test.ts` (y los ficheros nuevos) -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `wikipedia-es` entra en el conjunto cerrado como Fuente mutable, solo por revisión. `recuperar` pide el título y la fecha a la API para esa revisión y el wikitexto con `action=raw&oldid=N`, y lo versiona en `corpus/biografias/{fuente}--{titulo}--rN.txt` con la licencia según la fecha. El cotejo de Citas nunca lee biografías, y una Cita de Fuente mutable rompe. El Autor declara su biografía con `autor.ts biografia` y el build rompe si la revisión no casa. La reutilización de obras compara la obra de la cabecera. `dist/` sin cambios. No se ha descargado ninguna biografía real.
+
+**Revisión:** 13 parches aplicados, 2 diferidos y 2 rechazados (cotejo tipado único en lugar de directorios separados, que cumple igual el AC; la cola de `{{` desequilibrados antes del tope). Seguimiento: high 1 → true.
+
+**Verificación:** suite 115 ficheros y 3564 pruebas; astro check, 0 errores; build en verde; `dist/` idéntico a 6a5942ef.

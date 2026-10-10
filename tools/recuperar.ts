@@ -41,6 +41,12 @@
  *
  * No acepta `--obra`, `--año` ni `--licencia`, y no es un descuido: el «So that» de la
  * historia es que nadie pueda teclear una Procedencia que la Fuente no dice.
+ *
+ * **Una Fuente mutable va por su propia rama** (Historia 17.1). Solo se admite una dirección
+ * que pida una revisión (`oldid=N`); se descarga **solo** el texto de origen de esa revisión
+ * (`/w/index.php?oldid=N&action=raw`), nunca la página renderizada ni la dirección viva, y se
+ * versiona como documento de biografía en `corpus/biografias/`, con la revisión en el nombre
+ * y en la cabecera. Ese espacio es aparte de `corpus/fuentes/`: el cotejo de Citas no lo lee.
  */
 
 import { existsSync } from 'node:fs';
@@ -49,11 +55,23 @@ import { basename, extname, join } from 'node:path';
 import { DOMINIO } from '../src/lib/dominio.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
-import { conReintentos, fuenteDeUrl, type Fuente } from './lib/fuentes.ts';
+import {
+  conReintentos,
+  fuenteDeUrl,
+  mismoTitulo,
+  type DireccionamientoPorRevision,
+  type Fuente,
+} from './lib/fuentes.ts';
 import {
   analizarDocumento,
   autorDelIndice,
+  CLASE_BIOGRAFIA,
+  componerBiografia,
   componerDocumento,
+  derivarBiografia,
+  LECTORES_DE_BIOGRAFIA,
+  nombreDeBiografia,
+  unaLinea,
   derivarDeLaDeclaracion,
   derivarDocumento,
   fichaDeIndiceReconocida,
@@ -89,6 +107,18 @@ const TIPOS_ADMITIDOS = ['text/html', 'text/plain', 'application/xhtml+xml'];
  */
 const TIPOS_DE_ENCABEZADO = ['text/x-wiki', 'text/plain', 'text/html'];
 
+/**
+ * Los tipos del **texto de origen de una revisión** de una Fuente mutable — Historia 17.1.
+ *
+ * Aparte de `TIPOS_DE_ENCABEZADO`, que admite también `text/html` porque el encabezado de
+ * Wikisource es un metadato que se lee si llega: el cuerpo de una biografía **es** el
+ * documento, y una página HTML que llegase por ahí se versionaría como si fuera wikitexto.
+ */
+const TIPOS_DE_ORIGEN_EN_BRUTO = ['text/x-wiki', 'text/plain'];
+
+/** Los tipos de la respuesta en la que la Fuente declara título y fecha de una revisión. */
+const TIPOS_DE_DECLARACION = ['application/json'];
+
 /** Las Fuentes cuyo metadato vive en el texto de origen y no en la página renderizada. */
 const ENCABEZADO_EN_EL_ORIGEN = new Set(['wikisource-es']);
 
@@ -123,6 +153,16 @@ if (!fuente.permiteReutilizacion) {
       `(licencia declarada: ${fuente.licencia}). No se ha descargado nada.`,
     ],
   });
+}
+
+// ── Una Fuente mutable entra por revisión, y a su propio espacio ─────────────
+
+if (fuente.mutable === true) {
+  if (fuente.revision === undefined) {
+    // `fuenteDeUrl` ya no la reconoce; esto solo lo deja escrito para el tipo.
+    terminar({ ok: false, motivos: [`${fuente.nombre} es mutable y no declara revisión.`] });
+  }
+  await recuperarBiografia(url, fuente, fuente.revision);
 }
 
 // ── Lo ya versionado se reutiliza, sin volver a pedirlo ──────────────────────
@@ -295,6 +335,34 @@ if (existsSync(destino)) {
   const comoSeLlama = (obra: string | undefined, pagina: string | undefined) =>
     pagina === undefined || pagina === obra ? `«${obra}»` : `«${pagina}», de «${obra}»`;
 
+  /*
+   * Historia 17.1 — y la **obra que declara su cabecera**, además de la derivada. El nombre
+   * es una clave con pérdida: dos obras que truncan igual comparten fichero, y si la
+   * declaración del existente deriva lo mismo que la pedida —una declaración vacía de
+   * título, un documento anterior a una corrección del lector— solo la cabecera dice que el
+   * fichero es de otra obra. Contestar «ya versionado» ahí dejaría la pedida sin versionar.
+   * Una biografía que ocupe el nombre tampoco es esta obra.
+   */
+  const obraDeSuCabecera = existente.cabecera.obra;
+  const otraCabecera =
+    existente.cabecera.clase === CLASE_BIOGRAFIA ||
+    obraDeSuCabecera === undefined ||
+    unaLinea(obraDeSuCabecera) !== unaLinea(derivado.obra);
+
+  if (otraCabecera && suyo.obra === derivado.obra && suyo.pagina === derivado.pagina) {
+    terminar({
+      ok: false,
+      motivos: [
+        `«${derivado.obra}» y «${existente.cabecera.clase === CLASE_BIOGRAFIA ? existente.cabecera.titulo : obraDeSuCabecera}», ` +
+          `la obra que declara la cabecera del documento existente, comparten nombre de ` +
+          `documento (${nombre}.txt).`,
+        'El nombre se recorta, y estas dos coinciden al recortarlo. No se ha versionado ' +
+          'nada: renombre el documento existente o acorte el título antes de volver a ' +
+          'recuperar.',
+      ],
+    });
+  }
+
   if (suyo.obra !== derivado.obra || suyo.pagina !== derivado.pagina) {
     terminar({
       ok: false,
@@ -439,6 +507,176 @@ terminar({
 });
 
 // ── Piezas ───────────────────────────────────────────────────────────────────
+
+/**
+ * La rama de una Fuente mutable — Historia 17.1. Termina el proceso siempre.
+ *
+ * El orden es el de la rama de obras, con tres diferencias que son la historia entera:
+ *
+ *   · sin una revisión en la dirección no se pide nada;
+ *   · **el título y la fecha los declara la Fuente** sobre esa revisión, no la dirección
+ *     tecleada: si la dirección trae otro título, se niega nombrando los dos;
+ *   · el texto que se versiona es solo el de origen de esa revisión, nunca la página.
+ *
+ * La reutilización va **por revisión** y antes de pedir nada: el `oldid` identifica la
+ * revisión en toda la Fuente. Otra revisión del mismo artículo es otro documento, y el
+ * anterior se queda donde está (AD-2).
+ */
+async function recuperarBiografia(
+  pedida: string,
+  fuente: Fuente,
+  direccionamiento: DireccionamientoPorRevision,
+): Promise<never> {
+  const revision = direccionamiento.revisionDe(pedida);
+  if (revision === undefined) {
+    terminar({
+      ok: false,
+      motivos: [
+        `«${pedida}» no pide ninguna revisión, y ${fuente.nombre} cambia cada día: su ` +
+          'dirección viva no es un documento. No se ha pedido nada.',
+        'Use el enlace permanente de la revisión, con «oldid=N»: en el artículo, ' +
+          '«Herramientas → Enlace permanente», o una fila del «Ver historial». Por ejemplo: ' +
+          'https://es.wikipedia.org/w/index.php?title=Séneca&oldid=123456789',
+      ],
+    });
+  }
+
+  const tecleado = direccionamiento.tituloPedido(pedida);
+  const otroArticulo = (declarado: string, deDonde: string) =>
+    terminar({
+      ok: false,
+      motivos: [
+        `La dirección nombra «${tecleado}» y la revisión ${revision} es de «${declarado}», ` +
+          `según ${deDonde}. No son el mismo artículo: no se ha versionado nada.`,
+        'Copie el enlace permanente desde el propio artículo, o pida la revisión sin título.',
+      ],
+    });
+
+  const yaVersionada = await biografiaDeRevision(rutas.biografias, fuente.id, revision);
+  if (yaVersionada !== undefined) {
+    if (tecleado !== undefined && mismoTitulo(yaVersionada.titulo) !== tecleado) {
+      otroArticulo(yaVersionada.titulo, `la cabecera de ${yaVersionada.ruta}`);
+    }
+    terminar({
+      ok: true,
+      ruta: yaVersionada.ruta,
+      mensaje:
+        `Ya versionado: ${yaVersionada.ruta}\n` +
+        `La revisión ${revision} no cambia, así que no se ha vuelto a descargar ni se ha ` +
+        'añadido otra copia.',
+    });
+  }
+
+  const lector = LECTORES_DE_BIOGRAFIA[fuente.id];
+  if (lector === undefined) {
+    terminar({ ok: false, motivos: [`No hay lector de biografía para «${fuente.id}».`] });
+  }
+
+  // Lo que la Fuente declara de la revisión: el artículo y la fecha.
+  const consulta = direccionamiento.declaracion(revision);
+  const respuesta = await conReintentos(
+    () => descargar(consulta, fuente, { tipos: TIPOS_DE_DECLARACION, acepta: 'application/json' }),
+    (r) => r.ok || !esPasajero(r),
+  );
+  if (!respuesta.ok) terminar({ ok: false, motivos: respuesta.motivos });
+  const declarada = lector.revisionDeclarada(respuesta.contenido, revision);
+  if (!declarada.ok) terminar({ ok: false, motivos: [declarada.motivo] });
+  if (tecleado !== undefined && declarada.titulo !== tecleado) {
+    otroArticulo(declarada.titulo, fuente.nombre);
+  }
+
+  const nombre = nombreDeBiografia(fuente.id, declarada.titulo, revision);
+  if (nombre === undefined) {
+    terminar({
+      ok: false,
+      motivos: [
+        `El título «${declarada.titulo}» no deja ningún nombre utilizable al normalizarlo.`,
+        'No se ha versionado nada.',
+      ],
+    });
+  }
+
+  const origen = direccionamiento.origen(revision);
+  const descarga = await conReintentos(
+    () => descargar(origen, fuente, { tipos: TIPOS_DE_ORIGEN_EN_BRUTO, acepta: 'text/x-wiki, text/plain' }),
+    (r) => r.ok || !esPasajero(r),
+  );
+  if (!descarga.ok) terminar({ ok: false, motivos: descarga.motivos });
+
+  const derivada = derivarBiografia(fuente.id, descarga.contenido, declarada.titulo);
+  if (!derivada.ok) terminar({ ok: false, motivos: [derivada.motivo] });
+
+  const enlace = direccionamiento.enlacePermanente(declarada.titulo, revision);
+  const licencia = direccionamiento.licenciaEn(declarada.fecha);
+  const destino = join(rutas.biografias, `${nombre}.txt`);
+  await mkdir(rutas.biografias, { recursive: true });
+  try {
+    // `wx`: nunca se sobrescribe un documento. Si algo ocupa el nombre, lo dice.
+    await writeFile(
+      destino,
+      componerBiografia(
+        {
+          fuente: fuente.id,
+          titulo: declarada.titulo,
+          revision,
+          fechaDeRevision: declarada.fecha,
+          licencia,
+          url: enlace,
+          ...(pedida !== enlace ? { pedido: pedida } : {}),
+          recuperado: new Date().toISOString().slice(0, 10),
+        },
+        derivada.declaracion,
+        derivada.cuerpo,
+      ),
+      { encoding: 'utf8', flag: 'wx' },
+    );
+  } catch (fallo) {
+    const codigo = (fallo as { code?: string }).code;
+    terminar({
+      ok: false,
+      motivos: [
+        codigo === 'EEXIST'
+          ? `${destino} ya existe pero no es la biografía de la revisión ${revision} de ` +
+            `${fuente.nombre}. No se ha sobrescrito: revíselo antes de volver a recuperar.`
+          : `No se pudo escribir ${destino}: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+      ],
+    });
+  }
+
+  terminar({
+    ok: true,
+    ruta: destino,
+    mensaje:
+      `Documento de biografía versionado: ${destino}\n` +
+      `Artículo: ${declarada.titulo}\n` +
+      `Revisión: ${revision}, del ${declarada.fecha} (${enlace})\n` +
+      'El cotejo de Citas no lee corpus/biografias/: de este documento no sale ninguna Cita.\n' +
+      `Licencia: ${licencia} (${fuente.nombre}, por la fecha de la revisión)`,
+  });
+}
+
+/** El documento de biografía de esa revisión de esa Fuente, si ya está versionado. */
+async function biografiaDeRevision(
+  carpeta: string,
+  idFuente: string,
+  revision: number,
+): Promise<{ ruta: string; titulo: string } | undefined> {
+  if (!existsSync(carpeta)) return undefined;
+  for (const entrada of await readdir(carpeta)) {
+    if (extname(entrada) !== '.txt') continue;
+    if (!entrada.startsWith(`${idFuente}--`) || !entrada.endsWith(`--r${revision}.txt`)) continue;
+    const ruta = join(carpeta, entrada);
+    const cabecera = analizarDocumento(await readFile(ruta, 'utf8'))?.cabecera;
+    if (
+      cabecera?.clase === CLASE_BIOGRAFIA &&
+      cabecera.fuente === idFuente &&
+      cabecera.revision === revision
+    ) {
+      return { ruta, titulo: cabecera.titulo };
+    }
+  }
+  return undefined;
+}
 
 /**
  * El documento de una carpeta que salió de esta misma dirección, si lo hay.

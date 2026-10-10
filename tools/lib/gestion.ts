@@ -14,6 +14,8 @@
 import { mkdir, rename, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { analizarDocumento, CLASE_BIOGRAFIA, nombreDeBiografia } from './documento.ts';
+import { fuenteDe } from './fuentes.ts';
 import { autorAdmisible, nombre as nombreDeEntidad, tradicion } from '../../src/lib/admision.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
@@ -161,6 +163,81 @@ export async function editarAutor(
   // Autor y cambiarla rompería los enlaces entrantes, igual que con las Citas (AD-4).
   const ruta = await escribirAutor(rutas, slug, fusion);
   return { ok: true, ruta, mensaje: `Autor «${slug}» actualizado.` };
+}
+
+/**
+ * Declara la biografía de un Autor — Historia 17.1: `biografia: { documento, revision }`.
+ *
+ * Existe para que nadie teclee la revisión: se **lee** de la cabecera del documento, que es
+ * lo que la recuperación escribió. Se niega si el documento no está en `corpus/biografias/`,
+ * si no es la biografía de una Fuente mutable, o si su nombre no es el que su cabecera da;
+ * es lo mismo que comprueba la puerta del build, dicho antes de escribir nada.
+ */
+export async function declararBiografia(
+  rutas: Rutas,
+  slug: string,
+  documento: string,
+): Promise<Resultado> {
+  const nombre = basename(documento).replace(/\.txt$/u, '');
+  const autores = await leerAutores(rutas);
+  const actual = autores.find((a) => a.slug === slug);
+  if (!actual) return { ok: false, motivos: [`El Autor «${slug}» no existe en el corpus.`] };
+
+  const ruta = join(rutas.biografias, `${nombre}.txt`);
+  if (!existsSync(ruta)) {
+    return {
+      ok: false,
+      motivos: [
+        `No hay ningún documento «${nombre}.txt» en ${rutas.biografias}.`,
+        'Recupérelo primero con: npx tsx tools/recuperar.ts "<enlace permanente con oldid>".',
+      ],
+    };
+  }
+
+  const cabecera = analizarDocumento(await readFile(ruta, 'utf8'))?.cabecera;
+  if (cabecera === undefined) {
+    return { ok: false, motivos: [`${ruta} no tiene la forma que produce la recuperación.`] };
+  }
+  if (cabecera.clase !== CLASE_BIOGRAFIA || fuenteDe(cabecera.fuente)?.mutable !== true) {
+    return {
+      ok: false,
+      motivos: [`${ruta} no es la biografía de una Fuente mutable (fuente «${cabecera.fuente}»).`],
+    };
+  }
+  const esperado = nombreDeBiografia(cabecera.fuente, cabecera.titulo, cabecera.revision);
+  if (esperado !== nombre) {
+    return {
+      ok: false,
+      motivos: [
+        `${ruta} declara «${cabecera.titulo}», revisión ${cabecera.revision}, y por eso tendría ` +
+          `que llamarse ${esperado ?? '(ningún nombre utilizable)'}.txt.`,
+      ],
+    };
+  }
+
+  const enFichero: Record<string, unknown> = { ...actual };
+  delete enFichero.slug;
+  delete enFichero.ruta;
+  const fusion = { ...enFichero, biografia: { documento: nombre, revision: cabecera.revision } };
+
+  const validado = autorAdmisible.safeParse(fusion);
+  if (!validado.success) {
+    return {
+      ok: false,
+      motivos: validado.error.issues.map((i) =>
+        i.path.length > 0 ? `${i.path.join('.')}: ${i.message}` : i.message,
+      ),
+    };
+  }
+
+  const escrita = await escribirAutor(rutas, slug, fusion);
+  return {
+    ok: true,
+    ruta: escrita,
+    mensaje:
+      `Autor «${slug}»: biografía ${nombre} (${cabecera.titulo}, revisión ${cabecera.revision}, ` +
+      `${cabecera.licencia}).`,
+  };
 }
 
 export async function crearTema(rutas: Rutas, nombre: string): Promise<Resultado> {

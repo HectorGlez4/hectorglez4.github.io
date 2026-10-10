@@ -5,7 +5,11 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
-import { componerDocumento, type CabeceraDeDocumento } from '../../tools/lib/documento.ts';
+import {
+  componerBiografia,
+  componerDocumento,
+  type CabeceraDeDocumento,
+} from '../../tools/lib/documento.ts';
 import { autorAdmisible, citaAdmisible } from '../../src/lib/admision.ts';
 
 const ejecutar = promisify(execFile);
@@ -1272,5 +1276,38 @@ describe('Historia 19.1 — la candidata lleva la traducción que el documento d
         traduccion: { traductor: 'Germán Salinas', año: 1909 },
       });
     }
+  });
+});
+
+describe('Historia 17.1 — de una biografía no sale ninguna candidata, aunque esté en fuentes/', () => {
+  it.each([
+    ['wikipedia-es', 'https://es.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=123'],
+    ['wikisource-es', 'https://es.wikisource.org/wiki/S%C3%A9neca'],
+  ])('con fuente: %s sale con 1, dice por qué y no escribe nada', async (fuente, url) => {
+    const { corpus } = await corpusConAutores();
+    const ruta = join(corpus, 'fuentes', `${fuente}--seneca--r123.txt`);
+    await writeFile(
+      ruta,
+      componerBiografia(
+        {
+          fuente,
+          titulo: 'Séneca',
+          revision: 123,
+          fechaDeRevision: '2024-05-01',
+          licencia: 'CC BY-SA 4.0',
+          url,
+          recuperado: '2026-10-10',
+        },
+        'Séneca',
+        TEXTO,
+      ),
+      'utf8',
+    );
+
+    const resultado = await extraer(ruta, corpus);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/documento de biografía \(clase: biografia\)/);
+    expect(await readdir(join(corpus, '_revision'))).toEqual([]);
+    expect(await readdir(join(corpus, 'citas'))).toEqual([]);
   });
 });

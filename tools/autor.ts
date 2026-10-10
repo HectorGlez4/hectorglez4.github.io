@@ -7,6 +7,11 @@
  *   npx tsx tools/autor.ts editar seneca --semblanza "…"
  *   npx tsx tools/autor.ts listar
  *   npx tsx tools/autor.ts retirar seneca --motivo "por qué sale del Corpus"
+ *   npx tsx tools/autor.ts biografia seneca wikipedia-es--seneca--r123456789
+ *
+ * **La biografía se declara, no se teclea** (Historia 17.1): `biografia` lee la revisión
+ * de la cabecera del documento de `corpus/biografias/` y la escribe en la ficha, después de
+ * comprobar que el documento existe y es la biografía de una Fuente mutable.
  *
  * **Retirar mueve la ficha a `corpus/_autores-retirados/` y no borra nada** (AD-2), y se
  * niega mientras algo del Corpus apunte al Autor. Existe porque el 2026-09-14 descartar a
@@ -28,6 +33,7 @@
 import {
   TRADICIONES,
   crearAutor,
+  declararBiografia,
   editarAutor,
   retirarAutor,
   type DatosDeAutor,
@@ -59,6 +65,7 @@ const USO = [
   '                               [--tradicion …]',
   '  npx tsx tools/autor.ts listar',
   '  npx tsx tools/autor.ts retirar <slug> --motivo "…"',
+  '  npx tsx tools/autor.ts biografia <slug> <documento de corpus/biografias/>',
   '',
 ].join('\n');
 
@@ -66,7 +73,7 @@ const USO = [
 const CON_VALOR_AL_RETIRAR = ['--corpus', '--motivo'] as const;
 
 /** Las órdenes que toman el slug del Autor como primer argumento suelto. */
-const CON_SLUG = ['editar', 'retirar'];
+const CON_SLUG = ['editar', 'retirar', 'biografia'];
 
 /**
  * La tradición, comprobada contra el conjunto del esquema antes de llegar a él.
@@ -111,11 +118,16 @@ const slugPosicional =
   orden !== undefined && CON_SLUG.includes(orden) && argumentos[1] && !argumentos[1].startsWith('--')
     ? [argumentos[1]]
     : [];
+// `biografia` toma además el documento como segundo argumento suelto.
+if (orden === 'biografia' && argumentos[2] && !argumentos[2].startsWith('--')) {
+  slugPosicional.push(argumentos[2]);
+}
 const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
   solas: [orden ?? '', ...slugPosicional],
   // Cada orden admite las suyas: un `--motivo` en `crear` o un `--nombre` en `retirar` se
   // rechazan igual que una bandera inventada, en vez de ignorarse.
-  conValor: orden === 'retirar' ? CON_VALOR_AL_RETIRAR : CON_VALOR,
+  conValor:
+    orden === 'retirar' ? CON_VALOR_AL_RETIRAR : orden === 'biografia' ? ['--corpus'] : CON_VALOR,
 });
 if (noReconocidos.length > 0) {
   process.stderr.write(`${noReconocidos.join('\n')}\n\n${USO}`);
@@ -170,6 +182,16 @@ switch (orden) {
       process.exit(2);
     }
     terminar(await retirarAutor(rutas, slug, motivo));
+  }
+
+  case 'biografia': {
+    const slug = argumentos[1];
+    const documento = argumentos[2];
+    if (!slug || slug.startsWith('--') || !documento || documento.startsWith('--')) {
+      process.stderr.write(`Indique el slug del Autor y el documento de su biografía.\n\n${USO}`);
+      process.exit(2);
+    }
+    terminar(await declararBiografia(rutas, slug, documento));
   }
 
   default:

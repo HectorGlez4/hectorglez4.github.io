@@ -14,6 +14,7 @@
 import { normalizar, palabras } from '../../src/lib/normalizar.ts';
 import { slugDeObra } from '../../src/lib/slug.ts';
 import { añoExacto } from './extraccion.ts';
+import { mismoTitulo, revisionExacta } from './fuentes.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entidades
@@ -2099,6 +2100,11 @@ export function derivarDocumento(
 }
 
 export interface CabeceraDeDocumento {
+  /**
+   * Ausente en un documento de obra, que es lo que han sido todos hasta la Historia 17.1: un
+   * documento versionado antes, sin `clase`, se sigue analizando igual.
+   */
+  clase?: undefined;
   fuente: string;
   obra: string;
   /** Se omite cuando no consta exacto. Nunca se escribe vacío. */
@@ -2123,9 +2129,48 @@ export interface CabeceraDeDocumento {
   recuperado: string;
 }
 
+/**
+ * La cabecera de un **documento de biografía** — Historia 17.1.
+ *
+ * Un documento de biografía no es el de una obra: no declara obra ni año, y de él no sale
+ * ninguna Cita. Lo que lo identifica es el artículo y **la revisión**, porque su Fuente es
+ * mutable y lo único fijo de ella es el texto de origen de un `oldid` concreto. Los campos
+ * de obra se declaran ausentes a propósito: así quien lee `cabecera.obra` de un documento
+ * analizado tiene que contar con que no lo haya, en vez de recibir el título del artículo
+ * haciéndose pasar por una obra.
+ */
+export interface CabeceraDeBiografia {
+  clase: 'biografia';
+  fuente: string;
+  /** El título del artículo, tal y como lo da la dirección pedida o la redirección. */
+  titulo: string;
+  /** La revisión (`oldid`) cuyo texto de origen es el cuerpo. Forma parte del nombre. */
+  revision: number;
+  /** El enlace permanente de esa revisión. */
+  url: string;
+  /** La dirección que se pidió, cuando no es el enlace permanente. */
+  pedido?: string;
+  /** La fecha de la revisión que la Fuente declara, `AAAA-MM-DD`. */
+  fechaDeRevision: string;
+  /** La licencia del texto **de esa revisión**, según su fecha. */
+  licencia: string;
+  recuperado: string;
+  obra?: never;
+  año?: never;
+  traductor?: never;
+  añoDeTraduccion?: never;
+}
+
+/** Lo que `analizarDocumento` lee de una cabecera: la de una obra o la de una biografía. */
+export type CabeceraAnalizada = CabeceraDeDocumento | CabeceraDeBiografia;
+
+/** La marca de clase que lleva un documento de biografía en su cabecera. */
+export const CLASE_BIOGRAFIA = 'biografia';
+
 const SEPARADOR = '---';
 
-function unaLinea(valor: string): string {
+/** Un valor de cabecera tal y como se escribe: en una línea, con los espacios colapsados. */
+export function unaLinea(valor: string): string {
   return valor.replace(/\s+/gu, ' ').trim();
 }
 
@@ -2157,20 +2202,54 @@ export function componerDocumento(
   if (cabecera.pedido !== undefined) lineas.push(`pedido: ${unaLinea(cabecera.pedido)}`);
   lineas.push(`recuperado: ${unaLinea(cabecera.recuperado)}`);
 
-  // Una línea `---` dentro de la declaración partiría el documento en otro sitio.
-  const declarado = declaracion
+  return `${lineas.join('\n')}\n${SEPARADOR}\n${zonaDeDeclaracion(declaracion)}\n${SEPARADOR}\n${cuerpo.trim()}\n`;
+}
+
+/** Una línea `---` dentro de la declaración partiría el documento en otro sitio. */
+function zonaDeDeclaracion(declaracion: string): string {
+  return declaracion
     .split('\n')
     .map((linea) => (linea.trim() === SEPARADOR ? linea.replace(/-/gu, '–') : linea))
     .join('\n')
     .trim();
-
-  return `${lineas.join('\n')}\n${SEPARADOR}\n${declarado}\n${SEPARADOR}\n${cuerpo.trim()}\n`;
 }
 
-/** Lo contrario de `componerDocumento`. `undefined` si el fichero no tiene esa forma. */
+/**
+ * El documento de biografía tal y como se versiona — Historia 17.1.
+ *
+ * Las mismas tres zonas que el de una obra, para que una sola función los analice a los dos;
+ * cambia la cabecera, que lleva `clase: biografia` y la revisión en vez de obra y año.
+ */
+export function componerBiografia(
+  cabecera: Omit<CabeceraDeBiografia, 'clase'>,
+  declaracion: string,
+  cuerpo: string,
+): string {
+  const lineas = [
+    `fuente: ${unaLinea(cabecera.fuente)}`,
+    `clase: ${CLASE_BIOGRAFIA}`,
+    `titulo: ${unaLinea(cabecera.titulo)}`,
+    `revision: ${cabecera.revision}`,
+    `fechaDeRevision: ${unaLinea(cabecera.fechaDeRevision)}`,
+    `licencia: ${unaLinea(cabecera.licencia)}`,
+    `url: ${unaLinea(cabecera.url)}`,
+  ];
+  if (cabecera.pedido !== undefined) lineas.push(`pedido: ${unaLinea(cabecera.pedido)}`);
+  lineas.push(`recuperado: ${unaLinea(cabecera.recuperado)}`);
+  return `${lineas.join('\n')}\n${SEPARADOR}\n${zonaDeDeclaracion(declaracion)}\n${SEPARADOR}\n${cuerpo.trim()}\n`;
+}
+
+/**
+ * Lo contrario de `componerDocumento` y de `componerBiografia`. `undefined` si el fichero no
+ * tiene esa forma.
+ *
+ * Historia 17.1 — lee `clase` y `revision`. Un documento sin `clase` es de obra, como todos
+ * los versionados antes; uno con `clase: biografia` exige título y revisión, y una `clase`
+ * desconocida no se ignora: el fichero está mal formado.
+ */
 export function analizarDocumento(
   contenido: string,
-): { cabecera: CabeceraDeDocumento; declaracion: string; cuerpo: string } | undefined {
+): { cabecera: CabeceraAnalizada; declaracion: string; cuerpo: string } | undefined {
   const lineas = contenido.replace(/\r\n?/gu, '\n').split('\n');
   const primero = lineas.findIndex((linea) => linea.trim() === SEPARADOR);
   if (primero === -1) return undefined;
@@ -2189,6 +2268,40 @@ export function analizarDocumento(
   const obra = campos.get('obra');
   const url = campos.get('url');
   const recuperado = campos.get('recuperado');
+  const declaracion = lineas.slice(primero + 1, segundo).join('\n').trim();
+  const cuerpo = lineas.slice(segundo + 1).join('\n');
+
+  const clase = campos.get('clase');
+  if (clase !== undefined) {
+    if (clase !== CLASE_BIOGRAFIA) return undefined;
+    const titulo = campos.get('titulo');
+    const revision = revisionExacta(campos.get('revision'));
+    // Una biografía que declara obra o año es un documento a medio cambiar de clase.
+    if (obra !== undefined || campos.has('año') || campos.has('ano')) return undefined;
+    const fechaDeRevision = campos.get('fechaderevision');
+    const licencia = campos.get('licencia');
+    if (!fuente || !titulo || revision === undefined || !url || !recuperado) return undefined;
+    if (!fechaDeRevision || !/^\d{4}-\d{2}-\d{2}$/u.test(fechaDeRevision) || !licencia) {
+      return undefined;
+    }
+    const pedido = campos.get('pedido');
+    return {
+      cabecera: {
+        clase: CLASE_BIOGRAFIA,
+        fuente,
+        titulo,
+        revision,
+        fechaDeRevision,
+        licencia,
+        url,
+        recuperado,
+        ...(pedido !== undefined && pedido !== '' ? { pedido } : {}),
+      },
+      declaracion,
+      cuerpo,
+    };
+  }
+
   if (!fuente || !obra || !url || !recuperado) return undefined;
 
   const declarado = campos.get('año') ?? campos.get('ano');
@@ -2220,8 +2333,8 @@ export function analizarDocumento(
       ...(traductor !== undefined && traductor !== '' ? { traductor } : {}),
       ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
     },
-    declaracion: lineas.slice(primero + 1, segundo).join('\n').trim(),
-    cuerpo: lineas.slice(segundo + 1).join('\n'),
+    declaracion,
+    cuerpo,
   };
 }
 /**
@@ -2383,4 +2496,235 @@ function colaDelTituloDeclarado(obra: string, pagina: string): string | undefine
 
   const cola = laObraVaDelante ? deLaPagina.slice(deLaObra.length) : deLaPagina.slice(1);
   return cola.length === 0 ? undefined : cola.join('/');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El documento de biografía — Historia 17.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Lo que la Fuente declara de una revisión: el artículo al que pertenece y su fecha. */
+export type RevisionDeclarada =
+  | { ok: true; titulo: string; fecha: string }
+  | { ok: false; motivo: string };
+
+/**
+ * El lector de una Fuente **mutable**: lo que la Fuente declara de una revisión, y el texto
+ * plano del wikitexto en bruto de esa revisión.
+ *
+ * No es un `LectorDeFuente`, y a propósito: aquel está construido sobre las plantillas de
+ * encabezado de Wikisource y declara obra, página, Autor y año, que es lo que necesita una
+ * Cita. Una biografía no declara nada de eso, y de ella no sale ninguna Cita; si el lector de
+ * Wikipedia fuera un `LectorDeFuente`, `extraer` y `documentar` podrían derivar una «obra» de
+ * un artículo de enciclopedia.
+ */
+export interface LectorDeBiografia {
+  /**
+   * El título del artículo y la fecha de la revisión, de la respuesta de la Fuente sobre esa
+   * revisión. **El título lo dice la Fuente, no la URL tecleada**: una dirección con el
+   * `title=` de un artículo y el `oldid` de otro llevaría al cuerpo del segundo con el
+   * nombre del primero.
+   */
+  revisionDeclarada(respuesta: string, revision: number): RevisionDeclarada;
+  /** El cuerpo en texto plano, o por qué no se puede despojar. */
+  cuerpo(wikitexto: string): CuerpoDeBiografia;
+}
+
+export type CuerpoDeBiografia = { ok: true; cuerpo: string } | { ok: false; motivo: string };
+
+/**
+ * La respuesta de la API de MediaWiki a `action=query&prop=revisions|info&revids=N`.
+ *
+ * Una revisión que la Fuente no reconoce llega en `badrevids`, o no llega en ninguna página:
+ * las dos cosas son «esa revisión no existe», y se niega. La fecha es la del `timestamp` de
+ * la revisión, reducida a día; la página que la contiene da el título.
+ */
+function revisionDeclaradaDeMediaWiki(respuesta: string, revision: number): RevisionDeclarada {
+  const noLaReconoce: RevisionDeclarada = {
+    ok: false,
+    motivo:
+      `La Fuente no reconoce la revisión ${revision}: no existe, se ocultó o se borró. ` +
+      'No se ha versionado nada.',
+  };
+
+  let datos: unknown;
+  try {
+    datos = JSON.parse(respuesta);
+  } catch {
+    return { ok: false, motivo: 'La Fuente no contestó con datos legibles sobre la revisión.' };
+  }
+
+  const consulta = (datos as { query?: unknown } | null)?.query;
+  if (typeof consulta !== 'object' || consulta === null) return noLaReconoce;
+  const { badrevids, pages } = consulta as { badrevids?: unknown; pages?: unknown };
+  if (badrevids !== undefined) return noLaReconoce;
+  if (typeof pages !== 'object' || pages === null) return noLaReconoce;
+
+  for (const pagina of Object.values(pages as Record<string, unknown>)) {
+    if (typeof pagina !== 'object' || pagina === null) continue;
+    const { title, revisions } = pagina as { title?: unknown; revisions?: unknown };
+    if (typeof title !== 'string' || !Array.isArray(revisions)) continue;
+    const suya = revisions.find(
+      (r): r is { revid: number; timestamp: string } =>
+        typeof r === 'object' &&
+        r !== null &&
+        revisionExacta((r as { revid?: unknown }).revid as number) === revision &&
+        typeof (r as { timestamp?: unknown }).timestamp === 'string',
+    );
+    if (suya === undefined) continue;
+    const fecha = /^(\d{4}-\d{2}-\d{2})T/u.exec(suya.timestamp)?.[1];
+    const titulo = mismoTitulo(title);
+    if (fecha === undefined || titulo === '') {
+      return { ok: false, motivo: `La Fuente declara la revisión ${revision} sin título o sin fecha.` };
+    }
+    return { ok: true, titulo, fecha };
+  }
+  return noLaReconoce;
+}
+
+/** Cuántas pasadas se dan, como mucho, a un marcado anidado. Sin tope, un texto hostil colgaría. */
+const MAX_PASADAS_DE_WIKITEXTO = 50;
+
+/** Repite un reemplazo hasta que deja de cambiar algo, o hasta el tope. Dice si se agotó. */
+function hastaQueNoCambie(
+  texto: string,
+  paso: (t: string) => string,
+): { texto: string; agotado: boolean } {
+  let actual = texto;
+  for (let i = 0; i < MAX_PASADAS_DE_WIKITEXTO; i += 1) {
+    const siguiente = paso(actual);
+    if (siguiente === actual) return { texto: actual, agotado: false };
+    actual = siguiente;
+  }
+  return { texto: actual, agotado: paso(actual) !== actual };
+}
+
+const ENLACE_QUE_NO_ES_TEXTO =
+  /\[\[\s*(?:archivo|file|imagen|image|categor[íi]a|category)\s*:[^[\]]*\]\]/giu;
+
+/**
+ * Las etiquetas HTML que se retiran, **por nombre**. Una lista cerrada y no `<[^>]*>`: en
+ * prosa un «<» suelto es texto, y retirar todo lo que parezca etiqueta se llevaría por
+ * delante lo que hubiera entre un «<» y el siguiente «>».
+ */
+const ETIQUETAS_CONOCIDAS =
+  /<\/?(?:ref|references|br|small|sup|sub|span|div|nowiki|poem|center|gallery)\b[^<>]*\/?>/giu;
+
+/**
+ * El wikitexto de un artículo convertido en texto plano, con un despojado **básico** del
+ * marcado: comentarios, referencias, plantillas `{{…}}` (anidadas), tablas `{|…|}`, enlaces
+ * internos `[[a|b]]` → `b` y `[[a]]` → `a`, ficheros y categorías, enlaces externos, negritas
+ * y cursivas, encabezados `== … ==`, palabras mágicas y las etiquetas HTML conocidas.
+ *
+ * Básico quiere decir que no resuelve nada: lo que una plantilla dibujaría —una fecha, una
+ * cifra— desaparece en vez de inventarse. Y si el anidamiento agota las pasadas con marcado
+ * todavía dentro, **se niega**: versionar medio despojado dejaría llaves en el cuerpo de un
+ * documento que se presenta como texto plano.
+ */
+export function cuerpoDeWikitexto(wikitexto: string): CuerpoDeBiografia {
+  let texto = wikitexto.replace(/\r\n?/gu, '\n');
+  texto = texto.replace(/<!--[\s\S]*?-->/gu, '');
+  texto = texto.replace(/<ref\b[^<>]*\/>/giu, '');
+  texto = texto.replace(/<ref\b[^<>]*>[\s\S]*?<\/ref\s*>/giu, '');
+  texto = texto.replace(/<(gallery|math|syntaxhighlight|score|timeline)\b[^<>]*>[\s\S]*?<\/\1\s*>/giu, '');
+
+  const pasos: [string, (t: string) => string][] = [
+    // Las plantillas, de dentro afuera: `{{a|{{b}}}}` deja de ser plantilla en dos pasadas.
+    ['{{', (t) => t.replace(/\{\{(?:(?!\{\{|\}\})[\s\S])*\}\}/gu, '')],
+    ['{|', (t) => t.replace(/\{\|(?:(?!\{\||\|\})[\s\S])*\|\}/gu, '')],
+    [
+      '[[',
+      (t) =>
+        t
+          .replace(ENLACE_QUE_NO_ES_TEXTO, '')
+          .replace(/\[\[[^[\]|]*\|([^[\]]*)\]\]/gu, '$1')
+          .replace(/\[\[([^[\]|]*)\]\]/gu, '$1'),
+    ],
+  ];
+  for (const [marca, paso] of pasos) {
+    const resultado = hastaQueNoCambie(texto, paso);
+    texto = resultado.texto;
+    if (resultado.agotado && texto.includes(marca)) {
+      return {
+        ok: false,
+        motivo:
+          `El marcado «${marca}» sigue anidado tras ${MAX_PASADAS_DE_WIKITEXTO} pasadas y no se ` +
+          'ha podido despojar. No se ha versionado nada: el cuerpo saldría con marcado dentro.',
+      };
+    }
+  }
+
+  texto = texto.replace(/\[(?:https?:)?\/\/[^\s\]]+\s+([^\]]*)\]/giu, '$1');
+  texto = texto.replace(/\[(?:https?:)?\/\/[^\s\]]+\]/giu, '');
+  texto = texto.replace(/'{2,}/gu, '');
+  texto = texto.replace(/^[ \t]*(={1,6})[ \t]*(.*?)[ \t]*\1[ \t]*$/gmu, '$2');
+  texto = texto.replace(/__[A-ZÁÉÍÓÚÑ0-9_]+?__/gu, '');
+  texto = texto.replace(/^[ \t]*[*#:;]+[ \t]*/gmu, '');
+  texto = texto.replace(/<br\b[^<>]*\/?>/giu, '\n');
+  texto = texto.replace(ETIQUETAS_CONOCIDAS, '');
+  texto = resolverEntidades(texto, false);
+  return { ok: true, cuerpo: normalizarEspacios(texto) };
+}
+
+/**
+ * Los lectores de biografía, por Fuente. Toda Fuente mutable tiene el suyo, y ninguna tiene
+ * lector de obra: `tests/unit/extraccion.test.ts` lo exige así.
+ */
+export const LECTORES_DE_BIOGRAFIA: Readonly<Record<string, LectorDeBiografia>> = {
+  'wikipedia-es': {
+    revisionDeclarada: revisionDeclaradaDeMediaWiki,
+    cuerpo: cuerpoDeWikitexto,
+  },
+};
+
+export type DerivacionDeBiografia =
+  | { ok: true; declaracion: string; cuerpo: string }
+  | { ok: false; motivo: string };
+
+/**
+ * Declaración y cuerpo de la revisión de un artículo, sin tocar disco ni red.
+ *
+ * `titulo` es el que la Fuente declara de esa revisión. La declaración guarda su línea: es
+ * lo que la Fuente dice de sí misma en el documento, como el `|título` en una obra.
+ */
+export function derivarBiografia(
+  idFuente: string,
+  wikitexto: string,
+  titulo: string,
+): DerivacionDeBiografia {
+  const lector = LECTORES_DE_BIOGRAFIA[idFuente];
+  if (lector === undefined) {
+    return {
+      ok: false,
+      motivo:
+        `No hay lector de biografía para «${idFuente}». Toda Fuente mutable necesita el suyo ` +
+        'en tools/lib/documento.ts.',
+    };
+  }
+
+  const cuerpo = lector.cuerpo(wikitexto);
+  if (!cuerpo.ok) return cuerpo;
+  if (cuerpo.cuerpo === '') {
+    return { ok: false, motivo: 'La revisión no trae texto: no se ha versionado nada.' };
+  }
+
+  return { ok: true, declaracion: titulo, cuerpo: cuerpo.cuerpo };
+}
+
+/**
+ * El nombre de un documento de biografía: `{fuente}--{slug-del-titulo}--r{revision}`.
+ *
+ * La revisión forma parte de su identidad: dos revisiones del mismo artículo son dos
+ * documentos, y la segunda no reemplaza a la primera (AD-2). El slug del título se acota
+ * igual que el de una obra; la revisión no se recorta nunca.
+ */
+export function nombreDeBiografia(
+  idFuente: string,
+  titulo: string,
+  revision: number,
+): string | undefined {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(idFuente)) return undefined;
+  if (revisionExacta(revision) === undefined) return undefined;
+  const delTitulo = segmentoDeNombre(titulo);
+  if (delTitulo === undefined) return undefined;
+  return `${idFuente}--${delTitulo}--r${revision}`;
 }

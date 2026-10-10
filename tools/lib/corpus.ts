@@ -25,8 +25,8 @@ import type {
   ObjetivoDeTema,
   ObjetivoDeTradicion,
 } from '../../src/lib/objetivo.ts';
-import { FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
-import { analizarDocumento } from './documento.ts';
+import { BIOGRAFIA_MAL_COLOCADA, FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
+import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada } from './documento.ts';
 /*
  * Solo los tipos, y a propósito: quien decide qué se inspecciona y cómo se agrega es
  * `indexacion.ts`, que es puro y no toca disco. Esta capa escribe lo que le den. Al ser
@@ -231,6 +231,16 @@ export interface Rutas {
    */
   fuentes: string;
   /**
+   * Los documentos de biografía — Historia 17.1: el wikitexto de **una revisión** de un
+   * artículo de una Fuente mutable, que sostiene la semblanza de un Autor.
+   *
+   * Es un espacio **aparte** de `fuentes/` y no un prefijo dentro de él: el cotejo de Citas
+   * lee solo `fuentes/`, así que una Cita no puede casar con una biografía ni por nombre
+   * exacto ni por prefijo, por mucho que la obra se llame como el Autor. Lo lee el build
+   * para una sola cosa: comprobar que la revisión que declara un Autor es la versionada.
+   */
+  biografias: string;
+  /**
    * El censo de Citas anteriores a la v3 que todavía no tienen documento — Historia 11.2.
    *
    * Va junto a `corpus/portada.json`, que ya es metadato del Corpus y no colección.
@@ -337,6 +347,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     obrasRetiradas: join(raizCorpus, '_obras-retiradas'),
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
+    biografias: join(raizCorpus, 'biografias'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
@@ -951,10 +962,45 @@ export function nombreDeFicheroDeCita(slugAutor: string, slugCita: string): stri
  */
 export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDeFuente> {
   const ficheros = await ficherosDe(rutas.fuentes, ['.txt']);
-  const documentos = new Map<string, string | null>();
+  const documentos = new Map<string, string | null | typeof BIOGRAFIA_MAL_COLOCADA>();
   for (const ruta of ficheros) {
     const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
-    documentos.set(slugDeFichero(ruta), analizado === undefined ? null : analizado.cuerpo);
+    documentos.set(
+      slugDeFichero(ruta),
+      analizado === undefined
+        ? null
+        : // Historia 17.1 — una biografía mal colocada en `fuentes/` no da cuerpo que cotejar:
+          // va marcada, y `documentosDeCita` la excluye.
+          analizado.cabecera.clase === CLASE_BIOGRAFIA
+          ? BIOGRAFIA_MAL_COLOCADA
+          : analizado.cuerpo,
+    );
+  }
+  return documentos;
+}
+
+/**
+ * Los documentos de biografía versionados, por nombre sin extensión — Historia 17.1.
+ *
+ * Solo la cabecera: es lo único que la puerta del build compara con lo que el Autor declara.
+ * `null` es un fichero que ocupa el nombre y no se deja analizar. Lee **solo** el primer nivel
+ * de `corpus/biografias/`: ninguna lectura del cotejo de Citas pasa por aquí.
+ */
+export async function leerDocumentosDeBiografia(
+  rutas: Rutas,
+): Promise<Map<string, CabeceraAnalizada | null>> {
+  // **No recursiva**, a diferencia de `ficherosDe`: el nombre del documento es su identidad
+  // y lo que declara el Autor, y una subcarpeta haría que dos ficheros respondieran al mismo.
+  const ficheros = existsSync(rutas.biografias)
+    ? (await readdir(rutas.biografias, { withFileTypes: true }))
+        .filter((e) => e.isFile() && extname(e.name) === '.txt')
+        .map((e) => join(rutas.biografias, e.name))
+        .sort()
+    : [];
+  const documentos = new Map<string, CabeceraAnalizada | null>();
+  for (const ruta of ficheros) {
+    const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
+    documentos.set(slugDeFichero(ruta), analizado === undefined ? null : analizado.cabecera);
   }
   return documentos;
 }
@@ -978,7 +1024,8 @@ export async function leerDocumentosDeclarados(
   >();
   for (const ruta of ficheros) {
     const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
-    if (analizado === undefined) continue;
+    // Una biografía no declara obra ni traducción que restituir (Historia 17.1).
+    if (analizado === undefined || analizado.cabecera.clase === CLASE_BIOGRAFIA) continue;
     documentos.set(slugDeFichero(ruta), {
       fuente: analizado.cabecera.fuente,
       // La `obra:` de la cabecera: contra ella se juzga si una grafía es literal (22.2).

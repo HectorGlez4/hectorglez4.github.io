@@ -3,6 +3,7 @@ import { glob } from 'astro/loaders';
 import {
   año,
   añoFallecimiento,
+  biografia,
   coleccionAdmisible,
   estadoDerechos,
   fuenteDeCita,
@@ -82,6 +83,8 @@ const autores = defineCollection({
     // §6.1 — el suelo del 40 % de tradición latinoamericana necesita saber de quién
     // hablamos. Opcional: ver la nota en `admision.ts`.
     tradicion: tradicion.optional(),
+    // Historia 17.1 — la revisión que sostiene la semblanza. Ver la nota en `admision.ts`.
+    biografia: biografia.optional(),
   }),
 });
 

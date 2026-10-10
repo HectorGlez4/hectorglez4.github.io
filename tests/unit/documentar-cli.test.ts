@@ -13,7 +13,7 @@ import {
   limpiar,
   type CorpusDePrueba,
 } from './ayuda/construir.js';
-import { componerDocumento } from '../../tools/lib/documento.ts';
+import { componerBiografia, componerDocumento } from '../../tools/lib/documento.ts';
 import { CENSO_DE_PARTIDA, FICHERO_DEL_CENSO } from '../../tools/lib/cotejo.ts';
 
 const ejecutar = promisify(execFile);
@@ -426,5 +426,37 @@ describe('Historia 19.1 — --restituir-traduccion', () => {
     const conRetirar = await correr(corpus, ['--restituir-traduccion', '--retirar', SLUG, 'motivo']);
     expect(conRetirar.codigo).toBe(2);
     expect(await readFile(join(corpus, FICHERO), 'utf8')).toBe(CITA_CENSADA);
+  });
+});
+
+describe('Historia 17.1 — una Cita no se documenta con una biografía, aunque esté en fuentes/', () => {
+  it.each([
+    ['wikipedia-es', 'https://es.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=123'],
+    ['wikisource-es', 'https://es.wikisource.org/wiki/S%C3%A9neca'],
+  ])('con fuente: %s sale con 1, dice por qué y no toca la Cita ni el censo', async (fuente, url) => {
+    const nombre = `fuentes/${fuente}--seneca--r123.txt`;
+    const corpus = await enDisco({
+      ...CORPUS,
+      [nombre]: componerBiografia(
+        {
+          fuente,
+          titulo: 'Séneca',
+          revision: 123,
+          fechaDeRevision: '2024-05-01',
+          licencia: 'CC BY-SA 4.0',
+          url,
+          recuperado: '2026-10-10',
+        },
+        'Séneca',
+        CUERPO,
+      ),
+    });
+    const antes = await leerCorpus(corpus);
+
+    const resultado = await correr(corpus, [SLUG, join(corpus, nombre)]);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/documento de biografía \(clase: biografia\)/);
+    expect(await leerCorpus(corpus)).toEqual(antes);
+    expect(await readdir(join(corpus, '_revision'))).toEqual([]);
   });
 });

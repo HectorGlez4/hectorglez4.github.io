@@ -62,6 +62,7 @@ import {
 } from './lib/corpus.ts';
 import {
   analizarDocumento,
+  CLASE_BIOGRAFIA,
   derivarDeLaDeclaracion,
   procedenciaDeLaDerivacion,
   esElMismoAutor,
@@ -204,6 +205,18 @@ if (analizado === undefined) {
         '(cabecera, «---», declaración de la Fuente, «---» y cuerpo debajo).',
       'No se ha escrito ninguna candidata.',
       EN_SU_LUGAR,
+    ],
+  });
+}
+
+// Historia 17.1 — de una biografía no sale ninguna Cita, aunque esté mal colocada.
+if (analizado.cabecera.clase === CLASE_BIOGRAFIA) {
+  terminar({
+    ok: false,
+    motivos: [
+      `«${rutaDelDocumento}» es un documento de biografía (clase: biografia): de él no sale ` +
+        'ninguna Cita. Su sitio es corpus/biografias/.',
+      'No se ha escrito ninguna candidata.',
     ],
   });
 }

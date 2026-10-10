@@ -250,12 +250,62 @@ export const tradicion = z.enum(['latinoamericana', 'peninsular', 'otra'], {
   message: 'La tradición, si se declara, es latinoamericana, peninsular u otra.',
 });
 
+/**
+ * La biografía que sostiene a un Autor — Historia 17.1: el documento de `corpus/biografias/`
+ * y la revisión de su Fuente mutable.
+ *
+ * Estricto: una clave de más es casi siempre una errata de una de las dos, y una errata
+ * aquí desataría la biografía de su revisión sin que nada lo dijera. Opcional, y sin valor
+ * se omite. Que el documento exista y sea **esa** revisión no lo puede ver un esquema, que
+ * juzga un fichero a la vez: lo comprueba la puerta del build, enganchada en `astro.config.mjs`.
+ * Qué se publica con ella lo decide la Historia 17.2; hoy no cambia ninguna página.
+ */
+export const biografia = z
+  .object(
+    {
+      documento: z
+        .string({ message: 'Regla incumplida: la biografía del Autor no declara su documento.' })
+        .regex(
+          /^[a-z0-9-]+--[a-z0-9-]+--r[1-9]\d*$/,
+          'Regla incumplida: el documento de la biografía es su nombre en corpus/biografias/, ' +
+            'sin «.txt»: «{fuente}--{titulo}--r{revision}».',
+        ),
+      revision: z
+        .number({ message: 'Regla incumplida: la biografía del Autor no declara su revisión.' })
+        .int('Regla incumplida: la revisión de la biografía es un entero.')
+        .positive('Regla incumplida: la revisión de la biografía es un entero positivo.'),
+    },
+    {
+      message:
+        'Regla incumplida: la biografía del Autor es un objeto con «documento» y «revision».',
+    },
+  )
+  .strict()
+  /*
+   * El nombre lleva la revisión dentro, y el campo la vuelve a decir: si no dicen la misma,
+   * una de las dos se tecleó mal. Se rechaza aquí, en el fichero, antes de que la puerta del
+   * build lo tenga que adivinar contra el documento.
+   */
+  .superRefine((valor, contexto) => {
+    const delNombre = /--r([1-9]\d*)$/.exec(valor.documento)?.[1];
+    if (delNombre !== undefined && Number(delNombre) !== valor.revision) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['revision'],
+        message:
+          `Regla incumplida: el documento «${valor.documento}» es la revisión ${delNombre} y ` +
+          `la biografía declara la ${valor.revision}: tienen que ser la misma.`,
+      });
+    }
+  });
+
 export const autorAdmisible = z.object({
   nombre: nombre('Autor'),
   añoFallecimiento,
   añoNacimiento: año.optional(),
   semblanza,
   tradicion: tradicion.optional(),
+  biografia: biografia.optional(),
 });
 
 export type AutorAdmisible = z.infer<typeof autorAdmisible>;
