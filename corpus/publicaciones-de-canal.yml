@@ -1,0 +1,46 @@
+# Publicaciones del canal propio — Historia 21.3, Épica 21, FR-45
+#
+# QUÉ REGISTRA. Actos de publicación: qué día, en qué cuenta, en qué formato, a qué
+# página del sitio enlaza lo publicado («-» si no enlaza a ninguna) y si el enlace iba
+# marcado. A los 90 días es lo que distingue «la página no trae visitas» de «se publicó
+# la mitad de las semanas».
+#
+# POR QUÉ SOLO AÑADE, al contrario que las series. serie-de-indexacion.yml mide un
+# ESTADO y por eso reemplaza por fecha: una segunda lectura del mismo día sustituye a la
+# primera. Esto registra ACTOS: dos fotos el mismo día en la misma cuenta son DOS
+# publicaciones, y reescribir una entrada borraría un hecho. Solo se añade al final;
+# ninguna entrada anterior se reescribe.
+#
+# QUÉ LO DISTINGUE DE SUS VECINOS. De serie-de-indexacion.yml, lo de arriba: aquélla mide
+# lo que el buscador tiene, esto lo que se hizo. De peticiones-de-rastreo.yml, que también
+# solo añade, el destinatario: aquello anota lo que se le pidió al BUSCADOR; esto, lo que
+# se le enseñó a quien SIGUE una cuenta. Ninguno de los dos mide visitas.
+#
+# CIERRA LA 18.2. La Historia 18.2 se da por hecha cuando este registro muestre CUATRO
+# SEMANAS ISO SEGUIDAS con la foto diaria y el enlace marcado en una misma cuenta. La
+# consulta lleva la cuenta: días con foto por semana y red, y la racha actual y la máxima.
+#
+#   npm run canal                                        # por semana y red. NO escribe.
+#   npm run canal -- anotar <red> <formato> <ruta|-> [--fecha AAAA-MM-DD] [--nota "…"]
+#
+#   <red>      instagram, tiktok, x, threads o facebook (src/lib/redes.ts).
+#   <formato>  foto, reel, pieza o historia.
+#   <ruta>     una página que el sitio publica —ruta o URL entera— o «-» si no enlaza.
+#   --fecha    la jornada real de la publicación; por omisión, hoy. Nunca futura.
+#   --nota     texto libre, que se guarda tal cual (D-6). Se omite si no se da.
+#
+# EL CAMPO `marcado`. Cierto si el enlace tecleado llevaba ?de=<red> con la misma red
+# de la publicación; falso si no llevaba marca. Un enlace marcado para OTRA red se
+# rechaza: sus visitas se atribuirían a otra cuenta. Lo sin enlace no lleva el campo. Se
+# guarda la ruta y no la URL: el dominio tiene un solo dueño, src/lib/dominio.ts.
+#
+# CÓDIGOS DE SALIDA. 1 si lo dicho se rechaza —red ajena, formato desconocido, ruta que
+# el sitio no publica, enlace marcado para otra red, fecha futura— o si este fichero no
+# se deja leer; 2 si la forma de la invocación falla —bandera desconocida, argumentos de
+# menos o de más, --fecha sin forma de jornada, una opción repetida—. Ninguno escribe.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y
+# ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee
+# (AD-24): lo que se publicó en una red no es contenido del sitio.
+
+publicaciones:

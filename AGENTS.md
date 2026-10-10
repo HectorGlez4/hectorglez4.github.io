@@ -242,6 +242,46 @@ URL no es una petición, es ruido. Un rechazo sale con código 1; una bandera ma
 2. No se anota nada que no corresponda a una petición real: una entrada inventada es peor que
 no tener el registro.
 
+## Anotar lo que se publica en el canal
+
+Se publica a diario en varias cuentas, y sin registro a los 90 días no se distingue «la
+página no trae visitas» de «se publicó la mitad de las semanas». La orden no publica nada;
+**anota lo que ya se publicó**, una publicación por invocación:
+
+```
+npm run canal                                                  # por semana ISO y red. NO escribe nada.
+npm run canal -- anotar facebook foto /cita/<slug>/            # anota lo publicado hoy (marcado: false)
+npm run canal -- anotar instagram foto https://<dominio>/cita/<slug>/?de=instagram   # marcado: true
+npm run canal -- anotar tiktok reel - --fecha 2026-10-08 --nota "vídeo del Kit"      # sin enlace
+```
+
+La red es una del conjunto cerrado de `src/lib/redes.ts`; el formato, `foto`, `reel`, `pieza`
+o `historia`; la ruta, una que el sitio **publica** —la juzga `rutasPublicadas`, igual que en
+rastreo— o `-` si no enlaza. Se acepta la URL entera y se guarda la ruta. `--nota` se guarda tal
+cual y se omite si no se da.
+
+**El campo `marcado` es la mitad del cierre de la 18.2.** Vale `true` si el enlace tecleado
+llevaba `?de=<red>` con la misma red de la publicación y `false` si no llevaba marca; un enlace
+marcado para **otra** red se rechaza, porque sus visitas se atribuirían a otra cuenta. Lo que
+va con `-` no lleva el campo. Pega el enlace del Kit, que ya sale marcado, y no la ruta a pelo.
+
+Un rechazo de lo dicho —red ajena, formato desconocido, ruta no publicada, enlace marcado para
+otra red, fecha futura, un Corpus o un registro ilegibles— sale con código 1; la forma de la
+invocación —bandera mal escrita o repetida, argumentos de menos o de más, `--fecha` sin forma
+de jornada, `--nota` vacía—, con 2. En ninguno de los dos casos se escribe nada.
+
+`corpus/publicaciones-de-canal.yml` **solo añade**, como `peticiones-de-rastreo.yml` y al
+revés que las series: dos fotos el mismo día en la misma cuenta son dos publicaciones. Se
+escribe por `appendFile` tras validar el fichero y la entrada, y se relee después para
+comprobar que la última entrada es la nueva; un fichero ilegible —o una entrada a mano con una
+red, un formato o una fecha imposibles— se niega sin tocarlo. La consulta desglosa a dónde
+enlaza cada semana y red —Cita, Autor, Colección, portada, «otra», «ya no se publica» y «sin
+enlace»— con la familia sacada del censo, cuenta los días con `foto` y los enlaces marcados, y
+da por red la racha actual y la máxima de semanas ISO **consecutivas** con foto los 7 días y
+todo enlace marcado: «La 18.2 se cierra con 4: lleva N». Ningún módulo de `src/lib/` lo lee
+(AD-24), y el fichero se versiona con su cabecera y la lista vacía: ningún agente anota
+publicaciones que no ha hecho. La 21.4 añadirá a la misma orden las señales externas.
+
 ## Documentar una Cita ya publicada
 
 Las Citas anteriores a la v3 se publicaron cuando la Procedencia se tecleaba, y siguen en

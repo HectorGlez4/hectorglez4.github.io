@@ -90,8 +90,11 @@ export interface PeticionDeRastreo {
  *
  * El `www` se acepta porque la propiedad es de **dominio** (`sc-domain:`) y cubre el ápice
  * y el `www` a la vez: son el mismo sitio y la misma petición. Cualquier otro host no.
+ *
+ * Exportada para el registro del canal (Historia 21.3), que acepta la misma URL pegada del
+ * navegador y tiene que negarse a lo mismo: una copia aquí y otra allí divergirían.
  */
-function hostAjeno(dada: string): string | undefined {
+export function hostAjeno(dada: string): string | undefined {
   if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(dada)) return undefined;
   let url: URL;
   try {

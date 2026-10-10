@@ -34,6 +34,7 @@
     "demanda": "tsx tools/demanda.ts",
     "demanda:registrar": "tsx tools/demanda.ts --registrar",
     "rastreo": "tsx tools/rastreo.ts",
+    "canal": "tsx tools/canal.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "astro": "astro"

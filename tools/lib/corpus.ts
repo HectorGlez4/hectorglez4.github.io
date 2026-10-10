@@ -38,6 +38,10 @@ import type { LecturaDeFamilia, LecturaDeIndexacion, RepartoDeEstado } from './i
  * es `tools/lib/rastreo.ts`, que es puro. Esta capa escribe lo que le den.
  */
 import type { PeticionDeRastreo } from './rastreo.ts';
+/* Y con el registro del canal (21.3): quién valida la publicación es `tools/lib/canal.ts`. */
+import { SIN_ENLACE, esFormato, type PublicacionDeCanal } from './canal.ts';
+import { esJornada } from '../../src/lib/citaDelDia.ts';
+import { esRedValida } from '../../src/lib/redes.ts';
 /* Y con la serie de tráfico (20.2): quién agrega es `tools/lib/trafico.ts`, que es puro. */
 import type { LecturaDeMes, LecturaDeTrafico } from './trafico.ts';
 /*
@@ -103,6 +107,13 @@ export const FICHERO_DE_DEMANDA = 'serie-de-demanda.yml';
  * registra actos. Está escrito en las dos cabeceras.
  */
 export const FICHERO_DE_PETICIONES = 'peticiones-de-rastreo.yml';
+
+/**
+ * El registro de publicaciones del canal propio — Historia 21.3. Su nombre tiene un solo dueño.
+ *
+ * De la misma clase que el de peticiones: **solo añade**, porque registra actos.
+ */
+export const FICHERO_DE_PUBLICACIONES = 'publicaciones-de-canal.yml';
 
 /**
  * La lista de candidatos por época — Historia 19.5. Su nombre tiene un solo dueño.
@@ -250,6 +261,14 @@ export interface Rutas {
    */
   peticionesDeRastreo: string;
   /**
+   * El registro de publicaciones del canal propio — Historia 21.3, FR-45.
+   *
+   * Metadato del Corpus con el mismo aislamiento que sus vecinos (AD-24): ninguna base de
+   * `src/content.config.ts` apunta aquí y ningún módulo de `src/lib/` lo lee. Qué se publicó
+   * en una red es un acto editorial sobre el canal, nunca contenido del sitio.
+   */
+  publicacionesDeCanal: string;
+  /**
    * La lista de candidatos por época — Historia 19.5.
    *
    * Metadato del Corpus como sus vecinos y con el mismo aislamiento (AD-24): ninguna base de
@@ -301,6 +320,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     serieDeTrafico: join(raizCorpus, FICHERO_DE_TRAFICO),
     serieDeDemanda: join(raizCorpus, FICHERO_DE_DEMANDA),
     peticionesDeRastreo: join(raizCorpus, FICHERO_DE_PETICIONES),
+    publicacionesDeCanal: join(raizCorpus, FICHERO_DE_PUBLICACIONES),
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
@@ -2366,6 +2386,242 @@ export async function registrarPeticionesDeRastreo(
   }
 
   await appendFile(ruta, añadido, 'utf8');
+  return ruta;
+}
+
+/**
+ * La cabecera del registro de publicaciones del canal — Historia 21.3.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que la de peticiones: un
+ * corpus de pruebas, o un clon al que le falte el fichero, tiene que poder anotar su primera
+ * publicación sin que nadie escriba la cabecera a mano.
+ */
+export const CABECERA_DE_PUBLICACIONES = [
+  '# Publicaciones del canal propio — Historia 21.3, Épica 21, FR-45',
+  '#',
+  '# QUÉ REGISTRA. Actos de publicación: qué día, en qué cuenta, en qué formato, a qué',
+  '# página del sitio enlaza lo publicado («-» si no enlaza a ninguna) y si el enlace iba',
+  '# marcado. A los 90 días es lo que distingue «la página no trae visitas» de «se publicó',
+  '# la mitad de las semanas».',
+  '#',
+  '# POR QUÉ SOLO AÑADE, al contrario que las series. serie-de-indexacion.yml mide un',
+  '# ESTADO y por eso reemplaza por fecha: una segunda lectura del mismo día sustituye a la',
+  '# primera. Esto registra ACTOS: dos fotos el mismo día en la misma cuenta son DOS',
+  '# publicaciones, y reescribir una entrada borraría un hecho. Solo se añade al final;',
+  '# ninguna entrada anterior se reescribe.',
+  '#',
+  '# QUÉ LO DISTINGUE DE SUS VECINOS. De serie-de-indexacion.yml, lo de arriba: aquélla mide',
+  '# lo que el buscador tiene, esto lo que se hizo. De peticiones-de-rastreo.yml, que también',
+  '# solo añade, el destinatario: aquello anota lo que se le pidió al BUSCADOR; esto, lo que',
+  '# se le enseñó a quien SIGUE una cuenta. Ninguno de los dos mide visitas.',
+  '#',
+  '# CIERRA LA 18.2. La Historia 18.2 se da por hecha cuando este registro muestre CUATRO',
+  '# SEMANAS ISO SEGUIDAS con la foto diaria y el enlace marcado en una misma cuenta. La',
+  '# consulta lleva la cuenta: días con foto por semana y red, y la racha actual y la máxima.',
+  '#',
+  '#   npm run canal                                        # por semana y red. NO escribe.',
+  '#   npm run canal -- anotar <red> <formato> <ruta|-> [--fecha AAAA-MM-DD] [--nota "…"]',
+  '#',
+  '#   <red>      instagram, tiktok, x, threads o facebook (src/lib/redes.ts).',
+  '#   <formato>  foto, reel, pieza o historia.',
+  '#   <ruta>     una página que el sitio publica —ruta o URL entera— o «-» si no enlaza.',
+  '#   --fecha    la jornada real de la publicación; por omisión, hoy. Nunca futura.',
+  '#   --nota     texto libre, que se guarda tal cual (D-6). Se omite si no se da.',
+  '#',
+  '# EL CAMPO `marcado`. Cierto si el enlace tecleado llevaba ?de=<red> con la misma red',
+  '# de la publicación; falso si no llevaba marca. Un enlace marcado para OTRA red se',
+  '# rechaza: sus visitas se atribuirían a otra cuenta. Lo sin enlace no lleva el campo. Se',
+  '# guarda la ruta y no la URL: el dominio tiene un solo dueño, src/lib/dominio.ts.',
+  '#',
+  '# CÓDIGOS DE SALIDA. 1 si lo dicho se rechaza —red ajena, formato desconocido, ruta que',
+  '# el sitio no publica, enlace marcado para otra red, fecha futura— o si este fichero no',
+  '# se deja leer; 2 si la forma de la invocación falla —bandera desconocida, argumentos de',
+  '# menos o de más, --fecha sin forma de jornada, una opción repetida—. Ninguno escribe.',
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y',
+  '# ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee',
+  '# (AD-24): lo que se publicó en una red no es contenido del sitio.',
+  '',
+  'publicaciones:',
+  '',
+].join('\n');
+
+/** La clave de la que cuelgan las entradas. */
+const CLAVE_DE_PUBLICACIONES = 'publicaciones';
+
+/**
+ * Las publicaciones de un registro ya leído, comprobando que el fichero sea lo que dice ser.
+ *
+ * Misma comprobación de forma que la del registro de peticiones —un fichero sin la clave
+ * dejaría la entrada añadida como lista huérfana— y, además, la de los **valores**: una
+ * entrada escrita a mano con una red que no existe o una fecha imposible contaría en la
+ * consulta semanal como si fuera buena, y aquí se nombra en vez de contarla.
+ */
+function analizarPublicaciones(nombre: string, contenido: string): PublicacionDeCanal[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'No se lee a medias ni se escribe encima: corríjalo y vuelva a intentarlo.',
+    );
+  }
+
+  if (
+    leido === null ||
+    leido === undefined ||
+    typeof leido !== 'object' ||
+    Array.isArray(leido) ||
+    !(CLAVE_DE_PUBLICACIONES in leido)
+  ) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_PUBLICACIONES}:» en la raíz del fichero. Añadir una ` +
+        'publicación sin ella dejaría una lista huérfana que ningún lector cuenta. Restaure la ' +
+        'cabecera del registro y vuelva a intentarlo.',
+    );
+  }
+
+  const publicaciones = (leido as Record<string, unknown>)[CLAVE_DE_PUBLICACIONES];
+  if (publicaciones === null || publicaciones === undefined) return [];
+
+  if (!Array.isArray(publicaciones)) {
+    throw new Error(
+      `${nombre}: «${CLAVE_DE_PUBLICACIONES}» tiene que ser una lista de publicaciones, y es ` +
+        `${typeof publicaciones}.`,
+    );
+  }
+
+  for (const [i, entrada] of publicaciones.entries()) {
+    const deLaEntrada = `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_PUBLICACIONES}»`;
+    if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
+      throw new Error(`${deLaEntrada} no es una publicación (${JSON.stringify(entrada)}).`);
+    }
+    const campos = entrada as Record<string, unknown>;
+    for (const clave of ['fecha', 'red', 'formato', 'ruta']) {
+      if (typeof campos[clave] !== 'string') {
+        throw new Error(
+          `${deLaEntrada} no declara «${clave}». Una publicación lleva fecha, red, formato y ` +
+            'ruta, o no se puede contar.',
+        );
+      }
+    }
+    const { fecha, red, formato, ruta, marcado, nota } = campos as Record<string, unknown> & {
+      fecha: string;
+      red: string;
+      formato: string;
+      ruta: string;
+    };
+    if (!esJornada(fecha)) {
+      throw new Error(`${deLaEntrada} tiene «fecha: ${fecha}», que no es AAAA-MM-DD del calendario.`);
+    }
+    if (!esRedValida(red)) {
+      throw new Error(`${deLaEntrada} tiene «red: ${red}», que no es una de las cuentas propias.`);
+    }
+    if (!esFormato(formato)) {
+      throw new Error(`${deLaEntrada} tiene «formato: ${formato}», que no es un formato del canal.`);
+    }
+    if (ruta !== SIN_ENLACE && !ruta.startsWith('/')) {
+      throw new Error(
+        `${deLaEntrada} tiene «ruta: ${ruta}»: se espera una ruta que empiece por «/» o «${SIN_ENLACE}».`,
+      );
+    }
+    if (marcado !== undefined && typeof marcado !== 'boolean') {
+      throw new Error(`${deLaEntrada} tiene «marcado: ${String(marcado)}»: tiene que ser true o false.`);
+    }
+    if (nota !== undefined && typeof nota !== 'string') {
+      throw new Error(`${deLaEntrada} tiene una «nota» que no es texto.`);
+    }
+  }
+
+  return publicaciones as PublicacionDeCanal[];
+}
+
+/** Las publicaciones ya anotadas. Un registro que no existe se lee como registro vacío. */
+export async function leerPublicacionesDeCanal(rutas: Rutas): Promise<PublicacionDeCanal[]> {
+  if (!existsSync(rutas.publicacionesDeCanal)) return [];
+  return analizarPublicaciones(
+    `corpus/${FICHERO_DE_PUBLICACIONES}`,
+    await readFile(rutas.publicacionesDeCanal, 'utf8'),
+  );
+}
+
+/** Cómo se escribe una publicación como elemento de la lista. */
+function bloqueDePublicacion(publicacion: PublicacionDeCanal): string {
+  // `- ` ocupa el sitio de los dos primeros espacios de la primera clave. `aYaml` omite lo
+  // que no tiene valor, así que `marcado` y `nota` ausentes no se escriben; un `false` sí.
+  return `  -${aYaml(
+    {
+      fecha: publicacion.fecha,
+      red: publicacion.red,
+      formato: publicacion.formato,
+      ruta: publicacion.ruta,
+      marcado: publicacion.marcado,
+      nota: publicacion.nota,
+    },
+    '    ',
+  ).slice(3)}`;
+}
+
+/**
+ * Añade una publicación al registro. **Solo añade**: lo anterior queda byte a byte igual.
+ *
+ * Por `appendFile`, como el registro de peticiones: no hay temporal que pueda quedarse
+ * huérfano ni un `rename` que se lleve por delante lo que otra ejecución añadió entretanto.
+ * Antes de escribir se valida el fichero y se compone en memoria lo que quedaría, así que un
+ * fichero ilegible —o uno en el que la lista no es lo último— se niega sin tocarlo. Después
+ * se relee y se comprueba que la última entrada es la nueva y que el recuento creció en uno.
+ */
+export async function registrarPublicacionDeCanal(
+  rutas: Rutas,
+  publicacion: PublicacionDeCanal,
+): Promise<string> {
+  const ruta = rutas.publicacionesDeCanal;
+  const nombre = `corpus/${FICHERO_DE_PUBLICACIONES}`;
+  const bloque = bloqueDePublicacion(publicacion);
+
+  // La entrada se valida antes de tocar nada, también la creación del fichero.
+  const [comoSeRelee] = analizarPublicaciones(nombre, `${CLAVE_DE_PUBLICACIONES}:\n${bloque}`);
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      // `wx` falla si el fichero apareció entretanto, en vez de truncar lo que otra
+      // ejecución acabara de añadir.
+      await writeFile(ruta, CABECERA_DE_PUBLICACIONES, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const cuantasHabia = analizarPublicaciones(nombre, anterior).length;
+  const salto = anterior === '' || anterior.endsWith('\n') ? '' : '\n';
+  const añadido = `${salto}${bloque}`;
+
+  const quedaria = analizarPublicaciones(nombre, `${anterior}${añadido}`);
+  if (quedaria.length !== cuantasHabia + 1) {
+    throw new Error(
+      `${nombre}: añadir al final no deja la publicación colgando de ` +
+        `«${CLAVE_DE_PUBLICACIONES}:» (había ${cuantasHabia} y quedarían ${quedaria.length}). ` +
+        'El registro se escribe solo por añadido, así que la lista tiene que ser lo último del ' +
+        'fichero. No se ha escrito nada.',
+    );
+  }
+
+  await appendFile(ruta, añadido, 'utf8');
+
+  const releidas = analizarPublicaciones(nombre, await readFile(ruta, 'utf8'));
+  if (
+    releidas.length !== cuantasHabia + 1 ||
+    JSON.stringify(releidas.at(-1)) !== JSON.stringify(comoSeRelee)
+  ) {
+    throw new Error(
+      `${nombre}: tras añadir, el registro no termina en la publicación anotada (había ` +
+        `${cuantasHabia} y hay ${releidas.length}). Otra ejecución pudo escribir a la vez: ` +
+        'revise el final del fichero antes de volver a anotar.',
+    );
+  }
   return ruta;
 }
 

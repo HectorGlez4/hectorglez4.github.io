@@ -344,7 +344,7 @@ development_status:
   21-1-la-cita-del-día-recorre-las-aptas-en-rondas-por-autor: review
   # 21.2 no es código: lista propuesta con la regla D-5, tachado en bloque de Héctor, un solo commit feat(portada).
   21-2-de-16-citas-aptas-a-120-o-más-con-la-regla-en-el-commit: backlog  # bloqueada: el tachado en bloque y la regla D-5 son de Héctor (readiness §4)
-  21-3-cada-publicación-del-canal-queda-anotada: backlog
+  21-3-cada-publicación-del-canal-queda-anotada: review  # el registro lo llena Héctor al publicar; cierra la 18.2 con cuatro semanas
   21-4-cada-señal-externa-queda-anotada-propia-o-ajena: backlog
   epic-21-retrospective: optional
 

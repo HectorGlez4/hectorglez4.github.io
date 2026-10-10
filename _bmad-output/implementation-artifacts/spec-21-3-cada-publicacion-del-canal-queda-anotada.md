@@ -2,10 +2,10 @@
 title: 'Historia 21.3 — Cada publicación del canal queda anotada'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'd0e4d9e3e282db406d14ec80eea510a8c70032f3'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context: []
 warnings: []
 deferred: []
@@ -114,9 +114,31 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10 (high 0, medium 3, low 7)
+- defer: 0
+- reject: 4
+- addressed_findings:
+  - `[medium]` `[patch]` Se perdía si el enlace iba marcado, que es la mitad del cierre de la 18.2 → `marcado`, y se rechaza la marca de otra red.
+  - `[medium]` `[patch]` Nada calculaba el cierre de la 18.2 → días con foto, enlaces marcados y rachas de semanas ISO consecutivas por red.
+  - `[medium]` `[patch]` Rename atómico con actualización perdida y temporales huérfanos → `appendFile` con validación previa y relectura.
+  - `[low]` `[patch]` Validación de entradas a mano; try/catch del Corpus; «ya no se publica» aparte; `--nota`; salida acotada; cabecera; pruebas.
+
 ## Verification
 
 **Commands:**
 - `npx vitest run tests/unit/canal.test.ts tests/unit/rastreo.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `npm run canal -- anotar <red> <formato> <ruta|-> [--fecha] [--nota]` añade al final de `corpus/publicaciones-de-canal.yml` (vacío y versionado), con `marcado` según `?de=`. `npm run canal` informa por semana ISO y red: destinos, días con foto, enlaces marcados y la racha hacia el cierre de la 18.2. Ruta juzgada por `rutasPublicadas`; códigos 1 y 2; el sitio no lo lee.
+
+**Revisión:** 10 parches aplicados y 4 rechazados (`FECHA_JORNADA` y la fecha UTC, porque la publicación es un acto local; host sin esquema; deshacer una entrada, que se corrige con otra; aviso de duplicado, porque dos publicaciones el mismo día son dos actos). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 113 ficheros y 3391 pruebas; astro check, 0 errores; build en verde y `dist/` sin cambios.
