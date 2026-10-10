@@ -57,14 +57,20 @@ const CORPUS: CorpusParaFechar = {
 };
 
 describe('Historia 18.4 — de qué ficheros depende cada superficie', () => {
-  it('una Página de Cita depende de su fichero **y del de su Autor**', () => {
+  it('una Página de Cita depende de su fichero, **del de su Autor y de los de sus Temas**', () => {
     // La plantilla recibe `autor` de su `getStaticPaths` y compone con `autor.nombre` el
     // título, la meta descripción y el `application/ld+json`. Sin el fichero del Autor,
     // corregir una semblanza reconstruye ciento y pico páginas con HTML distinto y todas
     // declaran una fecha de hace meses: la misma quema de señal, en la dirección rancia.
+    // Historia 22.8: los chips de `RutasDeSalida` pintan el nombre de cada Tema, así que su
+    // fichero también es parte de la página — el aviso ya lo sabía, la fecha no.
     const ficheros = ficherosPorSuperficie(CORPUS);
     expect(ficheros.get('/cita/seneca-el-tiempo')?.sort()).toEqual(
-      ['citas/a.md', 'autores/seneca.yml'].sort(),
+      ['citas/a.md', 'autores/seneca.yml', 'temas/el-tiempo.yml'].sort(),
+    );
+    // Sin Temas, solo los dos.
+    expect(ficheros.get('/cita/marco-aurelio-el-deber')?.sort()).toEqual(
+      ['citas/c.md', 'autores/marco-aurelio.yml'].sort(),
     );
   });
 

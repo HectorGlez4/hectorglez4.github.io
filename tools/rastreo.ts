@@ -34,6 +34,7 @@
  */
 
 import { rutasIndexables, rutasPublicadas } from '../src/lib/publicado.ts';
+import { congelacionVigente } from '../src/lib/obras.ts';
 import { declararRutasIndexables } from '../src/lib/superficies.ts';
 import { censoPorFamilia } from './lib/indexacion.ts';
 import {
@@ -178,6 +179,8 @@ export async function principal(
     // Lo ya anotado, para que la misma URL del mismo día no entre dos veces por ejecutar la
     // orden dos veces —lo natural cuando no se sabe si la primera cuajó—.
     anteriores,
+    // Historia 22.8 — con la familia Obra congelada no se pide rastreo de ninguna Obra.
+    ...(congelacionVigente() === undefined ? {} : { congelacion: congelacionVigente() }),
   });
 
   if (!seleccion.ok) {

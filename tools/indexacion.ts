@@ -1,7 +1,7 @@
 /**
  * El estado de indexación, por familia y versionado — Historia 16.1, Épica 16.
  *
- *   npx tsx tools/indexacion.ts [--corpus corpus] [--presupuesto 2000] [--json]
+ *   npx tsx tools/indexacion.ts [--corpus corpus] [--presupuesto 2000] [--sitemap <fichero>] [--json]
  *   npx tsx tools/indexacion.ts --registrar
  *
  * Sin banderas, **consulta**: pregunta a la fuente, agrega por familia, informa y no
@@ -49,9 +49,10 @@ import {
   MOTIVOS_SIN_CREDENCIALES,
   PETICIONES_POR_MINUTO,
   SALIDA_SIN_CREDENCIALES,
+  CENSO_DE_FAMILIA,
   TECHO_DIARIO_DE_INSPECCIONES,
   VARIABLE_DE_CREDENCIALES,
-  censoPorFamilia,
+  censoDeLaSerie,
   componerLectura,
   credencialDe,
   inspeccionDe,
@@ -62,7 +63,7 @@ import {
   propiedadDeDominio,
   resumirFamilia,
   type Credencial,
-  type Familia,
+  type FamiliaDeLaSerie,
   type FamiliaSinLeer,
   type Inspeccion,
   type LecturaDeFamilia,
@@ -70,6 +71,9 @@ import {
   type PlanDeInspeccion,
 } from './lib/indexacion.ts';
 import { colgarObras } from '../src/lib/obras.ts';
+import { SM11_VIGENTE } from '../src/lib/umbrales.ts';
+import type { ListaDeObras } from './lib/avisar.ts';
+import { obrasDelSitemap } from './avisar.ts';
 import {
   leerAutores,
   leerCitas,
@@ -93,7 +97,8 @@ const USO = [
   '      la que ya hubiera de la misma jornada: esto mide un estado, no una sesión.',
   '',
   `Opciones: --corpus <ruta>, --presupuesto <n> (por omisión ${TECHO_DIARIO_DE_INSPECCIONES},`,
-  '          que es el techo diario de la propiedad), --json, --registrar, --ayuda',
+  '          que es el techo diario de la propiedad), --sitemap <fichero> (el censo de la',
+  '          familia Obra; por omisión, el sitemap publicado), --json, --registrar, --ayuda',
 ].join('\n');
 
 /**
@@ -257,10 +262,21 @@ export async function leerIndexacion(opciones: {
    * tener que silenciar nada.
    */
   escribir?: (linea: string) => void;
+  /**
+   * Las rutas de Obra del sitemap publicado, o por qué no se pudieron leer — Historia 22.8.
+   * Es el censo de la familia Obra: sin él la familia va a `sinLeer` con su motivo, nunca a
+   * cero, y nunca se sustituye por `rutasPublicadas`, que cuenta también las `noindex`.
+   */
+  obras?: ListaDeObras;
 }): Promise<{ lectura: LecturaDeIndexacion; plan: PlanDeInspeccion }> {
   const momento = opciones.momento ?? new Date();
-  const censo = censoPorFamilia(opciones.conjunto);
-  const plan = planDeInspeccion(censo, opciones.presupuesto);
+  const obras = opciones.obras ?? { motivo: 'no se leyó el sitemap publicado' };
+  const censo = censoDeLaSerie(opciones.conjunto, 'rutas' in obras ? obras.rutas : []);
+  /*
+   * Mientras rija SM-11, Autor y Obra se leen enteras: la comparación de la misma jornada
+   * entre las dos no admite muestra. El resto del presupuesto se reparte entre las demás.
+   */
+  const plan = planDeInspeccion(censo, opciones.presupuesto, SM11_VIGENTE ? ['autor', 'obra'] : []);
   const pasoMs = opciones.pasoMs ?? PASO_MS;
 
   /*
@@ -278,8 +294,16 @@ export async function leerIndexacion(opciones: {
     );
   }
 
-  const lecturas: Partial<Record<Familia, LecturaDeFamilia>> = {};
-  const sinLeer: FamiliaSinLeer[] = [];
+  const lecturas: Partial<Record<FamiliaDeLaSerie, LecturaDeFamilia>> = {};
+  const sinLeer: FamiliaSinLeer<FamiliaDeLaSerie>[] = [];
+
+  /*
+   * Una Obra sin sitemap legible no es una familia vacía: es una familia sin leer. Y un
+   * sitemap legible que no trae ninguna Obra tampoco es un cero —81 eran indexables el día
+   * del primer despliegue—: lo más probable es que se leyera otro fichero, y se dice.
+   */
+  if ('motivo' in obras) sinLeer.push({ familia: 'obra', motivo: obras.motivo });
+  else if (obras.rutas.length === 0) sinLeer.push({ familia: 'obra', motivo: 'el sitemap no trae ninguna Obra' });
 
   /*
    * El presupuesto que no llega a una familia no es un fallo de la fuente, pero tampoco es
@@ -349,7 +373,10 @@ export async function leerIndexacion(opciones: {
       continue;
     }
 
-    lecturas[deFamilia.familia] = resumirFamilia(deFamilia.publicadas, inspecciones);
+    lecturas[deFamilia.familia] = {
+      ...resumirFamilia(deFamilia.publicadas, inspecciones),
+      censo: CENSO_DE_FAMILIA[deFamilia.familia],
+    };
   }
 
   return {
@@ -376,10 +403,12 @@ export async function principal(
   argumentos: string[],
   hacerInspector: (credencial: Credencial) => Promise<Inspeccionar> = inspectorDeSearchConsole,
   entorno: Record<string, string | undefined> = process.env,
+  /** De dónde salen las Obras del sitemap publicado. Por omisión, el sitio en línea. */
+  leerObras: (local: string | undefined) => Promise<ListaDeObras> = obrasDelSitemap,
 ): Promise<number> {
   const sobrantes = motivosDeArgumentosNoReconocidos(argumentos, {
     solas: ['--json', '--registrar', '--ayuda'],
-    conValor: ['--corpus', '--presupuesto'],
+    conValor: ['--corpus', '--presupuesto', '--sitemap'],
   });
   if (sobrantes.length > 0) {
     process.stderr.write(`${[...sobrantes, '', USO].join('\n')}\n`);
@@ -463,6 +492,7 @@ export async function principal(
     propiedad,
     presupuesto,
     inspeccionar,
+    obras: await leerObras(opcion(argumentos, '--sitemap')),
     // El aviso va por el error estándar: no ensucia el `--json`, que es contrato.
     escribir: (linea) => process.stderr.write(`${linea}\n`),
   });

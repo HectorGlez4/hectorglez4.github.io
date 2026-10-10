@@ -24,14 +24,18 @@
  * en la dirección rancia: el buscador vuelve, ve el HTML cambiado, y aprende que el campo
  * miente.
  *
- *   · **Página de Cita** — su fichero **y el de su Autor**. La plantilla
+ *   · **Página de Cita** — su fichero, **el de su Autor, los de sus Temas y la ficha de su Obra**. La plantilla
  *     —`src/pages/cita/[slug].astro`— recibe `autor` de su `getStaticPaths` y compone con
  *     `autor.nombre` el título de pestaña, la `<meta description>` y el
  *     `application/ld+json`. Corregir la semblanza de Séneca reconstruye 181 páginas con
  *     HTML distinto: si solo dependieran de su propio fichero, las 181 declararían una
  *     fecha de hace meses. La inflación al revés —retocar un Autor mueve la fecha de sus
  *     Citas— está acotada y es la verdad: solo dispara cuando ese fichero cambia de veras,
- *     y cuando dispara es porque el HTML cambió.
+ *     y cuando dispara es porque el HTML cambió. Los Temas entran porque `RutasDeSalida`
+ *     pinta el nombre de cada Tema de la Cita en su chip (Historia 22.8: el aviso ya lo
+ *     sabía y la fecha no; ahora las dos lecturas salen de la misma relación). Y la ficha
+ *     de su Obra, cuyo título pintan la Atribución y los datos estructurados.
+ *   · **Página de Obra** — su ficha, sus Citas y el fichero de su Autor (Historia 22.4).
  *   · **Página de Autor, de Tema y de Colección** — su fichero, los de las Citas que
  *     agregan **y los de los Autores de esas Citas**. Son listados: si entra una Cita
  *     nueva en un Tema, la página cambió aunque el fichero del Tema no se haya tocado; y
@@ -147,18 +151,20 @@ export interface CorpusParaFechar {
 }
 
 /**
- * Qué ficheros del Corpus compone cada superficie, por su ruta ya normalizada.
+ * Qué ficheros del Corpus compone cada superficie, por su ruta **canónica** — AD-27.
  *
- * Las rutas salen de los constructores de `src/lib/superficies.ts` y **no se escriben a
- * mano**: es la misma exigencia que cumple `tools/avisar.ts`, y por el mismo motivo —lo
- * que aquí se nombre mal no falla, simplemente no casa con ninguna entrada del sitemap y
- * la fecha desaparece en silencio—. Se normalizan porque el sitemap entrega direcciones
- * completas y con barra final, y `rutaNormalizada` es quien decide que las dos formas son
- * la misma superficie.
+ * Es el **único dueño** de la relación «superficie → ficheros que renderiza». Tiene dos
+ * lecturas y ninguna la repite: `ficherosPorSuperficie` —por ruta normalizada— fecha el
+ * sitemap, y `rutasAvisadasPor` de `tools/lib/avisar.ts` la recorre al revés —«fichero →
+ * rutas»— para el aviso de cambio. Que sean inversas lo fija una prueba sobre un corpus de
+ * ejemplo (`tests/unit/indexnow.test.ts`); antes eran dos funciones escritas a mano, y el
+ * aviso sabía que los chips de una Cita nombran sus Temas mientras la fecha no lo sabía.
  */
-export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, string[]> {
+export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, string[]> {
   /** El fichero de cada Autor, que es lo que aporta el nombre que las páginas renderizan. */
   const ficheroDeAutor = new Map(corpus.autores.map((autor) => [autor.slug, autor.ruta]));
+  const ficheroDeTema = new Map(corpus.temas.map((tema) => [tema.slug, tema.ruta]));
+  const ficheroDeObra = new Map((corpus.obras ?? []).map((obra) => [obra.nombre, obra.ruta]));
   const citasDeAutor = new Map<string, string[]>();
   const deTema = new Map<string, string[]>();
   const deCita = new Map<string, CitaParaFechar>();
@@ -180,16 +186,21 @@ export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, str
 
   const porSuperficie = new Map<string, string[]>();
   const declarar = (ruta: string, ficheros: readonly (string | undefined)[]) => {
-    porSuperficie.set(
-      rutaNormalizada(ruta),
-      [...new Set(ficheros.filter((f): f is string => f !== undefined))],
-    );
+    porSuperficie.set(ruta, [...new Set(ficheros.filter((f): f is string => f !== undefined))]);
   };
 
   for (const cita of corpus.citas) {
     // El fichero del Autor entra aquí porque la plantilla compone con `autor.nombre` el
-    // título, la meta descripción y los datos estructurados: cambiarlo cambia el HTML.
-    declarar(rutaDeCita(cita.slug), [cita.ruta, ficheroDeAutor.get(cita.autor)]);
+    // título, la meta descripción y los datos estructurados: cambiarlo cambia el HTML. Los de
+    // sus Temas, porque `RutasDeSalida` pinta el nombre de cada uno en su chip. Y la ficha de
+    // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3). Los
+    // listados no: `TarjetaDeCita` no lleva la Obra.
+    declarar(rutaDeCita(cita.slug), [
+      cita.ruta,
+      ficheroDeAutor.get(cita.autor),
+      ...(cita.temas ?? []).map((tema) => ficheroDeTema.get(tema)),
+      cita.obra === undefined ? undefined : ficheroDeObra.get(cita.obra),
+    ]);
   }
 
   for (const autor of corpus.autores) {
@@ -228,9 +239,28 @@ export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, str
    * (AD-12), así que cualquier fecha que el historial sepa dar es vieja el día que se
    * publica, y lo sería en la única URL que el buscador visita a diario. La regla de la
    * historia se le aplica igual que a cualquier otra superficie: cuando no se sabe la
-   * fecha, se omite el campo. El razonamiento largo está en la cabecera del módulo.
+   * fecha, se omite el campo. El razonamiento largo está en la cabecera del módulo. El
+   * aviso, en cambio, la anuncia siempre: es la excepción que nombra su prueba.
    */
 
+  return porSuperficie;
+}
+
+/**
+ * Qué ficheros del Corpus compone cada superficie, por su ruta ya normalizada.
+ *
+ * Las rutas salen de los constructores de `src/lib/superficies.ts` y **no se escriben a
+ * mano**: es la misma exigencia que cumple `tools/avisar.ts`, y por el mismo motivo —lo
+ * que aquí se nombre mal no falla, simplemente no casa con ninguna entrada del sitemap y
+ * la fecha desaparece en silencio—. Se normalizan porque el sitemap entrega direcciones
+ * completas y con barra final, y `rutaNormalizada` es quien decide que las dos formas son
+ * la misma superficie.
+ */
+export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, string[]> {
+  const porSuperficie = new Map<string, string[]>();
+  for (const [ruta, ficheros] of relacionDeSuperficies(corpus)) {
+    porSuperficie.set(rutaNormalizada(ruta), ficheros);
+  }
   return porSuperficie;
 }
 

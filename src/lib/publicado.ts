@@ -21,10 +21,12 @@ import {
   MAX_SALTOS_DESDE_LA_PORTADA,
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
+  type CongelacionDeObras,
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia } from './admision.ts';
 import {
   colgarObras,
+  congelacionVigente,
   esObraIndexable,
   rutaDeLaObra,
   type CitaParaObra,
@@ -478,12 +480,16 @@ export interface ObrasDelSitio {
 export function obrasDelConjunto(
   citas: readonly CitaConSuObra[],
   autores: readonly Pick<Autor, 'slug'>[],
+  congelacion?: CongelacionDeObras | null,
 ): ObrasDelSitio {
   // Un Autor publicado es uno del Corpus con alguna Cita publicada (`autoresPublicados`): las
   // Citas de aquí ya son publicadas, así que basta con que su Autor exista.
   const delSitio = new Set(autores.map((a) => a.slug));
   const publicadas = citas.filter((cita) => delSitio.has(cita.autor));
-  return { publicadas: obrasDeLasCitas(publicadas), indexables: obrasIndexables(publicadas) };
+  return {
+    publicadas: obrasDeLasCitas(publicadas),
+    indexables: obrasIndexables(publicadas, congelacion),
+  };
 }
 
 /**
@@ -492,24 +498,44 @@ export function obrasDelConjunto(
  * `obrasDelConjunto`. La usa `integraciones/indexables.ts`, que no tiene `astro:content` y lee
  * de disco; una prueba de build fija que su lista y la del armazón coinciden.
  */
-export function obrasDeLosDatos(datos: {
-  citas: readonly CitaParaObra[];
-  autores: readonly Pick<Autor, 'slug'>[];
-  fichas: readonly FichaDeObra[];
-}): ObrasDelSitio {
-  return obrasDelConjunto(colgarObras(datos.citas, datos.fichas), datos.autores);
+export function obrasDeLosDatos(
+  datos: {
+    citas: readonly CitaParaObra[];
+    autores: readonly Pick<Autor, 'slug'>[];
+    fichas: readonly FichaDeObra[];
+  },
+  congelacion?: CongelacionDeObras | null,
+): ObrasDelSitio {
+  return obrasDelConjunto(colgarObras(datos.citas, datos.fichas), datos.autores, congelacion);
 }
 
 /**
  * Las Obras cuya página se indexa, con la regla pura `esObraIndexable` sobre el recuento de la
  * Obra y el de su Autor —las Citas publicadas de ese Autor—. Es la única aplicación de la
  * regla: la usan `rutasIndexables` y `integraciones/indexables.ts`.
+ *
+ * Historia 22.8 — con la congelación declarada en `umbrales.ts` (`congelacionVigente`), la
+ * regla además exige que la ficha esté en la lista congelada: ninguna Obra entra, y la que
+ * deja de cumplir FR-52 sale igual. Llega como dato, por parámetro con valor por omisión, en
+ * las dos instancias del módulo —páginas e `integraciones/indexables.ts`—; nunca se lee de la
+ * serie de indexación (AD-24).
  */
-export function obrasIndexables(citas: readonly CitaConSuObra[]): ObraResuelta[] {
+export function obrasIndexables(
+  citas: readonly CitaConSuObra[],
+  /**
+   * Sin pasar, la declarada (`congelacionVigente()`); `null` es «sin congelación», que es lo
+   * que necesita `npm run obra -- congelar` para leer la lista de la regla sola.
+   */
+  congelacion?: CongelacionDeObras | null,
+): ObraResuelta[] {
   const porAutor = new Map<string, number>();
   for (const cita of citas) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
-  return obrasDeLasCitas(citas).filter((obra) =>
-    esObraIndexable(obra.recuento, porAutor.get(obra.autor) ?? 0),
+  const efectiva = congelacion === undefined ? congelacionVigente() : congelacion;
+  const congeladas = efectiva === null || efectiva === undefined ? undefined : new Set(efectiva.indexables);
+  return obrasDeLasCitas(citas).filter(
+    (obra) =>
+      esObraIndexable(obra.recuento, porAutor.get(obra.autor) ?? 0) &&
+      (congeladas === undefined || congeladas.has(obra.nombre)),
   );
 }
 

@@ -20,7 +20,12 @@
 import { normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
 import { rutaDeObra } from './superficies.ts';
-import { MAX_PROPORCION_OBRA_DEL_AUTOR, MIN_CITAS_OBRA_INDEXABLE } from './umbrales.ts';
+import {
+  CONGELACION_DE_OBRAS,
+  MAX_PROPORCION_OBRA_DEL_AUTOR,
+  MIN_CITAS_OBRA_INDEXABLE,
+  type CongelacionDeObras,
+} from './umbrales.ts';
 
 /** La orden que crea las fichas que faltan. Se nombra una vez y la citan los mensajes. */
 export const ORDEN_DE_SEMBRAR_OBRAS = 'npm run obra -- sembrar';
@@ -131,6 +136,20 @@ export function esObraIndexable(recuento: number, citasDelAutor: number): boolea
   if (recuento < MIN_CITAS_OBRA_INDEXABLE) return false;
   if (citasDelAutor <= 0) return false;
   return recuento / citasDelAutor < MAX_PROPORCION_OBRA_DEL_AUTOR;
+}
+
+/**
+ * La congelación de la familia Obra, si está declarada — Historia 22.8, AD-25.
+ *
+ * Es la **única** consulta de la declaración de `src/lib/umbrales.ts`: la usa `obrasIndexables`
+ * como dato de la regla, `npm run rastreo -- --registrar` para negarse a anotar una Obra, y la
+ * usarán las ediciones en venta (22.9) y las Piezas que enlacen a una Obra. Se lee del código
+ * versionado y nunca de la serie de indexación (AD-24). El parámetro existe para las pruebas.
+ */
+export function congelacionVigente(
+  declarada: CongelacionDeObras | undefined = CONGELACION_DE_OBRAS,
+): CongelacionDeObras | undefined {
+  return declarada;
 }
 
 /** Una ficha ya admitida, vista con el nombre de su fichero. */

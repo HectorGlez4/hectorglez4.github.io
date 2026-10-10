@@ -41,6 +41,11 @@ import {
   rutaDeColeccion,
   rutaDeTema,
 } from '../../src/lib/superficies.ts';
+import {
+  PRIMER_DESPLIEGUE_DE_OBRAS,
+  SEMANAS_HASTA_JUZGAR_SM11,
+  SM11_VIGENTE,
+} from '../../src/lib/umbrales.ts';
 
 /**
  * Las cuatro familias del sitio, y no hay una quinta.
@@ -55,12 +60,41 @@ export type Familia = 'cita' | 'autor' | 'tema' | 'coleccion';
 /** El orden en el que se nombran y se reparten. Es el del PRD: Cita, Autor, Tema, Colección. */
 export const FAMILIAS: readonly Familia[] = ['cita', 'autor', 'tema', 'coleccion'];
 
+/**
+ * Las familias que mide **esta serie**: las cuatro y la Obra — Historia 22.8, FR-40.
+ *
+ * La Obra se mide aquí y en ningún otro informe todavía —el tráfico, la demanda, el rastreo y
+ * el canal siguen con las cuatro de `FAMILIAS`—, y se mide distinto: su censo no es lo
+ * publicado sino **las rutas `/obra/…` del sitemap publicado**, porque una Obra con `noindex`
+ * existe y no se cuenta (FR-52). Sin sitemap legible la familia va a `sinLeer` con su motivo,
+ * jamás a cero.
+ */
+export type FamiliaDeLaSerie = Familia | 'obra';
+
+export const FAMILIAS_DE_LA_SERIE: readonly FamiliaDeLaSerie[] = [...FAMILIAS, 'obra'];
+
 /** El nombre con el que el producto llama a cada familia — PRD §3, y no se traduce. */
-export const NOMBRE_DE_FAMILIA: Readonly<Record<Familia, string>> = {
+export const NOMBRE_DE_FAMILIA: Readonly<Record<FamiliaDeLaSerie, string>> = {
   cita: 'Cita',
   autor: 'Autor',
   tema: 'Tema',
   coleccion: 'Colección',
+  obra: 'Obra',
+};
+
+/**
+ * Qué conjunto midió una familia, escrito en cada entrada: `publicadas` es el conjunto
+ * publicable (`censoPorFamilia`); `sitemap`, las rutas del sitemap publicado (la Obra).
+ * Una entrada anterior a la 22.8 no lo trae y se sigue leyendo: entonces era `publicadas`.
+ */
+export type CensoMedido = 'publicadas' | 'sitemap';
+
+export const CENSO_DE_FAMILIA: Readonly<Record<FamiliaDeLaSerie, CensoMedido>> = {
+  cita: 'publicadas',
+  autor: 'publicadas',
+  tema: 'publicadas',
+  coleccion: 'publicadas',
+  obra: 'sitemap',
 };
 
 /**
@@ -210,13 +244,35 @@ export type CensoPorFamilia = Readonly<Record<Familia, readonly string[]>>;
  * `rutasPublicadas`, así que una familia nueva no puede desaparecer de esta serie en
  * silencio.
  *
- * **La Obra no se cuenta todavía, y es a propósito** (Historia 22.4). `rutasPublicadas`
- * enumera las Páginas de Obra desde la 22.4, pero la serie no mide esa familia hasta la pasada
- * de métricas (22.8), que la leerá aparte y solo con las indexables del sitemap. La prueba que
- * iguala la unión con `rutasPublicadas` excluye las rutas de Obra por su nombre: la exclusión
- * está escrita, no es un olvido.
+ * **La Obra no entra aquí, y es a propósito** (Historia 22.4). `rutasPublicadas` enumera las
+ * Páginas de Obra —también las `noindex`—, y la serie de indexación la mide aparte, con las
+ * rutas del sitemap publicado (`censoDeLaSerie`, 22.8); el tráfico, la demanda, el rastreo y
+ * el canal no la cuentan todavía. La prueba que iguala la unión con `rutasPublicadas` excluye
+ * las rutas de Obra por su nombre: la exclusión está escrita, no es un olvido.
  */
 export function censoPorFamilia(conjunto: ConjuntoPublicable): CensoPorFamilia {
+  return censoDeLasCuatro(conjunto);
+}
+
+/** El censo de la serie de indexación: las cuatro familias y la Obra del sitemap. */
+export type CensoDeLaSerie = Readonly<Record<FamiliaDeLaSerie, readonly string[]>>;
+
+/**
+ * El censo que mide la serie de indexación — Historia 22.8.
+ *
+ * Las cuatro familias salen de lo publicado, como siempre; la Obra, de las rutas de Obra del
+ * **sitemap publicado** que se le pasen —nunca de `rutasPublicadas`, que enumera también las
+ * Obras con `noindex`—. Sin sitemap, `obras` es la lista vacía y quien lee la serie tiene que
+ * declarar la familia en `sinLeer` con su motivo: aquí no se inventa ningún cero.
+ */
+export function censoDeLaSerie(
+  conjunto: ConjuntoPublicable,
+  obras: readonly string[] = [],
+): CensoDeLaSerie {
+  return { ...censoDeLasCuatro(conjunto), obra: [...obras] };
+}
+
+function censoDeLasCuatro(conjunto: ConjuntoPublicable): CensoPorFamilia {
   return {
     cita: conjunto.citas.map((c) => rutaDeCita(c.slug)),
     autor: autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
@@ -227,7 +283,7 @@ export function censoPorFamilia(conjunto: ConjuntoPublicable): CensoPorFamilia {
 
 /** Lo que se va a inspeccionar de una familia, y si eso es toda la familia o una muestra. */
 export interface PlanDeFamilia {
-  familia: Familia;
+  familia: FamiliaDeLaSerie;
   /** Cuántas URL publica hoy la familia. Es el denominador del reparto. */
   publicadas: number;
   /** Las que se van a pedir, en orden estable. */
@@ -251,7 +307,9 @@ export interface PlanDeInspeccion {
    * familia que falló: es una que **no se intentó**, y la entrada de la serie tiene que
    * decirlo con su motivo en vez de dejarla como si se hubiera leído cero.
    */
-  sinPresupuesto: readonly Familia[];
+  sinPresupuesto: readonly FamiliaDeLaSerie[];
+  /** Las familias que se pidieron enteras (SM-11), aunque el resto se muestree. */
+  enteras?: readonly FamiliaDeLaSerie[];
 }
 
 /**
@@ -268,7 +326,18 @@ export interface PlanDeInspeccion {
  * URL. Sin eso, dos jornadas seguidas medirían muestras distintas por azar y la diferencia
  * entre ellas no significaría nada.
  */
-export function planDeInspeccion(censo: CensoPorFamilia, presupuesto: number): PlanDeInspeccion {
+export function planDeInspeccion(
+  censo: Partial<Record<FamiliaDeLaSerie, readonly string[]>>,
+  presupuesto: number,
+  /**
+   * Familias que se leen **enteras** antes de repartir nada — Historia 22.8. Mientras rija
+   * SM-11 son Autor y Obra: la comparación de la misma jornada entre las dos no admite
+   * muestra, y las dos son pequeñas (~147 URL). El resto del presupuesto se reparte entre las
+   * demás con el suelo y la proporción de siempre. Si el presupuesto no da para ellas, se
+   * llevan lo que haya, en el orden dado, y quedan declaradas como muestreadas.
+   */
+  enteras: readonly FamiliaDeLaSerie[] = [],
+): PlanDeInspeccion {
   /*
    * `NaN` sobrevive a `Math.max(0, Math.trunc(NaN))` —sigue siendo `NaN`— y de ahí en
    * adelante toda comparación es falsa: el reparto no asigna nada, el relleno de una en una
@@ -279,8 +348,8 @@ export function planDeInspeccion(censo: CensoPorFamilia, presupuesto: number): P
   const disponible =
     Number.isFinite(presupuesto) ? Math.max(0, Math.trunc(presupuesto)) : 0;
 
-  const tamaños = new Map<Familia, number>();
-  for (const familia of FAMILIAS) {
+  const tamaños = new Map<FamiliaDeLaSerie, number>();
+  for (const familia of FAMILIAS_DE_LA_SERIE) {
     const cuantas = censo[familia]?.length ?? 0;
     // Una familia sin nada publicado no entra ni como leída ni como fallida: no hay nada
     // que leer. Escribirla como cero sería exactamente lo que la épica prohíbe.
@@ -288,10 +357,31 @@ export function planDeInspeccion(censo: CensoPorFamilia, presupuesto: number): P
   }
 
   const publicadas = [...tamaños.values()].reduce((a, b) => a + b, 0);
-  const asignado = repartir(tamaños, disponible);
+
+  /*
+   * Primero se **reserva el suelo** de las demás familias —que ninguna se quede sin serie—;
+   * con lo que quede, las enteras en el orden dado; y lo que sobre aún se reparte entre las
+   * demás con el suelo y la proporción de siempre. Si las enteras no caben, se muestrean y lo
+   * dice su `muestreada`.
+   */
+  const asignado = new Map<FamiliaDeLaSerie, number>();
+  const enterasConCenso = enteras.filter((f) => tamaños.has(f));
+  const demas = new Map([...tamaños].filter(([familia]) => !enterasConCenso.includes(familia)));
+  const suelo = Math.min(
+    disponible,
+    [...demas.values()].reduce((suma, total) => suma + Math.min(total, MUESTRA_MINIMA_POR_FAMILIA), 0),
+  );
+  let paraEnteras = disponible - suelo;
+  for (const familia of enterasConCenso) {
+    const cuantas = Math.min(tamaños.get(familia) ?? 0, paraEnteras);
+    asignado.set(familia, cuantas);
+    paraEnteras -= cuantas;
+  }
+  const gastado = [...asignado.values()].reduce((a, b) => a + b, 0);
+  for (const [familia, cuantas] of repartir(demas, disponible - gastado)) asignado.set(familia, cuantas);
 
   const familias: PlanDeFamilia[] = [];
-  const sinPresupuesto: Familia[] = [];
+  const sinPresupuesto: FamiliaDeLaSerie[] = [];
 
   for (const [familia, total] of tamaños) {
     const cuantas = asignado.get(familia) ?? 0;
@@ -313,6 +403,7 @@ export function planDeInspeccion(censo: CensoPorFamilia, presupuesto: number): P
     inspecciones: familias.reduce((suma, f) => suma + f.rutas.length, 0),
     familias,
     sinPresupuesto,
+    ...(enterasConCenso.length > 0 ? { enteras: enterasConCenso } : {}),
   };
 }
 
@@ -323,8 +414,11 @@ export function planDeInspeccion(censo: CensoPorFamilia, presupuesto: number): P
  * presupuesto corto se lo comía Cita y las tres agregaciones se quedaban sin ninguna
  * petición — que es el caso que hace ilegible la comparación por la que existe la serie.
  */
-function repartir(tamaños: ReadonlyMap<Familia, number>, presupuesto: number): Map<Familia, number> {
-  const asignado = new Map<Familia, number>();
+function repartir(
+  tamaños: ReadonlyMap<FamiliaDeLaSerie, number>,
+  presupuesto: number,
+): Map<FamiliaDeLaSerie, number> {
+  const asignado = new Map<FamiliaDeLaSerie, number>();
   for (const familia of tamaños.keys()) asignado.set(familia, 0);
 
   let restante = presupuesto;
@@ -333,7 +427,7 @@ function repartir(tamaños: ReadonlyMap<Familia, number>, presupuesto: number): 
     if (a[1] !== b[1]) return a[1] - b[1];
     // Empate deshecho por el orden declarado, no por el de inserción de un `Map`: dos
     // familias del mismo tamaño tienen que repartirse igual en cualquier ejecución.
-    return FAMILIAS.indexOf(a[0]) - FAMILIAS.indexOf(b[0]);
+    return FAMILIAS_DE_LA_SERIE.indexOf(a[0]) - FAMILIAS_DE_LA_SERIE.indexOf(b[0]);
   });
 
   for (const [familia, total] of porTamaño) {
@@ -344,12 +438,12 @@ function repartir(tamaños: ReadonlyMap<Familia, number>, presupuesto: number): 
   }
 
   // Lo que sobra, en proporción a lo que a cada familia le queda por cubrir.
-  const falta = new Map<Familia, number>();
+  const falta = new Map<FamiliaDeLaSerie, number>();
   for (const [familia, total] of tamaños) falta.set(familia, total - (asignado.get(familia) ?? 0));
   const sumaDeFaltas = [...falta.values()].reduce((a, b) => a + b, 0);
 
   if (restante > 0 && sumaDeFaltas > 0) {
-    for (const familia of FAMILIAS) {
+    for (const familia of FAMILIAS_DE_LA_SERIE) {
       const pendiente = falta.get(familia);
       if (pendiente === undefined || pendiente === 0) continue;
       const extra = Math.floor((restante * pendiente) / sumaDeFaltas);
@@ -365,7 +459,7 @@ function repartir(tamaños: ReadonlyMap<Familia, number>, presupuesto: number): 
   let sobrante = presupuesto - [...asignado.values()].reduce((a, b) => a + b, 0);
   while (sobrante > 0) {
     let repartido = false;
-    for (const familia of FAMILIAS) {
+    for (const familia of FAMILIAS_DE_LA_SERIE) {
       if (sobrante === 0) break;
       const total = tamaños.get(familia);
       if (total === undefined) continue;
@@ -446,6 +540,11 @@ export interface LecturaDeFamilia {
    * respuesta y no cuesta ni una petición más.
    */
   estados: RepartoDeEstado[];
+  /**
+   * Qué conjunto se midió — Historia 22.8. Lo pone quien lee (`leerIndexacion`) con
+   * `CENSO_DE_FAMILIA`; opcional porque las entradas anteriores no lo traen.
+   */
+  censo?: CensoMedido;
 }
 
 /**
@@ -542,8 +641,8 @@ export function motivoDeFallo(error: unknown): string {
 }
 
 /** Una familia que no se leyó, con el motivo que lo impidió. */
-export interface FamiliaSinLeer {
-  familia: Familia;
+export interface FamiliaSinLeer<F extends FamiliaDeLaSerie = Familia> {
+  familia: F;
   motivo: string;
 }
 
@@ -559,12 +658,15 @@ export interface LecturaDeIndexacion {
   momento?: Date;
   /** La propiedad consultada, para que la entrada diga de dónde salió. */
   propiedad: string;
-  /** El total publicable de las cuatro familias en el momento de la lectura. */
+  /**
+   * El total publicable de las cuatro familias en el momento de la lectura. **Sin la Obra**
+   * (22.8): su censo es otro —el sitemap— y va en su familia.
+   */
   publicadas: number;
-  /** Cuántas peticiones se gastaron de verdad. */
+  /** Cuántas peticiones se gastaron de verdad, Obra incluida. */
   inspeccionadas: number;
-  familias: Partial<Record<Familia, LecturaDeFamilia>>;
-  sinLeer: Partial<Record<Familia, string>>;
+  familias: Partial<Record<FamiliaDeLaSerie, LecturaDeFamilia>>;
+  sinLeer: Partial<Record<FamiliaDeLaSerie, string>>;
 }
 
 /**
@@ -578,13 +680,13 @@ export interface LecturaDeIndexacion {
 export function componerLectura(entrada: {
   momento?: Date;
   propiedad: string;
-  censo: CensoPorFamilia;
-  lecturas: Partial<Record<Familia, LecturaDeFamilia>>;
-  sinLeer: readonly FamiliaSinLeer[];
+  censo: Partial<Record<FamiliaDeLaSerie, readonly string[]>>;
+  lecturas: Partial<Record<FamiliaDeLaSerie, LecturaDeFamilia>>;
+  sinLeer: readonly FamiliaSinLeer<FamiliaDeLaSerie>[];
 }): LecturaDeIndexacion {
   const { censo, lecturas } = entrada;
 
-  const sinLeer: Partial<Record<Familia, string>> = {};
+  const sinLeer: Partial<Record<FamiliaDeLaSerie, string>> = {};
   for (const { familia, motivo } of entrada.sinLeer) {
     /*
      * Un motivo en blanco no es un motivo, y aquí además es peligroso: `aYaml` omite las
@@ -609,14 +711,16 @@ export function componerLectura(entrada: {
     sinLeer[familia] = motivo;
   }
 
-  const familias: Partial<Record<Familia, LecturaDeFamilia>> = {};
+  const familias: Partial<Record<FamiliaDeLaSerie, LecturaDeFamilia>> = {};
   let publicadas = 0;
   let inspeccionadas = 0;
 
-  for (const familia of FAMILIAS) {
+  for (const familia of FAMILIAS_DE_LA_SERIE) {
     const cuantas = censo[familia]?.length ?? 0;
     if (cuantas === 0) continue;
-    publicadas += cuantas;
+    // Historia 22.8 — el total de la entrada suma solo las cuatro de siempre, para que siga
+    // siendo comparable con las entradas anteriores; la Obra va aparte, en su familia.
+    if (familia !== 'obra') publicadas += cuantas;
 
     const leida = lecturas[familia];
     if (leida !== undefined) {
@@ -662,7 +766,7 @@ export function lineasDeLectura(lectura: LecturaDeIndexacion): string[] {
     '',
   ];
 
-  for (const familia of FAMILIAS) {
+  for (const familia of FAMILIAS_DE_LA_SERIE) {
     const leida = lectura.familias[familia];
     if (leida === undefined) continue;
     const muestreada = leida.muestra < leida.publicadas ? ` (muestra de ${leida.publicadas})` : '';
@@ -675,7 +779,7 @@ export function lineasDeLectura(lectura: LecturaDeIndexacion): string[] {
     for (const { estado, urls } of leida.estados) lineas.push(`    ${urls} — ${estado}`);
   }
 
-  const sinLeer = FAMILIAS.filter((f) => lectura.sinLeer[f] !== undefined);
+  const sinLeer = FAMILIAS_DE_LA_SERIE.filter((f) => lectura.sinLeer[f] !== undefined);
   if (sinLeer.length > 0) {
     lineas.push('', 'Familias sin leer —se omiten de la entrada, no se escriben como cero—');
     for (const familia of sinLeer) {
@@ -683,6 +787,52 @@ export function lineasDeLectura(lectura: LecturaDeIndexacion): string[] {
     }
   }
 
+  if (SM11_VIGENTE) lineas.push('', ...lineasDeSm11(lectura));
+
+  return lineas;
+}
+
+/** La jornada desde la que SM-11 se juzga: 8 semanas tras el primer despliegue de la 22.4. */
+export function jornadaDeJuzgarSm11(): string {
+  const [año, mes, dia] = PRIMER_DESPLIEGUE_DE_OBRAS.split('-').map(Number);
+  const fecha = new Date(Date.UTC(año, mes - 1, dia + SEMANAS_HASTA_JUZGAR_SM11 * 7));
+  return fecha.toISOString().slice(0, 10);
+}
+
+function proporcion(leida: LecturaDeFamilia): string {
+  if (leida.muestra === 0) return 'sin muestra';
+  const porcentaje = (100 * leida.indexadas) / leida.muestra;
+  const muestreada = leida.muestra < leida.publicadas ? `, muestreada de ${leida.publicadas}` : '';
+  return `${porcentaje.toLocaleString('es-ES', { maximumFractionDigits: 1 })} % ` +
+    `(${leida.indexadas} de ${leida.muestra}${muestreada})`;
+}
+
+/**
+ * La línea SM-11 del informe — Historia 22.8: la proporción indexada de Obra frente a la de
+ * Autor **de la misma lectura**, y, desde `jornadaDeJuzgarSm11`, el recordatorio de que toca
+ * juzgarla. Juzgar no lo hace la orden: congelar es un commit de Héctor.
+ */
+export function lineasDeSm11(lectura: LecturaDeIndexacion): string[] {
+  const obra = lectura.familias.obra;
+  const autor = lectura.familias.autor;
+  const lineas: string[] = [];
+  if (obra === undefined || autor === undefined) {
+    const faltan = [
+      ...(obra === undefined ? ['Obra'] : []),
+      ...(autor === undefined ? ['Autor'] : []),
+    ];
+    lineas.push(`SM-11: sin comparación en esta lectura —sin leer: ${faltan.join(' y ')}—.`);
+  } else {
+    lineas.push(`SM-11: Obra ${proporcion(obra)} indexada frente a Autor ${proporcion(autor)}.`);
+  }
+  const momento = lectura.momento ?? new Date();
+  const hoy = `${momento.getFullYear()}-${String(momento.getMonth() + 1).padStart(2, '0')}-${String(momento.getDate()).padStart(2, '0')}`;
+  const juzgar = jornadaDeJuzgarSm11();
+  lineas.push(
+    hoy >= juzgar
+      ? 'Toca juzgar SM-11: lo decide Héctor (congelar es `npm run obra -- congelar` y un commit).'
+      : `SM-11 se juzga desde el ${juzgar}.`,
+  );
   return lineas;
 }
 

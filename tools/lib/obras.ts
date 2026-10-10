@@ -14,8 +14,8 @@
  */
 
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import { basename, dirname, join } from 'node:path';
+import { readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, resolve } from 'node:path';
 import {
   clave,
   colapsar,
@@ -53,6 +53,8 @@ import {
 import { FICHERO_DEL_CENSO } from './cotejo.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from './documento.ts';
 import type { Resultado } from './gestion.ts';
+import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
+import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
 
 /** Lo que hay que hacer para que la Obra tenga ficha activa, decidido en solo lectura. */
 export type PlanDeFicha =
@@ -1031,4 +1033,223 @@ export async function citasConObra<C extends CitaParaObra>(
       formas: [o.forma],
     }));
   return { ok: true, citas: colgarObras(citas, [...fichas, ...provisionales]) };
+}
+
+// ─── La congelación de la familia Obra (Historia 22.8, AD-25) ──────────────────────────
+
+/** El fichero donde vive la declaración: junto a los números de FR-52. */
+export const FICHERO_DE_UMBRALES = resolve(import.meta.dirname, '../../src/lib/umbrales.ts');
+
+/**
+ * El bloque de la declaración en el texto de `umbrales.ts`. Es lo **único** que `congelar` y
+ * `levantar` reescriben; si no se encuentra tal cual, no se toca nada.
+ */
+const BLOQUE_DE_CONGELACION =
+  /(export const CONGELACION_DE_OBRAS: CongelacionDeObras \| undefined = )(undefined|\{[\s\S]*?\n\});/u;
+
+function declaracionDeCongelacion(texto: string): { valor: string; desde?: string } | undefined {
+  const encontrado = BLOQUE_DE_CONGELACION.exec(texto);
+  if (encontrado === null) return undefined;
+  const valor = encontrado[2];
+  const desde = /desde:\s*'(\d{4}-\d{2}-\d{2})'/u.exec(valor)?.[1];
+  return { valor, ...(desde === undefined ? {} : { desde }) };
+}
+
+/** Lo que dice el texto de un `umbrales.ts` sobre la congelación. */
+export type CongelacionLeida =
+  | { estado: 'sin-bloque' }
+  | { estado: 'declarada'; congelacion: CongelacionDeObras | undefined }
+  | { estado: 'ilegible'; motivo: string };
+
+/**
+ * La congelación que declara el texto de un `umbrales.ts` — Historia 22.8.
+ *
+ * Es el mismo analizador que usan `congelar` y `levantar`, y el que usa el aviso para saber
+ * qué regía en `--desde` (`git show <desde>:src/lib/umbrales.ts`). Un texto sin el bloque es
+ * de antes de la 22.8: `sin-bloque`, que quien llama lee como «sin congelación». Un bloque que
+ * no se deja leer es `ilegible`, y nunca se adivina.
+ */
+export function leerCongelacionDeclarada(texto: string): CongelacionLeida {
+  const declarada = declaracionDeCongelacion(texto);
+  if (declarada === undefined) return { estado: 'sin-bloque' };
+  if (declarada.valor === 'undefined') return { estado: 'declarada', congelacion: undefined };
+  const lista = /indexables:\s*\[([\s\S]*?)\]/u.exec(declarada.valor);
+  if (declarada.desde === undefined || lista === null) {
+    return { estado: 'ilegible', motivo: 'el bloque CONGELACION_DE_OBRAS no tiene «desde» o «indexables» legibles' };
+  }
+  const resto = lista[1].replace(/'[^'\n]*'/gu, '').replace(/[\s,]/gu, '');
+  if (resto !== '') {
+    return { estado: 'ilegible', motivo: 'la lista «indexables» de CONGELACION_DE_OBRAS no es una lista de nombres' };
+  }
+  const indexables = [...lista[1].matchAll(/'([^'\n]*)'/gu)].map((m) => m[1]);
+  return { estado: 'declarada', congelacion: { desde: declarada.desde, indexables } };
+}
+
+/** El valor numérico de una constante de `umbrales.ts` en su texto, o `undefined`. */
+export function constanteNumerica(texto: string, nombre: string): number | undefined {
+  const m = new RegExp(`export const ${nombre} = ([0-9.]+);`, 'u').exec(texto);
+  return m === null ? undefined : Number(m[1]);
+}
+
+function sinBloque(fichero: string): Resultado {
+  return {
+    ok: false,
+    motivos: [
+      `No se encuentra la declaración «export const CONGELACION_DE_OBRAS: CongelacionDeObras | ` +
+        `undefined = …;» en ${fichero}. La orden solo reescribe ese bloque y no lo adivina.`,
+      NADA_ESCRITO,
+    ],
+  };
+}
+
+/**
+ * Escribe por temporal y `rename`, y relee lo escrito: un fallo a medias no deja el fichero
+ * roto, el temporal no se queda huérfano, y si lo releído no es lo compuesto, se dice.
+ */
+async function reescribirUmbrales(fichero: string, texto: string): Promise<void> {
+  const temporal = `${fichero}.${process.pid}.tmp`;
+  try {
+    await writeFile(temporal, texto, 'utf8');
+    await rename(temporal, fichero);
+  } catch (fallo) {
+    await rm(temporal, { force: true });
+    throw fallo;
+  }
+  if ((await readFile(fichero, 'utf8')) !== texto) {
+    throw new Error(`${fichero} no contiene lo que se acaba de escribir: revíselo con git diff.`);
+  }
+}
+
+/**
+ * `npm run obra -- congelar` — declara la congelación con la lista indexable vigente.
+ *
+ * Reescribe solo el bloque `CONGELACION_DE_OBRAS` de `umbrales.ts` con la jornada y los
+ * nombres de ficha que hoy se indexan, calculados con la misma función que la construcción
+ * (`obrasDeLosDatos`, sin congelación). Se niega —código 1, nada escrito— si ya hay una
+ * congelación declarada. No hace commit: congelar es un commit de Héctor.
+ */
+export async function congelarObras(
+  rutas: Rutas,
+  opciones: { umbrales?: string; hoy: string },
+): Promise<Resultado> {
+  const fichero = opciones.umbrales ?? FICHERO_DE_UMBRALES;
+  let texto: string;
+  try {
+    texto = await readFile(fichero, 'utf8');
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se puede leer ${fichero}: ${textoDe(fallo)}`, NADA_ESCRITO] };
+  }
+  const declarada = declaracionDeCongelacion(texto);
+  if (declarada === undefined) return sinBloque(fichero);
+  if (declarada.valor !== 'undefined') {
+    return {
+      ok: false,
+      motivos: [
+        `La familia Obra ya está congelada${declarada.desde === undefined ? '' : ` desde el ${declarada.desde}`}. ` +
+          'Congelar otra vez reescribiría la lista con la de hoy, y la lista es la del día en ' +
+          'que se congeló. Para empezar de nuevo, `npm run obra -- levantar` primero.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  let nombres: string[];
+  try {
+    const { indexables } = obrasDeLosDatos(
+      {
+        citas: await leerCitas(rutas.citas),
+        autores: await leerAutores(rutas),
+        fichas: await leerFichasDeObra(rutas),
+      },
+      // La regla sola: la lista que se congela es la que FR-52 deja indexar hoy.
+      null,
+    );
+    nombres = indexables.map((obra) => obra.nombre).sort((a, b) => a.localeCompare(b, 'es'));
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [`No se puede leer el Corpus para saber qué Obras se indexan: ${textoDe(fallo)}`, NADA_ESCRITO],
+    };
+  }
+
+  if (nombres.length === 0) {
+    return {
+      ok: false,
+      motivos: [
+        'Hoy no se indexa ninguna Obra: congelar dejaría la familia sin ninguna página indexable ' +
+          'y no frenaría nada que no esté ya parado.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const bloque = [
+    '{',
+    `  desde: '${opciones.hoy}',`,
+    '  indexables: [',
+    ...nombres.map((n) => `    '${n}',`),
+    '  ],',
+    '}',
+  ].join('\n');
+  const nuevo = texto.replace(BLOQUE_DE_CONGELACION, (_t, cabeza: string) => `${cabeza}${bloque};`);
+  const releida = declaracionDeCongelacion(nuevo);
+  if (releida?.desde !== opciones.hoy) return sinBloque(fichero);
+
+  try {
+    await reescribirUmbrales(fichero, nuevo);
+  } catch (fallo) {
+    return { ok: false, motivos: [textoDe(fallo), NADA_ESCRITO] };
+  }
+  return {
+    ok: true,
+    ruta: fichero,
+    mensaje: [
+      `Familia Obra congelada desde el ${opciones.hoy}: ${nombres.length} Obra(s) indexable(s) en la lista.`,
+      `  ${fichero}: CONGELACION_DE_OBRAS`,
+      'Mientras rija, ninguna Obra entra en el conjunto indexable, las que dejen de cumplir FR-52',
+      'salen, y `npm run rastreo -- --registrar` rechaza toda URL de Obra.',
+      'No se ha hecho commit: congelar es un commit, y se deshace con `git revert` o `levantar`.',
+    ].join('\n'),
+  };
+}
+
+/**
+ * `npm run obra -- levantar` — devuelve la declaración a `undefined`. Se niega —código 1, nada
+ * escrito— si no hay congelación declarada. No hace commit.
+ */
+export async function levantarCongelacion(opciones: { umbrales?: string } = {}): Promise<Resultado> {
+  const fichero = opciones.umbrales ?? FICHERO_DE_UMBRALES;
+  let texto: string;
+  try {
+    texto = await readFile(fichero, 'utf8');
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se puede leer ${fichero}: ${textoDe(fallo)}`, NADA_ESCRITO] };
+  }
+  const declarada = declaracionDeCongelacion(texto);
+  if (declarada === undefined) return sinBloque(fichero);
+  if (declarada.valor === 'undefined') {
+    return {
+      ok: false,
+      motivos: ['La familia Obra no está congelada: no hay nada que levantar.', NADA_ESCRITO],
+    };
+  }
+  const nuevo = texto.replace(BLOQUE_DE_CONGELACION, (_t, cabeza: string) => `${cabeza}undefined;`);
+  try {
+    await reescribirUmbrales(fichero, nuevo);
+  } catch (fallo) {
+    return { ok: false, motivos: [textoDe(fallo), NADA_ESCRITO] };
+  }
+  return {
+    ok: true,
+    ruta: fichero,
+    mensaje: [
+      `Congelación levantada${declarada.desde === undefined ? '' : ` (regía desde el ${declarada.desde})`}.`,
+      `  ${fichero}: CONGELACION_DE_OBRAS = undefined`,
+      'La indexabilidad vuelve a ser la regla de FR-52 sola. No se ha hecho commit.',
+    ].join('\n'),
+  };
+}
+
+function textoDe(fallo: unknown): string {
+  return fallo instanceof Error ? fallo.message : String(fallo);
 }

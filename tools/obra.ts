@@ -23,13 +23,23 @@
  * versionado de su Obra, sin sacarla del censo. `reunir`, `separar` y `titular` editan la
  * ficha y nunca las Citas. Reunir y separar los decide el dueño del Corpus.
  *
+ * Historia 22.8 — el freno de SM-11:
+ *
+ *   npm run obra -- congelar
+ *   npm run obra -- levantar
+ *
+ * `congelar` reescribe solo el bloque `CONGELACION_DE_OBRAS` de `src/lib/umbrales.ts` con la
+ * jornada y la lista indexable vigente; `levantar` lo devuelve a `undefined`. Ninguna hace
+ * commit, y las dos se niegan —código 1, nada escrito— si no hay nada que hacer. `--umbrales
+ * <fichero>` sirve a las pruebas para no tocar el del repositorio.
+ *
  * Códigos: 2 es la forma de la invocación (falta un argumento, sobra uno, una bandera que no
  * existe); 1 es lo que la invocación dice.
  *
  * Nadie escribe ni borra fichas a mano.
  */
 
-import { rutasDelCorpus } from './lib/corpus.ts';
+import { fechaLocal, rutasDelCorpus } from './lib/corpus.ts';
 import {
   motivosDeArgumentosNoReconocidos,
   opcion,
@@ -38,7 +48,9 @@ import {
   terminar,
 } from './lib/cli.ts';
 import {
+  congelarObras,
   formatearInformeDeSiembra,
+  levantarCongelacion,
   restituirGrafia,
   retirarFichaDeObra,
   reunirFichas,
@@ -55,6 +67,8 @@ const USO = [
   '  npm run obra -- reunir <ficha-destino> <ficha-absorbida> [--corpus corpus]',
   '  npm run obra -- separar <ficha> <ficha-otra> [--corpus corpus]',
   '  npm run obra -- titular <ficha> "<grafía>" [--corpus corpus]',
+  '  npm run obra -- congelar [--corpus corpus]',
+  '  npm run obra -- levantar',
   '',
 ].join('\n');
 
@@ -164,6 +178,27 @@ async function principal(): Promise<never> {
         ]);
       }
       return terminar(await retirarFichaDeObra(rutas, sueltos[0], motivo));
+    }
+
+    case 'congelar':
+    case 'levantar': {
+      const conValor = ['--corpus', '--umbrales'];
+      const mal = motivosDeArgumentosNoReconocidos([...resto, ...trasElSeparador], {
+        solas: [],
+        conValor,
+      });
+      if (mal.length > 0) usoMal(mal);
+      const sueltos = [...posicionales(resto, conValor), ...trasElSeparador];
+      if (sueltos.length > 0) {
+        usoMal([`Sobra ${sueltos.map((a) => `«${a}»`).join(', ')}: «${orden}» no toma argumentos.`]);
+      }
+      const umbrales = opcion(resto, '--umbrales');
+      const destino = umbrales === undefined ? {} : { umbrales };
+      return terminar(
+        orden === 'congelar'
+          ? await congelarObras(rutas, { ...destino, hoy: fechaLocal(new Date()) })
+          : await levantarCongelacion(destino),
+      );
     }
 
     default:

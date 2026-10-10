@@ -30,12 +30,14 @@ import {
   desajustesDeIndexables,
   informeDeObras,
   marcasDePagina,
+  nombresCongeladosSinFicha,
   rutaDeFicheroHtml,
   rutasDelSitemap,
   titularDeDesajustes,
   type PaginaIndexable,
 } from '../tools/lib/indexables.ts';
-import { rutaDeLaObra } from '../src/lib/obras.ts';
+import { congelacionVigente, rutaDeLaObra } from '../src/lib/obras.ts';
+import type { CongelacionDeObras } from '../src/lib/umbrales.ts';
 import { obrasDeLosDatos, type ObrasDelSitio } from '../src/lib/publicado.ts';
 import { declararRutasIndexables } from '../src/lib/superficies.ts';
 
@@ -52,13 +54,23 @@ async function ficherosBajo(raiz: string, filtro: (nombre: string) => boolean): 
  * `obrasDeLosDatos`, que repite los pasos de `conjuntoPublicable`. Exportada para la prueba que
  * compara esta lista con la del armazón sobre el mismo corpus.
  */
-export async function obrasDelCorpusEnDisco(raiz: string): Promise<ObrasDelSitio> {
+export async function obrasDelCorpusEnDisco(
+  raiz: string,
+  /**
+   * Historia 22.8 — la congelación con la que se aplica la regla. Sin pasar, la declarada hoy
+   * (`congelacionVigente()`); `null`, ninguna. El aviso pasa la que regía en `--desde`.
+   */
+  congelacion?: CongelacionDeObras | null,
+): Promise<ObrasDelSitio> {
   const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-  return obrasDeLosDatos({
-    citas: await leerCitas(rutas.citas),
-    autores: await leerAutores(rutas),
-    fichas: await leerFichasDeObra(rutas),
-  });
+  return obrasDeLosDatos(
+    {
+      citas: await leerCitas(rutas.citas),
+      autores: await leerAutores(rutas),
+      fichas: await leerFichasDeObra(rutas),
+    },
+    congelacion,
+  );
 }
 
 export default function rutasIndexablesDelCorpus(): AstroIntegration {
@@ -75,6 +87,19 @@ export default function rutasIndexablesDelCorpus(): AstroIntegration {
         const { publicadas, indexables } = await obrasDelCorpusEnDisco(raiz);
         declararRutasIndexables(indexables.map((obra) => rutaDeLaObra(obra)));
         logger.info(informeDeObras(publicadas.length, indexables.length));
+        // Historia 22.8 — un nombre congelado que ya no es ninguna ficha activa avisa, no rompe.
+        const congelacion = congelacionVigente();
+        if (congelacion !== undefined) {
+          const fichas = await leerFichasDeObra(rutasDelCorpus(join(raiz, 'corpus')));
+          const sueltos = nombresCongeladosSinFicha(congelacion, fichas.map((f) => f.nombre));
+          if (sueltos.length > 0) {
+            logger.warn(
+              `La congelación de Obras (desde ${congelacion.desde}) nombra ${sueltos.length} ficha(s) ` +
+                `que no están en corpus/obras/: ${sueltos.join(', ')}. No se indexan; si se ` +
+                'reunieron o retiraron, la lista se rehace con `levantar` y `congelar`.',
+            );
+          }
+        }
       },
 
       'astro:build:done': async ({ dir, logger }) => {

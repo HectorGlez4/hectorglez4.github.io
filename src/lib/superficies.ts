@@ -77,6 +77,9 @@ export interface Superficie {
  * aquí: `tests/unit/publicable-y-alcanzable.test.ts` compara las dos listas, y
  * `Armazon.astro` rompe el build si compone una ruta que nadie ha declarado.
  */
+/** El fichero de la Página de Obra: su identidad en la declaración (Historia 22.4). */
+const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
+
 export const SUPERFICIES: readonly Superficie[] = [
   {
     nombre: 'la portada',
@@ -124,7 +127,7 @@ export const SUPERFICIES: readonly Superficie[] = [
   },
   {
     nombre: 'la Página de Obra',
-    pagina: 'obra/[autor]/[slug]/[...page].astro',
+    pagina: PAGINA_DE_OBRA,
     reconoce: /^\/obra\/[^/]+\/[^/]+(?:\/\d+)?$/,
     // Historia 22.4 — toda Obra con al menos una Cita publicada tiene página, pero solo se
     // indexa la que no repite otra (FR-52). Esa mitad la decide el Corpus, no la ruta: llega
@@ -346,6 +349,14 @@ export function superficieDeclaradaDe(
 ): Superficie | undefined {
   const ruta = rutaNormalizada(rutaOUrl);
   return superficies.find((superficie) => superficie.reconoce.test(ruta));
+}
+
+/**
+ * Si una ruta es de la Página de Obra —la 1 o una 2+—, por la declaración y no por el prefijo
+ * — Historia 22.8. Es el único predicado: lo usan el aviso, el rastreo y la serie.
+ */
+export function esRutaDeObra(rutaOUrl: string): boolean {
+  return superficieDeclaradaDe(rutaOUrl)?.pagina === PAGINA_DE_OBRA;
 }
 
 /**

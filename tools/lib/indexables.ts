@@ -102,3 +102,16 @@ export function informeDeObras(publicadas: number, indexables: number): string {
     indexables === 1 ? 'indexable' : 'indexables'
   }.`;
 }
+
+/**
+ * Los nombres de la congelación de Obras que no resuelven a ninguna ficha activa — Historia
+ * 22.8. El build los nombra en un aviso y no rompe: una Obra absorbida o retirada después de
+ * congelar simplemente no se indexa.
+ */
+export function nombresCongeladosSinFicha(
+  congelacion: { indexables: readonly string[] },
+  fichasActivas: readonly string[],
+): string[] {
+  const activas = new Set(fichasActivas);
+  return congelacion.indexables.filter((nombre) => !activas.has(nombre));
+}

@@ -774,3 +774,48 @@ describe('Historia 22.6 — una nota de más de 160 caracteres', () => {
     expect(resultado.salida).toContain('no puede pasar de 160 caracteres');
   }, 300_000);
 });
+
+/*
+ * Historia 22.8 — la congelación declarada, en las dos instancias de la regla.
+ *
+ * Se construye una copia del proyecto con `CONGELACION_DE_OBRAS` puesta en su `umbrales.ts`
+ * —nunca el del árbol (AD-21)—. La lista congelada trae «Sobre la brevedad de la vida», que
+ * no cumple FR-52 (93 %), y no trae «Cartas a Lucilio», que sí la cumple: las dos quedan fuera.
+ * Que el armazón (la sonda) y la integración (el sitemap y la comprobación de `build:done`)
+ * digan lo mismo es la paridad: si una instancia leyera la congelación y la otra no, el build
+ * rompería por desajuste antes de llegar aquí.
+ */
+describe('Historia 22.8 — la congelación declarada, construida', () => {
+  let proyecto = '';
+  let salida = '';
+
+  beforeAll(async () => {
+    const original = await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
+    const congelado = original.replace(
+      'export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = undefined;',
+      "export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = {\n  desde: '2026-12-06',\n  indexables: [\n    'seneca--sobre-la-brevedad-de-la-vida',\n  ],\n};",
+    );
+    const resultado = await construirConCorpus(corpus(1), {
+      paginas: { 'sonda.astro': SONDA },
+      ficheros: { 'src/lib/umbrales.ts': congelado },
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).toBe(0);
+    proyecto = resultado.proyecto;
+    salida = resultado.salida;
+  }, 300_000);
+
+  it('ninguna Obra entra y la de la lista que no cumple la regla tampoco', async () => {
+    expect(salida).toContain('5 Obras publicadas, 0 indexables.');
+    expect(salida).toMatch(/El sitemap, los `noindex` y Pagefind coinciden/);
+    const sonda = await html(proyecto, '/sonda/');
+    const delArmazon = JSON.parse(
+      (/<pre id="obras">([\s\S]*?)<\/pre>/.exec(sonda)?.[1] ?? '{}').replace(/&quot;/g, '"'),
+    ) as { publicadas: string[]; indexables: string[] };
+    expect(delArmazon.publicadas).toHaveLength(5);
+    expect(delArmazon.indexables).toEqual([]);
+    expect((await anunciadas(proyecto)).filter((r) => r.startsWith('/obra/'))).toEqual([]);
+    // Cartas cumple FR-52 y no estaba en la lista: la misma página, con `noindex`.
+    expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
+  });
+});

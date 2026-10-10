@@ -5,6 +5,7 @@
  *   npx tsx tools/avisar.ts --desde <sha> --hasta <sha>
  *   npx tsx tools/avisar.ts --todo                   # el sitemap entero
  *   npx tsx tools/avisar.ts --ensayo                 # compone y no envía
+ *   npx tsx tools/avisar.ts --desde <sha> --sitemap dist/sitemap-0.xml   # Obras de un fichero local
  *
  * ── Por qué existe ───────────────────────────────────────────────────────────────────
  *
@@ -30,8 +31,10 @@
  * aviso vacío.
  *
  * Y lo que este empujón haya cambiado, deducido del propio repositorio con `git diff` y
- * sin salir a la red. Se observan las cuatro familias publicables —Cita, Autor, Tema y
- * Colección— y se avisan también las superficies agregadas cuyo HTML reproduce el dato.
+ * sin salir a la red. Se observan las familias publicables —Cita, Autor, Tema, Colección y
+ * Ficha de Obra— y se avisan también las superficies agregadas cuyo HTML reproduce el dato.
+ * Las Obras, solo si se indexan después o si su estado anunciable cambió; para saberlo se
+ * lee el sitemap desplegado —la única salida a la red, y no tumba nada si falla—.
  * En una Cita el slug se lee del frontmatter y **no** se deriva del nombre del fichero:
  * no coinciden —el fichero separa autor y texto con dos guiones y el slug lleva uno—, y
  * confundirlos anuncia 404 con cara de éxito. De una Cita retirada o editada en este mismo
@@ -42,40 +45,176 @@
  * el caso legítimo en que sí toca —un cambio de plantilla que afecta a todas— está
  * `--todo`, que se pide a mano.
  */
-import { readFile } from 'node:fs/promises';
-import { execFile } from 'node:child_process';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
-import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { join, relative } from 'node:path';
 import {
   PUNTO_DE_INDEXNOW,
   avisoDeIndexNow,
   type AvisoDeIndexNow,
 } from '../src/lib/buscadores.ts';
 import { SITIO } from '../src/lib/dominio.ts';
+import { rutaDeLaObra } from '../src/lib/obras.ts';
+import {
+  MAX_PROPORCION_OBRA_DEL_AUTOR,
+  MIN_CITAS_OBRA_INDEXABLE,
+  type CongelacionDeObras,
+} from '../src/lib/umbrales.ts';
+import { constanteNumerica, leerCongelacionDeclarada } from './lib/obras.ts';
+import { corpusParaFechar } from '../integraciones/historial.ts';
+import { obrasDelCorpusEnDisco } from '../integraciones/indexables.ts';
+import { relacionDeSuperficies } from './lib/cambios.ts';
 /*
  * Las rutas se componen con los constructores y no a mano, por lo mismo que en el sitio:
  * lo que se anuncia aquí tiene que ser la canónica. Escritas a mano se quedaron sin barra
  * final al migrar, y este aviso —que corre tras cada despliegue— pasó a entregar al
- * buscador la forma que redirige, que es justo lo que la migración venía a quitar.
+ * buscador la forma que redirige, que es justo lo que la migración venía a quitar. Hoy las
+ * da la relación de `tools/lib/cambios.ts`, que las compone con esos constructores.
  */
 import { opcion } from './lib/cli.ts';
 import {
-  leerCitas,
-  leerColecciones,
-  rutasDelCorpus,
-  separarFrontmatter,
-  slugDeColeccion,
-  slugDeFichero,
-} from './lib/corpus.ts';
-import {
   DIRECTORIOS_AVISABLES,
-  familiaDeFichero,
-  rutasAfectadas,
-  type CambioAvisable,
-  type CitaAvisable,
+  componerAviso,
+  rutasDeObraDelSitemap,
+  type AvisoCompuesto,
+  type ListaDeObras,
+  type Relacion,
 } from './lib/avisar.ts';
 
 const ejecutar = promisify(execFile);
+
+/**
+ * La relación de un Corpus en disco con los ficheros escritos **relativos a la raíz** de ese
+ * Corpus —`corpus/citas/…`—, que es como los nombra `git diff`. Así la de antes, leída de
+ * una copia temporal, y la de después, leída del árbol, hablan de los mismos ficheros.
+ */
+async function relacionEnDisco(raiz: string): Promise<Relacion> {
+  const relacion = relacionDeSuperficies(await corpusParaFechar(raiz));
+  const relativa = new Map<string, string[]>();
+  for (const [ruta, ficheros] of relacion) {
+    relativa.set(ruta, ficheros.map((f) => relative(raiz, f).split('\\').join('/')));
+  }
+  return relativa;
+}
+
+/**
+ * El Corpus de una revisión, extraído a una copia temporal **fuera del árbol** (AD-21).
+ *
+ * Solo los directorios publicables, y solo los que existían en esa revisión: `git archive`
+ * se niega ante una ruta que no casa, y un rango anterior a la 22.1 no tiene `corpus/obras`.
+ * Git es historia versionada, no la red.
+ *
+ * Se comprueban **los dos** procesos: si `git archive` falla y `tar` sale con 0 sobre una
+ * entrada vacía, la copia vacía parecería un Corpus sin Obras y todas las de hoy pasarían por
+ * nuevas. Cualquier fallo lanza, y la copia se borra también entonces.
+ */
+async function corpusDeRevision(raiz: string, revision: string): Promise<string> {
+  const { stdout } = await ejecutar('git', ['ls-tree', '--name-only', revision, 'corpus/'], {
+    cwd: raiz,
+  });
+  const presentes = new Set(stdout.split('\n').map((l) => l.trim()).filter(Boolean));
+  const directorios = DIRECTORIOS_AVISABLES.map(([d]) => d).filter((d) => presentes.has(d));
+  if (!directorios.includes('corpus/citas')) {
+    throw new Error(`${revision} no tiene corpus/citas`);
+  }
+  const copia = await mkdtemp(join(tmpdir(), 'sabiduria-aviso-'));
+  try {
+    await new Promise<void>((listo, fallo) => {
+      const archivo = spawn('git', ['archive', '--format=tar', revision, '--', ...directorios], {
+        cwd: raiz,
+      });
+      const tar = spawn('tar', ['-x', '-C', copia]);
+      archivo.stdout.pipe(tar.stdin);
+      let error = '';
+      archivo.stderr.on('data', (d) => (error += String(d)));
+      let codigoArchivo: number | null | undefined;
+      let codigoTar: number | null | undefined;
+      const terminar = () => {
+        if (codigoArchivo === undefined || codigoTar === undefined) return;
+        if (codigoArchivo === 0 && codigoTar === 0) listo();
+        else {
+          fallo(
+            new Error(
+              `no se pudo extraer ${revision}: git archive salió con ${codigoArchivo}, tar con ` +
+                `${codigoTar}${error.trim() === '' ? '' : ` (${error.trim()})`}`,
+            ),
+          );
+        }
+      };
+      archivo.on('error', fallo);
+      tar.on('error', fallo);
+      archivo.on('close', (codigo) => {
+        codigoArchivo = codigo;
+        terminar();
+      });
+      tar.on('close', (codigo) => {
+        codigoTar = codigo;
+        terminar();
+      });
+    });
+  } catch (fallo) {
+    await rm(copia, { recursive: true, force: true });
+    throw fallo;
+  }
+  return copia;
+}
+
+/** Lo que el rango tiene que mirar fuera del Corpus: la regla de indexabilidad. */
+const FICHERO_DE_LA_REGLA = 'src/lib/umbrales.ts';
+
+/**
+ * La congelación que regía en una revisión, leída de su `umbrales.ts` con el mismo analizador
+ * que `congelar` y `levantar`. Un fichero sin el bloque es de antes de la 22.8: sin congelación.
+ */
+async function congelacionEnRevision(
+  raiz: string,
+  revision: string,
+): Promise<{ congelacion: CongelacionDeObras | null; texto: string }> {
+  const { stdout } = await ejecutar('git', ['show', `${revision}:${FICHERO_DE_LA_REGLA}`], {
+    cwd: raiz,
+    maxBuffer: 8 * 1024 * 1024,
+  });
+  const leida = leerCongelacionDeclarada(stdout);
+  if (leida.estado === 'ilegible') throw new Error(`${FICHERO_DE_LA_REGLA} en ${revision}: ${leida.motivo}`);
+  return {
+    congelacion: leida.estado === 'declarada' ? (leida.congelacion ?? null) : null,
+    texto: stdout,
+  };
+}
+
+/** El tiempo que se espera al sitemap publicado antes de darlo por ilegible. */
+export const ESPERA_DEL_SITEMAP_MS = 30_000;
+
+/**
+ * Las rutas de Obra indexables **después**, del sitemap construido y desplegado.
+ *
+ * El trabajo `avisar` corre tras desplegar y sin `dist/`, así que por omisión se pide
+ * `{SITIO}/sitemap-0.xml`, con tiempo límite; con `--sitemap <fichero>` se lee un fichero
+ * local. Si no se puede leer, se devuelve el motivo y no una lista vacía: una lista vacía
+ * diría que todas las Obras dejaron de indexarse.
+ */
+export async function obrasDelSitemap(
+  local: string | undefined,
+  pedir: typeof fetch = fetch,
+): Promise<ListaDeObras> {
+  try {
+    const xml = local !== undefined
+      ? await readFile(local, 'utf8')
+      : await (async () => {
+          const respuesta = await pedir(new URL('/sitemap-0.xml', SITIO), {
+            signal: AbortSignal.timeout(ESPERA_DEL_SITEMAP_MS),
+          });
+          if (!respuesta.ok) throw new Error(`el sitemap respondió ${respuesta.status}`);
+          return respuesta.text();
+        })();
+    if (!/<urlset[\s>]/.test(xml)) throw new Error('lo leído no es un sitemap');
+    return { rutas: rutasDeObraDelSitemap(xml) };
+  } catch (fallo) {
+    return { motivo: `sitemap ilegible: ${fallo instanceof Error ? fallo.message : String(fallo)}` };
+  }
+}
 
 /**
  * Las rutas que toca avisar por un rango de commits.
@@ -84,12 +223,25 @@ const ejecutar = promisify(execFile);
  * el disco solo sabe cómo están las cosas ahora. `--diff-filter` no descarta borrados a
  * propósito —una Cita retirada también hay que anunciarla, para que el buscador deje de
  * ofrecer una página que ya da 404—.
+ *
+ * Qué rutas renderizan cada fichero lo dice la relación de `tools/lib/cambios.ts` (AD-27),
+ * leída sobre el Corpus de después —el árbol— y sobre el de antes —una copia de `desde`—.
+ * De la de antes sale a qué páginas pertenecía lo que este rango borró. El slug de una Cita
+ * se lee de su frontmatter y no del nombre del fichero, que no coinciden: el fichero separa
+ * autor y texto con dos guiones y el slug lleva uno, y confundirlos anuncia 404.
+ *
+ * El rango mira también `src/lib/umbrales.ts`: un commit que solo congela, levanta o mueve un
+ * umbral de FR-52 no toca el Corpus y sí cambia qué Obras se indexan. La lista de antes se
+ * calcula con la congelación que regía en `desde`; los umbrales, en cambio, son los de hoy, y
+ * si el rango los cambió se dice.
  */
 export async function rutasTocadas(
   raiz: string,
   desde: string,
   hasta: string,
-): Promise<string[]> {
+  despues: ListaDeObras,
+  avisar: (linea: string) => void = (linea) => console.warn(`Aviso: ${linea}`),
+): Promise<AvisoCompuesto> {
   const { stdout } = await ejecutar(
     'git',
     [
@@ -98,107 +250,66 @@ export async function rutasTocadas(
       `${desde}..${hasta}`,
       '--',
       ...DIRECTORIOS_AVISABLES.map(([directorio]) => directorio),
+      FICHERO_DE_LA_REGLA,
     ],
     { cwd: raiz },
   );
 
-  const ficheros = stdout.split('\n').map((l) => l.trim()).filter(Boolean);
-  if (ficheros.length === 0) return [];
+  const tocados = stdout.split('\n').map((l) => l.trim()).filter(Boolean);
+  const reglaCambiada = tocados.includes(FICHERO_DE_LA_REGLA);
+  const cambiados = tocados.filter((f) => f !== FICHERO_DE_LA_REGLA);
+  if (cambiados.length === 0 && !reglaCambiada) return { rutas: [], avisos: [] };
 
-  /*
-   * El slug de una Cita **no** es el nombre de su fichero, y confundirlos compone URLs
-   * que no existen.
-   *
-   * `slugDeFichero` dice en su propio comentario que sirve para Autores y Temas; el
-   * fichero de una Cita separa autor y texto con dos guiones —`manuel-gonzalez-prada--los-
-   * que-vengan-manana…`— mientras que el slug publicado lleva uno solo, porque es un campo
-   * explícito del frontmatter. Derivarlo del nombre daba `/cita/…prada--los-que…`, que es
-   * un 404: el aviso habría salido verde todos los días anunciando páginas inexistentes.
-   *
-   * Así que se lee el campo. Para lo que sigue en el corpus, del disco; para lo que este
-   * rango borró —que es justo lo que más falta hace avisar, para que el buscador deje de
-   * ofrecer una página que ya da 404—, del propio git, con `git show`. Sigue sin salir a
-   * la red: git es historia versionada, no un servicio.
-   */
-  const rutasCorpus = rutasDelCorpus(join(raiz, 'corpus'));
-  const publicadas = await leerCitas(rutasCorpus.citas);
-  const porRuta = new Map(publicadas.map((c) => [resolve(c.ruta), c]));
-  const colecciones = await leerColecciones(rutasCorpus);
-  const cambios: CambioAvisable[] = [];
+  const relacionDespues = await relacionEnDisco(raiz);
 
-  for (const fichero of ficheros) {
-    const familia = familiaDeFichero(fichero);
-    if (familia === undefined) continue;
-
-    if (familia !== 'cita') {
-      const ruta = join(raiz, fichero);
-      const slug = familia === 'coleccion'
-        ? slugDeColeccion(rutasCorpus, ruta)
-        : slugDeFichero(ruta);
-      cambios.push({ familia, slug });
-      continue;
-    }
-
-    const despues = porRuta.get(resolve(join(raiz, fichero)));
-    const antes = await citaEnRevision(raiz, desde, fichero);
-    if (antes === undefined && despues === undefined) continue;
-    cambios.push({
-      familia: 'cita',
-      slug: despues?.slug ?? antes!.slug,
-      citaAntes: antes,
-      citaDespues: despues === undefined
-        ? undefined
-        : { slug: despues.slug, autor: despues.autor, temas: despues.temas ?? [] },
-    });
-  }
-
-  return rutasAfectadas(
-    cambios,
-    publicadas.map((cita) => ({
-      slug: cita.slug,
-      autor: cita.autor,
-      temas: cita.temas ?? [],
-    })),
-    colecciones.map((coleccion) => ({
-      slug: coleccion.slug,
-      miembros: coleccion.miembros,
-    })),
-  );
-}
-
-/**
- * La forma anterior de una Cita tocada, leída de la revisión de partida en git.
- *
- * Se le pregunta al commit de partida porque en el de llegada el fichero ya no está. Si
- * tampoco estaba antes —un fichero que nació dentro del rango, o una ruta que
- * nunca fue una Cita— no hay nada que avisar y se devuelve `undefined` en vez de romper:
- * esto corre después de desplegar y no puede tumbar una publicación que ya está en línea.
- */
-async function citaEnRevision(
-  raiz: string,
-  desde: string,
-  fichero: string,
-): Promise<CitaAvisable | undefined> {
+  let relacionAntes: Relacion | undefined;
+  let antes: ListaDeObras;
+  const avisos: string[] = [];
+  let copia: string | undefined;
   try {
-    const { stdout } = await ejecutar('git', ['show', `${desde}:${fichero}`], {
-      cwd: raiz,
-      maxBuffer: 8 * 1024 * 1024,
-    });
-    const datos = separarFrontmatter(stdout);
-    const slug = datos?.['slug'];
-    if (typeof slug !== 'string' || slug === '') return undefined;
-    const autor = datos?.['autor'];
-    const temas = datos?.['temas'];
-    return {
-      slug,
-      autor: typeof autor === 'string' && autor !== '' ? autor : undefined,
-      temas: Array.isArray(temas)
-        ? temas.filter((tema): tema is string => typeof tema === 'string')
-        : [],
-    };
-  } catch {
-    return undefined;
+    copia = await corpusDeRevision(raiz, desde);
+    relacionAntes = await relacionEnDisco(copia);
+  } catch (fallo) {
+    avisos.push(
+      `Sin el Corpus de ${desde} no se avisan las páginas de lo que este rango borró ` +
+        `(${fallo instanceof Error ? fallo.message : String(fallo)}).`,
+    );
   }
+  try {
+    if (copia === undefined || relacionAntes === undefined) throw new Error(`Corpus de ${desde} ilegible`);
+    const { congelacion, texto } = await congelacionEnRevision(raiz, desde);
+    for (const nombre of ['MIN_CITAS_OBRA_INDEXABLE', 'MAX_PROPORCION_OBRA_DEL_AUTOR'] as const) {
+      const entonces = constanteNumerica(texto, nombre);
+      const hoy = nombre === 'MIN_CITAS_OBRA_INDEXABLE' ? MIN_CITAS_OBRA_INDEXABLE : MAX_PROPORCION_OBRA_DEL_AUTOR;
+      if (entonces !== undefined && entonces !== hoy) {
+        avisar(
+          `${nombre} cambió en el rango (${entonces} → ${hoy}): la lista de Obras indexables ` +
+            'de antes se calcula con los umbrales de hoy.',
+        );
+      }
+    }
+    /*
+     * La lista de antes sale de la **misma función** que usa la construcción, sobre el Corpus
+     * y la congelación de `desde`: reimplementar la regla aquí sería el segundo cómputo que
+     * AD-11 prohíbe.
+     */
+    const { indexables } = await obrasDelCorpusEnDisco(copia, congelacion);
+    antes = { rutas: indexables.map((obra) => rutaDeLaObra(obra)) };
+  } catch (fallo) {
+    antes = { motivo: fallo instanceof Error ? fallo.message : String(fallo) };
+  } finally {
+    if (copia !== undefined) await rm(copia, { recursive: true, force: true });
+  }
+
+  const aviso = componerAviso({
+    cambiados,
+    reglaCambiada,
+    relacionDespues,
+    ...(relacionAntes === undefined ? {} : { relacionAntes }),
+    indexablesAntes: antes,
+    indexablesDespues: despues,
+  });
+  return { rutas: aviso.rutas, avisos: [...avisos, ...aviso.avisos] };
 }
 
 /** Todas las URLs que el sitio publica, leídas del sitemap recién construido. */
@@ -233,6 +344,7 @@ async function principal(argumentos: string[]): Promise<number> {
   const todo = argumentos.includes('--todo');
   const desde = opcion(argumentos, '--desde');
   const hasta = opcion(argumentos, '--hasta') ?? 'HEAD';
+  const sitemap = opcion(argumentos, '--sitemap');
 
   const rutas = new Set<string>();
 
@@ -245,7 +357,9 @@ async function principal(argumentos: string[]): Promise<number> {
      * lo que de verdad significa.
      */
     try {
-      for (const ruta of await rutasTocadas(raiz, desde, hasta)) rutas.add(ruta);
+      const aviso = await rutasTocadas(raiz, desde, hasta, await obrasDelSitemap(sitemap));
+      for (const ruta of aviso.rutas) rutas.add(ruta);
+      for (const linea of aviso.avisos) console.warn(`Aviso: ${linea}`);
     } catch (error) {
       console.warn(`Aviso: no se pudo leer el rango ${desde}..${hasta} — ${String(error)}`);
     }

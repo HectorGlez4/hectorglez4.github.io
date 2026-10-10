@@ -37,6 +37,7 @@ import { tituloDeObra } from '../../src/lib/marca.ts';
 import {
   desajustesDeIndexables,
   informeDeObras,
+  nombresCongeladosSinFicha,
   marcasDePagina,
   rutaDeFicheroHtml,
   rutasDelSitemap,
@@ -284,6 +285,12 @@ describe('la comprobación del build, pura', () => {
       '/obra/a/b',
       '/',
     ]);
+  });
+
+  it('22.8 — los nombres congelados que no son ninguna ficha activa', () => {
+    expect(
+      nombresCongeladosSinFicha({ indexables: ['a--b', 'a--absorbida'] }, ['a--b', 'a--c']),
+    ).toEqual(['a--absorbida']);
   });
 
   it('el informe de SM-11', () => {

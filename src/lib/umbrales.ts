@@ -58,6 +58,43 @@ export const MIN_CITAS_OBRA_INDEXABLE = 2;
  */
 export const MAX_PROPORCION_OBRA_DEL_AUTOR = 0.9;
 
+/**
+ * La congelación de la familia Obra — el freno de SM-11 (AD-25, Historia 22.8).
+ *
+ * Vive junto a los dos números de FR-52 porque es un dato más de la misma regla: mientras
+ * esté declarada, una Obra se indexa **si cumple FR-52 y su ficha está en `indexables`** —la
+ * lista de nombres de ficha que se indexaban el día que se congeló—. Ninguna entra; las que
+ * dejan de cumplir la regla salen. La aplica `obrasIndexables` (`src/lib/publicado.ts`) en las
+ * dos instancias del sitio, y la consultan por `congelacionVigente()` (`src/lib/obras.ts`) el
+ * rastreo y, cuando existan, las ediciones en venta (22.9) y las Piezas que enlacen a Obras.
+ *
+ * **No se escribe a mano**: la compone `npm run obra -- congelar` desde la lista indexable
+ * vigente y la devuelve a `undefined` `npm run obra -- levantar`. Ninguna de las dos hace
+ * commit: congelar y levantar son commits de Héctor, revertibles con `git revert`, como
+ * encender un Modelo en `ingreso.ts`. Nunca se deriva de la serie de indexación (AD-24).
+ */
+export interface CongelacionDeObras {
+  /** La jornada en que se congeló, `AAAA-MM-DD`. */
+  desde: string;
+  /** Los nombres de ficha (`{slug-autor}--{slug-obra}`) que se indexaban al congelar. */
+  indexables: readonly string[];
+}
+
+export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = undefined;
+
+/**
+ * Si rige la medición de SM-11: mientras sea `true`, la lectura de la serie lee **enteras** las
+ * familias Autor y Obra —la comparación de la misma jornada no admite muestra— y reparte el
+ * resto del presupuesto entre las demás. Se apaga cuando SM-11 se juzgue.
+ */
+export const SM11_VIGENTE = true;
+
+/** El primer despliegue de la Página de Obra (Historia 22.4): el origen del plazo de SM-11. */
+export const PRIMER_DESPLIEGUE_DE_OBRAS = '2026-10-10';
+
+/** Semanas tras el primer despliegue a partir de las cuales SM-11 se juzga. */
+export const SEMANAS_HASTA_JUZGAR_SM11 = 8;
+
 /** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
 export const MAX_CITAS_RELACIONADAS = 4;
 

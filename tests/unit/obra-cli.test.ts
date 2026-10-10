@@ -211,3 +211,124 @@ describe('Historia 22.1 — npm run obra', () => {
     expect(hecho.codigo).toBe(2);
   });
 });
+
+describe('Historia 22.8 — congelar y levantar', () => {
+  /** Una copia de `umbrales.ts` del repositorio: la orden nunca toca el de verdad aquí. */
+  async function umbralesDePrueba(): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), 'sabiduria-umbrales-'));
+    temporales.push(dir);
+    const fichero = join(dir, 'umbrales.ts');
+    await writeFile(fichero, await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8'), 'utf8');
+    return fichero;
+  }
+
+  /** Cartas con 3 Citas y una suelta: 3 de 4 es el 75 %, indexable. */
+  async function corpusConObraIndexable(): Promise<string> {
+    const corpus = await corpusConCita();
+    for (const [slug, obra] of [
+      ['seneca-b', 'Cartas a Lucilio'],
+      ['seneca-c', 'Cartas a Lucilio'],
+      ['seneca-d', undefined],
+    ] as const) {
+      await escribirCita(join(corpus, 'citas'), slug.replace('seneca-', 'seneca--'), {
+        texto: `Texto ${slug}.`,
+        autor: 'seneca',
+        slug,
+        ...(obra === undefined ? {} : { procedencia: { obra, año: 64 } }),
+        estadoDerechos: 'dominio-público',
+      });
+    }
+    expect((await correr(corpus, ['sembrar'])).codigo).toBe(0);
+    return corpus;
+  }
+
+  it('el repositorio queda sin congelar', async () => {
+    expect(await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8')).toContain(
+      'export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = undefined;',
+    );
+  });
+
+  it('congelar escribe la jornada y la lista indexable vigente, y solo ese bloque', async () => {
+    const corpus = await corpusConObraIndexable();
+    const umbrales = await umbralesDePrueba();
+    const original = await readFile(umbrales, 'utf8');
+
+    const hecho = await correr(corpus, ['congelar', '--umbrales', umbrales]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toContain('1 Obra(s) indexable(s)');
+    const congelado = await readFile(umbrales, 'utf8');
+    expect(congelado).toMatch(
+      /export const CONGELACION_DE_OBRAS: CongelacionDeObras \| undefined = \{\n {2}desde: '\d{4}-\d{2}-\d{2}',\n {2}indexables: \[\n {4}'seneca--cartas-a-lucilio',\n {2}\],\n\};/,
+    );
+    // Fuera del bloque, nada cambia.
+    const fuera = (texto: string) => texto.replace(/export const CONGELACION_DE_OBRAS[\s\S]*?;\n(?=\n)/, '');
+    expect(fuera(congelado)).toBe(fuera(original));
+
+    // Congelar dos veces se niega, y no escribe.
+    const otra = await correr(corpus, ['congelar', '--umbrales', umbrales]);
+    expect(otra.codigo).toBe(1);
+    expect(otra.error).toMatch(/ya está congelada desde el/);
+    expect(await readFile(umbrales, 'utf8')).toBe(congelado);
+
+    // Levantar la devuelve a `undefined`: el fichero queda como estaba.
+    const levantada = await correr(corpus, ['levantar', '--umbrales', umbrales]);
+    expect(levantada.codigo, levantada.error).toBe(0);
+    expect(await readFile(umbrales, 'utf8')).toBe(original);
+
+    // Y levantar sin congelación se niega, sin escribir.
+    const nada = await correr(corpus, ['levantar', '--umbrales', umbrales]);
+    expect(nada.codigo).toBe(1);
+    expect(nada.error).toMatch(/no está congelada/);
+    expect(await readFile(umbrales, 'utf8')).toBe(original);
+  });
+
+  it('congelar sin ninguna Obra indexable hoy se niega con 1 y no escribe', async () => {
+    const corpus = await corpusConCita();
+    await correr(corpus, ['sembrar']);
+    const umbrales = await umbralesDePrueba();
+    const original = await readFile(umbrales, 'utf8');
+    const hecho = await correr(corpus, ['congelar', '--umbrales', umbrales]);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toMatch(/no se indexa ninguna Obra/);
+    expect(await readFile(umbrales, 'utf8')).toBe(original);
+  });
+
+  it('el analizador de la declaración: el mismo que usa el aviso para leer `desde`', async () => {
+    const { leerCongelacionDeclarada, constanteNumerica } = await import('../../tools/lib/obras.ts');
+    const original = await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
+    expect(leerCongelacionDeclarada(original)).toEqual({ estado: 'declarada', congelacion: undefined });
+    expect(leerCongelacionDeclarada('export const OTRA = 1;')).toEqual({ estado: 'sin-bloque' });
+    const congelado = original.replace(
+      'CongelacionDeObras | undefined = undefined;',
+      "CongelacionDeObras | undefined = {\n  desde: '2026-12-06',\n  indexables: [\n    'a--b',\n    'c--d',\n  ],\n};",
+    );
+    expect(leerCongelacionDeclarada(congelado)).toEqual({
+      estado: 'declarada',
+      congelacion: { desde: '2026-12-06', indexables: ['a--b', 'c--d'] },
+    });
+    const roto = original.replace(
+      'CongelacionDeObras | undefined = undefined;',
+      "CongelacionDeObras | undefined = {\n  desde: '2026-12-06',\n  indexables: LISTA,\n};",
+    );
+    expect(leerCongelacionDeclarada(roto).estado).toBe('ilegible');
+    expect(constanteNumerica(original, 'MAX_PROPORCION_OBRA_DEL_AUTOR')).toBe(0.9);
+    expect(constanteNumerica(original, 'MIN_CITAS_OBRA_INDEXABLE')).toBe(2);
+  });
+
+  it('un fichero sin el bloque se niega con 1 y no lo toca', async () => {
+    const corpus = await corpusConCita();
+    const umbrales = await umbralesDePrueba();
+    await writeFile(umbrales, 'export const OTRA = 1;\n', 'utf8');
+    const hecho = await correr(corpus, ['congelar', '--umbrales', umbrales]);
+    expect(hecho.codigo).toBe(1);
+    expect(await readFile(umbrales, 'utf8')).toBe('export const OTRA = 1;\n');
+  });
+
+  it.each([
+    ['congelar con un argumento de más', ['congelar', 'ya']],
+    ['levantar con una bandera que no existe', ['levantar', '--forzar']],
+  ])('%s sale con 2', async (_caso, argumentos) => {
+    const corpus = await corpusConCita();
+    expect((await correr(corpus, argumentos)).codigo).toBe(2);
+  });
+});

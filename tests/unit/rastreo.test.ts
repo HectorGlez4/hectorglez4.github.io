@@ -814,4 +814,27 @@ describe('Historia 22.4 — pedir rastreo de una Página de Obra', () => {
     expect(() => juzgar('/obra/a/z/')).not.toThrow();
     expect(() => juzgar('/obra/a/b/2/')).not.toThrow();
   });
+
+  it('22.8 — con la familia Obra congelada, toda URL de Obra se rechaza y se nombra la congelación', () => {
+    const congelacion = { desde: '2026-12-06', indexables: ['a--b'] };
+    const juzgar = (ruta: string) =>
+      componerPeticiones({
+        seleccion: [ruta],
+        publicadas: [...PUBLICADAS, '/obra/a/b/'],
+        indexables: [...PUBLICADAS, '/obra/a/b/'],
+        fecha: HOY,
+        hoy: HOY,
+        congelacion,
+      });
+    // Aunque esté en la lista congelada e indexable: no se pide rastreo de ninguna Obra.
+    const obra = juzgar('/obra/a/b/');
+    expect(obra.ok).toBe(false);
+    expect(obra.ok ? '' : obra.motivos.join()).toMatch(/congelada desde el 2026-12-06.*CONGELACION_DE_OBRAS/s);
+    // Lo demás se sigue pudiendo pedir.
+    expect(juzgar('/autor/autor-0/').ok).toBe(true);
+    // Una errata recibe primero lo que hay que corregir: que esa ruta no se publica.
+    const errata = juzgar('/obra/a/zz/');
+    expect(errata.ok ? '' : errata.motivos.join()).toMatch(/no la publica el sitio/);
+    expect(errata.ok ? '' : errata.motivos.join()).not.toMatch(/congelada/);
+  });
 });

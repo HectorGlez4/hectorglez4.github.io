@@ -40,9 +40,14 @@ import {
   planDeInspeccion,
   propiedadDeDominio,
   resumirFamilia,
+  censoDeLaSerie,
+  jornadaDeJuzgarSm11,
+  lineasDeLectura,
+  lineasDeSm11,
   type Familia,
   type Inspeccion,
 } from '../../tools/lib/indexacion.ts';
+import { rutasDeObraDelSitemap } from '../../tools/lib/avisar.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import { aYaml } from '../../tools/lib/corpus.ts';
 import {
@@ -137,8 +142,9 @@ describe('el censo por familia', () => {
      * quinta familia al dueño del conjunto publicable y nadie la añade al censo, esta
      * afirmación cae en vez de dejar que la familia desaparezca de la serie en silencio.
      *
-     * Historia 22.4 — la Obra es la excepción escrita: `rutasPublicadas` la enumera, y la serie
-     * no la cuenta hasta la pasada de métricas (22.8). Se excluye aquí por su nombre.
+     * Historia 22.4 — la Obra es la excepción escrita: `rutasPublicadas` la enumera también con
+     * `noindex`, y la serie la mide aparte con el censo del sitemap (`censoDeLaSerie`, 22.8).
+     * Se excluye aquí por su nombre.
      */
     const publicadas = rutasPublicadas(conjunto)
       .filter((r) => r !== '/')
@@ -779,6 +785,12 @@ function capturarSalida() {
 
 const CREDENCIAL = { [VARIABLE_DE_CREDENCIALES]: '{"type":"service_account"}' };
 
+/**
+ * Un sitemap publicado sin Obras, para que la orden no salga a la red en las pruebas
+ * (Historia 22.8): por omisión pide el sitemap del sitio en línea.
+ */
+const SIN_OBRAS = async () => ({ rutas: [] as string[] });
+
 /** Un inspector de mentira: contesta lo que se le diga y no toca la red. */
 function inspectorQueContesta(
   veredicto: (ruta: string) => string | undefined,
@@ -797,6 +809,7 @@ describe('la orden', () => {
       ['--corpus', corpus],
       async () => inspectorQueContesta((r) => (r === '/cita/cita-0/' ? 'PASS' : 'FAIL')),
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     expect(codigo).toBe(0);
@@ -812,6 +825,7 @@ describe('la orden', () => {
       ['--corpus', corpus, '--registrar'],
       async () => inspectorQueContesta((r) => (r === '/cita/cita-0/' ? 'PASS' : 'FAIL')),
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     expect(codigo).toBe(0);
@@ -827,11 +841,14 @@ describe('la orden', () => {
         { estado: 'Discovered - currently not indexed', urls: MIN_CITAS_POR_TEMA - 1 },
         { estado: 'Submitted and indexed', urls: 1 },
       ],
+      // Historia 22.8 — cada familia anota qué conjunto midió.
+      censo: 'publicadas',
     });
     // Autor y Tema también se leen: son familias publicadas y la entrada las lleva.
     expect(entrada.familias?.autor.publicadas).toBe(1);
     expect(entrada.familias?.tema.publicadas).toBe(1);
-    expect(entrada.sinLeer).toBeUndefined();
+    // Un sitemap legible sin ninguna Obra no es un cero: la familia sale sin leer, nombrada.
+    expect(entrada.sinLeer).toEqual({ obra: 'el sitemap no trae ninguna Obra' });
   });
 
   it('fallo parcial: la familia que agota la cuota se omite y las demás se escriben', async () => {
@@ -846,6 +863,7 @@ describe('la orden', () => {
           return { ruta, veredicto: 'PASS', estado: 'Submitted and indexed' };
         },
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     const [entrada] = await leerSerieDeIndexacion(rutasDelCorpus(corpus));
@@ -866,11 +884,13 @@ describe('la orden', () => {
       ['--corpus', corpus, '--registrar'],
       async () => inspectorQueContesta(() => 'FAIL'),
       CREDENCIAL,
+      SIN_OBRAS,
     );
     await principal(
       ['--corpus', corpus, '--registrar'],
       async () => inspectorQueContesta(() => 'PASS'),
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     const serie = await leerSerieDeIndexacion(rutasDelCorpus(corpus));
@@ -886,6 +906,7 @@ describe('la orden', () => {
       ['--corpus', corpus, '--registrar', '--presupuesto', '25'],
       async () => inspectorQueContesta(() => 'FAIL'),
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     const [entrada] = await leerSerieDeIndexacion(rutasDelCorpus(corpus));
@@ -914,6 +935,7 @@ describe('la orden', () => {
       ['--corpus', corpus, '--json'],
       async () => inspectorQueContesta((r) => (r === '/cita/cita-0/' ? 'PASS' : 'FAIL')),
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     expect(codigo).toBe(0);
@@ -949,6 +971,7 @@ describe('la orden', () => {
           return { ruta, veredicto: 'PASS', estado: 'Submitted and indexed' };
         },
       CREDENCIAL,
+      SIN_OBRAS,
     );
 
     const texto = salida.join('');
@@ -976,6 +999,7 @@ describe('la orden', () => {
         ['--corpus', corpus, '--presupuesto', String(TECHO_DIARIO_DE_INSPECCIONES)],
         async () => inspectorQueContesta(() => 'FAIL'),
         CREDENCIAL,
+        SIN_OBRAS,
       ),
     ).toBe(0);
   });
@@ -1179,5 +1203,178 @@ describe('el aislamiento del sitio (AD-24)', () => {
 
     expect(lectura.familias.cita?.indexadas).toBe(MIN_CITAS_POR_TEMA);
     expect(rutasPublicadas(conjunto)).toContain('/cita/la-vida-0/');
+  });
+});
+
+// ─── Historia 22.8: la familia Obra se mide aparte ───────────────────────────────────
+
+describe('Historia 22.8 — la familia Obra en la serie', () => {
+  const OBRAS = ['/obra/autor-0/una/', '/obra/autor-1/otra/'];
+
+  it('el censo de Obra sale del sitemap, nunca de lo publicado', () => {
+    const conjunto = conjuntoDe(MIN_CITAS_POR_TEMA);
+    expect(censoDeLaSerie(conjunto, OBRAS).obra).toEqual(OBRAS);
+    // Sin sitemap, la lista vacía: quien lee la declara sin leer, no la escribe como cero.
+    expect(censoDeLaSerie(conjunto).obra).toEqual([]);
+    // Las cuatro de siempre no cambian.
+    const { obra: _obra, ...cuatro } = censoDeLaSerie(conjunto, OBRAS);
+    expect(cuatro).toEqual(censoPorFamilia(conjunto));
+  });
+
+  it('el sitemap da solo las rutas de Obra, con su barra final', () => {
+    const xml =
+      '<urlset><url><loc>https://sabiduriadebolsillo.net/obra/a/b/</loc></url>' +
+      '<url><loc>https://sabiduriadebolsillo.net/autor/a/</loc></url>' +
+      '<url><loc>https://sabiduriadebolsillo.net/</loc></url></urlset>';
+    expect(rutasDeObraDelSitemap(xml)).toEqual(['/obra/a/b/']);
+  });
+
+  it('con SM-11, Autor y Obra se leen enteras y el resto se reparte entre las demás', () => {
+    const censo = {
+      cita: Array.from({ length: 300 }, (_, i) => `/cita/c-${i}/`),
+      autor: Array.from({ length: 60 }, (_, i) => `/autor/a-${i}/`),
+      tema: Array.from({ length: 30 }, (_, i) => `/tema/t-${i}/`),
+      coleccion: [],
+      obra: Array.from({ length: 80 }, (_, i) => `/obra/a/o-${i}/`),
+    };
+    const plan = planDeInspeccion(censo, 200, ['autor', 'obra']);
+    const de = (f: string) => plan.familias.find((x) => x.familia === f);
+    expect(de('autor')?.rutas).toHaveLength(60);
+    expect(de('autor')?.muestreada).toBe(false);
+    expect(de('obra')?.rutas).toHaveLength(80);
+    expect(de('obra')?.muestreada).toBe(false);
+    // Las 60 restantes, entre Cita y Tema, con el suelo de siempre.
+    expect((de('cita')?.rutas.length ?? 0) + (de('tema')?.rutas.length ?? 0)).toBe(60);
+    expect(de('tema')?.rutas.length).toBeGreaterThanOrEqual(MUESTRA_MINIMA_POR_FAMILIA);
+    expect(plan.inspecciones).toBe(200);
+    expect(plan.enteras).toEqual(['autor', 'obra']);
+  });
+
+  it('el suelo de las demás va primero: si Autor y Obra no caben, se muestrean y se dice', () => {
+    const censo = {
+      cita: Array.from({ length: 300 }, (_, i) => `/cita/c-${i}/`),
+      autor: Array.from({ length: 60 }, (_, i) => `/autor/a-${i}/`),
+      tema: Array.from({ length: 30 }, (_, i) => `/tema/t-${i}/`),
+      coleccion: Array.from({ length: 5 }, (_, i) => `/coleccion/k-${i}/`),
+      obra: Array.from({ length: 80 }, (_, i) => `/obra/a/o-${i}/`),
+    };
+    // Suelo: Cita 20 + Tema 20 + Colección 5 = 45; quedan 55 para Autor (60) y Obra (80).
+    const plan = planDeInspeccion(censo, 100, ['autor', 'obra']);
+    const de = (f: string) => plan.familias.find((x) => x.familia === f);
+    expect(de('cita')?.rutas).toHaveLength(MUESTRA_MINIMA_POR_FAMILIA);
+    expect(de('tema')?.rutas).toHaveLength(MUESTRA_MINIMA_POR_FAMILIA);
+    expect(de('coleccion')?.rutas).toHaveLength(5);
+    expect(de('autor')?.rutas).toHaveLength(55);
+    expect(de('autor')?.muestreada).toBe(true);
+    expect(de('obra')).toBeUndefined();
+    expect(plan.sinPresupuesto).toEqual(['obra']);
+    expect(plan.inspecciones).toBe(100);
+  });
+
+  it('la línea SM-11 dice qué lado se muestreó', () => {
+    const lineas = lineasDeSm11({
+      propiedad: 'sc-domain:x',
+      publicadas: 0,
+      inspeccionadas: 0,
+      momento: new Date(2026, 9, 20),
+      familias: {
+        autor: { publicadas: 60, muestra: 55, indexadas: 5, noIndexadas: 50, estados: [] },
+        obra: { publicadas: 80, muestra: 80, indexadas: 2, noIndexadas: 78, estados: [] },
+      },
+      sinLeer: {},
+    });
+    expect(lineas[0]).toBe(
+      'SM-11: Obra 2,5 % (2 de 80) indexada frente a Autor 9,1 % (5 de 55, muestreada de 60).',
+    );
+  });
+
+  it('el total de la entrada suma solo las cuatro de siempre; la Obra va en su familia', async () => {
+    const { lectura } = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta(() => 'FAIL'),
+      pasoMs: 0,
+      obras: { rutas: OBRAS },
+    });
+    expect(lectura.publicadas).toBe(MIN_CITAS_POR_TEMA + 3 + 1);
+    expect(lectura.familias.obra?.publicadas).toBe(2);
+  });
+
+  it('la lectura mide la Obra con su censo del sitemap y lo anota en cada familia', async () => {
+    const { lectura } = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta((r) => (r === OBRAS[0] ? 'PASS' : 'FAIL')),
+      pasoMs: 0,
+      obras: { rutas: OBRAS },
+    });
+    expect(lectura.familias.obra).toMatchObject({ publicadas: 2, muestra: 2, indexadas: 1, censo: 'sitemap' });
+    expect(lectura.familias.cita?.censo).toBe('publicadas');
+    expect(lectura.familias.autor?.censo).toBe('publicadas');
+    expect(lectura.sinLeer).toEqual({});
+  });
+
+  it('sin sitemap legible, la Obra va a sinLeer con su motivo y jamás a cero', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    const codigo = await principal(
+      ['--corpus', corpus, '--registrar'],
+      async () => inspectorQueContesta(() => 'FAIL'),
+      CREDENCIAL,
+      async () => ({ motivo: 'sitemap ilegible: sin red' }),
+    );
+    expect(codigo).toBe(0);
+    const [entrada] = await leerSerieDeIndexacion(rutasDelCorpus(corpus));
+    expect(entrada.familias?.obra).toBeUndefined();
+    expect(entrada.sinLeer?.obra).toBe('sitemap ilegible: sin red');
+    // El fichero lo dice igual: la familia Obra está nombrada, sin cero al lado.
+    const texto = readFileSync(join(corpus, FICHERO_DE_INDEXACION), 'utf8');
+    expect(texto).toMatch(/obra: "sitemap ilegible: sin red"/);
+    expect(texto).toMatch(/censo: "publicadas"/);
+    expect(texto).not.toMatch(/^\s+obra:\n\s+publicadas: 0/m);
+  });
+
+  it('una entrada vieja, sin «censo», se sigue leyendo', async () => {
+    const corpus = await corpusConCitas(1);
+    await writeFile(
+      join(corpus, FICHERO_DE_INDEXACION),
+      `${CABECERA_DE_INDEXACION}  - fecha: "2026-09-01"\n    propiedad: sc-domain:x\n    publicadas: 1\n` +
+        '    inspeccionadas: 1\n    familias:\n      cita:\n        publicadas: 1\n        muestra: 1\n' +
+        '        indexadas: 0\n        noIndexadas: 1\n',
+      'utf8',
+    );
+    const [entrada] = await leerSerieDeIndexacion(rutasDelCorpus(corpus));
+    expect(entrada.familias?.cita.censo).toBeUndefined();
+    expect(entrada.familias?.cita.publicadas).toBe(1);
+  });
+
+  it('la línea SM-11 compara Obra con Autor de la misma lectura, y avisa cuando toca juzgar', () => {
+    const familia = (indexadas: number, muestra: number) => ({
+      publicadas: muestra,
+      muestra,
+      indexadas,
+      noIndexadas: muestra - indexadas,
+      estados: [],
+    });
+    const lectura = {
+      propiedad: 'sc-domain:x',
+      publicadas: 0,
+      inspeccionadas: 0,
+      familias: { obra: familia(2, 80), autor: familia(10, 60) },
+      sinLeer: {},
+    };
+    expect(jornadaDeJuzgarSm11()).toBe('2026-12-05');
+    const antes = lineasDeSm11({ ...lectura, momento: new Date(2026, 9, 20) });
+    expect(antes[0]).toBe('SM-11: Obra 2,5 % (2 de 80) indexada frente a Autor 16,7 % (10 de 60).');
+    expect(antes[1]).toBe('SM-11 se juzga desde el 2026-12-05.');
+    const despues = lineasDeSm11({ ...lectura, momento: new Date(2026, 11, 5) });
+    expect(despues[1]).toMatch(/^Toca juzgar SM-11: lo decide Héctor/);
+    // Sin una de las dos, no hay comparación, y se dice.
+    const sinObra = lineasDeSm11({ ...lectura, familias: { autor: familia(1, 2) }, momento: new Date(2026, 9, 20) });
+    expect(sinObra[0]).toMatch(/sin comparación .*Obra/);
+    // Y el informe la lleva.
+    expect(lineasDeLectura({ ...lectura, momento: new Date(2026, 9, 20) }).join('\n')).toContain('SM-11: Obra');
   });
 });

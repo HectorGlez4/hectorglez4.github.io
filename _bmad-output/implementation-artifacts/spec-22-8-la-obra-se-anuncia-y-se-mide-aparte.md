@@ -2,14 +2,29 @@
 title: '22.8 — Lo que cambia en una obra se anuncia, y la familia se mide aparte'
 type: 'feature'
 created: '2026-10-10'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'e7fb9a6a2f5cef76fc8732200277322858614aac'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-22-context.md'
   - '{project-root}/AGENTS.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Una Obra que entra o sale del conjunto indexable sin que cambie ninguno de sus ficheros se anuncia, pero su `lastmod` sigue siendo el de sus ficheros.
+    evidence: |-
+      La relación AD-27 fecha por ficheros; el cambio de indexabilidad de una hermana no toca ninguno, y el sitemap la publica con una fecha anterior.
+    location: >-
+      tools/lib/cambios.ts relacionDeSuperficies
+    severity: low
+  - summary: >-
+      El trabajo `avisar` lee el sitemap desplegado justo después de desplegar; una caché del CDN podría servir aún el anterior y ocultar transiciones de indexabilidad.
+    evidence: |-
+      `obrasDelSitemap` no comprueba frescura; GitHub Pages cachea. Sin efecto mientras no cambie la indexabilidad de ninguna Obra en un empujón.
+    location: >-
+      tools/avisar.ts obrasDelSitemap
+    severity: low
 ---
 
 <intent-contract>
@@ -92,3 +107,18 @@ deferred: []
 - `npx astro check` -- expected: 0 errores.
 - `npm run build` -- expected: termina; «180 Obras publicadas, 81 indexables».
 - `npx tsx tools/avisar.ts --desde HEAD~3 --ensayo --sitemap dist/sitemap-0.xml` -- expected: sale 0, no envía.
+
+## Auto Run Result
+
+**Resumen:** la relación superficie→ficheros tiene un dueño (`relacionDeSuperficies`) y dos lecturas fijadas inversas por prueba, con la Página de Obra (ficha, Citas, Autor) y la Página de Cita dependiendo ya de sus Temas y de la ficha de su Obra; el aviso anuncia las Obras por la relación y las hermanas solo por diferencia de listas indexables (antes: Corpus y congelación de `--desde`; después: sitemap desplegado); la serie de indexación mide la familia Obra con censo del sitemap y lee Autor y Obra enteras mientras rija SM-11; y la congelación es `CONGELACION_DE_OBRAS` en `umbrales.ts`, compuesta por `npm run obra -- congelar|levantar`, consumida como dato por la indexabilidad y consultada por el rastreo. El repositorio queda sin congelar.
+
+**Ficheros:** `tools/lib/cambios.ts`, `tools/lib/avisar.ts`, `tools/avisar.ts` (relación, aviso, copia de `desde`), `integraciones/historial.ts` (fichas fechadas), `integraciones/indexables.ts`, `src/lib/umbrales.ts`, `src/lib/obras.ts`, `src/lib/publicado.ts`, `src/lib/superficies.ts` (congelación, `esRutaDeObra`), `tools/lib/indexacion.ts`, `tools/indexacion.ts`, `tools/lib/indexables.ts` (familia Obra, SM-11), `tools/lib/rastreo.ts`, `tools/rastreo.ts` (rechazo por congelación), `tools/lib/obras.ts`, `tools/obra.ts` (congelar/levantar), pruebas (`avisar-rango.test.ts` y `congelacion-de-obras.test.ts` nuevas) y `AGENTS.md`.
+
+**Revisión:** 13 patches (1 alto, 6 medios, 6 bajos), 2 deferidos, 9 rechazados.
+
+**Revisión de seguimiento:** `true` — parcheados alto 1, medio 6, bajo 6; hay un alto.
+
+**Verificación:** 13 ficheros de prueba tocados, 532/532; `npx astro check` 0 errores; `npm run build` termina con «180 Obras publicadas, 81 indexables» y la comprobación cruzada en verde; `npx tsx tools/avisar.ts --desde HEAD~3 --ensayo --sitemap dist/sitemap-0.xml` sale 0 sin enviar; `npm test` completo (ver commit).
+
+**Riesgos:** la relación de después sale del árbol en disco (en CI coincide con `--hasta`); un cambio de umbrales en el rango solo se avisa por consola; la Página de Obra no depende de los ficheros de Tema, como fija la spec.
+

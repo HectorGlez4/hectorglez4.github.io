@@ -155,6 +155,17 @@ minuto por propiedad, se pide una URL por petición y se van espaciando. Al pasa
 publicadas la lectura pasa sola a **muestreo por familia**, con el tamaño de muestra escrito en
 cada entrada.
 
+**La familia Obra** (Historia 22.8) se mide en esta serie y en ninguna otra todavía. Su censo
+son las rutas `/obra/…` del **sitemap publicado** —nunca una página `noindex`—, que se pide al
+sitio en línea o se lee de `--sitemap <fichero>`; sin sitemap legible, o con uno que no trae
+ninguna Obra, la familia va a `sinLeer` con su motivo, jamás a cero. Cada familia de la entrada
+anota qué conjunto midió, `censo: publicadas | sitemap` (las entradas viejas no lo traen y se
+siguen leyendo), y el `publicadas` de la entrada suma solo las cuatro de siempre. Mientras
+`SM11_VIGENTE` (`src/lib/umbrales.ts`), Autor y Obra se leen **enteras** después de reservar el
+suelo de las demás —si no caben, se muestrean y se dice—, y el informe da la línea SM-11: Obra
+frente a Autor de la misma lectura y, desde `PRIMER_DESPLIEGUE_DE_OBRAS` más
+`SEMANAS_HASTA_JUZGAR_SM11`, «toca juzgar SM-11: lo decide Héctor».
+
 ## Leer el tráfico orgánico
 
 Un sustituto de SM-2 sale de Search Console por mes, y se versiona igual que la indexación:
@@ -274,7 +285,8 @@ anotar una URL que el sitio no publique —una ruta inexistente, un listado pagi
 búsqueda— y a anotar más de diez de golpe, porque §4.17 declara que pedir rastreo de 1.715
 URL no es una petición, es ruido. Un rechazo sale con código 1; una bandera mal escrita, con
 2. No se anota nada que no corresponda a una petición real: una entrada inventada es peor que
-no tener el registro.
+no tener el registro. Mientras la familia Obra esté congelada (`CONGELACION_DE_OBRAS`, Historia
+22.8), toda URL de Obra se rechaza con 1, nombrando la congelación.
 
 ## Anotar lo que se publica en el canal
 
@@ -589,6 +601,39 @@ Toda Página de Obra —indexable o no, y sus páginas 2+— declara su Tarjeta 
 sans y «{n} citas de {Autor}, {año}», sin nota ni traductor. En `/buscar/`, el Autor del
 resultado de Obra sale del metadato `data-pagefind-meta="autor"` del enlace de la Cabecera:
 quitarlo o moverlo fuera de `data-pagefind-body` deja los resultados de Obra sin Autor.
+
+### El aviso, la serie y la congelación (Historia 22.8)
+
+Qué fichero compone qué página lo dice **una sola relación**, `relacionDeSuperficies` de
+`tools/lib/cambios.ts` (AD-27): fecha el sitemap y, leída al revés, decide qué avisa
+`tools/avisar.ts`. La Página de Obra es su ficha, sus Citas y el fichero de su Autor; una
+Página de Cita incluye además los ficheros de sus Temas y la ficha de su Obra (lo que su
+marcado pinta). `corpus/obras/` se fecha con git y entra en el `git diff` del aviso, igual que
+`src/lib/umbrales.ts`: un commit que solo congela o mueve un umbral compara las listas igual.
+
+Para el aviso, el estado de una Obra es uno: **indexable o no**. Una Obra tocada se avisa si
+es indexable después —lo dice el sitemap desplegado, `{SITIO}/sitemap-0.xml`, o
+`--sitemap <fichero>`— o si lo era antes; una hermana, solo si entra o sale de la lista
+indexable. La lista de antes sale de `obrasDelCorpusEnDisco` sobre una copia temporal del
+Corpus de `--desde`, con la congelación que regía en `--desde` (leída de su `umbrales.ts`) y
+los umbrales de hoy —si el rango los cambió, se dice—. Sin una de las dos listas no se avisa
+ninguna hermana, y lo que no se pudo decidir se nombra.
+
+**La congelación** es `CONGELACION_DE_OBRAS` en `src/lib/umbrales.ts`, y el repositorio la
+tiene en `undefined`. Mientras rija, una Obra se indexa si cumple FR-52 **y** su ficha está
+en la lista: ninguna entra, las que dejan de cumplir salen; un nombre de la lista que ya no es
+ninguna ficha activa avisa en el build. La aplica `obrasIndexables` en las dos instancias; la
+consulta `congelacionVigente()` (`src/lib/obras.ts`) —el rastreo, y la usarán la 22.9 y las
+Piezas—. Nunca se lee de la serie. **Congelar o levantar lo decide Héctor**, con su orden y un
+commit — ningún agente congela:
+
+```
+npm run obra -- congelar     # reescribe solo ese bloque con la jornada y la lista indexable de hoy
+npm run obra -- levantar     # lo devuelve a undefined
+```
+
+Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que hacer
+—también `congelar` cuando hoy no se indexa ninguna Obra—.
 
 ## Curar una Colección
 

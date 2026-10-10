@@ -261,8 +261,13 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     expect(primera.get('/')).toBeUndefined();
   });
 
-  it('una Página de Cita lleva la fecha de su Cita', () => {
-    for (const slug of SLUGS) expect(primera.get(`/cita/${slug}`), slug).toBe(PRIMER_INSTANTE);
+  it('una Página de Cita lleva la más reciente de su Cita, su Autor y sus Temas', () => {
+    /*
+     * Historia 22.8 — el chip de cada Tema pinta su nombre, así que renombrar «El tiempo» en
+     * el segundo commit cambia el HTML de toda Cita que lo declara —aquí, todas—, y su fecha
+     * es la del Tema. Antes la relación del sitemap no lo sabía y la del aviso sí.
+     */
+    for (const slug of SLUGS) expect(primera.get(`/cita/${slug}`), slug).toBe(SEGUNDO_INSTANTE);
   });
 
   it('la Página de Tema lleva la de su fichero, que cambió después', () => {

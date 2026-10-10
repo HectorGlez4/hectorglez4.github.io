@@ -39,11 +39,13 @@ import { esJornada } from '../../src/lib/citaDelDia.ts';
  */
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import {
+  esRutaDeObra,
   esServicioPorForma,
   rutaNormalizada,
   superficieDeclaradaDe,
 } from '../../src/lib/superficies.ts';
 import { FAMILIAS, NOMBRE_DE_FAMILIA, type CensoPorFamilia, type Familia } from './indexacion.ts';
+import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
 
 /**
  * Cuántas URL caben en una petición. **La decena, no el millar** — §4.17, FR-46.
@@ -149,6 +151,12 @@ export function componerPeticiones(entrada: {
    * alguien añada una tercera vía de anotar.
    */
   anteriores?: readonly PeticionDeRastreo[];
+  /**
+   * La congelación de la familia Obra, si está declarada — Historia 22.8. Quien llama la pasa
+   * con `congelacionVigente()` de `src/lib/obras.ts`, la misma consulta que usa la regla de
+   * indexabilidad: mientras rija, no se pide rastreo de ninguna Página de Obra (SM-11).
+   */
+  congelacion?: CongelacionDeObras;
 }): Seleccion {
   const motivos: string[] = [];
   const anteriores = entrada.anteriores ?? [];
@@ -276,6 +284,21 @@ export function componerPeticiones(entrada: {
               'único criterio que esta orden aplica. O la ruta no existe, o su superficie no ' +
               'llega al umbral que la publica. Anotarla ensuciaría el registro con algo que ' +
               'la serie de indexación nunca podrá cruzar.',
+      );
+      continue;
+    }
+
+    /*
+     * Historia 22.8 — con la familia Obra congelada no se pide rastreo de ninguna Obra. Va
+     * después de saber que la ruta se publica: una errata recibe «no la publica el sitio», que
+     * es lo que hay que corregir antes.
+     */
+    if (entrada.congelacion !== undefined && esRutaDeObra(normalizada)) {
+      motivos.push(
+        `«${dada}» es una Página de Obra y la familia Obra está congelada desde el ` +
+          `${entrada.congelacion.desde} (CONGELACION_DE_OBRAS en src/lib/umbrales.ts, SM-11): ` +
+          'mientras rija no se pide rastreo de ninguna Obra. Se levanta con ' +
+          '`npm run obra -- levantar` y un commit.',
       );
       continue;
     }

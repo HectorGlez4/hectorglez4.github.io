@@ -324,7 +324,9 @@ export async function fechasDeLasSuperficies(
     }
 
     const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-    const ambitos = [rutas.citas, rutas.autores, rutas.temas, rutas.colecciones];
+    // Historia 22.8 — las Fichas de Obra se fechan con git como los demás ficheros: sin su
+    // directorio en el ámbito, el título de una Obra cambiaba sin mover su `lastmod`.
+    const ambitos = [rutas.citas, rutas.autores, rutas.temas, rutas.colecciones, rutas.obras];
 
     const [corpus, fechas] = await Promise.all([
       corpusParaFechar(raiz),
