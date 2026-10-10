@@ -611,6 +611,8 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
     ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
       ? { distintaDe: ficha.distintaDe }
       : {}),
+    // La nota la escribe Héctor (22.6): aquí solo se conserva, tal cual, cuando se reescribe.
+    ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
   });
 }
 

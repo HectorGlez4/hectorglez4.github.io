@@ -14,7 +14,7 @@
  */
 
 import { z } from 'astro/zod';
-import { MAX_CARACTERES_CRITERIO } from './umbrales.ts';
+import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
 import { normalizar } from './normalizar.ts';
 
 /**
@@ -523,8 +523,13 @@ export const formaDeObraAdmisible = z
  * mismo Autor de las que esta se declara distinta, y silencia el aviso de prefijo. Sin valor
  * se omite; nunca lista vacía. Lo escribe `npm run obra -- separar`, nunca una persona.
  *
- * Los campos de las épicas siguientes —`nota`, `ediciones`— no se declaran todavía: el
- * `.strict()` los rechaza hasta que una historia los construya.
+ * `nota` (Historia 22.6) es opcional: una frase de 1 a `MAX_CARACTERES_NOTA_DE_OBRA`
+ * caracteres, medidos tras recortar, que la Página de Obra pinta al pie (UX-DR44). La escribe
+ * Héctor a mano y es el único campo de la ficha que se edita a mano: ninguna orden la rellena,
+ * y las que reescriben una ficha la conservan tal cual. Sin valor se omite.
+ *
+ * Los campos de las épicas siguientes —`ediciones`— no se declaran todavía: el `.strict()`
+ * los rechaza hasta que una historia los construya.
  *
  * La comparten la colección de `src/content.config.ts` y todo lector de `tools/`, que la
  * aplica en vez de leer YAML crudo (AD-17: una sola entrada).
@@ -568,15 +573,39 @@ export const obraAdmisible = z
           message: 'Regla incumplida: «distintaDe» no repite ninguna forma.',
         })
         .optional(),
+      /*
+       * Se mide lo que queda al recortar, en puntos de código —no en unidades UTF-16, que
+       * contarían doble un carácter fuera del plano básico—, pero **no se recorta el valor**:
+       * NFR-12 prohíbe que el sistema altere lo que el editor guardó. Lo que hay mal escrito se
+       * rechaza.
+       */
+      nota: z
+        .string({ message: 'Regla incumplida: la nota de una Ficha de Obra es una cadena.' })
+        .refine((nota) => !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(nota), {
+          message:
+            'Regla incumplida: la nota de una Ficha de Obra es una sola línea: sin saltos de ' +
+            'línea, tabuladores ni caracteres de control.',
+        })
+        .refine((nota) => nota.trim().length >= 1, {
+          message:
+            'Regla incumplida: la nota de una Ficha de Obra no puede estar vacía ni ser solo ' +
+            'espacios. Sin nota, el campo se omite.',
+        })
+        .refine((nota) => [...nota.trim()].length <= MAX_CARACTERES_NOTA_DE_OBRA, {
+          message:
+            'Regla incumplida: la nota de una Ficha de Obra no puede pasar de ' +
+            `${MAX_CARACTERES_NOTA_DE_OBRA} caracteres. Es una frase, no una sinopsis.`,
+        })
+        .optional(),
     },
     {
       error: (problema) =>
         problema.code === 'unrecognized_keys'
           ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
-            `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas y ` +
-            'distintaDe.'
+            `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
+            'distintaDe y nota.'
           : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-            'opcionalmente distintaDe.',
+            'opcionalmente distintaDe y nota.',
     },
   )
   .strict()

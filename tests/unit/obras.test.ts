@@ -24,6 +24,10 @@ import {
   nombreDeFichaDeObra,
   prefijosDeFormas,
   obrasDeCitas,
+  dondeLeer,
+  entradaComun,
+  ROTULO_DE_FUENTE_SIN_NOMBRE,
+  type CitaParaDondeLeer,
   type FichaDeObra,
 } from '../../src/lib/obras.ts';
 import {
@@ -77,6 +81,15 @@ describe('el esquema de la Ficha de Obra', () => {
     ).toBe(true);
   });
 
+  it('admite una nota de 1 a 160 caracteres, medidos tras recortar, y no la recorta — 22.6', () => {
+    // 160 puntos de código, aunque fuera del plano básico sean 320 unidades UTF-16.
+    for (const nota of ['n', 'n'.repeat(160), `  ${'n'.repeat(160)}  `, '𝔫'.repeat(160)]) {
+      const leida = obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], nota });
+      expect(leida.success, nota).toBe(true);
+      expect(leida.data?.nota).toBe(nota);
+    }
+  });
+
   it('admite distintaDe con formas canónicas de otras Obras', () => {
     expect(
       obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x i'] })
@@ -91,7 +104,14 @@ describe('el esquema de la Ficha de Obra', () => {
     ['forma repetida', { autor: 'seneca', titulo: 'X', formas: ['x', 'x'] }],
     ['título en blanco', { autor: 'seneca', titulo: '  ', formas: ['x'] }],
     ['autor que no es slug', { autor: 'Séneca', titulo: 'X', formas: ['x'] }],
-    ['campo de una épica siguiente', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 'n' }],
+    ['campo de una épica siguiente', { autor: 'seneca', titulo: 'X', formas: ['x'], ediciones: [] }],
+    ['nota vacía', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: '' }],
+    ['nota en blanco', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: '   ' }],
+    ['nota de 161 caracteres', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 'n'.repeat(161) }],
+    ['nota que no es cadena', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 3 }],
+    ['nota de 161 puntos de código', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: '𝔫'.repeat(161) }],
+    ['nota con salto de línea', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 'Una línea.\nY otra.' }],
+    ['nota con un carácter de control', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 'Una\tnota.' }],
     ['distintaDe vacío', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: [] }],
     ['distintaDe no canónico', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['Y'] }],
     ['distintaDe de su propia forma', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x'] }],
@@ -1156,5 +1176,222 @@ describe('22.3 — colgarObras no arrastra una Obra vieja', () => {
     const [otraVez] = colgarObras([colgada], []);
     expect(otraVez).not.toHaveProperty('obra');
     expect(otraVez).toEqual({ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } });
+  });
+});
+
+/*
+ * Historia 22.6 — «Dónde leer esta obra», puro. Las filas de datos de la matriz; lo que se ve
+ * construido está en `obra-pagina.test.ts`.
+ */
+describe('22.6 — dondeLeer, puro', () => {
+  const WS = { id: 'wikisource-es', nombre: 'Wikisource en español', licencia: 'CC BY-SA 4.0' };
+  const GB = { id: 'gutenberg', nombre: 'Project Gutenberg', licencia: 'dominio público' };
+  const ws = (pagina: string, extra: Partial<CitaParaDondeLeer> = {}): CitaParaDondeLeer => ({
+    fuente: { ...WS, url: `https://es.wikisource.org/wiki/${pagina}` },
+    ...extra,
+  });
+  const traducida = (traductor: string, año?: number) => ({
+    procedencia: { traduccion: { traductor, ...(año !== undefined ? { año } : {}) } },
+  });
+
+  it('un documento: una línea con el nombre, la licencia y el enlace a esa URL', () => {
+    const r = dondeLeer([ws('Cartas'), ws('Cartas'), ws('Cartas')]);
+    expect(r).toEqual({
+      lineas: [
+        {
+          nombre: 'Wikisource en español',
+          licencia: 'CC BY-SA 4.0',
+          paginas: 1,
+          enlace: 'https://es.wikisource.org/wiki/Cartas',
+          citas: 3,
+        },
+      ],
+      citasSinDocumento: 0,
+      total: 3,
+    });
+  });
+
+  it('repartida: cuenta las páginas y enlaza a la entrada de la obra', () => {
+    const citas = Array.from({ length: 12 }, (_, i) => ws(`Or%C3%A1culo_manual_y_arte_de_prudencia/${i + 1}`));
+    const [linea] = dondeLeer(citas).lineas;
+    expect(linea.paginas).toBe(12);
+    expect(linea.enlace).toBe('https://es.wikisource.org/wiki/Or%C3%A1culo_manual_y_arte_de_prudencia');
+  });
+
+  it('la misma página escrita con y sin codificar cuenta una vez', () => {
+    const [linea] = dondeLeer([ws('Ariel/Capítulo_II'), ws('Ariel/Cap%C3%ADtulo_II')]).lineas;
+    expect(linea.paginas).toBe(1);
+    expect(linea.enlace).toBe('https://es.wikisource.org/wiki/Ariel/Cap%C3%ADtulo_II');
+  });
+
+  it('sin entrada que la Fuente garantice, la línea va sin enlace', () => {
+    // Dos anfitriones.
+    const dosAnfitriones = dondeLeer([
+      { fuente: { ...WS, url: 'https://es.wikisource.org/wiki/Odas/1' } },
+      { fuente: { ...WS, url: 'https://en.wikisource.org/wiki/Odas/2' } },
+    ]).lineas[0];
+    expect(dosAnfitriones.paginas).toBe(2);
+    expect(dosAnfitriones).not.toHaveProperty('enlace');
+    // Dos páginas de primer nivel: no hay `Padre` común.
+    expect(dondeLeer([ws('Odas'), ws('Epodos')]).lineas[0]).not.toHaveProperty('enlace');
+    // Gutenberg: un prefijo de dos tramos que no es ninguna página.
+    expect(
+      entradaComun([
+        'https://www.gutenberg.org/cache/epub/66373/pg66373.txt',
+        'https://www.gutenberg.org/cache/epub/2000/pg2000.txt',
+      ]),
+    ).toBeUndefined();
+    expect(entradaComun(['https://a.org/libros/obra/1', 'https://a.org/libros/obra/2'])).toBeUndefined();
+    expect(entradaComun(['https://es.wikisource.org/wiki/X?p=1', 'https://es.wikisource.org/wiki/X/2'])).toBeUndefined();
+    // Las subpáginas de Wikisource, sí; también con la página padre entre ellas.
+    expect(entradaComun(['https://es.wikisource.org/wiki/Obra', 'https://es.wikisource.org/wiki/Obra/2'])).toBe(
+      'https://es.wikisource.org/wiki/Obra',
+    );
+  });
+
+  it('la normalización: sin fragmento ni barra final, escapes en mayúsculas y la versión móvil', () => {
+    const [linea] = dondeLeer([
+      ws('Odas_%28Horacio%2c_Salinas_tr.%29/I'),
+      ws('Odas_(Horacio,_Salinas_tr.)/I/'),
+      ws('Odas_%28Horacio%2C_Salinas_tr.%29/I#Oda_3'),
+      { fuente: { ...WS, url: 'https://es.m.wikisource.org/wiki/Odas_(Horacio,_Salinas_tr.)/II' } },
+    ]).lineas;
+    expect(linea.paginas).toBe(2);
+    expect(linea.enlace).toBe('https://es.wikisource.org/wiki/Odas_(Horacio%2C_Salinas_tr.)');
+  });
+
+  it('nada se cae del recuento: sin nombre ni dirección legible, la línea va sin enlace y cuenta', () => {
+    const r = dondeLeer([{ fuente: { id: 'gutenberg', url: 'no es una dirección' } }, {}]);
+    expect(r.lineas).toEqual([{ nombre: 'gutenberg', paginas: 1, citas: 1 }]);
+    expect(r.citasSinDocumento).toBe(1);
+    const sinNada = dondeLeer([{ fuente: { id: '', url: 'tampoco' } }]);
+    expect(sinNada.lineas.map((l) => l.nombre)).toEqual([ROTULO_DE_FUENTE_SIN_NOMBRE]);
+    expect(sinNada.citasSinDocumento).toBe(0);
+  });
+
+  it('con nombres que discrepan no gana el primero: el rótulo sale sin nombre (el anfitrión)', () => {
+    const [linea] = dondeLeer([
+      ws('A'),
+      { fuente: { ...WS, nombre: 'Wikisource', url: 'https://es.wikisource.org/wiki/A' } },
+    ]).lineas;
+    expect(linea.nombre).toBe('es.wikisource.org');
+  });
+
+  it('licencia y año de traducción: solo si todas las Citas los declaran y coinciden', () => {
+    const sinLicencia = { fuente: { id: WS.id, nombre: WS.nombre, url: 'https://es.wikisource.org/wiki/A' } };
+    expect(dondeLeer([ws('A'), sinLicencia]).lineas[0]).not.toHaveProperty('licencia');
+    const años = dondeLeer([
+      ws('Odas', traducida('Germán Salinas', 1909)),
+      ws('Odas', traducida('Germán Salinas')),
+    ]).lineas[0];
+    expect(años.traduccion).toEqual({ traductor: 'Germán Salinas' });
+  });
+
+  it('dos Fuentes: la de más Citas primero y, a igualdad, por nombre', () => {
+    const gb = (n: number): CitaParaDondeLeer => ({ fuente: { ...GB, url: `https://www.gutenberg.org/ebooks/${n}` } });
+    const r = dondeLeer([gb(1), gb(1), ws('A'), ws('A'), ws('A'), ws('A'), ws('A')]);
+    expect(r.lineas.map((l) => l.nombre)).toEqual(['Wikisource en español', 'Project Gutenberg']);
+    const empate = dondeLeer([ws('A'), gb(1)]);
+    expect(empate.lineas.map((l) => l.nombre)).toEqual(['Project Gutenberg', 'Wikisource en español']);
+  });
+
+  it('sin nombre de Fuente: el anfitrión, como la Línea de la Fuente; sin licencia, no la inventa', () => {
+    const [linea] = dondeLeer([{ fuente: { id: 'gutenberg', url: 'https://www.gutenberg.org/ebooks/1' } }]).lineas;
+    expect(linea.nombre).toBe('gutenberg.org');
+    expect(linea).not.toHaveProperty('licencia');
+  });
+
+  it('traducción: el traductor y el año, si constan; dos traductores son dos líneas', () => {
+    const una = dondeLeer([ws('Odas', traducida('Germán Salinas', 1909))]).lineas[0];
+    expect(una.traduccion).toEqual({ traductor: 'Germán Salinas', año: 1909 });
+    const sinAño = dondeLeer([ws('Odas', traducida('Germán Salinas'))]).lineas[0];
+    expect(sinAño.traduccion).toEqual({ traductor: 'Germán Salinas' });
+    const dos = dondeLeer([
+      ws('Odas', traducida('Germán Salinas', 1909)),
+      ws('Odas', traducida('Germán Salinas', 1909)),
+      ws('Odas_Burgos', traducida('Javier de Burgos', 1844)),
+    ]);
+    expect(dos.lineas.map((l) => l.traduccion?.traductor)).toEqual(['Germán Salinas', 'Javier de Burgos']);
+    expect(dos.lineas.map((l) => l.citas)).toEqual([2, 1]);
+  });
+
+  it('sin cotejo (c): ninguna línea, y todas sin documento', () => {
+    expect(dondeLeer([{}, { fuente: null }, {}])).toEqual({ lineas: [], citasSinDocumento: 3, total: 3 });
+  });
+
+  it('parcial (d): las líneas y cuántas no tienen documento', () => {
+    const r = dondeLeer([...Array.from({ length: 26 }, () => ws('Proverbios')), {}]);
+    expect(r.lineas).toHaveLength(1);
+    expect(r.citasSinDocumento).toBe(1);
+    expect(r.total).toBe(27);
+  });
+});
+
+describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que reescriben la conservan', () => {
+  const NOTA = 'Trescientos aforismos comentados, publicados en Huesca en 1647.';
+
+  it('aprobar con la ficha ya existente (aplicarFichaDeObra) la deja con su nota', async () => {
+    const rutas = await corpusTemporal();
+    await asegurarFichaDeObra(rutas, { autor: 'seneca', obra: 'X', citasPublicadas: [] });
+    await conNota(rutas, 'seneca--x');
+    const antes = await readFile(join(rutas.obras, 'seneca--x.yml'), 'utf8');
+    await escribirCita(rutas.revision, 'seneca-a', citaCompleta('seneca-a', 'X'));
+
+    expect((await aprobar(rutas, ['seneca-a'])).publicadas).toEqual(['seneca-a']);
+    expect(await readFile(join(rutas.obras, 'seneca--x.yml'), 'utf8')).toBe(antes);
+    expect((await leerFichasDeObra(rutas))[0]?.nota).toBe(NOTA);
+  });
+
+  it('retirar mueve la ficha con su nota, y aprobar la restaura con ella', async () => {
+    const rutas = await corpusTemporal();
+    await asegurarFichaDeObra(rutas, { autor: 'seneca', obra: 'X', citasPublicadas: [] });
+    await conNota(rutas, 'seneca--x');
+    expect((await retirarFichaDeObra(rutas, 'seneca--x', 'prueba')).ok).toBe(true);
+    expect(await readFile(join(rutas.obrasRetiradas, 'seneca--x.yml'), 'utf8')).toContain(NOTA);
+
+    await escribirCita(rutas.revision, 'seneca-a', citaCompleta('seneca-a', 'X'));
+    expect((await aprobar(rutas, ['seneca-a'])).publicadas).toEqual(['seneca-a']);
+    expect((await leerFichasDeObra(rutas))[0]?.nota).toBe(NOTA);
+  });
+
+  async function conNota(rutas: Rutas, nombre: string) {
+    const ruta = join(rutas.obras, `${nombre}.yml`);
+    await writeFile(ruta, `${await readFile(ruta, 'utf8')}nota: "${NOTA}"\n`, 'utf8');
+  }
+
+  it('sembrar no escribe nota', async () => {
+    const rutas = await corpusTemporal();
+    await publicar(rutas, citaCompleta('seneca-a', 'Cartas a Lucilio'));
+    await sembrarFichasDeObra(rutas);
+    const [ficha] = await leerFichasDeObra(rutas);
+    expect(ficha).not.toHaveProperty('nota');
+    expect(await readFile(ficha.ruta, 'utf8')).not.toContain('nota');
+  });
+
+  it('titular, separar y reunir conservan la nota de la ficha que queda', async () => {
+    const rutas = await corpusTemporal();
+    await publicar(rutas, citaCompleta('seneca-a', 'De la brevedad de la vida'));
+    await publicar(rutas, citaCompleta('seneca-b', 'De la Brevedad de la Vida'));
+    await publicar(rutas, citaCompleta('seneca-c', 'Sobre la brevedad de la vida'));
+    await sembrarFichasDeObra(rutas);
+    const destino = 'seneca--de-la-brevedad-de-la-vida';
+    const absorbida = 'seneca--sobre-la-brevedad-de-la-vida';
+    await conNota(rutas, destino);
+    await conNota(rutas, absorbida);
+    const notaDe = async (nombre: string) => (await leerFichasDeObra(rutas)).find((f) => f.nombre === nombre)?.nota;
+
+    expect((await titularFicha(rutas, destino, 'De la Brevedad de la Vida')).ok).toBe(true);
+    expect(await notaDe(destino)).toBe(NOTA);
+
+    expect((await separarFichas(rutas, destino, absorbida)).ok).toBe(true);
+    expect(await notaDe(destino)).toBe(NOTA);
+    expect(await notaDe(absorbida)).toBe(NOTA);
+
+    const hecho = await reunirFichas(rutas, destino, absorbida);
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    expect(await notaDe(destino)).toBe(NOTA);
+    // La de la absorbida no se hereda: se queda en la retirada, y el parte lo dice.
+    if (hecho.ok) expect(hecho.mensaje).toContain(`La nota de «${absorbida}» no pasa a la reunida`);
+    expect(await readFile(join(rutas.obrasRetiradas, `${absorbida}.yml`), 'utf8')).toContain(NOTA);
   });
 });

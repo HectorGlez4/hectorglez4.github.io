@@ -484,6 +484,14 @@ sobrescribe y se niega ante una colisión de nombre. Una obra cuya forma canóni
 —«…»— no necesita ficha. Escribir una candidata en `_revision/` no crea ficha. El título de una ficha nueva es la grafía literal que más Citas usan (empate: la
 primera alfabética), la regla `grafiaPorOmision` de `src/lib/obras.ts`.
 
+**La excepción es `nota`** (Historia 22.6), el único campo de la ficha que se edita a mano y
+solo lo escribe Héctor: una línea de 1 a `MAX_CARACTERES_NOTA_DE_OBRA` (160, en
+`src/lib/umbrales.ts`) puntos de código tras recortar, sin saltos de línea, que la Página de
+Obra pinta al pie de su página 1. Ninguna orden la rellena —ni `sembrar` ni la aprobación—, y
+las que reescriben o mueven una ficha (`titular`, `separar`, `retirar`) la conservan. `reunir`
+conserva la de la destino y **no hereda** la de la absorbida: se queda en
+`corpus/_obras-retiradas/` y el parte lo dice.
+
 El build (`integraciones/obras.ts`) **rompe** por una Obra publicada sin ficha —con la orden
 que la crea—, por una forma reclamada por dos fichas, por un nombre sin forma de slug o
 repetido (`.yml` y `.yaml`, o anidado), por un nombre cuyo prefijo no es su `autor` y por un

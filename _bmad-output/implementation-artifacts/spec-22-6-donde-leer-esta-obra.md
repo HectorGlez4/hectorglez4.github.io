@@ -2,10 +2,10 @@
 title: 'Historia 22.6 — Dónde leer esta obra'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '2a4bb8ba88a3e79111775017f6ebdb3ab695701d'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-22-4-la-obra-tiene-pagina.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/mockups/pagina-de-obra.html'
@@ -112,9 +112,31 @@ Todo sale de datos ya publicados: la `fuente` de cada Cita y su traducción.
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10 (high 0, medium 3, low 7)
+- defer: 0
+- reject: 1
+- addressed_findings:
+  - `[medium]` `[patch]` `entradaComun` podía inventar una entrada (directorios de Gutenberg) → solo subpáginas de Wikisource; las 14 entradas reales comprobadas con 200.
+  - `[medium]` `[patch]` Citas que se caían del recuento y valores comunes mal calculados → todo grupo cuenta; licencia y año solo si todas las Citas los declaran.
+  - `[medium]` `[patch]` Sin pruebas del render de «repartida» ni de la línea sin enlace → pruebas de build.
+  - `[low]` `[patch]` Normalización de páginas; el estado (d) fuera del `h3`; `Rotulo.astro` compartido; `nota` por puntos de código y sin saltos ni controles; `data-pagefind-ignore`; `dondeLeer` una vez por Obra; conservación de la nota al aprobar y al retirar; AGENTS.md.
+
 ## Verification
 
 **Commands:**
 - `npx vitest run tests/unit/obras.test.ts tests/unit/obra-pagina.test.ts tests/unit/obras-build.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** la página 1 de cada Obra lleva al pie «Dónde leer esta obra»: una línea por Fuente y traducción, con licencia y el nombre de la Fuente enlazado al documento o a la entrada de la obra repartida («Wikisource en español, repartida en 12 páginas. Licencia CC BY-SA 4.0.»). Estados (c) y (d) en el corpus real: 7 y 6 Obras. Campo `nota` opcional (≤160 puntos de código) que solo escribe Héctor, pintado tras la sección, con filete y sin encabezado; nunca en la meta. Sin ediciones en venta (22.9).
+
+**Revisión:** 10 parches aplicados y 1 rechazado (tokens tipográficos que no existen en el sistema: se conservan los literales, como en los componentes vecinos). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 118 ficheros y 3800 pruebas; astro check, 0 errores; build en verde (180/81 y 2081 rutas coincidentes); las 14 URLs de entrada responden 200 en Wikisource.

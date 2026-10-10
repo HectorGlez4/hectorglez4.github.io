@@ -732,6 +732,7 @@ export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
     titulo: entrada.data.titulo,
     formas: [...entrada.data.formas],
     ...(entrada.data.distintaDe !== undefined ? { distintaDe: [...entrada.data.distintaDe] } : {}),
+    ...(entrada.data.nota !== undefined ? { nota: entrada.data.nota } : {}),
   };
 }
 

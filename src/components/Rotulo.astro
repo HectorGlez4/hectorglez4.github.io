@@ -1,0 +1,30 @@
+---
+/**
+ * El rótulo de sección de la Página de Obra — «Temas» y «Dónde leer esta obra» (UX-DR41, UX-DR42).
+ *
+ * Un `h2` en `author` y tinta apagada, en versalitas por espaciado. Una sola regla para los dos
+ * rótulos de la página: dos copias acabarían divergiendo. Sin márgenes: el aire lo pone quien lo
+ * rodea. El peso, el espaciado y el interlineado son los mismos literales que el rótulo de las
+ * Rutas de salida y el nombre del Autor, porque `tokens.css` no declara tokens para ellos.
+ */
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<h2 class="rotulo" id={id}><slot /></h2>
+
+<style>
+  .rotulo {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+</style>

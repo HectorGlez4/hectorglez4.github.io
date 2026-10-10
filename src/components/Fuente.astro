@@ -28,6 +28,7 @@
  * parte de lo mismo que hace este sitio con las Citas.
  */
 import type { Cita } from '../lib/publicado.ts';
+import { rotuloDeFuente } from '../lib/obras.ts';
 
 interface Props {
   cita: Cita;
@@ -38,17 +39,10 @@ const { fuente } = Astro.props.cita;
 /*
  * El rótulo del enlace es el nombre de la Fuente cuando consta y su anfitrión cuando no.
  * Nunca la URL desnuda: una dirección de Wikisource con guiones bajos y barras leída en
- * voz alta por un lector de pantalla es ruido, y UX-DR21 pide frases.
+ * voz alta por un lector de pantalla es ruido, y UX-DR21 pide frases. La regla es la de
+ * «Dónde leer esta obra» (22.6), y por eso vive en `rotuloDeFuente`.
  */
-const anfitrion = (() => {
-  try {
-    return new URL(fuente!.url).hostname.replace(/^www\./, '');
-  } catch {
-    return undefined;
-  }
-})();
-
-const rotulo = fuente?.nombre ?? anfitrion;
+const rotulo = fuente === undefined ? undefined : rotuloDeFuente(fuente);
 ---
 
 {

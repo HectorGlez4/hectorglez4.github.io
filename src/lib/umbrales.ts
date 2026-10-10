@@ -179,6 +179,18 @@ export const MIN_CITAS_POR_COLECCION = 15;
 export const MAX_CARACTERES_CRITERIO = 160;
 
 /**
+ * Caracteres que puede medir la `nota` de una Ficha de Obra — Historia 22.6, UX-DR44.
+ *
+ * La nota es la única frase escrita a mano que publica la Página de Obra, y la escribe Héctor:
+ * ninguna orden la rellena. Se acota en la puerta de admisión por la misma razón que el
+ * criterio de una Colección —recortarla en la página sería reescribir lo que el editor
+ * guardó (NFR-12)—, y con el mismo número: una frase, no una sinopsis (FR-51). Se mide en
+ * puntos de código el texto **tras recortar** los espacios de los extremos, sin recortar el
+ * valor.
+ */
+export const MAX_CARACTERES_NOTA_DE_OBRA = 160;
+
+/**
  * Proporción de palabras con señales de OCR roto que un texto puede traer — Historia 11.5.
  *
  * **VALOR PROVISIONAL**, y conviene decir de qué sale. Sale de **un solo documento

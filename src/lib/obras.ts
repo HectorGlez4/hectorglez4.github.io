@@ -147,6 +147,8 @@ export interface FichaDeObra {
   formas: readonly string[];
   /** Formas de otras Obras del mismo Autor de las que esta se declara distinta (22.2). */
   distintaDe?: readonly string[];
+  /** La nota de la ficha (22.6): la escribe Héctor a mano y ninguna orden la toca. */
+  nota?: string;
 }
 
 /** Lo que de una Cita importa para resolver su Obra. */
@@ -687,6 +689,11 @@ export interface ObraResuelta {
   temas: string[];
   /** Cuántas Citas publicadas la resuelven. */
   recuento: number;
+  /**
+   * La nota de la ficha, tal como la escribió Héctor (22.6, UX-DR44). Solo la pinta la página
+   * 1 de la Página de Obra, al pie: nunca la meta ni la Tarjeta.
+   */
+  nota?: string;
 }
 
 /** Lo que de una Cita importa para derivar los atributos de su Obra. */
@@ -774,6 +781,7 @@ export function resolverObras(
       edicionCotejada: cotejadas.length > 0,
       temas,
       recuento: suyas.length,
+      ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
     });
   }
 
@@ -833,4 +841,212 @@ export function avisosDeAñosDeObras(
     );
   }
   return avisos;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dónde leer esta obra — Historia 22.6, UX-DR42 y UX-DR50 (c, d)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Lo que de la Fuente de una Cita importa para nombrarla y enlazarla. */
+export interface FuenteParaLeer {
+  id: string;
+  url: string;
+  nombre?: string;
+  licencia?: string;
+}
+
+/**
+ * El anfitrión de una dirección, sin `www.`, o `undefined` si no es una URL. Es el rótulo de
+ * reserva de una Fuente que no declara nombre: nunca la URL desnuda (UX-DR21).
+ */
+export function anfitrionDe(url: string): string | undefined {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Cómo se nombra una Fuente: su `nombre` si consta; si no, su anfitrión; si la dirección no se
+ * deja leer, su identificador. Es la regla de la Línea de la Fuente (`Fuente.astro`) y la de
+ * «Dónde leer esta obra»: una sola, para que la misma Fuente no se llame de dos maneras según la
+ * página.
+ */
+export function rotuloDeFuente(
+  fuente: Pick<FuenteParaLeer, 'url' | 'nombre'> & { id?: string },
+): string | undefined {
+  return fuente.nombre ?? anfitrionDe(fuente.url) ?? (fuente.id !== '' ? fuente.id : undefined);
+}
+
+/** El rótulo de una Fuente de la que no se sabe ni nombre, ni anfitrión, ni identificador. */
+export const ROTULO_DE_FUENTE_SIN_NOMBRE = 'Fuente sin nombre';
+
+/** Lo que de una Cita importa para decir dónde leer su Obra. */
+export interface CitaParaDondeLeer {
+  fuente?: FuenteParaLeer | null;
+  procedencia?: { traduccion?: { traductor: string; año?: number } } | null;
+}
+
+/** Una línea de «Edición cotejada, gratuita»: una Fuente, o una traducción en una Fuente. */
+export interface LineaDondeLeer {
+  /** El nombre de la Fuente (`rotuloDeFuente`). Es el texto del enlace. */
+  nombre: string;
+  /** La licencia, solo si **todas** las Citas del grupo la declaran y dicen la misma. */
+  licencia?: string;
+  /** Cuántas páginas distintas de la Fuente reúne el grupo, ya normalizadas. */
+  paginas: number;
+  /**
+   * Con una página, esa dirección; con varias, la entrada de la obra (`entradaComun`), solo
+   * donde la estructura de la Fuente la garantiza. Si no, no hay enlace: nunca se inventa uno.
+   */
+  enlace?: string;
+  /** El traductor y, si **todas** sus Citas lo declaran igual, el año de la traducción. */
+  traduccion?: { traductor: string; año?: number };
+  /** Cuántas Citas de la Obra salen de este grupo: decide el orden. */
+  citas: number;
+}
+
+export interface ResumenDondeLeer {
+  lineas: LineaDondeLeer[];
+  /** Cuántas Citas de la Obra no declaran Fuente: el estado (c) o (d) de UX-DR50. */
+  citasSinDocumento: number;
+  total: number;
+}
+
+/**
+ * El valor si **todas** lo declaran y coinciden; si alguna lo omite o discrepa, `undefined`.
+ * Una licencia o un año que solo dicen algunas Citas no es de la edición entera.
+ */
+function valorComun<T>(valores: readonly (T | undefined)[]): T | undefined {
+  if (valores.length === 0 || valores.some((v) => v === undefined)) return undefined;
+  return new Set(valores).size === 1 ? valores[0] : undefined;
+}
+
+/** Un tramo de ruta sin escapes, o tal cual si sus escapes no se dejan leer. */
+function sinEscapes(tramo: string): string {
+  try {
+    return decodeURIComponent(tramo);
+  } catch {
+    return tramo;
+  }
+}
+
+/**
+ * Una dirección en forma canónica, para no contar dos veces la misma página: sin fragmento ni
+ * barra final, con cada tramo de la ruta escapado de una sola manera (los `%xx` en mayúsculas)
+ * y la versión móvil de Wikisource (`es.m.wikisource.org`) como la de escritorio. Una dirección
+ * ilegible se devuelve tal cual.
+ */
+export function paginaNormalizada(url: string): string {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return url;
+  }
+  u.hash = '';
+  u.hostname = u.hostname.replace(/\.m\.wikisource\.org$/u, '.wikisource.org');
+  const tramos = u.pathname.split('/').filter((t) => t !== '');
+  u.pathname = `/${tramos.map((t) => encodeURIComponent(sinEscapes(t))).join('/')}`;
+  return u.href.replace(/%[0-9a-f]{2}/giu, (escape) => escape.toUpperCase());
+}
+
+/**
+ * La entrada de una obra repartida en varias páginas, **solo** donde la estructura de la Fuente
+ * la garantiza: las subpáginas de Wikisource. `…/wiki/Padre/Sub…` es, por construcción de
+ * Wikisource, una subpágina de `…/wiki/Padre`, así que con todas las direcciones bajo el mismo
+ * `Padre` la entrada es `…/wiki/Padre`.
+ *
+ * En cualquier otro caso —otra Fuente, como Gutenberg (`/cache/epub/N/…`), páginas de primer
+ * nivel distintas, otro anfitrión, una consulta— devuelve `undefined` y la línea va sin enlace:
+ * un prefijo común no es una página, y enlazarlo sería inventar una dirección.
+ */
+export function entradaComun(urls: readonly string[]): string | undefined {
+  let partes: URL[];
+  try {
+    partes = urls.map((u) => new URL(paginaNormalizada(u)));
+  } catch {
+    return undefined;
+  }
+  if (partes.length === 0) return undefined;
+  const origen = partes[0].origin;
+  if (!/^https?:\/\/[a-z]+\.wikisource\.org$/u.test(origen)) return undefined;
+  if (partes.some((u) => u.origin !== origen || u.search !== '')) return undefined;
+
+  const padres = new Set<string>();
+  let algunaSubpagina = false;
+  for (const u of partes) {
+    const [espacio, padre, ...sub] = u.pathname.split('/').filter((t) => t !== '');
+    if (espacio !== 'wiki' || padre === undefined) return undefined;
+    padres.add(padre);
+    if (sub.length > 0) algunaSubpagina = true;
+  }
+  if (padres.size !== 1 || !algunaSubpagina) return undefined;
+  return `${origen}/wiki/${[...padres][0]}`;
+}
+
+/**
+ * Dónde leer una Obra — Historia 22.6, UX-DR42.
+ *
+ * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así
+ * que dos traductores en la misma Fuente son dos líneas. Las ordena de más a menos Citas y, a
+ * igualdad, por nombre de Fuente. Todo sale de datos ya publicados en cada Cita; nada se
+ * consulta ni se compone.
+ *
+ * Ninguna Cita con Fuente se cae del recuento: un grupo que no se deja rotular ni enlazar va
+ * sin enlace y con el rótulo de reserva, y sus Citas cuentan como cotejadas. Así el estado (c)
+ * sale solo cuando de verdad ninguna Cita tiene `fuente`.
+ */
+export function dondeLeer(citas: readonly CitaParaDondeLeer[]): ResumenDondeLeer {
+  const grupos = new Map<
+    string,
+    { id: string; fuentes: FuenteParaLeer[]; traducciones: ({ traductor: string; año?: number } | undefined)[] }
+  >();
+  let citasSinDocumento = 0;
+
+  for (const cita of citas) {
+    const fuente = cita.fuente;
+    if (fuente === undefined || fuente === null) {
+      citasSinDocumento += 1;
+      continue;
+    }
+    const traduccion = cita.procedencia?.traduccion;
+    const llave = `${fuente.id}\u0000${traduccion?.traductor ?? ''}`;
+    const grupo = grupos.get(llave) ?? { id: fuente.id, fuentes: [], traducciones: [] };
+    grupo.fuentes.push(fuente);
+    grupo.traducciones.push(traduccion);
+    grupos.set(llave, grupo);
+  }
+
+  const lineas: LineaDondeLeer[] = [];
+  for (const { id, fuentes, traducciones } of grupos.values()) {
+    const urls = [...new Set(fuentes.map((f) => paginaNormalizada(f.url)))].sort();
+    // Con nombres que discrepan no se elige el primero que llegue: se rotula como sin nombre.
+    const nombre =
+      rotuloDeFuente({ id, url: urls[0], nombre: valorComun(fuentes.map((f) => f.nombre)) }) ??
+      ROTULO_DE_FUENTE_SIN_NOMBRE;
+    const licencia = valorComun(fuentes.map((f) => f.licencia));
+    const traductor = traducciones[0]?.traductor;
+    const año = valorComun(traducciones.map((t) => t?.año));
+    const enlace =
+      urls.length === 1 ? (anfitrionDe(urls[0]) !== undefined ? urls[0] : undefined) : entradaComun(urls);
+    lineas.push({
+      nombre,
+      ...(licencia !== undefined ? { licencia } : {}),
+      paginas: urls.length,
+      ...(enlace !== undefined ? { enlace } : {}),
+      ...(traductor !== undefined ? { traduccion: { traductor, ...(año !== undefined ? { año } : {}) } } : {}),
+      citas: fuentes.length,
+    });
+  }
+
+  lineas.sort(
+    (a, b) =>
+      b.citas - a.citas ||
+      a.nombre.localeCompare(b.nombre, 'es') ||
+      (a.traduccion?.traductor ?? '').localeCompare(b.traduccion?.traductor ?? '', 'es'),
+  );
+
+  return { lineas, citasSinDocumento, total: citas.length };
 }

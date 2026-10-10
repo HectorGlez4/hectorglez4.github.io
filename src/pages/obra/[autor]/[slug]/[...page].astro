@@ -8,15 +8,18 @@
  * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
  * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
  *
- * Página 1: Cabecera, Listado y Temas. Páginas 2+: solo Cabecera y Listado, y `noindex` por
- * forma. Nada de prosa compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se
- * dice sale de hechos del Corpus.
+ * Página 1: Cabecera, Listado, Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota
+ * (Historia 22.6). Páginas 2+: solo Cabecera y Listado, y `noindex` por forma. Nada de prosa
+ * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
+ * del Corpus, salvo la nota, que escribe Héctor a mano.
  *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
  */
 import Armazon from '../../../../components/Armazon.astro';
 import Chips from '../../../../components/Chips.astro';
+import DondeLeer from '../../../../components/DondeLeer.astro';
+import Rotulo from '../../../../components/Rotulo.astro';
 import DatosDeObra from '../../../../components/DatosDeObra.astro';
 import Paginacion from '../../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../../components/TarjetaDeCita.astro';
@@ -29,7 +32,7 @@ import {
   temasPublicados,
   type Cita,
 } from '../../../../lib/publicado.ts';
-import { rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
+import { dondeLeer, rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
@@ -68,16 +71,23 @@ export const getStaticPaths = (async ({ paginate }) => {
     }
     const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
     const citas = porObra.get(obra.nombre) ?? [];
-    return paginate(citas, {
+    const paginas = paginate(citas, {
       params: { autor: segmentoDeAutor, slug: segmentoDeObra },
       props: { obra, autor, temas: temasDeLaObra(citas, publicados) },
       pageSize: CITAS_POR_PAGINA,
     });
+    // «Dónde leer» (22.6) se calcula una vez, sobre todas las Citas de la Obra, y solo lo
+    // recibe la página 1: las 2+ no lo pintan.
+    const resumen = dondeLeer(citas);
+    return paginas.map((pagina, i) =>
+      i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen } } : pagina,
+    );
   });
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { obra, autor, temas, page: pagina } = Astro.props;
+const resumenDondeLeer = 'dondeLeer' in Astro.props ? Astro.props.dondeLeer : undefined;
 
 const ruta = rutaDeLaObra(obra, pagina.currentPage);
 const canonica = new URL(ruta, Astro.site).href;
@@ -137,11 +147,22 @@ const emiteVista = caracterDe(ruta) === 'producto';
     {
       primera && temas.length > 0 && (
         <section class="temas" aria-labelledby="temas-de-la-obra">
-          <h2 class="rotulo" id="temas-de-la-obra">
-            Temas
-          </h2>
+          <Rotulo id="temas-de-la-obra">Temas</Rotulo>
           <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} />
         </section>
+      )
+    }
+
+    {/* UX-DR42 — al pie de la página 1, después del Listado, la Paginación y los Temas. */}
+    {primera && resumenDondeLeer !== undefined && <DondeLeer resumen={resumenDondeLeer} />}
+
+    {
+      /*
+       * UX-DR44 — la nota de la ficha, fuera de la sección y sin encabezado, tras un filete. La
+       * escribe Héctor; nunca va en la meta ni en la Tarjeta.
+       */
+      primera && obra.nota !== undefined && (
+        <p class="nota-de-la-ficha" data-pagefind-ignore>{obra.nota}</p>
       )
     }
   </div>
@@ -208,19 +229,23 @@ const emiteVista = caracterDe(ruta) === 'producto';
     border-top: var(--grosor-filete) solid var(--filete);
   }
 
+  /* UX-DR42 — 5 × `--unidad` de la paginación a «Temas». */
   .temas {
-    margin-top: var(--respiracion);
+    margin-top: calc(var(--unidad) * 5);
   }
 
-  /* El rótulo de sección de las Rutas de salida y la Página de Autor, que tampoco es global. */
-  .rotulo {
-    margin: 0;
+  /*
+   * UX-DR44 — la nota: `caption` en tinta apagada, dentro de la medida de prosa, con 4 ×
+   * `--unidad` por encima del filete y 3 × por debajo.
+   */
+  .nota-de-la-ficha {
+    max-width: var(--medida-prosa);
+    margin: calc(var(--unidad) * 4) 0 0;
+    padding-top: calc(var(--unidad) * 3);
+    border-top: var(--grosor-filete) solid var(--filete);
     font-family: var(--sans);
-    font-size: var(--autor);
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    line-height: 1.4;
-    text-transform: uppercase;
+    font-size: var(--pie);
+    line-height: 1.5;
     color: var(--tinta-apagada);
   }
 </style>

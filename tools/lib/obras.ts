@@ -473,7 +473,11 @@ async function fichaActiva(
   return { ok: true, ficha, fichas };
 }
 
-/** La ficha tal como se escribe: sin nombre ni ruta, y sin `distintaDe` vacío. */
+/**
+ * La ficha tal como se escribe: sin nombre ni ruta, y sin `distintaDe` vacío. La `nota` se
+ * conserva tal cual (22.6): la escribe Héctor a mano, y reescribir una ficha para titularla o
+ * separarla no puede borrársela.
+ */
 function datosDeFicha(ficha: FichaDeObra) {
   return {
     autor: ficha.autor,
@@ -482,6 +486,7 @@ function datosDeFicha(ficha: FichaDeObra) {
     ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
       ? { distintaDe: [...ficha.distintaDe] }
       : {}),
+    ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
   };
 }
 
@@ -547,11 +552,14 @@ export async function reunirFichas(
   const heredadas = (b.distintaDe ?? []).filter(
     (f) => !formas.includes(f) && !(a.distintaDe ?? []).includes(f),
   );
+  // La nota es de la destino y se conserva; la de la absorbida no se hereda —describe otra
+  // ficha y la escribe Héctor, no una orden—: se queda en la retirada y el parte lo dice.
   const nueva = {
     autor: a.autor,
     titulo: a.titulo,
     formas,
     ...(distintaDe.length > 0 ? { distintaDe } : {}),
+    ...(a.nota !== undefined ? { nota: a.nota } : {}),
   };
 
   // Terceras fichas que se declaraban distintas de una forma de la absorbida: ahora lo son de
@@ -604,6 +612,12 @@ export async function reunirFichas(
         : []),
       `  ${b.ruta} → ${movida}`,
       `  Motivo: reunida en ${a.nombre}`,
+      ...(b.nota !== undefined
+        ? [
+            `La nota de «${b.nombre}» no pasa a la reunida: se queda en ${movida}. Si debe ` +
+              `publicarse, escríbala a mano en ${a.ruta}.`,
+          ]
+        : []),
       ...(terceras.length > 0
         ? [
             'Estas fichas se declaraban distintas de una forma de la absorbida, y ahora lo son de ' +

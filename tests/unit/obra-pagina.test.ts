@@ -12,6 +12,7 @@ import {
   paginaConstruida,
 } from './ayuda/construir.js';
 import { obrasDelCorpusEnDisco } from '../../integraciones/indexables.ts';
+import { componerDocumento } from '../../tools/lib/documento.ts';
 import { rutaDeLaObra } from '../../src/lib/obras.ts';
 
 /**
@@ -152,6 +153,29 @@ const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 const NOINDEX = /<meta name="robots" content="noindex, follow"/;
+
+/**
+ * La sección «Dónde leer esta obra» entera, con su `</section>` de cierre: lleva otra `section`
+ * dentro —la parte de la edición cotejada—, así que no basta con el primer cierre.
+ */
+function seccionDondeLeer(pagina: string): string {
+  const inicio = pagina.indexOf('<section class="donde-leer"');
+  if (inicio === -1) return '';
+  const etiquetas = /<section\b|<\/section>/g;
+  etiquetas.lastIndex = inicio;
+  let profundidad = 0;
+  for (let m = etiquetas.exec(pagina); m !== null; m = etiquetas.exec(pagina)) {
+    profundidad += m[0] === '</section>' ? -1 : 1;
+    if (profundidad === 0) return pagina.slice(inicio, m.index + m[0].length);
+  }
+  return '';
+}
+
+/** Las líneas de la sección, sin el enlace ni los espacios del marcado. */
+const lineasDe = (donde: string) =>
+  [...donde.matchAll(/<p class="linea[^"]*"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
+    m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(),
+  );
 const EN_PAGEFIND = /<main[^>]*data-pagefind-body/;
 
 function jsonLd(pagina: string): Record<string, unknown>[] {
@@ -409,6 +433,79 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     }
   });
 
+  /*
+   * Historia 22.6 — «Dónde leer esta obra» en el corpus de arriba: todas las Citas con Fuente,
+   * sin nombre ni licencia —el andamio no los declara—, así que la línea lleva el anfitrión.
+   */
+  describe('22.6 — «Dónde leer esta obra»', () => {
+    const seccion = seccionDondeLeer;
+    const lineas = (pagina: string) =>
+      [...seccion(pagina).matchAll(/<p class="linea[^"]*"[^>]*>([\s\S]*?)<\/p>/g)].map((m) => m[1].trim());
+
+    it('un documento: el h2, el rótulo y una línea con el nombre de la Fuente enlazado', async () => {
+      const pagina = await html(proyecto, CARTAS);
+      const donde = seccion(pagina);
+      expect(donde).toMatch(/<section class="donde-leer"[^>]*aria-labelledby="donde-leer-esta-obra"/);
+      expect(donde).toMatch(/<h2 class="rotulo" id="donde-leer-esta-obra"[^>]*>Dónde leer esta obra<\/h2>/);
+      expect(donde).toMatch(/<section class="donde-leer"[^>]*data-pagefind-ignore/);
+      expect(donde).toMatch(/<section class="parte[^"]*"[^>]*aria-labelledby="edicion-cotejada"/);
+      expect(donde).toMatch(/<h3 id="edicion-cotejada"[^>]*>Edición cotejada, gratuita<\/h3>/);
+      const todas = lineas(pagina);
+      expect(todas).toHaveLength(1);
+      expect(todas[0]).toMatch(
+        /^<a href="https:\/\/es\.wikisource\.org\/wiki\/Cartas_a_Lucilio" rel="noopener nofollow"[^>]*>es\.wikisource\.org<\/a>\.$/,
+      );
+      // Sin licencia declarada no hay «Licencia», ni recuento de Citas sin documento.
+      expect(donde).not.toContain('Licencia');
+      expect(donde).not.toContain('documento cotejado');
+    });
+
+    it('traducción: «…, en la traducción de {traductor} ({año}).»', async () => {
+      const [linea] = lineas(await html(proyecto, ENQUIRIDION));
+      expect(linea.replace(/<[^>]+>/g, '')).toBe('es.wikisource.org, en la traducción de Pablo de Prado (1888).');
+    });
+
+    it('va después del Listado, la Paginación y los Temas, nunca entre las Citas', async () => {
+      const pagina = await html(proyecto, BREVEDAD);
+      const posicion = (marca: string) => pagina.indexOf(marca);
+      expect(posicion('class="listado"')).toBeGreaterThan(-1);
+      expect(posicion('class="paginacion"')).toBeGreaterThan(posicion('class="listado"'));
+      expect(posicion('class="temas"')).toBeGreaterThan(posicion('class="paginacion"'));
+      expect(posicion('class="donde-leer"')).toBeGreaterThan(posicion('class="temas"'));
+    });
+
+    it('página 2: ni la sección ni la nota', async () => {
+      const segunda = await html(proyecto, `${BREVEDAD}2/`);
+      // Marcado, no estilos: Astro emite la hoja de un componente importado aunque no se pinte.
+      expect(segunda).not.toContain('<section class="donde-leer"');
+      expect(segunda).not.toContain('Dónde leer esta obra');
+      expect(segunda).not.toContain('class="nota-de-la-ficha"');
+    });
+
+    it('sin nota en la ficha: ni el párrafo ni su filete', async () => {
+      expect(await html(proyecto, CARTAS)).not.toContain('class="nota-de-la-ficha"');
+    });
+
+    it('el ritmo y los colores, con tokens y sin literales', async () => {
+      const fuente = await readFile(join(RAIZ, 'src/components/DondeLeer.astro'), 'utf8');
+      const estilo = /<style>([\s\S]*?)<\/style>/.exec(fuente)?.[1] ?? '';
+      expect(estilo).not.toMatch(/#[0-9a-fA-F]{3,6}\b|rgba?\(|hsla?\(|\d+px/u);
+      for (const familia of estilo.matchAll(/font-family:\s*([^;]+);/gu)) {
+        expect(familia[1].trim()).toMatch(/^var\(--[a-z-]+\)$/u);
+      }
+      expect(estilo).toContain('margin-top: calc(var(--unidad) * 4)');
+      expect(estilo).toContain('margin-top: calc(var(--unidad) * 2)');
+      // Un solo `.rotulo` para «Temas» y «Dónde leer»: el de `Rotulo.astro`.
+      expect(estilo).not.toContain('.rotulo');
+      // Las ediciones en venta (22.9) no dejan nada: ni regla, ni contenedor.
+      expect(fuente.slice(fuente.indexOf("---", 3))).not.toMatch(/venta|ediciones/iu);
+      const pagina = await readFile(join(RAIZ, 'src/pages/obra/[autor]/[slug]/[...page].astro'), 'utf8');
+      expect(pagina).toContain('margin-top: calc(var(--unidad) * 5)');
+      expect(pagina).not.toMatch(/\.rotulo\s*\{/);
+      expect(pagina).toContain('<Rotulo id="temas-de-la-obra">Temas</Rotulo>');
+    });
+  });
+
   describe('se corrige sola', () => {
     let segundo = '';
 
@@ -478,5 +575,166 @@ describe('Historia 22.4 — lo que rompe el build', () => {
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toContain('corpus/obras/seneca--1984.yml');
     expect(resultado.salida).toContain('solo un número');
+  }, 300_000);
+});
+
+/*
+ * Historia 22.6 — los estados de «Dónde leer esta obra» y la nota, construidos. Las Citas sin
+ * documento tienen que estar en el censo de cotejo, y con el censo en el fixture el andamio
+ * deja de sembrar documentos: los dos que hacen falta se escriben aquí, a la vista.
+ *
+ *   · «Sobre la brevedad de la vida»: 2 cotejadas en Wikisource —con nombre y licencia— y 1 sin
+ *     documento (d, singular). Su ficha trae nota.
+ *   · «Cartas a Lucilio»: 1 cotejada y 2 sin documento (d, plural).
+ *   · «De la ira»: 1 sin documento (c).
+ */
+describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', () => {
+  const NOTA = 'Diálogo dirigido a Paulino, prefecto de la annona, sobre el uso del tiempo.';
+  const WS = { id: 'wikisource-es', nombre: 'Wikisource en español', licencia: 'CC BY-SA 4.0' };
+  const URL_BREVEDAD = 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida';
+  const URL_CARTAS = 'https://es.wikisource.org/wiki/Cartas_a_Lucilio';
+
+  const cotejada = (slug: string, texto: string, obra: string, url: string) =>
+    citaValida({ slug, texto, procedencia: { obra, año: 49 }, fuente: { ...WS, url } });
+  const sinDocumento = (slug: string, texto: string, obra: string) =>
+    citaValida({ slug, texto, procedencia: { obra, año: 49 }, fuente: undefined });
+  const documento = (obra: string, url: string, textos: string[]) =>
+    componerDocumento({ fuente: 'wikisource-es', obra, url, recuperado: '2026-08-21' }, obra, textos.join('\n\n'));
+
+  const B1 = 'La vida es larga si se sabe emplear bien.';
+  const B2 = 'Nadie te devolverá los años perdidos.';
+  const C1 = 'Nadie se hace sabio por casualidad.';
+  const E1 = 'Aprende a querer lo que tienes.';
+  const E2 = 'El que está en todas partes no está en ninguna.';
+  const D1 = 'El fuego prueba el oro; la desgracia, al hombre fuerte.';
+  const D2 = 'Al sabio no le alcanza ni la injuria ni la afrenta.';
+  const URL_EPISTOLAS = 'https://es.wikisource.org/wiki/Epistolas_morales';
+  const URL_PROVIDENCIA = 'https://es.wikisource.org/wiki/De_la_providencia';
+  const URL_CONSTANCIA = 'https://es.wikisource.org/wiki/De_la_constancia_del_sabio';
+  // El censo es cerrado (11.2): solo admite slugs del censo de partida, así que las Citas sin
+  // documento son cuatro de las de Séneca que de verdad están en él.
+  const BREVEDAD_SIN = 'seneca-la-vida-si-sabes-usarla-es-larga';
+  const CARTAS_SIN_1 = 'seneca-mientras-esperamos-vivir-la-vida-pasa';
+  const CARTAS_SIN_2 = 'seneca-ninguna-cosa-se-parece-tanto-a-la';
+  const IRA_SIN = 'seneca-no-hay-viento-favorable-para-el-que';
+  const CENSADAS = [BREVEDAD_SIN, CARTAS_SIN_1, CARTAS_SIN_2, IRA_SIN];
+  const fichero = (slug: string) => `citas/${slug.replace(/^seneca-/, 'seneca--')}.md`;
+
+  let proyecto = '';
+
+  beforeAll(async () => {
+    const resultado = await construirConCorpus({
+      'autores/seneca.yml': AUTOR_VALIDO,
+      'temas/el-tiempo.yml': TEMA_VALIDO,
+      'pendientes-de-cotejo.yml': `citas:\n${CENSADAS.map((s) => `  - ${s}\n`).join('')}`,
+      'obras/seneca--sobre-la-brevedad-de-la-vida.yml':
+        'autor: "seneca"\ntitulo: "Sobre la brevedad de la vida"\nformas:\n  - "sobre la brevedad de la vida"\n' +
+        `nota: "${NOTA}"\n`,
+      'citas/seneca--brevedad-1.md': cotejada('seneca-brevedad-1', B1, 'Sobre la brevedad de la vida', URL_BREVEDAD),
+      'citas/seneca--brevedad-2.md': cotejada('seneca-brevedad-2', B2, 'Sobre la brevedad de la vida', URL_BREVEDAD),
+      [fichero(BREVEDAD_SIN)]: sinDocumento(BREVEDAD_SIN, 'La vida, si sabes usarla, es larga.', 'Sobre la brevedad de la vida'),
+      'citas/seneca--cartas-1.md': cotejada('seneca-cartas-1', C1, 'Cartas a Lucilio', URL_CARTAS),
+      [fichero(CARTAS_SIN_1)]: sinDocumento(CARTAS_SIN_1, 'Mientras esperamos vivir, la vida pasa.', 'Cartas a Lucilio'),
+      [fichero(CARTAS_SIN_2)]: sinDocumento(
+        CARTAS_SIN_2,
+        'Ninguna cosa se parece tanto a la injusticia como la justicia tardía.',
+        'Cartas a Lucilio',
+      ),
+      [fichero(IRA_SIN)]: sinDocumento(IRA_SIN, 'No hay viento favorable para el que no sabe adónde va.', 'De la ira'),
+      'fuentes/wikisource-es--sobre-la-brevedad-de-la-vida.txt': documento(
+        'Sobre la brevedad de la vida',
+        URL_BREVEDAD,
+        [B1, B2],
+      ),
+      'fuentes/wikisource-es--cartas-a-lucilio.txt': documento('Cartas a Lucilio', URL_CARTAS, [C1]),
+      // Dos subpáginas del mismo `Padre`: tiene entrada.
+      'citas/seneca--epistolas-1.md': cotejada('seneca-epistolas-1', E1, 'Epístolas morales', `${URL_EPISTOLAS}/1`),
+      'citas/seneca--epistolas-2.md': cotejada('seneca-epistolas-2', E2, 'Epístolas morales', `${URL_EPISTOLAS}/2`),
+      'fuentes/wikisource-es--epistolas-morales.txt': documento('Epístolas morales', `${URL_EPISTOLAS}/1`, [E1, E2]),
+      // Dos páginas de primer nivel: ninguna es la entrada de la otra.
+      'citas/seneca--dialogos-1.md': cotejada('seneca-dialogos-1', D1, 'Diálogos', URL_PROVIDENCIA),
+      'citas/seneca--dialogos-2.md': cotejada('seneca-dialogos-2', D2, 'Diálogos', URL_CONSTANCIA),
+      'fuentes/wikisource-es--dialogos.txt': documento('Diálogos', URL_PROVIDENCIA, [D1, D2]),
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).toBe(0);
+    proyecto = resultado.proyecto;
+  }, 300_000);
+
+  const seccion = async (ruta: string) => seccionDondeLeer(await html(proyecto, ruta));
+  const lineas = lineasDe;
+
+  it('parcial (d), en singular: la línea con su licencia y «Una de sus 3 citas…»', async () => {
+    const donde = await seccion('/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    expect(lineas(donde)).toEqual([
+      'Wikisource en español. Licencia CC BY-SA 4.0.',
+      'Una de sus 3 citas no tiene documento cotejado.',
+    ]);
+    expect(donde).toMatch(new RegExp(`<a href="${escapar(URL_BREVEDAD)}" rel="noopener nofollow"[^>]*>Wikisource en español</a>`));
+    // La frase de las Citas sin documento va después de la parte de la edición cotejada, fuera
+    // de ella y a nivel de la sección.
+    const parte = /<section class="parte[\s\S]*?<\/section>/.exec(donde)?.[0] ?? '';
+    expect(parte).toContain('<h3');
+    expect(parte).not.toContain('documento cotejado');
+    const tras = donde.slice(donde.indexOf(parte) + parte.length);
+    expect(tras).toMatch(/^\s*<p class="linea sin-documento"[^>]*>Una de sus 3 citas no tiene documento cotejado\.<\/p>\s*<\/section>$/);
+  });
+
+  it('repartida en subpáginas de Wikisource: la entrada de la obra, y la línea exacta', async () => {
+    const donde = await seccion('/obra/seneca/epistolas-morales/');
+    expect(lineasDe(donde)).toEqual(['Wikisource en español, repartida en 2 páginas. Licencia CC BY-SA 4.0.']);
+    expect(donde).toMatch(/<a href="https:\/\/es\.wikisource\.org\/wiki\/Epistolas_morales" rel="noopener nofollow"/);
+  });
+
+  it('sin entrada derivable: la línea va sin enlace', async () => {
+    const donde = await seccion('/obra/seneca/dialogos/');
+    expect(lineasDe(donde)).toEqual(['Wikisource en español, repartida en 2 páginas. Licencia CC BY-SA 4.0.']);
+    expect(donde).not.toContain('<a');
+  });
+
+  it('parcial (d), en plural: «2 de sus 3 citas no tienen documento cotejado.»', async () => {
+    const donde = await seccion('/obra/seneca/cartas-a-lucilio/');
+    expect(lineas(donde)).toEqual([
+      'Wikisource en español. Licencia CC BY-SA 4.0.',
+      '2 de sus 3 citas no tienen documento cotejado.',
+    ]);
+  });
+
+  it('sin cotejo (c): bajo el h2, solo la frase; sin rótulo ni enlace', async () => {
+    const donde = await seccion('/obra/seneca/de-la-ira/');
+    expect(donde).toMatch(/<h2[^>]*>Dónde leer esta obra<\/h2>/);
+    expect(lineas(donde)).toEqual(['Ninguna de sus citas tiene todavía documento cotejado.']);
+    expect(donde).not.toContain('<h3');
+    expect(donde).not.toContain('<a ');
+  });
+
+  it('la nota: tras la sección, fuera de ella, sin encabezado; nunca en la meta', async () => {
+    const pagina = await html(proyecto, '/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    const fin = pagina.indexOf('</section>', pagina.indexOf('class="donde-leer"'));
+    const nota = pagina.indexOf('class="nota-de-la-ficha"');
+    expect(fin).toBeGreaterThan(-1);
+    expect(nota).toBeGreaterThan(fin);
+    expect(pagina).toMatch(new RegExp(`<p class="nota-de-la-ficha"[^>]*>${escapar(NOTA)}</p>`));
+    // Una sola vez: ni en la descripción, ni en `og:`, ni en los datos estructurados.
+    expect(pagina.split(NOTA)).toHaveLength(2);
+    expect(/<meta name="description" content="([^"]*)"/.exec(pagina)?.[1]).not.toContain('Paulino');
+    // Las Obras sin nota no la llevan.
+    expect(await html(proyecto, '/obra/seneca/cartas-a-lucilio/')).not.toContain('class="nota-de-la-ficha"');
+  });
+});
+
+describe('Historia 22.6 — una nota de más de 160 caracteres', () => {
+  it('rompe el build y nombra la regla', async () => {
+    const resultado = await construirConCorpus({
+      'autores/seneca.yml': AUTOR_VALIDO,
+      'temas/el-tiempo.yml': TEMA_VALIDO,
+      'obras/seneca--sobre-la-brevedad-de-la-vida.yml':
+        'autor: "seneca"\ntitulo: "Sobre la brevedad de la vida"\nformas:\n  - "sobre la brevedad de la vida"\n' +
+        `nota: "${'n'.repeat(161)}"\n`,
+      'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toContain('no puede pasar de 160 caracteres');
   }, 300_000);
 });

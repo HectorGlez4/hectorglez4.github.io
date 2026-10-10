@@ -1,0 +1,120 @@
+---
+/**
+ * «Dónde leer esta obra» — Historia 22.6, UX-DR42 y UX-DR50 (c, d).
+ *
+ * El pie de la página 1 de la Página de Obra: de qué edición se tomó el texto de sus Citas,
+ * bajo qué licencia y dónde leer la obra entera. Recibe el resumen ya calculado por
+ * `dondeLeer` (`src/lib/obras.ts`) en `getStaticPaths`; aquí no se compone más prosa que la
+ * plantilla fija de la línea.
+ *
+ * Tres formas, y ninguna afirma un cotejo que no ocurrió (FR-54):
+ *
+ *   · con Fuentes: la parte «Edición cotejada, gratuita», con una línea por Fuente y traducción;
+ *   · (d) además, Citas sin documento: cuántas, **después** de esa parte y fuera de ella, a nivel
+ *     de la sección, porque no son de ninguna edición cotejada;
+ *   · (c) ninguna Cita con Fuente: solo la frase que lo dice, sin rótulo ni enlace, porque un
+ *     rótulo que nombra una edición cotejada encima de su ausencia la afirmaría.
+ *
+ * Va fuera del índice de Pagefind (`data-pagefind-ignore`): «Licencia CC BY-SA» no puede ser un
+ * resultado de búsqueda en cada Obra.
+ */
+import Rotulo from './Rotulo.astro';
+import type { LineaDondeLeer, ResumenDondeLeer } from '../lib/obras.ts';
+
+interface Props {
+  resumen: ResumenDondeLeer;
+}
+
+const { lineas, citasSinDocumento, total } = Astro.props.resumen;
+
+/** Lo que sigue al nombre de la Fuente, con la puntuación de la plantilla. */
+function resto(linea: LineaDondeLeer): string {
+  const repartida = linea.paginas > 1 ? `, repartida en ${linea.paginas} páginas` : '';
+  const traduccion =
+    linea.traduccion === undefined
+      ? ''
+      : `, en la traducción de ${linea.traduccion.traductor}` +
+        (linea.traduccion.año !== undefined ? ` (${linea.traduccion.año})` : '');
+  const licencia = linea.licencia !== undefined ? ` Licencia ${linea.licencia}.` : '';
+  return `${repartida}${traduccion}.${licencia}`;
+}
+
+const sinDocumento =
+  citasSinDocumento === 1
+    ? `Una de sus ${total} citas no tiene documento cotejado.`
+    : `${citasSinDocumento} de sus ${total} citas no tienen documento cotejado.`;
+---
+
+<section class="donde-leer" aria-labelledby="donde-leer-esta-obra" data-pagefind-ignore>
+  <Rotulo id="donde-leer-esta-obra">Dónde leer esta obra</Rotulo>
+  {
+    lineas.length === 0 ? (
+      <p class="linea tras-el-rotulo">Ninguna de sus citas tiene todavía documento cotejado.</p>
+    ) : (
+      <>
+        <section class="parte tras-el-rotulo" aria-labelledby="edicion-cotejada">
+          <h3 id="edicion-cotejada">Edición cotejada, gratuita</h3>
+          {lineas.map((linea) => (
+            <p class="linea">
+              {linea.enlace !== undefined ? (
+                <a href={linea.enlace} rel="noopener nofollow">{linea.nombre}</a>
+              ) : (
+                linea.nombre
+              )}{resto(linea)}
+            </p>
+          ))}
+        </section>
+        {citasSinDocumento > 0 && <p class="linea sin-documento">{sinDocumento}</p>}
+      </>
+    )
+  }
+</section>
+
+<style>
+  /*
+   * El ritmo de UX-DR42 (DESIGN.md § Pie de la Página de Obra): 4 × `--unidad` hasta la
+   * sección, 2 × del `h2` a lo que lo sigue y 1 × del rótulo de la parte a sus líneas y entre
+   * líneas. El peso y el interlineado son los del rótulo (`Rotulo.astro`) y la Línea de la
+   * Fuente: `tokens.css` no declara tokens para ellos.
+   */
+  .donde-leer {
+    margin-top: calc(var(--unidad) * 4);
+    max-width: var(--medida-prosa);
+  }
+
+  .tras-el-rotulo {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  /* El rótulo de la parte: `caption` con el peso de `author`, en tinta. */
+  h3 {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--tinta);
+  }
+
+  .linea {
+    margin: var(--unidad) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    line-height: 1.5;
+    color: var(--tinta-apagada);
+  }
+
+  p.tras-el-rotulo {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  /*
+   * El nombre de la Fuente saca del sitio: siena, como todo enlace de salida (DESIGN.md
+   * § Colors), y subrayado siempre, no al pasar el cursor.
+   */
+  .linea a {
+    color: var(--siena);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--grosor-filete);
+  }
+</style>
