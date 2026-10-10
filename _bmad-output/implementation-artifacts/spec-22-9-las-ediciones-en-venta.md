@@ -2,14 +2,22 @@
 title: '22.9 — Las ediciones en venta, construidas y apagadas'
 type: 'feature'
 created: '2026-10-10'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '644823d258803a3373023b3e91d3c119eff059ba'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-22-context.md'
   - '{project-root}/AGENTS.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Declarar ediciones con el Modelo apagado cambia el fichero de la ficha, y con él el `lastmod` de la Página de Obra en el sitemap.
+    evidence: |-
+      La relación AD-27 fecha por fichero, no por campo. El HTML de todas las páginas sí es idéntico (probado), pero `dist/sitemap-0.xml` cambiaría en el repositorio real. Solo ocurre cuando Héctor declare la primera edición, presumiblemente al encender.
+    location: >-
+      tools/lib/cambios.ts relacionDeSuperficies, integraciones/historial.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -94,3 +102,18 @@ deferred: []
 - `npm run build` -- expected: termina; `grep -rl 'data-ingreso' dist | wc -l` = 0.
 - `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` -- expected: verde.
 - `npm run ingreso` -- expected: «solicitar» y «ninguna tienda declarada».
+
+## Auto Run Result
+
+**Resumen:** la afiliación de libros queda construida y apagada: `TIENDAS` en `src/lib/ingreso.ts` (vacío en el repositorio: ninguna marca escrita), `urlDeEdicion` pura, el campo `ediciones` juzgado por el esquema (tienda del conjunto, dominio de la tienda, sin marca ni puerto), la admisión en la página 1 de la Página de Obra (encender exige al menos una tienda), el bloque «Ediciones en venta» bajo la edición cotejada en un único `data-ingreso`, el aviso de ediciones sin cotejada y las órdenes `npm run obra -- edicion` (rechaza con congelación) y `quitar-edicion`.
+
+**Ficheros:** `src/lib/ingreso.ts`, `src/lib/ediciones.ts` (nuevo), `src/lib/admision.ts`, `src/lib/obras.ts`, `src/lib/publicado.ts`, `integraciones/obras.ts`, `src/components/EdicionesEnVenta.astro` (nuevo), `src/components/DondeLeer.astro`, la página de Obra, `tools/lib/corpus.ts`, `tools/lib/obras.ts`, `tools/obra.ts`, `tools/lib/ingresos.ts`, `tools/ingreso.ts`, pruebas (`ediciones-en-venta.test.ts` nueva; `ingreso`, `ingreso-construido`, `obras`, `obra-pagina`, `ayuda/construir.ts`, e2e `ingreso-accesible`) y `AGENTS.md`.
+
+**Revisión:** 15 patches (4 medios, 11 bajos), 1 deferido, 9 rechazados.
+
+**Revisión de seguimiento:** `true` — parcheados alto 0, medio 4, bajo 11; puntuación 3 × 4 + 11 = 23 ≥ 5.
+
+**Verificación:** 12 ficheros de prueba tocados, 436/436 (y 285/285 en mi repaso de cinco de ellos); `npx astro check` 0 errores; `npm run build` termina y `dist/` no contiene ningún `data-ingreso` (idéntico al de la base); `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` 12/12; `npm run ingreso` dice «dispara la SOLICITUD» y «ninguna tienda declarada». La suite completa la corre el CI en el push.
+
+**Riesgos:** `src/lib/admision.ts` importa `ingreso.ts`, así que una declaración de Modelos inválida para también las órdenes que cargan el esquema; con `TIENDAS` vacío una ficha con `ediciones` no se deja leer (correcto hoy); quitar una edición no consulta la congelación (no expone nada nuevo).
+

@@ -533,8 +533,11 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect(estilo).toContain('margin-top: calc(var(--unidad) * 2)');
       // Un solo `.rotulo` para «Temas» y «Dónde leer»: el de `Rotulo.astro`.
       expect(estilo).not.toContain('.rotulo');
-      // Las ediciones en venta (22.9) no dejan nada: ni regla, ni contenedor.
-      expect(fuente.slice(fuente.indexOf("---", 3))).not.toMatch(/venta|ediciones/iu);
+      // Las ediciones en venta (22.9) no dejan regla en la hoja de la sección: su presentación
+      // va en atributos `style` dentro de `EdicionesEnVenta.astro`, que no trae bloque `<style>`.
+      expect(estilo).not.toMatch(/venta|ediciones|data-ingreso/iu);
+      const enVenta = await readFile(join(RAIZ, 'src/components/EdicionesEnVenta.astro'), 'utf8');
+      expect(enVenta.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/<style[\s>]/);
       const pagina = await readFile(join(RAIZ, 'src/pages/obra/[autor]/[slug]/[...page].astro'), 'utf8');
       expect(pagina).toContain('margin-top: calc(var(--unidad) * 5)');
       expect(pagina).not.toMatch(/\.rotulo\s*\{/);

@@ -516,6 +516,20 @@ da la orden de retirarla.
 `sembrar` informa además de los grupos de grafías equivalentes y de los pares en que una
 forma es prefijo de otra del mismo Autor.
 
+**`ediciones`** (Historia 22.9) es el otro campo que decide Héctor, y **no se escribe a mano**:
+lo escriben sus dos órdenes, que lo validan con el esquema del build.
+
+```
+npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"]
+npm run obra -- quitar-edicion <ficha> <n>     # n: la posición, como la numera el parte de `edicion`
+```
+
+Corregir una edición es quitarla y volver a declararla. Sin ediciones el campo se omite —nunca
+`ediciones: []`—. Las órdenes que reescriben o mueven una ficha (`titular`, `separar`, el
+ajuste del título de `documentar`/`restituir-grafia`, `retirar`) las conservan; `reunir`
+conserva las de la destino, no hereda las de la absorbida y lo dice. Cómo se encienden y qué
+exige cada edición: «Encender la afiliación de libros».
+
 ### Una obra, un nombre (Historia 22.2)
 
 ```
@@ -938,9 +952,59 @@ página 2» en `admitidoEn`, y la prueba de `dist/` juzga cada ruta, no cada fic
 v7.1). `revisarDeclaracionDeIngreso` rechaza las dos cosas. La excepción que tenía la
 afiliación en la Página de Cita se revocó: su enlace nacerá de la Procedencia en la Página de
 Obra, que existe desde la 22.4 y es superficie de lectura —rechaza donaciones y publicidad—.
-Es la **única** donde la afiliación puede admitirse, y aún no la admite: lo hará la 22.9 con
-una línea en `admitidoEn`, así que hoy no la admite ninguna superficie. Falta
-además decidir **qué edición se enlaza**, y eso se decide con la cuenta delante.
+Es la **única** donde la afiliación puede admitirse, y desde la 22.9 la admite (página 1, se
+indexe o no; nunca la 2+). **Qué edición se enlaza** se decide con la cuenta delante, ficha a
+ficha.
+
+### Encender la afiliación de libros (Historia 22.9)
+
+Todo el camino está construido y apagado: el conjunto cerrado de tiendas `TIENDAS` en
+`src/lib/ingreso.ts`, el campo `ediciones` de la Ficha de Obra juzgado por el esquema
+(`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y el
+bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro de «Dónde leer
+esta obra», tras la edición cotejada. El repositorio versiona **`TIENDAS` vacío**, y mientras lo
+esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
+
+1. **La primera tienda, con su marca, la declara Héctor** en `TIENDAS`
+   (`{ clave, nombre, dominio, parametro, marca }`). El repositorio es público y la marca queda a
+   la vista: **ningún agente escribe una tienda ni una marca**.
+2. **Las ediciones se declaran con su orden**, nunca escribiendo `ediciones` a mano:
+
+   ```
+   npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"]
+   ```
+
+   La dirección va **sin** marca —el esquema rechaza la que ya trae el parámetro de la tienda— y
+   tiene que ser `https://` del dominio de la tienda o de un subdominio suyo. Se niega con
+   código 1 y sin escribir si la familia Obra está congelada (`CONGELACION_DE_OBRAS`, SM-11), si
+   la tienda no es del conjunto o si el esquema la rechaza (otro dominio, un puerto, el
+   parámetro de la marca en cualquier capitalización); con 2, la forma de la invocación. Si la
+   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará.
+   `quitar-edicion <ficha> <n>` la quita (1 si no hay esa posición).
+   Las órdenes que reescriben una ficha conservan sus ediciones; `reunir` no hereda las de la
+   absorbida y lo dice.
+3. **Encender es el booleano**, y en lugar del `destino` que exigen los demás Modelos exige
+   **al menos una tienda declarada**: sin ella el build se para. Una edición solo se pinta en
+   una Obra con alguna Cita cotejada —la edición en venta nunca va sola (FR-54)—; si no la hay,
+   el build avisa «Ediciones sin edición cotejada» nombrando la ficha. Apagada, `dist/` es
+   idéntico con ediciones declaradas o sin ellas.
+4. **Barrido de accesibilidad con el Modelo encendido**: el mismo
+   `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, que ya barre
+   la Página de Obra con dos ediciones de una tienda inventada en la copia.
+
+**Retirar una tienda** de `TIENDAS` exige antes quitar con `quitar-edicion` todas sus ediciones
+de **toda** ficha, activa en `corpus/obras/` o retirada en `corpus/_obras-retiradas/`: el
+esquema rechaza una edición de una tienda que no existe, y eso rompe el build y cualquier orden
+que lea las fichas (y restaurar una ficha retirada que la traiga).
+
+**El programa de afiliados puede exigir su propia declaración literal en el sitio** —un texto
+fijo, en un sitio concreto—. La del bloque («Enlace de afiliado: si compras, el sitio recibe una
+comisión sin coste para ti.», en `EdicionesEnVenta.astro`) es la de `EXPERIENCE.md`, no la del
+programa: el día de encender se comprueba contra las condiciones de la cuenta y, si piden otra,
+se cambia antes del commit del encendido.
+
+`npm run ingreso` dice cuántas tiendas hay («ninguna tienda declarada» hoy), y el Umbral de la
+afiliación sigue disparando **solicitar** la cuenta, no encenderla.
 
 **El tope de guion se mide donde se admite.** `tests/unit/ingreso-construido.test.ts` construye
 una copia con todos los Modelos que alguna superficie admite encendidos y la medición puesta,

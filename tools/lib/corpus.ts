@@ -66,6 +66,12 @@ import {
 } from './demanda.ts';
 
 /**
+ * El esquema con el que se leen y escriben las fichas. Por omisión, el del sitio; las pruebas
+ * y la orden `edicion` pasan el de un conjunto de tiendas dado (`esquemaDeObra`, 22.9).
+ */
+type EsquemaDeObra = Pick<typeof obraAdmisible, 'parse' | 'safeParse'>;
+
+/**
  * El registro de sesiones de sembrado — Historia 11.3. Su nombre tiene un solo dueño,
  * igual que el del censo de cotejo.
  */
@@ -540,7 +546,10 @@ export async function leerColecciones(rutas: Rutas): Promise<ColeccionEnCorpus[]
  * colección del build. Una ficha que no lo cumple, o que no se deja analizar, se rechaza
  * nombrando el fichero; leerla a medias daría una resolución que miente.
  */
-async function leerFichasDe(directorio: string): Promise<FichaDeObra[]> {
+async function leerFichasDe(
+  directorio: string,
+  esquema: EsquemaDeObra = obraAdmisible,
+): Promise<FichaDeObra[]> {
   const ficheros = await ficherosDe(directorio, ['.yml', '.yaml']);
   return Promise.all(
     ficheros.map(async (ruta) => {
@@ -552,7 +561,7 @@ async function leerFichasDe(directorio: string): Promise<FichaDeObra[]> {
           `${ruta} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
         );
       }
-      const admitida = obraAdmisible.safeParse(bruto);
+      const admitida = esquema.safeParse(bruto);
       if (!admitida.success) {
         throw new Error(
           `${ruta} no es una Ficha de Obra admisible: ` +
@@ -571,8 +580,11 @@ async function leerFichasDe(directorio: string): Promise<FichaDeObra[]> {
 }
 
 /** Las Fichas de Obra activas, de `corpus/obras/`. */
-export function leerFichasDeObra(rutas: Rutas): Promise<FichaDeObra[]> {
-  return leerFichasDe(rutas.obras);
+export function leerFichasDeObra(
+  rutas: Rutas,
+  esquema: EsquemaDeObra = obraAdmisible,
+): Promise<FichaDeObra[]> {
+  return leerFichasDe(rutas.obras, esquema);
 }
 
 /** Las Fichas de Obra retiradas, de `corpus/_obras-retiradas/` (AD-2). */
@@ -613,6 +625,17 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
       : {}),
     // La nota la escribe Héctor (22.6): aquí solo se conserva, tal cual, cuando se reescribe.
     ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
+    // Las ediciones en venta (22.9), en su orden y con los campos en el mismo orden siempre.
+    ...(ficha.ediciones !== undefined && ficha.ediciones.length > 0
+      ? {
+          ediciones: ficha.ediciones.map((edicion) => ({
+            tienda: edicion.tienda,
+            formato: edicion.formato,
+            url: edicion.url,
+            ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
+          })),
+        }
+      : {}),
   });
 }
 
@@ -625,8 +648,12 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
  * escribe sobre la misma ruta, validada con `obraAdmisible` y a un temporal que se renombra:
  * una ficha cortada a media escritura rompería el build.
  */
-export async function reescribirFichaDeObra(ruta: string, ficha: ObraAdmisible): Promise<string> {
-  const admitida = obraAdmisible.parse(ficha);
+export async function reescribirFichaDeObra(
+  ruta: string,
+  ficha: ObraAdmisible,
+  esquema: EsquemaDeObra = obraAdmisible,
+): Promise<string> {
+  const admitida = esquema.parse(ficha);
   if (!existsSync(ruta)) {
     throw new Error(`No se reescribe ${ruta}: no existe. Las fichas nuevas las crea escribirFichaDeObra.`);
   }

@@ -183,9 +183,11 @@ describe('Historia 14.1 — el estado no se deriva de nada que no sea el módulo
     }
   });
 
-  it('lo único que importa son las superficies y los umbrales', () => {
+  it('lo único que importa son las superficies, los umbrales y la forma de las ediciones', () => {
+    // `./ediciones.ts` (22.9) es la forma de una edición en venta: constantes y tipos, sin
+    // estado ni E/S. Nada de lo que decide el estado sale de fuera de este módulo.
     const importados = [...CODIGO.matchAll(/from '([^']+)'/g)].map((m) => m[1]);
-    expect(importados.sort()).toEqual(['./superficies.ts', './umbrales.ts']);
+    expect(importados.sort()).toEqual(['./ediciones.ts', './superficies.ts', './umbrales.ts']);
   });
 });
 
@@ -197,15 +199,16 @@ describe('Historia 14.1 — qué superficie admite qué Modelo', () => {
     }
   });
 
-  it('hoy ninguna superficie de lectura admite ningún Modelo', () => {
-    // El estado, que es más estricto que la regla: la afiliación **podría** admitirse en la
-    // Página de Cita y aun así no está admitida en ninguna parte, porque falta decidir qué
-    // edición se enlaza y la cuenta ni siquiera está solicitada.
-    for (const modelo of MODELOS) {
-      for (const lectura of SUPERFICIES_DE_LECTURA) {
-        expect(modelo.admitidoEn, `${modelo.id} / ${lectura}`).not.toContain(lectura);
-      }
-    }
+  it('la única admisión en una superficie de lectura es la afiliación en la Página de Obra — 22.9', () => {
+    // El estado, que es más estricto que la regla: desde la 22.9 la afiliación se admite en la
+    // Página de Obra —y solo ahí—, y ningún otro Modelo se admite en ninguna superficie de
+    // lectura. Admitida no es encendida: sigue apagada y sin ninguna tienda.
+    const enLectura = MODELOS.flatMap((modelo) =>
+      modelo.admitidoEn
+        .filter((pagina) => SUPERFICIES_DE_LECTURA.includes(pagina))
+        .map((pagina) => `${modelo.id} / ${pagina}`),
+    );
+    expect(enLectura).toEqual(['afiliacion-de-libros / obra/[autor]/[slug]/[...page].astro']);
   });
 
   it('la regla veda ahí a las donaciones y a la publicidad, y solo a esas dos', () => {
@@ -255,6 +258,10 @@ describe('Historia 14.2 — a dónde lleva la invitación', () => {
     // dónde llevar a nadie, y fingir un destino sería la primera mentira del censo.
     for (const id of ['afiliacion-de-libros', 'producto-propio', 'publicidad-acotada']) {
       expect(modeloDe(id)?.destino, id).toBeUndefined();
+    }
+    // La afiliación sí tiene superficie desde la 22.9, y no por eso destino: cada edición lleva
+    // el suyo, con la marca de su tienda.
+    for (const id of ['producto-propio', 'publicidad-acotada']) {
       expect(modeloDe(id)?.admitidoEn, id).toEqual([]);
     }
   });
@@ -618,7 +625,8 @@ describe('Historia 17.5 — la afiliación solo en la Página de Obra', () => {
       OBRAS[0],
     ]);
     expect(revisarDeclaracionDeIngreso([afiliacion([OBRAS[0]])])).toEqual([]);
-    expect(modeloDe('afiliacion-de-libros')?.admitidoEn).toEqual([]);
+    // Y la 22.9 la admite ahí, y solo ahí.
+    expect(modeloDe('afiliacion-de-libros')?.admitidoEn).toEqual([OBRAS[0]]);
   });
 
   it('la Página de Obra es de lectura: donaciones y publicidad se rechazan ahí — 22.4', () => {

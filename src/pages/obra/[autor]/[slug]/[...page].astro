@@ -33,6 +33,7 @@ import {
   type Cita,
 } from '../../../../lib/publicado.ts';
 import { dondeLeer, rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
+import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
@@ -104,6 +105,17 @@ const primera = pagina.currentPage === 1;
  */
 declararRutasIndexables(rutasIndexables(await conjuntoPublicable()));
 const emiteVista = caracterDe(ruta) === 'producto';
+
+/*
+ * Historia 22.9 — las ediciones en venta. Se pregunta por la **ruta**: la afiliación se admite
+ * en esta superficie, y `modelosEnRuta` la excluye por forma de las páginas 2+ y la deja en la 1
+ * se indexe la Obra o no. Apagada, no hay `enVenta` y «Dónde leer» se pinta como antes.
+ */
+const afiliacion = modelosEnRuta(ruta).find((modelo) => modelo.id === 'afiliacion-de-libros');
+const enVenta =
+  afiliacion !== undefined && obra.ediciones !== undefined
+    ? { id: afiliacion.id, ediciones: edicionesEnVenta(obra.ediciones) }
+    : undefined;
 ---
 
 <Armazon
@@ -163,7 +175,7 @@ const emiteVista = caracterDe(ruta) === 'producto';
     }
 
     {/* UX-DR42 — al pie de la página 1, después del Listado, la Paginación y los Temas. */}
-    {primera && resumenDondeLeer !== undefined && <DondeLeer resumen={resumenDondeLeer} />}
+    {primera && resumenDondeLeer !== undefined && <DondeLeer resumen={resumenDondeLeer} enVenta={enVenta} />}
 
     {
       /*

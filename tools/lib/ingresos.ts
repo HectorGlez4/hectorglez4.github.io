@@ -29,8 +29,10 @@
 import { milesEnEspañol } from '../../src/lib/formato.ts';
 import {
   MODELOS,
+  TIENDAS,
   type Modelo,
   type QueDisparaElUmbral,
+  type Tienda,
 } from '../../src/lib/ingreso.ts';
 
 /**
@@ -363,7 +365,10 @@ export function estadosDe(medida: Medida, modelos: readonly Modelo[] = MODELOS):
  * puede aparecer. Lo último no es adorno: un Modelo encendido que no admite ninguna
  * superficie no se ve en ninguna parte, y esa es la avería que cuesta más tiempo entender.
  */
-export function lineasDelInforme(estados: readonly EstadoDeModelo[]): string[] {
+export function lineasDelInforme(
+  estados: readonly EstadoDeModelo[],
+  tiendas: readonly Tienda[] = TIENDAS,
+): string[] {
   const lineas = ['Modelos de Ingreso', '══════════════════', ''];
 
   for (const estado of estados) {
@@ -380,6 +385,9 @@ export function lineasDelInforme(estados: readonly EstadoDeModelo[]): string[] {
       // Escrita y no publicada valdría lo mismo que no escrita.
       `  Nota:        ${modelo.nota}`,
     );
+    // Historia 22.9 — la afiliación no tiene destino: lleva a las tiendas declaradas, y sin
+    // ninguna no puede encenderse.
+    if (modelo.id === 'afiliacion-de-libros') lineas.push(`  Tiendas:     ${textoDeTiendas(tiendas)}`);
     if (estado.aviso !== undefined) lineas.push(`  ATENCIÓN:    ${estado.aviso}`);
     lineas.push('');
   }
@@ -397,6 +405,44 @@ export function lineasDelInforme(estados: readonly EstadoDeModelo[]): string[] {
   );
 
   return lineas;
+}
+
+/**
+ * El informe como datos, para `--json`. Las tiendas de la afiliación (22.9) van con su clave,
+ * nombre y dominio, y **sin** marca ni parámetro: el informe es para encadenar, y la marca no
+ * tiene por qué viajar a ningún otro sitio.
+ */
+export function datosDelInforme(
+  medida: Medida,
+  estados: readonly EstadoDeModelo[],
+  tiendas: readonly Tienda[] = TIENDAS,
+) {
+  return {
+    medida,
+    tiendas: tiendas.map((t) => ({ clave: t.clave, nombre: t.nombre, dominio: t.dominio })),
+    modelos: estados.map((estado) => ({
+      id: estado.modelo.id,
+      nombre: estado.modelo.nombre,
+      encendido: estado.modelo.encendido,
+      dispara: estado.modelo.dispara,
+      umbral: estado.modelo.umbral,
+      admitidoEn: estado.modelo.admitidoEn,
+      cifra: estado.cifra,
+      cruzado: estado.cruzado,
+      accion: estado.accion,
+      ...(estado.aviso === undefined ? {} : { aviso: estado.aviso }),
+    })),
+  };
+}
+
+/** Las tiendas declaradas, por su nombre; ninguna se dice con todas las letras. */
+export function textoDeTiendas(tiendas: readonly Tienda[] = TIENDAS): string {
+  if (tiendas.length === 0) {
+    return 'ninguna tienda declarada (la primera, con su marca, la declara el dueño de la cuenta en TIENDAS de src/lib/ingreso.ts)';
+  }
+  return `${tiendas.length} declarada${tiendas.length === 1 ? '' : 's'}: ${tiendas
+    .map((t) => `${t.nombre} (${t.dominio})`)
+    .join(', ')}`;
 }
 
 /**

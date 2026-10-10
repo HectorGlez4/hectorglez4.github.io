@@ -15,6 +15,9 @@
  *
  * Historia 22.3 — avisa también de la «Obra con años discrepantes»: la Obra no publica año, y
  * cada Cita sigue mostrando el de su Procedencia.
+ *
+ * Historia 22.9 — y de la ficha con ediciones en venta sin ninguna Cita cotejada: la página no
+ * las pinta, porque la edición en venta nunca va sola (FR-54).
  */
 
 import { fileURLToPath } from 'node:url';
@@ -32,6 +35,7 @@ import { documentosDeCita } from '../tools/lib/cotejo.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from '../tools/lib/documento.ts';
 import {
   avisosDeAñosDeObras,
+  avisosDeEdicionesSinCotejada,
   avisosDeObras,
   clave,
   fallosDeObras,
@@ -107,7 +111,12 @@ export default function fichasDeObra(): AstroIntegration {
     return {
       fallos: fallosDeObras(fichas, citas, autores, documentos),
       // Historia 22.3 — y la Obra cuyas Citas declaran años distintos, que no publica año.
-      avisos: [...avisosDeObras(fichas, citas), ...avisosDeAñosDeObras(fichas, citas)],
+      // Historia 22.9 — y la ficha con ediciones en venta sin ninguna edición cotejada.
+      avisos: [
+        ...avisosDeObras(fichas, citas),
+        ...avisosDeAñosDeObras(fichas, citas),
+        ...avisosDeEdicionesSinCotejada(fichas, citas),
+      ],
     };
   }
 

@@ -20,6 +20,8 @@ import {
   clave,
   colapsar,
   colgarObras,
+  avisosDeEdicionesSinCotejada,
+  congelacionVigente,
   esGrafiaLiteral,
   formaDeObra,
   grafiaPorOmision,
@@ -55,6 +57,11 @@ import { derivarDeLaDeclaracion, esElMismoAutor } from './documento.ts';
 import type { Resultado } from './gestion.ts';
 import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
 import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
+import { esquemaDeObra } from '../../src/lib/admision.ts';
+import { TIENDAS, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
+
+/** El esquema con que se leen y reescriben las fichas; por omisión, el del sitio (22.9). */
+type EsquemaDeFicha = Parameters<typeof leerFichasDeObra>[1];
 
 /** Lo que hay que hacer para que la Obra tenga ficha activa, decidido en solo lectura. */
 export type PlanDeFicha =
@@ -454,11 +461,12 @@ export const ORDEN_DE_REUNIR = 'npm run obra -- reunir';
 async function fichaActiva(
   rutas: Rutas,
   nombre: string,
+  esquema?: EsquemaDeFicha,
 ): Promise<{ ok: true; ficha: FichaDeObra; fichas: FichaDeObra[] } | { ok: false; motivos: string[] }> {
   const buscado = nombre.replace(/\.ya?ml$/u, '');
   let fichas: FichaDeObra[];
   try {
-    fichas = await leerFichasDeObra(rutas);
+    fichas = await leerFichasDeObra(rutas, esquema);
   } catch (fallo) {
     return { ok: false, motivos: [`No se pueden leer las Fichas de Obra: ${texto(fallo)}`] };
   }
@@ -476,9 +484,9 @@ async function fichaActiva(
 }
 
 /**
- * La ficha tal como se escribe: sin nombre ni ruta, y sin `distintaDe` vacío. La `nota` se
- * conserva tal cual (22.6): la escribe Héctor a mano, y reescribir una ficha para titularla o
- * separarla no puede borrársela.
+ * La ficha tal como se escribe: sin nombre ni ruta, y sin `distintaDe` vacío. La `nota` (22.6)
+ * y las `ediciones` (22.9) se conservan tal cual: las decide Héctor, y reescribir una ficha para
+ * titularla o separarla no puede borrárselas.
  */
 function datosDeFicha(ficha: FichaDeObra) {
   return {
@@ -489,6 +497,9 @@ function datosDeFicha(ficha: FichaDeObra) {
       ? { distintaDe: [...ficha.distintaDe] }
       : {}),
     ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
+    ...(ficha.ediciones !== undefined && ficha.ediciones.length > 0
+      ? { ediciones: ficha.ediciones.map((edicion) => ({ ...edicion })) }
+      : {}),
   };
 }
 
@@ -524,10 +535,12 @@ export async function reunirFichas(
   rutas: Rutas,
   nombreDestino: string,
   nombreAbsorbida: string,
+  /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
+  esquema?: EsquemaDeFicha,
 ): Promise<Resultado> {
-  const destino = await fichaActiva(rutas, nombreDestino);
+  const destino = await fichaActiva(rutas, nombreDestino, esquema);
   if (!destino.ok) return { ok: false, motivos: [...destino.motivos, NADA_ESCRITO] };
-  const absorbida = await fichaActiva(rutas, nombreAbsorbida);
+  const absorbida = await fichaActiva(rutas, nombreAbsorbida, esquema);
   if (!absorbida.ok) return { ok: false, motivos: [...absorbida.motivos, NADA_ESCRITO] };
   const a = destino.ficha;
   const b = absorbida.ficha;
@@ -554,14 +567,18 @@ export async function reunirFichas(
   const heredadas = (b.distintaDe ?? []).filter(
     (f) => !formas.includes(f) && !(a.distintaDe ?? []).includes(f),
   );
-  // La nota es de la destino y se conserva; la de la absorbida no se hereda —describe otra
-  // ficha y la escribe Héctor, no una orden—: se queda en la retirada y el parte lo dice.
+  // La nota y las ediciones en venta son de la destino y se conservan; las de la absorbida no
+  // se heredan —describen otra ficha y las decide Héctor, no una orden—: se quedan en la
+  // retirada y el parte lo dice.
   const nueva = {
     autor: a.autor,
     titulo: a.titulo,
     formas,
     ...(distintaDe.length > 0 ? { distintaDe } : {}),
     ...(a.nota !== undefined ? { nota: a.nota } : {}),
+    ...(a.ediciones !== undefined && a.ediciones.length > 0
+      ? { ediciones: a.ediciones.map((edicion) => ({ ...edicion })) }
+      : {}),
   };
 
   // Terceras fichas que se declaraban distintas de una forma de la absorbida: ahora lo son de
@@ -581,7 +598,7 @@ export async function reunirFichas(
     return { ok: false, motivos: [`No se pudo leer ${a.ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
   }
   try {
-    await reescribirFichaDeObra(a.ruta, nueva);
+    await reescribirFichaDeObra(a.ruta, nueva, esquema);
   } catch (fallo) {
     return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
   }
@@ -618,6 +635,15 @@ export async function reunirFichas(
         ? [
             `La nota de «${b.nombre}» no pasa a la reunida: se queda en ${movida}. Si debe ` +
               `publicarse, escríbala a mano en ${a.ruta}.`,
+          ]
+        : []),
+      ...(b.ediciones !== undefined && b.ediciones.length > 0
+        ? [
+            (b.ediciones.length === 1
+              ? `La edición en venta de «${b.nombre}» no pasa a la reunida: se queda en ${movida}. `
+              : `Las ${b.ediciones.length} ediciones en venta de «${b.nombre}» no pasan a la ` +
+                `reunida: se quedan en ${movida}. `) +
+              `Si deben publicarse, declárelas en «${a.nombre}» con «npm run obra -- edicion».`,
           ]
         : []),
       ...(terceras.length > 0
@@ -665,10 +691,12 @@ export async function separarFichas(
   rutas: Rutas,
   nombreUna: string,
   nombreOtra: string,
+  /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
+  esquema?: EsquemaDeFicha,
 ): Promise<Resultado> {
-  const una = await fichaActiva(rutas, nombreUna);
+  const una = await fichaActiva(rutas, nombreUna, esquema);
   if (!una.ok) return { ok: false, motivos: [...una.motivos, NADA_ESCRITO] };
-  const otra = await fichaActiva(rutas, nombreOtra);
+  const otra = await fichaActiva(rutas, nombreOtra, esquema);
   if (!otra.ok) return { ok: false, motivos: [...otra.motivos, NADA_ESCRITO] };
   const a = una.ficha;
   const b = otra.ficha;
@@ -703,10 +731,10 @@ export async function separarFichas(
   let escritaA = false;
   try {
     if (nuevaA !== undefined) {
-      await reescribirFichaDeObra(a.ruta, nuevaA);
+      await reescribirFichaDeObra(a.ruta, nuevaA, esquema);
       escritaA = true;
     }
-    if (nuevaB !== undefined) await reescribirFichaDeObra(b.ruta, nuevaB);
+    if (nuevaB !== undefined) await reescribirFichaDeObra(b.ruta, nuevaB, esquema);
   } catch (fallo) {
     const vuelta = escritaA ? await restaurar(a.ruta, originalA) : NADA_ESCRITO;
     return { ok: false, motivos: [texto(fallo), vuelta] };
@@ -734,8 +762,10 @@ export async function titularFicha(
   rutas: Rutas,
   nombre: string,
   grafia: string,
+  /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
+  esquema?: EsquemaDeFicha,
 ): Promise<Resultado> {
-  const leida = await fichaActiva(rutas, nombre);
+  const leida = await fichaActiva(rutas, nombre, esquema);
   if (!leida.ok) return { ok: false, motivos: [...leida.motivos, NADA_ESCRITO] };
   const { ficha, fichas } = leida;
 
@@ -775,7 +805,7 @@ export async function titularFicha(
   }
 
   try {
-    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), titulo });
+    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), titulo }, esquema);
   } catch (fallo) {
     return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
   }
@@ -785,6 +815,215 @@ export async function titularFicha(
     mensaje: [
       `«${ficha.nombre}» se titula ahora «${titulo}» (antes «${ficha.titulo}»).`,
       `El nombre del fichero no cambia: es la URL de la Obra (AD-4).`,
+    ].join('\n'),
+  };
+}
+
+/** Una edición en venta tal como la teclea `npm run obra -- edicion` (22.9). */
+export interface EdicionTecleada {
+  tienda: string;
+  formato: string;
+  url: string;
+  descripcion?: string;
+}
+
+/**
+ * Añade una edición en venta al final de una ficha — Historia 22.9, FR-35.
+ *
+ * Es la orden con la que Héctor declara ediciones: ningún agente la usa por su cuenta, y nadie
+ * escribe `ediciones` a mano. Se niega —sin escribir nada— si la familia Obra está congelada
+ * (SM-11: congelada, no se curan ediciones), si la tienda no es del conjunto cerrado `TIENDAS`
+ * de `src/lib/ingreso.ts` (hoy vacío: toda tienda se rechaza) y si la ficha resultante no
+ * cumple el esquema —la misma regla que aplica el build, con la dirección de otro dominio o con
+ * la marca ya puesta—. La edición que ya está, igual, no se repite.
+ *
+ * `opciones` es para las pruebas: un conjunto de tiendas inventado y una congelación dada, sin
+ * tocar los ficheros del repositorio. La orden llama siempre con lo declarado.
+ */
+export async function declararEdicion(
+  rutas: Rutas,
+  nombre: string,
+  edicion: EdicionTecleada,
+  opciones: { tiendas?: readonly Tienda[]; congelacion?: CongelacionDeObras | null } = {},
+): Promise<Resultado> {
+  const congelacion =
+    opciones.congelacion === undefined ? congelacionVigente() : (opciones.congelacion ?? undefined);
+  if (congelacion !== undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `La familia Obra está congelada desde el ${congelacion.desde} (CONGELACION_DE_OBRAS en ` +
+          'src/lib/umbrales.ts, SM-11): mientras lo esté, no se curan ediciones en venta.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const tiendas = opciones.tiendas ?? TIENDAS;
+  const tienda = tiendaDe(edicion.tienda, tiendas);
+  if (tienda === undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `«${edicion.tienda}» no es ninguna tienda declarada en TIENDAS de src/lib/ingreso.ts` +
+          (tiendas.length === 0
+            ? ', y hoy no declara ninguna. La primera tienda, con su marca, la declara el dueño de la cuenta.'
+            : `. Las declaradas: ${tiendas.map((t) => `«${t.clave}»`).join(', ')}.`),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const esquema = esquemaDeObra(tiendas);
+  const leida = await fichaActiva(rutas, nombre, esquema);
+  if (!leida.ok) return { ok: false, motivos: [...leida.motivos, NADA_ESCRITO] };
+  const { ficha } = leida;
+
+  const previas = ficha.ediciones ?? [];
+  if (previas.some((e) => e.tienda === edicion.tienda && e.formato === edicion.formato && e.url === edicion.url)) {
+    return {
+      ok: false,
+      motivos: [`«${ficha.nombre}» ya declara esa edición: no se repite.`, NADA_ESCRITO],
+    };
+  }
+
+  const nueva = {
+    ...datosDeFicha(ficha),
+    ediciones: [
+      ...previas.map((e) => ({ ...e })),
+      {
+        tienda: edicion.tienda,
+        formato: edicion.formato,
+        url: edicion.url,
+        ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
+      },
+    ],
+  };
+  const admitida = esquema.safeParse(nueva);
+  if (!admitida.success) {
+    return {
+      ok: false,
+      motivos: [
+        `La edición no se puede declarar en ${ficha.ruta}:`,
+        ...admitida.error.issues.map(
+          (i) => `  ${i.path.length > 0 ? `${i.path.join('.')}: ` : ''}${i.message}`,
+        ),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  try {
+    await reescribirFichaDeObra(ficha.ruta, admitida.data, esquema);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  const formato = edicion.formato === 'impresa' ? 'impresa' : 'electrónica';
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `Edición ${formato} en ${tienda.nombre} declarada en «${ficha.nombre}».`,
+      `  ${ficha.ruta}`,
+      ...lineasDeEdiciones(admitida.data.ediciones ?? [], tiendas),
+      'La marca de afiliado la pone el build desde TIENDAS. La edición solo se pinta con la ' +
+        'afiliación encendida y alguna Cita de la Obra cotejada: nunca va sola (FR-54).',
+      ...(await avisoSinCotejada(rutas, { ...ficha, ediciones: admitida.data.ediciones ?? [] })),
+    ].join('\n'),
+  };
+}
+
+/**
+ * Las ediciones de una ficha, numeradas desde 1: la posición es la que toma
+ * `npm run obra -- quitar-edicion`.
+ */
+function lineasDeEdiciones(
+  ediciones: readonly { tienda: string; formato: string; url: string; descripcion?: string }[],
+  tiendas: readonly Tienda[],
+): string[] {
+  if (ediciones.length === 0) return ['  Ediciones en venta: ninguna.'];
+  return [
+    `  Ediciones en venta (${ediciones.length}):`,
+    ...ediciones.map(
+      (e, i) =>
+        `    ${i + 1}. ${e.formato === 'impresa' ? 'impresa' : 'electrónica'} en ` +
+        `${tiendaDe(e.tienda, tiendas)?.nombre ?? e.tienda} — ${e.url}` +
+        (e.descripcion !== undefined ? ` («${e.descripcion}»)` : ''),
+    ),
+  ];
+}
+
+/**
+ * El aviso de que una ficha con ediciones no tiene ninguna Cita publicada cotejada: con el
+ * mismo predicado que el build (`avisosDeEdicionesSinCotejada`), para que la orden y el build
+ * no puedan discrepar. Si las Citas no se dejan leer, lo dice en vez de callar.
+ */
+async function avisoSinCotejada(rutas: Rutas, ficha: FichaDeObra): Promise<string[]> {
+  let citas: Awaited<ReturnType<typeof leerCitas>>;
+  try {
+    citas = await leerCitas(rutas.citas);
+  } catch (fallo) {
+    return [`Aviso: no se pudo comprobar si la Obra tiene alguna Cita cotejada: ${texto(fallo)}`];
+  }
+  return avisosDeEdicionesSinCotejada([ficha], citas).length === 0
+    ? []
+    : [
+        'Aviso: ninguna Cita publicada de esta Obra tiene documento cotejado, así que sus ' +
+          'ediciones en venta no se pintarán hasta que alguna lo tenga: la edición en venta ' +
+          'nunca va sola (FR-54).',
+      ];
+}
+
+/**
+ * Quita la edición en venta de la posición `posicion` (desde 1, como las numera el parte de
+ * `edicion`) — Historia 22.9. Corregir una edición es quitarla y volver a declararla, sin
+ * editar el YAML a mano. Si la lista queda vacía, el campo se omite: nunca `ediciones: []`.
+ * Se niega —sin escribir— si la ficha no tiene esa posición.
+ *
+ * No consulta la congelación: quitar una edición no expone nada nuevo, y una edición mal
+ * declarada tiene que poder retirarse también con la familia congelada.
+ */
+export async function quitarEdicion(
+  rutas: Rutas,
+  nombre: string,
+  posicion: number,
+  opciones: { tiendas?: readonly Tienda[] } = {},
+): Promise<Resultado> {
+  const tiendas = opciones.tiendas ?? TIENDAS;
+  const esquema = esquemaDeObra(tiendas);
+  const leida = await fichaActiva(rutas, nombre, esquema);
+  if (!leida.ok) return { ok: false, motivos: [...leida.motivos, NADA_ESCRITO] };
+  const { ficha } = leida;
+  const previas = ficha.ediciones ?? [];
+  if (!Number.isInteger(posicion) || posicion < 1 || posicion > previas.length) {
+    return {
+      ok: false,
+      motivos: [
+        previas.length === 0
+          ? `«${ficha.nombre}» no declara ninguna edición en venta.`
+          : `«${ficha.nombre}» no tiene la edición ${posicion}: declara ${previas.length}, ` +
+            `numeradas de 1 a ${previas.length}.`,
+        ...(previas.length === 0 ? [] : lineasDeEdiciones(previas, tiendas)),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  const quitada = previas[posicion - 1];
+  const restantes = previas.filter((_, i) => i !== posicion - 1);
+  try {
+    await reescribirFichaDeObra(ficha.ruta, datosDeFicha({ ...ficha, ediciones: restantes }), esquema);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `Quitada la edición ${posicion} de «${ficha.nombre}»: ` +
+        `${quitada.formato === 'impresa' ? 'impresa' : 'electrónica'} en ` +
+        `${tiendaDe(quitada.tienda, tiendas)?.nombre ?? quitada.tienda} — ${quitada.url}.`,
+      `  ${ficha.ruta}`,
+      ...lineasDeEdiciones(restantes, tiendas),
     ].join('\n'),
   };
 }
@@ -802,10 +1041,12 @@ export async function ajustarTitulosDeObra(
   rutas: Rutas,
   autor: string,
   formas: readonly string[],
+  /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
+  esquema?: EsquemaDeFicha,
 ): Promise<string[]> {
   const lineas: string[] = [];
   try {
-    const fichas = await leerFichasDeObra(rutas);
+    const fichas = await leerFichasDeObra(rutas, esquema);
     const citas = await leerCitas(rutas.citas);
     for (const ficha of fichas) {
       if (ficha.autor !== autor || !ficha.formas.some((f) => formas.includes(f))) continue;
@@ -814,7 +1055,7 @@ export async function ajustarTitulosDeObra(
         continue;
       }
       const titulo = grafiaPorOmision(grafias);
-      await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), titulo });
+      await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), titulo }, esquema);
       lineas.push(
         `El título de ${ficha.ruta} ya no lo declaraba ninguna Cita publicada: pasa de ` +
           `«${ficha.titulo}» a «${titulo}», la grafía por omisión.`,

@@ -15,17 +15,30 @@
  *   · (c) ninguna Cita con Fuente: solo la frase que lo dice, sin rótulo ni enlace, porque un
  *     rótulo que nombra una edición cotejada encima de su ausencia la afirmaría.
  *
+ * Historia 22.9 — con la afiliación encendida y admitida en la ruta (lo pregunta la página, que
+ * es quien puede importar `src/lib/ingreso.ts`), llega `enVenta` y, **solo si hay alguna línea
+ * cotejada**, se pintan las «Ediciones en venta» al final de la sección: nunca van solas ni en
+ * lugar de la cotejada (FR-54). Sin `enVenta`, el marcado es byte a byte el de antes.
+ *
  * Va fuera del índice de Pagefind (`data-pagefind-ignore`): «Licencia CC BY-SA» no puede ser un
  * resultado de búsqueda en cada Obra.
  */
 import Rotulo from './Rotulo.astro';
+import EdicionesEnVenta from './EdicionesEnVenta.astro';
 import type { LineaDondeLeer, ResumenDondeLeer } from '../lib/obras.ts';
+import type { EdicionEnVenta } from '../lib/ediciones.ts';
 
 interface Props {
   resumen: ResumenDondeLeer;
+  /** Las ediciones en venta ya compuestas, y el Modelo que las pone (22.9). */
+  enVenta?: {
+    id: string;
+    ediciones: readonly EdicionEnVenta[];
+  };
 }
 
 const { lineas, citasSinDocumento, total } = Astro.props.resumen;
+const { enVenta } = Astro.props;
 
 /** Lo que sigue al nombre de la Fuente, con la puntuación de la plantilla. */
 function resto(linea: LineaDondeLeer): string {
@@ -65,6 +78,9 @@ const sinDocumento =
           ))}
         </section>
         {citasSinDocumento > 0 && <p class="linea sin-documento">{sinDocumento}</p>}
+        {enVenta !== undefined && enVenta.ediciones.length > 0 && (
+          <EdicionesEnVenta id={enVenta.id} ediciones={enVenta.ediciones} />
+        )}
       </>
     )
   }

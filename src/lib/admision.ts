@@ -16,6 +16,7 @@
 import { z } from 'astro/zod';
 import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
 import { normalizar } from './normalizar.ts';
+import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
 /**
  * Un año como entero. Ni fechas completas ni cadenas: el modelo dice entero.
@@ -528,95 +529,237 @@ export const formaDeObraAdmisible = z
  * Héctor a mano y es el único campo de la ficha que se edita a mano: ninguna orden la rellena,
  * y las que reescriben una ficha la conservan tal cual. Sin valor se omite.
  *
- * Los campos de las épicas siguientes —`ediciones`— no se declaran todavía: el `.strict()`
- * los rechaza hasta que una historia los construya.
+ * `ediciones` (Historia 22.9) es opcional: la lista de ediciones en venta que Héctor declara
+ * con `npm run obra -- edicion`, en el orden en que la Página de Obra las pinta. Cada una es de
+ * una tienda del conjunto cerrado `TIENDAS` de `src/lib/ingreso.ts`, con una dirección
+ * `https://` de su dominio y **sin** la marca de afiliado, que la pone el build. Rige con la
+ * afiliación encendida o apagada: con el conjunto vacío —el estado del repositorio— ninguna
+ * ficha puede declarar ediciones.
  *
  * La comparten la colección de `src/content.config.ts` y todo lector de `tools/`, que la
- * aplica en vez de leer YAML crudo (AD-17: una sola entrada).
+ * aplica en vez de leer YAML crudo (AD-17: una sola entrada). `esquemaDeObra` existe para las
+ * pruebas y para la orden que valida contra un conjunto de tiendas dado; el sitio usa
+ * `obraAdmisible`, que es el esquema con las tiendas declaradas.
  */
-export const obraAdmisible = z
-  .object(
-    {
-      autor: z
-        .string({ message: 'Regla incumplida: falta el Autor de la Ficha de Obra.' })
-        .regex(
-          /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-          'Regla incumplida: el Autor de una Ficha de Obra es el slug de un Autor: ' +
-            'minúsculas, dígitos y guiones, sin diacríticos.',
-        ),
-      titulo: z
-        .string({ message: 'Regla incumplida: falta el título de la Ficha de Obra.' })
-        .regex(
-          /\S/,
-          'Regla incumplida: el título de una Ficha de Obra no puede estar vacío ni ser solo ' +
-            'espacios.',
-        ),
-      formas: z
-        .array(formaDeObraAdmisible, {
-          error: 'Regla incumplida: «formas» es la lista de formas canónicas que reclama la ficha.',
-        })
-        .min(1, 'Regla incumplida: una Ficha de Obra reclama al menos una forma.')
-        .refine((formas) => new Set(formas).size === formas.length, {
-          message: 'Regla incumplida: una Ficha de Obra no repite ninguna forma.',
+export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
+  return z
+    .object(
+      {
+        autor: z
+          .string({ message: 'Regla incumplida: falta el Autor de la Ficha de Obra.' })
+          .regex(
+            /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+            'Regla incumplida: el Autor de una Ficha de Obra es el slug de un Autor: ' +
+              'minúsculas, dígitos y guiones, sin diacríticos.',
+          ),
+        titulo: z
+          .string({ message: 'Regla incumplida: falta el título de la Ficha de Obra.' })
+          .regex(
+            /\S/,
+            'Regla incumplida: el título de una Ficha de Obra no puede estar vacío ni ser solo ' +
+              'espacios.',
+          ),
+        formas: z
+          .array(formaDeObraAdmisible, {
+            error: 'Regla incumplida: «formas» es la lista de formas canónicas que reclama la ficha.',
+          })
+          .min(1, 'Regla incumplida: una Ficha de Obra reclama al menos una forma.')
+          .refine((formas) => new Set(formas).size === formas.length, {
+            message: 'Regla incumplida: una Ficha de Obra no repite ninguna forma.',
+          }),
+        distintaDe: z
+          .array(formaDeObraAdmisible, {
+            error:
+              'Regla incumplida: «distintaDe» es la lista de formas canónicas de las Obras de ' +
+              'las que esta se declara distinta.',
+          })
+          .min(
+            1,
+            'Regla incumplida: «distintaDe» sin ninguna forma se omite; no se escribe vacío.',
+          )
+          .refine((formas) => new Set(formas).size === formas.length, {
+            message: 'Regla incumplida: «distintaDe» no repite ninguna forma.',
+          })
+          .optional(),
+        /*
+         * Se mide lo que queda al recortar, en puntos de código —no en unidades UTF-16, que
+         * contarían doble un carácter fuera del plano básico—, pero **no se recorta el valor**:
+         * NFR-12 prohíbe que el sistema altere lo que el editor guardó. Lo que hay mal escrito se
+         * rechaza.
+         */
+        nota: z
+          .string({ message: 'Regla incumplida: la nota de una Ficha de Obra es una cadena.' })
+          .refine((nota) => !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(nota), {
+            message:
+              'Regla incumplida: la nota de una Ficha de Obra es una sola línea: sin saltos de ' +
+              'línea, tabuladores ni caracteres de control.',
+          })
+          .refine((nota) => nota.trim().length >= 1, {
+            message:
+              'Regla incumplida: la nota de una Ficha de Obra no puede estar vacía ni ser solo ' +
+              'espacios. Sin nota, el campo se omite.',
+          })
+          .refine((nota) => [...nota.trim()].length <= MAX_CARACTERES_NOTA_DE_OBRA, {
+            message:
+              'Regla incumplida: la nota de una Ficha de Obra no puede pasar de ' +
+              `${MAX_CARACTERES_NOTA_DE_OBRA} caracteres. Es una frase, no una sinopsis.`,
+          })
+          .optional(),
+        ediciones: z
+          .array(edicionAdmisible(tiendas), {
+            error: 'Regla incumplida: «ediciones» es la lista de ediciones en venta de la Obra.',
+          })
+          .min(1, 'Regla incumplida: «ediciones» sin ninguna edición se omite; no se escribe vacía.')
+          .optional(),
+      },
+      {
+        error: (problema) =>
+          problema.code === 'unrecognized_keys'
+            ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
+              `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
+              'distintaDe, nota y ediciones.'
+            : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
+              'opcionalmente distintaDe, nota y ediciones.',
+      },
+    )
+    .strict()
+    .refine(
+      (ficha) => !(ficha.distintaDe ?? []).some((forma) => ficha.formas.includes(forma)),
+      {
+        message:
+          'Regla incumplida: una Ficha de Obra no se declara distinta de una forma que ella ' +
+          'misma reclama.',
+        path: ['distintaDe'],
+      },
+    );
+}
+
+/**
+ * Una edición en venta de una Ficha de Obra — Historia 22.9, AD-1, AD-20.
+ *
+ * Lo que impide cada regla:
+ *
+ *   · `tienda` del conjunto: una tienda inventada no tendría marca ni nombre que pintar;
+ *   · dirección `https://` del dominio de **esa** tienda (o un subdominio): una edición de
+ *     Amazon México que apunta a otro sitio llevaría la marca de una cuenta a una tienda que
+ *     no la paga, y una dirección en claro no se publica;
+ *   · sin el parámetro de marca: la marca la pone el build desde `TIENDAS`, y una dirección que
+ *     ya la trae colaría la de otro —o duplicaría la propia—;
+ *   · descripción de una línea, como la nota: va en la misma línea que el enlace.
+ */
+function edicionAdmisible(tiendas: readonly Tienda[]) {
+  const claves = tiendas.map((t) => `«${t.clave}»`).join(', ');
+  return z
+    .object(
+      {
+        tienda: z
+          .string({ message: 'Regla incumplida: falta la tienda de la edición en venta.' })
+          .refine((clave) => tiendaDe(clave, tiendas) !== undefined, {
+            message:
+              'Regla incumplida: la tienda de una edición en venta es una de las que declara ' +
+              'TIENDAS en src/lib/ingreso.ts' +
+              (tiendas.length === 0 ? ', y hoy no declara ninguna.' : `: ${claves}.`),
+          }),
+        formato: z.enum(FORMATOS_DE_EDICION, {
+          error: 'Regla incumplida: el formato de una edición en venta es «impresa» o «electronica».',
         }),
-      distintaDe: z
-        .array(formaDeObraAdmisible, {
-          error:
-            'Regla incumplida: «distintaDe» es la lista de formas canónicas de las Obras de ' +
-            'las que esta se declara distinta.',
-        })
-        .min(
-          1,
-          'Regla incumplida: «distintaDe» sin ninguna forma se omite; no se escribe vacío.',
-        )
-        .refine((formas) => new Set(formas).size === formas.length, {
-          message: 'Regla incumplida: «distintaDe» no repite ninguna forma.',
-        })
-        .optional(),
-      /*
-       * Se mide lo que queda al recortar, en puntos de código —no en unidades UTF-16, que
-       * contarían doble un carácter fuera del plano básico—, pero **no se recorta el valor**:
-       * NFR-12 prohíbe que el sistema altere lo que el editor guardó. Lo que hay mal escrito se
-       * rechaza.
-       */
-      nota: z
-        .string({ message: 'Regla incumplida: la nota de una Ficha de Obra es una cadena.' })
-        .refine((nota) => !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(nota), {
+        url: z.string({ message: 'Regla incumplida: falta la dirección de la edición en venta.' }),
+        descripcion: unaLinea('la descripción de una edición en venta').optional(),
+      },
+      {
+        error: (problema) =>
+          problema.code === 'unrecognized_keys'
+            ? 'Regla incumplida: una edición en venta no reconoce ' +
+              `«${problema.keys.join('», «')}». Sus campos son tienda, formato, url y descripcion.`
+            : 'Regla incumplida: una edición en venta es un objeto con tienda, formato y url, y ' +
+              'opcionalmente descripcion.',
+      },
+    )
+    .strict()
+    .superRefine((edicion, ctx) => {
+      let url: URL;
+      try {
+        url = new URL(edicion.url);
+      } catch {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['url'],
+          message: `Regla incumplida: «${edicion.url}» no es una dirección completa.`,
+        });
+        return;
+      }
+      if (url.protocol !== 'https:' || /\s/.test(edicion.url) || url.username !== '' || url.password !== '') {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['url'],
           message:
-            'Regla incumplida: la nota de una Ficha de Obra es una sola línea: sin saltos de ' +
-            'línea, tabuladores ni caracteres de control.',
-        })
-        .refine((nota) => nota.trim().length >= 1, {
+            `Regla incumplida: «${edicion.url}» no es una dirección «https://» sin espacios ni ` +
+            'credenciales. Un enlace de compra no se publica en claro.',
+        });
+        return;
+      }
+      const tienda = tiendaDe(edicion.tienda, tiendas);
+      // Sin tienda ya hay un incumplimiento que lo dice; el dominio no se puede juzgar.
+      if (tienda === undefined) return;
+      if (!esDelDominio(url.hostname, tienda.dominio)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['url'],
           message:
-            'Regla incumplida: la nota de una Ficha de Obra no puede estar vacía ni ser solo ' +
-            'espacios. Sin nota, el campo se omite.',
-        })
-        .refine((nota) => [...nota.trim()].length <= MAX_CARACTERES_NOTA_DE_OBRA, {
+            `Regla incumplida: «${edicion.url}» no es de ${tienda.dominio}, el dominio de ` +
+            `«${tienda.clave}». Una edición en venta solo apunta a la tienda que declara.`,
+        });
+      }
+      // Mirado en lo tecleado: `URL` borra el `:443` por omisión y lo daría por bueno.
+      if (url.port !== '' || /^[a-z]+:\/\/[^/?#]*:/iu.test(edicion.url)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['url'],
           message:
-            'Regla incumplida: la nota de una Ficha de Obra no puede pasar de ' +
-            `${MAX_CARACTERES_NOTA_DE_OBRA} caracteres. Es una frase, no una sinopsis.`,
-        })
-        .optional(),
-    },
-    {
-      error: (problema) =>
-        problema.code === 'unrecognized_keys'
-          ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
-            `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
-            'distintaDe y nota.'
-          : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-            'opcionalmente distintaDe y nota.',
-    },
-  )
-  .strict()
-  .refine(
-    (ficha) => !(ficha.distintaDe ?? []).some((forma) => ficha.formas.includes(forma)),
-    {
+            `Regla incumplida: «${edicion.url}» lleva un puerto explícito. Una edición en venta ` +
+            'apunta a la tienda tal cual se publica, sin puerto.',
+        });
+      }
+      // El nombre del parámetro sin distinguir mayúsculas: `?TAG=` también es la marca de otro.
+      const parametro = tienda.parametro.toLowerCase();
+      if ([...url.searchParams.keys()].some((clave) => clave.toLowerCase() === parametro)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['url'],
+          message:
+            `Regla incumplida: «${edicion.url}» ya trae el parámetro «${tienda.parametro}» de la ` +
+            'marca de afiliado. La ficha declara la dirección sin marca: la pone el build desde ' +
+            'TIENDAS de src/lib/ingreso.ts.',
+        });
+      }
+    });
+}
+
+/**
+ * Una cadena de una sola línea, de 1 a `MAX_CARACTERES_NOTA_DE_OBRA` puntos de código tras
+ * recortar: la nota de la ficha y la descripción de una edición. Se mide lo recortado pero
+ * **no se recorta el valor** (NFR-12).
+ */
+function unaLinea(que: string) {
+  const Que = que.charAt(0).toUpperCase() + que.slice(1);
+  return z
+    .string({ message: `Regla incumplida: ${que} es una cadena.` })
+    .refine((texto) => !/[\p{Cc}\p{Zl}\p{Zp}]/u.test(texto), {
       message:
-        'Regla incumplida: una Ficha de Obra no se declara distinta de una forma que ella ' +
-        'misma reclama.',
-      path: ['distintaDe'],
-    },
-  );
+        `Regla incumplida: ${que} es una sola línea: sin saltos de línea, tabuladores ni ` +
+        'caracteres de control.',
+    })
+    .refine((texto) => texto.trim().length >= 1, {
+      message: `Regla incumplida: ${que} no puede estar vacía ni ser solo espacios. Sin ella, el campo se omite.`,
+    })
+    .refine((texto) => [...texto.trim()].length <= MAX_CARACTERES_NOTA_DE_OBRA, {
+      message: `Regla incumplida: ${Que} no puede pasar de ${MAX_CARACTERES_NOTA_DE_OBRA} caracteres.`,
+    });
+}
+
+/** El esquema de la Ficha de Obra con las tiendas declaradas: el que usa el sitio. */
+export const obraAdmisible = esquemaDeObra();
 
 export type ObraAdmisible = z.infer<typeof obraAdmisible>;
+/** Una edición en venta ya admitida. */
+export type EdicionAdmisible = NonNullable<ObraAdmisible['ediciones']>[number];

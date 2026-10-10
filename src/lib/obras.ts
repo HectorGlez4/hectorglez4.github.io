@@ -17,6 +17,7 @@
  * `tools/lib/obras.ts`.
  */
 
+import type { FormatoDeEdicion } from './ediciones.ts';
 import { normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
 import { rutaDeObra } from './superficies.ts';
@@ -168,6 +169,21 @@ export interface FichaDeObra {
   distintaDe?: readonly string[];
   /** La nota de la ficha (22.6): la escribe Héctor a mano y ninguna orden la toca. */
   nota?: string;
+  /**
+   * Las ediciones en venta (22.9), en el orden de la ficha. Las declara Héctor con
+   * `npm run obra -- edicion`; las órdenes que reescriben una ficha las conservan.
+   */
+  ediciones?: readonly EdicionDeObra[];
+}
+
+/** Una edición en venta de una ficha, ya admitida por el esquema (22.9). */
+export interface EdicionDeObra {
+  /** La clave de una tienda de `TIENDAS` (`src/lib/ingreso.ts`). */
+  tienda: string;
+  formato: FormatoDeEdicion;
+  /** La dirección **sin** marca: la marca la añade `urlDeEdicion` al construir. */
+  url: string;
+  descripcion?: string;
 }
 
 /** Lo que de una Cita importa para resolver su Obra. */
@@ -713,6 +729,11 @@ export interface ObraResuelta {
    * 1 de la Página de Obra, al pie: nunca la meta ni la Tarjeta.
    */
   nota?: string;
+  /**
+   * Las ediciones en venta de la ficha (22.9). Solo las pinta la página 1 de la Página de Obra,
+   * con la afiliación encendida y alguna edición cotejada (FR-54): nunca van solas.
+   */
+  ediciones?: readonly EdicionDeObra[];
 }
 
 /** Lo que de una Cita importa para derivar los atributos de su Obra. */
@@ -801,6 +822,7 @@ export function resolverObras(
       temas,
       recuento: suyas.length,
       ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
+      ...(ficha.ediciones !== undefined ? { ediciones: ficha.ediciones } : {}),
     });
   }
 
@@ -857,6 +879,33 @@ export function avisosDeAñosDeObras(
     avisos.push(
       `  · Obra con años discrepantes: ${ficha.ruta} → sus Citas declaran ${años.join(', ')}. ` +
         'La Obra no publica año; cada Cita sigue mostrando el de su Procedencia.',
+    );
+  }
+  return avisos;
+}
+
+/**
+ * «Ediciones sin edición cotejada» — Historia 22.9, FR-54.
+ *
+ * Una ficha que declara ediciones en venta y ninguna de cuyas Citas publicadas tiene Fuente:
+ * la página no las pinta —la edición en venta nunca va sola ni en lugar de la cotejada—, con
+ * la afiliación encendida o apagada. Avisa y no rompe: documentar una Cita lo corrige, y
+ * retirar el documento de la última no puede tumbar el sitio.
+ */
+export function avisosDeEdicionesSinCotejada(
+  fichas: readonly FichaDeObra[],
+  citas: readonly CitaParaObra[],
+): string[] {
+  const porFicha = citasPorFicha(fichas, citas);
+  const avisos: string[] = [];
+  for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
+    const ediciones = ficha.ediciones ?? [];
+    if (ediciones.length === 0) continue;
+    if ((porFicha.get(ficha.nombre) ?? []).some(tieneFuente)) continue;
+    avisos.push(
+      `  · Ediciones sin edición cotejada: ${ficha.ruta} → declara ${ediciones.length} ` +
+        `${ediciones.length === 1 ? 'edición' : 'ediciones'} en venta y ninguna de sus Citas ` +
+        'publicadas tiene documento cotejado. No se pintan: la edición en venta nunca va sola (FR-54).',
     );
   }
   return avisos;

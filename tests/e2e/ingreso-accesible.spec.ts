@@ -12,7 +12,10 @@ import {
   citaValida,
   construirConCorpus,
   fuenteConDonacionesEncendidas,
+  fuenteConModeloEncendido,
+  fuenteConTiendaDePrueba,
   limpiar,
+  TIENDA_DE_PRUEBA,
   paginaEnDist,
 } from '../unit/ayuda/construir.js';
 
@@ -114,7 +117,29 @@ const CORPUS = {
     texto: 'La vida, si sabes usarla, es larga; nadie te la puede quitar de las manos.',
     aptaParaPortada: true,
   }),
+  /*
+   * Historia 22.9 — la Obra de las dos Citas, con dos ediciones en venta de la tienda inventada
+   * que la copia declara. Las dos Citas están cotejadas, así que el bloque se pinta.
+   */
+  'obras/seneca--sobre-la-brevedad-de-la-vida.yml': [
+    'autor: "seneca"',
+    'titulo: "Sobre la brevedad de la vida"',
+    'formas:',
+    '  - "sobre la brevedad de la vida"',
+    'ediciones:',
+    `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+    '    formato: "impresa"',
+    `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/dp/X"`,
+    '    descripcion: "Cátedra, 2015"',
+    `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+    '    formato: "electronica"',
+    `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/e/Y"`,
+    '',
+  ].join('\n'),
 };
+
+/** La Página de Obra de esas dos Citas: la única superficie que admite la afiliación. */
+const OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
 
 /** La jornada se fija: la Cita del Día rota con el calendario, no con lo que se mide aquí. */
 const JORNADA = '2026-08-20';
@@ -190,7 +215,12 @@ test.beforeAll(async () => {
   const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
   // El diff que promete la épica —un booleano— acotado al bloque de donaciones. El ayudante
   // rompe si la sustitución alcanzara a otro Modelo, y dice qué pasa si ya está encendido.
-  const encendida = fuenteConDonacionesEncendidas(fuente);
+  // Historia 22.9 — y la afiliación, con la tienda inventada que exige su encendido: la
+  // Página de Obra se barre con las ediciones en venta puestas.
+  const encendida = fuenteConModeloEncendido(
+    fuenteConDonacionesEncendidas(fuenteConTiendaDePrueba(fuente)),
+    'afiliacion-de-libros',
+  );
 
   const construido = await construirConCorpus(CORPUS, {
     jornada: JORNADA,
@@ -216,6 +246,11 @@ test.beforeAll(async () => {
         'no hay nada que barrer. Un barrido en verde sobre esto no significaría nada.',
     ).toBe(true);
   }
+  const deLaObra = await readFile(paginaEnDist(dist, OBRA), 'utf8');
+  expect(
+    deLaObra.includes(`${MARCA_DE_INGRESO}="afiliacion-de-libros"`),
+    'la Página de Obra se construyó sin las ediciones en venta: no hay nada que barrer.',
+  ).toBe(true);
 
   servidor = spawn('node', [join(new URL('..', import.meta.url).pathname, 'servidor.mjs')], {
     env: { ...process.env, DIST: dist, PUERTO: String(PUERTO_SITIO) },
@@ -509,5 +544,61 @@ test.describe('encendida sigue sin ser un muro — NFR-10, UX-DR36', () => {
 
       expect(fijos, `${superficie.nombre}\n${fijos.join('\n')}`).toEqual([]);
     }
+  });
+});
+
+/**
+ * Historia 22.9 — las ediciones en venta, barridas con la afiliación encendida.
+ *
+ * La Página de Obra es la única superficie que admite el Modelo. Se barre entera, y luego se
+ * mira lo que el navegador tiene delante de cada enlace: sale a pestaña nueva y lo dice en su
+ * nombre, `rel="sponsored noopener"`, y la declaración de afiliado le llega por
+ * `aria-describedby`.
+ */
+test.describe('las ediciones en venta encendidas pasan el barrido de accesibilidad', () => {
+  const enlaces = (page: Page) => page.locator(`[${MARCA_DE_INGRESO}="afiliacion-de-libros"] a`);
+
+  test('la Página de Obra pasa la auditoría automática', async ({ page }) => {
+    await irA(page, OBRA);
+    const { violations } = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    const resumen = violations.flatMap((v) =>
+      v.nodes.map((n) => `${v.id}: ${v.help} — ${n.target.join(' ')}`),
+    );
+    expect(resumen, resumen.join('\n')).toEqual([]);
+  });
+
+  test('cada enlace dice a dónde va, que abre pestaña nueva y que es de afiliado', async ({ page }) => {
+    await irA(page, OBRA);
+    await expect(enlaces(page)).toHaveCount(2);
+    const nombres = [
+      /^Edición impresa en Librería de Prueba \(se abre en una pestaña nueva\)$/,
+      /^Edición electrónica en Librería de Prueba \(se abre en una pestaña nueva\)$/,
+    ];
+    for (const [i, nombre] of nombres.entries()) {
+      const enlace = enlaces(page).nth(i);
+      await expect(enlace).toHaveAccessibleName(nombre);
+      await expect(enlace).toHaveAccessibleDescription(
+        'Enlace de afiliado: si compras, el sitio recibe una comisión sin coste para ti.',
+      );
+      await expect(enlace).toHaveAttribute('rel', 'sponsored noopener');
+      await expect(enlace).toHaveAttribute('target', '_blank');
+      const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      await expect(enlace).toHaveAttribute(
+        'href',
+        new RegExp(`[?&]${escapar(TIENDA_DE_PRUEBA.parametro)}=${escapar(TIENDA_DE_PRUEBA.marca)}$`),
+      );
+    }
+  });
+
+  test('el contraste del bloque pasa la regla de axe', async ({ page }) => {
+    await irA(page, OBRA);
+    const { violations } = await new AxeBuilder({ page })
+      .include(`[${MARCA_DE_INGRESO}="afiliacion-de-libros"]`)
+      .withRules(['color-contrast'])
+      .analyze();
+    const resumen = violations.flatMap((v) => v.nodes.map((n) => `${v.id} — ${n.target.join(' ')}`));
+    expect(resumen, resumen.join('\n')).toEqual([]);
   });
 });

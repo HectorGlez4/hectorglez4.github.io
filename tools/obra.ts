@@ -33,6 +33,17 @@
  * commit, y las dos se niegan —código 1, nada escrito— si no hay nada que hacer. `--umbrales
  * <fichero>` sirve a las pruebas para no tocar el del repositorio.
  *
+ * Historia 22.9 — las ediciones en venta:
+ *
+ *   npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"]
+ *   npm run obra -- quitar-edicion <ficha> <n>
+ *
+ * Añade una edición al final de `ediciones` de la ficha, validada con el esquema del build. Se
+ * niega —código 1, nada escrito— con la familia Obra congelada (SM-11), con una tienda que no
+ * es del conjunto `TIENDAS` de `src/lib/ingreso.ts` —hoy vacío— y con lo que el esquema rechace.
+ * `quitar-edicion` quita la de la posición `n` (desde 1, como las numera el parte de `edicion`);
+ * código 1 si no existe esa posición. Las ediciones las decide Héctor: ningún agente declara una.
+ *
  * Códigos: 2 es la forma de la invocación (falta un argumento, sobra uno, una bandera que no
  * existe); 1 es lo que la invocación dice.
  *
@@ -49,6 +60,8 @@ import {
 } from './lib/cli.ts';
 import {
   congelarObras,
+  declararEdicion,
+  quitarEdicion,
   formatearInformeDeSiembra,
   levantarCongelacion,
   restituirGrafia,
@@ -67,6 +80,8 @@ const USO = [
   '  npm run obra -- reunir <ficha-destino> <ficha-absorbida> [--corpus corpus]',
   '  npm run obra -- separar <ficha> <ficha-otra> [--corpus corpus]',
   '  npm run obra -- titular <ficha> "<grafía>" [--corpus corpus]',
+  '  npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"] [--corpus corpus]',
+  '  npm run obra -- quitar-edicion <ficha> <n> [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
   '',
@@ -178,6 +193,57 @@ async function principal(): Promise<never> {
         ]);
       }
       return terminar(await retirarFichaDeObra(rutas, sueltos[0], motivo));
+    }
+
+    case 'edicion': {
+      const conValor = ['--corpus', '--descripcion'];
+      const sueltos = [...posicionales(resto, conValor), ...trasElSeparador];
+      const soloOpciones: string[] = [];
+      for (let i = 0; i < resto.length; i += 1) {
+        const actual = resto[i];
+        if (conValor.includes(actual)) {
+          soloOpciones.push(actual);
+          const siguiente = resto[i + 1];
+          if (siguiente !== undefined && !siguiente.startsWith('--')) {
+            soloOpciones.push(siguiente);
+            i += 1;
+          }
+        } else if (actual.startsWith('--')) {
+          soloOpciones.push(actual);
+        }
+      }
+      const mal = motivosDeArgumentosNoReconocidos(soloOpciones, { solas: [], conValor });
+      if (mal.length > 0) usoMal(mal);
+      for (const bandera of conValor) {
+        if (resto.filter((a) => a === bandera).length > 1) usoMal([`«${bandera}» se da dos veces.`]);
+      }
+      if (sueltos.length < 4) usoMal(['Falta la ficha, la tienda, el formato o la dirección.']);
+      if (sueltos.length > 4) {
+        usoMal([
+          `Sobra ${sueltos.slice(4).map((a) => `«${a}»`).join(', ')}: se declara una edición cada vez.`,
+        ]);
+      }
+      const [ficha, tienda, formato, url] = sueltos;
+      const descripcion = opcion(resto, '--descripcion');
+      if (descripcion !== undefined && descripcion.trim() === '') {
+        usoMal(['«--descripcion» vacía: sin descripción, la bandera se omite.']);
+      }
+      return terminar(
+        await declararEdicion(rutas, ficha, {
+          tienda,
+          formato,
+          url,
+          ...(descripcion !== undefined ? { descripcion } : {}),
+        }),
+      );
+    }
+
+    case 'quitar-edicion': {
+      const [ficha, n] = exactamente(2, 'la ficha y la posición de la edición');
+      if (!/^[1-9]\d*$/.test(n)) {
+        usoMal([`«${n}» no es una posición: las ediciones se numeran desde 1, como las lista \`edicion\`.`]);
+      }
+      return terminar(await quitarEdicion(rutas, ficha, Number(n)));
     }
 
     case 'congelar':

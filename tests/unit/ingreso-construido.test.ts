@@ -12,7 +12,9 @@ import {
   fuenteConAdmisionAnadida,
   fuenteConDonacionesEncendidas,
   fuenteConModeloEncendido,
+  fuenteConTiendaDePrueba,
   limpiar,
+  TIENDA_DE_PRUEBA,
 } from './ayuda/construir.js';
 import { bytesDeGuionEnLinea } from './ayuda/guion.js';
 import {
@@ -343,11 +345,15 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
      * AD-20 lleva escrito unas líneas más abajo.
      */
     const sinComentarios = (texto: string) => texto.replace(/\/\*[\s\S]*?\*\//g, '');
-    const fuente = await readFile(resolve(RAIZ, 'src/components/Sostener.astro'), 'utf8');
-    expect(
-      sinComentarios(fuente).match(/<style[\s>]/g) ?? [],
-      'Sostener.astro trae un bloque <style>',
-    ).toEqual([]);
+    // Historia 22.9 — y el de las ediciones en venta, por lo mismo: la Página de Obra lo
+    // importa con la afiliación apagada.
+    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro']) {
+      const fuente = await readFile(resolve(RAIZ, 'src/components', componente), 'utf8');
+      expect(
+        sinComentarios(fuente).match(/<style[\s>]/g) ?? [],
+        `${componente} trae un bloque <style>`,
+      ).toEqual([]);
+    }
 
     /*
      * Los controles positivos, y hacen falta las dos mitades: que el patrón reconozca un
@@ -452,7 +458,7 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     }
   });
 
-  it('y quien consulta el estado son exactamente las tres superficies de la 14.2', async () => {
+  it('y quien consulta el estado son las tres superficies de la 14.2, la Obra y la admisión', async () => {
     /*
      * El censo de consumidores. Con los cuatro Modelos apagados estaba vacío y su comentario
      * anunciaba este momento: en cuanto alguna superficie consulta el estado, lo que hay que
@@ -464,6 +470,11 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
      * sitio y esta prueba es la que obliga a decirlo en el diff. La guarda de `src/components/`
      * —la prueba de arriba— sigue igual de estricta: `Sostener.astro` no importa este módulo,
      * recibe el destino como primitiva.
+     *
+     * Historia 22.9 — entran dos más, y las dos por decisión escrita: la Página de Obra, que
+     * pregunta si aloja la afiliación y compone sus ediciones, y `src/lib/admision.ts`, porque
+     * el esquema de la Ficha de Obra juzga cada edición contra el conjunto cerrado `TIENDAS`.
+     * `EdicionesEnVenta.astro` sigue sin importarlo: recibe primitivas.
      */
     const fuentes = await readdir(resolve(RAIZ, 'src'), { recursive: true, withFileTypes: true });
     const consultan: string[] = [];
@@ -477,9 +488,11 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     }
     const relativas = consultan.map((c) => c.slice(resolve(RAIZ).length + 1)).sort();
     expect(relativas).toEqual([
+      'src/lib/admision.ts',
       'src/pages/404.astro',
       'src/pages/buscar.astro',
       'src/pages/index.astro',
+      'src/pages/obra/[autor]/[slug]/[...page].astro',
     ]);
   });
 });
@@ -714,8 +727,8 @@ describe('Historia 14.2 — encender sin destino detiene la construcción', () =
  * Se construye la copia con **todos** los Modelos que hoy admite alguna superficie encendidos
  * a la vez —parcheando `src/lib/ingreso.ts` en la copia, nunca en el árbol (AD-21)— y con la
  * medición configurada, porque el guion de medición va en línea en toda página y es el que más
- * ha crecido sin que nadie lo viera (retro de la épica 7). Hoy esa lista es solo las
- * donaciones; el día que la 22.9 admita la afiliación en la Página de Obra, entra aquí sola.
+ * ha crecido sin que nadie lo viera (retro de la épica 7). Desde la 22.9 la lista son las
+ * donaciones y la afiliación, que entró sola al admitirse en la Página de Obra.
  */
 describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite', () => {
   const aLimpiar: string[] = [];
@@ -728,12 +741,32 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     m.admitidoEn.length > 0 ? { ...m, encendido: true } : m,
   );
 
+  /*
+   * Historia 22.9 — la afiliación ya se admite en la Página de Obra, así que se mide encendida
+   * en una Obra **con ediciones**: la ficha de las dos Citas del corpus declara una, de la tienda
+   * inventada que la copia declara (encender la afiliación exige alguna tienda).
+   */
+  const CORPUS_CON_EDICIONES = {
+    ...CORPUS,
+    'obras/seneca--sobre-la-brevedad-de-la-vida.yml': [
+      'autor: "seneca"',
+      'titulo: "Sobre la brevedad de la vida"',
+      'formas:',
+      '  - "sobre la brevedad de la vida"',
+      'ediciones:',
+      `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+      '    formato: "impresa"',
+      `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/dp/X"`,
+      '',
+    ].join('\n'),
+  };
+
   beforeAll(async () => {
-    let fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
+    let fuente = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
     for (const modelo of ADMITIDOS) {
       if (!modelo.encendido) fuente = fuenteConModeloEncendido(fuente, modelo.id);
     }
-    const build = await construirConCorpus(CORPUS, {
+    const build = await construirConCorpus(CORPUS_CON_EDICIONES, {
       jornada: JORNADA,
       entorno: { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' },
       ficheros: { 'src/lib/ingreso.ts': fuente },

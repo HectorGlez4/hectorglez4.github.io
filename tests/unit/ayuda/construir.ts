@@ -408,8 +408,14 @@ function fichasDeObraDe(corpus: CorpusDePrueba): Record<string, string> {
           `La ficha de prueba «${ruta}» no es YAML: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
         );
       }
-      // Por el esquema, nunca como YAML crudo: una ficha que no lo cumple no reclama nada.
-      const ficha = obraAdmisible.safeParse(bruto);
+      // Por el esquema, nunca como YAML crudo: una ficha que no lo cumple no reclama nada. Las
+      // `ediciones` (22.9) se juzgan aparte: dependen de las tiendas que declare la copia, que
+      // este proceso no ve, y una ficha que las trae reclama sus formas igual.
+      const { ediciones: _ediciones, ...sinEdiciones } =
+        bruto !== null && typeof bruto === 'object' ? (bruto as Record<string, unknown>) : {};
+      const ficha = obraAdmisible.safeParse(
+        bruto !== null && typeof bruto === 'object' ? sinEdiciones : bruto,
+      );
       if (ficha.success) {
         for (const forma of ficha.data.formas) reclamadas.add(`${ficha.data.autor}\u0000${forma}`);
       }
@@ -584,6 +590,46 @@ export function fuenteConAdmisionAnadida(fuente: string, id: string, pagina: str
   const nueva = `admitidoEn: [${elementos === '' ? '' : `${elementos}, `}'${pagina}']`;
   const tramoNuevo = tramo.replace(lista[0], nueva);
   return fuente.slice(0, inicio) + tramoNuevo + fuente.slice(fin);
+}
+
+/**
+ * Una tienda **inventada** para las copias — Historia 22.9.
+ *
+ * El repositorio versiona `TIENDAS` vacío: ninguna marca de afiliado se escribe hasta que el
+ * dueño de la cuenta declare la primera. Las pruebas que necesitan una tienda la ponen en la
+ * copia del proyecto con `fuenteConTiendaDePrueba`, nunca en el árbol (AD-21), y con un dominio
+ * reservado (`.example`) y una marca que no es de nadie.
+ */
+export const TIENDA_DE_PRUEBA = {
+  clave: 'libreria-de-prueba',
+  nombre: 'Librería de Prueba',
+  dominio: 'libreria.example',
+  parametro: 'tag',
+  marca: 'marca-de-prueba-21',
+} as const;
+
+/** La declaración vacía de `src/lib/ingreso.ts`, tal cual: lo que el parche sustituye. */
+const TIENDAS_VACIAS = 'export const TIENDAS: readonly Tienda[] = [];';
+
+/**
+ * `src/lib/ingreso.ts` con `TIENDA_DE_PRUEBA` declarada. Rompe si la declaración vacía no está
+ * exactamente una vez: el día que el dueño declare la primera tienda, quien use esto tiene que
+ * decidir qué mide, en vez de construir en silencio sin la tienda que creía poner.
+ */
+export function fuenteConTiendaDePrueba(fuente: string): string {
+  const partes = fuente.split(TIENDAS_VACIAS);
+  if (partes.length !== 2) {
+    throw new Error(
+      `\`${TIENDAS_VACIAS}\` aparece ${partes.length - 1} veces en la fuente de src/lib/ingreso.ts ` +
+        'en vez de una: o ya hay tiendas declaradas en el árbol, o la declaración cambió de forma.',
+    );
+  }
+  const t = TIENDA_DE_PRUEBA;
+  return partes.join(
+    'export const TIENDAS: readonly Tienda[] = [\n' +
+      `  { clave: '${t.clave}', nombre: '${t.nombre}', dominio: '${t.dominio}', ` +
+      `parametro: '${t.parametro}', marca: '${t.marca}' },\n];`,
+  );
 }
 
 // ─── Piezas de corpus válidas, para partir de algo que sí construye ──────────

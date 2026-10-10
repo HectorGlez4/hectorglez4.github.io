@@ -23,6 +23,7 @@ import { MODELOS } from '../src/lib/ingreso.ts';
 import {
   MILISEGUNDOS_DE_ESPERA,
   anotaciones,
+  datosDelInforme,
   estadosDe,
   interpretarLectura,
   lineasDelInforme,
@@ -106,21 +107,7 @@ const estados = estadosDe(medida, MODELOS);
 if (argumentos.includes('--json')) {
   process.stdout.write(
     `${JSON.stringify(
-      {
-        medida,
-        modelos: estados.map((estado) => ({
-          id: estado.modelo.id,
-          nombre: estado.modelo.nombre,
-          encendido: estado.modelo.encendido,
-          dispara: estado.modelo.dispara,
-          umbral: estado.modelo.umbral,
-          admitidoEn: estado.modelo.admitidoEn,
-          cifra: estado.cifra,
-          cruzado: estado.cruzado,
-          accion: estado.accion,
-          ...(estado.aviso === undefined ? {} : { aviso: estado.aviso }),
-        })),
-      },
+      datosDelInforme(medida, estados),
       null,
       2,
     )}\n`,

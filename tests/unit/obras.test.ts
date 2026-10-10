@@ -3,7 +3,8 @@ import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promis
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { obraAdmisible } from '../../src/lib/admision.ts';
+import { esquemaDeObra, obraAdmisible } from '../../src/lib/admision.ts';
+import { TIENDA_DE_PRUEBA } from './ayuda/construir.js';
 import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
 import type { Autor, Cita } from '../../src/lib/publicado.ts';
 import {
@@ -47,6 +48,7 @@ import {
   sembrarFichasDeObra,
   separarFichas,
   titularFicha,
+  ajustarTitulosDeObra,
 } from '../../tools/lib/obras.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { aprobar } from '../../tools/lib/revision.ts';
@@ -104,7 +106,7 @@ describe('el esquema de la Ficha de Obra', () => {
     ['forma repetida', { autor: 'seneca', titulo: 'X', formas: ['x', 'x'] }],
     ['título en blanco', { autor: 'seneca', titulo: '  ', formas: ['x'] }],
     ['autor que no es slug', { autor: 'Séneca', titulo: 'X', formas: ['x'] }],
-    ['campo de una épica siguiente', { autor: 'seneca', titulo: 'X', formas: ['x'], ediciones: [] }],
+    ['ediciones vacías', { autor: 'seneca', titulo: 'X', formas: ['x'], ediciones: [] }],
     ['nota vacía', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: '' }],
     ['nota en blanco', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: '   ' }],
     ['nota de 161 caracteres', { autor: 'seneca', titulo: 'X', formas: ['x'], nota: 'n'.repeat(161) }],
@@ -117,6 +119,14 @@ describe('el esquema de la Ficha de Obra', () => {
     ['distintaDe de su propia forma', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x'] }],
   ])('rechaza %s', (_caso, datos) => {
     expect(obraAdmisible.safeParse(datos).success).toBe(false);
+  });
+
+  it('una clave desconocida la rechaza `.strict()`, y el mensaje nombra los campos', () => {
+    const r = obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], sinopsis: 'Y' });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues.map((i) => i.message).join()).toContain(
+      'no reconoce «sinopsis». Sus campos son autor, titulo, formas, distintaDe, nota y ediciones.',
+    );
   });
 });
 
@@ -1393,5 +1403,72 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
     // La de la absorbida no se hereda: se queda en la retirada, y el parte lo dice.
     if (hecho.ok) expect(hecho.mensaje).toContain(`La nota de «${absorbida}» no pasa a la reunida`);
     expect(await readFile(join(rutas.obrasRetiradas, `${absorbida}.yml`), 'utf8')).toContain(NOTA);
+  });
+
+  /*
+   * Historia 22.9 — lo mismo con las ediciones en venta. El esquema del sitio no admite ninguna
+   * (TIENDAS vacío), así que las órdenes reciben el de una tienda inventada, como `edicion`.
+   */
+  const ESQUEMA = esquemaDeObra([{ ...TIENDA_DE_PRUEBA }]);
+  const EDICIONES = [
+    'ediciones:',
+    `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+    '    formato: "impresa"',
+    `    url: "https://www.${TIENDA_DE_PRUEBA.dominio}/dp/X"`,
+    '    descripcion: "Cátedra, 2015."',
+    `  - tienda: "${TIENDA_DE_PRUEBA.clave}"`,
+    '    formato: "electronica"',
+    `    url: "https://${TIENDA_DE_PRUEBA.dominio}/e/Y?th=1"`,
+    '',
+  ].join('\n');
+  const bloqueDeEdiciones = (yaml: string) => yaml.slice(yaml.indexOf('ediciones:'));
+
+  async function conNotaYEdiciones(rutas: Rutas, nombre: string) {
+    const ruta = join(rutas.obras, `${nombre}.yml`);
+    await writeFile(ruta, `${await readFile(ruta, 'utf8')}nota: "${NOTA}"\n${EDICIONES}`, 'utf8');
+  }
+
+  it('titular, separar, reunir y el ajuste del título conservan nota y ediciones — 22.9', async () => {
+    const rutas = await corpusTemporal();
+    await publicar(rutas, citaCompleta('seneca-a', 'De la brevedad de la vida'));
+    await publicar(rutas, citaCompleta('seneca-b', 'De la Brevedad de la Vida'));
+    await publicar(rutas, citaCompleta('seneca-c', 'Sobre la brevedad de la vida'));
+    await sembrarFichasDeObra(rutas);
+    const destino = 'seneca--de-la-brevedad-de-la-vida';
+    const absorbida = 'seneca--sobre-la-brevedad-de-la-vida';
+    await conNotaYEdiciones(rutas, destino);
+    await conNotaYEdiciones(rutas, absorbida);
+    const yamlDe = (nombre: string) => readFile(join(rutas.obras, `${nombre}.yml`), 'utf8');
+    const comprobar = async (nombre: string) => {
+      const yaml = await yamlDe(nombre);
+      expect(yaml).toContain(`nota: "${NOTA}"`);
+      expect(bloqueDeEdiciones(yaml)).toBe(EDICIONES);
+    };
+
+    expect((await titularFicha(rutas, destino, 'De la Brevedad de la Vida', ESQUEMA)).ok).toBe(true);
+    await comprobar(destino);
+
+    expect((await separarFichas(rutas, destino, absorbida, ESQUEMA)).ok).toBe(true);
+    await comprobar(destino);
+    await comprobar(absorbida);
+
+    // El ajuste del título (documentar, restituir-grafia): un título que ya no declara ninguna
+    // Cita pasa a la grafía por omisión, y la ficha conserva lo demás.
+    const ruta = join(rutas.obras, `${destino}.yml`);
+    await writeFile(ruta, (await readFile(ruta, 'utf8')).replace(/^titulo: .*$/m, 'titulo: "Título viejo"'), 'utf8');
+    const lineas = await ajustarTitulosDeObra(rutas, 'seneca', ['de la brevedad de la vida'], ESQUEMA);
+    expect(lineas.join('\n')).toContain('Título viejo');
+    expect(await yamlDe(destino)).not.toContain('Título viejo');
+    await comprobar(destino);
+
+    const hecho = await reunirFichas(rutas, destino, absorbida, ESQUEMA);
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    await comprobar(destino);
+    if (hecho.ok) {
+      expect(hecho.mensaje).toContain(`Las 2 ediciones en venta de «${absorbida}» no pasan a la reunida`);
+    }
+    expect(bloqueDeEdiciones(await readFile(join(rutas.obrasRetiradas, `${absorbida}.yml`), 'utf8'))).toBe(
+      EDICIONES,
+    );
   });
 });

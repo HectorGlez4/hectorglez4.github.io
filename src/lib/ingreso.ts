@@ -48,6 +48,9 @@ import {
   SESIONES_PARA_PRODUCTO_PROPIO,
   SESIONES_PARA_PUBLICIDAD,
 } from './umbrales.ts';
+import { FORMATOS_DE_EDICION, type EdicionEnVenta, type FormatoDeEdicion } from './ediciones.ts';
+
+export { FORMATOS_DE_EDICION, type EdicionEnVenta, type FormatoDeEdicion };
 
 /** Los cuatro Modelos de Ingreso de la Épica 14. No hay más, y añadir uno se ve en el diff. */
 export type IdDeModelo =
@@ -153,7 +156,7 @@ export const SUPERFICIES_DE_LECTURA: readonly string[] = [
   'cita/[slug].astro',
   'coleccion/[slug]/[...page].astro',
   // Historia 22.4 — la Página de Obra es de lectura: rechaza donaciones y publicidad. La
-  // afiliación tiene su propia regla (`esPaginaDeObra`) y la admite la 22.9.
+  // afiliación tiene su propia regla (`esPaginaDeObra`), y desde la 22.9 la admite aquí.
   'obra/[autor]/[slug]/[...page].astro',
 ];
 
@@ -172,10 +175,10 @@ export const SUPERFICIES_DE_LECTURA: readonly string[] = [
  * la Página de Obra** (FR-35, Historia 22.9). Esa regla la impone `revisarDeclaracionDeIngreso`
  * con `esPaginaDeObra`, y cubre la Página de Cita igual que cualquier otra superficie.
  *
- * Hoy **no está admitida en ninguna superficie** y sigue apagada. Lo que sigue sin decidirse
- * es **qué edición se enlaza** —la cotejada suele tener versión gratuita y no ingresa nada;
- * una moderna anotada ingresa y erosiona el «no se inventa una obra para poder enlazar»— y
- * eso se decide con la cuenta delante.
+ * Desde la Historia 22.9 está **admitida en la Página de Obra** y sigue apagada. Lo que sigue
+ * sin decidirse es **qué edición se enlaza** —la cotejada suele tener versión gratuita y no
+ * ingresa nada; una moderna anotada ingresa y erosiona el «no se inventa una obra para poder
+ * enlazar»— y eso lo decide Héctor en cada ficha, con la cuenta delante.
  *
  * El producto propio no está aquí porque no existe todavía: cuando exista traerá su superficie
  * y con ella esta decisión, y entonces se escribe.
@@ -204,8 +207,8 @@ export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...pag
  * afiliación de libros (AD-20 v7.1, FR-35).
  *
  * Desde la Historia 22.4 la Página de Obra existe —`obra/[autor]/[slug]/[...page].astro`— y
- * es la única superficie declarada que cumple esta regla; la afiliación sigue sin admitirse
- * en ella hasta la Historia 22.9, que lo hará con una línea en `admitidoEn`. Por prefijo y no
+ * es la única superficie declarada que cumple esta regla; la Historia 22.9 admitió ahí la
+ * afiliación con una línea en `admitidoEn`. Por prefijo y no
  * por el nombre exacto del fichero: todo lo que genere `src/pages/obra/` es la Página de Obra.
  */
 export function esPaginaDeObra(pagina: string): boolean {
@@ -217,6 +220,157 @@ export function esPaginaDeObra(pagina: string): boolean {
    */
   if (pagina.split('/').some((segmento) => segmento.startsWith('_'))) return false;
   return pagina !== 'obra/index.astro';
+}
+
+/**
+ * Una tienda donde se vende una edición — Historia 22.9, FR-35, AD-20.
+ *
+ * El conjunto es **cerrado**: una edición en venta solo puede apuntar a una tienda de
+ * `TIENDAS`, y su dirección tiene que ser del `dominio` de esa tienda. La marca de afiliado
+ * vive aquí y en ningún otro sitio: la ficha declara la dirección **sin** marca, y la marca la
+ * añade `urlDeEdicion` al construir. Así una marca nunca se teclea en una ficha, cambiarla es
+ * esta línea, y una ficha no puede colar la marca de otro.
+ *
+ * Se identifica por `clave` (y no por otro nombre de campo) a propósito: los parches de las
+ * pruebas recortan el tramo de cada Modelo de `MODELOS` buscando el campo que lo identifica,
+ * y una tienda que lo repitiera partiría ese tramo en dos.
+ */
+export interface Tienda {
+  /** Lo que escribe la ficha en `tienda`: minúsculas, dígitos y guiones. */
+  clave: string;
+  /** Cómo la nombra la página: «Edición impresa en {nombre}». */
+  nombre: string;
+  /** El anfitrión de sus direcciones, sin esquema; también vale cualquier subdominio suyo. */
+  dominio: string;
+  /** El parámetro de consulta que lleva la marca, como `tag`. */
+  parametro: string;
+  /** La marca de afiliado. Solo la escribe el dueño de la cuenta. */
+  marca: string;
+}
+
+/**
+ * Las tiendas declaradas. **Ninguna, y no por descuido.**
+ *
+ * La primera tienda —con su marca— la declara Héctor, con la cuenta ya solicitada y delante:
+ * este repositorio es público y una marca escrita aquí queda a la vista de cualquiera, así que
+ * ningún agente escribe una. Mientras el conjunto esté vacío el esquema de la Ficha de Obra
+ * rechaza toda edición (no hay tienda que nombrar), y encender la afiliación detiene la
+ * construcción: un Modelo de afiliación sin tienda no tiene a dónde llevar a nadie.
+ *
+ * Declarar la primera es el cambio declarado de FR-35, y se escribe así:
+ *
+ *     { clave: 'amazon-mx', nombre: 'Amazon México', dominio: 'amazon.com.mx',
+ *       parametro: 'tag', marca: '<la marca de la cuenta>' }
+ */
+export const TIENDAS: readonly Tienda[] = [];
+
+
+/** Lo que de una edición declarada importa aquí. La forma la juzga `src/lib/admision.ts`. */
+export interface EdicionDeclarada {
+  tienda: string;
+  formato: string;
+  url: string;
+  descripcion?: string;
+}
+
+/** La tienda de una clave, o `undefined` si no es del conjunto. */
+export function tiendaDe(clave: string, tiendas: readonly Tienda[] = TIENDAS): Tienda | undefined {
+  return tiendas.find((tienda) => tienda.clave === clave);
+}
+
+/**
+ * Si el anfitrión de una dirección es el dominio de una tienda o un subdominio suyo:
+ * `www.amazon.com.mx` lo es de `amazon.com.mx`, y `amazon.com.mx.ejemplo.org` no.
+ */
+export function esDelDominio(anfitrion: string, dominio: string): boolean {
+  const host = anfitrion.toLowerCase();
+  const propio = dominio.toLowerCase();
+  return host === propio || host.endsWith(`.${propio}`);
+}
+
+/**
+ * La dirección de una edición con la marca de su tienda — Historia 22.9.
+ *
+ * Pura y sin E/S: añade `parametro=marca` a la dirección declarada **respetando su consulta**
+ * —`…/dp/X?th=1` da `…/dp/X?th=1&tag=m-21`— y su fragmento, sin volver a escapar lo que ya
+ * traía. La ficha nunca trae la marca (el esquema rechaza la dirección que ya la lleva), así
+ * que aquí no hay que decidir entre dos.
+ */
+export function urlDeEdicion(
+  edicion: Pick<EdicionDeclarada, 'url'>,
+  tienda: Pick<Tienda, 'parametro' | 'marca'>,
+): string {
+  const almohadilla = edicion.url.indexOf('#');
+  const sinFragmento = almohadilla === -1 ? edicion.url : edicion.url.slice(0, almohadilla);
+  const fragmento = almohadilla === -1 ? '' : edicion.url.slice(almohadilla);
+  const par = `${encodeURIComponent(tienda.parametro)}=${encodeURIComponent(tienda.marca)}`;
+  const union = !sinFragmento.includes('?') ? '?' : /[?&]$/.test(sinFragmento) ? '' : '&';
+  return `${sinFragmento}${union}${par}${fragmento}`;
+}
+
+/**
+ * Las ediciones declaradas en una ficha, compuestas para la página y en su orden.
+ *
+ * Una edición de una tienda que no es del conjunto **rompe**: el esquema de la ficha ya la
+ * habría rechazado, así que llegar aquí con una es que algo se saltó la admisión, y pintarla
+ * sin marca —o sin tienda— sería peor que parar.
+ */
+export function edicionesEnVenta(
+  ediciones: readonly EdicionDeclarada[],
+  tiendas: readonly Tienda[] = TIENDAS,
+): EdicionEnVenta[] {
+  return ediciones.map((edicion) => {
+    const tienda = tiendaDe(edicion.tienda, tiendas);
+    if (tienda === undefined) {
+      throw new Error(
+        `La edición «${edicion.url}» es de la tienda «${edicion.tienda}», que no está declarada ` +
+          'en TIENDAS de src/lib/ingreso.ts. El esquema de la Ficha de Obra debía haberla rechazado.',
+      );
+    }
+    if (!(FORMATOS_DE_EDICION as readonly string[]).includes(edicion.formato)) {
+      throw new Error(`La edición «${edicion.url}» declara un formato desconocido: «${edicion.formato}».`);
+    }
+    return {
+      href: urlDeEdicion(edicion, tienda),
+      formato: edicion.formato as FormatoDeEdicion,
+      tienda: tienda.nombre,
+      ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
+    };
+  });
+}
+
+/**
+ * Lo que incumple la declaración de las tiendas, ya redactado. Rige **con la afiliación
+ * encendida o apagada**: una tienda mal declarada rompería el día del encendido, y el diff que
+ * la escribe es el momento de decirlo.
+ */
+export function revisarTiendas(tiendas: readonly Tienda[] = TIENDAS): string[] {
+  const fallos: string[] = [];
+  const vistas = new Set<string>();
+  for (const tienda of tiendas) {
+    const quien = `La tienda «${tienda.clave}»`;
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(tienda.clave)) {
+      fallos.push(`${quien} no tiene una clave válida: minúsculas, dígitos y guiones.`);
+    }
+    if (vistas.has(tienda.clave)) fallos.push(`${quien} se declara dos veces.`);
+    vistas.add(tienda.clave);
+    if (tienda.nombre.trim() === '') {
+      fallos.push(`${quien} no tiene nombre, y es como la nombra la página.`);
+    }
+    if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(tienda.dominio)) {
+      fallos.push(
+        `${quien} declara el dominio «${tienda.dominio}», que no es un anfitrión en minúsculas ` +
+          'sin esquema ni ruta, como «amazon.com.mx».',
+      );
+    }
+    if (!/^[A-Za-z0-9_-]+$/.test(tienda.parametro)) {
+      fallos.push(`${quien} declara el parámetro «${tienda.parametro}», que no es un nombre de parámetro.`);
+    }
+    if (tienda.marca.trim() === '' || /\s/.test(tienda.marca)) {
+      fallos.push(`${quien} declara una marca vacía o con espacios: el enlace no la llevaría.`);
+    }
+  }
+  return fallos;
 }
 
 /**
@@ -265,18 +419,17 @@ export const MODELOS: readonly Modelo[] = [
     dispara: 'solicita',
     umbral: { clase: 'sesiones-organicas-mensuales', sesiones: SESIONES_PARA_AFILIACION },
     /*
-     * Ninguna todavía, y no por descuido. El enlace de afiliación nacería de la Procedencia
-     * ya publicada (sin PA-API: exige 3 ventas en 180 días para entrar y 10 cualificadas en
-     * 30 días por marketplace para conservarse), y desde AD-20 v7.1 **solo puede admitirse
-     * en la Página de Obra** (`esPaginaDeObra`), que existe desde la 22.4: la Historia 22.9 la
-     * admitirá ahí. Encima queda abierto **qué edición se enlaza**: la cotejada suele tener
-     * versión gratuita y no ingresa nada, y una moderna anotada ingresa y erosiona el «no se
-     * inventa una obra para poder enlazar».
+     * Historia 22.9 — solo la Página de Obra, y solo su página 1 (la 2+ queda fuera por forma
+     * en `modelosEnRuta`), se indexe la Obra o no: el `noindex` decide qué ve el buscador, no
+     * qué ve quien llega desde la Atribución. AD-20 v7.1 no deja admitirla en ninguna otra
+     * superficie (`esPaginaDeObra`).
      *
-     * Las dos cosas se deciden con la cuenta ya solicitada y delante, no aquí. Mientras
-     * tanto esta lista vacía es la respuesta honesta, y el día que se decida será un diff.
+     * Admitida no es encendida. Este Modelo no tiene `destino`: cada edición lleva el suyo,
+     * compuesto con la marca de su tienda (`urlDeEdicion`), y encenderlo exige que `TIENDAS`
+     * declare al menos una. Qué edición se enlaza en cada Obra lo decide Héctor en su ficha,
+     * con la cuenta delante; hasta entonces no hay tienda y ninguna ficha puede declarar una.
      */
-    admitidoEn: [],
+    admitidoEn: ['obra/[autor]/[slug]/[...page].astro'],
     nota:
       'Cruzar su Umbral significa solicitar la cuenta, y solicitar arranca el reloj de las ' +
       '3 ventas en 180 días que ya cerró la cuenta del proyecto una vez.',
@@ -431,8 +584,9 @@ export function modelosMarcadosEn(html: string): string[] {
 export function revisarDeclaracionDeIngreso(
   modelos: readonly Modelo[] = MODELOS,
   superficies: readonly Superficie[] = SUPERFICIES,
+  tiendas: readonly Tienda[] = TIENDAS,
 ): string[] {
-  const fallos: string[] = [];
+  const fallos: string[] = [...revisarTiendas(tiendas)];
   const declaradas = new Set(superficies.map((superficie) => superficie.pagina));
 
   /*
@@ -546,15 +700,28 @@ export function revisarDeclaracionDeIngreso(
      * error, y sin funcionar— y no tendría sentido cazar solo la más aparatosa.
      *
      * **Lo que esta puerta da por supuesto, escrito para quien llegue con el segundo Modelo:**
-     * que un Modelo encendido pone un **enlace** en una página. Vale para las donaciones y
-     * valdría para la afiliación de libros. No tiene por qué valer para `producto-propio` ni
+     * que un Modelo encendido pone un **enlace** en una página. Vale para las donaciones; la
+     * afiliación pone uno por edición y se juzga aparte, arriba. No tiene por qué valer para `producto-propio` ni
      * para `publicidad-acotada`, que podrían no llevar a ninguna dirección propia; encenderlos
      * tal como está escrito hoy obligaría a declarar un destino falso solo para cruzar la
      * puerta, que es peor que no tenerla. No se resuelve aquí —no hay ningún Modelo así
      * todavía y adivinar su forma sería inventarse un requisito—, pero el día que lo haya, lo
      * que hay que cambiar es esta condición, no el destino que se declare.
      */
-    if (modelo.encendido) {
+    /*
+     * Historia 22.9 — la afiliación no tiene un destino: cada edición lleva el suyo, compuesto
+     * con la marca de su tienda. Su forma de «no llevar a ninguna parte» es no tener ninguna
+     * tienda declarada, y eso es lo que se le exige en lugar del destino.
+     */
+    if (modelo.encendido && modelo.id === 'afiliacion-de-libros') {
+      if (tiendas.length === 0) {
+        fallos.push(
+          `«${modelo.nombre}» está encendido y TIENDAS no declara ninguna tienda, así que ` +
+            'ninguna edición puede llevar a ninguna parte. Declare la primera tienda con su ' +
+            'marca, o vuelva a apagarlo.',
+        );
+      }
+    } else if (modelo.encendido) {
       if (modelo.destino === undefined) {
         fallos.push(
           `«${modelo.nombre}» está encendido y no declara destino, así que la ` +
