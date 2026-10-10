@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
-import { citaConProcedenciaCompleta, procedenciaDe } from './ayuda/corpus.ts';
+import { citaConObraMasLarga, citaConProcedenciaCompleta, procedenciaDe } from './ayuda/corpus.ts';
 
 /**
  * Historia 2.1 — Página de Cita.
@@ -304,5 +304,247 @@ test.describe('Historia 2.1 — microcopia', () => {
 
     expect(propio).not.toMatch(/[!¡]/);
     expect(propio).not.toMatch(/\p{Extended_Pictographic}/u);
+  });
+});
+
+/**
+ * Historia 22.5 — la Atribución dice de qué obra sale, y se ve que es un enlace.
+ *
+ * Los enlaces en tinta (el nombre del Autor, el título de la Obra y «de {Autor}» en la Cabecera
+ * de Obra) van subrayados **sin** `:hover`, que en móvil no existe, y sus zonas de toque no se
+ * pisan a 360 px (WCAG 2.5.8). Se mide en los dos proyectos, a 360 px en ambos, con la Inter del
+ * sitio y el cursor fuera de la página. Los valores esperados salen de los tokens de la propia
+ * página y no se escriben aquí.
+ *
+ * La guardia que corre en CI sobre la hoja emitida está en `tests/unit/obra-pagina.test.ts`.
+ */
+test.describe('Historia 22.5 — los enlaces en tinta de la Atribución', () => {
+  const completa = citaConProcedenciaCompleta();
+  const larga = citaConObraMasLarga();
+  const INEXISTENTE = '/esta-pagina-no-existe-22-5';
+
+  /** Lo que valen `--tinta`, `--tinta-apagada` y `--grosor-filete` calculados en la página. */
+  async function tokens(page: Page) {
+    return page.evaluate(() => {
+      const sonda = document.createElement('span');
+      sonda.style.color = 'var(--tinta)';
+      sonda.style.borderTop = 'var(--grosor-filete) solid';
+      document.body.append(sonda);
+      const tinta = getComputedStyle(sonda).color;
+      const grosor = getComputedStyle(sonda).borderTopWidth;
+      sonda.style.color = 'var(--tinta-apagada)';
+      const apagada = getComputedStyle(sonda).color;
+      sonda.remove();
+      return { tinta, apagada, grosor };
+    });
+  }
+
+  async function abrir(page: Page, ruta: string) {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto(ruta);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    await page.mouse.move(0, 0);
+  }
+
+  function estilo(n: Element) {
+    const e = getComputedStyle(n);
+    return {
+      color: e.color,
+      linea: e.textDecorationLine,
+      grosor: e.textDecorationThickness,
+    };
+  }
+
+  interface Caja {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+    alto: number;
+  }
+
+  interface Zonas {
+    nombre: Caja;
+    /** La caja del texto del nombre, sin el relleno que agranda la zona. */
+    textoDelNombre: Caja;
+    linea: Caja;
+    titulo: Caja[];
+    fuente: Caja[];
+    /** Por fragmento del título: el anillo de foco y lo que deja libre el interlineado. */
+    anillo: { foco: boolean; arriba: number; abajo: number; holgura: number }[];
+    tocaTitulo: boolean;
+  }
+
+  /**
+   * Las zonas de toque de la Atribución en la página abierta, y el anillo de foco del título.
+   * Sin enlace de Obra, `titulo` sale vacío; quien lo exija lo dice con su propio error.
+   */
+  async function zonas(page: Page): Promise<Zonas> {
+    await page.locator('figcaption .procedencia').scrollIntoViewIfNeeded();
+    return page.evaluate(() => {
+      const caja = (r: DOMRect) => ({ top: r.top, bottom: r.bottom, left: r.left, right: r.right, alto: r.height });
+      const nombre = document.querySelector('figcaption .autor a');
+      const linea = document.querySelector('figcaption .procedencia');
+      if (nombre === null || linea === null) throw new Error('La página no pinta la Atribución.');
+      const n = getComputedStyle(nombre);
+      const rn = nombre.getBoundingClientRect();
+      const textoDelNombre = {
+        ...caja(rn),
+        top: rn.top + parseFloat(n.paddingTop),
+        bottom: rn.bottom - parseFloat(n.paddingBottom),
+      };
+      const titulo = document.querySelector<HTMLElement>('figcaption .procedencia a');
+      const trozos = titulo === null ? [] : [...titulo.getClientRects()].map(caja);
+      const fuente = [...document.querySelectorAll('.fuente a')].flatMap((a) => [...a.getClientRects()].map(caja));
+
+      let tocaTitulo = false;
+      let anillo: { foco: boolean; arriba: number; abajo: number; holgura: number }[] = [];
+      if (titulo !== null) {
+        // La zona responde de verdad en su relleno: 1 px dentro del borde superior, por encima
+        // de las letras, el toque cae en el enlace.
+        const primero = trozos[0];
+        const tocado = document.elementFromPoint(primero.left + primero.alto / 2, primero.top + 1);
+        tocaTitulo = tocado === titulo || titulo.contains(tocado);
+
+        titulo.focus();
+        const t = getComputedStyle(titulo);
+        const relleno = parseFloat(t.paddingTop);
+        const fuera = parseFloat(t.outlineOffset) + parseFloat(t.outlineWidth);
+        const interlineado = parseFloat(getComputedStyle(linea).lineHeight);
+        anillo = trozos.map((trozo) => {
+          const contenido = trozo.alto - relleno * 2;
+          return {
+            foco: titulo.matches(':focus-visible'),
+            // Cuánto sale el anillo por encima y por debajo de la caja de contenido del texto.
+            arriba: relleno + fuera,
+            abajo: relleno + fuera,
+            // Lo que separa la caja de contenido de esta línea de la de la siguiente.
+            holgura: interlineado - contenido,
+          };
+        });
+        titulo.blur();
+      }
+      return { nombre: caja(rn), textoDelNombre, linea: caja(linea.getBoundingClientRect()), titulo: trozos, fuente, anillo, tocaTitulo };
+    });
+  }
+
+  /** Dos cajas se solapan si comparten área: tocarse en un borde no es solaparse. */
+  function solapan(a: Caja, b: Caja): boolean {
+    return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  }
+
+  function exigirTitulo(z: Zonas, donde: string): Caja[] {
+    if (z.titulo.length === 0) {
+      throw new Error(`${donde}: la Atribución no trae enlace de Obra, y esta prueba lo necesita.`);
+    }
+    return z.titulo;
+  }
+
+  /** Las comprobaciones de zonas, las mismas en cada superficie que pinta la Atribución. */
+  function comprobarZonas(z: Zonas, donde: string) {
+    expect(z.nombre.alto, `${donde}: zona del nombre`).toBeGreaterThanOrEqual(44);
+    expect(solapan(z.nombre, z.linea), `${donde}: el nombre pisa la línea de la Procedencia`).toBe(false);
+    z.titulo.forEach((trozo, i) => {
+      expect(trozo.alto, `${donde}: zona del título, fragmento ${i + 1}`).toBeGreaterThanOrEqual(24);
+      expect(solapan(z.nombre, trozo), `${donde}: el nombre pisa el título, fragmento ${i + 1}`).toBe(false);
+      for (const fuente of z.fuente) {
+        expect(solapan(trozo, fuente), `${donde}: el título pisa la Línea de la Fuente`).toBe(false);
+      }
+    });
+    if (z.titulo.length > 0) {
+      expect(z.tocaTitulo, `${donde}: el relleno del título no recibe el toque`).toBe(true);
+      for (const [i, a] of z.anillo.entries()) {
+        expect(a.foco, `${donde}: el título no muestra el foco`).toBe(true);
+        // El anillo no entra en la línea siguiente —ni en la anterior— del párrafo.
+        expect(a.abajo, `${donde}: el anillo invade la línea siguiente, fragmento ${i + 1}`).toBeLessThanOrEqual(a.holgura);
+        expect(a.arriba, `${donde}: el anillo invade la línea anterior, fragmento ${i + 1}`).toBeLessThanOrEqual(a.holgura);
+      }
+      // Ni la caja del texto del nombre.
+      expect(Math.min(...z.titulo.map((t) => t.top))).toBeGreaterThan(z.textoDelNombre.bottom);
+    }
+  }
+
+  test('el nombre y el título van en tinta y subrayados sin pasar el cursor', async ({ page }) => {
+    test.skip(completa === undefined, 'Ninguna Cita del Corpus declara obra y año a la vez.');
+    await abrir(page, `/cita/${completa!.slug}`);
+    const { tinta, apagada, grosor } = await tokens(page);
+
+    const nombre = await page.locator('figcaption .autor a').evaluate(estilo);
+    const titulo = await page.locator('figcaption .procedencia a').evaluate(estilo);
+    const linea = await page.locator('figcaption .procedencia').evaluate((n) => getComputedStyle(n).color);
+
+    for (const [que, e] of [
+      ['nombre', nombre],
+      ['título', titulo],
+    ] as const) {
+      expect(e.color, que).toBe(tinta);
+      expect(e.linea, que).toBe('underline');
+      expect(e.grosor, que).toBe(grosor);
+    }
+    // El título, más oscuro que el resto de su línea.
+    expect(linea).toBe(apagada);
+    expect(titulo.color).not.toBe(linea);
+
+    // Solo el título es enlace: el año queda fuera.
+    await expect(page.locator('figcaption .procedencia a')).toHaveCount(1);
+    await expect(page.locator('figcaption .procedencia a')).not.toContainText(String(completa!.año));
+  });
+
+  test('a 360 px, en la Página de Cita, las zonas no se pisan y el título tiene 24 px', async ({ page }) => {
+    test.skip(completa === undefined, 'Ninguna Cita del Corpus declara obra y año a la vez.');
+    await abrir(page, `/cita/${completa!.slug}`);
+    const z = await zonas(page);
+    exigirTitulo(z, completa!.slug);
+    comprobarZonas(z, completa!.slug);
+  });
+
+  test('a 360 px, con el título más largo del Corpus, partido en varias líneas', async ({ page }) => {
+    test.skip(larga === undefined, 'Ninguna Cita del Corpus declara obra y Fuente.');
+    await abrir(page, `/cita/${larga!.slug}`);
+    const z = await zonas(page);
+    const trozos = exigirTitulo(z, larga!.slug);
+    expect(trozos.length, `«${larga!.obra}» no parte a 360 px`).toBeGreaterThanOrEqual(2);
+    // Es una Cita con Fuente: debajo va la Línea de la Fuente, y el título no puede pisarla.
+    expect(z.fuente.length, `${larga!.slug} no trae Línea de la Fuente`).toBeGreaterThan(0);
+    comprobarZonas(z, larga!.slug);
+  });
+
+  for (const [donde, ruta] of [
+    ['la portada', '/'],
+    ['la página 404', INEXISTENTE],
+  ] as const) {
+    test(`a 360 px, en ${donde}, las zonas de la Atribución tampoco se pisan`, async ({ page }) => {
+      await abrir(page, ruta);
+      // La Cita del Día puede no declarar obra: entonces se mide el nombre contra la línea.
+      comprobarZonas(await zonas(page), donde);
+    });
+  }
+
+  test('sin obra, la línea de la Procedencia no lleva enlace', async ({ page }) => {
+    await abrir(page, SIN_OBRA);
+    await expect(page.locator('figcaption .procedencia')).toContainText('Sin obra documentada');
+    await expect(page.locator('figcaption .procedencia a')).toHaveCount(0);
+  });
+
+  test('en la Cabecera de Obra, «de {Autor}» sigue el mismo criterio, con 44 px de zona', async ({
+    page,
+  }) => {
+    test.skip(completa === undefined, 'Ninguna Cita del Corpus declara obra y año a la vez.');
+    await abrir(page, `/cita/${completa!.slug}`);
+    const enCita = await page.locator('figcaption .autor a').evaluate(estilo);
+    const obra = await page.locator('figcaption .procedencia a').getAttribute('href');
+    expect(obra).toMatch(/^\/obra\//);
+
+    await abrir(page, obra!);
+    const { tinta, grosor } = await tokens(page);
+    const de = page.locator('.cabecera-de-obra .de a');
+    const enObra = await de.evaluate(estilo);
+    const alto = await de.evaluate((n) => n.getBoundingClientRect().height);
+
+    expect(enObra).toEqual(enCita);
+    expect(enObra).toEqual({ color: tinta, linea: 'underline', grosor });
+    expect(alto).toBeGreaterThanOrEqual(44);
   });
 });

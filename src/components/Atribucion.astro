@@ -32,11 +32,11 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
 ---
 
 <p class="autor">
-  <a href={rutaDeAutor(autor.slug)}>{autor.nombre}</a>
+  <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{autor.nombre}</a>
 </p>
 {
   linea.titulo !== undefined && enlaceDeObra !== undefined ? (
-    <p class="procedencia"><a href={enlaceDeObra}>{linea.titulo}</a>{linea.resto}</p>
+    <p class="procedencia"><a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>{linea.resto}</p>
   ) : (
     <p class="procedencia">{linea.resto}</p>
   )
@@ -53,25 +53,30 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
     text-transform: uppercase;
   }
 
+  /*
+   * El color y el subrayado —en tinta, siempre subrayado— son `.enlace-en-tinta`, en
+   * src/styles/tokens.css, la misma regla que la Cabecera de Obra (Historia 22.5).
+   *
+   * UX-DR22 — zona de toque de 44px. El nombre se compone a 13px con interlineado 1,4, así
+   * que su caja mide 18,2px: en móvil es un blanco difícil justo para el enlace que abre la
+   * ruta de salida principal. El relleno crece el área sensible y el margen negativo lo
+   * devuelve todo a su sitio, de modo que el ritmo vertical no se mueve ni un píxel.
+   *
+   * El relleno es asimétrico (WCAG 2.5.8), 24px arriba y 2 abajo: 18,2 + 24 + 2 = 44,2px.
+   *   · Arriba, `--zona-de-toque / 2 + --unidad / 4` = 24px, que son justo los 3 × `--unidad`
+   *     de relleno superior del `figcaption` (BloqueDeCita.astro): la zona llega al filete y no
+   *     pasa de él, y ahí no hay nada que tocar.
+   *   · Abajo, `--unidad / 4` = 2px. La línea de la Procedencia empieza `--unidad` (8px) por
+   *     debajo de la caja del nombre y la zona del título sube 4px sobre esa línea (véase
+   *     `.procedencia a`), así que la zona del nombre acaba 2px antes que la del título y 6px
+   *     antes que la línea (medido a 360px con la Inter del sitio en
+   *     `tests/e2e/pagina-de-cita.spec.ts`; `tests/unit/enlaces-en-tinta.test.ts` fija los
+   *     rellenos).
+   */
   .autor a {
-    /* En tinta, no en siena: el nombre es información, no una acción. */
-    color: var(--tinta);
-    text-decoration: none;
-
-    /*
-     * UX-DR22 — zona de toque de 44px. El nombre se compone a 13px, así que su caja de
-     * texto mide unos 18: en móvil es un blanco difícil justo para el enlace que abre
-     * la ruta de salida principal. El relleno crece el área sensible y el margen
-     * negativo lo devuelve todo a su sitio, de modo que el ritmo vertical de 8px no se
-     * mueve ni un píxel.
-     */
     display: inline-block;
-    padding-block: 13px;
-    margin-block: -13px;
-  }
-
-  .autor a:hover {
-    text-decoration: underline;
+    padding-block: calc(var(--zona-de-toque) / 2 + var(--unidad) / 4) calc(var(--unidad) / 4);
+    margin-block: calc(var(--zona-de-toque) / -2 - var(--unidad) / 4) calc(var(--unidad) / -4);
   }
 
   .procedencia {
@@ -81,5 +86,42 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
     font-weight: 400;
     line-height: 1.5;
     color: var(--tinta-apagada);
+  }
+
+  /*
+   * El título de la Obra: en tinta, más oscuro que el resto de la línea, y subrayado siempre
+   * (`.enlace-en-tinta`).
+   *
+   * Su zona efectiva tiene que medir **al menos 24px** (3 × `--unidad`), y mide 26: la caja de
+   * contenido de la Inter del sitio a 13px es de 16px, y `--unidad × 5/8` = 5px de relleno por
+   * cada lado le suman 10. Quedan 2px de holgura por si la fuente redondea distinto.
+   *
+   * Es un enlace en línea —un título largo tiene que poder partirse—, así que el relleno
+   * vertical no mueve el interlineado y no hace falta devolverlo: en un elemento en línea el
+   * margen vertical no tiene efecto. El horizontal sí desplazaría el texto, y por eso se
+   * devuelve con margen negativo. El relleno es igual por los cuatro lados para que el anillo
+   * de foco, que se dibuja alrededor de él, pueda ceñirse al texto con un solo
+   * `outline-offset` (abajo). Cuando el título parte, `box-decoration-break: clone` repite
+   * relleno y margen en cada fragmento: sin él, el fragmento que empieza o acaba en mitad del
+   * título no tiene relleno lateral y el anillo, desplazado hacia dentro, corta la primera o la
+   * última letra de la línea.
+   */
+  .procedencia a {
+    padding: calc(var(--unidad) * 5 / 8);
+    margin-inline: calc(var(--unidad) * -5 / 8);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /*
+   * UX-DR23 — el anillo global (2px en siena, separado 2px) se dibuja fuera del relleno: 5 + 2
+   * + 2 = 9px por debajo de las letras, que es entrar en la línea siguiente cuando la línea
+   * parte después del título, porque entre la caja de contenido de una línea y la de la
+   * siguiente solo hay 3,5px (19,5 − 16). Con el desplazamiento en `-(--unidad / 2)` = -4px el
+   * borde interior queda a 1px del texto y el exterior a 3, dentro de esos 3,5. Un desplazamiento negativo con relleno es el mismo anillo, no otro
+   * estilo de foco: color, grosor y radio siguen siendo los de tokens.css.
+   */
+  .procedencia a:focus-visible {
+    outline-offset: calc(var(--unidad) / -2);
   }
 </style>

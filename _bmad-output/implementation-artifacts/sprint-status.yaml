@@ -363,7 +363,7 @@ development_status:
   # 22.4 detrás de la 19.1. La indexabilidad nace con la página: sin rutas de Obra, su prueba sobre dist/ pasa en vacío.
   22-4-la-obra-tiene-página-y-solo-se-indexa-si-no-repite-otra: review  # 180 Obras, 81 indexables al desplegar (línea base SM-11)
   # 22.5 lleva los dos defectos de UX de la Atribución (título E2 y Autor subrayado viajan juntos).
-  22-5-la-atribución-dice-de-qué-obra-sale-y-se-ve-que-es-un-enlace: backlog
+  22-5-la-atribución-dice-de-qué-obra-sale-y-se-ve-que-es-un-enlace: review
   22-6-dónde-leer-esta-obra: backlog
   # 22.7 decide que el fichero del Autor entra en la Tarjeta de Obra (AD-16), pendiente del visto bueno de Héctor.
   22-7-la-obra-se-encuentra-en-el-buscador-del-sitio-y-se-ve-al-com: backlog

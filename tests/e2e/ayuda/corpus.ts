@@ -100,6 +100,30 @@ export function citaConProcedenciaCompleta():
   return undefined;
 }
 
+/**
+ * La Cita con Fuente cuya Obra declara el título más largo, por su slug —Historia 22.5—, para
+ * medir la Atribución con un título que parte en varias líneas a 360 px y con la Línea de la
+ * Fuente debajo. Se deriva y no se fija: el título más largo de hoy puede no serlo después de
+ * la siguiente siembra. Empate, por slug.
+ */
+export function citaConObraMasLarga(): { slug: string; obra: string } | undefined {
+  let mejor: { slug: string; obra: string } | undefined;
+  for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
+    const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
+    const obra = campo(contenido, '  obra');
+    const slug = campo(contenido, 'slug');
+    if (obra === undefined || slug === undefined || !/^fuente:/m.test(contenido)) continue;
+    if (
+      mejor === undefined ||
+      obra.length > mejor.obra.length ||
+      (obra.length === mejor.obra.length && slug < mejor.slug)
+    ) {
+      mejor = { slug, obra };
+    }
+  }
+  return mejor;
+}
+
 /** El texto literal de una Cita del Corpus, por su slug. */
 export function textoDe(slug: string): string {
   for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {

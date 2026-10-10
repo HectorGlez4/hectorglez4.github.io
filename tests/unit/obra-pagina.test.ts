@@ -147,6 +147,9 @@ const datos = {
 <body><pre id="obras">{JSON.stringify(datos)}</pre></body></html>
 `;
 
+/** Una ruta como literal de expresión regular: `/obra/…/` lleva barras y puede llevar puntos. */
+const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 const NOINDEX = /<meta name="robots" content="noindex, follow"/;
 const EN_PAGEFIND = /<main[^>]*data-pagefind-body/;
@@ -280,6 +283,93 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       const pagina = await html(proyecto, `/cita/${cita}/`);
       expect(pagina, cita).toMatch(new RegExp(`<p class="procedencia"[^>]*><a href="${ruta}"[^>]*>${linea}</p>`));
     }
+  });
+
+  it('el nombre, el título y «de {Autor}» llevan la misma clase de enlace en tinta — 22.5', async () => {
+    // Historia 22.5 — un solo criterio (`.enlace-en-tinta`, en tokens.css) para los tres, y
+    // el resto de la línea fuera del enlace.
+    const cita = await html(proyecto, '/cita/seneca-cartas-0/');
+    expect(cita).toMatch(/<p class="autor"[^>]*>\s*<a href="\/autor\/seneca\/" class="enlace-en-tinta"[^>]*>Séneca<\/a>/);
+    expect(cita).toMatch(
+      new RegExp(
+        `<p class="procedencia"[^>]*><a href="${escapar(CARTAS)}" class="enlace-en-tinta"[^>]*>Cartas a Lucilio</a>, 64\\.</p>`,
+      ),
+    );
+    const obra = await html(proyecto, CARTAS);
+    expect(obra).toMatch(/<p class="de"[^>]*>de <a href="\/autor\/seneca\/" class="enlace-en-tinta"[^>]*>Séneca<\/a>/);
+  });
+
+  /*
+   * Historia 22.5 — la guardia que corre en CI. Las pruebas de punta a punta miden el subrayado y
+   * las zonas de toque a 360 px, pero el CI no las ejecuta; esto lee la hoja de estilos que el
+   * build emite —en línea, en los `<style>` de cada página— y fija lo que las sostiene: la regla
+   * compartida, que ninguna regla de componente la pise, y los rellenos decididos.
+   */
+  describe('la hoja emitida — 22.5', () => {
+    /** Las reglas de la página como `selector → cuerpo`, sin el atributo de ámbito de Astro. */
+    async function reglas(ruta: string): Promise<{ selector: string; cuerpo: string }[]> {
+      const pagina = await html(proyecto, ruta);
+      return [...pagina.matchAll(/<style>([\s\S]*?)<\/style>/g)].flatMap((m) =>
+        [...m[1].matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((r) => ({
+          selector: r[1].replace(/\[data-astro-cid-[\w-]+\]/g, '').trim(),
+          cuerpo: r[2],
+        })),
+      );
+    }
+    const declaraciones = (cuerpo: string) =>
+      new Map(
+        cuerpo
+          .split(';')
+          .filter((d) => d.includes(':'))
+          .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const),
+      );
+
+    it('existe `.enlace-en-tinta`: tinta, subrayado y grosor del filete', async () => {
+      for (const ruta of ['/cita/seneca-cartas-0/', CARTAS]) {
+        const regla = (await reglas(ruta)).find((r) => r.selector === '.enlace-en-tinta');
+        expect(regla, ruta).toBeDefined();
+        const d = declaraciones(regla!.cuerpo);
+        expect(d.get('color'), ruta).toBe('var(--tinta)');
+        expect(d.get('text-decoration-line') ?? d.get('text-decoration'), ruta).toMatch(/^underline\b/);
+        expect(d.get('text-decoration-thickness'), ruta).toBe('var(--grosor-filete)');
+      }
+    });
+
+    it('ninguna regla de `.autor a`, `.procedencia a` ni `.de a` fija color ni subrayado', async () => {
+      const todas = [...(await reglas('/cita/seneca-cartas-0/')), ...(await reglas(CARTAS))];
+      const delEnlace = todas.filter((r) =>
+        r.selector.split(',').some((s) => /^\.(autor|procedencia|de) a(:[\w-]+)?$/.test(s.trim())),
+      );
+      // Las tres existen —si no, la prueba no miraría nada—.
+      for (const selector of ['.autor a', '.procedencia a', '.de a']) {
+        expect(delEnlace.some((r) => r.selector === selector), selector).toBe(true);
+      }
+      for (const regla of delEnlace) {
+        const fijadas = [...declaraciones(regla.cuerpo).keys()].filter(
+          (p) => p === 'color' || p.startsWith('text-decoration'),
+        );
+        expect(fijadas, regla.selector).toEqual([]);
+      }
+      // Y ningún subrayado que dependa del cursor.
+      expect(delEnlace.map((r) => r.selector)).not.toContain('.autor a:hover');
+    });
+
+    it('los rellenos decididos: 24 + 2 en el nombre, 5 por lado en el título y 10 + 10 en «de»', async () => {
+      const todas = [...(await reglas('/cita/seneca-cartas-0/')), ...(await reglas(CARTAS))];
+      const de = (selector: string) => declaraciones(todas.find((r) => r.selector === selector)?.cuerpo ?? '');
+      expect(de('.autor a').get('padding-block')).toBe(
+        'calc(var(--zona-de-toque) / 2 + var(--unidad) / 4) calc(var(--unidad) / 4)',
+      );
+      expect(de('.autor a').get('margin-block')).toBe(
+        'calc(var(--zona-de-toque) / -2 - var(--unidad) / 4) calc(var(--unidad) / -4)',
+      );
+      expect(de('.procedencia a').get('padding')).toBe('calc(var(--unidad) * 5 / 8)');
+      expect(de('.procedencia a').get('margin-inline')).toBe('calc(var(--unidad) * -5 / 8)');
+      // Relleno en cada fragmento de un título partido: sin él, el anillo de foco corta letras.
+      expect(de('.procedencia a').get('box-decoration-break')).toBe('clone');
+      expect(de('.procedencia a:focus-visible').get('outline-offset')).toBe('calc(var(--unidad) / -2)');
+      expect(de('.de a').get('padding-block')).toBe('calc((var(--zona-de-toque) - var(--cuerpo-md) * 1.6) / 2)');
+    });
   });
 
   it('JSON-LD: el `isPartOf` de la Cita y el `about` de la Obra comparten `@id`', async () => {

@@ -162,6 +162,21 @@ a {
   text-underline-offset: 0.2em;
 }
 
+/*
+ * Historia 22.5 — el enlace en tinta: un nombre o un título que es información y no una
+ * acción, y que por eso no va en siena. Se ve que es enlace porque va subrayado **siempre**,
+ * no al pasar el cursor, que en móvil no existe. El desplazamiento lo hereda de `a`.
+ *
+ * Es una sola regla para la Atribución (nombre del Autor y título de la Obra) y la Cabecera
+ * de Obra («de {Autor}»): dos copias acabarían divergiendo. La zona de toque no va aquí,
+ * porque depende del cuerpo y del interlineado de cada sitio.
+ */
+.enlace-en-tinta {
+  color: var(--tinta);
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--grosor-filete);
+}
+
 img,
 svg {
   max-width: 100%;

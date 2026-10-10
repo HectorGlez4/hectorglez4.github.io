@@ -2,7 +2,7 @@
 title: 'Historia 22.5 — La atribución dice de qué obra sale, y se ve que es un enlace'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '9047670655e1dd2aad1ceda13223a78173e51bcc'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -80,9 +80,29 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5 (high 0, medium 1, low 4)
+- defer: 0
+- reject: 2
+- addressed_findings:
+  - `[medium]` `[patch]` Todo lo que fija la historia solo lo comprobaban las e2e, que el CI no corre → guardia unitaria sobre la hoja emitida.
+  - `[low]` `[patch]` Rellenos con tokens; comentario 24/26; todos los fragmentos del título contra el nombre, la línea y la Fuente; título partido; `/` y `/404`; error claro sin título; foco visible del título con relleno simétrico, `outline-offset` y `box-decoration-break`; `CARTAS` escapado.
+
 ## Verification
 
 **Commands:**
 - `npx playwright test tests/e2e/pagina-de-cita.spec.ts` (y el spec de la Obra, si se toca) -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `.enlace-en-tinta`, una sola regla en `tokens.css` (tinta, subrayado siempre visible y `--grosor-filete`), la llevan el nombre y el título de la Atribución y «de {Autor}» de la Cabecera de Obra. A 360 px: el nombre mide 44 px, el título 26 px y los separan 2 px, sin solape con la Procedencia ni con la Fuente; el foco visible del título no invade la línea siguiente.
+
+**Revisión:** 5 parches aplicados y 2 rechazados (8 px de separación, porque el AC pide no solapar; volver a un `:hover`). Seguimiento: false.
+
+**Verificación:** suite 118 ficheros y 3754 pruebas; e2e de Página de Cita y accesibilidad en los dos proyectos, 116 en verde; astro check, 0 errores; build en verde.

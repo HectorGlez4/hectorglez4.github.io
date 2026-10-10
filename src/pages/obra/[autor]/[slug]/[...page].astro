@@ -117,7 +117,7 @@ const emiteVista = caracterDe(ruta) === 'producto';
         * punto medio es decoración: quien usa lector de pantalla oye una coma.
         */}
       <p class="de">
-        de <a href={rutaDeAutor(autor.slug)}>{autor.nombre}</a>{
+        de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{autor.nombre}</a>{
           obra.año !== undefined && (
             <>
               <span aria-hidden="true"> · </span><span class="oculto">, </span>{obra.año}
@@ -178,17 +178,17 @@ const emiteVista = caracterDe(ruta) === 'producto';
   }
 
   /*
-   * El nombre es información y no una acción: en tinta, subrayado siempre. La zona de toque
-   * llega a 44 px con relleno y se devuelve con margen negativo, como el nombre en la
-   * Atribución, para que el ritmo vertical no se mueva.
+   * El nombre es información y no una acción: en tinta, subrayado siempre. Color y subrayado
+   * son `.enlace-en-tinta` (src/styles/tokens.css), la misma regla que la Atribución
+   * (Historia 22.5). La zona de toque llega a `--zona-de-toque` (44 px) con relleno y se devuelve
+   * con margen negativo, para que el ritmo vertical no se mueva. El relleno es lo que le falta a
+   * la línea (`--cuerpo-md` × 1,6 = 24 px, el interlineado de `.de`) para llegar a 44, repartido
+   * por igual: 10 + 10. Si cambia el interlineado de `.de`, hay que cambiar aquí el 1,6.
    */
   .de a {
-    color: var(--tinta);
-    text-decoration: underline;
-    text-decoration-thickness: var(--grosor-filete);
     display: inline-block;
-    padding-block: 10px;
-    margin-block: -10px;
+    padding-block: calc((var(--zona-de-toque) - var(--cuerpo-md) * 1.6) / 2);
+    margin-block: calc((var(--cuerpo-md) * 1.6 - var(--zona-de-toque)) / 2);
   }
 
   /* Sin clase global para esto: es la misma regla que `Paginacion.astro` declara para sí. */
