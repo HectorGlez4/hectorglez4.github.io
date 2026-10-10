@@ -1,0 +1,62 @@
+# Señales externas — Historia 21.4, Épica 21
+#
+# QUÉ REGISTRA. Enlaces hacia el sitio desde fuera, con su clase: PROPIA si lo puso
+# Héctor —la bio de TikTok, el Linktree, el campo web de Facebook— y AJENA si lo puso un
+# tercero. De cada una: qué día se puso o se vio, la URL que enlaza (origen), la página del
+# sitio a la que lleva (destino) y, si el destino iba marcado con ?de=<red>, `marcado:
+# true`. Cuando serie-de-indexacion.yml se mueva, esto es lo que dirá si antes hubo una
+# señal externa y de qué clase. La fecha puede ser anterior al canal: una bio o un enlace
+# ajeno pueden existir de antes.
+#
+# POR QUÉ SOLO AÑADE, como publicaciones-de-canal.yml y peticiones-de-rastreo.yml, y al
+# contrario que las series, que miden un ESTADO y reemplazan por fecha. Esto registra
+# HECHOS: que un enlace apareció. Reescribir una entrada borraría cuándo apareció, que es
+# justo lo que se compara con la serie. Solo se añade al final; ninguna entrada anterior
+# se reescribe. Anotar dos veces el mismo enlace —mismo origen, destino y tipo— se admite
+# con un aviso, y la consulta cuenta ENLACES DISTINTOS, no entradas.
+#
+# CORREGIR SIN REESCRIBIR. Una señal anotada por error —una ajena que era propia, un
+# origen equivocado— se deshace con otra entrada: la misma orden con --retira <fecha de la
+# que corrige>, que anota `retira: <fecha>` con el mismo origen, destino y tipo. La
+# consulta deja de contar la retirada y no cuenta la corrección como enlace. Si lo bueno
+# era otra cosa, se anota después como señal nueva.
+#
+# LA 18.1 NO SE CIERRA CON SEÑALES PROPIAS. Las propias se ponen a voluntad y no dicen
+# nada de si alguien de fuera enlaza: la Historia 18.1 se cierra con la PRIMERA AJENA. La
+# consulta lo dice siempre —«hay N», nombrando la primera, o «todavía ninguna»—.
+#
+# LAS PROPIAS DE LA SEMANA DEL CICLO se anotan el día que se ponen, una por enlace, con
+# --tipo propia: si se anotan después, la fecha ya no dice cuándo empezó a existir.
+#
+# A LAS DOS SEMANAS DE LA PRIMERA PROPIA se mira a mano, en el informe de Enlaces de
+# Search Console, si su dominio figura como dominio de referencia, y se anota a mano como
+# comentario al final de este fichero («# AAAA-MM-DD — <dominio>: figura | no figura»).
+# La consulta dice cuándo toca; la orden no lee Search Console ni hace ninguna petición.
+#
+#   npm run canal                                    # incluye las señales. NO escribe.
+#   npm run canal -- senal <url-origen> <ruta-destino> --tipo propia|ajena
+#                     [--fecha AAAA-MM-DD] [--nota "…"] [--retira AAAA-MM-DD]
+#
+#   <url-origen>    la página de fuera que enlaza, con su http(s)://.
+#   <ruta-destino>  la página del sitio a la que lleva —ruta o URL entera—, que el sitio
+#                   tiene que publicar. Se guarda la ruta del censo.
+#   --tipo          propia o ajena. Obligatorio.
+#   --fecha         la jornada en que se puso o se vio; por omisión, hoy. Nunca futura.
+#   --nota          texto libre, que se guarda tal cual (D-6). Se omite si no se da.
+#   --retira        la fecha de la señal igual que esta entrada corrige.
+#
+# CÓDIGOS DE SALIDA.
+# Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es
+# del dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una
+# URL con usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una
+# red que no existe, o más de una; una fecha futura; un --retira sin señal igual viva en
+# esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de la
+# invocación: sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida
+# o repetida; argumentos de menos o de más; un --fecha o un --retira sin forma de jornada;
+# una --nota vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.
+#
+# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y
+# ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee
+# (AD-24): quién enlaza al sitio desde fuera no es contenido del sitio.
+
+senales:

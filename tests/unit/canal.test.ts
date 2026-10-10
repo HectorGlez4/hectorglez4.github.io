@@ -10,9 +10,13 @@ import { DOMINIO } from '../../src/lib/dominio.ts';
 import { rutaDeColeccion } from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_PUBLICACIONES,
+  CABECERA_DE_SENALES,
   FICHERO_DE_PUBLICACIONES,
+  FICHERO_DE_SENALES,
   leerPublicacionesDeCanal,
+  leerSenalesExternas,
   registrarPublicacionDeCanal,
+  registrarSenalExterna,
   rutasDelCorpus,
 } from '../../tools/lib/corpus.ts';
 import { censoPorFamilia } from '../../tools/lib/indexacion.ts';
@@ -20,13 +24,19 @@ import {
   FORMATOS,
   cierreDe18_2,
   componerPublicacion,
+  componerSenal,
   desplazarSemana,
   destinoDePublicacion,
   lineasDeCanal,
+  lineasDeSenales,
   rachasPorRed,
+  resumenDeSenales,
   resumenPorSemana,
   semanaIso,
   type PublicacionDeCanal,
+  type SenalExterna,
+  type TipoDeSenal,
+  CODIGOS_DE_SENAL,
 } from '../../tools/lib/canal.ts';
 import { conjuntoDelCorpus } from '../../tools/indexacion.ts';
 import { principal } from '../../tools/canal.ts';
@@ -529,7 +539,7 @@ describe('la orden', () => {
     ['--fecha repetida', ['anotar', 'facebook', 'foto', '-', '--fecha', '2026-10-08', '--fecha', HOY], /«--fecha» aparece más de una vez/],
     ['--nota vacía', ['anotar', 'facebook', 'foto', '-', '--nota', '  '], /«--nota» vacía/],
     ['suborden desconocida', ['publicar', 'facebook', 'foto', '-'], /no es una suborden/],
-    ['--fecha en la consulta', ['--fecha', HOY], /solo tienen sentido al anotar/],
+    ['--fecha en la consulta', ['--fecha', HOY], /«--fecha» y «--nota» son de «anotar» y de «senal».*la consulta no escribe nada/],
   ])('%s: código 2, uso, y no escribe', async (_, argumentos, motivo) => {
     const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
     const salida = capturarSalida();
@@ -608,6 +618,7 @@ describe('el aislamiento del sitio (AD-24)', () => {
     for (const fichero of ficheros) {
       const contenido = readFileSync(resolve(RAIZ, 'src', String(fichero)), 'utf8');
       expect(contenido, String(fichero)).not.toContain(FICHERO_DE_PUBLICACIONES);
+      expect(contenido, String(fichero)).not.toContain(FICHERO_DE_SENALES);
       expect(contenido, String(fichero)).not.toContain('tools/lib/canal');
     }
   });
@@ -624,5 +635,647 @@ describe('el aislamiento del sitio (AD-24)', () => {
         ruta,
       ).toBe(true);
     }
+  });
+});
+
+// ─── Señales externas — Historia 21.4 ────────────────────────────────────────────────
+
+function senal(
+  origen: string,
+  destino: string,
+  extra: { tipo?: TipoDeSenal; fecha?: string; nota?: string; retira?: string; anteriores?: SenalExterna[] } = {},
+) {
+  return componerSenal(
+    {
+      origen,
+      destino,
+      tipo: extra.tipo ?? 'propia',
+      fecha: extra.fecha ?? HOY,
+      ...(extra.nota !== undefined ? { nota: extra.nota } : {}),
+      ...(extra.retira !== undefined ? { retira: extra.retira } : {}),
+    },
+    { publicadas: PUBLICADAS, hoy: HOY, anteriores: extra.anteriores ?? [] },
+  );
+}
+
+function motivosDeSenal(salida: ReturnType<typeof senal>): string {
+  expect(salida.ok).toBe(false);
+  return salida.ok ? '' : salida.motivos.join('\n');
+}
+
+describe('componer una señal externa', () => {
+  it('propia: fecha, tipo, origen tal cual (sin espacios en los extremos) y destino del censo', () => {
+    expect(senal('  https://www.tiktok.com/@x  ', '/')).toEqual({
+      ok: true,
+      senal: { fecha: HOY, tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' },
+    });
+  });
+
+  it('ajena con nota; la URL entera del destino se guarda como ruta, sin marca si no la llevaba', () => {
+    const salida = senal('https://blog.ejemplo/post', `https://${DOMINIO}/cita/una-cita#arriba`, {
+      tipo: 'ajena',
+      nota: 'reseña',
+    });
+    expect(salida.ok && salida.senal).toEqual({
+      fecha: HOY,
+      tipo: 'ajena',
+      origen: 'https://blog.ejemplo/post',
+      destino: '/cita/una-cita/',
+      nota: 'reseña',
+    });
+  });
+
+  it('el destino con ?de=<red> lleva marcado: true; con una red que no existe se rechaza', () => {
+    const salida = senal('https://linktr.ee/x', '/?de=tiktok');
+    expect(salida.ok && salida.senal).toMatchObject({ destino: '/', marcado: true });
+    expect(motivosDeSenal(senal('https://linktr.ee/x', '/?de=myspace'))).toMatch(/marcado para «myspace»/);
+    expect(motivosDeSenal(senal('https://linktr.ee/x', '/?de=x&de=tiktok'))).toMatch(/más de una marca/);
+  });
+
+  it('un origen del dominio propio, de su www o de un subdominio no es externo', () => {
+    for (const origen of [
+      `https://${DOMINIO}/x`,
+      `https://www.${DOMINIO}/`,
+      `http://blog.${DOMINIO}/post`,
+      `https://${DOMINIO.toUpperCase()}/`,
+    ]) {
+      expect(motivosDeSenal(senal(origen, '/')), origen).toMatch(/señal interna/);
+    }
+    // Un dominio que solo termina igual no es un subdominio.
+    expect(senal(`https://otro${DOMINIO}/`, '/').ok).toBe(true);
+  });
+
+  it('un origen sin esquema, o con otro que no es http(s), se rechaza', () => {
+    for (const origen of ['tiktok.com/@x', 'ftp://ejemplo.org/x', 'https://', '/cita/una-cita/']) {
+      expect(motivosDeSenal(senal(origen, '/')), origen).toMatch(/no es una URL absoluta http\(s\)/);
+    }
+  });
+
+  it('un destino que el sitio no publica, de otro dominio o «-» se rechaza', () => {
+    expect(motivosDeSenal(senal('https://a.example/', '/buscar/'))).toMatch(/declara no publicable/);
+    expect(motivosDeSenal(senal('https://a.example/', '/cita/inexistente/'))).toMatch(/no la publica el sitio/);
+    expect(motivosDeSenal(senal('https://a.example/', 'https://otro.example/'))).toMatch(/otro\.example/);
+    expect(motivosDeSenal(senal('https://a.example/', '-'))).toMatch(/no es un destino/);
+  });
+
+  it('una fecha futura se rechaza; una anterior al canal no, porque una bio puede ser de antes', () => {
+    expect(motivosDeSenal(senal('https://a.example/', '/', { fecha: '2026-10-11' }))).toMatch(/todavía no ha llegado/);
+    expect(senal('https://a.example/', '/', { fecha: '2023-07-16' }).ok).toBe(true);
+    // El suelo de las publicaciones se mantiene.
+    expect(motivosDe(componer('-', 'facebook', { fecha: '2025-10-08' }))).toMatch(/errata del año/);
+  });
+
+  it('el origen rechaza localhost, una IP, un host sin punto y una URL con credenciales', () => {
+    for (const origen of [
+      'http://localhost:4321/x',
+      'https://app.localhost/',
+      'http://127.0.0.1/',
+      'http://[::1]/',
+      'https://intranet/',
+    ]) {
+      expect(motivosDeSenal(senal(origen, '/')), origen).toMatch(/no es una página pública/);
+    }
+    for (const origen of ['https://yo:secreto@blog.ejemplo.org/', 'https://yo@blog.ejemplo.org/']) {
+      expect(motivosDeSenal(senal(origen, '/')), origen).toMatch(/usuario o contraseña/);
+    }
+  });
+
+  it('el dominio propio con punto final sigue siendo propio', () => {
+    expect(motivosDeSenal(senal(`https://${DOMINIO}./x`, '/'))).toMatch(/señal interna/);
+    expect(motivosDeSenal(senal(`https://www.${DOMINIO}./`, '/'))).toMatch(/señal interna/);
+  });
+
+  it('el destino se recorta, y ?de= solo cuenta en la consulta, nunca en el fragmento', () => {
+    const recortado = senal('https://a.example/', '  /cita/una-cita/  ');
+    expect(recortado.ok && recortado.senal.destino).toBe('/cita/una-cita/');
+    const enFragmento = senal('https://a.example/', '/cita/una-cita/#x?de=tiktok');
+    expect(enFragmento.ok && enFragmento.senal).not.toHaveProperty('marcado');
+    const enConsulta = senal('https://a.example/', ' /cita/una-cita/?de=tiktok#x ');
+    expect(enConsulta.ok && enConsulta.senal).toMatchObject({ destino: '/cita/una-cita/', marcado: true });
+  });
+
+  it('--retira: corrige una señal viva con la misma terna, y nada más', () => {
+    const anterior: SenalExterna = { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://a.example/', destino: '/' };
+    const correccion = senal('https://a.example/', '/', { tipo: 'ajena', retira: '2026-10-09', anteriores: [anterior] });
+    expect(correccion.ok && correccion.senal).toEqual({ ...anterior, fecha: HOY, retira: '2026-10-09' });
+
+    expect(
+      motivosDeSenal(senal('https://a.example/', '/', { tipo: 'propia', retira: '2026-10-09', anteriores: [anterior] })),
+    ).toMatch(/No hay ninguna señal propia del 2026-10-09/);
+    expect(
+      motivosDeSenal(senal('https://a.example/', '/', { tipo: 'ajena', retira: '2026-10-08', anteriores: [anterior] })),
+    ).toMatch(/No hay ninguna señal ajena del 2026-10-08/);
+    const yaRetirada = correccion.ok ? correccion.senal : anterior;
+    expect(
+      motivosDeSenal(
+        senal('https://a.example/', '/', { tipo: 'ajena', retira: '2026-10-09', anteriores: [anterior, yaRetirada] }),
+      ),
+    ).toMatch(/ya está retirada/);
+  });
+
+});
+
+describe('el resumen de señales', () => {
+  it('sin señales lo dice, y dice que todavía no hay ajena', () => {
+    const resumen = resumenDeSenales([], { cita: [], autor: [], tema: [], coleccion: [] }, ['/'], HOY);
+    expect(resumen).toEqual({
+      propias: [],
+      ajenas: [],
+      hayAjena: false,
+      retiradas: 0,
+      comprobacionDeSearchConsole: { estado: 'sinPropias' },
+    });
+    const texto = lineasDeSenales(resumen).join('\n');
+    expect(texto).toMatch(/No hay ninguna señal externa anotada\./);
+    expect(texto).toMatch(/La 18\.1 se cierra con la primera ajena: todavía ninguna\./);
+  });
+
+  it('separa propias de ajenas, con la familia del destino del censo', async () => {
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusConCitas(MIN_CITAS_POR_TEMA)));
+    const senales: SenalExterna[] = [
+      { fecha: '2026-10-08', tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' },
+      { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://blog.ejemplo/post', destino: '/cita/cita-0/', marcado: true, nota: 'reseña' },
+      { fecha: '2026-10-10', tipo: 'propia', origen: 'https://linktr.ee/x', destino: '/autor/autor-0/' },
+    ];
+    const resumen = resumenDeSenales(senales, censoPorFamilia(conjunto), rutasPublicadas(conjunto), HOY);
+    expect(resumen.propias.map((s) => s.familia)).toEqual(['portada', 'autor']);
+    expect(resumen.ajenas.map((s) => s.familia)).toEqual(['cita']);
+    expect(resumen.hayAjena).toBe(true);
+
+    const texto = lineasDeSenales(resumen).join('\n');
+    expect(texto).toMatch(/Propias \(2\)\n {4}2026-10-08 {2}https:\/\/www\.tiktok\.com\/@x {2}→ {2}\/ {2}\(portada\)/);
+    expect(texto).toMatch(
+      /Ajenas \(1\)\n {4}2026-10-09 {2}https:\/\/blog\.ejemplo\/post {2}→ {2}\/cita\/cita-0\/ {2}\(Cita, marcada\) {2}— reseña {2}⚠ copia un enlace del Kit/,
+    );
+    expect(texto).toMatch(
+      /La 18\.1 se cierra con la primera ajena: hay 1\. La primera, del 2026-10-09: https:\/\/blog\.ejemplo\/post → \/cita\/cita-0\/\./,
+    );
+    // Una propia marcada no lleva el aviso del Kit: es lo esperable.
+    expect(texto.match(/copia un enlace del Kit/g)).toHaveLength(1);
+  });
+
+  it('ordena por fecha y, a igual fecha, por orden del fichero; la primera ajena es la más temprana', () => {
+    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const senales: SenalExterna[] = [
+      { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://b.example/', destino: '/' },
+      { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://c.example/', destino: '/' },
+      { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://a.example/', destino: '/' },
+    ];
+    const resumen = resumenDeSenales(senales, censo, ['/'], HOY);
+    expect(resumen.ajenas.map((s) => s.origen)).toEqual(['https://c.example/', 'https://a.example/', 'https://b.example/']);
+    expect(resumen.primeraAjena).toMatchObject({ fecha: '2026-10-08', origen: 'https://c.example/', destino: '/' });
+  });
+
+  it('cuenta enlaces distintos, no entradas, y no cuenta lo retirado ni la corrección', () => {
+    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const a: SenalExterna = { fecha: '2026-10-05', tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' };
+    const ajena: SenalExterna = { fecha: '2026-10-06', tipo: 'ajena', origen: 'https://a.example/', destino: '/' };
+    const resumen = resumenDeSenales(
+      [a, { ...a, fecha: '2026-10-07' }, ajena, { ...ajena, fecha: HOY, retira: '2026-10-06' }],
+      censo,
+      ['/'],
+      HOY,
+    );
+    expect(resumen.propias).toHaveLength(1);
+    expect(resumen.propias[0]).toMatchObject({ fecha: '2026-10-05', anotaciones: 2 });
+    expect(resumen.ajenas).toEqual([]);
+    expect(resumen.hayAjena).toBe(false);
+    expect(resumen.retiradas).toBe(1);
+    const texto = lineasDeSenales(resumen).join('\n');
+    expect(texto).toMatch(/Propias \(1\)\n.*anotada 2 veces/);
+    expect(texto).toMatch(/1 retirada por corrección/);
+    expect(texto).toMatch(/todavía ninguna/);
+  });
+
+  it('la comprobación de Search Console toca a los 14 días de la primera propia', () => {
+    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const propia: SenalExterna = { fecha: '2026-09-26', tipo: 'propia', origen: 'https://linktr.ee/x', destino: '/' };
+    expect(resumenDeSenales([propia], censo, ['/'], '2026-10-09').comprobacionDeSearchConsole).toEqual({
+      estado: 'aunNoToca',
+      desde: '2026-10-10',
+    });
+    const pendiente = resumenDeSenales([propia], censo, ['/'], '2026-10-10');
+    expect(pendiente.comprobacionDeSearchConsole).toEqual({ estado: 'pendiente', desde: '2026-10-10' });
+    expect(lineasDeSenales(pendiente).join('\n')).toMatch(/Search Console .*: pendiente desde 2026-10-10\./);
+    expect(lineasDeSenales(resumenDeSenales([propia], censo, ['/'], '2026-09-30')).join('\n')).toMatch(
+      /aún no toca; toca el 2026-10-10\./,
+    );
+  });
+});
+
+describe('el registro de señales en corpus/', () => {
+  it('la cabecera dice qué registra, por qué solo añade, qué cierra la 18.1, el ciclo y Search Console', () => {
+    expect(CABECERA_DE_SENALES).toMatch(/QUÉ REGISTRA\. Enlaces hacia el sitio desde fuera/);
+    expect(CABECERA_DE_SENALES).toMatch(/PROPIA/);
+    expect(CABECERA_DE_SENALES).toMatch(/AJENA/);
+    expect(CABECERA_DE_SENALES).toMatch(/POR QUÉ SOLO AÑADE/);
+    expect(CABECERA_DE_SENALES).toMatch(/LA 18\.1 NO SE CIERRA CON SEÑALES PROPIAS/);
+    expect(CABECERA_DE_SENALES).toMatch(/PRIMERA AJENA/);
+    expect(CABECERA_DE_SENALES).toMatch(/LAS PROPIAS DE LA SEMANA DEL CICLO se anotan el día que se ponen/);
+    expect(CABECERA_DE_SENALES).toMatch(/A LAS DOS SEMANAS DE LA PRIMERA PROPIA/);
+    expect(CABECERA_DE_SENALES).toMatch(/dominio de referencia/);
+    expect(CABECERA_DE_SENALES).toMatch(/Search Console/);
+    expect(CABECERA_DE_SENALES).toMatch(/AD-24/);
+    expect(CABECERA_DE_SENALES).toMatch(/npm run canal -- senal/);
+  });
+
+  it('el fichero versionado es la cabecera y la lista vacía', () => {
+    const versionado = readFileSync(resolve(RAIZ, 'corpus', FICHERO_DE_SENALES), 'utf8');
+    expect(versionado).toBe(CABECERA_DE_SENALES);
+    expect(parsearYaml(versionado)).toEqual({ senales: null });
+  });
+
+  it('es metadato del Corpus, no una colección', () => {
+    const configuracion = readFileSync(resolve(RAIZ, 'src/content.config.ts'), 'utf8');
+    expect(configuracion).not.toContain(FICHERO_DE_SENALES);
+  });
+
+  it('crea el fichero con su cabecera, y la señal se relee igual', async () => {
+    const rutas = rutasDelCorpus(await corpusConCitas(1));
+    const una: SenalExterna = {
+      fecha: HOY,
+      tipo: 'ajena',
+      origen: 'https://blog.ejemplo/post?a=1&b=2',
+      destino: '/',
+      marcado: true,
+      nota: 'con «comillas» y: dos puntos',
+    };
+    await registrarSenalExterna(rutas, una);
+    const escrito = await readFile(rutas.senalesExternas, 'utf8');
+    expect(escrito.startsWith(CABECERA_DE_SENALES)).toBe(true);
+    expect(await leerSenalesExternas(rutas)).toEqual([una]);
+  });
+
+  it('no reescribe: con dos señales y un alta, lo anterior queda byte a byte igual', async () => {
+    const rutas = rutasDelCorpus(await corpusConCitas(1));
+    await registrarSenalExterna(rutas, { fecha: '2026-10-08', tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' });
+    await registrarSenalExterna(rutas, { fecha: '2026-10-09', tipo: 'propia', origen: 'https://linktr.ee/x', destino: '/' });
+    const antes = `${await readFile(rutas.senalesExternas, 'utf8')}# 2026-10-09 — tiktok.com: no figura\n`;
+    await writeFile(rutas.senalesExternas, antes, 'utf8');
+
+    await registrarSenalExterna(rutas, { fecha: HOY, tipo: 'ajena', origen: 'https://blog.ejemplo/', destino: '/' });
+
+    expect((await readFile(rutas.senalesExternas, 'utf8')).startsWith(antes)).toBe(true);
+    expect((await leerSenalesExternas(rutas)).map((s) => s.fecha)).toEqual(['2026-10-08', '2026-10-09', HOY]);
+  });
+
+  it('un fichero ilegible, o con la lista seguida de otra clave, se niega sin tocarlo', async () => {
+    const rutas = rutasDelCorpus(await corpusConCitas(1));
+    for (const roto of ['# sin la clave\n', 'senales: [\n', 'senales:\notra: 1\n']) {
+      await writeFile(rutas.senalesExternas, roto, 'utf8');
+      await expect(
+        registrarSenalExterna(rutas, { fecha: HOY, tipo: 'propia', origen: 'https://a.example/', destino: '/' }),
+        roto,
+      ).rejects.toThrow(/senales-externas\.yml/);
+      expect(await readFile(rutas.senalesExternas, 'utf8')).toBe(roto);
+    }
+  });
+
+  it('una entrada escrita a mano con un valor imposible se nombra al leer', async () => {
+    const rutas = rutasDelCorpus(await corpusConCitas(1));
+    const base = 'fecha: "2026-10-08"\n    tipo: "propia"\n    origen: "https://a.example/"\n    destino: "/"';
+    const casos: [string, RegExp][] = [
+      [base.replace('2026-10-08', '2026-02-31'), /entrada 1 .*«fecha: 2026-02-31»/],
+      [base.replace('propia', 'mia'), /entrada 1 .*«tipo: mia»/],
+      [base.replace('https://a.example/', 'a.example'), /entrada 1 .*«origen: a\.example»/],
+      [base.replace('destino: "/"', 'destino: "cita/x/"'), /entrada 1 .*«destino: cita\/x\/»/],
+      [base.replace('destino: "/"', 'destino: "/?de=x"'), /entrada 1 .*«destino: \/\?de=x».*sin «\?» ni «#»/],
+      [base.replace('destino: "/"', 'destino: "/#a"'), /entrada 1 .*«destino: \/#a»/],
+      [base.replace('https://a.example/', `https://${DOMINIO}/x`), /entrada 1 .*«origen: https:\/\/.*señal interna/],
+      [base.replace('https://a.example/', 'http://localhost/'), /entrada 1 .*no es una página pública/],
+      [`${base}\n    marcado: "sí"`, /entrada 1 .*«marcado: sí»/],
+      [`${base}\n    retira: "ayer"`, /entrada 1 .*«retira: ayer»/],
+      [`${base}\n    nota: 3`, /entrada 1 .*«nota» que no es texto/],
+    ];
+    for (const [entrada, motivo] of casos) {
+      await writeFile(rutas.senalesExternas, `senales:\n  - ${entrada}\n`, 'utf8');
+      await expect(leerSenalesExternas(rutas)).rejects.toThrow(motivo);
+    }
+  });
+});
+
+describe('la orden «senal»', () => {
+  it('propia: línea al final con la fecha de hoy, y sale con 0', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(
+      await principal(['--corpus', corpus, 'senal', 'https://www.tiktok.com/@x', '/', '--tipo', 'propia'], AHORA),
+    ).toBe(0);
+    expect(await leerSenalesExternas(rutasDelCorpus(corpus))).toEqual([
+      { fecha: HOY, tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' },
+    ]);
+    expect(salida.join('')).toMatch(/todavía ninguna/);
+    // Una señal no toca el registro de publicaciones.
+    expect(existsSync(join(corpus, FICHERO_DE_PUBLICACIONES))).toBe(false);
+  });
+
+  it('ajena con nota y --fecha, y su --json', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(
+      await principal(
+        ['--corpus', corpus, 'senal', 'https://blog.ejemplo/post', '/cita/cita-0/', '--tipo', 'ajena',
+          '--nota', 'reseña', '--fecha', '2026-10-09', '--json'],
+        AHORA,
+      ),
+    ).toBe(0);
+    const leido = JSON.parse(salida.join(''));
+    expect(leido.anotada).toEqual({
+      fecha: '2026-10-09',
+      tipo: 'ajena',
+      origen: 'https://blog.ejemplo/post',
+      destino: '/cita/cita-0/',
+      nota: 'reseña',
+    });
+    expect(leido.registro).toBe(join(corpus, FICHERO_DE_SENALES));
+    expect(leido.senales.hayAjena).toBe(true);
+    expect(leido.senales.ajenas[0].familia).toBe('cita');
+  });
+
+  it.each([
+    ['sin tipo', ['senal', 'https://a.example/', '/'], /necesita «--tipo propia» o «--tipo ajena»/],
+    ['tipo malo', ['senal', 'https://a.example/', '/', '--tipo', 'otra'], /«--tipo otra» no es una clase de señal/],
+    ['--tipo sin valor', ['senal', 'https://a.example/', '/', '--tipo'], /necesita un valor/],
+    ['--tipo repetido', ['senal', 'https://a.example/', '/', '--tipo', 'propia', '--tipo', 'ajena'], /«--tipo» aparece más de una vez/],
+    ['faltan argumentos', ['senal', 'https://a.example/', '--tipo', 'propia'], /necesita dos argumentos/],
+    ['sobran argumentos', ['senal', 'https://a.example/', '/', '/autor/autor-0/', '--tipo', 'propia'], /toma dos argumentos/],
+    ['--fecha sin forma de jornada', ['senal', 'https://a.example/', '/', '--tipo', 'propia', '--fecha', '9/10'], /no es una fecha del calendario/],
+    ['--tipo al anotar una publicación', ['anotar', 'x', 'foto', '-', '--tipo', 'propia'], /una publicación no tiene clase/],
+    ['--tipo en la consulta', ['--tipo', 'propia'], /«--fecha» y «--nota» son de «anotar» y de «senal».*la consulta no escribe nada/],
+  ])('%s: código 2, uso, y no escribe', async (_, argumentos, motivo) => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, ...argumentos], AHORA)).toBe(2);
+    expect(salida.join('')).toMatch(motivo);
+    expect(salida.join('')).toMatch(/npm run canal -- senal/);
+    expect(existsSync(join(corpus, FICHERO_DE_SENALES))).toBe(false);
+    expect(existsSync(join(corpus, FICHERO_DE_PUBLICACIONES))).toBe(false);
+  });
+
+  it.each([
+    ['origen propio', ['senal', `https://${DOMINIO}/x`, '/'], /señal interna/],
+    ['origen www propio', ['senal', `https://www.${DOMINIO}/`, '/'], /señal interna/],
+    ['origen sin esquema', ['senal', 'tiktok.com/@x', '/'], /no es una URL absoluta/],
+    ['destino no publicado', ['senal', 'https://a.example/', '/buscar/'], /no publicable/],
+    ['fecha futura', ['senal', 'https://a.example/', '/', '--fecha', '2026-10-11'], /todavía no ha llegado/],
+  ])('%s: código 1 y no escribe', async (_, argumentos, motivo) => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, ...argumentos, '--tipo', 'propia'], AHORA)).toBe(1);
+    expect(salida.join('')).toMatch(motivo);
+    expect(existsSync(join(corpus, FICHERO_DE_SENALES))).toBe(false);
+  });
+
+  it('un registro de señales ilegible hace fallar también la consulta, con 1', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await writeFile(join(corpus, FICHERO_DE_SENALES), 'senales: [\n', 'utf8');
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(1);
+    expect(salida.join('')).toMatch(/senales-externas\.yml no es YAML válido/);
+  });
+
+  it('consulta con 1 propia: el bloque dice «todavía ninguna» ajena', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    await principal(['--corpus', corpus, 'senal', 'https://www.tiktok.com/@x', '/', '--tipo', 'propia'], AHORA);
+    const fichero = join(corpus, FICHERO_DE_SENALES);
+    const antes = await readFile(fichero, 'utf8');
+
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(0);
+    const texto = salida.join('');
+    expect(texto).toMatch(/Señales externas/);
+    expect(texto).toMatch(/Propias \(1\)\n {4}2026-10-10 {2}https:\/\/www\.tiktok\.com\/@x {2}→ {2}\/ {2}\(portada\)/);
+    expect(texto).toMatch(/Ajenas \(0\)\n {4}ninguna/);
+    expect(texto).toMatch(/La 18\.1 se cierra con la primera ajena: todavía ninguna\./);
+    expect(await readFile(fichero, 'utf8')).toBe(antes);
+  });
+
+  it('consulta con 1 propia y 1 ajena: separadas, «hay 1», también en --json', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    await principal(['--corpus', corpus, 'senal', 'https://www.tiktok.com/@x', '/', '--tipo', 'propia'], AHORA);
+    await principal(
+      ['--corpus', corpus, 'senal', 'https://blog.ejemplo/post', '/autor/autor-0/', '--tipo', 'ajena'],
+      AHORA,
+    );
+
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(0);
+    const texto = salida.join('');
+    expect(texto).toMatch(/Propias \(1\)\n.*tiktok/);
+    expect(texto).toMatch(/Ajenas \(1\)\n.*blog\.ejemplo\/post {2}→ {2}\/autor\/autor-0\/ {2}\(Autor\)/);
+    expect(texto).toMatch(/La 18\.1 se cierra con la primera ajena: hay 1\./);
+
+    const json = capturarSalida();
+    expect(await principal(['--corpus', corpus, '--json'], AHORA)).toBe(0);
+    const leido = JSON.parse(json.join(''));
+    expect(leido.senales.propias).toHaveLength(1);
+    expect(leido.senales.ajenas).toHaveLength(1);
+    expect(leido.senales.hayAjena).toBe(true);
+  });
+
+  it('la consulta sin señales lo dice y no crea el fichero', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(0);
+    expect(salida.join('')).toMatch(/No hay ninguna señal externa anotada\./);
+    expect(existsSync(join(corpus, FICHERO_DE_SENALES))).toBe(false);
+  });
+});
+
+describe('la orden «senal», tras la revisión', () => {
+  it('la línea «Anotada señal …» lleva tipo, fecha, origen, destino, familia y «, marcada»', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(
+      await principal(
+        ['--corpus', corpus, 'senal', 'https://linktr.ee/sabiduriadebolsillo', '/cita/cita-0/?de=instagram', '--tipo', 'propia'],
+        AHORA,
+      ),
+    ).toBe(0);
+    expect(salida.join('')).toMatch(
+      /Anotada señal propia {2}2026-10-10 {2}https:\/\/linktr\.ee\/sabiduriadebolsillo {2}→ {2}\/cita\/cita-0\/ {2}\(Cita, marcada\)/,
+    );
+  });
+
+  it('--tipo antes de la suborden vale igual', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    expect(await principal(['--corpus', corpus, '--tipo', 'ajena', 'senal', 'https://a.example/', '/'], AHORA)).toBe(0);
+    expect(await leerSenalesExternas(rutasDelCorpus(corpus))).toEqual([
+      { fecha: HOY, tipo: 'ajena', origen: 'https://a.example/', destino: '/' },
+    ]);
+  });
+
+  it.each([
+    ['--nota vacía', ['senal', 'https://a.example/', '/', '--tipo', 'propia', '--nota', '  '], /«--nota» vacía/],
+    ['--retira sin forma de jornada', ['senal', 'https://a.example/', '/', '--tipo', 'propia', '--retira', 'ayer'], /«--retira ayer» no es una fecha/],
+    ['--retira al anotar', ['anotar', 'x', 'foto', '-', '--retira', HOY], /se corrige con otra publicación/],
+    ['--retira en la consulta', ['--retira', HOY], /la consulta no escribe nada/],
+  ])('%s: código 2 y no escribe', async (_, argumentos, motivo) => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, ...argumentos], AHORA)).toBe(2);
+    expect(salida.join('')).toMatch(motivo);
+    expect(existsSync(join(corpus, FICHERO_DE_SENALES))).toBe(false);
+    expect(existsSync(join(corpus, FICHERO_DE_PUBLICACIONES))).toBe(false);
+  });
+
+  it.each([
+    ['marca de una red que no existe', ['senal', 'https://a.example/', '/?de=myspace'], /marcado para «myspace»/],
+    ['marca vacía', ['senal', 'https://a.example/', '/?de='], /ninguna red/],
+    ['origen localhost', ['senal', 'http://localhost:4321/', '/'], /no es una página pública/],
+    ['origen con credenciales', ['senal', 'https://yo:x@a.example/', '/'], /usuario o contraseña/],
+    ['dominio propio con punto final', ['senal', `https://${DOMINIO}./`, '/'], /señal interna/],
+    ['--retira sin señal igual', ['senal', 'https://a.example/', '/', '--retira', '2026-10-09'], /No hay ninguna señal propia/],
+  ])('%s: código 1 y no escribe', async (_, argumentos, motivo) => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, ...argumentos, '--tipo', 'propia'], AHORA)).toBe(1);
+    expect(salida.join('')).toMatch(motivo);
+    expect(existsSync(join(corpus, FICHERO_DE_SENALES))).toBe(false);
+  });
+
+  it('una señal igual se anota, avisa con la fecha de la primera, y la consulta cuenta un enlace', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    const args = ['--corpus', corpus, 'senal', 'https://www.tiktok.com/@sabiduriabolsillo', '/', '--tipo', 'propia'];
+    expect(await principal([...args, '--fecha', '2026-10-08'], AHORA)).toBe(0);
+
+    const salida = capturarSalida();
+    expect(await principal(args, AHORA)).toBe(0);
+    expect(salida.join('')).toMatch(/ya hay una igual del 2026-10-08/);
+    expect(await leerSenalesExternas(rutasDelCorpus(corpus))).toHaveLength(2);
+
+    const consulta = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(0);
+    expect(consulta.join('')).toMatch(/Propias \(1\)\n {4}2026-10-08 .*anotada 2 veces/);
+  });
+
+  it('--retira deshace una ajena anotada por error sin reescribir nada', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    const ajena = ['--corpus', corpus, 'senal', 'https://a.example/post', '/', '--tipo', 'ajena'];
+    expect(await principal([...ajena, '--fecha', '2026-10-09'], AHORA)).toBe(0);
+    const fichero = join(corpus, FICHERO_DE_SENALES);
+    const antes = await readFile(fichero, 'utf8');
+
+    const salida = capturarSalida();
+    expect(await principal([...ajena, '--retira', '2026-10-09', '--nota', 'era propia'], AHORA)).toBe(0);
+    expect(salida.join('')).toMatch(/Anotada corrección: retira la señal ajena del 2026-10-09/);
+    expect((await readFile(fichero, 'utf8')).startsWith(antes)).toBe(true);
+    expect((await leerSenalesExternas(rutasDelCorpus(corpus))).at(-1)).toEqual({
+      fecha: HOY,
+      tipo: 'ajena',
+      origen: 'https://a.example/post',
+      destino: '/',
+      retira: '2026-10-09',
+      nota: 'era propia',
+    });
+
+    const consulta = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(0);
+    expect(consulta.join('')).toMatch(/todavía ninguna/);
+    expect(consulta.join('')).toMatch(/1 retirada por corrección/);
+
+    // Retirar dos veces la misma no se admite.
+    const otra = capturarSalida();
+    expect(await principal([...ajena, '--retira', '2026-10-09'], AHORA)).toBe(1);
+    expect(otra.join('')).toMatch(/ya está retirada/);
+  });
+
+  it('la consulta --json nombra la primera ajena y la comprobación de Search Console', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    await principal(['--corpus', corpus, 'senal', 'https://linktr.ee/x', '/', '--tipo', 'propia', '--fecha', '2026-09-20'], AHORA);
+    await principal(['--corpus', corpus, 'senal', 'https://b.example/', '/', '--tipo', 'ajena', '--fecha', '2026-10-09'], AHORA);
+    await principal(['--corpus', corpus, 'senal', 'https://a.example/', '/', '--tipo', 'ajena', '--fecha', '2026-10-01'], AHORA);
+
+    const json = capturarSalida();
+    expect(await principal(['--corpus', corpus, '--json'], AHORA)).toBe(0);
+    const leido = JSON.parse(json.join(''));
+    expect(leido.senales.primeraAjena).toMatchObject({ fecha: '2026-10-01', origen: 'https://a.example/', destino: '/' });
+    expect(leido.senales.ajenas.map((s: SenalExterna) => s.fecha)).toEqual(['2026-10-01', '2026-10-09']);
+    expect(leido.senales.comprobacionDeSearchConsole).toEqual({ estado: 'pendiente', desde: '2026-10-04' });
+  });
+});
+
+describe('cada suborden lee solo su registro', () => {
+  it('un senales-externas.yml roto no bloquea «anotar»', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await writeFile(join(corpus, FICHERO_DE_SENALES), 'senales: [\n', 'utf8');
+    capturarSalida();
+    expect(await principal(['--corpus', corpus, 'anotar', 'x', 'foto', '-'], AHORA)).toBe(0);
+    expect(await leerPublicacionesDeCanal(rutasDelCorpus(corpus))).toHaveLength(1);
+  });
+
+  it('un publicaciones-de-canal.yml roto no bloquea «senal»', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await writeFile(join(corpus, FICHERO_DE_PUBLICACIONES), 'publicaciones: [\n', 'utf8');
+    capturarSalida();
+    expect(await principal(['--corpus', corpus, 'senal', 'https://a.example/', '/', '--tipo', 'ajena'], AHORA)).toBe(0);
+    expect(await leerSenalesExternas(rutasDelCorpus(corpus))).toHaveLength(1);
+  });
+
+  it('el registro propio roto sí bloquea su suborden, con 1 y sin escribir', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await writeFile(join(corpus, FICHERO_DE_SENALES), 'senales: [\n', 'utf8');
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, 'senal', 'https://a.example/', '/', '--tipo', 'ajena'], AHORA)).toBe(1);
+    expect(salida.join('')).toMatch(/senales-externas\.yml no es YAML válido/);
+    expect(await readFile(join(corpus, FICHERO_DE_SENALES), 'utf8')).toBe('senales: [\n');
+  });
+
+  it('la consulta enseña las publicaciones si las señales no se leen, y las nombra, con 1', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    await principal(['--corpus', corpus, 'anotar', 'x', 'foto', '-'], AHORA);
+    await writeFile(join(corpus, FICHERO_DE_SENALES), 'senales: [\n', 'utf8');
+
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(1);
+    const texto = salida.join('');
+    expect(texto).toMatch(/2026-W41\n {2}x: 1/);
+    expect(texto).toMatch(/No se ha podido leer corpus\/senales-externas\.yml; no se cuenta nada de él\./);
+
+    const json = capturarSalida();
+    expect(await principal(['--corpus', corpus, '--json'], AHORA)).toBe(1);
+    const leido = JSON.parse(json.join('').split('\n}\n')[0] + '\n}');
+    expect(leido.publicaciones).toHaveLength(1);
+    expect(leido.senales).toBeUndefined();
+    expect(leido.sinLeer.map((s: { registro: string }) => s.registro)).toEqual([`corpus/${FICHERO_DE_SENALES}`]);
+  });
+
+  it('la consulta enseña las señales si las publicaciones no se leen, y las nombra, con 1', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    await principal(['--corpus', corpus, 'senal', 'https://a.example/', '/', '--tipo', 'ajena'], AHORA);
+    await writeFile(join(corpus, FICHERO_DE_PUBLICACIONES), 'publicaciones: [\n', 'utf8');
+
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(1);
+    const texto = salida.join('');
+    expect(texto).toMatch(/No se ha podido leer corpus\/publicaciones-de-canal\.yml; no se cuenta nada de él\./);
+    expect(texto).toMatch(/La 18\.1 se cierra con la primera ajena: hay 1\./);
+  });
+});
+
+describe('los códigos de «senal» tienen una sola redacción', () => {
+  const normalizar = (texto: string) => texto.replace(/\s+/g, ' ').trim();
+  const codigos = normalizar(CODIGOS_DE_SENAL);
+
+  it('la cabecera del registro la repite literal', () => {
+    expect(normalizar(CABECERA_DE_SENALES.replace(/^#/gm, ''))).toContain(codigos);
+  });
+
+  it('AGENTS.md la repite literal', () => {
+    expect(normalizar(readFileSync(resolve(RAIZ, 'AGENTS.md'), 'utf8'))).toContain(codigos);
+  });
+
+  it('el docblock de tools/canal.ts la repite literal', () => {
+    const fuente = readFileSync(resolve(RAIZ, 'tools/canal.ts'), 'utf8');
+    const docblock = fuente.slice(0, fuente.indexOf('*/')).replace(/^ \* ?/gm, '');
+    expect(normalizar(docblock)).toContain(codigos);
   });
 });

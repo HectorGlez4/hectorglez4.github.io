@@ -81,9 +81,12 @@ export type ComposicionDePublicacion =
 
 /** Los valores de `?de=` que trae lo tecleado, en el orden en que aparecen. */
 function marcasDeOrigen(dada: string): string[] {
-  const inicio = dada.indexOf('?');
+  // El fragmento se quita antes de buscar la consulta: un `?de=` detrás de `#` no llega al
+  // servidor, y no marca nada.
+  const sinFragmento = dada.split('#')[0];
+  const inicio = sinFragmento.indexOf('?');
   if (inicio === -1) return [];
-  const consulta = dada.slice(inicio + 1).split('#')[0];
+  const consulta = sinFragmento.slice(inicio + 1);
   return new URLSearchParams(consulta).getAll(PARAMETRO_DE_ORIGEN);
 }
 
@@ -97,14 +100,22 @@ function marcasDeOrigen(dada: string): string[] {
 function rutaPublicadaDe(
   dada: string,
   publicadas: readonly string[],
+  /**
+   * Si quien llama admite «-» como «no enlaza». La publicación sí (21.3); la señal externa
+   * no (21.4), porque una señal que no enlaza al sitio no es una señal. Solo cambia la
+   * redacción del motivo: la decisión es la misma.
+   */
+  admiteSinEnlace = true,
 ): { ok: true; ruta: string } | { ok: false; motivo: string } {
   const ajeno = hostAjeno(dada);
   if (ajeno !== undefined) {
     return {
       ok: false,
-      motivo:
-        `«${dada}» es de «${ajeno}» y no de ${DOMINIO}. Este registro anota lo que enlaza al ` +
-        `sitio; una publicación que lleva a otro sitio se anota con «${SIN_ENLACE}».`,
+      motivo: admiteSinEnlace
+        ? `«${dada}» es de «${ajeno}» y no de ${DOMINIO}. Este registro anota lo que enlaza al ` +
+          `sitio; una publicación que lleva a otro sitio se anota con «${SIN_ENLACE}».`
+        : `El destino «${dada}» es de «${ajeno}» y no de ${DOMINIO}: una señal externa se ` +
+          'anota por la página del sitio a la que lleva.',
     };
   }
 
@@ -119,7 +130,9 @@ function rutaPublicadaDe(
       ok: false,
       motivo:
         `«${dada}» no es una URL de este sitio: se espera la dirección completa de una página ` +
-        `publicada, su ruta empezando por «/», o «${SIN_ENLACE}» si la publicación no enlaza.`,
+        (admiteSinEnlace
+          ? `publicada, su ruta empezando por «/», o «${SIN_ENLACE}» si la publicación no enlaza.`
+          : 'publicada o su ruta empezando por «/».'),
     };
   }
 
@@ -134,12 +147,42 @@ function rutaPublicadaDe(
     ok: false,
     motivo: noPublicable
       ? `«${dada}» es ${declarada.nombre} y el sitio la declara no publicable en ` +
-        'src/lib/superficies.ts. Enlazar ahí desde el canal no lleva a nada que se cuente: ' +
-        'enlace a una página publicada.'
+        'src/lib/superficies.ts. ' +
+        (admiteSinEnlace
+          ? 'Enlazar ahí desde el canal no lleva a nada que se cuente: enlace a una página publicada.'
+          : 'Una señal hacia ahí no lleva a nada que el buscador indexe: anote la página publicada.')
       : `«${dada}» no la publica el sitio: no está en el conjunto publicable. O la ruta no ` +
-        'existe, o su superficie no llega al umbral que la publica. Una publicación que ' +
-        'enlaza a un 404 no se anota como si enlazara al sitio.',
+        'existe, o su superficie no llega al umbral que la publica. ' +
+        (admiteSinEnlace
+          ? 'Una publicación que enlaza a un 404 no se anota como si enlazara al sitio.'
+          : 'Un enlace que lleva a un 404 no es una señal hacia el sitio.'),
   };
+}
+
+/**
+ * Por qué una fecha no se anota, o `undefined` si se anota. Jornada del calendario y no
+ * futura, para publicaciones (21.3) y señales (21.4); no anterior a la primera anotable,
+ * solo para publicaciones.
+ */
+function motivoDeFechaDe(fecha: string, hoy: string, que: 'publicación' | 'señal'): string | undefined {
+  if (!esJornada(fecha)) return `«${fecha}» no es una fecha del calendario: se espera AAAA-MM-DD.`;
+  if (fecha > hoy) {
+    return (
+      `${fecha} todavía no ha llegado —hoy es ${hoy}—. Este registro anota ` +
+      (que === 'publicación'
+        ? 'lo que ya se publicó, nunca lo que está programado.'
+        : 'enlaces que ya existen, nunca los que se esperan.')
+    );
+  }
+  // El suelo es de las publicaciones: una bio o un enlace ajeno pueden ser anteriores al
+  // canal, y anotarlos con su fecha real es justo lo que se quiere (21.4).
+  if (que === 'publicación' && fecha < PRIMERA_JORNADA_DEL_CANAL) {
+    return (
+      `${fecha} es anterior a ${PRIMERA_JORNADA_DEL_CANAL}, la primera jornada ` +
+      `anotable. Si la ${que} es reciente, lo más probable es que sea una errata del año.`
+    );
+  }
+  return undefined;
 }
 
 /**
@@ -168,19 +211,8 @@ export function componerPublicacion(
     );
   }
 
-  if (!esJornada(entrada.fecha)) {
-    motivos.push(`«${entrada.fecha}» no es una fecha del calendario: se espera AAAA-MM-DD.`);
-  } else if (entrada.fecha > contexto.hoy) {
-    motivos.push(
-      `${entrada.fecha} todavía no ha llegado —hoy es ${contexto.hoy}—. Este registro anota ` +
-        'lo que ya se publicó, nunca lo que está programado.',
-    );
-  } else if (entrada.fecha < PRIMERA_JORNADA_DEL_CANAL) {
-    motivos.push(
-      `${entrada.fecha} es anterior a ${PRIMERA_JORNADA_DEL_CANAL}, la primera jornada ` +
-        'anotable. Si la publicación es reciente, lo más probable es que sea una errata del año.',
-    );
-  }
+  const motivoDeFecha = motivoDeFechaDe(entrada.fecha, contexto.hoy, 'publicación');
+  if (motivoDeFecha !== undefined) motivos.push(motivoDeFecha);
 
   let ruta = SIN_ENLACE;
   let marcado: boolean | undefined;
@@ -484,6 +516,367 @@ export function lineasDeCanal(
   lineas.push(
     `La 18.2 se cierra con ${cierre.semanasNecesarias}: lleva ${cierre.lleva}` +
       `${cierre.red !== undefined ? ` (${cierre.red})` : ''}.`,
+  );
+  return lineas;
+}
+
+// ─── Señales externas — Historia 21.4 ────────────────────────────────────────────────
+//
+// Un enlace hacia el sitio desde fuera, con su clase: **propia** si lo puso Héctor —la bio
+// de TikTok, el Linktree, el campo web de Facebook— o **ajena** si lo puso un tercero.
+// Cuando la serie de indexación se mueva, esto es lo que dirá si hubo una señal externa
+// antes y de qué clase. La 18.1 no se cierra con señales propias: se cierra con la primera
+// ajena.
+
+/** Las dos clases de señal. Un conjunto cerrado, por lo mismo que las redes y los formatos. */
+export const TIPOS_DE_SENAL = ['propia', 'ajena'] as const;
+
+export type TipoDeSenal = (typeof TIPOS_DE_SENAL)[number];
+
+export function esTipoDeSenal(valor: string): valor is TipoDeSenal {
+  return (TIPOS_DE_SENAL as readonly string[]).includes(valor);
+}
+
+/** Cuántos días después de la primera propia toca mirar el informe de Enlaces de Search Console. */
+export const DIAS_HASTA_LA_COMPROBACION = 14;
+
+/**
+ * Los códigos de salida de `senal`, con una sola redacción. La cabecera de
+ * `corpus/senales-externas.yml`, AGENTS.md y el docblock de `tools/canal.ts` la repiten
+ * literal, y `tests/unit/canal.test.ts` comprueba que las tres coinciden con esta.
+ */
+export const CODIGOS_DE_SENAL =
+  'Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del ' +
+  'dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con ' +
+  'usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red que no ' +
+  'existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa fecha; o un ' +
+  'registro que no se deja leer. Código 2 si falla la forma de la invocación: sin --tipo o con ' +
+  'un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos de menos ' +
+  'o de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o --retira ' +
+  'fuera de senal. Ninguno de los dos escribe nada.';
+
+/** Una señal externa anotada. */
+export interface SenalExterna {
+  fecha: string;
+  tipo: TipoDeSenal;
+  /** La URL de la página que enlaza, tal como se tecleó, sin espacios en los extremos. */
+  origen: string;
+  /** La ruta canónica de la página del sitio a la que lleva, como la escribe el censo. */
+  destino: string;
+  /**
+   * La orden lo escribe, y cierto, solo si el destino tecleado llevaba `?de=<red>`: la visita
+   * que traiga llegará al receptor con origen. Sin marca, el campo no se escribe; una entrada
+   * a mano con `false` se lee como sin marca.
+   */
+  marcado?: boolean;
+  /**
+   * Presente solo en una **corrección**: la fecha de la señal con la misma terna —origen,
+   * destino y tipo— que esta entrada retira. El registro solo añade, así que deshacer una
+   * señal anotada por error es anotar otra que lo diga; la consulta deja de contar la
+   * retirada y no cuenta la corrección como enlace.
+   */
+  retira?: string;
+  /** Texto libre, tal como se tecleó (D-6). Se omite si no se dio. */
+  nota?: string;
+}
+
+export type ComposicionDeSenal =
+  | { ok: true; senal: SenalExterna }
+  | { ok: false; motivos: string[] };
+
+/** Si un host es el dominio propio o cualquier subdominio suyo, con punto final o sin él. */
+function esDelDominioPropio(host: string): boolean {
+  const propio = DOMINIO.toLowerCase();
+  const limpio = host.toLowerCase().replace(/\.$/, '');
+  return limpio === propio || limpio.endsWith(`.${propio}`);
+}
+
+/**
+ * Por qué una cadena no vale como origen de una señal externa, o `undefined` si vale. La
+ * comparten la composición y la lectura del registro: una entrada escrita a mano no puede
+ * colar lo que la orden rechaza.
+ */
+export function motivoDeOrigen(origen: string): string | undefined {
+  let url: URL | undefined;
+  if (/^https?:\/\//i.test(origen)) {
+    try {
+      url = new URL(origen);
+    } catch {
+      url = undefined;
+    }
+  }
+  if (url === undefined || url.hostname === '') {
+    return (
+      `«${origen}» no es una URL absoluta http(s): se espera la dirección entera de la página ` +
+      'que enlaza, con su https://, tal como sale en la barra del navegador.'
+    );
+  }
+  if (url.username !== '' || url.password !== '') {
+    return (
+      `«${origen}» lleva usuario o contraseña: no es la dirección pública de una página, y no ` +
+      'se guarda una credencial en el repositorio.'
+    );
+  }
+  const host = url.hostname.toLowerCase().replace(/\.$/, '');
+  if (esDelDominioPropio(host)) {
+    return (
+      `«${origen}» es de ${DOMINIO}: un enlace desde el propio sitio es una señal interna, no ` +
+      'externa. El origen es la página de fuera que enlaza hacia aquí.'
+    );
+  }
+  const esIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.startsWith('[');
+  if (host === 'localhost' || host.endsWith('.localhost') || esIp || !host.includes('.')) {
+    return (
+      `«${origen}» no es una página pública: localhost, una IP o un host sin punto no enlazan ` +
+      'al sitio para el buscador. El origen es la página de fuera, con su dominio.'
+    );
+  }
+  return undefined;
+}
+
+/**
+ * La señal a anotar, o los motivos por los que no se anota.
+ *
+ * El tipo llega ya juzgado: es forma de la invocación (código 2) y lo decide la cáscara. El
+ * destino se juzga exactamente como la ruta de una publicación (21.3): `rutasPublicadas`
+ * decide, se recortan consulta y fragmento y se guarda la ruta del censo. La marca `?de=` se
+ * juzga con la misma regla, salvo que aquí no hay red de la publicación con la que cotejarla:
+ * basta con que nombre una red propia, y una sola.
+ */
+export function componerSenal(
+  entrada: {
+    origen: string;
+    destino: string;
+    tipo: TipoDeSenal;
+    fecha: string;
+    retira?: string;
+    nota?: string;
+  },
+  contexto: { publicadas: readonly string[]; hoy: string; anteriores?: readonly SenalExterna[] },
+): ComposicionDeSenal {
+  const motivos: string[] = [];
+
+  const origen = entrada.origen.trim();
+  const motivoOrigen = motivoDeOrigen(origen);
+  if (motivoOrigen !== undefined) motivos.push(motivoOrigen);
+
+  const motivoDeFecha = motivoDeFechaDe(entrada.fecha, contexto.hoy, 'señal');
+  if (motivoDeFecha !== undefined) motivos.push(motivoDeFecha);
+
+  const destinoDado = entrada.destino.trim();
+  let destino = '';
+  if (destinoDado === SIN_ENLACE) {
+    motivos.push(
+      `«${SIN_ENLACE}» no es un destino: una señal externa es un enlace hacia el sitio, y se ` +
+        'anota por la página publicada a la que lleva.',
+    );
+  } else {
+    const resuelta = rutaPublicadaDe(destinoDado, contexto.publicadas, false);
+    if (resuelta.ok) destino = resuelta.ruta;
+    else motivos.push(resuelta.motivo);
+  }
+
+  const marcas = marcasDeOrigen(destinoDado);
+  const invalida = marcas.find((marca) => !esRedValida(marca));
+  if (invalida !== undefined) {
+    motivos.push(
+      `El destino está marcado para ${invalida === '' ? 'ninguna red («de=» vacío)' : `«${invalida}»`}, ` +
+        `que no es una de las cuentas propias (${REDES_VALIDAS.join(', ')}): sus visitas llegarían ` +
+        'al receptor con un origen que no se cuenta. Pegue el enlace del Kit o la ruta sin marca.',
+    );
+  } else if (new Set(marcas).size > 1) {
+    motivos.push(
+      `El destino lleva más de una marca de origen (${marcas.join(', ')}): sus visitas se ` +
+        'atribuirían a una sola de ellas. Pegue el enlace con una marca, o sin ninguna.',
+    );
+  }
+
+  if (entrada.retira !== undefined && motivos.length === 0) {
+    const terna = { origen, destino, tipo: entrada.tipo };
+    const anteriores = contexto.anteriores ?? [];
+    const vivas = senalesVivas(anteriores);
+    const existe = anteriores.some(
+      (s) => s.retira === undefined && s.fecha === entrada.retira && mismaTerna(s, terna),
+    );
+    const viva = vivas.some((s) => s.fecha === entrada.retira && mismaTerna(s, terna));
+    if (!existe) {
+      motivos.push(
+        `No hay ninguna señal ${entrada.tipo} del ${entrada.retira} de «${origen}» a ${destino}: ` +
+          '--retira corrige una señal ya anotada, con su mismo origen, destino y tipo.',
+      );
+    } else if (!viva) {
+      motivos.push(`La señal ${entrada.tipo} del ${entrada.retira} de «${origen}» a ${destino} ya está retirada.`);
+    }
+  }
+
+  if (motivos.length > 0) return { ok: false, motivos };
+  const senal: SenalExterna = { fecha: entrada.fecha, tipo: entrada.tipo, origen, destino };
+  if (marcas.length > 0) senal.marcado = true;
+  if (entrada.retira !== undefined) senal.retira = entrada.retira;
+  if (entrada.nota !== undefined) senal.nota = entrada.nota;
+  return { ok: true, senal };
+}
+
+/** Si dos señales son el mismo enlace: mismo origen, destino y tipo. */
+export function mismaTerna(
+  a: Pick<SenalExterna, 'origen' | 'destino' | 'tipo'>,
+  b: Pick<SenalExterna, 'origen' | 'destino' | 'tipo'>,
+): boolean {
+  return a.origen === b.origen && a.destino === b.destino && a.tipo === b.tipo;
+}
+
+/**
+ * Las señales que cuentan: ni las correcciones ni lo que una corrección retira (la misma
+ * terna en la fecha que nombra su `retira`).
+ */
+function senalesVivas(senales: readonly SenalExterna[]): SenalExterna[] {
+  const correcciones = senales.filter((s) => s.retira !== undefined);
+  return senales.filter(
+    (s) =>
+      s.retira === undefined &&
+      !correcciones.some((c) => c.retira === s.fecha && mismaTerna(c, s)),
+  );
+}
+
+/** La señal viva más antigua con la misma terna, si la hay: lo que avisa de un duplicado. */
+export function senalIgualA(
+  senal: SenalExterna,
+  anteriores: readonly SenalExterna[],
+): SenalExterna | undefined {
+  if (senal.retira !== undefined) return undefined;
+  return ordenadasPorFecha(senalesVivas(anteriores)).find((s) => mismaTerna(s, senal));
+}
+
+/** Por fecha y, a igual fecha, en el orden del fichero (`sort` es estable). */
+function ordenadasPorFecha<T extends { fecha: string }>(senales: readonly T[]): T[] {
+  return [...senales].sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+
+/**
+ * Un enlace externo distinto: la primera anotación viva de su terna, con la familia de su
+ * destino —la misma clasificación que la de la 21.3— y cuántas veces se anotó.
+ */
+export interface EnlaceExterno extends SenalExterna {
+  familia: Destino;
+  anotaciones: number;
+}
+
+/** Cuándo toca mirar el informe de Enlaces de Search Console. */
+export type ComprobacionDeSearchConsole =
+  | { estado: 'sinPropias' }
+  | { estado: 'aunNoToca'; desde: string }
+  | { estado: 'pendiente'; desde: string };
+
+/** Las señales separadas por clase, y lo que mira el cierre de la 18.1. */
+export interface ResumenDeSenales {
+  /** Enlaces distintos, no entradas, por fecha de su primera anotación. */
+  propias: EnlaceExterno[];
+  ajenas: EnlaceExterno[];
+  /** La 18.1 se cierra con la primera ajena. */
+  hayAjena: boolean;
+  primeraAjena?: EnlaceExterno;
+  /** Entradas retiradas por una corrección. */
+  retiradas: number;
+  comprobacionDeSearchConsole: ComprobacionDeSearchConsole;
+}
+
+/** La jornada `dias` días después de la dada. */
+function masDias(fecha: string, dias: number): string {
+  const momento = new Date(`${fecha}T00:00:00Z`);
+  momento.setUTCDate(momento.getUTCDate() + dias);
+  return momento.toISOString().slice(0, 10);
+}
+
+export function resumenDeSenales(
+  senales: readonly SenalExterna[],
+  censo: CensoPorFamilia,
+  publicadas: readonly string[],
+  hoy: string,
+): ResumenDeSenales {
+  const vivas = ordenadasPorFecha(senalesVivas(senales));
+  const enlaces: EnlaceExterno[] = [];
+  for (const senal of vivas) {
+    const ya = enlaces.find((e) => mismaTerna(e, senal));
+    if (ya !== undefined) {
+      ya.anotaciones += 1;
+      continue;
+    }
+    enlaces.push({
+      ...senal,
+      familia: destinoDePublicacion(senal.destino, censo, publicadas),
+      anotaciones: 1,
+    });
+  }
+  const propias = enlaces.filter((s) => s.tipo === 'propia');
+  const ajenas = enlaces.filter((s) => s.tipo === 'ajena');
+  const correcciones = senales.filter((s) => s.retira !== undefined).length;
+
+  let comprobacionDeSearchConsole: ComprobacionDeSearchConsole = { estado: 'sinPropias' };
+  if (propias.length > 0) {
+    const desde = masDias(propias[0].fecha, DIAS_HASTA_LA_COMPROBACION);
+    comprobacionDeSearchConsole = hoy >= desde ? { estado: 'pendiente', desde } : { estado: 'aunNoToca', desde };
+  }
+
+  return {
+    propias,
+    ajenas,
+    hayAjena: ajenas.length > 0,
+    ...(ajenas.length > 0 ? { primeraAjena: ajenas[0] } : {}),
+    retiradas: senales.length - correcciones - senalesVivas(senales).length,
+    comprobacionDeSearchConsole,
+  };
+}
+
+function lineaDeSenal(enlace: EnlaceExterno): string {
+  const marca = enlace.marcado === true ? ', marcada' : '';
+  const veces = enlace.anotaciones > 1 ? `, anotada ${enlace.anotaciones} veces` : '';
+  const nota = enlace.nota !== undefined ? `  — ${enlace.nota}` : '';
+  /*
+   * Una ajena con `?de=` copia un enlace que solo sale del Kit: o la puso alguien que lo
+   * tomó de una publicación propia —y está bien que se diga—, o es propia mal clasificada.
+   */
+  const kit = enlace.tipo === 'ajena' && enlace.marcado === true ? '  ⚠ copia un enlace del Kit' : '';
+  return (
+    `    ${enlace.fecha}  ${enlace.origen}  →  ${enlace.destino}  ` +
+    `(${NOMBRE_DEL_DESTINO[enlace.familia]}${marca}${veces})${nota}${kit}`
+  );
+}
+
+/** El bloque «Señales externas» del informe. */
+export function lineasDeSenales(resumen: ResumenDeSenales): string[] {
+  const lineas = ['Señales externas', '════════════════', ''];
+  if (resumen.propias.length === 0 && resumen.ajenas.length === 0) {
+    lineas.push('No hay ninguna señal externa anotada.');
+  } else {
+    lineas.push(`  Propias (${resumen.propias.length})`);
+    if (resumen.propias.length === 0) lineas.push('    ninguna');
+    for (const enlace of resumen.propias) lineas.push(lineaDeSenal(enlace));
+    lineas.push(`  Ajenas (${resumen.ajenas.length})`);
+    if (resumen.ajenas.length === 0) lineas.push('    ninguna');
+    for (const enlace of resumen.ajenas) lineas.push(lineaDeSenal(enlace));
+  }
+  if (resumen.retiradas > 0) {
+    lineas.push(`  (${resumen.retiradas} retirada${resumen.retiradas === 1 ? '' : 's'} por corrección, sin contar)`);
+  }
+
+  const primera = resumen.primeraAjena;
+  lineas.push(
+    '',
+    primera !== undefined
+      ? `La 18.1 se cierra con la primera ajena: hay ${resumen.ajenas.length}. La primera, del ` +
+          `${primera.fecha}: ${primera.origen} → ${primera.destino}.`
+      : 'La 18.1 se cierra con la primera ajena: todavía ninguna.',
+  );
+
+  const comprobacion = resumen.comprobacionDeSearchConsole;
+  lineas.push(
+    comprobacion.estado === 'sinPropias'
+      ? 'Comprobación en Search Console: sin ninguna propia, aún no toca.'
+      : comprobacion.estado === 'aunNoToca'
+        ? `Comprobación en Search Console (primera propia + ${DIAS_HASTA_LA_COMPROBACION} días): ` +
+          `aún no toca; toca el ${comprobacion.desde}.`
+        : `Comprobación en Search Console (primera propia + ${DIAS_HASTA_LA_COMPROBACION} días): ` +
+          `pendiente desde ${comprobacion.desde}.`,
   );
   return lineas;
 }

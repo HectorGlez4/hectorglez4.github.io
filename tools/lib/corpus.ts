@@ -39,7 +39,15 @@ import type { LecturaDeFamilia, LecturaDeIndexacion, RepartoDeEstado } from './i
  */
 import type { PeticionDeRastreo } from './rastreo.ts';
 /* Y con el registro del canal (21.3): quién valida la publicación es `tools/lib/canal.ts`. */
-import { SIN_ENLACE, esFormato, type PublicacionDeCanal } from './canal.ts';
+import {
+  SIN_ENLACE,
+  esFormato,
+  CODIGOS_DE_SENAL,
+  esTipoDeSenal,
+  motivoDeOrigen,
+  type PublicacionDeCanal,
+  type SenalExterna,
+} from './canal.ts';
 import { esJornada } from '../../src/lib/citaDelDia.ts';
 import { esRedValida } from '../../src/lib/redes.ts';
 /* Y con la serie de tráfico (20.2): quién agrega es `tools/lib/trafico.ts`, que es puro. */
@@ -114,6 +122,13 @@ export const FICHERO_DE_PETICIONES = 'peticiones-de-rastreo.yml';
  * De la misma clase que el de peticiones: **solo añade**, porque registra actos.
  */
 export const FICHERO_DE_PUBLICACIONES = 'publicaciones-de-canal.yml';
+
+/**
+ * El registro de señales externas — Historia 21.4. Su nombre tiene un solo dueño.
+ *
+ * De la misma clase que el de publicaciones: **solo añade**, porque registra hechos.
+ */
+export const FICHERO_DE_SENALES = 'senales-externas.yml';
 
 /**
  * La lista de candidatos por época — Historia 19.5. Su nombre tiene un solo dueño.
@@ -269,6 +284,14 @@ export interface Rutas {
    */
   publicacionesDeCanal: string;
   /**
+   * El registro de señales externas — Historia 21.4.
+   *
+   * Metadato del Corpus con el mismo aislamiento que sus vecinos (AD-24): ninguna base de
+   * `src/content.config.ts` apunta aquí y ningún módulo de `src/lib/` lo lee. Quién enlaza
+   * al sitio desde fuera no es contenido del sitio.
+   */
+  senalesExternas: string;
+  /**
    * La lista de candidatos por época — Historia 19.5.
    *
    * Metadato del Corpus como sus vecinos y con el mismo aislamiento (AD-24): ninguna base de
@@ -321,6 +344,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     serieDeDemanda: join(raizCorpus, FICHERO_DE_DEMANDA),
     peticionesDeRastreo: join(raizCorpus, FICHERO_DE_PETICIONES),
     publicacionesDeCanal: join(raizCorpus, FICHERO_DE_PUBLICACIONES),
+    senalesExternas: join(raizCorpus, FICHERO_DE_SENALES),
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
@@ -2564,7 +2588,8 @@ function bloqueDePublicacion(publicacion: PublicacionDeCanal): string {
 }
 
 /**
- * Añade una publicación al registro. **Solo añade**: lo anterior queda byte a byte igual.
+ * Añade un bloque al final de un registro de solo añadir. **Solo añade**: lo anterior queda
+ * byte a byte igual. Lo comparten el registro de publicaciones (21.3) y el de señales (21.4).
  *
  * Por `appendFile`, como el registro de peticiones: no hay temporal que pueda quedarse
  * huérfano ni un `rename` que se lleve por delante lo que otra ejecución añadió entretanto.
@@ -2572,38 +2597,43 @@ function bloqueDePublicacion(publicacion: PublicacionDeCanal): string {
  * fichero ilegible —o uno en el que la lista no es lo último— se niega sin tocarlo. Después
  * se relee y se comprueba que la última entrada es la nueva y que el recuento creció en uno.
  */
-export async function registrarPublicacionDeCanal(
-  rutas: Rutas,
-  publicacion: PublicacionDeCanal,
-): Promise<string> {
-  const ruta = rutas.publicacionesDeCanal;
-  const nombre = `corpus/${FICHERO_DE_PUBLICACIONES}`;
-  const bloque = bloqueDePublicacion(publicacion);
+async function añadirAlRegistro<T>(registro: {
+  ruta: string;
+  raiz: string;
+  nombre: string;
+  clave: string;
+  cabecera: string;
+  /** Qué es una entrada, para los mensajes: «la publicación», «la señal». */
+  laEntrada: string;
+  bloque: string;
+  analizar: (nombre: string, contenido: string) => T[];
+}): Promise<string> {
+  const { ruta, raiz, nombre, clave, cabecera, laEntrada, bloque, analizar } = registro;
 
   // La entrada se valida antes de tocar nada, también la creación del fichero.
-  const [comoSeRelee] = analizarPublicaciones(nombre, `${CLAVE_DE_PUBLICACIONES}:\n${bloque}`);
+  const [comoSeRelee] = analizar(nombre, `${clave}:\n${bloque}`);
 
   if (!existsSync(ruta)) {
-    await mkdir(rutas.raiz, { recursive: true });
+    await mkdir(raiz, { recursive: true });
     try {
       // `wx` falla si el fichero apareció entretanto, en vez de truncar lo que otra
       // ejecución acabara de añadir.
-      await writeFile(ruta, CABECERA_DE_PUBLICACIONES, { encoding: 'utf8', flag: 'wx' });
+      await writeFile(ruta, cabecera, { encoding: 'utf8', flag: 'wx' });
     } catch (fallo) {
       if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
     }
   }
 
   const anterior = await readFile(ruta, 'utf8');
-  const cuantasHabia = analizarPublicaciones(nombre, anterior).length;
+  const cuantasHabia = analizar(nombre, anterior).length;
   const salto = anterior === '' || anterior.endsWith('\n') ? '' : '\n';
   const añadido = `${salto}${bloque}`;
 
-  const quedaria = analizarPublicaciones(nombre, `${anterior}${añadido}`);
+  const quedaria = analizar(nombre, `${anterior}${añadido}`);
   if (quedaria.length !== cuantasHabia + 1) {
     throw new Error(
-      `${nombre}: añadir al final no deja la publicación colgando de ` +
-        `«${CLAVE_DE_PUBLICACIONES}:» (había ${cuantasHabia} y quedarían ${quedaria.length}). ` +
+      `${nombre}: añadir al final no deja ${laEntrada} colgando de ` +
+        `«${clave}:» (había ${cuantasHabia} y quedarían ${quedaria.length}). ` +
         'El registro se escribe solo por añadido, así que la lista tiene que ser lo último del ' +
         'fichero. No se ha escrito nada.',
     );
@@ -2611,18 +2641,248 @@ export async function registrarPublicacionDeCanal(
 
   await appendFile(ruta, añadido, 'utf8');
 
-  const releidas = analizarPublicaciones(nombre, await readFile(ruta, 'utf8'));
+  const releidas = analizar(nombre, await readFile(ruta, 'utf8'));
   if (
     releidas.length !== cuantasHabia + 1 ||
     JSON.stringify(releidas.at(-1)) !== JSON.stringify(comoSeRelee)
   ) {
     throw new Error(
-      `${nombre}: tras añadir, el registro no termina en la publicación anotada (había ` +
+      `${nombre}: tras añadir, el registro no termina en ${laEntrada} anotada (había ` +
         `${cuantasHabia} y hay ${releidas.length}). Otra ejecución pudo escribir a la vez: ` +
         'revise el final del fichero antes de volver a anotar.',
     );
   }
   return ruta;
+}
+
+/** Añade una publicación al registro del canal. **Solo añade** (ver `añadirAlRegistro`). */
+export async function registrarPublicacionDeCanal(
+  rutas: Rutas,
+  publicacion: PublicacionDeCanal,
+): Promise<string> {
+  return añadirAlRegistro({
+    ruta: rutas.publicacionesDeCanal,
+    raiz: rutas.raiz,
+    nombre: `corpus/${FICHERO_DE_PUBLICACIONES}`,
+    clave: CLAVE_DE_PUBLICACIONES,
+    cabecera: CABECERA_DE_PUBLICACIONES,
+    laEntrada: 'la publicación',
+    bloque: bloqueDePublicacion(publicacion),
+    analizar: analizarPublicaciones,
+  });
+}
+
+/** Un párrafo como líneas de comentario YAML de a lo sumo 90 columnas. */
+function envolverComentario(texto: string, ancho = 90): string[] {
+  const lineas: string[] = [];
+  let actual = '#';
+  for (const palabra of texto.split(/\s+/)) {
+    if (`${actual} ${palabra}`.length > ancho && actual !== '#') {
+      lineas.push(actual);
+      actual = '#';
+    }
+    actual = `${actual} ${palabra}`;
+  }
+  lineas.push(actual);
+  return lineas;
+}
+
+/**
+ * La cabecera del registro de señales externas — Historia 21.4.
+ *
+ * Va aquí y no solo en el fichero del repositorio por lo mismo que la de publicaciones: un
+ * corpus de pruebas, o un clon al que le falte el fichero, tiene que poder anotar su primera
+ * señal sin que nadie escriba la cabecera a mano.
+ */
+export const CABECERA_DE_SENALES = [
+  '# Señales externas — Historia 21.4, Épica 21',
+  '#',
+  '# QUÉ REGISTRA. Enlaces hacia el sitio desde fuera, con su clase: PROPIA si lo puso',
+  '# Héctor —la bio de TikTok, el Linktree, el campo web de Facebook— y AJENA si lo puso un',
+  '# tercero. De cada una: qué día se puso o se vio, la URL que enlaza (origen), la página del',
+  '# sitio a la que lleva (destino) y, si el destino iba marcado con ?de=<red>, `marcado:',
+  '# true`. Cuando serie-de-indexacion.yml se mueva, esto es lo que dirá si antes hubo una',
+  '# señal externa y de qué clase. La fecha puede ser anterior al canal: una bio o un enlace',
+  '# ajeno pueden existir de antes.',
+  '#',
+  '# POR QUÉ SOLO AÑADE, como publicaciones-de-canal.yml y peticiones-de-rastreo.yml, y al',
+  '# contrario que las series, que miden un ESTADO y reemplazan por fecha. Esto registra',
+  '# HECHOS: que un enlace apareció. Reescribir una entrada borraría cuándo apareció, que es',
+  '# justo lo que se compara con la serie. Solo se añade al final; ninguna entrada anterior',
+  '# se reescribe. Anotar dos veces el mismo enlace —mismo origen, destino y tipo— se admite',
+  '# con un aviso, y la consulta cuenta ENLACES DISTINTOS, no entradas.',
+  '#',
+  '# CORREGIR SIN REESCRIBIR. Una señal anotada por error —una ajena que era propia, un',
+  '# origen equivocado— se deshace con otra entrada: la misma orden con --retira <fecha de la',
+  '# que corrige>, que anota `retira: <fecha>` con el mismo origen, destino y tipo. La',
+  '# consulta deja de contar la retirada y no cuenta la corrección como enlace. Si lo bueno',
+  '# era otra cosa, se anota después como señal nueva.',
+  '#',
+  '# LA 18.1 NO SE CIERRA CON SEÑALES PROPIAS. Las propias se ponen a voluntad y no dicen',
+  '# nada de si alguien de fuera enlaza: la Historia 18.1 se cierra con la PRIMERA AJENA. La',
+  '# consulta lo dice siempre —«hay N», nombrando la primera, o «todavía ninguna»—.',
+  '#',
+  '# LAS PROPIAS DE LA SEMANA DEL CICLO se anotan el día que se ponen, una por enlace, con',
+  '# --tipo propia: si se anotan después, la fecha ya no dice cuándo empezó a existir.',
+  '#',
+  '# A LAS DOS SEMANAS DE LA PRIMERA PROPIA se mira a mano, en el informe de Enlaces de',
+  '# Search Console, si su dominio figura como dominio de referencia, y se anota a mano como',
+  '# comentario al final de este fichero («# AAAA-MM-DD — <dominio>: figura | no figura»).',
+  '# La consulta dice cuándo toca; la orden no lee Search Console ni hace ninguna petición.',
+  '#',
+  '#   npm run canal                                    # incluye las señales. NO escribe.',
+  '#   npm run canal -- senal <url-origen> <ruta-destino> --tipo propia|ajena',
+  '#                     [--fecha AAAA-MM-DD] [--nota "…"] [--retira AAAA-MM-DD]',
+  '#',
+  '#   <url-origen>    la página de fuera que enlaza, con su http(s)://.',
+  '#   <ruta-destino>  la página del sitio a la que lleva —ruta o URL entera—, que el sitio',
+  '#                   tiene que publicar. Se guarda la ruta del censo.',
+  '#   --tipo          propia o ajena. Obligatorio.',
+  '#   --fecha         la jornada en que se puso o se vio; por omisión, hoy. Nunca futura.',
+  '#   --nota          texto libre, que se guarda tal cual (D-6). Se omite si no se da.',
+  '#   --retira        la fecha de la señal igual que esta entrada corrige.',
+  '#',
+  '# CÓDIGOS DE SALIDA.',
+  ...envolverComentario(CODIGOS_DE_SENAL),
+  '#',
+  '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y',
+  '# ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee',
+  '# (AD-24): quién enlaza al sitio desde fuera no es contenido del sitio.',
+  '',
+  'senales:',
+  '',
+].join('\n');
+
+/** La clave de la que cuelgan las señales. */
+const CLAVE_DE_SENALES = 'senales';
+
+/**
+ * Las señales de un registro ya leído, comprobando la forma del fichero y los valores de
+ * cada entrada, como el registro de publicaciones: una entrada escrita a mano con una clase
+ * que no existe contaría como si fuera buena, y aquí se nombra en vez de contarla.
+ */
+function analizarSenales(nombre: string, contenido: string): SenalExterna[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'No se lee a medias ni se escribe encima: corríjalo y vuelva a intentarlo.',
+    );
+  }
+
+  if (
+    leido === null ||
+    leido === undefined ||
+    typeof leido !== 'object' ||
+    Array.isArray(leido) ||
+    !(CLAVE_DE_SENALES in leido)
+  ) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_SENALES}:» en la raíz del fichero. Añadir una ` +
+        'señal sin ella dejaría una lista huérfana que ningún lector cuenta. Restaure la ' +
+        'cabecera del registro y vuelva a intentarlo.',
+    );
+  }
+
+  const senales = (leido as Record<string, unknown>)[CLAVE_DE_SENALES];
+  if (senales === null || senales === undefined) return [];
+
+  if (!Array.isArray(senales)) {
+    throw new Error(
+      `${nombre}: «${CLAVE_DE_SENALES}» tiene que ser una lista de señales, y es ${typeof senales}.`,
+    );
+  }
+
+  for (const [i, entrada] of senales.entries()) {
+    const deLaEntrada = `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_SENALES}»`;
+    if (entrada === null || typeof entrada !== 'object' || Array.isArray(entrada)) {
+      throw new Error(`${deLaEntrada} no es una señal (${JSON.stringify(entrada)}).`);
+    }
+    const campos = entrada as Record<string, unknown>;
+    for (const clave of ['fecha', 'tipo', 'origen', 'destino']) {
+      if (typeof campos[clave] !== 'string') {
+        throw new Error(
+          `${deLaEntrada} no declara «${clave}». Una señal lleva fecha, tipo, origen y ` +
+            'destino, o no se puede contar.',
+        );
+      }
+    }
+    const { fecha, tipo, origen, destino, marcado, retira, nota } = campos as Record<string, unknown> & {
+      fecha: string;
+      tipo: string;
+      origen: string;
+      destino: string;
+    };
+    if (!esJornada(fecha)) {
+      throw new Error(`${deLaEntrada} tiene «fecha: ${fecha}», que no es AAAA-MM-DD del calendario.`);
+    }
+    if (!esTipoDeSenal(tipo)) {
+      throw new Error(`${deLaEntrada} tiene «tipo: ${tipo}»: se espera propia o ajena.`);
+    }
+    // El origen se juzga con la misma regla que al anotar: una entrada a mano no cuela lo
+    // que la orden rechaza, como un origen del propio dominio.
+    const motivoOrigen = motivoDeOrigen(origen);
+    if (motivoOrigen !== undefined) {
+      throw new Error(`${deLaEntrada} tiene «origen: ${origen}»: ${motivoOrigen}`);
+    }
+    if (!destino.startsWith('/') || /[?#]/.test(destino)) {
+      throw new Error(
+        `${deLaEntrada} tiene «destino: ${destino}»: se espera una ruta que empiece por «/», ` +
+          'sin «?» ni «#».',
+      );
+    }
+    if (marcado !== undefined && typeof marcado !== 'boolean') {
+      throw new Error(`${deLaEntrada} tiene «marcado: ${String(marcado)}»: tiene que ser true o false.`);
+    }
+    if (retira !== undefined && (typeof retira !== 'string' || !esJornada(retira))) {
+      throw new Error(
+        `${deLaEntrada} tiene «retira: ${String(retira)}»: se espera la fecha AAAA-MM-DD de la señal que corrige.`,
+      );
+    }
+    if (nota !== undefined && typeof nota !== 'string') {
+      throw new Error(`${deLaEntrada} tiene una «nota» que no es texto.`);
+    }
+  }
+
+  return senales as SenalExterna[];
+}
+
+/** Las señales ya anotadas. Un registro que no existe se lee como registro vacío. */
+export async function leerSenalesExternas(rutas: Rutas): Promise<SenalExterna[]> {
+  if (!existsSync(rutas.senalesExternas)) return [];
+  return analizarSenales(`corpus/${FICHERO_DE_SENALES}`, await readFile(rutas.senalesExternas, 'utf8'));
+}
+
+/** Cómo se escribe una señal como elemento de la lista. */
+function bloqueDeSenal(senal: SenalExterna): string {
+  return `  -${aYaml(
+    {
+      fecha: senal.fecha,
+      tipo: senal.tipo,
+      origen: senal.origen,
+      destino: senal.destino,
+      marcado: senal.marcado,
+      retira: senal.retira,
+      nota: senal.nota,
+    },
+    '    ',
+  ).slice(3)}`;
+}
+
+/** Añade una señal al registro. **Solo añade** (ver `añadirAlRegistro`). */
+export async function registrarSenalExterna(rutas: Rutas, senal: SenalExterna): Promise<string> {
+  return añadirAlRegistro({
+    ruta: rutas.senalesExternas,
+    raiz: rutas.raiz,
+    nombre: `corpus/${FICHERO_DE_SENALES}`,
+    clave: CLAVE_DE_SENALES,
+    cabecera: CABECERA_DE_SENALES,
+    laEntrada: 'la señal',
+    bloque: bloqueDeSenal(senal),
+    analizar: analizarSenales,
+  });
 }
 
 /**

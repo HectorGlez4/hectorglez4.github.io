@@ -2,14 +2,21 @@
 title: 'Historia 21.4 — Cada señal externa queda anotada, propia o ajena'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'de99ecdaff5963f17056f2f606419da3022a8507'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-21-3-cada-publicacion-del-canal-queda-anotada.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      El recordatorio de Search Console sigue diciendo «pendiente» después de hecha la comprobación: el resultado es un comentario que ninguna orden lee.
+    evidence: |-
+      La lectura de la 21.4 se anota a mano como comentario al final de senales-externas.yml.
+    location: >-
+      tools/lib/canal.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -88,9 +95,31 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13 (high 0, medium 3, low 10)
+- defer: 1 (low 1)
+- reject: 1
+- addressed_findings:
+  - `[medium]` `[patch]` Un registro roto bloqueaba la otra suborden → cada una lee el suyo; la consulta nombra el que no pudo leer.
+  - `[medium]` `[patch]` El informe de la 18.1 no decía cuál es la primera ajena → la nombra, con la lista ordenada por fecha.
+  - `[medium]` `[patch]` El lector era más laxo que el escritor (una ajena interna escrita a mano cerraba la 18.1) → misma validación.
+  - `[low]` `[patch]` Orígenes locales; destino recortado; `?de=` solo en la consulta; duplicados avisados y contados por enlace; `--retira`; sin límite inferior de fecha; ajena marcada señalada; recordatorio de Search Console; mensajes y códigos de un solo dueño; tipos; pruebas.
+
 ## Verification
 
 **Commands:**
 - `npx vitest run tests/unit/canal.test.ts tests/unit/rastreo.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `npm run canal -- senal <url-origen> <ruta-destino> --tipo propia|ajena [--fecha] [--nota] [--retira]` añade al final de `corpus/senales-externas.yml` (vacío y versionado). La consulta separa propias de ajenas por enlace distinto, nombra la primera ajena que cerraría la 18.1 y avisa de cuándo toca mirar el informe de enlaces de Search Console.
+
+**Revisión:** 13 parches aplicados, 1 diferido y 1 rechazado (agregado por familia en lugar de etiqueta por fila). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 113 ficheros y 3457 pruebas; astro check, 0 errores; build en verde.
