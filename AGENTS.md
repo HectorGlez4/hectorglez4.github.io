@@ -405,6 +405,23 @@ ficha activa del Autor avisa como declaración rancia. Códigos: 2 es la forma d
 conocidas están propuestas, con sus datos y la orden exacta, en
 `_bmad-output/implementation-artifacts/propuesta-reuniones-de-obra.md`.
 
+### La obra se llama igual en todas partes (Historia 22.3)
+
+Toda superficie nombra la obra con el **título de su Obra resuelta** (`cita.obra.titulo`), que
+`src/lib/obras.ts` deriva con `resolverObras` y `src/lib/publicado.ts` cuelga en cada Cita:
+la Atribución, lo copiado, el JSON-LD, la Tarjeta, la Imagen de Cita, la Imagen del Kit y la
+Pieza. **Fuera de `src/lib/obras.ts` y `src/lib/admision.ts`, nada de `src/` ni de
+`public/islas/` lee `procedencia.obra`**; lo fija una prueba de `tests/unit/obras.test.ts`.
+El año que acompaña al título en la Atribución, lo copiado, la Imagen y la Tarjeta es el de la
+Procedencia de **esa** Cita. El `isPartOf` del JSON-LD describe la Obra y lleva el año de la
+Obra, y sin él va sin fecha.
+
+El build **avisa** «Obra con años discrepantes» cuando las Citas de una misma ficha declaran
+`procedencia.año` distintos, y nombra la ficha y los años. Significa que la Obra no tiene año:
+se omite, nunca se elige uno ni se infiere, y el año de una traducción nunca cuenta. No rompe
+y **todavía no se puede silenciar**. Decidir el año de la Obra —o corregir la Cita mal
+fechada— queda para cuando la Obra tenga página.
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:

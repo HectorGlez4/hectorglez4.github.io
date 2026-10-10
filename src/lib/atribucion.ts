@@ -13,7 +13,8 @@
 import type { Cita, Autor } from './publicado.ts';
 
 /**
- * La procedencia compuesta —obra y año, en ese orden— o `undefined` si no consta ninguna.
+ * La procedencia compuesta —título de la Obra y año de la Cita, en ese orden— o `undefined`
+ * si no consta ninguna.
  *
  * Tiene dueño único por lo mismo que el texto de copiar: desde la Historia 13.2 la consumen
  * dos cosas —el texto que se publica y la Pieza de Canal, que la escribe **dentro de la
@@ -27,8 +28,14 @@ import type { Cita, Autor } from './publicado.ts';
  * escribe, que es la regla de siempre (FR-2).
  */
 export function procedenciaCompuesta(cita: Cita): string | undefined {
-  const { obra, año } = cita.procedencia ?? {};
-  return [obra, año].filter((x) => x !== undefined).join(', ') || undefined;
+  /*
+   * Historia 22.3 — la obra se nombra con el título de su Obra resuelta, nunca con la grafía
+   * que declara la Cita: una Obra que reúne dos grafías se llama igual en todas partes. El
+   * año, en cambio, es el de la Procedencia de **esta** Cita, nunca el de la Obra.
+   */
+  const titulo = cita.obra?.titulo;
+  const año = cita.procedencia?.año;
+  return [titulo, año].filter((x) => x !== undefined).join(', ') || undefined;
 }
 
 /**

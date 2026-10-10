@@ -17,7 +17,9 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 import {
+  clave,
   colapsar,
+  colgarObras,
   esGrafiaLiteral,
   formaDeObra,
   grafiaPorOmision,
@@ -27,8 +29,10 @@ import {
   obrasDeCitas,
   prefijosDeFormas,
   type CitaConObra,
+  type CitaParaObra,
   type FichaDeObra,
   type GrafiaDeObra,
+  type ObraResuelta,
 } from '../../src/lib/obras.ts';
 import {
   escribirCita,
@@ -960,4 +964,57 @@ export async function restituirGrafia(rutas: Rutas, slug: string): Promise<Resul
       'Ni el texto, ni el año, ni el slug han cambiado.',
     ].join('\n'),
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La obra se llama igual en todas partes — Historia 22.3
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Las Citas leídas por `tools/` con su Obra resuelta colgada, como las lleva el sitio.
+ *
+ * Lo que sale de `tools/` —la Pieza, su texto para publicar— nombra la obra con el mismo
+ * título que la Página de Cita, y para eso necesita la misma resolución: `colgarObras` sobre
+ * las fichas de `corpus/obras/`.
+ *
+ * Una Obra de esas Citas que **ninguna** ficha reclama —un corpus a medio sembrar, que el
+ * build no dejaría publicar— se resuelve con la ficha que `npm run obra -- sembrar` crearía
+ * para ella: su grafía por omisión. Así la orden no calla una obra que la Cita sí declara.
+ * Nada se escribe: la ficha provisional no sale de aquí.
+ */
+export async function citasConObra<C extends CitaParaObra>(
+  rutas: Rutas,
+  citas: readonly C[],
+): Promise<
+  { ok: true; citas: (C & { obra?: ObraResuelta })[] } | { ok: false; motivos: string[] }
+> {
+  let fichas: FichaDeObra[];
+  try {
+    fichas = await leerFichasDeObra(rutas);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [
+        `No se pueden leer las Fichas de Obra para nombrar las obras: ${texto(fallo)}`,
+        'Sin ellas no se sabe con qué título se publica cada Obra, y no se ha compuesto nada.',
+      ],
+    };
+  }
+  const reclamadas = new Set(fichas.flatMap((f) => f.formas.map((forma) => clave(f.autor, forma))));
+  const provisionales: FichaDeObra[] = obrasDeCitas(citas)
+    .filter((o) => !reclamadas.has(clave(o.autor, o.forma)))
+    .map((o) => ({
+      /*
+       * Un nombre que ninguna ficha real puede tener —lleva paréntesis y espacios, que
+       * `FORMA_DE_NOMBRE` rechaza— y que no repite otra provisional, porque lleva la identidad
+       * entera (Autor, forma). Con el nombre que `sembrar` derivaría, una provisional podía
+       * coincidir con una ficha real de otra forma y llevarse su Obra resuelta.
+       */
+      nombre: `(sin ficha) ${o.autor} ${o.forma}`,
+      ruta: '(sin ficha)',
+      autor: o.autor,
+      titulo: grafiaPorOmision(o.grafias),
+      formas: [o.forma],
+    }));
+  return { ok: true, citas: colgarObras(citas, [...fichas, ...provisionales]) };
 }

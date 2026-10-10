@@ -4,8 +4,14 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { obraAdmisible } from '../../src/lib/admision.ts';
+import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
+import type { Autor, Cita } from '../../src/lib/publicado.ts';
 import {
+  avisosDeAñosDeObras,
   avisosDeDistintaRancia,
+  colgarObras,
+  obraDeCita,
+  resolverObras,
   avisosDeObras,
   avisosDePrefijo,
   clave,
@@ -30,6 +36,7 @@ import {
 } from '../../tools/lib/corpus.ts';
 import {
   asegurarFichaDeObra,
+  citasConObra,
   restituirGrafia,
   retirarFichaDeObra,
   reunirFichas,
@@ -43,6 +50,8 @@ import { darDeAltaLote } from '../../tools/alta.ts';
 import { retirarAutor } from '../../tools/lib/gestion.ts';
 
 /** Historia 22.1 — cada Obra tiene ficha antes de tener URL. */
+
+const RAIZ_DEL_REPO = join(import.meta.dirname, '..', '..');
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -897,5 +906,255 @@ describe('22.2 — reunir, separar y titular', () => {
     const hecho = await titularFicha(rutas, 'seneca--de-la-brevedad-de-la-vida', 'Obras de Séneca');
     expect(hecho.ok).toBe(false);
     expect(await readFile(join(rutas.obras, 'seneca--de-la-brevedad-de-la-vida.yml'), 'utf8')).toBe(antes);
+  });
+});
+
+describe('22.3 — la Obra resuelta, pura', () => {
+  const DOS = ficha('larra--articulos', 'larra', 'Artículos', ['articulos', 'articulos de costumbres']);
+
+  function citaConAño(
+    slug: string,
+    obra: string,
+    extra: { año?: number; traduccion?: { traductor: string; año?: number }; fuente?: string; temas?: string[] } = {},
+  ) {
+    return {
+      slug,
+      autor: 'larra',
+      temas: extra.temas ?? [],
+      procedencia: {
+        obra,
+        ...(extra.año !== undefined ? { año: extra.año } : {}),
+        ...(extra.traduccion !== undefined ? { traduccion: extra.traduccion } : {}),
+      },
+      ...(extra.fuente !== undefined ? { fuente: { id: extra.fuente } } : {}),
+    };
+  }
+
+  it('reunida: las dos grafías resuelven la misma Obra, con el título de la ficha', () => {
+    const citas = [citaConAño('a', 'Artículos'), citaConAño('b', 'Artículos de costumbres')];
+    const obras = resolverObras(citas, [DOS]);
+    expect(obraDeCita(citas[0], [DOS], obras)?.titulo).toBe('Artículos');
+    expect(obraDeCita(citas[1], [DOS], obras)?.titulo).toBe('Artículos');
+    expect(obras.get('larra--articulos')?.recuento).toBe(2);
+  });
+
+  it('el título sigue la regla de tituloEfectivo', () => {
+    const otra = { ...DOS, titulo: 'Artículos varios' };
+    const citas = [citaConAño('a', 'Artículos de costumbres'), citaConAño('b', 'Artículos de costumbres'), citaConAño('c', 'Artículos')];
+    expect(resolverObras(citas, [otra]).get(otra.nombre)?.titulo).toBe(
+      tituloEfectivo(otra, [otra], citas),
+    );
+    expect(resolverObras(citas, [otra]).get(otra.nombre)?.titulo).toBe('Artículos de costumbres');
+  });
+
+  it('año común: dos Citas con 1898 dan 1898', () => {
+    const citas = [citaConAño('a', 'Artículos', { año: 1898 }), citaConAño('b', 'Artículos', { año: 1898 }), citaConAño('c', 'Artículos')];
+    expect(resolverObras(citas, [DOS]).get(DOS.nombre)?.año).toBe(1898);
+    expect(avisosDeAñosDeObras([DOS], citas)).toEqual([]);
+  });
+
+  it('años distintos: se omite el año y se avisa nombrando ficha y años', () => {
+    const citas = [citaConAño('a', 'Artículos', { año: 1902 }), citaConAño('b', 'Artículos', { año: 1898 })];
+    const obra = resolverObras(citas, [DOS]).get(DOS.nombre)!;
+    expect(obra).not.toHaveProperty('año');
+    const avisos = avisosDeAñosDeObras([DOS], citas);
+    expect(avisos).toHaveLength(1);
+    expect(avisos[0]).toContain('Obra con años discrepantes');
+    expect(avisos[0]).toContain(DOS.ruta);
+    expect(avisos[0]).toContain('1898, 1902');
+  });
+
+  it('traducción: el año de la traducción no aporta año a la Obra', () => {
+    const citas = [citaConAño('a', 'Artículos', { traduccion: { traductor: 'Fulano', año: 1909 } })];
+    expect(resolverObras(citas, [DOS]).get(DOS.nombre)).not.toHaveProperty('año');
+    const mezcla = [...citas, citaConAño('b', 'Artículos', { año: 1835 })];
+    expect(resolverObras(mezcla, [DOS]).get(DOS.nombre)?.año).toBe(1835);
+    expect(avisosDeAñosDeObras([DOS], mezcla)).toEqual([]);
+  });
+
+  it('fuentes distintas, edición cotejada, temas unidos y recuento', () => {
+    const citas = [
+      citaConAño('a', 'Artículos', { fuente: 'wikisource', temas: ['el-tiempo', 'la-patria'] }),
+      citaConAño('b', 'Artículos', { fuente: 'wikisource', temas: ['la-patria'] }),
+      citaConAño('c', 'Artículos de costumbres', { fuente: 'cervantes', temas: ['el-amor'] }),
+    ];
+    const obra = resolverObras(citas, [DOS]).get(DOS.nombre)!;
+    expect(obra.fuentes).toEqual(['cervantes', 'wikisource']);
+    expect(obra.edicionCotejada).toBe(true);
+    expect(obra.temas).toEqual(['el-amor', 'el-tiempo', 'la-patria']);
+    expect(obra.recuento).toBe(3);
+
+    const sin = resolverObras([citaConAño('d', 'Artículos')], [DOS]).get(DOS.nombre)!;
+    expect(sin.edicionCotejada).toBe(false);
+    expect(sin.fuentes).toEqual([]);
+  });
+
+  it('una ficha sin Citas resuelve con recuento 0 y su título', () => {
+    const obra = resolverObras([], [DOS]).get(DOS.nombre)!;
+    expect(obra).toMatchObject({ titulo: 'Artículos', recuento: 0, fuentes: [], temas: [] });
+  });
+
+  it('sin obra: la Cita no lleva el campo', () => {
+    const [colgada] = colgarObras([{ slug: 'x', autor: 'larra', procedencia: { año: 1835 } }], [DOS]);
+    expect(colgada).not.toHaveProperty('obra');
+  });
+
+  it('lo copiado lleva el año de esa Cita, no el de la Obra; sin año, sin año', () => {
+    const AUTOR: Autor = { slug: 'larra', nombre: 'Mariano José de Larra', semblanza: 's', añoFallecimiento: 1837 };
+    const base = (slug: string, obra: string, año?: number): Cita => ({
+      slug,
+      texto: 'Texto.',
+      autor: 'larra',
+      temas: [],
+      procedencia: { obra, ...(año !== undefined ? { año } : {}) },
+      aptaParaPortada: false,
+    });
+    const [conAño, otraConAño, sinAño] = colgarObras(
+      [base('a', 'Artículos', 1835), base('b', 'Artículos de costumbres', 1835), base('c', 'Artículos de costumbres')],
+      [DOS],
+    );
+    expect(conAño.obra?.año).toBe(1835);
+    expect(textoParaCopiar(otraConAño, AUTOR)).toBe('«Texto.» — Mariano José de Larra, Artículos, 1835.');
+    expect(textoParaCopiar(sinAño, AUTOR)).toBe('«Texto.» — Mariano José de Larra, Artículos.');
+    expect(procedenciaCompuesta(sinAño)).toBe('Artículos');
+  });
+});
+
+describe('22.3 — fuera de obras.ts y la admisión, nadie lee procedencia.obra', () => {
+  const PERMITIDOS = new Set(['src/lib/obras.ts', 'src/lib/admision.ts']);
+  const LEE = [
+    // `cita.procedencia.obra`, `procedencia?.obra`, `procedencia['obra']`
+    /procedencia\??\.obra\b/u,
+    /procedencia\??\.?\[\s*['"`]obra['"`]\s*\]/u,
+    // `const { obra, año } = cita.procedencia` y variantes con alias o valores por omisión
+    // (también repartida en varias líneas: se mira el fichero entero)
+    /\{[^{}]*\bobra\b[^{}]*\}\s*=\s*[^;{}]*procedencia/u,
+    // `const { procedencia: { obra } } = cita` y `({ procedencia: { obra } }) => …`
+    /procedencia\s*:\s*\{[^{}]*\bobra\b/u,
+    // `cita.procedencia!.obra`
+    /procedencia\s*!\s*\.\s*obra\b/u,
+  ];
+
+  async function ficheros(directorio: string): Promise<string[]> {
+    const entradas = await readdir(join(RAIZ_DEL_REPO, directorio), { recursive: true, withFileTypes: true });
+    return entradas
+      .filter((e) => e.isFile() && /\.(ts|astro|js|mjs)$/u.test(e.name))
+      .map((e) => {
+        // `parentPath` desde Node 20.12/21.4; `path`, su nombre anterior, como respaldo.
+        const padre =
+          (e as { parentPath?: string }).parentPath ??
+          (e as { path?: string }).path ??
+          join(RAIZ_DEL_REPO, directorio);
+        return join(padre, e.name).slice(RAIZ_DEL_REPO.length + 1).split('\\').join('/');
+      });
+  }
+
+  it('la prueba detecta las tres formas', () => {
+    expect(LEE.some((r) => r.test('const t = cita.procedencia.obra;'))).toBe(true);
+    expect(LEE.some((r) => r.test("const t = cita.procedencia?.['obra'];"))).toBe(true);
+    expect(LEE.some((r) => r.test('const { obra, año } = cita.procedencia;'))).toBe(true);
+    expect(LEE.some((r) => r.test('const {\n  obra,\n  año,\n} = cita.procedencia;'))).toBe(true);
+    expect(LEE.some((r) => r.test('const { procedencia: { obra } } = cita;'))).toBe(true);
+    expect(LEE.some((r) => r.test('const f = ({ procedencia: { año, obra } }) => obra;'))).toBe(true);
+    expect(LEE.some((r) => r.test('const t = cita.procedencia!.obra;'))).toBe(true);
+    expect(LEE.some((r) => r.test('const titulo = cita.obra?.titulo;'))).toBe(false);
+    expect(LEE.some((r) => r.test('const { año } = cita.procedencia;'))).toBe(false);
+  });
+
+  it('ningún fichero de src/ ni public/islas/ fuera de los permitidos', async () => {
+    const todos = [...(await ficheros('src')), ...(await ficheros('public/islas'))];
+    expect(todos).toContain('src/lib/obras.ts');
+    const infractores: string[] = [];
+    for (const ruta of todos) {
+      if (PERMITIDOS.has(ruta)) continue;
+      const contenido = await readFile(join(RAIZ_DEL_REPO, ruta), 'utf8');
+      for (const regla of LEE) {
+        const hallado = regla.exec(contenido);
+        if (hallado === null) continue;
+        const linea = contenido.slice(0, hallado.index).split('\n').length;
+        infractores.push(`${ruta}:${linea}: ${hallado[0].replace(/\s+/gu, ' ')}`);
+      }
+    }
+    expect(infractores).toEqual([]);
+  });
+});
+
+describe('22.3 — citasConObra, del lado de tools/', () => {
+  async function escribirFicha(rutas: Rutas, nombre: string, titulo: string, formas: string[]) {
+    await writeFile(
+      join(rutas.obras, `${nombre}.yml`),
+      `autor: seneca\ntitulo: ${titulo}\nformas:\n${formas.map((f) => `  - ${f}`).join('\n')}\n`,
+      'utf8',
+    );
+  }
+
+  it('con ficha real reunida, cada Cita lleva el título de la ficha', async () => {
+    const rutas = await corpusTemporal();
+    await escribirFicha(rutas, 'seneca--de-la-brevedad-de-la-vida', 'De la brevedad de la vida', [
+      'de la brevedad de la vida',
+      'sobre la brevedad de la vida',
+    ]);
+    const hecho = await citasConObra(rutas, [
+      citaCompleta('a', 'De la brevedad de la vida'),
+      citaCompleta('b', 'Sobre la brevedad de la vida'),
+    ]);
+    expect(hecho.ok).toBe(true);
+    if (!hecho.ok) return;
+    expect(hecho.citas.map((c) => c.obra?.titulo)).toEqual([
+      'De la brevedad de la vida',
+      'De la brevedad de la vida',
+    ]);
+    expect(hecho.citas[0].obra?.nombre).toBe('seneca--de-la-brevedad-de-la-vida');
+  });
+
+  it('sin ficha, una provisional con la grafía por omisión, y sin escribir nada', async () => {
+    const rutas = await corpusTemporal();
+    const hecho = await citasConObra(rutas, [
+      citaCompleta('a', 'Cartas a Lucilio'),
+      citaCompleta('b', 'Cartas a Lucilio'),
+      citaCompleta('c', 'cartas a Lucilio'),
+    ]);
+    expect(hecho.ok).toBe(true);
+    if (!hecho.ok) return;
+    expect(new Set(hecho.citas.map((c) => c.obra?.titulo))).toEqual(new Set(['Cartas a Lucilio']));
+    expect(await readdir(rutas.obras)).toEqual([]);
+  });
+
+  it('una provisional nunca comparte nombre con una ficha real ni con otra provisional', async () => {
+    const rutas = await corpusTemporal();
+    // La ficha real se llama como `sembrar` llamaría a «De la ira», pero reclama otra forma.
+    await escribirFicha(rutas, 'seneca--de-la-ira', 'De la ira I', ['de la ira i']);
+    const hecho = await citasConObra(rutas, [
+      citaCompleta('a', 'De la ira I'),
+      citaCompleta('b', 'De la ira'),
+      citaCompleta('c', 'De la clemencia'),
+    ]);
+    expect(hecho.ok).toBe(true);
+    if (!hecho.ok) return;
+    const [real, sinFicha, otra] = hecho.citas.map((c) => c.obra!);
+    expect(real).toMatchObject({ nombre: 'seneca--de-la-ira', titulo: 'De la ira I', recuento: 1 });
+    expect(sinFicha.titulo).toBe('De la ira');
+    expect(otra.titulo).toBe('De la clemencia');
+    expect(new Set([real.nombre, sinFicha.nombre, otra.nombre]).size).toBe(3);
+  });
+
+  it('con una ficha ilegible no lanza: devuelve el motivo', async () => {
+    const rutas = await corpusTemporal();
+    await writeFile(join(rutas.obras, 'seneca--rota.yml'), 'autor: [\n', 'utf8');
+    const hecho = await citasConObra(rutas, [citaCompleta('a', 'De la ira')]);
+    expect(hecho.ok).toBe(false);
+    if (hecho.ok) return;
+    expect(hecho.motivos.join('\n')).toContain('seneca--rota.yml');
+  });
+});
+
+describe('22.3 — colgarObras no arrastra una Obra vieja', () => {
+  it('quita el obra previo cuando ninguna ficha resuelve ya la Cita', () => {
+    const DOS = ficha('larra--articulos', 'larra', 'Artículos', ['articulos']);
+    const [colgada] = colgarObras([{ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } }], [DOS]);
+    expect(colgada.obra?.titulo).toBe('Artículos');
+    const [otraVez] = colgarObras([colgada], []);
+    expect(otraVez).not.toHaveProperty('obra');
+    expect(otraVez).toEqual({ slug: 'a', autor: 'larra', procedencia: { obra: 'Artículos' } });
   });
 });

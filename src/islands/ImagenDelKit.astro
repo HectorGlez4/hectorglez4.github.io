@@ -14,6 +14,7 @@
  * La descarga es la misma función `descargar()` que usa cualquier visitante, de modo que
  * el fichero que se lleva Héctor y el que se lleva el visitante son el mismo.
  */
+import { procedenciaCompuesta } from '../lib/atribucion.ts';
 import { MARCA } from '../lib/marca.ts';
 import { tramoDe } from '../lib/tramos.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
@@ -25,8 +26,9 @@ interface Props {
 
 const { cita, autor } = Astro.props;
 const tramo = tramoDe(cita.texto);
-const { obra, año } = cita.procedencia;
-const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
+// Historia 22.3 — compuesta por `atribucion.ts` con el título de la Obra resuelta; la isla
+// (`public/islas/imagen.js`) la recibe ya compuesta en `data-procedencia`.
+const procedencia = procedenciaCompuesta(cita) ?? '';
 ---
 
 <div

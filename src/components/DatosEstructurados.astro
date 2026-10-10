@@ -20,7 +20,12 @@ interface Props {
 }
 
 const { cita, autor, canonica } = Astro.props;
-const { obra, año } = cita.procedencia;
+/*
+ * Historia 22.3 — `isPartOf` describe la **Obra**, así que lleva su título y su año resueltos:
+ * el año solo si todas sus Citas coinciden, y si no, se omite. Nunca el año de esta Cita, que
+ * afirmaría como fecha de la Obra un dato que solo consta para un pasaje.
+ */
+const obra = cita.obra;
 
 const datos: Record<string, unknown> = {
   '@context': 'https://schema.org',
@@ -60,8 +65,8 @@ if (cita.fuente !== undefined) {
 if (obra !== undefined) {
   datos.isPartOf = {
     '@type': 'CreativeWork',
-    name: obra,
-    ...(año !== undefined ? { datePublished: String(año) } : {}),
+    name: obra.titulo,
+    ...(obra.año !== undefined ? { datePublished: String(obra.año) } : {}),
   };
 }
 ---

@@ -41,7 +41,7 @@
  *   · UX-DR26 — todo lo que ofrece la imagen está disponible como texto copiable; el
  *     atributo `data-texto-plano` lo deja legible desde el marcado.
  */
-import { textoParaCopiar } from '../lib/atribucion.ts';
+import { procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
 import { DESTINO_OPACO } from '../lib/compartir.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import { MARCA } from '../lib/marca.ts';
@@ -56,8 +56,9 @@ interface Props {
 const { cita, autor } = Astro.props;
 const tramo = tramoDe(cita.texto);
 
-const { obra, año } = cita.procedencia;
-const procedencia = [obra, año].filter((x) => x !== undefined).join(', ');
+// Historia 22.3 — compuesta por `atribucion.ts` con el título de la Obra resuelta; la isla
+// (`public/islas/imagen.js`) la recibe ya compuesta en `data-procedencia`.
+const procedencia = procedenciaCompuesta(cita) ?? '';
 ---
 
 {

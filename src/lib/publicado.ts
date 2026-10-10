@@ -23,6 +23,7 @@ import {
   MIN_CITAS_POR_TEMA,
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia } from './admision.ts';
+import { colgarObras, type FichaDeObra, type ObraResuelta } from './obras.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
@@ -47,6 +48,12 @@ export interface Cita {
    * nunca se inventa un documento, que es lo que FR-2 prohíbe.
    */
   fuente?: FuenteDeCita;
+  /**
+   * La Obra resuelta de la Cita — Historia 22.3. Es de donde toda superficie saca el nombre
+   * de la obra (`obra.titulo`), para que una Obra que reúne grafías se llame igual en todas
+   * partes. Una Cita sin obra declarada no la lleva.
+   */
+  obra?: ObraResuelta;
   aptaParaPortada: boolean;
 }
 
@@ -461,6 +468,7 @@ type EntradaCita = CollectionEntry<'citas'>;
 type EntradaAutor = CollectionEntry<'autores'>;
 type EntradaTema = CollectionEntry<'temas'>;
 type EntradaColeccion = CollectionEntry<'colecciones'>;
+type EntradaObra = CollectionEntry<'obras'>;
 
 export function aplanarCita(entrada: EntradaCita): Cita {
   return {
@@ -495,6 +503,24 @@ export function aplanarColeccion(entrada: EntradaColeccion): Coleccion {
     nombre: entrada.data.nombre,
     criterio: entrada.data.criterio,
     miembros: [...entrada.data.miembros],
+  };
+}
+
+/**
+ * Una Ficha de Obra tal y como la resuelve `src/lib/obras.ts`. Su nombre es el identificador
+ * del cargador —la ruta dentro de `corpus/obras/` sin extensión—, el mismo que
+ * `integraciones/obras.ts` le da al leerla de disco.
+ */
+export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
+  return {
+    nombre: entrada.id,
+    // La ruta del fichero tal como la da el cargador, para que los mensajes nombren el
+    // fichero de verdad (`.yml` o `.yaml`); sin ella, la forma habitual.
+    ruta: entrada.filePath ?? `corpus/obras/${entrada.id}.yml`,
+    autor: entrada.data.autor,
+    titulo: entrada.data.titulo,
+    formas: [...entrada.data.formas],
+    ...(entrada.data.distintaDe !== undefined ? { distintaDe: [...entrada.data.distintaDe] } : {}),
   };
 }
 
@@ -568,7 +594,13 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
 
   const { getCollection } = await import('astro:content');
 
-  const citas = (await getCollection('citas')).map(aplanarCita);
+  /*
+   * Historia 22.3 — cada Cita lleva colgada su Obra resuelta, y es lo único que las
+   * superficies leen para nombrarla. Las fichas ya las ha juzgado `integraciones/obras.ts`
+   * antes de que se construya ninguna página.
+   */
+  const fichas = (await getCollection('obras')).map(aplanarFichaDeObra);
+  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas);
   /*
    * Las Colecciones **declaradas** viven en esta variable local y no salen de aquí.
    *

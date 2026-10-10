@@ -20,7 +20,12 @@ interface Props {
 }
 
 const { cita, autor } = Astro.props;
-const { obra, año, referencia, traduccion } = cita.procedencia;
+const { año, referencia, traduccion } = cita.procedencia;
+/*
+ * Historia 22.3 — el título de la Obra resuelta, el mismo en todas las superficies. El año
+ * que lo acompaña sigue siendo el de la Procedencia de esta Cita.
+ */
+const obra = cita.obra?.titulo;
 
 /**
  * La línea de procedencia. Se compone con lo que consta y solo con lo que consta.

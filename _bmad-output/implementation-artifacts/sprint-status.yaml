@@ -359,7 +359,7 @@ development_status:
   22-1-cada-obra-tiene-ficha-antes-de-tener-url: review  # las reuniones de grafías (1 grupo, 2 prefijos) las decide Héctor en la 22.2
   # 22.2: las reuniones de obras conocidas las decide Héctor, en commit propio, antes de la 22.4.
   22-2-una-obra-un-nombre-las-grafías-se-deciden-en-la-ficha: review  # reuniones propuestas en propuesta-reuniones-de-obra.md, sin aplicar: las decide Héctor
-  22-3-la-obra-se-llama-igual-en-todas-partes: backlog
+  22-3-la-obra-se-llama-igual-en-todas-partes: review
   # 22.4 detrás de la 19.1. La indexabilidad nace con la página: sin rutas de Obra, su prueba sobre dist/ pasa en vacío.
   22-4-la-obra-tiene-página-y-solo-se-indexa-si-no-repite-otra: backlog
   # 22.5 lleva los dos defectos de UX de la Atribución (título E2 y Autor subrayado viajan juntos).

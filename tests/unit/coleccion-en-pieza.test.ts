@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { seleccionDeColeccion } from '../../src/lib/coleccionEnPieza.ts';
 import { MINIMO_DE_CITAS } from '../../src/lib/pieza.ts';
+import { colgarObras, type FichaDeObra } from '../../src/lib/obras.ts';
 import {
   coleccionesPublicadas,
   resolverColeccion,
@@ -29,14 +30,32 @@ const SENECA: Autor = {
 
 const autores = new Map<string, Autor>([['seneca', SENECA]]);
 
-const cita = (slug: string, texto: string, autor = 'seneca'): Cita => ({
-  slug,
-  texto,
-  autor,
-  temas: [],
-  procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
-  aptaParaPortada: false,
-});
+/**
+ * Historia 22.3 — una Cita del conjunto publicable lleva colgada su Obra resuelta, que es de
+ * donde la atribución saca el título. El fixture la cuelga igual, con su ficha.
+ */
+const FICHA: FichaDeObra = {
+  nombre: 'seneca--sobre-la-brevedad-de-la-vida',
+  ruta: 'corpus/obras/seneca--sobre-la-brevedad-de-la-vida.yml',
+  autor: 'seneca',
+  titulo: 'Sobre la brevedad de la vida',
+  formas: ['sobre la brevedad de la vida'],
+};
+
+const cita = (slug: string, texto: string, autor = 'seneca'): Cita =>
+  colgarObras(
+    [
+      {
+        slug,
+        texto,
+        autor,
+        temas: [],
+        procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
+        aptaParaPortada: false,
+      },
+    ],
+    [FICHA],
+  )[0];
 
 const breve = (i: number): Cita =>
   cita(`c${i}`, `Fragmento número ${i} sobre la brevedad de la vida.`);

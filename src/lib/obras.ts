@@ -496,22 +496,22 @@ function grafiasPorFicha(
   fichas: readonly FichaDeObra[],
   citas: readonly CitaConObra[],
 ): Map<string, GrafiaDeObra[]> {
-  const indice = indiceDeFichas(fichas);
-  const cuentas = new Map<string, Map<string, number>>();
-  for (const cita of citas) {
-    const ficha = fichaDeCita(cita, indice);
-    if (ficha === undefined) continue;
-    const obra = cita.procedencia?.obra as string;
-    const cuenta = cuentas.get(ficha.nombre) ?? new Map<string, number>();
-    cuenta.set(obra, (cuenta.get(obra) ?? 0) + 1);
-    cuentas.set(ficha.nombre, cuenta);
-  }
+  // Historia 22.3 — las grafías salen de las Citas que resuelve cada ficha, con la misma
+  // resolución que `resolverObras`: el título que se publica y el que se comprueba no pueden
+  // contar Citas distintas.
   return new Map(
-    [...cuentas].map(([nombre, cuenta]) => [
-      nombre,
-      [...cuenta].map(([literal, n]) => ({ literal, citas: n })),
-    ]),
+    [...citasPorFicha(fichas, citas)].map(([nombre, suyas]) => [nombre, grafiasDeCitas(suyas)]),
   );
+}
+
+/** Las grafías literales de unas Citas y cuántas usa cada una, por orden de aparición. */
+function grafiasDeCitas(citas: readonly CitaConObra[]): GrafiaDeObra[] {
+  const cuenta = new Map<string, number>();
+  for (const cita of citas) {
+    const obra = cita.procedencia?.obra as string;
+    cuenta.set(obra, (cuenta.get(obra) ?? 0) + 1);
+  }
+  return [...cuenta].map(([literal, n]) => ({ literal, citas: n }));
 }
 
 /** Las grafías que declaran las Citas publicadas que resuelven una ficha. */
@@ -526,18 +526,14 @@ export function grafiasDeFicha(
 /**
  * El título que la Obra publica: el de su ficha mientras alguna Cita publicada lo declare, y
  * si no, el de `grafiaPorOmision`. `undefined` si ninguna Cita resuelve la ficha. Lo publica
- * la 22.3; aquí solo se decide.
+ * la 22.3 por `resolverObras`, con la misma regla (`tituloDe`).
  */
 export function tituloEfectivo(
   ficha: FichaDeObra,
   fichas: readonly FichaDeObra[],
   citas: readonly CitaConObra[],
 ): string | undefined {
-  const grafias = grafiasDeFicha(ficha, fichas, citas);
-  if (grafias.length === 0) return undefined;
-  return grafias.some((g) => mismaGrafia(g.literal, ficha.titulo))
-    ? ficha.titulo
-    : grafiaPorOmision(grafias);
+  return tituloDe(ficha, grafiasDeFicha(ficha, fichas, citas));
 }
 
 /** Si una de las dos fichas declara a la otra distinta. */
@@ -592,6 +588,189 @@ export function avisosDeDistintaRancia(fichas: readonly FichaDeObra[]): string[]
           `${ficha.autor} reclama esa forma: es una declaración rancia, que ya no separa nada.`,
       );
     }
+  }
+  return avisos;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La obra se llama igual en todas partes — Historia 22.3
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Una Obra ya resuelta: su ficha y lo que se deriva de sus Citas publicadas.
+ *
+ * Es lo **único** que las superficies leen de la Obra. Antes cada una nombraba la obra con el
+ * `procedencia.obra` de la Cita que tenía delante, y en cuanto una ficha reúne dos grafías la
+ * misma Obra habría salido con dos nombres según por dónde se mirara. Fuera de este módulo y
+ * de la admisión, nadie lee `procedencia.obra` (lo fija `tests/unit/obras.test.ts`).
+ */
+export interface ObraResuelta {
+  /** Nombre de la ficha: la identidad de URL de la Obra. */
+  nombre: string;
+  autor: string;
+  /** El título que se publica: el `tituloEfectivo` de la 22.2. */
+  titulo: string;
+  /**
+   * El año de la Obra, **solo** si todas las Citas que declaran `procedencia.año` coinciden.
+   * Si discrepan se omite —nunca se infiere ni se elige— y el build avisa
+   * (`avisosDeAñosDeObras`). El de una traducción no cuenta: es de la edición (19.1).
+   *
+   * No es el año que acompaña al título en la Atribución ni en lo copiado: ahí va el de la
+   * Procedencia de **esa** Cita.
+   */
+  año?: number;
+  /** Los identificadores de Fuente distintos de sus Citas, ordenados. */
+  fuentes: string[];
+  /** Si alguna de sus Citas tiene Fuente: hay edición cotejada que enseñar. */
+  edicionCotejada: boolean;
+  /** La unión de los Temas de sus Citas, ordenada. */
+  temas: string[];
+  /** Cuántas Citas publicadas la resuelven. */
+  recuento: number;
+}
+
+/** Lo que de una Cita importa para derivar los atributos de su Obra. */
+export interface CitaParaObra extends CitaConObra {
+  procedencia?: { obra?: string; año?: number } | null;
+  temas?: readonly string[];
+  fuente?: { id: string } | null;
+}
+
+/** El título publicado, con la regla de `tituloEfectivo`, sobre grafías ya contadas. */
+function tituloDe(ficha: FichaDeObra, grafias: readonly GrafiaDeObra[]): string | undefined {
+  if (grafias.length === 0) return undefined;
+  return grafias.some((g) => mismaGrafia(g.literal, ficha.titulo))
+    ? ficha.titulo
+    : grafiaPorOmision(grafias);
+}
+
+/** Las Citas que resuelve cada ficha, por nombre de ficha. */
+function citasPorFicha<C extends CitaConObra>(
+  fichas: readonly FichaDeObra[],
+  citas: readonly C[],
+): Map<string, C[]> {
+  const indice = indiceDeFichas(fichas);
+  const porFicha = new Map<string, C[]>();
+  for (const cita of citas) {
+    const ficha = fichaDeCita(cita, indice);
+    if (ficha === undefined) continue;
+    porFicha.set(ficha.nombre, [...(porFicha.get(ficha.nombre) ?? []), cita]);
+  }
+  return porFicha;
+}
+
+/**
+ * Si una Cita tiene Fuente: un único criterio para `fuentes` y `edicionCotejada`, que si no
+ * podrían decir a la vez «hay edición cotejada» y «ninguna Fuente».
+ */
+function tieneFuente<C extends CitaParaObra>(cita: C): cita is C & { fuente: { id: string } } {
+  return typeof cita.fuente?.id === 'string' && cita.fuente.id !== '';
+}
+
+/** Los años distintos que declaran las Procedencias de unas Citas, ordenados. */
+function añosDeclarados(citas: readonly CitaParaObra[]): number[] {
+  const años = new Set<number>();
+  for (const cita of citas) {
+    // Solo `procedencia.año`: `procedencia.traduccion.año` es de la edición (19.1).
+    const año = cita.procedencia?.año;
+    if (typeof año === 'number') años.add(año);
+  }
+  return [...años].sort((a, b) => a - b);
+}
+
+/**
+ * Los atributos derivados de cada Obra, por nombre de ficha.
+ *
+ * Recibe las Citas publicadas y las fichas **ya admitidas**. Devuelve una entrada por ficha,
+ * también para la que no resuelve ninguna Cita —con `recuento` 0 y su `titulo` declarado—,
+ * porque esa avisa y no rompe (22.1).
+ */
+export function resolverObras(
+  citas: readonly CitaParaObra[],
+  fichas: readonly FichaDeObra[],
+): Map<string, ObraResuelta> {
+  // Un único origen de grafías por ficha: `citasPorFicha`, el mismo del que tira
+  // `grafiasPorFicha` y, por ella, `tituloEfectivo`.
+  const porFicha = citasPorFicha(fichas, citas);
+  const resueltas = new Map<string, ObraResuelta>();
+
+  for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
+    const suyas = porFicha.get(ficha.nombre) ?? [];
+    const años = añosDeclarados(suyas);
+    const cotejadas = suyas.filter(tieneFuente);
+    const fuentes = [...new Set(cotejadas.map((c) => c.fuente.id))].sort((a, b) =>
+      a.localeCompare(b, 'es'),
+    );
+    const temas = [...new Set(suyas.flatMap((c) => c.temas ?? []))].sort((a, b) =>
+      a.localeCompare(b, 'es'),
+    );
+
+    resueltas.set(ficha.nombre, {
+      nombre: ficha.nombre,
+      autor: ficha.autor,
+      titulo: tituloDe(ficha, grafiasDeCitas(suyas)) ?? ficha.titulo,
+      ...(años.length === 1 ? { año: años[0] } : {}),
+      fuentes,
+      edicionCotejada: cotejadas.length > 0,
+      temas,
+      recuento: suyas.length,
+    });
+  }
+
+  return resueltas;
+}
+
+/**
+ * La Obra resuelta de una Cita, o `undefined` si no declara obra o ninguna ficha la reclama.
+ * Es la consulta que usan quien cuelga la Obra en cada Cita y quien la necesite suelta.
+ */
+export function obraDeCita(
+  cita: CitaConObra,
+  fichas: readonly FichaDeObra[] | Map<string, FichaDeObra>,
+  obras: ReadonlyMap<string, ObraResuelta>,
+): ObraResuelta | undefined {
+  const ficha = fichaDeCita(cita, fichas);
+  return ficha === undefined ? undefined : obras.get(ficha.nombre);
+}
+
+/**
+ * Las Citas con su Obra resuelta colgada en `obra`. Una Cita sin Obra no lleva el campo
+ * —se omite, nunca `undefined` escrito—, como cualquier opcional del corpus.
+ */
+export function colgarObras<C extends CitaParaObra>(
+  citas: readonly C[],
+  fichas: readonly FichaDeObra[],
+): (C & { obra?: ObraResuelta })[] {
+  const obras = resolverObras(citas, fichas);
+  const indice = indiceDeFichas(fichas);
+  return citas.map((cita) => {
+    const obra = obraDeCita(cita, indice, obras);
+    if (obra !== undefined) return { ...cita, obra };
+    // Una Obra colgada antes que ninguna ficha resuelve ya se quita: nunca se arrastra.
+    if (!('obra' in cita)) return cita;
+    const { obra: _anterior, ...sinObra } = cita as C & { obra?: ObraResuelta };
+    return sinObra as C;
+  });
+}
+
+/**
+ * «Obra con años discrepantes»: las Citas de una misma Obra declaran años distintos, así que
+ * la Obra no publica año. Avisa y no rompe: cada Cita sigue mostrando el suyo, y decidir cuál
+ * es el de la Obra —o si alguna Cita está mal fechada— es de una persona.
+ */
+export function avisosDeAñosDeObras(
+  fichas: readonly FichaDeObra[],
+  citas: readonly CitaParaObra[],
+): string[] {
+  const porFicha = citasPorFicha(fichas, citas);
+  const avisos: string[] = [];
+  for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
+    const años = añosDeclarados(porFicha.get(ficha.nombre) ?? []);
+    if (años.length < 2) continue;
+    avisos.push(
+      `  · Obra con años discrepantes: ${ficha.ruta} → sus Citas declaran ${años.join(', ')}. ` +
+        'La Obra no publica año; cada Cita sigue mostrando el de su Procedencia.',
+    );
   }
   return avisos;
 }

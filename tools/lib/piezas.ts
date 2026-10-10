@@ -58,6 +58,7 @@ import {
   leerColeccionesRetiradas,
 } from './curacion.ts';
 import type { Resultado } from './gestion.ts';
+import { citasConObra } from './obras.ts';
 
 /** Donde caen las Piezas cuando no se dice otra cosa. Está en `.gitignore` a propósito. */
 export const DIRECTORIO_DE_PIEZAS = 'piezas';
@@ -249,7 +250,10 @@ export async function componerPieza(
     );
   }
 
-  const publicadas = (await leerCitas(rutas.citas)) as unknown as Cita[];
+  // Historia 22.3 — con su Obra resuelta, para nombrarla como la nombra el sitio.
+  const conObra = await citasConObra(rutas, (await leerCitas(rutas.citas)) as unknown as Cita[]);
+  if (!conObra.ok) return { ok: false, motivos: [...motivos, ...conObra.motivos] };
+  const publicadas: Cita[] = conObra.citas;
   const enRevision = await leerCitas(rutas.revision);
   const porSlug = new Map(publicadas.map((c) => [c.slug, c]));
   const revisandose = new Set(enRevision.map((c) => c.slug));
@@ -526,7 +530,10 @@ export async function componerPiezaDeColeccion(
   const declaracion = await declaracionDeColeccion(declarada);
   if (!declaracion.ok) return { ok: false, motivos: declaracion.motivos };
 
-  const citas = (await leerCitas(rutas.citas)) as unknown as Cita[];
+  // Historia 22.3 — con su Obra resuelta, para nombrarla como la nombra el sitio.
+  const conObra = await citasConObra(rutas, (await leerCitas(rutas.citas)) as unknown as Cita[]);
+  if (!conObra.ok) return { ok: false, motivos: [...motivos, ...conObra.motivos] };
+  const citas: Cita[] = conObra.citas;
   const autores = new Map(
     ((await leerAutores(rutas)) as unknown as Autor[]).map((a) => [a.slug, a]),
   );

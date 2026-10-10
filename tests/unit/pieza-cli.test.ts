@@ -206,6 +206,70 @@ describe('Historia 13.2 — componer una Pieza de varias Citas', () => {
     expect(compuesta, 'la Pieza va sin procedencia').not.toBe(await huellaDe(sinProcedencia));
   });
 
+  it('con una ficha reunida, la Pieza y su texto dicen el título de la ficha (22.3)', async () => {
+    /*
+     * Historia 22.3 — la Pieza nombra la Obra como la nombra el sitio: con el título de su
+     * ficha, aunque la Cita declare la otra grafía que la ficha reúne. El año es el de cada Cita.
+     */
+    const TITULO = 'De la brevedad de la vida';
+    const corpus = await enDisco(
+      corpusCon({ 1: textoBreve(1) }, {
+        'citas/seneca--fragmento-2.md': citaValida({
+          slug: slugDe(2),
+          texto: textoBreve(2),
+          procedencia: { obra: TITULO, año: 55 },
+        }),
+        'obras/seneca--de-la-brevedad-de-la-vida.yml':
+          `autor: seneca\ntitulo: ${TITULO}\nformas:\n` +
+          '  - de la brevedad de la vida\n  - sobre la brevedad de la vida\n',
+      }),
+    );
+    const antes = await corpusEnDisco(corpus);
+    const png = await destino();
+    const hecha = await correr(corpus, [
+      'componer',
+      '--red',
+      'instagram',
+      slugDe(1),
+      slugDe(2),
+      '--salida',
+      png,
+    ]);
+    expect(hecha.codigo, hecha.error).toBe(0);
+
+    expect(hecha.salida).toContain(`«${textoBreve(1)}» — Séneca, ${TITULO}, 49.`);
+    expect(hecha.salida).toContain(`«${textoBreve(2)}» — Séneca, ${TITULO}, 55.`);
+    expect(hecha.salida).not.toContain('Sobre la brevedad de la vida');
+
+    const bien = [
+      { texto: textoBreve(1), autor: 'Séneca', procedencia: `${TITULO}, 49` },
+      { texto: textoBreve(2), autor: 'Séneca', procedencia: `${TITULO}, 55` },
+    ];
+    expect(huella(await readFile(png)), 'la Pieza no lleva el título de la ficha').toBe(
+      await huellaDe(bien),
+    );
+    expect(await corpusEnDisco(corpus)).toEqual(antes);
+  });
+
+  it('una ficha de Obra ilegible rechaza con código 1 y su motivo, sin escribir nada (22.3)', async () => {
+    const corpus = await enDisco(
+      corpusCon({ 1: textoBreve(1), 2: textoBreve(2) }, { 'obras/seneca--rota.yml': 'autor: [\n' }),
+    );
+    const png = await destino();
+    const hecha = await correr(corpus, [
+      'componer',
+      '--red',
+      'instagram',
+      slugDe(1),
+      slugDe(2),
+      '--salida',
+      png,
+    ]);
+    expect(hecha.codigo).toBe(1);
+    expect(hecha.error + hecha.salida).toContain('seneca--rota.yml');
+    expect(existsSync(png)).toBe(false);
+  });
+
   it('una Cita sin la clave «procedencia» se compone en vez de reventar', async () => {
     /*
      * `leerCitas` devuelve el frontmatter **sin validar**, así que la clave puede faltar. La

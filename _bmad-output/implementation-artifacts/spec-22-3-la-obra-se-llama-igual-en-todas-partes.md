@@ -2,10 +2,10 @@
 title: 'Historia 22.3 — La obra se llama igual en todas partes'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'c10f0fa70e24ea7b4aaa22290ed349eca1c262b1'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-22-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-22-2-una-obra-un-nombre-las-grafias-se-deciden-en-la-ficha.md'
@@ -103,7 +103,25 @@ deferred: []
 
 ## Spec Change Log
 
+### 2026-10-10 — desviación aceptada de «dist/ idéntico»
+- **Hallazgo:** el `isPartOf` del JSON-LD describe la Obra, pero llevaba como `datePublished` el año de la Cita; la misma CreativeWork salía con años distintos en páginas distintas.
+- **Cambio:** `isPartOf.datePublished` = `obra.año`, y se omite si no hay. El AC de la épica no exige `dist/` idéntico en la 22.3; esa cláusula la añadió el spec.
+- **Efecto medido:** 129 Páginas de Cita ganan `datePublished` en `isPartOf` (Cajal 108 con 1898, Sor Juana 20 con 1691, Martí 1 con 1891). Quitando ese campo, `dist/` es idéntico a c10f0fa7. La Atribución visible no cambia.
+- **KEEP:** el año de la Atribución y de lo copiado sigue siendo el de la Cita.
+
 ## Review Triage Log
+
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 3, low 9)
+- defer: 0
+- reject: 4
+- addressed_findings:
+  - `[medium]` `[patch]` Una prueba en rojo, `coleccion-en-pieza` (fixture sin Obra) → fixture con `colgarObras`.
+  - `[medium]` `[patch]` `isPartOf` con años contradictorios → año de la Obra o nada.
+  - `[medium]` `[patch]` La Pieza y el Kit sin prueba con ficha reunida → pruebas de la CLI de Pieza y de `/kit`.
+  - `[low]` `[patch]` `colgarObras` quita lo rancio; `filePath`; nombres de ficha provisional; un único origen de grafías; un criterio de Fuente; la regla de lectura con anidadas y `!`; nombre de la prueba; aserción del enlace acotada; AGENTS.md.
 
 ## Verification
 
@@ -111,3 +129,13 @@ deferred: []
 - `npx vitest run tests/unit/obras.test.ts tests/unit/obra-construida.test.ts tests/unit/compartir.test.ts tests/unit/traduccion-construida.test.ts` -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `src/lib/obras.ts` resuelve cada Cita a su Obra (`ObraResuelta`: título, año común, Fuentes, edición cotejada, Temas y recuento). El conjunto publicable la cuelga en cada Cita, y la Atribución, lo copiado, el JSON-LD, la Tarjeta, las Imágenes de Cita y del Kit y la Pieza nombran la obra con su título. Fuera de `obras.ts` y de la admisión nada de `src/` lee `procedencia.obra`. Aviso del build «Obra con años discrepantes» (hoy 0).
+
+**Revisión:** 12 parches aplicados y 4 rechazados (rendimiento; atributos sin consumidor hasta la 22.4; la regla de lectura sobre `tools/`, que es el plano de escritura; avisar en desarrollo de una obra sin ficha, que ya lo hace la puerta). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 112 ficheros y 3321 pruebas; astro check, 0 errores; build en verde; `dist/` idéntico a c10f0fa7 salvo los 129 `isPartOf.datePublished` descritos en el registro de cambios.

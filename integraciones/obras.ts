@@ -12,6 +12,9 @@
  * Historia 22.2 — también rompe una Obra publicada con dos grafías de la misma forma si
  * alguna no es literal de su Fuente, y avisa de los prefijos sin decidir y de los títulos
  * que ya no declara ninguna Cita.
+ *
+ * Historia 22.3 — avisa también de la «Obra con años discrepantes»: la Obra no publica año, y
+ * cada Cita sigue mostrando el de su Procedencia.
  */
 
 import { fileURLToPath } from 'node:url';
@@ -28,6 +31,7 @@ import {
 import { documentosDeCita } from '../tools/lib/cotejo.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from '../tools/lib/documento.ts';
 import {
+  avisosDeAñosDeObras,
   avisosDeObras,
   clave,
   fallosDeObras,
@@ -102,7 +106,8 @@ export default function fichasDeObra(): AstroIntegration {
 
     return {
       fallos: fallosDeObras(fichas, citas, autores, documentos),
-      avisos: avisosDeObras(fichas, citas),
+      // Historia 22.3 — y la Obra cuyas Citas declaran años distintos, que no publica año.
+      avisos: [...avisosDeObras(fichas, citas), ...avisosDeAñosDeObras(fichas, citas)],
     };
   }
 

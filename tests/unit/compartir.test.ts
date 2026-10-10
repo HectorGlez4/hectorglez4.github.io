@@ -5,18 +5,35 @@ import { DESTINOS, textoParaCompartir } from '../../src/lib/compartir.ts';
 import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
 import { citaEnPieza } from '../../src/lib/pieza.ts';
 import type { Cita, Autor } from '../../src/lib/publicado.ts';
+import { colgarObras, type FichaDeObra } from '../../src/lib/obras.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 
 /** Historia 10.3 — compartir el enlace a un destino. */
 
-const CITA = {
-  slug: 'seneca-una',
-  texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
-  autor: 'seneca',
-  temas: [],
-  procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
-} as unknown as Cita;
+/**
+ * Historia 22.3 — una Cita del sitio llega con su Obra resuelta colgada, que es de donde las
+ * superficies sacan el título. Los fixtures se cuelgan igual, con su ficha.
+ */
+function conObra(cita: Cita, ficha: Omit<FichaDeObra, 'ruta'>): Cita {
+  return colgarObras([cita], [{ ...ficha, ruta: `corpus/obras/${ficha.nombre}.yml` }])[0];
+}
+
+const CITA = conObra(
+  {
+    slug: 'seneca-una',
+    texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
+    autor: 'seneca',
+    temas: [],
+    procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
+  } as unknown as Cita,
+  {
+    nombre: 'seneca--sobre-la-brevedad-de-la-vida',
+    autor: 'seneca',
+    titulo: 'Sobre la brevedad de la vida',
+    formas: ['sobre la brevedad de la vida'],
+  },
+);
 
 const AUTOR = { slug: 'seneca', nombre: 'Séneca' } as unknown as Autor;
 const URL_CITA = 'https://sabiduriadebolsillo.net/cita/seneca-una';
@@ -103,13 +120,17 @@ describe('Historia 10.3 — la isla no construye direcciones en el cliente', () 
 });
 
 describe('Historia 19.1 — lo copiado nombra la traducción', () => {
-  const ODA = {
-    slug: 'horacio-una',
-    texto: 'Feliz quien lejos de negocios vive.',
-    autor: 'horacio',
-    temas: [],
-    procedencia: { obra: 'Odas', traduccion: { traductor: 'Germán Salinas', año: 1909 } },
-  } as unknown as Cita;
+  const ODAS = { nombre: 'horacio--odas', autor: 'horacio', titulo: 'Odas', formas: ['odas'] };
+  const ODA = conObra(
+    {
+      slug: 'horacio-una',
+      texto: 'Feliz quien lejos de negocios vive.',
+      autor: 'horacio',
+      temas: [],
+      procedencia: { obra: 'Odas', traduccion: { traductor: 'Germán Salinas', año: 1909 } },
+    } as unknown as Cita,
+    ODAS,
+  );
   const HORACIO = { slug: 'horacio', nombre: 'Horacio' } as unknown as Autor;
 
   it('«… — Horacio, Odas, trad. de Germán Salinas, 1909.»', () => {
@@ -118,11 +139,14 @@ describe('Historia 19.1 — lo copiado nombra la traducción', () => {
     );
   });
 
-  it('con año de la Obra y traducción sin año', () => {
-    const cita = {
-      ...ODA,
-      procedencia: { obra: 'Odas', año: -23, traduccion: { traductor: 'Wikisource' } },
-    } as unknown as Cita;
+  it('con el año de la Cita y traducción sin año', () => {
+    const cita = conObra(
+      {
+        ...ODA,
+        procedencia: { obra: 'Odas', año: -23, traduccion: { traductor: 'Wikisource' } },
+      } as unknown as Cita,
+      ODAS,
+    );
     expect(textoParaCopiar(cita, HORACIO)).toBe(
       '«Feliz quien lejos de negocios vive.» — Horacio, Odas, -23, trad. de Wikisource.',
     );
