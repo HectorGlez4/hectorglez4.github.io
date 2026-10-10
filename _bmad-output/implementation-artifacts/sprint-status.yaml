@@ -267,10 +267,10 @@ development_status:
   # (Odas 35, Consolación a Marcia 14, Eneida 8, Fedro 6) publican el año de su traducción como el de la obra.
   19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: review
   19-2-el-bucle-siembra-clasicos-con-meta-propia: review  # falta el listón, que lo pone Héctor
-  19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog
+  19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog  # bloqueada: consume las semblanzas con fuente (las elige Héctor) y la lista de obras de la 17.3, detrás de la 22.4
   # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie
   # de indexación muestre una familia por encima del 20 %.
-  19-4-la-epoca-agrupa-a-los-autores-que-comparten-tiempo-y-escuela: backlog
+  19-4-la-epoca-agrupa-a-los-autores-que-comparten-tiempo-y-escuela: backlog  # bloqueada: no se construye hasta que una familia pase del 20 % indexado
   # 19.5 sustituye al listón numérico: la época se deriva de las categorías de Wikisource-es
   # —Antigüedad 83 autores, Roma 63, Grecia 35, católicos 8— y termina por agotamiento, no
   # por una cifra. `DP-Autores-100` es la marca de dominio público de la propia Fuente.
