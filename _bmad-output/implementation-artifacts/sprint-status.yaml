@@ -343,7 +343,7 @@ development_status:
   # 21.1: al desplegar, la Cita de ese día cambia; se despliega un día sin jornada fijada o se fija la de ese día.
   21-1-la-cita-del-día-recorre-las-aptas-en-rondas-por-autor: backlog
   # 21.2 no es código: lista propuesta con la regla D-5, tachado en bloque de Héctor, un solo commit feat(portada).
-  21-2-de-16-citas-aptas-a-120-o-más-con-la-regla-en-el-commit: backlog
+  21-2-de-16-citas-aptas-a-120-o-más-con-la-regla-en-el-commit: backlog  # bloqueada: el tachado en bloque y la regla D-5 son de Héctor (readiness §4)
   21-3-cada-publicación-del-canal-queda-anotada: backlog
   21-4-cada-señal-externa-queda-anotada-propia-o-ajena: backlog
   epic-21-retrospective: optional
@@ -361,17 +361,17 @@ development_status:
   22-2-una-obra-un-nombre-las-grafías-se-deciden-en-la-ficha: review  # reuniones propuestas en propuesta-reuniones-de-obra.md, sin aplicar: las decide Héctor
   22-3-la-obra-se-llama-igual-en-todas-partes: review
   # 22.4 detrás de la 19.1. La indexabilidad nace con la página: sin rutas de Obra, su prueba sobre dist/ pasa en vacío.
-  22-4-la-obra-tiene-página-y-solo-se-indexa-si-no-repite-otra: backlog
+  22-4-la-obra-tiene-página-y-solo-se-indexa-si-no-repite-otra: backlog  # bloqueada: la Página de Obra espera a que Héctor decida las reuniones de la 22.2 (propuesta-reuniones-de-obra.md)
   # 22.5 lleva los dos defectos de UX de la Atribución (título E2 y Autor subrayado viajan juntos).
-  22-5-la-atribución-dice-de-qué-obra-sale-y-se-ve-que-es-un-enlace: backlog
-  22-6-dónde-leer-esta-obra: backlog
+  22-5-la-atribución-dice-de-qué-obra-sale-y-se-ve-que-es-un-enlace: backlog  # bloqueada: la Página de Obra espera a que Héctor decida las reuniones de la 22.2 (propuesta-reuniones-de-obra.md)
+  22-6-dónde-leer-esta-obra: backlog  # bloqueada: la Página de Obra espera a que Héctor decida las reuniones de la 22.2 (propuesta-reuniones-de-obra.md)
   # 22.7 decide que el fichero del Autor entra en la Tarjeta de Obra (AD-16), pendiente del visto bueno de Héctor.
-  22-7-la-obra-se-encuentra-en-el-buscador-del-sitio-y-se-ve-al-com: backlog
-  22-8-lo-que-cambia-en-una-obra-se-anuncia-y-la-familia-se-mide-ap: backlog
+  22-7-la-obra-se-encuentra-en-el-buscador-del-sitio-y-se-ve-al-com: backlog  # bloqueada: la Página de Obra espera a que Héctor decida las reuniones de la 22.2 (propuesta-reuniones-de-obra.md)
+  22-8-lo-que-cambia-en-una-obra-se-anuncia-y-la-familia-se-mide-ap: backlog  # bloqueada: la Página de Obra espera a que Héctor decida las reuniones de la 22.2 (propuesta-reuniones-de-obra.md)
   # 22.9: construidas y APAGADAS, detrás de la 17.5.
-  22-9-las-ediciones-en-venta-construidas-y-apagadas: backlog
+  22-9-las-ediciones-en-venta-construidas-y-apagadas: backlog  # bloqueada: detrás de la 22.4 y de la 17.5
   # 22.10: los «Defectos anotados» de EXPERIENCE.md que no van en la 22.5 (mensajes de estado 4.1.3, entre otros).
-  22-10-lo-construido-cumple-las-espinas-de-ux: backlog
+  22-10-lo-construido-cumple-las-espinas-de-ux: backlog  # bloqueada: la Página de Obra espera a que Héctor decida las reuniones de la 22.2 (propuesta-reuniones-de-obra.md)
   epic-22-retrospective: optional
 
 action_items:
