@@ -106,7 +106,7 @@ development_status:
   11-1-la-fuente-se-recupera-y-su-metadato-sale-del-documento: done
   11-2-ninguna-cita-se-publica-sin-aparecer-en-su-documento: done
   11-3-el-objetivo-de-cada-sesión-sale-del-hueco-no-del-criterio: done
-  11-4-el-corpus-alcanza-volumen-defendible: in-progress
+  11-4-el-corpus-alcanza-volumen-defendible: in-progress  # no es de bmad-build: sesiones de sembrado (npm run objetivo / sesion:registrar), se cierra por resultado medido
   11-5-un-documento-ilegible-no-siembra: done
   11-6-documentar-una-cita-publicada: done
   epic-11-retrospective: optional
@@ -267,7 +267,7 @@ development_status:
   # (Odas 35, Consolación a Marcia 14, Eneida 8, Fedro 6) publican el año de su traducción como el de la obra.
   19-1-de-una-obra-traducida-se-conserva-lo-que-la-fuente-declare: review
   19-2-el-bucle-siembra-clasicos-con-meta-propia: review  # falta el listón, que lo pone Héctor
-  19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog  # bloqueada: consume las semblanzas con fuente (las elige Héctor) y la lista de obras de la 17.3, detrás de la 22.4
+  19-3-la-profundidad-por-autor-llega-a-la-obra-y-a-la-biografia: backlog  # bloqueada: solo falta que Héctor elija las semblanzas con fuente (recuperar + autor.ts biografia); 17.3, 17.4 y 22.4 ya en review
   # 19.4 tiene condición de arranque, no solo dependencia: no se construye hasta que la serie
   # de indexación muestre una familia por encima del 20 %.
   19-4-la-epoca-agrupa-a-los-autores-que-comparten-tiempo-y-escuela: backlog  # bloqueada: no se construye hasta que una familia pase del 20 % indexado
