@@ -68,13 +68,65 @@ export interface SeleccionDeCitaDelDia {
 }
 
 /**
+ * El orden de la rotación: un recorrido **en rondas por Autor** (Historia 21.1).
+ *
+ * Por qué no basta ordenar por slug: el slug de una Cita empieza por el de su Autor, así
+ * que el orden alfabético agrupa a cada Autor y un Autor con k Citas aptas ocupa k
+ * jornadas seguidas de portada.
+ *
+ * El recorrido: se agrupa por Autor, se ordenan los Autores y, dentro de cada uno, sus
+ * Citas por slug; luego se toma la 1.ª de cada Autor, la 2.ª de cada uno, y así hasta
+ * agotarlas. Con A(a1, a2, a3), B(b1) y C(c1, c2) sale a1, b1, c1, a2, c2, a3.
+ *
+ * Sigue siendo una **permutación** de las aptas —cada una exactamente una vez—, así que la
+ * rotación de abajo las recorre todas antes de repetir (FR-9) sin recordar nada (AD-10,
+ * AD-12). Y es determinista: los dos órdenes son `localeCompare(…, 'es')` sobre slugs, de
+ * modo que no depende de en qué orden leyó el disco el build.
+ *
+ * La regla que garantiza: **ningún Autor ocupa más de dos jornadas seguidas**, salvo el que
+ * sea el único con Citas en dos o más rondas finales consecutivas —y entonces no hay otro
+ * Autor con quien alternarlo—. Dentro de una ronda con al menos dos Autores, dos jornadas
+ * seguidas nunca comparten Autor. La repetición solo ocurre en una frontera, y con una
+ * condición precisa:
+ *
+ * - de la ronda r a la r+1, cuando la r+1 tiene **un solo** Autor y ese Autor es el último
+ *   alfabéticamente de la r, que es el que la cerró;
+ * - en la vuelta del final al principio, cuando la última ronda tiene un solo Autor y ese
+ *   Autor es el primero alfabéticamente del conjunto.
+ *
+ * Como cada ronda tiene un subconjunto de los Autores de la anterior, una ronda de un solo
+ * Autor deja solas a todas las siguientes: las rondas solitarias son siempre las finales.
+ * Con A(2) y B(1) sale a1, b1, a2, y de a2 se vuelve a a1: dos jornadas, no tres.
+ */
+export function ordenEnRondas(aptas: Cita[]): Cita[] {
+  const porAutor = new Map<string, Cita[]>();
+  for (const cita of aptas) {
+    const suyas = porAutor.get(cita.autor);
+    if (suyas) suyas.push(cita);
+    else porAutor.set(cita.autor, [cita]);
+  }
+
+  const grupos = [...porAutor.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, 'es'))
+    .map(([, citas]) => citas.sort((a, b) => a.slug.localeCompare(b.slug, 'es')));
+
+  const orden: Cita[] = [];
+  const rondas = grupos.reduce((mayor, grupo) => Math.max(mayor, grupo.length), 0);
+  for (let ronda = 0; ronda < rondas; ronda += 1) {
+    for (const grupo of grupos) {
+      if (ronda < grupo.length) orden.push(grupo[ronda]);
+    }
+  }
+  return orden;
+}
+
+/**
  * La Cita del Día.
  *
- * Rota por el conjunto de Citas aptas para portada, ordenado por slug para que el orden
- * no dependa de en qué orden leyó el disco el build. El índice es el número de días desde
- * la época módulo el tamaño del conjunto: recorre **todas** antes de repetir ninguna, que
- * es lo que FR-9 pide, y no necesita recordar cuáles ya salieron —lo cual exigiría un
- * estado que AD-10 no permite tener.
+ * Rota por el conjunto de Citas aptas para portada en el orden de `ordenEnRondas`. El
+ * índice es el número de días desde la época módulo el tamaño del conjunto: recorre
+ * **todas** antes de repetir ninguna, que es lo que FR-9 pide, y no necesita recordar
+ * cuáles ya salieron —lo cual exigiría un estado que AD-10 no permite tener.
  *
  * Una fijación manual para esa fecha tiene prioridad sobre la rotación.
  */
@@ -85,7 +137,7 @@ export function citaDelDia(
 ): SeleccionDeCitaDelDia | null {
   if (aptas.length === 0) return null;
 
-  const orden = [...aptas].sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
+  const orden = ordenEnRondas(aptas);
 
   const fijada = fijaciones[jornada];
   if (fijada !== undefined) {

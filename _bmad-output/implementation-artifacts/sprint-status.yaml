@@ -339,9 +339,9 @@ development_status:
   20-4-la-semana-cero-se-lee-y-se-anota: backlog  # bloqueada: semana manual de Héctor (wrangler, credencial de Search Console, Bing, paneles)
   epic-20-retrospective: optional
 
-  epic-21: backlog
+  epic-21: in-progress
   # 21.1: al desplegar, la Cita de ese día cambia; se despliega un día sin jornada fijada o se fija la de ese día.
-  21-1-la-cita-del-día-recorre-las-aptas-en-rondas-por-autor: backlog
+  21-1-la-cita-del-día-recorre-las-aptas-en-rondas-por-autor: review
   # 21.2 no es código: lista propuesta con la regla D-5, tachado en bloque de Héctor, un solo commit feat(portada).
   21-2-de-16-citas-aptas-a-120-o-más-con-la-regla-en-el-commit: backlog  # bloqueada: el tachado en bloque y la regla D-5 son de Héctor (readiness §4)
   21-3-cada-publicación-del-canal-queda-anotada: backlog
