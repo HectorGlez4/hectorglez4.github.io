@@ -177,20 +177,97 @@ test.describe('Historia 2.8 — foco', () => {
     expect(anillo.separacion).toBe('2px');
   });
 
+  /*
+   * Historia 22.10 — esta prueba preguntaba `getComputedStyle(n, ':focus-visible')`, que no
+   * resuelve pseudoclases de estado: devuelve el estilo de reposo y pasaba con el anillo
+   * suprimido en el campo de búsqueda. Ahora se tabula de verdad —`:focus-visible` solo casa
+   * cuando el foco llega por teclado— y se mira el estilo del elemento que tiene el foco.
+   */
   test('el indicador de foco no está suprimido en ningún elemento', async ({ page }) => {
     for (const ruta of SUPERFICIES) {
       await page.goto(ruta);
-      const suprimido = await page.evaluate(() =>
-        [...document.querySelectorAll('a, button, input, textarea, select, [tabindex]')].filter(
-          (n) => {
-            const s = getComputedStyle(n, ':focus-visible');
-            return s.outlineStyle === 'none' || s.outlineWidth === '0px';
-          },
-        ).length,
-      );
-      expect(suprimido, ruta).toBe(0);
+      /*
+       * Cada enfocable lleva una marca única antes de tabular: así se reconoce sin ambigüedad
+       * cuándo el recorrido vuelve al primero, y el tope sale de cuántos hay, no de un número
+       * escrito a mano que una página larga superaría sin que nadie lo notara.
+       */
+      const enfocables = await page.evaluate(() => {
+        const candidatos = [
+          ...document.querySelectorAll<HTMLElement>(
+            'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])',
+          ),
+        ];
+        candidatos.forEach((n, i) => n.setAttribute('data-barrido-de-foco', String(i)));
+        return candidatos.length;
+      });
+      expect(enfocables, `${ruta}: no hay nada enfocable`).toBeGreaterThan(0);
+
+      const suprimidos: string[] = [];
+      let primero: string | null = null;
+      let vuelta = false;
+      // Cada enfocable una vez, más las paradas fuera del documento al dar la vuelta.
+      for (let i = 0; i < enfocables + 3 && !vuelta; i += 1) {
+        await page.keyboard.press('Tab');
+        const foco = await page.evaluate(() => {
+          const n = document.activeElement as HTMLElement | null;
+          if (n === null || n === document.body || n === document.documentElement) return null;
+          const s = getComputedStyle(n);
+          return {
+            marca: n.getAttribute('data-barrido-de-foco') ?? `sin marca: ${n.outerHTML.slice(0, 80)}`,
+            descripcion: n.outerHTML.slice(0, 100),
+            suprimido: s.outlineStyle === 'none' || s.outlineWidth === '0px',
+          };
+        });
+        if (foco === null) continue;
+        if (primero === null) primero = foco.marca;
+        else if (foco.marca === primero) {
+          vuelta = true;
+          break;
+        }
+        if (foco.suprimido) suprimidos.push(foco.descripcion);
+      }
+      expect(vuelta, `${ruta}: el recorrido con el tabulador no dio la vuelta en ${enfocables + 3} pasos`).toBe(true);
+      expect(suprimidos, ruta).toEqual([]);
     }
   });
+
+  for (const ruta of ['/buscar/', '/una-ruta-que-no-existe/']) {
+    test(`el campo de búsqueda de ${ruta} lleva el anillo de foco al llegar con el teclado`, async ({
+      page,
+    }) => {
+      await page.goto(ruta);
+      let alcanzado = false;
+      for (let i = 0; i < 40 && !alcanzado; i += 1) {
+        await page.keyboard.press('Tab');
+        alcanzado = await page.evaluate(() => document.activeElement?.tagName === 'INPUT');
+      }
+      expect(alcanzado, `${ruta}: el campo no recibe el foco por teclado`).toBe(true);
+
+      const anillo = await page.evaluate(() => {
+        const s = getComputedStyle(document.activeElement!);
+        return {
+          ancho: s.outlineWidth,
+          estilo: s.outlineStyle,
+          separacion: s.outlineOffset,
+          color: s.outlineColor,
+          siena: getComputedStyle(document.documentElement).getPropertyValue('--siena').trim(),
+        };
+      });
+      expect(anillo.estilo).toBe('solid');
+      expect(anillo.ancho).toBe('2px');
+      expect(anillo.separacion).toBe('2px');
+      // El color, el del token: se compara resolviéndolo en el propio navegador.
+      const sienaResuelto = await page.evaluate((valor) => {
+        const prueba = document.createElement('span');
+        prueba.style.color = valor;
+        document.body.append(prueba);
+        const color = getComputedStyle(prueba).color;
+        prueba.remove();
+        return color;
+      }, anillo.siena);
+      expect(anillo.color).toBe(sienaResuelto);
+    });
+  }
 
   test('en la Página de Cita el orden es contenido, acciones y después salidas', async ({
     page,
@@ -304,24 +381,108 @@ test.describe('Historia 2.8 — responsive', () => {
             (padre.textContent ?? '').trim().length > (n.textContent ?? '').trim().length;
           return !(enLinea && acompanado);
         })
-        .map((n) => n.getBoundingClientRect())
-        .filter((r) => r.width > 0 && r.height > 0)
-        .map((r) => ({ arriba: r.top, abajo: r.bottom, izq: r.left, der: r.right, alto: r.height })),
+        // Solo los listados de bloque con filete entre filas: las Citas hermanas.
+        .map((n) => ({ r: n.getBoundingClientRect(), lista: n.closest('.hermanas') }))
+        .filter(({ r }) => r.width > 0 && r.height > 0)
+        .map(({ r, lista }) => ({
+          arriba: r.top,
+          abajo: r.bottom,
+          izq: r.left,
+          der: r.right,
+          alto: r.height,
+          // El listado al que pertenece, para reconocer las filas apiladas de un enlace de bloque.
+          lista: lista === null ? -1 : [...document.querySelectorAll('.hermanas')].indexOf(lista),
+        })),
     );
 
     for (const caja of cajas) expect(caja.alto).toBeGreaterThanOrEqual(44);
 
-    // Y ninguna pareja se solapa dejando menos de 8px entre medias.
+    /*
+     * Y entre dos zonas vecinas quedan 8px. Antes solo se pedía que no se solapasen, y el
+     * comentario prometía los 8px sin medirlos (Historia 22.10). El hueco es por eje: dos
+     * cajas quedan separadas por el eje en el que no se cruzan.
+     *
+     * Las filas de las Citas hermanas —`.hermanas`, con el ancho entero de la columna y el
+     * filete entre una y otra, el único separador del sistema— no se miden entre sí: son
+     * enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un hueco. Basta
+     * con que no se solapen. La exención se nombra por selector, no por «cualquier lista»,
+     * para que una botonera en `ul` no se cuele por ella.
+     */
     for (let i = 0; i < cajas.length; i += 1) {
       for (let j = i + 1; j < cajas.length; j += 1) {
         const a = cajas[i];
         const b = cajas[j];
-        const separaVertical = a.abajo <= b.arriba || b.abajo <= a.arriba;
-        const separaHorizontal = a.der <= b.izq || b.der <= a.izq;
-        // Se solapan solo si no hay separación en ninguno de los dos ejes.
-        expect(separaVertical || separaHorizontal).toBe(true);
+        const filasDeUnListado =
+          a.lista !== -1 &&
+          a.lista === b.lista &&
+          Math.abs(a.izq - b.izq) <= 1 &&
+          Math.abs(a.der - b.der) <= 1;
+        if (filasDeUnListado) {
+          expect(a.abajo <= b.arriba || b.abajo <= a.arriba, JSON.stringify([a, b])).toBe(true);
+          continue;
+        }
+        const vertical = Math.max(a.arriba - b.abajo, b.arriba - a.abajo);
+        const horizontal = Math.max(a.izq - b.der, b.izq - a.der);
+        // Medio píxel de holgura por el redondeo subpíxel del navegador.
+        expect(Math.max(vertical, horizontal), JSON.stringify([a, b])).toBeGreaterThanOrEqual(7.5);
       }
     }
+  });
+
+  /*
+   * Historia 22.10 — la prueba de arriba solo pedía que las cajas no se solapasen; los 8px de
+   * `{spacing.unit}` entre zonas vecinas no los medía nadie, y los números de la Paginación
+   * iban a 4px. Se mide en el listado de Autor con más páginas del `dist/`, a 360 px, con el
+   * hueco por eje: dos cajas vecinas quedan separadas al menos 8px en el eje que las separa.
+   */
+  test('los números de la Paginación quedan a 8px entre zonas de toque, en la fila y entre filas', async ({
+    page,
+  }) => {
+    const autores = readdirSync(join(dist, 'autor'))
+      .map((slug) => ({
+        slug,
+        paginas: readdirSync(join(dist, 'autor', slug)).filter((e) => /^\d+$/.test(e)).length,
+      }))
+      .sort((a, b) => b.paginas - a.paginas || a.slug.localeCompare(b.slug, 'es'));
+    expect(autores[0]?.paginas ?? 0, 'ningún Autor del dist/ tiene más de una página').toBeGreaterThan(0);
+
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto(`/autor/${autores[0].slug}/`);
+
+    const cajas = await page.evaluate(() =>
+      [...document.querySelectorAll('.numeros > li > *')].map((n) => {
+        const r = n.getBoundingClientRect();
+        return { arriba: r.top, abajo: r.bottom, izq: r.left, der: r.right, alto: r.height, ancho: r.width };
+      }),
+    );
+    expect(cajas.length).toBeGreaterThan(1);
+    // Sin dos filas, la separación entre filas no se mediría: el listado más largo a 360 px
+    // tiene que envolver, o esta prueba no prueba lo que dice.
+    const filas = new Set(cajas.map((c) => Math.round(c.arriba))).size;
+    expect(filas, 'los números de la Paginación no envuelven a 360 px').toBeGreaterThanOrEqual(2);
+
+    for (const caja of cajas) {
+      expect(caja.alto).toBeGreaterThanOrEqual(44);
+      expect(caja.ancho).toBeGreaterThanOrEqual(44);
+    }
+    for (let i = 0; i < cajas.length; i += 1) {
+      for (let j = i + 1; j < cajas.length; j += 1) {
+        const a = cajas[i];
+        const b = cajas[j];
+        const vertical = Math.max(a.arriba - b.abajo, b.arriba - a.abajo);
+        const horizontal = Math.max(a.izq - b.der, b.izq - a.der);
+        // Medio píxel de holgura por el redondeo subpíxel del navegador.
+        expect(Math.max(vertical, horizontal), `números ${i + 1} y ${j + 1}`).toBeGreaterThanOrEqual(7.5);
+      }
+    }
+
+    // Y el `span` oculto de dentro del enlace no hereda la zona de toque.
+    const oculto = await page.evaluate(() => {
+      const n = document.querySelector('.numeros a .oculto');
+      return n === null ? null : n.getBoundingClientRect().width;
+    });
+    expect(oculto).not.toBeNull();
+    expect(oculto!).toBeLessThanOrEqual(1);
   });
 
   test('el ancho extra de escritorio es margen y no contenido nuevo', async ({ page }) => {
@@ -404,5 +565,33 @@ test.describe('Historia 2.8 — sin muro de entrada ni movimiento impuesto', () 
         .map((d) => (d.endsWith('ms') ? Number.parseFloat(d) : Number.parseFloat(d) * 1000)),
     );
     for (const duracion of duraciones) expect(duracion).toBeLessThanOrEqual(150);
+  });
+});
+
+test.describe('Historia 22.10 — subrayado y pestaña nueva', () => {
+  test('«Buscar» de la cabecera y los enlaces del pie van subrayados sin pasar el cursor', async ({
+    page,
+  }) => {
+    // UX-DR52: no son enlaces de bloque de la lista cerrada, y en móvil no hay cursor.
+    await page.goto('/');
+    const enlaces = page.locator('header a.buscar, footer nav a');
+    expect(await enlaces.count()).toBeGreaterThan(1);
+    const sinSubrayar = await enlaces.evaluateAll((ns) =>
+      ns
+        .filter((n) => !getComputedStyle(n).textDecorationLine.includes('underline'))
+        .map((n) => n.textContent?.trim()),
+    );
+    expect(sinSubrayar).toEqual([]);
+  });
+
+  test('las cuentas sociales del pie abren en la misma pestaña y conservan rel="me"', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const cuentas = page.locator('footer nav a[rel~="me"]');
+    expect(await cuentas.count()).toBeGreaterThan(0);
+    // Solo las cuentas: si un día el pie aloja un enlace que entrega algo a un tercero
+    // —donar, comprar—, ese sí abriría pestaña nueva.
+    expect(await cuentas.evaluateAll((ns) => ns.filter((n) => n.hasAttribute('target')).length)).toBe(0);
   });
 });

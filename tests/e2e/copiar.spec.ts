@@ -60,14 +60,92 @@ test.describe('Historia 2.2 — copiar', () => {
     const boton = page.getByRole('button', { name: 'Copiar la cita' });
     await boton.click();
 
-    await expect(page.getByRole('button', { name: 'Copiado.' })).toBeVisible();
-    // Sin ningún elemento flotante añadido al documento.
-    expect(await page.locator('[role="status"], [role="alert"], .toast').count()).toBe(0);
+    // La confirmación se ve en el propio botón; su nombre accesible no cambia, porque el
+    // anuncio va solo por la región de estado (Historia 22.10: un solo anuncio, no dos).
+    await expect(page.locator('[data-copiar] [data-etiqueta]')).toHaveText('Copiado.');
+    await expect(boton).toHaveAccessibleName('Copiar la cita');
+    // Sin ningún elemento flotante añadido al documento: la región de estado de la Historia
+    // 22.10 no flota ni se ve, y ninguna alerta ni notificación aparece.
+    expect(await page.locator('[role="alert"], .toast').count()).toBe(0);
+    const region = page.locator('[data-copiar] + [role="status"]');
+    expect(
+      await region.evaluate((n) => {
+        const r = n.getBoundingClientRect();
+        return r.width <= 1 && r.height <= 1;
+      }),
+    ).toBe(true);
 
     // Y vuelve a su estado tras los dos segundos.
-    await expect(page.getByRole('button', { name: 'Copiar la cita' })).toBeVisible({
+    await expect(page.locator('[data-copiar] [data-etiqueta]')).toHaveText('Copiar la cita', {
       timeout: 4000,
     });
+  });
+
+  test('«Copiado.» se anuncia por una región role="status" que está desde la carga', async ({
+    page,
+  }) => {
+    // Historia 22.10 — WCAG 4.1.3. La región existe antes de copiar, vacía y no oculta: lo
+    // que se anuncia es un cambio de contenido, no de visibilidad.
+    await page.goto(CON_PROCEDENCIA);
+    const region = page.locator('[data-copiar] + [role="status"]');
+    await expect(region).toHaveCount(1);
+    await expect(region).toHaveText('');
+    await expect(region).not.toHaveAttribute('hidden', /.*/);
+    await expect(region).not.toHaveAttribute('aria-hidden', /.*/);
+    expect(await region.evaluate((n) => getComputedStyle(n).display)).not.toBe('none');
+
+    await page.getByRole('button', { name: 'Copiar la cita' }).click();
+    await expect(region).toHaveText('Copiado.');
+    // Y se vacía con el botón, para que la próxima copia vuelva a anunciarse.
+    await expect(region).toHaveText('', { timeout: 4000 });
+  });
+
+  test('copiar dos veces seguidas vuelve a anunciarse: la región se vacía antes de escribir', async ({
+    page,
+  }) => {
+    // El mismo texto escrito sobre sí mismo no es un cambio y no se anuncia.
+    await page.goto(CON_PROCEDENCIA);
+    await page.evaluate(() => {
+      const region = document.querySelector('[data-copiar] + [role="status"]')!;
+      const textos: string[] = [];
+      (window as unknown as { __textos: string[] }).__textos = textos;
+      new MutationObserver(() => textos.push(region.textContent ?? '')).observe(region, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    });
+    const boton = page.getByRole('button', { name: 'Copiar la cita' });
+    await boton.click();
+    await expect(page.locator('[data-copiar] + [role="status"]')).toHaveText('Copiado.');
+    await boton.click();
+    await page.waitForFunction(
+      () => (window as unknown as { __textos: string[] }).__textos.filter((t) => t === 'Copiado.').length === 2,
+    );
+    const textos = await page.evaluate(() => (window as unknown as { __textos: string[] }).__textos);
+    // Entre los dos «Copiado.», la región pasó por vacía.
+    expect(textos.slice(textos.indexOf('Copiado.') + 1)).toContain('');
+  });
+
+  test('si el portapapeles falla tras una copia buena, no queda «Copiado.» en ninguna parte', async ({
+    page,
+  }) => {
+    await page.goto(CON_PROCEDENCIA);
+    await page.getByRole('button', { name: 'Copiar la cita' }).click();
+    await expect(page.locator('[data-copiar] + [role="status"]')).toHaveText('Copiado.');
+
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: () => Promise.reject(new Error('denegado')) },
+        configurable: true,
+      });
+    });
+    await page.getByRole('button', { name: 'Copiar la cita' }).click();
+
+    await expect(page.locator('[data-respaldo-texto]')).toBeVisible();
+    await expect(page.locator('[data-copiar] + [role="status"]')).toHaveText('');
+    await expect(page.locator('[data-copiar] [data-etiqueta]')).toHaveText('Copiar la cita');
+    await expect(page.locator('[data-copiar]')).not.toHaveAttribute('data-estado', /.*/);
   });
 
   test('si el portapapeles falla, el texto se ofrece seleccionable y sin error técnico', async ({

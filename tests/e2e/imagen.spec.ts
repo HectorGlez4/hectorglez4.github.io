@@ -223,3 +223,172 @@ test.describe('Historia 5.2 — plantillas', () => {
     expect(opacidad).toMatch(/rgba?\(/);
   });
 });
+
+test.describe('Historia 22.10 — el estado del diálogo se anuncia', () => {
+  test('la imagen lista se anuncia por una región role="status" del diálogo', async ({ page }) => {
+    await abrirDialogo(page);
+    const region = page.locator('[data-dialogo] [role="status"]');
+    await expect(region).toHaveCount(1);
+    await expect(region).toHaveText('La imagen está lista.');
+    // Fuera de la vista pero no oculta: si la sacase del árbol de accesibilidad, no anunciaría.
+    await expect(region).not.toHaveAttribute('hidden', /.*/);
+    await expect(region).not.toHaveAttribute('aria-hidden', /.*/);
+  });
+});
+
+test.describe('Historia 22.10 — el generador que no llega a cargar', () => {
+  test('el diálogo lo dice, lo anuncia y ofrece copiar el texto, sin promesa sin tratar', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const errores: string[] = [];
+    page.on('pageerror', (e) => errores.push(e.message));
+    await page.route('**/islas/imagen.js', (ruta) => ruta.abort());
+
+    await page.goto(CITA);
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+
+    const dialogo = page.locator('[data-dialogo]');
+    await expect(dialogo).toBeVisible();
+    await expect(dialogo.locator('[data-fallo]')).toBeVisible();
+    await expect(dialogo.locator('[data-fallo]')).toContainText('No se ha podido preparar la imagen.');
+    // La previsualización vacía y la acción que no podría cumplir ya no están a la vista.
+    await expect(dialogo.locator('[data-lienzo]')).toBeHidden();
+    await expect(dialogo.locator('[data-descargar]')).toBeHidden();
+    // El fallo se anuncia por la región de estado del diálogo.
+    await expect(dialogo.locator('[role="status"]')).toContainText('No se ha podido preparar la imagen.');
+
+    // Copiar el texto: cierra el diálogo y copia con el Copiar de la página.
+    await dialogo.getByRole('button', { name: 'Copiar el texto' }).click();
+    await expect(dialogo).toBeHidden();
+    const portapapeles = await page.evaluate(() => navigator.clipboard.readText());
+    expect(portapapeles).toContain('La libertad, Sancho');
+    await expect(page.locator('[data-copiar] + [role="status"]')).toHaveText('Copiado.');
+
+    expect(errores, 'ninguna promesa rechazada sin tratar').toEqual([]);
+  });
+
+  test('un clic posterior reintenta y, si el generador llega, pinta', async ({ page }) => {
+    let abortar = true;
+    await page.route('**/islas/imagen.js', (ruta) => (abortar ? ruta.abort() : ruta.continue()));
+
+    await page.goto(CITA);
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    await expect(page.locator('[data-fallo]')).toBeVisible();
+    await page.keyboard.press('Escape');
+
+    abortar = false;
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    await page.waitForFunction(() => {
+      const l = document.querySelector('[data-lienzo]') as HTMLCanvasElement | null;
+      return !!l && l.getContext('2d')!.getImageData(0, 0, 1, 1).data[3] === 255;
+    });
+    await expect(page.locator('[data-fallo]')).toBeHidden();
+    await expect(page.locator('[data-lienzo]')).toBeVisible();
+    await expect(page.locator('[data-descargar]')).toBeVisible();
+  });
+});
+
+test.describe('Historia 22.10 — revisión: re-anuncio, respaldo y una sola carga', () => {
+  /** Registra cada texto por el que pasa la región de estado del diálogo. */
+  async function espiarRegion(page: import('@playwright/test').Page) {
+    await page.evaluate(() => {
+      const region = document.querySelector('[data-dialogo] [role="status"]')!;
+      const textos: string[] = [];
+      (window as unknown as { __textos: string[] }).__textos = textos;
+      new MutationObserver(() => textos.push(region.textContent ?? '')).observe(region, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    });
+  }
+  const textos = (page: import('@playwright/test').Page) =>
+    page.evaluate(() => (window as unknown as { __textos: string[] }).__textos);
+
+  test('cambiar de plantilla vuelve a anunciar «La imagen está lista.»', async ({ page }) => {
+    await abrirDialogo(page);
+    const region = page.locator('[data-dialogo] [role="status"]');
+    await expect(region).toHaveText('La imagen está lista.');
+    await espiarRegion(page);
+
+    await page.getByRole('button', { name: 'Tinta' }).click();
+    await page.waitForFunction(() =>
+      (window as unknown as { __textos: string[] }).__textos.includes('La imagen está lista.'),
+    );
+    // Se vació antes de volver a escribirse: el mismo texto sobre sí mismo no se anuncia.
+    const vistos = await textos(page);
+    expect(vistos.indexOf('')).toBeGreaterThanOrEqual(0);
+    expect(vistos.indexOf('')).toBeLessThan(vistos.indexOf('La imagen está lista.'));
+  });
+
+  test('sin Copiar en la página, «Copiar el texto» copia él mismo y lo anuncia', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const errores: string[] = [];
+    page.on('pageerror', (e) => errores.push(e.message));
+    await page.route('**/islas/imagen.js', (ruta) => ruta.abort());
+    await page.goto(CITA);
+    await page.evaluate(() => document.querySelector('[data-copiar]')!.remove());
+
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    await page.getByRole('button', { name: 'Copiar el texto' }).click();
+
+    await expect(page.locator('[data-dialogo]')).toBeVisible();
+    await expect(page.locator('[data-dialogo] [role="status"]')).toHaveText('Copiado.');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('La libertad, Sancho');
+    expect(errores).toEqual([]);
+  });
+
+  test('sin Copiar y con el portapapeles roto, el texto se revela seleccionable', async ({ page }) => {
+    const errores: string[] = [];
+    page.on('pageerror', (e) => errores.push(e.message));
+    await page.route('**/islas/imagen.js', (ruta) => ruta.abort());
+    await page.goto(CITA);
+    await page.evaluate(() => {
+      document.querySelector('[data-copiar]')!.remove();
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: () => Promise.reject(new Error('denegado')) },
+        configurable: true,
+      });
+    });
+
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    await page.getByRole('button', { name: 'Copiar el texto' }).click();
+
+    const campo = page.locator('[data-fallo-texto]');
+    await expect(campo).toBeVisible();
+    await expect(campo).toHaveValue(/La libertad, Sancho/);
+    expect(errores).toEqual([]);
+  });
+
+  test('dos cargas a la vez piden el módulo una vez y cuentan un solo fallo', async ({ page }) => {
+    const pedidas: string[] = [];
+    let abortar = true;
+    await page.route(/\/islas\/imagen\.js(\?.*)?$/, async (ruta) => {
+      pedidas.push(ruta.request().url());
+      if (!abortar) return ruta.continue();
+      // Se retrasa el fallo para que la segunda llamada llegue con la primera pendiente.
+      await new Promise((r) => setTimeout(r, 300));
+      return ruta.abort();
+    });
+
+    await page.goto(CITA);
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    // Con el generador aún pendiente, la acción final pide cargarlo otra vez.
+    await page.locator('[data-descargar]').click();
+    await expect(page.locator('[data-fallo]')).toBeVisible();
+    expect(pedidas).toHaveLength(1);
+
+    abortar = false;
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    await expect(page.locator('[data-lienzo]')).toBeVisible();
+    // Un solo fallo contado: el reintento es el `?1`, no el `?2`.
+    expect(pedidas).toHaveLength(2);
+    expect(pedidas[1]).toMatch(/imagen\.js\?1$/);
+  });
+});

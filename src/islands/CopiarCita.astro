@@ -28,6 +28,13 @@
  *     nada que llamar y el copiado funciona igual.
  *   · El respaldo que se revela es el de **esta** isla y no el primero de la página: el
  *     Kit Diario lleva dos.
+ *
+ * El guion no lleva su propio `(() => { … })()`: `define:vars` ya lo envuelve en una
+ * función, y el envoltorio repetido eran dos espacios de sangría por línea en el
+ * presupuesto de bytes (Historia 22.10). Tampoco pregunta si su marcado existe: el guion lo
+ * emite este mismo componente justo detrás, bajo la misma condición, y el compilador no
+ * admite un `return` fuera de función. Quitarle `define:vars` obligaría a devolverle el
+ * envoltorio.
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
 import { EVENTOS } from '../lib/medicion.ts';
@@ -48,12 +55,33 @@ const carga = textoParaCopiar(cita, autor);
  * escuchaba dos veces. El `id` del respaldo también se repetía, que es marcado inválido.
  */
 const instancia = cita.slug;
+
+/*
+ * Historia 22.10 — «Copiado.» se anuncia **una sola vez, por la región**, y por eso el botón
+ * fija su nombre accesible con `aria-label`: el rótulo visible cambia dos segundos, el nombre
+ * no. Con los dos cambiando, un lector que anuncia el cambio de nombre del control enfocado
+ * —unos lo hacen, otros no— diría «Copiado.» dos veces; sin la región, los que no lo hacen no
+ * dirían nada, y WCAG 4.1.3 pide el mensaje de estado por un rol, no por suerte. El nombre
+ * sigue conteniendo el rótulo en reposo; «Copiado.» es una confirmación de dos segundos, no
+ * el rótulo del control.
+ *
+ * Para que copiar dos veces seguidas vuelva a anunciarse, `volver` vacía la región al empezar
+ * cada pulsación y el mensaje se escribe en el fotograma siguiente: escribir el mismo texto
+ * sobre sí mismo no es un cambio y no se anuncia. Y si el portapapeles falla tras una copia
+ * buena, `volver` ya ha quitado temporizador, región y rótulo antes del respaldo.
+ */
+const ROTULO = 'Copiar la cita';
 ---
 
 <div class="isla" data-pagefind-ignore>
-  <button type="button" class="copiar" data-copiar={instancia} data-carga={carga}>
-    <span data-etiqueta>Copiar la cita</span>
+  <button type="button" class="copiar" data-copiar={instancia} data-carga={carga} aria-label={ROTULO}>
+    <span data-etiqueta>{ROTULO}</span>
   </button>
+
+  {/* Historia 22.10 — WCAG 4.1.3: «Copiado.» también se anuncia, por una región que está desde
+      la carga, vacía y fuera de la vista pero no oculta. La confirmación visible sigue en el
+      botón; la región es para quien no la ve. */}
+  <p class="solo-para-lectores" role="status" data-anuncio></p>
 
   {/* Respaldo de UX-DR20: si el portapapeles falla, el texto se revela seleccionable. */}
   <p class="respaldo" data-respaldo hidden>
@@ -63,38 +91,38 @@ const instancia = cita.slug;
 </div>
 
 <script is:inline define:vars={{ EVENTO_COPIADO: EVENTOS.copiado, INSTANCIA: instancia }}>
-  (() => {
-    const boton = document.querySelector(`[data-copiar="${INSTANCIA}"]`);
-    if (!boton) return;
+  const boton = document.querySelector(`[data-copiar="${INSTANCIA}"]`);
+  const isla = boton.closest('.isla');
+  const etiqueta = boton.querySelector('[data-etiqueta]');
+  const anuncio = isla.querySelector('[data-anuncio]');
+  const original = etiqueta.textContent;
+  let temporizador;
 
-    const isla = boton.closest('.isla');
-    const etiqueta = boton.querySelector('[data-etiqueta]');
-    const original = etiqueta.textContent;
-    let temporizador;
+  const volver = () => {
+    clearTimeout(temporizador);
+    etiqueta.textContent = original;
+    anuncio.textContent = '';
+    boton.removeAttribute('data-estado');
+  };
 
-    boton.addEventListener('click', async () => {
-      const carga = boton.dataset.carga;
+  boton.addEventListener('click', async () => {
+    volver();
+    try {
+      await navigator.clipboard.writeText(boton.dataset.carga);
 
-      try {
-        await navigator.clipboard.writeText(carga);
-
-        window.__medir && window.__medir(EVENTO_COPIADO);
-        etiqueta.textContent = 'Copiado.';
-        boton.setAttribute('data-estado', 'copiado');
-        clearTimeout(temporizador);
-        temporizador = setTimeout(() => {
-          etiqueta.textContent = original;
-          boton.removeAttribute('data-estado');
-        }, 2000);
-      } catch {
-        const respaldo = isla.querySelector('[data-respaldo]');
-        const campo = isla.querySelector('[data-respaldo-texto]');
-        respaldo.hidden = false;
-        campo.focus();
-        campo.select();
-      }
-    });
-  })();
+      window.__medir && window.__medir(EVENTO_COPIADO);
+      etiqueta.textContent = 'Copiado.';
+      boton.setAttribute('data-estado', 'copiado');
+      requestAnimationFrame(() => (anuncio.textContent = 'Copiado.'));
+      temporizador = setTimeout(volver, 2000);
+    } catch {
+      const respaldo = isla.querySelector('[data-respaldo]');
+      const campo = isla.querySelector('[data-respaldo-texto]');
+      respaldo.hidden = false;
+      campo.focus();
+      campo.select();
+    }
+  });
 </script>
 
 <style>

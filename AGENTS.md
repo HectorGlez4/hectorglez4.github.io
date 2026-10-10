@@ -31,6 +31,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Un campo opcional sin valor se omite del fichero; nunca cadena vacía ni `null`. La distinción entre procedencia completa, parcial y ausente es de presencia de campos.
 - Ningún componente lleva valores literales de color o tipografía — usa los tokens de `DESIGN.md` como propiedades personalizadas de CSS.
 - La familia serif se aplica solo a texto de Cita, nombre de Autor y nombre de Tema.
+- Un mensaje de estado («Copiado.», el recuento de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma (`requestAnimationFrame`): el mismo texto escrito sobre sí mismo no se anuncia. Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
 
 ## Known pitfalls
 

@@ -145,9 +145,8 @@ const autorDelDia = seleccion
     transition: border-color 150ms;
   }
 
-  input:focus,
-  input:focus-visible {
-    outline: none;
+  /* Historia 22.10 — el filete se suma al anillo global de UX-DR23; no lo sustituye. */
+  input:focus {
     border-bottom: 2px solid var(--siena);
   }
 

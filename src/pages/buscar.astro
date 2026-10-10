@@ -61,7 +61,13 @@ const colecciones = conjunto.colecciones;
       />
     </form>
 
-    <p class="estado" data-estado hidden></p>
+    {/*
+      * Historia 22.10 — WCAG 4.1.3: el recuento y la búsqueda sin resultados se anuncian por
+      * esta región, que está desde la carga, vacía y sin `hidden`: lo que se anuncia es un
+      * cambio de contenido, no de visibilidad. Sin resultados dice la frase de la salida y se
+      * aparta de la vista, para no pintarla dos veces.
+      */}
+    <p class="estado" role="status" data-estado></p>
 
     <ul class="resultados" data-resultados></ul>
 
@@ -171,11 +177,20 @@ const colecciones = conjunto.colecciones;
     // La tabla llega de `src/lib/tipoDeResultado.ts` por `define:vars`. Escribirla aquí a
     // mano era la segunda copia, y la que se quedaba atrás al añadir una superficie.
 
+    // Historia 22.10 — vaciar y escribir en el fotograma siguiente: el mismo recuento dos veces,
+    // o dos búsquedas vacías seguidas, no cambian el texto y no se anunciarían.
+    function decir(texto) {
+      estado.textContent = '';
+      requestAnimationFrame(() => (estado.textContent = texto));
+    }
+
     function pintar(resultados, consulta) {
       lista.replaceChildren();
 
-      if (resultados.length === 0) {
-        estado.hidden = true;
+      const vacio = resultados.length === 0;
+      estado.classList.toggle('solo-para-lectores', vacio);
+      if (vacio) {
+        decir(salida.querySelector('.sugerencia')?.textContent.trim() || 'Ningún resultado.');
         salida.hidden = false;
         // AD-13 — a través del módulo de medición, nunca del proveedor. La consulta
         // viaja como texto y no va asociada a ningún visitante.
@@ -184,9 +199,7 @@ const colecciones = conjunto.colecciones;
       }
 
       salida.hidden = true;
-      estado.hidden = false;
-      estado.textContent =
-        resultados.length === 1 ? 'Un resultado.' : `${resultados.length} resultados.`;
+      decir(resultados.length === 1 ? 'Un resultado.' : `${resultados.length} resultados.`);
 
       for (const dato of resultados) {
         const tipo = (dato.meta && dato.meta.tipo) || TIPO_POR_OMISION;
@@ -241,7 +254,7 @@ const colecciones = conjunto.colecciones;
 
       if (consulta.trim() === '') {
         lista.replaceChildren();
-        estado.hidden = true;
+        estado.textContent = '';
         salida.hidden = true;
         return;
       }
@@ -313,16 +326,15 @@ const colecciones = conjunto.colecciones;
     transition: border-color 150ms;
   }
 
+  /* Historia 22.10 — el filete pasa a 2px siena **además** del anillo global de UX-DR23,
+     nunca en su lugar: el anillo no se suprime en ningún elemento, tampoco en el campo. */
   input:focus {
-    outline: none;
     border-bottom: 2px solid var(--siena);
   }
 
-  /* El anillo de UX-DR23 se sustituye aquí por el filete de 2px, que es el propio
-     indicador de foco del campo según DESIGN.md. No se suprime nada: se cambia de forma. */
-  input:focus-visible {
-    outline: none;
-    border-bottom: 2px solid var(--siena);
+  /* Vacía no ocupa sitio, pero sigue en el árbol de accesibilidad: no lleva `hidden`. */
+  .estado:empty {
+    margin: 0;
   }
 
   .estado {

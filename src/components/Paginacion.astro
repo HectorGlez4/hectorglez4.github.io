@@ -117,18 +117,23 @@ const base = pagina.url.first ?? pagina.url.current;
   /*
    * Los números van en lista ordenada porque eso es lo que son. El `flex-wrap` es lo que
    * impide que un listado de muchas páginas empuje el control fuera de la caja en el móvil.
+   *
+   * Historia 22.10 — entre dos zonas de toque vecinas va `{spacing.unit}` entero, en la fila y
+   * entre filas (`EXPERIENCE.md § Interaction Primitives`); antes era la mitad.
    */
   .numeros {
     display: flex;
     flex-wrap: wrap;
-    gap: calc(var(--unidad) * 0.5);
+    gap: var(--unidad);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .numeros a,
-  .numeros span {
+  /* Hijos directos: el `span.oculto` de dentro del enlace no es una zona de toque y no debe
+     heredar sus 44px. */
+  .numeros > li > a,
+  .numeros > li > span {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,7 +142,7 @@ const base = pagina.url.first ?? pagina.url.current;
     font-size: var(--pie);
   }
 
-  .numeros span[aria-current] {
+  .numeros > li > span[aria-current] {
     color: var(--tinta);
     font-weight: 600;
   }

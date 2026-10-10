@@ -26,6 +26,7 @@
  * llegue también a quien recorre los enlaces.
  */
 
+import { AVISO_DE_PESTAÑA_NUEVA } from '../lib/accesibilidad.ts';
 import type { EdicionEnVenta } from '../lib/ediciones.ts';
 
 interface Props {
@@ -106,7 +107,7 @@ const DECLARACION = 'Enlace de afiliado: si compras, el sitio recibe una comisi�
       ediciones.map((edicion, i) => (
         <li style={DE_LA_LINEA}>
           {/* En una sola línea: un salto entre el enlace y lo que sigue dejaría un espacio delante de los dos puntos. */}
-          <a href={edicion.href} rel="sponsored noopener" target="_blank" aria-describedby={idDeLaDeclaracion(i)} style={DEL_ENLACE}>Edición {nombreDelFormato(edicion.formato)} en {edicion.tienda}<span style={SOLO_PARA_LECTORES}> (se abre en una pestaña nueva)</span></a>{trasElEnlace(edicion.descripcion)} <span id={idDeLaDeclaracion(i)}>{DECLARACION}</span>
+          <a href={edicion.href} rel="sponsored noopener" target="_blank" aria-describedby={idDeLaDeclaracion(i)} style={DEL_ENLACE}>Edición {nombreDelFormato(edicion.formato)} en {edicion.tienda}<span style={SOLO_PARA_LECTORES}>{AVISO_DE_PESTAÑA_NUEVA}</span></a>{trasElEnlace(edicion.descripcion)} <span id={idDeLaDeclaracion(i)}>{DECLARACION}</span>
         </li>
       ))
     }

@@ -238,18 +238,23 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     min-height: var(--zona-de-toque);
   }
 
+  /*
+   * Historia 22.10 — «Buscar» va subrayado siempre (UX-DR52): no es la marca ni ningún otro
+   * enlace de la lista cerrada de bloques, y en móvil no hay cursor que pase por encima. El
+   * subrayado permanente **sustituye** al que antes salía solo con `:hover`, por eso ya no
+   * está en la regla de abajo; la marca, enlace de bloque, conserva el suyo.
+   */
   .buscar {
     font-size: var(--cuerpo-md);
     color: var(--siena);
-    text-decoration: none;
+    text-decoration-line: underline;
     display: flex;
     align-items: center;
     min-height: var(--zona-de-toque);
     padding-inline: var(--unidad);
   }
 
-  .marca:hover,
-  .buscar:hover {
+  .marca:hover {
     text-decoration: underline;
   }
 

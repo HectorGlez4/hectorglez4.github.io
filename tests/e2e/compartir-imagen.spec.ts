@@ -90,6 +90,13 @@ test.describe('Historia 10.2 — con hoja del sistema', () => {
     expect(await page.locator('body').innerText()).not.toMatch(/no compatible|no admite|tu navegador/i);
   });
 
+  test('el diálogo se llama como su acción: «Compartir…»', async ({ page }) => {
+    // Historia 22.10 — antes decía «Descargar» también donde comparte.
+    await conHojaDelSistema(page);
+    await abrirYComponer(page);
+    await expect(page.getByRole('dialog')).toHaveAccessibleName(/^Compartir/);
+  });
+
   test('cerrar la hoja sin elegir destino no registra nada ni enseña error', async ({ page }) => {
     await conHojaDelSistema(page, 'cancela');
     await page.addInitScript(() => {
@@ -127,6 +134,11 @@ test.describe('Historia 10.2 — sin hoja del sistema, la v1 intacta', () => {
     const descarga = page.waitForEvent('download');
     await page.locator('[data-descargar]').click();
     expect((await descarga).suggestedFilename()).toMatch(/\.png$/);
+  });
+
+  test('el diálogo se llama como su acción: «Descargar…»', async ({ page }) => {
+    await abrirYComponer(page);
+    await expect(page.getByRole('dialog')).toHaveAccessibleName(/^Descargar/);
   });
 
   test('la etiqueta es la de siempre y el control está activo', async ({ page }) => {

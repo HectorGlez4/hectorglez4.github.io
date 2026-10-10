@@ -32,6 +32,30 @@ test.describe('Historia 10.3 — sin hoja del sistema', () => {
     await expect(page.locator('[data-hoja]')).toBeHidden();
   });
 
+  test('cada destino dice «Compartir en {destino}» y avisa de la pestaña nueva en su nombre', async ({
+    page,
+  }) => {
+    // Historia 22.10 — con el patrón de «Apoyar el sitio»: el aviso, oculto a la vista y
+    // dentro del nombre accesible. Y sigue abriendo pestaña nueva: compartir es entregar
+    // algo en curso a un tercero.
+    await page.goto(CITA);
+    for (const destino of DESTINOS) {
+      const enlace = page.locator(`[data-destino="${destino.id}"]`);
+      await expect(enlace, destino.id).toHaveAccessibleName(
+        `Compartir en ${destino.nombre} (se abre en una pestaña nueva)`,
+      );
+      await expect(enlace, destino.id).toHaveAttribute('target', '_blank');
+      // Lo que se ve es el rótulo; el aviso va en un `span` fuera de la vista.
+      expect(await enlace.evaluate((n) => n.firstChild?.textContent), destino.id).toBe(
+        `Compartir en ${destino.nombre}`,
+      );
+      expect(
+        await enlace.locator('span').evaluate((n) => n.getBoundingClientRect().width),
+        destino.id,
+      ).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('cada destino lleva la Cita y el Autor en el enlace', async ({ page }) => {
     await page.goto(CITA);
     for (const destino of DESTINOS) {

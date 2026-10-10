@@ -118,7 +118,8 @@ body {
 
 /*
  * UX-DR23 — El foco es visible siempre, anillo de 2px en siena separado 2px. No se
- * suprime en ningún elemento; no existe una sola regla `outline: none` en el proyecto.
+ * suprime en ningún elemento, tampoco en el campo de búsqueda: ninguna regla del proyecto
+ * anula el `outline`, y una prueba de `tests/unit/espinas-de-ux.test.ts` lo vigila.
  */
 :focus-visible {
   outline: 2px solid var(--siena);
@@ -175,6 +176,21 @@ a {
   color: var(--tinta);
   text-decoration-line: underline;
   text-decoration-thickness: var(--grosor-filete);
+}
+
+/*
+ * Historia 22.10 — lo que oye el lector de pantalla y no se ve: el aviso de pestaña nueva
+ * dentro de un enlace y las regiones `role="status"` (WCAG 4.1.3). Fuera del flujo, pero
+ * **no oculto**: ni `hidden` ni `display: none`, que lo sacarían también del árbol de
+ * accesibilidad y la región dejaría de anunciar.
+ */
+.solo-para-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 img,

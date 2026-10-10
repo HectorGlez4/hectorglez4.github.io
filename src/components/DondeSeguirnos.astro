@@ -21,6 +21,13 @@
  * sitio, que es lo que un enlace de perfil afirma. El canal no lo lleva —no es una
  * identidad— pero sí `type`, que es como un lector sabe qué va a encontrar.
  *
+ * Historia 22.10 — las cuentas abren **en la misma pestaña**: pestaña nueva solo para
+ * entregar algo en curso a un tercero —donar, compartir, comprar— (`EXPERIENCE.md §
+ * Interaction Primitives`). Ir a una cuenta no es eso; es irse, y el botón de atrás vuelve.
+ * Y van subrayadas **siempre** (UX-DR52): no están en la lista cerrada de enlaces de bloque,
+ * y en móvil no existe el paso del cursor que antes era su única señal además del siena; el
+ * subrayado permanente sustituye al que antes salía solo al pasar el cursor.
+ *
  * La lista de cuentas sale de `CUENTAS_PUBLICAS`, que deriva de REDES y de PERFILES.
  * Añadir una cuenta allí la hace aparecer aquí sola; una red sin perfil conocido —hoy, X—
  * no se pinta en vez de enlazar a un 404.
@@ -33,7 +40,7 @@ import { CUENTAS_PUBLICAS } from '../lib/redes.ts';
     {
       CUENTAS_PUBLICAS.map((cuenta) => (
         <li>
-          <a href={cuenta.perfil} rel="me noopener" target="_blank">
+          <a href={cuenta.perfil} rel="me">
             {cuenta.nombre}
           </a>
         </li>
@@ -71,10 +78,6 @@ import { CUENTAS_PUBLICAS } from '../lib/redes.ts';
     min-height: var(--zona-de-toque);
     font-size: var(--pie);
     color: var(--siena);
-    text-decoration: none;
-  }
-
-  .seguir a:hover {
-    text-decoration: underline;
+    text-decoration-line: underline;
   }
 </style>

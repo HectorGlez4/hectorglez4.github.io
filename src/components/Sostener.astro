@@ -64,6 +64,7 @@
  * `@media` propios, la conversación que toca es dónde vive la hoja de un Modelo encendido, no
  * colar el bloque y perder la invisibilidad.
  */
+import { AVISO_DE_PESTAÑA_NUEVA } from '../lib/accesibilidad.ts';
 import { MARCA } from '../lib/marca.ts';
 
 interface Props {
@@ -172,6 +173,6 @@ const SOLO_PARA_LECTORES = [
     * cualquier lector de pantalla al enfocarlo, sin cambiar lo que se ve.
     */}
   <a href={href} target="_blank" rel="noopener noreferrer" style={DEL_ENLACE}>
-    Apoyar el sitio<span style={SOLO_PARA_LECTORES}> (se abre en una pestaña nueva)</span>
+    Apoyar el sitio<span style={SOLO_PARA_LECTORES}>{AVISO_DE_PESTAÑA_NUEVA}</span>
   </a>
 </aside>

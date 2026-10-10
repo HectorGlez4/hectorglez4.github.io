@@ -68,6 +68,14 @@ export const DESTINOS: readonly Destino[] = [
 ];
 
 /**
+ * Historia 22.10 — lo que dice cada destino: «Compartir en {destino}», no el nombre solo, que
+ * leído suelto por un lector de pantalla no dice qué hace el enlace.
+ */
+export function rotuloDeDestino(destino: Destino): string {
+  return `Compartir en ${destino.nombre}`;
+}
+
+/**
  * El texto que se propone al compartir.
  *
  * Nunca es solo la dirección: lleva la Cita entera y el nombre del Autor. El enlace viaja

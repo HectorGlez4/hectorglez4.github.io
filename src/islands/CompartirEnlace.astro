@@ -16,14 +16,29 @@
  *   · Con hoja del sistema se esconde la lista y se enseña el botón. Sin ella la lista ya
  *     está ahí, visible y con destinos concretos — que es lo que pide el criterio, en vez
  *     de un control deshabilitado o un aviso de incompatibilidad.
+ *   · Historia 22.10 — cada destino dice «Compartir en {destino}» y avisa de la pestaña
+ *     nueva dentro de su nombre accesible, con el patrón de «Apoyar el sitio».
  *   · Cancelar la hoja no es un fallo y no se registra. Ver la nota de `ImagenDeCita`.
  *   · FR-20 — cada destino concreto se registra con su nombre, que es lo que responde
  *     «hacia dónde»; la hoja del sistema se registra como `opaco`, porque la Web Share
  *     API no dice adónde fue y no se intenta averiguarlo. El oyente de los destinos es
  *     uno solo, delegado en la isla: uno por enlace costaba bytes de guion, y la Página
  *     de Cita tiene presupuesto.
+ *
+ * El guion no lleva su propio `(() => { … })()`: `define:vars` ya lo envuelve en una
+ * función, y el envoltorio repetido eran dos espacios de sangría por línea en el
+ * presupuesto de bytes (Historia 22.10). Tampoco pregunta si su marcado existe: el guion lo
+ * emite este mismo componente justo detrás, bajo la misma condición, y el compilador no
+ * admite un `return` fuera de función. Quitarle `define:vars` obligaría a devolverle el
+ * envoltorio.
  */
-import { DESTINO_OPACO, DESTINOS, textoParaCompartir } from '../lib/compartir.ts';
+import { AVISO_DE_PESTAÑA_NUEVA } from '../lib/accesibilidad.ts';
+import {
+  DESTINO_OPACO,
+  DESTINOS,
+  rotuloDeDestino,
+  textoParaCompartir,
+} from '../lib/compartir.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
 
@@ -51,7 +66,7 @@ const texto = textoParaCompartir(cita, autor);
             target="_blank"
             rel="noopener noreferrer"
           >
-            {destino.nombre}
+            {rotuloDeDestino(destino)}<span class="solo-para-lectores">{AVISO_DE_PESTAÑA_NUEVA}</span>
           </a>
         </li>
       ))
@@ -62,17 +77,13 @@ const texto = textoParaCompartir(cita, autor);
 <script
   is:inline
   define:vars={{ EVENTO_COMPARTICION: EVENTOS.comparticionDeEnlace, DESTINO_OPACO }}>
-  (() => {
-    const isla = document.querySelector('[data-compartir]');
-    if (!isla) return;
+  const isla = document.querySelector('[data-compartir]');
+  isla.addEventListener('click', (evento) => {
+    const destino = evento.target.closest('[data-destino]');
+    if (destino) window.__medir && window.__medir(EVENTO_COMPARTICION, null, destino.dataset.destino);
+  });
 
-    isla.addEventListener('click', (evento) => {
-      const destino = evento.target.closest('[data-destino]');
-      if (destino) window.__medir && window.__medir(EVENTO_COMPARTICION, null, destino.dataset.destino);
-    });
-
-    if (!navigator.share) return;
-
+  if (navigator.share) {
     const boton = isla.querySelector('[data-hoja]');
     isla.querySelector('[data-destinos]').hidden = true;
     boton.hidden = false;
@@ -81,9 +92,9 @@ const texto = textoParaCompartir(cita, autor);
       try {
         await navigator.share({ text: isla.dataset.texto, url: isla.dataset.url });
         window.__medir && window.__medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
-      } catch {} // Cancelar no es un fallo y no se registra.
+      } catch {}
     });
-  })();
+  }
 </script>
 
 <style>

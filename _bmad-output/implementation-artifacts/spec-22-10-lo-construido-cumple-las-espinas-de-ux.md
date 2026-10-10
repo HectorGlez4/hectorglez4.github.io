@@ -2,9 +2,10 @@
 title: '22.10 — Lo construido cumple las espinas de UX'
 type: 'bugfix'
 created: '2026-10-10'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'ed17a77eb666bb90f40781236b6c033da8a10778'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md'
   - '{project-root}/AGENTS.md'
@@ -84,3 +85,39 @@ deferred: []
 - `npx astro check` -- expected: 0 errores.
 - `npm run build` -- expected: termina.
 - `npx playwright test <los e2e de arriba> --project=escritorio` y `--project=movil` donde aplique -- expected: verde.
+
+## Auto Run Result
+
+**Resumen:** los siete defectos de `EXPERIENCE.md § Defectos anotados` que no eran de la 22.5 quedan corregidos, con UX-DR52 en el resto del sitio:
+1. Ya no hay ningún `outline: none` en el código, y el campo de búsqueda conserva el anillo global.
+2. La Paginación separa los números 8 px, también entre filas.
+3. El Diálogo de Imagen se nombra por su botón: «Compartir…» o «Descargar…».
+4. Cada destino dice «Compartir en {destino}» y avisa de la pestaña nueva, con un único dueño del aviso (`src/lib/accesibilidad.ts`).
+5. Si el generador no carga, el diálogo lo dice, ofrece copiar el texto y reintenta.
+6. Las cuentas del pie abren en la misma pestaña.
+7. Hay regiones `role="status"` que vuelven a anunciar el mismo texto.
+8. «Buscar» y los enlaces del pie se subrayan siempre.
+
+**Ficheros:** `src/styles/tokens.css`, `src/pages/buscar.astro`, `src/pages/404.astro`, `src/components/Paginacion.astro`, `src/islands/ImagenDeCita.astro`, `src/islands/CompartirEnlace.astro`, `src/islands/CopiarCita.astro`, `src/lib/compartir.ts`, `src/lib/accesibilidad.ts` (nuevo), `src/components/DondeSeguirnos.astro`, `src/components/Armazon.astro`, `src/components/Sostener.astro`, `src/components/EdicionesEnVenta.astro`, `tests/unit/espinas-de-ux.test.ts` (nuevo), e2e (`accesibilidad`, `copiar`, `imagen`, `compartir-imagen`, `compartir-enlace`, `busqueda`) y `AGENTS.md`.
+
+**Revisión:**
+- 14 patches aplicados: 5 medios y 9 bajos.
+- Nada deferido.
+- 6 hallazgos rechazados.
+
+**Revisión de seguimiento:** `true`. Se parchearon 5 hallazgos medios y 9 bajos, y la puntuación es 3 × 5 + 9 = 24, por encima de 5.
+
+**Verificación:**
+- `npx astro check`: 0 errores.
+- `npm run build`: termina.
+- Vitest: 954 pruebas en 21 ficheros según el implementador, y 103/103 en mi repaso de cuatro ficheros.
+- Playwright en escritorio y móvil: 344 pasan y 26 se omiten (omisiones previas, en specs que no se tocaron).
+- El peor guion en línea pesa 5934 bytes, por debajo del tope de 6656.
+- `grep` de `outline: none|0` en `src` y `public/islas`: 0 coincidencias.
+
+**Pendiente y riesgos:**
+- Vaciar «Defectos anotados» requiere una pasada de `bmad-ux` y no se ha editado a mano.
+- Durante 2 s el rótulo visible del botón («Copiado.») no coincide con su nombre accesible fijo («Copiar la cita»). Se eligió así para no anunciar dos veces; el razonamiento está en el componente.
+- Se quitó la envoltura interior de las islas para recuperar bytes de guion, y con ella sus guardas de `return`.
+- Ningún anuncio se ha comprobado con un lector de pantalla real.
+

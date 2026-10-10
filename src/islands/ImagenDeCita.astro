@@ -36,10 +36,49 @@
  *   · El diálogo se abre **antes** de tener el generador, así que la Página de Cita
  *     sigue siendo utilizable mientras se compone (UX-DR20). La descarga del módulo
  *     ocurre al pulsar y no antes, que es lo que AD-6 pide para una isla cara.
+ *   · Antes de entregar la imagen se redibuja: lo que sale es, sin dudas, lo que se ve.
  *   · El cierre al tocar fuera funciona porque el clic sobre el propio `<dialog>` cae en
  *     el fondo: el contenido está dentro de sus hijos.
  *   · UX-DR26 — todo lo que ofrece la imagen está disponible como texto copiable; el
- *     atributo `data-texto-plano` lo deja legible desde el marcado.
+ *     atributo `data-texto-plano` lo deja legible desde el marcado. Va en el marcado y no lo
+ *     pone el guion: el texto entero dentro del guion pesaba en el presupuesto de bytes.
+ *
+ * Historia 22.10, lo que las espinas de UX pedían y no estaba. Para que quepa en el
+ * presupuesto de bytes, los tres comentarios que quedaban dentro del guion —la comprobación
+ * de FR-17, el redibujo y la cancelación— se subieron aquí, donde ya estaban explicados:
+ *
+ *   · El nombre accesible del diálogo sigue al rótulo de su acción porque **es** ese rótulo:
+ *     `aria-labelledby` apunta al botón que lo abre, así que cuando el guion cambia
+ *     «Descargar como imagen» por «Compartir como imagen», el diálogo cambia de nombre con él
+ *     sin una línea más de guion ni una segunda cadena que mantener.
+ *   · Si el generador no llega, el diálogo lo dice en una frase donde iba la
+ *     previsualización y ofrece copiar el texto: la Imagen nunca es la única vía. «Copiar el
+ *     texto» cierra el diálogo y pulsa el Copiar de la página, que ya sabe copiar, confirmar
+ *     en el botón, anunciar «Copiado.» y revelar el texto si el portapapeles falla: una
+ *     segunda copia de esa lógica divergiría de la primera. Si la página no lleva Copiar, el
+ *     diálogo copia `data-texto-plano` él mismo y, si el portapapeles falla, revela el texto
+ *     seleccionable, con el mismo patrón que el respaldo de Copiar.
+ *   · El fallo **no se guarda**: `cargar` comparte una sola promesa pendiente —dos clics a la
+ *     vez no piden dos veces el módulo ni cuentan dos fallos— y la suelta si se rechaza, así
+ *     que el siguiente clic vuelve a pedirlo; el rechazo se trata ahí mismo y ningún
+ *     manejador deja una promesa rechazada sin tratar. El reintento lleva `?{n}` en la
+ *     dirección porque el navegador recuerda el fallo de un módulo por su URL y, sin
+ *     cambiarla, devolvería el mismo rechazo sin volver a pedirlo: lo destapó la prueba.
+ *   · `decir` vacía la región y escribe el mensaje en el fotograma siguiente: escribir el
+ *     mismo texto sobre sí mismo no es un cambio y no se anuncia, y reabrir, reintentar o
+ *     cambiar de plantilla vuelven a decir «La imagen está lista.».
+ *   · La región `role="status"` va **dentro** del `<dialog>` y no junto al botón: con el
+ *     diálogo abierto como modal, todo lo de fuera es inerte y sale del árbol de
+ *     accesibilidad, y una región inerte no anuncia nada. Está en el marcado desde la carga
+ *     y vacía; lo que anuncia —la imagen lista y el fallo— ocurre siempre con el diálogo
+ *     abierto, que es cuando la región se ve.
+ *
+ * El guion no lleva su propio `(() => { … })()`: `define:vars` ya lo envuelve en una
+ * función, y el envoltorio repetido eran dos espacios de sangría por línea en el
+ * presupuesto de bytes (Historia 22.10). Tampoco pregunta si su marcado existe: el guion lo
+ * emite este mismo componente justo detrás, bajo la misma condición, y el compilador no
+ * admite un `return` fuera de función. Quitarle `define:vars` obligaría a devolverle el
+ * envoltorio.
  */
 import { procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
 import { DESTINO_OPACO } from '../lib/compartir.ts';
@@ -59,6 +98,10 @@ const tramo = tramoDe(cita.texto);
 // Historia 22.3 — compuesta por `atribucion.ts` con el título de la Obra resuelta; la isla
 // (`public/islas/imagen.js`) la recibe ya compuesta en `data-procedencia`.
 const procedencia = procedenciaCompuesta(cita) ?? '';
+
+// Historia 22.10 — el `id` que nombra al diálogo sale del slug, como el respaldo de Copiar:
+// dos islas en una página no pueden compartirlo.
+const idDeLaAccion = `abrir-imagen-${cita.slug}`;
 ---
 
 {
@@ -73,8 +116,9 @@ const procedencia = procedenciaCompuesta(cita) ?? '';
       data-tamano={tramo.pixelesEnImagen}
       data-nombre={cita.slug}
       data-marca={MARCA}
+      data-texto-plano={textoParaCopiar(cita, autor)}
     >
-      <button type="button" class="abrir" data-abrir>
+      <button type="button" class="abrir" id={idDeLaAccion} data-abrir>
         Descargar como imagen
       </button>
 
@@ -83,7 +127,7 @@ const procedencia = procedenciaCompuesta(cita) ?? '';
         * anuncio como diálogo a los lectores de pantalla. Reimplementarlo a mano habría
         * sido más código y peor accesibilidad.
         */}
-      <dialog class="dialogo" data-dialogo aria-label="Descargar la cita como imagen">
+      <dialog class="dialogo" data-dialogo aria-labelledby={idDeLaAccion}>
         <div class="cabecera">
           <p class="titulo">Elige un diseño.</p>
           <button type="button" class="cerrar" data-cerrar aria-label="Cerrar">
@@ -95,9 +139,17 @@ const procedencia = procedenciaCompuesta(cita) ?? '';
 
         <canvas class="lienzo" data-lienzo width="1080" height="1080" aria-label="Previsualización de la imagen" />
 
+        <div class="fallo" data-fallo hidden>
+          <p data-frase>No se ha podido preparar la imagen. Puedes copiar el texto de la cita.</p>
+          <button type="button" class="abrir" data-copiar-texto>Copiar el texto</button>
+          <textarea data-fallo-texto readonly rows="4" aria-label="Texto de la cita" hidden>{textoParaCopiar(cita, autor)}</textarea>
+        </div>
+
         <button type="button" class="descargar" data-descargar>
           Descargar
         </button>
+
+        <p class="solo-para-lectores" role="status" data-anuncio></p>
       </dialog>
     </div>
   )
@@ -118,100 +170,130 @@ const procedencia = procedenciaCompuesta(cita) ?? '';
     EVENTO_DESCARGA: EVENTOS.descargaDeImagen,
     EVENTO_COMPARTICION: EVENTOS.comparticionDeImagen,
     DESTINO_OPACO,
-    TEXTO_PARA_COPIAR: textoParaCopiar(cita, autor),
   }}>
-  (() => {
-    const isla = document.querySelector('[data-imagen]');
-    if (!isla) return;
+  const isla = document.querySelector('[data-imagen]');
+  const $ = (s) => isla.querySelector(s);
+  const dialogo = $('[data-dialogo]');
+  const lienzo = $('[data-lienzo]');
+  const contenedorPlantillas = $('[data-plantillas]');
+  const descargar = $('[data-descargar]');
+  const fallo = $('[data-fallo]');
+  const anuncio = $('[data-anuncio]');
 
-    const dialogo = isla.querySelector('[data-dialogo]');
-    const lienzo = isla.querySelector('[data-lienzo]');
-    const contenedorPlantillas = isla.querySelector('[data-plantillas]');
+  const campo = $('[data-fallo-texto]');
 
-    let generador = null;
-    let plantillaActual = 'papel';
+  let pendiente = null;
+  let fallos = 0;
+  let plantillaActual = 'papel';
 
-    // FR-17 — capacidad de compartir FICHEROS, no de compartir. Ver la nota de arriba.
-    let compartible = false;
+  let compartible = false;
+  try {
+    const p = new File([], 'p.png', { type: 'image/png' });
+    compartible = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [p] });
+  } catch {}
+
+  if (compartible) {
+    $('[data-abrir]').textContent = 'Compartir como imagen';
+    descargar.textContent = 'Compartir';
+  }
+
+  const datos = () => ({
+    texto: isla.dataset.texto,
+    autor: isla.dataset.autor,
+    procedencia: isla.dataset.procedencia,
+    tamaño: Number(isla.dataset.tamano),
+    marca: isla.dataset.marca,
+    plantilla: plantillaActual,
+  });
+
+  const decir = (texto) => {
+    anuncio.textContent = '';
+    requestAnimationFrame(() => (anuncio.textContent = texto));
+  };
+
+  const cargar = () =>
+    (pendiente ||= import(`/islas/imagen.js${fallos ? `?${fallos}` : ''}`).catch(() => {
+      fallos++;
+      pendiente = null;
+    })).then((g) => {
+      fallo.hidden = !!g;
+      lienzo.hidden = descargar.hidden = !g;
+      if (!g) decir($('[data-frase]').textContent);
+      return g;
+    });
+
+  const pintar = (g) => {
+    g.dibujar(lienzo, datos());
+    decir('La imagen está lista.');
+  };
+
+  function pintarBotonesDePlantilla(plantillas) {
+    contenedorPlantillas.replaceChildren();
+    for (const plantilla of plantillas) {
+      const boton = document.createElement('button');
+      boton.type = 'button';
+      boton.className = 'plantilla';
+      boton.textContent = plantilla.nombre;
+      boton.dataset.plantilla = plantilla.id;
+      boton.setAttribute('aria-pressed', String(plantilla.id === plantillaActual));
+      boton.addEventListener('click', async () => {
+        plantillaActual = plantilla.id;
+        for (const otro of contenedorPlantillas.children) {
+          otro.setAttribute('aria-pressed', String(otro.dataset.plantilla === plantillaActual));
+        }
+        const g = await cargar();
+        g && pintar(g);
+      });
+      contenedorPlantillas.append(boton);
+    }
+  }
+
+  $('[data-abrir]').addEventListener('click', async () => {
+    dialogo.showModal();
+    const g = await cargar();
+    if (!g) return;
+    pintarBotonesDePlantilla(g.PLANTILLAS);
+    pintar(g);
+  });
+
+  $('[data-cerrar]').addEventListener('click', () => dialogo.close());
+
+  dialogo.addEventListener('click', (evento) => {
+    if (evento.target === dialogo) dialogo.close();
+  });
+
+  $('[data-copiar-texto]').addEventListener('click', async () => {
+    const copiar = document.querySelector(`[data-copiar="${isla.dataset.nombre}"]`);
+    if (copiar) {
+      dialogo.close();
+      return copiar.click();
+    }
     try {
-      const p = new File([], 'p.png', { type: 'image/png' });
-      compartible = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [p] });
-    } catch {}
+      await navigator.clipboard.writeText(isla.dataset.textoPlano);
+      decir('Copiado.');
+    } catch {
+      campo.hidden = false;
+      campo.select();
+    }
+  });
 
-    if (compartible) {
-      isla.querySelector('[data-abrir]').textContent = 'Compartir como imagen';
-      isla.querySelector('[data-descargar]').textContent = 'Compartir';
+  descargar.addEventListener('click', async () => {
+    const g = await cargar();
+    if (!g) return;
+    g.dibujar(lienzo, datos());
+    const nombre = isla.dataset.nombre;
+    const salida = compartible ? await g.compartir(lienzo, nombre) : 'descarga';
+    if (salida === 'cancelada') return;
+
+    if (salida === 'compartida') {
+      window.__medir && window.__medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
+      return;
     }
 
-    const datos = () => ({
-      texto: isla.dataset.texto,
-      autor: isla.dataset.autor,
-      procedencia: isla.dataset.procedencia,
-      tamaño: Number(isla.dataset.tamano),
-      marca: isla.dataset.marca,
-      plantilla: plantillaActual,
-    });
+    await g.descargar(lienzo, nombre);
+    window.__medir && window.__medir(EVENTO_DESCARGA);
+  });
 
-    async function cargar() {
-      if (generador) return generador;
-      generador = await import('/islas/imagen.js');
-      return generador;
-    }
-
-    function pintarBotonesDePlantilla(plantillas) {
-      contenedorPlantillas.replaceChildren();
-      for (const plantilla of plantillas) {
-        const boton = document.createElement('button');
-        boton.type = 'button';
-        boton.className = 'plantilla';
-        boton.textContent = plantilla.nombre;
-        boton.dataset.plantilla = plantilla.id;
-        boton.setAttribute('aria-pressed', String(plantilla.id === plantillaActual));
-        boton.addEventListener('click', async () => {
-          plantillaActual = plantilla.id;
-          for (const otro of contenedorPlantillas.children) {
-            otro.setAttribute('aria-pressed', String(otro.dataset.plantilla === plantillaActual));
-          }
-          const g = await cargar();
-          g.dibujar(lienzo, datos());
-        });
-        contenedorPlantillas.append(boton);
-      }
-    }
-
-    isla.querySelector('[data-abrir]').addEventListener('click', async () => {
-      dialogo.showModal();
-      const g = await cargar();
-      pintarBotonesDePlantilla(g.PLANTILLAS);
-      g.dibujar(lienzo, datos());
-    });
-
-    isla.querySelector('[data-cerrar]').addEventListener('click', () => dialogo.close());
-
-    dialogo.addEventListener('click', (evento) => {
-      if (evento.target === dialogo) dialogo.close();
-    });
-
-    isla.querySelector('[data-descargar]').addEventListener('click', async () => {
-      const g = await cargar();
-      // Se redibuja justo antes: lo que sale es, sin dudas, lo que se está viendo.
-      g.dibujar(lienzo, datos());
-      const nombre = isla.dataset.nombre;
-
-      const salida = compartible ? await g.compartir(lienzo, nombre) : 'descarga';
-      if (salida === 'cancelada') return; // Ni evento ni mensaje: no ha pasado nada.
-
-      if (salida === 'compartida') {
-        window.__medir && window.__medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
-        return;
-      }
-
-      await g.descargar(lienzo, nombre);
-      window.__medir && window.__medir(EVENTO_DESCARGA);
-    });
-
-    isla.dataset.textoPlano = TEXTO_PARA_COPIAR;
-  })();
 </script>
 )}
 
@@ -305,6 +387,45 @@ const procedencia = procedenciaCompuesta(cita) ?? '';
     flex-wrap: wrap;
     gap: var(--unidad);
     margin-top: calc(var(--unidad) * 3);
+  }
+
+  .fallo {
+    margin-block: calc(var(--unidad) * 3);
+    font-size: var(--cuerpo-md);
+  }
+
+  .fallo p {
+    margin: 0;
+  }
+
+  /* La frase arriba y el botón debajo, separados como el resto de controles del diálogo. */
+  .fallo button,
+  .fallo textarea {
+    display: block;
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  /* El respaldo del respaldo: solo sin Copiar en la página y con el portapapeles roto. */
+  .fallo textarea {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    background: var(--contenedor-bajo);
+    border: var(--grosor-filete) solid var(--filete);
+    border-radius: var(--radio);
+    padding: var(--unidad);
+    resize: vertical;
+  }
+
+  .fallo textarea[hidden] {
+    display: none;
+  }
+
+  /* `display: block` gana al `display: none` de `[hidden]`: sin esto el lienzo vacío
+     seguiría ocupando el sitio de la frase de fallo. */
+  .lienzo[hidden] {
+    display: none;
   }
 
   .lienzo {

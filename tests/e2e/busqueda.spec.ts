@@ -311,3 +311,70 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
     await expect(page.locator('[data-salida]')).toBeHidden();
   });
 });
+
+test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se anuncian', () => {
+  test('la región role="status" está desde la carga, vacía y no oculta', async ({ page }) => {
+    await page.goto('/buscar/');
+    const region = page.locator('[role="status"]');
+    await expect(region).toHaveCount(1);
+    await expect(region).toHaveText('');
+    await expect(region).not.toHaveAttribute('hidden', /.*/);
+    expect(await region.evaluate((n) => getComputedStyle(n).display)).not.toBe('none');
+  });
+
+  test('con resultados anuncia el recuento', async ({ page }) => {
+    await buscar(page, 'no hay camino');
+    const cuantos = await page.locator('[data-resultados] .resultado').count();
+    await expect(page.locator('[role="status"]')).toHaveText(
+      cuantos === 1 ? 'Un resultado.' : `${cuantos} resultados.`,
+    );
+  });
+
+  test('sin resultados anuncia la frase de la salida, sin pintarla dos veces', async ({ page }) => {
+    /*
+     * Pagefind contesta a casi cualquier consulta con lo que más se le parece, así que el
+     * caso vacío no se puede pedir al índice real: se sirve un Pagefind que no encuentra nada.
+     * Lo que se ejecuta es el guion de la página, no un doble suyo.
+     */
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: 'export async function init() {}\nexport async function search() { return { results: [] }; }',
+      }),
+    );
+    await buscar(page, 'consulta que no está');
+
+    const region = page.locator('[role="status"]');
+    await expect(region).toHaveText('No encontramos esa frase. Prueba con menos palabras.');
+    await expect(page.locator('.sugerencia')).toBeVisible();
+    // La región se aparta de la vista: la frase ya se ve en la salida.
+    expect(await region.evaluate((n) => n.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+  });
+
+  test('tras una búsqueda vacía, la siguiente con resultados vuelve a enseñar el recuento', async ({
+    page,
+  }) => {
+    // Un Pagefind de prueba: nada para «nada», un resultado para lo demás.
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: [
+          'export async function init() {}',
+          'export async function search(q) {',
+          "  if (q === 'nada') return { results: [] };",
+          "  return { results: [{ data: async () => ({ url: '/cita/una/', meta: { title: 'Una' } }) }] };",
+          '}',
+        ].join('\n'),
+      }),
+    );
+    await buscar(page, 'nada');
+    const estado = page.locator('[data-estado]');
+    await expect(estado).toHaveText('No encontramos esa frase. Prueba con menos palabras.');
+
+    await page.locator('[data-consulta]').fill('algo');
+    await expect(estado).toHaveText('Un resultado.');
+    await expect(estado).toBeVisible();
+    await expect(estado).not.toHaveClass(/solo-para-lectores/);
+    expect(await estado.evaluate((n) => n.getBoundingClientRect().width)).toBeGreaterThan(1);
+  });
+});
