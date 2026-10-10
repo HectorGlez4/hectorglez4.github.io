@@ -19,6 +19,8 @@
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
 import { MARCA } from './marca.ts';
 import { tramoDe } from './tramos.ts';
+import { añosDeAutor, recuentoDeDocumentadas } from './atribucion.ts';
+import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
 
 /** 1200×630 es la proporción que piden los validadores de previsualización. */
 export const ANCHO = 1200;
@@ -112,11 +114,22 @@ export function svgDeTarjeta(datos: DatosDeTarjeta): string {
   ].join('');
 }
 
+/** Cuántas líneas caben bajo el filete de una Tarjeta de listado, bajada o hechos. */
+export const MAX_LINEAS_DE_BAJADA = 4;
+
 export interface DatosDeTarjetaDeListado {
   /** El nombre de la página: el Tema, la Colección, el Autor. */
   titulo: string;
-  /** Por qué existe esa página: el criterio, la semblanza. Opcional a propósito. */
+  /** Por qué existe esa página: la descripción del sitio, el Tema, el criterio. Opcional. */
   bajada?: string;
+  /**
+   * Hechos derivados del Corpus, uno por línea, **en lugar de** una bajada — Historia 17.2: la
+   * Tarjeta de Autor dice años y recuento de Citas documentadas, y no la semblanza, que puede
+   * ser texto ajeno sin sitio para su atribución (AD-28). Cada hecho empieza línea, y el tope
+   * de líneas de la bajada (`MAX_LINEAS_DE_BAJADA`) vale para todos juntos. Con `bajada` a la
+   * vez, `svgDeTarjetaDeListado` lanza: dos textos bajo el filete no los ha decidido nadie.
+   */
+  hechos?: readonly string[];
   /**
    * Si se dibuja la marca al pie. Cierto salvo en la portada, donde **el título ya es la
    * marca** y repetirla la enseñaría dos veces.
@@ -168,15 +181,29 @@ export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
   const alturaTitulo = Math.round(CUERPO_TITULO * 1.25);
 
   const CUERPO_BAJADA = 30;
+  if (datos.hechos !== undefined && datos.bajada !== undefined) {
+    throw new Error(
+      'La Tarjeta de listado lleva bajada o hechos, no las dos cosas: ' +
+        `«${datos.titulo}» trae las dos.`,
+    );
+  }
+  const parrafos =
+    datos.hechos !== undefined
+      ? datos.hechos.filter((hecho) => hecho.trim() !== '')
+      : datos.bajada === undefined || datos.bajada.trim() === ''
+        ? []
+        : [datos.bajada];
   const lineasDeBajada =
-    datos.bajada === undefined || datos.bajada.trim() === ''
-      ? []
-      : /*
-         * Cuatro líneas como mucho: por debajo del filete no cabe más sin comerse la marca, y
-         * una bajada que no cabe se corta aquí y se lee entera al abrir el enlace — el mismo
-         * criterio que su hermana aplica a la Cita que no admite Imagen.
-         */
-        repartirEnLineas(datos.bajada, CUERPO_BAJADA, anchoUtil).slice(0, 4);
+    /*
+     * Cuatro líneas como mucho: por debajo del filete no cabe más sin comerse la marca, y
+     * una bajada que no cabe se corta aquí y se lee entera al abrir el enlace — el mismo
+     * criterio que su hermana aplica a la Cita que no admite Imagen. Los hechos de Autor son
+     * dos líneas cortas y no llegan al tope; el título, que es lo que crece con un nombre
+     * largo, no tiene tope y empuja el bloque, no lo recorta.
+     */
+    parrafos
+      .flatMap((parrafo) => repartirEnLineas(parrafo, CUERPO_BAJADA, anchoUtil))
+      .slice(0, MAX_LINEAS_DE_BAJADA);
   const alturaBajada = Math.round(CUERPO_BAJADA * 1.45);
 
   const altoTitulo = lineasDeTitulo.length * alturaTitulo;
@@ -204,4 +231,25 @@ export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
     marca,
     '</svg>',
   ].join('');
+}
+
+/**
+ * Los datos de la Tarjeta Social de un Autor — Historia 17.2, AD-28.
+ *
+ * **Solo hechos del Corpus**, para todos los Autores: el nombre, los años y, si tiene alguna,
+ * cuántas de sus Citas publicadas están documentadas (`esCitaDocumentada`). Nunca la
+ * semblanza, sea propia o ajena: esta imagen es la que el Kit Diario publica en las cuentas
+ * propias, rasterizada y sin enlace ni licencia, y una bajada escrita por el sistema sería
+ * prosa nueva sobre una persona real. Los años y el recuento salen de los mismos dueños que la
+ * ficha y la descripción, para que digan lo mismo.
+ */
+export function datosDeTarjetaDeAutor(
+  autor: Pick<Autor, 'slug' | 'nombre' | 'añoNacimiento' | 'añoFallecimiento'>,
+  citas: readonly Cita[],
+): DatosDeTarjetaDeListado {
+  const recuento = recuentoDeDocumentadas(citasDocumentadasDeAutor(citas, autor.slug));
+  return {
+    titulo: autor.nombre,
+    hechos: recuento === undefined ? [añosDeAutor(autor)] : [añosDeAutor(autor), recuento],
+  };
 }

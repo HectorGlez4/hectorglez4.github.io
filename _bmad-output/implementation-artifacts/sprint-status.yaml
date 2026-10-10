@@ -219,7 +219,7 @@ development_status:
 
   epic-17: in-progress
   17-1-una-fuente-mutable-entra-por-revisión-y-su-documento-no-comp: review
-  17-2-la-semblanza-sitúa-al-autor-publica-su-atribución-y-sale-de: backlog
+  17-2-la-semblanza-sitúa-al-autor-publica-su-atribución-y-sale-de: review  # las semblanzas con fuente las elige Héctor (recuperar + autor.ts biografia)
   # 17.3 y 17.5 se reescribieron en su sitio en la v7.1 (epics.md, fc694747); la clave no cambia.
   # La 17.3 se construye DESPUÉS de la 22.4; la 17.5, ANTES de la 22.9.
   17-3-la-página-de-autor-enumera-su-obra: backlog  # bloqueada: detrás de la 22.4

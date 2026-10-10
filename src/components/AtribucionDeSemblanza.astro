@@ -1,0 +1,36 @@
+---
+/**
+ * La atribución de una semblanza ajena — Historia 17.2, AD-28.
+ *
+ *   Semblanza tomada de «Séneca» en Wikipedia en español, revisión 123 · CC BY-SA 4.0
+ *
+ * Va justo debajo de la semblanza, en la Ficha de Autor de la página 1, que es la única
+ * superficie que la porta (`PORTAN_LA_ATRIBUCION` en `src/lib/atribucion.ts`). Nombra el
+ * artículo, la Fuente y la revisión, y eso es el enlace, al enlace permanente de **esa**
+ * revisión: una procedencia guardada y no mostrada no atribuye nada, y un enlace a la dirección
+ * viva atribuiría un texto que puede haber cambiado. La licencia sale de la cabecera del
+ * documento, que la fija por la fecha de la revisión (3.0 antes del 29-06-2023, 4.0 después),
+ * y enlaza a su escritura (`ENLACES_DE_LICENCIA` en `src/lib/biografia.ts`).
+ *
+ * **Sin bloque `<style>`, a propósito.** Astro recoge los estilos por el grafo de
+ * importaciones y no por lo que se dibuja, así que una regla aquí acabaría en el `<head>` de
+ * todas las Páginas de Autor, también de las que no tienen biografía, y `dist/` cambiaría en
+ * cada una. La presentación va en atributos `style`, solo con tokens de DESIGN.md: `caption`
+ * (`--pie`) y `on-surface-variant` (`--tinta-apagada`) para la línea. Los enlaces son enlaces
+ * de salida y heredan la regla global de `src/styles/tokens.css`: `primary` (`--siena`) y el
+ * subrayado del navegador, que no se quita.
+ */
+import type { AtribucionDeSemblanza } from '../lib/biografia.ts';
+
+interface Props {
+  atribucion: AtribucionDeSemblanza;
+}
+
+const { atribucion } = Astro.props;
+---
+
+<p style="margin: var(--unidad) 0 0; font-family: var(--sans); font-size: var(--pie); color: var(--tinta-apagada);">
+  Semblanza tomada de <a href={atribucion.url} rel="noopener nofollow"
+    >«{atribucion.titulo}» en {atribucion.fuente}, revisión {atribucion.revision}</a
+  > · <a href={atribucion.urlDeLicencia} rel="noopener license">{atribucion.licencia}</a>
+</p>

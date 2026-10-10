@@ -19,6 +19,7 @@ import {
   cotejar,
   cotejarBiografias,
   documentosDeCita,
+  MIN_PALABRAS_SEMBLANZA,
   titularDeFallos,
 } from '../../tools/lib/cotejo.ts';
 import {
@@ -422,13 +423,15 @@ describe('el Autor declara su biografía', () => {
 });
 
 describe('la puerta de la revisión', () => {
-  const cabecera = analizarDocumento(BIOGRAFIA)!.cabecera;
-  const documentos = new Map<string, CabeceraAnalizada | null>([
-    ['wikipedia-es--seneca--r123', cabecera],
+  const { cabecera, cuerpo } = analizarDocumento(BIOGRAFIA)!;
+  // Historia 17.2 — la puerta lee cabecera **y** cuerpo, contra el que coteja la semblanza.
+  const documentos = new Map<string, { cabecera: CabeceraAnalizada; cuerpo: string } | null>([
+    ['wikipedia-es--seneca--r123', { cabecera, cuerpo }],
   ]);
   const autor = (documento: string, revision: number) => ({
     ruta: 'corpus/autores/seneca.yml',
     biografia: { documento, revision },
+    semblanza: 'No es que tengamos poco tiempo, es que perdemos mucho.',
   });
 
   it('pasa cuando el documento existe y es la revisión declarada', () => {
@@ -473,10 +476,10 @@ describe('la puerta de la revisión', () => {
     )!.cabecera;
     const deFuenteFija = analizarDocumento(BIOGRAFIA.replace('fuente: wikipedia-es', 'fuente: wikisource-es'))!
       .cabecera;
-    const raros = new Map<string, CabeceraAnalizada | null>([
+    const raros = new Map<string, { cabecera: CabeceraAnalizada; cuerpo: string } | null>([
       ['wikipedia-es--a--r1', null],
-      ['wikisource-es--seneca--r123', deObra],
-      ['wikisource-es--b--r123', deFuenteFija],
+      ['wikisource-es--seneca--r123', { cabecera: deObra, cuerpo }],
+      ['wikisource-es--b--r123', { cabecera: deFuenteFija, cuerpo }],
     ]);
     const fallos = cotejarBiografias(
       [
@@ -499,8 +502,8 @@ describe('la puerta de la revisión', () => {
         autor('wikisourcex--seneca--r123', 123),
       ],
       new Map([
-        ['wikipedia-es--lucio-anneo-seneca--r123', cabecera],
-        ['wikisourcex--seneca--r123', cabecera],
+        ['wikipedia-es--lucio-anneo-seneca--r123', { cabecera, cuerpo }],
+        ['wikisourcex--seneca--r123', { cabecera, cuerpo }],
       ]),
     );
     expect(fallos).toHaveLength(2);
@@ -511,11 +514,12 @@ describe('la puerta de la revisión', () => {
   });
 
   it('valida la forma del valor antes de usarlo', () => {
+    const conCuerpo = (cabecera: unknown) => ({ cabecera, cuerpo });
     const raros = new Map<string, unknown>([
       ['wikipedia-es--a--r1', 'texto'],
-      ['wikipedia-es--b--r1', { clase: 'biografia', fuente: 'wikipedia-es', titulo: 'B', revision: '1' }],
-      ['wikipedia-es--c--r1', { clase: 'biografia', fuente: 'wikipedia-es', titulo: 'C', revision: 2 ** 60 }],
-      ['wikipedia-es--d--r1', { clase: 'biografia', fuente: 'wikipedia-es', revision: 1 }],
+      ['wikipedia-es--b--r1', conCuerpo({ clase: 'biografia', fuente: 'wikipedia-es', titulo: 'B', revision: '1' })],
+      ['wikipedia-es--c--r1', conCuerpo({ clase: 'biografia', fuente: 'wikipedia-es', titulo: 'C', revision: 2 ** 60 })],
+      ['wikipedia-es--d--r1', conCuerpo({ clase: 'biografia', fuente: 'wikipedia-es', revision: 1 })],
       ['wikipedia-es--e--r1', undefined],
     ]);
     const fallos = cotejarBiografias(
@@ -537,6 +541,116 @@ describe('la puerta de la revisión', () => {
     expect([...(await leerDocumentosDeBiografia(rutas)).keys()]).toEqual([
       'wikipedia-es--seneca--r123',
     ]);
+  });
+});
+
+describe('Historia 17.2 — la semblanza está literal en la revisión que la atribuye', () => {
+  const { cabecera, cuerpo } = analizarDocumento(BIOGRAFIA)!;
+  const documentos = new Map([['wikipedia-es--seneca--r123', { cabecera, cuerpo }]]);
+  const conSemblanza = (semblanza?: string) => ({
+    ruta: 'corpus/autores/seneca.yml',
+    biografia: { documento: 'wikipedia-es--seneca--r123', revision: 123 },
+    ...(semblanza !== undefined ? { semblanza } : {}),
+  });
+
+  it('pasa cuando la semblanza aparece literal, con otro espaciado', () => {
+    expect(
+      cotejarBiografias(
+        [conSemblanza('No es que tengamos poco   tiempo,\nes que perdemos mucho.')],
+        documentos,
+      ),
+    ).toEqual([]);
+  });
+
+  it.each([
+    ['otra puntuación', 'No es que tengamos poco tiempo; es que perdemos mucho.'],
+    ['otra palabra', 'Lucio Anneo Séneca fue un filósofo cordobés y estoico.'],
+    ['prosa compuesta', 'Filósofo estoico hispanorromano, tutor y consejero de Nerón.'],
+  ])('rompe nombrando el fichero de Autor: %s', (_caso, semblanza) => {
+    const [fallo, ...resto] = cotejarBiografias([conSemblanza(semblanza)], documentos);
+    expect(resto).toEqual([]);
+    expect(fallo.ruta).toBe('corpus/autores/seneca.yml');
+    expect(fallo.regla).toContain('corpus/biografias/wikipedia-es--seneca--r123.txt');
+    expect(fallo.regla).toMatch(/no aparece literal/);
+  });
+
+  it('un Autor con biografía y sin semblanza no pasa', () => {
+    const fallos = cotejarBiografias([conSemblanza(), conSemblanza('  ')], documentos);
+    expect(fallos).toHaveLength(2);
+    for (const fallo of fallos) expect(fallo.regla).toMatch(/no tiene semblanza que cotejar/);
+  });
+
+  it.each(["[[Córdoba]]", ']]', "'''", "''", '{{', '<ref'])(
+    'rechaza una semblanza con marcado de wikitexto: %s',
+    (marca) => {
+      const conMarcado = analizarDocumento(
+        BIOGRAFIA.replace('es que perdemos mucho.', `es que perdemos mucho ${marca} sin duda.`),
+      )!;
+      const [fallo] = cotejarBiografias(
+        [conSemblanza(`No es que tengamos poco tiempo, es que perdemos mucho ${marca} sin duda.`)],
+        new Map([['wikipedia-es--seneca--r123', conMarcado]]),
+      );
+      expect(fallo?.ruta).toBe('corpus/autores/seneca.yml');
+      expect(fallo?.regla).toMatch(/marcado de wikitexto/);
+    },
+  );
+
+  it(`rechaza una semblanza de menos de ${MIN_PALABRAS_SEMBLANZA} palabras, aunque esté literal`, () => {
+    expect(MIN_PALABRAS_SEMBLANZA).toBe(8);
+    const [fallo] = cotejarBiografias([conSemblanza('es que perdemos mucho.')], documentos);
+    expect(fallo?.ruta).toBe('corpus/autores/seneca.yml');
+    expect(fallo?.regla).toMatch(/tiene 4 palabras.*al menos 8/s);
+  });
+
+  it.each([
+    ['http', 'http://es.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=123'],
+    ['otra revisión', 'https://es.wikipedia.org/w/index.php?title=S%C3%A9neca&oldid=124'],
+    ['la dirección viva', 'https://es.wikipedia.org/wiki/S%C3%A9neca'],
+    ['otro anfitrión', 'https://example.org/w/index.php?title=S%C3%A9neca&oldid=123'],
+  ])('rechaza un enlace de cabecera que no lleva a esa revisión: %s', (_caso, url) => {
+    const [fallo] = cotejarBiografias(
+      [conSemblanza('No es que tengamos poco tiempo, es que perdemos mucho.')],
+      new Map([['wikipedia-es--seneca--r123', { cabecera: { ...cabecera, url }, cuerpo }]]),
+    );
+    expect(fallo?.ruta).toBe('corpus/autores/seneca.yml');
+    expect(fallo?.regla).toMatch(/no es un enlace permanente https de la revisión 123/);
+  });
+
+  it('acepta el enlace permanente por ruta', () => {
+    const url = 'https://es.wikipedia.org/wiki/Especial:EnlacePermanente/123';
+    expect(
+      cotejarBiografias(
+        [conSemblanza('No es que tengamos poco tiempo, es que perdemos mucho.')],
+        new Map([['wikipedia-es--seneca--r123', { cabecera: { ...cabecera, url }, cuerpo }]]),
+      ),
+    ).toEqual([]);
+  });
+
+  it('rechaza una licencia sin escritura enlazable', () => {
+    const [fallo] = cotejarBiografias(
+      [conSemblanza('No es que tengamos poco tiempo, es que perdemos mucho.')],
+      new Map([
+        ['wikipedia-es--seneca--r123', { cabecera: { ...cabecera, licencia: 'GFDL' }, cuerpo }],
+      ]),
+    );
+    expect(fallo?.ruta).toBe('corpus/autores/seneca.yml');
+    expect(fallo?.regla).toMatch(/licencia \(«GFDL»\)/);
+  });
+
+  it('el cuerpo se lee de corpus/biografias/ junto a la cabecera', async () => {
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-biografia-'));
+    temporales.push(raiz);
+    const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+    await mkdir(rutas.biografias, { recursive: true });
+    await writeFile(join(rutas.biografias, 'wikipedia-es--seneca--r123.txt'), BIOGRAFIA, 'utf8');
+    const leidos = await leerDocumentosDeBiografia(rutas);
+    expect(leidos.get('wikipedia-es--seneca--r123')?.cuerpo).toContain('perdemos mucho');
+    expect(
+      cotejarBiografias(
+        [conSemblanza('No es que tengamos poco tiempo, es que perdemos mucho.')],
+        leidos,
+      ),
+    ).toEqual([]);
   });
 });
 

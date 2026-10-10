@@ -15,6 +15,13 @@ import { normalizar, palabras } from '../../src/lib/normalizar.ts';
 import { slugDeObra } from '../../src/lib/slug.ts';
 import { añoExacto } from './extraccion.ts';
 import { mismoTitulo, revisionExacta } from './fuentes.ts';
+import {
+  CLASE_BIOGRAFIA,
+  SEPARADOR,
+  cabeceraDeBiografia,
+  partirDocumento,
+  type CabeceraDeBiografia,
+} from '../../src/lib/biografia.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entidades
@@ -2129,45 +2136,16 @@ export interface CabeceraDeDocumento {
   recuperado: string;
 }
 
-/**
- * La cabecera de un **documento de biografía** — Historia 17.1.
- *
- * Un documento de biografía no es el de una obra: no declara obra ni año, y de él no sale
- * ninguna Cita. Lo que lo identifica es el artículo y **la revisión**, porque su Fuente es
- * mutable y lo único fijo de ella es el texto de origen de un `oldid` concreto. Los campos
- * de obra se declaran ausentes a propósito: así quien lee `cabecera.obra` de un documento
- * analizado tiene que contar con que no lo haya, en vez de recibir el título del artículo
- * haciéndose pasar por una obra.
+/*
+ * La cabecera de biografía, la marca de clase y el separador viven en `src/lib/biografia.ts`
+ * desde la Historia 17.2: el build lee la misma cabecera para publicar la atribución, y el
+ * sitio no puede importar de `tools/`. Se reexportan para que nada de `tools/` cambie de
+ * origen.
  */
-export interface CabeceraDeBiografia {
-  clase: 'biografia';
-  fuente: string;
-  /** El título del artículo, tal y como lo da la dirección pedida o la redirección. */
-  titulo: string;
-  /** La revisión (`oldid`) cuyo texto de origen es el cuerpo. Forma parte del nombre. */
-  revision: number;
-  /** El enlace permanente de esa revisión. */
-  url: string;
-  /** La dirección que se pidió, cuando no es el enlace permanente. */
-  pedido?: string;
-  /** La fecha de la revisión que la Fuente declara, `AAAA-MM-DD`. */
-  fechaDeRevision: string;
-  /** La licencia del texto **de esa revisión**, según su fecha. */
-  licencia: string;
-  recuperado: string;
-  obra?: never;
-  año?: never;
-  traductor?: never;
-  añoDeTraduccion?: never;
-}
+export { CLASE_BIOGRAFIA, type CabeceraDeBiografia } from '../../src/lib/biografia.ts';
 
 /** Lo que `analizarDocumento` lee de una cabecera: la de una obra o la de una biografía. */
 export type CabeceraAnalizada = CabeceraDeDocumento | CabeceraDeBiografia;
-
-/** La marca de clase que lleva un documento de biografía en su cabecera. */
-export const CLASE_BIOGRAFIA = 'biografia';
-
-const SEPARADOR = '---';
 
 /** Un valor de cabecera tal y como se escribe: en una línea, con los espacios colapsados. */
 export function unaLinea(valor: string): string {
@@ -2250,57 +2228,22 @@ export function componerBiografia(
 export function analizarDocumento(
   contenido: string,
 ): { cabecera: CabeceraAnalizada; declaracion: string; cuerpo: string } | undefined {
-  const lineas = contenido.replace(/\r\n?/gu, '\n').split('\n');
-  const primero = lineas.findIndex((linea) => linea.trim() === SEPARADOR);
-  if (primero === -1) return undefined;
-  const segundo = lineas.findIndex((linea, i) => i > primero && linea.trim() === SEPARADOR);
-  if (segundo === -1) return undefined;
+  const partido = partirDocumento(contenido);
+  if (partido === undefined) return undefined;
+  const { campos, declaracion, cuerpo } = partido;
 
-  const campos = new Map<string, string>();
-  for (const linea of lineas.slice(0, primero)) {
-    if (linea.trim() === '') continue;
-    const dosPuntos = linea.indexOf(':');
-    if (dosPuntos === -1) return undefined;
-    campos.set(linea.slice(0, dosPuntos).trim().toLowerCase(), linea.slice(dosPuntos + 1).trim());
+  const clase = campos.get('clase');
+  if (clase !== undefined) {
+    if (clase !== CLASE_BIOGRAFIA) return undefined;
+    // Historia 17.2 — el mismo lector que usa el build para publicar la atribución.
+    const cabecera = cabeceraDeBiografia(campos);
+    return cabecera === undefined ? undefined : { cabecera, declaracion, cuerpo };
   }
 
   const fuente = campos.get('fuente');
   const obra = campos.get('obra');
   const url = campos.get('url');
   const recuperado = campos.get('recuperado');
-  const declaracion = lineas.slice(primero + 1, segundo).join('\n').trim();
-  const cuerpo = lineas.slice(segundo + 1).join('\n');
-
-  const clase = campos.get('clase');
-  if (clase !== undefined) {
-    if (clase !== CLASE_BIOGRAFIA) return undefined;
-    const titulo = campos.get('titulo');
-    const revision = revisionExacta(campos.get('revision'));
-    // Una biografía que declara obra o año es un documento a medio cambiar de clase.
-    if (obra !== undefined || campos.has('año') || campos.has('ano')) return undefined;
-    const fechaDeRevision = campos.get('fechaderevision');
-    const licencia = campos.get('licencia');
-    if (!fuente || !titulo || revision === undefined || !url || !recuperado) return undefined;
-    if (!fechaDeRevision || !/^\d{4}-\d{2}-\d{2}$/u.test(fechaDeRevision) || !licencia) {
-      return undefined;
-    }
-    const pedido = campos.get('pedido');
-    return {
-      cabecera: {
-        clase: CLASE_BIOGRAFIA,
-        fuente,
-        titulo,
-        revision,
-        fechaDeRevision,
-        licencia,
-        url,
-        recuperado,
-        ...(pedido !== undefined && pedido !== '' ? { pedido } : {}),
-      },
-      declaracion,
-      cuerpo,
-    };
-  }
 
   if (!fuente || !obra || !url || !recuperado) return undefined;
 

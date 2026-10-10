@@ -2,10 +2,10 @@
 title: 'Historia 17.2 — La semblanza sitúa al Autor, publica su atribución, y sale de la Tarjeta'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '1defa706bb65bdd0775a0d2139f5b7588d1f1ce5'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-17-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-17-1-una-fuente-mutable-entra-por-revision.md'
@@ -101,7 +101,23 @@ deferred: []
 
 ## Spec Change Log
 
+### 2026-10-10 — los años antes de Cristo
+- **Hallazgo:** la Tarjeta nueva, igual que la ficha ya existente, escribía «-4–65» y «-65–-8».
+- **Cambio:** `añosDeAutor` es el dueño único y escribe «65–8 a. C.» o «4 a. C.–65 d. C.». Eso cambia, además de los 65 PNG de Tarjeta de Autor, la línea de años de 22 páginas de Autor (19 Autores, y las páginas 2–4 de Séneca) y, en consecuencia, unos fragmentos de Pagefind. El AC «solo cambian los PNG» queda superado a sabiendas.
+
 ## Review Triage Log
+
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9 (high 0, medium 3, low 6)
+- defer: 0
+- reject: 2
+- addressed_findings:
+  - `[medium]` `[patch]` Años negativos en superficies públicas → «a. C.» con un solo dueño.
+  - `[medium]` `[patch]` La ruta de la Tarjeta podía volver a llevar la semblanza sin que fallara nada → `datosDeTarjetaDeAutor` pura y probada; sin «0 citas documentadas».
+  - `[medium]` `[patch]` La puerta aceptaba marcado de wikitexto, fragmentos triviales y un enlace a otra revisión → rechazos con nombre.
+  - `[low]` `[patch]` Licencia enlazada y artículo nombrado; tokens en lugar de literales; meta sin redundancia; el cuerpo decide con `semblanzaEn`; cargador con error claro y vigilancia en desarrollo; `hechos`/`bajada` excluyentes y tope de líneas; aserciones acotadas.
 
 ## Verification
 
@@ -109,3 +125,13 @@ deferred: []
 - `npx vitest run tests/unit/biografia-build.test.ts tests/unit/biografia.test.ts` (y las pruebas de la Tarjeta y de la Página de Autor tocadas) -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** un Autor que declara `biografia` publica una semblanza cotejada literal contra su revisión (sin marcado, al menos 8 palabras, enlace permanente que casa). La atribución va visible en la página 1: «Semblanza tomada de «{titulo}» en Wikipedia en español, revisión N · CC BY-SA X», con enlaces. La meta, el JSON-LD, Pagefind y las páginas 2+ no reproducen la semblanza ajena. La Tarjeta Social de todo Autor lleva nombre, años y Citas documentadas. Los años antes de Cristo se escriben «a. C.». Ningún Autor real declara biografía todavía.
+
+**Revisión:** 9 parches aplicados y 2 rechazados (comprobar el índice de Pagefind construido; el contenido de la semblanza, que es editorial). Seguimiento: 3×3 = 9 → true.
+
+**Verificación:** suite 116 ficheros y 3628 pruebas; astro check, 0 errores; build en verde. `dist/` frente a 1defa706: los 65 PNG de Tarjeta de Autor, la línea de años de 22 páginas de Autor y los fragmentos de Pagefind que dependen de ellas.

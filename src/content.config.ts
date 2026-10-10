@@ -1,5 +1,9 @@
+import { readdir, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineCollection, reference, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob, type Loader } from 'astro/loaders';
 import {
   año,
   añoFallecimiento,
@@ -15,6 +19,7 @@ import {
   texto,
   tradicion,
 } from './lib/admision.js';
+import { leerBiografia } from './lib/biografia.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -188,4 +193,78 @@ const obras = defineCollection({
   schema: obraAdmisible,
 });
 
-export const collections = { citas, autores, temas, colecciones, obras };
+/*
+ * Las biografías — Historia 17.2, AD-26, AD-28.
+ *
+ * `corpus/biografias/` guarda el wikitexto de una revisión de un artículo, y de él el sitio
+ * solo publica **la atribución** de la semblanza: qué Fuente, qué revisión, su enlace
+ * permanente y su licencia. Este cargador lee la cabecera y **nada del cuerpo**: el texto
+ * ajeno no entra en el almacén de contenido, y la semblanza que se publica es la del
+ * fichero del Autor, que la puerta del build (`integraciones/cotejo.ts`) ya ha exigido que
+ * aparezca literal en ese cuerpo.
+ *
+ * Solo el primer nivel, como `leerDocumentosDeBiografia`: el nombre del documento es su
+ * identidad y lo que declara el Autor. Un fichero cuya cabecera no es la de una biografía bien
+ * formada **para la construcción**: saltarlo en silencio dejaría a la puerta como única voz, y
+ * solo habla de los documentos que algún Autor declara.
+ *
+ * Nadie llama a `getCollection('biografias')` si ningún Autor declara biografía — ver
+ * `conjuntoPublicable` —, así que con el directorio vacío no se suma el aviso de colección
+ * vacía que ya imprimen las Colecciones.
+ */
+const cargadorDeBiografias: Loader = {
+  name: 'biografias',
+  load: async ({ store, parseData, config, watcher }) => {
+    const carpeta = join(fileURLToPath(config.root), 'corpus', 'biografias');
+
+    async function cargar(): Promise<void> {
+      store.clear();
+      if (!existsSync(carpeta)) return;
+      const ficheros = (await readdir(carpeta, { withFileTypes: true }))
+        .filter((e) => e.isFile() && extname(e.name) === '.txt')
+        .map((e) => e.name)
+        .sort();
+      for (const fichero of ficheros) {
+        const ruta = `corpus/biografias/${fichero}`;
+        const leida = leerBiografia(await readFile(join(carpeta, fichero), 'utf8'));
+        if (leida === undefined) {
+          throw new Error(
+            `Regla incumplida: la cabecera de ${ruta} no se puede leer como la de una biografía ` +
+              '(fuente, clase, titulo, revision, fechaDeRevision, licencia, url y recuperado). ' +
+              'Recupérela de nuevo con tools/recuperar.ts, o retírela del directorio.',
+          );
+        }
+        const id = fichero.slice(0, -'.txt'.length);
+        const { fuente, titulo, revision, url, licencia } = leida.cabecera;
+        const data = await parseData({ id, data: { fuente, titulo, revision, url, licencia } });
+        store.set({ id, data, filePath: ruta });
+      }
+    }
+
+    await cargar();
+
+    // En desarrollo, una biografía recuperada o retirada se vuelve a leer sin reiniciar.
+    if (watcher !== undefined) {
+      watcher.add(carpeta);
+      const alCambiar = (ruta: string) => {
+        if (ruta.startsWith(carpeta)) void cargar();
+      };
+      watcher.on('add', alCambiar);
+      watcher.on('change', alCambiar);
+      watcher.on('unlink', alCambiar);
+    }
+  },
+};
+
+const biografias = defineCollection({
+  loader: cargadorDeBiografias,
+  schema: z.object({
+    fuente: z.string().min(1),
+    titulo: z.string().min(1),
+    revision: z.number().int().positive(),
+    url: z.string().regex(/^https:\/\/\S+$/),
+    licencia: z.string().min(1),
+  }),
+});
+
+export const collections = { citas, autores, temas, colecciones, obras, biografias };

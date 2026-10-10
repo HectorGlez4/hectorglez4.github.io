@@ -24,6 +24,7 @@ import {
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia } from './admision.ts';
 import { colgarObras, type FichaDeObra, type ObraResuelta } from './obras.ts';
+import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
@@ -63,6 +64,13 @@ export interface Autor {
   semblanza: string;
   añoNacimiento?: number;
   añoFallecimiento: number;
+  /**
+   * La atribución de la semblanza — Historia 17.2. Presente **solo** si el Autor declara
+   * `biografia`: entonces la semblanza es texto ajeno (CC BY-SA), sale literal de esa
+   * revisión, y solo se reproduce donde puede llevar esta atribución (`src/lib/atribucion.ts`).
+   * Ausente, la semblanza es la breve del editor y se publica como siempre.
+   */
+  atribucion?: AtribucionDeSemblanza;
 }
 
 export interface Tema {
@@ -127,6 +135,22 @@ export function temasPublicados(temas: Tema[], citas: Cita[]): Tema[] {
   return temas
     .filter((t) => (cuenta.get(t.slug) ?? 0) >= MIN_CITAS_POR_TEMA)
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+/**
+ * Si una Cita está **documentada**: publicada con la Fuente de la que se tomó — Historia 17.2.
+ *
+ * Es la definición de «citas documentadas» que cuentan la Tarjeta Social de Autor y la
+ * descripción de un Autor con biografía, y vive aquí para que las dos cuenten lo mismo. Las
+ * Citas anteriores a la v3 que siguen en el censo de pendientes no declaran Fuente y no cuentan.
+ */
+export function esCitaDocumentada(cita: Cita): boolean {
+  return cita.fuente !== undefined;
+}
+
+/** Cuántas Citas publicadas de un Autor están documentadas — ver `esCitaDocumentada`. */
+export function citasDocumentadasDeAutor(citas: readonly Cita[], slugAutor: string): number {
+  return citas.filter((c) => c.autor === slugAutor && esCitaDocumentada(c)).length;
 }
 
 /** Las Citas de un Autor, en orden estable para que el build sea reproducible. */
@@ -482,8 +506,61 @@ export function aplanarCita(entrada: EntradaCita): Cita {
   };
 }
 
+/**
+ * El Autor tal y como lo leen las superficies. Los campos se nombran uno a uno: `biografia`
+ * —lo que declara el fichero— no viaja, viaja su atribución ya resuelta, y solo la pone
+ * `resolverAtribuciones`.
+ */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  return { slug: entrada.id, ...entrada.data };
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento } = entrada.data;
+  return {
+    slug: entrada.id,
+    nombre,
+    semblanza,
+    ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
+    añoFallecimiento,
+  };
+}
+
+/** Lo que el cargador de `corpus/biografias/` guarda de cada documento: su cabecera. */
+export interface BiografiaCargada {
+  id: string;
+  fuente: string;
+  titulo: string;
+  revision: number;
+  url: string;
+  licencia: string;
+}
+
+/**
+ * Cuelga de cada Autor que declara biografía la atribución de su semblanza — Historia 17.2.
+ *
+ * Rompe si el documento declarado no está cargado, o su Fuente o su licencia no tienen con qué
+ * atribuirse (`atribucionDeBiografia`): la puerta del build (la integración que compara cada
+ * biografía con su revisión) ya lo habrá dicho con la ruta del Autor, y publicar la semblanza
+ * ajena sin su atribución es justo lo que AD-28 prohíbe. Un Autor sin biografía sale tal cual.
+ */
+export function resolverAtribuciones(
+  autores: readonly Autor[],
+  declaradas: ReadonlyMap<string, string>,
+  biografias: readonly BiografiaCargada[],
+): Autor[] {
+  const porId = new Map(biografias.map((b) => [b.id, b]));
+  return autores.map((autor) => {
+    const documento = declaradas.get(autor.slug);
+    if (documento === undefined) return autor;
+    const biografia = porId.get(documento);
+    const atribucion = biografia === undefined ? undefined : atribucionDeBiografia(biografia);
+    if (atribucion === undefined) {
+      throw new Error(
+        `El Autor «${autor.slug}» declara la biografía ${documento} y no hay atribución que ` +
+          'publicar con ella: el documento no está en corpus/biografias/, o su Fuente no tiene ' +
+          'nombre declarado, o su licencia no tiene escritura enlazable. Una semblanza ajena no ' +
+          'se publica sin su atribución.',
+      );
+    }
+    return { ...autor, atribucion };
+  });
 }
 
 export function aplanarTema(entrada: EntradaTema): Tema {
@@ -612,9 +689,30 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
    */
   const declaradas = (await getCollection('colecciones')).map(aplanarColeccion);
 
+  /*
+   * Historia 17.2 — la atribución de la semblanza de quien declara biografía. La colección de
+   * biografías solo se consulta si alguien la declara: vacía, `getCollection` imprimiría un
+   * aviso de colección inexistente en cada construcción.
+   */
+  const entradasDeAutor = await getCollection('autores');
+  const biografiasDeclaradas = new Map(
+    entradasDeAutor.flatMap((e) =>
+      e.data.biografia !== undefined ? [[e.id, e.data.biografia.documento] as const] : [],
+    ),
+  );
+  const biografias =
+    biografiasDeclaradas.size === 0
+      ? []
+      : (await getCollection('biografias')).map((e) => ({ id: e.id, ...e.data }));
+  const autores = resolverAtribuciones(
+    entradasDeAutor.map(aplanarAutor),
+    biografiasDeclaradas,
+    biografias,
+  );
+
   const conjunto: ConjuntoPublicable = {
     citas,
-    autores: (await getCollection('autores')).map(aplanarAutor),
+    autores,
     temas: (await getCollection('temas')).map(aplanarTema),
     colecciones: coleccionesPublicadas(declaradas, citas),
   };

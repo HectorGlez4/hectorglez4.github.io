@@ -22,6 +22,7 @@
 import type { Autor, Cita } from '../lib/publicado.ts';
 import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
+import { hechosDeAutor, semblanzaEn } from '../lib/atribucion.ts';
 
 interface Props {
   autor: Autor;
@@ -29,9 +30,11 @@ interface Props {
   citas: readonly Cita[];
   canonica: string;
   tramo: TramoDeLaLista;
+  /** Cuántas Citas del Autor entero están documentadas: ver `esCitaDocumentada`. */
+  documentadas: number;
 }
 
-const { autor, citas, canonica, tramo } = Astro.props;
+const { autor, citas, canonica, tramo, documentadas } = Astro.props;
 
 /*
  * El `@id` de la persona cuelga de la URL de su página y no es la URL a secas: la URL
@@ -54,7 +57,11 @@ const datos = {
     '@type': 'Person',
     '@id': idDeLaPersona,
     name: autor.nombre,
-    description: autor.semblanza,
+    /*
+     * Historia 17.2, AD-28 — el JSON-LD no puede llevar la atribución de una semblanza
+     * ajena: con biografía, la descripción son hechos del Corpus.
+     */
+    description: semblanzaEn(autor, 'datos-estructurados') ?? hechosDeAutor(autor, documentadas),
     ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
     deathDate: String(autor.añoFallecimiento),
   },

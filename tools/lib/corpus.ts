@@ -982,13 +982,14 @@ export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDe
 /**
  * Los documentos de biografía versionados, por nombre sin extensión — Historia 17.1.
  *
- * Solo la cabecera: es lo único que la puerta del build compara con lo que el Autor declara.
- * `null` es un fichero que ocupa el nombre y no se deja analizar. Lee **solo** el primer nivel
+ * La cabecera, que la puerta del build compara con lo que el Autor declara, y el cuerpo,
+ * contra el que coteja su semblanza (Historia 17.2). `null` es un fichero que ocupa el nombre
+ * y no se deja analizar. Lee **solo** el primer nivel
  * de `corpus/biografias/`: ninguna lectura del cotejo de Citas pasa por aquí.
  */
 export async function leerDocumentosDeBiografia(
   rutas: Rutas,
-): Promise<Map<string, CabeceraAnalizada | null>> {
+): Promise<Map<string, { cabecera: CabeceraAnalizada; cuerpo: string } | null>> {
   // **No recursiva**, a diferencia de `ficherosDe`: el nombre del documento es su identidad
   // y lo que declara el Autor, y una subcarpeta haría que dos ficheros respondieran al mismo.
   const ficheros = existsSync(rutas.biografias)
@@ -997,10 +998,13 @@ export async function leerDocumentosDeBiografia(
         .map((e) => join(rutas.biografias, e.name))
         .sort()
     : [];
-  const documentos = new Map<string, CabeceraAnalizada | null>();
+  const documentos = new Map<string, { cabecera: CabeceraAnalizada; cuerpo: string } | null>();
   for (const ruta of ficheros) {
     const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
-    documentos.set(slugDeFichero(ruta), analizado === undefined ? null : analizado.cabecera);
+    documentos.set(
+      slugDeFichero(ruta),
+      analizado === undefined ? null : { cabecera: analizado.cabecera, cuerpo: analizado.cuerpo },
+    );
   }
   return documentos;
 }

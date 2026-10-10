@@ -13,7 +13,8 @@
 
 import { createHash } from 'node:crypto';
 import { CLASE_BIOGRAFIA, nombreDeBiografia, nombreDeDocumento } from './documento.ts';
-import { fuenteDe, revisionExacta } from './fuentes.ts';
+import { fuenteDe, fuenteDeUrl, revisionExacta } from './fuentes.ts';
+import { ENLACES_DE_LICENCIA } from '../../src/lib/biografia.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // La comparación
@@ -607,18 +608,45 @@ export function resumenDeCotejo(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// La biografía que declara un Autor — Historia 17.1
+// La biografía que declara un Autor — Historias 17.1 y 17.2
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Un Autor tal y como lo necesita la puerta: dónde está y qué biografía declara. */
+/** Un Autor tal y como lo necesita la puerta: dónde está, qué biografía declara y su semblanza. */
 export interface AutorParaCotejar {
   /** El fichero del Autor, como se teclea. */
   ruta: string;
   biografia?: { documento: string; revision: number };
+  /**
+   * La semblanza del fichero — Historia 17.2: si el Autor declara biografía, tiene que estar
+   * **literal** en su cuerpo. Opcional en el tipo porque el fichero se lee sin validar; un
+   * Autor con biografía y sin semblanza no pasa la puerta.
+   */
+  semblanza?: string;
 }
 
 /**
- * Comprueba que la biografía que declara cada Autor es **la revisión versionada**.
+ * Un documento de biografía tal y como lo lee la puerta: su cabecera y su cuerpo — Historia
+ * 17.2, que coteja la semblanza contra el cuerpo con la misma comparación que las Citas.
+ */
+export interface DocumentoDeBiografiaParaCotejar {
+  cabecera: unknown;
+  cuerpo: string;
+}
+
+/**
+ * Cuántas palabras tiene, como poco, una semblanza atribuida — Historia 17.2.
+ *
+ * Con menos, «fue un filósofo» casa literal en casi cualquier artículo: el cotejo dejaría de
+ * decir nada sobre de dónde sale el texto.
+ */
+export const MIN_PALABRAS_SEMBLANZA = 8;
+
+/** El marcado de wikitexto que una semblanza atribuida no puede arrastrar — Historia 17.2. */
+export const MARCADO_DE_WIKITEXTO: readonly string[] = ['[[', ']]', "'''", "''", '{{', '<ref'];
+
+/**
+ * Comprueba que la biografía que declara cada Autor es **la revisión versionada**, y que su
+ * semblanza sale de ella.
  *
  * Una Fuente mutable cambia, y la revisión es lo único fijo de ella. Sin esta puerta,
  * actualizar la revisión en el Autor seguiría apoyándose en el documento viejo y publicaría
@@ -626,13 +654,21 @@ export interface AutorParaCotejar {
  *
  *   · el documento no está en `corpus/biografias/`, o está y no se deja analizar;
  *   · el documento no es de una Fuente mutable, o no es una biografía;
- *   · la revisión de su cabecera —o la de su nombre— no es la declarada.
+ *   · la revisión de su cabecera —o la de su nombre— no es la declarada;
+ *   · el enlace de su cabecera no es un `https` de esa revisión, o su licencia no tiene
+ *     escritura enlazable (Historia 17.2);
+ *   · su semblanza lleva marcado de wikitexto, o tiene menos de `MIN_PALABRAS_SEMBLANZA`;
+ *   · su semblanza no aparece **literal** en el cuerpo del documento (Historia 17.2), con la
+ *     misma comparación que el cotejo de Citas (`apareceEnDocumento`). Así «una semblanza sin
+ *     procedencia declarada no se publica» es una puerta y no una promesa: lo publicado con
+ *     la atribución de una revisión está, palabra por palabra, en esa revisión.
  *
  * Cada fallo nombra el fichero del Autor, el documento y las dos revisiones.
  */
 export function cotejarBiografias(
   autores: readonly AutorParaCotejar[],
-  // `unknown` a propósito: lo que haya en el mapa se valida antes de usarlo.
+  // `unknown` a propósito: lo que haya en el mapa se valida antes de usarlo. Lo que se espera
+  // es un `DocumentoDeBiografiaParaCotejar`, o `null` si el fichero no se deja analizar.
   documentos: ReadonlyMap<string, unknown>,
   carpeta = 'corpus/biografias',
 ): FalloDeCotejo[] {
@@ -657,7 +693,12 @@ export function cotejarBiografias(
       continue;
     }
 
-    const cabecera = cabeceraDeBiografia(documentos.get(declarada.documento));
+    const documento = documentos.get(declarada.documento);
+    const cabecera = formaDeBiografia(
+      typeof documento === 'object' && documento !== null
+        ? (documento as { cabecera?: unknown }).cabecera
+        : undefined,
+    );
     if (cabecera === 'ilegible') {
       fallos.push(
         regla(
@@ -699,6 +740,96 @@ export function cotejarBiografias(
             'el nombre y la cabecera del documento tienen que decir lo mismo.',
         ),
       );
+      continue;
+    }
+
+    /*
+     * Historia 17.2 — lo que la página publica con la atribución sale de la cabecera: el
+     * enlace tiene que ser `https` y apuntar a **esa** revisión, y la licencia tiene que tener
+     * escritura enlazable. Un enlace a otra revisión atribuiría un texto que no es este.
+     */
+    const revisionDelEnlace =
+      typeof cabecera.url === 'string' &&
+      /^https:\/\//u.test(cabecera.url) &&
+      fuenteDeUrl(cabecera.url)?.id === cabecera.fuente
+        ? fuenteDe(cabecera.fuente)?.revision?.revisionDe(cabecera.url)
+        : undefined;
+    if (revisionDelEnlace !== declarada.revision) {
+      fallos.push(
+        regla(
+          `${delante} el enlace de su cabecera (${String(cabecera.url)}) no es un enlace ` +
+            `permanente https de la revisión ${declarada.revision} en su Fuente: la atribución publica ese ` +
+            'enlace, y tiene que llevar a esta revisión y no a otra. Recupere el documento de nuevo.',
+        ),
+      );
+      continue;
+    }
+    if (typeof cabecera.licencia !== 'string' || ENLACES_DE_LICENCIA[cabecera.licencia] === undefined) {
+      fallos.push(
+        regla(
+          `${delante} su licencia («${String(cabecera.licencia)}») no es ninguna de las que la ` +
+            `atribución sabe enlazar (${Object.keys(ENLACES_DE_LICENCIA).join(', ')}).`,
+        ),
+      );
+      continue;
+    }
+
+    /*
+     * Historia 17.2 — la semblanza tiene que estar en el documento que la atribuye. El
+     * sistema nunca compone una semblanza: o está literal en la revisión declarada, o no se
+     * publica con su atribución, y el build se para.
+     */
+    const cuerpo = (documento as { cuerpo?: unknown }).cuerpo;
+    if (typeof cuerpo !== 'string') {
+      fallos.push(
+        regla(`${delante} ese documento no tiene la forma que produce la recuperación.`),
+      );
+      continue;
+    }
+    if (typeof autor.semblanza !== 'string' || autor.semblanza.trim() === '') {
+      fallos.push(
+        regla(
+          `${delante} no tiene semblanza que cotejar. La semblanza de un Autor con biografía ` +
+            'es el texto literal de esa revisión.',
+        ),
+      );
+      continue;
+    }
+    /*
+     * El cuerpo es wikitexto despojado a medias: una semblanza copiada de él puede arrastrar
+     * marcado que el despojado no quitó, y casaría literal igual. Publicado, se leería
+     * «[[Córdoba]]». Se rechaza aquí y no en la página, que no reescribe texto ajeno.
+     */
+    const marcado = MARCADO_DE_WIKITEXTO.find((marca) => autor.semblanza!.includes(marca));
+    if (marcado !== undefined) {
+      fallos.push(
+        regla(
+          `${delante} su semblanza lleva marcado de wikitexto («${marcado}»). Copie el texto ` +
+            'tal y como se lee, sin marcado.',
+        ),
+      );
+      continue;
+    }
+    const palabras = colapsarEspacios(autor.semblanza).split(' ').length;
+    if (palabras < MIN_PALABRAS_SEMBLANZA) {
+      fallos.push(
+        regla(
+          `${delante} su semblanza tiene ${palabras} ${palabras === 1 ? 'palabra' : 'palabras'}, ` +
+            `y una semblanza atribuida tiene al menos ${MIN_PALABRAS_SEMBLANZA}: un fragmento ` +
+            'tan corto casa en cualquier artículo y no sitúa a nadie.',
+        ),
+      );
+      continue;
+    }
+    if (!apareceEnDocumento(autor.semblanza, cuerpo)) {
+      fallos.push(
+        regla(
+          `${delante} su semblanza no aparece literal en el cuerpo de ese documento. La ` +
+            'semblanza de un Autor con biografía se copia tal cual de la revisión que la ' +
+            'atribuye —solo cuenta el espaciado—: corríjala con el texto del documento, o ' +
+            'retire la biografía del Autor y conserve la semblanza propia.',
+        ),
+      );
     }
   }
 
@@ -709,17 +840,25 @@ export function cotejarBiografias(
  * La cabecera de un valor del mapa, validada en su forma: un objeto con `fuente`, y si dice
  * ser biografía, `titulo` y una revisión entera segura. Lo demás es `'ilegible'`.
  */
-function cabeceraDeBiografia(
+function formaDeBiografia(
   valor: unknown,
 ):
-  | { clase: typeof CLASE_BIOGRAFIA; fuente: string; titulo: string; revision: number }
+  | {
+      clase: typeof CLASE_BIOGRAFIA;
+      fuente: string;
+      titulo: string;
+      revision: number;
+      // Se validan después, con su propio mensaje: Historia 17.2.
+      url: unknown;
+      licencia: unknown;
+    }
   | { clase: undefined; fuente: string }
   | 'ilegible' {
   if (typeof valor !== 'object' || valor === null) return 'ilegible';
-  const { clase, fuente, titulo, revision } = valor as Record<string, unknown>;
+  const { clase, fuente, titulo, revision, url, licencia } = valor as Record<string, unknown>;
   if (typeof fuente !== 'string' || fuente === '') return 'ilegible';
   if (clase === undefined) return { clase: undefined, fuente };
   if (clase !== CLASE_BIOGRAFIA || typeof titulo !== 'string' || titulo === '') return 'ilegible';
   if (typeof revision !== 'number' || revisionExacta(revision) === undefined) return 'ilegible';
-  return { clase, fuente, titulo, revision };
+  return { clase, fuente, titulo, revision, url, licencia };
 }

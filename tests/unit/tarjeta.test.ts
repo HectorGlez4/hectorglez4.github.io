@@ -179,9 +179,11 @@ describe('FR-19 — la Tarjeta de una página de listado', () => {
 
   it('escapa lo que podría romper el SVG', () => {
     /*
-     * El criterio de una Colección y la semblanza de un Autor son texto de editor: pueden
-     * traer comillas y ampersands. Sin escapar, un `&` deja el SVG mal formado y el
-     * rasterizador devuelve una imagen rota — que las redes reportan como inaccesible.
+     * El criterio de una Colección y el nombre de una página son texto de editor: pueden
+     * traer comillas y ampersands. (La semblanza de un Autor ya no llega aquí: desde la
+     * Historia 17.2 su Tarjeta lleva solo hechos, ver `semblanza.test.ts`.) Sin escapar, un
+     * `&` deja el SVG mal formado y el rasterizador devuelve una imagen rota — que las redes
+     * reportan como inaccesible.
      */
     const conSignos = svgDeTarjetaDeListado({
       titulo: 'Ley & orden',
@@ -206,7 +208,8 @@ describe('FR-19 — la Tarjeta de una página de listado', () => {
   });
 
   it('sin bajada sigue siendo una tarjeta válida', () => {
-    // Una Página de Autor sin semblanza es admisible; su tarjeta no puede romperse por eso.
+    // Una página de listado sin bajada —la portada o un Autor de quien no consta nada que
+    // contar— es admisible; su tarjeta no puede romperse por eso.
     const sinBajada = svgDeTarjetaDeListado({ titulo: 'Solo el nombre' });
     expect(sinBajada).toContain('Solo el nombre');
     expect(sinBajada).toContain(`width="${ANCHO}"`);

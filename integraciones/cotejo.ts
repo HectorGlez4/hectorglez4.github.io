@@ -23,6 +23,10 @@
  * leen en el mismo informe, con la ruta del fichero de Autor delante. Las dos lecturas son
  * disjuntas: el cotejo de Citas no lee `corpus/biografias/`.
  *
+ * Historia 17.2 — y que la semblanza de ese Autor aparece **literal** en el cuerpo de esa
+ * revisión, con la misma comparación que las Citas: es lo que la página publica con su
+ * atribución.
+ *
  * AD-22 — no pide nada por la red. Todo lo que lee está versionado en el repositorio.
  */
 
@@ -92,6 +96,8 @@ export default function cotejoDeCitas(): AstroIntegration {
     const autores = (await leerAutores(rutas)).map((autor) => ({
       ruta: relativaALaRaiz(raiz, autor.ruta),
       ...(autor.biografia !== undefined ? { biografia: autor.biografia } : {}),
+      // Historia 17.2 — la semblanza se coteja literal contra el cuerpo de la biografía.
+      ...(typeof autor.semblanza === 'string' ? { semblanza: autor.semblanza } : {}),
     }));
     const deBiografias = cotejarBiografias(
       autores,

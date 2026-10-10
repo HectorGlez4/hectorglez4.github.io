@@ -15,6 +15,8 @@
  * pertenece** una dirección; quien la pide es `tools/recuperar.ts` y nadie más.
  */
 
+import { NOMBRES_DE_FUENTE_DE_BIOGRAFIA, revisionExacta } from '../../src/lib/biografia.ts';
+
 export interface Fuente {
   id: string;
   nombre: string;
@@ -71,21 +73,12 @@ export interface DireccionamientoPorRevision {
   licenciaEn(fecha: string): string;
 }
 
-/**
- * Una revisión escrita como entero positivo, y nada más — Historia 17.1.
- *
- * El **único** analizador de revisión del proyecto: lo usan la dirección (`oldid=N`), la
- * cabecera del documento (`revision: N`) y la respuesta de la Fuente. Dos analizadores
- * empezarían idénticos y divergirían a la primera corrección, y entonces una revisión
- * valdría al pedirla y no al leerla. `0`, `012`, `12a`, `prev` y lo que no quepa en un
- * entero seguro no son revisiones.
+/*
+ * El único analizador de revisión del proyecto vive en `src/lib/biografia.ts` desde la
+ * Historia 17.2, porque el build también lee la revisión de una biografía. Se reexporta aquí
+ * para que `tools/` lo siga encontrando donde estaba.
  */
-export function revisionExacta(valor: string | number | undefined): number | undefined {
-  const texto = typeof valor === 'number' ? String(valor) : valor;
-  if (texto === undefined || !/^[1-9]\d{0,15}$/u.test(texto)) return undefined;
-  const revision = Number(texto);
-  return Number.isSafeInteger(revision) ? revision : undefined;
-}
+export { revisionExacta };
 
 /** El enlace permanente por ruta: `/wiki/Especial:EnlacePermanente/N` o `/wiki/Special:PermanentLink/N`. */
 const RUTA_DE_ENLACE_PERMANENTE = /^\/wiki\/(?:Especial:EnlacePermanente|Special:PermanentLink)\/([^/]+)$/u;
@@ -204,7 +197,9 @@ export const FUENTES: readonly Fuente[] = [
      * documento es el wikitexto de un `oldid` concreto, que no cambia nunca.
      */
     id: 'wikipedia-es',
-    nombre: 'Wikipedia en español',
+    // El nombre lo publica la página en la atribución de la semblanza, y su dueño es
+    // `src/lib/biografia.ts` (Historia 17.2): de ahí lo toma esta entrada.
+    nombre: NOMBRES_DE_FUENTE_DE_BIOGRAFIA['wikipedia-es']!,
     licencia: 'CC BY-SA 4.0',
     permiteReutilizacion: true,
     anfitriones: ['es.wikipedia.org', 'es.m.wikipedia.org'],

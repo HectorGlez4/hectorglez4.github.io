@@ -113,6 +113,14 @@ deja leer, no es de una Fuente mutable o no es esa revisión.
 npx tsx tools/autor.ts biografia <slug-de-autor> <documento de corpus/biografias/>
 ```
 
+**Con biografía, la `semblanza` de la ficha se coteja literal contra el cuerpo de esa revisión**
+—misma comparación que las Citas, al menos 8 palabras y sin marcado de wikitexto; si no, el
+build rompe nombrando el fichero de Autor—, y se publica solo en la página 1 de `/autor/{slug}/`,
+fuera de Pagefind y con su atribución visible («Semblanza tomada de «Título» en Wikipedia en
+español, revisión N · licencia», enlazada al permanente y a la escritura de la licencia).
+Meta, JSON-LD y páginas 2+ dicen hechos del Corpus; qué superficie la porta lo decide
+`src/lib/atribucion.ts`. La Tarjeta de Autor, de todos, lleva solo nombre, años y Citas documentadas.
+
 ## Leer el estado de indexación
 
 El sitio cumple desde hace tiempo la exigencia de *ser* indexable y aun así el buscador ha

@@ -19,7 +19,15 @@ import Armazon from '../../../components/Armazon.astro';
 import DatosDeAutor from '../../../components/DatosDeAutor.astro';
 import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
-import { autoresPublicados, citasDeAutor, conjuntoPublicable, type Cita } from '../../../lib/publicado.ts';
+import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.astro';
+import {
+  autoresPublicados,
+  citasDeAutor,
+  citasDocumentadasDeAutor,
+  conjuntoPublicable,
+  type Cita,
+} from '../../../lib/publicado.ts';
+import { añosDeAutor, descripcionDeAutor, semblanzaEn } from '../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDeAutor } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
@@ -31,27 +39,38 @@ export const getStaticPaths = (async ({ paginate }) => {
   return autoresPublicados(conjunto.autores, conjunto.citas).flatMap((autor) =>
     paginate(citasDeAutor(conjunto.citas, autor.slug), {
       params: { slug: autor.slug },
-      props: { autor },
+      props: { autor, documentadas: citasDocumentadasDeAutor(conjunto.citas, autor.slug) },
       pageSize: CITAS_POR_PAGINA,
     }),
   );
 }) satisfies GetStaticPaths;
 
-const { autor } = Astro.props;
+const { autor, documentadas } = Astro.props;
 const pagina = Astro.props.page as import('astro').Page<Cita>;
 
 const ruta = rutaDeAutor(autor.slug, pagina.currentPage);
 
-const años =
-  autor.añoNacimiento !== undefined
-    ? `${autor.añoNacimiento}–${autor.añoFallecimiento}`
-    : `Fallecido en ${autor.añoFallecimiento}`;
+const años = añosDeAutor(autor);
 const canonica = new URL(ruta, Astro.site).href;
+
+/*
+ * Historia 17.2, AD-28 — qué superficie puede reproducir la semblanza lo decide
+ * `src/lib/atribucion.ts`, no esta página. Una semblanza propia sale donde siempre; una ajena
+ * (el Autor declara biografía) solo en la ficha de la página 1, con su atribución debajo, y
+ * donde no cabe se dicen hechos del Corpus.
+ */
+const semblanza = semblanzaEn(
+  autor,
+  pagina.currentPage === 1 ? 'ficha-de-autor' : 'paginas-siguientes',
+);
+// Si el índice de Pagefind puede llevarla; si no, va dentro de `data-pagefind-ignore`.
+const enElIndice = semblanzaEn(autor, 'indice-de-busqueda') !== undefined;
+const descripcion = descripcionDeAutor(autor, documentadas);
 ---
 
 <Armazon
   titulo={tituloDeAutor(autor.nombre, pagina.currentPage)}
-  descripcion={`Citas de ${autor.nombre} con su procedencia documentada. ${autor.semblanza}`}
+  descripcion={descripcion}
   tarjeta={`/tarjeta/autor/${autor.slug}.png`}
   ruta={ruta}
   tipo="autor"
@@ -63,12 +82,29 @@ const canonica = new URL(ruta, Astro.site).href;
     citas={pagina.data}
     canonica={canonica}
     tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
+    documentadas={documentadas}
   />
   <div class="pagina contenedor">
     <header class="ficha">
       <h1>{autor.nombre}</h1>
       <p class="años">{años}</p>
-      <p class="semblanza">{autor.semblanza}</p>
+      {
+        semblanza !== undefined &&
+          (enElIndice ? (
+            <p class="semblanza">{semblanza}</p>
+          ) : (
+            /*
+             * Fuera del índice de Pagefind, con su atribución debajo: un resultado de búsqueda
+             * la recortaría en un fragmento sin atribución.
+             */
+            <div data-pagefind-ignore>
+              <p class="semblanza">{semblanza}</p>
+              {autor.atribucion !== undefined && (
+                <AtribucionDeSemblanza atribucion={autor.atribucion} />
+              )}
+            </div>
+          ))
+      }
     </header>
 
     {
