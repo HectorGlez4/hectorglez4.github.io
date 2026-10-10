@@ -298,10 +298,40 @@ export function rutaNormalizada(rutaOUrl: string): string {
   return sinBarraFinal === '' ? '/' : sinBarraFinal;
 }
 
-/** La superficie a la que pertenece una ruta, o `undefined` si nadie la ha declarado. */
-export function superficieDeclaradaDe(rutaOUrl: string): Superficie | undefined {
+/**
+ * La superficie a la que pertenece una ruta, o `undefined` si nadie la ha declarado.
+ *
+ * `superficies` existe para las pruebas de `src/lib/ingreso.ts`, que tienen que poder juzgar
+ * una admisión en una superficie que todavía no existe —la Página de Obra— con **este mismo
+ * predicado** y no con una copia suya. El sitio nunca lo pasa.
+ */
+export function superficieDeclaradaDe(
+  rutaOUrl: string,
+  superficies: readonly Superficie[] = SUPERFICIES,
+): Superficie | undefined {
   const ruta = rutaNormalizada(rutaOUrl);
-  return SUPERFICIES.find((superficie) => superficie.reconoce.test(ruta));
+  return superficies.find((superficie) => superficie.reconoce.test(ruta));
+}
+
+/**
+ * Si una ruta es servicio **por forma**: una página 2+ de un listado, la que casa con el
+ * `noPublicableEn` de su superficie.
+ *
+ * Es la mitad de `caracterDe` que no depende de la declaración entera de la superficie, y se
+ * nombra aparte porque tiene un segundo consumidor: `src/lib/ingreso.ts` niega cualquier
+ * Modelo en estas rutas (Historia 17.5). Son una sola regla, y por eso viven en una sola
+ * función; si `caracterDe` y la admisión de ingreso leyeran la forma cada una a su manera,
+ * la primera paginación que cambiara de forma colaría un Modelo en la página 2.
+ *
+ * Una ruta que nadie declara no es servicio por forma: no es nada, y quien tiene que gritar
+ * por ella es `caracterDe`.
+ */
+export function esServicioPorForma(
+  rutaOUrl: string,
+  superficies: readonly Superficie[] = SUPERFICIES,
+): boolean {
+  const ruta = rutaNormalizada(rutaOUrl);
+  return superficieDeclaradaDe(ruta, superficies)?.noPublicableEn?.test(ruta) ?? false;
 }
 
 /**
@@ -328,7 +358,7 @@ export function caracterDe(rutaOUrl: string): Caracter {
     );
   }
 
-  return superficie.noPublicableEn?.test(ruta) ? 'servicio' : superficie.caracter;
+  return esServicioPorForma(ruta) ? 'servicio' : superficie.caracter;
 }
 
 /** Las cuatro consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`. */

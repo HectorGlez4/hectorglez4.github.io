@@ -784,7 +784,7 @@ Modelo que suba el ingreso degradando el rebote de la Página de Cita.
 
 **Encender las donaciones ya no exige tocar ninguna página.** La invitación está construida
 —`src/components/Sostener.astro`, y la portada, `/buscar` y `/404` preguntan por ella con
-`modelosEn('<su pagina>')`—, así que el commit del encendido es el booleano y nada más.
+`modelosEnRuta('<su ruta>')`—, así que el commit del encendido es el booleano y nada más.
 
 **Ese mismo commit tiene dos requisitos que el booleano no trae puestos**, y saltarse
 cualquiera de los dos publica una invitación que no debería haberse publicado:
@@ -837,20 +837,32 @@ rechaza: **donaciones y publicidad acotada**. La exclusión nace de la invitaci�
 que vive en portada, búsqueda y 404, y aguas arriba se estrechó a la publicidad, el único
 Modelo que degrada la superficie que produce el ingreso.
 
-**La afiliación de libros es la excepción, y está registrada.** Su enlace no se añade a la
-Página de Cita: *nace* de la Procedencia ya publicada, que esa página ya muestra y que se
-deriva en el build sin consultar a nadie. No interrumpe ninguna lectura porque no añade
-superficie —convierte en enlace un dato que ya estaba escrito—, así que admitirla ahí el día
-que se solicite la cuenta será una línea en `admitidoEn` y no una renegociación de UX-DR36.
-Hoy no está admitida en ninguna superficie: falta decidir **qué edición se enlaza**, y eso se
-decide con la cuenta delante.
+**La admisión se nombra por superficie y se consulta por ruta** (Historia 17.5). `admitidoEn`
+sigue diciendo el fichero de la superficie, pero las páginas preguntan
+`modelosEnRuta('<su ruta>')`, que resuelve la ruta con el mismo predicado de
+`src/lib/superficies.ts` y **excluye por forma** las páginas 2+ de un listado: admitir un
+Modelo en el listado de Tema lo pone en `/tema/x/` y nunca en `/tema/x/2/`. La restricción es
+solo de forma: lo que se declare servicio por contenido —el `noindex` de una Obra que repite
+otra, 22.4— no restringe ninguna admisión. Por eso no hay forma de escribir «también la
+página 2» en `admitidoEn`, y la prueba de `dist/` juzga cada ruta, no cada fichero.
+
+**La Página de Autor no admite ningún Modelo, y la afiliación solo la Página de Obra** (AD-20
+v7.1). `revisarDeclaracionDeIngreso` rechaza las dos cosas. La excepción que tenía la
+afiliación en la Página de Cita se revocó: su enlace nacerá de la Procedencia en la Página de
+Obra (Historia 22.9), que todavía no existe, así que hoy no la admite ninguna superficie. Falta
+además decidir **qué edición se enlaza**, y eso se decide con la cuenta delante.
+
+**El tope de guion se mide donde se admite.** `tests/unit/ingreso-construido.test.ts` construye
+una copia con todos los Modelos que alguna superficie admite encendidos y la medición puesta,
+y exige que cada ruta con un `data-ingreso` quede bajo `MAX_BYTES_DE_GUION`. Admitir un Modelo
+en una superficie nueva la mete en esa medida sin tocar la prueba.
 
 Un Modelo no se aloja jamás en el armazón compartido: es una línea, aparece en todas partes e
 incluye la Página de Cita.
 
 **Lo que un Modelo ponga en una página va marcado con `data-ingreso="<id>"`.** No es
 decoración: `tests/unit/ingreso-construido.test.ts` recorre el `dist/` construido y exige que
-lo marcado en cada página esté encendido y admitido ahí. La declaración la vigila `npm test` y
+lo marcado en cada ruta esté encendido y admitido en esa ruta. La declaración la vigila `npm test` y
 también el build: desde la 14.2 tres superficies importan `src/lib/ingreso.ts`, así que
 `astro build` lo evalúa al cargar y una declaración que no se sostiene detiene la construcción.
 Con todo apagado eso significa que un Modelo apagado es **invisible y no latente** (UX-DR35)

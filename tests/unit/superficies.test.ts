@@ -5,6 +5,7 @@ import {
   caracterDe,
   consecuenciasDe,
   consecuenciasDelCaracter,
+  esServicioPorForma,
   rutaNormalizada,
   superficieDeclaradaDe,
   superficiesDelBarrido,
@@ -361,5 +362,24 @@ describe('Historia 12.1 — la declaración está sana', () => {
       if (superficie.noPublicableEn === undefined) continue;
       expect(superficie.caracter, superficie.nombre).toBe('producto');
     }
+  });
+});
+
+describe('Historia 17.5 — el servicio por forma, con nombre propio', () => {
+  it('esServicioPorForma es verdadero en la página 2+ de un listado', () => {
+    for (const ruta of ['/tema/x/2/', '/autor/x/2', '/coleccion/x/17/']) {
+      expect(esServicioPorForma(ruta), ruta).toBe(true);
+    }
+  });
+
+  it('y falso en la página 1, en un slug numérico, en el servicio por declaración y en una ruta no declarada', () => {
+    for (const ruta of ['/tema/x/', '/tema/1984/', '/buscar/', '/404', '/', '/no-declarada/', '/tema/x/2/extra']) {
+      expect(esServicioPorForma(ruta), ruta).toBe(false);
+    }
+  });
+
+  it('y caracterDe sigue diciendo servicio de la página 2+ — regresión', () => {
+    expect(caracterDe('/tema/x/2/')).toBe('servicio');
+    expect(caracterDe('/tema/x/')).toBe('producto');
   });
 });

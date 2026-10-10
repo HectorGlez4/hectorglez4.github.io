@@ -9,17 +9,22 @@ import {
   TEMA_VALIDO,
   citaValida,
   construirConCorpus,
+  fuenteConAdmisionAnadida,
   fuenteConDonacionesEncendidas,
+  fuenteConModeloEncendido,
   limpiar,
 } from './ayuda/construir.js';
+import { bytesDeGuionEnLinea } from './ayuda/guion.js';
 import {
   MARCA_DE_INGRESO,
   MODELOS,
   modeloDe,
-  modelosEn,
+  modelosEnRuta,
   modelosMarcadosEn,
+  type Modelo,
 } from '../../src/lib/ingreso.ts';
 import { superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import { CITAS_POR_PAGINA, MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 14.1 — lo que se comprueba sobre el sitio construido de verdad.
@@ -113,6 +118,20 @@ function rutaDe(relativa: string): string {
    */
   const sinIndice = sinExtension.replace(/(^|\/)index$/, '');
   return sinIndice === '' ? '/' : `/${sinIndice}`;
+}
+
+/**
+ * Los Modelos que una página de `dist/` debe llevar marcados: los que `modelosEnRuta` admite
+ * en **su ruta** con la declaración que se le pase.
+ *
+ * Una página sin superficie declarada no puede alojar nada: nadie ha decidido que sí. Se mira
+ * aquí antes de preguntar porque `modelosEnRuta` rompe con una ruta sin declarar, que es lo
+ * correcto para la página que se construye y no para quien recorre `dist/` entero.
+ */
+function admitidosEnLaRuta(relativa: string, modelos: readonly Modelo[]): string[] {
+  const ruta = rutaDe(relativa);
+  if (superficieDeclaradaDe(ruta) === undefined) return [];
+  return modelosEnRuta(ruta, modelos).map((m) => m.id);
 }
 
 /** Los ficheros de una extensión dentro de `dist/`, por su ruta relativa. */
@@ -241,18 +260,17 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
      * Escrita como un vacío fijo, esta prueba se volvía inútil el mismo día que sirviera de
      * algo: con las donaciones encendidas habría que borrarla o excluir tres superficies a
      * mano, y la promesa de que encender es el diff de una línea sería falsa. Escrita así,
-     * cada página se juzga contra lo que `modelosEn` dice de **su** superficie, y sigue
-     * cazando el caso que de verdad importa —un marcador colado en la Página de Cita, o uno
-     * con una errata que no es ningún Modelo—.
+     * cada página se juzga contra lo que `modelosEnRuta` dice de **su ruta** —no de su
+     * fichero, desde la Historia 17.5: la página 2 de un listado comparte fichero con la 1 y
+     * no comparte admisión—, y sigue cazando el caso que de verdad importa —un marcador
+     * colado en la Página de Cita, o uno con una errata que no es ningún Modelo—.
      *
      * Hoy los cuatro están apagados, así que lo esperado es vacío en las nueve superficies y
      * la aserción dice además lo mismo por la vía tosca: ni la cadena `data-ingreso` aparece
      * en el HTML, que es lo que descarta el contenedor vacío y el comentario.
      */
     for (const [relativa, html] of Object.entries(paginas)) {
-      const superficie = superficieDeclaradaDe(rutaDe(relativa));
-      // Una página sin superficie declarada no puede alojar nada: nadie ha decidido que sí.
-      const admitidos = superficie === undefined ? [] : modelosEn(superficie.pagina).map((m) => m.id);
+      const admitidos = admitidosEnLaRuta(relativa, MODELOS);
       expect([...modelosMarcadosEn(html)].sort(), relativa).toEqual([...admitidos].sort());
       if (admitidos.length === 0) expect(html, relativa).not.toContain(MARCA_DE_INGRESO);
     }
@@ -687,7 +705,207 @@ describe('Historia 14.2 — encender sin destino detiene la construcción', () =
 });
 
 /**
- * El gancho con el que se construyen los dos proyectos parcheados de arriba.
+ * Historia 17.5 — el tope de guion se mide en **toda** superficie que admita un Modelo.
+ *
+ * El tope de `MAX_BYTES_DE_GUION` solo se medía en la Página de Cita, que hoy no admite
+ * ninguno. AD-20 lo pide en cada superficie que aloje un Modelo, y con el Modelo **puesto**:
+ * medido con todo apagado no diría nada del día del encendido.
+ *
+ * Se construye la copia con **todos** los Modelos que hoy admite alguna superficie encendidos
+ * a la vez —parcheando `src/lib/ingreso.ts` en la copia, nunca en el árbol (AD-21)— y con la
+ * medición configurada, porque el guion de medición va en línea en toda página y es el que más
+ * ha crecido sin que nadie lo viera (retro de la épica 7). Hoy esa lista es solo las
+ * donaciones; el día que la 22.9 admita la afiliación en la Página de Obra, entra aquí sola.
+ */
+describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite', () => {
+  const aLimpiar: string[] = [];
+  let paginas: Record<string, string> = {};
+
+  /** Los Modelos que alguna superficie admite hoy: los únicos que tiene sentido encender. */
+  const ADMITIDOS = MODELOS.filter((m) => m.admitidoEn.length > 0);
+  /** La declaración que tiene la copia, para juzgar cada ruta contra ella. */
+  const DECLARACION: Modelo[] = MODELOS.map((m) =>
+    m.admitidoEn.length > 0 ? { ...m, encendido: true } : m,
+  );
+
+  beforeAll(async () => {
+    let fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
+    for (const modelo of ADMITIDOS) {
+      if (!modelo.encendido) fuente = fuenteConModeloEncendido(fuente, modelo.id);
+    }
+    const build = await construirConCorpus(CORPUS, {
+      jornada: JORNADA,
+      entorno: { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' },
+      ficheros: { 'src/lib/ingreso.ts': fuente },
+    });
+    aLimpiar.push(build.proyecto);
+    expect(build.codigo, build.salida).toBe(0);
+    paginas = await paginasDe(join(build.proyecto, 'dist'));
+  }, 240_000);
+
+  afterAll(async () => {
+    await Promise.all(aLimpiar.splice(0).map(limpiar));
+  });
+
+  it('hay algo que medir: alguna superficie admite hoy algún Modelo', () => {
+    expect(ADMITIDOS.length).toBeGreaterThan(0);
+  });
+
+  it('lo marcado en cada ruta es exactamente lo encendido y admitido en esa ruta', () => {
+    for (const [relativa, html] of Object.entries(paginas)) {
+      expect([...modelosMarcadosEn(html)].sort(), relativa).toEqual(
+        admitidosEnLaRuta(relativa, DECLARACION).sort(),
+      );
+    }
+  });
+
+  it('cada ruta que lleva un `data-ingreso` cabe en MAX_BYTES_DE_GUION, con la medición puesta', () => {
+    const conModelo = Object.entries(paginas).filter(
+      ([, html]) => modelosMarcadosEn(html).length > 0,
+    );
+    // Las rutas marcadas son exactamente las que la declaración admite, y alguna hay: sin
+    // ellas el bucle de abajo no afirmaría nada. Cuántas, lo dice la declaración y no un número.
+    const esperadas = Object.keys(paginas)
+      .filter((relativa) => admitidosEnLaRuta(relativa, DECLARACION).length > 0)
+      .map(rutaDe)
+      .sort();
+    expect(esperadas.length).toBeGreaterThan(0);
+    expect(conModelo.map(([relativa]) => rutaDe(relativa)).sort()).toEqual(esperadas);
+
+    for (const [relativa, html] of conModelo) {
+      // El instalador de la medición tiene que estar: sin él se mediría menos de lo servido.
+      expect(html, relativa).toContain('window.__medir=function');
+      const bytes = bytesDeGuionEnLinea(html);
+      expect(bytes, `${relativa}: ${bytes} bytes de guion en línea`).toBeLessThan(
+        MAX_BYTES_DE_GUION,
+      );
+    }
+  });
+
+  it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {
+    /*
+     * El control positivo de la medida, con las formas que de verdad salen en `dist/` —
+     * `<script>` a secas y `<script type="application/ld+json">`— y las que el contador dice
+     * reconocer: un guion de módulo con `src`, que se descarga y cuenta 0; la etiqueta en
+     * mayúsculas; el `ld+json` con comilla simple; y un carácter de dos bytes, que `length`
+     * contaría como uno.
+     */
+    const html = [
+      '<script>abcd</script>',
+      '<script type="application/ld+json">{"@type":"Quotation"}</script>',
+      "<script type='application/ld+json'>{\"x\":1}</script>",
+      '<script type="module" src="/_astro/isla.js"></script>',
+      '<SCRIPT>ef</SCRIPT>',
+      '<script>é</script>',
+    ].join('');
+    expect(bytesDeGuionEnLinea(html)).toBe(4 + 2 + 2);
+    expect(bytesDeGuionEnLinea('<script type="module" src="/x.js"></script>')).toBe(0);
+  });
+});
+
+/**
+ * Historia 17.5 — una página 2+ no lleva el Modelo que admite su fichero.
+ *
+ * Hoy ningún listado admite ningún Modelo, así que en el sitio real esto no se puede ver. Se
+ * construye una copia con una declaración **inventada**: las donaciones encendidas y admitidas
+ * además en el listado de Tema, y la página de Tema parcheada para preguntar por ellas como lo
+ * hacen la portada, `/buscar` y `/404`. El corpus lleva una Cita más de las que caben en una
+ * página, para que exista `/tema/el-tiempo/2/`. Por fichero, esa página admitiría las
+ * donaciones; por ruta, no.
+ */
+describe('Historia 17.5 — la página 2+ de un listado admitido no lleva el Modelo', () => {
+  const aLimpiar: string[] = [];
+  let paginas: Record<string, string> = {};
+
+  const TEMA = 'tema/[slug]/[...page].astro';
+  const DECLARACION: Modelo[] = MODELOS.map((m) =>
+    m.id === 'donaciones'
+      ? { ...m, encendido: true, admitidoEn: [...m.admitidoEn, TEMA] }
+      : m,
+  );
+
+  const SLUGS = Array.from(
+    { length: CITAS_POR_PAGINA + 1 },
+    (_, i) => `seneca-frase-${String(i).padStart(3, '0')}`,
+  );
+  const CORPUS_PAGINADO: Record<string, string> = {
+    'autores/seneca.yml': AUTOR_VALIDO,
+    'temas/el-tiempo.yml': TEMA_VALIDO,
+    ...Object.fromEntries(
+      SLUGS.map((slug, i) => [
+        `citas/${slug}.md`,
+        citaValida({ texto: `Frase número ${i} del catálogo de prueba.`, slug }),
+      ]),
+    ),
+  };
+
+  beforeAll(async () => {
+    const ingreso = fuenteConAdmisionAnadida(
+      fuenteConDonacionesEncendidas(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8')),
+      'donaciones',
+      TEMA,
+    );
+
+    const IMPORTACION = "import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';";
+    const PAGINACION = '<Paginacion pagina={pagina} />';
+    const pagina = await readFile(resolve(RAIZ, 'src/pages', TEMA), 'utf8');
+    expect(pagina.split(IMPORTACION), 'la página de Tema cambió de forma').toHaveLength(2);
+    expect(pagina.split(PAGINACION), 'la página de Tema cambió de forma').toHaveLength(2);
+    // El parche inyecta `modelosEnRuta(ruta)`: sin una `const ruta` en la página, el build
+    // fallaría con un ReferenceError que no diría qué se rompió.
+    expect(
+      /^const ruta = /m.test(pagina),
+      'la página de Tema ya no declara `const ruta`: el parche de esta prueba no sabe a qué ' +
+        'ruta preguntar y hay que rehacerlo con la forma nueva de la página',
+    ).toBe(true);
+    const tema = pagina
+      .replace(
+        IMPORTACION,
+        `${IMPORTACION}\nimport Sostener from '../../../components/Sostener.astro';\nimport { modelosEnRuta } from '../../../lib/ingreso.ts';`,
+      )
+      .replace(
+        PAGINACION,
+        `${PAGINACION}\n    {modelosEnRuta(ruta).map((modelo) => modelo.destino !== undefined && <Sostener id={modelo.id} href={modelo.destino} />)}`,
+      );
+
+    const build = await construirConCorpus(CORPUS_PAGINADO, {
+      jornada: JORNADA,
+      ficheros: { 'src/lib/ingreso.ts': ingreso, [`src/pages/${TEMA}`]: tema },
+    });
+    aLimpiar.push(build.proyecto);
+    expect(build.codigo, build.salida).toBe(0);
+    paginas = await paginasDe(join(build.proyecto, 'dist'));
+  }, 240_000);
+
+  afterAll(async () => {
+    await Promise.all(aLimpiar.splice(0).map(limpiar));
+  });
+
+  it('la página 1 del listado lleva las donaciones: la admisión inventada sí surte efecto', () => {
+    expect(modelosMarcadosEn(paginas['tema/el-tiempo/index.html'])).toEqual(['donaciones']);
+  });
+
+  it('y la página 2, del mismo fichero, no lleva nada', () => {
+    const segunda = paginas['tema/el-tiempo/2/index.html'];
+    expect(segunda, 'el corpus no dio página 2').toBeDefined();
+    // Es la misma superficie, y su fichero admite las donaciones: por fichero las llevaría.
+    expect(superficieDeclaradaDe(rutaDe('tema/el-tiempo/2/index.html'))?.pagina).toBe(TEMA);
+    expect(DECLARACION.find((m) => m.id === 'donaciones')?.admitidoEn).toContain(TEMA);
+    expect(modelosMarcadosEn(segunda)).toEqual([]);
+    expect(segunda).not.toContain(MARCA_DE_INGRESO);
+  });
+
+  it('y cada ruta lleva lo que `modelosEnRuta` le admite, con esta misma declaración', () => {
+    for (const [relativa, html] of Object.entries(paginas)) {
+      expect([...modelosMarcadosEn(html)].sort(), relativa).toEqual(
+        admitidosEnLaRuta(relativa, DECLARACION).sort(),
+      );
+    }
+  });
+});
+
+/**
+ * El gancho con el que se construyen los cuatro proyectos parcheados de arriba.
  *
  * Sus dos guardas fallan en silencio si nadie las ejercita —una escribiendo sobre el
  * repositorio de verdad, la otra dejando pasar un parche que no encontró su sitio—, así que se
@@ -773,7 +991,7 @@ describe('la ayuda de build — el parche del encendido no puede encender a otro
   it('con las donaciones ya encendidas lo dice, en vez de encender a su vecino', () => {
     // El caso con fecha: es exactamente el árbol del día que LC-4 se cierre.
     expect(() => fuenteConDonacionesEncendidas(censo(true))).toThrow(
-      'ya están encendidas en el árbol',
+      'ya está encendido en el árbol',
     );
   });
 
@@ -790,6 +1008,40 @@ describe('la ayuda de build — el parche del encendido no puede encender a otro
     const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
     const parcheado = fuenteConDonacionesEncendidas(fuente);
     expect(modelosEncendidosEn(parcheado)).toEqual(['donaciones']);
+  });
+
+  it('la admisión añadida cae en el bloque de su Modelo, sin depender del literal del array', () => {
+    const conAdmision = [
+      'export const MODELOS = [',
+      '  {',
+      "    id: 'donaciones',",
+      '    admitidoEn: [',
+      "      'index.astro',",
+      "      '404.astro',",
+      '    ],',
+      '  },',
+      '  {',
+      "    id: 'afiliacion-de-libros',",
+      '    admitidoEn: [],',
+      '  },',
+      '];',
+    ].join('\n');
+    const parcheado = fuenteConAdmisionAnadida(conAdmision, 'donaciones', 'tema/[slug]/[...page].astro');
+    expect(parcheado).toContain("'404.astro', 'tema/[slug]/[...page].astro']");
+    expect(parcheado).toContain("id: 'afiliacion-de-libros',\n    admitidoEn: [],");
+    // Una lista vacía también, y sin coma colgando delante.
+    expect(fuenteConAdmisionAnadida(conAdmision, 'afiliacion-de-libros', 'x.astro')).toContain(
+      "admitidoEn: ['x.astro']",
+    );
+    expect(() => fuenteConAdmisionAnadida(conAdmision, 'donaciones', 'index.astro')).toThrow(
+      'ya admite',
+    );
+  });
+
+  it('y sobre el censo de verdad la admisión de las donaciones se puede ampliar', async () => {
+    const fuente = await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
+    const parcheado = fuenteConAdmisionAnadida(fuente, 'donaciones', 'tema/[slug]/[...page].astro');
+    expect(parcheado).toContain("'404.astro', 'tema/[slug]/[...page].astro']");
   });
 
   /** Qué Modelos declara encendidos una fuente de `ingreso.ts`, leyendo tramo por tramo. */

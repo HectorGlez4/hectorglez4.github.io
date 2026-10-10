@@ -15,7 +15,7 @@
  */
 import Armazon from '../components/Armazon.astro';
 import Sostener from '../components/Sostener.astro';
-import { modelosEn } from '../lib/ingreso.ts';
+import { modelosEnRuta } from '../lib/ingreso.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import { tituloDe } from '../lib/marca.ts';
 import {
@@ -131,10 +131,10 @@ const colecciones = conjunto.colecciones;
        * momento posible para ofrecerla. Aquí queda al final de la columna, visible desde la
        * primera carga y sin cruzarse con ningún resultado.
        *
-       * Quien decide es `modelosEn('buscar.astro')` —encendido **y** admitido aquí—, no esta
+       * Quien decide es `modelosEnRuta` —encendido **y** admitido aquí—, no esta
        * página. Con todo apagado no se emite nada, ni contenedor ni marca (UX-DR35).
        */
-      modelosEn('buscar.astro').map(
+      modelosEnRuta(Astro.url.pathname).map(
         (modelo) => modelo.destino !== undefined && <Sostener id={modelo.id} href={modelo.destino} />,
       )
     }

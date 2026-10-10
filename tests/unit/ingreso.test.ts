@@ -6,15 +6,17 @@ import {
   MODELOS,
   MODELOS_VEDADOS_EN_LECTURA,
   SUPERFICIES_DE_LECTURA,
+  SUPERFICIES_SIN_INGRESO,
+  esPaginaDeObra,
   modeloDe,
-  modelosEn,
+  modelosEnRuta,
   modelosEncendidos,
   modelosMarcadosEn,
   revisarCensoDeIngreso,
   revisarDeclaracionDeIngreso,
   type Modelo,
 } from '../../src/lib/ingreso.ts';
-import { SUPERFICIES } from '../../src/lib/superficies.ts';
+import { SUPERFICIES, type Superficie } from '../../src/lib/superficies.ts';
 import {
   CONDICIONES_PARA_DONACIONES,
   SESIONES_PARA_AFILIACION,
@@ -40,6 +42,25 @@ const FUENTE = readFileSync(resolve(import.meta.dirname, '../../src/lib/ingreso.
  * `process.env`»— y una prueba que mirase el fichero entero le prohibiría explicarse.
  */
 const CODIGO = FUENTE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+/**
+ * Una ruta de muestra por cada forma que el sitio construye: la página 1 y la 2 de cada
+ * listado, y una de cada superficie suelta. Es lo que se le pregunta a `modelosEnRuta`.
+ */
+const RUTAS_DE_MUESTRA = [
+  '/',
+  '/cita/una-cita/',
+  '/autor/seneca/',
+  '/autor/seneca/2/',
+  '/tema/el-tiempo/',
+  '/tema/el-tiempo/2/',
+  '/coleccion/una-coleccion/',
+  '/coleccion/una-coleccion/2/',
+  '/buscar/',
+  '/404',
+  '/kit/',
+  '/lote/',
+];
 
 /**
  * Un Modelo cualquiera al que retorcerle un campo, para probar la revisión.
@@ -78,10 +99,10 @@ describe('Historia 14.1 — los cuatro Modelos y su estado', () => {
     expect(modelosEncendidos()).toEqual([]);
   });
 
-  it('y ninguna superficie aloja ninguno, porque para alojarlo hace falta estar encendido', () => {
-    // Las dos condiciones a la vez: `modelosEn` cruza admisión y estado. La portada admite
+  it('y ninguna ruta aloja ninguno, porque para alojarlo hace falta estar encendido', () => {
+    // Las dos condiciones a la vez: `modelosEnRuta` cruza admisión y estado. La portada admite
     // las donaciones y aun así no aloja nada, que es lo que significa «apagado».
-    for (const superficie of SUPERFICIES) expect(modelosEn(superficie.pagina)).toEqual([]);
+    for (const ruta of RUTAS_DE_MUESTRA) expect(modelosEnRuta(ruta), ruta).toEqual([]);
     expect(modeloDe('donaciones')?.admitidoEn).toContain('index.astro');
   });
 
@@ -92,10 +113,8 @@ describe('Historia 14.1 — los cuatro Modelos y su estado', () => {
      * admisión— daría verde en las nueve superficies y también el día del encendido.
      */
     const encendidas: Modelo[] = [{ ...(modeloDe('donaciones') as Modelo), encendido: true }];
-    const enPortada = encendidas.filter((m) => m.encendido && m.admitidoEn.includes('index.astro'));
-    const enLaCita = encendidas.filter((m) => m.encendido && m.admitidoEn.includes('cita/[slug].astro'));
-    expect(enPortada.map((m) => m.id)).toEqual(['donaciones']);
-    expect(enLaCita).toEqual([]);
+    expect(modelosEnRuta('/', encendidas).map((m) => m.id)).toEqual(['donaciones']);
+    expect(modelosEnRuta('/cita/una-cita/', encendidas)).toEqual([]);
   });
 
   it('encender uno es cambiar un solo booleano, y nada más', () => {
@@ -241,10 +260,11 @@ describe('Historia 14.2 — a dónde lleva la invitación', () => {
   });
 
   it('apagado, el destino no admite nada por sí solo', () => {
-    // Declarar a dónde iría no es encenderlo: `modelosEn` sigue cruzando estado y admisión, y
-    // con las donaciones apagadas las tres superficies que las admiten siguen sin alojarlas.
-    for (const pagina of ['index.astro', 'buscar.astro', '404.astro']) {
-      expect(modelosEn(pagina), pagina).toEqual([]);
+    // Declarar a dónde iría no es encenderlo: `modelosEnRuta` sigue cruzando estado y
+    // admisión, y con las donaciones apagadas las tres superficies que las admiten siguen sin
+    // alojarlas.
+    for (const ruta of ['/', '/buscar/', '/404']) {
+      expect(modelosEnRuta(ruta), ruta).toEqual([]);
     }
   });
 
@@ -354,13 +374,20 @@ describe('Historia 14.1 — la revisión de la declaración', () => {
     }
   });
 
-  it('y la afiliación no: ahí la regla la deja, aunque hoy no esté admitida', () => {
-    // Que la excepción esté escrita **en la regla** es lo que hace que admitirla mañana sea
-    // una línea y no una renegociación de UX-DR36.
+  it('y la afiliación en la Página de Cita también, pero por su propia regla y no por esta', () => {
+    /*
+     * Hasta la v7.1 la afiliación era la excepción registrada de la Página de Cita y esta
+     * prueba afirmaba que ahí pasaba. AD-20 v7.1 revocó la excepción: la afiliación solo se
+     * admite en la Página de Obra. Se rechaza, pero con **un** fallo y el de su regla —no el de
+     * superficie de lectura—, porque la lista de vedados sigue siendo la de las donaciones y la
+     * publicidad.
+     */
     const fallos = revisarDeclaracionDeIngreso([
       modeloDePrueba({ id: 'afiliacion-de-libros', admitidoEn: ['cita/[slug].astro'] }),
     ]);
-    expect(fallos).toEqual([]);
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('Página de Obra');
+    expect(fallos[0]).not.toContain('superficie de lectura');
   });
 
   it('admitir una superficie que nadie ha declarado se rechaza', () => {
@@ -435,5 +462,214 @@ describe('Historia 14.1 — la marca con la que una superficie aloja un Modelo',
 
   it('no ve nada donde no hay nada', () => {
     expect(modelosMarcadosEn('<main><p>Una Cita cualquiera.</p></main>')).toEqual([]);
+  });
+});
+
+/** Un censo de superficies con una Página de Obra inventada, paginada como sus vecinas. */
+function conPaginaDeObra(pagina: string): Superficie[] {
+  return [
+    ...SUPERFICIES,
+    {
+      nombre: 'la Página de Obra',
+      pagina,
+      reconoce: /^\/obra\/[^/]+\/[^/]+(?:\/\d+)?$/,
+      caracter: 'producto',
+      noPublicableEn: /^\/obra\/[^/]+\/[^/]+\/\d+$/,
+    },
+  ];
+}
+
+/**
+ * Historia 17.5 — un Modelo se admite por ruta.
+ *
+ * La admisión se sigue **nombrando** por superficie, pero se **consulta** por ruta, con el
+ * mismo predicado con el que `src/lib/superficies.ts` declara las superficies. Las
+ * declaraciones de abajo son inventadas a propósito: hoy ningún Modelo está encendido, ninguno
+ * está admitido en un listado y la Página de Obra no existe, así que sobre la declaración real
+ * casi todo daría vacío y no demostraría nada.
+ */
+describe('Historia 17.5 — la admisión se consulta por ruta', () => {
+  const TEMA = 'tema/[slug]/[...page].astro';
+
+  /** Las donaciones encendidas y admitidas además en el listado de Tema: inventado. */
+  const conElListadoDeTema: Modelo[] = [
+    {
+      ...(modeloDe('donaciones') as Modelo),
+      encendido: true,
+      admitidoEn: ['index.astro', 'buscar.astro', '404.astro', TEMA],
+    },
+  ];
+
+  it('la portada, con las donaciones encendidas, las aloja', () => {
+    const encendidas: Modelo[] = [{ ...(modeloDe('donaciones') as Modelo), encendido: true }];
+    expect(modelosEnRuta('/', encendidas).map((m) => m.id)).toEqual(['donaciones']);
+    // Con y sin barra final es la misma ruta, como en `superficies.ts`.
+    expect(modelosEnRuta('/buscar', encendidas).map((m) => m.id)).toEqual(['donaciones']);
+    expect(modelosEnRuta('/buscar/', encendidas).map((m) => m.id)).toEqual(['donaciones']);
+  });
+
+  it('la página 1 de un listado admitido lo aloja', () => {
+    expect(modelosEnRuta('/tema/x/', conElListadoDeTema).map((m) => m.id)).toEqual(['donaciones']);
+  });
+
+  it('y su página 2+ no, aunque la admita su fichero: es servicio por forma', () => {
+    /*
+     * El defecto que la historia cierra. Por fichero, `/tema/x/2/` es `tema/[slug]/[...page].astro`
+     * igual que `/tema/x/`, y `modelosEn(fichero)` le daba las donaciones. Por ruta, la forma
+     * de la página 2 la excluye.
+     */
+    for (const ruta of ['/tema/x/2/', '/tema/x/2', '/tema/x/37/']) {
+      expect(modelosEnRuta(ruta, conElListadoDeTema), ruta).toEqual([]);
+    }
+    // Y la superficie es la misma: lo que cambia es la forma de la ruta, no el fichero.
+    expect(SUPERFICIES.find((s) => s.reconoce.test('/tema/x/2'))?.pagina).toBe(TEMA);
+  });
+
+  it('las páginas 2+ de los tres listados que pueden admitir quedan fuera, sea cual sea el Modelo', () => {
+    /*
+     * Tema, Colección y la Página de Obra inventada: los listados paginados en los que una
+     * declaración **podría** admitir un Modelo. El de Autor no entra porque la historia lo
+     * prohíbe y la revisión lo rechaza; usarlo aquí sería probar sobre una declaración que no
+     * se puede escribir. Colección es superficie de lectura, así que el Modelo es
+     * `producto-propio`, que no está vedado ahí.
+     */
+    const superficies = conPaginaDeObra('obra/[autor]/[slug]/[...page].astro');
+    const enLosTres: Modelo[] = [
+      modeloDePrueba({
+        encendido: true,
+        admitidoEn: [TEMA, 'coleccion/[slug]/[...page].astro', 'obra/[autor]/[slug]/[...page].astro'],
+      }),
+    ];
+    expect(revisarDeclaracionDeIngreso(enLosTres, superficies)).toEqual([]);
+    for (const ruta of ['/tema/el-tiempo/2/', '/coleccion/una/2/', '/obra/cervantes/el-quijote/2/']) {
+      expect(modelosEnRuta(ruta, enLosTres, superficies), ruta).toEqual([]);
+    }
+    // El control positivo: la página 1 de los tres sí lo aloja con esta misma declaración.
+    for (const ruta of ['/tema/el-tiempo/', '/coleccion/una/', '/obra/cervantes/el-quijote/']) {
+      expect(modelosEnRuta(ruta, enLosTres, superficies), ruta).toHaveLength(1);
+    }
+  });
+
+  it('un slug numérico es página 1 y no página 2+: la forma es la de la ruta entera', () => {
+    // `/tema/1984` es un Tema, no la página 1984 de nada (superficies.ts lo ancla así).
+    expect(modelosEnRuta('/tema/1984/', conElListadoDeTema).map((m) => m.id)).toEqual(['donaciones']);
+  });
+
+  it('la restricción es solo de forma: una superficie de servicio por declaración sí admite', () => {
+    /*
+     * `/buscar` y `/404` son `servicio` por su declaración, no por la forma de su ruta, y son
+     * justo las superficies que UX-DR36 da a las donaciones. Si la admisión preguntara por
+     * `caracterDe` en vez de por la forma, las perdería; y el día que la 22.4 declare servicio
+     * por contenido una Obra que repite otra, lo mismo.
+     */
+    const encendidas: Modelo[] = [{ ...(modeloDe('donaciones') as Modelo), encendido: true }];
+    expect(modelosEnRuta('/404', encendidas).map((m) => m.id)).toEqual(['donaciones']);
+  });
+
+  it('la consulta y el fragmento se quitan antes de juzgar, también en una URL entera', () => {
+    expect(modelosEnRuta('/tema/x/2/?orden=a', conElListadoDeTema)).toEqual([]);
+    expect(modelosEnRuta('/tema/x/2/#arriba', conElListadoDeTema)).toEqual([]);
+    expect(modelosEnRuta('https://ejemplo.invalido/tema/x/2/?a=b#c', conElListadoDeTema)).toEqual([]);
+    // Y los controles positivos: la página 1 con consulta o fragmento sigue alojándolo.
+    for (const ruta of [
+      '/tema/x/?orden=a',
+      '/tema/x/#arriba',
+      '/?utm_source=x#hoy',
+      'https://ejemplo.invalido/tema/x/?a=b#c',
+    ]) {
+      expect(modelosEnRuta(ruta, conElListadoDeTema).map((m) => m.id), ruta).toEqual(['donaciones']);
+    }
+  });
+
+  it('una ruta que nadie ha declarado rompe, con el fichero que hay que tocar', () => {
+    expect(() => modelosEnRuta('/inventada/')).toThrow('src/lib/superficies.ts');
+  });
+});
+
+describe('Historia 17.5 — la afiliación solo en la Página de Obra', () => {
+  /** Las dos formas que podría tener su fichero: la de la espina y la del contrato. */
+  const OBRAS = ['obra/[autor]/[slug]/[...page].astro', 'obra/[autor]/[obra].astro'];
+
+
+  const afiliacion = (admitidoEn: string[], encendido = false) =>
+    modeloDePrueba({ id: 'afiliacion-de-libros', admitidoEn, encendido });
+
+  it('fuera de la Página de Obra se rechaza, también en la portada', () => {
+    for (const pagina of ['index.astro', 'buscar.astro', '404.astro', 'cita/[slug].astro']) {
+      const fallos = revisarDeclaracionDeIngreso([afiliacion([pagina])]);
+      expect(fallos, pagina).toHaveLength(1);
+      expect(fallos[0], pagina).toContain('solo puede admitirse en la Página de Obra');
+    }
+  });
+
+  it('en la Página de Obra no falla por esta regla', () => {
+    for (const obra of OBRAS) {
+      expect(revisarDeclaracionDeIngreso([afiliacion([obra])], conPaginaDeObra(obra)), obra).toEqual(
+        [],
+      );
+    }
+  });
+
+  it('y como hoy no existe ninguna Página de Obra, no la admite ninguna superficie', () => {
+    // Sin el censo inventado, la Obra no es ninguna superficie declarada: falla por eso, y por
+    // nada más. Ninguna superficie real cumple `esPaginaDeObra`.
+    const fallos = revisarDeclaracionDeIngreso([afiliacion([OBRAS[0]])]);
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('no es ninguna superficie declarada');
+    expect(SUPERFICIES.filter((s) => esPaginaDeObra(s.pagina))).toEqual([]);
+  });
+
+  it('esPaginaDeObra reconoce lo que genera src/pages/obra/ y nada más', () => {
+    for (const obra of OBRAS) expect(esPaginaDeObra(obra), obra).toBe(true);
+    for (const otra of [
+      'obras.astro',
+      'autor/[slug]/[...page].astro',
+      'obra/[autor]/[slug].png.ts',
+      'obra/index.astro',
+      'obra/_parcial.astro',
+      'obra/[autor]/_comun/[slug].astro',
+    ]) {
+      expect(esPaginaDeObra(otra), otra).toBe(false);
+    }
+  });
+
+  it('admitida en la Obra, la página 1 la aloja y la 2+ no — la forma vale también ahí', () => {
+    const obra = OBRAS[0];
+    const superficies = conPaginaDeObra(obra);
+    const encendida = [{ ...afiliacion([obra], true) }];
+    expect(modelosEnRuta('/obra/cervantes/el-quijote/', encendida, superficies)).toHaveLength(1);
+    expect(modelosEnRuta('/obra/cervantes/el-quijote/2/', encendida, superficies)).toEqual([]);
+  });
+});
+
+describe('Historia 17.5 — la Página de Autor no aloja ningún Modelo', () => {
+  const AUTOR = 'autor/[slug]/[...page].astro';
+
+  it('cualquier Modelo admitido en el listado de Autor se rechaza', () => {
+    for (const modelo of MODELOS) {
+      const fallos = revisarDeclaracionDeIngreso([{ ...modelo, admitidoEn: [AUTOR] }]);
+      expect(
+        fallos.some((f) => f.includes(AUTOR) && f.includes('no aloja ningún Modelo')),
+        modelo.id,
+      ).toBe(true);
+    }
+  });
+
+  it('el control positivo: el mismo Modelo en el listado de Tema no falla por esta regla', () => {
+    const fallos = revisarDeclaracionDeIngreso([
+      modeloDePrueba({ admitidoEn: ['tema/[slug]/[...page].astro'] }),
+    ]);
+    expect(fallos).toEqual([]);
+  });
+
+  it('la regla nombra una superficie que existe, y si desaparece del censo se dice', () => {
+    expect(SUPERFICIES_SIN_INGRESO).toEqual([AUTOR]);
+    for (const pagina of SUPERFICIES_SIN_INGRESO) {
+      expect(SUPERFICIES.map((s) => s.pagina)).toContain(pagina);
+    }
+    const sinAutor = SUPERFICIES.filter((s) => s.pagina !== AUTOR);
+    const fallos = revisarDeclaracionDeIngreso([modeloDePrueba()], sinAutor);
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('superficie sin ingreso');
   });
 });

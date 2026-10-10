@@ -452,9 +452,6 @@ export async function limpiar(proyecto: string): Promise<void> {
 
 // ─── El parche del encendido, en un solo sitio ───────────────────────────────
 
-/** El Modelo que este ayudante enciende. Se nombra una vez y se usa en los mensajes. */
-const DONACIONES = "id: 'donaciones',";
-
 /**
  * `src/lib/ingreso.ts` con las donaciones encendidas, para dárselo al gancho `ficheros`.
  *
@@ -489,24 +486,24 @@ const DONACIONES = "id: 'donaciones',";
  * valiendo. Lo que se exige es **un encendido más que antes**, y que sea el suyo.
  */
 export function fuenteConDonacionesEncendidas(fuente: string): string {
-  const inicio = fuente.indexOf(DONACIONES);
-  if (inicio === -1) {
-    throw new Error(
-      `No hay ningún «${DONACIONES}» en la fuente de \`src/lib/ingreso.ts\`. O el Modelo se ` +
-        'renombró, o lo que se ha pasado aquí no es ese fichero: en los dos casos el parche ' +
-        'del encendido ya no significa lo que dice.',
-    );
-  }
+  return fuenteConModeloEncendido(fuente, 'donaciones');
+}
 
-  // El tramo de donaciones acaba donde empieza el `id:` del Modelo siguiente. Si es el
-  // último del censo, acaba con el fichero.
-  const siguiente = fuente.indexOf("id: '", inicio + DONACIONES.length);
-  const fin = siguiente === -1 ? fuente.length : siguiente;
-  const tramo = fuente.slice(inicio, fin);
+/**
+ * Lo mismo para cualquier Modelo del censo — Historia 17.5.
+ *
+ * La medición del tope de guion construye el sitio con **todos** los Modelos que hoy admite
+ * alguna superficie encendidos a la vez, no solo las donaciones. Es la misma sustitución
+ * acotada al tramo del Modelo, con las mismas tres guardas: el bloque existe, su
+ * `encendido: false,` estaba ahí, y lo que queda encendido de más es él y nadie más. Para
+ * encender varios se encadena: cada llamada exige un encendido más que la fuente que recibe.
+ */
+export function fuenteConModeloEncendido(fuente: string, id: string): string {
+  const { inicio, fin, tramo, BLOQUE } = tramoDelModelo(fuente, id);
 
   if (!tramo.includes('encendido: false,')) {
     throw new Error(
-      'Las donaciones ya están encendidas en el árbol: su bloque de `src/lib/ingreso.ts` no ' +
+      `«${id}» ya está encendido en el árbol: su bloque de \`src/lib/ingreso.ts\` no ` +
         'trae ningún `encendido: false,` que cambiar. Este ayudante existe para construir el ' +
         'sitio encendido **sin** encenderlo en el repositorio; si ya lo está, quien lo llama ' +
         'está midiendo otra cosa y tiene que decidir qué.',
@@ -528,16 +525,65 @@ export function fuenteConDonacionesEncendidas(fuente: string): string {
 
   // El tramo se recorta igual que arriba: con `indexOf` a secas, un censo cuyo último Modelo
   // fuera donaciones daría -1 y `slice(inicio, -1)` cortaría por el final del fichero.
-  const siguienteNuevo = parcheado.indexOf("id: '", inicio + DONACIONES.length);
+  const siguienteNuevo = parcheado.indexOf("id: '", inicio + BLOQUE.length);
   const tramoNuevo = parcheado.slice(inicio, siguienteNuevo === -1 ? parcheado.length : siguienteNuevo);
   if (!tramoNuevo.includes('encendido: true,')) {
     throw new Error(
-      'El Modelo que quedó encendido no es donaciones. El parche cambió un booleano de otro ' +
+      `El Modelo que quedó encendido no es «${id}». El parche cambió un booleano de otro ` +
         'bloque, así que la construcción mediría un Modelo distinto del que se pidió.',
     );
   }
 
   return parcheado;
+}
+
+/**
+ * El tramo de `src/lib/ingreso.ts` que declara un Modelo: del `id:` suyo al `id:` del Modelo
+ * siguiente, o al final del fichero si es el último. Es el troceo que comparten todos los
+ * parches de esta sección, y lo que impide que uno de ellos toque el bloque de otro Modelo.
+ */
+function tramoDelModelo(
+  fuente: string,
+  id: string,
+): { inicio: number; fin: number; tramo: string; BLOQUE: string } {
+  const BLOQUE = `id: '${id}',`;
+  const inicio = fuente.indexOf(BLOQUE);
+  if (inicio === -1) {
+    throw new Error(
+      `No hay ningún «${BLOQUE}» en la fuente de \`src/lib/ingreso.ts\`. O el Modelo se ` +
+        'renombró, o lo que se ha pasado aquí no es ese fichero: en los dos casos el parche ' +
+        'del encendido ya no significa lo que dice.',
+    );
+  }
+  const siguiente = fuente.indexOf("id: '", inicio + BLOQUE.length);
+  const fin = siguiente === -1 ? fuente.length : siguiente;
+  return { inicio, fin, tramo: fuente.slice(inicio, fin), BLOQUE };
+}
+
+/**
+ * `src/lib/ingreso.ts` con una superficie más en el `admitidoEn` de un Modelo — Historia 17.5.
+ *
+ * Para declaraciones **inventadas** en una copia: no depende del literal exacto del array, sino
+ * del tramo del Modelo (`tramoDelModelo`) y de que en él haya un solo `admitidoEn: [...]`. La
+ * superficie se añade al final de la lista, que puede estar vacía o escrita en varias líneas.
+ */
+export function fuenteConAdmisionAnadida(fuente: string, id: string, pagina: string): string {
+  const { inicio, fin, tramo } = tramoDelModelo(fuente, id);
+  const listas = [...tramo.matchAll(/admitidoEn:\s*\[([^\]]*)\]/g)];
+  if (listas.length !== 1) {
+    throw new Error(
+      `El bloque de «${id}» trae ${listas.length} \`admitidoEn\` en vez de uno: el parche no ` +
+        'sabe en cuál añadir la superficie.',
+    );
+  }
+  const [lista] = listas;
+  if (lista[1].includes(`'${pagina}'`)) {
+    throw new Error(`«${id}» ya admite «${pagina}»: el parche no cambiaría nada.`);
+  }
+  const elementos = lista[1].trim().replace(/,$/, '');
+  const nueva = `admitidoEn: [${elementos === '' ? '' : `${elementos}, `}'${pagina}']`;
+  const tramoNuevo = tramo.replace(lista[0], nueva);
+  return fuente.slice(0, inicio) + tramoNuevo + fuente.slice(fin);
 }
 
 // ─── Piezas de corpus válidas, para partir de algo que sí construye ──────────

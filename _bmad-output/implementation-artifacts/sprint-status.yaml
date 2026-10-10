@@ -224,7 +224,7 @@ development_status:
   # La 17.3 se construye DESPUÉS de la 22.4; la 17.5, ANTES de la 22.9.
   17-3-la-página-de-autor-enumera-su-obra: backlog  # bloqueada: detrás de la 22.4
   17-4-la-ficha-abre-la-página-y-solo-la-primera: backlog  # bloqueada: la ficha lleva la lista de obras de la 17.3
-  17-5-un-modelo-se-admite-por-ruta-y-el-tope-de-guion-se-mide-dond: backlog
+  17-5-un-modelo-se-admite-por-ruta-y-el-tope-de-guion-se-mide-dond: review
   epic-17-retrospective: optional
 
   # Épica 18 — no la escribió el PRD de la v5: nació el 04/09 de la Historia 16.1, que midió

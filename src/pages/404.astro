@@ -16,7 +16,7 @@ import BloqueDeCita from '../components/BloqueDeCita.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
-import { modelosEn } from '../lib/ingreso.ts';
+import { modelosEnRuta } from '../lib/ingreso.ts';
 import { tituloDe } from '../lib/marca.ts';
 import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
 import { rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
@@ -88,10 +88,10 @@ const autorDelDia = seleccion
        * quien llega aquí venía de un enlace roto y lo primero que necesita es por dónde
        * seguir. La invitación es lo último, debajo del filete, para quien la busque.
        *
-       * Quien decide es `modelosEn('404.astro')` —encendido **y** admitido aquí—, no esta
+       * Quien decide es `modelosEnRuta` —encendido **y** admitido aquí—, no esta
        * página. Con todo apagado no se emite nada, ni contenedor ni marca (UX-DR35).
        */
-      modelosEn('404.astro').map(
+      modelosEnRuta(Astro.url.pathname).map(
         (modelo) => modelo.destino !== undefined && <Sostener id={modelo.id} href={modelo.destino} />,
       )
     }

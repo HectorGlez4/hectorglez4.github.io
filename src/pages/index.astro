@@ -17,7 +17,7 @@ import DatosDelSitio from '../components/DatosDelSitio.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
-import { modelosEn } from '../lib/ingreso.ts';
+import { modelosEnRuta } from '../lib/ingreso.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 import {
@@ -156,7 +156,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       /*
        * Lo último de la columna: la invitación a sostener el sitio — Historia 14.2, UX-DR36.
        *
-       * **No hay ningún `if` de la portada aquí.** Quien decide es `modelosEn('index.astro')`,
+       * **No hay ningún `if` de la portada aquí.** Quien decide es `modelosEnRuta`,
        * que cruza las dos condiciones en un solo sitio: el Modelo tiene que estar **encendido**
        * y tener admitida **esta** superficie. Con los cuatro apagados —el estado de hoy—
        * devuelve la lista vacía y esta página no emite absolutamente nada: ni contenedor, ni
@@ -165,8 +165,12 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
        *
        * El `destino !== undefined` no decide nada: `revisarDeclaracionDeIngreso` ya detiene el
        * build de un Modelo encendido sin destino, así que aquí solo estrecha el tipo opcional.
+       *
+       * La ruta va escrita y no leída de la URL: la portada es una superficie de una sola ruta,
+       * y la prueba de andamiaje de la Historia 1.1 vigila que esta página no nombre al
+       * generador (señal de que no queda la portada de ejemplo de la plantilla).
        */
-      modelosEn('index.astro').map(
+      modelosEnRuta('/').map(
         (modelo) => modelo.destino !== undefined && <Sostener id={modelo.id} href={modelo.destino} />,
       )
     }

@@ -11,6 +11,7 @@ import {
   puntoFinal,
 } from '../../src/lib/medicion.ts';
 import { CITAS_POR_PAGINA, MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
+import { bytesDeGuionEnLinea } from './ayuda/guion.js';
 import { caracterDe, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import {
@@ -321,10 +322,8 @@ describe('Retro épica 7 — el presupuesto de guion también con la medición e
       // El instalador tiene que estar: si no, esto no mide nada.
       expect(html).toContain('window.__medir=function');
 
-      const guiones = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
-        .filter((m) => !m[1].includes('application/ld+json'))
-        .map((m) => m[2]);
-      const bytes = guiones.reduce((n, g) => n + g.length, 0);
+      // El contador compartido con la medida de la Historia 17.5: bytes UTF-8, una sola frontera.
+      const bytes = bytesDeGuionEnLinea(html);
 
       expect(bytes, `${bytes} bytes de guion en línea con la medición encendida`).toBeLessThan(
         MAX_BYTES_DE_GUION,

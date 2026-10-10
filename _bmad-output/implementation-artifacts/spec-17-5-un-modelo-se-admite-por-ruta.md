@@ -2,14 +2,21 @@
 title: 'Historia 17.5 — Un Modelo se admite por ruta, y el tope de guion se mide donde se admite'
 type: 'feature'
 created: '2026-10-10'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'c9aa9b8296e36062b81216c162b705c47e677849'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-17-context.md'
 warnings: []
-deferred: []
+deferred:
+  - summary: >-
+      Falta decidir si la Página de Obra es superficie de lectura (y por tanto si veda donaciones y publicidad allí).
+    evidence: |-
+      La 17.5 hace de la Obra el único sitio de la afiliación, pero no la añade a SUPERFICIES_DE_LECTURA; la 22.9 debe fijarlo.
+    location: >-
+      src/lib/ingreso.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -87,9 +94,30 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-10 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9 (high 0, medium 1, low 8)
+- defer: 1 (low 1)
+- reject: 2
+- addressed_findings:
+  - `[medium]` `[patch]` El contador del tope contaba unidades UTF-16 y no bytes → contador compartido en UTF-8, sin distinguir mayúsculas.
+  - `[low]` `[patch]` La prueba de las 2+ ya no admite un Modelo en Autor; las páginas leen su ruta; consulta y fragmento recortados; `esPaginaDeObra` estricta; pruebas de `esServicioPorForma`; parches de prueba robustos; mínimo derivado; comentarios.
+- Tras los parches, la suite completa dio un fallo en `andamiaje` (la portada nombraba al generador por `Astro.url.pathname`); la portada pasa su ruta escrita (`'/'`).
+
 ## Verification
 
 **Commands:**
 - `npx vitest run tests/unit/ingreso-construido.test.ts` (y el resto de `tests/unit/ingreso*.test.ts`) -- expected: verde
 - `npx astro check` -- expected: 0 errores
 - `npm run build` -- expected: código 0
+
+## Auto Run Result
+
+Status: done
+
+**Resumen:** `modelosEnRuta(ruta)` sustituye a `modelosEn(fichero)`. La admisión se nombra por superficie y se juzga por ruta, y una página 2+ de listado (servicio por forma) nunca aloja un Modelo. La afiliación solo cabe en la Página de Obra; ningún Modelo cabe en el listado de Autor. El tope de guion se mide, con los Modelos encendidos, en cada ruta que lleva `data-ingreso`, y la prueba de `dist/` juzga por ruta. `dist/` sin cambios con todo apagado.
+
+**Revisión:** 9 parches aplicados, 1 diferido y 2 rechazados (rechazar la admisión en superficies paginadas, porque el spec eligió excluir al consultar; la medición de guiones externos `src`, porque ningún Modelo los trae). Seguimiento: false.
+
+**Verificación:** suite completa 3656/3657 antes del último arreglo; el fallo de `andamiaje` está corregido y sus 127 pruebas afectadas pasan; astro check, 0 errores; build en verde; `dist/` idéntico a c9aa9b82.

@@ -35,7 +35,13 @@
  * algo del sitio construido: si lo cambia, es de aquí.
  */
 
-import { SUPERFICIES } from './superficies.ts';
+import {
+  SUPERFICIES,
+  esServicioPorForma,
+  rutaNormalizada,
+  superficieDeclaradaDe,
+  type Superficie,
+} from './superficies.ts';
 import {
   CONDICIONES_PARA_DONACIONES,
   SESIONES_PARA_AFILIACION,
@@ -98,6 +104,12 @@ export interface Modelo {
    * identidad con la que se declaran en `src/lib/superficies.ts`, para que las dos listas
    * se puedan cruzar y no puedan divergir en silencio.
    *
+   * **Se nombra por fichero y se consulta por ruta** (Historia 17.5). Un mismo fichero genera
+   * rutas de distinto carácter —el listado de Tema da la página 1, que es producto, y las 2+,
+   * que son servicio por forma—, así que admitir aquí un listado **no** lo admite en sus
+   * páginas 2+: `modelosEnRuta` las excluye siempre. Lo que esta lista dice es «la superficie
+   * admite el Modelo»; qué rutas de la superficie lo llevan lo decide la forma de la ruta.
+   *
    * Vacía significa **ninguna**, y es una declaración, no un hueco por rellenar: hoy solo
    * las donaciones tienen decidido dónde aparecen (UX-DR36). Dónde aterriza un enlace de
    * afiliación, qué edición se enlaza y dónde iría el producto propio siguen abiertos a
@@ -150,17 +162,17 @@ export const SUPERFICIES_DE_LECTURA: readonly string[] = [
  * fuera del flujo de lectura— y aguas arriba **se estrechó a la publicidad**, que es el único
  * Modelo que degrada la superficie que produce el ingreso. Esos dos son los vedados.
  *
- * **La afiliación de libros es la excepción registrada, y está resuelta aguas arriba.** Su
- * enlace no se añade a la Página de Cita: *nace* de la Procedencia ya publicada, que esa
- * página ya muestra y que se deriva en el build sin consultar a nadie (AD-20, AD-22). No
- * interrumpe ninguna lectura porque no añade superficie: convierte en enlace un dato que ya
- * estaba escrito. Por eso admitirla ahí, el día que se decida, no contradice UX-DR36.
+ * **La afiliación de libros no está en esta lista porque tiene una regla más estrecha que
+ * ella**, y no porque se le permita la lectura. Hasta la v7.1 era la excepción registrada de
+ * la Página de Cita —su enlace nacería de la Procedencia que esa página ya muestra—; AD-20 v7.1
+ * revocó esa excepción y la de la Página de Autor, y la afiliación pasó a admitirse **solo en
+ * la Página de Obra** (FR-35, Historia 22.9). Esa regla la impone `revisarDeclaracionDeIngreso`
+ * con `esPaginaDeObra`, y cubre la Página de Cita igual que cualquier otra superficie.
  *
- * Hoy **no está admitida en ninguna superficie** y sigue apagada, y esto no lo cambia: lo que
- * declara es que ese día será una línea en `admitidoEn`, y no una discusión sobre si la regla
- * lo permitía. Lo que sigue sin decidirse es **qué edición se enlaza** —la cotejada suele
- * tener versión gratuita y no ingresa nada; una moderna anotada ingresa y erosiona el «no se
- * inventa una obra para poder enlazar»— y eso se decide con la cuenta delante.
+ * Hoy **no está admitida en ninguna superficie** y sigue apagada. Lo que sigue sin decidirse
+ * es **qué edición se enlaza** —la cotejada suele tener versión gratuita y no ingresa nada;
+ * una moderna anotada ingresa y erosiona el «no se inventa una obra para poder enlazar»— y
+ * eso se decide con la cuenta delante.
  *
  * El producto propio no está aquí porque no existe todavía: cuando exista traerá su superficie
  * y con ella esta decisión, y entonces se escribe.
@@ -169,6 +181,42 @@ export const MODELOS_VEDADOS_EN_LECTURA: readonly IdDeModelo[] = [
   'donaciones',
   'publicidad-acotada',
 ];
+
+/**
+ * Las superficies que no admiten **ningún** Modelo — Historia 17.5.
+ *
+ * Hoy es una: la Página de Autor. AD-20 v7.1 revocó la admisión de la afiliación ahí, y la
+ * lista de obras que la Historia 17.3 le añadirá enlaza a cada Página de Obra, que es donde
+ * vive el enlace de afiliación: la Página de Autor se publica idéntica con la afiliación
+ * encendida o apagada. Esa lista no existe todavía, así que su condición —«no aloja ningún
+ * Modelo»— se escribe aquí, como regla de la declaración, y no espera a la página.
+ *
+ * Se nombra por fichero, como `admitidoEn`, y por eso cubre las dos formas de la superficie:
+ * la página 1 y las 2+ (que además quedan fuera por forma).
+ */
+export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...page].astro'];
+
+/**
+ * Si un fichero de página es la Página de Obra — la única superficie que puede admitir la
+ * afiliación de libros (AD-20 v7.1, FR-35).
+ *
+ * Hoy no existe ninguna Página de Obra, así que la regla no la cumple ninguna superficie
+ * declarada y la afiliación no se puede admitir en ninguna parte. Se escribe ya, con la
+ * identidad que tendrá —todo lo que genere `src/pages/obra/`—, para que la Historia 22.9 la
+ * admita con una línea en `admitidoEn` y no con una renegociación de la regla. Por prefijo y
+ * no por el nombre exacto del fichero: la forma de la ruta de la Obra es de la Épica 22, y
+ * esta regla no tiene por qué fijarla antes que ella.
+ */
+export function esPaginaDeObra(pagina: string): boolean {
+  if (!pagina.startsWith('obra/') || !pagina.endsWith('.astro')) return false;
+  /*
+   * Dos cosas bajo `src/pages/obra/` que no son la Página de Obra: un segmento que empieza por
+   * `_` —Astro no lo publica como ruta, es un parcial o un ayudante de la carpeta— y
+   * `obra/index.astro`, que sería un índice de obras y no la página de una.
+   */
+  if (pagina.split('/').some((segmento) => segmento.startsWith('_'))) return false;
+  return pagina !== 'obra/index.astro';
+}
 
 /**
  * El censo de Modelos, con su estado. **Los cuatro apagados, que es el estado de hoy.**
@@ -218,11 +266,11 @@ export const MODELOS: readonly Modelo[] = [
     /*
      * Ninguna todavía, y no por descuido. El enlace de afiliación nacería de la Procedencia
      * ya publicada (sin PA-API: exige 3 ventas en 180 días para entrar y 10 cualificadas en
-     * 30 días por marketplace para conservarse), y la Procedencia se muestra en la Página de
-     * Cita — que es superficie de lectura y hoy no admite ningún Modelo. Encima queda
-     * abierto **qué edición se enlaza**: la cotejada suele tener versión gratuita y no
-     * ingresa nada, y una moderna anotada ingresa y erosiona el «no se inventa una obra para
-     * poder enlazar».
+     * 30 días por marketplace para conservarse), y desde AD-20 v7.1 **solo puede admitirse
+     * en la Página de Obra** (`esPaginaDeObra`), que todavía no existe: la Historia 22.9 la
+     * admitirá ahí. Encima queda abierto **qué edición se enlaza**: la cotejada suele tener
+     * versión gratuita y no ingresa nada, y una moderna anotada ingresa y erosiona el «no se
+     * inventa una obra para poder enlazar».
      *
      * Las dos cosas se deciden con la cuenta ya solicitada y delante, no aquí. Mientras
      * tanto esta lista vacía es la respuesta honesta, y el día que se decida será un diff.
@@ -287,14 +335,57 @@ export function modelosEncendidos(): Modelo[] {
 }
 
 /**
- * Los Modelos que una superficie puede alojar hoy: admitidos **y** encendidos.
+ * Los Modelos que una **ruta** puede alojar hoy: encendidos **y** admitidos en su superficie —
+ * Historia 17.5.
  *
  * Las dos condiciones a la vez y en un solo sitio. Preguntar solo por la admisión dejaría
  * que una superficie pintara un Modelo apagado; preguntar solo por el estado, que lo pintara
  * la Página de Cita.
+ *
+ * **Por ruta y no por fichero**, que es lo que la 17.5 cambia. Hasta entonces se preguntaba
+ * `modelosEn('index.astro')`, y un fichero genera rutas de distinto carácter: el listado de
+ * Tema da la página 1, que es producto, y las 2+, que son servicio por forma. Admitir un
+ * Modelo en ese fichero lo colaba en todas. Aquí la ruta se resuelve a su superficie con el
+ * mismo predicado que `src/lib/superficies.ts` usa para declararla —`superficieDeclaradaDe`—,
+ * y una ruta que es **servicio por forma** (`esServicioPorForma`, la misma mitad de
+ * `caracterDe`) no aloja nada, la admita su fichero o no.
+ *
+ * **La restricción es solo de forma.** Lo que la Historia 22.4 declare servicio **por
+ * contenido** —el `noindex` de una Obra que repite otra— no restringe ninguna admisión: el
+ * `noindex` decide qué ve el buscador, no qué ve quien llega desde una atribución. Por eso
+ * aquí se pregunta por `esServicioPorForma` y no por `caracterDe`: el carácter mezclaría las
+ * dos cosas el día que exista la segunda, y además diría «servicio» de `/buscar` y `/404`,
+ * que lo son por declaración y sí admiten las donaciones.
+ *
+ * La consulta (`?…`) y el fragmento (`#…`) se quitan antes de juzgar: `/tema/x/2/?a=b` es la
+ * página 2 y `/#arriba` es la portada, y una dirección completa vale igual que su ruta.
+ *
+ * Una ruta que nadie ha declarado **rompe**, como en `caracterDe`: quien la pasa es una página
+ * que se está construyendo, y una invitación que desaparece en silencio por una errata en la
+ * ruta es peor que un build parado con el nombre del fichero que hay que tocar.
+ *
+ * `modelos` y `superficies` son para las pruebas, que juzgan declaraciones inventadas con este
+ * mismo cruce; el sitio llama siempre con la declaración de verdad.
  */
-export function modelosEn(pagina: string): Modelo[] {
-  return MODELOS.filter((modelo) => modelo.encendido && modelo.admitidoEn.includes(pagina));
+export function modelosEnRuta(
+  rutaOUrl: string,
+  modelos: readonly Modelo[] = MODELOS,
+  superficies: readonly Superficie[] = SUPERFICIES,
+): Modelo[] {
+  const ruta = rutaNormalizada(
+    typeof rutaOUrl === 'string' ? rutaOUrl.replace(/[?#][\s\S]*$/, '') : rutaOUrl,
+  );
+  const superficie = superficieDeclaradaDe(ruta, superficies);
+  if (superficie === undefined) {
+    throw new Error(
+      `La ruta «${ruta}» pregunta qué Modelo de Ingreso aloja y no es ninguna superficie ` +
+        'declarada en src/lib/superficies.ts. Corrige la ruta en la página o declárala allí.',
+    );
+  }
+  if (esServicioPorForma(ruta, superficies)) return [];
+  return modelos.filter(
+    (modelo) => modelo.encendido && modelo.admitidoEn.includes(superficie.pagina),
+  );
 }
 
 /**
@@ -325,12 +416,23 @@ export function modelosMarcadosEn(html: string): string[] {
  * Se devuelve en vez de lanzarse para poder probarlo sin construir, y porque quien lo aplica
  * decide qué hacer con ello. Comprueba las formas que tiene el estado de despistarse de su
  * dueño: una superficie que no existe, un Modelo vedado colado en una superficie de lectura,
- * un Modelo encendido que no aparece en ninguna parte, y las erratas que dejarían una entrada
+ * cualquier Modelo en la Página de Autor, la afiliación fuera de la Página de Obra, un Modelo
+ * encendido que no aparece en ninguna parte, y las erratas que dejarían una entrada
  * inservible sin que nada fallara.
+ *
+ * Lo que **no** comprueba, porque no se puede declarar mal: un Modelo en una página 2+. La
+ * admisión se nombra por superficie y la exclusión por forma la aplica `modelosEnRuta` a toda
+ * ruta, así que no hay forma de escribir en `admitidoEn` «también la página 2».
+ *
+ * `superficies` es para las pruebas: la Página de Obra todavía no existe, y la regla de la
+ * afiliación solo se puede ejercitar sobre un censo que la declare.
  */
-export function revisarDeclaracionDeIngreso(modelos: readonly Modelo[] = MODELOS): string[] {
+export function revisarDeclaracionDeIngreso(
+  modelos: readonly Modelo[] = MODELOS,
+  superficies: readonly Superficie[] = SUPERFICIES,
+): string[] {
   const fallos: string[] = [];
-  const declaradas = new Set(SUPERFICIES.map((superficie) => superficie.pagina));
+  const declaradas = new Set(superficies.map((superficie) => superficie.pagina));
 
   /*
    * Que las superficies de lectura sigan existiendo se comprueba **aquí y no solo en las
@@ -342,6 +444,18 @@ export function revisarDeclaracionDeIngreso(modelos: readonly Modelo[] = MODELOS
     if (!declaradas.has(lectura)) {
       fallos.push(
         `«${lectura}» está declarada como superficie de lectura y ya no existe en ` +
+          'src/lib/superficies.ts. Mientras no concuerden, la superficie de verdad no está ' +
+          'protegida por nada.',
+      );
+    }
+  }
+
+  // La misma guarda para las superficies sin ingreso, y por el mismo motivo: renombrar la
+  // Página de Autor dejaría la regla apuntando a un fichero muerto y la página, sin proteger.
+  for (const sinIngreso of SUPERFICIES_SIN_INGRESO) {
+    if (!declaradas.has(sinIngreso)) {
+      fallos.push(
+        `«${sinIngreso}» está declarada como superficie sin ingreso y ya no existe en ` +
           'src/lib/superficies.ts. Mientras no concuerden, la superficie de verdad no está ' +
           'protegida por nada.',
       );
@@ -385,8 +499,24 @@ export function revisarDeclaracionDeIngreso(modelos: readonly Modelo[] = MODELOS
         fallos.push(
           `«${modelo.nombre}» dice admitirse en «${pagina}», que es superficie de lectura. ` +
             'Ese Modelo no puede alojarse ahí (UX-DR36): son el punto de entrada desde los ' +
-            'buscadores y donde el producto cumple su promesa. La excepción registrada es la ' +
-            'afiliación, que no añade superficie sino que enlaza la Procedencia ya publicada.',
+            'buscadores y donde el producto cumple su promesa. La afiliación no está en esta ' +
+            'lista porque tiene una regla más estrecha: solo la Página de Obra.',
+        );
+      }
+      if (SUPERFICIES_SIN_INGRESO.includes(pagina)) {
+        fallos.push(
+          `«${modelo.nombre}» dice admitirse en «${pagina}», que no aloja ningún Modelo ` +
+            '(AD-20 v7.1): la Página de Autor se publica idéntica con cualquier Modelo ' +
+            'encendido o apagado, y su lista de obras enlaza a la Página de Obra, que es donde ' +
+            'vive el enlace de afiliación.',
+        );
+      }
+      if (modelo.id === 'afiliacion-de-libros' && !esPaginaDeObra(pagina)) {
+        fallos.push(
+          `«${modelo.nombre}» dice admitirse en «${pagina}», y solo puede admitirse en la ` +
+            'Página de Obra (AD-20 v7.1, FR-35). Ni la Página de Cita ni la de Autor la ' +
+            'admiten: la excepción de la Cita se revocó, y la Obra es donde el enlace nace de ' +
+            'la Procedencia sin añadir nada a la lectura.',
         );
       }
     }
