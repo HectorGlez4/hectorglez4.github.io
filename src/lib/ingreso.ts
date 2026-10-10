@@ -191,11 +191,11 @@ export const MODELOS_VEDADOS_EN_LECTURA: readonly IdDeModelo[] = [
 /**
  * Las superficies que no admiten **ningún** Modelo — Historia 17.5.
  *
- * Hoy es una: la Página de Autor. AD-20 v7.1 revocó la admisión de la afiliación ahí, y la
- * lista de obras que la Historia 17.3 le añadirá enlaza a cada Página de Obra, que es donde
- * vive el enlace de afiliación: la Página de Autor se publica idéntica con la afiliación
- * encendida o apagada. Esa lista no existe todavía, así que su condición —«no aloja ningún
- * Modelo»— se escribe aquí, como regla de la declaración, y no espera a la página.
+ * Hoy es una: la Página de Autor. AD-20 v7.1 revocó la admisión de la afiliación ahí, y su
+ * Lista de Obras (Historia 17.3, `ListaDeObras.astro`) enlaza a cada Página de Obra, que es
+ * donde vive el enlace de afiliación: la Página de Autor se publica idéntica con la afiliación
+ * encendida o apagada. Su condición —«no aloja ningún Modelo»— se escribe aquí, como regla de
+ * la declaración, y no en la página.
  *
  * Se nombra por fichero, como `admitidoEn`, y por eso cubre las dos formas de la superficie:
  * la página 1 y las 2+ (que además quedan fuera por forma).

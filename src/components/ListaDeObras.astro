@@ -1,0 +1,134 @@
+---
+/**
+ * Lista de Obras de la Página de Autor — Historia 17.3, UX-DR46.
+ *
+ * Una entrada por Obra del Autor, enlazada a su Página de Obra —también si esta no se indexa—,
+ * con el título de la ficha a la izquierda y el recuento de Citas publicadas a la derecha. Las
+ * Obras llegan ya resueltas y ordenadas (`obrasDelAutor` en `src/lib/publicado.ts`): aquí no se
+ * deriva nada, y nunca se lee la Procedencia. Enumera Obras, no Citas (AD-19).
+ *
+ * El año es el de la Obra —omitido si sus Citas discrepan o no lo dicen, nunca el de una
+ * traducción—, con la forma de la Cabecera de Obra: el punto medio es decoración y el lector de
+ * pantalla oye una coma. Antes de Cristo, «350 a. C.» (`añoLegible`), nunca «-350». Al pie,
+ * cuántas Citas no declaran obra; con ninguna, nada.
+ *
+ * Fuera del índice de Pagefind: la lista no es contenido propio de la página. Sin guion y sin
+ * enlace comercial: la Página de Autor no admite ningún Modelo.
+ */
+import Rotulo from './Rotulo.astro';
+import { rutaDeLaObra, type ObraResuelta } from '../lib/obras.ts';
+import { añoLegible } from '../lib/atribucion.ts';
+
+interface Props {
+  obras: readonly ObraResuelta[];
+  sinObra: number;
+}
+
+const { obras, sinObra } = Astro.props;
+
+/*
+ * «Y …» solo cuando sigue a la lista: sin ninguna Obra, la línea va sola bajo el rótulo y no
+ * puede empezar por «Y».
+ */
+const conLista = obras.length > 0;
+const pie =
+  sinObra === 0
+    ? undefined
+    : sinObra === 1
+      ? `${conLista ? 'Y una' : 'Una'} cita sin obra documentada.`
+      : `${conLista ? 'Y ' : ''}${sinObra} citas sin obra documentada.`;
+
+const citas = (n: number) => (n === 1 ? 'una cita' : `${n} citas`);
+---
+
+{
+  (obras.length > 0 || pie !== undefined) && (
+    <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
+      <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
+      {obras.length > 0 && (
+        <ul class="lista-de-obras">
+          {obras.map((obra) => (
+            <li>
+              <a href={rutaDeLaObra(obra)}>
+                <span class="titulo">{obra.titulo}{
+                  obra.año !== undefined && (
+                    <><span aria-hidden="true"> · </span><span class="oculto">, </span>{añoLegible(obra.año)}</>
+                  )
+                }</span>
+                <span class="recuento"><span aria-hidden="true">{obra.recuento}</span><span class="oculto">, {citas(obra.recuento)}</span></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {pie !== undefined && <p class="sin-obra">{pie}</p>}
+    </section>
+  )
+}
+
+<style>
+  .obras-del-autor {
+    margin-top: calc(var(--unidad) * 5);
+    max-width: var(--medida-prosa);
+  }
+
+  .lista-de-obras {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  /* Filete entre entradas, no por encima de la primera (la maqueta, orden B). */
+  .lista-de-obras li + li {
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  /*
+   * Enlace de bloque: sin subrayado, lo identifican su forma y su posición (EXPERIENCE.md,
+   * «Subrayado siempre visible»). La fila entera es la zona de toque.
+   */
+  .lista-de-obras a {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: calc(var(--unidad) * 1.5);
+    box-sizing: border-box;
+    min-height: var(--zona-de-toque);
+    padding-block: calc(var(--unidad) * 1.25);
+    color: var(--tinta);
+    text-decoration: none;
+  }
+
+  .titulo {
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    min-width: 0;
+  }
+
+  .recuento {
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .sin-obra {
+    margin: calc(var(--unidad) * 2) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+
+  /* Sin clase global para esto: la misma regla que la Cabecera de Obra declara para sí. */
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

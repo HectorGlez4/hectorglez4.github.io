@@ -105,3 +105,38 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
     expect(scripts).toHaveLength(0);
   });
 });
+
+test.describe('Historia 17.3 — la Lista de Obras', () => {
+  const UNAMUNO = '/autor/miguel-de-unamuno/';
+
+  test('cada entrada es un enlace de al menos 44 px a su Página de Obra, que existe', async ({
+    page,
+    request,
+  }) => {
+    await page.goto(UNAMUNO);
+    await expect(page.getByRole('heading', { level: 2, name: 'Su obra en este Corpus' })).toBeVisible();
+    const enlaces = page.locator('.lista-de-obras li a');
+    expect(await enlaces.count()).toBeGreaterThan(0);
+
+    const filas = await enlaces.evaluateAll((ns) =>
+      ns.map((n) => ({
+        href: n.getAttribute('href')!,
+        alto: n.getBoundingClientRect().height,
+        subrayado: getComputedStyle(n).textDecorationLine,
+      })),
+    );
+    for (const { href, alto, subrayado } of filas) {
+      expect(href).toMatch(/^\/obra\/miguel-de-unamuno\/[^/]+\/$/);
+      expect(alto, href).toBeGreaterThanOrEqual(44);
+      expect(subrayado, href).toBe('none');
+      expect((await request.get(href, { maxRedirects: 0 })).status(), href).toBe(200);
+    }
+  });
+
+  test('la página 2 no la lleva', async ({ page, request }) => {
+    const segunda = '/autor/miguel-de-unamuno/2/';
+    test.skip((await request.get(segunda)).status() !== 200, 'Unamuno cabe hoy en una sola página.');
+    await page.goto(segunda);
+    await expect(page.locator('.lista-de-obras')).toHaveCount(0);
+  });
+});

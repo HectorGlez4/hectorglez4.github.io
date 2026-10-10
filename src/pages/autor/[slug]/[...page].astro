@@ -20,11 +20,13 @@ import DatosDeAutor from '../../../components/DatosDeAutor.astro';
 import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.astro';
+import ListaDeObras from '../../../components/ListaDeObras.astro';
 import {
   autoresPublicados,
   citasDeAutor,
   citasDocumentadasDeAutor,
   conjuntoPublicable,
+  obrasDelAutor,
   type Cita,
 } from '../../../lib/publicado.ts';
 import { añosDeAutor, descripcionDeAutor, semblanzaEn } from '../../../lib/atribucion.ts';
@@ -39,13 +41,18 @@ export const getStaticPaths = (async ({ paginate }) => {
   return autoresPublicados(conjunto.autores, conjunto.citas).flatMap((autor) =>
     paginate(citasDeAutor(conjunto.citas, autor.slug), {
       params: { slug: autor.slug },
-      props: { autor, documentadas: citasDocumentadasDeAutor(conjunto.citas, autor.slug) },
+      props: {
+        autor,
+        documentadas: citasDocumentadasDeAutor(conjunto.citas, autor.slug),
+        // Historia 17.3 — la Lista de Obras: solo la pinta la página 1.
+        suObra: obrasDelAutor(conjunto.citas, autor.slug),
+      },
       pageSize: CITAS_POR_PAGINA,
     }),
   );
 }) satisfies GetStaticPaths;
 
-const { autor, documentadas } = Astro.props;
+const { autor, documentadas, suObra } = Astro.props;
 const pagina = Astro.props.page as import('astro').Page<Cita>;
 
 const ruta = rutaDeAutor(autor.slug, pagina.currentPage);
@@ -106,6 +113,15 @@ const descripcion = descripcionDeAutor(autor, documentadas);
           ))
       }
     </header>
+
+    {
+      /*
+       * Historia 17.3, UX-DR46 — la Lista de Obras, bajo la semblanza y su atribución. Ya va
+       * solo en la página 1. Lo que queda para la 17.4 es la ficha entera —nombre, años,
+       * semblanza—: moverla delante del catálogo y quitarla de las páginas 2+.
+       */
+      pagina.currentPage === 1 && <ListaDeObras obras={suObra.obras} sinObra={suObra.sinObra} />
+    }
 
     {
       /*

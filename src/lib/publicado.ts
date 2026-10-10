@@ -459,6 +459,35 @@ export function obrasDeLasCitas(citas: readonly CitaConSuObra[]): ObraResuelta[]
   return [...porNombre.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 }
 
+/** La Lista de Obras de un Autor y lo que queda fuera de ella — Historia 17.3. */
+export interface ObrasDelAutor {
+  /** Sus Obras, de más a menos Citas publicadas y por título a igualdad. */
+  obras: ObraResuelta[];
+  /** Cuántas de sus Citas publicadas no resuelven ninguna Obra. */
+  sinObra: number;
+}
+
+/**
+ * Las Obras de un Autor para su página — Historia 17.3, UX-DR46.
+ *
+ * Salen de las Obras **resueltas** de sus Citas publicadas (`obrasDeLasCitas`), nunca de la
+ * Procedencia: una ficha sin Citas publicadas no añade entrada (FR-42). El orden es el de
+ * `temasDeLaObra` —de más a menos Citas, por título a igualdad y, al final, por nombre de
+ * ficha— y el que dibuja la maqueta.
+ * `sinObra` cuenta las Citas sin Obra resuelta, que la página dice al pie y no enumera.
+ */
+export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string): ObrasDelAutor {
+  const suyas = citas.filter((cita) => cita.autor === slugAutor);
+  const obras = obrasDeLasCitas(suyas).sort(
+    (a, b) =>
+      b.recuento - a.recuento ||
+      a.titulo.localeCompare(b.titulo, 'es') ||
+      // Último desempate, por la identidad de la ficha: el orden no depende del de entrada.
+      a.nombre.localeCompare(b.nombre, 'es'),
+  );
+  return { obras, sinObra: suyas.filter((cita) => cita.obra === undefined).length };
+}
+
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
 export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores'>): ObraResuelta[] {
   return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;

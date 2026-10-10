@@ -2,9 +2,10 @@
 title: '17.3 — La Página de Autor enumera su obra'
 type: 'feature'
 created: '2026-10-10'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'de207d38ac64d8d3802f2ab739b43101e67e8218'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-17-context.md'
   - '{project-root}/AGENTS.md'
@@ -86,3 +87,18 @@ deferred: []
 - `npx astro check` -- expected: 0 errores.
 - `npm run build` -- expected: termina.
 - `npx playwright test tests/e2e/pagina-de-autor.spec.ts --project=escritorio` -- expected: verde.
+
+## Auto Run Result
+
+**Resumen:** la página 1 de cada Página de Autor lleva «Su obra en este Corpus»: una entrada por Obra del Autor (por recuento y título), con título, año si consta (`añoLegible`) y recuento en cifras tabulares, enlazada a su Página de Obra aunque no se indexe; al pie, las Citas sin obra. Derivada de `obrasDelAutor` en `src/lib/publicado.ts`, nunca de la Procedencia.
+
+**Ficheros:** `src/lib/publicado.ts` (`obrasDelAutor`), `src/components/ListaDeObras.astro` (nuevo), `src/pages/autor/[slug]/[...page].astro`, `src/lib/ingreso.ts` (comentario), `tests/unit/lista-de-obras.test.ts` (nuevo), `tests/e2e/pagina-de-autor.spec.ts`.
+
+**Revisión:** 6 patches (2 medios, 4 bajos), 0 deferidos, 14 rechazados.
+
+**Revisión de seguimiento:** `true` — parcheados medio 2, bajo 4; puntuación 3 × 2 + 4 = 10 ≥ 5 → `true`.
+
+**Verificación:** `lista-de-obras` y `obras` 133/133; la batería de la Página de Autor y de guion 449/449; `npx astro check` 0 errores; `npm run build` termina; `pagina-de-autor.spec.ts` 12/12 y `accesibilidad.spec.ts` 35/35 en escritorio.
+
+**Riesgos:** la prueba e2e depende de Unamuno en el Corpus real; la lista aún va fuera de la ficha, que la 17.4 mueve delante del catálogo.
+
