@@ -292,6 +292,40 @@ describe('Historia 17.3 — la Lista de Obras, construida', () => {
     expect(lista).toBeLessThan(citas);
   });
 
+  /*
+   * Historia 17.4 — la ficha abre la página, y solo la primera. Séneca tiene semblanza propia:
+   * antes de la 17.4 la página 2 la repetía con los años.
+   */
+  it('17.4 — página 1: h1, años, semblanza, Lista de Obras y luego «Citas documentadas»', async () => {
+    const pagina = await html('/autor/seneca/');
+    const posiciones = [
+      pagina.indexOf('<h1'),
+      pagina.indexOf('class="años'),
+      pagina.indexOf('class="semblanza'),
+      pagina.indexOf('<section class="obras-del-autor'),
+      pagina.indexOf('Citas documentadas</h2>'),
+      pagina.indexOf('<ul class="listado'),
+    ];
+    for (const p of posiciones) expect(p).toBeGreaterThan(-1);
+    expect([...posiciones].sort((a, b) => a - b)).toEqual(posiciones);
+    expect(pagina).toContain('4 a. C.–65 d. C.</p>');
+    expect(pagina.match(/<h1[\s>]/g)).toHaveLength(1);
+  });
+
+  it('17.4 — página 2: solo el h1 y el listado, con noindex', async () => {
+    const segunda = await html('/autor/seneca/2/');
+    const ficha = /<header class="ficha"[^>]*>([\s\S]*?)<\/header>/.exec(segunda)?.[1] ?? '';
+    expect(ficha.replace(/<[^>]+>/g, '').trim()).toBe('Séneca');
+    expect(segunda.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(segunda).not.toContain('<p class="años');
+    expect(segunda).not.toContain('<p class="semblanza');
+    expect(segunda).not.toContain('Semblanza tomada de');
+    expect(segunda).not.toContain('<section class="obras-del-autor');
+    expect(segunda).toContain('Citas documentadas</h2>');
+    expect(segunda).toContain('<ul class="listado');
+    expect(segunda).toMatch(/<meta name="robots" content="noindex/);
+  });
+
   it('enumera Obras, no Citas: ninguna Cita dentro y ninguna repetida en la página', async () => {
     const pagina = await html('/autor/seneca/');
     expect(seccion(pagina)).not.toMatch(/\/cita\//);

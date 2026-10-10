@@ -276,10 +276,14 @@ describe('Historia 17.2 — la semblanza ajena solo donde porta su atribución',
     );
   });
 
-  it('la página 2 no muestra la semblanza ajena', () => {
+  it('la página 2 no muestra la semblanza ajena ni su atribución', () => {
     const html = leer('/autor/seneca/2/');
     expect(html).not.toContain(SEMBLANZA_LITERAL);
     expect(html).not.toContain('Semblanza tomada de');
+    expect(html).not.toContain('class="semblanza"');
+    const ficha = /<header class="ficha"[^>]*>([\s\S]*?)<\/header>/.exec(html)?.[1];
+    expect(ficha).toBeDefined();
+    expect(ficha).not.toMatch(/data-pagefind-ignore/);
     expect(metaDescripcion(html)).not.toContain(SEMBLANZA_LITERAL);
   });
 

@@ -223,7 +223,7 @@ development_status:
   # 17.3 y 17.5 se reescribieron en su sitio en la v7.1 (epics.md, fc694747); la clave no cambia.
   # La 17.3 se construye DESPUÉS de la 22.4; la 17.5, ANTES de la 22.9.
   17-3-la-página-de-autor-enumera-su-obra: review  # Lista de Obras en la página 1; la 17.4 la mete en la ficha delante del catálogo
-  17-4-la-ficha-abre-la-página-y-solo-la-primera: backlog  # desbloqueada el 10/10: la 17.3 en review
+  17-4-la-ficha-abre-la-página-y-solo-la-primera: review  # la ficha solo en la 1; el caso con biografía se prueba cuando Héctor declare la primera
   17-5-un-modelo-se-admite-por-ruta-y-el-tope-de-guion-se-mide-dond: review
   epic-17-retrospective: optional
 

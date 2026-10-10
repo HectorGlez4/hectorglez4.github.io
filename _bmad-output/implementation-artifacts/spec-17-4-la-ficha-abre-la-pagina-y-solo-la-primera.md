@@ -2,9 +2,10 @@
 title: '17.4 — La ficha abre la página, y solo la primera'
 type: 'feature'
 created: '2026-10-10'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '5483ef72b0bdf7742ddaf0e4f5395c1c82b06088'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-17-context.md'
   - '{project-root}/AGENTS.md'
@@ -69,3 +70,16 @@ deferred: []
 - `npx astro check` -- expected: 0 errores.
 - `npm run build` -- expected: termina.
 - `npx playwright test tests/e2e/pagina-de-autor.spec.ts` -- expected: verde.
+
+## Auto Run Result
+
+**Resumen:** la ficha entera de la Página de Autor (años, semblanza, su atribución y la Lista de Obras) va solo en la página 1, delante del catálogo; las 2+ llevan el `h1` y el listado, con `noindex`. `paginas-siguientes` deja de ser superficie de la semblanza en `src/lib/atribucion.ts`.
+
+**Ficheros:** `src/pages/autor/[slug]/[...page].astro`, `src/lib/atribucion.ts`, `tests/unit/semblanza.test.ts`, `tests/unit/biografia-build.test.ts`, `tests/unit/lista-de-obras.test.ts`, `tests/e2e/pagina-de-autor.spec.ts`, `tests/e2e/ayuda/corpus.ts`, `AGENTS.md`.
+
+**Revisión:** 7 patches bajos, 0 deferidos, 14 rechazados (la semblanza propia en meta y JSON-LD de las 2+ la fija el contrato).
+
+**Revisión de seguimiento:** `true` — parcheados bajo 7; puntuación 7 ≥ 5.
+
+**Verificación:** 196/196 en los cuatro unitarios; `npx astro check` 0 errores; `npm run build` termina; `pagina-de-autor.spec.ts` 30 pasan y 2 omitidas (el caso con biografía: ningún Autor la declara hoy) en escritorio y móvil.
+

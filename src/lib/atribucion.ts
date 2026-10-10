@@ -89,9 +89,11 @@ export function textoParaCopiar(cita: Cita, autor: Autor): string {
  * Las superficies de la Página de Autor que **consultan** si pueden reproducir la semblanza.
  *
  * La reproducían todas: el cuerpo de la página 1, las páginas 2+, el `<meta description>`, la
- * `description` del JSON-LD y el índice de Pagefind. Con una semblanza propia —la breve que
- * escribe el editor— da igual; con una ajena (CC BY-SA, de una biografía) cada una tiene que
- * poder llevar su atribución, y solo una puede.
+ * `description` del JSON-LD y el índice de Pagefind. Desde la Historia 17.4 el **cuerpo** de las
+ * páginas 2+ no tiene ficha y no lleva la semblanza, propia o ajena, así que ya no consulta; su
+ * `<meta description>` y su JSON-LD siguen su propia regla, la de esas dos superficies.
+ * Con una semblanza propia —la breve que escribe el editor— da igual; con una ajena (CC BY-SA,
+ * de una biografía) cada una tiene que poder llevar su atribución, y solo una puede.
  *
  * La Tarjeta Social no está en la lista porque no pregunta: no la lleva **nunca**, sea propia o
  * ajena, y se compone con hechos (`datosDeTarjetaDeAutor` en `tarjeta.ts`). Un PNG no lleva
@@ -99,7 +101,6 @@ export function textoParaCopiar(cita: Cita, autor: Autor): string {
  */
 export const SUPERFICIES_DE_LA_SEMBLANZA = [
   'ficha-de-autor',
-  'paginas-siguientes',
   'meta-description',
   'datos-estructurados',
   'indice-de-busqueda',

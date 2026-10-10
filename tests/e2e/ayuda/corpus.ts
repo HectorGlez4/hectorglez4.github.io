@@ -146,18 +146,43 @@ export function textoDe(slug: string): string {
  * que caben, para que la prueba siga siendo exigente y no pase mirando un Autor de tres.
  */
 export function autorEnUnaPagina(): { slug: string; citas: number } | undefined {
+  const elegido = [...citasPorAutor().entries()]
+    .filter(([, n]) => n > 0 && n <= CITAS_POR_PAGINA)
+    .sort((a, b) => b[1] - a[1])[0];
+  return elegido === undefined ? undefined : { slug: elegido[0], citas: elegido[1] };
+}
+
+/**
+ * Un Autor cuyas Citas no caben en una página, si hoy existe alguno: el de **más** Citas, para
+ * que su página 2 exista. Historia 17.4 — la ficha solo en la página 1; se pregunta al Corpus en
+ * vez de fijar un Autor que una retirada dejaría en una sola página.
+ */
+export function autorEnVariasPaginas(): { slug: string; citas: number } | undefined {
+  const elegido = [...citasPorAutor().entries()]
+    .filter(([, n]) => n > CITAS_POR_PAGINA)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  return elegido === undefined ? undefined : { slug: elegido[0], citas: elegido[1] };
+}
+
+/** Cuántas Citas publicadas tiene cada Autor, por su slug. */
+function citasPorAutor(): Map<string, number> {
   const cuenta = new Map<string, number>();
   for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
-    const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
-    const autor = campo(contenido, 'autor');
+    const autor = campo(readFileSync(join(raiz, 'citas', fichero), 'utf8'), 'autor');
     if (autor !== undefined) cuenta.set(autor, (cuenta.get(autor) ?? 0) + 1);
   }
+  return cuenta;
+}
 
-  const caben = [...cuenta.entries()]
-    .filter(([, n]) => n > 0 && n <= CITAS_POR_PAGINA)
-    .sort((a, b) => b[1] - a[1]);
-  const elegido = caben[0];
-  return elegido === undefined ? undefined : { slug: elegido[0], citas: elegido[1] };
+/**
+ * Un Autor del Corpus que declara biografía —su semblanza lleva atribución debajo—, si hoy hay.
+ */
+export function autorConBiografia(): string | undefined {
+  return readdirSync(join(raiz, 'autores'))
+    .filter((f) => f.endsWith('.yml'))
+    .sort()
+    .find((f) => /^biografia:/m.test(readFileSync(join(raiz, 'autores', f), 'utf8')))
+    ?.replace(/\.yml$/, '');
 }
 
 /**

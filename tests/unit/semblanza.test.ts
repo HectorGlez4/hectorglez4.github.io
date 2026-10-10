@@ -82,6 +82,15 @@ describe('qué superficie reproduce la semblanza', () => {
     }
   });
 
+  it('las páginas 2+ no son superficie de la semblanza, ni propia ni ajena (17.4)', () => {
+    expect(SUPERFICIES_DE_LA_SEMBLANZA).toEqual([
+      'ficha-de-autor',
+      'meta-description',
+      'datos-estructurados',
+      'indice-de-busqueda',
+    ]);
+  });
+
   it('una semblanza propia sigue en todas', () => {
     for (const superficie of SUPERFICIES_DE_LA_SEMBLANZA) {
       expect(semblanzaEn(SENECA, superficie), superficie).toBe(SENECA.semblanza);

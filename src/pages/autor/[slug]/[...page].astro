@@ -2,8 +2,8 @@
 /**
  * Página de Autor — FR-4, FR-5.
  *
- * Semblanza breve más todas las Citas publicadas del Autor. Un Autor sin Citas publicadas
- * no tiene página: `autoresPublicados` no lo devuelve, así que no se genera ruta y su URL
+ * La Ficha de Autor —solo en la página 1— más todas las Citas publicadas del Autor. Un Autor
+ * sin Citas publicadas no tiene página: `autoresPublicados` no lo devuelve, así que no se genera ruta y su URL
  * da 404 (FR-4). No hay ninguna comprobación que hacer aquí — la ausencia es estructural.
  *
  * La paginación de FR-5 vive en esta misma ruta: `[...page]` deja la primera página en
@@ -61,17 +61,22 @@ const años = añosDeAutor(autor);
 const canonica = new URL(ruta, Astro.site).href;
 
 /*
- * Historia 17.2, AD-28 — qué superficie puede reproducir la semblanza lo decide
- * `src/lib/atribucion.ts`, no esta página. Una semblanza propia sale donde siempre; una ajena
- * (el Autor declara biografía) solo en la ficha de la página 1, con su atribución debajo, y
- * donde no cabe se dicen hechos del Corpus.
+ * Historia 17.4 — la Ficha de Autor (años, semblanza, su atribución y la Lista de Obras)
+ * vive solo en la página 1, delante del catálogo: es la excepción declarada de la regla de
+ * agregación. Las páginas 2+ son otra superficie —`noindex` por forma, `superficies.ts`— y
+ * conservan solo el `h1` con el nombre y el listado, como las 2+ de Colección y de Obra.
  */
-const semblanza = semblanzaEn(
-  autor,
-  pagina.currentPage === 1 ? 'ficha-de-autor' : 'paginas-siguientes',
-);
+const primera = pagina.currentPage === 1;
+
+/*
+ * Historia 17.2, AD-28 — qué superficie puede reproducir la semblanza lo decide
+ * `src/lib/atribucion.ts`, no esta página. Una semblanza propia sale en la ficha y donde
+ * siempre; una ajena (el Autor declara biografía) solo en la ficha, con su atribución debajo,
+ * y donde no cabe se dicen hechos del Corpus. Las páginas 2+ ya no la consultan: no tienen ficha.
+ */
+const semblanza = primera ? semblanzaEn(autor, 'ficha-de-autor') : undefined;
 // Si el índice de Pagefind puede llevarla; si no, va dentro de `data-pagefind-ignore`.
-const enElIndice = semblanzaEn(autor, 'indice-de-busqueda') !== undefined;
+const enElIndice = primera && semblanzaEn(autor, 'indice-de-busqueda') !== undefined;
 const descripcion = descripcionDeAutor(autor, documentadas);
 ---
 
@@ -81,7 +86,7 @@ const descripcion = descripcionDeAutor(autor, documentadas);
   tarjeta={`/tarjeta/autor/${autor.slug}.png`}
   ruta={ruta}
   tipo="autor"
-  vista={pagina.currentPage === 1 ? 'superficie' : undefined}
+  vista={primera ? 'superficie' : undefined}
 >
   <DatosDeAutor
     slot="cabeza"
@@ -94,7 +99,7 @@ const descripcion = descripcionDeAutor(autor, documentadas);
   <div class="pagina contenedor">
     <header class="ficha">
       <h1>{autor.nombre}</h1>
-      <p class="años">{años}</p>
+      {primera && años !== '' && <p class="años">{años}</p>}
       {
         semblanza !== undefined &&
           (enElIndice ? (
@@ -116,11 +121,10 @@ const descripcion = descripcionDeAutor(autor, documentadas);
 
     {
       /*
-       * Historia 17.3, UX-DR46 — la Lista de Obras, bajo la semblanza y su atribución. Ya va
-       * solo en la página 1. Lo que queda para la 17.4 es la ficha entera —nombre, años,
-       * semblanza—: moverla delante del catálogo y quitarla de las páginas 2+.
+       * Historia 17.3, UX-DR46 — la Lista de Obras, bajo la semblanza y su atribución y antes
+       * del catálogo. Es parte de la ficha, así que solo la lleva la página 1 (17.4).
        */
-      pagina.currentPage === 1 && <ListaDeObras obras={suObra.obras} sinObra={suObra.sinObra} />
+      primera && <ListaDeObras obras={suObra.obras} sinObra={suObra.sinObra} />
     }
 
     {

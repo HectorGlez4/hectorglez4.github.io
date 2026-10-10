@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { autorEnUnaPagina } from './ayuda/corpus.ts';
+import { autorConBiografia, autorEnUnaPagina, autorEnVariasPaginas } from './ayuda/corpus.ts';
 
 /** Historia 2.3 — Página de Autor. */
 
@@ -138,5 +138,72 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
     test.skip((await request.get(segunda)).status() !== 200, 'Unamuno cabe hoy en una sola página.');
     await page.goto(segunda);
     await expect(page.locator('.lista-de-obras')).toHaveCount(0);
+  });
+});
+
+test.describe('Historia 17.4 — la ficha abre la página, y solo la primera', () => {
+  /** h1 entero y borde superior de la semblanza dentro del primer viewport, sin desplazar. */
+  async function fichaSinDesplazar(page: import('@playwright/test').Page, ruta: string) {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto(ruta);
+    const alto = page.viewportSize()!.height;
+
+    const h1 = await page.locator('h1').boundingBox();
+    expect(h1, 'h1').not.toBeNull();
+    expect(h1!.y, 'h1').toBeGreaterThanOrEqual(0);
+    expect(h1!.y + h1!.height, 'h1').toBeLessThanOrEqual(alto);
+
+    const semblanza = await page.locator('.semblanza').boundingBox();
+    expect(semblanza, '.semblanza').not.toBeNull();
+    expect(semblanza!.y, '.semblanza').toBeGreaterThanOrEqual(0);
+    expect(semblanza!.y, '.semblanza').toBeLessThan(alto);
+
+    // Sin muro, modal ni aviso previo: nada se interpone.
+    await expect(page.locator('dialog[open], [role="dialog"], [aria-modal="true"]')).toHaveCount(0);
+  }
+
+  test('a 360 × 640, el nombre y la semblanza se ven sin desplazar', async ({ page }) => {
+    await fichaSinDesplazar(page, MACHADO);
+  });
+
+  test('a 360 × 640, también con la atribución de una semblanza ajena', async ({ page }) => {
+    const slug = autorConBiografia();
+    test.skip(slug === undefined, 'Ningún Autor del Corpus declara hoy biografía.');
+    await fichaSinDesplazar(page, `/autor/${slug}/`);
+  });
+
+  test('la ficha va antes del catálogo', async ({ page }) => {
+    await page.goto(MACHADO);
+    const orden = await page.evaluate(() => {
+      const rotulo = [...document.querySelectorAll('h2')].find(
+        (n) => n.textContent?.trim() === 'Citas documentadas',
+      );
+      const listado = rotulo?.parentElement?.querySelector(':scope > ul.listado') ?? null;
+      const y = (n: Element | null | undefined) =>
+        n == null ? -1 : n.getBoundingClientRect().top + window.scrollY;
+      return [
+        y(document.querySelector('h1')),
+        y(document.querySelector('.ficha .años')),
+        y(document.querySelector('.ficha .semblanza')),
+        y(document.querySelector('.obras-del-autor')),
+        y(rotulo),
+        y(listado),
+      ];
+    });
+    for (const y of orden) expect(y).toBeGreaterThanOrEqual(0);
+    expect([...orden].sort((a, b) => a - b)).toEqual(orden);
+  });
+
+  test('la página 2 conserva solo el nombre y el listado, y no se indexa', async ({ page }) => {
+    const autor = autorEnVariasPaginas();
+    test.skip(autor === undefined, 'Ningún Autor del Corpus pasa hoy de una página.');
+    await page.goto(`/autor/${autor!.slug}/2/`);
+    await expect(page.locator('h1')).toHaveCount(1);
+    for (const selector of ['.años', '.semblanza', '.lista-de-obras', '.obras-del-autor']) {
+      await expect(page.locator(selector), selector).toHaveCount(0);
+    }
+    await expect(page.getByText('Semblanza tomada de')).toHaveCount(0);
+    expect(await page.locator('.listado > li').count()).toBeGreaterThan(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 });
