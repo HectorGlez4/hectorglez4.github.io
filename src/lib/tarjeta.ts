@@ -19,8 +19,9 @@
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
 import { MARCA } from './marca.ts';
 import { tramoDe } from './tramos.ts';
-import { añosDeAutor, recuentoDeDocumentadas } from './atribucion.ts';
+import { añoLegible, añosDeAutor, recuentoDeDocumentadas } from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
+import type { ObraResuelta } from './obras.ts';
 
 /** 1200×630 es la proporción que piden los validadores de previsualización. */
 export const ANCHO = 1200;
@@ -139,6 +140,13 @@ export interface DatosDeTarjetaDeListado {
    * y entonces fallaría sin que nadie supiera por qué.
    */
   conMarca?: boolean;
+  /**
+   * La familia del título: la serif por omisión —es nombre de Tema, de Autor o de Colección—
+   * y la sans para la Obra, cuyo título va en Inter en toda superficie (Historia 22.7,
+   * UX-DR38). Es una opción de esta plantilla y no otra plantilla: la Tarjeta de Obra es la de
+   * listado.
+   */
+  familiaDelTitulo?: 'serif' | 'sans';
 }
 
 /**
@@ -179,6 +187,7 @@ export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
   const CUERPO_TITULO = 68;
   const lineasDeTitulo = repartirEnLineas(datos.titulo, CUERPO_TITULO, anchoUtil);
   const alturaTitulo = Math.round(CUERPO_TITULO * 1.25);
+  const familiaDelTitulo = datos.familiaDelTitulo === 'sans' ? SANS : SERIF;
 
   const CUERPO_BAJADA = 30;
   if (datos.hechos !== undefined && datos.bajada !== undefined) {
@@ -218,7 +227,7 @@ export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
     ...lineasDeTitulo.map(
       (linea, i) =>
         `<text x="${MARGEN}" y="${inicio + i * alturaTitulo}" ` +
-        `font-family="${SERIF}" font-size="${CUERPO_TITULO}" fill="${TINTA}">` +
+        `font-family="${familiaDelTitulo}" font-size="${CUERPO_TITULO}" fill="${TINTA}">` +
         `${escapar(linea)}</text>`,
     ),
     `<rect x="${MARGEN}" y="${trasTitulo}" width="96" height="2" fill="${FILETE}"/>`,
@@ -251,5 +260,40 @@ export function datosDeTarjetaDeAutor(
   return {
     titulo: autor.nombre,
     hechos: recuento === undefined ? [añosDeAutor(autor)] : [añosDeAutor(autor), recuento],
+  };
+}
+
+/**
+ * La bajada de la Tarjeta de Obra — Historia 22.7: «{n} citas de {Autor}, {año}».
+ *
+ * «1 cita de…» en singular. El año es el **de la Obra** (`obra.año`), que ya se omite si sus
+ * Citas discrepan o no lo dicen y nunca es el de una traducción: sin él no hay coma ni año. Un
+ * año antes de Cristo se lee como en la Atribución, «350 a. C.», sin signo.
+ */
+export function bajadaDeTarjetaDeObra(
+  obra: Pick<ObraResuelta, 'recuento' | 'año'>,
+  autor: Pick<Autor, 'nombre'>,
+): string {
+  const citas = obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`;
+  const año = obra.año === undefined ? '' : `, ${añoLegible(obra.año)}`;
+  return `${citas} de ${autor.nombre}${año}`;
+}
+
+/**
+ * Los datos de la Tarjeta Social de una Obra — Historia 22.7, AD-28.
+ *
+ * Es la de listado con el título en la sans y un solo hecho, la bajada. **Solo hechos del
+ * Corpus**: el título de la Obra resuelta, su recuento de Citas publicadas, el nombre del Autor
+ * y el año de la Obra. Nunca la nota —la escribe Héctor para la página, no para una imagen sin
+ * contexto—, ni el traductor, ni la licencia: por eso recibe un `Pick` y no la Obra entera.
+ */
+export function datosDeTarjetaDeObra(
+  obra: Pick<ObraResuelta, 'titulo' | 'recuento' | 'año'>,
+  autor: Pick<Autor, 'nombre'>,
+): DatosDeTarjetaDeListado {
+  return {
+    titulo: obra.titulo,
+    hechos: [bajadaDeTarjetaDeObra(obra, autor)],
+    familiaDelTitulo: 'sans',
   };
 }

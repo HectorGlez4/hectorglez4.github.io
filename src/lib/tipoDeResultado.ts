@@ -22,8 +22,9 @@ export const ETIQUETAS_DE_RESULTADO = {
   autor: 'Autor',
   tema: 'Tema',
   coleccion: 'Colección',
-  // Historia 22.4 — las Obras indexables entran en Pagefind con su tipo. El resultado completo
-  // —título en Inter, Autor debajo— es de la 22.7.
+  // Historia 22.4 — las Obras indexables entran en Pagefind con su tipo. Desde la 22.7 el
+  // resultado lleva el título en Inter y el Autor debajo (metadato `autor` de la Cabecera de
+  // Obra), y se lee «Obra: {título}, de {Autor}»; lo pinta `src/pages/buscar.astro`.
   obra: 'Obra',
 } as const;
 

@@ -584,6 +584,12 @@ una Obra con `noindex`; `npm run canal` acepta cualquier Obra publicada, porque 
 publicación puede enlazarla. En el sitemap, la Obra lleva `lastmod` con el criterio de las
 demás agregaciones: lo más reciente de su ficha, sus Citas y el fichero de su Autor.
 
+Toda Página de Obra —indexable o no, y sus páginas 2+— declara su Tarjeta Social en
+`/tarjeta/obra/{slug-autor}/{slug-obra}.png` (Historia 22.7): la de listado con el título en la
+sans y «{n} citas de {Autor}, {año}», sin nota ni traductor. En `/buscar/`, el Autor del
+resultado de Obra sale del metadato `data-pagefind-meta="autor"` del enlace de la Cabecera:
+quitarlo o moverlo fuera de `data-pagefind-body` deja los resultados de Obra sin Autor.
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:

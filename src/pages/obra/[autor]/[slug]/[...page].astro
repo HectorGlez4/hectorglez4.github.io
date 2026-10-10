@@ -90,6 +90,9 @@ const { obra, autor, temas, page: pagina } = Astro.props;
 const resumenDondeLeer = 'dondeLeer' in Astro.props ? Astro.props.dondeLeer : undefined;
 
 const ruta = rutaDeLaObra(obra, pagina.currentPage);
+// Historia 22.7 — la Tarjeta Social, en todas las páginas de la Obra, se indexe o no.
+const segmentos = segmentosDeObra(obra.nombre);
+const tarjeta = `/tarjeta/obra/${segmentos.autor}/${segmentos.obra}.png`;
 const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
 
@@ -108,6 +111,7 @@ const emiteVista = caracterDe(ruta) === 'producto';
   descripcion={descripcionDeObra(autor, obra, pagina.currentPage)}
   ruta={ruta}
   tipo="obra"
+  tarjeta={tarjeta}
   vista={emiteVista ? 'superficie' : undefined}
 >
   <DatosDeObra
@@ -126,8 +130,13 @@ const emiteVista = caracterDe(ruta) === 'producto';
         * dicen, y nunca el de una traducción (UX-DR51)—; el traductor no se nombra aquí. El
         * punto medio es decoración: quien usa lector de pantalla oye una coma.
         */}
+      {/*
+        * Historia 22.7 — `autor` es el metadato con el que `/buscar/` pinta el Autor bajo el
+        * título de la Obra; Pagefind lo toma del texto del enlace. Las páginas 2+ no entran en
+        * el índice, así que lo lleve o no da igual.
+        */}
       <p class="de">
-        de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{autor.nombre}</a>{
+        de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta" data-pagefind-meta="autor">{autor.nombre}</a>{
           obra.año !== undefined && (
             <>
               <span aria-hidden="true"> · </span><span class="oculto">, </span>{obra.año}

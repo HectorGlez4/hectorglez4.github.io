@@ -89,6 +89,45 @@ test.describe('Historia 3.1 — encontrar', () => {
     }
   });
 
+  /*
+   * Historia 22.7 — el resultado de Obra: rótulo «Obra», título en la sans (`.de-obra`), el Autor
+   * debajo y el nombre accesible «Obra: {título}, de {Autor}». Los demás, como estaban.
+   */
+  test('un resultado de Obra lleva el título en la sans y el Autor debajo', async ({ page }) => {
+    await buscar(page, 'proverbios y cantares');
+    const obras = await page
+      .locator('[data-resultados] .resultado')
+      .evaluateAll((ns) =>
+        ns
+          .filter((n) => n.querySelector('.clase')!.getAttribute('data-tipo') === 'obra')
+          .map((n) => {
+            const titulo = n.querySelector('.titulo')!;
+            return {
+              etiqueta: n.querySelector('.clase')!.textContent!.trim(),
+              deObra: titulo.classList.contains('de-obra'),
+              familia: getComputedStyle(titulo).fontFamily,
+              titulo: titulo.textContent!.trim(),
+              autor: n.querySelector('.r-autor')?.textContent?.trim(),
+              nombre: n.querySelector('a')!.getAttribute('aria-label'),
+            };
+          }),
+      );
+    expect(obras.length).toBeGreaterThan(0);
+    for (const obra of obras) {
+      expect(obra.etiqueta).toBe(ETIQUETAS_DE_RESULTADO.obra);
+      expect(obra.deObra).toBe(true);
+      expect(obra.familia).not.toMatch(/Georgia|Source Serif/);
+      expect(obra.autor).toBe('Antonio Machado');
+      expect(obra.nombre).toBe(`Obra: ${obra.titulo}, de Antonio Machado`);
+    }
+
+    // Los de otro tipo, como hoy: sin la clase, sin línea de Autor, sin nombre accesible propio.
+    const otros = page.locator('[data-resultados] .resultado:not(:has([data-tipo="obra"]))');
+    expect(await otros.count()).toBeGreaterThan(0);
+    expect(await otros.locator('.de-obra, .r-autor').count()).toBe(0);
+    expect(await otros.locator('a[aria-label]').count()).toBe(0);
+  });
+
   test('todo resultado lleva a una página que existe', async ({ page, request }) => {
     await buscar(page, 'vida');
     for (const r of await resultados(page)) {

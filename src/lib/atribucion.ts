@@ -130,7 +130,7 @@ export function semblanzaEn(
 }
 
 /** Un año como lo lee una persona: los negativos, sin signo y «a. C.». */
-function añoLegible(año: number, era: '' | ' d. C.'): string {
+export function añoLegible(año: number, era: '' | ' d. C.' = ''): string {
   return año < 0 ? `${-año} a. C.` : `${año}${era}`;
 }
 

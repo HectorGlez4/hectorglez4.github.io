@@ -236,6 +236,42 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     expect(await anunciadas(proyecto)).not.toContain(ruta);
   });
 
+  /*
+   * Historia 22.7 — la Tarjeta Social de Obra la declaran todas sus páginas, se indexe o no, y
+   * el PNG existe; la Cabecera de la indexable lleva el metadato `autor` que pinta `/buscar/`.
+   */
+  it.each([
+    ['indexable', CARTAS, '/tarjeta/obra/seneca/cartas-a-lucilio.png'],
+    ['no indexable', IRA, '/tarjeta/obra/seneca/de-la-ira.png'],
+    ['página 2', `${BREVEDAD}2/`, '/tarjeta/obra/seneca/sobre-la-brevedad-de-la-vida.png'],
+    ['traducida, sin año', ENQUIRIDION, '/tarjeta/obra/epicteto/enquiridion.png'],
+  ])('22.7 — %s: declara su Tarjeta de Obra, y el PNG existe', async (_caso, ruta, tarjeta) => {
+    const pagina = await html(proyecto, ruta);
+    expect(pagina).toContain(`<meta property="og:image" content="${SITIO}${tarjeta}">`);
+    expect(pagina).toContain(`<meta name="twitter:image" content="${SITIO}${tarjeta}">`);
+    const png = await readFile(join(proyecto, 'dist', tarjeta));
+    // La firma de un PNG y su cabecera IHDR: 1200 × 630.
+    expect(png.subarray(1, 4).toString('latin1')).toBe('PNG');
+    expect(png.readUInt32BE(16)).toBe(1200);
+    expect(png.readUInt32BE(20)).toBe(630);
+  });
+
+  it('22.7 — una PNG por Obra publicada, ni una más', async () => {
+    const { readdir } = await import('node:fs/promises');
+    const raiz = join(proyecto, 'dist', 'tarjeta', 'obra');
+    const pngs: string[] = [];
+    for (const autor of await readdir(raiz)) {
+      for (const fichero of await readdir(join(raiz, autor))) pngs.push(`/obra/${autor}/${fichero.replace(/\.png$/, '')}/`);
+    }
+    expect(pngs.sort()).toEqual([BREVEDAD, CARTAS, IRA, DISERTACIONES, ENQUIRIDION].sort());
+  });
+
+  it('22.7 — la Cabecera de la indexable lleva el metadato `autor` con el nombre', async () => {
+    const pagina = await html(proyecto, CARTAS);
+    expect(pagina).toMatch(/<a href="\/autor\/seneca\/" class="enlace-en-tinta" data-pagefind-meta="autor"[^>]*>Séneca<\/a>/);
+    expect(pagina).toMatch(EN_PAGEFIND);
+  });
+
   it('pestaña y descripción: «frases»; el cuerpo, «citas» y ninguna prosa', async () => {
     const pagina = await html(proyecto, CARTAS);
     expect(pagina).toContain('<title>Frases de Séneca en Cartas a Lucilio | Sabiduría de Bolsillo</title>');

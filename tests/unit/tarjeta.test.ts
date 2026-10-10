@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { ALTO, ANCHO, svgDeTarjeta, svgDeTarjetaDeListado } from '../../src/lib/tarjeta.ts';
+import sharp from 'sharp';
+import {
+  ALTO,
+  ANCHO,
+  bajadaDeTarjetaDeObra,
+  datosDeTarjetaDeObra,
+  svgDeTarjeta,
+  svgDeTarjetaDeListado,
+} from '../../src/lib/tarjeta.ts';
+import { SANS, SERIF } from '../../src/lib/lienzo.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { tramoDe } from '../../src/lib/tramos.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
@@ -249,5 +258,77 @@ describe('FR-19 — la Tarjeta de la portada', () => {
   it('y las demás la siguen llevando: la opción no cambia el caso normal', () => {
     const svg = svgDeTarjetaDeListado({ titulo: 'La prudencia', bajada: 'Una bajada.' });
     expect(svg).toContain(MARCA.toLocaleUpperCase('es'));
+  });
+});
+
+/**
+ * Historia 22.7 — la Tarjeta Social de una Obra: la de listado, con el título en la sans y una
+ * sola línea de hechos, «{n} citas de {Autor}, {año}». Solo hechos del Corpus (AD-28).
+ */
+describe('Historia 22.7 — la Tarjeta de Obra', () => {
+  const SENECA = { nombre: 'Séneca' };
+  const CARTAS = { titulo: 'Cartas a Lucilio', recuento: 3, año: 64 };
+
+  it('la bajada: plural con el año de la Obra', () => {
+    expect(bajadaDeTarjetaDeObra(CARTAS, SENECA)).toBe('3 citas de Séneca, 64');
+  });
+
+  it('la bajada: «1 cita de…» en singular', () => {
+    expect(bajadaDeTarjetaDeObra({ recuento: 1, año: 41 }, SENECA)).toBe('1 cita de Séneca, 41');
+  });
+
+  it('la bajada: un año antes de Cristo se lee «a. C.», sin signo', () => {
+    expect(bajadaDeTarjetaDeObra({ recuento: 2, año: -350 }, { nombre: 'Aristóteles' })).toBe(
+      '2 citas de Aristóteles, 350 a. C.',
+    );
+  });
+
+  it('la bajada: sin año de Obra, sin coma ni año', () => {
+    expect(bajadaDeTarjetaDeObra({ recuento: 9 }, { nombre: 'Epicteto' })).toBe('9 citas de Epicteto');
+  });
+
+  it('es la de listado: el título y la bajada como único hecho, en la sans', () => {
+    const datos = datosDeTarjetaDeObra(CARTAS, SENECA);
+    expect(datos).toEqual({
+      titulo: 'Cartas a Lucilio',
+      hechos: ['3 citas de Séneca, 64'],
+      familiaDelTitulo: 'sans',
+    });
+    const svg = svgDeTarjetaDeListado(datos);
+    expect(svg).toContain(`font-family="${SANS}" font-size="68" fill`);
+    expect(svg).not.toContain(`font-family="${SERIF}"`);
+    expect(svg).toContain('>Cartas a Lucilio</text>');
+    expect(svg).toContain('>3 citas de Séneca, 64</text>');
+  });
+
+  it('las demás de listado siguen con el título en serif', () => {
+    const svg = svgDeTarjetaDeListado({ titulo: 'La prudencia', bajada: 'Una bajada.' });
+    expect(svg).toContain(`font-family="${SERIF}" font-size="68"`);
+  });
+
+  it('ni la nota ni el traductor, aunque la Obra los traiga', () => {
+    const obra = {
+      ...CARTAS,
+      nota: 'Una nota escrita a mano sobre esta edición.',
+      traductor: 'Pablo de Prado',
+      licencia: 'CC BY-SA 4.0',
+    };
+    const svg = svgDeTarjetaDeListado(datosDeTarjetaDeObra(obra, SENECA));
+    expect(svg).not.toContain('nota escrita');
+    expect(svg).not.toContain('Pablo de Prado');
+    expect(svg).not.toContain('CC BY-SA');
+  });
+
+  it('el nombre del Autor entra en su entrada: otro nombre, otro SVG', () => {
+    const a = svgDeTarjetaDeListado(datosDeTarjetaDeObra(CARTAS, SENECA));
+    const b = svgDeTarjetaDeListado(datosDeTarjetaDeObra(CARTAS, { nombre: 'Lucio Anneo Séneca' }));
+    expect(a).not.toBe(b);
+  });
+
+  it('función del contenido: los mismos datos dan los mismos bytes de PNG', async () => {
+    const rasterizar = () =>
+      sharp(Buffer.from(svgDeTarjetaDeListado(datosDeTarjetaDeObra(CARTAS, SENECA)))).png().toBuffer();
+    const [uno, dos] = await Promise.all([rasterizar(), rasterizar()]);
+    expect(uno.equals(dos)).toBe(true);
   });
 });

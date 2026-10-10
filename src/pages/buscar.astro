@@ -207,8 +207,29 @@ const colecciones = conjunto.colecciones;
         const titulo = document.createElement('span');
         titulo.className = 'titulo';
         titulo.textContent = dato.meta && dato.meta.title ? dato.meta.title : dato.url;
-
         a.append(clase, titulo);
+
+        // Historia 22.7 — el resultado de Obra lleva el título en la sans y el Autor debajo, y se
+        // lee «Obra: {título}, de {Autor}». Sin metadato de Autor, ni línea ni «, de».
+        if (tipo === 'obra') {
+          titulo.classList.add('de-obra');
+          const autor =
+            dato.meta && typeof dato.meta.autor === 'string' ? dato.meta.autor.trim() : '';
+          if (autor !== '') {
+            const linea = document.createElement('span');
+            linea.className = 'r-autor';
+            linea.textContent = autor;
+            a.append(linea);
+          }
+          // Sin título en el índice, el visible es la URL: no se lee en voz alta.
+          if (dato.meta && dato.meta.title) {
+            a.setAttribute(
+              'aria-label',
+              `${ETIQUETA.obra}: ${dato.meta.title}` + (autor !== '' ? `, de ${autor}` : ''),
+            );
+          }
+        }
+
         li.append(a);
         lista.append(li);
       }
@@ -342,6 +363,22 @@ const colecciones = conjunto.colecciones;
     font-family: var(--serif);
     font-size: var(--titular-sm);
     color: var(--tinta);
+  }
+
+  /* Historia 22.7 — el título de una Obra va en Inter: mismo cuerpo y peso, solo cambia la familia. */
+  .resultados :global(.titulo.de-obra) {
+    font-family: var(--sans);
+  }
+
+  /* El Autor bajo el título de una Obra, con el estilo `author`, como en la Tarjeta de Cita. */
+  .resultados :global(.r-autor) {
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
   }
 
   .salida {
