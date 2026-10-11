@@ -1,6 +1,8 @@
 ---
 texto: "O más bien es el conflicto mismo, es la misma apasionada incertidumbre lo que unifica mi acción y me hace vivir y obrar."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-o-mas-bien-es-el-conflicto-mismo"
 procedencia:
   obra: "Del sentimiento trágico de la vida/XI"

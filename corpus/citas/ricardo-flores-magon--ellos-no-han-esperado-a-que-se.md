@@ -1,6 +1,8 @@
 ---
 texto: "Ellos no han esperado a que se encarame nadie a la presidencia de la República para iniciar una era de justicia."
 autor: "ricardo-flores-magon"
+temas:
+  - "la-justicia"
 slug: "ricardo-flores-magon-ellos-no-han-esperado-a-que-se"
 procedencia:
   obra: "La patria burguesa y la patria universal"

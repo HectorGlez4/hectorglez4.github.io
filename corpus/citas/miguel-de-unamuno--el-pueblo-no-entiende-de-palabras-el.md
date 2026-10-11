@@ -1,6 +1,8 @@
 ---
 texto: "El pueblo no entiende de palabras; el pueblo no ha entendido más que vuestras obras."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-palabra"
 slug: "miguel-de-unamuno-el-pueblo-no-entiende-de-palabras-el"
 procedencia:
   obra: "San Manuel Bueno, mártir"

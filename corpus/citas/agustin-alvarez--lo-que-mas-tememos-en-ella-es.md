@@ -1,6 +1,8 @@
 ---
 texto: "Lo que más tememos en ella es el dolor que la acompaña o la enfermedad que la precede."
 autor: "agustin-alvarez"
+temas:
+  - "la-muerte"
 slug: "agustin-alvarez-lo-que-mas-tememos-en-ella-es"
 procedencia:
   obra: "La transformación de las razas en América"

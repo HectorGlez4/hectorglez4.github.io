@@ -1,6 +1,8 @@
 ---
 texto: "Se sueña con grandes hechos; la lucha enamora, porque implica la libertad."
 autor: "miguel-cane"
+temas:
+  - "la-libertad"
 slug: "miguel-cane-se-suena-con-grandes-hechos-la-lucha"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

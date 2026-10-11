@@ -1,6 +1,8 @@
 ---
 texto: "Porque maravilla es sentir dolor en el fuego, y, con todo, vivir; pero aun es mayor maravilla vivir en el fuego y no sentir dolor."
 autor: "agustin-de-hipona"
+temas:
+  - "la-vida"
 slug: "agustin-de-hipona-porque-maravilla-es-sentir-dolor-en-el"
 procedencia:
   obra: "La ciudad de Dios"

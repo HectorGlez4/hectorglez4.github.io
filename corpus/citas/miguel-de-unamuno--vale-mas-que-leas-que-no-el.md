@@ -1,6 +1,8 @@
 ---
 texto: "Vale más que leas que no el que te alimentes de chismes y comadrerías del pueblo."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-vale-mas-que-leas-que-no-el"
 procedencia:
   obra: "San Manuel Bueno, mártir"

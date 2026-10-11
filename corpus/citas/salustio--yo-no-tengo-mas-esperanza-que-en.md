@@ -1,7 +1,9 @@
 ---
-texto: "No son mis palabras aliñadas, ni hago de esto caso; harto se descubre la virtud por sí misma."
+texto: "Yo no tengo más esperanza que en mí mismo; y así es preciso mantenerla con mi valor y conducta, porque todo lo demás es muy endeble."
 autor: "salustio"
-slug: "salustio-no-son-mis-palabras-alinadas-ni-hago"
+temas:
+  - "la-virtud"
+slug: "salustio-yo-no-tengo-mas-esperanza-que-en"
 procedencia:
   obra: "Guerra de Jugurta"
 estadoDerechos: "dominio-público"

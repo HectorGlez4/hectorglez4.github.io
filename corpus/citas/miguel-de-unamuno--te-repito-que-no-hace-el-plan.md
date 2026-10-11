@@ -1,6 +1,8 @@
 ---
 texto: "Te repito, que no hace el plan a la vida, sino que ésta se lo traza a sí misma, viviendo."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-te-repito-que-no-hace-el-plan"
 procedencia:
   obra: "¡Adentro!"

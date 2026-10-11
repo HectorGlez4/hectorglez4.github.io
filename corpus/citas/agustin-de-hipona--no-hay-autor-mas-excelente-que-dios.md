@@ -1,6 +1,8 @@
 ---
 texto: "No hay autor más excelente que Dios, ni arte más eficaz que la palabra de Dios; ni causa mejor que lo bueno para que lo criara Dios bueno."
 autor: "agustin-de-hipona"
+temas:
+  - "la-palabra"
 slug: "agustin-de-hipona-no-hay-autor-mas-excelente-que-dios"
 procedencia:
   obra: "La ciudad de Dios"

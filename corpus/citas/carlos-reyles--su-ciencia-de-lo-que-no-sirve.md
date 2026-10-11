@@ -1,6 +1,8 @@
 ---
 texto: "Su ciencia de lo que no sirve para vivir es prodigiosa, más prodigiosa todavía su ignorancia de lo que para vivir sirve."
 autor: "carlos-reyles"
+temas:
+  - "el-saber"
 slug: "carlos-reyles-su-ciencia-de-lo-que-no-sirve"
 procedencia:
   obra: "La Muerte Del Cisne"

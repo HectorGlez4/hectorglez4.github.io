@@ -1,7 +1,9 @@
 ---
-texto: "Los trabajos excitan é inflaman el valor: y la adversidad fue siempre la escuela de la virtud."
+texto: "Porque por lo demás, sabida cosa es que entre amigos no hay distincion; y que la amistad nos halla, ó por lo menos nos hace á todos iguales."
 autor: "minucio-felix"
-slug: "minucio-felix-los-trabajos-excitan-e-inflaman-el-valor"
+temas:
+  - "la-amistad"
+slug: "minucio-felix-porque-por-lo-demas-sabida-cosa-es"
 procedencia:
   obra: "El Octavio"
 estadoDerechos: "dominio-público"

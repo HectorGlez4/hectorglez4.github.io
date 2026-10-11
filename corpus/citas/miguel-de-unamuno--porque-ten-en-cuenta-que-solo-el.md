@@ -1,6 +1,8 @@
 ---
 texto: "Porque ten en cuenta que sólo el porvenir es reino de libertad; pues así que algo se vierte al tiempo, a su ceñidor queda sujeto."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-libertad"
 slug: "miguel-de-unamuno-porque-ten-en-cuenta-que-solo-el"
 procedencia:
   obra: "¡Adentro!"

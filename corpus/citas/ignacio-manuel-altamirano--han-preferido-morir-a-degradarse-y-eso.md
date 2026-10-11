@@ -1,6 +1,8 @@
 ---
 texto: "Han preferido morir a degradarse, y eso no por vanidad, ni por conservar una herencia de honor, sino porque tal es nuestra naturaleza."
 autor: "ignacio-manuel-altamirano"
+temas:
+  - "la-gloria"
 slug: "ignacio-manuel-altamirano-han-preferido-morir-a-degradarse-y-eso"
 procedencia:
   obra: "El Zarco"
