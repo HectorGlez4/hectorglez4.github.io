@@ -1,0 +1,29 @@
+fuente: wikisource-es
+obra: El Zarco
+año: 1869
+url: https://es.wikisource.org/wiki/El_Zarco/Cap%C3%ADtulo_I
+recuperado: 2026-10-11
+---
+El Zarco/Capítulo I
+|título = [[El Zarco]]
+|autor = Ignacio Manuel Altamirano
+obra> |título=El Zarco
+obra> |autor=Ignacio Manuel Altamirano
+obra> |año=1869
+obra> |título={{Anclaje+|Índice}}
+---
+Yautepec es una población de tierra calienta, cuyo caserío se esconde en un bosque de verdura. De lejos, ora se llegue de Cuernavaca por el camino quebrado de las Tetillas, que serpentea en medio de dos colinas rocallosas cuya forma les ha dado nombre, ora descienda de la fría y empinada sierra de Tepoztlán, por el lado Norte, o que se descubra por el sendero llano que viene del valle de Amilpas por el Oriente, atravesando las ricas y hermosas haciendas de caña de Cocoyoc, Calderón, Casasano y San Carlos, siempre se contempla a Yautepec como un inmenso bosque por el que sobresalen apenas las torrecillas de su iglesia parroquial.
+
+De cerca, Yautepec presenta un aspecto original y pintoresco. Es un pueblo mitad oriental y mitad americano. Oriental, porque los árboles que forman ese bosque de que hemos hablado son naranjos y limoneros, grandes, frondosos, cargados siempre de frutos y de azahares que embalsaman la atmósfera con sus aromas embriagadores. Naranjos y limoneros por donde quiera, con extraordinaria profusión. Diríase que allí estos árboles son el producto espontáneo de la tierra; tal es la exuberancia con que se dan, agrupándose, estorbándose, formando ásperas y sombrías bóvedas en las huertas grandes o pequeñas que cultivan todos los vecinos, y rozando con sus ramajes de un verde brillante y oscuro y cargados de pomas de oro los aleros de teja o de bálago de las casas. Mignon no extrañaría su patria, en Yautepec, donde los naranjos y limoneros florecen en todas las estaciones.
+
+Verdad es que este conjunto oriental se modifica en parte por la mezcla de otras plantas americanas, pues los bananos suelen mostrar allí sus esbeltos troncos y sus anchas hojas, y los mameyes y otras zapotáceas elevan sus enhiestas copas sobre los bosquecilIos, pero los naranjos y limoneros dominan por su abundancia. En 1854, perteneciendo todavía Yautepec al Estado de México, se hizo un recuento de estos árboles en esta población, y se encontró con que había más de quinientos mil. Hoy, después de veinte años, es natural que se hayan duplicado y triplicado. Los vecinos viven casi exclusivamente del producto de estos preciosos frutales, y antes de que existiera el ferrocarril de Veracruz, ellos surtían únicamente de naranjas y limones a la ciudad de México.
+
+Por lo demás, el aspecto del pueblo es semejante al de todos los de las tierras calientes de la República. Algunas casas de azotea pintadas de colores chillantes, las más de tejados oscuros y salpicados con las manchas cobrizas de la humedad, muchísimas de paja o de palmeras de la tierra fría, todas amplias, cercadas de paredes de adobe, de árboles o de piedras; alegres, surtidas abundantemente de agua, nadando en flores y cómodas, aunque sin ningún refinamiento moderno.
+
+Un río apacible de linfas transparentes y serenas que no es impetuoso más que en las crecientes del tiempo de lluvias, divide el pueblo y el bosque, atravesando la plaza, lamiendo dulcemente aquellos cármenes y dejándose robar sus aguas por numerosos apantles que las dispersan en todas direcciones. Ese río es verdaderamente el dios fecundador de la comarca y el padre de los dulces frutos que nos refrescan, durante los calores del estío, y que alegran las fiestas populares en México en todo el año.
+
+La población es buena, tranquila, laboriosa, amante de la paz, franca, sencilla y hospitalaria. Rodeada de magníficas haciendas de caña de azúcar, mantiene un activo tráfico con ellas, así como con Cuernavaca y Morelos, es el centro de numerosos pueblecillos de indígenas, situados en la falda meridional de la cordillera que divide la tierra caliente del valle de México, y con la metrópoli de la República a causa de los productos de sus inmensas huertas de que hemos hablado.
+
+En lo político y administrativo, Yautepec, desde que pertenecía al Estado de México, fue elevándose de un rango subalterno y dependiente de Cuernavaca, hasta ser cabecera de distrito, carácter que conserva todavía. No ha tomado parte activa en las guerras civiles y ha sido las más veces víctima de ellas, aunque ha sabido reponerse de sus desastres, merced a sus inagotables recursos y a su laboriosidad. El río y los árboles frutales son su tesoro; así es que los facciosos, los partidarios y los bandidos, han podido arrebatarle frecuentemente sus rentas, pero no han logrado mermar ni destruir su capital.
+
+La población toda habla español, pues se compone de razas mestizas. Los indios puros han desaparecido allí completamente.

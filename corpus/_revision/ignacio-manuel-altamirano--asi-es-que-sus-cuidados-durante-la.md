@@ -1,0 +1,14 @@
+---
+texto: "Así es que sus cuidados, durante la enfermedad de la anciana, habían sido exquisitos, y las vigilias y la inquietud sufridas se revelaban en su bello semblante, pálido y demacrado."
+autor: "ignacio-manuel-altamirano"
+slug: "ignacio-manuel-altamirano-asi-es-que-sus-cuidados-durante-la"
+procedencia:
+  obra: "El Zarco"
+  año: 1869
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_Zarco/Cap%C3%ADtulo_XVII"
+---

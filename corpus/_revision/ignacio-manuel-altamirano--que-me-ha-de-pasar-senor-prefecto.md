@@ -1,0 +1,14 @@
+---
+texto: "-¡Qué me ha de pasar, señor prefecto, una gran desgracia!, que mi hija ha sido robada anoche."
+autor: "ignacio-manuel-altamirano"
+slug: "ignacio-manuel-altamirano-que-me-ha-de-pasar-senor-prefecto"
+procedencia:
+  obra: "El Zarco"
+  año: 1869
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_Zarco/Cap%C3%ADtulo_XIII"
+---
