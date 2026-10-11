@@ -1,6 +1,8 @@
 ---
 texto: "Lo que queremos es que esa unión sea efectiva y para animarnos a la gloriosa empresa de nuestra libertad; unirnos para reposar, para dormir en los brazos de la apatía, ayer fue una mengua, hoy es una traición."
 autor: "simon-bolivar"
+temas:
+  - "la-patria"
 slug: "simon-bolivar-lo-que-queremos-es-que-esa-union"
 procedencia:
   obra: "Discurso ante la Sociedad Patriótica"

@@ -1,6 +1,8 @@
 ---
 texto: "No es justo destruir los hombres que no quieren ser libres, ni es libertad la que se goza bajo el imperio de las armas contra la opinión de seres fanáticos cuya depravación de espíritu les hace amar las cadenas como los vínculos sociales."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-no-es-justo-destruir-los-hombres-que"
 procedencia:
   obra: "Manifiesto de Carúpano"

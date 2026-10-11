@@ -1,6 +1,8 @@
 ---
 texto: "La verdadera constitución liberal está en los códigos civiles y criminales; y la más terrible tiranía la ejercen los Tribunales por el tremendo instrumento de las leyes."
 autor: "simon-bolivar"
+temas:
+  - "la-justicia"
 slug: "simon-bolivar-la-verdadera-constitucion-liberal-esta-en-los"
 procedencia:
   obra: "Discurso en Bolivia"

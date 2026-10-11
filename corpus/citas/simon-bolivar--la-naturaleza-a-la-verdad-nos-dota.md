@@ -1,6 +1,8 @@
 ---
 texto: "La naturaleza a la verdad nos dota, al nacer, del incentivo de la libertad; mas sea pereza, sea propensión inherente a la humanidad, lo cierto es que ella reposa tranquila aunque ligada con las trabas que le imponen."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-la-naturaleza-a-la-verdad-nos-dota"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"
