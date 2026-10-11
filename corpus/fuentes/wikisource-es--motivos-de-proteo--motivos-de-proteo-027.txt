@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/027
+recuperado: 2026-10-11
+---
+Motivos de Proteo/027
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXVI - Nuestra complejidad personal. Nadie diga: «tal soy, tal seré siempre».
+
+.............................................................................................................................................
+
+... Pero admito que sea algo que nazca de real desenvolvimiento de tu ser, y no un carácter adventicio, lo que se refleja presentemente en tu conciencia y se manifiesta por tus sentimientos y tus actos. Aun así, nada definitivo y absoluto te será lícito afirmar de aquella realidad, que no es, en ninguno de nosotros, campo cerrado, inmóvil permanencia, sino perpetuo llegar a ser, cambio continuo, mar por donde van y vienen las olas. El saber de sí mismo no arriba a término que permita jurar: «Tal soy, tal seré siempre». Ese saber es recompensa de una obra que se renueva cada día, como la fe que se prueba en la contradicción, como el pan que santifica el trabajo. Las tendencias que tenemos por más fundamentales y características de la personalidad de cada uno, no se presentan nunca sin alguna interrupción languidez o divergencia; y aun su estabilidad como resumen o promedio de las manifestaciones morales ¡cuán distante está de poder confiar siempre en lo futuro; cuán distante de la seguridad de que la pasión que hoy soberanamente nos domina no ceda alguna vez su puesto a otra diversa o antagónica, que trastorne, por natural desenvolvimiento de su influjo, todo el orden de la vida moral! Quien se propusiera obtener para su alma una unidad absolutamente previsible, sin vacilaciones, sin luchas, padecería la ilusión del cazador demente que, entrando, armado de toda suerte de armas, por tupida selva del trópico, se empeñara, con frenético delirio, en abatir cuanta viviente criatura hubiese en ella, y cien y cien veces repitiera la feral persecución, hasta que un ruido de pasos, o de alas, o un rugido, o un gorjeo, o un zumbar cenzalino, le mostrasen otras tantas veces la imposibilidad de lograr completa paz y silencio. Bosques de espesura llamó a los hombres el rey don Alfonso el Sabio.
+
+Hay siempre en nuestro espíritu una parte irreductible a disciplina, sea que en él prevalezca la disciplina del bien o la del mal, y la de la acción o la de la inercia. Gérmenes y propensiones rebeldes se agitan siempre dentro de nosotros, y su ocasión natural de despertar coincide acaso con el instante en que más firmes nos hallábamos en la pasión que daba seguro impulso a nuestra vida; en la convicción o la fe que la concentraban y encauzaban; en el sosiego que nos parecía haber sellado para siempre la paz de nuestras potencias interiores.
+
+Filosofía del espíritu humano; investigación en la historia de los hombres y los pueblos; juicio sobre un carácter, una aptitud o una moralidad; propósito de educación o de reforma, que no tomen en cuenta, para cada uno de sus fines, esta complexidad de la persona moral, no se lisonjeen con la esperanza de la verdad ni del acierto.

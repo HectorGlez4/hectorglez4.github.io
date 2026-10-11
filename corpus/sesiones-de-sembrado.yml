@@ -533,3 +533,14 @@ sesiones:
       citasPublicadas: 2049
       procedenciaCompleta: 22
       tradicionLatinoamericanaSobreHispanicos: 54.3
+  - fecha: "2026-10-11"
+    hora: "13:36"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Rodó: Motivos de Proteo"
+    motivo: "Ampliación de José Enrique Rodó con «Motivos de Proteo» (38 capítulos de Wikisource), obra distinta de «Ariel»."
+    resultado:
+      citasPublicadas: 2057
+      procedenciaCompleta: 22
+      tradicionLatinoamericanaSobreHispanicos: 54.3

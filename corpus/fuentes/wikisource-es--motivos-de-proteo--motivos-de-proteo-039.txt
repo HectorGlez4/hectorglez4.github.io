@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/039
+recuperado: 2026-10-11
+---
+Motivos de Proteo/039
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXXVIII - Fuerza de propaganda adscrita al acto más mínimo.
+
+Y así como no hay acto cuya vanidad sea segura con relación a la vida del que, voluntaria o indeliberadamente, lo realiza, tampoco le hay que no pueda dejar huella en la conciencia o el destino de los otros hombres. Con cada uno de nuestros actos, aun los más ligeros, triviales y ajenos de intención, no sólo proponemos un punto de partida para un encadenamiento capaz de prolongarse y conducir a no esperado término dentro de nuestra existencia, sino que le proponemos también para encadenamientos semejantes fuera de nosotros. Porque todo acto nuestro, por nimio que parezca, tiene una potencia incalculable de difusión y propaganda. No hay entre ellos ninguno que esté absolutamente destituido de ese toque magnético que tiende a provocar la imitación, y luego, a persistir en quien lo imita, por esa otra imitación de uno mismo que llamamos costumbre. Hacer tal o cual cosa es siempre propender, con más o menos fuerza, a que la hagan igual todos aquellos que la ven y todos aquellos que la oyen referir. Y esto no es sólo cierto de los actos mínimos de una voluntad grande y poderosa: es una radical virtud del acto, que, sin saberlo ni los que la ejercen ni los que la sufren, puede estar adscrita a un movimiento del ánimo del niño, del mendigo, del débil, del necio, del vilipendiado.
+
+Además, el valor de aquello que se hace o se dice, como influencia que entra a desenvolverse en lo interior del alma de otro, ¿quién lo calculará con fijeza si no es conociendo hasta en sus ápices la situación peculiar de esta alma, dentro de la cual una moción levísima, y en un sentido indiferente para los demás, puede ser la causa que rompa el orden en que ella reposaba, o que, por el contrario, lo restablezca y confirme, por misteriosamente fatal o misteriosamente oportuna?
+
+Hablaban los viejos moralistas del farisaísmo en el escándalo, y lo encontraban allí donde el hecho inocente es acusado de ejemplo tentador. Pero ¿quién sabe qué fondo de verdad personal no habría a menudo en estas acusaciones sospechadas de fingidas y pérfidas, si se piensa en la inextricable repercusión de una palabra o una imagen que entran a provocar los ecos extraños y los falaces reflejos de Psiquis?... Otro tanto pasa con el génesis arcano del amor, de la fe, del odio, de la duda... Porque nada de lo que obra de afuera sobre el alma la mueve como al cuerpo inanimado, cuyo movimiento puede preverse con exactitud, sabidas su resistencia invariable y la energía del móvil. Carácter de las reacciones de la vida es la espontaneidad, que establece una desproporción constante entre el impulso exterior y los efectos del impulso; y esta desproporción puede llegar a ser inmensa...
+
+Una palabra... un gesto... una mirada... El rayo que fulmina no es más certero y súbito que suelen serlo esas cosas sobre el alma nuestra. Y para las mortales lentitudes del remordimiento y el dolor ¿cuántas veces no son el germen terquísimo que retoña y dura hasta la muerte? ¿Quién agotará su sentido a la imagen que sella el recuerdo de Sully Prudhomme como la empresa de su pensamiento intenso y melancólico: aquel vaso de flores que, herido al paso y sin querer, con un golpe ligero, sobrelleva, como quien siente el pudor del sufrimiento, su apenas visible rasgadura, mientras por ella se escapa, lenta, lentamente, el agua que humedece los cabos de las flores, y éstas se marchitan y mueren?...

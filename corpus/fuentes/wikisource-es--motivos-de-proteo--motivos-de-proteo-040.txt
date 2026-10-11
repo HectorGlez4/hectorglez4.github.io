@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/040
+recuperado: 2026-10-11
+---
+Motivos de Proteo/040
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXXIX - El hecho nimio y la invención.
+
+En el descubrimiento, en la invención, en el zarpazo con que aferra su presa la atención hipertrófica que, perenne en el fondo de un espíritu, espía el movimiento de la realidad, a modo de pupila felina, dilatada en la sombra, aguardando el paso de la víctima, el hecho nimio ¡cómo se agiganta y vuelve glorioso!... La manzana de Newton, la lámpara de Galileo, no son sino moldes de una inicial con que comienzan muchas páginas en la historia del espíritu humano. Una marmita cuya tapa se mueve a impulsos del vapor pone a Worcester sobre las huellas de la fuerza con que más tarde humillará al espacio la locomotora. Un papel que, por encima de una llama, se sostiene y sube en el aire, inspira a los Montgolfier el principio de la navegación aérea. Haüy deja caer involuntariamente unos prismas de espato al suelo de su laboratorio, observa cómo se parten en pedazos simétricos, y descubre las leyes de la cristalografía. Un burgomaestre de Brujas, Luis de Barken, frota, por pueril distracción, un diamante con otro, y acierta así con el pulimento y la talla de la más noble de las piedras. El caballero de Meré consulta sobre el juego de dados a Pascal; y con su respuesta, Pascal funda el cálculo de probabilidades. En la invención artística, igual grandeza de la pequeñez apresada por las garras de la observación. Leonardo no halla modo de figurar como quiere al Judas de La Cena; repara un día, yendo por la calle, en la postura de un gañán, y la forma con que en vano soñaba se le imprime en los ojos. Milton asiste, de viaje por Italia, al retablo de un titiritero, y allí germina en su mente sublime la concepción de El Paraíso perdido.
+
+.............................................................................................................................................

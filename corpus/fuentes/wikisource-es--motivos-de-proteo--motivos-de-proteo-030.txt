@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/030
+recuperado: 2026-10-11
+---
+Motivos de Proteo/030
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXIX - Imposibilidad de una igualdad perenne.
+
+Ni la más alta perfección moral asequible, que importa la concordia de las tendencias inferiores subordinadas a la potestad de la razón; ni la más primitiva sencillez, que muestra, persistiendo en la conciencia humana, el vestigio de la línea recta y segura del instinto; ni la más ciega y pertinaz pasión, que absorbe toda el alma y la mueve, mientras dura la vida, en un solo arrebatado impulso, tienen fuerza con que prevalecer sobre lo complejo de nuestra naturaleza hasta el punto de anular la diversidad, la inconsecuencia y la contradicción, que se entrelazan con las mismas raíces de nuestro ser.
+
+¿Hay límpida y serena conciencia por la que no haya pasado la sombra de algún instante infiel al orden que componen los otros?... Levantémonos a la cumbre sublime donde se tocan lo divino y lo humano. Subamos hasta Jesús e interroguémosle. En la vía de su amor infinito hubo también cabida para la desesperanza, el desánimo y el tedio. Volviendo de la Pascua, y ya en el umbral de su pasión, el Redentor llegó al monte de los Olivos... Y allí una mitad de su alma peleó contra la otra; allí fue la angustia de la duda, y el sudor de muerte, y la rebelión que amaga, desde lo hondo de las entrañas mortales, a la parte que es puro amor y vida; allí fue el hesitar de que estuvo pendiente, en el momento más solemne y trágico del mundo, si el mundo iba a levantarse a la luz o a desplomarse en la sombra. ¿Quién, si recuerda esto, creerá accesible a sus fuerzas una eterna lucidez y constancia en la voluntad del bien? La palabra de Kempis enseña a los confiados cómo el desprecio de la tentación es vanidad en los más justos. «Jamás (dice ese penetrante asesor de los que creen), conocí hombre tan piadoso que no tuviera intermisión en el consuelo divino».
+
+Y así como en el orden celeste de la vida del santo, la disonancia se da también en el alma del héroe primitivo y candoroso, que corre desatada, como la piedra por la pendiente, en derechura a su objeto; y en el alma simple del rústico, cuya mente gira dentro de una mínima complejidad de tendencias y necesidades. La fiereza de Aquiles se deshace en lágrimas de misericordiosa ternura cuando Príamo se postra a sus plantas. Sancho no parece él mismo, pero lo es -lo es con esa identidad que nace de imitación de la naturaleza, y no de regularidad artificiosa-: en pasos como el del inmortal abandono de su ínsula.
+
+Frente al hecho revelador, según el cual el entendimiento lógico de Taine, pretendió inferir de un acto aislado la noción entera de un carácter: por un solo hilo, la trama completa de una personalidad; frente al hecho revelador y limitando la eficacia de aquel procedimiento, se reproduce, harto a menudo, en la existencia humana, el hecho que podemos llamar contradictorio: el hecho en que la personalidad de cada uno se manifiesta-bajo una faz divergente o antitética de aquella que predomina en su carácter y mira al norte de su vida.

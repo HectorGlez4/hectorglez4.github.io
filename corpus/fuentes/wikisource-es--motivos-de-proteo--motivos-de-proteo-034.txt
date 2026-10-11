@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/034
+recuperado: 2026-10-11
+---
+Motivos de Proteo/034
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXXIII - Momentos proféticos.
+
+Para quien siente en sí la necesidad de una reforma íntima; para quien ha menester quebrantar el hábito o inclinación que tiene bajo yugo a su personalidad moral; para quien ve agotadas las energías que de sí mismo conoce, lo complejo y variable de nuestra naturaleza es prenda de esperanza, es promesa dichosa de levante y regeneración. Porque, supuesto cierto poder avizorador y directivo de la voluntad para contener o alentar los movimientos de esa espontaneidad infinita, es a ellos a quien se debe que seamos capaces de libertarnos y de renovarnos. Cada una de las desviaciones o disonancias de un momento: ráfaga de entusiasmo que calienta el ambiente de una vida apática; acierto o intuición que rasga las sombras de una mente oscura y torpe; vena de alegría que brota en un vasto erial de horas tristes; inspiración benéfica que interrumpe la unidad de una existencia consagrada al mal: cada una de estas desviaciones de un momento, es como un claro que se abre de improviso sobre un horizonte de bonanza, y ofrece, para la reacción redentora de la voluntad, un punto de partida posible. Observar y utilizar tales disonancias, es resorte maestro en la obra del cultivo propio. Y aun cuando la atención y la voluntad no detengan ante ellas el paso... La veleidad dichosa, el momento rebelde, se pierden entonces en el olvido y la sombra, y se reanuda el tenor usual de existencia. -¿Es que han pasado para no volver?-. ¡Quién sabe! ¡Cuántas veces han vuelto...; han vuelto de esa profundidad ignorada de uno mismo, donde vagaron por misteriosos rumbos; y su reaparición no ha sido sólo el eco que vanamente suena en la memoria, ni nueva veleidad que anima el soplo de un instante, sino ya impulso eficaz, voluntad firme y duradera, nuncio de redención, aurora de nueva vida!
+
+Las más hondas transformaciones morales suelen anunciarse, muy antes de llegar, por uno de estos momentos que no dejan más huella que un relámpago, y que confundimos con la muchedumbre de nuestras efímeras inconsecuencias: oscuro y desconocido precursor, profeta sin signo visible, que pasa, allá adentro, envuelto en la corriente del vulgo.

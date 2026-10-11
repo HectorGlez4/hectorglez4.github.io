@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/051
+recuperado: 2026-10-11
+---
+Motivos de Proteo/051
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+L - Fuerza del amor en la formación de la personalidad.
+
+... Es el monarca, es el tirano; y su fuerza despótica viene revestida de la gracia visible, el signo de elección y derecho, que la hace acepta a quienes la sufren. La diversidad de su acción es infinita, no menos por voluntarioso que por omnipotente. Ni en la ocasión y el sentido en que se manifiesta, muestra ley que le obligue, ni en sus modificaciones guarda algún género de lógica. Llega y se desata; se retrae y desaparece, con la espontaneidad genial o demoníaca que excede de la previsión del juicio humano. El misterio, que la hermosa fábula de Psiquis puso de condición a su fidelidad y permanencia, constituye el ambiente en que se desenvuelve su esencia eterna y proteiforme. Si, abstractamente considerado el amor, es fuerza elemental que representa en el orden del alma la idea más prístina y más simple, nada iguala en complejidad al amor real y concreto, cuya trama riquísima todo lo resume y todo lo reasume, hasta identificarse con la viva y orgánica unidad de nuestro espíritu. Como el río caudal se engrandece con el tributo de los medianos y pequeños; como la hoguera trueca en fuego, que la agiganta, todo lo que cae dentro de ella, de igual manera el amor, apropiándose de cuantas pasiones halla al par de él en el alma, las refunde consigo, las compele a su objeto, y no les deja ser más que para honrarle y servirle. Pero no sólo como señor las avasalla, sino que como padre las engendra; porque no cabe cosa en corazón humano que con el amor no trabe de inmediato su origen: cuando no a modo de derivación y complemento, a modo de límite y reacción. Así, donde él alienta nacen deseo y esperanza, admiración y entusiasmo; donde él reposa, nacen tedio y melancolía, indecisión y abatimiento; donde él halla obstáculos y guerra, nacen odio y furor, ira y envidia. Y la fuerza plasmante y modeladora de la personalidad, que cada uno de estos movimientos del alma lleva en sí, se reúne, volviendo al seno del amor, que los recoge a su centro, con la más grande y poderosa de todas, que es la que al mismo amor, como una de tantas pasiones, pertenece; y esta suprema fuerza de acumulación y doble impulso, lo es a la vez de ordenación y disciplina: reguladora fuerza que señala a cada una de aquellas potencias subordinadas, su lugar; a la proporción en que concurren, su grado; a la ocasión en que se manifiestan, su tiempo; por donde inferirás la parte inmensa que a la soberanía del amor está atribuida en la obra de instituir, fortalecer y reformar nuestra personalidad.

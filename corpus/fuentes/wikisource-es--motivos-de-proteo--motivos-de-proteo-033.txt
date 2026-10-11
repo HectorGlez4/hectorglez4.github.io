@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/033
+recuperado: 2026-10-11
+---
+Motivos de Proteo/033
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXXII - Ventajas de la multiplicidad de nuestro fondo íntimo.
+
+¡Nuestra complejidad, nuestra instabilidad moral, nuestra multitud de formas virtuales que una leve moción exterior basta a veces para levantar a lo activo y aparente del alma! ¡De cuán diversas maneras puede considerarse este pensamiento, y cuán fecundo y sugestivo es! Para el dilettante sólo ofrece alicientes de curiosa delectación y vagabundez agradable; para el asceta y el estoico, es pensamiento de pavor, que trae la imagen de las movedizas arenas sobre que se asienta nuestra unidad personal, que ellos aspiran a afirmar en base de bronce. Pero quien concibe la vida, a diferencia del dilettante, como acción real; a diferencia del estoico y el asceta, como rectificación y tránsito constantes, valora cuánto hay de propicio y ventajoso en la multiplicidad de nuestro fondo íntimo.
+
+La concurrencia, en una organización individual, de aspectos opuestos, de modos de sensibilidad contradictorios; la manifestación simultánea o la alternada sucesión, dentro de la unidad de una conciencia, de elementos ordinariamente separados, es poderoso fermento de originalidad, del que a menudo vienen visiones nuevas de las cosas; percepción de relaciones imprevistas; estímulos de investigación y libertad; maneras de ver y de sentir que acaso entrañan una innovación consistente y fecunda, capaz de comunicarse a los otros: variación espontánea, que, en el desenvolvimiento de la sociedad, como se ha supuesto en el de las especies naturales, propone y hace prevalecer un tipo nuevo. La concordia, o la perenne reacción, de los contrarios, suele ser el secreto de las originalidades superiores. Cien espíritus habrá en quien los divergentes impulsos de la creencia y el deseo, mantendrán indefinidamente la estéril anarquía de la indecisión y de la duda; y otros ciento que resolverán esta anarquía por la vuelta a la sugestión más poderosa entre las que obren con la sociedad y la herencia: por el triunfo de una idea o inclinación de esas que rivalizan dentro de ellos sin modificarla ni ensancharla en nada; reduciendo en adelante los atrevimientos de las demás a desviaciones efímeras y vanas; pero habrá un espíritu que, de la lucha y competencia interior, se levantará a un plano más alto, a una posición ignorada y descubridora de horizontes; ya sea esto en la esfera de la inteligencia, por el hallazgo de una síntesis, de una teoría o de un estilo; ya sea en la esfera de la vida moral, por el ejemplo de un sesgo desusado en la acción y la conducta.

@@ -1,0 +1,14 @@
+---
+texto: "Por este libro se infundió en Colón el presentimiento del hallazgo inaudito."
+autor: "jose-enrique-rodo"
+slug: "jose-enrique-rodo-por-este-libro-se-infundio-en-colon"
+procedencia:
+  obra: "Motivos de Proteo"
+  año: 1909
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Motivos_de_Proteo/056"
+---

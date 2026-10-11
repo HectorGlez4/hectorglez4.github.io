@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/053
+recuperado: 2026-10-11
+---
+Motivos de Proteo/053
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+LII - El amor y la civilización personal.
+
+Humanidad reducida a breve escala, es la persona; barbarie, no menos que la de la horda y el aduar, la condición de cada uno como sale de manos de la naturaleza, antes de que la sujeten a otras leyes la comunicación con los demás y la costumbre. Y en esta obra de civilización personal, que tiene su punto de partida en la indómita fiereza del niño y llega a su coronamiento en la perfección del patricio, del hidalgo, del supremo ejemplar de una raza que florece en una ilustre, altiva y opulenta ciudad, la iniciación de amor es, como en los preámbulos de la cultura humana, fuerza que excita y complementa todas las artes que a tal obra concurren; así las más someras, que terminan en la suavidad de la palabra y la grada de las formas, como las que toman por blanco más hondas virtualidades del sentimiento y el juicio. En la deleitosa galería del «Decamerón» descuella la bien trazada figura de Cimone de Chipre, el rústico torpe y lánguido, indócil, para cuanto importe urbanizar su condición cerril, a toda emulación, halago y ejemplo, y a quien el amor de la hermosa Efigenia levanta, con sólo el orfeico poder de su beldad, a una súbita y maravillosa cultura de todas las potencias del alma y el cuerpo, hasta dejarle trocado en el caballero de más gentil disposición y mejor gracia, de más varia destreza y más delicado entendimiento, que pudiera encontrarse en mucho espacio a la redonda. Igual concepto de la civilizadora teurgia del amor, inspiró a Jorge Sand el carácter de su Mauprat, en quien una naturaleza selvática, aguijada por el estímulo de la pasión, se remonta, con la sublime inconsciencia del iluminado, a las cumbres de la superioridad de espíritu.

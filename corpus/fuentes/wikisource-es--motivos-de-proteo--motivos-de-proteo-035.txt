@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/035
+recuperado: 2026-10-11
+---
+Motivos de Proteo/035
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXXIV - El barco que parte.
+
+Mira la soledad del mar. Una línea impenetrable la cierra, tocando al cielo por todas partes menos aquella en que el límite es la playa. Un barco, ufano el porte, se aleja, con palpitación ruidosa, de la orilla. Sol declinante; brisa que dice «¡vamos!»; mansas nubes. El barco se adelanta, dejando una huella negra en el aire, una huella blanca en el mar. Avanza, avanza, sobre las ondas sosegadas. Llegó a la línea donde el mar y el cielo se tocan. Bajó por ella. Ya sólo el alto mástil aparece; ya se disipa esta última apariencia del barco. ¡Cuán misteriosa vuelve a quedar ahora la línea impenetrable! ¿Quién no la creyera, allí donde está, término real, borde de abismo? Pero tras ella se dilata el mar, el mar inmenso; y más hondo, más hondo, el mar inmenso aún; y luego hay tierras que limitan, por el opuesto extremo, otros mares; y nuevas tierras, y otras más, que pinta el sol de los distintos climas y donde alientan variadas castas de hombres: la estupenda extensión de las tierras pobladas y desiertas, la redondez sublime del mundo. Dentro de esta inmensidad, hállase el puerto para donde el barco ha partido. Quizás, llegado a él, tome después caminos diferentes entre otros puntos de ese campo infinito, y ya no vuelva nunca, cual si la misteriosa línea que pasó fuese de veras el vacío en donde todo acaba... Pero he aquí que, un día, consultando la misma línea misteriosa, ves levantarse un jirón flotante de humo, una bandera, un mástil, un casco de aspecto conocido... ¡Es el barco que vuelve! Vuelve, como el caballo fiel a la dehesa. Acaso más pobre y leve que al partir; acaso herido por la perfidia de la onda; pero acaso también, sano y colmado de preciosas cosechas. Tal vez, como en alforjas de su potente lomo, trae el tributo de los climas ardientes: aromas deleitables, dulces naranjas, piedras que lucen como el sol, o pieles suaves y vistosas. Tal vez, a trueque de las que llevaba, trae gentes de más sencillo corazón, de voluntad más recia y brazos más robustos. ¡Gloria y ventura al barco! Tal vez, si de más industriosa parte procede, trae los forjados hierros que arman para el trabajo la mano de los hombres; la tejida lana; el metal rico, en las redondas piezas que son el acicate del mundo; tal vez trozos de mármol y de bronce, a que el arte humano infundió el soplo de la vida, o mazos de papel donde, en huellas de diminutos moldes, vienen pueblos de ideas. ¡Gloria, gloria y ventura, al barco!

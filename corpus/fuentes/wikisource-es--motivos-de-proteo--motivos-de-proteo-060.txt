@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/060
+recuperado: 2026-10-11
+---
+Motivos de Proteo/060
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+LIX - Vacilaciones que resuelve el azar.
+
+Curioso es ver cómo, puesta el alma en el crucero de dos caminos que la reclaman con igual fuerza o la convidan con igual halago, libra a veces a una respuesta de la fatalidad la solución de la incertidumbre que no ha sido capaz de disipar por determinación voluntaria. Cuando el motivo imperioso no surge de deliberación, se le crea artificialmente mediante un compromiso con el azar. Vocaciones famosas han prevalecido de esta suerte, si no se exagera el valor de rasgos anecdóticos, cuyo fondo de verdad humana tiene a su favor, por otra parte, la incalculable trascendencia de lo que parece más pequeño y más nimio, en la secreta generación de lo grande.
+
+Jacobo Sforza, el fundador de aquella heroica estirpe del Renacimiento, fue, en sus principios, humilde labrador de Romaña. Cuando llegó hasta él el soplo guerrero de su tiempo y hubo de resolver si acudiría a este llamado o continuaría labrando su terrón, fió al azar el desenlace de sus dudas. Sacó un hacha del cinto. Frente a donde estaba, en su heredad, levantábase un grueso árbol. Lanzaría la acerada hoja contra el tronco, y sí después de herirle, se desplomaba el hacha al pie del árbol, Jacobo no modificaría el tenor de su existencia; pero si acaso el arma quedaba presa y aferrada en el tronco, la espada del soldado sería en adelante su hoz. Partió el hacha como un relámpago, y el tronco la recibió en su seno sin soltarla de sí: Jacobo Sforza quedó consagrado para siempre a la guerra. De semejante modo cuenta Goethe que resolvió vacilaciones de su adolescencia entre la poesía y la pintura: tomó un puñal, y arrojándolo al río orillado de sauces, por donde navegaba, no lo vio sumergirse, porque lo velaron las ramas flotantes: lo cual significaba, según de antemano tenía convenido, que no insistiría en el género de vocación que rivalizaba con aquella que le llevó a ser el poeta del Fausto.
+
+Esta apelación a la fatalidad suele encontrarse en la existencia de las almas religiosas, con carácter de providencialismo. San Bernardo fue árbitro de los destinos de la Iglesia, bajo la ruda estameña de sus hábitos, pero desechó, por espíritu de abnegación, dignidades y honores. En Milán, la muchedumbre le ruega con instancia para que entre a ocupar la silla episcopal que le ofrecen. Él se remite a la indicación divina, provocándola en esta forma: si su caballo, abandonado a sí mismo, le conduce a lo interior de la ciudad, aceptará la preeminencia; la rehusará si le lleva rumbo al campo. Pasó esto último. La vida del predicador de las Cruzadas siguió en sus términos de gloriosa humildad.

@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Motivos de Proteo
+año: 1909
+url: https://es.wikisource.org/wiki/Motivos_de_Proteo/032
+recuperado: 2026-10-11
+---
+Motivos de Proteo/032
+|título=[[Motivos de Proteo]]
+|autor=José Enrique Rodó
+obra> |título=Motivos de Proteo
+obra> |autor=José Enrique Rodó
+obra> |año=1909
+obra> |título={{Anclaje+|Índice}}
+---
+XXXI - Los pozos comunicantes. Ráfagas.
+
+La infinita y desacordada variedad de las cosas y los acontecimientos multiplica la ocasión de que nuestra desigualdad radical dé muestra de sí. Y a la influencia de lo que ocurre en torno de nosotros, únense acaso, para ello, otras más lejanas y escondidas... Nuestra alma no está puesta en el tiempo como cavidad de fondo cerrado e incapaz de dar paso a la respiración de lo que quedar bajo de ella. Hemos de figurarnosla mejor como abismal e insondable pozo, cuyas entrañas se hunden en la oscura profundidad del tiempo muerto. Porque el alma de cada uno de nosotros es el término en que remata una inmensa muchedumbre de almas: las de nuestros padres, las de nuestros abuelos; los de la segunda, los de la décima, los de la centésima generación...; almas abiertas, en lo hondo del tiempo, unas sobre otras, hasta el confín de los orígenes humanos, como abismos que uno de otro salen y se engendran; y a medida que se desciende, truécase en dos abismos cada abismo, porque cada alma que nace viene inmediatamente de dos almas. Debajo de la raíz de tu conciencia, y en comunicación siempre posible contigo, flota así la vida de cien generaciones. Todas las que pasaron de la realidad del mundo, persisten en ti de tal manera; y por el tránsito que tú les das al porvenir mediante el alma de tus hijos, gozan vida inmortal, en cuanto perpetúan la esencia y compendio de sus actos, a que se acumulará la esencia y compendio de los tuyos. ¿Qué es el misterioso mandato del instinto, que obra en ti sin intervención de tu voluntad y tu conciencia, sino una voz que, propagándose a favor de aquellos pozos comunicantes, sube hasta tu alma, desde el fondo de un pasado inmemorial, y te obliga a un acto prefijado por la costumbre de tus progenitores?
+
+Pero otros ecos, no constantes ni organizados, como los del instinto, y que se anuncian por manifestaciones más personales de la actividad interior, no llegan tal vez a nuestra alma, de abismos remotos o cercanos: los ecos del pensar y el sentir de mil abuelos, esparcidos por diversas partes del mundo, vinculados a distintos tiempos, modelados por los hábitos de cien diferentes vocaciones y ejercicios; pastores y guerreros, labradores y navegantes, amos y siervos, devotos de unos y otros dioses; y estos ecos, que acaso nunca llegan a fundirse en unidad perfecta y armónica, por enérgica que sea la fuerza concertante de la propia personalidad y por convergentes que acierten a ser alguna vez las virtualidades que se acumulan en herencia; estos ecos, digo, ¿no darán razón de muchas de las disonancias y contradicciones de nuestra vida moral?... Yo los imagino de modo que, ya alimentan un perpetuo conflicto, que la conciencia refleja sin saber su causa e impulso; ya sólo se manifiestan en lucha sorda y subterránea, que apenas percibe la conciencia, hasta que tal vez un eco, destacado de entre los otros, brota de súbito en idea y mueve el corazón y la voluntad, produciendo una de esas divergencias de nuestro ser usual, a que, adecuada y expresivamente, solemos dar nombre de ráfagas, y en las que nos desconocemos a nosotros mismos.
+
+Ráfagas: sugestión melancólica, estremecimiento de religiosidad, arranque de heroísmo, tentación perversa, relámpago de inspiración, asomo de locura: mil cosas vagas e incongruentes, sueño que surgen, de este modo, del secreto del alma, apartándonos por un instante de la pauta de la vida común, para perderse luego en la igualdad y consecuencia de las horas que no conocen ímpetu rebelde. Somos, en esas ocasiones extrañas, como quien, sentado al borde de un abismo, sintiera llegar de sus profundidades misteriosas, rompiendo el silencio en que se escudan, ya un temeroso trueno, ya un vago son de campanas, ya un lastimero ¡ay!, ya un murmullo de alas, ya el rumor de la avenida de un río.
