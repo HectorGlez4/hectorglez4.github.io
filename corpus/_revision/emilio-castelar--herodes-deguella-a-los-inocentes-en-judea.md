@@ -1,0 +1,13 @@
+---
+texto: "Herodes degüella a los inocentes en Judea, como los degolló Cartago para desarmar a sus divinidades en el terrible asedio que le pusiera Agatócles."
+autor: "emilio-castelar"
+slug: "emilio-castelar-herodes-deguella-a-los-inocentes-en-judea"
+procedencia:
+  obra: "Recuerdos de Elda o Las fiestas de mi pueblo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Recuerdos_de_Elda_o_Las_fiestas_de_mi_pueblo"
+---

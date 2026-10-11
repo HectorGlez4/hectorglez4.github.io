@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Sobre la proclamación de la República
+url: https://es.wikisource.org/wiki/Sobre_la_proclamaci%C3%B3n_de_la_Rep%C3%BAblica_-_Discursos_de_Emilio_Castelar_%2811-02-1873%29
+recuperado: 2026-10-11
+---
+Sobre la proclamación de la República - Discursos de Emilio Castelar (11-02-1873)
+|título=Sobre la proclamación de la República
+|autor=Emilio Castelar
+|año=11 de febrero de 1873
+---
+",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Emilio Castelar - Discursos 11 febrero 1873.pdf/1"},"num":{"wt":"1"},"formatted":{"wt":"1"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Emilio Castelar - Discursos 11 febrero 1873.pdf/1","href":"./Página:Emilio_Castelar_-_Discursos_11_febrero_1873.pdf/1"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Emilio Castelar - Discursos 11 febrero 1873.pdf/2"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"3"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Emilio Castelar - Discursos 11 febrero 1873.pdf/2","href":"./Página:Emilio_Castelar_-_Discursos_11_febrero_1873.pdf/2"},"params":{},"i":3}}]}'>El Sr. PRESIDENTE: El Sr. Castelar tiene la palabra.
+
+El Sr. CASTELAR: Señores Diputados, ignoro si lo exhausto de mi voz y lo flaco de mis fuerzas me permitirán usar de la palabra como debo, en estas circunstancias solemnes, en estas circunstancias críticas, en estas circunstancias extraordinarias en que la Nacion española pasa de uno a otro hemisferio de la política.
+
+Señores Diputados, las patrióticas frases que aquí se acaban de oír; las declaraciones que han resonado en este templo de las leyes y que pronto resonarán en Europa y en todo el mundo, me dan esperanza, me dan seguridad de que una vez más, como en 1808, todos los españoles olvidarán sus diferencias para acordarse solo de la salvacion de la Pátria.
+
+Sí, Sres. Diputados; los escrúpulos del Sr. Salaverria son legítimos; los escrúpulos del Sr. Ulloa son legítimos y han sido expresados con una propiedad de lenguaje y una mesura de carácter, que nunca les agradecerá bastante la Cámara y que recogerá en su dia con aplauso la historia. Pero yo debo decir que todo estaba previsto en la Constitucion, todo previsto, menos que una dinastía entera hiciese renuncia de la Corona. Estaba prevista la abdicacion del Monarca en su sucesor: una Constitucion monárquica no habia podido prever, no habia previsto la renuncia de toda la dinastía. Cuando las circunstancias son supremas, cuando son extraordinarias, cuando es necesario que la autoridad no se interrumpa ni por un momento, es preciso atenernos á las fórmulas legales en todo cuanto sea posible, reconociendo el poder de esta Cámara, y prescindiendo de las fórmulas legales en aquello que no ha sido previsto por la Constitucion.
+
+¡Ah! siempre, en todo tiempo, cuando la Pátria ha peligrado, lo mismo en la guerra de la Independencia que en la guerra civil, no ha habido más que una voz: las Córtes, las Córtes, las Córtes; las Córtes, para salvar la Monarquía; las Córtes, para salvar la libertad; las Córtes, para salvar el órden. Pues bien; que las Córtes salven ahora la honra, la independencia, la integridad de la Pátria. (Aplausos. — El Sr. Ministro de Estado pide la palabra.)
+
+Señores, no tengo más que una cosa que decir: yo soy aquel que se opuso á las abstenciones; yo soy aquel que declaró que el gran problema es aliar el órden con la libertad; yo soy aquel que ha luchado á brazo partido con todas las impaciencias y con todas las demagogias; yo os prometo por mi honor, por mi conciencia, que mientras me quede vida, que mientras me quede palabra, haré toda clase de sacrificios por la honra de la Nacion, por la integridad de todos sus territorios, por el órden social y por la union de todos los españoles. (Grandes aplausos.)
+
+(...)
+
+El Sr. CASTELAR: Pido la palabra.
+
+El Sr. VICEPRESIDENTE (Gomez): El Sr. Castelar tiene la palabra.
+
+El Sr. CASTELAR: Dos palabras, porque lo supremo de las circunstancias y lo decisivo de la hora no me permiten decir más.
+
+Señores Diputados, aquí el partido republicano no reivindica la gloria que seria para él de haber destruido la Monarquía; no os echeis vosotros tampoco en cara la responsabilidad de este momento supremo. No; nadie ha destruido la Monarquía en España: nadie la ha matado. Yo, que tanto he contribuido á que este momento viniera, yo debo decir que no siento en mi conciencia, no, el mérito de haber concluido con la Monarquía; la Monarquía ha muerto por una descomposicion interior; la Monarquía ha muerto sin que nadie, absolutamente nadie, haya contribuido á ello más que la providencia de Dios.
+
+Señores, con Fernando VII murió la Monarquía tradicional; con la fuga de Doña Isabel II la Monarquía parlamentaria; con la renuncia de D. Amadeo de Saboya la Monarquía democrática: nadie ha acabado con ella; ha muerto por sí misma. Nadie trae la República; la traen todas las circunstancias; la trae una conjuracion de la sociedad, de la naturaleza y de la historia. Señores, saludémosla como el sol que se levanta por su propia fuerza en el cielo de nuestra Pátria. (Grandes aplausos.)
