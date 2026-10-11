@@ -1,6 +1,8 @@
 ---
 texto: "La división del poder es la primera de las garantías contra el abuso de su ejercicio."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-la-division-del-poder-es-la-primera"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

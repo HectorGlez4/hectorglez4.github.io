@@ -1,6 +1,8 @@
 ---
 texto: "Los hombres sin ideales son incapaces de resistir las acechanzas que las mediocracias siembran en su camino."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-los-hombres-sin-ideales-son-incapaces-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

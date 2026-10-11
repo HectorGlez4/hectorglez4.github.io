@@ -1,6 +1,8 @@
 ---
 texto: "Más alcanza en todas las artes una mediana habilidad con aplicación, que no un raro talento sin ella."
 autor: "baltasar-gracian"
+temas:
+  - "el-trabajo"
 slug: "baltasar-gracian-mas-alcanza-en-todas-las-artes-una"
 procedencia:
   obra: "El político"

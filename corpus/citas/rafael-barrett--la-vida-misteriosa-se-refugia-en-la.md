@@ -1,6 +1,8 @@
 ---
 texto: "La vida misteriosa se refugia en la carne que sufre."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-la-vida-misteriosa-se-refugia-en-la"
 procedencia:
   obra: "Lápida"

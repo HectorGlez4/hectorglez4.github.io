@@ -1,6 +1,8 @@
 ---
 texto: "Lo que llamamos sentimiento del honor es, aun en los no cristianos, un producto cristiano."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-gloria"
 slug: "miguel-de-unamuno-lo-que-llamamos-sentimiento-del-honor-es"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

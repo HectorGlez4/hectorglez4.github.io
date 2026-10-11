@@ -1,6 +1,8 @@
 ---
 texto: "La verdad se va haciendo, incesante e ilimitadamente, en todos los dominios de nuestra experiencia."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-la-verdad-se-va-haciendo-incesante-e"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

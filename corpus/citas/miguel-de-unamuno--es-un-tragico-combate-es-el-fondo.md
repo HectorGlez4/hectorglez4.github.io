@@ -1,6 +1,8 @@
 ---
 texto: "Es un trágico combate, es el fondo de la tragedia, el combate de la vida con la razón."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-es-un-tragico-combate-es-el-fondo"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

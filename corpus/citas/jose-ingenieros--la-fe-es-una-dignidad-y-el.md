@@ -1,7 +1,9 @@
 ---
-texto: "La ineptitud para satisfacer un deseo ó hartar un apetito determina esta pasión que hace sufrir del bien ajeno."
+texto: "La fe es una dignidad y el fanatismo es un renunciamiento."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-ineptitud-para-satisfacer-un-deseo-o"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-fe-es-una-dignidad-y-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La moral no consiste en cegar los instintos, esos manantiales de la vida, sino en utilizarlos, en canalizarlos."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-la-moral-no-consiste-en-cegar-los"
 procedencia:
   obra: "El porno-cinematógrafo"

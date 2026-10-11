@@ -1,6 +1,8 @@
 ---
 texto: "El hombre grande como el vulgar, se dirigen por el pensamiento, y se mueven por la voluntad y las pasiones."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-el-hombre-grande-como-el-vulgar-se"
 procedencia:
   obra: "El Criterio"

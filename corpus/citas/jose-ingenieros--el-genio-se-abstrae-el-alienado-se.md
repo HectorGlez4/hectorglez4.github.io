@@ -1,6 +1,8 @@
 ---
 texto: "El genio se abstrae; el alienado se distrae."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-el-genio-se-abstrae-el-alienado-se"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

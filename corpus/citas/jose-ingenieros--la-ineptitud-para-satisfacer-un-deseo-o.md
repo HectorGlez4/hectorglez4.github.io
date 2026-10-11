@@ -1,7 +1,9 @@
 ---
-texto: "El hombre extraordinario se revela auroralmente, como si obedeciera á una predestinación irrevocable."
+texto: "La ineptitud para satisfacer un deseo ó hartar un apetito determina esta pasión que hace sufrir del bien ajeno."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-extraordinario-se-revela-auroralmente-como"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-ineptitud-para-satisfacer-un-deseo-o"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Hay cosas que los hombres sin mérito real no perdonan cuando han llegado al poder."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-humildad"
 slug: "domingo-faustino-sarmiento-hay-cosas-que-los-hombres-sin-merito"
 procedencia:
   obra: "Recuerdos de provincia"

@@ -1,6 +1,8 @@
 ---
 texto: "Todo hombre sabe a tosco sin el artificio, y ha menester pulirse en todo orden de perfección."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-todo-hombre-sabe-a-tosco-sin-el"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

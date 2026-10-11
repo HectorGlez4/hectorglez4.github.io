@@ -1,6 +1,8 @@
 ---
 texto: "La virtud es un esfuerzo real hacia lo que se concibe como perfección potencial; nunca llega á ser la perfección misma."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-la-virtud-es-un-esfuerzo-real-hacia"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

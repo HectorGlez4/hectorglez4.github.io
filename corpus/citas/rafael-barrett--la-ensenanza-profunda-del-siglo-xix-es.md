@@ -1,6 +1,8 @@
 ---
 texto: "La enseñanza profunda del siglo XIX es la de nuestra identidad con la naturaleza."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-ensenanza-profunda-del-siglo-xix-es"
 procedencia:
   obra: "El retorno a la tierra"

@@ -1,6 +1,8 @@
 ---
 texto: "La gloria que no es nacional, es doméstica, no pertenece a la historia."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-gloria"
 slug: "juan-bautista-alberdi-la-gloria-que-no-es-nacional-es"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

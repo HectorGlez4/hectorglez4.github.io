@@ -1,6 +1,8 @@
 ---
 texto: "El ocio noble era la inversión del tiempo que oponían, como expresión de la vida superior, a la actividad económica."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-tiempo"
 slug: "jose-enrique-rodo-el-ocio-noble-era-la-inversion-del"
 procedencia:
   obra: "Ariel"

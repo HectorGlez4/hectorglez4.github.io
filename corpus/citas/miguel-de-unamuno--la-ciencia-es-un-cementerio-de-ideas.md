@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia es un cementerio de ideas muertas, aunque de ellas salga vida."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-la-ciencia-es-un-cementerio-de-ideas"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

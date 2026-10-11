@@ -1,6 +1,8 @@
 ---
 texto: "Es la belleza en sí, eterna, divina, única belleza real, y de la que no son todas las demás sino un reflejo."
 autor: "platon"
+temas:
+  - "la-verdad"
 slug: "platon-es-la-belleza-en-si-eterna-divina"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

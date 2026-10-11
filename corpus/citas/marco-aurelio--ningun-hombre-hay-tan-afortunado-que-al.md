@@ -1,6 +1,8 @@
 ---
 texto: "Ningún hombre hay tan afortunado que al morir no tenga á su lado quien se alegre del mal que le sucede."
 autor: "marco-aurelio"
+temas:
+  - "la-muerte"
 slug: "marco-aurelio-ningun-hombre-hay-tan-afortunado-que-al"
 procedencia:
   obra: "Soliloquios"

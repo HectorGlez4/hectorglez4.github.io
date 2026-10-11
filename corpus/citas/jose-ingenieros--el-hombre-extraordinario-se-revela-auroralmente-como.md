@@ -1,7 +1,9 @@
 ---
-texto: "La fe es una dignidad y el fanatismo es un renunciamiento."
+texto: "El hombre extraordinario se revela auroralmente, como si obedeciera á una predestinación irrevocable."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-fe-es-una-dignidad-y-el"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-el-hombre-extraordinario-se-revela-auroralmente-como"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
