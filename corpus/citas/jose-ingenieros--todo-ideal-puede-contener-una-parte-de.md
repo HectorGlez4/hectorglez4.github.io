@@ -1,7 +1,9 @@
 ---
-texto: "Hay que poner más lejos la intención y la esperanza, resistiendo las tentaciones del éxito inmediato; la gloria es más difícil, pero más digna."
+texto: "Todo ideal puede contener una parte de error, ó serlo totalmente: es una visión remota, expuesta á ser inexacta."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-hay-que-poner-mas-lejos-la-intencion"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-todo-ideal-puede-contener-una-parte-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

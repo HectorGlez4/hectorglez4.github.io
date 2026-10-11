@@ -1,6 +1,8 @@
 ---
 texto: "El amor es mucho menos digno de envidia que de compasión."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-el-amor-es-mucho-menos-digno-de"
 procedencia:
   obra: "Fedro"

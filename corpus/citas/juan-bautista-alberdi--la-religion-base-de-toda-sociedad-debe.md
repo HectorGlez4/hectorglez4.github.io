@@ -1,6 +1,8 @@
 ---
 texto: "La religión, base de toda sociedad, debe ser entre nosotros ramo de educación, no de instrucción."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-saber"
 slug: "juan-bautista-alberdi-la-religion-base-de-toda-sociedad-debe"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

@@ -1,6 +1,8 @@
 ---
 texto: "Y, en realidad de verdad, es prueba de un hombre perfectamente sabio y superior á las pasiones el saber, en lo uno, ser sufrido, y en lo otro templado."
 autor: "marco-aurelio"
+temas:
+  - "la-prudencia"
 slug: "marco-aurelio-y-en-realidad-de-verdad-es-prueba"
 procedencia:
   obra: "Soliloquios"

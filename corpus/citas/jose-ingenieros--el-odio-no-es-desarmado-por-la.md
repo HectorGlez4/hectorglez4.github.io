@@ -1,7 +1,9 @@
 ---
-texto: "La envidia es una defensa de las sombras contra los hombres."
+texto: "El odio no es desarmado por la buena ó la mala fortuna; la envidia sí."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-envidia-es-una-defensa-de-las"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-odio-no-es-desarmado-por-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

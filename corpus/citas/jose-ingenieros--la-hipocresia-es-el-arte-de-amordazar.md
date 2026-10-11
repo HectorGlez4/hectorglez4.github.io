@@ -1,7 +1,9 @@
 ---
-texto: "Ningún ideal es falso para quien lo profesa: es su verdad y él coopera á su advenimiento, con fe, con desinterés."
+texto: "La hipocresía es el arte de amordazar la dignidad; ella hace enmudecer los escrúpulos en los espíritus incapaces de resistir la tentación del mal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-ningun-ideal-es-falso-para-quien-lo"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-hipocresia-es-el-arte-de-amordazar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

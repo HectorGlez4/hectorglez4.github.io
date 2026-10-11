@@ -1,6 +1,8 @@
 ---
 texto: "Además, lo que es natural no decrece por la duración, y el tiempo agota el dolor."
 autor: "seneca"
+temas:
+  - "el-tiempo"
 slug: "seneca-ademas-lo-que-es-natural-no-decrece"
 procedencia:
   obra: "Consolación a Marcia"

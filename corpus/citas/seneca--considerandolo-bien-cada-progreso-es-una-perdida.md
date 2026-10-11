@@ -1,6 +1,8 @@
 ---
 texto: "Considerándolo bien, cada progreso es una pérdida."
 autor: "seneca"
+temas:
+  - "el-tiempo"
 slug: "seneca-considerandolo-bien-cada-progreso-es-una-perdida"
 procedencia:
   obra: "Consolación a Marcia"

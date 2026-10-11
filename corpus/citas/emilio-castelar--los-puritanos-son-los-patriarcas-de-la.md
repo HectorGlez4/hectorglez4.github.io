@@ -1,6 +1,8 @@
 ---
 texto: "Los puritanos son los patriarcas de la libertad; ellos abren un nuevo mundo en la tierra; ellos abren un nuevo surco en la conciencia; ellos crean una nueva sociedad."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-los-puritanos-son-los-patriarcas-de-la"
 procedencia:
   obra: "Defensa de la enmienda al proyecto de abolición de la esclavitud"

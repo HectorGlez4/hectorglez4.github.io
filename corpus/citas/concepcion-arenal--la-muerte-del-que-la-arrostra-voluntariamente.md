@@ -1,6 +1,8 @@
 ---
 texto: "La muerte del que la arrostra voluntariamente por la patria en el campo de batalla, ó por la humanidad en una epidemia, con ser muy distintas son igualmente heroicas."
 autor: "concepcion-arenal"
+temas:
+  - "la-muerte"
 slug: "concepcion-arenal-la-muerte-del-que-la-arrostra-voluntariamente"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

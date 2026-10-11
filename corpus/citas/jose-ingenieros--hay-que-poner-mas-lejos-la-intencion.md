@@ -1,7 +1,9 @@
 ---
-texto: "La hipocresía es el arte de amordazar la dignidad; ella hace enmudecer los escrúpulos en los espíritus incapaces de resistir la tentación del mal."
+texto: "Hay que poner más lejos la intención y la esperanza, resistiendo las tentaciones del éxito inmediato; la gloria es más difícil, pero más digna."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-hipocresia-es-el-arte-de-amordazar"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-hay-que-poner-mas-lejos-la-intencion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

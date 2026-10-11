@@ -1,6 +1,8 @@
 ---
 texto: "Porque es preciso resolverse en todos los casos, no por razones de amistad, de interés, de opinion; sino por razones de justicia."
 autor: "platon"
+temas:
+  - "la-justicia"
 slug: "platon-porque-es-preciso-resolverse-en-todos-los"
 procedencia:
   obra: "Critón"

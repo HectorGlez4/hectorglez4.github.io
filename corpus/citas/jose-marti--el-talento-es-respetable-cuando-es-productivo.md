@@ -1,6 +1,8 @@
 ---
 texto: "El talento es respetable cuando es productivo: no debe ser nunca esperanza única de los que aspiran a altos puestos."
 autor: "jose-marti"
+temas:
+  - "el-trabajo"
 slug: "jose-marti-el-talento-es-respetable-cuando-es-productivo"
 procedencia:
   obra: "Diputado"

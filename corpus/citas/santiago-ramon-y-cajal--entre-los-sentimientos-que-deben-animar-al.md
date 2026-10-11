@@ -1,6 +1,8 @@
 ---
 texto: "Entre los sentimientos que deben animar al hombre de ciencia, merece particular mención el patriotismo."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-patria"
 slug: "santiago-ramon-y-cajal-entre-los-sentimientos-que-deben-animar-al"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

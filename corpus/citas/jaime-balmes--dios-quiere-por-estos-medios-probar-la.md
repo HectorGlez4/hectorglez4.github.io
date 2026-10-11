@@ -1,7 +1,9 @@
 ---
-texto: "La vida no es ya tan bella, pero todavía es soportable; la filosofía se va encapotando como el tiempo, pero el sol no ha desaparecido aun."
+texto: "Dios quiere por estos medios, probar la fortaleza del hombre; y el premio de la constancia no siempre se hace esperar todo en la otra vida."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-vida-no-es-ya-tan-bella"
+temas:
+  - "la-adversidad"
+slug: "jaime-balmes-dios-quiere-por-estos-medios-probar-la"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

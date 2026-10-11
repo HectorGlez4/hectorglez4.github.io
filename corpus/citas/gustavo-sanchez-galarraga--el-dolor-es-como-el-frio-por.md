@@ -1,6 +1,8 @@
 ---
 texto: "El Dolor es como el frío: por donde pasa junta a los hombres."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-adversidad"
 slug: "gustavo-sanchez-galarraga-el-dolor-es-como-el-frio-por"
 procedencia:
   obra: "A Flor De Piel: Frases"

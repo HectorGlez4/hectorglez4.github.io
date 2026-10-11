@@ -1,6 +1,8 @@
 ---
 texto: "Yo os fuí maestro de amor: yo he procurado daros el amor de la verdad; no la verdad, que es infinita."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-verdad"
 slug: "jose-enrique-rodo-yo-os-fui-maestro-de-amor-yo"
 procedencia:
   obra: "Parábolas"

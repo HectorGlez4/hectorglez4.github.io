@@ -1,7 +1,9 @@
 ---
-texto: "Todo ideal puede contener una parte de error, ó serlo totalmente: es una visión remota, expuesta á ser inexacta."
+texto: "Nunca se obstinan en el error, sin traicionar por ello á la verdad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-ideal-puede-contener-una-parte-de"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-nunca-se-obstinan-en-el-error-sin"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Asimismo, siendo los hombres amigos, no hay necesidad de la justicia; pero siendo los hombres justos, con todo eso tienen necesidad de la amistad."
 autor: "aristoteles"
+temas:
+  - "la-amistad"
 slug: "aristoteles-asimismo-siendo-los-hombres-amigos-no-hay"
 procedencia:
   obra: "Ética a Nicómaco"
