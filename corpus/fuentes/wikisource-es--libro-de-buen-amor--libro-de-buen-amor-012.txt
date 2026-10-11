@@ -1,0 +1,55 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/012
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/012
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+De lo que contesçió al arçipreste con Fernand Garçía, su mensajero.
+
+\nMis ojos no verán lus \t \t \n\tpues perdido he a Crus. \t\n \t\n\tCrus crusada, panadera, \t \t\n\ttomé por entendedera, \t \t\n\ttomé senda por carrera \t\n \tcomo andalús.\n\n\tCoydando que la avría, \t \t\n\tdíxelo a Fernand Garçía \t \t\n\tque troxiese la pletesía \t\n \tet fuese pleytés e dus.\n\n\tDíxome que l' plasía de grado \t \t\n\te físose de la crus privado, \t \t\n\ta mí dio rumiar salvado \t\n \tél comió el pan más dus.\n\n\tPrometiol' por mi consejo \t \t\n\ttrigo que tenía añejo, \t \t\n\tet presentol' un conejo \t\n \tel traidor falso marfús.\n\n\tDios confonda mensajero \t \t\n\ttan presto e tan ligero: \t \t\n\tnon medre Dios tal conejero, \t\n \tque la caça ansí adús.\n\n\tQuando la crus veía, yo siempre me omillava, \t\t\n\tsantiguábame a ella do quier que la fallava, \t\n\tel compaño de çerca en la crus adorava, \t\n\tdel mal de la crusada yo non me reguardava. \t\n \t\n\tDel escolar goloso compañero de cucaña \t\t\n\tfise esta otra trova, non vos sea estraña, \t\n\tca de ante nin después non fallé en España \t\n\tquien ansí me fesiese de escarnio magadaña.\n</Poem>"}},"i":0}}]}'>
+
+Mis ojos no verán lus
+pues perdido he a Crus.
+
+Crus crusada, panadera,
+tomé por entendedera,
+tomé senda por carrera
+como andalús.
+
+Coydando que la avría,
+díxelo a Fernand Garçía
+que troxiese la pletesía
+et fuese pleytés e dus.
+
+Díxome que l' plasía de grado
+e físose de la crus privado,
+a mí dio rumiar salvado
+él comió el pan más dus.
+
+Prometiol' por mi consejo
+trigo que tenía añejo,
+et presentol' un conejo
+el traidor falso marfús.
+
+Dios confonda mensajero
+tan presto e tan ligero:
+non medre Dios tal conejero,
+que la caça ansí adús.
+
+Quando la crus veía, yo siempre me omillava,
+santiguábame a ella do quier que la fallava,
+el compaño de çerca en la crus adorava,
+del mal de la crusada yo non me reguardava.
+
+Del escolar goloso compañero de cucaña
+fise esta otra trova, non vos sea estraña,
+ca de ante nin después non fallé en España
+quien ansí me fesiese de escarnio magadaña.

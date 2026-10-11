@@ -1,0 +1,62 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/018
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/018
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí fabla del pecado de la cobdiçia
+
+\nContigo siempre traes los mortales pecados, \t \n\tcon mucha cobdiçia, los omes engañados, \t\n\tfáseles cobdiçiar, mucho ser denodados, \t\n\tpasar los mandamientos, que de Dios fueron dados. \t\n\n\tDe todos los pecados es raís la cobdiçia: \t\t\n\tésta es tu fija mayor, tu mayordoma ambiçia, \t\n\tésta es tu alferes, et tu casa ofiçia, \t\n\tésta destruye el mundo, sostienta la justiçia. \t\n\n\tLa soberbia et ira que non falla do quepa, \t\n\tavarisia e loxuria que arden más que estepa, \t\n\tgula, embidia, açidia, que s' pegan como lepra, \t\n\tde la cobdiçia nasçen, es d'ella raís et çepa. \t\n\n\tEn ti fasen morada, alevoso traydor. \t\n\tCon palabras muy dulses, con gesto engañador, \t\n\tprometen e mandan mucho los omes con amor, \t\n\tpor complir lo que mandan, cobdiçian lo peor. \t\n\n\tCobdiçian los averes, que ellos non ganaron, \t\n\tpor complir las promesas, que con amor mandaron, \t\n\tmuchos por tal cobdiçia lo ageno furtaron, \t\n\tporque penan sus almas, e los cuerpos lasraron. \t\n\n\tMurieron por los furtos de muerte sopitaña, \t\t\n\tarrastrados et enforcados de manera estraña, \t\n\ten todo eres encuentro, e de mala picaña, \t\n\tquien tu cobdiçia tiene el pecado lo engaña. \t\n\n\tPor cobdiçia feçiste a Troya destroyr, \t\t\n\tpor la manzana escrita que non debiera escrebir \t\n\tquando la dio a Venus Paris por le indusir, \t\n\tque troxo a Elena que cobdiçiaba servir. \t\n\n\tPor tu mala cobdiçia los de Egipto morieron, \t \t\n\tlos cuerpos enfamaron, las ánimas perdieron, \t\n\tfueron e son airados de Dios los que te creyeron, \t\n\tde mucho que cobdiçiaron, poca parte ovieron. \t\n\n\tPor la cobdiçia pierde el omen el bien que tiene, \t\n\tcoyda aver más mucho de quanto le conviene, \t\n\tnon a lo que cobdiçia, lo suyo non mantiene, \t\n\tlo que contesçió al perro, a éstos tal les viene.\n</Poem>"}},"i":0}}]}'>
+
+Contigo siempre traes los mortales pecados,
+con mucha cobdiçia, los omes engañados,
+fáseles cobdiçiar, mucho ser denodados,
+pasar los mandamientos, que de Dios fueron dados.
+
+De todos los pecados es raís la cobdiçia:
+ésta es tu fija mayor, tu mayordoma ambiçia,
+ésta es tu alferes, et tu casa ofiçia,
+ésta destruye el mundo, sostienta la justiçia.
+
+La soberbia et ira que non falla do quepa,
+avarisia e loxuria que arden más que estepa,
+gula, embidia, açidia, que s' pegan como lepra,
+de la cobdiçia nasçen, es d'ella raís et çepa.
+
+En ti fasen morada, alevoso traydor.
+Con palabras muy dulses, con gesto engañador,
+prometen e mandan mucho los omes con amor,
+por complir lo que mandan, cobdiçian lo peor.
+
+Cobdiçian los averes, que ellos non ganaron,
+por complir las promesas, que con amor mandaron,
+muchos por tal cobdiçia lo ageno furtaron,
+porque penan sus almas, e los cuerpos lasraron.
+
+Murieron por los furtos de muerte sopitaña,
+arrastrados et enforcados de manera estraña,
+en todo eres encuentro, e de mala picaña,
+quien tu cobdiçia tiene el pecado lo engaña.
+
+Por cobdiçia feçiste a Troya destroyr,
+por la manzana escrita que non debiera escrebir
+quando la dio a Venus Paris por le indusir,
+que troxo a Elena que cobdiçiaba servir.
+
+Por tu mala cobdiçia los de Egipto morieron,
+los cuerpos enfamaron, las ánimas perdieron,
+fueron e son airados de Dios los que te creyeron,
+de mucho que cobdiçiaron, poca parte ovieron.
+
+Por la cobdiçia pierde el omen el bien que tiene,
+coyda aver más mucho de quanto le conviene,
+non a lo que cobdiçia, lo suyo non mantiene,
+lo que contesçió al perro, a éstos tal les viene.

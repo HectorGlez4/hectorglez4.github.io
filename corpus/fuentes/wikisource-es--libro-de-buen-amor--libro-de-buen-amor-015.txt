@@ -1,0 +1,57 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/015
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/015
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+De cómo el amor vino al arçipreste, et de la pelea que con él ovo el dicho arçipreste.
+
+\nDirevos una pelea, que una noche me vino, \t \t \n\tpensando en mi ventura sañudo et non con vino: \t\n\tun omen grande, fermoso, mesurado a mí vino: \t\n\tyo le pregunté quién era, dixo: «Amor, tu vesino.» \t\n\n\tCon saña que tenía, fuilo a denostar: \t\t\n\tdíxel': «Si Amor eres, no puedes aquí estar, \t\n\teres mentiroso, falso en muchos enartar, \t\n\tsalvar non puedes uno, puedes çient mil matar. \t\n\n\tCon engaños et lisonjas, et sotiles mentiras \t\n\temponçoñas las lenguas, enerbolas tus viras, \t\n\tel que mejor te sirve, a él fieres, quando tiras, \t\n\tpárteslo del amiga al omen que aíras. \t\n\n\tTraes enloqueçidos a muchos con tu saber, \t\n\tfáseslos perder el sueño, el comer, e el beber, \t\n\tfases a muchos omes tanto se atrever \t\n\ten ti, fasta que el cuerpo e el alma van perder. \t\n\n\tNon tienes regla çierta, ni tienes en ti tiento, \t\n\ta las vegadas prendes con gran arrebatamiento, \t\n\ta veses poco a poco con maestrías çiento; \t\n\tde quanto yo te digo, tú sabes que non miento. \t\n\n\tDesque los omes prendes, non das por ellos nada, \t\n\ttráeslos de hoy en cras en vida muy penada, \t\n\tfases al que te cree lastar en tu mesnada, \t\n\tet por plaser poquillo andar luenga jornada. \t\n\n\tEres tan enconado, que do fieres de golpe, \t\n\tnon lo sana mengía, emplasto, nin jarope, \t\n\tnon sé fuerte nin reçio que se contigo tope, \t\n\tque no l' debatas luego por mucho que se enforçe. \t\n\n\tDe cómo enflaqueses las gentes e las dañas, \t \t\n\tmuchos libros ay d'esto, de cómo las engañas \t\n\tcon tus muchos doñeos e con tus malas mañas \t\n\tsiempre tiras la fuerça, dísenlo en fasañas.\n</Poem>"}},"i":0}}]}'>
+
+Direvos una pelea, que una noche me vino,
+pensando en mi ventura sañudo et non con vino:
+un omen grande, fermoso, mesurado a mí vino:
+yo le pregunté quién era, dixo: «Amor, tu vesino.»
+
+Con saña que tenía, fuilo a denostar:
+díxel': «Si Amor eres, no puedes aquí estar,
+eres mentiroso, falso en muchos enartar,
+salvar non puedes uno, puedes çient mil matar.
+
+Con engaños et lisonjas, et sotiles mentiras
+emponçoñas las lenguas, enerbolas tus viras,
+el que mejor te sirve, a él fieres, quando tiras,
+párteslo del amiga al omen que aíras.
+
+Traes enloqueçidos a muchos con tu saber,
+fáseslos perder el sueño, el comer, e el beber,
+fases a muchos omes tanto se atrever
+en ti, fasta que el cuerpo e el alma van perder.
+
+Non tienes regla çierta, ni tienes en ti tiento,
+a las vegadas prendes con gran arrebatamiento,
+a veses poco a poco con maestrías çiento;
+de quanto yo te digo, tú sabes que non miento.
+
+Desque los omes prendes, non das por ellos nada,
+tráeslos de hoy en cras en vida muy penada,
+fases al que te cree lastar en tu mesnada,
+et por plaser poquillo andar luenga jornada.
+
+Eres tan enconado, que do fieres de golpe,
+non lo sana mengía, emplasto, nin jarope,
+non sé fuerte nin reçio que se contigo tope,
+que no l' debatas luego por mucho que se enforçe.
+
+De cómo enflaqueses las gentes e las dañas,
+muchos libros ay d'esto, de cómo las engañas
+con tus muchos doñeos e con tus malas mañas
+siempre tiras la fuerça, dísenlo en fasañas.

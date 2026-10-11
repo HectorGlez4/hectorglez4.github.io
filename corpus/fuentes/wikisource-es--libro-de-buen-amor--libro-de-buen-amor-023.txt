@@ -1,0 +1,42 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/023
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/023
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del lobo, e de la cabra, e de la grilla
+
+\nEl lobo a la cabra comíala por merienda, \t \n\tatravesósele un hueso, estaba en contienda, \t\n\tafogarse quería, demandava corrienda \t\n\tfísicos et maestros, que quería faser emienda. \t\n\n\tPrometió al que lo sacase, tesoros e grand riquesa, \t\n\tvino la grulla de somo del altesa, \t\n\tsacole con el pico el hueso con sotilesa, \t\n\tel lobo fincó sano para comer sin peresa. \t\n\n\tDixo la grulla al lobo, que l' quisiese pagar, \t\n\tel lobo dixo: '¡Cómo! ¿yo non te pudiera tragar, \t\n\t'el cuello con mis dientes, si quisiera apertar? \t\n\t'Pues séate soldada, pues non te quise matar.' \t\n\n\tBien ansí tú lo fases: aora que estás lleno \t\n\tde pan e de dineros que forçaste de lo ageno, \t\n\tnon quieres dar al poble un poco de çenteno, \t\n\tmas ansí te secarás como roçío et feno. \t\n\n\tEn faser bien al malo cosa non l'aprovecha, \t\n\tomen desagradeçido bien fecho nunca pecha, \t\n\tel buen conosçimiento mal omen lo desecha, \t\n\tel bien que omen le fase, dis' que es por su derecha. \t\n</Poem>"}},"i":0}}]}'>
+
+El lobo a la cabra comíala por merienda,
+atravesósele un hueso, estaba en contienda,
+afogarse quería, demandava corrienda
+físicos et maestros, que quería faser emienda.
+
+Prometió al que lo sacase, tesoros e grand riquesa,
+vino la grulla de somo del altesa,
+sacole con el pico el hueso con sotilesa,
+el lobo fincó sano para comer sin peresa.
+
+Dixo la grulla al lobo, que l' quisiese pagar,
+el lobo dixo: '¡Cómo! ¿yo non te pudiera tragar,
+'el cuello con mis dientes, si quisiera apertar?
+'Pues séate soldada, pues non te quise matar.'
+
+Bien ansí tú lo fases: aora que estás lleno
+de pan e de dineros que forçaste de lo ageno,
+non quieres dar al poble un poco de çenteno,
+mas ansí te secarás como roçío et feno.
+
+En faser bien al malo cosa non l'aprovecha,
+omen desagradeçido bien fecho nunca pecha,
+el buen conosçimiento mal omen lo desecha,
+el bien que omen le fase, dis' que es por su derecha.

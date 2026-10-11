@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/022
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/022
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí fabla del pecado de la avarisia
+
+\nTú eres avarisia, eres escaso mucho, \t\t \n\tal tomar te alegras, al dar non lo as ducho, \t\n\tnon te fartaría Duero con el su aguaducho, \t\n\tsiempre te fallo mal cada que te escucho. \t\n\n\tPor la grand escasesa fue perdido el rico, \t\n\tque al poble Sant Láçaro non dio solo un çatico, \t\n\tnon quieres ver nin amas poble grand nin chico, \t\n\tnin de los tus tesoros non le quieres dar un pico. \t\n\n\tMagüer que te es mandado por santo mandamiento \t\n\tque vistas al desnudo, et fartes al fambriento, \t\n\tet des al poble posada, tanto eres avariento, \t\n\tque nunca lo diste a uno, pidiéndotelo çiento. \t\n\n\tMesquino: ¿tú qué farás el día de la afruenta \t\n\tquando de tus haberes et de tu mucha renta \t\n\tte demandare Dios de la despensa cuenta? \t\n\tNon te valdrán tesoros, nin reynos çincuenta. \t\n\n\tQuando tú eras poble, que tenías grand dolençia, \t\n\tentonçes sospiravas, et fasías penitençia, \t\n\tpidías a Dios que te diese salud e mantenençia, \t\n\tet que partirías con pobles, et non farías fallençia. \t\n\n\tOyó Dios tus querellas, et diote buen consejo, \t\n\tsalud, e grand riquesa, et tesoro sobejo, \t\n\tquando ves el poble, cáesete el çejo, \t\n\tfases como el lobo doliente en el vallejo.\n</Poem>"}},"i":0}}]}'>
+
+Tú eres avarisia, eres escaso mucho,
+al tomar te alegras, al dar non lo as ducho,
+non te fartaría Duero con el su aguaducho,
+siempre te fallo mal cada que te escucho.
+
+Por la grand escasesa fue perdido el rico,
+que al poble Sant Láçaro non dio solo un çatico,
+non quieres ver nin amas poble grand nin chico,
+nin de los tus tesoros non le quieres dar un pico.
+
+Magüer que te es mandado por santo mandamiento
+que vistas al desnudo, et fartes al fambriento,
+et des al poble posada, tanto eres avariento,
+que nunca lo diste a uno, pidiéndotelo çiento.
+
+Mesquino: ¿tú qué farás el día de la afruenta
+quando de tus haberes et de tu mucha renta
+te demandare Dios de la despensa cuenta?
+Non te valdrán tesoros, nin reynos çincuenta.
+
+Quando tú eras poble, que tenías grand dolençia,
+entonçes sospiravas, et fasías penitençia,
+pidías a Dios que te diese salud e mantenençia,
+et que partirías con pobles, et non farías fallençia.
+
+Oyó Dios tus querellas, et diote buen consejo,
+salud, e grand riquesa, et tesoro sobejo,
+quando ves el poble, cáesete el çejo,
+fases como el lobo doliente en el vallejo.

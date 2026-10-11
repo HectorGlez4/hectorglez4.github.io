@@ -1,0 +1,52 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/028
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/028
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí fabla del pecado de la gula
+
+\n\nLa golosina tienes, goloso laminero, \t \n\tquerríes a quantas veçes gostarlas tú primero, \t\n\tenfrasquesçes, pecado, eres grand venternero, \t\n\tpor cobrar la tu fuerza, eres lobo carniçero. \t\n\n\tDesque te conoçí, nunca te vi ayunar, \t\n\talmuerças de mañana, non pierdas la yantar, \t\n\tsin mesura meriendas, mejor quieres çenar, \t\n\tsi tienes qué, o puedes, a la noche çaherar. \t\n\n\tCon la mucha vianda e vino creçe la frema, \t\t\n\tduermes con tu amiga, afógate postema, \t\n\tliévate el diablo, en el infierno te quema, \t\n\ttú dises al garçón, que coma bien y non tema. \t\n\n\tAdán el nuestro padre por gula e tragonía, \t\n\tporque comió del fruto que comer non debía, \t\n\techole del paraíso Dios en aquese día, \t\n\tpor ello en el infierno desque morió yasía. \t\n\n\tMató la golosina muchos en el desierto \t\n\tde los más mejores que y eran por çierto, \t\n\tel profeta lo dise esto que te refierto: \t\n\tpor comer e tragar siempre estás boca abierto. \t\n\n\tFeçiste por la gula a Lot, noble burgués, \t\t\n\tbeber tanto que yogó con sus fijas; pues ves \t\n\ta faser tu forniçio; ca do mucho vino es, \t\n\tluego es la loxuria, et todo mal después. \t\n\n\tMuerte muy rebatada trahe la golosina \t \t\n\tal cuerpo muy goloso e al alma mesquina; \t\n\td'esto ay muchas fablas e estorias paladina; \t\n\tdesírtelo he más breve por te enviar ayna.\n</Poem>"}},"i":0}}]}'>
+
+La golosina tienes, goloso laminero,
+querríes a quantas veçes gostarlas tú primero,
+enfrasquesçes, pecado, eres grand venternero,
+por cobrar la tu fuerza, eres lobo carniçero.
+
+Desque te conoçí, nunca te vi ayunar,
+almuerças de mañana, non pierdas la yantar,
+sin mesura meriendas, mejor quieres çenar,
+si tienes qué, o puedes, a la noche çaherar.
+
+Con la mucha vianda e vino creçe la frema,
+duermes con tu amiga, afógate postema,
+liévate el diablo, en el infierno te quema,
+tú dises al garçón, que coma bien y non tema.
+
+Adán el nuestro padre por gula e tragonía,
+porque comió del fruto que comer non debía,
+echole del paraíso Dios en aquese día,
+por ello en el infierno desque morió yasía.
+
+Mató la golosina muchos en el desierto
+de los más mejores que y eran por çierto,
+el profeta lo dise esto que te refierto:
+por comer e tragar siempre estás boca abierto.
+
+Feçiste por la gula a Lot, noble burgués,
+beber tanto que yogó con sus fijas; pues ves
+a faser tu forniçio; ca do mucho vino es,
+luego es la loxuria, et todo mal después.
+
+Muerte muy rebatada trahe la golosina
+al cuerpo muy goloso e al alma mesquina;
+d'esto ay muchas fablas e estorias paladina;
+desírtelo he más breve por te enviar ayna.

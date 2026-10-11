@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/029
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/029
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del león et del caballo
+
+\nUn caballo muy gordo pasçía en la defesa, \t\t \n\tveníe el león de caza, pero con él non pesa, \t\n\tel león tan goloso al caballo sopesa, \t\n\t'Vasallo', dixo, 'mío, la mano tú me besa.' \t\n\n\tAl león gargantero respondió el caballo, \t \t\n\tdis': 'Tú eres mi señor, e yo tu vasallo, \t\n\ten te besar la mano yo en eso me fallo, \t\n\tmas ir a ti non puedo, que tengo un grand contrallo. \t\n\n\tAyer do me ferrava un ferrero maldito, \t\n\techome en este pie un clavo tan fito, \t\n\tenclavome; ven, señor, con tu diente bendito \t\n\tsácamelo, et fas de mí como de tuyo quito.' \t\n\n\tAbaxose el león por le dar algún confuerto, \t\t\n\tel caballo ferrado contra sí fiso tuerto, \t\n\tlas coçes el caballo lançó fuerte en çierto, \t\n\tdiole entre los ojos, echole frío muerto. \t\n\n\tEl caballo con el miedo fuyó aguas vivas, \t \t\n\tavía mucho comido de yerbas muy esquivas, \t\n\tiva mucho cansado, tomáronlo adivas: \t\n\tansí mueren los locos golosos do tú ivas. \t\n\n\tEl comedor sin mesura, et la grand venternía, \t \t\n\totrosí mucho vino con mucha beberría, \t\n\tmás mata que cuchillo, Ypocrás lo desía; \t\n\ttú dises que quien bien come, bien fase garçonía.\n</Poem>"}},"i":0}}]}'>
+
+Un caballo muy gordo pasçía en la defesa,
+veníe el león de caza, pero con él non pesa,
+el león tan goloso al caballo sopesa,
+'Vasallo', dixo, 'mío, la mano tú me besa.'
+
+Al león gargantero respondió el caballo,
+dis': 'Tú eres mi señor, e yo tu vasallo,
+en te besar la mano yo en eso me fallo,
+mas ir a ti non puedo, que tengo un grand contrallo.
+
+Ayer do me ferrava un ferrero maldito,
+echome en este pie un clavo tan fito,
+enclavome; ven, señor, con tu diente bendito
+sácamelo, et fas de mí como de tuyo quito.'
+
+Abaxose el león por le dar algún confuerto,
+el caballo ferrado contra sí fiso tuerto,
+las coçes el caballo lançó fuerte en çierto,
+diole entre los ojos, echole frío muerto.
+
+El caballo con el miedo fuyó aguas vivas,
+avía mucho comido de yerbas muy esquivas,
+iva mucho cansado, tomáronlo adivas:
+ansí mueren los locos golosos do tú ivas.
+
+El comedor sin mesura, et la grand venternía,
+otrosí mucho vino con mucha beberría,
+más mata que cuchillo, Ypocrás lo desía;
+tú dises que quien bien come, bien fase garçonía.

@@ -1,0 +1,62 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/021
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/021
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del caballo e del asno
+
+\nIva lidiar en campo el caballo fasiente, \t \n\tporque forçó la dueña el su señor valiente, \t\n\tlorigas bien levadas, muy valiente se siente: \t\n\tmucho delante l'iba el asno mal doliente. \t\n\n\tCon los pies, et con las manos, et con el noble freno. \t\n\tEl caballo soberbio fasía tan grand sueno, \t\n\tque a las otras bestias espanta como trueno: \t\n\tel asno con el miedo quedó, et no l' fue bueno. \t\n\n\tEstava refusando el asno con la grand carga, \t\n\tandava mal e poco, al caballo embarga: \t\n\tderribole el caballo en medio de la varga; \t\n\tdis': 'Don villano nesçio, buscad carrera larga.' \t\n\n\tDio salto en el campo ligero, aperçebido, \t\t\n\tcoydó ser vençedor, et fincó él vençido. \t\n\tEn el cuerpo muy fuerte de lança fue ferido, \t\n\tlas entrañas le salen, estava muy perdido. \t\n\n\tDesque salió del campo, non valía una çermeña; \t\n\ta arar lo pusieron, et a traer la leña, \t\n\ta veses a la noria, a veses a la aceña: \t\n\tescota el soberbio el amor de la dueña. \t\n\n\tTenía del grand yugo desolladas las çerviçes, \t\n\tdel finojar a veses finchadas las narises, \t\n\trodillas desolladas fasiendo muchas prises, \t\n\tojos fondos, bermejos, como pies de perdises. \t\n\n\tLos quadriles salidos, somidas las ijadas, \t\n\tel espinaso agudo, las orejas colgadas: \t\n\tvídolo el asno nesçio: rijó bien tres vegadas, \t\n\tdis': 'Compañero soberbio ¿dó son tu empelladas? \t\n\n\t'¿dó es tu noble freno, et tu dorada silla? \t\n\t'¿dó es tu soberbia, dó es la tu rensilla? \t\n\t'Siempre vivrás mesquino, e con mucha mansilla, \t\n\t'vengue la tu soberbia tanta mala postilla.' \t\n\n\tAquí tomen enxiemplo, et liçón cada día \t\n\tlos que son muy soberbios con su grand orgullía, \t\n\tque fuerza e edat e onra, salud e valentía \t\n\tnon pueden durar siempre, vanse con mançebía. \t\n</Poem>"}},"i":0}}]}'>
+
+Iva lidiar en campo el caballo fasiente,
+porque forçó la dueña el su señor valiente,
+lorigas bien levadas, muy valiente se siente:
+mucho delante l'iba el asno mal doliente.
+
+Con los pies, et con las manos, et con el noble freno.
+El caballo soberbio fasía tan grand sueno,
+que a las otras bestias espanta como trueno:
+el asno con el miedo quedó, et no l' fue bueno.
+
+Estava refusando el asno con la grand carga,
+andava mal e poco, al caballo embarga:
+derribole el caballo en medio de la varga;
+dis': 'Don villano nesçio, buscad carrera larga.'
+
+Dio salto en el campo ligero, aperçebido,
+coydó ser vençedor, et fincó él vençido.
+En el cuerpo muy fuerte de lança fue ferido,
+las entrañas le salen, estava muy perdido.
+
+Desque salió del campo, non valía una çermeña;
+a arar lo pusieron, et a traer la leña,
+a veses a la noria, a veses a la aceña:
+escota el soberbio el amor de la dueña.
+
+Tenía del grand yugo desolladas las çerviçes,
+del finojar a veses finchadas las narises,
+rodillas desolladas fasiendo muchas prises,
+ojos fondos, bermejos, como pies de perdises.
+
+Los quadriles salidos, somidas las ijadas,
+el espinaso agudo, las orejas colgadas:
+vídolo el asno nesçio: rijó bien tres vegadas,
+dis': 'Compañero soberbio ¿dó son tu empelladas?
+
+'¿dó es tu noble freno, et tu dorada silla?
+'¿dó es tu soberbia, dó es la tu rensilla?
+'Siempre vivrás mesquino, e con mucha mansilla,
+'vengue la tu soberbia tanta mala postilla.'
+
+Aquí tomen enxiemplo, et liçón cada día
+los que son muy soberbios con su grand orgullía,
+que fuerza e edat e onra, salud e valentía
+non pueden durar siempre, vanse con mançebía.

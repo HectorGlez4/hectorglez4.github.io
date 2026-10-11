@@ -1,0 +1,62 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/026
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/026
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí fabla del pecado de la invidia
+
+\nEres pura envidia, en el mundo non ha tanta,\n\tcon grand çelo que tienes omen de ti se espanta, \t\n\tsi el tu amigo te dise: 'Fabla ya quánta \t\n\t'tristesa e sospecha tu coraçón quebranta.' \t\n\n\tEl çelo siempre nasçe de tu envidia pura, \t\n\ttemiendo que a tu amiga otro le fabla en locura, \t\n\tpor esto eres çeloso, e triste con rencura, \t\n\tsiempre coydas en çelos, de otro bien non as cura. \t\n\n\tDesque avía el çelo en ti arraygar, \t\n\tsospiros e corajes quiérente afogar, \t\n\tde ti mesmo nin de otro non te puedes pagar, \t\n\tel coraçón te salta, nunca estás de vagar. \t\n\n\tCon çelo e sospecha a todos aborresçes, \t\n\tlevántasles baraja, con çelo enfraquesçes, \t\n\tbuscas malas contiendas, fallas lo que meresçes, \t\n\tcontésçete como acaesçe en la red a los peçes. \t\n\n\tEntras en la pelea, non puedes d'ella salir, \t\n\testás fraco e sin fuerza, non te puedes refertir, \t\n\tnin la puedes vençer, nin puedes ende foír, \t\n\testórvate tu pecado, fásete allí morrir. \t\n\n\tPor envidia Caín a su hermano Abel \t\n\tmatolo, porque yase dentro en Mongibel; \t\n\tJacob a Esaú por la envidia d'él, \t\n\tfurtole la bendiçión, porque fue rebtado d'él. \t\n\n\tFue por la envidia mala traído Jesu Christo \t\n\tDios verdadero e omen, fijo de Dios muy quisto, \t\n\tpor envidia fue preso, et muerto et conquistado, \t\n\ten ti non es un bien nin fallado, nin visto. \t\n\n\tCada día los omes por cobdiçia porfían, \t\t\n\tcon envidia e çelo omes e bestias lidian, \t\n\ta do quier que tú seas, los çelos allí herían, \t\n\tla envidia los parte, envidiosos los crían. \t\n\n\tPorque tiene tu vesino más trigo que tú paja, \t\n\tcon tu mucha envidia levántasle baraja, \t\n\tansí te acaesçe por le levar ventaja \t\n\tcomo con los pavesnos contesçió a la graja. \t\n</Poem>"}},"i":0}}]}'>
+
+Eres pura envidia, en el mundo non ha tanta,
+con grand çelo que tienes omen de ti se espanta,
+si el tu amigo te dise: 'Fabla ya quánta
+'tristesa e sospecha tu coraçón quebranta.'
+
+El çelo siempre nasçe de tu envidia pura,
+temiendo que a tu amiga otro le fabla en locura,
+por esto eres çeloso, e triste con rencura,
+siempre coydas en çelos, de otro bien non as cura.
+
+Desque avía el çelo en ti arraygar,
+sospiros e corajes quiérente afogar,
+de ti mesmo nin de otro non te puedes pagar,
+el coraçón te salta, nunca estás de vagar.
+
+Con çelo e sospecha a todos aborresçes,
+levántasles baraja, con çelo enfraquesçes,
+buscas malas contiendas, fallas lo que meresçes,
+contésçete como acaesçe en la red a los peçes.
+
+Entras en la pelea, non puedes d'ella salir,
+estás fraco e sin fuerza, non te puedes refertir,
+nin la puedes vençer, nin puedes ende foír,
+estórvate tu pecado, fásete allí morrir.
+
+Por envidia Caín a su hermano Abel
+matolo, porque yase dentro en Mongibel;
+Jacob a Esaú por la envidia d'él,
+furtole la bendiçión, porque fue rebtado d'él.
+
+Fue por la envidia mala traído Jesu Christo
+Dios verdadero e omen, fijo de Dios muy quisto,
+por envidia fue preso, et muerto et conquistado,
+en ti non es un bien nin fallado, nin visto.
+
+Cada día los omes por cobdiçia porfían,
+con envidia e çelo omes e bestias lidian,
+a do quier que tú seas, los çelos allí herían,
+la envidia los parte, envidiosos los crían.
+
+Porque tiene tu vesino más trigo que tú paja,
+con tu mucha envidia levántasle baraja,
+ansí te acaesçe por le levar ventaja
+como con los pavesnos contesçió a la graja.

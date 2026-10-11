@@ -1,0 +1,62 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/003
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/003
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí diso de cómo el arçipreste rogó a Dios, que le diese graçia que podiese faser este libro.
+
+Dios Padre, Dios Fijo, Dios Spíritu Santo: \t \n\tEl que naçió de la Virgen, esfuerço nos dé tanto, \t\n\tque siempre lo loemos en prosa et en canto, \t\n\tsea de nuestras almas cobertura et manto. \t\n\n\tEl que fiso el çielo, la tierra, et el mar, \t\n\tÉl me done su graçia, e me quiera alumbrar, \t\n\tque pueda de cantares un librete rimar, \t\n\tque los que lo oyeren, puedan solás tomar. \t\n\n\tTú, Señor Dios mío, qu'el omen crieste, \t\n\tenforma e ayuda a mí, el tu açipreste, \t\n\tque pueda faser un libro de buen amor aqueste, \t\n\tque los cuerpos alegre, e a las almas preste. \t\n\n\tSi queredes, señores, oír un buen solás, \t\n\tescuchad el romanse, sosegad vos en pas, \t\n\tnon vos diré mentira en quanto en él yas', \t\n\tca por todo el mundo se usa et se fas'. \t\n\n\tEt porque mejor de todos sea escuchado, \t\n\tfablarvos he por trobas e cuento rimado: \t\n\tes un desir fermoso e saber sin pecado, \t\n\trazón más plasentera, fablar más apostado. \t\n\n\tNon tengades que es libro neçio de devaneo, \t\n\tnin creades que es chufa algo que en él leo, \t\n\tca segund buen dinero yase en vil correo, \t\n\tansí en feo libro está saber non feo. \t\n\n\tEl axenús de fuera más negro es que caldera, \t\n\tes de dentro muy blanco, más que la peñavera, \t\n\tblanca farina está so negra cobertera, \t\n\tazúcar negro e blanco está en vil cañavera. \t\n\n\tSobre la espina está la noble rosa flor, \t\n\ten fea letra está saber de grand doctor; \t\n\tcomo so mala capa yase buen bebedor, \t\n\tansí so el mal tabardo está buen amor. \t\n\n\tEt porque de todo bien es comienço e raís \t\n\tla Virgen Santa María, por ende yo, Juan Roís, \t\n\taçipreste de Fita, d'ella primero fis' \t\n\tcantar de los sus gosos siete que ansí dis'.</Poem>"}},"i":0}}]}'>
+
+Dios Padre, Dios Fijo, Dios Spíritu Santo:
+El que naçió de la Virgen, esfuerço nos dé tanto,
+que siempre lo loemos en prosa et en canto,
+sea de nuestras almas cobertura et manto.
+
+El que fiso el çielo, la tierra, et el mar,
+Él me done su graçia, e me quiera alumbrar,
+que pueda de cantares un librete rimar,
+que los que lo oyeren, puedan solás tomar.
+
+Tú, Señor Dios mío, qu'el omen crieste,
+enforma e ayuda a mí, el tu açipreste,
+que pueda faser un libro de buen amor aqueste,
+que los cuerpos alegre, e a las almas preste.
+
+Si queredes, señores, oír un buen solás,
+escuchad el romanse, sosegad vos en pas,
+non vos diré mentira en quanto en él yas',
+ca por todo el mundo se usa et se fas'.
+
+Et porque mejor de todos sea escuchado,
+fablarvos he por trobas e cuento rimado:
+es un desir fermoso e saber sin pecado,
+razón más plasentera, fablar más apostado.
+
+Non tengades que es libro neçio de devaneo,
+nin creades que es chufa algo que en él leo,
+ca segund buen dinero yase en vil correo,
+ansí en feo libro está saber non feo.
+
+El axenús de fuera más negro es que caldera,
+es de dentro muy blanco, más que la peñavera,
+blanca farina está so negra cobertera,
+azúcar negro e blanco está en vil cañavera.
+
+Sobre la espina está la noble rosa flor,
+en fea letra está saber de grand doctor;
+como so mala capa yase buen bebedor,
+ansí so el mal tabardo está buen amor.
+
+Et porque de todo bien es comienço e raís
+la Virgen Santa María, por ende yo, Juan Roís,
+açipreste de Fita, d'ella primero fis'
+cantar de los sus gosos siete que ansí dis'.

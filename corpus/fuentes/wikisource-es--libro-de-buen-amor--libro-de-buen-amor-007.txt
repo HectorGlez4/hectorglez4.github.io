@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/007
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/007
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí dise de cómo segund natura los omes e las otras animalias quieren aver compañía con las fembras.
+
+\nComo dise Aristóteles, cosa es verdadera, \t \n\tel mundo por dos cosas trabaja: la primera, \t\n\tpor aver mantenençia; la otra era \t\n\tpor aver juntamiento con fembra plasentera. \t\n\n\tSi lo dixiese de mío, sería de culpar; \t\n\tdíselo grand filósofo, non só yo de rebtar; \t\n\tde lo que dise el sabio non debemos dubdar, \t\n\tque por obra se prueba el sabio e su fablar. \t\n\n\tQue dis' verdat el sabio claramente se prueba \t\n\tomes, aves, animalias, toda bestia de cueva \t\n\tquieren, segund natura, compaña siempre nueva; \t\n\tet quanto más el omen que a toda cosa se mueva. \t\n\n\tDigo muy más del omen, que de toda criatura: \t\n\ttodos a tiempo çierto se juntan con natura, \t\n\tel omen de mal seso todo tiempo sin mesura \t\n\tcada que puede quiere faser esta locura. \t\n\n\tEl fuego siempre quiere estar en la senisa, \t\n\tcomo quier' que más arde, quanto más se atisa, \t\n\tel omen quando peca, bien ve que deslisa, \t\n\tmas non se parte ende, ca natura lo entisa. \t\n\n\tEt yo como soy omen como otro pecador, \t\n\tove de las mugeres a veses grand amor; \t\n\tprobar omen las cosas non es por ende peor, \t\n\te saber bien, e mal, e usar lo mejor.\n</Poem>"}},"i":0}}]}'>
+
+Como dise Aristóteles, cosa es verdadera,
+el mundo por dos cosas trabaja: la primera,
+por aver mantenençia; la otra era
+por aver juntamiento con fembra plasentera.
+
+Si lo dixiese de mío, sería de culpar;
+díselo grand filósofo, non só yo de rebtar;
+de lo que dise el sabio non debemos dubdar,
+que por obra se prueba el sabio e su fablar.
+
+Que dis' verdat el sabio claramente se prueba
+omes, aves, animalias, toda bestia de cueva
+quieren, segund natura, compaña siempre nueva;
+et quanto más el omen que a toda cosa se mueva.
+
+Digo muy más del omen, que de toda criatura:
+todos a tiempo çierto se juntan con natura,
+el omen de mal seso todo tiempo sin mesura
+cada que puede quiere faser esta locura.
+
+El fuego siempre quiere estar en la senisa,
+como quier' que más arde, quanto más se atisa,
+el omen quando peca, bien ve que deslisa,
+mas non se parte ende, ca natura lo entisa.
+
+Et yo como soy omen como otro pecador,
+ove de las mugeres a veses grand amor;
+probar omen las cosas non es por ende peor,
+e saber bien, e mal, e usar lo mejor.

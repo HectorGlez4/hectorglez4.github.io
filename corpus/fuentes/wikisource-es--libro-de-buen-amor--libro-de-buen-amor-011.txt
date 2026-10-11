@@ -1,0 +1,67 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/011
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/011
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+De cómo todas las cosas del mundo son vanidat, sino amar a Dios
+
+\nComo dise Salomón, e dise la verdat, \t \t \n\tque las cosas del mundo todas son vanidat, \t\n\ttodas son pasaderas, vanse con la edat; \t\n\tsalvo amor de Dios, todas son liviandat. \t\n\n\tEt yo desque vi la dueña partida e mudada, \t \t\n\tdixe: «Querer do non me quieren, faría una nada: \t\n\t»responder do non me llaman, es vanidat probada.» \t\n\tPartime de su pleyto, pues de mí es redrada. \t\n\n\tSabe Dios, que aquesta dueña e quantas yo vi, \t \t\n\tsiempre quise guardarlas, et siempre las serví, \t\n\tsi servir non las pude, nunca las deserví, \t\n\tde dueña mesurada siempre bien escrebí. \t\n\n\tMucho sería villano e torpe pajés, \t\n\tsi de la mujer noble dixiese cosa refés; \t\n\tca en muger loçana, fermosa e cortés \t\n\ttodo bien del mundo e todo plaser es. \t\n\n\tSi Dios, quando formó el ome entendiera \t \t\n\tque era mala cosa la mujer, non la diera \t\n\tal ome por compañera, nin d'él non la fesiera, \t\n\tsi para bien non fuera, tan noble non saliera. \t\n\n\tSi omen a la mujer non la quisiese bien, \t \t\n\tnon ternía tantos presos el amor quantos tien', \t\n\tpor santo nin santa que seya, non sé quién, \t\n\tnon codiçie compaña, si solo se mantien'. \t\n\n\tUna fabla lo dise, que vos digo agora: \t\t\n\tque una ave sola nin bien canta, nin bien llora, \t\n\tel mástel sin la vela non puede estar toda hora, \t\n\tnin las verças non se crían tan bien sin la noria. \t\n\n\tEt yo como estava solo sin compañía, \t \t\n\tcodiçiaba tener lo que otro para sí tenía, \t\n\tpuse el ojo en otra non santa, más sentía, \t\n\tyo cruisiava por ella, otro la avíe valdía. \t\n\n\tEt porque yo non podía con ella ansí fablar, \t \t\n\tpuse por mí mensagero, coydando recabdar \t\n\ta un mi compañero, sópome el clavo echar, \t\n\tél comió la vianda, e a mí fiso rumiar. \t\n\n\tFis' con el grand pesar esta trova cazurra, \t \t\n\tla dueña que la oyere, por ella non me aburra, \t\n\tca debríen me desir neçio, et más que bestia burra, \t\n\tsi de tan grand escarnio yo non trovase burla.\n</Poem>"}},"i":0}}]}'>
+
+Como dise Salomón, e dise la verdat,
+que las cosas del mundo todas son vanidat,
+todas son pasaderas, vanse con la edat;
+salvo amor de Dios, todas son liviandat.
+
+Et yo desque vi la dueña partida e mudada,
+dixe: «Querer do non me quieren, faría una nada:
+»responder do non me llaman, es vanidat probada.»
+Partime de su pleyto, pues de mí es redrada.
+
+Sabe Dios, que aquesta dueña e quantas yo vi,
+siempre quise guardarlas, et siempre las serví,
+si servir non las pude, nunca las deserví,
+de dueña mesurada siempre bien escrebí.
+
+Mucho sería villano e torpe pajés,
+si de la mujer noble dixiese cosa refés;
+ca en muger loçana, fermosa e cortés
+todo bien del mundo e todo plaser es.
+
+Si Dios, quando formó el ome entendiera
+que era mala cosa la mujer, non la diera
+al ome por compañera, nin d'él non la fesiera,
+si para bien non fuera, tan noble non saliera.
+
+Si omen a la mujer non la quisiese bien,
+non ternía tantos presos el amor quantos tien',
+por santo nin santa que seya, non sé quién,
+non codiçie compaña, si solo se mantien'.
+
+Una fabla lo dise, que vos digo agora:
+que una ave sola nin bien canta, nin bien llora,
+el mástel sin la vela non puede estar toda hora,
+nin las verças non se crían tan bien sin la noria.
+
+Et yo como estava solo sin compañía,
+codiçiaba tener lo que otro para sí tenía,
+puse el ojo en otra non santa, más sentía,
+yo cruisiava por ella, otro la avíe valdía.
+
+Et porque yo non podía con ella ansí fablar,
+puse por mí mensagero, coydando recabdar
+a un mi compañero, sópome el clavo echar,
+él comió la vianda, e a mí fiso rumiar.
+
+Fis' con el grand pesar esta trova cazurra,
+la dueña que la oyere, por ella non me aburra,
+ca debríen me desir neçio, et más que bestia burra,
+si de tan grand escarnio yo non trovase burla.

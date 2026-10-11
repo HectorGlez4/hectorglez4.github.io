@@ -1,0 +1,69 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/001
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/001
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+JESÚS NAZARENUS REX JUDAEORUM
+
+\nSeñor Dios, que a los jodíos pueblo de perdiçión\nsacaste de cabtivo del poder de Faraón,\na Daniel sacaste del poço de Babilón,\nsaca a mi coytado d'esta mala presión.\n\t\nSeñor, tú diste graçia a Ester la reyna,\nant'el rey Asuero ovo tu graçia digna,\nSeñor, dame tu graçia e tu merçed ayna,\nsácame d'esta laçeria, d'esta presión. \t\n\nSeñor, tú que sacaste al Profeta del lago,\nde poder de gentiles sacaste a Santiago,\na Santa Marina libreste del vientre del drago,\nlibra a mí, Dios mío, d'esta presión do yago.\n\nSeñor, tú que libreste a santa Susaña,\ndel falso testimonio de la falsa compaña,\nlíbrame, mi Dios, d'esta y coyta tanmaña,\ndame tu misericordia, tira de mí tu saña.\n\nA Jonás, el Profeta, del vientre de la ballena\nen que moró tres días dentro en la mar llena,\nsacástelo tú sano así como de casa buena;\nMexías, tú me salva sin culpa e sin pena.\n\nSeñor, a los tres niños de muerte los libreste,\ndel forno del grand fuego sin lesión saqueste,\nde las ondas del mar a sant Pedro tomeste:\nSeñor, de aquesta coyta saca al tu arçipreste.\n\nAun tú que dixiste a los tus servidores,\nque con ellos serías ante reyes desidores,\net los darías palabras, que fabrasen mejores,\nSeñor, tú sey conmigo, guárdame de traydores.\n\nEl nombre profetizado fuer grande Hemanuel,\nFijo de Dios muy alto Salvador de Israel,\nen la salutaçión el ángel Gabriel\nte fizo çierta d'esto, tú fuiste çierta d'él.\n\nPor esta profeçía e por la salutaçión\npor el nombre tan alto Hemanuel salvaçión,\nSeñora, dame tu graçia, et dame consolaçión,\ngáname del tu fijo graçia et bendiçión.\n\nDame graçia, señora de todos los señores,\ntira de mí tu saña, tira de mí rencores:\nfaz que todo se torne sobre los mezcladores,\nayúdame, Gloriosa, Madre de pecadores.\n</Poem>"}},"i":0}}]}'>
+
+Ésta es oraçión qu'el arçipreste fizo a Dios quando començó este libro suyo.
+
+Señor Dios, que a los jodíos pueblo de perdiçión
+sacaste de cabtivo del poder de Faraón,
+a Daniel sacaste del poço de Babilón,
+saca a mi coytado d'esta mala presión.
+
+Señor, tú diste graçia a Ester la reyna,
+ant'el rey Asuero ovo tu graçia digna,
+Señor, dame tu graçia e tu merçed ayna,
+sácame d'esta laçeria, d'esta presión.
+
+Señor, tú que sacaste al Profeta del lago,
+de poder de gentiles sacaste a Santiago,
+a Santa Marina libreste del vientre del drago,
+libra a mí, Dios mío, d'esta presión do yago.
+
+Señor, tú que libreste a santa Susaña,
+del falso testimonio de la falsa compaña,
+líbrame, mi Dios, d'esta y coyta tanmaña,
+dame tu misericordia, tira de mí tu saña.
+
+A Jonás, el Profeta, del vientre de la ballena
+en que moró tres días dentro en la mar llena,
+sacástelo tú sano así como de casa buena;
+Mexías, tú me salva sin culpa e sin pena.
+
+Señor, a los tres niños de muerte los libreste,
+del forno del grand fuego sin lesión saqueste,
+de las ondas del mar a sant Pedro tomeste:
+Señor, de aquesta coyta saca al tu arçipreste.
+
+Aun tú que dixiste a los tus servidores,
+que con ellos serías ante reyes desidores,
+et los darías palabras, que fabrasen mejores,
+Señor, tú sey conmigo, guárdame de traydores.
+
+El nombre profetizado fuer grande Hemanuel,
+Fijo de Dios muy alto Salvador de Israel,
+en la salutaçión el ángel Gabriel
+te fizo çierta d'esto, tú fuiste çierta d'él.
+
+Por esta profeçía e por la salutaçión
+por el nombre tan alto Hemanuel salvaçión,
+Señora, dame tu graçia, et dame consolaçión,
+gáname del tu fijo graçia et bendiçión.
+
+Dame graçia, señora de todos los señores,
+tira de mí tu saña, tira de mí rencores:
+faz que todo se torne sobre los mezcladores,
+ayúdame, Gloriosa, Madre de pecadores.

@@ -1,0 +1,52 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/020
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/020
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí fabla del pecado de la soberbia
+
+\nSoberbia mucha tienes a do miedo non as, \t \t \n\tpiensas pues non as miedo tú de qué pasarás, \t\n\tlas joyas para tu amiga de qué las complarás, \t\n\tpor esto robas et furtas, porque tú penarás. \t\n\n\tFases con tu soberbia acometer malas cosas, \t\n\trobar a camineros las joyas preçiosas, \t\n\tforçar muchas mugeres casadas e esposas, \t\n\tvírgenes et solteras, viudas et religiosas. \t\n\n\tPor tales malefiçios mándalos la ley matar, \t\n\tmueren de malas muertes, non los puedes tú quitar. \t\n\tLiévalos el diablo por el tu grand abeytar, \t\n\tfuego infernal arde do uvías asentar. \t\n\n\tPor tu mucha soberbia feçiste mucho perder, \t\n\tprimero muchos ángeles, con ellos Luçifer, \t\n\tque por su gran soberbia e su desagradeçer \t\n\tde las sillas del çielo ovieron de caer. \t\n\n\tMagüer de su natura buenos fueron criados, \t\n\tpor la su grand soberbia fueron e son dañados; \t\n\tquantos por la soberbia fueron e son dañados, \t\n\tnon se podrán escrebir en mil priegos contados. \t\n\n\tQuantos fueron e son, batallas et peleas, \t\n\tinjurias e barajas et contiendas muy feas, \t\n\tAmor, por tu soberbia se fasen, bien lo creas, \t\n\ttoda maldat del mundo es do quier que tú seas. \t\n\n\tEl omen muy soberbio et muy denodado, \t\n\tque non a de Dios miedo, nin cata aguisado, \t\n\tante muere que otro más fraco et más lasrado, \t\n\tcontésçel' como al asno con el caballo armado.\n</Poem>"}},"i":0}}]}'>
+
+Soberbia mucha tienes a do miedo non as,
+piensas pues non as miedo tú de qué pasarás,
+las joyas para tu amiga de qué las complarás,
+por esto robas et furtas, porque tú penarás.
+
+Fases con tu soberbia acometer malas cosas,
+robar a camineros las joyas preçiosas,
+forçar muchas mugeres casadas e esposas,
+vírgenes et solteras, viudas et religiosas.
+
+Por tales malefiçios mándalos la ley matar,
+mueren de malas muertes, non los puedes tú quitar.
+Liévalos el diablo por el tu grand abeytar,
+fuego infernal arde do uvías asentar.
+
+Por tu mucha soberbia feçiste mucho perder,
+primero muchos ángeles, con ellos Luçifer,
+que por su gran soberbia e su desagradeçer
+de las sillas del çielo ovieron de caer.
+
+Magüer de su natura buenos fueron criados,
+por la su grand soberbia fueron e son dañados;
+quantos por la soberbia fueron e son dañados,
+non se podrán escrebir en mil priegos contados.
+
+Quantos fueron e son, batallas et peleas,
+injurias e barajas et contiendas muy feas,
+Amor, por tu soberbia se fasen, bien lo creas,
+toda maldat del mundo es do quier que tú seas.
+
+El omen muy soberbio et muy denodado,
+que non a de Dios miedo, nin cata aguisado,
+ante muere que otro más fraco et más lasrado,
+contésçel' como al asno con el caballo armado.

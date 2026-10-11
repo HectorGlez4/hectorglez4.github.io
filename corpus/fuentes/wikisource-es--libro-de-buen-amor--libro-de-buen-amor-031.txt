@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/031
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/031
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del león que se mató con ira
+
+\nIra et vanalgoria al león orgulloso, \t \n\tque fue a todas bestias cruel e muy dañoso, \t\n\tmató a sí mesmo irado, et muy sañoso, \t\n\tdesirte he el enxiemplo; séate provechoso. \t\n\n\tEl león orgulloso con ira e valentía, \t\t\n\tquando era mançebo, todas las bestias corría, \t\n\ta las unas matava, a las otras fería, \t\n\tvínole grand vegedat, flaquesa e peoría. \t\n\n\tFueron aquestas nuevas a las bestias coseras, \t\n\tfueron muy alegres, porque andaban solteras, \t\n\tcontra él vinieron todas por vengar sus denteras, \t\n\taun el asno nesçio veníe en las delanteras. \t\n\n\tTodos en el león feríen et non poquillo, \t\n\tel javalín sañudo, dávale del colmillo, \t\n\tferíanlo de los cuernos el toro e el novillo, \t\n\tel asno perezoso en él poníe su sillo. \t\n\n\tDiole grand par de coçes, en la frente gelas pon': \t\t\n\tel león con grand ira travó de su coraçón, \t\n\tcon sus uñas mesmas murió et con ál non, \t\n\tira e vanagloria diéronle mal gualardón. \t\n\n\tEl omen, que tiene estado, honra et grant poder \t\n\tlo que para sí non quiere, non lo debe a otros faser \t\n\tque mucho ayna, se puede todo su poder perder. \t\n\tEt lo qu'él fiso a otros, d'ellos tal puede aver.\n</Poem>"}},"i":0}}]}'>
+
+Ira et vanalgoria al león orgulloso,
+que fue a todas bestias cruel e muy dañoso,
+mató a sí mesmo irado, et muy sañoso,
+desirte he el enxiemplo; séate provechoso.
+
+El león orgulloso con ira e valentía,
+quando era mançebo, todas las bestias corría,
+a las unas matava, a las otras fería,
+vínole grand vegedat, flaquesa e peoría.
+
+Fueron aquestas nuevas a las bestias coseras,
+fueron muy alegres, porque andaban solteras,
+contra él vinieron todas por vengar sus denteras,
+aun el asno nesçio veníe en las delanteras.
+
+Todos en el león feríen et non poquillo,
+el javalín sañudo, dávale del colmillo,
+feríanlo de los cuernos el toro e el novillo,
+el asno perezoso en él poníe su sillo.
+
+Diole grand par de coçes, en la frente gelas pon':
+el león con grand ira travó de su coraçón,
+con sus uñas mesmas murió et con ál non,
+ira e vanagloria diéronle mal gualardón.
+
+El omen, que tiene estado, honra et grant poder
+lo que para sí non quiere, non lo debe a otros faser
+que mucho ayna, se puede todo su poder perder.
+Et lo qu'él fiso a otros, d'ellos tal puede aver.

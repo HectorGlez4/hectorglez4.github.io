@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/027
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/027
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del pavón e de la corneja
+
+\nAl pavón la corneja vídol' faser la rueda, \t \n\tdixo con grand envidia: 'Yo faré quanto pueda, \t\n\t'por ser atán fermosa' -esta locura coeda: \t\n\tla negra por ser blanca contra sí se denueda. \t\n\n\tPeló todo su cuerpo, su cara et su çeja; \t\n\tde péndolas de pavón vistió nueva pelleja, \t\n\tfermosa et non de suyo fuese para la iglesa: \t\n\talgunas fasen esto que fiso la corneja. \t\n\n\tGraja empavonada como pavón vestida \t\n\tvídose bien pintada, e fuese enloqueçida, \t\n\ta mejores que non ella era desagradeçida, \t\n\tcon los pavesnos anda la tan desconoçida. \t\n\n\tEl pavón de tal fijo espantado se fiso, \t\n\tvido el mal engaño, et el color apostiso, \t\n\tpelole toda la pluma, et echola en el carriso, \t\n\tmás negra paresía la graja que el eriso. \t\n\n\tAnsí con tu envidia fases a muchos sobrar, \t\n\tpierden lo que ganaron por lo ageno cobrar, \t\n\tcon la envidia quieren por los cuerpos quebrar, \t\n\tnon fallarán en ti si non todo mal obrar. \t\n\n\tQuien quiere lo que non es suyo, et quiere otro paresçer \t\n\tcon algo de lo ageno ahora resplandesçer, \t\n\tlo suyo e lo ageno todo se va a perder, \t\n\tquien se tiene por lo que non es, loco es, va a perder.\n</Poem>"}},"i":0}}]}'>
+
+Al pavón la corneja vídol' faser la rueda,
+dixo con grand envidia: 'Yo faré quanto pueda,
+'por ser atán fermosa' -esta locura coeda:
+la negra por ser blanca contra sí se denueda.
+
+Peló todo su cuerpo, su cara et su çeja;
+de péndolas de pavón vistió nueva pelleja,
+fermosa et non de suyo fuese para la iglesa:
+algunas fasen esto que fiso la corneja.
+
+Graja empavonada como pavón vestida
+vídose bien pintada, e fuese enloqueçida,
+a mejores que non ella era desagradeçida,
+con los pavesnos anda la tan desconoçida.
+
+El pavón de tal fijo espantado se fiso,
+vido el mal engaño, et el color apostiso,
+pelole toda la pluma, et echola en el carriso,
+más negra paresía la graja que el eriso.
+
+Ansí con tu envidia fases a muchos sobrar,
+pierden lo que ganaron por lo ageno cobrar,
+con la envidia quieren por los cuerpos quebrar,
+non fallarán en ti si non todo mal obrar.
+
+Quien quiere lo que non es suyo, et quiere otro paresçer
+con algo de lo ageno ahora resplandesçer,
+lo suyo e lo ageno todo se va a perder,
+quien se tiene por lo que non es, loco es, va a perder.

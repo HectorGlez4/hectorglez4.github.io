@@ -1,0 +1,52 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/030
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/030
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí fabla del pecado de la vanagloria
+
+\n\nIra e vanagloria tienes; en el mundo non ay tamaña, \t\t \n\tmás orgullo e más brío tienes, que toda España, \t\n\tsi non se fase lo tuyo, tomas ira et saña, \t\n\tenojo et mal querençia anda en tu compaña. \t\n\n\tPor la grand vanagloria Nabucodonosor, \t \t\n\tdonde era poderoso, et de Babilonia señor, \t\n\tpoco a Dios preçiaba nin avía d'é1 temor. \t\n\tTirole Dios su poderío, e todo su honor. \t\n\n\tÉl fue muy vil tornado et de las bestias egual, \t\t\n\tcomía yerbas montesas, como buey paja et ál, \t\n\tde cabellos cobierto, como bestia atal, \t\n\tuñas crió mayores que águila cabdal. \t\n\n\tRencor et omeçida criados de ti son, \t\t\n\tvos ved que yo soy fulano, de los garçones garçón. \t\n\tDises muchos baldones así que de rondón, \t\n\tmátanse los babiecas desque tú estás, follón. \t\n\n\tCon la grand ira Sansón, que la su fuerça perdió, \t\t\n\tcuando su mujer Dalila los cabellos le cortó, \t\n\ten que avía la fuerça, et desque la bien cobró, \t\n\tasí mesmo con ira, e a otros muchos mató. \t\n\n\tCon grand ira e saña Saúl, que fue rey \t\t\n\tel primero que los jodíos ovieron en su ley. \t\n\tÉl mesmo se mató con su espada; pues vey, \t\n\tsi debo fiar en ti, a la fe non ansí lo crey. \t\n\n\tQuien bien te conosçiere, de ti non fiará, \t\n\tel que tus obras viere, de ti se arredrará, \t\n\tquanto más te usare, menos te preçiará, \t\n\tquanto más te probare, menos te amará.\n</Poem>"}},"i":0}}]}'>
+
+Ira e vanagloria tienes; en el mundo non ay tamaña,
+más orgullo e más brío tienes, que toda España,
+si non se fase lo tuyo, tomas ira et saña,
+enojo et mal querençia anda en tu compaña.
+
+Por la grand vanagloria Nabucodonosor,
+donde era poderoso, et de Babilonia señor,
+poco a Dios preçiaba nin avía d'é1 temor.
+Tirole Dios su poderío, e todo su honor.
+
+Él fue muy vil tornado et de las bestias egual,
+comía yerbas montesas, como buey paja et ál,
+de cabellos cobierto, como bestia atal,
+uñas crió mayores que águila cabdal.
+
+Rencor et omeçida criados de ti son,
+vos ved que yo soy fulano, de los garçones garçón.
+Dises muchos baldones así que de rondón,
+mátanse los babiecas desque tú estás, follón.
+
+Con la grand ira Sansón, que la su fuerça perdió,
+cuando su mujer Dalila los cabellos le cortó,
+en que avía la fuerça, et desque la bien cobró,
+así mesmo con ira, e a otros muchos mató.
+
+Con grand ira e saña Saúl, que fue rey
+el primero que los jodíos ovieron en su ley.
+Él mesmo se mató con su espada; pues vey,
+si debo fiar en ti, a la fe non ansí lo crey.
+
+Quien bien te conosçiere, de ti non fiará,
+el que tus obras viere, de ti se arredrará,
+quanto más te usare, menos te preçiará,
+quanto más te probare, menos te amará.

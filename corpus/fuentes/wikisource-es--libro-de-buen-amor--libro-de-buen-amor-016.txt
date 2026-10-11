@@ -1,0 +1,67 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/016
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/016
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del garçón que quería casar con tres mujeres
+
+\nEra un garçón loco, mançebo bien valiente, \t \t \n\tnon quería casarse con una solamente, \t\n\tsi non con tres mugeres; tal era su talente; \t\n\tporfiaron en cabo con él toda la gente. \t\n\n\tSu padre e su madre, et su hermano mayor \t\n\tafincáronle mucho, que ya por su amor \t\n\tcon dos que se casase, primero con la menor, \t\n\tet dende a un mes complido casase con la mayor. \t\n\n\tFiso su casamiento con aquesta condiçión: \t\n\tel primer mes ya pasado dixiéronle tal raçón, \t\n\tque al otro su hermano con una e con más non \t\n\tquisiese que le casasen a ley e a bendiçión. \t\n\n\tRespondió el casado, que esto non fesiesen, \t\n\tque él tenía muger, en que ambos a dos oviesen \t\n\tcompaña mucho buena, e d'esto le dixiesen, \t\n\tde casarlo con otra non se entremetiesen. \t\n\n\tAqueste omen bueno padre de aqueste neçio \n\ttenía un molino de grand muela de preçio, \t\n\tante que fuese casado el garçón atán reçio, \t\n\tandando mucho la muela teníala con el pie quedo. \t\n\n\tAquesta fuerza grande e aquesta valentía, \n\tante que fuese casado ligero la fasía. \t\n\tEl un mes ya pasado que casado avía, \t\n\tquiso probar como ante e vino allí un día: \t\n\n\tprobó tener la muela como avía usado, \t\n\tlevantole las piernas, echolo por mal cabo, \t\n\tlevantose el neçio, maldíxole con mal fado, \t\n\tdis: '¡Ay molino resio! Aun te vea casado.' \t\n\n\tA la muger primera él tanto la amó, \t\t\n\tque a la otra donsella nunca más la miró, \t\n\tnon probó más tener la muela, sol' non lo asmó, \t\n\tansí tu devaneo al garçón loco domó. \t\n\n\tEres padre del fuego, pariente de la llama, \t\t\n\tmás arde e más se quema qualquier que te más ama \t\n\tAmor, quien te más sigue, quémasle cuerpo et alma \t\n\tdestrúyeslo del todo, como el fuego a la rama. \t\n\n\tLos que te non probaron, en buen día nasçieron, \t\n\tfolgaron sin coydado, nunca entristeçieron, \t\n\tdesque a ti fallaron, todos su bien perdieron, \t\n\tfueles como a las ranas, quando el rey pidieron.\n</Poem>"}},"i":0}}]}'>
+
+Era un garçón loco, mançebo bien valiente,
+non quería casarse con una solamente,
+si non con tres mugeres; tal era su talente;
+porfiaron en cabo con él toda la gente.
+
+Su padre e su madre, et su hermano mayor
+afincáronle mucho, que ya por su amor
+con dos que se casase, primero con la menor,
+et dende a un mes complido casase con la mayor.
+
+Fiso su casamiento con aquesta condiçión:
+el primer mes ya pasado dixiéronle tal raçón,
+que al otro su hermano con una e con más non
+quisiese que le casasen a ley e a bendiçión.
+
+Respondió el casado, que esto non fesiesen,
+que él tenía muger, en que ambos a dos oviesen
+compaña mucho buena, e d'esto le dixiesen,
+de casarlo con otra non se entremetiesen.
+
+Aqueste omen bueno padre de aqueste neçio
+tenía un molino de grand muela de preçio,
+ante que fuese casado el garçón atán reçio,
+andando mucho la muela teníala con el pie quedo.
+
+Aquesta fuerza grande e aquesta valentía,
+ante que fuese casado ligero la fasía.
+El un mes ya pasado que casado avía,
+quiso probar como ante e vino allí un día:
+
+probó tener la muela como avía usado,
+levantole las piernas, echolo por mal cabo,
+levantose el neçio, maldíxole con mal fado,
+dis: '¡Ay molino resio! Aun te vea casado.'
+
+A la muger primera él tanto la amó,
+que a la otra donsella nunca más la miró,
+non probó más tener la muela, sol' non lo asmó,
+ansí tu devaneo al garçón loco domó.
+
+Eres padre del fuego, pariente de la llama,
+más arde e más se quema qualquier que te más ama
+Amor, quien te más sigue, quémasle cuerpo et alma
+destrúyeslo del todo, como el fuego a la rama.
+
+Los que te non probaron, en buen día nasçieron,
+folgaron sin coydado, nunca entristeçieron,
+desque a ti fallaron, todos su bien perdieron,
+fueles como a las ranas, quando el rey pidieron.

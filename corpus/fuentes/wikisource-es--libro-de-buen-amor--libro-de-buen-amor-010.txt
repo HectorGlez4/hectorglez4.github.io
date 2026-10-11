@@ -1,0 +1,52 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/010
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/010
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo de quando la tierra bramava
+
+\n«Ainsí fuer que la tierra començó a bramar \t\t \n\testava tan finchada, que quería quebrar; \t\n\ta quantos la oíen, podíe mal espantar, \t\n\tcomo dueña en parto començose de coytar. \t\n\n\tLa gente que tan grandes bramidos oía, \t \t\n\tcoydaban que era preñada: a tanto se dolía. \t\n\tPensaban, que era grand sierpe, o grand bestia paría, \t\n\tque a todo el mundo combríe e estragaría. \t\n\n\tQuando ella bramava, pensava de foír, \t \t\n\tet desque vino el día que ovo de parir, \t\n\tparió un mur topo, escarnio fue de reír, \t\n\tsus bramuras e espantos en burla fueron salir. \t\n\n\tEt bien ansí acaesçió, a muchas e a tu amo. \t\t\n\tprimeramente mucho trigo dan, poca paja, tamo, \t\n\tçiegan muchos con el viento, vanse perder con mal ramo; \t\n\tvete, dil' que me non quiera, que no l' quiero, ni l'amo.» \t\n\n\tOme, que mucho fabla, fase menos a veses, \t\t\n\tpone muy grant espanto, chica cosa es dos nueses: \t\n\tlas cosas mucho caras alguna hora son rafeses, \t\n\tlas viles e las rafeses son caras a las de veses. \t\n\n\tComo por chica cosa aborreçía en grand saña, \t\n\tarredrose de mí, físome el juego mañana, \t\n\taquél es engañado quien coyda que engaña, \t\n\td'esto, fise trova de tristesa tan maña. \t\n\n\tFis' luego estas cántigas de verdadera salva. \t\t\n\tmandé que gelas diesen de noche o al alva: \t\n\tno las quiso tomar; dixe yo: «Muy mal va, \t\n\t»al tiempo se encoge mejor la yerba malva.»\n</Poem>"}},"i":0}}]}'>
+
+«Ainsí fuer que la tierra començó a bramar
+estava tan finchada, que quería quebrar;
+a quantos la oíen, podíe mal espantar,
+como dueña en parto començose de coytar.
+
+La gente que tan grandes bramidos oía,
+coydaban que era preñada: a tanto se dolía.
+Pensaban, que era grand sierpe, o grand bestia paría,
+que a todo el mundo combríe e estragaría.
+
+Quando ella bramava, pensava de foír,
+et desque vino el día que ovo de parir,
+parió un mur topo, escarnio fue de reír,
+sus bramuras e espantos en burla fueron salir.
+
+Et bien ansí acaesçió, a muchas e a tu amo.
+primeramente mucho trigo dan, poca paja, tamo,
+çiegan muchos con el viento, vanse perder con mal ramo;
+vete, dil' que me non quiera, que no l' quiero, ni l'amo.»
+
+Ome, que mucho fabla, fase menos a veses,
+pone muy grant espanto, chica cosa es dos nueses:
+las cosas mucho caras alguna hora son rafeses,
+las viles e las rafeses son caras a las de veses.
+
+Como por chica cosa aborreçía en grand saña,
+arredrose de mí, físome el juego mañana,
+aquél es engañado quien coyda que engaña,
+d'esto, fise trova de tristesa tan maña.
+
+Fis' luego estas cántigas de verdadera salva.
+mandé que gelas diesen de noche o al alva:
+no las quiso tomar; dixe yo: «Muy mal va,
+»al tiempo se encoge mejor la yerba malva.»

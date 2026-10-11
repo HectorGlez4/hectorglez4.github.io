@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/025
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/025
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del águila et del caçador
+
+\nEl águila cabdal canta sobre la faya, \t\t \n\ttodas las otras aves de allí las atalaya, \t\n\tnon ay péndola d'ella, que en tierra caya, \t\n\tsi ballestero la falla, préçiala más que saya. \t\n\n\tSaetas e quadrillos, que trae amolados, \t\n\tcon péndolas de águila los ha empendolados, \t\n\tfue como había usado a ferir los venados, \t\n\tal águila cabdal diole por los costados. \t\n\n\tCató contra sus pechos el águila ferida, \t\t\n\te vido, que sus péndolas la habían escarnida, \t\n\tdixo contra sí misma una raçón temida: \t\n\t'De mí salió quien me mató, et me tiró la vida.' \t\n\n\tEl loco, el mesquino que su alma non cata, \t\t\n\tusando tu locura e tu mala barata, \t\n\tdestruye a su cuerpo e a su alma mata, \t\n\tque de sí mesmo sale quien su vida desata. \t\n\n\tOmen, ave, o bestia, a que amor retiente, \t\t\n\tdesque cumple loxuria, luego se arrepiente, \t\n\tentristese en punto, luego flaquesa siente, \t\n\tacórtase la vida: quien lo dixo non miente. \t\n\n\t¿Quién podríe desir quántos tu loxuria mata? \t\n\t¿Quién diríe tu forniçio et tu mala barata? \t\n\tAl que tu entendimiento e tu locura cata \t\n\tel diablo lo lieva, quando non se recata. \t\n</Poem>"}},"i":0}}]}'>
+
+El águila cabdal canta sobre la faya,
+todas las otras aves de allí las atalaya,
+non ay péndola d'ella, que en tierra caya,
+si ballestero la falla, préçiala más que saya.
+
+Saetas e quadrillos, que trae amolados,
+con péndolas de águila los ha empendolados,
+fue como había usado a ferir los venados,
+al águila cabdal diole por los costados.
+
+Cató contra sus pechos el águila ferida,
+e vido, que sus péndolas la habían escarnida,
+dixo contra sí misma una raçón temida:
+'De mí salió quien me mató, et me tiró la vida.'
+
+El loco, el mesquino que su alma non cata,
+usando tu locura e tu mala barata,
+destruye a su cuerpo e a su alma mata,
+que de sí mesmo sale quien su vida desata.
+
+Omen, ave, o bestia, a que amor retiente,
+desque cumple loxuria, luego se arrepiente,
+entristese en punto, luego flaquesa siente,
+acórtase la vida: quien lo dixo non miente.
+
+¿Quién podríe desir quántos tu loxuria mata?
+¿Quién diríe tu forniçio et tu mala barata?
+Al que tu entendimiento e tu locura cata
+el diablo lo lieva, quando non se recata.

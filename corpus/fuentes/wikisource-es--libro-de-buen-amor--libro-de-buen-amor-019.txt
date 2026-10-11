@@ -1,0 +1,37 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/019
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/019
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Enxiemplo del alano que llevava la pieça de carne en la boca
+
+\nAlano carniçero en un río andava, \t\t \n\tuna pieça de carne en la boca pasava, \t\n\tcon la sombra del agua dos tanto l' semejava, \t\n\tcobdiçiola abarcar, cayósele la que levava. \t\n\n\tPor la sombra mentirosa et por su coydar vano \t \t\n\tla carne que tenía, perdiola el alano, \t\n\tnon ovo lo que quiso, non l' fue cobdiçiar sano, \t\n\tcoydó ganar, et perdió lo que tenía en su mano. \t\n\n\tCada día contesçe al cobdiçioso atal, \t \t\n\tcoyda ganar contigo, et pierde su cabdal, \t\n\tde aquesta raís mala nasçe todo el mal, \t\n\tes la mala cobdiçia un pecado mortal. \t\n\n\tLo más e lo mejor, lo qu'es más preçiado, \t \t\n\tdesque lo tiene omen çierto et ya ganado, \t\n\tnunca debe dexarlo por un vano coydado: \t\n\tquien dexa lo que tiene fase grand mal recabdo.\n</Poem>"}},"i":0}}]}'>
+
+Alano carniçero en un río andava,
+una pieça de carne en la boca pasava,
+con la sombra del agua dos tanto l' semejava,
+cobdiçiola abarcar, cayósele la que levava.
+
+Por la sombra mentirosa et por su coydar vano
+la carne que tenía, perdiola el alano,
+non ovo lo que quiso, non l' fue cobdiçiar sano,
+coydó ganar, et perdió lo que tenía en su mano.
+
+Cada día contesçe al cobdiçioso atal,
+coyda ganar contigo, et pierde su cabdal,
+de aquesta raís mala nasçe todo el mal,
+es la mala cobdiçia un pecado mortal.
+
+Lo más e lo mejor, lo qu'es más preçiado,
+desque lo tiene omen çierto et ya ganado,
+nunca debe dexarlo por un vano coydado:
+quien dexa lo que tiene fase grand mal recabdo.

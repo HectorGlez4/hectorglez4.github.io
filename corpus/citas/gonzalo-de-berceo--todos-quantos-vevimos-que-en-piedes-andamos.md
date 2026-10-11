@@ -1,0 +1,15 @@
+---
+texto: "Todos quantos vevimos que en piedes andamos, Siquiere en preson, o en lecho iagamos, Todos somos romeos que camino andamos: San Peidro lo diz esto, por él vos lo probamos."
+autor: "gonzalo-de-berceo"
+temas:
+  - "la-vida"
+slug: "gonzalo-de-berceo-todos-quantos-vevimos-que-en-piedes-andamos"
+procedencia:
+  obra: "Milagros de Nuestra Señora"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Milagros_de_Nuestra_Se%C3%B1ora_-_Pr%C3%B3logo"
+---

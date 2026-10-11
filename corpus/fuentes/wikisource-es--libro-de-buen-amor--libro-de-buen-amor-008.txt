@@ -1,0 +1,42 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/008
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/008
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+De cómo el arcipreste fuer enamorado.
+
+\nAsí fuer que un tiempo una dueña me priso, \t \t \n\tde su amor non fuy en ese tiempo repiso, \t\n\tsiempre avía d'ella buena fabla e buen riso, \t\n\tnunca ál fiso por mí, ni creo que faser quiso. \t\n\n\tEra dueña en todo, e de dueñas señora, \t \t\n\tnon podía estar solo con ella una hora, \t\n\tmucho de omen se guardan allí do ella mora; \t\n\tmás mucho que non guardan los jodíos la Tora. \t\n\n\tSabe toda noblesa de oro e de seda, \t\t\n\tcomplida de muchos bienes anda mansa e leda, \t\n\tes de buenas costumbres, sosegada, e queda, \t\n\tnon se podría vençer por pintada moneda. \t\n\n\tEnviel' esta cantiga que es deyuso puesta \t\n\tcon la mi mensagera, que tenía empuesta; \t\n\tdise verdad la fabla, que la dueña compuesta, \t\n\tsi non quier'el mandado, non da buena respuesta. \t\n\n\tDixo la dueña cuerda a la mi mensagera: \t\n\t«Yo veo otras muchas creer a ti, parlera, \t\n\t»et fállanse ende mal: castigo en su manera, \t\n\t»bien como la raposa en agena mollera.»\n</Poem>"}},"i":0}}]}'>
+
+Así fuer que un tiempo una dueña me priso,
+de su amor non fuy en ese tiempo repiso,
+siempre avía d'ella buena fabla e buen riso,
+nunca ál fiso por mí, ni creo que faser quiso.
+
+Era dueña en todo, e de dueñas señora,
+non podía estar solo con ella una hora,
+mucho de omen se guardan allí do ella mora;
+más mucho que non guardan los jodíos la Tora.
+
+Sabe toda noblesa de oro e de seda,
+complida de muchos bienes anda mansa e leda,
+es de buenas costumbres, sosegada, e queda,
+non se podría vençer por pintada moneda.
+
+Enviel' esta cantiga que es deyuso puesta
+con la mi mensagera, que tenía empuesta;
+dise verdad la fabla, que la dueña compuesta,
+si non quier'el mandado, non da buena respuesta.
+
+Dixo la dueña cuerda a la mi mensagera:
+«Yo veo otras muchas creer a ti, parlera,
+»et fállanse ende mal: castigo en su manera,
+»bien como la raposa en agena mollera.»

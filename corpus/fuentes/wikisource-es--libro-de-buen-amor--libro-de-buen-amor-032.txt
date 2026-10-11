@@ -1,0 +1,37 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/032
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/032
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Aquí diçe del pecado de la açidia
+
+\nDe la açidia eres mesonero et posada, \t\t \n\tnunca quieres que de bondat faça nada, \t\n\tdesque lo ves valdío, dasle vida penada, \t\n\ten pecado comiença, en tristesa acavada. \t\n\n\tNunca estás valdío; aquél que una ves atas, \t\t\n\tfáselos pensar engaños, muchas malas baratas, \t\n\tdeléytase en pecados et en malas baratas, \t\n\tcon tus malas maestrías almas e cuerpos matas. \t\n\n\tOtrosí con açidia traes ipocresía, \t\n\tandas con grand simplesa pensando pletesía, \t\n\tpensando estás triste, tu ojo non se ersía, \t\n\tdo ves la fermosa, oteas con raposía. \t\n\n\tDe quanto bien podrías, non fases de ello cosa, \t\t\n\tengañas todo el mundo con palabra fermosa, \t\n\tquieres lo que el lobo quiere de la raposa; \t\n\tabogado de fuero: oy' fabla provechosa.\n</Poem>"}},"i":0}}]}'>
+
+De la açidia eres mesonero et posada,
+nunca quieres que de bondat faça nada,
+desque lo ves valdío, dasle vida penada,
+en pecado comiença, en tristesa acavada.
+
+Nunca estás valdío; aquél que una ves atas,
+fáselos pensar engaños, muchas malas baratas,
+deléytase en pecados et en malas baratas,
+con tus malas maestrías almas e cuerpos matas.
+
+Otrosí con açidia traes ipocresía,
+andas con grand simplesa pensando pletesía,
+pensando estás triste, tu ojo non se ersía,
+do ves la fermosa, oteas con raposía.
+
+De quanto bien podrías, non fases de ello cosa,
+engañas todo el mundo con palabra fermosa,
+quieres lo que el lobo quiere de la raposa;
+abogado de fuero: oy' fabla provechosa.

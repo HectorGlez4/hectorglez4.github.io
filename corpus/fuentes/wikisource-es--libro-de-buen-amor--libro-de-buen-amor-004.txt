@@ -1,0 +1,82 @@
+fuente: wikisource-es
+obra: Libro de Buen Amor
+año: 1330
+url: https://es.wikisource.org/wiki/Libro_de_Buen_Amor/004
+recuperado: 2026-10-11
+---
+Libro de Buen Amor/004
+|título=[[Libro de Buen Amor]]
+|autor=Arcipreste de Hita
+obra> |título=Libro de Buen Amor
+obra> |autor=Arcipreste de Hita
+obra> |año=1330
+obra> |título={{Anclaje+|Índice}}
+---
+Gosos de Santa María I
+
+Santa María \t\t \t \n\tlus del día, \t\t\n\tTú me guía \t\t\n \ttodavía. \n\n\tGáname graçia et bendiçión \t\t\t\n\tet de Jesús consolaçión \t \t\n\tque pueda con devoçión. \t\t\n cantar de tu alegría.\n \t\n\tEl primero goso que s' lea \t\t \t\n\ten çibdad de Galilea \t\n\tNazaret creo que sea \t\t\n \toviste mensagería. \t\n\n\tDel ángel que a ti vino \t\t\n\tGabriel santo et digno \t \t\n\ttróxote mensag' divino \t\t\n \tdíxote «Ave María».\n\n\tTú, desque el mandado oíste \t\t \t\n\tomilmente reçebiste; \t \t\n\tluego, Virgen, conçebiste \t\t\n \tal fijo que Dios en ti envía.\n\n\tEn Belén acaeçió \t\t \t\n\tel segund' quando nasçió \t \t\n\te sin dolor aparesçió \t\t\n \tde ti, Virgen, el Mexía.\n\n\tEl terçer cuenta las leyes, \t\t \t\n\tquando vinieron los reyes, \t \t\n\te adoraron al que veyes \t\t\n \ten tu brazo do yasçía.\n\n\tOfreçiol' mirra Gaspar, \t\t\t\n\tMelchor fue ençienso dar, \t \t\n\toro ofreçió Baltasar \t\t\n \tal que Dios e ome seya.\n\n\tAlegría quarta e buena \t\t\t\n\tfue quando la Magdalena \t \t\n\tte dixo gozo sin pena \t\t\n \tqu'el tu fijo vevía.\n\n\tEl quinto plaser oviste, \t\t \t\n\tquando al tu fijo viste \t \t\n\tsobir al çielo et diste \t\t\n \tgracias a Dios o subía.\n\n\tMadre, el tu goso sexto \t\t\t\n\tquando en los discípulos presto \t \t\n\tfue Spíritu Santo puesto \t\t\n \ten tu santa compañía.\n\n\tDel septeno, Madre Santa, \t\t \t\n\tla iglesia toda canta, \t \t\n\tsobiste con gloria tanta \t\t\n \tal çielo e quanto y avía.\n\n\tReynas con tu fijo quisto \t\t\n\tnuestro Señor Jesu Christo, \t \t\n\tpor ti sea de nos visto\n en la gloria sin fallía.\n</Poem>"}},"i":0}}]}'>
+
+Santa María
+lus del día,
+Tú me guía
+todavía.
+
+Gáname graçia et bendiçión
+et de Jesús consolaçión
+que pueda con devoçión.
+cantar de tu alegría.
+
+El primero goso que s' lea
+en çibdad de Galilea
+Nazaret creo que sea
+oviste mensagería.
+
+Del ángel que a ti vino
+Gabriel santo et digno
+tróxote mensag' divino
+díxote «Ave María».
+
+Tú, desque el mandado oíste
+omilmente reçebiste;
+luego, Virgen, conçebiste
+al fijo que Dios en ti envía.
+
+En Belén acaeçió
+el segund' quando nasçió
+e sin dolor aparesçió
+de ti, Virgen, el Mexía.
+
+El terçer cuenta las leyes,
+quando vinieron los reyes,
+e adoraron al que veyes
+en tu brazo do yasçía.
+
+Ofreçiol' mirra Gaspar,
+Melchor fue ençienso dar,
+oro ofreçió Baltasar
+al que Dios e ome seya.
+
+Alegría quarta e buena
+fue quando la Magdalena
+te dixo gozo sin pena
+qu'el tu fijo vevía.
+
+El quinto plaser oviste,
+quando al tu fijo viste
+sobir al çielo et diste
+gracias a Dios o subía.
+
+Madre, el tu goso sexto
+quando en los discípulos presto
+fue Spíritu Santo puesto
+en tu santa compañía.
+
+Del septeno, Madre Santa,
+la iglesia toda canta,
+sobiste con gloria tanta
+al çielo e quanto y avía.
+
+Reynas con tu fijo quisto
+nuestro Señor Jesu Christo,
+por ti sea de nos visto
+en la gloria sin fallía.
