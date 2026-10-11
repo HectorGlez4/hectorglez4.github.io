@@ -698,3 +698,14 @@ sesiones:
       citasPublicadas: 2199
       procedenciaCompleta: 21.7
       tradicionLatinoamericanaSobreHispanicos: 54.3
+  - fecha: "2026-10-11"
+    hora: "16:29"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Álvarez, Reyles y Larra: candidatas ya extraídas"
+    motivo: "Explotación de candidatas ya extraídas de Agustín Álvarez, Carlos Reyles y Larra, sin revisar hasta hoy."
+    resultado:
+      citasPublicadas: 2207
+      procedenciaCompleta: 21.6
+      tradicionLatinoamericanaSobreHispanicos: 54.3

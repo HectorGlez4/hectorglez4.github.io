@@ -1,7 +1,9 @@
 ---
-texto: "El que ama el poder y aspira tenerlo, debe dejarse mutilar la mano antes que abrirla, si está llena de verdades: verdad y poder son antítesis."
+texto: "La credulidad natural basta para aceptar a fardo cerrado las creencias de nuestros mayores, cuando no se tiene ninguna, y es el mayor obstáculo para abandonarlas cuando se las tiene."
 autor: "agustin-alvarez"
-slug: "agustin-alvarez-el-que-ama-el-poder-y-aspira"
+temas:
+  - "la-razon"
+slug: "agustin-alvarez-la-credulidad-natural-basta-para-aceptar-a"
 procedencia:
   obra: "La transformación de las razas en América"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La superioridad de un pueblo se concretaba antaño en el ejército; éste era algo así como el _substratum_ de las virtudes y excelencias nacionales: hoy lo es la Riqueza."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-la-superioridad-de-un-pueblo-se-concretaba"
 procedencia:
   obra: "La Muerte Del Cisne"

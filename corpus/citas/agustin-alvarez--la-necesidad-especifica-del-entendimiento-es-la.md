@@ -1,7 +1,9 @@
 ---
-texto: "La credulidad natural basta para aceptar a fardo cerrado las creencias de nuestros mayores, cuando no se tiene ninguna, y es el mayor obstáculo para abandonarlas cuando se las tiene."
+texto: "La necesidad específica del entendimiento es la explicación, como la necesidad específica del estómago es el alimento."
 autor: "agustin-alvarez"
-slug: "agustin-alvarez-la-credulidad-natural-basta-para-aceptar-a"
+temas:
+  - "el-saber"
+slug: "agustin-alvarez-la-necesidad-especifica-del-entendimiento-es-la"
 procedencia:
   obra: "La transformación de las razas en América"
 estadoDerechos: "dominio-público"

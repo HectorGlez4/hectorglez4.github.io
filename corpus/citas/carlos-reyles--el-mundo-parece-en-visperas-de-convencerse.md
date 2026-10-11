@@ -1,6 +1,8 @@
 ---
 texto: "El mundo parece en vísperas de convencerse de que el egoísmo sano, es más provechoso para la economía social que el enfermizo desinterés."
 autor: "carlos-reyles"
+temas:
+  - "la-virtud"
 slug: "carlos-reyles-el-mundo-parece-en-visperas-de-convencerse"
 procedencia:
   obra: "La Muerte Del Cisne"

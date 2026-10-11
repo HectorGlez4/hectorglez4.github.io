@@ -1,6 +1,8 @@
 ---
 texto: "No siempre está en mano del hombre el coordinar sus ideas y formar con ellas una obra arreglada, con principio, medio y fin."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-libertad"
 slug: "mariano-jose-de-larra-no-siempre-esta-en-mano-del-hombre"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

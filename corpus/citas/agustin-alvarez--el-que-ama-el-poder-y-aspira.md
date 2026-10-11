@@ -1,7 +1,9 @@
 ---
-texto: "La necesidad específica del entendimiento es la explicación, como la necesidad específica del estómago es el alimento."
+texto: "El que ama el poder y aspira tenerlo, debe dejarse mutilar la mano antes que abrirla, si está llena de verdades: verdad y poder son antítesis."
 autor: "agustin-alvarez"
-slug: "agustin-alvarez-la-necesidad-especifica-del-entendimiento-es-la"
+temas:
+  - "la-verdad"
+slug: "agustin-alvarez-el-que-ama-el-poder-y-aspira"
 procedencia:
   obra: "La transformación de las razas en América"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El huevo de Colón es la parábola más significativa de lo que hace el talento."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-saber"
 slug: "mariano-jose-de-larra-el-huevo-de-colon-es-la-parabola"
 procedencia:
   obra: "Los amantes de Teruel"
