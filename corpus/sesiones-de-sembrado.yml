@@ -753,3 +753,14 @@ sesiones:
       citasPublicadas: 2247
       procedenciaCompleta: 21.6
       tradicionLatinoamericanaSobreHispanicos: 55.3
+  - fecha: "2026-10-11"
+    hora: "16:51"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "J. V. González y Mitre: ensayo argentino"
+    motivo: "Siembra de Joaquín V. González ('A solas con mi demonio') y Bartolomé Mitre (educación, bibliófagos): Autores argentinos nuevos de Wikisource."
+    resultado:
+      citasPublicadas: 2252
+      procedenciaCompleta: 21.5
+      tradicionLatinoamericanaSobreHispanicos: 57.1

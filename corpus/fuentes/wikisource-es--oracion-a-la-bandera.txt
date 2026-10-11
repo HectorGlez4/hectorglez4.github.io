@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Oración a la bandera
+url: https://es.wikisource.org/wiki/Oraci%C3%B3n_a_la_bandera
+recuperado: 2026-10-11
+---
+Oración a la bandera
+[[Categoría:Obras de Joaquín V. González]]
+|título={{PAGENAME}}
+|autor=Joaquín V. González
+---
+Bandera de la Patria, celeste y blanca, símbolo de la unión y la fuerza con que nuestros padres nos dieron independencia y libertad; guía de la victoria en la guerra y del trabajo y la cultura en la paz.
+
+Vínculo sagrado e indisoluble entre las generaciones pasadas, presentes y futuras.
+
+Juremos defenderla hasta morir antes que verla humillada.
+
+Que flote con honor y gloria al frente de nuestras fortalezas, ejércitos y buques y en todo tiempo y lugar de la tierra donde ellos la condujeren.
+
+Que a su sombra la Nación Argentina acreciente su grandeza por siglos y siglos y sea para todos los hombres mensajera de libertad, signo de civilización y garantía de justicia.
