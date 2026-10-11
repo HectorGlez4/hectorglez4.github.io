@@ -1,6 +1,8 @@
 ---
 texto: "La propiedad, la vida, el honor, son bienes nominales, cuando la justicia es mala."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-la-propiedad-la-vida-el-honor-son"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

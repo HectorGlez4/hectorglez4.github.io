@@ -1,6 +1,8 @@
 ---
 texto: "No, no debe el hombre huir de la luz por temor de caer en el mal; la verdad no teme la luz, y el bien moral es una gran verdad."
 autor: "jaime-balmes"
+temas:
+  - "la-verdad"
 slug: "jaime-balmes-no-no-debe-el-hombre-huir-de"
 procedencia:
   obra: "El Criterio"

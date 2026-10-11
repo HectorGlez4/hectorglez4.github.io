@@ -1,7 +1,9 @@
 ---
-texto: "La honestidad del hombre mediocre equidista del bien y del mal; niega al segundo sin afirmar al primero."
+texto: "Las únicas víctimas de esa falsa virtud son los hombres excelentes, constreñidos á no pestañear mientras los mediocres empañan su gloria."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-honestidad-del-hombre-mediocre-equidista-del"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-las-unicas-victimas-de-esa-falsa-virtud"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

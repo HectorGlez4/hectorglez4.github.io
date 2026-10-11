@@ -1,6 +1,8 @@
 ---
 texto: "El amor a la libertad no es la república, como el amor a la plata no es la riqueza."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-el-amor-a-la-libertad-no-es"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

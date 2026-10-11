@@ -1,6 +1,8 @@
 ---
 texto: "No es que las curules se deban de derecho a los inteligentes: es que el pueblo las da a quien se ocupa de él y le hace bien."
 autor: "jose-marti"
+temas:
+  - "la-justicia"
 slug: "jose-marti-no-es-que-las-curules-se-deban"
 procedencia:
   obra: "Diputado"

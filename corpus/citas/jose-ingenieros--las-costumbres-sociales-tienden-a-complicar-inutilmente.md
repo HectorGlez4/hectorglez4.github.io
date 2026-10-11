@@ -1,6 +1,8 @@
 ---
 texto: "Las costumbres sociales tienden a complicar inútilmente la vida, apartando al hombre de la Naturaleza, que es la fuente única de su felicidad."
 autor: "jose-ingenieros"
+temas:
+  - "la-felicidad"
 slug: "jose-ingenieros-las-costumbres-sociales-tienden-a-complicar-inutilmente"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

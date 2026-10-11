@@ -1,6 +1,8 @@
 ---
 texto: "No estábamos preparados para tanto bien; el bien, como el mal, da la muerte cuando es súbito y excesivo."
 autor: "simon-bolivar"
+temas:
+  - "la-adversidad"
 slug: "simon-bolivar-no-estabamos-preparados-para-tanto-bien-el"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"

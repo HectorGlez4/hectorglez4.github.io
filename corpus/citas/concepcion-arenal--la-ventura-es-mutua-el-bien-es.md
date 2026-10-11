@@ -1,6 +1,8 @@
 ---
 texto: "La ventura es mutua, el bien es armonía, y por la justicia de los hombres se mide su felicidad."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-ventura-es-mutua-el-bien-es"
 procedencia:
   obra: "La mujer del porvenir"

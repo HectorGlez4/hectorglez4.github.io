@@ -1,6 +1,8 @@
 ---
 texto: "La cosa más terrible de todas es la muerte, porque es el remate de todo, y parece que para el muerto no hay ya más bien alguno ni más mal."
 autor: "aristoteles"
+temas:
+  - "la-muerte"
 slug: "aristoteles-la-cosa-mas-terrible-de-todas-es"
 procedencia:
   obra: "Ética a Nicómaco"

@@ -1,6 +1,8 @@
 ---
 texto: "Un hombre tiene tanta más vida cuanta mayor es su benevolencia; todo mal es un tanto de inexistencia y de muerte."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-un-hombre-tiene-tanta-mas-vida-cuanta"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
