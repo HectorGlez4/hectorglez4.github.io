@@ -1,0 +1,14 @@
+---
+texto: "Yo soy una simple máquina que se mueve a impulsos de un motor; pero tú tienes sesos y no te rebelas, ¡desgraciado!"
+autor: "ricardo-flores-magon"
+slug: "ricardo-flores-magon-yo-soy-una-simple-maquina-que-se"
+procedencia:
+  obra: "El obrero y la máquina"
+  año: 1916
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_obrero_y_m%C3%A1quina"
+---
