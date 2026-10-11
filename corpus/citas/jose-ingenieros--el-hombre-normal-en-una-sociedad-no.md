@@ -1,7 +1,9 @@
 ---
-texto: "Los ideales éticos no son exclusivos del sentimiento religioso; no lo es la virtud; ni la santidad."
+texto: "El hombre normal en una sociedad no lo es en otra; el de ha mil años no lo sería hoy, ni en el porvenir."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-ideales-eticos-no-son-exclusivos-del"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-hombre-normal-en-una-sociedad-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

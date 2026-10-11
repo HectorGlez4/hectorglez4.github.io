@@ -1,6 +1,8 @@
 ---
 texto: "La fuerza tiende á ejercer su imperio porque es la fuerza; la vida tiende á dilatarse porque es la vida."
 autor: "carlos-reyles"
+temas:
+  - "la-vida"
 slug: "carlos-reyles-la-fuerza-tiende-a-ejercer-su-imperio"
 procedencia:
   obra: "La Muerte Del Cisne"

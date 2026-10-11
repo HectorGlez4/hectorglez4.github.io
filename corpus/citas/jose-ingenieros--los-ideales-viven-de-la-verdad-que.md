@@ -1,6 +1,8 @@
 ---
 texto: "Los ideales viven de la Verdad, que se va haciendo; ni puede ser vital ninguno que la contradiga en su punto del tiempo."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-los-ideales-viven-de-la-verdad-que"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

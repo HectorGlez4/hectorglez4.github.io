@@ -1,7 +1,9 @@
 ---
-texto: "Una buena lógica debiera comprender al hombre entero; porque la verdad está en relacion con todas las facultades del hombre."
+texto: "La pasion dirigida por la razon se elevó hasta el heroismo; entregada á su ímpetu ciego, se ha degradado hasta el crímen."
 autor: "jaime-balmes"
-slug: "jaime-balmes-una-buena-logica-debiera-comprender-al-hombre"
+temas:
+  - "la-razon"
+slug: "jaime-balmes-la-pasion-dirigida-por-la-razon-se"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

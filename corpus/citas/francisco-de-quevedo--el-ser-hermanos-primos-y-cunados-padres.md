@@ -1,6 +1,8 @@
 ---
 texto: "El ser hermanos, primos y cuñados, padres y hijos, sirve más veces de disculpa de dejarlo de ser, que de razón para serlo."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-deber"
 slug: "francisco-de-quevedo-el-ser-hermanos-primos-y-cunados-padres"
 procedencia:
   obra: "Marco Bruto"

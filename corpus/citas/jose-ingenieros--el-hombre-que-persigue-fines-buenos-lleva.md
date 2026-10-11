@@ -1,7 +1,9 @@
 ---
-texto: "La obligación y la sanción no emanan ya de lo sobrenatural, sino del hombre."
+texto: "El hombre que persigue fines buenos lleva en sí toda la fuerza de la naturaleza; la maldad absoluta sería la muerte absoluta."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-obligacion-y-la-sancion-no-emanan"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-hombre-que-persigue-fines-buenos-lleva"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

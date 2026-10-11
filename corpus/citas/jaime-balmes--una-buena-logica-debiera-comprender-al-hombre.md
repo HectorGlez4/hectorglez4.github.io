@@ -1,7 +1,9 @@
 ---
-texto: "El hombre tiene siempre un gran caudal de fuerzas sin emplear; y el secreto de hacer mucho, es acertar á explotarse á sí mismo."
+texto: "Una buena lógica debiera comprender al hombre entero; porque la verdad está en relacion con todas las facultades del hombre."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-hombre-tiene-siempre-un-gran-caudal"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-una-buena-logica-debiera-comprender-al-hombre"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

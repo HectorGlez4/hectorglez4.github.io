@@ -1,7 +1,9 @@
 ---
-texto: "El pobre no puede vivir su vida, tantos son los compromisos de la indigencia; redimirse de ella es comenzar á vivir."
+texto: "El éxito se mendiga; la gloria se conquista."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-pobre-no-puede-vivir-su-vida"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-exito-se-mendiga-la-gloria-se"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

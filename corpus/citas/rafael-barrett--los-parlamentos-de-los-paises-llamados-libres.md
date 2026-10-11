@@ -1,6 +1,8 @@
 ---
 texto: "Los Parlamentos de los países llamados libres ignoran los compromisos de la patria, y cuanto más grave es el asunto, más se tapa."
 autor: "rafael-barrett"
+temas:
+  - "la-patria"
 slug: "rafael-barrett-los-parlamentos-de-los-paises-llamados-libres"
 procedencia:
   obra: "Diplomacia"

@@ -1,7 +1,9 @@
 ---
-texto: "El éxito se mendiga; la gloria se conquista."
+texto: "La virtud suele ser un gesto audaz, como todo lo original; la honestidad es un harapiento uniforme que se endosa resignadamente."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-exito-se-mendiga-la-gloria-se"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-virtud-suele-ser-un-gesto-audaz"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La juventud es deslumbramiento, frondosidad de ensueños, embriaguez de embriagueces; pero no es libertad."
 autor: "amado-nervo"
+temas:
+  - "la-vida"
 slug: "amado-nervo-la-juventud-es-deslumbramiento-frondosidad-de-ensuenos"
 procedencia:
   obra: "Plenitud"

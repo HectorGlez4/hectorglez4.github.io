@@ -1,7 +1,9 @@
 ---
-texto: "La pasion dirigida por la razon se elevó hasta el heroismo; entregada á su ímpetu ciego, se ha degradado hasta el crímen."
+texto: "El hombre tiene siempre un gran caudal de fuerzas sin emplear; y el secreto de hacer mucho, es acertar á explotarse á sí mismo."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-pasion-dirigida-por-la-razon-se"
+temas:
+  - "el-trabajo"
+slug: "jaime-balmes-el-hombre-tiene-siempre-un-gran-caudal"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

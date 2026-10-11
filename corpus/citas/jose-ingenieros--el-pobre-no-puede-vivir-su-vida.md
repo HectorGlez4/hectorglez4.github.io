@@ -1,7 +1,9 @@
 ---
-texto: "El hombre normal en una sociedad no lo es en otra; el de ha mil años no lo sería hoy, ni en el porvenir."
+texto: "El pobre no puede vivir su vida, tantos son los compromisos de la indigencia; redimirse de ella es comenzar á vivir."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-normal-en-una-sociedad-no"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-el-pobre-no-puede-vivir-su-vida"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

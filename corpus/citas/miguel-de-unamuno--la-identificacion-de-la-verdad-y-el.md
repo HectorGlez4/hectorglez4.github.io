@@ -1,6 +1,8 @@
 ---
 texto: "La identificación de la verdad y el bien no es más que un piadoso deseo."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-la-identificacion-de-la-verdad-y-el"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

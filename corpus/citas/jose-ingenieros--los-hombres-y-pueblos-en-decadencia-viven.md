@@ -1,7 +1,9 @@
 ---
-texto: "La virtud suele ser un gesto audaz, como todo lo original; la honestidad es un harapiento uniforme que se endosa resignadamente."
+texto: "Los hombres y pueblos en decadencia viven acordándose de dónde vienen; los hombres geniales y los pueblos fuertes sólo necesitan saber dónde van."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-virtud-suele-ser-un-gesto-audaz"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-los-hombres-y-pueblos-en-decadencia-viven"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Los ministros y príncipes facinorosos buscan la virtud más calificada para tener que profanar en servicio de los que han menester."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-los-ministros-y-principes-facinorosos-buscan-la"
 procedencia:
   obra: "Marco Bruto"

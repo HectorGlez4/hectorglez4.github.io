@@ -1,6 +1,8 @@
 ---
 texto: "La vida engaña a la razón; y ésta a aquélla."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-vida-engana-a-la-razon-y"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

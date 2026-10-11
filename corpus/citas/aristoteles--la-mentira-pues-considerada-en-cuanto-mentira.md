@@ -1,6 +1,8 @@
 ---
 texto: "La mentira, pues, considerada en cuanto mentira, mala cosa es y digna de reprensión, y la verdad buena y digna de alabanza."
 autor: "aristoteles"
+temas:
+  - "la-verdad"
 slug: "aristoteles-la-mentira-pues-considerada-en-cuanto-mentira"
 procedencia:
   obra: "Ética a Nicómaco"

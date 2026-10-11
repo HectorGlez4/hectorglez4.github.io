@@ -1,7 +1,9 @@
 ---
-texto: "El hombre que persigue fines buenos lleva en sí toda la fuerza de la naturaleza; la maldad absoluta sería la muerte absoluta."
+texto: "El hombre puede equivocarse y decaer; la naturaleza no se equivoca ni decae."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-que-persigue-fines-buenos-lleva"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-el-hombre-puede-equivocarse-y-decaer-la"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

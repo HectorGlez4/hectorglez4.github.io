@@ -1,6 +1,8 @@
 ---
 texto: "El valor de un objeto cualquiera no es, por regla general, más que la representación del trabajo que ha costado."
 autor: "concepcion-arenal"
+temas:
+  - "el-trabajo"
 slug: "concepcion-arenal-el-valor-de-un-objeto-cualquiera-no"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

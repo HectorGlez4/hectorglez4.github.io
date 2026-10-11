@@ -1,6 +1,8 @@
 ---
 texto: "El oro podrá acumular miles de aventureros; pero sólo la ley de libertad hará de esas multitudes y de ese oro un Estado civilizado y floreciente."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-el-oro-podra-acumular-miles-de-aventureros"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

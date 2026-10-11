@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres y pueblos en decadencia viven acordándose de dónde vienen; los hombres geniales y los pueblos fuertes sólo necesitan saber dónde van."
+texto: "Los ideales éticos no son exclusivos del sentimiento religioso; no lo es la virtud; ni la santidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hombres-y-pueblos-en-decadencia-viven"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-ideales-eticos-no-son-exclusivos-del"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

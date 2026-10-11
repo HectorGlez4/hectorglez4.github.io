@@ -1,6 +1,8 @@
 ---
 texto: "La inteligencia nos unifica y nos funde; era la ignorancia la que nos separaba."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-inteligencia-nos-unifica-y-nos-funde"
 procedencia:
   obra: "La conquista de Inglaterra"
