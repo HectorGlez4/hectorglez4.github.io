@@ -1,6 +1,8 @@
 ---
 texto: "El escritor satírico es por lo común, como la luna, un cuerpo opaco destinado a dar luz, y es acaso el único de quien con razón se puede decir que da lo que no tiene."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-palabra"
 slug: "mariano-jose-de-larra-el-escritor-satirico-es-por-lo-comun"
 procedencia:
   obra: "De la sátira y de los satíricos"

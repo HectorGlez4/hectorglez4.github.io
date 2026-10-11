@@ -1,6 +1,8 @@
 ---
 texto: "Leí verdaderos libros, y vi que el talento y el genio suelen fundar la gramática futura sin molestarse en saludar la presente."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-lei-verdaderos-libros-y-vi-que-el"
 procedencia:
   obra: "La regla"

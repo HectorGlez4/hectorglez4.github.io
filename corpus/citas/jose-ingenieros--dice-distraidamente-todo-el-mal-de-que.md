@@ -1,7 +1,9 @@
 ---
-texto: "El equilibrio del mediocre es exiguo comparado con el del genio; aquél soporta un trabajo igual á uno y éste lo emprende igual á mil."
+texto: "Dice distraídamente todo el mal de que no está seguro y calla con prudencia todo el bien que sabe."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-equilibrio-del-mediocre-es-exiguo-comparado"
+temas:
+  - "la-palabra"
+slug: "jose-ingenieros-dice-distraidamente-todo-el-mal-de-que"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Ciertos hombres tienen el talento de ver mucho en todo; pero les cabe la desgracia de ver todo lo que no hay, y nada de lo que hay."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-ciertos-hombres-tienen-el-talento-de-ver"
 procedencia:
   obra: "El Criterio"

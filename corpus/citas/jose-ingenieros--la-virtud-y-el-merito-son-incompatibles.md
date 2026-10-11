@@ -1,7 +1,9 @@
 ---
-texto: "Es más que el simple éxito accesible al común de los mediocres; pero es menos que la gloria, exclusivamente reservada á los hombres superiores."
+texto: "La virtud y el mérito son incompatibles con el tartufismo; la observación induce á desconfiar de esas misteriosas excelencias morales."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-mas-que-el-simple-exito-accesible"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-virtud-y-el-merito-son-incompatibles"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

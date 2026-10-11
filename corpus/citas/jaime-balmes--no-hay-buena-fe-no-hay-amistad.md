@@ -1,6 +1,8 @@
 ---
 texto: "No hay buena fe, no hay amistad, no hay gratitud, no hay generosidad, no hay virtud sobre la tierra; todo es egoismo, miras interesadas, perfidias, traicion, mentira."
 autor: "jaime-balmes"
+temas:
+  - "la-verdad"
 slug: "jaime-balmes-no-hay-buena-fe-no-hay-amistad"
 procedencia:
   obra: "El Criterio"

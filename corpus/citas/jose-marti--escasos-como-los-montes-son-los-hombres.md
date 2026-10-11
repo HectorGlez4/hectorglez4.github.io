@@ -1,6 +1,8 @@
 ---
 texto: "Escasos, como los montes, son los hombres que saben mirar desde ellos, y sienten con entrañas de nación o de humanidad."
 autor: "jose-marti"
+temas:
+  - "la-patria"
 slug: "jose-marti-escasos-como-los-montes-son-los-hombres"
 procedencia:
   obra: "Carta a Federico Enríquez y Carvajal"

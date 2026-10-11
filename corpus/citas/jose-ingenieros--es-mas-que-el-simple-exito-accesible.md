@@ -1,7 +1,9 @@
 ---
-texto: "No teniendo valor para la verdad es imposible tenerlo para la justicia."
+texto: "Es más que el simple éxito accesible al común de los mediocres; pero es menos que la gloria, exclusivamente reservada á los hombres superiores."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-no-teniendo-valor-para-la-verdad-es"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-es-mas-que-el-simple-exito-accesible"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

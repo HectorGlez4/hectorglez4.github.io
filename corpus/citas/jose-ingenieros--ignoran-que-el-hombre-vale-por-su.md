@@ -1,7 +1,9 @@
 ---
-texto: "La virtud y el mérito son incompatibles con el tartufismo; la observación induce á desconfiar de esas misteriosas excelencias morales."
+texto: "Ignoran que el hombre vale por su saber; niegan que la cultura es la más honda fuente de la virtud."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-virtud-y-el-merito-son-incompatibles"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-ignoran-que-el-hombre-vale-por-su"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

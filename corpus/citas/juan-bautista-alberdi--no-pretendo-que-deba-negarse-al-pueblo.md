@@ -1,6 +1,8 @@
 ---
 texto: "No pretendo que deba negarse al pueblo la instrucción primaria, sino que es un medio impotente de mejoramiento comparado con otros, que se han desatendido."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-saber"
 slug: "juan-bautista-alberdi-no-pretendo-que-deba-negarse-al-pueblo"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

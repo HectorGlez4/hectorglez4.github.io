@@ -1,6 +1,8 @@
 ---
 texto: "Una sociedad de alma heroica no permanece largo tiempo sin Héroe grande."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-gloria"
 slug: "jose-enrique-rodo-una-sociedad-de-alma-heroica-no-permanece"
 procedencia:
   obra: "Motivos de Proteo"

@@ -1,6 +1,8 @@
 ---
 texto: "El dinero es el nervio del progreso y del engrandecimiento, es el alma de la paz y del orden, como es el agente rey de la guerra."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-riqueza"
 slug: "juan-bautista-alberdi-el-dinero-es-el-nervio-del-progreso"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

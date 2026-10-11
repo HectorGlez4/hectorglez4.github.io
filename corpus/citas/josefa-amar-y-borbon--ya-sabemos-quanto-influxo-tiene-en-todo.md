@@ -1,6 +1,8 @@
 ---
 texto: "Ya sabemos quanto influxo tiene en todo la opinión; y así la mala, en que los hombres tienen ahora a las mugeres, es suficiente para mantenerlas siempre en la ignorancia."
 autor: "josefa-amar-y-borbon"
+temas:
+  - "la-justicia"
 slug: "josefa-amar-y-borbon-ya-sabemos-quanto-influxo-tiene-en-todo"
 procedencia:
   obra: "Discurso en defensa del talento de las mugeres"

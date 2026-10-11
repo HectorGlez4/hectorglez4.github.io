@@ -1,6 +1,8 @@
 ---
 texto: "Sí, el hombre es el único ser que lanza un clamor de justicia en el universal y eterno sacrificio de los débiles."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-si-el-hombre-es-el-unico-ser"
 procedencia:
   obra: "Los partidos y la Unión Nacional"

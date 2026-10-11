@@ -1,6 +1,8 @@
 ---
 texto: "Sí; la filantropía es un deber de cada hombre y de cada uno de los grupos sociales en que el hombre se desarrolla."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-deber"
 slug: "eugenio-maria-de-hostos-si-la-filantropia-es-un-deber-de"
 procedencia:
   obra: "Moral social"

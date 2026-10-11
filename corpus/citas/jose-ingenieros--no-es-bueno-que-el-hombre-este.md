@@ -1,6 +1,8 @@
 ---
 texto: "No es bueno que el hombre esté solo, pero es indispensable que no esté mal acompañado."
 autor: "jose-ingenieros"
+temas:
+  - "la-amistad"
 slug: "jose-ingenieros-no-es-bueno-que-el-hombre-este"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

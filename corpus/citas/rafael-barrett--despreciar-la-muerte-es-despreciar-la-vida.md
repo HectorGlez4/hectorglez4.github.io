@@ -1,6 +1,8 @@
 ---
 texto: "Despreciar la muerte es despreciar la vida, y la vida de un joven es bagaje ligero."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-despreciar-la-muerte-es-despreciar-la-vida"
 procedencia:
   obra: "La violencia"

@@ -1,7 +1,9 @@
 ---
-texto: "El orgullo es una arrogancia originada por nobles motivos y quiere aquilatar el mérito; la soberbia es una desmedida presunción y busca alargar la sombra."
+texto: "No teniendo valor para la verdad es imposible tenerlo para la justicia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-orgullo-es-una-arrogancia-originada-por"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-no-teniendo-valor-para-la-verdad-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

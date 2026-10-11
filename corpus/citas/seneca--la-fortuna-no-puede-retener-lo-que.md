@@ -1,6 +1,8 @@
 ---
 texto: "La fortuna no puede retener lo que la naturaleza abandona, y no es posible sea desgraciado el que ya no existe."
 autor: "seneca"
+temas:
+  - "la-muerte"
 slug: "seneca-la-fortuna-no-puede-retener-lo-que"
 procedencia:
   obra: "Consolación a Marcia"

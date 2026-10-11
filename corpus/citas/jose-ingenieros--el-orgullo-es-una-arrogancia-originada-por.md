@@ -1,7 +1,9 @@
 ---
-texto: "Dice distraídamente todo el mal de que no está seguro y calla con prudencia todo el bien que sabe."
+texto: "El orgullo es una arrogancia originada por nobles motivos y quiere aquilatar el mérito; la soberbia es una desmedida presunción y busca alargar la sombra."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-dice-distraidamente-todo-el-mal-de-que"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-el-orgullo-es-una-arrogancia-originada-por"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Todo cálculo es ilusorio: no se hereda el genio, el talento, la belleza ni el crimen."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-todo-calculo-es-ilusorio-no-se-hereda"
 procedencia:
   obra: "El porno-cinematógrafo"

@@ -1,6 +1,8 @@
 ---
 texto: "Peor es vivir indignos de la vida por no saber morir, que morir dignos de vida por saber buscar la muerte."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-muerte"
 slug: "francisco-de-quevedo-peor-es-vivir-indignos-de-la-vida"
 procedencia:
   obra: "Marco Bruto"

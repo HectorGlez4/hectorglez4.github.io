@@ -1,6 +1,8 @@
 ---
 texto: "Porque es gran flaqueza de ánimo el huir las cosas de trabajo y muerte, no por ser cosa honrosa el morir, sino por huir del mal."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-porque-es-gran-flaqueza-de-animo-el"
 procedencia:
   obra: "Ética a Nicómaco"

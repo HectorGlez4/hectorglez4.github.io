@@ -1,6 +1,8 @@
 ---
 texto: "Fundados en estas verdades dijimos no hace mucho tiempo que el teatro rara vez corrige al hombre, porque el hombre es animal de poco escarmiento."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-error"
 slug: "mariano-jose-de-larra-fundados-en-estas-verdades-dijimos-no-hace"
 procedencia:
   obra: "«Catalina Howard»"

@@ -1,6 +1,8 @@
 ---
 texto: "El fin de todo este discurso es sacar por fruto que debe reinar la paz y concordia entre los hombres, siendo todos de una misma naturaleza y linaje."
 autor: "marco-aurelio"
+temas:
+  - "la-amistad"
 slug: "marco-aurelio-el-fin-de-todo-este-discurso-es"
 procedencia:
   obra: "Soliloquios"
