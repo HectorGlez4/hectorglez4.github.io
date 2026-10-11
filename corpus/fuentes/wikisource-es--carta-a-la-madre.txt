@@ -1,0 +1,39 @@
+fuente: wikisource-es
+obra: Carta a la Madre
+url: https://es.wikisource.org/wiki/Carta_a_la_Madre
+recuperado: 2026-10-11
+---
+Carta a la Madre
+[[Categoría:Epístolas de José Martí]]
+|título={{PAGENAME}}
+|autor=[[José Martí]]
+|fecha=20190420
+---
+Madre mía:
+
+Hoy, 25 de marzo, en vísperas de un largo viaje, estoy pensando en Vd. Yo sin cesar pienso en Vd. Vd. se duele, en la cólera de su amor, del sacrificio de mi vida; y ¿por qué nací de Vd. con una vida que ama el sacrificio? Palabras, no puedo. El deber de un hombre está allí donde es más útil. Pero conmigo va siempre, en mi creciente y necesaria agonía, el recuerdo de mi madre.
+
+Abrace a mis hermanas, y a sus compañeros. ¡Ojalá pueda algún día verlos a todos a mi alrededor, contentos de mí! Y entonces si que cuidaré yo de Vd. con mimo y con orgullo. Ahora, bendígame, y crea que jamás saldrá de mí! corazón obra sin piedad y sin limpieza. La bendición.
+
+Su
+
+J. Martí
+
+[Montecristi] 25 marzo 1895
+
+Tengo razón para ir más contento y seguro de lo que Vd. pudiera imaginar. No son inútiles la verdad y la ternura. No padezca. -
+
+José Martí
+
+La fuente de este texto no se ha especificado.
+
+Por favor, especifique las fuentes originales en la página de discusión (se recomienda utilizar la plantilla {{infotexto}} en la página de discusión). Las fuentes (autor, traductor, año de la edición copiada, editorial, web, etc.) permiten determinar que el texto es fiel al original y que no contiene errores de transcripción, y permite asegurar que se encuentra en dominio público o bajo licencia compatible (Véase Wikisource:Derechos de autor).
+
+A menos que se añada información de derechos de autor y/o la fuente de este texto en la página de discusión, puede ser borrado un mes después del día en el cual esta plantilla fue agregada. Ver Wikisource:Políticas de borrado.
+
+Este aviso fue puesto el 20 de abril de 2019.
+
+Comentarios: ¿Fuente? -Aleator 17:44 20 abr 2019 (UTC)
+
+;Cuando agregues esta plantilla:
+Usa {{subst:aviso sin fuente|Carta a la Madre}}-- ~~~~ para notificar a quién creó el texto sin fuente.

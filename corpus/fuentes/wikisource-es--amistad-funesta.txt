@@ -1,0 +1,30 @@
+fuente: wikisource-es
+obra: Amistad funesta
+url: https://es.wikisource.org/wiki/Amistad_funesta
+recuperado: 2026-10-11
+---
+Amistad funesta
+[[Categoría:Novelas de José Martí]]
+|fecha=20180804
+|título=Amistad funesta
+|autor=José Martí
+|título={{Anclaje+|Índice}}
+---
+La fuente de este texto no se ha especificado.
+
+Por favor, especifique las fuentes originales en la página de discusión (se recomienda utilizar la plantilla {{infotexto}} en la página de discusión). Las fuentes (autor, traductor, año de la edición copiada, editorial, web, etc.) permiten determinar que el texto es fiel al original y que no contiene errores de transcripción, y permite asegurar que se encuentra en dominio público o bajo licencia compatible (Véase Wikisource:Derechos de autor).
+
+A menos que se añada información de derechos de autor y/o la fuente de este texto en la página de discusión, puede ser borrado un mes después del día en el cual esta plantilla fue agregada. Ver Wikisource:Políticas de borrado.
+
+Este aviso fue puesto el 4 de agosto de 2018.
+
+;Cuando agregues esta plantilla:
+Usa {{subst:aviso sin fuente|Amistad funesta}}-- ~~~~ para notificar a quién creó el texto sin fuente.
+
+Índice(no listados originalmente)
+
+Capítulo I
+
+Capítulo II
+
+Capítulo III
