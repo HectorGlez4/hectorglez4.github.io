@@ -1,0 +1,14 @@
+---
+texto: "-No os enojéis, Preciosa -dijo el padre-; que, a lo menos de vos, imagino que no se puede presumir cosa mala, que vuestro buen rostro os acredita y sale por fiador de vuestras buenas obras."
+autor: "miguel-de-cervantes"
+slug: "miguel-de-cervantes-no-os-enojeis-preciosa-dijo-el-padre"
+procedencia:
+  obra: "Novelas ejemplares"
+  año: 1825
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_gitanilla_%281825%29"
+---

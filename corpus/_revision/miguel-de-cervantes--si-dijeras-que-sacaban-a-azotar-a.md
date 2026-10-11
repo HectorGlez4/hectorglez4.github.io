@@ -1,0 +1,14 @@
+---
+texto: "-Si dijeras que sacaban a azotar a un alcagüete, entendiera que sacaban a azotar un coche."
+autor: "miguel-de-cervantes"
+slug: "miguel-de-cervantes-si-dijeras-que-sacaban-a-azotar-a"
+procedencia:
+  obra: "Novelas ejemplares"
+  año: 1825
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_licenciado_Vidriera_%281825%29"
+---

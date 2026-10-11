@@ -1,0 +1,14 @@
+---
+texto: "Pues ¿paréceles a vuesas mercedes que sería barro tener cada mes tres millones de reales como ahechados?"
+autor: "miguel-de-cervantes"
+slug: "miguel-de-cervantes-pues-pareceles-a-vuesas-mercedes-que-seria"
+procedencia:
+  obra: "Novelas ejemplares"
+  año: 1825
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_coloquio_de_los_perros_%281825%29"
+---

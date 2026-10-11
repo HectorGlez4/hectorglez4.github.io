@@ -1,0 +1,14 @@
+---
+texto: "Llegó la dueña, y, tendiéndose de la misma manera, puso la boca en el oído de su señora, y con voz baja le dijo que traía el ungüento y de la manera que había de probar su virtud."
+autor: "miguel-de-cervantes"
+slug: "miguel-de-cervantes-llego-la-duena-y-tendiendose-de-la"
+procedencia:
+  obra: "Novelas ejemplares"
+  año: 1825
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_celoso_extreme%C3%B1o_%281825%29"
+---

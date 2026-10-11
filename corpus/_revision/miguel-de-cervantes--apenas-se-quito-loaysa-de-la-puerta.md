@@ -1,0 +1,14 @@
+---
+texto: "Apenas se quitó Loaysa de la puerta, cuando, con más ligereza que el traer de sus muletas prometía, se fue a dar cuenta a sus consejeros de su buen comienzo, adivino del buen fin que por él esperaba."
+autor: "miguel-de-cervantes"
+slug: "miguel-de-cervantes-apenas-se-quito-loaysa-de-la-puerta"
+procedencia:
+  obra: "Novelas ejemplares"
+  año: 1825
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_celoso_extreme%C3%B1o_%281825%29"
+---
