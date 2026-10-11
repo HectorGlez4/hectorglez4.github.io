@@ -1,0 +1,43 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_4
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 4
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo IVº - De lo que dixo un genovés a su alma, cuando se ovo de morir
+
+Un día fablava el conde Lucanor con Patronio, su consegero, et contával’ su fazienda en esta manera:
+
+-Patronio, loado a Dios, yo tengo mi fazienda assaz en buen estado et en paz, et he todo lo que me cumple, segund mis vezinos et mis eguales, et por aventura más.
+
+Et algunos conséjanme que comiençe un fecho de muy grant aventura, et
+yo he grant voluntad de fazer aquello que me consejan; pero por la fiança que en vos he, non lo quise començar fasta que fablase conbusco et vos rogasse que me consejásedes lo que fiziese en ello.
+
+-Señor conde Lucanor -dixo Patronio-, para que vós fagades en este fecho lo que vos más cunple, plazerme ía mucho que sopiésedes lo que conteçió a un genués.
+
+El conde le rogó quel’ dixiesse cómo fuera aquello.
+
+Patronio le dixo:
+
+-Señor conde Lucanor: un genués era muy rico et muy bien andante, segund sus vezinos. Et aquel genués adolesçió muy mal, et de que entendió que non podía escapar de la muerte, fizo llamar a sus parientes et a sus amigos; et desque todos fueron con él, envió por su muger et sus fijos; et assentósse en un palaçio muy bueno donde paresçía la mar et la tierra; et fizo traer ante sí todo su tesoro et todas sus joyas, et de que todo lo tovo ante sí, conmençó en manera de trebejo a fablar con su alma en esta guisa:
+
+-Alma, yo beo que tú te quieres partir de mí, et non sé por qué lo fazes; ca si tú quieres muger et fijos, bien los vees aquí delante tales de que te deves tener por pagada; et si quisieres parientes et amigos, ves aquí muchos et muy buenos et mucho onrados; et si quieres muy grant tesoro de oro et de plata et de piedras preçiosas et de joyas et de paños et de merchandías, tú tienes aquí tanto dello que te non faze mengua aver más; et si tú quieres naves et galeas que te ganen et te trayan muy grant aver et muy grant onra,
+veeslas aquí, ó están en la mar que paresçe deste mi palaçio; et si quieres muchas heredades et huertas, et muy fermosas et muy delectosas, véeslas ó paresçen destas finiestras; et si quieres cavallos et mulas, et aves et canes para caçar et tomar plazer, et joglares para te fazer alegría et solaz, et muy buena posada, mucho apostada de camas et de estrados et de todas las otras cosas que son ý mester; de todas estas cosas a ti non te mengua nada; et pues tú as tanto bien et non te tienes ende por pagada nin puedes sofrir el
+bien que tienes, pues con todo esto non quieres fincar et quieres buscar lo que non sabes, de aquí adelante ve con la ira de Dios, et será muy nesçio qui de ti se doliere por mal que te venga.
+
+Et vós, señor conde Lucanor, pues, loado a Dios, estades en paz et con bien et con onra, tengo que non faredes buen recabdo en abenturar esto et començar lo que dezides que vos consejan; ca por aventura estos vuestros consejeros vos lo dizen porque saben que desque en tal fecho vos ovieren metido, que por fuerça abredes a fazer lo que ellos quisieren et que avredes a seguir su voluntad desque fuéredes en el grant mester, así como siguen ellos la vuestra agora que estades en paz. Et por aventura cuidan que por el
+vuestro pleito endereçarán ellos sus faziendas, lo que se les non guisa en cuanto vos vivierdes en asusiego, et conteçervos ía lo que dezía el genués a la su alma; mas, por el mi consejo, en cuanto pudierdes aver paz et assossiego a vuestra onra, et sin vuestra mengua, non vos metades en cosa que lo ayades todo aventurar.
+
+Al conde plogo mucho del consejo que Patronio le dava. Et fízolo así, et fallóse ende bien.
+
+Et cuando don Johan falló este exiemplo, tóvolo por bueno et non quiso fazer viessos de nuebo, sinon que puso ý una palabra que dizen las viejas en Castiella. Et la palabra dize así:
+
+Quien bien se siede non se lieve.
+
+Et la istoria deste exemplo es ésta que se sigue:

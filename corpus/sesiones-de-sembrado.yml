@@ -372,3 +372,12 @@ sesiones:
       citasPublicadas: 1894
       procedenciaCompleta: 26.1
       tradicionLatinoamericanaSobreHispanicos: 55.9
+  - fecha: "2026-10-11"
+    hora: "09:18"
+    clase: "epoca"
+    propuesto: "Agotar la época Edad Media: le quedan 36 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 39 candidatos en la época Edad Media: 2 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    resultado:
+      citasPublicadas: 1912
+      procedenciaCompleta: 22.5
+      tradicionLatinoamericanaSobreHispanicos: 54.3

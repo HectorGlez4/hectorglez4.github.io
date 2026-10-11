@@ -1,0 +1,39 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_6
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 6
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo VIº - De lo que contesçió a la golondrina con las otras aves cuando vio sembrar el lino
+
+Un día fablava el conde Lucanor con Patronio, su consejero, et díxol’:
+
+-Patronio, a mí dizen que unos mis vezinos, que son más poderosos que yo, se andan ayuntando et faziendo muchas maestrías et artes con que me puedan engañar et fazer mucho damno; et yo non lo creo, nin me reçelo ende; pero por el buen entendimiento que vós avedes, quiérovos preguntar que me digades si entendedes que devo fazer alguna cosa sobresto.
+
+-Señor conde Lucanor -dixo Patronio-, para que en esto fagades lo que yo entiendo que vos cumple, plazerme ía mucho que sopiésedes lo que contesçió a la golondrina con las otras aves.
+
+El conde Lucanor le preguntó cómo fuera aquello.
+
+-Señor conde Lucanor -dixo Patronio-, la golondrina vido que un omne
+senbrava lino, et entendió, por el su buen entendimiento, que si aquel lino nasçiesse, podrían los omnes fazer redes et lazos para tomar las aves. Et luego fuesse para las aves et fízolas ayuntar, et díxoles en cómo el omne senbrava aquel lino et que fuesen çiertas que si aquel lino nasçiesse, que se les seguiría ende muy grant dampno et que les consejava que ante que el lino nasçiesse que fuessen allá et que lo arrincassen. Ca las cosas son ligeras de se desfazer en el comienço et después son muy más graves de se
+desfazer. Et las aves tovieron esto en poco et non lo quisieron fazer. Et la golondrina les afincó desto muchas veces, fasta que vio que las aves non se sintían desto, nin davan por ello nada, et que el lino era ya tan cresçido que las aves non lo podrían arrancar con las manos nin con los picos. Et desque esto vieron las aves, que el lino era cresçido, et que non podían poner consejo al daño que se les ende seguiría, arripintiéronse ende mucho por que ante non avían ý puesto consejo. Pero el repintimiento fue a tiempo que non podían tener ya pro.
+
+Et ante desto, cuando la golondrina vio que non querían poner recabdo las aves en aquel daño que les vinía, fuesse para’l omne, et metiósse en su poder et ganó de’l segurança para sí et para su linage. Et después acá biven las golondrinas en poder de los omnes et son seguras dellos. Et las otras aves que se non quisieron guardar, tómanlas cada día con redes et con lazos.
+
+-Et vós, señor conde Lucanor, si queredes ser guardado deste dampno que dezides que vos puede venir, apercebitvos et ponet ý recabdo, ante que el daño vos pueda acaesçer. Ca non es cuerdo el que vee la cosa desque es acaesçida, mas es cuerdo el que por una señaleja o por un movimiento cualquier entiende el daño quel’ puede venir et pone ý consejo porque nol’ acaezca.
+
+Al conde plogo esto mucho, et fízolo segund Patronio le consejó et fallóse ende bien.
+
+Et porque entendió don Johan que este enxienplo era muy bueno fízole poner en este libro et fizo estos viessos que dizen assí:
+
+En el comienço deve omne partir
+
+el daño que non le pueda venir.
+
+Et la istoria deste exiemplo es ésta que se sigue:

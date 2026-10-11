@@ -1,0 +1,78 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_24
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 24
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo XXIVº - De lo que contesçió a un rey que quería provar a tres sus fijos
+
+Un día fablava el conde Lucanor con Patronio, su consegero, et díxole assí:
+
+-Patronio, en la mi casa se crían muchos moços, dellos omnes de grand
+guisa et dellos que lo non son tanto, et beo en ellos muchas maneras et muy estrañas. Et por el grand entendimiento que vós avedes, ruégovos que me digades, cuanto vós entendedes, en qué manera puedo yo conosçer cuál moço recudrá a seer mejor omne.
+
+-Señor conde -dixo Patronio-, esto que me vós dezides es muy fuerte cosa de vos lo dezir ciertamente, ca non se puede saber çiertamente ninguna cosa de lo que es de venir; et esto que vós preguntades es por venir, et por ende non se puede saber ciertamente; mas lo que desto se puede saber es por señales que paresçen en los moços, también de dentro como de fuera; et las que paresçen de fuera son las figuras de la cara et el donaire et la color et el talle del cuerpo et de los miembros, ca por estas cosas paresçe la señal
+de la complisión et de los miembros prinçipales, que son el coraçón et el meollo et el fígado; como quier que estas son señales non se puede saber lo çierto; ca pocas vezes se acuerdan todas las señales a una cosa; ca si las unas señales muestran lo uno, muestran las otras el contrario; pero a lo más, segund son estas señales, assí recuden las obras.
+
+Et las más çiertas señales son las de la cara, et señaladamente las de los ojos, et otrosí el donaire; ca muy pocas vezes fallesçen éstas. Et non tengades que el donarie se dize por seer omne fermoso en la cara nin feo, ca muchos omnes son pintados et fermosos, et non an donarie de omne; et otros paresçen feos, que an buen donario para seer omnes apuestos.
+
+Et el talle del cuerpo et de los miembros muestran señal de la complisión et paresçe si deve seer valiente o ligero, et las tales cosas. Mas el talle del cuerpo et de los miembros non muestran çiertamente cuáles deven seer las obras. Et con todo esto, éstas son señales, et pues digo señales, digo cosa non çierta, ca la señal sienpre es cosa que paresce por ella lo que deve seer; mas non es cosa forçada que sea assí en toda guisa. Et éstas son las señales
+de fuera, que siempre son muy dubdosas para conosçer lo que vós me
+preguntades. Mas para conosçer los moços por las señales de dentro que son ya cuanto más ciertas, plazerme ía que sopiésedes cómo provó una vez un rey moro a tres fijos que avía, por saber cuál dellos sería mejor omne.
+
+El conde le rogó quel’ dixiesse cómo fuera aquello.
+
+-Señor conde Lucanor -dixo Patronio-, un rey moro avía tres fijos; et porque el padre puede fazer que regne cual fijo de los suyos él quisiere, después que el rey llegó a la vegez, los omnes buenos de su tierra pidiéronle por merçed que les señalasse cuál daquellos sus fijos quería que regnasse en pos él. Et el rey díxoles que dende a un mes gelo diría.
+
+Et cuando vino a ocho o a dies días, una tarde dixo al fijo mayor que otro día grand mañana quería cavalgar et que fuesse con él. Otro día, vino el infante mayor al rey, pero que non tan mañana como el rey, su padre, dixiera.
+
+Et desque llegó, díxol’ el rey que se quería vestir, quel’ fiziesse traer los paños. El infante dixo al camarero que troxiesse los paños; el camarero preguntó que cuáles paños quería. El infante tornó al rey et preguntól’ que cuáles paños quería. El rey díxole que el aljuva; et él tornó al camarero et díxole que el aljuva quería el rey. Et el camarero le preguntó que cuál almexía
+quería, et el infante tornó al rey a gelo preguntar. Et assí fizo por
+cada vestidura, que sienpre iva et vinía por cada pregunta, fasta que el rey tovo todos los paños. Et vino el camarero, et le vistió et lo calçó.
+
+Et desque fue vestido et calçado, mandó el rey al infante que fiziesse traer el cavallo, et él dixo al que guardava los cavallos del rey quel’ troxiesse el cavallo, et el que los guardava díxole que cuál cavallo traería; et el infante tornó con esto al rey, et assí fizo por la siella et por el freno et por el espada et las espuellas; et por todo lo que avía mester para cavalgar, por cada cosa fue preguntar al rey.
+
+Desque todo fue guisado, dixo el rey al infante que non podía cavalgar, et que fuesse él andar por la villa et que parasse mientes a las cosas que vería porque lo sopiesse retraer al rey.
+
+El infante cavalgó et fueron con él todos los onrados omnes del rey et del regno, et ivan ý muchas trompas et tabales et otros strumentos. El infante andido una pieça por la villa, et desque tornó al rey, preguntól’ quél’ paresçía de lo que viera. Et el infante díxole que bien le paresçía, sinon quel’ fazían muy grand roído aquellos estrumentes.
+
+Et a cabo de otros días, mandó el rey al fijo mediano que veniesse a él otro día mañana, et el infante fízolo assí. Et el rey fizo todas las pruevas que fiziera al infante mayor, su hermano, et el infante fízolo, et dixo bien como el hermano mayor.
+
+Et a cabo de otros días, mandó al infante menor, su fijo, que fuesse con él de grand mañana. Et el infante madurgó ante que el rey despertasse, et esperó fasta que despertó el rey; et luego que fue espierto, entró el infante et omillósele con la reverençia que devía. Et el rey mandól’ quel’ fiziesse traer de bestir. Et el infante preguntó qué paños quería, et en una vez le preguntó por todo lo que avía de bestir et de callar, et fue por ello et tráxogelo
+todo. Et non quiso que otro camarero lo vestiesse nin lo calçasse sinon él, dando a entender que se ternía por de buena ventura si el rey, su padre, tomasse plazer o serviçio de lo que él pudiesse fazer, et que pues su padre era, que razón et aguisado era de fazer cuantos serviçios et omildades pudiesse.
+
+Et desque el rey fue vestido et calçado, mandó al infante quel’ fiziesse traer el cavallo. Et él preguntóle cuál cavallo quería, et con cuál siella et con cuál freno, et cuál espada, et por todas las cosas que eran mester paral’ cavalgar, et quién quería que cavalgasse con él, et assí por todo cuanto cumplía. Et desque todo lo fizo, non preguntó por ello más de una vez, et tráxolo et
+aguisólo como el rey lo avía mandado.
+
+Et desque todo fue fecho, dixo el rey que non quería cavalgar, mas que cavalgasse él et quel’ contasse lo que viesse. Et el infante cavalgó et fueron con él todos como fizieran con los otros sus hermanos; mas él nin ninguno de sus hermanos, nin omne del mundo, non sabié nada de la razón porque el rey fazía esto.
+
+Et desque el infante cavalgó, mandó quel’ mostrassen toda la villa de dentro, et las calles et do tenía el rey sus tesoros, et cuántos podían seer, et las mezquitas et toda la nobleza de la villa de dentro et las gentes que ý moravan.
+
+Et después salió fuera et mandó que saliessen allá todos los omnes de
+armas, et de cavallo et de pie, et mandóles que trebejassen et le mostrassen todos los juegos de armas et de trebejos, et vio los muros et las torres et las fortalezas de la villa. Et desque lo ovo visto, tornósse paral rey, su padre.
+
+Et cuando tornó era ya muy tarde. Et el rey le preguntó de las cosas que avía visto. Et el infante le dixo que si a él non pesasse, que él le diría lo quel’ paresçía de lo que avía visto. Et el rey le mandó, so pena de la su bendiçión, quel’ dixiesse lo quel’ paresçía. Et el infante le dixo que como quier que él era muy leal rey, quel’ paresçía que non era tan bueno como devía, ca si lo fuesse, pues avía tan buena gente et tanta, et tan grand poder et tan grand aver, et que si por él non fincasse, que todo el mundo devía ser suyo.
+
+Al rey plogo mucho deste denuesto que el infante le dixo.
+
+Et cuando vino el plazo a que avía de dar respuesta a los de la tierra, díxoles que aquel fijo les dava por rey.
+
+Et esto fizo por las señales que vio en los otros et por las que vio en éste. Et como quier que más quisiera cualquier de los otros para rey, non tovo por aguisado de lo fazer por lo que vio en los unos et en el otro.
+
+Et vós, señor conde, si queredes saber cuál moço sería mejor, parat mientes a estas tales cosas, et assí podredes entender algo et por aventura lo más dello que a de ser de los moços.
+
+Al conde plogo mucho de lo que Patronio le dixo.
+
+Et porque don Johan tovo este por buen exienplo, fízolo escrivir en este libro et fizo estos viessos que dizen assí:
+
+Por obras et maneras podrás conosçer
+
+a los moços cuáles deven los más seer.
+
+Et la istoria deste exiemplo es ésta que se sigue:

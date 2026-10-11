@@ -1,0 +1,45 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_30
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 30
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo XXXº - De lo que contesçió al rey Abenabet de Sevilla con Ramaiquía, su muger
+
+Un día fablava el conde Lucanor con Patronio, su consegero, en esta
+manera:
+
+-Patronio, a mí contesçe con un omne assí: que muchas vezes me ruega et me pide quel’ ayude et le dé algo de lo mío; et comoquier que cuando fago aquello que él me ruega, da a entender que me lo gradesçe, luego que otra vez me pide alguna cosa, si lo non fago assí como él quiere, luego se ensaña et da a entender que non me lo gradesçe et que a olbidado todo lo que fiz por él. Et por el buen entendimiento que habedes, ruégovos que me consejedes en qué manera passe con este omne.
+
+-Señor conde Lucanor -dixo Patronio-, a mí paresçe que vos contesçe con este omne segund contesçió al rey Abenabet de Sevilla con Ramaiquía, su muger.
+
+El conde preguntó cómo fuera aquello.
+
+-Señor conde -dixo Patronio-, el rey Abenabet era casado con Ramaiquía et amávala más que cosa del mundo; et ella era muy buena muger et los moros an della muchos buenos exiemplos; pero avía una manera que non era muy buena: esto era que a las vezes tomava algunos antojos a su voluntad. Et acaesçió que un día, estando en Córdova en el mes de febrero, cayó una nieve; et cuando Ramaiquía la vio, començó a llorar. Et preguntól’ el rey por qué llorava.
+
+Et ella díxol’ que por que nunca la dexava estar en tierra que viesse nieve. Et el rey, por le fazer plazer, fizo poner almendrales por toda la xierra de Córdova; porque pues Córdova es tierra caliente et non nieva ý cada año, que en el febrero paresciessen los almendrales floridos, que semejan nieve, por le fazer perder el deseo de la nieve.
+
+Otra vez, estando Ramaiquía en una cámara sobre el río, vio una muger
+descalça bolviendo lodo cerca el río para fazer adobes; et cuando Ramaiquía lo vio, començó a llorar; et el rey preguntól’ por qué llorava. Et ella díxol’ que porque nunca podía estar a su guisa, siquier faziendo lo que fazía aquella muger.
+
+Entonçe, por le fazer plazer, mandó el rey fenchir de agua rosada aquella grand albuhera de Córdova en logar de agua, et en lugar de tierra, fízola fenchir de açúcar et de canela et de gengibre et espic et clavos et musgo et ambra et algalina, et de todas buenas espeçias et buenos olores que pudían seer; et en lugar de paja, poner cañas de açúcar. Et desque destas cosas fue llena el albuhera de tal lodo cual entendedes que podría seer, dixo el rey a Ramaiquía que se descalçase et que follasse aquel lodo et que fiziesse adobes
+del cuantos quisiesse.
+
+Otro día, por otra cosa que se le antojó, començó a llorar; et el rey preguntól’ por qué lo fazía.
+
+Et ella díxol’ que cómo non lloraría, que nunca fiziera el rey cosa por le fazer plazer. Et el rey veyendo que, pues tanto avía fecho por le fazer plazer et conplir su talante, et que ya non sabía qué pudiesse fazer más, díxol’ una palabra que se dize en el algaravía desta guisa: «v. a. le mahar aten?», et quiere dezir: «¿Et non el día del lodo?», como diziendo que pues las otras cosas olvidava, que non devía olvidar el lodo que fiziera por le fazer plazer.
+Et vés, señor conde, si veedes que por cosa que por aquel omne fagades, que si non le fazedes todo lo ál que vos dize, que luego olvida et desgradesçe todo lo que por él avedes fecho, conséjovos que non fagades por él tanto que se vos torne en grand daño de vuestra fazienda. Et a vos, otrosí, conséjovos que, si alguno fiziesse por vos alguna cosa que vos cumpla et después non fiziere todo lo que vós querriedes, que por esso nunca lo desconozcades el bien que vos vino de lo que por vos fizo.
+
+El conde tovo este por buen consejo et fízolo assí et fallósse ende bien. Et teniendo don Johan éste por buen enxiemplo, fízolo escrivir en este libro et fizo estos viessos que dizen assí:
+
+Qui te desconosçe tu bien fecho,
+
+non dexes por él tu grand provecho.
+
+Et la istoria deste exienplo es ésta que se sigue:

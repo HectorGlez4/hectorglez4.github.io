@@ -1,0 +1,39 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_7
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 7
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo VIIº - De lo que contesçió a una muger quel’ dizién doña Truhana
+
+Otra vez fablava el conde Lucanor con Patronio en esta guisa:
+
+-Patronio, un omne me dixo una razón et amostróme la manera cómo podría seer. Et bien vos digo que tantas maneras de aprovechamiento ha en ella que, si Dios quiere que se faga assí como me él dixo, que sería mucho mi pro; ca tantas cosas son que nasçen las unas de las otras, que al cabo es muy grant fecho además.
+
+Et contó a Patronio la manera cómo podría seer. Desque Patronio entendió aquellas razones, respondió al conde en esta manera:
+
+-Señor conde Lucanor, siempre oí dezir que era buen seso atenerse omne a las cosas çiertas et non a las vanas fuzas, ca muchas vezes a los que se atienen a las fuzas, contésçeles lo que contesçió a doña Truana. Et el conde preguntó cómo fuera aquello.
+
+-Señor conde -dixo Patronio-, una muger fue que avié nombre doña Truana et era asaz más pobre que rica, et un día iva al mercado et levava una olla de miel en la cabeça. Et yendo por el camino, començó a cuidar que vendría aquella olla de miel et que compraría una partida de huevos, et de aquellos huevos nazçirían gallinas et depués, de aquellos dineros que valdrían, conpraría ovejas, et assí fue comprando de las ganancias que faría, fasta que fallóse por más rica que ninguna de sus vezinas.
+
+Et con aquella riqueza que ella cuidava que avía, asmó cómo casaría sus fijos et sus fijas, et cómo iría aguardada por la calle con yernos et con nueras, et cómo dizían por ella cómo fuera de buena ventura en llegar a tan grant riqueza, seyendo tan pobre como solía seer.
+
+Et pensando en esto començó a reír con grand plazer que avía de la su
+buena andança, et, en riendo, dio con la mano en su fruente, et entonçes cayól’ la olla de la miel en tierra, et quebróse. Cuando vio la olla quebrada, començó a fazer muy grant duelo, toviendo que avía perdido todo lo que cuidava que avría si la olla non le quebrara. Et porque puso todo su pensamiento por fuza vana, non se fizo al cabo nada de lo que ella cuidava. Et vós, señor conde, si queredes que lo que vos dixieren et lo que vós cuidardes sea todo cosa çierta, cred et cuidat sienpre todas cosas tales que sean
+aguisadas et non fuzas dubdosas et vanas. Et si las quisierdes provar, guardatvos que non aventuredes nin pongades de lo vuestro cosa de que vos sintades por fiuza de la pro de lo que non sodes çierto.
+
+Al conde plogo de lo que Patronio le dixo, et fízolo assí et fallóse ende bien.
+
+Et porque don Johan se pagó deste exienplo, fízolo poner en este libro et fizo estos viessos que dizen assí:
+
+A las cosas çiertas vos comendat
+
+et las fuizas vanas dexat.
+
+Et la istoria deste exiemplo es ésta que sigue:

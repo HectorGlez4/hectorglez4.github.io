@@ -1,0 +1,47 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_5
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 5
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo quinto - De lo que contesçió a un raposo con un cuervo que tenié un pedaço de queso en el pico
+
+Otra vez fablava el conde Lucanor con Patronio, su consejero, et díxol’ assí:
+
+-Patronio, un omne que da a entender que es mi amigo, me començó a loar mucho, dándome a entender que avía en mí muchos complimientos de onra et de poder et de muchas vondades. Et de que con estas razones me falagó cuanto pudo, movióme un pleito, que en la primera vista, segund lo que yo puedo entender, que paresçe que es mi pro.
+
+Et contó el conde a Patronio cuál era el pleito quel’ movía; et como quier que paresçía el pleito aprovechoso, Patronio entendió el engaño que yazía ascondido so las palabras fremosas. Et por ende dixo al conde:
+
+-Señor conde Lucanor, sabet que este omne vos quiere engañar, dándovos a entender que el vuestro poder et el vuestro estado es mayor de cuanto es la verdat. Et para que vos podades guardar deste engaño que vos quiere fazer, plazerme ía que sopiésedes lo que contesçió a un cuervo con un raposo. Et el conde le preguntó cómo fuera aquello.
+
+-Señor conde Lucanor -dixo Patronio-, el cuervo falló una vegada un grant pedaço de queso et subió en un árbol porque pudiese comer el queso más a su guisa et sin reçelo et sin enbargo de ninguno. Et en cuanto el cuervo assí estava, passó el raposo por el pie del árbol, et desque vio el queso que el cuervo tenía, començó a cuidar en cuál manera lo podría levar de’l. Et por ende començó a fablar con él en esta guisa:
+
+-Don Cuervo, muy gran tiempo ha que oí fablar de vós et de la vuestra
+nobleza, et de la vuestra apostura. Et como quiera que vos mucho busqué, non fue la voluntat de Dios, nin la mi ventura, que vos pudiesse fallar fasta agora, et agora que vos veo, entiendo que a mucho más bien en vos de cuanto me dizían. Et porque veades que non vos lo digo por lesonja, también como vos diré las aposturas que en vos entiendo, también vos diré las cosas en que las gentes tienen que non sodes tan apuesto. Todas las gentes tienen que la color de las vuestras péñolas et de los ojos et del pico et de los pies
+et de las uñas, que todo es prieto, et por que la cosa prieta non es tan apuesta como la de otra color, et vós sodes todo prieto, tienen las gentes que es mengua de vuestra apostura, et non entienden cómo yerran en ello mucho; ca como quier que las vuestras péñolas son prietas, tan prieta e tan luzia es aquella pretura, que torna en india, como péñolas de pavón, que es la más fremosa ave del mundo; et como quier que los vuestros ojos son prietos, cuanto para ojos, mucho son más fremosos que otros ojos ningunos, ca la propriedat del ojo non es sinon ver, et porque toda cosa prieta conorta
+el viso, para los ojos, los prietos son los mejores, et por ende son más loados los ojos de la ganzela, que son más prietos que de ninguna otra animalia.
+
+Otrosí, el vuestro pico et las vuestras manos et uñas son fuertes más
+que de ninguna ave tanmaña como vós. Otrosí, en el vuestro buelo avedes tan grant ligereza, que vos non enbarga el viento de ir contra él, por rezio que sea, lo que otra ave non puede fazer tan ligeramente como vós. Et bien tengo que, pues Dios todas las cosas faze con razón, que non consintría que, pues en todo sodes tan complido, que oviese en vos mengua de non cantar mejor que ninguna otra ave. Et pues Dios me fizo tanta merçet que vos veo, et sé que ha en vos más bien de cuanto nunca de vos oí, si yo pudiesse oír de vos el vuestro canto, para siempre me ternía por de buena
+ventura.
+
+Et señor conde Lucanor, parat mientes que maguer que la entençión del raposo era para engañar al cuervo, que sienpre las sus razones fueron con verdat. Et set çierto que los engaños et damños mortales siempre son los que se dizen con verdat engañosa.
+
+Et desque el cuervo vio en cuantas maneras el raposo le alabava, et cómo le dizía verdat en todas creó que asíl’ dizía verdat en todo lo ál, et tovo que era su amigo, et non sospechó que lo fazía por levar de’l el queso que tenía en el pico, et por las muchas buenas razones quel’ avía oído, et por los falagos et ruegos quel’ fiziera porque cantase, avrió el pico para cantar. Et desque el pico fue avierto para cantar, cayó el queso en tierra, et tomólo el raposo et fuese con él; et así fincó engañado el cuervo del raposo, creyendo
+que avía en sí más apostura et más complimiento de cuanto era la verdat. Et vós, señor conde Lucanor, como quier que Dios vos fizo assaz merçet en todo, pues beedes que aquel omne vos quiere fazer entender que avedes mayor poder et mayor onra o más vondades de cuanto vós sabedes que es la verdat, entendet que lo faze por vos engañar, et guardat vos de’l et faredes como omne de buen recabdo.
+
+Al conde plogo mucho de lo que Patronio le dixo, et fízolo assí. Et con su consejo fue él guardado de yerro.
+
+Et porque entendió don Johan que este exiemplo era muy bueno, fízolo escrivir en este libro, et fizo estos viessos, en que se entiende avreviadamente la entención de todo este exiemplo. Et los viessos dizen así:
+
+Qui te alaba con lo que non es en ti,
+
+sabe que quiere levar lo que as de ti.
+
+Et la estoria deste enxemplo es ésta que se sigue:

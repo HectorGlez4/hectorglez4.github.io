@@ -1,0 +1,44 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_23
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 23
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo XXIIIº - De lo que fazen las formigas para se mantener
+
+Otra vez fablava el conde Lucanor con Patronio, su consejero, en esta
+manera:
+
+-Patronio, loado a Dios, yo só assaz rico, et algunos conséjanme que pues lo puedo fazer, que non tome otro cuidado, sinon tomar plazer et comer et bever et folgar, que assaz he para mi vida, et aún, que dexe a mios fijos bien heredados. Et por el buen entendimiento que vós avedes, ruégovos que me consejedes lo que vos paresçe que devo fazer.
+
+-Señor conde Lucanor -dixo Patronio-, como quier que el folgar et tomar plazer es bueno, para que vós fagades en esto lo que es más aprovechoso, plazerme ía que sopiéssedes lo que faze la formiga para mantenimiento de su vida.
+
+Et el conde le preguntó cómo era aquello, et Patronio le dixo:
+
+-Señor conde Lucanor, ya vós veedes cuánto pequeña cosa es la formiga, et, segund razón, non devía aver muy grand aperçebimiento, pero fallaredes que cada año, al tiempo que los omnes cogen el pan, sallen ellas de sus formigueros et van a las eras et traen cuanto pan pueden para su mantenimiento, et métenlo en sus casas. Et a la primera agua que viene, sácanlo fuera; et las gentes dizen que lo sacan a enxugar, et non saben lo que dizen, ca non es assí la verdat; ca bien sabedes vós que cuando las formigas sacan la primera vez el pan fuera de sus formigueros, que estonçe es la primera agua et comiença el invierno, et pues si ellas, cada que lloviesse, oviessen de sacar el pan para lo enxugar, luenga lavor ternían, et demás que non podrían aver sol para lo enxugar, ca en el invierno non faze tantas vegadas sol que lo pudiessen enxugar.
+
+Mas la verdat porque ellas lo sacan la primera vez que llueve es ésta: ellas meten cuanto pan pueden aver en sus casas una vez, et non catan por ál, sinon por traer cuanto fallan. Et desque lo tienen ya en salvo, cuidan que tienen ya recabdo para su vida esse año. Et cuando viene la lluvia et se moja, el pan comiença de naçer; et ellas veen que si el pan naçe en los formigueros, que en logar de se gobernar dello, que su pan mismo las mataría, et serían ellas ocasión de su daño. Et entonçe sácanlo fuera et comen aquel
+coraçón que a en cada grano de que sale la semiente et dexan todo el grano entero. Et después, por lluvia que faga, non puede naçer, et goviérnanse de’l todo el año.
+
+Et aún fallaredes que maguer que tengan cuanto pan les complía, que cada que buen tiempo faze, non dexan de acarrear cualesquier erbizuelas que fallan. Et esto fazen reçelando que les non cumplirá aquello que tienen; et mientre an tiempo, non quieren estar de valde nin perder el tiempo que Dios les da, pues se pueden aprovechar de’l.
+
+Et vós, señor conde, pues la formiga, que es tan mesquina cosa, ha tal entendimiento et faze tanto por se mantener, bien devedes cuidar que non es buena razón para ningún omne, et mayormente para los que an de mantener grand estado et governar a muchos, en querer sienpre comer de lo ganado; ca çierto sed que por grant aver que sea, onde sacan cada día et non ponen ý nada, que non puede durar mucho, et demás paresçe muy grand amortiguamiento et grand mengua de coraçón.
+
+Mas el mio consejo es éste: que si queredes comer et folgar, que lo fagades sienpre manteniendo vuestro estado et guardando vuestra onra, et catando et aviendo cuidado cómo avredes de que lo cumplades, ca si mucho ovierdes et bueno quisierdes seer,
+assaz avredes logares en que lo despendades a vuestra onra.
+
+Al conde plogo mucho deste consejo que Patronio le dio, et fízolo assí, et fallóse ende bien.
+
+Et porque don Johan se pagó deste exiemplo, fízolo poner en este libro, et fizo estos viessos que dizen assí:
+
+Non comas sienpre lo que as ganado;
+
+bive tal vida que mueras onrado.
+
+Et la istoria deste exiemplo es ésta que se sigue:

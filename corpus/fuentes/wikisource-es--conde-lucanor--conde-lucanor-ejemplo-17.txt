@@ -1,0 +1,36 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_17
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 17
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo XVIIº - De lo que contesçió a un omne que avía muy grant fambre, quel’ convidaron otros muy floxamente a comer
+
+Otra vez fablava el conde Lucanor con Patronio, su consegero, et díxole assí:
+
+-Patronio, un omne vino a mí et díxome que faría por mí una cosa que me cumplía a mí mucho; et como quier que me lo dixo, entendí en él que me lo dizía tan floxamente quel’ plazdrié mucho escusasse de tomar del aquella ayuda. Et yo, de una parte, entiendo que me cumpliría mucho de fazer aquello que me él ruega, et de otra parte, he muy grant enbargo de tomar del aquel ayuda, pues veo que me lo dize tan floxamente. Et por el buen entendimiento que vós avedes, ruégovos que me digades lo que vos paresçe que devo fazer en esta razón.
+
+-Señor conde Lucanor -dixo Patronio-, porque vós fágades en esto lo que me semeja que es vuestra pro, plazerme ía mucho que sopiésedes lo que contesçió a un omne con otro quel’ conbidó a comer.
+El conde le rogó quel’ dixiesse cómo fuera aquello.
+
+-Señor conde Lucanor -dixo Patronio-, un omne bueno era que avía seído muy rico et era llegado a muy grand pobreza et fazíasele muy grand vergüença de demandar nin envergoñarse a ninguno por lo que avía de comer; et por esta razón sufría muchas vezes muy grand fanbre et muy grand lazeria. Et un día, yendo él muy cuitado, porque non podía aver ninguna cosa que comiesse, passó por una casa de un su conosçiente que estava comiendo; et cuando le vio passar por la puerta, preguntól’ muy floxamente si quería comer; et él, por el grand mester que avía, començó a lavar las manos, et díxol’:
+
+-En buena fe, don Fulano, pues tanto me conjurastes et me afincastes que comiesse conbusco, non me paresçe que faría aguisado en contradezir tanto vuestra voluntad nin fazervos quebrantar vuestra jura. Et assentósse a comer, et perdió aquella fambre et aquella quexa en que estava. En dende adelante, acorriól’ Dios, et diol’ manera cómo salió de aquella lazeria tan grande.
+
+Et vós, señor conde Lucanor, pues entendedes que aquello que aquel omne vos ruega es grand vuestra pro, dalde a entender que llo fazedes por complir su ruego, et non paredes mientes a cuanto floxamente vos lo él ruega et non esperedes a que vos afinque más por ello, sinon por aventura non vos fablará en ello más, et seervos ía más vergüença si vós lo oviéssedes a rogar lo que él ruega a vos.
+
+El conde tovo esto por bien et por buen consejo, et fízolo assí, et fallósse ende bien.
+
+Et entendiendo don Johan que este exiemplo era muy bueno, fízolo escrivir en este libro et fizo estos viessos que dizen assí:
+
+En lo que tu pro pudieres fallar,
+
+nunca te fagas mucho por rogar.
+
+Et la istoria deste exiemplo es ésta que se sigue:

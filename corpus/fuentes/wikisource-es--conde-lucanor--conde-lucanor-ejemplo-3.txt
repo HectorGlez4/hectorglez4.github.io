@@ -1,0 +1,71 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_3
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 3
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo tercero - Del salto que fizo el rey Richalte de Inglaterra en la mar contra los moros
+
+Un día se apartó el conde Lucanor con Patronio, su consejero, et díxol’ así:
+
+-Patronio, yo fío mucho en el vuestro entendimiento, et sé que lo que vós non entendiéredes, o a lo que non pudiéredes dar consejo, que non a ningún otro omne que lo pudiese açertar; por ende, vos ruego que me consejedes lo mejor que vés entendiérdes en lo que agora vos diré:
+
+Vós sabedes muy bien que yo non só ya muy mançebo, et acaesçióme assí: que desde que fui nasçido fasta agora, que siempre me crié et visqué en muy grandes guerras, a vezes con cristianos et a vezes con moros, et lo demás sienpre lo ove con reys, mis señores et mis vezinos. Et cuando lo ove con cristianos, como quier que sienpre me guardé que nunca se levantase ninguna guerra a mi culpa, pero non se podía escusar de tomar muy grant daño muchos que lo non meresçieron. Et lo uno por esto, et por otros yerros que yo fiz contra nuestro señor Dios, et otrosí, porque veo que por omne del mundo, nin por ninguna manera, non puedo un día solo ser seguro de la muerte, et só çierto que naturalmente, segund la mi edat, non puedo vevir muy luengamente, et sé que he de ir ante Dios, que es tal juez de que non me puedo escusar por palabras nin por otra manera, nin puedo
+ser jubgado sinon por las buenas obras o malas que oviere fecho; et sé que si por mi desaventura fuere fallado en cosa por que Dios con derecho aya de ser contra mí, sé çierto que en ninguna manera non pudié escusar de ir a las penas del Infierno en que sin fin avré a fincar, et cosa del mundo non me podía ý tener pro, et si Dios me fiziere tanta merçed porque Él falle en mí tal meresçimiento, porque me deva escoger para ser compañero de los sus siervos et ganar el Paraíso, sé por çierto que a este bien et a este plazer et a esta gloria, non se puede comparar ningún otro plazer del mundo. Et
+pues este bien et este mal tan grande non se cobra sinon por las obras, ruégovos que, segund el estado que yo tengo, que cuidedes et me consejedes la manera mejor que entendiéredes porque pueda fazer emienda a Dios de los yerros que contra Él fiz, et pueda aver la su gracia.
+
+-Señor conde Lucanor -dixo Patronio-, mucho me plaze de todas estas razones que avedes dicho, et señaladamente porque me dixiestes que en todo esto vos consejase segund el estado que vós tenedes, ca si de otra guisa me lo dixiéredes, bien cuidaría que lo dixiéredes por me provar segund la prueva que el rey fezo a su privado que vos conté el otro día en el exiemplo que vos dixe; mas plázeme mucho porque dezides que queredes fazer emienda a Dios de los yerros que fiziestes, guardando vuestro estado et vuestra onra; ca çiertamente, señor conde Lucanor, si vós quisiéredes dexar vuestro estado et tomar vida de orden o de otro apartamiento, non podríades
+escusar que vos non acaesciesçen dos cosas: la primera, que
+seríades muy mal judgado de todas las gentes, ca todos dirían que lo
+fazíades con mengua de coraçón et vos despagávades de bevir entre los
+buenos; et la otra es que sería muy grant marabilia si pudiésedes sofrir las asperezas de la orden, et si después la oviésedes a dexar o bevir en ella, non la guardando como devíades, seervos ía muy grant daño para’l alma et grant vergüença et grant denuesto para’l cuerpo et para el alma et para la fama. Mas pues este bien queredes fazer, plazerme ía que sopiésedes lo que mostró Dios a un hermitaño muy sancto de lo que avía de conteçer a él et al rey Richalte de Englaterra.
+
+El conde Lucanor le rogó quel’ dixiese que cómo fuera aquello.
+
+-Señor conde Lucanor -dixo Patronio-, un hermitaño era omne de muy
+buena vida, et fazía mucho bien, et sufría grandes trabajos por ganar la gracia de Dios. Et por ende, fízol’ Dios tanta merçed quel’ prometió et le aseguró que avría la gloria de Paraíso. El hermitaño gradesçió esto mucho a Dios; et seyendo ya desto seguro, pidió a Dios por merçed quel’ mostrasse quién avía de seer su compañero en Paraíso. Et como quier que el Nuestro Señor le enviase dezir algunas vezes con el ángel que non fazía bien en le demandar tal cosa, pero tanto se afincó en su petiçión, que tovo por bien nuestro señor Dios del’ responder, et envióle dezir por su ángel que el rey Richalte de Inglaterra et él serían compañones en Paraíso.
+
+Desta razón non plogo mucho el hermitaño, ca él conosçía muy bien al rey et sabía que era omne muy guerrero et que avía muertos et robados et deseredados muchas gentes, et sienpre le viera fazer vida muy contralla de la suya, et aun, que paresçía muy alongado de la carrera de salvación; et por esto estava el hermitaño de muy mal talante.
+
+Et desque nuestro señor Dios lo vio así estar, enviól’ dezir con el su ángel que non se quexase nin se marabillase de lo quel’ dixiera, ca çierto fuesse que más serviçio fiziera a Dios et más meresçiera el rey Richalte en un salto que saltara, que el hermitaño en cuantas buenas obras fiziera en su vida.
+
+El hermitaño se marabilló ende mucho, et preguntól’ cómo podía esto seer.
+
+Et el ángel le dixo que sopiese que el rey de Françia et el rey de Inglaterra et el rey de Navarra pasaron a Ultramar. Et el día que llegaron al puerto, yendo todos armados para tomar tierra, bieron en la ribera tanta muchedumbre de moros, que tomaron dubda si podrían salir a tierra. Estonçe el rey de Françia envió dezir al rey de Inglaterra que viniese a aquella nave a do él estava et que acordarían cómo avían de fazer. Et el rey de Inglaterra, que estava en su cavallo, cuando esto oyó, dixo al mandadero del rey de Françia quel’ dixiese de su parte que bien sabía que él avía fecho a
+Dios muchos enojos et muchos pesares en este mundo et que sienpre le
+pidiera merçed quel’ traxiese a tiempo quel’ fiziese emienda por el su cuerpo, et que, loado a Dios, que veía el día que él deseava mucho; ca si allí muriese, pues avía fecho la emienda que pudiera ante que de su tierra se partiesse, et estava en verdadera penitencia, que era çierto quel’ avría Dios merced al alma, et que si los moros fuessen vençidos, que tomaría Dios mucho serviçio, et serían todos muy de buena ventura.
+
+Et de que esta razón ovo dicha, acomendó el cuerpo et el alma a Dios et pidiól’ merçed quel’ acorriesse, et signóse del signo de la sancta Cruz et mandó a los suyos quel’ ayudassen. Et luego dio de las espuelas al cavallo et saltó en la mar contra la ribera do estavan los moros. Et como quiera que estavan cerca del puerto, non era la mar tan vaxa que el rey et el cavallo non se metiessen todos so el agua en guisa que non paresçió dellos ninguna cosa; pero Dios, así como señor tan piadoso et de tan grant poder, et acordándose de lo que dixo en el Evangelio, que non quiere la muerte del pecador sinon que se convierta et viva, acorrió entonçe al rey de Inglaterra,
+libról’ de muerte para este mundo et diol’ vida perdurable para sienpre, et escapól’ de aquel peligro del agua; et endereçó a los moros.
+
+Et cuando los ingleses vieron fazer esto a su señor, saltaron todos en la mar en pos dél et endereçaron todos a los moros. Cuando los françeses vieron esto, tovieron que les era mengua grande, lo que ellos nunca solían sofrir, et saltaron luego todos en la mar contra los moros. Et desque los vieron venir contra sí, et vieron que non dubdavan la muerte, et que vinían contra ellos tan bravamente, non les osaron asperar, et dexáronles el puerto de la mar et començaron a fuir. Et desque los christianos llegaron al puerto, mataron
+muchos de los que pudieron alcançar et fueron muy bien andantes, et
+fizieron dese camino mucho serviçio a Dios. Et todo este vien vino por aquel salto que fizo el rey Richalte de Inglaterra.
+
+Cuando el hermitaño esto oyó, plógol’ ende muncho et entendió quel’ fazía Dios muy grant merçed en querer que fuesse él compañero en Paraíso de omne que tal servicio fiziera a Dios, et tanto enxalçamiento en la fe cathólica.
+
+Et vós, señor conde Lucanor, si queredes servir a Dios et fazerle emienda de los enojos quel’ avedes fecho, guisat que, ante que partades de vuestra tierra, emendedes lo que avedes fecho a aquellos que entendedes que feziestes algún daño. Et fazed penitençia de vuestros pecados, et non paredes mientes al hufana del mundo sin pro, et que es toda vanidat, nin creades a muchos que vos dirán que fagades mucho por la valía. Et esta valía dizen ellos por mantener muchas gentes, et non catan si an de que lo pueden complir, et non paran mientes cómo acabaron o cuántos fincaron de los que non cataron sinon por esta que ellos llaman grant valía o cómo son poblados los sus solares. Et vós, señor conde Lucanor, pues dezides que queredes servir a Dios et fazerle emienda de los enojos quel’ feziestes, non querades seguir esta carrera que es de ufana et llena de vanidat. Mas, pues Dios vos pobló en tierra quel’ podades servir contra los moros, tan bien por mar como por tierra, fazet vuestro poder porque seades seguro de lo que dexades en vuestra tierra. Et esto fincando seguro, et aviendo fecho emienda a Dios de los yerros que fiziestes, porque estedes en verdadera penitençia, porque de los bienes que fezierdes ayades de todos meresçimiento, et faziendo esto podedes dexar todo lo ál, et estar sienpre en serviçio de Dios et acabar así vuestra vida. Et faziendo esto, tengo que ésta es la mejor manera que vós podedes tomar para salvar el alma, guardando vuestro estado et vuestra onra. Et devedes crer que por estar en
+servicio de Dios non morredes ante, nin bivredes más por estar en vuestra tierra. Et si muriéredes en serviçio de Dios, biviendo en la manera que vos yo he dicho, seredes mártir et muy bien aventurado, et aunque non murades por armas, la buena voluntat et las buenas obras vos farán mártir, et aun los que mal quisieren dezir, non podrían; ca ya todos veyen que non dexades nada de lo que devedes fazer de cavallería, mas queredes seer cavallero de Dios et dexades de ser cavallero del diablo et de la ufana del mundo, que es
+falleçedera.
+
+Agora, señor conde, vos he dicho el mío consejo segund me lo pidiestes, de lo que yo entiendo cómo podedes mejor salvar el alma segund el estado que tenedes. Et semejaredes a lo que fizo el rey Richalte de Inglaterra en el sancto et bien fecho que fizo.
+
+Al conde Lucanor plogo mucho del consejo que Patronio le dio, et rogó a Dios quel’ guisase que lo pueda fazer como él lo dizía et como el conde lo tenía en coraçón.
+
+Et veyendo don Johan que este exiemplo era bueno, mandólo poner en este libro, et fizo estos viessos en que se entiende abreviadamente todo el enxienplo. Et los viesos dizen así:
+
+Qui por cavallero se toviere,
+
+más deve desear este salto
+
+que non si en la orden se metiere,
+
+o se ençerrasse tras muro alto.
+
+Et la estoria deste exiemplo es ésta que se sigue:

@@ -714,3 +714,9 @@ descartes:
     idDePagina: 218352
     nombre: "Catalina de Eslava"
     motivo: "Sembrada y medida el 24/09, después de la Historia 19.12. Su única obra en la Fuente, el soneto «El sagrado laurel ciña tu frente», se sirve por transclusión de un escaneo y el documento se versiona MUDO: ni la página ni su Índice: declaran Autor, así que FR-23 lo para. El motivo del 20/09 decía «lírica breve en verso», que ya no es la razón: con la 19.12 los tercetos salen enteros. Reabrir si la Fuente llega a declarar su autoría en la página."
+  - fecha: "2026-10-11"
+    epoca: "antiguedad"
+    candidato: "jose-manuel-estrada"
+    idDePagina: 71256
+    nombre: "José Manuel Estrada"
+    motivo: "Revisado el 11/10 contra la Fuente. Miscategorizado en Antigüedad (argentino, 1842-1894). Su página de autor solo lista obras como escaneos PDF/DjVu sin texto transcrito en páginas de la Fuente, o sin enlace; nada que cotejar literal."

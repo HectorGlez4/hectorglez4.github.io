@@ -1,0 +1,42 @@
+fuente: wikisource-es
+obra: Conde Lucanor
+url: https://es.wikisource.org/wiki/Conde_Lucanor/Ejemplo_16
+recuperado: 2026-10-11
+---
+Conde Lucanor/Ejemplo 16
+|titulo = [[Conde Lucanor]]
+|autor = Juan Manuel
+obra> |título=Conde Lucanor
+obra> |autor=Juan Manuel
+obra> |título={{Anclaje+|Índice}}
+---
+Exemplo XVIº - De la repuesta que dio el conde Ferrant Gonsáles a Muño Lainez, su pariente
+
+El conde Lucanor fablava un día con Patronio en esta guisa:
+
+-Patronio, bien entendedes que non so yo ya muy mançebo, et sabedes que passé muchos trabajos fasta aquí. Et bien vos digo que querría de aquí adelante folgar et caçar, et escusar los trabajos et afanes; et porque yo sé que siempre me consejastes lo mejor, ruégovos que me consejedes lo que vierdes que me cae más de fazer.
+
+-Señor conde -dixo Patronio-, como quier que vos dezides bien et razón, pero plazerme ía que sopiéssedes lo que dixo una vez el conde Ferrant Gonsáles a Muño Lainez.
+
+El conde Lucanor le rogó quel’ dixiesse cómo fuera aquello.
+
+-Señor conde -dixo Patronio-, el conde Ferrant Gonsáles era en Burgos et avía passados muchos trabajos por defender su tierra. Et una vez que estava ya como más en assossiego et en paz, díxole Muño Lainez que sería bien que dallí adelante que non se metiesse en tantos roídos, et que folgasse él et dexasse folgar a sus gentes.
+
+Et el conde respondiól’ que a omne del mundo non plazdría más que a él folgar et estar viçioso si pudiesse; mas que bien sabía que avían grand guerra con los moros et con los leoneses et con los navarros, et si quisiessen mucho folgar, que los sus contrarios que luego serían contra ellos; et si quisiessen andar a caça con buenas aves por Arlançón arriba et ayuso et en buenas mulas gordas, et dexar de defender la tierra, que bien lo podrían fazer, mas que les contesçería como dezía el vierbo antigo: «Murió el onbre et murió el su nombre»; mas si quisiéremos olbidar los viçios et fazer mucho por nos defender et levar nuestra onra adelante, dirán por nos, depués que muriéremos: «Murió el omne, mas non murió el su nombre». Et
+pues viziosos et lazdrados, todos avemos a morir, non me semeja que sería bueno si por viçio nin por la folgura dexáremos de fazer en guisa que depués que nos muriéremos, que nunca muera la buena fama de los nuestros fechos.
+
+Et vós, señor conde, pues sabedes que avedes a morir, por el mi consejo, nunca por viçio nin por folgura dexaredes de fazer tales cosas, porque, aun desque vos murierdes, siempre finque viva la fama de los vuestros fechos.
+
+Al conde plogo mucho desto que Patronio le consejó, et fízolo assí, et fallósse dello muy bien.
+
+Et porque don Johan tovo este exiemplo por muy bueno, fízolo escrivir en este libro et fizo estos viessos que dizen assí:
+
+Si por viçio et por folgura
+
+la buena fama perdemos,
+
+la vida muy poco dura,
+
+denostados fincaremos.
+
+Et la istoria deste exiemplo es ésta que se sigue:
