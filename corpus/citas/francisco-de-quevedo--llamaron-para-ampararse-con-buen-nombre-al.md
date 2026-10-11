@@ -1,6 +1,8 @@
 ---
 texto: "Llamaron, para ampararse con buen nombre, al pueblo a la libertad, palabra siempre bienquista de la multitud licenciosa."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-libertad"
 slug: "francisco-de-quevedo-llamaron-para-ampararse-con-buen-nombre-al"
 procedencia:
   obra: "Marco Bruto"

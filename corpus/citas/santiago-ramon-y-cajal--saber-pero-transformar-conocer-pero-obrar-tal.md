@@ -1,6 +1,8 @@
 ---
 texto: "Saber, pero transformar; conocer, pero obrar: tal es la norma del verdadero hombre de ciencia."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-saber-pero-transformar-conocer-pero-obrar-tal"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

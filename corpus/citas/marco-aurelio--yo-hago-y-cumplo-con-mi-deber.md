@@ -1,6 +1,8 @@
 ---
 texto: "Yo hago y cumplo con mi deber; las demás cosas no me llevan la atención; porque, ó son inanimadas, ó irracionales, ó van fuera de razón é ignoran el camino verdadero."
 autor: "marco-aurelio"
+temas:
+  - "el-deber"
 slug: "marco-aurelio-yo-hago-y-cumplo-con-mi-deber"
 procedencia:
   obra: "Soliloquios"

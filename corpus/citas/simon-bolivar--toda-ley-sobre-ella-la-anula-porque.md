@@ -1,6 +1,8 @@
 ---
 texto: "Toda ley sobre ella la anula porque imponiendo la necesidad al deber, quita el mérito a la fe, que es la base de la Religión."
 autor: "simon-bolivar"
+temas:
+  - "el-deber"
 slug: "simon-bolivar-toda-ley-sobre-ella-la-anula-porque"
 procedencia:
   obra: "Discurso en Bolivia"

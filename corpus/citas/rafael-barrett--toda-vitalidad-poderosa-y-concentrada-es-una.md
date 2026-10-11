@@ -1,6 +1,8 @@
 ---
 texto: "Toda vitalidad poderosa y concentrada es una medida justa de dolor y de muerte."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-toda-vitalidad-poderosa-y-concentrada-es-una"
 procedencia:
   obra: "La guerra"

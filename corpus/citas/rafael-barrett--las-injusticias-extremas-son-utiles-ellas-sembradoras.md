@@ -1,6 +1,8 @@
 ---
 texto: "Las injusticias extremas son útiles; ellas, sembradoras de cóleras sagradas, han despertado el genio, han revolucionado los pueblos y han fecundado la Historia."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-las-injusticias-extremas-son-utiles-ellas-sembradoras"
 procedencia:
   obra: "La justicia"

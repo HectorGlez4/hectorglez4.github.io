@@ -1,6 +1,8 @@
 ---
 texto: "El amante debe amar el alma, y en el alma la virtud."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-el-amante-debe-amar-el-alma-y"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

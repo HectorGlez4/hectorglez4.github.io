@@ -1,6 +1,8 @@
 ---
 texto: "El ideal es la mentira, pero la mentira que cesará de serlo, la mentira-verdad, la mentira-germen."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-el-ideal-es-la-mentira-pero-la"
 procedencia:
   obra: "La conquista de Inglaterra"

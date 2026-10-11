@@ -1,6 +1,8 @@
 ---
 texto: "Mis últimos votos son por la felicidad de la Patria."
 autor: "simon-bolivar"
+temas:
+  - "la-patria"
 slug: "simon-bolivar-mis-ultimos-votos-son-por-la-felicidad"
 procedencia:
   obra: "Última proclama del Libertador Simón Bolívar"

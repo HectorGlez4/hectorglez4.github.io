@@ -1,6 +1,8 @@
 ---
 texto: "La música es la ciencia del amor con relacion al ritmo y á la armonía."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-la-musica-es-la-ciencia-del-amor"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

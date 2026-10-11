@@ -1,6 +1,8 @@
 ---
 texto: "Queda, pues, demostrado, que lo que se mueve por si mismo es inmortal, y nadie temerá afirmar, que el poder de moverse por sí mismo es la esencia del alma."
 autor: "platon"
+temas:
+  - "la-vida"
 slug: "platon-queda-pues-demostrado-que-lo-que-se"
 procedencia:
   obra: "Fedro"
