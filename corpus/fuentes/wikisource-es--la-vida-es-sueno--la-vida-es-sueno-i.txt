@@ -1,0 +1,629 @@
+fuente: wikisource-es
+obra: La vida es sueño
+url: https://es.wikisource.org/wiki/La_vida_es_sue%C3%B1o/I
+recuperado: 2026-10-11
+---
+La vida es sueño/I
+|titulo=[[La vida es sueño]]
+|autor=Pedro Calderón de la Barca
+obra> |titulo=La vida es sueño
+obra> |autor=Pedro Calderón de la Barca
+---
+",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:La vida es sueño.djvu/9"},"num":{"wt":"5"},"formatted":{"wt":"5"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:La vida es sueño.djvu/9","href":"./Página:La_vida_es_sueño.djvu/9"},"params":{},"i":1}}]}'>
+
+LA VIDA ES SUEÑO
+
+JORNADA PRIMERA
+
+A un lado monte fragoso, y al otro una torre, cuya planta baja sirve de prision á Segismundo. La puerta, que da frente al espectador, está entreabierta. La accion principia al anochecer.
+
+*
+
+ESCENA PRIMERA
+
+Rosaura. Clarin.
+
+(Rosaura, vestida de hombre, aparece en lo alto de las peñas, y baja á lo llano: tras ella viene Clarin.)
+
+ROS. Hipogrifo violento
+Que corriste parejas con el viento,
+¿Dónde, rayo sin llama,
+Pájaro sin matiz, pez sin escama,
+Y bruto sin instinto
+Natural, al confuso laberinto
+Destas desnudas peñas
+Te desbocas, arrastras y despeñas?
+Quédate en este monte,
+Donde tengan los brutos su Faetonte;
+
+Que yo, sin más camino
+Que el que me dan las leyes del destino.
+Ciega y desesperada,
+Bajaré la aspereza enmarañada
+Deste monte eminente,
+Que arruga al sol el ceño de su frente.
+Mal, Polonia, recibes
+A un extranjero, pues con sangre escribes
+Su entrada en tus arenas,
+Y apenas llega, cuando llega á penas.
+Bien mi suerte lo dice;
+Mas ¿Dónde halló piedad un infelice?
+CLAR. Di dos, y no me dejes
+En la posada á mí cuando te quejes;
+Que si dos hemos sido
+Los que de nuestra patria hemos salido
+A probar aventuras,
+Dos los que, entre desdichas y locuras.
+Aquí habemos llegado,
+Y dos los que del monte hemos rodado:
+¿No es razón que yo sienta
+Meterme en el pesar, y no en la cuenta?
+ROS. No te quiero dar parte
+En mis quejas, Clarín, por no quitarte,
+Llorando tu desvelo,
+El derecho que tienes tú al consuelo.
+Que tanto gusto habia
+En quejarse, un filósofo decia.
+Que, á trueco de quejarse,
+Habían las desdichas de buscarse.
+CLAR. El filósofo era
+Un borracho barbón: ¡Oh! ¡Quién le diera
+Más de mil bofetadas!
+Quejárase después de muy bien dadas.
+Mas ¿Qué harémos, señora,
+A pié, solos, perdidos y á esta hora.
+En un desierto monte.
+Cuando se parte el sol á otro horizonte?
+ROS. ¡Quién ha visto sucesos tan extraños!
+Mas, si la vista no padece engaños
+Que hace la fantasía,
+A la medrosa luz que aun tiene el día.
+
+\n<section begin=\"s2\"/>{{c|ESCENA II}}\n\n{{c|''Segismundo (en la torre). Rosaura. Clarin. ''}}\n\n::'''SEGIS'''. ''(Dentro.'') ¡Ay mísero de mí! ¡Ay infelice! \n\n::'''ROS''' ¡Qué triste voz escucho! \nCon nuevas penas y tormentos lucho. \n\n::'''CLAR'''. Yo con nuevos temores. \n\n::'''ROS'''. Clarín... \n\n::'''CLAR'''. {{Brecha}}Señora... \n\n::'''ROS'''. {{Brecha}}{{Brecha}}Huyamos los rigores \nDesta encantada torre. \n\n::'''CLAR'''. {{Brecha}}{{Brecha}}Yo aun no tengo \nAnimo para huir, cuando á eso vengo. "}}">
+Me parece que veo
+Un edificio.
+
+CLAR. O miente mi deseo,
+O termino las señas.
+
+ROS. Rústico nace, entre desnudas peñas.
+Un palacio tan breve,
+Que al sol apenas á mirar se atreve.
+Con tan rudo artificio
+La arquitectura está de su edificio,
+Que parece, á las plantas
+De tantas rocas y de peñas tantas
+Que al sol tocan la lumbre,
+Peñasco que ha rodado de la cumbre.
+
+CLAR. Vámonos acercando;
+Que este es mucho mirar, señora, cuando
+Es mejor que la gente
+Que habita en ella generosamente
+Nos admita.
+
+ROS. La puerta
+(Mejor diré funesta boca) abierta
+Está, y desde su centro
+Nace la noche, pues la engendra dentro.
+{Suenan dentro cadenas.)
+
+CLAR. ¡Qué es lo que escucho, cielo!
+
+ROS. Inmóvil bulto soy de fuego y hielo.
+
+CLAR. ¿Cadenita hay que suena?
+Mátenme, si no es galeote en pena:
+Bien mi temor lo dice.
+
+ESCENA II
+
+Segismundo (en la torre). Rosaura. Clarin.
+
+SEGIS. (Dentro.) ¡Ay mísero de mí! ¡Ay infelice!
+
+ROS ¡Qué triste voz escucho!
+
+Con nuevas penas y tormentos lucho.
+
+CLAR. Yo con nuevos temores.
+
+ROS. Clarín...
+
+CLAR. Señora...
+
+ROS. Huyamos los rigores
+
+Desta encantada torre.
+
+CLAR. Yo aun no tengo
+
+Animo para huir, cuando á eso vengo.
+
+ROS. ¿No es breve luz aquella
+Caduca exhalación, pálida estrella,
+Que en trémulos desmayos,
+Pulsando ardores y latiendo rayos.
+Hace más tenebrosa
+La oscura habitación con luz dudosa?
+Si, pues a sus reflejos
+Puedo determinar (aunque de lejos,)
+Una prisión oscura,
+Que es de un vivo cadáver sepultura;
+Y, porque mas me asombre,
+En el traje de fiera yace un hombre
+De prisiones cargado,
+Y sólo de una luz acompañado.
+Pues huir no podemos,
+Desde aquí sus desdichas escuchemos:
+Sepamos lo que dice.
+
+Abrense las hojas de la puerta, y descúbrese Segismundo con una cadena y vestido de pieles. Hay luz en la torre.
+
+SEGIS. ¡Ay mísero de mí! ¡Ay infelice!
+Apurar, cielos, pretendo,
+Ya que me tratáis así,
+Qué delito cometí.
+Contra vosotros, naciendo;
+Aunque si nací, ya entiendo
+Qué delito he cometido:
+Bastante causa ha tenido
+Vuestra justicia y rigor;
+Pues el delito mayor
+Del hombre es haber nacido.
+Sólo quisiera saber,
+Para apurar mis desvelos
+(Dejando á una parte, cielos,
+El delito del nacer),
+¿Qué más os pude ofender
+Para castigarme más?
+¿No nacieron los demás?
+Pues si los demás nacieron,
+¿Qué privilegios tuvieron,
+Que yo no gocé jamas?
+Nace el ave, y con las galas
+Que le dan belleza suma,
+
+Apenas es flor de pluma
+Ó ramillete con alas,
+Cuando las etéreas salas
+Corta con velocidad.
+Negándose á la piedad
+Del nido que deja en calma:
+¿Y teniendo yo más alma,
+Tengo menos libertad?
+
+Nace el bruto, y con la piel
+Que dibujan manchas bellas,
+Apénas signo es de estrellas
+(Gracias al docto pincel),
+Cuando, atrevido y cruel,
+La humana necesidad
+Le enseña á tener crueldad,
+Monstruo de su laberinto:
+¿Y yo, con mejor instinto;
+Tengo menos libertad?
+
+Nace el pez, que no respira,
+Aborto de ovas y lamas;
+Y, apénas bajel de escamas
+Sobre las ondas se mira,
+Cuando á todas partes gira,
+Midiendo la inmensidad
+De tanta capacidad
+Como le da el centro frio:
+¿Y yo, con más albedrío.
+Tengo menos libertad?
+
+Nace el arroyo, culebra
+Que entre flores se desata,
+Y, apenas, sierpe de plata.
+Entre las flores se quiebra,
+Cuando, músico, celebra
+De las flores la piedad,
+Que le da la majestad
+Del campo abierto á su huida:
+¿Y, teniendo yo mas vida,
+Tengo menos libertad?
+
+¡En llegando á esta pasión,
+Un volcan, un Etna hecho.
+Quisiera arrancar del pecho
+
+Pedazos del corazon!
+¿Qué ley, justicia ó razon
+Negar á los hombres sabe
+Prívilegio tan süave,
+Excepcíon tan principal,
+Que Dios le ha, dado á. un cristal,
+A un pez, á un bruto y á, un ave?
+ROS. Temor y piedad en mí
+Sus razones han causado.
+SEGIS. ¿Quién mis voces ha escuchado?
+¿Es Clotaldo?
+CLAR. (Ap. á su ama.) Dí que sí.
+ROS. No es sino un triste (!Ay de mí!),
+Que en estas bóvedas frias
+Oyó tus melancolías.
+SEGIS. Pues muerte aquí te daré,
+Porque no sepas que sé (Asela.)
+Que sabes ﬂaquezas mías.
+Sólo porque me has oido,
+Entre mis membrudos brazos
+Te tengo de hacer pedazos.
+CLAR. Yo soy sordo y no he podido
+Escucharte.
+ROS. Si has nacido
+Humano, baste el postrarme
+A tus píés para, librarme.
+SEGIS. Tu voz pudo enternecerme,
+Tu presencia. suspenderme,
+Y tu respeto turbarme.
+¿ Quién eres? Que aunque yo aquí
+Tan poco del mundo sé,
+Que cuna y sepulcro fué
+Esta torre para mí,
+Y aunque desde que nací
+(Si esto es nacer) solo advierto
+Este rústico desierto,
+Donde miserable vivo,
+Siendo un esqueleto vivo,
+Siendo un animado muerto;
+Y aunque nunca vi ni hablé
+Sino á un hombre solamente,
+
+Que aquí mis desdichas siente.
+Por quien las noticias sé
+De cielo y tierra; y aunque
+Aquí, porque mas te asombres
+Y monstruo humano me nombres.
+Entre asombros y quimeras.
+Soy un hombre de las fieras,
+Y una fiera de los hombres;
+
+Y aunque, en desdichas tan graves,
+La política he estudiado,
+De los brutos enseñado.
+Advertido de las aves,
+Y de los astros suaves
+Los círculos he medido:
+Tú solo, tú, has suspendido
+La pasión á mis enojos.
+La suspensión á mis ojos.
+La admiración á mi oído.
+
+Con cada vez que te veo
+Nueva admiración me das,
+Y cuando te miro más.
+Aun más mirarte deseo.
+Ojos hidrópicos creo
+Que mis ojos deben ser;
+Pues cuando es muerte el beber,
+Beben más; y desta suerte.
+Viendo que el ver me da muerte,
+Estoy muriendo por ver.
+
+Pero véate yo y muera;
+Que no sé, rendido ya.
+Si el verte muerte me da.
+El no verte qué me diera.
+Fuera, mas que muerte fiera,
+Ira, rabia y dolor fuerte;
+Fuera muerte: desta suerte
+Su rigor he ponderado.
+Pues dar vida á un desdichado
+Es dar á un dichoso muerte.
+
+ROS. Con asombro de mirarte,
+Con admiración de oirte.
+Ni sé qué pueda decirte.
+
+Ni qué pueda preguntarte:
+Solo diré que á esta parte
+Hoy el cielo me ha guiado
+Para haberme consolado,
+Si consuelo puede ser
+Del que es desdichado, ver
+Otro que es más desdichado.
+
+Cuentan de un sabio, que un dia
+Tan pobre y mísero estaba,
+Que sólo se sustentaba
+De unas yerbas que cogia.
+¿Habrá otro (entre sí decía)
+Más pobre y triste que yo?
+Y cuando el rostro volvió.
+Halló la respuesta, viendo
+Que iba otro sabio cogiendo
+Las hojas que él arrojó.
+
+Quejoso de la fortuna.
+Yo en este mundo vivia,
+Y, cuando entre mí decía:
+¿Habrá otra persona alguna
+De suerte más importuna?
+Piadoso me has respondido;
+Pues, volviendo en mi sentido.
+Hallo que las penas mias.
+Para hacerlas tú alegrías,
+Las hubieras recogido.
+
+Y, por si acaso mis penas
+Pueden en algo aliviarte,
+Óyelas atento, y toma
+Las que de ellas me sobraren.
+Yo soy ...
+
+ESCENA III
+
+Clotaldo. Soldados. Segismundo. Rosaura. Clarín.
+
+CLOT. (Dentro.) Guardas desta torre, que, dormidas ó cobardes,
+Disteis paso a dos personas que han quebrantado la cárcel...
+ROS. Nueva confusión padezco.
+
+SEGIS. Este es Clotaldo, mi alcaide.
+¿Aun no acaban mis desdichas?
+CLOT. (Dentro.) Acudid, y vigilantes,
+Sin que puedan defenderse, o prendedles ó matadles.
+VOCES. (Dentro.) ¡Traición!
+CLAR. Guardas desta torre, que entrar
+aquí nos dejasteis,
+Pues que nos dais á escoger, el prendernos es más fácil.
+(Salen Clotaldo y los soldados: él con una pistola y todos con los rostros cubiertos.)
+
+(Ap. á los soldados, al salir.)
+
+CLOT. Todos os cubrid los rostros; que es diligencia importante.
+Mientras estamos aquí, que no nos conozca nadie.
+CLAR. ¿Enmascaraditos hay?
+CLOT. Oh vosotros, que, ignorantes.
+De aqueste vedado sitio coto y término pasasteis
+Contra el decreto del Rey, que manda que no ose nadie
+Examinar el prodigio que entre esos peñascos yace:
+Rendid las armas y vidas, ó aquesta pistola, áspid
+De metal, escupirá el veneno penetrante
+De dos balas, cuyo fuego será escándalo del aire.
+SEGIS. Primero, tirano dueño, que los ofendas ni agravies,
+Será mi vida despojo destos lazos miserables;
+Pues en ellos, vive Dios, tengo de despedazarme
+Con las manos, con los dientes, entre aquestas peñas, antes
+Que su desdicha consienta y que llore sus ultrajes.
+CLOT. Si sabes que tus desdichas, Segismundo, son tan grandes.
+Que antes de nacer moriste por ley del cielo; si sabes
+Que aquestas prisiones son de tus furias arrogantes
+Un freno que las detenga, y una rueda que las pare:
+¿Por qué blasonas? La puerta (A los soldados.) cerrad de esa
+estrecha cárcel;
+Escondedle en ella.
+SEGIS. ¡Ah, cielos, qué bien hacéis en quitarme
+La libertad! Porque fuera contra vosotros gigante.
+Que para quebrar al sol esos vidrios y cristales.
+Sobre cimientos del piedra pusiera montes de jaspe.
+CLOT. Quizá, porque no los pongas, hoy padeces tantos males.
+(Llévanse algunos soldados á Segismundo, y enciérranle en su prisión.)
+
+ESCENA IV
+
+Rosaura. Clotaldo. Clarín. Soldados.
+
+ROS. Ya que vi que la soberbia te ofendió tanto, ignorante
+Fuera en no pedirte humilde vida que á tus plantas yace.
+Muévate en mí la piedad; que será rigor notable
+Que no hallen favor en tí ni soberbias ni humildades.
+CLAR. Y si humildad ni soberbia no te obligan — personajes
+Que han movido y removido mil Autos sacramentales,
+— Yo, ni humilde ni soberbio, sino entre las dos mitades
+Entreverado, te pido que nos remedies y ampares.
+CLOT. ¡Hola!
+SOLD. Señor ...
+CLOT. A los dos quitad las armas, y atadles
+Los ojos, porque no vean cómo ni de dónde salen.
+ROS. Mi espada es ésta, que á tí solamente ha de entregarse;
+Porque, al fin, de todos eres el principal, y no sabe
+Rendirse á menos valor.
+CLAR. La mia es tal, que puede darse
+Al más ruin: tomadla vos. (A un soldado.)
+ROS. Y si he de morir, dejarte
+Quiero, en fe desta piedad, prenda que pudo estimarse
+Por el dueño que algún dia se la ciñó: que la guardes
+Te encargo, porque aunque yo no sé qué secreto alcance,
+Sé que esta dorada espada encierra misterios grandes;
+Pues solo fiado en ella, vengo á Polonia á vengarme
+De un agravio.
+CLOT. (Ap.) ¡Santos cielos! ¡Qué es esto! Ya son más graves
+Mis penas y confusiones, mis ansias y mis pesares.
+Quién te la dio?
+ROS. Una mujer.
+CLOT. ¿Cómo se llama?
+ROS. Que calle
+Su nombre es fuerza.
+CLOT. ¿De qué infieres ahora, ó sabes.
+Que hay secreto en esta espada?
+ROS. Quien me la dio, dijo: «Parte
+A Polonia, y solicita con ingenio, estudio ó arte.
+Que te vean esa espada los nobles y principales;
+Que yo sé que alguno dellos te favorezca y ampare;»
+Que, por si acaso era muerto, no quiso entonces nombrarle.
+
+CLOT. (Ap.) ¡Válgame el cielo, qué escucho! Aun no sé determinarme
+Si tales sucesos son ilusiones ó verdades.
+Esta es la espada que yo dejé á la hermosa Violante,
+Por señas que el que ceñida la trajera, habia de hallarme
+Amoroso como hijo, y piadoso como padre.
+¿Pues qué he de hacer (¡Ay de mí!) en confusión semejante,
+Si quien la trae por favor, para su muerte la trae.
+Pues que sentenciado á muerte llega á mis pies? ¡Qué notable
+Confusión! ¡Qué triste hado! ¡Qué suerte tan inconstante!
+Este es mi hijo, y las señas dicen bien con las señales
+Del corazón, que por verlo llama al pecho, y en él bate
+Las alas, y no pudiendo romper los candados, hace
+Lo que aquel que está encerrado, y oyendo ruido en la calle,
+Se asoma por la ventana. El así, como no sabe
+Lo que pasa, y oye el ruido, va á los ojos á asomarse.
+Que son ventanas del pecho, por donde en lágrimas sale.
+¿Qué he de hacer? (¡Valedme, cielos!) ¿Qué he de hacer? Porque llevarle
+Al Rey, es llevarle (¡A triste!) a morir. Pues ocultarle
+Al Rey no puedo, conforme a la ley del homenaje.
+De una parte el amor propio, y la lealtad de otra parte
+Me rinden. Pero ¿Qué dudo? La lealtad al Rey ¿No es ántse
+Que la vida y que el honor? Pues ella viva y él falte.
+Fuera de que, si ahora atiendo a que dijo que á vengarse
+Viene de un agravio, hombre que está agraviado, es infame.
+— No es mi hijo, no es mi hijo, ni tiene mi noble sangre.
+Pero, si ya ha sucedido un peligro, de quien nadie
+Se libró, porque el honor es de materia tan frágil,
+Que con una acción se quiebra ó se mancha con un aire:
+¿Qué más puede hacer, qué más, el que es noble, de su parte.
+Que, á costa de tantos riesgos haber venido á buscarle?
+Mi hijo es, mi sangre tiene, pues tiene valor tan grande;
+Y así, entre una y otra duda, el medio más importante
+Es irme al Rey, y decirle que es mi hijo y que le mate.
+Quizá la misma piedad de mi honor podrá obhgarle;
+Y si le merezco vivo, yo le ayudaré á vengarse
+De su agravio; mas si el Rey, en sus rigores constante,
+Le da muerte, morirá sin saber que soy su padre.
+— Venid conmigo, extranjeros; (A Rosaura y Clarín.) no temáis,
+no, de que os falte
+Compañía en las desdichas, pues en duda semejante
+De vivir ó de morir, no sé cuáles son más grandes. (Vanse.)
+
+Salón de Palacio Real en la corte.
+
+Escena V
+
+Astolfo y soldados, que salen por un lado, y por el otro la Infanta
+
+Estrella y damas. Música militar, dentro, y salvas.
+
+AST. Bien al ver los excelentes
+Rayos, que fueron cometas,
+Mezclan salvas diferentes
+Las cajas y las trompetas,
+Los pájaros y las fuentes:
+Siendo, con música igual,
+Y con maravilla suma,
+A tu vista celestial
+Unos, clarines de pluma.
+Y otras, aves de metal;
+
+Y así os saludan, señora.
+Como á su Reina las balas.
+Los pájaros como Aurora,
+Las trompetas como á Palas,
+Y las flores como á Flora;
+Porque sois, burlando el dia
+Que ya la noche destierra,
+Aurora en el alegría,
+Flora en paz. Palas en guerra,
+Y Reina en el alma mia.
+
+ESTR. Si la voz se ha de medir
+Con las acciones humanas.
+Mal habéis hecho en decir
+Finezas tan cortesanas.
+Donde os pueda desmentir
+Todo ese marcial trofeo,
+Con quien ya atrevida lucho;
+Pues no dicen, según creo,
+Las lisonjas que os escucho.
+Con los rigores que veo.
+
+Y advertid que es baja acción,
+Que solo á una fiera toca.
+Madre de engaño y traición,
+El halagar con la boca
+Y matar con la intención.
+
+AST. Muy mal informada estáis,
+Estrella, pues que la fe
+De mis finezas dudáis,
+Y os suplico que me oigáis
+La causa, á ver si la sé.
+
+Falleció Eustorgio Tercero,
+Rey de Polonia, y quedó
+Basilio por heredero,
+Y dos hijas, de quien yo
+Y vos nacimos. — No quiero
+Cansar con lo que no tiene
+Lugar aquí. — Clorilene,
+Vuestra madre y mi señora,
+Que en mejor imperio ahora
+Dosel de luceros tiene,
+
+Fué la mayor, de quien vos
+Sois hija; fué la segunda.
+Madre y tia de los dos.
+La gallarda Recisunda,
+Que guarde mil años Dios;
+Casó en Moscovia, de quien
+Nací yo. Volver ahora
+Al otro principio es bien.
+Basilio, que ya, señora,
+Se rinde al común desden
+
+Del tiempo, más inclinado
+A los estudios que dado
+A mujeres, enviudó
+Sin hijos; y vos y yo
+Aspiramos á este Estado.
+Vos alegáis que habéis sido
+Hija de hermana mayor;
+Yo, que varón he nacido,
+Y aunque de hermana menor,
+Os debo ser preferido.
+
+Vuestra intención y la mia
+A nuestro tio contamos:
+El respondió que quería
+Componernos, y aplazamos
+Este puesto y este dia.
+
+\n<section begin=\"s2\"/>{{c|{{x-grande|ESCENA VI}}}}\n \n{{c|''El Rey Basilio. Acompañamiento. Astolfo. Estrella.''<br> ''Damas. Soldados.''}}\n \n::ESTR. Sabio Tales ... \n::AST. Docto Euclídes ...\n::ESTR. Que entre signos ...\n::AST. Que entre estrellas ... "}}'>
+Con esta intención salí
+De Moscovia y de su tierra;
+Con esta llegué hasta aquí,
+En vez de haceros yo guerra,
+A que me la hagáis á mí.
+
+¡Oh! quiera amor, sabio dios,
+Que el vulgo, astrólogo cierto.
+Hoy lo sea con los dos,
+Y que pare este concierto
+En que seáis Reina vos,
+Pero Reina en mi albedrío.
+Dándoos, para más honor,
+Su corona nuestro tio.
+Sus triunfos vuestro valor,
+Y su imperio el amor mio.
+
+ESTR. A tan cortés bizarría
+Menos mi pecho no muestra.
+Pues la imperial monarquía
+Para solo hacerla vuestra
+Me holgara que fuera mia;
+Aunque no está satisfecho
+Mi amor de que sois ingrato.
+Si en cuanto decis, sospecho
+Que os desmiente ese retrato
+Que está pendiente del pecho.
+
+AST. Satisfaceros intento
+Con él ... Mas lugar no da
+'Tanto sonoro instrumento, (Tocan cajas.)
+Que avisa que sale ya
+El Rey con su parlamento.
+
+ESCENA VI
+
+El Rey Basilio. Acompañamiento. Astolfo. Estrella.
+Damas. Soldados.
+
+ESTR. Sabio Tales ...
+
+AST. Docto Euclídes ...
+
+ESTR. Que entre signos ...
+
+AST. Que entre estrellas ...

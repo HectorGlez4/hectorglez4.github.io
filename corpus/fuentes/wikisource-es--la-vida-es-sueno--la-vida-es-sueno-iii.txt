@@ -1,0 +1,171 @@
+fuente: wikisource-es
+obra: La vida es sueño
+url: https://es.wikisource.org/wiki/La_vida_es_sue%C3%B1o/III
+recuperado: 2026-10-11
+---
+La vida es sueño/III
+|titulo=[[La vida es sueño]]
+|autor=Pedro Calderón de la Barca
+obra> |titulo=La vida es sueño
+obra> |autor=Pedro Calderón de la Barca
+---
+JORNADA TERCERA
+
+Un calabozo en la torre de Segismundo.
+
+ESCENA PRIMERA
+
+Clarin.
+
+En una encantada torre, por lo que sé, vivo preso:
+¿Qué me harán por lo que ignoro, si por lo que sé me han muerto?
+¡Que un hombre con tanta hambre viniese á morir viviendo!
+Lástima tengo de mí; todos dirán: «Bien lo creo»;
+Y bien se puede creer, pues, para mí este silencio
+No conforma con el nombre Clarin; y callar no puedo.
+Quien me hace compañía aquí, si á decirlo acierto,
+Son arañas y ratones: ¡Miren qué dulces jilgueros!
+De los sueños desta noche la triste cabeza tengo
+Llena de mil chirimías, de trompetas y embelecos,
+De procesiones, de cruces, de disciplinantes; y estos,
+
+\n<section begin=\"s2\"/>{{c|{{x-grande|ESCENA II}}}} \n\n{{c|''Soldados. Clarín.''}}\n \n::SOLDADO 1° (''Dentro.'') Esta es la torre en que está. Echad \nla puerta en el suelo. \nEntrad todos. \n\n::CLAR. ¡Vive Dios! Que á mí me buscan, es cierto, \nPues que dicen que aquí estoy. ¿Qué me querrán? \n\n::SOLDADO 1° (''Dentro.'') Entrad dentro. \n{Salen varios soldados.) \n\n::SOLDADO 2° Aqui está. \n\n::CLAR. No está. \n\n::TODOS LOS SOLDADOS. Señor ... \n\n::CLAR. (''Ap.'') ¿Si vienen borrachos estos? \n\n::SOLDADO 1° Tú nuestro príncipe eres; ni admitimos ni \nqueremos \nSino al señor natural, y no á príncipe extranjero. \nA todos nos da los pies. \n\n::SOLDADOS. ¡Viva el gran Príncipe nuestro! \n\n::CLAR. (''Ap.'') Vive Dios, que va de veras. ¿Si es costumbre \nen este Reino \nPrender uno cada dia y hacerle príncipe, y luego \nVolverle á la torre? Sí, pues cada dia lo veo: \nFuerza es hacer mi papel. \n\n::SOLDADOS. Danos tus plantas. \n\n::CLAR. No puedo. \nPorque has he menester para mí, y fuera defecto \nSer príncipe desplantado. \n\n::SOLDADO 2° Todos á tu padre mesmo "}}">
+Unos suben, otros bajan, unos se desmayan viendo
+La sangre que llevan otros; mas yo, la verdad diciendo,
+De no comer me desmayo; que en una prisión me veo,
+Donde ya todos los dias en el filósofo leo
+Nicomédes, y las noches en el concilio Niceno.
+Si llaman santo al callar, como en calendario nuevo,
+San secreto es para mí, pues le ayuno y no le huelgo;
+Aunque está bien merecido el castigo que padezco,
+Pues callé, siendo criado, que es el mayor sacrilegio.
+(Ruido de cajas y clarines, y voces dentro.)
+
+ESCENA II
+
+Soldados. Clarín.
+
+SOLDADO 1° (Dentro.) Esta es la torre en que está. Echad
+
+la puerta en el suelo.
+
+Entrad todos.
+
+CLAR. ¡Vive Dios! Que á mí me buscan, es cierto,
+
+Pues que dicen que aquí estoy. ¿Qué me querrán?
+
+SOLDADO 1° (Dentro.) Entrad dentro.
+
+{Salen varios soldados.)
+
+SOLDADO 2° Aqui está.
+
+CLAR. No está.
+
+TODOS LOS SOLDADOS. Señor ...
+
+CLAR. (Ap.) ¿Si vienen borrachos estos?
+
+SOLDADO 1° Tú nuestro príncipe eres; ni admitimos ni
+
+queremos
+
+Sino al señor natural, y no á príncipe extranjero.
+
+A todos nos da los pies.
+
+SOLDADOS. ¡Viva el gran Príncipe nuestro!
+
+CLAR. (Ap.) Vive Dios, que va de veras. ¿Si es costumbre
+
+en este Reino
+
+Prender uno cada dia y hacerle príncipe, y luego
+
+Volverle á la torre? Sí, pues cada dia lo veo:
+
+Fuerza es hacer mi papel.
+
+SOLDADOS. Danos tus plantas.
+
+CLAR. No puedo.
+
+Porque has he menester para mí, y fuera defecto
+
+Ser príncipe desplantado.
+
+SOLDADO 2° Todos á tu padre mesmo
+
+\n<section begin=\"s2\"/>{{c|{{x-grande|ESCENA III}}}}\n\n{{c|''Segismundo. Clarín. Soldados.''}}\n \n::SEGIS. ¿Quién nombra aquí á Segismundo? \n\n::CLAR. (''Ap.'') ¡Mas que soy príncipe huero! \n\n::SOLDADO 1° ¿Quién es Segismundo? \n\n::SEGIS. Yo. \n\n::SOLDADO 2° (''A Clarín.'') Pues, ¿Cómo, atrevido y necio. \nTú te hacias Segismundo? \n\n::CLAR. ¿Yo Segismundo? Eso niego. \nVosotros fuisteis los que me segismundeasteis: luego \nVuestra ha sido solamente necedad y atrevimiento. \n\n::SOLDADO 1° Gran príncipe Segismundo (que las señas que traemos \nTuyas son, aunque por fe te aclamamos señor nuestro), \nTu padre, el gran rey Basilio, temeroso que los cielos \nCumplan un hado, que dice que ha de verse á tus pies puesto. \nVencido de tí, pretende quitarte acción y derecho \nY dársele á Astolfo, duque de Moscovia. Para esto \nJuntó su corte; y el vulgo, penetrando ya y sabiendo \nQue tiene rey natural, no quiere que un extranjero \nVenga á mandarle. Y así, haciendo noble desprecio \nDe la inclemencia del hado, te ha buscado donde preso \nVives, para que asistido de sus armas, y saliendo \nDesta torre á restaurar tu imperial corona y cetro. \nSe la quites á un tirano. Sal, pues, que en ese desierto. \nEjército numeroso de bandidos y plebeyos. \nTe aclama: la libertad te espera; oye sus acentos. \n\n::VOCES. (''Dentro.'') ¡Viva Segismundo, viva! "}}">
+Le dijimos que á tí solo por príncipe conocemos,
+No al de Moscovia.
+
+CLAR. ¿A mi padre le perdisteis el respeto y
+Sois unos tales por cuales.
+
+SOLDADO 1° Fué lealtad de nuestro pecho.
+
+CLAR. Si fué lealtad, yo os perdono.
+
+SOLDADO 2° Sal á restaurar tu imperio.
+¡Viva Segismundo!
+
+TODOS. ¡Viva!
+
+CLAR. (Ap.) ¿Segismundo dicen? Bueno:
+Segismundos llaman todos los príncipes contrahechos.
+
+ESCENA III
+
+Segismundo. Clarín. Soldados.
+
+SEGIS. ¿Quién nombra aquí á Segismundo?
+
+CLAR. (Ap.) ¡Mas que soy príncipe huero!
+
+SOLDADO 1° ¿Quién es Segismundo?
+
+SEGIS. Yo.
+
+SOLDADO 2° (A Clarín.) Pues, ¿Cómo, atrevido y necio.
+
+Tú te hacias Segismundo?
+
+CLAR. ¿Yo Segismundo? Eso niego.
+
+Vosotros fuisteis los que me segismundeasteis: luego
+
+Vuestra ha sido solamente necedad y atrevimiento.
+
+SOLDADO 1° Gran príncipe Segismundo (que las señas que traemos
+
+Tuyas son, aunque por fe te aclamamos señor nuestro),
+
+Tu padre, el gran rey Basilio, temeroso que los cielos
+
+Cumplan un hado, que dice que ha de verse á tus pies puesto.
+
+Vencido de tí, pretende quitarte acción y derecho
+
+Y dársele á Astolfo, duque de Moscovia. Para esto
+
+Juntó su corte; y el vulgo, penetrando ya y sabiendo
+
+Que tiene rey natural, no quiere que un extranjero
+
+Venga á mandarle. Y así, haciendo noble desprecio
+
+De la inclemencia del hado, te ha buscado donde preso
+
+Vives, para que asistido de sus armas, y saliendo
+
+Desta torre á restaurar tu imperial corona y cetro.
+
+Se la quites á un tirano. Sal, pues, que en ese desierto.
+
+Ejército numeroso de bandidos y plebeyos.
+
+Te aclama: la libertad te espera; oye sus acentos.
+
+VOCES. (Dentro.) ¡Viva Segismundo, viva!

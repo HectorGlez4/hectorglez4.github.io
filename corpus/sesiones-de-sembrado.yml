@@ -390,3 +390,14 @@ sesiones:
       citasPublicadas: 1916
       procedenciaCompleta: 22.5
       tradicionLatinoamericanaSobreHispanicos: 51.4
+  - fecha: "2026-10-11"
+    hora: "09:27"
+    clase: "epoca"
+    propuesto: "Agotar la época Edad Media: le quedan 34 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 39 candidatos en la época Edad Media: 4 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Siglo de Oro: Calderón de la Barca (La vida es sueño, El alcalde de Zalamea)"
+    motivo: "Se sembró de la época Siglo de Oro en vez de Edad Media: la Fuente sirve allí La vida es sueño y El alcalde de Zalamea en texto limpio, y los autores medievales restantes llegan en verso con tabuladores o traducidos."
+    resultado:
+      citasPublicadas: 1924
+      procedenciaCompleta: 22.5
+      tradicionLatinoamericanaSobreHispanicos: 50
