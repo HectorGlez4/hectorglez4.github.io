@@ -1,0 +1,13 @@
+---
+texto: "\"Anda, Domingo, me dijo, y tráeme de la sacristía el misal, que necesito ver un spelbus que hay, contra lo que dice Nebrija\"."
+autor: "domingo-faustino-sarmiento"
+slug: "domingo-faustino-sarmiento-anda-domingo-me-dijo-y-traeme-de"
+procedencia:
+  obra: "Recuerdos de provincia"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Recuerdos_de_provincia/Los_Oro"
+---

@@ -1,0 +1,14 @@
+fuente: wikisource-es
+obra: Recuerdos de provincia
+url: https://es.wikisource.org/wiki/Recuerdos_de_provincia/Biograf%C3%ADas
+recuperado: 2026-10-11
+---
+Recuerdos de provincia/Biografías
+|título=[[Recuerdos de provincia]]
+|autor=[[Domingo Faustino Sarmiento|Domingo Faustino Sarmiento]]
+---
+Apuntes Biográficos. — Bajo este nombre se publicó la vida del fraile Aldao, apóstata, general de Rosas; obrita muy gustada por los inteligentes como composición literaria. El autor se propone para más tarde, bajo el título de Vidas americanas, colectar las diversas biografías que ha publicado, de personajes chilenos o argentinos, dignos de recuerdo. La biografía es el libro más original que puede dar la América del Sur en nuestra época, y el mejor material que haya de suministrarse a la historia. Los Apuntes biográficos fueron traducidos al francés por M. Eugène Tandonnet, candidato dos veces a la Asamblea Nacional quien, aunque partidario de Rosas por amistad personal con Oribe, se explica en estos términos con respecto al autor: "Sin pretender a la perfección literaria, ha querido solamente poner de relieve algunas de las figuras más enérgicas de la era de la independencia, y dejarnos entrever la fisonomía general de las provincias argentinas, las costumbres, las preocupaciones, las pasiones, en una palabra, la vida de aquellos pueblos a la vez guerreros y pastores. Hay bajo este aspecto un método superior, incontestable en los Apuntes biográficos del señor Sarmiento. Es ciertamente un estudio al natural, aunque trazado al correr de la pluma y de la pasión. En la marcha del estilo y en el movimiento general de las ideas, se encuentra el abandono melancólico y los raptos de violencia que caracterizan a los habitantes de las provincias argentinas... El señor Sarmiento, por la elevación de espíritu, por sus estadios serios, se separa completamente de los principales jefes del bando unitario... Pero cuando los recuerdos de la Patria se presentan a la imaginación del desterrado; cuando recapacita en el papel brillante y útil que sus facultades le habrían asegurado en aquella patria tan cara, entonces la cólera desborda de su corazón y se derrama en maldiciones ardientes contra el afortunado adversario, cuyo triunfo ha causado su destierro".
+
+Otras biografías he publicado en los diarios, tales como la del presbítero Balmaceda, la del presbítero Irarrázabal, la del coronel Pereira, argentino, fundador de la escuela militar de Chile; la del senador don Manuel Gardarillas, la de don José Dolores Bustos, sanjuanino, visitador general de escuela en Chile.
+
+El Facundo , o Civilización y Barbarie, y estos Recuerdos de Provincia pertenecen al mismo género.

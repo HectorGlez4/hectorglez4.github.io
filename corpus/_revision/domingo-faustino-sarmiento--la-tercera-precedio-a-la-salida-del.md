@@ -1,0 +1,13 @@
+---
+texto: "La tercera precedió a la salida del ejército destinado a combatir al General Madrid en Tucumán, y alude a la reciente muerte de Villafañe."
+autor: "domingo-faustino-sarmiento"
+slug: "domingo-faustino-sarmiento-la-tercera-precedio-a-la-salida-del"
+procedencia:
+  obra: "Facundo (1874)/Apéndice: Proclamas de Facundo Quiroga"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Facundo:_19"
+---
