@@ -1,0 +1,12 @@
+fuente: wikisource-es
+obra: Alabanzas de la moneda
+url: https://es.wikisource.org/wiki/Alabanzas_de_la_moneda
+recuperado: 2026-10-11
+---
+Alabanzas de la moneda
+|título=Alabanzas de la moneda
+|autor=Francisco de Quevedo
+---
+El dinero para hermoso tiene blanco y amarillo, para galán tiene claridad y refulgencia, para enamorado tiene saetas como el dios Cupido, para avasallar las gentes tiene yugo y coyundas, para defensor tiene castillos; para noble, león; para fuerte, columnas; para grave, coronas; y al fin, para honra y provecho lo tiene todo.
+
+El dinero tiene tres nombres: el uno por fuerte, el otro por útil, el otro por perfecto. Por fuerte se llama moneda, que quiere decir munición y fortaleza; por útil se llama pecunia, que quiere decir pegujal o granjería gananciosa, por perfecto se llama dinero, tornando el apellido del número deceno, que es el de perfecto.

@@ -1,0 +1,13 @@
+---
+texto: "Y hay hombre que por no acordarse de ellas se detiene hasta que se enfada y mata, y en topando con su ahora bien, se va."
+autor: "francisco-de-quevedo"
+slug: "francisco-de-quevedo-y-hay-hombre-que-por-no-acordarse"
+procedencia:
+  obra: "Cuento de cuentos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Cuento_de_cuentos"
+---

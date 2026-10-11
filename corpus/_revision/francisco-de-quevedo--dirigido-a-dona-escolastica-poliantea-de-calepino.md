@@ -1,0 +1,13 @@
+---
+texto: "Dirigido a Doña Escolástica Poliantea de Calepino, Señora de Trilingüe y Babilonia."
+autor: "francisco-de-quevedo"
+slug: "francisco-de-quevedo-dirigido-a-dona-escolastica-poliantea-de-calepino"
+procedencia:
+  obra: "La culta latiniparla"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_culta_latiniparla"
+---

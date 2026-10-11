@@ -1,0 +1,12 @@
+fuente: wikisource-es
+obra: Discurso de todos los diablos o Infierno enmendado
+url: https://es.wikisource.org/wiki/Discurso_de_todos_los_diablos
+recuperado: 2026-10-11
+---
+Discurso de todos los diablos
+[[Categoría:Obras de Francisco de Quevedo]]
+|título=Discurso de todos los diablos o Infierno enmendado
+|autor=Francisco de Quevedo y Villegas
+|título={{Anclaje+|Índice}}
+---
+Índice(no listados originalmente)

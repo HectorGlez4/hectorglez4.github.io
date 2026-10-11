@@ -1,0 +1,41 @@
+fuente: wikisource-es
+obra: Salmos
+url: https://es.wikisource.org/wiki/Salmos_-_Quevedo
+recuperado: 2026-10-11
+---
+Salmos - Quevedo
+|título=Salmos
+|autor=[[Francisco de Quevedo]]
+|título={{Anclaje+|Índice}}
+---
+Índice(no listados originalmente)
+
+Salmo I
+
+Salmo II
+
+Salmo VI
+
+Salmo VII
+
+Salmo IX
+
+Salmo X
+
+Salmo XIV
+
+Salmo XVI
+
+Salmo XVII
+
+Salmo XVIII
+
+Salmo XIX
+
+Salmo XXI
+
+Salmo XXII
+
+Salmo XXIII
+
+Salmo XXVI
