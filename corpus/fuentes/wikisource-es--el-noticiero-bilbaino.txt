@@ -1,0 +1,22 @@
+fuente: wikisource-es
+obra: El Noticiero Bilbaíno
+url: https://es.wikisource.org/wiki/El_Noticiero_Bilba%C3%ADno
+recuperado: 2026-10-11
+---
+El Noticiero Bilbaíno
+|titulo = El Noticiero Bilbaíno
+|autor=[[Autor:Antonio de Trueba|Antonio de Trueba]]
+|fecha=9 de julio de 1883
+|título=[[El maestro y el discípulo]]
+|publicación=El Noticiero Bilbaíno
+|autor=[[Autor:Miguel de Unamuno|Miguel de Unamuno]]
+|título=[[En Alcalá de Henares]]
+|fecha=18 de noviembre de 1889
+obra> |título=El maestro y el discípulo
+obra> |autor=Antonio de Trueba
+---
+Artículos
+
+"}},"i":0}}]}'>Antonio de Trueba (9 de julio de 1883). «El maestro y el discípulo». El Noticiero Bilbaíno (Bilbao) (2.838): 3.
+
+"}},"i":0}}]}'>Miguel de Unamuno (18 de noviembre de 1889). «En Alcalá de Henares». El Noticiero Bilbaíno (Bilbao) (4.837): 3.

@@ -1,0 +1,13 @@
+---
+texto: "De la retirada de Silvela, un literato perdido en la política, algo creo que podría decir."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-de-la-retirada-de-silvela-un-literato"
+procedencia:
+  obra: "Sobre la tumba de Costa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Sobre_la_tumba_de_Costa"
+---

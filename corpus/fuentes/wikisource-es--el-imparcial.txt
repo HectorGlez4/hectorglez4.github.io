@@ -1,0 +1,26 @@
+fuente: wikisource-es
+obra: El Imparcial
+url: https://es.wikisource.org/wiki/El_Imparcial
+recuperado: 2026-10-11
+---
+El Imparcial
+|titulo = El Imparcial
+|autor=[[Autor:Ramiro de Maeztu|Ramiro de Maeztu]]
+|fecha=28 de noviembre de 1901
+|título=[[El ideal anarquista en España]]
+|publicación=El Imparcial
+|autor=[[Autor:Francisco Alcántara|Francisco Alcántara]]
+|fecha=10 de diciembre de 1911
+|título=[[Ricardo Arredondo]]
+obra> |título=El ideal anarquista en España
+obra> |autor=Ramiro de Maeztu
+---
+Artículos
+
+Ramiro de Maeztu (28 de noviembre de 1901). «El ideal anarquista en España». El Imparcial (Madrid) (12.442): 3.
+
+Francisco Alcántara (10 de diciembre de 1911). «Ricardo Arredondo». El Imparcial (Madrid) (16.084): 4.
+
+Miguel de Unamuno (18 de septiembre de 1916). «Con Don Quijote en Sigüenza». El Imparcial (Madrid) (17.813): 3.
+
+Constantino Román Salamero (15 de octubre de 1917). «Ganivet en Finlandia». El Imparcial (Madrid) (18.203): 3-4.

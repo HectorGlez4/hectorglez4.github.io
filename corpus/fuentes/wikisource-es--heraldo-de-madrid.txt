@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Heraldo de Madrid
+url: https://es.wikisource.org/wiki/Heraldo_de_Madrid
+recuperado: 2026-10-11
+---
+Heraldo de Madrid
+|titulo = Heraldo de Madrid
+|autor=[[Autor:Enrique María Repullés|E. M. Repullés]]
+|título=[[El arte español.—La ermita de San Isidro de Ávila en Madrid]]
+|fecha=1 de diciembre de 1894
+|publicación=Heraldo de Madrid
+|autor=[[Autor:Miguel de Unamuno|Miguel de Unamuno]]
+|título=[[El anti-maquetismo]]
+|fecha=18 de septiembre de 1898
+obra> |título=El arte español.—La ermita de San Isidro de Ávila en Madrid
+obra> |autor=Enrique María Repullés
+---
+Artículos
+
+E. M. Repullés (1 de diciembre de 1894). «El arte español.—La ermita de San Isidro de Ávila en Madrid». Heraldo de Madrid (Madrid) (1.485): 1.
+
+"}},"i":0}}]}'>Miguel de Unamuno (18 de septiembre de 1898). «El anti-maquetismo». Heraldo de Madrid (Madrid) (2.869): 1.
+
+"}},"i":0}}]}'>Ramiro de Maeztu (31 de diciembre de 1912). «Sobre el arte inmoral y la pornografía». Heraldo de Madrid (8.066): 1.
+
+Entrevistas
+
+«El partido carlista: Declaraciones de Vázquez de Mella» (29 de junio de 1909) Heraldo de Madrid, año XX, nº 6.787, p. 1. (url)

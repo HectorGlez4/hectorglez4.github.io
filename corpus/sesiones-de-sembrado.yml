@@ -555,3 +555,14 @@ sesiones:
       citasPublicadas: 2064
       procedenciaCompleta: 21.9
       tradicionLatinoamericanaSobreHispanicos: 54.3
+  - fecha: "2026-10-11"
+    hora: "13:56"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Unamuno: ensayos de ideas"
+    motivo: "Ampliación de Miguel de Unamuno con ensayos de Wikisource (Mi religión, Verdad y vida, Sobre la tumba de Costa, La crisis actual del patriotismo español), ya versionados y sin explotar."
+    resultado:
+      citasPublicadas: 2076
+      procedenciaCompleta: 21.8
+      tradicionLatinoamericanaSobreHispanicos: 54.3

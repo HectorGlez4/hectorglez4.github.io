@@ -1,0 +1,11 @@
+fuente: wikisource-es
+obra: La Lucha
+url: https://es.wikisource.org/wiki/La_Lucha_%28Barcelona%29
+recuperado: 2026-10-11
+---
+La Lucha (Barcelona)
+|titulo = La Lucha
+---
+Artículos
+
+Miguel de Unamuno (5 de noviembre de 1918) «El archiduque de España. Tiene la gracia de la pantera», La Lucha

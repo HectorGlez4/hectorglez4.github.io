@@ -1,0 +1,13 @@
+---
+texto: "Y así, tal vez ocurre que á quienes buscan asentar el sentimiento de la patria española sobre otras bases que las proclamadas por tradición, se les acusa de negar esa patria."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-y-asi-tal-vez-ocurre-que-a"
+procedencia:
+  obra: "La crisis actual del patriotismo español"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_crisis_actual_del_patriotismo_espa%C3%B1ol"
+---
