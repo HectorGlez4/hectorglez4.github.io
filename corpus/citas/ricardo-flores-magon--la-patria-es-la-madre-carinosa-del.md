@@ -1,6 +1,8 @@
 ---
 texto: "La patria es la madre cariñosa del rico y la madrastra del pobre."
 autor: "ricardo-flores-magon"
+temas:
+  - "la-patria"
 slug: "ricardo-flores-magon-la-patria-es-la-madre-carinosa-del"
 procedencia:
   obra: "La patria burguesa y la patria universal"

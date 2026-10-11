@@ -1,7 +1,9 @@
 ---
-texto: "El que no ha creado no es genio, no llegó á serlo, fué una ilusión disipada."
+texto: "El que ha atravesado dignamente una pobreza es un heroico ejemplar de carácter."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-no-ha-creado-no-es"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-el-que-ha-atravesado-dignamente-una-pobreza"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

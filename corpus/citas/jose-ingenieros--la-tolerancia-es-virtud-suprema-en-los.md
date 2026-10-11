@@ -1,6 +1,8 @@
 ---
 texto: "La tolerancia es virtud suprema en los que piensan."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-la-tolerancia-es-virtud-suprema-en-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

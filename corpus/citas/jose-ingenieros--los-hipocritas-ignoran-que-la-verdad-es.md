@@ -1,7 +1,9 @@
 ---
-texto: "El símbolo del hombre mediocre es la paciencia imitativa; del hombre superior, la imaginación creadora."
+texto: "Los hipócritas ignoran que la verdad es la condición fundamental de la virtud."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-simbolo-del-hombre-mediocre-es-la"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-los-hipocritas-ignoran-que-la-verdad-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

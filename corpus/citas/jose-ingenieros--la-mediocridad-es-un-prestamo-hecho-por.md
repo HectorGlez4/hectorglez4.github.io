@@ -1,7 +1,9 @@
 ---
-texto: "El genio es excelente por su moral, ó no es genio."
+texto: "La mediocridad es un préstamo hecho por la grey al individuo; la originalidad es una virtud intrínseca."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-es-excelente-por-su-moral"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-mediocridad-es-un-prestamo-hecho-por"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

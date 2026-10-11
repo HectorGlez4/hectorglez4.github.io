@@ -1,6 +1,8 @@
 ---
 texto: "La razon es clara, el resistir á tentaciones muy vehementes exige virtud firme y acendrada."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-la-razon-es-clara-el-resistir-a"
 procedencia:
   obra: "El Criterio"

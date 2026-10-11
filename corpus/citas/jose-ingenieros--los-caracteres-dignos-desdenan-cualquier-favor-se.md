@@ -1,7 +1,9 @@
 ---
-texto: "El que ha atravesado dignamente una pobreza es un heroico ejemplar de carácter."
+texto: "Los caracteres dignos desdeñan cualquier favor; se estiman superiores á lo que puede darse sin mérito."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-ha-atravesado-dignamente-una-pobreza"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-caracteres-dignos-desdenan-cualquier-favor-se"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

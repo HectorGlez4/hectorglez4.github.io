@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad es un préstamo hecho por la grey al individuo; la originalidad es una virtud intrínseca."
+texto: "El odio es rectilíneo y no teme la luz; la envidia es torcida y trabaja en la sombra."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-es-un-prestamo-hecho-por"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-odio-es-rectilineo-y-no-teme"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

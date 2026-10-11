@@ -1,6 +1,8 @@
 ---
 texto: "Un hombre laborioso es el catecismo más edificante."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-trabajo"
 slug: "juan-bautista-alberdi-un-hombre-laborioso-es-el-catecismo-mas"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

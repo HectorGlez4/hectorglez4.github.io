@@ -1,6 +1,8 @@
 ---
 texto: "La que es á la vez muy decente y muy fácil es, no cerrar la boca á los hombres, sino hacerse mejor."
 autor: "platon"
+temas:
+  - "la-virtud"
 slug: "platon-la-que-es-a-la-vez-muy"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"

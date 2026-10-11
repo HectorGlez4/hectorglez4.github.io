@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia moderna es grande por ser esencialmente anárquica."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-ciencia-moderna-es-grande-por-ser"
 procedencia:
   obra: "Mi anarquismo"

@@ -1,7 +1,9 @@
 ---
-texto: "El elogio del mérito es un estímulo para su simulación."
+texto: "El símbolo del hombre mediocre es la paciencia imitativa; del hombre superior, la imaginación creadora."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-elogio-del-merito-es-un-estimulo"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-simbolo-del-hombre-mediocre-es-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

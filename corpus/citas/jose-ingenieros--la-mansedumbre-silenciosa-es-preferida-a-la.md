@@ -1,7 +1,9 @@
 ---
-texto: "Todo ideal, seguido por muchedumbres, sólo es pensado por pocos visionarios que son sus amos."
+texto: "La mansedumbre silenciosa es preferida á la dignidad altiva."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-ideal-seguido-por-muchedumbres-solo-es"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-la-mansedumbre-silenciosa-es-preferida-a-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

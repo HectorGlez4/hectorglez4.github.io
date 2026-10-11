@@ -1,6 +1,8 @@
 ---
 texto: "La naturaleza es una; las morales, muchas."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-razon"
 slug: "gustavo-sanchez-galarraga-la-naturaleza-es-una-las-morales-muchas"
 procedencia:
   obra: "A Flor De Piel: Frases"

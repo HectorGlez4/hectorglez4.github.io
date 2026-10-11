@@ -1,6 +1,8 @@
 ---
 texto: "La virtud es también un género de arte, un arte divino; ella sonríe maternalmente a las Gracias."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-virtud"
 slug: "jose-enrique-rodo-la-virtud-es-tambien-un-genero-de"
 procedencia:
   obra: "Ariel"

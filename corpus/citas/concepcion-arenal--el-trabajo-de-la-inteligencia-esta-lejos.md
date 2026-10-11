@@ -1,6 +1,8 @@
 ---
 texto: "El trabajo de la inteligencia está lejos de ser una cosa espontánea en el hombre."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-el-trabajo-de-la-inteligencia-esta-lejos"
 procedencia:
   obra: "La mujer del porvenir"

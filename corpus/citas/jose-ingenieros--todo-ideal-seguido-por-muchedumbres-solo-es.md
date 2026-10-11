@@ -1,7 +1,9 @@
 ---
-texto: "El odio es rectilíneo y no teme la luz; la envidia es torcida y trabaja en la sombra."
+texto: "Todo ideal, seguido por muchedumbres, sólo es pensado por pocos visionarios que son sus amos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-odio-es-rectilineo-y-no-teme"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-todo-ideal-seguido-por-muchedumbres-solo-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

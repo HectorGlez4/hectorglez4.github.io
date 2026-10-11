@@ -1,6 +1,8 @@
 ---
 texto: "El conflicto entre la razón y la vida es algo más que una duda."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-el-conflicto-entre-la-razon-y-la"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

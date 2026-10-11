@@ -1,6 +1,8 @@
 ---
 texto: "Lo que más dificulta la perfección del hombre es su adaptación a un ambiente de moralidad inferior."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-lo-que-mas-dificulta-la-perfeccion-del"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

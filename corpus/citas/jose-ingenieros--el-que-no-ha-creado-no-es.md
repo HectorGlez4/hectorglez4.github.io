@@ -1,7 +1,9 @@
 ---
-texto: "Los hipócritas ignoran que la verdad es la condición fundamental de la virtud."
+texto: "El que no ha creado no es genio, no llegó á serlo, fué una ilusión disipada."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hipocritas-ignoran-que-la-verdad-es"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-que-no-ha-creado-no-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

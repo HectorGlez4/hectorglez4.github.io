@@ -1,7 +1,9 @@
 ---
-texto: "El amor a lo que fue es una voluptuosa cobardía."
+texto: "La vida es la conquista del medio, la transformación de lo exterior por el genio interior."
 autor: "rafael-barrett"
-slug: "rafael-barrett-el-amor-a-lo-que-fue-es"
+temas:
+  - "la-vida"
+slug: "rafael-barrett-la-vida-es-la-conquista-del-medio"
 procedencia:
   obra: "Filosofía del altruismo"
 estadoDerechos: "dominio-público"

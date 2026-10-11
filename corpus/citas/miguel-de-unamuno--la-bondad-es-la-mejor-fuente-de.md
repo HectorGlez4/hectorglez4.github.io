@@ -1,6 +1,8 @@
 ---
 texto: "La bondad es la mejor fuente de clarividencia espiritual."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-virtud"
 slug: "miguel-de-unamuno-la-bondad-es-la-mejor-fuente-de"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

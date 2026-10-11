@@ -1,7 +1,9 @@
 ---
-texto: "El progreso humano es la resultante de ese contraste perpetuo entre masas inertes y energías propulsoras."
+texto: "El elogio del mérito es un estímulo para su simulación."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-progreso-humano-es-la-resultante-de"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-elogio-del-merito-es-un-estimulo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El hombre no debe hacer cosa que no pueda confesar y publicar altamente."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-virtud"
 slug: "mariano-jose-de-larra-el-hombre-no-debe-hacer-cosa-que"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

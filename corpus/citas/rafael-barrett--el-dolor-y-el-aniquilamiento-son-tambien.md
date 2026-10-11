@@ -1,6 +1,8 @@
 ---
 texto: "El dolor y el aniquilamiento son también útiles."
 autor: "rafael-barrett"
+temas:
+  - "la-adversidad"
 slug: "rafael-barrett-el-dolor-y-el-aniquilamiento-son-tambien"
 procedencia:
   obra: "El esfuerzo"

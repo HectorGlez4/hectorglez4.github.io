@@ -1,7 +1,9 @@
 ---
-texto: "La mansedumbre silenciosa es preferida á la dignidad altiva."
+texto: "El progreso humano es la resultante de ese contraste perpetuo entre masas inertes y energías propulsoras."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mansedumbre-silenciosa-es-preferida-a-la"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-progreso-humano-es-la-resultante-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

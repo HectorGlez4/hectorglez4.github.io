@@ -1,7 +1,9 @@
 ---
-texto: "Los caracteres dignos desdeñan cualquier favor; se estiman superiores á lo que puede darse sin mérito."
+texto: "El genio es excelente por su moral, ó no es genio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-caracteres-dignos-desdenan-cualquier-favor-se"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-genio-es-excelente-por-su-moral"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
