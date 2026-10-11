@@ -1,0 +1,15 @@
+---
+texto: "Desciende al nivel de tu interlocutor, para no humillarle ni desorientarle."
+autor: "amado-nervo"
+temas:
+  - "la-humildad"
+slug: "amado-nervo-desciende-al-nivel-de-tu-interlocutor-para"
+procedencia:
+  obra: "Plenitud"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Plenitud/V_%28El_signo%29"
+---

@@ -1,6 +1,8 @@
 ---
 texto: "El dolor es como las nubes: cuando estamos dentro de él sólo vemos gris en redentor, un gris misterioso y trágico; pero en cuanto se aleja y lo dora el sol del recuerdo, ya es gloria, transfiguración y majestad."
 autor: "amado-nervo"
+temas:
+  - "la-adversidad"
 slug: "amado-nervo-el-dolor-es-como-las-nubes-cuando"
 procedencia:
   obra: "Plenitud"
