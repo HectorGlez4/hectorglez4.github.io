@@ -1,7 +1,9 @@
 ---
-texto: "Todo se reduce á la breve duración de un día, el que alaba y el que es alabado."
+texto: "Todo aquello que no hace que un hombre sea en sí peor de lo que antes era; esto no empeora su vida ni le acarrea mengua alguna ni exterior, ni interiormente."
 autor: "marco-aurelio"
-slug: "marco-aurelio-todo-se-reduce-a-la-breve-duracion"
+temas:
+  - "la-virtud"
+slug: "marco-aurelio-todo-aquello-que-no-hace-que-un"
 procedencia:
   obra: "Soliloquios"
   traduccion:

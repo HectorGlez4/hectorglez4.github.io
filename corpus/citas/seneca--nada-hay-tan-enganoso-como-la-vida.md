@@ -1,6 +1,8 @@
 ---
 texto: "Nada hay tan engañoso como la vida humana; nada hay tan pérfido; y a fe mía, nadie la aceptara si no se nos diese sin saberlo nosotros."
 autor: "seneca"
+temas:
+  - "la-vida"
 slug: "seneca-nada-hay-tan-enganoso-como-la-vida"
 procedencia:
   obra: "Consolación a Marcia"

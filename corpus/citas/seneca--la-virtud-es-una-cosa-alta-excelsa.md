@@ -1,6 +1,8 @@
 ---
 texto: "La virtud es una cosa alta, excelsa, real e infatigable; el deleite es abatido, servil, débil y caduco, cuya morada son los burdeles y bodegones."
 autor: "seneca"
+temas:
+  - "la-virtud"
 slug: "seneca-la-virtud-es-una-cosa-alta-excelsa"
 procedencia:
   obra: "De la vida bienaventurada"

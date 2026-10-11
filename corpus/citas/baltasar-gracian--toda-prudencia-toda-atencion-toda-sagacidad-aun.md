@@ -1,6 +1,8 @@
 ---
 texto: "Toda prudencia, toda atención, toda sagacidad, aún no es bastante en este dificultoso punto."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-toda-prudencia-toda-atencion-toda-sagacidad-aun"
 procedencia:
   obra: "El político"

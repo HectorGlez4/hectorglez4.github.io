@@ -1,6 +1,8 @@
 ---
 texto: "El fin del discurso es que en la vida ninguna cosa debe reputarse por más excelente que la virtud moral."
 autor: "marco-aurelio"
+temas:
+  - "la-virtud"
 slug: "marco-aurelio-el-fin-del-discurso-es-que-en"
 procedencia:
   obra: "Soliloquios"

@@ -1,6 +1,8 @@
 ---
 texto: "No desprecies la muerte; antes bien, recíbela con gusto, como que ésta es una de aquellas cosas que quería la Naturaleza."
 autor: "marco-aurelio"
+temas:
+  - "la-muerte"
 slug: "marco-aurelio-no-desprecies-la-muerte-antes-bien-recibela"
 procedencia:
   obra: "Soliloquios"

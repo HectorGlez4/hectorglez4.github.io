@@ -1,6 +1,8 @@
 ---
 texto: "La sentencia viene á parar en lo mismo, y es que un sabio saca de su filosofia, como decia Antisthenes, el poder conversar consigo mismo."
 autor: "marco-aurelio"
+temas:
+  - "el-saber"
 slug: "marco-aurelio-la-sentencia-viene-a-parar-en-lo"
 procedencia:
   obra: "Soliloquios"

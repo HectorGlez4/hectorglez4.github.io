@@ -1,7 +1,9 @@
 ---
-texto: "La servidumbre no es penosa cuando, cansados del amo, con un solo paso se recobra la libertad: contra las injurias de la vida tengo el beneficio de la muerte."
+texto: "Todo lo humano es breve y caduco, no ocupando nada en lo infinito del tiempo."
 autor: "seneca"
-slug: "seneca-la-servidumbre-no-es-penosa-cuando-cansados"
+temas:
+  - "el-tiempo"
+slug: "seneca-todo-lo-humano-es-breve-y-caduco"
 procedencia:
   obra: "Consolación a Marcia"
   traduccion:

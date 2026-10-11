@@ -1,7 +1,9 @@
 ---
-texto: "Las cosas del mundo son siempre las mismas en sus vueltas orbiculares de arriba abajo, de siglo en siglo."
+texto: "Todo se reduce á la breve duración de un día, el que alaba y el que es alabado."
 autor: "marco-aurelio"
-slug: "marco-aurelio-las-cosas-del-mundo-son-siempre-las"
+temas:
+  - "la-gloria"
+slug: "marco-aurelio-todo-se-reduce-a-la-breve-duracion"
 procedencia:
   obra: "Soliloquios"
   traduccion:
@@ -11,5 +13,5 @@ fuente:
   id: "wikisource-es"
   nombre: "Wikisource en español"
   licencia: "CC BY-SA 4.0"
-  url: "https://es.wikisource.org/wiki/Soliloquios/Libro_IX"
+  url: "https://es.wikisource.org/wiki/Soliloquios/Libro_IV"
 ---
