@@ -1,6 +1,8 @@
 ---
 texto: "Omega es también alfa; el tiempo no avanza, gira; no tiene edad."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-omega-es-tambien-alfa-el-tiempo-no"
 procedencia:
   obra: "Año nuevo"

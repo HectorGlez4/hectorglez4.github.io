@@ -1,6 +1,8 @@
 ---
 texto: "Nos apresuramos a ignorar si la ciencia nos puede hacer infelices, pues nos creemos más obligados a ser dichosos que a ser sabios."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-felicidad"
 slug: "mariano-jose-de-larra-nos-apresuramos-a-ignorar-si-la-ciencia"
 procedencia:
   obra: "Capuletti e Montechi"

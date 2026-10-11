@@ -1,6 +1,8 @@
 ---
 texto: "El oro es barro; los soldados y los siervos, fantasmas, y el honor, mentira."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-el-oro-es-barro-los-soldados-y"
 procedencia:
   obra: "Filosofía del altruismo"

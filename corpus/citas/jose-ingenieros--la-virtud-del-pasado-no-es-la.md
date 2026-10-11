@@ -1,7 +1,9 @@
 ---
-texto: "No desbastar la propia ignorancia es perecer en vida; los caracteres mediocres están muertos antes de morir."
+texto: "La virtud del pasado no es la virtud del presente; los santos de mañana no serán los mismos de ayer."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-no-desbastar-la-propia-ignorancia-es-perecer"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-virtud-del-pasado-no-es-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

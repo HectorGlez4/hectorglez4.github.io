@@ -1,6 +1,8 @@
 ---
 texto: "Silencio es reconocer que los conflictos se resuelven mejor callando que hablando, y que el tiempo influye más en ellos que las palabras."
 autor: "alberto-masferrer"
+temas:
+  - "la-palabra"
 slug: "alberto-masferrer-silencio-es-reconocer-que-los-conflictos-se"
 procedencia:
   obra: "El elogio del silencio"

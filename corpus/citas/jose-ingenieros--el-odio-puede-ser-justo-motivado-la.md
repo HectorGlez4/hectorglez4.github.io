@@ -1,6 +1,8 @@
 ---
 texto: "El odio puede ser justo, motivado; la envidia es siempre injusta, pues la prosperidad no daña á nadie."
 autor: "jose-ingenieros"
+temas:
+  - "la-envidia"
 slug: "jose-ingenieros-el-odio-puede-ser-justo-motivado-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "Mal puede retroceder el que no ha hecho más que poner los pies en el camino."
 autor: "andres-bello"
+temas:
+  - "el-tiempo"
 slug: "andres-bello-mal-puede-retroceder-el-que-no-ha"
 procedencia:
   obra: "Modo de estudiar la historia"

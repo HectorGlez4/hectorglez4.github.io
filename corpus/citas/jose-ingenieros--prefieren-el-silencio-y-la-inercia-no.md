@@ -1,7 +1,9 @@
 ---
-texto: "La virtud del pasado no es la virtud del presente; los santos de mañana no serán los mismos de ayer."
+texto: "Prefieren el silencio y la inercia; no pensar es su única manera de no equivocarse."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-virtud-del-pasado-no-es-la"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-prefieren-el-silencio-y-la-inercia-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

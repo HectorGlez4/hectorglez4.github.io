@@ -1,7 +1,9 @@
 ---
-texto: "Su temor del vicio y su impotencia para la virtud se equivalen; son simples beneficiarios de la mediocridad moral que les rodea."
+texto: "Sin algún ingenio es imposible ascender por los senderos de la virtud; sin alguna virtud son inaccesibles los del ingenio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-su-temor-del-vicio-y-su-impotencia"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-sin-algun-ingenio-es-imposible-ascender-por"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

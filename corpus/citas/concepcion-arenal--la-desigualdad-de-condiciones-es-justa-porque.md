@@ -1,6 +1,8 @@
 ---
 texto: "La desigualdad de condiciones es justa porque es necesaria; pero allí donde acaba la necesidad acaba el derecho."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-desigualdad-de-condiciones-es-justa-porque"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

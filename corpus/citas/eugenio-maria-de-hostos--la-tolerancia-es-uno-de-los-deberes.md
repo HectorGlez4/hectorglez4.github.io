@@ -1,6 +1,8 @@
 ---
 texto: "La tolerancia es uno de los deberes más extensos á que estamos llamados en el concierto de la vida colectiva."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-deber"
 slug: "eugenio-maria-de-hostos-la-tolerancia-es-uno-de-los-deberes"
 procedencia:
   obra: "Moral social"

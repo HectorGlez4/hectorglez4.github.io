@@ -1,6 +1,8 @@
 ---
 texto: "Tal es el hombre; la menor cosa le desconcierta, le hace otro."
 autor: "jaime-balmes"
+temas:
+  - "la-vida"
 slug: "jaime-balmes-tal-es-el-hombre-la-menor-cosa"
 procedencia:
   obra: "El Criterio"

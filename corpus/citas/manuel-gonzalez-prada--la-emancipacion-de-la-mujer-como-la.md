@@ -1,6 +1,8 @@
 ---
 texto: "La emancipación de la mujer, como la libertad del esclavo, no se debe al Cristianismo, sino a la Filosofía."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-la-emancipacion-de-la-mujer-como-la"
 procedencia:
   obra: "Las esclavas de la Iglesia"

@@ -1,6 +1,8 @@
 ---
 texto: "No temas nunca, en los casos angustiosos, decir una palabra optimista."
 autor: "amado-nervo"
+temas:
+  - "la-palabra"
 slug: "amado-nervo-no-temas-nunca-en-los-casos-angustiosos"
 procedencia:
   obra: "Plenitud"

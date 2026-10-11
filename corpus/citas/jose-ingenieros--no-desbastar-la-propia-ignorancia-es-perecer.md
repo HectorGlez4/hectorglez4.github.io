@@ -1,7 +1,9 @@
 ---
-texto: "Sin algún ingenio es imposible ascender por los senderos de la virtud; sin alguna virtud son inaccesibles los del ingenio."
+texto: "No desbastar la propia ignorancia es perecer en vida; los caracteres mediocres están muertos antes de morir."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-sin-algun-ingenio-es-imposible-ascender-por"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-no-desbastar-la-propia-ignorancia-es-perecer"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

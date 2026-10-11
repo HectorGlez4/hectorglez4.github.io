@@ -1,7 +1,9 @@
 ---
-texto: "Prefieren el silencio y la inercia; no pensar es su única manera de no equivocarse."
+texto: "Á la gloria de un Homero llega siempre apareada la ridiculez de un Zoilo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-prefieren-el-silencio-y-la-inercia-no"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-a-la-gloria-de-un-homero-llega"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

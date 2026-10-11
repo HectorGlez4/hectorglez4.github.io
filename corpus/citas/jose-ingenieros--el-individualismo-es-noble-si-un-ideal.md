@@ -1,7 +1,9 @@
 ---
-texto: "Á la gloria de un Homero llega siempre apareada la ridiculez de un Zoilo."
+texto: "El individualismo es noble si un ideal lo alienta y lo eleva; sin ideal, es una caída á más bajo nivel que la mediocridad misma."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-a-la-gloria-de-un-homero-llega"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-el-individualismo-es-noble-si-un-ideal"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

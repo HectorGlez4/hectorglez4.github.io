@@ -1,6 +1,8 @@
 ---
 texto: "Para mí la patria no será nunca triunfo sino agonía y deber."
 autor: "jose-marti"
+temas:
+  - "la-patria"
 slug: "jose-marti-para-mi-la-patria-no-sera-nunca"
 procedencia:
   obra: "Carta a Federico Enríquez y Carvajal"

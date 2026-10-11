@@ -1,6 +1,8 @@
 ---
 texto: "Quien no ve la hermosura que tiene el perder la vida por no perder la honra, no tiene ni honra ni vida."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-gloria"
 slug: "francisco-de-quevedo-quien-no-ve-la-hermosura-que-tiene"
 procedencia:
   obra: "Marco Bruto"

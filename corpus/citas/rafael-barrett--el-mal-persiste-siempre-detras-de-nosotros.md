@@ -1,6 +1,8 @@
 ---
 texto: "El mal persiste siempre detrás de nosotros, como una manada de lobos que aúllan."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-el-mal-persiste-siempre-detras-de-nosotros"
 procedencia:
   obra: "El valor"

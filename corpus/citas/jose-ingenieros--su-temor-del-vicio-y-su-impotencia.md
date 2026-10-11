@@ -1,7 +1,9 @@
 ---
-texto: "La pasión es su atributo necesario, aun cuando parezca desviar de la verdad; lleva á la hipérbole, al error mismo; á la mentira nunca."
+texto: "Su temor del vicio y su impotencia para la virtud se equivalen; son simples beneficiarios de la mediocridad moral que les rodea."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-pasion-es-su-atributo-necesario-aun"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-su-temor-del-vicio-y-su-impotencia"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Muchas veces no sólo peca contra justicia el que nada hace, sino también el que hace algo."
 autor: "marco-aurelio"
+temas:
+  - "la-justicia"
 slug: "marco-aurelio-muchas-veces-no-solo-peca-contra-justicia"
 procedencia:
   obra: "Soliloquios"

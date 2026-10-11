@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia, como los ejércitos, necesita generales y soldados; aquellos conciben el plan, pero estos son los que positivamente vencen."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-trabajo"
 slug: "santiago-ramon-y-cajal-la-ciencia-como-los-ejercitos-necesita-generales"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -1,7 +1,9 @@
 ---
-texto: "El individualismo es noble si un ideal lo alienta y lo eleva; sin ideal, es una caída á más bajo nivel que la mediocridad misma."
+texto: "La pasión es su atributo necesario, aun cuando parezca desviar de la verdad; lleva á la hipérbole, al error mismo; á la mentira nunca."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-individualismo-es-noble-si-un-ideal"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-pasion-es-su-atributo-necesario-aun"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
