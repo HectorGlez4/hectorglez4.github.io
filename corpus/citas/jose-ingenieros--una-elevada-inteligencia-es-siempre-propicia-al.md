@@ -1,6 +1,8 @@
 ---
 texto: "Una elevada inteligencia es siempre propicia al talento moral y éste es la condición misma de la virtud."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-una-elevada-inteligencia-es-siempre-propicia-al"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

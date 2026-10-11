@@ -1,6 +1,8 @@
 ---
 texto: "La lucha por la vida, con todas sus ferocidades, no es más que el santo amor a la vida."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-la-lucha-por-la-vida-con-todas"
 procedencia:
   obra: "El odio"

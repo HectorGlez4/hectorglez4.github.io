@@ -1,6 +1,8 @@
 ---
 texto: "Cada día que pasa es una vergüenza más para nuestra patria y un peligro, porque el tiempo sanciona lentamente los hechos consumados."
 autor: "miguel-cane"
+temas:
+  - "la-patria"
 slug: "miguel-cane-cada-dia-que-pasa-es-una-verguenza"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

@@ -1,6 +1,8 @@
 ---
 texto: "Según el adagio árabe, una de las tres misiones de cada hombre en este mundo es plantar un árbol."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-segun-el-adagio-arabe-una-de-las"
 procedencia:
   obra: "El odio a los árboles"

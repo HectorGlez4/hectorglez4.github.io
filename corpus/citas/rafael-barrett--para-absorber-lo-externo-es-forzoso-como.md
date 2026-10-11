@@ -1,6 +1,8 @@
 ---
 texto: "Para absorber lo externo es forzoso, como en una bomba aspirante, hacer el vacío; la sed de riqueza de esclavos y de gloria no es más que el signo del vacío espiritual."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-para-absorber-lo-externo-es-forzoso-como"
 procedencia:
   obra: "Filosofía del altruismo"

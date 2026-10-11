@@ -1,6 +1,8 @@
 ---
 texto: "Mira las palabras de dos caras, palabras-bifrontes, Janos: son las palabras de honor, llamadas así por apodo; según te necesiten las verás del bueno o del mal frente."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-palabra"
 slug: "mariano-jose-de-larra-mira-las-palabras-de-dos-caras-palabras"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

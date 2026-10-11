@@ -1,7 +1,9 @@
 ---
-texto: "Reconozcamos, pues, que Solón ha desengañado al mundo y le ha enseñado cuán difícil es dirigir por simples leyes a los hombres."
+texto: "Las repetidas elecciones son esenciales en los sistemas populares, porque nada es tan peligroso como dejar permanecer largo tiempo en un mismo ciudadano el poder."
 autor: "simon-bolivar"
-slug: "simon-bolivar-reconozcamos-pues-que-solon-ha-desenganado-al"
+temas:
+  - "la-libertad"
+slug: "simon-bolivar-las-repetidas-elecciones-son-esenciales-en-los"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"
 estadoDerechos: "dominio-público"

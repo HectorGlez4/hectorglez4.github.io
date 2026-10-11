@@ -1,6 +1,8 @@
 ---
 texto: "Hay entre nosotros unos pocos hombres que andan jugando a la gallina ciega con nuestra felicidad, y que tienen el raro tino de hacer siempre las cosas al revés."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-felicidad"
 slug: "mariano-jose-de-larra-hay-entre-nosotros-unos-pocos-hombres-que"
 procedencia:
   obra: "Buenas noches. Segunda carta de Fígaro a su corresponsal en París, acerca de la disolución de las Cortes, y de otras varias cosas del día"

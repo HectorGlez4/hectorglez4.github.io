@@ -1,6 +1,8 @@
 ---
 texto: "Grande gloria es ser único en la bondad; empero es gloria avarienta."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-gloria"
 slug: "francisco-de-quevedo-grande-gloria-es-ser-unico-en-la"
 procedencia:
   obra: "Marco Bruto"

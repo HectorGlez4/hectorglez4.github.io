@@ -1,6 +1,8 @@
 ---
 texto: "La expropiación es la llave de oro que abre las puertas de la libertad, porque la posesión de la riqueza da la independencia económica."
 autor: "ricardo-flores-magon"
+temas:
+  - "la-libertad"
 slug: "ricardo-flores-magon-la-expropiacion-es-la-llave-de-oro"
 procedencia:
   obra: "La patria burguesa y la patria universal"

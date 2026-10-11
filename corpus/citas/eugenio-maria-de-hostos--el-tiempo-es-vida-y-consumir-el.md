@@ -1,7 +1,9 @@
 ---
-texto: "Ni aun el placer de la verdad es tan intenso como el placer de la justicia."
+texto: "El tiempo es vida, y consumir el tiempo en no hacer lo que se debe es consumir inútilmente la existencia."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-ni-aun-el-placer-de-la-verdad"
+temas:
+  - "el-tiempo"
+slug: "eugenio-maria-de-hostos-el-tiempo-es-vida-y-consumir-el"
 procedencia:
   obra: "Moral social"
   año: 1917

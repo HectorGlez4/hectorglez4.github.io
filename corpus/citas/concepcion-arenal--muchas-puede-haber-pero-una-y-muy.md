@@ -1,6 +1,8 @@
 ---
 texto: "Muchas puede haber; pero una, y muy poderosa, es sin duda la ignorancia de la mujer, punto de apoyo para el error, obstáculo para la difusión de la verdad."
 autor: "concepcion-arenal"
+temas:
+  - "el-error"
 slug: "concepcion-arenal-muchas-puede-haber-pero-una-y-muy"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

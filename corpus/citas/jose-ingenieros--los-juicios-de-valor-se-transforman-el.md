@@ -1,7 +1,9 @@
 ---
-texto: "El ingenio es una esperanza; el genio es su realización."
+texto: "Los juicios de valor se transforman: el bien de hoy es el mal de ayer, el mal de hoy es el bien de mañana."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-ingenio-es-una-esperanza-el-genio"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-los-juicios-de-valor-se-transforman-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

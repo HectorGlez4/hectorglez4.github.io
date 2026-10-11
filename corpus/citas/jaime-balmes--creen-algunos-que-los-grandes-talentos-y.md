@@ -1,6 +1,8 @@
 ---
 texto: "Creen algunos que los grandes talentos y el mucho saber, propenden de suyo al mal; esto es una especie de blasfemia contra la bondad del Criador."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-creen-algunos-que-los-grandes-talentos-y"
 procedencia:
   obra: "El Criterio"

@@ -1,6 +1,8 @@
 ---
 texto: "Nuestra suerte es distinta: luchar para abrirnos paso a la patria, y cuando lo hayamos conseguido, trabajar por realizar en ella el bien que concebimos."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-patria"
 slug: "domingo-faustino-sarmiento-nuestra-suerte-es-distinta-luchar-para-abrirnos"
 procedencia:
   obra: "Recuerdos de provincia"
