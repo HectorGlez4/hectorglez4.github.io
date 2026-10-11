@@ -1,6 +1,8 @@
 ---
 texto: "Contra lo sublime, inventó el diablo lo ridículo; contra lo ridículo, sólo tienen los hombres el desprecio."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-palabra"
 slug: "gustavo-sanchez-galarraga-contra-lo-sublime-invento-el-diablo-lo"
 procedencia:
   obra: "A Flor De Piel: Frases"

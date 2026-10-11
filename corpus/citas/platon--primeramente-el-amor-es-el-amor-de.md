@@ -1,6 +1,8 @@
 ---
 texto: "Primeramente, el Amor es el amor de alguna cosa; en segundo lugar, de una cosa que le falta."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-primeramente-el-amor-es-el-amor-de"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

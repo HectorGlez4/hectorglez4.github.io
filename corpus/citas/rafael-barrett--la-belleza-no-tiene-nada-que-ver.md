@@ -1,6 +1,8 @@
 ---
 texto: "La belleza no tiene nada que ver con el amor."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-la-belleza-no-tiene-nada-que-ver"
 procedencia:
   obra: "El porno-cinematógrafo"

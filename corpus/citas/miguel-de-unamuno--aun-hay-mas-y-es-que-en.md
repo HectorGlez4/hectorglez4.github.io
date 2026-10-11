@@ -1,7 +1,9 @@
 ---
-texto: "Y, sin embargo, ni la fe es trasmisible o racional, ni la razón es vital."
+texto: "Aún hay más, y es que en el problema concreto vital que nos interesa, la razón no toma posición alguna."
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-y-sin-embargo-ni-la-fe-es"
+temas:
+  - "la-razon"
+slug: "miguel-de-unamuno-aun-hay-mas-y-es-que-en"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"
 estadoDerechos: "dominio-público"

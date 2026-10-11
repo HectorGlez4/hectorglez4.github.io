@@ -1,6 +1,8 @@
 ---
 texto: "Se parecen á los que no han salido nunca de su país; fuera del horizonte á que estan acostumbrados, se imaginan que no hay mas mundo."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-se-parecen-a-los-que-no-han"
 procedencia:
   obra: "El Criterio"

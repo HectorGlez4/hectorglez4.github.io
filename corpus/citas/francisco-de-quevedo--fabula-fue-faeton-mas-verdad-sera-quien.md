@@ -1,6 +1,8 @@
 ---
 texto: "Fábula fue Faetón; mas verdad será quien le imitare: cosa tan indigna, que no pudo ser verdad en el sol, y lo puede ser en los hombres."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-verdad"
 slug: "francisco-de-quevedo-fabula-fue-faeton-mas-verdad-sera-quien"
 procedencia:
   obra: "Marco Bruto"

@@ -1,7 +1,9 @@
 ---
-texto: "La virtud eleva al hombre sobre la moral de su rebaño; resiste activamente á ella."
+texto: "Nacemos diferentes; hay una variadísima escala desde el idiota hasta el genio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-virtud-eleva-al-hombre-sobre-la"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-nacemos-diferentes-hay-una-variadisima-escala-desde"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

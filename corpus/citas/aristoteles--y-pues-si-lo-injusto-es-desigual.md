@@ -1,6 +1,8 @@
 ---
 texto: "Y, pues, si lo injusto es desigual, lo justo será igual; lo cual, sin más dar razones, lo tienen todos por verdad."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-y-pues-si-lo-injusto-es-desigual"
 procedencia:
   obra: "Ética a Nicómaco"

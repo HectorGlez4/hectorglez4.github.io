@@ -1,6 +1,8 @@
 ---
 texto: "La envidia deprimió el ingenio del sublime Homero; seas quien seas, Zoilo, tienes el nombre de envidioso."
 autor: "ovidio"
+temas:
+  - "la-envidia"
 slug: "ovidio-la-envidia-deprimio-el-ingenio-del-sublime"
 procedencia:
   obra: "El remedio del amor"

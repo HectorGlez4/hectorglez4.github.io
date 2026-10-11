@@ -1,7 +1,9 @@
 ---
-texto: "No olvidemos, sin embargo, que esas virtudes son pequeñas; es grave error oponerlas á las grandes."
+texto: "La virtud eleva al hombre sobre la moral de su rebaño; resiste activamente á ella."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-no-olvidemos-sin-embargo-que-esas-virtudes"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-virtud-eleva-al-hombre-sobre-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La humanidad no ha hecho caso a los metafísicos de gabinete, sino a los profetas, metáforas en acción."
 autor: "rafael-barrett"
+temas:
+  - "la-palabra"
 slug: "rafael-barrett-la-humanidad-no-ha-hecho-caso-a"
 procedencia:
   obra: "Filosofía del altruismo"

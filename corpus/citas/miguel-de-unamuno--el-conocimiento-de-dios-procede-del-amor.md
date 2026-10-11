@@ -1,6 +1,8 @@
 ---
 texto: "El conocimiento de Dios procede del amor a Dios, y es un conocimiento que poco o nada tiene de racional."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-amor"
 slug: "miguel-de-unamuno-el-conocimiento-de-dios-procede-del-amor"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

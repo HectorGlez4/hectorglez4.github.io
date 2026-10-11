@@ -1,6 +1,8 @@
 ---
 texto: "Lo que va a seguir no me ha salido de la razón, sino de la vida, aunque para trasmitíroslo tengo en cierto modo que racionalizarlo."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-lo-que-va-a-seguir-no-me"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

@@ -1,6 +1,8 @@
 ---
 texto: "Alcanzaré al extremo de la ancianidad; no alcanzaré al principio de la ciencia que busco."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-saber"
 slug: "jose-enrique-rodo-alcanzare-al-extremo-de-la-ancianidad-no"
 procedencia:
   obra: "Parábolas"
