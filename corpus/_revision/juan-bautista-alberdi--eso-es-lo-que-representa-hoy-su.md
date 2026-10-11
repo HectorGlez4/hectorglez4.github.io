@@ -1,0 +1,14 @@
+---
+texto: "Eso es lo que representa hoy su Asamblea general, compuesta de un Senado y una Cámara de Representantes; su poder ejecutivo con cuatro Ministerios y con un consejo de Estado de ochenta miembros, sus Cortes de justicia."
+autor: "juan-bautista-alberdi"
+slug: "juan-bautista-alberdi-eso-es-lo-que-representa-hoy-su"
+procedencia:
+  obra: "Bases y puntos de partida para la organización política de la República Argentina"
+  año: 1915
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Bases_y_puntos_de_partida_para_la_organizaci%C3%B3n_pol%C3%ADtica_de_la_Rep%C3%BAblica_Argentina/26"
+---

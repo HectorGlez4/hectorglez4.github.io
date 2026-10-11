@@ -1,0 +1,67 @@
+fuente: wikisource-es
+obra: Bases y puntos de partida para la organización política de la República Argentina
+año: 1915
+url: https://es.wikisource.org/wiki/Bases_y_puntos_de_partida_para_la_organizaci%C3%B3n_pol%C3%ADtica_de_la_Rep%C3%BAblica_Argentina/22
+recuperado: 2026-10-11
+---
+Bases y puntos de partida para la organización política de la República Argentina/22
+|título=[[Bases y puntos de partida para la organización política de la República Argentina]]
+|autor=Juan Bautista Alberdi
+obra> |título=Bases y puntos de partida para la organización política de la República Argentina
+obra> |año=1915
+obra> |autor=Juan Bautista Alberdi
+obra> |título={{Anclaje+|Índice}}
+---
+Idea de la manera práctica de organizar el gobierno mixto que se propone, tomada de los gobiernos federales de Norte América, Suiza y Alemania. Cuestión electoral
+
+El mecanismo del gobierno general de Norte América nos ofrece una idea del modo de hacer práctica la asociación de los principios en la organización de las autoridades generales. Allí también, como entre nosotros, se disputaban el poderío del gobierno las dos tendencias unitaria y federal, y la necesidad de amalgamarlas en el seno de un sistema compuesto, les sugirió un mecanismo, que puede ser aplicado a un orden de cosas semejante, con las modificaciones exigidas por la especialidad de cada caso. La asimilación discreta de un sistema adaptable en circunstancias análogas no es la copia servil, que jamás puede ser discreta en política constitucional. Indicaré el fondo del sistema, sin descender a pormenores que deben reglarse por las circunstancias especiales del caso.
+
+La ejecución del sistema mixto que proponemos será realizable por la división del cuerpo legislativo general en dos cámaras: una destinada a representar las Provincias en su soberanía local, debiendo su elección, en segundo grado, a las legislaturas
+provinciales, que deben ser conservadas; y otra que, debiendo su elección al pueblo de toda la República, represente a éste, sin consideración a localidades, y como si todas las Provincias formasen un solo Estado argentino. En la primera Cámara serán iguales las Provincias, teniendo cada una igual número de representantes en la legislatura general; en la segunda estarán representadas según el censo de la población, y naturalmente serán desiguales.
+
+Este doble sistema de representación igual y desigual en las dos Cámaras que concurran a la sanción de ley, será el medio de satisfacer dos necesidades del modo de ser actual de nuestro país. Por una parte es necesario reconocer que, a pesar de las diferencias
+que existen entre las Provincias bajo el aspecto del territorio, de la población y de la riqueza, ellas son iguales como cuerpos políticos. Puede ser diverso su poder, pero el derecho es el mismo. Así en la República de las siete Provincias Unidas, Holanda estaba
+con algunos de los Estados federados en razón de 1 a 19. -Pero bajo otro aspecto, tampoco se puede desconocer la necesidad de dar a cada Provincia en el Congreso una representación proporcional a su población desigual, pues sería injusto que Buenos Aires eligiese un diputado por cada setenta mil almas, y que La Rioja eligiese uno por cada diez mil. Por ese sistema, las poblaciones más adelantadas de la República vendrán a tener menos parte en el gobierno y dirección del país.
+
+Así tendremos un Congreso general, formado de dos cámaras, que será el eco de las Provincias y el eco de la Nación: Congreso federativo y nacional a la vez, cuyas leyes serán la obra combinada de cada Provincia en particular y de todas en general.
+
+Si contra el sistema de dos cámaras legislativas se objetase el ejemplo de Méjico, que no ha podido librarse de la anarquía a pesar de él, también podría recordarse que la República Argentina ha sido desgraciada las cuatro veces que ha ensayado la representación legislativa por una sola cámara.
+
+Para realizar la misma fusión de principios en la composición del poder ejecutivo nacional, deberá éste recibir su elección del pueblo o de las legislaturas de todas las Provincias, en cuyo sentido será, por su origen y carácter un gobierno nacional y federativo perfectamente en cuanto al ejercicio de sus funciones, por la limitación que su poder recibirá de la acción de los gobiernos provinciales.
+
+Igual carácter mixto ofrecerá el poder judiciario federal, si ha de deber la promoción de sus miembros al poder ejecutivo general que represente la nacionalidad del país, y al acuerdo de la cámara o sección legislativa que represente las Provincias en su soberanía particular; y si sus funciones se limitasen a conocer de la constitucionalidad de los actos públicos, dejando a las judicaturas provinciales el conocimiento de las controversias de dominio privado.
+
+El Gobierno general de los Estados Unidos no es el único que ofrezca el mecanismo empleado para asociar en la formación de las autoridades generales los dos elementos unitario y federal. No hay federación célebre y digna de figurar como modelo que no presente igual ejemplo en el día. Es que todas ellas sienten la misma necesidad inherente a su complexión de centralizar sus medios de libertad, de orden y de engrandecimiento. En América, los Estados Unidos, y en Europa, Suiza y Alemania, han abandonado, el federalismo puro por el federalismo unitario en la constitución de su
+gobierno general.
+
+Suiza fue una federación de Estados y no un Estado federativo hasta 1798.
+
+Asociados sucesivamente desde el siglo XIV con la mira de su defensa común y no de hacer vida solidaria, sus cantones resistieron siempre toda idea de centralización. Medio francesa y vecina de Francia, fue Suiza la primera en recibir la influencia unitaria de la revolución de 1789. La revolución le llevó en las puntas de las bayonetas el dogma de las Repúblicas unas e indivisibles. Pero las tradiciones del país resistieron profundamente esa unidad.
+
+Napoleón con su tacto de estado comprendió la necesidad de respetar la historia y los antecedentes; y en su acta de mediación de 1802 restableció las constituciones cantonales, sin desatender la unidad de Suiza, conservando el equilibrio del poder central y de la libertad de los cantones.
+
+Bajo el tratado de Viena de 1815, volvió Suiza al federalismo puro. Hasta 1848 fue incesante la lucha del Sonderbund -liga parcial de los cantones que defendían la descentralización- con los partidarios de la unidad nacional.
+
+Como en Norte América en 1787, los dos principios rivales de Suiza encontraron la paz en la Constitución de 12 de Septiembre de 1848. La idea de Napoleón de 1802 es la base del sistema que tiene por objeto ensanchar las prerrogativas del poder central.
+
+Comienza la Constitución por reconocer la soberanía de los cantones, pero subordinándola a la del Estado. Considera los cantones como un elemento de la nación, pero arriba de la consideración de los intereses locales coloca el interés de la patria común.
+
+En la organización del poder central prevalece completamente nuestra idea, o más bien la idea americana. La autoridad suprema de Suiza es ejercida por una asamblea federal dividida en dos secciones, a saber: un consejo nacional y otro de los Estados o cantones. El Consejo Nacional se compone de diputados del pueblo suizo, elegidos por votación directa, en razón de uno por veinte mil almas; y el Consejo de los cantones se compone de cuarenta y cuatro miembros, nombrados por los Estados cantonales, a razón de dos por cada cantón. -Al favor de ese sistema, Suiza posee hoy el poder de
+cohesión y de unidad, que faltó siempre a sus adelantos, sin caer en la unidad excesiva que le impuso el Directorio francés, y que Napoleón tuvo el buen sentido de cambiar por el sistema mixto, que se ha restablecido en 1848.
+
+Estrechar el vínculo que une los Estados federados de Alemania y hacer de esta federación de Estados un Estado federativo, fue todo el propósito del Parlamento de Francfort, al dar la Constitución alemana de 1848. Ella sentaba como principio la superioridad de la autoridad general sobre las autoridades particulares, declarando sin
+embargo, que los Estados conservan su independencia en cuanto no era limitada por la constitución del Imperio, y guardaban sus dignidades y derechos no delegados expresamente a la autoridad central. -Daba el poder legislativo a un parlamento compuesto de dos cámaras, bajo los nombres de Cámara de los Estados y Cámara del pueblo, elegidas por sistemas diferentes. -El poder de las tradiciones seculares de
+aislamiento de ese país y las dimensiones de los principales reinos de que consta, fueron causa de que quedase sin efecto el ensayo constitucional de Francfort, que representa a pesar de eso el anhelo ardiente y general de Alemania por la centralización del gobierno.
+Vemos, pues, que en Europa, lo mismo que en América, las federaciones tienden a estrechar más y más su vínculo de unión y a dilatar la esfera de acción civilizadora y progresista del gobierno central o federal. -Si los países que nunca han formado un
+Estado propenden a realizarlo, ¿qué no deberán hacer los que son fracciones de una unidad que ha existido por dos siglos?
+Sistema electoral. -En cuanto al sistema electoral que haya de emplearse para la formación de los poderes públicos -punto esencialísimo a la paz y prosperidad de estas Repúblicas- la Constitución argentina no debe olvidar las condiciones de
+inteligencia y de bienestar material exigidas por la prudencia en todas partes, como garantías de la pureza y acierto del sufragio; y al fijar las condiciones de elegibilidad, debe tener muy presente la necesidad que estos países escasos de hombres tienen de ser poco rígidos en punto a nacionalidad de origen. Países que deben formarse y aumentarse con extranjeros de regiones más ilustradas que las nuestras, no deben cerrarles absolutamente las puertas de la representación, si quieren que ésta se mantenga a la altura
+de la civilización del país.
+
+La inteligencia y la fortuna en cierto grado no son condiciones que excluyan la universalidad del sufragio, desde que ellas son asequibles para todos mediante la educación y la industria. Sin una alteración grave en el sistema electoral de la República Argentina, habrá que renunciar a la esperanza de obtener gobiernos dignos de la obra del sufragio.
+
+Para obviar los inconvenientes de una supresión brusca de los derechos de que ha estado en posesión la multitud, podrá emplearse el sistema de elección doble y triple, que es el mejor medio de purificar el sufragio universal sin reducirlo ni suprimirlo, y de
+preparar las masas para el ejercicio futuro del sufragio directo.
+Todo el éxito del sistema republicano en países como los nuestros depende del sistema electoral. No hay pueblo, por limitado que sea, al que no pueda aplicarse la República, si se sabe adaptar a su capacidad el sistema de elección o de su intervención en la formación del poder y de las leyes. A no ser por eso, jamás habría existido la República en Grecia y en Roma, donde el pueblo sufragante sólo constaba de los capaces, es decir, de una minoría reducidísima en comparación del pueblo inactivo.
+
+Y para que la misma regla de fusión presida a la formación de los gobiernos provinciales, la Constitución tendrá que dejar a las Provincias sus legislaturas, sus gobernadores y sus jueces de primera y segunda instancia, más o menos como hoy existen, en cuanto a su modo de formación o elección, se entiende, no así en lo tocante a los objetos y extensión de sus facultades. Legislaturas o consejos de administración, gobernadores o juntas económicas, ¿qué importan los nombres? Los objetos y la extensión de su poder es lo que ha de verse.

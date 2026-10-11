@@ -1,0 +1,14 @@
+---
+texto: "Traigo estos recuerdos para hacer notar la obligación que impone al Congrego un estado tan delicado y susceptible de cosas, de proceder con la mayor prudencia y de abstenerse de pasos que lo hagan partícipe indirecto del desquicio del país."
+autor: "juan-bautista-alberdi"
+slug: "juan-bautista-alberdi-traigo-estos-recuerdos-para-hacer-notar-la"
+procedencia:
+  obra: "Bases y puntos de partida para la organización política de la República Argentina"
+  año: 1915
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Bases_y_puntos_de_partida_para_la_organizaci%C3%B3n_pol%C3%ADtica_de_la_Rep%C3%BAblica_Argentina/29"
+---

@@ -1,0 +1,14 @@
+---
+texto: "Tampoco podréis llevar hasta el interior de nuestros países la acción de Europa por medio de sus inmigraciones, que hoy regeneran nuestras costas, sino por vehículos tan poderosos como los ferrocarriles."
+autor: "juan-bautista-alberdi"
+slug: "juan-bautista-alberdi-tampoco-podreis-llevar-hasta-el-interior-de"
+procedencia:
+  obra: "Bases y puntos de partida para la organización política de la República Argentina"
+  año: 1915
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Bases_y_puntos_de_partida_para_la_organizaci%C3%B3n_pol%C3%ADtica_de_la_Rep%C3%BAblica_Argentina/15"
+---

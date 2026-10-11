@@ -1,0 +1,14 @@
+---
+texto: "Sé que sin ella la industria es imposible; pero los hechos prueban que se llega a la moral más presto por el camino de los hábitos laboriosos y productivos de esas nociones honestas, que no por la instrucción abstracta."
+autor: "juan-bautista-alberdi"
+slug: "juan-bautista-alberdi-se-que-sin-ella-la-industria-es"
+procedencia:
+  obra: "Bases y puntos de partida para la organización política de la República Argentina"
+  año: 1915
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Bases_y_puntos_de_partida_para_la_organizaci%C3%B3n_pol%C3%ADtica_de_la_Rep%C3%BAblica_Argentina/13"
+---
