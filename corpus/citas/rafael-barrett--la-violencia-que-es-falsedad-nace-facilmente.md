@@ -1,6 +1,8 @@
 ---
 texto: "La violencia, que es falsedad, nace fácilmente de los prejuicios y de las aberraciones sociales."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-la-violencia-que-es-falsedad-nace-facilmente"
 procedencia:
   obra: "La violencia"

@@ -1,6 +1,8 @@
 ---
 texto: "No se salva el que quiere, sino el que lo merece, y nada es tan respetable como esta armonía entre la justicia y la ciencia."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-no-se-salva-el-que-quiere-sino"
 procedencia:
   obra: "Herborizando"

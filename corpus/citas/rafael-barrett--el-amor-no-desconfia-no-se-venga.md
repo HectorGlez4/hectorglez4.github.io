@@ -1,6 +1,8 @@
 ---
 texto: "El amor no desconfía, no se venga, no hiere; el amor siempre cree y perdona y vive y hace vivir."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-el-amor-no-desconfia-no-se-venga"
 procedencia:
   obra: "Pasionales"

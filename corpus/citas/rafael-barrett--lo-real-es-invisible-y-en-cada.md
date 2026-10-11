@@ -1,7 +1,9 @@
 ---
-texto: "Lo que importa no es aislarnos, sino comunicarnos: no es cerrarnos, sino abrirnos."
+texto: "Lo real es invisible, y en cada uno de nosotros hay un mundo secreto."
 autor: "rafael-barrett"
-slug: "rafael-barrett-lo-que-importa-no-es-aislarnos-sino"
+temas:
+  - "la-verdad"
+slug: "rafael-barrett-lo-real-es-invisible-y-en-cada"
 procedencia:
   obra: "Filosofía del altruismo"
 estadoDerechos: "dominio-público"

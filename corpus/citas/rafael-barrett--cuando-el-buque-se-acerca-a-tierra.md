@@ -1,6 +1,8 @@
 ---
 texto: "Cuando el buque se acerca a tierra, no es la multitud de a bordo quien la ve primero, sino el vigía solitario en su mástil."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-cuando-el-buque-se-acerca-a-tierra"
 procedencia:
   obra: "Vacuna"

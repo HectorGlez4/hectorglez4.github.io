@@ -1,6 +1,8 @@
 ---
 texto: "La mayoría inmensa de los hombres es incapaz de crear una idea, un gesto."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-mayoria-inmensa-de-los-hombres-es"
 procedencia:
   obra: "La sinceridad"
