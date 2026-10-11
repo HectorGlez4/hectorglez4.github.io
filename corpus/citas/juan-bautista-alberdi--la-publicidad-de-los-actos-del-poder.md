@@ -1,6 +1,8 @@
 ---
 texto: "La publicidad de los actos del poder es otro rasgo del gobierno libre, como preservativo de sus abusos."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-la-publicidad-de-los-actos-del-poder"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

@@ -1,6 +1,8 @@
 ---
 texto: "Gobernar diez años es hacer un curso de política y de administración."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-saber"
 slug: "juan-bautista-alberdi-gobernar-diez-anos-es-hacer-un-curso"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

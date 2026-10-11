@@ -1,6 +1,8 @@
 ---
 texto: "Gobernar es poblar, asimilando, en primer término; educando y seleccionando, después."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-saber"
 slug: "jose-enrique-rodo-gobernar-es-poblar-asimilando-en-primer-termino"
 procedencia:
   obra: "Ariel"

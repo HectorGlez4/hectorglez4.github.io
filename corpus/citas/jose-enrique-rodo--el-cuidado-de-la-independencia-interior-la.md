@@ -1,6 +1,8 @@
 ---
 texto: "El cuidado de la independencia interior —la de la personalidad, la del criterio— es una principalísima forma del respeto propio."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-libertad"
 slug: "jose-enrique-rodo-el-cuidado-de-la-independencia-interior-la"
 procedencia:
   obra: "Ariel"

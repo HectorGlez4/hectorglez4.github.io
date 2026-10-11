@@ -1,6 +1,8 @@
 ---
 texto: "Lo que hicimos para salir de la esclavitud, debemos hacer para salir del atraso, que es igual a la servidumbre: la gloria no debe tener más títulos que la civilización."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-gloria"
 slug: "juan-bautista-alberdi-lo-que-hicimos-para-salir-de-la"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

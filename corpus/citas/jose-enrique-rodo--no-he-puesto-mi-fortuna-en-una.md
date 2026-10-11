@@ -1,6 +1,8 @@
 ---
 texto: "No he puesto mi fortuna en una sola nave, ni en un solo puerto; ni pende todo mi caudal de las ganancias de este año."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-riqueza"
 slug: "jose-enrique-rodo-no-he-puesto-mi-fortuna-en-una"
 procedencia:
   obra: "Motivos de Proteo"

@@ -1,6 +1,8 @@
 ---
 texto: "El tipo de la grandeza americana no es Napoleón, es Washington; y Washington no representa triunfos militares, sino prosperidad, engrandecimiento, organización y paz."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-gloria"
 slug: "juan-bautista-alberdi-el-tipo-de-la-grandeza-americana-no"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

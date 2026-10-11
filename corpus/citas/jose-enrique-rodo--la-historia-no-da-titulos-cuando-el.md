@@ -1,6 +1,8 @@
 ---
 texto: "La historia no da títulos cuando el procedimiento de elección es la subasta de la púrpura."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-gloria"
 slug: "jose-enrique-rodo-la-historia-no-da-titulos-cuando-el"
 procedencia:
   obra: "Ariel"

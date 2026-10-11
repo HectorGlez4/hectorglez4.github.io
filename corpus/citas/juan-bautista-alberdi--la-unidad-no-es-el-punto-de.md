@@ -1,6 +1,8 @@
 ---
 texto: "La unidad no es el punto de partida, es el punto final de los gobiernos; la historia lo dice, y la razón lo demuestra."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-razon"
 slug: "juan-bautista-alberdi-la-unidad-no-es-el-punto-de"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"
