@@ -720,3 +720,9 @@ descartes:
     idDePagina: 71256
     nombre: "José Manuel Estrada"
     motivo: "Revisado el 11/10 contra la Fuente. Miscategorizado en Antigüedad (argentino, 1842-1894). Su página de autor solo lista obras como escaneos PDF/DjVu sin texto transcrito en páginas de la Fuente, o sin enlace; nada que cotejar literal."
+  - fecha: "2026-10-11"
+    epoca: "colombianos"
+    candidato: "julio-florez"
+    idDePagina: 109922
+    nombre: "Julio Flórez"
+    motivo: "Revisado el 11/10: sus 62 poemas de la Fuente se versionan con un volcado JSON de transclusión dentro del cuerpo y la puerta de OCR los rechaza (7,9 % de señales); no hay Citas posibles hasta que recuperar limpie ese volcado."

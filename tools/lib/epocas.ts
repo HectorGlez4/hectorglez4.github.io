@@ -247,6 +247,26 @@ export const EPOCAS: readonly Epoca[] = [
     nombre: 'Autores ecuatorianos',
     categoria: 'Categoría:Autores ecuatorianos',
   },
+  {
+    id: 'argentinos',
+    nombre: 'Autores argentinos',
+    categoria: 'Categoría:Autores argentinos',
+  },
+  {
+    id: 'mexicanos',
+    nombre: 'Autores mexicanos',
+    categoria: 'Categoría:Autores mexicanos',
+  },
+  {
+    id: 'chilenos',
+    nombre: 'Autores chilenos',
+    categoria: 'Categoría:Autores chilenos',
+  },
+  {
+    id: 'uruguayos',
+    nombre: 'Autores uruguayos',
+    categoria: 'Categoría:Autores uruguayos',
+  },
 ];
 
 /** La época de un identificador, o `undefined` si no la declara la Fuente. */

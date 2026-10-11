@@ -1,0 +1,31 @@
+fuente: wikisource-es
+obra: De viaje
+url: https://es.wikisource.org/wiki/De_viaje
+recuperado: 2026-10-11
+---
+De viaje
+[[Categoría:Poesías de Julio Flórez]]
+|título=De viaje
+|autor=Julio Flórez
+---
+De viaje
+
+\n\nSiempre aturdido entre el tumulto ignaro\nvoy con mi carga de dolor a cuestas,\nolas salvando y empinadas crestas\nen tierra, sin bordón, y en mar sin faro.\n\nAquí y en todas partes sin amparo,\ncon los labios repletos de protestas,\ntras horas desoladas y funestas,\na bajar la pendiente me preparo.\n\nRuinas no más, desolación y luto\ndejo en mi senda lúgubre; a mi vista\nse abre la eternidad y no me inmuto.\n\n¡Sólo seguir viviendo me contrista,\npues tengo para el último minuto\nel alma pronta y la materia lista!\n</poem>"}},"i":0}}]}'>
+
+Siempre aturdido entre el tumulto ignaro
+voy con mi carga de dolor a cuestas,
+olas salvando y empinadas crestas
+en tierra, sin bordón, y en mar sin faro.
+
+Aquí y en todas partes sin amparo,
+con los labios repletos de protestas,
+tras horas desoladas y funestas,
+a bajar la pendiente me preparo.
+
+Ruinas no más, desolación y luto
+dejo en mi senda lúgubre; a mi vista
+se abre la eternidad y no me inmuto.
+
+¡Sólo seguir viviendo me contrista,
+pues tengo para el último minuto
+el alma pronta y la materia lista!
