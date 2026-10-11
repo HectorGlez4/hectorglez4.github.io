@@ -1,7 +1,9 @@
 ---
-texto: "El hombre excelente se reconoce porque es capaz de renunciar al éxito si en ello está la condición de la gloria, ó si tiene por precio una partícula de su dignidad."
+texto: "Éstos saben que los dones naturales no se transmutan en talento ó en genio sin un esfuerzo, que es la medida de su mérito."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-excelente-se-reconoce-porque-es"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-estos-saben-que-los-dones-naturales-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

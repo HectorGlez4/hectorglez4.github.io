@@ -1,7 +1,9 @@
 ---
-texto: "La firmeza del genio es una suprema dignidad del propio Ideal; la falta de creencias sólidamente cimentadas convierte al mediocre en fanático."
+texto: "El hombre excelente se reconoce porque es capaz de renunciar al éxito si en ello está la condición de la gloria, ó si tiene por precio una partícula de su dignidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-firmeza-del-genio-es-una-suprema"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-hombre-excelente-se-reconoce-porque-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

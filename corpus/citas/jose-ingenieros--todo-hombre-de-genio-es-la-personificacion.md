@@ -1,7 +1,9 @@
 ---
-texto: "El tiempo es el aliado del genio; el trabajo completa las iniciativas de la inspiración."
+texto: "Todo hombre de genio es la personificación suprema de un Ideal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-tiempo-es-el-aliado-del-genio"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-todo-hombre-de-genio-es-la-personificacion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

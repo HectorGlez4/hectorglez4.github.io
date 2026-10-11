@@ -1,6 +1,8 @@
 ---
 texto: "Vana ilusión, sin duda, pero capaz de remover montañas y de impulsar ardientemente la humanidad hacia la verdad y el bien."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-verdad"
 slug: "santiago-ramon-y-cajal-vana-ilusion-sin-duda-pero-capaz-de"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -1,6 +1,8 @@
 ---
 texto: "No va bien tanta susceptibilidad a pueblos nuevos, que para prosperar necesitan de todo el mundo."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-humildad"
 slug: "juan-bautista-alberdi-no-va-bien-tanta-susceptibilidad-a-pueblos"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

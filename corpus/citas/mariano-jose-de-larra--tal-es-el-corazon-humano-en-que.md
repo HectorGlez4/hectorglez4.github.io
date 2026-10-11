@@ -1,6 +1,8 @@
 ---
 texto: "Tal es el corazón humano, en que lucha siempre el bien con el mal, aun al mismo tiempo de ser vencido aquél por éste."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-virtud"
 slug: "mariano-jose-de-larra-tal-es-el-corazon-humano-en-que"
 procedencia:
   obra: "«Catalina Howard»"

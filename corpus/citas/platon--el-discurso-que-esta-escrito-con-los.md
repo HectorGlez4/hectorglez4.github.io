@@ -1,6 +1,8 @@
 ---
 texto: "El discurso que está escrito con los caracteres de la ciencia en el alma del que estudia, es el que puede defenderse por sí mismo, el que sabe hablar y callar a tiempo."
 autor: "platon"
+temas:
+  - "la-palabra"
 slug: "platon-el-discurso-que-esta-escrito-con-los"
 procedencia:
   obra: "Fedro"

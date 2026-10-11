@@ -1,7 +1,9 @@
 ---
-texto: "Todo hombre de genio es la personificación suprema de un Ideal."
+texto: "La firmeza del genio es una suprema dignidad del propio Ideal; la falta de creencias sólidamente cimentadas convierte al mediocre en fanático."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-hombre-de-genio-es-la-personificacion"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-firmeza-del-genio-es-una-suprema"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

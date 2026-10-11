@@ -1,7 +1,9 @@
 ---
-texto: "Muchos hombres darían su vida por defender á su secta; son raros los que se han inmolado conscientemente por una doctrina ó por un ideal."
+texto: "El tiempo es el aliado del genio; el trabajo completa las iniciativas de la inspiración."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-muchos-hombres-darian-su-vida-por-defender"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-tiempo-es-el-aliado-del-genio"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

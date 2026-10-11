@@ -1,6 +1,8 @@
 ---
 texto: "El error de creer que la igualdad ante la ley es la igualdad ante la justicia, y el más fatal todavía de imaginar que la ventura está en razón de la riqueza."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-el-error-de-creer-que-la-igualdad"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

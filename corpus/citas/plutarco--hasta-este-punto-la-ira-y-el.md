@@ -1,6 +1,8 @@
 ---
 texto: "Hasta este punto la ira y el furor los hizo perder la razón, no dejando duda de que el hombre es la más cruel de todas las fieras, cuando a las pasiones se une el poder."
 autor: "plutarco"
+temas:
+  - "la-razon"
 slug: "plutarco-hasta-este-punto-la-ira-y-el"
 procedencia:
   obra: "Vidas paralelas"

@@ -1,6 +1,8 @@
 ---
 texto: "El hombre bien educado y de moderación dice á la Naturaleza, que todo lo dispensa y todo lo recupera: Dame lo que gustares y vuelve á tomarte lo que quisieres."
 autor: "marco-aurelio"
+temas:
+  - "la-humildad"
 slug: "marco-aurelio-el-hombre-bien-educado-y-de-moderacion"
 procedencia:
   obra: "Soliloquios"

@@ -1,7 +1,9 @@
 ---
-texto: "Éstos saben que los dones naturales no se transmutan en talento ó en genio sin un esfuerzo, que es la medida de su mérito."
+texto: "Muchos hombres darían su vida por defender á su secta; son raros los que se han inmolado conscientemente por una doctrina ó por un ideal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-estos-saben-que-los-dones-naturales-no"
+temas:
+  - "la-muerte"
+slug: "jose-ingenieros-muchos-hombres-darian-su-vida-por-defender"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

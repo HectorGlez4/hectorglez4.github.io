@@ -1,6 +1,8 @@
 ---
 texto: "Es que hay trazas de que lo que me sucede es un gran bien, y nos engañamos todos sin duda, si creemos que la muerte es un mal."
 autor: "platon"
+temas:
+  - "la-muerte"
 slug: "platon-es-que-hay-trazas-de-que-lo"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"

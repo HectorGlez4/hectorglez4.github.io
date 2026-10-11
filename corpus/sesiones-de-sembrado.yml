@@ -797,3 +797,14 @@ sesiones:
       citasPublicadas: 2283
       procedenciaCompleta: 21.4
       tradicionLatinoamericanaSobreHispanicos: 58
+  - fecha: "2026-10-11"
+    hora: "17:09"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Barrido heurístico de aforismos (2)"
+    motivo: "Segundo barrido heurístico de aforismos sobre corpus/_revision con umbral relajado (frases con 3 o más sustantivos abstractos)."
+    resultado:
+      citasPublicadas: 2304
+      procedenciaCompleta: 21.3
+      tradicionLatinoamericanaSobreHispanicos: 58

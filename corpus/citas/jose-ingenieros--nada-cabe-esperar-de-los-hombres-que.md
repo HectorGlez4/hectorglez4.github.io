@@ -1,6 +1,8 @@
 ---
 texto: "Nada cabe esperar de los hombres que entran á la vida sin afiebrarse por algún ideal; á los que nunca fueron jóvenes, paréceles descarriada toda soñadora inquietud."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-nada-cabe-esperar-de-los-hombres-que"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
