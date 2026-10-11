@@ -1,6 +1,8 @@
 ---
 texto: "Puede el hombre con ardimiento y con bondad ser valiente y virtuoso; mas faltándole el estudio, no sabrá ser virtuoso ni valiente."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-saber"
 slug: "francisco-de-quevedo-puede-el-hombre-con-ardimiento-y-con"
 procedencia:
   obra: "Marco Bruto"

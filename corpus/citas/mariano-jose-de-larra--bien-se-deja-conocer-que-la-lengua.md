@@ -1,6 +1,8 @@
 ---
 texto: "Bien se deja conocer que la lengua es para un hablador lo que el fusil para el soldado; con ella se defiende y con ella mata."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-palabra"
 slug: "mariano-jose-de-larra-bien-se-deja-conocer-que-la-lengua"
 procedencia:
   obra: "Filología"

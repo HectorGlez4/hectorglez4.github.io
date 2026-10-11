@@ -1,6 +1,8 @@
 ---
 texto: "La Naturaleza no podría engendrar nada nuevo, si la obligasen a conservar lo viejo."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-la-naturaleza-no-podria-engendrar-nada-nuevo"
 procedencia:
   obra: "La lucha sociel"

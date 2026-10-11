@@ -1,6 +1,8 @@
 ---
 texto: "Los tesoros abundan; solo se necesita trabajo."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-los-tesoros-abundan-solo-se-necesita-trabajo"
 procedencia:
   obra: "El Criterio"

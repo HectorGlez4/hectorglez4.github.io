@@ -1,6 +1,8 @@
 ---
 texto: "Comprender es modelar; encajar la pasta amorfa de los hechos en la estatua vacía de la razón."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-comprender-es-modelar-encajar-la-pasta-amorfa"
 procedencia:
   obra: "La ruleta"

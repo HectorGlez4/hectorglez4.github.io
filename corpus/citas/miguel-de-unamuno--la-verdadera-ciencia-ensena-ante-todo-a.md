@@ -1,6 +1,8 @@
 ---
 texto: "La verdadera ciencia enseña, ante todo, a dudar y a ignorar; la abogacía no duda ni cree que ignora."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-la-verdadera-ciencia-ensena-ante-todo-a"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

@@ -1,6 +1,8 @@
 ---
 texto: "El genio nunca ha sido una institución oficial."
 autor: "jose-ingenieros"
+temas:
+  - "la-libertad"
 slug: "jose-ingenieros-el-genio-nunca-ha-sido-una-institucion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

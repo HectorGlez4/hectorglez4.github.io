@@ -1,6 +1,8 @@
 ---
 texto: "Lo más es que, no sólo el morir es efecto de la naturaleza, pero aun conveniencia de la misma."
 autor: "marco-aurelio"
+temas:
+  - "la-muerte"
 slug: "marco-aurelio-lo-mas-es-que-no-solo-el"
 procedencia:
   obra: "Soliloquios"

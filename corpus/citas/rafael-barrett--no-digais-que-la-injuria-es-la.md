@@ -1,6 +1,8 @@
 ---
 texto: "No digáis que la injuria es la palabra; no hay palabra donde no hay pensamiento."
 autor: "rafael-barrett"
+temas:
+  - "la-palabra"
 slug: "rafael-barrett-no-digais-que-la-injuria-es-la"
 procedencia:
   obra: "El duelo"

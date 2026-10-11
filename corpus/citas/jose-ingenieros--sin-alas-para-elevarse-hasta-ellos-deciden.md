@@ -1,6 +1,8 @@
 ---
 texto: "Sin alas para elevarse hasta ellos, deciden rebajarlos; la exigüidad del propio valimiento les induce á roer el mérito ajeno."
 autor: "jose-ingenieros"
+temas:
+  - "la-envidia"
 slug: "jose-ingenieros-sin-alas-para-elevarse-hasta-ellos-deciden"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "No vivía yo ya en mí, sino que vivía en mi pueblo y mi pueblo vivía en mí."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-patria"
 slug: "miguel-de-unamuno-no-vivia-yo-ya-en-mi-sino"
 procedencia:
   obra: "San Manuel Bueno, mártir"

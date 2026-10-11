@@ -1,6 +1,8 @@
 ---
 texto: "El progreso, más que en aumentar la energía total, reside en distribuirla mejor."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-el-progreso-mas-que-en-aumentar-la"
 procedencia:
   obra: "La cortesía"

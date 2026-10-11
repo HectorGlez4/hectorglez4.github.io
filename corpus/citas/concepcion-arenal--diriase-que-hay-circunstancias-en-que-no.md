@@ -1,6 +1,8 @@
 ---
 texto: "Diríase que hay circunstancias en que no se predica la resignación sino para ponerla á prueba, ni la virtud sino para explotarla."
 autor: "concepcion-arenal"
+temas:
+  - "la-virtud"
 slug: "concepcion-arenal-diriase-que-hay-circunstancias-en-que-no"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

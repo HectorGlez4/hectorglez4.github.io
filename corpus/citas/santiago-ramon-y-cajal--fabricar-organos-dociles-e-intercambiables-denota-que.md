@@ -1,6 +1,8 @@
 ---
 texto: "Fabricar órganos dóciles e intercambiables, denota que el maestro se ha preocupado más de sí mismo que de su país y de la Ciencia."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-fabricar-organos-dociles-e-intercambiables-denota-que"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

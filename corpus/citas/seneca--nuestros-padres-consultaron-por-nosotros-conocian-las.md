@@ -1,6 +1,8 @@
 ---
 texto: "Nuestros padres consultaron por nosotros; conocían las leyes de la vida y nos engendraron para soportarlas."
 autor: "seneca"
+temas:
+  - "la-vida"
 slug: "seneca-nuestros-padres-consultaron-por-nosotros-conocian-las"
 procedencia:
   obra: "Consolación a Marcia"
