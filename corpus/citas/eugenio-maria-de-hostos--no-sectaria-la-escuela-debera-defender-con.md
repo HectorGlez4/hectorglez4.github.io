@@ -1,6 +1,8 @@
 ---
 texto: "No sectaria, la escuela deberá defender con vigor su independencia de todo dogma religioso, de todo dogma político, de todo dogma económico, de todo dogma científico, de todo dogma literario; en una palabra, de todo dogma."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-libertad"
 slug: "eugenio-maria-de-hostos-no-sectaria-la-escuela-debera-defender-con"
 procedencia:
   obra: "Moral social"

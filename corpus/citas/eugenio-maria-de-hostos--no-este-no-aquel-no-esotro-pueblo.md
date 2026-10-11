@@ -1,7 +1,9 @@
 ---
-texto: "El objetivo es parecer, no ser; el propósito, tener, no hacer."
+texto: "No éste, no aquél, no esotro pueblo; no éste, no aquél, no esotro individuo son los capaces de realizar por sí mismos los fines de la Humanidad."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-el-objetivo-es-parecer-no-ser-el"
+temas:
+  - "la-humildad"
+slug: "eugenio-maria-de-hostos-no-este-no-aquel-no-esotro-pueblo"
 procedencia:
   obra: "Moral social"
   año: 1917

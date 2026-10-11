@@ -1,7 +1,9 @@
 ---
-texto: "No éste, no aquél, no esotro pueblo; no éste, no aquél, no esotro individuo son los capaces de realizar por sí mismos los fines de la Humanidad."
+texto: "Los conocimientos prácticos y teóricos en que se funda el desarrollo de los bienes materiales, morales é intelectuales, son patrimonio de la Humanidad."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-no-este-no-aquel-no-esotro-pueblo"
+temas:
+  - "el-saber"
+slug: "eugenio-maria-de-hostos-los-conocimientos-practicos-y-teoricos-en-que"
 procedencia:
   obra: "Moral social"
   año: 1917

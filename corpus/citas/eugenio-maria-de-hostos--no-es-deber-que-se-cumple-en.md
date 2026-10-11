@@ -1,7 +1,9 @@
 ---
-texto: "No tenía dinero: escribió, peroró, trabajó, ganó la vida."
+texto: "No es deber que se cumple en circunstancias extraordinarias, sino en las circunstancias más comunes de la vida diaria."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-no-tenia-dinero-escribio-peroro-trabajo-gano"
+temas:
+  - "el-deber"
+slug: "eugenio-maria-de-hostos-no-es-deber-que-se-cumple-en"
 procedencia:
   obra: "Moral social"
   año: 1917

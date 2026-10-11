@@ -1,7 +1,9 @@
 ---
-texto: "No es deber que se cumple en circunstancias extraordinarias, sino en las circunstancias más comunes de la vida diaria."
+texto: "El hombre no es bueno ni acaso lo sea nunca: lo confirma la Ciencia."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-no-es-deber-que-se-cumple-en"
+temas:
+  - "la-verdad"
+slug: "eugenio-maria-de-hostos-el-hombre-no-es-bueno-ni-acaso-2"
 procedencia:
   obra: "Moral social"
   año: 1917

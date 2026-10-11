@@ -1,7 +1,9 @@
 ---
-texto: "El niño es la promesa del hombre, el hombre la esperanza de alguna parte de la Humanidad: la escuela tiene por objeto moral la preparación de conciencias."
+texto: "No tenía dinero: escribió, peroró, trabajó, ganó la vida."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-el-nino-es-la-promesa-del-hombre"
+temas:
+  - "el-trabajo"
+slug: "eugenio-maria-de-hostos-no-tenia-dinero-escribio-peroro-trabajo-gano"
 procedencia:
   obra: "Moral social"
   año: 1917

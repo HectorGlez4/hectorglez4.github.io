@@ -1,6 +1,8 @@
 ---
 texto: "Todos los hombres, por enemigos que sean de las trabas que impone toda asociación, necesitan urgentemente de la sociedad."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-amistad"
 slug: "eugenio-maria-de-hostos-todos-los-hombres-por-enemigos-que-sean"
 procedencia:
   obra: "Moral social"

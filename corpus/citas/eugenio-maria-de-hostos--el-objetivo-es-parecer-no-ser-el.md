@@ -1,7 +1,9 @@
 ---
-texto: "Los conocimientos prácticos y teóricos en que se funda el desarrollo de los bienes materiales, morales é intelectuales, son patrimonio de la Humanidad."
+texto: "El objetivo es parecer, no ser; el propósito, tener, no hacer."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-los-conocimientos-practicos-y-teoricos-en-que"
+temas:
+  - "la-verdad"
+slug: "eugenio-maria-de-hostos-el-objetivo-es-parecer-no-ser-el"
 procedencia:
   obra: "Moral social"
   año: 1917
