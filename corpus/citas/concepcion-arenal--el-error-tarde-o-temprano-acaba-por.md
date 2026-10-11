@@ -1,6 +1,8 @@
 ---
 texto: "El error, tarde o temprano, acaba por limitarse a sí mismo, y la primera forma de su impotencia, es la contradicción: si quisiera ser lógico, se haría imposible."
 autor: "concepcion-arenal"
+temas:
+  - "el-error"
 slug: "concepcion-arenal-el-error-tarde-o-temprano-acaba-por"
 procedencia:
   obra: "La mujer del porvenir"

@@ -1,6 +1,8 @@
 ---
 texto: "Los estudios filosóficos constituyen, sobre todo, buena preparación y excelente gimnasia para el hombre de laboratorio."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-los-estudios-filosoficos-constituyen-sobre-todo-buena"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

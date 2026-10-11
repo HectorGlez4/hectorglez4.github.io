@@ -1,6 +1,8 @@
 ---
 texto: "Un pueblo que acepta silenciosamente la opresión y que busca la redención en combinaciones bizantinas, es un pueblo que abdica."
 autor: "miguel-cane"
+temas:
+  - "la-libertad"
 slug: "miguel-cane-un-pueblo-que-acepta-silenciosamente-la-opresion"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

@@ -1,6 +1,8 @@
 ---
 texto: "La exaltación del amor propio, peligrosa en los espíritus vulgares, es útil al hombre que sirve un Ideal."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-la-exaltacion-del-amor-propio-peligrosa-en"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

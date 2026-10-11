@@ -1,6 +1,8 @@
 ---
 texto: "El tiempo se modifica también con la edad, y esto es más grave."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-el-tiempo-se-modifica-tambien-con-la"
 procedencia:
   obra: "El río invisible"

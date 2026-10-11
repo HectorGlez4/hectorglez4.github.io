@@ -3,6 +3,7 @@ texto: "La justicia consiste en dar a cada hombre lo que legítimamente le corre
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-virtud"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-la-justicia-consiste-en-dar-a-cada"
 procedencia:
   obra: "El intelectual y el obrero"

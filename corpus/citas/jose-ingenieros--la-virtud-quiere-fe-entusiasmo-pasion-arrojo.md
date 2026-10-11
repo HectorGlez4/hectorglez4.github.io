@@ -1,7 +1,9 @@
 ---
-texto: "El que miente es traidor: sus víctimas le escuchan, suponiendo que dice la verdad."
+texto: "La virtud quiere fe, entusiasmo, pasión, arrojo: de ellos vive."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-miente-es-traidor-sus-victimas"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-virtud-quiere-fe-entusiasmo-pasion-arrojo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

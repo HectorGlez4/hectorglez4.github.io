@@ -1,6 +1,8 @@
 ---
 texto: "La libertad y el bienestar están al alcance de nuestras manos."
 autor: "ricardo-flores-magon"
+temas:
+  - "la-libertad"
 slug: "ricardo-flores-magon-la-libertad-y-el-bienestar-estan-al"
 procedencia:
   obra: "Manifiesto del 23 de septiembre de 1911"

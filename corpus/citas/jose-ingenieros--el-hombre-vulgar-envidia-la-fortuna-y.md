@@ -1,7 +1,9 @@
 ---
-texto: "El investigador de una verdad se sobrepone á la sociedad en que vive: trabaja para ella y piensa por todos, anticipándose, contrariando sus rutinas."
+texto: "El hombre vulgar envidia la fortuna y las posiciones burocráticas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-investigador-de-una-verdad-se-sobrepone"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-hombre-vulgar-envidia-la-fortuna-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

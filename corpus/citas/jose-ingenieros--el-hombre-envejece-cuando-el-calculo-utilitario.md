@@ -1,7 +1,9 @@
 ---
-texto: "La honestidad está al alcance de todos; la virtud es de pocos elegidos."
+texto: "El hombre envejece cuando el cálculo utilitario reemplaza á la alegría juvenil."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-honestidad-esta-al-alcance-de-todos"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-el-hombre-envejece-cuando-el-calculo-utilitario"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La Riqueza, aunque por modos invisibles á veces, fué y sigue siendo la musa del mundo."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-la-riqueza-aunque-por-modos-invisibles-a"
 procedencia:
   obra: "La Muerte Del Cisne"

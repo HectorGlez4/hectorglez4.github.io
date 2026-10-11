@@ -1,6 +1,8 @@
 ---
 texto: "Una minoría gloriosa de intelectuales existió siempre, y aunque con escasez y esporádicamente, la ciencia fue en todo tiempo cultivada."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-una-minoria-gloriosa-de-intelectuales-existio-siempre"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

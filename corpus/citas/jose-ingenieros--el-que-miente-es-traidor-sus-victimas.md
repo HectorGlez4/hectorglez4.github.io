@@ -1,7 +1,9 @@
 ---
-texto: "El hombre envejece cuando el cálculo utilitario reemplaza á la alegría juvenil."
+texto: "El que miente es traidor: sus víctimas le escuchan, suponiendo que dice la verdad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-envejece-cuando-el-calculo-utilitario"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-el-que-miente-es-traidor-sus-victimas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

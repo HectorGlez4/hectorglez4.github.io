@@ -1,6 +1,8 @@
 ---
 texto: "Una misma noche nos espera a todos, y todos hemos de pisar una vez el camino de la muerte."
 autor: "horacio"
+temas:
+  - "la-muerte"
 slug: "horacio-una-misma-noche-nos-espera-a-todos"
 procedencia:
   obra: "Odas"

@@ -1,7 +1,9 @@
 ---
-texto: "La sabiduría era una fórmula verbal salida del pasado y del misterio."
+texto: "El carácter es un escollo y el vicio de decir la verdad es otro."
 autor: "agustin-alvarez"
-slug: "agustin-alvarez-la-sabiduria-era-una-formula-verbal-salida"
+temas:
+  - "la-verdad"
+slug: "agustin-alvarez-el-caracter-es-un-escollo-y-el"
 procedencia:
   obra: "La transformación de las razas en América"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El pensar quiere tiempo, y lo pensado ejecución."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-tiempo"
 slug: "francisco-de-quevedo-el-pensar-quiere-tiempo-y-lo-pensado"
 procedencia:
   obra: "Marco Bruto"

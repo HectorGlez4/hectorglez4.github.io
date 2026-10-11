@@ -1,6 +1,8 @@
 ---
 texto: "La felicidad no se aguarda del cielo ni se mendiga de otros; se persigue por sí mismo, se conquista con sus propios esfuerzos."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-felicidad"
 slug: "manuel-gonzalez-prada-la-felicidad-no-se-aguarda-del-cielo"
 procedencia:
   obra: "Las esclavas de la Iglesia"

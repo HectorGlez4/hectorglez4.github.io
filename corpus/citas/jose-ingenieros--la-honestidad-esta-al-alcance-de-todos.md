@@ -1,7 +1,9 @@
 ---
-texto: "La vulgaridad transforma el amor de la vida en pusilanimidad, la prudencia en cobardía, el orgullo en vanidad, el respeto en servilismo."
+texto: "La honestidad está al alcance de todos; la virtud es de pocos elegidos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-vulgaridad-transforma-el-amor-de-la"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-honestidad-esta-al-alcance-de-todos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
