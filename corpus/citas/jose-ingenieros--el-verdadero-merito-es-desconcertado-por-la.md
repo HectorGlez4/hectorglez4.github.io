@@ -1,7 +1,9 @@
 ---
-texto: "El hombre pone su honor en el mérito propio y es juez supremo de sí mismo; asciende á la dignidad."
+texto: "El verdadero mérito es desconcertado por la adulación: tiene su orgullo y su pudor, como la castidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-pone-su-honor-en-el"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-el-verdadero-merito-es-desconcertado-por-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

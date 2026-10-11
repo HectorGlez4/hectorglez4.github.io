@@ -1,7 +1,9 @@
 ---
-texto: "El Genio es un guión que pone el destino entre dos párrafos de la historia."
+texto: "La aristocracia del mérito es el régimen ideal frente á las mediocracias que ensombrecen la historia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-es-un-guion-que-pone"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-la-aristocracia-del-merito-es-el-regimen"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

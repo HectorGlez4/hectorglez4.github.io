@@ -1,7 +1,9 @@
 ---
-texto: "El mediocre limita su horizonte afectivo á sí mismo, á su familia, á su camarilla, á su facción; pero no sabe extenderlo hasta la Verdad, la Patria ó la Humanidad, que sólo pueden apasionar al genio."
+texto: "El viejo tiende á la inercia, busca el menor esfuerzo; así como la pereza es una vejez anticipada, la vejez es una pereza que llega fatalmente en cierta hora de la vida."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-mediocre-limita-su-horizonte-afectivo-a"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-viejo-tiende-a-la-inercia-busca"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

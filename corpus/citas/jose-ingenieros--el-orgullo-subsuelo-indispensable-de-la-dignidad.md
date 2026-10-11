@@ -1,6 +1,8 @@
 ---
 texto: "El orgullo, subsuelo indispensable de la dignidad, imprime á los hombres cierto bello gesto que las sombras censuran."
 autor: "jose-ingenieros"
+temas:
+  - "la-gloria"
 slug: "jose-ingenieros-el-orgullo-subsuelo-indispensable-de-la-dignidad"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

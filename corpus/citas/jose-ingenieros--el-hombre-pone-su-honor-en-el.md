@@ -1,7 +1,9 @@
 ---
-texto: "La aristocracia del mérito es el régimen ideal frente á las mediocracias que ensombrecen la historia."
+texto: "El hombre pone su honor en el mérito propio y es juez supremo de sí mismo; asciende á la dignidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-aristocracia-del-merito-es-el-regimen"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-hombre-pone-su-honor-en-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

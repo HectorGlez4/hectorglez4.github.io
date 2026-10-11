@@ -1,6 +1,8 @@
 ---
 texto: "El sabio busca la Verdad por buscarla y goza arrancando á la naturaleza secretos para él inútiles ó peligrosos."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-el-sabio-busca-la-verdad-por-buscarla"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,7 +1,9 @@
 ---
-texto: "Hay hombres que nunca han sido jóvenes; en sus corazones, prematuramente agostados, no encontraron calor las opiniones extremas ni aliento las exageraciones románticas."
+texto: "La dignidad es un rompeolas opuesto por el individuo á la marea de mediocridad que le acosa."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-hay-hombres-que-nunca-han-sido-jovenes"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-dignidad-es-un-rompeolas-opuesto-por"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "La dignidad es un rompeolas opuesto por el individuo á la marea de mediocridad que le acosa."
+texto: "El éxito es el mejor lubrificante del corazón; el fracaso es su más urticante corrosivo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-dignidad-es-un-rompeolas-opuesto-por"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-el-exito-es-el-mejor-lubrificante-del"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El verdadero mérito es desconcertado por la adulación: tiene su orgullo y su pudor, como la castidad."
+texto: "El hombre de genio, en el tiempo que dura un relámpago, intuye su Ideal: toda su vida marcha tras él, persiguiendo la quimera entrevista."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-verdadero-merito-es-desconcertado-por-la"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-el-hombre-de-genio-en-el-tiempo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El que puede domesticar sus convicciones no es, no puede ser, nunca, absolutamente, un hombre genial."
+texto: "Hay más valor moral en creer firmemente un error, que en aceptar tibiamente una verdad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-puede-domesticar-sus-convicciones-no"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-hay-mas-valor-moral-en-creer-firmemente"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

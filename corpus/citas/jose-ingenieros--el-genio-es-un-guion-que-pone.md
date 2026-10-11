@@ -1,7 +1,9 @@
 ---
-texto: "El hombre de genio, en el tiempo que dura un relámpago, intuye su Ideal: toda su vida marcha tras él, persiguiendo la quimera entrevista."
+texto: "El Genio es un guión que pone el destino entre dos párrafos de la historia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-de-genio-en-el-tiempo"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-genio-es-un-guion-que-pone"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

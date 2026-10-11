@@ -1,7 +1,9 @@
 ---
-texto: "El viejo tiende á la inercia, busca el menor esfuerzo; así como la pereza es una vejez anticipada, la vejez es una pereza que llega fatalmente en cierta hora de la vida."
+texto: "El que puede domesticar sus convicciones no es, no puede ser, nunca, absolutamente, un hombre genial."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-viejo-tiende-a-la-inercia-busca"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-el-que-puede-domesticar-sus-convicciones-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

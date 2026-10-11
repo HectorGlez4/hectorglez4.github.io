@@ -1,7 +1,9 @@
 ---
-texto: "Cuando el ignorante se cree igualado al estudioso, el bribón al apóstol, el boquirroto al elocuente y el burdégano al digno, la escala del mérito desaparece en una oprobiosa nivelación de villanía."
+texto: "Hay hombres que nunca han sido jóvenes; en sus corazones, prematuramente agostados, no encontraron calor las opiniones extremas ni aliento las exageraciones románticas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cuando-el-ignorante-se-cree-igualado-al"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-hay-hombres-que-nunca-han-sido-jovenes"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
