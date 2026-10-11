@@ -1,0 +1,13 @@
+---
+texto: "No hay ciertamente quien no reconozca por propio testimonio de su conciencia que solo se alcanza la dignidad moral con las obras, y que no comienza el órden ético sino en la esfera de la práctica."
+autor: "nicolas-salmeron"
+slug: "nicolas-salmeron-no-hay-ciertamente-quien-no-reconozca-por"
+procedencia:
+  obra: "Defensa de la Internacional - Parte 2"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Defensa_de_la_Internacional_-_Parte_2_%2827-10-71%29%2C_Nicol%C3%A1s_Salmer%C3%B3n"
+---
