@@ -1,0 +1,93 @@
+fuente: wikisource-es
+obra: La flor
+url: https://es.wikisource.org/wiki/Un_recuerdo_%28Castro%29
+recuperado: 2026-10-11
+---
+Un recuerdo (Castro)
+[[Categoría:Poesías de Rosalía de Castro]]
+|título=[[La flor]]
+|autor=Rosalía de Castro
+obra> |título=La flor
+obra> |autor=Rosalía de Castro
+obra> |título={{Anclaje+|Índice}}
+---
+",{"template":{"target":{"wt":"c","href":"./Plantilla:C"},"params":{"1":{"wt":"Un recuerdo"}},"i":0}},"</big>"]}'>
+
+Un recuerdo
+
+\n ¡Ay, cómo el llanto de mis ojos quema!...\n ¡Cuál mi mejilla abrasa!... \n ¡Cómo el rudo penar que me envenena \n mi corazón traspasa! \n \n Cómo siento el pesar del alma mía \n al empuje violento \n del dulce y triste recordar de un día \n que pasó como el viento. \n \n Cuán presentes están en mi memoria \n un nombre y un suspiro... \n Página extraña de mi larga historia, \n de un bien con que deliro. \n \n Yo escuchaba tina voz llena de encanto, \n melodía sin nombre, \n que iba risueña a recoger mi llanto... \n ¡Era la voz de un hombre! \n \n Sombra fugaz que se acerco liviana \n vertiendo sus amores, \n y que posó sobre mi sien temprana \n mil cariñosas flores. \n \n Acarició mi frente que se hundía \n entre acerbos pesares; \n y lleno de dulzura y de armonía \n díjome sus cantares. \n \n Y ¡ay!, eran dulces cual sonora lira, \n que vibrando se siente \n en lejana enramada, adonde expira \n su gemido doliente. \n \n Yo percibí su divinal ternura \n penetrar en el alma, \n disipando la tétrica amargura \n que robara mi calma. \n \n Y la ardiente pasión sustituyendo \n a una fría memoria, \n sentí con fuerza el corazón latiendo \n por una nueva gloria. \n \n Dicha sin fin, que se acercó temprana \n con extraños placeres, \n como el bello fulgor de una mañana \n que sueñan las mujeres. \n \n Rosa que nace al saludar el día, \n y a la tarde se muere, \n retrato de un placer y una agonía \n que al corazón se adhiere. \n \n Imagen fiel de esa esperanza vana \n que en nada se convierte; \n que dice el hombre en su ilusión mañana, \n y mañana es la muerte. \n \n Y así pasó: Mi frente adormecida \n volvióse luego roja; \n y trocóse el albor de mi alegría, \n flor que, seca, se arroja \n \n Calló la voz de melodía tanta \n y la dicha durmió; \n y al nuevo resplandor que se levanta \n lo pasado murió. \n \n Hoy sólo el llanto a mis dolores queda, \n sueños de amor de corazón, dormid: \n ¡Dicha sin fin que a mi existir se niegan \n gloria y placer y venturanza huid!... \n</poem>"}},"i":0}}]}'>
+
+¡Ay, cómo el llanto de mis ojos quema!...
+¡Cuál mi mejilla abrasa!...
+¡Cómo el rudo penar que me envenena
+mi corazón traspasa!
+
+Cómo siento el pesar del alma mía
+al empuje violento
+del dulce y triste recordar de un día
+que pasó como el viento.
+
+Cuán presentes están en mi memoria
+un nombre y un suspiro...
+Página extraña de mi larga historia,
+de un bien con que deliro.
+
+Yo escuchaba tina voz llena de encanto,
+melodía sin nombre,
+que iba risueña a recoger mi llanto...
+¡Era la voz de un hombre!
+
+Sombra fugaz que se acerco liviana
+vertiendo sus amores,
+y que posó sobre mi sien temprana
+mil cariñosas flores.
+
+Acarició mi frente que se hundía
+entre acerbos pesares;
+y lleno de dulzura y de armonía
+díjome sus cantares.
+
+Y ¡ay!, eran dulces cual sonora lira,
+que vibrando se siente
+en lejana enramada, adonde expira
+su gemido doliente.
+
+Yo percibí su divinal ternura
+penetrar en el alma,
+disipando la tétrica amargura
+que robara mi calma.
+
+Y la ardiente pasión sustituyendo
+a una fría memoria,
+sentí con fuerza el corazón latiendo
+por una nueva gloria.
+
+Dicha sin fin, que se acercó temprana
+con extraños placeres,
+como el bello fulgor de una mañana
+que sueñan las mujeres.
+
+Rosa que nace al saludar el día,
+y a la tarde se muere,
+retrato de un placer y una agonía
+que al corazón se adhiere.
+
+Imagen fiel de esa esperanza vana
+que en nada se convierte;
+que dice el hombre en su ilusión mañana,
+y mañana es la muerte.
+
+Y así pasó: Mi frente adormecida
+volvióse luego roja;
+y trocóse el albor de mi alegría,
+flor que, seca, se arroja
+
+Calló la voz de melodía tanta
+y la dicha durmió;
+y al nuevo resplandor que se levanta
+lo pasado murió.
+
+Hoy sólo el llanto a mis dolores queda,
+sueños de amor de corazón, dormid:
+¡Dicha sin fin que a mi existir se niegan
+gloria y placer y venturanza huid!...

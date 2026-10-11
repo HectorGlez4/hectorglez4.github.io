@@ -1,0 +1,13 @@
+---
+texto: "Por lo demás, ingenua y confiada, puestas sus esperanzas en manos de Dios, y confiada en su infinita misericordia, nada la halagaba sino la paz de su casa."
+autor: "rosalia-de-castro"
+slug: "rosalia-de-castro-por-lo-demas-ingenua-y-confiada-puestas"
+procedencia:
+  obra: "En las orillas del Sar/Prólogo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/En_las_orillas_del_Sar/Pr%C3%B3logo"
+---

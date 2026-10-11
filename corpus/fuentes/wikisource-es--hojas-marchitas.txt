@@ -1,0 +1,25 @@
+fuente: wikisource-es
+obra: Hojas marchitas
+url: https://es.wikisource.org/wiki/Hojas_marchitas
+recuperado: 2026-10-11
+---
+Hojas marchitas
+[[Categoría:Poesías de Rosalía de Castro]]
+|título={{PAGENAME}}
+|autor=Rosalía de Castro
+---
+\n Las rosas en sus troncos se secaron, \n los lirios blancos en su tallo erguidos \n secáronse también, \n y airado el viento arrebató sus hojas, \n arrebató sus hojas perfumadas \n que nunca más veré. \n \n Otras rosas después y otros jardines \n con lirios blancos en su tallo erguidos \n he visto florecer; \n mas ya cansados de llorar mis ojos, \n en vez de llanto en ellos, derramaron \n gotas de amarga hiel. \n</poem>"}},"i":0}}]}'>
+
+Las rosas en sus troncos se secaron,
+los lirios blancos en su tallo erguidos
+secáronse también,
+y airado el viento arrebató sus hojas,
+arrebató sus hojas perfumadas
+que nunca más veré.
+
+Otras rosas después y otros jardines
+con lirios blancos en su tallo erguidos
+he visto florecer;
+mas ya cansados de llorar mis ojos,
+en vez de llanto en ellos, derramaron
+gotas de amarga hiel.

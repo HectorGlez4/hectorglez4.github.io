@@ -1,0 +1,13 @@
+---
+texto: "Antes de caer para no levantarse más; antes de aceptar resignada el doloroso calvario con que el Cielo quiso probarla, marchó á Carril con los suyos."
+autor: "rosalia-de-castro"
+slug: "rosalia-de-castro-antes-de-caer-para-no-levantarse-mas"
+procedencia:
+  obra: "En las orillas del Sar/Prólogo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/En_las_orillas_del_Sar/Pr%C3%B3logo"
+---
