@@ -456,3 +456,14 @@ sesiones:
       citasPublicadas: 1978
       procedenciaCompleta: 22
       tradicionLatinoamericanaSobreHispanicos: 54.8
+  - fecha: "2026-10-11"
+    hora: "10:05"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Luis de Góngora: sonetos"
+    motivo: "Siembra de Góngora (sonetos de Wikisource con renglones limpios): Autor del Siglo de Oro, época abierta; 64 de los títulos de su lista devuelven 404 y solo 27 se pudieron versionar."
+    resultado:
+      citasPublicadas: 1981
+      procedenciaCompleta: 22
+      tradicionLatinoamericanaSobreHispanicos: 53.5

@@ -1,0 +1,27 @@
+fuente: wikisource-es
+obra: A un sueño
+url: https://es.wikisource.org/wiki/A_un_sue%C3%B1o
+recuperado: 2026-10-11
+---
+A un sueño
+[[Categoría:Sonetos de Luis de Góngora y Argote]]
+|título={{PAGENAME}}
+|autor=[[Luis de Góngora y Argote]]
+---
+Varia imaginación que, en mil intentos,
+a pesar gastas de tu triste amor
+la dulce munición del blando sueño,
+alimentando vanos pensamientos,
+
+pues traes los espíritus despiertos
+sólo a representarme el grave ceño
+del rostro dulcemente zahareño
+(gloriosa suspensión de mis tormentos),
+
+el sueño (autor de representaciones),
+en su teatro, sobre el viento armado,
+sombras suele vestir de bulto hermoso.
+
+Síguelo; mostraráte el rostro amado,
+y engañarán un rato tus pasiones
+dos bienes, que serán dormir y cuello.
