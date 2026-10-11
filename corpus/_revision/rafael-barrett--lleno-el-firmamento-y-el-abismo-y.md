@@ -1,0 +1,13 @@
+---
+texto: "Llenó el firmamento y el abismo, y nuestra ciencia terrible es incapaz todavía de medir el hueco que ha dejado."
+autor: "rafael-barrett"
+slug: "rafael-barrett-lleno-el-firmamento-y-el-abismo-y"
+procedencia:
+  obra: "Dios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Dios_%28Barrett%29"
+---

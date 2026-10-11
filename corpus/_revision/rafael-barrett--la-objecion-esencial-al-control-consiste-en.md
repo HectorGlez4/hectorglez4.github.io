@@ -1,0 +1,13 @@
+---
+texto: "La objeción esencial al «control» consiste en que la ciencia es impotente para establecerlo."
+autor: "rafael-barrett"
+slug: "rafael-barrett-la-objecion-esencial-al-control-consiste-en"
+procedencia:
+  obra: "Los médicos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Los_m%C3%A9dicos"
+---

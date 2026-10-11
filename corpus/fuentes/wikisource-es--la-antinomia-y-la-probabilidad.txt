@@ -1,0 +1,105 @@
+fuente: wikisource-es
+obra: La antinomia y la probabilidad
+url: https://es.wikisource.org/wiki/La_antinomia_y_la_probabilidad
+recuperado: 2026-10-11
+---
+La antinomia y la probabilidad
+[[Categoría:Ensayos de Rafael Barrett]]
+|titulo = La antinomia y la probabilidad
+|autor = Rafael Barrett
+---
+No estamos seguros de nada. ¿Saldrá el sol mañana? Es muy probable.
+
+¿Existiremos dentro de un mes? He aquí algo mucho menos probable.
+
+¿Qué oscuro instinto nos dice todo esto?
+
+Pero ¿es realmente oscuro este instinto? ¿No dependerá la vaguedad de sus contestaciones de la vaguedad de las preguntas?
+
+Tomo un dado. Si lo arrojo, ¿qué punto saldrá? No lo sé.
+
+No sé si saldrá el 1 o el 6. Pero es exactamente tan probable que salga uno como otro. Cosa ésta tan cierta como un axioma. Puedo afirmar más: que la probabilidad de que salga el 1 es cinco veces más pequeña que la probabilidad de que no salga.
+
+El sencillo ejemplo del dado nos autoriza aparentemente a definir la probabilidad. La probabilidad de un suceso sería la relación del número de casos favorables al número total de casos posibles.
+
+¿Probabilidad de que salga el punto 1? Casos favorables: 1; casos posibles: 6.Contestación: 1/6.
+
+¿Probabilidad de que no salga? Casos favorables: 5. Casos posibles: 6. Contestación: 5/6.
+
+D'Alembert sonríe y nos advierte que no hay más que dos casos posibles: o el suceso en cuestión ocurre o no ocurre. La probabilidad de cualquier suceso es siempre ½, y no vale la pena de seguir adelante.
+
+A lo que responderemos que los casos han de ser igualmente probables. Con lo que nos reducimos a definir lo probable por lo probable.
+
+¿Cómo sabremos que dos casos posibles son igualmente probables? Una especie de sentido común indestructible nos guía en el ejemplo del dado. ¿Será siempre así?
+
+Desgraciadamente, no. El ilustre Bertrand (Calcul des Probabilités) se propone encontrar la probabilidad para que, en una circunferencia, una cuerda trazada al azar sea mayor que el lado del triángulo equilátero inscripto. Adoptando sucesivamente dos puntos de partida, el autor halla con el uno 1/2, y con el otro 1/3.
+
+Pero en el problema de Bertrand los casos posibles son infinitos. Ninguna contradicción resulta de los problemas planteados con el dado, con los naipes, con unas que contienen bolas de distintos colores, etc. Es que aquí los casos posibles son numerables.
+
+Es decir que el concepto de probabilidad es inaplicable, en su sentido raíz, a cuestiones de continuidad, como son precisamente la inmensa mayoría de las cuestiones que se presentan en la mecánica y en la física.
+
+Nada de esto debe extrañarnos. Muchos conceptos, como el de número y los de las operaciones elementales, han ido modificándose, generalizándose, para abrazar una mayor extensión de conocimiento. Aplicados directamente a su sentido primero, conducen a contradicciones por el estilo de la que ofrece Bertrand.
+
+La generalización del concepto de probabilidad, generalización que lo hace aplicable a cuestiones geométricas y físicas, consiste esencialmente en atribuir a la probabilidad que se busca una forma arbitraria, sin otro requisito que satisfacer el principio de razón suficiente y la condición de continuidad. Sucede entonces que la expresión de la probabilidad a que se llega suele ser independiente de la hipótesis inicial; de otro modo: la probabilidad es siempre la misma, y libre de toda contradicción.
+
+Los curiosos que posean las matemáticas elementales pueden leer el Traité des Probabilités del célebre Poincaré, donde se tratan muchas cuestiones de esta clase, elegantemente planteadas y resueltas.
+
+Mi propósito no es insistir en la parte técnica del asunto, ni en sus importantes consecuencias para la ciencia positiva, sino dejar sentado lo legítimo, lo intuitivo del concepto de probabilidad, e indicar los extraños aspectos que ofrece el estudio de ese concepto.
+
+Vuelvo a tomar el lado. Lo arrojo: ha salido el punto 1. Sin embargo, era cinco veces más probable que saliera otro, y no ése. Es extraño que haya salido el punto 1. Pero, ¿no sería igualmente extraño que hubiera salido cualquiera de los demás?
+
+He aquí que nos parece extraño algo que no puede menos de suceder.
+
+¿Por qué ha salido el punto 1? El dado sigue una trayectoria que depende del impulso de mis dedos, de la resistencia del aire, de la acción de la gravedad. El punto que representa al quedar inmóvil depende de todo eso, y además de las asperezas, de la elasticidad, de la dureza no sólo del piso, sino del mismo dado. ¿Qué hay de arbitrario en todo eso? Nuestra ciencia nos declara que absolutamente nada.
+
+Para los que hagan sus reservas respecto a la mano y al cerebro que mueve esa mano, se dispondrá una máquina, como la ruleta, que lance el dado. El problema será el mismo.
+
+Hay que admitir que si ha salido el punto 1, es que era fatal que saliera.
+
+Vuelvo a arrojar mi dado. No sale el punto 1. ¿Qué es lo único que puedo decir? Que esta vez era imposible que saliera.
+
+En la realidad no hay más que sucesos fatales y sucesos imposibles. ¿Qué tiene que ver nuestro concepto de probabilidad con todo esto?
+
+Pero siempre expresamos nuestra ignorancia con palabras de probabilidad. Ignoramos si saldrá el sol mañana, y en vez de hacer constar sencillamente esa ignorancia, o de puntualizar que es fatal o imposible que salga el sol mañana, decimos: «Es enormemente probable que el sol salga mañana».
+
+Y sentimos que decimos la verdad.
+
+¿Cómo explicar que ese concepto tan intuitivo y fundamental de la probabilidad no tenga en la realidad correspondencia alguna?
+
+No tratemos tan mal a la realidad. Tomemos a ella un poco más despacio.
+
+En vez de arrojar el dado una vez, hagámoslo cien, mil veces, y contemos las que ha salido el punto 1. Encontramos que ha salido con una frecuencia próximamente cinco veces menor que los demás puntos; lo mismo que nos advertía nuestro concepto de probabilidad.
+
+Y cuanto mayor sea el número de pruebas que hagamos, tanto más se acercarán los hechos a la idea.
+
+-¿No sabíamos absolutamente nada de una serie de fenómenos, y hemos predicho una ley? ¿Qué significa esto?
+
+Los fenómenos estaban fatalmente preparados de toda eternidad, y sin embargo, nuestra ignorancia los reglamenta de antemano.
+
+Llueve durante dos horas en un patio embaldosado. Nada sé de la curva caprichosa que seguirá, desde el misterioso seno de la nube, cada gotita de agua. No sé nada, y, sin embargo, afirmo que cada baldosa recibirá próximamente el mismo número de gotas.
+
+Y así es.
+
+Un gas se supone compuesto de una cantidad colosal de moléculas, que vuelan en todas direcciones con velocidades grandísimas. Nada sé de las trayectorias de esas moléculas, y, sin embargo, de mi misma completa ignorancia deduzco una ley de la probabilidad que me conduce como por la mano a la ley de Mariotte, hermosa ley física de innumerables aplicaciones.
+
+Abramos una tabla de logaritmos. Nada hay allí de arbitrario. Cada cifra es hija fatal de la aritmética. Puedo volver a calcular cada cifra por medio de deducciones inatacables. Por el momento ignoro los millares de signos allí estampados. Apoyado en mi misma ignorancia, sostengo que la cifra 1 se encuentra tan frecuentemente impresa como la cifra 7.
+
+Y así es.
+
+Mi ignorancia sabe, predice y descubre.
+
+¿Cómo resolver esta antinomia?
+
+Pascal, que lo ha dicho todo, escribe no sé dónde, que el mismo principio de contradicción está sujeto a crítica.
+
+La discusión del problema de la voluntad hará recordar algún día la frase de Pascal, frase que por otra parte no es inadmisible en matemáticas. Pero confesemos que no hay necesidad de sospechar que una cosa pueda ser y no ser al mismo tiempo, para resolver la antinomia de probabilidad.
+
+Si mi ignorancia sabe, es que no hay tal ignorancia.
+
+Cuando confirmo que ignoro las trayectorias de las gotas de lluvia, afirmo implícitamente que el conjunto de causas que separan esas trayectorias de la vertical, o alteran sus distancias relativas, se destruyen las unas a las otras. Cuando afirmo que ignoro si saldrá cara o cruz al echar al aire una moneda, afirmo que en un gran número de pruebas se destruyen las causas que deciden el resultado del fenómeno. En todos estos ejemplos, ignorar es afirmar una simetría.
+
+Es muy de observar que nada podemos predecir de una sola prueba. ¿Saldrá cara en este momento? Las pequeñas causas que lo han de decidir no tienen tiempo para luchar en masa con las otras y poner de relieve la ley. Por eso la sensación de azar positivo, de ignorancia real, es típica en este caso. Por eso los jugadores se arruinan a la larga. Siempre juegan a un golpe. Verdad es que en una gran serie de golpes todos los jugadores estarían de acuerdo, y no habría contra quién jugar.
+
+La idea de simetría la adquirimos al solo enunciado de la cuestión, y de ella deducimos la ley de probabilidad por una función de la inteligencia análoga a la función analítica del cálculo. Examínese todos los sucesos a que atribuimos un concepto de probabilidad y se descubrirá una base de conocimiento directo del fenómeno. La ley de probabilidad expresa precisamente ese conocimiento, y cuanto se aparte de ella, a posteriori, la realidad, otro tanto nuestro conocimiento se apartará de la exactitud.
+
+Es que pocas veces sabemos, pero menos veces todavía, ignoramos.

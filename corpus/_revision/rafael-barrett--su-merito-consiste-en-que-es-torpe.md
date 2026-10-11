@@ -1,0 +1,13 @@
+---
+texto: "Su mérito consiste en que es torpe como la Providencia, y en que convierte una cuestión particular en un riesgo público."
+autor: "rafael-barrett"
+slug: "rafael-barrett-su-merito-consiste-en-que-es-torpe"
+procedencia:
+  obra: "El revólver"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_rev%C3%B3lver"
+---

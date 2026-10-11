@@ -1,0 +1,35 @@
+fuente: wikisource-es
+obra: Los médicos
+url: https://es.wikisource.org/wiki/Los_m%C3%A9dicos
+recuperado: 2026-10-11
+---
+Los médicos
+[[Categoría:Ensayos de Rafael Barrett]]
+|titulo = Los médicos
+|autor = Rafael Barrett
+---
+¿De qué viven los médicos? De los enfermos. El hecho es conocido, pero no solemos sacar sus evidentes consecuencias. Lejos de recompensar a los médicos por la cantidad de salud que gracias a ellos, o a pesar de ellos, pueda haber en el mundo, se les recompensa en razón de la cantidad de enfermedad que revisan. Sumad los dolores, las angustias y las agonías de la carne humana en los países civilizados a lo occidental, y previa una simple proporción, deduciréis lo que se abona a los médicos. El interés de todo médico es que haya enfermos, cuantos más mejor, como el interés de todo abogado es que haya gentes de mala fe y de mal humor, enredadores, tercos y tramposos. La lealtad de los corazones y el sentimiento de lo justo acabarían con los pleitos. También la higiene privada es para los médicos una epidemia.
+
+Si constituyesen un gremio de moralidad media; si fueran hombres parecidos a los demás, correríamos grave riesgo. Cada cual provoca en el ambiente que le envuelve las transformaciones favorables a su existencia: el comerciante acapara, el periodista inventa, el político intriga, el banquero hace correr noticias, falsas o no, que ayuden a sus planes. Al médico le conviene que haya enfermos: es extraordinario que no procure producirlos. La medicina, incapaz de curar, no lo es de enfermar. Nada más sencillo que descomponer un aparato, por mucho que ignoremos su mecanismo. Pues bien, mientras los bolsistas urden la miseria y la desesperación de familias inocentes, y los empresarios industriales restablecen sobre la tierra una esclavitud peor que la otra, los médicos, según todas las probabilidades, renuncian al semihomicidio lucrativo. Si empeoran el estado de sus clientes es -fenómeno curioso- de un modo involuntario.
+
+Les somos, a priori, grandemente deudores de que, en general, se abstengan de intervenir demasiado en sus asuntos. Les hemos de estar muy agradecidos de que se mantengan en su papel de espectadores a veces poco afortunados. ¿Y quién tiene la culpa de nuestra situación desairada? Nosotros mismos. ¿En virtud de qué razonamiento de topos hemos resuelto pagarles por visita? Ningún técnico es empleado a jornal; se le ajusta el precio de una obra concluida satisfactoriamente, y ¡ay del ingeniero a quien se le cae el viaducto, o del contador a quien no le salen las cuentas! Era de sentido común convenir los honorarios en el caso único de la curación. Un campesino muy avaro tenía a su mujer en cama desde hacía dos meses, y acosado por los vecinos, se decidió a llamar al doctor:
+
+-Que me la cure o que me la mate, le he de pagar peso sobre peso. La vieja falleció, y a poco, apareció el galeno a saldar su cuenta.
+
+-¿La mató usted? -preguntó el aldeano.
+
+-¡Qué locura! Dios dispuso de lo que era suyo.
+
+-¿La curó usted?
+
+-Desgraciadamente, no.
+
+-Pues, entonces, no le debo nada.
+
+Una medida de pública defensa sería publicar al lado de cada defunción acaecida en el día, el nombre del médico. Se cuenta que uno de los judíos más ricos del mercado francés comenzó a poner en práctica esta idea, utilizando la cuarta plana de un pequeño diario que arrendó no se sabe dónde, cuando no poseía un centavo aún. Chantaje tan ingenuo fue la base de su fortuna. La verdad es que se abre sumario ante una desgracia por imprudencia, ante un accidente complicado en esas muertes que con deliciosa ironía denominamos naturales. El problema es el salvoconducto del asesinado.
+
+La objeción esencial al «control» consiste en que la ciencia es impotente para establecerlo. Ninguna persona medianamente ilustrada o que haya visto de cerca trabajar a los médicos, se hará ilusiones sobre los vagos recursos del azaroso arte de sanar. Un resfrío, media docena de granos, una jaqueca, he aquí problemas terribles. Oímos, sin extrañarnos, que a los mejores facultativos se les mueren seguidos los enfermos, y que principiantes salvan a moribundos desahuciados por eminencias. No pasa mes sin que se renueven las teorías en curso. Los sistemas menos razonables encuentran éxito. Ignorantes iluminados enarbolan procedimientos estrafalarios, reúnen millares de dolientes y hasta los curan. Lo más conveniente para los enfermos que quieran gastar una cierta suma en la experiencia, es recorrer los consultorios, apuntar lo ocurrido en cada uno y comparar las anotaciones. ¿Quién, ante el estado rudimentario de la fisiología y de la terapéutica, tiene derecho de acusar a un médico por torpe o criminal?
+
+¿Será prudente adquirir en unas cuantas semanas las escasas nociones reconocidamente útiles que arroja la medicina moderna, y no acudir jamás a los médicos? Esto sería quizá lógico, pero, indudablemente, poco humano. Necesitamos la fe. Siempre, el que viene a tocar las llagas es el santo milagroso. Siempre se escuchan las palabras de consuelo. Si el médico no fuera sino un sabio, estaría perdido. Es un mago, un sacerdote. Trae los sacramentos en las botellas y frascos donde los boticarios sin conciencia vierten sus innumerables porquerías. El médico es el enviado de la providencia. Su función es sobre todo religiosa.
+
+La medicina, en su acción social, tan diferente de la quirúrgica, se aparta de la ciencia y seguirá apartándose mucho tiempo. Durante mucho tiempo, los discípulos de Pasteur, que no era médico, lucharán en la soledad del laboratorio, antes que desaparezcan los actuales curanderos perfeccionados y sugestionadores a la moda. Y aquellos fanáticos de la certidumbre que se acercan a los lechos de los hospitales, no llevan la piedad en la boca y la indecisión en el alma, sino la fiera curiosidad en los ojos y la muerte en las manos. Van a violar el enigma, a sacrificar a sabiendas un cuerpo dolorido, para ensayar la nueva hipótesis, la nueva sustancia. Delincuentes sublimes, roban la vida presente, como el amor, para cimentar la vida futura.
