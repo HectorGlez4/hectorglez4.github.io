@@ -1,7 +1,9 @@
 ---
-texto: "Sin los mediocres no habría estabilidad en las sociedades; sin los superiores no puede concebirse el progreso."
+texto: "El que sirve á un Ideal, vive de él: nadie le forzará á soñar lo que no quiere ni le impedirá ascender hacia su ensueño."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-sin-los-mediocres-no-habria-estabilidad-en"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-el-que-sirve-a-un-ideal-vive"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

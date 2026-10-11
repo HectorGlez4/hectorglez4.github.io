@@ -1,6 +1,8 @@
 ---
 texto: "No; la palabra no puede resonar allí donde se oye la cadena: el pensamiento humano no puede vivir allí donde la libertad no existe."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-no-la-palabra-no-puede-resonar-alli"
 procedencia:
   obra: "Defensa de la enmienda al proyecto de abolición de la esclavitud"

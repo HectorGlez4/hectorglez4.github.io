@@ -1,6 +1,8 @@
 ---
 texto: "Todo en la civilización de nuestro suelo es europeo; la América misma es un descubrimiento europeo."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-verdad"
 slug: "juan-bautista-alberdi-todo-en-la-civilizacion-de-nuestro-suelo"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

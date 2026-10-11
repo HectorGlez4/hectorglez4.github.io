@@ -1,7 +1,9 @@
 ---
-texto: "Es una cobardía aplacar la admiración; hay que cultivarla como un fuego sagrado, evitando que la envidia la cubra con su pátina ignominiosa."
+texto: "Tragan sin digerir, hasta el empacho mental; ignoran que el hombre no vive de lo que engulle, sino de lo que asimila."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-una-cobardia-aplacar-la-admiracion-hay"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-tragan-sin-digerir-hasta-el-empacho-mental"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

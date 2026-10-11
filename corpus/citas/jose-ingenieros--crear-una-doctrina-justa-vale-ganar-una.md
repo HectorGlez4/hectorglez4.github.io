@@ -1,6 +1,8 @@
 ---
 texto: "Crear una doctrina justa vale ganar una batalla para la verdad; presentir un ritmo de civilización cuesta más que acometer una conquista."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-crear-una-doctrina-justa-vale-ganar-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

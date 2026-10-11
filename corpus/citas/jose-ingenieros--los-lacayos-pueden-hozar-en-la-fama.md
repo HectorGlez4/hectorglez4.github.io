@@ -1,6 +1,8 @@
 ---
 texto: "Los lacayos pueden hozar en la fama; los hombres excelentes no saben envenenar la vida ajena."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-los-lacayos-pueden-hozar-en-la-fama"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

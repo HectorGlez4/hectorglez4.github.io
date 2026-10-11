@@ -1,6 +1,8 @@
 ---
 texto: "Puede haber concluido el tiempo de las hogueras inquisitoriales; no ha finalizado el ciclo de las luchas religiosas."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-tiempo"
 slug: "manuel-gonzalez-prada-puede-haber-concluido-el-tiempo-de-las"
 procedencia:
   obra: "Italia y el papado"

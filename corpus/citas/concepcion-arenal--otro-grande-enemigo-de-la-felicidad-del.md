@@ -1,6 +1,8 @@
 ---
 texto: "Otro grande enemigo de la felicidad del rico es el amor propio, monstruo voraz nunca satisfecho que pide más cuanto más le damos."
 autor: "concepcion-arenal"
+temas:
+  - "la-felicidad"
 slug: "concepcion-arenal-otro-grande-enemigo-de-la-felicidad-del"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

@@ -1,6 +1,8 @@
 ---
 texto: "Las creencias son el esqueleto del carácter; el hombre que las posee firmes y elevadas, lo tiene excelente."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-las-creencias-son-el-esqueleto-del-caracter"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "Lo inmoral no es que exista el mal, sino cederle."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-lo-inmoral-no-es-que-exista-el"
 procedencia:
   obra: "Inmoralidad de los exámenes"

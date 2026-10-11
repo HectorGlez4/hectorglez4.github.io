@@ -1,6 +1,8 @@
 ---
 texto: "El hombre se civiliza, se hace más sensible, más humano, más justo; se mejora."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-el-hombre-se-civiliza-se-hace-mas"
 procedencia:
   obra: "La mujer del porvenir"

@@ -1,6 +1,8 @@
 ---
 texto: "El dolor es motivado, impone respeto; el fastidio vago, sin causa determinada, halla poca tolerancia; el dolor hiere, el fastidio corroe."
 autor: "concepcion-arenal"
+temas:
+  - "la-adversidad"
 slug: "concepcion-arenal-el-dolor-es-motivado-impone-respeto-el"
 procedencia:
   obra: "La mujer del porvenir"

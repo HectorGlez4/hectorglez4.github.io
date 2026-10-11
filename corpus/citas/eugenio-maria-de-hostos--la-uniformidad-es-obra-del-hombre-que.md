@@ -1,6 +1,8 @@
 ---
 texto: "La uniformidad es obra del hombre que sabe imitar siempre y pocas veces crea."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-saber"
 slug: "eugenio-maria-de-hostos-la-uniformidad-es-obra-del-hombre-que"
 procedencia:
   obra: "Moral social"

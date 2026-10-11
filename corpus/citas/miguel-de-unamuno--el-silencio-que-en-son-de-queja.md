@@ -1,6 +1,8 @@
 ---
 texto: "El silencio que en son de queja me dices que te rodea, es un silencio solemne; sobre él resonarán más limpias tus palabras."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-palabra"
 slug: "miguel-de-unamuno-el-silencio-que-en-son-de-queja"
 procedencia:
   obra: "¡Adentro!"

@@ -1,6 +1,8 @@
 ---
 texto: "El talento no es más que la obligación de aplicarlo."
 autor: "jose-marti"
+temas:
+  - "el-trabajo"
 slug: "jose-marti-el-talento-no-es-mas-que-la"
 procedencia:
   obra: "Diputado"

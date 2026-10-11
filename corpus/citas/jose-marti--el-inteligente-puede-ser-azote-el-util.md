@@ -1,6 +1,8 @@
 ---
 texto: "El inteligente puede ser azote: el útil hace siempre bien."
 autor: "jose-marti"
+temas:
+  - "la-virtud"
 slug: "jose-marti-el-inteligente-puede-ser-azote-el-util"
 procedencia:
   obra: "Diputado"

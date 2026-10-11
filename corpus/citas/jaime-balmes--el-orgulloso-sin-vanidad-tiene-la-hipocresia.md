@@ -1,7 +1,9 @@
 ---
-texto: "El hombre ama naturalmente la verdad y el bien; y no se aparta de ellos sino cuando las pasiones le arrastran y extravian."
+texto: "El orgulloso sin vanidad, tiene la hipocresía de la virtud; el vanidoso tiene la franqueza de su debilidad."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-hombre-ama-naturalmente-la-verdad-y"
+temas:
+  - "la-humildad"
+slug: "jaime-balmes-el-orgulloso-sin-vanidad-tiene-la-hipocresia"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

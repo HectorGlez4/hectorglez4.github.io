@@ -1,6 +1,8 @@
 ---
 texto: "Bien está, pues, dicho por ventura, que no se ha de procurar de tener muchos amigos, sino tantos cuantos sean bastantes para pasar la vida."
 autor: "aristoteles"
+temas:
+  - "la-amistad"
 slug: "aristoteles-bien-esta-pues-dicho-por-ventura-que"
 procedencia:
   obra: "Ética a Nicómaco"
