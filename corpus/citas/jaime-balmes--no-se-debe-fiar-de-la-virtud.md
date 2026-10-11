@@ -1,7 +1,9 @@
 ---
-texto: "El ceder es debilidad, el volver atras cobardia; el faltar al deber es manifestar miedo, es someterse á la afrenta."
+texto: "No se debe fiar de la virtud del comun de los hombres, puesta á prueba muy dura."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-ceder-es-debilidad-el-volver-atras"
+temas:
+  - "la-prudencia"
+slug: "jaime-balmes-no-se-debe-fiar-de-la-virtud"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

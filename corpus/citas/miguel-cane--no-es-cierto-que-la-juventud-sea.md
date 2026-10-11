@@ -1,7 +1,9 @@
 ---
-texto: "La historia se ríe ante la virtud mirífica de las instituciones; imitarlas, adaptarlas, todo es inútil."
+texto: "No es cierto que la juventud sea idéntica en todas partes, como la mañana no es igual en todo el orbe."
 autor: "miguel-cane"
-slug: "miguel-cane-la-historia-se-rie-ante-la-virtud"
+temas:
+  - "la-vida"
+slug: "miguel-cane-no-es-cierto-que-la-juventud-sea"
 procedencia:
   obra: "Juvenilla; Prosa ligera"
 estadoDerechos: "dominio-público"

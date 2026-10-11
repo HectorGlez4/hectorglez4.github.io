@@ -1,7 +1,9 @@
 ---
-texto: "El hombre en todas las condiciones sociales, en todas las circunstancias de la vida, es siempre hombre, es decir una cosa muy pequeña."
+texto: "El primer obstáculo que se encuentra es que el hombre se conoce poco á sí mismo; y entónces, ¿cómo sabrá lo que puede y lo que no puede?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-hombre-en-todas-las-condiciones-sociales"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-el-primer-obstaculo-que-se-encuentra-es"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

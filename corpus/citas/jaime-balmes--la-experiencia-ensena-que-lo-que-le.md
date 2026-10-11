@@ -1,6 +1,8 @@
 ---
 texto: "La experiencia enseña que lo que le falta al hombre para obrar bien, no es conocimiento especulativo y general, sino práctico, detallado, con aplicacion á todos los actos de la vida."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-experiencia-ensena-que-lo-que-le"
 procedencia:
   obra: "El Criterio"

@@ -1,7 +1,9 @@
 ---
-texto: "El primer obstáculo que se encuentra es que el hombre se conoce poco á sí mismo; y entónces, ¿cómo sabrá lo que puede y lo que no puede?"
+texto: "El ceder es debilidad, el volver atras cobardia; el faltar al deber es manifestar miedo, es someterse á la afrenta."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-primer-obstaculo-que-se-encuentra-es"
+temas:
+  - "el-deber"
+slug: "jaime-balmes-el-ceder-es-debilidad-el-volver-atras"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

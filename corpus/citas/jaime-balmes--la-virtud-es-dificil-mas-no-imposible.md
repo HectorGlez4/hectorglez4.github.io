@@ -1,6 +1,8 @@
 ---
 texto: "La virtud es difícil, mas no imposible: el hombre no la alcanza aquí en la tierra sin mezcla de muchas debilidades que la deslustran; pero no carece de los medios suficientes para poseerla y perfeccionarla."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-la-virtud-es-dificil-mas-no-imposible"
 procedencia:
   obra: "El Criterio"

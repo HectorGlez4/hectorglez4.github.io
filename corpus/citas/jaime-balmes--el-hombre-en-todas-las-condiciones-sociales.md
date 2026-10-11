@@ -1,7 +1,9 @@
 ---
-texto: "No se debe fiar de la virtud del comun de los hombres, puesta á prueba muy dura."
+texto: "El hombre en todas las condiciones sociales, en todas las circunstancias de la vida, es siempre hombre, es decir una cosa muy pequeña."
 autor: "jaime-balmes"
-slug: "jaime-balmes-no-se-debe-fiar-de-la-virtud"
+temas:
+  - "la-humildad"
+slug: "jaime-balmes-el-hombre-en-todas-las-condiciones-sociales"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"
