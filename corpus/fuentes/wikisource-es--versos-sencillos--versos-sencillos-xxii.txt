@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nEstoy en el baile extraño\nDe polaina y casaquín\nQue dan, del año hacia el fin,\nLos cazadores del año. \n\nUna duquesa violeta\nVa con un frac colorado;\nMarca un vizconde pintado\nEl tiempo en la pandereta. \n\nY pasan las chupas rojas\nPasan los tules de fuego,\nComo delante de un ciego\nPasan volando las hojas.\n</poem>"}},"i":0}}]}'>
+
+Estoy en el baile extraño
+De polaina y casaquín
+Que dan, del año hacia el fin,
+Los cazadores del año.
+
+Una duquesa violeta
+Va con un frac colorado;
+Marca un vizconde pintado
+El tiempo en la pandereta.
+
+Y pasan las chupas rojas
+Pasan los tules de fuego,
+Como delante de un ciego
+Pasan volando las hojas.

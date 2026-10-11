@@ -1,0 +1,38 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXIII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXIII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nDe mi desdicha espantosa\nSiento, ¡oh estrellas!, que muero;\nYo quiero vivir, yo quiero\nVer a una mujer hermosa.\n\nEl cabello, como un casco,\nLe corona el rostro bello:\nBrilla su negro cabello\nComo un sable de Damasco.\n\n¿Aquélla? ...Pues pon la hiel\nDel mundo entero en un haz,\nY tállala en cuerpo, y haz,\nUn alma entera de hiel!\n\n¿Esta?... Pues ésta infeliz\nLleva escarpines rosados,\nY los labios colorados,\nY la cara de barniz. \n\nEl alma lúgubre grita:\n\"¡Mujer, maldita mujer!\"\n¡No sé yo quién pueda ser\nEntre las dos la maldita! \n</poem>\n</div>"}},"i":0}}]}'>
+
+De mi desdicha espantosa
+Siento, ¡oh estrellas!, que muero;
+Yo quiero vivir, yo quiero
+Ver a una mujer hermosa.
+
+El cabello, como un casco,
+Le corona el rostro bello:
+Brilla su negro cabello
+Como un sable de Damasco.
+
+¿Aquélla? ...Pues pon la hiel
+Del mundo entero en un haz,
+Y tállala en cuerpo, y haz,
+Un alma entera de hiel!
+
+¿Esta?... Pues ésta infeliz
+Lleva escarpines rosados,
+Y los labios colorados,
+Y la cara de barniz.
+
+El alma lúgubre grita:
+"¡Mujer, maldita mujer!"
+¡No sé yo quién pueda ser
+Entre las dos la maldita!

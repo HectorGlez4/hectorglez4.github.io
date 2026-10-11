@@ -1,0 +1,38 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXI
+recuperado: 2026-10-11
+---
+Versos sencillos/XXI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nAyer la vi en el salón\nDe los pintores, y ayer\nDetrás de aquella mujer\nSe me saltó el corazón. \n\nSentada en el suelo rudo\nEstá en el lienzo dormido\nAl pie, el esposo rendido;\nAl seno el niño desnudo. \n\nSobre unas briznas de paja\nSe ven mendrugos mondados;\nLe cuelga el manto a los lados,\nLo mismo que una mortaja. \n\nNo nace en el torvo suelo\nNi una viola, ni una espiga:\nMuy lejos, la casa amiga,\nMuy triste y oscuro el cielo. \n\n¡Esa es la hermosa mujer\nQue me robó el corazón\nEn el soberbio salón\nDe los pintores de ayer! \n\n</poem>"}},"i":0}}]}'>
+
+Ayer la vi en el salón
+De los pintores, y ayer
+Detrás de aquella mujer
+Se me saltó el corazón.
+
+Sentada en el suelo rudo
+Está en el lienzo dormido
+Al pie, el esposo rendido;
+Al seno el niño desnudo.
+
+Sobre unas briznas de paja
+Se ven mendrugos mondados;
+Le cuelga el manto a los lados,
+Lo mismo que una mortaja.
+
+No nace en el torvo suelo
+Ni una viola, ni una espiga:
+Muy lejos, la casa amiga,
+Muy triste y oscuro el cielo.
+
+¡Esa es la hermosa mujer
+Que me robó el corazón
+En el soberbio salón
+De los pintores de ayer!

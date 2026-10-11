@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXVIII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXVIII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nPor la tumba del cortijo\nDonde está el padre enterrado,\nPasa el hijo, de soldado\nDel invasor; pasa el hijo. \n\nEl padre, un bravo en la guerra,\nEnvuelto en su pabellón\nAlzase; y de un bofetón\nlo tiende, muerto, por tierra. \n\nEl rayo reluce; zumba\nEl viento por el cortijo;\nEl padre recoge al hijo,\nY se lo lleva a la tumba. \n</poem>"}},"i":0}}]}'>
+
+Por la tumba del cortijo
+Donde está el padre enterrado,
+Pasa el hijo, de soldado
+Del invasor; pasa el hijo.
+
+El padre, un bravo en la guerra,
+Envuelto en su pabellón
+Alzase; y de un bofetón
+lo tiende, muerto, por tierra.
+
+El rayo reluce; zumba
+El viento por el cortijo;
+El padre recoge al hijo,
+Y se lo lleva a la tumba.

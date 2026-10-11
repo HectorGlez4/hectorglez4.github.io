@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XIX
+recuperado: 2026-10-11
+---
+Versos sencillos/XIX
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nPor tus ojos encendidos\nY lo mal puesto de un broche,\nPensé que estuviste anoche\nJugando a juegos prohibidos. \n\nTe odié por vil y alevosa;\nTe odié con odio de muerte;\nNáusea me daba de verte\nTan villana y tan hermosa. \n\nY por la esquela que vi\nSin saber cómo ni cuando,\nSé que estuviste llorando\nToda la noche por mí. \n</poem>"}},"i":0}}]}'>
+
+Por tus ojos encendidos
+Y lo mal puesto de un broche,
+Pensé que estuviste anoche
+Jugando a juegos prohibidos.
+
+Te odié por vil y alevosa;
+Te odié con odio de muerte;
+Náusea me daba de verte
+Tan villana y tan hermosa.
+
+Y por la esquela que vi
+Sin saber cómo ni cuando,
+Sé que estuviste llorando
+Toda la noche por mí.

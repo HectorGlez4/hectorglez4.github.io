@@ -1,0 +1,58 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/IX
+recuperado: 2026-10-11
+---
+Versos sencillos/IX
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nQuiero, a la sombra de un ala,\nContar este cuento en flor:\nLa niña de Guatemala,\nLa que se murió de amor.\n\nEran de lirios los ramos,\nY las orlas de reseda\nY de jazmín: la enterramos\nEn una caja de seda. \n\n... Ella dio al desmemoriado\nUna almohadilla de olor:\nEl volvió, volvió casado:\nElla se murió de amor. \n\nIban cargándola en andas\nObispos y embajadores:\nDetrás iba el pueblo en tandas,\nTodo cargado de flores. \n\n...Ella, Por volverlo a ver,\nSalió a verlo al mirador:\nEl volvió con su mujer:\nElla se murió de amor. \n\nComo de bronce candente\nAl beso de despedida\nEra su frente ¡la frente\nQue más he amado en la vida! \n\n...Se entró de tarde en el río,\nLa sacó muerta el doctor:\nDicen que murió de frío:\nYo sé que murió de amor. \n\nAllí, en la bóveda helada,\nLa pusieron en dos bancos;\nBesé su mano afilada,\nBesé sus zapatos blancos. \n\nCallado, al oscurecer,\nMe llamó el enterrador:\n¡Nunca más he vuelto a ver\nA la que murió de amor!\n</poem>"}},"i":0}}]}'>
+
+Quiero, a la sombra de un ala,
+Contar este cuento en flor:
+La niña de Guatemala,
+La que se murió de amor.
+
+Eran de lirios los ramos,
+Y las orlas de reseda
+Y de jazmín: la enterramos
+En una caja de seda.
+
+... Ella dio al desmemoriado
+Una almohadilla de olor:
+El volvió, volvió casado:
+Ella se murió de amor.
+
+Iban cargándola en andas
+Obispos y embajadores:
+Detrás iba el pueblo en tandas,
+Todo cargado de flores.
+
+...Ella, Por volverlo a ver,
+Salió a verlo al mirador:
+El volvió con su mujer:
+Ella se murió de amor.
+
+Como de bronce candente
+Al beso de despedida
+Era su frente ¡la frente
+Que más he amado en la vida!
+
+...Se entró de tarde en el río,
+La sacó muerta el doctor:
+Dicen que murió de frío:
+Yo sé que murió de amor.
+
+Allí, en la bóveda helada,
+La pusieron en dos bancos;
+Besé su mano afilada,
+Besé sus zapatos blancos.
+
+Callado, al oscurecer,
+Me llamó el enterrador:
+¡Nunca más he vuelto a ver
+A la que murió de amor!

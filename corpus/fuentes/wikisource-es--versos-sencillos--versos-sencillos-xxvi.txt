@@ -1,0 +1,25 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXVI
+recuperado: 2026-10-11
+---
+Versos sencillos/XXVI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\nYo que vivo, \naunque me he muerto,\nSoy un gran descubridor,\nPorque anoche he descubierto\nLa medicina de amor. \n\nCuando al peso de la cruz\nEl hombre morir resuelve,\nSale a hacer bien, \nlo hace, y vuelve\nComo de un baño de luz. \n\n</poem>"}},"i":0}}]}'>
+
+Yo que vivo,
+aunque me he muerto,
+Soy un gran descubridor,
+Porque anoche he descubierto
+La medicina de amor.
+
+Cuando al peso de la cruz
+El hombre morir resuelve,
+Sale a hacer bien,
+lo hace, y vuelve
+Como de un baño de luz.

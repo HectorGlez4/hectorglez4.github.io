@@ -1,6 +1,8 @@
 ---
 texto: "El hombre no tiene ningún derecho especial porque pertenezca a una raza o a otra: dígase hombre, y ya se dicen todos los derechos."
 autor: "jose-marti"
+temas:
+  - "la-justicia"
 slug: "jose-marti-el-hombre-no-tiene-ningun-derecho-especial"
 procedencia:
   obra: "Mi raza"

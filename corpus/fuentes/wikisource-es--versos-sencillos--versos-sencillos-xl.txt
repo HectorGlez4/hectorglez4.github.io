@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XL
+recuperado: 2026-10-11
+---
+Versos sencillos/XL
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\nPinta mi amigo el pintor\nSus angelones dorados,\nEn nubes arrodillados,\nCon soles alrededor.\n\nPínteme con sus pinceles\nLos angelitos medrosos\nQue me trajeron, piadosos,\nSus dos ramos de claveles.\n\n</poem>"}},"i":0}}]}'>
+
+Pinta mi amigo el pintor
+Sus angelones dorados,
+En nubes arrodillados,
+Con soles alrededor.
+
+Pínteme con sus pinceles
+Los angelitos medrosos
+Que me trajeron, piadosos,
+Sus dos ramos de claveles.

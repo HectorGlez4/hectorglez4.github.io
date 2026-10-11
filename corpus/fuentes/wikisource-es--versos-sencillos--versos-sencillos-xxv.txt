@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXV
+recuperado: 2026-10-11
+---
+Versos sencillos/XXV
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\n¡Yo pienso cuando me alegro\nComo un escolar sencillo,\nEn el canario amarillo,\nQue tiene el ojo tan negro! \n\n¡Yo quiero, cuando me muera\nSin patria, pero sin amo,\nTener en mi losa un ramo\nDe flores, y una bandera! \n\n</poem>"}},"i":0}}]}'>
+
+¡Yo pienso cuando me alegro
+Como un escolar sencillo,
+En el canario amarillo,
+Que tiene el ojo tan negro!
+
+¡Yo quiero, cuando me muera
+Sin patria, pero sin amo,
+Tener en mi losa un ramo
+De flores, y una bandera!

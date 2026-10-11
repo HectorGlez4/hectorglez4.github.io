@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXV
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXV
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n¿Qué importa que tu puñal\nSe me clave en el riñón?\n¡Tengo mis versos, que son\nMás fuertes que tu puñal!\n\n¿Qué importa que este dolor\nSeque el mar y nuble el cielo?\nEl verso, dulce consuelo,\nNace al lado del dolor.\n</poem>\n</div>"}},"i":0}}]}'>
+
+¿Qué importa que tu puñal
+Se me clave en el riñón?
+¡Tengo mis versos, que son
+Más fuertes que tu puñal!
+
+¿Qué importa que este dolor
+Seque el mar y nuble el cielo?
+El verso, dulce consuelo,
+Nace al lado del dolor.

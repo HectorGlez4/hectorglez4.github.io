@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXIII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXIII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nYo quiero salir del mundo\nPor la puerta natural:\nEn un carro de hojas verdes\nA morir me han de llevar. \n\nNo me pongan en lo oscuro\nA morir como un traidor;\nYo soy bueno, y como bueno\nMoriré de cara al Sol! \n</poem>\n</div>"}},"i":0}}]}'>
+
+Yo quiero salir del mundo
+Por la puerta natural:
+En un carro de hojas verdes
+A morir me han de llevar.
+
+No me pongan en lo oscuro
+A morir como un traidor;
+Yo soy bueno, y como bueno
+Moriré de cara al Sol!

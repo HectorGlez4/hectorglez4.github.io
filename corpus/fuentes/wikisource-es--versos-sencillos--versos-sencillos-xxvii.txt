@@ -1,0 +1,43 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXVII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXVII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\nEl enemigo brutal\nNos pone fuego a la casa;\nEl sable la calle arrasa,\nA la luna tropical. \n\nPocos salieron ilesos\nDel sable del español;\nLa calle, al salir el sol,\nEra un reguero de sesos. \n\nPasa, entre balas, un coche:\nEntran, llorando, a una muerta;\nLlama una mano a la puerta\nEn lo negro de la noche. \n\nNo hay bala que no taladre\nEl portón; y la mujer\nQue llama, me ha dado el ser;\nMe viene a buscar mi madre. \n\nA la boca de la muerte,\nLos valientes habaneros\nSe quitaron los sombreros\nAnte la matrona fuerte. \n\nY después que nos besamos\nComo dos locos, me dijo:\n\"Vamos pronto, vamos, hijo;\nLa luna está sola: vamos.\" \n</poem>"}},"i":0}}]}'>
+
+El enemigo brutal
+Nos pone fuego a la casa;
+El sable la calle arrasa,
+A la luna tropical.
+
+Pocos salieron ilesos
+Del sable del español;
+La calle, al salir el sol,
+Era un reguero de sesos.
+
+Pasa, entre balas, un coche:
+Entran, llorando, a una muerta;
+Llama una mano a la puerta
+En lo negro de la noche.
+
+No hay bala que no taladre
+El portón; y la mujer
+Que llama, me ha dado el ser;
+Me viene a buscar mi madre.
+
+A la boca de la muerte,
+Los valientes habaneros
+Se quitaron los sombreros
+Ante la matrona fuerte.
+
+Y después que nos besamos
+Como dos locos, me dijo:
+"Vamos pronto, vamos, hijo;
+La luna está sola: vamos."

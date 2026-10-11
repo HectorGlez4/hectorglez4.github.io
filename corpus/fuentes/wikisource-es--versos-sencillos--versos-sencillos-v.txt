@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/V
+recuperado: 2026-10-11
+---
+Versos sencillos/V
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nSi ves un monte de espumas\nEs mi verso lo que ves:\nMi verso es un monte, y es\nUn abanico de plumas.\n\nMi verso es como un puñal\nQue por el puño echa flor:\nMi verso es un surtidor\nQue da un agua de coral.\n\nMi verso es de un verde claro\nY de un carmín encendido:\nMi verso es un ciervo herido\nQue busca en el monte amparo.\n\nMi verso al valiente agrada:\nMi verso, breve y sincero,\nEs del vigor del acero\nCon que se funde la espada. \n</poem>"}},"i":0}}]}'>
+
+Si ves un monte de espumas
+Es mi verso lo que ves:
+Mi verso es un monte, y es
+Un abanico de plumas.
+
+Mi verso es como un puñal
+Que por el puño echa flor:
+Mi verso es un surtidor
+Que da un agua de coral.
+
+Mi verso es de un verde claro
+Y de un carmín encendido:
+Mi verso es un ciervo herido
+Que busca en el monte amparo.
+
+Mi verso al valiente agrada:
+Mi verso, breve y sincero,
+Es del vigor del acero
+Con que se funde la espada.

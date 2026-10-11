@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXVII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXVII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\nAquí está el pecho, mujer,\nQue ya sé que lo herirás;\n¡Más grande debiera ser,\nPara que lo hirieses más!\n\nPorque noto, alma torcida,\nQue en mi pecho milagroso,\nMientras más honda la herida,\nEs mi canto más hermoso.\n</poem>"}},"i":0}}]}'>
+
+Aquí está el pecho, mujer,
+Que ya sé que lo herirás;
+¡Más grande debiera ser,
+Para que lo hirieses más!
+
+Porque noto, alma torcida,
+Que en mi pecho milagroso,
+Mientras más honda la herida,
+Es mi canto más hermoso.

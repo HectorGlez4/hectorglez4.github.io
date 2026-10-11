@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/VI
+recuperado: 2026-10-11
+---
+Versos sencillos/VI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nSi quieren que de este mundo\nLleve una memoria grata,\nLlevaré, padre profundo\nTu cabellera de plata.\n\nSi quieren por gran favor,\nQue lleve más, llevaré\nLa copia que hizo el pintor\nDe la hermana que adoré.\n\nSi quieren que a la otra vida\nMe lleve todo un tesoro,\n¡Llevo la trenza escondida\nQue guardo en mi caja de oro!\n\n</poem>"}},"i":0}}]}'>
+
+Si quieren que de este mundo
+Lleve una memoria grata,
+Llevaré, padre profundo
+Tu cabellera de plata.
+
+Si quieren por gran favor,
+Que lleve más, llevaré
+La copia que hizo el pintor
+De la hermana que adoré.
+
+Si quieren que a la otra vida
+Me lleve todo un tesoro,
+¡Llevo la trenza escondida
+Que guardo en mi caja de oro!

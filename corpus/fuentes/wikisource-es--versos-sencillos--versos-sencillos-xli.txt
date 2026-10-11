@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XLI
+recuperado: 2026-10-11
+---
+Versos sencillos/XLI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\nCuando me vino el honor\nDe la tierra generosa,\nNo pensé en Blanca ni en Rosa\nNi en lo grande del favor.\n\nPensé en el pobre artillero\nQue está en la tumba, callado;\nPensé en mi padre, el soldado;\nPensé en mi padre, el obrero.\n\nCuando llegó la pomposa\nCarta, en su noble cubierta,\nPensé en la tumba desierta\nNo pensé en Blanca ni en Rosa.\n\n</poem>"}},"i":0}}]}'>
+
+Cuando me vino el honor
+De la tierra generosa,
+No pensé en Blanca ni en Rosa
+Ni en lo grande del favor.
+
+Pensé en el pobre artillero
+Que está en la tumba, callado;
+Pensé en mi padre, el soldado;
+Pensé en mi padre, el obrero.
+
+Cuando llegó la pomposa
+Carta, en su noble cubierta,
+Pensé en la tumba desierta
+No pensé en Blanca ni en Rosa.

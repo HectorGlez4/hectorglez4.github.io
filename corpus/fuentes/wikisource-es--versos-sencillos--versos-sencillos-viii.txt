@@ -1,0 +1,43 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/VIII
+recuperado: 2026-10-11
+---
+Versos sencillos/VIII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nYo tengo un amigo muerto\nQue suele venirme a ver:\nMi amigo se sienta, y canta;\nCanta en voz que ha de doler. \n\n\"En un ave de dos alas\n\"Bogo por el cielo azul:\n\"Un ala del ave es negra\n\"Otra de oro Caribú. \n\n\"El corazón es un loco\n\"Que no sabe de un color:\n\"O es su amor de dos colores,\n\"O dice que no es amor. \n\n\"Hay una loca más fiera\n\"Que el corazón infeliz:\n\"La que le chupó la sangre\n\"Y se echó luego a reír. \n\n\"Corazón que lleva rota\n\"El ancla fiel del hogar,\n\"Va como barca perdida,\n\"Que no sabe a dónde va.\" \n\nEn cuanto llega a esta angustia\nRompe el muerto a maldecir:\nLe amanso el cráneo, lo acuesto;\nAcuesto al muerto a dormir. \n</poem>"}},"i":0}}]}'>
+
+Yo tengo un amigo muerto
+Que suele venirme a ver:
+Mi amigo se sienta, y canta;
+Canta en voz que ha de doler.
+
+"En un ave de dos alas
+"Bogo por el cielo azul:
+"Un ala del ave es negra
+"Otra de oro Caribú.
+
+"El corazón es un loco
+"Que no sabe de un color:
+"O es su amor de dos colores,
+"O dice que no es amor.
+
+"Hay una loca más fiera
+"Que el corazón infeliz:
+"La que le chupó la sangre
+"Y se echó luego a reír.
+
+"Corazón que lleva rota
+"El ancla fiel del hogar,
+"Va como barca perdida,
+"Que no sabe a dónde va."
+
+En cuanto llega a esta angustia
+Rompe el muerto a maldecir:
+Le amanso el cráneo, lo acuesto;
+Acuesto al muerto a dormir.

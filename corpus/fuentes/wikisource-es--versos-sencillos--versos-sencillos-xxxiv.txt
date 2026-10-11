@@ -1,0 +1,28 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXIV
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXIV
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\n¡Penas! ¿Quién osa decir\nQue tengo yo penas?\nLuego, Después del rayo, y del fuego,\nTendré tiempo de sufrir. \n\nYo sé de un pesar profundo\nEntre las penas sin nombres:\n¡La esclavitud de los hombres\nEs la gran pena del mundo!\n\nHay montes, y hay que subir\nLos montes altos; ¡después\nVeremos, alma, quién es\nQuien te me ha puesto al morir!\n</poem>"}},"i":0}}]}'>
+
+¡Penas! ¿Quién osa decir
+Que tengo yo penas?
+Luego, Después del rayo, y del fuego,
+Tendré tiempo de sufrir.
+
+Yo sé de un pesar profundo
+Entre las penas sin nombres:
+¡La esclavitud de los hombres
+Es la gran pena del mundo!
+
+Hay montes, y hay que subir
+Los montes altos; ¡después
+Veremos, alma, quién es
+Quien te me ha puesto al morir!

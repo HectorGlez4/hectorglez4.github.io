@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXI
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\nPara modelo de un dios\nEl pintor lo envió a pedir:\n¡Para eso no! ¡para ir,\nPatria, a servirse los dos! \n\nBien estará en la pintura\nEl hijo que amo y bendigo:\n¡Mejor en la ceja oscura,\nCara a cara al enemigo! \n\nEs rubio, es fuerte, es garzón\nDe nobleza natural:\n¡Hijo, por la luz natal!\n¡Hijo, por el pabellón! \n\nVamos, pues, hijo viril;\nVamos los dos; si yo muero,\nMe besas: si tú... ¡prefiero\nVerte muerto a verte vil\n</poem>"}},"i":0}}]}'>
+
+Para modelo de un dios
+El pintor lo envió a pedir:
+¡Para eso no! ¡para ir,
+Patria, a servirse los dos!
+
+Bien estará en la pintura
+El hijo que amo y bendigo:
+¡Mejor en la ceja oscura,
+Cara a cara al enemigo!
+
+Es rubio, es fuerte, es garzón
+De nobleza natural:
+¡Hijo, por la luz natal!
+¡Hijo, por el pabellón!
+
+Vamos, pues, hijo viril;
+Vamos los dos; si yo muero,
+Me besas: si tú... ¡prefiero
+Verte muerto a verte vil

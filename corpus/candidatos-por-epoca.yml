@@ -1003,6 +1003,621 @@ epocas:
         idDePagina: 42863
         pagina: "https://es.wikisource.org/wiki/Autor:Tom%C3%A1s_de_Aquino"
         dominioPublico: true
+  - id: "colombianos"
+    nombre: "Autores colombianos"
+    categoria: "Categoría:Autores colombianos"
+    recuperada: "2026-10-11"
+    candidatos:
+      - nombre: "Adolfo León Gómez"
+        slug: "adolfo-leon-gomez"
+        idDePagina: 134526
+        pagina: "https://es.wikisource.org/wiki/Autor:Adolfo_Le%C3%B3n_G%C3%B3mez"
+        dominioPublico: false
+      - nombre: "Álvaro Uribe"
+        slug: "alvaro-uribe"
+        idDePagina: 238130
+        pagina: "https://es.wikisource.org/wiki/Autor:%C3%81lvaro_Uribe"
+        dominioPublico: false
+      - nombre: "Antonio Nariño"
+        slug: "antonio-narino"
+        idDePagina: 27776
+        pagina: "https://es.wikisource.org/wiki/Autor:Antonio_Nari%C3%B1o"
+        dominioPublico: true
+      - nombre: "Carlos Arturo Torres"
+        slug: "carlos-arturo-torres"
+        idDePagina: 61498
+        pagina: "https://es.wikisource.org/wiki/Autor:Carlos_Arturo_Torres"
+        dominioPublico: true
+      - nombre: "Enrique Álvarez Henao"
+        slug: "enrique-alvarez-henao"
+        idDePagina: 27291
+        pagina: "https://es.wikisource.org/wiki/Autor:Enrique_%C3%81lvarez_Henao"
+        dominioPublico: true
+      - nombre: "Francisco José Urrutia"
+        slug: "francisco-jose-urrutia"
+        idDePagina: 237835
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Jos%C3%A9_Urrutia"
+        dominioPublico: false
+      - nombre: "Gabriel García Márquez"
+        slug: "gabriel-garcia-marquez"
+        idDePagina: 44747
+        pagina: "https://es.wikisource.org/wiki/Autor:Gabriel_Garc%C3%ADa_M%C3%A1rquez"
+        dominioPublico: false
+      - nombre: "Guillermo Valencia"
+        slug: "guillermo-valencia"
+        idDePagina: 70140
+        pagina: "https://es.wikisource.org/wiki/Autor:Guillermo_Valencia"
+        dominioPublico: false
+      - nombre: "Joaquín Mosquera"
+        slug: "joaquin-mosquera"
+        idDePagina: 388624
+        pagina: "https://es.wikisource.org/wiki/Autor:Joaqu%C3%ADn_Mosquera"
+        dominioPublico: true
+      - nombre: "Jorge Eliécer Gaitán"
+        slug: "jorge-eliecer-gaitan"
+        idDePagina: 28269
+        pagina: "https://es.wikisource.org/wiki/Autor:Jorge_Eli%C3%A9cer_Gait%C3%A1n"
+        dominioPublico: false
+      - nombre: "Jorge Holguín"
+        slug: "jorge-holguin"
+        idDePagina: 237839
+        pagina: "https://es.wikisource.org/wiki/Autor:Jorge_Holgu%C3%ADn"
+        dominioPublico: false
+      - nombre: "Jorge Isaacs"
+        slug: "jorge-isaacs"
+        idDePagina: 19696
+        pagina: "https://es.wikisource.org/wiki/Autor:Jorge_Isaacs"
+        dominioPublico: true
+      - nombre: "José Asunción Silva"
+        slug: "jose-asuncion-silva"
+        idDePagina: 2295
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Asunci%C3%B3n_Silva"
+        dominioPublico: true
+      - nombre: "José Eustasio Rivera"
+        slug: "jose-eustasio-rivera"
+        idDePagina: 215804
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Eustasio_Rivera"
+        dominioPublico: false
+      - nombre: "José María Samper"
+        slug: "jose-maria-samper"
+        idDePagina: 350820
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Mar%C3%ADa_Samper"
+        dominioPublico: true
+      - nombre: "José María Vargas Vila"
+        slug: "jose-maria-vargas-vila"
+        idDePagina: 139281
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Mar%C3%ADa_Vargas_Vila"
+        dominioPublico: false
+      - nombre: "Josefa Acevedo de Gómez"
+        slug: "josefa-acevedo-de-gomez"
+        idDePagina: 35262
+        pagina: "https://es.wikisource.org/wiki/Autor:Josefa_Acevedo_de_G%C3%B3mez"
+        dominioPublico: true
+      - nombre: "Juan García del Río"
+        slug: "juan-garcia-del-rio"
+        idDePagina: 137980
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Garc%C3%ADa_del_R%C3%ADo"
+        dominioPublico: true
+      - nombre: "Juan José Botero Ruiz"
+        slug: "juan-jose-botero-ruiz"
+        idDePagina: 54706
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Jos%C3%A9_Botero_Ruiz"
+        dominioPublico: false
+      - nombre: "Juan Manuel García Tejada"
+        slug: "juan-manuel-garcia-tejada"
+        idDePagina: 12004
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Manuel_Garc%C3%ADa_Tejada"
+        dominioPublico: true
+      - nombre: "Julio Arboleda"
+        slug: "julio-arboleda"
+        idDePagina: 27540
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_Arboleda"
+        dominioPublico: true
+      - nombre: "Julio Flórez"
+        slug: "julio-florez"
+        idDePagina: 109922
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_Fl%C3%B3rez"
+        dominioPublico: true
+      - nombre: "Lorenzo Marroquín"
+        slug: "lorenzo-marroquin"
+        idDePagina: 262452
+        pagina: "https://es.wikisource.org/wiki/Autor:Lorenzo_Marroqu%C3%ADn"
+        dominioPublico: true
+      - nombre: "Luis Carlos López"
+        slug: "luis-carlos-lopez"
+        idDePagina: 377084
+        pagina: "https://es.wikisource.org/wiki/Autor:Luis_Carlos_L%C3%B3pez"
+        dominioPublico: false
+      - nombre: "Miguel Antonio Caro"
+        slug: "miguel-antonio-caro"
+        idDePagina: 110244
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_Antonio_Caro"
+        dominioPublico: true
+      - nombre: "Óscar Delgado"
+        slug: "oscar-delgado"
+        idDePagina: 238230
+        pagina: "https://es.wikisource.org/wiki/Autor:%C3%93scar_Delgado"
+        dominioPublico: false
+      - nombre: "Rafael Pombo"
+        slug: "rafael-pombo"
+        idDePagina: 8225
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Pombo"
+        dominioPublico: true
+      - nombre: "Salvador Camacho Roldán"
+        slug: "salvador-camacho-roldan"
+        idDePagina: 137735
+        pagina: "https://es.wikisource.org/wiki/Autor:Salvador_Camacho_Rold%C3%A1n"
+        dominioPublico: true
+      - nombre: "Samael Aun Weor"
+        slug: "samael-aun-weor"
+        idDePagina: 15638
+        pagina: "https://es.wikisource.org/wiki/Autor:Samael_Aun_Weor"
+        dominioPublico: false
+      - nombre: "Soledad Acosta de Samper"
+        slug: "soledad-acosta-de-samper"
+        idDePagina: 22811
+        pagina: "https://es.wikisource.org/wiki/Autor:Soledad_Acosta_de_Samper"
+        dominioPublico: true
+      - nombre: "Temistocles Avella"
+        slug: "temistocles-avella"
+        idDePagina: 398654
+        pagina: "https://es.wikisource.org/wiki/Autor:Temistocles_Avella"
+        dominioPublico: true
+  - id: "cubanos"
+    nombre: "Autores cubanos"
+    categoria: "Categoría:Autores cubanos"
+    recuperada: "2026-10-11"
+    candidatos:
+      - nombre: "Antonio Guiteras y Font"
+        slug: "antonio-guiteras-y-font"
+        idDePagina: 266638
+        pagina: "https://es.wikisource.org/wiki/Autor:Antonio_Guiteras_y_Font"
+        dominioPublico: true
+      - nombre: "Augusto de Armas y Colón"
+        slug: "augusto-de-armas-y-colon"
+        idDePagina: 27546
+        pagina: "https://es.wikisource.org/wiki/Autor:Augusto_de_Armas_y_Col%C3%B3n"
+        dominioPublico: true
+      - nombre: "Brígida Agüero"
+        slug: "brigida-aguero"
+        idDePagina: 21487
+        pagina: "https://es.wikisource.org/wiki/Autor:Br%C3%ADgida_Ag%C3%BCero"
+        dominioPublico: true
+      - nombre: "Catalina Rodríguez"
+        slug: "catalina-rodriguez"
+        idDePagina: 238258
+        pagina: "https://es.wikisource.org/wiki/Autor:Catalina_Rodr%C3%ADguez"
+        dominioPublico: true
+      - nombre: "Cirilo Villaverde"
+        slug: "cirilo-villaverde"
+        idDePagina: 350584
+        pagina: "https://es.wikisource.org/wiki/Autor:Cirilo_Villaverde"
+        dominioPublico: true
+      - nombre: "Clotilde del Carmen Rodríguez"
+        slug: "clotilde-del-carmen-rodriguez"
+        idDePagina: 386112
+        pagina: "https://es.wikisource.org/wiki/Autor:Clotilde_del_Carmen_Rodr%C3%ADguez"
+        dominioPublico: true
+      - nombre: "Domitila García de Coronado"
+        slug: "domitila-garcia-de-coronado"
+        idDePagina: 237847
+        pagina: "https://es.wikisource.org/wiki/Autor:Domitila_Garc%C3%ADa_de_Coronado"
+        dominioPublico: false
+      - nombre: "Emilio Bobadilla"
+        slug: "emilio-bobadilla"
+        idDePagina: 51547
+        pagina: "https://es.wikisource.org/wiki/Autor:Emilio_Bobadilla"
+        dominioPublico: true
+      - nombre: "Emilio Roig de Leuchsenring"
+        slug: "emilio-roig-de-leuchsenring"
+        idDePagina: 137759
+        pagina: "https://es.wikisource.org/wiki/Autor:Emilio_Roig_de_Leuchsenring"
+        dominioPublico: false
+      - nombre: "Emilio Soulére"
+        slug: "emilio-soulere"
+        idDePagina: 252686
+        pagina: "https://es.wikisource.org/wiki/Autor:Emilio_Soul%C3%A9re"
+        dominioPublico: true
+      - nombre: "Enrique Piñeyro"
+        slug: "enrique-pineyro"
+        idDePagina: 134921
+        pagina: "https://es.wikisource.org/wiki/Autor:Enrique_Pi%C3%B1eyro"
+        dominioPublico: true
+      - nombre: "Felipe Poey"
+        slug: "felipe-poey"
+        idDePagina: 308372
+        pagina: "https://es.wikisource.org/wiki/Autor:Felipe_Poey"
+        dominioPublico: true
+      - nombre: "Fernando Tarrida del Mármol"
+        slug: "fernando-tarrida-del-marmol"
+        idDePagina: 25885
+        pagina: "https://es.wikisource.org/wiki/Autor:Fernando_Tarrida_del_M%C3%A1rmol"
+        dominioPublico: true
+      - nombre: "Fidel Castro"
+        slug: "fidel-castro"
+        idDePagina: 9448
+        pagina: "https://es.wikisource.org/wiki/Autor:Fidel_Castro"
+        dominioPublico: false
+      - nombre: "Francisca González Ruz"
+        slug: "francisca-gonzalez-ruz"
+        idDePagina: 386063
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisca_Gonz%C3%A1lez_Ruz"
+        dominioPublico: true
+      - nombre: "Francisco Agüero"
+        slug: "francisco-aguero"
+        idDePagina: 27075
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Ag%C3%BCero"
+        dominioPublico: true
+      - nombre: "Francisco Sellén"
+        slug: "francisco-sellen"
+        idDePagina: 339350
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Sell%C3%A9n"
+        dominioPublico: true
+      - nombre: "Gabriel de la Concepción Valdés"
+        slug: "gabriel-de-la-concepcion-valdes"
+        idDePagina: 134491
+        pagina: "https://es.wikisource.org/wiki/Autor:Gabriel_de_la_Concepci%C3%B3n_Vald%C3%A9s"
+        dominioPublico: true
+      - nombre: "Ignacio María de Acosta"
+        slug: "ignacio-maria-de-acosta"
+        idDePagina: 26313
+        pagina: "https://es.wikisource.org/wiki/Autor:Ignacio_Mar%C3%ADa_de_Acosta"
+        dominioPublico: true
+      - nombre: "Ignacio Valdés y Machuca"
+        slug: "ignacio-valdes-y-machuca"
+        idDePagina: 12417
+        pagina: "https://es.wikisource.org/wiki/Autor:Ignacio_Vald%C3%A9s_y_Machuca"
+        dominioPublico: true
+      - nombre: "Joaquín Fontanals del Castillo"
+        slug: "joaquin-fontanals-del-castillo"
+        idDePagina: 390598
+        pagina: "https://es.wikisource.org/wiki/Autor:Joaqu%C3%ADn_Fontanals_del_Castillo"
+        dominioPublico: true
+      - nombre: "Joaquín Nicolás Aramburu"
+        slug: "joaquin-nicolas-aramburu"
+        idDePagina: 27526
+        pagina: "https://es.wikisource.org/wiki/Autor:Joaqu%C3%ADn_Nicol%C3%A1s_Aramburu"
+        dominioPublico: true
+      - nombre: "José Antonio Saco"
+        slug: "jose-antonio-saco"
+        idDePagina: 404888
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Antonio_Saco"
+        dominioPublico: true
+      - nombre: "José de Armas y Cárdenas"
+        slug: "jose-de-armas-y-cardenas"
+        idDePagina: 381604
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_de_Armas_y_C%C3%A1rdenas"
+        dominioPublico: true
+      - nombre: "José María Félix de Arrate"
+        slug: "jose-maria-felix-de-arrate"
+        idDePagina: 11612
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Mar%C3%ADa_F%C3%A9lix_de_Arrate"
+        dominioPublico: true
+      - nombre: "José María Heredia"
+        slug: "jose-maria-heredia"
+        idDePagina: 6753
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Mar%C3%ADa_Heredia"
+        dominioPublico: true
+      - nombre: "Juan Clemente Zenea"
+        slug: "juan-clemente-zenea"
+        idDePagina: 32397
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Clemente_Zenea"
+        dominioPublico: true
+      - nombre: "Juan Francisco Manzano"
+        slug: "juan-francisco-manzano"
+        idDePagina: 35977
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Francisco_Manzano"
+        dominioPublico: true
+      - nombre: "Luisa Pérez de Zambrana"
+        slug: "luisa-perez-de-zambrana"
+        idDePagina: 238001
+        pagina: "https://es.wikisource.org/wiki/Autor:Luisa_P%C3%A9rez_de_Zambrana"
+        dominioPublico: true
+      - nombre: "Manuel de Zequeira y Arango"
+        slug: "manuel-de-zequeira-y-arango"
+        idDePagina: 12204
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_de_Zequeira_y_Arango"
+        dominioPublico: true
+      - nombre: "Manuel María Pérez y Ramírez"
+        slug: "manuel-maria-perez-y-ramirez"
+        idDePagina: 12157
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Mar%C3%ADa_P%C3%A9rez_y_Ram%C3%ADrez"
+        dominioPublico: true
+      - nombre: "Manuel Valdés Rodríguez"
+        slug: "manuel-valdes-rodriguez"
+        idDePagina: 258150
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Vald%C3%A9s_Rodr%C3%ADguez"
+        dominioPublico: true
+      - nombre: "Manuela Agramonte"
+        slug: "manuela-agramonte"
+        idDePagina: 386116
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuela_Agramonte"
+        dominioPublico: true
+      - nombre: "María de Santa Cruz"
+        slug: "maria-de-santa-cruz"
+        idDePagina: 238274
+        pagina: "https://es.wikisource.org/wiki/Autor:Mar%C3%ADa_de_Santa_Cruz"
+        dominioPublico: true
+      - nombre: "Martina Pierra de Poo"
+        slug: "martina-pierra-de-poo"
+        idDePagina: 238006
+        pagina: "https://es.wikisource.org/wiki/Autor:Martina_Pierra_de_Poo"
+        dominioPublico: true
+      - nombre: "Merced Valdés Mendoza"
+        slug: "merced-valdes-mendoza"
+        idDePagina: 13000
+        pagina: "https://es.wikisource.org/wiki/Autor:Merced_Vald%C3%A9s_Mendoza"
+        dominioPublico: true
+      - nombre: "Pamela Fernández de Laude"
+        slug: "pamela-fernandez-de-laude"
+        idDePagina: 386261
+        pagina: "https://es.wikisource.org/wiki/Autor:Pamela_Fern%C3%A1ndez_de_Laude"
+        dominioPublico: true
+      - nombre: "Pedro Figueredo"
+        slug: "pedro-figueredo"
+        idDePagina: 263431
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_Figueredo"
+        dominioPublico: true
+      - nombre: "Pedro José Guiteras Font"
+        slug: "pedro-jose-guiteras-font"
+        idDePagina: 253815
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_Jos%C3%A9_Guiteras_Font"
+        dominioPublico: true
+      - nombre: "Rafael Mendive"
+        slug: "rafael-mendive"
+        idDePagina: 18231
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Mendive"
+        dominioPublico: true
+      - nombre: "Ramón Meza y Suárez Inclán"
+        slug: "ramon-meza-y-suarez-inclan"
+        idDePagina: 231780
+        pagina: "https://es.wikisource.org/wiki/Autor:Ram%C3%B3n_Meza_y_Su%C3%A1rez_Incl%C3%A1n"
+        dominioPublico: true
+      - nombre: "Ramón Vélez Herrera"
+        slug: "ramon-velez-herrera"
+        idDePagina: 386118
+        pagina: "https://es.wikisource.org/wiki/Autor:Ram%C3%B3n_V%C3%A9lez_Herrera"
+        dominioPublico: true
+      - nombre: "Raúl de Cárdenas y Echarte"
+        slug: "raul-de-cardenas-y-echarte"
+        idDePagina: 134414
+        pagina: "https://es.wikisource.org/wiki/Autor:Ra%C3%BAl_de_C%C3%A1rdenas_y_Echarte"
+        dominioPublico: false
+      - nombre: "Úrsula Céspedes de Escanaverino"
+        slug: "ursula-cespedes-de-escanaverino"
+        idDePagina: 238003
+        pagina: "https://es.wikisource.org/wiki/Autor:%C3%9Arsula_C%C3%A9spedes_de_Escanaverino"
+        dominioPublico: true
+  - id: "ecuatorianos"
+    nombre: "Autores ecuatorianos"
+    categoria: "Categoría:Autores ecuatorianos"
+    recuperada: "2026-10-11"
+    candidatos:
+      - nombre: "Abelardo Moncayo Jijón"
+        slug: "abelardo-moncayo-jijon"
+        idDePagina: 23917
+        pagina: "https://es.wikisource.org/wiki/Autor:Abelardo_Moncayo_Jij%C3%B3n"
+        dominioPublico: true
+      - nombre: "Arturo Borja"
+        slug: "arturo-borja"
+        idDePagina: 74282
+        pagina: "https://es.wikisource.org/wiki/Autor:Arturo_Borja"
+        dominioPublico: true
+      - nombre: "Dolores Veintimilla"
+        slug: "dolores-veintimilla"
+        idDePagina: 50311
+        pagina: "https://es.wikisource.org/wiki/Autor:Dolores_Veintimilla"
+        dominioPublico: true
+      - nombre: "Ernesto Noboa y Caamaño"
+        slug: "ernesto-noboa-y-caamano"
+        idDePagina: 117739
+        pagina: "https://es.wikisource.org/wiki/Autor:Ernesto_Noboa_y_Caama%C3%B1o"
+        dominioPublico: false
+      - nombre: "Francisco Javier Salazar Arboleda"
+        slug: "francisco-javier-salazar-arboleda"
+        idDePagina: 23138
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Javier_Salazar_Arboleda"
+        dominioPublico: true
+      - nombre: "Gabriel García Moreno"
+        slug: "gabriel-garcia-moreno"
+        idDePagina: 23092
+        pagina: "https://es.wikisource.org/wiki/Autor:Gabriel_Garc%C3%ADa_Moreno"
+        dominioPublico: true
+      - nombre: "Gonzalo Zaldumbide"
+        slug: "gonzalo-zaldumbide"
+        idDePagina: 361852
+        pagina: "https://es.wikisource.org/wiki/Autor:Gonzalo_Zaldumbide"
+        dominioPublico: false
+      - nombre: "Honorato Vázquez"
+        slug: "honorato-vazquez"
+        idDePagina: 24565
+        pagina: "https://es.wikisource.org/wiki/Autor:Honorato_V%C3%A1zquez"
+        dominioPublico: false
+      - nombre: "Humberto Fierro"
+        slug: "humberto-fierro"
+        idDePagina: 117734
+        pagina: "https://es.wikisource.org/wiki/Autor:Humberto_Fierro"
+        dominioPublico: false
+      - nombre: "Humberto Salvador"
+        slug: "humberto-salvador"
+        idDePagina: 272718
+        pagina: "https://es.wikisource.org/wiki/Autor:Humberto_Salvador"
+        dominioPublico: false
+      - nombre: "Jacinto Collahuazo"
+        slug: "jacinto-collahuazo"
+        idDePagina: 73742
+        pagina: "https://es.wikisource.org/wiki/Autor:Jacinto_Collahuazo"
+        dominioPublico: true
+      - nombre: "Jacinto de Evia"
+        slug: "jacinto-de-evia"
+        idDePagina: 198786
+        pagina: "https://es.wikisource.org/wiki/Autor:Jacinto_de_Evia"
+        dominioPublico: true
+      - nombre: "Joaquín Gallegos Lara"
+        slug: "joaquin-gallegos-lara"
+        idDePagina: 89372
+        pagina: "https://es.wikisource.org/wiki/Autor:Joaqu%C3%ADn_Gallegos_Lara"
+        dominioPublico: false
+      - nombre: "José de la Cuadra"
+        slug: "jose-de-la-cuadra"
+        idDePagina: 58646
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_de_la_Cuadra"
+        dominioPublico: false
+      - nombre: "José Joaquín de Olmedo"
+        slug: "jose-joaquin-de-olmedo"
+        idDePagina: 12151
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Joaqu%C3%ADn_de_Olmedo"
+        dominioPublico: true
+      - nombre: "Juan Abel Echeverría"
+        slug: "juan-abel-echeverria"
+        idDePagina: 23924
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Abel_Echeverr%C3%ADa"
+        dominioPublico: false
+      - nombre: "Juan Bautista Aguirre"
+        slug: "juan-bautista-aguirre"
+        idDePagina: 11149
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Bautista_Aguirre"
+        dominioPublico: true
+      - nombre: "Juan León Mera"
+        slug: "juan-leon-mera"
+        idDePagina: 23273
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Le%C3%B3n_Mera"
+        dominioPublico: true
+      - nombre: "Julio Endara"
+        slug: "julio-endara"
+        idDePagina: 137912
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_Endara"
+        dominioPublico: false
+      - nombre: "Julio Matovelle"
+        slug: "julio-matovelle"
+        idDePagina: 23921
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_Matovelle"
+        dominioPublico: false
+      - nombre: "Julio Zaldumbide Gangotena"
+        slug: "julio-zaldumbide-gangotena"
+        idDePagina: 23786
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_Zaldumbide_Gangotena"
+        dominioPublico: true
+      - nombre: "Luis A. Martínez"
+        slug: "luis-a-martinez"
+        idDePagina: 49829
+        pagina: "https://es.wikisource.org/wiki/Autor:Luis_A._Mart%C3%ADnez"
+        dominioPublico: true
+      - nombre: "Luis Alberto Costales"
+        slug: "luis-alberto-costales"
+        idDePagina: 221299
+        pagina: "https://es.wikisource.org/wiki/Autor:Luis_Alberto_Costales"
+        dominioPublico: false
+      - nombre: "Luis Cordero"
+        slug: "luis-cordero"
+        idDePagina: 23852
+        pagina: "https://es.wikisource.org/wiki/Autor:Luis_Cordero"
+        dominioPublico: true
+      - nombre: "Manuel J. Calle"
+        slug: "manuel-j-calle"
+        idDePagina: 135073
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_J._Calle"
+        dominioPublico: true
+      - nombre: "Manuel Nicolás Arízaga"
+        slug: "manuel-nicolas-arizaga"
+        idDePagina: 333656
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Nicol%C3%A1s_Ar%C3%ADzaga"
+        dominioPublico: true
+      - nombre: "Matilde Hidalgo Navarro"
+        slug: "matilde-hidalgo-navarro"
+        idDePagina: 255695
+        pagina: "https://es.wikisource.org/wiki/Autor:Matilde_Hidalgo_Navarro"
+        dominioPublico: false
+      - nombre: "Medardo Ángel Silva"
+        slug: "medardo-angel-silva"
+        idDePagina: 68841
+        pagina: "https://es.wikisource.org/wiki/Autor:Medardo_%C3%81ngel_Silva"
+        dominioPublico: true
+      - nombre: "Miguel Ángel Corral"
+        slug: "miguel-angel-corral"
+        idDePagina: 23585
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_%C3%81ngel_Corral"
+        dominioPublico: true
+      - nombre: "Miguel Moreno Ordóñez"
+        slug: "miguel-moreno-ordonez"
+        idDePagina: 23919
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_Moreno_Ord%C3%B3%C3%B1ez"
+        dominioPublico: true
+      - nombre: "Miguel Riofrío"
+        slug: "miguel-riofrio"
+        idDePagina: 23101
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_Riofr%C3%ADo"
+        dominioPublico: true
+      - nombre: "Numa Pompilio Llona"
+        slug: "numa-pompilio-llona"
+        idDePagina: 23074
+        pagina: "https://es.wikisource.org/wiki/Autor:Numa_Pompilio_Llona"
+        dominioPublico: true
+      - nombre: "Octavio Cordero Palacios"
+        slug: "octavio-cordero-palacios"
+        idDePagina: 288375
+        pagina: "https://es.wikisource.org/wiki/Autor:Octavio_Cordero_Palacios"
+        dominioPublico: false
+      - nombre: "Pablo Palacio"
+        slug: "pablo-palacio"
+        idDePagina: 261780
+        pagina: "https://es.wikisource.org/wiki/Autor:Pablo_Palacio"
+        dominioPublico: false
+      - nombre: "Pedro Fermín Cevallos"
+        slug: "pedro-fermin-cevallos"
+        idDePagina: 285158
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_Ferm%C3%ADn_Cevallos"
+        dominioPublico: true
+      - nombre: "Quintiliano Sánchez"
+        slug: "quintiliano-sanchez"
+        idDePagina: 23879
+        pagina: "https://es.wikisource.org/wiki/Autor:Quintiliano_S%C3%A1nchez"
+        dominioPublico: true
+      - nombre: "Rafael Carvajal"
+        slug: "rafael-carvajal"
+        idDePagina: 23079
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Carvajal"
+        dominioPublico: true
+      - nombre: "Rafael García Goyena"
+        slug: "rafael-garcia-goyena"
+        idDePagina: 12620
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Garc%C3%ADa_Goyena"
+        dominioPublico: true
+      - nombre: "Rafael María Arízaga"
+        slug: "rafael-maria-arizaga"
+        idDePagina: 24622
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Mar%C3%ADa_Ar%C3%ADzaga"
+        dominioPublico: false
+      - nombre: "Ramón Samaniego Palacio"
+        slug: "ramon-samaniego-palacio"
+        idDePagina: 23250
+        pagina: "https://es.wikisource.org/wiki/Autor:Ram%C3%B3n_Samaniego_Palacio"
+        dominioPublico: true
+      - nombre: "Remigio Crespo Toral"
+        slug: "remigio-crespo-toral"
+        idDePagina: 113379
+        pagina: "https://es.wikisource.org/wiki/Autor:Remigio_Crespo_Toral"
+        dominioPublico: false
+      - nombre: "Simón Bolívar"
+        slug: "simon-bolivar"
+        idDePagina: 2657
+        pagina: "https://es.wikisource.org/wiki/Autor:Sim%C3%B3n_Bol%C3%ADvar"
+        dominioPublico: true
+      - nombre: "Vicente Emilio Molestina"
+        slug: "vicente-emilio-molestina"
+        idDePagina: 126503
+        pagina: "https://es.wikisource.org/wiki/Autor:Vicente_Emilio_Molestina"
+        dominioPublico: true
+      - nombre: "Vicente Piedrahíta"
+        slug: "vicente-piedrahita"
+        idDePagina: 23871
+        pagina: "https://es.wikisource.org/wiki/Autor:Vicente_Piedrah%C3%ADta"
+        dominioPublico: true
+      - nombre: "Vicente Rocafuerte"
+        slug: "vicente-rocafuerte"
+        idDePagina: 218017
+        pagina: "https://es.wikisource.org/wiki/Autor:Vicente_Rocafuerte"
+        dominioPublico: true
   - id: "edad-media"
     nombre: "Edad Media"
     categoria: "Categoría:Autores de la Edad Media"
@@ -1277,6 +1892,321 @@ epocas:
         slug: "tomas-de-rocamora"
         idDePagina: 250688
         pagina: "https://es.wikisource.org/wiki/Autor:Tom%C3%A1s_de_Rocamora"
+        dominioPublico: true
+  - id: "peruanos"
+    nombre: "Autores peruanos"
+    categoria: "Categoría:Autores peruanos"
+    recuperada: "2026-10-11"
+    candidatos:
+      - nombre: "Abelardo Gamarra Rondó"
+        slug: "abelardo-gamarra-rondo"
+        idDePagina: 244965
+        pagina: "https://es.wikisource.org/wiki/Autor:Abelardo_Gamarra_Rond%C3%B3"
+        dominioPublico: true
+      - nombre: "Abraham Valdelomar"
+        slug: "abraham-valdelomar"
+        idDePagina: 32402
+        pagina: "https://es.wikisource.org/wiki/Autor:Abraham_Valdelomar"
+        dominioPublico: true
+      - nombre: "Alan García"
+        slug: "alan-garcia"
+        idDePagina: 21076
+        pagina: "https://es.wikisource.org/wiki/Autor:Alan_Garc%C3%ADa"
+        dominioPublico: false
+      - nombre: "Amalia Puga de Lozada"
+        slug: "amalia-puga-de-lozada"
+        idDePagina: 176808
+        pagina: "https://es.wikisource.org/wiki/Autor:Amalia_Puga_de_Lozada"
+        dominioPublico: false
+      - nombre: "Angélica Palma"
+        slug: "angelica-palma"
+        idDePagina: 200988
+        pagina: "https://es.wikisource.org/wiki/Autor:Ang%C3%A9lica_Palma"
+        dominioPublico: false
+      - nombre: "Arístides Herrera Cuntti"
+        slug: "aristides-herrera-cuntti"
+        idDePagina: 27646
+        pagina: "https://es.wikisource.org/wiki/Autor:Ar%C3%ADstides_Herrera_Cuntti"
+        dominioPublico: false
+      - nombre: "Aurora Cáceres Moreno"
+        slug: "aurora-caceres-moreno"
+        idDePagina: 177004
+        pagina: "https://es.wikisource.org/wiki/Autor:Aurora_C%C3%A1ceres_Moreno"
+        dominioPublico: false
+      - nombre: "Benjamín Castañeda"
+        slug: "benjamin-castaneda"
+        idDePagina: 334527
+        pagina: "https://es.wikisource.org/wiki/Autor:Benjam%C3%ADn_Casta%C3%B1eda"
+        dominioPublico: true
+      - nombre: "Carlos Augusto Salaverry"
+        slug: "carlos-augusto-salaverry"
+        idDePagina: 38895
+        pagina: "https://es.wikisource.org/wiki/Autor:Carlos_Augusto_Salaverry"
+        dominioPublico: true
+      - nombre: "Carlos Germán Amézaga"
+        slug: "carlos-german-amezaga"
+        idDePagina: 133182
+        pagina: "https://es.wikisource.org/wiki/Autor:Carlos_Germ%C3%A1n_Am%C3%A9zaga"
+        dominioPublico: true
+      - nombre: "Carlos Oquendo de Amat"
+        slug: "carlos-oquendo-de-amat"
+        idDePagina: 82300
+        pagina: "https://es.wikisource.org/wiki/Autor:Carlos_Oquendo_de_Amat"
+        dominioPublico: false
+      - nombre: "Carlos Wiesse Portocarrero"
+        slug: "carlos-wiesse-portocarrero"
+        idDePagina: 240908
+        pagina: "https://es.wikisource.org/wiki/Autor:Carlos_Wiesse_Portocarrero"
+        dominioPublico: false
+      - nombre: "Carmen Torres Calderón Pinillos"
+        slug: "carmen-torres-calderon-pinillos"
+        idDePagina: 213896
+        pagina: "https://es.wikisource.org/wiki/Autor:Carmen_Torres_Calder%C3%B3n_Pinillos"
+        dominioPublico: false
+      - nombre: "Carolina Freyre"
+        slug: "carolina-freyre"
+        idDePagina: 200984
+        pagina: "https://es.wikisource.org/wiki/Autor:Carolina_Freyre"
+        dominioPublico: true
+      - nombre: "Cayetano Suricalday"
+        slug: "cayetano-suricalday"
+        idDePagina: 40870
+        pagina: "https://es.wikisource.org/wiki/Autor:Cayetano_Suricalday"
+        dominioPublico: true
+      - nombre: "César Vallejo"
+        slug: "cesar-vallejo"
+        idDePagina: 19361
+        pagina: "https://es.wikisource.org/wiki/Autor:C%C3%A9sar_Vallejo"
+        dominioPublico: false
+      - nombre: "Clemente Althaus"
+        slug: "clemente-althaus"
+        idDePagina: 24674
+        pagina: "https://es.wikisource.org/wiki/Autor:Clemente_Althaus"
+        dominioPublico: true
+      - nombre: "Clorinda Matto de Turner"
+        slug: "clorinda-matto-de-turner"
+        idDePagina: 147729
+        pagina: "https://es.wikisource.org/wiki/Autor:Clorinda_Matto_de_Turner"
+        dominioPublico: true
+      - nombre: "Elvira García y García"
+        slug: "elvira-garcia-y-garcia"
+        idDePagina: 174070
+        pagina: "https://es.wikisource.org/wiki/Autor:Elvira_Garc%C3%ADa_y_Garc%C3%ADa"
+        dominioPublico: false
+      - nombre: "Enrique A. Carrillo"
+        slug: "enrique-a-carrillo"
+        idDePagina: 84314
+        pagina: "https://es.wikisource.org/wiki/Autor:Enrique_A._Carrillo"
+        dominioPublico: false
+      - nombre: "Eugenio Larrabure y Unanue"
+        slug: "eugenio-larrabure-y-unanue"
+        idDePagina: 136272
+        pagina: "https://es.wikisource.org/wiki/Autor:Eugenio_Larrabure_y_Unanue"
+        dominioPublico: true
+      - nombre: "Federico More Barrionuevo"
+        slug: "federico-more-barrionuevo"
+        idDePagina: 409655
+        pagina: "https://es.wikisource.org/wiki/Autor:Federico_More_Barrionuevo"
+        dominioPublico: false
+      - nombre: "Federico Villarreal"
+        slug: "federico-villarreal"
+        idDePagina: 306722
+        pagina: "https://es.wikisource.org/wiki/Autor:Federico_Villarreal"
+        dominioPublico: true
+      - nombre: "Felipe Pardo y Aliaga"
+        slug: "felipe-pardo-y-aliaga"
+        idDePagina: 25959
+        pagina: "https://es.wikisource.org/wiki/Autor:Felipe_Pardo_y_Aliaga"
+        dominioPublico: true
+      - nombre: "Felipe Pinglo Alva"
+        slug: "felipe-pinglo-alva"
+        idDePagina: 264490
+        pagina: "https://es.wikisource.org/wiki/Autor:Felipe_Pinglo_Alva"
+        dominioPublico: false
+      - nombre: "Flora Tristan"
+        slug: "flora-tristan"
+        idDePagina: 156371
+        pagina: "https://es.wikisource.org/wiki/Autor:Flora_Tristan"
+        dominioPublico: true
+      - nombre: "Florentino Alcorta"
+        slug: "florentino-alcorta"
+        idDePagina: 133189
+        pagina: "https://es.wikisource.org/wiki/Autor:Florentino_Alcorta"
+        dominioPublico: true
+      - nombre: "Francisco García Calderón Rey"
+        slug: "francisco-garcia-calderon-rey"
+        idDePagina: 134927
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Garc%C3%ADa_Calder%C3%B3n_Rey"
+        dominioPublico: false
+      - nombre: "Guamán Poma de Ayala"
+        slug: "guaman-poma-de-ayala"
+        idDePagina: 74302
+        pagina: "https://es.wikisource.org/wiki/Autor:Guam%C3%A1n_Poma_de_Ayala"
+        dominioPublico: true
+      - nombre: "Javier Heraud"
+        slug: "javier-heraud"
+        idDePagina: 220191
+        pagina: "https://es.wikisource.org/wiki/Autor:Javier_Heraud"
+        dominioPublico: false
+      - nombre: "José Arnaldo Márquez"
+        slug: "jose-arnaldo-marquez"
+        idDePagina: 135000
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Arnaldo_M%C3%A1rquez"
+        dominioPublico: true
+      - nombre: "José Carlos Mariátegui"
+        slug: "jose-carlos-mariategui"
+        idDePagina: 32361
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Carlos_Mari%C3%A1tegui"
+        dominioPublico: false
+      - nombre: "José de la Torre Ugarte"
+        slug: "jose-de-la-torre-ugarte"
+        idDePagina: 245374
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_de_la_Torre_Ugarte"
+        dominioPublico: true
+      - nombre: "José Luis Bustamante y Rivero"
+        slug: "jose-luis-bustamante-y-rivero"
+        idDePagina: 270936
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Luis_Bustamante_y_Rivero"
+        dominioPublico: false
+      - nombre: "José María Eguren"
+        slug: "jose-maria-eguren"
+        idDePagina: 171188
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Mar%C3%ADa_Eguren"
+        dominioPublico: false
+      - nombre: "José Santos Chocano"
+        slug: "jose-santos-chocano"
+        idDePagina: 156222
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Santos_Chocano"
+        dominioPublico: false
+      - nombre: "Juan del Valle y Caviedes"
+        slug: "juan-del-valle-y-caviedes"
+        idDePagina: 25969
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_del_Valle_y_Caviedes"
+        dominioPublico: true
+      - nombre: "Juan Guillermo More Ruiz"
+        slug: "juan-guillermo-more-ruiz"
+        idDePagina: 66009
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Guillermo_More_Ruiz"
+        dominioPublico: true
+      - nombre: "Juan Velasco Alvarado"
+        slug: "juan-velasco-alvarado"
+        idDePagina: 270226
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Velasco_Alvarado"
+        dominioPublico: false
+      - nombre: "Juana Rosa de Amézaga"
+        slug: "juana-rosa-de-amezaga"
+        idDePagina: 133297
+        pagina: "https://es.wikisource.org/wiki/Autor:Juana_Rosa_de_Am%C3%A9zaga"
+        dominioPublico: true
+      - nombre: "Lastenia Larriva de Llona"
+        slug: "lastenia-larriva-de-llona"
+        idDePagina: 174084
+        pagina: "https://es.wikisource.org/wiki/Autor:Lastenia_Larriva_de_Llona"
+        dominioPublico: true
+      - nombre: "Luis Benjamín Cisneros"
+        slug: "luis-benjamin-cisneros"
+        idDePagina: 41520
+        pagina: "https://es.wikisource.org/wiki/Autor:Luis_Benjam%C3%ADn_Cisneros"
+        dominioPublico: true
+      - nombre: "Luis Miguel Sánchez Cerro"
+        slug: "luis-miguel-sanchez-cerro"
+        idDePagina: 270940
+        pagina: "https://es.wikisource.org/wiki/Autor:Luis_Miguel_S%C3%A1nchez_Cerro"
+        dominioPublico: false
+      - nombre: "Manuel A. Bedoya"
+        slug: "manuel-a-bedoya"
+        idDePagina: 334155
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_A._Bedoya"
+        dominioPublico: false
+      - nombre: "Manuel Ascencio Segura"
+        slug: "manuel-ascencio-segura"
+        idDePagina: 74039
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Ascencio_Segura"
+        dominioPublico: true
+      - nombre: "Manuel González Prada"
+        slug: "manuel-gonzalez-prada"
+        idDePagina: 23655
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Gonz%C3%A1lez_Prada"
+        dominioPublico: true
+      - nombre: "Manuel Odría"
+        slug: "manuel-odria"
+        idDePagina: 299782
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Odr%C3%ADa"
+        dominioPublico: false
+      - nombre: "Manuel Prado Ugarteche"
+        slug: "manuel-prado-ugarteche"
+        idDePagina: 270740
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Prado_Ugarteche"
+        dominioPublico: false
+      - nombre: "María Jesús Alvarado Rivera"
+        slug: "maria-jesus-alvarado-rivera"
+        idDePagina: 242280
+        pagina: "https://es.wikisource.org/wiki/Autor:Mar%C3%ADa_Jes%C3%BAs_Alvarado_Rivera"
+        dominioPublico: false
+      - nombre: "María Wiesse"
+        slug: "maria-wiesse"
+        idDePagina: 180012
+        pagina: "https://es.wikisource.org/wiki/Autor:Mar%C3%ADa_Wiesse"
+        dominioPublico: false
+      - nombre: "Mario Vargas Llosa"
+        slug: "mario-vargas-llosa"
+        idDePagina: 109145
+        pagina: "https://es.wikisource.org/wiki/Autor:Mario_Vargas_Llosa"
+        dominioPublico: false
+      - nombre: "Mercedes Cabello de Carbonera"
+        slug: "mercedes-cabello-de-carbonera"
+        idDePagina: 174082
+        pagina: "https://es.wikisource.org/wiki/Autor:Mercedes_Cabello_de_Carbonera"
+        dominioPublico: true
+      - nombre: "Miguel Grau Seminario"
+        slug: "miguel-grau-seminario"
+        idDePagina: 2862
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_Grau_Seminario"
+        dominioPublico: true
+      - nombre: "Narciso Aréstegui"
+        slug: "narciso-arestegui"
+        idDePagina: 181230
+        pagina: "https://es.wikisource.org/wiki/Autor:Narciso_Ar%C3%A9stegui"
+        dominioPublico: true
+      - nombre: "Pablo de Olavide"
+        slug: "pablo-de-olavide"
+        idDePagina: 44302
+        pagina: "https://es.wikisource.org/wiki/Autor:Pablo_de_Olavide"
+        dominioPublico: true
+      - nombre: "Pedro Castillo"
+        slug: "pedro-castillo"
+        idDePagina: 276851
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_Castillo"
+        dominioPublico: false
+      - nombre: "Pedro Gárezon Thomas"
+        slug: "pedro-garezon-thomas"
+        idDePagina: 164314
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_G%C3%A1rezon_Thomas"
+        dominioPublico: false
+      - nombre: "Pedro Paz Soldán y Unánue"
+        slug: "pedro-paz-soldan-y-unanue"
+        idDePagina: 30537
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_Paz_Sold%C3%A1n_y_Un%C3%A1nue"
+        dominioPublico: true
+      - nombre: "Ricardo Palma"
+        slug: "ricardo-palma"
+        idDePagina: 3358
+        pagina: "https://es.wikisource.org/wiki/Autor:Ricardo_Palma"
+        dominioPublico: true
+      - nombre: "Ricardo Rossel"
+        slug: "ricardo-rossel"
+        idDePagina: 71708
+        pagina: "https://es.wikisource.org/wiki/Autor:Ricardo_Rossel"
+        dominioPublico: true
+      - nombre: "Teófilo V. Méndez Ramos"
+        slug: "teofilo-v-mendez-ramos"
+        idDePagina: 110933
+        pagina: "https://es.wikisource.org/wiki/Autor:Te%C3%B3filo_V._M%C3%A9ndez_Ramos"
+        dominioPublico: false
+      - nombre: "Teresa González de Fanning"
+        slug: "teresa-gonzalez-de-fanning"
+        idDePagina: 174066
+        pagina: "https://es.wikisource.org/wiki/Autor:Teresa_Gonz%C3%A1lez_de_Fanning"
         dominioPublico: true
   - id: "siglo-de-oro"
     nombre: "Autores españoles del Siglo de Oro"
@@ -1563,3 +2493,218 @@ epocas:
         idDePagina: 19767
         pagina: "https://es.wikisource.org/wiki/Autor:Vicente_Espinel"
         dominioPublico: true
+  - id: "venezolanos"
+    nombre: "Autores venezolanos"
+    categoria: "Categoría:Autores venezolanos"
+    recuperada: "2026-10-11"
+    candidatos:
+      - nombre: "Acisclo Valdivieso Montaño"
+        slug: "acisclo-valdivieso-montano"
+        idDePagina: 134855
+        pagina: "https://es.wikisource.org/wiki/Autor:Acisclo_Valdivieso_Monta%C3%B1o"
+        dominioPublico: false
+      - nombre: "Alfredo Jahn"
+        slug: "alfredo-jahn"
+        idDePagina: 134525
+        pagina: "https://es.wikisource.org/wiki/Autor:Alfredo_Jahn"
+        dominioPublico: false
+      - nombre: "Andrés Bello"
+        slug: "andres-bello"
+        idDePagina: 3827
+        pagina: "https://es.wikisource.org/wiki/Autor:Andr%C3%A9s_Bello"
+        dominioPublico: true
+      - nombre: "Andrés Eloy Blanco"
+        slug: "andres-eloy-blanco"
+        idDePagina: 154694
+        pagina: "https://es.wikisource.org/wiki/Autor:Andr%C3%A9s_Eloy_Blanco"
+        dominioPublico: false
+      - nombre: "Andrés Mata"
+        slug: "andres-mata"
+        idDePagina: 36075
+        pagina: "https://es.wikisource.org/wiki/Autor:Andr%C3%A9s_Mata"
+        dominioPublico: false
+      - nombre: "Antonio Leocadio Guzmán"
+        slug: "antonio-leocadio-guzman"
+        idDePagina: 134734
+        pagina: "https://es.wikisource.org/wiki/Autor:Antonio_Leocadio_Guzm%C3%A1n"
+        dominioPublico: true
+      - nombre: "Antonio Paredes"
+        slug: "antonio-paredes"
+        idDePagina: 134846
+        pagina: "https://es.wikisource.org/wiki/Autor:Antonio_Paredes"
+        dominioPublico: true
+      - nombre: "Bartolomé Tavera Acosta"
+        slug: "bartolome-tavera-acosta"
+        idDePagina: 134903
+        pagina: "https://es.wikisource.org/wiki/Autor:Bartolom%C3%A9_Tavera_Acosta"
+        dominioPublico: false
+      - nombre: "Cecilio Acosta"
+        slug: "cecilio-acosta"
+        idDePagina: 133185
+        pagina: "https://es.wikisource.org/wiki/Autor:Cecilio_Acosta"
+        dominioPublico: true
+      - nombre: "César Zumeta"
+        slug: "cesar-zumeta"
+        idDePagina: 134841
+        pagina: "https://es.wikisource.org/wiki/Autor:C%C3%A9sar_Zumeta"
+        dominioPublico: false
+      - nombre: "Eloy Guillermo González"
+        slug: "eloy-guillermo-gonzalez"
+        idDePagina: 134529
+        pagina: "https://es.wikisource.org/wiki/Autor:Eloy_Guillermo_Gonz%C3%A1lez"
+        dominioPublico: false
+      - nombre: "Emilio Constantino Guerrero"
+        slug: "emilio-constantino-guerrero"
+        idDePagina: 134660
+        pagina: "https://es.wikisource.org/wiki/Autor:Emilio_Constantino_Guerrero"
+        dominioPublico: true
+      - nombre: "Félix E. Bigotte"
+        slug: "felix-e-bigotte"
+        idDePagina: 136222
+        pagina: "https://es.wikisource.org/wiki/Autor:F%C3%A9lix_E._Bigotte"
+        dominioPublico: true
+      - nombre: "Filiberto Rodríguez Motamayor"
+        slug: "filiberto-rodriguez-motamayor"
+        idDePagina: 110047
+        pagina: "https://es.wikisource.org/wiki/Autor:Filiberto_Rodr%C3%ADguez_Motamayor"
+        dominioPublico: true
+      - nombre: "Francisco Jiménez Arráiz"
+        slug: "francisco-jimenez-arraiz"
+        idDePagina: 134530
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Jim%C3%A9nez_Arr%C3%A1iz"
+        dominioPublico: false
+      - nombre: "Francisco Lazo Martí"
+        slug: "francisco-lazo-marti"
+        idDePagina: 136794
+        pagina: "https://es.wikisource.org/wiki/Autor:Francisco_Lazo_Mart%C3%AD"
+        dominioPublico: true
+      - nombre: "Heraclio Martín de la Guardia"
+        slug: "heraclio-martin-de-la-guardia"
+        idDePagina: 134858
+        pagina: "https://es.wikisource.org/wiki/Autor:Heraclio_Mart%C3%ADn_de_la_Guardia"
+        dominioPublico: true
+      - nombre: "Hugo Chávez"
+        slug: "hugo-chavez"
+        idDePagina: 187432
+        pagina: "https://es.wikisource.org/wiki/Autor:Hugo_Ch%C3%A1vez"
+        dominioPublico: false
+      - nombre: "José María Rojas Espaillat"
+        slug: "jose-maria-rojas-espaillat"
+        idDePagina: 353817
+        pagina: "https://es.wikisource.org/wiki/Autor:Jos%C3%A9_Mar%C3%ADa_Rojas_Espaillat"
+        dominioPublico: true
+      - nombre: "Juan Antonio Pérez Bonalde"
+        slug: "juan-antonio-perez-bonalde"
+        idDePagina: 31284
+        pagina: "https://es.wikisource.org/wiki/Autor:Juan_Antonio_P%C3%A9rez_Bonalde"
+        dominioPublico: true
+      - nombre: "Julio César Salas"
+        slug: "julio-cesar-salas"
+        idDePagina: 134639
+        pagina: "https://es.wikisource.org/wiki/Autor:Julio_C%C3%A9sar_Salas"
+        dominioPublico: false
+      - nombre: "Laureano Vallenilla Lanz"
+        slug: "laureano-vallenilla-lanz"
+        idDePagina: 134863
+        pagina: "https://es.wikisource.org/wiki/Autor:Laureano_Vallenilla_Lanz"
+        dominioPublico: false
+      - nombre: "Laureano Villanueva"
+        slug: "laureano-villanueva"
+        idDePagina: 134872
+        pagina: "https://es.wikisource.org/wiki/Autor:Laureano_Villanueva"
+        dominioPublico: true
+      - nombre: "Manuel Díaz Rodríguez"
+        slug: "manuel-diaz-rodriguez"
+        idDePagina: 21022
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_D%C3%ADaz_Rodr%C3%ADguez"
+        dominioPublico: false
+      - nombre: "Manuel Landaeta Rosales"
+        slug: "manuel-landaeta-rosales"
+        idDePagina: 134555
+        pagina: "https://es.wikisource.org/wiki/Autor:Manuel_Landaeta_Rosales"
+        dominioPublico: true
+      - nombre: "Miguel Eduardo Pardo"
+        slug: "miguel-eduardo-pardo"
+        idDePagina: 69740
+        pagina: "https://es.wikisource.org/wiki/Autor:Miguel_Eduardo_Pardo"
+        dominioPublico: true
+      - nombre: "Nicanor Bolet Peraza"
+        slug: "nicanor-bolet-peraza"
+        idDePagina: 411704
+        pagina: "https://es.wikisource.org/wiki/Autor:Nicanor_Bolet_Peraza"
+        dominioPublico: true
+      - nombre: "Pedro César Dominici"
+        slug: "pedro-cesar-dominici"
+        idDePagina: 110189
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_C%C3%A9sar_Dominici"
+        dominioPublico: false
+      - nombre: "Pedro Manuel Arcaya"
+        slug: "pedro-manuel-arcaya"
+        idDePagina: 134856
+        pagina: "https://es.wikisource.org/wiki/Autor:Pedro_Manuel_Arcaya"
+        dominioPublico: false
+      - nombre: "Rafael Bolívar Coronado"
+        slug: "rafael-bolivar-coronado"
+        idDePagina: 134961
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Bol%C3%ADvar_Coronado"
+        dominioPublico: true
+      - nombre: "Rafael Cadenas"
+        slug: "rafael-cadenas"
+        idDePagina: 123076
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Cadenas"
+        dominioPublico: false
+      - nombre: "Rafael González Pacheco"
+        slug: "rafael-gonzalez-pacheco"
+        idDePagina: 134904
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Gonz%C3%A1lez_Pacheco"
+        dominioPublico: true
+      - nombre: "Rafael López Baralt"
+        slug: "rafael-lopez-baralt"
+        idDePagina: 134892
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_L%C3%B3pez_Baralt"
+        dominioPublico: true
+      - nombre: "Rafael María Baralt"
+        slug: "rafael-maria-baralt"
+        idDePagina: 38453
+        pagina: "https://es.wikisource.org/wiki/Autor:Rafael_Mar%C3%ADa_Baralt"
+        dominioPublico: true
+      - nombre: "Rufino Blanco-Fombona"
+        slug: "rufino-blanco-fombona"
+        idDePagina: 350830
+        pagina: "https://es.wikisource.org/wiki/Autor:Rufino_Blanco-Fombona"
+        dominioPublico: false
+      - nombre: "Simón Bolívar"
+        slug: "simon-bolivar"
+        idDePagina: 2657
+        pagina: "https://es.wikisource.org/wiki/Autor:Sim%C3%B3n_Bol%C3%ADvar"
+        dominioPublico: true
+      - nombre: "Simón Rodríguez"
+        slug: "simon-rodriguez"
+        idDePagina: 134556
+        pagina: "https://es.wikisource.org/wiki/Autor:Sim%C3%B3n_Rodr%C3%ADguez"
+        dominioPublico: true
+      - nombre: "Tomás Michelena"
+        slug: "tomas-michelena"
+        idDePagina: 134864
+        pagina: "https://es.wikisource.org/wiki/Autor:Tom%C3%A1s_Michelena"
+        dominioPublico: true
+      - nombre: "Tulio Febres Cordero"
+        slug: "tulio-febres-cordero"
+        idDePagina: 49102
+        pagina: "https://es.wikisource.org/wiki/Autor:Tulio_Febres_Cordero"
+        dominioPublico: false
+      - nombre: "Vicente Dávila"
+        slug: "vicente-davila"
+        idDePagina: 134557
+        pagina: "https://es.wikisource.org/wiki/Autor:Vicente_D%C3%A1vila"
+        dominioPublico: false
+      - nombre: "Vicente Gerbasi"
+        slug: "vicente-gerbasi"
+        idDePagina: 187483
+        pagina: "https://es.wikisource.org/wiki/Autor:Vicente_Gerbasi"
+        dominioPublico: false
+      - nombre: "Victorino Márquez Bustillos"
+        slug: "victorino-marquez-bustillos"
+        idDePagina: 134854
+        pagina: "https://es.wikisource.org/wiki/Autor:Victorino_M%C3%A1rquez_Bustillos"
+        dominioPublico: false

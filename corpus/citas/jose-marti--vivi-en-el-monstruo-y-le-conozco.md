@@ -1,6 +1,8 @@
 ---
 texto: "Viví en el monstruo, y le conozco las entrañas;-y mi honda es la de David."
 autor: "jose-marti"
+temas:
+  - "la-libertad"
 slug: "jose-marti-vivi-en-el-monstruo-y-le-conozco"
 procedencia:
   obra: "Carta a Manuel Mercado"

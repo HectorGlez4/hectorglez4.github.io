@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XLII
+recuperado: 2026-10-11
+---
+Versos sencillos/XLII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nEn el extraño bazar\nDel amor, junto a la mar,\nLa perla triste y sin par\nLe tocó por suerte a Agar. \n\nAgar de tanto tenerla\nAl pecho, de tanto verla\nAgar, llegó a aborrecerla;\nMajó, tiró al mar la perla.\n\nY cuando Agar, venenosa\nDe inútil furia, y llorosa,\nPidió al mar la perla hermosa,\nDijo la mar borrascosa: \n\n\"¿Qué hiciste, torpe, qué hiciste\nDe la perla que tuviste?\nLa majaste, me la diste;\nYo guardo la perla triste.\"\n\n</poem>"}},"i":0}}]}'>
+
+En el extraño bazar
+Del amor, junto a la mar,
+La perla triste y sin par
+Le tocó por suerte a Agar.
+
+Agar de tanto tenerla
+Al pecho, de tanto verla
+Agar, llegó a aborrecerla;
+Majó, tiró al mar la perla.
+
+Y cuando Agar, venenosa
+De inútil furia, y llorosa,
+Pidió al mar la perla hermosa,
+Dijo la mar borrascosa:
+
+"¿Qué hiciste, torpe, qué hiciste
+De la perla que tuviste?
+La majaste, me la diste;
+Yo guardo la perla triste."

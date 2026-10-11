@@ -1,0 +1,38 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXX
+recuperado: 2026-10-11
+---
+Versos sencillos/XXX
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nEl rayo surca, sangriento,\nEl lóbrego nubarrón:\nEcha el barco, ciento a ciento,\nLos negros por el portón. \n\nEl viento, fiero, quebraba\nLos almácigos copudos;\nAndaba la hilera, andaba,\nDe los esclavos desnudos. \n\nEl temporal sacudía\nLos barracones henchidos;\nUna madre con su cría\nPasaba dando alaridos.\n\nRojo, como en el desierto,\nsalió el sol al horizonte;\nY alumbró a un esclavo muerto,\nColgado a un seibo del monte.\n\nUn niño lo vio: tembló\nDe pasión por los que gimen;\nY, al pie del muerto, juró\nLavar con su sangre el crimen!\n\n</poem>"}},"i":0}}]}'>
+
+El rayo surca, sangriento,
+El lóbrego nubarrón:
+Echa el barco, ciento a ciento,
+Los negros por el portón.
+
+El viento, fiero, quebraba
+Los almácigos copudos;
+Andaba la hilera, andaba,
+De los esclavos desnudos.
+
+El temporal sacudía
+Los barracones henchidos;
+Una madre con su cría
+Pasaba dando alaridos.
+
+Rojo, como en el desierto,
+salió el sol al horizonte;
+Y alumbró a un esclavo muerto,
+Colgado a un seibo del monte.
+
+Un niño lo vio: tembló
+De pasión por los que gimen;
+Y, al pie del muerto, juró
+Lavar con su sangre el crimen!

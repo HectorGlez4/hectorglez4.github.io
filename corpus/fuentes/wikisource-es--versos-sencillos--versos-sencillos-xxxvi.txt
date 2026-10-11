@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXVI
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXVI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nYa sé: de carne se puede\nHacer una flor; se puede,\nCon el poder del cariño,\nHacer un cielo, ¡y un niño!\n\nDe carne se hace también\nEl alacrán; y también\nEl gusano de la rosa,\nY la lechuza espantosa.\n</poem>\n</div>"}},"i":0}}]}'>
+
+Ya sé: de carne se puede
+Hacer una flor; se puede,
+Con el poder del cariño,
+Hacer un cielo, ¡y un niño!
+
+De carne se hace también
+El alacrán; y también
+El gusano de la rosa,
+Y la lechuza espantosa.

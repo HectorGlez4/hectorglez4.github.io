@@ -222,6 +222,31 @@ export const EPOCAS: readonly Epoca[] = [
     nombre: 'Edad Media',
     categoria: 'Categoría:Autores de la Edad Media',
   },
+  {
+    id: 'peruanos',
+    nombre: 'Autores peruanos',
+    categoria: 'Categoría:Autores peruanos',
+  },
+  {
+    id: 'cubanos',
+    nombre: 'Autores cubanos',
+    categoria: 'Categoría:Autores cubanos',
+  },
+  {
+    id: 'venezolanos',
+    nombre: 'Autores venezolanos',
+    categoria: 'Categoría:Autores venezolanos',
+  },
+  {
+    id: 'colombianos',
+    nombre: 'Autores colombianos',
+    categoria: 'Categoría:Autores colombianos',
+  },
+  {
+    id: 'ecuatorianos',
+    nombre: 'Autores ecuatorianos',
+    categoria: 'Categoría:Autores ecuatorianos',
+  },
 ];
 
 /** La época de un identificador, o `undefined` si no la declara la Fuente. */

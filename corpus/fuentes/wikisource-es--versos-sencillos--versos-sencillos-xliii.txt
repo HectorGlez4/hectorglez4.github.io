@@ -1,0 +1,37 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XLIII
+recuperado: 2026-10-11
+---
+Versos sencillos/XLIII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\n\nMucho, señora, daría\nPor tender sobre tu espalda\nTu cabellera bravía,\nTu cabellera de gualda: \n\nDespacio la tendería,\nCallado la besaría. \n\nPor sobre la oreja fina\nBaja lustroso el cabello,\nLo mismo que una cortina\nQue se levanta hacia el cuello. \n\nLa oreja es obra divina\nDe porcelana de China. \n\nMucho, señora te diera\nPor desenredar el nudo\nDe tu roja cabellera\nSobre tu cuello desnudo: \n\nMuy despacio la esparciera\nHilo por hilo la abriera. \n</poem>\n</div>"}},"i":0}}]}'>
+
+Mucho, señora, daría
+Por tender sobre tu espalda
+Tu cabellera bravía,
+Tu cabellera de gualda:
+
+Despacio la tendería,
+Callado la besaría.
+
+Por sobre la oreja fina
+Baja lustroso el cabello,
+Lo mismo que una cortina
+Que se levanta hacia el cuello.
+
+La oreja es obra divina
+De porcelana de China.
+
+Mucho, señora te diera
+Por desenredar el nudo
+De tu roja cabellera
+Sobre tu cuello desnudo:
+
+Muy despacio la esparciera
+Hilo por hilo la abriera.

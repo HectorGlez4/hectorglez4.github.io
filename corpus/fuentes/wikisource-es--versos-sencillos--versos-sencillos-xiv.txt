@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XIV
+recuperado: 2026-10-11
+---
+Versos sencillos/XIV
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nYo no puedo olvidar nunca\nLa mañanita de otoño\nEn que le salió un retoño\nA la pobre rama trunca. \n\nLa mañanita en que, en vano,\nJunto a la estufa apagada,\nUna niña enamorada\nLe tendió al viejo la mano. \n</poem>"}},"i":0}}]}'>
+
+Yo no puedo olvidar nunca
+La mañanita de otoño
+En que le salió un retoño
+A la pobre rama trunca.
+
+La mañanita en que, en vano,
+Junto a la estufa apagada,
+Una niña enamorada
+Le tendió al viejo la mano.

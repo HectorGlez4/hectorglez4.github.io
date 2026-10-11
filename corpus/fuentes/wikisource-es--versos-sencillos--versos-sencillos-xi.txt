@@ -1,0 +1,38 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XI
+recuperado: 2026-10-11
+---
+Versos sencillos/XI
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nYo tengo un paje muy fiel\nQue me cuida y que me gruñe,\nY al salir, me limpia y bruñe\nMi corona de laurel. \n\nYo tengo un paje ejemplar\nQue no come, que no duerme,\nY que se acurruca a verme\nTrabajar, y sollozar. \n\nSalgo y el vil se desliza\nY en mi bolsillo aparece,\nVuelvo, y el terco me ofrece\nUna taza de ceniza. \n\nSi duermo, al rayar el día\nSe sienta junto a mi cama;\nSi escribo, sangre derrama\nMi paje en la escribanía. \n\nMi paje, hombre de respeto.\nAl andar castañetea;\nHiela mi paje, y chispea;\nMi paje es un esqueleto. \n\n</poem>"}},"i":0}}]}'>
+
+Yo tengo un paje muy fiel
+Que me cuida y que me gruñe,
+Y al salir, me limpia y bruñe
+Mi corona de laurel.
+
+Yo tengo un paje ejemplar
+Que no come, que no duerme,
+Y que se acurruca a verme
+Trabajar, y sollozar.
+
+Salgo y el vil se desliza
+Y en mi bolsillo aparece,
+Vuelvo, y el terco me ofrece
+Una taza de ceniza.
+
+Si duermo, al rayar el día
+Se sienta junto a mi cama;
+Si escribo, sangre derrama
+Mi paje en la escribanía.
+
+Mi paje, hombre de respeto.
+Al andar castañetea;
+Hiela mi paje, y chispea;
+Mi paje es un esqueleto.

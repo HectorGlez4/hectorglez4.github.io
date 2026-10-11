@@ -401,3 +401,14 @@ sesiones:
       citasPublicadas: 1924
       procedenciaCompleta: 22.5
       tradicionLatinoamericanaSobreHispanicos: 50
+  - fecha: "2026-10-11"
+    hora: "09:33"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 31 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 0 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Reponer la tradición latinoamericana: Versos sencillos de José Martí"
+    motivo: "Sembrado de los Versos sencillos y de textos de José Martí ya versionados, para reponer la proporción de tradición latinoamericana, que las épocas peninsulares abiertas bajaron del 56 % al 50 %."
+    resultado:
+      citasPublicadas: 1942
+      procedenciaCompleta: 22.3
+      tradicionLatinoamericanaSobreHispanicos: 50

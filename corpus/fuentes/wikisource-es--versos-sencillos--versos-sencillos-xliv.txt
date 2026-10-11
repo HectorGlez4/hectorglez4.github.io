@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XLIV
+recuperado: 2026-10-11
+---
+Versos sencillos/XLIV
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nTiene el leopardo un abrigo\nEn su monte seco y pardo:\nYo tengo más que el leopardo\nPorque tengo un buen amigo.\n\nDuerme, como en un juguete,\nLa mushma en su cojinete\nDe arte del Japón yo digo:\n\"No hay cojín como un amigo\".\n\nTiene el conde su abolengo;\nTiene la aurora el mendigo;\nTiene ala el ave: ¡yo tengo\nAllá en México un amigo!\n\nTiene el señor presidente\nUn jardín con una fuente,\nY un tesoro en oro y trigo:\nTengo más, tengo un amigo.\n</poem>"}},"i":0}}]}'>
+
+Tiene el leopardo un abrigo
+En su monte seco y pardo:
+Yo tengo más que el leopardo
+Porque tengo un buen amigo.
+
+Duerme, como en un juguete,
+La mushma en su cojinete
+De arte del Japón yo digo:
+"No hay cojín como un amigo".
+
+Tiene el conde su abolengo;
+Tiene la aurora el mendigo;
+Tiene ala el ave: ¡yo tengo
+Allá en México un amigo!
+
+Tiene el señor presidente
+Un jardín con una fuente,
+Y un tesoro en oro y trigo:
+Tengo más, tengo un amigo.

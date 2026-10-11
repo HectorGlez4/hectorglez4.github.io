@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XXXII
+recuperado: 2026-10-11
+---
+Versos sencillos/XXXII
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nEn el negro callejón\nDonde en tinieblas paseo,\nAlzo los ojos, y veo\nLa iglesia, erguida, a un rincón. \n\n¿Será misterio?\n¿Será Revelación y poder?\n¿Será, rodilla, el deber\nDe postrarse? ¿Qué será? \n\nTiembla la noche: en la parra\nMuerde el gusano el retoño;\nGrazna, llamando al otoño\nLa hueca y hosca cigarra.\n\nGraznan dos: atento al dúo\nAlzo los ojos y veo\nQue la iglesia del paseo\nTiene la forma de un búho.\n</poem>"}},"i":0}}]}'>
+
+En el negro callejón
+Donde en tinieblas paseo,
+Alzo los ojos, y veo
+La iglesia, erguida, a un rincón.
+
+¿Será misterio?
+¿Será Revelación y poder?
+¿Será, rodilla, el deber
+De postrarse? ¿Qué será?
+
+Tiembla la noche: en la parra
+Muerde el gusano el retoño;
+Grazna, llamando al otoño
+La hueca y hosca cigarra.
+
+Graznan dos: atento al dúo
+Alzo los ojos y veo
+Que la iglesia del paseo
+Tiene la forma de un búho.

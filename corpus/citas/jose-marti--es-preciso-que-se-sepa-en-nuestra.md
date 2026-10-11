@@ -1,6 +1,8 @@
 ---
 texto: "Es preciso que se sepa en nuestra América la verdad de los Estados Unidos."
 autor: "jose-marti"
+temas:
+  - "la-verdad"
 slug: "jose-marti-es-preciso-que-se-sepa-en-nuestra"
 procedencia:
   obra: "La verdad sobre los Estados Unidos"

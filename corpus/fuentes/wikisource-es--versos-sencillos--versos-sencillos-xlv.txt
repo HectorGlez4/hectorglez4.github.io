@@ -1,0 +1,55 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/XLV
+recuperado: 2026-10-11
+---
+Versos sencillos/XLV
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n<poem>\n\nSueño con claustros de mármol\nDonde en silencio divino\nLos héroes, de pie, reposan:\n¡De noche, a la luz del alma,\nHablo con ellos; de noche!\nEstán en fila: paseo\nEntre las filas: las manos\nDe piedra les beso: abren\nLos ojos de piedra: mueven\nLos labios de piedra: tiemblan\nLas barbas de piedra: empuñan\nLa espada de piedra: lloran\n¡Vibra la espada en la vaina!\nMudo, les beso la mano.\n\n¡Hablo con ellos, de noche!\nEstán en fila: paseo\nEntre las filas: lloroso\nMe abrazo a un mármol:\n\"¡Oh, mármol\nDicen que beben tus hijos\nSu propia sangre en las copas\nVenenosas de sus dueños!\n¡Que hablan la lengua podrida\nDe sus rufianes! Que comen\nJuntos el pan del oprobio,\nEn la mesa ensangrentada!\nQue pierden en lengua inútil\nEl último fuego! ¡Dicen,\nOh mármol, mármol dormido,\nQue ya se ha muerto tu raza!\"\n\nÉchame en tierra de un bote\nEl héroe que abrazo: me ase\nDel cuello: barre la tierra\nCon mi cabeza: levanta\nEl brazo, ¡el brazo le luce\nlo mismo que un sol!: resuena\nLa piedra: buscan el cinto\nLas manos blancas: del soplo\nSaltan los hombres de mármol!\n</poem>\n</div>"}},"i":0}}]}'>
+
+Sueño con claustros de mármol
+Donde en silencio divino
+Los héroes, de pie, reposan:
+¡De noche, a la luz del alma,
+Hablo con ellos; de noche!
+Están en fila: paseo
+Entre las filas: las manos
+De piedra les beso: abren
+Los ojos de piedra: mueven
+Los labios de piedra: tiemblan
+Las barbas de piedra: empuñan
+La espada de piedra: lloran
+¡Vibra la espada en la vaina!
+Mudo, les beso la mano.
+
+¡Hablo con ellos, de noche!
+Están en fila: paseo
+Entre las filas: lloroso
+Me abrazo a un mármol:
+"¡Oh, mármol
+Dicen que beben tus hijos
+Su propia sangre en las copas
+Venenosas de sus dueños!
+¡Que hablan la lengua podrida
+De sus rufianes! Que comen
+Juntos el pan del oprobio,
+En la mesa ensangrentada!
+Que pierden en lengua inútil
+El último fuego! ¡Dicen,
+Oh mármol, mármol dormido,
+Que ya se ha muerto tu raza!"
+
+Échame en tierra de un bote
+El héroe que abrazo: me ase
+Del cuello: barre la tierra
+Con mi cabeza: levanta
+El brazo, ¡el brazo le luce
+lo mismo que un sol!: resuena
+La piedra: buscan el cinto
+Las manos blancas: del soplo
+Saltan los hombres de mármol!

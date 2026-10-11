@@ -1,6 +1,8 @@
 ---
 texto: "La afinidad de los caracteres es más poderosa entre los hombres que la afinidad del color."
 autor: "jose-marti"
+temas:
+  - "la-amistad"
 slug: "jose-marti-la-afinidad-de-los-caracteres-es-mas"
 procedencia:
   obra: "Mi raza"

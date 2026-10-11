@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo que divide a los hombres, todo lo que especifica, aparta o acorrala es un pecado contra la humanidad."
 autor: "jose-marti"
+temas:
+  - "la-justicia"
 slug: "jose-marti-todo-lo-que-divide-a-los-hombres"
 procedencia:
   obra: "Mi raza"

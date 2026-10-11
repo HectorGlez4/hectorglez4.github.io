@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Versos sencillos
+url: https://es.wikisource.org/wiki/Versos_sencillos/II
+recuperado: 2026-10-11
+---
+Versos sencillos/II
+|título=[[Versos sencillos]]
+|autor=José Martí
+obra> |título=Versos sencillos
+obra> |autor=José Martí
+obra> |título={{Anclaje+|Índice}}
+---
+\n\n<poem>\nYo sé de Egipto y Nigricia,\nY de Persia y Xenophonte;\nY prefiero la caricia\nDel aire fresco del monte.\n\nYo sé de las historias viejas\nDel hombre y de sus rencillas;\nY prefiero las abejas\nVolando en las campanillas.\n\nYo sé del canto del viento\nEn las ramas vocingleras:\nNadie me diga que miento,\nQue lo prefiero de veras.\n\nYo sé de un gamo aterrado\nQue vuelve al redil, y expira, -\nY de un corazón cansado\nQue muere oscuro y sin ira.\n</poem>"}},"i":0}}]}'>
+
+Yo sé de Egipto y Nigricia,
+Y de Persia y Xenophonte;
+Y prefiero la caricia
+Del aire fresco del monte.
+
+Yo sé de las historias viejas
+Del hombre y de sus rencillas;
+Y prefiero las abejas
+Volando en las campanillas.
+
+Yo sé del canto del viento
+En las ramas vocingleras:
+Nadie me diga que miento,
+Que lo prefiero de veras.
+
+Yo sé de un gamo aterrado
+Que vuelve al redil, y expira, -
+Y de un corazón cansado
+Que muere oscuro y sin ira.
