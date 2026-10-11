@@ -1,0 +1,13 @@
+---
+texto: "DON RAMÓN.- Dice que en esta disputa el público es testigo de que él siempre ha probado con raciocinios, que siempre tiene razón y que no ha dicho desvergüenzas."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-don-ramon-dice-que-en-esta-disputa"
+procedencia:
+  obra: "Donde las dan las toman"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Donde_las_dan_las_toman"
+---

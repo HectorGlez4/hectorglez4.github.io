@@ -1,0 +1,13 @@
+---
+texto: "Hay iguales que se incomodan mutuamente debiendo amarse."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-hay-iguales-que-se-incomodan-mutuamente-debiendo"
+procedencia:
+  obra: "Antony - Artículo segundo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Antony_-_Art%C3%ADculo_segundo"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Alguno de los que se entretienen en poner letreros en las paredes había escrito, sin embargo, con yeso en una esquina, que no parecía sino que se estaba saliendo, aun antes de borrarse: Gobernación."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-alguno-de-los-que-se-entretienen-en"
+procedencia:
+  obra: "El día de difuntos de 1836"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_d%C3%ADa_de_difuntos_de_1836"
+---

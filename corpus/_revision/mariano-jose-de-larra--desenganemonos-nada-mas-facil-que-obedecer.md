@@ -1,0 +1,13 @@
+---
+texto: "Desengañémonos: nada más fácil que obedecer."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-desenganemonos-nada-mas-facil-que-obedecer"
+procedencia:
+  obra: "Lo que no se puede decir, no se debe decir"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Lo_que_no_se_puede_decir%2C_no_se_debe_decir"
+---

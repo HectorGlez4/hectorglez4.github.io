@@ -1,0 +1,13 @@
+---
+texto: "En literatura no puede buscar por consiguiente sino verdades."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-en-literatura-no-puede-buscar-por-consiguiente"
+procedencia:
+  obra: "Literatura"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Literatura_%28Larra%29"
+---

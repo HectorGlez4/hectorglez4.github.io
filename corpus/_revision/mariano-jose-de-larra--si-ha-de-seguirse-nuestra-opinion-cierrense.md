@@ -1,0 +1,13 @@
+---
+texto: "Si ha de seguirse nuestra opinión, ciérrense los teatros; porque no hay reforma ni mejora posible donde no hay por parte de nadie amor al arte."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-si-ha-de-seguirse-nuestra-opinion-cierrense"
+procedencia:
+  obra: "De las traducciones"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/De_las_traducciones"
+---

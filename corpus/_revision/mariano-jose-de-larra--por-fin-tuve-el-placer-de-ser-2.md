@@ -1,0 +1,13 @@
+---
+texto: "Por fin tuve el placer de ser introducido en el oscuro santuario."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-por-fin-tuve-el-placer-de-ser-2"
+procedencia:
+  obra: "Don Timoteo o el literato"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Don_Timoteo_o_el_literato"
+---

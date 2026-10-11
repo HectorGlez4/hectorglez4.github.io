@@ -1,0 +1,13 @@
+---
+texto: "Y vaya por todas la traducción del señor Burgos:"
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-y-vaya-por-todas-la-traduccion-del"
+procedencia:
+  obra: "Donde las dan las toman"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Donde_las_dan_las_toman"
+---
