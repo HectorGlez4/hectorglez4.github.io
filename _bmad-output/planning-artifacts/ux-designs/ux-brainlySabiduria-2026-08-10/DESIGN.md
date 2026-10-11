@@ -4,7 +4,7 @@ status: final
 sources:
   - "{planning_artifacts}/prds/prd-brainlySabiduria-2026-08-10/prd.md"
   - "{planning_artifacts}/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md"
-updated: 2026-10-09
+updated: 2026-10-11
 colors:
   surface: '#faf7f0'
   surface-dim: '#efe9dd'
@@ -228,7 +228,7 @@ Agrupados por superficie, con los mismos grupos y en el mismo orden que `EXPERIE
 ### Listados
 
 - **Tarjeta de Cita** — fragmento de la Cita en `{typography.headline-sm}`, nombre del Autor en `{typography.author}`, filete divisorio entre tarjetas. Sin imagen ni fondo propio. Al pasar el cursor, sin sombra: solo el fondo pasa a `{colors.surface-container-low}`. *(v7.1)* En las Páginas de Obra y de Autor va sin el nombre del Autor (`EXPERIENCE.md § Component Patterns`).
-- **Paginación** *(recoge lo construido)* — sin filete propio: el listado ya cierra con el de su última tarjeta, y la separación la dan 3 × `{spacing.unit}` de aire. En una sola fila, «Anterior» en un extremo y «Siguiente» en el otro, en `{typography.body-md}` y `{colors.primary}`, sin subrayado salvo al pasar el cursor y con alto mínimo `{components.tap-target-min}`. En medio, «Página N de M» en `{typography.caption}` y `{colors.on-surface-variant}`, y los números de página en `{typography.caption}` y `{colors.primary}`, cada uno en su zona de toque cuadrada de `{components.tap-target-min}`. Las zonas se separan por `{spacing.unit}`, como toda zona de toque; hoy van más juntas: no cumple, defecto anotado. El número actual no enlaza: va en `{colors.on-surface}` y con más peso. Donde no hay página anterior o siguiente queda su sitio vacío, para que la fila no se descoloque.
+- **Paginación** *(recoge lo construido)* — sin filete propio: el listado ya cierra con el de su última tarjeta, y la separación la dan 3 × `{spacing.unit}` de aire. En una sola fila, «Anterior» en un extremo y «Siguiente» en el otro, en `{typography.body-md}` y `{colors.primary}`, sin subrayado salvo al pasar el cursor y con alto mínimo `{components.tap-target-min}`. En medio, «Página N de M» en `{typography.caption}` y `{colors.on-surface-variant}`, y los números de página en `{typography.caption}` y `{colors.primary}`, cada uno en su zona de toque cuadrada de `{components.tap-target-min}`. Las zonas se separan por `{spacing.unit}`, como toda zona de toque, también en vertical si la fila no cabe y se parte. El número actual no enlaza: va en `{colors.on-surface}` y con más peso. Donde no hay página anterior o siguiente queda su sitio vacío, para que la fila no se descoloque.
 - **Chip de Tema** *(recoge lo construido)* — el nombre en Source Serif al cuerpo de `{typography.body-md}` y en `{colors.on-surface}`, sobre `{colors.surface-container}`, que cambia a `{colors.surface-container-high}` al pasar el cursor; radio `{rounded.lg}`, alto mínimo `{components.tap-target-min}` y 2 × `{spacing.unit}` de relleno lateral. Entre chips, `{spacing.unit}`. Nunca en siena: los Temas son navegación, no acento. [ASSUMPTION]
 - **Chip de Colección** — idéntico al de Tema. Que se distingan no es trabajo del chip: lo dice el sitio donde aparece y el nombre que lleva.
 
@@ -253,7 +253,7 @@ Agrupados por superficie, con los mismos grupos y en el mismo orden que `EXPERIE
 
 ### Búsqueda
 
-- **Campo de búsqueda** — vive en `/buscar/` y en el 404; desde las demás superficies se llega por la Cabecera. Filete inferior de `{components.rule-width}` en `{colors.outline}`. Sin caja, sin sombra, sin icono. Al recibir foco lleva el anillo global de `EXPERIENCE.md § Accessibility Floor`, como todo lo enfocable; hoy lo suprime y en su lugar el filete pasa a `{colors.primary}` y se engruesa: no cumple, defecto anotado. [ASSUMPTION]
+- **Campo de búsqueda** — vive en `/buscar/` y en el 404; desde las demás superficies se llega por la Cabecera. Filete inferior de `{components.rule-width}` en `{colors.outline}`. Sin caja, sin sombra, sin icono. Al recibir foco lleva el anillo global de `EXPERIENCE.md § Accessibility Floor`, como todo lo enfocable; además, el filete pasa a `{colors.primary}` y se engruesa, sumado al anillo y nunca en su lugar. [ASSUMPTION]
 - **Resultado de búsqueda** *(recoge lo construido; Obra, v7.1)* — en `/buscar/`, dentro de la medida de prosa: una fila por resultado, con filete inferior `{colors.outline-variant}`, alto mínimo `{components.tap-target-min}` y 2 × `{spacing.unit}` de relleno vertical; toda la fila es el enlace. Arriba, el rótulo de tipo —«Cita», «Autor», «Tema», «Colección» u «Obra»— en mayúsculas con el espaciado de `{typography.author}`, al cuerpo y peso de `{typography.caption}` y en `{colors.on-surface-variant}`; a `{spacing.unit}`, el título en Source Serif al cuerpo de `{typography.headline-sm}` y en `{colors.on-surface}`. Encima de la lista, el recuento en `{typography.caption}` y `{colors.on-surface-variant}`. [ASSUMPTION] **El de Obra** lleva el título en Inter (`§ Typography`), con el mismo cuerpo y peso que los demás: solo cambia la familia, sin token nuevo. Debajo, el nombre del Autor en `{typography.author}` y `{colors.on-surface-variant}`, como en la Tarjeta de Cita. [ASSUMPTION]
 
 ### Modelos de ingreso
