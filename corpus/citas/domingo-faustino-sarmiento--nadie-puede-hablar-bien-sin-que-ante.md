@@ -1,6 +1,8 @@
 ---
 texto: "Nadie puede hablar bien sin que, ante todo, se haya dado primero cuenta a sí mismo de aquello sobre lo cual se propone hablar."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-palabra"
 slug: "domingo-faustino-sarmiento-nadie-puede-hablar-bien-sin-que-ante"
 procedencia:
   obra: "La infancia y educación de Abraham Lincoln"

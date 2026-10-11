@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad, que supone que, como el derecho, la fuerza está en todos, dificulta que la de uno solo sofoque la libertad."
 autor: "concepcion-arenal"
+temas:
+  - "la-libertad"
 slug: "concepcion-arenal-la-igualdad-que-supone-que-como-el"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

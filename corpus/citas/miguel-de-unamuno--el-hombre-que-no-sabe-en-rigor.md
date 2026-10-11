@@ -1,6 +1,8 @@
 ---
 texto: "El hombre, que no sabe en rigor por qué hace lo que hace y no otra cosa, siente la necesidad de darse cuenta de su razón de obrar, y la forja."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-el-hombre-que-no-sabe-en-rigor"
 procedencia:
   obra: "Del sentimiento trágico de la vida/XI"

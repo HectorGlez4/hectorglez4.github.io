@@ -1,6 +1,8 @@
 ---
 texto: "La razón, lo que llamamos tal, el conocimiento reflejo y reflexivo, el que distingue al hombre, es un producto social."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-razon-lo-que-llamamos-tal-el"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

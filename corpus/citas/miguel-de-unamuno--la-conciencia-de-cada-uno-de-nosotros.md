@@ -1,6 +1,8 @@
 ---
 texto: "La conciencia de cada uno de nosotros, en efecto, es una sociedad de personas; en mí viven varios yos, y hasta los yos de aquellos con quienes vivo."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-la-conciencia-de-cada-uno-de-nosotros"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

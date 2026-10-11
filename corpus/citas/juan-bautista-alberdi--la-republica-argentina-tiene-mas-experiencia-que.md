@@ -1,6 +1,8 @@
 ---
 texto: "La República Argentina tiene más experiencia que todas sus hermanas del Sud, por la razón de que ha padecido como ninguna."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-adversidad"
 slug: "juan-bautista-alberdi-la-republica-argentina-tiene-mas-experiencia-que"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

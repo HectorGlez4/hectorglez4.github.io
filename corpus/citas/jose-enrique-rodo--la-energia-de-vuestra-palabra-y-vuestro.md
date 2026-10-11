@@ -1,6 +1,8 @@
 ---
 texto: "La energía de vuestra palabra y vuestro ejemplo puede llegar hasta incorporar las fuerzas vivas del pasado a la obra del futuro."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-tiempo"
 slug: "jose-enrique-rodo-la-energia-de-vuestra-palabra-y-vuestro"
 procedencia:
   obra: "Ariel"

@@ -1,6 +1,8 @@
 ---
 texto: "La razón de esto es la supuesta inferioridad de la mujer; nada puede ser mutuo entre los que no se creen iguales."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-razon-de-esto-es-la-supuesta"
 procedencia:
   obra: "La mujer del porvenir"

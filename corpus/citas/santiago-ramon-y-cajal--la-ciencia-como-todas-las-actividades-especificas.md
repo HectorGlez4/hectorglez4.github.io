@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia, como todas las actividades específicas del entendimiento, es simple consecuencia de la imitación y del ejemplo."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-la-ciencia-como-todas-las-actividades-especificas"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

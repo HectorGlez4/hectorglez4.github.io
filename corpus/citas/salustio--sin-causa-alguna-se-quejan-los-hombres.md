@@ -1,6 +1,8 @@
 ---
 texto: "Sin causa alguna se quejan los hombres de que su naturaleza es flaca y de corta duración; y que se gobierna más por la suerte, que por su virtud."
 autor: "salustio"
+temas:
+  - "la-virtud"
 slug: "salustio-sin-causa-alguna-se-quejan-los-hombres"
 procedencia:
   obra: "Guerra de Jugurta"

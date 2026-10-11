@@ -1,6 +1,8 @@
 ---
 texto: "El ocio, flojedad, pereza, indolencia y negligencia, vicios son, en efecto, con que se huye del trabajo, que aun siendo útil es penoso."
 autor: "agustin-de-hipona"
+temas:
+  - "el-trabajo"
 slug: "agustin-de-hipona-el-ocio-flojedad-pereza-indolencia-y-negligencia"
 procedencia:
   obra: "La ciudad de Dios"

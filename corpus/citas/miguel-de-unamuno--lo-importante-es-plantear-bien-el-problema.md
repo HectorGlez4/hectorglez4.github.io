@@ -1,6 +1,8 @@
 ---
 texto: "Lo importante es plantear bien el problema, y de aquí que el progreso consiste, no pocas veces, en deshacer lo hecho."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-lo-importante-es-plantear-bien-el-problema"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

@@ -1,6 +1,8 @@
 ---
 texto: "El triunfo supremo de la razón, facultad analítica, esto es, destructiva y disolvente, es poner en duda su propia validez."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-el-triunfo-supremo-de-la-razon-facultad"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

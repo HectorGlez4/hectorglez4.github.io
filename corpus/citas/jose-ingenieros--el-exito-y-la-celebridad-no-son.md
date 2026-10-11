@@ -1,7 +1,9 @@
 ---
-texto: "La desarmonía de un Sarmiento es un progreso; sus discordancias son rebeliones á las rutinas de los mediocres."
+texto: "El éxito y la celebridad no son la gloria; nada más falaz que la sanción de los contemporáneos y de las muchedumbres."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-desarmonia-de-un-sarmiento-es-un"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-exito-y-la-celebridad-no-son"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Una idea grande no puede caber en un espíritu estrecho, ni un sentimiento generoso arraigar en un alma mezquina."
 autor: "agustin-alvarez"
+temas:
+  - "el-saber"
 slug: "agustin-alvarez-una-idea-grande-no-puede-caber-en"
 procedencia:
   obra: "La transformación de las razas en América"

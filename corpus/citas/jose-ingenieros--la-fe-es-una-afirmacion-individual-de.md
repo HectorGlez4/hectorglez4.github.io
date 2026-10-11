@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres mediocres son innumerables y vegetan moldeados por su rebaño, como cera fundida en el cuño social."
+texto: "La fe es una afirmación individual de alguna verdad propia y el fanatismo es una conjura de huestes para ahogar la verdad de los demás."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hombres-mediocres-son-innumerables-y-vegetan"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-fe-es-una-afirmacion-individual-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El poder diabólico del dinero, aborrecible é inexplicable para los moralistas, viene, sin duda, de que es el signo de aquella voluntad preciosa."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-el-poder-diabolico-del-dinero-aborrecible-e"
 procedencia:
   obra: "La Muerte Del Cisne"

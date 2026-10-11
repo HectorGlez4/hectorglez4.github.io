@@ -1,6 +1,8 @@
 ---
 texto: "La moral que surge de cuanto aprendemos es que todo justifica la Esperanza, madre fecunda de las reformas."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-la-moral-que-surge-de-cuanto-aprendemos"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

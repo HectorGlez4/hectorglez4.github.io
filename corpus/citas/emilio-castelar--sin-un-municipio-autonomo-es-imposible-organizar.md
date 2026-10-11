@@ -1,6 +1,8 @@
 ---
 texto: "Sin un municipio autónomo es imposible organizar la democracia, como es imposible fundar la libertad sin un individuo tambien autónomo."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-sin-un-municipio-autonomo-es-imposible-organizar"
 procedencia:
   obra: "Correspondencia a la nación alemana"
