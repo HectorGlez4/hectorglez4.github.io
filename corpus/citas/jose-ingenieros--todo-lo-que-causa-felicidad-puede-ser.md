@@ -1,7 +1,9 @@
 ---
-texto: "Ningún hombre es excepcional en todas sus aptitudes; pero son mediocres, á carta cabal, los que no descuellan en ninguna."
+texto: "Todo lo que causa felicidad puede ser objeto de envidia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-ningun-hombre-es-excepcional-en-todas-sus"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-todo-lo-que-causa-felicidad-puede-ser"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

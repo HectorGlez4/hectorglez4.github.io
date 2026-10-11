@@ -1,6 +1,8 @@
 ---
 texto: "Sin los ancianos, pobres criaturas, el mundo se hubiera parecido a una escuela de párvulos."
 autor: "rosalia-de-castro"
+temas:
+  - "el-tiempo"
 slug: "rosalia-de-castro-sin-los-ancianos-pobres-criaturas-el-mundo"
 procedencia:
   obra: "Ruinas"

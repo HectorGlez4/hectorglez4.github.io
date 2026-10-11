@@ -1,6 +1,8 @@
 ---
 texto: "La fortuna se desea y tal vez se ayuda, la fama se diligencia; deseo de reputación nace de la virtud."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-la-fortuna-se-desea-y-tal-vez"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

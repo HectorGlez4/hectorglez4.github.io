@@ -1,6 +1,8 @@
 ---
 texto: "Los venezolanos aman la patria, pero no aman sus leyes; porque éstas han sido nocivas y eran la fuente del mal."
 autor: "simon-bolivar"
+temas:
+  - "la-patria"
 slug: "simon-bolivar-los-venezolanos-aman-la-patria-pero-no"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"

@@ -1,6 +1,8 @@
 ---
 texto: "Lo racional, en efecto, no es sino lo relacional; la razón se limita a relacionar elementos irracionales."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-lo-racional-en-efecto-no-es-sino"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

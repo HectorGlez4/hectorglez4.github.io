@@ -1,6 +1,8 @@
 ---
 texto: "Es una esperanza desesperada, es la impaciencia de la esperanza, es acaso la esperanza sin fe."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-es-una-esperanza-desesperada-es-la-impaciencia"
 procedencia:
   obra: "Sobre la tumba de Costa"

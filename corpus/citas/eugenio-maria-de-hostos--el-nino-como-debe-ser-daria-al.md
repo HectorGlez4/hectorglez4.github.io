@@ -1,6 +1,8 @@
 ---
 texto: "El niño como debe ser daría al hombre que debe ser."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-saber"
 slug: "eugenio-maria-de-hostos-el-nino-como-debe-ser-daria-al"
 procedencia:
   obra: "Moral social"

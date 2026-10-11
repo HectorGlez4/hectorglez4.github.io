@@ -1,6 +1,8 @@
 ---
 texto: "Lo que te acontezca es lo único que debe acontecerte, y el universo entero no aplastará sin razón a la más pequeña hormiga."
 autor: "amado-nervo"
+temas:
+  - "la-vida"
 slug: "amado-nervo-lo-que-te-acontezca-es-lo-unico"
 procedencia:
   obra: "Plenitud"

@@ -1,6 +1,8 @@
 ---
 texto: "Cada vez que el hombre ha intentado elevarse por la razón a una síntesis del universo ha fracasado lamentablemente."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-cada-vez-que-el-hombre-ha-intentado"
 procedencia:
   obra: "Filosofía del altruismo"

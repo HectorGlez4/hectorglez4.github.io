@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad tiende á ennoblecer el trabajo hasta el manual; y como el trabajo es moralizador, favorece la libertad."
 autor: "concepcion-arenal"
+temas:
+  - "el-trabajo"
 slug: "concepcion-arenal-la-igualdad-tiende-a-ennoblecer-el-trabajo"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

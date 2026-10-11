@@ -1,6 +1,8 @@
 ---
 texto: "La bondad es sensibilidad, compasión y paciencia."
 autor: "concepcion-arenal"
+temas:
+  - "la-virtud"
 slug: "concepcion-arenal-la-bondad-es-sensibilidad-compasion-y-paciencia"
 procedencia:
   obra: "La mujer del porvenir"

@@ -1,6 +1,8 @@
 ---
 texto: "Hay un mundo, el mundo sensible, que es hijo del hambre, y otro mundo, el ideal, que es hijo del amor."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-amor"
 slug: "miguel-de-unamuno-hay-un-mundo-el-mundo-sensible-que"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

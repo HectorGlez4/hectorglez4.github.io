@@ -1,6 +1,8 @@
 ---
 texto: "El símil era muy del gusto de los filósofos, que comparaban la vida con la navegación y la muerte con el arribar al puerto."
 autor: "marco-aurelio"
+temas:
+  - "la-muerte"
 slug: "marco-aurelio-el-simil-era-muy-del-gusto-de"
 procedencia:
   obra: "Soliloquios"

@@ -1,6 +1,8 @@
 ---
 texto: "Todo está allí, menos el genio del hombre, menos la inteligencia y la libertad."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-libertad"
 slug: "domingo-faustino-sarmiento-todo-esta-alli-menos-el-genio-del"
 procedencia:
   obra: "Recuerdos de provincia"

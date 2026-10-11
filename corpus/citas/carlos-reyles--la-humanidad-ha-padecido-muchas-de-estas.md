@@ -1,6 +1,8 @@
 ---
 texto: "La humanidad ha padecido muchas de estas demencias saludables."
 autor: "carlos-reyles"
+temas:
+  - "la-razon"
 slug: "carlos-reyles-la-humanidad-ha-padecido-muchas-de-estas"
 procedencia:
   obra: "La Muerte Del Cisne"

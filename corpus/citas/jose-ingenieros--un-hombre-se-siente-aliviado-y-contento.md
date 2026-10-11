@@ -1,6 +1,8 @@
 ---
 texto: "Un hombre se siente aliviado y contento cuando ha puesto todo su corazón en su obra, cuando ha hecho lo mejor que podía."
 autor: "jose-ingenieros"
+temas:
+  - "el-trabajo"
 slug: "jose-ingenieros-un-hombre-se-siente-aliviado-y-contento"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

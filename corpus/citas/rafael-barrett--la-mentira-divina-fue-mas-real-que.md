@@ -1,6 +1,8 @@
 ---
 texto: "La mentira divina fue más real que todas las verdades."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-la-mentira-divina-fue-mas-real-que"
 procedencia:
   obra: "Dios"

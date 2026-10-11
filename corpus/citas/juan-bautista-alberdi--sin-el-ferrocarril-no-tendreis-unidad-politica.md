@@ -1,6 +1,8 @@
 ---
 texto: "Sin el ferrocarril no tendréis unidad política en países donde la distancia hace imposible la acción del poder central."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-patria"
 slug: "juan-bautista-alberdi-sin-el-ferrocarril-no-tendreis-unidad-politica"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

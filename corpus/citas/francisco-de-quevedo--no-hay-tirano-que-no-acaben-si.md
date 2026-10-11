@@ -1,6 +1,8 @@
 ---
 texto: "No hay tirano que no acaben, si se juntan uno que aborrece la tiranía por su naturaleza y otro que la aborrece por la razón."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-libertad"
 slug: "francisco-de-quevedo-no-hay-tirano-que-no-acaben-si"
 procedencia:
   obra: "Marco Bruto"

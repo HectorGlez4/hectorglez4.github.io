@@ -1,7 +1,9 @@
 ---
-texto: "Todo lo que causa felicidad puede ser objeto de envidia."
+texto: "Los que no saben admirar no tienen porvenir, están inhabilitados para ascender hacia una perfección ideal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-lo-que-causa-felicidad-puede-ser"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-los-que-no-saben-admirar-no-tienen"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

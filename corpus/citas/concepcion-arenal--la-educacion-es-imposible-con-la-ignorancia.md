@@ -1,6 +1,8 @@
 ---
 texto: "La educación es imposible con la ignorancia y la falta de prestigio de la mujer."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-la-educacion-es-imposible-con-la-ignorancia"
 procedencia:
   obra: "La mujer del porvenir"

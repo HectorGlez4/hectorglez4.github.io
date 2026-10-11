@@ -1,7 +1,9 @@
 ---
-texto: "Los que no saben admirar no tienen porvenir, están inhabilitados para ascender hacia una perfección ideal."
+texto: "Ningún hombre es excepcional en todas sus aptitudes; pero son mediocres, á carta cabal, los que no descuellan en ninguna."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-que-no-saben-admirar-no-tienen"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-ningun-hombre-es-excepcional-en-todas-sus"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

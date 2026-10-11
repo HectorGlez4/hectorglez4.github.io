@@ -1,6 +1,8 @@
 ---
 texto: "El Gobierno que ha tenido Buenos Aires por veinte años puede engendrar el fanatismo, pero no la inteligencia de la libertad."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-el-gobierno-que-ha-tenido-buenos-aires"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

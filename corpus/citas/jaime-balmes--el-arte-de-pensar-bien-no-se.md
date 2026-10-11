@@ -1,6 +1,8 @@
 ---
 texto: "El arte de pensar bien no se aprende tanto con reglas como con modelos."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-el-arte-de-pensar-bien-no-se"
 procedencia:
   obra: "El Criterio"

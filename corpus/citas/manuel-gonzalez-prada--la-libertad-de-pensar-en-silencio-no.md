@@ -1,6 +1,8 @@
 ---
 texto: "La libertad de pensar en silencio no se discute, se consigna."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-la-libertad-de-pensar-en-silencio-no"
 procedencia:
   obra: "Librepensamiento de acción"

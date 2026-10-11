@@ -1,6 +1,8 @@
 ---
 texto: "Los mediocres de todas las razas son iguales, y cualquier raza, guiada por el genio, sería capaz de conquistar el mundo."
 autor: "rafael-barrett"
+temas:
+  - "la-gloria"
 slug: "rafael-barrett-los-mediocres-de-todas-las-razas-son"
 procedencia:
   obra: "Razas inferiores"
