@@ -1,6 +1,8 @@
 ---
 texto: "La vida no se resuelve con silogismos; no es un problema de ajedrez."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-la-vida-no-se-resuelve-con-silogismos"
 procedencia:
   obra: "Filosofía del altruismo"

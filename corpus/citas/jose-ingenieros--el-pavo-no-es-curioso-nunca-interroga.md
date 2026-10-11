@@ -1,7 +1,9 @@
 ---
-texto: "Todos los hombres altivos viven soñando una modesta independencia material; la miseria es mordaza que traba la lengua y paraliza el corazón."
+texto: "El pavo no es curioso; nunca interroga á la naturaleza."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todos-los-hombres-altivos-viven-sonando-una"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-pavo-no-es-curioso-nunca-interroga"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

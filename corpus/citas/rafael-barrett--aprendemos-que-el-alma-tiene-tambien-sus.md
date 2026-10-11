@@ -1,6 +1,8 @@
 ---
 texto: "Aprendemos que el alma tiene también sus estaciones; desolados por el invierno, esperaremos en la graciosa primavera."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-aprendemos-que-el-alma-tiene-tambien-sus"
 procedencia:
   obra: "El retorno a la tierra"

@@ -1,7 +1,9 @@
 ---
-texto: "Es violenta siempre la vitoria, porque la da la mayor parte: vence el número y no la razón."
+texto: "El valiente tiene miedo del contrario; el cobarde tiene miedo de su propio temor."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-es-violenta-siempre-la-vitoria-porque-la"
+temas:
+  - "el-miedo"
+slug: "francisco-de-quevedo-el-valiente-tiene-miedo-del-contrario-el"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

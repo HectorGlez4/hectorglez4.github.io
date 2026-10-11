@@ -1,7 +1,9 @@
 ---
-texto: "El hombre honesto aguanta el freno con que lo sujetan sus cómplices; el hombre virtuoso se eleva sobre ellos con un golpe de ala."
+texto: "Todos los hombres altivos viven soñando una modesta independencia material; la miseria es mordaza que traba la lengua y paraliza el corazón."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hombre-honesto-aguanta-el-freno-con"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-todos-los-hombres-altivos-viven-sonando-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

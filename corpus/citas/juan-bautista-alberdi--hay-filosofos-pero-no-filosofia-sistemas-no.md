@@ -1,6 +1,8 @@
 ---
 texto: "Hay filósofos, pero no filosofía; sistemas, no ciencia."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-saber"
 slug: "juan-bautista-alberdi-hay-filosofos-pero-no-filosofia-sistemas-no"
 procedencia:
   obra: "Ideas para presidir a la confección del curso de filosofía contemporánea"

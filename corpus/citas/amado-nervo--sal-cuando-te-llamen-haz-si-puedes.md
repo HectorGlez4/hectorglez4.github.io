@@ -1,6 +1,8 @@
 ---
 texto: "Sal cuando te llamen; haz, si puedes, el bien que te pidan, y vuélvete a casa."
 autor: "amado-nervo"
+temas:
+  - "la-humildad"
 slug: "amado-nervo-sal-cuando-te-llamen-haz-si-puedes"
 procedencia:
   obra: "Plenitud"

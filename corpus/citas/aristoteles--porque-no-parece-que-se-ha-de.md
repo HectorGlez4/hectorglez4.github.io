@@ -1,6 +1,8 @@
 ---
 texto: "Porque no parece que se ha de amar toda cosa, sino aquella que es digna de amor, la cual es o buena, o suave, o útil."
 autor: "aristoteles"
+temas:
+  - "el-amor"
 slug: "aristoteles-porque-no-parece-que-se-ha-de"
 procedencia:
   obra: "Ética a Nicómaco"

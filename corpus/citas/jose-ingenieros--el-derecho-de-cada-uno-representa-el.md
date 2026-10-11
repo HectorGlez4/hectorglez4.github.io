@@ -1,7 +1,9 @@
 ---
-texto: "La voz del deber manda augusta y absoluta; pero nuestro conocimiento del deber, y la noción que de él nos formamos, varían incesantemente."
+texto: "El derecho de cada uno representa el deber de los demás; y el deber de cada uno constituye el derecho de los otros."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-voz-del-deber-manda-augusta-y"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-el-derecho-de-cada-uno-representa-el"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

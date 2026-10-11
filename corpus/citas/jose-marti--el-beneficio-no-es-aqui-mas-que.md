@@ -1,6 +1,8 @@
 ---
 texto: "El beneficio no es aquí más que el deber: todavía se llama al deber bien que se hace."
 autor: "jose-marti"
+temas:
+  - "el-deber"
 slug: "jose-marti-el-beneficio-no-es-aqui-mas-que"
 procedencia:
   obra: "Diputado"

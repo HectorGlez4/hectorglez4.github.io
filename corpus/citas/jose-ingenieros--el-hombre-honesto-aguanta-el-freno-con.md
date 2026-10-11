@@ -1,7 +1,9 @@
 ---
-texto: "La dignidad estimula toda perfección del hombre; la vanidad acicatea cualquier éxito de la sombra."
+texto: "El hombre honesto aguanta el freno con que lo sujetan sus cómplices; el hombre virtuoso se eleva sobre ellos con un golpe de ala."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-dignidad-estimula-toda-perfeccion-del-hombre"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-hombre-honesto-aguanta-el-freno-con"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

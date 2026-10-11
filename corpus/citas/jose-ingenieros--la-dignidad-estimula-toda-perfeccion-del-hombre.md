@@ -1,7 +1,9 @@
 ---
-texto: "El odio que clama y asalta es temible; la envidia que calla y conspira es repugnante."
+texto: "La dignidad estimula toda perfección del hombre; la vanidad acicatea cualquier éxito de la sombra."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-odio-que-clama-y-asalta-es"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-dignidad-estimula-toda-perfeccion-del-hombre"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

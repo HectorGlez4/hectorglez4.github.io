@@ -1,6 +1,8 @@
 ---
 texto: "Lo triste de la calumnia no es que los canallas la digan, sino que los hombres honrados la oigan."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-palabra"
 slug: "gustavo-sanchez-galarraga-lo-triste-de-la-calumnia-no-es"
 procedencia:
   obra: "A Flor De Piel: Frases"

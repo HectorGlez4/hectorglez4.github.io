@@ -1,6 +1,8 @@
 ---
 texto: "La tierra árida desea la lluvia; el aire recio apetece lo mismo; también el mundo anhela poner por obra lo que se ha de hacer."
 autor: "marco-aurelio"
+temas:
+  - "la-vida"
 slug: "marco-aurelio-la-tierra-arida-desea-la-lluvia-el"
 procedencia:
   obra: "Soliloquios"

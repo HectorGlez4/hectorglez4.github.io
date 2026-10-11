@@ -1,7 +1,9 @@
 ---
-texto: "Los criticastros son, de instinto, enemigos de la obra; desean achicarla por la simple razón de que ellos no la han escrito."
+texto: "La más intrépida paciencia no hace de un rutinario un pensador; la verdad hay que saberla amar y sentir."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-criticastros-son-de-instinto-enemigos-de"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-mas-intrepida-paciencia-no-hace-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

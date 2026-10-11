@@ -1,6 +1,8 @@
 ---
 texto: "No; la llama divina del pensamiento es inextinguible en el pueblo filipino, y de un modo ó de otro ha de brillar y darse á conocer."
 autor: "jose-rizal"
+temas:
+  - "la-libertad"
 slug: "jose-rizal-no-la-llama-divina-del-pensamiento-es"
 procedencia:
   obra: "Filipinas Dentro De Cien Años (Estudio Politico-Social)"

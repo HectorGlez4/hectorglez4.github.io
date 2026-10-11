@@ -1,6 +1,8 @@
 ---
 texto: "Generalmente nadie obtiene a la vez bienes grandes y duraderos; la felicidad que permanece hasta el fin, es la que llega lentamente."
 autor: "seneca"
+temas:
+  - "la-felicidad"
 slug: "seneca-generalmente-nadie-obtiene-a-la-vez-bienes"
 procedencia:
   obra: "Consolación a Marcia"
