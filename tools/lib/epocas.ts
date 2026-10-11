@@ -212,6 +212,16 @@ export const EPOCAS: readonly Epoca[] = [
     nombre: 'Autores novohispanos',
     categoria: 'Categoría:Autores novohispanos',
   },
+  {
+    id: 'siglo-de-oro',
+    nombre: 'Autores españoles del Siglo de Oro',
+    categoria: 'Categoría:Autores españoles del Siglo de Oro',
+  },
+  {
+    id: 'edad-media',
+    nombre: 'Edad Media',
+    categoria: 'Categoría:Autores de la Edad Media',
+  },
 ];
 
 /** La época de un identificador, o `undefined` si no la declara la Fuente. */
