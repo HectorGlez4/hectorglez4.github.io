@@ -1,7 +1,9 @@
 ---
-texto: "Dejamos apuntado ya que el sabio, por religioso que sea, gana mucho en un ambiente de libre expansión espiritual."
+texto: "Los grandes hombres son, a ratos, genios; a ratos, niños, y siempre incompletos."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-dejamos-apuntado-ya-que-el-sabio-por"
+temas:
+  - "la-vida"
+slug: "santiago-ramon-y-cajal-los-grandes-hombres-son-a-ratos-genios"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

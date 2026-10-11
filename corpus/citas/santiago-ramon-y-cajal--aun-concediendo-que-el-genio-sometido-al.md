@@ -1,6 +1,8 @@
 ---
 texto: "Aun concediendo que el genio, sometido al contraste de la observación, salga puro de todo error, consideremos que todo cuanto ha descubierto en un dominio dado es casi nada en parangón con lo que deja por descubrir."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-humildad"
 slug: "santiago-ramon-y-cajal-aun-concediendo-que-el-genio-sometido-al"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

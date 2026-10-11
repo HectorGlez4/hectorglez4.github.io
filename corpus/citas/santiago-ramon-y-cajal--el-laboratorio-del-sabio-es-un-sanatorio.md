@@ -1,7 +1,9 @@
 ---
-texto: "Los grandes hombres son, a ratos, genios; a ratos, niños, y siempre incompletos."
+texto: "El laboratorio del sabio es un sanatorio incomparable para los extravíos de la atención y los desmayos de la voluntad."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-los-grandes-hombres-son-a-ratos-genios"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-el-laboratorio-del-sabio-es-un-sanatorio"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

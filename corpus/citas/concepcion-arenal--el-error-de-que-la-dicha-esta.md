@@ -1,6 +1,8 @@
 ---
 texto: "El error de que la dicha está en razón directa de la riqueza, es de los más perturbadores y dañinos; da la sed de goces materiales, la fiebre del oro y la idea de buscar un fin por medios que le hacen imposible."
 autor: "concepcion-arenal"
+temas:
+  - "la-felicidad"
 slug: "concepcion-arenal-el-error-de-que-la-dicha-esta"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

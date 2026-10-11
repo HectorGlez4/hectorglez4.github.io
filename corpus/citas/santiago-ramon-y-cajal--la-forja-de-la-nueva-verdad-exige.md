@@ -1,7 +1,9 @@
 ---
-texto: "El laboratorio del sabio es un sanatorio incomparable para los extravíos de la atención y los desmayos de la voluntad."
+texto: "La forja de la nueva verdad exige casi siempre severas abstenciones y renuncias."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-el-laboratorio-del-sabio-es-un-sanatorio"
+temas:
+  - "la-verdad"
+slug: "santiago-ramon-y-cajal-la-forja-de-la-nueva-verdad-exige"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

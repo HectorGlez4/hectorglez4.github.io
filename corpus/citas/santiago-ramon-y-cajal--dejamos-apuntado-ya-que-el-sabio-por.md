@@ -1,7 +1,9 @@
 ---
-texto: "La forja de la nueva verdad exige casi siempre severas abstenciones y renuncias."
+texto: "Dejamos apuntado ya que el sabio, por religioso que sea, gana mucho en un ambiente de libre expansión espiritual."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-la-forja-de-la-nueva-verdad-exige"
+temas:
+  - "la-libertad"
+slug: "santiago-ramon-y-cajal-dejamos-apuntado-ya-que-el-sabio-por"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La pasión para el hombre es un torrente; para la mujer, un abismo."
 autor: "concepcion-arenal"
+temas:
+  - "el-amor"
 slug: "concepcion-arenal-la-pasion-para-el-hombre-es-un"
 procedencia:
   obra: "La mujer del porvenir"

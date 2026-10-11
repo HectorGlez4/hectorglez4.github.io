@@ -1,6 +1,8 @@
 ---
 texto: "El dolor es activo, se gasta con el tiempo, se alivia; el tedio es una cosa pasiva, es un vacío que se siente siempre lo mismo, si no se siente más."
 autor: "concepcion-arenal"
+temas:
+  - "la-adversidad"
 slug: "concepcion-arenal-el-dolor-es-activo-se-gasta-con"
 procedencia:
   obra: "La mujer del porvenir"

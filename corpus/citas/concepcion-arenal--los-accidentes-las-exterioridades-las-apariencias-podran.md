@@ -1,6 +1,8 @@
 ---
 texto: "Los accidentes, las exterioridades, las apariencias, podrán variar; pero las condiciones esenciales que la educación perfecciona son las mismas, cualquiera que sea la posición social del que las tiene."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-los-accidentes-las-exterioridades-las-apariencias-podran"
 procedencia:
   obra: "La educación de la mujer"
