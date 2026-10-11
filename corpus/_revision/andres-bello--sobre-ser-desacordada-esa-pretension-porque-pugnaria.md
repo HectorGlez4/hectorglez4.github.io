@@ -1,0 +1,13 @@
+---
+texto: "Sobre ser desacordada esa pretensión, porque pugnaría con el primero de los objetos de la lengua, la fácil y clara transmisión del pensamiento, sería del todo inasequible."
+autor: "andres-bello"
+slug: "andres-bello-sobre-ser-desacordada-esa-pretension-porque-pugnaria"
+procedencia:
+  obra: "Discurso en la inauguración de la Universidad de Chile"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Discurso_en_la_inauguraci%C3%B3n_de_la_Universidad_de_Chile"
+---
