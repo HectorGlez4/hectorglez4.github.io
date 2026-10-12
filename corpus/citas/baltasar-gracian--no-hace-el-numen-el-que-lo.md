@@ -1,6 +1,8 @@
 ---
 texto: "No hace el numen el que lo dora, sino el que lo adora: el sagaz más quiere necesitados de sí que agradecidos."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-no-hace-el-numen-el-que-lo"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

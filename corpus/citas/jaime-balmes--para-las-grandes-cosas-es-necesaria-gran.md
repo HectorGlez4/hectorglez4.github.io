@@ -1,6 +1,8 @@
 ---
 texto: "Para las grandes cosas es necesaria gran fuerza, para las pequeñas basta pequeña; pero todas han menester alguna."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-para-las-grandes-cosas-es-necesaria-gran"
 procedencia:
   obra: "El Criterio"

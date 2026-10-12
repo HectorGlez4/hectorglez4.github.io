@@ -1,6 +1,8 @@
 ---
 texto: "Pero los que hacen las buenas obras parece que aman más a los que las reciben, que los que las reciben a los que las hacen."
 autor: "aristoteles"
+temas:
+  - "la-amistad"
 slug: "aristoteles-pero-los-que-hacen-las-buenas-obras"
 procedencia:
   obra: "Ética a Nicómaco"

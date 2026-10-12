@@ -1,7 +1,9 @@
 ---
-texto: "Por esto conviene tenerlas a entrambas o a ninguna; que la ira sufrida sabe ser virtud, y la paciencia enojada sabe dejar de ser vicio."
+texto: "Mata el médico al enfermo con lo que le receta para que sane: destruye el consejero al señor con lo que le persuade para que acierte."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-por-esto-conviene-tenerlas-a-entrambas-o"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-mata-el-medico-al-enfermo-con-lo"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

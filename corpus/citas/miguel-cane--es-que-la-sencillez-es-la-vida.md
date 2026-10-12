@@ -1,6 +1,8 @@
 ---
 texto: "Es que la sencillez es la vida y la verdad y nada hay más difícil que penetrar en ese santuario."
 autor: "miguel-cane"
+temas:
+  - "la-verdad"
 slug: "miguel-cane-es-que-la-sencillez-es-la-vida"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

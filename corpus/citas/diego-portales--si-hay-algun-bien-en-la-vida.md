@@ -1,6 +1,8 @@
 ---
 texto: "Si hay algún bien en la vida es el consuelo de tener un amigo a quien entregarse y que merezca este título sagrado."
 autor: "diego-portales"
+temas:
+  - "la-amistad"
 slug: "diego-portales-si-hay-algun-bien-en-la-vida"
 procedencia:
   obra: "Carta de Diego Portales a Antonio Garfias (13 de mayo de 1832)"

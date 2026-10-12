@@ -1,6 +1,8 @@
 ---
 texto: "Si a mí se me escaparen las riquezas, no me llevarán más que a sí mismas; pero si te huyeren a ti, quedarás atónito y juzgarás que has quedado sin ti."
 autor: "seneca"
+temas:
+  - "la-riqueza"
 slug: "seneca-si-a-mi-se-me-escaparen-las"
 procedencia:
   obra: "De la vida bienaventurada"

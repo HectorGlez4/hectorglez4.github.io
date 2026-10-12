@@ -1,6 +1,8 @@
 ---
 texto: "No es al amor a quien hay que pintar ciego."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-no-es-al-amor-a-quien-hay"
 procedencia:
   obra: "El odio"

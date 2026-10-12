@@ -1,6 +1,8 @@
 ---
 texto: "Hay injusticias, es cierto; pero la injusticia no es la regla de la sociedad; y si bien se observa, los grandes crímenes son excepciones monstruosas."
 autor: "jaime-balmes"
+temas:
+  - "la-justicia"
 slug: "jaime-balmes-hay-injusticias-es-cierto-pero-la-injusticia"
 procedencia:
   obra: "El Criterio"
