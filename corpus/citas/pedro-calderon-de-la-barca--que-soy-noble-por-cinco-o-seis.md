@@ -1,6 +1,8 @@
 ---
 texto: "Que soy noble por cinco o seis mil reales; y esto es dinero y no es honra; que honra no la compra nadie."
 autor: "pedro-calderon-de-la-barca"
+temas:
+  - "la-riqueza"
 slug: "pedro-calderon-de-la-barca-que-soy-noble-por-cinco-o-seis"
 procedencia:
   obra: "El alcalde de Zalamea"

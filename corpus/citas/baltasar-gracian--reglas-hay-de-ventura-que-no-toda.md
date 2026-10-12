@@ -1,6 +1,8 @@
 ---
 texto: "Reglas hay de ventura, que no toda es acasos para el sabio; puede ser ayudada de la industria."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-reglas-hay-de-ventura-que-no-toda"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

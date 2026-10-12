@@ -1,6 +1,8 @@
 ---
 texto: "Sin la atencion estamos distraidos, nuestro espíritu se halla, por decirlo así, en otra parte; y por lo mismo no ve aquello que se le muestra."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-sin-la-atencion-estamos-distraidos-nuestro-espiritu"
 procedencia:
   obra: "El Criterio"

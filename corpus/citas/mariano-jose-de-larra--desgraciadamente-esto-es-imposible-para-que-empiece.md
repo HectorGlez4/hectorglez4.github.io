@@ -1,6 +1,8 @@
 ---
 texto: "Desgraciadamente esto es imposible: para que empiece el día es indispensable que se acabe la noche."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-tiempo"
 slug: "mariano-jose-de-larra-desgraciadamente-esto-es-imposible-para-que-empiece"
 procedencia:
   obra: "Conventos españoles"

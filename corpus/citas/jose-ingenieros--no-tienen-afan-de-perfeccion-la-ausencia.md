@@ -1,6 +1,8 @@
 ---
 texto: "No tienen afán de perfección: la ausencia de ideales impídeles poner en sus actos el grano de sal que poetiza la vida."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-no-tienen-afan-de-perfeccion-la-ausencia"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

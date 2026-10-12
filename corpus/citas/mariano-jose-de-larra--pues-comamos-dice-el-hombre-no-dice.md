@@ -1,6 +1,8 @@
 ---
 texto: "Pues comamos, dice el hombre; no dice: reflexionemos."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-razon"
 slug: "mariano-jose-de-larra-pues-comamos-dice-el-hombre-no-dice"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

@@ -1,6 +1,8 @@
 ---
 texto: "Porque todo hombre vicioso hace agravio o a sí mismo o a otro, y el que hace agravio es injusto; por donde todo hombre vicioso es injusto."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-porque-todo-hombre-vicioso-hace-agravio-o"
 procedencia:
   obra: "Ética a Nicómaco"

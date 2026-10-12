@@ -1,6 +1,8 @@
 ---
 texto: "Basta que un prejuicio sea inverosímil para que lo acepten y lo difundan; cuando creen equivocarse podemos jurar que han cometido la imprudencia de pensar."
 autor: "jose-ingenieros"
+temas:
+  - "el-error"
 slug: "jose-ingenieros-basta-que-un-prejuicio-sea-inverosimil-para"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
