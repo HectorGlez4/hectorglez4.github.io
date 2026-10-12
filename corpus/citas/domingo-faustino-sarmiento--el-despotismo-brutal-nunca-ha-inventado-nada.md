@@ -1,6 +1,8 @@
 ---
 texto: "El despotismo brutal nunca ha inventado nada de nuevo."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-libertad"
 slug: "domingo-faustino-sarmiento-el-despotismo-brutal-nunca-ha-inventado-nada"
 procedencia:
   obra: "Recuerdos de provincia"

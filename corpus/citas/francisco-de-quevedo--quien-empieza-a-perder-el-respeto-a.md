@@ -1,6 +1,8 @@
 ---
 texto: "Quien empieza a perder el respeto a los reyes, los acaba por todos los demás que le siguen."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-libertad"
 slug: "francisco-de-quevedo-quien-empieza-a-perder-el-respeto-a"
 procedencia:
   obra: "Marco Bruto"

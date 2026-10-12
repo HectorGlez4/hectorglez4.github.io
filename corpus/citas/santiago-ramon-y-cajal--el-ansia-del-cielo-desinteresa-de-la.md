@@ -1,7 +1,9 @@
 ---
-texto: "El afán de llegar antes nos lleva a veces a incurrir en ligerezas; pero ocurre también que el ansia febril de tocar la meta los primeros nos granjea el mérito de la prioridad."
+texto: "El ansia del cielo desinteresa de la tierra."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-el-afan-de-llegar-antes-nos-lleva"
+temas:
+  - "la-vida"
+slug: "santiago-ramon-y-cajal-el-ansia-del-cielo-desinteresa-de-la"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

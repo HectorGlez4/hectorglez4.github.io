@@ -1,7 +1,9 @@
 ---
-texto: "Los héroes y los dioses son tanto más grandes cuanto más osados y terribles."
+texto: "El espectáculo de este mundo nos muestra sólo el egoísmo recompensado."
 autor: "carlos-reyles"
-slug: "carlos-reyles-los-heroes-y-los-dioses-son-tanto"
+temas:
+  - "la-virtud"
+slug: "carlos-reyles-el-espectaculo-de-este-mundo-nos-muestra"
 procedencia:
   obra: "La Muerte Del Cisne"
 estadoDerechos: "dominio-público"

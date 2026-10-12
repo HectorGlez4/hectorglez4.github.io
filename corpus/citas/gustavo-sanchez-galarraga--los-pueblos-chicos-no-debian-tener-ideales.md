@@ -1,6 +1,8 @@
 ---
 texto: "Los pueblos chicos no debían tener ideales grandes."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-patria"
 slug: "gustavo-sanchez-galarraga-los-pueblos-chicos-no-debian-tener-ideales"
 procedencia:
   obra: "A Flor De Piel: Frases"

@@ -1,6 +1,8 @@
 ---
 texto: "Los sujetos eminentemente raros dependen de los tiempos."
 autor: "baltasar-gracian"
+temas:
+  - "el-tiempo"
 slug: "baltasar-gracian-los-sujetos-eminentemente-raros-dependen-de-los"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

@@ -1,6 +1,8 @@
 ---
 texto: "La eminencia real no está en el pelear, sino en el gobernar."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-la-eminencia-real-no-esta-en-el"
 procedencia:
   obra: "El político"

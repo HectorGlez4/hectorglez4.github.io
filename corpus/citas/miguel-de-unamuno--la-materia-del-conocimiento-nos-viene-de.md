@@ -1,6 +1,8 @@
 ---
 texto: "La materia del conocimiento nos viene de fuera."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-la-materia-del-conocimiento-nos-viene-de"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

@@ -1,6 +1,8 @@
 ---
 texto: "Los viajes son la única cultura de los que no pueden tener otra."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "el-saber"
 slug: "gustavo-sanchez-galarraga-los-viajes-son-la-unica-cultura-de"
 procedencia:
   obra: "A Flor De Piel: Frases"

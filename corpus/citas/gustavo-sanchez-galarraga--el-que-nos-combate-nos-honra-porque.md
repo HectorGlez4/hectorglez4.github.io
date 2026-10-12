@@ -1,6 +1,8 @@
 ---
 texto: "El que nos combate nos honra, porque se ocupa de nosotros."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-gloria"
 slug: "gustavo-sanchez-galarraga-el-que-nos-combate-nos-honra-porque"
 procedencia:
   obra: "A Flor De Piel: Frases"

@@ -1,6 +1,8 @@
 ---
 texto: "El simplemente vano no irrita, excita compasion, presta pábulo á la sátira."
 autor: "jaime-balmes"
+temas:
+  - "la-humildad"
 slug: "jaime-balmes-el-simplemente-vano-no-irrita-excita-compasion"
 procedencia:
   obra: "El Criterio"

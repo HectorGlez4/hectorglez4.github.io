@@ -1,6 +1,8 @@
 ---
 texto: "Nada sería la tiranía presente si al menos diera garantías de libertades y progresos para tiempos venideros."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-nada-seria-la-tirania-presente-si-al"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

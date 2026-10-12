@@ -1,6 +1,8 @@
 ---
 texto: "La democracia adora ciegamente el becerro de oro."
 autor: "concepcion-arenal"
+temas:
+  - "la-riqueza"
 slug: "concepcion-arenal-la-democracia-adora-ciegamente-el-becerro-de"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

@@ -1,6 +1,8 @@
 ---
 texto: "Quien dice costumbres dice ideas, caracteres, creencias, habitudes."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-tiempo"
 slug: "juan-bautista-alberdi-quien-dice-costumbres-dice-ideas-caracteres-creencias"
 procedencia:
   obra: "Reacción contra el españolismo"
