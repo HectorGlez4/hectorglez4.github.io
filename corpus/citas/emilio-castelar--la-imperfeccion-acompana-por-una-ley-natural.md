@@ -1,6 +1,8 @@
 ---
 texto: "La imperfección acompaña, por una ley natural incontrastable, los comienzos y nacimientos de los sores y de las ideas."
 autor: "emilio-castelar"
+temas:
+  - "el-error"
 slug: "emilio-castelar-la-imperfeccion-acompana-por-una-ley-natural"
 procedencia:
   obra: "Filosofía de la historia"

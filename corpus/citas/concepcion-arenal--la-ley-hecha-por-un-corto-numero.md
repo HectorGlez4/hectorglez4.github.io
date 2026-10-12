@@ -1,6 +1,8 @@
 ---
 texto: "La ley hecha por un corto número de personas no podrá ser equitativa ni conveniente á la generalidad."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-ley-hecha-por-un-corto-numero"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

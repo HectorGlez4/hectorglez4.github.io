@@ -1,6 +1,8 @@
 ---
 texto: "El concepto de lo mejor está implicado en la vida misma, que tiende á perfeccionarse."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-el-concepto-de-lo-mejor-esta-implicado"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

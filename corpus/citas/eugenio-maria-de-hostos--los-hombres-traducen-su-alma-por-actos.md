@@ -1,6 +1,8 @@
 ---
 texto: "Los hombres traducen su alma por actos ó por ideas."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-palabra"
 slug: "eugenio-maria-de-hostos-los-hombres-traducen-su-alma-por-actos"
 procedencia:
   obra: "Moral social"

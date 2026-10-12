@@ -1,6 +1,8 @@
 ---
 texto: "El jugador funda su vicio en la ignorancia y en la impotencia absolutas."
 autor: "rafael-barrett"
+temas:
+  - "el-error"
 slug: "rafael-barrett-el-jugador-funda-su-vicio-en-la"
 procedencia:
   obra: "La ruleta"

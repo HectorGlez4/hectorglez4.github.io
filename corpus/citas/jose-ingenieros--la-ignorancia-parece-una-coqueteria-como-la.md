@@ -1,7 +1,9 @@
 ---
-texto: "El miedo á las ideas concretas ocúltase bajo el antifaz de las vaguedades cívicas."
+texto: "La ignorancia parece una coquetería, como la duda elegante que inquieta á ciertos fanáticos sin ideales."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-miedo-a-las-ideas-concretas-ocultase"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-ignorancia-parece-una-coqueteria-como-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

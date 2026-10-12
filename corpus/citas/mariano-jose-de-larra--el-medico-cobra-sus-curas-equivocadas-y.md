@@ -1,6 +1,8 @@
 ---
 texto: "El médico cobra sus curas equivocadas, y el abogado sus pleitos perdidos por el bien del público."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-justicia"
 slug: "mariano-jose-de-larra-el-medico-cobra-sus-curas-equivocadas-y"
 procedencia:
   obra: "Quién es el público y dónde se le encuentra"

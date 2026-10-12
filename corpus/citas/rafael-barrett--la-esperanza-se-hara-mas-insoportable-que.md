@@ -1,6 +1,8 @@
 ---
 texto: "La esperanza se hará más insoportable que el recuerdo."
 autor: "rafael-barrett"
+temas:
+  - "la-adversidad"
 slug: "rafael-barrett-la-esperanza-se-hara-mas-insoportable-que"
 procedencia:
   obra: "Marcar el paso"

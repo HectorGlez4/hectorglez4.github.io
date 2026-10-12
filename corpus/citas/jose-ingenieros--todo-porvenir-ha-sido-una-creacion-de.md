@@ -1,7 +1,9 @@
 ---
-texto: "La ignorancia parece una coquetería, como la duda elegante que inquieta á ciertos fanáticos sin ideales."
+texto: "Todo porvenir ha sido una creación de los hombres capaces de presentirlo, concretándolo en infinita sucesión de ideales."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-ignorancia-parece-una-coqueteria-como-la"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-todo-porvenir-ha-sido-una-creacion-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

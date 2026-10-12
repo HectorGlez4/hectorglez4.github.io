@@ -1,7 +1,9 @@
 ---
-texto: "Todo porvenir ha sido una creación de los hombres capaces de presentirlo, concretándolo en infinita sucesión de ideales."
+texto: "El tiempo y el ejercicio adaptan á la vida servil."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-porvenir-ha-sido-una-creacion-de"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-tiempo-y-el-ejercicio-adaptan-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

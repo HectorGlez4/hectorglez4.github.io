@@ -1,7 +1,9 @@
 ---
-texto: "El tiempo y el ejercicio adaptan á la vida servil."
+texto: "El miedo á las ideas concretas ocúltase bajo el antifaz de las vaguedades cívicas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-tiempo-y-el-ejercicio-adaptan-a"
+temas:
+  - "el-miedo"
+slug: "jose-ingenieros-el-miedo-a-las-ideas-concretas-ocultase"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

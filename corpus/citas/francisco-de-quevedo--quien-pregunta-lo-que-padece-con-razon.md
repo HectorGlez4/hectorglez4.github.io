@@ -1,7 +1,9 @@
 ---
-texto: "El que gobierna bien la ciudad que otro gobernó mal, la gobierna y la restaura."
+texto: "Quien pregunta lo que padece, con razón padece, y sin remedio, lo que pregunta."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-el-que-gobierna-bien-la-ciudad-que"
+temas:
+  - "la-adversidad"
+slug: "francisco-de-quevedo-quien-pregunta-lo-que-padece-con-razon"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

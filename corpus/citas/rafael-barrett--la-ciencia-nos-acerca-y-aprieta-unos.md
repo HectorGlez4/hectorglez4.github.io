@@ -1,7 +1,9 @@
 ---
-texto: "La desconfianza, la crueldad y la concupiscencia siguen siendo los movimientos espontáneos del alma."
+texto: "La ciencia nos acerca y aprieta unos con otros, por mucho que nos aborrezcamos."
 autor: "rafael-barrett"
-slug: "rafael-barrett-la-desconfianza-la-crueldad-y-la-concupiscencia"
+temas:
+  - "el-saber"
+slug: "rafael-barrett-la-ciencia-nos-acerca-y-aprieta-unos"
 procedencia:
   obra: "La conquista de Inglaterra"
 estadoDerechos: "dominio-público"
