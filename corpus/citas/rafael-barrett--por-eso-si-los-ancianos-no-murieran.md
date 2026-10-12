@@ -1,6 +1,8 @@
 ---
 texto: "Por eso, si los ancianos no murieran, los niños cesarían de nacer."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-por-eso-si-los-ancianos-no-murieran"
 procedencia:
   obra: "La lucha sociel"

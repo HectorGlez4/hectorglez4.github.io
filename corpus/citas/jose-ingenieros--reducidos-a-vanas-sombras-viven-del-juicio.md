@@ -1,7 +1,9 @@
 ---
-texto: "En ese sufrimiento está el núcleo moral de la envidia: muerde el corazón como un ácido, lo carcome como una polilla, lo corroe como la herrumbre al metal."
+texto: "Reducidos á vanas sombras, viven del juicio ajeno; se ignoran á sí mismos, limitándose á creerse como los creen los demás."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-en-ese-sufrimiento-esta-el-nucleo-moral"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-reducidos-a-vanas-sombras-viven-del-juicio"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

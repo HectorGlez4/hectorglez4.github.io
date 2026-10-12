@@ -1,6 +1,8 @@
 ---
 texto: "Por consiguiente, bajo la relación moral, no hay guía más malo, ni compañero más funesto, que un hombre enamorado."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-por-consiguiente-bajo-la-relacion-moral-no"
 procedencia:
   obra: "Fedro"

@@ -1,6 +1,8 @@
 ---
 texto: "Nos quejamos de la lentitud de los procesos: si los jueces fueran absolutamente justos y medianamente razonables, no se atreverían a fallar nunca."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-nos-quejamos-de-la-lentitud-de-los"
 procedencia:
   obra: "La justicia"

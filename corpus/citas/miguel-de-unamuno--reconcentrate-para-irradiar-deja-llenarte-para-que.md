@@ -1,6 +1,8 @@
 ---
 texto: "Reconcéntrate para irradiar; deja llenarte para que rebases luego, conservando el manantial."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-reconcentrate-para-irradiar-deja-llenarte-para-que"
 procedencia:
   obra: "¡Adentro!"

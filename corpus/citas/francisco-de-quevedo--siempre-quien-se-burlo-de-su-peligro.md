@@ -1,6 +1,8 @@
 ---
 texto: "Siempre quien se burló de su peligro, se halló burlado dél."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-prudencia"
 slug: "francisco-de-quevedo-siempre-quien-se-burlo-de-su-peligro"
 procedencia:
   obra: "Marco Bruto"

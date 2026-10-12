@@ -1,7 +1,9 @@
 ---
-texto: "Hay una medida exacta para apreciar la genialidad: si es legítima se reconoce por su obra, honda en su raigambre y vasta en su floración."
+texto: "En ese sufrimiento está el núcleo moral de la envidia: muerde el corazón como un ácido, lo carcome como una polilla, lo corroe como la herrumbre al metal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-hay-una-medida-exacta-para-apreciar-la"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-en-ese-sufrimiento-esta-el-nucleo-moral"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

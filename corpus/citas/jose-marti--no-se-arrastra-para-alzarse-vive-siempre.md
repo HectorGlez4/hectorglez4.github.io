@@ -1,6 +1,8 @@
 ---
 texto: "No se arrastra para alzarse: vive siempre alto, para que nada pueda contra él."
 autor: "jose-marti"
+temas:
+  - "la-virtud"
 slug: "jose-marti-no-se-arrastra-para-alzarse-vive-siempre"
 procedencia:
   obra: "Diputado"

@@ -1,6 +1,8 @@
 ---
 texto: "Justicieros y vengadores no nacen por generación espontánea; vienen de semillas arrojadas por los injustos y malvados."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-justicieros-y-vengadores-no-nacen-por-generacion"
 procedencia:
   obra: "Cosechando el fruto"

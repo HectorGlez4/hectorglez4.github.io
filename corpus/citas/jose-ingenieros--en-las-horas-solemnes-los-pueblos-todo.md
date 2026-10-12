@@ -1,7 +1,9 @@
 ---
-texto: "Es serio, por incapacidad de reirse; le atormenta la alegría de los satisfechos."
+texto: "En las horas solemnes los pueblos todo lo esperan de los grandes hombres; en las épocas decadentes bastan los vulgares."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-serio-por-incapacidad-de-reirse-le"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-en-las-horas-solemnes-los-pueblos-todo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

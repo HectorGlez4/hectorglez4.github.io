@@ -1,7 +1,9 @@
 ---
-texto: "Reducidos á vanas sombras, viven del juicio ajeno; se ignoran á sí mismos, limitándose á creerse como los creen los demás."
+texto: "Hay una medida exacta para apreciar la genialidad: si es legítima se reconoce por su obra, honda en su raigambre y vasta en su floración."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-reducidos-a-vanas-sombras-viven-del-juicio"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-hay-una-medida-exacta-para-apreciar-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
