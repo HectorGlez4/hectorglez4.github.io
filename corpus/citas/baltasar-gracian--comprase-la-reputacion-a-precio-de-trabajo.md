@@ -1,6 +1,8 @@
 ---
 texto: "Cómprase la reputación a precio de trabajo; poco vale lo que poco cuesta."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-comprase-la-reputacion-a-precio-de-trabajo"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

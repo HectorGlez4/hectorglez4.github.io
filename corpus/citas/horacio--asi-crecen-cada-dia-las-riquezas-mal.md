@@ -1,6 +1,8 @@
 ---
 texto: "Así crecen cada día las riquezas mal ganadas; sin embargo, no se qué les falta siempre que nunca el avaro se harta de aumentarlas."
 autor: "horacio"
+temas:
+  - "la-riqueza"
 slug: "horacio-asi-crecen-cada-dia-las-riquezas-mal"
 procedencia:
   obra: "Odas"

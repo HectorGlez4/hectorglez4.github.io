@@ -1,6 +1,8 @@
 ---
 texto: "Claro es que semejante optimismo no debe ser ciego, sino avisado y previsor."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-prudencia"
 slug: "santiago-ramon-y-cajal-claro-es-que-semejante-optimismo-no-debe"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

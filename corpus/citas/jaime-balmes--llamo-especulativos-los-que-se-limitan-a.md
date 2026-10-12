@@ -1,7 +1,9 @@
 ---
-texto: "Esto no lo habrá negado el historiador; pues bien, esto basta: píntense los pormenores como se quiera, la verdad quedará en su lugar."
+texto: "Llamo especulativos los que se limitan á conocer; y prácticos los que nos dirigen para obrar."
 autor: "jaime-balmes"
-slug: "jaime-balmes-esto-no-lo-habra-negado-el-historiador"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-llamo-especulativos-los-que-se-limitan-a"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

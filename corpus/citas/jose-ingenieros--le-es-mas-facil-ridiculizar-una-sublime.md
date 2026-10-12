@@ -1,7 +1,9 @@
 ---
-texto: "Por eso repiten los moralistas: la fama tiene caprichos y la gloria secretos."
+texto: "Le es más fácil ridiculizar una sublime acción que imitarla."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-por-eso-repiten-los-moralistas-la-fama"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-le-es-mas-facil-ridiculizar-una-sublime"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

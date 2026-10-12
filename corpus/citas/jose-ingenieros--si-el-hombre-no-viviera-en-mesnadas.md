@@ -1,7 +1,9 @@
 ---
-texto: "Le es más fácil ridiculizar una sublime acción que imitarla."
+texto: "Si el hombre no viviera en mesnadas, el amor propio sería dignidad en todos; lo es solamente en los caracteres firmes."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-le-es-mas-facil-ridiculizar-una-sublime"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-si-el-hombre-no-viviera-en-mesnadas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

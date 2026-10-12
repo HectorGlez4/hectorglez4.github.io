@@ -1,7 +1,9 @@
 ---
-texto: "Si el hombre no viviera en mesnadas, el amor propio sería dignidad en todos; lo es solamente en los caracteres firmes."
+texto: "Por eso los calumniadores minúsculos son más terribles, como las fuerzas moleculares que nadie ve y carcomen los metales más nobles."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-si-el-hombre-no-viviera-en-mesnadas"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-por-eso-los-calumniadores-minusculos-son-mas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

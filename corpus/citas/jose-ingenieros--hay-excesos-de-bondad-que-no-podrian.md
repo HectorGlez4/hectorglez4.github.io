@@ -1,7 +1,9 @@
 ---
-texto: "Son feligreses de la palabra; no ascienden á la idea ni conciben el ideal."
+texto: "Hay excesos de bondad que no podrían distinguirse del envilecimiento; hay falta de justicia en la moral del perdón sistemático."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-son-feligreses-de-la-palabra-no-ascienden"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-hay-excesos-de-bondad-que-no-podrian"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

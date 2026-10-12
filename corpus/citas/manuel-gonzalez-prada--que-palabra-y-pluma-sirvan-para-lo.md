@@ -1,6 +1,8 @@
 ---
 texto: "Que palabra y pluma sirvan para lo que deben servir: lejos adulación y mentira."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-que-palabra-y-pluma-sirvan-para-lo"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

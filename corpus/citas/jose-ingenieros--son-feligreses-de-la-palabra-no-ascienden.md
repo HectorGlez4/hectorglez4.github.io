@@ -1,7 +1,9 @@
 ---
-texto: "Por eso los calumniadores minúsculos son más terribles, como las fuerzas moleculares que nadie ve y carcomen los metales más nobles."
+texto: "Son feligreses de la palabra; no ascienden á la idea ni conciben el ideal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-por-eso-los-calumniadores-minusculos-son-mas"
+temas:
+  - "la-palabra"
+slug: "jose-ingenieros-son-feligreses-de-la-palabra-no-ascienden"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

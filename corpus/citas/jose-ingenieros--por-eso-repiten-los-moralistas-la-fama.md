@@ -1,7 +1,9 @@
 ---
-texto: "Hay excesos de bondad que no podrían distinguirse del envilecimiento; hay falta de justicia en la moral del perdón sistemático."
+texto: "Por eso repiten los moralistas: la fama tiene caprichos y la gloria secretos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-hay-excesos-de-bondad-que-no-podrian"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-por-eso-repiten-los-moralistas-la-fama"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
