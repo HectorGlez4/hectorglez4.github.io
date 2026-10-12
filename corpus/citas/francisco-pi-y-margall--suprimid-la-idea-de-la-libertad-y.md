@@ -1,6 +1,8 @@
 ---
 texto: "Suprimid la idea de la libertad, y no comprendereis la idea de la fatalidad: suprimid la idea de la fatalidad y carecerá de sentido la idea de la libertad."
 autor: "francisco-pi-y-margall"
+temas:
+  - "la-libertad"
 slug: "francisco-pi-y-margall-suprimid-la-idea-de-la-libertad-y"
 procedencia:
   obra: "Defensa de la Internacional - Parte II"

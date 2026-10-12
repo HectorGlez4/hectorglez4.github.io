@@ -1,7 +1,9 @@
 ---
-texto: "Ser alguien es creer intensamente; pensar es creer; amar es creer; odiar es creer; luchar es creer; vivir es creer."
+texto: "Hay tantos idealismos como ideales; y tantos ideales como idealistas; y tantos idealistas como hombres ansiosos de perfección."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-ser-alguien-es-creer-intensamente-pensar-es"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-hay-tantos-idealismos-como-ideales-y-tantos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

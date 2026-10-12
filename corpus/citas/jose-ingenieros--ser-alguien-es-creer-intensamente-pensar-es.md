@@ -1,7 +1,9 @@
 ---
-texto: "Pero nada puede crearse sin materia y sin energía: sin saberlo y sin quererlo nadie crea cosas que valgan ó duren."
+texto: "Ser alguien es creer intensamente; pensar es creer; amar es creer; odiar es creer; luchar es creer; vivir es creer."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-pero-nada-puede-crearse-sin-materia-y"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-ser-alguien-es-creer-intensamente-pensar-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

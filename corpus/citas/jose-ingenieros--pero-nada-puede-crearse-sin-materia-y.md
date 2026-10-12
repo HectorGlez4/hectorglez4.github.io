@@ -1,7 +1,9 @@
 ---
-texto: "En la aristocracia del mérito corresponde tanta parte á la virtud y al carácter como á la inteligencia; de otro modo sería incompleta y su esfuerzo ineficaz."
+texto: "Pero nada puede crearse sin materia y sin energía: sin saberlo y sin quererlo nadie crea cosas que valgan ó duren."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-en-la-aristocracia-del-merito-corresponde-tanta"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-pero-nada-puede-crearse-sin-materia-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

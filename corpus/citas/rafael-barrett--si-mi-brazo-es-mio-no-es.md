@@ -1,6 +1,8 @@
 ---
 texto: "Si mi brazo es mío, no es porque lo distingo y lo palpo, sino porque me duele, porque lo experimento de una manera real."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-si-mi-brazo-es-mio-no-es"
 procedencia:
   obra: "Filosofía del altruismo"

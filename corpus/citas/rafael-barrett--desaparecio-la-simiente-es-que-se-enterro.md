@@ -1,6 +1,8 @@
 ---
 texto: "Desapareció la simiente; es que se enterró en el surco."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-desaparecio-la-simiente-es-que-se-enterro"
 procedencia:
   obra: "El que fue"

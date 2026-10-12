@@ -1,6 +1,8 @@
 ---
 texto: "De lo dicho inferiré que para pensar bien no es buen sistema poner el espíritu en tortura, sino que es conveniente dejarle con cierto desahogo."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-de-lo-dicho-inferire-que-para-pensar"
 procedencia:
   obra: "El Criterio"

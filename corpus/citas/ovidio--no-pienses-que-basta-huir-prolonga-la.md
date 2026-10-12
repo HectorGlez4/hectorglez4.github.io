@@ -1,6 +1,8 @@
 ---
 texto: "No pienses que basta huir; prolonga la ausencia hasta que el fuego pierda toda su fuerza y no se oculte una brasa bajo las cenizas."
 autor: "ovidio"
+temas:
+  - "el-amor"
 slug: "ovidio-no-pienses-que-basta-huir-prolonga-la"
 procedencia:
   obra: "El remedio del amor"

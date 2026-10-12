@@ -1,6 +1,8 @@
 ---
 texto: "Tú mismo eres idea viva; no te sacrifiques a las muertas, a las que se aprenden en papeles."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-tu-mismo-eres-idea-viva-no-te"
 procedencia:
   obra: "¡Adentro!"

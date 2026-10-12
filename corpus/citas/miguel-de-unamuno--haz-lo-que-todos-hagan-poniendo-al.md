@@ -1,6 +1,8 @@
 ---
 texto: "Haz lo que todos hagan, poniendo, al hacerlo, todo tu espíritu en ello, y será cuanto hagas original por muy común que sea."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-trabajo"
 slug: "miguel-de-unamuno-haz-lo-que-todos-hagan-poniendo-al"
 procedencia:
   obra: "¡Adentro!"
