@@ -3,6 +3,7 @@ texto: "Casi todos los revolucionarios y reformadores, se parecen a los niños: 
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "el-miedo"
 slug: "manuel-gonzalez-prada-casi-todos-los-revolucionarios-y-reformadores-se"
 procedencia:
   obra: "El intelectual y el obrero"

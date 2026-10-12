@@ -1,7 +1,9 @@
 ---
-texto: "No son las voluntades mas firmes las que chocan continuamente con todo; por el contrario los muy impetuosos ceden cuando se les resiste, atacan cuando se cede."
+texto: "Al abuso de nuestras facultades físicas sucede el dolor; á los extravíos del espíritu siguen el pesar y el remordimiento."
 autor: "jaime-balmes"
-slug: "jaime-balmes-no-son-las-voluntades-mas-firmes-las"
+temas:
+  - "la-virtud"
+slug: "jaime-balmes-al-abuso-de-nuestras-facultades-fisicas-sucede"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Si poeta, canta un ideal; si sabio, lo define; si santo, lo enseña; si héroe, lo ejecuta."
+texto: "En la adversidad no flaquean: redoblan su pujanza, se aleccionan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-si-poeta-canta-un-ideal-si-sabio"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-en-la-adversidad-no-flaquean-redoblan-su"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

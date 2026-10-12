@@ -1,6 +1,8 @@
 ---
 texto: "Pero lleva una ventaja lo sabio, que es eterno; y si este no es su siglo, muchos otros lo serán."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-pero-lleva-una-ventaja-lo-sabio-que"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

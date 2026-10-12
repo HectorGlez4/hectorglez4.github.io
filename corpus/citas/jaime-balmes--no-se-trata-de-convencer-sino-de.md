@@ -1,7 +1,9 @@
 ---
-texto: "Al abuso de nuestras facultades físicas sucede el dolor; á los extravíos del espíritu siguen el pesar y el remordimiento."
+texto: "No se trata de convencer, sino de vencer; el amor propio se interesa en la contienda, y conocidos son los infinitos recursos de este maligno agente."
 autor: "jaime-balmes"
-slug: "jaime-balmes-al-abuso-de-nuestras-facultades-fisicas-sucede"
+temas:
+  - "la-humildad"
+slug: "jaime-balmes-no-se-trata-de-convencer-sino-de"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

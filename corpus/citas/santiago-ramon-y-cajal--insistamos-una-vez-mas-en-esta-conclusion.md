@@ -1,7 +1,9 @@
 ---
-texto: "Porque es más fácil forjar una teoría que descubrir un fenómeno."
+texto: "Insistamos una vez más en esta conclusión evidente: el haber positivo de un sabio hállase formado por el conjunto de los hechos originales que aporta."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-porque-es-mas-facil-forjar-una-teoria"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-insistamos-una-vez-mas-en-esta-conclusion"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"
