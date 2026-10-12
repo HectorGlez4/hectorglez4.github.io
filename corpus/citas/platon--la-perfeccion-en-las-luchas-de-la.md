@@ -1,6 +1,8 @@
 ---
 texto: "La perfección en las luchas de la palabra está sometida, a mi parecer, a las mismas condiciones que la perfección en las demás clases de lucha."
 autor: "platon"
+temas:
+  - "la-palabra"
 slug: "platon-la-perfeccion-en-las-luchas-de-la"
 procedencia:
   obra: "Fedro"

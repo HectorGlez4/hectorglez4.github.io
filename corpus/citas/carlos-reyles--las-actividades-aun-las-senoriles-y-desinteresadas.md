@@ -1,6 +1,8 @@
 ---
 texto: "Las actividades, aun las señoriles y desinteresadas, si se escudriña un poco, verase que se dirigen á la riqueza y por ella se aperciben y acicalan para la lucha."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-las-actividades-aun-las-senoriles-y-desinteresadas"
 procedencia:
   obra: "La Muerte Del Cisne"

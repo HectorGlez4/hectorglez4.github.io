@@ -1,7 +1,9 @@
 ---
-texto: "Todo hombre declina su personalidad al convertirse en funcionario: no lleva visible la cadena al pie, como el esclavo, pero la arrastra ocultamente, amarrada en su intestino."
+texto: "La naturaleza se opone á toda nivelación, viendo en la igualdad la muerte; necesita del genio más que del imbécil y del talento más que de la mediocridad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-hombre-declina-su-personalidad-al-convertirse"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-la-naturaleza-se-opone-a-toda-nivelacion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

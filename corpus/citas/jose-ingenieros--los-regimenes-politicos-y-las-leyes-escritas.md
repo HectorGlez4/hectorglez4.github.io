@@ -1,7 +1,9 @@
 ---
-texto: "La sensibilidad se atenúa en los viejos y se embotan sus vías de comunicación con el mundo que les rodea; los tejidos se endurecen y tórnanse menos sensibles al dolor físico."
+texto: "Los regímenes políticos y las leyes escritas no han modificado nunca la mediocridad de quienes las admiran ni el sufrimiento de quienes las aguantan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-sensibilidad-se-atenua-en-los-viejos"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-los-regimenes-politicos-y-las-leyes-escritas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La moral social, además de incompleta, sería muy corta en su alcance y muy mezquina en su propósito, si sólo ligara al hombre con la sociedad nacional de que forma parte."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-deber"
 slug: "eugenio-maria-de-hostos-la-moral-social-ademas-de-incompleta-seria"
 procedencia:
   obra: "Moral social"

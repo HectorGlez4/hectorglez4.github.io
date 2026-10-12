@@ -1,6 +1,8 @@
 ---
 texto: "Ningún animal lamenta por mucho tiempo la pérdida de sus hijos, si no es el hombre, que ayuda a su dolor, no siendo su aflicción como la experimenta, sino como se la propone."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-ningun-animal-lamenta-por-mucho-tiempo-la"
 procedencia:
   obra: "Consolación a Marcia"

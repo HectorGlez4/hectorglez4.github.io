@@ -1,6 +1,8 @@
 ---
 texto: "La caridad está viva; pero la razón yace casi muerta en la mujer, y se semeja a un misionero que ignorase el idioma de los pueblos que quería convertir."
 autor: "concepcion-arenal"
+temas:
+  - "la-razon"
 slug: "concepcion-arenal-la-caridad-esta-viva-pero-la-razon"
 procedencia:
   obra: "La mujer del porvenir"

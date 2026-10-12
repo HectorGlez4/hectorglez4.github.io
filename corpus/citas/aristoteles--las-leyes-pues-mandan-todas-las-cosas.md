@@ -1,6 +1,8 @@
 ---
 texto: "Las leyes, pues, mandan todas las cosas, dirigiéndolas, o al bien común de todos, o de los mejores, o de los más principales en virtud, o en cualquier otra manera."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-las-leyes-pues-mandan-todas-las-cosas"
 procedencia:
   obra: "Ética a Nicómaco"

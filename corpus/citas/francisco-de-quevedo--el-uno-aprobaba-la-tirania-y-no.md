@@ -1,6 +1,8 @@
 ---
 texto: "El uno aprobaba la tiranía y no las guerras civiles, por no padecerlas, como si la tiranía no fuera la peor guerra civil y ya vitoriosa."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-libertad"
 slug: "francisco-de-quevedo-el-uno-aprobaba-la-tirania-y-no"
 procedencia:
   obra: "Marco Bruto"

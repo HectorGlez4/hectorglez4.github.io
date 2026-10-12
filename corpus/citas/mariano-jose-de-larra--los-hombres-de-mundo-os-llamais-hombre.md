@@ -1,7 +1,9 @@
 ---
-texto: "Los autores han dicho siempre en sus prólogos, y se lo han llegado a creer ellos mismos, que escriben para el público; no sería malo que se desengañasen de este error."
+texto: "Los hombres de mundo os llamáis hombre de honor y de carácter, y a cada suceso nuevo cambiáis de opinión, apostatáis de vuestros principios."
 autor: "mariano-jose-de-larra"
-slug: "mariano-jose-de-larra-los-autores-han-dicho-siempre-en-sus"
+temas:
+  - "la-virtud"
+slug: "mariano-jose-de-larra-los-hombres-de-mundo-os-llamais-hombre"
 procedencia:
   obra: "Fígaro (Artículos selectos)"
 estadoDerechos: "dominio-público"

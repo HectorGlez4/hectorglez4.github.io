@@ -1,6 +1,8 @@
 ---
 texto: "Las diligencias y el vapor han reunido a los hombres de todas las distancias: desde que el espacio ha desaparecido en el tiempo, ha desaparecido también en el terreno."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-tiempo"
 slug: "mariano-jose-de-larra-las-diligencias-y-el-vapor-han-reunido"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

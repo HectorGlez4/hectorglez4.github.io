@@ -1,6 +1,8 @@
 ---
 texto: "El inconstante sustituye un trabajo á otro, porque así se evita la molestia que experimenta con la necesidad de sujetar su atencion y accion á un objeto determinado."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-el-inconstante-sustituye-un-trabajo-a-otro"
 procedencia:
   obra: "El Criterio"

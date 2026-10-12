@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo que acontece, ó sucede en tal conformidad que hayas nacido para llevarlo, ó de tal suerte que no seas hombre para tolerarlo."
 autor: "marco-aurelio"
+temas:
+  - "la-adversidad"
 slug: "marco-aurelio-todo-lo-que-acontece-o-sucede-en"
 procedencia:
   obra: "Soliloquios"

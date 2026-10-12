@@ -1,7 +1,9 @@
 ---
-texto: "Las pretendidas democracias de todos los tiempos han sido y serán confabulaciones de profesionales para oprimir á las masas inferiores y excluir á los hombres eminentes."
+texto: "El hábito de la ficción desmorona á los caracteres hipócritas vertiginosamente, como si cada nueva mentira los empujara hacia el precipicio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-pretendidas-democracias-de-todos-los-tiempos"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-el-habito-de-la-ficcion-desmorona-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

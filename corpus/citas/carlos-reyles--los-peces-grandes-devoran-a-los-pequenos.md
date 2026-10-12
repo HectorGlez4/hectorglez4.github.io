@@ -1,6 +1,8 @@
 ---
 texto: "Los peces grandes devoran á los pequeños, las microscópicas bacterias al hombre, los pensamientos robustos á los débiles, los dioses á los dioses."
 autor: "carlos-reyles"
+temas:
+  - "la-vida"
 slug: "carlos-reyles-los-peces-grandes-devoran-a-los-pequenos"
 procedencia:
   obra: "La Muerte Del Cisne"

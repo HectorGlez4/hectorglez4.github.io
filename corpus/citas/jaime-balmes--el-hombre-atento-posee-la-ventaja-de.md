@@ -1,6 +1,8 @@
 ---
 texto: "El hombre atento posee la ventaja de ser mas urbano y cortes; porque el amor propio de los demas se siente lastimado, si notan que no atendemos á lo que ellos dicen."
 autor: "jaime-balmes"
+temas:
+  - "la-prudencia"
 slug: "jaime-balmes-el-hombre-atento-posee-la-ventaja-de"
 procedencia:
   obra: "El Criterio"
