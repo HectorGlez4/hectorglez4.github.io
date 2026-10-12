@@ -1,6 +1,8 @@
 ---
 texto: "Habrían creído a sus obras y no a sus palabras, porque las palabras no sirven para apoyar las obras, sino que las obras se bastan."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-palabra"
 slug: "miguel-de-unamuno-habrian-creido-a-sus-obras-y-no"
 procedencia:
   obra: "San Manuel Bueno, mártir"

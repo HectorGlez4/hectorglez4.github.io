@@ -1,6 +1,8 @@
 ---
 texto: "Porque la razón aniquila y la imaginación entera, integra o totaliza; la razón por sí sola mata y la imaginación es la que da vida."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-porque-la-razon-aniquila-y-la-imaginacion"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

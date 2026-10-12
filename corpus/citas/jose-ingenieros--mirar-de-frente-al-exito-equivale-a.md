@@ -1,7 +1,9 @@
 ---
-texto: "Al principio la vejez mediocriza á todo hombre superior; más tarde la decrepitud inferioriza al viejo ya mediocre."
+texto: "Mirar de frente al éxito, equivale á asomarse á un precipicio: se retrocede á tiempo ó se cae en él para siempre."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-al-principio-la-vejez-mediocriza-a-todo"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-mirar-de-frente-al-exito-equivale-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

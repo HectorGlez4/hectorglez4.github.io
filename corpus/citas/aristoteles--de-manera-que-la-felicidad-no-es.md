@@ -1,6 +1,8 @@
 ---
 texto: "De manera que la felicidad no es otra cosa sino una contemplación."
 autor: "aristoteles"
+temas:
+  - "la-felicidad"
 slug: "aristoteles-de-manera-que-la-felicidad-no-es"
 procedencia:
   obra: "Ética a Nicómaco"

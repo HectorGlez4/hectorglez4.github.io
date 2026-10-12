@@ -1,6 +1,8 @@
 ---
 texto: "Vivimos de la opinión ajena, y el público es cruel; exige espectáculos de circo: gladiadores."
 autor: "rafael-barrett"
+temas:
+  - "la-gloria"
 slug: "rafael-barrett-vivimos-de-la-opinion-ajena-y-el"
 procedencia:
   obra: "El duelo"

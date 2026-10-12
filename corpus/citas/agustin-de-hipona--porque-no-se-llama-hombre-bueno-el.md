@@ -1,6 +1,8 @@
 ---
 texto: "Porque no se llama hombre bueno el que sabe lo que es bueno, sino el que ama lo bueno."
 autor: "agustin-de-hipona"
+temas:
+  - "la-virtud"
 slug: "agustin-de-hipona-porque-no-se-llama-hombre-bueno-el"
 procedencia:
   obra: "La ciudad de Dios"
