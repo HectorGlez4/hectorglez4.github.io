@@ -1,6 +1,8 @@
 ---
 texto: "Nada hay tan voluntario como la religion."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-nada-hay-tan-voluntario-como-la-religion"
 procedencia:
   obra: "Defensa de la libertad de cultos"

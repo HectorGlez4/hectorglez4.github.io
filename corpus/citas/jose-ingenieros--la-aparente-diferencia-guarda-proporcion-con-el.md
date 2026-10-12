@@ -1,7 +1,9 @@
 ---
-texto: "Las funciones del organismo empiezan á decaer á cierta edad."
+texto: "La aparente diferencia guarda proporción con el mérito."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-funciones-del-organismo-empiezan-a-decaer"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-la-aparente-diferencia-guarda-proporcion-con-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

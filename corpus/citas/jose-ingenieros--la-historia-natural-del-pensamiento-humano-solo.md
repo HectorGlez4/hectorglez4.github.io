@@ -1,7 +1,9 @@
 ---
-texto: "El mérito de cada uno se aquilata en la opinión de sus iguales."
+texto: "La historia natural del pensamiento humano sólo estudia creencias, no certidumbres."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-merito-de-cada-uno-se-aquilata"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-historia-natural-del-pensamiento-humano-solo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

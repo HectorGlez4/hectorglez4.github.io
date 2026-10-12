@@ -1,6 +1,8 @@
 ---
 texto: "El privilegio vuelve á las manos mejores."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-el-privilegio-vuelve-a-las-manos-mejores"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

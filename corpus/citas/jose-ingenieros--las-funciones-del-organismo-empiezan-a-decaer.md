@@ -1,7 +1,9 @@
 ---
-texto: "La multitud posee una experiencia sumisa al pasado: rutinas, prejuicios, domesticidades."
+texto: "Las funciones del organismo empiezan á decaer á cierta edad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-multitud-posee-una-experiencia-sumisa-al"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-las-funciones-del-organismo-empiezan-a-decaer"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

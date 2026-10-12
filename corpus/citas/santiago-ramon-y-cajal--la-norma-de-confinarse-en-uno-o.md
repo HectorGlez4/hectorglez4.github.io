@@ -1,6 +1,8 @@
 ---
 texto: "La norma de confinarse en uno o en corto número de temas, posee valor absoluto."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-la-norma-de-confinarse-en-uno-o"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

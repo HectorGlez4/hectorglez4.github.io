@@ -1,7 +1,9 @@
 ---
-texto: "La aparente diferencia guarda proporción con el mérito."
+texto: "La dignidad se identifica con el ideal: no conoce la historia más bellos ejemplos de conducta."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-aparente-diferencia-guarda-proporcion-con-el"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-dignidad-se-identifica-con-el-ideal"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

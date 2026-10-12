@@ -1,6 +1,8 @@
 ---
 texto: "La necesidad trae la función y el funcionario trae el procedimiento."
 autor: "agustin-alvarez"
+temas:
+  - "el-trabajo"
 slug: "agustin-alvarez-la-necesidad-trae-la-funcion-y-el"
 procedencia:
   obra: "La transformación de las razas en América"

@@ -1,7 +1,9 @@
 ---
-texto: "La dignidad se identifica con el ideal: no conoce la historia más bellos ejemplos de conducta."
+texto: "El mérito de cada uno se aquilata en la opinión de sus iguales."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-dignidad-se-identifica-con-el-ideal"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-merito-de-cada-uno-se-aquilata"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

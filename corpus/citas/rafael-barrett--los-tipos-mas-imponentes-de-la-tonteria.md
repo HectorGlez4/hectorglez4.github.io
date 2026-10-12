@@ -1,6 +1,8 @@
 ---
 texto: "Los tipos más imponentes de la tontería se encuentran entre los sabios."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-los-tipos-mas-imponentes-de-la-tonteria"
 procedencia:
   obra: "Filosofía del altruismo"

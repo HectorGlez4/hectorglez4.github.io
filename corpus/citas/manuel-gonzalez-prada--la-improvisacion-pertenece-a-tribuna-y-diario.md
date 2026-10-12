@@ -1,6 +1,8 @@
 ---
 texto: "La improvisación pertenece a tribuna y diario."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-la-improvisacion-pertenece-a-tribuna-y-diario"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

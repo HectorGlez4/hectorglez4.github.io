@@ -1,6 +1,8 @@
 ---
 texto: "La misma sobreabundancia de ingenio produce este defecto, como las personas demasiado ágiles y briosas se mantienen difícilmente en un paso mesurado y grave."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-la-misma-sobreabundancia-de-ingenio-produce-este"
 procedencia:
   obra: "El Criterio"

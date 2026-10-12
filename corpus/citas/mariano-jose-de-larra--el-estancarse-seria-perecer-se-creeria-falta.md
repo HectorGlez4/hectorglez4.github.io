@@ -1,6 +1,8 @@
 ---
 texto: "El estancarse sería perecer; se creería falta de recursos o de mérito su constancia."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-tiempo"
 slug: "mariano-jose-de-larra-el-estancarse-seria-perecer-se-creeria-falta"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

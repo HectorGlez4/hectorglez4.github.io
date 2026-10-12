@@ -1,6 +1,8 @@
 ---
 texto: "La posteridad ha sido siempre generosa con los fundadores de escuela."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-gloria"
 slug: "santiago-ramon-y-cajal-la-posteridad-ha-sido-siempre-generosa-con"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
