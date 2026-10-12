@@ -1,6 +1,8 @@
 ---
 texto: "Mira bien, repito, a todos lados: no citarás ni una casa tan desgraciada, que no encuentre consuelo en otra casa más desgraciada todavía."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-mira-bien-repito-a-todos-lados-no"
 procedencia:
   obra: "Consolación a Marcia"

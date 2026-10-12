@@ -1,6 +1,8 @@
 ---
 texto: "Producto de la asociación de dos seres, el hombre en ninguna época de su vida puede desarrollarse y prosperar sino en asociación de otros seres."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-vida"
 slug: "eugenio-maria-de-hostos-producto-de-la-asociacion-de-dos-seres"
 procedencia:
   obra: "Moral social"

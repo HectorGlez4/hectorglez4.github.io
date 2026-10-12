@@ -1,6 +1,8 @@
 ---
 texto: "Sin embargo, ni las hormigas ni las abejas conocen el dinero."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-sin-embargo-ni-las-hormigas-ni-las"
 procedencia:
   obra: "Deudas"

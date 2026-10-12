@@ -1,6 +1,8 @@
 ---
 texto: "Pues la amistad hace también que una buena racha resulte más brillante y que, en cambio, las malas rachas sean más ligeras, al repartirlas y dividirlas."
 autor: "ciceron"
+temas:
+  - "la-amistad"
 slug: "ciceron-pues-la-amistad-hace-tambien-que-una"
 procedencia:
   obra: "Sobre la amistad"

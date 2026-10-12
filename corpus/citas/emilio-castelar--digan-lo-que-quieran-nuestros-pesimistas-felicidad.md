@@ -1,6 +1,8 @@
 ---
 texto: "Digan lo que quieran nuestros pesimistas, felicidad no se encuentra en el aniquilamiento, sino en la plenitud del ser."
 autor: "emilio-castelar"
+temas:
+  - "la-felicidad"
 slug: "emilio-castelar-digan-lo-que-quieran-nuestros-pesimistas-felicidad"
 procedencia:
   obra: "Recuerdos de Elda o Las fiestas de mi pueblo"

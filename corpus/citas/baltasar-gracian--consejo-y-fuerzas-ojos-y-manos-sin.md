@@ -1,6 +1,8 @@
 ---
 texto: "Consejo y fuerzas, ojos y manos: sin valor es estéril la sabiduría."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-consejo-y-fuerzas-ojos-y-manos-sin"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

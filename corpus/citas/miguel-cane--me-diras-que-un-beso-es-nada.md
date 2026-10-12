@@ -1,6 +1,8 @@
 ---
 texto: "Me dirás que un beso es nada; a veces es un abismo."
 autor: "miguel-cane"
+temas:
+  - "el-amor"
 slug: "miguel-cane-me-diras-que-un-beso-es-nada"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

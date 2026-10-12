@@ -1,7 +1,9 @@
 ---
-texto: "Enemiga poderosa de la dignidad es la miseria: ella hace trizas los caracteres mediocres é incuba las peores servidumbres."
+texto: "No basta acumular riquezas para crear una patria: Cartago no lo fué."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-enemiga-poderosa-de-la-dignidad-es-la"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-no-basta-acumular-riquezas-para-crear-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

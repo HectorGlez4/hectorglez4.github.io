@@ -1,7 +1,9 @@
 ---
-texto: "No basta acumular riquezas para crear una patria: Cartago no lo fué."
+texto: "Sin velas, sería estéril la pujanza del viento; sin viento, de nada servirían las lonas más amplias."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-no-basta-acumular-riquezas-para-crear-una"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-sin-velas-seria-esteril-la-pujanza-del"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "No pudiendo confiar en nadie, los hipócritas viven cegando las fuentes de su propio corazón: no sienten la raza, la patria, la clase, la familia ni la amistad."
 autor: "jose-ingenieros"
+temas:
+  - "la-amistad"
 slug: "jose-ingenieros-no-pudiendo-confiar-en-nadie-los-hipocritas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

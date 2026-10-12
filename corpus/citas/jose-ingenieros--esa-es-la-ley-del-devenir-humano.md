@@ -1,7 +1,9 @@
 ---
-texto: "Sin velas, sería estéril la pujanza del viento; sin viento, de nada servirían las lonas más amplias."
+texto: "Ésa es la ley del devenir humano: la realidad, yerma de suyo, recibe vida y calor de los ideales, sin cuya influencia yacería inerte y los evos serían mudos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-sin-velas-seria-esteril-la-pujanza-del"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-esa-es-la-ley-del-devenir-humano"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

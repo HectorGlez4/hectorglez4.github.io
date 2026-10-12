@@ -1,6 +1,8 @@
 ---
 texto: "No es pues el sentido quien me ha engañado, sino mi lijereza y precipitacion."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-no-es-pues-el-sentido-quien-me"
 procedencia:
   obra: "El Criterio"

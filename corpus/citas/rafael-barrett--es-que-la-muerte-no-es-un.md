@@ -1,6 +1,8 @@
 ---
 texto: "Es que la muerte no es un aniquilamiento, ni una transfiguración, sino un balance."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-es-que-la-muerte-no-es-un"
 procedencia:
   obra: "El día de difuntos"

@@ -1,6 +1,8 @@
 ---
 texto: "Hay errores de tanto bulto, hay juicios que llevan tan manifiesto el sello de la pasion, que no alucinan á quien no esté cegado por ella."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-hay-errores-de-tanto-bulto-hay-juicios"
 procedencia:
   obra: "El Criterio"

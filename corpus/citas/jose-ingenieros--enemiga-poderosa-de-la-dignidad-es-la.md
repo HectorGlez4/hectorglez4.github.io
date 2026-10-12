@@ -1,7 +1,9 @@
 ---
-texto: "Ésa es la ley del devenir humano: la realidad, yerma de suyo, recibe vida y calor de los ideales, sin cuya influencia yacería inerte y los evos serían mudos."
+texto: "Enemiga poderosa de la dignidad es la miseria: ella hace trizas los caracteres mediocres é incuba las peores servidumbres."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-esa-es-la-ley-del-devenir-humano"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-enemiga-poderosa-de-la-dignidad-es-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

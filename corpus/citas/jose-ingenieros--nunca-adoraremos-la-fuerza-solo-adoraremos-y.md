@@ -1,6 +1,8 @@
 ---
 texto: "Nunca adoraremos la fuerza; sólo adoraremos y sólo queremos servir la justicia y la bondad, aunque ellas fueran tan débiles como un niño en su cuna."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-nunca-adoraremos-la-fuerza-solo-adoraremos-y"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
