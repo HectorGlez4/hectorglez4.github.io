@@ -1,6 +1,8 @@
 ---
 texto: "Imponer espectadores al amor es desnaturalizarlo."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-imponer-espectadores-al-amor-es-desnaturalizarlo"
 procedencia:
   obra: "El porno-cinematógrafo"

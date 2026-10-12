@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué sería de ese hormiguero de racionales si sus religiones no le hicieran soportable el tiempo?"
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-tiempo"
 slug: "eugenio-maria-de-hostos-que-seria-de-ese-hormiguero-de-racionales"
 procedencia:
   obra: "Moral social"

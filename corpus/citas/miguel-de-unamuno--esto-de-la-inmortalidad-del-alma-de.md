@@ -1,6 +1,8 @@
 ---
 texto: "Esto de la inmortalidad del alma, de la persistencia de la conciencia individual, no es racional, cae fuera de la razón."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-esto-de-la-inmortalidad-del-alma-de"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

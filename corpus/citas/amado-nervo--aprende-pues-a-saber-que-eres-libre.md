@@ -1,6 +1,8 @@
 ---
 texto: "Aprende, pues, a saber que eres libre y enseña a los otros que lo son."
 autor: "amado-nervo"
+temas:
+  - "la-libertad"
 slug: "amado-nervo-aprende-pues-a-saber-que-eres-libre"
 procedencia:
   obra: "Plenitud"

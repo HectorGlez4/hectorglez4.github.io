@@ -1,6 +1,8 @@
 ---
 texto: "Teorías abstractas son las que producen la perniciosa idea de una libertad ilimitada."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-teorias-abstractas-son-las-que-producen-la"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"

@@ -1,6 +1,8 @@
 ---
 texto: "Toda amistad, pues, como está dicho, consiste en compañía."
 autor: "aristoteles"
+temas:
+  - "la-amistad"
 slug: "aristoteles-toda-amistad-pues-como-esta-dicho-consiste"
 procedencia:
   obra: "Ética a Nicómaco"

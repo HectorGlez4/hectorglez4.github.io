@@ -1,6 +1,8 @@
 ---
 texto: "Educarse es prepararse a la vida, y la vida ha cambiado."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-educarse-es-prepararse-a-la-vida-y"
 procedencia:
   obra: "Exámenes"

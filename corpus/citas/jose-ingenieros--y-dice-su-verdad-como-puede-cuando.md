@@ -1,6 +1,8 @@
 ---
 texto: "Y dice su verdad como puede, cuando puede, donde puede."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-y-dice-su-verdad-como-puede-cuando"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
