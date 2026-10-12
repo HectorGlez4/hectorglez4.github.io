@@ -1,7 +1,9 @@
 ---
-texto: "La longevidad mental es un accidente; no es la regla."
+texto: "La cultura no entibia á los visionarios: su vida entera es una fe en acción."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-longevidad-mental-es-un-accidente-no"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-cultura-no-entibia-a-los-visionarios"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

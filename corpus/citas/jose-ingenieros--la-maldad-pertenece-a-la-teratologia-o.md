@@ -1,7 +1,9 @@
 ---
-texto: "Todo lo natural es divino, todo lo divino es moral, todo lo natural es moral."
+texto: "La maldad pertenece a la teratología o a la patología moral: es una monstruosidad o una enfermedad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-lo-natural-es-divino-todo-lo"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-maldad-pertenece-a-la-teratologia-o"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

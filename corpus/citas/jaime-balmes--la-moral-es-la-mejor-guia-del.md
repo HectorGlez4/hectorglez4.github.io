@@ -1,6 +1,8 @@
 ---
 texto: "La moral es la mejor guia del entendimiento práctico."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-la-moral-es-la-mejor-guia-del"
 procedencia:
   obra: "El Criterio"

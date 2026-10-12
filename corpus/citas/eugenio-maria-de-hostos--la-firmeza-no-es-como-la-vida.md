@@ -1,7 +1,9 @@
 ---
-texto: "El ahorro, por su mismo carácter, es un ejercicio doméstico."
+texto: "La firmeza no es, como la vida práctica traduce, ni terquedad, ni obstinación."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-el-ahorro-por-su-mismo-caracter-es"
+temas:
+  - "la-virtud"
+slug: "eugenio-maria-de-hostos-la-firmeza-no-es-como-la-vida"
 procedencia:
   obra: "Moral social"
   año: 1917

@@ -1,6 +1,8 @@
 ---
 texto: "El ocupar uno lugar donde le pueden decir que se quite, necedad a perfil."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-humildad"
 slug: "francisco-de-quevedo-el-ocupar-uno-lugar-donde-le-pueden"
 procedencia:
   obra: "Origen y definición de la necedad"

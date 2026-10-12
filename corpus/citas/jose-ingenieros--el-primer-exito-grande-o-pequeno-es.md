@@ -1,7 +1,9 @@
 ---
-texto: "La cultura no entibia á los visionarios: su vida entera es una fe en acción."
+texto: "El primer éxito, grande ó pequeño, es perturbador."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-cultura-no-entibia-a-los-visionarios"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-primer-exito-grande-o-pequeno-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

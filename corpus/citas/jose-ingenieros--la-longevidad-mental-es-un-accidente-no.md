@@ -1,7 +1,9 @@
 ---
-texto: "El diablo no sabe más por viejo que por diablo."
+texto: "La longevidad mental es un accidente; no es la regla."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-diablo-no-sabe-mas-por-viejo"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-longevidad-mental-es-un-accidente-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

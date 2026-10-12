@@ -1,6 +1,8 @@
 ---
 texto: "La justicia puede no ser necesaria cuando el mayor número no la cree tal."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-justicia-puede-no-ser-necesaria-cuando"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

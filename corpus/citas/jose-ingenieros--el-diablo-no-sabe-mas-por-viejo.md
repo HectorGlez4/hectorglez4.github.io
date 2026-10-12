@@ -1,7 +1,9 @@
 ---
-texto: "El genio es una fuerza que actúa en función del medio."
+texto: "El diablo no sabe más por viejo que por diablo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-es-una-fuerza-que-actua"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-diablo-no-sabe-mas-por-viejo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

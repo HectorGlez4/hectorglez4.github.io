@@ -1,6 +1,8 @@
 ---
 texto: "Los justos no deben obedecer muy estrictamente a la ley."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-los-justos-no-deben-obedecer-muy-estrictamente"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

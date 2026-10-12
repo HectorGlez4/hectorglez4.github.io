@@ -1,6 +1,8 @@
 ---
 texto: "Las facciones son adversas á todas las originalidades."
 autor: "jose-ingenieros"
+temas:
+  - "la-libertad"
 slug: "jose-ingenieros-las-facciones-son-adversas-a-todas-las"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

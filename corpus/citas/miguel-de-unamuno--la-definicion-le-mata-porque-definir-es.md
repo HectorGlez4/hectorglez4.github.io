@@ -1,6 +1,8 @@
 ---
 texto: "La definición le mata, porque definir es poner fines, es limitar, y no cabe definir lo absolutamente indefinible."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-palabra"
 slug: "miguel-de-unamuno-la-definicion-le-mata-porque-definir-es"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

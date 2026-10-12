@@ -1,7 +1,9 @@
 ---
-texto: "El primer éxito, grande ó pequeño, es perturbador."
+texto: "El genio es una fuerza que actúa en función del medio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-primer-exito-grande-o-pequeno-es"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-genio-es-una-fuerza-que-actua"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

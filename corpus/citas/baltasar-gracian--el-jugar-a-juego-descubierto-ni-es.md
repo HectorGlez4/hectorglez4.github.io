@@ -1,6 +1,8 @@
 ---
 texto: "El jugar a juego descubierto ni es de utilidad ni de gusto."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-el-jugar-a-juego-descubierto-ni-es"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"
