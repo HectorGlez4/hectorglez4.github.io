@@ -1,6 +1,8 @@
 ---
 texto: "Lo que importa no es impedir que lo exterior nos penetre, sino que lo interior desborde."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-lo-que-importa-no-es-impedir-que"
 procedencia:
   obra: "Filosofía del altruismo"

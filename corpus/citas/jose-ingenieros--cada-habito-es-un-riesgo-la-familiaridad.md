@@ -1,7 +1,9 @@
 ---
-texto: "El primer germen de perfección moral se manifiesta en una decidida preferencia por el bien: haciéndolo, enseñándolo, admirándolo."
+texto: "Cada hábito es un riesgo; la familiaridad aviene á las cosas detestables y á las personas indignas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-primer-germen-de-perfeccion-moral-se"
+temas:
+  - "la-prudencia"
+slug: "jose-ingenieros-cada-habito-es-un-riesgo-la-familiaridad"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

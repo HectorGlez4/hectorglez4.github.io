@@ -1,6 +1,8 @@
 ---
 texto: "El espíritu como el cuerpo ha menester un buen régimen; y en este régimen hay una condicion indispensable: la templanza."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-el-espiritu-como-el-cuerpo-ha-menester"
 procedencia:
   obra: "El Criterio"

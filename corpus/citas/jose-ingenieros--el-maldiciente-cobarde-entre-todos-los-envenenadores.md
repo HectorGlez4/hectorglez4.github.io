@@ -1,7 +1,9 @@
 ---
-texto: "Los pusilánimes son impotentes, como los aturdidos; los unos reflexionan cuando conviene obrar, y los otros obran sin haber reflexionado."
+texto: "El maldiciente, cobarde entre todos los envenenadores, está seguro de la impunidad: por eso es despreciable."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-pusilanimes-son-impotentes-como-los-aturdidos"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-maldiciente-cobarde-entre-todos-los-envenenadores"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

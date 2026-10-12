@@ -1,7 +1,9 @@
 ---
-texto: "El maldiciente, cobarde entre todos los envenenadores, está seguro de la impunidad: por eso es despreciable."
+texto: "El primer germen de perfección moral se manifiesta en una decidida preferencia por el bien: haciéndolo, enseñándolo, admirándolo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-maldiciente-cobarde-entre-todos-los-envenenadores"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-primer-germen-de-perfeccion-moral-se"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

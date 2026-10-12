@@ -1,6 +1,8 @@
 ---
 texto: "La generalidad de los hombres descienden al sepulcro, no solo sin haberse conocido á sí propios, sino tambien sin haberlo intentado."
 autor: "jaime-balmes"
+temas:
+  - "la-muerte"
 slug: "jaime-balmes-la-generalidad-de-los-hombres-descienden-al"
 procedencia:
   obra: "El Criterio"

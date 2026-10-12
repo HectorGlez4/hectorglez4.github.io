@@ -1,7 +1,9 @@
 ---
-texto: "Cada hábito es un riesgo; la familiaridad aviene á las cosas detestables y á las personas indignas."
+texto: "Los pusilánimes son impotentes, como los aturdidos; los unos reflexionan cuando conviene obrar, y los otros obran sin haber reflexionado."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cada-habito-es-un-riesgo-la-familiaridad"
+temas:
+  - "la-prudencia"
+slug: "jose-ingenieros-los-pusilanimes-son-impotentes-como-los-aturdidos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

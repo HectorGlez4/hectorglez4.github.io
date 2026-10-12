@@ -1,6 +1,8 @@
 ---
 texto: "La experiencia complica la tontería de los mediocres, pero no puede convertirlos en genios; la vejez no abuena al perverso, lo torna inútil para el mal."
 autor: "jose-ingenieros"
+temas:
+  - "el-tiempo"
 slug: "jose-ingenieros-la-experiencia-complica-la-tonteria-de-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

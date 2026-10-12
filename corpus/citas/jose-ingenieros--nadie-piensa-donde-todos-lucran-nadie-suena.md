@@ -1,6 +1,8 @@
 ---
 texto: "Nadie piensa, donde todos lucran; nadie sueña, donde todos tragan."
 autor: "jose-ingenieros"
+temas:
+  - "la-riqueza"
 slug: "jose-ingenieros-nadie-piensa-donde-todos-lucran-nadie-suena"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

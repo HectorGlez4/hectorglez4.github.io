@@ -1,6 +1,8 @@
 ---
 texto: "Los principios nuevos no pueden prosperar sino a costa de los viejos."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-tiempo"
 slug: "mariano-jose-de-larra-los-principios-nuevos-no-pueden-prosperar-sino"
 procedencia:
   obra: "Conventos españoles"
