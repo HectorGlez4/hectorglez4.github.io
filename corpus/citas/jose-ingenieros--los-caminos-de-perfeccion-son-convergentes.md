@@ -1,7 +1,9 @@
 ---
-texto: "El rico puede sentir emulación ó celos por la riqueza ajena; pero envidiará el talento."
+texto: "Los caminos de perfección son convergentes."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-rico-puede-sentir-emulacion-o-celos"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-caminos-de-perfeccion-son-convergentes"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

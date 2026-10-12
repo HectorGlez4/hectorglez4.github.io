@@ -1,7 +1,9 @@
 ---
-texto: "Los caminos de perfección son convergentes."
+texto: "La fe es de visionarios y el fanatismo es de siervos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-caminos-de-perfeccion-son-convergentes"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-fe-es-de-visionarios-y-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

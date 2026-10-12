@@ -1,6 +1,8 @@
 ---
 texto: "La génesis del crimen es inconsciente, y la del genio también."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-la-genesis-del-crimen-es-inconsciente-y"
 procedencia:
   obra: "Filosofía del altruismo"

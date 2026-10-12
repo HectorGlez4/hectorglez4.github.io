@@ -1,6 +1,8 @@
 ---
 texto: "Todo vencimiento es odioso, y del dueño, o necio, o fatal."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-todo-vencimiento-es-odioso-y-del-dueno"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

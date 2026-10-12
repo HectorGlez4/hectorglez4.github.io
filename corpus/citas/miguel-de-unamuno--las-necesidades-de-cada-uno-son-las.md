@@ -1,6 +1,8 @@
 ---
 texto: "Las necesidades de cada uno son las más universales, porque son las de todos."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-justicia"
 slug: "miguel-de-unamuno-las-necesidades-de-cada-uno-son-las"
 procedencia:
   obra: "¡Adentro!"

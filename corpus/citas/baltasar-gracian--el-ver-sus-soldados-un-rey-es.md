@@ -1,6 +1,8 @@
 ---
 texto: "El ver sus soldados un rey es premiarlos, y su presencia vale por otro ejército."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-el-ver-sus-soldados-un-rey-es"
 procedencia:
   obra: "El político"

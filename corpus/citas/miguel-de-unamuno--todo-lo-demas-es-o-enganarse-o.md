@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo demás es o engañarse o querer engañar a los demás."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-todo-lo-demas-es-o-enganarse-o"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

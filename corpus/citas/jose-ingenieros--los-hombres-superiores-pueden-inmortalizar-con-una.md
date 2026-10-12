@@ -1,7 +1,9 @@
 ---
-texto: "La desigualdad es fuerza y esencia de toda selección."
+texto: "Los hombres superiores pueden inmortalizar con una palabra á sus lacayos ó á sus sicarios."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-desigualdad-es-fuerza-y-esencia-de"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-los-hombres-superiores-pueden-inmortalizar-con-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

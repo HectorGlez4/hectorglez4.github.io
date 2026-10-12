@@ -1,6 +1,8 @@
 ---
 texto: "La inteligencia es monista o panteísta, la voluntad es monoteísta o egotista."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-inteligencia-es-monista-o-panteista-la"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

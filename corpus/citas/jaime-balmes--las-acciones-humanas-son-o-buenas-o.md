@@ -1,6 +1,8 @@
 ---
 texto: "Las acciones humanas son ó buenas ó malas."
 autor: "jaime-balmes"
+temas:
+  - "el-deber"
 slug: "jaime-balmes-las-acciones-humanas-son-o-buenas-o"
 procedencia:
   obra: "El Criterio"

@@ -1,7 +1,9 @@
 ---
-texto: "Los idealistas románticos son exagerados porque son insaciables."
+texto: "El conservador sagaz puede bendecir al revolucionario, tanto como éste á él."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-idealistas-romanticos-son-exagerados-porque-son"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-el-conservador-sagaz-puede-bendecir-al-revolucionario"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

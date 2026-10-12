@@ -1,6 +1,8 @@
 ---
 texto: "La dictadura es la anarquía constituida y convertida en institución permanente."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-la-dictadura-es-la-anarquia-constituida-y"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

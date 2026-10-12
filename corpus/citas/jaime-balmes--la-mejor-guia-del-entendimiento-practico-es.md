@@ -1,6 +1,8 @@
 ---
 texto: "La mejor guia del entendimiento práctico, es la moral."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-mejor-guia-del-entendimiento-practico-es"
 procedencia:
   obra: "El Criterio"

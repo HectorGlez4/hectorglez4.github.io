@@ -1,6 +1,8 @@
 ---
 texto: "Los que matan, ¡ay! son los que se están muriendo."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-los-que-matan-ay-son-los-que"
 procedencia:
   obra: "El altruismo y la energía"

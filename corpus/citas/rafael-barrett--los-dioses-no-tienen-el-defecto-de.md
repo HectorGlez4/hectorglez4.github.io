@@ -1,6 +1,8 @@
 ---
 texto: "Los dioses no tienen el defecto de la inmortalidad."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-los-dioses-no-tienen-el-defecto-de"
 procedencia:
   obra: "El que fue"

@@ -1,7 +1,9 @@
 ---
-texto: "El talento es mucho más que una mediocridad complicada; no puede ascender hasta él la inteligencia común."
+texto: "Todo ideal es relativo á una imperfecta realidad presente."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-talento-es-mucho-mas-que-una"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-todo-ideal-es-relativo-a-una-imperfecta"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

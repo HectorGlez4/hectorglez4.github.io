@@ -1,6 +1,8 @@
 ---
 texto: "Los males que no puedes remediar son infinitos."
 autor: "amado-nervo"
+temas:
+  - "la-adversidad"
 slug: "amado-nervo-los-males-que-no-puedes-remediar-son"
 procedencia:
   obra: "Plenitud"

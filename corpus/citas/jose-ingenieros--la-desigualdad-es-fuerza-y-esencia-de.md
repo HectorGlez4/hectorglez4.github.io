@@ -1,7 +1,9 @@
 ---
-texto: "Todo ideal es relativo á una imperfecta realidad presente."
+texto: "La desigualdad es fuerza y esencia de toda selección."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-ideal-es-relativo-a-una-imperfecta"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-la-desigualdad-es-fuerza-y-esencia-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

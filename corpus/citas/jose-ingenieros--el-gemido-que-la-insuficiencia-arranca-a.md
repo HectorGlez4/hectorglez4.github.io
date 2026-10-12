@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres superiores pueden inmortalizar con una palabra á sus lacayos ó á sus sicarios."
+texto: "El gemido que la insuficiencia arranca á la vanidad es una forma especial de alabanza."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hombres-superiores-pueden-inmortalizar-con-una"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-gemido-que-la-insuficiencia-arranca-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

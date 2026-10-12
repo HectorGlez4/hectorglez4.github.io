@@ -1,7 +1,9 @@
 ---
-texto: "El gemido que la insuficiencia arranca á la vanidad es una forma especial de alabanza."
+texto: "Cada época tiene sus ideales, sus virtuosos y sus santos: héroes, apóstoles ó sabios."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-gemido-que-la-insuficiencia-arranca-a"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-cada-epoca-tiene-sus-ideales-sus-virtuosos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

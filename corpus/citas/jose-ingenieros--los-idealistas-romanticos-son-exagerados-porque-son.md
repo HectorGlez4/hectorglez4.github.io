@@ -1,7 +1,9 @@
 ---
-texto: "Cada época tiene sus ideales, sus virtuosos y sus santos: héroes, apóstoles ó sabios."
+texto: "Los idealistas románticos son exagerados porque son insaciables."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cada-epoca-tiene-sus-ideales-sus-virtuosos"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-idealistas-romanticos-son-exagerados-porque-son"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

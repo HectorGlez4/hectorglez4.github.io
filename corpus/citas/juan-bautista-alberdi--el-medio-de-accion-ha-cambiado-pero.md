@@ -1,6 +1,8 @@
 ---
 texto: "El medio de acción ha cambiado, pero el producto es el mismo."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-tiempo"
 slug: "juan-bautista-alberdi-el-medio-de-accion-ha-cambiado-pero"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

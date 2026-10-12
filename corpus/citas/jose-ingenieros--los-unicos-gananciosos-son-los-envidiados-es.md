@@ -1,6 +1,8 @@
 ---
 texto: "Los únicos gananciosos son los envidiados; es satisfactorio sentirse adorar de rodillas."
 autor: "jose-ingenieros"
+temas:
+  - "la-envidia"
 slug: "jose-ingenieros-los-unicos-gananciosos-son-los-envidiados-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

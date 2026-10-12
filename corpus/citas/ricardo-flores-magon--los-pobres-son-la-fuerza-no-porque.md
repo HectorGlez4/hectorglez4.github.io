@@ -1,6 +1,8 @@
 ---
 texto: "Los pobres son la fuerza, no porque son pobres, sino porque son el mayor número."
 autor: "ricardo-flores-magon"
+temas:
+  - "la-riqueza"
 slug: "ricardo-flores-magon-los-pobres-son-la-fuerza-no-porque"
 procedencia:
   obra: "Discurso pronunciado por RFM el 16 de septiembre de 1910"

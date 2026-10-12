@@ -1,7 +1,9 @@
 ---
-texto: "El conservador sagaz puede bendecir al revolucionario, tanto como éste á él."
+texto: "El talento es mucho más que una mediocridad complicada; no puede ascender hasta él la inteligencia común."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-conservador-sagaz-puede-bendecir-al-revolucionario"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-talento-es-mucho-mas-que-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

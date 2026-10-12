@@ -1,6 +1,8 @@
 ---
 texto: "La mansedumbre es una medianía en lo que toca a los enojos."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-la-mansedumbre-es-una-mediania-en-lo"
 procedencia:
   obra: "Ética a Nicómaco"
