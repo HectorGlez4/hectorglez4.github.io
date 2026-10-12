@@ -1,6 +1,8 @@
 ---
 texto: "El orden es la primera ley del progreso espiritual; las mejores aptitudes se pierden si libramos nuestra cultura a la improvisación y divagamos sobre lo que no entendemos."
 autor: "jose-ingenieros"
+temas:
+  - "el-deber"
 slug: "jose-ingenieros-el-orden-es-la-primera-ley-del"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

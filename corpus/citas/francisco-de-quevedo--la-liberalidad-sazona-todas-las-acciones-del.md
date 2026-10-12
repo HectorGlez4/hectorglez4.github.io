@@ -1,6 +1,8 @@
 ---
 texto: "La liberalidad sazona todas las acciones del príncipe: es realce de lo bueno y disculpa de lo malo; absuelve las acusaciones en su vida, granjea las lágrimas en su muerte."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-la-liberalidad-sazona-todas-las-acciones-del"
 procedencia:
   obra: "Marco Bruto"

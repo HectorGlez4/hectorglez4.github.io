@@ -1,6 +1,8 @@
 ---
 texto: "La pereza, es decir, la pasion de la inaccion, tiene para triunfar, una ventaja sobre las demas pasiones, y es que no exige nada; su objeto es una pura negacion."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-la-pereza-es-decir-la-pasion-de"
 procedencia:
   obra: "El Criterio"

@@ -1,6 +1,8 @@
 ---
 texto: "Más se requiere hoy para un sabio que antiguamente para siete; y más es menester para tratar con un solo hombre en estos tiempos que con todo un pueblo en los pasados."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-mas-se-requiere-hoy-para-un-sabio"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

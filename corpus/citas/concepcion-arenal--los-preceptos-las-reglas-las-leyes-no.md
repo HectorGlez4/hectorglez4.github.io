@@ -1,6 +1,8 @@
 ---
 texto: "Los preceptos, las reglas, las leyes, no pueden obligar á todos por igual, sino porque en todos hallan igualmente aptitudes bastantes para comprenderlas y cumplimentarlas."
 autor: "concepcion-arenal"
+temas:
+  - "el-deber"
 slug: "concepcion-arenal-los-preceptos-las-reglas-las-leyes-no"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

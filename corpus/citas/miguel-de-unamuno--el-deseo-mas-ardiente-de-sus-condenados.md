@@ -1,6 +1,8 @@
 ---
 texto: "El deseo más ardiente de sus condenados es el de que se les recuerde aquí, en la tierra, y se hable de ellos, y es esto lo que más ilumina las tinieblas del infierno."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-gloria"
 slug: "miguel-de-unamuno-el-deseo-mas-ardiente-de-sus-condenados"
 procedencia:
   obra: "Del sentimiento trágico de la vida/III"

@@ -1,6 +1,8 @@
 ---
 texto: "La fe en el porvenir, la confianza en la eficacia del esfuerzo humano, son el antecedente necesario de toda acción enérgica y de todo propósito fecundo."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-tiempo"
 slug: "jose-enrique-rodo-la-fe-en-el-porvenir-la-confianza"
 procedencia:
   obra: "Ariel"

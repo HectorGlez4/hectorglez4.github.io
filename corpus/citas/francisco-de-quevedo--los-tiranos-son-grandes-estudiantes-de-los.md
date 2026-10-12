@@ -1,6 +1,8 @@
 ---
 texto: "Los tiranos son grandes estudiantes de los semblantes; y el pueblo, cuando reinan, espía con atención las señas exteriores, para descansar la curiosidad ansiosa sin riesgo."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-libertad"
 slug: "francisco-de-quevedo-los-tiranos-son-grandes-estudiantes-de-los"
 procedencia:
   obra: "Marco Bruto"

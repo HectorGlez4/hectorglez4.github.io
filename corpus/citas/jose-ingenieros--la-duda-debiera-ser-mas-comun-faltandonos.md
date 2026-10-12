@@ -1,6 +1,8 @@
 ---
 texto: "La duda debiera ser más común, faltándonos criterios de certidumbre absoluta; la primera actitud, sin embargo, es una adhesión á lo que se presenta á nuestra experiencia."
 autor: "jose-ingenieros"
+temas:
+  - "el-saber"
 slug: "jose-ingenieros-la-duda-debiera-ser-mas-comun-faltandonos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

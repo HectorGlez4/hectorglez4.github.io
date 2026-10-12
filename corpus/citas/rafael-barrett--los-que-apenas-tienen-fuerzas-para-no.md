@@ -1,6 +1,8 @@
 ---
 texto: "Los que apenas tienen fuerzas para no ser aplastados las emplean únicamente en odiar, y destilan la última defensa de los organismos inferiores: veneno."
 autor: "rafael-barrett"
+temas:
+  - "la-envidia"
 slug: "rafael-barrett-los-que-apenas-tienen-fuerzas-para-no"
 procedencia:
   obra: "El odio"

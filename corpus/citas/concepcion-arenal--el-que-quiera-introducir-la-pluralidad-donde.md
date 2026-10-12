@@ -1,6 +1,8 @@
 ---
 texto: "El que quiera introducir la pluralidad donde la unidad es necesaria, introduce la injusticia y con ella la desventura."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-el-que-quiera-introducir-la-pluralidad-donde"
 procedencia:
   obra: "La mujer del porvenir"

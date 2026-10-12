@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad, aunque extraviada por la ira pueda recurrir á la violencia, en su estado normal ama la paz, y es contraria al militarismo, tan peligroso para la libertad."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-igualdad-aunque-extraviada-por-la-ira"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

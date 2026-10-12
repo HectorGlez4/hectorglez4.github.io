@@ -1,7 +1,9 @@
 ---
-texto: "La eficacia de la difamación arraiga en la complacencia tácita de quienes la escuchan, en la cobardía colectiva de cuantos pueden escucharla sin indignarse."
+texto: "La conducta, en sí misma, no es distinguida ni vulgar; la intención ennoblece los actos, los eleva, los idealiza y, en otros casos, determina su vulgaridad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-eficacia-de-la-difamacion-arraiga-en"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-conducta-en-si-misma-no-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

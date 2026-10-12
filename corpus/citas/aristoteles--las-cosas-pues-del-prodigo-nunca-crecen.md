@@ -1,6 +1,8 @@
 ---
 texto: "Las cosas, pues, del pródigo nunca crecen mucho, porque no es posible que el que de ninguna parte recibe, dé a todos."
 autor: "aristoteles"
+temas:
+  - "la-riqueza"
 slug: "aristoteles-las-cosas-pues-del-prodigo-nunca-crecen"
 procedencia:
   obra: "Ética a Nicómaco"

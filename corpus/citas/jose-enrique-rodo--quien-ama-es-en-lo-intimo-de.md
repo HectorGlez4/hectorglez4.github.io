@@ -1,6 +1,8 @@
 ---
 texto: "Quien ama es, en lo íntimo de su imaginación, poeta y artista, aunque carezca del don de plasmar en obra real y sensible ese divino espíritu que lo posee."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-amor"
 slug: "jose-enrique-rodo-quien-ama-es-en-lo-intimo-de"
 procedencia:
   obra: "Motivos de Proteo"

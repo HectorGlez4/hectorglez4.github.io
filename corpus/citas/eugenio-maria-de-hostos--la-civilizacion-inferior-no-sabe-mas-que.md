@@ -1,6 +1,8 @@
 ---
 texto: "La civilización inferior no sabe más que divertirse; verter á raudales en nonadas peligrosas el tiempo que pesa sobre individuos, grupos y sociedad entera."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-tiempo"
 slug: "eugenio-maria-de-hostos-la-civilizacion-inferior-no-sabe-mas-que"
 procedencia:
   obra: "Moral social"
