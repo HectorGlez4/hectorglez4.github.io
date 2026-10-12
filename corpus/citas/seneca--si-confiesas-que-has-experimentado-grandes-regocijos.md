@@ -1,6 +1,8 @@
 ---
 texto: "Si confiesas que has experimentado grandes regocijos, no debes quejarte de los que te han arrebatado, sino agradecer los que has recibido."
 autor: "seneca"
+temas:
+  - "la-felicidad"
 slug: "seneca-si-confiesas-que-has-experimentado-grandes-regocijos"
 procedencia:
   obra: "Consolación a Marcia"

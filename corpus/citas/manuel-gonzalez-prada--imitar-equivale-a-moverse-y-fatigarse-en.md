@@ -1,6 +1,8 @@
 ---
 texto: "Imitar equivale a moverse y fatigarse en el vagón de un ferrocarril: nos imaginamos realizar mucho y no hacemos más que seguir el impulso del motor."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-imitar-equivale-a-moverse-y-fatigarse-en"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

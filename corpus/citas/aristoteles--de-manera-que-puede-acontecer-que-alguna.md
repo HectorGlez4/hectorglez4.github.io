@@ -1,6 +1,8 @@
 ---
 texto: "De manera, que puede acontecer que alguna cosa sea injusta y no sea aún agravio, si no se le añade el ser obra voluntaria."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-de-manera-que-puede-acontecer-que-alguna"
 procedencia:
   obra: "Ética a Nicómaco"

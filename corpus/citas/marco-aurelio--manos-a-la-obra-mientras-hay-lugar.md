@@ -1,6 +1,8 @@
 ---
 texto: "Manos á la obra, mientras hay lugar para ello, y no mires alrededor si habrá quien lo sepa."
 autor: "marco-aurelio"
+temas:
+  - "el-trabajo"
 slug: "marco-aurelio-manos-a-la-obra-mientras-hay-lugar"
 procedencia:
   obra: "Soliloquios"

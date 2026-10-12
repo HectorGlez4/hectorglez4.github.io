@@ -1,6 +1,8 @@
 ---
 texto: "No viven su vida por sí mismos, sino para el fantasma que proyectan en la opinión de sus similares."
 autor: "jose-ingenieros"
+temas:
+  - "la-gloria"
 slug: "jose-ingenieros-no-viven-su-vida-por-si-mismos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

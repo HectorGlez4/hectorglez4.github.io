@@ -1,7 +1,9 @@
 ---
-texto: "Se ha dicho que ningun grande hombre le parecia grande á su ayuda de cámara; esto encierra mucha verdad."
+texto: "Échase pues de ver que el arte de pensar bien no interesa solamente á los filósofos, sino tambien á las gentes mas sencillas."
 autor: "jaime-balmes"
-slug: "jaime-balmes-se-ha-dicho-que-ningun-grande-hombre"
+temas:
+  - "la-razon"
+slug: "jaime-balmes-echase-pues-de-ver-que-el-arte"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

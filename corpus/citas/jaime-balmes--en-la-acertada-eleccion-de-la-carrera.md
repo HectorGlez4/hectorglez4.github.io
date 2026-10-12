@@ -1,7 +1,9 @@
 ---
-texto: "Échase pues de ver que el arte de pensar bien no interesa solamente á los filósofos, sino tambien á las gentes mas sencillas."
+texto: "En la acertada eleccion de la carrera no solo se interesa el adelanto del individuo, sino la felicidad de toda su vida."
 autor: "jaime-balmes"
-slug: "jaime-balmes-echase-pues-de-ver-que-el-arte"
+temas:
+  - "la-felicidad"
+slug: "jaime-balmes-en-la-acertada-eleccion-de-la-carrera"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

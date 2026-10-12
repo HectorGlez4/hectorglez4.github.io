@@ -1,6 +1,8 @@
 ---
 texto: "Nacemos para crecer; envejecemos para morir."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-nacemos-para-crecer-envejecemos-para-morir"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

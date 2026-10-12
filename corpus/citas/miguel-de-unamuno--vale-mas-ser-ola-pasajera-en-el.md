@@ -1,6 +1,8 @@
 ---
 texto: "Vale más ser ola pasajera en el océano, que charco muerto en la hondonada."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-vale-mas-ser-ola-pasajera-en-el"
 procedencia:
   obra: "¡Adentro!"

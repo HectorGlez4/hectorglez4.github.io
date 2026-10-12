@@ -1,6 +1,8 @@
 ---
 texto: "Pero la vida es liberal en sumo grado; haz inventario estricto de sus dones y te convencerás."
 autor: "amado-nervo"
+temas:
+  - "la-vida"
 slug: "amado-nervo-pero-la-vida-es-liberal-en-sumo"
 procedencia:
   obra: "Plenitud"

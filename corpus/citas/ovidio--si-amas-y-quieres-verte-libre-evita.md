@@ -1,6 +1,8 @@
 ---
 texto: "Si amas y quieres verte libre, evita la compañía de los enamorados: este contagio alcanza al hombre lo mismo que a los rebaños."
 autor: "ovidio"
+temas:
+  - "el-amor"
 slug: "ovidio-si-amas-y-quieres-verte-libre-evita"
 procedencia:
   obra: "El remedio del amor"

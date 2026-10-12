@@ -1,6 +1,8 @@
 ---
 texto: "No busques un adorno afectado de palabras para explicar tus pensamientos; no seas amigo de hablar demasiado ni hombre de muchos negocios."
 autor: "marco-aurelio"
+temas:
+  - "la-palabra"
 slug: "marco-aurelio-no-busques-un-adorno-afectado-de-palabras"
 procedencia:
   obra: "Soliloquios"

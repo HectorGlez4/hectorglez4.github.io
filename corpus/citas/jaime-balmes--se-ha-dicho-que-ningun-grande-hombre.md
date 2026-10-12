@@ -1,7 +1,9 @@
 ---
-texto: "En la acertada eleccion de la carrera no solo se interesa el adelanto del individuo, sino la felicidad de toda su vida."
+texto: "Se ha dicho que ningun grande hombre le parecia grande á su ayuda de cámara; esto encierra mucha verdad."
 autor: "jaime-balmes"
-slug: "jaime-balmes-en-la-acertada-eleccion-de-la-carrera"
+temas:
+  - "la-gloria"
+slug: "jaime-balmes-se-ha-dicho-que-ningun-grande-hombre"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

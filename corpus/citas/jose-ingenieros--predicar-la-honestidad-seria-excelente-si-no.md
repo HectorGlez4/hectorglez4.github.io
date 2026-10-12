@@ -1,6 +1,8 @@
 ---
 texto: "Predicar la honestidad sería excelente si no fuera un renunciamiento á la virtud, cuyo norte es la perfección incesante."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-predicar-la-honestidad-seria-excelente-si-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
