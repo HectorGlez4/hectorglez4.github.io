@@ -1,7 +1,9 @@
 ---
-texto: "Toda oligarquía es la antítesis de una aristocracia natural; con el andar del tiempo resulta su más vigoroso obstáculo."
+texto: "Nacer y morir son los términos inviolables de la vida; ella nos dice con voz firme que lo normal no es nacer ni morir en la plenitud de nuestras funciones."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-toda-oligarquia-es-la-antitesis-de-una"
+temas:
+  - "la-muerte"
+slug: "jose-ingenieros-nacer-y-morir-son-los-terminos-inviolables"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La conciencia del saber que posee le da cierta dignidad reservada y misteriosa."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "el-saber"
 slug: "domingo-faustino-sarmiento-la-conciencia-del-saber-que-posee-le"
 procedencia:
   obra: "Facundo (1874)/Capítulo II"

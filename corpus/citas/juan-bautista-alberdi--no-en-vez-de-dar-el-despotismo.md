@@ -1,6 +1,8 @@
 ---
 texto: "No: en vez de dar el despotismo a un hombre, es mejor darlo a la ley."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-no-en-vez-de-dar-el-despotismo"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

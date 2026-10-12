@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué es el amor más elevado, sino una piedad devoradora?"
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-que-es-el-amor-mas-elevado-sino"
 procedencia:
   obra: "Pasionales"

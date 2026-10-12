@@ -1,6 +1,8 @@
 ---
 texto: "Todos los juegos son simulacros de combates, representaciones atenuadas de la esencia misma de la vida: la guerra."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-todos-los-juegos-son-simulacros-de-combates"
 procedencia:
   obra: "De deporte"

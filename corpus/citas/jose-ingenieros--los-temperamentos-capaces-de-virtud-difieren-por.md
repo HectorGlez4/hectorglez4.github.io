@@ -1,6 +1,8 @@
 ---
 texto: "Los temperamentos capaces de virtud difieren por su intensidad."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-los-temperamentos-capaces-de-virtud-difieren-por"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

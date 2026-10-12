@@ -1,6 +1,8 @@
 ---
 texto: "Tampoco es virtud la continencia, sino mezcla de cosas de virtud."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-tampoco-es-virtud-la-continencia-sino-mezcla"
 procedencia:
   obra: "Ética a Nicómaco"

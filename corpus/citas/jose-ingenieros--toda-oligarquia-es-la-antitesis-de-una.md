@@ -1,7 +1,9 @@
 ---
-texto: "La peor manera de combatir la mentira democrática sería aceptar la mentira aristocrática; en los dos casos trátase de idénticos mediocres con distinta escarapela."
+texto: "Toda oligarquía es la antítesis de una aristocracia natural; con el andar del tiempo resulta su más vigoroso obstáculo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-peor-manera-de-combatir-la-mentira"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-toda-oligarquia-es-la-antitesis-de-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

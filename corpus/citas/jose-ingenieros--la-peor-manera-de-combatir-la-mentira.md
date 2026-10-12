@@ -1,7 +1,9 @@
 ---
-texto: "Nacer y morir son los términos inviolables de la vida; ella nos dice con voz firme que lo normal no es nacer ni morir en la plenitud de nuestras funciones."
+texto: "La peor manera de combatir la mentira democrática sería aceptar la mentira aristocrática; en los dos casos trátase de idénticos mediocres con distinta escarapela."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-nacer-y-morir-son-los-terminos-inviolables"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-peor-manera-de-combatir-la-mentira"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
