@@ -1,6 +1,8 @@
 ---
 texto: "Las multitudes trasforman las lenguas, como los infusorios modifican los continentes."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-las-multitudes-trasforman-las-lenguas-como-los"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

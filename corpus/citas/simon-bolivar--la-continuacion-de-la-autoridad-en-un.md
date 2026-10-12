@@ -1,6 +1,8 @@
 ---
 texto: "La continuación de la autoridad en un mismo individuo frecuentemente ha sido el término de los gobiernos democráticos."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-la-continuacion-de-la-autoridad-en-un"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"

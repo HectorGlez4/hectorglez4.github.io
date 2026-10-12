@@ -1,6 +1,8 @@
 ---
 texto: "La planta de la civilización no se propaga de semilla."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-tiempo"
 slug: "juan-bautista-alberdi-la-planta-de-la-civilizacion-no-se"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

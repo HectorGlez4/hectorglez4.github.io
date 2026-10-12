@@ -1,6 +1,8 @@
 ---
 texto: "La admiración extremada achica la personalidad y ofusca el entendimiento, que llega a tomar las hipótesis por demostraciones, las sombras por claridades."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-humildad"
 slug: "santiago-ramon-y-cajal-la-admiracion-extremada-achica-la-personalidad-y"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

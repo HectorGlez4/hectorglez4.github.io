@@ -1,6 +1,8 @@
 ---
 texto: "El príncipe que confiesa que teme, aconseja le desprecien."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-miedo"
 slug: "francisco-de-quevedo-el-principe-que-confiesa-que-teme-aconseja"
 procedencia:
   obra: "Marco Bruto"

@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo que llega a la cumbre, está cerca de caer."
 autor: "seneca"
+temas:
+  - "la-gloria"
 slug: "seneca-todo-lo-que-llega-a-la-cumbre"
 procedencia:
   obra: "Consolación a Marcia"

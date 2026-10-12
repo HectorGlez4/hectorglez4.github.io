@@ -1,6 +1,8 @@
 ---
 texto: "El banquero se burla de los diez mil reales, el artesano queda arruinado."
 autor: "jaime-balmes"
+temas:
+  - "la-riqueza"
 slug: "jaime-balmes-el-banquero-se-burla-de-los-diez"
 procedencia:
   obra: "El Criterio"

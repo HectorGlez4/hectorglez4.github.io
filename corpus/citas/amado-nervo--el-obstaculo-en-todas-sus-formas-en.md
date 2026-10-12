@@ -1,6 +1,8 @@
 ---
 texto: "El obstáculo, en todas sus formas, en todas sus magnitudes, ha de salirte al paso."
 autor: "amado-nervo"
+temas:
+  - "la-adversidad"
 slug: "amado-nervo-el-obstaculo-en-todas-sus-formas-en"
 procedencia:
   obra: "Plenitud"

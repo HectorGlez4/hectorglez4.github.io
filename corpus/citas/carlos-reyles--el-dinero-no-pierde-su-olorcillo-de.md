@@ -1,6 +1,8 @@
 ---
 texto: "El dinero no pierde su olorcillo de azufre."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-el-dinero-no-pierde-su-olorcillo-de"
 procedencia:
   obra: "La Muerte Del Cisne"

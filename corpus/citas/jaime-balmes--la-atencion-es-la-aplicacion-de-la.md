@@ -1,6 +1,8 @@
 ---
 texto: "La atencion es la aplicacion de la mente á un objeto."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-atencion-es-la-aplicacion-de-la"
 procedencia:
   obra: "El Criterio"

@@ -1,6 +1,8 @@
 ---
 texto: "El hijo necesita siempre de su madre, aunque la mantenga."
 autor: "concepcion-arenal"
+temas:
+  - "el-amor"
 slug: "concepcion-arenal-el-hijo-necesita-siempre-de-su-madre"
 procedencia:
   obra: "La mujer del porvenir"

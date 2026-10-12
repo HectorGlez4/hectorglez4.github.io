@@ -3,6 +3,7 @@ texto: "Las revoluciones vienen de arriba y se operan desde abajo."
 autor: "manuel-gonzalez-prada"
 temas:
   - "la-libertad"
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-las-revoluciones-vienen-de-arriba-y-se"
 procedencia:
   obra: "El intelectual y el obrero"

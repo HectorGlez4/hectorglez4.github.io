@@ -1,6 +1,8 @@
 ---
 texto: "La inteligencia vence a la materia, el arte al número."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "el-saber"
 slug: "domingo-faustino-sarmiento-la-inteligencia-vence-a-la-materia-el"
 procedencia:
   obra: "Facundo (1874)/Capítulo XI"

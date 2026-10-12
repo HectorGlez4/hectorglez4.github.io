@@ -1,7 +1,9 @@
 ---
-texto: "La igualdad supone comparación, y la comparación cosas ó personas que han de ser comparadas."
+texto: "La desigualdad decretada en el campo de batalla se bendice y se consolida en el templo."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-la-igualdad-supone-comparacion-y-la-comparacion"
+temas:
+  - "la-justicia"
+slug: "concepcion-arenal-la-desigualdad-decretada-en-el-campo-de"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Los ríos caudalosos menguan divididos en multitud de arroyos, y la llama se extingue quitándole la leña de que se alimenta."
 autor: "ovidio"
+temas:
+  - "la-prudencia"
 slug: "ovidio-los-rios-caudalosos-menguan-divididos-en-multitud"
 procedencia:
   obra: "El remedio del amor"

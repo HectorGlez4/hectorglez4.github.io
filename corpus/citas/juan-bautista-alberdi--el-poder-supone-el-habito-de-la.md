@@ -1,6 +1,8 @@
 ---
 texto: "El poder supone el hábito de la obediencia."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-el-poder-supone-el-habito-de-la"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"
