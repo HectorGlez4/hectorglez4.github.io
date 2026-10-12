@@ -1,6 +1,8 @@
 ---
 texto: "Siempre miran los celosos con antojos de allende, que hacen las cosas pequeñas, grandes; los enanos, gigantes, y las sospechas, verdades."
 autor: "miguel-de-cervantes"
+temas:
+  - "la-envidia"
 slug: "miguel-de-cervantes-siempre-miran-los-celosos-con-antojos-de"
 procedencia:
   obra: "Novelas ejemplares"

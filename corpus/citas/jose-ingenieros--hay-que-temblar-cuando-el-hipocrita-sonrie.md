@@ -1,6 +1,8 @@
 ---
 texto: "Hay que temblar cuando el hipócrita sonríe: viene tanteando la empuñadura de algún estilete oculto bajo su capa."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-hay-que-temblar-cuando-el-hipocrita-sonrie"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "No es lo importante trabajar, sino trabajarnos."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-no-es-lo-importante-trabajar-sino-trabajarnos"
 procedencia:
   obra: "El día de difuntos"

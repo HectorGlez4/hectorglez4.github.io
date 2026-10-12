@@ -1,6 +1,8 @@
 ---
 texto: "Sin el individuo no existe la sociedad; sin la sociedad no existe el individuo."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-vida"
 slug: "eugenio-maria-de-hostos-sin-el-individuo-no-existe-la-sociedad"
 procedencia:
   obra: "Moral social"

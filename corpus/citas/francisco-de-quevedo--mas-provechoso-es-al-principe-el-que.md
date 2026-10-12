@@ -1,6 +1,8 @@
 ---
 texto: "Más provechoso es al príncipe el que le da cuidado que el que se le quita, porque siendo cuidado el reino, le quita el reino quien le quita el cuidado."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-prudencia"
 slug: "francisco-de-quevedo-mas-provechoso-es-al-principe-el-que"
 procedencia:
   obra: "Marco Bruto"

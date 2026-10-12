@@ -1,6 +1,8 @@
 ---
 texto: "Si las resistencias en el camino de la perfección dependen de otros, conviene prescindir de ellas, como si no existiesen, y redoblar el esfuerzo enaltecedor."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-si-las-resistencias-en-el-camino-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

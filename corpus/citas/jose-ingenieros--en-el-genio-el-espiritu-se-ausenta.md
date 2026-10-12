@@ -1,6 +1,8 @@
 ---
 texto: "En el genio, el espíritu se ausenta de los demás; en la locura, se ausenta de sí mismo."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-en-el-genio-el-espiritu-se-ausenta"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

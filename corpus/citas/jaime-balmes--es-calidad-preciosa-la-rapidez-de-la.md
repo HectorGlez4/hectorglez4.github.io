@@ -1,6 +1,8 @@
 ---
 texto: "Es calidad preciosa la rapidez de la percepcion; pero conviene estar prevenido contra su efecto ordinario, que es la inexactitud."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-es-calidad-preciosa-la-rapidez-de-la"
 procedencia:
   obra: "El Criterio"

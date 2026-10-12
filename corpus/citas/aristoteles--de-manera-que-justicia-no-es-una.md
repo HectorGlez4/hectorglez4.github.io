@@ -1,6 +1,8 @@
 ---
 texto: "De manera que justicia no es una sola especie de virtud, sino una suma de todas las virtudes."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-de-manera-que-justicia-no-es-una"
 procedencia:
   obra: "Ética a Nicómaco"

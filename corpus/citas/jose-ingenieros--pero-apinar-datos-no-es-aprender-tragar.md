@@ -1,7 +1,9 @@
 ---
-texto: "Son incapaces de guardar un secreto; confiárselo equivale á ocultar un tesoro en caja de vidrio."
+texto: "Pero apiñar datos no es aprender; tragar no es digerir."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-son-incapaces-de-guardar-un-secreto-confiarselo"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-pero-apinar-datos-no-es-aprender-tragar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

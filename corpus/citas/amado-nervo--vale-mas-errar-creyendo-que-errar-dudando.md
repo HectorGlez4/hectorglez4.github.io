@@ -1,6 +1,8 @@
 ---
 texto: "Vale más errar creyendo que errar dudando."
 autor: "amado-nervo"
+temas:
+  - "el-error"
 slug: "amado-nervo-vale-mas-errar-creyendo-que-errar-dudando"
 procedencia:
   obra: "Plenitud"
