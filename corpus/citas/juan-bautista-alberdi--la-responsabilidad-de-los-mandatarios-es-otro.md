@@ -1,6 +1,8 @@
 ---
 texto: "La responsabilidad de los mandatarios es otro rasgo esencial del gobierno libre."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-la-responsabilidad-de-los-mandatarios-es-otro"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

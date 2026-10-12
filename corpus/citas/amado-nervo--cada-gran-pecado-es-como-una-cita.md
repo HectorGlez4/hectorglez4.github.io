@@ -1,6 +1,8 @@
 ---
 texto: "Cada gran pecado es como una cita de mujer; antes nos parece henchido de voluptuosidades maravillosas."
 autor: "amado-nervo"
+temas:
+  - "la-virtud"
 slug: "amado-nervo-cada-gran-pecado-es-como-una-cita"
 procedencia:
   obra: "Plenitud"

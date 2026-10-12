@@ -1,6 +1,8 @@
 ---
 texto: "Los que no son estúpidos simulan la estupidez."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-los-que-no-son-estupidos-simulan-la"
 procedencia:
   obra: "La sinceridad"

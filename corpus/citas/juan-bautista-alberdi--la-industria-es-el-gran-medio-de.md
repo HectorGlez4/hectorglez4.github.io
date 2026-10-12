@@ -1,6 +1,8 @@
 ---
 texto: "La industria es el gran medio de moralización."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-trabajo"
 slug: "juan-bautista-alberdi-la-industria-es-el-gran-medio-de"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

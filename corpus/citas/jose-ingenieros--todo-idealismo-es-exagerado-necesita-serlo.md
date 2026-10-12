@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad no es una complicada resultante de energías, sino su ausencia."
+texto: "Todo idealismo es exagerado, necesita serlo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-no-es-una-complicada-resultante"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-todo-idealismo-es-exagerado-necesita-serlo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

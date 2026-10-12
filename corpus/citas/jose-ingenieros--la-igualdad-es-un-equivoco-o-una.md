@@ -1,7 +1,9 @@
 ---
-texto: "El odio es loable si lo comparamos con la hipocresía."
+texto: "La igualdad es un equívoco ó una paradoja, según los casos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-odio-es-loable-si-lo-comparamos"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-la-igualdad-es-un-equivoco-o-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

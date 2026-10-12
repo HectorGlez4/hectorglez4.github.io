@@ -1,7 +1,9 @@
 ---
-texto: "El carácter es un exponente de toda la personalidad y no de algún elemento aislado."
+texto: "El que no admira lo mejor, no puede mejorar."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-caracter-es-un-exponente-de-toda"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-que-no-admira-lo-mejor-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El entendimiento inquisitivo es como un arma de combate."
+texto: "La variabilidad es uno de los rasgos que mejor traducen la honradez del investigador."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-el-entendimiento-inquisitivo-es-como-un-arma"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-la-variabilidad-es-uno-de-los-rasgos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

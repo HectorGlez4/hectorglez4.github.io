@@ -1,6 +1,8 @@
 ---
 texto: "El pensamiento es lenguaje interior, y el lenguaje interior brota del exterior."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-palabra"
 slug: "miguel-de-unamuno-el-pensamiento-es-lenguaje-interior-y-el"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

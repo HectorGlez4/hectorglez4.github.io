@@ -1,7 +1,9 @@
 ---
-texto: "La igualdad es un equívoco ó una paradoja, según los casos."
+texto: "La mediocridad no es una complicada resultante de energías, sino su ausencia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-igualdad-es-un-equivoco-o-una"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-la-mediocridad-no-es-una-complicada-resultante"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

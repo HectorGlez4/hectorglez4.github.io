@@ -1,6 +1,8 @@
 ---
 texto: "El competir con persona poderosa el que no lo es, necedad a prueba de mosquete."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-prudencia"
 slug: "francisco-de-quevedo-el-competir-con-persona-poderosa-el-que"
 procedencia:
   obra: "Origen y definición de la necedad"

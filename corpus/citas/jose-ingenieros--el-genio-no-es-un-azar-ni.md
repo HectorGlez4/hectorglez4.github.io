@@ -1,7 +1,9 @@
 ---
-texto: "Todo idealismo es exagerado, necesita serlo."
+texto: "El genio no es un azar ni una enfermedad; ni es, tampoco, un capricho intercalado en el curso de la historia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-idealismo-es-exagerado-necesita-serlo"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-genio-no-es-un-azar-ni"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

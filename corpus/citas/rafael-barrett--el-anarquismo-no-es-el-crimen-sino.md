@@ -1,6 +1,8 @@
 ---
 texto: "El anarquismo no es el crimen, sino el signo del crimen."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-el-anarquismo-no-es-el-crimen-sino"
 procedencia:
   obra: "La dinamita"

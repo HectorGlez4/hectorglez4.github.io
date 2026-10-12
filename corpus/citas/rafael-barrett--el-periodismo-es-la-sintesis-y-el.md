@@ -1,6 +1,8 @@
 ---
 texto: "El periodismo es la síntesis y el comercio de la curiosidad."
 autor: "rafael-barrett"
+temas:
+  - "la-palabra"
 slug: "rafael-barrett-el-periodismo-es-la-sintesis-y-el"
 procedencia:
   obra: "Psicología del periodismo"

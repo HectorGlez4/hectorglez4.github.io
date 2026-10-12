@@ -1,6 +1,8 @@
 ---
 texto: "El que es cumplidamente bueno, con todo cumple bien."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-el-que-es-cumplidamente-bueno-con-todo"
 procedencia:
   obra: "Marco Bruto"

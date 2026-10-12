@@ -1,7 +1,9 @@
 ---
-texto: "El que ejecuta un acto bajo y vil, es por el hecho mismo rebajado."
+texto: "El idealismo moral no es patrimonio exclusivo de ningún credo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-ejecuta-un-acto-bajo-y"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-idealismo-moral-no-es-patrimonio-exclusivo"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

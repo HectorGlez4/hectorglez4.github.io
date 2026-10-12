@@ -1,7 +1,9 @@
 ---
-texto: "El que no admira lo mejor, no puede mejorar."
+texto: "El odio es loable si lo comparamos con la hipocresía."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-no-admira-lo-mejor-no"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-odio-es-loable-si-lo-comparamos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El justo, como el fiel de la balanza simbólica, debe petrificarse en su gesto solemne."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-el-justo-como-el-fiel-de-la"
 procedencia:
   obra: "La justicia"

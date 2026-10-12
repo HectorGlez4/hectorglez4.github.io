@@ -1,6 +1,8 @@
 ---
 texto: "Las pasiones son buenos instrumentos, pero malos consejeros."
 autor: "jaime-balmes"
+temas:
+  - "la-prudencia"
 slug: "jaime-balmes-las-pasiones-son-buenos-instrumentos-pero-malos"
 procedencia:
   obra: "El Criterio"

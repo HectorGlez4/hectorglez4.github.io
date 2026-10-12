@@ -1,6 +1,8 @@
 ---
 texto: "La vocación es la conciencia de una aptitud determinada."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-trabajo"
 slug: "jose-enrique-rodo-la-vocacion-es-la-conciencia-de-una"
 procedencia:
   obra: "Motivos de Proteo"

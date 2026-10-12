@@ -1,7 +1,9 @@
 ---
-texto: "El genio no es un azar ni una enfermedad; ni es, tampoco, un capricho intercalado en el curso de la historia."
+texto: "El carácter es un exponente de toda la personalidad y no de algún elemento aislado."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-no-es-un-azar-ni"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-caracter-es-un-exponente-de-toda"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
