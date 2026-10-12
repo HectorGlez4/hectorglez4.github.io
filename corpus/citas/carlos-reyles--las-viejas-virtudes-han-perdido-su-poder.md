@@ -1,6 +1,8 @@
 ---
 texto: "Las viejas virtudes han perdido su poder."
 autor: "carlos-reyles"
+temas:
+  - "la-virtud"
 slug: "carlos-reyles-las-viejas-virtudes-han-perdido-su-poder"
 procedencia:
   obra: "La Muerte Del Cisne"

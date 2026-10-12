@@ -1,7 +1,9 @@
 ---
-texto: "Todo renacimiento se anuncia por el respeto de las diferencias, por su culto."
+texto: "El que se acostumbra á pronunciar palabras falsas, acaba por faltar á la propia sin repugnancia, perdiendo toda noción de lealtad consigo mismo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-renacimiento-se-anuncia-por-el-respeto"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-el-que-se-acostumbra-a-pronunciar-palabras"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El gobierno de la mediocridad vuelve vana la emulación que realza los caracteres y las inteligencias y que los entona con la perspectiva de la efectividad de su dominio."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-justicia"
 slug: "jose-enrique-rodo-el-gobierno-de-la-mediocridad-vuelve-vana"
 procedencia:
   obra: "Ariel"

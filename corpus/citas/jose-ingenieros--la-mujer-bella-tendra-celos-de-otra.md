@@ -1,7 +1,9 @@
 ---
-texto: "Las palabras y las muecas del envidioso se pierden en la ciénaga donde se arrastra, como silbidos de reptiles que saludan el vuelo sereno del águila que pasa en la altura."
+texto: "La mujer bella tendrá celos de otra hermosura; pero envidiará á las ricas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-palabras-y-las-muecas-del-envidioso"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-mujer-bella-tendra-celos-de-otra"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

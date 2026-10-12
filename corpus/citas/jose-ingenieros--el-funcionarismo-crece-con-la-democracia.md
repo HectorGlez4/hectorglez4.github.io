@@ -1,7 +1,9 @@
 ---
-texto: "El virtuoso presiente alguna forma de perfección futura y le sacrifica los automatismos consolidados por el hábito."
+texto: "El funcionarismo crece con la democracia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-virtuoso-presiente-alguna-forma-de-perfeccion"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-el-funcionarismo-crece-con-la-democracia"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

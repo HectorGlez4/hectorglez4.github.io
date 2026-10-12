@@ -1,6 +1,8 @@
 ---
 texto: "La naturaleza, por su parte, nos prepara a sufrir el suceso cuando éste llega, no antes."
 autor: "amado-nervo"
+temas:
+  - "la-adversidad"
 slug: "amado-nervo-la-naturaleza-por-su-parte-nos-prepara"
 procedencia:
   obra: "Plenitud"

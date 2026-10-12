@@ -1,7 +1,9 @@
 ---
-texto: "El mentiroso conspira contra la quietud ajena, falta al respeto á todos, siembra la inseguridad y la desconfianza."
+texto: "El original aspira á diferenciarse de los demás, sobrepasándolos en pensamiento, en virtudes ó en acción."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-mentiroso-conspira-contra-la-quietud-ajena"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-original-aspira-a-diferenciarse-de-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

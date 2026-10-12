@@ -1,6 +1,8 @@
 ---
 texto: "El obrero reclama pan al azar, pero también instrucción."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-el-obrero-reclama-pan-al-azar-pero"
 procedencia:
   obra: "La nueva religión"

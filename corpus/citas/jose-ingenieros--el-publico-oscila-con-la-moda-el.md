@@ -1,7 +1,9 @@
 ---
-texto: "El funcionarismo crece con la democracia."
+texto: "El público oscila con la moda; el físico se gasta."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-funcionarismo-crece-con-la-democracia"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-publico-oscila-con-la-moda-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El envidioso cree marchar al calvario cuando observa que otros escalan la cumbre."
+texto: "El devenir humano sólo aprovecha de los originales; se opera entre individuos diferenciados."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-envidioso-cree-marchar-al-calvario-cuando"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-devenir-humano-solo-aprovecha-de-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

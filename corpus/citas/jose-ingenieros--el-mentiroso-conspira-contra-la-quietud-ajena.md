@@ -1,7 +1,9 @@
 ---
-texto: "La dignidad, afán de autonomía, lleva á reducir la dependencia de otros á la medida de lo indispensable, siempre enorme."
+texto: "El mentiroso conspira contra la quietud ajena, falta al respeto á todos, siembra la inseguridad y la desconfianza."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-dignidad-afan-de-autonomia-lleva-a"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-el-mentiroso-conspira-contra-la-quietud-ajena"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

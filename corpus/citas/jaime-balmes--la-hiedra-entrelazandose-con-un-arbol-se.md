@@ -1,6 +1,8 @@
 ---
 texto: "La hiedra entrelazándose con un árbol, se levanta á grande altura; si creciese sin arrimo, yaceria tendida por el suelo pisoteada por todos los transeuntes."
 autor: "jaime-balmes"
+temas:
+  - "la-amistad"
 slug: "jaime-balmes-la-hiedra-entrelazandose-con-un-arbol-se"
 procedencia:
   obra: "El Criterio"

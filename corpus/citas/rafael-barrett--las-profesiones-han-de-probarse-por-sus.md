@@ -1,6 +1,8 @@
 ---
 texto: "Las profesiones han de probarse por sus obras, como las virtudes, y han de emanciparse del vergonzoso monopolio gubernamental, forzosamente envenenado por el virus político."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-las-profesiones-han-de-probarse-por-sus"
 procedencia:
   obra: "Inmoralidad de los exámenes"

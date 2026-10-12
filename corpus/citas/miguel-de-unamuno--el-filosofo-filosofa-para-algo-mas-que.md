@@ -1,6 +1,8 @@
 ---
 texto: "El filósofo filosofa para algo más que para filosofar."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-el-filosofo-filosofa-para-algo-mas-que"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

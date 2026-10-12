@@ -1,6 +1,8 @@
 ---
 texto: "Un diario vive del número; si se aparta de lo vulgar está perdido."
 autor: "rafael-barrett"
+temas:
+  - "la-palabra"
 slug: "rafael-barrett-un-diario-vive-del-numero-si-se"
 procedencia:
   obra: "Psicología del periodismo"

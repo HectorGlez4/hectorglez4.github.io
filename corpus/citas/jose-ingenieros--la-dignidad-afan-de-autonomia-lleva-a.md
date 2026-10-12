@@ -1,7 +1,9 @@
 ---
-texto: "La mujer bella tendrá celos de otra hermosura; pero envidiará á las ricas."
+texto: "La dignidad, afán de autonomía, lleva á reducir la dependencia de otros á la medida de lo indispensable, siempre enorme."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mujer-bella-tendra-celos-de-otra"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-dignidad-afan-de-autonomia-lleva-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

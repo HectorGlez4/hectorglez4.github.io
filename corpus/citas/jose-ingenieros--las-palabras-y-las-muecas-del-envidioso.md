@@ -1,7 +1,9 @@
 ---
-texto: "El devenir humano sólo aprovecha de los originales; se opera entre individuos diferenciados."
+texto: "Las palabras y las muecas del envidioso se pierden en la ciénaga donde se arrastra, como silbidos de reptiles que saludan el vuelo sereno del águila que pasa en la altura."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-devenir-humano-solo-aprovecha-de-los"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-las-palabras-y-las-muecas-del-envidioso"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

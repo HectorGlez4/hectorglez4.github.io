@@ -1,6 +1,8 @@
 ---
 texto: "El poder y la propiedad contraen una union indisoluble: la propiedad lleva anejo el poder; el poder lleva aneja la propiedad."
 autor: "francisco-pi-y-margall"
+temas:
+  - "la-riqueza"
 slug: "francisco-pi-y-margall-el-poder-y-la-propiedad-contraen-una"
 procedencia:
   obra: "Defensa de la Internacional - Parte II"

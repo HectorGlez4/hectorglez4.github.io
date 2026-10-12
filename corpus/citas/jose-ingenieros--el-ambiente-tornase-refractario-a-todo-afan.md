@@ -1,7 +1,9 @@
 ---
-texto: "El público oscila con la moda; el físico se gasta."
+texto: "El ambiente tórnase refractario á todo afán de perfección."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-publico-oscila-con-la-moda-el"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-el-ambiente-tornase-refractario-a-todo-afan"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

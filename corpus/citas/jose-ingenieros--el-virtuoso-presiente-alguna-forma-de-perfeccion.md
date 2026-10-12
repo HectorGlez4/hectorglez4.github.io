@@ -1,7 +1,9 @@
 ---
-texto: "El original aspira á diferenciarse de los demás, sobrepasándolos en pensamiento, en virtudes ó en acción."
+texto: "El virtuoso presiente alguna forma de perfección futura y le sacrifica los automatismos consolidados por el hábito."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-original-aspira-a-diferenciarse-de-los"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-virtuoso-presiente-alguna-forma-de-perfeccion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

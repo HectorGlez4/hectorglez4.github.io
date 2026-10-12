@@ -1,6 +1,8 @@
 ---
 texto: "El instruido quebrado y el ignorante rico."
 autor: "jaime-balmes"
+temas:
+  - "la-riqueza"
 slug: "jaime-balmes-el-instruido-quebrado-y-el-ignorante-rico"
 procedencia:
   obra: "El Criterio"

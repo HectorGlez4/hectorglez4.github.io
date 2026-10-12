@@ -1,7 +1,9 @@
 ---
-texto: "El ambiente tórnase refractario á todo afán de perfección."
+texto: "Todo renacimiento se anuncia por el respeto de las diferencias, por su culto."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-ambiente-tornase-refractario-a-todo-afan"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-todo-renacimiento-se-anuncia-por-el-respeto"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

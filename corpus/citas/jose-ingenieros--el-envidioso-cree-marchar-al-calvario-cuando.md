@@ -1,7 +1,9 @@
 ---
-texto: "El que se acostumbra á pronunciar palabras falsas, acaba por faltar á la propia sin repugnancia, perdiendo toda noción de lealtad consigo mismo."
+texto: "El envidioso cree marchar al calvario cuando observa que otros escalan la cumbre."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-se-acostumbra-a-pronunciar-palabras"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-envidioso-cree-marchar-al-calvario-cuando"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
