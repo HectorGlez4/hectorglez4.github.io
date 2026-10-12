@@ -1,7 +1,9 @@
 ---
-texto: "El envidioso es ingrato, como luminoso el sol, la nube opaca y la nieve fría: lo es naturalmente."
+texto: "La fuerza de las creencias está en no ser puramente racionales; pensamos con el corazón y con la cabeza."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-envidioso-es-ingrato-como-luminoso-el"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-la-fuerza-de-las-creencias-esta-en"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

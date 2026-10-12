@@ -1,7 +1,9 @@
 ---
-texto: "El verdadero justo resiste á la tentación de no serlo cuando en ello tiene un beneficio; el mediocre cede siempre."
+texto: "Un pensamiento no fecundado por la pasión es como los soles de invierno: alumbran, pero bajo sus rayos se puede morir helado."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-verdadero-justo-resiste-a-la-tentacion"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-un-pensamiento-no-fecundado-por-la-pasion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

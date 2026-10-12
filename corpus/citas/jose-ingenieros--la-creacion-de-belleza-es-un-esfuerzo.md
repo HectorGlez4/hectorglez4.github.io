@@ -1,7 +1,9 @@
 ---
-texto: "Un acto no es honesto ni delictuoso en sí mismo, sino ante el juicio de la sociedad en que se produce."
+texto: "La creación de belleza es un esfuerzo original; la historia del arte conserva los nombres de pocos creadores y olvida á innúmeros secuaces que los imitan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-un-acto-no-es-honesto-ni-delictuoso"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-la-creacion-de-belleza-es-un-esfuerzo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

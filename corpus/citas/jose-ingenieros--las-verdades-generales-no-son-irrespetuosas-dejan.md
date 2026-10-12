@@ -1,7 +1,9 @@
 ---
-texto: "Las ilusiones tienen tanto valor como las verdades más exactas; pueden tener más que ellas, si son intensamente pensadas ó sentidas."
+texto: "Las verdades generales no son irrespetuosas; dejan entreabierta una rendija por donde escapan las excepciones particulares."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-ilusiones-tienen-tanto-valor-como-las"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-las-verdades-generales-no-son-irrespetuosas-dejan"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

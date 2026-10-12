@@ -1,7 +1,9 @@
 ---
-texto: "Los prejuicios son creencias anteriores á la observación; los juicios, exactos ó erróneos, son consecutivos á ella."
+texto: "El éxito es un abismo irresistible, como una boca juvenil que invita al beso; pocos retroceden."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-prejuicios-son-creencias-anteriores-a-la"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-exito-es-un-abismo-irresistible-como"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

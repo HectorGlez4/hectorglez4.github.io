@@ -1,7 +1,9 @@
 ---
-texto: "Los grandes pensadores son solitarios; parecen proscriptos en su propio medio."
+texto: "Un acto no es honesto ni delictuoso en sí mismo, sino ante el juicio de la sociedad en que se produce."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-grandes-pensadores-son-solitarios-parecen-proscriptos"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-un-acto-no-es-honesto-ni-delictuoso"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

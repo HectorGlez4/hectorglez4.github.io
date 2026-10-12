@@ -1,7 +1,9 @@
 ---
-texto: "La piel se cubre de más afeites cuando es menos sólida la columna vertebral; las buenas maneras son más apreciadas que las buenas acciones."
+texto: "Los grandes pensadores son solitarios; parecen proscriptos en su propio medio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-piel-se-cubre-de-mas-afeites"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-los-grandes-pensadores-son-solitarios-parecen-proscriptos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

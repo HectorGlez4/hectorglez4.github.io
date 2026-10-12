@@ -1,7 +1,9 @@
 ---
-texto: "La irresponsabilidad colectiva borra la cuota individual del yerro: nadie se sonroja cuando todas las mejillas pueden reclamar su parte en la común vergüenza."
+texto: "El que tiene méritos sabe lo que cuestan y los respeta; estima en los otros lo que desearía se le estimara á él mismo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-irresponsabilidad-colectiva-borra-la-cuota-individual"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-el-que-tiene-meritos-sabe-lo-que"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El hurto no enriquece; la limosna jamás empobrece a nadie; del asesino hablan hasta las paredes."
 autor: "jose-ingenieros"
+temas:
+  - "la-riqueza"
 slug: "jose-ingenieros-el-hurto-no-enriquece-la-limosna-jamas"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

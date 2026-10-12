@@ -1,7 +1,9 @@
 ---
-texto: "La fuerza de las creencias está en no ser puramente racionales; pensamos con el corazón y con la cabeza."
+texto: "La hipocresía es más honda que la mentira: ésta puede ser accidental, aquélla es permanente."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-fuerza-de-las-creencias-esta-en"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-hipocresia-es-mas-honda-que-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Las deudas contraídas por vanidad ó por vicio, obligan á fingir y engañar; el que las acumula, renuncia á toda dignidad."
+texto: "Los espíritus rutinarios son rebeldes á la admiración: no reconocen el fuego de los astros porque nunca han tenido en sí una chispa."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-deudas-contraidas-por-vanidad-o-por"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-los-espiritus-rutinarios-son-rebeldes-a-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

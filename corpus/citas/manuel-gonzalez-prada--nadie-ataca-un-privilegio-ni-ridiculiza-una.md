@@ -1,6 +1,8 @@
 ---
 texto: "Nadie ataca un privilegio ni ridiculiza una superstición sin que mil voces le maldigan ni mil brazos le amenacen."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-nadie-ataca-un-privilegio-ni-ridiculiza-una"
 procedencia:
   obra: "Librepensamiento de acción"

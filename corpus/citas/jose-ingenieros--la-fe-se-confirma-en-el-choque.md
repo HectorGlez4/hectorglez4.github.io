@@ -1,7 +1,9 @@
 ---
-texto: "Los remordimientos de la primera culpa ceden á la necesidad de ocultarla con otras; los espíritus mediocres no se amedrentan."
+texto: "La fe se confirma en el choque con las opiniones contrarias; el fanatismo teme vacilar ante ellas é intenta ahogarlas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-remordimientos-de-la-primera-culpa-ceden"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-la-fe-se-confirma-en-el-choque"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

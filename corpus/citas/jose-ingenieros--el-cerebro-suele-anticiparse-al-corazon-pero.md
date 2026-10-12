@@ -1,6 +1,8 @@
 ---
 texto: "El cerebro suele anticiparse al corazón; pero nuestros sentimientos influyen más intensamente que nuestras ideas en la formación de los criterios morales."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-el-cerebro-suele-anticiparse-al-corazon-pero"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "Las buenas obras jamás descansan; pasan de unos espíritus a otros, reposando un momento en cada uno de ellos para restaurarse y recobrar sus fuerzas."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-virtud"
 slug: "miguel-de-unamuno-las-buenas-obras-jamas-descansan-pasan-de"
 procedencia:
   obra: "¡Adentro!"

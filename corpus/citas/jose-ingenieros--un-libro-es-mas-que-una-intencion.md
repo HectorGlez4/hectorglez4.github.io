@@ -1,7 +1,9 @@
 ---
-texto: "Los rutinarios, en cambio, no se corrigen ni se desconvencen nunca; sus prejuicios son como los clavos: cuanto más se golpean más se adentran."
+texto: "Un libro es más que una intención: es un gesto."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-rutinarios-en-cambio-no-se-corrigen"
+temas:
+  - "la-palabra"
+slug: "jose-ingenieros-un-libro-es-mas-que-una-intencion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

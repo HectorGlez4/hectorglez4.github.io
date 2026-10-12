@@ -1,6 +1,8 @@
 ---
 texto: "La grandeza de una poesía no depende de la magnitud del tema, ni de sus proporciones ni sentimientos."
 autor: "federico-garcia-lorca"
+temas:
+  - "la-palabra"
 slug: "federico-garcia-lorca-la-grandeza-de-una-poesia-no-depende"
 procedencia:
   obra: "La imagen poética de Luis de Góngora"

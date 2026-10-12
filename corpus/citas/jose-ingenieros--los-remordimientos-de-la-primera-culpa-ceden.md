@@ -1,7 +1,9 @@
 ---
-texto: "La hipocresía es más honda que la mentira: ésta puede ser accidental, aquélla es permanente."
+texto: "Los remordimientos de la primera culpa ceden á la necesidad de ocultarla con otras; los espíritus mediocres no se amedrentan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-hipocresia-es-mas-honda-que-la"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-remordimientos-de-la-primera-culpa-ceden"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

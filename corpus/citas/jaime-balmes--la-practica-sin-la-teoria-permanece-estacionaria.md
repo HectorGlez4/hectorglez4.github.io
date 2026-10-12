@@ -1,6 +1,8 @@
 ---
 texto: "La práctica sin la teoría permanece estacionaria, ó no adelanta sino con muchísima lentitud; pero á su vez, la teoría sin la práctica fuera tambien infructuosa."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-practica-sin-la-teoria-permanece-estacionaria"
 procedencia:
   obra: "El Criterio"

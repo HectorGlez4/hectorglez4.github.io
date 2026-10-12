@@ -1,7 +1,9 @@
 ---
-texto: "El que tiene méritos sabe lo que cuestan y los respeta; estima en los otros lo que desearía se le estimara á él mismo."
+texto: "Los prejuicios son creencias anteriores á la observación; los juicios, exactos ó erróneos, son consecutivos á ella."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-tiene-meritos-sabe-lo-que"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-los-prejuicios-son-creencias-anteriores-a-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

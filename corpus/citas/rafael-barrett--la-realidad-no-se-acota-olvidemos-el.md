@@ -1,6 +1,8 @@
 ---
 texto: "La realidad no se acota; olvidemos el calendario, y atendamos al manantial constante y silencioso que nos brota del alma."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-la-realidad-no-se-acota-olvidemos-el"
 procedencia:
   obra: "Año nuevo"

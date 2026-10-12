@@ -1,7 +1,9 @@
 ---
-texto: "La creación de belleza es un esfuerzo original; la historia del arte conserva los nombres de pocos creadores y olvida á innúmeros secuaces que los imitan."
+texto: "La piel se cubre de más afeites cuando es menos sólida la columna vertebral; las buenas maneras son más apreciadas que las buenas acciones."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-creacion-de-belleza-es-un-esfuerzo"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-piel-se-cubre-de-mas-afeites"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

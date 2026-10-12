@@ -1,7 +1,9 @@
 ---
-texto: "La fe se confirma en el choque con las opiniones contrarias; el fanatismo teme vacilar ante ellas é intenta ahogarlas."
+texto: "El envidioso es ingrato, como luminoso el sol, la nube opaca y la nieve fría: lo es naturalmente."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-fe-se-confirma-en-el-choque"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-envidioso-es-ingrato-como-luminoso-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

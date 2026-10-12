@@ -1,6 +1,8 @@
 ---
 texto: "Las teorías, las doctrinas, los sistemas se explican: los sentimientos se sienten."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-razon"
 slug: "mariano-jose-de-larra-las-teorias-las-doctrinas-los-sistemas-se"
 procedencia:
   obra: "Los amantes de Teruel"

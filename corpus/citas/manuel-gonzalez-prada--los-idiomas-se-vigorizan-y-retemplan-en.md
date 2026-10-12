@@ -1,6 +1,8 @@
 ---
 texto: "Los idiomas se vigorizan y retemplan en la fuente popular, más que en las reglas muertas de los gramáticos y en las exhumaciones prehistóricas de los eruditos."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-los-idiomas-se-vigorizan-y-retemplan-en"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

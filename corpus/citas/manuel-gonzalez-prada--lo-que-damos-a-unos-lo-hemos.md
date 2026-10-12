@@ -1,6 +1,8 @@
 ---
 texto: "Lo que damos a unos, lo hemos tomado de otros: lo que nos parece una ofrenda no pasa de una restitución a los herederos legítimos."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-lo-que-damos-a-unos-lo-hemos"
 procedencia:
   obra: "Librepensamiento de acción"

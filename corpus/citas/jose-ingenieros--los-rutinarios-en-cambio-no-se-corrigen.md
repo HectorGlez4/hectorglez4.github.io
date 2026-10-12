@@ -1,7 +1,9 @@
 ---
-texto: "Los espíritus rutinarios son rebeldes á la admiración: no reconocen el fuego de los astros porque nunca han tenido en sí una chispa."
+texto: "Los rutinarios, en cambio, no se corrigen ni se desconvencen nunca; sus prejuicios son como los clavos: cuanto más se golpean más se adentran."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-espiritus-rutinarios-son-rebeldes-a-la"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-los-rutinarios-en-cambio-no-se-corrigen"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
