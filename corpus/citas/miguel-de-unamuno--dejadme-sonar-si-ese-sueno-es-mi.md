@@ -1,6 +1,8 @@
 ---
 texto: "Dejadme soñar; si ese sueño es mi vida, no me despertéis de él."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-dejadme-sonar-si-ese-sueno-es-mi"
 procedencia:
   obra: "Del sentimiento trágico de la vida/III"

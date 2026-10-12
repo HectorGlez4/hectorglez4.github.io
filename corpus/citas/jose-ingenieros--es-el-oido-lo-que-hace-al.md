@@ -1,7 +1,9 @@
 ---
-texto: "Está bien perdonar una vez y sería inicuo no perdonar ninguna; pero el que perdona dos veces se hace cómplice de los malvados."
+texto: "Es el oído lo que hace al músico; el ojo lleva la mano del pintor."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-esta-bien-perdonar-una-vez-y-seria"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-es-el-oido-lo-que-hace-al"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

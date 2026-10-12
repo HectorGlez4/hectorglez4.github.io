@@ -1,6 +1,8 @@
 ---
 texto: "Empero no basta demoler: hay que construir."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-trabajo"
 slug: "santiago-ramon-y-cajal-empero-no-basta-demoler-hay-que-construir"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

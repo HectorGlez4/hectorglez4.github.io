@@ -1,7 +1,9 @@
 ---
-texto: "Es el oído lo que hace al músico; el ojo lleva la mano del pintor."
+texto: "Por eso todo idealista es una viviente afirmación de individualismo, aunque persiga una quimera social: puede vivir para los demás, nunca de los demás."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-el-oido-lo-que-hace-al"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-por-eso-todo-idealista-es-una-viviente"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

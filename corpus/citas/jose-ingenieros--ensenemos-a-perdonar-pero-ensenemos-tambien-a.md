@@ -1,7 +1,9 @@
 ---
-texto: "He aquí una nueva base para la tolerancia: cada hombre necesita de su enemigo."
+texto: "Enseñemos á perdonar; pero enseñemos también á no ofender."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-he-aqui-una-nueva-base-para-la"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-ensenemos-a-perdonar-pero-ensenemos-tambien-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

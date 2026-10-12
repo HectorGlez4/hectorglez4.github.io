@@ -1,6 +1,8 @@
 ---
 texto: "Con la atencion notamos las preciosidades y las recogemos; con la distraccion dejamos quizá caer al suelo el oro y las perlas como cosa baladí."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-con-la-atencion-notamos-las-preciosidades-y"
 procedencia:
   obra: "El Criterio"

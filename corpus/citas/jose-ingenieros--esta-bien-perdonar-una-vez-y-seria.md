@@ -1,7 +1,9 @@
 ---
-texto: "Por eso todo idealista es una viviente afirmación de individualismo, aunque persiga una quimera social: puede vivir para los demás, nunca de los demás."
+texto: "Está bien perdonar una vez y sería inicuo no perdonar ninguna; pero el que perdona dos veces se hace cómplice de los malvados."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-por-eso-todo-idealista-es-una-viviente"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-esta-bien-perdonar-una-vez-y-seria"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

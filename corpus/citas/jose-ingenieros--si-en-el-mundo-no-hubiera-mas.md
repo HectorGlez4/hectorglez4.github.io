@@ -1,7 +1,9 @@
 ---
-texto: "Difama sordamente y en secreto á los mismos que inciensa en público; traiciona siempre á los que alaba."
+texto: "Si en el mundo no hubiera más que rebeldes, no podría marchar; tornárase imposible la rebeldía si faltara contra quien rebelarse."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-difama-sordamente-y-en-secreto-a-los"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-si-en-el-mundo-no-hubiera-mas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

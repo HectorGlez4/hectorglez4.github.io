@@ -1,7 +1,9 @@
 ---
-texto: "Hay una moral del honor y otra de su caricatura: ser ó parecer."
+texto: "He aquí una nueva base para la tolerancia: cada hombre necesita de su enemigo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-hay-una-moral-del-honor-y-otra"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-he-aqui-una-nueva-base-para-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

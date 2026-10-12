@@ -1,7 +1,9 @@
 ---
-texto: "Enseñemos á perdonar; pero enseñemos también á no ofender."
+texto: "Hay una moral del honor y otra de su caricatura: ser ó parecer."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-ensenemos-a-perdonar-pero-ensenemos-tambien-a"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-hay-una-moral-del-honor-y-otra"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

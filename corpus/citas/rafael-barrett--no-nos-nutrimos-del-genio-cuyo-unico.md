@@ -1,6 +1,8 @@
 ---
 texto: "No nos nutrimos del genio, cuyo único testigo es él, sino de su cadáver."
 autor: "rafael-barrett"
+temas:
+  - "la-gloria"
 slug: "rafael-barrett-no-nos-nutrimos-del-genio-cuyo-unico"
 procedencia:
   obra: "El vulgo y el genio"

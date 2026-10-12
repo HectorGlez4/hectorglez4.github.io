@@ -1,6 +1,8 @@
 ---
 texto: "En un tiempo se desea un príncipe guerrero, y en otro un pacífico; la infelicidad está en trocarse las veces, en encontrarse las contingencias."
 autor: "baltasar-gracian"
+temas:
+  - "el-tiempo"
 slug: "baltasar-gracian-en-un-tiempo-se-desea-un-principe"
 procedencia:
   obra: "El político"
