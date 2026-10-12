@@ -1,6 +1,8 @@
 ---
 texto: "Y, sobre todo en amarnos, entendámonos o no, y no en entendernos sin amarnos, estriba la verdadera vida."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-amor"
 slug: "miguel-de-unamuno-y-sobre-todo-en-amarnos-entendamonos-o"
 procedencia:
   obra: "¡Adentro!"

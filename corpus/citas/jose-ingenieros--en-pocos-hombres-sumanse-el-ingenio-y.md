@@ -1,7 +1,9 @@
 ---
-texto: "Por eso las academias suelen ser cementerios donde se glorifica á hombres que ya han dejado de existir para su ciencia ó para su arte."
+texto: "En pocos hombres súmanse el ingenio y la virtud en un total de dignidad: forman una aristocracia natural, siempre exigua frente al número infinito de espíritus omisos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-por-eso-las-academias-suelen-ser-cementerios"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-en-pocos-hombres-sumanse-el-ingenio-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Pocos, poquísimos hombres conservan en el mando las virtudes que revelan en la vida privada."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-virtud"
 slug: "manuel-gonzalez-prada-pocos-poquisimos-hombres-conservan-en-el-mando"
 procedencia:
   obra: "La autoridad"

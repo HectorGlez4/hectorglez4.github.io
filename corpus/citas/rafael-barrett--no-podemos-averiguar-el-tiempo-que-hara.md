@@ -1,6 +1,8 @@
 ---
 texto: "No podemos averiguar el tiempo que hará mañana, y queremos definir los remolinos misteriosos de la vida."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-no-podemos-averiguar-el-tiempo-que-hara"
 procedencia:
   obra: "La justicia"

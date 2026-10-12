@@ -1,6 +1,8 @@
 ---
 texto: "Si bien se observa, toda cuestion y hasta toda ciencia, tienen uno ó pocos puntos capitales á los que se refieren los demas."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-si-bien-se-observa-toda-cuestion-y"
 procedencia:
   obra: "El Criterio"

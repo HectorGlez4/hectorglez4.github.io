@@ -1,6 +1,8 @@
 ---
 texto: "Suframos, ¿quién ha dicho que la vida es placer?"
 autor: "rafael-barrett"
+temas:
+  - "la-adversidad"
 slug: "rafael-barrett-suframos-quien-ha-dicho-que-la-vida"
 procedencia:
   obra: "La sinceridad"

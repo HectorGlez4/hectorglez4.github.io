@@ -1,6 +1,8 @@
 ---
 texto: "El mayor bien para un hombre discreto es un buen hermano."
 autor: "longo"
+temas:
+  - "la-amistad"
 slug: "longo-el-mayor-bien-para-un-hombre-discreto"
 procedencia:
   obra: "Dafnis y Cloe"

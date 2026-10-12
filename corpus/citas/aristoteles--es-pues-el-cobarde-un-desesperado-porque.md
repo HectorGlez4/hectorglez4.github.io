@@ -1,6 +1,8 @@
 ---
 texto: "Es, pues, el cobarde un desesperado, porque todas las cosas teme; en lo cual es al revés el valeroso, porque el osar, de buena esperanza procede."
 autor: "aristoteles"
+temas:
+  - "el-miedo"
 slug: "aristoteles-es-pues-el-cobarde-un-desesperado-porque"
 procedencia:
   obra: "Ética a Nicómaco"

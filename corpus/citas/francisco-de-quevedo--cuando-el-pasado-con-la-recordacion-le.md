@@ -1,6 +1,8 @@
 ---
 texto: "Cuando el pasado con la recordación le vuelve el que pasa, con la virtud le logra, y el porvenir con la prudencia le previene."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-tiempo"
 slug: "francisco-de-quevedo-cuando-el-pasado-con-la-recordacion-le"
 procedencia:
   obra: "Marco Bruto"

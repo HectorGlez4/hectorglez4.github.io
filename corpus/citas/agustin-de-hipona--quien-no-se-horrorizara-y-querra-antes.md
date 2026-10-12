@@ -1,6 +1,8 @@
 ---
 texto: "¿Quién no se horrorizará y querrá antes morir si, le dan a escoger una de dos cosas: o la muerte, o volver otra vez a la infancia?"
 autor: "agustin-de-hipona"
+temas:
+  - "la-muerte"
 slug: "agustin-de-hipona-quien-no-se-horrorizara-y-querra-antes"
 procedencia:
   obra: "La ciudad de Dios"

@@ -1,6 +1,8 @@
 ---
 texto: "Ni la razón ni la vida se dan por vencidas nunca."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-ni-la-razon-ni-la-vida-se"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

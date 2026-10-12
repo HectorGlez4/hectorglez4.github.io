@@ -1,6 +1,8 @@
 ---
 texto: "Es natural a los jóvenes despreciar la muerte."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-es-natural-a-los-jovenes-despreciar-la"
 procedencia:
   obra: "La violencia"

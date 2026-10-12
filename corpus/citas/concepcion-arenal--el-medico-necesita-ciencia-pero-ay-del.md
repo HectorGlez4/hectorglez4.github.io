@@ -1,6 +1,8 @@
 ---
 texto: "El médico necesita ciencia; pero ¡ay del enfermo si no tiene conciencia también!"
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-el-medico-necesita-ciencia-pero-ay-del"
 procedencia:
   obra: "La mujer del porvenir"
