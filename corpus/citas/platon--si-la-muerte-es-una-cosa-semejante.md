@@ -1,6 +1,8 @@
 ---
 texto: "Si la muerte es una cosa semejante, la llamo con razon un bien; porque entonces el tiempo todo entero no es más que una larga noche."
 autor: "platon"
+temas:
+  - "la-muerte"
 slug: "platon-si-la-muerte-es-una-cosa-semejante"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"

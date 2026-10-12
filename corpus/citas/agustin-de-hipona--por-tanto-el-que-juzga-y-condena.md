@@ -1,6 +1,8 @@
 ---
 texto: "Por tanto el que juzga y condena injustamente si es juzgado y condenado justamente con la misma medida recibe, aunque no lo mismo que dio."
 autor: "agustin-de-hipona"
+temas:
+  - "la-justicia"
 slug: "agustin-de-hipona-por-tanto-el-que-juzga-y-condena"
 procedencia:
   obra: "La ciudad de Dios"

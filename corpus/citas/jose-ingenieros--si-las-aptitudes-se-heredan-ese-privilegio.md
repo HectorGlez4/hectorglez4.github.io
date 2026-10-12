@@ -1,6 +1,8 @@
 ---
 texto: "Si las aptitudes se heredan, ese privilegio les resulta inútil y podrían renunciarlo; si no se heredan, es injusto y deben perderlo."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-si-las-aptitudes-se-heredan-ese-privilegio"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

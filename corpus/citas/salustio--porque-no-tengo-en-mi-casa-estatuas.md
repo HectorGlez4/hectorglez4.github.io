@@ -1,6 +1,8 @@
 ---
 texto: "Porque no tengo en mi casa estatuas y porque mi nobleza es de ayer; siendo cierto que es mejor adquirírsela uno por sí mismo que haber corrompido la que heredó."
 autor: "salustio"
+temas:
+  - "la-gloria"
 slug: "salustio-porque-no-tengo-en-mi-casa-estatuas"
 procedencia:
   obra: "Guerra de Jugurta"

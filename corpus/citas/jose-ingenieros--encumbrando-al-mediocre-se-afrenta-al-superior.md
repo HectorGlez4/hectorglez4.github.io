@@ -1,6 +1,8 @@
 ---
 texto: "Encumbrando al mediocre se afrenta al superior; por el honesto se olvida al virtuoso."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-encumbrando-al-mediocre-se-afrenta-al-superior"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

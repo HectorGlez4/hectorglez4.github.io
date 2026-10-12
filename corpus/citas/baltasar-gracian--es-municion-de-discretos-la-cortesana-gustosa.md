@@ -1,6 +1,8 @@
 ---
 texto: "Es munición de discretos la cortesana gustosa erudición: un práctico saber de todo lo corriente, más a lo noticioso, menos a lo vulgar."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-es-municion-de-discretos-la-cortesana-gustosa"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

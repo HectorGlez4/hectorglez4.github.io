@@ -1,7 +1,9 @@
 ---
-texto: "Sacrificio es la consagración de una idea ó un sentimiento con un acto de suprema utilidad para otro, aunque sea un esfuerzo supremo para quien lo hace."
+texto: "Respondiendo de una vez: convertir los deberes en costumbres."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-sacrificio-es-la-consagracion-de-una-idea"
+temas:
+  - "el-deber"
+slug: "eugenio-maria-de-hostos-respondiendo-de-una-vez-convertir-los-deberes"
 procedencia:
   obra: "Moral social"
   año: 1917

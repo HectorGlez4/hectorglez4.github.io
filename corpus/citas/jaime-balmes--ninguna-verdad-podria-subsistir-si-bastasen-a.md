@@ -1,6 +1,8 @@
 ---
 texto: "Ninguna verdad podria subsistir, si bastasen á hacernos dudar de ella algunas dificultades que no alcanzásemos á desvanecer."
 autor: "jaime-balmes"
+temas:
+  - "la-verdad"
 slug: "jaime-balmes-ninguna-verdad-podria-subsistir-si-bastasen-a"
 procedencia:
   obra: "El Criterio"

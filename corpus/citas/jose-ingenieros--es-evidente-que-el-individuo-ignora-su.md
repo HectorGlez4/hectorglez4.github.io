@@ -1,6 +1,8 @@
 ---
 texto: "Es evidente que el individuo ignora su propio crepúsculo: ningún viejo admite que su inteligencia haya disminuído."
 autor: "jose-ingenieros"
+temas:
+  - "el-tiempo"
 slug: "jose-ingenieros-es-evidente-que-el-individuo-ignora-su"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
