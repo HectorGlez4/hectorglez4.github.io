@@ -1,7 +1,9 @@
 ---
-texto: "El envidioso, que lo ignora, ve el resultado á que otros llegan y él no, sin sospechar de cuantas espinas está sembrado el camino de la gloria."
+texto: "El hambriento puede ser rebelde: no es nunca un hombre libre."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-envidioso-que-lo-ignora-ve-el"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-el-hambriento-puede-ser-rebelde-no-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

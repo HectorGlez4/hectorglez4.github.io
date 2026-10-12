@@ -1,6 +1,8 @@
 ---
 texto: "El amor se vale de la riqueza como de una égida que fascina nuestros ojos."
 autor: "ovidio"
+temas:
+  - "la-riqueza"
 slug: "ovidio-el-amor-se-vale-de-la-riqueza"
 procedencia:
   obra: "El remedio del amor"

@@ -1,7 +1,9 @@
 ---
-texto: "El hambriento puede ser rebelde: no es nunca un hombre libre."
+texto: "La inmensa masa de los hombres piensa con cabeza de ingenuo pastor: no entendería el idioma de quien le explicara la evolución del universo ó de la vida."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hambriento-puede-ser-rebelde-no-es"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-inmensa-masa-de-los-hombres-piensa"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

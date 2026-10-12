@@ -1,7 +1,9 @@
 ---
-texto: "El bueno todo lo suple: dora el no, endulza la verdad y afeita la misma vejez."
+texto: "La esperanza es gran falsificadora de la verdad: corríjala la cordura, procurando que sea superior la fruición al deseo."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-el-bueno-todo-lo-suple-dora-el"
+temas:
+  - "la-prudencia"
+slug: "baltasar-gracian-la-esperanza-es-gran-falsificadora-de-la"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"
   año: 1647

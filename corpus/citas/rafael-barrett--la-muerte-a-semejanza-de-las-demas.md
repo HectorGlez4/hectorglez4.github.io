@@ -1,6 +1,8 @@
 ---
 texto: "La muerte, a semejanza de las demás augustas leyes naturales, merece ser tratada con más elevación, y, ¿por qué no decirlo?, con más religiosidad."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-la-muerte-a-semejanza-de-las-demas"
 procedencia:
   obra: "Suicidios"

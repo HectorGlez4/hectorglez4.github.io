@@ -1,6 +1,8 @@
 ---
 texto: "El Amor es como los manantiales: clara pureza de cristal, arriba; limos cenagosos en el fondo."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "el-amor"
 slug: "gustavo-sanchez-galarraga-el-amor-es-como-los-manantiales-clara"
 procedencia:
   obra: "A Flor De Piel: Frases"

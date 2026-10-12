@@ -1,6 +1,8 @@
 ---
 texto: "El pensar bien consiste, ó en conocer la verdad, ó en dirigir el entendimiento por el camino que conduce á ella."
 autor: "jaime-balmes"
+temas:
+  - "la-verdad"
 slug: "jaime-balmes-el-pensar-bien-consiste-o-en-conocer"
 procedencia:
   obra: "El Criterio"

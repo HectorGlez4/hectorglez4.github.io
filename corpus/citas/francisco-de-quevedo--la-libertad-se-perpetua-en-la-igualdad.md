@@ -1,6 +1,8 @@
 ---
 texto: "La libertad se perpetúa en la igualdad de todos y se amotina en la desigualdad de uno."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-libertad"
 slug: "francisco-de-quevedo-la-libertad-se-perpetua-en-la-igualdad"
 procedencia:
   obra: "Marco Bruto"

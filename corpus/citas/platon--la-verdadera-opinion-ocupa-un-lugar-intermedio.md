@@ -1,6 +1,8 @@
 ---
 texto: "La verdadera opinion ocupa un lugar intermedio entre la ciencia y la ignorancia."
 autor: "platon"
+temas:
+  - "el-saber"
 slug: "platon-la-verdadera-opinion-ocupa-un-lugar-intermedio"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

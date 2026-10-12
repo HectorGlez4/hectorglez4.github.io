@@ -1,7 +1,9 @@
 ---
-texto: "La inmensa masa de los hombres piensa con cabeza de ingenuo pastor: no entendería el idioma de quien le explicara la evolución del universo ó de la vida."
+texto: "El envidioso, que lo ignora, ve el resultado á que otros llegan y él no, sin sospechar de cuantas espinas está sembrado el camino de la gloria."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-inmensa-masa-de-los-hombres-piensa"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-envidioso-que-lo-ignora-ve-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

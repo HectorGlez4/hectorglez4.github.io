@@ -1,6 +1,8 @@
 ---
 texto: "El hombre no interviene en la fijación de sus propios deberes; los acata como decretos sobrenaturales."
 autor: "jose-ingenieros"
+temas:
+  - "el-deber"
 slug: "jose-ingenieros-el-hombre-no-interviene-en-la-fijacion"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
