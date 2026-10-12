@@ -1,6 +1,8 @@
 ---
 texto: "Mi vida existe por sí misma y no para darla en espectáculo."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-mi-vida-existe-por-si-misma-y"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

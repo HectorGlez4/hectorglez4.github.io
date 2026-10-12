@@ -3,6 +3,7 @@ texto: "Porque la honra premio es de la virtud, y a los buenos se les debe de de
 autor: "aristoteles"
 temas:
   - "la-justicia"
+  - "la-virtud"
 slug: "aristoteles-porque-la-honra-premio-es-de-la"
 procedencia:
   obra: "Ética a Nicómaco"

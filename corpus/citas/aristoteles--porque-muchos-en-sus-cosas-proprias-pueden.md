@@ -1,6 +1,8 @@
 ---
 texto: "Porque muchos en sus cosas proprias pueden usar de virtud, lo que no pueden hacer en las ajenas."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-porque-muchos-en-sus-cosas-proprias-pueden"
 procedencia:
   obra: "Ética a Nicómaco"

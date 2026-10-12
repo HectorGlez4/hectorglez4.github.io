@@ -1,6 +1,8 @@
 ---
 texto: "Somos súbditos de la fortuna, reina cruel, inexorable, que nos impone a su capricho lo justo y lo injusto."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-somos-subditos-de-la-fortuna-reina-cruel"
 procedencia:
   obra: "Consolación a Marcia"

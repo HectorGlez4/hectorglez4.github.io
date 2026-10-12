@@ -1,6 +1,8 @@
 ---
 texto: "¿Pero podemos contener a ese instinto que lleva al hombre a querer conocer y sobre todo a querer conocer aquello que a vivir, y a vivir siempre, conduzca?"
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-pero-podemos-contener-a-ese-instinto-que"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

@@ -1,6 +1,8 @@
 ---
 texto: "Y siempre se levantará frente al racionalismo el vitalismo, siempre la voluntad se erguirá frente a la razón."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-y-siempre-se-levantara-frente-al-racionalismo"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

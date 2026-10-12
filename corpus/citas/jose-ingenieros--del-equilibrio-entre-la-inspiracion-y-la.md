@@ -1,6 +1,8 @@
 ---
 texto: "Del equilibrio entre la inspiración y la sabiduría nace el genio."
 autor: "jose-ingenieros"
+temas:
+  - "el-saber"
 slug: "jose-ingenieros-del-equilibrio-entre-la-inspiracion-y-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

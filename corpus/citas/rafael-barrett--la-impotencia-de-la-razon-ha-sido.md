@@ -1,6 +1,8 @@
 ---
 texto: "La impotencia de la razón ha sido reconocida siempre por los pensadores razonables."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-la-impotencia-de-la-razon-ha-sido"
 procedencia:
   obra: "Filosofía del altruismo"

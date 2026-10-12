@@ -1,6 +1,8 @@
 ---
 texto: "¿ Quieres tú ser alabado de un hombre que tres veces cada hora se maldice á sí mismo?"
 autor: "marco-aurelio"
+temas:
+  - "la-gloria"
 slug: "marco-aurelio-quieres-tu-ser-alabado-de-un-hombre"
 procedencia:
   obra: "Soliloquios"
