@@ -1,6 +1,8 @@
 ---
 texto: "Y no cumple con su deber quien lo calla, sino quien lo dice."
 autor: "jose-marti"
+temas:
+  - "el-deber"
 slug: "jose-marti-y-no-cumple-con-su-deber-quien"
 procedencia:
   obra: "La verdad sobre los Estados Unidos"

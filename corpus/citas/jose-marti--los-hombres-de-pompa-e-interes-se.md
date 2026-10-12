@@ -1,6 +1,8 @@
 ---
 texto: "Los hombres de pompa e interés se irán de un lado, blancos o negros; y los hombres generosos y desinteresados se irán de otro."
 autor: "jose-marti"
+temas:
+  - "la-virtud"
 slug: "jose-marti-los-hombres-de-pompa-e-interes-se"
 procedencia:
   obra: "Mi raza"

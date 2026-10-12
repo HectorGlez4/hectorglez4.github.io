@@ -1,6 +1,8 @@
 ---
 texto: "Desdichado de aquel que ni se dejare convencer de los hombres ni de las bestias."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-adversidad"
 slug: "francisco-de-quevedo-desdichado-de-aquel-que-ni-se-dejare"
 procedencia:
   obra: "Execración contra los judíos"

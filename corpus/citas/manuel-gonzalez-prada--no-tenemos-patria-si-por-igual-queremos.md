@@ -1,6 +1,8 @@
 ---
 texto: "No tenemos patria, si por igual queremos a todas las naciones; no somos patriotas, si dejamos de preferir un conciudadano nuestro a un lapón, a un francés o a un chino."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-patria"
 slug: "manuel-gonzalez-prada-no-tenemos-patria-si-por-igual-queremos"
 procedencia:
   obra: "Rebelión del soldado"

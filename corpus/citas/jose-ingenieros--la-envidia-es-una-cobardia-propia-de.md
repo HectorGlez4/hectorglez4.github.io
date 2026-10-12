@@ -1,7 +1,9 @@
 ---
-texto: "Es falso que el talento y el genio pueblen los asilos; si ha habido, por acaso, diez hombres excelentes, encontráronse á su lado un millón de mediocres y pobres diablos."
+texto: "La envidia es una cobardía propia de los débiles, un odio impotente, una incapacidad manifiesta de competir ó de odiar."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-falso-que-el-talento-y-el"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-envidia-es-una-cobardia-propia-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

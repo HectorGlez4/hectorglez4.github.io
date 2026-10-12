@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo gasta un mal modo, hasta la justicia y razón."
 autor: "baltasar-gracian"
+temas:
+  - "la-justicia"
 slug: "baltasar-gracian-todo-lo-gasta-un-mal-modo-hasta"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

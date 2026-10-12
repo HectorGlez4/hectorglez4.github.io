@@ -1,6 +1,8 @@
 ---
 texto: "Pero, en mi opinión, lo vergonzoso no es el hablar y escribir bien, sino el hablar y escribir mal."
 autor: "platon"
+temas:
+  - "la-palabra"
 slug: "platon-pero-en-mi-opinion-lo-vergonzoso-no"
 procedencia:
   obra: "Fedro"

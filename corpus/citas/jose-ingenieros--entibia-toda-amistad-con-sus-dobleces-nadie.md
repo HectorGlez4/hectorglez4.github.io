@@ -1,7 +1,9 @@
 ---
-texto: "La envidia es una cobardía propia de los débiles, un odio impotente, una incapacidad manifiesta de competir ó de odiar."
+texto: "Entibia toda amistad con sus dobleces: nadie puede confiar en su recalcitrante simulación."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-envidia-es-una-cobardia-propia-de"
+temas:
+  - "la-amistad"
+slug: "jose-ingenieros-entibia-toda-amistad-con-sus-dobleces-nadie"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Algunos agotan toda su vida en el espacio de catorce años: para éstos es la edad más larga la que es la primera para el hombre."
 autor: "seneca"
+temas:
+  - "el-tiempo"
 slug: "seneca-algunos-agotan-toda-su-vida-en-el"
 procedencia:
   obra: "Consolación a Marcia"

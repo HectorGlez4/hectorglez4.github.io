@@ -1,6 +1,8 @@
 ---
 texto: "La historia de la civilización demuestra hasta la saciedad la esterilidad de la metafísica en sus reiterados esfuerzos por adivinar las leyes de la naturaleza."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-la-historia-de-la-civilizacion-demuestra-hasta"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

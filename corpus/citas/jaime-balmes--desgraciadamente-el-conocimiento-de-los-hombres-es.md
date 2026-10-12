@@ -1,6 +1,8 @@
 ---
 texto: "Desgraciadamente el conocimiento de los hombres es uno de los estudios mas dificiles; y por lo mismo es tarea espinosa el recoger los datos precisos para acertar."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-desgraciadamente-el-conocimiento-de-los-hombres-es"
 procedencia:
   obra: "El Criterio"

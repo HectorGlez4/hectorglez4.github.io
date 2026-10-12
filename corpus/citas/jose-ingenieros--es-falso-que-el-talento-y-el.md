@@ -1,7 +1,9 @@
 ---
-texto: "Entibia toda amistad con sus dobleces: nadie puede confiar en su recalcitrante simulación."
+texto: "Es falso que el talento y el genio pueblen los asilos; si ha habido, por acaso, diez hombres excelentes, encontráronse á su lado un millón de mediocres y pobres diablos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-entibia-toda-amistad-con-sus-dobleces-nadie"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-es-falso-que-el-talento-y-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
