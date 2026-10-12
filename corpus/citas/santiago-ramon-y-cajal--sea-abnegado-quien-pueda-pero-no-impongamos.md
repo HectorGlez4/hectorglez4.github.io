@@ -1,7 +1,9 @@
 ---
-texto: "Por eso se ha dicho que el primer descubrimiento es el que cuesta; los demás suelen ser corolarios del primero."
+texto: "Sea abnegado quien pueda, pero no impongamos a nadie la abnegación."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-por-eso-se-ha-dicho-que-el"
+temas:
+  - "la-virtud"
+slug: "santiago-ramon-y-cajal-sea-abnegado-quien-pueda-pero-no-impongamos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "En el favoritismo se empantanan los que pisan firme y avanzan los que se arrastran mansos: como en los tembladerales."
+texto: "Con frecuencia mantiénense honestos por conveniencia; algunas veces por simplicidad: el prurito de la tentación no inquieta su tontería banal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-en-el-favoritismo-se-empantanan-los-que"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-con-frecuencia-mantienense-honestos-por-conveniencia-algunas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

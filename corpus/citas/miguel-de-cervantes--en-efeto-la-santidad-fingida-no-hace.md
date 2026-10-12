@@ -1,6 +1,8 @@
 ---
 texto: "En efeto, la santidad fingida no hace daño a ningún tercero, sino al que la usa."
 autor: "miguel-de-cervantes"
+temas:
+  - "la-virtud"
 slug: "miguel-de-cervantes-en-efeto-la-santidad-fingida-no-hace"
 procedencia:
   obra: "Novelas ejemplares"

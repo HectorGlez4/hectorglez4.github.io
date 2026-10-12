@@ -1,6 +1,8 @@
 ---
 texto: "Se dirá que con la experiencia; es cierto; pero el mal está en que esa experiencia es larga, y que á veces da su fruto cuando la vida toca á su término."
 autor: "jaime-balmes"
+temas:
+  - "el-tiempo"
 slug: "jaime-balmes-se-dira-que-con-la-experiencia-es"
 procedencia:
   obra: "El Criterio"

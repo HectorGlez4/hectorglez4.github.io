@@ -1,6 +1,8 @@
 ---
 texto: "De manera que todas las cosas malas nos ponen temor: como son la infamia, la pobreza, la enfermedad, la falta de amigos, la muerte."
 autor: "aristoteles"
+temas:
+  - "el-miedo"
 slug: "aristoteles-de-manera-que-todas-las-cosas-malas"
 procedencia:
   obra: "Ética a Nicómaco"

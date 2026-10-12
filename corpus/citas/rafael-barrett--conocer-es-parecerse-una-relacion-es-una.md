@@ -1,6 +1,8 @@
 ---
 texto: "Conocer es parecerse; una relación es una reciprocidad o no es nada."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-conocer-es-parecerse-una-relacion-es-una"
 procedencia:
   obra: "La dinamita"

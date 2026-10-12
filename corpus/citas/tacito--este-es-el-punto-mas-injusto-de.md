@@ -1,6 +1,8 @@
 ---
 texto: "Este es el punto más injusto de las guerras: todos reivindican para sí una parte de las victorias, pero achacan las derrotas a un solo."
 autor: "tacito"
+temas:
+  - "la-justicia"
 slug: "tacito-este-es-el-punto-mas-injusto-de"
 procedencia:
   obra: "La vida de Julio Agrícola"

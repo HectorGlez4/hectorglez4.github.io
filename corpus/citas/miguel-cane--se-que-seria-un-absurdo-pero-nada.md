@@ -1,6 +1,8 @@
 ---
 texto: "Sé que sería un absurdo; pero nada hay más terrible que el absurdo cuando toma una forma definitiva y neta."
 autor: "miguel-cane"
+temas:
+  - "la-razon"
 slug: "miguel-cane-se-que-seria-un-absurdo-pero-nada"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

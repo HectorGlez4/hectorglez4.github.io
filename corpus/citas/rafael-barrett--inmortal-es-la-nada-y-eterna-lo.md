@@ -1,6 +1,8 @@
 ---
 texto: "Inmortal es la nada, y eterna; lo inmortal es lo inmóvil."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-inmortal-es-la-nada-y-eterna-lo"
 procedencia:
   obra: "El que fue"
