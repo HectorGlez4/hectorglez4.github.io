@@ -1,6 +1,8 @@
 ---
 texto: "La ilusión gobierna el drama espantable del mundo."
 autor: "carlos-reyles"
+temas:
+  - "la-vida"
 slug: "carlos-reyles-la-ilusion-gobierna-el-drama-espantable-del"
 procedencia:
   obra: "La Muerte Del Cisne"

@@ -1,6 +1,8 @@
 ---
 texto: "La autoridad se funda en el asentimiento indeliberado que una nación da a un hecho permanente."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-justicia"
 slug: "domingo-faustino-sarmiento-la-autoridad-se-funda-en-el-asentimiento"
 procedencia:
   obra: "Facundo (1874)/Capítulo VII"

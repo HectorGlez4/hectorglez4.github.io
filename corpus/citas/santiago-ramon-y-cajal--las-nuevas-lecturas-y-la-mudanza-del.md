@@ -1,7 +1,9 @@
 ---
-texto: "Quien resume, se resume a sí mismo; quiero decir que a menudo expone sus juicios y doctrinas en lugar de las del autor."
+texto: "Las nuevas lecturas y la mudanza del medio moral e intelectual cambian y mejoran continuamente el ambiente interior y depuran y refinan nuestros juicios."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-quien-resume-se-resume-a-si-mismo"
+temas:
+  - "el-saber"
+slug: "santiago-ramon-y-cajal-las-nuevas-lecturas-y-la-mudanza-del"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

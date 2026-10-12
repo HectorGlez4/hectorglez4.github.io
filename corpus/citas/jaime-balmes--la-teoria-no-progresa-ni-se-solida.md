@@ -1,7 +1,9 @@
 ---
-texto: "El orígen de la pereza se halla en nuestra misma organizacion, y en el modo con que se ejercen nuestras funciones."
+texto: "La teoría no progresa ni se solida sin la observacion, y la observacion estriba en la práctica."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-origen-de-la-pereza-se-halla"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-la-teoria-no-progresa-ni-se-solida"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

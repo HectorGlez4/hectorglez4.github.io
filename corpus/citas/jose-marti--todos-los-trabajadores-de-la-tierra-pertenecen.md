@@ -1,6 +1,8 @@
 ---
 texto: "Todos los trabajadores de la tierra pertenecen ya a una sola nación, y no se querellan entre sí, sino todos juntos contra los que los oprimen."
 autor: "jose-marti"
+temas:
+  - "el-trabajo"
 slug: "jose-marti-todos-los-trabajadores-de-la-tierra-pertenecen"
 procedencia:
   obra: "Karl Marx"

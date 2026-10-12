@@ -1,6 +1,8 @@
 ---
 texto: "La venalidad, que empieza desde el voto público, se propaga a todos los resortes institucionales."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-justicia"
 slug: "jose-enrique-rodo-la-venalidad-que-empieza-desde-el-voto"
 procedencia:
   obra: "Ariel"

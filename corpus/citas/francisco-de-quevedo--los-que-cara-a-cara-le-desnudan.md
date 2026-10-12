@@ -1,6 +1,8 @@
 ---
 texto: "Los que cara a cara le desnudan, dan la señal a los que están detrás para que le maten."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-amistad"
 slug: "francisco-de-quevedo-los-que-cara-a-cara-le-desnudan"
 procedencia:
   obra: "Marco Bruto"

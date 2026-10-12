@@ -1,6 +1,8 @@
 ---
 texto: "La consecuencia vital del racionalismo sería el suicidio."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-consecuencia-vital-del-racionalismo-seria-el"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

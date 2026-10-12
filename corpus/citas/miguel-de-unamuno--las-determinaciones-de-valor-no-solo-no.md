@@ -1,6 +1,8 @@
 ---
 texto: "Las determinaciones de valor, no sólo no son nunca racionalizables, son antirracionales."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-las-determinaciones-de-valor-no-solo-no"
 procedencia:
   obra: "Del sentimiento trágico de la vida/IV"

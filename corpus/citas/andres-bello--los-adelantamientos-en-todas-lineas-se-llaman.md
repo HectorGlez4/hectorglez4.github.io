@@ -1,6 +1,8 @@
 ---
 texto: "Los adelantamientos en todas líneas se llaman unos a otros, se eslabonan, se empujan."
 autor: "andres-bello"
+temas:
+  - "el-saber"
 slug: "andres-bello-los-adelantamientos-en-todas-lineas-se-llaman"
 procedencia:
   obra: "Discurso en la inauguración de la Universidad de Chile"

@@ -1,6 +1,8 @@
 ---
 texto: "La sociedad, en vez de explotar este tesoro, le desdeña, si acaso no le escarnece."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-sociedad-en-vez-de-explotar-este"
 procedencia:
   obra: "La mujer del porvenir"

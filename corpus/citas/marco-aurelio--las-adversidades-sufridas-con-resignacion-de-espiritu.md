@@ -1,6 +1,8 @@
 ---
 texto: "Las adversidades sufridas con resignación de espíritu haciendo buen uso de las adversidades acaecidas."
 autor: "marco-aurelio"
+temas:
+  - "la-adversidad"
 slug: "marco-aurelio-las-adversidades-sufridas-con-resignacion-de-espiritu"
 procedencia:
   obra: "Soliloquios"

@@ -1,6 +1,8 @@
 ---
 texto: "La concordia, o la perenne reacción, de los contrarios, suele ser el secreto de las originalidades superiores."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-razon"
 slug: "jose-enrique-rodo-la-concordia-o-la-perenne-reaccion-de"
 procedencia:
   obra: "Motivos de Proteo"

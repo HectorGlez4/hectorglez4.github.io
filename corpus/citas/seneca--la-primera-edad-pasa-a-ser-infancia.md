@@ -1,6 +1,8 @@
 ---
 texto: "La primera edad pasa a ser infancia, la infancia pasa a ser pubertad, a la pubertad la absorbe la juventud, a la juventud la vejez."
 autor: "seneca"
+temas:
+  - "el-tiempo"
 slug: "seneca-la-primera-edad-pasa-a-ser-infancia"
 procedencia:
   obra: "Consolación a Marcia"

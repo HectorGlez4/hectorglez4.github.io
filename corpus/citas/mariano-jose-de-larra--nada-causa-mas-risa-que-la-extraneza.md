@@ -1,7 +1,9 @@
 ---
-texto: "Una piedra busca el fondo de un río; un gas busca la parte superior de la atmósfera."
+texto: "Nada causa más risa que la extrañeza y el enfado del pobre; sin embargo, nada más natural."
 autor: "mariano-jose-de-larra"
-slug: "mariano-jose-de-larra-una-piedra-busca-el-fondo-de-un"
+temas:
+  - "la-adversidad"
+slug: "mariano-jose-de-larra-nada-causa-mas-risa-que-la-extraneza"
 procedencia:
   obra: "Fígaro (Artículos selectos)"
 estadoDerechos: "dominio-público"

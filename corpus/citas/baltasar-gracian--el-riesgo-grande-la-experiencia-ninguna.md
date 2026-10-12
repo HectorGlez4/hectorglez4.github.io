@@ -1,6 +1,8 @@
 ---
 texto: "El riesgo grande, la experiencia ninguna."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-el-riesgo-grande-la-experiencia-ninguna"
 procedencia:
   obra: "El político"

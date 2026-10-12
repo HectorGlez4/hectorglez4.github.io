@@ -1,6 +1,8 @@
 ---
 texto: "Los días se suceden con lentitud inexorable."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-tiempo"
 slug: "jose-enrique-rodo-los-dias-se-suceden-con-lentitud-inexorable"
 procedencia:
   obra: "Ariel"

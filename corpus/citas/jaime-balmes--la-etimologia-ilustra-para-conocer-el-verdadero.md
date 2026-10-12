@@ -1,6 +1,8 @@
 ---
 texto: "La etimología ilustra para conocer el verdadero significado, pero no lo determina."
 autor: "jaime-balmes"
+temas:
+  - "la-palabra"
 slug: "jaime-balmes-la-etimologia-ilustra-para-conocer-el-verdadero"
 procedencia:
   obra: "El Criterio"
