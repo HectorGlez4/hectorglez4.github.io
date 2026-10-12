@@ -1,6 +1,8 @@
 ---
 texto: "Someterse á las leyes es una obligacion absoluta; es el deber."
 autor: "platon"
+temas:
+  - "el-deber"
 slug: "platon-someterse-a-las-leyes-es-una-obligacion"
 procedencia:
   obra: "Critón"

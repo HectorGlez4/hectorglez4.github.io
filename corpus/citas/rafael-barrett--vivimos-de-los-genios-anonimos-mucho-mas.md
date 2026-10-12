@@ -1,6 +1,8 @@
 ---
 texto: "Vivimos de los genios anónimos mucho más que de los oficiales."
 autor: "rafael-barrett"
+temas:
+  - "la-gloria"
 slug: "rafael-barrett-vivimos-de-los-genios-anonimos-mucho-mas"
 procedencia:
   obra: "Filosofía del altruismo"

@@ -1,6 +1,8 @@
 ---
 texto: "Para el desarrollo de toda facultad hay una condicion indispensable: el ejercicio."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-para-el-desarrollo-de-toda-facultad-hay"
 procedencia:
   obra: "El Criterio"

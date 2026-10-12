@@ -1,6 +1,8 @@
 ---
 texto: "No es en el aire donde están los surcos de tu labor, sino en la tierra humilde."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-no-es-en-el-aire-donde-estan"
 procedencia:
   obra: "La elocuencia"

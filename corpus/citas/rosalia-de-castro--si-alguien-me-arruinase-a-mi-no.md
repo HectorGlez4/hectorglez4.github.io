@@ -1,6 +1,8 @@
 ---
 texto: "Si alguien me arruinase a mí, no serían los pobres, sino los ricos."
 autor: "rosalia-de-castro"
+temas:
+  - "la-riqueza"
 slug: "rosalia-de-castro-si-alguien-me-arruinase-a-mi-no"
 procedencia:
   obra: "Ruinas"

@@ -1,6 +1,8 @@
 ---
 texto: "Por eso el prestigio rodea á las virtudes intelectuales: la santidad está en la sabiduría."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-por-eso-el-prestigio-rodea-a-las"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

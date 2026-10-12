@@ -1,7 +1,9 @@
 ---
-texto: "Evolucionar es variar; solamente se varía mediante la invención."
+texto: "Sólo hay juventud en los que persiguen con entusiasmo una perfección; por eso en los caracteres excelentes puede persistir sobre el apeñuscarse de los años."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-evolucionar-es-variar-solamente-se-varia-mediante"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-solo-hay-juventud-en-los-que-persiguen"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
