@@ -1,7 +1,9 @@
 ---
-texto: "Todos los rutinarios son intolerantes; su exigua cultura los condena á serlo."
+texto: "Sólo se odia lo que se cree malo ó nocivo; en cambio, toda prosperidad excita la envidia, como cualquier resplandor irrita los ojos enfermos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todos-los-rutinarios-son-intolerantes-su-exigua"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-solo-se-odia-lo-que-se-cree"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

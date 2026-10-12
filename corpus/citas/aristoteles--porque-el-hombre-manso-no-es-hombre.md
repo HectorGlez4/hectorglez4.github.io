@@ -3,6 +3,7 @@ texto: "Porque el hombre manso no es hombre vengativo: antes es benigno y miseri
 autor: "aristoteles"
 temas:
   - "la-prudencia"
+  - "la-virtud"
 slug: "aristoteles-porque-el-hombre-manso-no-es-hombre"
 procedencia:
   obra: "Ética a Nicómaco"

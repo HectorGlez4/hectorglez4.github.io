@@ -1,7 +1,9 @@
 ---
-texto: "Enseñan que es necesario ser como los demás; el virtuoso anhela ser mejor."
+texto: "Todos los rutinarios son intolerantes; su exigua cultura los condena á serlo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-ensenan-que-es-necesario-ser-como-los"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-todos-los-rutinarios-son-intolerantes-su-exigua"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

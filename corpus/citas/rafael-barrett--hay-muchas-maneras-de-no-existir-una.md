@@ -1,6 +1,8 @@
 ---
 texto: "Hay muchas maneras de no existir; una de ellas es el desorden."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-hay-muchas-maneras-de-no-existir-una"
 procedencia:
   obra: "La violencia"

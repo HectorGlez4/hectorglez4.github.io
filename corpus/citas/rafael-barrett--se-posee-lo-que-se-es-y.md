@@ -1,6 +1,8 @@
 ---
 texto: "Se posee lo que se es, y en cuanto se da."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-se-posee-lo-que-se-es-y"
 procedencia:
   obra: "Filosofía del altruismo"

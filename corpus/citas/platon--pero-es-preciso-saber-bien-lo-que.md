@@ -1,6 +1,8 @@
 ---
 texto: "Pero es preciso saber bien lo que es amar lo bello: es desear apropiárselo y poseerlo siempre, para ser dichoso."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-pero-es-preciso-saber-bien-lo-que"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

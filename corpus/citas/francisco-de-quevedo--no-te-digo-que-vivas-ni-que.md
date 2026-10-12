@@ -1,6 +1,8 @@
 ---
 texto: "No te digo que vivas ni que mueras: vive si pudieres, y muere si no pudieres más."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-vida"
 slug: "francisco-de-quevedo-no-te-digo-que-vivas-ni-que"
 procedencia:
   obra: "Marco Bruto"

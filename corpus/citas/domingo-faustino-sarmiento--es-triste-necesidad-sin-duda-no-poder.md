@@ -1,6 +1,8 @@
 ---
 texto: "Es triste necesidad sin duda no poder citar sino los muertos en apoyo de la verdad."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-verdad"
 slug: "domingo-faustino-sarmiento-es-triste-necesidad-sin-duda-no-poder"
 procedencia:
   obra: "Facundo (1874)/Capítulo XIII"

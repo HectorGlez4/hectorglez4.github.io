@@ -1,6 +1,8 @@
 ---
 texto: "Quizas se atreven á mas de lo que pueden; pero á veces no pueden porque no se atreven."
 autor: "jaime-balmes"
+temas:
+  - "el-miedo"
 slug: "jaime-balmes-quizas-se-atreven-a-mas-de-lo"
 procedencia:
   obra: "El Criterio"

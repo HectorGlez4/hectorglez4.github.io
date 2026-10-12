@@ -1,7 +1,9 @@
 ---
-texto: "Sólo se odia lo que se cree malo ó nocivo; en cambio, toda prosperidad excita la envidia, como cualquier resplandor irrita los ojos enfermos."
+texto: "Enseñan que es necesario ser como los demás; el virtuoso anhela ser mejor."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-solo-se-odia-lo-que-se-cree"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-ensenan-que-es-necesario-ser-como-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

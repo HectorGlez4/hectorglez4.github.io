@@ -1,6 +1,8 @@
 ---
 texto: "No hagas cosa alguna de mala gana ni hagas tus cosas sin respeto al bien común; nada harás sin examinarlo de antemano, ni lo harás arrastrado de alguna pasión."
 autor: "marco-aurelio"
+temas:
+  - "el-deber"
 slug: "marco-aurelio-no-hagas-cosa-alguna-de-mala-gana"
 procedencia:
   obra: "Soliloquios"

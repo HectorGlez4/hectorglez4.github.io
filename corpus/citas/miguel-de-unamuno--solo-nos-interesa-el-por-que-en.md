@@ -1,6 +1,8 @@
 ---
 texto: "Sólo nos interesa el por qué en vista del para qué; sólo queremos saber de dónde venimos para mejor poder averiguar adónde vamos."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-solo-nos-interesa-el-por-que-en"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

@@ -1,6 +1,8 @@
 ---
 texto: "Ese es, hija, nuestro pecado: el de haber nacido."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-ese-es-hija-nuestro-pecado-el-de"
 procedencia:
   obra: "San Manuel Bueno, mártir"

@@ -1,6 +1,8 @@
 ---
 texto: "Dificil es que a quien haya formado una opinión se le convenza de su falsedad."
 autor: "sofocles"
+temas:
+  - "el-error"
 slug: "sofocles-dificil-es-que-a-quien-haya-formado"
 procedencia:
   obra: "Antígona (Alemany y Bolufer tr.)"

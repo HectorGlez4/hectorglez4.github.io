@@ -1,6 +1,8 @@
 ---
 texto: "No hay pueblos civilizados; hay hombres civilizados."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-no-hay-pueblos-civilizados-hay-hombres-civilizados"
 procedencia:
   obra: "La sinceridad"
