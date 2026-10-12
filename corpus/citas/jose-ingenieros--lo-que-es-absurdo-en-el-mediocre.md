@@ -1,7 +1,9 @@
 ---
-texto: "La avaricia seca el corazón, lo cierra á la fe, al amor, á la esperanza, al ideal."
+texto: "Lo que es absurdo en el mediocre, en el hombre superior es un adorno: simple exponente de fuerza."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-avaricia-seca-el-corazon-lo-cierra"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-lo-que-es-absurdo-en-el-mediocre"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

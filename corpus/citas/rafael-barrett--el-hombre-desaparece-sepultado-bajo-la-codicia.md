@@ -1,6 +1,8 @@
 ---
 texto: "El hombre desaparece, sepultado bajo la codicia del hombre."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-el-hombre-desaparece-sepultado-bajo-la-codicia"
 procedencia:
   obra: "El yugo en la selva"

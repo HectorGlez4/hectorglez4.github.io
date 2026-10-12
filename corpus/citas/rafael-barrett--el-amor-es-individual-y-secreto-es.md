@@ -1,6 +1,8 @@
 ---
 texto: "El amor es individual y secreto: es lo único inadaptable a lo múltiple; es un vértice que avanza solo."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-el-amor-es-individual-y-secreto-es"
 procedencia:
   obra: "El porno-cinematógrafo"

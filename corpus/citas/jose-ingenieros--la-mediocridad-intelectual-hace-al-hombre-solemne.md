@@ -1,7 +1,9 @@
 ---
-texto: "El que paga una culpa con muchos años de virtud, es como si no hubiera pecado: se purifica."
+texto: "La mediocridad intelectual hace al hombre solemne, modesto, incoloro y obtuso."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-paga-una-culpa-con-muchos"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-mediocridad-intelectual-hace-al-hombre-solemne"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

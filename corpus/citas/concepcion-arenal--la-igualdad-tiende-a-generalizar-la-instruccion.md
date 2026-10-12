@@ -1,7 +1,9 @@
 ---
-texto: "El hombre virtuoso halla goces y facilidades para la virtud, que le elevan en ella cada vez más."
+texto: "La igualdad tiende á generalizar la instrucción y favorece la libertad."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-el-hombre-virtuoso-halla-goces-y-facilidades"
+temas:
+  - "la-libertad"
+slug: "concepcion-arenal-la-igualdad-tiende-a-generalizar-la-instruccion"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

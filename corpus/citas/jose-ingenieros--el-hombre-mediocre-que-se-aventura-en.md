@@ -1,6 +1,8 @@
 ---
 texto: "El hombre mediocre que se aventura en la liza social tiene una sola finalidad: el éxito."
 autor: "jose-ingenieros"
+temas:
+  - "la-gloria"
 slug: "jose-ingenieros-el-hombre-mediocre-que-se-aventura-en"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "La razón calla para que no la ametrallen."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-la-razon-calla-para-que-no-la"
 procedencia:
   obra: "El revólver"

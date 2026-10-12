@@ -1,6 +1,8 @@
 ---
 texto: "El ritmo de nuestra vida retarda, y el tiempo corre y nos sumerge y nos desmorona."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-el-ritmo-de-nuestra-vida-retarda-y"
 procedencia:
   obra: "El río invisible"

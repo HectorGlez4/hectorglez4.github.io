@@ -1,6 +1,8 @@
 ---
 texto: "El escepticismo vital viene del choque entre la razón y el deseo."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-el-escepticismo-vital-viene-del-choque-entre"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

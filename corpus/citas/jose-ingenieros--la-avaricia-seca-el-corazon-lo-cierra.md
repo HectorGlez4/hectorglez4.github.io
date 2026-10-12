@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad intelectual hace al hombre solemne, modesto, incoloro y obtuso."
+texto: "La avaricia seca el corazón, lo cierra á la fe, al amor, á la esperanza, al ideal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-intelectual-hace-al-hombre-solemne"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-la-avaricia-seca-el-corazon-lo-cierra"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

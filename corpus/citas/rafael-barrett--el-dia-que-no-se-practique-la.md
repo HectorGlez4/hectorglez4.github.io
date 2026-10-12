@@ -1,6 +1,8 @@
 ---
 texto: "El día que no se practique la guerra, se habrá debilitado la idea de patria."
 autor: "rafael-barrett"
+temas:
+  - "la-patria"
 slug: "rafael-barrett-el-dia-que-no-se-practique-la"
 procedencia:
   obra: "El antipatriotismo"

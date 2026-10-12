@@ -1,6 +1,8 @@
 ---
 texto: "El artificio cubre la verdad, y acaba creándola."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-el-artificio-cubre-la-verdad-y-acaba"
 procedencia:
   obra: "De deporte"

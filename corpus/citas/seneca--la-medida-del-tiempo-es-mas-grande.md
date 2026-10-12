@@ -1,6 +1,8 @@
 ---
 texto: "La medida del tiempo es más grande que la del mundo, porque se pueden contar muchas revoluciones del mundo realizadas en el tiempo."
 autor: "seneca"
+temas:
+  - "el-tiempo"
 slug: "seneca-la-medida-del-tiempo-es-mas-grande"
 procedencia:
   obra: "Consolación a Marcia"

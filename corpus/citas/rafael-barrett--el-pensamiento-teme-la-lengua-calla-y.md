@@ -1,6 +1,8 @@
 ---
 texto: "El pensamiento teme, la lengua calla, y la sinceridad, como en tiempo de Calígula y de Torquemada, es siempre un heroísmo."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-el-pensamiento-teme-la-lengua-calla-y"
 procedencia:
   obra: "La sinceridad"

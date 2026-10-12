@@ -1,6 +1,8 @@
 ---
 texto: "El olvido de una sola circunstancia nos puede llevar al error."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-el-olvido-de-una-sola-circunstancia-nos"
 procedencia:
   obra: "El Criterio"

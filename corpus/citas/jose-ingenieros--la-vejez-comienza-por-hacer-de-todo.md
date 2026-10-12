@@ -1,7 +1,9 @@
 ---
-texto: "El genio, en cambio, se revela por la perennidad de su irradiación: como si fuera su vida un perpetuo amanecer."
+texto: "La vejez comienza por hacer de todo individuo un hombre mediocre."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-en-cambio-se-revela-por"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-vejez-comienza-por-hacer-de-todo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

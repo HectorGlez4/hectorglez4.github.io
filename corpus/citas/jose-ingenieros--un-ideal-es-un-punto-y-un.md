@@ -1,7 +1,9 @@
 ---
-texto: "La vejez comienza por hacer de todo individuo un hombre mediocre."
+texto: "Un Ideal es un punto y un momento entre los infinitos posibles que pueblan el espacio y el tiempo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-vejez-comienza-por-hacer-de-todo"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-un-ideal-es-un-punto-y-un"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

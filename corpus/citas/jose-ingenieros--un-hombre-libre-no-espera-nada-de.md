@@ -1,7 +1,9 @@
 ---
-texto: "Lo que es absurdo en el mediocre, en el hombre superior es un adorno: simple exponente de fuerza."
+texto: "Un hombre libre no espera nada de otros."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-lo-que-es-absurdo-en-el-mediocre"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-un-hombre-libre-no-espera-nada-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

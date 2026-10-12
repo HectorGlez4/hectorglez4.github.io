@@ -1,6 +1,8 @@
 ---
 texto: "La prudencia, como virtud, ha servido de poco á la moral."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-prudencia"
 slug: "eugenio-maria-de-hostos-la-prudencia-como-virtud-ha-servido-de"
 procedencia:
   obra: "Moral social"

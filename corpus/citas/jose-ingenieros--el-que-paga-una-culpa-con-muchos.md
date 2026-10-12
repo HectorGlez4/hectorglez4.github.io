@@ -1,7 +1,9 @@
 ---
-texto: "Un hombre libre no espera nada de otros."
+texto: "El que paga una culpa con muchos años de virtud, es como si no hubiera pecado: se purifica."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-un-hombre-libre-no-espera-nada-de"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-que-paga-una-culpa-con-muchos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

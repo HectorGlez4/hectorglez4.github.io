@@ -1,6 +1,8 @@
 ---
 texto: "La verdad en la eleccion de los medios es elegir los que son conformes á la moral, y mejor conducen al fin."
 autor: "jaime-balmes"
+temas:
+  - "la-verdad"
 slug: "jaime-balmes-la-verdad-en-la-eleccion-de-los"
 procedencia:
   obra: "El Criterio"
