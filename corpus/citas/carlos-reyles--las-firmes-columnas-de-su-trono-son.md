@@ -1,6 +1,8 @@
 ---
 texto: "Las firmes columnas de su trono, son las leyes mismas de la vida."
 autor: "carlos-reyles"
+temas:
+  - "la-vida"
 slug: "carlos-reyles-las-firmes-columnas-de-su-trono-son"
 procedencia:
   obra: "La Muerte Del Cisne"

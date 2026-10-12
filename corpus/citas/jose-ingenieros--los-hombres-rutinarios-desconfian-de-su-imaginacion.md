@@ -1,7 +1,9 @@
 ---
-texto: "Los grandes hombres dicen de sí, naturalmente, elogios que en labios ajenos los harían sonrojar; las grandes sombras gozan oyendo las alabanzas que temen no merecer."
+texto: "Los hombres rutinarios desconfían de su imaginación, santiguándose cuando ésta les atribula con heréticas tentaciones."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-grandes-hombres-dicen-de-si-naturalmente"
+temas:
+  - "el-miedo"
+slug: "jose-ingenieros-los-hombres-rutinarios-desconfian-de-su-imaginacion"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

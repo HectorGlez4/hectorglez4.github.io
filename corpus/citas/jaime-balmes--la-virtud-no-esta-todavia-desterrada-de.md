@@ -1,6 +1,8 @@
 ---
 texto: "La virtud no está todavía desterrada de la tierra; yo conozco muchas personas que sin atroz calumnia no pueden ser contadas entre los criminales."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-la-virtud-no-esta-todavia-desterrada-de"
 procedencia:
   obra: "El Criterio"

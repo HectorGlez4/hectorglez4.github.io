@@ -1,6 +1,8 @@
 ---
 texto: "La presión de la desdicha nacional ha destrozado el misterioso mecanismo que renueva los seres, ha mancillado y falseado el amor."
 autor: "rafael-barrett"
+temas:
+  - "la-adversidad"
 slug: "rafael-barrett-la-presion-de-la-desdicha-nacional-ha"
 procedencia:
   obra: "Los niños tristes"

@@ -1,7 +1,9 @@
 ---
-texto: "El odio puede hervir en los grandes corazones; puede ser justo y santo; lo es muchas veces, cuando quiere borrar la tiranía, la infamia, la indignidad."
+texto: "Los grandes hombres dicen de sí, naturalmente, elogios que en labios ajenos los harían sonrojar; las grandes sombras gozan oyendo las alabanzas que temen no merecer."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-odio-puede-hervir-en-los-grandes"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-los-grandes-hombres-dicen-de-si-naturalmente"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

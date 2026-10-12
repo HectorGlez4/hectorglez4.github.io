@@ -1,7 +1,9 @@
 ---
-texto: "Tanto da que el pueblo sea domesticado por oligarquías de blasonados ó de advenedizos: en ambas están igualmente proscritas la dignidad y los ideales."
+texto: "La historia es una infinita inquietud de perfecciones, que grandes hombres presienten ó simbolizan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-tanto-da-que-el-pueblo-sea-domesticado"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-historia-es-una-infinita-inquietud-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

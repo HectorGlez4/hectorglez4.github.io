@@ -1,6 +1,8 @@
 ---
 texto: "La lucha por la vida suscita en cada especie las calidades correspondientes a sus condiciones particulares, reales o imaginarias."
 autor: "agustin-alvarez"
+temas:
+  - "la-vida"
 slug: "agustin-alvarez-la-lucha-por-la-vida-suscita-en"
 procedencia:
   obra: "La transformación de las razas en América"

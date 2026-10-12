@@ -1,6 +1,8 @@
 ---
 texto: "Los hombres hacen lo que llaman buenas acciones, como si pagaran un impuesto para ser bien juzgados."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-los-hombres-hacen-lo-que-llaman-buenas"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

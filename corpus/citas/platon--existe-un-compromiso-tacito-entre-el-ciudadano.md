@@ -1,6 +1,8 @@
 ---
 texto: "Existe un compromiso tácito entre el ciudadano y las leyes; éstas, protegiéndole, tienen derecho á su respeto."
 autor: "platon"
+temas:
+  - "la-justicia"
 slug: "platon-existe-un-compromiso-tacito-entre-el-ciudadano"
 procedencia:
   obra: "Critón"

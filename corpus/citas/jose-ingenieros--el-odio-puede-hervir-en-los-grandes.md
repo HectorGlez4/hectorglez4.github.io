@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres rutinarios desconfían de su imaginación, santiguándose cuando ésta les atribula con heréticas tentaciones."
+texto: "El odio puede hervir en los grandes corazones; puede ser justo y santo; lo es muchas veces, cuando quiere borrar la tiranía, la infamia, la indignidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hombres-rutinarios-desconfian-de-su-imaginacion"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-el-odio-puede-hervir-en-los-grandes"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

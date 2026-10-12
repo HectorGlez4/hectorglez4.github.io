@@ -1,7 +1,9 @@
 ---
-texto: "La virtud perfecta se sustrae y oculta a nuestros ojos, y el fruto que madura temprano no espera al otoño."
+texto: "Delibera contigo mismo, y pesa bien lo que deseas; una vez entrado en esta ciudad de maravillas, por aquí hay que salir."
 autor: "seneca"
-slug: "seneca-la-virtud-perfecta-se-sustrae-y-oculta"
+temas:
+  - "la-prudencia"
+slug: "seneca-delibera-contigo-mismo-y-pesa-bien-lo"
 procedencia:
   obra: "Consolación a Marcia"
   traduccion:

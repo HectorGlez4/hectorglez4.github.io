@@ -1,6 +1,8 @@
 ---
 texto: "Te glorías de tu púrpura y de tus fasces: gloria frívola, de que debieras avergonzarte, teniendo el alma manchada."
 autor: "minucio-felix"
+temas:
+  - "la-gloria"
 slug: "minucio-felix-te-glorias-de-tu-purpura-y-de"
 procedencia:
   obra: "El Octavio"

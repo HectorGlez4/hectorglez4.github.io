@@ -1,6 +1,8 @@
 ---
 texto: "No niegan el amor á la pátria los internacionales; lo que quieren es agrandar ese sentimiento, y sobre todo, contraponerle el amor á la humanidad."
 autor: "francisco-pi-y-margall"
+temas:
+  - "la-patria"
 slug: "francisco-pi-y-margall-no-niegan-el-amor-a-la-patria"
 procedencia:
   obra: "Defensa de la Internacional - Parte II"

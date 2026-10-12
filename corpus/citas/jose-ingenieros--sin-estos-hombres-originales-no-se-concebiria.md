@@ -1,7 +1,9 @@
 ---
-texto: "El bien y el mal serían idénticos si se les considerara en sí mismos, objetivamente, como atributos de ciertos hechos; se diferencian en nuestro juicio humano."
+texto: "Sin estos hombres originales no se concebiría la transformación de las costumbres; conservaríamos los sentimientos y acciones de los primitivos seres humanos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-bien-y-el-mal-serian-identicos"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-sin-estos-hombres-originales-no-se-concebiria"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
