@@ -1,7 +1,9 @@
 ---
-texto: "Este orden no puede existir sin leyes que lo fundamenten: esas leyes son las leyes naturales de la sociedad."
+texto: "El hombre es ya adulto de razón, y hasta se le puede considerar adulto de conciencia."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-este-orden-no-puede-existir-sin-leyes"
+temas:
+  - "la-razon"
+slug: "eugenio-maria-de-hostos-el-hombre-es-ya-adulto-de-razon"
 procedencia:
   obra: "Moral social"
   año: 1917

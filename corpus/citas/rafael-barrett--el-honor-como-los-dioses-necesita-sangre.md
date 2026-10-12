@@ -1,6 +1,8 @@
 ---
 texto: "El honor, como los dioses, necesita sangre."
 autor: "rafael-barrett"
+temas:
+  - "la-gloria"
 slug: "rafael-barrett-el-honor-como-los-dioses-necesita-sangre"
 procedencia:
   obra: "El duelo"

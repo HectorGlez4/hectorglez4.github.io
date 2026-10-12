@@ -1,6 +1,8 @@
 ---
 texto: "Mas si por fuerza lo hace, ni hace justicia, ni agravia, sino accidentariamente, porque aconteció ser justo o injusto lo que hacía."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-mas-si-por-fuerza-lo-hace-ni"
 procedencia:
   obra: "Ética a Nicómaco"

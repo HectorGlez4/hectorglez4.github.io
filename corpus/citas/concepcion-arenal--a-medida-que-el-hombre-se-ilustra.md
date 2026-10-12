@@ -1,6 +1,8 @@
 ---
 texto: "A medida que el hombre se ilustra, se civiliza, se hace mejor, mejora la condición de la mujer; le da derechos, le reconoce más semejanza."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-a-medida-que-el-hombre-se-ilustra"
 procedencia:
   obra: "La mujer del porvenir"

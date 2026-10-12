@@ -1,6 +1,8 @@
 ---
 texto: "Necesario es apresurarse; la muerte viene detrás; pronto desaparecerá todo este entusiasmo; muy pronto, al primer grito de alarma plegarán tu tienda."
 autor: "seneca"
+temas:
+  - "la-muerte"
 slug: "seneca-necesario-es-apresurarse-la-muerte-viene-detras"
 procedencia:
   obra: "Consolación a Marcia"

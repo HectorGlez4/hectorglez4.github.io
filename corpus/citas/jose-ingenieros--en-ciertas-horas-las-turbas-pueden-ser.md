@@ -1,6 +1,8 @@
 ---
 texto: "En ciertas horas las turbas pueden ser sus cómplices: el pueblo nunca."
 autor: "jose-ingenieros"
+temas:
+  - "la-libertad"
 slug: "jose-ingenieros-en-ciertas-horas-las-turbas-pueden-ser"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,6 +1,8 @@
 ---
 texto: "El oro es metal, independientemente de nuestro conocimiento; hé aquí una verdad objetiva."
 autor: "jaime-balmes"
+temas:
+  - "la-verdad"
 slug: "jaime-balmes-el-oro-es-metal-independientemente-de-nuestro"
 procedencia:
   obra: "El Criterio"

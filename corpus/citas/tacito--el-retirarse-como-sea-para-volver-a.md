@@ -1,6 +1,8 @@
 ---
 texto: "El retirarse, como sea para volver a acometer, tienen más por ardid y buen consejo que por miedo."
 autor: "tacito"
+temas:
+  - "la-prudencia"
 slug: "tacito-el-retirarse-como-sea-para-volver-a"
 procedencia:
   obra: "Del Origen y del Territorio de los Germanos"

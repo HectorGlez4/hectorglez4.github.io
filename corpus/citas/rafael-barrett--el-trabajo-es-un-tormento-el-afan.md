@@ -1,6 +1,8 @@
 ---
 texto: "El trabajo es un tormento, el afán de libertad, sed de venganza, y el progreso, crimen."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-el-trabajo-es-un-tormento-el-afan"
 procedencia:
   obra: "El odio"

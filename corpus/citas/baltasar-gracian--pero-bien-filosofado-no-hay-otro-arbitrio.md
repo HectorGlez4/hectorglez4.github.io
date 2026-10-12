@@ -1,6 +1,8 @@
 ---
 texto: "Pero, bien filosofado, no hay otro arbitrio sino el de la virtud y atención, porque no hay más dicha ni más desdicha que prudencia o imprudencia."
 autor: "baltasar-gracian"
+temas:
+  - "la-felicidad"
 slug: "baltasar-gracian-pero-bien-filosofado-no-hay-otro-arbitrio"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

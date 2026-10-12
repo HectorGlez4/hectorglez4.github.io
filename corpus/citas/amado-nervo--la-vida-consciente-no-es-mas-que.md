@@ -1,6 +1,8 @@
 ---
 texto: "La vida consciente no es más que de ayer."
 autor: "amado-nervo"
+temas:
+  - "la-vida"
 slug: "amado-nervo-la-vida-consciente-no-es-mas-que"
 procedencia:
   obra: "Plenitud"

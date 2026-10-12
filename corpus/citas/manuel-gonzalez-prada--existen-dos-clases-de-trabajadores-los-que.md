@@ -1,6 +1,8 @@
 ---
 texto: "Existen dos clases de trabajadores: los que en realidad trabajan, y los que aparentemente lo hacen, llamando trabajo el ver sudar y derrengarse al prójimo."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-trabajo"
 slug: "manuel-gonzalez-prada-existen-dos-clases-de-trabajadores-los-que"
 procedencia:
   obra: "Primero de Mayo (1907)"
