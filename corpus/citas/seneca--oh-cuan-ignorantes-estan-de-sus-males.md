@@ -1,6 +1,8 @@
 ---
 texto: "¡Oh, cuán ignorantes están de sus males los que no celebran la muerte como el mejor invento de la naturaleza!"
 autor: "seneca"
+temas:
+  - "la-muerte"
 slug: "seneca-oh-cuan-ignorantes-estan-de-sus-males"
 procedencia:
   obra: "Consolación a Marcia"

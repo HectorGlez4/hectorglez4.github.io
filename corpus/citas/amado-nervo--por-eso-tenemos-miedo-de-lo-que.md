@@ -1,6 +1,8 @@
 ---
 texto: "Por eso tenemos miedo de lo que no ha sucedido aún, y sabemos siempre soportar lo que está sucediendo, aun cuando sea la muerte misma."
 autor: "amado-nervo"
+temas:
+  - "el-miedo"
 slug: "amado-nervo-por-eso-tenemos-miedo-de-lo-que"
 procedencia:
   obra: "Plenitud"

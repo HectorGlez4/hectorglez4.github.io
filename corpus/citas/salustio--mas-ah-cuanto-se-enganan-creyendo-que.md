@@ -1,6 +1,8 @@
 ---
 texto: "Mas ¡ah, cuánto se engañan, creyendo que pueden lograr juntas dos cosas tan repugnantes entre sí, como son el deleite de la ociosidad y el premio de la virtud!"
 autor: "salustio"
+temas:
+  - "la-virtud"
 slug: "salustio-mas-ah-cuanto-se-enganan-creyendo-que"
 procedencia:
   obra: "Guerra de Jugurta"

@@ -1,6 +1,8 @@
 ---
 texto: "¿Quién confía, ni por un instante, su fortuna al prójimo?"
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-quien-confia-ni-por-un-instante-su"
 procedencia:
   obra: "El duelo"

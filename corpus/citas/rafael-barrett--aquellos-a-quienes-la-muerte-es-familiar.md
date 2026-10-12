@@ -1,6 +1,8 @@
 ---
 texto: "Aquellos a quienes la muerte es familiar son los más nobles."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-aquellos-a-quienes-la-muerte-es-familiar"
 procedencia:
   obra: "El día de difuntos"

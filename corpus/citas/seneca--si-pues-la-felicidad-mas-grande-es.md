@@ -1,7 +1,9 @@
 ---
-texto: "Unos ceden a la razón, a otros es necesario citarles grandes nombres cuya autoridad se impone al alma y cuyo brillo la deslumbra."
+texto: "Si pues la felicidad más grande es no nacer, considera como la segunda ser libertado pronto de la vida, para entrar en la plenitud del ser."
 autor: "seneca"
-slug: "seneca-unos-ceden-a-la-razon-a-otros"
+temas:
+  - "la-muerte"
+slug: "seneca-si-pues-la-felicidad-mas-grande-es"
 procedencia:
   obra: "Consolación a Marcia"
   traduccion:

@@ -1,6 +1,8 @@
 ---
 texto: "No faltará a todo esto quien diga que la vida debe someterse a la razón, a lo que contestaremos que nadie debe lo que no puede, y la vida no puede someterse a la razón."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-no-faltara-a-todo-esto-quien-diga"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

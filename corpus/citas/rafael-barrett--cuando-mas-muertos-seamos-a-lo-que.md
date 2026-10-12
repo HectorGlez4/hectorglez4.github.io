@@ -1,6 +1,8 @@
 ---
 texto: "Cuando más muertos seamos a lo que no nos importa, cuanto más vivos en nuestra esencia, tanto más nos emanciparemos de la muerte y nos acercaremos a la inmortalidad."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-cuando-mas-muertos-seamos-a-lo-que"
 procedencia:
   obra: "El día de difuntos"

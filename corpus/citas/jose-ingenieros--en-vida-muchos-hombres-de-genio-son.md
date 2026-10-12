@@ -1,7 +1,9 @@
 ---
-texto: "Todo viejo cree que los jóvenes le desprecian y desean su muerte para suplantarle."
+texto: "En vida, muchos hombres de genio son ignorados, proscriptos, desestimados ó escarnecidos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-viejo-cree-que-los-jovenes-le"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-en-vida-muchos-hombres-de-genio-son"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

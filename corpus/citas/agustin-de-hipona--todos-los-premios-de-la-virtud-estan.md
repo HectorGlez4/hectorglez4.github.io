@@ -1,6 +1,8 @@
 ---
 texto: "Todos los premios de la virtud están en manos de la ambición."
 autor: "agustin-de-hipona"
+temas:
+  - "la-virtud"
 slug: "agustin-de-hipona-todos-los-premios-de-la-virtud-estan"
 procedencia:
   obra: "La ciudad de Dios"
