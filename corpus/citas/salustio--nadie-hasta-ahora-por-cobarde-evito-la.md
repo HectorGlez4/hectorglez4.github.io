@@ -1,6 +1,8 @@
 ---
 texto: "Nadie hasta ahora por cobarde evitó la muerte, ni padre alguno ha deseado que sus hijos fuesen eternos, sino que fuesen buenos y viviesen con honor."
 autor: "salustio"
+temas:
+  - "la-muerte"
 slug: "salustio-nadie-hasta-ahora-por-cobarde-evito-la"
 procedencia:
   obra: "Guerra de Jugurta"

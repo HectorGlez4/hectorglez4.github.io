@@ -1,6 +1,8 @@
 ---
 texto: "La miseria es desdichada, hay que reconocerlo, siquiera no sea más que para no insultarla con plácemes hipócritas ó ignorantes."
 autor: "concepcion-arenal"
+temas:
+  - "la-adversidad"
 slug: "concepcion-arenal-la-miseria-es-desdichada-hay-que-reconocerlo"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

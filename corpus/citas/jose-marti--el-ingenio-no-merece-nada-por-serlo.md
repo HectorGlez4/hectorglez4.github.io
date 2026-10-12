@@ -1,6 +1,8 @@
 ---
 texto: "El ingenio no merece nada por serlo; merece por lo que produce y por lo que se aplica."
 autor: "jose-marti"
+temas:
+  - "el-trabajo"
 slug: "jose-marti-el-ingenio-no-merece-nada-por-serlo"
 procedencia:
   obra: "Diputado"

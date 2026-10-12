@@ -1,6 +1,8 @@
 ---
 texto: "El misterio no está fuera de nosotros, sino que lo llevamos encima del corazón."
 autor: "federico-garcia-lorca"
+temas:
+  - "la-vida"
 slug: "federico-garcia-lorca-el-misterio-no-esta-fuera-de-nosotros"
 procedencia:
   obra: "La imagen poética de Luis de Góngora"

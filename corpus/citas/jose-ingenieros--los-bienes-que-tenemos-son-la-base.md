@@ -1,7 +1,9 @@
 ---
-texto: "El ingenio es la llama; la brasa es la mediocridad."
+texto: "Los bienes que tenemos son la base de nuestra independencia; los que deseamos son la cadena remachada sobre nuestra esclavitud."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-ingenio-es-la-llama-la-brasa"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-los-bienes-que-tenemos-son-la-base"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

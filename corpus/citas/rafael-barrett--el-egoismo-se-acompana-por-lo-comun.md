@@ -1,6 +1,8 @@
 ---
 texto: "El egoísmo se acompaña por lo común de una atrofia no solamente sentimental, sino intelectual."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-el-egoismo-se-acompana-por-lo-comun"
 procedencia:
   obra: "El altruismo y la energía"

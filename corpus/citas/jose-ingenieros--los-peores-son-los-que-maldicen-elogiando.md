@@ -1,7 +1,9 @@
 ---
-texto: "Toda evolución moral es un esfuerzo del talento virtuoso hacia la perfección futura; nunca inerte condescendencia de la mediocridad para con el pasado."
+texto: "Los peores son los que maldicen elogiando: templan su aplauso con arremangadas reservas, más graves que las peores imputaciones."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-toda-evolucion-moral-es-un-esfuerzo-del"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-los-peores-son-los-que-maldicen-elogiando"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

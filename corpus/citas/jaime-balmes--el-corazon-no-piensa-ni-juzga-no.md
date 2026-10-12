@@ -1,7 +1,9 @@
 ---
-texto: "La sensacion no es errada; pero sí lo es el juicio que por ella formamos."
+texto: "El corazon no piensa ni juzga, no hace mas que sentir; pero el sentimiento es un poderoso resorte que mueve el alma, y desplega y multiplica sus facultades."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-sensacion-no-es-errada-pero-si"
+temas:
+  - "la-razon"
+slug: "jaime-balmes-el-corazon-no-piensa-ni-juzga-no"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

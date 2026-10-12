@@ -1,6 +1,8 @@
 ---
 texto: "El tedio es una enfermedad del entendimiento que no acomete sino a los ociosos."
 autor: "concepcion-arenal"
+temas:
+  - "el-trabajo"
 slug: "concepcion-arenal-el-tedio-es-una-enfermedad-del-entendimiento"
 procedencia:
   obra: "La mujer del porvenir"

@@ -1,6 +1,8 @@
 ---
 texto: "La pereza es la verdadera intriga; os juro que no hay otra: esa es la gran causa oculta; es más fácil negar las cosas que enterarse de ellas."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-trabajo"
 slug: "mariano-jose-de-larra-la-pereza-es-la-verdadera-intriga-os"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

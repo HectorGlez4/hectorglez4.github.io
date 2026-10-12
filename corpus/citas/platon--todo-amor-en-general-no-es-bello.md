@@ -1,6 +1,8 @@
 ---
 texto: "Todo amor, en general, no es bello ni laudable, si no es honesto."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-todo-amor-en-general-no-es-bello"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

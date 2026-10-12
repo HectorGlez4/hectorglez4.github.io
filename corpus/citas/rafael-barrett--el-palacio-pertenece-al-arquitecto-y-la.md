@@ -1,6 +1,8 @@
 ---
 texto: "El palacio pertenece al arquitecto, y la tierra a quien la fecunda y embellece."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-el-palacio-pertenece-al-arquitecto-y-la"
 procedencia:
   obra: "El robo"

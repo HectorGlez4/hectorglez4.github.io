@@ -1,6 +1,8 @@
 ---
 texto: "Todo ideal, por ser una creencia, puede contener una parte de error, o serlo totalmente: es una visión remota y por lo tanto expuesta a ser inexacta."
 autor: "jose-ingenieros"
+temas:
+  - "el-error"
 slug: "jose-ingenieros-todo-ideal-por-ser-una-creencia-puede"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

@@ -1,6 +1,8 @@
 ---
 texto: "El iconoclasticismo de los jóvenes no suele ser en el fondo sino afán de derribar a los ídolos para erigirse ellos mismos en ídolos."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-gloria"
 slug: "gustavo-sanchez-galarraga-el-iconoclasticismo-de-los-jovenes-no-suele"
 procedencia:
   obra: "A Flor De Piel: Frases"

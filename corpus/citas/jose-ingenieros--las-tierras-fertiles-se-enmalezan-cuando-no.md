@@ -1,7 +1,9 @@
 ---
-texto: "Los peores son los que maldicen elogiando: templan su aplauso con arremangadas reservas, más graves que las peores imputaciones."
+texto: "Las tierras fértiles se enmalezan cuando no son cultivadas; los espíritus rutinarios se pueblan de prejuicios, que los esclavizan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-peores-son-los-que-maldicen-elogiando"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-las-tierras-fertiles-se-enmalezan-cuando-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

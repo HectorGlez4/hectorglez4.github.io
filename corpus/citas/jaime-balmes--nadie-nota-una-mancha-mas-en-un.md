@@ -1,6 +1,8 @@
 ---
 texto: "Nadie nota una mancha mas en un cristal muy sucio; pero en otro muy limpio y brillante, se presenta desde luego á los ojos el mas pequeño lunar."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-nadie-nota-una-mancha-mas-en-un"
 procedencia:
   obra: "El Criterio"

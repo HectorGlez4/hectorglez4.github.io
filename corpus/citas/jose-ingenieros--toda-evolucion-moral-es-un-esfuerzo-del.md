@@ -1,7 +1,9 @@
 ---
-texto: "Los únicos bienes intangibles son los que acumulamos en el cerebro y en el corazón; cuando ellos faltan ningún tesoro los sustituye."
+texto: "Toda evolución moral es un esfuerzo del talento virtuoso hacia la perfección futura; nunca inerte condescendencia de la mediocridad para con el pasado."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-unicos-bienes-intangibles-son-los-que"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-toda-evolucion-moral-es-un-esfuerzo-del"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

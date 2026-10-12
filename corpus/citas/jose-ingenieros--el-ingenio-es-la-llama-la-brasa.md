@@ -1,7 +1,9 @@
 ---
-texto: "Los más grandes espíritus son los que asocian las luces del intelecto con las magnificencias del corazón."
+texto: "El ingenio es la llama; la brasa es la mediocridad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-mas-grandes-espiritus-son-los-que"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-ingenio-es-la-llama-la-brasa"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

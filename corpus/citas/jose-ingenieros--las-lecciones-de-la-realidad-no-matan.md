@@ -1,7 +1,9 @@
 ---
-texto: "Los bienes que tenemos son la base de nuestra independencia; los que deseamos son la cadena remachada sobre nuestra esclavitud."
+texto: "Las lecciones de la realidad no matan al idealista: lo educan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-bienes-que-tenemos-son-la-base"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-las-lecciones-de-la-realidad-no-matan"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
