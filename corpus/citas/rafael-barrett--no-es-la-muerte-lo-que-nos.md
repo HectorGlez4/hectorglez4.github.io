@@ -1,6 +1,8 @@
 ---
 texto: "No es la muerte lo que nos abruma sino el deseo y el designio de morir."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-no-es-la-muerte-lo-que-nos"
 procedencia:
   obra: "Suicidios"

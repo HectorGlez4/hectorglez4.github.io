@@ -1,6 +1,8 @@
 ---
 texto: "No preguntan los partidos y las clases sociales si sus propósitos son justos; preguntan solo si son convenientes."
 autor: "nicolas-salmeron"
+temas:
+  - "la-justicia"
 slug: "nicolas-salmeron-no-preguntan-los-partidos-y-las-clases"
 procedencia:
   obra: "Defensa de la Internacional - Parte 2"

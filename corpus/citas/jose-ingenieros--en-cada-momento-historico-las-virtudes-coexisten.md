@@ -1,6 +1,8 @@
 ---
 texto: "En cada momento histórico las virtudes coexisten con los prejuicios; el talento moral practica las primeras; la honestidad mediocre se aferra á los segundos."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-en-cada-momento-historico-las-virtudes-coexisten"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

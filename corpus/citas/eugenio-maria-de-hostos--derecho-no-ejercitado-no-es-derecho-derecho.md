@@ -1,6 +1,8 @@
 ---
 texto: "Derecho no ejercitado, no es derecho; derecho no vivido, no es derecho; derecho pasivo, no es derecho."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-justicia"
 slug: "eugenio-maria-de-hostos-derecho-no-ejercitado-no-es-derecho-derecho"
 procedencia:
   obra: "Moral social"

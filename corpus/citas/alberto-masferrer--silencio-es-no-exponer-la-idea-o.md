@@ -1,6 +1,8 @@
 ---
 texto: "Silencio es no exponer la idea o el plan a medio concebir, ni leer la obra en borrador, ni dar como criatura viviente lo que es apenas un anhelo."
 autor: "alberto-masferrer"
+temas:
+  - "la-palabra"
 slug: "alberto-masferrer-silencio-es-no-exponer-la-idea-o"
 procedencia:
   obra: "El elogio del silencio"

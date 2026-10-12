@@ -1,6 +1,8 @@
 ---
 texto: "Si los tienes, tenerlos; y si no, no desearlos y serás rico."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-riqueza"
 slug: "francisco-de-quevedo-si-los-tienes-tenerlos-y-si-no"
 procedencia:
   obra: "Libro de todas las cosas y otras muchas más"

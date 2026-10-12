@@ -1,6 +1,8 @@
 ---
 texto: "Para el comun de los hombres suele bastar mucho ménos; y para los decididamente malos la simple oportunidad equivale á vehemente tentacion."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-para-el-comun-de-los-hombres-suele"
 procedencia:
   obra: "El Criterio"

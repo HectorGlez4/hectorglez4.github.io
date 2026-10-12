@@ -1,6 +1,8 @@
 ---
 texto: "Porque la patria es más indeterminada, más exterior que la familia."
 autor: "rafael-barrett"
+temas:
+  - "la-patria"
 slug: "rafael-barrett-porque-la-patria-es-mas-indeterminada-mas"
 procedencia:
   obra: "Más allá del patriotismo"

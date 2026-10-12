@@ -1,6 +1,8 @@
 ---
 texto: "Si un hombre civilizado está más arriba que los demás, no es porque tenga mayor estatura, sino porque está encaramado sobre la civilización."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-si-un-hombre-civilizado-esta-mas-arriba"
 procedencia:
   obra: "Razas inferiores"

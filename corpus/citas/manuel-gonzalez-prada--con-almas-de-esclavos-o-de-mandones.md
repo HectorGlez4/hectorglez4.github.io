@@ -1,6 +1,8 @@
 ---
 texto: "Con almas de esclavos o de mandones, no se va sino a la esclavitud o a la tiranía."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-con-almas-de-esclavos-o-de-mandones"
 procedencia:
   obra: "Fiesta universal"

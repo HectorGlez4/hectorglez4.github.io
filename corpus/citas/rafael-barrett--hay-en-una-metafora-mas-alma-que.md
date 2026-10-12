@@ -1,6 +1,8 @@
 ---
 texto: "Hay en una metáfora más alma que en cien teoremas."
 autor: "rafael-barrett"
+temas:
+  - "la-palabra"
 slug: "rafael-barrett-hay-en-una-metafora-mas-alma-que"
 procedencia:
   obra: "Filosofía del altruismo"

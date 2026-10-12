@@ -1,6 +1,8 @@
 ---
 texto: "No os impacientéis: como tengáis prudencia y decisión, llegaréis á la suspirada meta."
 autor: "francisco-pi-y-margall"
+temas:
+  - "la-prudencia"
 slug: "francisco-pi-y-margall-no-os-impacienteis-como-tengais-prudencia-y"
 procedencia:
   obra: "Discurso por el 18º aniversario de la Primera República española"

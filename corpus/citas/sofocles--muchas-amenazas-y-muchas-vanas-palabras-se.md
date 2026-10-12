@@ -1,6 +1,8 @@
 ---
 texto: "Muchas amenazas y muchas vanas palabras se profieren en un arrebato de ira; pero cuando la razón recobra su imperio, se disipan esas arrogancias."
 autor: "sofocles"
+temas:
+  - "la-razon"
 slug: "sofocles-muchas-amenazas-y-muchas-vanas-palabras-se"
 procedencia:
   obra: "Edipo en Colono (Alemany y Bolufer tr.)"

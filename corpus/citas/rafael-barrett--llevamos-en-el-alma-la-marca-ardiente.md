@@ -1,6 +1,8 @@
 ---
 texto: "Llevamos en el alma la marca ardiente de la esclavitud: el miedo."
 autor: "rafael-barrett"
+temas:
+  - "el-miedo"
 slug: "rafael-barrett-llevamos-en-el-alma-la-marca-ardiente"
 procedencia:
   obra: "La sinceridad"
