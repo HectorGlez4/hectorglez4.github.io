@@ -1,6 +1,8 @@
 ---
 texto: "Las andaderas no enseñan a andar, sino el dolor de las caídas."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-adversidad"
 slug: "gustavo-sanchez-galarraga-las-andaderas-no-ensenan-a-andar-sino"
 procedencia:
   obra: "A Flor De Piel: Frases"

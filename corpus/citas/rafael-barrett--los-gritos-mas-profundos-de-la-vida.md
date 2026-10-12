@@ -1,7 +1,9 @@
 ---
-texto: "La razón será lo que se quiera, menos un motor."
+texto: "Los gritos más profundos de la vida han salido de hombres ignorantes."
 autor: "rafael-barrett"
-slug: "rafael-barrett-la-razon-sera-lo-que-se-quiera"
+temas:
+  - "la-vida"
+slug: "rafael-barrett-los-gritos-mas-profundos-de-la-vida"
 procedencia:
   obra: "Filosofía del altruismo"
 estadoDerechos: "dominio-público"

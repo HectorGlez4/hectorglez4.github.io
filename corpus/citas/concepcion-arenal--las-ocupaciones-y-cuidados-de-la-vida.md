@@ -1,7 +1,9 @@
 ---
-texto: "La educación de las mujeres hasta aquí podría llamarse, sin mucha violencia, Arte de perder el tiempo."
+texto: "Las ocupaciones y cuidados de la vida física, un trabajo manual, lejos de perjudicar, pueden servir de descanso a los del espíritu."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-la-educacion-de-las-mujeres-hasta-aqui"
+temas:
+  - "el-trabajo"
+slug: "concepcion-arenal-las-ocupaciones-y-cuidados-de-la-vida"
 procedencia:
   obra: "La mujer del porvenir"
   año: 1844

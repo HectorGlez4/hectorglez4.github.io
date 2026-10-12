@@ -1,7 +1,9 @@
 ---
-texto: "El hipócrita transforma su vida entera en una mentira metódicamente organizada."
+texto: "El brillo de la gloria sobre las frentes elegidas deslumbra á los ineptos, como el hartazgo del rico encela al miserable."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-hipocrita-transforma-su-vida-entera-en"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-brillo-de-la-gloria-sobre-las"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

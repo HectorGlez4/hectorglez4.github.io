@@ -1,7 +1,9 @@
 ---
-texto: "La juventud no es simple cuestión de estado civil y puede sobrevivir á alguna cana: es un don de vida expresiva y febril."
+texto: "La evolución de los sentimientos colectivos, representados por los conceptos de bien y de virtud, se opera por intermedio de hombres extraordinarios."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-juventud-no-es-simple-cuestion-de"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-evolucion-de-los-sentimientos-colectivos-representados"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Un miedo inexplicable rumorea en el corazón."
+texto: "La vida de una manzana desde que es tenue flor hasta que, dorada, cae del árbol a la hierba, es tan misteriosa y tan grande como el ritmo periódico de las mareas."
 autor: "federico-garcia-lorca"
-slug: "federico-garcia-lorca-un-miedo-inexplicable-rumorea-en-el-corazon"
+temas:
+  - "la-vida"
+slug: "federico-garcia-lorca-la-vida-de-una-manzana-desde-que"
 procedencia:
   obra: "La imagen poética de Luis de Góngora"
 estadoDerechos: "dominio-público"

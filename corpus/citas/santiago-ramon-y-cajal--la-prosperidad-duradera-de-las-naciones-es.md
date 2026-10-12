@@ -1,6 +1,8 @@
 ---
 texto: "La prosperidad duradera de las naciones es obra de la ciencia y de sus múltiples aplicaciones al fomento de la vida y de los intereses materiales."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-la-prosperidad-duradera-de-las-naciones-es"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

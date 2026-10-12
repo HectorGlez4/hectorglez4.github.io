@@ -1,6 +1,8 @@
 ---
 texto: "La Vida, como la escala de Jacob, empieza en la tierra, pero acaba en Dios."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-vida"
 slug: "gustavo-sanchez-galarraga-la-vida-como-la-escala-de-jacob"
 procedencia:
   obra: "A Flor De Piel: Frases"

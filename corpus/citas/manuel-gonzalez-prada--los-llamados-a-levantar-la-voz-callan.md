@@ -1,6 +1,8 @@
 ---
 texto: "Los llamados a levantar la voz, callan por conveniencia o por miedo."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-miedo"
 slug: "manuel-gonzalez-prada-los-llamados-a-levantar-la-voz-callan"
 procedencia:
   obra: "Italia y el papado"

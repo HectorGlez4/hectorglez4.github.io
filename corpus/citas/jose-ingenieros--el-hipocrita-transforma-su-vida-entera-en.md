@@ -1,7 +1,9 @@
 ---
-texto: "El tiempo es un sepulturero ecuánime: entierra en una misma fosa á los críticos injustos y á los malos autores."
+texto: "El hipócrita transforma su vida entera en una mentira metódicamente organizada."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-tiempo-es-un-sepulturero-ecuanime-entierra"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-el-hipocrita-transforma-su-vida-entera-en"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad moral á que se ajustan los hombres honestos, nunca esclaviza al hombre moralmente superior."
+texto: "El tiempo es un sepulturero ecuánime: entierra en una misma fosa á los críticos injustos y á los malos autores."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-moral-a-que-se-ajustan"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-tiempo-es-un-sepulturero-ecuanime-entierra"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

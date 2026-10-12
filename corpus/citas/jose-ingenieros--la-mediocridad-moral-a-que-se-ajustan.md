@@ -1,7 +1,9 @@
 ---
-texto: "La imaginación no basta para dar vida á la obra: la voluntad la engendra."
+texto: "La mediocridad moral á que se ajustan los hombres honestos, nunca esclaviza al hombre moralmente superior."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-imaginacion-no-basta-para-dar-vida"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-mediocridad-moral-a-que-se-ajustan"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

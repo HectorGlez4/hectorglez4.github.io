@@ -1,6 +1,8 @@
 ---
 texto: "La mejor regla para asegurarse de la bondad de una definicion, es aplicarla desde luego á las cosas definidas; y observar si las comprende á todas, y á ellas solas."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-mejor-regla-para-asegurarse-de-la"
 procedencia:
   obra: "El Criterio"

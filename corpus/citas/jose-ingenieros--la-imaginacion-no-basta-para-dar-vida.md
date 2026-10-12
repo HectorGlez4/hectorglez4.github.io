@@ -1,7 +1,9 @@
 ---
-texto: "Las áureas minas, las industrias afiebradas y las lluvias generosas hacen de un país un estado rico: se necesitan ideales de cultura para que en él haya una patria."
+texto: "La imaginación no basta para dar vida á la obra: la voluntad la engendra."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-aureas-minas-las-industrias-afiebradas-y"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-la-imaginacion-no-basta-para-dar-vida"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

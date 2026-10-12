@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad tiende á confundir las clases, á que fraternicen los hombres; disminuye sus desdenes, sus odios, sus iras, y facilita la armonía necesaria á la libertad."
 autor: "concepcion-arenal"
+temas:
+  - "la-libertad"
 slug: "concepcion-arenal-la-igualdad-tiende-a-confundir-las-clases"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

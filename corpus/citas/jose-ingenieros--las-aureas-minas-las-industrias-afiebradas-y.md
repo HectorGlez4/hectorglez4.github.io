@@ -1,7 +1,9 @@
 ---
-texto: "El brillo de la gloria sobre las frentes elegidas deslumbra á los ineptos, como el hartazgo del rico encela al miserable."
+texto: "Las áureas minas, las industrias afiebradas y las lluvias generosas hacen de un país un estado rico: se necesitan ideales de cultura para que en él haya una patria."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-brillo-de-la-gloria-sobre-las"
+temas:
+  - "la-patria"
+slug: "jose-ingenieros-las-aureas-minas-las-industrias-afiebradas-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

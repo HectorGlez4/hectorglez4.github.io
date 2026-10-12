@@ -1,6 +1,8 @@
 ---
 texto: "La sabiduría antigua, hoy condensada en dogmas, sólo puede ser respetable como punto de partida."
 autor: "jose-ingenieros"
+temas:
+  - "el-saber"
 slug: "jose-ingenieros-la-sabiduria-antigua-hoy-condensada-en-dogmas"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

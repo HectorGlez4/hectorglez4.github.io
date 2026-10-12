@@ -1,6 +1,8 @@
 ---
 texto: "Lo ve todo, lo ve todo siempre el Tiempo, que un dia eleva a unos, y otro, a otros."
 autor: "sofocles"
+temas:
+  - "el-tiempo"
 slug: "sofocles-lo-ve-todo-lo-ve-todo-siempre"
 procedencia:
   obra: "Edipo en Colono (Alemany y Bolufer tr.)"

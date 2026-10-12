@@ -1,6 +1,8 @@
 ---
 texto: "La rutina que desdeña á la ciencia, muestra con semejante desden un orgullo necio, hijo de la ignorancia."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-rutina-que-desdena-a-la-ciencia"
 procedencia:
   obra: "El Criterio"

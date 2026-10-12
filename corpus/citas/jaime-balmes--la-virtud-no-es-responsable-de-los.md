@@ -1,6 +1,8 @@
 ---
 texto: "La virtud no es responsable de los males acarreados por nuestra imprevision ó lijereza; pero el hombre suele achacárselos á ella con demasiada facilidad."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-la-virtud-no-es-responsable-de-los"
 procedencia:
   obra: "El Criterio"

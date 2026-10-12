@@ -1,6 +1,8 @@
 ---
 texto: "La República federal europea es la garantía de la paz entre todos, y el principio de la libertad para todos."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-la-republica-federal-europea-es-la-garantia"
 procedencia:
   obra: "Correspondencia a la nación alemana"
