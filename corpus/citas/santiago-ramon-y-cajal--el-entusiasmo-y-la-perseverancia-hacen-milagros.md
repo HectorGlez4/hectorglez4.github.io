@@ -1,6 +1,8 @@
 ---
 texto: "El entusiasmo y la perseverancia hacen milagros."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-trabajo"
 slug: "santiago-ramon-y-cajal-el-entusiasmo-y-la-perseverancia-hacen-milagros"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

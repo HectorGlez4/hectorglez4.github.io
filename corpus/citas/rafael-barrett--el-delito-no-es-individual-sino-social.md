@@ -1,6 +1,8 @@
 ---
 texto: "El delito no es individual, sino social."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-el-delito-no-es-individual-sino-social"
 procedencia:
   obra: "La dinamita"

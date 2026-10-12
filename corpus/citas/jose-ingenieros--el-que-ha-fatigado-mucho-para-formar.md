@@ -1,6 +1,8 @@
 ---
 texto: "El que ha fatigado mucho para formar sus creencias, sabe respetar el valor de las ajenas."
 autor: "jose-ingenieros"
+temas:
+  - "la-humildad"
 slug: "jose-ingenieros-el-que-ha-fatigado-mucho-para-formar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

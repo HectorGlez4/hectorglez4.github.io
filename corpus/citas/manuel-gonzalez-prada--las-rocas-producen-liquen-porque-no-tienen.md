@@ -1,6 +1,8 @@
 ---
 texto: "Las rocas producen liquen porque no tienen sustancia para nutrir al cedro."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-las-rocas-producen-liquen-porque-no-tienen"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

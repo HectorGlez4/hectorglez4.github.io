@@ -1,6 +1,8 @@
 ---
 texto: "La paz entre estas dos potencias se hace imposible, y hay que vivir de su guerra."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-paz-entre-estas-dos-potencias-se"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

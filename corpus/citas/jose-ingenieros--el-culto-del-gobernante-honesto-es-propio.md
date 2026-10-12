@@ -1,7 +1,9 @@
 ---
-texto: "La fe es llama que enciende y el fanatismo es ceniza que apaga."
+texto: "El culto del gobernante honesto es propio de mercaderes que temen al malo, sin concebir al superior."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-fe-es-llama-que-enciende-y"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-culto-del-gobernante-honesto-es-propio"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

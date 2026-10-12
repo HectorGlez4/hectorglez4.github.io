@@ -1,7 +1,9 @@
 ---
-texto: "El triunfo es un bálsamo de los sentimientos, una lima eficaz contra las asperezas del carácter."
+texto: "La evolución moral es lenta, pero segura."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-triunfo-es-un-balsamo-de-los"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-evolucion-moral-es-lenta-pero-segura"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

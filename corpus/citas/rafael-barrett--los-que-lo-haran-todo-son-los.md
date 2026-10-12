@@ -1,6 +1,8 @@
 ---
 texto: "Los que lo harán todo son los humildes que protestan."
 autor: "rafael-barrett"
+temas:
+  - "la-humildad"
 slug: "rafael-barrett-los-que-lo-haran-todo-son-los"
 procedencia:
   obra: "El antipatriotismo"

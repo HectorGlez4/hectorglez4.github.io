@@ -1,6 +1,8 @@
 ---
 texto: "El mejor natural es inculto sin ella, y les falta la mitad a las perfecciones si les falta la cultura."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-el-mejor-natural-es-inculto-sin-ella"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

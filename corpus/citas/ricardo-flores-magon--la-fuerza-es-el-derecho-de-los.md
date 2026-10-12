@@ -1,6 +1,8 @@
 ---
 texto: "La fuerza es el derecho de los hartos: ¡pues que sea la fuerza el derecho de los hambrientos!"
 autor: "ricardo-flores-magon"
+temas:
+  - "la-justicia"
 slug: "ricardo-flores-magon-la-fuerza-es-el-derecho-de-los"
 procedencia:
   obra: "Los mártires de Chicago"

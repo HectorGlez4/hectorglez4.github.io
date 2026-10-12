@@ -1,6 +1,8 @@
 ---
 texto: "La cortesía es el aceite que suaviza los frotamientos inevitables de la máquina social."
 autor: "rafael-barrett"
+temas:
+  - "la-amistad"
 slug: "rafael-barrett-la-cortesia-es-el-aceite-que-suaviza"
 procedencia:
   obra: "La cortesía"

@@ -1,7 +1,9 @@
 ---
-texto: "La vulgaridad es el aguafuerte de la mediocridad."
+texto: "La fe es llama que enciende y el fanatismo es ceniza que apaga."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-vulgaridad-es-el-aguafuerte-de-la"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-fe-es-llama-que-enciende-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

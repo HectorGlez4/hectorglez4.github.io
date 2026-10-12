@@ -1,6 +1,8 @@
 ---
 texto: "La desigualdad humana no es un descubrimiento moderno."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-la-desigualdad-humana-no-es-un-descubrimiento"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

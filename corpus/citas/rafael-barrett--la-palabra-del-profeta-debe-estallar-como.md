@@ -1,6 +1,8 @@
 ---
 texto: "La palabra del profeta debe estallar como un trueno."
 autor: "rafael-barrett"
+temas:
+  - "la-palabra"
 slug: "rafael-barrett-la-palabra-del-profeta-debe-estallar-como"
 procedencia:
   obra: "El valor"

@@ -1,7 +1,9 @@
 ---
-texto: "La verdad en la conducta es obrar por impulso de esta buena voluntad."
+texto: "La influencia del orgullo es peor para los negocios que la de la vanidad."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-verdad-en-la-conducta-es-obrar"
+temas:
+  - "la-humildad"
+slug: "jaime-balmes-la-influencia-del-orgullo-es-peor-para"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

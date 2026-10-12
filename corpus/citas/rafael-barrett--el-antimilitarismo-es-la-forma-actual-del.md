@@ -1,6 +1,8 @@
 ---
 texto: "El antimilitarismo es la forma actual del antipatriotismo."
 autor: "rafael-barrett"
+temas:
+  - "la-patria"
 slug: "rafael-barrett-el-antimilitarismo-es-la-forma-actual-del"
 procedencia:
   obra: "El antipatriotismo"

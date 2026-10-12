@@ -1,7 +1,9 @@
 ---
-texto: "El genio y el idiota son los términos extremos de una escala infinita."
+texto: "El triunfo es un bálsamo de los sentimientos, una lima eficaz contra las asperezas del carácter."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-y-el-idiota-son-los"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-triunfo-es-un-balsamo-de-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El genio es una alta armonía; necesita serlo."
+texto: "El genio y el idiota son los términos extremos de una escala infinita."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-genio-es-una-alta-armonia-necesita"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-genio-y-el-idiota-son-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

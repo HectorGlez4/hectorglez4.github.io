@@ -1,7 +1,9 @@
 ---
-texto: "La avaricia es una exaltación de sentimientos egoístas propios de la vejez."
+texto: "El genio es una alta armonía; necesita serlo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-avaricia-es-una-exaltacion-de-sentimientos"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-genio-es-una-alta-armonia-necesita"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

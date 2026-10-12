@@ -1,7 +1,9 @@
 ---
-texto: "Los tiranos son tan malos, que las virtudes son su riesgo."
+texto: "Las mujeres son artífices y oficinas de la vida, y ocasiones y causas de la muerte."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-los-tiranos-son-tan-malos-que-las"
+temas:
+  - "la-vida"
+slug: "francisco-de-quevedo-las-mujeres-son-artifices-y-oficinas-de"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

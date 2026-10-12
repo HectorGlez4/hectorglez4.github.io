@@ -1,7 +1,9 @@
 ---
-texto: "El culto del gobernante honesto es propio de mercaderes que temen al malo, sin concebir al superior."
+texto: "La avaricia es una exaltación de sentimientos egoístas propios de la vejez."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-culto-del-gobernante-honesto-es-propio"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-la-avaricia-es-una-exaltacion-de-sentimientos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
