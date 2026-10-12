@@ -1,7 +1,9 @@
 ---
-texto: "Todo el que piensa con cabeza propia, ó tiene un corazón altivo, se aparta del tremedal donde prosperan los envilecidos."
+texto: "El genio, en su oportunidad, es tan irreemplazable como el mediocre en la propia; mil, cien mil mediocres no harían entonces lo que un genio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-el-que-piensa-con-cabeza-propia"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-genio-en-su-oportunidad-es-tan"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El mediocre, incapaz de orgullo, pone su vanidad en perseguir el éxito, indignamente si es necesario; sabe que su sombra lo necesita."
+texto: "El digno está obligado á burlarse de las mil rutinas que el servil adora bajo el nombre de principios; su conflicto es perpetuo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-mediocre-incapaz-de-orgullo-pone-su"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-digno-esta-obligado-a-burlarse-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

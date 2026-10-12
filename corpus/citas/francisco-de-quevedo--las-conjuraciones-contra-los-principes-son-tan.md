@@ -1,6 +1,8 @@
 ---
 texto: "Las conjuraciones contra los príncipes son tan peligrosas como injustas: de más riesgo mientras se tratan que cuando se efetúan."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-justicia"
 slug: "francisco-de-quevedo-las-conjuraciones-contra-los-principes-son-tan"
 procedencia:
   obra: "Marco Bruto"

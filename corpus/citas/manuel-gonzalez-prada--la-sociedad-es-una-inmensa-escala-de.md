@@ -1,6 +1,8 @@
 ---
 texto: "La sociedad es una inmensa escala de iniquidades, todos combaten por adquirir el amplio desarrollo de su individualidad."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-justicia"
 slug: "manuel-gonzalez-prada-la-sociedad-es-una-inmensa-escala-de"
 procedencia:
   obra: "El Primero de Mayo"

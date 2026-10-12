@@ -1,6 +1,8 @@
 ---
 texto: "Los legisladores, pues, lo que más procuran es la concordia, y la discordia y motín, como cosa enemiga, procuran evitarlo."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-los-legisladores-pues-lo-que-mas-procuran"
 procedencia:
   obra: "Ética a Nicómaco"

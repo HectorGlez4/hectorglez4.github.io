@@ -1,6 +1,8 @@
 ---
 texto: "El fuerte no engaña al débil por la misma razón: a la simple vista huye el primero del segundo, y éste es el orden, el único orden posible."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-verdad"
 slug: "mariano-jose-de-larra-el-fuerte-no-engana-al-debil-por"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

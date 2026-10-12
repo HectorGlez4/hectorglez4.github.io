@@ -1,7 +1,9 @@
 ---
-texto: "Los ideales de las épocas muertas, por nobles que sean, son ideales de muertos y traen en las lívidas manos una antorcha funeraria."
+texto: "El tiempo descubre infaliblemente, los principios activos de la conducta humana, que son idénticos á los de toda la actividad universal."
 autor: "carlos-reyles"
-slug: "carlos-reyles-los-ideales-de-las-epocas-muertas-por"
+temas:
+  - "el-tiempo"
+slug: "carlos-reyles-el-tiempo-descubre-infaliblemente-los-principios-activos"
 procedencia:
   obra: "La Muerte Del Cisne"
 estadoDerechos: "dominio-público"

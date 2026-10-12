@@ -1,6 +1,8 @@
 ---
 texto: "La poesía es una bellísima doncella, casta, honesta, discreta, aguda, retirada, y que se contiene en los límites de la discreción más alta."
 autor: "miguel-de-cervantes"
+temas:
+  - "la-palabra"
 slug: "miguel-de-cervantes-la-poesia-es-una-bellisima-doncella-casta"
 procedencia:
   obra: "Novelas ejemplares"

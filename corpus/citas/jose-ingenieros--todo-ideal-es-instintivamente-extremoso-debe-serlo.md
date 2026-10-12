@@ -1,6 +1,8 @@
 ---
 texto: "Todo ideal es, instintivamente, extremoso; debe serlo á sabiendas, si es menester, pues pronto se rebaja al refractarse en la mediocridad de los más."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-todo-ideal-es-instintivamente-extremoso-debe-serlo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

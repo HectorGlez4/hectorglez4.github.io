@@ -1,6 +1,8 @@
 ---
 texto: "La imitación, que sirve para ejercitarse en lo manual o técnico de las artes, no debe considerarse como el arte mismo ni como su primordial objeto."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-la-imitacion-que-sirve-para-ejercitarse-en"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

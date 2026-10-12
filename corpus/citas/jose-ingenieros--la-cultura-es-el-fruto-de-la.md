@@ -1,7 +1,9 @@
 ---
-texto: "El original, el imaginativo, el creador, atrae sus odios, los busca, los desafía, sabiéndolos terribles porque son irresponsables."
+texto: "La cultura es el fruto de la curiosidad, de esa inquietud misteriosa que invita á mirar el fondo de todos los abismos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-original-el-imaginativo-el-creador-atrae"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-cultura-es-el-fruto-de-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

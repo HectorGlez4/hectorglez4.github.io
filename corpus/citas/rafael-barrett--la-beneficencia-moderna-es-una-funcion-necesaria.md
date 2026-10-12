@@ -1,6 +1,8 @@
 ---
 texto: "La beneficencia moderna es una función necesaria, en que ni el que recibe tiene nada que agradecer, ni el que da tiene nada que ufanarse."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-la-beneficencia-moderna-es-una-funcion-necesaria"
 procedencia:
   obra: "La beneficencia"

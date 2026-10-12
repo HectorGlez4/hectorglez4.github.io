@@ -1,7 +1,9 @@
 ---
-texto: "La cultura es el fruto de la curiosidad, de esa inquietud misteriosa que invita á mirar el fondo de todos los abismos."
+texto: "El mediocre, incapaz de orgullo, pone su vanidad en perseguir el éxito, indignamente si es necesario; sabe que su sombra lo necesita."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-cultura-es-el-fruto-de-la"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-mediocre-incapaz-de-orgullo-pone-su"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

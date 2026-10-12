@@ -1,6 +1,8 @@
 ---
 texto: "El vulgo, donde tantos talentos brillan, es la masa ancha, larga y profunda que todo lo llena; es el material humano."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-el-vulgo-donde-tantos-talentos-brillan-es"
 procedencia:
   obra: "El vulgo y el genio"

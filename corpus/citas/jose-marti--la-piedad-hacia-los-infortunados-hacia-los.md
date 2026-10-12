@@ -1,6 +1,8 @@
 ---
 texto: "La piedad hacia los infortunados, hacia los ignorantes y desposeídos, no puede ir tan lejos que encabece o fomente sus errores."
 autor: "jose-marti"
+temas:
+  - "la-justicia"
 slug: "jose-marti-la-piedad-hacia-los-infortunados-hacia-los"
 procedencia:
   obra: "El tercer año del partido revolucionario cubano"

@@ -1,7 +1,9 @@
 ---
-texto: "Las principales dotes de un buen entendimiento práctico son la madurez del juicio, el buen sentido, el tacto, y estas cualidades les faltan á ellos."
+texto: "El fin ha de ser proporcionado á los medios, y estos son las fuerzas intelectuales, morales ó fisicas y demas recursos de que se puede disponer."
 autor: "jaime-balmes"
-slug: "jaime-balmes-las-principales-dotes-de-un-buen-entendimiento"
+temas:
+  - "la-prudencia"
+slug: "jaime-balmes-el-fin-ha-de-ser-proporcionado-a"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"
