@@ -1,6 +1,8 @@
 ---
 texto: "Las ideas llegan a ser cárcel también, como la letra."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-libertad"
 slug: "jose-enrique-rodo-las-ideas-llegan-a-ser-carcel-tambien"
 procedencia:
   obra: "Parábolas"

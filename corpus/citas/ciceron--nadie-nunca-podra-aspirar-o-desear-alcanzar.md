@@ -1,6 +1,8 @@
 ---
 texto: "Nadie nunca podrá aspirar o desear alcanzar las cotas más altas sin pensar que no debe tener en cuenta su recuerdo y su imagen."
 autor: "ciceron"
+temas:
+  - "la-gloria"
 slug: "ciceron-nadie-nunca-podra-aspirar-o-desear-alcanzar"
 procedencia:
   obra: "Sobre la amistad"

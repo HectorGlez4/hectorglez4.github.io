@@ -1,6 +1,8 @@
 ---
 texto: "La moda del día prescribe los libros cortos, si han de ser libros."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-tiempo"
 slug: "mariano-jose-de-larra-la-moda-del-dia-prescribe-los-libros"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

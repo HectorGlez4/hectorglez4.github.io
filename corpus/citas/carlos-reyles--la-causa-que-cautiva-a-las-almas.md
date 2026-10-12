@@ -1,6 +1,8 @@
 ---
 texto: "La causa que cautiva á las almas nobles no triunfará jamás."
 autor: "carlos-reyles"
+temas:
+  - "la-gloria"
 slug: "carlos-reyles-la-causa-que-cautiva-a-las-almas"
 procedencia:
   obra: "La Muerte Del Cisne"

@@ -1,6 +1,8 @@
 ---
 texto: "Las honestas palabras dan indicio de la honestidad del que las pronuncia o las escribe."
 autor: "miguel-de-cervantes"
+temas:
+  - "la-palabra"
 slug: "miguel-de-cervantes-las-honestas-palabras-dan-indicio-de-la"
 procedencia:
   obra: "Novelas ejemplares"

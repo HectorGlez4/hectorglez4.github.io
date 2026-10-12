@@ -1,6 +1,8 @@
 ---
 texto: "Los poderes más incontrastables han pedido su legitimidad al sufragio universal."
 autor: "emilio-castelar"
+temas:
+  - "la-justicia"
 slug: "emilio-castelar-los-poderes-mas-incontrastables-han-pedido-su"
 procedencia:
   obra: "Correspondencia a la nación alemana"

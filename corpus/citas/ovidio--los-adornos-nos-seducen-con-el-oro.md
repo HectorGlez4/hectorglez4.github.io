@@ -1,6 +1,8 @@
 ---
 texto: "Los adornos nos seducen; con el oro y las piedras preciosas se ocultan las macas, y la joven viene a ser una mínima parte de su propia persona."
 autor: "ovidio"
+temas:
+  - "el-amor"
 slug: "ovidio-los-adornos-nos-seducen-con-el-oro"
 procedencia:
   obra: "El remedio del amor"

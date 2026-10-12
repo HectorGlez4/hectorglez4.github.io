@@ -1,6 +1,8 @@
 ---
 texto: "Las sociedades modernas están lejos de haberse limpiado de la lepra de sus preocupaciones."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-las-sociedades-modernas-estan-lejos-de-haberse"
 procedencia:
   obra: "La mujer del porvenir"

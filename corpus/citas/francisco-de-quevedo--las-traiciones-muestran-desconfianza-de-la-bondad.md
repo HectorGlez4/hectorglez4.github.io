@@ -1,6 +1,8 @@
 ---
 texto: "Las traiciones muestran desconfianza de la bondad o talento o poder del príncipe."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-amistad"
 slug: "francisco-de-quevedo-las-traiciones-muestran-desconfianza-de-la-bondad"
 procedencia:
   obra: "Marco Bruto"

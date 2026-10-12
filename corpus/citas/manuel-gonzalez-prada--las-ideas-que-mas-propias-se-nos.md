@@ -1,6 +1,8 @@
 ---
 texto: "Las ideas que más propias se nos figuran, nos vienen del medio intelectual en que respiramos o de la atmósfera artificial que nos formamos con la lectura."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-las-ideas-que-mas-propias-se-nos"
 procedencia:
   obra: "Librepensamiento de acción"

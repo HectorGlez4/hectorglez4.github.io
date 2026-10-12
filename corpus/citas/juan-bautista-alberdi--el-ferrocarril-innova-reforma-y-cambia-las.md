@@ -1,6 +1,8 @@
 ---
 texto: "El ferrocarril innova, reforma y cambia las cosas más difíciles, sin decretos ni asonadas."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-tiempo"
 slug: "juan-bautista-alberdi-el-ferrocarril-innova-reforma-y-cambia-las"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

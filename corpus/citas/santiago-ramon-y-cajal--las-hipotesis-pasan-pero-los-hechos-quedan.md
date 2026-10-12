@@ -1,6 +1,8 @@
 ---
 texto: "Las hipótesis pasan, pero los hechos quedan."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-las-hipotesis-pasan-pero-los-hechos-quedan"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

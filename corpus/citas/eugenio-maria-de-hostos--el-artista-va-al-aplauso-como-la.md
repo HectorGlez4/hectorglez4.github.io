@@ -1,6 +1,8 @@
 ---
 texto: "El artista va al aplauso como la corriente del río va á la mar."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-gloria"
 slug: "eugenio-maria-de-hostos-el-artista-va-al-aplauso-como-la"
 procedencia:
   obra: "Moral social"

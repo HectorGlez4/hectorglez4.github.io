@@ -1,7 +1,9 @@
 ---
-texto: "El mejor agricultor será pues el que conozca mas verdades relativas á la práctica de su profesion."
+texto: "Quien en el trato ordinario no respeta la hacienda ajena, ¿creeis que procederá con pureza cuando maneje el erario de la nacion?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-mejor-agricultor-sera-pues-el-que"
+temas:
+  - "la-justicia"
+slug: "jaime-balmes-quien-en-el-trato-ordinario-no-respeta"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

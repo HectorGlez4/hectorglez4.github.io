@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad debe estar en su máximo grado en los pueblos salvajes."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-igualdad-debe-estar-en-su-maximo"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

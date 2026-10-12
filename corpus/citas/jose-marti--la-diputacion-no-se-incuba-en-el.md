@@ -1,7 +1,9 @@
 ---
-texto: "Los privilegios mueren en todas partes, y mueren para alcanzar una diputación."
+texto: "La diputación no se incuba en el pensamiento ambicioso: se produce por el asentimiento general."
 autor: "jose-marti"
-slug: "jose-marti-los-privilegios-mueren-en-todas-partes-y"
+temas:
+  - "el-deber"
+slug: "jose-marti-la-diputacion-no-se-incuba-en-el"
 procedencia:
   obra: "Diputado"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La inspiración da la imagen, pero no el vestido."
 autor: "federico-garcia-lorca"
+temas:
+  - "la-palabra"
 slug: "federico-garcia-lorca-la-inspiracion-da-la-imagen-pero-no"
 procedencia:
   obra: "La imagen poética de Luis de Góngora"
