@@ -1,7 +1,9 @@
 ---
-texto: "El idealista perfecto sería romántico á los veinte años y estoico á los cincuenta; es tan anormal el estoicismo en la juventud como el romanticismo en la edad madura."
+texto: "La personalidad humana es una formación continua, no una entidad fija; se organiza y se desorganiza, evoluciona é involuciona, crece y se amengua, se intensifica y se agota."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-idealista-perfecto-seria-romantico-a-los"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-la-personalidad-humana-es-una-formacion-continua"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

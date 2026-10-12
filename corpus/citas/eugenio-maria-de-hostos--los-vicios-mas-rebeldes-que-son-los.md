@@ -1,6 +1,8 @@
 ---
 texto: "Los vicios más rebeldes, que son los de sensualidad, contra todo remedio se rebelan y resisten, por el vergonzoso poder que tienen de absorber fuera del tiempo los sentidos."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-virtud"
 slug: "eugenio-maria-de-hostos-los-vicios-mas-rebeldes-que-son-los"
 procedencia:
   obra: "Moral social"

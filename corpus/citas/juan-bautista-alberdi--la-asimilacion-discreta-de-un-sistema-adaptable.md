@@ -1,6 +1,8 @@
 ---
 texto: "La asimilación discreta de un sistema adaptable en circunstancias análogas no es la copia servil, que jamás puede ser discreta en política constitucional."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-saber"
 slug: "juan-bautista-alberdi-la-asimilacion-discreta-de-un-sistema-adaptable"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

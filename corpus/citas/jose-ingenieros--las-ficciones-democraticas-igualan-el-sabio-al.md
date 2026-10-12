@@ -1,7 +1,9 @@
 ---
-texto: "La memoria no hace al genio, aunque no le estorba; pero ella y el razonamiento, cimentado en sus datos, no crean nada superior á lo real que percibimos."
+texto: "Las ficciones democráticas igualan el sabio al analfabeto, el señor al lacayo, el poeta al prestamista: cada uno tiene un voto y el supremo derecho es votar."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-memoria-no-hace-al-genio-aunque"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-las-ficciones-democraticas-igualan-el-sabio-al"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

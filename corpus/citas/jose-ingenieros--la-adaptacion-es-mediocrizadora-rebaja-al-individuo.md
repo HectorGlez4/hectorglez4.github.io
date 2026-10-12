@@ -1,7 +1,9 @@
 ---
-texto: "La personalidad humana es una formación continua, no una entidad fija; se organiza y se desorganiza, evoluciona é involuciona, crece y se amengua, se intensifica y se agota."
+texto: "La adaptación es mediocrizadora; rebaja al individuo á los modos de pensar y sentir que son comunes á la masa, borrando sus rasgos propiamente personales."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-personalidad-humana-es-una-formacion-continua"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-la-adaptacion-es-mediocrizadora-rebaja-al-individuo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

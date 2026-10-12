@@ -1,7 +1,9 @@
 ---
-texto: "Las ficciones democráticas igualan el sabio al analfabeto, el señor al lacayo, el poeta al prestamista: cada uno tiene un voto y el supremo derecho es votar."
+texto: "El idealista perfecto sería romántico á los veinte años y estoico á los cincuenta; es tan anormal el estoicismo en la juventud como el romanticismo en la edad madura."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-ficciones-democraticas-igualan-el-sabio-al"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-el-idealista-perfecto-seria-romantico-a-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

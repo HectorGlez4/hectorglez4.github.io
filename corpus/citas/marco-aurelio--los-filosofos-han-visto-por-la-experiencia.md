@@ -1,6 +1,8 @@
 ---
 texto: "Los filósofos han visto por la experiencia que quien desea ser bueno de veras, es necesario no haga caso del desprecio, al cual no haya dado motivo legitimo."
 autor: "marco-aurelio"
+temas:
+  - "la-virtud"
 slug: "marco-aurelio-los-filosofos-han-visto-por-la-experiencia"
 procedencia:
   obra: "Soliloquios"

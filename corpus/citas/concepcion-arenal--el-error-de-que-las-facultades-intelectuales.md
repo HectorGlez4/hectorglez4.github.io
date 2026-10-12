@@ -1,6 +1,8 @@
 ---
 texto: "El error de que las facultades intelectuales de la mujer no pueden compararse a las del hombre tiene fatales consecuencias, como todos los errores, y más que muchos."
 autor: "concepcion-arenal"
+temas:
+  - "el-error"
 slug: "concepcion-arenal-el-error-de-que-las-facultades-intelectuales"
 procedencia:
   obra: "La mujer del porvenir"

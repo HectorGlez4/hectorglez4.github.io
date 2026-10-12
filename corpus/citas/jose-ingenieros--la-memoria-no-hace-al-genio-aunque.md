@@ -1,7 +1,9 @@
 ---
-texto: "Los grandes ingenios son ecuánimes para criticar á sus iguales, como si reconocieran en ellos una consanguineidad en línea directa; en el émulo no ven nunca un rival."
+texto: "La memoria no hace al genio, aunque no le estorba; pero ella y el razonamiento, cimentado en sus datos, no crean nada superior á lo real que percibimos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-grandes-ingenios-son-ecuanimes-para-criticar"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-la-memoria-no-hace-al-genio-aunque"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

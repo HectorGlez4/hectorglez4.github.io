@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres sanos de cuerpo y de mente son, generalmente, optimistas y afirmativos; los enfermos y los desequilibrados suelen ser pesimistas y escépticos."
+texto: "La juventud es, por definición, capacidad renovadora; la virilidad misma sólo se mide por la aptitud de renovarse parcialmente dentro de las orientaciones ya adquiridas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hombres-sanos-de-cuerpo-y-de"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-juventud-es-por-definicion-capacidad-renovadora"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

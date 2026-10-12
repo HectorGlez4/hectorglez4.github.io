@@ -1,7 +1,9 @@
 ---
-texto: "El que aspira á ser águila debe mirar lejos y esforzarse para volar alto; el que se resigna á arrastrarse como un gusano renuncia al derecho de protestar si lo aplastan."
+texto: "La sanción ajena es fácil para lo que concuerda con rutinas secularmente practicadas; es áspera cuando la imaginación pone mayor originalidad en el concepto y en la forma."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-aspira-a-ser-aguila-debe"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-sancion-ajena-es-facil-para-lo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

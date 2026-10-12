@@ -1,6 +1,8 @@
 ---
 texto: "El ignorante es inferior al sabio, el cobarde al valiente, el que no sabe hablar al orador brillante y fácil, el de espíritu tardo al de genio vivo y desenvuelto."
 autor: "platon"
+temas:
+  - "el-saber"
 slug: "platon-el-ignorante-es-inferior-al-sabio-el"
 procedencia:
   obra: "Fedro"

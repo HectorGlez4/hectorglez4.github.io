@@ -1,6 +1,8 @@
 ---
 texto: "El egoísmo es, pues, una contingencia por lo general; expresa una relación defectuosa con el ambiente, es una momentánea solución al problema del individuo."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-el-egoismo-es-pues-una-contingencia-por"
 procedencia:
   obra: "El altruismo y la energía"

@@ -1,6 +1,8 @@
 ---
 texto: "El rico al parecer tan torpe, tiene la mirada ménos vivaz que su antagonista, pero en cambio ve mas claro, mas hondo, de un modo mas seguro, mas perspicaz, mas certero."
 autor: "jaime-balmes"
+temas:
+  - "la-riqueza"
 slug: "jaime-balmes-el-rico-al-parecer-tan-torpe-tiene"
 procedencia:
   obra: "El Criterio"

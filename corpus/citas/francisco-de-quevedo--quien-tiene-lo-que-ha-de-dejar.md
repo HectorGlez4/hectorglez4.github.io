@@ -1,6 +1,8 @@
 ---
 texto: "Quien tiene lo que ha de dejar a otro, le justifica, o, por lo menos, le ocasiona deseos de que se lo deje y diligencias para que se lo acabe de dejar."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-riqueza"
 slug: "francisco-de-quevedo-quien-tiene-lo-que-ha-de-dejar"
 procedencia:
   obra: "Marco Bruto"

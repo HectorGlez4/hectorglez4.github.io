@@ -1,6 +1,8 @@
 ---
 texto: "La silla curul es la misión: no es la recompensa de un talento inútil, no es el premio de una elocuencia incipiente, no es la satisfacción de una soberbia prematura."
 autor: "jose-marti"
+temas:
+  - "el-deber"
 slug: "jose-marti-la-silla-curul-es-la-mision-no"
 procedencia:
   obra: "Diputado"

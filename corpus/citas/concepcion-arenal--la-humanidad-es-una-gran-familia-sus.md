@@ -1,6 +1,8 @@
 ---
 texto: "La humanidad es una gran familia; sus individuos se dedican: unos á labrar la tierra, otros á cambiar sus productos, otros á fabricar vestidos, etc., etc."
 autor: "concepcion-arenal"
+temas:
+  - "el-trabajo"
 slug: "concepcion-arenal-la-humanidad-es-una-gran-familia-sus"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

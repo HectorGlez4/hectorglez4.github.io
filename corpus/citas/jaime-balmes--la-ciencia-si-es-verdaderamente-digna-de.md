@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia, si es verdaderamente digna de este nombre, se ocupa en el descubrimiento de las leyes que rigen la naturaleza; y así su ayuda ha de ser de la mayor importancia."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-ciencia-si-es-verdaderamente-digna-de"
 procedencia:
   obra: "El Criterio"

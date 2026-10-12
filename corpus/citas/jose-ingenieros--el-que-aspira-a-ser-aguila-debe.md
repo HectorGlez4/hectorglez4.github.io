@@ -1,7 +1,9 @@
 ---
-texto: "La adaptación es mediocrizadora; rebaja al individuo á los modos de pensar y sentir que son comunes á la masa, borrando sus rasgos propiamente personales."
+texto: "El que aspira á ser águila debe mirar lejos y esforzarse para volar alto; el que se resigna á arrastrarse como un gusano renuncia al derecho de protestar si lo aplastan."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-adaptacion-es-mediocrizadora-rebaja-al-individuo"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-que-aspira-a-ser-aguila-debe"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

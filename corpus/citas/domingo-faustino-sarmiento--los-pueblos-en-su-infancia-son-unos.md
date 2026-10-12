@@ -1,6 +1,8 @@
 ---
 texto: "Los pueblos en su infancia son unos niños que nada prevén, que nada conocen, y es preciso que los hombres de alta previsión y de alta comprensión les sirvan de padre."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "el-tiempo"
 slug: "domingo-faustino-sarmiento-los-pueblos-en-su-infancia-son-unos"
 procedencia:
   obra: "Facundo (1874)/Capítulo VIII"

@@ -1,6 +1,8 @@
 ---
 texto: "La virtud, que se llama fortaleza, en cualquiera ciencia que se hallare, es evidentísimo testigo de los males y miserias humanas, que la hacen sufrir con paciencia."
 autor: "agustin-de-hipona"
+temas:
+  - "la-virtud"
 slug: "agustin-de-hipona-la-virtud-que-se-llama-fortaleza-en"
 procedencia:
   obra: "La ciudad de Dios"

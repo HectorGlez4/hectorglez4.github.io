@@ -1,6 +1,8 @@
 ---
 texto: "La prodigalidad, pues, excede en el dar y no recebir, y en el recebir es falta; mas la avaricia falta en el dar y excede en el recebir, sino en algunos."
 autor: "aristoteles"
+temas:
+  - "la-riqueza"
 slug: "aristoteles-la-prodigalidad-pues-excede-en-el-dar"
 procedencia:
   obra: "Ética a Nicómaco"

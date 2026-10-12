@@ -1,7 +1,9 @@
 ---
-texto: "La sanción ajena es fácil para lo que concuerda con rutinas secularmente practicadas; es áspera cuando la imaginación pone mayor originalidad en el concepto y en la forma."
+texto: "Los grandes ingenios son ecuánimes para criticar á sus iguales, como si reconocieran en ellos una consanguineidad en línea directa; en el émulo no ven nunca un rival."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-sancion-ajena-es-facil-para-lo"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-los-grandes-ingenios-son-ecuanimes-para-criticar"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

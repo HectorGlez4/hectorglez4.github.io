@@ -1,6 +1,8 @@
 ---
 texto: "El crédito es la disponibilidad del capital; y el capital es la varilla mágica que debe darnos población, caminos, canales, industria, educación y libertad."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-riqueza"
 slug: "juan-bautista-alberdi-el-credito-es-la-disponibilidad-del-capital"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"
