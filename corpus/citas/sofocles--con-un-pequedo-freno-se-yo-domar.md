@@ -1,6 +1,8 @@
 ---
 texto: "Con un pequedo freno sé yo domar a los enfurecidos caballos; pues no debe ensoberbecerse quien es esclavo de otro."
 autor: "sofocles"
+temas:
+  - "la-humildad"
 slug: "sofocles-con-un-pequedo-freno-se-yo-domar"
 procedencia:
   obra: "Antígona (Alemany y Bolufer tr.)"

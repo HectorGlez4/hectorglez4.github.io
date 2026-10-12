@@ -1,6 +1,8 @@
 ---
 texto: "Allí hice lo que pude; aquí haré lo que debo."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-deber"
 slug: "francisco-de-quevedo-alli-hice-lo-que-pude-aqui-hare"
 procedencia:
   obra: "Marco Bruto"

@@ -1,6 +1,8 @@
 ---
 texto: "Tú no has encontrado un medio de cultivar la memoria, sino de despertar reminiscencias; y das a tus discípulos la sombra de la ciencia y no la ciencia misma."
 autor: "platon"
+temas:
+  - "el-saber"
 slug: "platon-tu-no-has-encontrado-un-medio-de"
 procedencia:
   obra: "Fedro"

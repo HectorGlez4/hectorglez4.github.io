@@ -1,6 +1,8 @@
 ---
 texto: "Todas las pasiones, para el logro de su objeto, exigen algo; solo la pereza no exige nada."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-todas-las-pasiones-para-el-logro-de"
 procedencia:
   obra: "El Criterio"

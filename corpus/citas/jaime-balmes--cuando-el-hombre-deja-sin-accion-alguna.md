@@ -1,6 +1,8 @@
 ---
 texto: "Cuando el hombre deja sin accion alguna de sus facultades, es un instrumento al que le faltan cuerdas; cuando las emplea mal es un instrumento destemplado."
 autor: "jaime-balmes"
+temas:
+  - "la-virtud"
 slug: "jaime-balmes-cuando-el-hombre-deja-sin-accion-alguna"
 procedencia:
   obra: "El Criterio"

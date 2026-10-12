@@ -1,6 +1,8 @@
 ---
 texto: "Puede ser un error; no es una indignidad."
 autor: "jose-ingenieros"
+temas:
+  - "el-error"
 slug: "jose-ingenieros-puede-ser-un-error-no-es-una"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

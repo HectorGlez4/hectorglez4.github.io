@@ -1,6 +1,8 @@
 ---
 texto: "Hay mucho que saber y es poco el vivir, y no se vive si no se sabe."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-hay-mucho-que-saber-y-es-poco"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

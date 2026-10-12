@@ -1,6 +1,8 @@
 ---
 texto: "Rebélate desde el primer instante; la medicina no surte efecto si el mal se agrava con la negligencia."
 autor: "ovidio"
+temas:
+  - "la-prudencia"
 slug: "ovidio-rebelate-desde-el-primer-instante-la-medicina"
 procedencia:
   obra: "El remedio del amor"

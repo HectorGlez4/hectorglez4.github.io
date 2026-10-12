@@ -1,6 +1,8 @@
 ---
 texto: "Con un poco de trabajo que se tomara, la ortiga sería útil; se la descuida y se vuelve dañosa."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-con-un-poco-de-trabajo-que-se"
 procedencia:
   obra: "El odio a los árboles"
