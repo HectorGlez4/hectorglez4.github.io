@@ -1,6 +1,8 @@
 ---
 texto: "Esto es decirnos que á nadie hace feliz el lugar en donde vive, sino su buen método de vivir y saber regularse en cualquiera parte que habite."
 autor: "marco-aurelio"
+temas:
+  - "la-felicidad"
 slug: "marco-aurelio-esto-es-decirnos-que-a-nadie-hace"
 procedencia:
   obra: "Soliloquios"

@@ -1,6 +1,8 @@
 ---
 texto: "Y mientras odiéis estaréis privados de la ciencia, y frente a la realidad sombría no seréis más que miserables fantasmas."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-y-mientras-odieis-estareis-privados-de-la"
 procedencia:
   obra: "Patriotismo"

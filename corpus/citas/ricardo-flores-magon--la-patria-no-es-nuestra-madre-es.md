@@ -1,6 +1,8 @@
 ---
 texto: "La patria no es nuestra madre: ¡es nuestro verdugo!"
 autor: "ricardo-flores-magon"
+temas:
+  - "la-patria"
 slug: "ricardo-flores-magon-la-patria-no-es-nuestra-madre-es"
 procedencia:
   obra: "La patria burguesa y la patria universal"

@@ -1,6 +1,8 @@
 ---
 texto: "¿Y qué es el miedo y la tristeza sino una voluntad disconforme a las cosas que no queremos?"
 autor: "agustin-de-hipona"
+temas:
+  - "el-miedo"
 slug: "agustin-de-hipona-y-que-es-el-miedo-y-la"
 procedencia:
   obra: "La ciudad de Dios"

@@ -1,6 +1,8 @@
 ---
 texto: "Pensamos para vivir, he dicho; pero acaso fuera más acertado decir que pensamos porque vivimos, y que la forma de nuestro pensamiento responde a la de nuestra vida."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-pensamos-para-vivir-he-dicho-pero-acaso"
 procedencia:
   obra: "Del sentimiento trágico de la vida/XI"

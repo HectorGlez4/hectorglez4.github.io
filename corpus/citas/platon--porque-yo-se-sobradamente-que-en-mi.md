@@ -3,6 +3,7 @@ texto: "Porque yo sé sobradamente que en mí no existe semejante sabiduría, ni
 autor: "platon"
 temas:
   - "el-saber"
+  - "la-humildad"
 slug: "platon-porque-yo-se-sobradamente-que-en-mi"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"

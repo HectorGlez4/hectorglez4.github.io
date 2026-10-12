@@ -1,6 +1,8 @@
 ---
 texto: "La realidad se encaja en los moldes de la razón, como la llave en su cerradura."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-la-realidad-se-encaja-en-los-moldes"
 procedencia:
   obra: "El retorno a la tierra"

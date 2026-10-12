@@ -1,7 +1,9 @@
 ---
-texto: "El poder de concebir está subordinado al de percibir: cada hombre tiene la memoria y la imaginación que corresponde á sus percepciones predominantes."
+texto: "Las nociones mal digeridas sólo sirven para atorar el entendimiento."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-poder-de-concebir-esta-subordinado-al"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-las-nociones-mal-digeridas-solo-sirven-para"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

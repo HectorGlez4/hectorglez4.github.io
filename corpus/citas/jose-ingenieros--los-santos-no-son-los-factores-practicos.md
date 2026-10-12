@@ -1,6 +1,8 @@
 ---
 texto: "Los santos no son los factores prácticos de la vida social, sino las masas mediocres que imitan débilmente su fórmula."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-los-santos-no-son-los-factores-practicos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

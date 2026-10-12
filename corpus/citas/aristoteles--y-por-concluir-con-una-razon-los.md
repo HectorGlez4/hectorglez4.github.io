@@ -1,6 +1,8 @@
 ---
 texto: "Y, por concluir con una razón: los hábitos salen conformes a los actos."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-y-por-concluir-con-una-razon-los"
 procedencia:
   obra: "Ética a Nicómaco"

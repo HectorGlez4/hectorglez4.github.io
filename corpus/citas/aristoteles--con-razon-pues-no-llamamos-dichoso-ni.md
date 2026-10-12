@@ -1,6 +1,8 @@
 ---
 texto: "Con razón, pues, no llamamos dichoso ni al buey, ni al caballo, ni a otro animal ninguno, pues ninguno dellos puede emplearse en semejantes ejercicios."
 autor: "aristoteles"
+temas:
+  - "la-felicidad"
 slug: "aristoteles-con-razon-pues-no-llamamos-dichoso-ni"
 procedencia:
   obra: "Ética a Nicómaco"

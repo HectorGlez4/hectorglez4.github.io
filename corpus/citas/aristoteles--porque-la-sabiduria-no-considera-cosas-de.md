@@ -1,6 +1,8 @@
 ---
 texto: "Porque la sabiduría no considera cosas, de que felicidad ninguna al hombre le proceda, pues las cosas que trata ni nacen ni fenecen."
 autor: "aristoteles"
+temas:
+  - "el-saber"
 slug: "aristoteles-porque-la-sabiduria-no-considera-cosas-de"
 procedencia:
   obra: "Ética a Nicómaco"
