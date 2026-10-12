@@ -1,6 +1,8 @@
 ---
 texto: "El nivel de los gobernantes desciende hasta marcar el cero: la mediocracia es una confabulación de los ceros contra las unidades."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-el-nivel-de-los-gobernantes-desciende-hasta"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

@@ -1,7 +1,9 @@
 ---
-texto: "La evolución humana es un perfeccionamiento continuo del hombre para adaptarse á la naturaleza, que evoluciona á su vez."
+texto: "El gentilhombre tiene siempre un enemigo en el mediocre; la reciprocidad de sentimientos y de aspiraciones sólo es posible entre iguales."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-evolucion-humana-es-un-perfeccionamiento-continuo"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-gentilhombre-tiene-siempre-un-enemigo-en"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Los delincuentes son castigados por los delitos que no han cometido, como serían vacunados por la viruela que no habrían nunca de padecer."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-los-delincuentes-son-castigados-por-los-delitos"
 procedencia:
   obra: "Vacuna"

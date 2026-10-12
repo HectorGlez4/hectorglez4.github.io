@@ -1,7 +1,9 @@
 ---
-texto: "Los santos de la moral idealista no hacen milagros: realizan magnas obras, conciben supremas bellezas é investigan profundas verdades."
+texto: "La democracia es un espejismo, como todas las abstracciones que pueblan la fantasía de los ilusos ó forman el capital de los mendaces."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-santos-de-la-moral-idealista-no"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-la-democracia-es-un-espejismo-como-todas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

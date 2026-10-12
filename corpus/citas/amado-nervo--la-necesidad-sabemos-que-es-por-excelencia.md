@@ -1,6 +1,8 @@
 ---
 texto: "La necesidad sabemos que es por excelencia industriosa, y gracias a ella hay muchísimas ramas de la ciencia que han alcanzado progresos enormes."
 autor: "amado-nervo"
+temas:
+  - "el-saber"
 slug: "amado-nervo-la-necesidad-sabemos-que-es-por-excelencia"
 procedencia:
   obra: "Plenitud"

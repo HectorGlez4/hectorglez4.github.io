@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad tiene amor á la obra social en que toma parte, y predispone á obedecer á la ley, á formarla y consolidar la libertad."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-igualdad-tiene-amor-a-la-obra"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

@@ -1,7 +1,9 @@
 ---
-texto: "La democracia es un espejismo, como todas las abstracciones que pueblan la fantasía de los ilusos ó forman el capital de los mendaces."
+texto: "La evolución humana es un perfeccionamiento continuo del hombre para adaptarse á la naturaleza, que evoluciona á su vez."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-democracia-es-un-espejismo-como-todas"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-evolucion-humana-es-un-perfeccionamiento-continuo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

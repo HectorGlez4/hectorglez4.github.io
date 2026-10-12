@@ -1,6 +1,8 @@
 ---
 texto: "No hay culpa en nacer sin dotes excepcionales; no puede exigírseles que trepen las cuestas riscosas por donde ascienden los preclaros ingenios."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-no-hay-culpa-en-nacer-sin-dotes"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

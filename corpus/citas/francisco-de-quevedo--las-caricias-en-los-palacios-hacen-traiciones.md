@@ -1,7 +1,9 @@
 ---
-texto: "Todo cuanto tiene y ha alcanzado ha sido dádiva de la iniquidad; nada posee que no sea delito del que se lo dio y del que lo tiene."
+texto: "Las caricias en los palacios hacen traiciones y traidores; y cuando son menos malas, son prólogos de la disimulación."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-todo-cuanto-tiene-y-ha-alcanzado-ha"
+temas:
+  - "la-amistad"
+slug: "francisco-de-quevedo-las-caricias-en-los-palacios-hacen-traiciones"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

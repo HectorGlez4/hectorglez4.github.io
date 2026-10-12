@@ -1,6 +1,8 @@
 ---
 texto: "Los que quitan la amistad del vida parece que privan al mundo del sol: ningún don de los dioses inmortales es mejor que ella, nada es más agradable."
 autor: "ciceron"
+temas:
+  - "la-amistad"
 slug: "ciceron-los-que-quitan-la-amistad-del-vida"
 procedencia:
   obra: "Sobre la amistad"

@@ -1,7 +1,9 @@
 ---
-texto: "El gentilhombre tiene siempre un enemigo en el mediocre; la reciprocidad de sentimientos y de aspiraciones sólo es posible entre iguales."
+texto: "Los mediocres son útiles para el equilibrio social: poco importa que ellos se cuenten por millares y los idealistas en dedos de una mano."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-gentilhombre-tiene-siempre-un-enemigo-en"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-los-mediocres-son-utiles-para-el-equilibrio"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

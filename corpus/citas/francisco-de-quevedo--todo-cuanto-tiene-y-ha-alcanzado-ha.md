@@ -1,7 +1,9 @@
 ---
-texto: "El robo que saquea las repúblicas es aquél que, hipócrita de la cudicia, llama desinterés el no recibir de otro, y limpieza el tomarlo todo."
+texto: "Todo cuanto tiene y ha alcanzado ha sido dádiva de la iniquidad; nada posee que no sea delito del que se lo dio y del que lo tiene."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-el-robo-que-saquea-las-republicas-es"
+temas:
+  - "la-riqueza"
+slug: "francisco-de-quevedo-todo-cuanto-tiene-y-ha-alcanzado-ha"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

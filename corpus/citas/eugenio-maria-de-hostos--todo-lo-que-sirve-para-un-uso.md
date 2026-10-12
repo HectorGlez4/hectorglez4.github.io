@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo que sirve para un uso es útil, y todo lo que tiene la propiedad de ser útil contribuye al mejoramiento de las condiciones de la vida."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-trabajo"
 slug: "eugenio-maria-de-hostos-todo-lo-que-sirve-para-un-uso"
 procedencia:
   obra: "Moral social"

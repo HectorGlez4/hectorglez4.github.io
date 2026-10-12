@@ -1,6 +1,8 @@
 ---
 texto: "La desigualdad de las condiciones es necesaria, es buena contenida en ciertos límites, pero cuando los pasa es inicua y es absurda."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-la-desigualdad-de-las-condiciones-es-necesaria"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

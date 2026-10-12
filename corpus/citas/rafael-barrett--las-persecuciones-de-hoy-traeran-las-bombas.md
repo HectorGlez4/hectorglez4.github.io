@@ -1,6 +1,8 @@
 ---
 texto: "Las persecuciones de hoy traerán las bombas de mañana, que traerán otras persecuciones y la sangre renueva el terror que hace verter más sangre."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-las-persecuciones-de-hoy-traeran-las-bombas"
 procedencia:
   obra: "Terror"

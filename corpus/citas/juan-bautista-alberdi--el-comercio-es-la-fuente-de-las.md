@@ -1,6 +1,8 @@
 ---
 texto: "El comercio es la fuente de las riquezas de las naciones; pero el nuestro se halla en el último grado de aniquilamiento."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-riqueza"
 slug: "juan-bautista-alberdi-el-comercio-es-la-fuente-de-las"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

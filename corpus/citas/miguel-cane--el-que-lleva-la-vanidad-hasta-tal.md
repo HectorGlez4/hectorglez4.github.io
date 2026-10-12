@@ -1,7 +1,9 @@
 ---
-texto: "La causa por la cual los amantes y las queridas no se fastidian de estar juntos, es porque hablan siempre de ellos mismos."
+texto: "El que lleva la vanidad hasta tal extremo, ese no se fastidia: tiene un robusto objeto de pasion que lo absorberá mientras viva."
 autor: "miguel-cane"
-slug: "miguel-cane-la-causa-por-la-cual-los-amantes"
+temas:
+  - "la-humildad"
+slug: "miguel-cane-el-que-lleva-la-vanidad-hasta-tal"
 procedencia:
   obra: "A la distancia"
 estadoDerechos: "dominio-público"

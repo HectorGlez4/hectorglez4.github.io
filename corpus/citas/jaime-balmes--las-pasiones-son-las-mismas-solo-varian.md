@@ -1,6 +1,8 @@
 ---
 texto: "Las pasiones son las mismas, solo varian por su forma, ó mas bien por la graduacion de intensidad, y por el modo de dirigirse á su objeto."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-las-pasiones-son-las-mismas-solo-varian"
 procedencia:
   obra: "El Criterio"

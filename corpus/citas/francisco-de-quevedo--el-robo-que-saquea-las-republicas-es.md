@@ -1,7 +1,9 @@
 ---
-texto: "Las caricias en los palacios hacen traiciones y traidores; y cuando son menos malas, son prólogos de la disimulación."
+texto: "El robo que saquea las repúblicas es aquél que, hipócrita de la cudicia, llama desinterés el no recibir de otro, y limpieza el tomarlo todo."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-las-caricias-en-los-palacios-hacen-traiciones"
+temas:
+  - "la-justicia"
+slug: "francisco-de-quevedo-el-robo-que-saquea-las-republicas-es"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

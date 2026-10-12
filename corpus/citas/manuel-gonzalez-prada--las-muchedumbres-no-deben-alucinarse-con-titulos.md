@@ -1,6 +1,8 @@
 ---
 texto: "Las muchedumbres no deben alucinarse con títulos pomposos ni dejarse deslumbrar con uniformes o vestiduras churriguerescas."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-razon"
 slug: "manuel-gonzalez-prada-las-muchedumbres-no-deben-alucinarse-con-titulos"
 procedencia:
   obra: "La autoridad"

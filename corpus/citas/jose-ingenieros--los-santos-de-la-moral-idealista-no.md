@@ -1,7 +1,9 @@
 ---
-texto: "El fondo sentimental no varía; lo que se trasmuta incesantemente es la forma intelectual que lo transforma en juicio de valor, dándole fuerza ética."
+texto: "Los santos de la moral idealista no hacen milagros: realizan magnas obras, conciben supremas bellezas é investigan profundas verdades."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-fondo-sentimental-no-varia-lo-que"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-santos-de-la-moral-idealista-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

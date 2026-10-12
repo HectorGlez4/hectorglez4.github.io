@@ -1,6 +1,8 @@
 ---
 texto: "La salud no odia, y el odio absoluto, la obsesión del mal por el mal, el designio de la destrucción inútil es cosa de enfermos."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-la-salud-no-odia-y-el-odio"
 procedencia:
   obra: "El odio"
