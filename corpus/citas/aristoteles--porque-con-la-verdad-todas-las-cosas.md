@@ -1,6 +1,8 @@
 ---
 texto: "Porque con la verdad todas las cosas que son cuadran, y la verdad presto descompadra con la mentira."
 autor: "aristoteles"
+temas:
+  - "la-verdad"
 slug: "aristoteles-porque-con-la-verdad-todas-las-cosas"
 procedencia:
   obra: "Ética a Nicómaco"

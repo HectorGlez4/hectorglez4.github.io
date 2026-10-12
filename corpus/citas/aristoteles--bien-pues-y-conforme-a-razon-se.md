@@ -1,6 +1,8 @@
 ---
 texto: "Bien, pues, y conforme a razón se dice, que haciendo cosas justas se hace el hombre justo, y ejercitándose en cosas de templanza, templado en su vivir."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-bien-pues-y-conforme-a-razon-se"
 procedencia:
   obra: "Ética a Nicómaco"

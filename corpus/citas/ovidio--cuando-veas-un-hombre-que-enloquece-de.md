@@ -1,6 +1,8 @@
 ---
 texto: "Cuando veas un hombre que enloquece de furor, deja pasar su arrebato, difícil de contenerse en el primer impetu de la cólera."
 autor: "ovidio"
+temas:
+  - "la-prudencia"
 slug: "ovidio-cuando-veas-un-hombre-que-enloquece-de"
 procedencia:
   obra: "El remedio del amor"

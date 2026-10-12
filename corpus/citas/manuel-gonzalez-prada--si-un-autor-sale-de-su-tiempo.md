@@ -1,6 +1,8 @@
 ---
 texto: "Si un autor sale de su tiempo, ha de ser para adivinar las cosas futuras, no para desenterrar ideas y palabras muertas."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-tiempo"
 slug: "manuel-gonzalez-prada-si-un-autor-sale-de-su-tiempo"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

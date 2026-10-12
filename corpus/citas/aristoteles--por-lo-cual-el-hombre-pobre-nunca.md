@@ -1,6 +1,8 @@
 ---
 texto: "Por lo cual, el hombre pobre nunca será magnífico, porque no tiene de dónde gastar como conviene."
 autor: "aristoteles"
+temas:
+  - "la-riqueza"
 slug: "aristoteles-por-lo-cual-el-hombre-pobre-nunca"
 procedencia:
   obra: "Ética a Nicómaco"

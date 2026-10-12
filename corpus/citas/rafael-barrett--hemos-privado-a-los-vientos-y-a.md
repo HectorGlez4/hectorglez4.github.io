@@ -1,6 +1,8 @@
 ---
 texto: "Hemos privado a los vientos y a las aguas de su libertad salvaje, y los hemos condenado a los trabajos forzados de la rueda."
 autor: "rafael-barrett"
+temas:
+  - "la-libertad"
 slug: "rafael-barrett-hemos-privado-a-los-vientos-y-a"
 procedencia:
   obra: "La ruleta"

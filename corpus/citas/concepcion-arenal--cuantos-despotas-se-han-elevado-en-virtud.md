@@ -1,6 +1,8 @@
 ---
 texto: "¡Cuántos déspotas se han elevado en virtud del sufragio universal, cuántas leyes hechas por el pueblo contra el pueblo mismo!"
 autor: "concepcion-arenal"
+temas:
+  - "la-libertad"
 slug: "concepcion-arenal-cuantos-despotas-se-han-elevado-en-virtud"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

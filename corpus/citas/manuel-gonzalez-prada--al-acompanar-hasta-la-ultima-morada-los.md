@@ -1,6 +1,8 @@
 ---
 texto: "Al acompañar hasta la última morada los restos de un hombre idolatrado, pensamos enterrar a otro, y nos enterramos a nosotros mismos."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-muerte"
 slug: "manuel-gonzalez-prada-al-acompanar-hasta-la-ultima-morada-los"
 procedencia:
   obra: "Discurso en el entierro de Luis Márquez (ortografía RAE)"

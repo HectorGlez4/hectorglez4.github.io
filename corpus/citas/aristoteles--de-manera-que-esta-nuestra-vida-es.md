@@ -1,7 +1,9 @@
 ---
-texto: "Y así aquéllas fácilmente se quiebran, como cosas fundadas sobre falso y mudable fundamento; pero la fundada en la virtud es la que permanece."
+texto: "De manera que esta nuestra vida es una manera de feria en que, dando y recibiendo, se conserva la humana compañía."
 autor: "aristoteles"
-slug: "aristoteles-y-asi-aquellas-facilmente-se-quiebran-como"
+temas:
+  - "la-vida"
+slug: "aristoteles-de-manera-que-esta-nuestra-vida-es"
 procedencia:
   obra: "Ética a Nicómaco"
 estadoDerechos: "dominio-público"

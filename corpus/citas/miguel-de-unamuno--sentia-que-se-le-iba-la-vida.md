@@ -1,6 +1,8 @@
 ---
 texto: "Sentía que se le iba la vida, y se agarraba a ella."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-sentia-que-se-le-iba-la-vida"
 procedencia:
   obra: "Tres novelas ejemplares y un prólogo/El marqués de Lumbría"

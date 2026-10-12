@@ -3,6 +3,7 @@ texto: "Pues así como al cuerpo le lleva y conduce su propio peso, así al áni
 autor: "agustin-de-hipona"
 temas:
   - "la-virtud"
+  - "el-amor"
 slug: "agustin-de-hipona-pues-asi-como-al-cuerpo-le-lleva"
 procedencia:
   obra: "La ciudad de Dios"

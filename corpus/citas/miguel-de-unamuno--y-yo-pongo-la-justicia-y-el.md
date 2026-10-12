@@ -1,6 +1,8 @@
 ---
 texto: "Y yo pongo la justicia y el respeto al hombre por encima del interés de la patria."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-justicia"
 slug: "miguel-de-unamuno-y-yo-pongo-la-justicia-y-el"
 procedencia:
   obra: "Confesión de culpa"

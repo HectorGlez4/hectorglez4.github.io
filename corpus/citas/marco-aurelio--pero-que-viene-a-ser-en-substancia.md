@@ -1,6 +1,8 @@
 ---
 texto: "Pero qué viene á ser en substancia una fama inmortal? absolutamente una pura vanidad."
 autor: "marco-aurelio"
+temas:
+  - "la-gloria"
 slug: "marco-aurelio-pero-que-viene-a-ser-en-substancia"
 procedencia:
   obra: "Soliloquios"
