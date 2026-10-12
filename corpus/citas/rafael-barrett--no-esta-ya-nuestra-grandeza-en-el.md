@@ -1,6 +1,8 @@
 ---
 texto: "No está ya nuestra grandeza en el pasado, sino en el futuro."
 autor: "rafael-barrett"
+temas:
+  - "la-patria"
 slug: "rafael-barrett-no-esta-ya-nuestra-grandeza-en-el"
 procedencia:
   obra: "El retorno a la tierra"

@@ -1,6 +1,8 @@
 ---
 texto: "Donde todos creen poder hablar, callan los sabios; la mediocridad prefiere escuchar á los más viles embaidores."
 autor: "jose-ingenieros"
+temas:
+  - "la-palabra"
 slug: "jose-ingenieros-donde-todos-creen-poder-hablar-callan-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

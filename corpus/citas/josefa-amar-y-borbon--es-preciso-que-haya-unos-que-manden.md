@@ -1,6 +1,8 @@
 ---
 texto: "Es preciso que haya unos que manden a los otros, y sucede no pocas veces, que al de más ingenio, le toca la suerte de obedecer, y respetar al que tiene menos."
 autor: "josefa-amar-y-borbon"
+temas:
+  - "la-justicia"
 slug: "josefa-amar-y-borbon-es-preciso-que-haya-unos-que-manden"
 procedencia:
   obra: "Discurso en defensa del talento de las mugeres"

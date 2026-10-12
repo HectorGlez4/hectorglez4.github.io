@@ -1,6 +1,8 @@
 ---
 texto: "De la misma manera el deleite no es paga ni causa de la virtud, sino una añadidura, y no agrada porque deleita, sino deleita porque agrada."
 autor: "seneca"
+temas:
+  - "la-virtud"
 slug: "seneca-de-la-misma-manera-el-deleite-no"
 procedencia:
   obra: "De la vida bienaventurada"

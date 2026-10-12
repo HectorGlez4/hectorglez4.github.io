@@ -1,6 +1,8 @@
 ---
 texto: "Tú buscas la felicidad en el corazón humano, y para eso lo destrozas, hozando en él como quien remueve la tierra en busca de un tesoro."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-felicidad"
 slug: "mariano-jose-de-larra-tu-buscas-la-felicidad-en-el-corazon"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

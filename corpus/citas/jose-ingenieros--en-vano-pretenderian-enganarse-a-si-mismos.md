@@ -1,7 +1,9 @@
 ---
-texto: "Envidiando se sufre más que odiando: como esos tormentos enfermizos que tórnanse terroríficos de noche, amplificados por el horror de las tinieblas."
+texto: "En vano pretenderían engañarse á sí mismos, confundiendo la susceptibilidad con la delicadeza; aquélla nace del miedo y ésta es hija del orgullo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-envidiando-se-sufre-mas-que-odiando-como"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-en-vano-pretenderian-enganarse-a-si-mismos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

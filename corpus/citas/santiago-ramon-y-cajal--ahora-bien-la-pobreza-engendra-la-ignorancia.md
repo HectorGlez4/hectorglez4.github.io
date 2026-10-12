@@ -1,7 +1,9 @@
 ---
-texto: "En suma: el azar afortunado suele ser casi siempre el premio del esfuerzo perseverante."
+texto: "Ahora bien: la pobreza engendra la ignorancia."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-en-suma-el-azar-afortunado-suele-ser"
+temas:
+  - "la-riqueza"
+slug: "santiago-ramon-y-cajal-ahora-bien-la-pobreza-engendra-la-ignorancia"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

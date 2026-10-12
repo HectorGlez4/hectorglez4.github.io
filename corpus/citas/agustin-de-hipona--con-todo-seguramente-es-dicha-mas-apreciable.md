@@ -1,6 +1,8 @@
 ---
 texto: "Con todo, seguramente, es dicha más apreciable tener amigo a un buen vecino que sujetar por fuerza al malo belicoso."
 autor: "agustin-de-hipona"
+temas:
+  - "la-amistad"
 slug: "agustin-de-hipona-con-todo-seguramente-es-dicha-mas-apreciable"
 procedencia:
   obra: "La ciudad de Dios"

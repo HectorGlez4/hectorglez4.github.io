@@ -1,6 +1,8 @@
 ---
 texto: "Matamos lo que no ha nacido aún: tenemos miedo."
 autor: "rafael-barrett"
+temas:
+  - "el-miedo"
 slug: "rafael-barrett-matamos-lo-que-no-ha-nacido-aun"
 procedencia:
   obra: "La sinceridad"
