@@ -1,6 +1,8 @@
 ---
 texto: "El viejo es un niño triste, que la vejez se parece a la infancia como la tarde a la aurora."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-tiempo"
 slug: "manuel-gonzalez-prada-el-viejo-es-un-nino-triste-que"
 procedencia:
   obra: "Librepensamiento de acción"

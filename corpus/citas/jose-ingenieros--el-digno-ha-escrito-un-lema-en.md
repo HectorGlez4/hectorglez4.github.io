@@ -1,6 +1,8 @@
 ---
 texto: "El digno ha escrito un lema en su blasón: lo que tiene por precio una partícula de honor, es caro."
 autor: "jose-ingenieros"
+temas:
+  - "la-gloria"
 slug: "jose-ingenieros-el-digno-ha-escrito-un-lema-en"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

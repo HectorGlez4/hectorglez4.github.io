@@ -1,6 +1,8 @@
 ---
 texto: "El que tiene miedo á la muerte, ó teme la insensibilidad, ú otro género de sentimiento."
 autor: "marco-aurelio"
+temas:
+  - "el-miedo"
 slug: "marco-aurelio-el-que-tiene-miedo-a-la-muerte"
 procedencia:
   obra: "Soliloquios"

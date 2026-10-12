@@ -1,6 +1,8 @@
 ---
 texto: "Nada es tan contrario a la armonía entre los poderes, como su mezcla."
 autor: "simon-bolivar"
+temas:
+  - "la-justicia"
 slug: "simon-bolivar-nada-es-tan-contrario-a-la-armonia"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"

@@ -1,6 +1,8 @@
 ---
 texto: "El ansia de lucro, la fiebre del oro hacen del hombre pálido una fiera implacable y sanguinaria."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-riqueza"
 slug: "manuel-gonzalez-prada-el-ansia-de-lucro-la-fiebre-del"
 procedencia:
   obra: "Ferocidad teutona"

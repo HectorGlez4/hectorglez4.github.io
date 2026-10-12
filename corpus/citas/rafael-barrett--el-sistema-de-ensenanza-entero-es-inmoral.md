@@ -1,6 +1,8 @@
 ---
 texto: "El sistema de enseñanza entero es inmoral."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-el-sistema-de-ensenanza-entero-es-inmoral"
 procedencia:
   obra: "Inmoralidad de los exámenes"

@@ -1,6 +1,8 @@
 ---
 texto: "El dinero tiene tres nombres: el uno por fuerte, el otro por útil, el otro por perfecto."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-riqueza"
 slug: "francisco-de-quevedo-el-dinero-tiene-tres-nombres-el-uno"
 procedencia:
   obra: "Alabanzas de la moneda"

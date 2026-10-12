@@ -1,6 +1,8 @@
 ---
 texto: "La aptitud que menos tienen, aunque parezca paradójico, es la que más tienen."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-saber"
 slug: "eugenio-maria-de-hostos-la-aptitud-que-menos-tienen-aunque-parezca"
 procedencia:
   obra: "Moral social"

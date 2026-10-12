@@ -1,7 +1,9 @@
 ---
-texto: "La realidad nunca puede igualarse al ensueño en la perpetua persecución de la quimera."
+texto: "La fe es tolerante: es un misticismo que respeta las creencias propias en las ajenas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-realidad-nunca-puede-igualarse-al-ensueno"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-la-fe-es-tolerante-es-un-misticismo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

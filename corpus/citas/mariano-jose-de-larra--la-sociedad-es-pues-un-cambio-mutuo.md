@@ -1,6 +1,8 @@
 ---
 texto: "La sociedad es, pues, un cambio mutuo de perjuicios recíprocos."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-vida"
 slug: "mariano-jose-de-larra-la-sociedad-es-pues-un-cambio-mutuo"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

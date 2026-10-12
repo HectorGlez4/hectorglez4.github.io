@@ -1,6 +1,8 @@
 ---
 texto: "La confianza es madre del descuido, y éste es plaga de los grandes oficiales."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-la-confianza-es-madre-del-descuido-y"
 procedencia:
   obra: "El político"

@@ -1,6 +1,8 @@
 ---
 texto: "La admiración de la novedad es estimación de los aciertos."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-la-admiracion-de-la-novedad-es-estimacion"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

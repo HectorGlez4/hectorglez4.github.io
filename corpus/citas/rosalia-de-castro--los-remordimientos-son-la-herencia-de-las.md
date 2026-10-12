@@ -1,6 +1,8 @@
 ---
 texto: "Los remordimientos son la herencia de las mujeres débiles."
 autor: "rosalia-de-castro"
+temas:
+  - "la-virtud"
 slug: "rosalia-de-castro-los-remordimientos-son-la-herencia-de-las"
 procedencia:
   obra: "LIEDERS"

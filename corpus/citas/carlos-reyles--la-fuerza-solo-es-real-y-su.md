@@ -1,6 +1,8 @@
 ---
 texto: "La fuerza sólo es real, y su ejercicio la causa primera de lo existente y la condición necesaria de la vida."
 autor: "carlos-reyles"
+temas:
+  - "la-vida"
 slug: "carlos-reyles-la-fuerza-solo-es-real-y-su"
 procedencia:
   obra: "La Muerte Del Cisne"

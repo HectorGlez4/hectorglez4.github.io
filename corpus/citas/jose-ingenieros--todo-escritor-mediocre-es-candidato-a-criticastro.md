@@ -1,6 +1,8 @@
 ---
 texto: "Todo escritor mediocre es candidato á criticastro."
 autor: "jose-ingenieros"
+temas:
+  - "la-envidia"
 slug: "jose-ingenieros-todo-escritor-mediocre-es-candidato-a-criticastro"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

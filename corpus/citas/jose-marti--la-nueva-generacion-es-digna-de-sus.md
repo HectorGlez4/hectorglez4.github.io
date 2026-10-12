@@ -1,6 +1,8 @@
 ---
 texto: "La nueva generación es digna de sus padres."
 autor: "jose-marti"
+temas:
+  - "el-tiempo"
 slug: "jose-marti-la-nueva-generacion-es-digna-de-sus"
 procedencia:
   obra: "Vindicación de Cuba"

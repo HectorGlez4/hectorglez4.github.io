@@ -1,7 +1,9 @@
 ---
-texto: "Los países son expresiones geográficas y los estados son equilibrios de instituciones."
+texto: "La moralidad es tan importante como la inteligencia en la composición global del carácter."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-paises-son-expresiones-geograficas-y-los"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-moralidad-es-tan-importante-como-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

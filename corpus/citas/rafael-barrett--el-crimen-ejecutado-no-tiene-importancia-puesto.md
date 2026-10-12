@@ -1,6 +1,8 @@
 ---
 texto: "El crimen ejecutado no tiene importancia, puesto que no tiene remedio."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-el-crimen-ejecutado-no-tiene-importancia-puesto"
 procedencia:
   obra: "Vacuna"
