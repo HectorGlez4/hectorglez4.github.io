@@ -1,6 +1,8 @@
 ---
 texto: "Docto símbolo desta verdad es la saeta; con la pluma vuela el hierro que ha de herir."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-palabra"
 slug: "francisco-de-quevedo-docto-simbolo-desta-verdad-es-la-saeta"
 procedencia:
   obra: "Marco Bruto"

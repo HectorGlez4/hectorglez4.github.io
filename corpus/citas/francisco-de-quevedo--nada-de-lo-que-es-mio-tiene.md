@@ -1,6 +1,8 @@
 ---
 texto: "Nada de lo que es mío tiene algún precio: en todo mi propia ignorancia me sirve de penitencia."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-humildad"
 slug: "francisco-de-quevedo-nada-de-lo-que-es-mio-tiene"
 procedencia:
   obra: "Marco Bruto"

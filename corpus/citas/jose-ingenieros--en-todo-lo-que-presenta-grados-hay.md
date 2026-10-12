@@ -1,6 +1,8 @@
 ---
 texto: "En todo lo que presenta grados hay mediocridad; en la escala de la inteligencia humana el hombre mediocre es el claro-obscuro entre el talento y la estulticie."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-en-todo-lo-que-presenta-grados-hay"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

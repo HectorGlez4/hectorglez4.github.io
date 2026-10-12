@@ -1,6 +1,8 @@
 ---
 texto: "El pecado del hombre es la brutalidad; el de la mujer, la frivolidad."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-virtud"
 slug: "gustavo-sanchez-galarraga-el-pecado-del-hombre-es-la-brutalidad"
 procedencia:
   obra: "A Flor De Piel: Frases"

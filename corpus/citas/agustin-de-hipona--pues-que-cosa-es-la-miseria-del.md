@@ -1,6 +1,8 @@
 ---
 texto: "¿Pues qué cosa es la miseria del hombre sino padecer contra sí mismo la desobediencia de sí mismo, y que ya que no quiso lo que pudo, quiera lo que no puede?"
 autor: "agustin-de-hipona"
+temas:
+  - "la-adversidad"
 slug: "agustin-de-hipona-pues-que-cosa-es-la-miseria-del"
 procedencia:
   obra: "La ciudad de Dios"

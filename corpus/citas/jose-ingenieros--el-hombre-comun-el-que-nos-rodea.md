@@ -1,6 +1,8 @@
 ---
 texto: "El hombre común, el que nos rodea á millares, el que prospera y se reproduce en el silencio y en la tiniebla, es el mediocre."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-el-hombre-comun-el-que-nos-rodea"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

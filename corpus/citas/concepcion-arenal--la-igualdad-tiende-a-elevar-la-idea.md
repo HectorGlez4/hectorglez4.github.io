@@ -1,6 +1,8 @@
 ---
 texto: "La igualdad tiende á elevar la idea que el hombre forma de sí mismo; y como el creerse digno conduce á serlo, semejante persuasión es un auxiliar de la libertad."
 autor: "concepcion-arenal"
+temas:
+  - "la-libertad"
 slug: "concepcion-arenal-la-igualdad-tiende-a-elevar-la-idea"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

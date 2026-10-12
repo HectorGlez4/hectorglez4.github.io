@@ -1,6 +1,8 @@
 ---
 texto: "Yo no haré caso de que venga o se ausente la fortuna: miraré todas las tierras como si fueran mías, y las mías como si fuesen de todos."
 autor: "seneca"
+temas:
+  - "la-felicidad"
 slug: "seneca-yo-no-hare-caso-de-que-venga"
 procedencia:
   obra: "De la vida bienaventurada"

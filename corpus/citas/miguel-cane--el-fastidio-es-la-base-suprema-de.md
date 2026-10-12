@@ -1,6 +1,8 @@
 ---
 texto: "El fastidio es la base suprema de la vida."
 autor: "miguel-cane"
+temas:
+  - "la-vida"
 slug: "miguel-cane-el-fastidio-es-la-base-suprema-de"
 procedencia:
   obra: "A la distancia"

@@ -1,6 +1,8 @@
 ---
 texto: "El reloj de la historia está próximo a señalar, con su aguja inexorable, el instante en que ha de producir la muerte de esta sociedad que agoniza."
 autor: "ricardo-flores-magon"
+temas:
+  - "el-tiempo"
 slug: "ricardo-flores-magon-el-reloj-de-la-historia-esta-proximo"
 procedencia:
   obra: "Manifiesto del 16 de marzo de 1918"

@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia existe porque borra las divisiones aparentes de la realidad."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-ciencia-existe-porque-borra-las-divisiones"
 procedencia:
   obra: "La dinamita"

@@ -1,6 +1,8 @@
 ---
 texto: "Con esas dos fuerzas: el amor expansivo y el odio represor–cuyas formas públicas son el interés y el privilegio–se van edificando las nacionalidades."
 autor: "jose-marti"
+temas:
+  - "la-patria"
 slug: "jose-marti-con-esas-dos-fuerzas-el-amor-expansivo"
 procedencia:
   obra: "El tercer año del partido revolucionario cubano"

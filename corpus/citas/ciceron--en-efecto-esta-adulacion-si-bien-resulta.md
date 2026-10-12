@@ -1,6 +1,8 @@
 ---
 texto: "En efecto, esta adulación, si bien resulta perjudicial, no puede dañar a nadie más que a aquel que la acepte y se deleite en ella."
 autor: "ciceron"
+temas:
+  - "la-amistad"
 slug: "ciceron-en-efecto-esta-adulacion-si-bien-resulta"
 procedencia:
   obra: "Sobre la amistad"

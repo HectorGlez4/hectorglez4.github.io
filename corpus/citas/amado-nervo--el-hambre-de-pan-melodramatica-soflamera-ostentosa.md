@@ -1,6 +1,8 @@
 ---
 texto: "El hambre de pan, melodramática, soflamera, ostentosa, es la que más nos conmueve, pero no es la más digna de conmovernos, ¿Qué me dices del hambre de amor?"
 autor: "amado-nervo"
+temas:
+  - "el-amor"
 slug: "amado-nervo-el-hambre-de-pan-melodramatica-soflamera-ostentosa"
 procedencia:
   obra: "Plenitud"

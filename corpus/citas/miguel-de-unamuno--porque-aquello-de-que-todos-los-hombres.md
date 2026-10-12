@@ -1,6 +1,8 @@
 ---
 texto: "Porque aquello de que todos los hombres tienden por naturaleza a conocer, está bien; pero ¿para qué?"
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-porque-aquello-de-que-todos-los-hombres"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

@@ -1,6 +1,8 @@
 ---
 texto: "El hombre que se sacrifica por su hijo, por su compañera o por su padre no es tan grande como el que se sacrificó por un desconocido."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-el-hombre-que-se-sacrifica-por-su"
 procedencia:
   obra: "Más allá del patriotismo"
