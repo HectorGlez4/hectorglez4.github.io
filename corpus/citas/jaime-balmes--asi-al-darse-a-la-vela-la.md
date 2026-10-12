@@ -1,7 +1,9 @@
 ---
-texto: "De aquí infiero que para merecer la verdadera alabanza es preciso ser virtuoso; esto es un raciocinio."
+texto: "Así al darse á la vela la embarcacion que nos lleva, el puerto y las costas huyen á toda prisa; cuando en realidad nada se ha movido sino la nave."
 autor: "jaime-balmes"
-slug: "jaime-balmes-de-aqui-infiero-que-para-merecer-la"
+temas:
+  - "el-error"
+slug: "jaime-balmes-asi-al-darse-a-la-vela-la"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

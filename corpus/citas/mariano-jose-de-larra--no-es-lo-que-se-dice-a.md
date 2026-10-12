@@ -1,6 +1,8 @@
 ---
 texto: "No es lo que se dice a veces lo que hace más efecto, sino lo que se calla o se deja entender."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-palabra"
 slug: "mariano-jose-de-larra-no-es-lo-que-se-dice-a"
 procedencia:
   obra: "Los amantes de Teruel"

@@ -1,6 +1,8 @@
 ---
 texto: "Si el médico no fuera sino un sabio, estaría perdido."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-si-el-medico-no-fuera-sino-un"
 procedencia:
   obra: "Los médicos"

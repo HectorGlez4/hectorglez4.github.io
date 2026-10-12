@@ -1,6 +1,8 @@
 ---
 texto: "En fin, concluye diciendo que la sabiduría consiste en entender muy bien los principios de las más graves cosas, y lo que dellos se colige."
 autor: "aristoteles"
+temas:
+  - "el-saber"
 slug: "aristoteles-en-fin-concluye-diciendo-que-la-sabiduria"
 procedencia:
   obra: "Ética a Nicómaco"

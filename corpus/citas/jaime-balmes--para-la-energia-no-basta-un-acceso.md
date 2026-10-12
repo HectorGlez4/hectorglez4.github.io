@@ -1,7 +1,9 @@
 ---
-texto: "Así al darse á la vela la embarcacion que nos lleva, el puerto y las costas huyen á toda prisa; cuando en realidad nada se ha movido sino la nave."
+texto: "Para la energía no basta un acceso momentáneo; es necesaria una pasion fuerte, pero sostenida por algun tiempo."
 autor: "jaime-balmes"
-slug: "jaime-balmes-asi-al-darse-a-la-vela-la"
+temas:
+  - "el-trabajo"
+slug: "jaime-balmes-para-la-energia-no-basta-un-acceso"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

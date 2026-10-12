@@ -1,6 +1,8 @@
 ---
 texto: "Algunas explicaciones enseñarán mas que los preceptos y teorías."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-algunas-explicaciones-ensenaran-mas-que-los-preceptos"
 procedencia:
   obra: "El Criterio"

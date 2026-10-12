@@ -1,7 +1,9 @@
 ---
-texto: "Para la energía no basta un acceso momentáneo; es necesaria una pasion fuerte, pero sostenida por algun tiempo."
+texto: "De aquí infiero que para merecer la verdadera alabanza es preciso ser virtuoso; esto es un raciocinio."
 autor: "jaime-balmes"
-slug: "jaime-balmes-para-la-energia-no-basta-un-acceso"
+temas:
+  - "la-virtud"
+slug: "jaime-balmes-de-aqui-infiero-que-para-merecer-la"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Si supieras esperar, nada te pasaría; llegaría todo mejor de lo que imaginas, y te ahorrarías el tormento del miedo."
 autor: "amado-nervo"
+temas:
+  - "el-miedo"
 slug: "amado-nervo-si-supieras-esperar-nada-te-pasaria-llegaria"
 procedencia:
   obra: "Plenitud"

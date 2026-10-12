@@ -1,6 +1,8 @@
 ---
 texto: "En efecto, el hombre debe comprender lo general; es decir, elevarse de la multiplicidad de las sensaciones a la unidad racional."
 autor: "platon"
+temas:
+  - "la-razon"
 slug: "platon-en-efecto-el-hombre-debe-comprender-lo"
 procedencia:
   obra: "Fedro"

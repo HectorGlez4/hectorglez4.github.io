@@ -1,6 +1,8 @@
 ---
 texto: "En suma: más que escasez de medios, hay miseria de voluntad."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-trabajo"
 slug: "santiago-ramon-y-cajal-en-suma-mas-que-escasez-de-medios"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
