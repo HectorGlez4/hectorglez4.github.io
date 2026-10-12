@@ -1,6 +1,8 @@
 ---
 texto: "Si un hombre cambia, traiciona y engaña, por esto mismo se engaña a sí mismo, y sale de su propia conciencia moral; el carácter llega siempre a ser conocido."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-si-un-hombre-cambia-traiciona-y-engana"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

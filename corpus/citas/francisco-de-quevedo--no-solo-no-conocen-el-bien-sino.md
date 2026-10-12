@@ -1,6 +1,8 @@
 ---
 texto: "No sólo no conocen el bien, sino que el bien que reciben le pagan con mal y no gastan el mal sino en agradecer el bien."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-no-solo-no-conocen-el-bien-sino"
 procedencia:
   obra: "Execración contra los judíos"

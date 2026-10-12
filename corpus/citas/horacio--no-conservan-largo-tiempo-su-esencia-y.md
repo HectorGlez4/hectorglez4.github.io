@@ -1,6 +1,8 @@
 ---
 texto: "No conservan largo tiempo su esencia y sus matices las flores de la primavera, ni el rostro encendido de la luna brilla todas las noches con igual esplendor."
 autor: "horacio"
+temas:
+  - "el-tiempo"
 slug: "horacio-no-conservan-largo-tiempo-su-esencia-y"
 procedencia:
   obra: "Odas"

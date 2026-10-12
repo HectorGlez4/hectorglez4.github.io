@@ -1,6 +1,8 @@
 ---
 texto: "El que está poseído por un deseo y dominado por el deleite, debe necesariamente buscar en el objeto de su amor el mayor placer posible."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-el-que-esta-poseido-por-un-deseo"
 procedencia:
   obra: "Fedro"

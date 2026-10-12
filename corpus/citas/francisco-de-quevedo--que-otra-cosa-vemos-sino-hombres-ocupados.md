@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué otra cosa vemos sino hombres ocupados en negociar su propio castigo y su misma desolación?"
 autor: "francisco-de-quevedo"
+temas:
+  - "la-vida"
 slug: "francisco-de-quevedo-que-otra-cosa-vemos-sino-hombres-ocupados"
 procedencia:
   obra: "Marco Bruto"

@@ -1,6 +1,8 @@
 ---
 texto: "Por el engaño se nos ha dominado más que por la fuerza; y por el vicio se nos ha degradado más bien que por la superstición."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-por-el-engano-se-nos-ha-dominado"
 procedencia:
   obra: "Discurso de Simón Bolívar ante el Congreso de Angostura"

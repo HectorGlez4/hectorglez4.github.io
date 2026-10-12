@@ -1,7 +1,9 @@
 ---
-texto: "Hombres y sombras: difieren como el cristal y la arcilla."
+texto: "Los políticos mediocres marcan el cero absoluto en el termómetro de la historia, conservándose limpios de infamia y de virtud."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-hombres-y-sombras-difieren-como-el-cristal"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-los-politicos-mediocres-marcan-el-cero-absoluto"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

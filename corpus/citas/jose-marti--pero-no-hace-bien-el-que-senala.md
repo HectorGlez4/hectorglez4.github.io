@@ -1,6 +1,8 @@
 ---
 texto: "Pero no hace bien el que señala el daño, y arde en ansias generosas de ponerle remedio, sino el que enseña remedio blando al daño."
 autor: "jose-marti"
+temas:
+  - "el-deber"
 slug: "jose-marti-pero-no-hace-bien-el-que-senala"
 procedencia:
   obra: "Karl Marx"

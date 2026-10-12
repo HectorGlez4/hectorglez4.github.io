@@ -1,6 +1,8 @@
 ---
 texto: "La virtud arrastra y enseña; los honestos se resignan á imitar alguna parte de las excelencias que practican los virtuosos."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-la-virtud-arrastra-y-ensena-los-honestos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

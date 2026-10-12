@@ -1,6 +1,8 @@
 ---
 texto: "La ley moral es la ley natural de nuestro ser."
 autor: "jose-ingenieros"
+temas:
+  - "el-deber"
 slug: "jose-ingenieros-la-ley-moral-es-la-ley-natural"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

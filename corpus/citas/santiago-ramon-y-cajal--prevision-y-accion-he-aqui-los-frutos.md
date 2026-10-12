@@ -1,6 +1,8 @@
 ---
 texto: "Previsión y acción: he aquí los frutos que el hombre obtiene del determinismo fenomenal."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-prevision-y-accion-he-aqui-los-frutos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

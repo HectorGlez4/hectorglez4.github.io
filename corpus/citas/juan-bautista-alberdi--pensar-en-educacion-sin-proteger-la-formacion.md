@@ -1,6 +1,8 @@
 ---
 texto: "Pensar en educación sin proteger la formación de las familias, es esperar ricas cosechas de un suelo sin abono ni preparación."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-saber"
 slug: "juan-bautista-alberdi-pensar-en-educacion-sin-proteger-la-formacion"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

@@ -1,6 +1,8 @@
 ---
 texto: "Nada espera el pueblo cubano de la revolución que la revolución no pueda darle."
 autor: "jose-marti"
+temas:
+  - "la-patria"
 slug: "jose-marti-nada-espera-el-pueblo-cubano-de-la"
 procedencia:
   obra: "El tercer año del partido revolucionario cubano"
