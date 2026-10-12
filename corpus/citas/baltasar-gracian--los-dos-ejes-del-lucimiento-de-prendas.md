@@ -1,6 +1,8 @@
 ---
 texto: "Los dos ejes del lucimiento de prendas: el uno sin el otro, felicidad a medias."
 autor: "baltasar-gracian"
+temas:
+  - "la-felicidad"
 slug: "baltasar-gracian-los-dos-ejes-del-lucimiento-de-prendas"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

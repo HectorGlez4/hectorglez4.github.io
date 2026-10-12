@@ -1,6 +1,8 @@
 ---
 texto: "No; la justicia para brillar ha menester largos combates, sangrientos, pero menos dolorosos que el reinado tranquilo de la iniquidad."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-no-la-justicia-para-brillar-ha-menester"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

@@ -1,6 +1,8 @@
 ---
 texto: "Admirar al hombre honesto es rebajarse; adorarlo es envilecerse."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-admirar-al-hombre-honesto-es-rebajarse-adorarlo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

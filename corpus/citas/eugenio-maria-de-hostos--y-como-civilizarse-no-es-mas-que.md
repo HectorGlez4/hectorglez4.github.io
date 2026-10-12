@@ -1,7 +1,9 @@
 ---
-texto: "Pero, seres de razón, civilizar no es desolar; civilizar no es sustituir la población de un territorio con los advenedizos que ponemos en lugar de ella."
+texto: "Y como civilizarse no es más que elevarse en la escala de la racionalidad humana, es evidente que civilizarse es un deber."
 autor: "eugenio-maria-de-hostos"
-slug: "eugenio-maria-de-hostos-pero-seres-de-razon-civilizar-no-es"
+temas:
+  - "el-deber"
+slug: "eugenio-maria-de-hostos-y-como-civilizarse-no-es-mas-que"
 procedencia:
   obra: "Moral social"
   año: 1917

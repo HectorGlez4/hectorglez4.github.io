@@ -1,6 +1,8 @@
 ---
 texto: "Tenían razón: comprendían su época y sabían servirla."
 autor: "juan-bautista-alberdi"
+temas:
+  - "el-tiempo"
 slug: "juan-bautista-alberdi-tenian-razon-comprendian-su-epoca-y-sabian"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

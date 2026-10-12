@@ -1,7 +1,9 @@
 ---
-texto: "Todo idealismo es, por eso, un afán de cultura intensa: cuenta entre sus enemigos más audaces á la ignorancia, madrastra de obstinadas rutinas."
+texto: "La decadencia del hombre que envejece está representada por una regresión sistemática de la intelectualidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-idealismo-es-por-eso-un-afan"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-la-decadencia-del-hombre-que-envejece-esta"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

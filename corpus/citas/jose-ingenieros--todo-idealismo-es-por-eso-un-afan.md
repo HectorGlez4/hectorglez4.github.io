@@ -1,7 +1,9 @@
 ---
-texto: "Pueden practicar el mal por inercia y el bien por equivocación; se entregan á los acontecimientos por incapacidad de orientarlos."
+texto: "Todo idealismo es, por eso, un afán de cultura intensa: cuenta entre sus enemigos más audaces á la ignorancia, madrastra de obstinadas rutinas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-pueden-practicar-el-mal-por-inercia-y"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-todo-idealismo-es-por-eso-un-afan"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

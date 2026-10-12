@@ -1,7 +1,9 @@
 ---
-texto: "La excesiva prudencia de los mediocres ha paralizado siempre las iniciativas más fecundas."
+texto: "Pueden practicar el mal por inercia y el bien por equivocación; se entregan á los acontecimientos por incapacidad de orientarlos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-excesiva-prudencia-de-los-mediocres-ha"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-pueden-practicar-el-mal-por-inercia-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

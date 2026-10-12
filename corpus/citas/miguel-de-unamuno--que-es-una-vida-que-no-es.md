@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué es una vida que no es mía, ni tuya, ni de otro cualquiera?"
 autor: "miguel-de-unamuno"
+temas:
+  - "la-vida"
 slug: "miguel-de-unamuno-que-es-una-vida-que-no-es"
 procedencia:
   obra: "¡Adentro!"

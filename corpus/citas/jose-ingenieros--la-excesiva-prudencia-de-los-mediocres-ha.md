@@ -1,7 +1,9 @@
 ---
-texto: "La decadencia del hombre que envejece está representada por una regresión sistemática de la intelectualidad."
+texto: "La excesiva prudencia de los mediocres ha paralizado siempre las iniciativas más fecundas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-decadencia-del-hombre-que-envejece-esta"
+temas:
+  - "la-prudencia"
+slug: "jose-ingenieros-la-excesiva-prudencia-de-los-mediocres-ha"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

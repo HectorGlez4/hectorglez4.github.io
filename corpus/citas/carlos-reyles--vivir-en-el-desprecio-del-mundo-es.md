@@ -1,6 +1,8 @@
 ---
 texto: "Vivir en el desprecio del mundo es el pináculo de la sabiduría; desdeñar las riquezas y las actividades renumeradoras, es vivir filosóficamente."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-vivir-en-el-desprecio-del-mundo-es"
 procedencia:
   obra: "La Muerte Del Cisne"

@@ -1,6 +1,8 @@
 ---
 texto: "La naturaleza ha hecho al hombre y a la mujer diferentes, pero armónicos; la sociedad los desfigura, de modo que vienen en muchos casos a ser opuestos."
 autor: "concepcion-arenal"
+temas:
+  - "la-vida"
 slug: "concepcion-arenal-la-naturaleza-ha-hecho-al-hombre-y"
 procedencia:
   obra: "La mujer del porvenir"

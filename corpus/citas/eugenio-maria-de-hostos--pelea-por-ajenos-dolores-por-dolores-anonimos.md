@@ -1,6 +1,8 @@
 ---
 texto: "Pelea por ajenos dolores, por dolores anónimos, con la seguridad de no alcanzar por recompensa ni la gloria."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-virtud"
 slug: "eugenio-maria-de-hostos-pelea-por-ajenos-dolores-por-dolores-anonimos"
 procedencia:
   obra: "Moral social"

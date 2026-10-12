@@ -1,6 +1,8 @@
 ---
 texto: "Ni la soberbia es vicio del que concede la potestad, sino del alma que perversamente ama su potestad, vilipendiando la potestad más justa del que es más poderoso."
 autor: "agustin-de-hipona"
+temas:
+  - "la-humildad"
 slug: "agustin-de-hipona-ni-la-soberbia-es-vicio-del-que"
 procedencia:
   obra: "La ciudad de Dios"
