@@ -1,6 +1,8 @@
 ---
 texto: "El interes que se erigiera en ídolo, se convierte en víctima."
 autor: "jaime-balmes"
+temas:
+  - "la-riqueza"
 slug: "jaime-balmes-el-interes-que-se-erigiera-en-idolo"
 procedencia:
   obra: "El Criterio"

@@ -1,7 +1,9 @@
 ---
-texto: "Los partidos políticos son agregados de preocupaciones, de aspiraciones, de intereses y de caracteres."
+texto: "El negro que se aísla, provoca a aislarse al blanco."
 autor: "jose-marti"
-slug: "jose-marti-los-partidos-politicos-son-agregados-de-preocupaciones"
+temas:
+  - "la-justicia"
+slug: "jose-marti-el-negro-que-se-aisla-provoca-a"
 procedencia:
   obra: "Mi raza"
 estadoDerechos: "dominio-público"

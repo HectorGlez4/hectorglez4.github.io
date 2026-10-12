@@ -1,6 +1,8 @@
 ---
 texto: "La calumnia, segura de no ser agredida, corre al aire libre."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-la-calumnia-segura-de-no-ser-agredida"
 procedencia:
   obra: "El revólver"

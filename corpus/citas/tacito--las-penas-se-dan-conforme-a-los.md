@@ -1,6 +1,8 @@
 ---
 texto: "Las penas se dan conforme a los delitos."
 autor: "tacito"
+temas:
+  - "la-justicia"
 slug: "tacito-las-penas-se-dan-conforme-a-los"
 procedencia:
   obra: "Del Origen y del Territorio de los Germanos"

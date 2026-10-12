@@ -1,6 +1,8 @@
 ---
 texto: "El sabio, porque comprende, y el santo, porque perdona."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-virtud"
 slug: "gustavo-sanchez-galarraga-el-sabio-porque-comprende-y-el-santo"
 procedencia:
   obra: "A Flor De Piel: Frases"

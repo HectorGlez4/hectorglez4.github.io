@@ -1,6 +1,8 @@
 ---
 texto: "La manía de los códigos viene de la vanidad de los emperadores."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-la-mania-de-los-codigos-viene-de"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

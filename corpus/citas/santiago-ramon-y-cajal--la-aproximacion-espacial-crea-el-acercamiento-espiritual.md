@@ -1,7 +1,9 @@
 ---
-texto: "La cultura aun elemental implica cierto desahogo económico."
+texto: "La aproximación espacial crea el acercamiento espiritual."
 autor: "santiago-ramon-y-cajal"
-slug: "santiago-ramon-y-cajal-la-cultura-aun-elemental-implica-cierto-desahogo"
+temas:
+  - "la-amistad"
+slug: "santiago-ramon-y-cajal-la-aproximacion-espacial-crea-el-acercamiento-espiritual"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
 estadoDerechos: "dominio-público"

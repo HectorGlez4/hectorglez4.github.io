@@ -1,7 +1,9 @@
 ---
-texto: "La política se degrada, conviértese en profesión."
+texto: "El envidioso activo posee una elocuencia intrépida, disimulando con niágaras de palabras su estiptiquez de ideas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-politica-se-degrada-conviertese-en-profesion"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-envidioso-activo-posee-una-elocuencia-intrepida"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

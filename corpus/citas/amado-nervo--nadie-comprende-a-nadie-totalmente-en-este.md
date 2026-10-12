@@ -1,6 +1,8 @@
 ---
 texto: "Nadie comprende a nadie totalmente en este mundo; si tal comprensión fuese posible, la identidad se manifestaría en seguida, y cesaría el fenómeno de las separatividad."
 autor: "amado-nervo"
+temas:
+  - "la-amistad"
 slug: "amado-nervo-nadie-comprende-a-nadie-totalmente-en-este"
 procedencia:
   obra: "Plenitud"

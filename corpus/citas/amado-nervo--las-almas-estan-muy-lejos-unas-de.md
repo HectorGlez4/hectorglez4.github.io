@@ -1,6 +1,8 @@
 ---
 texto: "Las almas están muy lejos unas de otras."
 autor: "amado-nervo"
+temas:
+  - "la-amistad"
 slug: "amado-nervo-las-almas-estan-muy-lejos-unas-de"
 procedencia:
   obra: "Plenitud"

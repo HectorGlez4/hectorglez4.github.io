@@ -1,6 +1,8 @@
 ---
 texto: "La burocracia es una masonería de voracidades en acecho."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-la-burocracia-es-una-masoneria-de-voracidades"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

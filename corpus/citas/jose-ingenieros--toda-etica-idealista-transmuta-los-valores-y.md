@@ -1,6 +1,8 @@
 ---
 texto: "Toda ética idealista transmuta los valores y eleva el rango del mérito; las virtudes y los vicios trocan sus matices, en más ó en menos, creando equilibrios nuevos."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-toda-etica-idealista-transmuta-los-valores-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

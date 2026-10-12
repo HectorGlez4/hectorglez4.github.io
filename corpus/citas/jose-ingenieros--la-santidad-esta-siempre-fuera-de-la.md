@@ -1,6 +1,8 @@
 ---
 texto: "La santidad está siempre fuera de la hipocresía colectiva."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-la-santidad-esta-siempre-fuera-de-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

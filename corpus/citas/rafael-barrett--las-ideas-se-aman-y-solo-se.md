@@ -1,6 +1,8 @@
 ---
 texto: "Las ideas se aman, y sólo se odian las personas."
 autor: "rafael-barrett"
+temas:
+  - "la-amistad"
 slug: "rafael-barrett-las-ideas-se-aman-y-solo-se"
 procedencia:
   obra: "El odio"

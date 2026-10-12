@@ -1,6 +1,8 @@
 ---
 texto: "Nada corrompe ni malea tanto como el ejercicio de la autoridad, por momentánea y reducida que sea."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-libertad"
 slug: "manuel-gonzalez-prada-nada-corrompe-ni-malea-tanto-como-el"
 procedencia:
   obra: "La autoridad"

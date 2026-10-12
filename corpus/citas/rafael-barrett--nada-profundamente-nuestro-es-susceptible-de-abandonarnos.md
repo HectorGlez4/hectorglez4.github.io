@@ -1,6 +1,8 @@
 ---
 texto: "Nada profundamente nuestro es susceptible de abandonarnos."
 autor: "rafael-barrett"
+temas:
+  - "la-libertad"
 slug: "rafael-barrett-nada-profundamente-nuestro-es-susceptible-de-abandonarnos"
 procedencia:
   obra: "El robo"

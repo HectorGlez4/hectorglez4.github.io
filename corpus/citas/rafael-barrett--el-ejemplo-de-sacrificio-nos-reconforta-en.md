@@ -1,6 +1,8 @@
 ---
 texto: "El ejemplo de sacrificio nos reconforta en lo más esencial de nuestro ser."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-el-ejemplo-de-sacrificio-nos-reconforta-en"
 procedencia:
   obra: "Más allá del patriotismo"

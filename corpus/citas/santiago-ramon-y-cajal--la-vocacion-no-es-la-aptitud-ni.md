@@ -1,6 +1,8 @@
 ---
 texto: "La vocación no es la aptitud, ni la aptitud conduce necesariamente al éxito."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-trabajo"
 slug: "santiago-ramon-y-cajal-la-vocacion-no-es-la-aptitud-ni"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
