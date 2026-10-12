@@ -1,6 +1,8 @@
 ---
 texto: "Este es el anhelo: la sed de eternidad es lo que se llama amor entre los hombres; y quien a otro ama es que quiere eternizarse en él."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-amor"
 slug: "miguel-de-unamuno-este-es-el-anhelo-la-sed-de"
 procedencia:
   obra: "Del sentimiento trágico de la vida/III"

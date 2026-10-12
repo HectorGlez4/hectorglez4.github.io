@@ -1,6 +1,8 @@
 ---
 texto: "Este culto, no a la muerte, sino a la inmortalidad, inicia y conserva las religiones."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-muerte"
 slug: "miguel-de-unamuno-este-culto-no-a-la-muerte-sino"
 procedencia:
   obra: "Del sentimiento trágico de la vida/III"

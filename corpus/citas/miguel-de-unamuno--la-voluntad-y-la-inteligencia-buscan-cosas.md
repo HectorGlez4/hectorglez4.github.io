@@ -1,6 +1,8 @@
 ---
 texto: "La voluntad y la inteligencia buscan cosas opuestas: aquélla absorber al mundo en nosotros, apropiárnoslo; y ésta, que seamos absorbidos en el mundo."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-voluntad-y-la-inteligencia-buscan-cosas"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

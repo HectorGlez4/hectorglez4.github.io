@@ -1,7 +1,9 @@
 ---
-texto: "Cuando tratamos de ejecutar alguna cosa, las pasiones son á veces un auxiliar excelente; mas para prepararla en nuestro entendimiento, son consejeros muy peligrosos."
+texto: "El deber de la disciplina y del honor ¿se extenderá hasta un sacrificio inútil?"
 autor: "jaime-balmes"
-slug: "jaime-balmes-cuando-tratamos-de-ejecutar-alguna-cosa-las"
+temas:
+  - "el-deber"
+slug: "jaime-balmes-el-deber-de-la-disciplina-y-del"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

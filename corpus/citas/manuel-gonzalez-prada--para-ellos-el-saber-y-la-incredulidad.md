@@ -1,6 +1,8 @@
 ---
 texto: "Para ellos, el saber y la incredulidad; para ellas, la ignorancia y el fanatismo."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-saber"
 slug: "manuel-gonzalez-prada-para-ellos-el-saber-y-la-incredulidad"
 procedencia:
   obra: "Las esclavas de la Iglesia"

@@ -1,7 +1,9 @@
 ---
-texto: "En la vida privada, la conducta pequeña es la de los manejos ignobles, de las miras mezquinas, del vicio; la conducta grande es la que inspira la generosidad y la virtud."
+texto: "Basta haber estudiado el corazon del hombre para conocer que estas escenas no son raras; y que jugamos con nosotros mismos de una manera lastimosa."
 autor: "jaime-balmes"
-slug: "jaime-balmes-en-la-vida-privada-la-conducta-pequena"
+temas:
+  - "el-error"
+slug: "jaime-balmes-basta-haber-estudiado-el-corazon-del-hombre"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

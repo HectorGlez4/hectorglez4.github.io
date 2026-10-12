@@ -1,6 +1,8 @@
 ---
 texto: "La regla de nuestro siglo es, no hacerse matar por sistema alguno: en filosofía, la tolerancia es la ley de nuestro tiempo."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-libertad"
 slug: "juan-bautista-alberdi-la-regla-de-nuestro-siglo-es-no"
 procedencia:
   obra: "Ideas para presidir a la confección del curso de filosofía contemporánea"

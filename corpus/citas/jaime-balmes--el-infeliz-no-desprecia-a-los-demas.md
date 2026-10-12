@@ -1,7 +1,9 @@
 ---
-texto: "Basta haber estudiado el corazon del hombre para conocer que estas escenas no son raras; y que jugamos con nosotros mismos de una manera lastimosa."
+texto: "El infeliz no desprecia á los demas hombres, los respeta, quizas los admira y teme."
 autor: "jaime-balmes"
-slug: "jaime-balmes-basta-haber-estudiado-el-corazon-del-hombre"
+temas:
+  - "la-adversidad"
+slug: "jaime-balmes-el-infeliz-no-desprecia-a-los-demas"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

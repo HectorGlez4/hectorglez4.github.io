@@ -1,6 +1,8 @@
 ---
 texto: "Los vicios más cobardes, la difamación, la maledicencia, la calumnia, porque matan el tiempo, sobreviven."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-palabra"
 slug: "eugenio-maria-de-hostos-los-vicios-mas-cobardes-la-difamacion-la"
 procedencia:
   obra: "Moral social"

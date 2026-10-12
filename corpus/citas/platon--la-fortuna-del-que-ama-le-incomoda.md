@@ -1,6 +1,8 @@
 ---
 texto: "La fortuna del que ama le incomoda, y se regocijará con su ruina."
 autor: "platon"
+temas:
+  - "la-envidia"
 slug: "platon-la-fortuna-del-que-ama-le-incomoda"
 procedencia:
   obra: "Fedro"

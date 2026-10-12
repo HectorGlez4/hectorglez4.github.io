@@ -1,6 +1,8 @@
 ---
 texto: "En el crepúsculo medra el vicio, que la mediocridad ampara; en la noche irrumpe el delito, reprimido por leyes que la sociedad forja."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-en-el-crepusculo-medra-el-vicio-que"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

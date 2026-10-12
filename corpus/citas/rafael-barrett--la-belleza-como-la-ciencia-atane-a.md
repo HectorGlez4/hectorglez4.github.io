@@ -1,6 +1,8 @@
 ---
 texto: "La belleza, como la ciencia, atañe a la colectividad."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-belleza-como-la-ciencia-atane-a"
 procedencia:
   obra: "El porno-cinematógrafo"

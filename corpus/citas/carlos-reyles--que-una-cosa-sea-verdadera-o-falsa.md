@@ -1,6 +1,8 @@
 ---
 texto: "Que una cosa sea verdadera ó falsa desde la torre de marfil del pensamiento, ¿qué importa?: lo que importa es que sea útil á la vida."
 autor: "carlos-reyles"
+temas:
+  - "la-verdad"
 slug: "carlos-reyles-que-una-cosa-sea-verdadera-o-falsa"
 procedencia:
   obra: "La Muerte Del Cisne"

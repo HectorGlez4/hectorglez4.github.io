@@ -1,6 +1,8 @@
 ---
 texto: "La guerra se llevó los padres y no los ha devuelto aún."
 autor: "rafael-barrett"
+temas:
+  - "la-adversidad"
 slug: "rafael-barrett-la-guerra-se-llevo-los-padres-y"
 procedencia:
   obra: "Hogares heridos"
