@@ -1,0 +1,13 @@
+---
+texto: "-Busca cualquier pretexto para que no te obliguen a ir esta tarde."
+autor: "soledad-acosta-de-samper"
+slug: "soledad-acosta-de-samper-busca-cualquier-pretexto-para-que-no-te"
+procedencia:
+  obra: "Un crimen (Samper)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Un_crimen_(Samper)"
+---

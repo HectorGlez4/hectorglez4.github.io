@@ -1,0 +1,13 @@
+---
+texto: "-Me preguntó por quiénes pensaba votar y me dio una lista para que fuera el domingo."
+autor: "soledad-acosta-de-samper"
+slug: "soledad-acosta-de-samper-me-pregunto-por-quienes-pensaba-votar-y"
+procedencia:
+  obra: "Un crimen (Samper)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Un_crimen_(Samper)"
+---

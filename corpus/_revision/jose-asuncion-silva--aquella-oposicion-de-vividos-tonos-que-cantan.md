@@ -1,0 +1,13 @@
+---
+texto: "Aquella oposición de vívidos tonos que cantan, tentaría la paleta de un colorista."
+autor: "jose-asuncion-silva"
+slug: "jose-asuncion-silva-aquella-oposicion-de-vividos-tonos-que-cantan"
+procedencia:
+  obra: "De sobremesa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/De_sobremesa"
+---

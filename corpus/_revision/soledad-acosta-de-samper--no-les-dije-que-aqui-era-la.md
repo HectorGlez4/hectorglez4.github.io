@@ -1,0 +1,13 @@
+---
+texto: "-¿No les dije que aquí era la estancia de Rafael?"
+autor: "soledad-acosta-de-samper"
+slug: "soledad-acosta-de-samper-no-les-dije-que-aqui-era-la"
+procedencia:
+  obra: "Un crimen (Samper)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Un_crimen_(Samper)"
+---

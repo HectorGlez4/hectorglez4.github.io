@@ -1,0 +1,13 @@
+---
+texto: "-Me dio a entender que creía en una calumnia..."
+autor: "soledad-acosta-de-samper"
+slug: "soledad-acosta-de-samper-me-dio-a-entender-que-creia-en"
+procedencia:
+  obra: "Novelas y cuadros de la vida sur-americana"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Dolores"
+---
