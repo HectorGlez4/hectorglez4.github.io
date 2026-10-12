@@ -1,7 +1,9 @@
 ---
-texto: "Es notorio que la infancia y la senectud se tocan; todos los idiomas consagran esta observación en refranes harto conocidos."
+texto: "Son estados sin ser naciones; países, no patrias."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-notorio-que-la-infancia-y-la"
+temas:
+  - "la-patria"
+slug: "jose-ingenieros-son-estados-sin-ser-naciones-paises-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

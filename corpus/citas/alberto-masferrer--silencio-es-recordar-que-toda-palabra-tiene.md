@@ -1,6 +1,8 @@
 ---
 texto: "Silencio es recordar que toda palabra tiene un hoy y un mañana; es decir; un valor de momento y un alcance futuro incalculable."
 autor: "alberto-masferrer"
+temas:
+  - "la-palabra"
 slug: "alberto-masferrer-silencio-es-recordar-que-toda-palabra-tiene"
 procedencia:
   obra: "El elogio del silencio"

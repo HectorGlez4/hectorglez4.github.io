@@ -1,6 +1,8 @@
 ---
 texto: "Más veen muchos ojos que dos: no se apodera tan presto el veneno de la injusticia de muchos corazones como se apodera de uno solo."
 autor: "miguel-de-cervantes"
+temas:
+  - "la-justicia"
 slug: "miguel-de-cervantes-mas-veen-muchos-ojos-que-dos-no"
 procedencia:
   obra: "Novelas ejemplares"

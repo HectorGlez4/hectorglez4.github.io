@@ -1,6 +1,8 @@
 ---
 texto: "En lo más hondo de todas las catástrofes, por espantosas que las supongas, quedará siempre tu yo, inmortal, inaccesible, al cual nada ni nadie puede hacer mal."
 autor: "amado-nervo"
+temas:
+  - "la-adversidad"
 slug: "amado-nervo-en-lo-mas-hondo-de-todas-las"
 procedencia:
   obra: "Plenitud"

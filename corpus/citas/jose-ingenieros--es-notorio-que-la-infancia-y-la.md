@@ -1,7 +1,9 @@
 ---
-texto: "Para aprovechar á los indignos han tenido que humillárseles mansamente; los honores que no se conquistan hay que pagarlos con abajamientos."
+texto: "Es notorio que la infancia y la senectud se tocan; todos los idiomas consagran esta observación en refranes harto conocidos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-para-aprovechar-a-los-indignos-han-tenido"
+temas:
+  - "el-tiempo"
+slug: "jose-ingenieros-es-notorio-que-la-infancia-y-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

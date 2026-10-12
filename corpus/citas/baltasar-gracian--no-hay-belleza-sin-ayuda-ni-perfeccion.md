@@ -1,6 +1,8 @@
 ---
 texto: "No hay belleza sin ayuda, ni perfección que no dé en bárbara sin el realce del artificio: a lo malo socorre y lo bueno lo perfecciona."
 autor: "baltasar-gracian"
+temas:
+  - "la-virtud"
 slug: "baltasar-gracian-no-hay-belleza-sin-ayuda-ni-perfeccion"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

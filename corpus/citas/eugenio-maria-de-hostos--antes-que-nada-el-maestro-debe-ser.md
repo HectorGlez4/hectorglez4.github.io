@@ -1,6 +1,8 @@
 ---
 texto: "Antes que nada, el maestro debe ser educador de la conciencia infantil y juvenil; más que nada, la escuela es un fundamento de moral."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-saber"
 slug: "eugenio-maria-de-hostos-antes-que-nada-el-maestro-debe-ser"
 procedencia:
   obra: "Moral social"

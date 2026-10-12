@@ -1,7 +1,9 @@
 ---
-texto: "Son estados sin ser naciones; países, no patrias."
+texto: "Para aprovechar á los indignos han tenido que humillárseles mansamente; los honores que no se conquistan hay que pagarlos con abajamientos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-son-estados-sin-ser-naciones-paises-no"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-para-aprovechar-a-los-indignos-han-tenido"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

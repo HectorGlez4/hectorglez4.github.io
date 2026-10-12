@@ -1,6 +1,8 @@
 ---
 texto: "Se perece como unidad; se subsiste como acción."
 autor: "rafael-barrett"
+temas:
+  - "la-muerte"
 slug: "rafael-barrett-se-perece-como-unidad-se-subsiste-como"
 procedencia:
   obra: "El que fue"

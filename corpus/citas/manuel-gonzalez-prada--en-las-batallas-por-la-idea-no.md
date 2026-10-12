@@ -1,6 +1,8 @@
 ---
 texto: "En las batallas por la idea no se conoce auxiliar más poderoso que el amor."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-amor"
 slug: "manuel-gonzalez-prada-en-las-batallas-por-la-idea-no"
 procedencia:
   obra: "Las esclavas de la Iglesia"

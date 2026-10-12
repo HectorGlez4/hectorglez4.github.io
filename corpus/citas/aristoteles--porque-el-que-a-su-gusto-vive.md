@@ -1,6 +1,8 @@
 ---
 texto: "Porque el que a su gusto vive, ni escucha la razón que le desaconseje aquello, ni tampoco la entenderá."
 autor: "aristoteles"
+temas:
+  - "la-razon"
 slug: "aristoteles-porque-el-que-a-su-gusto-vive"
 procedencia:
   obra: "Ética a Nicómaco"

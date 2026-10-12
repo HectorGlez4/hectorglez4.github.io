@@ -1,6 +1,8 @@
 ---
 texto: "Nos resignamos á que unos anden á pie y otros en coche; pero no que unos vayan descalzos y otros que tengan media docena de carruajes."
 autor: "concepcion-arenal"
+temas:
+  - "la-riqueza"
 slug: "concepcion-arenal-nos-resignamos-a-que-unos-anden-a"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
