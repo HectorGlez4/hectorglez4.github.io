@@ -1,7 +1,9 @@
 ---
-texto: "Olvida que no hay perfección sin esfuerzo: sólo pueden mirar al sol de frente los que osan clavar su pupila sin temer la ceguera."
+texto: "Suele tener cómplices, pero no tiene amigos; la hipocresía no ata por el corazón, sino por el interés."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-olvida-que-no-hay-perfeccion-sin-esfuerzo"
+temas:
+  - "la-amistad"
+slug: "jose-ingenieros-suele-tener-complices-pero-no-tiene-amigos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

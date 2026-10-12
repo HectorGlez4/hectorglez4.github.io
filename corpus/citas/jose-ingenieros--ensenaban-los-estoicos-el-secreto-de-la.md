@@ -1,7 +1,9 @@
 ---
-texto: "Suele tener cómplices, pero no tiene amigos; la hipocresía no ata por el corazón, sino por el interés."
+texto: "Enseñaban los estoicos el secreto de la dignidad: contentarse con lo que se tiene, restringiendo las propias necesidades."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-suele-tener-complices-pero-no-tiene-amigos"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-ensenaban-los-estoicos-el-secreto-de-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

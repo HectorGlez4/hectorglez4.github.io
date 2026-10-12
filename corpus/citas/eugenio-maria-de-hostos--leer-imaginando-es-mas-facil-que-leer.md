@@ -1,6 +1,8 @@
 ---
 texto: "Leer imaginando es más fácil que leer pensando."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-saber"
 slug: "eugenio-maria-de-hostos-leer-imaginando-es-mas-facil-que-leer"
 procedencia:
   obra: "Moral social"

@@ -1,7 +1,9 @@
 ---
-texto: "Enseñaban los estoicos el secreto de la dignidad: contentarse con lo que se tiene, restringiendo las propias necesidades."
+texto: "Olvida que no hay perfección sin esfuerzo: sólo pueden mirar al sol de frente los que osan clavar su pupila sin temer la ceguera."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-ensenaban-los-estoicos-el-secreto-de-la"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-olvida-que-no-hay-perfeccion-sin-esfuerzo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

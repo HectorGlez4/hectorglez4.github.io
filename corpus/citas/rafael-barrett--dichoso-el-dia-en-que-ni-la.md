@@ -1,6 +1,8 @@
 ---
 texto: "Dichoso el día en que ni la fortuna ni la miseria se hereden."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-dichoso-el-dia-en-que-ni-la"
 procedencia:
   obra: "Doctores"

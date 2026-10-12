@@ -1,6 +1,8 @@
 ---
 texto: "Siempre se estima más el fin que mueve a la obra que la obra hecha."
 autor: "agustin-de-hipona"
+temas:
+  - "el-trabajo"
 slug: "agustin-de-hipona-siempre-se-estima-mas-el-fin-que"
 procedencia:
   obra: "La ciudad de Dios"
