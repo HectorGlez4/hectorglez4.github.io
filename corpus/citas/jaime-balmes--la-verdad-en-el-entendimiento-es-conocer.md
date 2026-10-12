@@ -1,7 +1,9 @@
 ---
-texto: "El hombre emplea la hipocresía para engañarse á sí mismo, acaso mas que para engañar á los otros."
+texto: "La verdad en el entendimiento, es conocer las cosas tales como son."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-hombre-emplea-la-hipocresia-para-enganarse"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-la-verdad-en-el-entendimiento-es-conocer"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

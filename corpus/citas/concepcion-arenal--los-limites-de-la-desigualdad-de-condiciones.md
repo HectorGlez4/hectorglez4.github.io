@@ -1,6 +1,8 @@
 ---
 texto: "Los límites de la desigualdad de condiciones están en la necesidad y en la justicia."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-los-limites-de-la-desigualdad-de-condiciones"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

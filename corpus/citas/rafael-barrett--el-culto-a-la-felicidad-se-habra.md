@@ -1,7 +1,9 @@
 ---
-texto: "La muerte deja intactos los problemas de la vida."
+texto: "El culto a la felicidad se habrá convertido en el culto al dolor, pero el templo estará en pie."
 autor: "rafael-barrett"
-slug: "rafael-barrett-la-muerte-deja-intactos-los-problemas-de"
+temas:
+  - "la-felicidad"
+slug: "rafael-barrett-el-culto-a-la-felicidad-se-habra"
 procedencia:
   obra: "Pasionales"
 estadoDerechos: "dominio-público"

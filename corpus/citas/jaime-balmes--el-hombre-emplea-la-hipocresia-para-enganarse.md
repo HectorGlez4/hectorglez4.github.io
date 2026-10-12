@@ -1,7 +1,9 @@
 ---
-texto: "La verdad en proponerse un fin, es proponerse el fin conveniente y debido, segun las circunstancias."
+texto: "El hombre emplea la hipocresía para engañarse á sí mismo, acaso mas que para engañar á los otros."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-verdad-en-proponerse-un-fin-es"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-el-hombre-emplea-la-hipocresia-para-enganarse"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

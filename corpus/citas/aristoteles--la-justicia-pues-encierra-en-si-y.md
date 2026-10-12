@@ -1,6 +1,8 @@
 ---
 texto: "La justicia, pues, encierra en sí y comprende todas las virtudes, y es la más perfeta de todas la virtudes, porque es el uso de la virtud que es más perfeta."
 autor: "aristoteles"
+temas:
+  - "la-justicia"
 slug: "aristoteles-la-justicia-pues-encierra-en-si-y"
 procedencia:
   obra: "Ética a Nicómaco"

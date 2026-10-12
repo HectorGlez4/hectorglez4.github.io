@@ -1,6 +1,8 @@
 ---
 texto: "La experiencia, sólo ella, decide sobre la legitimidad de los ideales, en cada tiempo y lugar."
 autor: "jose-ingenieros"
+temas:
+  - "el-saber"
 slug: "jose-ingenieros-la-experiencia-solo-ella-decide-sobre-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

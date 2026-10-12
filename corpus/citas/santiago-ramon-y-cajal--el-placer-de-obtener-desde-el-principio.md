@@ -1,6 +1,8 @@
 ---
 texto: "El placer de obtener desde el principio algún fruto de sus afanes, aumentará progresivamente su afición al trabajo."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-trabajo"
 slug: "santiago-ramon-y-cajal-el-placer-de-obtener-desde-el-principio"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

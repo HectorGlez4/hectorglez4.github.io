@@ -1,6 +1,8 @@
 ---
 texto: "La filosofía es un producto humano de cada filósofo, y cada filósofo es un hombre de carne y hueso que se dirige a otros hombres de carne y hueso como él."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-la-filosofia-es-un-producto-humano-de"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

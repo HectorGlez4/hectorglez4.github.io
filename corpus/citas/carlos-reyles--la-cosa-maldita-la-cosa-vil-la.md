@@ -1,6 +1,8 @@
 ---
 texto: "La cosa maldita, la cosa vil: la Riqueza, es acumulación y conservación de voluntad, como la ciencia es acumulación y conservación de pensamiento."
 autor: "carlos-reyles"
+temas:
+  - "la-riqueza"
 slug: "carlos-reyles-la-cosa-maldita-la-cosa-vil-la"
 procedencia:
   obra: "La Muerte Del Cisne"

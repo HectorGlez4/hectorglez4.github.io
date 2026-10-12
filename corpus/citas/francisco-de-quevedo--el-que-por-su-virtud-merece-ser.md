@@ -1,6 +1,8 @@
 ---
 texto: "El que por su virtud merece ser hijo de otro, no lo siendo, tiene mejor línea que el que lo es y no lo merece."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-el-que-por-su-virtud-merece-ser"
 procedencia:
   obra: "Marco Bruto"

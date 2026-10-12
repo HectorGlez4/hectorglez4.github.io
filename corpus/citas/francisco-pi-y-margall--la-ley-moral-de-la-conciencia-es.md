@@ -1,6 +1,8 @@
 ---
 texto: "La ley moral de la conciencia es esencialmente modificable y variable: la ley moral de la razon es inmutable y permanente, como la razon misma."
 autor: "francisco-pi-y-margall"
+temas:
+  - "la-razon"
 slug: "francisco-pi-y-margall-la-ley-moral-de-la-conciencia-es"
 procedencia:
   obra: "Defensa de la Internacional - Parte II"

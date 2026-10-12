@@ -1,7 +1,9 @@
 ---
-texto: "La verdad en el entendimiento, es conocer las cosas tales como son."
+texto: "La verdad en proponerse un fin, es proponerse el fin conveniente y debido, segun las circunstancias."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-verdad-en-el-entendimiento-es-conocer"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-la-verdad-en-proponerse-un-fin-es"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

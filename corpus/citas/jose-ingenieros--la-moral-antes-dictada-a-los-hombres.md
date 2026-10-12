@@ -1,6 +1,8 @@
 ---
 texto: "La moral, antes dictada a los hombres por la misma divinidad, aparece ahora impuesta al hombre por su propia razón."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-la-moral-antes-dictada-a-los-hombres"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

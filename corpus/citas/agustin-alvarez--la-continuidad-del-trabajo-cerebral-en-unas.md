@@ -1,6 +1,8 @@
 ---
 texto: "La continuidad del trabajo cerebral en unas mismas sencillas operaciones, lo hace rutinario, automático, casi instintivo."
 autor: "agustin-alvarez"
+temas:
+  - "el-trabajo"
 slug: "agustin-alvarez-la-continuidad-del-trabajo-cerebral-en-unas"
 procedencia:
   obra: "La transformación de las razas en América"
