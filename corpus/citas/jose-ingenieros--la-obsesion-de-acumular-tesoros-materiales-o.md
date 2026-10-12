@@ -1,7 +1,9 @@
 ---
-texto: "El hábito de resignarse para medrar crea resortes cada vez más sólidos, automatismos que destiñen para siempre todo rasgo individual."
+texto: "La obsesión de acumular tesoros materiales, ó el torpe afán de usufructuarlos en la holganza, borra del espíritu colectivo todo rastro de ensueño."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-habito-de-resignarse-para-medrar-crea"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-la-obsesion-de-acumular-tesoros-materiales-o"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Los inquisidores perdonan el crimen, no la idea."
 autor: "rafael-barrett"
+temas:
+  - "la-libertad"
 slug: "rafael-barrett-los-inquisidores-perdonan-el-crimen-no-la"
 procedencia:
   obra: "Lápida"

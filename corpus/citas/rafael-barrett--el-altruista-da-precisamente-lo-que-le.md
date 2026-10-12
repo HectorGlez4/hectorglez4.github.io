@@ -1,7 +1,9 @@
 ---
-texto: "La abundancia reduce el número de egoístas."
+texto: "El altruista da precisamente lo que le sobra."
 autor: "rafael-barrett"
-slug: "rafael-barrett-la-abundancia-reduce-el-numero-de-egoistas"
+temas:
+  - "la-virtud"
+slug: "rafael-barrett-el-altruista-da-precisamente-lo-que-le"
 procedencia:
   obra: "El altruismo y la energía"
 estadoDerechos: "dominio-público"

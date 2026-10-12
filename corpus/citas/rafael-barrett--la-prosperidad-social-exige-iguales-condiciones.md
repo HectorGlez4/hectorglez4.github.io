@@ -1,6 +1,8 @@
 ---
 texto: "La prosperidad social exige iguales condiciones."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-la-prosperidad-social-exige-iguales-condiciones"
 procedencia:
   obra: "Mi anarquismo"

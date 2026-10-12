@@ -1,6 +1,8 @@
 ---
 texto: "La facultad de elegir y de obrar brota eternamente del espíritu."
 autor: "jose-ingenieros"
+temas:
+  - "la-libertad"
 slug: "jose-ingenieros-la-facultad-de-elegir-y-de-obrar"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

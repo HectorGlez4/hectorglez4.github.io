@@ -1,6 +1,8 @@
 ---
 texto: "El hábito de la servidumbre trae consigo sentimientos de domesticidad, en los cortesanos lo mismo que en los pueblos."
 autor: "jose-ingenieros"
+temas:
+  - "la-libertad"
 slug: "jose-ingenieros-el-habito-de-la-servidumbre-trae-consigo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

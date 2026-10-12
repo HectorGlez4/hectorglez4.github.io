@@ -1,6 +1,8 @@
 ---
 texto: "Los fuertes mueren tal vez, pero no matan."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-los-fuertes-mueren-tal-vez-pero-no"
 procedencia:
   obra: "Pasionales"

@@ -1,6 +1,8 @@
 ---
 texto: "La sinceridad atrae el rencor, el rencor general provoca lo imprevisto."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-la-sinceridad-atrae-el-rencor-el-rencor"
 procedencia:
   obra: "La sinceridad"

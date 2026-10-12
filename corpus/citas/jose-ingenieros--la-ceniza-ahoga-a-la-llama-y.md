@@ -1,7 +1,9 @@
 ---
-texto: "El verdadero crítico enriquece las obras que estudia y en todo lo que toca deja un rastro de su personalidad."
+texto: "La ceniza ahoga á la llama y protege á la brasa."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-verdadero-critico-enriquece-las-obras-que"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-ceniza-ahoga-a-la-llama-y"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

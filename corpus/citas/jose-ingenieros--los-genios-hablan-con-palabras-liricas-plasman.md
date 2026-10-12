@@ -1,7 +1,9 @@
 ---
-texto: "Los contemporáneos no suelen marcar el paso á compás del genio; pero si éste ha cumplido su obra, una nueva generación estará habilitada para comprenderlo."
+texto: "Los genios hablan con palabras líricas; plasman los estadistas sus planes visionarios; ponen los héroes su corazón en la balanza del destino."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-contemporaneos-no-suelen-marcar-el-paso"
+temas:
+  - "la-palabra"
+slug: "jose-ingenieros-los-genios-hablan-con-palabras-liricas-plasman"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

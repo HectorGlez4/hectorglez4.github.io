@@ -1,7 +1,9 @@
 ---
-texto: "Los genios hablan con palabras líricas; plasman los estadistas sus planes visionarios; ponen los héroes su corazón en la balanza del destino."
+texto: "El mérito queda excluido en absoluto; basta la influencia."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-genios-hablan-con-palabras-liricas-plasman"
+temas:
+  - "la-justicia"
+slug: "jose-ingenieros-el-merito-queda-excluido-en-absoluto-basta"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
