@@ -1,6 +1,8 @@
 ---
 texto: "No son las leyes las que necesitamos cambiar; son los hombres, las cosas."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-no-son-las-leyes-las-que-necesitamos"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

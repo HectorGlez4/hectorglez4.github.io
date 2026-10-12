@@ -1,6 +1,8 @@
 ---
 texto: "Es preciso, por consiguiente, no hacer jamás injusticia, ni volver el mal por el mal, cualquiera que haya sido el que hayamos recibido."
 autor: "platon"
+temas:
+  - "la-justicia"
 slug: "platon-es-preciso-por-consiguiente-no-hacer-jamas"
 procedencia:
   obra: "Critón"

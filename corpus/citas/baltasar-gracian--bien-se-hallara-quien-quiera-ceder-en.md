@@ -1,6 +1,8 @@
 ---
 texto: "Bien se hallará quien quiera ceder en la dicha, y en el genio; pero en el ingenio, ninguno, cuanto menos una soberanía."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-bien-se-hallara-quien-quiera-ceder-en"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"
