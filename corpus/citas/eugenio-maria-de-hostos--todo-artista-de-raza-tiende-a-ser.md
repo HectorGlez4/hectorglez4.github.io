@@ -1,6 +1,8 @@
 ---
 texto: "Todo artista de raza tiende á ser original, personal, inconfundible."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-gloria"
 slug: "eugenio-maria-de-hostos-todo-artista-de-raza-tiende-a-ser"
 procedencia:
   obra: "Moral social"

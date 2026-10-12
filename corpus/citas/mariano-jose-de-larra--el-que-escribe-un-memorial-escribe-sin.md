@@ -1,6 +1,8 @@
 ---
 texto: "El que escribe un memorial escribe sin duda para sí."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-palabra"
 slug: "mariano-jose-de-larra-el-que-escribe-un-memorial-escribe-sin"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

@@ -1,7 +1,9 @@
 ---
-texto: "Cada ilusión magnífica conviértese, por las malas artes de un mago enemigo, en prosaica realidad; cada ardor generoso en desencantada ironía."
+texto: "La dicha humana no tuvo nunca amante más rendido ni servidor más fiel."
 autor: "carlos-reyles"
-slug: "carlos-reyles-cada-ilusion-magnifica-conviertese-por-las-malas"
+temas:
+  - "la-felicidad"
+slug: "carlos-reyles-la-dicha-humana-no-tuvo-nunca-amante"
 procedencia:
   obra: "La Muerte Del Cisne"
 estadoDerechos: "dominio-público"

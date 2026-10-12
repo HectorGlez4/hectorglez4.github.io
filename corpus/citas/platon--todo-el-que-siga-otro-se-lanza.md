@@ -1,6 +1,8 @@
 ---
 texto: "Todo el que siga otro se lanza por un camino desconocido."
 autor: "platon"
+temas:
+  - "la-prudencia"
 slug: "platon-todo-el-que-siga-otro-se-lanza"
 procedencia:
   obra: "Fedro"

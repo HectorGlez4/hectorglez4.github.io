@@ -1,6 +1,8 @@
 ---
 texto: "El sentimiento no transige con términos medios."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-el-sentimiento-no-transige-con-terminos-medios"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

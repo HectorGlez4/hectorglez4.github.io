@@ -1,6 +1,8 @@
 ---
 texto: "Todo arte requiere de sus apreciadores ó inteligencia ó gusto."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "el-saber"
 slug: "eugenio-maria-de-hostos-todo-arte-requiere-de-sus-apreciadores-o"
 procedencia:
   obra: "Moral social"

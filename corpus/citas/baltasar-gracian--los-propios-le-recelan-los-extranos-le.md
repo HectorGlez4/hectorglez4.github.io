@@ -1,6 +1,8 @@
 ---
 texto: "Los propios le recelan, los extraños le temen y todos le atienden, porque a todos entiende."
 autor: "baltasar-gracian"
+temas:
+  - "la-gloria"
 slug: "baltasar-gracian-los-propios-le-recelan-los-extranos-le"
 procedencia:
   obra: "El político"

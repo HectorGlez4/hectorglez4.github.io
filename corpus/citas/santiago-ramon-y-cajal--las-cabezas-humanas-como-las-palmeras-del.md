@@ -1,6 +1,8 @@
 ---
 texto: "Las cabezas humanas, como las palmeras del desierto, se fecundan a distancia."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-amistad"
 slug: "santiago-ramon-y-cajal-las-cabezas-humanas-como-las-palmeras-del"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

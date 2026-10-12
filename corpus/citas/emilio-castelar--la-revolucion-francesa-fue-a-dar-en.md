@@ -1,6 +1,8 @@
 ---
 texto: "La revolucion francesa fué á dar en la dictadura por no haber sabido producir el municipio."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-la-revolucion-francesa-fue-a-dar-en"
 procedencia:
   obra: "Correspondencia a la nación alemana"

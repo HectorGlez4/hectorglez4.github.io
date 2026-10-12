@@ -1,6 +1,8 @@
 ---
 texto: "Los deshonestos llaman deshonestas a sus acciones, y, siendo amadores de ellas, no se atreven a ser ostensores."
 autor: "agustin-de-hipona"
+temas:
+  - "la-virtud"
 slug: "agustin-de-hipona-los-deshonestos-llaman-deshonestas-a-sus-acciones"
 procedencia:
   obra: "La ciudad de Dios"

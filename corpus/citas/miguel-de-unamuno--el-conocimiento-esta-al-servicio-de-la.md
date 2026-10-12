@@ -1,6 +1,8 @@
 ---
 texto: "El conocimiento está al servicio de la necesidad de vivir, y primariamente al servicio del instinto de conservación personal."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-el-conocimiento-esta-al-servicio-de-la"
 procedencia:
   obra: "Del sentimiento trágico de la vida/II"

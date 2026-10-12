@@ -1,6 +1,8 @@
 ---
 texto: "Las teorías nos abandonan, los hechos nos defienden."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-las-teorias-nos-abandonan-los-hechos-nos"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -1,6 +1,8 @@
 ---
 texto: "El recato no se ha extinguido, como se extinguen otras virtudes: todos quieren parecer buenos aunque no lo sean, y esto conserva la debida decencia en las concurrencias."
 autor: "josefa-amar-y-borbon"
+temas:
+  - "la-virtud"
 slug: "josefa-amar-y-borbon-el-recato-no-se-ha-extinguido-como"
 procedencia:
   obra: "Discurso en defensa del talento de las mugeres"

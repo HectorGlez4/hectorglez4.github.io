@@ -1,6 +1,8 @@
 ---
 texto: "Nada hay mas frágil que esto, y nada que acarrée más desgracias a los corazones que aman."
 autor: "ignacio-manuel-altamirano"
+temas:
+  - "el-amor"
 slug: "ignacio-manuel-altamirano-nada-hay-mas-fragil-que-esto-y"
 procedencia:
   obra: "La Navidad en las montañas"
