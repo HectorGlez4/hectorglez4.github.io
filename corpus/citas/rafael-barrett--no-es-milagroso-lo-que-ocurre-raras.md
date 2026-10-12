@@ -1,6 +1,8 @@
 ---
 texto: "No es milagroso lo que ocurre raras veces, sino lo que siempre ocurre."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-no-es-milagroso-lo-que-ocurre-raras"
 procedencia:
   obra: "El robo"

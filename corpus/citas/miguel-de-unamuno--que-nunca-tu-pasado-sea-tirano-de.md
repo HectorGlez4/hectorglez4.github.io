@@ -1,6 +1,8 @@
 ---
 texto: "Que nunca tu pasado sea tirano de tu porvenir; no son esperanzas ajenas las que tienes que colmar."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-tiempo"
 slug: "miguel-de-unamuno-que-nunca-tu-pasado-sea-tirano-de"
 procedencia:
   obra: "¡Adentro!"

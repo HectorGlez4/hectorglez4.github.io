@@ -1,6 +1,8 @@
 ---
 texto: "No soy yo quien te hace desgraciado, sino tu cobardía."
 autor: "ricardo-flores-magon"
+temas:
+  - "el-miedo"
 slug: "ricardo-flores-magon-no-soy-yo-quien-te-hace-desgraciado"
 procedencia:
   obra: "El obrero y la máquina"
