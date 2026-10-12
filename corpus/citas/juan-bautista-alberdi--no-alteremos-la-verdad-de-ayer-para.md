@@ -1,6 +1,8 @@
 ---
 texto: "No alteremos la verdad de ayer para desfigurar la verdad de hoy."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-verdad"
 slug: "juan-bautista-alberdi-no-alteremos-la-verdad-de-ayer-para"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

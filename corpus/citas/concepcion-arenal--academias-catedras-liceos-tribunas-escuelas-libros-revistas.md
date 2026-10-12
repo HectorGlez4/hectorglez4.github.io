@@ -1,6 +1,8 @@
 ---
 texto: "Academias, cátedras, liceos, tribunas, escuelas, libros, revistas, ¡cuántos medios de difundir rápidamente la ciencia, que no obstante se comunica tan despacio!"
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-academias-catedras-liceos-tribunas-escuelas-libros-revistas"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

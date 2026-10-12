@@ -1,6 +1,8 @@
 ---
 texto: "Por esto se mira como vergonzoso el entregarse ligeramente, y se exige la prueba del tiempo, que es el que hace conocer mejor todas las cosas."
 autor: "platon"
+temas:
+  - "el-tiempo"
 slug: "platon-por-esto-se-mira-como-vergonzoso-el"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

@@ -1,6 +1,8 @@
 ---
 texto: "En verdad ¡cuán varios y complejos somos!"
 autor: "jose-enrique-rodo"
+temas:
+  - "la-vida"
 slug: "jose-enrique-rodo-en-verdad-cuan-varios-y-complejos-somos"
 procedencia:
   obra: "Motivos de Proteo"

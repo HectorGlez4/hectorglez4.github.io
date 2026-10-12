@@ -1,6 +1,8 @@
 ---
 texto: "Más quiero que se acorte lo que me resta de vida, que es menos, que infamar lo que de mi vida ha pasado, que es más."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-gloria"
 slug: "francisco-de-quevedo-mas-quiero-que-se-acorte-lo-que"
 procedencia:
   obra: "Marco Bruto"

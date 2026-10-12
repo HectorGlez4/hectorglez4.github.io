@@ -1,6 +1,8 @@
 ---
 texto: "En el gobierno de las naciones, la política pequeña es la política de los intereses bastardos, de las intrigas, de la corrupcion; la política grande es la política de la conveniencia pública, de la razon, del derecho."
 autor: "jaime-balmes"
+temas:
+  - "la-justicia"
 slug: "jaime-balmes-en-el-gobierno-de-las-naciones-la"
 procedencia:
   obra: "El Criterio"
