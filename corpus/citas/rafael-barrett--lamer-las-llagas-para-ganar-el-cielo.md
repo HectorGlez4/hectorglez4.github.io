@@ -1,6 +1,8 @@
 ---
 texto: "Lamer las llagas para ganar el cielo no es lo que nos hace falta, sino curarlas con regularidad."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-lamer-las-llagas-para-ganar-el-cielo"
 procedencia:
   obra: "La beneficencia"

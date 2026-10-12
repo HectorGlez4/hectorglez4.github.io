@@ -1,6 +1,8 @@
 ---
 texto: "Asesinar es un accidente; no engendrar es un prolongado crimen."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-asesinar-es-un-accidente-no-engendrar-es"
 procedencia:
   obra: "La huelga"

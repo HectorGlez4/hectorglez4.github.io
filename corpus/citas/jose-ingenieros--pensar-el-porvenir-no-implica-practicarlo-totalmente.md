@@ -1,6 +1,8 @@
 ---
 texto: "Pensar el porvenir no implica practicarlo totalmente; basta la firme intención de marchar hacia él."
 autor: "jose-ingenieros"
+temas:
+  - "el-tiempo"
 slug: "jose-ingenieros-pensar-el-porvenir-no-implica-practicarlo-totalmente"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

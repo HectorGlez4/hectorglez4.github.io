@@ -1,6 +1,8 @@
 ---
 texto: "Poner a una doctrina el mote de pesimista, no es condenar su validez ni los llamados optimistas son más eficaces en la acción."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-poner-a-una-doctrina-el-mote-de"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

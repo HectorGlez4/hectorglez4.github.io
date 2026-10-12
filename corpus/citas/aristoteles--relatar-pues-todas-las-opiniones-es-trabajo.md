@@ -1,6 +1,8 @@
 ---
 texto: "Relatar, pues, todas las opiniones es trabajo inútil por ventura, y basta proponer las más ilustres, y las que parece que en alguna manera consisten en razón."
 autor: "aristoteles"
+temas:
+  - "el-saber"
 slug: "aristoteles-relatar-pues-todas-las-opiniones-es-trabajo"
 procedencia:
   obra: "Ética a Nicómaco"
