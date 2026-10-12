@@ -1,7 +1,9 @@
 ---
-texto: "El pudor de los hipócritas es la peluca de su calvicie moral."
+texto: "La inextinguible hostilidad de los mediocres sirve de pedestal á los genios, los santos y los héroes."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-pudor-de-los-hipocritas-es-la"
+temas:
+  - "la-adversidad"
+slug: "jose-ingenieros-la-inextinguible-hostilidad-de-los-mediocres-sirve"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Los caracteres perfectamente equilibrados son rarezas."
+texto: "Los hombres bastos pueden tener fanatismos, ideales jamás."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-caracteres-perfectamente-equilibrados-son-rarezas"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-hombres-bastos-pueden-tener-fanatismos-ideales"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

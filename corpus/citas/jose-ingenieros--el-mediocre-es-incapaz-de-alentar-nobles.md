@@ -1,7 +1,9 @@
 ---
-texto: "Las creencias son los móviles de toda actividad humana."
+texto: "El mediocre es incapaz de alentar nobles pasiones."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-las-creencias-son-los-moviles-de-toda"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-mediocre-es-incapaz-de-alentar-nobles"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

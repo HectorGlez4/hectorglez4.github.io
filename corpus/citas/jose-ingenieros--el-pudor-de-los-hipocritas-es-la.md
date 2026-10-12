@@ -1,7 +1,9 @@
 ---
-texto: "Los hombres bastos pueden tener fanatismos, ideales jamás."
+texto: "El pudor de los hipócritas es la peluca de su calvicie moral."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hombres-bastos-pueden-tener-fanatismos-ideales"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-pudor-de-los-hipocritas-es-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

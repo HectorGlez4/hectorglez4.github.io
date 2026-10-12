@@ -1,7 +1,9 @@
 ---
-texto: "Los grandes hechos nunca se hacen sin aventurarlos."
+texto: "El peor fabricador de venenos es la honra."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-los-grandes-hechos-nunca-se-hacen-sin"
+temas:
+  - "la-gloria"
+slug: "francisco-de-quevedo-el-peor-fabricador-de-venenos-es-la"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

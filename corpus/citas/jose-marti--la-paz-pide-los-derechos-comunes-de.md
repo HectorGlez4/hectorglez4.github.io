@@ -1,6 +1,8 @@
 ---
 texto: "La paz pide los derechos comunes de la naturaleza; los derechos diferenciales, contrarios a la naturaleza, son enemigos de la paz."
 autor: "jose-marti"
+temas:
+  - "la-justicia"
 slug: "jose-marti-la-paz-pide-los-derechos-comunes-de"
 procedencia:
   obra: "Mi raza"

@@ -1,6 +1,8 @@
 ---
 texto: "La soledad es impracticable y la sociedad es fatal: debemos mantener nuestra cabeza en la primera y confiar nuestras manos a la segunda."
 autor: "jose-ingenieros"
+temas:
+  - "la-vida"
 slug: "jose-ingenieros-la-soledad-es-impracticable-y-la-sociedad"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

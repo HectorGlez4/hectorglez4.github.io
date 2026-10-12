@@ -1,7 +1,9 @@
 ---
-texto: "El peor fabricador de venenos es la honra."
+texto: "La disimulación en los príncipes es traición honesta contra los traidores."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-el-peor-fabricador-de-venenos-es-la"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-la-disimulacion-en-los-principes-es-traicion"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

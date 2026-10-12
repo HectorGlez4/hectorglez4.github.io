@@ -1,7 +1,9 @@
 ---
-texto: "La disimulación en los príncipes es traición honesta contra los traidores."
+texto: "Los grandes hechos nunca se hacen sin aventurarlos."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-la-disimulacion-en-los-principes-es-traicion"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-los-grandes-hechos-nunca-se-hacen-sin"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Toda negación es, en sí misma, afirmativa; negar es afirmar una negación."
+texto: "Los espíritus alicortos son malévolos; los grandes ingenios son admirativos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-toda-negacion-es-en-si-misma-afirmativa"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-los-espiritus-alicortos-son-malevolos-los-grandes"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

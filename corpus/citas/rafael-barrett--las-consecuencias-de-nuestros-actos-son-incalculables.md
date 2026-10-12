@@ -1,6 +1,8 @@
 ---
 texto: "Las consecuencias de nuestros actos son incalculables."
 autor: "rafael-barrett"
+temas:
+  - "la-prudencia"
 slug: "rafael-barrett-las-consecuencias-de-nuestros-actos-son-incalculables"
 procedencia:
   obra: "La justicia"

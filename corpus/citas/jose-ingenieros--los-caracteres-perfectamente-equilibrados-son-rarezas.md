@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad moral es una resignación: simple falta de iniciativa, muchas veces, para practicar el mal."
+texto: "Los caracteres perfectamente equilibrados son rarezas."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-moral-es-una-resignacion-simple"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-caracteres-perfectamente-equilibrados-son-rarezas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "El mediocre es incapaz de alentar nobles pasiones."
+texto: "La mediocridad moral es una resignación: simple falta de iniciativa, muchas veces, para practicar el mal."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-mediocre-es-incapaz-de-alentar-nobles"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-mediocridad-moral-es-una-resignacion-simple"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

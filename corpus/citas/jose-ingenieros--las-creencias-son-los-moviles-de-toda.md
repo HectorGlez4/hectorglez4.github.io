@@ -1,7 +1,9 @@
 ---
-texto: "La inextinguible hostilidad de los mediocres sirve de pedestal á los genios, los santos y los héroes."
+texto: "Las creencias son los móviles de toda actividad humana."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-inextinguible-hostilidad-de-los-mediocres-sirve"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-las-creencias-son-los-moviles-de-toda"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Los sentimientos por si solos, son mala regla de conducta."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-los-sentimientos-por-si-solos-son-mala"
 procedencia:
   obra: "El Criterio"

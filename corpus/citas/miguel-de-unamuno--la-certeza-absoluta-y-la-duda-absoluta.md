@@ -1,6 +1,8 @@
 ---
 texto: "La certeza absoluta y la duda absoluta nos están igualmente vedadas."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-la-certeza-absoluta-y-la-duda-absoluta"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

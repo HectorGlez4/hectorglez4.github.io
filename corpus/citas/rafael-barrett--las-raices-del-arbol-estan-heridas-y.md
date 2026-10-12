@@ -1,6 +1,8 @@
 ---
 texto: "Las raíces del árbol están heridas, y nos enfurecemos contra las hojas que vemos amarillear y marchitarse."
 autor: "rafael-barrett"
+temas:
+  - "el-error"
 slug: "rafael-barrett-las-raices-del-arbol-estan-heridas-y"
 procedencia:
   obra: "La dinamita"
