@@ -1,7 +1,9 @@
 ---
-texto: "Rara vez se da á sí propio exacta cuenta del móvil de sus acciones; y por esto, aun en las virtudes mas acendradas, hay algo de escoria."
+texto: "Cuanto mas elevada es una inteligencia, ménos ideas tiene; porque encierra en pocas, lo que las mas limitadas tienen distribuido en muchas."
 autor: "jaime-balmes"
-slug: "jaime-balmes-rara-vez-se-da-a-si-propio"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-cuanto-mas-elevada-es-una-inteligencia-menos"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "En los dignos el propio juicio antepónese á la aprobación ajena; en los mediocres se postergan los méritos y se cultiva la sombra."
 autor: "jose-ingenieros"
+temas:
+  - "la-humildad"
 slug: "jose-ingenieros-en-los-dignos-el-propio-juicio-anteponese"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

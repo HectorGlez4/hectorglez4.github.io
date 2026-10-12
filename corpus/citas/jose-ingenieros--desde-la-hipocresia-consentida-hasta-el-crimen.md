@@ -1,6 +1,8 @@
 ---
 texto: "Desde la hipocresía consentida hasta el crimen castigado, la transición es insensible: la noche se incuba en el crepúsculo."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-desde-la-hipocresia-consentida-hasta-el-crimen"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

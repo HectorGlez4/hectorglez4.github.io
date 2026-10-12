@@ -1,6 +1,8 @@
 ---
 texto: "Se puede ser honesto sin sentir un afán de perfección: sobra para ello con no ostentar el mal."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-se-puede-ser-honesto-sin-sentir-un"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

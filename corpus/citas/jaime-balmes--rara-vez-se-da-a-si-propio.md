@@ -1,7 +1,9 @@
 ---
-texto: "Hay verdades de muchas clases; porque hay realidad de muchas clases."
+texto: "Rara vez se da á sí propio exacta cuenta del móvil de sus acciones; y por esto, aun en las virtudes mas acendradas, hay algo de escoria."
 autor: "jaime-balmes"
-slug: "jaime-balmes-hay-verdades-de-muchas-clases-porque-hay"
+temas:
+  - "la-virtud"
+slug: "jaime-balmes-rara-vez-se-da-a-si-propio"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

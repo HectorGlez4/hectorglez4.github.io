@@ -1,7 +1,9 @@
 ---
-texto: "Cuanto mas elevada es una inteligencia, ménos ideas tiene; porque encierra en pocas, lo que las mas limitadas tienen distribuido en muchas."
+texto: "Hay verdades de muchas clases; porque hay realidad de muchas clases."
 autor: "jaime-balmes"
-slug: "jaime-balmes-cuanto-mas-elevada-es-una-inteligencia-menos"
+temas:
+  - "la-verdad"
+slug: "jaime-balmes-hay-verdades-de-muchas-clases-porque-hay"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

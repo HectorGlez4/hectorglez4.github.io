@@ -1,6 +1,8 @@
 ---
 texto: "Rendimos tributo de veneración a quien añade una obra original a una biblioteca, y se lo negamos a quien lleva una biblioteca en la cabeza."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-rendimos-tributo-de-veneracion-a-quien-anade"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

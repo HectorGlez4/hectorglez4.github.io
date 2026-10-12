@@ -1,6 +1,8 @@
 ---
 texto: "Pero el sabio, estando consigo a solas, puede contemplar, y cuanto más sabio fuere muy mejor."
 autor: "aristoteles"
+temas:
+  - "el-saber"
 slug: "aristoteles-pero-el-sabio-estando-consigo-a-solas"
 procedencia:
   obra: "Ética a Nicómaco"

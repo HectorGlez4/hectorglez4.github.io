@@ -1,6 +1,8 @@
 ---
 texto: "Grande arma ofensiva de los agraviados es la culpa de quien los agravió."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-justicia"
 slug: "francisco-de-quevedo-grande-arma-ofensiva-de-los-agraviados-es"
 procedencia:
   obra: "Marco Bruto"

@@ -1,6 +1,8 @@
 ---
 texto: "Vivimos por nuestros frutos; el único crimen es la esterilidad."
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-vivimos-por-nuestros-frutos-el-unico-crimen"
 procedencia:
   obra: "El esfuerzo"

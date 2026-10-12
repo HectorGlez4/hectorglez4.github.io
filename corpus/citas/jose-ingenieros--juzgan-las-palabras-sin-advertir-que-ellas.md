@@ -1,6 +1,8 @@
 ---
 texto: "Juzgan las palabras sin advertir que ellas se refieren á cosas; admiten con un nombre lo que repudian con otro."
 autor: "jose-ingenieros"
+temas:
+  - "la-palabra"
 slug: "jose-ingenieros-juzgan-las-palabras-sin-advertir-que-ellas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

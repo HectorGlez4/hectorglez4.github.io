@@ -1,6 +1,8 @@
 ---
 texto: "No veis más que lo verdadero, y se os escapa lo real."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-no-veis-mas-que-lo-verdadero-y"
 procedencia:
   obra: "Filosofía del altruismo"

@@ -1,6 +1,8 @@
 ---
 texto: "Te llamas liberal y despreocupado; y el día que te apoderes del látigo, azotarás como te han azotado."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-libertad"
 slug: "mariano-jose-de-larra-te-llamas-liberal-y-despreocupado-y-el"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

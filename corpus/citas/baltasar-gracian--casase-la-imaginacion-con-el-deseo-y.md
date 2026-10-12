@@ -1,6 +1,8 @@
 ---
 texto: "Cásase la imaginación con el deseo, y concibe siempre mucho más de lo que las cosas son."
 autor: "baltasar-gracian"
+temas:
+  - "la-felicidad"
 slug: "baltasar-gracian-casase-la-imaginacion-con-el-deseo-y"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"
