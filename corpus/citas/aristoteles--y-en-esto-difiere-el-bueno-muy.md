@@ -1,6 +1,8 @@
 ---
 texto: "Y en esto difiere el bueno muy mucho de los demás: en que en todas las cosas entiende la verdad, y es como una regla y medida dellas."
 autor: "aristoteles"
+temas:
+  - "la-verdad"
 slug: "aristoteles-y-en-esto-difiere-el-bueno-muy"
 procedencia:
   obra: "Ética a Nicómaco"

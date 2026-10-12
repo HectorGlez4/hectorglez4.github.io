@@ -1,7 +1,9 @@
 ---
-texto: "Por la virtud, nunca por la honestidad, se miden los valores de la aristocracia moral."
+texto: "Y, sin los innovadores, ¿quién empujaría el carro de la vida, sobre el que van aquéllos tan satisfechos?"
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-por-la-virtud-nunca-por-la-honestidad"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-y-sin-los-innovadores-quien-empujaria-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

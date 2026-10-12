@@ -1,6 +1,8 @@
 ---
 texto: "También la poesía es hija del gran fracaso del amor."
 autor: "antonio-machado"
+temas:
+  - "el-amor"
 slug: "antonio-machado-tambien-la-poesia-es-hija-del-gran"
 procedencia:
   obra: "Abel Martín"

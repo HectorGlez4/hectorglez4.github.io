@@ -1,6 +1,8 @@
 ---
 texto: "En nosotros se lee la horrible velocidad del tiempo."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-en-nosotros-se-lee-la-horrible-velocidad"
 procedencia:
   obra: "El río invisible"

@@ -1,6 +1,8 @@
 ---
 texto: "Tú no cuentes como quien ha de vivir millares de años; tienes ya la muerte encima de tí; mientras tienes vida, mientras te lo permite la ocasión, procura hacerte bueno."
 autor: "marco-aurelio"
+temas:
+  - "la-muerte"
 slug: "marco-aurelio-tu-no-cuentes-como-quien-ha-de"
 procedencia:
   obra: "Soliloquios"

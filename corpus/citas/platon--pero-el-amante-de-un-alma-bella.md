@@ -1,6 +1,8 @@
 ---
 texto: "Pero el amante de un alma bella permanece fiel toda la vida, porque lo que ama es durable."
 autor: "platon"
+temas:
+  - "el-amor"
 slug: "platon-pero-el-amante-de-un-alma-bella"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

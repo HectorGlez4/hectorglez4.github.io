@@ -1,6 +1,8 @@
 ---
 texto: "Porque sin virtud es dificultosa cosa mostrarse uno moderado en las prosperidades."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-porque-sin-virtud-es-dificultosa-cosa-mostrarse"
 procedencia:
   obra: "Ética a Nicómaco"

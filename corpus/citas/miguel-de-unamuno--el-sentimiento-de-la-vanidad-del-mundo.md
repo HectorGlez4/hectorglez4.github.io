@@ -1,6 +1,8 @@
 ---
 texto: "El sentimiento de la vanidad del mundo pasajero nos mete el amor, único en que se vence lo vano y transitorio, único que rellena y eterniza la vida."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-amor"
 slug: "miguel-de-unamuno-el-sentimiento-de-la-vanidad-del-mundo"
 procedencia:
   obra: "Del sentimiento trágico de la vida/III"

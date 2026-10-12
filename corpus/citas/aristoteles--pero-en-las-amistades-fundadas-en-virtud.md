@@ -1,6 +1,8 @@
 ---
 texto: "Pero en las amistades fundadas en virtud, ninguna queja hay."
 autor: "aristoteles"
+temas:
+  - "la-amistad"
 slug: "aristoteles-pero-en-las-amistades-fundadas-en-virtud"
 procedencia:
   obra: "Ética a Nicómaco"

@@ -3,6 +3,7 @@ texto: "En estos casos, cuando el uno no quiere oír la verdad y el otro está p
 autor: "ciceron"
 temas:
   - "la-verdad"
+  - "la-amistad"
 slug: "ciceron-en-estos-casos-cuando-el-uno-no"
 procedencia:
   obra: "Sobre la amistad"
