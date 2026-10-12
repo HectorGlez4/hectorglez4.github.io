@@ -1,6 +1,8 @@
 ---
 texto: "El respeto debido á los grandes hombres no ha de rayar en culto, ni la consideracion á su dictámen degenerar en ciega sumision."
 autor: "jaime-balmes"
+temas:
+  - "la-humildad"
 slug: "jaime-balmes-el-respeto-debido-a-los-grandes-hombres"
 procedencia:
   obra: "El Criterio"

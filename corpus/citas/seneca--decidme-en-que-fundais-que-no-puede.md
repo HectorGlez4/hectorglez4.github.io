@@ -1,6 +1,8 @@
 ---
 texto: "Decidme: ¿en qué fundáis que no puede separarse la virtud del deleite?"
 autor: "seneca"
+temas:
+  - "la-virtud"
 slug: "seneca-decidme-en-que-fundais-que-no-puede"
 procedencia:
   obra: "De la vida bienaventurada"

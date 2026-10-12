@@ -1,6 +1,8 @@
 ---
 texto: "La indignación es también medio entre la invidia y el vicio del que de ajenos males se huelga."
 autor: "aristoteles"
+temas:
+  - "la-envidia"
 slug: "aristoteles-la-indignacion-es-tambien-medio-entre-la"
 procedencia:
   obra: "Ética a Nicómaco"

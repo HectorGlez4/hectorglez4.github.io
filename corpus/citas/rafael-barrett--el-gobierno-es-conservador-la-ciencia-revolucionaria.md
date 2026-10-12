@@ -1,6 +1,8 @@
 ---
 texto: "El gobierno es conservador; la ciencia, revolucionaria y su peor enemigo."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-el-gobierno-es-conservador-la-ciencia-revolucionaria"
 procedencia:
   obra: "Inmoralidad de los exámenes"

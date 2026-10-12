@@ -1,6 +1,8 @@
 ---
 texto: "Las leyes y las constituciones que por la violencia gobiernan a los pueblos son falsas."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-las-leyes-y-las-constituciones-que-por"
 procedencia:
   obra: "Mi anarquismo"

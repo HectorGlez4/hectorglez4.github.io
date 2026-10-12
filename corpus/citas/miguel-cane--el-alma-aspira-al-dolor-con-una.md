@@ -1,6 +1,8 @@
 ---
 texto: "El alma aspira al dolor con una voluntad persistente e invencible."
 autor: "miguel-cane"
+temas:
+  - "la-adversidad"
 slug: "miguel-cane-el-alma-aspira-al-dolor-con-una"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

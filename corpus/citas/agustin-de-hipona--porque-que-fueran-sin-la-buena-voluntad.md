@@ -1,7 +1,9 @@
 ---
-texto: "No quieras andar tras los dioses falsos y engañosos; antes deséchalos y desprécialos, abrazando la verdadera libertad."
+texto: "Porque ¿qué fueran sin la buena voluntad sino malos?"
 autor: "agustin-de-hipona"
-slug: "agustin-de-hipona-no-quieras-andar-tras-los-dioses-falsos"
+temas:
+  - "la-virtud"
+slug: "agustin-de-hipona-porque-que-fueran-sin-la-buena-voluntad"
 procedencia:
   obra: "La ciudad de Dios"
   traduccion:
@@ -11,5 +13,5 @@ fuente:
   id: "wikisource-es"
   nombre: "Wikisource en español"
   licencia: "CC BY-SA 4.0"
-  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/II"
+  url: "https://es.wikisource.org/wiki/La_ciudad_de_Dios/XII"
 ---

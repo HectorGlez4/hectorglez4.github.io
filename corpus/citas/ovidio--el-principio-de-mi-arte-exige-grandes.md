@@ -1,6 +1,8 @@
 ---
 texto: "El principio de mi arte exige grandes sacrificios, mas sólo cuesta trabajo vencer los primeros momentos."
 autor: "ovidio"
+temas:
+  - "el-trabajo"
 slug: "ovidio-el-principio-de-mi-arte-exige-grandes"
 procedencia:
   obra: "El remedio del amor"

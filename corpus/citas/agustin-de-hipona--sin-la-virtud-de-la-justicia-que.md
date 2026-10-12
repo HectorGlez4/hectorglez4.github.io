@@ -1,6 +1,8 @@
 ---
 texto: "Sin la virtud de la justicia, ¿qué son los reinos sino unos execrables latrocinios?"
 autor: "agustin-de-hipona"
+temas:
+  - "la-justicia"
 slug: "agustin-de-hipona-sin-la-virtud-de-la-justicia-que"
 procedencia:
   obra: "La ciudad de Dios"

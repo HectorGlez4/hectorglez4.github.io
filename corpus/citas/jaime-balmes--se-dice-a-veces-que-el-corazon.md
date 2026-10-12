@@ -1,7 +1,9 @@
 ---
-texto: "La religion no sofoca los sentimientos, solo los modera y los dirige; la prudencia no desecha el auxilio de las pasiones templadas, solo se guarda de su predominio."
+texto: "Se dice á veces que el corazon no engaña; ¡lamentable error!"
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-religion-no-sofoca-los-sentimientos-solo"
+temas:
+  - "el-error"
+slug: "jaime-balmes-se-dice-a-veces-que-el-corazon"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

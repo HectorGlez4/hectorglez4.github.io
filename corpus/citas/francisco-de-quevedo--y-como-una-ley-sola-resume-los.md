@@ -1,6 +1,8 @@
 ---
 texto: "Y como una ley sola resume los derechos del cielo, no padece equivocaciones ni consiente trampas."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-justicia"
 slug: "francisco-de-quevedo-y-como-una-ley-sola-resume-los"
 procedencia:
   obra: "Marco Bruto"
