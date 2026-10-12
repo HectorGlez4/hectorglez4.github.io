@@ -1,6 +1,8 @@
 ---
 texto: "Para engañarnos basta ó mala fe ó error."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-para-enganarnos-basta-o-mala-fe-o"
 procedencia:
   obra: "El Criterio"

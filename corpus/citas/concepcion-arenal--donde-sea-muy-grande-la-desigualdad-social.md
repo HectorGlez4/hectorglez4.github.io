@@ -1,6 +1,8 @@
 ---
 texto: "Donde sea muy grande la desigualdad social, no puede ser una verdad la igualdad política."
 autor: "concepcion-arenal"
+temas:
+  - "la-justicia"
 slug: "concepcion-arenal-donde-sea-muy-grande-la-desigualdad-social"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

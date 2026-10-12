@@ -1,6 +1,8 @@
 ---
 texto: "Tres cosas, las mejores del mundo, aborrecen sumamente tres géneros de gentes: la salud, los médicos; la paz, los soldados; la verdad, algunos escribanos y letrados."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-verdad"
 slug: "francisco-de-quevedo-tres-cosas-las-mejores-del-mundo-aborrecen"
 procedencia:
   obra: "Libro de todas las cosas y otras muchas más"

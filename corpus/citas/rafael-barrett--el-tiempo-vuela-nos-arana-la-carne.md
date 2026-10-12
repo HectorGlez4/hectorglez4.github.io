@@ -1,6 +1,8 @@
 ---
 texto: "El tiempo vuela, nos araña la carne, nos estruja, nos destroza al intentar arrebatarnos en su ligera huida."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-el-tiempo-vuela-nos-arana-la-carne"
 procedencia:
   obra: "El río invisible"

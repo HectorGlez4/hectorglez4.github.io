@@ -1,6 +1,8 @@
 ---
 texto: "¿De qué serviría mandar si costara trabajo?"
 autor: "rafael-barrett"
+temas:
+  - "el-trabajo"
 slug: "rafael-barrett-de-que-serviria-mandar-si-costara-trabajo"
 procedencia:
   obra: "Marcar el paso"

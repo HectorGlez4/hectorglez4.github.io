@@ -1,6 +1,8 @@
 ---
 texto: "Sólo una cosa matará a la ciencia, el odio."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-solo-una-cosa-matara-a-la-ciencia"
 procedencia:
   obra: "Patriotismo"

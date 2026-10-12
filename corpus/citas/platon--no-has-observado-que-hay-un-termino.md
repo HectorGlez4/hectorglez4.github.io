@@ -1,6 +1,8 @@
 ---
 texto: "¿No has observado que hay un término medio entre la ciencia y la ignorancia?"
 autor: "platon"
+temas:
+  - "el-saber"
 slug: "platon-no-has-observado-que-hay-un-termino"
 procedencia:
   obra: "El banquete (de Azcárate tr.)"

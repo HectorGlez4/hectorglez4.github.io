@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué motivo hay para que seamos ingratos, y nos envidiemos á nosotros mismos nuestra felicidad?"
 autor: "minucio-felix"
+temas:
+  - "la-envidia"
 slug: "minucio-felix-que-motivo-hay-para-que-seamos-ingratos"
 procedencia:
   obra: "El Octavio"

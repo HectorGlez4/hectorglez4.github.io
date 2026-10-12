@@ -1,6 +1,8 @@
 ---
 texto: "Y el tiempo no borra una sílaba de lo que así se habla."
 autor: "jose-ingenieros"
+temas:
+  - "la-palabra"
 slug: "jose-ingenieros-y-el-tiempo-no-borra-una-silaba"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

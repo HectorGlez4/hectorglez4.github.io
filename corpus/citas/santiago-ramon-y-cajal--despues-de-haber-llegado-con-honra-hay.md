@@ -1,6 +1,8 @@
 ---
 texto: "Después de haber llegado con honra, hay que caer con honor."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-gloria"
 slug: "santiago-ramon-y-cajal-despues-de-haber-llegado-con-honra-hay"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"
