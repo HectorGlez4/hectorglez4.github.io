@@ -1,6 +1,8 @@
 ---
 texto: "Esta opinión no se funda en ningún razonamiento; pero es frecuente que las opiniones más resueltas sean las menos razonadas."
 autor: "concepcion-arenal"
+temas:
+  - "la-razon"
 slug: "concepcion-arenal-esta-opinion-no-se-funda-en-ningun"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

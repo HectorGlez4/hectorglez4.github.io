@@ -1,6 +1,8 @@
 ---
 texto: "Bella es la máxima de amar al prójimo, y más bella la de amar al prójimo que no vemos, al que vendría mañana."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-bella-es-la-maxima-de-amar-al"
 procedencia:
   obra: "La sinceridad"

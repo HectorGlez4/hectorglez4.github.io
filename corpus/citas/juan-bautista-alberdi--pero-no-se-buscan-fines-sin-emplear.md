@@ -1,6 +1,8 @@
 ---
 texto: "Pero no se buscan fines sin emplear los medios de obtenerlos; y para obtenerlos seria y eficazmente, es menester que los medios correspondan a los fines."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-prudencia"
 slug: "juan-bautista-alberdi-pero-no-se-buscan-fines-sin-emplear"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

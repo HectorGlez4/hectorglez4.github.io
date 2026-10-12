@@ -1,6 +1,8 @@
 ---
 texto: "Pues bien; los conocimientos en usted no son más que opiniones, y en mí, hasta las opiniones son conocimientos."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-saber"
 slug: "miguel-de-unamuno-pues-bien-los-conocimientos-en-usted-no"
 procedencia:
   obra: "La Kultura y la cultura"

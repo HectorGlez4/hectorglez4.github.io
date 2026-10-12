@@ -1,6 +1,8 @@
 ---
 texto: "Parece pues, que el uso del dinero más consiste en el emplearlo y darlo, que no en recebirlo y conservarlo."
 autor: "aristoteles"
+temas:
+  - "la-riqueza"
 slug: "aristoteles-parece-pues-que-el-uso-del-dinero"
 procedencia:
   obra: "Ética a Nicómaco"

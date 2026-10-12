@@ -1,6 +1,8 @@
 ---
 texto: "Esto sólo sé: que lo que la fortuna nos diere lo tomaremos con paciencia."
 autor: "publio-terencio-africano"
+temas:
+  - "la-adversidad"
 slug: "publio-terencio-africano-esto-solo-se-que-lo-que-la"
 procedencia:
   obra: "Formión"

@@ -1,6 +1,8 @@
 ---
 texto: "Más se saca de la dependencia que de la cortesía: vuelve luego las espaldas a la fuente el satisfecho, y la naranja exprimida cae del oro al lodo."
 autor: "baltasar-gracian"
+temas:
+  - "la-prudencia"
 slug: "baltasar-gracian-mas-se-saca-de-la-dependencia-que"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

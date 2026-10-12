@@ -1,6 +1,8 @@
 ---
 texto: "No está la dificultad en comprender sino en atinar."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-no-esta-la-dificultad-en-comprender-sino"
 procedencia:
   obra: "El Criterio"

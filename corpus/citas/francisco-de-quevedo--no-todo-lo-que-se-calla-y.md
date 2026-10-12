@@ -1,7 +1,9 @@
 ---
-texto: "Empero la liberalidad, de que todos participan, la alaban todos: los buenos, por premio; los malos, por paga."
+texto: "No todo lo que se calla y se descubre es falta de secreto, sino muchas veces sobra de malicia ajena."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-empero-la-liberalidad-de-que-todos-participan"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-no-todo-lo-que-se-calla-y"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Para hacer el bien, basta verlo claramente; no lo hacen los que no lo ven; nadie sería malo sabiéndolo."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-para-hacer-el-bien-basta-verlo-claramente"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
