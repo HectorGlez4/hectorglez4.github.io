@@ -1,6 +1,8 @@
 ---
 texto: "Hay que ensangrentarnos, hay que desfallecer en busca de la verdad, de lo que no muere, y a ello nos empuja el amor."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-hay-que-ensangrentarnos-hay-que-desfallecer-en"
 procedencia:
   obra: "El día de difuntos"

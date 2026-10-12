@@ -1,6 +1,8 @@
 ---
 texto: "Es propio de un alma grande é ingenua alegrarse de las virtudes con que se halla adornado el prójimo, y más conociéndose la ventaja."
 autor: "marco-aurelio"
+temas:
+  - "la-virtud"
 slug: "marco-aurelio-es-propio-de-un-alma-grande-e"
 procedencia:
   obra: "Soliloquios"

@@ -1,6 +1,8 @@
 ---
 texto: "Entre la injusticia barata y la justicia cara, no hay término que elegir."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-entre-la-injusticia-barata-y-la-justicia"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

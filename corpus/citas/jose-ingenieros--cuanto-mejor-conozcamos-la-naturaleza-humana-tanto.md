@@ -1,6 +1,8 @@
 ---
 texto: "Cuanto mejor conozcamos la naturaleza humana, tanto más seguros marcharemos hacia el advenimiento de la moral y de la justicia."
 autor: "jose-ingenieros"
+temas:
+  - "el-saber"
 slug: "jose-ingenieros-cuanto-mejor-conozcamos-la-naturaleza-humana-tanto"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

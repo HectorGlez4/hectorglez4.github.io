@@ -1,6 +1,8 @@
 ---
 texto: "Sólo que la admiración nace en el fuerte y la envidia en el subalterno."
 autor: "jose-ingenieros"
+temas:
+  - "la-envidia"
 slug: "jose-ingenieros-solo-que-la-admiracion-nace-en-el"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

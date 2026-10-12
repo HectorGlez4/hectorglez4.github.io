@@ -1,6 +1,8 @@
 ---
 texto: "Porque la patria debe ser algo así como una buena madre que ampara por igual a todos sus hijos."
 autor: "ricardo-flores-magon"
+temas:
+  - "la-patria"
 slug: "ricardo-flores-magon-porque-la-patria-debe-ser-algo-asi"
 procedencia:
   obra: "La patria burguesa y la patria universal"

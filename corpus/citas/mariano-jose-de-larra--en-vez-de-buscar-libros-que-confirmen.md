@@ -1,6 +1,8 @@
 ---
 texto: "En vez de buscar libros que confirmen la opinión de usted, la primera diligencia que ha de hacer es saber quién es el autor del artículo contrario."
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-saber"
 slug: "mariano-jose-de-larra-en-vez-de-buscar-libros-que-confirmen"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

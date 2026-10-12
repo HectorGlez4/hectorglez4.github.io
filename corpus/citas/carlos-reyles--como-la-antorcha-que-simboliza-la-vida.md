@@ -1,6 +1,8 @@
 ---
 texto: "Como la antorcha que simboliza la vida en las fiestas panateneas, la antorcha del espíritu pasa de mano en mano."
 autor: "carlos-reyles"
+temas:
+  - "el-saber"
 slug: "carlos-reyles-como-la-antorcha-que-simboliza-la-vida"
 procedencia:
   obra: "La Muerte Del Cisne"

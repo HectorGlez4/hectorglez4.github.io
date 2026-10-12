@@ -1,6 +1,8 @@
 ---
 texto: "Como el pensador no deja, a pesar de todo, de ser hombre, pone la razón al servicio de la vida, sépalo o no."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-como-el-pensador-no-deja-a-pesar"
 procedencia:
   obra: "Del sentimiento trágico de la vida/VI"

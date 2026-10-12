@@ -1,6 +1,8 @@
 ---
 texto: "Puede uno saber muy bien las reglas de un arte, y no acertar á ponerlas en práctica."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-puede-uno-saber-muy-bien-las-reglas"
 procedencia:
   obra: "El Criterio"

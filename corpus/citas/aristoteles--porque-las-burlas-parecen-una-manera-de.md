@@ -1,6 +1,8 @@
 ---
 texto: "Porque las burlas parecen una manera de descanso, y como los hombres no pueden perseverar en el trabajo de contino, tienen necesidad de algún descanso."
 autor: "aristoteles"
+temas:
+  - "el-trabajo"
 slug: "aristoteles-porque-las-burlas-parecen-una-manera-de"
 procedencia:
   obra: "Ética a Nicómaco"

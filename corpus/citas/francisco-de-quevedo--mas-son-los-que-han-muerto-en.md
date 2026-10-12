@@ -1,6 +1,8 @@
 ---
 texto: "Más son los que han muerto en las batallas a miedo que a hierro, y no son pocas vitorias las que ha alcanzado el temor por desesperado, no por valiente."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-miedo"
 slug: "francisco-de-quevedo-mas-son-los-que-han-muerto-en"
 procedencia:
   obra: "Marco Bruto"

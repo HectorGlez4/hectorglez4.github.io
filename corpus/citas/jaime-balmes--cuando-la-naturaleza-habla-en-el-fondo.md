@@ -1,6 +1,8 @@
 ---
 texto: "Cuando la naturaleza habla en el fondo de nuestra alma con voz tan clara y tono tan decisivo, es necedad el no escucharla."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-cuando-la-naturaleza-habla-en-el-fondo"
 procedencia:
   obra: "El Criterio"

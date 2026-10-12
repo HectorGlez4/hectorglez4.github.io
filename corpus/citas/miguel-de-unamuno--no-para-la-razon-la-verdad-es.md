@@ -1,6 +1,8 @@
 ---
 texto: "No, para la razón, la verdad es lo que se puede demostrar que es, que existe, consuélenos o no."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-no-para-la-razon-la-verdad-es"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"
