@@ -1,6 +1,8 @@
 ---
 texto: "Tiene amor rosa y ortiga, y la amapola y la espiga le brotan del mismo grano."
 autor: "antonio-machado"
+temas:
+  - "el-amor"
 slug: "antonio-machado-tiene-amor-rosa-y-ortiga-y-la"
 procedencia:
   obra: "Abel Martín"

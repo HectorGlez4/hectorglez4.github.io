@@ -1,6 +1,8 @@
 ---
 texto: "Cuando se concede que un hombre está loco, ¿cómo es posible enfadarse con él?"
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-razon"
 slug: "mariano-jose-de-larra-cuando-se-concede-que-un-hombre-esta"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

@@ -1,6 +1,8 @@
 ---
 texto: "Todas las artes se aprenden, y en todos los mecánicos empleos, aun en los más fáciles, hay tiempo de aprendices."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-todas-las-artes-se-aprenden-y-en"
 procedencia:
   obra: "El político"

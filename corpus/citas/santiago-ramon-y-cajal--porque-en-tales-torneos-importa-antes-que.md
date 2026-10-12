@@ -1,6 +1,8 @@
 ---
 texto: "Porque en tales torneos, importa, antes que defendernos, defender la verdad."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-verdad"
 slug: "santiago-ramon-y-cajal-porque-en-tales-torneos-importa-antes-que"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

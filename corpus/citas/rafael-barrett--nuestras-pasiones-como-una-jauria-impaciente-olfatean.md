@@ -1,6 +1,8 @@
 ---
 texto: "Nuestras pasiones, como una jauría impaciente, olfatean el peligro y la gloria."
 autor: "rafael-barrett"
+temas:
+  - "la-gloria"
 slug: "rafael-barrett-nuestras-pasiones-como-una-jauria-impaciente-olfatean"
 procedencia:
   obra: "El esfuerzo"

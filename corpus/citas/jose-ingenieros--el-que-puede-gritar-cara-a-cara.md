@@ -1,7 +1,9 @@
 ---
-texto: "Cuanto mejor cerebrado está el hombre, tanto más alta y magnífica es su función de pensar."
+texto: "El que puede gritar cara á cara una injuria, el que denuncia á voces un vicio ajeno, el que acepta los riesgos de sus decires, no es un maldiciente."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cuanto-mejor-cerebrado-esta-el-hombre-tanto"
+temas:
+  - "la-palabra"
+slug: "jose-ingenieros-el-que-puede-gritar-cara-a-cara"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

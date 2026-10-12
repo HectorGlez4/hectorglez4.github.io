@@ -1,6 +1,8 @@
 ---
 texto: "Unidos, igualados por la muerte, el señor y el campesino dormían el mismo sueño en una misma tierra."
 autor: "rosalia-de-castro"
+temas:
+  - "la-muerte"
 slug: "rosalia-de-castro-unidos-igualados-por-la-muerte-el-senor"
 procedencia:
   obra: "En las orillas del Sar/Prólogo"
