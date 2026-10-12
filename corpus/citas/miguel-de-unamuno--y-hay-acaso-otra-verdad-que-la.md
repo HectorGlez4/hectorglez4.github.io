@@ -1,7 +1,9 @@
 ---
-texto: "Que aberración y no otra cosa es el hombre mera y exclusivamente racional."
+texto: "¿Y hay acaso otra verdad que la verdad racional?"
 autor: "miguel-de-unamuno"
-slug: "miguel-de-unamuno-que-aberracion-y-no-otra-cosa-es"
+temas:
+  - "la-verdad"
+slug: "miguel-de-unamuno-y-hay-acaso-otra-verdad-que-la"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"
 estadoDerechos: "dominio-público"

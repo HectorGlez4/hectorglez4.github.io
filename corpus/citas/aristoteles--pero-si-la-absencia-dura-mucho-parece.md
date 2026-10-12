@@ -1,7 +1,9 @@
 ---
-texto: "Porque el amistad es una buena voluntad en los que en ella se corresponden."
+texto: "Pero si la absencia dura mucho, parece que hace poner en olvido la amistad, por lo cual se dice, comúnmente, que el silencio ha deshecho muchas amistades."
 autor: "aristoteles"
-slug: "aristoteles-porque-el-amistad-es-una-buena-voluntad"
+temas:
+  - "la-amistad"
+slug: "aristoteles-pero-si-la-absencia-dura-mucho-parece"
 procedencia:
   obra: "Ética a Nicómaco"
 estadoDerechos: "dominio-público"

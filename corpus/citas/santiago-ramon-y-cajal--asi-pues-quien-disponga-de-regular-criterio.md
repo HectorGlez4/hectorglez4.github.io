@@ -1,6 +1,8 @@
 ---
 texto: "Así, pues, quien disponga de regular criterio para guiarse en la vida, lo tendrá también para marchar desembarazado por el camino de la investigación."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-asi-pues-quien-disponga-de-regular-criterio"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

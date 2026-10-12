@@ -1,6 +1,8 @@
 ---
 texto: "Pero lo que es proprio de la felicidad son los actos y ejercicios virtuosos, y de lo contrario los contrarios."
 autor: "aristoteles"
+temas:
+  - "la-felicidad"
 slug: "aristoteles-pero-lo-que-es-proprio-de-la"
 procedencia:
   obra: "Ética a Nicómaco"

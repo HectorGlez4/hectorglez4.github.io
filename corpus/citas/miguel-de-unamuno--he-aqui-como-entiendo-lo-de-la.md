@@ -1,6 +1,8 @@
 ---
 texto: "He aquí cómo entiendo lo de la verdad en la vida y la vida en la verdad."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-he-aqui-como-entiendo-lo-de-la"
 procedencia:
   obra: "Verdad y vida"

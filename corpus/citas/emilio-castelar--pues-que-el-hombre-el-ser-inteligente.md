@@ -1,6 +1,8 @@
 ---
 texto: "Pues qué, el hombre, el sér inteligente y libre, activo y moral, ¿puede ser propiedad de alguien?"
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-pues-que-el-hombre-el-ser-inteligente"
 procedencia:
   obra: "Defensa de la enmienda al proyecto de abolición de la esclavitud"

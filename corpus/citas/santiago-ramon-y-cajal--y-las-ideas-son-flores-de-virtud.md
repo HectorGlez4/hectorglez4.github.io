@@ -1,6 +1,8 @@
 ---
 texto: "Y las ideas son flores de virtud que no abren sus corolas, o se marchitan rápidamente, en el vaho de la orgía."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-virtud"
 slug: "santiago-ramon-y-cajal-y-las-ideas-son-flores-de-virtud"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

@@ -1,7 +1,9 @@
 ---
-texto: "Algunas veces el hombre genial vacila y se interroga ansiosamente sobre su propio destino: cuando muerden su talón los envidiosos ó cuando le adulan los hipócritas."
+texto: "Sólo el digno y el libre pueden tener una patria."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-algunas-veces-el-hombre-genial-vacila-y"
+temas:
+  - "la-patria"
+slug: "jose-ingenieros-solo-el-digno-y-el-libre-pueden"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

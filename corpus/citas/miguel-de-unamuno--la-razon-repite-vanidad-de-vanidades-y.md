@@ -1,6 +1,8 @@
 ---
 texto: "La razón repite: ¡vanidad de vanidades, y todo vanidad!"
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-la-razon-repite-vanidad-de-vanidades-y"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

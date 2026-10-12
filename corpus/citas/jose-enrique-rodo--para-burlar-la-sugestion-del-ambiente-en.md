@@ -1,6 +1,8 @@
 ---
 texto: "Para burlar la sugestión del ambiente en que se vive y reivindicar la libertad interior, apartándose de él, hay dos modos de apartamiento: los viajes y la soledad."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-libertad"
 slug: "jose-enrique-rodo-para-burlar-la-sugestion-del-ambiente-en"
 procedencia:
   obra: "Parábolas"

@@ -1,6 +1,8 @@
 ---
 texto: "Porque ¿en quién podrá depositar mejor la fortuna sus riquezas que en aquel que, cuando se las pidiere, se las volverá sin quejas?"
 autor: "seneca"
+temas:
+  - "la-riqueza"
 slug: "seneca-porque-en-quien-podra-depositar-mejor-la"
 procedencia:
   obra: "De la vida bienaventurada"
