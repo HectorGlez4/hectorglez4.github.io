@@ -1,6 +1,8 @@
 ---
 texto: "La ambición es bella entre todas las pasiones, mientras la vanidad no la envilece; por eso es respetable en los genios y ridícula en los tontos."
 autor: "jose-ingenieros"
+temas:
+  - "la-gloria"
 slug: "jose-ingenieros-la-ambicion-es-bella-entre-todas-las"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

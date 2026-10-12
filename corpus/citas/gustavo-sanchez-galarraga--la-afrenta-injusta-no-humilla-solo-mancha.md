@@ -1,6 +1,8 @@
 ---
 texto: "La afrenta injusta no humilla; sólo mancha el deshonor que se merece."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-gloria"
 slug: "gustavo-sanchez-galarraga-la-afrenta-injusta-no-humilla-solo-mancha"
 procedencia:
   obra: "A Flor De Piel: Frases"

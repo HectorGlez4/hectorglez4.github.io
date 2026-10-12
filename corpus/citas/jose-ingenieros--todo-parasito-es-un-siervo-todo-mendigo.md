@@ -1,7 +1,9 @@
 ---
-texto: "La cuna dorada no da aptitudes; tampoco las da la urna electoral."
+texto: "Todo parásito es un siervo; todo mendigo es un doméstico."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-cuna-dorada-no-da-aptitudes-tampoco"
+temas:
+  - "la-libertad"
+slug: "jose-ingenieros-todo-parasito-es-un-siervo-todo-mendigo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

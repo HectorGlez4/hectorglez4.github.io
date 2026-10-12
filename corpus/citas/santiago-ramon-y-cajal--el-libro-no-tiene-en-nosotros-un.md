@@ -1,6 +1,8 @@
 ---
 texto: "El libro no tiene en nosotros un devoto, sino un juez."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "la-palabra"
 slug: "santiago-ramon-y-cajal-el-libro-no-tiene-en-nosotros-un"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

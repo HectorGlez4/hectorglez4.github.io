@@ -1,6 +1,8 @@
 ---
 texto: "Un entendimiento claro, capaz y exacto, abarca el objeto entero; le mira por todos sus lados, en todas sus relaciones con lo que le rodea."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-un-entendimiento-claro-capaz-y-exacto-abarca"
 procedencia:
   obra: "El Criterio"

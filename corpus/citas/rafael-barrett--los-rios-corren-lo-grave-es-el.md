@@ -1,6 +1,8 @@
 ---
 texto: "Los ríos corren; lo grave es el pantano."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-los-rios-corren-lo-grave-es-el"
 procedencia:
   obra: "La huelga"

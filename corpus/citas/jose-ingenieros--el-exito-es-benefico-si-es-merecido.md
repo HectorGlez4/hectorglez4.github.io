@@ -1,7 +1,9 @@
 ---
-texto: "El envidioso pasivo es solemne y sentencioso; el activo es un escorpión atrabiliario."
+texto: "El éxito es benéfico si es merecido; exalta la personalidad, la estimula."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-envidioso-pasivo-es-solemne-y-sentencioso"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-exito-es-benefico-si-es-merecido"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Un ciego á quien se quitan las cataratas, no juzga bien de las distancias, tamaños y figuras, hasta haber adquirido la práctica de ver."
+texto: "La segur no corta si no es aplicada al árbol, la hoz no siega si no es aplicada al tallo."
 autor: "jaime-balmes"
-slug: "jaime-balmes-un-ciego-a-quien-se-quitan-las"
+temas:
+  - "el-trabajo"
+slug: "jaime-balmes-la-segur-no-corta-si-no-es"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

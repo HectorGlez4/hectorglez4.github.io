@@ -1,6 +1,8 @@
 ---
 texto: "El hipócrita mide su generosidad por las ventajas que de ella obtiene; concibe la beneficencia como una industria lucrativa para su reputación."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-el-hipocrita-mide-su-generosidad-por-las"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

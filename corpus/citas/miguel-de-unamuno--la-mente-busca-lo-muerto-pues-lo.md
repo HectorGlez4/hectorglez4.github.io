@@ -1,6 +1,8 @@
 ---
 texto: "La mente busca lo muerto, pues lo vivo se le escapa; quiere cuajar en témpanos la corriente fugitiva, quiere fijarla."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-tiempo"
 slug: "miguel-de-unamuno-la-mente-busca-lo-muerto-pues-lo"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

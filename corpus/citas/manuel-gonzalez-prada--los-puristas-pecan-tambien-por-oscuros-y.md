@@ -1,6 +1,8 @@
 ---
 texto: "Los puristas pecan también por oscuros; y donde no hay nitidez en la elocución, falta claridad en el concepto."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "la-palabra"
 slug: "manuel-gonzalez-prada-los-puristas-pecan-tambien-por-oscuros-y"
 procedencia:
   obra: "Conferencia en el Ateneo de Lima (ortografía RAE)"

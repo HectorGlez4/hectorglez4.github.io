@@ -1,7 +1,9 @@
 ---
-texto: "La segur no corta si no es aplicada al árbol, la hoz no siega si no es aplicada al tallo."
+texto: "La ley cristiana que prohibe los juicios temerarios es no solo ley de caridad, sino de prudencia, y buena lógica."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-segur-no-corta-si-no-es"
+temas:
+  - "la-prudencia"
+slug: "jaime-balmes-la-ley-cristiana-que-prohibe-los-juicios"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

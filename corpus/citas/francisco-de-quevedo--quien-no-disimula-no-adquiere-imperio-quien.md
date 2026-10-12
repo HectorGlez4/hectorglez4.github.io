@@ -1,7 +1,9 @@
 ---
-texto: "El rey bueno se ha de amar; el malo se ha de sufrir."
+texto: "Quien no disimula, no adquiere imperio; quien no sabe disimularlo que disimula, no puede conservarle."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-el-rey-bueno-se-ha-de-amar"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-quien-no-disimula-no-adquiere-imperio-quien"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

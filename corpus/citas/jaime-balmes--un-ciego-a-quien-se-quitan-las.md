@@ -1,7 +1,9 @@
 ---
-texto: "La ley cristiana que prohibe los juicios temerarios es no solo ley de caridad, sino de prudencia, y buena lógica."
+texto: "Un ciego á quien se quitan las cataratas, no juzga bien de las distancias, tamaños y figuras, hasta haber adquirido la práctica de ver."
 autor: "jaime-balmes"
-slug: "jaime-balmes-la-ley-cristiana-que-prohibe-los-juicios"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-un-ciego-a-quien-se-quitan-las"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

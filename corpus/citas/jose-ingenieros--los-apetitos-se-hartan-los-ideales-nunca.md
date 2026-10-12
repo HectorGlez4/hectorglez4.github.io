@@ -1,7 +1,9 @@
 ---
-texto: "El éxito es benéfico si es merecido; exalta la personalidad, la estimula."
+texto: "Los apetitos se hartan; los ideales nunca."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-exito-es-benefico-si-es-merecido"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-apetitos-se-hartan-los-ideales-nunca"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "Las causas del progreso son más hondas y complicadas; las palabras, por más solemnemente que se escriban, no cambian ni modifican los hechos."
 autor: "miguel-cane"
+temas:
+  - "la-palabra"
 slug: "miguel-cane-las-causas-del-progreso-son-mas-hondas"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

@@ -1,6 +1,8 @@
 ---
 texto: "La amada no acompaña; es aquello que no se tiene y vanamente se espera."
 autor: "antonio-machado"
+temas:
+  - "el-amor"
 slug: "antonio-machado-la-amada-no-acompana-es-aquello-que"
 procedencia:
   obra: "Abel Martín"

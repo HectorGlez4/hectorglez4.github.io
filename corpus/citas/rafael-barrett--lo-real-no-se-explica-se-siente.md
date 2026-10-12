@@ -1,6 +1,8 @@
 ---
 texto: "Lo real no se explica: se siente y se ejecuta."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-lo-real-no-se-explica-se-siente"
 procedencia:
   obra: "Filosofía del altruismo"

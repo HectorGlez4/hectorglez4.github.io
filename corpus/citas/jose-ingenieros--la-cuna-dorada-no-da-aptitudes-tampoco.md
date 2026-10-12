@@ -1,7 +1,9 @@
 ---
-texto: "El elogio sincero y desinteresado no rebaja á quien lo otorga ni ofende á quien lo recibe, aun cuando es injusto."
+texto: "La cuna dorada no da aptitudes; tampoco las da la urna electoral."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-elogio-sincero-y-desinteresado-no-rebaja"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-la-cuna-dorada-no-da-aptitudes-tampoco"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

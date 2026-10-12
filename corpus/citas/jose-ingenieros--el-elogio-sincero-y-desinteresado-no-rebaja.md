@@ -1,7 +1,9 @@
 ---
-texto: "Todo parásito es un siervo; todo mendigo es un doméstico."
+texto: "El elogio sincero y desinteresado no rebaja á quien lo otorga ni ofende á quien lo recibe, aun cuando es injusto."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-parasito-es-un-siervo-todo-mendigo"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-el-elogio-sincero-y-desinteresado-no-rebaja"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

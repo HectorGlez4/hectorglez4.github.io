@@ -1,7 +1,9 @@
 ---
-texto: "Los apetitos se hartan; los ideales nunca."
+texto: "Las existencias vegetativas no tienen biografía: no vive el que no deja rastros en las cosas ó en los espíritus."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-apetitos-se-hartan-los-ideales-nunca"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-las-existencias-vegetativas-no-tienen-biografia-no"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
