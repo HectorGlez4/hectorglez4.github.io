@@ -1,6 +1,8 @@
 ---
 texto: "No he elegido lo más horrendo, sino lo más frecuente; no la excepción, sino la regla."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-no-he-elegido-lo-mas-horrendo-sino"
 procedencia:
   obra: "La esclavitud y el estado"

@@ -1,6 +1,8 @@
 ---
 texto: "No hay poder más difícil de mantener que el de un príncipe nuevo."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-no-hay-poder-mas-dificil-de-mantener"
 procedencia:
   obra: "Discurso en Bolivia"

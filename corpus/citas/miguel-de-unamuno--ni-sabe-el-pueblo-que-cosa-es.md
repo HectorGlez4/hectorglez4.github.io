@@ -1,6 +1,8 @@
 ---
 texto: "Ni sabe el pueblo qué cosa es fe, ni acaso le importa mucho."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-verdad"
 slug: "miguel-de-unamuno-ni-sabe-el-pueblo-que-cosa-es"
 procedencia:
   obra: "San Manuel Bueno, mártir"

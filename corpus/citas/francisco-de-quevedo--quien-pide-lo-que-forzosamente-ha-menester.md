@@ -1,6 +1,8 @@
 ---
 texto: "Quien pide lo que forzosamente ha menester para cumplir pide para dar."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-justicia"
 slug: "francisco-de-quevedo-quien-pide-lo-que-forzosamente-ha-menester"
 procedencia:
   obra: "Execración contra los judíos"

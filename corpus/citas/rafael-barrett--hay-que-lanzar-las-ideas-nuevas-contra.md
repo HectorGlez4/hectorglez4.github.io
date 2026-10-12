@@ -1,6 +1,8 @@
 ---
 texto: "Hay que lanzar las ideas nuevas contra las ideas viejas; hay que conspirar contra el pasado, y barrer los fantasmas."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-hay-que-lanzar-las-ideas-nuevas-contra"
 procedencia:
   obra: "El valor"

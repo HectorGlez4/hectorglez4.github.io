@@ -1,6 +1,8 @@
 ---
 texto: "Lo verdadero es objeto de la ciencia; empleado en la utilidad común cambia de siglo en siglo."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-lo-verdadero-es-objeto-de-la-ciencia"
 procedencia:
   obra: "Filosofía del altruismo"

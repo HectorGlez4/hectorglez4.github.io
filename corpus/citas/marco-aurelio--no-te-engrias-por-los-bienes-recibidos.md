@@ -1,6 +1,8 @@
 ---
 texto: "No te engrías por los bienes recibidos, ni muestres repugnancia en desprenderte de ellos."
 autor: "marco-aurelio"
+temas:
+  - "la-humildad"
 slug: "marco-aurelio-no-te-engrias-por-los-bienes-recibidos"
 procedencia:
   obra: "Soliloquios"

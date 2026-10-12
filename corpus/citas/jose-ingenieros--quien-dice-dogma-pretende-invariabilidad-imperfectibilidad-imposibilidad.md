@@ -1,6 +1,8 @@
 ---
 texto: "Quien dice dogma, pretende invariabilidad, imperfectibilidad, imposibilidad de crítica y de reflexión personal."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-quien-dice-dogma-pretende-invariabilidad-imperfectibilidad-imposibilidad"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"

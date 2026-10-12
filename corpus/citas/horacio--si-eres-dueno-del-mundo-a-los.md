@@ -1,6 +1,8 @@
 ---
 texto: "Si eres dueño del mundo, a los dioses debes tu fortuna; tal es el principio y fin de toda grandeza."
 autor: "horacio"
+temas:
+  - "la-gloria"
 slug: "horacio-si-eres-dueno-del-mundo-a-los"
 procedencia:
   obra: "Odas"

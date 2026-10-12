@@ -1,6 +1,8 @@
 ---
 texto: "No lo deseo, porque quiero bien a mi patria; no lo temo, porque conozco sus ciudadanos."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-patria"
 slug: "francisco-de-quevedo-no-lo-deseo-porque-quiero-bien-a"
 procedencia:
   obra: "Marco Bruto"

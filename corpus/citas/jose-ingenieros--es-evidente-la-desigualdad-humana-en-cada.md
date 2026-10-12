@@ -1,6 +1,8 @@
 ---
 texto: "Es evidente la desigualdad humana en cada tiempo y lugar; hay siempre hombres y sombras."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-es-evidente-la-desigualdad-humana-en-cada"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
