@@ -1,6 +1,8 @@
 ---
 texto: "Los sistemas menos razonables encuentran éxito."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-los-sistemas-menos-razonables-encuentran-exito"
 procedencia:
   obra: "Los médicos"

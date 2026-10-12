@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad está en no dar escándalo ni servir de ejemplo."
+texto: "El que no cultiva su mente, va derecho á la disgregación del carácter."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-esta-en-no-dar-escandalo"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-el-que-no-cultiva-su-mente-va"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

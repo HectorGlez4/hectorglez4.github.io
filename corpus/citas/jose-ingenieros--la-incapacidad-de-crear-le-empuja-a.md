@@ -1,7 +1,9 @@
 ---
-texto: "Los que han sentido el esfuerzo de crear saben lo que cuesta."
+texto: "La incapacidad de crear le empuja á destruir."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-que-han-sentido-el-esfuerzo-de"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-incapacidad-de-crear-le-empuja-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

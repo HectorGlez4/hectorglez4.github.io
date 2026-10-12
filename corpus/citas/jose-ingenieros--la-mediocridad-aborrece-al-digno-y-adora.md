@@ -1,7 +1,9 @@
 ---
-texto: "La incapacidad de crear le empuja á destruir."
+texto: "La mediocridad aborrece al digno y adora al lacayo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-incapacidad-de-crear-le-empuja-a"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-mediocridad-aborrece-al-digno-y-adora"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

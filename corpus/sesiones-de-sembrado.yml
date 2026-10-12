@@ -1985,3 +1985,14 @@ sesiones:
       citasPublicadas: 4191
       procedenciaCompleta: 15.6
       tradicionLatinoamericanaSobreHispanicos: 54.7
+  - fecha: "2026-10-12"
+    hora: "21:40"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 30 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 0 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Barrido de sentencias (92)"
+    motivo: "Barrido de sentencias 92 (familia de frases de hasta 175 caracteres con artículo inicial, en presente y sin primera ni segunda persona; semilla 3535, con tope a Ingenieros y Barrett) sobre corpus/_revision."
+    resultado:
+      citasPublicadas: 4207
+      procedenciaCompleta: 15.6
+      tradicionLatinoamericanaSobreHispanicos: 54.7

@@ -1,7 +1,9 @@
 ---
-texto: "El éxito envanece á los mediocres, nunca al excelente."
+texto: "Los que han sentido el esfuerzo de crear saben lo que cuesta."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-exito-envanece-a-los-mediocres-nunca"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-los-que-han-sentido-el-esfuerzo-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

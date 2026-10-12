@@ -1,7 +1,9 @@
 ---
-texto: "El culto de las apariencias lleva á desdeñar la realidad."
+texto: "El que se detiene prueba impotencia para marchar."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-culto-de-las-apariencias-lleva-a"
+temas:
+  - "el-trabajo"
+slug: "jose-ingenieros-el-que-se-detiene-prueba-impotencia-para"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

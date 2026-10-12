@@ -1,7 +1,9 @@
 ---
-texto: "El que no cultiva su mente, va derecho á la disgregación del carácter."
+texto: "El culto de las apariencias lleva á desdeñar la realidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-no-cultiva-su-mente-va"
+temas:
+  - "la-verdad"
+slug: "jose-ingenieros-el-culto-de-las-apariencias-lleva-a"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

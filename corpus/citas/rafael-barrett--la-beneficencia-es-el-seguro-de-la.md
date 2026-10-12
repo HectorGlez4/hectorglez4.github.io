@@ -1,6 +1,8 @@
 ---
 texto: "La beneficencia es el seguro de la civilización."
 autor: "rafael-barrett"
+temas:
+  - "la-virtud"
 slug: "rafael-barrett-la-beneficencia-es-el-seguro-de-la"
 procedencia:
   obra: "La beneficencia"

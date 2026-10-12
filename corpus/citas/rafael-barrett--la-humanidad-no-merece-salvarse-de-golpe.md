@@ -1,6 +1,8 @@
 ---
 texto: "La humanidad no merece salvarse de golpe, sino ruin y penosamente."
 autor: "rafael-barrett"
+temas:
+  - "la-vida"
 slug: "rafael-barrett-la-humanidad-no-merece-salvarse-de-golpe"
 procedencia:
   obra: "La beneficencia"

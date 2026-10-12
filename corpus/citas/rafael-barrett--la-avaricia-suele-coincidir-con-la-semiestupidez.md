@@ -1,6 +1,8 @@
 ---
 texto: "La avaricia suele coincidir con la semiestupidez."
 autor: "rafael-barrett"
+temas:
+  - "la-riqueza"
 slug: "rafael-barrett-la-avaricia-suele-coincidir-con-la-semiestupidez"
 procedencia:
   obra: "El altruismo y la energía"

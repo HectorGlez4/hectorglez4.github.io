@@ -1,7 +1,9 @@
 ---
-texto: "La mediocridad aborrece al digno y adora al lacayo."
+texto: "El éxito envanece á los mediocres, nunca al excelente."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-mediocridad-aborrece-al-digno-y-adora"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-el-exito-envanece-a-los-mediocres-nunca"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

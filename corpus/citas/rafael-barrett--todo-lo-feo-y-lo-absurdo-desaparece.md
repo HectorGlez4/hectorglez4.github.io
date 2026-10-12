@@ -1,6 +1,8 @@
 ---
 texto: "Todo lo feo y lo absurdo desaparece tarde o temprano."
 autor: "rafael-barrett"
+temas:
+  - "el-tiempo"
 slug: "rafael-barrett-todo-lo-feo-y-lo-absurdo-desaparece"
 procedencia:
   obra: "Deudas"

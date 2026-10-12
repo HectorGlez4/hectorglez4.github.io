@@ -1,7 +1,9 @@
 ---
-texto: "La duda nos amordaza, nos ciega, nos paraliza."
+texto: "La injusticia de las civilizaciones prolonga la injusticia fundamental de la especie."
 autor: "rafael-barrett"
-slug: "rafael-barrett-la-duda-nos-amordaza-nos-ciega-nos"
+temas:
+  - "la-justicia"
+slug: "rafael-barrett-la-injusticia-de-las-civilizaciones-prolonga-la"
 procedencia:
   obra: "La justicia"
 estadoDerechos: "dominio-público"

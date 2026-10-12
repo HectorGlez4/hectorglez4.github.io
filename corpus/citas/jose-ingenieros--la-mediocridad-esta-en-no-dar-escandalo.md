@@ -1,7 +1,9 @@
 ---
-texto: "El que se detiene prueba impotencia para marchar."
+texto: "La mediocridad está en no dar escándalo ni servir de ejemplo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-que-se-detiene-prueba-impotencia-para"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-mediocridad-esta-en-no-dar-escandalo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
