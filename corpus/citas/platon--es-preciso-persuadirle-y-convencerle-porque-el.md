@@ -1,6 +1,8 @@
 ---
 texto: "Es preciso persuadirle y convencerle, porque el juez no está sentado en su silla para complacer violando la ley, sino para hacer justicia obedeciéndola."
 autor: "platon"
+temas:
+  - "la-justicia"
 slug: "platon-es-preciso-persuadirle-y-convencerle-porque-el"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"

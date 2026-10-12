@@ -1,6 +1,8 @@
 ---
 texto: "Bueno es, por no morir, adaptarse al medio externo: mejor es subsistir sin adaptarse, en la afirmación soberana de un destino propio."
 autor: "rafael-barrett"
+temas:
+  - "la-libertad"
 slug: "rafael-barrett-bueno-es-por-no-morir-adaptarse-al"
 procedencia:
   obra: "Patriotismo"

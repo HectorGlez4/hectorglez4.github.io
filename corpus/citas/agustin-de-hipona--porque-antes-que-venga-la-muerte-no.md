@@ -1,6 +1,8 @@
 ---
 texto: "Porque antes que venga la muerte no está muriendo, sino viviendo, y cuando hubiere ya venido estará muerto, y no muriendo."
 autor: "agustin-de-hipona"
+temas:
+  - "la-muerte"
 slug: "agustin-de-hipona-porque-antes-que-venga-la-muerte-no"
 procedencia:
   obra: "La ciudad de Dios"

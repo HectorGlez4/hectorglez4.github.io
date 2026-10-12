@@ -1,6 +1,8 @@
 ---
 texto: "Forjarnos un cerebro fuerte, un cerebro original, exclusivamente nuestro: he ahí la labor preliminar, absolutamente inexcusable."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-forjarnos-un-cerebro-fuerte-un-cerebro-original"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

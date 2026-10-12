@@ -1,6 +1,8 @@
 ---
 texto: "Porque si me engaño ya soy; pues el que realmente no es, tampoco puede engañarse, y, por consiguiente, ya soy si me engaño."
 autor: "agustin-de-hipona"
+temas:
+  - "el-error"
 slug: "agustin-de-hipona-porque-si-me-engano-ya-soy-pues"
 procedencia:
   obra: "La ciudad de Dios"

@@ -1,6 +1,8 @@
 ---
 texto: "Vive al día, en las olas del tiempo, pero asentado sobre tu roca viva, dentro del mar de la eternidad; al día en la eternidad, es como debes vivir."
 autor: "miguel-de-unamuno"
+temas:
+  - "el-tiempo"
 slug: "miguel-de-unamuno-vive-al-dia-en-las-olas-del"
 procedencia:
   obra: "¡Adentro!"

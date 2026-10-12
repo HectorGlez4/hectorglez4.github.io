@@ -1,6 +1,8 @@
 ---
 texto: "Tú me mandas; pero no te mandas a ti mismo."
 autor: "mariano-jose-de-larra"
+temas:
+  - "la-libertad"
 slug: "mariano-jose-de-larra-tu-me-mandas-pero-no-te-mandas"
 procedencia:
   obra: "Fígaro (Artículos selectos)"

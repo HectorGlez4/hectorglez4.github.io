@@ -1,6 +1,8 @@
 ---
 texto: "Sean nuestros maestros los libros: mentores sabios, serenos, sin eclipses ni mal humor."
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-sean-nuestros-maestros-los-libros-mentores-sabios"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

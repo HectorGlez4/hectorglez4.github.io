@@ -1,6 +1,8 @@
 ---
 texto: "También se consideran tres circunstancias en cualquier artífice, para que pueda sacar una buena producción: la naturaleza, la doctrina y el uso."
 autor: "agustin-de-hipona"
+temas:
+  - "el-trabajo"
 slug: "agustin-de-hipona-tambien-se-consideran-tres-circunstancias-en-cualquier"
 procedencia:
   obra: "La ciudad de Dios"

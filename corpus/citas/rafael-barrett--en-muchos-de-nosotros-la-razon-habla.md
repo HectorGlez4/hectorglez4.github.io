@@ -1,6 +1,8 @@
 ---
 texto: "En muchos de nosotros la razón habla, y no la escuchamos; embriones sagrados se mueven confusamente en nuestro espíritu, y los hacemos morir."
 autor: "rafael-barrett"
+temas:
+  - "la-razon"
 slug: "rafael-barrett-en-muchos-de-nosotros-la-razon-habla"
 procedencia:
   obra: "La sinceridad"

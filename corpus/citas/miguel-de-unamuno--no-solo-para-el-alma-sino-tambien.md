@@ -1,6 +1,8 @@
 ---
 texto: "No sólo para el alma, sino también para el espíritu, es una necesidad la dicha."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-felicidad"
 slug: "miguel-de-unamuno-no-solo-para-el-alma-sino-tambien"
 procedencia:
   obra: "Del sentimiento trágico de la vida/V"

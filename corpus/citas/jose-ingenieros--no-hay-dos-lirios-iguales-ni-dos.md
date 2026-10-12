@@ -1,7 +1,9 @@
 ---
-texto: "Sus prejuicios son los documentos arqueológicos de la psicología social: residuos de virtudes crepusculares, supervivencias de morales extinguidas."
+texto: "No hay dos lirios iguales, ni dos águilas, ni dos orugas, ni dos hombres: todo lo que vive es incesantemente desigual."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-sus-prejuicios-son-los-documentos-arqueologicos-de"
+temas:
+  - "la-vida"
+slug: "jose-ingenieros-no-hay-dos-lirios-iguales-ni-dos"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
