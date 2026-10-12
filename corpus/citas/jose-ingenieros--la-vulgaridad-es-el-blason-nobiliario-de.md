@@ -1,7 +1,9 @@
 ---
-texto: "Todo perdonan menos esa herejía: ser original es una cosa detestable."
+texto: "La vulgaridad es el blasón nobiliario de los hombres ensoberbecidos de su mediocridad; la custodian como al tesoro el avaro."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-perdonan-menos-esa-herejia-ser-original"
+temas:
+  - "la-humildad"
+slug: "jose-ingenieros-la-vulgaridad-es-el-blason-nobiliario-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

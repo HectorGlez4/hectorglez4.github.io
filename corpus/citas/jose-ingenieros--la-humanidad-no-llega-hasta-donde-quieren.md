@@ -1,7 +1,9 @@
 ---
-texto: "Cada verbo es una flecha cuyo alcance finca en la elasticidad del arco: la firmeza moral de la dignidad."
+texto: "La humanidad no llega hasta donde quieren los idealistas en cada perfección particular; pero siempre llega más allá de donde habría ido sin su esfuerzo."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-cada-verbo-es-una-flecha-cuyo-alcance"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-la-humanidad-no-llega-hasta-donde-quieren"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "El hábito de fingir es incompatible con esos matices del orgullo; la mentira es opaca á cualquier resplandor de dignidad."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-el-habito-de-fingir-es-incompatible-con"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

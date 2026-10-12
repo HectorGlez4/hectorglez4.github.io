@@ -1,7 +1,9 @@
 ---
-texto: "La vulgaridad es el blasón nobiliario de los hombres ensoberbecidos de su mediocridad; la custodian como al tesoro el avaro."
+texto: "Los hipócritas ignoran la perfección; más aún, la aborrecen con tanto énfasis como al crimen desembozado."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-vulgaridad-es-el-blason-nobiliario-de"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-hipocritas-ignoran-la-perfeccion-mas-aun"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

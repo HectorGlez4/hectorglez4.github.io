@@ -1,7 +1,9 @@
 ---
-texto: "Las cosas grandes no las consigue quien no las aventura."
+texto: "Los monarcas más peligran en lo que creen que en lo que dudan; porque esto aguarda el consejo que busca, y aquello sigue el que le dan."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-las-cosas-grandes-no-las-consigue-quien"
+temas:
+  - "la-prudencia"
+slug: "francisco-de-quevedo-los-monarcas-mas-peligran-en-lo-que"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

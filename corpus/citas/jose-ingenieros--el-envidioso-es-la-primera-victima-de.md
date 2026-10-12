@@ -1,7 +1,9 @@
 ---
-texto: "La humanidad no llega hasta donde quieren los idealistas en cada perfección particular; pero siempre llega más allá de donde habría ido sin su esfuerzo."
+texto: "El envidioso es la primera víctima de su propio veneno; la envidia le devora como el cáncer á la víscera, le ahoga como la hiedra á la encina."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-humanidad-no-llega-hasta-donde-quieren"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-el-envidioso-es-la-primera-victima-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

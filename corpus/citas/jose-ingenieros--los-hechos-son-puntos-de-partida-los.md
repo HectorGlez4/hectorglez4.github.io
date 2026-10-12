@@ -1,7 +1,9 @@
 ---
-texto: "El envidioso es la primera víctima de su propio veneno; la envidia le devora como el cáncer á la víscera, le ahoga como la hiedra á la encina."
+texto: "Los hechos son puntos de partida; los ideales son faros luminosos que de trecho en trecho alumbran la ruta."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-envidioso-es-la-primera-victima-de"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-hechos-son-puntos-de-partida-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

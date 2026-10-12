@@ -1,7 +1,9 @@
 ---
-texto: "Los monarcas más peligran en lo que creen que en lo que dudan; porque esto aguarda el consejo que busca, y aquello sigue el que le dan."
+texto: "La ambición se irrita con promesas; no satisface."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-los-monarcas-mas-peligran-en-lo-que"
+temas:
+  - "la-gloria"
+slug: "francisco-de-quevedo-la-ambicion-se-irrita-con-promesas-no"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

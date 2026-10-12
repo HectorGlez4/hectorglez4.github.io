@@ -1,6 +1,8 @@
 ---
 texto: "La historia castiga con tanta severidad como la leyenda: una página de crónica dura más que un rosal."
 autor: "jose-ingenieros"
+temas:
+  - "el-tiempo"
 slug: "jose-ingenieros-la-historia-castiga-con-tanta-severidad-como"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

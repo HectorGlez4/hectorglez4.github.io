@@ -1,6 +1,8 @@
 ---
 texto: "El buen pensador procura ver en los objetos todo lo que hay, pero no mas de lo que hay."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-el-buen-pensador-procura-ver-en-los"
 procedencia:
   obra: "El Criterio"

@@ -1,7 +1,9 @@
 ---
-texto: "El sentido común es colectivo, eminentemente plebocrático; el buen sentido es individual, prerrogativa de la más absoluta aristocracia: la del ingenio."
+texto: "Todo perdonan menos esa herejía: ser original es una cosa detestable."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-sentido-comun-es-colectivo-eminentemente-plebocratico"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-todo-perdonan-menos-esa-herejia-ser-original"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,7 +1,9 @@
 ---
-texto: "Los hechos son puntos de partida; los ideales son faros luminosos que de trecho en trecho alumbran la ruta."
+texto: "El mal no se corrige con la complacencia ó la complicidad; es nocivo como los venenos y debe oponérsele antídotos eficaces: la reprobación y el desprecio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hechos-son-puntos-de-partida-los"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-el-mal-no-se-corrige-con-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

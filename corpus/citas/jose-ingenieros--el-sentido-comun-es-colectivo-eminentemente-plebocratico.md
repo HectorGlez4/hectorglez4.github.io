@@ -1,7 +1,9 @@
 ---
-texto: "El mal no se corrige con la complacencia ó la complicidad; es nocivo como los venenos y debe oponérsele antídotos eficaces: la reprobación y el desprecio."
+texto: "El sentido común es colectivo, eminentemente plebocrático; el buen sentido es individual, prerrogativa de la más absoluta aristocracia: la del ingenio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-el-mal-no-se-corrige-con-la"
+temas:
+  - "la-razon"
+slug: "jose-ingenieros-el-sentido-comun-es-colectivo-eminentemente-plebocratico"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

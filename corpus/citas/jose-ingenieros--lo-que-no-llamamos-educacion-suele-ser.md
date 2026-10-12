@@ -1,7 +1,9 @@
 ---
-texto: "Lo que es falso, muerto está; hay que darle sepultura."
+texto: "Lo que no llamamos educación suele ser más precioso que lo así denominado."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-lo-que-es-falso-muerto-esta-hay"
+temas:
+  - "el-saber"
+slug: "jose-ingenieros-lo-que-no-llamamos-educacion-suele-ser"
 procedencia:
   obra: "Hacia una Moral sin Dogmas: Lecciones sobre Emerson y el Eticismo"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La inspiracion no desciende sobre el perezoso; no existe cuando no hierven en el espíritu ideas y sentimientos fecundantes."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-la-inspiracion-no-desciende-sobre-el-perezoso"
 procedencia:
   obra: "El Criterio"

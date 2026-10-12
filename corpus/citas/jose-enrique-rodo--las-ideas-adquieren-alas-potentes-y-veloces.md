@@ -1,6 +1,8 @@
 ---
 texto: "Las ideas adquieren alas potentes y veloces, no en el helado seno de la abstracción, sino en el luminoso y cálido ambiente de la forma."
 autor: "jose-enrique-rodo"
+temas:
+  - "la-palabra"
 slug: "jose-enrique-rodo-las-ideas-adquieren-alas-potentes-y-veloces"
 procedencia:
   obra: "Ariel"

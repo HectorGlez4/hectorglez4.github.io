@@ -1,7 +1,9 @@
 ---
-texto: "Los hipócritas ignoran la perfección; más aún, la aborrecen con tanto énfasis como al crimen desembozado."
+texto: "Cada verbo es una flecha cuyo alcance finca en la elasticidad del arco: la firmeza moral de la dignidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-hipocritas-ignoran-la-perfeccion-mas-aun"
+temas:
+  - "la-palabra"
+slug: "jose-ingenieros-cada-verbo-es-una-flecha-cuyo-alcance"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

@@ -1,6 +1,8 @@
 ---
 texto: "La maldad humana se castiga, se perdona, o se desprecia, simplemente; pero no se recuerda."
 autor: "gustavo-sanchez-galarraga"
+temas:
+  - "la-justicia"
 slug: "gustavo-sanchez-galarraga-la-maldad-humana-se-castiga-se-perdona"
 procedencia:
   obra: "A Flor De Piel: Frases"
