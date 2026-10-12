@@ -1,6 +1,8 @@
 ---
 texto: "Y nada más temible que una sociedad cogida y empujada por el miedo."
 autor: "manuel-gonzalez-prada"
+temas:
+  - "el-miedo"
 slug: "manuel-gonzalez-prada-y-nada-mas-temible-que-una-sociedad"
 procedencia:
   obra: "El Primero de Mayo"

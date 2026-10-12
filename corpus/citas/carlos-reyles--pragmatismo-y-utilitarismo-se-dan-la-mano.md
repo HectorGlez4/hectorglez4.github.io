@@ -1,6 +1,8 @@
 ---
 texto: "Pragmatismo y utilitarismo se dan la mano: la verdad es lo útil."
 autor: "carlos-reyles"
+temas:
+  - "la-verdad"
 slug: "carlos-reyles-pragmatismo-y-utilitarismo-se-dan-la-mano"
 procedencia:
   obra: "La Muerte Del Cisne"

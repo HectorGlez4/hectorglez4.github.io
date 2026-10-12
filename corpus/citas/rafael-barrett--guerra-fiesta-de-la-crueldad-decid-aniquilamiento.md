@@ -1,6 +1,8 @@
 ---
 texto: "Guerra, fiesta de la crueldad: decid aniquilamiento de la crueldad."
 autor: "rafael-barrett"
+temas:
+  - "la-justicia"
 slug: "rafael-barrett-guerra-fiesta-de-la-crueldad-decid-aniquilamiento"
 procedencia:
   obra: "La guerra"

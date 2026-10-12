@@ -1,6 +1,8 @@
 ---
 texto: "Y así, el constante sabe dar razón de su parecer, pero el porfiado no otra sino porque sí y porque no."
 autor: "aristoteles"
+temas:
+  - "la-prudencia"
 slug: "aristoteles-y-asi-el-constante-sabe-dar-razon"
 procedencia:
   obra: "Ética a Nicómaco"

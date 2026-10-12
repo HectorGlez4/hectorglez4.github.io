@@ -1,6 +1,8 @@
 ---
 texto: "Igualar todos los antropoides sería negar la humanidad; igualar todos los hombres sería negar el progreso de la especie humana."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-igualar-todos-los-antropoides-seria-negar-la"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

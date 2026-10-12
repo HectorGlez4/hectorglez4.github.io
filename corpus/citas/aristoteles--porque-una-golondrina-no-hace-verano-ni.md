@@ -1,6 +1,8 @@
 ---
 texto: "Porque una golondrina no hace verano, ni un día sólo, y de la misma manera un solo día ni un poquillo de tiempo no hace dichosos a los hombres ni les da verdadera prosperidad."
 autor: "aristoteles"
+temas:
+  - "la-felicidad"
 slug: "aristoteles-porque-una-golondrina-no-hace-verano-ni"
 procedencia:
   obra: "Ética a Nicómaco"
