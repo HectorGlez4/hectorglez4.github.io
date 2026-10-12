@@ -1,6 +1,8 @@
 ---
 texto: "Éste es el error que nos ciega y afemina: sufrimos lo que nunca habíamos previsto que debíamos sufrir."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-este-es-el-error-que-nos-ciega"
 procedencia:
   obra: "Consolación a Marcia"

@@ -1,6 +1,8 @@
 ---
 texto: "Mar tranquilo y viento favorable, no revelan la habilidad del piloto: necesarios son los reveses para que se pruebe la fortaleza del ánimo."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-mar-tranquilo-y-viento-favorable-no-revelan"
 procedencia:
   obra: "Consolación a Marcia"

@@ -1,6 +1,8 @@
 ---
 texto: "Pongamos sin temor la piedra fundamental de la libertad suramericana: vacilar es perdernos."
 autor: "simon-bolivar"
+temas:
+  - "la-libertad"
 slug: "simon-bolivar-pongamos-sin-temor-la-piedra-fundamental-de"
 procedencia:
   obra: "Discurso ante la Sociedad Patriótica"

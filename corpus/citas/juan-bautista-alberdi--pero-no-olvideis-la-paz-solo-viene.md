@@ -1,6 +1,8 @@
 ---
 texto: "Pero no olvidéis: la paz sólo viene por el camino de la ley."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-justicia"
 slug: "juan-bautista-alberdi-pero-no-olvideis-la-paz-solo-viene"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

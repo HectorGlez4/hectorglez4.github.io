@@ -1,6 +1,8 @@
 ---
 texto: "Para que una metáfora tenga vida necesita dos condiciones esenciales: forma y radio de acción."
 autor: "federico-garcia-lorca"
+temas:
+  - "la-palabra"
 slug: "federico-garcia-lorca-para-que-una-metafora-tenga-vida-necesita"
 procedencia:
   obra: "La imagen poética de Luis de Góngora"

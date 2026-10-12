@@ -1,6 +1,8 @@
 ---
 texto: "Porque más dificultosa cosa es esperar las cosas tristes, que abstenerse de las aplacibles."
 autor: "aristoteles"
+temas:
+  - "la-prudencia"
 slug: "aristoteles-porque-mas-dificultosa-cosa-es-esperar-las"
 procedencia:
   obra: "Ética a Nicómaco"

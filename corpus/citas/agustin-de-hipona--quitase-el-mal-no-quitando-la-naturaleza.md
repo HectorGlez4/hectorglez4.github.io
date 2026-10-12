@@ -1,6 +1,8 @@
 ---
 texto: "Quitase el mal no quitando la naturaleza o alguna parte suya, sino corrigiendo y sanando la viciada y depravada."
 autor: "agustin-de-hipona"
+temas:
+  - "la-virtud"
 slug: "agustin-de-hipona-quitase-el-mal-no-quitando-la-naturaleza"
 procedencia:
   obra: "La ciudad de Dios"

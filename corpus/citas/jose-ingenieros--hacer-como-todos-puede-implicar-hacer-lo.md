@@ -1,7 +1,9 @@
 ---
-texto: "Algún poeta melancólico escribió que es hermoso vivir de recuerdos: frase absurda."
+texto: "Hacer como todos, puede implicar hacer lo indigno; el progreso moral tiene como condición adelantarse á su tiempo, como cualquier otro progreso."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-algun-poeta-melancolico-escribio-que-es-hermoso"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-hacer-como-todos-puede-implicar-hacer-lo"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"
