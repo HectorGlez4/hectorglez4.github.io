@@ -1,7 +1,9 @@
 ---
-texto: "La libertad al tirano le muda el nombre, y la avaricia al príncipe."
+texto: "Las leyes sacrosantas mejor se hallan servidas de uno que las ejecuta, que de muchos que las interpretan."
 autor: "francisco-de-quevedo"
-slug: "francisco-de-quevedo-la-libertad-al-tirano-le-muda-el"
+temas:
+  - "la-justicia"
+slug: "francisco-de-quevedo-las-leyes-sacrosantas-mejor-se-hallan-servidas"
 procedencia:
   obra: "Marco Bruto"
 estadoDerechos: "dominio-público"

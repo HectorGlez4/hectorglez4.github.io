@@ -1,6 +1,8 @@
 ---
 texto: "El rayo del amor ilumina la hondura del hueco jamás cruzado."
 autor: "rafael-barrett"
+temas:
+  - "el-amor"
 slug: "rafael-barrett-el-rayo-del-amor-ilumina-la-hondura"
 procedencia:
   obra: "El prójimo"

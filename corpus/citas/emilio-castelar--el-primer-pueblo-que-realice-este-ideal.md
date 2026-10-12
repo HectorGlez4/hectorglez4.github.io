@@ -1,6 +1,8 @@
 ---
 texto: "El primer pueblo que realice este ideal redimirá á todos los demás pueblos."
 autor: "emilio-castelar"
+temas:
+  - "la-libertad"
 slug: "emilio-castelar-el-primer-pueblo-que-realice-este-ideal"
 procedencia:
   obra: "Correspondencia a la nación alemana"

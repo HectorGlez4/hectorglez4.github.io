@@ -1,7 +1,9 @@
 ---
-texto: "La envidia, sin duda, arraiga como ellas en una tendencia afectiva, pero posee caracteres propios que permiten diferenciarla."
+texto: "Los pequeños virtuosos prefieren la práctica del bien á su prédica."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-envidia-sin-duda-arraiga-como-ellas"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-los-pequenos-virtuosos-prefieren-la-practica-del"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

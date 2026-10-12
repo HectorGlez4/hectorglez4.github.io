@@ -1,6 +1,8 @@
 ---
 texto: "El suelo prohíja a los hombres, los arrastra, se los asimila y hace suyos."
 autor: "juan-bautista-alberdi"
+temas:
+  - "la-patria"
 slug: "juan-bautista-alberdi-el-suelo-prohija-a-los-hombres-los"
 procedencia:
   obra: "Bases y puntos de partida para la organización política de la República Argentina"

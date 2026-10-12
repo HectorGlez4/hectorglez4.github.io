@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia estará siempre detenida y desfigurada por el artefacto administrativo, que no anda si no le untan manos culpables."
 autor: "rafael-barrett"
+temas:
+  - "el-saber"
 slug: "rafael-barrett-la-ciencia-estara-siempre-detenida-y-desfigurada"
 procedencia:
   obra: "Inmoralidad de los exámenes"

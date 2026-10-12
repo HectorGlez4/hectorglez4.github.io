@@ -1,6 +1,8 @@
 ---
 texto: "La civilización sería inexplicable en una raza constituida por hombres sin iniciativa."
 autor: "jose-ingenieros"
+temas:
+  - "la-razon"
 slug: "jose-ingenieros-la-civilizacion-seria-inexplicable-en-una-raza"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

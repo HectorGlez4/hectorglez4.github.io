@@ -1,7 +1,9 @@
 ---
-texto: "Los pequeños virtuosos prefieren la práctica del bien á su prédica."
+texto: "La fortuna aumenta la gracia de los espíritus cultivados y torna insolente la vulgaridad de los palurdos."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-los-pequenos-virtuosos-prefieren-la-practica-del"
+temas:
+  - "la-riqueza"
+slug: "jose-ingenieros-la-fortuna-aumenta-la-gracia-de-los"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

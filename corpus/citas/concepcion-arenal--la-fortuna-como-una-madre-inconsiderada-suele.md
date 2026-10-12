@@ -1,7 +1,9 @@
 ---
-texto: "La miseria establece un bloqueo bien estrecho alrededor del miserable."
+texto: "La fortuna, como una madre inconsiderada, suele hacer infelices á los hijos que mima."
 autor: "concepcion-arenal"
-slug: "concepcion-arenal-la-miseria-establece-un-bloqueo-bien-estrecho"
+temas:
+  - "la-felicidad"
+slug: "concepcion-arenal-la-fortuna-como-una-madre-inconsiderada-suele"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"
 estadoDerechos: "dominio-público"

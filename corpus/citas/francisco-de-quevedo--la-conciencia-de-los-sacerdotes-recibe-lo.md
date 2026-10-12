@@ -1,6 +1,8 @@
 ---
 texto: "La conciencia de los sacerdotes recibe lo que la arca del templo no admite."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-justicia"
 slug: "francisco-de-quevedo-la-conciencia-de-los-sacerdotes-recibe-lo"
 procedencia:
   obra: "Execración contra los judíos"

@@ -1,7 +1,9 @@
 ---
-texto: "La fortuna aumenta la gracia de los espíritus cultivados y torna insolente la vulgaridad de los palurdos."
+texto: "La envidia, sin duda, arraiga como ellas en una tendencia afectiva, pero posee caracteres propios que permiten diferenciarla."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-la-fortuna-aumenta-la-gracia-de-los"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-la-envidia-sin-duda-arraiga-como-ellas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

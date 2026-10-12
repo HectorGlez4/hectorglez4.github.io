@@ -1,7 +1,9 @@
 ---
-texto: "Los sentimientos morales auxilian la virtud."
+texto: "La envidia les destroza el corazon, sienten una abrasadora sed de venganza."
 autor: "jaime-balmes"
-slug: "jaime-balmes-los-sentimientos-morales-auxilian-la-virtud"
+temas:
+  - "la-envidia"
+slug: "jaime-balmes-la-envidia-les-destroza-el-corazon-sienten"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

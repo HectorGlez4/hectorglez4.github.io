@@ -1,6 +1,8 @@
 ---
 texto: "El ostracismo tuvo por virtud el desterrar la virtud en eminente grado."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-el-ostracismo-tuvo-por-virtud-el-desterrar"
 procedencia:
   obra: "Marco Bruto"

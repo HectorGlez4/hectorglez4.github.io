@@ -1,6 +1,8 @@
 ---
 texto: "El análisis moderno despoja cruelmente a la verdad científica de todo contenido real."
 autor: "rafael-barrett"
+temas:
+  - "la-verdad"
 slug: "rafael-barrett-el-analisis-moderno-despoja-cruelmente-a-la"
 procedencia:
   obra: "Filosofía del altruismo"

@@ -1,6 +1,8 @@
 ---
 texto: "El romanticismo violenta los sentimientos, falsea las pasiones y altera la noción intuitiva de las virtudes y los vicios."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-razon"
 slug: "eugenio-maria-de-hostos-el-romanticismo-violenta-los-sentimientos-falsea-las"
 procedencia:
   obra: "Moral social"
