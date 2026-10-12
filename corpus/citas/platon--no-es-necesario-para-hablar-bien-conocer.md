@@ -1,6 +1,8 @@
 ---
 texto: "¿No es necesario para hablar bien conocer la verdad sobre aquello de que se intenta tratar?"
 autor: "platon"
+temas:
+  - "la-palabra"
 slug: "platon-no-es-necesario-para-hablar-bien-conocer"
 procedencia:
   obra: "Fedro"

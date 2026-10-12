@@ -1,6 +1,8 @@
 ---
 texto: "Amor es exaltación que traspasa los límites usuales del imaginar y el sentir, y a esto llamamos inspiración en el poeta."
 autor: "jose-enrique-rodo"
+temas:
+  - "el-amor"
 slug: "jose-enrique-rodo-amor-es-exaltacion-que-traspasa-los-limites"
 procedencia:
   obra: "Motivos de Proteo"

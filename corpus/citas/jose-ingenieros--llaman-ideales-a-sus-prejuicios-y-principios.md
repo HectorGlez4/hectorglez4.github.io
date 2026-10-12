@@ -1,7 +1,9 @@
 ---
-texto: "Mientras un país no es patria, sus habitantes no constituyen una nación."
+texto: "Llaman ideales á sus prejuicios y principios á sus preocupaciones, sin advertir que son simple rutina embotellada, parodias de razón, opiniones sin juicio."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-mientras-un-pais-no-es-patria-sus"
+temas:
+  - "el-error"
+slug: "jose-ingenieros-llaman-ideales-a-sus-prejuicios-y-principios"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

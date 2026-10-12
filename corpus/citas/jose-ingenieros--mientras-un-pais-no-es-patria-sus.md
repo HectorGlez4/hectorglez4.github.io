@@ -1,7 +1,9 @@
 ---
-texto: "En cada pueblo y en cada época la medida de lo excelso está en los ideales de perfección que se denominan genio, heroísmo y santidad."
+texto: "Mientras un país no es patria, sus habitantes no constituyen una nación."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-en-cada-pueblo-y-en-cada-epoca"
+temas:
+  - "la-patria"
+slug: "jose-ingenieros-mientras-un-pais-no-es-patria-sus"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

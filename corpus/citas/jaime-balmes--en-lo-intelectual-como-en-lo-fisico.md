@@ -1,6 +1,8 @@
 ---
 texto: "En lo intelectual como en lo físico, el órgano que no funciona se adormece, pierde de su vida, el miembro que no se mueve se paraliza."
 autor: "jaime-balmes"
+temas:
+  - "el-trabajo"
 slug: "jaime-balmes-en-lo-intelectual-como-en-lo-fisico"
 procedencia:
   obra: "El Criterio"

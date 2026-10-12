@@ -1,6 +1,8 @@
 ---
 texto: "Y sola la amistad de los buenos está libre de chismerías, porque ninguno fácilmente creerá lo que otro le diga de aquel que por largo tiempo lo tiene experimentado."
 autor: "aristoteles"
+temas:
+  - "la-amistad"
 slug: "aristoteles-y-sola-la-amistad-de-los-buenos"
 procedencia:
   obra: "Ética a Nicómaco"

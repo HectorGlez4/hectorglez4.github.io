@@ -1,6 +1,8 @@
 ---
 texto: "El cielo de la fama no es muy grande, y cuantos más en él entren, menos toca a cada uno de ellos."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-gloria"
 slug: "miguel-de-unamuno-el-cielo-de-la-fama-no-es"
 procedencia:
   obra: "Del sentimiento trágico de la vida/III"

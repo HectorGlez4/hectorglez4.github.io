@@ -1,7 +1,9 @@
 ---
-texto: "Es el rubor de la mejilla sonoramente abofeteada por la gloria ajena."
+texto: "En cada pueblo y en cada época la medida de lo excelso está en los ideales de perfección que se denominan genio, heroísmo y santidad."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-es-el-rubor-de-la-mejilla-sonoramente"
+temas:
+  - "la-virtud"
+slug: "jose-ingenieros-en-cada-pueblo-y-en-cada-epoca"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

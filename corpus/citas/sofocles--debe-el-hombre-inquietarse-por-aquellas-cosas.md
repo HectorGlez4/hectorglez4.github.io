@@ -1,6 +1,8 @@
 ---
 texto: "¿Debe el hombre inquietarse por aquellas cosas que sólo dependen de la fortuna y sobre las cuales no puede haber razonable previsión?"
 autor: "sofocles"
+temas:
+  - "la-adversidad"
 slug: "sofocles-debe-el-hombre-inquietarse-por-aquellas-cosas"
 procedencia:
   obra: "Edipo, rey (Alemany y Bolufer tr.)"

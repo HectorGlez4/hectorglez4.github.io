@@ -1,6 +1,8 @@
 ---
 texto: "Antes de leer una historia es muy importante leer la vida del historiador."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-antes-de-leer-una-historia-es-muy"
 procedencia:
   obra: "El Criterio"

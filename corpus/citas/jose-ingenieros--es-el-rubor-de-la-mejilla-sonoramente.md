@@ -1,7 +1,9 @@
 ---
-texto: "Llaman ideales á sus prejuicios y principios á sus preocupaciones, sin advertir que son simple rutina embotellada, parodias de razón, opiniones sin juicio."
+texto: "Es el rubor de la mejilla sonoramente abofeteada por la gloria ajena."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-llaman-ideales-a-sus-prejuicios-y-principios"
+temas:
+  - "la-envidia"
+slug: "jose-ingenieros-es-el-rubor-de-la-mejilla-sonoramente"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

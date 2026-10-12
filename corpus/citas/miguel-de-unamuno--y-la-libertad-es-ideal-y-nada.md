@@ -1,6 +1,8 @@
 ---
 texto: "Y la libertad es ideal y nada más que ideal, y en serlo está precisamente su fuerza toda."
 autor: "miguel-de-unamuno"
+temas:
+  - "la-libertad"
 slug: "miguel-de-unamuno-y-la-libertad-es-ideal-y-nada"
 procedencia:
   obra: "¡Adentro!"
