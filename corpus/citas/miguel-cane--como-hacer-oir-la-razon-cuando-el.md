@@ -1,6 +1,8 @@
 ---
 texto: "¿Cómo hacer oir la razón cuando el corazón late a reventar?"
 autor: "miguel-cane"
+temas:
+  - "la-razon"
 slug: "miguel-cane-como-hacer-oir-la-razon-cuando-el"
 procedencia:
   obra: "Juvenilla; Prosa ligera"

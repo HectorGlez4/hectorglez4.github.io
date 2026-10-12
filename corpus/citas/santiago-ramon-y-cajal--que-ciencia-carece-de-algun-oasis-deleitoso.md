@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué ciencia carece de algún oasis deleitoso donde nuestra inteligencia encuentre útil empleo y plena satisfacción?"
 autor: "santiago-ramon-y-cajal"
+temas:
+  - "el-saber"
 slug: "santiago-ramon-y-cajal-que-ciencia-carece-de-algun-oasis-deleitoso"
 procedencia:
   obra: "Reglas y consejos sobre investigación científica"

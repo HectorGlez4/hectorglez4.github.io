@@ -1,6 +1,8 @@
 ---
 texto: "Y el rico tiene necesidad del pobre para que le haga sus haciendas, y el pobre del rico para que le mantenga y le dé en qué ganar la vida."
 autor: "aristoteles"
+temas:
+  - "la-riqueza"
 slug: "aristoteles-y-el-rico-tiene-necesidad-del-pobre"
 procedencia:
   obra: "Ética a Nicómaco"

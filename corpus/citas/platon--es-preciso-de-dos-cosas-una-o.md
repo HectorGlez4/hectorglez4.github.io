@@ -1,6 +1,8 @@
 ---
 texto: "Es preciso de dos cosas una: ó la muerte es un absoluto anonadamiento y una privacion de todo sentimiento, ó, como se dice, es un tránsito del alma de un lugar á otro."
 autor: "platon"
+temas:
+  - "la-muerte"
 slug: "platon-es-preciso-de-dos-cosas-una-o"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"

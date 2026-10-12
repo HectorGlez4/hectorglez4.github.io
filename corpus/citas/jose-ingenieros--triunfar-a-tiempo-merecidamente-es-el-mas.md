@@ -1,7 +1,9 @@
 ---
-texto: "En la vida se es actor ó público, timonel ó galeote."
+texto: "Triunfar á tiempo, merecidamente, es el más favorable rocío para cualquier germen de superioridad moral."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-en-la-vida-se-es-actor-o"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-triunfar-a-tiempo-merecidamente-es-el-mas"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

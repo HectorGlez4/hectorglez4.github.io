@@ -1,6 +1,8 @@
 ---
 texto: "¡Ay del pueblo que no tiene fe en sí mismo!"
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "la-patria"
 slug: "domingo-faustino-sarmiento-ay-del-pueblo-que-no-tiene-fe"
 procedencia:
   obra: "Facundo (1874)/Capítulo I"

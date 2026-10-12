@@ -1,6 +1,8 @@
 ---
 texto: "Nunca piden favor los que merecen justicia."
 autor: "jose-ingenieros"
+temas:
+  - "la-justicia"
 slug: "jose-ingenieros-nunca-piden-favor-los-que-merecen-justicia"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

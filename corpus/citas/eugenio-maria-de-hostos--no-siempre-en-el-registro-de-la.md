@@ -1,6 +1,8 @@
 ---
 texto: "No siempre en el registro de la realidad se encuentra la verdad, como no siempre se encuentra oro en el registro de un filón aurífero."
 autor: "eugenio-maria-de-hostos"
+temas:
+  - "la-verdad"
 slug: "eugenio-maria-de-hostos-no-siempre-en-el-registro-de-la"
 procedencia:
   obra: "Moral social"

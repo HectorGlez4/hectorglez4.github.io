@@ -1,6 +1,8 @@
 ---
 texto: "Toda moral futura es un producto de esfuerzos individuales, obra de caracteres excelentes que conciben y practican perfecciones inaccesibles al hombre honesto."
 autor: "jose-ingenieros"
+temas:
+  - "la-virtud"
 slug: "jose-ingenieros-toda-moral-futura-es-un-producto-de"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

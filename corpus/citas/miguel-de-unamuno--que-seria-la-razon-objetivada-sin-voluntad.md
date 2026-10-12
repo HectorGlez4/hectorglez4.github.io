@@ -1,6 +1,8 @@
 ---
 texto: "¿Qué sería la razón objetivada, sin voluntad ni sentimiento?"
 autor: "miguel-de-unamuno"
+temas:
+  - "la-razon"
 slug: "miguel-de-unamuno-que-seria-la-razon-objetivada-sin-voluntad"
 procedencia:
   obra: "Del sentimiento trágico de la vida: VIII"

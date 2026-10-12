@@ -1,7 +1,9 @@
 ---
-texto: "Cuanto mas ilustrado esté el entendimiento mejor conocerá la inefable belleza de la virtud, y conociéndola mejor, tendrá ménos dificultades en practicarla."
+texto: "De cuyo principio infiero que discurren muy mal los que en tratándose de ejecutar, descuidan la ciencia y solo se atienen á la práctica."
 autor: "jaime-balmes"
-slug: "jaime-balmes-cuanto-mas-ilustrado-este-el-entendimiento-mejor"
+temas:
+  - "el-saber"
+slug: "jaime-balmes-de-cuyo-principio-infiero-que-discurren-muy"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

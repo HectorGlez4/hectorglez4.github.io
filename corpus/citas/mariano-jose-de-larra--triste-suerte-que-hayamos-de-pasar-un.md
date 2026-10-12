@@ -1,6 +1,8 @@
 ---
 texto: "¡Triste suerte, que hayamos de pasar un año en deshacer el error de un día!"
 autor: "mariano-jose-de-larra"
+temas:
+  - "el-error"
 slug: "mariano-jose-de-larra-triste-suerte-que-hayamos-de-pasar-un"
 procedencia:
   obra: "Buenas noches. Segunda carta de Fígaro a su corresponsal en París, acerca de la disolución de las Cortes, y de otras varias cosas del día"
