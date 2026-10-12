@@ -1,6 +1,8 @@
 ---
 texto: "Conocer la verdad, es ya, por cierto, un mérito."
 autor: "agustin-alvarez"
+temas:
+  - "la-verdad"
 slug: "agustin-alvarez-conocer-la-verdad-es-ya-por-cierto"
 procedencia:
   obra: "La transformación de las razas en América"

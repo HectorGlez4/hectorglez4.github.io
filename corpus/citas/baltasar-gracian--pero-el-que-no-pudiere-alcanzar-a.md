@@ -1,6 +1,8 @@
 ---
 texto: "Pero el que no pudiere alcanzar a tener la sabiduría en servidumbre, lógrela en familiaridad."
 autor: "baltasar-gracian"
+temas:
+  - "el-saber"
 slug: "baltasar-gracian-pero-el-que-no-pudiere-alcanzar-a"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

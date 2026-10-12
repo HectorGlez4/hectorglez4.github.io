@@ -1,6 +1,8 @@
 ---
 texto: "Cuando los ricos no se esfuerzan en generalizar la instrucción, ¿sobre quiénes caen las fatales consecuencias de la ignorancia?"
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-cuando-los-ricos-no-se-esfuerzan-en"
 procedencia:
   obra: "La Igualdad Social y Política y sus Relaciones con la Libertad"

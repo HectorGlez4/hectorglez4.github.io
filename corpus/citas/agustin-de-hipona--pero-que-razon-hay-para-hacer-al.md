@@ -1,6 +1,8 @@
 ---
 texto: "Pero ¿qué razón hay para hacer al dolor argumento de la muerte, siendo antes indicio y prueba real de vida?"
 autor: "agustin-de-hipona"
+temas:
+  - "la-vida"
 slug: "agustin-de-hipona-pero-que-razon-hay-para-hacer-al"
 procedencia:
   obra: "La ciudad de Dios"

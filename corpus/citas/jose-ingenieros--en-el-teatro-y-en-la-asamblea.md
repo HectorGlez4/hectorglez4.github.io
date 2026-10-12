@@ -1,7 +1,9 @@
 ---
-texto: "Todo hombre se esfuerza por simular las aptitudes y cualidades que considera ventajosas para acrecentar la sombra que proyecta en su escenario."
+texto: "En el teatro y en la asamblea la gloria es rápida y barata, aunque ilusoria; los oyentes se sugestionan recíprocamente, suman su entusiasmo y estallan en ovaciones."
 autor: "jose-ingenieros"
-slug: "jose-ingenieros-todo-hombre-se-esfuerza-por-simular-las"
+temas:
+  - "la-gloria"
+slug: "jose-ingenieros-en-el-teatro-y-en-la-asamblea"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"
 estadoDerechos: "dominio-público"

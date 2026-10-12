@@ -1,6 +1,8 @@
 ---
 texto: "No es, pues, el reposo el fin de nuestra vida, porque lo tomamos por amor del ejercicio."
 autor: "aristoteles"
+temas:
+  - "el-trabajo"
 slug: "aristoteles-no-es-pues-el-reposo-el-fin"
 procedencia:
   obra: "Ética a Nicómaco"

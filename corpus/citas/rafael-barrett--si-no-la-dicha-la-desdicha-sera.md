@@ -1,6 +1,8 @@
 ---
 texto: "Si no la dicha, la desdicha será nuestra razón de vivir y la explicación del universo."
 autor: "rafael-barrett"
+temas:
+  - "la-adversidad"
 slug: "rafael-barrett-si-no-la-dicha-la-desdicha-sera"
 procedencia:
   obra: "Pasionales"

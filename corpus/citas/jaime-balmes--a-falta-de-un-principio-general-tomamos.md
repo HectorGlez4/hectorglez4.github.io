@@ -1,6 +1,8 @@
 ---
 texto: "A falta de un principio general tomamos á veces un hecho que no tiene mas verdad y certeza de la que nosotros le otorgamos."
 autor: "jaime-balmes"
+temas:
+  - "el-error"
 slug: "jaime-balmes-a-falta-de-un-principio-general-tomamos"
 procedencia:
   obra: "El Criterio"

@@ -1,6 +1,8 @@
 ---
 texto: "Frente á los que mienten con viles objetivos, la exageración de los idealistas es una verdad apasionada."
 autor: "jose-ingenieros"
+temas:
+  - "la-verdad"
 slug: "jose-ingenieros-frente-a-los-que-mienten-con-viles"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

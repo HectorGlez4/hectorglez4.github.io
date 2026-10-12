@@ -1,6 +1,8 @@
 ---
 texto: "Y muchas veces a sí mismo se persuade el miedo, y se le hace el discurso receloso, porque no hay quien no se crea a sí mismo."
 autor: "francisco-de-quevedo"
+temas:
+  - "el-miedo"
 slug: "francisco-de-quevedo-y-muchas-veces-a-si-mismo-se"
 procedencia:
   obra: "Marco Bruto"

@@ -1,6 +1,8 @@
 ---
 texto: "Debemos amar la familia mientras este amor no nos conduzca a odiar la comunidad hermana en que vivimos, y debemos amar la patria mientras no odiemos a la humanidad."
 autor: "rafael-barrett"
+temas:
+  - "la-patria"
 slug: "rafael-barrett-debemos-amar-la-familia-mientras-este-amor"
 procedencia:
   obra: "Más allá del patriotismo"

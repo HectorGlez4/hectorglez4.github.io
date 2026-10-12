@@ -1,6 +1,8 @@
 ---
 texto: "Si es la privacion de todo sentimiento, una dormida pacífica que no es turbada por ningun sueño, ¿qué mayor ventaja puede presentar la muerte?"
 autor: "platon"
+temas:
+  - "la-muerte"
 slug: "platon-si-es-la-privacion-de-todo-sentimiento"
 procedencia:
   obra: "Apología de Sócrates (de Azcárate tr.)"
