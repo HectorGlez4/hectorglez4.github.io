@@ -1,6 +1,8 @@
 ---
 texto: "El criterio para valorar lo envidiado es puramente subjetivo: cada hombre se cree la medida de los demás, según el juicio que tiene de sí mismo."
 autor: "jose-ingenieros"
+temas:
+  - "la-envidia"
 slug: "jose-ingenieros-el-criterio-para-valorar-lo-envidiado-es"
 procedencia:
   obra: "El Hombre Mediocre: Ensayo de psicologia y moral"

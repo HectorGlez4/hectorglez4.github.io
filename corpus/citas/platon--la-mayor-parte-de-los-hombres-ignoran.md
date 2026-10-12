@@ -1,7 +1,9 @@
 ---
-texto: "El amor desgraciado se aflige, porque no excita la compasión de nadie; pero cuando es dichoso, todo le parece encantador, hasta las cosas más indiferentes."
+texto: "La mayor parte de los hombres ignoran la esencia de las cosas, y en su ignorancia, de la que apenas se aperciben, desprecian desde el principio plantear la cuestión."
 autor: "platon"
-slug: "platon-el-amor-desgraciado-se-aflige-porque-no"
+temas:
+  - "el-saber"
+slug: "platon-la-mayor-parte-de-los-hombres-ignoran"
 procedencia:
   obra: "Fedro"
   traduccion:

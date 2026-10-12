@@ -1,6 +1,8 @@
 ---
 texto: "La justicia pide códigos capaces de defender los derechos y la inocencia de hombres libres."
 autor: "simon-bolivar"
+temas:
+  - "la-justicia"
 slug: "simon-bolivar-la-justicia-pide-codigos-capaces-de-defender"
 procedencia:
   obra: "Mensaje al Congreso de Colombia"

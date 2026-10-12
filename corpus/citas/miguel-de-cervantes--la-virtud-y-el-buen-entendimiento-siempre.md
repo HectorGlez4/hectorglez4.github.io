@@ -1,6 +1,8 @@
 ---
 texto: "La virtud y el buen entendimiento siempre es una y siempre es uno: desnudo o vestido, solo o acompañado."
 autor: "miguel-de-cervantes"
+temas:
+  - "la-virtud"
 slug: "miguel-de-cervantes-la-virtud-y-el-buen-entendimiento-siempre"
 procedencia:
   obra: "Novelas ejemplares"

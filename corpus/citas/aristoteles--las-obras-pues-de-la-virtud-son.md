@@ -1,6 +1,8 @@
 ---
 texto: "Las obras, pues, de la virtud son honestas y hechas por causa de lo honesto."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-las-obras-pues-de-la-virtud-son"
 procedencia:
   obra: "Ética a Nicómaco"

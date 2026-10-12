@@ -1,7 +1,9 @@
 ---
-texto: "El hombre, aunque dotado de libertad de albedrio, no deja de estar sujeto á una muchedumbre de influencias que contribuyen poderosamente á decidirle."
+texto: "El hombre dominado por una preocupacion no busca ni en los libros ni en las cosas lo que realmente hay, sino lo que le conviene para apoyar sus opiniones."
 autor: "jaime-balmes"
-slug: "jaime-balmes-el-hombre-aunque-dotado-de-libertad-de"
+temas:
+  - "el-error"
+slug: "jaime-balmes-el-hombre-dominado-por-una-preocupacion-no"
 procedencia:
   obra: "El Criterio"
 estadoDerechos: "dominio-público"

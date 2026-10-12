@@ -1,6 +1,8 @@
 ---
 texto: "Lo imprevisto constituye la nobleza de la vida."
 autor: "amado-nervo"
+temas:
+  - "la-vida"
 slug: "amado-nervo-lo-imprevisto-constituye-la-nobleza-de-la"
 procedencia:
   obra: "Plenitud"

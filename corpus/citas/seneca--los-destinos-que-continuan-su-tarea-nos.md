@@ -1,6 +1,8 @@
 ---
 texto: "Los destinos, que continúan su tarea, nos quitan el sentimiento de nuestra destrucción; y para ocultar mejor su marcha, la muerte se esconde bajo el nombre de vida."
 autor: "seneca"
+temas:
+  - "la-muerte"
 slug: "seneca-los-destinos-que-continuan-su-tarea-nos"
 procedencia:
   obra: "Consolación a Marcia"

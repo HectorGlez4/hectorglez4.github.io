@@ -1,6 +1,8 @@
 ---
 texto: "La razon es fria, pero ve claro; darle calor, y no ofuscar su claridad: las pasiones son ciegas, pero dan fuerza; darles direccion, y aprovecharse de su fuerza."
 autor: "jaime-balmes"
+temas:
+  - "la-razon"
 slug: "jaime-balmes-la-razon-es-fria-pero-ve-claro"
 procedencia:
   obra: "El Criterio"

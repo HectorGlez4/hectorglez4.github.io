@@ -1,6 +1,8 @@
 ---
 texto: "El temor, la necesidad, el cálculo, el amor a la gloria, vencen la natural repugnancia que por lo común inspiran las fatigas del entendimiento."
 autor: "concepcion-arenal"
+temas:
+  - "el-saber"
 slug: "concepcion-arenal-el-temor-la-necesidad-el-calculo-el"
 procedencia:
   obra: "La mujer del porvenir"

@@ -1,6 +1,8 @@
 ---
 texto: "La inteligencia, el talento y el saber serán llamados de nuevo a dirigir los destinos públicos como en todos los países civilizados."
 autor: "domingo-faustino-sarmiento"
+temas:
+  - "el-saber"
 slug: "domingo-faustino-sarmiento-la-inteligencia-el-talento-y-el-saber"
 procedencia:
   obra: "Facundo (1874)/Capítulo XV"
