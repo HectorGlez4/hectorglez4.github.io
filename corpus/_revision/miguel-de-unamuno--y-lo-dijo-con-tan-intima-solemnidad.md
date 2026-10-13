@@ -1,0 +1,13 @@
+---
+texto: "Y lo dijo con tan íntima solemnidad casera, que Ramiro se sintió presa de un indefinible desasosiego y de un extraño remordimiento."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-y-lo-dijo-con-tan-intima-solemnidad"
+procedencia:
+  obra: "La tía Tula (1921)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_t%C3%ADa_Tula_(1921)"
+---

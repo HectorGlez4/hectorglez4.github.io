@@ -1,0 +1,14 @@
+---
+texto: "Acaso Caín, el bíblico, el que mató al otro Abel, empezó a querer a este luego que lo vio muerto."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-acaso-cain-el-biblico-el-que-mato"
+procedencia:
+  obra: "Abel Sánchez, una historia de pasión"
+  año: 1917
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Abel_S%C3%A1nchez_(1917)"
+---

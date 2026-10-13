@@ -1,0 +1,13 @@
+---
+texto: "Yo os lloro, pero sonrío a la libertad, que me abraza y me saluda."
+autor: "rosalia-de-castro"
+slug: "rosalia-de-castro-yo-os-lloro-pero-sonrio-a-la"
+procedencia:
+  obra: "Flavio"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Flavio"
+---

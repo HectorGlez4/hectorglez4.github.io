@@ -1,0 +1,13 @@
+---
+texto: "Que no pesen sobre mi corazón más que afecciones ligeras, de esas que nacen y mueren a impulsos de la voluntad."
+autor: "rosalia-de-castro"
+slug: "rosalia-de-castro-que-no-pesen-sobre-mi-corazon-mas"
+procedencia:
+  obra: "Flavio"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Flavio"
+---

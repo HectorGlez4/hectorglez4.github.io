@@ -1,0 +1,13 @@
+---
+texto: "¿Qué haríamos nosotros, los hombres más desgraciados y encerrados en el laberinto de nuevo estilo, los que ya habían empezado a tener deseo de darse un baño caliente?"
+autor: "petronio"
+slug: "petronio-que-hariamos-nosotros-los-hombres-mas-desgraciados"
+procedencia:
+  obra: "Satiricón (Selección), capítulos 62-75"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Satiric%C3%B3n_(Selecci%C3%B3n)%2C_cap%C3%ADtulos_62-75"
+---

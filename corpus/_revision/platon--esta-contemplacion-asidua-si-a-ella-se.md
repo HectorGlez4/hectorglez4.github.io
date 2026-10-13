@@ -1,0 +1,16 @@
+---
+texto: "Esta contemplación asidua, si a ella se unen la moderación y cierto desahogo, basta para hacer dichosa una vida entera."
+autor: "platon"
+slug: "platon-esta-contemplacion-asidua-si-a-ella-se"
+procedencia:
+  obra: "Timeo de Locres"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Timeo_de_Locres"
+---

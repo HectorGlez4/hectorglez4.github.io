@@ -1,0 +1,16 @@
+---
+texto: "En la voz y el oido se distinguen sonidos rápidos y agudos, y sonidos lentos y graves, y otros más regulares que ocupan un término medio."
+autor: "platon"
+slug: "platon-en-la-voz-y-el-oido-se"
+procedencia:
+  obra: "Timeo de Locres"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Timeo_de_Locres"
+---

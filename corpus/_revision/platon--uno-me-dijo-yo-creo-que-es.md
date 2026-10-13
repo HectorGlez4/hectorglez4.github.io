@@ -1,0 +1,16 @@
+---
+texto: "Uno me dijo: yo creo, que es lo ventajoso; otro, lo conveniente; otro, lo útil; otro, lo provechoso."
+autor: "platon"
+slug: "platon-uno-me-dijo-yo-creo-que-es"
+procedencia:
+  obra: "Clitofón"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Clitof%C3%B3n"
+---

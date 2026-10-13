@@ -1,0 +1,13 @@
+---
+texto: "Rosalía está triste, y la tristeza rodea de aureola mística sus sienes, y la tristeza se plañe en todos los acordes de su lira."
+autor: "emilio-castelar"
+slug: "emilio-castelar-rosalia-esta-triste-y-la-tristeza-rodea"
+procedencia:
+  obra: "Prólogo de Follas novas (de Rosalía de Castro)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Follas_novas%2FPr%C3%B3logo"
+---

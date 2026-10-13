@@ -1,0 +1,15 @@
+---
+texto: "Las moscas, con todo, alguna virtud tienen, nosotros no más somos que burbujas."
+autor: "petronio"
+temas:
+  - "la-vida"
+slug: "petronio-las-moscas-con-todo-alguna-virtud-tienen"
+procedencia:
+  obra: "Satiricón (Selección)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Satiric%C3%B3n_(Selecci%C3%B3n)"
+---

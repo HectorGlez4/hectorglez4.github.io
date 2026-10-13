@@ -1,0 +1,13 @@
+---
+texto: "Y sobre todo, yo no quiero, no debo darles madrastra a mis hijos..."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-y-sobre-todo-yo-no-quiero-no"
+procedencia:
+  obra: "La tía Tula (1921)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_t%C3%ADa_Tula_(1921)"
+---

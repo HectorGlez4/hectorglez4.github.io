@@ -1,0 +1,13 @@
+---
+texto: "Creedme, la evaporatio al cerebro va y en todo el cuerpo un flujo hace."
+autor: "petronio"
+slug: "petronio-creedme-la-evaporatio-al-cerebro-va-y"
+procedencia:
+  obra: "Satiricón (Selección)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Satiric%C3%B3n_(Selecci%C3%B3n)"
+---

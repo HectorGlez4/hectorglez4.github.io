@@ -1,0 +1,13 @@
+---
+texto: "¿O es que el zángano no tiene algo de abeja y la abeja de zángano?"
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-o-es-que-el-zangano-no-tiene"
+procedencia:
+  obra: "La tía Tula (1921)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_t%C3%ADa_Tula_(1921)"
+---
