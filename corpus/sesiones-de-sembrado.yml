@@ -2069,3 +2069,14 @@ sesiones:
       citasPublicadas: 4320
       procedenciaCompleta: 15.3
       tradicionLatinoamericanaSobreHispanicos: 66.7
+  - fecha: "2026-10-13"
+    hora: "15:00"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores cubanos: le quedan 4 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 44 candidatos en la época Autores cubanos: 1 ya sembrados y 39 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Épocas: peruanos, cubanos, venezolanos, ecuatorianos, uruguayos, Edad Media"
+    motivo: "Siembra de las épocas peruanos, cubanos, venezolanos, ecuatorianos, uruguayos y Edad Media con fuentes nuevas de Wikisource (solo Tarrida del Mármol da Citas); candidatos de dominio público sin prosa descartados con motivo."
+    resultado:
+      citasPublicadas: 4325
+      procedenciaCompleta: 15.3
+      tradicionLatinoamericanaSobreHispanicos: 69

@@ -1,0 +1,13 @@
+---
+texto: "Ya la tierra esperaba, con los surcos abiertos, la semilla para multiplicarla y el riego fecundante para sus muslos núbiles."
+autor: "abraham-valdelomar"
+slug: "abraham-valdelomar-ya-la-tierra-esperaba-con-los-surcos"
+procedencia:
+  obra: "El camino hacia el sol"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_camino_hacia_el_sol"
+---

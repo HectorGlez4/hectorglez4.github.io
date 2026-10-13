@@ -1,0 +1,109 @@
+fuente: wikisource-es
+obra: Concepción del Ideal Libertario
+url: https://es.wikisource.org/wiki/Concepci%C3%B3n_del_Ideal_Libertario
+recuperado: 2026-10-13
+---
+Concepción del Ideal Libertario
+[[Categoría:Obras de Fernando Tarrida del Mármol]]
+|título=Concepción del Ideal Libertario
+|autor=Fernando Tarrida del Mármol
+---
+Publicado en dos partes en el periódico La Huelga General, números 4 y 6, diciembre de 1901.
+
+I. Los dos Límites
+
+"El objeto final de la vida humana, ha dicho León Tolstoi, en medio de este mundo, que es infinito en el tiempo y en el espacio, no puede ser accesible al hombre en sus límites".
+
+Este objeto, imposible de alcanzar, pero al cual puede hacercarse indefinidamente, es comprensible al hombre y constituye el ideal de los que quieren ayudar al reemplazo de una vida odiosa, egoísta, violenta, irracional, por otra de goce, de fraternidad, de libertad, de razón; es, en una palabra, la aspiración de los que quieren disminuir sin cesar el mal y aumentar constantemente el bien, no sólo en el interés personal, sino principalmente y sobre todo en interés de toda la humanidad, comprendiendo además que sólo por el bien de todos es como realmente se trabaja en la propia felicidad.
+
+Los goces materiales, morales e intelectuales aumentan cada día y no cesan jamás de aumentar; pero por desgracia, en nuestra sociedad autoritaria, son acaparados por algunos privilegiados, y el mayor número, precisamente aquellos que más contribuyen a producirlos, no pueden gozar de ellos. De todos modos esos bienes existen; son bienes adquiridos de los cuales cada uno tendrá su parte el día en que el mundo quede organizado de una manera equitativa, y aumentarán siempre, porque las aplicaciones de la ciencia son ilimitadas, porque todo invento es casi siempre el origen de un invento nuevo y que la mayor parte de las necesidades satisfechas ceden el lugar a nuevas necesidades... A la vereda sigue el camino real, a éste las vías férreas, al barco de vela los grandes trasatlánticos, al montgolfier los globos de gas, precursores de los navíos aéreos, y en cada uno de estos perfeccionamientos se observa el aumento del bienestar, de la seguridad y de la velocidad; se ansían los 50 kilómetros por hora cuando se han obtenido 30; tres años después no bastan los 80, y el mismo fenómeno se observa en todas las esferas del arte, de la ciencia o de la industria.
+
+Eso es una consecuencia de la condición humana, y es también la más firme garantía del progreso indefinido.
+
+El límite de ese aumento de goces posibles es el de todas las cantidades que crecen de una manera continua, es decir, el infinito; una cantidad más grande que todo valor, por grande que sea, límite que no alcanzaremos jamás, pero al cual tendemos siempre a acercarnos.
+
+Tal es la primera fase de la lucha.
+
+La segunda comprende la supresión del mal. Desde el punto de vista de la humanidad, el peor de todos los males, el que engendra casi todos los otros es la falta de libertad.
+
+Aunque considerando innecesario definir la libertad, diremos: es la facultad de permitir al organismo todas las manifestaciones físicas, morales, intelectuales, consumidoras y productivas que reclama, en tanto que estas manifestaciones no destruyen en otros esta misma facultad.
+
+Esta limitación no es artificial, sino natural y como la condición misma de posibilidad de la libertad, sin la cual ésta no podría existir; porque si con el pretexto de mi gusto me abrogo el derecho de impedir a mi vecino que escriba una carta, por ejemplo, le reconozco un derecho análogo sobre mí, y ceso, por tanto, de tener la libertad de escribir una carta si se le antoja impedírmelo.
+
+El principio contrario a las manifestaciones de la libertad así definida es el principio de autoridad. Esta puede ser de dos clases: artificial y natural.
+
+La primera es el resultado de un contrato, de una ley o de la fuerza, y puede ser suprimida por la fuerza o por un pacto.
+
+La segunda, que se manifiesta de maneras tan diversas, pero todas absolutamente naturales -fenómenos físicos, atracción amorosa, superioridad intelectual, influencias morales, etc.- debe ser, a lo menos en lo que concierne a sus resultados potenciales, combatida sin cesar por los esfuerzos combinados de todos. La supresión es una condición de la felicidad, uno de los objetos de la vida humana consiste en perseguir su desaparición completa. No se llegará jamás completamente, pero se aproximará sin cesar al objeto.
+
+El límite de esta disminución de autoridad es el de todas las cantidades que decrecen de una manera continua, es decir, cero, una cantidad más pequeña que todas las cantidades positivas, por pequeñas que sean, límite que no llegaremos a alcanzar jamás, pero al cual tendemos siempre a aproximarnos.
+
+Tal es la segunda fase de la lucha.
+
+* *
+
+No crea nadie que se deja de ser anarquista porque se reconozca que la anarquía absoluta, es decir, la supresión completa de todas las manifestaciones de la autoridad es un sueño irrealizable.
+
+Supóngase un médico que cuide a un paciente afecto de una enfermedad incurable, aunque susceptible de ser combatida enérgicamente; hará de seguro todos los esfuerzos imaginables para suprimir todas las manifestaciones de dolor y de malestar, para disminuir las que queden y para reducirlas aun en cuanto sea posible, para acercarse más y más cada vez a la curación absoluta, que reconoce, no obstante, imposible.
+
+¿Quiere eso decir que sea partidario de la curación parcial? No; es tan partidario de la curación absoluta como el que más, y únicamente obrando como tal consigue que la curación parcial sea todo lo completa posible.
+
+Del mismo modo el que tiende al cero de la autoridad es un anarquista; por más que esté persuadido que ese cero no se alcanzará nunca.
+
+Es, por otra parte, fácil de demostrar que es un bien que sea así, afirmación que algunos han combatido cuando declaramos que llegados al cero de la autoridad el objeto de la humanidad desaparecería.
+
+Es fácil dar una fórmula matemática muy sencilla de la Felicidad general.
+
+Sea, en un momento dado, p el progreso realizado; a, la cantidad de autoridad existente. Desde el momento que la felicidad está en razón directa de p y en razón inversa de a, la fórmula de la Felicidad F será en aquel momento:
+
+F = c {p \\over a}</math>'''"}},"i":0}}]}'>
+F=cpa
+
+siendo c un coeficiente función de cierto número de cantidades finitas.
+
+F aumentará cuando p sea más grande o cuando a sea más pequeña. Si ésta disminuye constantemente y p, por su parte, aumenta sin cesar, la felicidad general F aumentará igualmente sin interrupción y en proporciones considerables.
+
+Pero p, es decir, el progreso no puede ser infinito. Si pues a llegase a ser cero (0), la fórmula de la Felicidad general, en aquel momento, sería
+
+F = c {p \\over 0} = z</math>'''"}},"i":0}}]}'>
+F=cp0=z
+
+es decir, una cantidad más grande que toda cantidad por grande que sea, o, en otros términos, que no sería ya susceptible de aumento.
+
+El objeto de la vida habría cesado de existir.
+
+II. Anarquistas y Simpáticos
+
+En las discusiones y en las luchas por las ideas, es más útil preguntar al contradictor dónde va, que recordarle de dónde viene. No es fácil despojarse en algunos días ni en algunos meses de preocupaciones arraigadas de larga fecha, y hay quien acepta la cosa sin aceptar la palabra; pero como la palabra no es más que un detalle, solo que importa sobre todo es la cosa, a los que se muestran dispuestos a aceptar la cosa, siempre que se les explique de manera que puedan comprenderla, conviene tenderles la mano y abrir los brazos para recibirlos, en vez de rechazarlos despreciativamente so pretexto de que vienen de un campo que no es el nuestro, o porque no conciben el ideal de la misma manera que nosotros le concebimos.
+
+He aquí por qué, estando de acuerdo con la interpretación que de mis declaraciones de Londres hizo Urales en Suplemento, y, coincidiendo, con las explicaciones tan claras y hermosas que Anselmo Lorenzo, mi hermano, amigo y compañero, hizo en el artículo "Definiendo", publicado en La Revista Blanca, no participo de los temores que les causa la aproximación a nuestras ideas de los que Lorenzo llama tan cruelmente "la bandada de políticos que se nos ha echado encima", olvidando que entre la "bandada" se encuentran hombres de buena fe con cuyo apoyo nos hemos sentido dichosos en días de terribles pruebas; hombres que nos proporcionarán aún la felicidad de encontrarlos a nuestro lado en el momento de la gran batalla (1).
+
+He aquí también por qué estoy lejos de participar de la opinión emitida en estas columnas por nuestro compañero Malato sobre esos elementos "simpáticos" que se acercan a nuestras ideas y frecuentemente las defienden sin decidirse a aceptarlas completamente; sobre esos pensadores que "están casi con nosotros" y cuya independencia le parece tan repugnante, atribuyéndola a debilidad, a un cálculo interesado o al miedo.
+
+Esto, que puede ser verdad en ciertos casos, no está probado que lo sea siempre. Entre esos pensadores que se acercan a nuestras ideas sin tomar el nombre o sin aceptarlas todas, se encuentran los Octave Mirveau, los Lucien Descaves, los Urbain Gohier, los Zola, los Clemenceau, los Ibsen, los Walter Crane, los Edwar Carpenter, los Pedro Dorado, los Nicolás Estévanez y tantos otros escritores y luchadores cuya buena fe no puede ser puesta en duda. Las diferencias, cada día menores, que pueden separarles de nosotros son debidas en todo caso, a su convicción, al pensamiento íntimo, sobre el cual Juan Grave ha escrito con estricta justicia en su hermoso libro sobre La Anarquía:
+
+"Respecto al pensamiento íntimo de cada uno, los anarquistas comprenden que cada individuo no puede pensar de otro modo que como lo permite su propia mentalidad; no verán inconveniente en que ciertas gentes se reunan en edificios especiales para dirigir oraciones y alabanzas a un ser hipotético, mientras no traten de imponer sus creencias a los otros.
+
+"No esperan el triunfo de la razón sino de la cultura de los cerebros, poseídos también por experiencia propia que la fuerza y la compasión no logran sofocar la idea.
+
+"Libertad absoluta en el dominio del pensamiento."
+
+Por otra parte conviene no olvidar que hay entre nosotros individuos que se llaman anarquistas sin serlo, que únicamente se proponen cubrir con un hermoso manto la manifestación de pasiones egoístas u odiosas que nada tienen que ver con la emancipación y la libertad de la multitud; mientras que fuera de nuestro campo hay individuos que son verdaderos anarquistas sin darse cuenta de ello.
+
+De estos últimos podría citar ejemplos a montones, algunos bastante conocidos. He aquí uno verdaderamente chocante. El almirante francés Reveillère, un pensador ocupado de problemas sociales, acaba precisamente de crear una nueva escuela a la que ha dado el nombre de "Autarquía", de la cual da esta definición:
+
+"El desarrollo de la energía individual debe ser el objeto de las instituciones sociales y políticas; hacer que cada uno dé el máximum, todo consiste en eso. El objeto es el programa intelectual y moral del individuo; la sociedad no es más que el medio. Para el autarquista el único progreso digno de este nombre es el desarrollo de la facultad que tiene el hombre de gobernarse a sí mismo."
+
+Evidentemente conocemos algo que se le aproxima, y podría objetarse al almirante Reveillère que no era necesario fabricar un nuevo sustantivo. Pero esto sería, convenimos en ello, regatear sobre intenciones reconocidamente excelentes. Lo que caracteriza el sistema que nos expone, y que en resumen no nos desagrada, es un odio vigoroso hacia el Estado y su pretendida función social. "Hay dos doctrinas frente a frente, explica este marino que navega con tanta seguridad sobre el océano de la sociología y de la política como antes al frente de una flota acorazada sobre los mares de la India y de la China, la de la omnipotencia del Estado que es propiamente la doctrina monárquica; la otra que parte de este principio. “Nadie puede delegar derechos que no tiene.” Esta última es esencialmente la doctrina de la autarquía: lo que está prohibido a todos no puede ser permitido al Estado."
+
+Verdaderamente, en tanto que Reveillère continúe siendo almirante, lo mismo que el inolvidable Pi y Margall mientras fue diputado, no podemos considerar a aquel, como no pudimos considerar a éste, como formando parte del partido anarquista militante, el cual no admite almirantes ni diputados; pero está fuera de duda que Reveillère en el fondo es un anarquista que se permite la fantasía de llamarse autarquista, como Pi y Margall era un libertario que se daba el calificativo de federal.
+
+En lugar de rechazar estos elementos "simpáticos" debemos, por el contrario, y esta es una apreciación personal, hacer todos nuestros esfuerzos para demostrarles que nos proponemos el mismo objeto. Y esto podemos y debemos hacerlo sin abjurar de ninguno de nuestros principios, explicándolos y desponjándolos de toda exageración, de toda nebulosidad y aun a los elementos que son sencillamente nuestros vecinos, sin confundirse con nosotros, debemos ofrecerles un pacto de alianza, no para ayudar a malos pastores a crearse posiciones sobre los sufrimientos del pueblo, sino para ofrecerles sin confusión nuestro apoyo leal para la obtención de un objetivo común, como nosotros hemos utilizado el suyo cuando lo hemos creído conveniente y necesario.
+
+Véase lo que ha escrito recientemente nuestro Eliseo Reclus en la Contemporary Review, de Londres:
+
+"En cuanto a nopsotros, anarquistas, no nos separemos jamás del mundo para edificar una capillita oculta en los bosques. En todas partes hay luchas que reclaman nuestra presencia y permaneceremos en nuestro puesto prontos a llevar nuestro apoyo allí donde sea necesario. Sabemos, además, que hay muchas gentes que, por rutina o por ignorancia, nos combaten hoy y que acabarán por abrazar nuestra causa. Para cada hombre a quien las circunstancias permiten o aconsejan unirse a nosotros, hay miles a quien las necesidades de la vida o las contingencias de la lucha retienen alejados, pero que miran el porvenir, aman nuestras doctrinas y guardan nuestras palabras en el fondo de su corazón."
+
+A ellos, a esos "simpáticos", tanto como a los que se llaman ya francamente anarquistas, me dirigiré igualmente exponiendo, en el próximo artículo, el programa libertario tal como lo entiendo y tal como lo entienden, así lo creo al menos, la inmensa mayoría de los anarquistas del universo.
+
+FERNANDO TARRIDA.

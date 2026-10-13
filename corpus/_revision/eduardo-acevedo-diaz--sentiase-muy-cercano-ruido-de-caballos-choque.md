@@ -1,0 +1,13 @@
+---
+texto: "Sentíase muy cercano ruido de caballos, choque de sables y crujidos de cazoletas."
+autor: "eduardo-acevedo-diaz"
+slug: "eduardo-acevedo-diaz-sentiase-muy-cercano-ruido-de-caballos-choque"
+procedencia:
+  obra: "El combate de la tapera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_combate_de_la_tapera"
+---
