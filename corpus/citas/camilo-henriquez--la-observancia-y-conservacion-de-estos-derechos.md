@@ -1,0 +1,15 @@
+---
+texto: "La observancia y conservación de estos derechos forman la libertad: donde no son respetados, reina la tiranía."
+autor: "camilo-henriquez"
+temas:
+  - "la-libertad"
+slug: "camilo-henriquez-la-observancia-y-conservacion-de-estos-derechos"
+procedencia:
+  obra: "Catecismo de los patriotas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Catecismo_de_los_patriotas"
+---

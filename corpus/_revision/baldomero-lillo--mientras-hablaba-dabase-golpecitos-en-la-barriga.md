@@ -1,0 +1,13 @@
+---
+texto: "Mientras hablaba dábase golpecitos en la barriga con los dijes de la cadena de su reloj y guiñaba los ojos maliciosamente."
+autor: "baldomero-lillo"
+slug: "baldomero-lillo-mientras-hablaba-dabase-golpecitos-en-la-barriga"
+procedencia:
+  obra: "El calabozo número 5"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_calabozo_n%C3%BAmero_5"
+---

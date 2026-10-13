@@ -1,0 +1,13 @@
+---
+texto: "A la verdad, una no tiene peor enemigo que su buen corazón."
+autor: "baldomero-lillo"
+slug: "baldomero-lillo-a-la-verdad-una-no-tiene-peor"
+procedencia:
+  obra: "Era él solo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Era_%C3%A9l_solo"
+---

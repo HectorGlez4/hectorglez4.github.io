@@ -1,0 +1,13 @@
+---
+texto: "En una sarta de monedas peruanas y bolivianas que llevaba al cuello, le había encontrado la madre Cristina una medalla de la Virgen María."
+autor: "joaquin-diaz-garces"
+slug: "joaquin-diaz-garces-en-una-sarta-de-monedas-peruanas-y"
+procedencia:
+  obra: "La gitana redentora"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_gitana_redentora"
+---
