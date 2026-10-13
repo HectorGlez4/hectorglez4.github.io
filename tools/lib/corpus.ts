@@ -694,8 +694,9 @@ export interface CitaEnCorpus extends CitaAdmisible {
 /** Lee las Citas de un directorio. `citas/` son las publicadas; `_revision/`, las que no. */
 export async function leerCitas(directorio: string): Promise<CitaEnCorpus[]> {
   const ficheros = await ficherosDe(directorio, ['.md']);
-  const leidas = await Promise.all(
-    ficheros.map(async (ruta) => {
+  const leidas = await enLotes(
+    ficheros,
+    async (ruta) => {
       const bruto = await readFile(ruta, 'utf8');
       let datos: Record<string, unknown> | null;
       try {
@@ -722,9 +723,27 @@ export async function leerCitas(directorio: string): Promise<CitaEnCorpus[]> {
       const temas =
         datos.temas === undefined ? citaAdmisible.shape.temas.parse(undefined) : datos.temas;
       return { ...(datos as unknown as CitaAdmisible), temas: temas as string[], ruta };
-    }),
+    },
   );
   return leidas.filter((c): c is CitaEnCorpus => c !== null);
+}
+
+/**
+ * Aplica `trabajo` a cada elemento por tandas, para no abrir todos los ficheros a la vez.
+ * Con el Corpus en cientos de miles de candidatas, `Promise.all` sobre todo `_revision/`
+ * agotaba los descriptores de fichero (EMFILE) y `revisar` dejaba de poder aprobar nada.
+ * Conserva el orden de la entrada.
+ */
+async function enLotes<T, R>(
+  elementos: readonly T[],
+  trabajo: (elemento: T) => Promise<R>,
+  tamano = 512,
+): Promise<R[]> {
+  const resultado: R[] = [];
+  for (let i = 0; i < elementos.length; i += tamano) {
+    resultado.push(...(await Promise.all(elementos.slice(i, i + tamano).map(trabajo))));
+  }
+  return resultado;
 }
 
 /**
