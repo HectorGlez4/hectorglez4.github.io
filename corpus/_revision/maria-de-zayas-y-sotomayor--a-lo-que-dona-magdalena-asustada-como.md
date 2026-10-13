@@ -1,0 +1,13 @@
+---
+texto: "A lo que doña Magdalena, asustada, como despertó y le vio en su cuadra, le dijo:"
+autor: "maria-de-zayas-y-sotomayor"
+slug: "maria-de-zayas-y-sotomayor-a-lo-que-dona-magdalena-asustada-como"
+procedencia:
+  obra: "Estragos que causa el vicio"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Estragos_que_causa_el_vicio"
+---

@@ -2027,3 +2027,12 @@ sesiones:
       citasPublicadas: 4229
       procedenciaCompleta: 15.6
       tradicionLatinoamericanaSobreHispanicos: 59.3
+  - fecha: "2026-10-13"
+    hora: "10:54"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 24 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 6 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    resultado:
+      citasPublicadas: 4244
+      procedenciaCompleta: 15.5
+      tradicionLatinoamericanaSobreHispanicos: 58.1

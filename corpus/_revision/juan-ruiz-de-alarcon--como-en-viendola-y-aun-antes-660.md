@@ -1,0 +1,13 @@
+---
+texto: "¿Como en viendola? y aun antes, 660 allegaos a vna tapada, y antes de mostraros nada pedirà cintas, y guantes."
+autor: "juan-ruiz-de-alarcon"
+slug: "juan-ruiz-de-alarcon-como-en-viendola-y-aun-antes-660"
+procedencia:
+  obra: "El semejante a sí mismo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_semejante_a_sí_mismo"
+---
