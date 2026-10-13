@@ -1,0 +1,13 @@
+---
+texto: "Sí, amigo, voy a partir; quiero experimentar los afectos de la vida activa que tú me alabas; sé que la inacción me es nociva; pero te engañas si has creído que mi existencia está al presente inactiva."
+autor: "esteban-echeverria"
+slug: "esteban-echeverria-si-amigo-voy-a-partir-quiero-experimentar"
+procedencia:
+  obra: "Cartas a un amigo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Cartas_a_un_amigo"
+---

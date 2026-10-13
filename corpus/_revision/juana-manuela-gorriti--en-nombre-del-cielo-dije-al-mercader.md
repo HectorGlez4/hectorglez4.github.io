@@ -1,0 +1,13 @@
+---
+texto: "-En nombre del cielo -dije al mercader-, dígnese usted a sacarme de una cruel ansiedad."
+autor: "juana-manuela-gorriti"
+slug: "juana-manuela-gorriti-en-nombre-del-cielo-dije-al-mercader"
+procedencia:
+  obra: "Un viaje al país del oro"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Un_viaje_al_pa%C3%ADs_del_oro"
+---

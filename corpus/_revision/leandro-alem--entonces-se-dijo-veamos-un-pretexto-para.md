@@ -1,0 +1,13 @@
+---
+texto: "Entonces, se dijo, veamos un pretexto para ganar tiempo y poder buscar municiones."
+autor: "leandro-alem"
+slug: "leandro-alem-entonces-se-dijo-veamos-un-pretexto-para"
+procedencia:
+  obra: "Exposición sobre la Revolución de 1890 (Leandro Alem)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Exposici%C3%B3n_sobre_la_Revoluci%C3%B3n_de_1890_(Leandro_Alem)"
+---

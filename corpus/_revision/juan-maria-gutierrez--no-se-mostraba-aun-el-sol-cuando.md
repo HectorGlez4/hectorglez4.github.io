@@ -1,0 +1,13 @@
+---
+texto: "No se mostraba aún el sol, cuando salió María de su aposento y comenzó a pasearse por los jardines, cuyas flores recién engalanadas con el rocío, se mecían sobre las ramas al soplo de los aires frescos."
+autor: "juan-maria-gutierrez"
+slug: "juan-maria-gutierrez-no-se-mostraba-aun-el-sol-cuando"
+procedencia:
+  obra: "El capitán de Patricios"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/El_capit%C3%A1n_de_Patricios"
+---

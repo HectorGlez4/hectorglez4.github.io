@@ -1,0 +1,16 @@
+---
+texto: "La literatura es un árbol que cuando se trasplanta degenera: es como el habitante de las montañas, que llora y se aniquila lejos de la tierra natal."
+autor: "juan-maria-gutierrez"
+temas:
+  - "la-palabra"
+slug: "juan-maria-gutierrez-la-literatura-es-un-arbol-que-cuando"
+procedencia:
+  obra: "Fisonomía del saber español cual deba ser entre nosotros"
+  año: 1837
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Fisonom%C3%ADa_del_saber_espa%C3%B1ol_cual_deba_ser_entre_nosotros"
+---

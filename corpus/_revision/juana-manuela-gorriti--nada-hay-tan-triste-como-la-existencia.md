@@ -1,0 +1,13 @@
+---
+texto: "Nada hay tan triste como la existencia de un cura de puna."
+autor: "juana-manuela-gorriti"
+slug: "juana-manuela-gorriti-nada-hay-tan-triste-como-la-existencia"
+procedencia:
+  obra: "Un viaje aciago"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Un_viaje_aciago"
+---

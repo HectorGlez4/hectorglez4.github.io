@@ -1,0 +1,13 @@
+---
+texto: "-La lucha es la vida -respondió la graciosa chica, sacudiendo con donaire su rizada cabellera-; la lucha es la vida; y yo espero con ansia esa mística influencia que venga a desterrar la monotonía insoportable de la mía."
+autor: "juana-manuela-gorriti"
+slug: "juana-manuela-gorriti-la-lucha-es-la-vida-respondio-la"
+procedencia:
+  obra: "Un viaje aciago"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Un_viaje_aciago"
+---
