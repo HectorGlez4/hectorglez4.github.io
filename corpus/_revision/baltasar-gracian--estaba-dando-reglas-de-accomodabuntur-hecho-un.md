@@ -1,0 +1,13 @@
+---
+texto: "Estaba dando reglas de _accomodabuntur_, hecho un oráculo de la propia _comodité_."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-estaba-dando-reglas-de-accomodabuntur-hecho-un"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

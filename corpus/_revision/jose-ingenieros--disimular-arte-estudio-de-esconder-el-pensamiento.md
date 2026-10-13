@@ -1,0 +1,13 @@
+---
+texto: "Disimular: \"arte, estudio de esconder el pensamiento propio o algún propósito."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-disimular-arte-estudio-de-esconder-el-pensamiento"
+procedencia:
+  obra: "La simulación en la lucha por la vida"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64188/pg64188.txt"
+---

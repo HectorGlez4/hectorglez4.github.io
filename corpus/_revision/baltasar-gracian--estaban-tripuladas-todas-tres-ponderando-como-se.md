@@ -1,0 +1,13 @@
+---
+texto: "Estaban tripuladas todas tres, ponderando, como se usa, sus muchos méritos y su poca dicha, cuando llevado de su curiosidad el cortesano, se fué acercando lisonjero y, habiéndolas celebrado, significó su deseo de saber quiénes eran."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-estaban-tripuladas-todas-tres-ponderando-como-se"
+procedencia:
+  obra: "El criticón (tomo 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62691/pg62691.txt"
+---

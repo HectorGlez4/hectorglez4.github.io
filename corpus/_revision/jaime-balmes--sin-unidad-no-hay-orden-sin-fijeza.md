@@ -1,0 +1,13 @@
+---
+texto: "Sin _unidad_ no hay orden, sin _fijeza_ no hay estabilidad; y en el mundo moral como en el físico, nada puede prosperar que no sea ordenado y estable."
+autor: "jaime-balmes"
+slug: "jaime-balmes-sin-unidad-no-hay-orden-sin-fijeza"
+procedencia:
+  obra: "El Protestantismo comparado con el Catolicismo en sus relaciones con la Civilización Europea (Vols 1-2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/59797/pg59797.txt"
+---

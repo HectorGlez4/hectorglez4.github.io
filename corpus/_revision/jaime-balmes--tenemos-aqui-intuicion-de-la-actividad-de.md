@@ -1,0 +1,13 @@
+---
+texto: "¿Tenemos aquí intuicion de la actividad de la luz? nó, de ninguna manera."
+autor: "jaime-balmes"
+slug: "jaime-balmes-tenemos-aqui-intuicion-de-la-actividad-de"
+procedencia:
+  obra: "Filosofía Fundamental, Tomo IV"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/28430/pg28430.txt"
+---

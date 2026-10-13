@@ -1,0 +1,14 @@
+---
+texto: "CRÓNICA DE LA ÉPOCA DEL DECIMOSEPTIMO VIRREY DEL PERÚ"
+autor: "ricardo-palma"
+slug: "ricardo-palma-cronica-de-la-epoca-del-decimoseptimo-virrey"
+procedencia:
+  obra: "Las mejores tradiciones peruanas"
+  año: 1918
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77298/pg77298.txt"
+---

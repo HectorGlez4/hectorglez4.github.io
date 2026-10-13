@@ -1,0 +1,13 @@
+---
+texto: "Los fines a que responde la simulación en los animales son un sencillo corolario de los fenómenos que acabamos de revistar."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-los-fines-a-que-responde-la-simulacion"
+procedencia:
+  obra: "La simulación en la lucha por la vida"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64188/pg64188.txt"
+---

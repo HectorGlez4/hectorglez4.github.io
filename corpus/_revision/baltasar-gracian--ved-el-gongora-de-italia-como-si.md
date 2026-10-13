@@ -1,0 +1,13 @@
+---
+texto: "Ved el Góngora de Italia, como si él se fuese el Aquilino."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-ved-el-gongora-de-italia-como-si"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "El hecho es harto conocido y está consagrado en refranes populares."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-el-hecho-es-harto-conocido-y-esta"
+procedencia:
+  obra: "La simulación en la lucha por la vida"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64188/pg64188.txt"
+---

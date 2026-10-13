@@ -1,0 +1,13 @@
+---
+texto: "Los caudillos nuevos han aprendido de los viejos a pertrecharse de recursos en las bandoleras enemigas."
+autor: "jose-marti"
+slug: "jose-marti-los-caudillos-nuevos-han-aprendido-de-los"
+procedencia:
+  obra: "Granos de oro: Pensamientos Seleccionados en las Obras de José Martí"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/43861/pg43861.txt"
+---

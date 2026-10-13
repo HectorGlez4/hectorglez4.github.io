@@ -1,0 +1,13 @@
+---
+texto: "Augusto pensó en la huída, pero el amor a Eugenia le contuvo."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-augusto-penso-en-la-huida-pero-el"
+procedencia:
+  obra: "Niebla (Nivola)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49836/pg49836.txt"
+---

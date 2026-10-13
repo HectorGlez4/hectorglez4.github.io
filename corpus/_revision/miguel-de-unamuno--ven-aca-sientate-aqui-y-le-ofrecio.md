@@ -1,0 +1,13 @@
+---
+texto: "—¡Ven acá, siéntate aquí!—y le ofreció sus rodillas."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-ven-aca-sientate-aqui-y-le-ofrecio"
+procedencia:
+  obra: "Niebla (Nivola)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49836/pg49836.txt"
+---

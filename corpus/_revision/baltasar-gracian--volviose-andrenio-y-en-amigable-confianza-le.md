@@ -1,0 +1,13 @@
+---
+texto: "Volvióse Andrenio y en amigable confianza le preguntó si sabía de quién era aquel alcázar y quién le habitaba."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-volviose-andrenio-y-en-amigable-confianza-le"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

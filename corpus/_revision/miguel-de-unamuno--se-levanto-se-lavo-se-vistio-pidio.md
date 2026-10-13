@@ -1,0 +1,13 @@
+---
+texto: "Se levantó, se lavó, se vistió, pidió el desayuno, devorándolo luego."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-se-levanto-se-lavo-se-vistio-pidio"
+procedencia:
+  obra: "Niebla (Nivola)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49836/pg49836.txt"
+---

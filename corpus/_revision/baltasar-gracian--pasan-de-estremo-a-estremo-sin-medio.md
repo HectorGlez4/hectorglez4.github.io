@@ -1,0 +1,13 @@
+---
+texto: "Pasan de estremo á estremo sin medio: de humanos á insolentísimos."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-pasan-de-estremo-a-estremo-sin-medio"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

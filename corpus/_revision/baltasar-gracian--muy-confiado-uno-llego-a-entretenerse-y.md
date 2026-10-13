@@ -1,0 +1,13 @@
+---
+texto: "Muy confiado uno llegó á entretenerse y ver las gavias; mas al punto agarraron dél para revestirle la librea."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-muy-confiado-uno-llego-a-entretenerse-y"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

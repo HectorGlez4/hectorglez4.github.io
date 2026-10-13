@@ -1,0 +1,13 @@
+---
+texto: "Basta, dijo la Fortuna: que lo que más me habían de estimar los hombres eso me calumnian."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-basta-dijo-la-fortuna-que-lo-que"
+procedencia:
+  obra: "El criticón (tomo 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62691/pg62691.txt"
+---

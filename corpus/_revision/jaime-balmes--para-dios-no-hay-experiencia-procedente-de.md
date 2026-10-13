@@ -1,0 +1,13 @@
+---
+texto: "Para Dios no hay experiencia procedente de afuera; porque nada puede influir sobre él; toda su experiencia consiste en el conocimiento y amor de sí mismo."
+autor: "jaime-balmes"
+slug: "jaime-balmes-para-dios-no-hay-experiencia-procedente-de"
+procedencia:
+  obra: "Filosofía Fundamental, Tomo III"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17974/pg17974.txt"
+---

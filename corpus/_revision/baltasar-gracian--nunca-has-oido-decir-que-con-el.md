@@ -1,0 +1,13 @@
+---
+texto: "¿Nunca has oído decir que con el humo de España se luce Roma?"
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-nunca-has-oido-decir-que-con-el"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

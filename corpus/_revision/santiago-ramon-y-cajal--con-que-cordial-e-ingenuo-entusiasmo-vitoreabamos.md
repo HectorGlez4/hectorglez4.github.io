@@ -1,0 +1,13 @@
+---
+texto: "¡Con qué cordial e ingenuo entusiasmo vitoreábamos a los bravos soldados de África, y singularmente a los generales Prim y O’Donnell!"
+autor: "santiago-ramon-y-cajal"
+slug: "santiago-ramon-y-cajal-con-que-cordial-e-ingenuo-entusiasmo-vitoreabamos"
+procedencia:
+  obra: "Recuerdos de mi vida (tomo 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/58331/pg58331.txt"
+---

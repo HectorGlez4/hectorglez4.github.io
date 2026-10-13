@@ -1,0 +1,13 @@
+---
+texto: "Ésta, respondió alzando la voz el Valeroso, fué del tan celebrado después, como emulado antes, pero nunca bastantemente ni estimado ni premiado, don Fernando Cortés, Marqués del Valle."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-esta-respondio-alzando-la-voz-el-valeroso"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

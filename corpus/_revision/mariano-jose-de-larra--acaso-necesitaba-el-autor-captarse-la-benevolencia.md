@@ -1,0 +1,14 @@
+---
+texto: "Acaso necesitaba el autor captarse la benevolencia de sus lectores creando en ellos hacia él una prevención favorable de su suficiencia."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-acaso-necesitaba-el-autor-captarse-la-benevolencia"
+procedencia:
+  obra: "Obras completas de Fígaro, Tomo 2"
+  año: 1870
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/68444/pg68444.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Esta otra, que se sigue, es totalmente superflua."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-esta-otra-que-se-sigue-es-totalmente"
+procedencia:
+  obra: "El criticón (tomo 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62691/pg62691.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Apenas se acordaba ya ni de Eugenia ni de la hipoteca liberada, ni de la mozuela de la planchadora."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-apenas-se-acordaba-ya-ni-de-eugenia"
+procedencia:
+  obra: "Niebla (Nivola)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49836/pg49836.txt"
+---

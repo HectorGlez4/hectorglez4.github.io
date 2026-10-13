@@ -1,0 +1,13 @@
+---
+texto: "Basta, dijo Critilo, que no es todo oro lo que reluce."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-basta-dijo-critilo-que-no-es-todo"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

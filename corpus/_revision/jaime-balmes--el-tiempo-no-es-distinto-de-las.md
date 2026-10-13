@@ -1,0 +1,13 @@
+---
+texto: "El tiempo no es distinto de las cosas. 293"
+autor: "jaime-balmes"
+slug: "jaime-balmes-el-tiempo-no-es-distinto-de-las"
+procedencia:
+  obra: "Filosofía Fundamental, Tomo III"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17974/pg17974.txt"
+---

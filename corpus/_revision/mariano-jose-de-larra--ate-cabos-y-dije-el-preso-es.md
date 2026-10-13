@@ -1,0 +1,14 @@
+---
+texto: "Até cabos y dije: «El preso es el doncel, y el que lo prende el conde de Villena»."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-ate-cabos-y-dije-el-preso-es"
+procedencia:
+  obra: "Obras completas de Fígaro, Tomo 1"
+  año: 1889
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/67676/pg67676.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Por fortuna, unas pobres mujeres que lavaban no lejos de allí, acudieron en mi ayuda."
+autor: "santiago-ramon-y-cajal"
+slug: "santiago-ramon-y-cajal-por-fortuna-unas-pobres-mujeres-que-lavaban"
+procedencia:
+  obra: "Recuerdos de mi vida (tomo 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/58331/pg58331.txt"
+---

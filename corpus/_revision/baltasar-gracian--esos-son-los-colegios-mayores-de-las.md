@@ -1,0 +1,13 @@
+---
+texto: "Ésos son los colegios mayores de las más célebres universidades de la Europa."
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-esos-son-los-colegios-mayores-de-las"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

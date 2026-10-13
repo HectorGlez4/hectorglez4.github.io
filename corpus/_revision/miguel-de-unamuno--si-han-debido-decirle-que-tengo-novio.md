@@ -1,0 +1,13 @@
+---
+texto: "—Sí, han debido decirle que tengo novio."
+autor: "miguel-de-unamuno"
+slug: "miguel-de-unamuno-si-han-debido-decirle-que-tengo-novio"
+procedencia:
+  obra: "Niebla (Nivola)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49836/pg49836.txt"
+---

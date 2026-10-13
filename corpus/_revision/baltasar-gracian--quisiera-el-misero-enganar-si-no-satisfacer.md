@@ -1,0 +1,13 @@
+---
+texto: "Quisiera el mísero engañar, si no satisfacer, su hambre canina y dícele su codicia:"
+autor: "baltasar-gracian"
+slug: "baltasar-gracian-quisiera-el-misero-enganar-si-no-satisfacer"
+procedencia:
+  obra: "El criticón (tomo 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/63402/pg63402.txt"
+---

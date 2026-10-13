@@ -1,0 +1,14 @@
+---
+texto: "Encontré á España empezando á despertar de un sueño como el de Endimión, aparte la diferencia del número de los años."
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-encontre-a-espana-empezando-a-despertar-de"
+procedencia:
+  obra: "Obras completas de Fígaro, Tomo 2"
+  año: 1870
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/68444/pg68444.txt"
+---

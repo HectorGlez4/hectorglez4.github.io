@@ -1,0 +1,13 @@
+---
+texto: "Este concepto concuerda, en general, con algunas ideas sostenidas por Ribot."
+autor: "jose-ingenieros"
+slug: "jose-ingenieros-este-concepto-concuerda-en-general-con-algunas"
+procedencia:
+  obra: "La simulación en la lucha por la vida"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64188/pg64188.txt"
+---

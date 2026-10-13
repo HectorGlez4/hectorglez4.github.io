@@ -1,0 +1,14 @@
+---
+texto: "¡Por Santiago! venid acá, Ferrus: ¿qué hicisteis vos de cuanto os encargué?"
+autor: "mariano-jose-de-larra"
+slug: "mariano-jose-de-larra-por-santiago-venid-aca-ferrus-que-hicisteis"
+procedencia:
+  obra: "Obras completas de Fígaro, Tomo 1"
+  año: 1889
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/67676/pg67676.txt"
+---
