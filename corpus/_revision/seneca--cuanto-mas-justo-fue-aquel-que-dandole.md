@@ -1,0 +1,13 @@
+---
+texto: "¿Cuánto más justo fue aquel que, dándole nuevas de la muerte de su hijo, pronunció una sentencia digna de un gran varón?"
+autor: "seneca"
+slug: "seneca-cuanto-mas-justo-fue-aquel-que-dandole"
+procedencia:
+  obra: "Consolación a Polibio"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Consolaci%C3%B3n_a_Polibio"
+---

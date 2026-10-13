@@ -1,0 +1,16 @@
+---
+texto: "Con respecto a su ciencia, te aseguro, Critón, que es una maravilla, porque todo lo saben."
+autor: "platon"
+slug: "platon-con-respecto-a-su-ciencia-te-aseguro"
+procedencia:
+  obra: "Eutidemo"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Eutidemo"
+---

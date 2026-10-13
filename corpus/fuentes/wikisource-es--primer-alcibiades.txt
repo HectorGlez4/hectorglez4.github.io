@@ -1,0 +1,1777 @@
+fuente: wikisource-es
+obra: Primer Alcibíades
+url: https://es.wikisource.org/wiki/Primer_Alcib%C3%ADades
+recuperado: 2026-10-13
+---
+Primer Alcibíades
+[[Categoría:Obras de Platón]]
+|título=El primer Alcibíades<br><small>''o de la naturaleza humana''</small>
+|autor=Platón
+---
+<small>''o de la naturaleza humana''</small>"},"autor":{"wt":"Platón"},"sección":{"wt":""}},"i":0}}]}'>
+
+ΕλληνικάEnglishfrançaisрусский
+
+Sócrates: Hijo de Clinias, estarás sorprendido de ver, que habiendo sido yo el primero a amarte, sea ahora el último en dejarte; que después de haberte abandonado mis rivales, permanezca yo fiel; y en fin, que teniéndote los demás como sitiado con sus amorosos obsequios, sólo yo haya estado sin hablarte por espacio de tantos años. No ha sido ningún miramiento humano el que me ha sugerido esta conducta, sino una consideración por entero divina, que te explicaré más adelante. Ahora que el Dios no me lo impide, me apresuro a comunicarme contigo, y espero que nuestra relación no te ha de ser desagradable para lo sucesivo. En todo el tiempo que ha durado mi silencio, no he cesado de mirar y juzgar la conducta que has observado con mis rivales; entre el gran número de hombres orgullosos que se han mostrado adictos a ti, no hay uno que no hayas rechazado con tus desdenes, y quiero explicarte la causa de este tu desprecio para con ellos. Tú crees no necesitar de nadie, tan generosa y liberal ha sido contigo la naturaleza, comenzando por el cuerpo y concluyendo con el alma. En primer lugar te crees el más hermoso y más bien formado de todos los hombres, y en este punto basta verte para decir que no te engañas. En segundo lugar, tú te crees pertenecer a una de las más ilustres familias de Atenas, Atenas que es la ciudad de mayor consideración entre las demás ciudades griegas. Por tu padre cuentas con numerosos y poderosos amigos, que te apoyarán en cualquier lance, y no los tienes menos poderosos por tu madre. Pero a tus ojos el principal apoyo es Pericles, hijo de Xantippo, que tu padre dio por tutor a tu hermano y a ti, y cuya autoridad es tan grande, que hace todo lo que quiere, no sólo en esta ciudad, sino en toda la Grecia y en las demás naciones extranjeras. Podría hablar también de tus riquezas, si no supiera que en este punto no eres orgulloso. Todas estas grandes ventajas te han inspirado tanta vanidad, que has despreciado a todos tus amantes, como hombres demasiado inferiores a ti, y así ha resultado que todos se han retirado; tú lo has llegado a conocer, y estoy muy seguro de que te sorprende verme persistir en mi pasión, y que quieres averiguar qué esperanza he podido conservar para seguirte sólo después que todos mis rivales te han abandonado.
+
+Alcibíades: Lo que tú no sabes, Sócrates, es que me has llevado de ventaja un solo momento, porque tenía intención de preguntarte yo el primero qué es lo que justifica tu perseverancia. ¿Qué quieres y qué esperas, cuando te veo, importuno, aparecer siempre y con empeño en todos los parajes a donde yo voy? Porque, en fin, yo no puedo menos de sorprenderme de esta conducta tuya, y será para mí un placer el que me digas cuáles son tus miras.
+
+Sócrates: Es decir, que me oirás con gusto, puesto que tienes deseo de saber cómo pienso; voy, pues, a hablarte como a un hombre que tendrá la paciencia de escucharme, y que no tratará de librarse de mí.
+
+Alcibíades: Sí, Sócrates, habla pues.
+
+Sócrates: Mira bien a lo que te comprometes, para que no te sorprendas si encuentras en mí tanta dificultad en concluir como he tenido para comenzar.
+
+Alcibíades: Habla, mi querido Sócrates, y por mí te doy todo el tiempo que necesites.
+
+Sócrates: Es preciso obedecerte, y aunque es difícil hablar como amante a un hombre que no ha dado oídos a ninguno, tengo, sin embargo, valor para decirte mi pensamiento. Tengo para mí, Alcibíades, que si yo te hubiese visto contento con todas tus perfecciones y con ánimo de vivir sin otra ambición, ha largo tiempo que hubiera renunciado a mi pasión, o, por lo menos, me lisonjeo de ello. Pero ahora te voy a descubrir otros pensamientos bien diferentes sobre ti mismo, y por esto conocerás que mi terquedad en no perderte de vista no ha tenido otro objeto que estudiarte. Me parece que si algún Dios te dijese de repente: Alcibíades, ¿qué querrías más, morir en el acto, o, contento con las perfecciones que posees, renunciar para siempre a otras mayores ventajas? se me figura que querrías más morir. He aquí la esperanza que te hace amar la vida. Estás persuadido de que apenas hayas arengado a los atenienses, cosa que va a suceder bien pronto, los harás sentir que mereces ser honrado más que Pericles y más que ninguno de los ciudadanos que hayan ilustrado la república; que te harás dueño de la ciudad, que tu poder se extenderá a todas las ciudades griegas y hasta a las naciones bárbaras que habitan nuestro continente. Pero si ese mismo Dios te dijera: Alcibíades, serás dueño de toda la Europa, pero no extenderás tu dominación sobre el Asia; creo que tú no querrías vivir para alcanzar una dominación tan miserable, ni para nada que no sea llenar el mundo entero con el ruido de tu nombre y de tu poder; y creo también que, excepto Ciro y Xerxes, no hay un hombre a quien quieras conceder la superioridad. Aquí tienes tus miras; yo lo sé y no por conjeturas; bien adviertes que digo verdad, y quizá por esto mismo no dejarás de preguntarme: Sócrates, ¿qué tiene que ver este preámbulo con tu obstinación en seguirme por todas partes, que es lo que te proponías explicarme? Voy a satisfacerte, querido hijo de Clinias y de Dinomaca. Es porque todos esos vastos planes no puedes llevarlos a buen término sin mí; tanto influjo tengo sobre todos tus negocios y sobre ti mismo. De aquí procede sin duda que el Dios que me gobierna no me ha permitido hablarte hasta ahora, y yo aguardaba su permiso. Y como tú tienes esperanza de que desde el momento en que hayas hecho ver a tus conciudadanos lo digno que eres de los más grandes honores, ellos te dejarán dueño de todo, yo espero en igual forma adquirir gran crédito para contigo desde el acto en que te haya convencido de que no hay ni tutor, ni pariente, ni hermano que pueda darte el poder a que aspiras, y que sólo yo, como más digno que ningún otro, puedo hacerlo, auxiliado de Dios. Mientras eras joven y no tenías esta gran ambición, Dios no me permitió hablarte, para no malgastar el tiempo. Hoy me lo permite, porque ya tienes capacidad para entenderme.
+
+Alcibíades: Confieso, Sócrates, que te encuentro más admirable ahora, desde que has comenzado a hablarme, que antes cuando guardabas silencio, aunque siempre me lo has parecido; has adivinado perfectamente mis pensamientos, lo confieso; y aun cuando te dijera lo contrario, no conseguiría persuadirte. Pero, ¿cómo conseguirás probarme que con tu socorro llegaré a conseguir las grandes cosas que medito, y que sin ti no puedo prometerme nada?
+
+Sócrates: ¿Exiges de mí que haga un gran discurso como los que estás tú acostumbrado a escuchar? Ya sabes, que no es esa la forma que yo uso. Pero estoy en posición, creo, de convencerte de que lo que llevo sentado es verdadero, con tal que quieras concederme una sola cosa.
+
+Alcibíades: La concedo, con tal que no sea muy difícil.
+
+Sócrates: ¿Es cosa difícil responder a algunas preguntas?
+
+Alcibíades: No.
+
+Sócrates: Respóndeme, pues.
+
+Alcibíades: No tienes más que preguntarme.
+
+Sócrates: ¿Supondré, al interrogarte, que meditas estos grandes planes que yo te atribuyo?
+
+Alcibíades: Así me gusta; por lo menos tendré el placer de oír lo que tú tienes que decirme.
+
+Sócrates: Respóndeme. Tú te preparas, como dije antes, para presentarte dentro de pocos días en la Asamblea de los atenienses, para comunicarles tus luces. Si en aquel acto te encontrase y te dijese: Alcibíades, ¿con motivo de qué deliberación te has levantado a dar tu dictamen a los atenienses? ¿Es sobre cosas que sabes tú mejor que ellos? ¿Qué me responderías?
+
+Alcibíades: Te respondería sin dudar, que es sobre cosas que yo sé mejor que ellos.
+
+Sócrates: Porque tú no puedes dar buenos consejos, sino sobre cosas que tú sabes.
+
+Alcibíades: ¿Cómo es posible darlos sobre lo que no se sabe?
+
+Sócrates: ¿Y no es cierto, que tú no puedes saber las cosas, sino por haberlas aprendido de los demás, o por haberlas descubierto tú mismo?
+
+Alcibíades: ¿Cómo se pueden saber las cosas de otra manera?
+
+Sócrates: Pero ¿es posible que las hayas aprendido de los demás o encontrado por ti mismo, cuando no has querido ni aprender nada, ni indagar nada?
+
+Alcibíades: Eso no puede ser.
+
+Sócrates: ¿Te ha venido a la mente indagar o aprender lo que tú creías saber?
+
+Alcibíades: No, sin duda.
+
+Sócrates: Luego lo que tú sabes ahora, hubo un tiempo en que pensabas no saberlo.
+
+Alcibíades: Eso es muy cierto.
+
+Sócrates: Pero yo sé, poco más o menos, las cosas que has aprendido; si olvido alguna, recuérdamela. Tú has aprendido, si no me equivoco, a leer y escribir, tocar la lira y luchar, porque la flauta la has desdeñado. He aquí todo lo que tú sabes, a no ser que hayas aprendido algo de que no dé yo cuenta, a pesar de que día y noche he sido testigo de tu conducta.
+
+Alcibíades: Es cierto; son las únicas cosas que he aprendido.
+
+Sócrates: Cuando los atenienses deliberen sobre la escritura, ¿te levantarás para dar tus consejos acerca de cómo es necesario escribir?
+
+Alcibíades: No, seguramente.
+
+Sócrates: ¿Te levantarás cuando deliberen sobre el modo de tocar la lira?
+
+Alcibíades: ¡Vaya una magnífica deliberación!
+
+Sócrates: Pero los atenienses, ¿no tienen costumbre de deliberar sobre los diferentes ejercicios de la palestra?
+
+Alcibíades: Convengo en ello.
+
+Sócrates: ¿Sobre qué esperas tú que deliberen para que pueda aconsejarles? ¿No será sobre la manera de construir una casa?
+
+Alcibíades: No, ciertamente.
+
+Sócrates: El más miserable albañil les aconsejaría mejor que tú.
+
+Alcibíades: Tienes razón.
+
+Sócrates: ¿Tampoco será cuando deliberen sobre algún punto de adivinación?
+
+Alcibíades: No.
+
+Sócrates: Un adivino sabe en esta materia más que tú.
+
+Alcibíades: Seguramente.
+
+Sócrates: Ya sea pequeño o grande, hermoso o feo, de alto o bajo nacimiento.
+
+Alcibíades: Ciertamente.
+
+Sócrates: Porque un buen consejo viene de la ciencia y no de las riquezas.
+
+Alcibíades: Sin dificultad.
+
+Sócrates: Y si los atenienses deliberasen sobre la salud de los ciudadanos, ¿no buscarían un médico para consultarle, sin averiguar si era rico o pobre?
+
+Alcibíades: Eso es bien seguro.
+
+Sócrates: ¿Con qué motivo y con qué razones te levantarlas a dar a los atenienses buenos consejos?
+
+Alcibíades: Cuando deliberan sobre sus negocios.
+
+Sócrates: ¡Qué! ¿cuando deliberan en lo relativo a la construcción de buques para saber la clase de los que deben construir?
+
+Alcibíades: No es eso, Sócrates.
+
+Sócrates: Porque tú no has aprendido a construir buques, y he aquí por qué sobre esta materia no hablarás. ¿No es así?
+
+Alcibíades: Tú lo has dicho.
+
+Sócrates: ¿Cuándo, pues, deliberan sobre sus negocios, dime?
+
+Alcibíades: Cuando se trata de la paz, de la guerra o de cualquier otro negocio que atañe a la república.
+
+Sócrates: Es decir, cuando deliberan con qué pueblos debe estarse en guerra o hacerse la paz, y cuándo y cómo?
+
+Alcibíades: Eso mismo.
+
+Sócrates: ¿Si es preciso llevar la paz o la guerra a pueblos con que convenga adoptar uno u otro medio?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Consultando la conveniencia como mejor partido?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Y por todo el tiempo que convenga?
+
+Alcibíades: Nada más cierto.
+
+Sócrates: Si los atenienses deliberasen con qué atletas es preciso luchar, y con quiénes agarrarse de manos, sin tocar a los cuerpos, y cómo y cuándo es preciso hacer estos diferentes ejercicios, ¿darías tú mejores consejos sobre todo esto que un maestro de palestra?
+
+Alcibíades: El maestro de palestra los daría mejores sin dificultad.
+
+Sócrates: Puedes decirme a qué atendería principalmente este maestro de palestra, para ordenar con quién, cuándo y cómo deben hacerse estos ejercicios? ¿No atendería a que se ejecutaran lo mejor posible?
+
+Alcibíades: Sin duda.
+
+Sócrates: Ordenaría, como lo mejor, que se ejecutaran por todo el tiempo que se creyera conveniente?
+
+Alcibíades: Por todo el tiempo.
+
+Sócrates: ¿Y en las ocasiones que mejor conviniera?
+
+Alcibíades: Seguramente.
+
+Sócrates: Y el que canta ¿no debe tan pronto acompañarse con la lira y tan pronto bailar, cantando y tocando?
+
+Alcibíades: Así es preciso.
+
+Sócrates: ¿Y esto debe hacerlo, cuando sea lo mejor y más conveniente?
+
+Alcibíades: Es cierto.
+
+Sócrates: ¿Y por todo el tiempo que mejor sea?
+
+Alcibíades: Sí.
+
+Sócrates: Puesto que hay un mejor en el canto y en el acompañamiento, como le hay en la lucha, ¿cómo llamas tú a este mejor? porque al de la lucha yo le llamo mejor gimnástico.
+
+Alcibíades: No te entiendo.
+
+Sócrates: Procura seguirme. Si fuera yo, respondería, que este mejor es lo que siempre es bien; y lo que siempre es bien ¿no es lo que se hace conforme a las reglas del arte?
+
+Alcibíades: Tienes razón.
+
+Sócrates: ¿El arte de la lucha no es la gimnástica?
+
+Alcibíades: Así lo has dicho.
+
+Sócrates: ¿Pero no tengo razón?
+
+Alcibíades: Me parece que sí.
+
+Sócrates: Ánimo; a ti me dirijo, y procura responderme bien. ¿Cómo llamas el arte que enseña a cantar, tocar la lira y bailar bien? ¿No podrías decírmelo en una sola palabra?
+
+Alcibíades: No en verdad, Sócrates:.
+
+Sócrates: Haz un ensayo; voy a ponerte en el camino. ¿Cómo llamas tú a las diosas que presiden a este arte?
+
+Alcibíades: ¿Quieres hablar de las musas?
+
+Sócrates: Seguramente. Mira qué nombre ha tomado este arte de las musas.
+
+Alcibíades: ¡Ah! ¿hablas de la música?
+
+Sócrates: Precisamente; y como te he dicho, que lo que se hace conforme a las reglas de la lucha y de la gimnasia se llama gimnástica, dime igualmente cómo llamas tú lo que se hace según las reglas de este arte.
+
+Alcibíades: Yo lo llamo arte musical.
+
+Sócrates: Muy bien. Pero, dime, en el arte de hacer la guerra y en el de hacer la paz ¿cuál es lo mejor y cómo lo llamas? Así como en cada una de las otras dos artes dices que lo mejor en el uno es lo que es más gimnástico, y lo mejor en el otro lo que es más musical, trata de decirme ahora, en lo que te he preguntado, el nombre de lo mejor.
+
+Alcibíades: No podré decírtelo.
+
+Sócrates: Pero si alguno te oyese razonar y dar consejos sobre alimentos, y decir: este alimento es mejor que aquel, es preciso tomarlo en tal tiempo y en tal cantidad, y él te preguntase: Alcibíades, ¿qué es lo que llamas mejor? ¿no sería una vergüenza que no pudieses responderle que lo mejor es lo que es más sano, aunque no seas médico, y que en las cosas que haces profesión de saber y sobre las que te mezclas en dar consejos, como sabiéndolas mejor que los demás, no tuvieses nada que responder? ¿No te llena esto de confusión?
+
+Alcibíades: Lo confieso.
+
+Sócrates: Aplícate pues y haz un esfuerzo para decirme cuál es el objeto de este mejor que buscamos en el arte de hacer la paz o la guerra, y con quién se debe estar en guerra o en paz.
+
+Alcibíades: Yo no podré encontrarlo por más que me empeñe.
+
+Sócrates: ¡Qué! ¿No sabes, que cuando hacemos la guerra nos quejamos de cualquier cosa que nos han hecho aquellos contra los que tomamos las armas, e ignoras qué nombre damos a aquello de que nos quejamos?
+
+Alcibíades: Sé que decimos que se nos ha engañado o insultado o despojado.
+
+Sócrates: Ánimo y sigamos. Cuando tales cosas nos suceden, ¿puedes explicarme la diferente manera en que pueden ocurrir?
+
+Alcibíades: ¿Quieres decir, Sócrates, que pueden ellas ocurrir justa o injustamente?
+
+Sócrates: Eso mismo.
+
+Alcibíades: Y esto constituye una diferencia infinita.
+
+Sócrates: ¿A qué pueblos declararán la guerra los atenienses por tus consejos? ¿Será a los que siguen la justicia o a los que la violan?
+
+Alcibíades: ¡Terrible pregunta, Sócrates! Porque aun cuando hubiese alguno que creyese que es preciso hacer la guerra a los que respetan la justicia, se atrevería a sostenerlo?
+
+Sócrates: Es cierto; eso no es conforme a las leyes.
+
+Alcibíades: No, sin duda; eso no es ni justo, ni decente.
+
+Sócrates: ¿Tendrás por consiguiente en cuenta la justicia en todos tus consejos?
+
+Alcibíades: Es indispensable.
+
+Sócrates: Pero ese mejor, que yo te reclamaba antes, con motivo de la paz y de la guerra, para saber con quién, cómo y cuándo es preciso hacer la guerra y la paz ¿no es siempre lo más justo?
+
+Alcibíades: Así me parece.
+
+Sócrates: Pero, mi querido Alcibíades, es preciso que suceda una de dos cosas: o que sin saberlo, ignores tú lo que es justo, o que, sin saberlo yo, hayas ido a casa de algún maestro que te enseñara a distinguir lo que es más justo y lo que es más injusto. ¿Quién es ese maestro? Dímelo, te lo suplico, para que me pongas en sus manos y me recomiendes a él.
+
+Alcibíades: Esa es una de tus ironías, Sócrates.
+
+Sócrates: No, te lo juro por el Dios que preside a nuestra amistad, y que es un Dios a quien no querría ofender con un perjurio. Te lo suplico muy seriamente; si tienes un maestro, dime quién es.
+
+Alcibíades: ¡Ah! y aunque yo no tenga maestro, ¿crees tú que no pueda saber por otra parte lo que es justo y lo que es injusto?
+
+Sócrates: Lo sabrás, si lo has descubierto tú mismo.
+
+Alcibíades: ¿Y crees tú que no lo he descubierto?
+
+Sócrates: Si has hecho indagaciones, lo habrás descubierto.
+
+Alcibíades: ¿Piensas que no he hecho yo indagaciones?
+
+Sócrates: Pero si has hecho indagaciones, habrás creído ignorarlo.
+
+Alcibíades: ¿Te imaginas que no ha habido un tiempo en que yo lo ignoraba?
+
+Sócrates: Muy bien. Pero podrías señalarme precisamente ese tiempo, en que has creído que ignorabas lo que es justo e injusto. Veamos; ¿fue el año pasado cuando empezaste a hacer tus indagaciones porque lo ignorabas? ¿O creías saberlo? Di la verdad para que no hablemos en vano.
+
+Alcibíades: El año pasado creía saberlo.
+
+Sócrates: ¿Hace tres, cuatro, cinco, no lo creías lo mismo?
+
+Alcibíades: Lo mismo.
+
+Sócrates: Antes de este tiempo tú eras un niño; ¿no es así?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y en ese mismo tiempo de tu infancia, estoy seguro de que creías saberlo?
+
+Alcibíades: ¿Cómo dices que estás seguro?
+
+Sócrates: Porque durante tu infancia, en casa de tus maestros y en todas partes; en medio de tus juegos de dados o cualquier otro, te he visto muchas veces no dudar sobre la decisión de lo justo y de lo injusto, y decir con tono firme y seguro a cualquiera de tus camaradas, que era un pícaro, que era injusto, que te hacia una injusticia; ¿no es cierto esto?
+
+Alcibíades: ¿Qué debía hacer, a juicio tuyo, cuando se me hacía alguna injusticia?
+
+Sócrates: ¿Quieres decir, lo que debías hacer, ignorando o sabiendo que lo que te se hacía era una injusticia?
+
+Alcibíades: Pero yo no lo ignoraba; antes bien, reconocía perfectamente que se me hacía una injusticia.
+
+Sócrates: Ya ves por esto que, cuando no eras más que un niño, creías conocer ya lo justo y lo injusto.
+
+Alcibíades: Creía conocerlo y lo conocía.
+
+Sócrates: ¿En qué época fue el descubrimiento? porque no fue cuando ya creías saberlo.
+
+Alcibíades: No, sin duda.
+
+Sócrates: ¿En qué tiempo creías tú ignorarlo? Míralo, hecha cuentas; tengo mucho miedo que no des con ese tiempo.
+
+Alcibíades: En verdad, Sócrates, no puedo decírtelo.
+
+Sócrates: ¿Por consiguiente, tú no has encontrado por ti mismo esta ciencia de lo justo y de lo injusto?
+
+Alcibíades: Así parece.
+
+Sócrates: Pero confesaste antes que no la has aprendido de los demás; y si no la has encontrado por ti mismo ni la has aprendido de los demás, ¿cómo la sabes? ¿De dónde te ha venido?
+
+Alcibíades: Pero quizá me engañé, cuando te dije que no la había aprendido por mí mismo.
+
+Sócrates: Pues entonces, ¿cómo la has aprendido por ti mismo?
+
+Alcibíades: Creo, que la he aprendido como los demás.
+
+Sócrates: ¿Otra vez volvemos a empezar? ¿de quién la has aprendido? habla.
+
+Alcibíades: Del pueblo.
+
+Sócrates: Mal maestro me citas.
+
+Alcibíades: ¡Qué! ¿el pueblo no es capaz de enseñarla?
+
+Sócrates: ¡Bien libre está! si no es capaz de enseñar a juzgar bien sobre las jugadas de un tablero, ¿cómo ha de enseñar lo que es justo o injusto, que es mucho más difícil? ¿no lo crees tú como yo?
+
+Alcibíades: Si, sin duda.
+
+'Sócrates: ¿Y si no es capaz de enseñarte cosas de tan poca consecuencia, cómo te ha de enseñar las que son más importantes?
+
+Alcibíades: Soy de tu dictamen; sin embargo, el pueblo es capaz de enseñar muchas cosas muy superiores a este juego.
+
+Sócrates: ¿Cuáles?
+
+Alcibíades: Nuestra lengua, por ejemplo, yo no la he aprendido de nadie sino del pueblo, sin que pueda nombrar ni un solo maestro; y esta enseñanza se la debo a él, a pesar de tenerle tú por un mal maestro.
+
+Sócrates: ¡Ah! es cierto, querido mío, que el pueblo, en materia de lengua, es muy excelente maestro y tienes razón en referirte a él.
+
+Alcibíades: ¿Por qué?
+
+Sócrates: Porque en materia de lengua el pueblo tiene todo lo que deben tener los mejores maestros.
+
+Alcibíades: ¿Qué es lo que tiene?
+
+Sócrates: ¿Los que quieren enseñar una cosa no deben saberla bien antes?
+
+Alcibíades: ¿Quién lo duda?
+
+Sócrates: ¿Los que saben bien una cosa no deben estar de acuerdo entre sí sobre lo que saben, sin disputar jamás?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y si disputasen, creerías que estaban bien instruidos?
+
+Alcibíades: De ninguna manera.
+
+Sócrates: ¿Cómo, pues, serían capaces de enseñarlo?
+
+Alcibíades: De ningún modo.
+
+Sócrates: ¡Qué! ¿todo el pueblo no conviene sobre la significación de estas palabras: una piedra, un bastón? Interroga a todos los griegos; ellos te responderán la misma cosa, y cuando les pidan una piedra o un bastón, todos se dirigirán a estos objetos, y así de todo lo demás. ¿Porque creo que esto es lo que tu quieres decir por saber la lengua?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y todos los griegos no convienen en esto, ciudadanos con ciudadanos, ciudades con ciudades?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Por consiguiente, para la lengua el pueblo sería muy buen maestro?
+
+Alcibíades: Sin duda.
+
+Sócrates: ¿Y así si quisiéramos que un hombre se hiciera muy entendido en la lengua, le pondríamos justamente en manos del pueblo?
+
+Alcibíades: Justamente.
+
+Sócrates: Pero si en lugar de querer saber lo que significan las palabras hombre o caballo, quisiéramos saber si un caballo es bueno o malo, ¿el pueblo sería capaz de enseñárnoslo?
+
+Alcibíades: No, seguramente.
+
+Sócrates: Porque una prueba bien segura de que no lo sabe y de que no puede enseñarlo es que no está de acuerdo sobre este punto consigo mismo.
+
+Alcibíades: Sin duda.
+
+Sócrates: Y si quisiéramos saber, no lo que quiere decir la palabra hombre, sino lo que es un hombre sano o enfermo, ¿el pueblo estaría en estado de decírnoslo?
+
+Alcibíades: Menos aún.
+
+Sócrates: En todo lo que le veas en desacuerdo consigo mismo, ¿no le juzgarás muy mal maestro?
+
+Alcibíades: Sin dificultad.
+
+Sócrates: ¿Y crees tú que sobre lo justo y lo injusto y sobre sus propios negocios el pueblo esté más de acuerdo consigo mismo que en los demás?
+
+Alcibíades: No, ¡por Júpiter!
+
+Sócrates: ¿No crees tú que precisamente en esto es en lo que menos de acuerdo está el pueblo?
+
+Alcibíades: Estoy persuadido de eso.
+
+Sócrates: Has oído ni leído jamás, que por sostener que una cosa está sana o enferma, hayan tomado los hombres las armas y se hayan degollado los unos a los otros?
+
+Alcibíades: ¡Qué locura!
+
+Sócrates: Pero confiesa que si no lo has visto, por lo menos has leído que eso ha sucedido por sostener que una cosa es justa o injusta; por ejemplo, en la Odisea y en la Iliada de Homero.
+
+Alcibíades: Sí, seguramente.
+
+Sócrates: El fundamento de estos poemas ¿no es la diversidad de opiniones sobre la justicia y la injusticia?
+
+Alcibíades: Sí, Sócrates.
+
+Sócrates: ¿No es esta diversidad la que causó tantos combates y tantas muertes entre los griegos y troyanos, la que ha hecho pasar por tantos peligros a Ulisses, y la que perdió a los amantes de Penélope?
+
+Alcibíades: Dices verdad.
+
+Sócrates: ¿No es esta misma diversidad sobre lo justo y lo injusto la única causa que ha hecho perecer a tantos atenienses, lacedemonios y beocios en la tomada de Tanagre, y después de ésta en la batalla de Coronea, donde recibió la muerte tu padre?
+
+Alcibíades: ¿Podrá nadie negarlo?
+
+Sócrates: ¿Nos atreveremos a decir que el pueblo sabe bien una cosa sobre la que disputa con tanta animosidad, dejándose llevar de los más funestos arranques?
+
+Alcibíades: No, sin duda.
+
+Sócrates: ¡Ah! ¡mira los maestros que nos citas; en el acto mismo reconoces su ignorancia!
+
+Alcibíades: Lo confieso.
+
+Sócrates: ¿Qué trazas hay de que tú sepas lo que es justo o injusto, cuando se te ve tan indeciso y tan fluctuante, y cuando ni lo has aprendido de los demás, ni lo has descubierto por ti mismo?
+
+Alcibíades: Ninguna traza hay, según tú dices.
+
+Sócrates: ¿Cómo, según tú dices? hablas muy mal, Alcibíades.
+
+Alcibíades: ¿Cómo?
+
+Sócrates: ¿Sostienes que soy yo el que dice eso?
+
+Alcibíades: ¡Y qué! ¿no eres tú el que dices que yo no sé nada de todo lo relativo a la justicia e injusticia?
+
+Sócrates: No, no soy yo seguramente.
+
+Alcibíades: ¿Quién es entonces? ¿soy yo?
+
+Sócrates: Sí, tú mismo.
+
+Alcibíades: ¿Cómo?
+
+Sócrates: He aquí cómo. Si yo te preguntase entre el uno y el dos, cuál es el mayor número, ¿no me responderías que el dos?
+
+Alcibíades: Sí.
+
+Sócrates: Y sí yo te preguntase, ¿en qué es más grande?
+
+Alcibíades: En uno.
+
+Sócrates: ¿Quién de nosotros dice que dos es más que uno?
+
+Alcibíades: Yo.
+
+Sócrates: ¿No soy yo el que pregunta y tú el que respondes?
+
+Alcibíades: Sí.
+
+Sócrates: Y en este momento sobre lo justo y lo injusto, ¿no soy yo el que pregunta y tú el que respondes?
+
+Alcibíades: Es cierto.
+
+Sócrates: Y si te preguntase cuáles son las letras que componen el nombre de Sócrates y las dijeses una por una, ¿quién de los dos las diría?
+
+Alcibíades: Yo.
+
+Sócrates: ¡Y bien!... en una palabra, en una conversación de preguntas y respuestas, ¿quién afirma una cosa? ¿el que pregunta o el que responde?
+
+Alcibíades: Me parece, Sócrates, que el que responde.
+
+Sócrates: ¿Y hasta ahora no soy yo el que ha preguntado?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y no eres tú el que me ha respondido?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Quién de los dos ha sido, tú o yo, el que ha afirmado todo lo que hemos dicho?
+
+Alcibíades: Tengo que convenir en que yo.
+
+Sócrates: ¿No se ha dicho que el precioso Alcibíades, hijo de Clinias, no sabiendo qué es lo justo y lo injusto, creyendo sin embargo saberlo, se presenta en la Asamblea de los atenienses para darles consejos sobre cosas que él mismo ignora? ¿no es esto?
+
+Alcibíades: Eso mismo es.
+
+Sócrates: Se te puede aplicar, Alcibíades, este dicho de Eurípides: tú eres él que la ha nombrado, porque no soy yo el que lo he dicho, sino tú; y no tienes motivo para achacármelo.
+
+Alcibíades: Me parece que tienes razón,
+
+Sócrates: Créeme, Alcibíades; es una empresa insensata querer ir a enseñar a los atenienses lo que tú no sabes, lo que no has querido saber.
+
+Alcibíades: Me imagino, Sócrates, que los atenienses y todos los demás griegos raras veces examinan en sus asambleas lo que es más justo o más injusto, porque están persuadidos de que es un punto demasiado claro. Así es que, sin detenerse en esta indagación, marchan derechos a lo que es más útil; y lo útil y lo justo son muy diferentes, puesto que siempre hubo gentes que se han encontrado muy bien cometiendo grandes injusticias, y otros que por haber sido justos han librado muy mal.
+
+Sócrates: ¡Qué! Si lo útil y lo justo son muy diferentes, según dices, ¿piensas conocer lo que es útil a los hombres y por qué les es útil?
+
+Alcibíades: ¿Quién lo impide, Sócrates, a no ser que exijas de mí que diga de quién lo he aprendido, o si lo he descubierto por mí mismo?
+
+Sócrates: ¿Qué es lo que haces, Alcibíades? Supuesto que hablas así, puede ser, y de hecho lo es, fácil refutarte con las mismas razones que ya he expuesto; tú quieres nuevas pruebas y nuevas demostraciones, y tratas las primeras como trajes viejos que salen a la escena y que tú no quieres vestir, porque deseas cosa nueva. Yo, sin seguirte en tus extravíos, te preguntaré, como ya lo hice, dónde has aprendido lo que es útil y quién ha sido tu maestro; en una palabra, te pregunto de una vez todo lo que te pregunté antes. Es bien seguro que me darás la misma respuesta, y que no podrás probarme, ni que has aprendido de otros lo que es útil, ni que lo has encontrado por ti mismo. Pero como eres muy delicado, y no gustas oír dos veces la misma cosa, quiero abandonar esta cuestión: si sabes o no sabes lo que es útil a los atenienses. Pero si lo justo y lo útil son una misma cosa, o si son muy diferentes, como tú dices, ¿por qué no me lo has probado? Pruébamelo, sea interrogándome, como yo te he interrogado, sea en forma de discurso, haciendo patente la cosa.
+
+Alcibíades: Pero no sé, Sócrates, si seré capaz de hablar delante de ti.
+
+Sócrates: Mi querido Alcibíades; supón que soy yo la Asamblea, que soy yo el pueblo; cuando concurres allí, ¿no es preciso que persuadas a cada particular?
+
+Alcibíades: Así es.
+
+Sócrates: Y cuando se sabe bien una cosa, ¿no es igual demostrarla a uno por uno, o a muchos a la vez, como un maestro de lira enseña a uno o a muchos discípulos?
+
+Alcibíades: Eso es cierto.
+
+Sócrates: Y el mismo maestro, ¿no es capaz de enseñar la aritmética a uno o a muchos?
+
+Alcibíades: Sí.
+
+Sócrates: Y este hombre ¿no debe saber aritmética?
+
+Alcibíades: Ciertamente.
+
+Sócrates: Por consiguiente, lo que puedas enseñar a muchos lo puedes enseñar a uno solo.
+
+Alcibíades: Sin duda.
+
+Sócrates: ¿Pero qué es lo que puedes enseñar? ¿No es lo que sabes?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Qué otra diferencia hay entre un orador, que habla a todo un pueblo, y un hombre que habla con su amigo en conversación particular, sino que el primero tiene que convencer a muchos, y el segundo a uno solo?
+
+Alcibíades: Así parece.
+
+Sócrates: Veamos. Puesto que el que es capaz de probar a muchos lo que sabe, es con más razón capaz de probarlo a uno sólo, despliega para conmigo toda tu elocuencia, y trata de demostrarme, que lo que es justo no siempre es útil.
+
+Alcibíades: Eres bien exigente, Sócrates.
+
+Sócrates: Tan exigente, que voy a probarte en el acto lo contrario de lo que tú rehúsas probar.
+
+Alcibíades: Vamos, habla.
+
+Sócrates: Sólo quiero que me respondas.
+
+Alcibíades: ¡Ah! Nada de preguntas, te lo suplico; habla tú sólo.
+
+Sócrates: ¡Qué! ¿Es que no quieres que se te convenza?
+
+Alcibíades: Yo no pido tanto.
+
+Sócrates: Cuando tú mismo me concedas que lo que yo siento es verdadero, ¿no te darás por convencido?
+
+Alcibíades: Así me parece.
+
+Sócrates: Respóndeme, pues, y si no aprendes por ti mismo que lo justo es siempre útil, no lo creas jamás bajo la fe de ningún otro.
+
+Alcibíades: En buen hora; estoy dispuesto a responderte, porque pienso que en ello ningún mal me resultará.
+
+Sócrates: Eres profeta, Alcibíades; pero dime, ¿crees tú que haya cosas justas que sean útiles, y otras que no lo sean?
+
+Alcibíades: Seguramente lo creo.
+
+Sócrates: ¿Crees igualmente, que las unas sean honestas y las otras todo lo contrario?
+
+Alcibíades: Sea como tú dices, si gustas.
+
+Sócrates: Pregunto: ¿un hombre que hace una acción inhonesta, hace una acción justa?
+
+Alcibíades: Estoy muy lejos de creerlo.
+
+Sócrates: ¿Crees que todo lo que es justo es honesto?
+
+Alcibíades: Estoy persuadido de ello.
+
+Sócrates: ¿Pero todo lo que es honesto es bueno? ¿o crees que hay cosas honestas que son malas?
+
+Alcibíades: Yo creo, Sócrates, que hay ciertas cosas honestas que son malas.
+
+Sócrates: ¿Y, por consiguiente, que las hay inhonestas que son buenas?
+
+Alcibíades: Sí.
+
+Sócrates: Observa si te he entendido bien. En los combates ha sucedido muchas veces que un hombre, queriendo socorrer a su amigo o pariente, ha recibido muchas heridas o ha sido muerto, y que otro, abandonando a su pariente o amigo, ha salvado la vida. ¿No es esto lo que tú quieres decir?
+
+Alcibíades: Eso mismo.
+
+Sócrates: El socorro que un hombre da a su amigo es una cosa honesta en cuanto se trata de salvar al que está obligado a socorrer; ¿y no es esto lo que se llama valor?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y este mismo socorro es una cosa mala, en cuanto el que lo ejecuta se expone a ser herido y a morir?
+
+Alcibíades: Sí, sin duda.
+
+Sócrates: ¿Pero el valor no es una cosa y la muerte otra?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Entonces este socorro que se da a su amigo no es al mismo tiempo y por el mismo concepto una cosa honesta y una cosa mala?
+
+Alcibíades: Así me lo parece.
+
+Sócrates: Pero mira, si lo que hace esta acción honesta no es igualmente lo que la hace buena; porque tú has reconocido que, con respecto al valor, esta acción es bella. Examinemos, pues, ahora si el valor es un bien o un mal, y he aquí el medio de hacer bien este examen. ¿Te deseas a ti mismo bienes o males?
+
+Alcibíades: Bienes sin duda.
+
+Sócrates: ¿Sobre todo, los mayores bienes de que no querrías verte privado?
+
+Alcibíades: Sí, los mayores.
+
+Sócrates: ¿Qué piensas tú del valor? ¿A qué precio consentirías verte privado de él?
+
+Alcibíades: A precio de la vida, si era cosa de vivir con nota de cobarde.
+
+Sócrates: ¿La cobardía se parece al más grande de todos los males?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Igual a la muerte misma?
+
+Alcibíades: Sí, a la muerte.
+
+Sócrates: ¿La vida y el valor no son los contrarios de la muerte y de la cobardía?
+
+Alcibíades: Quién lo duda.
+
+Sócrates: ¿Desechas los unos y deseas los otros?
+
+Alcibíades: Sí, ciertamente.
+
+Sócrates: ¿No es porque encuentras los unos muy buenos y los otros muy malos?
+
+Alcibíades: Sin dificultad.
+
+Sócrates: ¿Has reconocido tú mismo, que socorrer al amigo en los combates es una cosa honesta, considerándola con relación al bien, que es el valor?
+
+Alcibíades: Lo he reconocido.
+
+Sócrates: Y que es una cosa mala con relación al mal, es decir, a la muerte?
+
+Alcibíades: Lo confieso.
+
+Sócrates: Se sigue de aquí, que se debe llamar cada acción según lo que ella produce; si la llamas buena cuando se convierte en bien, es preciso también llamarla mala cuando se convierte en mal.
+
+Alcibíades: Así me parece.
+
+Sócrates: Una bella acción ¿no es honesta en cuanto es buena, e inhonesta en cuanto es mala?
+
+Alcibíades: Sin contradicción.
+
+Sócrates: Desde el momento en que dices, que socorrer a un amigo en los combates es una acción honesta y al mismo tiempo una acción mala, es como si dijeras que es mala y que es buena.
+
+Alcibíades: Me parece que dices verdad.
+
+Sócrates: No hay nada honesto que sea malo, en tanto que honesto, ni nada de inhonesto que sea bueno, en tanto que inhonesto.
+
+Alcibíades: Así me parece.
+
+Sócrates: Busquemos otra prueba de esta verdad. ¿Todos los que hacen bellas acciones no obran bien?
+
+Alcibíades: Muy bien.
+
+Sócrates: Y obrar bien ¿no es ser dichoso?
+
+Alcibíades: Sí.
+
+Sócrates: ¿No es dichoso por la posesión del bien?
+
+Alcibíades: Ciertamente.
+
+Sócrates: ¿Y este bien no se adquiere por obrar bien?
+
+Alcibíades: ¿Quién lo duda?
+
+Sócrates: Luego son dichosos los que obran bien?
+
+Alcibíades: Sí, seguramente.
+
+Sócrates: Luego hay razón para decir, que obrar bien y ser dichoso es todo uno?
+
+Alcibíades: Sí.
+
+Sócrates: Las bellas acciones ¿son siempre buenas?
+
+Alcibíades: ¿Quién puede negarlo?
+
+Sócrates: Lo que es honesto y lo que es bueno ¿nos parecen la misma cosa?
+
+Alcibíades: Es indudable.
+
+Sócrates: Por consiguiente ¿todo lo que encontremos honesto debemos encontrarlo bueno?
+
+Alcibíades: Es de una necesidad absoluta.
+
+Sócrates: Y ahora, lo que es bueno, ¿es útil o no lo es?
+
+Alcibíades: Muy útil.
+
+Sócrates: Te acuerdas de lo que hemos dicho, hablando de la justicia, y en lo que estamos de acuerdo?
+
+Alcibíades: Estamos de acuerdo, me parece, en que las acciones justas son necesariamente honestas.
+
+Sócrates: Y lo que es honesto ¿es bueno?
+
+Alcibíades: Sí.
+
+Sócrates: Por consiguiente, Alcibíades, todo lo que es justo es útil.
+
+Alcibíades: Así parece.
+
+Sócrates: Ten bien presente, que eres tú mismo el que asegura todas estas verdades, porque yo no hago más que interrogar.
+
+Alcibíades: En eso estoy.
+
+Sócrates: Si alguno, creyendo conocer bien la naturaleza de la justicia, entrase en la Asamblea de los atenienses o de los peparetienses, y les dijese, que sabía que las acciones justas son algunas veces malas, ¿no te burlarías de él, tú que acabas de reconocer que la justicia y la utilidad son la misma cosa?
+
+Alcibíades: Te juro, Sócrates, por todos los dioses, que yo no sé lo que digo, y francamente, temo que he perdido la razón, porque estas cosas me parecen tan pronto de una manera, tan pronto de otra, según tú me preguntas.
+
+Sócrates: ¿Ignoras, querido mío, la causa de este desorden?
+
+Alcibíades: La ignoro completamente.
+
+Sócrates: Y si alguno te preguntase, si tienes dos o tres ojos, dos o cuatro manos, responderías tú tan pronto de una manera, tan pronto de otra? ¿No responderías siempre de una misma manera?
+
+Alcibíades: Comienzo a desconfiar mucho de mí mismo; creo, sin embargo, que respondería siempre de igual modo.
+
+Sócrates: ¿Y por qué? Porqué sabes bien que no tienes más que dos ojos y dos manos; ¿no es así?
+
+Alcibíades: Lo creo.
+
+Sócrates: Puesto que respondes tan diferentemente, a pesar tuyo, sobre la misma cosa, es una prueba infalible de que tú la ignoras.
+
+Alcibíades: Así parece.
+
+Sócrates: Si convienes en que fluctúas en tus respuestas sobre lo justo y lo injusto, sobre lo honesto y lo inhonesto, sobre lo bueno y lo malo, sobre lo útil y su contrario, ¿no es evidente que esta incertidumbre procede de tu ignorancia?
+
+Alcibíades: Eso me parece evidente.
+
+Sócrates: Es máxima segura, que el espíritu siempre está fluctuante e incierto sobre lo que ignora.
+
+Alcibíades: No puede ser de otra manera.
+
+Sócrates: Pero, dime, ¿sabes cómo podrías subir al cielo?
+
+Alcibíades: No, ¡por Júpiter! te lo juro.
+
+Sócrates: ¡Y tu espíritu está fluctuante sobre esto?
+
+Alcibíades: Nada de eso.
+
+Sócrates: ¿Sabes la razón, o quieres que te la diga?
+
+Alcibíades: Dila.
+
+Sócrates: Es, querido mío, que no sabiendo el medio de subir al cielo, no crees saberlo.
+
+Alcibíades: ¿Qué dices?
+
+Sócrates: Examinemos este punto. Cuando ignoras una cosa y sabes que la ignoras, ¿estás incierto y fluctuante sobre esta misma cosa? Por ejemplo, no sabes que ignoras el arte de preparar las viandas?
+
+Alcibíades: Sí.
+
+Sócrates: Te complaces en razonar sobre la manera de prepararlas, y hablas de ellas tan pronto de una manera, tan pronto de otra? ¿no dejas obrar al cocinero, que es a quien corresponde?
+
+Alcibíades: Dices verdad.
+
+Sócrates: Y si estuvieses a bordo de un buque, te mezclarlas en dar tu dictamen sobre el movimiento del timón, si había de ser a la izquierda o a la derecha? ignorando el arte de navegar, ¿dirías tan pronto una cosa, tan pronto otra, o dejarías más bien gobernar al piloto?
+
+Alcibíades: Sin duda le dejaría gobernar.
+
+Sócrates: Luego tú jamás estás fluctuante e indeciso sobre cosas que no sabes, con tal que sepas que no las sabes.
+
+Alcibíades: Así me parece.
+
+Sócrates: ¿Comprendes bien que todas las faltas que se cometen, no proceden sino de esta especie de ignorancia, que hace que se crea saber lo que no se sabe?
+
+Alcibíades: ¿Qué dices?
+
+Sócrates: Digo, que lo que nos arrastra a emprender una cosa es la creencia en que estamos de que sabemos llevarla a cabo.
+
+Alcibíades: Ya entiendo.
+
+Sócrates: Porque cuando estamos persuadidos de que no lo sabemos, se deja el negocio a otros.
+
+Alcibíades: Eso sucede constantemente.
+
+Sócrates: Así es, que los que están en esta última clase de ignorancia, jamás faltan; porque dejan a los demás el cuidado de las cosas que ellos no saben.
+
+Alcibíades: Estoy conforme.
+
+Sócrates: ¿Quiénes son, pues, los que cometen faltas? ¿No son los que saben las cosas?
+
+Alcibíades: No, seguramente.
+
+Sócrates: Puesto que no son ni los que saben las cosas, ni los que las ignoran, sabiendo que las ignoran, se sigue de aquí necesariamente, que son aquellos, que no sabiéndolas, creen sin embargo saberlas; ¿hay otros?
+
+Alcibíades: No, no hay más que estos.
+
+Sócrates: He aquí la más vergonzosa ignorancia; he aquí la que es causa de todos los males.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: Y cuando esta ignorancia recae sobre cosas de grandísima trascendencia, ¿no es entonces vergonzosa y terrible en sus efectos?
+
+Alcibíades: ¿Puede negarse eso?
+
+Sócrates: ¿Puedes citarme cosa alguna que sea de mayor trascendencia que lo justo, lo honesto, lo bueno, lo útil?
+
+Alcibíades: No, ciertamente.
+
+Sócrates: Y no es sobre estas mismas cosas, sobre las que tú mismo dices que estás fluctuante e indeciso?
+
+Alcibíades: Sí.
+
+Sócrates: Y esta incertidumbre no es una prueba, como ya lo hemos dicho, de que no sólo ignoras las cosas más importantes, sino que, ignorándolas, crees saberlas?
+
+Alcibíades: Me temo que sea así.
+
+Sócrates: ¡Oh Dios! en qué estado tan miserable te hallas; no me atrevo a darle nombre. Sin embargo, puesto que estamos solos, es preciso decirlo. Mi querido Alcibíades, estás sumido en la peor ignorancia, como lo acreditan tus palabras, y como lo atestiguas contra ti mismo. He aquí, por qué te has arrojado, como cuerpo muerto, en la política, antes de recibir instrucción. Y tú no eres el único a quien sucede esta desgracia, porque es común a la mayor parte de los que se mezclan en los negocios de la república; un pequeño número exceptúo, y quizá sólo a Pericles, tu tutor.
+
+Alcibíades: También se dice, Sócrates, que no se ha hecho tan hábil por sí mismo, sino que ha vivido en estrecha relación con muchos hombres hábiles, como Pitoclides, Anaxágoras, y aún hoy día, en la edad en que ya está, pasa días enteros con Damon, para instruirse constantemente.
+
+Sócrates: ¿Has conocido a alguno que, sabiendo perfectamente una cosa, no pueda enseñarla a otro? Tu maestro de lira te ha enseñado lo que sabía y lo ha enseñado a todos los que ha querido.
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y tú, que lo has aprendido de él, no podías enseñarlo a otro?
+
+Alcibíades: Sí.
+
+Sócrates: ¿No sucede lo mismo con un maestro de música y un maestro de gimnasia?
+
+Alcibíades: Ciertamente.
+
+Sócrates: Porque la mejor prueba de que se sabe bien una cosa, es el estar en posición de enseñarla a otros.
+
+Alcibíades: Así es verdad.
+
+Sócrates: ¿Pero puedes nombrarme alguno a quien Pericles haya hecho hábil? Comencemos por sus propios hijos.
+
+Alcibíades: ¡Pero, Sócrates, si los hijos de Pericles son estólidos!
+
+Sócrates: ¿Y Clinias tu hermano?
+
+Alcibíades: Eso es hablarme de un loco.
+
+Sócrates: Si Clinias es loco, y los hijos de Pericles mentecatos, de dónde nace que Pericles se ha desentendido de material tan precioso como el tuyo?
+
+Alcibíades: Tengo yo la culpa, por no haberme aplicado a nada de lo que él me ha dicho.
+
+Sócrates: Pero entre todos los atenienses y entre los extranjeros, libres o esclavos, puedes nombrarme alguno a quien el trato con Pericles haya hecho más hábil, como puedo yo nombrarte un Pitodoras, hijo de Isoloco, y un Callias, hijo de Calliades, que se han hecho muy hábiles, a costa de cien minas, en la escuela de Zenon?
+
+Alcibíades: No puedo nombrarte ni uno solo.
+
+Sócrates: Enhorabuena; ¿pero qué pretendes hacer de ti, Alcibíades? quieres seguir como te encuentras, o en fin, quieres mirar por ti?
+
+Alcibíades: Tratemos este asunto entre los dos, Sócrates. Comprendo todo lo que dices, y estoy conforme con ello; sí, todos los que se mezclan en los negocios de la república no son más que ignorantes, si se exceptúa un corto número.
+
+Sócrates: ¿Y después?
+
+Alcibíades: Si fueren personas instruidas, sería preciso que el que pretende igualarse con ellos o sobrepujarlos, trabajase y se ejercitase, y que después entrase en lid con atletas de reputación; pero, puesto que no dejan de mezclarse en el gobierno sin saber nada, ¿qué necesidad hay de tomarse el trabajo de prepararse y ejercitarse? Yo estoy bien seguro de que con el solo socorro de la naturaleza sobrepujaré a todos.
+
+Sócrates: ¡Ah! mi querido Alcibíades, ¿qué es lo que acabas de decirme? ¡tu manifestación es indigna del noble continente y demás ventajas que posees!
+
+Alcibíades: ¿Cómo? Sócrates, explícate.
+
+Sócrates: ¡Ah! estoy inconsolable por ti y por mí, si...
+
+Alcibíades: ¿Qué significa ese si...
+
+Sócrates: Si crees no tener que combatir y superar más que a gentes de esa calaña.
+
+Alcibíades: ¿A quién quieres entonces que trate de superar?
+
+Sócrates: Aún eso me sorprende más; ¿es esa la pregunta que debe hacer un hombre que cree tener un corazón grande?
+
+Alcibíades: ¿Qué quiere decir eso? ¿No son estos los únicos que puedo temer?
+
+Sócrates: Si tuvieses que conducir un buque de guerra que debiese pronto combatir, ¿te bastaría ser más hábil para la maniobra que todos los que compusiesen la tripulación? ¿No te propondrías más bien superar a los mejores pilotos de los enemigos, en lugar de medirte, como haces ahora, con los tuyos, por cima de los cuales debes sobresalir tanto, que no sólo crean que no pueden disputarte el puesto, sino que reconociéndose inferiores no piensen más que en combatir con los enemigos bajo tus órdenes? He aquí los sentimientos que deben animarte, si tienes intenciones de hacer alguna cosa grande, digna de ti y de la patria.
+
+Alcibíades: ¡Ah! ese es mi ídolo.
+
+Sócrates: ¡Vaya una ambición digna de Alcibíades, limitarse a ser el más bravo de nuestros soldados! ¿No deberás tener más bien en cuenta los generales enemigos para superarlos, y por este medio ejercitarte y compararte sin cesar a ellos?
+
+Alcibíades: ¿Quiénes son esos grandes generales, Sócrates?
+
+Sócrates: ¿No sabes que nuestra república está casi siempre en guerra con los lacedemonios o con el gran rey?
+
+Alcibíades: Lo sé.
+
+Sócrates: Si piensas ponerte a la cabeza de los atenienses, es preciso que te prepares para combatir los reyes de Lacedemonia y el rey de Persia.
+
+Alcibíades: Quizá digas verdad.
+
+Sócrates: ¡Oh! no, no, mi querido Alcibíades; no debes pensar sino en superar a un Midias, tan entendido en la cría de codornices y a otros de este jaez, que se inmiscuyen en la gobernación de la república, descubriendo aún, como dirían ciertas mujerzuelas, la larga cabellera de esclavos que llevan en su alma, y que con su lenguaje bárbaro, lejos de gobernarla, han llegado a corromper la ciudad por medio de sus cobardes adulaciones. He aquí las gentes que debes proponernos por modelos, sin pensar en ti mismo, sin pensar en instruirte; y de esta manera irás y sostendrás los combates que te esperan, sin haberte ejercitado jamás, sin haber hecho ningún preparativo; y en tal estado te pondrás a la cabeza de los atenienses.
+
+Alcibíades: Todo lo que me dices, Sócrates, lo tengo por verdadero; sin embargo, me imagino que los generales de Lacedemonia y el rey de Persia son como los demás. Sócrates. ¡Ah, mi querido Alcibíades; fíjate un poco, te lo suplico, en esa opinión!
+
+Alcibíades: ¿Cómo?
+
+Sócrates: Primeramente, ¿cuál de estas dos cosas te daría más cuidado: formarte de estos hombres una idea que te les haga temibles, o tomarlos por hombres de quienes nada tienes que temer?
+
+Alcibíades: Sin dudar, prefiero formar una gran idea de ellos.
+
+Sócrates: ¿Crees que será un mal para ti el tener cuidado de ti mismo?
+
+Alcibíades: Por lo contrario, estoy persuadido de que sería un gran bien.
+
+Sócrates: De esa manera la opinión que has formado de tus enemigos es ya un gran mal.
+
+Alcibíades: Lo confieso.
+
+Sócrates: Además es falsa, y puedo hacértelo ver.
+
+Alcibíades: ¿Cómo?
+
+Sócrates: Qué hombres piensas que son los mejores, ¿los de alto, o los de bajo nacimiento?
+
+Alcibíades: Los de alto nacimiento, evidentemente.
+
+Sócrates: Y los que a este gran nacimiento han unido una buena educación, ¿no crees que tienen todo lo necesario para la perfección de la virtud?
+
+Alcibíades: Eso es indudable.
+
+Sócrates: Comparando, pues, nuestra condición a la suya, veamos en primer lugar, si los reyes de Lacedemonia y el rey de Persia son de nacimiento inferior al nuestro. ¿No sabemos que los primeros descienden de Hércules, y los últimos de Aquemenes y que Hércules y Aquemenes descienden de Júpiter?
+
+Alcibíades: Y mi familia, ócrates, ¿no desciende de Eurisaces y Eurisaces no remonta hasta Júpiter?
+
+Sócrates: Y la mía, mi querido Alcibíades, ya que lo tomas por ese rumbo, ¿no desciende de Dédalo, y Dédalo no nos lleva hasta Vulcano, hijo de Júpiter? Pero la diferencia que hay entre ellos y nosotros es, que remontan hasta Júpiter por una gradación continua de reyes sin ninguna interrupción; los unos han sido reyes de Argos y de Lacedemonia, y los otros siempre han reinado en Persia y han poseído muchas veces el Asia, como sucede en este momento; en lugar de que nuestros abuelos no han sido más que simples particulares como nosotros. Si te vieses precisado a dar explicación a Artaxerxes, hijo de Xerxes, de tus antepasados, y de Salamina la patria de Eurisaces, o de Egina la de Eaco, más antigua aún, ¿qué objeto de risa no sería para él? Así como estamos precisados a darnos por vencidos en punto a nacimiento, veamos si no somos tan inferiores en punto a educación. ¿No te han dicho nunca las grandes ventajas que tienen en esto los reyes de Lacedemonia, cuyas mujeres son guardadas por los Éforos, para asegurarse, cuanto es posible, de que no darán a luz más que reyes de la raza de Hércules? Y el rey de Persia está en este concepto tan por cima de los reyes de Lacedemonia, que jamás se ha sospechado que la reina pueda dar a luz un príncipe que no sea hijo del rey, y por esta razón jamás se ha guardado, siendo su única guarda el temor. En el nacimiento del primogénito, que debe suceder en la corona, todos los pueblos de este gran imperio celebran con festejos este día, y posteriormente todos los años se solemniza el día con sacrificios solemnes en todas las provincias del Asia; en lugar de que cuando nosotros nacemos, mi querido Alcibíades, se nos puede aplicar el dicho del poeta cómico: apenas nuestros vecinos se aperciben de ello. El tal niño es educado, no por una nodriza de bajo nacimiento, sino por los más virtuosos eunucos de la corte, que tienen cuidado de formar y amoldar su cuerpo para que tenga el talle más hermoso posible, y cuyo empleo da una consideración muy alta. Cuando tiene siete años, le pone a cargo de escuderos, y entra ya a ejercitar la caza. A los catorce se le entrega a los preceptores del rey, que son cuatro señores escogidos, los más estimados de toda la Persia, y se procura que estén en el vigor de la edad; el uno pasa por el más sabio, el otro por el más justo, el tercero por el más templado y el cuarto por el más valiente. El primero le enseña la magia de Zoroastro, hijo de Ormuzd; es decir, la religión y todo el culto de los dioses, y le enseña igualmente todos los deberes de buen rey. El segundo le enseña a decir siempre la verdad, aunque sea contra sí mismo. El tercero le enseña a no dejarse jamás vencer por sus pasiones, a fin de que se mantenga siempre libre y rey, teniendo siempre imperio sobre sí mismo. El cuarto le acostumbra a ser intrépido, y le enseña a no temer nada; porque si teme, es esclavo. En vez de todo esto, dime tú, ¿qué preceptor has tenido? Pericles te abandonó en manos de Zopiro, esclavo de Tracia, que era incapaz de otro empleo a causa de su ancianidad. Te referiría todo el curso de la educación de tus adversarios si no fuese tarea larga, pero la muestra que acabo de darte creo sea bastante para que puedas juzgar de lo demás. Nadie ha tenido más cuidado de tu nacimiento que del de cualquiera otro ateniense, ni nadie cuida de tu educación, a menos que tengas algún amigo que se interese en ello. Si atiendes a las riquezas de los persas, a la magnificencia de sus trajes, al prodigioso gasto que hacen en perfumes y esencias, a la multitud de esclavos de que se ven rodeados, a todo su lujo y delicadeza, te ruborizarías al verte tan por bajo de ellos.
+
+¿Quieres echar una mirada sobre la templanza de los lacedemonios, su modestia, su desembarazo, su dulzura, su magnanimidad, su igualdad de espíritu en todos los accidentes de la vida, sobre su valor, su firmeza, su paciencia en los trabajos, su noble emulación, su amor a la gloria? en todas estas cualidades tú eres un niño cotejado con ellos. Si quieres que miremos a las riquezas, porque creas tener por este lado alguna ventaja, voy a hablarte de ellas para hacerte conocer quién eres tú. No hay ninguna comparación entre nosotros y los lacedemonios, pues son ellos infinitamente más ricos. ¿Se atrevería ninguno de nosotros a comparar nuestras tierras con las de Esparta y de Mesena, que son mucho más extensas y mejores, y que mantienen un número infinito de esclavos sin contar los ilotas? Añade los caballos y los demás ganados que moran en los pastos de Mesena. Pero dejo esto aparte para hablarte sólo del oro y de la plata; toda la Grecia reunida tiene menos que Lacedemonia sola, porque hace tiempo el dinero de toda la Grecia y muchas veces el de los bárbaros entra en Lacedemonia y no sale jamás; y como la zorra dijo al león en las fábulas de Esopo: veo muy bien los pasos del dinero que entra en Lacedemonia, pero no veo los del que sale. También es cierto que los particulares son más ricos en Lacedemonia que en todo el resto de la Grecia, y que el rey es allí más rico que todos los particulares; porque además de los grandes bienes que tiene como suyos propios, se le pasa una cantidad considerable. Pero si la riqueza de los lacedemonios aparece tan grande cotejada con la del resto de la Grecia, no es nada para con la del rey de Persia. He oído decir a un hombre digno de fe, que había sido uno de los embajadores cerca de este príncipe, que había hecho una gran jornada por un país bellísimo y fertilísimo, que los naturales llamaban la cintura de la Reina; que en otra jornada pasó por otro país que se llamaba el velo de la Reina, y que había otras grandes y fértiles provincias destinadas únicamente a suministrar los trajes de la reina, cada una de las cuales llevaba el nombre de la prenda de ropaje que tenía que suministrar. De manera, que si alguno fuese a decir a la esposa de Jerjes, a Amestris madre del rey: hay en Atenas un hombre, que, en todo lo que tiene, sólo cuenta con trescientos arpentas, poco más o menos, de tierra que posee en el pueblo de Erquies, y es hijo de Dinomaca, cuyo equipo, menaje y joyas apenas valen cincuenta minas, y este hombre se prepara para hacer la guerra a Artagerjes. ¡Cuál sería al pronto su sorpresa, al ver la audacia de este hombre, que quiere atacar al gran rey Artagerjes!... ¿Qué crees que pensaría? Sin duda diría: este hombre funda seguramente el triunfo de semejante empresa en su aplicación, en su gran habilidad, porque estas son las únicas cosas que aprecian los griegos. Pero cuando se le dijese: este Alcibíades es un joven que no tiene veinte años, sin ninguna clase de experiencia, y tan presuntuoso, que cuando su amigo le hizo ver que debe ante todas cosas tener cuidado de sí, trabajar, meditar, ejercitarse, y que sólo después de esto podrá hacer la guerra al gran rey, no quiere creer nada, y dice, que tal como es, se considera con el mérito necesario para ello. Creo que la sorpresa de la reina sería mucho mayor, y nos preguntaría: ¿en qué se fía ese joven? y si nosotros le respondiéramos: en su belleza, en su talle, en su riqueza y en las dotes de su espíritu, ¿no es cierto que nos tendría por locos, si fijaba su atención en la superioridad de estos datos respecto de ella misma? Pero sin subir tan alto, creo, que Lampito, hija de Leoliquidas, mujer de Arquidamo y madre de Agis, que son todos de casta real en Lacedemonia, no se sorprendería menos, si se le dijese, que mal educado como has sido, deseas ponerte a la cabeza de los atenienses para hacer la guerra a su hijo. ¡Ah! ¿y no sería una vergüenza, que mujeres, y mujeres de nuestros enemigos, sepan mejor que nosotros mismos las cualidades que deberíamos tener para hacerles la guerra? Así, mi querido Alcibíades, sigue mis consejos, y obedece al precepto que está escrito en el frontispicio del templo de Delfos: Conócete a ti mismo, porque los enemigos con quienes te las has de haber son tales, como yo los represento y no como tú te imaginas. El único medio de vencerlos es la aplicación y la habilidad; si renuncias a estas cualidades necesarias, renuncia también a la gloria fuera y dentro de tu país, gloria a que has aspirado con más ardor que otro alguno.
+
+Alcibíades: Puedes explicarme, Sócrates, ¿cuál es el cuidado que debo tomar de mí mismo? porque me hablas, lo confieso, con más sinceridad que ningún otro.
+
+Sócrates: Sin duda puedo hacerlo; pero no es esto útil a ti sólo. Juntos debemos buscar los medios de hacernos mejores, que yo no tengo menos necesidad que tú, yo que sobre ti tengo sólo una ventaja.
+
+Alcibíades: ¿Cuál es esa ventaja?
+
+Sócrates: Que mi tutor es mejor y más sabio que Pericles, que es el tuyo.
+
+Alcibíades: ¿Quién es ese tutor?
+
+Sócrates: El Dios que hasta hoy no me ha permitido hablarte; siguiendo sus aspiraciones, sólo mediando yo puedes conseguir la gloria, como antes te dije.
+
+Alcibíades: ¿Te burlas, Sócrates:?
+
+Sócrates: Quizá; pero siempre es una verdad que tenemos una necesidad muy grande de mirar por nosotros mismos, como la tienen todos los hombres, y nosotros dos más que ninguno.
+
+Alcibíades: Sí, Sócrates, cuando menos por lo que a mí toca.
+
+Sócrates: Y lo mismo me sucede a mí.
+
+Alcibíades: ¿Qué haremos, pues?
+
+Sócrates: Este es el momento, querido mío, en que es preciso quitar la pereza y la desidia.
+
+Alcibíades: Convengo en ello.
+
+Sócrates: Veamos y examinemos juntos lo que intentamos. Dime, ¿no queremos hacernos muy buenos?
+
+Alcibíades: Sí.
+
+Sócrates: ¿En qué clase de virtud?
+
+Alcibíades: En la virtud que constituye la bondad del hombre.
+
+Sócrates: ¿Y quién es el hombre bueno?
+
+Alcibíades: El que lo es para los negocios.
+
+Sócrates: ¿Para qué negocios? ¿Para los de equitación?
+
+Alcibíades: No.
+
+Sócrates: Porque eso corresponde a los picadores.
+
+Alcibíades: Sí.
+
+Sócrates: ¿En los de la marina?
+
+Alcibíades: Tampoco.
+
+Sócrates: Porque eso corresponde a los pilotos.
+
+Alcibíades: Sí.
+
+Sócrates: ¿Pues en qué negocios?
+
+Alcibíades: En los negocios que ocupan a nuestros mejores atenienses.
+
+Sócrates: ¿Qué entiendes por nuestros mejores atenienses? ¿Son los hábiles o los inhábiles?
+
+Alcibíades: Los hábiles.
+
+Sócrates: ¿Por lo tanto, según tú, cuando es hábil uno para una cosa, es bueno para la cosa misma?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y los inhábiles no son en manera alguna buenos?
+
+Alcibíades: Sin duda.
+
+Sócrates: Un zapatero tiene toda la habilidad para hacer zapatos; ¿es bueno para esto?
+
+Alcibíades: Muy bueno.
+
+Sócrates: ¿Pero es inhábil para hacer trajes?
+
+Alcibíades: Sí.
+
+Sócrates: Por consiguiente es un mal sastre.
+
+Alcibíades: Sin dificultad.
+
+Sócrates: Este mismo hombre, por lo tanto, ¿es bueno y malo?
+
+Alcibíades: Así me lo parece.
+
+Sócrates: Se sigue de este principio, que aquellos que tú llamas buenos son igualmente malos.
+
+Alcibíades: No es eso lo que yo quiero decir.
+
+Sócrates: Pues entonces ¿qué entiendes por hombres buenos?
+
+Alcibíades: Entiendo los que saben gobernar.
+
+Sócrates: ¿Gobernar, qué? ¿caballos?
+
+Alcibíades:No.
+
+Sócrates: ¿Hombres?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Los enfermos? No. ¿Los pilotos? Tampoco. ¿Los labradores? Tampoco.
+
+Sócrates: Pues, ¿quiénes? ¿Los que hacen algo, o los que no hacen nada?
+
+Alcibíades: Los que hacen alguna cosa.
+
+Sócrates: ¿Quiénes son? ¿Qué? Trata de explicarte y de hacérmelo comprender.
+
+Alcibíades: Los que viven en sociedad y se sirven los unos a los otros, como los que vivimos en las ciudades.
+
+Sócrates: Según tú, es gobernar a los hombres que se sirven de otros hombres.
+
+Alcibíades: Así lo entiendo.
+
+Sócrates: ¿Es gobernar a los contramaestres que se sirven de los marineros?
+
+Alcibíades: No.
+
+Sócrates: Porque eso pertenece a los pilotos.
+
+Alcibíades: Sí.
+
+Sócrates: ¿Es gobernar a los tocadores de flauta que se sirven de músicos y danzantes?
+
+Alcibíades: Tampoco.
+
+Sócrates: Porque eso pertenece a los maestros de capilla.
+
+Alcibíades: Es cierto.
+
+Sócrates: Entonces ¿qué entiendes por gobernar a los hombres que se sirven de otros hombres?
+
+Alcibíades: Entiendo mandar a hombres que viven juntos bajo las mismas leyes y el mismo gobierno.
+
+Sócrates: ¿Y qué arte es ese que enseña a mandarlos? Si te preguntase, cuál es el arte que enseña a mandar a todos los marineros de un mismo buque, ¿qué me responderías?
+
+Alcibíades: Que es el arte de los pilotos.
+
+Sócrates: Y si te preguntase, ¿cuál es el arte que enseña a mandar a los músicos y danzantes?
+
+Alcibíades: Yo te respondería que es el arte de los maestros de capilla.
+
+Sócrates: ¿Cómo llamas este arte que enseña a mandar a los que forman un mismo cuerpo de Estado?
+
+Alcibíades: El arte de aconsejar bien, Sócrates ¡Cómo! ¿El arte de los pilotos es el arte de dar malos consejos?
+
+Alcibíades: No.
+
+Sócrates: ¿No se proponen darlos buenos?
+
+Alcibíades: Seguramente, por el bien de los que se hallan embarcados.
+
+Sócrates: Dices muy bien. ¿Pero de qué buenos consejos hablas, y qué es a lo que tienden?
+
+Alcibíades: Tienden a conservar y mejorar la gobernación.
+
+Sócrates: ¿Pero qué es lo que conserva los Estados? ¿Qué cosa es esa cuya presencia o ausencia sostiene la sociedad? Si tú me preguntaras, qué es lo que un cuerpo debe tener o no tener para mantenerse sano y en buen estado, yo te respondería sobre la marcha, que debe tener la salud y no tener la enfermedad. ¿No lo crees tú como yo?
+
+Alcibíades: Lo mismo que tú.
+
+Sócrates: Y si me preguntases lo mismo sobre el ojo respondería igualmente, que está bien cuando tiene buena vista, y mal cuando tiene ceguera; sobre los oídos lo mismo, que están bien cuando tienen todo lo que necesitan para oír, sin ninguna disposición para la sordera.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: Y en un Estado, ¿qué es lo que debe haber o no haber para que se halle en la mejor situación posible?
+
+Alcibíades: Me parece, Sócrates, que es preciso que la amistad reine entre los ciudadanos, y que se destierren entre ellos el odio y la división.
+
+Sócrates: ¿Qué llamas amistad? ¿es la concordia o la discordia?
+
+Alcibíades: La concordia seguramente.
+
+Sócrates: ¿Cuál es el arte que hace que los Estados concuerden, por ejemplo, sobre los números?
+
+Alcibíades: Es la aritmética.
+
+Sócrates: ¿Es un arte en el que concuerdan entre sí los particulares?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y cada uno consigo mismo?
+
+Alcibíades: Sin dificultad.
+
+Sócrates: ¿Y cómo llamas al arte que hace que cada uno concuerde consigo mismo siempre sobre la magnitud de un pie o de un codo? ¿no es el arte de medir?
+
+Alcibíades: Sí, sin duda.
+
+Sócrates: Y los Estados y los particulares ¿se ponen de acuerdo por medio de este arte?
+
+Alcibíades: Sí.
+
+Sócrates: ¿No sucede lo mismo sobre los pesos?
+
+Alcibíades: Lo mismo.
+
+Sócrates: ¿Y cuál es la concordia de que hablas? ¿en qué consiste y qué arte es el que la da a conocer? ¿la de un Estado es la misma que hace que un particular se ponga de acuerdo consigo mismo y con los demás?
+
+Alcibíades: Me parece que es la misma.
+
+Sócrates: ¿Cuál es? no desistas de responderme, e instrúyeme por caridad.
+
+Alcibíades: Creo que es esta amistad y esta concordia que hacen que un padre y una madre estén bien con sus hijos, un hermano con su hermano, una mujer con su marido.
+
+Sócrates: ¿Crees que un marido puede estar de acuerdo con su mujer sobre obras de lana que ella entiende perfectamente y que él no entiende?
+
+Alcibíades: No, sin duda.
+
+Sócrates: Es imposible, porque es una obra de mujer.
+
+Alcibíades: Sí.
+
+Sócrates: ¿Es posible que una mujer pueda estar de acuerdo con su marido en materia de armas, cuando no sabe lo que son?
+
+Alcibíades: No.
+
+Sócrates: Me podrías responder que sólo es acomodado al talento del hombre.
+
+Alcibíades: Es cierto.
+
+Sócrates: ¿Convienes en que hay ciencias que están destinadas a las mujeres, y otras que están reservadas a los hombres?
+
+Alcibíades: ¿Quién puede negarlo?
+
+Sócrates: Sobre todas estas ciencias no es posible que las mujeres estén de acuerdo con sus maridos.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: Por consiguiente no habrá amistad, puesto que la amistad no es más que la concordia.
+
+Alcibíades: Soy de tu opinión.
+
+Sócrates: Y así cuando una mujer haga lo que debe hacer, ¿no será amada por su marido?
+
+Alcibíades: No me parece.
+
+Sócrates: Y cuando un marido haga lo que debe hacer, ¿no será amado por su mujer?
+
+Alcibíades: No.
+
+Sócrates: ¿Luego los Estados, en los que hace cada uno lo que debe hacer, no estarán bien gobernados?
+
+Alcibíades: Me parece que sí, Sócrates.
+
+Sócrates: ¿Qué es lo que dices? ¿Será bien gobernado un Estado sin que la amistad reine en él? ¿No hemos convenido en que por la amistad un Estado está bien regido, y que en otro caso todo es desorden y confusión?
+
+Alcibíades: Pero me parece, sin embargo, que es esto mismo lo que produce la amistad; que cada uno haga lo que debe hacer.
+
+Sócrates: Hace un momento decías lo contrario; pero es preciso que te hagas entender. ¿Cómo dices ahora que la concordia bien establecida produce la amistad? ¡Ah! ¿puede haber concordia sobre negocios que los unos saben y los otros no saben?
+
+Alcibíades: Eso es imposible.
+
+Sócrates: Cuando cada uno hace lo que debe hacer, hace lo que es justo o lo que es injusto?
+
+Alcibíades: ¡Vaya una pregunta! cada uno hace lo que es justo.
+
+Sócrates: De aquí se sigue, que en el acto mismo en que todos los ciudadanos hacen lo que es justo, no pueden sin embargo amarse.
+
+Alcibíades: La consecuencia parece necesaria.
+
+Sócrates: ¿Cuál es, pues, esta amistad o esta concordia que puede hacernos hábiles y capaces de dar buenos consejos, para que entremos así en el número de los que llamas tú buenos ciudadanos? Porque no puedo comprender, ni lo que es, ni en quién se encuentra; porque tan pronto se la encuentra en ciertas personas, tan pronto no se la encuentra ya, como se ve por tus palabras.
+
+Alcibíades: Te juro, Sócrates, por todos los dioses, que yo mismo no sé lo que me digo, y que corro gran riesgo de estar dentro de algún tiempo en muy mal estado, sin apercibirme de ello.
+
+Sócrates: No te desanimes, Alcibíades; si te apercibieses de este estado a los cincuenta años, te sería difícil poner remedio y tener cuidado de ti mismo; pero en la edad en que tú estás, es justamente el tiempo oportuno de sentir tu mal.
+
+Alcibíades: Y cuando uno siente el mal ¿qué deberá hacer?
+
+Sócrates: Sólo hace falta, Alcibíades, responder a algunas preguntas; si lo haces, espero que, con la ayuda de Dios, tú y yo nos haremos mejores que somos, por lo menos si damos fe a mi profecía.
+
+Alcibíades: Si sólo consiste en responder, el éxito es seguro.
+
+Sócrates: Veamos pues. Qué es tener cuidado de sí mismo? no sea que cuando creamos tener más cuidado de nosotros mismos, nos suceda muchas veces, que, sin apercibirnos, sea otra cosa muy distinta la que llame nuestra atención. ¿Qué es preciso hacer para tener cuidado de sí mismo? ¿Tiene un hombre cuidado de sí cuando le tiene de las cosas que son suyas?
+
+Alcibíades: Así me parece.
+
+Sócrates: ¿Cómo? un hombre tiene cuidado de sus pies, cuando le tiene de las cosas que son para sus pies?
+
+Alcibíades: No te entiendo.
+
+Sócrates: ¿No conoces nada que esté únicamente hecho para la mano? Las sortijas para qué parte del cuerpo están hechas? no son para los dedos?
+
+Alcibíades: Sin duda.
+
+Sócrates: ¿Los zapatos no están hechos también para los pies?
+
+Alcibíades: Seguramente.
+
+Sócrates: Tenemos cuidado de nuestros pies cuando le tenemos de nuestros zapatos?
+
+Alcibíades: Aún no te entiendo, Sócrates.
+
+Sócrates: ¡Pero qué! ¿no has dicho, Alcibíades, que se toma cuidado por las cosas?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y hacer una cosa mejor no es tomar cuidado por ella?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Cuál es el arte que hace los zapatos mejores?
+
+Alcibíades: El arte del zapatero.
+
+Sócrates: ¿Por medio del arte del zapatero es como tenemos cuidado de nuestros zapatos?
+
+Alcibíades: Sí.
+
+Sócrates: Es por el arte del zapatero por el que nosotros tenemos cuidado de nuestros pies, o es por el arte que hace nuestros pies mejores?
+
+Alcibíades: Es por este último arte sin duda.
+
+Sócrates: ¿No hacemos nuestros pies mejores por el mismo arte que hace todo nuestro cuerpo mejor?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y este arte no es la gimnástica?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Por medio de la gimnástica tenemos cuidado de nuestros pies, y por el arte del zapatero tenemos cuidado de las cosas destinadas a nuestros pies?
+
+Alcibíades: Sin duda.
+
+Sócrates: Por medio de la gimnástica tenemos cuidado de nuestras manos, y por el arte del joyero tenemos cuidado de las cosas destinadas a nuestras manos?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Por medio de la gimnástica tenemos cuidado de nuestro cuerpo, y por el arte del tejedor y todas las demás artes tenemos cuidado de las cosas destinadas a nuestros cuerpos?
+
+Alcibíades: Es indudable.
+
+Sócrates: Y por consiguiente ¿el arte por el que tenemos cuidado de nosotros no es el mismo, que aquel por el que tenemos cuidado de las cosas que son para nosotros?
+
+Alcibíades: Así lo creo.
+
+Sócrates: Se sigue de aquí, que cuando tienes cuidado de las cosas que son tuyas, no tienes cuidado de ti mismo.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: ¿Porque no es el mismo arte por el que un hombre tiene cuidado de sí mismo y lo tiene de las cosas destinadas para sí mismo?
+
+Alcibíades: Lo confieso.
+
+Sócrates: ¿Cuál, pues, es el arte, por el que tenemos cuidado de nosotros mismos?
+
+Alcibíades: No puedo decírtelo.
+
+Sócrates: Estamos convenidos ya en que no es ninguno por el que podemos mejorar las cosas que son nuestras, sino que es aquel por el que podemos hacernos nosotros mismos mejores.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: ¿Pero podemos conocer el arte de hacer zapatos, si no sabemos antes lo que es un zapato?
+
+Alcibíades: No.
+
+Sócrates: ¿Y el arte de engastar sortijas, si no sabemos antes lo que es una sortija?
+
+Alcibíades: Es claro.
+
+Sócrates: ¿Qué medio tenemos de conocer el arte que nos hace mejores a nosotros mismos, si no sabemos antes lo que somos nosotros mismos?
+
+Alcibíades: Es absolutamente imposible.
+
+Sócrates: ¿Pero es una cosa fácil conocerse a sí mismo, y fue un ignorante el que inscribió este precepto a las puertas del templo de Apolo en Delfos? ¿O es una cosa muy difícil que no es dado a todos los hombres conseguir?
+
+Alcibíades: Para mí, Sócrates, he creído con la mayor evidencia, que es dado a todos los hombres conseguirlo; pero también que ofrece gran dificultad.
+
+Sócrates: Pero, Alcibíades, sea fácil o no, es cosa infalible que si una vez llegamos a conocerlo, sabremos bien pronto y sin dificultad el cuidado que debemos tener de nosotros mismos; en vez de que si lo ignoramos, jamás llegaremos a conocer la naturaleza de este cuidado.
+
+Alcibíades: Eso es indudable.
+
+Sócrates: ¡Ánimo, pues! ¿Por qué medio encontraremos la esencia de las cosas, hablando en general? Siguiendo este rumbo encontraremos bien pronto lo que somos nosotros, y si ignoramos esta esencia nos ignoraremos siempre a nosotros mismos.
+
+Alcibíades: Dices verdad.
+
+Sócrates: Sígueme, y te conjuro a ello por Júpiter. ¿Con quién conversas en este momento? ¿Es con otro más que conmigo?
+
+Alcibíades: No, es contigo.
+
+Sócrates: ¿Y yo contigo?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Es Sócrates el que habla?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Es Alcibíades el que escucha?
+
+Alcibíades: Así es.
+
+Sócrates: Y para hablar Sócrates, ¿no se vale de la palabra?
+
+Alcibíades: ¿Qué quieres decir con eso?
+
+Sócrates: Servirse de la palabra y hablar, ¿no son la misma cosa?
+
+Alcibíades: Sin dificultad.
+
+Sócrates: El que se sirve de una cosa y la cosa de que se sirve, ¿no son diferentes?
+
+Alcibíades: No te entiendo.
+
+Sócrates: Un zapatero, por ejemplo, ¿se sirve del trinchete, de las hormas y otros instrumentos?
+
+Alcibíades: Sin duda.
+
+Sócrates: ¿Y el que corta con su trinchete es diferente del trinchete con que corta?
+
+Alcibíades: Ciertamente.
+
+Sócrates: ¿Por consiguiente, el hombre que toca la lira no es la misma cosa que la lira con que toca?
+
+Alcibíades: Es seguro.
+
+Sócrates: Esto es lo que te preguntaba antes: si el que se sirve de una cosa te parece diferente siempre de la cosa de que él se sirve.
+
+Alcibíades: Sí, muy diferente.
+
+Sócrates: Pero el zapatero no corta sólo con sus instrumentos, corta también con sus manos.
+
+Alcibíades: También con sus manos.
+
+Sócrates: ¿Se sirve de sus manos?
+
+Alcibíades: Sin duda.
+
+Sócrates: ¿Se sirve igualmente de sus ojos al cortar?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Estamos de acuerdo en que el que se sirve de una cosa es siempre diferente de la cosa de que se sirve?
+
+Alcibíades: Estamos de acuerdo.
+
+Sócrates: Por consiguiente, ¿el zapatero y el tocador de lira son otra cosa que las manos y los ojos de que ambos se sirven.
+
+Alcibíades: Es claro.
+
+Sócrates: El hombre se sirve de su cuerpo.
+
+Alcibíades: ¿Quién lo duda?
+
+Sócrates: ¿Y lo que se sirve de una cosa es diferente que la cosa de que se sirve?
+
+Alcibíades: Sí.
+
+Sócrates: El hombre, por consiguiente, es otra cosa que su cuerpo.
+
+Alcibíades: Lo creo.
+
+Sócrates: ¿Qué es el hombre?
+
+Alcibíades: Yo no puedo decirlo, Sócrates.
+
+Sócrates: Por lo menos podrías decirme, que el hombre es una cosa que se sirve del cuerpo.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: ¿Hay alguna cosa que se sirva del cuerpo más que el alma?
+
+Alcibíades: No, no hay más que el alma.
+
+Sócrates: ¿Es ella la que manda?
+
+Alcibíades: Ciertamente.
+
+Sócrates: Y yo creo, que no hay nadie que no se vea forzado a reconocer...
+
+Alcibíades: ¿Qué?
+
+Sócrates: Que el hombre es una de estas tres cosas.
+
+Alcibíades: ¿Qué cosas?
+
+Sócrates: O el alma o el cuerpo, o el compuesto de uno y otro.
+
+Alcibíades: Conforme.
+
+Sócrates: ¿Pero estamos conformes en que el alma manda al cuerpo?
+
+Alcibíades: Lo estamos.Sócrates. ¿El cuerpo se manda a sí mismo?
+
+Alcibíades: No, ciertamente.
+
+Sócrates: Porque hemos dicho que el cuerpo es el que obedece.
+
+Alcibíades: Sí.
+
+Sócrates: Luego no es lo que buscamos.
+
+Alcibíades: Así parece.
+
+Sócrates: ¿Es el compuesto el que manda al cuerpo? ¿y éste compuesto es el hombre?
+
+Alcibíades: Podrá suceder.
+
+Sócrates: Nada menos que eso, porque no mandando uno de los dos, es imposible que los dos juntos manden.
+
+Alcibíades: Eso es muy cierto.
+
+Sócrates: Puesto que ni el cuerpo ni el compuesto de alma y cuerpo son el hombre, es preciso de toda necesidad, o que el hombre no sea absolutamente nada, o que el alma sola sea el hombre.
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿Hay necesidad de demostrar aún más claramente que el alma sola es el hombre?
+
+Alcibíades: No, ¡por Júpiter! está bastante probado.
+
+Sócrates: Aún no hemos profundizado esta verdad con toda la exactitud que ella exige, pero es suficiente la prueba hecha, y esto basta. La profundizaríamos más, cuando hubiésemos encontrado lo que acabamos de abandonar, porque era de difícil indagación.
+
+Alcibíades: ¿Qué es?
+
+Sócrates: Lo que dijimos antes, que era preciso, en primer lugar, conocer la esencia de las cosas generalmente hablando, y en lugar de esta esencia absoluta nos hemos detenido a examinar la esencia de una cosa particular, y quizá esto baste, porque no podremos encontrar en nosotros nada que sea más que nuestra alma.
+
+Alcibíades: Eso es muy cierto.
+
+Sócrates: Por consiguiente, es un principio sentado que cuando conversamos tú y yo, es mi alma la que conversa con la tuya.
+
+Alcibíades: Entendido.
+
+Sócrates: Esto es lo que decíamos hace un momento: que Sócrates habla a Alcibíades dirigiéndole la palabra, no a su cuerpo como parece, sino a Alcibíades mismo; es decir, a su alma.
+
+Alcibíades: Eso es evidente.
+
+Sócrates: ¿El que manda que nos conozcamos a nosotros mismos manda, por consiguiente, que conozcamos nuestra alma?
+
+Alcibíades: Yo lo creo así.
+
+Sócrates: Luego el que conoce sólo su cuerpo conoce lo que está en él, pero no conoce lo que él es?
+
+Alcibíades: Sí.
+
+Sócrates: Así un médico no se conoce a sí mismo, en tanto que médico, ni un maestro de palestra, en tanto que maestro de palestra?
+
+Alcibíades: No, a mi parecer.
+
+Sócrates: Aún menos los labradores y todos los demás artesanos que lejos de conocerse a sí mismos, ni conocen lo que particularmente les toca, y además su arte los liga a cosas más lejanas aún de ellos que lo que está en ellos. En efecto, el objeto de sus cuidados no es tanto su cuerpo como las cosas que tienen relación con el cuerpo.
+
+Alcibíades: Todo eso es también muy verdadero.
+
+Sócrates: Por lo tanto, si es sabiduría conocerse a sí mismo, ninguno de estos artistas es sabio por su arte.
+
+Alcibíades: Soy de tu dictamen.
+
+Sócrates: Y he aquí por qué todas estas artes parecen viles, y por consiguiente indignas de una persona decente.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: Volviendo, pues, a nuestro principio, todo hombre que tiene cuidado de su cuerpo, tiene cuidado de lo que le pertenece, pero no de sí mismo.
+
+Alcibíades: Estoy de acuerdo.
+
+Sócrates: Todo hombre que ama las riquezas no se ama a sí mismo, ni lo que está en él; sino que ama una cosa aún más lejana de él y de lo que está en él.
+
+Alcibíades: Así me lo parece.
+
+Sócrates: El que sólo se ocupa en amontonar riquezas, ¿maneja mal sus negocios?
+
+Alcibíades: Es muy cierto.
+
+Sócrates: Si alguno se ha enamorado del cuerpo de Alcibíades, no es Alcibíades el objeto de su cariño, sino una de las cosas que pertenecen a Alcibíades.
+
+Alcibíades: Estoy convencido de ello.
+
+Sócrates: El que ha de amar a Alcibíades ha de amar su alma.
+
+Alcibíades: Consecuencia necesaria.
+
+Sócrates: He aquí por qué el que sólo ama tu cuerpo se retira desde que esta flor de belleza comienza a marchitarse.
+
+Alcibíades: Es cierto.
+
+Sócrates: Pero el que ama tu alma, no se retira jamás, en tanto que puede ella aspirar a mayor perfección.
+
+Alcibíades: Así parece.
+
+Sócrates: Aquí tienes la razón por qué he sido yo el único que no te ha abandonado y que permanece constante, después que aparece marchita la flor de tu belleza y que todos tus amantes se han retirado.
+
+Alcibíades: Gran placer me das, y te suplico que no me abandones.
+
+Sócrates: Trabaja sin descanso con todas tus fuerzas para hacerte mejor.
+
+Alcibíades: Trabajaré.
+
+Sócrates: Al ver lo que sucede, es fácil juzgar que Alcibíades, hijo de Clinias, jamás ha tenido, y aun ahora mismo no tiene, más que un único y verdadero amante; y este amante fiel, digno de ser amado, es Sócrates, hijo de Sofromico y de Ferarete.
+
+Alcibíades: Nada más verdadero.
+
+Sócrates: ¿No me dijiste, cuando me avisté contigo y antes de que yo te hiciera prevención alguna, que tenías intención de hablarme para saber por qué era el único que no me había retirado?
+
+Alcibíades: Así te lo dije, y es muy cierto.
+
+Sócrates: Ahora ya sabes la razón, y es, que yo te he amado a ti mismo, mientras que los demás sólo han amado lo que está en ti. La belleza de lo que está en ti comienza a disiparse cuando tu belleza propia comienza a florecer; y si no te dejas malear y corromper por el pueblo, yo no te abandonaré en toda mi vida. Pero temo que infatuado con el favor del pueblo, como ha sucedido a un gran número de nuestros mejores ciudadanos; porque el pueblo de la magmánima Erectea tiene una preciosa máscara; pero es preciso verle con la cara descubierta. Créeme, pues, Alcibíades, y toma las precauciones que te digo.
+
+Alcibíades: ¿Qué precauciones?
+
+Sócrates: La de ejercitarte y aprender bien lo que es preciso saber antes de mezclarte en los negocios de la república, a fin de que, robustecido con un buen preservativo, puedas sin temor exponerte a los peligros.
+
+Alcibíades: Todo eso está muy bien dicho, Sócrates; pero trata de explicarme cómo podemos tener cuidado de nosotros mismos.
+
+Sócrates: Ese es negocio ya ventilado; porque ante todas cosas hemos sentado lo que es el hombre, y con razón, porque temeríamos, no siendo este punto bien conocido, dirigir nuestro cuidado a otras cosas que no fueran nosotros mismos, sin apercibirnos de ello.
+
+Alcibíades: Así es.
+
+Sócrates: Estamos convenidos, además, en que es el alma la que es preciso cuidar, debiendo ser este el único fin que nos propongamos.
+
+Alcibíades: Sin duda.
+
+Sócrates: Que es preciso dejar a los demás el cuidado del cuerpo y de lo que pertenece al cuerpo, como las riquezas.
+
+Alcibíades: ¿Puede negarse eso?
+
+Sócrates: ¿Cómo podríamos sentar esta verdad de una manera más clara y evidente? porque si consiguiéramos verla con toda claridad, es indudable que nos conoceríamos perfectamente a nosotros mismos. Tratemos, pues, en nombre de los dioses, de entender bien el precepto de Delfos, de que ya hemos hablado; pero ¿comprendemos, por ventura, ya toda su fuerza?
+
+Alcibíades: ¿Qué fuerza? ¿Qué quieres decir con eso, Sócrates?
+
+Sócrates: Voy a comunicarte lo que a mi juicio quiere decir esta inscripción y el precepto que ella encierra. No es posible hacértele comprender por otra comparación que por esta que se toma de la vista.
+
+Alcibíades: ¿Cómo?
+
+Sócrates: Fíjate bien: si esta inscripción hablase al ojo, como habla al hombre, y le dijese: mírate a ti mismo, ¿qué creeríamos nosotros que le decía? ¿No creeríamos que la inscripción ordenaba al ojo que se mirase en una cosa, en la que el ojo pudiera verse?
+
+Alcibíades: Eso es evidente.
+
+Sócrates: Busquemos esta cosa, en la que, mirando, podamos ver el ojo y nosotros mismos.
+
+Alcibíades: Puede verse en los espejos y en otros cuerpos semejantes.
+
+Sócrates: Hablas muy bien. ¿No hay también en el ojo algún pequeño punto que hace el mismo efecto que el espejo?
+
+Alcibíades: Hay uno seguramente.
+
+Sócrates: Has observado que siempre que miras en tu ojo ves, como en un espejo, tu semblante en esta parte que se llama pupila, donde se refleja la imagen de aquel que en ella se ve?
+
+Alcibíades: Es cierto.
+
+Sócrates: Un ojo, para verse, debe mirar en otro ojo, y en aquella parte del ojo, que es la más preciosa, y que es la única que tiene la facultad de ver?
+
+Alcibíades: ¿Quién lo duda?
+
+Sócrates: Porque si fijase sus miradas sobre cualquiera otra parte del cuerpo del hombre, o sobre cualquier otro objeto, a menos que no fuese semejante a esta parte del ojo que ve, de ninguna manera se vería a sí mismo.
+
+Alcibíades: Tienes razón.
+
+Sócrates: Un ojo, que quiere verse a sí mismo, debe mirarse en otro ojo, y en esta parte de ojo, donde reside toda su virtud, es decir, la vista.
+
+Alcibíades: Seguramente.
+
+Sócrates: Mi querido Alcibíades, ¿no sucede lo mismo con el alma? para verse ¿no debe mirarse en el alma, y en esta parte del alma donde reside toda su virtud, que es la sabiduría, o en cualquiera otra cosa a la que esta parte del alma se parezca en cierta manera?
+
+Alcibíades: Así me lo parece.
+
+Sócrates: ¿Pero podremos encontrar alguna parte del alma, que sea más divina que aquella en que residen la esencia y la sabiduría?
+
+Alcibíades: No ciertamente.
+
+Sócrates: En esta parte del alma, verdaderamente divina, es donde es preciso mirarse, y contemplar allí todo lo divino, es decir, Dios y la sabiduría, para conocerse a sí mismo perfectamente.
+
+Alcibíades: Así me parece.
+
+Sócrates: Conocerse a sí mismo es la sabiduría, según hemos convenido.
+
+Alcibíades: Es cierto.
+
+Sócrates: No conociéndonos a nosotros mismos, y no siendo sabios, ¿podemos conocer ni nuestros bienes, ni nuestros males?
+
+Alcibíades: ¡Ah! ¿cómo los conoceríamos, Sócrates:?
+
+Sócrates: Porque no es posible que el que no conoce a Alcibíades conozca lo que pertenece a Alcibíades, como perteneciendo a Alcibíades.
+
+Alcibíades: No, ¡por Júpiter! eso no es posible.
+
+Sócrates: Sólo conociéndonos a nosotros mismos, es como podemos conocer, que lo que está en nosotros nos pertenece.
+
+Alcibíades: Seguramente.
+
+Sócrates: Y si no conociésemos lo que está en nosotros, no conoceríamos tampoco lo que se refiere a las cosas que están en nosotros.
+
+Alcibíades: Lo confieso.
+
+Sócrates: Hemos hecho mal, cuando hemos convenido en que hay gentes, que no conociéndose a sí mismos, conocen sin embargo lo que está en ellos, porque ni aun las cosas que pertenecen a lo que está en ellos conocen. Estos tres conocimientos: conocerse a sí mismo, conocer lo que está en nosotros, y conocer las cosas que pertenecen a lo que está en nosotros, están ligados entre sí; son efecto de un solo y mismo arte.
+
+Alcibíades: Así parece.
+
+Sócrates: Todo hombre que no conoce las cosas que están en él, no conocerá tampoco las que pertenecen a otros.
+
+Alcibíades: Eso es verdad.
+
+Sócrates: No conociendo las cosas pertenecientes a los demás, no puede conocer las del Estado.
+
+Alcibíades: Es una consecuencia necesaria.
+
+Sócrates: ¿Un hombre semejante puede ser alguna vez un buen hombre de Estado?
+
+Alcibíades: No.
+
+Sócrates: ¿Ni puede ser tampoco un buen administrador para gobernar una casa?
+
+Alcibíades: No.
+
+Sócrates: ¿Ni sabe lo que hace?
+
+Alcibíades: Nada sabe.
+
+Sócrates: No sabiendo lo que hace, ¿es posible que no cometa faltas?
+
+Alcibíades: Imposible, seguramente.
+
+Sócrates: Cometiendo faltas, ¿no causa mal en particular y en público?
+
+Alcibíades: Seguramente.
+
+Sócrates: Haciendo mal ¿no es desgraciado?
+
+Alcibíades: Sí, muy desgraciado.
+
+Sócrates: ¿Y aquellos a cuyo servicio se consagra?
+
+Alcibíades: Desgraciados también.
+
+Sócrates: ¿Luego no es posible que el que no es ni bueno, ni sabio, sea dichoso?
+
+Alcibíades: No, sin duda.
+
+Sócrates: ¿Todos los hombres viciosos son entonces desgraciados?
+
+Alcibíades: Muy desgraciados.
+
+Sócrates: ¿Luego no son las riquezas, sino la sabiduría la que libra al hombre de ser desgraciado?
+
+Alcibíades: Seguramente.
+
+Sócrates: Por lo tanto, mi querido Alcibíades, los Estados para ser dichosos no tienen necesidad de murallas, ni de buques, ni de arsenales, ni de tropas, ni de grande aparato; la única cosa de que tienen necesidad para su felicidad es la virtud.
+
+Alcibíades: Es cierto.
+
+Sócrates: Y si quieres manejar bien los negocios de la república, es preciso que imbuyas a tus conciudadanos en la virtud.
+
+Alcibíades: Estoy persuadido de eso.
+
+Sócrates: ¿Pero puede darse lo que no se tiene?
+
+Alcibíades: ¿Cómo puede darse?
+
+Sócrates: Ante todas cosas es preciso, pues, que pienses en ser virtuoso, como debe de hacer todo hombre, que no sólo quiera tener cuidado de sí mismo y de las cosas que son suyas, sino también del Estado y de las cosas que pertenecen al Estado.
+
+Alcibíades: Sin dificultad.
+
+Sócrates: No debes, por consiguiente, pensar en adquirir para ti y para el Estado un grande imperio y el poder absoluto de hacer todo lo que te agrade, sino únicamente lo que dicten la sabiduría y la justicia.
+
+Alcibíades: Eso me parece muy cierto.
+
+Sócrates: Porque si tú y el Estado gobernáis sabia y justamente, obtendréis el favor de los dioses.
+
+Alcibíades: Estoy persuadido de ello.
+
+Sócrates: Y gobernaréis justa y sabiamente, si como te dije antes, no perdéis de vista esa luz divina que brilla en vosotros.
+
+Alcibíades: Así parece.
+
+Sócrates: Porque mirándoos en esta luz, os veréis vosotros mismos, y conoceréis vuestros verdaderos bienes.
+
+Alcibíades: Sin duda.
+
+Sócrates: Y obrando así, ¿no haréis siempre el bien?
+
+Alcibíades: Ciertamente.
+
+Sócrates: Si hacéis siempre el bien, me atrevo a salir garante de que seréis siempre dichosos.
+
+Alcibíades: En esta materia eres tú una buena garantía, Sócrates.
+
+Sócrates: Pero si gobernáis injustamente, y en lugar de suspirar por la verdadera luz, os fijáis en lo que está sin Dios y lleno de tinieblas, no haréis, sin que pueda ser de otra manera, sino obras de tinieblas, porque no os conoceréis a vosotros mismos.
+
+Alcibíades: Así lo creo.
+
+Sócrates: Mi querido Alcibíades, represéntate un hombre que tenga el poder de hacerlo todo, y que no tenga juicio; ¿qué debe esperarse y cuál será el resultado para él y para el Estado? Por ejemplo, que un enfermo tenga el poder de hacer todo lo que le venga a la cabeza, que no conozca la medicina, y que nadie se atreva a decirle nada ni a contenerle, ¿qué le sucederá? Destruirá sin duda su cuerpo.
+
+Alcibíades: Eso es cierto.
+
+Sócrates: Y si en una nave un hombre, sin tener ni buen sentido ni la habilidad de piloto, se toma la libertad de hacer lo que le parezca, tú mismo ves lo que no puede menos de suceder a él y a todos los que a él se entreguen.
+
+Alcibíades: No podrán menos de perecer todos.
+
+Sócrates: Lo mismo sucede con todas las ciudades, repúblicas y todos los poderes; si están privados de la virtud, su ruina es infalible.
+
+Alcibíades: Imposible de otra manera.
+
+Sócrates: Por consiguiente, mi querido Alcibíades, si quieres ser dichoso tú y que lo sea la república, no es preciso un grande imperio, sino la virtud.
+
+Alcibíades: Seguramente, Sócrates.
+
+Sócrates: Y antes de adquirir esta virtud, lejos de mandar, es mejor obedecer, no digo a un niño, sino a un hombre, siempre que sea más virtuoso que él.
+
+Alcibíades: Eso me parece cierto.
+
+Sócrates: Y lo que es mejor, ¿no es lo más precioso?
+
+Alcibíades: Sin duda.
+
+Sócrates: Y lo que es más precioso, ¿no es lo más conveniente?
+
+Alcibíades: Sin dificultad.
+
+Sócrates: ¿Es conveniente al hombre vicioso ser esclavo, porque esto le cuadra mejor?
+
+Alcibíades: Seguramente.
+
+Sócrates: ¿El vicio, pues, es una cosa servil?
+
+Alcibíades: Convengo en ello.
+
+Sócrates: ¿Y la virtud una cosa liberal?
+
+Alcibíades: Sí.
+
+Sócrates: ¿Y no es preciso evitar este servilismo?
+
+Alcibíades: Seguramente, Sócrates.
+
+Sócrates: Pues bien, mi querido Alcibíades, conoces tu propia situación; ¿eres digno de ser libre o esclavo?
+
+Alcibíades: ¡Ah! Sócrates, conozco bien mi situación.
+
+Sócrates: ¿Pero sabes cómo puedes salir de ese estado, que no me atreveré a calificar, hablando de un hombre como tú?
+
+Alcibíades: Sí, lo sé. ¿Cómo? Si Sócrates quiere.
+
+Sócrates: Dices muy mal, Alcibíades.
+
+Alcibíades: ¿Pues cómo tengo que decir?
+
+Sócrates: Si Dios quiere.
+
+Alcibíades: Pues bien, digo si Dios quiere; y añado, que para lo sucesivo vamos a mudar de papeles, tú harás el mío y yo el tuyo, es decir, que yo voy a mi vez a ser tu amante, como tú has sido el mío hasta aquí.
+
+Sócrates: En este caso, mi querido Alcibíades lo que se dice de la cigüeña se podrá decir de mi amor para contigo, si después de haber hecho nacer en tu seno un nuevo amor alado, este le nutre y le cuida a su vez.
+
+Alcibíades: Así será; y desde este día voy a aplicarme a la justicia.
+
+Sócrates: Deseo que perseveres en ese pensamiento; pero te confieso, que sin desconfiar de tu buen natural, temo que la fuerza de los ejemplos que dominan en esta ciudad, nos arrollen al fin a ti y a mi.

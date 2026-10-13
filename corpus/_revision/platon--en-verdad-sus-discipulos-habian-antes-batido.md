@@ -1,0 +1,16 @@
+---
+texto: "En verdad, sus discípulos habían antes batido palmas al oír sus razonamientos; pero en este momento, las columnas del liceo parecía que aplaudían también."
+autor: "platon"
+slug: "platon-en-verdad-sus-discipulos-habian-antes-batido"
+procedencia:
+  obra: "Eutidemo"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Eutidemo"
+---

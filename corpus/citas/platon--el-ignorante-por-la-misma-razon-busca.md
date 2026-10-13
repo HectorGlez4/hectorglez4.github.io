@@ -1,0 +1,18 @@
+---
+texto: "El ignorante por la misma razón busca y ama al sabio."
+autor: "platon"
+temas:
+  - "el-saber"
+slug: "platon-el-ignorante-por-la-misma-razon-busca"
+procedencia:
+  obra: "Lisis"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Lisis"
+---

@@ -1,0 +1,16 @@
+---
+texto: "Extranjero. -Hasta aquí el sofista y el pescador de caña marchan a la par, arrancando del arte de adquirir."
+autor: "platon"
+slug: "platon-extranjero-hasta-aqui-el-sofista-y-el"
+procedencia:
+  obra: "El sofista ó del ser"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Sofista"
+---

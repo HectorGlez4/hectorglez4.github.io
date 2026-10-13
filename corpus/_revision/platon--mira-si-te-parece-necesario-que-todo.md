@@ -1,0 +1,16 @@
+---
+texto: "Mira si te parece necesario, que todo lo que se produce sea producido en virtud de alguna causa."
+autor: "platon"
+slug: "platon-mira-si-te-parece-necesario-que-todo"
+procedencia:
+  obra: "Filebo ó del placer"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Filebo"
+---

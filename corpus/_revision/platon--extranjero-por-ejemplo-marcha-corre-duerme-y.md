@@ -1,0 +1,16 @@
+---
+texto: "Extranjero. -Por ejemplo: “marcha”, “corre”, “duerme”, y todos los demás verbos, que representan acciones, si se pronuncian en fila, no formarán nunca un discurso."
+autor: "platon"
+slug: "platon-extranjero-por-ejemplo-marcha-corre-duerme-y"
+procedencia:
+  obra: "El sofista ó del ser"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Sofista"
+---

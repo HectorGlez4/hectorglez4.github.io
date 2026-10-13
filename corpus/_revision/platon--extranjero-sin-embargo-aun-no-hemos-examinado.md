@@ -1,0 +1,16 @@
+---
+texto: "Extranjero. -Sin embargo, aun no hemos examinado las opiniones de todos los que han discutido sutilmente la cuestión del SER y del NO-SER."
+autor: "platon"
+slug: "platon-extranjero-sin-embargo-aun-no-hemos-examinado"
+procedencia:
+  obra: "El sofista ó del ser"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Sofista"
+---

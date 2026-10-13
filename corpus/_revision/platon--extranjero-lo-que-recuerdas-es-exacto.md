@@ -1,0 +1,16 @@
+---
+texto: "Extranjero. -Lo que recuerdas es exacto."
+autor: "platon"
+slug: "platon-extranjero-lo-que-recuerdas-es-exacto"
+procedencia:
+  obra: "El sofista ó del ser"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Sofista"
+---

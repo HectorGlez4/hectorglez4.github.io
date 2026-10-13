@@ -1,0 +1,16 @@
+---
+texto: "—Es, le dije, que si eres dichoso con tales amores, tus versos y tus cantos redundarán en honor tuyo, es decir, en alabanza del amante que haya tenido la fortuna de conseguir tan gran victoria."
+autor: "platon"
+slug: "platon-es-le-dije-que-si-eres-dichoso"
+procedencia:
+  obra: "Lisis"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Lisis"
+---

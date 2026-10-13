@@ -1,0 +1,16 @@
+---
+texto: "En cuanto puedo yo juzgar, es un presente hecho a los hombres por los dioses, que nos ha sido enviado desde el cielo por algún Prometeo, en medio de brillante fuego."
+autor: "platon"
+slug: "platon-en-cuanto-puedo-yo-juzgar-es-un"
+procedencia:
+  obra: "Filebo ó del placer"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Filebo"
+---

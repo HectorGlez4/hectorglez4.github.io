@@ -1,0 +1,16 @@
+---
+texto: "Diremos que es el mismo arte, o los contaremos como dos?"
+autor: "platon"
+slug: "platon-diremos-que-es-el-mismo-arte-o"
+procedencia:
+  obra: "Filebo ó del placer"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Filebo"
+---

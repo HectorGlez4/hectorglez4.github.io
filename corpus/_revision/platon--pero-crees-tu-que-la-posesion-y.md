@@ -1,0 +1,16 @@
+---
+texto: "¿Pero, crees tú, que la posesión y el uso de los bienes bastan para ser dichoso? –Sí–."
+autor: "platon"
+slug: "platon-pero-crees-tu-que-la-posesion-y"
+procedencia:
+  obra: "Eutidemo"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Eutidemo"
+---

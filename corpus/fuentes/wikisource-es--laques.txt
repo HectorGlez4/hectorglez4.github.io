@@ -1,0 +1,525 @@
+fuente: wikisource-es
+obra: Laques
+traductor: Patricio de Azcárate Corral
+añoDeTraduccion: 1871
+url: https://es.wikisource.org/wiki/Laques
+recuperado: 2026-10-13
+---
+Laques
+[[Categoría:Obras de Platón]]
+|título=Laques
+|autor=Platón
+|traductor=Patricio de Azcárate Corral
+|año=1871
+---
+catalàΕλληνικάEnglishfrançaisfrançaisLatinaрусский
+
+Lisímaco: Hola, Nicias y Laques, ¿habéis visto a ese hombre armado, que acaba de trabajar en la esgrima? Cuando Melesías y yo os suplicamos que vinieseis a ver este espectáculo, no os dijimos las razones que nos movían para ello: pero os las vamos a decir ahora, en la persuasión de que podemos hablaros con toda confianza. La mayor parte de las gentes se mofan de esta clase de ejercicios, y cuando se les pide consejo, lejos de manifestar su pensamiento, sólo tratan de adivinar el gusto de los que les consultan, y hablan siempre contra su propia opinión. Respecto a vosotros, sabemos que a una extrema sinceridad unís una capacidad muy grande, y por lo mismo esperamos que diréis ingenuamente lo que pensáis sobre lo que tenemos que comunicaros. He aquí a lo que viene a parar todo este preámbulo. Cada uno de nosotros tiene un hijo; helos aquí presentes: éste, hijo de Melesías, lleva el nombre de su abuelo, y se llama Tucídides; aquél, que es el mío, tiene el nombre de mi padre y se llama Arístides como él. Hemos resuelto procurar su mejor educación, y no hacer lo que acostumbran los más de los padres, que desde que sus hijos entran en adolescencia los dejan vivir a su libertad y capricho. Nuestra intención es vigilarlos con el mayor esmero, sin perderlos de vista; y como vosotros tenéis también hijos, hemos creído que, cual ninguno, habréis pensado en los medios de hacerlos muy virtuosos; y si esta idea no os ha ocupado seriamente, por ser vuestros hijos demasiado tiernos, hemos creído que llevareis muy a bien este recuerdo sobre un negocio que no debe aplazarse, y que conviene que deliberemos aquí, todos juntos, sobre la educación que debemos darles.
+
+Aunque este discurso os parezca largo, es preciso, si os place, Nicias y Laques, que tengáis la bondad de oírme sobre este punto. Sabéis, que Melesías y yo no tenemos más que una mesa y que estos hijos comen con nosotros; nada os queremos ocultar, y como os dije al principio, os hablaremos con entera confianza. Tanto éste, como yo, conversamos con nuestros hijos, refiriéndoles las muchas proezas, que nuestros padre hicieron, tanto en paz como en guerra, mientras estuvieron a la cabeza de los atenienses y de sus aliados; pero desgraciadamente nada semejante podemos decir de nosotros mismos, así es que nos sonrojamos en su presencia, y no tenemos más remedio que echar la culpa a nuestros padres; porque, desde que fuimos crecidos nos dejaron vivir en la molicie y en una licencia que nos han perdido, mientras que estaban ellos entregados al servicio de los demás. Por esto es por lo que no cesamos de amonestar a nuestros hijos, diciéndoles, que si se abandonan y no nos obedecen se deshonrarán; en lugar de que si se aplican, se mostrarán quizá dignos del nombre que llevan. Ellos responden, que nos obedecerán; y, en vista de esta promesa, andamos indagando lo que deben aprender y la educación que debemos darles para que se hagan hombres de bien, tanto cuanto sea posible. Alguno nos ha dicho que nada mejor para un joven que aprender la esgrima, y para ello nos ha ponderado hasta el cielo a este hombre, que acaba de dar pruebas de su habilidad, y nos ha suplicado que vengamos a verle. Nosotros hemos creído que debíamos venir, y al paso traeros a vosotros, no sólo por el placer que pudierais recibir, sino también para que nos auxiliarais con vuestras luces, y para que pudiéramos deliberar juntos sobre la educación de nuestros hijos. He aquí lo que queríamos comunicaros. Ahora a vosotros toca auxiliarnos con vuestros consejos, diciéndonos si aprobáis o desaprobáis el ejercicio de las armas, ilustrándonos sobre las ocupaciones y la instrucción que es preciso dar a estos jóvenes; y en fin, declarando la conducta que vosotros mismos habréis resuelto observar.
+
+Nicias: Por lo que a mí hace, Lisímaco y Melesías, alabo en todo y por todo vuestro pensamiento; estoy dispuesto a tomar parte en esta deliberación, y creo que Laques se prestará a lo mismo.
+
+Laques: Tienes razón en lo que has dicho, Nicias; todo lo que Lisímaco acaba de decir de su padre y del de Melesías me parece perfectamente dicho, no sólo respecto de ellos, sino también respecto de nosotros y de todos los que se mezclan en el gobierno de la república; porque a todos nos sucede lo que acaba de decir, tanto sobre la educación de los hijos, como sobre todos nuestros negocios domésticos. Has hablado admirablemente, Lisímaco; pero lo que me sorprende es que acudas a nosotros para consultarnos sobre ese objeto, y no lo hayas hecho a Sócrates, que, en primer lugar, es de tu pueblo, y, en segundo, está consagrado por entero a estas materias relativas a la educación de los jóvenes, para indagar las ciencias que les son más necesarias, y las ocupaciones que más les convienen.
+
+Lisímaco: ¡Cómo! Laques, ¿Sócrates se dedica a la educación de la juventud?
+
+Laques: Te lo aseguro, Lisímaco.
+
+Nicias: Yo puedo asegurártelo también; porque no hace cuatro días que me ha dado para mi hijo un maestro de música, que es Damon, discípulo de Agatocles, y que, superior en su arte, tiene además todas las cualidades que puedes desear en un hombre que ha de dirigir a jóvenes de esta edad.
+
+Lisímaco: En verdad, Sócrates, Nicias y Laques; yo y los que son tan viejos como yo, no conocemos a los que son jóvenes; porque apenas salimos de casa a causa de nuestros muchos años; pero tú, ¡oh hijo de Sofronisco! si tienes algún buen consejo que darme, a mí que soy de tu mismo pueblo, no me lo niegues; puedo decir, que me lo debes de justicia, porque eres amigo de nuestra casa. Tu padre Sofronisco y yo hemos sido siempre amigos desde nuestra infancia, y nuestra amistad ha durado hasta su muerte sin la menor disidencia. Ahora recuerdo que mil veces estos jóvenes, hablando juntos en casa, repiten a cada momento el nombre de Sócrates, de quien dicen mil alabanzas, y yo jamás me apercibí de preguntarles si hablaban de Sócrates, hijo de Sofronisco; pero, hijos míos, decidme ahora; ¿es este el Sócrates, de que os he oído hablar tantas veces?
+
+Arístides y Tucídides: Sí, padre mío; es el mismo.
+
+Lisímaco: Estoy altamente satisfecho ¡por Juno! mi querido Sócrates, al ver lo bien que sostienes la reputación de tu padre, el mejor de los hombres; y quiero que en adelante tus intereses sean los míos, como los míos serán los tuyos.
+
+Laques: Haces muy bien, Lisímaco, no le dejes marchar; porque le he visto en muchas ocasiones sostener, no sólo la reputación de su padre, sino también la de su patria. En la derrota de Delio se retiró conmigo, y puedo asegurarte que si todos los demás hubiesen cumplido su deber como él, nuestra ciudad se hubiera sostenido y no hubiera experimentado tan triste desgracia.
+
+Lisímaco: Sócrates, he aquí un magnífico elogio que de ti se hace en este acto; ¿y por quién? por gentes muy dignas de ser creídas en todas las cosas y particularmente en estas. Te aseguro que nadie oye este elogio con más placer que yo. Estoy gozoso por la gran reputación que has sabido adquirirte, y cuéntame en el número de los que desean más tu felicidad. Has debido venir muchas veces a vernos, como un amigo de la casa. Comienza desde hoy, puesto que hemos renovado una amistad antigua; únete a nosotros y a estos jóvenes, para que tú y ellos conservéis vuestra amistad, como un depósito paterno. Esperamos que así lo harás, y por nuestra parte no te permitiremos que lo olvides. Pero volviendo a nuestro objeto; ¿qué dices? ¿qué te parece? ¿este ejercicio de la esgrima merece ser aprendido por los jóvenes?
+
+Sócrates: Sobre esto, Lisímaco, trataré de darte el mejor consejo de que sea capaz, y no dejaré de cumplir cuanto me ordenes; pero como soy el más joven y tengo menos experiencia que todos vosotros, es justo que os oiga antes, y entonces daré yo mi dictamen si difiere del vuestro, apoyándole en razones capaces de producir en vosotros la convicción. ¿Qué dices, pues, tú, Nicias? A ti te toca hablar el primero.
+
+Nicias: No rehúso decir lo que siento, Sócrates. Me parece, tal es mi dictamen, que este ejercicio de las armas es muy útil a los jóvenes, porque además de alejarlos de los placeres de pasatiempo, que buscan de ordinario por falta de ocupación, los endurece en el trabajo y los hace necesariamente más vigorosos y más robustos. Mejor que éste no le hay, ni que exija más maña, ni más fuerza. Este y el de montar a caballo son los más a propósito para jóvenes libres, porque a causa de las guerras que tenemos o que podamos tener, no hay mejores ejercicios que los que se hacen con las armas que sirven para la guerra. Son de un gran auxilio en los combates, ya se combata en filas, o ya rotas estas, haya que batirse cuerpo a cuerpo; ya se persiga al enemigo que de tiempo en tiempo vuelve la cara para resistir, o ya que en retirada haya precisión de desembarazarse de un hombre que le ya dando alcance a uno con espada en mano. El que está acostumbrado a estos ejercicios no teme a un hombre solo ni a muchos juntos, y siempre saldrá vencedor. Por otra parte, inspiran una verdadera pasión por otros más serios; porque doy por sentado, que todo hombre que se ejercita en la esgrima, entra en deseos de saber la táctica militar, como resultado de la esgrima, y cuando lo ha conseguido, lleno de ambición y ansioso de gloria, se instruye en todo aquello que puede alimentar esta idea, y trabaja en elevarse por grados a los conocimientos de un general de ejército. Es cierto que nada hay tan precioso ni tan útil como estos diferentes ejercicios de armas con todos los demás estudios que preparan para la guerra, siendo este indudablemente el primero. A todas estas ventajas es preciso añadir además una, que no es pequeña, y es que esta ciencia de la esgrima hace los hombres más valientes y más atrevidos en los combates, sin que despreciemos otro efecto que produce, por insignificante que parezca, y es, que en ocasiones da al hombre cierto aire marcial y apuesto que impone a sus enemigos. Soy, pues, de dictamen, Lisímaco, que es preciso enseñar a los jóvenes estos ejercicios, y ya he dado las razones. Si Laques es de otro dictamen, le oiré con gusto.
+
+Laques: Pero, Nicias, es necesario mucho atrevimiento para decir de cualquier ciencia que no debe aprenderse, porque siempre es bueno saber de todo; y si la esgrima es una ciencia, como lo pretenden los que la enseñan y como Nicias lo dice, estoy conforme en que conviene aprenderla; pero si no es una ciencia y los que se dicen sus maestros nos engañan a fuerza de ponderarla, o sí, aun siendo ciencia, es de poco interés, ¿para qué consagrarse a ella? Lo que me obliga a hablar así es el estar persuadido de que si fuera una ciencia que mereciera la pena, no hubieran los lacedemonios dejado de cultivarla, cuando no hacen más en toda su vida que buscar y aprender las cosas que pueden hacerles superiores en la guerra a sus enemigos. Y aun cuando esto se hubiera ocultado a los lacedemonios, he aquí lo que no han podido ignorar los maestros de esgrima; y es que, de todos los griegos, los lacedemonios son los más apasionados por todo lo que hace relación al ejercicio de las armas, y que los maestros de esgrima, que allí adquiriesen reputación, harían indudablemente por todas partes su negocio, como sucede respecto de los poetas trágicos que se acreditan en Atenas. Porque todo hombre, que se reconoce con talento para hacer tragedias, no corre el Ática y va de ciudad en ciudad a representar sus piezas, sino que se viene derecho aquí, para que aquí se representen, y tiene razón: en vez de lo que veo a estos valientes campeones, que enseñan la esgrima, mirar a Lacedemonia como un templo inaccesible, donde no se atreven a poner ni un pié, y rodar por todas partes, enseñando su arte a otros, y particularmente a pueblos que se reconocen ellos mismos inferiores a sus vecinos en todo lo relativo a la guerra. Además, Lisímaco, he visto un gran número de estos maestros de esgrima en lances dados, y sé lo que valen. Es fácil formar juicio al ver que la fatalidad ha querido, como si fuera con intención, que ninguno de tales maestros haya adquirido ni la más pequeña reputación en la guerra. En todas las demás artes siempre hay algunos, entre los que las profesan, que sobresalen y adquieren nombradía; pero a los tales maestros les persigue cierta fatalidad. Porque este mismo Stesileo que se está dando en espectáculo a toda esta gente, como acabamos de ver, y que ha hablado tan en grande de sí mismo, le he visto en cierta ocasión dar un espectáculo de otro género, bien a pesar suyo. Hallándose en una nave que atacó a otra de carga enemiga, este Stesileo combatía con una pica armada de una dalla, arma tan ridícula como lo era él mismo entre los combatientes. Las proezas que hizo no merecen referirse; pero el resultado que tuvo esta estrategia guerrera de poner una dalla o guadaña al remate de una pica, merece especial mención. Como nuestro hombre se batía con semejante arma, sucedió desgraciadamente que se enredó en el aparejo del buque enemigo, en términos que, por más esfuerzos que hacía para desenredarla, no podía. Mientras los dos buques estuvieron al abordaje, el uno junto al otro, no se desprendió él del cabo de su arma; pero cuando el buque enemigo comenzó a alejarse y veía que le arrastraba, dejó deslizar poco a poco su pica entre sus manos, hasta que sólo la sostenía por el último remate. La actitud ridícula en que aparecía era objeto de chacota y burla de parte de los enemigos, hasta que habiéndole arrojado una piedra que cayó a sus pies, tuvo que abandonar su arma querida; y los hombres de nuestro buque no pudieron contener sus risotadas al ver la guadaña armada pendiente del aparejo del buque enemigo. Puede muy bien suceder que la esgrima sea, como dice Nicias, una ciencia muy útil, pero yo os digo lo que he visto; de suerte, que, como dije al principio, si es una ciencia, es de bien poca utilidad, y si no lo es y se nos engaña dándole este bello nombre, tampoco merece que nos detengamos en ella. Si son los cobardes los que se dedican a la esgrima, se hacen más insolentes y su cobardía se pone más en evidencia; y si son los valientes, todo el mundo tiene puestos en ellos los ojos; y si llegan a incurrir en la menor falta, sufren mil burlas y mil calumnias; porque esta profesión no es indiferente; expone furiosamente a la envidia, y si un hombre que se aplica a ella no se distingue grandemente por su valor, cae en el ridículo, sin poder evitarlo. He aquí lo que me parece, Lisímaco, la inclinación a este ejercicio. Pero ahora, como dije al principio, es preciso no dejar marchar a Sócrates, sin que a su vez nos dé su dictamen.
+
+Lisímaco: Te lo suplico, Sócrates, porque tenemos necesidad de un juez que termine esta diferencia. Si Nicias y Laques hubieran sido del mismo dictamen, hubiéramos podido ahorrarte este trabajo; pero ya ves que disienten enteramente. Es necesario oír tu dictamen y ver a cuál de los dos prestas tu aprobación.
+
+Sócrates: ¡Cómo! Lisímaco, ¿sigues el dictamen del mayor número?
+
+Lisímaco: ¿Qué cosa mejor puede hacerse?
+
+Sócrates: ¿Y tú también, Melesías? ¡qué! ¡tratándose de la elección de los ejercicios que habrá de aprender tu hijo! ¿te atendrás más bien al dictamen del mayor número que al de un hombre solo, que haya sido bien educado y que haya tenido excelentes maestros?
+
+Melesías: Por lo que hace a mí, Sócrates, me atendré a este último.
+
+Sócrates: ¿Te atendrás más bien a su opinión que a la de nosotros cuatro?
+
+Melesías: Quizá.
+
+Sócrates: Porque yo creo que, para juzgar bien, es preciso juzgar por la ciencia y no por el número.
+
+Melesías: Sin contradicción.
+
+Sócrates: Por consiguiente, la primer cosa, que es preciso examinar, es si alguno de nosotros es persona entendida en la materia sobre que se va a deliberar, o si no lo es. Si hay uno que lo sea, es preciso acudir a él y dejar los demás; si no le hay es preciso buscarle en otra parte; ¿por qué Melesías y tú, Lisímaco, imagináis que se trata aquí de un negocio de poca trascendencia? No hay que engañarse; se trata de un bien, que es el más grande de todos los bienes; se trata de la educación de los hijos, de que depende la felicidad de las familias; porque, según que los hijos son viciosos o virtuosos, la casas caen o se levantan.
+
+Melesías: Dices verdad.
+
+Sócrates: No es poca toda prudencia en este negocio.
+
+Melesías: Seguramente.
+
+Sócrates: ¿Cómo haremos, pues, si queremos examinar cuál de nosotros cuatro es el más hábil en esta clase de ejercicios? ¿No acudiremos desde luego a aquel que los haya aprendido mejor, que más se haya ejercitado y que haya tenido los mejores maestros?
+
+Melesías: Así me lo parece.
+
+Sócrates: Y antes de esto, ¿no trataremos de conocer la cosa misma que estos maestros le hayan enseñado?
+
+Melesías: ¿Qué es lo que dices?
+
+Sócrates: Me explicaré mejor. Me parece que al principio no nos pusimos de acuerdo sobre la cosa que había de ser materia de deliberación, a fin de saber quién de nosotros es el más hábil y ha sido formado por los mejores maestros.
+
+Nicias: ¡Qué! Sócrates; ¿no deliberamos sobre la esgrima para saber si es preciso o no es preciso hacerla aprender a nuestros hijos?
+
+Sócrates: No digo que no, Nicias, pero cuando un hombre se pregunta si es preciso aplicar o no aplicar un remedio a los ojos, ¿crees tú que su deliberación debe de recaer más sobre el remedio que sobre los ojos?
+
+Nicias: Sobre los ojos.
+
+Sócrates: Y cuando un hombre delibera si pondrá o no un bocado a su caballo, ¿no se fijará más bien en el caballo que en el bocado?
+
+Nicias: Sin duda.
+
+Sócrates: En una palabra, siempre que se delibera sobre una cosa con relación a otra, la deliberación recae sobre esta otra cosa, a la que se hace referencia, y no sobre la primera.
+
+Nicias: Necesariamente.
+
+Sócrates: Es preciso por lo tanto examinar bien, si el que nos aconseja es hábil en la cosa sobre la que recae nuestra consulta.
+
+Nicias: Eso es cierto.
+
+Sócrates: Ahora deliberamos sobre lo que es preciso que aprendan estos jóvenes, y la cuestión recae por consiguiente sobre su alma misma.
+
+Nicias: Así es.
+
+Sócrates: Por lo tanto, se trata de saber si entre nosotros hay alguno que sea hábil y experimentado para dar cultura a un alma, y que haya tenido excelentes maestros.
+
+Laques: ¿Cómo, Sócrates, no has visto nunca personas, que, sin ningún maestro, se han hecho más hábiles en ciertas artes, que otros con muchos maestros?
+
+Sócrates: Si, Laques, he conocido algunos, y todos estos podrán decirte que son muy hábiles; pero tú no les creerás jamás mientras no hagan antes, no digo una, sino muchas obras bien hechas y bien trabajadas.
+
+Nicias: Tienes razón, Sócrates.
+
+Sócrates: Puesto que Lisímaco y Melesías nos han llamado para que les diéramos consejos sobre la educación de sus hijos, por el ansia de hacerlos virtuosos, nosotros, Nicias y Laques, estamos obligados, si creemos haber adquirido sobre esta materia la capacidad necesaria, a darles el nombre de los maestros que hemos tenido, probar que eran hombres de bien, y que, después de haber formado muchos buenos discípulos, nos han hecho virtuosos también a nosotros; y si alguno entre nosotros pretende no haber tenido maestro, que nos muestre sus obras y nos haga ver entre los atenienses o los extranjeros, entre los hombres libres o los esclavos, las personas que con sus preceptos se han hecho mejores según el voto de todo el mundo. Si no podemos nombrar nuestros maestros, ni hacer ver nuestras obras, es preciso remitir nuestros amigos en busca de consejo a otra parte, y no exponernos, corrompiendo a sus hijos, a las justas quejas que podrían dirigirnos hombres que nos aman. Por lo que a mí toca, Lisímaco y Melesías, soy el primero en confesar que jamás he tenido maestro en este arte, aunque con pasión le he amado desde mi juventud; pero no he sido bastante rico para pagar a sofistas, que se alababan de ser los únicos capaces de hacerme hombre de bien, y por mí mismo aún no he podido encontrar este arte. Si Nicias y Laques lo han encontrado, no me sorprenderá; porque siendo más ricos que yo, han podido hacer que se les enseñara, y siendo también más viejos han podido encontrarle por sí mismos; por esto me parecen muy capaces de poder instruir a un joven. Por otra parte, jamás hubieran hablado con tanto desembarazo sobre la utilidad o inutilidad de estos ejercicios, si no estuviesen seguros de su capacidad. Por lo tanto, a ellos es a quienes corresponde hablar. Pero lo que me sorprende es que estén tan encontrados en sus dictámenes. Te ruego, Lisímaco, que a la manera que Laques te suplicó que no me dejaras marchar, y que me obligaras a dar mi dictamen, tengas ahora a bien no dejar marchar a Laques y Nicias, sin obligarles a que te respondan, diciéndoles: Sócrates asegura que no entiende nada de estas materias, y que es incapaz de decidir quién de vosotros tiene razón, porque no ha tenido maestros, ni tampoco ha encontrado esta ciencia por sí mismo; por lo tanto, vosotros, Nicias y Laques, decidnos si habéis visto algún maestro excelente para la educación de la juventud. ¿habéis aprendido de alguno este arte? ¿o le habéis encontrado por vosotros mismos? Si le habéis aprendido, decidnos quién ha sido vuestro maestro, y quiénes son los que viven entregados a la misma profesión, a fin de que si los negocios públicos no nos dejan el desahogo necesario, vayamos a ellos, y a fuerza de presentes y de caricias les obliguemos a tomar a su cargo nuestros hijos y los vuestros, y a impedir que por sus vicios deshonren a sus abuelos; y si habéis encontrado este arte por vosotros mismos, citadnos las personas que habéis formado, y que de viciosos se han hecho virtuosos en vuestras manos; pero si es cosa que desde hoy comenzáis a mezclaros en la enseñanza, tened presente que no vais a hacer el ensayo sobre Carienses, sino sobre vuestros hijos y los hijos de vuestros mejores amigos, y temed no os suceda precisamente lo que dice el proverbio: hacer su aprendizaje sobre una vasija de barro. Decidnos, pues, qué es lo que podéis o no podéis hacer. He aquí, Lisímaco, lo que yo quiero que les preguntes, y no les dejes marchar sin que te contesten.
+
+Lisímaco: Me parece que Sócrates habla perfectamente. Ved, amigos míos, si os es fácil responder a todas estas preguntas; porque no podéis dudar que haciéndolo así, nos dais a Melesías y a mí un gran placer. Ya os he dicho, que si hemos contado con vosotros para deliberar en este asunto, ha sido porque hemos creído que teniendo hijos vosotros como nosotros, que van a entrar bien pronto en la edad en que debe pensarse en su educación, estaréis ya preparados sobre este punto; y esta es la razón porque, si nada hay que os lo impida, debéis examinar la cuestión con Sócrates, dando cada uno sus razones; porque, como éste ha dicho muy bien, este es el negocio más grave de nuestra vida. Ved, pues, de acceder a mi súplica.
+
+Nicias: Se advierte bien, Lisímaco, que sólo conoces a Sócrates por su padre y que no le has tratado de cerca; sin duda sólo le viste durante su infancia en los templos, o cuando su padre le llevaba a las asambleas de vuestro barrio, pero después que se ha hecho hombre formal, bien puede asegurarse que no has tenido con él ninguna relación.
+
+Lisímaco: ¿Por qué dices eso? Nicias
+
+Nicias: Porque ignoras por completo, que Sócrates mira, como cosa propia, a todo el que conversa con él, y aunque al pronto sólo le hable de cosas indiferentes, le precisa después por el hilo de su discurso a darle razón de su conducta, a decirle de qué manera vive y de qué manera ha vivido, y cuando la conversación ha llegado a este punto, Sócrates no le deja hasta que ha examinado su hombre a fondo, y sabe cuánto ha hecho, bueno o malo. Yo lo he experimentado sobradamente, y sé muy bien que es una necesidad pasar por esta aduana, de la que no me lisonjeo estar yo libre. Sin embargo, en este punto me doy por satisfecho, y experimento un singular placer todas las veces que puedo conversar con él; porque nunca es un mal grande para nadie, que alguno le advierta las faltas que ha cometido y pueda cometer. Si un hombre quiere hacerse sabio, no tema este examen, sino que por el contrario, según la máxima de Solon, es preciso estar siempre aprendiendo; y no creas neciamente que la sabiduría nos viene con la edad. Por consiguiente no será para mí, ni nuevo, ni desagradable, que Sócrates me ponga en el banquillo de los acusados, y ya supuse desde luego, que estando él aquí, no serian nuestros hijos objeto de discusión, sino que lo seríamos nosotros mismos. Por mi parte me entrego a él voluntariamente; que dirija la conversación a su gusto. Ahora indaga la opinión de Laques.
+
+Laques: Mi opinión es sencilla, Nicias, o por mejor decir, no lo es; porque no es siempre la misma. Unas veces me arrebatan estos discursos, y otras veces no los sufro. Cuando oigo a un hombre que habla de la virtud y de la ciencia, y que es un verdadero hombre, digno de sus propias convicciones, me encanta, es para mí un placer inexplicable ver que sus palabras y sus acciones están perfectamente de acuerdo, y se me figura que es el único músico que sostiene una armonía perfecta, no con una lira, ni con otros instrumentos, sino con el tono de su propia vida; porque todas sus acciones concuerdan con todas sus palabras, no según el tono lidio, frigio, o jónico, sino según el tono dórico, único que merece el nombre de armonía griega. Cuando un hombre de estas condiciones habla, me encanta, me llena de gozo y no hay nadie que no crea que estoy loco al oír sus discursos; tal es la avidez con que escucho sus palabras. Pero el que hace todo lo contrario me aflige cruelmente, y cuanto mejor parece explicarse, tanta mayor es mi aversión a los discursos. Aún no conozco a Sócrates por sus palabras, pero le conozco por sus acciones, y le he considerado muy digno de pronunciar los más bellos discursos y de hablar con entera franqueza; y si lo hace como decís, estoy dispuesto a conversar con él. Seré gustoso en que me examine, y no llevaré a mal que me instruya, porque sigo el dictamen de Solon: que es preciso aprender siempre, aun envejeciendo. Sólo añado a su máxima lo siguiente: que sólo debe aprenderse de los hombres de bien. Porque precisamente se me ha de conceder, que el que enseña debe ser un hombre de bien, para que no tenga yo repugnancia; y no se interprete mi disgusto por indocilidad. Por lo demás, que el maestro sea más joven que yo, que carezca de reputación y otras cosas semejantes, me importa muy poco. Así, pues, Sócrates, queda de tu cuenta examinarme, instruirme y preguntarme lo que yo sé. Estos son mis sentimientos para contigo desde el día en que corrimos juntos un gran peligro, y en que diste pruebas de tu virtud, tales como el hombre más de bien podía haber dado. Dime, pues, lo que quieras, sin que mi edad te detenga en manera alguna.
+
+Sócrates: Por lo menos no podemos quejarnos de que no estéis dispuestos a deliberar con nosotros y a resolver la cuestión.
+
+Lisímaco: A nosotros toca ahora hablar, Sócrates, y me expreso así, porque te cuento a ti como uno de nosotros mismos. Examina en mi lugar, y te conjuro a ello por amor a estos jóvenes, que es lo que podemos exigir de Nicias y Laques, y delibera con ellos explicándoles lo que tú piensas; porque respecto a mí, me falta la memoria a causa de mis muchos años, olvido la mayor parte de las preguntas que quería hacer, y no me acuerdo de mucho de lo que se dice, sobre todo, cuando la cuestión principal se ve interrumpida y cortada por nuevos incidentes. Discutid entre vosotros el negocio de que se trata, os escucharé con Melesías y después haremos lo que creáis que deba hacerse.
+
+Sócrates: Nicias y Laques, es preciso examinar la cuestión que hemos propuesto, a saber: si hemos tenido maestros en este arte de enseñar la virtud, o si hemos formado algunos discípulos, y si los hemos hecho mejores que eran; pero me parece que hay un medio más corto que nos llevará directamente a lo que buscamos, y que penetra más en el fondo del debate. Porque si conociésemos que una cosa cualquiera, comunicada a alguno, le podía hacer mejor, y si con esto adquiriésemos el secreto de comunicársela, es claro que debemos por lo menos conocer esta cosa, puesto que podemos indicar los medios más seguros y más fáciles de adquirirla. Quizá no entendéis lo que os digo, pero un ejemplo os lo hará patente. Si sabemos con certeza que los ojos se hacen mejores comunicándoles la vista y podemos comunicársela, es claro que conoceremos lo que es la vista y sabremos lo que debe hacerse para procurarla; en lugar de que si no sabemos lo que es la vista o el oído, en vano intentaremos ser buenos médicos para los ojos y para los oídos, ni dar buenos consejos sobre el medio mejor de oír y de ver.
+
+Lisímaco: Dices verdad, Sócrates.
+
+Sócrates: Nuestros dos amigos ¿no nos han llamado aquí, Laques, para deliberar con nosotros, acerca de qué manera se podrá hacer nacer la virtud en el alma de sus hijos y hacerles mejores?
+
+Laques: Eso es.
+
+Sócrates: Es preciso ante todo, que sepamos lo que es la virtud; porque si la ignoramos ¿seremos capaces de dar consejos sobre los medios de adquirirla?
+
+Laques: De ninguna manera, Sócrates.
+
+Sócrates: ¿Supondremos, Laques, que sabemos lo que es?
+
+Laques: Lo suponemos.
+
+Sócrates: Pero cuando sabemos lo que es una cosa, ¿no podemos decirla?
+
+Laques: ¿Cómo no hemos de poder?
+
+Sócrates: Pero, Laques, no examinemos ahora lo que es la virtud en general, porque seria una discusión demasiado larga; contentémonos con examinar si tenemos todos los datos para conocer bien algunas de sus partes; el examen será más fácil y más corto.
+
+Laques: Así lo quiero yo, Sócrates, puesto que es esa tu opinión.
+
+Sócrates: ¿Pero qué parte de la virtud escogeremos? Sin duda la que parece ser el único objeto de la esgrima, porque el común de las gentes cree que este arte conduce directamente al valor.
+
+Laques: Así lo cree en efecto.
+
+Sócrates: Tratemos por lo pronto, Laques, de definir con exactitud lo que es el valor; después examinaremos los medios de comunicarle a estos jóvenes, en cuanto sea posible, ya sea por el hábito, ya por el estudio. ¿Di, pues, qué es el valor?
+
+Laques: En verdad, Sócrates, me preguntas una cosa que no ofrece dificultad. El hombre que guarda su puesto en una batalla, que no huye, que rechaza al enemigo; he aquí un hombre valiente.
+
+Sócrates: Muy bien, Laques, pero quizá por haberme explicado mal, has respondido a una cosa distinta de la que yo te pregunté.
+
+Laques: ¿Cómo? Sócrates.
+
+Sócrates: Voy a decírtelo, si puedo. Un hombre valiente es, en tu opinión, el que guarda bien su puesto en el ejército y combate al enemigo.
+
+Laques: Es lo mismo que yo digo.
+
+Sócrates: También lo digo yo, pero el que combate al enemigo huyendo, y no guardando su puesto...?
+
+Laques: ¿Cómo huyendo?
+
+Sócrates: Sí, huyendo como los escitas, por ejemplo, que no combaten menos huyendo que atacando; y como Homero lo dice, en cierto pasaje, de los caballos de Eneas, que se dirigían a uno y otro lado, hábiles en huir y atacar. ¡Ah! No supone en Eneas mismo esta ciencia de apelar a la fuga con intención, puesto que le llama sabio en huir?
+
+Laques: Eso es muy bueno, Sócrates, porque Homero habla de los carros de guerra en este pasaje; y en cuanto a lo que dices de los escitas, se trata de tropas de caballería que se baten de esa manera, pero nuestra infantería griega combate como yo digo.
+
+Sócrates: Exceptuarás quizá a los lacedemonios, porque he oído decir que en la batalla de Platea, cuando atacaron a los persas, que formaban un muro con sus broqueles, creyeron que no les convenía mantenerse firmes en su puesto, y emprendieron la fuga; y cuando las filas de los persas se rompieron por perseguir a los lacedemonios, volvieron éstos la cara como la caballería, y por medio de esta maniobra estratégica consiguieron la victoria.
+
+Laques: Es cierto.
+
+Sócrates: He aquí por qué te decía antes que había sido yo causa de que no hubieses respondido bien, porque yo te había interrogado mal, puesto que quería saber de ti lo que es un hombre valiente, no sólo en la infantería, sino también en la caballería y demás especies de armas; y no sólo un hombre valiente en todo lo relativo a la guerra, sino también en los peligros de la mar, en las enfermedades, en la pobreza y en el manejo de los negocios públicos; y lo mismo un hombre valiente en medio de los disgustos, las tristezas, los temores, los deseos y los placeres; un hombre valiente, que sepa combatir sus pasiones, sea resistiéndolas a pié firme, sea huyendo de ellas, porque el valor, Laques, se extiende a todas estas cosas.
+
+Laques: Eso es cierto, Sócrates.
+
+Sócrates: Todos estos hombres son valientes. Los unos prueban su valor contra los placeres, los otros contra las tristezas, éstos contra los deseos, aquellos contra los temores, y en todos estos accidentes pueden otros, por el contrario, dar pruebas de cobarde.
+
+Laques: Sin contradicción.
+
+Sócrates: Te supliqué que me explicaras cada una de estas dos cosas contrarias, el valor y la cobardía. Comencemos por el valor. Trata de decirme lo que es esta cualidad, que siempre es la misma en todas estas ocasiones tan diferentes. ¿No entiendes aún lo que digo?
+
+Laques: Aún no lo entiendo bien.
+
+Sócrates: He aquí lo que quiero decir. Si, por ejemplo, te preguntase yo lo que es la actividad que se refiere a correr, tocar instrumentos, hablar, aprender, y a otras mil cosas a que aplicamos esta actividad mediante las manos, la lengua, el espíritu, que son las principales; ¿me comprenderías?
+
+Laques: Sí.
+
+Sócrates: Si alguno me preguntase: Sócrates, ¿qué es esa actividad que se extiende a todas estas cosas? le respondería que la actividad es una facultad que hace mucho en poco tiempo; definición que conviene a la carrera, a la palabra, y a todos los demás ejercicios.
+
+Laques: Tienes razón, Sócrates; está bien definida.
+
+Sócrates: Pues defíneme lo mismo el valor; dime cuál es esta facultad, que es siempre la misma en el placer, en la tristeza y en todas las demás cosas de que hemos hablado, y que no muda jamás, ni de naturaleza, ni de nombre.
+
+Laques: Me parece que es una disposición del alma a manifestar constancia en todo, puesto que es preciso dar una definición que comprenda todas las diferentes especies de valor.
+
+Sócrates: Así es preciso hacerlo para responder exactamente a la cuestión; pero me parece que no tienes por valor toda constancia del alma, y lo infiero de que pones el valor en el número de las cosas bellas.
+
+Laques: Sí, sin duda, y de las más bellas.
+
+Sócrates: Sí, esta constancia, cuando va unida a la razón, es buena y bella.
+
+Laques: Seguramente.
+
+Sócrates: Y cuando se tropieza con la insensatez, ¿no es todo lo contrario? ¿no es mala y perniciosa?
+
+Laques: Sin contradicción.
+
+Sócrates: ¿Llamas bello a lo que es malo y pernicioso?
+
+Laques: No lo permita Dios, Sócrates.
+
+Sócrates: ¿Luego a esta especie de constancia no le das el nombre de valor, puesto que no es bella, y que el valor es algo bello?
+
+Laques: Dices verdad.
+
+Sócrates: La paciencia o constancia unida a la razón, ¿es en tu opinión el verdadero valor?
+
+Laques: Así lo creo.
+
+Sócrates: Veamos. ¿Es la que va unida a la razón en ciertos casos, o la que está unida en todos, en las cosas pequeñas como en las grandes? Por ejemplo, un hombre gasta constante y prudentemente sus bienes, con una entera certeza de que sus gastos le producirán un día grandes riquezas; ¿llamarás a este hombre valiente?
+
+Laques: No, ¡por Júpiter! Sócrates.
+
+Sócrates: Pero un médico, por ejemplo, tiene a su hijo único o cualquiera otra persona enferma de una inflamación del pulmón; este hijo le persigue y le pide de comer y beber; el médico, lejos de dejarse llevar, sufre con paciencia sus lamentos: ¿le daremos el nombre de valiente?
+
+Laques: Tampoco es ese valor, a mi parecer.
+
+Sócrates: En la guerra, he aquí un hombre, que está en esta disposición de alma de que hablamos; quiere mantenerse firme, y sosteniendo su valor con su prudencia, le hace ver ésta que será bien pronto socorrido; que sus enemigos son mucho más débiles, y que él tiene la ventaja del terreno; este bravo, que es tan prudente, ¿te parece más valiente que su enemigo que le espera a pie firme?
+
+Laques: No, sin duda; este último es el valiente, Sócrates.
+
+Sócrates: Sin embargo, el valor de este último es menos prudente que el del primero.
+
+Laques: Eso es cierto.
+
+Sócrates: Se sigue de aquí, que un soldado de caballería, que en un combate pruebe valor, fiado en la destreza con que maneja el caballo, será menos valiente que el que esté privado de esta ventaja.
+
+Laques: Sí, seguramente.
+
+Sócrates: ¿Dirás lo mismo de un arquero, de un hondero y de todos los demás, cuya firmeza esté sostenida por su habilidad?
+
+Laques: Sin dificultad.
+
+Sócrates: Y los que, sin haber aprendido nunca el oficio de buzos, tuviesen el valor de sumergirse en el agua ¿te parecerían más valientes que los buzos de oficio?
+
+Laques: ¿Quién podría sostener lo contrario? Sócrates.
+
+Sócrates: Nadie seguramente, conforme a tus principios.
+
+Laques: Sí, esos son mis principios en efecto.
+
+Sócrates: ¿De manera, Laques, que estas gentes, que no tienen ninguna experiencia, se arrojan al peligro mucho más imprudentemente que los que se exponen con alguna razón?
+
+Laques: Sí, sin duda.
+
+Sócrates: Pero la audacia insensata y la paciencia irracional nos parecieron antes vergonzosas y perjudiciales.
+
+Laques: Eso es cierto.
+
+Sócrates: Y el valor nos ha parecido una cosa bella.
+
+Laques: Convengo en ello.
+
+Sócrates: Pues bien, ahora sucede todo lo contrario; damos el nombre de valor a una audacia insensata.
+
+Laques: Lo confieso.
+
+Sócrates: ¿Y crees que obramos bien?
+
+Laques: No, ¡por Júpiter! Sócrates.
+
+Sócrates: De modo, Laques, que, por tu propia confesión, ni tú ni yo nos ajustamos al tono dórico, porque nuestras acciones no corresponden a nuestras palabras. Al ver nuestras acciones, yo creo que se diría que nosotros tenemos valor; pero oyendo nuestras palabras, bien pronto se mudaría de opinión.
+
+Laques: Tienes razón.
+
+Sócrates: ¡Pero qué! ¿tienes por prudente que permanezcamos en este estado?
+
+Laques: Te aseguro que no.
+
+Sócrates: ¿Quieres que nos conformemos por un momento con la definición que hemos dado?
+
+Laques: ¿Qué definición?
+
+Sócrates: Que el verdadero valor es la paciencia. Si quieres, mostremos nuestra paciencia continuando nuestra indagación, a fin de que el valor no se burle de nosotros y nos acuse de no buscarle valientemente, puesto que, según nuestros principios, ser paciente es ser valiente.
+
+Laques: Estoy dispuesto a ello, Sócrates, y no lo esquivo, por más que sea nuevo en esta clase de disputas; pero te confieso que estoy disgustado y que tengo un verdadero sentimiento en no poder explicar lo que pienso, porque me parece que concibo perfectamente lo que es el valor; y no comprendo cómo se me escapa tanto esta idea, que no puedo explicarla.
+
+Sócrates: Pero, Laques, el deber de un buen cazador ¿no consiste en no cansarse y no verse jamás burlado?
+
+Laques: Estoy conforme.
+
+Sócrates: ¿Quieres que entre en nuestra partida de caza Nicias, para ver si es más dichoso?
+
+Laques: Lo quiero, y ¿por que no?
+
+Sócrates: Ven acá, Nicias, ven, si puedes, a socorrer a tus amigos, que se ven embarazados y que no saben qué rumbo tomar; porque ya ves cuán imposible se hace que consigamos nuestro objeto. Sácanos de este apuro y fija tu propio pensamiento, diciéndonos lo que es el valor.
+
+Nicias: Ha mucho que me parecía que definíais mal esta virtud. ¡Ah! ¿de dónde nace que no os habéis valido en esta ocasión de lo que tantas veces y con tanto acierto te he oído yo en otras? Sócrates.
+
+Sócrates: ¿Y qué es? Nicias
+
+Nicias: Te he oído decir muchas veces que en aquello en que cada uno sabe es idóneo, pero que en lo que no sabe es inepto.
+
+Sócrates: ¡Por Júpiter! eso es muy cierto, Nicias
+
+Nicias: Por consiguiente, si un hombre valiente es bueno, es hábil en lo que sabe.
+
+Sócrates: ¿Lo entiendes tú? Laques.
+
+Laques: Sí lo entiendo; sin embargo, no comprendo por entero lo que quiere decir.
+
+Sócrates: Me parece que yo lo comprendo; creo que quiere decir, que el valor es una ciencia.
+
+Laques: ¿Qué ciencia? Sócrates.
+
+Sócrates: ¿Por qué no se lo preguntas a él?
+
+Laques: Pues ya se lo pregunto.
+
+Sócrates: ¡Pues bien! Nicias, responde a Laques y dile qué ciencia es el valor, en tu opinión; porque no será indudablemente la ciencia del tocador de flauta.
+
+Nicias: No.
+
+Sócrates: ¿Ni la del tocador de lira?
+
+Nicias: Tampoco.
+
+Sócrates: ¿Cuál es, y sobre qué versa?
+
+Laques: Le apuras bien, Sócrates; sí, que diga qué ciencia es.
+
+Nicias: Digo, Laques, que es la ciencia de las cosas que son de temer y de las que no son de temer, sea en la guerra, sea en todas las demás ocasiones de la vida.
+
+Laques: ¡Extraña definición! Sócrates.
+
+Sócrates: ¿Por qué la encuentras tan extraña, Laques?
+
+Laques: ¿Por qué? porque la ciencia y el valor son dos cosas diferentes.
+
+Sócrates: Nicias pretende que no.
+
+Laques: Sí, lo pretende, y en eso chochea.
+
+Sócrates: Pues bien, tratemos de instruirle; las injurias no son razones.
+
+Nicias: No tiene intención de ofenderme, pero desea mucho que lo que yo he dicho no valga nada, porque él mismo se ha engañado en grande.
+
+Laques: Esa es la pura verdad, pero yo te haré ver, que tú no has andado más acertado que yo. Sin ir más lejos, ¿los médicos no conocen lo que hay que temer en las enfermedades? Y en este caso ¿crees tú, que los hombres valientes son los que conocen lo que es de temer? ¿o llamas a los médicos hombres valientes?
+
+Nicias: No, seguramente.
+
+Laques: Lo mismo que los labradores. Sin embargo, los labradores conocen perfectamente lo que hay que temer respecto a sus trabajos. Lo mismo sucede con todos los demás artistas; conocen todos muy bien lo que hay que temer en su profesión y lo que no, y no son por esto más valientes.
+
+Sócrates: ¿Qué dices, Nicias, de esta crítica de Laques? Me parece que significa algo.
+
+Nicias: Seguramente dice alguna cosa, pero no dice nada verdadero.
+
+Sócrates: ¿Cómo?
+
+Nicias: ¿Cómo? Es que él cree que los médicos no saben más que reconocer lo que es sano y lo que es enfermo, y de hecho no saben más. ¿Pero crees tú, Laques, que los médicos saben si la salud es más de temer para tal enfermo, que la enfermedad? Y no crees, que hay muchos enfermos a quienes sería más ventajoso no curar que curar? ¿Te atreverás a decir, que es bueno vivir siempre, y que no hay muchas personas para las que seria más ventajoso el morir?
+
+Laques: Eso podrá ocurrir algunas veces.
+
+Nicias: ¿Y crees tú, que las cosas, que parecen temibles a los que tienen por bueno el vivir, parezcan lo mismo a los que tienen por más ventajoso el morir?
+
+Laques: No, sin duda.
+
+Nicias: ¿Y a quiénes tomarás por jueces? ¿los médicos? ¿los de otras profesiones? Ellos nada conocen, porque esto sólo pertenece a los que están versados en esta ciencia de las cosas temibles, y estos son los que yo llamo valientes.
+
+Sócrates: Laques, ¿entiendes ahora lo que dice Nicias?
+
+Laques: Sí, entiendo, que, según se explica, no hay otros hombres valientes que los adivinos; porque ¿qué otro que un adivino puede saber si es más ventajoso morir que vivir? Te preguntaría con gusto, Nicias, si eres adivino. Si no lo eres, adiós tu valor.
+
+Nicias: ¿Cómo? Piensas que sea negocio de adivino conocer las cosas que son temibles y las que no lo son?
+
+Laques: Sin duda, y si no, ¿a quién toca?
+
+Nicias: ¿A quién? al que yo di, o, mi querido Laques, al hombre valiente; porque, el oficio de un adivino es conocer sólo los signos de las cosas que deben suceder, como muertes, enfermedades, pérdida de bienes, derrotas, victorias, ya sea en la guerra, ya en otras luchas; ¿pero crees tú, que conviene más a un adivino que a otro hombre el juzgar cuáles de estos accidentes son más o menos ventajosos?
+
+Laques: En verdad, Sócrates, no comprendo lo que quiere decir; porque para él no hay ni adivino, ni médico, ni otro hombre a quien el nombre de valiente pueda convenir. Es preciso ir en busca de un Dios. Pero si he de decirte lo que pienso, Nicias no tiene valor para confesar que no sabe lo que dice; no hace más que bregar y retorcerse para ocultar su embarazo. Otro tanto pudimos hacer tú y yo, Sócrates, si sólo nos hubiéramos propuesto ocultar las contradicciones en que incurrimos. Si habláramos delante de jueces, esta conducta tendría disculpa, pero en una conversación como la nuestra ¿qué significa querer triunfar con vanos discursos?
+
+Sócrates: Indudablemente eso a nada conduciría, pero veamos bien si lo que pretende decir Nicias tiene algún valor, y si tú no tienes razón al acusarle de que todo es un hablar por hablar. Supliquémosle que nos explique más claramente su pensamiento, y si vemos que está la razón de su parte, seguiremos sus principios; si no lo está, trataremos de instruirle.
+
+Laques: Interrógale tú mismo, Sócrates, si quieres; yo bastante le he preguntado.
+
+Sócrates: Sea así; le interrogaré por ti y por mí.
+
+Laques: Como quieras.
+
+Sócrates: Dime, te lo suplico, Nicias, o más bien dinos, porque hablo también por Laques; ¿sostienes que el valor es la ciencia de las cosas que deben temerse y de las cosas que no deben temerse?
+
+Nicias: Sí, lo sostengo.
+
+Sócrates: Sostienes igualmente, que esta ciencia no es dada a toda clase de gentes, puesto que no es conocida ni por los médicos, ni por los adivinos, que, por consiguiente, no pueden ser valientes, si no han adquirido esta ciencia. ¿No es esto lo que dices?
+
+Nicias: Sí, sin duda.
+
+Sócrates: No se puede aplicar aquí el proverbio: una jabalina comprendería esto; y la jabalina no es valiente.
+
+Nicias: No, seguramente.
+
+Sócrates: De aquí se infiere, Nicias, que estás persuadido de que la jabalina de Acromion no ha sido valiente. No lo digo de burlas, sino muy de veras; es de necesidad que el que habla como tú no admita ningún género de valor en las bestias, o que conceda inteligencia a los leones, a los leopardos, a los jabalís, para que sepan muchas cosas que la mayor parte de los hombres ignoran, a causa de su mucha dificultad. también es preciso, que el que sostiene que el valor es lo que tú dices, sostenga igualmente que los leones, los toros, los zorros, están dotados de valor, tanto los unos como los otros.
+
+Laques: ¡Por todos los dioses, Sócrates, hablas perfectamente! Dime en verdad, Nicias, si crees que las bestias, que de común consentimiento pasan por valientes, son más hábiles que nosotros, ¿o te atreves a ir contra el común sentir y sostener que no son valientes?
+
+Nicias: Te digo, en una palabra, Laques, que no llamo valiente, ni a bestia, ni a hombre, ni a nadie que por ignorancia no teme las cosas temibles; yo le llamo temerario y estúpido. ¡Ah! ¿piensas que llamo yo valientes a los niños, que por ignorancia no temen ningún peligro? a mi entender, no tener miedo y ser valiente son dos cosas muy diferentes; nada hay más raro que el valor acompañado de la prudencia, y nada más común que el atrevimiento, que la audacia, que la intrepidez acompañadas de imprudencia; porque este es el lote de la mayor parte de los hombres, de las mujeres y de los niños; en una palabra, los que tú llamas, con todo el mundo, valientes , yo los llamo temerarios, y no doy el nombre de valientes más que a los que son valientes e ilustrados, que son los únicos de que quiero hablar.
+
+Laques: Mira, Sócrates, cómo Nicias se inciensa a sí mismo, mientras que a todos aquellos, que pasan por valientes, intenta privarles de este mérito.
+
+Nicias: No es esa mi intención, Laques, tranquilízate; por el contrario, reconozco que tú y Lamaco sois prudentes y sabios, puesto que sois valientes. Lo mismo digo de muchos de nuestros atenienses.
+
+Laques: Si bien tengo materia para responderte, no lo hago por temor de que me acuses de ser un verdadero Exonio.
+
+Sócrates: ¡Ah! No digas eso, te lo suplico, Laques; se ve claramente que no te has apercibido de que Nicias ha aprendido estas bellas cosas de nuestro amigo Damon, y que Damon es el íntimo de Prodico, el más hábil de todos los sofistas para esta especie de distinciones.
+
+Laques: ¡Oh! Sócrates, sienta bien en un sofista hacer vana ostentación de sus sutilezas, pero no en un hombre como Nicias, que los atenienses han escogido para ponerle a la cabeza de la república.
+
+Sócrates: Mi querido Laques, sienta bien en un hombre, a quien se le han encomendado tan graves negocios de gobierno, el trabajar para hacerse más hábil que los demás. He ahí por lo que me parece que Nicias merece algún miramiento, y que, por lo menos, es preciso examinar las razones que tiene para definir el valor como lo hace.
+
+Laques: Examínalas, pues, cuanto te plazca, Sócrates.
+
+Sócrates: Es lo que voy a hacer; pero no pienses que te voy a echar fuera; tendrás una parte en mi discurso. Fija bien tu atención, y ten en cuenta lo que voy a decir.
+
+Laques: Sea así, puesto que lo quieres.
+
+Sócrates: Bien; Nicias, dime, te lo suplico, tomando la cuestión en su origen, si no es cierto que desde luego hemos mirado el valor como una parte de la virtud.
+
+Nicias: Es cierto.
+
+Sócrates: Conforme a tu respuesta, si el valor no es más que una parte de la virtud, ¿no hay otras partes, que reunidas con aquella constituyen lo que denominamos virtud?
+
+Nicias: ¿Cómo puede ser de otra manera?
+
+Sócrates: En este punto piensas como yo; porque además del valor, reconozco también otras partes de la virtud, como la templanza la justicia y muchas otras. ¿No las reconoces tú igualmente?
+
+Nicias: Sin duda.
+
+Sócrates: Bueno. Henos aquí de acuerdo ya sobre este punto. Pasemos a las cosas que son temibles y a las que no lo son; examinémoslas bien, no sea que tú las entiendas de una manera y nosotros de otra. Vamos a decirte lo que pensamos. Si no convienes en ello, nos dirás tu opinión. Creemos que las cosas temibles son las que inspiran miedo, y no temibles las que no le inspiran. El miedo no lo causan, ni las cosas sucedidas ya, ni las que en el acto suceden, sino las que se esperan; porque el miedo no es más que la idea de un mal inminente. ¿No lo crees así? Laques.
+
+Laques: Sí.
+
+Sócrates: He aquí nuestro dictamen, Nicias. Por cosas temibles entendemos los males del porvenir, y por cosas no temibles entendemos las cosas del porvenir, pero que, o parecen buenas, o, por lo menos, no parecen malas. ¿Admites nuestra definición o no la admites?
+
+Nicias: La admito seguramente.
+
+Sócrates: ¿Y la ciencia de estas cosas es lo que tú llamas valor?
+
+Nicias: Es eso mismo.
+
+Sócrates: Pasemos a un tercer punto, para ver si nos ponemos de acuerdo.
+
+Nicias: ¿Qué punto es?
+
+Sócrates: Vas a verlo. Decimos Laques y yo que en todas las cosas la ciencia tiene un carácter universal y absoluto; no es una para las cosas pasadas, y otra para las cosas del porvenir, porque la ciencia siempre es la misma. Por ejemplo, en lo que mira a la salud, siempre es la misma ciencia de la medicina la que juzga de ella, y la que ve lo que ha sido, lo que es y lo que será sano o enfermo. La agricultura asimismo juzga de lo que ha venido, de lo que viene y de lo que vendrá sobre la tierra. En la guerra, ya lo sabes, la ciencia del general se extiende a todo, a lo pasado, a lo presente y a lo porvenir; ninguna necesidad tiene del arte de la adivinación y antes, por el contrario, manda en el adivino, como quien sabe mucho mejor que éste lo que sucede y lo que debe suceder. ¿No es formal la ley misma? Pues la ley dispone, no que el adivino mande al general, sino que el general mande al adivino. ¿No es esto lo que sostenemos? Laques.
+
+Laques: Seguramente, Sócrates.
+
+Sócrates: ¿Y tú, Nicias, concedes como nosotros que la ciencia, siendo siempre la misma, juzga igualmente de lo pasado, de lo presente y de lo porvenir?
+
+Nicias: Sí, lo digo como tú, Sócrates, porque me parece que no puede ser de otra manera.
+
+Sócrates: Dices, muy excelente Nicias, que el valor es la ciencia de las cosas temibles y de las que no lo son. ¿No es esto lo que dices?
+
+Nicias: Sí.
+
+Sócrates: ¿No estamos también de acuerdo en que estas cosas temibles son males del porvenir, así como son bienes del porvenir las cosas que no son temibles?
+
+Nicias: Sí, Sócrates, estamos de acuerdo.
+
+Sócrates: ¿Y en que esta ciencia no se extiende sólo al porvenir, sino también a lo presente y a lo pasado?
+
+Nicias: Convengo en ello.
+
+Sócrates: No es cierto, entonces, que el valor sea sólo la ciencia de las cosas temibles y no temibles, porque no conoce sólo bienes y males del porvenir, sino que se extiende tanto como las demás ciencias, y juzga igualmente de los males y de los bienes presentes, de los males y de los bienes pasados.
+
+Nicias: Así parece.
+
+Sócrates: Tú sólo nos has definido la tercera parte del valor, y quisiéramos conocer la naturaleza del valor todo entero. Ahora me parece, según tus principios, que la ciencia es, no sólo la de las cosas temibles, sino también la de todos los bienes y todos los males en general. ¿Habrás cambiado de opinión, Nicias, o es esto mismo lo que quieres decir?
+
+Nicias: Me parece, que el valor tiene toda la extensión que tú dices.
+
+Sócrates: Sentado esto, ¿piensas que un hombre valiente esté privado de una parte de la virtud, poseyendo la ciencia de todos los bienes y de todos los males pasados, presentes y futuros? ¿Crees que semejante hombre tendrá necesidad de la templanza, de la justicia y de la santidad, cuando puede precaverse prudentemente contra todos los males que le puedan venir de parte de los hombres y de los dioses, y proporcionarse todos los bienes a que pueda aspirar, puesto que sabe cómo debe conducirse en cada lance que ocurra?
+
+Nicias: Lo que dice Sócrates me parece verdadero.
+
+Sócrates: ¿El valor no es una parte de la virtud, sino que es la virtud entera?
+
+Nicias: Así me lo parece.
+
+Sócrates: Sin embargo, nosotros habíamos dicho que el valor no era más que una parte.
+
+Nicias: En efecto, así lo dijimos.
+
+Sócrates: Y lo que entonces dijimos ¿no nos parece ahora verdadero?
+
+Nicias: Lo confieso.
+
+Sócrates: Por consiguiente, aún no hemos averiguado lo que es el valor.
+
+Nicias: Estoy conforme.
+
+Laques: Creía, mi querido Nicias, que tú lo indagarías mejor que cualquiera otro, al ver el desprecio que me habías manifestado, cuando yo respondía a Sócrates; y había concebido grandes esperanzas de que, con el socorro de la sabiduría de Damon, lo hubieras conseguido.
+
+Nicias: Vaya, Laques, que vamos perfectamente. No te importa nada aparecer muy ignorante sobre lo que es el valor, con tal de que haya aparecido yo tan ignorante como tú; sólo esto has tenido en cuenta, sin calcular si es conveniente que ignoremos cosas que debe conocer todo hombre de buen sentido. Así son todos los hombres; no se miran a sí mismos, y sólo fijan sus miradas en los demás. En cuanto a mí creo haber respondido medianamente. Si me he engañado en algo, no pretendo ser infalible, y me corregiré instruyéndome, sea con Damon, de quien parece te burlas sin conocerle, sea con otros; y cuando me considere bien instruido, te comunicaré parte de mi ciencia; porque no soy envidioso, y me parece que tú tienes una gran necesidad de instrucción.
+
+Laques: Y tú, Nicias, si hemos de creerte, eres un gran sabio. Sin embargo, con toda esta magnífica opinión de ti mismo, yo aconsejo a Lisímaco y a Melesías que no nos consulten más sobre la educación de sus hijos, y si me creen, como ya lo dije, que se entiendan para esto únicamente con Sócrates, porque por lo que a mí hace, si mis hijos estuvieran en edad, este es el partido que tomaría.
+
+Nicias: ¡Ah! En este punto estoy de acuerdo contigo. Si Sócrates se toma el cuidado de nuestros hijos, no hay necesidad de buscar otro, y estoy dispuesto a entregarle mi hijo Nicerate, si tiene la bondad de encargarse de él. Pero todos los días cuando le hablo de esto, me remite a otros maestros, y me rehúsa sus cuidados. Mira, Lisímaco, si tú tienes más influencia sobre él.
+
+Lisímaco: Muy justo sería, porque por mi parte estoy dispuesto a hacer por Sócrates lo que por nadie haría. ¿Qué dices a esto, Sócrates? ¿te dejarás ablandar y querrás encargarte de estos jóvenes para hacerlos mejores?
+
+Sócrates: Sería preciso ser bien despegado para no querer contribuir a hacer a estos jóvenes tan buenos cuanto puedan serlo. Si en la conversación que acabamos de tener hubiera aparecido yo muy hábil y los demás ignorantes, tendríais razón para escogerme con preferencia a cualquier otro, pero ya veis que todos nos hemos visto en el mismo embarazo. Y así ¿por qué preferirme? Me parece que ninguno de nosotros merece la preferencia. Siendo esto así, ved si os parece bien este consejo: soy de dictamen, (estamos solos y somos leales los unos para los otros) que todos busquemos el mejor maestro, primero, para nosotros y, después, para estos jóvenes, sin ahorrar gasto ni sacrificio alguno; porque jamás aconsejaré el permanecer en la situación en que nos hallamos, y si alguno se burla de nosotros porque a nuestra edad vamos a la escuela, nos defenderemos, poniendo de frente la autoridad de Homero, que dice en cierto pasaje: el pudor no sienta bien al indigente; y burlándonos de lo que pueda decirse, procuraremos mirar a la vez por nosotros mismos y por estos jóvenes.
+
+Lisímaco: Ese consejo, Sócrates, me agrada en extremo, y con respecto a mí, cuanto más viejo soy, tanto más empeño tengo en instruirme al mismo tiempo que mis hijos. Haz, pues, lo que dices; ven mañana a mi casa desde la madrugada, y no faltes, te lo suplico, a fin de que acordemos los medios de ejecutar lo que hemos resuelto. Ahora ya es tiempo de que concluya esta conversación.
+
+Sócrates: No faltaré, Lisímaco; iré mañana a tu casa temprano, si Dios quiere.

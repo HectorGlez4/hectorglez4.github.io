@@ -1,0 +1,16 @@
+---
+texto: "Creo, en efecto, que todos los que tienen un poco de inteligencia convendrán en que el conocimiento más verdadero, sin comparación, es el que tiene por objeto el ser, lo que existe realmente, y cuya naturaleza es siempre la misma."
+autor: "platon"
+slug: "platon-creo-en-efecto-que-todos-los-que"
+procedencia:
+  obra: "Filebo ó del placer"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Filebo"
+---

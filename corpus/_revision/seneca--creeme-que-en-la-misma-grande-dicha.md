@@ -1,0 +1,13 @@
+---
+texto: "Créeme que en la misma grande dicha hay la felicidad de morir, no habiendo cosa cierta que dure un día."
+autor: "seneca"
+slug: "seneca-creeme-que-en-la-misma-grande-dicha"
+procedencia:
+  obra: "Consolación a Polibio"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Consolaci%C3%B3n_a_Polibio"
+---

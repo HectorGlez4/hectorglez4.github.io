@@ -1,0 +1,16 @@
+---
+texto: "Sócrates: La primera de estas ciencias es, creo la medicina, y la segunda la política, y la ciencia de la ciencia es simplemente la ciencia."
+autor: "platon"
+slug: "platon-socrates-la-primera-de-estas-ciencias-es"
+procedencia:
+  obra: "Cármides"
+  traduccion:
+    traductor: "Patricio de Azcárate Corral"
+    año: 1871
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/C%C3%A1rmides"
+---
