@@ -1,0 +1,13 @@
+---
+texto: "España y Portugal se disponen a librarse de las suyas."
+autor: "praxedis-g-guerrero"
+slug: "praxedis-g-guerrero-espana-y-portugal-se-disponen-a-librarse"
+procedencia:
+  obra: "Puntos Rojos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Puntos_Rojos"
+---
