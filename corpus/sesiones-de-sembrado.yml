@@ -2036,3 +2036,14 @@ sesiones:
       citasPublicadas: 4244
       procedenciaCompleta: 15.5
       tradicionLatinoamericanaSobreHispanicos: 58.1
+  - fecha: "2026-10-13"
+    hora: "11:41"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores colombianos: le quedan 24 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 31 candidatos en la época Autores colombianos: 6 ya sembrados y 1 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Época: Autores argentinos"
+    motivo: "Siembra de la época Autores argentinos con fuentes nuevas de Wikisource (Echeverría, Gutiérrez, Gorriti, Alem, Varela, Palacios); descartados con motivo 191 candidatos de dominio público sin prosa utilizable."
+    resultado:
+      citasPublicadas: 4274
+      procedenciaCompleta: 15.5
+      tradicionLatinoamericanaSobreHispanicos: 63.4
