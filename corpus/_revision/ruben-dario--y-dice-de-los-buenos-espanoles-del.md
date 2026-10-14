@@ -1,0 +1,13 @@
+---
+texto: "Y dice de los buenos españoles del descubrimiento y de los rapaces que les robaban a los indios sus oros y sus piedras ricas."
+autor: "ruben-dario"
+slug: "ruben-dario-y-dice-de-los-buenos-espanoles-del"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

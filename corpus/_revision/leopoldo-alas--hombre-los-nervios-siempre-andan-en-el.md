@@ -1,0 +1,13 @@
+---
+texto: "--Hombre, los nervios siempre andan en el ajo... y la primavera... la sangre... la savia nueva... es claro... todo influye... pero usted no puede entender esto...."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-hombre-los-nervios-siempre-andan-en-el"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

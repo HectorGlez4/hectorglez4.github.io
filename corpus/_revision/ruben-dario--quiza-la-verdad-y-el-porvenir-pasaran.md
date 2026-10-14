@@ -1,0 +1,13 @@
+---
+texto: "Quizá la verdad y el porvenir pasaran entre la excesiva discreción del primero y la indiscreción de los otros dos."
+autor: "ruben-dario"
+slug: "ruben-dario-quiza-la-verdad-y-el-porvenir-pasaran"
+procedencia:
+  obra: "Prosa Dispersa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/55616/pg55616.txt"
+---

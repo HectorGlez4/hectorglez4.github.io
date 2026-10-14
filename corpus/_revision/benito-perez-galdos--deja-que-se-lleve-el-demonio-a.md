@@ -1,0 +1,13 @@
+---
+texto: "--Deja que se lleve el demonio a Lili, mujer; él volverá."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-deja-que-se-lleve-el-demonio-a"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

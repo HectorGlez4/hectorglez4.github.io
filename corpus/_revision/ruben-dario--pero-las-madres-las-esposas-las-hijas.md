@@ -1,0 +1,13 @@
+---
+texto: "¡Pero las madres, las esposas, las hijas, los hijos!"
+autor: "ruben-dario"
+slug: "ruben-dario-pero-las-madres-las-esposas-las-hijas"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

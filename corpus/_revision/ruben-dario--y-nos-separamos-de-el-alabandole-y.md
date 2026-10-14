@@ -1,0 +1,13 @@
+---
+texto: "Y nos separamos de él alabándole y deseando para nosotros una vejez, no verde, sino como esa, dorada y de color de rosa."
+autor: "ruben-dario"
+slug: "ruben-dario-y-nos-separamos-de-el-alabandole-y"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

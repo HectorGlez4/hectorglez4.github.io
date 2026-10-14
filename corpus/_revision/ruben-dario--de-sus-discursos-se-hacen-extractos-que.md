@@ -1,0 +1,13 @@
+---
+texto: "De sus discursos se hacen extractos, que, hábilmente aislados, presentan un sentido absolutamente distinto del pensamiento integral del autor."
+autor: "ruben-dario"
+slug: "ruben-dario-de-sus-discursos-se-hacen-extractos-que"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

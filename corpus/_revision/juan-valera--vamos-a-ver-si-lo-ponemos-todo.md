@@ -1,0 +1,13 @@
+---
+texto: "Vamos a ver si lo ponemos todo en claro."
+autor: "juan-valera"
+slug: "juan-valera-vamos-a-ver-si-lo-ponemos-todo"
+procedencia:
+  obra: "El Superhombre y otras novedades"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/31613/pg31613.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "--¡Cómo era aquel _verso_ en que juraba mi primo que se reía y lloraba al mismo tiempo!"
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-como-era-aquel-verso-en-que-juraba"
+procedencia:
+  obra: "Doctor Sutilis (Cuentos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64589/pg64589.txt"
+---

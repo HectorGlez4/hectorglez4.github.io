@@ -1,0 +1,13 @@
+---
+texto: "Las harpas y las flautas sonaban del lado de Italia."
+autor: "ruben-dario"
+slug: "ruben-dario-las-harpas-y-las-flautas-sonaban-del"
+procedencia:
+  obra: "Los Raros"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/50365/pg50365.txt"
+---

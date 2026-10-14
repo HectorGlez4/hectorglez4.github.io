@@ -1,0 +1,13 @@
+---
+texto: "«Señorita, ni la paciencia de Job... pero tendré paciencia»."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-senorita-ni-la-paciencia-de-job-pero"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

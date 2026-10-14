@@ -1,0 +1,13 @@
+---
+texto: "Hay además motivos mundanos poderosos que se opondrían a estos absurdos amores, aunque la vocación y promesa de D."
+autor: "juan-valera"
+slug: "juan-valera-hay-ademas-motivos-mundanos-poderosos-que-se"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

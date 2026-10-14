@@ -1,0 +1,13 @@
+---
+texto: "En tanto, el salón amarillo estaba en una discreta obscuridad, si había pocos tertulios."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-en-tanto-el-salon-amarillo-estaba-en"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

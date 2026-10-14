@@ -1,0 +1,13 @@
+---
+texto: "¿No se enamora Fausto de Elena, que vivió dos mil quinientos años antes de que él naciese?"
+autor: "juan-valera"
+slug: "juan-valera-no-se-enamora-fausto-de-elena-que"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---

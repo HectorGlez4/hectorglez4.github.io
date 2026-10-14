@@ -1,0 +1,13 @@
+---
+texto: "En fin, esto se lo explicará á usted Fernando, si hablan de ello, mejor que yo."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-en-fin-esto-se-lo-explicara-a"
+procedencia:
+  obra: "Doctor Sutilis (Cuentos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64589/pg64589.txt"
+---

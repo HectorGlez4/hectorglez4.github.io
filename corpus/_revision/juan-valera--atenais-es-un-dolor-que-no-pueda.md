@@ -1,0 +1,13 @@
+---
+texto: "ATENAIS.--Es un dolor que no pueda ser el único."
+autor: "juan-valera"
+slug: "juan-valera-atenais-es-un-dolor-que-no-pueda"
+procedencia:
+  obra: "Cuentos y diálogos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/27214/pg27214.txt"
+---

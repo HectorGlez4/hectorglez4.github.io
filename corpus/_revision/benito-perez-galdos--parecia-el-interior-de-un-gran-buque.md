@@ -1,0 +1,13 @@
+---
+texto: "Parecía el interior de un gran buque náufrago, tendido sobre la playa, y a quien las olas hubieran quebrado por la mitad, doblándole en un ángulo obtuso."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-parecia-el-interior-de-un-gran-buque"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

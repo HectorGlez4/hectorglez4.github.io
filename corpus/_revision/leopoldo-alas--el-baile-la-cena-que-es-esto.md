@@ -1,0 +1,13 @@
+---
+texto: "El baile, la cena; ¿qué es esto, Ana, qué es esto?..."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-el-baile-la-cena-que-es-esto"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

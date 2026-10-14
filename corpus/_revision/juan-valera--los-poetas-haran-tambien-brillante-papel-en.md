@@ -1,0 +1,13 @@
+---
+texto: "Los poetas harán también brillante papel en este drama del porvenir."
+autor: "juan-valera"
+slug: "juan-valera-los-poetas-haran-tambien-brillante-papel-en"
+procedencia:
+  obra: "Cartas americanas. Primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62984/pg62984.txt"
+---

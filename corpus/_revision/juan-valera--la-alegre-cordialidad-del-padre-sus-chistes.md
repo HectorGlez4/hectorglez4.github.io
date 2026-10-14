@@ -1,0 +1,13 @@
+---
+texto: "La alegre cordialidad del padre, sus chistes, sus muestras de afecto, no pudieron sacar a D."
+autor: "juan-valera"
+slug: "juan-valera-la-alegre-cordialidad-del-padre-sus-chistes"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

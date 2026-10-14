@@ -1,0 +1,13 @@
+---
+texto: "Era la imagen del romanticismo, como le vestiría su enemigo el clasicismo, de buena gana."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-era-la-imagen-del-romanticismo-como-le"
+procedencia:
+  obra: "Doctor Sutilis (Cuentos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64589/pg64589.txt"
+---

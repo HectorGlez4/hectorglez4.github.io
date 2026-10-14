@@ -1,0 +1,13 @@
+---
+texto: "Además, los decadentes eran enemigos de la salud, de la alegría, de la vida, en fin."
+autor: "ruben-dario"
+slug: "ruben-dario-ademas-los-decadentes-eran-enemigos-de-la"
+procedencia:
+  obra: "Los Raros"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/50365/pg50365.txt"
+---

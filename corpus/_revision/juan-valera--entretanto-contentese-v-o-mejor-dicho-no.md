@@ -1,0 +1,13 @@
+---
+texto: "Entretanto, conténtese V. o mejor dicho no se disguste con esto que le dedico, pues bien sé yo que, si vale algo y si tiene chiste, V. habrá de hallarle, sin que tenga yo necesidad de indicar dónde está lo chistoso para que V. lo ría."
+autor: "juan-valera"
+slug: "juan-valera-entretanto-contentese-v-o-mejor-dicho-no"
+procedencia:
+  obra: "Cuentos y diálogos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/27214/pg27214.txt"
+---

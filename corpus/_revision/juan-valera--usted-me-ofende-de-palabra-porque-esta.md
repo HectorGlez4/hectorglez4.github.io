@@ -1,0 +1,13 @@
+---
+texto: "Usted me ofende de palabra, porque está lejos de mí."
+autor: "juan-valera"
+slug: "juan-valera-usted-me-ofende-de-palabra-porque-esta"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---

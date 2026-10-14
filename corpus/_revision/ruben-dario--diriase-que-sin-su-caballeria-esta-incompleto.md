@@ -1,0 +1,13 @@
+---
+texto: "Diríase que sin su caballería está incompleto."
+autor: "ruben-dario"
+slug: "ruben-dario-diriase-que-sin-su-caballeria-esta-incompleto"
+procedencia:
+  obra: "Letras"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51029/pg51029.txt"
+---

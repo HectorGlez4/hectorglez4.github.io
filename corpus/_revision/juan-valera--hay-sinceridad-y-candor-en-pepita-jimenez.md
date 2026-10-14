@@ -1,0 +1,13 @@
+---
+texto: "Hay sinceridad y candor en Pepita Jiménez."
+autor: "juan-valera"
+slug: "juan-valera-hay-sinceridad-y-candor-en-pepita-jimenez"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

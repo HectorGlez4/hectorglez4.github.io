@@ -1,0 +1,13 @@
+---
+texto: "Tienen la realidad de la existencia nuestra."
+autor: "ruben-dario"
+slug: "ruben-dario-tienen-la-realidad-de-la-existencia-nuestra"
+procedencia:
+  obra: "Los Raros"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/50365/pg50365.txt"
+---

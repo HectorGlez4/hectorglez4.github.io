@@ -1,0 +1,13 @@
+---
+texto: "Su talento es superior al de todos los otros escultores."
+autor: "ruben-dario"
+slug: "ruben-dario-su-talento-es-superior-al-de-todos"
+procedencia:
+  obra: "Peregrinaciones"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51870/pg51870.txt"
+---

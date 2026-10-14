@@ -1,0 +1,13 @@
+---
+texto: "¡Como si nunca me uvierra bisto y yo que le Beia todos los dias ha todas orras en mi Halma!"
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-como-si-nunca-me-uvierra-bisto-y"
+procedencia:
+  obra: "Doctor Sutilis (Cuentos)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/64589/pg64589.txt"
+---

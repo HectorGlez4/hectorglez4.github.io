@@ -1,0 +1,13 @@
+---
+texto: "Sin diálogo, y al son de una música más o menos sugestiva, sería la obra una agradable pantomima."
+autor: "ruben-dario"
+slug: "ruben-dario-sin-dialogo-y-al-son-de-una"
+procedencia:
+  obra: "Prosa Dispersa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/55616/pg55616.txt"
+---

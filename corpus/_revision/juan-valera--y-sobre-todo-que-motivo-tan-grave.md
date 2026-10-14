@@ -1,0 +1,13 @@
+---
+texto: "Y sobre todo, ¿qué motivo tan grave de queja no había dado D."
+autor: "juan-valera"
+slug: "juan-valera-y-sobre-todo-que-motivo-tan-grave"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

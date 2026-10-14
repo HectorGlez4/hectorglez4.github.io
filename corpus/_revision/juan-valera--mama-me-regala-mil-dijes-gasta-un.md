@@ -1,0 +1,13 @@
+---
+texto: "Mamá me regala mil dijes; gasta un dineral en mis vestidos y sombreros."
+autor: "juan-valera"
+slug: "juan-valera-mama-me-regala-mil-dijes-gasta-un"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---

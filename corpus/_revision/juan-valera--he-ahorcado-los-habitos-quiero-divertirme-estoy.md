@@ -1,0 +1,13 @@
+---
+texto: "He ahorcado los hábitos; quiero divertirme, estoy en la flor de la mocedad y quiero gozar de ella."
+autor: "juan-valera"
+slug: "juan-valera-he-ahorcado-los-habitos-quiero-divertirme-estoy"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

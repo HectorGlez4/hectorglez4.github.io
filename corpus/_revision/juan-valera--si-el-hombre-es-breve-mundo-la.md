@@ -1,0 +1,13 @@
+---
+texto: ".....Si el hombre es breve mundo, La mujer es breve cielo,"
+autor: "juan-valera"
+slug: "juan-valera-si-el-hombre-es-breve-mundo-la"
+procedencia:
+  obra: "Cartas americanas. Primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62984/pg62984.txt"
+---

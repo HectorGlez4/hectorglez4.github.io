@@ -1,0 +1,13 @@
+---
+texto: "Es menester, sin embargo, desechar, olvidar este amor."
+autor: "juan-valera"
+slug: "juan-valera-es-menester-sin-embargo-desechar-olvidar-este"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

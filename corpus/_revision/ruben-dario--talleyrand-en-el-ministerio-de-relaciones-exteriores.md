@@ -1,0 +1,13 @@
+---
+texto: "Talleyrand en el ministerio de relaciones exteriores, y Delcassé."
+autor: "ruben-dario"
+slug: "ruben-dario-talleyrand-en-el-ministerio-de-relaciones-exteriores"
+procedencia:
+  obra: "Peregrinaciones"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51870/pg51870.txt"
+---

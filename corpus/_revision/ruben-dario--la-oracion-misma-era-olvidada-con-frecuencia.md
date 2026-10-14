@@ -1,0 +1,13 @@
+---
+texto: "La oración misma era olvidada con frecuencia, cuando algún experimento le mantenía cauteloso y febril."
+autor: "ruben-dario"
+slug: "ruben-dario-la-oracion-misma-era-olvidada-con-frecuencia"
+procedencia:
+  obra: "Cuentos y crónicas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51627/pg51627.txt"
+---

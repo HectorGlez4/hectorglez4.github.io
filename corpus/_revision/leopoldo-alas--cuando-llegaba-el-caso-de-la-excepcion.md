@@ -1,0 +1,13 @@
+---
+texto: "¿Cuándo llegaba el caso de la excepción?"
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-cuando-llegaba-el-caso-de-la-excepcion"
+procedencia:
+  obra: "El Señor y los demás son Cuentos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62361/pg62361.txt"
+---

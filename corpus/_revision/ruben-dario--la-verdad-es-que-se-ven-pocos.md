@@ -1,0 +1,13 @@
+---
+texto: "La verdad es que se ven pocos niños en París."
+autor: "ruben-dario"
+slug: "ruben-dario-la-verdad-es-que-se-ven-pocos"
+procedencia:
+  obra: "Peregrinaciones"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51870/pg51870.txt"
+---

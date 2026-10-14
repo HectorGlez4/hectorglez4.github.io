@@ -1,0 +1,13 @@
+---
+texto: "En la pronunciación dejan un poco que desear las cordobesas."
+autor: "juan-valera"
+slug: "juan-valera-en-la-pronunciacion-dejan-un-poco-que"
+procedencia:
+  obra: "Algo de todo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30213/pg30213.txt"
+---

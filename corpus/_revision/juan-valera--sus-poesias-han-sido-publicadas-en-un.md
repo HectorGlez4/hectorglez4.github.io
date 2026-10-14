@@ -1,0 +1,13 @@
+---
+texto: "Sus poesías han sido publicadas en un tomo con prólogo del sabio D."
+autor: "juan-valera"
+slug: "juan-valera-sus-poesias-han-sido-publicadas-en-un"
+procedencia:
+  obra: "Cartas americanas. Primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62984/pg62984.txt"
+---

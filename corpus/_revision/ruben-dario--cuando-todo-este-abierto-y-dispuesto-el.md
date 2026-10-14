@@ -1,0 +1,13 @@
+---
+texto: "Cuando todo esté abierto y dispuesto, el aspecto no podrá menos que ser en extremo atrayente."
+autor: "ruben-dario"
+slug: "ruben-dario-cuando-todo-este-abierto-y-dispuesto-el"
+procedencia:
+  obra: "Peregrinaciones"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51870/pg51870.txt"
+---

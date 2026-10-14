@@ -1,0 +1,13 @@
+---
+texto: "Lesseps, el gran Lesseps, el gran francés, movía desde París la máquina."
+autor: "ruben-dario"
+slug: "ruben-dario-lesseps-el-gran-lesseps-el-gran-frances"
+procedencia:
+  obra: "Prosa Política (Las Repúblicas Americanas)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53413/pg53413.txt"
+---

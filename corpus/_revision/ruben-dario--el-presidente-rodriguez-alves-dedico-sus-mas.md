@@ -1,0 +1,13 @@
+---
+texto: "El Presidente Rodríguez Alves dedicó sus más tesoneros esfuerzos al saneamiento, transformación y embellecimiento de la ciudad de Río Janeiro, y mejoramiento de los puertos del país."
+autor: "ruben-dario"
+slug: "ruben-dario-el-presidente-rodriguez-alves-dedico-sus-mas"
+procedencia:
+  obra: "Prosa Política (Las Repúblicas Americanas)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53413/pg53413.txt"
+---

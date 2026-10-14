@@ -1,0 +1,13 @@
+---
+texto: "98--1829.--León XII.--«Canis et coluber»--Perro y serpiente."
+autor: "ruben-dario"
+slug: "ruben-dario-98-1829-leon-xii-canis-et-coluber"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

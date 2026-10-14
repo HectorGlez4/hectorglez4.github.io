@@ -1,0 +1,13 @@
+---
+texto: "«¡Tal vez con la Regenta!» pensó el de Pernueces; y se prometió espiarlos."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-tal-vez-con-la-regenta-penso-el"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

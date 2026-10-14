@@ -1,0 +1,13 @@
+---
+texto: "Él no se hubiera ido si yo no le hubiera obligado a que se fuese, mandándoselo y despidiéndole."
+autor: "juan-valera"
+slug: "juan-valera-el-no-se-hubiera-ido-si-yo"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Siguió hacia la derecha, separando con dificultad las espinas de cien plantas ariscas, que le cerraban el paso."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-siguio-hacia-la-derecha-separando-con-dificultad"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

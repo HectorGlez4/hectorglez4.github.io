@@ -1,0 +1,13 @@
+---
+texto: "[Illustration: ¡El poeta ha visto ninfas!]"
+autor: "ruben-dario"
+slug: "ruben-dario-illustration-el-poeta-ha-visto-ninfas"
+procedencia:
+  obra: "Azul..."
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/52894/pg52894.txt"
+---

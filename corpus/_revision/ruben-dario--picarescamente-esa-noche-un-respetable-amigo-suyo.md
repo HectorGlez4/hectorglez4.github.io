@@ -1,0 +1,13 @@
+---
+texto: "Picarescamente, esa noche, un respetable amigo suyo calificó ese cuadro como un símbolo..."
+autor: "ruben-dario"
+slug: "ruben-dario-picarescamente-esa-noche-un-respetable-amigo-suyo"
+procedencia:
+  obra: "España Contemporánea"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54934/pg54934.txt"
+---

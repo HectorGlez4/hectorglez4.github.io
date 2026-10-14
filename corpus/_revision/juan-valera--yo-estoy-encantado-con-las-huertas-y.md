@@ -1,0 +1,13 @@
+---
+texto: "Yo estoy encantado con las huertas, y todas las tardes me paseo por ellas un par de horas."
+autor: "juan-valera"
+slug: "juan-valera-yo-estoy-encantado-con-las-huertas-y"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

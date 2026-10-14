@@ -1,0 +1,13 @@
+---
+texto: "A su paso por Nueva York sufrió el ardoroso contagio que el doctor Veyga y otros americanos distinguidos."
+autor: "ruben-dario"
+slug: "ruben-dario-a-su-paso-por-nueva-york-sufrio"
+procedencia:
+  obra: "Prosa Dispersa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/55616/pg55616.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Fue predicar en desierto o peor que predicar en desierto."
+autor: "juan-valera"
+slug: "juan-valera-fue-predicar-en-desierto-o-peor-que"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

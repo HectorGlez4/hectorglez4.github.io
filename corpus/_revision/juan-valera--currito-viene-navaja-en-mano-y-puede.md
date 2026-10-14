@@ -1,0 +1,13 @@
+---
+texto: "Currito viene navaja en mano y puede escabechar a usted en un santiamén."
+autor: "juan-valera"
+slug: "juan-valera-currito-viene-navaja-en-mano-y-puede"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "El hombre probo fué maculado; el honorable Charles A."
+autor: "ruben-dario"
+slug: "ruben-dario-el-hombre-probo-fue-maculado-el-honorable"
+procedencia:
+  obra: "Prosa Dispersa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/55616/pg55616.txt"
+---

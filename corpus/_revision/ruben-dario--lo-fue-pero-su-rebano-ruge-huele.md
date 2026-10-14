@@ -1,0 +1,13 @@
+---
+texto: "Lo fué, pero su rebaño ruge, huele a selva y come carne cruda."
+autor: "ruben-dario"
+slug: "ruben-dario-lo-fue-pero-su-rebano-ruge-huele"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

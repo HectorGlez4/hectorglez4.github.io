@@ -1,0 +1,13 @@
+---
+texto: "¡En qué donosa sociedad vivimos, que se olvida hasta este punto de sus deberes y deja perder de este modo un ser preciosísimo!..."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-en-que-donosa-sociedad-vivimos-que-se"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

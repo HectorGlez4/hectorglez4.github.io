@@ -1,0 +1,13 @@
+---
+texto: "Me retiré de casa de Pepita muy temprano."
+autor: "juan-valera"
+slug: "juan-valera-me-retire-de-casa-de-pepita-muy"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

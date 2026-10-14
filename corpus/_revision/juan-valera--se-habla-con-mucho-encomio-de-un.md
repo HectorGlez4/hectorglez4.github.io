@@ -1,0 +1,13 @@
+---
+texto: "Se habla con mucho encomio de un nuevo sistema de notación musical por él inventado."
+autor: "juan-valera"
+slug: "juan-valera-se-habla-con-mucho-encomio-de-un"
+procedencia:
+  obra: "Cartas americanas. Primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62984/pg62984.txt"
+---

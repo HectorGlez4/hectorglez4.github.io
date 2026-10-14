@@ -1,0 +1,13 @@
+---
+texto: "Yo soy de la raza en que se usa el yelmo del manchego y el penacho del Gascón."
+autor: "ruben-dario"
+slug: "ruben-dario-yo-soy-de-la-raza-en-que"
+procedencia:
+  obra: "Prosa Dispersa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/55616/pg55616.txt"
+---

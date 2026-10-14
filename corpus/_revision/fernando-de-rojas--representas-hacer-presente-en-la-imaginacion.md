@@ -1,0 +1,13 @@
+---
+texto: "_representas_ **** hacer presente en la imaginacion"
+autor: "fernando-de-rojas"
+slug: "fernando-de-rojas-representas-hacer-presente-en-la-imaginacion"
+procedencia:
+  obra: "La Celestina"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/1619/pg1619.txt"
+---

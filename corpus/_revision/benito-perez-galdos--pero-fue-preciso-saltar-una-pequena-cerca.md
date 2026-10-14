@@ -1,0 +1,13 @@
+---
+texto: "Pero fue preciso saltar una pequeña cerca, y la Nela ofreció su mano al ciego."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-pero-fue-preciso-saltar-una-pequena-cerca"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

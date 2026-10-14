@@ -1,0 +1,13 @@
+---
+texto: "Es el palacio de las flores, son los jardines cercanos."
+autor: "ruben-dario"
+slug: "ruben-dario-es-el-palacio-de-las-flores-son"
+procedencia:
+  obra: "Peregrinaciones"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51870/pg51870.txt"
+---

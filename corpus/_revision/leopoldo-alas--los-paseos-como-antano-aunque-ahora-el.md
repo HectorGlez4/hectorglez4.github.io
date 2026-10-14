@@ -1,0 +1,13 @@
+---
+texto: "Los paseos como antaño, aunque ahora el primero que tomaba por Oriente era Joaquín, porque ya le fatigaba la cuesta."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-los-paseos-como-antano-aunque-ahora-el"
+procedencia:
+  obra: "El Señor y los demás son Cuentos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62361/pg62361.txt"
+---

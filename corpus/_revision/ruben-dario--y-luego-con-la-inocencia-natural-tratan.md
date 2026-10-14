@@ -1,0 +1,13 @@
+---
+texto: "Y luego, con la inocencia natural, tratan de fabricar un nido."
+autor: "ruben-dario"
+slug: "ruben-dario-y-luego-con-la-inocencia-natural-tratan"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

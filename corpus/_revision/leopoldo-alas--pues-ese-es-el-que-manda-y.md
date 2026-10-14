@@ -1,0 +1,13 @@
+---
+texto: "--Pues ese es el que manda; y usted tiene razón y don Frutos confunde la avena con la Habana, donde hizo su fortuna...."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-pues-ese-es-el-que-manda-y"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

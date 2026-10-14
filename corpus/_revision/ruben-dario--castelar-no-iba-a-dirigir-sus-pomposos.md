@@ -1,0 +1,13 @@
+---
+texto: "Castelar no iba a dirigir sus pomposos elogios a M."
+autor: "ruben-dario"
+slug: "ruben-dario-castelar-no-iba-a-dirigir-sus-pomposos"
+procedencia:
+  obra: "Letras"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51029/pg51029.txt"
+---

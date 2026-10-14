@@ -1,0 +1,13 @@
+---
+texto: "Manuel de Nascimiento, arrojado por una tormenta política, estaba en París."
+autor: "ruben-dario"
+slug: "ruben-dario-manuel-de-nascimiento-arrojado-por-una-tormenta"
+procedencia:
+  obra: "Los Raros"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/50365/pg50365.txt"
+---

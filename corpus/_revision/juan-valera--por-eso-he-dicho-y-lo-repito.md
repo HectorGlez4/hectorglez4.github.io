@@ -1,0 +1,13 @@
+---
+texto: "Por eso he dicho y lo repito, perdóneseme la inmodestia, que mi prudencia me ha valido."
+autor: "juan-valera"
+slug: "juan-valera-por-eso-he-dicho-y-lo-repito"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---

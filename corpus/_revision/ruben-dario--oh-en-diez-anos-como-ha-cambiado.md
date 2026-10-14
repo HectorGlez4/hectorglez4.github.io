@@ -1,0 +1,13 @@
+---
+texto: "¡Oh!, en diez años, ¡cómo ha cambiado el escenario y la corriente de nuestras vidas!"
+autor: "ruben-dario"
+slug: "ruben-dario-oh-en-diez-anos-como-ha-cambiado"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

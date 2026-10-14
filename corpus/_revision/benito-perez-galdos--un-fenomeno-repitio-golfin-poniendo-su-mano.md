@@ -1,0 +1,13 @@
+---
+texto: "--¡Un fenómeno!--repitió Golfín poniendo su mano sobre los cabellos de la chica--."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-un-fenomeno-repitio-golfin-poniendo-su-mano"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

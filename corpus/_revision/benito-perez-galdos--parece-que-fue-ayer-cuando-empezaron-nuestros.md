@@ -1,0 +1,13 @@
+---
+texto: "Parece que fue ayer cuando empezaron nuestros paseos...."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-parece-que-fue-ayer-cuando-empezaron-nuestros"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

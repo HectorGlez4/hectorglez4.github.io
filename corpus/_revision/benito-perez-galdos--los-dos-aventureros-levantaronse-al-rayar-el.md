@@ -1,0 +1,13 @@
+---
+texto: "Los dos aventureros levantáronse al rayar el día y cada cual fue por su lado: Celipín a su trabajo, la Nela a llevar un recado que le dio Señana para la criada del ingeniero."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-los-dos-aventureros-levantaronse-al-rayar-el"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

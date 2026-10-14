@@ -1,0 +1,13 @@
+---
+texto: "Yo estaba ya criada por una hermana de mi madre, que era también soltera, según dicen."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-yo-estaba-ya-criada-por-una-hermana"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

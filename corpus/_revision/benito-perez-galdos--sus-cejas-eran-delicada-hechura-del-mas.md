@@ -1,0 +1,13 @@
+---
+texto: "Sus cejas eran delicada hechura del más fino pincel y trazaban un arco sutil y delicioso."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-sus-cejas-eran-delicada-hechura-del-mas"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

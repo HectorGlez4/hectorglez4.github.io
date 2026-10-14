@@ -1,0 +1,13 @@
+---
+texto: "No hay aquí, pues, tal modernismo, sino en lo que de reflexión puede traer la vecindad de una moda que no se comprende."
+autor: "ruben-dario"
+slug: "ruben-dario-no-hay-aqui-pues-tal-modernismo-sino"
+procedencia:
+  obra: "España Contemporánea"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54934/pg54934.txt"
+---

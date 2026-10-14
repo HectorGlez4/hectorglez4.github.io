@@ -1,0 +1,13 @@
+---
+texto: "--Está allí--afirmó la Nela con aplomo, volviendo tristemente los ojos al punto indicado."
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-esta-alli-afirmo-la-nela-con-aplomo"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "--Por Dios y por las once mil... cállese usted, Quintanar--decía la Marquesa."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-por-dios-y-por-las-once-mil"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

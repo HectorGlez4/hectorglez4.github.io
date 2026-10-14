@@ -1,0 +1,13 @@
+---
+texto: "Recomiendo a los buenos gustadores estos sonetos fervorosos de amor y de admiración por la gloriosa península."
+autor: "ruben-dario"
+slug: "ruben-dario-recomiendo-a-los-buenos-gustadores-estos-sonetos"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

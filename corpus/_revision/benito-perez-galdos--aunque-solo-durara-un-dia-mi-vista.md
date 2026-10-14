@@ -1,0 +1,13 @@
+---
+texto: "Aunque sólo durara un día mi vista, aunque volviera a cegar al siguiente, ¡cuánto se lo agradecería!"
+autor: "benito-perez-galdos"
+slug: "benito-perez-galdos-aunque-solo-durara-un-dia-mi-vista"
+procedencia:
+  obra: "Marianela"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17340/pg17340.txt"
+---

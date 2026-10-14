@@ -1,0 +1,13 @@
+---
+texto: "Ya he dicho en otra ocasión a ese respecto lo siguiente:"
+autor: "ruben-dario"
+slug: "ruben-dario-ya-he-dicho-en-otra-ocasion-a"
+procedencia:
+  obra: "Cabezas: Pensadores y Artistas, Políticos"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/56047/pg56047.txt"
+---

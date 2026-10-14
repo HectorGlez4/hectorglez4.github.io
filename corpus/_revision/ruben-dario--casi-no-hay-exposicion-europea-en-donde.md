@@ -1,0 +1,13 @@
+---
+texto: "Casi no hay exposición europea en donde los medallados extranjeros no sean españoles."
+autor: "ruben-dario"
+slug: "ruben-dario-casi-no-hay-exposicion-europea-en-donde"
+procedencia:
+  obra: "España Contemporánea"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54934/pg54934.txt"
+---

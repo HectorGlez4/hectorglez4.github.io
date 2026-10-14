@@ -1,0 +1,13 @@
+---
+texto: "que se esponjan sobre los tejadillos de su palomar cuadrado, entrando y saliendo por las ventanas angostas."
+autor: "leopoldo-alas"
+slug: "leopoldo-alas-que-se-esponjan-sobre-los-tejadillos-de"
+procedencia:
+  obra: "La Regenta"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17073/pg17073.txt"
+---

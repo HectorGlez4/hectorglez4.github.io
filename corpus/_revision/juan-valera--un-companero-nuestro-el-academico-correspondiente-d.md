@@ -1,0 +1,13 @@
+---
+texto: "Un compañero nuestro, el académico correspondiente D."
+autor: "juan-valera"
+slug: "juan-valera-un-companero-nuestro-el-academico-correspondiente-d"
+procedencia:
+  obra: "Algo de todo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30213/pg30213.txt"
+---

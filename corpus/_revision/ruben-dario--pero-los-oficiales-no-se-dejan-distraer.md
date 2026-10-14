@@ -1,0 +1,13 @@
+---
+texto: "Pero los oficiales no se dejan distraer."
+autor: "ruben-dario"
+slug: "ruben-dario-pero-los-oficiales-no-se-dejan-distraer"
+procedencia:
+  obra: "Parisiana"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53930/pg53930.txt"
+---

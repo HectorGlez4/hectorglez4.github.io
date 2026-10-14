@@ -1,0 +1,13 @@
+---
+texto: "La ausencia es gran remedio para el mal de amores."
+autor: "juan-valera"
+slug: "juan-valera-la-ausencia-es-gran-remedio-para-el"
+procedencia:
+  obra: "Pepita Jiménez"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17223/pg17223.txt"
+---

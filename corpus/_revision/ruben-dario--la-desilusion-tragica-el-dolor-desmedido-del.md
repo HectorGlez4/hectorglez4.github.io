@@ -1,0 +1,13 @@
+---
+texto: "¿La desilusión trágica, el dolor desmedido, del amante no amado, del apóstol no oído?"
+autor: "ruben-dario"
+slug: "ruben-dario-la-desilusion-tragica-el-dolor-desmedido-del"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

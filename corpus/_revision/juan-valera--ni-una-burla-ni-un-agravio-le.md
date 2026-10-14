@@ -1,0 +1,13 @@
+---
+texto: "¡Ni una burla, ni un agravio Le hagan mente, ó tacto, ó labio!"
+autor: "juan-valera"
+slug: "juan-valera-ni-una-burla-ni-un-agravio-le"
+procedencia:
+  obra: "Cartas americanas. Primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/62984/pg62984.txt"
+---

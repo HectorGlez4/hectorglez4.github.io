@@ -1,0 +1,13 @@
+---
+texto: "El cuadro del burro se expuso en el mentado Salón de los Independientes."
+autor: "ruben-dario"
+slug: "ruben-dario-el-cuadro-del-burro-se-expuso-en"
+procedencia:
+  obra: "Todo al Vuelo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54112/pg54112.txt"
+---

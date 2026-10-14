@@ -1,0 +1,13 @@
+---
+texto: "No saben a punto fijo si el juicio que forman sobre ellos mismos está torcido por el amor propio."
+autor: "juan-valera"
+slug: "juan-valera-no-saben-a-punto-fijo-si-el"
+procedencia:
+  obra: "Algo de todo"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30213/pg30213.txt"
+---

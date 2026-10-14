@@ -1,0 +1,13 @@
+---
+texto: "Cual si se viniese desenrollando una enorme tela gris, avanza la marea, trayendo a la playa su ruido de espumas y sus convulsivas agitaciones."
+autor: "ruben-dario"
+slug: "ruben-dario-cual-si-se-viniese-desenrollando-una-enorme"
+procedencia:
+  obra: "Cuentos y crónicas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51627/pg51627.txt"
+---

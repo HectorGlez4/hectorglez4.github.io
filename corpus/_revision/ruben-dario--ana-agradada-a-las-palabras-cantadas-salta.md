@@ -1,0 +1,13 @@
+---
+texto: "Ana agradada a las palabras cantadas salta la cama."
+autor: "ruben-dario"
+slug: "ruben-dario-ana-agradada-a-las-palabras-cantadas-salta"
+procedencia:
+  obra: "Cuentos y crónicas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/51627/pg51627.txt"
+---

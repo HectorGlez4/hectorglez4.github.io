@@ -1,0 +1,13 @@
+---
+texto: "Mas de recientes estudios se desprende que pertenecen al siglo X estos cuentos que se hallan en todos los textos: 10."
+autor: "ruben-dario"
+slug: "ruben-dario-mas-de-recientes-estudios-se-desprende-que"
+procedencia:
+  obra: "Parisiana"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53930/pg53930.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Pronto se levantó sin haberse hecho daño y se dirigió precipitadamente al cuarto de su mujer."
+autor: "juan-valera"
+slug: "juan-valera-pronto-se-levanto-sin-haberse-hecho-dano"
+procedencia:
+  obra: "De varios colores"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30986/pg30986.txt"
+---
