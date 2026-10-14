@@ -1,0 +1,13 @@
+---
+texto: "--Porque son más vulgares--contestó Eloísa."
+autor: "fernan-caballero"
+slug: "fernan-caballero-porque-son-mas-vulgares-contesto-eloisa"
+procedencia:
+  obra: "La gaviota"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/23600/pg23600.txt"
+---

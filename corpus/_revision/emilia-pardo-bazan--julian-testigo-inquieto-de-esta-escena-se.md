@@ -1,0 +1,13 @@
+---
+texto: "Julián, testigo inquieto de esta escena, se adelantó y quiso arrebatárselo a Nucha."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-julian-testigo-inquieto-de-esta-escena-se"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

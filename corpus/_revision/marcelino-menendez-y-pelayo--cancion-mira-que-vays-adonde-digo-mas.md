@@ -1,0 +1,14 @@
+---
+texto: "Cancion mira que vays adonde digo, mas quedate comigo, que puede ser te lleue la fortuna a parte do te llamen importuna."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-cancion-mira-que-vays-adonde-digo-mas"
+procedencia:
+  obra: "Orígenes de la novela, Tomo II"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/71733/pg71733.txt"
+---

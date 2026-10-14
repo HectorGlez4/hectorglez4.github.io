@@ -1,0 +1,13 @@
+---
+texto: "--¡Ilustre nombre, por cierto!--exclamó el pintor."
+autor: "fernan-caballero"
+slug: "fernan-caballero-ilustre-nombre-por-cierto-exclamo-el-pintor"
+procedencia:
+  obra: "La gaviota"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/23600/pg23600.txt"
+---

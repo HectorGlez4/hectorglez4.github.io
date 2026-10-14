@@ -1,0 +1,14 @@
+---
+texto: "Quándo me diste lo que otros rehusan, o yo te pedí lo que no podias dar?"
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-quando-me-diste-lo-que-otros-rehusan"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

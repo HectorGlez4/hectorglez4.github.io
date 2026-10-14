@@ -1,0 +1,13 @@
+---
+texto: "Faltábale tiempo de madurar el plan: lo que importaba era obrar con celeridad y no arredrarse ante obstáculo alguno."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-faltabale-tiempo-de-madurar-el-plan-lo"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

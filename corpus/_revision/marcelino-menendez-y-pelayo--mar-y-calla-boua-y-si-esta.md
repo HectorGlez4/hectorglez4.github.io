@@ -1,0 +1,14 @@
+---
+texto: "_Mar._--Y calla, boua, y si está el dueño en casa, cómo saldra? en espeçial si ya ay allá enojos sobre ella, de manera que los vezinos sean públicos testigos de nuestros occultos defectos."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-mar-y-calla-boua-y-si-esta"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

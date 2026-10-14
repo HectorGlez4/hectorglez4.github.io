@@ -1,0 +1,13 @@
+---
+texto: "Somos unas infelices en creer sus embustes."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-somos-unas-infelices-en-creer-sus-embustes"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "_Her._--Si no, quédese para mañana, si oy no puede ser, que tus honestos exercicios no te dexan tiempo para otras cosas."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-her-si-no-quedese-para-manana-si"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

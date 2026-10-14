@@ -1,0 +1,14 @@
+---
+texto: "[25] Para la plebe cordobesa se llamaba Chavarría, y no gustaba oírle llamar de otro modo."
+autor: "antonio-alcala-galiano"
+slug: "antonio-alcala-galiano-25-para-la-plebe-cordobesa-se-llamaba"
+procedencia:
+  obra: "Recuerdos de un anciano"
+  año: 1878
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77703/pg77703.txt"
+---

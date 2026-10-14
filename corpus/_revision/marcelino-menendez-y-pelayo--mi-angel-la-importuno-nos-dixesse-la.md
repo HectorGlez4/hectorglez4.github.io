@@ -1,0 +1,14 @@
+---
+texto: "Mi angel la importunó nos dixesse la pena que padeçia alli, y ella con gran fatiga prosiguio."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-mi-angel-la-importuno-nos-dixesse-la"
+procedencia:
+  obra: "Orígenes de la novela, Tomo II"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/71733/pg71733.txt"
+---

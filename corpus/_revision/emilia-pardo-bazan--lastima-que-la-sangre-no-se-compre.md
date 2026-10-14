@@ -1,0 +1,13 @@
+---
+texto: "Lástima que la sangre no se compre en la tienda...."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-lastima-que-la-sangre-no-se-compre"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

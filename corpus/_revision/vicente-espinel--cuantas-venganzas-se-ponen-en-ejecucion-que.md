@@ -1,0 +1,13 @@
+---
+texto: "¿cuántas venganzas se ponen en ejecucion, que no se pondrian sino por la soledad?"
+autor: "vicente-espinel"
+slug: "vicente-espinel-cuantas-venganzas-se-ponen-en-ejecucion-que"
+procedencia:
+  obra: "Vida del escudero Marcos de Obregón"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/60147/pg60147.txt"
+---

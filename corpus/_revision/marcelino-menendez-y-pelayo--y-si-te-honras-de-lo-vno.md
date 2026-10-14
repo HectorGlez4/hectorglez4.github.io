@@ -1,0 +1,14 @@
+---
+texto: "Y si te honras de lo vno y te huelgas de ver le y querer le, huelga de obedescer le."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-y-si-te-honras-de-lo-vno"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Además, no es lo mismo distraerse con una muchacha cualquiera que tomar esposa."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-ademas-no-es-lo-mismo-distraerse-con"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

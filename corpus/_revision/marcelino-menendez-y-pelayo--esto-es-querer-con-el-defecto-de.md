@@ -1,0 +1,14 @@
+---
+texto: "Esto es querer con el defecto de tus flaquezas dar culpa á tus virtudes."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-esto-es-querer-con-el-defecto-de"
+procedencia:
+  obra: "Orígenes de la novela, Tomo II"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/71733/pg71733.txt"
+---

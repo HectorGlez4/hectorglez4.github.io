@@ -1,0 +1,13 @@
+---
+texto: "--Vamos allá--contestó Julián, que se había quedado ensimismado."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-vamos-alla-contesto-julian-que-se-habia"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

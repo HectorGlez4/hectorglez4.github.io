@@ -1,0 +1,13 @@
+---
+texto: "¿Y hay hombres bastante inertes para condenarse muy satisfechos á patullar toda su vida en tal charco?"
+autor: "fernan-caballero"
+slug: "fernan-caballero-y-hay-hombres-bastante-inertes-para-condenarse"
+procedencia:
+  obra: "Clemencia: Novela de costumbres"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/60284/pg60284.txt"
+---

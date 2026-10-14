@@ -1,0 +1,14 @@
+---
+texto: "Qué tentacion tomó a mi madre quando quitandome de sastre (por ser, como dizen, oficio de ladrones) me puso a baruero?"
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-que-tentacion-tomo-a-mi-madre-quando"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

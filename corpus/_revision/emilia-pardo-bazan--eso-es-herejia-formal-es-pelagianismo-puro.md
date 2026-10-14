@@ -1,0 +1,13 @@
+---
+texto: "¡Eso es herejía formal; es pelagianismo puro!"
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-eso-es-herejia-formal-es-pelagianismo-puro"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

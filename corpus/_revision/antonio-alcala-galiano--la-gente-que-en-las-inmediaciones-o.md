@@ -1,0 +1,14 @@
+---
+texto: "La gente que, en las inmediaciones o en otros lugares, estaba aguardando ansiosa a saber lo resuelto por la sociedad, árbitra entonces de la suerte de aquellas provincias, entendió desde luego que la resistencia había concluido."
+autor: "antonio-alcala-galiano"
+slug: "antonio-alcala-galiano-la-gente-que-en-las-inmediaciones-o"
+procedencia:
+  obra: "Recuerdos de un anciano"
+  año: 1878
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77703/pg77703.txt"
+---

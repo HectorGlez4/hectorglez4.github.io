@@ -1,0 +1,13 @@
+---
+texto: "Ahora los catalanes, arrepentidos, mostraban de mil maneras sus sentimientos."
+autor: "antonio-canovas-del-castillo"
+slug: "antonio-canovas-del-castillo-ahora-los-catalanes-arrepentidos-mostraban-de-mil"
+procedencia:
+  obra: "Historia de la decadencia de España"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47092/pg47092.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Tomó hacia la derecha; caminaba despacio, sin volver la cabeza atrás."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-tomo-hacia-la-derecha-caminaba-despacio-sin"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

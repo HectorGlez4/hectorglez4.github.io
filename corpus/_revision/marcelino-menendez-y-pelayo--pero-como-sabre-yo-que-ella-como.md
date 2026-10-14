@@ -1,0 +1,14 @@
+---
+texto: "Pero cómo sabre yo que ella, como cruel, aun se acordará de mí para matarme? pero ay, que me hezistes llamar cruel á la misericordia!"
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-pero-como-sabre-yo-que-ella-como"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

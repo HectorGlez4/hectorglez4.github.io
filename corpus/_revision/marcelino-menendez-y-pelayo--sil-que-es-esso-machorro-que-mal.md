@@ -1,0 +1,14 @@
+---
+texto: "_Sil._--Qué es esso, Machorro? qué mal es el que te ha acontescido?"
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-sil-que-es-esso-machorro-que-mal"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

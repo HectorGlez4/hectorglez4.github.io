@@ -1,0 +1,13 @@
+---
+texto: "La aceptación del señorito, al pronto, le había vuelto loco de contento."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-la-aceptacion-del-senorito-al-pronto-le"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

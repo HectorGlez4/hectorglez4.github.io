@@ -1,0 +1,13 @@
+---
+texto: "--Sí, señora; en serviros--repitió el joven,--pues he averiguado que es verdad que la corza blanca existe."
+autor: "gustavo-adolfo-becquer"
+slug: "gustavo-adolfo-becquer-si-senora-en-serviros-repitio-el-joven"
+procedencia:
+  obra: "Obras escogidas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53552/pg53552.txt"
+---

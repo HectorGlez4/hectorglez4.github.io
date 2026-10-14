@@ -1,0 +1,13 @@
+---
+texto: "--Me gusta que te diviertas, niña... pero el vértigo de Adolfina no está en tu naturaleza; te cansarás."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-me-gusta-que-te-diviertas-nina-pero"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

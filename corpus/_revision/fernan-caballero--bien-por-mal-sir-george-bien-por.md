@@ -1,0 +1,13 @@
+---
+texto: "Bien por mal, Sir George, bien por mal: ¿qué enemigo no desarma esta táctica?"
+autor: "fernan-caballero"
+slug: "fernan-caballero-bien-por-mal-sir-george-bien-por"
+procedencia:
+  obra: "Clemencia: Novela de costumbres"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/60284/pg60284.txt"
+---

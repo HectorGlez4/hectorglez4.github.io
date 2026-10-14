@@ -1,0 +1,13 @@
+---
+texto: "--Señora, ¿sabe si voy bien para la casa del marqués de Ulloa?"
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-senora-sabe-si-voy-bien-para-la"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

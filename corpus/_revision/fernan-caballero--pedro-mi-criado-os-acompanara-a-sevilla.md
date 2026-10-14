@@ -1,0 +1,13 @@
+---
+texto: "Pedro, mi criado, os acompañará a Sevilla, y os tomará asiento en la diligencia de Madrid."
+autor: "fernan-caballero"
+slug: "fernan-caballero-pedro-mi-criado-os-acompanara-a-sevilla"
+procedencia:
+  obra: "La gaviota"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/23600/pg23600.txt"
+---

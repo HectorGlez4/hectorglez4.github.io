@@ -1,0 +1,14 @@
+---
+texto: "DEL QUINTO ACTO.--Astasia y su compañia confusos y marauillados de lo que veian, vienen Heraclio y Logistico dar con ellos 383"
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-del-quinto-acto-astasia-y-su-compania"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

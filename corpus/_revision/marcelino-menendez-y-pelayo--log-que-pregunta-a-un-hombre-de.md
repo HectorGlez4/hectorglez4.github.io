@@ -1,0 +1,14 @@
+---
+texto: "_Log._--Qué pregunta a un hombre de amor tan libre! conmigo biene, que será parte para mejor seruirte si algo mandas."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-log-que-pregunta-a-un-hombre-de"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

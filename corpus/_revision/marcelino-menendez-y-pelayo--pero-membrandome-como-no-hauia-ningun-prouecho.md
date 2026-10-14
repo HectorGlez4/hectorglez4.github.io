@@ -1,0 +1,14 @@
+---
+texto: "Pero membrandome como no hauia ningun prouecho pensar más en ello, trabajaua conmigo quanto podia por me defender de traellas a la memoria."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-pero-membrandome-como-no-hauia-ningun-prouecho"
+procedencia:
+  obra: "Orígenes de la novela, Tomo II"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/71733/pg71733.txt"
+---

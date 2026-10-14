@@ -1,0 +1,13 @@
+---
+texto: "Desde que apareció por estos contornos, mi padre no me permite salir al aprisco ni visitar los establos."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-desde-que-aparecio-por-estos-contornos-mi"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

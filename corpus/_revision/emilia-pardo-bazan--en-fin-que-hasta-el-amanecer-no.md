@@ -1,0 +1,13 @@
+---
+texto: "En fin, que hasta el amanecer no me llegó el aviso."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-en-fin-que-hasta-el-amanecer-no"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

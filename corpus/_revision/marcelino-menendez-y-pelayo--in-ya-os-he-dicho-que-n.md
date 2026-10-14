@@ -1,0 +1,14 @@
+---
+texto: "_In._--Ya os he dicho que n'os os dé pena esso, porque yo hago las cosas debaxo de las faldas."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-in-ya-os-he-dicho-que-n"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

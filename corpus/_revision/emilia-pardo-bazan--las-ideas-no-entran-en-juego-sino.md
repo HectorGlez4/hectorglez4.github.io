@@ -1,0 +1,13 @@
+---
+texto: "Las ideas no entran en juego, sino solamente las personas, y en el terreno más mezquino: rencores, odios, rencillas, lucro miserable, vanidad microbiológica."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-las-ideas-no-entran-en-juego-sino"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

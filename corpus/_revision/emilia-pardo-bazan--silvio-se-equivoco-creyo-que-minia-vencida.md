@@ -1,0 +1,13 @@
+---
+texto: "Silvio se equivocó: creyó que Minia, vencida, callaba por imposibilidad de contestar; y se excusó, temeroso de incurrir en desagrado."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-silvio-se-equivoco-creyo-que-minia-vencida"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

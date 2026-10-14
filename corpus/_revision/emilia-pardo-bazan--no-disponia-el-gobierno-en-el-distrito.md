@@ -1,0 +1,13 @@
+---
+texto: "No disponía el gobierno en el distrito sino de lo que, pomposamente hablando, puede llamarse el elemento oficial."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-no-disponia-el-gobierno-en-el-distrito"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

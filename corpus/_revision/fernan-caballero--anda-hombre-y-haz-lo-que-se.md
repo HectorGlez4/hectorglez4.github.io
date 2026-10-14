@@ -1,0 +1,13 @@
+---
+texto: "-- Anda, hombre, y haz lo que se te manda, advirtió con renovada paciencia su señora y directora."
+autor: "fernan-caballero"
+slug: "fernan-caballero-anda-hombre-y-haz-lo-que-se"
+procedencia:
+  obra: "Clemencia: Novela de costumbres"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/60284/pg60284.txt"
+---

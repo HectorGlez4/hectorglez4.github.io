@@ -1,0 +1,13 @@
+---
+texto: "¡Decirme á mí falta de caridad, cuando hasta adelantadas les tengo pagadas sus necesidades!"
+autor: "fernan-caballero"
+slug: "fernan-caballero-decirme-a-mi-falta-de-caridad-cuando"
+procedencia:
+  obra: "Clemencia: Novela de costumbres"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/60284/pg60284.txt"
+---

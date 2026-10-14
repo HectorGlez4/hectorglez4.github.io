@@ -1,0 +1,13 @@
+---
+texto: "Silvio, perturbado en su digestión y en su refinamiento, se hizo atrás."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-silvio-perturbado-en-su-digestion-y-en"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

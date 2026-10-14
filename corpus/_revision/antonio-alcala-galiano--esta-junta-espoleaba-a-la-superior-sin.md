@@ -1,0 +1,14 @@
+---
+texto: "Esta junta espoleaba a la superior sin necesidad de ser aguijada por las inferiores; porque en ella estaba lo más ardoroso de los conjurados."
+autor: "antonio-alcala-galiano"
+slug: "antonio-alcala-galiano-esta-junta-espoleaba-a-la-superior-sin"
+procedencia:
+  obra: "Recuerdos de un anciano"
+  año: 1878
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77703/pg77703.txt"
+---

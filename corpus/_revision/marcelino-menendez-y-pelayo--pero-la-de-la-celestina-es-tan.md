@@ -1,0 +1,14 @@
+---
+texto: "Pero la de la _Celestina_ es tan vasta y compleja, que por sí sola reclama un libro, como el que prepara el señor Foulché-Delbosc hace años."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-pero-la-de-la-celestina-es-tan"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

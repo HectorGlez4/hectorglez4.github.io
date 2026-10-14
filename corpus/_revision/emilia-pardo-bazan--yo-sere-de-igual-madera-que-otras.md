@@ -1,0 +1,13 @@
+---
+texto: "Yo seré de igual madera que otras que pertenecían a mi clase, y ahora...."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-yo-sere-de-igual-madera-que-otras"
+procedencia:
+  obra: "La Tribuna"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17491/pg17491.txt"
+---

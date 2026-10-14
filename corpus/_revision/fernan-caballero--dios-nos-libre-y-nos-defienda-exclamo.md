@@ -1,0 +1,13 @@
+---
+texto: "--¡Dios nos libre y nos defienda!--exclamó Rafael--."
+autor: "fernan-caballero"
+slug: "fernan-caballero-dios-nos-libre-y-nos-defienda-exclamo"
+procedencia:
+  obra: "La gaviota"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/23600/pg23600.txt"
+---

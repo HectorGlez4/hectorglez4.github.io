@@ -1,0 +1,14 @@
+---
+texto: "Esta novela es seguramente de origen italiano, y en Castilla había pasado ya al teatro, según nos informa Gracián Dantisco."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-esta-novela-es-seguramente-de-origen-italiano"
+procedencia:
+  obra: "Orígenes de la novela, Tomo II"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/71733/pg71733.txt"
+---

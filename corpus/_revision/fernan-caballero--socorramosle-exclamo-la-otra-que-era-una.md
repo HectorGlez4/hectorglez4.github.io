@@ -1,0 +1,13 @@
+---
+texto: "--Socorrámosle--exclamó la otra, que era una mujer de edad, vestida con mucho aseo--."
+autor: "fernan-caballero"
+slug: "fernan-caballero-socorramosle-exclamo-la-otra-que-era-una"
+procedencia:
+  obra: "La gaviota"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/23600/pg23600.txt"
+---

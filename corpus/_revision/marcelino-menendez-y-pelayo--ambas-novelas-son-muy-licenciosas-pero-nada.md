@@ -1,0 +1,14 @@
+---
+texto: "Ambas novelas son muy licenciosas pero nada tienen que ver con el argumento de la _Seraphina_."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-ambas-novelas-son-muy-licenciosas-pero-nada"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

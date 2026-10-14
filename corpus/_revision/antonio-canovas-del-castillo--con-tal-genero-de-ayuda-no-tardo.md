@@ -1,0 +1,13 @@
+---
+texto: "Con tal género de ayuda no tardó el arte en ponerse en alto punto de esplendor."
+autor: "antonio-canovas-del-castillo"
+slug: "antonio-canovas-del-castillo-con-tal-genero-de-ayuda-no-tardo"
+procedencia:
+  obra: "Historia de la decadencia de España"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47092/pg47092.txt"
+---

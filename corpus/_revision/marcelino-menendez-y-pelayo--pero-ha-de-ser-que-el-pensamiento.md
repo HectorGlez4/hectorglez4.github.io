@@ -1,0 +1,14 @@
+---
+texto: "Pero ha de ser que el pensamiento o el entendimiento en su meditar la tal obra ha de tomar principios de ella mesma, para preuenir los medios y los fines."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-pero-ha-de-ser-que-el-pensamiento"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

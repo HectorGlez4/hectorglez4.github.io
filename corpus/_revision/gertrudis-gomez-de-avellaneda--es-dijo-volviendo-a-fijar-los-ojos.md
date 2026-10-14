@@ -1,0 +1,14 @@
+---
+texto: "Es,--dijo volviendo a fijar los ojos en el extranjero,--que a veces es libre y noble el alma, aunque el cuerpo sea esclavo y villano."
+autor: "gertrudis-gomez-de-avellaneda"
+slug: "gertrudis-gomez-de-avellaneda-es-dijo-volviendo-a-fijar-los-ojos"
+procedencia:
+  obra: "Sab (novela original)"
+  año: 1920
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75126/pg75126.txt"
+---

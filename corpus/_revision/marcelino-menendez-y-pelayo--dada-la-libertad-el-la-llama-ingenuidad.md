@@ -1,0 +1,14 @@
+---
+texto: "Dada la libertad (él la llama _ingenuidad_) con que la literatura de la Edad Media representaba las relaciones sexuales, la _Celestina_ parece menos escandalosa que otras muchas obras."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-dada-la-libertad-el-la-llama-ingenuidad"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

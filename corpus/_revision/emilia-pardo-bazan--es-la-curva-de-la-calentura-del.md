@@ -1,0 +1,13 @@
+---
+texto: "Es la curva de la calentura del desengaño..."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-es-la-curva-de-la-calentura-del"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

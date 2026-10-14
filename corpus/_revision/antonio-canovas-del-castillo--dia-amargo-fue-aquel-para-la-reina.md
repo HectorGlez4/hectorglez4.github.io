@@ -1,0 +1,13 @@
+---
+texto: "Día amargo fué aquel para la reina Doña Mariana."
+autor: "antonio-canovas-del-castillo"
+slug: "antonio-canovas-del-castillo-dia-amargo-fue-aquel-para-la-reina"
+procedencia:
+  obra: "Historia de la decadencia de España"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47092/pg47092.txt"
+---

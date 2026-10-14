@@ -1,0 +1,14 @@
+---
+texto: "Porque los celos son contra el natural ingenio de las mugeres: cosolete de araña para los arcabuzazos; la curiosidad en todas partes viciosa, y en esta más perniciosa."
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-porque-los-celos-son-contra-el-natural"
+procedencia:
+  obra: "Orígenes de la novela, Tomo III"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/76459/pg76459.txt"
+---

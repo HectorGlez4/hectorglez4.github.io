@@ -1,0 +1,13 @@
+---
+texto: "La llave del santuario y de la cámara de tormento, nadie se la arrancaría."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-la-llave-del-santuario-y-de-la"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

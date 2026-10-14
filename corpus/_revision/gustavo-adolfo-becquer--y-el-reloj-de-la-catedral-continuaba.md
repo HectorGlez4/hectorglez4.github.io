@@ -1,0 +1,13 @@
+---
+texto: "Y el reloj de la catedral continuaba dando la hora, y el hombre aquel proseguía recorriendo las teclas."
+autor: "gustavo-adolfo-becquer"
+slug: "gustavo-adolfo-becquer-y-el-reloj-de-la-catedral-continuaba"
+procedencia:
+  obra: "Obras escogidas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53552/pg53552.txt"
+---

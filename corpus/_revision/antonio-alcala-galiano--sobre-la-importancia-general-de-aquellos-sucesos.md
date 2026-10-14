@@ -1,0 +1,14 @@
+---
+texto: "Sobre la importancia general de aquellos sucesos gravísimos, apareció en ellos rota la unión hasta entonces constante de los diputados a Cortes de la una y la otra sociedad."
+autor: "antonio-alcala-galiano"
+slug: "antonio-alcala-galiano-sobre-la-importancia-general-de-aquellos-sucesos"
+procedencia:
+  obra: "Recuerdos de un anciano"
+  año: 1878
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77703/pg77703.txt"
+---

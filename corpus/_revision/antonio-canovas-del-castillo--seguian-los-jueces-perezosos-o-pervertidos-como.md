@@ -1,0 +1,13 @@
+---
+texto: "Seguían los jueces, perezosos ó pervertidos como antes, de modo que sólo podía decirse que entendían en dar tormento, el cual aplicaban con horrible dureza."
+autor: "antonio-canovas-del-castillo"
+slug: "antonio-canovas-del-castillo-seguian-los-jueces-perezosos-o-pervertidos-como"
+procedencia:
+  obra: "Historia de la decadencia de España"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47092/pg47092.txt"
+---

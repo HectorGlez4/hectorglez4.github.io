@@ -1,0 +1,13 @@
+---
+texto: "Vamos, mi señora doña Baltasara, créame usarced, y créame con todas veras... yo sospecho que aquí hay busilis..."
+autor: "gustavo-adolfo-becquer"
+slug: "gustavo-adolfo-becquer-vamos-mi-senora-dona-baltasara-creame-usarced"
+procedencia:
+  obra: "Obras escogidas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53552/pg53552.txt"
+---

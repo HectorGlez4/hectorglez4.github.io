@@ -2135,3 +2135,14 @@ sesiones:
       citasPublicadas: 4647
       procedenciaCompleta: 15.4
       tradicionLatinoamericanaSobreHispanicos: 66.3
+  - fecha: "2026-10-14"
+    hora: "23:21"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores cubanos: le quedan 4 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 44 candidatos en la época Autores cubanos: 1 ya sembrados y 39 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Gutenberg: Autores nuevos (2)"
+    motivo: "Siembra desde Gutenberg de Autores nuevos (2): Espinel, Cánovas, Alcalá Galiano, Menéndez y Pelayo, Bécquer, Fernán Caballero, Pardo Bazán, Avellaneda"
+    resultado:
+      citasPublicadas: 4689
+      procedenciaCompleta: 15.5
+      tradicionLatinoamericanaSobreHispanicos: 61

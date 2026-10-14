@@ -1,0 +1,13 @@
+---
+texto: "Todavía no hemos podido encontrar para usted retratos."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-todavia-no-hemos-podido-encontrar-para-usted"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

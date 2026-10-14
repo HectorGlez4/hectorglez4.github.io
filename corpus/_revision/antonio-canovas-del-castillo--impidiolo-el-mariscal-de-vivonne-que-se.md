@@ -1,0 +1,13 @@
+---
+texto: "Impidiólo el mariscal de Vivonne, que se presentó en el puerto de repente con una poderosa armada de franceses."
+autor: "antonio-canovas-del-castillo"
+slug: "antonio-canovas-del-castillo-impidiolo-el-mariscal-de-vivonne-que-se"
+procedencia:
+  obra: "Historia de la decadencia de España"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47092/pg47092.txt"
+---

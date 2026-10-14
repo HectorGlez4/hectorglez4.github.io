@@ -1,0 +1,14 @@
+---
+texto: "Habían llegado de la isla de León calesines salidos de aquel pueblo ya entrado el día, y como fuesen preguntados los caleseros qué había de nuevo en el punto de que venían, respondieron que nada."
+autor: "antonio-alcala-galiano"
+slug: "antonio-alcala-galiano-habian-llegado-de-la-isla-de-leon"
+procedencia:
+  obra: "Recuerdos de un anciano"
+  año: 1878
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77703/pg77703.txt"
+---

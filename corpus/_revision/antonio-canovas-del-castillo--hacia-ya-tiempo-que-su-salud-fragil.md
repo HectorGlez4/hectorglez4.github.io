@@ -1,0 +1,13 @@
+---
+texto: "Hacía ya tiempo, que su salud, frágil siempre, venía muy quebrantada."
+autor: "antonio-canovas-del-castillo"
+slug: "antonio-canovas-del-castillo-hacia-ya-tiempo-que-su-salud-fragil"
+procedencia:
+  obra: "Historia de la decadencia de España"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47092/pg47092.txt"
+---

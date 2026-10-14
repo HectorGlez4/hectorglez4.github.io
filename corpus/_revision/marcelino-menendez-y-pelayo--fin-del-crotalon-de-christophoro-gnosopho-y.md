@@ -1,0 +1,14 @@
+---
+texto: "FIN DEL CROTALON DE CHRISTOPHORO GNOSOPHO Y DE LOS INGENIOSOS SUEÑOS DEL GALLO DE LUCIANO FAMOSO ORADOR GRIEGO"
+autor: "marcelino-menendez-y-pelayo"
+slug: "marcelino-menendez-y-pelayo-fin-del-crotalon-de-christophoro-gnosopho-y"
+procedencia:
+  obra: "Orígenes de la novela, Tomo II"
+  año: 1905
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/71733/pg71733.txt"
+---

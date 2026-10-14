@@ -1,0 +1,13 @@
+---
+texto: "Sus labios, encendidos y rojos, parecían recortados hábilmente de un paño de púrpura por las invisibles manos de una hada."
+autor: "gustavo-adolfo-becquer"
+slug: "gustavo-adolfo-becquer-sus-labios-encendidos-y-rojos-parecian-recortados"
+procedencia:
+  obra: "Obras escogidas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53552/pg53552.txt"
+---

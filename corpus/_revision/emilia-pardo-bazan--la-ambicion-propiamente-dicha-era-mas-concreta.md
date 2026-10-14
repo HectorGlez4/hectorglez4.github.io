@@ -1,0 +1,13 @@
+---
+texto: "La ambición propiamente dicha era más concreta y positiva en su objeto que esta dolorosa inquietud, en la cual domina exaltado idealismo."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-la-ambicion-propiamente-dicha-era-mas-concreta"
+procedencia:
+  obra: "La Quimera"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/49756/pg49756.txt"
+---

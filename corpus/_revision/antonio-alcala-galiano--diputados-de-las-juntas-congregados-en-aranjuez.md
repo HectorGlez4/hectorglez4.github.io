@@ -1,0 +1,14 @@
+---
+texto: "Diputados de las Juntas, congregados en Aranjuez, compusieron una Junta magna, que tomó el título de Central."
+autor: "antonio-alcala-galiano"
+slug: "antonio-alcala-galiano-diputados-de-las-juntas-congregados-en-aranjuez"
+procedencia:
+  obra: "Recuerdos de un anciano"
+  año: 1878
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77703/pg77703.txt"
+---

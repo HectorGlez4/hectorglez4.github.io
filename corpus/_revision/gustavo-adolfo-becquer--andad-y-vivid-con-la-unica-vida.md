@@ -1,0 +1,13 @@
+---
+texto: "Andad y vivid con la única vida que puedo daros."
+autor: "gustavo-adolfo-becquer"
+slug: "gustavo-adolfo-becquer-andad-y-vivid-con-la-unica-vida"
+procedencia:
+  obra: "Obras escogidas"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53552/pg53552.txt"
+---

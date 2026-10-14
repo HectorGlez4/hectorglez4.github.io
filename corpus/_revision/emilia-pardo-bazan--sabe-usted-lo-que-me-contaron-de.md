@@ -1,0 +1,13 @@
+---
+texto: "¿Sabe usted lo que me contaron de ese viejecito... del Patriarca?"
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-sabe-usted-lo-que-me-contaron-de"
+procedencia:
+  obra: "La Tribuna"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/17491/pg17491.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "El arcipreste se enderezaba los espejuelos; su rostro congestionado revelaba inquietud."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-el-arcipreste-se-enderezaba-los-espejuelos-su"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

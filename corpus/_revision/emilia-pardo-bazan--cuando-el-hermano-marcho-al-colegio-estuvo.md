@@ -1,0 +1,13 @@
+---
+texto: "Cuando el hermano marchó al colegio, estuvo malucha."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-cuando-el-hermano-marcho-al-colegio-estuvo"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

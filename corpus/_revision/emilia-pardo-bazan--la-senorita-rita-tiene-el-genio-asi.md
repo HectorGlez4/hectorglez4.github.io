@@ -1,0 +1,13 @@
+---
+texto: "La señorita Rita tiene el genio así, franco y alegre...."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-la-senorita-rita-tiene-el-genio-asi"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---

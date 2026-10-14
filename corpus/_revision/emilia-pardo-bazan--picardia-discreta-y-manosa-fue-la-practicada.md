@@ -1,0 +1,13 @@
+---
+texto: "Picardía discreta y mañosa fue la practicada en Cebre mismo."
+autor: "emilia-pardo-bazan"
+slug: "emilia-pardo-bazan-picardia-discreta-y-manosa-fue-la-practicada"
+procedencia:
+  obra: "Los pazos de Ulloa"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/18005/pg18005.txt"
+---
