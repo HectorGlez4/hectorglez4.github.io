@@ -1,0 +1,13 @@
+---
+texto: "--Pero usted que es el gobernador eclesiástico, el que está en lugar de nuestro arzobispo, ¿qué haría usted si tal caso le aconteciese?"
+autor: "jose-rizal"
+slug: "jose-rizal-pero-usted-que-es-el-gobernador-eclesiastico"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---

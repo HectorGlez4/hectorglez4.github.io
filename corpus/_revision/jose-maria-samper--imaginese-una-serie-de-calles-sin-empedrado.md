@@ -1,0 +1,13 @@
+---
+texto: "Imagínese una serie de calles sin empedrado, caracoleando en anfiteatro al derredor de una colina por tres de sus lados."
+autor: "jose-maria-samper"
+slug: "jose-maria-samper-imaginese-una-serie-de-calles-sin-empedrado"
+procedencia:
+  obra: "Viajes de un Colombiano en Europa, primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/14329/pg14329.txt"
+---

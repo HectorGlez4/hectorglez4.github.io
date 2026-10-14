@@ -1,0 +1,13 @@
+---
+texto: "--¿Cómo diablos la he de conocer si no he puesto jamás los piés en ella?"
+autor: "jose-rizal"
+slug: "jose-rizal-como-diablos-la-he-de-conocer-si"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---

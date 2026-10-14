@@ -1,0 +1,13 @@
+---
+texto: "Y yo, á pesar de haber oido esto constantemente, pensé y creí siempre que Italia resucitaria."
+autor: "emilio-castelar"
+slug: "emilio-castelar-y-yo-a-pesar-de-haber-oido"
+procedencia:
+  obra: "Recuerdos de Italia (parte 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53742/pg53742.txt"
+---

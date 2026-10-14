@@ -1,0 +1,13 @@
+---
+texto: "Así la sociedad, la ciencia, la vida andan por un camino; y por otro completamente opuesto el catolicismo."
+autor: "emilio-castelar"
+slug: "emilio-castelar-asi-la-sociedad-la-ciencia-la-vida"
+procedencia:
+  obra: "Recuerdos de Italia (parte 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53741/pg53741.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "--Señor conde Lucanor--dijo Patronio--, esto que vos decides, que a vos contesce, sobre que me demandades consejo, paresce mucho a lo que contesció a un homne que tomaba perdices."
+autor: "juan-manuel"
+slug: "juan-manuel-senor-conde-lucanor-dijo-patronio-esto-que"
+procedencia:
+  obra: "El conde Lucanor"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65738/pg65738.txt"
+---

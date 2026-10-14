@@ -1,0 +1,13 @@
+---
+texto: "Sé que vuestro valiente padre murió de resultas de los cien azotes diarios, que le daban esos soldados; sé que no pensáis en vengarle..."
+autor: "jose-rizal"
+slug: "jose-rizal-se-que-vuestro-valiente-padre-murio-de"
+procedencia:
+  obra: "Noli me tángere"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47584/pg47584.txt"
+---

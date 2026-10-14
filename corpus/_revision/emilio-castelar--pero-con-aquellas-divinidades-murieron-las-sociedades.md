@@ -1,0 +1,13 @@
+---
+texto: "—Pero con aquellas divinidades murieron las sociedades que personificaban."
+autor: "emilio-castelar"
+slug: "emilio-castelar-pero-con-aquellas-divinidades-murieron-las-sociedades"
+procedencia:
+  obra: "Recuerdos de Italia (parte 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53741/pg53741.txt"
+---

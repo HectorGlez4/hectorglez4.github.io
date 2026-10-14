@@ -1,0 +1,13 @@
+---
+texto: "--¡Con mucho gusto!--contestó Ibarra;--tenía precisamente algo que decir ahora mismo á algunos en aquella reunión."
+autor: "jose-rizal"
+slug: "jose-rizal-con-mucho-gusto-contesto-ibarra-tenia-precisamente"
+procedencia:
+  obra: "Noli me tángere"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47584/pg47584.txt"
+---

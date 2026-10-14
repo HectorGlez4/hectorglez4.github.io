@@ -1,0 +1,13 @@
+---
+texto: "--Y ¿por qué? preguntó Simoun frunciendo las cejas."
+autor: "jose-rizal"
+slug: "jose-rizal-y-por-que-pregunto-simoun-frunciendo-las"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---

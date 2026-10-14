@@ -1,0 +1,13 @@
+---
+texto: "Confieso que Juan López me hizo meditar bastante."
+autor: "jose-maria-samper"
+slug: "jose-maria-samper-confieso-que-juan-lopez-me-hizo-meditar"
+procedencia:
+  obra: "Viajes de un Colombiano en Europa, primera serie"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/14329/pg14329.txt"
+---

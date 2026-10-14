@@ -1,0 +1,13 @@
+---
+texto: "Pero se engañaria quien atribuyera la fuerza de los papas en esta crísis suprema solamente á milagros de la fe."
+autor: "emilio-castelar"
+slug: "emilio-castelar-pero-se-enganaria-quien-atribuyera-la-fuerza"
+procedencia:
+  obra: "Recuerdos de Italia (parte 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53741/pg53741.txt"
+---

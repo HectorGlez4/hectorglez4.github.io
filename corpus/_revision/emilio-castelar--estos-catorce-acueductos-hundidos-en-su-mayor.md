@@ -1,0 +1,13 @@
+---
+texto: "Estos catorce acueductos, hundidos en su mayor parte, que eran catorce radios de vida y de salud, lo son hoy de corrupcion y de muerte."
+autor: "emilio-castelar"
+slug: "emilio-castelar-estos-catorce-acueductos-hundidos-en-su-mayor"
+procedencia:
+  obra: "Recuerdos de Italia (parte 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53742/pg53742.txt"
+---

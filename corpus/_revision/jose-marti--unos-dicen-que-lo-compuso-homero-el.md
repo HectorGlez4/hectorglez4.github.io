@@ -1,0 +1,13 @@
+---
+texto: "Unos dicen que lo compuso Homero, el poeta ciego de la barba de rizos, que andaba de pueblo en pueblo cantando sus versos al compás de la lira, como hacían los aedas de entonces."
+autor: "jose-marti"
+slug: "jose-marti-unos-dicen-que-lo-compuso-homero-el"
+procedencia:
+  obra: "La Edad de Oro: publicación mensual de recreo e instrucción dedicada a los niños de América."
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/19898/pg19898.txt"
+---

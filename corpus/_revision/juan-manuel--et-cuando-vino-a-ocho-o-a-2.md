@@ -1,0 +1,13 @@
+---
+texto: "Et cuando vino a ocho o a dies días, una tarde dijo al fijo mayor, que otro día de grand mañana quería cabalgar et que fuese con él."
+autor: "juan-manuel"
+slug: "juan-manuel-et-cuando-vino-a-ocho-o-a-2"
+procedencia:
+  obra: "El conde Lucanor"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65738/pg65738.txt"
+---

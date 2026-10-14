@@ -1,0 +1,13 @@
+---
+texto: "Santa madre de mi espíritu, hogar sagrado de mi corazon, templo de mi conciencia, el afecto inmenso que por ella siento crece con sus desgracias y toma en el extranjero la solemnidad y la grandeza de un culto."
+autor: "emilio-castelar"
+slug: "emilio-castelar-santa-madre-de-mi-espiritu-hogar-sagrado"
+procedencia:
+  obra: "Recuerdos de Italia (parte 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53742/pg53742.txt"
+---

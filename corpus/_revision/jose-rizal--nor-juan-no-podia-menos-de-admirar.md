@@ -1,0 +1,13 @@
+---
+texto: "Ñor Juan no podía menos de admirar al hombre que se sonreía tan particularmente."
+autor: "jose-rizal"
+slug: "jose-rizal-nor-juan-no-podia-menos-de-admirar"
+procedencia:
+  obra: "Noli me tángere"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47584/pg47584.txt"
+---

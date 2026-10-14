@@ -1,0 +1,13 @@
+---
+texto: "Pero confesad que es demasiada soledad en medio de aquella escuela de Salamanca en que se verificó la mayor parte del Renacimiento español, como en Florencia la mayor parte del Renacimiento italiano."
+autor: "emilio-castelar"
+slug: "emilio-castelar-pero-confesad-que-es-demasiada-soledad-en"
+procedencia:
+  obra: "Recuerdos de Italia (parte 2 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53742/pg53742.txt"
+---

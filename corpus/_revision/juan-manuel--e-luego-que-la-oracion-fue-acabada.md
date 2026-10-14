@@ -1,0 +1,13 @@
+---
+texto: "E luego que la oración fué acabada por el miraglo de Dios, engafeció el conde su marido, et ella partiose dél."
+autor: "juan-manuel"
+slug: "juan-manuel-e-luego-que-la-oracion-fue-acabada"
+procedencia:
+  obra: "El conde Lucanor"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65738/pg65738.txt"
+---

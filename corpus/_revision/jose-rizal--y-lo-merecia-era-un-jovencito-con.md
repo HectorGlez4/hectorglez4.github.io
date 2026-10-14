@@ -1,0 +1,13 @@
+---
+texto: "Y lo merecía: era un jovencito con alas, botas de montar, banda, cinturón y sombrero con plumajes."
+autor: "jose-rizal"
+slug: "jose-rizal-y-lo-merecia-era-un-jovencito-con"
+procedencia:
+  obra: "Noli me tángere"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47584/pg47584.txt"
+---

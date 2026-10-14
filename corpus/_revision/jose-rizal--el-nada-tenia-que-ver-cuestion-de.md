@@ -1,0 +1,13 @@
+---
+texto: "Él nada tenía que ver: ¡cuestion de tulisanes! y él solo cumplía con su obligacion."
+autor: "jose-rizal"
+slug: "jose-rizal-el-nada-tenia-que-ver-cuestion-de"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---

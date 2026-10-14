@@ -1,0 +1,13 @@
+---
+texto: "--Yo creía que los gobiernos buscarían bases más sólidas cuanto más amenazados..."
+autor: "jose-rizal"
+slug: "jose-rizal-yo-creia-que-los-gobiernos-buscarian-bases"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---

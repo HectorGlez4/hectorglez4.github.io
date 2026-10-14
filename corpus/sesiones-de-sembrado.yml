@@ -2113,3 +2113,14 @@ sesiones:
       citasPublicadas: 4566
       procedenciaCompleta: 15.6
       tradicionLatinoamericanaSobreHispanicos: 69
+  - fecha: "2026-10-14"
+    hora: "12:41"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores cubanos: le quedan 4 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 44 candidatos en la época Autores cubanos: 1 ya sembrados y 39 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Gutenberg: Autores presentes (2)"
+    motivo: "Siembra desde Gutenberg de Autores presentes (2): Rizal (Noli, Filibusterismo), Cané, Castelar, Samper, Ingenieros, Rodó y Juan Manuel."
+    resultado:
+      citasPublicadas: 4603
+      procedenciaCompleta: 15.5
+      tradicionLatinoamericanaSobreHispanicos: 69

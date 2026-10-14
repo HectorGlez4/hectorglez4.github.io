@@ -1,0 +1,13 @@
+---
+texto: "Plácido que entre sus amigos tenía fama de filósofo, perdió la paciencia, arrojó el libro, se levantó y se encaró con el catedrático:"
+autor: "jose-rizal"
+slug: "jose-rizal-placido-que-entre-sus-amigos-tenia-fama"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---

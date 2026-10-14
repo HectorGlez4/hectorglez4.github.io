@@ -1,0 +1,13 @@
+---
+texto: "Jamas acostumbro á acusar sin pruebas, y siempre me inclino á creer el bien y á no injuriar á la naturaleza humana."
+autor: "emilio-castelar"
+slug: "emilio-castelar-jamas-acostumbro-a-acusar-sin-pruebas-y"
+procedencia:
+  obra: "Recuerdos de Italia (parte 1 de 2)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/53741/pg53741.txt"
+---

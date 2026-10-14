@@ -1,0 +1,13 @@
+---
+texto: "--¡Sí! también lo ha hecho el padre Burg..."
+autor: "jose-rizal"
+slug: "jose-rizal-si-tambien-lo-ha-hecho-el-padre"
+procedencia:
+  obra: "Noli me tángere"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/47584/pg47584.txt"
+---

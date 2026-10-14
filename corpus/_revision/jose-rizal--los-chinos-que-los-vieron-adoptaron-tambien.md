@@ -1,0 +1,13 @@
+---
+texto: "Los chinos que los vieron, adoptaron tambien su postura: se sentaron como en sus tiendas, una pierna encogida y levantada y otra colgando y agitándose."
+autor: "jose-rizal"
+slug: "jose-rizal-los-chinos-que-los-vieron-adoptaron-tambien"
+procedencia:
+  obra: "El Filibusterismo (Continuación del Noli me tángere)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/30903/pg30903.txt"
+---
