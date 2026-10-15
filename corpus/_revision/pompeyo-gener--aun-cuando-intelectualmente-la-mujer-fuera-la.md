@@ -1,0 +1,13 @@
+---
+texto: "Aun cuando intelectualmente, la mujer fuera la equivalente y la igual, y aun queremos superior al hombre, que tiempo le quedaría en lo fuerte de su vida para dedicarse normalmente á otra cosa que á la maternidad?"
+autor: "pompeyo-gener"
+slug: "pompeyo-gener-aun-cuando-intelectualmente-la-mujer-fuera-la"
+procedencia:
+  obra: "De la mujer y sus derechos en las sociedades modernas I"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/De_la_mujer_y_sus_derechos_en_las_sociedades_modernas"
+---

@@ -1,0 +1,13 @@
+---
+texto: "En otros términos: en Francia hay un oficial para cada 21 hombres; en Italia uno para cada 16."
+autor: "pompeyo-gener"
+slug: "pompeyo-gener-en-otros-terminos-en-francia-hay-un"
+procedencia:
+  obra: "La cuestión catalana"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_cuesti%C3%B3n_catalana_(mayo_de_1903)"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Todo converje á ello en ella: la delicadeza y morbidez de sus líneas, la finura de su cutis, la tersura de sus carnes, la anchura de su pelvis, el desarrollo de sus formas, el del complexus solar y la estrechez de su cerebro."
+autor: "pompeyo-gener"
+slug: "pompeyo-gener-todo-converje-a-ello-en-ella-la"
+procedencia:
+  obra: "De la mujer y sus derechos en las sociedades modernas I"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/De_la_mujer_y_sus_derechos_en_las_sociedades_modernas"
+---

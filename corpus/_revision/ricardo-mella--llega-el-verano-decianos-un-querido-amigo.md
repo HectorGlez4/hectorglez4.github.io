@@ -1,0 +1,13 @@
+---
+texto: "Llega el verano, decíanos un querido amigo nuestro, y las condiciones del taller hacen penoso el trabajo."
+autor: "ricardo-mella"
+slug: "ricardo-mella-llega-el-verano-decianos-un-querido-amigo"
+procedencia:
+  obra: "La ley del número"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_ley_del_n%C3%BAmero"
+---
