@@ -1,6 +1,8 @@
 ---
 texto: "El hombre debe encontrar en la aflicción de su pensamiento su propia esperanza."
 autor: "ruben-dario"
+temas:
+  - "la-adversidad"
 slug: "ruben-dario-el-hombre-debe-encontrar-en-la-afliccion"
 procedencia:
   obra: "Letras"

@@ -1,7 +1,9 @@
 ---
-texto: "Los indoctos afectados son buñuelos sin miel y los podridos, bizcochos de galera."
+texto: "El que tiene es tenido y el que no tiene es dejado."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-los-indoctos-afectados-son-bunuelos-sin-miel"
+temas:
+  - "la-riqueza"
+slug: "baltasar-gracian-el-que-tiene-es-tenido-y-el"
 procedencia:
   obra: "El criticón (tomo 2 de 2)"
 estadoDerechos: "dominio-público"

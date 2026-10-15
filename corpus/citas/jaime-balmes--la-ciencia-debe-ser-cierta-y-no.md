@@ -1,6 +1,8 @@
 ---
 texto: "La ciencia debe ser cierta; y no puede haber certeza absoluta, si no hay identidad del ser que conoce con la cosa conocida."
 autor: "jaime-balmes"
+temas:
+  - "el-saber"
 slug: "jaime-balmes-la-ciencia-debe-ser-cierta-y-no"
 procedencia:
   obra: "Filosofía Fundamental, Tomo IV"

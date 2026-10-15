@@ -1,6 +1,8 @@
 ---
 texto: "El interés es el rey de los vicios, á quien todos sirven y le obedecen."
 autor: "baltasar-gracian"
+temas:
+  - "la-virtud"
 slug: "baltasar-gracian-el-interes-es-el-rey-de-los"
 procedencia:
   obra: "El criticón (tomo 1 de 2)"

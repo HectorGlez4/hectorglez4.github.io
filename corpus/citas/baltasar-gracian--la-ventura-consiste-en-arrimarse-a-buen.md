@@ -1,6 +1,8 @@
 ---
 texto: "La ventura consiste en arrimarse á buen árbol, para no ser sombra de un espino, de un alcornoque, de un quejigo."
 autor: "baltasar-gracian"
+temas:
+  - "la-vida"
 slug: "baltasar-gracian-la-ventura-consiste-en-arrimarse-a-buen"
 procedencia:
   obra: "El criticón (tomo 2 de 2)"

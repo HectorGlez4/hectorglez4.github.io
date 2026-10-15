@@ -1,6 +1,8 @@
 ---
 texto: "El camino de la virtud es el de la felicidad."
 autor: "ruben-dario"
+temas:
+  - "la-virtud"
 slug: "ruben-dario-el-camino-de-la-virtud-es-el"
 procedencia:
   obra: "Cuentos y crónicas"

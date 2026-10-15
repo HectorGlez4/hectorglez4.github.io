@@ -1,6 +1,8 @@
 ---
 texto: "Los halagos de los vicios matan y los rigores de las virtudes dan vida."
 autor: "baltasar-gracian"
+temas:
+  - "la-virtud"
 slug: "baltasar-gracian-los-halagos-de-los-vicios-matan-y"
 procedencia:
   obra: "El criticón (tomo 2 de 2)"

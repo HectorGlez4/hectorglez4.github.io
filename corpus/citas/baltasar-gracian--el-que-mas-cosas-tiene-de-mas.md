@@ -1,6 +1,8 @@
 ---
 texto: "El que más cosas tiene, de más depende y es más infeliz el que de más cosas necesita: así como el enfermo más cosas ha menester, que el sano."
 autor: "baltasar-gracian"
+temas:
+  - "la-riqueza"
 slug: "baltasar-gracian-el-que-mas-cosas-tiene-de-mas"
 procedencia:
   obra: "El criticón (tomo 2 de 2)"
