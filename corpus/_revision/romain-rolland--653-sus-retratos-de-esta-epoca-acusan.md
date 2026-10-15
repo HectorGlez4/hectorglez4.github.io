@@ -1,0 +1,13 @@
+---
+texto: "[653] Sus retratos de esta época acusan ese carácter popular."
+autor: "romain-rolland"
+slug: "romain-rolland-653-sus-retratos-de-esta-epoca-acusan"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

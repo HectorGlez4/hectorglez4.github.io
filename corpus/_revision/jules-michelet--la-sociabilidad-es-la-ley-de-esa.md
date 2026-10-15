@@ -1,0 +1,13 @@
+---
+texto: "La sociabilidad es la ley de esa raza; siempre se presentan en masa."
+autor: "jules-michelet"
+slug: "jules-michelet-la-sociabilidad-es-la-ley-de-esa"
+procedencia:
+  obra: "El Mar"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/26284/pg26284.txt"
+---

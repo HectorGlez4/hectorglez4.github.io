@@ -1,0 +1,13 @@
+---
+texto: "¡Qué importaba la bondad personal de un amo!"
+autor: "romain-rolland"
+slug: "romain-rolland-que-importaba-la-bondad-personal-de-un"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

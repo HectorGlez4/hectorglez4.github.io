@@ -1,0 +1,14 @@
+---
+texto: "Resonaron mil exclamaciones de júbilo al oír estas palabras: los ancianos custodios de las leyes colocaron la corona en las sienes de Aristodemo e hicieron sacrificios a Júpiter y otros supremos dioses."
+autor: "francois-de-salignac-de-la-mothe-fenelon"
+slug: "francois-de-salignac-de-la-mothe-fenelon-resonaron-mil-exclamaciones-de-jubilo-al-oir"
+procedencia:
+  obra: "Las aventuras de Telémaco seguidas de las de Aristonoo"
+  año: 1843
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77072/pg77072.txt"
+---

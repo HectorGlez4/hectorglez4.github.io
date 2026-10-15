@@ -1,0 +1,13 @@
+---
+texto: "Esas conchas necesitan muy poca cosa para vivir."
+autor: "jules-michelet"
+slug: "jules-michelet-esas-conchas-necesitan-muy-poca-cosa-para"
+procedencia:
+  obra: "El Mar"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/26284/pg26284.txt"
+---

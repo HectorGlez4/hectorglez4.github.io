@@ -1,0 +1,13 @@
+---
+texto: "Su amistad, iniciada por el año de 1535, fué íntima desde el otoño de 1538 y por completo fundada en Dios."
+autor: "romain-rolland"
+slug: "romain-rolland-su-amistad-iniciada-por-el-ano-de"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

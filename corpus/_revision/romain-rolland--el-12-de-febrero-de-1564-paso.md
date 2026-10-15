@@ -1,0 +1,13 @@
+---
+texto: "El 12 de febrero de 1564 pasó todo el día de pie trabajando en la _Pietà_[501]."
+autor: "romain-rolland"
+slug: "romain-rolland-el-12-de-febrero-de-1564-paso"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

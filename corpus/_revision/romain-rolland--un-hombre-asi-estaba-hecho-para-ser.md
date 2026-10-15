@@ -1,0 +1,13 @@
+---
+texto: "Un hombre así estaba hecho para ser engañado y ser víctima del amor, y lo fué."
+autor: "romain-rolland"
+slug: "romain-rolland-un-hombre-asi-estaba-hecho-para-ser"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

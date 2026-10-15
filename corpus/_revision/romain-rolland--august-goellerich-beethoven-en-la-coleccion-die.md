@@ -1,0 +1,13 @@
+---
+texto: "August Goellerich.--_Beethoven_ (en la colección Die Musik de R."
+autor: "romain-rolland"
+slug: "romain-rolland-august-goellerich-beethoven-en-la-coleccion-die"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

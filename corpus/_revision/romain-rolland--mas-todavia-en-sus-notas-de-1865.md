@@ -1,0 +1,13 @@
+---
+texto: "Más todavía: en sus notas de 1865, en las cuales clasifica los diversos géneros literarios, inscribía como de la misma familia a “La Odisea”, “La Ilíada” y “1805”[621]..."
+autor: "romain-rolland"
+slug: "romain-rolland-mas-todavia-en-sus-notas-de-1865"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

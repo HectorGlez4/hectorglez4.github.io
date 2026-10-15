@@ -1,0 +1,14 @@
+---
+texto: "Armado de escudo, celada, espada y lanza, ordenó las tropas de Acestes, y a su cabeza se dirigió hacia el enemigo; y aunque animoso aquel rey, solo pudo seguirle de lejos a causa de su ancianidad."
+autor: "francois-de-salignac-de-la-mothe-fenelon"
+slug: "francois-de-salignac-de-la-mothe-fenelon-armado-de-escudo-celada-espada-y-lanza"
+procedencia:
+  obra: "Las aventuras de Telémaco seguidas de las de Aristonoo"
+  año: 1843
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/77072/pg77072.txt"
+---

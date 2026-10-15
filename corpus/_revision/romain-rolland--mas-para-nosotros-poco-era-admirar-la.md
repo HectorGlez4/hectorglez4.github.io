@@ -1,0 +1,13 @@
+---
+texto: "Mas para nosotros, poco era admirar la obra: la vivíamos, era nuestra."
+autor: "romain-rolland"
+slug: "romain-rolland-mas-para-nosotros-poco-era-admirar-la"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

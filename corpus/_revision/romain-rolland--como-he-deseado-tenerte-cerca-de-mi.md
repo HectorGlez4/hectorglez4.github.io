@@ -1,0 +1,13 @@
+---
+texto: "¡Cómo he deseado tenerte cerca de mí, porque tu Beethoven es profundamente infeliz!"
+autor: "romain-rolland"
+slug: "romain-rolland-como-he-deseado-tenerte-cerca-de-mi"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

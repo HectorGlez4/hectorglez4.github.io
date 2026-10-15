@@ -1,0 +1,13 @@
+---
+texto: "[95] Me ha parecido que no carece de interés reproducir las dos cartas siguientes, porque hacen conocer a estas excelentes personas, los más fieles amigos de Beethoven."
+autor: "romain-rolland"
+slug: "romain-rolland-95-me-ha-parecido-que-no-carece"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

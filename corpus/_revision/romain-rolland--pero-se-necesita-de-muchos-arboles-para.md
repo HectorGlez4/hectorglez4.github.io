@@ -1,0 +1,13 @@
+---
+texto: "Pero se necesita de muchos árboles para hacer una floresta, y Tolstoi estaba solo."
+autor: "romain-rolland"
+slug: "romain-rolland-pero-se-necesita-de-muchos-arboles-para"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Ya sabéis que Urbino ha muerto, lo que es para mí una pena muy cruel, pero también una gracia muy grande que Dios me ha hecho."
+autor: "romain-rolland"
+slug: "romain-rolland-ya-sabeis-que-urbino-ha-muerto-lo"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

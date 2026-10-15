@@ -1,0 +1,13 @@
+---
+texto: "El abadejo no es tan abundante, va desapareciendo el escombro y el arenque se aleja."
+autor: "jules-michelet"
+slug: "jules-michelet-el-abadejo-no-es-tan-abundante-va"
+procedencia:
+  obra: "El Mar"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/26284/pg26284.txt"
+---

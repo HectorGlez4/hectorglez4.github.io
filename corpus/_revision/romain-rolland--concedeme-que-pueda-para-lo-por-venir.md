@@ -1,0 +1,13 @@
+---
+texto: "¡Concédeme que pueda, para lo por venir, vivir con mi Carlos!..."
+autor: "romain-rolland"
+slug: "romain-rolland-concedeme-que-pueda-para-lo-por-venir"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---

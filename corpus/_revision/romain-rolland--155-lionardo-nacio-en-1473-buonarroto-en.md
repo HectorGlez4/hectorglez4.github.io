@@ -1,0 +1,13 @@
+---
+texto: "[155] Lionardo nació en 1473; Buonarroto, en 1477; Giovan Simone en 1479; Sigismondo, en 1481."
+autor: "romain-rolland"
+slug: "romain-rolland-155-lionardo-nacio-en-1473-buonarroto-en"
+procedencia:
+  obra: "Vidas Ejemplares: Beethoven—Miguel Ángel—Tolstoi"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/65815/pg65815.txt"
+---
