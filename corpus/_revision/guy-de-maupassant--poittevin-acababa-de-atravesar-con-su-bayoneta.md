@@ -1,0 +1,14 @@
+---
+texto: "Poittevin acababa de atravesar con su bayoneta el pecho de un maniquí cuya cabeza Soireul deshacía á hachazos."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-poittevin-acababa-de-atravesar-con-su-bayoneta"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

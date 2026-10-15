@@ -1,0 +1,14 @@
+---
+texto: "Y los que habían llegado primero enseñaban á los otros el tragaluz tan temido."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-y-los-que-habian-llegado-primero-ensenaban"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "Sam sale á recibirle y acariciarle, mas el viejo Gaspar no ha vuelto aún."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-sam-sale-a-recibirle-y-acariciarle-mas"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

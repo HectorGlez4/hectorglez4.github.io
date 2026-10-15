@@ -1,0 +1,14 @@
+---
+texto: "Y al hablar así sonreía con satisfacción inocente, y orgullosa."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-y-al-hablar-asi-sonreia-con-satisfaccion"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

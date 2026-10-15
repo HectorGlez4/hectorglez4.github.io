@@ -1,0 +1,14 @@
+---
+texto: "He visto que ya no me querías, y he dicho para mí: ¿Qué haría yo para que me quisiera ese tunante?"
+autor: "victor-hugo"
+slug: "victor-hugo-he-visto-que-ya-no-me-querias"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

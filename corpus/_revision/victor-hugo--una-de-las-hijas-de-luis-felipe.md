@@ -1,0 +1,14 @@
+---
+texto: "Una de las hijas de Luis Felipe, María de Orléans, introducía el nombre de su raza entre los artistas, como Carlos de Orléans lo había inscrito entre los poetas."
+autor: "victor-hugo"
+slug: "victor-hugo-una-de-las-hijas-de-luis-felipe"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

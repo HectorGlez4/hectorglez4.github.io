@@ -1,0 +1,14 @@
+---
+texto: "Como se ha podido ver en lo que antes hemos dicho, las habitaciones estaban distribuidas de manera, que para ir al oratorio donde estaba la alcoba, ó para salir, era indispensable atravesar el dormitorio del obispo."
+autor: "victor-hugo"
+slug: "victor-hugo-como-se-ha-podido-ver-en-lo"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

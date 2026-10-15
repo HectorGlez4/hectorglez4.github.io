@@ -1,0 +1,14 @@
+---
+texto: "Ocho días después Juan Valjean se mudó, prometiéndose no volver á poner los pies, ni en el Luxemburgo, ni en la calle del Oeste, y se volvió á la calle de Plumet."
+autor: "victor-hugo"
+slug: "victor-hugo-ocho-dias-despues-juan-valjean-se-mudo"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

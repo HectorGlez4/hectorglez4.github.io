@@ -1,0 +1,14 @@
+---
+texto: "Estos son secretos del fuero interno, no conocidos más que de la tumba, en la que las almas entran desnudas."
+autor: "victor-hugo"
+slug: "victor-hugo-estos-son-secretos-del-fuero-interno-no"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

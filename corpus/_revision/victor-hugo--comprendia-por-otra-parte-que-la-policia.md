@@ -1,0 +1,14 @@
+---
+texto: "Comprendía, por otra parte, que la policía andaba por allí, emboscada en alguna parte, esperando la seña convenida y pronta á extender el brazo."
+autor: "victor-hugo"
+slug: "victor-hugo-comprendia-por-otra-parte-que-la-policia"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

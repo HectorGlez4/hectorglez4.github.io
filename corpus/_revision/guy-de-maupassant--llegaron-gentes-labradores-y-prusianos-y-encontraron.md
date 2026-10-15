@@ -1,0 +1,14 @@
+---
+texto: "Llegaron gentes, labradores y prusianos, y encontraron á la mujer, tranquila y satisfecha, sentada junto al tronco de un árbol."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-llegaron-gentes-labradores-y-prusianos-y-encontraron"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

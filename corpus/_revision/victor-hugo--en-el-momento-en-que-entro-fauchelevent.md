@@ -1,0 +1,14 @@
+---
+texto: "En el momento en que entró Fauchelevent, estaba impreso este doble signo de la preocupación en la fisonomía de la priora, que era aquella buena é ilustrada señorita de Bleumeur, madre Inocente, generalmente alegre."
+autor: "victor-hugo"
+slug: "victor-hugo-en-el-momento-en-que-entro-fauchelevent"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "Si aquella madre hubiese vuelto á Montfermeil al fin de los tres años, no hubiera, de seguro, reconocido á su hija."
+autor: "victor-hugo"
+slug: "victor-hugo-si-aquella-madre-hubiese-vuelto-a-montfermeil"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

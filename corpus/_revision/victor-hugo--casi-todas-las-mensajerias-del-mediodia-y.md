@@ -1,0 +1,14 @@
+---
+texto: "Casi todas las mensajerías del Mediodía y del Oeste pasaban entonces por los Campos Elíseos."
+autor: "victor-hugo"
+slug: "victor-hugo-casi-todas-las-mensajerias-del-mediodia-y"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

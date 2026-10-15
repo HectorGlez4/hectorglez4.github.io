@@ -1,0 +1,14 @@
+---
+texto: "Tres pencos blancos, que á primera vista llamaban la atención por sus enormes cabezas y sus redondas rodillas, arrastraban la diligencia que, por su estructura, semejaba un monstruo."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-tres-pencos-blancos-que-a-primera-vista"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

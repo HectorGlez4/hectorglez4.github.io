@@ -1,0 +1,14 @@
+---
+texto: "--Señor director del hospital, ¿cuántos enfermos tenéis en este momento?--le preguntó el obispo."
+autor: "victor-hugo"
+slug: "victor-hugo-senor-director-del-hospital-cuantos-enfermos-teneis"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

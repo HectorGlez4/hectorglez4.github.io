@@ -1,0 +1,14 @@
+---
+texto: "--¡Pero es que está esperando hace más de una hora vuestra vuelta,--añadió la portera."
+autor: "victor-hugo"
+slug: "victor-hugo-pero-es-que-esta-esperando-hace-mas"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

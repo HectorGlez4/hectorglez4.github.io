@@ -1,0 +1,14 @@
+---
+texto: "Estaba en uno de los momentos en que todas las ideas que llenan el espíritu son vagas."
+autor: "victor-hugo"
+slug: "victor-hugo-estaba-en-uno-de-los-momentos-en"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

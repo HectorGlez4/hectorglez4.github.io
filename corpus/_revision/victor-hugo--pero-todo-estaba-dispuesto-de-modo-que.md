@@ -1,0 +1,14 @@
+---
+texto: "Pero todo estaba dispuesto de modo que ninguna de las habitantes del claustro pudiese ver un rostro de afuera."
+autor: "victor-hugo"
+slug: "victor-hugo-pero-todo-estaba-dispuesto-de-modo-que"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

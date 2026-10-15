@@ -1,0 +1,14 @@
+---
+texto: "Partiendo de este supuesto, dijo la Thénardier:"
+autor: "victor-hugo"
+slug: "victor-hugo-partiendo-de-este-supuesto-dijo-la-thenardier"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

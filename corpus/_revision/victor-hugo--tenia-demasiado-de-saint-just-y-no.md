@@ -1,0 +1,14 @@
+---
+texto: "Tenía demasiado de Saint Just, y no lo bastante de Anacarsis Clootz."
+autor: "victor-hugo"
+slug: "victor-hugo-tenia-demasiado-de-saint-just-y-no"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

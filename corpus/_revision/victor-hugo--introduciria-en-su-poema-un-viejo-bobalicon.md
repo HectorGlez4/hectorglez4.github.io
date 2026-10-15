@@ -1,0 +1,14 @@
+---
+texto: "Introduciría en su poema un viejo bobalicón como yo, y le llamaría Néstor."
+autor: "victor-hugo"
+slug: "victor-hugo-introduciria-en-su-poema-un-viejo-bobalicon"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

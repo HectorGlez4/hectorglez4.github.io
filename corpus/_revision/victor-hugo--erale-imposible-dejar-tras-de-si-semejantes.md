@@ -1,0 +1,14 @@
+---
+texto: "Érale imposible dejar tras de sí semejantes partidas en descubierto; y quería, antes de penetrar alegremente en el porvenir, saldar completamente el pasado."
+autor: "victor-hugo"
+slug: "victor-hugo-erale-imposible-dejar-tras-de-si-semejantes"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

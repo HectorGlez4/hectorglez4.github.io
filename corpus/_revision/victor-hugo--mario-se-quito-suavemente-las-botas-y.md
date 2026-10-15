@@ -1,0 +1,14 @@
+---
+texto: "Mario se quitó suavemente las botas y las metió debajo de su cama."
+autor: "victor-hugo"
+slug: "victor-hugo-mario-se-quito-suavemente-las-botas-y"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "--Debéis dejarlo,--repitió la voz de hombre."
+autor: "victor-hugo"
+slug: "victor-hugo-debeis-dejarlo-repitio-la-voz-de-hombre"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

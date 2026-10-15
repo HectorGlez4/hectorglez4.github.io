@@ -1,0 +1,14 @@
+---
+texto: "--No hay sopa para ti, gandul--le gritó la vieja desde la cocina."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-no-hay-sopa-para-ti-gandul-le"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

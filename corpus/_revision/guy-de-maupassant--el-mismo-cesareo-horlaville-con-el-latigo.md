@@ -1,0 +1,14 @@
+---
+texto: "El mismo Cesáreo Horlaville, con el látigo en la mano, había entrado para presenciar la operación."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-el-mismo-cesareo-horlaville-con-el-latigo"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

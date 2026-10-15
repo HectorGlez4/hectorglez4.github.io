@@ -1,0 +1,14 @@
+---
+texto: "Enjolrás, que acababa de cargar de nuevo la suya, se la entregó."
+autor: "victor-hugo"
+slug: "victor-hugo-enjolras-que-acababa-de-cargar-de-nuevo"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

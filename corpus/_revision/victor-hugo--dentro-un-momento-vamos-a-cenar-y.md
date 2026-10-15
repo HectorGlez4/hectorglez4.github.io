@@ -1,0 +1,14 @@
+---
+texto: "Dentro un momento vamos á cenar, y se os arreglará la cama mientras..."
+autor: "victor-hugo"
+slug: "victor-hugo-dentro-un-momento-vamos-a-cenar-y"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

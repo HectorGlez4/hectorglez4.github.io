@@ -1,0 +1,14 @@
+---
+texto: "¡Cometer todos los días el mismo crimen!"
+autor: "victor-hugo"
+slug: "victor-hugo-cometer-todos-los-dias-el-mismo-crimen"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

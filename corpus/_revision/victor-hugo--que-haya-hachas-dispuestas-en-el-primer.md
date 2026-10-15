@@ -1,0 +1,14 @@
+---
+texto: "--Que haya hachas dispuestas en el primer piso para cortar la escalera."
+autor: "victor-hugo"
+slug: "victor-hugo-que-haya-hachas-dispuestas-en-el-primer"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

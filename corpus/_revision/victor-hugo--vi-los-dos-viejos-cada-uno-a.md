@@ -1,0 +1,14 @@
+---
+texto: "VI Los dos viejos, cada uno á su modo, hacen cuanto pueden para que Cosette sea feliz 557"
+autor: "victor-hugo"
+slug: "victor-hugo-vi-los-dos-viejos-cada-uno-a"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

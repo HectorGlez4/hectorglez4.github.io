@@ -1,0 +1,14 @@
+---
+texto: "¿El corazón puede deformarse y adquirir defectos y enfermedades incurables, bajo la presión de una desdicha desproporcionada, como la columna vertebral bajo una bóveda muy baja?"
+autor: "victor-hugo"
+slug: "victor-hugo-el-corazon-puede-deformarse-y-adquirir-defectos"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

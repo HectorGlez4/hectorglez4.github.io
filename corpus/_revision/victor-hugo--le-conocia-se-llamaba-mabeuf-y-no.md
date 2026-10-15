@@ -1,0 +1,14 @@
+---
+texto: "Le conocía; se llamaba Mabeuf, y no sé qué tendría hoy, pero es un pobre infeliz; mira su cabeza."
+autor: "victor-hugo"
+slug: "victor-hugo-le-conocia-se-llamaba-mabeuf-y-no"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

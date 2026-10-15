@@ -1,0 +1,14 @@
+---
+texto: "Los ojos escudriñaban aquella vaguedad, tratando de separarla de la aparición."
+autor: "victor-hugo"
+slug: "victor-hugo-los-ojos-escudrinaban-aquella-vaguedad-tratando-de"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "Llevaba su morral á la espalda, el garrote en la mano; su expresión era ruda, atrevida, fatigada y violenta la mirada."
+autor: "victor-hugo"
+slug: "victor-hugo-llevaba-su-morral-a-la-espalda-el"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "[10] Que me corten el cuello y que no pueda yo decir en mi vida tú ni vou, si no conozco yo al tal parisién."
+autor: "victor-hugo"
+slug: "victor-hugo-10-que-me-corten-el-cuello-y"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

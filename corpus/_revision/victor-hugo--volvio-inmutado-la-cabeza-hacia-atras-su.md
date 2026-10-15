@@ -1,0 +1,14 @@
+---
+texto: "Volvió, inmutado, la cabeza hacia atrás; su camisa, muy abierta y desabrochada, dejaba ver un cuello de toro, blanco y desnudo."
+autor: "victor-hugo"
+slug: "victor-hugo-volvio-inmutado-la-cabeza-hacia-atras-su"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

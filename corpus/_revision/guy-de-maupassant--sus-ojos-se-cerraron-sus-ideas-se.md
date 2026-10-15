@@ -1,0 +1,14 @@
+---
+texto: "Sus ojos se cerraron, sus ideas se obscurecieron, apoyó la pesada frente en los brazos, cruzados sobre la mesa, y, dulcemente, perdió la noción de los hechos y de las cosas."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-sus-ojos-se-cerraron-sus-ideas-se"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

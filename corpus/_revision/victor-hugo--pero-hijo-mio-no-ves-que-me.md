@@ -1,0 +1,14 @@
+---
+texto: "Pero, hijo mío, ¿no ves que me estás partiendo la cabeza?--Porque, eso sí, en cuanto llega á casa, en el desván, en la guardilla, donde quiera que pueda encaramarse, cuanto más alto mejor."
+autor: "victor-hugo"
+slug: "victor-hugo-pero-hijo-mio-no-ves-que-me"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

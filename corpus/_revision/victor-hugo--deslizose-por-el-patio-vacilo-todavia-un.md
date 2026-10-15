@@ -1,0 +1,14 @@
+---
+texto: "Deslizóse por el patio, vaciló todavía un momento; luego, levantó tímidamente el pestillo y empujó la puerta."
+autor: "victor-hugo"
+slug: "victor-hugo-deslizose-por-el-patio-vacilo-todavia-un"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

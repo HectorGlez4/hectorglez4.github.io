@@ -1,0 +1,14 @@
+---
+texto: "De repente oyó un ruido detrás de sí: era la portera Patagona que lo había seguido, y que desde lejos le enseñaba el puño, gritando:"
+autor: "victor-hugo"
+slug: "victor-hugo-de-repente-oyo-un-ruido-detras-de"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

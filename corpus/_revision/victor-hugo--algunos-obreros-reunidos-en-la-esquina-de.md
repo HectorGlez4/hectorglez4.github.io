@@ -1,0 +1,14 @@
+---
+texto: "Algunos obreros, reunidos en la esquina de la calle de Bercy, esperaban á un tal Lemarin, agente revolucionario del arrabal de San Marcelo."
+autor: "victor-hugo"
+slug: "victor-hugo-algunos-obreros-reunidos-en-la-esquina-de"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

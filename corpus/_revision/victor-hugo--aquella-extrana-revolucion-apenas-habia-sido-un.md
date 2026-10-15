@@ -1,0 +1,14 @@
+---
+texto: "Aquella extraña revolución apenas había sido un choque; no había hecho al realismo vencido ni siquiera el honor de tratarle como enemigo y verter su sangre."
+autor: "victor-hugo"
+slug: "victor-hugo-aquella-extrana-revolucion-apenas-habia-sido-un"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

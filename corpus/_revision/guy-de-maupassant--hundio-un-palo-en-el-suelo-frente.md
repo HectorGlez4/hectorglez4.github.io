@@ -1,0 +1,14 @@
+---
+texto: "Hundió un palo en el suelo frente á la perrera de Semillante, y allí ató el maniquí que parecía sostenerse en pie: luego fabricó la cabeza con un paquete de trapos sucios."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-hundio-un-palo-en-el-suelo-frente"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

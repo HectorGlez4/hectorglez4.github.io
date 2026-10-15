@@ -1,0 +1,14 @@
+---
+texto: "La estadística demuestra que la mortalidad de los niños abandonados es de cincuenta y cinco por ciento."
+autor: "victor-hugo"
+slug: "victor-hugo-la-estadistica-demuestra-que-la-mortalidad-de"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

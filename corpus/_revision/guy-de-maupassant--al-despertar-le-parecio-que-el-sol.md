@@ -1,0 +1,14 @@
+---
+texto: "Al despertar le pareció que el sol estaba en la mitad de su carrera; debían ser las doce."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-al-despertar-le-parecio-que-el-sol"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

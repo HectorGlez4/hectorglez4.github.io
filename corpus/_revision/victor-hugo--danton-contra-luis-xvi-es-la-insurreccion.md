@@ -1,0 +1,14 @@
+---
+texto: "Dantón contra Luis XVI es la insurrección; Hebert contra Dantón es el motín."
+autor: "victor-hugo"
+slug: "victor-hugo-danton-contra-luis-xvi-es-la-insurreccion"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "Voy á contarle lo que sé de él: es curioso."
+autor: "guy-de-maupassant"
+slug: "guy-de-maupassant-voy-a-contarle-lo-que-se-de"
+procedencia:
+  obra: "Cuentos escogidos"
+  año: 1908
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/74908/pg74908.txt"
+---

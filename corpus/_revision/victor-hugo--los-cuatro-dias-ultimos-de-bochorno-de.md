@@ -1,0 +1,14 @@
+---
+texto: "Los cuatro días últimos de bochorno, de viento y de sol, sin una gota de lluvia, habían hecho encorvar sus tallos, inclinarse los botones y caer las hojas."
+autor: "victor-hugo"
+slug: "victor-hugo-los-cuatro-dias-ultimos-de-bochorno-de"
+procedencia:
+  obra: "Los miserables - Tomo 2 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/78068/pg78068.txt"
+---

@@ -1,0 +1,14 @@
+---
+texto: "En el mismo instante en que el rayo de luna fué á sobreponerse, por así decirlo, aquella luz interior, apareció el dormido obispo como en la gloria, pero, endulzados no obstante, sus resplandores, por una media luz inefable."
+autor: "victor-hugo"
+slug: "victor-hugo-en-el-mismo-instante-en-que-el"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

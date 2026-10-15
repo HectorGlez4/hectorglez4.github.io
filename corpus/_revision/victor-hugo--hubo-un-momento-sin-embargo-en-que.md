@@ -1,0 +1,14 @@
+---
+texto: "Hubo un momento, sin embargo, en que la muchacha tembló; la Thénardier levantó la tapadera de una cacerola que hervía en el hornillo, después cogió un vaso y se acercó al depósito."
+autor: "victor-hugo"
+slug: "victor-hugo-hubo-un-momento-sin-embargo-en-que"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

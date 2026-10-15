@@ -1,0 +1,14 @@
+---
+texto: "Mario pasó los años de colegio para entrar luego en la escuela de jurisprudencia."
+autor: "victor-hugo"
+slug: "victor-hugo-mario-paso-los-anos-de-colegio-para"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---

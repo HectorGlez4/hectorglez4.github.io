@@ -1,0 +1,14 @@
+---
+texto: "--¡Los magníficos relojes, los ricos tapices, las brillantes libreas, todo ello debe ser altamente incómodo!"
+autor: "victor-hugo"
+slug: "victor-hugo-los-magnificos-relojes-los-ricos-tapices-las"
+procedencia:
+  obra: "Los miserables - Tomo 1 (de 2)"
+  año: 1897
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/75739/pg75739.txt"
+---
