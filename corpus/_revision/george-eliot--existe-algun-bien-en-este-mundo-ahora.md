@@ -1,0 +1,13 @@
+---
+texto: "Existe algún bien en este mundo, ahora lo comprendo; y esto nos convence de que hay más del que podemos pretender, a pesar de los disgustos y la maldad."
+autor: "george-eliot"
+slug: "george-eliot-existe-algun-bien-en-este-mundo-ahora"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Tal fue su impresión inmediata e indudable, bien que no hubiera visto a su hija desde hacía varios meses."
+autor: "george-eliot"
+slug: "george-eliot-tal-fue-su-impresion-inmediata-e-indudable"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

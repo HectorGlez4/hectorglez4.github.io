@@ -1,0 +1,13 @@
+---
+texto: "Entonces, voy a marcharme, maese Marner, y hablaré del bautismo antes de la noche."
+autor: "george-eliot"
+slug: "george-eliot-entonces-voy-a-marcharme-maese-marner-y"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "--Yo no soy hombre que contradiga a nadie, estoy por la paz y la tranquilidad."
+autor: "george-eliot"
+slug: "george-eliot-yo-no-soy-hombre-que-contradiga-a"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

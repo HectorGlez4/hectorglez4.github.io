@@ -1,0 +1,13 @@
+---
+texto: "Pero de ese modo, cada cual podía esperar agradablemente la llegada de su placer."
+autor: "george-eliot"
+slug: "george-eliot-pero-de-ese-modo-cada-cual-podia"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

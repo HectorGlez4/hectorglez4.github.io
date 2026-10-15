@@ -1,0 +1,13 @@
+---
+texto: "De ella tenemos conocimiento dos personas nada más: yo, y otra de confianza absoluta."
+autor: "charles-dickens"
+slug: "charles-dickens-de-ella-tenemos-conocimiento-dos-personas-nada"
+procedencia:
+  obra: "Una historia de dos ciudades"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/61887/pg61887.txt"
+---

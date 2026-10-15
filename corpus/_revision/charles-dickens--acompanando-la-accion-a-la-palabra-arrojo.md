@@ -1,0 +1,13 @@
+---
+texto: "Acompañando la acción a la palabra, arrojó a los pies del lacayo una moneda de oro."
+autor: "charles-dickens"
+slug: "charles-dickens-acompanando-la-accion-a-la-palabra-arrojo"
+procedencia:
+  obra: "Una historia de dos ciudades"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/61887/pg61887.txt"
+---

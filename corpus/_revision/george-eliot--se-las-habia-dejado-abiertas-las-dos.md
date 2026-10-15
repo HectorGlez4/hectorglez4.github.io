@@ -1,0 +1,13 @@
+---
+texto: "Se las había dejado abiertas las dos para tener aire; pero la del fondo estaba obstruida por los servidores y los vecinos del pueblo; sólo la primera había quedado libre."
+autor: "george-eliot"
+slug: "george-eliot-se-las-habia-dejado-abiertas-las-dos"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

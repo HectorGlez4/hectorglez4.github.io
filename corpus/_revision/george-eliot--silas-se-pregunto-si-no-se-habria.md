@@ -1,0 +1,13 @@
+---
+texto: "Silas se preguntó si no se habría dormido y miró el reloj; eran ya las cuatro de la mañana."
+autor: "george-eliot"
+slug: "george-eliot-silas-se-pregunto-si-no-se-habria"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

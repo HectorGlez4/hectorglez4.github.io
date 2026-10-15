@@ -1,0 +1,13 @@
+---
+texto: "--Aquella señora vieja que estaba sentada en un rincón junto á la chimenea en la casa donde estuviste velando anoche,--dijo la niña."
+autor: "nathaniel-hawthorne"
+slug: "nathaniel-hawthorne-aquella-senora-vieja-que-estaba-sentada-en"
+procedencia:
+  obra: "La letra escarlata"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/36990/pg36990.txt"
+---

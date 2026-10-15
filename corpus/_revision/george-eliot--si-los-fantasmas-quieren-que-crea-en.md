@@ -1,0 +1,13 @@
+---
+texto: "Si los fantasmas quieren que crea en ellos, que se dejen de deslizarse furtivamente en los sitios obscuros y solitarios; que vengan a donde hay gente y luz."
+autor: "george-eliot"
+slug: "george-eliot-si-los-fantasmas-quieren-que-crea-en"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

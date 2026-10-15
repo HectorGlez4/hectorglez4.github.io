@@ -1,0 +1,13 @@
+---
+texto: "Poco después entraban abrazados en la casa."
+autor: "charles-dickens"
+slug: "charles-dickens-poco-despues-entraban-abrazados-en-la-casa"
+procedencia:
+  obra: "Una historia de dos ciudades"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/61887/pg61887.txt"
+---

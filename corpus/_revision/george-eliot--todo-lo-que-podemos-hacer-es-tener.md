@@ -1,0 +1,13 @@
+---
+texto: "Todo lo que podemos hacer es tener confianza, maese Marner, y cumplir con nuestro deber, tanto como nos sea posible."
+autor: "george-eliot"
+slug: "george-eliot-todo-lo-que-podemos-hacer-es-tener"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

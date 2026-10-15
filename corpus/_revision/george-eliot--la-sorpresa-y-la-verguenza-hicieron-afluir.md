@@ -1,0 +1,13 @@
+---
+texto: "La sorpresa y la vergüenza hicieron afluir la sangre al rostro y al cuello de Nancy, que había sido educada en la creencia de que eran un deshonor hasta los crímenes de los parientes lejanos."
+autor: "george-eliot"
+slug: "george-eliot-la-sorpresa-y-la-verguenza-hicieron-afluir"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "Felizmente, el squire también salió a recibirles y dirigió ruidosos saludos al padre de Nancy."
+autor: "george-eliot"
+slug: "george-eliot-felizmente-el-squire-tambien-salio-a-recibirles"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

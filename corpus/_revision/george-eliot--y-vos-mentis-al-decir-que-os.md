@@ -1,0 +1,13 @@
+---
+texto: "Y vos mentís al decir que os deslizaríais en mi lugar; os haríais echar vos también, nada más."
+autor: "george-eliot"
+slug: "george-eliot-y-vos-mentis-al-decir-que-os"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

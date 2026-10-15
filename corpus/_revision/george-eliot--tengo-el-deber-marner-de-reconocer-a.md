@@ -1,0 +1,13 @@
+---
+texto: "Tengo el deber, Marner, de reconocer a Eppie como hija mía y darle la situación que le corresponde."
+autor: "george-eliot"
+slug: "george-eliot-tengo-el-deber-marner-de-reconocer-a"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

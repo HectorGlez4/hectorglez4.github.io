@@ -1,0 +1,13 @@
+---
+texto: "Si una cosa no debía existir, decía Nancy, era un deber estricto el renunciar hasta al deseo de conseguirla."
+autor: "george-eliot"
+slug: "george-eliot-si-una-cosa-no-debia-existir-decia"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

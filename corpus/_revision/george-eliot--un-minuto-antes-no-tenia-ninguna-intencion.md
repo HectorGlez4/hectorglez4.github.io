@@ -1,0 +1,13 @@
+---
+texto: "Un minuto antes no tenía ninguna intención precisa respecto a la criatura."
+autor: "george-eliot"
+slug: "george-eliot-un-minuto-antes-no-tenia-ninguna-intencion"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

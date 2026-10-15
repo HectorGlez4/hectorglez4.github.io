@@ -1,0 +1,13 @@
+---
+texto: "--¿Qué pregunta es esa, locuela?--exclamó la madre: ven y pídele su bendición."
+autor: "nathaniel-hawthorne"
+slug: "nathaniel-hawthorne-que-pregunta-es-esa-locuela-exclamo-la"
+procedencia:
+  obra: "La letra escarlata"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/36990/pg36990.txt"
+---

@@ -1,0 +1,13 @@
+---
+texto: "--¿Es la diligencia de Dover?--insistió la voz."
+autor: "charles-dickens"
+slug: "charles-dickens-es-la-diligencia-de-dover-insistio-la"
+procedencia:
+  obra: "Una historia de dos ciudades"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/61887/pg61887.txt"
+---

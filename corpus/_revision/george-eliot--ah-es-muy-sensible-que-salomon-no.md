@@ -1,0 +1,13 @@
+---
+texto: "¡Ah! es muy sensible que Salomón no viva en nuestro pueblo, y que no pueda tocar alguna pieza cuando lo deseamos, ¿no es cierto, señor Macey?"
+autor: "george-eliot"
+slug: "george-eliot-ah-es-muy-sensible-que-salomon-no"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

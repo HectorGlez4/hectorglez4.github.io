@@ -1,0 +1,13 @@
+---
+texto: "--Sólo Dios lo sabe, es verdad; pero no tema por mí."
+autor: "charles-dickens"
+slug: "charles-dickens-solo-dios-lo-sabe-es-verdad-pero"
+procedencia:
+  obra: "Una historia de dos ciudades"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/61887/pg61887.txt"
+---

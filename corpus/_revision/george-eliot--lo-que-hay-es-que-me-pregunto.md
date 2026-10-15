@@ -1,0 +1,13 @@
+---
+texto: "Lo que hay es que me pregunto cómo haremos para tener una cerca."
+autor: "george-eliot"
+slug: "george-eliot-lo-que-hay-es-que-me-pregunto"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---

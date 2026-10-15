@@ -1,0 +1,13 @@
+---
+texto: "Echaré a la calle toda vuestra secuela y me volveré a casar."
+autor: "george-eliot"
+slug: "george-eliot-echare-a-la-calle-toda-vuestra-secuela"
+procedencia:
+  obra: "Silas Marner"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/24823/pg24823.txt"
+---
