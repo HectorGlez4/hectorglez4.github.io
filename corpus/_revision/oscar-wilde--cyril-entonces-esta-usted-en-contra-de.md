@@ -1,0 +1,13 @@
+---
+texto: "CYRIL.- Entonces, ¿está usted en contra de la modernidad de la forma?"
+autor: "oscar-wilde"
+slug: "oscar-wilde-cyril-entonces-esta-usted-en-contra-de"
+procedencia:
+  obra: "La decadencia de la mentira"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_decadencia_de_la_mentira"
+---

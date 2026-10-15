@@ -1,0 +1,13 @@
+---
+texto: "Los japoneses son la creación reflexiva y consciente de ciertos artistas."
+autor: "oscar-wilde"
+slug: "oscar-wilde-los-japoneses-son-la-creacion-reflexiva-y"
+procedencia:
+  obra: "La decadencia de la mentira"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/La_decadencia_de_la_mentira"
+---

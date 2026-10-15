@@ -2201,3 +2201,14 @@ sesiones:
       citasPublicadas: 4734
       procedenciaCompleta: 15.7
       tradicionLatinoamericanaSobreHispanicos: 61
+  - fecha: "2026-10-15"
+    hora: "18:03"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores cubanos: le quedan 4 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 44 candidatos en la época Autores cubanos: 1 ya sembrados y 39 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Wikisource: ensayos y discursos"
+    motivo: "Wikisource: ensayos y discursos de Autores nuevos (Robespierre, Wilde) y descarte de candidatos colombianos sin obra"
+    resultado:
+      citasPublicadas: 4281
+      procedenciaCompleta: 17.2
+      tradicionLatinoamericanaSobreHispanicos: 61.4
