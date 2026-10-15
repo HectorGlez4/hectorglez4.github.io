@@ -1,0 +1,13 @@
+---
+texto: "Necesitaría tener la mirada aguzada por larga obscuridad para columbrar los reflejos extraviados en las tinieblas."
+autor: "elisee-reclus"
+slug: "elisee-reclus-necesitaria-tener-la-mirada-aguzada-por-larga"
+procedencia:
+  obra: "La Montaña"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/11598/pg11598.txt"
+---

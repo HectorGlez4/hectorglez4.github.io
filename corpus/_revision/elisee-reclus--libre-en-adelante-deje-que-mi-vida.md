@@ -1,0 +1,13 @@
+---
+texto: "Libre en adelante, dejé que mi vida se renovara á gusto de la naturaleza."
+autor: "elisee-reclus"
+slug: "elisee-reclus-libre-en-adelante-deje-que-mi-vida"
+procedencia:
+  obra: "La Montaña"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/11598/pg11598.txt"
+---

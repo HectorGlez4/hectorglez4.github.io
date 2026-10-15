@@ -1,0 +1,13 @@
+---
+texto: "En todas partes es la materia extensa, pero en cada globo tiene propiedades distintas."
+autor: "voltaire"
+slug: "voltaire-en-todas-partes-es-la-materia-extensa"
+procedencia:
+  obra: "Novelas de Voltaire — Tomo Primero"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/9895/pg9895.txt"
+---

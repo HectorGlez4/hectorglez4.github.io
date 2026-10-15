@@ -1,0 +1,13 @@
+---
+texto: "Quisiéron luego reconocer el mezquino pais donde se hallaban, y se dirigiéron de Norte á Sur."
+autor: "voltaire"
+slug: "voltaire-quisieron-luego-reconocer-el-mezquino-pais-donde"
+procedencia:
+  obra: "Novelas de Voltaire — Tomo Primero"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/9895/pg9895.txt"
+---

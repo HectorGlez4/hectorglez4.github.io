@@ -1,0 +1,13 @@
+---
+texto: "Se dice: la lucha por la vida asegura la supervivencia de los mejores y de los más aptos, y sigue por lo tanto un procedimiento aristocrático de selección individualista antes que la democrática nivelación colectivista del socialismo."
+autor: "enrico-ferri"
+slug: "enrico-ferri-se-dice-la-lucha-por-la-vida"
+procedencia:
+  obra: "Socialismo y ciencia positiva (Darwin-Spencer-Marx)"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "gutenberg"
+  nombre: "Project Gutenberg"
+  licencia: "dominio público"
+  url: "https://www.gutenberg.org/cache/epub/54282/pg54282.txt"
+---
