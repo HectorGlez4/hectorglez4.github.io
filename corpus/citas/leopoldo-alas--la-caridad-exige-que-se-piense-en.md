@@ -1,6 +1,8 @@
 ---
 texto: "La caridad exige que se piense en los demás."
 autor: "leopoldo-alas"
+temas:
+  - "la-virtud"
 slug: "leopoldo-alas-la-caridad-exige-que-se-piense-en"
 procedencia:
   obra: "La Regenta"
