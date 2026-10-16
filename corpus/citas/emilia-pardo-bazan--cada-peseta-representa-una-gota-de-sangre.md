@@ -1,6 +1,8 @@
 ---
 texto: "Cada peseta representa una gota de sangre; cada duro es un nervio; cada millar de duros, un pulmón."
 autor: "emilia-pardo-bazan"
+temas:
+  - "la-riqueza"
 slug: "emilia-pardo-bazan-cada-peseta-representa-una-gota-de-sangre"
 procedencia:
   obra: "La Quimera"
