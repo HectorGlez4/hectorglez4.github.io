@@ -1,6 +1,8 @@
 ---
 texto: "La crítica literaria nada tiene de ciencia exacta, y siempre tendrá mucho de impresión personal."
 autor: "marcelino-menendez-y-pelayo"
+temas:
+  - "el-saber"
 slug: "marcelino-menendez-y-pelayo-la-critica-literaria-nada-tiene-de-ciencia"
 procedencia:
   obra: "Orígenes de la novela, Tomo III"

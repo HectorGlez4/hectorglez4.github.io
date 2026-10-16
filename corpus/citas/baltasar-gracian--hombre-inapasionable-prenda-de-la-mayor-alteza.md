@@ -1,6 +1,8 @@
 ---
 texto: "Hombre inapasionable, prenda de la mayor alteza de ánimo."
 autor: "baltasar-gracian"
+temas:
+  - "la-virtud"
 slug: "baltasar-gracian-hombre-inapasionable-prenda-de-la-mayor-alteza"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

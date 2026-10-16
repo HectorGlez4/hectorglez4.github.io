@@ -1,7 +1,9 @@
 ---
-texto: "¡Amigos, vivir un poco más y saber un poco menos!"
+texto: "Si un hombre no busca algún arrimo, todos le dejarán estar y no vivir."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-amigos-vivir-un-poco-mas-y-saber"
+temas:
+  - "la-prudencia"
+slug: "baltasar-gracian-si-un-hombre-no-busca-algun-arrimo"
 procedencia:
   obra: "El criticón (tomo 1 de 2)"
 estadoDerechos: "dominio-público"

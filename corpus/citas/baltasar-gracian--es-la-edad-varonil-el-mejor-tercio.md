@@ -1,6 +1,8 @@
 ---
 texto: "Es la edad varonil el mejor tercio de la vida, como la que está en el medio."
 autor: "baltasar-gracian"
+temas:
+  - "la-vida"
 slug: "baltasar-gracian-es-la-edad-varonil-el-mejor-tercio"
 procedencia:
   obra: "El criticón (tomo 2 de 2)"

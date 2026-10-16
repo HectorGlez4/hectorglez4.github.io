@@ -1,7 +1,9 @@
 ---
-texto: "A estos individuos les gusta la adulación, cuando se les regala un falso elogio que se ajuste a lo que deseen oír, creen que ese vacuo discurso testimonia sus virtudes."
+texto: "Por tanto, a quien se hayan mostrado en ambos casos seguro, firme y sereno en su amistad, debemos considerar que pertenece a un género excepcional de hombres y casi divino."
 autor: "ciceron"
-slug: "ciceron-a-estos-individuos-les-gusta-la-adulacion"
+temas:
+  - "la-amistad"
+slug: "ciceron-por-tanto-a-quien-se-hayan-mostrado"
 procedencia:
   obra: "Sobre la amistad"
   traduccion:

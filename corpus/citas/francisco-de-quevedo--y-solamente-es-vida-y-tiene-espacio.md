@@ -1,6 +1,8 @@
 ---
 texto: "Y solamente es vida y tiene espacio en aquel varón que junta todos los tiempos en uno."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-vida"
 slug: "francisco-de-quevedo-y-solamente-es-vida-y-tiene-espacio"
 procedencia:
   obra: "Marco Bruto"

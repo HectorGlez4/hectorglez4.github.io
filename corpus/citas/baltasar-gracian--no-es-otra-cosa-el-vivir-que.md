@@ -1,7 +1,9 @@
 ---
-texto: "Gran hombre y gran nombre prometen gran persona: que hace mucho ruido lo campanudo y parece gran cosa lo abultado."
+texto: "No es otra cosa el vivir que un gozar de los bienes y saberlos lograr, tanto los de la naturaleza, como del arte, con modo, forma y templanza."
 autor: "baltasar-gracian"
-slug: "baltasar-gracian-gran-hombre-y-gran-nombre-prometen-gran"
+temas:
+  - "la-vida"
+slug: "baltasar-gracian-no-es-otra-cosa-el-vivir-que"
 procedencia:
   obra: "El criticón (tomo 2 de 2)"
 estadoDerechos: "dominio-público"

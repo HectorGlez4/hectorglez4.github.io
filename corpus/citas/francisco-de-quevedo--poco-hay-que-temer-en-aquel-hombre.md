@@ -1,6 +1,8 @@
 ---
 texto: "Poco hay que temer en aquel hombre que embaraza su alma en servir a su tez y a llenar de más bestia la piel exterior de su cuerpo."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-virtud"
 slug: "francisco-de-quevedo-poco-hay-que-temer-en-aquel-hombre"
 procedencia:
   obra: "Marco Bruto"

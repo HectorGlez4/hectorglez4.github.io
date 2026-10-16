@@ -1,6 +1,8 @@
 ---
 texto: "Ninguno es defensor de la muerte que le hace heredero, porque el interés es consuelo de los ambiciosos, y lo propio que deja persuade a que le dejen."
 autor: "francisco-de-quevedo"
+temas:
+  - "la-muerte"
 slug: "francisco-de-quevedo-ninguno-es-defensor-de-la-muerte-que"
 procedencia:
   obra: "Marco Bruto"

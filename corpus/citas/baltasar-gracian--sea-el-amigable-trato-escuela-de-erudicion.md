@@ -1,6 +1,8 @@
 ---
 texto: "Sea el amigable trato escuela de erudición, y la conversación enseñanza culta; un hacer de los amigos maestros, penetrando el útil del aprender con el gusto del conversar."
 autor: "baltasar-gracian"
+temas:
+  - "la-amistad"
 slug: "baltasar-gracian-sea-el-amigable-trato-escuela-de-erudicion"
 procedencia:
   obra: "Oráculo manual y arte de prudencia"

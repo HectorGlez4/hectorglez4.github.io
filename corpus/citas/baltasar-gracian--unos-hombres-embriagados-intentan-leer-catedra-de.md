@@ -1,6 +1,8 @@
 ---
 texto: "Unos hombres embriagados intentan leer cátedra de verdades."
 autor: "baltasar-gracian"
+temas:
+  - "la-verdad"
 slug: "baltasar-gracian-unos-hombres-embriagados-intentan-leer-catedra-de"
 procedencia:
   obra: "El criticón (tomo 1 de 2)"

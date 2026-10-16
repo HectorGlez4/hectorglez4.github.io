@@ -1,6 +1,8 @@
 ---
 texto: "Ni la naturaleza ni el arte proceden por saltos."
 autor: "marcelino-menendez-y-pelayo"
+temas:
+  - "la-vida"
 slug: "marcelino-menendez-y-pelayo-ni-la-naturaleza-ni-el-arte-proceden"
 procedencia:
   obra: "Orígenes de la novela, Tomo III"
