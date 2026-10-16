@@ -1,6 +1,8 @@
 ---
 texto: "Si recobraran la sana razón, ¿qué necesidad tendrían de poner tantas industrias al servicio de su vientre?"
 autor: "seneca"
+temas:
+  - "la-razon"
 slug: "seneca-si-recobraran-la-sana-razon-que-necesidad"
 procedencia:
   obra: "Consolación a Helvia"

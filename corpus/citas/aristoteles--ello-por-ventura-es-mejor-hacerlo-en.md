@@ -3,6 +3,7 @@ texto: "Ello por ventura es mejor hacerlo en compañía, pero con todo eso es el
 autor: "aristoteles"
 temas:
   - "la-felicidad"
+  - "el-saber"
 slug: "aristoteles-ello-por-ventura-es-mejor-hacerlo-en"
 procedencia:
   obra: "Ética a Nicómaco"

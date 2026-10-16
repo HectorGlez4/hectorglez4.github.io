@@ -1,7 +1,9 @@
 ---
-texto: "Persuádete de que los muertos no experimentan ningún dolor."
+texto: "Comienza a apreciar a tu hijo por sus virtudes y no por sus años, y bastante habrá vivido."
 autor: "seneca"
-slug: "seneca-persuadete-de-que-los-muertos-no-experimentan"
+temas:
+  - "la-virtud"
+slug: "seneca-comienza-a-apreciar-a-tu-hijo-por"
 procedencia:
   obra: "Consolación a Marcia"
   traduccion:

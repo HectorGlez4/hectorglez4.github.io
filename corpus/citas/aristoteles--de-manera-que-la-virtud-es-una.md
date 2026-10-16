@@ -1,6 +1,8 @@
 ---
 texto: "De manera que la virtud es una medianía, pues siempre al medio se encamina."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-de-manera-que-la-virtud-es-una"
 procedencia:
   obra: "Ética a Nicómaco"

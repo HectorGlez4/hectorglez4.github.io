@@ -1,6 +1,8 @@
 ---
 texto: "Acabaránse las lágrimas antes que las causas del dolor."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-acabaranse-las-lagrimas-antes-que-las-causas"
 procedencia:
   obra: "Consolación a Polibio"

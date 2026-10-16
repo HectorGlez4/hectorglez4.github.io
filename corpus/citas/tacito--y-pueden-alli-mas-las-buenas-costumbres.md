@@ -1,7 +1,9 @@
 ---
-texto: "Y el mayor argumento de su virtud y fuerza es que, para ser superiores a todos, no hacen agravio a ninguno."
+texto: "Y pueden allí más las buenas costumbres que en otra parte las buenas leyes."
 autor: "tacito"
-slug: "tacito-y-el-mayor-argumento-de-su-virtud"
+temas:
+  - "la-justicia"
+slug: "tacito-y-pueden-alli-mas-las-buenas-costumbres"
 procedencia:
   obra: "Del Origen y del Territorio de los Germanos"
   año: 1919

@@ -1,7 +1,9 @@
 ---
-texto: "¿Podrá extrañarnos la muerte de un hombre cuando todos necesariamente han de morir?"
+texto: "Persuádete de que los muertos no experimentan ningún dolor."
 autor: "seneca"
-slug: "seneca-podra-extranarnos-la-muerte-de-un-hombre"
+temas:
+  - "la-muerte"
+slug: "seneca-persuadete-de-que-los-muertos-no-experimentan"
 procedencia:
   obra: "Consolación a Marcia"
   traduccion:

@@ -1,6 +1,8 @@
 ---
 texto: "Al que desprecia todas estas cosas ¿qué daño le hace la pobreza?"
 autor: "seneca"
+temas:
+  - "la-riqueza"
 slug: "seneca-al-que-desprecia-todas-estas-cosas-que"
 procedencia:
   obra: "Consolación a Helvia"

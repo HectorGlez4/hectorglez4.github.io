@@ -1,6 +1,8 @@
 ---
 texto: "No halle el dolor por parte alguna entrada en ti."
 autor: "seneca"
+temas:
+  - "la-adversidad"
 slug: "seneca-no-halle-el-dolor-por-parte-alguna"
 procedencia:
   obra: "Consolación a Polibio"

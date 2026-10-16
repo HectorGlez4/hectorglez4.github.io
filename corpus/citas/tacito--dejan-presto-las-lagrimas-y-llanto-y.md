@@ -1,6 +1,8 @@
 ---
 texto: "Dejan presto las lágrimas y llanto, y tarde el dolor y tristeza."
 autor: "tacito"
+temas:
+  - "la-adversidad"
 slug: "tacito-dejan-presto-las-lagrimas-y-llanto-y"
 procedencia:
   obra: "Del Origen y del Territorio de los Germanos"

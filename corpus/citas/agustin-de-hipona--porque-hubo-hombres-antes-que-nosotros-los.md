@@ -1,6 +1,8 @@
 ---
 texto: "Porque hubo hombres antes que nosotros, los hay con nosotros y los habrá después de nosotros."
 autor: "agustin-de-hipona"
+temas:
+  - "la-vida"
 slug: "agustin-de-hipona-porque-hubo-hombres-antes-que-nosotros-los"
 procedencia:
   obra: "La ciudad de Dios"

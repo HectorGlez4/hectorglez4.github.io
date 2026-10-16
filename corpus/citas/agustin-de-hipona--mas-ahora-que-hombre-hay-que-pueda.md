@@ -1,6 +1,8 @@
 ---
 texto: "Mas ahora, ¿qué hombre hay que pueda vivir como quiere, cuando el mismo vivir no está en su mano?"
 autor: "agustin-de-hipona"
+temas:
+  - "la-libertad"
 slug: "agustin-de-hipona-mas-ahora-que-hombre-hay-que-pueda"
 procedencia:
   obra: "La ciudad de Dios"

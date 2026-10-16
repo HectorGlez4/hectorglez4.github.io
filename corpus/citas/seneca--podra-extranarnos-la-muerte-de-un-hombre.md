@@ -1,7 +1,9 @@
 ---
-texto: "Comienza a apreciar a tu hijo por sus virtudes y no por sus años, y bastante habrá vivido."
+texto: "¿Podrá extrañarnos la muerte de un hombre cuando todos necesariamente han de morir?"
 autor: "seneca"
-slug: "seneca-comienza-a-apreciar-a-tu-hijo-por"
+temas:
+  - "la-muerte"
+slug: "seneca-podra-extranarnos-la-muerte-de-un-hombre"
 procedencia:
   obra: "Consolación a Marcia"
   traduccion:

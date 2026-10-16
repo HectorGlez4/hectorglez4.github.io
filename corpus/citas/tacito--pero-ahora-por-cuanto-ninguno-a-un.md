@@ -1,6 +1,8 @@
 ---
 texto: "Pero ahora, por cuanto ninguno a un mismo tiempo puede gozar de una grande fama y sosiego, goce cada cual del bien de su siglo, sin murmurar del otro."
 autor: "tacito"
+temas:
+  - "la-gloria"
 slug: "tacito-pero-ahora-por-cuanto-ninguno-a-un"
 procedencia:
   obra: "Diálogo de los oradores"

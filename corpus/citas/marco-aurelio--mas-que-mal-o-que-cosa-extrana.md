@@ -1,6 +1,8 @@
 ---
 texto: "Mas qué mal ó qué cosa extraña es si un ignorante hace lo que es propio de un necio?"
 autor: "marco-aurelio"
+temas:
+  - "la-razon"
 slug: "marco-aurelio-mas-que-mal-o-que-cosa-extrana"
 procedencia:
   obra: "Soliloquios"

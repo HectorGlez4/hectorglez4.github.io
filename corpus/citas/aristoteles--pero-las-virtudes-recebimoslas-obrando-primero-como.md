@@ -1,6 +1,8 @@
 ---
 texto: "Pero las virtudes recebímoslas obrando primero, como en las demás artes."
 autor: "aristoteles"
+temas:
+  - "la-virtud"
 slug: "aristoteles-pero-las-virtudes-recebimoslas-obrando-primero-como"
 procedencia:
   obra: "Ética a Nicómaco"

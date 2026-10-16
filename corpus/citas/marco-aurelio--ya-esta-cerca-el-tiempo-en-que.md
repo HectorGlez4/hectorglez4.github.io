@@ -1,6 +1,8 @@
 ---
 texto: "Ya está cerca el tiempo en que á todos los echarás en olvido y todos se olvidarán de tí."
 autor: "marco-aurelio"
+temas:
+  - "el-tiempo"
 slug: "marco-aurelio-ya-esta-cerca-el-tiempo-en-que"
 procedencia:
   obra: "Soliloquios"
