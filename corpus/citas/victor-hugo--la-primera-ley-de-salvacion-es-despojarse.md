@@ -1,7 +1,9 @@
 ---
-texto: "El pensamiento es el trabajo de la inteligencia; la meditación fantástica es la voluptuosidad."
+texto: "La primera ley de salvación es despojarse de toda clase de carga."
 autor: "victor-hugo"
-slug: "victor-hugo-el-pensamiento-es-el-trabajo-de-la"
+temas:
+  - "la-prudencia"
+slug: "victor-hugo-la-primera-ley-de-salvacion-es-despojarse"
 procedencia:
   obra: "Los miserables - Tomo 2 (de 2)"
   año: 1897

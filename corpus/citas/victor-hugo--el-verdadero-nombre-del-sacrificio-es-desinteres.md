@@ -1,6 +1,8 @@
 ---
 texto: "El verdadero nombre del sacrificio es desinterés."
 autor: "victor-hugo"
+temas:
+  - "la-virtud"
 slug: "victor-hugo-el-verdadero-nombre-del-sacrificio-es-desinteres"
 procedencia:
   obra: "Los miserables - Tomo 2 (de 2)"

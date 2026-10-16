@@ -1,7 +1,9 @@
 ---
-texto: "Los grandes peligros residen en nosotros mismos."
+texto: "Todo hombre, incluso el mejor, posee cierta dureza irreflexiva que se la reserva para el animal."
 autor: "victor-hugo"
-slug: "victor-hugo-los-grandes-peligros-residen-en-nosotros-mismos"
+temas:
+  - "la-virtud"
+slug: "victor-hugo-todo-hombre-incluso-el-mejor-posee-cierta"
 procedencia:
   obra: "Los miserables - Tomo 1 (de 2)"
   año: 1897

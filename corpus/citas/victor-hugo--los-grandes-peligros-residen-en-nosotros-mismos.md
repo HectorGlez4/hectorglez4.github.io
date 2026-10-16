@@ -1,7 +1,9 @@
 ---
-texto: "Los brazos cruzados trabajan; las manos juntas hacen."
+texto: "Los grandes peligros residen en nosotros mismos."
 autor: "victor-hugo"
-slug: "victor-hugo-los-brazos-cruzados-trabajan-las-manos-juntas"
+temas:
+  - "la-prudencia"
+slug: "victor-hugo-los-grandes-peligros-residen-en-nosotros-mismos"
 procedencia:
   obra: "Los miserables - Tomo 1 (de 2)"
   año: 1897

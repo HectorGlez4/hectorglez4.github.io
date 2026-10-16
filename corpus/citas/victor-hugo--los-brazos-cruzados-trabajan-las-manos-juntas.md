@@ -1,7 +1,9 @@
 ---
-texto: "Los sufrimientos sociales empiezan á todas las edades."
+texto: "Los brazos cruzados trabajan; las manos juntas hacen."
 autor: "victor-hugo"
-slug: "victor-hugo-los-sufrimientos-sociales-empiezan-a-todas-las"
+temas:
+  - "el-trabajo"
+slug: "victor-hugo-los-brazos-cruzados-trabajan-las-manos-juntas"
 procedencia:
   obra: "Los miserables - Tomo 1 (de 2)"
   año: 1897

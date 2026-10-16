@@ -1,7 +1,9 @@
 ---
-texto: "Todo hombre, incluso el mejor, posee cierta dureza irreflexiva que se la reserva para el animal."
+texto: "La protesta del derecho contra el hecho persiste siempre; el robo de un pueblo no prescribe jamás."
 autor: "victor-hugo"
-slug: "victor-hugo-todo-hombre-incluso-el-mejor-posee-cierta"
+temas:
+  - "la-justicia"
+slug: "victor-hugo-la-protesta-del-derecho-contra-el-hecho"
 procedencia:
   obra: "Los miserables - Tomo 1 (de 2)"
   año: 1897

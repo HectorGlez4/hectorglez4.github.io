@@ -1,6 +1,8 @@
 ---
 texto: "Las grandes fiebres producen grandes sueños."
 autor: "victor-hugo"
+temas:
+  - "la-vida"
 slug: "victor-hugo-las-grandes-fiebres-producen-grandes-suenos"
 procedencia:
   obra: "Los miserables - Tomo 2 (de 2)"

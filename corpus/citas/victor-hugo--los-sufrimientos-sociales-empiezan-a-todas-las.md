@@ -1,7 +1,9 @@
 ---
-texto: "Todo ha degenerado en este siglo, hasta los pícaros."
+texto: "Los sufrimientos sociales empiezan á todas las edades."
 autor: "victor-hugo"
-slug: "victor-hugo-todo-ha-degenerado-en-este-siglo-hasta"
+temas:
+  - "la-adversidad"
+slug: "victor-hugo-los-sufrimientos-sociales-empiezan-a-todas-las"
 procedencia:
   obra: "Los miserables - Tomo 1 (de 2)"
   año: 1897

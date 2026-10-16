@@ -1,7 +1,9 @@
 ---
-texto: "La protesta del derecho contra el hecho persiste siempre; el robo de un pueblo no prescribe jamás."
+texto: "Todo ha degenerado en este siglo, hasta los pícaros."
 autor: "victor-hugo"
-slug: "victor-hugo-la-protesta-del-derecho-contra-el-hecho"
+temas:
+  - "el-tiempo"
+slug: "victor-hugo-todo-ha-degenerado-en-este-siglo-hasta"
 procedencia:
   obra: "Los miserables - Tomo 1 (de 2)"
   año: 1897
