@@ -1,6 +1,8 @@
 ---
 texto: "El dinero no es toda la riqueza, sino la parte móvil, líquida y más circulante de la riqueza."
 autor: "juan-valera"
+temas:
+  - "la-riqueza"
 slug: "juan-valera-el-dinero-no-es-toda-la-riqueza"
 procedencia:
   obra: "Algo de todo"

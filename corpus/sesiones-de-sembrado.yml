@@ -2223,3 +2223,14 @@ sesiones:
       citasPublicadas: 4291
       procedenciaCompleta: 17.2
       tradicionLatinoamericanaSobreHispanicos: 56.9
+  - fecha: "2026-10-16"
+    hora: "02:44"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores cubanos: le quedan 4 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 44 candidatos en la época Autores cubanos: 1 ya sembrados y 39 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Gutenberg: narrativa (1)"
+    motivo: "Narrativa de Gutenberg: Galdós, Palacio Valdés, Pereda, Valera, Alarcón, Blasco Ibáñez, Valle-Inclán"
+    resultado:
+      citasPublicadas: 4321
+      procedenciaCompleta: 17.2
+      tradicionLatinoamericanaSobreHispanicos: 53.9

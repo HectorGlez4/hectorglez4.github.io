@@ -1,6 +1,8 @@
 ---
 texto: "Ningún país, a no estar bajo el yugo de una tiranía invencible, tiene más gobierno que el que se da y merece."
 autor: "juan-valera"
+temas:
+  - "la-patria"
 slug: "juan-valera-ningun-pais-a-no-estar-bajo-el"
 procedencia:
   obra: "Algo de todo"
