@@ -9,6 +9,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 - Nunca edites a mano los artefactos de `_bmad-output/planning-artifacts/` ni de `_bmad-output/specs/` — vuelve a ejecutar la skill BMad que los produjo (`bmad-prd`, `bmad-architecture`, `bmad-ux`, `bmad-spec`, `bmad-create-epics-and-stories`); cada una deriva su salida del `.memlog.md` de su carpeta y un retoque a mano se pierde en la siguiente pasada.
 - Nunca borres ficheros de `corpus/` para «limpiar» — git es el único almacén del contenido y no hay copia en otro sitio. Para retirar una Cita, muévela a `corpus/_revision/`.
+- Las candidatas sin aprobar de `corpus/_revision/` **no se versionan** (decisión de Héctor, 2026-10-16): se regeneran con `tools/extraer.ts` desde `corpus/fuentes/`, que sí se versiona. Commitea con `git add -A corpus ':!corpus/_revision'` y `git add -u corpus/_revision`. Una Cita **retirada** que se mueve a `_revision/` sí es contenido: añádela a mano con `git add` o git perderá su única copia.
 - Commitea los artefactos de planificación aparte y antes de empezar una historia, nunca en el mismo commit que el código.
 
 ## Where things are
