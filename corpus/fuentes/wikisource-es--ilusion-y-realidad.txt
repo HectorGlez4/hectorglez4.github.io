@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Ilusión y realidad
 url: https://es.wikisource.org/wiki/Ilusión_y_realidad
-recuperado: 2026-10-12
+recuperado: 2026-10-17
 ---
 Ilusión y realidad
 |titulo = [[Novelas y cuadros de la vida sur-americana]] <br> Ilusión y realidad
 |autor = Soledad Acosta de Samper
 ---
-Ilusión y realidad"},"autor":{"wt":"Soledad Acosta de Samper"}},"i":0}}]}'>
-
 I saw two beings in the hues of youth
 
 standing upon a gentle hill,

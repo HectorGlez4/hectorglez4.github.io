@@ -1,15 +1,11 @@
 fuente: wikisource-es
 obra: Tres novelas ejemplares y un prólogo/Prólogo
 url: https://es.wikisource.org/wiki/Tres_novelas_ejemplares_y_un_pr%C3%B3logo/Pr%C3%B3logo
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Tres novelas ejemplares y un prólogo/Prólogo
 ---
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
-
 PRÓLOGO
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/14"},"num":{"wt":"10"},"formatted":{"wt":"10"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/14","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/14"},"params":{},"i":2}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/15"},"num":{"wt":"11"},"formatted":{"wt":"11"},"quality":{"wt":"1"}},"i":3}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/15","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/15"},"params":{},"i":4}}]}'/>
 
 I
 
@@ -30,8 +26,6 @@ Y llamo ejemplares a estas novelas porque las doy como ejemplo—asi, como suena
 ¡De realidad! ¡De realidad, sí!
 
 Sus agonistas, es decir, luchadores—o si queréis los llamaremos personajes—, son reales, realísimos, y con la realidad más íntima, con la que se dan ellos mismos, en puro querer ser, o en puro querer no ser, y no con la que le den los lectores.
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/18"},"num":{"wt":"14"},"formatted":{"wt":"14"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/18","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/18"},"params":{},"i":2}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/19"},"num":{"wt":"15"},"formatted":{"wt":"15"},"quality":{"wt":"1"}},"i":3}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/19","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/19"},"params":{},"i":4}}]}'/>
 
 II
 
@@ -72,11 +66,9 @@ Mas antes de pasar más adelante cúmpleme explicar que no es lo mismo querer no
 Hay, en efecto, cuatro posiciones, que son: dos positivas: a) querer ser; b) querer no ser; y dos negativas: c) no querer ser; d) no querer no ser. Como se puede: creer que hay Dios; creer que no hay Dios; no creer que hay Dios, y no creer que no hay Dios. Y ni creer que no hay Dios es lo mismo que no creer que hay Dios, ni querer no ser es no querer ser. De 2
 uno que no quiere ser, dificilmente se saca una cria— tur tura poética, de novela; pero de uno que quiere no ser, sí. Y el que quiere no ser, no es, ¡claro!, un suicida.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/20"},"num":{"wt":"16"},"formatted":{"wt":"16"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/20","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/20"},"params":{},"i":1}}]}'> El que quiere no ser lo quiere siendo.
+El que quiere no ser lo quiere siendo.
 
 ¿Qué? ¿Os parece un lío? Pues si esto os parece un lio, y no sois capaces, no ya sólo de comprenderlo, mas de sentirlo y de sentirlo apasionada y trágicamente, no llegaréis nunca a crear criaturas reales, y, por tanto, no llegaréis a gozar de ninguna novela, ni de la de vuestra vida. Porque sabido es que el que goza de una obra de arte es porque la crea en sí, la re—crea y se recrea con ella. Y por eso Cervantes en el prólogo a sus Novelas Ejemplares hablaba de «horas de recreación». Y yo me he recreado con su Licenciado Vidriera, recreándolo en mi al re—crearme.. Y el Licenciado Vidriera era yo mismo.
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/22"},"num":{"wt":"18"},"formatted":{"wt":"18"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/22","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/22"},"params":{},"i":2}}]}'/>
 
 III
 
@@ -85,8 +77,6 @@ Quedamos, pues—digo, me parece que hernos quedado en ello..., en que el hombre
 Comparad a Segismundo con Don Quijote, dos soñadores de la vida. La realidad en la vida de Don Quijote ne fueron los molinos de viento, sino los gigantes. Los molinos eran fenoménicos, aparenciales; los gigantes eran numénicos, sustanciales. El sueño es el que es vida, realidad, creación. La fe misma no es, según San Pablo, sino la sustancia de las cosas que se esperan, y lo que se espera es sueño. Y la fe es la fuente de la realidad, porque es la vida. Creer es crear.
 
 ¿O es que la Odisea, esa epopeya que es una novela, y una novela real, muy real, no es menos real cuando nos cuenta prodigios de ensueño que un realista exclui de su arte?
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/24"},"num":{"wt":"20"},"formatted":{"wt":"20"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/24","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/24"},"params":{},"i":2}}]}'/>
 
 IV
 
@@ -104,13 +94,11 @@ Y ese yo último e íntimo y supremo, ese yo trascendente—o inmanente—quién
 
 Y ahora os digo que esos personajes crepusculares—no de medio dia ni de media noche—que ni quieren ser ni quieren no ser, sino que se dejan llevar y traer, que todos esos personajes de que están llenas nuestras novelas contemporáneas españolas no son, con todos los pelos y señales que les distinguen con sus muletillas y sus tics y sus gestos, no son en su mayoria personas, y que no tienen realidad intima. No hay un momento en que se vacien, en que desnuden su alma.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/25"},"num":{"wt":"21"},"formatted":{"wt":"21"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/25","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/25"},"params":{},"i":1}}]}'> A un hombre de verdad se le descubre, se le crea, en un momento, en una frase, en un grito. Tal en Shakespeare. Y luego que le hayáis así descubierto, creado, lo conocéis mejor que él se conoce a sí mismo acaso.
+A un hombre de verdad se le descubre, se le crea, en un momento, en una frase, en un grito. Tal en Shakespeare. Y luego que le hayáis así descubierto, creado, lo conocéis mejor que él se conoce a sí mismo acaso.
 
 Si quieres crear, lector, por el arte personas, agonistas—trágicos, cómicos o novelescos, no acumules detalles, no te dediques a observar exterioridades de los que contigo conviven, sino trátalos, excitalos si puedes, quiérelos sobre todo, y espera a que un día—acaso nunca—saquen a luz y desnuda el alma de su alma, el que quieren ser, en un grito, en un acto, en una frase, y entonces toma ese su momento, mételo en ti y deja que como un germen se te desarrolle en el personaje de verdad, en el que es de veras real. Acaso tú llegues a saber mejor que tu amigo Juan o que tu amigo Tomás quién es el que quiere ser Juan o el que quiere ser Tomás o quién es el que cada uno de ellos quiere no ser.
 
 Balzac no era un hombre que hacía vida de mundo ni se pasaba el tiempo tomando notas de lo que veía en los demás o de lo que les oia. Llevaba el mundo dentro de sí.
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/28"},"num":{"wt":"24"},"formatted":{"wt":"24"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/28","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/28"},"params":{},"i":2}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/29"},"num":{"wt":"25"},"formatted":{"wt":"25"},"quality":{"wt":"1"}},"i":3}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/29","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/29"},"params":{},"i":4}}]}'/>
 
 V
 
@@ -144,7 +132,7 @@ Sé que en España, hoy, el consumo de novelas lo hacen principalmente mujeres. 
 
 ¡Bueno, más vale callarlo!
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/32"},"num":{"wt":"28"},"formatted":{"wt":"28"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/32","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/32"},"params":{},"i":1}}]}'> Esas señoras y señoritas se extasían, o ante un trajemontado sobre un maniquí, si el traje es de moda, o ante el desvestido o semi—desnudo; pero el desnudo franco y noble les repugna. Sobre todo el desnudo del alma.
+Esas señoras y señoritas se extasían, o ante un trajemontado sobre un maniquí, si el traje es de moda, o ante el desvestido o semi—desnudo; pero el desnudo franco y noble les repugna. Sobre todo el desnudo del alma.
 
 ¡Y así anda nuestra literatura novelescal Literatura... sí, literatura. Y nada més que literatura..
 

@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Mas no ha de salir de aquí (Letrilla satírica)
 url: https://es.wikisource.org/wiki/Mas_no_ha_de_salir_de_aqu%C3%AD_%28Letrilla_sat%C3%ADrica%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Mas no ha de salir de aquí (Letrilla satírica)
 [[Categoría:Poesías de Francisco de Quevedo]]
 |título=Mas no ha de salir de aquí <br> (Letrilla satírica)
 |autor=[[Francisco de Quevedo]]
 ---
-(Letrilla satírica)"},"autor":{"wt":"[[Francisco de Quevedo]]"}},"i":0}}]}'>
-
 Yo, que nunca sé callar,
 
 Y sólo tengo por mengua

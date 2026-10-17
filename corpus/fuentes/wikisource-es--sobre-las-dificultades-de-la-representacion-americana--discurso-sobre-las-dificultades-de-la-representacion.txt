@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Sobre las dificultades de la representación americana
 url: https://es.wikisource.org/wiki/Discurso_sobre_las_dificultades_de_la_representaci%C3%B3n_americana
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Discurso sobre las dificultades de la representación americana
 [[Categoría:Obras de Agustín Argüelles]]
@@ -9,7 +9,7 @@ Discurso sobre las dificultades de la representación americana
 |autor=Agustín Argüelles
 |año=23 de enero de 1811
 ---
-",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Discurso sobre las dificultades de la representación americana (23-01-1811), Agustín de Argüelles.pdf/1"},"num":{"wt":"1"},"formatted":{"wt":"1"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Discurso sobre las dificultades de la representación americana (23-01-1811), Agustín de Argüelles.pdf/1","href":"./Página:Discurso_sobre_las_dificultades_de_la_representación_americana_(23-01-1811),_Agustín_de_Argüelles.pdf/1"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Discurso sobre las dificultades de la representación americana (23-01-1811), Agustín de Argüelles.pdf/2"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"3"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Discurso sobre las dificultades de la representación americana (23-01-1811), Agustín de Argüelles.pdf/2","href":"./Página:Discurso_sobre_las_dificultades_de_la_representación_americana_(23-01-1811),_Agustín_de_Argüelles.pdf/2"},"params":{},"i":3}},"<pageseparator />"]}'>El Sr. ARGÜELLES: Señor, desearía saber si se ha de discutir el voto del Sr. Pérez de Castro, o la proposición que últimamente presentaron los señores americanos; y si retirada la primera, han sustituido en su lugar este voto.
+El Sr. ARGÜELLES: Señor, desearía saber si se ha de discutir el voto del Sr. Pérez de Castro, o la proposición que últimamente presentaron los señores americanos; y si retirada la primera, han sustituido en su lugar este voto.
 
 El Sr. MORALES y DUAREZ: Sobreseemos a nuestra proposición, bajo el primero y segundo modo, y suscribimos al voto del Sr. Diputado europeo.
 

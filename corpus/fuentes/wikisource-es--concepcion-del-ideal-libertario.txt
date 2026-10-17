@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Concepción del Ideal Libertario
 url: https://es.wikisource.org/wiki/Concepci%C3%B3n_del_Ideal_Libertario
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Concepción del Ideal Libertario
 [[Categoría:Obras de Fernando Tarrida del Mármol]]
@@ -56,7 +56,6 @@ Es fácil dar una fórmula matemática muy sencilla de la Felicidad general.
 
 Sea, en un momento dado, p el progreso realizado; a, la cantidad de autoridad existente. Desde el momento que la felicidad está en razón directa de p y en razón inversa de a, la fórmula de la Felicidad F será en aquel momento:
 
-F = c {p \\over a}</math>'''"}},"i":0}}]}'>
 F=cpa
 
 siendo c un coeficiente función de cierto número de cantidades finitas.
@@ -65,7 +64,6 @@ F aumentará cuando p sea más grande o cuando a sea más pequeña. Si ésta dis
 
 Pero p, es decir, el progreso no puede ser infinito. Si pues a llegase a ser cero (0), la fórmula de la Felicidad general, en aquel momento, sería
 
-F = c {p \\over 0} = z</math>'''"}},"i":0}}]}'>
 F=cp0=z
 
 es decir, una cantidad más grande que toda cantidad por grande que sea, o, en otros términos, que no sería ya susceptible de aumento.

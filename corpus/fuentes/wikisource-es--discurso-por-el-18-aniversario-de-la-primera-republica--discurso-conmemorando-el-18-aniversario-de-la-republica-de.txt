@@ -2,7 +2,7 @@ fuente: wikisource-es
 obra: Discurso por el 18º aniversario de la Primera República española
 año: 1891
 url: https://es.wikisource.org/wiki/Discurso_conmemorando_el_18_aniversario_de_la_Rep%C3%BAblica_de_1873
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Discurso conmemorando el 18 aniversario de la República de 1873
 [[Categoría:Obras de Francisco Pi y Margall]]
@@ -11,8 +11,6 @@ Discurso conmemorando el 18 aniversario de la República de 1873
 |autor=Francisco Pi y Margall
 |año=1891
 ---
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Discurso 18º aniversario I República, Pi y Margall.pdf/2"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"3"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Discurso 18º aniversario I República, Pi y Margall.pdf/2","href":"./Página:Discurso_18º_aniversario_I_República,_Pi_y_Margall.pdf/2"},"params":{},"i":2}}]}'>
-
 DISCURSO
 
 pronunciado por el Sr. Pí y Margall en el banquete

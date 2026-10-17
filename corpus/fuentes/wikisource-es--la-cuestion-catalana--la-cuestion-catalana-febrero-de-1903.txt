@@ -1,16 +1,13 @@
 fuente: wikisource-es
 obra: La cuestión catalana
 url: https://es.wikisource.org/wiki/La_cuesti%C3%B3n_catalana_(febrero_de_1903)
-recuperado: 2026-10-15
+recuperado: 2026-10-17
 ---
 La cuestión catalana (febrero de 1903)
 [[Categoría:Obras de Pompeyo Gener]]
 |título=La cuestión catalana
 |autor=Pompeyo Gener
 ---
-[[Pompeyo Gener]] «La cuestión catalana» (febrero de 1903) ''[[Nuestro Tiempo]]'' 26: pp. 201-211.</small>"}},"i":0}}]}'>
-
-Véase {{versalita|Nuestro Tiempo}}, núm. 24, Diciembre 1902. </ref>{{xx-grande|.}}"}},"i":0}}]}'>
 La cuestión catalana
 .
 
@@ -64,7 +61,6 @@ de cómo surgió el catalanismo.—su organización
 
 La primera manifestación moderna de la conciencia catalana como pueblo distinto, fué la célebre oda de Aribau á la patria, y la restauración de los Juegos Florales. Desde un principio la cosa no se presentó más que como una reivindicación de la hermosa lengua lemosina, hablada del Loire á Murcia:
 
-''Que l'univers empliren de llurs costums y lleys''."}},"i":0}}]}'>
 Plaume parlar la llengua d'aquells sabis
 Que l'univers empliren de llurs costums y lleys.
 
@@ -91,6 +87,48 @@ Formada la raza catalana por individuos que ante todo tienen conciencia de su in
 «No solamente han cambiado en jardines y hermosas vegas—dice el eminente sociólogo Mr. E. Demoulins
 —los valles regables que miran hacia el mar, sino que, á su manera, han atacado las pendientes áridas de las montañas y han forzado á la piedra resquebrajada, mezclada con las tierras allí aportadas del llano, á nutrir la viña, el olivo, los cereales, los árboles frutales y hasta la hortaliza, cumpliéndose aquel antiguo adagio que dice:
 
-de las piedras sacan panes.»"}},"i":0}}]}'>
 «Los catalanes
 de las piedras sacan panes.»
+
+Pero como esta agricultura, que por su parte, en lo social, es sólo una pequeña cultura, no basta á dar vida á una población siempre creciente, los catalanes han acudido á la industria, y esto no ya de ahora, sino de todo tiempo. Los paños de Berga, las armas de Ripoll, la joyería, la forja del hierro, las fundiciones de cobres y de bronces, el repujado de metales, el grabado, los vidrios, los cueros y pieles, los astilleros, la fabricación del papel y la del pergamino, eran ya grandes veneros de riqueza en Cataluña durante la Edad Media.»
+
+Así, acaba haciendo constar Mr. Demoulins, que en ninguna región vecina al mar, en Europa ó en América, se hallan tantas industrias diversas reunidas, ni hay tanta densidad industrial como en Cataluña. Cataluña tiene ella sola hoy día más del doble de máquinas y de motores, contando por unidades de fuerza, que todo el resto de la península. Y continúa diciendo: «Antes de la guerra de los albigenses Cataluña era ya la intermediaria de la cultura y de las ideas entre los otros pobres pueblos cristianos de la península y los Estados europeos más civilizados, sobre todo los mediterráneos. Entonces Cataluña propagó al resto de España la lengua, la literatura y la civilización románica ó provenzal; hoy le transmite las ideas y las tendencias europeas.»
+
+«Todas las trabas, todas las exacciones, todos los organismos oficiales del centro contrarios, todo el personal policiaco de investigadores y demás, no ha podido cambiar ni el carácter ni el desarrollo inmenso de Cataluña.»
+
+«La personalidad de Barcelona—dice otro estadista—viene acusándose de día en día, haciendo de ella uno de los centros mercantiles primeros del mundo, por el estilo de Hamburgo. Ninguna otra población de España puede comparársele bajo este aspecto, á pesar de la protección que los gobiernos de España han dado á Cádiz ya desde en tiempos de Isabel la Católica, y de las prohibiciones impuestas á los catalanes en diversas épocas. En sus muelles y en sus almacenes concentra Barcelona sola más de la tercera parte de los cambios de la nación en su interior y en sus exportaciones. Si Barcelona fuese puerto franco y tuviese un municipio autónomo como el de Hamburgo, sería al Sur lo que aquélla es al Norte, y tal vez llegaría á adquirir aún mayor importancia»
+.
+
+El desarrollo del comercio en los pueblos hace surgir primero una clase rica. La primera generación es aún tosca, pues está formada por obreros recién emancipados, rústicos con dinero, exentos de cultura y de todo pulimento. Pero como en la Italia del 1300 al 1500, y en la misma Cataluña medioeval, pronto con la clase rica se origina una clase superior. Esta clase, que cada día se va renovando, teniendo medios, se instruye y se forma conocimientos científicos y gustos literarios y artísticos. Los hijos de los menestrales enriquecidos son ya verdaderos gentlemens, ya viajan por las grandes naciones extranjeras; viven parte del año en París ó en otros grandes centros europeos, y adoptan é importan aquella superior cultura. Y esto es lo que ha pasado con nuestra capital.
+
+Barcelona tiene hoy, á más de sus teatros, más sociedades dramáticas, más sociedades musicales, literarias, de artes plásticas, más escuelas libres y centros docentes, más bibliotecas, más centros y casinos extranjeros, más librerías francesas, alemanas, etc., que Madrid. En cuanto á teatros, casi siempre funcionan en ellos dos ó tres compañías de ópera ó de drama francesas ó italianas. Todos los grandes artistas del mundo pasan por sus coliseos. Varios grupos de aficionados traducen y representan, con gran propiedad escénica, las mejores obras de los autores extranjeros. Barcelona ha visto traducciones de Ibsen, de Bjorson, de Hauptmann, de Maeterlinck, bien antes que Madrid, y aun Madrid, cuando las tiene, es desfiguradas por traductores sin conciencia, que les cambian los finales y les suprimen las mejores escenas. Todo catalán que quiere perfeccionarse en algo, tiene su vista puesta en los centros más cultos de Europa. Los que acaban carreras científicas, vánse á pasar largas temporadas á París y á Alemania para perfeccionarse. Los que siguen las industriales y fabriles van á Inglaterra, á Bélgica ó á Alsacia. Los artistas y los literatos, á París ó á Italia. Y todos vuelven agrandados, con mayor personalidad, con factura más potente y más perfecta, con una inteligencia más humana, más vasta y más comprensiva.
+
+Los padres que tienen medios para ello mandan á sus hijos á los colegios y Liceos de Francia, de Suiza, de Inglaterra ó de Alemania. Raro es el joven de veinte años que en Barcelona, y en cualquiera de los puertos de Cataluña ó de las principales poblaciones del interior, no sepa por lo menos dos lenguas á más de la castellana y la catalana. Estas acostumbran á ser el francés y el italiano. Muchos saben otras lenguas vivas y muertas. La clase obrera catalana es la que se diferencia más de la del resto de toda España. En lugar de emborracharse en las tabernas, van á las sociedades corales ó de instrucción, frecuentan las bibliotecas públicas, asisten en los teatros á los estrenos, especialmente á los de las más renombradas obras extranjeras, y leen la bibliografía de las obras serias que ven la luz en España y fuera de ella, que son las más y las mejores. Tienen Ateneos, centros de lectura, sociedades musicales y sociedades dramáticas. Alternan con los jóvenes intelectuales salidos de las aulas, y con la gente notable de todas las carreras, y más de una vez, en discusiones públicas y en los periódicos, han demostrado una instrucción y un buen sentido raro en los demás puntos de la Península aun en las clases altas. Además, esos obreros viajan, cual los individuos de las clases acomodadas. Para perfeccionarse en sus artes y oficios, toman el tren ó el vapor y emigran á otros puntos de Europa ó del Norte América, y con su trabajo viven, y estudian los adelantos de sus respectivas industrias, volviendo superiores á lo que fueron. Yo he tenido ocasión de observarlo en mis viajes por el extranjero. Apenas he estado en ninguna ciudad un poco importante en que no haya hallado obreros catalanes muy considerados en sus trabajos respectivos.
+
+Otros datos. En general el catalán viaja más que los otros individuos del resto de España. En la última Exposición de París, por cada individuo español de las demás provincias, fueron dieciséis de Cataluña. Además, una gran parte de España ha estado ocupada en el oficio de mandar, en provincias ó en colonias, ó viviendo directa ó indirectamente del Estado. Poblaciones de Castilla ó del centro hay, que se les hace un favor llevándoseles sus hijos al servicio militar, pues luego entran á policías, guardias civiles, criados de políticos, porteros de oficinas, alguaciles, etc., etc., y así tienen la vida asegurada. El catalán, por lo general, siempre ha tenido horror á esto. Quiere vivir de su trabajo y mira de reojo al que vive del presupuesto.
+
+El no haber estado más que pocos años en contacto con los musulmanes, que pronto repasaron el Ebro, ha hecho que el fatalismo oriental, la pereza, la indolencia, el espíritu de rapiña, etc., aquí no arraigaran. Así las influencias sanas de la raza Aria han podido fructificar y desarrollarse. Una continua inmigración pacífica de individuos de otras naciones de Europa que han venido á implantar industrias, ó á hacer el comercio, ha dado por resultado un aumento de civilización y un cosmopolitismo superior. La raza del país, continuamente cruzada con otros elementos europeos pertenecientes al mismo grupo Ario, se ha mejorado. La ciencia antropológica demuestra que los cruces con razas afines superiores mejoran las especies, mientras que si estos cruces se efectúan con razas diferentes y muy distantes, salen tipos híbridos, estériles la mayor parte de las veces, malos casi siempre, pues las diversas sangres incombinables están en lucha en cada individuo. Los mestizos siempre son peores que los tipos aislados de que proceden. Y esto es lo que ha pasado en algunos puntos de España.
+
+Y de esta superioridad étnica y social, los catalanes tienen hoy día pleno conocimiento. Saben que en general no son rebaños humanos, seres acarnerados dispuestos á ser conducidos siempre por lobos que hacen de pastores. Tienen conciencia de su superioridad colectiva sobre las provincias centrales, contra lo que se les venía diciendo en lo que oficialmente se les enseñaba. Se había formado por la pseudociencia oficial la leyenda de un tipo único de español perfecto, el cual era solo, el perfecto castellano. Y todo lo que divergiera ó no se amoldara á este tipo era declarado inferior, ridículo y hasta culpable. Y como ni por raza, ni por cultura, podíamos entrar en ese molde, los catalanes éramos declarados españoles inferiores, españoles irregulares.
+
+Pero con la autocultura de Cataluña, esa ilusión se ha desvanecido. Se han estudiado las razas. La sociología nos ha enseñado la base de las buenas agrupaciones super-orgánicas, y hemos visto que teníamos un nivel muy superior, en cuanto pensábamos y sentíamos por cuenta propia, resultando sólo inferiores al hacerlo á la castellana, y en cuanto nuestro tipo de organización social era el tipo industrial, y no el guerrero y teológico, que predominaba en el resto de España; supervivencia pura de organizaciones muertas. Y un ejemplo lo comprueba. En Cataluña ser muy hombre quiere decir tener mucha fuerza de voluntad, talento, empresa, actividad, etc. En muchos puntos de España significa ser muy bruto, pues del hombre sólo se comprende la valentía de la bestia humana y aun de la cruel bestia africana.
+
+Así se comprende que Cataluña no quiera ni pueda ser un feudo, ó un ensanche de Castilla, ni materia castellanizable, y proteste de la hegemonía central, pues se siente superior al centro. Y de aquí ha surgido el gran movimiento catalanista.
+
+En el próximo artículo pasaremos revista á los diversos elementos de este movimiento, é indicaremos la solución eminentemente española de esta cuestión que á todos preocupa.
+
+Pompeyo GENER.
+
+↑ Véase Nuestro Tiempo, núm. 24, Diciembre 1902.
+
+↑ En la batalla del Muradal, ó sea de Las Navas de Tolosa, asistió el Rey de Aragón con 4.000 caballeros, que eran la flor y nata de su caballería, y 20.000 infantes suministrados por las ciudades y villas catalanas, entre los cuales se contaban más de 8.000 arqueros y ballesteros. En dicho ejército figuraban los principales prohombres de Cataluña, lo mismo de la nobleza que de las letras. En él marcharon el Obispo de Barcelona, el Arzobispo de Tarragona, los Condes del Rosellón y de Ampurias, el Vizconde de Cardona, Gerardo de Cabrera, Guillermo de Cervera, Berenguer de Peramola, Guillermo de Cabestany, el famoso trovador de memorable fin trágico, y Dalmacio de Creixell como general en jefe y director de la ingeniería.
+
+↑ Los castelhaus son de gran ufana e ergaylhosos. No hi ha nes almon que vosaltres no faesetz exir de mesura, per go car faetz totes les coses amb erguyl e cuidatzvas que tat ço que vos voletz dega hom faer.—Crónica del Rey D. Jaime I.—Archivos de la Corona de Aragón.
+
+↑ Por esto, Maquiavelo considera á Fernando como el rey más prudente de su tiempo.
+
+↑ Véase Melo.
+
+↑ La Science sociale, 1899, número de Diciembre.
+
+↑ Van Berg: Memoire sur le commerce de I'Espagne. Auvers, 1898.

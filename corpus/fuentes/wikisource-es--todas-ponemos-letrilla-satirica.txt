@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Todas ponemos (Letrilla satírica)
 url: https://es.wikisource.org/wiki/Todas_ponemos_%28Letrilla_sat%C3%ADrica%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Todas ponemos (Letrilla satírica)
 [[Categoría:Poesías de Francisco de Quevedo]]
 |título=Todas ponemos <br> (Letrilla satírica)
 |autor=[[Francisco de Quevedo]]
 ---
-(Letrilla satírica)"},"autor":{"wt":"[[Francisco de Quevedo]]"}},"i":0}}]}'>
-
 Sabed, vecinas,
 
 Que mujeres y gallinas

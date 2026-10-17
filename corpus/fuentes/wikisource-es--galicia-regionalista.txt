@@ -1,20 +1,17 @@
 fuente: wikisource-es
 obra: Galicia regionalista
 url: https://es.wikisource.org/wiki/Galicia_regionalista
-recuperado: 2026-10-15
+recuperado: 2026-10-17
 ---
 Galicia regionalista
 [[Categoría:Obras de Manuel Murguía]]
 |título=Galicia regionalista
 |autor=Manuel Murguía
 ---
-[[Manuel Murguía]]: «Galicia regionalista» (1886) ''[[La España Regional]]'', año I, tomo II, pp. 3-13</small>"}},"i":0}}]}'>
-
 GALICIA REGIONALISTA.
 
 Discurso leído por el Presidente del Certamen celebrado
 
-En el primer certamen que se ha celebrado exclusivamente gallego y regionalista ha llevado la voz como presidente, en el mes agosto, D. Manuel Murguía, historiador insigne á quien la Redacción de {{versalita|La España Regional}} se complace en contar como compañero; por este motivo la publicación del discurso del señor Murguía es para nosotros un deber, que cumplimos gustosísimos dado lo mucho que como obra literaria vale el discurso y la importancia que á la empresa del regionalismo tiene esta manifestación solemne y conmovedora de las aspiraciones de nuestros amigos de Galicia. — (N. de la R.)</ref>"}},"i":0}}]}'>
 en Pontevedra.
 
 Señoras y Señores:

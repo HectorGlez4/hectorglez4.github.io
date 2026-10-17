@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: El desalojo
 url: https://es.wikisource.org/wiki/El_desalojo
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 El desalojo
 [[Categoría:Teatro de Florencio Sánchez]]
 |titulo = {{PAGENAME}}<br>(1906)
 |autor = Florencio Sánchez
 ---
-(1906)"},"autor":{"wt":"Florencio Sánchez"}},"i":0}}]}'>
-
 Personajes
 
 ENCARGADA

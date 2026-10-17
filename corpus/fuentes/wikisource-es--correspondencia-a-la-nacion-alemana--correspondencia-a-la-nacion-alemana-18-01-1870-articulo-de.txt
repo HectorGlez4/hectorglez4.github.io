@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Correspondencia a la nación alemana
 url: https://es.wikisource.org/wiki/Correspondencia_a_la_naci%C3%B3n_alemana_%2818-01-1870%29._Art%C3%ADculo_de_Emilio_Castelar
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Correspondencia a la nación alemana (18-01-1870). Artículo de Emilio Castelar
 [[Categoría:Obras de Emilio Castelar]]
@@ -9,7 +9,6 @@ Correspondencia a la nación alemana (18-01-1870). Artículo de Emilio Castelar
 |autor=Emilio Castelar
 |año=18 de enero de 1870
 ---
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:A la nación alemana (18-01-1870), Emilio Castelar.pdf/2"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"3"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:A la nación alemana (18-01-1870), Emilio Castelar.pdf/2","href":"./Página:A_la_nación_alemana_(18-01-1870),_Emilio_Castelar.pdf/2"},"params":{},"i":2}}]}'>
 Retiramos nuestro artículo de fondo para dar cabida á una correspondencia de Emilio Castelar, que publican los diarios de Alemania.
 
 Madrid 11 de octubre de 1869.

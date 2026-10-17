@@ -1,12 +1,10 @@
 fuente: wikisource-es
 obra: Autor:César Vallejo
 url: https://es.wikisource.org/wiki/Autor%3AC%C3%A9sar_Vallejo
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Autor:César Vallejo
 ---
-(16 de [[marzo]] de 1892 - 15 de [[abril]] de 1938) <br/> Poeta, escritor, periodista y dramaturgo [[Perú|peruano]]."}},"i":0}}]}'>
-
 César Abraham Vallejo Mendoza
 (16 de marzo de 1892 - 15 de abril de 1938)
 Poeta, escritor, periodista y dramaturgo peruano.

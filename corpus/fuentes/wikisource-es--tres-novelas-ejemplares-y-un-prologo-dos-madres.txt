@@ -1,15 +1,11 @@
 fuente: wikisource-es
 obra: Tres novelas ejemplares y un prólogo/Dos madres
 url: https://es.wikisource.org/wiki/Tres_novelas_ejemplares_y_un_pr%C3%B3logo/Dos_madres
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Tres novelas ejemplares y un prólogo/Dos madres
 ---
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
-
 DOS MADRES
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/36"},"num":{"wt":"32"},"formatted":{"wt":"32"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/36","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/36"},"params":{},"i":2}}]}'/>
 
 I
 
@@ -37,7 +33,7 @@ DON JUAN.—Casarnos asi, según la ley, y adoptar un hijo...
 
 RAQUEL. ¡Adoptar un hijo...! ¡Adoptar un hijo...! Sólo te faltaba decir que del Hospicio...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/37"},"num":{"wt":"33"},"formatted":{"wt":"33"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/37","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/37"},"params":{},"i":1}}]}'> DON JUAN.—Oh, no! Aquel sobrinillo tuyo, por ejemplo...
+DON JUAN.—Oh, no! Aquel sobrinillo tuyo, por ejemplo...
 
 RAQUEL. Ya te he dicho, Juan, que no hables de eso..., que no vuelvas a hablar de eso... Mi hermana, visto que tenemos fortuna...
 
@@ -64,7 +60,7 @@ RAQUEL—¡Bien! Pero tú puedes darme un hijo.
 TRES NOVELAS 3
 Tv.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/38"},"num":{"wt":"34"},"formatted":{"wt":"34"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/38","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/38"},"params":{},"i":1}}]}'> ¿Cómo? Engendrándolo en otra mujer, hijo tuyo, y entregándomelo luego. ¡Y quiéralo ella o no lo quiera, que lo quiero yo y basta!
+¿Cómo? Engendrándolo en otra mujer, hijo tuyo, y entregándomelo luego. ¡Y quiéralo ella o no lo quiera, que lo quiero yo y basta!
 
 DON JUAN.—Pero cómo quieres que yo quiera a otra mujer...
 
@@ -92,7 +88,7 @@ A decir esto se reía con una risa que sonaba a llanto.
 
 RAQUEL.—Será tu mujer, y de tu mujer, ¡claro está!, no podré tener celos...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/39"},"num":{"wt":"35"},"formatted":{"wt":"35"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/39","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/39"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/40"},"num":{"wt":"36"},"formatted":{"wt":"36"},"quality":{"wt":"1"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/40","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/40"},"params":{},"i":3}}]}'> DON JUAN.—Pero ella los tendrá de ti...
+DON JUAN.—Pero ella los tendrá de ti...
 
 RAQUEL. ¡Natural! Y ello ayudará a nuestra obra.
 
@@ -144,7 +140,7 @@ RAQUEL.—Quién sabe... Pero antes dame el hijo....
 
 ¿Lo oyes? Ahí está la angelical Berta Lapeira. ¡Angelicall Ja... ja... ja...` DON JUAN,—Y tú, demoníacal—gritó el hombre poniéndose en pie y costándole tenerse así.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/41"},"num":{"wt":"37"},"formatted":{"wt":"37"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/41","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/41"},"params":{},"i":1}}]}'> RAQUEL.—El demonio también es un ángel, michino...
+RAQUEL.—El demonio también es un ángel, michino...
 
 DON JUAN. Pero un ángel caido...
 
@@ -168,7 +164,7 @@ II
 
 Don Juan conocía a Berta desde la infancia. Eran relaciones de familia. Los padres de don Juan, huérfano y solo desde muy joven, habían sido grandes amigos de don Pedro Lapeira y de su señora. Éstos se habían siempre interesado por aquél y habíanse dolido como nadie de sus devaneos y de sus enredos con aventureras de ocasión. De tal modo, que cuando el pobre náufrago de los amores—que no del amor—recaló en el puerto de la viuda estéril, alegráronse como de una ventura del hijo de sus amigos, sin sospechar que aquel puerto era un puerto de tormentas.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/44"},"num":{"wt":"40"},"formatted":{"wt":"40"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/44","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/44"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/45"},"num":{"wt":"41"},"formatted":{"wt":"41"},"quality":{"wt":"1"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/45","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/45"},"params":{},"i":3}}]}'> Porque contra lo que creía don Juan, el sesudo ma trimonio Lapeira estimaba que aquella relación era ya a modo de un matrimonio, que don Juan necesitaba de una voluntad que supliera a la que le faltaba, y que si llegaban a tener hijos, el de sus amigos estaba salvado. Y de esto hablaban con frecuencia en sus comentarios domésticos, en la mesa, a la tragicomedia de la ciudad, sin recatarse delante de su hija, de la angelical Berta, que de tal modo fué interesándose por don Juan.
+Porque contra lo que creía don Juan, el sesudo ma trimonio Lapeira estimaba que aquella relación era ya a modo de un matrimonio, que don Juan necesitaba de una voluntad que supliera a la que le faltaba, y que si llegaban a tener hijos, el de sus amigos estaba salvado. Y de esto hablaban con frecuencia en sus comentarios domésticos, en la mesa, a la tragicomedia de la ciudad, sin recatarse delante de su hija, de la angelical Berta, que de tal modo fué interesándose por don Juan.
 
 Pero Berta, cuando oía a sus padres lamentarse de que Raquel no fuese hechia madre por don Juan y que luego se anudase para siempre y ante toda ley divina y humana—o mejor teocrática y democrática—aquel enlace de aventura, sentía dentro de si el deseo de que no fuera eso, y soñaba luego, a solas, con poder llegar a ser el ángel redentor de aquel náufrago de los amores y el que le sacase del puerto de las tormentas.
 
@@ -190,7 +186,7 @@ DON PEDRO.—Nuestra Tomasa, ¿te recuerdas?, hablaria de un bebedizo...
 
 DOÑA MARTA.—Sí tenía gracia lo del bebedizo... Si la pobre se hubiese mirado a un espejo...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/46"},"num":{"wt":"42"},"formatted":{"wt":"42"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/46","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/46"},"params":{},"i":1}}]}'> DON PEDRO. Y si hubiese visto cómo le habían dejado sus nueve partos y el tener que trabajar ian duro... Y si hubiese sido capaz de ver bien a la otra...
+DON PEDRO. Y si hubiese visto cómo le habían dejado sus nueve partos y el tener que trabajar ian duro... Y si hubiese sido capaz de ver bien a la otra...
 
 DOÑA MARTA.—Así sois los hombres... Unos puercos todos...
 
@@ -224,7 +220,7 @@ DOÑA MARTÁ.—Y aunque así sea... Tiene mucho, mucho, y aunque sacrifique alg
 
 DON PEDRO. Es verdad...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/47"},"num":{"wt":"43"},"formatted":{"wt":"43"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/47","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/47"},"params":{},"i":1}},"<pageseparator />",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/48","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/48"},"params":{},"i":2}},"<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/49"},"num":{"wt":"—"},"formatted":{"wt":"—"},"quality":{"wt":"1"}},"i":3}},"</span>"]}'> DOÑA MARTA.—Tenemos que redimirle, Pedro; nos lo piden sus padres...
+DOÑA MARTA.—Tenemos que redimirle, Pedro; nos lo piden sus padres...
 
 DON PEDRO. Y hay que hacer que nos lo pida tambien nuestra hija.
 
@@ -242,7 +238,7 @@ DON JUAN.—Hermana... Hermana...
 
 BERTA.—¿Qué? No te gusta eso de hermana...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/50"},"num":{"wt":"46"},"formatted":{"wt":"46"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/50","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/50"},"params":{},"i":1}}]}'> DON JUAN.—No la tuve; apenas si conocí a mi madre...
+DON JUAN.—No la tuve; apenas si conocí a mi madre...
 
 No puedo decir que he conocido mujer...
 
@@ -280,7 +276,7 @@ DON JUAN.¡Casándote conmigo!
 
 BERTA.— Acabáramos! ¿Quieres, pucs, casarte conmigo?
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/51"},"num":{"wt":"47"},"formatted":{"wt":"47"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/51","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/51"},"params":{},"i":1}}]}'> DON JUAN.—¡Claro!
+DON JUAN.—¡Claro!
 
 BERTA. Claro? ¡Obscuro! ¿Quieres casarte conmigo?
 
@@ -318,7 +314,7 @@ BERTA. Y que luche con la voluntad de ella...
 
 DON JUAN. Así es...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/52"},"num":{"wt":"48"},"formatted":{"wt":"48"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/52","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/52"},"params":{},"i":1}}]}'> BERTA.—¡Pues así será!
+BERTA.—¡Pues así será!
 
 DON JUAN. ¡Oh Berta..., Berta...!
 
@@ -329,8 +325,6 @@ DON JUAN. Y ellos, Bertat BERTA. Pero eres tan simple, Juan, como para no ver qu
 DON JUAN.—Entonces...
 
 BERTA.— Que acudiremos todos a salvarte.
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/54"},"num":{"wt":"50"},"formatted":{"wt":"50"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/54","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/54"},"params":{},"i":2}}]}'/>
 
 IV
 
@@ -344,7 +338,7 @@ Y esto supo la astuta mujer mantenerlo secreto. Y a la vez conocía mejor que na
 
 RAQUEL.—Mira, Juan, dentro de poco, tal vez antes de que os caséis, y en todo caso poco después de vuestra boda, la pequeña fortuna de los padres de Berta, la de tu futura esposa...., esposa, ¿eh?, no mujer, ¡esposa...!, la de tu futura esposa, será mía..., es decir, nuestra...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/55"},"num":{"wt":"51"},"formatted":{"wt":"51"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/55","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/55"},"params":{},"i":1}}]}'> DON JUAN.
+DON JUAN.
 
 Nuestra?
 
@@ -374,7 +368,7 @@ DON JUAN.—Pero dime, Quelina, dime—y al decirlo le lloraba la voz—, ¿por 
 
 RAQUEL. ¡A estas horas estarias, después de arruinado, muerto de miseria y de podredumbre!
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/56"},"num":{"wt":"52"},"formatted":{"wt":"52"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/56","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/56"},"params":{},"i":1}}]}'> DON JUAN.—¡Mejor, Raquel, mejor! Muerto, sí; muerto de miseria y de podredumbre. ¿No es esto miseria?
+DON JUAN.—¡Mejor, Raquel, mejor! Muerto, sí; muerto de miseria y de podredumbre. ¿No es esto miseria?
 
 ¿No es podredumbre? ¿Es que soy mío? ¿Es que soy yo?
 
@@ -400,7 +394,7 @@ RAQUEL. Y ella será tu esposa. ¡Esposa!, así dicen los zapateros: «¡Mi espo
 
 DON JUAN. Y si no le tenemos?
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/57"},"num":{"wt":"53"},"formatted":{"wt":"53"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/57","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/57"},"params":{},"i":1}}]}'> RAQUEL.—¡Calla, Juan, calla! ¿Si no le tenéis? ¿Si no nos lo da...? Soy capaz de...
+RAQUEL.—¡Calla, Juan, calla! ¿Si no le tenéis? ¿Si no nos lo da...? Soy capaz de...
 
 DON JUAN. ¡Calla, Raquel, que la ronquera de tu voz me da miedo!
 
@@ -413,8 +407,6 @@ Raquel le echó de sí con gesto brusco, se puso en pie como herida, miró a Jua
 RAQUEL. ¡No, ven; ven, Juan, ven! ¡Hijo mio! ¡Hijo mío! ¿Para qué quiero más hijo que tú? ¿No eres mi hijo?
 
 Y tuvo que acostarle, calenturiento y desvanecido.
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/60"},"num":{"wt":"56"},"formatted":{"wt":"56"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/60","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/60"},"params":{},"i":2}}]}'/>
 
 V
 
@@ -458,7 +450,7 @@ Raquel dobló al suelo la cara, que se le puso de repente intensamente palida, y
 
 RAQUEL.—Lo que hace falta es que todo ello fructifique...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/61"},"num":{"wt":"57"},"formatted":{"wt":"57"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/61","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/61"},"params":{},"i":1}}]}'> Como Juan se le acercara en busca dei beso de despedida—beso húmedo y largo y de toda la boca otras veces—, la viuda le rechazó diciéndole:
+Como Juan se le acercara en busca dei beso de despedida—beso húmedo y largo y de toda la boca otras veces—, la viuda le rechazó diciéndole:
 
 RAQUEL. No, jahora ya no! Ni quiero que se lo lleves a ella ni quiero quitárselo.
 
@@ -496,7 +488,7 @@ RAQUEL. —Bah! De las mujeres...
 
 BERTA. Y he sabido apreciar también su generosidad...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/64"},"num":{"wt":"60"},"formatted":{"wt":"60"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/64","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/64"},"params":{},"i":1}}]}'> RAQUEL—Generosidad? ¿Por qué? ¡Ah, sí, ya caigo!
+RAQUEL—Generosidad? ¿Por qué? ¡Ah, sí, ya caigo!
 
 ¡Pues, no, no! ¿Cómo iba a ligarle a mi suerte? Porque, en efecto, él quiso casarse conmigo...
 
@@ -532,7 +524,7 @@ BERTA. Y cómo...?
 
 RAQUEL—¡Fuí casada!
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/65"},"num":{"wt":"61"},"formatted":{"wt":"61"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/65","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/65"},"params":{},"i":1}}]}'> BERTA. JAh, si; es cierto que es usted viuda!
+BERTA. JAh, si; es cierto que es usted viuda!
 
 RAQUEL. Viuda... Viuda... Siempre lo fuí. Creo que naci viuda... Mi verdadero marido se me murió antes de yo nacer... ¡Pero dejémonos de locuras y desvaríos! ¿Y cómo lleva a Juan?
 
@@ -564,7 +556,7 @@ RAQUEL. A Ser madre! Esa es su obligación. ¡Ya que yo no he podido serlo, séa
 
 Hubo otro silencio opresor, que rompió Berta exclamando:
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/66"},"num":{"wt":"62"},"formatted":{"wt":"62"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/66","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/66"},"params":{},"i":1}}]}'> BERTA.¡Y lo seré!
+BERTA.¡Y lo seré!
 
 RAQUEL. ¡Gracias a Dios! ¿No le pregunté si venía acá a buscar la voluntad de Juan? ¡Pues la voluntad de Juan, de nuestro hombre, es ésa, es hacerse padre!
 
@@ -585,8 +577,6 @@ BERTA. A mis padres?
 RAQUEL, Sí, cuestión de negocios... Para consolarme de mi viudez me dedico a negocios, a empresas financieras...
 
 Y después de cerrar la puerta, murmuró: ¡Pobre esposa!
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/68"},"num":{"wt":"64"},"formatted":{"wt":"64"},"quality":{"wt":"1"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/68","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/68"},"params":{},"i":2}}]}'/>
 
 VII
 
@@ -624,7 +614,7 @@ BERTA.¿Qué bebedizo te ha dado, Juan?
 
 DON JUAN. Ya salió aquello...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/69"},"num":{"wt":"65"},"formatted":{"wt":"65"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/69","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/69"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/70"},"num":{"wt":"66"},"formatted":{"wt":"66"},"quality":{"wt":"1"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/70","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/70"},"params":{},"i":3}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/71"},"num":{"wt":"—"},"formatted":{"wt":"—"},"quality":{"wt":"1"}},"i":4}},"</span>"]}'> BERTA.— Pero ahora serás mío, sólo mio...
+BERTA.— Pero ahora serás mío, sólo mio...
 
 «¡Miol, ¡mío!—pensó Juan—. ¡Así dicen las dos!» BERTA. Tenemos que ir a verla!
 
@@ -680,7 +670,7 @@ DOÑA MARTA. Pero, por Dios, señora...
 
 RAQUEL. ¿Qué, no soy una buena amniga de la casa?
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/72"},"num":{"wt":"68"},"formatted":{"wt":"68"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/72","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/72"},"params":{},"i":1}}]}'> DOÑA MARTA.—Sí, sí; pero que no lo sepa..., que no le oiga...
+DOÑA MARTA.—Sí, sí; pero que no lo sepa..., que no le oiga...
 
 RAQUEL Y si me oye, ¿qué?
 
@@ -714,7 +704,7 @@ DON PEDRO.—NO; hay que afrontar la murmuración pública. Y más cuando va ext
 
 DON JUAN.—Sin duda!
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/74"},"num":{"wt":"70"},"formatted":{"wt":"70"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/74","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/74"},"params":{},"i":1}}]}'> DON PEDRO. Bástele, pues, a cada cual su conciencia.
+DON PEDRO. Bástele, pues, a cada cual su conciencia.
 
 Y miró don Pedro a su mujer como quien ha dicho una cosa profunda que le realza a los ojos de la que mejor le debe conocer.
 
@@ -728,7 +718,7 @@ Al poco, Raquel, la madrina, se instalaba casi en la casa y empezaba a disponerl
 
 Porque no me parece que en el estado en que se queda sea prudente querer criar a la niña. Correrían peligro las dos vidas...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/75"},"num":{"wt":"71"},"formatted":{"wt":"71"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/75","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/75"},"params":{},"i":1}}]}'> Los ojos de Berta se llenaron de lágrimas.
+Los ojos de Berta se llenaron de lágrimas.
 
 RAQUEL. Sí, lo comprendo, es muy natural. Sé lo que es una madre; pero la prudencia ante todo... Hay que guardarse para otras ocasiones...
 
@@ -756,7 +746,7 @@ RAQUEL—No quiera saber más, Berta. ¿Para qué...?
 
 ¡No; ella, Berta, no podía querer saber más! [Sabía ya demasiado! ¡Ojalá no supiera tanto! ¡Ojalá no se hubiera dejado tentar de la serpiente a probar de la fruta del árbol de la ciencia del bien y del mal! Y sus padres, sus buenos padres, parecían como huídos de la casa.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/78"},"num":{"wt":"74"},"formatted":{"wt":"74"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/78","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/78"},"params":{},"i":1}}]}'> Había que llevarles la nietecita a que la vieran. ¡Y era la nodriza quien se la llevaba...!
+Había que llevarles la nietecita a que la vieran. ¡Y era la nodriza quien se la llevaba...!
 
 Lo que sintió entonces Berta fué encendérsele en el pecho una devoradora compasión de su hombre, de su pobre Juan. Tomábale en sus brazos flacos como para ampararle de algún enemigo oculto, de algún terrible peligro, y apoyando su cabeza sudorosa y desgreñada sobre el hombro de su marido lloraba, lloraba, lloraba, mientras su pecho, agitado por convulsos sollozos, latía sobre el pecho acongojado del pobre don Juan. Y como una de estas veces la esposa madre gimiese «¡Hijo mío! ¡Hijo mío...! ¡Hijo mío...!, quedóse luego como muerta de terror al ver la congoja de muerte que crispó, enjabelgándola, la cara de su Juan.
 
@@ -774,7 +764,7 @@ DON JUAN.—No digas eso...., no digas eso..., no digas eso...
 
 Berta adivinó todo el tormento de su hombre. Y se propuso irlo ganando, ahijándolo, rescatándoselo. Aunque para ello hubiese que abandonar y que entregar a la hija. Quería su hombre, ¡su hombre!
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/79"},"num":{"wt":"75"},"formatted":{"wt":"75"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/79","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/79"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/80"},"num":{"wt":"76"},"formatted":{"wt":"76"},"quality":{"wt":"1"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/80","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/80"},"params":{},"i":3}}]}'> y él, el hombre, Juan, iba sintiéndose por su parte hombre, hombre más que padre. Sentía que para Raquel no fué más que un instrumento, un medio. ¿Un medio de qué? ¿De satisfacer un furioso hambre de maternidad: ¿O no más bien una extraña venganza, una venganza de otros mundos? Aquellas extrañas canciones de cuna que en lengua desconocida cantaba Raquel a Quelina, no a su ahijada, sino a su hija—su hija, sí, la de la viuda—, ¿hablaban de una dulce venganza, de una venganza suave y adormecedora como un veneno que hace dormirse? ¡Y cómo le miraba ahora Raquel a él, a su Juan! Y le buscaba menos que antes.
+y él, el hombre, Juan, iba sintiéndose por su parte hombre, hombre más que padre. Sentía que para Raquel no fué más que un instrumento, un medio. ¿Un medio de qué? ¿De satisfacer un furioso hambre de maternidad: ¿O no más bien una extraña venganza, una venganza de otros mundos? Aquellas extrañas canciones de cuna que en lengua desconocida cantaba Raquel a Quelina, no a su ahijada, sino a su hija—su hija, sí, la de la viuda—, ¿hablaban de una dulce venganza, de una venganza suave y adormecedora como un veneno que hace dormirse? ¡Y cómo le miraba ahora Raquel a él, a su Juan! Y le buscaba menos que antes.
 
 Pero cuando le buscaba y le encontraba, eran los antiguos encuentros, sólo que más sombrios y más frenéticos.
 
@@ -800,7 +790,7 @@ Pues que a mí me ha hecho ya madre, que te haga madre a ti. Y que puedas llamar
 
 BERTA. Es decir, que tú...
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/81"},"num":{"wt":"77"},"formatted":{"wt":"77"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/81","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/81"},"params":{},"i":1}}]}'> RAQUEL—¡Yo soy aquí la madre de verdad, yol Entonces Berta, fuera de sí, cogió a su marido, que se dejaba hacer, del brazo, arrancándolo de bajo el yugo de Raquel, se lo presentó a ésta y le gritó:
+RAQUEL—¡Yo soy aquí la madre de verdad, yol Entonces Berta, fuera de sí, cogió a su marido, que se dejaba hacer, del brazo, arrancándolo de bajo el yugo de Raquel, se lo presentó a ésta y le gritó:
 
 BERTA. ¡Pues bien, no! La madre soy yo, yo, yo....
 
@@ -838,7 +828,7 @@ BERTA. Y la fortuna de Juan?
 
 RAQUEL. ¡Juan no deja fortuna alguna...! Todo lo que hay aquí es mío! ¡Y si no lo sabías, ya lo sabes!
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Tres novelas ejemplares y un prólogo (1920).pdf/84"},"num":{"wt":"80"},"formatted":{"wt":"80"},"quality":{"wt":"1"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Tres novelas ejemplares y un prólogo (1920).pdf/84","href":"./Página:Tres_novelas_ejemplares_y_un_prólogo_(1920).pdf/84"},"params":{},"i":1}}]}'> BERTA. ¡Ladrona! ¡Ladrona! ¡Ladrona!
+BERTA. ¡Ladrona! ¡Ladrona! ¡Ladrona!
 
 RAQUEL.Esas son palabras, y no sabes quién le ha robado a quién. Acaso la ladrona eres tú...; las ladronas sois vosotras, las de tu condición. Y no quiero que hagáis de mi Quelina, de mi hija, ,una ladrona como vosotras... Y ahora piénsalo bien con tus padres. Piensa si os conviene vivir como mendigos, o en paz con la ladrona...
 

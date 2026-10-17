@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Carta a Andrés escrita desde las Batuecas por «El Pobrecito Hablador»
 url: https://es.wikisource.org/wiki/Carta_a_Andr%C3%A9s_escrita_desde_las_Batuecas_por_%C2%ABEl_Pobrecito_Hablador%C2%BB
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Carta a Andrés escrita desde las Batuecas por «El Pobrecito Hablador»
 [[Categoría:Artículos de Mariano J. de Larra]]
@@ -31,7 +31,6 @@ Ahí van, pues, esas mis incultas ideas, tales cuales son, mal o bien compaginad
 
 Esa breve dudilla se me ofrece por hoy, y nada más.
 
-o no se escribe porque no se lee?»"}},"i":0}}]}'>
 «¿No se lee en este país porque no se escribe,
 o no se escribe porque no se lee?»
 

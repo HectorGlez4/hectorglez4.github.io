@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: La cuestión catalana
 url: https://es.wikisource.org/wiki/La_cuesti%C3%B3n_catalana_(diciembre_de_1902)
-recuperado: 2026-10-15
+recuperado: 2026-10-17
 ---
 La cuestión catalana (diciembre de 1902)
 [[Categoría:Obras de Pompeyo Gener]]
 |título=La cuestión catalana
 |autor=Pompeyo Gener
 ---
-[[Pompeyo Gener]] «La cuestión catalana» (diciembre de 1902) ''[[Nuestro Tiempo]]'' 24: pp. 733-738.</small>"}},"i":0}}]}'>
-
 La cuestión catalana.
 
 (Ó SEA EL CATALANISMO)

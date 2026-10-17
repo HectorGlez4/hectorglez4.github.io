@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Satiricón (Selección), capítulos 62-75
 url: https://es.wikisource.org/wiki/Satiric%C3%B3n_(Selecci%C3%B3n)%2C_cap%C3%ADtulos_62-75
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Satiricón (Selección), capítulos 62-75
 |título=Satiricón (Selección), capítulos 62-75 <br> Traducción de <br>Mario Colago Sánchez
 |autor=Petronio
 ---
-Traducción de <br>Mario Colago Sánchez"},"autor":{"wt":"Petronio"},"sección":{"wt":""}},"i":0}}]}'>
-
 [LXII] "Forte dominus Capuae exierat ad scruta scita expedienda. Nactus ego occasionem persuadeo hospitem nostrum, ut mecum ad quintum miliarium veniat. Erat autem miles, fortis tanquam Orcus. Apoculamus nos circa gallicinia; luna lucebat tanquam meridie. Venimus inter monimenta: homo meus coepit ad stelas facere; sedeo ego cantabundus et stelas numero. Deinde ut respexi ad comitem, ille exuit se et omnia vestimenta secundum viam posuit. Mihi anima in naso esse; stabam tanquam mortuus. At ille circumminxit vestimenta sua, et subito lupus factus est. Nolite me iocari putare; ut mentiar, nullius patrimonium tanti facio. Sed, quod coeperam dicere, postquam lupus factus est, ululare coepit et in silvas fugit.
 
 -Por suerte, mi amo se había marchado a Capua para poner a punto unos vestidos viejos que él conocía. Aprovechando yo la ocasión, persuado a nuestro huésped para que venga conmigo hasta la quinta piedra miliar. Era un soldado, valiente como Orco. Salimos alrededor de la hora del primer canto del gallo; la luna brillaba como si fuese mediodía. Llegamos a la zona rodeada de monumentos sepulcrales: mi hombre empezó a ir por entre las estelas; yo me siento y, canturreando, cuento las estelas. Luego, cuando volví a mirar hacia mi compañero, él estaba desnudo y había puesto toda su ropa a lo largo del camino. Sólo me quedaba vida en la nariz; permanecí inmóvil como un muerto. Entonces él orinó alrededor de su ropa y, de repente, se convirtió en lobo. No queráis pensar que estoy bromeando; que yo no mentiría a nadie por todo el patrimonio del mundo. Pero, como venía diciendo, después de que se convirtiera en lobo, empezó a aullar y huyó hacia los bosques.

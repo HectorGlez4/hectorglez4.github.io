@@ -1,12 +1,10 @@
 fuente: wikisource-es
 obra: Proclamas del general San Martín/A los habitantes de las provincias del Río de la Plata
 url: https://es.wikisource.org/wiki/Proclamas_del_general_San_Mart%C3%ADn%3A_A_los_habitantes_de_las_provincias_del_R%C3%ADo_de_la_Plata
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Proclamas del general San Martín/A los habitantes de las provincias del Río de la Plata
 ---
-[[File:Yes Check Circle.svg|16px|link=Ayuda:Nivel de las páginas|validada]]</span>"}}'/>[[File:Yes Check Circle.svg|16px|link=Ayuda:Nivel de las páginas|validada]]</span>"}}'/>
-
 A los habitantes de las provincias del Rio de la Plata.
 
 Compatriotas: — Se acerca el momento en que yo debo seguir el destino que me llama: voy á emprender la grande obra de dar la libertad al Perú. Mas antes de mi partida, quiero deciros algunas verdades, que sentiría las acabaseis de conocer por experiencia. Tambien ós manifestaré las quejas que tengo, no de los hombres imparciales y bien intencionados, cuya opinion me ha consolado siempre; sino de algunos que conocen poco sus propios intereses, y los de su pais; porque al fin la calumnia como todos los crímenes, no es sino obra de la ignorancia y del discernimiento pervertido.
@@ -17,7 +15,7 @@ El genio del mal os ha inspirado el delirio de la federación: esta palabra est�
 
 Compatriotas: yo os hablo con la franqueza de un soldado: si dóciles á la experiencia de diez años de conflictos, no dais á vuestros deseos una direccion mas prudente, temo que cansados de la anarquía, suspireis al fin por la opresion, y recibais el yugo del primer aventurero feliz que se presente, quien léjos de fijar vuestro destino, no hará mas que prolongar vuestra incertidumbre.
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Proclamas del general San Martín.djvu/2"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"4"}},"i":0}},"</span>",{"template":{"target":{"wt":"#lst:Página:Proclamas del general San Martín.djvu/2","function":"lst"},"params":{"1":{"wt":"p2"}},"i":1}}]}'> Voy ahora á manifestaros las quejas que tengo, no porque el silencio sea una prueba dificil para mis sentimientos, sino porque yo no debo dejar en perplejidad á los hombres de bien, ni puedo abandonar enteramente á la posteridad el juicio de mi conducta, calumniada por hombres, en quienes la gratitud algun dia recobrará sus derechos.
+Voy ahora á manifestaros las quejas que tengo, no porque el silencio sea una prueba dificil para mis sentimientos, sino porque yo no debo dejar en perplejidad á los hombres de bien, ni puedo abandonar enteramente á la posteridad el juicio de mi conducta, calumniada por hombres, en quienes la gratitud algun dia recobrará sus derechos.
 
 Yo servia en el ejército español en 811: veinte años de honrados servicios me habian atraido alguna consideracion, sin embargo de ser americano: supe la revolucion de mi pais, y al abandonar mi fortuna y mis esperanzas, solo sentia no tener mas que sacrificar al deseo de contribuir á la libertad de mi patria: llegué á Buenos-Ayres á principios de 812, y desde entonces me consagré á la causa de América: sus enemigos podrán decir, si mis servicios han sido útiles.
 

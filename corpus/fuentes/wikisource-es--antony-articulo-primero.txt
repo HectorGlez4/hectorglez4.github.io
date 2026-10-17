@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Antony - Artículo primero
 url: https://es.wikisource.org/wiki/Antony_-_Art%C3%ADculo_primero
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Antony - Artículo primero
 [[Categoría:Artículos de Mariano J. de Larra]]
 |título=Antony : drama nuevo en cinco actos, de Alejandro Dumas.<br> Artículo primero
 |autor=[[Mariano José de Larra]]
 ---
-Artículo primero"},"autor":{"wt":"[[Mariano José de Larra]]"},"notas":{"wt":""}},"i":0}}]}'>
-
 Consideraciones acerca de la moderna escuela francesa.- Estado de la España. Inoportunidad de estos dramas entre nosotros.
 
 Por hoy y hasta mañana seremos graves: la primera impresión de este drama, más importante de lo que a primera vista parece, no nos deja disposición alguna para la risa con que suele Fígaro anatematizar los dislates que se agolpan en nuestra escena; no renunciamos sin embargo a ese derecho; no hacemos sino suspenderlo. Antony merece ser combatido con todas las armas: ojalá no sean todas de poco efecto contra tan formidable enemigo.

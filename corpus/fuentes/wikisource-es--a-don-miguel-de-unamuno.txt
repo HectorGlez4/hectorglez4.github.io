@@ -1,13 +1,11 @@
 fuente: wikisource-es
 obra: A don Miguel de Unamuno
 url: https://es.wikisource.org/wiki/A_don_Miguel_de_Unamuno
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 A don Miguel de Unamuno
 [[Categoría:Poesías de Antonio Machado]]
 ---
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
-
 XIII
 
 A DON MIGUEL DE UNAMUNO
