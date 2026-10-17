@@ -2151,7 +2151,7 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     }),
   );
 
-  /** Cada Cita publicada, con el slug de su Autor y la obra de su Procedencia. */
+  /** Cada Cita publicada, con el slug de su Autor, la obra de su Procedencia y su Fuente. */
   const citas = ficherosDe(join(raiz, 'corpus/citas'), /\.md$/).map((fichero) => {
     const contenido = readFileSync(join(raiz, 'corpus/citas', fichero), 'utf8');
     // Un fichero sin frontmatter no tumba el bloque: se queda sin campos y lo dice la
@@ -2159,6 +2159,7 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     const frontmatter = (parsearYaml(contenido.split('---')[1] ?? '') ?? {}) as {
       autor?: string;
       procedencia?: { obra?: string };
+      fuente?: { url?: string };
     };
     return { fichero, ...frontmatter };
   });
@@ -2169,12 +2170,33 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     if (analizado === undefined) return undefined;
     return {
       fuente: analizado.cabecera.fuente,
+      url: analizado.cabecera.url,
       ...derivarDeLaDeclaracion(analizado.cabecera.fuente, analizado.declaracion),
     };
   }
 
   /**
-   * Los Autores del Corpus que ya publicaron desde ese documento.
+   * Los Autores de las Citas que declaran este documento como su Fuente, por su `url`.
+   *
+   * Es el lado que no se equivoca de documento. Casar por obra confunde a los homónimos
+   * —«El duelo» de Larra con el de Barrett, «La guerra» de Mirbeau con la de Barrett, «El
+   * Estado» de Bastiat con el de González Prada—, y la siembra en barrido del 11/10/2026 trajo
+   * los tres a la vez: la puerta rechazaba a Barrett contra un documento del que no ha salido
+   * ninguna Cita suya. Es la misma clave con la que `retirar` decide si un documento sostiene
+   * algo.
+   */
+  function autoresQueLoCitan(fichero: string): string[] {
+    const url = derivadoDe(fichero)?.url;
+    if (url === undefined) return [];
+    const slugs = new Set<string>();
+    for (const cita of citas) {
+      if (cita.autor !== undefined && cita.fuente?.url === url) slugs.add(cita.autor);
+    }
+    return [...slugs];
+  }
+
+  /**
+   * Los Autores del Corpus que ya publicaron desde ese documento, **por su obra**.
    *
    * La Cita no apunta a un documento concreto: apunta a su **obra**. Así que los dos
    * lados se pasan por el mismo ayudante —la obra que el documento declara y la que la
@@ -2196,6 +2218,54 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     return [...slugs];
   }
 
+  /** Páginas que la Fuente no firma y de las que ya salieron Citas: ver la prueba que la usa. */
+  const SIN_FIRMA_DE_LA_FUENTE: string[] = [
+    'wikisource-es--carta-de-bernardo-o-higgins-al-pueblo-de-chile-17-julio-de.txt',
+    'wikisource-es--carta-de-diego-portales-a-antonio-garfias-13-de-mayo-de-1832.txt',
+    'wikisource-es--carta-de-diego-portales-a-diego-jose-benavente-29-de-julio.txt',
+    'wikisource-es--carta-de-diego-portales-a-diego-jose-benavente-6-de.txt',
+    'wikisource-es--carta-de-diego-portales-a-joaquin-tocornal-16-de-julio-de.txt',
+    'wikisource-es--chiapas.txt',
+    'wikisource-es--declaracion-de-la-independencia-de-chile.txt',
+    'wikisource-es--del-sentimiento-tragico-de-la-vida-v.txt',
+    'wikisource-es--del-sentimiento-tragico-de-la-vida-vi.txt',
+    'wikisource-es--del-sentimiento-tragico-de-la-vida-xi.txt',
+    'wikisource-es--discurso-de-simon-bolivar-ante-el-congreso-de-angostura.txt',
+    'wikisource-es--discurso-en-el-mitin-de-la-union-civica-en-el-fronton-de.txt',
+    'wikisource-es--discurso-pronunciado-por-rfm-el-11-de-noviembre-de-1911.txt',
+    'wikisource-es--discurso-pronunciado-por-rfm-el-13-de-octubre-de-1911.txt',
+    'wikisource-es--discurso-pronunciado-por-rfm-el-16-de-septiembre-de-1910.txt',
+    'wikisource-es--educacion-primaria-y-secundaria-en-la-republica-argentina.txt',
+    'wikisource-es--el-guante-negro.txt',
+    'wikisource-es--en-las-orillas-del-sar-prologo.txt',
+    'wikisource-es--exposicion-sobre-la-revolucion-de-1890-leandro-alem.txt',
+    'wikisource-es--facundo-1874-apendice-proclamas-de-facundo-quiroga.txt',
+    'wikisource-es--facundo-1874-capitulo-i.txt',
+    'wikisource-es--facundo-1874-capitulo-ii.txt',
+    'wikisource-es--facundo-1874-capitulo-ix.txt',
+    'wikisource-es--facundo-1874-capitulo-vi.txt',
+    'wikisource-es--facundo-1874-capitulo-vii.txt',
+    'wikisource-es--facundo-1874-capitulo-viii.txt',
+    'wikisource-es--facundo-1874-capitulo-xi.txt',
+    'wikisource-es--facundo-1874-capitulo-xii.txt',
+    'wikisource-es--facundo-1874-capitulo-xiii.txt',
+    'wikisource-es--facundo-1874-capitulo-xv.txt',
+    'wikisource-es--la-infancia-y-educacion-de-abraham-lincoln.txt',
+    'wikisource-es--las-siete-partidas-del-rey-don-alfonso-el-sabio-libro-1.txt',
+    'wikisource-es--las-siete-partidas-del-rey-don-alfonso-el-sabio-libro-2.txt',
+    'wikisource-es--manifiesto-del-16-de-marzo-de-1918.txt',
+    'wikisource-es--manifiesto-del-23-de-septiembre-de-1911.txt',
+    'wikisource-es--plenitud-i-dentro-de-ti-esta-el-secreto.txt',
+    'wikisource-es--proclamas-del-general-san-martin-a-la-nobleza-peruana.txt',
+    'wikisource-es--proclamas-del-general-san-martin-a-los-habitantes-de-las.txt',
+    'wikisource-es--proclamas-del-general-san-martin-a-los-soldados-americanos.txt',
+    'wikisource-es--proclamas-del-general-san-martin-a-los-soldados-espanoles.txt',
+    'wikisource-es--recopilacion-decreto-y-comunicacion-de-la-legion-de-merito.txt',
+    'wikisource-es--san-manuel-bueno-martir.txt',
+    'wikisource-es--tres-novelas-ejemplares-y-un-prologo-el-marques-de-lumbria.txt',
+    'wikisource-es--tres-novelas-ejemplares-y-un-prologo-prologo.txt',
+  ];
+
   it('hay corpus que cotejar: documentos, Autores y Citas', () => {
     /*
      * Los tres recuentos son lo que impide que las pruebas de abajo pasen por no mirar
@@ -2208,20 +2278,35 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     expect(citas.filter((c) => c.autor !== undefined).length).toBeGreaterThanOrEqual(220);
   });
 
-  it('todos los documentos se analizan y declaran a quien firma', () => {
-    /*
-     * No es una regla —un documento sin autor declarado se extrae igual— sino una medida:
-     * es lo que dice que los lectores de las dos Fuentes saben leer todas las formas
-     * reales, y no solo las del fixture. El día que entre un documento sin autor legible,
-     * esta prueba lo nombra y quien lo añada decide si es la Fuente o el lector.
-     */
-    const sinLeer = documentos.filter((fichero) => {
-      const derivado = derivadoDe(fichero);
-      return derivado === undefined || derivado.autor === undefined;
-    });
-    expect(sinLeer).toEqual([]);
+  it('todos los documentos se analizan', () => {
+    const sinAnalizar = documentos.filter((fichero) => derivadoDe(fichero) === undefined);
+    expect(sinAnalizar).toEqual([]);
+  });
 
-    const ilegibles = documentos.filter((f) => derivadoDe(f)!.autor!.nombres.length === 0);
+  it('los que sostienen Citas declaran a quien firma, salvo las páginas que la Fuente no firma', () => {
+    /*
+     * No es una regla —un documento sin autor declarado se extrae igual, y el parte lo dice:
+     * «Autor sin cotejar»— sino una medida: es lo que dice que los lectores de las dos Fuentes
+     * saben leer todas las formas reales, y no solo las del fixture.
+     *
+     * Se mide sobre los documentos que **sostienen Citas** por su `url`. Desde la siembra en
+     * barrido del 11/10/2026 se versionan documentos en lectura, y uno que todavía no ha
+     * publicado nada no ha puesto ninguna firma en el sitio: lo gobierna el protocolo de
+     * siembra, no esta prueba (decisión de Héctor, 2026-10-17).
+     *
+     * La lista son páginas que **la Fuente no firma** —un capítulo sin plantilla de
+     * encabezado, como el VI de «Del sentimiento trágico de la vida», o un discurso sin
+     * `|autor=`— y de las que ya salieron Citas: Citas cuyo Autor no cotejó la puerta de
+     * FR-23. Se ven, y no pueden crecer sin que alguien lo decida. Las de `Facundo` son otra
+     * cosa: la dirección versionada es una **redirección** (`Facundo:_04`), y el lector pide el
+     * wikitexto de la redirección y no el de su destino.
+     */
+    const sinFirma = documentos.filter(
+      (f) => autoresQueLoCitan(f).length > 0 && derivadoDe(f)?.autor === undefined,
+    );
+    expect(sinFirma).toEqual(SIN_FIRMA_DE_LA_FUENTE);
+
+    const ilegibles = documentos.filter((f) => derivadoDe(f)?.autor?.nombres.length === 0);
     expect(ilegibles).toEqual([]);
   });
 
@@ -2233,7 +2318,7 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
       // Un documento sin autor declarado no rechaza a nadie: la puerta no actúa.
       if (derivado?.autor === undefined) continue;
 
-      for (const slug of autoresQuePublicaronDesde(fichero)) {
+      for (const slug of autoresQueLoCitan(fichero)) {
         const nombre = nombreDelCorpus.get(slug);
         if (nombre === undefined) {
           rechazados.push(`${fichero}: corpus/autores/${slug}.yml no declara nombre`);
@@ -2252,30 +2337,34 @@ describe('FR-23 — ningún documento versionado se rechaza contra el Autor que 
     expect(rechazados).toEqual([]);
   });
 
-  it('y casi todos se cotejan de verdad contra una Cita publicada, con la lista de los que no', () => {
+  it('y todo documento que sostiene Citas casa con ellas también por su obra', () => {
     /*
      * El recuento es lo que impide que la prueba de arriba pase por no mirar nada, y la
-     * lista es lo que impide que un documento que dejó de casar con sus Citas se vuelva
-     * mudo. Eran tres los que no casaban —«De la brevedad de la vida», «Del sentimiento
-     * trágico de la vida» y la letrilla de Quevedo—: los tres publicaron sus Citas antes de
-     * la v3, con otro nombre de obra, y están en el censo de pendientes de cotejo.
+     * comprobación es lo que impide que un documento que **dejó de casar** con sus Citas se
+     * vuelva mudo: la obra es el camino por el que `extraer` y el cotejo enlazan una Cita con
+     * su documento, y un documento que lo pierde deja de vigilar lo que publicó.
      *
-     * Queda **uno**, y la lista ha menguado dos veces en la misma noche por el mismo motivo:
-     * el tramo de concentración de la Meta sembró cuarenta Citas desde «De la brevedad de la
-     * vida» y treinta y cuatro desde «Del sentimiento trágico de la vida», y todas casan con
-     * su documento porque salieron de él por la extracción de la 11.1. Lo que sigue pendiente
-     * de cotejo son las Citas viejas de esos documentos, no los documentos.
+     * Hasta el 11/10/2026 esto era una lista nominal de documentos sin Cita, y llegó a tener
+     * uno. La siembra en barrido versiona documentos en lectura que todavía no han dado
+     * ninguna —610 el 2026-10-17, 328 de ellos con candidatas pendientes—, y la lista dejó de
+     * decir nada. Así que se mira desde el lado que no se equivoca: cada documento al que
+     * alguna Cita apunta por `url` tiene que casar con **todos** esos Autores también por obra
+     * (decisión de Héctor, 2026-10-17). Un documento que no sostiene nada lo gobierna el
+     * protocolo de siembra, que lo retira cuando se ha leído sin fruto.
      *
-     * El que queda es la letrilla de Quevedo, y no se cierra sembrando: es un poema de una
-     * sola Cita, ya publicada antes de la v3 con otro nombre de obra. Ese caso pide
-     * `documentar`, no `extraer`.
+     * La letrilla de Quevedo, la última de la lista vieja, sale de aquí por eso mismo: su
+     * única Cita es anterior a la v3, no declara Fuente y está en el censo de pendientes de
+     * cotejo. Sigue pidiendo `documentar`, no `extraer`.
      */
-    const sinCita = documentos.filter((f) => autoresQuePublicaronDesde(f).length === 0);
+    const sostienen = documentos.filter((f) => autoresQueLoCitan(f).length > 0);
+    const sinCasar = sostienen.flatMap((f) => {
+      const porObra = new Set(autoresQuePublicaronDesde(f));
+      const faltan = autoresQueLoCitan(f).filter((slug) => !porObra.has(slug));
+      return faltan.length === 0 ? [] : [`${f}: ${faltan.join(', ')}`];
+    });
 
-    expect(sinCita).toEqual([
-      'wikisource-es--poderoso-caballero-es-don-dinero-letrilla-satirica.txt',
-    ]);
-    expect(documentos.length - sinCita.length).toBeGreaterThanOrEqual(54);
+    expect(sinCasar).toEqual([]);
+    expect(sostienen.length).toBeGreaterThanOrEqual(54);
   });
 });
 
