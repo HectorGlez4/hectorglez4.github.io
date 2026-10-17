@@ -96,6 +96,10 @@ por `import()` al pulsar y no cuenta.
     compartir caigan justo por debajo de la primera pantalla.
 12. **Cabecera nueva: «Autores · Obras · Buscar».**
 13. **La portada lleva una línea con las cifras del Corpus.**
+14. **La Línea de la Fuente sigue pegada a la Atribución** que acredita; la Tarjeta de Obra
+    va después de las dos (decidido tras la revisión).
+15. **«Historia de Instagram» solo aparece en pantallas táctiles.** En escritorio el bloque
+    lleva los otros tres destinos, como decidió el addendum v2.
 
 ## 4. Medir la lectura (Épica 23)
 
@@ -200,7 +204,8 @@ entre:
 La Cita sigue en la primera pantalla a 360×640 (FR-1). El orden de la página pasa a ser:
 
 1. **El Bloque de Cita**, con la atribución de siempre (Autor subrayado, título de la Obra en
-   tinta y subrayado, E2).
+   tinta y subrayado, E2), y pegada a ella **la Línea de la Fuente**, como hoy: «Texto tomado
+   de…» sigue junto a la Procedencia que acredita (DESIGN:223, EXPERIENCE:102).
 2. **La Tarjeta de Obra**, un componente nuevo y único (`TarjetaDeObra.astro`):
    - rótulo «De la obra»;
    - el título de la Obra resuelta (`cita.obra.titulo`), en la sans: la serif sigue
@@ -221,23 +226,22 @@ La Cita sigue en la primera pantalla a 360×640 (FR-1). El orden de la página p
    Las 4 Citas sin Obra (forma canónica vacía) no llevan tarjeta ni «Siguiente». Aceptado:
    con la tarjeta arriba, en móvil Copiar, Imagen y compartir quedan justo por debajo de la
    primera pantalla.
-3. **La Línea de la Fuente**, como hoy. Queda por decidir si va **antes** de la Tarjeta de
-   Obra, pegada a la Atribución que acredita (§14).
-4. **Copiar e Imagen**, y el bloque de compartir (§6).
-5. **«De la misma obra»**: hasta 3 Tarjetas de Cita de la misma Obra, sin repetir la actual
+3. **Copiar e Imagen**, y el bloque de compartir (§6).
+4. **«De la misma obra»**: hasta 3 Tarjetas de Cita de la misma Obra, sin repetir la actual
    ni la «siguiente», elegidas con el reparto a pasos iguales de `citasRelacionadas` sobre el
    orden del listado de la Obra, y «Las {n} citas de {título} →». Las tarjetas van sin Autor
    ni título de Obra. Se omite si, quitadas la actual y la siguiente, no queda ninguna (las
    87 Obras de 2 Citas). FR-12 ya decía que la relación se deriva de Autor, Obra y Tema; el
    código no miraba la Obra.
-6. **«Más de {Autor}»**: hasta `MAX_CITAS_RELACIONADAS` (4) Tarjetas de Cita sin Autor y con
+5. **«Más de {Autor}»**: hasta `MAX_CITAS_RELACIONADAS` (4) Tarjetas de Cita sin Autor y con
    el título de su Obra, sin repetir la actual, la siguiente ni las de la misma Obra, y «Las
    {n} citas de {Autor} →». Se omite si no queda ninguna.
-7. **Temas**, como hoy.
+6. **Temas**, como hoy.
 
 Todo lo nuevo va fuera del cuerpo de Pagefind y sin guion: son enlaces compuestos en el
 build (AD-5, AD-14), y dos construcciones del mismo commit dan el mismo `dist/`. El orden de
-tabulación pasa a ser contenido, Tarjeta de Obra, acciones y rutas de salida.
+tabulación pasa a ser contenido (Cita, Atribución, Línea de la Fuente), Tarjeta de Obra,
+acciones y rutas de salida.
 
 **Fuera de la Página de Cita:**
 
@@ -251,7 +255,7 @@ tabulación pasa a ser contenido, Tarjeta de Obra, acciones y rutas de salida.
 
 ## 6. Compartir donde se publica (Épica 25)
 
-**El bloque «Compartir en».** Cuatro botones a la vista, en este orden, y «Más opciones…»:
+**El bloque «Compartir en».** Cuatro botones a la vista en pantallas táctiles (tres en escritorio), en este orden, y «Más opciones…»:
 
 - **Historia de Instagram.** Entre el toque que comparte y `navigator.share({ files })` no hay
   **ninguna espera** de red ni de composición: `navigator.share` exige una activación del
@@ -275,8 +279,12 @@ tabulación pasa a ser contenido, Tarjeta de Obra, acciones y rutas de salida.
     pulsar de nuevo lo vuelve a intentar.
   Todo se anuncia por una región `role="status"` presente y vacía desde la carga, dentro del
   `<dialog>` si se anuncia con él abierto (convención de AGENTS.md). Solo existe para Citas
-  de hasta `MAX_CARACTERES_IMAGEN` (FR-10); por encima, el bloque lleva los otros tres. En
-  escritorio, donde no hay historias, ver §14.
+  de hasta `MAX_CARACTERES_IMAGEN` (FR-10); por encima, el bloque lleva los otros tres.
+  **Solo aparece con puntero grueso** (`matchMedia('(pointer: coarse)')`), porque
+  `canShare({files})` también es cierto en Safari de macOS y en Chrome de Windows, donde no
+  hay historias: en escritorio el bloque lleva los otros tres, sin aviso de incompatibilidad
+  (FR-17), como decidió el addendum v2 («un botón que no puede cumplir es peor que no
+  ofrecerlo»). Lo inserta la isla, así que sin guion tampoco aparece.
 - **WhatsApp** (`wa.me/?text=`), **Facebook** (`facebook.com/sharer/sharer.php?u=`, sin texto:
   la tarjeta sale de `og:title`, `og:description` y `og:image`, excepción declarada a FR-18
   «nunca solo la URL desnuda») y **Threads** (`threads.com/intent/post?text=&url=`). Son
@@ -289,7 +297,7 @@ tabulación pasa a ser contenido, Tarjeta de Obra, acciones y rutas de salida.
 Cada control conserva el nombre accesible «Compartir en {destino}» (`rotuloDeDestino`), con
 el aviso de pestaña nueva dentro cuando abre una; si el texto visible bajo el rótulo es solo
 el destino, el prefijo va en `.solo-para-lectores` (el defecto que corrigió la 22.10). Son
-**siete destinos nombrados**, cuatro a la vista y tres tras «Más opciones…», más la hoja: por
+**siete destinos nombrados**, cuatro a la vista (tres en escritorio) y tres tras «Más opciones…», más la hoja: por
 debajo del anti-patrón de ocho de EXPERIENCE:340. Sin iconos (DESIGN:213): los botones son
 texto, con zona de toque de 44 px.
 
@@ -475,7 +483,7 @@ retorno da por hora suya.
 |---|---|
 | **PRD** (`bmad-prd`) | **§4.9 y UJ-2** (la restricción «en escritorio no hay hoja del sistema» y el caso límite: la hoja existe donde el navegador la ofrece); **FR-7** (filtros, «Buscar en esta…»); **FR-8** (destacados por Citas; el filtrado sin resultados); **FR-9 y §10** (campo de búsqueda, acciones sobre la Cita del Día, cabecera, dos superficies nuevas); **FR-10 y FR-11** (formato 9:16 de una plantilla, dominio en la imagen); **FR-12** («De la misma obra», «Siguiente», Tarjeta de Obra); **FR-15 y el modelo de datos del addendum** (Autor: `ordenAlfabetico`, obligatorio para publicar y escrito por una orden); **FR-17** (la Historia comparte sin elección de plantilla y en escritorio no muestra aviso de incompatibilidad); **FR-18** (destinos nombrados visibles también donde hay hoja; Facebook comparte solo la URL y su Tarjeta Social hace de texto; la «marca de origen» de lo compartido es `?via=`; la Página de Obra también se comparte, con texto propuesto); **FR-20 y el glosario** (Destino de Compartición: un botón nombrado registra su botón aunque pase por la hoja; `opaco` queda para «Más opciones…»; siete destinos nombrados y `opaco`); **FR-22** (`?de=` solo cuentas propias, `?via=` para visitantes); **FR-51** (salto a «Dónde leer» y bloque de compartir en la página 1; `vista-de-obra`); **FR-52** (una Obra no indexable puede ser valor de filtro, no resultado); **NFR-1** (`/autores/` y `/obras/` entre las superficies indexables) y **un FR nuevo para los dos directorios** (contenido, orden, filtro, `/obras/` enlaza también las no indexables); **SM-3 y SM-4** (aproximación por `lectura` y `salida-interna`); **SM-5, SM-7 y SM-C3** (sobre lecturas, solo acciones de la Página de Cita); **SM-6** (denominador `busqueda`, incluye filtrados) y la métrica nueva de búsqueda seguida; la métrica nueva de **difusión**; **SM-8 y la Historia 20.1** no cambian (`vista-de-obra` es otro evento) |
 | **Decisiones del 04/10** (borrador §2, no BMad) | Se revocan las condiciones de reapertura de Facebook como destino, de «siguiente» y de `salida-interna` |
-| **UX** (`bmad-ux`) | **EXPERIENCE:** :26-39 (filas de `/autores/` y `/obras/` en la arquitectura de la información, :30 y :34 con sus orígenes nuevos, y el UJ que alcanza cada directorio), :33, :54 y :341 (la línea de cifras no afirma el cotejo), :76-82 (columna «Imagen 9:16»), :94 (cabecera), :102 (la Línea de la Fuente y la Tarjeta de Obra), :103-107 (Copiar, Imagen y el Diálogo también en la portada; destinos visibles con hoja), :113, :116 (Chip de Colección con criterio), :136 (compartir en la Página de Obra), :140 (Cabecera de Obra con salto), :167-168 (filtros; Autor bajo el resultado de Cita), :246 (destinos a la vista y «Más opciones…»), :264 (orden de tabulación de la Página de Cita); **DESIGN:** :138 (el siena en la primera pantalla, y el color de Autores y Obras en la cabecera), :217 (cabecera), :223 y :224 (la Línea de la Fuente y las acciones de la Página de Cita), :225 (Papel en 9:16 y el dominio al pie de las dos), :226 (las hermanas pasan a Tarjetas), :230 (Tarjeta de Cita con Obra), :233, :248 (Cabecera de Obra), :256-257 (campo de búsqueda en la portada; Autor bajo el resultado); **UX-DR11, UX-DR17, UX-DR19, UX-DR22, UX-DR24, UX-DR29, UX-DR34, UX-DR38, UX-DR53**; componentes nuevos: Tarjeta de Obra, bloque «Compartir en», directorio, selectores de filtro; dónde va la marca en la portada para no repetirla dos veces en la primera pantalla |
+| **UX** (`bmad-ux`) | **EXPERIENCE:** :26-39 (filas de `/autores/` y `/obras/` en la arquitectura de la información, :30 y :34 con sus orígenes nuevos, y el UJ que alcanza cada directorio), :33, :54 y :341 (la línea de cifras no afirma el cotejo), :76-82 (columna «Imagen 9:16»), :94 (cabecera), :103-107 (Copiar, Imagen y el Diálogo también en la portada; destinos visibles con hoja), :113, :116 (Chip de Colección con criterio), :136 (compartir en la Página de Obra), :140 (Cabecera de Obra con salto), :167-168 (filtros; Autor bajo el resultado de Cita), :246 (destinos a la vista y «Más opciones…»), :264 (orden de tabulación de la Página de Cita); **DESIGN:** :138 (el siena en la primera pantalla, y el color de Autores y Obras en la cabecera), :217 (cabecera), :224 (las acciones de la Página de Cita, con la Tarjeta de Obra después de la Línea de la Fuente), :225 (Papel en 9:16 y el dominio al pie de las dos), :226 (las hermanas pasan a Tarjetas), :230 (Tarjeta de Cita con Obra), :233, :248 (Cabecera de Obra), :256-257 (campo de búsqueda en la portada; Autor bajo el resultado); **UX-DR11, UX-DR17, UX-DR19, UX-DR22, UX-DR24, UX-DR29, UX-DR34, UX-DR38, UX-DR53**; componentes nuevos: Tarjeta de Obra, bloque «Compartir en», directorio, selectores de filtro; dónde va la marca en la portada para no repetirla dos veces en la primera pantalla |
 | **Arquitectura** (`bmad-architecture`) | **AD-6** (islas nuevas declaradas y contadas: compartir en la Página de Obra y en la portada, Copiar e Imagen en la portada, Historia de Instagram, el filtro de `/autores/` y `/obras/`, `busqueda.js`, y el sitio de la medición; si sale a un fichero, la única isla que no es bajo demanda, con su propio tope); **AD-8** (columna 9:16 en `tramos.ts`); **AD-11** (`rutasPublicadas` y `rutasIndexables` enumeran los directorios, que derivan de `autoresPublicados` y `obrasPublicadas`); **AD-13** (eventos `lectura`, `salida-interna`, `busqueda`, `vista-de-obra`; zonas; `via`; destinos de enlace y de imagen; columnas nuevas en D1 y su migración); **AD-17** (`/autores/` y `/obras/`: su tipo de resultado en Pagefind y qué parte de su lista se ignora); **AD-19** (la Tarjeta de Cita con Obra); **AD-24** (si los directorios son una familia de las series o quedan fuera del censo con exclusión escrita); **AD-27** (`relacionDeSuperficies` de `tools/lib/cambios.ts`: los listados de Tema, Colección y Autor se componen también con la ficha de Obra de sus Citas; `/autores/` y `/obras/` se declaran en la relación o se dejan fuera con su motivo, como la portada; y se decide si los recuentos, «Siguiente», «De la misma obra» y «Más de {Autor}» entran en la relación de la Página de Cita —incluirlos refecha y avisa por IndexNow todas las Páginas de Cita de un Autor con cada Cita nueva suya, 308 en el caso de Unamuno— o se quitan los recuentos de los enlaces de salida para que la Página de Cita no dependa de todo el Autor) |
 | **SPEC** (`bmad-spec`) | Rederivar a la v8 con las CAP afectadas (búsqueda, Página de Cita, compartir, portada, medición) y dos nuevas (directorios) |
 | **Épicas** (`bmad-create-epics-and-stories`) | Épicas 23 a 28 (§11); Historia 2.1 («la página no descarga ningún fichero de script», si la medición sale a un fichero); Historia 4.1 (de «no envía JavaScript» a «solo las islas declaradas») |
@@ -550,19 +558,8 @@ sobre vistas.
 
 ## 14. Lo que este diseño no decide
 
-**Para Héctor:**
-
-- si la Línea de la Fuente va **antes** de la Tarjeta de Obra, pegada a la Atribución que
-  acredita, para que «Texto tomado de…» no se lea como si hablara de la tarjeta (propuesta:
-  sí, Atribución y Fuente juntas y después la tarjeta);
-- qué hace «Historia de Instagram» en escritorio, donde no hay historias. El addendum v2
-  decidió no ofrecer Instagram en escritorio («un botón que no puede cumplir es peor que no
-  ofrecerlo»). Propuesta: el botón solo aparece con puntero grueso (`matchMedia('(pointer:
-  coarse)')`), porque `canShare({files})` también es cierto en Safari de macOS y en Chrome de
-  Windows; en escritorio el bloque lleva los otros tres, sin aviso de incompatibilidad
-  (FR-17).
-
-**Para las pasadas BMad**, con la propuesta que aquí se da:
+Las dos preguntas que eran de Héctor quedaron contestadas tras la revisión (§3, decisiones 14
+y 15). Lo demás es **para las pasadas BMad**, con la propuesta que aquí se da:
 
 - el tiempo mínimo de `lectura` (propuesta: 8 s) y si se cuenta como mucho una salida interna
   por lectura;
