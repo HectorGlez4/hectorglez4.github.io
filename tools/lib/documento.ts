@@ -79,9 +79,33 @@ export function resolverEntidades(texto: string, conservarPeligrosas = false): s
 // Retirada de marcado
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Lo que va de una etiqueta tras su nombre: atributos, con su valor entre comillas **saltado
+ * entero**.
+ *
+ * Un `[^>]*` cierra la etiqueta en el primer `>`, y un `>` dentro de comillas es texto del
+ * atributo, no el final de la etiqueta. Parsoid lo hace en cada plantilla: guarda su wikitexto
+ * en `data-mw='{…"wt":"\n&lt;br/>\n&lt;poem>…"}'`, con el `<` escapado y el `>` crudo. Cortar
+ * ahí versionaba el resto del atributo como si fuera la obra —207 documentos de Wikisource, del
+ * 11 al 15 de octubre de 2026—. Ver la prueba «Parsoid» de `documento.test.ts`.
+ *
+ * La comilla solo protege cuando **abre el valor** de un atributo, tras su `=`. Este retirado
+ * también pasa por el texto plano de Gutenberg, y ahí un apóstrofo de «qu'el» tras un `<`
+ * suelto se tragaría la obra hasta el siguiente; fuera de un valor, la etiqueta se cierra en
+ * el primer `>`, como siempre. Las alternativas no se solapan —un `=` ante comilla solo puede
+ * abrir valor—, así que un `<` sin cierre no dispara retroceso exponencial.
+ */
+const ATRIBUTOS = String.raw`(?:[^>=]|=\s*"[^"]*"|=\s*'[^']*'|=(?!\s*["']))*`;
+
 /** Etiquetas cuyo cierre o apertura separa líneas: la vecindad importa para el año. */
-const BLOQUES =
-  /<\/?(?:p|div|br|hr|h[1-6]|li|tr|td|th|blockquote|section|article|header|footer|nav|ul|ol|dl|dt|dd|table|pre|figure|figcaption|aside|main|caption)\b[^>]*>/gi;
+const BLOQUES = new RegExp(
+  String.raw`<\/?(?:p|div|br|hr|h[1-6]|li|tr|td|th|blockquote|section|article|header|footer|nav|ul|ol|dl|dt|dd|table|pre|figure|figcaption|aside|main|caption)\b` +
+    `${ATRIBUTOS}>`,
+  'gi',
+);
+
+/** Cualquier otra etiqueta, con la misma regla para las comillas. */
+const ETIQUETA = new RegExp(`<${ATRIBUTOS}>`, 'gu');
 
 const NO_ES_TEXTO = /<(script|style|noscript|template)\b[^>]*>[\s\S]*?<\/\1>/gi;
 
@@ -100,7 +124,7 @@ function normalizarEspacios(texto: string): string {
 export function aTextoPlano(marcado: string): string {
   let texto = marcado.replace(/<!--[\s\S]*?-->/gu, ' ').replace(NO_ES_TEXTO, ' ');
   texto = resolverEntidades(texto, true);
-  texto = texto.replace(BLOQUES, '\n').replace(/<[^>]*>/gu, '');
+  texto = texto.replace(BLOQUES, '\n').replace(ETIQUETA, '');
   texto = resolverEntidades(texto, false);
   return normalizarEspacios(texto);
 }
@@ -121,7 +145,9 @@ function elementoEquilibrado(
   desde: number,
   etiqueta: string,
 ): { fin: number; interior: string; cerrado: boolean } {
-  const patron = new RegExp(`<\\/?${etiqueta}\\b[^>]*>`, 'gi');
+  // Con los valores entre comillas saltados: una apertura cortada en el `>` de un atributo que
+  // acaba en `&lt;br/>` terminaría en `/>` y se contaría como autocerrada. Ver `ATRIBUTOS`.
+  const patron = new RegExp(`<\\/?${etiqueta}\\b${ATRIBUTOS}>`, 'gi');
   patron.lastIndex = desde;
   let profundidad = 0;
   let inicioInterior = desde;

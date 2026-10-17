@@ -125,6 +125,65 @@ describe('Historia 11.1 — la retirada de marcado deja la obra y no el cromo', 
   });
 });
 
+describe('Parsoid — el wikitexto que una plantilla guarda en `data-mw` no es la obra', () => {
+  /*
+   * Desde el 2026-10-11 es.wikisource sirve la vista de lectura de Parsoid (`useParsoid=1`), y
+   * Parsoid guarda el wikitexto de cada plantilla **dentro de un atributo**: `data-mw='{…}'`,
+   * con el `<` escapado y el `>` crudo. Retirar etiquetas con `<[^>]*>` cerraba la etiqueta en
+   * ese `>` y el resto del atributo se versionaba como texto, con sus `\n` literales:
+   *
+   *     \n<poem>\nPinta mi amigo el pintor\n…</poem>"}},"i":0}}]}'>
+   *
+   * Pasó en 207 documentos de Wikisource recuperados entre el 11 y el 15 de octubre, y 160 de
+   * ellos —sumados a los de Gutenberg— dejaron la suite en rojo por legibilidad. El fixture es
+   * la página real de «Versos sencillos/XL» tal como se sirve hoy, recortada.
+   */
+  const PARSOID = WIKISOURCE.replace(
+    /<p>No es que tengamos[\s\S]*?<\/p>/u,
+    `<div class="ws-bloque-centro ws-div" about="#mwt3" typeof="mw:Transclusion" id="mwAw" ` +
+      `data-mw='{"parts":[{"template":{"target":{"wt":"bc","href":"./Plantilla:Bc"},"params":{"1":` +
+      `{"wt":"\\n&lt;br/>\\n&lt;poem>\\nPinta mi amigo el pintor\\nSus angelones dorados,\\n&lt;/poem>"}},` +
+      `"i":0}}]}'>\n<p><br/></p>\n` +
+      `<div class="poem" typeof="mw:Extension/poem" about="#mwt4" id="mwBA" data-mw='{"name":"poem",` +
+      `"attrs":{},"body":{"extsrc":"\\nPinta mi amigo el pintor\\nSus angelones dorados,\\n"}}'>` +
+      `<p id="mwBQ">Pinta mi amigo el pintor<br id="mwBg"/>\nSus angelones dorados,</p></div></div>`,
+  );
+  const derivado = derivarDocumento('wikisource-es', PARSOID);
+  if (!derivado.ok) throw new Error(derivado.motivo);
+
+  it('el fixture lleva de verdad el `>` crudo dentro del atributo', () => {
+    expect(PARSOID).toContain(`&lt;br/>\\n&lt;poem>`);
+  });
+
+  it('el verso se versiona una vez, como texto, y no el wikitexto de la plantilla', () => {
+    expect(derivado.cuerpo).toContain('Pinta mi amigo el pintor\nSus angelones dorados,');
+    for (const fuga of ['\\n', '<poem>', '"i":0', `}}]}'>`, '"wt"']) {
+      expect(derivado.cuerpo, fuga).not.toContain(fuga);
+    }
+  });
+
+  it('y lo que sigue a la plantilla sigue siendo obra: la región no se cierra antes de tiempo', () => {
+    /*
+     * El mismo `>` crudo, un piso más abajo y peor que la fuga: el atributo acaba en `&lt;br/>`,
+     * la apertura cortada en ese `>` termina en `/>` y se contaba como **autocerrada**. Su
+     * `</div>` cerraba entonces la región de contenido, y todo lo que venía detrás desaparecía
+     * del documento sin un aviso.
+     */
+    expect(derivado.cuerpo).toContain('La vida es larga si sabes usarla');
+  });
+
+  it('cualquier atributo entre comillas puede llevar `>`, no solo el de Parsoid', () => {
+    expect(aTextoPlano(`<span title="a > b" data-x='c > d'>texto</span>`)).toBe('texto');
+  });
+
+  it('una comilla que no abre el valor de un atributo no alarga la etiqueta', () => {
+    // El texto plano de Gutenberg también pasa por aquí, y el castellano antiguo escribe
+    // «qu'el» y «s'alza». Tras un `<` suelto, ese apóstrofo no puede llevarse la obra por
+    // delante hasta el siguiente: la etiqueta se cierra en el primer `>`, como siempre.
+    expect(aTextoPlano(`<qu'el> tu fijo vevía, s'alza > fin`)).toBe(`tu fijo vevía, s'alza > fin`);
+  });
+});
+
 describe('Historia 11.1 — el diccionario oculto del conversor de idiomas es cromo', () => {
   /*
    * Toda página que Wikisource-es renderiza desde una transclusión <pages> lleva, antes del
