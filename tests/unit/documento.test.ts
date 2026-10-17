@@ -176,6 +176,22 @@ describe('Parsoid — el wikitexto que una plantilla guarda en `data-mw` no es l
     expect(aTextoPlano(`<span title="a > b" data-x='c > d'>texto</span>`)).toBe('texto');
   });
 
+  it('y una comilla escrita como entidad dentro del valor no lo cierra antes de tiempo', () => {
+    /*
+     * La cursiva del wikitexto es `''…''`, y Parsoid la escribe `&apos;&apos;` dentro del
+     * `data-mw` entre comillas simples. Resolver `&apos;` en la primera pasada —antes de
+     * retirar etiquetas— metía comillas crudas en el valor, que se cerraba en la primera, y la
+     * etiqueta acababa en el `>` de un `&lt;/small>`. Es la plantilla de encabezado de «El
+     * radicalismo de la derecha», tal como se sirve el 2026-10-17, recortada.
+     */
+    const encabezado =
+      `<span class="mw-empty-elt" typeof="mw:Transclusion" data-mw='{"parts":[{"template":{"params":` +
+      `{"notas":{"wt":"&lt;small>(1909) &apos;&apos;[[La Cataluña]]&apos;&apos;, nº 106.&lt;/small>"}},` +
+      `"i":0}}]}'></span><p>El radicalismo de la derecha</p>`;
+    expect(aTextoPlano(encabezado)).toBe('El radicalismo de la derecha');
+    expect(aTextoPlano(`<i title="&quot;a > b&quot;">dentro</i>`)).toBe('dentro');
+  });
+
   it('una comilla que no abre el valor de un atributo no alarga la etiqueta', () => {
     // El texto plano de Gutenberg también pasa por aquí, y el castellano antiguo escribe
     // «qu'el» y «s'alza». Tras un `<` suelto, ese apóstrofo no puede llevarse la obra por

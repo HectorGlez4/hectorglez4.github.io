@@ -41,8 +41,15 @@ const ENTIDADES: Readonly<Record<string, string>> = {
   Auml: 'Ä', Ouml: 'Ö', Uuml: 'Ü', Ntilde: 'Ñ', Ccedil: 'Ç',
 };
 
-/** Las que, resueltas antes de tiempo, se comerían con el marcado o lo falsearían. */
-const PELIGROSAS = new Set(['amp', 'lt', 'gt']);
+/**
+ * Las que, resueltas antes de tiempo, se comerían con el marcado o lo falsearían.
+ *
+ * Las comillas también: dentro del valor de un atributo van escritas como entidad, y
+ * resolverlas antes de retirar las etiquetas lo cierra en mitad —Parsoid escribe la cursiva
+ * del wikitexto, `''…''`, como `&apos;&apos;` dentro de su `data-mw`—. Ver `ATRIBUTOS`.
+ */
+const PELIGROSAS = new Set(['amp', 'lt', 'gt', 'quot', 'apos']);
+const CARACTERES_PELIGROSOS = new Set(['&', '<', '>', '"', "'"]);
 
 const ENTIDAD = /&(#[xX]?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
 
@@ -50,7 +57,7 @@ const ENTIDAD = /&(#[xX]?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
  * Resuelve las entidades de un fragmento.
  *
  * Se hace en dos pasadas —antes de retirar las etiquetas y otra vez después—, y por eso
- * la primera **conserva** `&amp;`, `&lt;` y `&gt;`: resolver `&lt;` antes de tiempo
+ * la primera **conserva** `&amp;`, `&lt;`, `&gt;` y las comillas: resolver `&lt;` antes de tiempo
  * fabricaría una etiqueta que el retirado se comería, y resolver `&amp;` abriría la
  * puerta a que la segunda pasada interpretara como marcado lo que la Fuente escribió
  * como texto (`&amp;lt;` es el texto «&lt;», no un «<»).
@@ -66,7 +73,7 @@ export function resolverEntidades(texto: string, conservarPeligrosas = false): s
       if (!Number.isFinite(codigo) || codigo <= 0 || codigo > 0x10ffff) return entera;
       if (codigo >= 0xd800 && codigo <= 0xdfff) return entera;
       const caracter = String.fromCodePoint(codigo);
-      if (conservarPeligrosas && (caracter === '&' || caracter === '<' || caracter === '>')) return entera;
+      if (conservarPeligrosas && CARACTERES_PELIGROSOS.has(caracter)) return entera;
       return caracter;
     }
     if (conservarPeligrosas && PELIGROSAS.has(cuerpo.toLowerCase())) return entera;
