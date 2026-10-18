@@ -231,6 +231,102 @@ describe('Historia 11.5 — el suplemento del traductor no es una mancha', () =>
   });
 });
 
+/**
+ * Cuatro afinados del 17/10/2026, y los cuatro por lo mismo que la cursiva y los ángulos: la
+ * canaria del margen saltó **sin que los documentos tuvieran nada roto**.
+ *
+ * La siembra en barrido trajo de Gutenberg y de Wikisource formas que estas señales no habían
+ * visto: la cursiva que abarca varias palabras y la que cruza el salto de renglón con que
+ * Gutenberg corta a setenta columnas (unas 16.000 palabras en los documentos de la banda del
+ * 1 al 2 %), las abreviaturas sin vocal («Sr.», «Vd.», «pp.»: unas 3.000), el «vn» del Siglo de
+ * Oro (1.448 en un solo libro) y el número de página de Gutenberg entre llaves (523 en 18
+ * documentos). Medido antes de tocar nada, y cada afinado medido por separado: quitar
+ * cualquiera de los cuatro deja documentos sanos por encima de la canaria. El «à» y el «ò» de
+ * época también se miraron, y no hacían falta: no se tocan.
+ *
+ * Lo que se descartó, y por qué: la «i» suelta y la cifra suelta disparan en textos sanos —la
+ * «i» conjunción de la ortografía de Bello, «el 4 de Julio»—, pero son exactamente las dos
+ * formas canónicas del escáner («6» por «ó», «i» por «í»). Eximirlas sería quitarle a la
+ * puerta lo que existe para cazar.
+ *
+ * Lo que estos afinados **no** resuelven: la marca de cursiva sigue llegando literal al texto
+ * de una candidata. Ya pasaba con la de una sola palabra —13.769 candidatas y una Cita
+ * publicada la traen—, y es otra puerta la que tiene que decidir qué hace con ella.
+ */
+describe('Historia 11.5 — la cursiva de varias palabras tampoco es una mancha', () => {
+  const ajenos = (texto: string) => medirLegibilidad(texto).señales['carácter-ajeno'];
+
+  it('abre en una palabra y cierra en otra de la misma línea', () => {
+    expect(ajenos('el _Tratado de la pintura_ de Leonardo')).toBe(0);
+  });
+
+  it('y cruza el salto de renglón con que Gutenberg corta la línea', () => {
+    expect(ajenos('_Mari-Gaila, con la\ncesta en la cadera, se aleja._ Y sigue.')).toBe(0);
+  });
+
+  it('lo que va dentro se sigue midiendo', () => {
+    expect(medirLegibilidad('_una frase con coraz6n roto_').señales['cifra-en-palabra']).toBeGreaterThan(0);
+  });
+
+  it('pero no cruza un párrafo: con una línea en blanco en medio, los dos siguen sueltos', () => {
+    expect(ajenos('abre _aquí\n\ny cierra_ allá')).toBe(2);
+  });
+
+  it('ni empareja dos marcas más lejanas que una frase', () => {
+    expect(ajenos(`abre _aquí${' y sigue'.repeat(50)} y cierra_ allá`)).toBe(2);
+  });
+
+  it('y un guion bajo pegado por los dos lados a una letra sigue siendo basura', () => {
+    expect(ajenos('la mu_er y el capi_ulo')).toBe(2);
+  });
+});
+
+describe('Historia 11.5 — la abreviatura sin vocal se lee por su punto', () => {
+  const impronunciables = (texto: string) => medirLegibilidad(texto).señales.impronunciable;
+
+  it('«Sr.», «Vd.», «Dr.», «pp.» y «cf.» no son impronunciables: el punto las declara', () => {
+    expect(impronunciables('El Sr. Pedro y Vd. lo saben, como el Dr. Gómez en las pp. 3 y 4; cf. lo dicho.')).toBe(0);
+  });
+
+  it('sin el punto, la misma forma sigue siendo impronunciable', () => {
+    expect(impronunciables('el Sr Pedro y el rbl')).toBe(2);
+  });
+
+  it('una tira de consonantes demasiado larga para abreviatura no se salva por el punto', () => {
+    expect(impronunciables('así acaba el rbltk.')).toBe(1);
+  });
+
+  it('y el punto no salva lo que otra regla condena', () => {
+    expect(impronunciables('dijo qus. Y luego enseiia.')).toBe(2);
+  });
+});
+
+describe('Historia 11.5 — «vn» es «un» en la grafía del Siglo de Oro', () => {
+  const impronunciables = (texto: string) => medirLegibilidad(texto).señales.impronunciable;
+
+  it('no es impronunciable', () => {
+    expect(impronunciables('vn hombre de bien, y Vn buen soldado')).toBe(0);
+  });
+
+  it('la exención es de esa palabra, no de la «v» como vocal', () => {
+    expect(impronunciables('vrt y vnt')).toBe(2);
+  });
+});
+
+describe('Historia 11.5 — el número de página de Gutenberg no es una mancha', () => {
+  it('«{pg 23}» entre dos palabras no cuenta', () => {
+    expect(medirLegibilidad('la guerra {pg 23} injusta').sospechosas).toBe(0);
+  });
+
+  it('ni la forma que nombra dos páginas', () => {
+    expect(medirLegibilidad('la guerra {pg 23, 24} injusta').sospechosas).toBe(0);
+  });
+
+  it('pero una llave que no encierra un número de página sigue disparando', () => {
+    expect(medirLegibilidad('la {pg guerra} injusta').señales['carácter-ajeno']).toBe(2);
+  });
+});
+
 describe('Historia 11.5 — ningún documento sano del Corpus queda condenado', () => {
   const fuentes = resolve(import.meta.dirname, '../../corpus/fuentes');
   const documentos = readdirSync(fuentes).filter((f) => f.endsWith('.txt'));

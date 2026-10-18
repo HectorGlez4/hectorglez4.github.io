@@ -17,6 +17,7 @@
 
 import {
   SEÑALES,
+  llevaMarcadoDeLaFuente,
   medirLegibilidad,
   type MedidaDeLegibilidad,
 } from '../../src/lib/legibilidad.ts';
@@ -63,7 +64,8 @@ export type Descarte =
   | { texto: string; motivo: 'ilegible' }
   | { texto: string; motivo: 'aparato-de-la-fuente' }
   | { texto: string; motivo: 'trozo-de-cita-ajena' }
-  | { texto: string; motivo: 'puntuacion-rota' };
+  | { texto: string; motivo: 'puntuacion-rota' }
+  | { texto: string; motivo: 'marcado-de-la-fuente' };
 
 /**
  * Las frases con que la Fuente **envuelve** la obra: el pie de licencia que Wikisource añade a
@@ -738,6 +740,17 @@ export function extraerCandidatas(
      */
     if (tienePuntuacionRota(sentencia)) {
       descartadas.push({ texto: sentencia, motivo: 'puntuacion-rota' });
+      continue;
+    }
+
+    /*
+     * Justo antes de la legibilidad, y por ella: la medida no cuenta como daño el número de
+     * página de Gutenberg ni la cursiva de varias palabras, porque son marcado y no manchas —
+     * 17/10/2026—. Eso no los convierte en texto de una Cita, y sin esta puerta la frase que
+     * los trae, que antes caía por ilegible, se propondría con el marcado dentro.
+     */
+    if (llevaMarcadoDeLaFuente(sentencia)) {
+      descartadas.push({ texto: sentencia, motivo: 'marcado-de-la-fuente' });
       continue;
     }
 
