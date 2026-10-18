@@ -1,463 +1,825 @@
-# Informe de validación — brainlySabiduria
+# Informe de validación — brainlySabiduria (pasada v8)
 
 - **DESIGN.md:** `_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md`
 - **EXPERIENCE.md:** `_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md`
-- **Ejecutado:** 2026-10-09T07:58:13+02:00
+- **Ejecutado:** 2026-10-18T16:46:28+02:00
 
 ## Veredicto general
 
-Como contrato de la **Página de Obra**, el par aguanta. La v7.1 la cubre con su fila de la IA, la Cabecera, «Dónde leer esta obra», las ediciones en venta, once estados, la sección de Obra traducida y la microcopia de pestaña y descripción, y todas las referencias de token resuelven. Lo que impide extraer limpio está **fuera del núcleo nuevo**: un componente del que dependen cuatro filas —la línea de la Fuente de la Página de Cita— no existe en ninguna de las dos espinas; la Tarjeta Social de Obra no tiene especificación visual, y reutilizar la plantilla que sí está descrita rompe la regla de la serif; y las dos espinas se contradicen entre sí en componentes ya construidos: la búsqueda de la cabecera, las acciones, el chip y la iconografía. También quedan dentro del contrato decisiones que el propio texto declara abiertas —la hoja del sistema en el Kit, el progreso de la imagen, los cuerpos de la Lista de Obras y la Tarjeta Social de Autor—, y EXPERIENCE.md arrastra mucha historia de decisiones que pertenece a la bitácora. Hay 21 `[ASSUMPTION]` pendientes de Héctor (6 en DESIGN.md y 15 en EXPERIENCE.md); están bien marcadas y no cuentan como hallazgo.
+**Este informe registra el estado del par antes de las correcciones.** Recoge lo que encontraron el 2026-10-18 la rúbrica, la lente de accesibilidad, la revisión de coherencia y el cotejo de entradas sobre el destilado v8 («la Cita como centro»), con las líneas de entonces. **Todos los altos y todos los medios se cerraron en la misma pasada**, con las decisiones de Héctor de la bitácora —130, «Buscar en esta obra» con dos campos ocultos; 131, «Más opciones…» como `<details>`; 132, la unidad a la vista en la Lista de Obras; 134, el filtro de los Directorios por subcadena; 135, el botón «Buscar» visible en «Buscar en…», la portada y el 404; 140, se conservan las marcas *(v8)*— y con los arreglos derivados de las entradas 133, 137 y 139. La verificación de cierre (`.working/verif-cierre.md`) no encontró ningún alto abierto, y lo que dejó a medias o abrió de nuevo también quedó cerrado. Cada alto lleva abajo «Resuelto: …» y cada medio su estado. Los bajos no se repasaron uno a uno y no llevan estado, aunque buena parte se atendió en las entradas 137 y 139. Dos cosas se cierran fuera de `bmad-ux`: el matiz de los mensajes de estado en `AGENTS.md`, que es de `bmad-project-context`, y los `[NOTE FOR PM]` para la pasada corta de `bmad-prd`.
 
-La lente de accesibilidad cambia el cuadro: **el suelo WCAG 2.1 AA que declaran las espinas no se cumple hoy, y no se cumpliría aunque se reconstruyera todo desde ellas.** No hay en el sitio una sola región viva. En `/buscar/` el recuento de resultados y la frase de «sin resultados» aparecen sin anunciarse, «Copiado.» solo cambia el rótulo del botón enfocado y la imagen lista llega en silencio, y el Accessibility Floor no menciona los mensajes de estado (4.1.3, AA). Es el único hallazgo high de la lente; otros dos tocan criterios de nivel A en lo construido —2.4.4 en los destinos de compartir y 4.1.2 en el nombre del diálogo de imagen— con severidad media. El resto es contrato sin escribir: ninguna pareja de la paleta separa un enlace del texto de su línea por color (todas por debajo de 3:1), así que el subrayado tiene que ser regla general y no caso por caso; falta una política de enlaces que salen del sitio y el nombre accesible de los enlaces de compartir y de afiliado; y la exención de zona de toque está mal aplicada al título de la Obra en la Atribución. La v7.1 decide bien lo gordo —subrayado siempre en la Página de Obra, estructura en «Dónde leer», nada recortado—, y el arreglo del high es corto: una regla en el Accessibility Floor y una región `role="status"` en `/buscar/` y en Copiar.
+Como contrato de la v8, el par se dejaba extraer casi entero. Cada superficie y cada componente nuevos tenían fila en las dos espinas, en los mismos grupos y en el mismo orden; las 357 referencias de token resolvían; los ocho contrastes publicados eran correctos; las once maquetas estaban enlazadas con su variante elegida, y las catorce decisiones de Héctor del 18/10 estaban escritas. Lo que impedía extraer limpio eran **dos decisiones que el PRD delegó a UX y seguían abiertas en el centro del alcance nuevo**: «Más opciones…» sin guion, en el que las dos espinas se contradecían, y el estado al que llega «Buscar en esta obra», con el filtro de Obra puesto y sin su selector. Detrás iban geometría que chocaba con las reglas propias —zonas de toque pegadas en la Cabecera de dos filas y en la cabecera de grupo de `/obras/`, y una portada cuyos encabezados partían la Cita del Día—, un par que más que doblaba su tamaño (DESIGN.md de 4.805 a 9.831 palabras, EXPERIENCE.md de 8.671 a 19.760) y reglas retiradas otra vez citadas dentro del contrato. Las `[ASSUMPTION]` pendientes de Héctor eran 43 y 69, bien marcadas, y no cuentan como hallazgo.
+
+Las otras tres lentes no mueven los veredictos; los afinan. **La de accesibilidad no encontró ningún alto**: los colores nuevos pasan, el orden de tabulación coincide con el de lectura y el foco nunca se pierde. Sus seis medios eran contrato sin escribir: la zona de la marca, el reflujo a 320 px con el texto al 200 %, los recuentos que se anuncian al teclear, los selectores nativos que rehacen la búsqueda a cada flecha, los `h2` de la portada y los avisos del Diálogo de la Historia. **La revisión de coherencia sumó un tercer alto** que la rúbrica no vio: la unidad del recuento en la Lista de Obras, que las dos espinas decían distinta. **El cotejo de entradas confirmó los dos altos de la rúbrica** y añadió lo que solo se ve contra el PRD: las zonas de FR-56 a medias, la falta de «volver a las letras» (FR-55), la frase del filtrado sin texto que no da nada (FR-8) y la descarga en iOS, que contradice el clímax de UJ-2. Los seis altos de los cuatro informes son tres problemas, y los tres están resueltos.
 
 ## Veredictos por categoría
 
 - Cobertura de flujos — adecuado
 - Completitud de tokens — adecuado
-- Cobertura de componentes — flojo
+- Cobertura de componentes — adecuado
 - Cobertura de estados — adecuado
-- Referencias visuales — adecuado
-- Hinchazón y sobreespecificación — flojo
+- Cobertura de referencias visuales — sólido
+- Sobrecarga y sobreespecificación — flojo
 - Disciplina de herencia — adecuado
-- Ajuste de forma — sólido
+- Forma — sólido
 
-## Hallazgos por severidad
+## Hallazgos por gravedad
 
-52 hallazgos: Critical 0 · High 4 · Medium 18 · Low 30. Rúbrica: 35 (High 3, Medium 11, Low 21). Lente de accesibilidad: 17 (High 1, Medium 7, Low 9).
+104 hallazgos en cuatro informes: rúbrica 26, accesibilidad 20, coherencia 24 y cotejo 34. Los seis altos son tres problemas distintos, todos resueltos; los medios, todos cerrados. Crítico 0 · Alto 6 · Medio 37 · Bajo 61.
 
-### Critical (0)
+| Informe | Altos | Medios | Bajos | Total |
+|---|---|---|---|---|
+| Rúbrica (`review-rubric.md`) | 2 | 12 | 12 | 26 |
+| Lente de accesibilidad (`review-accesibilidad.md`) | 0 | 6 | 14 | 20 |
+| Revisión de coherencia (`review-coherencia.md`) | 2 | 8 | 14 | 24 |
+| Cotejo de entradas (`reconcile-v8.md`) | 2 | 11 | 21 | 34 |
+| **Total** | **6** | **37** | **61** | **104** |
+
+### Críticos (0)
 
 Ninguno.
 
-### High (4)
+### Altos (6)
 
-**[Cobertura de componentes]** — La línea de la Fuente de la Página de Cita no tiene fila en ninguna de las dos espinas (§ DESIGN.md:133, :188, :199, :203; EXPERIENCE.md:166)
+**[Cobertura de componentes]** — «Más opciones…» sin guion: las dos espinas se contradicen y la decisión que tocaba cerrar seguía abierta (§ DESIGN.md:253, :309; EXPERIENCE.md:133; addendum «Lo que cuesta en guion»; v8-pagina-de-cita.html)
 
-Está construida (`src/components/Fuente.astro`, 2026-08-26) y cinco pasajes se definen contra ella:
+- DESIGN.md fija cómo se ve desplegado («en otra rejilla igual a `{spacing.unit}` debajo… como la dibuja 2C», `[ASSUMPTION]`) y lo aplica también «sin guion».
+- EXPERIENCE.md dice «Sin guion se ven todos los destinos de enlace… cómo se pliegan y cómo se ven desplegados está sin fijar».
+- El addendum v8 y la maqueta («[sin decidir] Cómo se ve «Más opciones…» abierto») delegan el mecanismo —un `<details>` que la isla convierte en la hoja— a UX y Arquitectura.
 
-- el siena de § Colors;
-- «Semblanza», «como el enlace de la Fuente en la Página de Cita»;
-- «Dónde leer esta obra», con la misma frase;
-- la exención de zona de toque;
-- las «Acciones», que van «debajo de la Atribución y de la línea de la Fuente».
+Si se construye un `<button>`, la Página de Cita y la portada llevan sin guion un control que no hace nada, contra «Ningún control que no haga nada». Si se construye un `<details>` cerrado, sin guion los tres destinos no «se ven», contra FR-18 y EXPERIENCE.md:133.
 
-Su comportamiento solo vive en el código: el rótulo es el nombre de la Fuente o su anfitrión, nunca la URL desnuda; lleva la licencia si consta; **no afirma el cotejo**; y no se pinta sin Fuente. Lo que FR-54 pide a «Dónde leer» se define por analogía con ella.
+Arreglo: decidir y escribirlo en las dos espinas: un `<details>` cuyo `<summary>` es «Más opciones…»; la isla lo convierte en el disparador de la hoja donde la hay. Añadir la fila de estado «Sin guion» y alinear o quitar el `[ASSUMPTION]` de DESIGN.
 
-Arreglo: una fila en cada espina, escrita como está construida.
+**Resuelto:** decisión de Héctor (bitácora 131). «Más opciones…» es un `<details>` nativo llamado «Más opciones para compartir», cerrado al cargar. Sin guion se abre como todo `<details>` y enseña Telegram, X y Correo, que están en el HTML inicial: ningún control queda muerto. Con guion y Hoja del Sistema, la isla lo cambia por un `button` sin `aria-expanded` que abre la hoja; con guion y sin hoja sigue siendo el desplegable (bitácora 139). Está escrito igual en DESIGN.md § Components (bloque «Compartir en») y en EXPERIENCE.md § Component Patterns, con su fila de estado «“Más opciones…” sin Hoja del Sistema».
 
-**[Cobertura de componentes]** — La Tarjeta Social de Obra (FR-51) no tiene especificación visual en DESIGN.md (§ DESIGN.md:201; EXPERIENCE.md:111)
+**[Cobertura de estados]** — «Buscar en esta obra» lleva a un estado que la espina prohíbe (§ EXPERIENCE.md:204, :200; DESIGN.md:310, :304; v8-buscar.html (decisión 8))
 
-Tiene fila en EXPERIENCE.md y no en DESIGN.md. La única especificación visual disponible es la «plantilla común de las Tarjetas Sociales de listado», que pone el nombre **en serif** y añade una banda siena decorativa. Reutilizarla para la Obra pone el título en serif, contra el Don't y contra la convención de la espina de arquitectura, y hereda un uso del siena que choca con «siena = actuar o salir». El `[DERIVADO]` «título de la Obra en Inter» de la bitácora (.memlog.md:63) no llegó a DESIGN.md. Quedan también abiertas la composición de la Tarjeta Social de Autor de la v5 («ni la maqueta ni la bitácora fijan su composición») y la Tarjeta Social de Cita (FR-19), que no tiene fila.
+El formulario manda «el filtro en un campo oculto», en singular, y «el de Obra no existe hasta elegir un Autor». Quien llega desde la Página de Obra tiene puesto el filtro de Obra y no tiene su selector: no ve qué se está filtrando y solo puede cambiarlo con «Quitar los filtros». `v8-buscar.html` lo deja «[sin decidir]» —¿dos campos ocultos, o `/buscar/` deduce el Autor de la ficha?— y la espina no lo recoge. Es una de las cuatro entradas nuevas a la búsqueda (FR-51).
 
-Arreglo: una fila «Tarjeta Social» en DESIGN.md, con sus variantes de Cita, listado, Autor y Obra, el título de la Obra en Inter y una decisión sobre la banda siena.
+Arreglo: comprometer que una dirección con `obra=` pone también el Autor de esa Obra y que los dos selectores aparecen elegidos; cómo se deduce es de Arquitectura. Añadir la fila de estado «Llega con un filtro puesto desde «Buscar en…»».
 
-**[Cobertura de componentes]** — Las dos espinas se contradicen entre sí en componentes construidos (§ DESIGN.md:133, :188, :190, :193, :209; EXPERIENCE.md:34, :92, :114, :235-236)
+**Resuelto:** decisión de Héctor (bitácora 130). En la Página de Obra, «Buscar en esta obra» envía dos campos ocultos, `autor` y `obra`: se llega a `/buscar/` con los dos selectores elegidos y el recuento completo («23 citas de José Martí en Maestros ambulantes.»). Una dirección que traiga solo `obra` completa el Autor desde la Obra, y cómo lo deduce lo fija Arquitectura. Escrito en DESIGN.md § Búsqueda, en EXPERIENCE.md § Component Patterns («La dirección») y en la fila de estado nueva «Llega con un filtro puesto desde «Buscar en…»».
 
-Son divergencias ya conocidas (.memlog.md:79), pero aquí no es solo la espina contra el código, sino un documento contra el otro, y quien implemente recibe dos respuestas. Gravedad de cada una:
+**[Revisión de coherencia]** — La Lista de Obras: la unidad del recuento, a la vista o solo para el lector de pantalla (§ DESIGN.md:283, :325; EXPERIENCE.md:162, :219)
 
-| Componente | Qué dice cada sitio | Gravedad |
-|---|---|---|
-| Campo de búsqueda | Las dos filas lo ponen «en la cabecera, todas las superficies públicas». DESIGN § Colors cuenta «Buscar» como enlace siena, y la nota de la maqueta de EXPERIENCE.md dice que lo construido es el enlace «Buscar». Afecta a la cabecera de todas las páginas (DESIGN.md:133, :190; EXPERIENCE.md:34, :92, :114). | high |
-| Acciones | DESIGN.md dice «cada una en su propia línea», como está construido. EXPERIENCE § Responsive dice «a ancho completo apiladas» por debajo de 600 px y «en línea» de 600 a 1024 (DESIGN.md:188; EXPERIENCE.md:235-236). | medium |
-| Chip de Tema | DESIGN.md lo pone en `caption` (Inter 13), con `rounded.md` y sin alto mínimo. La nota de la maqueta de EXPERIENCE.md trata «chips de Tema en Inter y por debajo de `tap-target-min`» como divergencia respecto de lo construido, que es serif a 44 px (DESIGN.md:193; EXPERIENCE.md:114). | medium |
-| Iconografía | DESIGN.md dice que los iconos se usan «exclusivamente para copiar, buscar y descargar», y el mismo DESIGN.md dice «Sin icono» en las Acciones y en el Campo de búsqueda (DESIGN.md:188, :190, :209). | medium |
+- DESIGN dice que en la Página de Autor va «la cifra sola a la vista, y la unidad para el lector de pantalla», y que solo el Directorio de Obras la reutiliza «con la unidad a la vista».
+- EXPERIENCE dice que el mismo componente lleva «la unidad visible —«27 citas», «1 cita»—» también en la Ficha de Autor, porque es la Fila de Obra del Directorio [ASSUMPTION].
+- Héctor (bitácora 123) decidió 6C solo para la Fila de Obra de `/obras/`, y `v8-pagina-de-obra.html` dibuja la Lista de Obras de Sor Juana con la cifra sola.
 
-Arreglo: que Héctor haga el triaje y que cada caso quede en una sola frase idéntica en las dos espinas, antes de que ninguna historia toque la Página de Cita o la cabecera.
+Con las dos espinas así, una historia sobre `ListaDeObras.astro` puede construir cualquiera de las dos cosas.
 
-**[Lente de accesibilidad · espina, construido]** — Ningún mensaje de estado se anuncia (§ EXPERIENCE.md § Accessibility Floor; src/pages/buscar.astro:64, :69)
+Arreglo: en EXPERIENCE.md:162, la cifra sola en la Ficha de Autor y la unidad a la vista en el Directorio, con la adopción en la Página de Autor como pendiente de Héctor; o, si Héctor prefiere la unidad en las dos, el cambio va en DESIGN.md:283.
 
-En `/buscar/`, el recuento («12 resultados.») y «No encontramos esa frase. Prueba con menos palabras.» aparecen al teclear sin `role="status"` ni `aria-live` (`src/pages/buscar.astro:64` y `:69`; un `grep` de `aria-live|role="status"` en `src/` da cero). Quien busca con lector de pantalla teclea y no oye nada: ni que hay resultados, ni cuántos, ni que no hay ninguno. La salida de FR-8, «nunca un callejón sin salida», es un callejón mudo. «Copiado.» (`src/islands/CopiarCita.astro:82`) solo cambia el texto del botón enfocado, y VoiceOver en iOS, que es el público mayoritario (móvil), muchas veces no anuncia ese cambio. La espina no lo pide en ninguna parte: `EXPERIENCE.md § Accessibility Floor` no menciona mensajes de estado, y la fila «Resultado de búsqueda *(recoge lo construido)*» (L110) documenta lo construido sin ellos. Lo mismo vale para «Generando imagen» (L156): la previsualización llega en silencio. — WCAG 4.1.3 Mensajes de estado (AA).
+**Resuelto:** decisión de Héctor (bitácora 132). La Lista de Obras de la Página de Autor enseña también la unidad —«27 citas», «1 cita»—, igual que la Fila de Obra del Directorio de Obras: es un solo componente. Escrito igual en DESIGN.md § Página de Autor y en EXPERIENCE.md § Component Patterns; cierra el pendiente de la v7.1 y cambia lo construido, que enseñaba la cifra sola.
 
-Arreglo: añadir al Accessibility Floor: «Todo mensaje de estado —recuento de resultados, búsqueda sin resultados, “Copiado.”, imagen lista— se anuncia por una región `role="status"` que existe en el marcado desde la carga, vacía y no `hidden`; el cambio es de contenido, no de visibilidad». En `buscar.astro`, quitar `hidden` de `.estado`, darle `role="status"` y escribir ahí también la frase de sin resultados. En `CopiarCita`, un hermano solo para lectores con `role="status"` que recibe «Copiado.».
+**[Revisión de coherencia]** — «Buscar en esta obra» envía solo `obra`, y el selector de Obra no existe sin Autor (§ EXPERIENCE.md:204, :200, :202; DESIGN.md:310; addendum.md:313)
 
-### Medium (18)
+Desde la Página de Obra el formulario lleva un solo campo oculto (`obra=…`), como dibuja `v8-pagina-de-obra.html`, y se llega a `/buscar/?obra=…` sin `autor`: hay un filtro puesto que ningún selector visible muestra, porque el de Obra «no existe hasta elegir un Autor» y «cambiar o quitar el Autor quita la Obra elegida». El recuento («23 citas de José Martí en Maestros ambulantes.») necesita además el Autor. `v8-buscar.html` lo marca «[sin decidir]».
 
-**[Cobertura de flujos]** — UJ-5 lleva dentro del contrato una decisión que él mismo declara sin tomar (§ EXPERIENCE.md:219-227)
+Arreglo: en la Obra, dos campos ocultos, `autor` y `obra`; si la dirección trae `obra` sin `autor`, el Autor se toma de la Obra y los dos selectores se ven puestos; en DESIGN.md, «el filtro en campos ocultos —dos en la Obra—».
 
-El paso 4 describe compartir desde la hoja del sistema, y la nota «Desfase abierto, sin decidir» reconoce que el Kit construido solo descarga y que FR-21 no lo exige. Quien implemente historias no puede saber si debe construir la hoja en el Kit. Además, el paso 1 nombra cinco cuentas y el clímax dice «cuatro redes»; esa incoherencia ya viene del PRD.
+**Resuelto:** decisión de Héctor (bitácora 130), la misma que cierra el alto de la rúbrica en Cobertura de estados: dos campos ocultos, `autor` y `obra`, y una dirección con solo `obra` completa el Autor desde la Obra. DESIGN.md § Búsqueda dice ya «los filtros en campos ocultos… En la Obra son dos».
 
-Arreglo: que Héctor decida. Si el Kit sigue descargando, el paso 4 se reescribe como está construido y la hoja pasa a `[NOTE FOR PM]`. Si no, se compromete como requisito y se añade un patrón de componente del Kit. La cifra de redes se corrige en el PRD.
+**[Cotejo de entradas]** — «Buscar en esta obra» choca con el selector de Obra (§ EXPERIENCE § Búsqueda; DESIGN § Búsqueda; v8-buscar.html)
 
-**[Completitud de tokens]** — Faltan los contrastes de los pares que cargan peso (§ DESIGN.md:131-133, :188, :193)
+Las dos espinas dan el formulario por cerrado con «el filtro en un campo oculto», en singular, pero el selector de Obra «no existe hasta elegir un Autor». Desde la Página de Obra se llegaría a `/buscar/?obra=…` con un filtro activo que ningún selector enseña ni deja quitar uno a uno, y el recuento no tendría su Autor. La maqueta dejó dos salidas y ninguna espina elige.
 
-Calculados por la rúbrica:
+Arreglo: elegir entre dos campos ocultos y deducir el Autor de la ficha.
 
-| Par | Contraste | Dónde se usa | Situación |
-|---|---|---|---|
-| `on-primary` sobre `primary` | 6,7:1 | botón primario, relleno al pasar el cursor, plantilla elegida, plantilla Siena | pasa, sin declarar |
-| texto del Chip de Tema | — | chip | el color no está asignado (solo `caption` y el fondo `surface-container`) |
-| campo de copia manual | 1,3:1 el filete `outline-variant` sobre `surface-container-low`; 1,04:1 el relleno frente a `surface` | campo de copia | nada lo identifica como campo (WCAG 1.4.11 pide 3:1) |
-| `outline` del campo de búsqueda | 3,66:1 | campo de búsqueda | pasa, sin declarar |
+**Resuelto:** decisión de Héctor (bitácora 130): dos campos ocultos, `autor` y `obra`, y una dirección con solo `obra` completa el Autor desde la Obra. Ver el alto de la rúbrica en Cobertura de estados.
 
-Dos de las cifras declaradas no cuadran: la tinta da 16,0:1, no 15,8:1, y la tinta apagada da 7,26:1, no 7,4:1.
+**[Cotejo de entradas]** — «Más opciones…» sin guion (§ EXPERIENCE § Component Patterns; DESIGN § Components; addendum; FR-18; NFR-2)
 
-Arreglo: una tabla de contraste con esos pares, asignar color al texto del chip y darle al campo de copia un filete que llegue a 3:1 (`outline`).
+FR-18 y NFR-2 exigen Telegram, X y Correo en el HTML inicial, «tras «Más opciones…»». El addendum propone un `<details>` y dice «lo cierran UX y Arquitectura». EXPERIENCE lo deja «sin fijar» y DESIGN los da por desplegados sin guion [ASSUMPTION]: dos contratos. Ninguna espina dice qué semántica tiene el despliegue con guion y sin hoja —`aria-expanded`, adónde va el foco, si los destinos se anuncian—. Construido como `button`, sin guion es un control que no hace nada.
 
-**[Completitud de tokens]** — Hay composiciones fuera de la escala de tokens (§ DESIGN.md:163, :194, :200, :201, :206)
+Arreglo: cerrar el pliegue y su semántica en las dos espinas.
 
-La convención de la espina de arquitectura dice que los estilos son tokens definidos una sola vez.
+**Resuelto:** decisión de Héctor (bitácora 131): `<details>` nativo «Más opciones para compartir», que sin guion se abre y enseña los tres destinos. La semántica también quedó escrita: con guion y sin hoja sigue siendo el `<details>`, el navegador expone su estado, el foco se queda en él y los destinos lo siguen en el orden del documento; con hoja, la isla lo cambia por un `button` sin `aria-expanded` (bitácora 139).
 
-- las Citas hermanas van en «Source Serif al tamaño de `{typography.body-lg}`», que es un token Inter;
-- el resultado de Obra va en «Inter al cuerpo y peso de `headline-sm`», que es un token serif;
-- la Lista de Obras deja «los cuerpos del título y del recuento… sin fijar», y eso bloquea la historia de la Épica 17;
-- la respiración móvil de 40 px es un literal sin token, aunque el código ya lo tiene;
-- las Tarjetas Sociales usan «píxeles del lienzo».
+### Medios (37)
 
-Arreglo: añadir tokens —por ejemplo uno serif de 17 px para las Citas hermanas, `title-sm` en Inter 21/600 y `quote-breathing` para móvil— y fijar los cuerpos de la Lista de Obras.
+**[Cobertura de flujos]** — UJ-3 y UJ-6 se apartan del PRD por decisión de Héctor, y los flujos no lo marcan (§ EXPERIENCE.md:403, :427-431, :44; prd.md:58-59, :67-68)
 
-**[Cobertura de componentes]** — Al Resultado de búsqueda le falta la base en DESIGN.md (§ DESIGN.md:206; EXPERIENCE.md:110)
+La bitácora 128 amplía la Resolución de UJ-3 con el Directorio de Obras y compartir por WhatsApp, donde el PRD la cierra en «vuelve… directamente al dominio (UJ-6)». UJ-6 cambia «salta a la «M»…, teclea «mar»» por teclear en el campo, y «escuela» por «enseñanza». Solo la resolución de UJ-3 lleva `[NOTE FOR PM]`, y en el Cierre de superficies, no en el flujo. Quien derive historias de UJ-6 tiene dos textos contradictorios y ninguna marca que diga cuál manda; el fallo de UJ-6 acaba con «el recorrido acaba en ese estado», que solo se entiende conociendo la versión del PRD.
 
-Solo existe «Resultado de búsqueda de tipo Obra», que se define por diferencia («el mismo trato que "Cita"…», «el mismo cuerpo y peso que ellos») contra una especificación base que no está escrita en ningún sitio. Lo construido es un rótulo de tipo y el título en serif de 21 px. Los nombres tampoco coinciden entre los dos ficheros.
+Arreglo: un `[NOTE FOR PM]` en cada uno de los dos flujos con la diferencia exacta, y reescribir la frase final: «con «escuela», como dice hoy el PRD, el recorrido acaba en cero resultados».
 
-Arreglo: una fila «Resultado de búsqueda» con la base y la variante de Obra.
+**Cerrado:** `[NOTE FOR PM]` al pie del paso 8 de UJ-3 y al final de UJ-6, con los tres puntos que enmienda, y la frase del fallo reescrita (bitácora 133).
 
-**[Cobertura de componentes]** — Al pie de la Página de Obra le falta la especificación visual (§ EXPERIENCE.md:106-109; DESIGN.md:194, :203)
+**[Completitud de tokens]** — Las composiciones híbridas se multiplican y el frontmatter ya no describe su uso (§ DESIGN.md:244, :335, :323, :336, :319, :321, :307; :181)
 
-«Temas de la Obra» no tiene fila en DESIGN.md, y no está fijado el ritmo vertical de la secuencia listado → paginación → Temas → Dónde leer → Nota, cuando las Rutas de salida lo tienen al detalle. Tampoco está fijado el nivel de encabezado de «Temas», mientras que «Dónde leer» sí fija su `h2` y sus `h3`.
+La v8 escribe en siete sitios una familia o un peso distintos de los que declara el token:
+- el título de la Tarjeta de Obra y el de las Obras de la portada, «Inter al cuerpo de `body-lg` con peso 600»;
+- la Fila de Autor y los Autores destacados, «Source Serif al cuerpo de `headline-sm`, con peso 400»;
+- el Encabezado del Directorio, «Inter al cuerpo de `headline-md`, con peso 600»;
+- las letras de salto, «`body-md` con peso 600»;
+- el resultado de tipo Directorio, en Inter al cuerpo de `headline-sm`.
 
-Arreglo: una fila para el pie de la Página de Obra que reutilice el ritmo de las Rutas de salida, con «Temas» como `h2`.
+La convención «un token de tipografía da solo su cuerpo» lo cubre en CSS, pero el frontmatter sigue declarando familia y peso (`headline-sm` = Source Serif 600), y un consumidor que lea el YAML sacará la familia o el peso equivocados.
 
-**[Cobertura de estados]** — «Carga normal… no hay nada que esperar» es falso para /buscar/ (§ EXPERIENCE.md:136, :141)
+Arreglo: tokens para las dos parejas que se repiten, `title-md` (Inter 17/600) y `name-sm` (Source Serif 21/400), y una línea que declare que la familia y el peso del YAML son los del uso principal.
 
-Los resultados llegan de Pagefind en el navegador: `buscar.astro` lo importa al enfocar el campo. Hay estados sin cubrir:
+**Cerrado sin tokens nuevos:** § Typography declara que la familia y el peso del frontmatter son los de su uso principal y enumera los usos híbridos (bitácora 137).
 
-- la consulta vacía, en la que no se muestra nada;
-- la carga del índice;
-- un índice que no carga: el error no se trata y la página se queda en blanco;
-- sin JavaScript: el formulario hace GET a `/buscar/?q=` y no aparece nada;
-- el tope de 30 resultados.
+**[Completitud de tokens]** — El campo de copia manual sigue con su filete a 1,3:1, y la v8 lo reutiliza en el Diálogo de la Historia (§ DESIGN.md:248, :260, :156; EXPERIENCE.md:305)
 
-Además, la salida de «sin resultados» construida enseña Temas, Colecciones y **todos** los Autores, y la espina dice «Temas destacados + Autores destacados». Pesa ahora porque la v7.1 añade el tipo Obra a esta superficie.
+El filete es `outline-variant` sobre `surface-container-low`. La tabla de la v8 acaba de publicar que el borde de un control pide 3:1 (WCAG 1.4.11), así que el contrato se contradice a sí mismo en un componente que la v8 ha vuelto a usar cuando falla el portapapeles.
 
-Arreglo: una fila por cada estado, como está construido o como se decida.
+Arreglo: el filete del campo en `{colors.outline}`, que sobre `surface-container-low` da 3,51:1.
 
-**[Cobertura de estados]** — «Generando imagen» no decide el progreso ni cubre el fallo del generador (§ EXPERIENCE.md:156)
+**Cerrado:** el filete pasa a `{colors.outline}`, 3,51:1; cambia lo construido (bitácora 137).
 
-El estado deja sin decidir si sigue haciendo falta el indicador de progreso que pedía la v1: lo anota y no lo resuelve. Tampoco hay estado para un generador que no llega a cargar, por ejemplo sin red después de cargar la página; hoy la previsualización se queda vacía indefinidamente.
+**[Cobertura de componentes]** — En la portada, la Tarjeta de Obra y «Compartir en» llevan su `h2` fijo y parten la Cita del Día en tres secciones (§ EXPERIENCE.md:365, :228; DESIGN.md:334)
 
-Arreglo: decidir lo del progreso y añadir el fallo, por ejemplo «No se pudo preparar la imagen.», con Copiar disponible.
+EXPERIENCE.md da a «De la obra» y «Compartir en» un `h2` en toda superficie. En la portada eso los pone al nivel de «La cita de hoy», «Obras» y «Temas», y el bloque que las dos espinas declaran «un solo bloque» se oye como tres secciones al navegar por encabezados (WCAG 1.3.1).
 
-**[Cobertura de estados]** — Dos estados de la Lista de Obras se han quedado viejos frente a la v7.1 (§ EXPERIENCE.md:139-140; DESIGN.md:198)
+Arreglo: dentro de «La cita de hoy», `h3` para «De la obra» y «Compartir en», y la regla escrita en Accessibility Floor: el nivel lo da el contenedor.
 
-- «Dos obras que son la misma partida por la Fuente — No se publican dos entradas» contradice AD-25 v7.1, que dice «grafías, nunca partes», que dos títulos donde uno es prefijo del otro avisan y no rompen, y que se decide en la Ficha de Obra. Hoy esos dos títulos serían dos Páginas de Obra hasta que la ficha las reúna.
-- «Cita sin obra declarada — … el recuento lo dice» se apoya en un recuento que DESIGN.md declara inexistente («Citas documentadas», sin recuento).
+**Cerrado:** `h3` dentro de «La cita de hoy», con la regla «el nivel lo da el contenedor» en el Accessibility Floor (bitácora 133).
 
-La Épica 17 hereda los dos.
+**[Cobertura de componentes]** — Los cierres de la portada se tratan distinto que sus gemelos, y la fuente única del subrayado no los nombra (§ DESIGN.md:334-336, :261, :222; EXPERIENCE.md:369)
 
-Arreglo: reescribir los dos estados contra AD-25 y FR-53, y decidir si hay recuento y dónde va.
+- En la portada van subrayados «Las {n} obras →», «Los {n} autores, de la A a la Z →» y «Ver esta cita».
+- En las Rutas de salida, los cierres «Las {n} citas de… →» son la última Fila de bloque, sin subrayar.
+- La lista de EXPERIENCE.md:369, declarada única fuente del subrayado, no incluye ninguno de los tres de la portada.
 
-**[Hinchazón y sobreespecificación]** — La prosa de EXPERIENCE.md arrastra historia de decisiones, alternativas descartadas y mediciones (§ EXPERIENCE.md:58-60, :99, :104, :106, :166)
+Arreglo: un solo trato para los cierres —Fila de bloque o enlace de texto subrayado— y los tres nombrados en la fuente única.
 
-La rúbrica pide que no lleve voz editorial:
+**Cerrado:** la fuente única del subrayado (EXPERIENCE.md § Accessibility Floor) tiene ya una regla para «Los cierres «→»», con un solo criterio, y nombra los de la portada.
 
-- Cabecera de Obra: «el diseño del 05/10 traía tres…», «11 de los 183», «llega a cinco» y el segundo tramo descartado;
-- Paginación: la historia de NFR-5;
-- «Frases» y «citas»: el porqué y el coste aceptado;
-- el título de pestaña: las alternativas descartadas;
-- las Zonas de toque: el párrafo sobre WCAG;
-- «Medido: los 16 del Oráculo…».
+**[Cobertura de estados]** — El índice que no carga sigue sin tratamiento: un callejón con guion (§ EXPERIENCE.md:329, :326, :324)
 
-Hay filas de 150 a 250 palabras en las que la regla cabe en una frase.
+Bajo el campo no aparece nada, ni resultados ni la salida de FR-8. La v8 lleva a `/buscar/` con estado desde la portada y desde las páginas 1 de Obra, Autor y Tema, y la búsqueda sin guion ya tiene una salida digna (7C). Con guion y sin índice, todo eso acaba en un callejón, que la propia espina veda («Nunca un callejón sin salida»).
 
-Arreglo: dejar en la espina la regla y su referencia (FR o AD), y llevar el porqué a la bitácora, donde ya está.
+Arreglo: que el fallo del índice muestre lo mismo que 7C —la frase, «vuelve atrás» y los dos Directorios— y lo anuncie por la región `role="status"`.
 
-**[Hinchazón y sobreespecificación]** — La regla retirada del siena sigue citada literalmente dentro de la regla vigente (§ DESIGN.md:133, :216)
+**Cerrado:** el índice que no carga muestra la salida 7C, con la frase escrita entera, y se anuncia por la región (bitácora 137).
 
-«si aparece en más de dos sitios de una pantalla, algo está mal» sigue en § Colors y en el Do. Fuera del alcance de UX, el comentario de `src/styles/tokens.css` la sigue enunciando como vigente. Quien busque «siena» encontrará la regla vieja dos veces, una de ellas en el código.
+**[Cobertura de estados]** — No hay estado para una búsqueda compartida que ya no resuelve (§ EXPERIENCE.md:200, :324)
 
-Arreglo: quitar la cita de la espina y avisar del comentario a la próxima historia que toque `tokens.css`.
+La v8 hace compartible la búsqueda («se comparte copiándola»), pero no dice qué pasa con un `?autor=` de un Autor retirado o un `?obra=` de una Obra reunida, cuya URL deja de existir por FR-53. La frase a cero «No encontramos «x» entre las citas de {Autor} en {Obra}» no puede nombrar un valor que ya no tiene título.
 
-**[Disciplina de herencia]** — Los nombres de token chocan con la convención del repositorio (§ DESIGN.md:38-113)
+Arreglo: un estado que ignore el valor desconocido, lo diga en una frase y deje la búsqueda sin ese filtro.
 
-`quote-*`, `author`, `quote-max-measure` y `quote-breathing` usan los nombres de entidad en inglés que vedan la convención de nombres de la espina de arquitectura y AGENTS.md («Ni `quote`… ni `author`»). El código los tradujo en `src/styles/tokens.css` (`--cita-xl`, `--autor`, `--siena`, `--titular-md`…), y esa correspondencia solo vive allí. El `title-lg` nuevo todavía no tiene nombre en español, y el obvio, `--titular-lg`, se confundiría con `--titular-md` y `--titular-sm`, que son serif.
+**Cerrado:** fila de estado «Un filtro de la dirección que ya no existe» en EXPERIENCE.md § State Patterns (bitácora 139).
 
-Arreglo: una tabla «token de DESIGN.md → propiedad CSS» en DESIGN.md con el nombre de `title-lg` ya fijado, o renombrar los tokens en español.
+**[Cobertura de referencias visuales]** — Decisiones que las maquetas v8 dejan «[sin decidir]» no llegaron a la espina, ni como decisión ni como divergencia (§ v8-buscar.html (decisión 1); v8-directorios.html (3A); EXPERIENCE.md:200, :214, :427)
 
-**[Lente de accesibilidad · espina]** — El enlace de una edición en venta se queda sin propósito ni declaración para quien navega por enlaces (§ EXPERIENCE.md L108, L118; DESIGN.md L204)
+- El orden de las opciones del selector de Autor —por nombre o por apellido—, que choca con la búsqueda por tecleo del selector nativo («con «M» no se llega a Martí»), y los 24 Temas que empiezan por «El» o «La».
+- Si el filtro de los Directorios casa por principio de palabra o por subcadena (13 o 14 resultados para «mar»), aunque la espina da «13 autores.» como ejemplo y UJ-6 depende de esa regla.
+- La etiqueta del campo de filtro de los Directorios y el texto de la «primera opción que no filtra» de cada selector.
 
-La espina fija que el enlace sea **solo** el nombre de la tienda, y corrige a propósito la maqueta, que enlazaba «Edición impresa en Amazon México» (L118). En la lista de enlaces del lector queda «Amazon México», y con dos ediciones en la misma tienda quedan dos «Amazon México» iguales que van a sitios distintos. La declaración «Enlace de afiliado: si compras…» va detrás, en la misma línea, pero no está asociada al enlace, así que FR-35 («en la misma línea que cada enlace») se cumple a la vista y no para quien navega por enlaces o tabula. Además: `rel="sponsored noopener"` presupone `target="_blank"` y la espina no dice si se abre en pestaña nueva; tampoco fija el elemento del bloque `data-ingreso`. Si se copia el patrón de `Sostener` (`<aside aria-label>`), queda una región complementaria metida dentro de «Dónde leer», dentro de `main`. — WCAG 2.4.4 Propósito de los enlaces (A: se salva por contexto de párrafo, pero ese contexto no llega por la lista de enlaces), 1.3.1.
+La fila de `v8-buscar` en la tabla de Maquetas anota tres divergencias, y no son estas.
 
-Arreglo: que el texto del enlace sea «Edición impresa en {tienda}» / «Edición electrónica en {tienda}», como en la maqueta, y que la declaración vaya en un `<span id>` referenciado con `aria-describedby` desde su enlace. Decidir y escribir si abre pestaña nueva; si la abre, el aviso va dentro del nombre accesible, como en `Sostener`. Las ediciones van en `<ul>`, una por `<li>`, dentro de un `<div data-ingreso>` con su `h3`, y nunca en un `aside`. Escribir «subrayado» explícitamente (ver el hallazgo de la regla del subrayado).
+Arreglo: decidir —por principio de palabra, con las opciones de Autor en el orden del Directorio y la microcopia escrita— o anotarlas en la columna de divergencias.
 
-**[Lente de accesibilidad · espina, construido]** — Los destinos de «Compartir la cita» no dicen que comparten (§ EXPERIENCE.md L90; DESIGN.md L188; src/islands/CompartirEnlace.astro:47-60)
+**Cerrado:** filtro por subcadena normalizada, que da 14 Autores para «mar» y cambia los ejemplos a «14 autores.» (decisión de Héctor, bitácora 134); orden y primera opción de los selectores (137); etiquetas del filtro y «(23 citas)» en el selector de Obra (139).
 
-Sin hoja del sistema (Firefox de escritorio, por ejemplo), lo que se ve y lo que se lee es una fila de enlaces «WhatsApp», «Telegram», «X» y «Correo» sin rótulo visible ni programático: el botón «Compartir la cita» desaparece justo entonces (`DESIGN.md` L188: «se sustituye por los destinos»), y la lista no lleva `aria-label` ni encabezado. Con NVDA, «enlace WhatsApp» se oye como el WhatsApp del sitio, y el día que la cuenta de X exista, el pie (`DondeSeguirnos`) y los destinos tendrán dos «X» con propósitos opuestos. — WCAG 2.4.4 Propósito de los enlaces (en contexto) (A): no hay frase, párrafo ni encabezado previo que dé el contexto.
+**[Sobrecarga y sobreespecificación]** — Vuelven las reglas retiradas citadas literalmente (§ EXPERIENCE.md:58, :102, :118, :137, :143, :223, :298, :315, :324, :343, :364, :386; DESIGN.md:141, :250)
 
-Arreglo: en la espina (`EXPERIENCE.md` L90, `DESIGN.md` L188), que cada destino diga «Compartir en {destino}», o como mínimo «Compartir en» oculto y solo para lectores dentro del enlace, con el aviso de pestaña nueva al final (siguiente hallazgo).
+Héctor decidió el 2026-10-09 que se quitan las reglas retiradas citadas literalmente y las alternativas descartadas, que ya están en la bitácora (entrada 84). La v8 añade 27 anotaciones «*(v8 — antes …)*» —21 en EXPERIENCE.md y 6 en DESIGN.md— y 19 llevan la regla vieja entre comillas. La más arriesgada está en la columna «Sí» de Voice and Tone, que guarda dentro de la celda la microcopia retirada «Esta cita es demasiado larga para generar una imagen.»: un extractor que lea esa columna la tomará por válida.
 
-**[Lente de accesibilidad · espina, construido]** — No hay una política de enlaces que salen del sitio, y lo construido hace tres cosas distintas (§ EXPERIENCE.md § Interaction Primitives; DESIGN.md L133)
+Arreglo: dejar el «*(v8)*» y quitar el «antes «…»», que ya está en la bitácora y en git.
 
-La Fuente abre en la misma pestaña (`Fuente.astro`). «Apoyar el sitio» abre pestaña nueva y lo anuncia dentro de su nombre accesible (`Sostener.astro`). Los destinos de compartir (`CompartirEnlace.astro:51`) y las cuentas del pie (`DondeSeguirnos.astro:36`, en todas las páginas) abren pestaña nueva **sin avisar**. Las ediciones en venta, sin decidir. En móvil, una pestaña nueva silenciosa rompe el gesto de volver, y quien no ve la pantalla no sabe por qué. La regla «siena = actuar o salir» (`DESIGN.md` L133) añade otro problema: confía al color la diferencia entre dentro y fuera. El rechazo de E3 («vestía igual la obra, dentro del sitio, que la Fuente, fuera») da por hecho que el color distingue, y siena sobre tinta es 2,56:1, que para protanopía o deuteranopía es el mismo marrón oscuro. — WCAG 3.2.5 (AAA) y técnica G201; 1.4.1 si el color es la única señal de «sale».
+**Cerrado:** se retiraron las citas literales «antes «…»» (bitácora 133); al cierre no queda ninguna en las dos espinas.
 
-Arreglo: una línea en `EXPERIENCE.md § Interaction Primitives` que diga qué enlaces abren pestaña nueva (propuesta: ninguno salvo los que entregan a un tercero con estado —donar, compartir, comprar—) y que todo enlace que la abre lo anuncia dentro de su nombre accesible con el patrón de `Sostener`. Añadir que el siena **nunca** es la única señal de salida: la salida la dice también el texto, como ya hace «Texto tomado de…». Arreglar `CompartirEnlace` y `DondeSeguirnos`.
+**[Sobrecarga y sobreespecificación]** — El par dobla su tamaño en una sola pasada (§ EXPERIENCE.md:133, :129, :134)
 
-**[Lente de accesibilidad · espina]** — La exención en línea está mal aplicada al título de la Obra en la Atribución, y «de {Autor}» no tiene regla de zona de toque (§ EXPERIENCE.md L166, L104; DESIGN.md L202; src/components/Atribucion.astro:77)
+DESIGN.md pasa de 4.805 a 9.831 palabras y EXPERIENCE.md de 8.671 a 19.760, con 179 y 67 marcas «(v8». Hay celdas de comportamiento de 479 palabras (el bloque «Compartir en»), de 333 (la Tarjeta de Obra) y de 298 (el Diálogo de la Historia). Son reglas de verdad, pero metidas en una celda de tabla no se pueden citar ni extraer por partes.
 
-El título no va «a mitad de oración»: abre la línea y casi **es** la línea («Oráculo manual y arte de prudencia, 1647.»). Lo que de verdad limita su altura no es el interlineado ajeno, sino que nadie le ha dado relleno. Medido en la Página de Cita a 320 px: la caja de la línea de Procedencia mide 19,5 px y la del texto 16 px. El enlace del Autor ya crece a 44 px con `padding-block: 13px` y margen negativo (`src/components/Atribucion.astro:77`) y **se mete 5 px en la línea de la Procedencia** (473,9–518,1 frente a 513,1); `elementFromPoint` sobre el hueco de esa línea devuelve ya el enlace del Autor. El de la Fuente queda 11,5 px por debajo, con 16 px de alto. Así que E2 apila tres objetivos en unos 84 px, y el del medio, de 16 px, solapa el área del de arriba. No pasaría ni la excepción de espaciado de 2.5.8, porque el círculo de 24 px centrado en el título corta la zona del Autor. Con el foco en el Autor, su anillo tacha además el título de la Obra. La Cabecera de Obra no dice nada del objetivo de «de {Autor}» (`DESIGN.md` L202, `EXPERIENCE.md` L104), que es el paso 4 de UJ-3. Aquí no hay nada interactivo en 8 px alrededor: el `h1` no enlaza y el listado empieza 32 px más abajo. — WCAG 2.5.8 (AA de 2.2) y 2.5.5 (AAA); la regla de producto de 44 px con 8 px (L166).
+Arreglo: convertir en listas debajo de la tabla las filas de más de 250 palabras, como ya se hizo con «Dónde leer esta obra», y, con la puerta pasada, quitar las marcas de versión de las reglas que no sustituyen a otra.
 
-Arreglo: retirar la [ASSUMPTION] de L166 para el título de la Obra y escribir que lleva al menos 24 px de zona efectiva sin solapar ninguna otra (relleno vertical con margen negativo, como el Autor) y que la zona ampliada del Autor no invade la línea siguiente: menos relleno inferior, o 2 × `{spacing.unit}` entre Autor y Procedencia. Para «de {Autor}», 44 px por el mismo procedimiento que el nombre en la Atribución. La exención se queda para la Fuente («Texto tomado de [Wikisource]»), que sí va dentro de una frase.
+**Cerrado en la pasada:** las celdas de más de 250 palabras pasaron a listas (bitácora 133), y las marcas *(v8)* se conservan, como hicieron las pasadas anteriores con las suyas, porque dicen a la siguiente pasada qué derivó de la v8 (bitácora 140). El tamaño no baja: al cierre, 12.015 y 23.723 palabras.
 
-**[Lente de accesibilidad · espina]** — El subrayado se escribe caso por caso, pero la paleta exige que sea regla general (§ DESIGN.md § Colors L133, L204; EXPERIENCE.md L177)
+**[Disciplina de herencia]** — Las zonas de FR-56 están escritas a medias (§ EXPERIENCE.md:118, :127, :129, :135, :136, :143, :144, :145, :146, :162, :172, :205, :217, :228-230)
 
-Ninguna pareja de color de enlace llega a 3:1 frente al texto de su línea: tinta/tinta apagada **2,20:1**, siena/tinta apagada **1,16:1** (prácticamente la misma luminancia), siena/tinta **2,56:1**. Así que **ningún** enlace dentro de un texto se distingue por color en este sistema. `DESIGN.md § Colors` (L133) justifica el siena con «6,3:1 sobre papel: pasa AA también como texto de enlace», que es la comparación equivocada para 1.4.1. El Accessibility Floor (L177) enumera solo dos casos subrayados (título de la Obra y «de {Autor}»), y las ediciones en venta (`DESIGN.md` L204) no dicen «subrayado». Hoy sale subrayado por el estilo por omisión del navegador, y deja de salir en cuanto alguien escriba `text-decoration: none` en un atributo `style`, como ya llevan el siena de «Buscar» y la paginación. Las cifras declaradas tampoco son exactas: tinta/papel es 16,0 (no 15,8) y tinta apagada/papel 7,26 (no 7,4). Ninguna cambia de nivel. — WCAG 1.4.1 Uso del color (A); regla axe `link-in-text-block`.
+Ocho filas dicen qué zona registran: la Cabecera, la Tarjeta de Obra, «De la misma obra», «Más de {Autor}», la Tarjeta de Cita, el Resultado, la Fila de Autor y la Cita del Día. Otras que FR-56 incluye no lo dicen: la Atribución y el Autor de la Cabecera de Obra, el Chip de Tema y el de Colección, la Paginación, la Lista de Obras, y las Obras y los Autores de la portada. Un consumidor no sabe si el silencio quiere decir «sin zona».
 
-Arreglo: sustituir L177 por la regla general: «Todo enlace que comparte línea con texto que no enlaza va subrayado siempre, sea tinta o siena; ninguna pareja de la paleta llega a 3:1 entre enlace y texto». Publicar en `§ Colors` las tres razones enlace/texto junto a las de texto/fondo, y corregir 15,8 → 16,0 y 7,4 → 7,26.
+Arreglo: quitar todas las menciones y remitir a FR-56, o poner en Component Patterns una sola tabla de componente y zona.
 
-**[Lente de accesibilidad · espina]** — Las versalitas no distinguen el nombre del Autor como enlace, porque el sistema las usa para lo que no enlaza (§ DESIGN.md L133, L186; EXPERIENCE.md L177)
+**Cerrado:** una sola tabla de componente y zona, EXPERIENCE.md § Zonas de salida interna, con los 16 valores del conjunto cerrado del addendum (bitácora 137).
 
-El token `author` (mayúsculas espaciadas) viste también los `h2` «TEMAS», «MÁS DE…», «DÓNDE LEER ESTA OBRA» y «CITAS DOCUMENTADAS», el rótulo de tipo «OBRA» de `/buscar/` y el nombre del Autor que va *dentro* de la tarjeta sin ser enlace propio. En la Página de Cita, el nombre en versalitas y sin subrayado no tiene ninguna señal visual de que lleva a algún sitio. Y el mismo destino, la Página de Autor, va subrayado en la Cabecera de Obra y sin subrayar en la Atribución. Las Rutas de salida no lo compensan: «Más de {Autor}» es un `h2`, no un enlace. No es un fallo estricto de 1.4.1 (el nombre ocupa su propia línea), pero el razonamiento de L133, L186 y L177 es falso y una historia lo heredaría como verdad. Quien más lo nota es la persona con baja visión o con dificultades cognitivas, que no descubre el enlace. — WCAG 3.2.4 Identificación coherente (AA, en el espíritu) y 1.4.1 por analogía.
+**[Disciplina de herencia]** — La regla de 8 px entre zonas de toque choca con la geometría que decide la v8, y no declara su alcance (§ EXPERIENCE.md:347, :352; DESIGN.md:230, :324)
 
-Arreglo: subrayar siempre también el nombre del Autor en la Atribución. Si se decide no hacerlo, que la espina lo registre como coste aceptado, con su motivo real, y retire «se distingue por sus versalitas».
+- **La Cabecera de dos filas** mide 105 = 8 + 44 + 44 + 8 + 1: la zona de la marca toca la de «Autores · Obras · Buscar», a 0 px, y la maqueta `.cab-a` lo confirma. EXPERIENCE.md:352 solo pide 8 px en horizontal.
+- **La cabecera de grupo de `/obras/`** pide 44 px para un nombre de 27,3 px de línea, por relleno y margen negativo, con la lista «a `{spacing.unit}` del nombre»: la zona asoma 8,35 px y queda a unos 0 px de la primera Fila de Obra.
+- **Las Filas de bloque apiladas** —Tarjeta de Obra, Directorios, portada— están pegadas, separadas solo por un filete.
 
-**[Lente de accesibilidad · construido]** — El diálogo de imagen se anuncia como «Descargar la cita como imagen» donde la acción es compartir (§ src/islands/ImagenDeCita.astro:85; EXPERIENCE.md L88; DESIGN.md L189)
+Arreglo: declarar en Interaction Primitives que dos filas de bloque a todo el ancho y apiladas no necesitan los 8 px, y decir si la marca es una de ellas; en la cabecera de grupo, el nombre como bloque de 44 px de alto.
 
-En móvil, donde la acción es compartir, son casi todos los dispositivos. El nombre está escrito en el marcado (`src/islands/ImagenDeCita.astro:85`), y el guion cambia el texto de los dos botones a «Compartir como imagen» y «Compartir», pero no toca el `aria-label`. El título visible, «Elige un diseño.», no está asociado al diálogo, así que quien ve y quien oye reciben dos nombres distintos. Rompe la regla de la propia espina («Su rótulo dice adónde irá la imagen», `EXPERIENCE.md` L88), que no dice cómo se nombra el diálogo. — WCAG 4.1.2 Nombre, función, valor (A) y 2.4.6 (AA).
+**Cerrado:** la marca a su ancho y 8 px entre las dos filas de la cabecera, que pasa de 105 a unos 113 px, con la Cita aún en la primera pantalla y a volver a medir (bitácoras 133 y 137); la cabecera de grupo como bloque de 44 px y las filas de bloque apiladas exentas de los 8 px, declarado en Interaction Primitives (139).
 
-Arreglo: `aria-labelledby` hacia el título visible y un `aria-describedby` que diga «Compartir» o «Descargar» según la capacidad, o actualizar el `aria-label` en el mismo punto del guion que cambia los rótulos. En `DESIGN.md` L189, una frase: «el nombre accesible del diálogo sigue al rótulo de la acción».
+**[Lente de accesibilidad]** — La zona de toque de la marca ocupa toda la fila y toca las de los tres enlaces (§ DESIGN.md:228, :230; EXPERIENCE.md:347, :352; v8-cabecera-y-portada.html:177, :193)
 
-### Low (30)
+La marca es un enlace de bloque con alto mínimo 44. Medido sobre la maqueta elegida: la zona mide 280 × 44 px a 320 y 320 × 44 a 360 —toda la fila, aunque el texto ocupa 181 px— y acaba en y = 52, justo donde empiezan «Autores», «Obras» y «Buscar»: **0 px** entre zonas, cuando la espina pide 8. 2.5.8 se cumple; lo que falla es la regla propia del producto, en la cabecera de todas las páginas: un toque 2 px por encima de «Autores», o a la derecha del nombre, lleva a la portada.
 
-**[Cobertura de flujos]** — El paso 2 de UJ-2 promete varios diseños compuestos a la vez (§ EXPERIENCE.md:196 frente a :89 y DESIGN.md:189)
+Arreglo: la marca a su ancho (`inline-flex`), `{spacing.unit}` también entre las dos filas (la cabecera pasa a unos 113 px; volver a medir la primera pantalla) y los 8 px también en vertical en EXPERIENCE.md:352.
 
-Dice «con unos pocos diseños y su Cita ya compuesta en cada uno». El Diálogo de Imagen, en las dos espinas, tiene una sola previsualización, tres botones de plantilla y Papel elegida al abrir.
+**Cerrado:** marca a su ancho, 8 px entre filas y en vertical (bitácoras 133 y 137).
 
-Arreglo: «elige entre Papel, Tinta y Siena; la previsualización muestra la elegida».
+**[Lente de accesibilidad]** — La cabecera y la rejilla «Compartir en» no tienen salida cuando el texto crece, y a 320 px desbordan (§ DESIGN.md:230, :251, :244; EXPERIENCE.md:440, :371, :172; v8-cabecera-y-portada.html:182)
 
-**[Cobertura de flujos]** — El clímax de UJ-1 no es el del PRD (§ EXPERIENCE.md:189-191)
+La espina fija las dos como formas cerradas («Mide 105px a 360 y lo mismo a 320»; «un 2 × 2 que no cambia»). A 320 px con el espaciado de 1.4.12 caben; con el texto al 200 %, «Buscar» sobresale **24 px** porque `.nav ul` no lleva `flex-wrap`, y la rejilla **62 px**, porque «WhatsApp» a 30 px no cabe en una columna de 136. En el sitio eso es desplazamiento horizontal de toda la página, que NFR-8 prohíbe. La regla «parte palabras antes que desbordar» solo se fija para la Cabecera de Obra y la Tarjeta de Obra. — WCAG 1.4.4, 1.4.10 y 1.4.12 (AA).
 
-El PRD lo pone en tener la Cita pegada, con su atribución, en menos de 30 s. La espina lo pone en «confía en lo que va a citar» (paso 3) y deja los 30 s en el paso 5, sin marca de clímax.
+Arreglo: los tres enlaces se parten en otra fila y nunca desbordan; la rejilla pasa a una columna cuando una celda no cabe, sin `white-space: nowrap`; todo título de Obra con algo al lado parte palabras; y en `accesibilidad.spec.ts`, una pasada a 320 px con el espaciado de 1.4.12 y otra con el texto al 200 %.
 
-Arreglo: marcar el clímax del PRD, o declarar la reinterpretación.
+**Cerrado:** reflujo a 320 px con el texto al 200 % escrito en las dos espinas —enlaces que se parten, rejilla que pasa a una columna, títulos que parten palabras— (bitácora 133).
 
-**[Cobertura de flujos]** — UJ-4 remite a un panel y a una herramienta que no existen (§ EXPERIENCE.md:37, :213, :216)
+**[Lente de accesibilidad]** — Los recuentos que se anuncian al teclear no tienen pausa, y la convención los vuelve a anunciar aunque no cambien (§ EXPERIENCE.md:214, :330, :367; DESIGN.md:320; AGENTS.md:35; src/pages/buscar.astro:271)
 
-El clímax dice «visible en el propio panel (FR-16)», y la IA afirma que «No hay panel autenticado en producción». El paso 1 habla de «la herramienta de Curación», cuando la puerta real son tres órdenes: `recuperar`, `extraer` y `revisar`.
+El filtro de los Directorios y `/buscar/` anuncian su recuento mientras se teclea, y la convención de vaciar y reescribir —pensada para «Copiado.»— hace que cada pulsación vuelva a decirlo: «gon», «gonz», «gonza» dicen «1 autor.» tres veces. Lo construido busca tras 150 ms sin teclear, casi una vez por letra. Quedan sin decidir si la región del Directorio está en el HTML inicial («Lo inserta la isla» no distingue el campo de la región), qué dice al cargar y qué dice al vaciar el campo. — WCAG 4.1.3 (se cumple; el problema es el ruido).
 
-Arreglo: «visible en el informe de salud del Corpus, en la terminal».
+Arreglo: separar dos ritmos: lo que el visitante repite se anuncia vaciando y reescribiendo; lo que cambia al teclear, tras una pausa de unos 700 ms y solo si la frase cambió. «La región está en el HTML inicial, vacía; la isla inserta solo el campo.» Pedir el matiz en AGENTS.md con `bmad-project-context`.
 
-**[Cobertura de flujos]** — Ningún flujo cubre la entrada directa a una Página de Obra desde el buscador externo (§ EXPERIENCE.md § Key Flows)
+**Cerrado en las espinas:** los dos ritmos escritos en el Accessibility Floor y aplicados en DESIGN.md, con la región del Directorio en el HTML inicial (bitácora 133). El matiz de AGENTS.md no lo puede cerrar `bmad-ux`: queda anotado para `bmad-project-context` (bitácora 138).
 
-La entrada desde el buscador externo («frases del Oráculo manual») es la primera razón de ser de §4.19, y tampoco hay flujo para el paso de «Dónde leer» a la edición cotejada. El PRD no tiene UJ para eso, así que la rúbrica no lo cuenta como falta.
+**[Lente de accesibilidad]** — En la portada, «De la obra» y «Compartir en» salen como `h2` hermanos de «La cita de hoy» (§ EXPERIENCE.md:365, :228; v8-cabecera-y-portada.html:733, :744, :755)
 
-Arreglo: si se quiere el flujo, pedir al PM una variante de UJ-3. La espina no debe inventar un UJ.
+Quien recorre por encabezados oye «La cita de hoy, De la obra, Compartir en, Obras, Temas…» al mismo nivel: la estructura dice que la Tarjeta y el compartir son secciones de la portada, no partes de la Cita del Día, y se confunden «De la obra» y «Obras». En la Página de Cita sí son `h2`, porque cuelgan del `h1`, que es el texto de la Cita. — WCAG 1.3.1 (A) y 2.4.6 (AA).
 
-**[Cobertura de componentes]** — Hay componentes construidos que no aparecen en ninguna espina (§ DESIGN.md § Components; EXPERIENCE.md § Component Patterns)
+Arreglo: en la portada, `h3` dentro de «La cita de hoy»; que la Tarjeta de Obra y el bloque «Compartir en» reciban el nivel por propiedad, como ya hace `BloqueDeCita` con `comoTitulo`.
 
-Aunque esta pasada quería ponerse al día con lo construido, faltan:
+**Cerrado** (bitácora 133); ver el medio de la rúbrica en Cobertura de componentes.
 
-- «Dónde seguirnos», en el pie del armazón (`DondeSeguirnos.astro`), que está en todas las páginas, también en las de lectura;
-- la cabecera del sitio, con la marca y «Buscar»;
-- la Cita del Día de la portada;
-- el material del Kit y del Lote (`MaterialParaPublicar.astro`).
+**[Lente de accesibilidad]** — Con el teclado en Windows, los selectores nativos rehacen la búsqueda a cada flecha (§ EXPERIENCE.md:325, :200)
 
-Arreglo: añadirles fila, o declararlos expresamente fuera del contrato.
+En Chrome, Edge y Firefox para Windows, las flechas sobre un `<select>` cerrado disparan `change` a cada pulsación. Cada cambio rehace la búsqueda, se anuncia y apila una entrada de historial: recorrer con flechas los 135 Autores hasta José Martí son unas setenta búsquedas, setenta anuncios, setenta peticiones de recuentos y setenta entradas de «atrás». El foco no se mueve, y eso está bien (3.2.2), pero la página cambia bajo el teclado a cada paso.
 
-**[Cobertura de componentes]** — La fila de la Tarjeta de Cita no recoge la excepción sin nombre de Autor (§ EXPERIENCE.md:93 frente a :105 y DESIGN.md:191)
+Arreglo: un cambio de selector se aplica tras unos 400 ms sin otro cambio; solo esa búsqueda se anuncia y entra en el historial, y mientras el mismo selector sigue cambiando la dirección se reemplaza.
 
-Sigue diciendo «Fragmento + autor» para los listados de Autor y de Obra, sin la excepción que sí fijan DESIGN.md y la fila del Listado de Obra: sin el nombre del Autor.
+**Cerrado:** espera de unos 400 ms y dirección reemplazada, no apilada (bitácora 133).
 
-Arreglo: añadir la excepción en esa fila.
+**[Lente de accesibilidad]** — El Diálogo de la Historia dice lo importante tarde, una sola vez o tres veces (§ EXPERIENCE.md:134, :269, :302-305, :368; DESIGN.md:257; v8-historia-de-instagram.html:391, :832, :835)
 
-**[Cobertura de estados]** — Una Obra cuyas Citas no tocan ningún Tema publicado no tiene estado (§ EXPERIENCE.md:106)
+- **La instrucción no se oye al abrir.** «Se copia el enlace para el sticker Enlace.» no está asociada al diálogo, y es la que avisa antes del segundo toque de que hay que pegar el enlace.
+- **Con el portapapeles fallido, la misma frase suena tres veces:** etiqueta del campo que recibe el foco, texto visible y mensaje de la región, y cae mientras la hoja del sistema está delante *(sin verificar)*.
+- **La duración de la frase visible está sin decidir.** Si caduca, quien vuelve de Instagram ya no la encuentra.
 
-Con todos sus Temas por debajo de 15, no se sabe si el rótulo «Temas» se pinta vacío.
+— WCAG 4.1.3 (AA), 1.3.1 (A) y 3.3.2 (A).
 
-Arreglo: «Sin Temas publicados, el bloque no existe».
+Arreglo: `aria-describedby` del `<dialog>` hacia la instrucción; una sola vía para el portapapeles fallido —el foco al campo, con la frase como etiqueta, sin escribir en la región—; y que la frase de estado visible no caduque.
 
-**[Cobertura de estados]** — Los estados construidos del Kit y del Lote no figuran en State Patterns (§ EXPERIENCE.md:35-36)
+**Cerrado:** `aria-describedby` hacia la instrucción, una sola vía para el portapapeles fallido y frase que no caduca (bitácora 133); si falla el generador, la línea de arriba se retira y el `aria-describedby` pasa a la frase del fallo (139).
 
-La fila del Lote dice que se documenta «como está construido», y faltan:
+**[Revisión de coherencia]** — El rótulo de tipo «Directorio»: DESIGN lo fija y EXPERIENCE lo delega (§ DESIGN.md:307, :309; EXPERIENCE.md:205; addendum.md:428)
 
-- «Hoy no hay ninguna Cita apta para portada.»;
-- el lote vacío;
-- una fijación muda;
-- la alternativa con Imagen.
+La bitácora 124 eligió 7C, «los dos Directorios como resultados de tipo Directorio», pero `v8-buscar.html` marca «[sin decidir] El rótulo «Directorio»». El addendum solo difiere a Arquitectura el tipo de resultado en Pagefind, que es mecanismo; el texto visible es de UX.
 
-Arreglo: filas de estado para los dos.
+Arreglo: en EXPERIENCE.md:205, «se rotula «Directorio» (variante 7C) [ASSUMPTION]; el tipo de resultado en Pagefind y qué parte de su lista se ignora los fija Arquitectura», y `[ASSUMPTION]` en DESIGN.md:307.
 
-**[Cobertura de estados]** — Quedan dos estados vacíos sin cubrir (§ EXPERIENCE.md § State Patterns)
+**Cerrado:** «Directorio» en las dos espinas; a Arquitectura quedan el tipo de Pagefind y qué parte de la lista se ignora.
 
-- la portada sin ninguna Colección publicada, que es el estado real de hoy porque `corpus/colecciones/` está vacío;
-- una Página de Autor cuyas Citas no declaran obra, con la Lista de Obras vacía (¿se pinta el rótulo?).
+**[Revisión de coherencia]** — La regla del siena, a la letra, pone «Siguiente cita de esta obra» en siena (§ DESIGN.md:139, :140; bitácora 117)
 
-Arreglo: una fila para cada uno.
+«Cuenta como actuar lo que mueve al visitante dentro de la misma página o del mismo listado, igual que la paginación.» «Siguiente cita de esta obra →» recorre el listado de la Obra, así que la regla lo manda a siena —la variante 1C que Héctor descartó—, y la línea siguiente lo pone en tinta.
 
-**[Referencias visuales]** — DESIGN.md cita maquetas sin nombrarlas ni enlazarlas (§ DESIGN.md:198-203)
+Arreglo: actuar es moverse dentro de la misma página —letras de salto, «Dónde leer esta obra ↓»— o entre las páginas de un mismo listado; ir a otra Página de Cita, aunque sea la siguiente de su Obra, es navegación que informa y va en tinta.
 
-- «la maqueta del orden B»;
-- «La maqueta»;
-- «Es la variante A» y «variante D2»;
-- «la bitácora», que es `.memlog.md` y no es una fuente para quien consume las espinas.
+**Cerrado:** regla del siena reescrita así (bitácora 133); la bitácora 136 añade que no rige en el Kit ni en el Lote.
 
-Con tres maquetas, «la maqueta» es ambigua.
+**[Revisión de coherencia]** — «Siguiente cita de {Tema} →» no compone con los nombres de Tema (§ DESIGN.md:246; EXPERIENCE.md:129, :294, :404, :268)
 
-Arreglo: enlazar `mockups/pagina-de-autor-tres-ordenes.html` y `mockups/pagina-de-obra-variantes.html`.
+Los 24 Temas empiezan por «El» o «La»: la plantilla da «Siguiente cita de El amor →» —sin contracción, en 7 Temas— o «Siguiente cita de La vida →» —con mayúscula a media frase, en 17—. La maqueta dibuja «Siguiente cita sobre la vida →», y el recuento de `/buscar/` ya fija la otra forma, «sobre la prudencia».
 
-**[Referencias visuales]** — «Mandan las espinas» se repite cuatro veces, y la nota de la Página de Autor niega una divergencia que ya existe (§ EXPERIENCE.md:116; DESIGN.md:198-199)
+Arreglo: «Siguiente cita sobre {tema} →», con el Tema en minúscula, en las cuatro ubicaciones, y quitar la divergencia de la tabla de Maquetas.
 
-Está en la cabecera y en tres notas. La nota de la maqueta de la Página de Autor dice además «si algún día divergen», cuando ya divergen en tres puntos que DESIGN.md enumera: la región junto a los años, el recuento en el rótulo y la semblanza a un cuerpo menor.
+**Cerrado:** «Siguiente cita sobre {tema} →» con el Tema en minúscula (bitácora 133).
 
-Arreglo: dejar una sola declaración y listar esas tres divergencias en la nota.
+**[Revisión de coherencia]** — UJ-6 y el paso 8 de UJ-3 se separan del PRD sin `[NOTE FOR PM]` en el propio flujo (§ EXPERIENCE.md:395, :403, :427-431; prd.md:59, :68)
 
-**[Hinchazón y sobreespecificación]** — El estado de implementación está mezclado con el contrato (§ DESIGN.md:188-207)
+La cabecera de UJ-3 dice «ampliado en la v8, con el texto nuevo del PRD», pero el paso 8 no está en el PRD. UJ-6 enmienda el PRD en tres puntos —«mar» en el campo, «enseñanza» y el cero del Directorio dicho con una frase y una salida, no con el recuento—. La bitácora 128 dice que las dos van al PRD, y solo EXPERIENCE.md:44 lleva la marca.
 
-- «(recoge lo construido)», «Construido:», «Sin construir (Épica 17)», «hoy se pinta también en las 2+»;
-- una marca de versión (v5, v7.1…) en casi cada fila.
+Arreglo: marcar la cabecera de UJ-3, un `[NOTE FOR PM]` al final de UJ-6 con los tres puntos, y «el recorrido que escribe hoy el PRD acaba en ese estado».
 
-Todo eso caduca con cada historia.
+**Cerrado** (bitácora 133); ver el medio de la rúbrica en Cobertura de flujos.
 
-Arreglo: un único marcador «Estado» por fila, o llevarlo a `sprint-status.yaml`.
+**[Revisión de coherencia]** — «Más opciones…» sin guion: tres versiones distintas (§ EXPERIENCE.md:133, :307; DESIGN.md:253; addendum.md:276; v8-pagina-de-obra.html)
 
-**[Hinchazón y sobreespecificación]** — Hay 21 tokens que ninguna espina referencia (§ DESIGN.md:136; EXPERIENCE.md:37)
+EXPERIENCE dice a la vez que sin guion «se ven todos los destinos» y que cómo se pliegan «está sin fijar»; DESIGN fija el aspecto desplegado «sin guion» [ASSUMPTION]; la maqueta de la Obra dibuja cerrado el `<details>` del addendum. FR-18 solo pide que estén en el HTML inicial.
 
-La paleta `error-*`, `inverse-*`, `surface-dim` y `surface-bright`, `surface-container-high` y `-highest`, `on-*-container`, `rounded.sm` y `rounded.full`. La paleta de error contradice que no exista ningún estado visual de error. Y `secondary` está reservado a una herramienta de curación que EXPERIENCE.md declara de terminal.
+Arreglo: WhatsApp, Facebook y Threads a la vista, y Telegram, X y Correo tras «Más opciones…», que sin guion los despliega al pulsarlo; el mecanismo lo cierra Arquitectura.
 
-Arreglo: quitarlos o marcarlos como reservados.
+**Cerrado** con la decisión de Héctor de la bitácora 131; ver el alto de la rúbrica en Cobertura de componentes.
 
-**[Hinchazón y sobreespecificación]** — Hay literales en píxeles donde ya existe un token (§ DESIGN.md:185, :187; EXPERIENCE.md:166)
+**[Revisión de coherencia]** — Las Rutas de salida no dicen que van fuera del cuerpo de Pagefind (§ EXPERIENCE.md:129, :135-137; prd.md:363 (FR-12))
 
-- «Botones — texto en Inter 15px» (`body-md`);
-- «filete corto (48px, 1px…)» (`rule-width`);
-- «8px de separación» (`spacing.unit`).
+FR-12: «La búsqueda interna no devuelve una Página de Cita por el texto de las Citas que enlaza». La espina lo dice de la Tarjeta de Obra, que no lleva texto de Cita, y no de «De la misma obra» ni de «Más de {Autor}», que llevan hasta siete fragmentos de otras Citas.
 
-Arreglo: citar los tokens.
+Arreglo: «Todo se compone en el build, es determinista y va fuera del cuerpo de Pagefind (FR-12).»
 
-**[Hinchazón y sobreespecificación]** — Las anti-referencias están duplicadas (§ DESIGN.md:124; EXPERIENCE.md:245-253)
+**Cerrado:** las Rutas de salida van fuera del cuerpo de Pagefind, escrito en su fila de Component Patterns.
 
-Texturas, publicidad intercalada y botoneras de ocho redes aparecen en DESIGN.md § Brand & Style y en EXPERIENCE.md § Inspiration & Anti-patterns.
+**[Revisión de coherencia]** — Obra traducida: dos hechos que ya no son ciertos (§ EXPERIENCE.md:276, :284)
 
-Arreglo: dejarlas en un solo sitio.
+«Hoy ninguna Cita publicada trae traductor»: el 2026-10-18, 307 Citas publicadas llevan `procedencia.traduccion` (la verificación de cierre contó 306). El `[NOTE FOR PM]` sobre la Atribución de Horacio («Odas, 1909.») pide arreglar algo que la Historia 19.1 ya resolvió, y haría perder una pasada del PRD.
 
-**[Disciplina de herencia]** — «Nombres heredados verbatim del PRD §2.3» no es cierto en tres de los cinco UJ (§ EXPERIENCE.md:184)
+Arreglo: poner al día las dos frases con la Historia 19.1 y sustituir el `[NOTE FOR PM]` por la constancia de lo resuelto, comprobando la Atribución contra lo construido.
 
-- UJ-1 pierde «, y la necesita ahora»;
-- UJ-3 pierde «una hora»;
-- UJ-4 pierde «nuevas» y «del sitio».
+**Cerrado:** § Obra traducida puesta al día con la Historia 19.1.
 
-Los identificadores UJ-N son estables, así que la trazabilidad no se rompe.
+**[Revisión de coherencia]** — La Cita del Día de la portada no dice si lleva la Línea de la Fuente (§ DESIGN.md:334; EXPERIENCE.md:228; prd.md:281, :348)
 
-Arreglo: copiar los títulos literales.
+FR-9 da a la Cita del Día la misma Tarjeta de Obra que su Página de Cita, y FR-12 la pone después de la atribución y de la Línea de la Fuente. Ninguna espina dice si la Cita del Día la lleva, ni dónde va respecto a «Ver esta cita».
 
-**[Disciplina de herencia]** — El `sources` de DESIGN.md omite el encargo de la Página de Obra y mezcla tres bases de ruta (§ DESIGN.md:4-6; EXPERIENCE.md:4-8)
+Arreglo: «y, si consta, su Línea de la Fuente, pegada a la Procedencia como en la Página de Cita [ASSUMPTION]», en las dos espinas.
 
-No incluye `docs/superpowers/specs/2026-10-05-pagina-de-obra-design.md`, aunque sus filas de la v7.1 (`title-lg`, cabecera A, D2, E2) responden a ese encargo. Además, `sources` mezcla `{planning_artifacts}/…`, `docs/…` relativa al repositorio y `DESIGN.md` relativa al espacio.
+**Cerrado:** la lleva si consta, pegada a la Procedencia (bitácora 137).
 
-Arreglo: añadir la fuente y unificar las bases.
+**[Cotejo de entradas]** — La Lista de Obras se contradice entre las dos espinas (§ DESIGN § Página de Autor; EXPERIENCE § Página de Autor)
 
-**[Disciplina de herencia]** — Los nombres de componente no son idénticos entre secciones y ficheros (§ DESIGN.md y EXPERIENCE.md, varias secciones)
+DESIGN pone la cifra sola a la vista, como está construido; EXPERIENCE, la unidad visible [ASSUMPTION]. Uno de los dos cambia lo construido en la Página de Autor sin decirlo. La revisión de coherencia lo da como alto.
 
-- «Rutas de Salida» (dos veces en DESIGN.md) frente a «Rutas de salida»;
-- «Tarjeta de Cita (listados)» frente a «Tarjeta de Cita»;
-- «Acciones de la Página de Cita» frente a «Acción Copiar», «Acción Imagen» y «Acción Compartir la cita»;
-- «Resultado de búsqueda de tipo Obra» frente a «Resultado de búsqueda»;
-- «diálogo de Imagen» y «Diálogo» frente a «Diálogo de Imagen»;
-- «Nota de la ficha», ambigua porque hay dos fichas en superficies vecinas, la de Obra y la de Autor.
+Arreglo: una sola frase en las dos espinas.
 
-Arreglo: un único nombre por componente, y «Nota de la Ficha de Obra».
+**Cerrado** con la decisión de Héctor de la bitácora 132: la unidad a la vista también en la Página de Autor.
 
-**[Disciplina de herencia]** — Tres desajustes con el glosario y con las fuentes (§ EXPERIENCE.md:108, :112, :153)
+**[Cotejo de entradas]** — «Siguiente cita de {Tema} →» sale agramatical (§ EXPERIENCE § Página de Cita; DESIGN § Página de Cita; v8-buscar.html)
 
-- «hoja del sistema» va en minúsculas en todo el texto, y el glosario dice «Hoja del Sistema»;
-- UX-DR35 se cita tres veces, y es un identificador definido en `epics.md`, que está aguas abajo de estas espinas y fuera de sus fuentes;
-- «Curación» y «Lote» se usan como nombres de superficie y no están en el glosario.
+Da «Siguiente cita de El amor →», y choca con la convención de la propia espina para el Tema dentro de una frase, en minúscula y tras «sobre». Menor: «Buscar en este Tema» va con mayúscula, y la microcopia escribe las entidades en minúscula.
 
-Arreglo: respetar la mayúscula del glosario y citar FR-33 y AD-20 en lugar de UX-DR35.
+Arreglo: resolver la plantilla, no anotarla como divergencia de la maqueta.
 
-**[Ajuste de forma]** — La clave `components` del frontmatter guarda dimensiones sueltas, y falta `description` (§ DESIGN.md:109-113)
+**Cerrado:** «Siguiente cita sobre {tema} →» (bitácora 133) y la minúscula de las entidades en microcopia, «Buscar en este tema», con `[NOTE FOR PM]` por la grafía del PRD (139).
 
-Guarda cuatro dimensiones (`rule-width`, las dos medidas y `tap-target-min`). La especificación de DESIGN.md reserva esa clave para objetos de componente, así que un resolvedor leería `rule-width` como un componente. Al frontmatter le falta además `description`.
+**[Cotejo de entradas]** — Los cambios a sabiendas de UJ-6 y UJ-3 no llevan marca para el PM en su recorrido (§ EXPERIENCE § Key Flows; § Cierre de superficies)
 
-Arreglo: mover esas dimensiones a `spacing` o a un grupo propio, y añadir `description`.
+El único `[NOTE FOR PM]` de recorridos está en el Cierre de superficies, y solo por el Directorio de Obras de UJ-3. El Key Flow de UJ-6 difiere del PRD en dos pasos y en su caso límite —el PRD dice que el filtro «lo dice con su recuento a cero»; la espina, con una frase sin recuento—, y la cabecera de UJ-3 se presenta como «texto nuevo del PRD». La pasada corta de `bmad-prd` no tiene desde los recorridos un puntero a lo que debe alinear.
 
-**[Ajuste de forma]** — «Obra traducida» termina con una nota para el PM (§ EXPERIENCE.md:130)
+Arreglo: un `[NOTE FOR PM]` en cada recorrido.
 
-«Aviso, no regla» es una nota para el PM sobre el modelo de datos y ya está en la bitácora (.memlog.md:55).
+**Cerrado** (bitácora 133); ver el medio de la rúbrica en Cobertura de flujos.
 
-Arreglo: dejarlo en una línea: «Abierto en datos: ver FR-48».
+**[Cotejo de entradas]** — Falta la frase del filtrado sin texto que no da nada (§ EXPERIENCE § State Patterns; FR-8)
 
-**[Lente de accesibilidad · espina]** — La Nota de la ficha cae, en la estructura, bajo el último h3 de «Dónde leer esta obra» (§ EXPERIENCE.md L109; DESIGN.md L205)
+FR-8 pide que, con filtros y sin resultados, la página nombre los filtros «a quien quizá no escribió ninguna». La única plantilla lleva texto («No encontramos «escuela» entre las citas de José Martí en Maestros ambulantes.»), y Autor + Tema o Autor + Obra + Tema pueden dar cero.
 
-Con el Modelo encendido ese `h3` es «Ediciones en venta», y quien navega por encabezados, o lee de corrido, oye «Trescientos aforismos comentados, publicados en Huesca en 1647…» como si fuera parte de la oferta comercial. La nota no tiene encabezado ni sección propia. — WCAG 1.3.1 Información y relaciones (A).
+Arreglo: la forma sin texto.
 
-Arreglo: «Dónde leer esta obra» como `<section aria-labelledby="{id del h2}">`, con la nota **fuera** de esa sección, y con un rótulo propio (`h2` con el trato del rótulo, por ejemplo «Sobre esta obra») o como `<p>` precedido del filete. Escribirlo en la fila de la Nota.
+**Cerrado:** «No hay citas de {Autor} sobre {tema}.» (bitácora 139).
 
-**[Lente de accesibilidad · espina]** — El recuento de la Lista de Obras es un número sin unidad (§ DESIGN.md L200; EXPERIENCE.md L102)
+**[Cotejo de entradas]** — FR-7: el orden de las opciones de los selectores, sin fijar (§ v8-buscar.html (decisión 1))
 
-La espina fija «el recuento de sus Citas a la derecha… con cifras tabulares», y la maqueta del orden B lo dibuja como `<span>34</span>` fuera del enlace. Con lector se oye «enlace, Del sentimiento trágico de la vida… 34». Tampoco se fija si la fila entera es el enlace (con 44 px, la fila lo pide) ni el nivel del rótulo «Su obra en este Corpus». — WCAG 1.3.1 y 2.4.4.
+La búsqueda por tecleo del selector nativo casa por el principio del rótulo: con el orden por apellido, «M» no lleva a Martí, y teclear «s» no lleva a «El saber».
 
-Arreglo: que la fila entera sea el enlace, con «citas» oculto solo para lectores tras la cifra («34 citas»), y que el rótulo sea `h2`, como «Citas documentadas» en lo construido.
+Arreglo: fijar el orden.
 
-**[Lente de accesibilidad · espina]** — Microcopia leída en voz alta (§ DESIGN.md L206; EXPERIENCE.md L110)
+**Cerrado:** orden y primera opción de los selectores escritos (bitácora 137).
 
-En «de Baltasar Gracián · 1647», el punto medio se lee «punto», «punto medio» o nada según el lector y su nivel de puntuación; en el último caso queda «de Baltasar Gracián 1647», sin pausa ni pista de que el número es un año. La Atribución resuelve lo mismo con coma («…, 1647.»). En `/buscar/`, el nombre de la fila de un resultado de Obra se compone sin puntuación: «Obra Oráculo manual y arte de prudencia Baltasar Gracián». — WCAG 1.3.1 y 2.4.4 (calidad, no fallo).
+**[Cotejo de entradas]** — FR-9: en la portada, «De la obra» y «Compartir en» son `h2`, como «La cita de hoy» (§ EXPERIENCE § Accessibility Floor; § Portada)
 
-Arreglo: el punto medio con `aria-hidden="true"` y una coma oculta solo para lectores (sin añadir «publicada en», que afirmaría un dato que la Procedencia no asegura). En el resultado, «Obra:» y «, de {Autor}» como texto solo para lectores.
+El bloque que la espina llama «uno solo» queda partido en el esquema de encabezados.
 
-**[Lente de accesibilidad · espina]** — Jerarquía de encabezados de la Página de Obra a medio fijar (§ EXPERIENCE.md L106)
+Arreglo: `h3` dentro de «La cita de hoy».
 
-El nivel del rótulo «Temas» no está escrito (L106 dice «bajo el rótulo»), mientras que «Dónde leer esta obra» es `h2` y sus partes `h3`. Visualmente, los `h3` («Edición cotejada, gratuita», `caption` 400 en tinta) pesan **menos** que el `h2` y que nada de su entorno, y se separan de las líneas que encabezan solo por el color: tinta frente a tinta apagada, 2,20:1, al mismo cuerpo y peso. Para quien ve poco, rótulo y contenido son la misma línea. — WCAG 1.3.1 y 1.4.1.
+**Cerrado** (bitácora 133).
 
-Arreglo: «Temas» como `h2`, como en las Rutas de salida. Los `h3` de «Dónde leer» en `caption` 600, para que la jerarquía tenga una señal que no sea el color.
+**[Cotejo de entradas]** — FR-55: falta «volver a las letras» (§ EXPERIENCE § Directorios; v8-directorios.html)
 
-**[Lente de accesibilidad · construido]** — La paginación separa los números 4 px, no los 8 px de la regla (§ src/components/Paginacion.astro:124; EXPERIENCE.md L166)
+La maqueta mide unos 6.000 px de vuelta desde la M de `/autores/` y unos 41.000 desde la U de `/obras/`, y lo deja «[sin decidir]». Sin ello, la defensa de que los Directorios no son un listado denso porque se recorren por letras solo vale bajando.
 
-Medido a 320 px en `/autor/baltasar-gracian/2/`: no hay desplazamiento horizontal (`scrollWidth` 320), pero la fila se descompone. «Página 2 de 4» se parte en dos líneas, los cuatro números se apilan en **una columna vertical** de 44 px a 4 px entre sí (188 px de alto), y «Siguiente» acaba en 301 px, 1 px dentro del margen. Pasa 2.5.8 por tamaño; incumple la regla de producto y deja los números apilados casi pegados para quien tiene temblor. — WCAG 1.4.10 (pasa por poco) y regla de producto de 8 px.
+Arreglo: decidirlo.
 
-Arreglo: `gap: var(--unidad)` en `.numeros`, y en anchos estrechos la fila de números en su propia línea (por ejemplo, `flex-wrap: wrap` en `.paginacion` con los números a ancho completo) en lugar de una columna.
+**Cerrado:** «Volver a las letras» al pie de cada grupo (bitácora 137).
 
-**[Lente de accesibilidad · espina]** — El reflow de la Cabecera A aguanta hoy, pero por casualidad (§ Fila de la Cabecera de Obra (DESIGN.md L202, EXPERIENCE.md L104))
+**[Cotejo de entradas]** — FR-56: las espinas asignan zona solo a parte de los enlaces (§ EXPERIENCE § Component Patterns; addendum (conjunto cerrado de `salida-interna`))
 
-Medido con la Inter del sitio sobre 133 de los 183 títulos, todos los largos incluidos. A 320 px (280 de texto), ningún título desborda; 16 ocupan tres líneas o más y 4 llegan a cuatro. Con el espaciado de 1.4.12, uno llega a seis. La palabra más ancha, «Librepensamiento», mide 226 px, y **276 px con el espaciado de 1.4.12: 4 px de holgura**. Los títulos son texto libre que escribe una persona en la Ficha (FR-53). Cualquier palabra de unas 17 letras o más («Hispanoamericanos», «Constitucionalismo») produce desplazamiento horizontal, y NFR-12 prohíbe encoger para remediarlo. La espina no dice cómo se parte una palabra que no cabe. — WCAG 1.4.10 Reflow y 1.4.12 Espaciado del texto (AA).
+Callan siete valores del conjunto cerrado del addendum —`atribucion`, `chip-de-tema`, `obras-de-portada`, `autores-de-portada`, `colecciones`, `lista-de-obras` y `paginacion`— y la zona de «Las {n} obras →», «Los {m} autores… →», «Ver esta cita» y «Buscar «x» en las citas». A medias, parece que las demás no registran.
 
-Arreglo: en la fila de la Cabecera de Obra, «el título parte palabras antes que desbordar: `overflow-wrap: break-word` y `hyphens: auto` con el `lang` del documento». Es la única salida compatible con NFR-12.
+Arreglo: nombrarlas todas o remitir al conjunto de AD-13.
 
-**[Lente de accesibilidad · espina, construido]** — El foco del campo de búsqueda contradice el suelo y es débil (§ EXPERIENCE.md L174; DESIGN.md L190; src/pages/buscar.astro:296, :303)
+**Cerrado:** tabla única de zonas con los 16 valores (bitácora 137).
 
-El Accessibility Floor dice «anillo de 2px en primary… Nunca se suprime» (L174), y `DESIGN.md` L190 da al campo otro indicador: un filete inferior que pasa de 1 px en `outline` a 2 px en siena. Lo construido escribe `outline: none` dos veces (`src/pages/buscar.astro:296` y `:303`), aunque `tokens.css:115` afirme que no existe ninguna regla así. El cambio de estado es 1 → 2 px con un cambio de color de **1,71:1** (contorno → siena), que con baja visión casi no se ve. — WCAG 2.4.7 Foco visible (AA: pasa) y 2.4.13 (AAA).
+**[Cotejo de entradas]** — La descarga en iOS contradice el clímax de UJ-2 (§ EXPERIENCE § State Patterns (rechazo de la Historia); PRD §4.9; diseño §13)
 
-Arreglo: reconciliar las espinas (o anillo también en el campo, o el filete de foco a 2 px **y** que el estado enfocado se distinga del no enfocado por al menos 3:1) y corregir el comentario de `tokens.css`.
+Con `NotAllowedError`, la caída dice solo «La imagen se ha descargado.»: en iOS va a Archivos y no a Fotos, desde donde la historia no la recoge, que es justo lo que UJ-2 promete evitar. El addendum lo acepta como deuda, pero la espina no lo dice ni ofrece el paso siguiente.
 
-**[Lente de accesibilidad · espina]** — Idioma de partes en los títulos que no son castellanos (§ EXPERIENCE.md L180)
+Arreglo: al menos, constancia de deuda aceptada en la fila del estado.
 
-«De Agri Cultura» (Catón, 2 Citas: tiene página) está en latín, y FR-48 abrirá la puerta a más títulos no castellanos. La Ficha de Obra no tiene campo de idioma, y la espina solo declara `lang="es"` en el documento (L180). La excepción de nombres propios de 3.1.2 probablemente cubre un título, por eso es baja. — WCAG 3.1.2 Idioma de las partes (AA).
+**Cerrado:** consta como deuda aceptada en la fila «El navegador rechaza la entrega de la Historia».
 
-Arreglo: un campo opcional de idioma del título en la Ficha, que se vuelque como `lang` en el `h1`, en la Atribución, en la Lista de Obras y en el resultado de búsqueda.
+**[Cotejo de entradas]** — FR-12: «De la misma obra» y «Más de {Autor}» no se declaran fuera de Pagefind (media-baja en el cotejo) (§ EXPERIENCE § Página de Cita; diseño §5)
 
-**[Lente de accesibilidad · espina]** — La fila del Chip de Tema no lleva la zona de toque ni el cuerpo construidos (§ DESIGN.md L193)
+Son ahora hasta siete Tarjetas de Cita con su fragmento entero, y solo la Tarjeta de Obra se declara fuera de `data-pagefind-body`.
 
-No lleva `{components.tap-target-min}` y fija el texto en `caption` (13 px). Lo construido mide 44 px con texto de 15 px (divergencia ya anotada en la bitácora). Si la historia de triaje alinea lo construido con la espina, los 16 chips del Oráculo manual pierden la zona de toque y bajan de cuerpo. El fondo del chip contra el papel es 1,10:1, así que el chip tampoco se reconoce como control por su forma. — WCAG 2.5.8, y legibilidad.
+Arreglo: decirlo de las Rutas de salida.
 
-Arreglo: recoger lo construido en la espina (texto de 15 px y alto mínimo de 44 px) antes de cualquier triaje.
+**Cerrado**; coincide con el medio 8 de coherencia.
 
-## Notas mecánicas (rúbrica)
+**[Cotejo de entradas]** — Retener sin recordar no consta en la Foundation (media-baja en el cotejo) (§ EXPERIENCE § Foundation; PRD §2.2)
 
-- `{ruta.al.token}` (EXPERIENCE.md:14) es el ejemplo de la sintaxis, no una referencia. Todas las demás resuelven.
-- DESIGN.md usa `headline-sm` y `quote-*` sin llaves (DESIGN.md:147, :185, :191). Las demás referencias van en la forma `{typography.…}`.
-- «Sin obra documentada» lleva punto final en la tabla de Voice and Tone (EXPERIENCE.md:50) y va sin él en Atribución y en State Patterns (:86, :137). Conviene unificarlo con lo que emite `Atribucion.astro`.
-- En § Responsive, de 600 a 1024 px, dice «medida limitada a `{components.quote-max-measure}`» para toda la columna (EXPERIENCE.md:236). DESIGN.md reserva 34ch para la Cita y 68ch para la prosa, y el código usa una columna de 45rem.
-- El formato base de lo copiado (FR-3), sin traductor, no está escrito en ningún sitio. Solo se deduce del ejemplo de § Obra traducida. La fila de la Acción Copiar debería decir que usa el título de la Ficha de Obra (FR-53).
-- Accessibility Floor dice «navegación al final» del orden de tabulación de la Página de Cita, y la cabecera (marca y «Buscar») va antes del contenido (EXPERIENCE.md:175). La rúbrica lo deja a la lente de accesibilidad.
-- Divergencias conocidas solo entre la espina y el código (.memlog.md:79), con la gravedad que les da la rúbrica:
+La v8 retiene «con lo que el sitio compone para todos… y nunca con lo que guarda cada visitante». La Foundation dice que la Página de Cita «lo que gana es retener», pero no recoge ese límite, que cierra la puerta a «seguir donde lo dejaste».
 
-  | Divergencia | Gravedad | Por qué |
-  |---|---|---|
-  | 4 px entre los números de página frente a los 8 px de las zonas de toque | medium | rompe una regla del suelo |
-  | banda siena decorativa en las Tarjetas Sociales | medium | la heredaría la Tarjeta Social de Obra; ver §3 |
-  | `aria-label` del diálogo que dice «Descargar» también al compartir | medium | toca a la accesibilidad |
-  | progreso de la imagen sin construir | medium | ver §4 |
-  | serif rasterizada en Georgia frente a «dos familias, sin excepciones» | low | — |
+Arreglo: recoger el límite.
 
-## Lo que está bien (lente de accesibilidad)
+**Cerrado:** recogido en la Foundation de EXPERIENCE.md.
 
-- **Contraste de texto, calculado:** tinta/papel 16,0:1; tinta apagada/papel 7,26:1, que se queda en 6,96 sobre `surface-container-low` (fondo de la tarjeta al pasar el cursor) y en 6,60 sobre `surface-container`; siena/papel 6,26:1 (6,00 al pasar el cursor); blanco/siena 6,70:1; tinta/chip 14,5:1. Todo pasa AA a 13 px, y casi todo AAA. El filete de búsqueda (`outline`) llega a 3,66:1 frente al papel (1.4.11).
-- **Subrayado siempre** del título de la Obra y de «de {Autor}», con el porqué escrito (en móvil no hay hover). E1 se descartó con la razón correcta.
-- **D2 sobre D1:** la diferencia entre lo gratuito y lo que se vende la dice la estructura (`h2` y `h3`), no tres enlaces siena seguidos. Sin ninguna Cita cotejada, no hay rótulo que afirme un cotejo.
-- **Un solo `h1` por página.** En la Página de Obra es el título, y las páginas 2+ lo repiten con «— página N» en la pestaña. El orden del marcado coincide con el de lectura (cabecera, listado, paginación, Temas, Dónde leer, nota): nada se reordena por CSS.
-- **Nada se recorta ni se encoge**, sin máximo de líneas, y sin desplazamiento horizontal medido a 320 px.
-- **Apagado es invisible y no latente:** sin hueco, sin contenedor y sin hoja.
-- **Ya construido y correcto:** paginación como `nav` con nombre, `aria-current` y «Página N» solo para lectores; enlace de salto al contenido; anillo de foco global de 2 px en siena separado 2 px; `prefers-reduced-motion` que elimina las transiciones; ni gestos ocultos ni animación de entrada; `<dialog>` nativo; `figure`/`blockquote`/`figcaption` en la Cita; y en `Sostener`, el aviso de pestaña nueva dentro del nombre accesible, que es el patrón que hay que extender al resto.
+### Bajos (61)
+
+**[Cobertura de flujos]** — «Siguiente cita de {Tema}» vuelve al mismo Autor si el Tema tiene uno solo (§ EXPERIENCE.md:294)
+
+Si un Tema publicado tiene un solo Autor, «Siguiente» da la vuelta y vuelve al mismo Autor, contra «nunca a otra del mismo Autor». Hoy no pasa, pero ninguna puerta lo impide, igual que en la fila «Cita sin Tema publicado».
+
+Arreglo: sin otro Autor en el Tema, no hay «Siguiente», como sin Tema.
+
+**[Cobertura de componentes]** — El rótulo de tipo «Directorio» lo decide DESIGN y EXPERIENCE lo delega a Arquitectura (§ DESIGN.md:307; EXPERIENCE.md:205, :326)
+
+El rótulo visible es microcopia y le toca a UX; a Arquitectura le tocan la clave de Pagefind y qué parte de la lista se ignora.
+
+Arreglo: que EXPERIENCE.md:205 comprometa «Directorio» y deje a Arquitectura solo esas dos cosas.
+
+**[Cobertura de componentes]** — El nombre accesible del Diálogo de la Historia hereda el prefijo oculto del botón (§ EXPERIENCE.md:134, :133)
+
+El diálogo toma su nombre «del botón que lo abre, «Historia de Instagram»», pero el nombre accesible de ese botón es «Compartir en Historia de Instagram», porque lleva el prefijo en `.solo-para-lectores`. Con `aria-labelledby`, el diálogo hereda el prefijo.
+
+Arreglo: escribir el nombre resultante, o tomarlo solo del texto visible.
+
+**[Cobertura de componentes]** — El material del Kit y del Lote no tiene fila en DESIGN.md (§ EXPERIENCE.md:249)
+
+El Kit y el Lote ofrecen ya los dos formatos, pero DESIGN.md no dice cómo se presentan el cuadrado y el 9:16. Es un pendiente de la v7.1 que la v8 amplía.
+
+Arreglo: una fila corta, o la constancia de que se documenta como está construido.
+
+**[Cobertura de estados]** — El selector de Obra no tiene estado mientras llegan sus recuentos (§ EXPERIENCE.md:200, :328)
+
+Son unos 41 KB que se piden al elegir Autor, y no se dice si el selector aparece sin recuentos o espera.
+
+Arreglo: una línea.
+
+**[Cobertura de estados]** — Dos estados de los Directorios solo viven en la fila de la maqueta (§ EXPERIENCE.md:270, :215)
+
+- La lista salta hacia abajo cuando la isla inserta el campo encima de las letras.
+- No hay «Volver a las letras» en `/obras/`, que la propia espina mide en unos 45.000 px.
+
+Arreglo: decidir los dos, o subirlos a una lista de pendientes visible.
+
+**[Cobertura de estados]** — En la última tanda, «Mostrar 30 más» puede pedir menos de 30 (§ v8-buscar.html (decisión 5))
+
+La maqueta lo deja «[sin decidir]» y la espina no lo menciona.
+
+Arreglo: confirmar que el rótulo no cambia, como dice FR-7, o llevarlo al PM.
+
+**[Cobertura de referencias visuales]** — «Buscar en…» con botón en una maqueta y sin él en otra; la espina elige sin botón (§ v8-buscar.html (decisión 8); v8-pagina-de-obra.html; DESIGN.md:310; EXPERIENCE.md:344)
+
+`v8-buscar.html` lo dibuja con un botón secundario «Buscar» y `v8-pagina-de-obra.html` sin él. La espina elige sin botón (`[ASSUMPTION]`), y el formulario sin envío visible —también en la portada— choca con «Toda acción tiene un control visible».
+
+Arreglo: que Héctor lo confirme; si se queda sin botón, declarar la excepción junto a esa regla.
+
+**[Sobrecarga y sobreespecificación]** — Cifras del Corpus fechadas dentro del contrato (§ EXPERIENCE.md:293, :295, :296, :215; DESIGN.md:261)
+
+«Hoy son 4 Citas», «Hoy son 7 Obras», «las 87 Obras de dos Citas», «unos 45.000px» y la página que crece «de unos 1.500px a unos 2.780» envejecen solas.
+
+Arreglo: «medido el 2026-10-18», o moverlas a la bitácora.
+
+**[Disciplina de herencia]** — Las entidades no se escriben igual en la microcopia nueva (§ EXPERIENCE.md:129, :294, :202, :204; DESIGN.md:246)
+
+«Siguiente cita de {Tema} →» produce «Siguiente cita de La vida →», mientras el Recuento escribe el Tema en minúscula y con «sobre», como dibuja la maqueta. «Buscar en este Tema» va con mayúscula y «Buscar en esta obra» en minúscula.
+
+Arreglo: una sola regla de mayúsculas para las entidades en la microcopia, y «Siguiente cita sobre {tema} →», si Héctor lo confirma.
+
+**[Disciplina de herencia]** — «Hoja del Sistema» no se escribe como en el glosario (§ EXPERIENCE.md:446)
+
+El glosario del PRD lo escribe con mayúsculas; en las espinas aparece siete veces en minúscula y una con mayúscula.
+
+Arreglo: el término del glosario.
+
+**[Disciplina de herencia]** — Los `sources` de las dos espinas no son simétricos (§ DESIGN.md:4-7; EXPERIENCE.md:4-9)
+
+Ninguna lista `addendum.md`, que es fuente de la v8 y delega mecanismos a UX, y DESIGN.md no lista `2026-10-05-pagina-de-obra-design.md`, que EXPERIENCE.md sí.
+
+Arreglo: añadir el addendum a las dos, y la decisión del 05/10 a DESIGN.
+
+**[Lente de accesibilidad]** — Los saltos dentro de la página no llevan el foco a su destino (§ EXPERIENCE.md:172, :215, :270; DESIGN.md:290, :321)
+
+El salto «Dónde leer esta obra ↓» y las letras de salto son anclas a un `h2`, y la espina no pide que el destino reciba el foco. VoiceOver en iOS no siempre mueve su cursor a un destino no enfocable *(sin verificar)*, y en `/obras/`, de unos 45.000 px, las letras son la única forma de llegar sin guion a la mitad baja. «Volver a las letras» sigue sin decidir. — WCAG 2.4.3 y 2.1.1 (A).
+
+Arreglo: el destino de un ancla lleva `tabindex="-1"` y `scroll-margin-top`, y recibe el foco; decidir «Volver a las letras».
+
+**[Lente de accesibilidad]** — «Más opciones…» tiene dos papeles y la espina no da el estado de ninguno (§ EXPERIENCE.md:133, :307; DESIGN.md:253; v8-pagina-de-cita.html:696-715)
+
+Con hoja del sistema es un botón que la abre; sin ella, despliega Telegram, X y Correo, y como divulgación necesita `aria-expanded`, que la maqueta pone y la espina no dice. Un `summary` que anuncia «contraído» y abre la hoja mentiría sobre su estado. La variante del navegador de Facebook dibuja los destinos sin el aviso de pestaña nueva. — WCAG 4.1.2 (A).
+
+Arreglo: con hoja, un `button` sin `aria-expanded`; sin hoja, una divulgación con `aria-expanded` y `aria-controls`; sin guion, los tres enlaces a la vista. Corregir la variante de Facebook de la maqueta.
+
+**[Lente de accesibilidad]** — Correo se anuncia como «se abre en una pestaña nueva» y casi nunca la abre (§ EXPERIENCE.md:133, :356; src/islands/CompartirEnlace.astro:66-69; src/lib/compartir.ts:63)
+
+Lo construido pone `target="_blank"` y `AVISO_DE_PESTAÑA_NUEVA` también al `mailto:`, que abre la aplicación de correo; algunos navegadores de escritorio dejan además una pestaña en blanco. El aviso describe algo que no pasa. — WCAG 2.4.4 (A).
+
+Arreglo: Correo abre en la misma pestaña y sin el aviso; los demás destinos de enlace, en pestaña nueva y con él.
+
+**[Lente de accesibilidad]** — Las filas de bloque de dos líneas se leen sin pausa entre el título y los hechos (§ EXPERIENCE.md:205, :217, :229)
+
+Nombres calculados en Chromium: «Oráculo manual y arte de prudencia Baltasar Gracián , 1647 , 141 citas»; «Juan María Gutiérrez 1809–1878 , 10 citas»; «Cita «A lo que se ha de estar…» José Martí». Otros navegadores pueden no meter ni el espacio. La espina fija el nombre del resultado de Obra y no el del resultado de Cita, que la v8 hace paralelo. — WCAG 2.4.4 y 1.3.1 (A).
+
+Arreglo: un separador solo para lectores «, » entre las dos líneas; para el resultado de Cita, «Cita: «{texto}», de {Autor}».
+
+**[Lente de accesibilidad]** — Las letras de salto no tienen nombre fijado (§ EXPERIENCE.md:215, :365; v8-directorios.html:279)
+
+Una letra sola, «Y» u «O», suena como conjunción, y en la lista de enlaces no dice adónde lleva. La maqueta ya lo resuelve con un prefijo oculto. — WCAG 2.4.4 y 2.5.3 (A).
+
+Arreglo: la navegación como «Letras», y cada letra como «Autores por la {letra}» en `/autores/` y «Obras de autores por la {letra}» en `/obras/`.
+
+**[Lente de accesibilidad]** — Los selectores de `/buscar/`: cuerpo, valores y grupo (§ DESIGN.md:304; EXPERIENCE.md:200; v8-buscar.html:166-168, :306)
+
+- El valor va a 15 px, y Safari en iOS amplía la página al enfocar un control de menos de 16 px y la deja ampliada.
+- «Sin cortar ningún valor» no es cierto: un `<select>` cerrado recorta un título largo.
+- Los recuentos de las opciones de Obra van sin unidad: «Maestros ambulantes (23)».
+- El grupo con su leyenda, «Filtrar las citas», está en la maqueta y no en la espina, y la maqueta dibuja la flecha con `appearance:none`.
+
+Arreglo: el valor a `{typography.body-lg}`; «el valor elegido puede recortarse en el control cerrado; la lista lo muestra entero»; «(23 citas)»; `fieldset` con `legend`; y la maqueta con la apariencia nativa.
+
+**[Lente de accesibilidad]** — El campo de copia manual sigue con su borde a 1,30:1, y la v8 lo lleva al Diálogo de la Historia (§ DESIGN.md:248, :260)
+
+Ya estaba en los pendientes de la v7.1. — WCAG 1.4.11 (AA).
+
+Arreglo: el filete en `{colors.outline}`, 3,51:1, como el campo de búsqueda y los selectores.
+
+**[Lente de accesibilidad]** — La previsualización no tiene alternativa textual que diga lo que se va a publicar (§ src/islands/ImagenDeCita.astro:140; DESIGN.md:258, :346-350; EXPERIENCE.md:134, :248)
+
+La cuadrada es hoy un `<canvas aria-label>` sin `role`, que puede ignorarse; la espina no fija la del 9:16; a 1:6 el texto se ve a 7 px y el dominio a 6, así que la alternativa es la única forma de saber qué lleva; y las espinas no coinciden en qué lleva (EXPERIENCE sin la procedencia, DESIGN con ella). — WCAG 1.1.1 (A).
+
+Arreglo: `role="img"` y un nombre que diga lo que lleva; igualar las dos espinas; y, fuera de WCAG, que el Kit ofrezca un texto alternativo para pegarlo al publicar en Instagram.
+
+**[Lente de accesibilidad]** — La cuenta de «la previsualización cabe en alto» es solo de 360 × 640 en vertical (§ DESIGN.md:258)
+
+Con el móvil en horizontal (unos 640 × 360) o con texto grande, la previsualización casi llena el alto y «Compartir en la historia» queda fuera. La Historia se ofrece con puntero grueso, así que es un caso real. — WCAG 1.4.10 y 1.3.4 (AA).
+
+Arreglo: el diálogo se desplaza por dentro siempre que no quepa, y la previsualización no pasa del alto disponible; comprobarlo en horizontal.
+
+**[Lente de accesibilidad]** — Los formularios «Buscar en…» y el campo de la portada no tienen botón de envío (§ DESIGN.md:310, :333; EXPERIENCE.md:199, :204)
+
+Solo se envían con Intro o con la tecla del teclado del móvil: quien usa control por voz o conmutadores no tiene nada que pulsar, y «enviarlo vacío da todas las Citas» no lo descubre nadie. Es calidad, no fallo (3.3.2 y 2.1.1 pasan).
+
+Arreglo: un botón secundario «Buscar» tras el campo, al menos en «Buscar en…», o registrar la decisión como coste aceptado.
+
+**[Lente de accesibilidad]** — La semántica de las listas en Safari, y `aria-current` en la cabecera (§ EXPERIENCE.md:365, :118; v8-directorios.html:279)
+
+Safari y VoiceOver quitan el rol de lista a una `<ul>` con `list-style: none`, y el público es mayoritariamente iOS. `aria-current="page"` solo se fija para la marca en la portada, y la navegación de la cabecera se llama «Principal» en una maqueta y «Secciones» en otra. — WCAG 1.3.1 (A).
+
+Arreglo: `role="list"` explícito en las listas sin viñeta; `aria-current="page"` en «Autores», «Obras» y «Buscar» en sus páginas; y el nombre «Principal».
+
+**[Lente de accesibilidad]** — La lista de lo que se subraya, que es la fuente única, no está completa (§ EXPERIENCE.md:369; DESIGN.md:334-336)
+
+No menciona «Ver esta cita», «Las {n} obras →» ni «Los {n} autores, de la A a la Z →», que DESIGN subraya. — WCAG 1.4.1 (A).
+
+Arreglo: añadir los tres a la lista.
+
+**[Lente de accesibilidad]** — «Mostrar 30 más» no tiene estado de carga ni de fallo (§ EXPERIENCE.md:203, :368)
+
+La tanda siguiente puede tardar, y no se dice qué hace una segunda pulsación ni qué se oye si no llega; hoy sería silencio. — WCAG 4.1.3 (AA).
+
+Arreglo: mientras llega, el botón ignora otra pulsación; si falla, la región lo dice («No se han podido cargar más resultados.») y el foco se queda en el botón.
+
+**[Lente de accesibilidad]** — El suelo declarado es WCAG 2.1 AA, no 2.2 (§ EXPERIENCE.md:362, :348; prd.md:1359 (NFR-9))
+
+EXPERIENCE.md dice que «WCAG 2.1 AA… no tiene criterio de tamaño de objetivo», pero 2.2 lo tiene (2.5.8, AA). La v8 ya cumple los criterios A y AA que añade 2.2: 2.4.11, 2.5.7 y 2.5.8; 3.2.6, 3.3.7 y 3.3.8 no aplican.
+
+Arreglo: `[NOTE FOR PM]`: subir NFR-9 a WCAG 2.2 AA en la pasada corta de `bmad-prd`, y luego actualizar EXPERIENCE.md.
+
+**[Revisión de coherencia]** — La fuente única del subrayado no lista tres enlaces que DESIGN subraya (§ EXPERIENCE.md:369; DESIGN.md:334-336)
+
+«Ver esta cita», «Las {n} obras →» y «Los {n} autores, de la A a la Z →» no están en la lista que la bitácora 106 declara única fuente.
+
+Arreglo: añadirlos como enlaces de texto en su propia línea.
+
+**[Revisión de coherencia]** — El cuerpo de las letras de salto se da por decidido sin estarlo (§ DESIGN.md:321)
+
+«En `{typography.body-md}` con peso 600» va sin `[ASSUMPTION]`, y `v8-directorios.html` marca «[sin decidir] el cuerpo de la letra».
+
+Arreglo: añadir `[ASSUMPTION]`.
+
+**[Revisión de coherencia]** — La tabla de Maquetas, incompleta en dos filas e inexacta en una (§ EXPERIENCE.md:271, :269)
+
+`v8-buscar.html` no marca variante recomendada para su decisión 8, le faltan dos divergencias (el botón «Buscar» de 8A y lo que deja sin decidir) y la fila de la Historia dice «Ninguna anotada», aunque la maqueta deja sin decidir si la línea de arriba se queda cuando falla el generador.
+
+Arreglo: completar las dos filas con esas divergencias.
+
+**[Revisión de coherencia]** — En la portada, los encabezados parten en tres lo que es un solo bloque (§ EXPERIENCE.md:228, :365)
+
+«De la obra» y «Compartir en» quedan como `h2` hermanos de «La cita de hoy». Coincide con el medio de la rúbrica y el de accesibilidad.
+
+Arreglo: en la portada, `h3` dentro de «La cita de hoy» [ASSUMPTION].
+
+**[Revisión de coherencia]** — «Temas de la Obra»: la columna Dónde no recoge el orden de la v8 (§ EXPERIENCE.md:174, :168; DESIGN.md:297)
+
+Dice «después del listado»; desde la v8, los Temas van después de «Compartir en».
+
+Arreglo: «Página de Obra, solo la primera página, después de «Compartir en»».
+
+**[Revisión de coherencia]** — Las zonas de FR-56 se nombran en unas filas sí y en otras no (§ EXPERIENCE.md:118, :127, :129, :135, :136, :143-146, :162, :172, :205, :217, :228-230; addendum.md:238)
+
+Callan su zona la Atribución, «de {Autor}», la Paginación, la Lista de Obras, el Chip de Tema, las Colecciones y las Obras y los Autores de la portada, y no se dice qué registra «Buscar «x» en las citas» del Directorio.
+
+Arreglo: una sola frase en Interaction Primitives que remita a FR-56 y al conjunto cerrado del addendum, o la zona en cada fila.
+
+**[Revisión de coherencia]** — El nombre accesible del Diálogo de la Historia no coincide con el de su botón (§ EXPERIENCE.md:134, :133)
+
+Con `aria-labelledby`, el diálogo se llama «Compartir en Historia de Instagram», no «Historia de Instagram».
+
+Arreglo: escribir el nombre resultante, o decir que toma solo el texto visible.
+
+**[Revisión de coherencia]** — «Mostrar 30 más» cuando faltan menos de 30 (§ EXPERIENCE.md:203; prd.md:123)
+
+La espina no dice qué rótulo lleva el botón en la última tanda, y el PRD pide que el texto no prometa más de lo que da.
+
+Arreglo: «Si quedan menos de 30, dice «Mostrar las {n} que faltan» [ASSUMPTION]», o declarar que no cambia y por qué.
+
+**[Revisión de coherencia]** — El recuento con filtros, en singular (§ EXPERIENCE.md:202)
+
+El singular solo está escrito para la búsqueda sin filtros («Un resultado.»).
+
+Arreglo: «Una cita de José Martí en Maestros ambulantes.» [ASSUMPTION].
+
+**[Revisión de coherencia]** — El aire de las Rutas de salida no es múltiplo de la unidad en móvil (§ DESIGN.md:261, :191; src/components/RutasDeSalida.astro:88)
+
+«A vez y media la respiración» da 60 px en móvil, que no es múltiplo de 8, contra «múltiplos de `{spacing.unit}`. Sin excepciones.».
+
+Arreglo: 8 × `{spacing.unit}` en móvil y 12 × en escritorio, o declarar la excepción.
+
+**[Revisión de coherencia]** — El criterio de Colección: «una línea» en el PRD, una frase de varios renglones en EXPERIENCE (§ EXPERIENCE.md:146; prd.md:289 (FR-9))
+
+EXPERIENCE da una frase «que puede ocupar de dos a cuatro renglones».
+
+Arreglo: «“En una línea” de FR-9 se lee como una frase, no como un renglón, y nunca se recorta» [NOTE FOR PM].
+
+**[Revisión de coherencia]** — El orden de los ocho Autores destacados, sin decidir y sin marca (§ EXPERIENCE.md:230, :267; DESIGN.md:336)
+
+Solo la tabla de Maquetas dice que está sin decidir; la maqueta los ordena como el Directorio.
+
+Arreglo: decirlo en la fila de la portada.
+
+**[Revisión de coherencia]** — Las espinas no citan el addendum entre sus fuentes (§ DESIGN.md:4-7; EXPERIENCE.md:4-9)
+
+El addendum v8 trae las decisiones diferidas a UX que esta pasada cierra.
+
+Arreglo: añadir `addendum.md` a las dos.
+
+**[Revisión de coherencia]** — Un `[ASSUMPTION]` sobre algo que fija el PRD (§ EXPERIENCE.md:315; prd.md:951-954, :458)
+
+«Su página 1 lleva el salto, compartir y «Buscar en esta obra», como la indexable (FR-51). [ASSUMPTION]»: FR-51 y FR-18 ya lo fijan.
+
+Arreglo: quitar ese `[ASSUMPTION]`, o moverlo tras lo que de verdad supone.
+
+**[Cotejo de entradas]** — «Nunca a otra del mismo Autor» no se puede cumplir en un Tema de un solo Autor (§ EXPERIENCE § State Patterns (FR-12))
+
+La vuelta al primer Autor devuelve al mismo, y ninguna puerta lo impide.
+
+Arreglo: cerrar el caso.
+
+**[Cotejo de entradas]** — FR-7: la primera opción de cada selector y el recuento de cada Obra en su opción (§ EXPERIENCE § Búsqueda)
+
+No se fijan el texto de la primera opción («Todos los autores», «Todas sus obras»…), la forma visible del recuento en la opción, ni si ese recuento sigue a los demás filtros o es el total.
+
+Arreglo: fijarlos.
+
+**[Cotejo de entradas]** — FR-7: el rótulo del resultado de tipo Directorio difiere entre espinas (§ DESIGN § Búsqueda; EXPERIENCE § Búsqueda)
+
+DESIGN da «Directorio»; EXPERIENCE dice que lo fija Arquitectura. El rótulo visible es de UX.
+
+Arreglo: comprometerlo en EXPERIENCE.
+
+**[Cotejo de entradas]** — FR-7: el texto de «Mostrar 30 más» en la última tanda parcial (§ EXPERIENCE § Búsqueda; v8-buscar.html)
+
+No se dice, y la maqueta lo deja «[sin decidir]».
+
+Arreglo: fijarlo.
+
+**[Cotejo de entradas]** — FR-8: el orden de los ocho Autores destacados (§ EXPERIENCE § Portada)
+
+La maqueta usa el del Directorio y advierte que por recuento «parecería un podio», lo que toca «el sitio nunca califica».
+
+Arreglo: fijar el orden.
+
+**[Cotejo de entradas]** — FR-9: el criterio «en una línea» frente a «una frase» (§ EXPERIENCE § Portada; prd.md (FR-9))
+
+Conviene que el PRD lea «una frase».
+
+Arreglo: llevarlo al PM.
+
+**[Cotejo de entradas]** — FR-9: si una de las seis Obras puede ser la de la Cita del Día (§ v8-cabecera-y-portada.html)
+
+Está «[sin decidir]» en la maqueta; la regla de rotación es de Arquitectura.
+
+Arreglo: dejarlo dicho como pendiente de Arquitectura.
+
+**[Cotejo de entradas]** — FR-10 y FR-11: se pierde el porqué de FR-11 (§ EXPERIENCE § Imágenes)
+
+«Cada elección entre el toque y la historia es una ocasión más de abandonar» no consta.
+
+Arreglo: recoger la razón.
+
+**[Cotejo de entradas]** — FR-17: «pulsar otra vez lo vuelve a intentar», concretado de otra forma (§ EXPERIENCE § Diálogo de la Historia)
+
+La espina lo concreta como cerrar el diálogo y pulsar otra vez «Historia de Instagram»: una lectura válida, pero distinta.
+
+Arreglo: declararlo.
+
+**[Cotejo de entradas]** — FR-18: se cayó la distinción entre hoja para enlaces y hoja para ficheros (§ EXPERIENCE § Compartir en)
+
+Se perdió al retirar la Acción Compartir la cita, y «Más opciones…» con hoja no dice cuál de las dos detecciones usa.
+
+Arreglo: decir cuál.
+
+**[Cotejo de entradas]** — FR-18: «Compartir una Obra sigue durante la congelación» no consta (§ EXPERIENCE § Página de Obra)
+
+Consta para la Tarjeta de Obra, la Fila de Obra y las Obras de la portada, no para compartir.
+
+Arreglo: añadirlo.
+
+**[Cotejo de entradas]** — FR-51: el orden del libro omite «documento a documento» (§ EXPERIENCE § Página de Obra)
+
+Para una Obra cotejada en varios documentos, que el PRD nombra y difiere a Arquitectura.
+
+Arreglo: nombrarlo.
+
+**[Cotejo de entradas]** — FR-55: en `/obras/`, la cabecera de grupo cuando lo tecleado casa con un título (§ EXPERIENCE § Directorios)
+
+No se dice si la cabecera de grupo del Autor se queda.
+
+Arreglo: decirlo.
+
+**[Cotejo de entradas]** — FR-55: el recuento en singular (§ EXPERIENCE § Directorios)
+
+No se dan «1 autor.» ni «1 obra.».
+
+Arreglo: escribirlos.
+
+**[Cotejo de entradas]** — FR-55: principio de palabra o subcadena (§ EXPERIENCE § Directorios; UJ-6)
+
+Es mecanismo, pero el ejemplo «13 autores.» de UJ-6 depende de ello: con subcadena salen 14.
+
+Arreglo: decidirlo.
+
+**[Cotejo de entradas]** — §10: la página 404 no está en la tabla de superficies (§ EXPERIENCE § IA)
+
+El PRD v8 la nombra como superficie pública no indexable, y solo vive en State Patterns.
+
+Arreglo: añadirla.
+
+**[Cotejo de entradas]** — UJ-1: el clímax no es el del PRD (preexistente) (§ EXPERIENCE § Key Flows (UJ-1))
+
+El PRD lo pone en tener la Cita pegada, con su atribución, en menos de treinta segundos; la espina, en «confía en lo que va a citar». La v8 lo hace visible, porque el PRD dice que la Tarjeta de Obra no le cuesta ese clímax.
+
+Arreglo: marcar el clímax del PRD o declarar la reinterpretación.
+
+**[Cotejo de entradas]** — «Dos familias, sin excepciones» frente a la Tarjeta Social rasterizada en Georgia (preexistente) (§ DESIGN § Typography)
+
+La v8 le suma la variante de los Directorios con la misma reserva.
+
+Arreglo: declarar la excepción o cambiar el rasterizado.
+
+**[Cotejo de entradas]** — «Que compartir no crezca a costa de copiar» (SM-C3) no consta (§ EXPERIENCE § Compartir en; diseño §12)
+
+La espina nombra SM-C5 para la Tarjeta de Obra y no recoge esta contra-métrica, aunque el orden —Copiar e Imagen antes del bloque de compartir— la respeta de hecho.
+
+Arreglo: recogerla.
+
+**[Cotejo de entradas]** — «Si falta, nada se recoloca» vale dentro de la rejilla, no para la página (§ EXPERIENCE § Compartir en)
+
+Sin reservar sitio, la isla que inserta la Historia empuja la rejilla unos 52 px después de cargar. No se pide reservar sitio, que UX-DR35 veda, sino que la frase no prometa más de lo que da.
+
+Arreglo: acotar la frase a la rejilla.
+
+**[Cotejo de entradas]** — Los filtros se aplican al cambiar, y en un `select` nativo eso es a cada flecha (§ EXPERIENCE § Búsqueda)
+
+Se buscaría y se anunciaría una vez por opción recorrida. No rompe 3.2.2, pero el anuncio se vuelve ruido. Es el medio 5 de la lente de accesibilidad.
+
+Arreglo: una pausa antes de aplicar.
+
+## Lo que está bien y no hay que tocar (lente de accesibilidad)
+
+- **Contraste, calculado:** el siena sobre papel da 6,26:1 en todos los usos nuevos y 6,00 sobre `surface-container-low`; la tinta apagada 7,26:1 y 6,96; el blanco sobre siena 6,70:1; el contorno de selectores y campo 3,66:1 (1.4.11); el anillo de foco 6,26:1; en las plantillas de la imagen, el apagado da 9,52:1 en Tinta y 5,40:1 en Siena. Los filetes de 1,36:1 separan y no identifican controles.
+- **Orden de tabulación igual al de lectura** en la cabecera, la Página de Cita, `/buscar/`, los Directorios y la Página de Obra; la variante 1C se descartó con la razón correcta.
+- **El foco nunca se pierde:** «Mostrar 30 más» lo lleva al primer resultado nuevo, «Quitar los filtros» al campo, el selector de Obra aparece detrás del de Autor sin moverlo, y filtrar un Directorio lo deja en el campo.
+- **Nada se deshabilita,** y lo que no puede cumplirse no existe: la Historia sin puntero grueso, la Imagen por encima de 300 caracteres, el selector de Obra sin Autor. Ningún estado afirma lo que no pasó.
+- **Etiquetas visibles encima** de todo campo y selector; los nombres de «Compartir en» contienen el texto visible (2.5.3); «→» y «↓» van en el marcado con `aria-hidden`; las letras de salto funcionan sin guion, miden 44 px y van a 8 px entre sí.
+- **La convención de `AGENTS.md`** sobre mensajes de estado está recogida en la espina y aplicada en las maquetas y en lo construido que la v8 reutiliza (`CopiarCita.astro`, `ImagenDeCita.astro`, `buscar.astro`, todos con `requestAnimationFrame`).
+
+## Comprobado sin hallazgo (revisión de coherencia)
+
+- **Bitácora 115–128:** las catorce decisiones están en las espinas con la variante exacta; la única diferencia era el rótulo de 7C (medio 3).
+- **Addendum, «De UX»:** las siete decisiones diferidas estaban cerradas en las espinas.
+- **Compartición:** el mecanismo de la Historia —portapapeles y después la hoja, `AbortError` frente a `NotAllowedError`, `pointer: coarse` y `canShare` con un PNG de prueba— sin contradicción; la línea de cifras, también.
+- **Componentes:** los nombres son los mismos en las dos espinas, y los grupos van en el mismo orden.
+- **Contrastes de § Colors, recalculados:** 16,00; 7,26; 6,26; 6,70; 3,66; y 2,20, 1,16 y 2,56 para las parejas enlace frente a texto.
+- **Los FR:** 7, 8, 9, 10, 11, 17, 18, 20, 21, 51, 52, 54 y 55 están como los fija el PRD; las únicas enmiendas son las de FR-12 y UJ-6.
+
+## Notas mecánicas
+
+- **Referencias cruzadas:** las `§` comprobadas resuelven todas (§ Portada, § Búsqueda, § Directorios, § Primitivas, § Obra traducida, § Maquetas, § Tipografía adaptativa e «Imágenes que salen del sitio»). No quedan referencias vivas a componentes retirados: «Compartir la cita» y «Citas hermanas» solo aparecen en notas de historia.
+- **Marcas abiertas.** En la puerta había 43 `[ASSUMPTION]` en DESIGN.md y 69 en EXPERIENCE.md, y tres `[NOTE FOR PM]`. Al cierre son 71 y 126 `[ASSUMPTION]`, que esperan la confirmación de Héctor y no cuentan como hallazgo, y seis `[NOTE FOR PM]` en EXPERIENCE.md.
+- **Fuera de `bmad-ux`.** Para la pasada corta de `bmad-prd`: FR-12, UJ-3, UJ-6, FR-9 («en una línea»), NFR-9 (WCAG 2.2 AA) y la grafía «en este tema» (bitácoras 125, 128, 138 y 139). Para `bmad-project-context`: los dos ritmos de anuncio y los mensajes de estado nuevos de la v8 en `AGENTS.md` (bitácora 138).
+- **Tamaño al cierre:** DESIGN.md 459 líneas y 12.015 palabras; EXPERIENCE.md 573 líneas y 23.723 palabras, con 80 y 201 marcas «(v8», que se conservan por convención de las pasadas anteriores (bitácora 140, decisión de proceso).
+- **Estado de la pasada:** el frontmatter de las dos espinas dice `status: final` y `updated: 2026-10-18`, y los `sources` ya incluyen el addendum en las dos. A la fecha de este informe la bitácora acaba en la entrada 141 y todavía no tiene el evento «spines finalized (v8)».
+- **Copias de `.working/`:** en la puerta quedaban seis copias de las maquetas v8, idénticas a las promovidas. Se borraron (bitácora 141); en `.working/` solo queda `verif-cierre.md`.
+- **Dibujos:** no hay Mermaid.
+- **Geometría comprobada contra las maquetas, en la puerta:** el salto «Dónde leer esta obra ↓» a 3 × `{spacing.unit}` deja 14 px entre su zona y la de «de {Autor}» y cumple; la rejilla de letras da 6 por fila y unos 200 px a 360; la Cabecera medía 105 px a 320 y a 360, y con los 8 px entre filas pasa a unos 113, a volver a medir.
+- **Cómo se cuentan los hallazgos:** 104 entradas en cuatro informes, sin deduplicar entre informes. Los seis altos son tres problemas distintos, y varios medios se repiten entre lentes (los `h2` de la portada, «Más opciones…», las zonas de FR-56, las marcas para el PM de UJ-3 y UJ-6).
 
 ## Ficheros de revisión
 
 - `review-rubric.md`
 - `review-accesibilidad.md`
+- `review-coherencia.md`
+- `reconcile-v8.md`
+- `.working/verif-cierre.md` (verificación de cierre, posterior a las correcciones)

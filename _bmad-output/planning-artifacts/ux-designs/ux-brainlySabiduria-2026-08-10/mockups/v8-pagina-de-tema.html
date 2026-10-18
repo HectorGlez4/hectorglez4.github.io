@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página de Tema v8</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta maqueta. Es una sola composición, sin variantes: dibuja lo que las
+     espinas v8 ya deciden. Si algo de aquí discrepa de ellas, mandan ellas.
+       DESIGN.md § Do's and Don'ts               («Buscar en este Tema» bajo el título y encima
+                                                  del listado: la excepción declarada a que la
+                                                  Página de Tema empiece por su contenido)
+       DESIGN.md § Components → Cabecera          (v8, variantes 1A y 2A: dos filas por debajo
+                                                  de 600 px, una desde 600; Autores y Obras en
+                                                  tinta, Buscar en siena, los tres subrayados)
+       DESIGN.md § Components → Búsqueda          (Campo de búsqueda; «Buscar en esta obra / en
+                                                  {Autor} / en este Tema»: en el Tema, bajo el
+                                                  h1 a 4 × unit y el listado 4 × más abajo)
+       DESIGN.md § Components → Listados          (Tarjeta de Cita con el título de su Obra como
+                                                  texto; Paginación)
+       DESIGN.md § Colors                         (la regla del siena: Buscar, la paginación, los
+                                                  enlaces del pie; la navegación que informa, en
+                                                  tinta)
+       DESIGN.md § Typography                     (serif para el nombre del Tema, el texto de la
+                                                  Cita; Inter para el título de la Obra y para lo
+                                                  tecleado en un campo)
+       DESIGN.md § Layout & Spacing               (múltiplos de 8 px; márgenes 20 / 24 / 56 px;
+                                                  respiración 40 / 64 px)
+       DESIGN.md § Elevation & Depth, § Shapes    (plano; el campo sin caja)
+       EXPERIENCE.md § Information Architecture   (Página de Tema: la página 1 ofrece «Buscar en
+                                                  este Tema», FR-6)
+       EXPERIENCE.md § Component Patterns         (Cabecera; Listados: Tarjeta de Cita, Paginación;
+                                                  Búsqueda: Campo de búsqueda, Buscar en esta obra
+                                                  / en {Autor} / en este Tema)
+       EXPERIENCE.md § State Patterns             (Páginas 2+ de Autor y de Tema: sin el
+                                                  formulario; Cita sin Obra)
+       EXPERIENCE.md § Interaction Primitives     (44 px de zona de toque, 8 px entre zonas;
+                                                  todo en la misma pestaña)
+       EXPERIENCE.md § Accessibility Floor        (foco visible; un h1; subrayado solo en línea
+                                                  de texto; puntos medios ocultos al lector)
+       EXPERIENCE.md § Responsive & Platform      (< 600 px y > 1024 px)
+     Lo construido que se imita: src/pages/tema/[slug]/[...page].astro, TarjetaDeCita.astro,
+     Paginacion.astro, Armazon.astro, DondeSeguirnos.astro, src/pages/404.astro (el campo) y
+     src/styles/tokens.css. Sin red y sin JavaScript: si Inter y Source Serif 4 no están
+     instaladas salen las familias de reserva del código, y las cifras se mueven unos píxeles.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: no es el sitio. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --mesa-tinta:#1c2027; --mesa-suave:#59616e; --mesa-marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#d9b56a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--mesa-tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1320px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:86ch;color:var(--mesa-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);letter-spacing:.02em;max-width:120ch;}
+  .meta b{color:var(--mesa-tinta);font-weight:600;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-size:12px;color:var(--mesa-suave);}
+  .leyenda span{display:inline-flex;align-items:center;gap:8px;}
+  .muestra{display:inline-block;width:22px;height:12px;border-radius:2px;}
+  .muestra.azul{background:#eaf0f7;border:1px dashed #8fa9c6;}
+  .muestra.ambar{background:#fdf4e3;border:1px dashed #c99a3a;}
+
+  section.fijo{margin-top:32px;padding:18px 22px;background:var(--mesa-alta);border:1px solid var(--mesa-linea);border-radius:4px;max-width:120ch;}
+  section.fijo h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;font-weight:600;margin:0 0 8px;}
+  section.fijo ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  section.fijo li{margin:4px 0;}
+  section.fijo b{color:var(--mesa-tinta);font-weight:600;}
+
+  section.bloque-mesa{margin-top:56px;}
+  .bloque-mesa > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;line-height:1.2;margin:0 0 8px;}
+  .bloque-mesa > .regla{margin:0;max-width:110ch;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  .bloque-mesa > .regla b{color:var(--mesa-tinta);font-weight:600;}
+
+  .fila{display:flex;flex-wrap:wrap;gap:36px 32px;margin-top:26px;align-items:flex-start;}
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:10px;width:380px;flex:none;}
+  figure.tel > figcaption{font-size:13px;line-height:1.5;color:var(--mesa-suave);min-height:6em;}
+  figure.tel > figcaption b{color:var(--mesa-tinta);font-weight:600;}
+  .etiqueta{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 6px;
+     font-size:12px;font-weight:700;letter-spacing:.06em;color:#fff;background:var(--mesa-marca);border-radius:3px;margin-right:4px;}
+  ul.notas{margin:0;padding:0 0 0 16px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);}
+  ul.notas li{margin:0 0 5px;}
+  ul.notas b{color:var(--mesa-tinta);font-weight:600;}
+  ul.notas li.pend{list-style:none;margin-left:-16px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;}
+  ul.notas li.pend b{color:var(--aviso-tinta);}
+
+  footer.fin{margin-top:64px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--mesa-suave);max-width:110ch;}
+  footer.fin b{color:var(--mesa-tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--mesa-tinta);margin:26px 0 8px;font-weight:600;}
+  footer.fin h2:first-child{margin-top:0;}
+  footer.fin ul{margin:6px 0 0;padding-left:18px;} footer.fin li{margin:3px 0;}
+  footer.fin li.pend{list-style:none;margin-left:-18px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;margin-bottom:6px;}
+  footer.fin li.pend b{color:var(--aviso-tinta);}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--mesa-alta);
+       border:1px solid var(--mesa-linea);border-radius:3px;padding:1px 5px;}
+
+  /* ---- El teléfono y la ventana: carcasa y barra del navegador, que no son el sitio ---- */
+  .telefono{width:380px;background:#17181c;border-radius:38px;padding:12px 10px 22px;border:1px solid #2b2d33;}
+  .navegador{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .navegador span{width:300px;text-align:center;background:#2a2c32;color:#d6d9df;border-radius:10px;
+       font:12.5px/1 system-ui,-apple-system,sans-serif;padding:8px 12px;letter-spacing:.01em;}
+  .navegador span::before{content:"";display:inline-block;width:7px;height:8px;margin-right:7px;border:1.5px solid #9ea3ad;border-radius:2px;vertical-align:-1px;}
+  .pantalla{width:360px;overflow:hidden;border-radius:3px 3px 26px 26px;}
+  .tira{width:380px;background:#17181c;border-radius:14px;padding:10px;border:1px solid #2b2d33;}
+  .tira .pantalla{border-radius:3px;}
+  .ventana{width:1140px;max-width:100%;background:#cfd3da;border-radius:8px;padding:10px;position:relative;overflow-x:auto;margin-top:26px;}
+  .ventana .barra{display:flex;align-items:center;gap:14px;height:30px;padding:0 6px 8px;}
+  .ventana .luces{width:42px;height:9px;flex:none;
+     background:radial-gradient(circle at 4.5px 4.5px,#9aa1ab 4px,transparent 4.5px) 0 0/16px 9px repeat-x;}
+  .ventana .direccion{flex:1;max-width:520px;background:#e9ebef;color:#3b414b;border-radius:6px;
+     font:12.5px/1 system-ui,-apple-system,sans-serif;padding:7px 12px;}
+  .ventana .pantalla{width:1120px;border-radius:3px;}
+
+  /* ===========================================================================
+     EL SITIO. Tokens con los nombres de CSS de la tabla «De token a propiedad CSS» de
+     DESIGN.md § Components, valores de su frontmatter y de src/styles/tokens.css. Cada regla
+     imita lo construido salvo donde las espinas v8 piden otra cosa, y eso se dice al lado.
+     =========================================================================== */
+  .lienzo{
+    --papel:#faf7f0; --contenedor-bajo:#f6f2ea; --contenedor:#f1ece2; --contenedor-alto:#eae4d8;
+    --tinta:#1f1b16; --tinta-apagada:#5a5147;
+    --contorno:#8a7f72; --filete:#ddd5c7;
+    --siena:#8c4a2f; --sobre-siena:#ffffff;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --titular-md:30px; --titular-sm:21px; --titular-obra:26px;
+    --cuerpo-lg:17px; --cuerpo-md:15px; --autor:13px; --pie:13px;
+    --unidad:8px; --canal:24px; --margen:20px; --respiracion:40px;
+    --radio:3px; --radio-tarjeta:6px; --grosor-filete:1px;
+    --medida-prosa:68ch; --ancho-pagina:45rem; --zona-de-toque:44px;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+    --pend:#6b4e12; --pend-fondo:#fdf4e3; --pend-linea:#c99a3a;
+
+    position:relative;width:360px;background:var(--papel);color:var(--tinta);
+    font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.65;overflow:hidden;
+  }
+  /* > 1024 px (EXPERIENCE § Responsive & Platform): margen de 56 px y respiración de 64. */
+  .lienzo.ancho{width:1120px;--margen:56px;--respiracion:64px;}
+  .lienzo a{color:var(--siena);text-underline-offset:.2em;}
+  .solo-para-lectores{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+  /* tokens.css: la columna del sitio, una sola definición para cabecera, contenido y pie. */
+  .contenedor{max-width:calc(var(--ancho-pagina) + var(--margen) * 2);margin-inline:auto;padding-inline:var(--margen);}
+
+  /* ---- Cabecera v8 (DESIGN § Components → Cabecera, 1A + 2A). Por debajo de 600 px, dos filas:
+     la marca y, debajo, los tres enlaces, con 1 × unit arriba y abajo: 105 px. ---- */
+  .cabecera{border-bottom:var(--grosor-filete) solid var(--filete);padding-block:var(--unidad);}
+  .marca{font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+         line-height:1.4;color:var(--tinta) !important;text-decoration:none;display:flex;align-items:center;
+         min-height:var(--zona-de-toque);width:max-content;}
+  .nav ul{list-style:none;margin:0 0 0 calc(var(--unidad) * -1);padding:0;display:flex;align-items:center;}
+  .nav a{font-size:var(--cuerpo-md);line-height:1.6;display:flex;align-items:center;justify-content:center;
+         min-height:var(--zona-de-toque);min-width:var(--zona-de-toque);padding-inline:var(--unidad);
+         text-decoration-line:underline;text-decoration-thickness:var(--grosor-filete);}
+  .nav a.en-tinta{color:var(--tinta) !important;}
+  .nav .punto{display:flex;align-items:center;justify-content:center;min-width:var(--unidad);
+              font-size:var(--cuerpo-md);line-height:1.6;color:var(--tinta-apagada);}
+  /* Desde 600 px, una fila: la marca a la izquierda y los enlaces a la derecha, 2 × unit de aire. */
+  .ancho .cabecera{display:flex;align-items:center;justify-content:space-between;padding-block:calc(var(--unidad) * 2);}
+  .ancho .nav ul{margin:0 calc(var(--unidad) * -1) 0 0;}
+
+  /* ---- Página de Tema: src/pages/tema/[slug]/[...page].astro ---- */
+  .pagina{padding-block:var(--respiracion);}
+  /* El nombre del Tema, como está construido: serif, titular-md, 600. Sin fila propia en las espinas. */
+  .pagina h1{position:relative;font-family:var(--serif);font-size:var(--titular-md);font-weight:600;line-height:1.2;margin:0;}
+
+  /* ---- «Buscar en este Tema» (DESIGN § Búsqueda): el Campo de búsqueda con su etiqueta visible,
+     el filtro en un campo oculto, dibujado como el campo del 404 y sin botón de envío visible
+     [ASSUMPTION]. A 4 × unit del h1 [ASSUMPTION]. Lo tecleado, en Inter a body-lg (v8). ---- */
+  .buscar-en{position:relative;margin:calc(var(--unidad) * 4) 0 0;max-width:var(--medida-prosa);}
+  .buscar-en label{display:block;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);margin-bottom:var(--unidad);}
+  .buscar-en input[type=search]{display:block;width:100%;min-height:var(--zona-de-toque);padding:var(--unidad) 0;margin:0;
+     font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.4;color:var(--tinta);
+     background:transparent;border:0;border-bottom:var(--grosor-filete) solid var(--contorno);border-radius:0;
+     -webkit-appearance:none;appearance:none;}
+  /* Con foco: el anillo global (2 px siena, 2 px de separación) y, sumado, el filete en siena y más grueso. */
+  .buscar-en input[type=search]:focus-visible,
+  .buscar-en input.con-foco{outline:2px solid var(--siena);outline-offset:2px;border-radius:var(--radio);
+     border-bottom:2px solid var(--siena);}
+
+  /* ---- Listado: TarjetaDeCita, a 4 × unit del formulario [ASSUMPTION] o, en las 2+, del h1. ---- */
+  .listado{list-style:none;margin:calc(var(--unidad) * 4) 0 0;padding:0;border-top:var(--grosor-filete) solid var(--filete);}
+  .tarjeta{border-bottom:var(--grosor-filete) solid var(--filete);}
+  .tarjeta > a{display:flex;flex-direction:column;gap:var(--unidad);min-height:var(--zona-de-toque);
+     padding:calc(var(--unidad) * 2) var(--unidad);margin-inline:calc(var(--unidad) * -1);
+     text-decoration:none;color:inherit;transition:background-color 150ms;}
+  .tarjeta > a:hover{background:var(--contenedor-bajo);}
+  .fragmento{font-family:var(--serif);font-size:var(--titular-sm);font-weight:600;line-height:1.3;color:var(--tinta);text-wrap:pretty;}
+  .autor{font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--tinta-apagada);}
+  /* v8 (DESIGN § Listados): el título de la Obra bajo el Autor, a 1 × unit —el gap de la tarjeta—,
+     en Inter, caption y tinta apagada, sin versalitas. Texto, nunca un segundo enlace. */
+  .de-obra{font-family:var(--sans);font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);overflow-wrap:break-word;}
+
+  /* ---- Paginación: Paginacion.astro, tal como está construida ---- */
+  .paginacion{position:relative;display:flex;align-items:center;justify-content:space-between;gap:var(--canal);margin-top:calc(var(--unidad) * 3);}
+  .paginacion > a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--cuerpo-md);text-decoration:none;}
+  .paginacion > a:hover{text-decoration:underline;}
+  .cuenta{margin:0;font-size:var(--pie);color:var(--tinta-apagada);}
+  .numeros{display:flex;flex-wrap:wrap;gap:var(--unidad);margin:0;padding:0;list-style:none;}
+  .numeros > li > a,.numeros > li > span{display:flex;align-items:center;justify-content:center;
+     min-width:var(--zona-de-toque);min-height:var(--zona-de-toque);font-size:var(--pie);text-decoration:none;}
+  .numeros > li > span[aria-current]{color:var(--tinta);font-weight:600;}
+
+  /* ---- Pie: Armazon.astro y DondeSeguirnos.astro ---- */
+  .pie{margin-top:calc(var(--respiracion) * 2);padding-block:calc(var(--unidad) * 3);
+       border-top:var(--grosor-filete) solid var(--filete);color:var(--tinta-apagada);font-size:var(--pie);}
+  .pie p{margin:0;}
+  .seguir{margin-top:calc(var(--unidad) * 2);}
+  .seguir ul{display:flex;flex-wrap:wrap;gap:calc(var(--unidad) * 2);margin:0;padding:0;list-style:none;}
+  .seguir a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--pie);color:var(--siena);text-decoration-line:underline;}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. Monoespaciadas: no son el sitio.
+     Azul = qué se ha recortado o medido. Ámbar = [sin decidir en las espinas].
+     =========================================================================== */
+  .tijera{margin:0 calc(var(--margen) * -1);padding:8px var(--margen);list-style:none;
+          border-bottom:1px dashed var(--anot-linea);background:var(--anot-fondo);
+          color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .hueco-pend{position:absolute;right:0;padding:1px 6px;border:1px dashed var(--pend-linea);background:var(--pend-fondo);
+        color:var(--pend);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;z-index:2;}
+  .pagina h1 > .hueco-pend{top:9px;font-weight:400;}
+  .buscar-en > .hueco-pend{top:1px;}
+  .paginacion > .hueco-pend{top:-21px;}
+  .medida{position:absolute;left:auto;right:0;padding:1px 6px;border:1px dashed var(--anot-linea);background:var(--anot-fondo);
+        color:var(--anot);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;z-index:2;}
+  .listado > .medida-li{list-style:none;position:relative;height:0;}
+  .listado > .medida-li > .medida{top:-9px;}
+  .pliegue{position:absolute;left:0;right:0;top:640px;border-top:1px dashed var(--anot);pointer-events:none;z-index:3;}
+  .pliegue span{position:absolute;right:6px;top:-17px;padding:0 4px;background:var(--anot-fondo);color:var(--anot);
+                font:10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .envia{margin:0;padding:8px var(--margen);border-top:1px dashed var(--anot-linea);background:var(--anot-fondo);
+         color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .franja{padding:var(--unidad) var(--margen) calc(var(--unidad) * 3);}
+</style>
+</head>
+<body>
+<div class="env">
+<header class="top">
+<h1>Página de Tema v8</h1>
+<p class="sub">La Página de Tema con lo que ya deciden las espinas v8: la cabecera nueva, «Buscar en este Tema» bajo el título y encima del listado —la excepción declarada a que la página empiece por su contenido—, las Tarjetas de Cita con el título de su Obra como texto y la paginación. La página 1 y una página 2, que no lleva el formulario, en un teléfono de 360&nbsp;px, y la página 1 en escritorio. Una sola composición, sin variantes: lo que no deciden las espinas va en ámbar.</p>
+<p class="meta"><b>El saber</b> (<code>corpus/temas/el-saber.yml</code>), el Tema mayor: <b>559 Citas</b> de 65 Autores, en <b>12 páginas</b> de 50, ordenadas por slug como hoy (<code>citasDeTema</code>). Corpus del 2026-10-18, 4.420 Citas. Fragmentos con el corte de 120 caracteres de <code>TarjetaDeCita.astro</code>; cada título de Obra es el que fija su Ficha de Obra en <code>corpus/obras/</code>, con la regla de <code>tituloEfectivo</code>. Tres de las 559 no proceden de ninguna Obra; una, «Abrid escuelas y se cerrarán cárceles.», de Concepción Arenal, cae en la página 2 y se dibuja ahí.</p>
+<div class="leyenda">
+<span><i class="muestra azul"></i>Anotación de la maqueta: lo recortado, lo medido. No es el sitio.</span>
+<span><i class="muestra ambar"></i>[sin decidir en las espinas]: se dibuja como está construido, y no es contrato.</span>
+</div>
+</header>
+
+<section class="fijo">
+<h2>Lo que se dibuja, y dónde lo deciden las espinas</h2>
+<ul>
+<li><b>La cabecera v8, 1A + 2A.</b> Por debajo de 600&nbsp;px, la marca en su fila y «Autores · Obras · Buscar» debajo, alineados con el texto de la marca, con 8&nbsp;px de aire arriba y abajo: 105&nbsp;px. Autores y Obras en tinta, Buscar en siena, los tres subrayados; los puntos medios, ocultos al lector de pantalla. Desde 600&nbsp;px, una sola fila. <i>DESIGN § Components → Cabecera; EXPERIENCE § Component Patterns → Cabecera.</i></li>
+<li><b>«Buscar en este Tema», solo en la página 1,</b> bajo el <code>h1</code> a 4 × <code>{spacing.unit}</code> y con el listado 4 × más abajo [ASSUMPTION]. Es un formulario GET a <code>/buscar/</code> con <code>tema=el-saber</code> en un campo oculto: lleva a la búsqueda con el Tema ya puesto, y enviado vacío da todas las Citas del Tema. No añade guion ni crea ninguna página indexable. El campo es el del 404, sin botón de envío visible [ASSUMPTION]: etiqueta visible encima, en caption y tinta apagada; filete inferior en contorno; lo tecleado en Inter a <code>body-lg</code> [ASSUMPTION]. <i>DESIGN § Do's and Don'ts y § Búsqueda; EXPERIENCE § Búsqueda.</i></li>
+<li><b>La Tarjeta de Cita del Tema lleva el Autor y el título de su Obra,</b> como texto y nunca como un segundo enlace: toda la tarjeta lleva a su Página de Cita. La Obra va bajo el Autor, a 1 × <code>{spacing.unit}</code>, en Inter, caption y tinta apagada, sin versalitas; el orden Autor y después Obra es [ASSUMPTION]. Una Cita sin Obra lleva solo el Autor. <i>DESIGN § Listados; EXPERIENCE § Listados; FR-6.</i></li>
+<li><b>La paginación, como está construida:</b> «Anterior» y «Siguiente» en los extremos, en siena y sin subrayado; en medio «Página N de M» y los doce números, cada uno en su zona de 44&nbsp;px, a 8&nbsp;px de la siguiente también en vertical; el actual, en tinta y sin enlace; el sitio de «Anterior» vacío en la página 1. <i>DESIGN § Listados → Paginación; EXPERIENCE § Listados.</i></li>
+<li><b>Las páginas 2+</b> llevan el <code>h1</code> y el listado, a 4 × <code>{spacing.unit}</code>, sin el formulario, con <code>noindex, follow</code> y la pestaña «— página N». <i>EXPERIENCE § State Patterns, «Páginas 2+ de Autor y de Tema».</i></li>
+<li><b>Ningún Modelo de Ingreso</b> admite la Página de Tema (<code>src/lib/ingreso.ts</code>): no queda nada que dibujar, ni hueco. Todo enlace abre en la misma pestaña.</li>
+</ul>
+</section>
+
+<!-- =====================================================================================
+     TELÉFONO, 360 px
+     ===================================================================================== -->
+<section class="bloque-mesa" id="telefono">
+<h2>En el teléfono, 360&nbsp;px</h2>
+<p class="regla">Cada teléfono enseña la página entera de arriba abajo, con las tarjetas del medio recortadas; la línea azul marca la primera pantalla de 360×640. Pestañas: «Citas sobre el saber | Sabiduría de Bolsillo» y «Citas sobre el saber — página 2 | Sabiduría de Bolsillo».</p>
+<div class="fila">
+
+<!-- ===== Página 1 ===== -->
+<figure class="tel">
+<figcaption><span class="etiqueta">1</span> <b>Página 1: el nombre, «Buscar en este Tema» y el listado.</b><br>El campo va justo encima del listado que filtra. Con 12 páginas es la única forma de llegar a una Cita sin pasarlas, y la primera Cita sigue en la primera pantalla.</figcaption>
+<div class="telefono"><div class="navegador"><span>sabiduriadebolsillo.net/tema/el-saber/</span></div><div class="pantalla"><div class="lienzo" lang="es">
+<div class="pliegue"><span>primera pantalla 360×640</span></div>
+<header class="cabecera contenedor">
+  <a class="marca" href="#">Sabiduría de Bolsillo</a>
+  <nav class="nav" aria-label="Principal"><ul>
+    <li><a class="en-tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+    <li><a class="en-tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+    <li><a href="#">Buscar</a></li>
+  </ul></nav>
+</header>
+<main id="contenido-1">
+<div class="pagina contenedor">
+  <h1>El saber<span class="hueco-pend" aria-hidden="true">[sin fila en las espinas]</span></h1>
+  <form class="buscar-en" role="search" action="#" method="get">
+    <span class="hueco-pend" aria-hidden="true">[sin decidir] el ejemplo</span>
+    <label for="q-1">Buscar en este Tema</label>
+    <input id="q-1" name="q" type="search" autocomplete="off">
+    <input type="hidden" name="tema" value="el-saber">
+  </form>
+  <ul class="listado">
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario obrar para vivir, y es necesario saber para obrar.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La necesidad específica del entendimiento es la explicación, como la necesidad específica del estómago es el alimento.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La sabiduría era una fórmula verbal salida del pasado y del misterio.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Una idea grande no puede caber en un espíritu estrecho, ni un sentimiento generoso arraigar en un alma mezquina.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La naturaleza debe atenderse y estimarse según el ingenio, la doctrina según la ciencia y el uso según el fruto.»</span><span class="autor">Agustín de Hipona</span><span class="de-obra">La ciudad de Dios</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Nadie que tenga buena mente es malo, mientras que algunos pésimos tienen una memoria asombrosa.»</span><span class="autor">Agustín de Hipona</span><span class="de-obra">La ciudad de Dios</span></a></li>
+    <li class="tijera">Recortadas las tarjetas 7 a 47, de Agustín de Hipona a Baltasar Gracián, por slug.</li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Comúnmente, los sabios mueren faltos de cordura; al contrario, los necios, hartos de consejo.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Con los necios poco importa ser sabio, y con los locos cuerdo: hásele de hablar a cada uno en su lenguaje.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Conciben todos altamente de sí, y más los que menos son.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+  </ul>
+  <nav class="paginacion" aria-label="Paginación del listado">
+    <span class="hueco-pend" aria-hidden="true">[sin decidir] cómo se parte la fila a 360</span>
+    <span aria-hidden="true"></span>
+    <p class="cuenta">Página 1 de 12</p>
+    <ol class="numeros">
+      <li><span aria-current="page">1</span></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>2</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>3</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>4</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>5</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>6</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>7</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>8</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>9</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>10</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>11</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>12</a></li>
+    </ol>
+    <a href="#" rel="next">Siguiente</a>
+  </nav>
+</div>
+</main>
+<footer class="pie contenedor">
+  <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+  <nav class="seguir" aria-label="Dónde seguirnos"><ul>
+    <li><a href="#" rel="me">Instagram</a></li><li><a href="#" rel="me">TikTok</a></li><li><a href="#" rel="me">Threads</a></li><li><a href="#" rel="me">Facebook</a></li><li><a href="#">RSS</a></li>
+  </ul></nav>
+</footer>
+</div></div></div>
+<ul class="notas">
+<li><b>Primera pantalla:</b> la cabecera mide 105&nbsp;px; «El saber» empieza a 145, la etiqueta a 213, el campo acaba a 285 y el texto de la primera Cita empieza a 333&nbsp;px. Entre el nombre y la primera Cita hay un campo, y nada más.</li>
+<li><b>Orden de tabulación:</b> «Saltar al contenido.», la marca, Autores, Obras, Buscar, el campo, las 50 tarjetas, los números y «Siguiente», y el pie. La Cita no es enfocable: lo es su tarjeta entera.</li>
+<li><b>Intro envía</b> el formulario; no hay botón que pulsar. El campo oculto no se ve ni se enfoca.</li>
+<li><b>La Paginación mide 304&nbsp;px:</b> «Página 1 de 12» en tres líneas y los números en 6 filas de 2, como está construida.</li>
+</ul>
+<div class="tira"><div class="pantalla"><div class="lienzo" lang="es">
+<div class="franja">
+  <form class="buscar-en" role="search" action="#" method="get" style="margin-top:calc(var(--unidad) * 2)">
+    <label for="q-foco">Buscar en este Tema</label>
+    <input id="q-foco" class="con-foco" name="q" type="search" autocomplete="off" value="ignorancia">
+    <input type="hidden" name="tema" value="el-saber">
+  </form>
+</div>
+<p class="envia">Con foco y lo tecleado. Intro → /buscar/?q=ignorancia&amp;tema=el-saber<br>Vacío → /buscar/?q=&amp;tema=el-saber: todas las Citas del Tema.</p>
+</div></div></div>
+<ul class="notas">
+<li><b>Con foco</b> lleva el anillo global —2&nbsp;px de siena separados 2&nbsp;px— y, sumado, el filete inferior en siena y a 2&nbsp;px. Lo tecleado va en Inter, en tinta, al cuerpo de <code>body-lg</code> (<i>DESIGN § Búsqueda → Campo de búsqueda; EXPERIENCE § Accessibility Floor</i>).</li>
+</ul>
+</figure>
+
+<!-- ===== Página 2 ===== -->
+<figure class="tel">
+<figcaption><span class="etiqueta">2</span> <b>Página 2: el nombre y el listado, sin el formulario.</b><br>«Buscar en este Tema» solo lo ofrece la página 1. La Cita sin Obra de la posición 78 lleva solo su Autor: no deja hueco.</figcaption>
+<div class="telefono"><div class="navegador"><span>sabiduriadebolsillo.net/tema/el-saber/2/</span></div><div class="pantalla"><div class="lienzo" lang="es">
+<div class="pliegue"><span>primera pantalla 360×640</span></div>
+<header class="cabecera contenedor">
+  <a class="marca" href="#">Sabiduría de Bolsillo</a>
+  <nav class="nav" aria-label="Principal"><ul>
+    <li><a class="en-tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+    <li><a class="en-tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+    <li><a href="#">Buscar</a></li>
+  </ul></nav>
+</header>
+<main id="contenido-2">
+<div class="pagina contenedor">
+  <h1>El saber</h1>
+  <ul class="listado">
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Conocerse en sí mismo no lo permite la propia afición; conocerse en los otros no lo sufre la trascendental adulación.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">El político</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Consejo y fuerzas, ojos y manos: sin valor es estéril la sabiduría.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«De una heroica educación sale un heroico rey.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">El político</span></a></li>
+    <li class="tijera">Recortadas las tarjetas 54 a 76.</li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«A medida que se educa, los instintos se tienen a raya, los sentimientos se elevan, las ideas se extienden y el hombre s…»</span><span class="autor">Concepción Arenal</span><span class="de-obra">La mujer del porvenir</span></a></li>
+    <li class="medida-li" aria-hidden="true"><span class="medida">78 · Cita sin Obra: sin línea de Obra</span></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Abrid escuelas y se cerrarán cárceles.»</span><span class="autor">Concepción Arenal</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Academias, cátedras, liceos, tribunas, escuelas, libros, revistas, ¡cuántos medios de difundir rápidamente la ciencia,…»</span><span class="autor">Concepción Arenal</span><span class="de-obra">La Igualdad Social y Política y sus Relaciones con la Libertad</span></a></li>
+    <li class="tijera">Recortadas las tarjetas 80 a 98, todas de Concepción Arenal.</li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La educación de las mujeres hasta aquí podría llamarse, sin mucha violencia, Arte de perder el tiempo.»</span><span class="autor">Concepción Arenal</span><span class="de-obra">La mujer del porvenir</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La educación es imposible con la ignorancia y la falta de prestigio de la mujer.»</span><span class="autor">Concepción Arenal</span><span class="de-obra">La mujer del porvenir</span></a></li>
+  </ul>
+  <nav class="paginacion" aria-label="Paginación del listado">
+    <span class="hueco-pend" aria-hidden="true">[sin decidir] una columna de 12 a 360</span>
+    <a href="#" rel="prev">Anterior</a>
+    <p class="cuenta">Página 2 de 12</p>
+    <ol class="numeros">
+      <li><a href="#"><span class="solo-para-lectores">Página </span>1</a></li>
+      <li><span aria-current="page">2</span></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>3</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>4</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>5</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>6</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>7</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>8</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>9</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>10</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>11</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>12</a></li>
+    </ol>
+    <a href="#" rel="next">Siguiente</a>
+  </nav>
+</div>
+</main>
+<footer class="pie contenedor">
+  <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+  <nav class="seguir" aria-label="Dónde seguirnos"><ul>
+    <li><a href="#" rel="me">Instagram</a></li><li><a href="#" rel="me">TikTok</a></li><li><a href="#" rel="me">Threads</a></li><li><a href="#" rel="me">Facebook</a></li><li><a href="#">RSS</a></li>
+  </ul></nav>
+</footer>
+</div></div></div>
+<ul class="notas">
+<li><b>Primera pantalla:</b> sin el formulario, el texto de la primera Cita empieza a 230&nbsp;px, 104 antes que en la página 1: el listado sigue a 4 × <code>{spacing.unit}</code> del <code>h1</code>, como hoy.</li>
+<li><b>La Paginación mide 616&nbsp;px:</b> con «Anterior» en la fila, los doce números caben de uno en uno. Es lo construido, y cómo se parte no lo decide ninguna espina.</li>
+<li><b>El mismo <code>h1</code></b> en todas las páginas, como está construido; lo que cambia es la pestaña, «— página 2». <code>noindex, follow</code>, fuera del sitemap.</li>
+<li><b>Ninguna línea dice que falta la Obra:</b> la tarjeta de «Abrid escuelas y se cerrarán cárceles.» acaba en el Autor. Lo que la Procedencia declare de ella se lee en su Página de Cita.</li>
+</ul>
+</figure>
+
+</div>
+</section>
+
+<!-- =====================================================================================
+     ESCRITORIO
+     ===================================================================================== -->
+<section class="bloque-mesa" id="escritorio">
+<h2>En escritorio, 1.120&nbsp;px</h2>
+<p class="regla">La misma composición: el ancho de más se convierte en aire, no en columnas (<i>EXPERIENCE § Responsive & Platform</i>). La cabecera pasa a una fila, con la marca a la izquierda, los enlaces a la derecha y 2 × <code>{spacing.unit}</code> de aire; la columna mide 720&nbsp;px con 56 de margen, y el campo, la medida de prosa. Se enseña la página 1 de arriba abajo, con las tarjetas del medio recortadas.</p>
+<div class="ventana">
+<div class="barra"><span class="luces" aria-hidden="true"></span><span class="direccion">sabiduriadebolsillo.net/tema/el-saber/</span></div>
+<div class="pantalla"><div class="lienzo ancho" lang="es">
+<header class="cabecera contenedor">
+  <a class="marca" href="#">Sabiduría de Bolsillo</a>
+  <nav class="nav" aria-label="Principal"><ul>
+    <li><a class="en-tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+    <li><a class="en-tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+    <li><a href="#">Buscar</a></li>
+  </ul></nav>
+</header>
+<main id="contenido-3">
+<div class="pagina contenedor">
+  <h1>El saber</h1>
+  <form class="buscar-en" role="search" action="#" method="get">
+    <label for="q-3">Buscar en este Tema</label>
+    <input id="q-3" name="q" type="search" autocomplete="off">
+    <input type="hidden" name="tema" value="el-saber">
+  </form>
+  <ul class="listado">
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario obrar para vivir, y es necesario saber para obrar.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La necesidad específica del entendimiento es la explicación, como la necesidad específica del estómago es el alimento.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«La sabiduría era una fórmula verbal salida del pasado y del misterio.»</span><span class="autor">Agustín Álvarez</span><span class="de-obra">La transformación de las razas en América</span></a></li>
+    <li class="tijera">Recortadas las tarjetas 4 a 47.</li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Comúnmente, los sabios mueren faltos de cordura; al contrario, los necios, hartos de consejo.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Con los necios poco importa ser sabio, y con los locos cuerdo: hásele de hablar a cada uno en su lenguaje.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+    <li class="tarjeta"><a href="#"><span class="fragmento">«Conciben todos altamente de sí, y más los que menos son.»</span><span class="autor">Baltasar Gracián</span><span class="de-obra">Oráculo manual y arte de prudencia</span></a></li>
+  </ul>
+  <nav class="paginacion" aria-label="Paginación del listado">
+    <span aria-hidden="true"></span>
+    <p class="cuenta">Página 1 de 12</p>
+    <ol class="numeros">
+      <li><span aria-current="page">1</span></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>2</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>3</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>4</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>5</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>6</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>7</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>8</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>9</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>10</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>11</a></li>
+      <li><a href="#"><span class="solo-para-lectores">Página </span>12</a></li>
+    </ol>
+    <a href="#" rel="next">Siguiente</a>
+  </nav>
+</div>
+</main>
+<footer class="pie contenedor">
+  <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+  <nav class="seguir" aria-label="Dónde seguirnos"><ul>
+    <li><a href="#" rel="me">Instagram</a></li><li><a href="#" rel="me">TikTok</a></li><li><a href="#" rel="me">Threads</a></li><li><a href="#" rel="me">Facebook</a></li><li><a href="#">RSS</a></li>
+  </ul></nav>
+</footer>
+</div></div>
+</div>
+</section>
+
+<footer class="fin">
+<h2>Lo que las espinas no deciden todavía</h2>
+<ul>
+<li class="pend"><b>El ejemplo del campo.</b> El campo del 404 lleva uno («Por ejemplo: no hay camino»); ninguna espina dice si «Buscar en este Tema» lo lleva ni qué diría. Se dibuja sin él. Es la misma pregunta que la maqueta de los Directorios deja abierta para su campo de filtro.</li>
+<li class="pend"><b>Cómo se parte la Paginación con 12 páginas a 360&nbsp;px.</b> DESIGN dice «en una sola fila» y que las zonas guardan 8&nbsp;px también en vertical «si la fila no cabe y se parte»; no dice cómo se reparte. Se dibuja lo construido, medido aquí: en la página 1, «Página 1 de 12» se estrecha a tres líneas y los doce números quedan en 6 filas de 2, y el control mide 304&nbsp;px de alto; en la página 2, con «Anterior» en la misma fila, quedan en una sola columna de 12 y mide 616&nbsp;px. En escritorio se parte en dos filas de números, 96&nbsp;px. La misma Paginación sirve a Autor y Obra, así que la pregunta no es solo del Tema.</li>
+<li class="pend"><b>El nombre del Tema no tiene fila en las espinas.</b> Se dibuja como está construido —Source Serif a <code>titular-md</code>, peso 600, el mismo <code>h1</code> en todas las páginas—, que es lo que el Nombre de Colección escribe para la suya. DESIGN § Typography solo dice que va en la serif.</li>
+</ul>
+<h2>Lo que la espina marca [ASSUMPTION] y aquí se dibuja así</h2>
+<ul>
+<li>El sitio del formulario: 4 × <code>{spacing.unit}</code> bajo el <code>h1</code>, y el listado 4 × más abajo.</li>
+<li>El campo del 404 sin botón de envío visible; Intro envía.</li>
+<li>Lo tecleado en Inter a <code>body-lg</code>, y el filete del foco en siena y más grueso, sumado al anillo.</li>
+<li>En la Tarjeta de Cita, el Autor antes que la Obra.</li>
+</ul>
+<h2>Cómo se hizo</h2>
+<p>Cada texto de Cita, Autor, título de Obra y recuento sale de <code>corpus/</code> el 2026-10-18: las Citas del Tema ordenadas por slug como <code>citasDeTema</code>, cortadas como <code>TarjetaDeCita.astro</code>, con el título de la Ficha de Obra de cada una. Las cifras de primera pantalla se midieron a 360&nbsp;px sobre esta misma maqueta con las fuentes de reserva del sistema: con Inter y Source Serif 4 instaladas se mueven unos píxeles. Sin red y sin JavaScript.</p>
+</footer>
+</div>
+</body>
+</html>

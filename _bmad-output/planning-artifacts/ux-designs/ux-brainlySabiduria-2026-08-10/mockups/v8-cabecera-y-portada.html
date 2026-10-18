@@ -1,0 +1,1269 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabecera y portada v8</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta maqueta. Si algo de aquí discrepa de las espinas, mandan ellas;
+     lo que las espinas todavía no deciden va en ámbar y no es contrato.
+       PRD v8 §10                                (toda página: la marca y «Autores · Obras ·
+                                                  Buscar»; la portada, identidad y retorno)
+       PRD v8 FR-9                               (portada: cifras, campo GET, Cita del Día con
+                                                  Tarjeta de Obra y acciones, seis Obras,
+                                                  Temas, Colecciones con criterio, ocho
+                                                  Autores, Directorios; el orden lo fija UX)
+       PRD v8 FR-8                               (los ocho Autores destacados y su suelo)
+       PRD v8 FR-55, NFR-5, NFR-8                (la cabecera a 320 px sin desplazamiento; a
+                                                  360×640 no saca la Cita de la primera
+                                                  pantalla; dos filas admitidas)
+       Addendum v8 «Decisiones de mecanismo diferidas — v8 · De UX» y «Las cifras que
+                  justifican lo que se deja a UX» (181 px de marca; la línea de cifras)
+       Diseño 2026-10-17 §3 (12, 13), §5, §6, §7, §9, §10 (fila UX), §14
+       EXPERIENCE.md § Information Architecture   (Portada; navegación lateral)
+       EXPERIENCE.md § Component Patterns         (Cabecera; Bloque de Cita; Atribución;
+                                                  Línea de la Fuente; Chip de Tema; Chip de
+                                                  Colección; Campo de búsqueda)
+       EXPERIENCE.md § Interaction Primitives     (44 px de zona y 8 px entre zonas)
+       EXPERIENCE.md § Accessibility Floor        (un solo h1; subrayado siempre visible;
+                                                  orden de tabulación = orden de lectura;
+                                                  zoom y reflujo sin desplazamiento)
+       EXPERIENCE.md § Responsive & Platform      (tres puntos de ruptura)
+       DESIGN.md § Colors                         (siena = actuar o salir; la navegación que
+                                                  informa, en tinta)
+       DESIGN.md § Typography                     (serif solo para Cita, Autor, Tema y
+                                                  Colección; la Obra en Inter)
+       DESIGN.md § Layout & Spacing               (margen 20 px; ritmo de 8 px)
+       DESIGN.md § Components                     (Cabecera; Bloque de Cita; Atribución; Línea
+                                                  de la Fuente; Chip de Tema y de Colección;
+                                                  Campo de búsqueda; botón secundario)
+     Construido de referencia: src/components/Armazon.astro (cabecera), src/pages/index.astro
+     (portada), src/pages/404.astro (formulario GET y Cita del Día), BloqueDeCita.astro,
+     Atribucion.astro, Fuente.astro, DondeSeguirnos.astro, src/styles/tokens.css.
+     Sin red y sin JavaScript: si Inter y Source Serif 4 no están instaladas salen las
+     familias de reserva del código, y los anchos medidos pueden moverse unos píxeles.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: no es el sitio. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --mesa-tinta:#1c2027; --mesa-suave:#59616e; --mesa-marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#d9b56a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--mesa-tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1320px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:80ch;color:var(--mesa-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);letter-spacing:.02em;max-width:118ch;}
+  .meta b{color:var(--mesa-tinta);font-weight:600;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-size:12px;color:var(--mesa-suave);}
+  .leyenda span{display:inline-flex;align-items:center;gap:8px;}
+  .muestra{display:inline-block;width:22px;height:12px;border-radius:2px;}
+  .muestra.azul{background:#eaf0f7;border:1px dashed #8fa9c6;}
+  .muestra.ambar{background:#fdf4e3;border:1px dashed #c99a3a;}
+  nav.indice{margin-top:16px;font-size:13px;line-height:1.7;color:var(--mesa-suave);}
+  nav.indice a{color:var(--mesa-marca);}
+
+  section.bloque-mesa{margin-top:56px;}
+  .bloque-mesa > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;line-height:1.2;margin:0 0 8px;}
+  .bloque-mesa > h3{font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mesa-suave);margin:40px 0 0;}
+  .bloque-mesa > .regla{margin:0;max-width:96ch;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  .bloque-mesa > .regla b{color:var(--mesa-tinta);font-weight:600;}
+
+  .fila{display:flex;flex-wrap:wrap;gap:36px 32px;margin-top:26px;align-items:flex-start;}
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:10px;width:380px;flex:none;}
+  figure.tel > figcaption{font-size:13px;line-height:1.5;color:var(--mesa-suave);}
+  figure.tel > figcaption b{color:var(--mesa-tinta);font-weight:600;}
+  .etiqueta{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--mesa-marca);margin-bottom:4px;}
+  .etiqueta.hoy{color:var(--mesa-suave);}
+  .etiqueta.reco{color:#fff;background:var(--mesa-marca);padding:1px 6px;border-radius:3px;}
+  ul.notas{margin:0;padding:0 0 0 16px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);}
+  ul.notas li{margin:0 0 5px;}
+  ul.notas b{color:var(--mesa-tinta);font-weight:600;}
+  ul.notas li.pend{list-style:none;margin-left:-16px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;}
+  ul.notas li.pend b{color:var(--aviso-tinta);}
+  ul.notas li.enm{list-style:none;margin-left:-16px;padding:6px 9px;background:var(--mesa-alta);
+     border:1px solid var(--mesa-linea);border-radius:3px;}
+  .esquema{margin:0;padding:8px 10px;background:var(--mesa-alta);border:1px solid var(--mesa-linea);border-radius:3px;
+     font:11.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mesa-tinta);white-space:pre;overflow-x:auto;}
+
+  footer.fin{margin-top:64px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--mesa-suave);max-width:100ch;}
+  footer.fin b{color:var(--mesa-tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--mesa-tinta);margin:26px 0 8px;font-weight:600;}
+  footer.fin h2:first-child{margin-top:0;}
+  footer.fin ul{margin:6px 0 0;padding-left:18px;} footer.fin li{margin:3px 0;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--mesa-alta);
+       border:1px solid var(--mesa-linea);border-radius:3px;padding:1px 5px;}
+
+  /* ---- El teléfono: carcasa y barra del navegador, que no son el sitio ---- */
+  .telefono{width:380px;background:#17181c;border-radius:38px;padding:12px 10px 22px;border:1px solid #2b2d33;}
+  .navegador{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .navegador span{width:300px;text-align:center;background:#2a2c32;color:#d6d9df;border-radius:10px;
+       font:12.5px/1 system-ui,-apple-system,sans-serif;padding:8px 12px;letter-spacing:.01em;}
+  .navegador span::before{content:"";display:inline-block;width:7px;height:8px;margin-right:7px;border:1.5px solid #9ea3ad;border-radius:2px;vertical-align:-1px;}
+  .pantalla{width:360px;overflow:hidden;border-radius:3px 3px 26px 26px;}
+  /* La primera pantalla y nada más: 640 px de alto, lo que se ve sin desplazar. */
+  .pantalla.vp{height:640px;}
+  .pantalla.vp > .lienzo{min-height:640px;}
+  /* Tira de 320 px: el reflujo de WCAG 1.4.10 que pide NFR-8. Solo la cabecera. */
+  .tira{width:340px;background:#17181c;border-radius:14px;padding:10px;border:1px solid #2b2d33;}
+  .tira .pantalla{width:320px;border-radius:3px;}
+  .tira-pie{font-size:11.5px;color:var(--mesa-suave);margin:4px 0 0;}
+  /* Ventana de escritorio: solo la cabecera, a 960 px (tramo 600–1024 de Responsive & Platform). */
+  .ventanas{display:flex;flex-direction:column;gap:18px;margin-top:22px;}
+  .ventana{width:980px;max-width:100%;background:#cfd3da;border-radius:8px;padding:28px 10px 10px;position:relative;overflow-x:auto;}
+  .ventana::before{content:"";position:absolute;top:10px;left:12px;width:42px;height:9px;
+     background:radial-gradient(circle at 4.5px 4.5px,#9aa1ab 4px,transparent 4.5px) 0 0/16px 9px repeat-x;}
+  .ventana .etiqueta{position:absolute;top:7px;left:64px;}
+
+  /* ===========================================================================
+     EL SITIO. 360 px de viewport (NFR-8). Tokens con los nombres de CSS de la tabla
+     «De token a propiedad CSS» de DESIGN.md § Components y valores de su frontmatter.
+     Cada regla imita src/components/ y src/styles/tokens.css salvo donde una variante
+     dice lo contrario, y eso se dice al lado.
+     =========================================================================== */
+  .lienzo{
+    --papel:#faf7f0; --papel-tenue:#efe9dd; --papel-claro:#fffdf8;
+    --contenedor-minimo:#ffffff; --contenedor-bajo:#f6f2ea; --contenedor:#f1ece2;
+    --contenedor-alto:#eae4d8; --contenedor-maximo:#e3dccf;
+    --tinta:#1f1b16; --tinta-apagada:#5a5147;
+    --contorno:#8a7f72; --filete:#ddd5c7;
+    --siena:#8c4a2f; --sobre-siena:#ffffff;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --cita-xl:44px; --cita-lg:36px; --cita-md:28px; --cita-sm:23px;
+    --titular-md:30px; --titular-sm:21px;
+    --titular-obra:26px;   /* title-lg. DESIGN.md: «todavía sin declarar» en tokens.css */
+    --cuerpo-lg:17px; --cuerpo-md:15px; --autor:13px; --pie:13px;
+    --unidad:8px; --canal:24px; --margen:20px; --respiracion:40px;
+    --radio:3px; --radio-tarjeta:6px; --grosor-filete:1px;
+    --medida-cita:34ch; --medida-prosa:68ch; --zona-de-toque:44px;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+    --pend:#6b4e12; --pend-fondo:#fdf4e3; --pend-linea:#c99a3a;
+
+    position:relative;width:360px;background:var(--papel);color:var(--tinta);
+    font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.65;
+  }
+  .lienzo.a320{width:320px;}
+  .lienzo.ancho{width:960px;--margen:var(--canal);}
+  .lienzo a{color:var(--siena);text-underline-offset:.2em;}
+  .oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+
+  /* ---------------------------------------------------------------------------
+     CABECERA. Piezas comunes: la marca como hoy (author, versalitas, tinta, enlace de
+     bloque sin subrayado) y cada enlace con su zona de 44 × 44 px como mínimo.
+     --------------------------------------------------------------------------- */
+  .cab{border-bottom:var(--grosor-filete) solid var(--filete);padding-inline:var(--margen);}
+  .marca{font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+         line-height:1.4;color:var(--tinta) !important;text-decoration:none;display:flex;align-items:center;
+         min-height:var(--zona-de-toque);}
+  /* 4A: el h1 envuelve la marca de la cabecera solo en la portada y no cambia su aspecto. */
+  .cab h1{margin:0;font:inherit;}
+  .nav ul{list-style:none;margin:0;padding:0;display:flex;align-items:center;}
+  .nav a{font-size:var(--cuerpo-md);line-height:1.6;display:flex;align-items:center;justify-content:center;
+         min-height:var(--zona-de-toque);min-width:var(--zona-de-toque);padding-inline:var(--unidad);
+         text-decoration-line:underline;}
+  /* El punto medio: oculto al lector de pantalla, y es el que separa las zonas: 8 px como mínimo. */
+  .nav .punto{display:flex;align-items:center;justify-content:center;min-width:var(--unidad);
+              font-size:var(--cuerpo-md);line-height:1.6;color:var(--tinta-apagada);}
+  /* Color de Autores y Obras (decisión 2). Sin clase: siena, como «Buscar» hoy. */
+  .nav a.tinta{color:var(--tinta);text-decoration-thickness:var(--grosor-filete);}
+
+  /* 1A — dos filas: la marca en la suya y «Autores · Obras · Buscar» debajo, a la izquierda. */
+  .cab-a{padding-block:var(--unidad);}
+  .cab-a .nav ul{margin-inline:calc(var(--unidad) * -1);}
+  .ancho .cab-a{display:flex;align-items:center;justify-content:space-between;padding-block:calc(var(--unidad) * 2);}
+  .ancho .cab-a .nav ul{margin-inline:0 calc(var(--unidad) * -1);}
+
+  /* 1B — una fila: la marca compacta, en dos líneas, y los tres enlaces a su derecha.
+     Zonas de 44 px de mínimo con 4 px de relleno lateral; si no cabe, se parte (320 px). */
+  .cab-b{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+         column-gap:calc(var(--unidad) * 2);padding-block:calc(var(--unidad) * 2);}
+  .cab-b .marca{line-height:1.3;}
+  .cab-b .marca .l{display:block;}
+  .cab-b .nav a{padding-inline:calc(var(--unidad) / 2);}
+  .cab-b .nav ul{margin-inline-end:calc(var(--unidad) / -2);}
+  .ancho .cab-b .marca .l{display:inline;}
+
+  /* 1C — dos filas por función: la marca y «Buscar» arriba, como hoy; «Autores · Obras» debajo. */
+  .cab-c{padding-block:var(--unidad);}
+  .cab-c .f1{display:flex;align-items:center;justify-content:space-between;gap:var(--canal);}
+  .cab-c .buscar{font-size:var(--cuerpo-md);line-height:1.6;display:flex;align-items:center;min-height:var(--zona-de-toque);
+                 padding-inline:var(--unidad);margin-inline-end:calc(var(--unidad) * -1);text-decoration-line:underline;}
+  .cab-c .nav ul{margin-inline:calc(var(--unidad) * -1);}
+
+  /* 4C — la cabecera de la portada sin la marca: solo los tres enlaces, en una fila. */
+  .cab-sin-marca{padding-block:var(--unidad);}
+  .cab-sin-marca .nav ul{margin-inline:calc(var(--unidad) * -1);}
+
+  /* Hoy, construido: la marca y «Buscar» en una fila (Armazon.astro). */
+  .cab-hoy{display:flex;align-items:center;justify-content:space-between;gap:var(--canal);padding-block:calc(var(--unidad) * 2);}
+  .cab-hoy .buscar{font-size:var(--cuerpo-md);display:flex;align-items:center;min-height:var(--zona-de-toque);
+                   padding-inline:var(--unidad);text-decoration-line:underline;}
+
+  /* ---------------------------------------------------------------------------
+     PÁGINA (lo común a la Página de Cita y a la portada)
+     --------------------------------------------------------------------------- */
+  .s-pag{padding:var(--respiracion) var(--margen);}
+  .s-pie{margin:calc(var(--respiracion) * 2) var(--margen) 0;padding:calc(var(--unidad) * 3) 0;
+         border-top:var(--grosor-filete) solid var(--filete);color:var(--tinta-apagada);font-size:var(--pie);line-height:1.65;}
+  .s-pie p{margin:0;}
+  .s-pie ul{display:flex;flex-wrap:wrap;gap:calc(var(--unidad) * 2);margin:calc(var(--unidad) * 2) 0 0;padding:0;list-style:none;}
+  .s-pie a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--pie);text-decoration-line:underline;}
+
+  .rotulo{margin:0;font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;
+          line-height:1.4;text-transform:uppercase;color:var(--tinta-apagada);}
+
+  /* Bloque de Cita, Atribución y Línea de la Fuente: como BloqueDeCita, Atribucion y Fuente. */
+  .bloque{margin:0;max-width:var(--medida-cita);}
+  .bloque blockquote{margin:0;border:0;padding:0;}
+  .texto{margin:0;font-family:var(--serif);font-weight:400;color:var(--tinta);text-wrap:pretty;
+         font-size:var(--cita-sm);line-height:1.4;}
+  /* En móvil cada tramo baja un escalón: xl → quote-lg, lg → quote-md. */
+  .texto.t-xl{font-size:var(--cita-lg);line-height:1.3;letter-spacing:-.01em;}
+  .texto.t-lg{font-size:var(--cita-md);line-height:1.35;}
+  .bloque figcaption{position:relative;margin-top:calc(var(--unidad) * 3);padding-top:calc(var(--unidad) * 3);}
+  .bloque figcaption::before{content:"";position:absolute;top:0;left:0;width:48px;height:var(--grosor-filete);background:var(--filete);}
+  .at-autor{margin:0;font-size:var(--autor);font-weight:600;letter-spacing:.09em;line-height:1.4;text-transform:uppercase;}
+  .at-autor a,.procedencia a{color:var(--tinta);text-decoration:underline;text-decoration-thickness:1px;}
+  .procedencia{margin:var(--unidad) 0 0;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  .fuente{margin:var(--unidad) 0 0;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  .fuente a{color:var(--siena);text-decoration:underline;}
+
+  /* «Ver esta cita»: como está en index.astro y en 404.astro (el `a` global, en siena). */
+  .ir{margin:calc(var(--unidad) * 3) 0 0;font-size:var(--cuerpo-md);}
+  .ir a{display:inline-flex;align-items:center;min-height:var(--zona-de-toque);text-decoration-line:underline;}
+
+  /* ---- Tarjeta de Obra y acciones: PROVISIONALES. Sus tokens los fija la maqueta de la
+     Página de Cita (addendum v8, diferidas a UX). Aquí solo ocupan su sitio. ---- */
+  .provisional{position:relative;outline:1px dashed var(--pend-linea);outline-offset:4px;}
+  .tobra{margin-top:calc(var(--unidad) * 4);padding:calc(var(--unidad) * 2);border:var(--grosor-filete) solid var(--filete);
+         border-radius:var(--radio-tarjeta);max-width:var(--medida-prosa);}
+  .tobra-titulo{margin:var(--unidad) 0 0;font-family:var(--sans);font-size:var(--cuerpo-lg);font-weight:600;line-height:1.35;color:var(--tinta);}
+  .tobra-hechos{margin:calc(var(--unidad) / 2) 0 0;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  .tobra ul{list-style:none;margin:var(--unidad) 0 0;padding:0;}
+  .tobra a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--cuerpo-md);
+           color:var(--tinta);text-decoration:underline;text-decoration-thickness:1px;}
+  .acciones{display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--unidad) * 2);margin-top:calc(var(--unidad) * 4);}
+  .boton{display:inline-flex;align-items:center;min-height:var(--zona-de-toque);padding-inline:calc(var(--unidad) * 3);
+         font-family:var(--sans);font-size:var(--cuerpo-md);color:var(--siena);background:transparent;
+         border:var(--grosor-filete) solid var(--siena);border-radius:var(--radio);text-decoration:none;}
+  .compartir{margin-top:calc(var(--unidad) * 3);}
+  .destinos{list-style:none;display:flex;flex-wrap:wrap;gap:var(--unidad);margin:calc(var(--unidad) * 2) 0 0;padding:0;}
+  .destinos .boton{padding-inline:calc(var(--unidad) * 2);}
+
+  /* ---- Portada: la línea de cifras y el campo (el formulario GET del 404) ---- */
+  .cifras{margin:0;font-size:var(--cuerpo-md);line-height:1.6;color:var(--tinta-apagada);max-width:var(--medida-prosa);}
+  .cifras.pie{font-size:var(--pie);line-height:1.5;margin-top:var(--unidad);}
+  .formulario{margin-top:calc(var(--unidad) * 3);max-width:var(--medida-prosa);}
+  .formulario label{display:block;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);margin-bottom:var(--unidad);}
+  /* El campo de 404.astro: filete inferior en contorno, sin caja ni icono; lo tecleado en la serif. */
+  .campo{display:block;width:100%;min-height:var(--zona-de-toque);font-family:var(--serif);font-size:var(--titular-sm);
+         color:var(--tinta);background:transparent;border:0;border-bottom:var(--grosor-filete) solid var(--contorno);
+         border-radius:0;padding:var(--unidad) 0;line-height:1.2;}
+  .campo::placeholder{color:var(--tinta-apagada);opacity:1;}
+
+  .seccion{margin-top:calc(var(--unidad) * 6);}
+  .seccion > .rotulo{margin-bottom:calc(var(--unidad) * 2);}
+  .del-dia > .rotulo{margin-bottom:calc(var(--unidad) * 3);}
+
+  /* Seis Obras: una por fila, como la Lista de Obras (título en Inter, en tinta), con su Autor. */
+  .filas{list-style:none;margin:0;padding:0;border-top:var(--grosor-filete) solid var(--filete);max-width:var(--medida-prosa);}
+  .filas li{border-bottom:var(--grosor-filete) solid var(--filete);}
+  .filas a{display:flex;flex-direction:column;justify-content:center;min-height:var(--zona-de-toque);
+           padding-block:calc(var(--unidad) * 1.5);text-decoration:none;color:inherit;}
+  .f-obra{font-family:var(--sans);font-size:var(--cuerpo-lg);font-weight:600;line-height:1.35;color:var(--tinta);}
+  .f-hechos{margin-top:calc(var(--unidad) / 2);font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  /* Ocho Autores: la lista de la portada de hoy (serif a titular-sm, en tinta, enlace de bloque). */
+  .autores a{flex-direction:row;align-items:center;justify-content:flex-start;padding-block:0;font-family:var(--serif);font-size:var(--titular-sm);
+             line-height:1.3;color:var(--tinta);}
+  /* Colección en fila (3B): el nombre en la serif y el criterio debajo, toda la fila enlaza. */
+  .f-col{font-family:var(--serif);font-size:var(--cuerpo-lg);line-height:1.35;color:var(--tinta);}
+  .f-criterio{margin-top:calc(var(--unidad) / 2);font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  /* El salto a un Directorio, tras su bloque. */
+  .al-dir{margin:calc(var(--unidad) * 2) 0 0;font-size:var(--cuerpo-md);}
+  .al-dir a{display:inline-flex;align-items:center;min-height:var(--zona-de-toque);text-decoration-line:underline;}
+  .al-dir a.tinta{color:var(--tinta);text-decoration-thickness:1px;}
+
+  .chips{list-style:none;display:flex;flex-wrap:wrap;gap:var(--unidad);margin:0;padding:0;}
+  .chip{display:inline-flex;align-items:center;min-height:var(--zona-de-toque);padding-inline:calc(var(--unidad) * 2);
+        background:var(--contenedor);border-radius:var(--radio-tarjeta);font-family:var(--serif);
+        font-size:var(--cuerpo-md);line-height:1.3;color:var(--tinta) !important;text-decoration:none;}
+  /* Colección en chip con su criterio debajo (3A). */
+  .colecciones-chip{list-style:none;margin:0;padding:0;max-width:var(--medida-prosa);}
+  .colecciones-chip li + li{margin-top:calc(var(--unidad) * 2);}
+  .colecciones-chip .criterio{margin:var(--unidad) 0 0;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+
+  /* 4C — la marca como h1 visible, en la sans a title-lg: uso nuevo de ese token. */
+  .marca-titular{margin:0;font-family:var(--sans);font-size:var(--titular-obra);font-weight:600;line-height:1.25;color:var(--tinta);}
+  .marca-titular + .cifras{margin-top:var(--unidad);}
+  /* Hoy: el h1 de index.astro, la marca otra vez en author y tinta apagada. */
+  .marca-hoy{margin:0;font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;line-height:1.4;color:var(--tinta-apagada);}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. Monoespaciada: no son el sitio.
+     Azul = qué se ha recortado o qué ilustra. Ámbar = [sin decidir en las espinas].
+     =========================================================================== */
+  .tijera{margin:0 calc(var(--margen) * -1);padding:8px var(--margen);list-style:none;
+          background:var(--anot-fondo);color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .tijera.abajo{margin-top:24px;border-top:1px dashed var(--anot-linea);}
+  .tijera.medio{border-top:1px dashed var(--anot-linea);border-bottom:1px dashed var(--anot-linea);}
+  .marca-pend{position:absolute;right:0;top:-18px;padding:1px 6px;border:1px dashed var(--pend-linea);background:var(--pend-fondo);
+        color:var(--pend);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;z-index:2;}
+  .rel{position:relative;}
+  .pliegue{position:absolute;left:0;right:0;top:640px;border-top:1px dashed var(--anot);pointer-events:none;z-index:3;}
+  .pliegue span{position:absolute;right:6px;top:-17px;padding:0 4px;background:var(--anot-fondo);color:var(--anot);
+                font:10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .regla-alto{position:absolute;left:0;right:0;pointer-events:none;z-index:3;border-top:1px dotted var(--anot);}
+  .regla-alto span{position:absolute;left:6px;top:-1px;padding:0 4px;background:var(--anot-fondo);color:var(--anot);
+                   font:10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header class="top">
+    <h1>Cabecera y portada v8: variantes para decidir</h1>
+    <p class="sub">Las cuatro decisiones de UX que la v8 deja abiertas sobre la cabecera de toda página y la portada de retorno (FR-9): cómo cabe «Sabiduría de Bolsillo · Autores · Obras · Buscar» a 360&nbsp;px, de qué color van Autores y Obras, la portada entera de arriba abajo, y dónde va la marca para no salir dos veces. A 360&nbsp;px y con datos reales del Corpus. Mandan las espinas y el PRD: si algo de aquí discrepa de ellos, el error está aquí.</p>
+    <p class="meta">Corpus del <b>2026-10-18</b> (commit bfbd699e): <b>4.420 Citas</b> publicadas de <b>135 Autores</b>; <b>4.399</b> con documento cotejado y 21 en <code>pendientes-de-cotejo.yml</code> · <b>517 Obras</b> con página, <b>277</b> indexables, de 63 Autores · <b>24 Temas</b> · <b>16 Colecciones</b> · 16 Citas aptas para portada. <b>Cita del Día del 18/10</b>, por rotación (índice 8 de 16, rondas por Autor): Séneca, «La vida, si sabes usarla, es larga.», de <i>De la brevedad de la vida</i>, 49 —sin documento: es una de las 21 del censo—. <b>Ocho destacados por FR-8</b>: Unamuno 308, Ingenieros 259, Quevedo 255, Gracián 242, Séneca 242, Arenal 237, Martí 222 y González Prada 204; sin Séneca, que es de tradición <code>otra</code> y no cuenta para el suelo, 3 latinoamericanos de 7 (43&nbsp;%): no cede nadie. Página de Cita de las decisiones 1 y 2: Martí, «Los pueblos que no se conocen…», de <i>Nuestra América</i> (1891, 27 Citas, Wikisource).</p>
+    <div class="leyenda">
+      <span><i class="muestra azul"></i>Anotación de la maqueta: lo recortado, lo medido, lo ilustrado. No es el sitio.</span>
+      <span><i class="muestra ambar"></i>[sin decidir en las espinas]: se dibuja para ocupar su sitio y no es contrato.</span>
+    </div>
+    <nav class="indice">1 · <a href="#d1">La cabecera a 360 px</a> &nbsp; 2 · <a href="#d2">El color de Autores y Obras</a> &nbsp; 3 · <a href="#d3">La portada de arriba abajo</a> &nbsp; 4 · <a href="#d4">La marca en la portada</a> &nbsp; · <a href="#fin">Recomendación</a></nav>
+  </header>
+
+  <!-- =====================================================================
+       DECISIÓN 1 — La cabecera a 360 px
+       ===================================================================== -->
+  <section class="bloque-mesa" id="d1">
+    <h2>1 · La cabecera a 360&nbsp;px</h2>
+    <p class="regla">«Sabiduría de Bolsillo · Autores · Obras · Buscar» no cabe en una fila: la marca mide 181&nbsp;px y los tres enlaces con su zona de toque y su separación pasan de los 320&nbsp;px útiles (addendum v8). NFR-8 admite <b>dos filas</b> si no sacan la Cita de la primera pantalla de la Página de Cita a 360×640, y exige <b>cero desplazamiento horizontal a 320&nbsp;px</b>. Cada teléfono enseña la primera pantalla —640&nbsp;px de alto, nada más— de una Página de Cita real; debajo, la cabecera a 320&nbsp;px. Aquí Autores y Obras van en tinta y Buscar en siena: el color es la decisión 2.</p>
+
+    <div class="fila">
+
+      <!-- ===== 1A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">1A · DOS FILAS: MARCA Y NAVEGACIÓN</span><br><b>La marca en su fila; «Autores · Obras · Buscar» debajo, alineados a la izquierda con el texto.</b> Respeta el orden y la redacción de PRD §10, la zona de 44&nbsp;px y los 8&nbsp;px entre zonas (el punto medio, oculto al lector). A partir de 600&nbsp;px, una sola fila.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <figure class="bloque">
+                  <blockquote><h1 class="texto t-lg">«Los pueblos que no se conocen han de darse prisa para conocerse, como quienes van a pelear juntos.»</h1></blockquote>
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="tobra provisional" aria-labelledby="o-1a">
+                  <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                  <h2 class="rotulo" id="o-1a">De la obra</h2>
+                  <p class="tobra-titulo">Nuestra América</p>
+                  <p class="tobra-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                  <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <div class="tira"><div class="pantalla"><div class="lienzo a320" lang="es">
+          <header class="cab cab-a">
+            <a class="marca" href="#">Sabiduría de Bolsillo</a>
+            <nav class="nav" aria-label="Principal"><ul>
+              <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+              <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+              <li><a href="#">Buscar</a></li>
+            </ul></nav>
+          </header>
+        </div></div></div>
+        <p class="tira-pie" data-medida="1a">A 320&nbsp;px: las mismas dos filas, sin desplazamiento.</p>
+        <ul class="notas">
+          <li><b>Alto:</b> 105&nbsp;px frente a los 77 de hoy: 28 más. Medido aquí, el texto de la Cita empieza a 145&nbsp;px y la Atribución acaba a 428; la Tarjeta de Obra asoma en el pliegue. Es la única de las tres que se dibuja igual a 320 que a 360.</li>
+          <li><b>Primera pantalla:</b> la Cita, la Atribución, la Fuente y la Tarjeta de Obra; Copiar, Imagen y compartir quedan debajo, como aceptó la decisión 11 del diseño.</li>
+          <li><b>Orden de tabulación = de lectura:</b> marca, Autores, Obras, Buscar; el enlace «Saltar al contenido.» sigue delante.</li>
+          <li class="enm"><b>Enmienda:</b> DESIGN.md § Components → Cabecera («la marca … y el enlace «Buscar»») y EXPERIENCE.md § Component Patterns → Cabecera («Lleva solo la marca … y el enlace «Buscar»»). Nada más.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 1B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">1B · UNA FILA: MARCA COMPACTA</span><br><b>La marca partida en dos líneas, «Sabiduría / de Bolsillo», y los tres enlaces a su derecha en la misma fila.</b> Conserva el alto de hoy a 360&nbsp;px. Respeta los 44&nbsp;px de zona, pero baja el relleno lateral de los enlaces a 4&nbsp;px; a 320&nbsp;px se parte en dos filas.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-b">
+                <a class="marca" href="#"><span><span class="l">Sabiduría</span> <span class="l">de Bolsillo</span></span></a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <figure class="bloque">
+                  <blockquote><h1 class="texto t-lg">«Los pueblos que no se conocen han de darse prisa para conocerse, como quienes van a pelear juntos.»</h1></blockquote>
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="tobra provisional" aria-labelledby="o-1b">
+                  <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                  <h2 class="rotulo" id="o-1b">De la obra</h2>
+                  <p class="tobra-titulo">Nuestra América</p>
+                  <p class="tobra-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                  <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <div class="tira"><div class="pantalla"><div class="lienzo a320" lang="es">
+          <header class="cab cab-b">
+            <a class="marca" href="#"><span><span class="l">Sabiduría</span> <span class="l">de Bolsillo</span></span></a>
+            <nav class="nav" aria-label="Principal"><ul>
+              <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+              <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+              <li><a href="#">Buscar</a></li>
+            </ul></nav>
+          </header>
+        </div></div></div>
+        <p class="tira-pie" data-medida="1b">A 320&nbsp;px: se parte en dos filas, sin desplazamiento.</p>
+        <ul class="notas">
+          <li><b>Alto:</b> 77&nbsp;px a 360, el de hoy, y la Cita empieza a 117; a 320, 121&nbsp;px, el más alto de los tres, porque la marca sigue en dos líneas y la navegación baja a otra fila.</li>
+          <li><b>Va justa:</b> a 360&nbsp;px sobran 29&nbsp;px con la fuente de reserva de esta maqueta (marca de 97&nbsp;px, enlaces de 178). Con otra fuente de reserva, con el zoom de texto del sistema o con un nombre más largo se parte también a 360, y la cabecera cambia de forma según el teléfono.</li>
+          <li><b>La marca deja de ser una línea:</b> apilada parece un logotipo, que es justo lo que <code>DESIGN.md § Brand &amp; Style</code> dice que el sitio no tiene. En escritorio vuelve a una línea.</li>
+          <li class="enm"><b>Enmienda:</b> las dos filas de la Cabecera, como 1A, y además un trato nuevo de la marca —partida en dos líneas— y un relleno lateral propio de estos tres enlaces. Patrón nuevo: la marca compacta.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 1C ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">1C · DOS FILAS POR FUNCIÓN</span><br><b>Arriba la marca y «Buscar», como hoy; debajo «Autores · Obras».</b> La primera fila no cambia en ninguna página; la que se añade es la de los dos Directorios. Separa lo que actúa (Buscar, siena) de lo que informa (tinta), pero cambia el orden de PRD §10.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-c">
+                <div class="f1"><a class="marca" href="#">Sabiduría de Bolsillo</a><a class="buscar" href="#">Buscar</a></div>
+                <nav class="nav" aria-label="Directorios"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <figure class="bloque">
+                  <blockquote><h1 class="texto t-lg">«Los pueblos que no se conocen han de darse prisa para conocerse, como quienes van a pelear juntos.»</h1></blockquote>
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="tobra provisional" aria-labelledby="o-1c">
+                  <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                  <h2 class="rotulo" id="o-1c">De la obra</h2>
+                  <p class="tobra-titulo">Nuestra América</p>
+                  <p class="tobra-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                  <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <div class="tira"><div class="pantalla"><div class="lienzo a320" lang="es">
+          <header class="cab cab-c">
+            <div class="f1"><a class="marca" href="#">Sabiduría de Bolsillo</a><a class="buscar" href="#">Buscar</a></div>
+            <nav class="nav" aria-label="Directorios"><ul>
+              <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+              <li><a class="tinta" href="#">Obras</a></li>
+            </ul></nav>
+          </header>
+        </div></div></div>
+        <p class="tira-pie" data-medida="1c">A 320&nbsp;px: las mismas dos filas, sin desplazamiento.</p>
+        <ul class="notas">
+          <li><b>Alto:</b> el de 1A, 105&nbsp;px; la Cita empieza a 145.</li>
+          <li><b>Orden de tabulación:</b> marca, Buscar, Autores, Obras —el de lectura de estas dos filas—, que ya no es «Autores · Obras · Buscar». Para conservar ese orden habría que separar el orden visual del de tabulación, y EXPERIENCE.md § Accessibility Floor lo prohíbe.</li>
+          <li><b>En escritorio</b> no se junta bien en una fila sin volver a cambiar el orden: queda en dos, o en «marca · Buscar · Autores · Obras».</li>
+          <li class="enm"><b>Enmienda:</b> la Cabecera, como 1A, y además el orden que escribe PRD §10 («Autores · Obras · Buscar»), que vuelve a <code>bmad-prd</code>.</li>
+        </ul>
+      </figure>
+    </div>
+
+    <h3>A partir de 600&nbsp;px (tableta y escritorio): solo la cabecera</h3>
+    <p class="regla" style="margin-top:6px">Se enseña porque la decisión lo exige: una cabecera de dos filas en el móvil tiene que decir qué hace donde sí cabe. Ventana de 960&nbsp;px, columna de 720&nbsp;px y margen de 24&nbsp;px, como <code>.contenedor</code> en <code>tokens.css</code>.</p>
+    <div class="ventanas">
+      <div class="ventana"><span class="etiqueta">1A</span><div class="lienzo ancho" lang="es">
+        <header class="cab cab-a" style="max-width:768px;margin-inline:auto;">
+          <a class="marca" href="#">Sabiduría de Bolsillo</a>
+          <nav class="nav" aria-label="Principal"><ul>
+            <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+            <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+            <li><a href="#">Buscar</a></li>
+          </ul></nav>
+        </header>
+      </div></div>
+      <div class="ventana"><span class="etiqueta">1B</span><div class="lienzo ancho" lang="es">
+        <header class="cab cab-b" style="max-width:768px;margin-inline:auto;">
+          <a class="marca" href="#"><span><span class="l">Sabiduría</span> <span class="l">de Bolsillo</span></span></a>
+          <nav class="nav" aria-label="Principal"><ul>
+            <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+            <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+            <li><a href="#">Buscar</a></li>
+          </ul></nav>
+        </header>
+      </div></div>
+      <div class="ventana"><span class="etiqueta">1C</span><div class="lienzo ancho" lang="es">
+        <header class="cab cab-c" style="max-width:768px;margin-inline:auto;">
+          <div class="f1"><a class="marca" href="#">Sabiduría de Bolsillo</a><a class="buscar" href="#">Buscar</a></div>
+          <nav class="nav" aria-label="Directorios"><ul>
+            <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+            <li><a class="tinta" href="#">Obras</a></li>
+          </ul></nav>
+        </header>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 2 — El color de Autores y Obras
+       ===================================================================== -->
+  <section class="bloque-mesa" id="d2">
+    <h2>2 · El color de Autores y Obras</h2>
+    <p class="regla">La regla del siena (<code>DESIGN.md § Colors</code>, v7.1) lo decide por la función, no por cuántas veces aparece: <b>siena</b> lo que actúa o saca del sitio —los botones, la paginación, «Buscar», la salida a una Fuente—; <b>tinta</b> la navegación que informa —el nombre del Autor, el título de la Obra—. Los Directorios no están en ninguna de las dos listas. Las tres sobre la cabecera 1A y la misma Página de Cita; los tres enlaces van subrayados siempre en las tres, porque comparten línea con los puntos medios, que no enlazan (§ Accessibility Floor), y porque «Buscar» ya lo va desde la 22.10.</p>
+
+    <div class="fila">
+
+      <!-- ===== 2A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">2A · AUTORES Y OBRAS EN TINTA, BUSCAR EN SIENA</span><br><b>Los Directorios son navegación que informa; Buscar actúa.</b> Aplica la regla del siena tal como está escrita, sin enmendarla. Siena en la primera pantalla: <b>2</b> (Buscar y la Fuente).</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <figure class="bloque">
+                  <blockquote><h1 class="texto t-lg">«Los pueblos que no se conocen han de darse prisa para conocerse, como quienes van a pelear juntos.»</h1></blockquote>
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="tobra provisional" aria-labelledby="o-2a">
+                  <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                  <h2 class="rotulo" id="o-2a">De la obra</h2>
+                  <p class="tobra-titulo">Nuestra América</p>
+                  <p class="tobra-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                  <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Lo mismo que el resto de la página:</b> Autores y Obras se ven como el nombre del Autor y el título de la Obra de la Atribución, que también llevan a una página del sitio.</li>
+          <li><b>La fila mezcla dos colores</b>, y eso dice algo verdadero: dos enlaces llevan a un índice que se lee, y el tercero a una herramienta.</li>
+          <li><b>Contraste:</b> tinta frente a tinta apagada del punto medio, 2,20:1; por eso el subrayado, no el color, dice que es enlace.</li>
+          <li class="enm"><b>Enmienda:</b> ninguna en <code>§ Colors</code>; solo añadir «Autores» y «Obras» de la cabecera a la lista de lo que va en tinta.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 2B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">2B · LOS TRES EN SIENA</span><br><b>La navegación del sitio va toda en siena, como «Buscar».</b> Un solo trato para toda la fila. Siena en la primera pantalla: <b>4</b> (Autores, Obras, Buscar y la Fuente).</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <figure class="bloque">
+                  <blockquote><h1 class="texto t-lg">«Los pueblos que no se conocen han de darse prisa para conocerse, como quienes van a pelear juntos.»</h1></blockquote>
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="tobra provisional" aria-labelledby="o-2b">
+                  <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                  <h2 class="rotulo" id="o-2b">De la obra</h2>
+                  <p class="tobra-titulo">Nuestra América</p>
+                  <p class="tobra-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                  <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>La cabecera se lee como un bloque de controles</b>, igual en todas las páginas, y la marca, en tinta, queda sola como identidad.</li>
+          <li><b>El siena deja de significar una sola cosa:</b> «Autores» y el nombre del Autor de la Atribución llevan los dos a páginas del sitio y saldrían en colores distintos.</li>
+          <li><b>Siena frente a tinta apagada, 1,16:1:</b> los tres se distinguen del punto medio solo por el subrayado, igual que en 2A.</li>
+          <li class="enm"><b>Enmienda:</b> <code>DESIGN.md § Colors</code>, la regla del siena —«lo lleva lo que actúa o saca del sitio»— gana una excepción: la navegación de la cabecera.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 2C ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">2C · LOS TRES EN TINTA</span><br><b>La cabecera entera en tinta, «Buscar» incluido.</b> Llevar a la página de búsqueda se trata como navegación, igual que llevar a un Directorio. Siena en la primera pantalla: <b>1</b> (la Fuente).</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <figure class="bloque">
+                  <blockquote><h1 class="texto t-lg">«Los pueblos que no se conocen han de darse prisa para conocerse, como quienes van a pelear juntos.»</h1></blockquote>
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="tobra provisional" aria-labelledby="o-2c">
+                  <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                  <h2 class="rotulo" id="o-2c">De la obra</h2>
+                  <p class="tobra-titulo">Nuestra América</p>
+                  <p class="tobra-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                  <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>La primera pantalla más callada:</b> el único siena que queda es la salida a la Fuente, que es justo la que más importa ver como salida.</li>
+          <li><b>«Buscar» deja de parecer lo que hace:</b> en la portada, con el campo de búsqueda a la vista (decisión 3), daría igual; en una Página de Cita es la única entrada a la búsqueda.</li>
+          <li class="enm"><b>Enmienda:</b> <code>DESIGN.md § Colors</code> («lo lleva … «Buscar»») y <code>§ Components → Cabecera</code> («Buscar» en <code>{colors.primary}</code>), y deshace parte de lo construido en la 22.10.</li>
+        </ul>
+      </figure>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 3 — La portada de arriba abajo
+       ===================================================================== -->
+  <section class="bloque-mesa" id="d3">
+    <h2>3 · La portada, de arriba abajo</h2>
+    <p class="regla">FR-9 v8 fija qué lleva y deja el orden a UX «partiendo del orden del diseño aprobado —la línea de cifras y el campo de búsqueda antes de la Cita del Día—», con el texto de la Cita del Día en la primera pantalla a 360×640. Las tres llevan la cabecera 1A, el color 2A y la marca 4A. <b>A y B, enteras</b> —el pliegue a 640&nbsp;px va marcado—; <b>C, solo la primera pantalla</b>, porque lo que cambia está arriba. La Tarjeta de Obra y el bloque «Compartir en» van provisionales: sus tokens se deciden en la maqueta de la Página de Cita.</p>
+
+    <div class="fila">
+
+      <!-- ===== 3A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">3A · EL ORDEN DEL DISEÑO APROBADO</span><br><b>Cifras, campo, la cita de hoy, Obras, Temas, Colecciones, Autores</b> —el orden de §9 del diseño—. La Colección conserva su chip y gana el criterio debajo. Cada Directorio, al pie de su bloque.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="cab cab-a">
+                <h1><a class="marca" href="#" aria-current="page">Sabiduría de Bolsillo</a></h1>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <p class="cifras rel"><span class="marca-pend">[sin decidir] cuerpo</span>4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                <form class="formulario" role="search" action="#" method="get">
+                  <label for="q-3a">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-3a" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino">
+                </form>
+
+                <section class="seccion del-dia" aria-labelledby="hoy-3a">
+                  <h2 class="rotulo" id="hoy-3a">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="ir"><a href="#">Ver esta cita</a></p>
+                  <section class="tobra provisional" aria-labelledby="o-3a">
+                    <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                    <h2 class="rotulo" id="o-3a">De la obra</h2>
+                    <p class="tobra-titulo">De la brevedad de la vida</p>
+                    <p class="tobra-hechos">Séneca<span aria-hidden="true"> · </span><span class="oculto">, </span>49<span aria-hidden="true"> · </span><span class="oculto">, </span>37 citas</p>
+                    <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                  </section>
+                  <div class="acciones">
+                    <button class="boton" type="button">Copiar la cita</button>
+                    <button class="boton" type="button">Compartir como imagen</button>
+                  </div>
+                  <section class="compartir provisional" aria-labelledby="c-3a">
+                    <span class="marca-pend">[sin decidir] «Compartir en»</span>
+                    <h2 class="rotulo" id="c-3a">Compartir en</h2>
+                    <ul class="destinos">
+                      <li><button class="boton" type="button">Historia de Instagram</button></li>
+                      <li><a class="boton" href="#">WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#">Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#">Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button class="boton" type="button" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+                </section>
+
+                <section class="seccion" aria-labelledby="ob-3a">
+                  <h2 class="rotulo rel" id="ob-3a">Obras<span class="marca-pend">[sin decidir] la rotación</span></h2>
+                  <ul class="filas">
+                    <li><a href="#"><span class="f-obra">Oráculo manual y arte de prudencia</span><span class="f-hechos">Baltasar Gracián<span aria-hidden="true"> · </span><span class="oculto">, </span>1647<span aria-hidden="true"> · </span><span class="oculto">, </span>141 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Nuestra América</span><span class="f-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Del sentimiento trágico de la vida</span><span class="f-hechos">Miguel de Unamuno<span aria-hidden="true"> · </span><span class="oculto">, </span>1913<span aria-hidden="true"> · </span><span class="oculto">, </span>50 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Ariel</span><span class="f-hechos">José Enrique Rodó<span aria-hidden="true"> · </span><span class="oculto">, </span>66 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">La mujer del porvenir</span><span class="f-hechos">Concepción Arenal<span aria-hidden="true"> · </span><span class="oculto">, </span>1844<span aria-hidden="true"> · </span><span class="oculto">, </span>104 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Recuerdos de provincia</span><span class="f-hechos">Domingo Faustino Sarmiento<span aria-hidden="true"> · </span><span class="oculto">, </span>9 citas</span></a></li>
+                  </ul>
+                  <p class="al-dir"><a class="tinta" href="#">Las 517 obras →</a></p>
+                </section>
+
+                <section class="seccion" aria-labelledby="te-3a">
+                  <h2 class="rotulo" id="te-3a">Temas</h2>
+                  <ul class="chips">
+                    <li><a class="chip" href="#">El amor</a></li><li><a class="chip" href="#">El deber</a></li><li><a class="chip" href="#">El error</a></li><li><a class="chip" href="#">El miedo</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">El trabajo</a></li><li><a class="chip" href="#">La adversidad</a></li><li><a class="chip" href="#">La amistad</a></li><li><a class="chip" href="#">La envidia</a></li><li><a class="chip" href="#">La felicidad</a></li><li><a class="chip" href="#">La gloria</a></li><li><a class="chip" href="#">La humildad</a></li><li><a class="chip" href="#">La justicia</a></li><li><a class="chip" href="#">La libertad</a></li><li><a class="chip" href="#">La muerte</a></li><li><a class="chip" href="#">La palabra</a></li><li><a class="chip" href="#">La patria</a></li><li><a class="chip" href="#">La prudencia</a></li><li><a class="chip" href="#">La razón</a></li><li><a class="chip" href="#">La riqueza</a></li><li><a class="chip" href="#">La verdad</a></li><li><a class="chip" href="#">La vida</a></li><li><a class="chip" href="#">La virtud</a></li>
+                  </ul>
+                </section>
+
+                <section class="seccion" aria-labelledby="co-3a">
+                  <h2 class="rotulo" id="co-3a">Colecciones</h2>
+                  <ul class="colecciones-chip">
+                    <li><a class="chip" href="#" aria-describedby="k1">Achaques de necedad</a><p class="criterio" id="k1">La necedad no se cura porque no se reconoce: el que no escucha, el que alaba sin saber por qué, y el vulgo con muchas lenguas.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k2">Amigos de los que fiarse</a><p class="criterio" id="k2">Cómo se elige y se prueba a un amigo: los que duran, los que se maleaban ya, y por qué al enemigo declarado se le teme menos.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k3">Cada uno es hijo de sus obras</a><p class="criterio" id="k3">Obrar como quien se es, no como obligan: el que se esculpe a sí mismo, el que se debe a lo que hace, y el que no se conoce.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k4">Conocer las cosas en su sazón</a><p class="criterio" id="k4">El acierto tiene hora: al principio es fácil dar fin a todo, y los que empiezan por el descanso dejan la fatiga para el final.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k5">Consejos para gobernar</a><p class="criterio" id="k5">Lo que don Quijote dijo a Sancho antes de la Ínsula: cómo juzgar, qué comer y por qué el que no madruga con el sol no goza del día.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k6">Cuatro mujeres</a><p class="criterio" id="k6">Cuatro mujeres en un canon que casi no las guardó: la que defendió su derecho a estudiar y la que pidió escuelas para cerrar cárceles.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k7">El silencio es sagrado de la cordura</a><p class="criterio" id="k7">Cuándo conviene no hablar: la lengua que suelta no vuelve a encadenarse, y hacer sigue siendo la mejor manera de decir.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k8">El uniforme y la sotana</a><p class="criterio" id="k8">El poder cuando se disfraza: el cuartel, la casaca y el altar, y la costumbre de glorificar al que mata en nombre de algo.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k9">El yo frente a la muchedumbre</a><p class="criterio" id="k9">Lo que la multitud te quita sin que lo notes, y por qué un alma sola puede valer lo que el universo entero.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k10">Elogio de lo escaso</a><p class="criterio" id="k10">El hambre que sazona la mesa parca, los privilegios del que tiene poco, y la sospecha de que lo superfluo estorba más de lo que sirve.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k11">Empezar de nuevo</a><p class="criterio" id="k11">Para quien creyó que ya no había otra vida posible dentro de la suya: la vocación que fracasa, el rumbo abandonado y lo que aún no sabes que llevas dentro.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k12">La vida, si sabes usarla, es larga</a><p class="criterio" id="k12">No es que tengamos poco tiempo: es que perdemos mucho. Las edades, la prisa por vivir, y lo que se ve cuando ya no hay qué ver.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k13">Los escollos del trato</a><p class="criterio" id="k13">Vivir entre gente tiene rumbo difícil: la cortesía que empeña, el favor que enfada, y cuándo lo cuerdo es retirarse a puerto.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k14">Prevenirse en la próspera</a><p class="criterio" id="k14">Las suertes se alternan y eso se sabe de antemano: guardar en la buena para la mala, y conocer el día aciago antes de jugarlo.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k15">Refranes de Sancho</a><p class="criterio" id="k15">Sabiduría de pueblo y no de hidalgo: los refranes que el Quijote pone en boca del escudero, y que la mitad se siguen diciendo hoy.</p></li>
+                    <li><a class="chip" href="#" aria-describedby="k16">Saber para ser libre</a><p class="criterio" id="k16">La instrucción del pueblo como condición de su libertad, y la ignorancia como la primera forma de la servidumbre.</p></li>
+                  </ul>
+                </section>
+
+                <section class="seccion" aria-labelledby="au-3a">
+                  <h2 class="rotulo rel" id="au-3a">Autores<span class="marca-pend">[sin decidir] el orden de los ocho</span></h2>
+                  <ul class="filas autores">
+                    <li><a href="#">Concepción Arenal</a></li>
+                    <li><a href="#">Manuel González Prada</a></li>
+                    <li><a href="#">Baltasar Gracián</a></li>
+                    <li><a href="#">José Ingenieros</a></li>
+                    <li><a href="#">José Martí</a></li>
+                    <li><a href="#">Francisco de Quevedo</a></li>
+                    <li><a href="#">Séneca</a></li>
+                    <li><a href="#">Miguel de Unamuno</a></li>
+                  </ul>
+                  <p class="al-dir"><a class="tinta" href="#">Los 135 autores, de la A a la Z →</a></p>
+                </section>
+              </main>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Primera pantalla:</b> la marca, la navegación, la línea de cifras, el campo, «La cita de hoy» y el texto de la Cita con su Atribución: medido aquí, el texto empieza a 379&nbsp;px y la Atribución acaba a 566. La Tarjeta de Obra y las acciones quedan debajo, como en la Página de Cita. La página entera mide 5.314&nbsp;px. El campo es el del 404: formulario GET a <code>/buscar/?q=</code>, sin botón y sin guion; se envía con la tecla del teclado.</li>
+          <li><b>La Cita de hoy no lleva Línea de la Fuente</b> porque no tiene documento: es justo la clase de Cita por la que la línea de cifras no puede decir «cada una con su fuente». La Tarjeta sí promete «dónde leerla», porque 35 de las 37 Citas de esa Obra están cotejadas.</li>
+          <li><b>Obras, justo después de la Cita y su Tarjeta de Obra:</b> lo que la v8 viene a enseñar queda en la segunda pantalla. Título en Inter (la Obra nunca va en la serif), Autor y hechos debajo, en la línea de la Tarjeta de Obra; año solo si consta. Tres latinoamericanos y tres peninsulares.</li>
+          <li><b>Colecciones:</b> el Chip de Colección de siempre, y debajo su criterio en <code>caption</code>, asociado al chip con <code>aria-describedby</code>. Los 16 criterios ocupan de dos a cuatro líneas: «en una línea» de FR-9 es una frase, no un renglón.</li>
+          <li><b>Autores:</b> la lista de hoy —serif a <code>titular-sm</code>— con los ocho de FR-8 en vez de los 135.</li>
+          <li class="pend"><b>[sin decidir]</b> La regla de rotación de las seis Obras es de Arquitectura: estas seis están elegidas a mano entre las 277 indexables, una por Autor. Y si una de ellas puede ser la Obra de la Cita del Día (aquí no lo es).</li>
+          <li class="pend"><b>[sin decidir]</b> El orden de los ocho Autores: FR-8 dice cuáles, no cómo se ordenan. Aquí, el del Directorio (por apellido); por recuento parecería un podio.</li>
+          <li class="pend"><b>[sin decidir]</b> El cuerpo de la línea de cifras (aquí <code>body-md</code> en tinta apagada) y si «Ver esta cita» sigue en siena, como está construido: lleva a una página del sitio, y por la regla del siena iría en tinta.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 3B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">3B · LO DE HOY, Y DESPUÉS LAS ENTIDADES</span><br><b>Cifras, campo, la cita de hoy, Temas, Colecciones, Obras, Autores.</b> Conserva el orden de la portada construida —Temas, Colecciones, Autores— y pone las Obras junto a los Autores, como en la cabecera. La Colección pasa a fila, con el criterio dentro del enlace.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="cab cab-a">
+                <h1><a class="marca" href="#" aria-current="page">Sabiduría de Bolsillo</a></h1>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <p class="cifras">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                <form class="formulario" role="search" action="#" method="get">
+                  <label for="q-3b">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-3b" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino">
+                </form>
+
+                <section class="seccion del-dia" aria-labelledby="hoy-3b">
+                  <h2 class="rotulo" id="hoy-3b">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="ir"><a href="#">Ver esta cita</a></p>
+                  <section class="tobra provisional" aria-labelledby="o-3b">
+                    <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                    <h2 class="rotulo" id="o-3b">De la obra</h2>
+                    <p class="tobra-titulo">De la brevedad de la vida</p>
+                    <p class="tobra-hechos">Séneca<span aria-hidden="true"> · </span><span class="oculto">, </span>49<span aria-hidden="true"> · </span><span class="oculto">, </span>37 citas</p>
+                    <ul><li><a href="#">Siguiente cita de esta obra →</a></li><li><a href="#">Ver la obra y dónde leerla →</a></li></ul>
+                  </section>
+                  <div class="acciones">
+                    <button class="boton" type="button">Copiar la cita</button>
+                    <button class="boton" type="button">Compartir como imagen</button>
+                  </div>
+                  <section class="compartir provisional" aria-labelledby="c-3b">
+                    <span class="marca-pend">[sin decidir] «Compartir en»</span>
+                    <h2 class="rotulo" id="c-3b">Compartir en</h2>
+                    <ul class="destinos">
+                      <li><button class="boton" type="button">Historia de Instagram</button></li>
+                      <li><a class="boton" href="#">WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#">Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#">Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button class="boton" type="button" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+                </section>
+
+                <section class="seccion" aria-labelledby="te-3b">
+                  <h2 class="rotulo" id="te-3b">Temas</h2>
+                  <ul class="chips">
+                    <li><a class="chip" href="#">El amor</a></li><li><a class="chip" href="#">El deber</a></li><li><a class="chip" href="#">El error</a></li><li><a class="chip" href="#">El miedo</a></li><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">El tiempo</a></li><li><a class="chip" href="#">El trabajo</a></li><li><a class="chip" href="#">La adversidad</a></li><li><a class="chip" href="#">La amistad</a></li><li><a class="chip" href="#">La envidia</a></li><li><a class="chip" href="#">La felicidad</a></li><li><a class="chip" href="#">La gloria</a></li><li><a class="chip" href="#">La humildad</a></li><li><a class="chip" href="#">La justicia</a></li><li><a class="chip" href="#">La libertad</a></li><li><a class="chip" href="#">La muerte</a></li><li><a class="chip" href="#">La palabra</a></li><li><a class="chip" href="#">La patria</a></li><li><a class="chip" href="#">La prudencia</a></li><li><a class="chip" href="#">La razón</a></li><li><a class="chip" href="#">La riqueza</a></li><li><a class="chip" href="#">La verdad</a></li><li><a class="chip" href="#">La vida</a></li><li><a class="chip" href="#">La virtud</a></li>
+                  </ul>
+                </section>
+
+                <section class="seccion" aria-labelledby="co-3b">
+                  <h2 class="rotulo rel" id="co-3b">Colecciones<span class="marca-pend">patrón nuevo: Colección en fila</span></h2>
+                  <ul class="filas">
+                    <li><a href="#"><span class="f-col">Achaques de necedad</span><span class="f-criterio">La necedad no se cura porque no se reconoce: el que no escucha, el que alaba sin saber por qué, y el vulgo con muchas lenguas.</span></a></li>
+                    <li><a href="#"><span class="f-col">Amigos de los que fiarse</span><span class="f-criterio">Cómo se elige y se prueba a un amigo: los que duran, los que se maleaban ya, y por qué al enemigo declarado se le teme menos.</span></a></li>
+                    <li><a href="#"><span class="f-col">Cada uno es hijo de sus obras</span><span class="f-criterio">Obrar como quien se es, no como obligan: el que se esculpe a sí mismo, el que se debe a lo que hace, y el que no se conoce.</span></a></li>
+                    <li><a href="#"><span class="f-col">Conocer las cosas en su sazón</span><span class="f-criterio">El acierto tiene hora: al principio es fácil dar fin a todo, y los que empiezan por el descanso dejan la fatiga para el final.</span></a></li>
+                    <li><a href="#"><span class="f-col">Consejos para gobernar</span><span class="f-criterio">Lo que don Quijote dijo a Sancho antes de la Ínsula: cómo juzgar, qué comer y por qué el que no madruga con el sol no goza del día.</span></a></li>
+                    <li><a href="#"><span class="f-col">Cuatro mujeres</span><span class="f-criterio">Cuatro mujeres en un canon que casi no las guardó: la que defendió su derecho a estudiar y la que pidió escuelas para cerrar cárceles.</span></a></li>
+                    <li><a href="#"><span class="f-col">El silencio es sagrado de la cordura</span><span class="f-criterio">Cuándo conviene no hablar: la lengua que suelta no vuelve a encadenarse, y hacer sigue siendo la mejor manera de decir.</span></a></li>
+                    <li><a href="#"><span class="f-col">El uniforme y la sotana</span><span class="f-criterio">El poder cuando se disfraza: el cuartel, la casaca y el altar, y la costumbre de glorificar al que mata en nombre de algo.</span></a></li>
+                    <li><a href="#"><span class="f-col">El yo frente a la muchedumbre</span><span class="f-criterio">Lo que la multitud te quita sin que lo notes, y por qué un alma sola puede valer lo que el universo entero.</span></a></li>
+                    <li><a href="#"><span class="f-col">Elogio de lo escaso</span><span class="f-criterio">El hambre que sazona la mesa parca, los privilegios del que tiene poco, y la sospecha de que lo superfluo estorba más de lo que sirve.</span></a></li>
+                    <li><a href="#"><span class="f-col">Empezar de nuevo</span><span class="f-criterio">Para quien creyó que ya no había otra vida posible dentro de la suya: la vocación que fracasa, el rumbo abandonado y lo que aún no sabes que llevas dentro.</span></a></li>
+                    <li><a href="#"><span class="f-col">La vida, si sabes usarla, es larga</span><span class="f-criterio">No es que tengamos poco tiempo: es que perdemos mucho. Las edades, la prisa por vivir, y lo que se ve cuando ya no hay qué ver.</span></a></li>
+                    <li><a href="#"><span class="f-col">Los escollos del trato</span><span class="f-criterio">Vivir entre gente tiene rumbo difícil: la cortesía que empeña, el favor que enfada, y cuándo lo cuerdo es retirarse a puerto.</span></a></li>
+                    <li><a href="#"><span class="f-col">Prevenirse en la próspera</span><span class="f-criterio">Las suertes se alternan y eso se sabe de antemano: guardar en la buena para la mala, y conocer el día aciago antes de jugarlo.</span></a></li>
+                    <li><a href="#"><span class="f-col">Refranes de Sancho</span><span class="f-criterio">Sabiduría de pueblo y no de hidalgo: los refranes que el Quijote pone en boca del escudero, y que la mitad se siguen diciendo hoy.</span></a></li>
+                    <li><a href="#"><span class="f-col">Saber para ser libre</span><span class="f-criterio">La instrucción del pueblo como condición de su libertad, y la ignorancia como la primera forma de la servidumbre.</span></a></li>
+                  </ul>
+                </section>
+
+                <section class="seccion" aria-labelledby="ob-3b">
+                  <h2 class="rotulo rel" id="ob-3b">Obras<span class="marca-pend">[sin decidir] la rotación</span></h2>
+                  <ul class="filas">
+                    <li><a href="#"><span class="f-obra">Oráculo manual y arte de prudencia</span><span class="f-hechos">Baltasar Gracián<span aria-hidden="true"> · </span><span class="oculto">, </span>1647<span aria-hidden="true"> · </span><span class="oculto">, </span>141 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Nuestra América</span><span class="f-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Del sentimiento trágico de la vida</span><span class="f-hechos">Miguel de Unamuno<span aria-hidden="true"> · </span><span class="oculto">, </span>1913<span aria-hidden="true"> · </span><span class="oculto">, </span>50 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Ariel</span><span class="f-hechos">José Enrique Rodó<span aria-hidden="true"> · </span><span class="oculto">, </span>66 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">La mujer del porvenir</span><span class="f-hechos">Concepción Arenal<span aria-hidden="true"> · </span><span class="oculto">, </span>1844<span aria-hidden="true"> · </span><span class="oculto">, </span>104 citas</span></a></li>
+                    <li><a href="#"><span class="f-obra">Recuerdos de provincia</span><span class="f-hechos">Domingo Faustino Sarmiento<span aria-hidden="true"> · </span><span class="oculto">, </span>9 citas</span></a></li>
+                  </ul>
+                  <p class="al-dir"><a class="tinta" href="#">Las 517 obras →</a></p>
+                </section>
+
+                <section class="seccion" aria-labelledby="au-3b">
+                  <h2 class="rotulo" id="au-3b">Autores</h2>
+                  <ul class="filas autores">
+                    <li><a href="#">Concepción Arenal</a></li>
+                    <li><a href="#">Manuel González Prada</a></li>
+                    <li><a href="#">Baltasar Gracián</a></li>
+                    <li><a href="#">José Ingenieros</a></li>
+                    <li><a href="#">José Martí</a></li>
+                    <li><a href="#">Francisco de Quevedo</a></li>
+                    <li><a href="#">Séneca</a></li>
+                    <li><a href="#">Miguel de Unamuno</a></li>
+                  </ul>
+                  <p class="al-dir"><a class="tinta" href="#">Los 135 autores, de la A a la Z →</a></p>
+                </section>
+              </main>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>La primera pantalla es la de 3A:</b> lo que cambia empieza después de las acciones.</li>
+          <li><b>Lo transversal antes que las entidades:</b> justo bajo la Cita, a qué toca —Temas y Colecciones—; al final, de quién y de qué libro, con los dos saltos a los Directorios juntos, en el orden de la cabecera.</li>
+          <li><b>Las Obras bajan:</b> empiezan a 3.775&nbsp;px, frente a 1.259 en 3A, detrás de 24 chips y 16 Colecciones y lejos de la Tarjeta de Obra que acaba de enseñar una. Es lo contrario de lo que la v8 viene a hacer con la Obra.</li>
+          <li><b>La Colección en fila</b> se lee como un índice y deja de parecer un Tema por la forma, no solo por el criterio. Ocupa menos que el chip con el criterio debajo —la página mide 5.074&nbsp;px, 240 menos que 3A—, pero ya no es el Chip de Colección «idéntico al de Tema» de las espinas: es un patrón nuevo.</li>
+          <li class="enm"><b>Enmienda:</b> el orden de §9 del diseño (que FR-9 toma como punto de partida) y EXPERIENCE.md § Listados → Chip de Colección, que en la portada dejaría de ser un chip.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 3C ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">3C · EL CAMPO PRIMERO, LAS CIFRAS COMO SU DESCRIPCIÓN</span><br><b>Campo, línea de cifras debajo, la cita de hoy;</b> lo demás, como 3A. La línea dice qué hay donde se busca, y va asociada al campo con <code>aria-describedby</code>, en <code>caption</code>. Solo la primera pantalla.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <h1><a class="marca" href="#" aria-current="page">Sabiduría de Bolsillo</a></h1>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <form class="formulario" style="margin-top:0" role="search" action="#" method="get">
+                  <label for="q-3c">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-3c" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino" aria-describedby="cif-3c">
+                  <p class="cifras pie" id="cif-3c">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                </form>
+                <section class="seccion del-dia" aria-labelledby="hoy-3c">
+                  <h2 class="rotulo" id="hoy-3c">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="ir"><a href="#">Ver esta cita</a></p>
+                  <section class="tobra provisional" aria-labelledby="o-3c">
+                    <span class="marca-pend">[sin decidir] Tarjeta de Obra</span>
+                    <h2 class="rotulo" id="o-3c">De la obra</h2>
+                    <p class="tobra-titulo">De la brevedad de la vida</p>
+                    <p class="tobra-hechos">Séneca<span aria-hidden="true"> · </span><span class="oculto">, </span>49<span aria-hidden="true"> · </span><span class="oculto">, </span>37 citas</p>
+                  </section>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>El campo es lo primero que se toca:</b> quien vuelve a buscar no lee antes una cifra.</li>
+          <li><b>La línea de cifras se hace pequeña</b> y pasa a describir el campo: el lector de pantalla la oye al entrar en él. Deja de ser lo primero que dice la portada sobre sí misma.</li>
+          <li><b>La Cita del Día empieza a 354&nbsp;px</b>, 25 más arriba que en 3A, porque la línea pasa a <code>caption</code>.</li>
+          <li class="enm"><b>Enmienda:</b> el orden de §9 del diseño en sus pasos 2 y 3; FR-9 lo admite («partiendo del orden del diseño aprobado»).</li>
+        </ul>
+      </figure>
+    </div>
+
+    <h3>La redacción de la línea de cifras</h3>
+    <p class="regla" style="margin-top:6px">La redacción final es de UX (addendum v8). Las dos son ciertas hoy y ninguna dice «cada una con su fuente», que solo podrá escribirse con el censo vacío (§5). Cifras con punto de millar, como <code>milesEnEspañol</code> de <code>src/lib/formato.ts</code>.</p>
+    <div class="fila">
+      <figure class="tel">
+        <figcaption><span class="etiqueta">REDACCIÓN 1 · LA DEL PRD</span><br>Tal como la escriben el addendum y el diseño.</figcaption>
+        <div class="tira" style="width:380px"><div class="pantalla"><div class="lienzo" lang="es"><main class="s-pag" style="padding-block:24px">
+          <p class="cifras">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+        </main></div></div></div>
+        <ul class="notas"><li><b>Da la cifra de cotejadas sin decir cuántas faltan:</b> quien quiera saberlo resta. Con el censo vacío diría «4.420 cotejadas», y ese día se cambia por la coletilla.</li></ul>
+      </figure>
+      <figure class="tel">
+        <figcaption><span class="etiqueta">REDACCIÓN 2 · LO QUE FALTA, DICHO</span><br>La misma cuenta, nombrando la diferencia.</figcaption>
+        <div class="tira" style="width:380px"><div class="pantalla"><div class="lienzo" lang="es"><main class="s-pag" style="padding-block:24px">
+          <p class="cifras">4.420 citas de 135 autores; todas menos 21, cotejadas con el texto de su fuente.</p>
+        </main></div></div></div>
+        <ul class="notas">
+          <li><b>Dice la ausencia en vez de callarla</b>, como «Sin obra documentada»; y con el censo vacío se convierte sola en «todas cotejadas», que es la coletilla que §5 permite ese día.</li>
+          <li><b>Pone en la portada lo que falta</b>, aunque sean 21 de 4.420, y la mayoría de los días la Cita de debajo es una de ellas (11 de las 16 aptas).</li>
+        </ul>
+      </figure>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 4 — La marca en la portada
+       ===================================================================== -->
+  <section class="bloque-mesa" id="d4">
+    <h2>4 · La marca en la portada</h2>
+    <p class="regla">Hoy la portada pinta la marca dos veces en la primera pantalla: en la cabecera, como enlace, y debajo como su <code>h1</code> (<code>index.astro</code>), y <code>portada.spec.ts</code> exige que el único <code>h1</code> sea la marca. Con la v8 la línea de cifras y el campo suben al principio, y la repetición se nota más. Primeras pantallas a 360×640 con la cabecera 1A; debajo de cada una, el esquema de encabezados que oye un lector de pantalla.</p>
+
+    <div class="fila">
+
+      <!-- ===== Hoy ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta hoy">HOY · LO CONSTRUIDO, CON LA CABECERA NUEVA</span><br><b>Para comparar, no se propone.</b> La marca en la cabecera y otra vez como <code>h1</code>, en <code>author</code> y tinta apagada; la Cita empieza a 413&nbsp;px, 34 más abajo que en 4A.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <h1 class="marca-hoy">Sabiduría de Bolsillo</h1>
+                <p class="cifras" style="margin-top:16px">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                <form class="formulario" role="search" action="#" method="get">
+                  <label for="q-4h">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-4h" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino">
+                </form>
+                <section class="seccion del-dia" aria-labelledby="hoy-4h">
+                  <h2 class="rotulo" id="hoy-4h">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <pre class="esquema">banner
+  enlace «Sabiduría de Bolsillo»
+  navegación «Principal»
+main
+  h1 Sabiduría de Bolsillo
+  búsqueda
+  h2 La cita de hoy</pre>
+      </figure>
+
+      <!-- ===== 4A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">4A · EL H1 ES LA MARCA DE LA CABECERA</span><br><b>En la portada, y solo en ella, la marca de la cabecera va dentro del <code>h1</code>;</b> el contenido empieza por la línea de cifras. Se ve igual en todas las páginas. Cumple «un único <code>h1</code>» y que sea la marca.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <h1><a class="marca" href="#" aria-current="page">Sabiduría de Bolsillo</a></h1>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <p class="cifras">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                <form class="formulario" role="search" action="#" method="get">
+                  <label for="q-4a">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-4a" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino">
+                </form>
+                <section class="seccion del-dia" aria-labelledby="hoy-4a">
+                  <h2 class="rotulo" id="hoy-4a">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <pre class="esquema">banner
+  h1 Sabiduría de Bolsillo
+    enlace, página actual
+  navegación «Principal»
+main
+  búsqueda
+  h2 La cita de hoy</pre>
+        <ul class="notas">
+          <li><b>La marca sale una vez</b> y la cabecera es la misma en todas las páginas, también por fuera: nadie nota que en la portada es un <code>h1</code>.</li>
+          <li><b>Lo que cuesta:</b> que el armazón sepa que está en la portada (hoy <code>Armazon.astro</code> ya recibe <code>ruta</code>), y que el <code>h1</code> quede en la región de cabecera y no en <code>main</code>: «Saltar al contenido.» lleva a la línea de cifras.</li>
+          <li><b>El enlace se conserva</b> con <code>aria-current="page"</code>: tocar la marca hace lo mismo en todas partes.</li>
+          <li class="enm"><b>Enmienda:</b> ninguna de producto; en las espinas, que la marca de la cabecera es el <code>h1</code> de la portada. <code>portada.spec.ts</code> sigue pasando tal como está.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 4B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">4B · UN H1 SOLO PARA LECTORES</span><br><b>La cabecera no cambia en ninguna página; el <code>h1</code> de la portada sigue en <code>main</code> con la marca, pero oculto a la vista</b> (<code>.solo-para-lectores</code>). Se ve igual que 4A; cambia lo que hay debajo.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-a">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <h1 class="oculto">Sabiduría de Bolsillo</h1>
+                <p class="cifras">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                <form class="formulario" role="search" action="#" method="get">
+                  <label for="q-4b">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-4b" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino">
+                </form>
+                <section class="seccion del-dia" aria-labelledby="hoy-4b">
+                  <h2 class="rotulo" id="hoy-4b">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <pre class="esquema">banner
+  enlace «Sabiduría de Bolsillo»
+  navegación «Principal»
+main
+  h1 Sabiduría de Bolsillo   (no se ve)
+  búsqueda
+  h2 La cita de hoy</pre>
+        <ul class="notas">
+          <li><b>El armazón no se toca</b> y «Saltar al contenido.» lleva a un <code>h1</code>.</li>
+          <li><b>Quien ve oye una cosa y lee otra:</b> el lector de pantalla anuncia la marca dos veces seguidas (el enlace y el <code>h1</code>), justo lo que se quería quitar, y un encabezado invisible es un recurso de último caso, no un patrón del sitio.</li>
+          <li class="enm"><b>Enmienda:</b> ninguna de producto; un uso nuevo de <code>.solo-para-lectores</code>, que hoy solo sirve avisos de pestaña y regiones de estado. Patrón nuevo: encabezado oculto.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 4C ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">4C · LA PORTADA SIN MARCA EN LA CABECERA</span><br><b>En la portada la cabecera lleva solo «Autores · Obras · Buscar», en una fila; la marca es el <code>h1</code> visible del contenido, en Inter 600 a 26&nbsp;px, con la línea de cifras como bajada.</b> La única que da a la portada un titular propio.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab cab-sin-marca">
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main class="s-pag">
+                <h1 class="marca-titular rel">Sabiduría de Bolsillo<span class="marca-pend">uso nuevo de title-lg</span></h1>
+                <p class="cifras">4.420 citas de 135 autores; 4.399 cotejadas con el texto de su fuente.</p>
+                <form class="formulario" role="search" action="#" method="get">
+                  <label for="q-4c">Escribe un fragmento, un autor o un tema.</label>
+                  <input class="campo" id="q-4c" name="q" type="search" autocomplete="off" placeholder="Por ejemplo: no hay camino">
+                </form>
+                <section class="seccion del-dia" aria-labelledby="hoy-4c">
+                  <h2 class="rotulo" id="hoy-4c">La cita de hoy</h2>
+                  <figure class="bloque">
+                    <blockquote><p class="texto t-xl">«La vida, si sabes usarla, es larga.»</p></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">Séneca</a></p>
+                      <p class="procedencia"><a href="#">De la brevedad de la vida</a>, 49.</p>
+                    </figcaption>
+                  </figure>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+        <pre class="esquema">banner
+  navegación «Principal»
+main
+  h1 Sabiduría de Bolsillo
+  búsqueda
+  h2 La cita de hoy</pre>
+        <ul class="notas">
+          <li><b>La portada gana un titular</b> —la marca con la línea de cifras debajo dice qué es esto— y la cabecera cabe en una fila, porque aquí no lleva la marca.</li>
+          <li><b>La cabecera deja de ser la misma en todas las páginas</b>, que es lo que PRD §10 escribe, y la marca crece hasta parecer un logotipo tipográfico.</li>
+          <li><b>Usa <code>title-lg</code></b>, que hoy es solo el titular de la Cabecera de Obra; la serif no puede, porque la marca no es Cita, Autor, Tema ni Colección.</li>
+          <li class="enm"><b>Enmienda:</b> PRD §10 («toda página pública lleva la misma cabecera: la marca … y «Autores · Obras · Buscar»»), que vuelve a <code>bmad-prd</code>, y DESIGN.md § Typography (un segundo uso de <code>title-lg</code>).</li>
+        </ul>
+      </figure>
+    </div>
+  </section>
+
+  <footer class="fin" id="fin">
+    <h2>Recomendación</h2>
+    <ul>
+      <li><b>Cabecera: 1A, dos filas.</b> Es la única que se dibuja igual a 320 que a 360 y en cualquier fuente de reserva, conserva el orden de PRD §10 y cuesta 28&nbsp;px de alto sin sacar la Cita de la primera pantalla.</li>
+      <li><b>Color: 2A, Autores y Obras en tinta y Buscar en siena.</b> Es la regla del siena aplicada tal como está escrita, sin enmendar <code>§ Colors</code>: los Directorios informan, Buscar actúa.</li>
+      <li><b>Portada: 3A, el orden del diseño aprobado, con la redacción 1.</b> Pone las Obras —lo que la v8 viene a enseñar— justo después de la Cita y su Tarjeta de Obra, conserva el Chip de Colección con su criterio debajo y no estrena componente.</li>
+      <li><b>Marca: 4A, el <code>h1</code> de la portada es la marca de la cabecera.</b> La marca sale una vez, la cabecera es la misma en todas las páginas y <code>portada.spec.ts</code> sigue valiendo sin tocarlo.</li>
+    </ul>
+    <h2>Lo que esta maqueta no decide</h2>
+    <ul>
+      <li>Los tokens de la Tarjeta de Obra y del bloque «Compartir en», y la Historia de Instagram en dos toques o preparada: los decide la maqueta de la Página de Cita. Aquí van con filete punteado en ámbar.</li>
+      <li>La regla de rotación de las seis Obras (Arquitectura) y si la Obra de la Cita del Día puede estar entre ellas.</li>
+      <li>El orden de los ocho Autores destacados, el cuerpo de la línea de cifras y el color de «Ver esta cita».</li>
+      <li>La portada sin Cita apta, sin Colecciones o sin Obras indexables: FR-9 dice que el bloque de Obras desaparece sin hueco; los demás estados siguen como en la espina.</li>
+    </ul>
+  </footer>
+</div>
+</body>
+</html>

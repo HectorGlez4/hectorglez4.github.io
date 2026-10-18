@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit Diario y Lote v8</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta maqueta. Si algo de aquí discrepa de las espinas, mandan ellas.
+       PRD v8   FR-21 (el material de la jornada: la Imagen en sus dos formatos, el pie con
+                la atribución y el enlace; la alternativa si no admite Imagen), FR-22 (una
+                marca de origen por cuenta, solo para las cuentas propias), FR-29 (el lote,
+                indistinguible de la jornada), FR-10 (dos formatos, el dominio legible al
+                pie), FR-11 (el 9:16 tiene un solo diseño, Papel), NFR-12; UJ-5.
+       EXPERIENCE.md § Information Architecture   (filas Kit Diario y Lote)
+       EXPERIENCE.md § Component Patterns → Imágenes que salen del sitio
+                                                   (Imagen de Cita; Material para publicar)
+       EXPERIENCE.md § Tipografía adaptativa       (columnas cuadrada y 9:16; el dominio al
+                                                   pie; la procedencia no se recorta)
+       EXPERIENCE.md § State Patterns              (Sin Cita apta para portada, Cita del Día
+                                                   sin Imagen, Jornadas por delante, Lote
+                                                   vacío, Fijación muda)
+       EXPERIENCE.md § Key Flows                   (UJ-5: el Kit DESCARGA, no comparte)
+       EXPERIENCE.md § Interaction Primitives      (zonas de toque; sin gestos ocultos;
+                                                   pestaña nueva solo para entregar a un tercero)
+       EXPERIENCE.md § Accessibility Floor         (mensajes de estado: «Copiado.»)
+       DESIGN.md § Colors                          (siena = actuar o salir; las imágenes que
+                                                   salen del sitio no son interfaz)
+       DESIGN.md § Shapes                          (la imagen, de esquinas rectas)
+       DESIGN.md § Components → Primitivas (botones), Cabecera (1A + 2A), Imágenes que
+                                                   salen del sitio (margen y dominio, cuadrada,
+                                                   9:16), De token a propiedad CSS
+       .memlog.md   entradas 66 (el Lote, superficie interna), 75, 85 (UJ-5 con lo
+                    construido: el Kit descarga), 115 (cabecera 1A + 2A), 120 (9:16 B y
+                    cuadrada B) y 126.
+       Lo construido, que las espinas recogen sin rediseñar: src/pages/kit.astro,
+                src/pages/lote.astro, src/components/MaterialParaPublicar.astro,
+                src/islands/ImagenDelKit.astro y CopiarCita.astro, src/lib/redes.ts,
+                kit.ts y lote.ts. DESIGN.md no tiene fila visual del Material para publicar:
+                sus valores salen de ahí, no de una regla.
+     Sin red y sin JavaScript. Fuentes del sistema: si Inter y Source Serif 4 no están
+     instaladas salen Georgia y la sans del sistema, y los saltos de línea pueden moverse.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: no es el sitio. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --mesa-tinta:#1c2027; --mesa-suave:#59616e; --mesa-marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#d9b56a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--mesa-tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1320px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:84ch;color:var(--mesa-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);letter-spacing:.02em;max-width:118ch;overflow-wrap:anywhere;}
+  .meta b{color:var(--mesa-tinta);font-weight:600;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-size:12px;color:var(--mesa-suave);}
+  .leyenda span{display:inline-flex;align-items:center;gap:8px;}
+  .muestra{display:inline-block;width:22px;height:12px;border-radius:2px;}
+  .muestra.azul{background:#eaf0f7;border:1px dashed #8fa9c6;}
+  .muestra.ambar{background:#fdf4e3;border:1px dashed #c99a3a;}
+  .muestra.gris{background:#d5d7dc;border:1px solid #9ea3ad;}
+
+  section.bloque-mesa{margin-top:60px;}
+  .bloque-mesa > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;line-height:1.2;margin:0 0 8px;}
+  .bloque-mesa > .regla{margin:0;max-width:96ch;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  .bloque-mesa > .regla b{color:var(--mesa-tinta);font-weight:600;}
+
+  .cols{display:flex;flex-wrap:wrap;gap:40px 32px;margin-top:26px;align-items:flex-start;}
+  .notas-col{flex:1 1 360px;max-width:560px;}
+  .notas-col h3{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--mesa-marca);
+     border-top:3px solid var(--mesa-marca);padding-top:10px;}
+  ol.notas{margin:0;padding:0;list-style:none;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);}
+  ol.notas li{position:relative;margin:0 0 9px;padding-left:26px;}
+  ol.notas li b{color:var(--mesa-tinta);font-weight:600;}
+  ol.notas li::before{content:attr(data-n);position:absolute;left:0;top:1px;width:17px;height:17px;border-radius:50%;
+     background:#2f5d8a;color:#fff;font:600 9.5px/17px ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;}
+  ol.notas li.pend{padding:6px 9px 6px 34px;background:var(--aviso-fondo);border:1px dashed var(--aviso-linea);
+     color:var(--aviso-tinta);border-radius:3px;}
+  ol.notas li.pend::before{background:#c99a3a;left:9px;top:7px;}
+  ol.notas li.pend b{color:var(--aviso-tinta);}
+
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:10px;width:380px;flex:none;}
+  figure.tel > figcaption{font-size:13px;line-height:1.5;color:var(--mesa-suave);}
+  figure.tel > figcaption b{color:var(--mesa-tinta);font-weight:600;}
+  .paso-mesa{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--mesa-marca);margin-bottom:2px;}
+
+  footer.fin{margin-top:72px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--mesa-suave);max-width:100ch;}
+  footer.fin b{color:var(--mesa-tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--mesa-tinta);margin:26px 0 8px;font-weight:600;}
+  footer.fin h2:first-child{margin-top:0;}
+  footer.fin ul{margin:6px 0 0;padding-left:18px;} footer.fin li{margin:4px 0;}
+  footer.fin li.pend{list-style:none;margin-left:-18px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;}
+  footer.fin li.pend b{color:var(--aviso-tinta);}
+  .env code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--mesa-alta);
+       border:1px solid var(--mesa-linea);border-radius:3px;padding:1px 5px;overflow-wrap:anywhere;}
+
+  /* ---- El teléfono: carcasa y barra del navegador, que no son el sitio ---- */
+  .telefono{width:380px;background:#17181c;border-radius:38px;padding:12px 10px 22px;border:1px solid #2b2d33;}
+  .navegador{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .navegador span{width:300px;text-align:center;background:#2a2c32;color:#d6d9df;border-radius:10px;
+       font:12.5px/1 system-ui,-apple-system,sans-serif;padding:8px 12px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .navegador span::before{content:"";display:inline-block;width:7px;height:8px;margin-right:7px;border:1.5px solid #9ea3ad;border-radius:2px;vertical-align:-1px;}
+  .pantalla{position:relative;width:360px;overflow:hidden;border-radius:3px 3px 26px 26px;}
+  .pantalla.vp{height:640px;}
+
+  /* ===========================================================================
+     EL SITIO. 360 px de viewport (NFR-8). Tokens con los nombres de CSS de la tabla
+     «De token a propiedad CSS» de DESIGN.md § Components y los valores de su frontmatter.
+     Cada regla imita lo construido (src/pages/kit.astro, lote.astro,
+     MaterialParaPublicar.astro, ImagenDelKit.astro, CopiarCita.astro, Armazon.astro y
+     src/styles/tokens.css), salvo la Cabecera, que es la v8, y el 9:16, que es nuevo.
+     =========================================================================== */
+  .lienzo{
+    --papel:#faf7f0; --contenedor-bajo:#f6f2ea; --contenedor:#f1ece2;
+    --tinta:#1f1b16; --tinta-apagada:#5a5147; --contorno:#8a7f72; --filete:#ddd5c7;
+    --siena:#8c4a2f; --sobre-siena:#ffffff;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --cuerpo-lg:17px; --cuerpo-md:15px; --autor:13px; --pie:13px;
+    --unidad:8px; --canal:24px; --margen:20px; --respiracion:40px;
+    --radio:3px; --radio-tarjeta:6px; --grosor-filete:1px;
+    --medida-prosa:68ch; --zona-de-toque:44px;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+    --pend:#6b4e12; --pend-fondo:#fdf4e3; --pend-linea:#c99a3a;
+
+    position:relative;width:360px;background:var(--papel);color:var(--tinta);
+    font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.65;overflow:hidden;
+    -webkit-text-size-adjust:100%;
+  }
+  .vp > .lienzo{min-height:640px;}
+  .lienzo a{color:var(--siena);text-underline-offset:.2em;}
+  .solo-para-lectores{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+  .contenedor{padding-inline:var(--margen);}
+
+  /* Cabecera v8, variantes 1A + 2A (DESIGN.md § Components → Cabecera): dos filas por
+     debajo de 600 px; Autores y Obras en tinta, Buscar en siena; los tres subrayados. */
+  .cab{border-bottom:var(--grosor-filete) solid var(--filete);padding-block:var(--unidad);}
+  .marca{font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+         line-height:1.4;color:var(--tinta) !important;text-decoration:none;display:flex;align-items:center;
+         min-height:var(--zona-de-toque);}
+  .nav ul{list-style:none;margin:0 calc(var(--unidad) * -1);padding:0;display:flex;align-items:center;}
+  .nav a{font-size:var(--cuerpo-md);line-height:1.6;display:flex;align-items:center;justify-content:center;
+         min-height:var(--zona-de-toque);min-width:var(--zona-de-toque);padding-inline:var(--unidad);
+         text-decoration-line:underline;}
+  .nav a.tinta{color:var(--tinta);text-decoration-thickness:var(--grosor-filete);}
+  .nav .punto{display:flex;align-items:center;justify-content:center;min-width:var(--unidad);
+              font-size:var(--cuerpo-md);line-height:1.6;color:var(--tinta-apagada);}
+
+  /* kit.astro y lote.astro */
+  .pagina{padding-block:var(--respiracion);}
+  .pagina h1,.pagina h2,.pagina h3{font-family:var(--sans);font-size:var(--cuerpo-md);text-transform:uppercase;
+       letter-spacing:.08em;color:var(--tinta-apagada);font-weight:700;}
+  .pagina h1{margin:.67em 0;}
+  .pagina h2{margin:.83em 0;}
+  .pagina h3{margin:1em 0;}
+  .jornada{margin-block:calc(var(--unidad) * 6);}
+  .jornada > h2{color:var(--tinta);}
+  .aviso{font-family:var(--sans);font-size:var(--cuerpo-md);color:var(--tinta);margin:1em 0;}
+  .alerta{background:var(--contenedor-bajo);border-left:calc(var(--unidad) * .5) solid var(--siena);
+          padding:calc(var(--unidad) * 2);border-radius:var(--radio);}
+  .alerta code,.orden code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--pie);word-break:break-word;}
+  .vacio{max-width:var(--medida-prosa);}
+  .orden{margin:1em 0;}
+  .paso{font-family:var(--sans);font-size:var(--cuerpo-md);margin:calc(var(--unidad) * 4) 0 1em;
+        padding-top:calc(var(--unidad) * 2);border-top:var(--grosor-filete) solid var(--filete);}
+
+  /* MaterialParaPublicar.astro */
+  .material{margin-block:calc(var(--unidad) * 4);padding-top:calc(var(--unidad) * 2);
+            border-top:var(--grosor-filete) solid var(--filete);}
+  .texto{font-family:var(--serif);margin:0 0 calc(var(--unidad) * 2);}
+  .enlace{font-family:var(--sans);font-size:var(--cuerpo-md);margin:1em 0;}
+  .redes{display:flex;flex-wrap:wrap;gap:var(--unidad);list-style:none;padding:0;margin:var(--unidad) 0 1em;
+         font-family:var(--sans);font-size:var(--cuerpo-md);}
+  .redes a{display:flex;align-items:center;min-height:var(--zona-de-toque);padding-inline:calc(var(--unidad) * 2);
+           border:var(--grosor-filete) solid var(--filete);border-radius:var(--radio);}
+
+  /* ImagenDelKit.astro: el lienzo a todo el ancho, con filete y esquinas rectas, y el
+     primario de descargar a todo el ancho debajo. */
+  .imagen{margin-block:calc(var(--unidad) * 2);}
+  .marco{display:block;width:100%;border:var(--grosor-filete) solid var(--filete);}
+  .descargar{display:block;width:100%;font-family:var(--sans);font-size:var(--cuerpo-md);color:var(--sobre-siena);
+             background:var(--siena);border:var(--grosor-filete) solid var(--siena);border-radius:var(--radio);
+             min-height:var(--zona-de-toque);padding-inline:calc(var(--unidad) * 4);margin-top:var(--unidad);cursor:pointer;}
+
+  /* CopiarCita.astro: el botón secundario. */
+  .isla{margin-top:calc(var(--unidad) * 4);}
+  .copiar{font-family:var(--sans);font-size:var(--cuerpo-md);color:var(--siena);background:transparent;
+          border:var(--grosor-filete) solid var(--siena);border-radius:var(--radio);min-height:var(--zona-de-toque);
+          padding-inline:calc(var(--unidad) * 3);cursor:pointer;}
+
+  /* Armazon.astro: el pie y DondeSeguirnos. */
+  .pie-sitio{margin-top:calc(var(--respiracion) * 2);padding-block:calc(var(--unidad) * 3);
+             border-top:var(--grosor-filete) solid var(--filete);color:var(--tinta-apagada);font-size:var(--pie);}
+  .pie-sitio p{margin:0;}
+  .seguir{margin-top:calc(var(--unidad) * 2);}
+  .seguir ul{display:flex;flex-wrap:wrap;gap:calc(var(--unidad) * 2);margin:0;padding:0;list-style:none;}
+  .seguir a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--pie);text-decoration-line:underline;}
+
+  /* ===========================================================================
+     LA IMAGEN. Píxeles del lienzo multiplicados por --e: 318 / 1080, lo que mide dentro
+     del filete a 360 px. Imita public/islas/imagen.js —margen 96, Cita en la serif a 1,3,
+     filete de 96 × 2, Autor en mayúsculas, procedencia en tinta apagada, marca al pie— con
+     lo que decide la v8: el dominio al cuerpo del Autor, con el peso y el color de la
+     procedencia, en la cuadrada (3B) y en el 9:16 (2B). Plantilla Papel en las dos.
+     =========================================================================== */
+  .imgc,.img916{--e:.29444;position:relative;overflow:hidden;background:#faf7f0;color:#1f1b16;}
+  .imgc{width:calc(1080px * var(--e));height:calc(1080px * var(--e));}
+  .img916{width:calc(1080px * var(--e));height:calc(1920px * var(--e));}
+  .i-zona{position:absolute;left:calc(96px * var(--e));right:calc(96px * var(--e));display:flex;flex-direction:column;justify-content:center;}
+  .i-cita{margin:0;font-family:"Source Serif 4",Georgia,"Times New Roman",serif;font-weight:400;font-size:calc(var(--px) * var(--e));line-height:1.3;color:#1f1b16;}
+  .i-filete{display:block;flex:none;width:calc(96px * var(--e));height:max(1px,calc(2px * var(--e)));background:#ddd5c7;}
+  .i-autor{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:600;text-transform:uppercase;line-height:1.25;color:#1f1b16;}
+  .i-proc{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:400;line-height:1.35;color:#5a5147;}
+  .i-pie{position:absolute;left:calc(96px * var(--e));right:calc(96px * var(--e));}
+  .i-marca{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:600;text-transform:uppercase;line-height:1.25;color:#5a5147;}
+  .i-dom{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:400;line-height:1.25;color:#5a5147;}
+
+  /* Cuadrada, 3B: Autor 24, procedencia 22, marca 20 y dominio 24. */
+  .imgc .i-zona{top:calc(96px * var(--e));bottom:calc(150px * var(--e));}
+  .imgc .i-filete{margin-top:calc(40px * var(--e));}
+  .imgc .i-autor{margin-top:calc(28px * var(--e));font-size:calc(24px * var(--e));}
+  .imgc .i-proc{margin-top:calc(14px * var(--e));font-size:calc(22px * var(--e));}
+  .imgc .i-pie{bottom:calc(68px * var(--e));}
+  .imgc .i-marca{font-size:calc(20px * var(--e));}
+  .imgc .i-dom{margin-top:calc(8px * var(--e));font-size:calc(24px * var(--e));}
+
+  /* 9:16, 2B: la Cita entre las bandas de Instagram (250 arriba, 370 abajo) y el pie a 280
+     del borde inferior. Autor 36, procedencia 33, marca 30 y dominio 36. */
+  .img916 .i-zona{top:calc(250px * var(--e));bottom:calc(370px * var(--e));}
+  .img916 .i-filete{margin-top:calc(60px * var(--e));}
+  .img916 .i-autor{margin-top:calc(42px * var(--e));font-size:calc(36px * var(--e));}
+  .img916 .i-proc{margin-top:calc(21px * var(--e));font-size:calc(33px * var(--e));}
+  .img916 .i-pie{bottom:calc(280px * var(--e));}
+  .img916 .i-marca{font-size:calc(30px * var(--e));}
+  .img916 .i-dom{margin-top:calc(8px * var(--e));font-size:calc(36px * var(--e));}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. No son el sitio y no ocupan sitio: cada número va en el
+     margen de 20 px y remite a la lista de al lado. Azul = qué ilustra; ámbar = [sin
+     decidir en las espinas]; las líneas discontinuas del 9:16 marcan las bandas de
+     Instagram y no van en la imagen.
+     =========================================================================== */
+  .ref{position:relative;}
+  .ref::after{content:attr(data-n);position:absolute;right:-19px;top:2px;z-index:3;width:16px;height:16px;border-radius:50%;
+     background:var(--anot);color:#fff;font:600 9px/16px ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;letter-spacing:0;text-transform:none;}
+  .ref.sd::after{background:var(--pend-linea);}
+  /* Donde la caja ya llega al borde del lienzo, el número va dentro; donde coincide con
+     otro, más abajo. */
+  .ref.dentro::after{right:4px;}
+  .ref.bajo::after{top:26px;}
+  .sd{outline:2px dashed var(--pend-linea);outline-offset:3px;}
+  .lz{position:absolute;left:0;right:0;border-top:1px dashed var(--anot-linea);z-index:2;}
+  .lz span{position:absolute;right:3px;top:1px;color:var(--anot);font:8.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .lz.sup{top:calc(250px * var(--e));}
+  .lz.inf{top:calc(1670px * var(--e));}
+  .lz.inf span{top:-12px;}
+  .pliegue{position:absolute;left:0;right:0;top:640px;z-index:4;border-top:2px dashed var(--anot);pointer-events:none;}
+  .pliegue span{position:absolute;left:4px;top:2px;background:var(--anot);color:#fff;padding:1px 6px;
+     font:600 9.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .tijera{margin:0 calc(var(--margen) * -1);padding:8px var(--margen);list-style:none;background:var(--anot-fondo);color:var(--anot);
+          font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;border-block:1px dashed var(--anot-linea);}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header class="top">
+    <h1>Kit Diario y Lote: el material para publicar</h1>
+    <p class="sub">Maqueta clave de la v8, sin variantes. El Kit Diario (<code>/kit/</code>) y el Lote (<code>/lote/</code>) a 360&nbsp;px, con lo que ya deciden las espinas v8 y la bitácora: la Imagen de Cita cuadrada con el dominio al pie (3B) y la vertical 9:16 (2B), las dos en Papel y para descargar, porque el Kit descarga y no comparte; el pie con la atribución, que lleva «Copiar la cita»; y el enlace a la Página de Cita, uno por cuenta con su marca de origen. Lo demás es lo construido en <code>MaterialParaPublicar.astro</code>, que las espinas recogen sin rediseñar. Mandan las espinas: si algo de aquí discrepa de <code>DESIGN.md</code>, de <code>EXPERIENCE.md</code> o del PRD v8, el error está aquí.</p>
+    <p class="meta"><b>La jornada:</b> 2026-10-18 · <b>La Cita del Día, por rotación:</b> «La vida, si sabes usarla, es larga.», de Séneca: 35 caracteres, tramo xl (64&nbsp;px en la cuadrada, 80 en el 9:16); su Obra es «De la brevedad de la vida», cuya ficha reúne la grafía «Sobre la brevedad de la vida», año 49 · <b>Aptas para portada:</b> 16 Citas de 11 Autores; ninguna pasa de 300 caracteres · <b>Fijaciones del Lote:</b> de ejemplo. <code>corpus/portada.json</code> se versiona con <code>fijaciones</code> vacío y fijar jornadas es de Héctor; las Citas y la rotación son las reales del árbol del 2026-10-18 · <b>Enlace de Instagram del Kit:</b> /cita/seneca-la-vida-si-sabes-usarla-es-larga/?de=instagram.</p>
+    <div class="leyenda">
+      <span><i class="muestra azul"></i>Anotación de la maqueta: el número remite a la lista, la línea marca un límite. No es el sitio.</span>
+      <span><i class="muestra ambar"></i>[sin decidir en las espinas]: dibujado con lo construido o con una propuesta, no contrato.</span>
+      <span><i class="muestra gris"></i>Cromo ajeno: la carcasa y la barra del navegador.</span>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       EL KIT DIARIO
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>El Kit del día · <code>/kit/</code></h2>
+    <p class="regla">La página entera, a 1:1 y sin recortar, tal como la abre Héctor a las siete en el móvil (UJ-5). La línea azul marca la primera pantalla de 360×640: enseña la Cita y la cuadrada casi entera, y «Descargar la imagen cuadrada» queda justo por debajo. <b>Cada formato trae su descarga</b>; el pie y los enlaces marcados van debajo, como en lo construido.</p>
+
+    <div class="cols">
+      <figure class="tel">
+        <figcaption><span class="paso-mesa">KIT DIARIO · 2026-10-18</span><br><b>La Cita del Día con sus dos imágenes, el pie y los cinco enlaces marcados.</b> <code>noindex</code>; ninguna superficie pública enlaza aquí.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net/kit/</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>primera pantalla · 360×640</span></div>
+              <a class="solo-para-lectores" href="#contenido-kit">Saltar al contenido.</a>
+
+              <header class="cab contenedor ref dentro" data-n="1">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+
+              <main id="contenido-kit">
+                <div class="pagina contenedor">
+                  <h1 class="ref" data-n="2">Kit del 2026-10-18</h1>
+
+                  <section class="material">
+                    <h2 class="ref sd" data-n="3">La Cita del Día</h2>
+
+                    <blockquote class="texto ref" data-n="4" data-tramo="xl">«La vida, si sabes usarla, es larga.»</blockquote>
+
+                    <div class="imagen ref" data-n="5">
+                      <div class="marco" role="img" aria-label="Imagen de la cita de Séneca">
+                        <div class="imgc">
+                          <div class="i-zona"><p class="i-cita" style="--px:64px">«La vida, si sabes usarla, es larga.»</p><span class="i-filete"></span><p class="i-autor">Séneca</p><p class="i-proc">De la brevedad de la vida, 49</p></div>
+                          <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                        </div>
+                      </div>
+                      <button type="button" class="descargar sd ref" data-n="6">Descargar la imagen cuadrada</button>
+                    </div>
+
+                    <div class="imagen sd ref" data-n="7">
+                      <div class="marco ref bajo" data-n="8" role="img" aria-label="Imagen vertical de la cita de Séneca">
+                        <div class="img916">
+                          <div class="i-zona"><p class="i-cita" style="--px:80px">«La vida, si sabes usarla, es larga.»</p><span class="i-filete"></span><p class="i-autor">Séneca</p><p class="i-proc">De la brevedad de la vida, 49</p></div>
+                          <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                          <div class="lz sup"><span>250</span></div>
+                          <div class="lz inf"><span>1670</span></div>
+                        </div>
+                      </div>
+                      <button type="button" class="descargar">Descargar la imagen vertical</button>
+                    </div>
+
+                    <div class="isla ref" data-n="9">
+                      <button type="button" class="copiar" aria-label="Copiar la cita"><span>Copiar la cita</span></button>
+                      <p class="solo-para-lectores" role="status"></p>
+                    </div>
+
+                    <p class="enlace ref" data-n="10"><a href="#">Ver la Página de Cita</a></p>
+
+                    <ul class="redes ref sd" data-n="11">
+                      <li><a href="#" title="/cita/seneca-la-vida-si-sabes-usarla-es-larga/?de=instagram">Instagram</a></li>
+                      <li><a href="#" title="/cita/seneca-la-vida-si-sabes-usarla-es-larga/?de=tiktok">TikTok</a></li>
+                      <li><a href="#" title="/cita/seneca-la-vida-si-sabes-usarla-es-larga/?de=x">X</a></li>
+                      <li><a href="#" title="/cita/seneca-la-vida-si-sabes-usarla-es-larga/?de=threads">Threads</a></li>
+                      <li><a href="#" title="/cita/seneca-la-vida-si-sabes-usarla-es-larga/?de=facebook">Facebook</a></li>
+                    </ul>
+                  </section>
+
+                  <p class="paso ref" data-n="12">Hay 3 jornadas preparadas por delante. <a href="#">Ver el lote</a></p>
+                </div>
+              </main>
+
+              <footer class="pie-sitio contenedor">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <nav class="seguir" aria-label="Dónde seguirnos"><ul>
+                  <li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li>
+                </ul></nav>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <div class="notas-col">
+        <h3>EL KIT, PIEZA A PIEZA</h3>
+        <ol class="notas">
+          <li data-n="1"><b>La Cabecera de la v8</b>, 1A + 2A: la del armazón, que el Kit lleva como toda página. Ninguna superficie pública enlaza al Kit; solo el Lote (Information Architecture).</li>
+          <li data-n="2"><b>El <code>h1</code></b>, «Kit del {jornada}», con la jornada en ISO, como está construido: Inter al cuerpo de <code>body-md</code>, en mayúsculas, en negrita y en tinta apagada.</li>
+          <li class="pend" data-n="3"><b>[sin decidir] La fila visual del Material para publicar.</b> EXPERIENCE.md le da fila de comportamiento y DESIGN.md ninguna (pendiente desde la v7.1, bitácora 101). Se dibujan los valores construidos, que no son contrato: el rótulo va a 15&nbsp;px en negrita, y no es el Rótulo de sección (<code>author</code>, 13&nbsp;px, peso 600); la Cita, a 17&nbsp;px; la descarga, en el primario.</li>
+          <li data-n="4"><b>La Cita</b>, en la serif al cuerpo de <code>body-lg</code>: es lo que se va a publicar, no el Bloque de Cita, y no lleva tramo de página. Tramo xl en las imágenes: 35 caracteres.</li>
+          <li data-n="5"><b>La cuadrada, variante 3B</b>: 1080×1080 en Papel, a todo el ancho (318×318 dentro del filete). La Cita a 64&nbsp;px; el Autor, a 24; la procedencia, a 22; la marca, a 20; y el dominio, a 24, con el peso y el color de la procedencia. El Kit no ofrece elegir plantilla: Papel, como lo construido. Esquinas rectas.</li>
+          <li class="pend" data-n="6"><b>[sin decidir] Los rótulos de las dos descargas.</b> Hoy hay una sola, «Descargar la imagen». Con dos ficheros, dos botones con el mismo nombre no dicen cuál descargan (WCAG 2.4.6). Se dibujan con «cuadrada» y «vertical», las palabras del PRD en UJ-5. Tampoco están decididos los nombres accesibles de los dos lienzos ni los de los ficheros: hoy los dos se llamarían <code>seneca-la-vida-si-sabes-usarla-es-larga.png</code>.</li>
+          <li class="pend" data-n="7"><b>[sin decidir] Dónde va el 9:16 y a qué tamaño.</b> La espina lo nombra («en sus dos formatos, el cuadrado y el 9:16, que se descargan») sin colocarlo. Se dibuja tras la cuadrada, con el trato construido de la cuadrada: a todo el ancho, 318×565 a 360&nbsp;px, y en escritorio, unos 720×1.280. En el Diálogo de la Historia cabe en alto, a 1:6, porque el diálogo tiene un alto máximo; aquí no hay diálogo que lo limite.</li>
+          <li data-n="8"><b>El 9:16, variante 2B</b>: 1080×1920, solo en Papel (FR-11). La Cita va centrada entre las dos bandas que pinta Instagram, y el pie, justo encima de la de abajo, a 280 del borde. La Cita a 80&nbsp;px; el Autor, a 36; la procedencia, a 33; la marca, a 30; y el dominio, a 36. Los cuerpos son la propuesta aceptada para probar, no un valor cerrado. Las líneas discontinuas marcan las bandas y no van en la imagen.</li>
+          <li data-n="9"><b>«Copiar la cita» lleva el pie</b>: «La vida, si sabes usarla, es larga.» — Séneca, De la brevedad de la vida, 49. Es la atribución de <code>atribucion.ts</code>, la misma que se lleva el visitante. Es el secundario; «Copiado.» se anuncia por su región <code>role="status"</code>, vacía desde la carga.</li>
+          <li data-n="10"><b>«Ver la Página de Cita»</b> va sin marca: es para mirar la página, no para publicarla. Se abre en la misma pestaña.</li>
+          <li class="pend" data-n="11"><b>Un enlace por cuenta</b>, en el orden de <code>redes.ts</code>, cada uno a <code>/cita/seneca-la-vida-si-sabes-usarla-es-larga/?de={red}</code>: <code>instagram</code>, <code>tiktok</code>, <code>x</code>, <code>threads</code>, <code>facebook</code> (FR-22). Lo que comparte un visitante nunca lleva esta marca. <b>[sin decidir] Cómo se copia:</b> hoy es un enlace, y copiarlo pide mantener pulsado, que «Sin gestos ocultos» veda; las espinas no dicen si esa regla alcanza a una superficie interna. Tampoco dicen si el Kit indica qué imagen va a cada red.</li>
+          <li data-n="12"><b>Jornadas por delante</b>, con las fijaciones de ejemplo del Lote, y el paso «Ver el lote». Hoy, con <code>corpus/portada.json</code> vacío, dice «No hay ninguna jornada preparada por delante.».</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       EL LOTE
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>El Lote · <code>/lote/</code></h2>
+    <p class="regla">El Kit de las jornadas que vienen, <b>con el mismo componente</b>: lo que se ve aquí es lo que el Kit traerá cada mañana (FR-29). Tres jornadas fijadas de ejemplo: dos que saldrán como están fijadas y una con la fijación muda, que es el fallo silencioso que el Lote existe para enseñar. A la derecha, el Lote tal como está hoy, sin ninguna fijación.</p>
+
+    <div class="cols">
+      <figure class="tel">
+        <figcaption><span class="paso-mesa">LOTE · TRES JORNADAS</span><br><b>La primera, entera; las otras dos, recortadas donde repiten.</b> <code>noindex</code>, fuera del sitemap y de los dos buscadores.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net/lote/</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <a class="solo-para-lectores" href="#contenido-lote">Saltar al contenido.</a>
+              <header class="cab contenedor">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+
+              <main id="contenido-lote">
+                <div class="pagina contenedor">
+                  <h1 class="ref" data-n="L1">Lote desde el 2026-10-18</h1>
+
+                  <!-- Jornada 1: honrada -->
+                  <section class="jornada">
+                    <h2 class="ref" data-n="L2">2026-10-19</h2>
+                    <section class="material">
+                      <h3 class="ref" data-n="L3">La Cita del Día</h3>
+                      <blockquote class="texto" data-tramo="xl">«Yo no sé lo que busco eternamente en la tierra, en el aire y en el cielo.»</blockquote>
+                      <div class="imagen">
+                        <div class="marco" role="img" aria-label="Imagen de la cita de Rosalía de Castro">
+                          <div class="imgc">
+                            <div class="i-zona"><p class="i-cita" style="--px:64px">«Yo no sé lo que busco eternamente en la tierra, en el aire y en el cielo.»</p><span class="i-filete"></span><p class="i-autor">Rosalía de Castro</p><p class="i-proc">En las orillas del Sar, 1884</p></div>
+                            <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                          </div>
+                        </div>
+                        <button type="button" class="descargar sd">Descargar la imagen cuadrada</button>
+                      </div>
+                      <div class="imagen sd">
+                        <div class="marco" role="img" aria-label="Imagen vertical de la cita de Rosalía de Castro">
+                          <div class="img916">
+                            <div class="i-zona"><p class="i-cita" style="--px:80px">«Yo no sé lo que busco eternamente en la tierra, en el aire y en el cielo.»</p><span class="i-filete"></span><p class="i-autor">Rosalía de Castro</p><p class="i-proc">En las orillas del Sar, 1884</p></div>
+                            <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                          </div>
+                        </div>
+                        <button type="button" class="descargar">Descargar la imagen vertical</button>
+                      </div>
+                      <div class="isla">
+                        <button type="button" class="copiar" aria-label="Copiar la cita"><span>Copiar la cita</span></button>
+                        <p class="solo-para-lectores" role="status"></p>
+                      </div>
+                      <p class="enlace"><a href="#">Ver la Página de Cita</a></p>
+                      <ul class="redes">
+                        <li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">X</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li>
+                      </ul>
+                    </section>
+                  </section>
+
+                  <!-- Jornada 2: honrada, recortada -->
+                  <section class="jornada">
+                    <h2>2026-10-20</h2>
+                    <section class="material">
+                      <h3>La Cita del Día</h3>
+                      <blockquote class="texto" data-tramo="xl">«Todo hombre puede ser, si se lo propone, escultor de su propio cerebro.»</blockquote>
+                      <p class="tijera ref dentro" data-n="L4">✂ recortado: las dos imágenes de Santiago Ramón y Cajal, «Copiar la cita», «Ver la Página de Cita» y los cinco enlaces, como en la jornada de arriba.</p>
+                    </section>
+                  </section>
+
+                  <!-- Jornada 3: fijación muda -->
+                  <section class="jornada">
+                    <h2>2026-10-21</h2>
+                    <p class="aviso alerta ref sd" data-n="L5"><strong>Esta jornada no saldrá como está fijada.</strong> La Cita <code>jose-marti-ser-culto-es-el-unico-modo-de</code> ya no está entre las aptas para portada, así que ese día se ignora la fijación. Abajo va lo que saldría de verdad: la Cita de la rotación.</p>
+                    <section class="material">
+                      <h3>La Cita del Día</h3>
+                      <blockquote class="texto" data-tramo="xl">«Despacito y buena letra: el hacer las cosas bien importa más que el hacerlas.»</blockquote>
+                      <div class="imagen">
+                        <div class="marco" role="img" aria-label="Imagen de la cita de Antonio Machado">
+                          <div class="imgc">
+                            <div class="i-zona"><p class="i-cita" style="--px:64px">«Despacito y buena letra: el hacer las cosas bien importa más que el hacerlas.»</p><span class="i-filete"></span><p class="i-autor">Antonio Machado</p><p class="i-proc">Proverbios y cantares (Nuevas Canciones)</p></div>
+                            <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                          </div>
+                        </div>
+                        <button type="button" class="descargar sd">Descargar la imagen cuadrada</button>
+                      </div>
+                      <p class="tijera">✂ recortado: la imagen vertical, «Copiar la cita», «Ver la Página de Cita» y los cinco enlaces, como en la primera jornada.</p>
+                    </section>
+                  </section>
+
+                  <p class="paso ref" data-n="L6">Lo de hoy está en <a href="#">el Kit del día</a>.</p>
+                </div>
+              </main>
+
+              <footer class="pie-sitio contenedor">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <nav class="seguir" aria-label="Dónde seguirnos"><ul>
+                  <li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li>
+                </ul></nav>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="tel">
+        <figcaption><span class="paso-mesa">LOTE · HOY, SIN FIJACIONES</span><br><b>Lote vacío</b>, como está construido: primero qué significa y después qué hacer. Es lo que sirve hoy el árbol, con <code>fijaciones</code> vacío.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net/lote/</span></div>
+          <div class="pantalla vp">
+            <div class="lienzo" lang="es">
+              <header class="cab contenedor">
+                <a class="marca" href="#">Sabiduría de Bolsillo</a>
+                <nav class="nav" aria-label="Principal"><ul>
+                  <li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li>
+                  <li><a href="#">Buscar</a></li>
+                </ul></nav>
+              </header>
+              <main>
+                <div class="pagina contenedor">
+                  <h1>Lote desde el 2026-10-18</h1>
+                  <div class="vacio ref" data-n="L7">
+                    <p class="aviso">No hay ninguna jornada preparada por delante. El sitio sigue publicando: cada día sale la Cita del Día que le toca por rotación.</p>
+                    <p class="aviso">Hoy ya está compuesto en <a href="#">el Kit del día</a>. Para dejar preparados los días que vienen, desde el ordenador:</p>
+                    <p class="orden"><code>npm run jornada -- fijar &lt;AAAA-MM-DD&gt; &lt;slug-de-cita&gt;</code></p>
+                    <p class="aviso">Queda escrito en <code>corpus/portada.json</code>, que es de donde sale la Cita del Día: lo que se prepara aquí es lo mismo que compondría ese día.</p>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <div class="notas-col">
+        <h3>EL LOTE, PIEZA A PIEZA</h3>
+        <ol class="notas">
+          <li data-n="L1"><b>«Lote desde el {jornada}»</b>: enumera las jornadas fijadas a partir de hoy, incluida la de hoy si está fijada, en orden de fecha (<code>lote.ts</code>).</li>
+          <li data-n="L2"><b>Cada jornada, su fecha como <code>h2</code></b>, en tinta, con el mismo trato que el <code>h1</code>. Fijaciones de ejemplo: el 19, Rosalía de Castro; el 20, Santiago Ramón y Cajal; el 21, una Cita que no es apta para portada, «Ser culto es el único modo de ser libre.», de José Martí.</li>
+          <li data-n="L3"><b>El material cuelga en <code>h3</code></b> y es el mismo componente del Kit (<code>MaterialParaPublicar.astro</code>), con el 9:16 incluido: si el Kit lo gana, el Lote también (FR-21). Sus [sin decidir] son los del Kit: notas 3, 6, 7 y 11.</li>
+          <li data-n="L4"><b>Recortado en la maqueta</b>, no en la página: cada jornada lleva su material entero.</li>
+          <li class="pend" data-n="L5"><b>Fijación muda</b>, destacada como está construida: fondo <code>contenedor-bajo</code>, filete izquierdo de 4&nbsp;px en siena y radio. Debajo, el material que saldrá de verdad, el de la rotación: Antonio Machado, cuya procedencia no declara año. <b>[sin decidir]</b> Ese filete no actúa ni saca del sitio. La regla del siena gobierna la interfaz, y las espinas no dicen si alcanza a las superficies internas.</li>
+          <li data-n="L6"><b>La vuelta al Kit.</b> Kit y Lote se enlazan entre sí y nada más los enlaza; los dos abren en la misma pestaña.</li>
+          <li data-n="L7"><b>Lote vacío</b>: la orden de terminal va después de lo que significa, porque quien abre esto está en el móvil. Una página en blanco no distinguiría «nada fijado» de «página rota».</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="fin">
+    <h2>[sin decidir en las espinas]</h2>
+    <ul>
+      <li class="pend"><b>El 9:16 dentro del material:</b> el sitio que ocupa, el orden respecto a la cuadrada y el tamaño de su previsualización. A todo el ancho, como la cuadrada construida, mide 318×565 a 360&nbsp;px y unos 720×1.280 en escritorio.</li>
+      <li class="pend"><b>Las dos descargas:</b> sus rótulos, que hoy serían el mismo; los nombres accesibles de los dos lienzos; y los nombres de los dos ficheros, que hoy serían el mismo, <code>{slug}.png</code>.</li>
+      <li class="pend"><b>El pie con la atribución:</b> UJ-5 lo da por «escrito», y lo construido lo lleva dentro de «Copiar la cita» sin enseñarlo. Las espinas no dicen si se ve.</li>
+      <li class="pend"><b>El enlace marcado:</b> cómo se copia sin mantener pulsado, y si el Kit dice qué imagen pide cada red.</li>
+      <li class="pend"><b>La fila visual del Material para publicar en DESIGN.md:</b> rótulos, cuerpo de la Cita, primario de descarga y enlaces de red. Hoy solo hay lo construido.</li>
+      <li class="pend"><b>Las superficies internas frente a la regla del siena:</b> el filete del aviso de fijación muda.</li>
+      <li class="pend"><b>Los cuerpos del 9:16:</b> 80, 64, 52 y 42&nbsp;px para la Cita y 36 para el dominio, propuestos para probar. La procedencia a 33 y la marca a 30 son [ASSUMPTION], tomados de la maqueta de la Historia de Instagram.</li>
+    </ul>
+
+    <h2>Lo que no enseña</h2>
+    <ul>
+      <li><b>El escritorio.</b> Es la misma columna, centrada a 45&nbsp;rem y sin composición propia (Responsive &amp; Platform). Solo cambia el tamaño de las previsualizaciones, y esa cifra está en la nota 7.</li>
+      <li><b>«Cita del Día sin Imagen» y su «Alternativa con Imagen».</b> Ninguna de las 16 Citas aptas para portada pasa de 300 caracteres, así que hoy no se da. Su aviso es el de State Patterns, y la alternativa lleva el mismo material, con sus dos formatos.</li>
+      <li><b>«Sin Cita apta para portada»,</b> ni «Copiado.» y el respaldo del portapapeles, que son los construidos.</li>
+    </ul>
+  </footer>
+
+</div>
+</body>
+</html>

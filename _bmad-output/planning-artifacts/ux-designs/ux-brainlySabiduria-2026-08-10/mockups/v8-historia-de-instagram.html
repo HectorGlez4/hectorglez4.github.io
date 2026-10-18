@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historia de Instagram: variantes</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta maqueta. Si algo de aquí discrepa de las espinas, mandan ellas.
+       PRD v8   FR-17 (la Historia de Instagram, sus estados), FR-10 (dos formatos, el
+                dominio legible al pie), FR-11 (el 9:16 tiene un solo diseño), FR-18 (el
+                orden del bloque), FR-20 (instagram-historia nombra el botón), NFR-2,
+                NFR-9, NFR-12; UJ-2 reescrito.
+       Addendum v8   «Decisiones de mecanismo — compartición (v8)» (la activación se
+                consume, primero el portapapeles, pantalla táctil que puede compartir el
+                fichero, la columna 9:16), «Deuda conocida que entra a propósito en la v8»
+                (la descarga solo por NotAllowedError, iOS va a Archivos), «Decisiones de
+                mecanismo diferidas — v8 → De UX» (dos toques o preparada).
+       Diseño v8   §3 decisiones 5 y 15, §6 «Compartir donde se publica», §13, §14.
+       EXPERIENCE.md § Voice and Tone            (frases completas, punto final)
+       EXPERIENCE.md § Tipografía adaptativa     (la columna «Imagen 9:16» es nueva:
+                                                  se dibuja una propuesta)
+       EXPERIENCE.md § Component Patterns        (Acción Imagen, Diálogo de Imagen,
+                                                  Acción Compartir la cita)
+       EXPERIENCE.md § State Patterns            (Generando imagen, Generador que no
+                                                  llega a cargar, Copiado fallido)
+       EXPERIENCE.md § Interaction Primitives    (Un toque, un resultado; zonas de toque;
+                                                  pestaña nueva)
+       EXPERIENCE.md § Accessibility Floor       (mensajes de estado por role="status";
+                                                  la imagen no es la única vía)
+       DESIGN.md § Colors                        (siena = actuar o salir; las imágenes que
+                                                  salen del sitio no son interfaz)
+       DESIGN.md § Typography, § Elevation & Depth (la atenuación del 40 %), § Shapes
+                                                  (la imagen, de esquinas rectas)
+       DESIGN.md § Components                    (Primitivas: botones, sin iconos;
+                                                  Acciones de la Página de Cita; Diálogo de
+                                                  Imagen; Imágenes que salen del sitio)
+       AGENTS.md «Conventions that differ from defaults» (región role="status" vacía desde
+                la carga, dentro del <dialog> si se anuncia con él abierto; vaciar y
+                escribir en el fotograma siguiente).
+     Sin red y sin JavaScript. Fuentes del sistema: si Inter y Source Serif 4 no están
+     instaladas salen Georgia y la sans del sistema, como en el rasterizado, y los saltos de
+     línea pueden moverse un poco.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: no es el sitio. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --mesa-tinta:#1c2027; --mesa-suave:#59616e; --mesa-marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#d9b56a; --aviso-tinta:#6b4e12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--mesa-tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1320px;margin:0 auto;padding:40px 24px 72px;}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:84ch;color:var(--mesa-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);letter-spacing:.02em;max-width:118ch;overflow-wrap:anywhere;}
+  .meta b{color:var(--mesa-tinta);font-weight:600;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-size:12px;color:var(--mesa-suave);}
+  .leyenda span{display:inline-flex;align-items:center;gap:8px;}
+  .muestra{display:inline-block;width:22px;height:12px;border-radius:2px;}
+  .muestra.azul{background:#eaf0f7;border:1px dashed #8fa9c6;}
+  .muestra.ambar{background:#fdf4e3;border:1px dashed #c99a3a;}
+  .muestra.gris{background:#d5d7dc;border:1px solid #9ea3ad;}
+
+  section.bloque-mesa{margin-top:60px;}
+  .bloque-mesa > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;line-height:1.2;margin:0 0 8px;}
+  .bloque-mesa > h3{font-family:"Source Serif 4",Georgia,serif;font-size:19px;font-weight:600;line-height:1.25;margin:40px 0 6px;}
+  .bloque-mesa > .regla{margin:0;max-width:96ch;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  .bloque-mesa > .regla b{color:var(--mesa-tinta);font-weight:600;}
+
+  .cols{display:flex;flex-wrap:wrap;gap:40px 32px;margin-top:26px;align-items:flex-start;}
+  .col{width:380px;flex:none;display:flex;flex-direction:column;gap:22px;}
+  .var-cab{border-top:3px solid var(--mesa-marca);padding-top:10px;}
+  .var-et{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--mesa-marca);}
+  .var-linea{margin:6px 0 0;font-size:13px;line-height:1.55;color:var(--mesa-suave);}
+  .var-linea b{color:var(--mesa-tinta);font-weight:600;}
+  .rec{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:3px;background:var(--mesa-marca);color:#fff;font-size:10.5px;letter-spacing:.08em;vertical-align:1px;}
+
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:10px;width:380px;flex:none;}
+  figure.tel > figcaption{font-size:13px;line-height:1.5;color:var(--mesa-suave);}
+  figure.tel > figcaption b{color:var(--mesa-tinta);font-weight:600;}
+  .paso{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--mesa-marca);margin-bottom:2px;}
+  ul.notas{margin:0;padding:0 0 0 16px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);}
+  ul.notas li{margin:0 0 5px;}
+  ul.notas b{color:var(--mesa-tinta);font-weight:600;}
+  ul.notas li.pend{list-style:none;margin-left:-16px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;}
+  ul.notas li.pend b{color:var(--aviso-tinta);}
+
+  .estado-cab{margin:34px 0 0;padding:12px 14px;background:var(--mesa-alta);border:1px solid var(--mesa-linea);border-radius:4px;max-width:1240px;}
+  .estado-cab h3{margin:0;font-family:"Source Serif 4",Georgia,serif;font-size:18px;font-weight:600;}
+  .estado-cab p{margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--mesa-suave);}
+  .estado-cab p b{color:var(--mesa-tinta);font-weight:600;}
+
+  footer.fin{margin-top:72px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--mesa-suave);max-width:100ch;}
+  footer.fin b{color:var(--mesa-tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--mesa-tinta);margin:26px 0 8px;font-weight:600;}
+  footer.fin h2:first-child{margin-top:0;}
+  footer.fin ul{margin:6px 0 0;padding-left:18px;} footer.fin li{margin:4px 0;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--mesa-alta);
+       border:1px solid var(--mesa-linea);border-radius:3px;padding:1px 5px;overflow-wrap:anywhere;}
+
+  /* ---- El teléfono: carcasa y barra del navegador, que no son el sitio ---- */
+  .telefono{width:380px;background:#17181c;border-radius:38px;padding:12px 10px 22px;border:1px solid #2b2d33;}
+  .navegador{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .navegador span{width:300px;text-align:center;background:#2a2c32;color:#d6d9df;border-radius:10px;
+       font:12.5px/1 system-ui,-apple-system,sans-serif;padding:8px 12px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .navegador span::before{content:"";display:inline-block;width:7px;height:8px;margin-right:7px;border:1.5px solid #9ea3ad;border-radius:2px;vertical-align:-1px;}
+  .navegador.app span{background:#202227;color:#aeb3bb;}
+  .navegador.app span::before{display:none;}
+  .pantalla{position:relative;width:360px;overflow:hidden;border-radius:3px 3px 26px 26px;}
+  .telefono.corto .pantalla{border-radius:3px;}
+  .pantalla.negra{background:#0d0e11;}
+
+  /* ===========================================================================
+     EL SITIO. 360 px de viewport (NFR-8). Tokens con los nombres de CSS de la tabla
+     «De token a propiedad CSS» de DESIGN.md § Components, valores de su frontmatter.
+     Cada regla imita src/islands/ y src/styles/tokens.css salvo donde se dice.
+     =========================================================================== */
+  .lienzo{
+    --papel:#faf7f0; --contenedor-bajo:#f6f2ea; --contenedor:#f1ece2;
+    --tinta:#1f1b16; --tinta-apagada:#5a5147; --filete:#ddd5c7;
+    --siena:#8c4a2f; --sobre-siena:#ffffff;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --titular-sm:21px; --cuerpo-lg:17px; --cuerpo-md:15px; --autor:13px; --pie:13px;
+    --unidad:8px; --canal:24px; --margen:20px; --respiracion:40px;
+    --radio:3px; --radio-tarjeta:6px; --grosor-filete:1px;
+    --medida-prosa:68ch; --zona-de-toque:44px;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+    --pend:#6b4e12; --pend-fondo:#fdf4e3; --pend-linea:#c99a3a;
+
+    position:relative;width:360px;background:var(--papel);color:var(--tinta);
+    font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.65;overflow:hidden;
+  }
+  .lienzo.alto{height:640px;}
+  .oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+  .s-pag{padding:0 var(--margen) var(--respiracion);}
+
+  /* Botón secundario: lo construido en CopiarCita, ImagenDeCita y CompartirEnlace. */
+  .sec{display:inline-flex;align-items:center;font-family:var(--sans);font-size:var(--cuerpo-md);line-height:1.2;
+       color:var(--siena);background:transparent;border:var(--grosor-filete) solid var(--siena);border-radius:var(--radio);
+       min-height:var(--zona-de-toque);padding:0 calc(var(--unidad) * 3);text-decoration:none;cursor:pointer;white-space:nowrap;}
+  /* Primario: solo existe dentro del Diálogo de Imagen. */
+  .prim{display:flex;align-items:center;justify-content:center;width:100%;font-family:var(--sans);font-size:var(--cuerpo-md);
+        color:var(--sobre-siena);background:var(--siena);border:var(--grosor-filete) solid var(--siena);border-radius:var(--radio);
+        min-height:var(--zona-de-toque);padding:0 calc(var(--unidad) * 4);cursor:pointer;}
+
+  /* Acciones: cada una en su línea y a su ancho; Copiar abre el grupo a 4 × unidad. */
+  .acciones{display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--unidad) * 2);margin-top:calc(var(--unidad) * 4);}
+  /* El bloque «Compartir en». Sus tokens los fija la maqueta de la Página de Cita: aquí se
+     dibuja con el botón secundario de lo construido y el rótulo de las Rutas de salida. */
+  .cen{position:relative;margin-top:calc(var(--unidad) * 4);}
+  .rotulo{margin:0;font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;
+          line-height:1.4;text-transform:uppercase;color:var(--tinta-apagada);}
+  .destinos{list-style:none;display:flex;flex-wrap:wrap;gap:var(--unidad);margin:calc(var(--unidad) * 2) 0 0;padding:0;}
+  .estado-pag{margin:calc(var(--unidad) * 2) 0 0;font-size:var(--pie);line-height:1.5;color:var(--tinta);max-width:var(--medida-prosa);}
+
+  /* Respaldo del portapapeles: el de CopiarCita, con el enlace en lugar del texto. */
+  .respaldo{margin:calc(var(--unidad) * 2) 0 0;max-width:var(--medida-prosa);}
+  .respaldo .r-et{display:block;margin:0 0 var(--unidad);font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  .campo{font-family:var(--sans);font-size:var(--cuerpo-md);line-height:1.5;color:var(--tinta);background:var(--contenedor-bajo);
+         border:var(--grosor-filete) solid var(--filete);border-radius:var(--radio);padding:var(--unidad);word-break:break-all;
+         outline:2px solid var(--siena);outline-offset:2px;}
+  .campo .sel{background:#c9dcf5;}
+
+  /* «De la misma obra»: Tarjetas de Cita, con el aire de las Rutas de salida. */
+  .misma{margin-top:60px;padding-top:calc(var(--unidad) * 3);border-top:var(--grosor-filete) solid var(--filete);}
+  .listado{list-style:none;margin:calc(var(--unidad) * 2) 0 0;padding:0;border-top:var(--grosor-filete) solid var(--filete);}
+  .tarjeta{border-bottom:var(--grosor-filete) solid var(--filete);}
+  .tarjeta a{display:block;min-height:var(--zona-de-toque);padding:calc(var(--unidad) * 2) 0;text-decoration:none;color:inherit;}
+  .fragmento{font-family:var(--serif);font-size:var(--titular-sm);font-weight:600;line-height:1.3;color:var(--tinta);}
+
+  /* Diálogo de Imagen: lo construido, a 360 px (max-width min(92vw, 520px) = 331 px). */
+  .velo{position:absolute;inset:0;background:rgb(31 27 22 / 40%);}
+  .dialogo{position:absolute;left:14.5px;width:331px;top:50%;transform:translateY(-50%);max-height:602px;overflow:hidden;
+           background:var(--papel);border:var(--grosor-filete) solid var(--filete);border-radius:var(--radio-tarjeta);
+           padding:calc(var(--unidad) * 3);}
+  .d-dentro.desplazado{margin-top:-55px;}
+  .d-cab{display:flex;align-items:center;justify-content:space-between;gap:var(--canal);}
+  .d-titulo{margin:0;flex:1;font-size:var(--cuerpo-md);line-height:1.6;}
+  .d-previa{display:flex;justify-content:center;margin:calc(var(--unidad) * 3) 0;}
+  .d-previa > div{outline:var(--grosor-filete) solid var(--filete);}
+  .d-vacia{width:180px;height:320px;background:var(--papel);}
+  .d-estado{margin:calc(var(--unidad) * 2) 0 0;font-size:var(--pie);line-height:1.5;color:var(--tinta);}
+  .d-fallo{margin:calc(var(--unidad) * 3) 0;font-size:var(--cuerpo-md);line-height:1.6;}
+  .d-fallo p{margin:0;}
+  .d-fallo .sec{margin-top:calc(var(--unidad) * 2);}
+
+  /* ===========================================================================
+     LA IMAGEN. Píxeles del lienzo, multiplicados por --e (la escala). Imita
+     public/islas/imagen.js: margen 96, Cita en la serif a 1,3, filete de 96 × 2, Autor en
+     mayúsculas, procedencia en tinta apagada, marca al pie. Los cuerpos del 9:16 y del
+     dominio son la propuesta de esta maqueta, no contrato.
+     =========================================================================== */
+  .img916,.imgc{--e:.33333;position:relative;overflow:hidden;background:#faf7f0;color:#1f1b16;flex:none;}
+  .img916{width:calc(1080px * var(--e));height:calc(1920px * var(--e));}
+  .imgc{width:calc(1080px * var(--e));height:calc(1080px * var(--e));}
+  .i-zona{position:absolute;left:calc(96px * var(--e));right:calc(96px * var(--e));display:flex;flex-direction:column;justify-content:center;}
+  .i-cita{margin:0;font-family:"Source Serif 4",Georgia,"Times New Roman",serif;font-weight:400;font-size:calc(var(--px) * var(--e));line-height:1.3;color:#1f1b16;}
+  .i-filete{display:block;flex:none;width:calc(96px * var(--e));height:max(1px,calc(2px * var(--e)));background:#ddd5c7;}
+  .i-autor{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:600;text-transform:uppercase;line-height:1.25;color:#1f1b16;}
+  .i-proc{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:400;line-height:1.35;color:#5a5147;}
+  .i-pie{position:absolute;left:calc(96px * var(--e));right:calc(96px * var(--e));}
+  .i-marca{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:600;text-transform:uppercase;line-height:1.25;color:#5a5147;}
+  .i-dom{margin:0;font-family:Inter,system-ui,sans-serif;font-weight:400;line-height:1.25;color:#5a5147;}
+
+  /* 9:16 — cuerpos de la atribución y del pie, propuesta: el Autor a 36, la procedencia a
+     33, la marca a 30 y el dominio a 36 (el cuerpo del Autor, sin su peso ni su color). */
+  .img916 .i-filete{margin-top:calc(60px * var(--e));}
+  .img916 .i-autor{margin-top:calc(42px * var(--e));font-size:calc(36px * var(--e));}
+  .img916 .i-proc{margin-top:calc(21px * var(--e));font-size:calc(33px * var(--e));}
+  .img916 .i-marca{font-size:calc(30px * var(--e));}
+  .img916 .i-dom{margin-top:calc(8px * var(--e));font-size:calc(36px * var(--e));}
+  /* A: la cuadrada, más alta. */
+  .img916.v-a .i-zona{top:calc(96px * var(--e));bottom:calc(96px * var(--e));}
+  .img916.v-a .i-pie{bottom:calc(96px * var(--e));}
+  /* B: centrada entre las dos zonas que tapa Instagram; pie encima de la de abajo. */
+  .img916.v-b .i-zona{top:calc(250px * var(--e));bottom:calc(370px * var(--e));}
+  /* C: arriba, bajo la zona de arriba; el centro queda libre. */
+  .img916.v-c .i-zona{top:calc(298px * var(--e));bottom:calc(370px * var(--e));justify-content:flex-start;}
+  .img916.v-b .i-pie,.img916.v-c .i-pie{bottom:calc(280px * var(--e));}
+
+  /* Cuadrada — los cuerpos de hoy (imagen.js): Autor 24, procedencia 22, marca 20. */
+  .imgc .i-zona{top:calc(96px * var(--e));bottom:calc(96px * var(--e));}
+  .imgc .i-filete{margin-top:calc(40px * var(--e));}
+  .imgc .i-autor{margin-top:calc(28px * var(--e));font-size:calc(24px * var(--e));}
+  .imgc .i-proc{margin-top:calc(14px * var(--e));font-size:calc(22px * var(--e));}
+  .imgc .i-marca{font-size:calc(20px * var(--e));}
+  .imgc .i-pie{bottom:calc(68px * var(--e));}
+  .imgc .i-dom{margin-top:calc(8px * var(--e));font-size:calc(20px * var(--e));}
+  .imgc.q-b .i-dom{font-size:calc(24px * var(--e));}
+  .imgc.q-a .i-zona,.imgc.q-b .i-zona{bottom:calc(150px * var(--e));}
+  /* Lo construido escribe la procedencia en una sola línea, sin ancho máximo. */
+  .una-linea .i-proc{white-space:nowrap;}
+
+  /* ---- Cromo de Instagram: no es el sitio. Bandas planas, sin iconos ni marca ajena. ---- */
+  .ig{position:absolute;left:0;right:0;height:calc(250px * var(--e));background:rgba(20,22,27,.42);
+      color:#f3f4f7;font:10px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;padding:6px 8px;}
+  .ig.arriba{top:0;}
+  .ig.abajo{bottom:0;text-align:right;}
+  .ig .pill{position:absolute;left:12px;right:56px;bottom:12px;height:40px;border:1.5px solid rgba(255,255,255,.9);border-radius:22px;
+           background:rgba(20,22,27,.62);color:#f3f4f7;font:10px/37px ui-monospace,SFMono-Regular,Menlo,monospace;padding-left:14px;}
+  .sticker{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;color:#2f5d8a;
+           border:1.5px dashed #2f5d8a;border-radius:8px;padding:7px 10px;font:10.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;}
+  .lz{position:absolute;left:0;right:0;border-top:1px dashed #8fa9c6;}
+  .lz span{position:absolute;right:4px;top:1px;color:#2f5d8a;font:9.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .lz.sup{top:calc(250px * var(--e));}
+  .lz.inf{top:calc(1670px * var(--e));}
+  .lz.inf span{top:-14px;}
+
+  /* ---- La hoja del sistema: ilustración, varía por sistema. No es el sitio. ---- */
+  .hoja{position:absolute;left:0;right:0;bottom:0;height:350px;background:#e4e5ea;border-radius:14px 14px 0 0;
+        border-top:1px solid #c3c7cf;padding:12px 16px;font-family:system-ui,-apple-system,sans-serif;color:#1c2027;}
+  .h-et{margin:0;color:#2f5d8a;font:10.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .h-fich{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12.5px;color:#3a3f48;}
+  .h-fich .img916{outline:1px solid #c3c7cf;}
+  .h-apps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+  .h-apps span{height:62px;border-radius:12px;background:#fff;display:flex;align-items:flex-end;justify-content:center;
+               font-size:11px;padding-bottom:6px;color:#3a3f48;}
+  .h-fila{margin:8px 0 0;background:#fff;border-radius:10px;padding:10px 12px;font-size:13px;color:#1c2027;}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. Monoespaciada: no son el sitio.
+     Azul = qué se ha recortado o qué ilustra. Ámbar = [sin decidir en las espinas].
+     =========================================================================== */
+  .tijera{margin:0;padding:8px var(--margen);list-style:none;background:var(--anot-fondo);color:var(--anot);
+          font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;border-bottom:1px dashed var(--anot-linea);}
+  .tijera.abajo{border-bottom:0;border-top:1px dashed var(--anot-linea);margin:20px calc(var(--margen) * -1) calc(var(--respiracion) * -1);}
+  .tijera.flota{position:absolute;left:0;right:0;top:0;z-index:3;}
+  .pend{margin:10px 0 0;padding:7px 9px;border:1px dashed var(--pend-linea);background:var(--pend-fondo);
+        color:var(--pend);font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .pend b{font-weight:700;}
+  .toque{position:relative;outline:2px dashed var(--anot);outline-offset:3px;}
+  .toque::after{content:attr(data-toque);position:absolute;right:-4px;top:-19px;background:var(--anot);color:#fff;
+                font:600 10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:1px 6px;border-radius:2px;white-space:nowrap;}
+  .entra{position:relative;outline:2px dashed var(--pend-linea);outline-offset:3px;}
+  .entra::after{content:attr(data-entra);position:absolute;left:0;top:-19px;background:var(--pend-fondo);color:var(--pend);
+                border:1px dashed var(--pend-linea);font:10px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;padding:1px 5px;white-space:nowrap;}
+  .baja{position:absolute;right:0;top:calc(var(--unidad) * 2 + 52px);padding:1px 6px;border:1px dashed var(--anot-linea);background:var(--anot-fondo);
+        color:var(--anot);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;}
+  .marca-silencio{margin:calc(var(--unidad) * 2) 0 0;padding:7px 9px;border:1px dashed var(--pend-linea);background:var(--pend-fondo);
+        color:var(--pend);font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .escala{position:absolute;left:6px;bottom:6px;z-index:2;padding:1px 6px;background:rgba(234,240,247,.92);color:#2f5d8a;
+          border:1px dashed #8fa9c6;font:9.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .feed{padding:0 0 14px;background:#0d0e11;}
+  .feed .barra{height:36px;display:flex;align-items:center;padding:0 12px;color:#9ea3ad;font:10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header class="top">
+    <h1>Historia de Instagram: variantes</h1>
+    <p class="sub">El destino «Historia de Instagram» de la v8 (FR-17): cómo se llega a la hoja del sistema sin gastar la activación del toque, dónde dice el sitio cada uno de sus estados, y cómo se compone la imagen de 1080×1920 en la plantilla Papel, con el dominio al pie, y la cuadrada con el dominio. Datos reales del Corpus, a 360&nbsp;px. Mandan las espinas: si algo de aquí discrepa de <code>DESIGN.md</code>, de <code>EXPERIENCE.md</code> o del PRD v8, el error está aquí.</p>
+    <p class="meta"><b>La Cita:</b> «Ser culto es el único modo de ser libre.», de José Martí: 40 caracteres, tramo xl; de <b>Maestros ambulantes</b> (1884, 23 Citas), tomada de Wikisource en español, CC BY-SA 4.0 · <b>Enlace que se copia:</b> https://sabiduriadebolsillo.net/cita/jose-marti-ser-culto-es-el-unico-modo-de/?via=instagram-historia · <b>La Cita más larga del Corpus:</b> 240 caracteres, de Santiago Ramón y Cajal, de <b>Reglas y consejos sobre investigación científica</b> (sin año, Project Gutenberg) · <b>La procedencia más larga:</b> la Obra de Mariano José de Larra de 167 caracteres · Dónde aparece la Historia: solo en pantalla táctil cuyo navegador puede compartir el fichero, y en Citas de hasta 300 caracteres (FR-17); en escritorio y en el navegador de la aplicación de Facebook en Android no aparece, y el bloque lleva los otros tres sin aviso.</p>
+    <div class="leyenda">
+      <span><i class="muestra azul"></i>Anotación de la maqueta: lo recortado, lo ilustrado, dónde se toca. No es el sitio.</span>
+      <span><i class="muestra ambar"></i>[sin decidir en las espinas]: propuesta de esta maqueta, no contrato.</span>
+      <span><i class="muestra gris"></i>Cromo ajeno: la hoja del sistema y la interfaz de Instagram, dibujadas sin iconos.</span>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       DECISIÓN 1 — Dos toques o preparada antes del toque
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>Decisión 1 · Dos toques, o preparada antes del toque</h2>
+    <p class="regla">Lo que no se negocia (addendum v8): <b>entre el toque que comparte y <code>navigator.share({ files })</code> no hay ninguna espera</b> de red ni de composición, porque la hoja exige una activación reciente y la gasta. El generador, el 9:16 compuesto y el fichero tienen que estar hechos antes de ese toque, y el generador no se descarga sin intención (AD-6). El orden es siempre el mismo: primero se copia el enlace, después se abre la hoja con el fichero y sin texto.</p>
+
+    <div class="cols">
+
+      <!-- ===================== A ===================== -->
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">A · DOS TOQUES, CON DIÁLOGO <span class="rec">RECOMENDADA</span></p>
+          <p class="var-linea"><b>Distingue:</b> el primer toque abre el diálogo y pide el generador; el segundo, «Compartir en la historia», copia y comparte. <b>Respeta</b> AD-6 sin enmienda y «Un toque, un resultado», que ya se lee así para la Imagen (EXPERIENCE § Interaction Primitives). <b>Enmienda</b> DESIGN § Diálogo de Imagen: sin botones de plantilla (FR-11) y con la previsualización a 1:6, no a todo el ancho.</p>
+        </div>
+
+        <figure class="tel">
+          <figcaption><span class="paso">A1 · LA PÁGINA</span><br>El botón lo pone la isla al cargar, si hay puntero grueso y <code>canShare</code> acepta un PNG de prueba. No se compone nada todavía.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <p class="tijera">Desplazada hasta las acciones. Arriba quedan la Cita, la Atribución, la Línea de la Fuente y la Tarjeta de Obra.</p>
+                <div class="s-pag">
+                  <div class="acciones">
+                    <button class="sec" type="button">Copiar la cita</button>
+                    <button class="sec" type="button">Compartir como imagen</button>
+                  </div>
+                  <section class="cen" aria-labelledby="cen-a1">
+                    <h2 class="rotulo" id="cen-a1">Compartir en</h2>
+                    <ul class="destinos">
+                      <li><button class="sec toque" data-toque="toque 1" type="button"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button class="sec" type="button" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+                  <section class="misma" aria-labelledby="misma-a1">
+                    <h2 class="rotulo" id="misma-a1">De la misma obra</h2>
+                    <ul class="listado">
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario hacer de cada hombre una antorcha.»</span></a></li>
+                    </ul>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li class="pend"><b>[sin decidir]</b> Los tokens del bloque «Compartir en» los fija la maqueta de la Página de Cita; aquí va con el botón secundario de lo construido y el rótulo de las Rutas de salida.</li>
+          </ul>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">A2 · EL DIÁLOGO, CARGANDO</span><br>Se abre al tocar, antes de que llegue <code>imagen.js</code> (State Patterns, «Generando imagen»): sin indicador de progreso, usable y cerrable.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                    <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  </section>
+                  <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li><li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario hacer de cada hombre una antorcha.»</span></a></li></ul></section>
+                </div>
+                <div class="velo"></div>
+                <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                  <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                  <div class="d-previa"><div class="d-vacia"></div></div>
+                  <p class="oculto" role="status"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li class="pend"><b>[sin decidir, derivado]</b> «Compartir en la historia» no está hasta que el fichero está hecho, y aparece con la previsualización. Hoy el botón del diálogo de la Imagen está desde que se abre; aquí, pulsarlo antes obligaría a esperar después del toque, que es lo que gasta la activación.</li>
+          </ul>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">A3 · EL DIÁLOGO, LISTO</span><br>El 9:16 en la plantilla Papel, ya compuesto y con el fichero hecho; la región dice «La imagen está lista.».</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                    <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  </section>
+                  <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li><li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario hacer de cada hombre una antorcha.»</span></a></li></ul></section>
+                </div>
+                <div class="velo"></div>
+                <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                  <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                  <div class="d-previa">
+                    <div class="img916 v-b" style="--e:.16667">
+                      <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                      <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                    </div>
+                  </div>
+                  <button class="prim toque" data-toque="toque 2" type="button">Compartir en la historia</button>
+                  <p class="oculto" role="status">La imagen está lista.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li><b>Medido:</b> a 360×640 el diálogo mide 331&nbsp;px de ancho y como mucho 602 de alto, el máximo del navegador para un modal. Con la previsualización a todo el ancho (283×503) mediría unos 690, y «Compartir en la historia» quedaría fuera de la pantalla. A 1:6 (180×320) mide unos 510, con las fuentes de esta maqueta.</li>
+            <li class="pend"><b>[sin decidir] microcopia nueva:</b> «Se copia el enlace para el sticker Enlace.» va donde la Imagen cuadrada dice «Elige un diseño.»: aquí no hay nada que elegir (FR-11).</li>
+          </ul>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">A4 · LA HOJA, SOBRE EL DIÁLOGO</span><br>Tras el segundo toque: <code>writeText</code> y, sin esperar a nada más, <code>share({ files })</code>.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                    <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  </section>
+                </div>
+                <div class="velo"></div>
+                <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                  <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                  <div class="d-previa">
+                    <div class="img916 v-b" style="--e:.16667">
+                      <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                      <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                    </div>
+                  </div>
+                  <button class="prim" type="button">Compartir en la historia</button>
+                </div>
+                <div class="hoja">
+                  <p class="h-et">Hoja del sistema · ilustración, no es el sitio</p>
+                  <div class="h-fich">
+                    <div class="img916 v-b" style="--e:.03333"><div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p></div></div>
+                    <span>1 imagen · PNG · 1080×1920</span>
+                  </div>
+                  <div class="h-apps"><span>Instagram</span><span>WhatsApp</span><span>Mensajes</span><span>Más</span></div>
+                  <p class="h-fila">Guardar imagen</p>
+                  <p class="h-fila">Copiar</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li><b>La hoja tapa la mitad de abajo.</b> Lo que el diálogo dice arriba sigue a la vista mientras se elige Instagram; lo que diga bajo el botón no se ve hasta volver. Por eso el aviso del sticker va antes del toque, y no solo al terminar (FR-17).</li>
+            <li>No se redibuja antes de entregar, como hace hoy la Imagen cuadrada: sería una espera después del toque.</li>
+          </ul>
+        </figure>
+      </div>
+
+      <!-- ===================== B ===================== -->
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">B · PREPARADA ANTES DEL TOQUE, UN SOLO TOQUE</p>
+          <p class="var-linea"><b>Distingue:</b> cuando el bloque «Compartir en» entra en pantalla, la isla pide el generador, compone el 9:16 y hace el fichero; solo entonces pone «Historia de Instagram», y un toque copia y comparte. <b>Enmienda</b> AD-6: la intención deja de ser un toque y pasa a ser llegar al bloque. <b>Enmienda</b> FR-17 en su último estado: si el generador no llega, el botón no aparece y nada lo dice.</p>
+        </div>
+
+        <figure class="tel">
+          <figcaption><span class="paso">B1 · LA PÁGINA, ANTES</span><br>El bloque ya está en pantalla y la imagen se está componiendo: la Historia aún no tiene botón.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <p class="tijera">Desplazada hasta las acciones. Arriba quedan la Cita, la Atribución, la Línea de la Fuente y la Tarjeta de Obra.</p>
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen" aria-labelledby="cen-b1">
+                    <h2 class="rotulo" id="cen-b1">Compartir en</h2>
+                    <ul class="destinos">
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button class="sec" type="button" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+                  <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li><li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario hacer de cada hombre una antorcha.»</span></a></li><li class="tarjeta"><a href="#"><span class="fragmento">«Ser bueno es el único modo de ser dichoso.»</span></a></li></ul></section>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li><b>Llegar al bloque es la única intención que hay.</b> Quien baja a «De la misma obra» pasa por él: cada lectura que llega aquí descarga <code>imagen.js</code> y compone 2&nbsp;Mpx en el móvil, comparta o no.</li>
+          </ul>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">B2 · LA PÁGINA, DESPUÉS</span><br>Con el fichero hecho, la isla pone el botón donde manda FR-18: el primero.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <p class="tijera">Desplazada hasta las acciones. Arriba quedan la Cita, la Atribución, la Línea de la Fuente y la Tarjeta de Obra.</p>
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen" aria-labelledby="cen-b2">
+                    <h2 class="rotulo" id="cen-b2">Compartir en</h2>
+                    <ul class="destinos">
+                      <li><button class="sec entra" data-entra="entra al terminar de componer" type="button"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button class="sec" type="button" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                    <span class="baja" aria-hidden="true">↓ 52 px</span>
+                  </section>
+                  <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li><li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario hacer de cada hombre una antorcha.»</span></a></li></ul></section>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li><b>La fila baja 52&nbsp;px</b> (44 del botón y 8 de separación) bajo el dedo de quien iba a pulsar WhatsApp, Facebook o Threads, y se pulsa la Historia sin querer.</li>
+            <li class="pend"><b>[patrón nuevo]</b> Reservarle el sitio antes evitaría el salto, pero sería un contenedor vacío en la página mientras se compone.</li>
+          </ul>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">B3 · LA HOJA, DIRECTA</span><br>Un toque: <code>writeText</code> y <code>share({ files })</code>. No hay diálogo.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <p class="tijera">Desplazada hasta las acciones.</p>
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                    <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  </section>
+                </div>
+                <div class="hoja">
+                  <p class="h-et">Hoja del sistema · ilustración, no es el sitio</p>
+                  <div class="h-fich">
+                    <div class="img916 v-b" style="--e:.03333"><div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p></div></div>
+                    <span>1 imagen · PNG · 1080×1920</span>
+                  </div>
+                  <div class="h-apps"><span>Instagram</span><span>WhatsApp</span><span>Mensajes</span><span>Más</span></div>
+                  <p class="h-fila">Guardar imagen</p>
+                  <p class="h-fila">Copiar</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li><b>La imagen no se ve antes de salir del sitio:</b> la primera vez que el visitante la ve es en Instagram. Tampoco hay dónde avisar del sticker antes del toque: el aviso llega al volver.</li>
+          </ul>
+        </figure>
+      </div>
+
+      <!-- ===================== C ===================== -->
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">C · PREPARADA SI DA TIEMPO; SI NO, EL DIÁLOGO</p>
+          <p class="var-linea"><b>Distingue:</b> el botón está desde la carga, como en A, y la imagen se prepara al entrar el bloque en pantalla, como en B; al tocarlo, si el fichero ya está hecho comparte en un toque, y si no, abre el diálogo de A. <b>Enmienda</b> AD-6, como B, y «Un toque, un resultado»: el mismo botón hace dos cosas según un tiempo que el visitante no ve. <b>[patrón nuevo]</b></p>
+        </div>
+
+        <figure class="tel">
+          <figcaption><span class="paso">C1 · LA PÁGINA</span><br>Idéntica a A1: el botón entra al cargar, antes de llegar al bloque, y no mueve la fila.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <p class="tijera">Desplazada hasta las acciones. Arriba quedan la Cita, la Atribución, la Línea de la Fuente y la Tarjeta de Obra.</p>
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen" aria-labelledby="cen-c1">
+                    <h2 class="rotulo" id="cen-c1">Compartir en</h2>
+                    <ul class="destinos">
+                      <li><button class="sec toque" data-toque="toque 1" type="button"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="sec" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button class="sec" type="button" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+                  <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li><li class="tarjeta"><a href="#"><span class="fragmento">«Es necesario hacer de cada hombre una antorcha.»</span></a></li></ul></section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">C2 · SI ESTABA LISTA</span><br>La hoja, directa, como en B3.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <p class="tijera">Desplazada hasta las acciones.</p>
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                    <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  </section>
+                </div>
+                <div class="hoja">
+                  <p class="h-et">Hoja del sistema · ilustración, no es el sitio</p>
+                  <div class="h-fich">
+                    <div class="img916 v-b" style="--e:.03333"><div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p></div></div>
+                    <span>1 imagen · PNG · 1080×1920</span>
+                  </div>
+                  <div class="h-apps"><span>Instagram</span><span>WhatsApp</span><span>Mensajes</span><span>Más</span></div>
+                  <p class="h-fila">Guardar imagen</p>
+                  <p class="h-fila">Copiar</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+
+        <figure class="tel">
+          <figcaption><span class="paso">C3 · SI NO ESTABA LISTA</span><br>El diálogo de A, con su segundo toque.</figcaption>
+          <div class="telefono">
+            <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+            <div class="pantalla">
+              <div class="lienzo alto" lang="es">
+                <div class="s-pag">
+                  <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                  <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                    <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  </section>
+                  <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li></ul></section>
+                </div>
+                <div class="velo"></div>
+                <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                  <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                  <div class="d-previa">
+                    <div class="img916 v-b" style="--e:.16667">
+                      <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                      <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                    </div>
+                  </div>
+                  <button class="prim toque" data-toque="toque 2" type="button">Compartir en la historia</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="notas">
+            <li><b>Lo más complejo de las tres</b>, con los costes de las dos: descarga y compone sin toque, como B, y sus estados viven en dos sitios, el diálogo o la página, según por dónde haya ido.</li>
+            <li>Quien pulsa rápido —casi todo el que baja a compartir— vive A; quien lee despacio, B. El visitante no sabe cuál le va a tocar.</li>
+          </ul>
+        </figure>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 1, SUS ESTADOS
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>Decisión 1, sus estados · dónde se dicen</h2>
+    <p class="regla">Los cinco estados de FR-17, con su frase. Todo se anuncia por una región <code>role="status"</code> que está en el marcado desde la carga, vacía: <b>dentro del diálogo</b> en A, porque con el diálogo abierto lo de fuera es inerte, y <b>junto al bloque</b> en B. Se vacía y se escribe en el fotograma siguiente, para que el mismo texto se vuelva a anunciar. Cancelar (<code>AbortError</code>) no dice nada ni registra nada, en las dos. <b>C</b> usa la columna A cuando abre el diálogo y la B cuando comparte directo. La línea visible va en <code>caption</code> y en tinta, bajo el botón o bajo el bloque [sin decidir].</p>
+
+    <!-- ===== Compartido ===== -->
+    <div class="estado-cab">
+      <h3>1 · Compartido</h3>
+      <p><b>«Enlace copiado: pégalo en el sticker Enlace.»</b> Solo si <code>writeText</code> resolvió: nunca dice «copiado» sin haber copiado (FR-17). Se registra <code>comparticion-de-imagen</code> con destino <code>instagram-historia</code>.</p>
+    </div>
+    <div class="cols">
+      <figure class="tel">
+        <figcaption><span class="paso">A · EN EL DIÁLOGO</span><br>Al volver de Instagram el diálogo sigue abierto, con la frase bajo el botón. Pulsarlo otra vez vuelve a compartir.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo alto" lang="es">
+              <div class="s-pag">
+                <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                </section>
+              </div>
+              <div class="velo"></div>
+              <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                <div class="d-previa">
+                  <div class="img916 v-b" style="--e:.16667">
+                    <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                    <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                  </div>
+                </div>
+                <button class="prim" type="button">Compartir en la historia</button>
+                <p class="d-estado" aria-hidden="true">Enlace copiado: pégalo en el sticker Enlace.</p>
+                <p class="oculto" role="status">Enlace copiado: pégalo en el sticker Enlace.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas"><li>Cabe: unos 546&nbsp;px de los 602.</li></ul>
+      </figure>
+
+      <figure class="tel">
+        <figcaption><span class="paso">B · EN LA PÁGINA</span><br>La frase va bajo el bloque, donde estaba el dedo. Con la hoja abierta, la mitad de abajo de la pantalla queda tapada, y casi siempre la frase con ella.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <p class="tijera">Desplazada hasta las acciones.</p>
+              <div class="s-pag">
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  <p class="estado-pag" aria-hidden="true">Enlace copiado: pégalo en el sticker Enlace.</p>
+                  <p class="oculto" role="status">Enlace copiado: pégalo en el sticker Enlace.</p>
+                </section>
+                <p class="tijera abajo">Sigue «De la misma obra».</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas"><li class="pend"><b>[sin decidir]</b> Cuánto dura la frase en la página: con la del botón de Copiar, 2&nbsp;s, ya se habría ido al volver de Instagram.</li></ul>
+      </figure>
+    </div>
+
+    <!-- ===== NotAllowedError ===== -->
+    <div class="estado-cab">
+      <h3>2 · El navegador rechaza la entrega (<code>NotAllowedError</code>)</h3>
+      <p><b>«La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.»</b> La activación se perdió o se negó: no es una cancelación. La misma acción descarga la imagen y deja el enlace copiado. Es la única descarga de la Historia, y se registra como <code>descarga-de-imagen</code> con destino <code>instagram-historia</code>.</p>
+    </div>
+    <div class="cols">
+      <figure class="tel">
+        <figcaption><span class="paso">A · EN EL DIÁLOGO</span><br>La frase, bajo el botón, en dos líneas.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo alto" lang="es">
+              <div class="s-pag">
+                <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                </section>
+              </div>
+              <div class="velo"></div>
+              <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                <div class="d-previa">
+                  <div class="img916 v-b" style="--e:.16667">
+                    <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                    <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                  </div>
+                </div>
+                <button class="prim" type="button">Compartir en la historia</button>
+                <p class="d-estado" aria-hidden="true">La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.</p>
+                <p class="oculto" role="status">La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="tel">
+        <figcaption><span class="paso">B · EN LA PÁGINA</span><br>La misma frase bajo el bloque.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <p class="tijera">Desplazada hasta las acciones.</p>
+              <div class="s-pag">
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  <p class="estado-pag" aria-hidden="true">La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.</p>
+                  <p class="oculto" role="status">La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.</p>
+                </section>
+                <p class="tijera abajo">Sigue «De la misma obra».</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li class="pend"><b>[sin decidir]</b> En iOS la descarga va a Archivos y no a Fotos, desde donde la historia no la recoge (deuda v8). La frase no lo dice; decir dónde ha caído sería otra frase por sistema.</li>
+        </ul>
+      </figure>
+    </div>
+
+    <!-- ===== Portapapeles ===== -->
+    <div class="estado-cab">
+      <h3>3 · El portapapeles falla</h3>
+      <p>La frase no dice «copiado» y el enlace se revela en un campo seleccionable: el mismo respaldo que Copiar, que dice «Selecciona el texto y cópialo.». La hoja se abre igual, porque el fichero sí está. <b>[sin decidir] microcopia derivada:</b> «Selecciona el enlace y cópialo para el sticker Enlace.»; si además cayó en la descarga, «La imagen se ha descargado. Selecciona el enlace y cópialo para el sticker Enlace.».</p>
+    </div>
+    <div class="cols">
+      <figure class="tel">
+        <figcaption><span class="paso">A · EN EL DIÁLOGO</span><br>El campo no cabe con la previsualización: el diálogo se desplaza por dentro y el foco va al campo, seleccionado, como en Copiar.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo alto" lang="es">
+              <div class="s-pag">
+                <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                </section>
+              </div>
+              <div class="velo"></div>
+              <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                <div class="d-dentro desplazado">
+                  <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                  <div class="d-previa">
+                    <div class="img916 v-b" style="--e:.16667">
+                      <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                      <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                    </div>
+                  </div>
+                  <button class="prim" type="button">Compartir en la historia</button>
+                  <div class="respaldo">
+                    <label class="r-et" for="enlace-a">Selecciona el enlace y cópialo para el sticker Enlace.</label>
+                    <div class="campo" id="enlace-a"><span class="sel">https://sabiduriadebolsillo.net/cita/jose-marti-ser-culto-es-el-unico-modo-de/?via=instagram-historia</span></div>
+                  </div>
+                  <p class="oculto" role="status">Selecciona el enlace y cópialo para el sticker Enlace.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas"><li><b>Medido:</b> con el campo, el contenido mide unos 655&nbsp;px y el diálogo, 602: se ve desplazado 55&nbsp;px. La línea de arriba queda fuera.</li></ul>
+      </figure>
+
+      <figure class="tel">
+        <figcaption><span class="paso">B · EN LA PÁGINA</span><br>El respaldo de Copiar, bajo el bloque.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <p class="tijera">Desplazada hasta las acciones.</p>
+              <div class="s-pag">
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  <div class="respaldo">
+                    <label class="r-et" for="enlace-b">Selecciona el enlace y cópialo para el sticker Enlace.</label>
+                    <div class="campo" id="enlace-b"><span class="sel">https://sabiduriadebolsillo.net/cita/jose-marti-ser-culto-es-el-unico-modo-de/?via=instagram-historia</span></div>
+                  </div>
+                  <p class="oculto" role="status">Selecciona el enlace y cópialo para el sticker Enlace.</p>
+                </section>
+                <p class="tijera abajo">Sigue «De la misma obra».</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas"><li>El campo lleva el enlace con su <code>?via=instagram-historia</code>: es el que irá al sticker.</li></ul>
+      </figure>
+    </div>
+
+    <!-- ===== Generador ===== -->
+    <div class="estado-cab">
+      <h3>4 · El generador no llega</h3>
+      <p><b>«No se ha podido preparar la imagen. Puedes copiar el texto de la cita.»</b> y «Copiar el texto»: la frase y el botón de lo construido (EXPERIENCE § State Patterns). La imagen nunca es la única vía. Pulsar otra vez lo vuelve a intentar.</p>
+    </div>
+    <div class="cols">
+      <figure class="tel">
+        <figcaption><span class="paso">A · EN EL DIÁLOGO</span><br>La frase va donde iba la previsualización, sin «Compartir en la historia». Se reintenta cerrando y pulsando otra vez «Historia de Instagram», como hoy la Imagen.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo alto" lang="es">
+              <div class="s-pag">
+                <div class="acciones"><button class="sec" type="button">Copiar la cita</button><button class="sec" type="button">Compartir como imagen</button></div>
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">Historia de Instagram</span></li><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                </section>
+                <section class="misma"><h2 class="rotulo">De la misma obra</h2><ul class="listado"><li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li></ul></section>
+              </div>
+              <div class="velo"></div>
+              <div class="dialogo" role="dialog" aria-label="Historia de Instagram">
+                <div class="d-cab"><p class="d-titulo">Se copia el enlace para el sticker Enlace.</p><button class="sec" type="button">Cerrar</button></div>
+                <div class="d-fallo">
+                  <p>No se ha podido preparar la imagen. Puedes copiar el texto de la cita.</p>
+                  <button class="sec" type="button">Copiar el texto</button>
+                </div>
+                <p class="oculto" role="status">No se ha podido preparar la imagen. Puedes copiar el texto de la cita.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li class="pend"><b>[sin decidir]</b> La línea de arriba se queda, como hoy «Elige un diseño.» en el fallo de la Imagen, aunque ya no haya enlace que copiar. Quitarla es una línea más de guion.</li>
+        </ul>
+      </figure>
+
+      <figure class="tel">
+        <figcaption><span class="paso">B · EN LA PÁGINA</span><br>El generador se pidió sin que nadie tocara nada; al fallar, el botón nunca llega a ponerse.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <p class="tijera">Desplazada hasta las acciones.</p>
+              <div class="s-pag">
+                <section class="cen"><h2 class="rotulo">Compartir en</h2>
+                  <ul class="destinos"><li><span class="sec">WhatsApp</span></li><li><span class="sec">Facebook</span></li><li><span class="sec">Threads</span></li><li><span class="sec">Más opciones…</span></li></ul>
+                  <p class="oculto" role="status"></p>
+                </section>
+                <p class="marca-silencio">Sin «Historia de Instagram» y sin frase: no hay nada que pulsar otra vez. Decirlo sería un mensaje de error sobre algo que nadie pidió.</p>
+                <p class="tijera abajo">Sigue «De la misma obra».</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul class="notas"><li><b>Enmienda FR-17</b>, que pide decirlo en una frase y reintentar al pulsar: en B el fallo es silencioso por construcción.</li></ul>
+      </figure>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 2 — La imagen 9:16
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>Decisión 2 · La imagen de 1080×1920, plantilla Papel</h2>
+    <p class="regla">A escala 1:3, que a 360&nbsp;px de ancho son 360×640: <b>lo que ve quien mira la historia a pantalla completa</b> en un móvil de 360. Arriba de cada variante, la historia vista, con las bandas que pone Instagram encima —unos 250&nbsp;px arriba y otros tantos abajo, la guía de Meta para historias; lo confirma la matriz de dispositivos— y el sticker Enlace donde Instagram lo deja al añadirlo, en el centro [supuesto]. Debajo, la imagen tal cual con la Cita más larga del Corpus. Las tres comparten cuerpos y pie; solo cambia dónde va cada cosa.</p>
+    <ul class="notas" style="margin-top:12px;max-width:110ch;">
+      <li class="pend"><b>[sin decidir] Columna «Imagen 9:16» de la tabla de tramos</b> (EXPERIENCE § Tipografía adaptativa; AD-8): un escalón por encima de la cuadrada, <b>80 / 64 / 52 / 42</b> px para ≤80 / 81–160 / 161–240 / 241–300 caracteres. El ancho útil es el mismo que en la cuadrada (888) y el alto sobra: la de 300 caracteres a 42 ocupa unas 8 líneas. A escala, la Cita de Martí sale a 27&nbsp;px y la de Cajal a 17. Lo que no cabe no se encoge (NFR-12).</li>
+      <li class="pend"><b>[sin decidir] Cuerpos de la atribución y del pie en el 9:16:</b> Autor 36, procedencia 33, marca 30 y <b>dominio 36</b>, el cuerpo del Autor sin su peso ni su color. A escala: 12, 11, 10 y 12&nbsp;px. El dominio queda tan legible como el nombre y por debajo de él: legible y subordinado, como pide FR-10. La procedencia se reparte en líneas, como la Cita: ver la última fila.</li>
+    </ul>
+
+    <div class="cols">
+
+      <!-- ===================== 9:16 A ===================== -->
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">A · LA CUADRADA, MÁS ALTA</p>
+          <p class="var-linea"><b>Distingue:</b> la retícula de la cuadrada sin cambios, con márgenes de 96, la Cita centrada en el lienzo y el pie a 96 del borde. <b>Respeta</b> DESIGN § Imágenes que salen del sitio tal como está. <b>Incumple</b> para qué está el dominio (FR-10, §4.9 del PRD): el campo de respuesta de Instagram lo tapa.</p>
+        </div>
+        <figure class="tel">
+          <figcaption><span class="paso">VISTA EN LA HISTORIA</span><br>El pie cae entero dentro de la banda de abajo; el sticker, sobre la Cita.</figcaption>
+          <div class="telefono">
+            <div class="navegador app"><span>historia de Instagram · ilustración</span></div>
+            <div class="pantalla">
+              <div class="img916 v-a">
+                <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="ig arriba">interfaz de Instagram: progreso y perfil</div>
+                <div class="ig abajo">interfaz de Instagram<span class="pill">campo de respuesta</span></div>
+                <span class="sticker">sticker Enlace · lo pone el visitante</span>
+              </div>
+            </div>
+          </div>
+        </figure>
+        <figure class="tel">
+          <figcaption><span class="paso">LA CITA MÁS LARGA, TAL CUAL</span><br>240 caracteres en el tramo md (52). Las líneas discontinuas marcan las bandas.</figcaption>
+          <div class="telefono">
+            <div class="navegador app"><span>la imagen, a escala 1:3</span></div>
+            <div class="pantalla">
+              <div class="img916 v-a">
+                <div class="i-zona"><p class="i-cita" style="--px:52px">«No es dado a todos aventurarse en la selva y trazar, a fuerza de energía, un camino practicable; pero aun los más humildes podemos aprovecharnos del sendero abierto por el genio, y arrancar, caminando por él, algún secreto a lo desconocido.»</p><span class="i-filete"></span><p class="i-autor">Santiago Ramón y Cajal</p><p class="i-proc">Reglas y consejos sobre investigación científica</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="lz sup"><span>250</span></div>
+                <div class="lz inf"><span>1670</span></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+
+      <!-- ===================== 9:16 B ===================== -->
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">B · CENTRADA, PIE SOBRE LA ZONA SEGURA <span class="rec">RECOMENDADA</span></p>
+          <p class="var-linea"><b>Distingue:</b> la Cita centrada entre las dos bandas que pone Instagram, y el pie justo encima de la de abajo. <b>Respeta</b> FR-10 (el dominio se lee en la historia) y la retícula de la cuadrada, con un solo cambio: dónde va el pie. <b>Cuesta:</b> el sticker cae al principio sobre la Cita o su atribución, y el visitante lo arrastra.</p>
+        </div>
+        <figure class="tel">
+          <figcaption><span class="paso">VISTA EN LA HISTORIA</span><br>Marca y dominio a la vista, sobre la banda de abajo.</figcaption>
+          <div class="telefono">
+            <div class="navegador app"><span>historia de Instagram · ilustración</span></div>
+            <div class="pantalla">
+              <div class="img916 v-b">
+                <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="ig arriba">interfaz de Instagram: progreso y perfil</div>
+                <div class="ig abajo">interfaz de Instagram<span class="pill">campo de respuesta</span></div>
+                <span class="sticker">sticker Enlace · lo pone el visitante</span>
+              </div>
+            </div>
+          </div>
+        </figure>
+        <figure class="tel">
+          <figcaption><span class="paso">LA CITA MÁS LARGA, TAL CUAL</span><br>Cabe entre las bandas con aire de sobra.</figcaption>
+          <div class="telefono">
+            <div class="navegador app"><span>la imagen, a escala 1:3</span></div>
+            <div class="pantalla">
+              <div class="img916 v-b">
+                <div class="i-zona"><p class="i-cita" style="--px:52px">«No es dado a todos aventurarse en la selva y trazar, a fuerza de energía, un camino practicable; pero aun los más humildes podemos aprovecharnos del sendero abierto por el genio, y arrancar, caminando por él, algún secreto a lo desconocido.»</p><span class="i-filete"></span><p class="i-autor">Santiago Ramón y Cajal</p><p class="i-proc">Reglas y consejos sobre investigación científica</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="lz sup"><span>250</span></div>
+                <div class="lz inf"><span>1670</span></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+
+      <!-- ===================== 9:16 C ===================== -->
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">C · ARRIBA, CON SITIO PARA EL STICKER</p>
+          <p class="var-linea"><b>Distingue:</b> la Cita empieza bajo la banda de arriba y deja libre el centro, donde Instagram pone el sticker; el pie, como en B. <b>[patrón nuevo]:</b> la composición reserva sitio a algo que el sitio no controla. <b>Cuesta:</b> las Citas cortas quedan arriba con un vacío debajo, y con las largas el sitio libre baja del centro.</p>
+        </div>
+        <figure class="tel">
+          <figcaption><span class="paso">VISTA EN LA HISTORIA</span><br>El sticker cae en el hueco, sin tapar la Cita.</figcaption>
+          <div class="telefono">
+            <div class="navegador app"><span>historia de Instagram · ilustración</span></div>
+            <div class="pantalla">
+              <div class="img916 v-c">
+                <div class="i-zona"><p class="i-cita" style="--px:80px">«Ser culto es el único modo de ser libre.»</p><span class="i-filete"></span><p class="i-autor">José Martí</p><p class="i-proc">Maestros ambulantes, 1884</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="ig arriba">interfaz de Instagram: progreso y perfil</div>
+                <div class="ig abajo">interfaz de Instagram<span class="pill">campo de respuesta</span></div>
+                <span class="sticker">sticker Enlace · lo pone el visitante</span>
+              </div>
+            </div>
+          </div>
+        </figure>
+        <figure class="tel">
+          <figcaption><span class="paso">LA CITA MÁS LARGA, TAL CUAL</span><br>La atribución llega al centro: el sticker la taparía.</figcaption>
+          <div class="telefono">
+            <div class="navegador app"><span>la imagen, a escala 1:3</span></div>
+            <div class="pantalla">
+              <div class="img916 v-c">
+                <div class="i-zona"><p class="i-cita" style="--px:52px">«No es dado a todos aventurarse en la selva y trazar, a fuerza de energía, un camino practicable; pero aun los más humildes podemos aprovecharnos del sendero abierto por el genio, y arrancar, caminando por él, algún secreto a lo desconocido.»</p><span class="i-filete"></span><p class="i-autor">Santiago Ramón y Cajal</p><p class="i-proc">Reglas y consejos sobre investigación científica</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="lz sup"><span>250</span></div>
+                <div class="lz inf"><span>1670</span></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DECISIÓN 3 — La cuadrada con el dominio
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>Decisión 3 · La cuadrada, con el dominio al pie</h2>
+    <p class="regla">A escala 1:3, 360×360: <b>lo que mide en un feed de 360&nbsp;px</b>. Con la Cita más larga del Corpus, porque el pie nuevo le quita sitio y FR-10 promete Imagen a toda Cita de hasta 300 caracteres. Conserva sus tres plantillas; aquí, Papel. Hoy no lleva el dominio.</p>
+
+    <div class="cols">
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">HOY · SIN DOMINIO</p>
+          <p class="var-linea">Lo construido (<code>imagen.js</code>): Autor 24, procedencia 22 y la marca a 20, a 96 del borde. A escala, la marca mide 6,7&nbsp;px.</p>
+        </div>
+        <figure class="tel">
+          <div class="telefono corto">
+            <div class="navegador app"><span>una publicación en el feed · ilustración</span></div>
+            <div class="pantalla negra">
+              <div class="feed"><div class="barra">publicación</div>
+                <div class="imgc">
+                  <div class="i-zona"><p class="i-cita" style="--px:42px">«No es dado a todos aventurarse en la selva y trazar, a fuerza de energía, un camino practicable; pero aun los más humildes podemos aprovecharnos del sendero abierto por el genio, y arrancar, caminando por él, algún secreto a lo desconocido.»</p><span class="i-filete"></span><p class="i-autor">Santiago Ramón y Cajal</p><p class="i-proc">Reglas y consejos sobre investigación científica</p></div>
+                  <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">A · UNA LÍNEA MÁS, AL CUERPO DE LA MARCA</p>
+          <p class="var-linea"><b>Distingue:</b> el dominio debajo de la marca, a 20, con su mismo color. <b>Respeta</b> la jerarquía de hoy y no le quita casi sitio a la Cita. <b>No cumple</b> «legible» de FR-10: a escala mide 6,7&nbsp;px, y nadie teclea lo que no puede leer.</p>
+        </div>
+        <figure class="tel">
+          <div class="telefono corto">
+            <div class="navegador app"><span>una publicación en el feed · ilustración</span></div>
+            <div class="pantalla negra">
+              <div class="feed"><div class="barra">publicación</div>
+                <div class="imgc q-a">
+                  <div class="i-zona"><p class="i-cita" style="--px:42px">«No es dado a todos aventurarse en la selva y trazar, a fuerza de energía, un camino practicable; pero aun los más humildes podemos aprovecharnos del sendero abierto por el genio, y arrancar, caminando por él, algún secreto a lo desconocido.»</p><span class="i-filete"></span><p class="i-autor">Santiago Ramón y Cajal</p><p class="i-proc">Reglas y consejos sobre investigación científica</p></div>
+                  <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">B · EL DOMINIO AL CUERPO DEL AUTOR <span class="rec">RECOMENDADA</span></p>
+          <p class="var-linea"><b>Distingue:</b> el dominio a 24, el cuerpo del Autor, con el peso y el color de la procedencia: la misma regla que en el 9:16. <b>Respeta</b> FR-10: a escala mide 8&nbsp;px, lo mismo que el nombre del Autor hoy, y queda por debajo de él. <b>Cuesta</b> unos 36&nbsp;px de lienzo; la Cita de 240 caracteres sigue cabiendo con aire.</p>
+        </div>
+        <figure class="tel">
+          <div class="telefono corto">
+            <div class="navegador app"><span>una publicación en el feed · ilustración</span></div>
+            <div class="pantalla negra">
+              <div class="feed"><div class="barra">publicación</div>
+                <div class="imgc q-b">
+                  <div class="i-zona"><p class="i-cita" style="--px:42px">«No es dado a todos aventurarse en la selva y trazar, a fuerza de energía, un camino practicable; pero aun los más humildes podemos aprovecharnos del sendero abierto por el genio, y arrancar, caminando por él, algún secreto a lo desconocido.»</p><span class="i-filete"></span><p class="i-autor">Santiago Ramón y Cajal</p><p class="i-proc">Reglas y consejos sobre investigación científica</p></div>
+                  <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
+        <ul class="notas"><li>El Autor de la cuadrada mide hoy 8&nbsp;px en un feed de 360. Subirlo no es de esta decisión; se anota.</li></ul>
+      </div>
+    </div>
+
+    <h3>Lo que destapa la maqueta · la procedencia no se reparte en líneas</h3>
+    <p class="regla"><code>imagen.js</code> escribe la procedencia con un solo <code>fillText</code>, sin ancho máximo, y lo que no cabe se sale del lienzo: es un recorte, y NFR-12 lo prohíbe. Estimado sobre el árbol del 2026-10-18, a unos 11&nbsp;px por carácter a 22: <b>75 Citas</b> tienen una procedencia de más de 80 caracteres, que pasa del margen; <b>11</b> pasan de 90, que se salen del lienzo; <b>4</b> pasan de 120. En el 9:16, a 33, pasarían del margen las de más de unos 54 caracteres: <b>391</b>. Aquí, la Cita de Larra cuya Obra tiene el título más largo del Corpus.</p>
+    <div class="cols">
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">HOY · UNA SOLA LÍNEA</p>
+          <p class="var-linea">Lo construido: el título se sale por la derecha y se pierde casi la mitad, desde «Don Quijote».</p>
+        </div>
+        <figure class="tel">
+          <div class="telefono corto">
+            <div class="navegador app"><span>la imagen cuadrada, a escala 1:3</span></div>
+            <div class="pantalla negra">
+              <div class="imgc una-linea">
+                <div class="i-zona"><p class="i-cita" style="--px:52px">«La verdad del teatro es enteramente convencional y la naturaleza no debe en él presentarse tan desnuda.»</p><span class="i-filete"></span><p class="i-autor">Mariano José de Larra</p><p class="i-proc">Primera representación del drama episódico, nuevo, original, en tres actos, titulado «Don Quijote de la Mancha en Sierra Morena» escrito por don Ventura de la Vega</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">CUADRADA B · REPARTIDA</p>
+          <p class="var-linea">La procedencia se reparte en líneas con el mismo algoritmo que la Cita, sin partir palabras, y la Cita sube para hacerle sitio.</p>
+        </div>
+        <figure class="tel">
+          <div class="telefono corto">
+            <div class="navegador app"><span>la imagen cuadrada, a escala 1:3</span></div>
+            <div class="pantalla negra">
+              <div class="imgc q-b">
+                <div class="i-zona"><p class="i-cita" style="--px:52px">«La verdad del teatro es enteramente convencional y la naturaleza no debe en él presentarse tan desnuda.»</p><span class="i-filete"></span><p class="i-autor">Mariano José de Larra</p><p class="i-proc">Primera representación del drama episódico, nuevo, original, en tres actos, titulado «Don Quijote de la Mancha en Sierra Morena» escrito por don Ventura de la Vega</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+      <div class="col">
+        <div class="var-cab">
+          <p class="var-et">9:16 B · REPARTIDA</p>
+          <p class="var-linea">Cuatro líneas de procedencia entre las bandas, sin tocar el pie.</p>
+        </div>
+        <figure class="tel">
+          <div class="telefono">
+            <div class="navegador app"><span>la imagen, a escala 1:3</span></div>
+            <div class="pantalla">
+              <div class="img916 v-b">
+                <div class="i-zona"><p class="i-cita" style="--px:64px">«La verdad del teatro es enteramente convencional y la naturaleza no debe en él presentarse tan desnuda.»</p><span class="i-filete"></span><p class="i-autor">Mariano José de Larra</p><p class="i-proc">Primera representación del drama episódico, nuevo, original, en tres actos, titulado «Don Quijote de la Mancha en Sierra Morena» escrito por don Ventura de la Vega</p></div>
+                <div class="i-pie"><p class="i-marca">Sabiduría de Bolsillo</p><p class="i-dom">sabiduriadebolsillo.net</p></div>
+                <div class="lz sup"><span>250</span></div>
+                <div class="lz inf"><span>1670</span></div>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <footer class="fin">
+    <h2>Recomendación</h2>
+    <ul>
+      <li><b>Decisión 1: A, dos toques con diálogo.</b> El generador solo se pide al tocar, así que AD-6 no se enmienda. Cada estado de FR-17 tiene dónde decirse, y el aviso del sticker se ve antes de salir hacia Instagram. El segundo toque llega con la activación recién dada y sin nada que esperar. Cuesta un toque más que B y una previsualización a 1:6.</li>
+      <li><b>Sus estados: los de la columna A</b>, bajo «Compartir en la historia», en <code>caption</code> y en tinta, con la región dentro del diálogo.</li>
+      <li><b>Decisión 2: B, centrada con el pie sobre la zona segura.</b> Es la cuadrada con un solo cambio, y es el que hace legible el dominio en la historia. C añade una regla nueva cuyo beneficio desaparece con las Citas largas.</li>
+      <li><b>Decisión 3: B, el dominio al cuerpo del Autor</b>, la misma regla en los dos formatos. Al cuerpo de la marca no se lee.</li>
+    </ul>
+
+    <h2>Lo que la maqueta destapa</h2>
+    <ul>
+      <li><b>El 9:16 no cabe a todo el ancho del diálogo</b> a 360×640: con 283×503, «Compartir en la historia» queda fuera. DESIGN § Diálogo de Imagen dice «a todo el ancho»; en 9:16 la previsualización cabe en alto.</li>
+      <li><b>La hoja del sistema tapa la mitad de abajo de la pantalla.</b> Lo que se dice al terminar llega cuando el visitante ya está en Instagram: por eso, en A, el aviso del sticker va arriba y antes del toque.</li>
+      <li><b>Hoy el botón del diálogo existe antes que el fichero</b>, y la Imagen cuadrada redibuja antes de entregar. Las dos cosas son esperas después del toque, y la Historia no puede permitírselas.</li>
+      <li><b>Con el pie a 96&nbsp;px del borde</b>, como la cuadrada, el campo de respuesta de Instagram tapa el dominio, que es el único enlace que sobrevive sin sticker.</li>
+      <li><b>Defecto de lo construido, aparte de la v8:</b> la procedencia de la Imagen cuadrada no se reparte en líneas y se recorta en el borde del lienzo (75 Citas pasan del margen, 11 se salen, estimado). Pide una historia propia, antes del 9:16 o con él.</li>
+    </ul>
+
+    <h2>[sin decidir en las espinas]</h2>
+    <ul>
+      <li>La microcopia nueva: «Se copia el enlace para el sticker Enlace.» y el respaldo «Selecciona el enlace y cópialo para el sticker Enlace.». Las frases de los estados compartido, rechazo y fallo del generador son las del diseño y de lo construido.</li>
+      <li>La columna 9:16 de la tabla de tramos (80 / 64 / 52 / 42) y los cuerpos de la atribución y del pie en los dos formatos.</li>
+      <li>Que «Compartir en la historia» aparezca con la previsualización, y no antes.</li>
+      <li>Cuánto dura la frase de estado; si dice adónde cae la descarga en iOS; si la línea de arriba se queda en el fallo del generador.</li>
+      <li>Los tokens del bloque «Compartir en» y de la Tarjeta de Obra: los fija la maqueta de la Página de Cita.</li>
+      <li>Supuestos que comprueba la matriz de dispositivos (addendum v8): las bandas de unos 250&nbsp;px, el sticker en el centro al añadirlo y que Instagram ofrezca «Historia» al recibir solo el fichero.</li>
+    </ul>
+
+    <h2>Lo que no enseña</h2>
+    <ul>
+      <li>El escritorio y el navegador de la aplicación de Facebook en Android: la Historia no aparece y el bloque lleva WhatsApp, Facebook, Threads y «Más opciones…», sin aviso (FR-17). Sin JavaScript, igual.</li>
+      <li>Una Cita de más de 300 caracteres: no hay Imagen en ningún formato, y tampoco Historia.</li>
+      <li>El 9:16 del Kit Diario, que se descarga, y el bloque de compartir de la Página de Obra, que no lleva Historia.</li>
+    </ul>
+  </footer>
+
+</div>
+</body>
+</html>

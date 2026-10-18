@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página de Cita v8</title>
+<style>
+  /* ===========================================================================
+     Qué gobierna esta maqueta. Si algo de aquí discrepa de las espinas, mandan ellas;
+     lo que las espinas aún no deciden lo deciden estas variantes.
+       PRD v8   FR-12 (reescrito: Tarjeta de Obra, «Siguiente», «De la misma obra»,
+                «Más de {Autor}», orden de la página), FR-17 (Historia de Instagram: solo
+                en pantalla táctil que comparte ficheros), FR-18 (reescrito: destinos a la
+                vista, orden, «Más opciones…»), FR-1 (la Cita, primera pantalla), FR-42,
+                FR-54 (la tarjeta no promete dónde leer sin cotejo), SM-C5.
+       Addendum v8  «Decisiones de mecanismo — compartición (v8)», «Deuda conocida… v8»
+                (las acciones caen bajo la primera pantalla) y «Decisiones de mecanismo
+                diferidas — v8 · De UX» (tokens de la Tarjeta de Obra y de «Compartir en»).
+       Diseño 2026-10-17  §3 decisiones 4, 11, 14 y 15; §5 orden de la página; §6 bloque
+                «Compartir en»; §14.
+       EXPERIENCE.md § Component Patterns · Página de Cita (Bloque de Cita, Atribución,
+                Línea de la Fuente, Acción Copiar, Acción Imagen, Acción Compartir la cita,
+                Rutas de salida) · Listados (Tarjeta de Cita, Chip de Tema)
+       EXPERIENCE.md § Interaction Primitives (44 px y 8 px; pestaña nueva solo para
+                compartir), § Accessibility Floor (subrayado; enlaces de bloque; región
+                role=status; orden de tabulación), § State Patterns (Cita sin Procedencia)
+       DESIGN.md § Colors (siena = actuar o salir; la navegación que informa, en tinta),
+                § Typography (serif solo para Cita, Autor, Tema y Colección; la Obra en
+                Inter), § Layout & Spacing (márgenes, respiración, ritmo de 8 px),
+                § Elevation & Depth (plano; el filete, único separador), § Shapes,
+                § Components · Página de Cita y Listados.
+       .memlog.md de UX: línea 149 («Compartir en {destino}» es TEXTO VISIBLE, 22.10),
+                138 (qué enlaces se subrayan), 90 (la regla del siena).
+     Datos reales de corpus/ (citas, autores, obras, fuentes) a 2026-10-18. Sin red y sin
+     JavaScript: si Inter y Source Serif 4 no están instaladas salen las familias de reserva
+     del código, y los saltos de línea —y con ellos el pliegue— pueden moverse un poco.
+     =========================================================================== */
+
+  /* ---- Cromo de la mesa de pruebas. Frío a propósito: no es el sitio. ---- */
+  :root{
+    --mesa:#e6e8ec; --mesa-alta:#f3f4f7; --mesa-linea:#c9ced7;
+    --mesa-tinta:#1c2027; --mesa-suave:#59616e; --mesa-marca:#2f5d8a;
+    --aviso-fondo:#fdf4e3; --aviso-linea:#d9b56a; --aviso-tinta:#6b4e12;
+    --reco-fondo:#e7f2ea; --reco-linea:#7fb08d; --reco-tinta:#1f5a32;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+      --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+      --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+      --reco-fondo:#16281c; --reco-linea:#2f5a3c; --reco-tinta:#9fd6b0;
+    }
+  }
+  :root[data-theme="dark"]{
+    --mesa:#15171b; --mesa-alta:#1e2127; --mesa-linea:#333941;
+    --mesa-tinta:#e6e8ec; --mesa-suave:#98a1af; --mesa-marca:#7fb0e0;
+    --aviso-fondo:#2a2314; --aviso-linea:#5c4a1c; --aviso-tinta:#e6cf95;
+    --reco-fondo:#16281c; --reco-linea:#2f5a3c; --reco-tinta:#9fd6b0;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--mesa);color:var(--mesa-tinta);font-family:Inter,system-ui,sans-serif;}
+  .env{max-width:1320px;margin:0 auto;padding:40px 16px 72px;}
+  @media (min-width:600px){.env{padding-inline:24px;}}
+
+  header.top{border-bottom:1px solid var(--mesa-linea);padding-bottom:22px;}
+  header.top h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:30px;line-height:1.15;
+     margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+  .sub{margin:0;max-width:80ch;color:var(--mesa-suave);font-size:15px;line-height:1.6;}
+  .meta{margin-top:14px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);letter-spacing:.02em;max-width:112ch;}
+  .meta b{color:var(--mesa-tinta);font-weight:600;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:14px;font-size:12px;color:var(--mesa-suave);}
+  .leyenda span{display:inline-flex;align-items:center;gap:8px;}
+  .muestra{display:inline-block;width:22px;height:12px;border-radius:2px;}
+  .muestra.azul{background:#eaf0f7;border:1px dashed #8fa9c6;}
+  .muestra.ambar{background:#fdf4e3;border:1px dashed #c99a3a;}
+  .muestra.verde{background:var(--reco-fondo);border:1px solid var(--reco-linea);}
+
+  section.bloque-mesa{margin-top:56px;}
+  .bloque-mesa > h2{font-family:"Source Serif 4",Georgia,serif;font-size:24px;font-weight:600;line-height:1.2;margin:0 0 8px;}
+  .bloque-mesa > h3{font-family:"Source Serif 4",Georgia,serif;font-size:19px;font-weight:600;line-height:1.25;margin:40px 0 6px;}
+  .bloque-mesa > .regla{margin:0 0 6px;max-width:96ch;font-size:13.5px;line-height:1.6;color:var(--mesa-suave);}
+  .bloque-mesa > .regla b{color:var(--mesa-tinta);font-weight:600;}
+
+  .fila{display:flex;flex-wrap:wrap;gap:36px 32px;margin-top:26px;align-items:flex-start;}
+  figure.tel{margin:0;display:flex;flex-direction:column;gap:10px;width:382px;max-width:100%;flex:none;}
+  figure.tel > figcaption{font-size:13px;line-height:1.5;color:var(--mesa-suave);min-height:var(--alto-pie,0);}
+  figure.tel > figcaption b{color:var(--mesa-tinta);font-weight:600;}
+  figure.tel > figcaption .distingue{display:block;margin-top:4px;color:var(--mesa-tinta);}
+  figure.tel > figcaption .norma{display:block;margin-top:4px;}
+  .etiqueta{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--mesa-marca);margin-bottom:4px;}
+  .etiqueta.reco{color:var(--reco-tinta);background:var(--reco-fondo);border:1px solid var(--reco-linea);padding:1px 6px;border-radius:3px;margin-left:6px;}
+  .subtel{font-size:12px;line-height:1.5;color:var(--mesa-suave);margin:4px 0 0;}
+  .subtel b{color:var(--mesa-tinta);font-weight:600;}
+  ul.notas{margin:0;padding:0 0 0 16px;font-size:12.5px;line-height:1.6;color:var(--mesa-suave);}
+  ul.notas li{margin:0 0 5px;}
+  ul.notas b{color:var(--mesa-tinta);font-weight:600;}
+  ul.notas li.pend{list-style:none;margin-left:-16px;padding:6px 9px;background:var(--aviso-fondo);
+     border:1px dashed var(--aviso-linea);color:var(--aviso-tinta);border-radius:3px;}
+  ul.notas li.pend b{color:var(--aviso-tinta);}
+
+  footer.fin{margin-top:64px;border-top:1px solid var(--mesa-linea);padding-top:22px;
+             font-size:13.5px;line-height:1.65;color:var(--mesa-suave);max-width:100ch;}
+  footer.fin b{color:var(--mesa-tinta);font-weight:600;}
+  footer.fin h2{font-family:"Source Serif 4",Georgia,serif;font-size:18px;color:var(--mesa-tinta);margin:26px 0 8px;font-weight:600;}
+  footer.fin h2:first-child{margin-top:0;}
+  footer.fin ul,footer.fin ol{margin:6px 0 0;padding-left:20px;} footer.fin li{margin:4px 0;}
+  footer.fin .caja-reco{padding:10px 14px;background:var(--reco-fondo);border:1px solid var(--reco-linea);border-radius:4px;color:var(--mesa-tinta);}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--mesa-alta);
+       border:1px solid var(--mesa-linea);border-radius:3px;padding:1px 5px;}
+
+  /* ---- El teléfono: carcasa y barra del navegador, que no son el sitio ---- */
+  .telefono{width:382px;max-width:100%;background:#17181c;border-radius:38px;padding:12px 10px 22px;border:1px solid #2b2d33;}
+  .telefono.corto{border-radius:22px;padding:10px 10px 14px;}
+  .navegador{height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .navegador span{width:300px;max-width:100%;text-align:center;background:#2a2c32;color:#d6d9df;border-radius:10px;
+       font:12.5px/1 system-ui,-apple-system,sans-serif;padding:8px 12px;letter-spacing:.01em;}
+  .navegador span::before{content:"";display:inline-block;width:7px;height:8px;margin-right:7px;border:1.5px solid #9ea3ad;border-radius:2px;vertical-align:-1px;}
+  .navegador.app span{background:#24314a;color:#dfe6f3;}
+  .navegador.app span::before{display:none;}
+  .pantalla{width:360px;max-width:100%;overflow:hidden;border-radius:3px 3px 26px 26px;}
+  .telefono.corto .pantalla{border-radius:3px;}
+
+  /* ===========================================================================
+     EL SITIO. 360 px de viewport (NFR-8). Tokens con los nombres CSS de la tabla
+     «De token a propiedad CSS» de DESIGN.md § Components, valores de su frontmatter.
+     Cada regla imita src/components/, src/islands/ y src/styles/tokens.css salvo donde
+     una variante pide otra cosa, y eso se dice al lado.
+     =========================================================================== */
+  .lienzo{
+    --papel:#faf7f0; --contenedor-bajo:#f6f2ea; --contenedor:#f1ece2; --contenedor-alto:#eae4d8;
+    --tinta:#1f1b16; --tinta-apagada:#5a5147; --contorno:#8a7f72; --filete:#ddd5c7;
+    --siena:#8c4a2f; --sobre-siena:#ffffff;
+    --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --cita-xl:44px; --cita-lg:36px; --cita-md:28px; --cita-sm:23px;
+    --titular-md:30px; --titular-sm:21px;
+    --titular-obra:26px;   /* title-lg. DESIGN.md: «todavía sin declarar» en tokens.css */
+    --cuerpo-lg:17px; --cuerpo-md:15px; --autor:13px; --pie:13px;
+    --unidad:8px; --canal:24px; --margen:20px; --respiracion:40px;
+    --radio:3px; --radio-tarjeta:6px; --grosor-filete:1px;
+    --medida-cita:34ch; --medida-prosa:68ch; --zona-de-toque:44px;
+    --anot:#2f5d8a; --anot-fondo:#eaf0f7; --anot-linea:#8fa9c6;
+    --pend:#6b4e12; --pend-fondo:#fdf4e3; --pend-linea:#c99a3a;
+
+    position:relative;width:360px;max-width:100%;background:var(--papel);color:var(--tinta);
+    font-family:var(--sans);font-size:var(--cuerpo-lg);line-height:1.65;overflow:hidden;
+  }
+  .lienzo a{color:var(--siena);text-underline-offset:.2em;}
+  .oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+  .lienzo p,.lienzo ul,.lienzo ol,.lienzo h1,.lienzo h2,.lienzo h3{margin:0;}
+
+  /* ---- Cabecera v8 «Sabiduría de Bolsillo · Autores · Obras · Buscar», en dos filas.
+          Disposición y color de Autores y Obras: los decide la maqueta de la cabecera. ---- */
+  .s-cab{padding:calc(var(--unidad) * 2) var(--margen) var(--unidad);border-bottom:var(--grosor-filete) solid var(--filete);}
+  .s-marca{font-size:var(--autor);font-weight:600;letter-spacing:.09em;text-transform:uppercase;line-height:1.4;
+           color:var(--tinta) !important;text-decoration:none;display:flex;align-items:center;min-height:var(--zona-de-toque);}
+  .s-nav{display:flex;align-items:center;list-style:none;padding:0;margin:0 0 0 calc(var(--unidad) * -1);font-size:var(--cuerpo-md);line-height:1.4;}
+  .s-nav li{display:flex;align-items:center;}
+  .s-nav a{display:flex;align-items:center;min-height:var(--zona-de-toque);padding-inline:var(--unidad);text-decoration:underline;}
+  .s-nav a.tinta{color:var(--tinta);}
+  .s-nav .punto{color:var(--tinta-apagada);}
+  .s-pag{padding:var(--respiracion) var(--margen);}
+  .s-pie{margin:calc(var(--respiracion) * 2) var(--margen) 0;padding:calc(var(--unidad) * 3) 0;
+         border-top:var(--grosor-filete) solid var(--filete);color:var(--tinta-apagada);font-size:var(--pie);line-height:1.65;}
+  .s-pie ul{display:flex;flex-wrap:wrap;gap:calc(var(--unidad) * 2);margin:calc(var(--unidad) * 2) 0 0;padding:0;list-style:none;}
+  .s-pie a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--pie);text-decoration:underline;}
+
+  /* ---- Bloque de Cita, Atribución (E2) y Línea de la Fuente: lo construido ---- */
+  .bloque{margin:0;max-width:var(--medida-cita);}
+  .bloque blockquote{margin:0;border:0;padding:0;}
+  /* Tramo xl (≤ 80) en móvil baja a quote-lg; md (161–240) baja a quote-sm. */
+  .cita-h1{font-family:var(--serif);font-weight:400;font-size:var(--cita-lg);line-height:1.3;
+           letter-spacing:-.01em;color:var(--tinta);text-wrap:pretty;}
+  .cita-h1.md{font-size:var(--cita-sm);line-height:1.4;letter-spacing:0;}
+  .bloque figcaption{position:relative;margin-top:calc(var(--unidad) * 3);padding-top:calc(var(--unidad) * 3);}
+  .bloque figcaption::before{content:"";position:absolute;top:0;left:0;width:48px;height:var(--grosor-filete);background:var(--filete);}
+  .at-autor{font-size:var(--autor);font-weight:600;letter-spacing:.09em;line-height:1.4;text-transform:uppercase;}
+  .at-autor a{color:var(--tinta);text-decoration:underline;text-decoration-thickness:1px;}
+  .procedencia{margin-top:var(--unidad) !important;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  .procedencia a{color:var(--tinta);text-decoration:underline;text-decoration-thickness:1px;}
+  .fuente{margin-top:var(--unidad) !important;font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);max-width:var(--medida-prosa);}
+  .fuente a{color:var(--siena);text-decoration:underline;}
+
+  /* ---- Rótulo de sección: author en tinta apagada, como en las Rutas de salida ---- */
+  .rotulo{font-family:var(--sans);font-size:var(--autor);font-weight:600;letter-spacing:.09em;
+          line-height:1.4;text-transform:uppercase;color:var(--tinta-apagada);}
+
+  /* ===== TARJETA DE OBRA ===== */
+  .to{max-width:var(--medida-prosa);}
+  .to-titulo{font-family:var(--sans);color:var(--tinta);overflow-wrap:break-word;hyphens:auto;text-wrap:balance;}
+  .to-hechos{color:var(--tinta-apagada);}
+  /* Filas de bloque, como las entradas de la Lista de Obras: sin subrayado, 44 px, filete entre filas. */
+  .to-filas{list-style:none;padding:0;border-top:var(--grosor-filete) solid var(--filete);}
+  .to-filas li{border-bottom:var(--grosor-filete) solid var(--filete);}
+  .to-filas a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--cuerpo-md);line-height:1.4;
+              color:var(--tinta);text-decoration:none;}
+
+  /* A — plana, filete a lo ancho, título en body-lg 600, filas en tinta. */
+  .to.a{margin-top:calc(var(--unidad) * 4);padding-top:calc(var(--unidad) * 3);border-top:var(--grosor-filete) solid var(--filete);}
+  .to.a .to-titulo,.to.b .to-titulo{margin-top:var(--unidad);font-size:var(--cuerpo-lg);font-weight:600;line-height:1.3;}
+  .to.a .to-hechos,.to.b .to-hechos{margin-top:var(--unidad);font-size:var(--pie);line-height:1.5;}
+  .to.a .to-filas,.to.b .to-filas{margin-top:calc(var(--unidad) * 2);}
+
+  /* B — el mismo contenido sobre surface-container-low, rounded.lg, sin filete superior. */
+  .to.b{margin-top:calc(var(--unidad) * 4);padding:calc(var(--unidad) * 3);background:var(--contenedor-bajo);border-radius:var(--radio-tarjeta);}
+  .to.b .to-filas li:last-child{border-bottom:0;}
+
+  /* C — la Obra como titular: title-lg; «Siguiente» como botón secundario; «Ver la obra» en tinta subrayado. */
+  .to.c{margin-top:calc(var(--unidad) * 4);padding-top:calc(var(--unidad) * 3);border-top:var(--grosor-filete) solid var(--filete);}
+  .to.c .to-titulo{margin-top:var(--unidad);font-size:var(--titular-obra);font-weight:600;line-height:1.25;}
+  .to.c .to-hechos{margin-top:var(--unidad);font-size:var(--cuerpo-md);line-height:1.6;}
+  .to.c .boton{margin-top:calc(var(--unidad) * 2);}
+  .to.c .ver{display:flex;align-items:center;min-height:var(--zona-de-toque);margin-top:var(--unidad);font-size:var(--cuerpo-md);
+             color:var(--tinta);text-decoration:underline;text-decoration-thickness:1px;width:fit-content;}
+
+  /* ===== ACCIONES: el botón secundario construido ===== */
+  .boton{display:flex;align-items:center;width:fit-content;font:400 var(--cuerpo-md)/1.4 var(--sans);color:var(--siena) !important;
+         background:transparent;border:var(--grosor-filete) solid var(--siena);border-radius:var(--radio);
+         min-height:var(--zona-de-toque);padding:var(--unidad) calc(var(--unidad) * 3);text-decoration:none;text-align:left;}
+  .acc-copiar{margin-top:calc(var(--unidad) * 4);}
+  .acc-imagen{margin-top:calc(var(--unidad) * 2);}
+
+  /* ===== «COMPARTIR EN» ===== */
+  .cmp{max-width:var(--medida-prosa);}
+  .cmp ul{list-style:none;padding:0;margin:0;}
+  /* A y C: rótulo común y rejilla de dos columnas; el relleno lateral baja a 2 × unit para que la celda quepa. */
+  .cmp.rej{margin-top:calc(var(--unidad) * 3);}
+  .cmp.rej .rejilla{display:grid;grid-template-columns:1fr 1fr;gap:var(--unidad);margin-top:calc(var(--unidad) * 2);}
+  .cmp.rej .rejilla .boton{width:100%;height:100%;padding-inline:calc(var(--unidad) * 2);}
+  .cmp.rej .ancha{grid-column:1 / -1;}
+  .cmp.rej .debajo{margin-top:var(--unidad);}
+  .cmp.rej .debajo .boton{width:100%;padding-inline:calc(var(--unidad) * 2);}
+  /* B: lo construido —en fila, a su ancho, separados por unit—, que a 360 px sale uno por línea. */
+  .cmp.lis{margin-top:calc(var(--unidad) * 2);}
+  .cmp.lis ul{display:flex;flex-wrap:wrap;gap:var(--unidad);}
+  .cmp .abierto{position:relative;}
+  .cmp .desplegado{margin-top:var(--unidad);}
+
+  /* ===== RUTAS DE SALIDA v8 ===== */
+  .rs{margin-top:calc(var(--respiracion) * 1.5);padding-top:calc(var(--unidad) * 3);border-top:var(--grosor-filete) solid var(--filete);max-width:var(--medida-prosa);}
+  .rs > section + section{margin-top:calc(var(--unidad) * 4);}
+  .listado{list-style:none;margin-top:calc(var(--unidad) * 2) !important;padding:0;border-top:var(--grosor-filete) solid var(--filete);}
+  .tarjeta{border-bottom:var(--grosor-filete) solid var(--filete);}
+  .tarjeta > a{display:flex;flex-direction:column;gap:var(--unidad);min-height:var(--zona-de-toque);
+             padding:calc(var(--unidad) * 2) var(--unidad);margin-inline:calc(var(--unidad) * -1);
+             text-decoration:none;color:inherit;}
+  .fragmento{font-family:var(--serif);font-size:var(--titular-sm);font-weight:600;line-height:1.3;color:var(--tinta);text-wrap:pretty;}
+  .de-obra{font-family:var(--sans);font-size:var(--pie);line-height:1.5;color:var(--tinta-apagada);}
+  /* B — la tarjeta compacta: el fragmento al cuerpo de body-lg en serif 400 y 1 × unit de relleno. Patrón nuevo. */
+  .compacta .tarjeta > a{padding-block:var(--unidad);gap:0;}
+  .compacta .fragmento{font-size:var(--cuerpo-lg);font-weight:400;line-height:1.5;}
+  .cierre{border-bottom:var(--grosor-filete) solid var(--filete);}
+  .cierre a{display:flex;align-items:center;min-height:var(--zona-de-toque);font-size:var(--cuerpo-md);line-height:1.4;color:var(--tinta);text-decoration:none;}
+  .chips{list-style:none;display:flex;flex-wrap:wrap;gap:var(--unidad);margin-top:calc(var(--unidad) * 2) !important;padding:0;}
+  .chip{display:flex;align-items:center;min-height:var(--zona-de-toque);padding-inline:calc(var(--unidad) * 2);
+        background:var(--contenedor);border-radius:var(--radio-tarjeta);font-family:var(--serif);
+        font-size:var(--cuerpo-md);line-height:1.3;color:var(--tinta) !important;text-decoration:none;}
+
+  /* ===========================================================================
+     ANOTACIONES DENTRO DEL PAPEL. Monoespaciada: no son el sitio.
+     Azul = qué se ha recortado o qué ilustra. Ámbar = [sin decidir en las espinas].
+     =========================================================================== */
+  .tijera{margin:0 calc(var(--margen) * -1);padding:8px var(--margen);list-style:none;
+          background:var(--anot-fondo);color:var(--anot);font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .tijera.arriba{border-bottom:1px dashed var(--anot-linea);margin-top:calc(var(--respiracion) * -1);margin-bottom:24px;}
+  .tijera.abajo{border-top:1px dashed var(--anot-linea);margin-top:24px;margin-bottom:calc(var(--respiracion) * -1);}
+  .marca-pend{display:block;margin-top:6px;padding:3px 7px;border:1px dashed var(--pend-linea);background:var(--pend-fondo);
+        color:var(--pend);font:10.5px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .hueco-pend{position:absolute;right:var(--margen);top:calc(var(--unidad) * 2 + var(--zona-de-toque) + 13px);padding:1px 6px;border:1px dashed var(--pend-linea);
+        background:var(--pend-fondo);color:var(--pend);font:10px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap;}
+  .pliegue{position:absolute;left:0;right:0;top:640px;border-top:2px dashed #c0392b;pointer-events:none;z-index:2;}
+  .pliegue span{position:absolute;right:6px;top:-19px;padding:1px 5px;background:#fbe9e7;color:#8e2a1e;border:1px solid #e6a59d;
+                font:10.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;border-radius:2px;}
+  .regla-px{position:absolute;left:2px;font:9.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#8e2a1e;z-index:2;}
+</style>
+</head>
+<body>
+<div class="env">
+
+  <header class="top">
+    <h1>Página de Cita v8: variantes para decidir</h1>
+    <p class="sub">La Página de Cita con lo que le añade la v8 —la Tarjeta de Obra, el bloque «Compartir en», «De la misma obra» y «Más de {Autor}» con Tarjetas de Cita—, en teléfonos de 360&nbsp;px y con datos reales del Corpus. Cada decisión abierta tiene dos o tres variantes; cada una dice qué la distingue y qué regla respeta o enmienda. Al final, la primera pantalla de 360×640 marcada con la composición recomendada.</p>
+    <p class="meta"><b>La Cita de las maquetas:</b> «Ser culto es el único modo de ser libre.» — José Martí, <b>Maestros ambulantes</b>, 1884 · texto tomado de Wikisource en español (CC BY-SA 4.0) · 40 caracteres, tramo xl, que en móvil baja a <code>quote-lg</code> (36&nbsp;px) · es la 9.ª de las <b>23 Citas</b> de la Obra en el orden del documento, todas de 1884 y todas cotejadas · <b>Siguiente:</b> la 10.ª, «La naturaleza no tiene celos, como los hombres.» · Martí tiene <b>222 Citas</b> · Temas: El saber, La libertad. Las Citas de «De la misma obra» y «Más de José Martí» salen del reparto a pasos iguales de <code>citasRelacionadas</code> (sobre el orden del libro, y sobre el del Autor sin las de la misma Obra), calculado sobre <code>corpus/</code> el 2026-10-18.</p>
+    <div class="leyenda">
+      <span><i class="muestra azul"></i>Anotación de la maqueta: lo recortado, lo ilustrado. No es el sitio.</span>
+      <span><i class="muestra ambar"></i>[sin decidir]: lo dibujado no es contrato todavía.</span>
+      <span><i class="muestra verde"></i>Variante que recomiendo.</span>
+      <span><i style="display:inline-block;width:22px;border-top:2px dashed #c0392b"></i>Pliegue: el borde inferior de la pantalla de 360×640.</span>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       1 — La Tarjeta de Obra
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>1 · La Tarjeta de Obra</h2>
+    <p class="regla"><b>Decidido (FR-12, diseño §5):</b> va después de la Atribución y de la Línea de la Fuente, que sigue pegada a la Procedencia; lleva el rótulo «De la obra», el título de su Ficha de Obra en la sans, «{Autor} · {año} · {n} citas» con los puntos medios ocultos al lector de pantalla, «Siguiente cita de esta obra →» y «Ver la obra y dónde leerla →» —«Ver la obra →» si ninguna Cita está cotejada—. No aloja ningún Modelo de Ingreso. <b>Abierto (addendum v8, de UX):</b> sus tokens. Las tres variantes tienen el mismo contenido y el mismo orden; cambian la separación, el cuerpo del título y el trato de los dos enlaces.</p>
+
+    <div class="fila" style="--alto-pie:212px">
+
+      <!-- ===== 1A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">1A · PLANA, EN TINTA</span><span class="etiqueta reco">RECOMENDADA</span>
+          <span class="distingue"><b>Qué la distingue:</b> un filete a lo ancho y el rótulo de las Rutas de salida; título en <code>body-lg</code> 600; hechos en <code>caption</code>; los dos enlaces son filas de bloque en tinta, como las entradas de la Lista de Obras.</span>
+          <span class="norma"><b>Regla:</b> respeta Elevation (plano; el filete es el único separador), la del siena (navegación que informa, en tinta: no añade ningún siena), Accessibility Floor (enlaces de bloque, sin subrayado, 44&nbsp;px) y Typography (la Obra en Inter).</span></figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab">
+                <a class="s-marca" href="#">Sabiduría de Bolsillo</a>
+                <ul class="s-nav"><li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li><li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li><li><a href="#">Buscar</a></li></ul>
+              </header>
+              <main class="s-pag">
+                <article>
+                  <figure class="bloque">
+                    <blockquote><h1 class="cita-h1">«Ser culto es el único modo de ser libre.»</h1></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">José Martí</a></p>
+                      <p class="procedencia"><a href="#">Maestros ambulantes</a>, 1884.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+
+                  <section class="to a" aria-labelledby="to-1a">
+                    <h2 class="rotulo" id="to-1a">De la obra</h2>
+                    <p class="to-titulo">Maestros ambulantes</p>
+                    <p class="to-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1884<span aria-hidden="true"> · </span><span class="oculto">, </span>23 citas</p>
+                    <ul class="to-filas">
+                      <li><a href="#">Siguiente cita de esta obra →</a></li>
+                      <li><a href="#">Ver la obra y dónde leerla →</a></li>
+                    </ul>
+                  </section>
+
+                  <div class="acc-copiar"><button type="button" class="boton">Copiar la cita</button></div>
+                  <p class="tijera abajo">Recortado: Imagen, «Compartir en», las Rutas de salida y el pie.</p>
+                </article>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto de la tarjeta:</b> unos 240&nbsp;px con su margen. «Siguiente» se ve entero; el pliegue corta «Ver la obra», y Copiar empieza unos 65&nbsp;px más abajo: la deuda aceptada (decisión 11, SM-C5).</li>
+          <li><b>El título no enlaza:</b> ya enlaza en la Atribución (E2) y aquí lo hace «Ver la obra»; tres enlaces iguales en 200&nbsp;px serían ruido para el lector de pantalla.</li>
+          <li><b>«De la obra»</b> es <code>h2</code>, como «Más de {Autor}» y «Temas»: el lector de pantalla la encuentra por encabezados. Los hechos no enlazan: el Autor ya enlaza arriba.</li>
+          <li><b>Siena en la primera pantalla:</b> dos —«Buscar» y la Fuente—, frente a los cinco de hoy, porque las acciones bajan del pliegue.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 1B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">1B · EN CONTENEDOR</span>
+          <span class="distingue"><b>Qué la distingue:</b> el contenido de 1A sobre <code>surface-container-low</code>, con <code>rounded.lg</code> y 3&nbsp;×&nbsp;<code>unit</code> de relleno, sin filete superior. La tarjeta se lee como una unidad aparte de la Procedencia.</span>
+          <span class="norma"><b>Regla:</b> enmienda la Página de Cita, que hoy no lleva ningún fondo. Elevation admite el cambio a <code>surface-container-low</code> «para delimitar una zona», y Shapes da <code>rounded.lg</code> a las tarjetas; pero es el color que toma la Tarjeta de Cita al pasar el cursor.</span></figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab">
+                <a class="s-marca" href="#">Sabiduría de Bolsillo</a>
+                <ul class="s-nav"><li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li><li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li><li><a href="#">Buscar</a></li></ul>
+              </header>
+              <main class="s-pag">
+                <article>
+                  <figure class="bloque">
+                    <blockquote><h1 class="cita-h1">«Ser culto es el único modo de ser libre.»</h1></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">José Martí</a></p>
+                      <p class="procedencia"><a href="#">Maestros ambulantes</a>, 1884.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+
+                  <section class="to b" aria-labelledby="to-1b">
+                    <h2 class="rotulo" id="to-1b">De la obra</h2>
+                    <p class="to-titulo">Maestros ambulantes</p>
+                    <p class="to-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1884<span aria-hidden="true"> · </span><span class="oculto">, </span>23 citas</p>
+                    <ul class="to-filas">
+                      <li><a href="#">Siguiente cita de esta obra →</a></li>
+                      <li><a href="#">Ver la obra y dónde leerla →</a></li>
+                    </ul>
+                  </section>
+
+                  <div class="acc-copiar"><button type="button" class="boton">Copiar la cita</button></div>
+                  <p class="tijera abajo">Recortado: Imagen, «Compartir en», las Rutas de salida y el pie.</p>
+                </article>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto:</b> unos 260&nbsp;px, 22 más que 1A por el relleno. El pliegue corta «Ver la obra», como en 1A, y Copiar baja 22&nbsp;px más.</li>
+          <li><b>Lo que cuesta ver:</b> el fondo es tenue a propósito —el sistema no tiene un tono de tarjeta en reposo— y en un móvil con el brillo bajo apenas se distingue del papel; un fondo más oscuro ya no estaría en la paleta de superficies públicas.</li>
+          <li><b>Riesgo de lectura:</b> un recuadro bajo la Cita es la forma de los bloques «también te puede interesar» que EXPERIENCE pone entre los anti-patrones. Aquí trae hechos del Corpus y no publicidad, pero se parece.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 1C ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">1C · LA OBRA COMO TITULAR</span>
+          <span class="distingue"><b>Qué la distingue:</b> el título en <code>title-lg</code> (26&nbsp;px, el de la Cabecera de Obra: la Obra se ve igual aquí que en su página); hechos en <code>body-md</code>; «Siguiente cita de esta obra →» como botón secundario en siena; «Ver la obra y dónde leerla →» en tinta, subrayado, en su línea.</span>
+          <span class="norma"><b>Regla:</b> enmienda dos cosas: lleva <code>title-lg</code> fuera de la Cabecera de Obra, y trata «Siguiente» como <i>actuar</i> —siena, por analogía con la Paginación, ya [ASSUMPTION] en DESIGN—, lo que añade un botón siena encima de Copiar.</span></figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab">
+                <a class="s-marca" href="#">Sabiduría de Bolsillo</a>
+                <ul class="s-nav"><li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li><li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li><li><a href="#">Buscar</a></li></ul>
+              </header>
+              <main class="s-pag">
+                <article>
+                  <figure class="bloque">
+                    <blockquote><h1 class="cita-h1">«Ser culto es el único modo de ser libre.»</h1></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">José Martí</a></p>
+                      <p class="procedencia"><a href="#">Maestros ambulantes</a>, 1884.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+
+                  <section class="to c" aria-labelledby="to-1c">
+                    <h2 class="rotulo" id="to-1c">De la obra</h2>
+                    <p class="to-titulo">Maestros ambulantes</p>
+                    <p class="to-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1884<span aria-hidden="true"> · </span><span class="oculto">, </span>23 citas</p>
+                    <a class="boton" href="#">Siguiente cita de esta obra →</a>
+                    <a class="ver" href="#">Ver la obra y dónde leerla →</a>
+                  </section>
+
+                  <div class="acc-copiar"><button type="button" class="boton">Copiar la cita</button></div>
+                  <p class="tijera abajo">Recortado: Imagen, «Compartir en», las Rutas de salida y el pie.</p>
+                </article>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto:</b> unos 260&nbsp;px. El botón «Siguiente» acaba justo en el pliegue y es lo último que se ve; «Ver la obra» ya cae debajo.</li>
+          <li><b>Gana:</b> la siguiente Cita es la llamada más visible después de la Cita, que es lo que pide G («que el visitante se quede»).</li>
+          <li><b>Cuesta:</b> un título de Obra a 26&nbsp;px pesa casi como la Cita a 36, y los 11 títulos de más de tres líneas en la Cabecera de Obra también lo serían aquí; y el primer botón que encuentra quien vino a copiar (UJ-1) es «Siguiente». Si la continuación sube y SM-5 baja, SM-C5 lo dirá, pero después de desplegar.</li>
+        </ul>
+      </figure>
+
+    </div>
+
+    <h3>Estados de la tarjeta, con la variante 1A</h3>
+    <p class="regla">Recortes: cada teléfono enseña solo la Atribución y la tarjeta. Hoy ninguna Obra del Corpus tiene años discrepantes; el estado «sin año» sale de una Obra cuyas Citas no declaran ninguno, y la tarjeta lo trata igual: sin año, nunca uno elegido (FR-42).</p>
+
+    <div class="fila" style="--alto-pie:104px">
+      <figure class="tel">
+        <figcaption><span class="etiqueta">UNA SOLA CITA, SIN COTEJO, SIN FUENTE</span><br><b>«Caminante, no hay camino, se hace camino al andar.»</b> — Antonio Machado. «Campos de Castilla» tiene una Cita, sin documento: está en <code>pendientes-de-cotejo.yml</code>.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: la cabecera y el texto de la Cita.</p>
+                <figure class="bloque">
+                  <figcaption>
+                    <p class="at-autor"><a href="#">Antonio Machado</a></p>
+                    <p class="procedencia"><a href="#">Campos de Castilla</a>, 1912.</p>
+                  </figcaption>
+                </figure>
+                <section class="to a" aria-labelledby="to-e1">
+                  <h2 class="rotulo" id="to-e1">De la obra</h2>
+                  <p class="to-titulo">Campos de Castilla</p>
+                  <p class="to-hechos">Antonio Machado<span aria-hidden="true"> · </span><span class="oculto">, </span>1912<span aria-hidden="true"> · </span><span class="oculto">, </span>1 cita</p>
+                  <ul class="to-filas">
+                    <li><a href="#">Siguiente cita sobre la vida →</a></li>
+                    <li><a href="#">Ver la obra →</a></li>
+                  </ul>
+                </section>
+                <p class="tijera abajo">Recortado: las acciones y lo demás.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Sin Línea de la Fuente:</b> la tarjeta va directamente tras la Procedencia, con el mismo filete.</li>
+          <li><b>«1 cita»</b>, en singular. <b>«Ver la obra →»</b> sin «y dónde leerla»: su página no tiene edición cotejada que ofrecer (FR-54).</li>
+          <li><b>«Siguiente» por Tema:</b> la Obra no tiene otra Cita, así que salta a la que sigue en el listado de su primer Tema, La vida (16.ª de 337). Ese listado va por slug, y la que sigue es <b>«Caminante, no hay camino, sino estelas en la mar.»</b>, de «Proverbios y cantares»: la variante casi igual que <code>citasRelacionadas</code> evitó en 2026 al repartir en vez de tomar contiguas. Va a Arquitectura y al PRD: FR-12 fija «la que le sigue en el listado del primero de sus Temas».</li>
+          <li class="pend"><b>[sin decidir]</b> La forma del rótulo. El diseño dice «Siguiente cita de {Tema} →», que con los nombres de Tema da «Siguiente cita de La vida →». Aquí, «sobre la vida», en minúscula, como «Citas sobre la vida» de la descripción de la Página de Tema.</li>
+        </ul>
+      </figure>
+
+      <figure class="tel">
+        <figcaption><span class="etiqueta">OBRA SIN AÑO</span><br><b>«Instrucción no es lo mismo que educación: aquélla se refiere al pensamiento, y ésta principalmente a los sentimientos.»</b> — José Martí. «Educación popular»: 17 Citas, ninguna declara año; todas cotejadas.</figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: la cabecera y el texto de la Cita.</p>
+                <figure class="bloque">
+                  <figcaption>
+                    <p class="at-autor"><a href="#">José Martí</a></p>
+                    <p class="procedencia"><a href="#">Educación popular</a>. Sin año documentado.</p>
+                  </figcaption>
+                </figure>
+                <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+                <section class="to a" aria-labelledby="to-e2">
+                  <h2 class="rotulo" id="to-e2">De la obra</h2>
+                  <p class="to-titulo">Educación popular</p>
+                  <p class="to-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>17 citas</p>
+                  <ul class="to-filas">
+                    <li><a href="#">Siguiente cita de esta obra →</a></li>
+                    <li><a href="#">Ver la obra y dónde leerla →</a></li>
+                  </ul>
+                </section>
+                <p class="tijera abajo">Recortado: las acciones y lo demás.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Sin año</b>, sin hueco y sin «Sin año documentado»: eso ya lo dice la Procedencia de esta Cita; la tarjeta solo dice los hechos que hay.</li>
+          <li><b>«Siguiente»</b> lleva a la 2.ª del documento, «Las cualidades morales suben de precio cuando están realzadas por las cualidades inteligentes.».</li>
+          <li><b>Título largo:</b> «Granos de oro: Pensamientos Seleccionados en las Obras de José Martí», la Obra de Martí con más Citas (38), ocupa dos líneas en <code>body-lg</code> a 320&nbsp;px y tres en <code>title-lg</code> (1C): la tarjeta crece con él y nunca recorta (NFR-12).</li>
+        </ul>
+      </figure>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       2 — El bloque «Compartir en»
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>2 · El bloque «Compartir en»</h2>
+    <p class="regla"><b>Decidido (FR-17, FR-18, addendum v8):</b> en este orden, «Historia de Instagram» —solo en pantalla táctil cuyo navegador comparte el fichero, y en Citas de hasta 300 caracteres—, WhatsApp, Facebook y Threads, siempre a la vista; después «Más opciones…», que abre la hoja donde la hay y, donde no, despliega Telegram, X y Correo. Sin iconos, 44&nbsp;px, nombre accesible «Compartir en {destino}» con el aviso de pestaña nueva en los enlaces. Copiar e Imagen siguen encima, como hoy. <b>Abierto:</b> rejilla o lista, y si «Compartir en» es texto de cada botón —lo que fijó la 22.10 (bitácora, línea 149)— o un rótulo común con el prefijo dentro del nombre accesible, como deja el diseño §6. <b>Arriba</b>, un móvil que comparte ficheros; <b>abajo</b>, el navegador de la app de Facebook en Android, sin Historia y sin hoja, con «Más opciones…» desplegado. El escritorio no necesita marco: lleva el bloque de abajo sin el despliegue, porque allí «Más opciones…» abre la hoja o despliega igual.</p>
+
+    <div class="fila" style="--alto-pie:232px">
+
+      <!-- ===== 2A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">2A · REJILLA 2×2, RÓTULO COMÚN</span>
+          <span class="distingue"><b>Qué la distingue:</b> «Compartir en» como rótulo de sección y cada botón solo con el destino; los cuatro destinos en una rejilla de dos columnas y «Más opciones…» a lo ancho debajo. «Compartir en » va en <code>.solo-para-lectores</code> dentro del nombre accesible (WCAG 2.5.3: el texto visible está en el nombre).</span>
+          <span class="norma"><b>Regla:</b> enmienda la 22.10 (texto visible «Compartir en {destino}») y DESIGN § Acciones («cada una en su línea y a su ancho»); baja el relleno lateral de los botones de 3 a 2&nbsp;×&nbsp;<code>unit</code> para que la celda quepa.</span></figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: la cabecera, la Cita, la Atribución, la Fuente y la Tarjeta de Obra.</p>
+                <div class="acc-copiar" style="margin-top:0"><button type="button" class="boton">Copiar la cita</button></div>
+                <div class="acc-imagen"><button type="button" class="boton">Compartir como imagen</button></div>
+                <section class="cmp rej" aria-labelledby="cmp-2a">
+                  <h2 class="rotulo" id="cmp-2a">Compartir en</h2>
+                  <ul class="rejilla">
+                    <li><button type="button" class="boton"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                  </ul>
+                  <div class="debajo"><button type="button" class="boton" aria-label="Más opciones para compartir">Más opciones…</button></div>
+                </section>
+                <p class="tijera abajo">Recortado: las Rutas de salida y el pie.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <p class="subtel"><b>Navegador de la app de Facebook en Android</b>: sin Historia de Instagram y sin hoja; «Más opciones…» desplegado.</p>
+        <div class="telefono corto">
+          <div class="navegador app"><span>Facebook · sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado hasta Copiar.</p>
+                <div class="acc-imagen" style="margin-top:0"><button type="button" class="boton">Descargar como imagen</button></div>
+                <section class="cmp rej" aria-labelledby="cmp-2a2">
+                  <h2 class="rotulo" id="cmp-2a2">Compartir en</h2>
+                  <ul class="rejilla">
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>WhatsApp</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Facebook</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Threads</a></li>
+                    <li aria-hidden="true"></li>
+                  </ul>
+                  <div class="debajo abierto"><button type="button" class="boton" aria-expanded="true" aria-label="Más opciones para compartir">Más opciones…</button></div>
+                  <ul class="rejilla desplegado">
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Telegram</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>X</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Correo</a></li>
+                  </ul>
+                </section>
+                <p class="tijera abajo">Recortado: las Rutas de salida y el pie.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto, arriba:</b> unos 200&nbsp;px desde el rótulo, 50 menos que 2B.</li>
+          <li><b>Cuesta:</b> en una celda de 156&nbsp;px «Historia de Instagram» parte en dos líneas y la primera fila crece; y sin la Historia la rejilla deja una celda vacía, porque «Más opciones…» no entra en ella.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 2B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">2B · LISTA, TEXTO COMPLETO</span>
+          <span class="distingue"><b>Qué la distingue:</b> lo construido en la 22.10, con los destinos de la v8: cada botón dice «Compartir en {destino}» como texto visible, sin rótulo, en fila y a su ancho —que a 360&nbsp;px sale uno por línea—, y «Más opciones…» al final.</span>
+          <span class="norma"><b>Regla:</b> respeta sin enmienda la bitácora (línea 149) y DESIGN § Acciones de la Página de Cita: mismo botón secundario, 3&nbsp;×&nbsp;<code>unit</code> de relleno, <code>unit</code> entre botones.</span></figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: la cabecera, la Cita, la Atribución, la Fuente y la Tarjeta de Obra.</p>
+                <div class="acc-copiar" style="margin-top:0"><button type="button" class="boton">Copiar la cita</button></div>
+                <div class="acc-imagen"><button type="button" class="boton">Compartir como imagen</button></div>
+                <div class="cmp lis">
+                  <ul>
+                    <li><button type="button" class="boton">Compartir en Historia de Instagram</button></li>
+                    <li><a class="boton" href="#">Compartir en WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><a class="boton" href="#">Compartir en Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><a class="boton" href="#">Compartir en Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><button type="button" class="boton" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                  </ul>
+                </div>
+                <p class="tijera abajo">Recortado: las Rutas de salida y el pie.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <p class="subtel"><b>Navegador de la app de Facebook en Android</b>: sin Historia de Instagram y sin hoja; «Más opciones…» desplegado.</p>
+        <div class="telefono corto">
+          <div class="navegador app"><span>Facebook · sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado hasta Copiar.</p>
+                <div class="acc-imagen" style="margin-top:0"><button type="button" class="boton">Descargar como imagen</button></div>
+                <div class="cmp lis">
+                  <ul>
+                    <li><a class="boton" href="#">Compartir en WhatsApp</a></li>
+                    <li><a class="boton" href="#">Compartir en Facebook</a></li>
+                    <li><a class="boton" href="#">Compartir en Threads</a></li>
+                    <li><button type="button" class="boton" aria-expanded="true" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    <li><a class="boton" href="#">Compartir en Telegram</a></li>
+                    <li><a class="boton" href="#">Compartir en X</a></li>
+                    <li><a class="boton" href="#">Compartir en Correo</a></li>
+                  </ul>
+                </div>
+                <p class="tijera abajo">Recortado: las Rutas de salida y el pie.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto, arriba:</b> cinco filas, unos 252&nbsp;px; abajo, desplegado, siete, unos 356&nbsp;px. Con Copiar e Imagen, nueve botones siena seguidos.</li>
+          <li><b>Gana:</b> no cambia nada de lo construido ni de lo decidido, y cada botón se entiende solo, sin leer el de al lado.</li>
+          <li><b>Cuesta:</b> la columna más larga, y «Compartir en» repetido siete veces es justo la botonera que EXPERIENCE pone entre los anti-patrones —aunque se quede en siete destinos, por debajo de ocho—.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 2C ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">2C · LA HISTORIA A LO ANCHO</span><span class="etiqueta reco">RECOMENDADA</span>
+          <span class="distingue"><b>Qué la distingue:</b> el rótulo común de 2A; «Historia de Instagram» ocupa la primera fila entera —es el único destino de imagen y el único que puede faltar— y debajo WhatsApp, Facebook, Threads y «Más opciones…» forman una rejilla 2×2 que es la misma con la Historia o sin ella.</span>
+          <span class="norma"><b>Regla:</b> enmienda lo mismo que 2A (la 22.10 y DESIGN § Acciones, con el relleno a 2&nbsp;×&nbsp;<code>unit</code>); conserva el orden de FR-18 leído de arriba abajo y de izquierda a derecha.</span></figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: la cabecera, la Cita, la Atribución, la Fuente y la Tarjeta de Obra.</p>
+                <div class="acc-copiar" style="margin-top:0"><button type="button" class="boton">Copiar la cita</button></div>
+                <div class="acc-imagen"><button type="button" class="boton">Compartir como imagen</button></div>
+                <section class="cmp rej" aria-labelledby="cmp-2c">
+                  <h2 class="rotulo" id="cmp-2c">Compartir en</h2>
+                  <ul class="rejilla">
+                    <li class="ancha"><button type="button" class="boton"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                    <li><button type="button" class="boton" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                  </ul>
+                </section>
+                <p class="tijera abajo">Recortado: las Rutas de salida y el pie.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <p class="subtel"><b>Navegador de la app de Facebook en Android</b>: sin Historia de Instagram y sin hoja; «Más opciones…» desplegado.</p>
+        <div class="telefono corto">
+          <div class="navegador app"><span>Facebook · sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado hasta Copiar.</p>
+                <div class="acc-imagen" style="margin-top:0"><button type="button" class="boton">Descargar como imagen</button></div>
+                <section class="cmp rej" aria-labelledby="cmp-2c2">
+                  <h2 class="rotulo" id="cmp-2c2">Compartir en</h2>
+                  <ul class="rejilla">
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>WhatsApp</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Facebook</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Threads</a></li>
+                    <li><button type="button" class="boton" aria-expanded="true" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                  </ul>
+                  <ul class="rejilla desplegado">
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Telegram</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>X</a></li>
+                    <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Correo</a></li>
+                  </ul>
+                </section>
+                <p class="tijera abajo">Recortado: las Rutas de salida y el pie.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto, arriba:</b> unos 180&nbsp;px desde el rótulo, 70 menos que 2B; sin la Historia, 52 menos, y nada se recoloca: WhatsApp sigue arriba a la izquierda.</li>
+          <li><b>El nombre largo no parte:</b> «Historia de Instagram» tiene los 320&nbsp;px.</li>
+          <li class="pend"><b>[sin decidir]</b> Cómo se ve «Más opciones…» abierto. Aquí solo aparece lo desplegado debajo; el mecanismo —un <code>&lt;details&gt;</code> que la isla convierte en la hoja— lo cierran UX y Arquitectura (addendum). En 2A y 2C lo desplegado cae en otra rejilla, fuera de la celda del botón.</li>
+        </ul>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       3 — «De la misma obra» y «Más de {Autor}»
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>3 · «De la misma obra» y «Más de {Autor}», con Tarjetas de Cita</h2>
+    <p class="regla"><b>Decidido (FR-12, diseño §5):</b> tras las acciones, «De la misma obra» con hasta 3 Tarjetas sin Autor ni Obra y «Las {n} citas de {título} →»; luego «Más de {Autor}» con hasta 4 Tarjetas sin Autor y con el título de su Obra como texto, nunca como segundo enlace, y «Las {n} citas de {Autor} →»; luego los Temas. Una sola Tarjeta de Cita (AD-19); las Citas hermanas de 17&nbsp;px se retiran (DESIGN:226). <b>Abierto:</b> el trato del título de la Obra dentro de la tarjeta, el de los cierres y si la tarjeta lleva aquí su cuerpo de listado.</p>
+
+    <div class="fila" style="--alto-pie:236px">
+
+      <!-- ===== 3A ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">3A · LA TARJETA DEL LISTADO, TAL CUAL</span><span class="etiqueta reco">RECOMENDADA</span>
+          <span class="distingue"><b>Qué la distingue:</b> <code>TarjetaDeCita</code> sin cambios —fragmento en <code>headline-sm</code> serif 600, recortado a 120 caracteres—; en «Más de José Martí», el título de la Obra debajo, en <code>caption</code> y tinta apagada, en Inter y sin versalitas, que son del Autor. Los cierres son la última fila del listado, en tinta, como las filas de la Tarjeta de Obra 1A.</span>
+          <span class="norma"><b>Regla:</b> respeta AD-19 (un solo componente), DESIGN § Tarjeta de Cita y § Typography; los cierres, Accessibility Floor (enlace de bloque).</span></figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: todo hasta el bloque «Compartir en».</p>
+                <nav class="rs" aria-label="Seguir leyendo" style="margin-top:0">
+                  <section aria-labelledby="mo-3a">
+                    <h2 class="rotulo" id="mo-3a">De la misma obra</h2>
+                    <ul class="listado">
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Hay un cúmulo de verdades esenciales que caben en el ala de un colibrí, y son, sin embargo, la clave de la paz pública,…»</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«El sol no es más necesario que el establecimiento de la enseñanza elemental científica.»</span></a></li>
+                      <li class="cierre"><a href="#">Las 23 citas de Maestros ambulantes →</a></li>
+                    </ul>
+                  </section>
+                  <section aria-labelledby="ma-3a">
+                    <h2 class="rotulo" id="ma-3a">Más de José Martí</h2>
+                    <ul class="listado">
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«A un pueblo ignorante puede engañársele con la superstición, y hacérsele servil.»</span><span class="de-obra">Educación popular</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Un pueblo no es la voluntad de un hombre solo, por pura que ella sea, ni el empeño pueril de realizar en una agrupación…»</span><span class="de-obra">El tercer año del partido revolucionario cubano</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«La inteligencia no es la facultad de imponerse; es el deber de ser útil a los demás.»</span><span class="de-obra">Diputado</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.»</span><span class="de-obra">Versos sencillos</span></a></li>
+                      <li class="cierre"><a href="#">Las 222 citas de José Martí →</a></li>
+                    </ul>
+                  </section>
+                  <section aria-labelledby="te-3a">
+                    <h2 class="rotulo" id="te-3a">Temas</h2>
+                    <ul class="chips"><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La libertad</a></li></ul>
+                  </section>
+                </nav>
+                <p class="tijera abajo">Sigue el pie del sitio.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto:</b> del filete de las rutas al último chip, unos 1.430&nbsp;px a 360. Va después de las acciones: no empuja nada que importe a UJ-1.</li>
+          <li><b>Cuáles:</b> la 1.ª, la 13.ª y la 23.ª del libro, sin la 9.ª (esta) ni la 10.ª (la siguiente). En «Más de José Martí», cuatro de 199 candidatas de otras Obras, primero las que comparten Tema.</li>
+          <li><b>El cierre</b> está dentro de la lista por la forma —una fila más, en la sans— y no por el sentido; si se prefiere fuera, es un <code>&lt;p&gt;</code> con el mismo trato. El lector de pantalla lo oye como un elemento más de la lista: «5 elementos».</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 3B ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">3B · TARJETA COMPACTA</span>
+          <span class="distingue"><b>Qué la distingue:</b> la misma tarjeta con el fragmento al cuerpo de <code>body-lg</code> en serif 400 —el de las Citas hermanas de hoy— y 1&nbsp;×&nbsp;<code>unit</code> de relleno vertical; título de la Obra y cierres como en 3A.</span>
+          <span class="norma"><b>Regla:</b> patrón nuevo, un segundo tamaño de la Tarjeta de Cita. AD-19 pide un solo componente y esto sería una variante suya; DESIGN no la tiene, y la v8 retira justo las hermanas a 17&nbsp;px.</span></figcaption>
+        <div class="telefono corto">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <main class="s-pag">
+                <p class="tijera arriba">Recortado: todo hasta el bloque «Compartir en».</p>
+                <nav class="rs compacta" aria-label="Seguir leyendo" style="margin-top:0">
+                  <section aria-labelledby="mo-3b">
+                    <h2 class="rotulo" id="mo-3b">De la misma obra</h2>
+                    <ul class="listado">
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Hay un cúmulo de verdades esenciales que caben en el ala de un colibrí, y son, sin embargo, la clave de la paz pública,…»</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«El sol no es más necesario que el establecimiento de la enseñanza elemental científica.»</span></a></li>
+                      <li class="cierre"><a href="#">Las 23 citas de Maestros ambulantes →</a></li>
+                    </ul>
+                  </section>
+                  <section aria-labelledby="ma-3b">
+                    <h2 class="rotulo" id="ma-3b">Más de José Martí</h2>
+                    <ul class="listado">
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«A un pueblo ignorante puede engañársele con la superstición, y hacérsele servil.»</span><span class="de-obra">Educación popular</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Un pueblo no es la voluntad de un hombre solo, por pura que ella sea, ni el empeño pueril de realizar en una agrupación…»</span><span class="de-obra">El tercer año del partido revolucionario cubano</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«La inteligencia no es la facultad de imponerse; es el deber de ser útil a los demás.»</span><span class="de-obra">Diputado</span></a></li>
+                      <li class="tarjeta"><a href="#"><span class="fragmento">«Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.»</span><span class="de-obra">Versos sencillos</span></a></li>
+                      <li class="cierre"><a href="#">Las 222 citas de José Martí →</a></li>
+                    </ul>
+                  </section>
+                  <section aria-labelledby="te-3b">
+                    <h2 class="rotulo" id="te-3b">Temas</h2>
+                    <ul class="chips"><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La libertad</a></li></ul>
+                  </section>
+                </nav>
+                <p class="tijera abajo">Sigue el pie del sitio.</p>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>Alto:</b> unos 1.060&nbsp;px, una cuarta parte menos que 3A.</li>
+          <li><b>Gana:</b> la página es más corta y las siete Citas se recorren de un vistazo.</li>
+          <li><b>Cuesta:</b> en la Página de Cita las Tarjetas dejan de ser las del listado de Autor, Tema y Obra, que es la razón por la que la v8 las cambió; y la serif 400 a 17&nbsp;px queda al mismo cuerpo que el título de la Tarjeta de Obra en 1A, de modo que la jerarquía entre las dos ya no la da el tamaño.</li>
+        </ul>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       4 — La primera pantalla de 360×640
+       ===================================================================== -->
+  <section class="bloque-mesa">
+    <h2>4 · La primera pantalla de 360×640, marcada</h2>
+    <p class="regla">La composición recomendada —1A, 2C, 3A— de arriba abajo. La línea roja es el pliegue: lo que cabe sin desplazar en 360×640 (NFR-8). <b>FR-1 se cumple en los tres casos:</b> la Cita es lo primero que se ve. Lo que se aceptó a sabiendas (decisión 11, deuda v8, SM-C5) también se ve: con una Cita de la Obra, Copiar queda bajo el pliegue. La cabecera se dibuja en dos filas, la forma más alta que el diseño propone; con la de una fila de hoy, todo sube 36&nbsp;px.</p>
+
+    <div class="fila" style="--alto-pie:84px">
+
+      <!-- ===== 4a: la página entera ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">CITA BREVE, PÁGINA ENTERA</span><br><b>«Ser culto es el único modo de ser libre.»</b> 40 caracteres, 36&nbsp;px. Toda la página, hasta el pie.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab" style="position:relative">
+                <span class="hueco-pend" aria-hidden="true">[sin decidir] la cabecera</span>
+                <a class="s-marca" href="#">Sabiduría de Bolsillo</a>
+                <ul class="s-nav"><li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li><li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li><li><a href="#">Buscar</a></li></ul>
+              </header>
+              <main class="s-pag">
+                <article>
+                  <figure class="bloque">
+                    <blockquote><h1 class="cita-h1">«Ser culto es el único modo de ser libre.»</h1></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">José Martí</a></p>
+                      <p class="procedencia"><a href="#">Maestros ambulantes</a>, 1884.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+
+                  <section class="to a" aria-labelledby="to-4a">
+                    <h2 class="rotulo" id="to-4a">De la obra</h2>
+                    <p class="to-titulo">Maestros ambulantes</p>
+                    <p class="to-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1884<span aria-hidden="true"> · </span><span class="oculto">, </span>23 citas</p>
+                    <ul class="to-filas">
+                      <li><a href="#">Siguiente cita de esta obra →</a></li>
+                      <li><a href="#">Ver la obra y dónde leerla →</a></li>
+                    </ul>
+                  </section>
+
+                  <div class="acc-copiar"><button type="button" class="boton">Copiar la cita</button></div>
+                  <div class="acc-imagen"><button type="button" class="boton">Compartir como imagen</button></div>
+                  <section class="cmp rej" aria-labelledby="cmp-4a">
+                    <h2 class="rotulo" id="cmp-4a">Compartir en</h2>
+                    <ul class="rejilla">
+                      <li class="ancha"><button type="button" class="boton"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                      <li><a class="boton" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button type="button" class="boton" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+
+                  <nav class="rs" aria-label="Seguir leyendo">
+                    <section aria-labelledby="mo-4a">
+                      <h2 class="rotulo" id="mo-4a">De la misma obra</h2>
+                      <ul class="listado">
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«Hay un cúmulo de verdades esenciales que caben en el ala de un colibrí, y son, sin embargo, la clave de la paz pública,…»</span></a></li>
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«Comieron y bebieron; pero no supieron de sí.»</span></a></li>
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«El sol no es más necesario que el establecimiento de la enseñanza elemental científica.»</span></a></li>
+                        <li class="cierre"><a href="#">Las 23 citas de Maestros ambulantes →</a></li>
+                      </ul>
+                    </section>
+                    <section aria-labelledby="ma-4a">
+                      <h2 class="rotulo" id="ma-4a">Más de José Martí</h2>
+                      <ul class="listado">
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«A un pueblo ignorante puede engañársele con la superstición, y hacérsele servil.»</span><span class="de-obra">Educación popular</span></a></li>
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«Un pueblo no es la voluntad de un hombre solo, por pura que ella sea, ni el empeño pueril de realizar en una agrupación…»</span><span class="de-obra">El tercer año del partido revolucionario cubano</span></a></li>
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«La inteligencia no es la facultad de imponerse; es el deber de ser útil a los demás.»</span><span class="de-obra">Diputado</span></a></li>
+                        <li class="tarjeta"><a href="#"><span class="fragmento">«Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.»</span><span class="de-obra">Versos sencillos</span></a></li>
+                        <li class="cierre"><a href="#">Las 222 citas de José Martí →</a></li>
+                      </ul>
+                    </section>
+                    <section aria-labelledby="te-4a">
+                      <h2 class="rotulo" id="te-4a">Temas</h2>
+                      <ul class="chips"><li><a class="chip" href="#">El saber</a></li><li><a class="chip" href="#">La libertad</a></li></ul>
+                    </section>
+                  </nav>
+                </article>
+              </main>
+              <footer class="s-pie">
+                <p>Citas de dominio público, con su procedencia documentada cuando consta.</p>
+                <ul><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Threads</a></li><li><a href="#">Facebook</a></li><li><a href="#">RSS</a></li></ul>
+              </footer>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>En la primera pantalla:</b> la cabecera, la Cita, la Atribución, la Fuente y la Tarjeta de Obra hasta «Siguiente cita de esta obra»; el pliegue corta «Ver la obra». Copiar empieza unos 65&nbsp;px por debajo; con la cabecera de una fila, unos 30.</li>
+          <li><b>Siena en la primera pantalla:</b> «Buscar» y el enlace de la Fuente. DESIGN:138 dice hoy «cinco sitios»; con la v8 la cifra cambia, y la regla, que es por función, no.</li>
+          <li><b>Orden de tabulación:</b> cabecera, Cita (no enfocable), Autor, título de la Obra, Fuente, «Siguiente», «Ver la obra», Copiar, Imagen, los cinco de compartir, siete tarjetas con sus dos cierres, dos chips y el pie: el orden de lectura (EXPERIENCE § Accessibility Floor, que el diseño §5 reescribe así).</li>
+          <li><b>La página entera</b> mide unos 2.780&nbsp;px a 360: más de cuatro pantallas. La misma Cita con la página de hoy —cabecera de una fila, sin tarjeta, «Compartir la cita» y cuatro hermanas a 17&nbsp;px— mide unos 1.500.</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 4b: Cita larga ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">CITA DEL TRAMO MD</span><br><b>«Conocerlos basta, sin vendas ni ambages…»</b> — José Martí, «Nuestra América», 1891: 225 caracteres, 23&nbsp;px; la 14.ª de 27.</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab">
+                <a class="s-marca" href="#">Sabiduría de Bolsillo</a>
+                <ul class="s-nav"><li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li><li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li><li><a href="#">Buscar</a></li></ul>
+              </header>
+              <main class="s-pag">
+                <article>
+                  <figure class="bloque">
+                    <blockquote><h1 class="cita-h1 md">«Conocerlos basta, sin vendas ni ambages; porque el que pone de lado, por voluntad u olvido, una parte de la verdad, cae a la larga por la verdad que le faltó, que crece en la negligencia, y derriba lo que se levanta sin ella.»</h1></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">José Martí</a></p>
+                      <p class="procedencia"><a href="#">Nuestra América</a>, 1891.</p>
+                    </figcaption>
+                  </figure>
+                  <p class="fuente">Texto tomado de <a href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+
+                  <section class="to a" aria-labelledby="to-4b">
+                    <h2 class="rotulo" id="to-4b">De la obra</h2>
+                    <p class="to-titulo">Nuestra América</p>
+                    <p class="to-hechos">José Martí<span aria-hidden="true"> · </span><span class="oculto">, </span>1891<span aria-hidden="true"> · </span><span class="oculto">, </span>27 citas</p>
+                    <ul class="to-filas">
+                      <li><a href="#">Siguiente cita de esta obra →</a></li>
+                      <li><a href="#">Ver la obra y dónde leerla →</a></li>
+                    </ul>
+                  </section>
+
+                  <div class="acc-copiar"><button type="button" class="boton">Copiar la cita</button></div>
+                  <p class="tijera abajo">Recortado: lo demás, como en la página entera.</p>
+                </article>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>En la primera pantalla:</b> la Cita entera, la Atribución, la Fuente y el rótulo «De la obra»; el pliegue corta el título de la Obra, y Copiar queda unos 180&nbsp;px más abajo. A 23&nbsp;px, una Cita de 225 caracteres ocupa ocho líneas.</li>
+          <li><b>Lo que esto dice de la decisión 1:</b> aquí la tarjeta apenas asoma y no compite con nada; 1C, con el titular a 26&nbsp;px, tampoco ganaría nada arriba.</li>
+          <li><b>«Siguiente»</b> lleva a la 15.ª, «Conocer el país, y gobernarlo conforme al conocimiento, es el único modo de librarlo de tiranías.».</li>
+        </ul>
+      </figure>
+
+      <!-- ===== 4c: Cita sin Obra ===== -->
+      <figure class="tel">
+        <figcaption><span class="etiqueta">CITA SIN OBRA</span><br><b>«Hacer es la mejor manera de decir.»</b> — José Martí. Su Procedencia solo trae una referencia: no hay Tarjeta de Obra ni «Siguiente» (FR-12).</figcaption>
+        <div class="telefono">
+          <div class="navegador"><span>sabiduriadebolsillo.net</span></div>
+          <div class="pantalla">
+            <div class="lienzo" lang="es">
+              <div class="pliegue"><span>pliegue 360×640</span></div>
+              <header class="s-cab">
+                <a class="s-marca" href="#">Sabiduría de Bolsillo</a>
+                <ul class="s-nav"><li><a class="tinta" href="#">Autores</a></li><li class="punto" aria-hidden="true">·</li><li><a class="tinta" href="#">Obras</a></li><li class="punto" aria-hidden="true">·</li><li><a href="#">Buscar</a></li></ul>
+              </header>
+              <main class="s-pag">
+                <article>
+                  <figure class="bloque">
+                    <blockquote><h1 class="cita-h1">«Hacer es la mejor manera de decir.»</h1></blockquote>
+                    <figcaption>
+                      <p class="at-autor"><a href="#">José Martí</a></p>
+                      <p class="procedencia">Sin obra documentada. Atribuida en sus escritos periodísticos.</p>
+                    </figcaption>
+                  </figure>
+
+                  <div class="acc-copiar"><button type="button" class="boton">Copiar la cita</button></div>
+                  <div class="acc-imagen"><button type="button" class="boton">Compartir como imagen</button></div>
+                  <section class="cmp rej" aria-labelledby="cmp-4c">
+                    <h2 class="rotulo" id="cmp-4c">Compartir en</h2>
+                    <ul class="rejilla">
+                      <li class="ancha"><button type="button" class="boton"><span class="oculto">Compartir en </span>Historia de Instagram</button></li>
+                      <li><a class="boton" href="#"><span class="oculto">Compartir en </span>WhatsApp<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Facebook<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><a class="boton" href="#"><span class="oculto">Compartir en </span>Threads<span class="oculto"> (se abre en una pestaña nueva)</span></a></li>
+                      <li><button type="button" class="boton" aria-label="Más opciones para compartir">Más opciones…</button></li>
+                    </ul>
+                  </section>
+                  <p class="tijera abajo">Recortado: «Más de José Martí» —no hay «De la misma obra»—, los Temas y el pie.</p>
+                </article>
+              </main>
+            </div>
+          </div>
+        </div>
+        <ul class="notas">
+          <li><b>En la primera pantalla:</b> la Cita, la Atribución con su «Sin obra documentada», Copiar, la Imagen y «Historia de Instagram»; el pliegue corta la fila de WhatsApp y Facebook. Sin Fuente declarada, no hay Línea de la Fuente.</li>
+          <li><b>Sin «De la misma obra»</b>: no hay Obra. «Más de José Martí» elige entre todas las demás suyas.</li>
+          <li><b>Es la rareza:</b> 4 Citas del Corpus no tienen Obra (diseño §5). Las otras 4.416 se parecen a 4a o a 4b.</li>
+        </ul>
+      </figure>
+
+    </div>
+  </section>
+
+  <footer class="fin">
+    <h2>Lo que recomiendo</h2>
+    <div class="caja-reco">
+      <p style="margin:0 0 6px"><b>Tarjeta de Obra: 1A.</b> Da a la Obra su bloque propio —lo segundo que se ve, como decidió Héctor— con piezas que el sistema ya tiene (rótulo de sección, filete, filas de bloque), sin fondo nuevo ni siena nuevo, y sin un titular que compita con la Cita ni un botón que se adelante a Copiar.</p>
+      <p style="margin:0 0 6px"><b>«Compartir en»: 2C.</b> Lee el orden de FR-18 de arriba abajo, deja entero el único nombre largo, y su rejilla 2×2 es la misma con la Historia o sin ella —escritorio, Facebook en Android—; cuesta reabrir el texto visible de la 22.10, con el nombre accesible intacto.</p>
+      <p style="margin:0"><b>«De la misma obra» y «Más de {Autor}»: 3A.</b> Es la Tarjeta de los listados sin variante, que es lo que pide AD-19 y la razón de que la v8 retire las hermanas; su largo cae después de las acciones y no empuja nada que importe a UJ-1.</p>
+    </div>
+
+    <h2>Lo que la maqueta destapa</h2>
+    <ol>
+      <li><b>«Siguiente» por Tema da la variante casi igual.</b> El listado de un Tema va por slug, así que la Cita que sigue a «Caminante, no hay camino, se hace camino al andar.» en La vida es «Caminante, no hay camino, sino estelas en la mar.». Es la forma de FR-12 («la que le sigue en el listado del primero de sus Temas»), y es de Arquitectura y del PRD, no de UX.</li>
+      <li><b>Dos acciones de imagen con nombres que se rozan.</b> «Compartir como imagen» (la cuadrada, con sus tres diseños) queda justo encima de «Historia de Instagram» (la 9:16, sin elegir). La maqueta no las toca porque la Acción Imagen no es de esta pasada, pero quien busca «la imagen» ve dos.</li>
+      <li><b>La cifra de DESIGN:138</b> —«cinco sitios» de siena en la primera pantalla— deja de ser cierta: con 1A son dos. La regla del siena es por función y no cambia; la frase de la cifra se reescribe.</li>
+      <li><b>DESIGN § Acciones de la Página de Cita</b> («cada una en su línea, a su ancho» y «3 × unit de relleno lateral») cambia con 2A o 2C solo para el bloque de compartir; Copiar e Imagen quedan como están.</li>
+      <li><b>Hoy ninguna Obra tiene años discrepantes</b>; el estado «sin año» de la tarjeta existe ya por Obras que no declaran ninguno (17 Citas en «Educación popular»).</li>
+      <li><b>La página pasa de unos 1.500&nbsp;px a unos 2.780</b> a 360, sobre todo por «De la misma obra» y «Más de {Autor}» en Tarjetas: es la deuda «el peso del HTML de la Página de Cita no tiene tope» del addendum, vista en píxeles.</li>
+    </ol>
+
+    <h2>Lo que esta maqueta no decide</h2>
+    <ul>
+      <li>La cabecera a 360&nbsp;px y el color de Autores y Obras: aquí, dos filas, con Autores y Obras en tinta y «Buscar» en siena, solo para medir el pliegue.</li>
+      <li>La Historia de Instagram en dos toques o preparada antes, y dónde se lee su «Enlace copiado: pégalo en el sticker Enlace.».</li>
+      <li>El ancho del bloque «Compartir en» en escritorio, y cómo se ve «Más opciones…» abierto.</li>
+      <li>Las Páginas de Obra, Autor y Tema: el bloque de compartir y «Buscar en esta…» tienen su propia maqueta.</li>
+    </ul>
+
+    <h2>Fuentes</h2>
+    <p style="margin:0">PRD v8 (FR-1, FR-12, FR-17, FR-18, FR-42, FR-54; SM-C5) y su addendum (bloque de la v8); <code>docs/superpowers/specs/2026-10-17-v8-cita-como-centro-design.md</code> §3, §5, §6, §14; <code>DESIGN.md</code> y <code>EXPERIENCE.md</code> (2026-10-11) y su <code>.memlog.md</code>; lo construido en <code>src/pages/cita/[slug].astro</code>, <code>src/components/</code> (BloqueDeCita, Atribucion, Fuente, RutasDeSalida, TarjetaDeCita) e <code>src/islands/CompartirEnlace.astro</code>; Citas, Autores, Fichas de Obra y documentos de <code>corpus/</code> a 2026-10-18. Estilo de la mesa heredado de <code>mockups/pagina-de-obra.html</code>.</p>
+  </footer>
+
+</div>
+</body>
+</html>
