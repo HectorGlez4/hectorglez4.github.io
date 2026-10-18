@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arquitectura v8: la Cita como centro</title>
+<meta name="description" content="Resumen visual de la arquitectura de la v8 de Sabiduría de Bolsillo, sacado de la espina y su memlog.">
+<style>
+:root {
+  color-scheme: light dark;
+  --fondo: #f6f4ef;
+  --panel: #ffffff;
+  --tinta: #1c1e22;
+  --tenue: #4f5660;
+  --linea: #ddd8ce;
+  --trazo: #858d98;
+  --trazo-fuerte: #3b4149;
+  --acento: #0a5c70;
+  --acento-medio: #4a93a5;
+  --acento-suave: #e2eff2;
+  --aviso: #855000;
+  --aviso-suave: #fbefd9;
+  --peligro: #a2271c;
+  --peligro-suave: #f8e3e0;
+  --chip: #f6f4ef;
+  --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #141619;
+    --panel: #1d2024;
+    --tinta: #e9e7e2;
+    --tenue: #aab1ba;
+    --linea: #2f343a;
+    --trazo: #6f7781;
+    --trazo-fuerte: #c5cbd2;
+    --acento: #72c6d8;
+    --acento-medio: #3f8797;
+    --acento-suave: #16323a;
+    --aviso: #e9b45e;
+    --aviso-suave: #33281a;
+    --peligro: #f28b7f;
+    --peligro-suave: #3b201d;
+    --chip: #24282d;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.pagina { max-width: 1060px; margin: 0 auto; padding: 32px 16px 64px; }
+a { color: var(--acento); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 2px; }
+code { font-family: var(--mono); font-size: .88em; overflow-wrap: anywhere; }
+.nw { white-space: nowrap; }
+.antetitulo { margin: 0; color: var(--tenue); font-size: .875rem; letter-spacing: .04em; }
+h1 { margin: .25rem 0 .5rem; font-size: clamp(1.6rem, 1.1rem + 2.4vw, 2.6rem); line-height: 1.15; letter-spacing: -.01em; }
+.entrada { max-width: 68ch; margin: 0 0 1rem; font-size: 1.0625rem; }
+.paradigma { max-width: 68ch; margin: 0 0 1.25rem; color: var(--tenue); }
+.leyenda { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: 0 0 1.5rem; padding: 0; list-style: none; font-size: .875rem; color: var(--tenue); }
+.leyenda li { display: flex; align-items: center; gap: .45rem; }
+.muestra { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; flex: none; }
+.muestra.acento { background: var(--acento-suave); border-color: var(--acento); }
+.muestra.aviso { background: var(--aviso-suave); border-color: var(--aviso); }
+.muestra.peligro { background: var(--peligro-suave); border-color: var(--peligro); }
+.muestra.discontinua { background: var(--panel); border-color: var(--trazo); border-style: dashed; }
+nav ol { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+nav a { display: inline-block; padding: .3rem .7rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--panel); text-decoration: none; font-size: .875rem; color: var(--tinta); }
+nav a:hover { border-color: var(--acento); }
+.bloque { display: grid; gap: 20px; padding: 40px 0; border-top: 1px solid var(--linea); }
+.bloque h2 { margin: 0 0 .75rem; font-size: 1.375rem; line-height: 1.25; }
+.num { display: inline-block; min-width: 1.6em; color: var(--acento); }
+.texto p { margin: 0 0 .9rem; max-width: 62ch; }
+.ads { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.ads li { font-family: var(--mono); font-size: .78rem; padding: .1rem .5rem; border-radius: 999px; background: var(--acento-suave); color: var(--tinta); border: 1px solid var(--linea); }
+.ads .rotulo { font-family: var(--fuente); background: none; border: 0; padding-left: 0; color: var(--tenue); }
+figure { margin: 0; min-width: 0; }
+figure svg { display: block; width: 100%; height: auto; max-width: 460px; margin: 0 auto; }
+figcaption { max-width: 460px; margin: .75rem auto 0; font-size: .875rem; color: var(--tenue); }
+.lista { margin: .25rem 0 0; padding-left: 1.1rem; max-width: 62ch; }
+.lista li { margin: 0 0 .55rem; }
+.lista strong { font-weight: 650; }
+.nota { font-size: .9rem; color: var(--tenue); }
+footer { border-top: 1px solid var(--linea); padding-top: 20px; font-size: .875rem; color: var(--tenue); }
+footer p { margin: 0 0 .5rem; max-width: 80ch; }
+@media (min-width: 900px) {
+  .pagina { padding-top: 48px; }
+  .bloque { grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 48px; align-items: start; }
+  .bloque .texto { position: sticky; top: 24px; }
+  .bloque.sin-fijar .texto { position: static; }
+}
+/* diagramas */
+.d { color: var(--trazo-fuerte); font-family: var(--fuente); }
+.d .caja { fill: var(--panel); stroke: var(--trazo); stroke-width: 1.2; }
+.d .caja-acento { fill: var(--acento-suave); stroke: var(--acento); stroke-width: 1.4; }
+.d .caja-aviso { fill: var(--aviso-suave); stroke: var(--aviso); stroke-width: 1.4; }
+.d .caja-peligro { fill: var(--peligro-suave); stroke: var(--peligro); stroke-width: 1.2; }
+.d .fuerte { stroke-width: 2.2; }
+.d .discontinua { stroke-dasharray: 5 4; }
+.d .borde-acento { fill: none; stroke: var(--acento); stroke-width: 1.4; }
+.d .chip { fill: var(--chip); stroke: var(--linea); stroke-width: 1; }
+.d .divisoria { stroke: var(--linea); stroke-width: 1.2; }
+.d text { fill: var(--tinta); }
+.d .t { font-size: 12px; }
+.d .tb { font-size: 12px; font-weight: 650; }
+.d .tt { font-size: 13.5px; font-weight: 650; }
+.d .ts { font-size: 11px; fill: var(--tenue); }
+.d .ts.tb { font-weight: 650; }
+.d .cab { font-size: 10.5px; font-weight: 650; letter-spacing: .06em; fill: var(--tenue); }
+.d .tm { font-family: var(--mono); }
+.d tspan.tm { font-family: var(--mono); }
+.d .ta { fill: var(--acento); }
+.d .tp { fill: var(--peligro); }
+.d .flecha { stroke: var(--trazo-fuerte); stroke-width: 1.5; fill: none; }
+.d .flecha-aviso { stroke: var(--aviso); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+.d .flecha-peligro { stroke: var(--peligro); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+.d .punta { fill: var(--trazo-fuerte); }
+.d .punta-aviso { fill: var(--aviso); }
+.d .punta-peligro { fill: var(--peligro); }
+.d .barrera { stroke: var(--aviso); stroke-width: 3; stroke-linecap: round; }
+.d .cruz-c { fill: var(--panel); stroke: var(--peligro); stroke-width: 1.5; }
+.d .cruz-x { stroke: var(--peligro); stroke-width: 1.6; stroke-linecap: round; fill: none; }
+.d .relleno-acento { fill: var(--acento); }
+.d .relleno-acento-medio { fill: var(--acento-medio); }
+.d .relleno-aviso { fill: var(--aviso); }
+.d .relleno-peligro { fill: var(--peligro); }
+.d .relleno-trazo { fill: var(--trazo); }
+</style>
+</head>
+<body>
+<main class="pagina">
+<header>
+<p class="antetitulo">Sabiduría de Bolsillo · espina de arquitectura · 18 de octubre de 2026</p>
+<h1>La v8, la Cita como centro</h1>
+<p class="entrada">Cómo encajan las piezas nuevas de la v8, en seis diagramas. Cada pieza nombra la decisión de la espina que la gobierna (<span class="nw">AD-n</span>) en <code>ARCHITECTURE-SPINE.md</code>.</p>
+<p class="paradigma">El paradigma no cambia: el Corpus atraviesa una tubería de build de un solo sentido —fuente, validación, derivación, prerenderizado— y, al lado, corre un plano de medición que escribe y nunca se lee. La v8 le cambia dos cosas: el emisor de la medición pasa a ser un fichero que el build genera desde <code>src/lib/medicion.ts</code> (<span class="nw">AD-6</span>, <span class="nw">AD-13</span>), y la tabla de D1 gana un estado que solo cambia por migraciones aditivas (<span class="nw">AD-14</span>).</p>
+<ul class="leyenda" aria-label="Leyenda de los diagramas">
+<li><span class="muestra acento" aria-hidden="true"></span>camino principal o pieza nueva de la v8</li>
+<li><span class="muestra aviso" aria-hidden="true"></span>a la espera o abierto</li>
+<li><span class="muestra peligro" aria-hidden="true"></span>puerta que rompe o vínculo que no existe</li>
+<li><span class="muestra discontinua" aria-hidden="true"></span>aún no existe o va aparte</li>
+</ul>
+<nav aria-label="Secciones">
+<ol>
+<li><a href="#epicas">1 · Épicas</a></li>
+<li><a href="#medicion">2 · Medición</a></li>
+<li><a href="#orden">3 · Orden del libro</a></li>
+<li><a href="#superficies">4 · Directorios y búsqueda</a></li>
+<li><a href="#puertas">5 · Puertas del build</a></li>
+<li><a href="#abierto">6 · Lo abierto</a></li>
+</ol>
+</nav>
+</header>
+
+<section id="epicas" class="bloque" aria-labelledby="h-epicas">
+<div class="texto">
+<h2 id="h-epicas"><span class="num">1</span>Seis épicas, cinco ramas</h2>
+<p>Desde la v8 la unidad de fusión es la épica, no la historia —y con ello cambian los bucles de <code>bmad-build</code>, que fusionaban historia a historia—: las historias se fusionan en la rama de su épica, las pruebas locales de Playwright corren a mano sobre esa rama y la rama entra en main con un solo merge, cuya fecha declara <code>umbrales.ts</code> (<span class="nw">AD-9</span>).</p><p>La 24 y la 26 comparten rama porque SM-11 las quiere juntas en vivo, y la 28 entra tras el juicio de SM-11 o con su fecha declarada. Entre las demás la espina no fija orden: como cada push a main despliega, el orden de fusión es el de despliegue.</p><p>El Corpus y la reparación de la publicación siguen entrando a diario en main, y el cambio de vocabulario de la medición entra como una épica más: desde su rama y ya con su huella (<span class="nw">AD-14</span>).</p>
+<ul class="ads" aria-label="Decisiones que gobiernan esta sección"><li class="rotulo">Gobierna:</li><li>AD-7</li><li>AD-9</li><li>AD-13</li><li>AD-14</li></ul>
+</div>
+<figure>
+<svg class="d" viewBox="-2 -2 364 517" role="img" aria-labelledby="s1-t s1-d">
+<title id="s1-t">Seis épicas en cinco ramas, cada una con un solo merge a main</title>
+<desc id="s1-d">Cada épica se integra en su rama: sus historias se fusionan allí, las pruebas locales de Playwright corren a mano sobre ella y entra en main con un solo merge cuya fecha declara umbrales.ts. La 24 y la 26 comparten rama. La 28 espera al juicio de SM-11 o a su fecha declarada. El cambio de vocabulario de la medición entra como una épica más, con su huella. El Corpus entra a diario directo en main, que despliega en cada push y nunca queda en rojo.</desc>
+<defs><marker id="s1-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta"/></marker><marker id="s1-fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-aviso"/></marker><marker id="s1-fp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-peligro"/></marker></defs>
+<rect x="0" y="90" width="34" height="393" rx="6" class="caja-acento"/>
+<circle cx="9" cy="100" r="2.6" class="relleno-acento"/><circle cx="9" cy="122" r="2.6" class="relleno-acento"/><circle cx="9" cy="144" r="2.6" class="relleno-acento"/><circle cx="9" cy="166" r="2.6" class="relleno-acento"/><circle cx="9" cy="188" r="2.6" class="relleno-acento"/><circle cx="9" cy="210" r="2.6" class="relleno-acento"/><circle cx="9" cy="232" r="2.6" class="relleno-acento"/><circle cx="9" cy="254" r="2.6" class="relleno-acento"/><circle cx="9" cy="276" r="2.6" class="relleno-acento"/><circle cx="9" cy="298" r="2.6" class="relleno-acento"/><circle cx="9" cy="320" r="2.6" class="relleno-acento"/><circle cx="9" cy="342" r="2.6" class="relleno-acento"/><circle cx="9" cy="364" r="2.6" class="relleno-acento"/><circle cx="9" cy="386" r="2.6" class="relleno-acento"/><circle cx="9" cy="408" r="2.6" class="relleno-acento"/><circle cx="9" cy="430" r="2.6" class="relleno-acento"/><circle cx="9" cy="452" r="2.6" class="relleno-acento"/>
+<text class="t ta tb" text-anchor="middle" transform="translate(27 286.5) rotate(-90)">main · cada push despliega · nunca en rojo</text>
+<text x="0" y="10" class="cab">CADA RAMA, IGUAL</text>
+<rect x="0" y="18" width="88" height="46" rx="6" class="caja"/>
+<text x="44" y="37.4" class="tb" text-anchor="middle">historias</text>
+<text x="44" y="52.4" class="ts" text-anchor="middle">en la rama</text>
+<rect x="110" y="18" width="116" height="46" rx="6" class="caja"/>
+<text x="168" y="37.4" class="tb" text-anchor="middle">Playwright local</text>
+<text x="168" y="52.4" class="ts" text-anchor="middle">a mano, antes</text>
+<rect x="248" y="18" width="112" height="46" rx="6" class="caja"/>
+<text x="304" y="37.4" class="tb" text-anchor="middle">un solo merge</text>
+<text x="304" y="52.4" class="ts" text-anchor="middle">fecha: umbrales.ts</text>
+<line x1="90" y1="41" x2="106" y2="41" class="flecha" marker-end="url(#s1-f)"/>
+<line x1="228" y1="41" x2="244" y2="41" class="flecha" marker-end="url(#s1-f)"/>
+<rect x="66" y="90" width="294" height="48" rx="6" class="caja"/>
+<text x="78" y="110.5" class="tt">Épica 23</text>
+<text x="78" y="125.5" class="ts">al desplegarla se revisan las cuotas de D1</text>
+<line x1="64" y1="114" x2="38" y2="114" class="flecha" marker-end="url(#s1-f)"/>
+<rect x="66" y="150" width="294" height="63" rx="6" class="caja-acento"/>
+<text x="78" y="170.5" class="tt">Épicas 24 + 26 · una sola rama</text>
+<text x="78" y="185.5" class="ts">SM-11 las quiere juntas en vivo</text>
+<text x="78" y="200.5" class="ts">su merge es el despliegue que nombra SM-11</text>
+<line x1="64" y1="181.5" x2="38" y2="181.5" class="flecha" marker-end="url(#s1-f)"/>
+<rect x="66" y="225" width="294" height="63" rx="6" class="caja"/>
+<text x="78" y="245.5" class="tt">Épica 25</text>
+<text x="78" y="260.5" class="ts">matriz de dispositivos antes del 9:16 (AD-7)</text>
+<text x="78" y="275.5" class="ts">Historia de Instagram en iOS: decide Héctor</text>
+<line x1="64" y1="256.5" x2="38" y2="256.5" class="flecha" marker-end="url(#s1-f)"/>
+<rect x="66" y="300" width="294" height="48" rx="6" class="caja"/>
+<text x="78" y="320.5" class="tt">Épica 27</text>
+<text x="78" y="335.5" class="ts">su rama y su merge, como las demás</text>
+<line x1="64" y1="324" x2="38" y2="324" class="flecha" marker-end="url(#s1-f)"/>
+<rect x="66" y="360" width="294" height="63" rx="6" class="caja-aviso"/>
+<text x="78" y="380.5" class="tt">Épica 28</text>
+<text x="78" y="395.5" class="ts">entra tras el juicio de SM-11</text>
+<text x="78" y="410.5" class="ts">o con su fecha declarada</text>
+<line x1="64" y1="391.5" x2="38" y2="391.5" class="flecha-aviso" marker-end="url(#s1-fa)"/>
+<line x1="51" y1="382.5" x2="51" y2="400.5" class="barrera"/>
+<rect x="66" y="435" width="294" height="48" rx="6" class="caja discontinua"/>
+<text x="78" y="455.5" class="tt">Cambio de vocabulario de la medición</text>
+<text x="78" y="470.5" class="ts">desde su rama y ya con su huella (AD-14)</text>
+<line x1="64" y1="459" x2="38" y2="459" class="flecha" marker-end="url(#s1-f)"/>
+<circle cx="9" cy="503" r="2.6" class="relleno-acento"/>
+<text x="20" y="507" class="ts">un commit del Corpus o de la reparación: a diario, en main</text>
+</svg>
+<figcaption>Cinco ramas para seis épicas, cada una con un solo merge a main. El orden de arriba abajo no es de calendario: solo la 28 tiene una espera escrita.</figcaption>
+</figure>
+</section>
+<section id="medicion" class="bloque" aria-labelledby="h-medicion">
+<div class="texto">
+<h2 id="h-medicion"><span class="num">2</span>La medición: un fichero, una cola y un desagüe</h2>
+<p>El emisor deja de ir en línea en cada página: el build genera un fichero de guion desde <code>src/lib/medicion.ts</code>, con su URL versionada por el contenido y su propio tope en <code>umbrales.ts</code> (<span class="nw">AD-6</span>, <span class="nw">AD-9</span>).</p><p>Un arranque mínimo del armazón abre <code>__medir</code> como cola antes de toda isla, así que el fichero puede llegar después; al cargar, solo él lee las marcas <code>?de=</code> y <code>?via=</code>, las quita de la dirección y las cuenta una vez por llegada (<span class="nw">AD-13</span>).</p><p>Cada evento nuevo lleva campos de un conjunto cerrado, y cada dato nuevo es una columna nula de D1 que entra por migración aditiva. Cuando cambia el vocabulario, migración, receptor y huella se hacen en su rama y llegan juntos a main, que nunca queda en rojo; y nada de D1 vuelve al sitio (<span class="nw">AD-14</span>).</p>
+<ul class="ads" aria-label="Decisiones que gobiernan esta sección"><li class="rotulo">Gobierna:</li><li>AD-6</li><li>AD-9</li><li>AD-13</li><li>AD-14</li><li>AD-17</li></ul>
+</div>
+<figure>
+<svg class="d" viewBox="-2 -2 364 925" role="img" aria-labelledby="s2-t s2-d">
+<title id="s2-t">El camino de un evento de medición, de la página a D1, y el orden de un cambio de vocabulario</title>
+<desc id="s2-d">La página declara sus vistas en un data-* y sus islas llaman a __medir. Un arranque en línea del armazón abre __medir como cola antes de toda isla. El guion de medición, un fichero externo generado por el build desde src/lib/medicion.ts, vacía la cola al cargar, lee y quita las marcas ?de= y ?via= y emite los eventos nuevos: lectura, salida-interna con zona, busqueda y vista-de-obra. Las balizas van por POST al receptor, un Worker, que escribe en D1, donde cada dato nuevo es una columna nula. Nada vuelve de D1 al sitio. Un cambio de vocabulario se hace en su rama: migración de D1, receptor con su huella y, por último, el sitio.</desc>
+<defs><marker id="s2-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta"/></marker><marker id="s2-fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-aviso"/></marker><marker id="s2-fp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-peligro"/></marker></defs>
+<rect x="0" y="0" width="330" height="78" rx="6" class="caja"/>
+<text x="12" y="20.5" class="tt">Página pública</text>
+<text x="12" y="35.5" class="ts">su <tspan class="tm">data-*</tspan> declara qué vistas emite (AD-17)</text>
+<text x="12" y="50.5" class="ts">sus islas llaman siempre <tspan class="tm">__medir(…)</tspan></text>
+<text x="12" y="65.5" class="ts">su dirección puede traer <tspan class="tm">?de=</tspan> o <tspan class="tm">?via=</tspan></text>
+<line x1="165" y1="78" x2="165" y2="98" class="flecha" marker-end="url(#s2-f)"/>
+<rect x="0" y="100" width="330" height="63" rx="6" class="caja"/>
+<text x="12" y="120.5" class="tt">Arranque en línea del armazón</text>
+<text x="12" y="135.5" class="ts">abre <tspan class="tm">__medir</tspan> como cola, antes de toda isla</text>
+<text x="12" y="150.5" class="ts">también sin punto final · cuenta en el tope · AD-13</text>
+<line x1="102" y1="163" x2="102" y2="183" class="flecha" marker-end="url(#s2-f)"/>
+<text x="112" y="178" class="ts">vacía la cola al cargar y la sustituye</text>
+<rect x="0" y="185" width="204" height="153" rx="6" class="caja-acento"/>
+<text x="12" y="205.5" class="tt">Guion de medición</text>
+<text x="12" y="220.5" class="ts tm">&lt;script src defer&gt;</text>
+<text x="12" y="235.5" class="ts">generado por el build desde</text>
+<text x="12" y="250.5" class="ts tm">src/lib/medicion.ts</text>
+<text x="12" y="265.5" class="ts">URL versionada por contenido</text>
+<text x="12" y="280.5" class="ts">tope propio en umbrales.ts</text>
+<text x="12" y="295.5" class="ts">sin punto final, no existe</text>
+<text x="12" y="314.5" class="ts ta">AD-6 · AD-9 · AD-13</text>
+<rect x="214" y="185" width="116" height="153" rx="6" class="caja"/>
+<text x="226" y="205.5" class="tt">Marcas</text>
+<text x="226" y="220.5" class="ts tm">?de=  ?via=</text>
+<text x="226" y="235.5" class="ts">solo las lee este</text>
+<text x="226" y="250.5" class="ts">guion, al cargar,</text>
+<text x="226" y="265.5" class="ts">antes de la vista;</text>
+<text x="226" y="280.5" class="ts">las quita con</text>
+<text x="226" y="295.5" class="ts tm">replaceState</text>
+<text x="226" y="310.5" class="ts">y cuentan una vez</text>
+<text x="226" y="325.5" class="ts">por llegada</text>
+<line x1="102" y1="338" x2="102" y2="358" class="flecha" marker-end="url(#s2-f)"/>
+<text x="112" y="353" class="ts">emite, del vocabulario cerrado</text>
+<rect x="0" y="360" width="330" height="172" rx="6" class="caja"/>
+<text x="12" y="381" class="tt">Eventos nuevos (AD-13)</text>
+<rect x="10" y="392" width="310" height="28" rx="5" class="chip"/>
+<text x="22" y="410.5" class="tb tm">lectura</text>
+<text x="136" y="410.5" class="ts">una por carga · 8 s o interacción</text>
+<rect x="10" y="426" width="310" height="28" rx="5" class="chip"/>
+<text x="22" y="444.5" class="tb tm">salida-interna</text>
+<text x="136" y="444.5" class="ts">una por carga · con su zona</text>
+<rect x="10" y="460" width="310" height="28" rx="5" class="chip"/>
+<text x="22" y="478.5" class="tb tm">busqueda</text>
+<text x="136" y="478.5" class="ts">asentada · tramo · filtros</text>
+<rect x="10" y="494" width="310" height="28" rx="5" class="chip"/>
+<text x="22" y="512.5" class="tb tm">vista-de-obra</text>
+<text x="136" y="512.5" class="ts">marca indexable / no indexable</text>
+<line x1="84" y1="532" x2="84" y2="552" class="flecha" marker-end="url(#s2-f)"/>
+<text x="94" y="547" class="ts">balizas · POST</text>
+<rect x="0" y="554" width="160" height="98" rx="6" class="caja"/>
+<text x="12" y="574.5" class="tt">Receptor · Worker</text>
+<text x="12" y="589.5" class="ts tm">medicion/receptor.ts</text>
+<text x="12" y="604.5" class="ts">decide qué se registra</text>
+<text x="12" y="619.5" class="ts">204 a lo que no sea POST</text>
+<path d="M186,564 a72,10 0 0,1 144,0 v78 a72,10 0 0,1 -144,0 z" class="caja-acento"/>
+<path d="M186,564 a72,10 0 0,0 144,0" class="borde-acento"/>
+<text x="198" y="594" class="tt">D1</text>
+<text x="198" y="610" class="ts">columna nula por dato</text>
+<text x="198" y="625" class="ts tm">via zona tramo</text>
+<text x="198" y="639" class="ts tm">filtros indexable</text>
+<line x1="162" y1="603" x2="183" y2="603" class="flecha" marker-end="url(#s2-f)"/>
+<path d="M330,603 H346 V39 H334" class="flecha-peligro"/>
+<circle cx="346" cy="321" r="7" class="cruz-c"/><path d="M343,318L349,324M349,318L343,324" class="cruz-x"/>
+<circle cx="7" cy="670" r="7" class="cruz-c"/><path d="M4,667L10,673M10,667L4,673" class="cruz-x"/>
+<text x="20" y="674" class="ts tp">nunca: ningún byte de dist/ deriva de D1 (AD-14)</text>
+<text x="0" y="704" class="cab">SI CAMBIA EL VOCABULARIO, EN SU RAMA</text>
+<rect x="0" y="714" width="330" height="46" rx="6" class="caja"/>
+<text x="12" y="733.4" class="tb">1 · Migración de D1</text>
+<text x="12" y="748.4" class="ts">solo aditiva · wrangler d1 migrations --remote</text>
+<line x1="165" y1="760" x2="165" y2="772" class="flecha" marker-end="url(#s2-f)"/>
+<rect x="0" y="774" width="330" height="46" rx="6" class="caja"/>
+<text x="12" y="793.4" class="tb">2 · Receptor desplegado</text>
+<text x="12" y="808.4" class="ts">con baliza de prueba y la huella versionada</text>
+<line x1="165" y1="820" x2="165" y2="832" class="flecha" marker-end="url(#s2-f)"/>
+<rect x="0" y="834" width="330" height="46" rx="6" class="caja-acento"/>
+<text x="12" y="853.4" class="tb">3 · Sitio</text>
+<text x="12" y="868.4" class="ts">merge a main ya con la huella; npm test la coteja</text>
+<text x="0" y="900" class="ts">1 y 2, en remoto, son actos de Héctor · main nunca en rojo</text>
+<text x="0" y="915" class="ts">revertir va al revés: primero el sitio, luego el receptor</text>
+</svg>
+<figcaption>De la página al desagüe: el único camino de un evento, y el orden en que se despliega un cambio de vocabulario.</figcaption>
+</figure>
+</section>
+<section id="orden" class="bloque" aria-labelledby="h-orden">
+<div class="texto">
+<h2 id="h-orden"><span class="num">3</span>El orden del libro</h2>
+<p>Las Citas de una Obra se ordenan como en el libro: por su posición en el documento cotejado.</p><p>Un cargador de contenido la localiza con el mismo localizador que el cotejo y guarda solo dónde aparece cada Cita —todas las apariciones, sin ordenar y nunca el texto—; <code>obras.ts</code> es el único que ordena y elige, y de él leen el listado en todas sus páginas, «Siguiente», «De la misma obra», la Tarjeta de Obra y la búsqueda (<span class="nw">AD-23</span>, <span class="nw">AD-25</span>).</p><p>En una Obra paginada, el orden entre sus documentos lo declara la propia Fuente con su índice de subpáginas, que <code>tools/</code> recupera una vez y versiona aparte; mientras no esté capturado, rige el orden natural del slug de página con los romanos leídos (<span class="nw">AD-22</span>). Sustituye al orden por slug con que hoy se pinta la Página de Obra.</p>
+<ul class="ads" aria-label="Decisiones que gobiernan esta sección"><li class="rotulo">Gobierna:</li><li>AD-5</li><li>AD-22</li><li>AD-23</li><li>AD-25</li></ul>
+</div>
+<figure>
+<svg class="d" viewBox="-2 -2 364 674" role="img" aria-labelledby="s3-t s3-d">
+<title id="s3-t">El orden del libro: de corpus/fuentes a obras.ts, su único dueño, y a cinco lectores</title>
+<desc id="s3-d">Los documentos de Fuente de corpus/fuentes pasan por un mismo localizador, indexOf sobre las formas colapsadas de cotejo.ts, que comparten el cotejo y el cargador de posiciones. El cargador guarda todas las apariciones de cada Cita, sin ordenar y sin el texto, y obras.ts las recibe por parámetro: ordena los documentos de la Obra, con el índice de subpáginas de la Fuente cuando esté capturado, y elige la aparición que cuenta. De obras.ts leen el orden la Página de Obra en todas sus páginas, Siguiente, De la misma obra, la Tarjeta de Obra de la Cita del Día y data-pagefind-sort.</desc>
+<defs><marker id="s3-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta"/></marker><marker id="s3-fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-aviso"/></marker><marker id="s3-fp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-peligro"/></marker></defs>
+<rect x="0" y="0" width="150" height="93" rx="6" class="caja"/>
+<text x="12" y="20.5" class="tt tm">corpus/fuentes/</text>
+<text x="12" y="35.5" class="ts">documentos de Fuente,</text>
+<text x="12" y="50.5" class="ts">uno por página,</text>
+<text x="12" y="65.5" class="ts">versionados</text>
+<text x="12" y="80.5" class="ts ta">AD-23</text>
+<rect x="162" y="0" width="184" height="93" rx="6" class="caja-aviso discontinua"/>
+<text x="174" y="20.5" class="tt">Índice de subpáginas</text>
+<text x="174" y="35.5" class="ts">lo recupera tools/ una vez</text>
+<text x="174" y="50.5" class="ts">y se versiona aparte (AD-22)</text>
+<text x="174" y="65.5" class="ts">aún sin capturar: rige el</text>
+<text x="174" y="80.5" class="ts">orden natural con romanos</text>
+<line x1="75" y1="93" x2="75" y2="113" class="flecha" marker-end="url(#s3-f)"/>
+<rect x="0" y="115" width="346" height="61" rx="6" class="caja"/>
+<text x="12" y="134.4" class="tb">Mismo localizador para los dos</text>
+<text x="12" y="149.4" class="ts"><tspan class="tm">indexOf</tspan> sobre las formas colapsadas de <tspan class="tm">cotejo.ts</tspan></text>
+<text x="12" y="164.4" class="ts">sobre los mismos documentos, sin biografías</text>
+<line x1="110" y1="176" x2="110" y2="196" class="flecha" marker-end="url(#s3-f)"/>
+<line x1="289" y1="176" x2="289" y2="196" class="flecha" marker-end="url(#s3-f)"/>
+<rect x="0" y="198" width="220" height="112" rx="6" class="caja-acento"/>
+<text x="12" y="218.5" class="tt">Cargador de posiciones</text>
+<text x="12" y="233.5" class="ts tm">content.config.ts</text>
+<text x="12" y="248.5" class="ts">guarda todas las apariciones</text>
+<text x="12" y="263.5" class="ts tm">slug → [documento, posición]</text>
+<text x="12" y="278.5" class="ts">sin ordenar, nunca el texto</text>
+<text x="12" y="297.5" class="ts ta">AD-23 · AD-5</text>
+<rect x="232" y="198" width="114" height="112" rx="6" class="caja"/>
+<text x="244" y="218.5" class="tt">Cotejo</text>
+<text x="244" y="233.5" class="ts">rompe el build</text>
+<text x="244" y="248.5" class="ts">si el texto no</text>
+<text x="244" y="263.5" class="ts">está literal en</text>
+<text x="244" y="278.5" class="ts">su documento</text>
+<text x="244" y="297.5" class="ts ta">AD-23</text>
+<line x1="110" y1="310" x2="110" y2="330" class="flecha" marker-end="url(#s3-f)"/>
+<text x="120" y="325" class="ts">las recibe por parámetro</text>
+<rect x="0" y="332" width="346" height="127" rx="6" class="caja-acento fuerte"/>
+<text x="12" y="352.5" class="tt tm">src/lib/obras.ts · único dueño</text>
+<text x="12" y="367.5" class="ts">ordena los documentos de cada Obra y elige</text>
+<text x="12" y="382.5" class="ts">la aparición que cuenta: la del primero;</text>
+<text x="12" y="397.5" class="ts">a igual posición, decide el slug</text>
+<text x="12" y="412.5" class="ts">entre Fuentes, primero la que más Citas aporta</text>
+<text x="12" y="427.5" class="ts">sin documento: detrás, por slug</text>
+<text x="12" y="446.5" class="ts ta">AD-25</text>
+<path d="M346,46.5 H354 V356 H349" class="flecha-aviso" marker-end="url(#s3-fa)"/>
+<line x1="173" y1="459" x2="173" y2="479" class="flecha" marker-end="url(#s3-f)"/>
+<rect x="0" y="481" width="346" height="189" rx="6" class="caja"/>
+<text x="12" y="502" class="tt">Lo leen de él, sin recalcularlo</text>
+<rect x="10" y="513" width="158" height="40" rx="5" class="chip"/>
+<text x="20" y="530" class="tb">Página de Obra</text>
+<text x="20" y="545" class="ts">listado, también las 2+</text>
+<rect x="178" y="513" width="158" height="40" rx="5" class="chip"/>
+<text x="188" y="530" class="tb">«Siguiente»</text>
+<text x="188" y="545" class="ts">tras la última, la primera</text>
+<rect x="10" y="559" width="158" height="40" rx="5" class="chip"/>
+<text x="20" y="576" class="tb">«De la misma obra»</text>
+<text x="20" y="591" class="ts">reparte a pasos iguales</text>
+<rect x="178" y="559" width="158" height="40" rx="5" class="chip"/>
+<text x="188" y="576" class="tb">Tarjeta de Obra</text>
+<text x="188" y="591" class="ts">de la Cita del Día</text>
+<rect x="10" y="605" width="326" height="55" rx="5" class="chip"/>
+<text x="20" y="622" class="tb tm">data-pagefind-sort</text>
+<text x="20" y="637" class="ts">ordinal entero: Autor → lista de obras → libro</text>
+<text x="20" y="652" class="ts">se aplica solo al filtrar sin texto</text>
+</svg>
+<figcaption>Un localizador compartido, un solo dueño del orden y cinco lectores que no lo recalculan. La línea discontinua es el índice de subpáginas, que aún no está capturado.</figcaption>
+</figure>
+</section>
+<section id="superficies" class="bloque" aria-labelledby="h-superficies">
+<div class="texto">
+<h2 id="h-superficies"><span class="num">4</span>Directorios, búsqueda y guiones</h2>
+<p><code>/autores/</code> y <code>/obras/</code> son superficies de producto con familia propia, <code>directorio</code>, en las cinco series: nunca cuentan en la familia de lo que listan, listan entidades y no Citas, y no admiten ningún Modelo de Ingreso (<span class="nw">AD-17</span>, <span class="nw">AD-19</span>, <span class="nw">AD-20</span>, <span class="nw">AD-24</span>).</p><p>En la búsqueda, un solo componente, y solo en la Página de Cita, escribe filtros, metadatos y clave de orden; todo bloque que enumera Citas queda fuera del índice, y el mapa de rótulos es un JSON del build que la isla pide junto a <code>filters()</code>, nunca HTML (<span class="nw">AD-11</span>). «Buscar en…» no crea superficie: es <code>/buscar/</code> con su estado en la dirección (<span class="nw">AD-17</span>).</p><p>Los guiones son de dos clases: en línea, bajo un solo tope y sin datos de contenido, o externos de una lista cerrada, cada uno con su tope (<span class="nw">AD-6</span>, <span class="nw">AD-9</span>).</p>
+<ul class="ads" aria-label="Decisiones que gobiernan esta sección"><li class="rotulo">Gobierna:</li><li>AD-3</li><li>AD-6</li><li>AD-9</li><li>AD-11</li><li>AD-17</li><li>AD-19</li><li>AD-20</li><li>AD-24</li></ul>
+</div>
+<figure>
+<svg class="d" viewBox="-2 -2 364 653" role="img" aria-labelledby="s4-t s4-d">
+<title id="s4-t">Quién alimenta la búsqueda y qué guiones van en línea o en fichero</title>
+<desc id="s4-d">Un solo componente de la Página de Cita escribe los filtros de Pagefind, con un Autor, como mucho una Obra y sus Temas publicados, sus metadatos y su clave de orden. Los Directorios /autores/ y /obras/ son producto, de familia propia, responden por su título y no admiten Modelo de Ingreso. Pagefind deja fuera los bloques que enumeran Citas. El mapa de rótulos es un JSON del build que la isla pide junto a filters(). Todo llega a /buscar/ con su estado en la dirección, y Buscar en… no crea superficie. Los guiones en línea van bajo un solo tope y sin datos de contenido; los externos son una lista cerrada: medición, filtro de Directorios y búsqueda con filtros con la página; imagen.js y Pagefind con import().</desc>
+<defs><marker id="s4-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta"/></marker><marker id="s4-fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-aviso"/></marker><marker id="s4-fp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-peligro"/></marker></defs>
+<text x="0" y="10" class="cab">QUIÉN ALIMENTA LA BÚSQUEDA</text>
+<rect x="0" y="18" width="170" height="127" rx="6" class="caja-acento"/>
+<text x="12" y="38.5" class="tt">Página de Cita</text>
+<text x="12" y="53.5" class="ts">un solo componente</text>
+<text x="12" y="68.5" class="ts">escribe filtros,</text>
+<text x="12" y="83.5" class="ts">metadatos y orden:</text>
+<text x="12" y="98.5" class="ts"><tspan class="tm">autor:</tspan> 1 · <tspan class="tm">obra:</tspan> ≤ 1</text>
+<text x="12" y="113.5" class="ts"><tspan class="tm">tema:</tspan> sus Temas publicados</text>
+<text x="12" y="132.5" class="ts ta">AD-11</text>
+<rect x="182" y="18" width="164" height="127" rx="6" class="caja"/>
+<text x="194" y="38.5" class="tt">Directorios</text>
+<text x="194" y="53.5" class="ts tm">/autores/  /obras/</text>
+<text x="194" y="68.5" class="ts">producto, familia</text>
+<text x="194" y="83.5" class="ts">propia «directorio»</text>
+<text x="194" y="98.5" class="ts">responden por su título</text>
+<text x="194" y="113.5" class="ts">sin Modelo de Ingreso</text>
+<text x="194" y="132.5" class="ts ta">AD-17 · AD-20 · AD-24</text>
+<line x1="85" y1="145" x2="85" y2="165" class="flecha" marker-end="url(#s4-f)"/>
+<line x1="264" y1="145" x2="150" y2="165" class="flecha" marker-end="url(#s4-f)"/>
+<rect x="0" y="167" width="170" height="93" rx="6" class="caja"/>
+<text x="12" y="187.5" class="tt">Índice de Pagefind</text>
+<text x="12" y="202.5" class="ts"><tspan class="tm">filters()</tspan> con recuentos</text>
+<text x="12" y="217.5" class="ts">deja fuera los bloques</text>
+<text x="12" y="232.5" class="ts">que enumeran Citas</text>
+<text x="12" y="247.5" class="ts">tipo «Directorio» aparte</text>
+<rect x="182" y="167" width="164" height="93" rx="6" class="caja discontinua"/>
+<text x="194" y="187.5" class="tt">Mapa de rótulos</text>
+<text x="194" y="202.5" class="ts">JSON del build:</text>
+<text x="194" y="217.5" class="ts tm">ficha → título, Autor</text>
+<text x="194" y="232.5" class="ts">nunca en el HTML</text>
+<text x="194" y="247.5" class="ts ta">AD-11</text>
+<line x1="85" y1="260" x2="85" y2="286" class="flecha" marker-end="url(#s4-f)"/>
+<line x1="264" y1="260" x2="264" y2="286" class="flecha" marker-end="url(#s4-f)"/>
+<text x="252" y="277" class="ts" text-anchor="end">pedido junto a <tspan class="tm">filters()</tspan></text>
+<rect x="0" y="288" width="346" height="97" rx="6" class="caja"/>
+<text x="12" y="308.5" class="tt tm">/buscar/?q=&amp;autor=&amp;obra=&amp;tema=</text>
+<text x="12" y="323.5" class="ts">identificadores, nunca rótulos; obra nunca sin autor</text>
+<text x="12" y="338.5" class="ts">«Buscar en…» lleva aquí: misma ruta, mismo HTML</text>
+<text x="12" y="353.5" class="ts">con filtros sigue admitiendo publicidad (AD-20)</text>
+<text x="12" y="372.5" class="ts ta">AD-17</text>
+<line x1="0" y1="409" x2="346" y2="409" class="divisoria"/>
+<text x="0" y="429" class="cab">GUIONES · AD-6</text>
+<rect x="0" y="437" width="170" height="171" rx="6" class="caja"/>
+<text x="12" y="457.5" class="tt">En línea</text>
+<text x="12" y="472.5" class="ts">bajo un solo tope en toda</text>
+<text x="12" y="487.5" class="ts">superficie pública,</text>
+<text x="12" y="502.5" class="ts">sin datos de contenido</text>
+<text x="12" y="517.5" class="ts">(van en <tspan class="tm">data-*</tspan>)</text>
+<text x="12" y="538.5" class="ts">· arranque de <tspan class="tm">__medir</tspan></text>
+<text x="12" y="553.5" class="ts">· disparador de Historia</text>
+<text x="12" y="568.5" class="ts">· «Más opciones…»</text>
+<text x="12" y="583.5" class="ts">· copiar, slug en <tspan class="tm">data-*</tspan></text>
+<rect x="182" y="437" width="164" height="171" rx="6" class="caja-acento"/>
+<text x="194" y="457.5" class="tt">Externos</text>
+<text x="194" y="472.5" class="ts">lista cerrada, cada uno</text>
+<text x="194" y="487.5" class="ts">con su tope (AD-9)</text>
+<text x="194" y="504" class="tb">con la página:</text>
+<text x="194" y="519" class="ts">· medición</text>
+<text x="194" y="534" class="ts">· filtro de Directorios</text>
+<text x="194" y="549" class="ts">· búsqueda con filtros</text>
+<text x="194" y="565.5" class="tb">con <tspan class="tm">import()</tspan>:</text>
+<text x="194" y="580.5" class="ts">· <tspan class="tm">imagen.js</tspan>, al pulsar</text>
+<text x="194" y="595.5" class="ts">· Pagefind, al enfocar</text>
+<text x="0" y="628" class="ts">lo empaquetado sale siempre a fichero: <tspan class="tm">assetsInlineLimit</tspan></text>
+<text x="0" y="643" class="ts">ningún Modelo de Ingreso trae <tspan class="tm">&lt;script src&gt;</tspan> (AD-20)</text>
+</svg>
+<figcaption>Quién escribe lo que la búsqueda indexa, y qué guion va en línea y cuál en fichero. El filtro de los Directorios importa la normalización canónica en vez de copiarla (AD-3).</figcaption>
+</figure>
+</section>
+<section id="puertas" class="bloque" aria-labelledby="h-puertas">
+<div class="texto">
+<h2 id="h-puertas"><span class="num">5</span>Las puertas del build</h2>
+<p>NFR-5 gana puerta: al terminar, sobre el <code>dist/</code> real, el build rompe si una superficie publicable queda a más de tres saltos de la portada, y las órdenes que retiran se niegan antes, con código 1 (<span class="nw">AD-11</span>).</p><p>El grafo se calcula sin los bloques que rotan con la jornada, así que dos construcciones del mismo commit en días distintos dan los mismos veredictos (<span class="nw">AD-12</span>).</p><p>El peso de <code>dist/</code> gana aviso y tope por debajo del techo de 1 GB de GitHub Pages: hoy mide 485 MB y, a 95–100 KB por Cita nueva, el techo llega hacia las 9.500–10.000 Citas (<span class="nw">AD-16</span>, Entorno operativo). Y la fecha del sitemap se mueve solo por lo que una página afirma: una Cita nueva ya no refecha las otras Páginas de Cita de su Autor (<span class="nw">AD-27</span>).</p>
+<ul class="ads" aria-label="Decisiones que gobiernan esta sección"><li class="rotulo">Gobierna:</li><li>AD-6</li><li>AD-11</li><li>AD-12</li><li>AD-16</li><li>AD-17</li><li>AD-27</li></ul>
+</div>
+<figure>
+<svg class="d" viewBox="-2 -2 364 839" role="img" aria-labelledby="s5-t s5-d">
+<title id="s5-t">Las puertas del build: dónde se para, cuánto pesa dist/ y qué fecha el sitemap</title>
+<desc id="s5-d">Las órdenes que retiran se niegan con código 1 si dejarían una Cita a más de tres saltos. Al terminar el build, sobre el dist/ real, el build rompe si algo publicable queda a más de tres saltos de la portada, calculado sin los bloques que rotan con la jornada; avisa y rompe por el peso de dist/; rompe si el sitemap, las páginas sin noindex y el índice difieren, y comprueba los guiones. Dos construcciones del mismo commit en días distintos dan los mismos veredictos. dist/ pesa 485 MB de 1 GB: 308 de Tarjetas Sociales, 134 de Páginas de Cita y 21 de Pagefind. El sitemap fecha solo lo que una página afirma: una Cita nueva fecha la suya, su Obra y los Directorios, y ninguna otra Página de Cita.</desc>
+<defs><marker id="s5-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta"/></marker><marker id="s5-fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-aviso"/></marker><marker id="s5-fp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-peligro"/></marker></defs>
+<text x="0" y="10" class="cab">DÓNDE SE PARA</text>
+<rect x="0" y="18" width="346" height="93" rx="6" class="caja"/>
+<text x="12" y="38.5" class="tt">Órdenes que retiran · tools/</text>
+<text x="12" y="53.5" class="ts tm">documentar --retirar · autor retirar</text>
+<text x="12" y="68.5" class="ts tm">coleccion quitar · tema quitar</text>
+<text x="12" y="83.5" class="ts">se niegan si dejarían una Cita a más de 3 saltos,</text>
+<text x="12" y="98.5" class="ts">calculados sobre el grafo del modelo (AD-11)</text>
+<rect x="262" y="26" width="76" height="20" rx="10" class="caja-peligro"/>
+<text x="300" y="40" class="ts tp tb" text-anchor="middle">código 1</text>
+<line x1="173" y1="111" x2="173" y2="131" class="flecha" marker-end="url(#s5-f)"/>
+<text x="183" y="126" class="ts">si pasan: commit y build</text>
+<rect x="0" y="133" width="346" height="208" rx="6" class="caja"/>
+<text x="12" y="154" class="tt tm">astro:build:done · sobre el dist/ real</text>
+<rect x="12" y="169" width="4" height="28" rx="2" class="relleno-peligro"/>
+<text x="26" y="180" class="tb">rompe si algo publicable queda a más de 3 saltos</text>
+<text x="26" y="196" class="ts">grafo sin los bloques data-jornada · AD-11, AD-12</text>
+<rect x="12" y="213" width="4" height="28" rx="2" class="relleno-peligro"/>
+<text x="26" y="224" class="tb">avisa, y luego rompe, por el peso de dist/</text>
+<text x="26" y="240" class="ts">aviso y tope en umbrales.ts, bajo 1 GB</text>
+<rect x="12" y="257" width="4" height="28" rx="2" class="relleno-peligro"/>
+<text x="26" y="268" class="tb">rompe si sitemap, noindex e índice difieren</text>
+<text x="26" y="284" class="ts">tienen que anunciar las mismas rutas · AD-17</text>
+<rect x="12" y="301" width="4" height="28" rx="2" class="relleno-peligro"/>
+<text x="26" y="312" class="tb">guiones: solo la lista cerrada, con su tope</text>
+<text x="26" y="328" class="ts">y ninguno empaquetado en línea · AD-6</text>
+<rect x="0" y="359" width="128" height="28" rx="6" class="caja"/>
+<text x="12" y="377.6" class="ts">mismo commit · día 1</text>
+<rect x="0" y="403" width="128" height="28" rx="6" class="caja"/>
+<text x="12" y="421.6" class="ts">mismo commit · día 2</text>
+<rect x="170" y="359" width="176" height="72" rx="6" class="caja-acento"/>
+<text x="182" y="378.4" class="tb">mismos veredictos</text>
+<text x="182" y="393.4" class="ts">HTML idéntico, salvo la</text>
+<text x="182" y="408.4" class="ts">portada, /kit y /lote</text>
+<text x="182" y="423.4" class="ts ta">AD-12</text>
+<line x1="130" y1="373" x2="166" y2="389" class="flecha" marker-end="url(#s5-f)"/>
+<line x1="130" y1="417" x2="166" y2="401" class="flecha" marker-end="url(#s5-f)"/>
+<text x="0" y="467" class="cab">PESO DE dist/ FRENTE AL TECHO DE GITHUB PAGES</text>
+<text x="167.8" y="483" class="ts tb" text-anchor="middle">485 MB · 16/10</text>
+<text x="346" y="483" class="ts tb" text-anchor="end">1 GB</text>
+<rect x="0" y="489" width="346" height="22" rx="4" class="caja"/>
+<rect x="0" y="489" width="106.6" height="22" class="relleno-acento"/>
+<rect x="106.6" y="489" width="46.4" height="22" class="relleno-acento-medio"/>
+<rect x="152.9" y="489" width="7.3" height="22" class="relleno-aviso"/>
+<rect x="160.2" y="489" width="7.6" height="22" class="relleno-trazo"/>
+<text x="256.9" y="504" class="ts" text-anchor="middle">aviso y tope, con margen</text>
+<rect x="0" y="524" width="10" height="10" rx="2" class="relleno-acento"/>
+<text x="16" y="533" class="ts">Tarjetas Sociales · 308 MB</text>
+<rect x="176" y="524" width="10" height="10" rx="2" class="relleno-acento-medio"/>
+<text x="192" y="533" class="ts">Páginas de Cita · 134 MB</text>
+<rect x="0" y="541" width="10" height="10" rx="2" class="relleno-aviso"/>
+<text x="16" y="550" class="ts">Pagefind · 21 MB</text>
+<rect x="176" y="541" width="10" height="10" rx="2" class="relleno-trazo"/>
+<text x="192" y="550" class="ts">resto · 22 MB</text>
+<text x="0" y="577" class="ts">95–100 KB por Cita nueva: el techo, hacia las 9.500–10.000 Citas</text>
+<text x="0" y="592" class="ts">Cloudflare Pages no es salida sola: corta a 20.000 ficheros,</text>
+<text x="0" y="607" class="ts">y dist/ lleva 15.339 (AD-16, Entorno operativo)</text>
+<text x="0" y="643" class="cab">QUÉ FECHA EL SITEMAP · AD-27</text>
+<rect x="0" y="655" width="122" height="26" rx="13" class="chip"/>
+<text x="61" y="672" class="ts tb" text-anchor="middle">una Cita nueva</text>
+<line x1="126" y1="668" x2="146" y2="668" class="flecha" marker-end="url(#s5-f)"/>
+<text x="154" y="672" class="t">la suya, su Obra, los Directorios</text>
+<circle cx="161" cy="686" r="7" class="cruz-c"/><path d="M158,683L164,689M164,683L158,689" class="cruz-x"/>
+<text x="174" y="690" class="ts tp">ninguna otra Página de Cita</text>
+<rect x="0" y="703" width="122" height="26" rx="13" class="chip"/>
+<text x="61" y="720" class="ts tb tm" text-anchor="middle">ordenAlfabetico</text>
+<line x1="126" y1="716" x2="146" y2="716" class="flecha" marker-end="url(#s5-f)"/>
+<text x="154" y="720" class="t">solo /autores/ y /obras/</text>
+<rect x="0" y="737" width="122" height="26" rx="13" class="chip"/>
+<text x="61" y="754" class="ts tb tm" text-anchor="middle">ordenRevisado</text>
+<line x1="126" y1="750" x2="146" y2="750" class="flecha" marker-end="url(#s5-f)"/>
+<text x="154" y="754" class="t">ninguna</text>
+<rect x="0" y="771" width="122" height="26" rx="13" class="chip"/>
+<text x="61" y="788" class="ts tb" text-anchor="middle">semblanza</text>
+<line x1="126" y1="784" x2="146" y2="784" class="flecha" marker-end="url(#s5-f)"/>
+<text x="154" y="788" class="t">solo la Página de Autor</text>
+<rect x="0" y="805" width="122" height="26" rx="13" class="chip"/>
+<text x="61" y="822" class="ts tb tm" text-anchor="middle">nota · ediciones</text>
+<line x1="126" y1="818" x2="146" y2="818" class="flecha" marker-end="url(#s5-f)"/>
+<text x="154" y="822" class="t">solo la Página de Obra</text>
+</svg>
+<figcaption>Dónde se para algo antes de publicarse, cuánto sitio queda en el alojamiento y qué superficies fecha cada cambio. Las cifras de peso son del 16 de octubre.</figcaption>
+</figure>
+</section>
+<section id="abierto" class="bloque sin-fijar" aria-labelledby="h-abierto">
+<div class="texto">
+<h2 id="h-abierto"><span class="num">6</span>Lo que queda abierto</h2>
+<p>Nada de esto frena a las épicas: las preguntas para la UX no bloquean ni a <code>bmad-spec</code> ni a las épicas, y la de Héctor no muerde hasta la Épica 25. El resto son aplazados con la condición que los reabre escrita en la espina; varios los reabre una cifra con nombre en <code>umbrales.ts</code>, que el build avisa sin romper (<span class="nw">AD-9</span>).</p>
+<ul class="lista">
+<li><strong>Para la UX.</strong> Si «Buscar en…» y las salidas de la búsqueda sin resultados llevan zona —hoy enviar un formulario no es salida (<span class="nw">AD-13</span>)— y qué hace <code>/buscar/</code> con <code>?autor=a&amp;obra=b</code> cuando <code>b</code> es de otro Autor.</li>
+<li><strong>Para Héctor.</strong> El botón «Historia de Instagram» en iOS, con la matriz de dispositivos delante (<span class="nw">AD-7</span>), y las cuotas de D1, que se suponen del plan gratuito, al desplegar la Épica 23.</li>
+<li><strong>Sin valor todavía.</strong> El mínimo de lecturas que cierra una línea base: se fija en un diff antes de leer la primera (<span class="nw">AD-9</span>).</li>
+<li><strong>Pérdida nombrada.</strong> Tras un despliegue que cambia el guion, hasta 10 minutos de vistas perdidas; se reabre si coincide con una ventana que se juzgue (<span class="nw">AD-6</span>).</li>
+<li><strong>Fuera por NFR-11.</strong> Sesión e identificador de visita; vuelven con la pasada de métricas, junto a la credencial de Cloudflare en Actions (<span class="nw">AD-14</span>, <span class="nw">AD-21</span>).</li>
+<li><strong>Por cifra.</strong> Los filtros de Pagefind con el mapa (~41 KB), el HTML de <code>/obras/</code> (517 Obras), el peso de <code>dist/</code> y, si NFR-7 se degrada, un tope de HTML para la Página de Cita (<span class="nw">AD-9</span>, <span class="nw">AD-16</span>).</li>
+<li><strong>Por hecho.</strong> El índice de subpáginas, con la primera Obra que salga desordenada (<span class="nw">AD-23</span>); la redirección de una Obra reunida o retirada, también en <code>?obra=</code>, con la primera Página de Obra indexada (<span class="nw">AD-25</span>).</li>
+<li><strong>Sin responder.</strong> Qué hacer con las Páginas de Cita si la hipótesis de §14.8 resulta falsa: la v8 las trabaja para que se lean y se sigan, no para que se indexen.</li>
+<li><strong>Fuera a propósito.</strong> El archivo de la Cita del Día (<span class="nw">AD-12</span>, <span class="nw">AD-24</span>, <span class="nw">AD-27</span>).</li>
+<li><strong>Fuera de la espina.</strong> <code>GUIA-DE-ARRANQUE.md</code> y <code>RECONCILIACION.md</code> están desfasados, y <code>publicar.yml</code> usa acciones para Node 20.</li>
+</ul>
+<p class="nota">Siguen como en la v7.1: el motor de vídeo, la Época, el proveedor de analítica y de publicidad, el producto propio y las cachés de la pregeneración y del cotejo.</p>
+
+<ul class="ads" aria-label="Decisiones que gobiernan esta sección"><li class="rotulo">Gobierna:</li><li>AD-6</li><li>AD-7</li><li>AD-9</li><li>AD-12</li><li>AD-13</li><li>AD-23</li><li>AD-25</li></ul>
+</div>
+<figure>
+<svg class="d" viewBox="-2 -2 364 651" role="img" aria-labelledby="s6-t s6-d">
+<title id="s6-t">Lo abierto y lo aplazado, según quién o qué lo reabre</title>
+<desc id="s6-d">Lo decide Héctor: la Historia de Instagram en iOS, en la Épica 25, y las cuotas de D1 al desplegar la 23. Lo decide la UX: la zona de Buscar en… y de la búsqueda sin resultados, y un par autor y obra que no casan. Lo reabre una cifra: los filtros de Pagefind, el HTML de /obras/, el peso de dist/ y el HTML de la Página de Cita. Lo reabre un hecho: el índice de subpáginas, la redirección de una Obra retirada, el guion anterior en caché, la sesión y el mínimo de lecturas. Fuera a propósito: el archivo de la Cita del Día.</desc>
+<defs><marker id="s6-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta"/></marker><marker id="s6-fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-aviso"/></marker><marker id="s6-fp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="punta-peligro"/></marker></defs>
+<rect x="0" y="0" width="346" height="95" rx="6" class="caja-aviso"/>
+<text x="12" y="18" class="cab">LO DECIDE HÉCTOR</text>
+<rect x="10" y="28" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="45" class="tb">Historia de Instagram en iOS</text>
+<text x="326" y="45" class="ts" text-anchor="end">Épica 25</text>
+<rect x="10" y="59" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="76" class="tb">cuotas de D1</text>
+<text x="326" y="76" class="ts" text-anchor="end">al desplegar la 23</text>
+<rect x="0" y="107" width="346" height="95" rx="6" class="caja-aviso"/>
+<text x="12" y="125" class="cab">LO DECIDE LA UX</text>
+<rect x="10" y="135" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="152" class="tb">zona en «Buscar en…»</text>
+<text x="326" y="152" class="ts" text-anchor="end">y búsqueda sin resultados</text>
+<rect x="10" y="166" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="183" class="tb tm">?autor=a&amp;obra=b</text>
+<text x="326" y="183" class="ts" text-anchor="end">cuando no casan</text>
+<rect x="0" y="214" width="346" height="157" rx="6" class="caja"/>
+<text x="12" y="232" class="cab">LO REABRE UNA CIFRA</text>
+<rect x="10" y="242" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="259" class="tb">filtros de Pagefind</text>
+<text x="326" y="259" class="ts" text-anchor="end">~41 KB con el mapa</text>
+<rect x="10" y="273" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="290" class="tb">HTML de /obras/</text>
+<text x="326" y="290" class="ts" text-anchor="end">517 Obras</text>
+<rect x="10" y="304" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="321" class="tb">peso de dist/</text>
+<text x="326" y="321" class="ts" text-anchor="end">485 MB de 1 GB</text>
+<rect x="10" y="335" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="352" class="tb">HTML de la Página de Cita</text>
+<text x="326" y="352" class="ts" text-anchor="end">si NFR-7 empeora</text>
+<rect x="0" y="383" width="346" height="188" rx="6" class="caja"/>
+<text x="12" y="401" class="cab">LO REABRE UN HECHO</text>
+<rect x="10" y="411" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="428" class="tb">índice de subpáginas</text>
+<text x="326" y="428" class="ts" text-anchor="end">1.ª Obra desordenada</text>
+<rect x="10" y="442" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="459" class="tb">redirigir una Obra retirada</text>
+<text x="326" y="459" class="ts" text-anchor="end">con la 1.ª Obra indexada</text>
+<rect x="10" y="473" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="490" class="tb">guion anterior en caché</text>
+<text x="326" y="490" class="ts" text-anchor="end">ventana que se juzgue</text>
+<rect x="10" y="504" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="521" class="tb">sesión e identificador</text>
+<text x="326" y="521" class="ts" text-anchor="end">pasada de métricas</text>
+<rect x="10" y="535" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="552" class="tb">mínimo de lecturas</text>
+<text x="326" y="552" class="ts" text-anchor="end">antes de la 1.ª línea base</text>
+<rect x="0" y="583" width="346" height="64" rx="6" class="caja discontinua"/>
+<text x="12" y="601" class="cab">FUERA, A PROPÓSITO</text>
+<rect x="10" y="611" width="326" height="26" rx="5" class="chip"/>
+<text x="20" y="628" class="tb">archivo de la Cita del Día</text>
+<text x="326" y="628" class="ts" text-anchor="end">AD-12, AD-24, AD-27</text>
+</svg>
+<figcaption>Cada pregunta o aplazado, agrupado por quién o qué lo reabre.</figcaption>
+</figure>
+</section>
+<footer>
+<p>Fuente única: <code>ARCHITECTURE-SPINE.md</code> (v8, actualizada el 2026-10-18) y su <code>.memlog.md</code>, desde la entrada «Arranca pasada de actualización v8». Las decisiones marcadas en la espina como de Héctor son del 17 y el 18 de octubre.</p>
+<p>Este resumen no decide nada: si algo de aquí contradice a la espina, manda la espina.</p>
+</footer>
+</main>
+</body>
+</html>
