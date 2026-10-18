@@ -335,6 +335,13 @@ describe('Historia 11.5 — ningún documento sano del Corpus queda condenado', 
   const cuerpoDe = (fichero: string) =>
     readFileSync(join(fuentes, fichero), 'utf8').split('\n---\n').slice(2).join('\n---\n');
 
+  /**
+   * Por debajo de este tamaño, una sola palabra rara pesa más que el margen que se quiere medir
+   * —con 50 palabras, una vale un 2 %, el umbral entero—. Es una medida de la prueba, no un
+   * umbral del producto: la puerta de `extraer` no lo conoce.
+   */
+  const MIN_PALABRAS_PARA_EL_MARGEN = 500;
+
   it('hay documentos que medir', () => {
     // Sin esto, retirar el corpus dejaría la prueba de abajo pasando sobre cero ficheros.
     expect(documentos.length).toBeGreaterThan(10);
@@ -346,7 +353,7 @@ describe('Historia 11.5 — ningún documento sano del Corpus queda condenado', 
     expect(medida.proporcion).toBeLessThanOrEqual(MAX_PROPORCION_ILEGIBLE);
   });
 
-  it('y con margen de sobra: el peor no llega ni a la mitad del umbral', () => {
+  it('y con margen de sobra: el peor de tamaño suficiente no llega ni a la mitad del umbral', () => {
     /*
      * El número importa tanto como el aprobado: el margen es lo que separa una puerta de una
      * lotería. Y esta prueba decía qué hacer cuando saltara —«revisar la señal que lo esté
@@ -360,8 +367,23 @@ describe('Historia 11.5 — ningún documento sano del Corpus queda condenado', 
      * anterior —una cuarta parte— describía un Corpus de 59 documentos cuyo peor caso era una
      * página de índice con 1 palabra rara de 204. Con 93 documentos y textos que hablan de
      * ortografía, la mitad del umbral sigue siendo margen de verdad y ya no es una foto vieja.
+     *
+     * Y desde el 17/10/2026 se mide sobre los documentos de al menos `MIN_PALABRAS_PARA_EL_MARGEN`.
+     * La siembra en barrido trajo cientos de páginas cortas —352 de 1.421 bajan de 500
+     * palabras—, y en ellas la canaria ya no mide un margen sino una palabra: en los sonetos
+     * de «Las tres musas», 73 palabras, el «1» de «Sonetos 1 al 25» vale 1,37 %; en «Cuatro de
+     * julio», el «4» de la fecha. Eximir la cifra o la «i» sueltas sería quitarle a la puerta
+     * sus dos señales canónicas, así que lo que se acota es la medida del margen, no la señal
+     * (decisión de Héctor). Todo documento, de cualquier tamaño, sigue sujeto al umbral entero
+     * en la prueba de arriba.
      */
-    const peor = Math.max(...documentos.map((f) => medirLegibilidad(cuerpoDe(f)).proporcion));
+    const medidas = documentos
+      .map((f) => medirLegibilidad(cuerpoDe(f)))
+      .filter((medida) => medida.palabras >= MIN_PALABRAS_PARA_EL_MARGEN);
+    // El suelo acota la medida, no la vacía: sin esto, subirlo de más la dejaría en verde sin mirar nada.
+    expect(medidas.length).toBeGreaterThan(documentos.length / 2);
+
+    const peor = Math.max(...medidas.map((medida) => medida.proporcion));
     expect(peor).toBeLessThan(MAX_PROPORCION_ILEGIBLE / 2);
   });
 });
