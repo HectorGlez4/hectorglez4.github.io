@@ -42,6 +42,9 @@ import {
   rutaDeTema,
 } from '../../src/lib/superficies.ts';
 import {
+  DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO,
+  DESPLIEGUE_DE_LA_REPARACION,
+  DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
   PRIMER_DESPLIEGUE_DE_OBRAS,
   SEMANAS_HASTA_JUZGAR_SM11,
   SM11_VIGENTE,
@@ -807,12 +810,32 @@ function proporcion(leida: LecturaDeFamilia): string {
     `(${leida.indexadas} de ${leida.muestra}${muestreada})`;
 }
 
+/** Un despliegue que movió lo que SM-11 compara, con la jornada en que llegó en vivo. */
+export interface DespliegueDeSm11 {
+  que: string;
+  jornada: string;
+}
+
+/** Los despliegues de `umbrales.ts` que ya llegaron, en orden; los que no, no salen. */
+export function desplieguesQueMuevenSm11(): DespliegueDeSm11[] {
+  const todos: { que: string; jornada: string | undefined }[] = [
+    { que: 'la reparación de la publicación', jornada: DESPLIEGUE_DE_LA_REPARACION },
+    { que: 'la Tarjeta de Obra con los Directorios', jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS },
+    { que: 'la portada de retorno', jornada: DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO },
+  ];
+  return todos.filter((d): d is DespliegueDeSm11 => d.jornada !== undefined);
+}
+
 /**
  * La línea SM-11 del informe — Historia 22.8: la proporción indexada de Obra frente a la de
  * Autor **de la misma lectura**, y, desde `jornadaDeJuzgarSm11`, el recordatorio de que toca
- * juzgarla. Juzgar no lo hace la orden: congelar es un commit de Héctor.
+ * juzgarla. Juzgar no lo hace la orden: congelar es un commit de Héctor. Cierra con los
+ * despliegues que movieron la comparación (PRD §6.7), si alguno llegó ya.
  */
-export function lineasDeSm11(lectura: LecturaDeIndexacion): string[] {
+export function lineasDeSm11(
+  lectura: LecturaDeIndexacion,
+  despliegues: readonly DespliegueDeSm11[] = desplieguesQueMuevenSm11(),
+): string[] {
   const obra = lectura.familias.obra;
   const autor = lectura.familias.autor;
   const lineas: string[] = [];
@@ -833,6 +856,12 @@ export function lineasDeSm11(lectura: LecturaDeIndexacion): string[] {
       ? 'Toca juzgar SM-11: lo decide Héctor (congelar es `npm run obra -- congelar` y un commit).'
       : `SM-11 se juzga desde el ${juzgar}.`,
   );
+  if (despliegues.length > 0) {
+    const nombrados = despliegues.map((d) => `${d.que} (${d.jornada})`);
+    lineas.push(
+      `Despliegues que mueven la comparación: ${new Intl.ListFormat('es', { type: 'conjunction' }).format(nombrados)}.`,
+    );
+  }
   return lineas;
 }
 

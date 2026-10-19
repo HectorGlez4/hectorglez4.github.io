@@ -41,6 +41,7 @@ import {
   propiedadDeDominio,
   resumirFamilia,
   censoDeLaSerie,
+  desplieguesQueMuevenSm11,
   jornadaDeJuzgarSm11,
   lineasDeLectura,
   lineasDeSm11,
@@ -1376,5 +1377,28 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
     expect(sinObra[0]).toMatch(/sin comparación .*Obra/);
     // Y el informe la lleva.
     expect(lineasDeLectura({ ...lectura, momento: new Date(2026, 9, 20) }).join('\n')).toContain('SM-11: Obra');
+  });
+
+  it('la línea SM-11 nombra los despliegues que movieron la comparación, y calla los que no han llegado', () => {
+    const lectura = {
+      propiedad: 'sc-domain:x',
+      publicadas: 0,
+      inspeccionadas: 0,
+      momento: new Date(2026, 9, 20),
+      familias: {},
+      sinLeer: {},
+    };
+    // La reparación llegó en vivo el 2026-10-19; las otras dos aún no tienen fecha.
+    expect(desplieguesQueMuevenSm11()[0]).toEqual({ que: 'la reparación de la publicación', jornada: '2026-10-19' });
+    const dos = lineasDeSm11(lectura, [
+      { que: 'la reparación de la publicación', jornada: '2026-10-19' },
+      { que: 'la Tarjeta de Obra con los Directorios', jornada: '2026-11-02' },
+    ]);
+    expect(dos.at(-1)).toBe(
+      'Despliegues que mueven la comparación: la reparación de la publicación (2026-10-19) y ' +
+        'la Tarjeta de Obra con los Directorios (2026-11-02).',
+    );
+    // Lo que no ha llegado no se escribe como hueco: sin despliegues, no hay línea.
+    expect(lineasDeSm11(lectura, []).some((l) => l.startsWith('Despliegues'))).toBe(false);
   });
 });

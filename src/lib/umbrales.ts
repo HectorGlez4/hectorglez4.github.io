@@ -95,6 +95,22 @@ export const PRIMER_DESPLIEGUE_DE_OBRAS = '2026-10-10';
 /** Semanas tras el primer despliegue a partir de las cuales SM-11 se juzga. */
 export const SEMANAS_HASTA_JUZGAR_SM11 = 8;
 
+/*
+ * Las jornadas en que un despliegue cambia lo que SM-11 compara (PRD §6.7): cada una es la del
+ * despliegue que **llega al sitio en vivo** —no la de su commit— y se anota ese día; `undefined`
+ * mientras no haya llegado. El informe de indexación las nombra en su línea SM-11, para que el
+ * juicio sepa qué movió la comparación. Si la ventana se reinicia desde alguna lo decide Héctor.
+ */
+
+/** La reparación de la publicación, en rojo del 2026-10-11 al 2026-10-19 (Publicar, 09:22 UTC). */
+export const DESPLIEGUE_DE_LA_REPARACION = '2026-10-19';
+
+/** La Tarjeta de Obra con los Directorios y la cabecera: las Épicas 24 y 26, juntas (26.11). */
+export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = undefined;
+
+/** La portada de retorno, si llega antes del juicio de SM-11 (Historia 28.5). */
+export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined;
+
 /** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
 export const MAX_CITAS_RELACIONADAS = 4;
 
