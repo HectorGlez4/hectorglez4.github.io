@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Del sentimiento trágico de la vida/II
 url: https://es.wikisource.org/wiki/Del_sentimiento_tr%C3%A1gico_de_la_vida/II
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Del sentimiento trágico de la vida/II
 |título=[[Del sentimiento trágico de la vida]]<br/>II<br/>El punto de partida
 |autor=Miguel de Unamuno
 ---
-II<br/>El punto de partida"},"autor":{"wt":"Miguel de Unamuno"},"sección":{"wt":""}},"i":0}}]}'>
-
 Acaso las reflexiones que vengo haciendo puedan parecer a alguien de un cierto carácter morboso.
 ¿Morboso? ¿Pero qué es eso de la enfermedad? ¿Qué es la salud?
 

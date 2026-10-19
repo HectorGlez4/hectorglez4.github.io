@@ -503,6 +503,9 @@ terminar({
     // Y ésta dice algo de la EDICIÓN, no de la obra: si es alta, el escaneo del que salió el
     // documento viene sucio y lo que quede pide leerse mirando la puntuación.
     `Descartadas por puntuación rota de la edición: ${porMotivo('puntuacion-rota')}\n` +
+    // El número de página y la cursiva de varias palabras de Gutenberg: marcado de la
+    // transcripción, que la legibilidad ya no cuenta como daño y no puede llegar a una Cita.
+    `Descartadas por llevar marcado de la Fuente: ${porMotivo('marcado-de-la-fuente')}\n` +
     `Descartadas por repetidas: ${porMotivo('repetida')}` +
     // Se dice aunque sea cero: es lo que distingue «no había nada nuevo» de «no se ejecutó».
     `\nYa estaban en revisión: ${repetidas}` +

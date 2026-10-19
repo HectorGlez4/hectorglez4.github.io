@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Guatimozín y Hernán Cortés. Diálogo (Pi y Margall)
 url: https://es.wikisource.org/wiki/Guatimoz%C3%ADn_y_Hern%C3%A1n_Cort%C3%A9s._Di%C3%A1logo_(Pi_y_Margall)
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Guatimozín y Hernán Cortés. Diálogo (Pi y Margall)
 [[Categoría:Obras de Francisco Pi y Margall]]
 |título=Guatimozín y Hernán Cortés<br>Diálogo
 |autor=[[Francisco Pi y Margall]]<br>1899
 ---
-Diálogo"},"autor":{"wt":"[[Francisco Pi y Margall]]<br>1899"},"notas":{"wt":""}},"i":0}}]}'>
-
 Sr. D. Luis de Madrazo.
 
 Estimado amigo: Nos conocimos siendo jóvenes y simpatizamos. Nos separó después por muchos años la distinta dirección que emprendimos. Este verano nos volvimos a ver en el Monasterio de Piedra, en aquel delicioso retiro donde tan bien descansa mi fatigado espíritu. Viejos ya, usted no ha querido morir sin dejarme un recuerdo: un retrato, que, como obra de usted, es inapreciable joya. Tampoco he querido morir yo sin dejarle una memoria: un diálogo que tenía hace meses concebido, y acabo de escribir hurtando el tiempo a los negocios de la política y el foro. No vale ni con mucho el diálogo lo que el retrato; pero los iguala el común sentimiento que los produjo.

@@ -2,14 +2,12 @@ fuente: wikisource-es
 obra: Declaración de la independencia de Chile
 año: 1818
 url: https://es.wikisource.org/wiki/Declaraci%C3%B3n_de_la_independencia_de_Chile
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Declaración de la independencia de Chile
 |titulo = Declaración de la independencia de Chile
 |año = 1818
 ---
-[[File:Yes Check Circle.svg|16px|link=Ayuda:Nivel de las páginas|validada]]</span>"}}'/>
-
 PROCLAMACION DE LA INDEPENDENCIA
 DE CHILE
 

@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Mi madrina
 url: https://es.wikisource.org/wiki/Mi_madrina
-recuperado: 2026-10-12
+recuperado: 2026-10-17
 ---
 Mi madrina
 |titulo = [[Novelas y cuadros de la vida sur-americana]] <br> Tipos sociales <br> Mi madrina (Recuerdos de Santafé)
 |autor = Soledad Acosta de Samper
 ---
-Tipos sociales <br> Mi madrina (Recuerdos de Santafé)"},"autor":{"wt":"Soledad Acosta de Samper"}},"i":0}}]}'>
-
 Siendo yo niño (de esto hace luengos años) cuando mi madre y mis hermanas preparaban algún amasijo o cosa delicada, para cuya cooperación no necesitaban de mis deditos que en todo se metían, ni de mi lengüita que todo lo repetía, todas decían en coro:
 
 «Que lleven a Pachito a casa de su madrina.» Yo escuchaba esta sentencia sin apelación, entre alegre y mohíno, y salía de la casa muy despacio, siguiendo a la criada a media cuadra de distancia, y deteniéndome a cada momento para atar las correas de mis botines y recoger la cacucha que me servía de pelota, y así distraía las penas de mi destierro.

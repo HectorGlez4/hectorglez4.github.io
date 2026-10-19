@@ -121,6 +121,48 @@ const GUION_BAJO = /_/u;
  */
 const SUPLEMENTO_ANGULAR = /<([^<>\n]{1,60})>/gu;
 
+/**
+ * La cursiva de Gutenberg que abarca **varias palabras** — 17/10/2026.
+ *
+ * `CURSIVA` mira palabra a palabra, así que «_Tratado de la pintura_» le deja un guion bajo
+ * suelto en la primera y otro en la última, y las dos disparaban. Es el mismo problema que el
+ * del suplemento angular y se resuelve igual: el par se retira **antes** de trocear, y solo
+ * para contar.
+ *
+ * A diferencia del ángulo, la cursiva **cruza el salto de renglón**: Gutenberg corta el texto a
+ * setenta columnas, y las acotaciones de Valle-Inclán abren en una línea y cierran tres más
+ * abajo. Lo que no cruza es un párrafo —una línea en blanco—, y tampoco empareja marcas a más
+ * de trescientos caracteres. Y solo abre y cierra en el borde de una palabra: un guion bajo
+ * pegado por los dos lados a una letra, «mu_er», sigue siendo basura y sigue disparando.
+ */
+const CURSIVA_DE_VARIAS_PALABRAS =
+  /(^|[^\p{L}\p{N}_])_((?:[^_\n]|\n(?!\n)){1,300}?)_(?=[^\p{L}\p{N}_]|$)/gmu;
+
+/**
+ * El número de página que Gutenberg intercala entre llaves: «{pg 23}», «{pg 23, 24}» —
+ * 17/10/2026, 523 en 18 documentos—. Es aparato de la transcripción, no texto ni mancha, y
+ * se retira antes de trocear como el suplemento angular. Una llave que no encierra
+ * exactamente eso sigue disparando.
+ */
+const PAGINA_DE_GUTENBERG = /\{pg\s*\d+(?:,\s*\d+)*\}/gu;
+
+/**
+ * Si el texto trae el marcado de la transcripción que `medirLegibilidad` deja de contar como
+ * daño: el número de página de Gutenberg o una cursiva de varias palabras.
+ *
+ * Lo pregunta la puerta por sentencia de `tools/lib/extraccion.ts`, porque no contarlo como
+ * daño no lo convierte en texto de una Cita. Vive aquí, junto a las dos constantes, para que lo
+ * que se exime al medir y lo que se descarta al extraer no puedan divergir. La cursiva de una
+ * sola palabra queda fuera a propósito: ya pasaba antes del 17/10/2026, y es otra decisión.
+ */
+export function llevaMarcadoDeLaFuente(texto: string): boolean {
+  if (new RegExp(PAGINA_DE_GUTENBERG.source, 'u').test(texto)) return true;
+  for (const [, , dentro] of texto.matchAll(CURSIVA_DE_VARIAS_PALABRAS)) {
+    if (/\s/u.test(dentro)) return true;
+  }
+  return false;
+}
+
 /** Guiones que parten una palabra al final de renglón. La raya (—) no es uno de ellos. */
 const GUIONES_DE_CORTE = /\p{L}[-‐‑­¬]$/u;
 
@@ -167,7 +209,7 @@ const VOLADITAS = /[ºª°]/gu;
  * cultismo y un nombre propio que nadie ha oído. «Fablar», «auri-rizada», «Nietzsche» y
  * «Shakespeare» las pasan; «qus», «enseiia» y «rbl» no.
  */
-function esImpronunciable(nucleo: string, letras: string): boolean {
+function esImpronunciable(nucleo: string, letras: string, abreviatura: boolean): boolean {
   if (letras.length < 2) return false;
 
   /*
@@ -204,8 +246,16 @@ function esImpronunciable(nucleo: string, letras: string): boolean {
    * Y ninguna palabra española se pronuncia sin vocal. Solo se juzga lo escrito en
    * alfabeto latino: el «ζῷον πολιτικόν» que Unamuno cita en griego no lleva ninguna de
    * nuestras vocales y está perfectamente transcrito.
+   *
+   * Dos excepciones del 17/10/2026, las dos de forma y no de vocabulario. La **abreviatura**
+   * no se pronuncia, se lee: «Sr.», «Vd.», «pp.», «cf.» llevan su punto pegado, que es lo
+   * mismo que exime a la letra suelta, y no pasan de cuatro letras. Y «vn» es «un» en la
+   * grafía del Siglo de Oro, donde la «v» vale «u»: se exime esa palabra y no la «v» como
+   * vocal, que dejaría pasar cualquier tira de consonantes que empiece por ella.
    */
-  if (!VOCALES.test(letras) && !NO_LATINA.test(letras)) return true;
+  if (!VOCALES.test(letras) && !NO_LATINA.test(letras) && !abreviatura && letras !== 'vn') {
+    return true;
+  }
 
   return false;
 }
@@ -230,8 +280,14 @@ export function medirLegibilidad(texto: string): MedidaDeLegibilidad {
   };
   const ejemplos: string[] = [];
 
-  // El par de ángulos del traductor se retira antes de partir en palabras: ver SUPLEMENTO_ANGULAR.
-  const crudas = texto.replace(SUPLEMENTO_ANGULAR, '$1').split(/\s+/).filter((t) => t !== '');
+  // El par de ángulos del traductor, la cursiva de varias palabras y el número de página de
+  // Gutenberg se retiran antes de partir en palabras, y solo para contar: ver cada constante.
+  const crudas = texto
+    .replace(SUPLEMENTO_ANGULAR, '$1')
+    .replace(CURSIVA_DE_VARIAS_PALABRAS, '$1$2')
+    .replace(PAGINA_DE_GUTENBERG, ' ')
+    .split(/\s+/)
+    .filter((t) => t !== '');
   const conRaya = usaGuionComoRaya(crudas);
   let palabras = 0;
   let sospechosas = 0;
@@ -292,7 +348,8 @@ export function medirLegibilidad(texto: string): MedidaDeLegibilidad {
     }
 
     const letras = nucleo.toLocaleLowerCase('es').replace(/[^\p{L}]/gu, '');
-    if (esImpronunciable(nucleo, letras)) disparadas.push('impronunciable');
+    const abreviatura = /^\p{L}{1,4}$/u.test(nucleo) && cruda.includes(`${nucleo}.`);
+    if (esImpronunciable(nucleo, letras, abreviatura)) disparadas.push('impronunciable');
 
     if (disparadas.length === 0) continue;
     sospechosas += 1;

@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: La mano pegada
 url: https://es.wikisource.org/wiki/La_mano_pegada
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 La mano pegada
 [[Categoría:Cuentos de Baldomero Lillo]]
 |título=[[Sub Terra]] <br> {{PAGENAME}}
 |autor=[[Baldomero Lillo]]
 ---
-{{PAGENAME}}"},"autor":{"wt":"[[Baldomero Lillo]]"},"notas":{"wt":""}},"i":0}}]}'>
-
 Por la carretera polvorienta, agobiado por la fatiga y el fulgurante resplandor del sol, marcha don Paico, el viejo vagabundo de la mano pegada. Su huesosa diestra oprime un grueso bastón en que apoya su cuerpo anguloso, descarnado, de cuyos hombros estrechos arranca el largo cuello que se dobla fláccidamente bajo la pesadumbre de la cabeza redonda y pelada como una bola de billar.
 
 Un sombrero de paño terroso, grasiento, de alas colgantes, sumido hasta las orejas, vela a medias el rostro de expresión indefinible, mezcla de astucia y simplicidad, animado por dos ojos lacrimosos que parpadean sin cesar. Una larga manta descolorida y llena de remiendos cae en pesados pliegues hasta cera de las rodillas, y sus pies descalzos que se arrastran, al andar dejan tras de sí un ancho surco en la espesa capa de polvo que cubre el camino.

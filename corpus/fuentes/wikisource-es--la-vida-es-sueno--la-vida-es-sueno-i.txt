@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: La vida es sueño
 url: https://es.wikisource.org/wiki/La_vida_es_sue%C3%B1o/I
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 La vida es sueño/I
 |titulo=[[La vida es sueño]]
@@ -9,8 +9,6 @@ La vida es sueño/I
 obra> |titulo=La vida es sueño
 obra> |autor=Pedro Calderón de la Barca
 ---
-",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:La vida es sueño.djvu/9"},"num":{"wt":"5"},"formatted":{"wt":"5"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:La vida es sueño.djvu/9","href":"./Página:La_vida_es_sueño.djvu/9"},"params":{},"i":1}}]}'>
-
 LA VIDA ES SUEÑO
 
 JORNADA PRIMERA
@@ -79,7 +77,6 @@ Mas, si la vista no padece engaños
 Que hace la fantasía,
 A la medrosa luz que aun tiene el día.
 
-\n<section begin=\"s2\"/>{{c|ESCENA II}}\n\n{{c|''Segismundo (en la torre). Rosaura. Clarin. ''}}\n\n::'''SEGIS'''. ''(Dentro.'') ¡Ay mísero de mí! ¡Ay infelice! \n\n::'''ROS''' ¡Qué triste voz escucho! \nCon nuevas penas y tormentos lucho. \n\n::'''CLAR'''. Yo con nuevos temores. \n\n::'''ROS'''. Clarín... \n\n::'''CLAR'''. {{Brecha}}Señora... \n\n::'''ROS'''. {{Brecha}}{{Brecha}}Huyamos los rigores \nDesta encantada torre. \n\n::'''CLAR'''. {{Brecha}}{{Brecha}}Yo aun no tengo \nAnimo para huir, cuando á eso vengo. "}}">
 Me parece que veo
 Un edificio.
 
@@ -123,7 +120,6 @@ Segismundo (en la torre). Rosaura. Clarin.
 SEGIS. (Dentro.) ¡Ay mísero de mí! ¡Ay infelice!
 
 ROS ¡Qué triste voz escucho!
-
 Con nuevas penas y tormentos lucho.
 
 CLAR. Yo con nuevos temores.
@@ -133,11 +129,9 @@ ROS. Clarín...
 CLAR. Señora...
 
 ROS. Huyamos los rigores
-
 Desta encantada torre.
 
 CLAR. Yo aun no tengo
-
 Animo para huir, cuando á eso vengo.
 
 ROS. ¿No es breve luz aquella
@@ -580,7 +574,6 @@ El respondió que quería
 Componernos, y aplazamos
 Este puesto y este dia.
 
-\n<section begin=\"s2\"/>{{c|{{x-grande|ESCENA VI}}}}\n \n{{c|''El Rey Basilio. Acompañamiento. Astolfo. Estrella.''<br> ''Damas. Soldados.''}}\n \n::ESTR. Sabio Tales ... \n::AST. Docto Euclídes ...\n::ESTR. Que entre signos ...\n::AST. Que entre estrellas ... "}}'>
 Con esta intención salí
 De Moscovia y de su tierra;
 Con esta llegué hasta aquí,
@@ -621,9 +614,262 @@ El Rey Basilio. Acompañamiento. Astolfo. Estrella.
 Damas. Soldados.
 
 ESTR. Sabio Tales ...
-
 AST. Docto Euclídes ...
-
 ESTR. Que entre signos ...
-
 AST. Que entre estrellas ...
+
+ESTR. Hoy gobiernas ...
+AST. Hoy resides ...
+ESTR. Y sus caminos ...
+AST. Sus huellas ...
+ESTR. Describes ...
+AST. Tasas y mides ...
+ESTR. Deja que en humildes lazos ...
+AST. Deja que en tiernos abrazos ...
+ESTR. Hiedra dése tronco sea.
+AST. Rendido á tus pies me vea.
+BAS. Sobrinos, dadme los brazos,
+
+Y creed, pues que leales
+A mi precepto amoroso,
+Venis con afectos tales,
+Que á nadie deje quejoso
+Y los dos quedéis iguales;
+Y así, cuando me confieso
+Rendido al prolijo peso,
+Sólo os pido en la ocasión
+Silencio, que admiración
+Ha de pedirla el suceso.
+
+Ya sabéis (estadme atentos, amados sobrinos mios.
+Corte ilustre de Polonia, vasallos, deudos y amigos).
+Ya sabéis que yo en el mundo por mi ciencia he merecido
+El sobrenombre de docto, pues, contra el tiempo y olvido.
+Los pinceles de Timantes, los mármoles de Lisipo.
+En el ámbito del orbe me aclaman el gran Basilio.
+Ya sabéis que son las ciencias que más curso y más estimo,
+Matemáticas sutiles, por quien al tiempo le quito.
+Por quien á la fama rompo la jurisdicción y oficio
+De enseñar más cada dia; pues, cuando en mis tablas miro
+Presentes las novedades de los venideros siglos.
+Le gano al tiempo las gracias de contar lo que yo he dicho.
+Esos círculos de nieve, esos doseles de vidrio,
+Que el sol ilumina á rayos, que parte la luna á giros;
+Esos orbes de diamantes, esos globos cristalinos.
+Que las estrellas adornan y que campean los signos,
+Son el estudio mayor de mis años, son los libros
+Donde, en papel de diamante, en cuadernos de zafiro,
+Escribe con líneas de oro, en caracteres distintos,
+El Cielo nuestros sucesos, ya adversos ó ya benignos.
+Estos leo tan veloz, que con mi espíritu sigo
+
+Sus rápidos movimientos por rumbos y por caminos.
+¡Pluguiera al Cielo, primero que mi ingenio hubiera sido
+De sus márgenes comento y de sus hojas registro.
+Hubiera sido mi vida el primero desperdicio
+De sus iras, y que en ellas mi tragedia hubiera sido,
+Porque de los infelices aun el mérito es cuchillo,
+Que á quien le daña el saber, homicida es de sí mismo!
+Dígalo yo, aunque mejor lo dirán sucesos mios,
+Para cuya admiración otra vez silencio os pido.
+En Clorilene, mi esposa, tuve un infelice hijo.
+En cuyo parto los cielos se agotaron de prodigios.
+Antes que á la luz hermosa le diese el sepulcro vivo
+De un vientre (porque el nacer y el morir son parecidos),
+Su madre infinitas veces, entre ideas y delirios
+Del sueño, vio que rompía sus entrañas, atrevido.
+Un monstruo en forma de hombre; y entre su sangre teñido.
+La daba muerte, naciendo víbora humana del siglo.
+Llegó de su parto el dia, y los presagios cumplidos
+(Porque tarde ó nunca son mentirosos los impíos).
+Nació en horóscopo tal, que el sol, en su sangre tinto,
+Entraba sañudamente con la luna en desafío;
+Y siendo valla la tierra, los dos faroles divinos
+A luz entera luchaban, ya que no á brazo partido.
+El mayor, el más horrendo eclipse que ha padecido
+El sol, después que con sangre lloró la muerte de Cristo,
+Este fué, porque anegado el orbe en incendios vivos.
+Presumió que padecía el último parasismo:
+Los cielos se oscurecieron, temblaron los edificios,
+Llovieron piedras las nubes, corrieron sangre los ríos.
+En aqueste, pues, del Sol, ya frenesí ó ya delirio.
+Nació Segismundo, dando de su condición indicios,
+Pues dio la muerte á su madre, con cuya fiereza dijo:
+— «Hombre soy, pues que ya empiezo a pagar mal beneficios.»
+— Yo, acudiendo á mis estudios, en ellos y en todo miro
+Que Segismundo seria el hombre más atrevido,
+El príncipe más cruel y el monarca más impío.
+Por quien su reino vendría a ser parcial y diviso.
+Escuela de las traiciones y academia de los vicios;
+Y él, de su furor llevado, entre asombros y delitos.
+Había de poner en mí las plantas; y yo rendido
+A sus pies me habia de ver (¡Con qué vergüenza lo digo!).
+Siendo alfombra de sus plantas las canas del rostro mió.
+¿Quién no da crédito al daño, y mas al daño que ha visto
+
+En su estudio, donde hace el amor propio su oficio?
+Pues, dando crédito yo a los hados que, adivinos,
+Me pronosticaban daños en fatales vaticinios.
+Determiné de encerrar la fiera que habia nacido.
+Por ver si el sabio tenia en las estrellas dominio.
+Publicóse que el infante nació muerto; y, prevenido,
+Hice labrar una torre entre las peñas y riscos
+De esos montes, donde apenas la luz ha hallado camino,
+Por defenderle la entrada sus rústicos obeliscos.
+Las graves penas y leyes que, con públicos edictos.
+Declararon que ninguno entrase á un vedado sitio
+Del monte, se ocasionaron de las causas que os he dicho.
+Allí Segismundo vive, mísero, pobre y cautivo.
+Adonde solo Clotaldo le ha hablado, tratado y visto.
+Este le ha enseñado ciencias, este en la ley le ha instruido
+Católica, siendo solo de sus miserias testigo.
+Aquí hay tres cosas: la una, que yo, Polonia, os estimo
+Tanto, que os quiero librar de la opresión y servicio
+De un Rey tirano, porque no fuera señor benigno
+El que á su patria y su imperio pusiera en tanto peligro.
+La otra es considerar que, si á mi sangre le quito
+El derecho que le dieron humano fuero y divino.
+No es cristiana caridad; pues ninguna ley ha dicho
+Que, por reservar yo á otro de tirano y de atrevido.
+Pueda yo serlo; supuesto que si es tirano mi hijo.
+Porque él delitos no haga, vengo yo á hacer los delitos.
+Es la última y tercera el ver cuánto yerro ha sido
+Dar crédito fácilmente a los sucesos previstos;
+Pues aunque su inclinación le dicte sus precipicios,
+Quizá no le vencerán; porque el hado más esquivo.
+La inclinación más violenta, el planeta más impío,
+Solo el albedrío inclinan, no fuerzan el albedrío.
+Y así, entre una y otra causa, vacilante y discursivo.
+Previne un remedio tal, que os suspenda los sentidos.
+Yo he de ponerle mañana, sin que él sepa que es mi hijo
+Y Rey vuestro, á Segismundo (que aqueste su nombre ha sido),
+En mi dosel, en mi silla, en fin, en el puesto mió.
+Donde os gobierne y os mande, y donde todos rendidos
+La obediencia le juréis; pues con aquesto consigo
+Tres cosas, con que respondo a las otras tres que he dicho.
+Es la primera que, siendo prudente, cuerdo y benigno.
+Desmintiendo en todo al hado, que del tantas cosas dijo.
+Gozaréis del natural príncipe vuestro, que ha sido
+
+Cortesano de unos montes y de sus fieras vecino.
+Es la segunda, que si él, soberbio, osado, atrevido
+Y cruel, con rienda suelta corre el campo de sus vicios,
+Habré y piadoso entonces con mi obligación cumplido;
+Y luego en desposeerle haré como Rey invicto,
+Siendo el volverle á la cárcel no crueldad, sino castigo.
+Es la tercera, que siendo el Príncipe como os digo.
+Por lo que os amo, vasallos, os daré Reyes mas dignos
+De la corona y el cetro; pues serán mis dos sobrinos.
+Que junto en uno el derecho de los dos, y convenidos
+Con la fe del matrimonio, tendrán lo que han merecido.
+Esto como rey os mando, esto como padre os pido.
+Esto como sabio os ruego, esto como anciano os digo.
+Y si el Séneca español, «Que era humilde esclavo, dijo,
+De su república un Rey», como esclavo os lo suplico.
+AST. Si á mí el responder me toca, como el que en efecto ha sido
+Aquí el mas interesado: en nombre de todos digo
+Que Segismundo parezca, pues le basta ser tu hijo.
+TOD. Danos al Príncipe nuestro, que ya por Rey le pedimos.
+BAS. Vasallos, esa fineza os agradezco y estimo.
+Acompañad á sus cuartos a los dos atlantes mios,
+Que mañana le veréis.
+TOD. ¡Viva el grande rey Basilio!
+
+(Entranse todos acompañando á Estrella y á Astólfo: quédase el Rey.)
+
+ESCENA VII
+
+Clotaldo. Rosaura. Clarín. Basilio.
+
+CLOT. ¿Podréte hablar? (Al Rey.)
+BAS. Oh Clotaldo! Tú seas muy bien venido.
+CLOT. Aunque viniendo á tus plantas era fuerza haberlo sido,
+Esta vez rompe, señor, el hado triste y esquivo
+El privilegio á la ley, y á la costumbre el estilo.
+BAS. ¿Qué tienes?
+CLOT. Una desdicha, señor, que me ha sucedido,
+Cuando pudiera tenerla por el mayor regocijo.
+BAS. Prosigue.
+CLOT. Este bello joven, osado ó inadvertido,
+
+Entró en la torre, señor, adonde al Príncipe ha visto,
+Y es ...
+BAS. No os aflijáis, Clotaldo; si otro dia hubiera sido.
+Confieso que lo sintiera: pero ya el secreto he dicho,
+Y no importa que él lo sepa, supuesto que yo lo digo.
+Vedme después, porque tengo muchas cosas que advertiros,
+Y muchas que hagáis por mí; que habéis de ser, os aviso,
+Instrumento del mayor suceso que el mundo ha visto:
+Y á esos presos, porque al fin no presumáis que castigo
+Descuidos vuestros, perdono. (Vase.)
+CLOT. ¡Vivas, gran señor, mil siglos!
+
+ESCENA VIII
+
+Clotaldo. Rosaura. Clarín.
+
+CLOT. (Ap. Mejoró el cielo la suerte. Ya no diré que es mi hijo.
+Pues que lo puedo excusar.) Extranjeros peregrinos.
+Libres estáis.
+ROS. Tus pies beso mil veces.
+CLAR. Y yo los piso,
+Que una letra más ó menos no reparan dos amigos.
+ROS. La vida, señor, me has dado; y pues á tu cuenta vivo.
+Eternamente seré esclavo tuyo.
+CLOT. No ha sido
+Vida la que yo te he dado, porque un hombre bien nacido.
+Si está agraviado, no vive; y supuesto que has venido
+A vengarte de un agravio, según tú proprio me has dicho.
+No te he dado vida yo, porque tú no la has traído;
+Que vida infame no es vida. (Ap. Bien con aquesto le animo.)
+ROS. Confieso que no la tengo, aunque de tí la recibo:
+Pero yo, con la venganza, dejaré mi honor tan limpio,
+Que pueda mi vida luego, atropellando peligros.
+Parecer dádiva tuya.
+CLOT. Toma el acero bruñido
+Que trajiste; que yo sé que él baste, en sangre teñido
+De tu enemigo, á vengarte; porque acero que fué mío . . .
+(Digo: este instante, este rato que en mi poder le he tenido),
+Sabrá vengarte.
+ROS. En tu nombre segunda vez me le ciño,
+
+Y en él juro mi venganza, aunque fuese mi enemigo
+Más poderoso.
+CLOT. ¿Eslo mucho?
+ROS. Tanto, que no te lo digo,
+No porque de tu prudencia mayores cosas no fio,
+Sino porque no se vuelva contra mí el favor que admiro
+En tu piedad.
+CLOT. Antes fuera ganarme á mí con decirlo;
+Pues fuera cerrarme el paso de ayudar á tu enemigo.
+(Ap. ¡Oh si supiera quién es!)
+ROS. Porque no pienses que estimo
+En poco esa confianza, sabe que el contrario ha sido
+No menos que Astolfo, Duque de Moscovia.
+CLOT. (Ap. Mal resisto
+El dolor, porque es más grave, que fué imaginado, visto.
+Apuremos más el caso.) Si moscovita has nacido.
+El que es natural señor, mal agraviarte ha podido:
+Vuélvete á tu patria pues, y deja el ardiente brio
+Que te despeña.
+ROS. Yo sé que, aunque mi Príncipe ha sido.
+Pudo agraviarme.
+CLOT. No pudo, aunque pusiera, atrevido,
+La mano en tu rostro. (Ap. ¡Ay, cielos!)
+ROS. Mayor fué el agravio mió.
+CLOT. Dilo ya, pues que no puedes decir más que yo imagino.
+ROS. Sí dijera; mas no sé con qué respeto te miro.
+Con qué afecto te venero, con qué estimación te asisto,
+Que no me atrevo á decirte que es este exterior vestido
+Enigma, pues no es de quien parece: juzga advertido.
+Si no soy ]o que parezco, y Astolfo á casarse vino
+Con Estrella, si podrá agraviarme. — Harto te he dicho.
+
+(Vanse Rosaura y Clarín.)
+
+CLOT. ¡Escucha, aguarda, detente!? Qué confuso laberinto
+Es este, donde no puede hallar la razón el hilo?
+¡Mi honor es el agraviado, poderoso el enemigo.
+Yo vasallo, ella mujer: Descubra el Cielo camino! ...
+Aunque no sé si podrá, cuando, en tan confuso abismo.
+Es todo el cielo un presagio, y es todo el mundo un prodigio.

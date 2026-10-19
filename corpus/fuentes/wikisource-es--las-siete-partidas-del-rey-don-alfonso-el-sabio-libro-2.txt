@@ -1,14 +1,11 @@
 fuente: wikisource-es
 obra: Las siete partidas del rey Don Alfonso el Sabio/Libro 2/Título 1
 url: https://es.wikisource.org/wiki/Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio/Libro_2/T%C3%ADtulo_1
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Las siete partidas del rey Don Alfonso el Sabio/Libro 2/Título 1
 índice> |Ano=1807
 ---
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/85"},"num":{"wt":"13"},"formatted":{"wt":"13"},"quality":{"wt":"3"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/85","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/85"},"params":{},"i":2}}]}'>
 AQUI COMIENZA EL LIBRO SEGUNDO.
 
 TITULO I.
@@ -110,7 +107,7 @@ Ca qui tal cosa faz va contra el fecho de Dios ca mata aquel quel
 puso en su logar en tierra contra su mandamiento que el mismo
 defendio que ninguno non metiese mano en los reyes para fazerles
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/87"},"num":{"wt":"15"},"formatted":{"wt":"15"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/87","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/87"},"params":{},"i":1}}]}'> mal. Otrosi faz contra el regno ca les tuelle aquella cabeza que Dios
+mal. Otrosi faz contra el regno ca les tuelle aquella cabeza que Dios
 les dio e la vida porque viven en uno. E demas
 da aquel regno
 mala nonbradia para sienpre.
@@ -193,7 +190,7 @@ o a prisión.
 De como el rey debe seer guardado de muerte, o de ferida, o
 de prisión ya lo avernos mostrado. E por ende tenemos por derecho
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/89"},"num":{"wt":"17"},"formatted":{"wt":"17"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/89","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/89"},"params":{},"i":1}}]}'> de mostrar las razones porque podrían tañer tan bien a lo uno como
+de mostrar las razones porque podrían tañer tan bien a lo uno como
 a lo al, porque los omes las sepan e se guarden de las fazer. E estas
 son las razones, asi como venderle o traerle en engaño a meterle
 en poder de sus enemigos, llamandol e echandol celada, o sacandol
@@ -235,7 +232,7 @@ La quarta cosa es de cómo se debe guardar que el rey non sea
 enfamado, se departe en dos maneras, la una por razon de bien, e
 la otra por razon de mal. La que es en razon de bien es en tres
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/90"},"num":{"wt":"18"},"formatted":{"wt":"18"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/90","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/90"},"params":{},"i":1}}]}'> guisas, e la del mal en otras tres guisas. E las del bien son estas.
+guisas, e la del mal en otras tres guisas. E las del bien son estas.
 La primera negar el bien que su señor faz. La segunda maguer gelo
 dé en otra manera. La tercer nol querer loar en la sazon que devie.
 E si estas son disfamamiento quanto mas las otras tres que vienen
@@ -281,3 +278,25 @@ Que la poridat del rey deve seer guardada que non sea descubierta.
 
 Non queremos meter en olvido la quinta cosa de que el rey deve seer guardado, ante queremos fablar de ella. E esta es de non seer descobierto de su poridat. Ca esto non deve seer fecho por palabra, nin por carta, nin por mandadero, nin por otra ninguna manera que seer pueda. Ca non tenemos que esta es menor traycion que qualquier destas otras de que fablado avemos. Ca por esta sola pueden venir a las trayciones que dixiemos e a todas las otras que seer podrian. E por esto la ponemos por una de las mayores. Onde dezimos que todos aquellos que descubrieren poridat de su rey que daño le podiese venir, que son traydores conescidamiente ellos e los que
 gelo conseiasen, e deven morir por ello e quanto ovieren sea del rey. E otrosi dezimos que ninguno non descubra otra poridat que el rey le diga sin su mandado.
+
+↑ f. regnan e departen los.
+
+↑ f. naturalmiente e dezimos.
+
+↑ f. a aquel.
+
+↑ al acuerda, aqui con la II, tit. II, VII partid.
+
+↑ Esto que diz que los fijos deven morir non se entiende á todos segunt diz la VI ley del tit. XXIV, II partida. Aqui con la VI, titulo XIII, II part.
+
+↑ Aqui con la IV, tit. VII, VII part. e la II, tit. IV, V partid.
+
+↑ Aqui con la V, tit. II, VII partid.
+
+↑ La VI, tit. XIII, II part.
+
+↑ f. ovieren.
+
+↑ La IV e la postrimera, tit. XIII, II partid.
+
+↑ El original dice, gelos.

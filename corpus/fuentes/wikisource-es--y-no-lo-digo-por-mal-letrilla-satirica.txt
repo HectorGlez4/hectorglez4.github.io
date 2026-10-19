@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Y no lo digo por mal (Letrilla satírica)
 url: https://es.wikisource.org/wiki/Y_no_lo_digo_por_mal_%28Letrilla_sat%C3%ADrica%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Y no lo digo por mal (Letrilla satírica)
 [[Categoría:Poesías de Francisco de Quevedo]]
 |título=Y no lo digo por mal <br> (Letrilla satírica)
 |autor=[[Francisco de Quevedo]]
 ---
-(Letrilla satírica)"},"autor":{"wt":"[[Francisco de Quevedo]]"}},"i":0}}]}'>
-
 Deseado he desde niño,
 
 Y antes si puede ser antes,

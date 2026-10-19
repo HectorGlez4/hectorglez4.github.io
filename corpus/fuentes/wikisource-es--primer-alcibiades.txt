@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Primer Alcibíades
 url: https://es.wikisource.org/wiki/Primer_Alcib%C3%ADades
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Primer Alcibíades
 [[Categoría:Obras de Platón]]
 |título=El primer Alcibíades<br><small>''o de la naturaleza humana''</small>
 |autor=Platón
 ---
-<small>''o de la naturaleza humana''</small>"},"autor":{"wt":"Platón"},"sección":{"wt":""}},"i":0}}]}'>
-
 ΕλληνικάEnglishfrançaisрусский
 
 Sócrates: Hijo de Clinias, estarás sorprendido de ver, que habiendo sido yo el primero a amarte, sea ahora el último en dejarte; que después de haberte abandonado mis rivales, permanezca yo fiel; y en fin, que teniéndote los demás como sitiado con sus amorosos obsequios, sólo yo haya estado sin hablarte por espacio de tantos años. No ha sido ningún miramiento humano el que me ha sugerido esta conducta, sino una consideración por entero divina, que te explicaré más adelante. Ahora que el Dios no me lo impide, me apresuro a comunicarme contigo, y espero que nuestra relación no te ha de ser desagradable para lo sucesivo. En todo el tiempo que ha durado mi silencio, no he cesado de mirar y juzgar la conducta que has observado con mis rivales; entre el gran número de hombres orgullosos que se han mostrado adictos a ti, no hay uno que no hayas rechazado con tus desdenes, y quiero explicarte la causa de este tu desprecio para con ellos. Tú crees no necesitar de nadie, tan generosa y liberal ha sido contigo la naturaleza, comenzando por el cuerpo y concluyendo con el alma. En primer lugar te crees el más hermoso y más bien formado de todos los hombres, y en este punto basta verte para decir que no te engañas. En segundo lugar, tú te crees pertenecer a una de las más ilustres familias de Atenas, Atenas que es la ciudad de mayor consideración entre las demás ciudades griegas. Por tu padre cuentas con numerosos y poderosos amigos, que te apoyarán en cualquier lance, y no los tienes menos poderosos por tu madre. Pero a tus ojos el principal apoyo es Pericles, hijo de Xantippo, que tu padre dio por tutor a tu hermano y a ti, y cuya autoridad es tan grande, que hace todo lo que quiere, no sólo en esta ciudad, sino en toda la Grecia y en las demás naciones extranjeras. Podría hablar también de tus riquezas, si no supiera que en este punto no eres orgulloso. Todas estas grandes ventajas te han inspirado tanta vanidad, que has despreciado a todos tus amantes, como hombres demasiado inferiores a ti, y así ha resultado que todos se han retirado; tú lo has llegado a conocer, y estoy muy seguro de que te sorprende verme persistir en mi pasión, y que quieres averiguar qué esperanza he podido conservar para seguirte sólo después que todos mis rivales te han abandonado.

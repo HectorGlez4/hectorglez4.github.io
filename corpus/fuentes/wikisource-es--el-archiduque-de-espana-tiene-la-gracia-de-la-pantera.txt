@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: El archiduque de España. Tiene la gracia de la pantera
 url: https://es.wikisource.org/wiki/El_archiduque_de_Espa%C3%B1a._Tiene_la_gracia_de_la_pantera
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 El archiduque de España. Tiene la gracia de la pantera
 [[Categoría:Artículos de Miguel de Unamuno]]
 |título=El archiduque de España. Tiene la gracia de la pantera
 |autor=Miguel de Unamuno
 ---
-[[Miguel de Unamuno]] «El archiduque de España. Tiene la gracia de la pantera» (5 de noviembre de 1918) ''[[La Lucha (Barcelona)|La Lucha]]''.</small>"}},"i":0}}]}'>
-
 EL ARCHIDUQUE DE ESPAÑA
 
 TIENE LA GRACIA DE LA PANTERA

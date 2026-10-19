@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Los dos patios
 url: https://es.wikisource.org/wiki/Los_dos_patios
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Los dos patios
 [[Categoría:Cuentos de Joaquín Díaz Garcés]]
 |título=Los dos patios <br> (Cuadros de la ciudad)
 |autor=Joaquín Díaz Garcés
 ---
-(Cuadros de la ciudad)"},"autor":{"wt":"Joaquín Díaz Garcés"},"sección":{"wt":""}},"i":0}}]}'>
-
 En una apartada calle de Santiago, de ésas que suelen figurar más en los partes de policía que en los planos de la ciudad, existía una especie de conventillo de no mala apariencia, que constaba de dos patios cuadrados y grandes.
 
 En el primer patio, las piezas eran espaciosas y altas y el valor del arrendamiento no estaba al alcance del inquilino pobre y desheredado. Veinte pesos no es cantidad despreciable para un jornalero, que gana el doble o muy poco más; pero sí lo es para el cajista honrado que cobra veinte pesos en la semana, o para la costurera activa que alcanza alrededor de diez, en el mismo tiempo.

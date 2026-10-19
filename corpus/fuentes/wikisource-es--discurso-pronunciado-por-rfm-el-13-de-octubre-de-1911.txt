@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Discurso pronunciado por RFM el 13 de octubre de 1911
 url: https://es.wikisource.org/wiki/Discurso_pronunciado_por_RFM_el_13_de_octubre_de_1911
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Discurso pronunciado por RFM el 13 de octubre de 1911
 ---
@@ -40,8 +40,6 @@ Las clases privilegiadas no permitirán jamás que el proletariado abra los ojos
 Compañeros: que la muerte del Maestro sirva para convencer a los pacifistas de que para acabar con la desigualdad social, para dar muerte al privilegio, para hacer de cada ser humano una personalidad libre, es necesario el uso de la fuerza y arrancar, por medio de ella, la riqueza a los burgueses que se interpongan entre el hombre y la libertad.
 
 La revolución que fomenta el Partido Liberal Mexicano está basada en la experiencia de que la razón, sin la fuerza, es una débil paja a merced de las represiones de la reacción enfurecida, y por eso los libertarios mexicanos no se rinden; por eso luchan sin tregua; por eso, audaces y gallardos, se mantienen en pie y enarbolando la bandera roja de las reivindicaciones proletarias, cuando los idólatras esperan que los déspotas les arrojen un mendrugo, sin pensar ¡insensatos! que tienen el derecho de tomarlo todo.
-
-Regeneración, núm. 60, 21 de octubre de 1911</u><br/>\n<i>Discurso pronunciado por Ricardo Flores Magón en el mitin <br/>\ninternacional que en memoria de Ferrer se celebró la noche del<br/>\n13 del corriente en esta ciudad.\n</i>"},"2":{"wt":"menor"}},"i":0}}]}'>
 
 Regeneración, núm. 60, 21 de octubre de 1911
 

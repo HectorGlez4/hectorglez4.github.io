@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Era él solo
 url: https://es.wikisource.org/wiki/Era_%C3%A9l_solo
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Era él solo
 [[Categoría:Cuentos de Baldomero Lillo]]
 |título=[[Sub Terra]] <br> {{PAGENAME}}
 |autor=[[Baldomero Lillo]]
 ---
-{{PAGENAME}}"},"autor":{"wt":"[[Baldomero Lillo]]"},"notas":{"wt":""}},"i":0}}]}'>
-
 Esa mañana, mientras Gabriel, arrodillado frente a la puerta de la cocina, frota los cubiertos de metal blanco, se le ocurre de pronto el proyecto muchas veces acariciado de huir, de ganar el monte que rodea al pueblo para dirigirse, en seguida, en busca de sus hermanas. Desde hace tiempo, el pensamiento de reunirse a las pequeñas, de verlas y de hablarlas, es su preocupación más constante. ¿Qué suerte les habrá cabido? ¿Serán más felices que él? Y se esfuerza por creerlo así, porque la sola idea de que tengan también que sufrir penalidades como las suyas, lo acongoja indeciblemente.
 
 Mas, como siempre le acontece, las dificultades de la empresa se le presentan con tales caracteres que se descorazona, conceptuándola irrealizable. ¡Residen tan lejos las pobrecillas, y él carece de dinero y de libertad para emprender el viaje!

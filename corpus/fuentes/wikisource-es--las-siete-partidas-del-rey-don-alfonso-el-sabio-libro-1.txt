@@ -1,14 +1,11 @@
 fuente: wikisource-es
 obra: Las siete partidas del rey Don Alfonso el Sabio/Libro 1/Título 1
 url: https://es.wikisource.org/wiki/Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio/Libro_1/T%C3%ADtulo_1
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Las siete partidas del rey Don Alfonso el Sabio/Libro 1/Título 1
 índice> |Ano=1807
 ---
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
-
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/74"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"3"}},"i":1}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/74","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/74"},"params":{},"i":2}}]}'>
 ESPECULO.
 
 ESTE ES EL LIBRO DEL FUERO QUE FIZO EL REY
@@ -103,7 +100,7 @@ ol convenier. E deve seer omildoso para non seer sobervio nin cruo
 a sus pueblos por su poder nin por su razon, e bien razonado
 porque sepa mostrar como se deven entender e guardar las leyes. E
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/76"},"num":{"wt":"4"},"formatted":{"wt":"4"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/76","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/76"},"params":{},"i":1}}]}'> debe seer sofrido en oyr bien lo quel dixieren, e mesurado en non se
+debe seer sofrido en oyr bien lo quel dixieren, e mesurado en non se
 rebatar en dicho nin en fecho.
 
 LEY V.
@@ -150,7 +147,7 @@ Como se deven entender las leyes.
 
 El entendemiento de las leyes deve seer conplido e sano, e ro-
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/77"},"num":{"wt":"5"},"formatted":{"wt":"5"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/77","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/77"},"params":{},"i":1}}]}'> mado todavia a la mejor parte e mas derecha e mas aprovechosa e
+mado todavia a la mejor parte e mas derecha e mas aprovechosa e
 mas verdadera.
 
 LEY IX.
@@ -195,7 +192,7 @@ faz vida de bestia e aun peor, ca la bestia faze segunt su sentido le
 abonda. Mas el ome que non quiere saber non quiere legar a
 quanto podrie alcanzar por su entendemiento. E pues que tanto bien
 
-<span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/78"},"num":{"wt":"6"},"formatted":{"wt":"6"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Las siete partidas del rey Don Alfonso el Sabio (1807).djvu/78","href":"./Página:Las_siete_partidas_del_rey_Don_Alfonso_el_Sabio_(1807).djvu/78"},"params":{},"i":1}}]}'> viene del saber, e tanto mal del non saber, bien semeja que el que
+viene del saber, e tanto mal del non saber, bien semeja que el que
 non quiere saber non a sabor de bien fazer. E pues que los omes
 codician naturalmiente saber todas las cosas e mas aquellas que son
 a su pro, bien tenemos que todos los de nuestros regnos e de
@@ -238,3 +235,19 @@ LEY XIII.
 Por esta ley se prueva como el rey don Alfonso puede facer leyes e las pueden facer sus herederos.
 
 Por fazer entender a los omes desentendudos que nos el sobre dicho rey don Alfonso avemos poder de facer estas leyes tambien como los otros que las fezieron ante de nos, oy mas queremos lo mostrar por todas estas maneras por razon e por fazana e por derecho. E por razon que si los emperadores e los reys que los imperios e los regnos ovieron por eleccion pudieron fazer leys en aquello que tovieron como en comienda, quanto mas nos que avemos el regno por derecho heredamiento. Por fazana, es non tan solamiente los reys de España que fueron antiguamiente las fezieron, mas condes e jueces e adelantados que eran de menor guisa e fueron guardadas fasta en este tiempo. E pues que estos las fezieron que avien mayores sobre si, mucho mas las podremos nos fazer que por la merced de Dios non avemos mayor sobre nos en el temporal. Por derecho, es lo puedemos probar por las leyes romanas e por el derecho de santa eglesia e por las leys despaña que fezieron los Godos en que dize en cada una destas que los emperadores e los reyes an poder de fazer leyes e de anader en ellas e de minguar en ellas e de camiar cada que mester sea. Onde por todas estas razones avemos poder conplidamiente de facer leyes. E por ende queremos comenzar en el nombre de Dios.
+
+↑ forte, ende.
+
+↑ f.este.
+
+↑ f.si.
+
+↑ f. aya.
+
+↑ f. creer.
+
+↑ el original dice, la.
+
+↑ el original dice, amuchigua, muestra.
+
+↑ Esto a logar contra los yerros, mas contra los menores non a logar fasta que an x años e medio, e dende arriba les pueden dar pena corporal.

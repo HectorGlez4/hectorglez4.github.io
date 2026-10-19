@@ -2,7 +2,7 @@ fuente: wikisource-es
 obra: «Blanca»
 año: 1836
 url: https://es.wikisource.org/wiki/Blanca_%28Larra%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Blanca (Larra)
 [[Categoría:Artículos de Mariano J. de Larra]]
@@ -10,8 +10,6 @@ Blanca (Larra)
 |año=1836
 |autor=[[Mariano José de Larra]]
 ---
-Reflexiones acerca de nuestra poesía moderna. <br>Poetas jóvenes que más se distinguen."},"año":{"wt":"1836"},"autor":{"wt":"[[Mariano José de Larra]]"},"notas":{"wt":"Publicado en \"El Español\"\nn.º 246, 3 de julio de 1836, Madrid."}},"i":0}}]}'>
-
 Dícese con frecuencia que éste no es el siglo de la poesía: nada nos atreveremos a decir en pro ni en contra de este común aserto; pero si no es nuestro siglo el de la poesía, es al menos innegable que es el de los poetas. Con esto no queremos decir que sean igualmente malos todos los que con su estro nos favorecen. Los hay medianos, algunos hay hasta soportables, especialmente si se empieza por descartar de todo examen los fabricadores de himnos y sonetos de circunstancias, gente parecida a las músicas de enhorabuena, que a la menor circunstancia de su vida de usted, en cuanto usted se muda de casa se aparecen delante del balcón o en la escalera con el bombo y el clarinete a dar y tomar en la canción de Carnicer. Lo mismo se nos figuran los abastecedores de poesía sonetesca y encomiástica. Ahora sobre todo que la «patria mía» rima tan perfectamente con Mendigorría, «divina» con «Cristina», «entonad» con «libertad», «aurora» con «Señora» y «Gobernadora», «discordia fiera» con «nación entera», y «de prosperidad fuente fecunda» con «Isabel segunda», no parece sino que Apolo y las nueve musas se han alistado Guardias Nacionales según el ruido de metros y ritmos que con el estruendo de las arenas se ha mezclado. O el dios de la guerra se ha hecho hombre de talento, o el dios poeta desesperado de su mal oficio ha sentado plaza en favor del trono y de la libertad, dos cosas tan inseparables como malo y composición de circunstancias.
 
 Entre estos poetas, sin embargo, que predican la concordia y cuyo sonsonete oímos todos como el ruido de las canales en invierno, alza la voz de vez en cuando algún romántico, «hugonote» o sectario de Hugo, porque lo que es clásico, ni autor de poesías fugitivas, a Filis y a la Paloma, al dengue de Clori, o a la cinta de la borrega de Melibeo, no se alcanza ya a ver ninguno en todo el horizonte de la disputada monarquía española. Las composiciones no son ya en el día «fugitivas» como antes. En otro tiempo ellas mismas huían: en los nuestros hay que huir de ellas. De todo el armatoste pindárico y anacreóntico, de toda la manera de nuestros viejos poetas no se ha salvado más que la letrilla, y ésa porque la ha sacado entre sus brazos disfrazada con atavíos políticos uno de nuestros modernos poetas, ni más ni menos que sacaba Eneas sus penates en hombros de la devastación de Troya.

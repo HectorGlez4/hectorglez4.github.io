@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: El sentimiento catalanista
 url: https://es.wikisource.org/wiki/El_sentimiento_catalanista
-recuperado: 2026-10-15
+recuperado: 2026-10-17
 ---
 El sentimiento catalanista
 [[Categoría:Obras de Joan Maragall]]
 |título=El sentimiento catalanista
 |autor=Joan Maragall
 ---
-[[Joan Maragall|Juan Maragall]] «El sentimiento catalanista» (enero de 1902) ''[[La Lectura]]'', año II, tomo primero, pp. 80-85.</small>"}},"i":0}}]}'>
-
 EL SENTIMIENTO CATALANISTA, por JOAN MARAGALL
 
 Cuando se trata de catalanismo se olvida generalmente que ésta es en el fondo una cuestión de sentimiento; y tal olvido priva de luz á la cuestión, y la lucha se encona en las tinieblas.

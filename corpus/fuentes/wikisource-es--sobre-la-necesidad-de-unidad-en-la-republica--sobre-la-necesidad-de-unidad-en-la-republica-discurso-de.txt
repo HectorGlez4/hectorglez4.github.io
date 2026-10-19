@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Sobre la necesidad de unidad en la República
 url: https://es.wikisource.org/wiki/Sobre_la_necesidad_de_unidad_en_la_Rep%C3%BAblica_-_Discurso_de_Nicol%C3%A1s_Salmer%C3%B3n_%2811_de_febrero_1873%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Sobre la necesidad de unidad en la República - Discurso de Nicolás Salmerón (11 de febrero 1873)
 [[Categoría:Obras de Nicolás Salmerón]]
@@ -9,7 +9,7 @@ Sobre la necesidad de unidad en la República - Discurso de Nicolás Salmerón (
 |autor=Nicolás Salmerón
 |año=11 de febrero de 1873
 ---
-",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Nicolás Salmerón - Discurso 11 de febrero 1873.pdf/1"},"num":{"wt":"1"},"formatted":{"wt":"1"},"quality":{"wt":"3"}},"i":0}},"</span>",{"template":{"target":{"wt":":Página:Nicolás Salmerón - Discurso 11 de febrero 1873.pdf/1","href":"./Página:Nicolás_Salmerón_-_Discurso_11_de_febrero_1873.pdf/1"},"params":{},"i":1}},"<pageseparator /><span>",{"template":{"target":{"wt":":MediaWiki:Proofreadpage_pagenum_template","href":"./MediaWiki:Proofreadpage_pagenum_template"},"params":{"page":{"wt":"Página:Nicolás Salmerón - Discurso 11 de febrero 1873.pdf/2"},"num":{"wt":"2"},"formatted":{"wt":"2"},"quality":{"wt":"3"}},"i":2}},"</span>",{"template":{"target":{"wt":":Página:Nicolás Salmerón - Discurso 11 de febrero 1873.pdf/2","href":"./Página:Nicolás_Salmerón_-_Discurso_11_de_febrero_1873.pdf/2"},"params":{},"i":3}}]}'>El Sr. SALMERON (D. Nicolás): Pido la palabra en pró.
+El Sr. SALMERON (D. Nicolás): Pido la palabra en pró.
 
 El Sr. CASTELAR: Cedo la palabra al Sr. Salmeron.
 

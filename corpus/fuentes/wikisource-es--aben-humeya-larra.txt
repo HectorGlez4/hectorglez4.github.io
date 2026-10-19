@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: Aben-Humeya (Larra)
 url: https://es.wikisource.org/wiki/Aben-Humeya_%28Larra%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Aben-Humeya (Larra)
 [[Categoría:Artículos de Mariano J. de Larra]]
 |título="Aben-Humeya", drama histórico en tres actos, nuevo en estos teatros. <br>Su autor don Francisco Martínez de la Rosa<ref> Se refiere al poeta y dramaturgo español [[Francisco Martínez de la Rosa]]</ref>
 |autor=[[Mariano José de Larra]]
 ---
-Su autor don Francisco Martínez de la Rosa<ref> Se refiere al poeta y dramaturgo español [[Francisco Martínez de la Rosa]]</ref>"},"autor":{"wt":"[[Mariano José de Larra]]"},"notas":{"wt":""}},"i":0}}]}'>
-
 No hace muchos días que anunciamos la próxima representación de esta obra de un ingenio distinguido ciertamente en nuestra literatura moderna por sus obras anteriores, en las cuales ha adquirido lauros muy lisonjeros como erudito, como escritor didáctico, como hablista y aun como poeta; al anunciarla no quisimos en manera alguna prevenir el juicio del público, y sólo nos ceñimos a exponer que se había representado ya en París, y la especie de éxito de urbanidad y galantería que en aquella capital había logrado.
 
 Parece sin embargo que nosotros no estábamos bien informados; posteriormente hemos visto y aun leído en el anuncio que del Aben-Humeya ha hecho la empresa de estos teatros, que «en los de París fue recibido con entusiásticos aplausos, y coronado con los honores del más positivo triunfo». Así sería, y nosotros nos apresuramos a dar la enhorabuena al autor y al drama; no se la hemos dado antes porque no sabíamos lo que en París había ocurrido. Pero después de leído el cartel, el cual debe saberlo como saben los carteles esas cosas, sería imperdonable en nosotros el menor asomo de duda; apreciando como apreciamos al autor, es para nosotros un alegrón el haber rectificado por esta vez nuestros erróneos datos; en lo sucesivo no nos volverá a suceder decir que no gustó en París; quedamos plenamente convencidos de que Aben-Humeya ha llegado a nosotros «precedido de una gran reputación adquirida dentro y fuera de España», es decir, europea.

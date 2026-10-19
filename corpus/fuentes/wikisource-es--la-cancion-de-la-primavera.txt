@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: La canción de la primavera
 url: https://es.wikisource.org/wiki/La_canci%C3%B3n_de_la_primavera
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 La canción de la primavera
 [[Categoría:Cuentos de Joaquín V. González]]
 |autor=Joaquín V. González
 ---
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
-
 La canción de la primavera
 
 Ya pasó la estación de las nieves, cuando todo se complace en ostentar señales de vejez y en remedar el silencio de los sepulcros; cuando los árboles amanecen vestidos de blanco, con las hojas pegadas como mechones de una cabeza anciana, y cayendo de ellas, una á una, las gotas de la escarcha, derretida por el tibio sol del invierno; cuando los pájaros, que dan voces fantásticas á los abismos, á las quebradas y á los valles, enmudecen y buscan el calor en misteriosos nidos, sólo visitados por el hada invisible que cuida el fuego de los amores, para que luego todos puedan saludar con cantos de regocijo á la primavera, triunfante sobre su carro de rosa.

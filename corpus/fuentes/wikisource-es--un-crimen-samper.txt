@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Un crimen (Samper)
 url: https://es.wikisource.org/wiki/Un_crimen_(Samper)
-recuperado: 2026-10-12
+recuperado: 2026-10-17
 ---
 Un crimen (Samper)
 |titulo = [[Novelas y cuadros de la vida sur-americana]] <br> Un crimen
 |autor = Soledad Acosta de Samper
 ---
-Un crimen"},"autor":{"wt":"Soledad Acosta de Samper"}},"i":0}}]}'>
-
 Non vedes las yerbas verdes y floridas,
 
 que amanecen verdes y anochecen secas.

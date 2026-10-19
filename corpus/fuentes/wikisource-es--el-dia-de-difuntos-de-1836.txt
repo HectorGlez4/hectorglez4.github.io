@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: El día de difuntos de 1836
 url: https://es.wikisource.org/wiki/El_d%C3%ADa_de_difuntos_de_1836
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 El día de difuntos de 1836
 [[Categoría:Artículos de Mariano J. de Larra]]
 |título=El día de difuntos de 1836<br>Fígaro en el cementerio
 |autor=[[Mariano José de Larra]]
 ---
-Fígaro en el cementerio"},"autor":{"wt":"[[Mariano José de Larra]]"},"notas":{"wt":""}},"i":0}}]}'>
-
 En atención a que no tengo gran memoria, circunstancia que no deja de contribuir a esta especie de felicidad que dentro de mí mismo me he formado, no tengo muy presente en qué artículo escribí (en los tiempos en que yo escribía) que vivía en un perpetuo asombro de cuantas cosas a mi vista se presentaban. Pudiera suceder también que no hubiera escrito tal cosa en ninguna parte, cuestión en verdad que dejaremos a un lado por harto poco importante en época en que nadie parece acordarse de lo que ha dicho ni de lo que otros han hecho. Pero suponiendo que así fuese, hoy, día de difuntos de 1836, declaro que si tal dije, es como si nada hubiera dicho, porque en la actualidad maldito si me asombro de cosa alguna. He visto tanto, tanto, tanto... como dice alguien en El Califa. Lo que sí me sucede es no comprender claramente todo lo que veo, y así es que al amanecer un día de difuntos no me asombra precisamente que haya tantas gentes que vivan; sucédeme, sí, que no lo comprendo.
 En esta duda estaba deliciosamente entretenido el día de los Santos, y fundado en el antiguo refrán que dice: Fíate en la Virgen y no corras (refrán cuyo origen no se concibe en un país tan eminentemente cristiano como el nuestro), encomendábame a todos ellos con tanta esperanza, que no tardó en cubrir mi frente una nube de melancolía; pero de aquellas melancolías de que sólo un liberal español en estas circunstancias puede formar una idea aproximada. Quiero dar una idea de esta melancolía, un hombre que cree en la amistad y llega a verla por dentro, un inexperto que se ha enamorado de una mujer, un heredero cuyo tío indiano muere de repente sin testar, un tenedor de bonos de Cortes, una viuda que tiene asignada pensión sobre el tesoro español, un diputado elegido en las penúltimas elecciones, un militar que ha perdido una pierna por el Estatuto, y se ha quedado sin pierna y sin Estatuto, un grande que fue liberal por ser prócer, y que se ha quedado sólo liberal, un general constitucional que persigue a Gómez, imagen fiel del hombre corriendo siempre tras la felicidad sin encontrarla en ninguna parte, un redactor del Mundo en la cárcel en virtud de la libertad de imprenta, un ministro de España y un Rey, en fin, constitucional, son todos seres alegres y bulliciosos, comparada su melancolía con aquélla que a mí me acosaba, me oprimía y me abrumaba en el momento de que voy hablando.
 

@@ -1,12 +1,10 @@
 fuente: wikisource-es
 obra: Proclamas del general San Martín/A los soldados españoles del ejército del virrey de Lima
 url: https://es.wikisource.org/wiki/Proclamas_del_general_San_Mart%C3%ADn%3A_A_los_soldados_espa%C3%B1oles_del_ej%C3%A9rcito_del_virrey_de_Lima
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Proclamas del general San Martín/A los soldados españoles del ejército del virrey de Lima
 ---
-[[File:Yes Check Circle.svg|16px|link=Ayuda:Nivel de las páginas|validada]]</span>"}}'/>[[File:Yes Check Circle.svg|16px|link=Ayuda:Nivel de las páginas|validada]]</span>"}}'/>
-
 A los soldados españoles del ejército del virrey de Lima.
 
 Las armas de la patria van á abrir su última campaña. ¿Que ventaja os figurais en oponeros á su marcha victoriosa? Cuando vuestros paisanos y compañeros se han declarado en España por la libertad contra el rey Fernando ¿os empeñareis vosotros en merecer la execracion de todas las almas sensibles sosteniendo su tirania en esta parte del mundo?

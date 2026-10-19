@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Retratos de Españoles ilustres
 url: https://es.wikisource.org/wiki/Francisco_de_Quevedo_y_Villegas_%28Retrato%29
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Francisco de Quevedo y Villegas (Retrato)
 |título=[[Retratos de Españoles ilustres]]
 |autor=Anónimo
 ---
-En esta transcripción se ha respetado la ortografía original.</small>"},"anterior":{"wt":"[[Arias Montano (Retrato)]]"},"próximo":{"wt":"[[Juan de Ferreras (Retrato)]]"}},"i":0}}]}'>
-
 D. FRANCISCO DE QUEVEDO Y VILLEGAS.
 
 Francisco de Quevedo y Villegas

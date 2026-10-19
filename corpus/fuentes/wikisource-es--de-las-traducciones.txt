@@ -1,15 +1,13 @@
 fuente: wikisource-es
 obra: De las traducciones
 url: https://es.wikisource.org/wiki/De_las_traducciones
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 De las traducciones
 [[Categoría:Artículos de Mariano J. de Larra]]
 |título=De las traducciones<br>De la introducción del «vaudeville francés» en el teatro español. «La viuda y el seminarista», «Los guantes amarillos», piezas nuevas en un acto
 |autor=[[Mariano José de Larra]]
 ---
-De la introducción del «vaudeville francés» en el teatro español. «La viuda y el seminarista», «Los guantes amarillos», piezas nuevas en un acto"},"autor":{"wt":"[[Mariano José de Larra]]"},"notas":{"wt":""}},"i":0}}]}'>
-
 Varias cosas se necesitan para traducir del francés al castellano una comedia. Primera, saber lo que son comedias; segunda, conocer el teatro y el público francés; tercera, conocer el teatro y el público español; cuarta, saber leer el francés; y quinta, saber escribir el castellano. Todo eso se necesita, y algo más, para traducir una comedia, se entiende, bien; porque para traducirla mal no se necesita más que atrevimiento y diccionario: por lo regular, el que tiene que servirse del segundo no anda escaso del primero.
 
 Sabiendo todas estas cosas, no se ignora que el gusto en teatros es variable; que en tanto hay efectos teatrales, en cuanto se establece entre el autor y el espectador una comunidad de afectos y de sensaciones; que de diversidad de costumbres nace la diferente expresión de las ideas; que lo que en un país y en una lengua es una chanza llena de sal ática puede llegar a ser en otros una necedad vacía de sentido; que un carácter nuevo en Francia puede ser viejo en España; no se ignora en fin que el traducir en materias de teatro casi nunca es interpretar: es buscar el equivalente, no de las palabras, sino de las situaciones. Traducir bien una comedia es adoptar una idea y un plan ajenos que estén en relación con las costumbres del país a que se traduce, y expresarlos y dialogarlos como si se escribiera originalmente; de donde se infiere que por lo regular no puede traducir bien comedias quien no es capaz de escribirlas originales. Lo demás es ser un truchimán, sentarse en el agujero del apuntador y decirle al público español: «Dice monsieur Scribe», etc., etc.

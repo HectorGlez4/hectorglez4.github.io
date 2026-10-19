@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Plenitud
 url: https://es.wikisource.org/wiki/Plenitud
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Plenitud
 |título={{Anclaje+|Índice}}
@@ -9,8 +9,6 @@ Plenitud
 Esta página contiene texto disponible desde una fuente digital alternativa. La mejor manera de publicar un texto es con una copia digital del original, por lo que este debe ser transcrito desde allí. Para más información visita cómo empezar una página y cómo publicar un texto.
 
 Fuente alternativa: A transcribir
-
-[[File:Circle with Pencil.svg|16px|link=Ayuda:Nivel de las páginas|no corregido]]</span>"}}'/>
 
 AMADO NERVO
 

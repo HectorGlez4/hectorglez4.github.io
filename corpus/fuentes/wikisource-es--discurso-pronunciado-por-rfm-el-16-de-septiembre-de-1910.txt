@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Discurso pronunciado por RFM el 16 de septiembre de 1910
 url: https://es.wikisource.org/wiki/Discurso_pronunciado_por_RFM_el_16_de_septiembre_de_1910
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Discurso pronunciado por RFM el 16 de septiembre de 1910
 ---
@@ -34,8 +34,6 @@ Grandes sabéis ser en el infortunio y grandes en el triunfo: ahí está la Hist
 Mexicanos: vuestro pasado merece un aplauso. Ahora es preciso que conquistéis el aplauso del porvenir por vuestra conducta en el presente. Habéis cumplido con vuestro deber en las grandes luchas del pasado; pero falta que toméis la parte que os corresponde en las grandes luchas del presente. La libertad que conquistasteis no puede ser efectiva, no podrá beneficiaros mientras no conquistéis la base primordial de todas las libertades —la libertad económica—, sin la cual el hombre es miserable juguete de los ladrones del Gobierno y de la Banca, que tienen sometida a la humanidad con algo más pesado que las cadenas, con algo más inicuo que el presidio y que se llama la Miseria, ¡el infierno trasplantado a la tierra por la codicia del rico!
 
 Os independizasteis de España; independizaos, ahora, de la miseria. Fuisteis audaces entonces; sed audaces ahora uniendo todas vuestras fuerzas a las del Partido Liberal mexicano, en su lucha de muerte contra el despotismo de Porfirio Díaz.
-
-Regeneración, núm. 4, 24 de septiembre de 1910</u><br/>\n<i>Discurso pronunciado por Ricardo Flores Magón en el Simpson Auditorium la<br/>\nnoche del 16 del corriente, con motivo de la gran fiesta proletaria organizada<br/>\npor los obreros mexicanos de esta ciudad para celebrar dignamente el centenario<br/>\ndel Grito de Dolores dado por Miguel Hidalgo y Costilla el 16 de septiembre de 1810.</i>"},"2":{"wt":"menor"}},"i":0}}]}'>
 
 Regeneración, núm. 4, 24 de septiembre de 1910
 

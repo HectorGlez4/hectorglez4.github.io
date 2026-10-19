@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Discurso pronunciado por RFM el 5 de noviembre de 1910
 url: https://es.wikisource.org/wiki/Discurso_pronunciado_por_RFM_el_5_de_noviembre_de_1910
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Discurso pronunciado por RFM el 5 de noviembre de 1910
 ---
@@ -40,8 +40,6 @@ No se sabe qué tanto tiempo tendría que durar esta situación para el proletar
 La situación del pueblo mexicano es especialísima. Contra el poder público obran en estos momentos los pobres, representados por el Partido Liberal, y los burgueses, representados por los Partidos Nacionalista Democrático y Nacional Antirreeleccionista. Esta situación tiene forzosamente que resolverse en un conflicto armado. La burguesía quiere negocios que la minoría “científica” no ha de darle. El proletariado, por su parte, quiere bienestar económico y dignificación social por medio de la toma de posesión de la tierra y la organización sindical, a lo que se oponen, por igual, el Gobierno y los partidos burgueses.
 
 Creo haber planteado el problema con claridad suficiente. Una lucha a muerte se prepara en estos momentos para la modificación del medio en que el pueblo mexicano, el pueblo pobre, se debate en una agonía de siglos. Si el pueblo pobre triunfa, esto es, si sigue las banderas del Partido Liberal, que es el de los trabajadores y de las clases que no poseen bienes de fortuna, México será la primera nación del mundo que dé un paso franco por el sendero de los pueblos todos de la tierra, aspiración poderosa que agita a la humanidad entera, sedienta de libertad, ansiosa de justicia, hambrienta de bienestar material; aspiración que se hace más aguda a medida que se ve con más claridad el evidente fracaso de la república burguesa para asegurar la libertad y la felicidad de los pueblos.
-
-Regeneración, núm. 10, 5 de noviembre de 1910</u><br/>\n<i>Disertación leída en la sesión del Grupo “Regeneración” la noche</br>\ndel domingo 30 de octubre de 1910 en el Labor Temple de esta ciudad.</i>"},"2":{"wt":"menor"}},"i":0}}]}'>
 
 Regeneración, núm. 10, 5 de noviembre de 1910
 

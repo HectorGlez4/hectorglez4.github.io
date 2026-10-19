@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Catecismo de los patriotas
 url: https://es.wikisource.org/wiki/Catecismo_de_los_patriotas
-recuperado: 2026-10-13
+recuperado: 2026-10-17
 ---
 Catecismo de los patriotas
 |título=Catecismo de los patriotas<br><small>(1813)</small>
 |autor=Camilo Henríquez
 ---
-<small>(1813)</small>"},"autor":{"wt":"Camilo Henríquez"}},"i":0}}]}'>
-
 -¿Qué es un patriota?
 
 -El amigo de la América y de la libertad.

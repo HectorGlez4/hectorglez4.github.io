@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Recopilacion Decreto y Comunicacion de la Legion de Mérito de Chile
 url: https://es.wikisource.org/wiki/Recopilacion_Decreto_y_Comunicacion_de_la_Legion_de_M%C3%A9rito_de_Chile
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Recopilacion Decreto y Comunicacion de la Legion de Mérito de Chile
 ---
@@ -13,7 +13,6 @@ El siguiente es el texto completo se transcribe de la búsqueda original que se 
 
 RECOPILACION
 
-'''DE LOS DECRETOS EXPEDIDOS POR EL </small>E<small>XMO. </small>S<small>R. </small>D<small>IRECTOR </small>S<small>UPREMO, SOBRE LA INSTITUCION Y REGLAMENTO DE LA </small>L<small>EGION DE </small>M<small>ERITO DE </small>C<small>HILE, CREADA EN PRIMERO DE JUNIO DE MIL OCHOCIENTOS DIEZ Y SIETE AÑOS, Y DE LO ACORDADO EN LAS ACTAS POSTERIORES DEL </small>C<small>ONSEJO DE LA MISMA HASTA EL DIA DE LA FECHA.</small>'''"}},"i":0}}]}'>
 DE LOS DECRETOS EXPEDIDOS POR EL EXMO. SR. DIRECTOR SUPREMO, SOBRE LA INSTITUCION Y REGLAMENTO DE LA LEGION DE MERITO DE CHILE, CREADA EN PRIMERO DE JUNIO DE MIL OCHOCIENTOS DIEZ Y SIETE AÑOS, Y DE LO ACORDADO EN LAS ACTAS POSTERIORES DEL CONSEJO DE LA MISMA HASTA EL DIA DE LA FECHA.
 
 [Decreto Ereccional de la Legion de Mérito de Chile]

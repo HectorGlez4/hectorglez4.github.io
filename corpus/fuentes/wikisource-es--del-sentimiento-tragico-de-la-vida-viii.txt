@@ -1,14 +1,12 @@
 fuente: wikisource-es
 obra: Del sentimiento trágico de la vida: VIII
 url: https://es.wikisource.org/wiki/Del_sentimiento_tr%C3%A1gico_de_la_vida%3A_VIII
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Del sentimiento trágico de la vida: VIII
 |título=[[Del sentimiento trágico de la vida]]<br/>VIII<br/>De Dios a Dios
 |autor=Miguel de Unamuno
 ---
-VIII<br/>De Dios a Dios"},"autor":{"wt":"Miguel de Unamuno"},"sección":{"wt":""}},"i":0}}]}'>
-
 No creo que sea violentar la verdad el decir que el sentimiento religioso es sentimiento de divinidad, y que sólo con violencia del corriente lenguaje humano puede hablarse de religión atea. Aunque es claro que todo dependerá del concepto que de Dios nos formemos. Concepto que depende a su vez del de divinidad.
 
 Conviénenos, en efecto, comenzar por el sentimiento de divinidad, antes de mayusculizar el concepto de esta cualidad y, articulándola, convertirla en la Divinidad, esto es, en Dios. Porque el hombre ha ido a Dios por lo divino más bien que ha deducido lo divino de Dios.

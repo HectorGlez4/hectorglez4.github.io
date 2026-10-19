@@ -587,3 +587,50 @@ describe('FR-24 — el numeral de sección no se pega al primer verso', () => {
     );
   });
 });
+
+/**
+ * Lo que la medida de legibilidad deja de contar como daño no puede pasar por eso a una Cita —
+ * 17/10/2026.
+ *
+ * La cursiva de varias palabras de Gutenberg y su número de página entre llaves dejaron de
+ * disparar en `medirLegibilidad`: son marcado de la transcripción, no manchas, y condenaban
+ * documentos sanos. Pero la misma medida es la puerta por sentencia, y una frase que los trae
+ * pasaría entonces a candidata **con el marcado dentro**: «…de cerca, {pg 23} ni la quiere…».
+ * Antes caía por ilegible; ahora cae por lo que es, y con su motivo. Las candidatas que salen
+ * son las mismas que antes de los afinados.
+ *
+ * La cursiva de **una** palabra (`_mujer_`) no se toca aquí: ya pasaba, y qué hacer con ella
+ * es otra decisión.
+ */
+describe('FR-24 — el marcado de la Fuente no llega a una candidata', () => {
+  const extraer = (...frases: string[]) =>
+    extraerCandidatas(documento({ fuente: 'gutenberg', texto: frases.join('\n\n') }), 'seneca');
+
+  it('una sentencia con el número de página de Gutenberg dentro se descarta por marcado', () => {
+    const resultado = extraer(
+      'La guerra injusta no la quiere nadie que la haya visto de cerca, {pg 23} ni el pueblo que la paga.',
+    );
+    if (!resultado.ok) throw new Error(resultado.motivo);
+    expect(resultado.candidatas).toEqual([]);
+    expect(resultado.descartadas.map((d) => d.motivo)).toEqual(['marcado-de-la-fuente']);
+  });
+
+  it('y la que trae cursiva de varias palabras, también', () => {
+    const resultado = extraer('El _Tratado de la pintura_ enseña que la sombra es la mitad de la luz.');
+    if (!resultado.ok) throw new Error(resultado.motivo);
+    expect(resultado.candidatas).toEqual([]);
+    expect(resultado.descartadas.map((d) => d.motivo)).toEqual(['marcado-de-la-fuente']);
+  });
+
+  it('pero la abreviatura y el «vn» del Siglo de Oro son texto, y pasan', () => {
+    const resultado = extraer('Dixo el Sr. cura que vn hombre de bien no ha de mentir aunque le cueste la hacienda.');
+    if (!resultado.ok) throw new Error(resultado.motivo);
+    expect(resultado.candidatas).toHaveLength(1);
+  });
+
+  it('y la cursiva de una sola palabra sigue como estaba', () => {
+    const resultado = extraer('La _mujer_ moderna no se contenta con lo que su abuela tuvo por bastante.');
+    if (!resultado.ok) throw new Error(resultado.motivo);
+    expect(resultado.candidatas).toHaveLength(1);
+  });
+});

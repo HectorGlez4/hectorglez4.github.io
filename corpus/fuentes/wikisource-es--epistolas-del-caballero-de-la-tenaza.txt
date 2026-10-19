@@ -1,7 +1,7 @@
 fuente: wikisource-es
 obra: Epístolas del Caballero de la Tenaza
 url: https://es.wikisource.org/wiki/Ep%C3%ADstolas_del_Caballero_de_la_Tenaza
-recuperado: 2026-10-11
+recuperado: 2026-10-17
 ---
 Epístolas del Caballero de la Tenaza
 |título=Epístolas del Caballero de la Tenaza
@@ -89,13 +89,11 @@ Cuando no hubiera servido el no enviar a vuesa merced la telilla que tan innumer
 
 Guarde Dios, etcétera.
 
-DE LA ATENAZADORA"}},"i":0}}]}'>
 -X-
 DE LA ATENAZADORA
 
 Presto ha descubierto vuesa merced la hilaza y la condición que tiene, como hombre al fin, y más mudable que todos. Si yo hubiera creído en mis tías, no me quejara de lo que vuesa merced hace; mas ya estoy determinada de correr con lo que se usa, sirviéndome esto de escarmiento para adelante. Dícenme que está vuesa merced muy bien empleado, y conozco a la dicha señora; cosa en que ha mostrado su buen gusto. Así le guarde Dios que haga de las suyas, aunque esto no es menester encomendárselo. Dios le guarde.
 
-RESPUESTA"}},"i":0}}]}'>
 -XI-
 RESPUESTA
 
@@ -185,7 +183,6 @@ De Dios a vuesa merced por todos y salud y vida y qué deseare de esta casa. Ent
 
 Poco dinero es rey delante y mucho amor, hablando con perdón. Satanás sólo lo puede juntar. Capítulo segundo, yo soy ése. Madrid, a ocho de octubre de 600. Doña, ya se entiende...
 
-<br>RESPUESTA DE LA TENAZADORA"}},"i":0}}]}'>
 * * *
 
 RESPUESTA DE LA TENAZADORA
