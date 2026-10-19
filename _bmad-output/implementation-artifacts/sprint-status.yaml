@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-09-2026 12:00
+last_updated: 10-19-2026 12:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -373,6 +373,86 @@ development_status:
   # 22.10: los «Defectos anotados» de EXPERIENCE.md que no van en la 22.5 (mensajes de estado 4.1.3, entre otros).
   22-10-lo-construido-cumple-las-espinas-de-ux: review  # «Defectos anotados» vaciada con bmad-ux el 11/10 (51b58985)
   epic-22-retrospective: optional
+
+  # v8 — la Cita como centro. Diseño aprobado por Héctor el 17/10
+  # (docs/superpowers/specs/2026-10-17-v8-cita-como-centro-design.md, 1223b5dd); PRD v8.1 (c73ebbf8), UX v8 (fd55d2bc),
+  # espina v8 (58a4b437), SPEC v8 (c255188f), épicas en epics.md (20d5082c). 50 historias: 43 de construcción, 7 operativas.
+  # La unidad de fusión es la épica, en su rama: 23 → 24 y 26 en una sola rama (la 24.8 antes que la 26.1) → 25 y 27 →
+  # 28 tras el juicio de SM-11 (desde el 2026-12-05) o con su fecha. Nada se fusiona con el CI en rojo; la reparación de la
+  # publicación (rota desde el 11/10) va antes, en la principal, y fuera de la v8.
+
+  # Épica 23 — medir la lectura. Va primera: sin ella ninguna otra se juzga.
+  epic-23: backlog
+  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: backlog  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28
+  23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: backlog  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado)
+  23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: backlog  # operativa: acto de Héctor (migraciones en remoto, receptor desplegado, huella)
+  23-4-el-sitio-se-audita-contra-wcag-2-2-aa: backlog
+  23-5-una-carga-que-se-lee-deja-una-lectura: backlog
+  23-6-las-marcas-de-llegada-cuentan-una-vez-y-salen-de-la-direcció: backlog
+  23-7-cada-salida-interna-dice-desde-qué-zona: backlog
+  23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: backlog
+  23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: backlog
+  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: backlog
+  23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: backlog  # operativa: acto de Héctor (mínimo de lecturas, plan de Cloudflare, merge y primer corte de SM-8)
+  epic-23-retrospective: optional
+
+  # Épicas 24 y 26 — una sola rama y un solo merge, por SM-11. La 24.8 se construye antes que la 26.1.
+  epic-24: backlog
+  24-1-la-página-de-obra-lista-sus-citas-en-el-orden-del-libro: backlog  # el cargador de posiciones va primero; pasa z a astro/zod (Héctor, 19/10)
+  24-2-el-build-avisa-antes-de-que-dist-llegue-al-techo-del-alojami: backlog
+  24-3-cada-cita-de-un-listado-dice-de-qué-obra-es: backlog
+  24-4-bajo-la-cita-la-obra-de-la-que-sale: backlog
+  24-5-de-una-cita-a-la-siguiente-del-libro: backlog
+  24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: backlog
+  24-7-la-obra-salta-a-dónde-leerla: backlog
+  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: backlog
+  epic-24-retrospective: optional
+
+  epic-26: backlog
+  26-1-todo-autor-publicado-tiene-su-clave-de-orden: backlog  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio
+  26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: backlog
+  26-3-todos-los-autores-de-la-a-a-la-z: backlog
+  26-4-todas-las-obras-bajo-su-autor: backlog
+  26-5-la-cabecera-lleva-a-autores-obras-y-buscar: backlog
+  26-6-el-directorio-filtra-al-teclear-sin-pensar-en-tildes: backlog
+  26-7-los-directorios-se-miden-como-familia-propia: backlog
+  26-8-ninguna-cita-queda-a-más-de-tres-saltos-y-el-build-lo-compru: backlog
+  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: backlog
+  26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves de orden; no bloquea)
+  26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: backlog  # operativa: acto de Héctor (merge conjunto 24+26; fechas de SM-11 y SM-8 de llegada en vivo)
+  epic-26-retrospective: optional
+
+  # Épica 25 — compartir donde se publica. La matriz de dispositivos corre dos veces, y cada una es puerta.
+  epic-25: backlog
+  25-1-compartir-en-whatsapp-facebook-y-threads-también-donde-hay-h: backlog
+  25-2-la-imagen-cuadrada-lleva-el-dominio-al-pie: backlog
+  25-3-la-historia-se-prueba-en-ios-y-en-android-antes-de-construir: backlog  # operativa: acto de Héctor (matriz iOS/Android con «Compartir como imagen» del sitio en vivo, antes del 9:16)
+  25-4-la-cita-también-en-vertical-y-el-kit-la-saca-para-el-canal: backlog
+  25-5-a-la-historia-de-instagram-en-dos-toques: backlog
+  25-6-la-obra-también-se-comparte: backlog
+  25-7-lo-compartido-se-comprueba-en-los-teléfonos-y-en-facebook-op: backlog  # operativa: acto de Héctor (matriz de cierre por túnel HTTPS y validador de Facebook)
+  epic-25-retrospective: optional
+
+  # Épica 27 — buscar con filtros. Tras la 23 y la 26; antes o después de la 25.
+  epic-27: backlog
+  27-1-cada-resultado-de-cita-lleva-su-autor-y-la-cita-declara-sus: backlog
+  27-2-la-búsqueda-se-acota-por-autor-y-por-tema: backlog
+  27-3-la-búsqueda-se-acota-también-por-una-obra-del-autor-elegido: backlog
+  27-4-la-búsqueda-vive-en-la-dirección-y-atrás-la-devuelve: backlog
+  27-5-los-resultados-llegan-de-30-en-30: backlog
+  27-6-sin-resultados-los-ocho-autores-con-más-citas: backlog
+  27-7-sin-javascript-la-búsqueda-lleva-a-los-directorios: backlog
+  27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: backlog
+  epic-27-retrospective: optional
+
+  # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
+  epic-28: backlog
+  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: backlog
+  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog
+  28-3-seis-obras-que-cambian-con-la-jornada: backlog
+  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: backlog
+  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: backlog  # operativa: acto de Héctor (merge desde el 2026-12-05 o con la fecha que declare Héctor)
+  epic-28-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
