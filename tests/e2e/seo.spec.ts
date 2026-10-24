@@ -3,6 +3,7 @@ import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
 import { rutaDeTema } from '../../src/lib/superficies.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
 
@@ -104,10 +105,19 @@ test.describe('Historia 2.7 — datos estructurados', () => {
     expect(datos.creator.name).toBe('Concepción Arenal');
   });
 
-  // Historia 23.1 — qué guiones descarga esta página se juzga en
-  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final. Que los datos
-  // estructurados no son JavaScript ejecutable lo dice allí la misma prueba: la Página de Cita
-  // descarga exactamente el guion de medición.
+  test('los datos estructurados no son JavaScript ejecutable', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como pide la Historia 23.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido sin punto final, no se pide ninguno; cuando se construya con él (23.2),
+     * esta misma prueba juzga el fichero. Con punto final lo juzga ya `tests/e2e/receptor.spec.ts`,
+     * que exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los', { waitUntil: 'networkidle' });
+    expect(fueraDeLaListaAlCargar(pedidos), `la Página de Cita pidió ${pedidos.join(', ')}`).toEqual([]);
+  });
 });
 
 test.describe('Historia 2.7 — nada huérfano', () => {

@@ -21,8 +21,9 @@ import { EVENTOS } from '../../src/lib/medicion.ts';
  *
  * Todo lo de aquí es puro: la declaración no lee disco (AD-5), así que la matriz entera
  * se ejercita sin construir nada. Lo que se comprueba no es que cada ruta lleve la
- * etiqueta que le toca —eso lo mira el build—, sino que las **cuatro consecuencias no
- * pueden discrepar**, que es el defecto que la historia cierra.
+ * etiqueta que le toca —eso lo mira el build—, sino que las **consecuencias no pueden
+ * discrepar**, que es el defecto que la historia cierra. (Eran cuatro; la 23.1 añadió la
+ * medición: si la ruta carga el fichero y qué vistas emite.)
  */
 
 /** Una ruta de cada superficie declarada, para barrer la matriz completa. */
@@ -59,7 +60,7 @@ afterEach(() => {
   olvidarRutasIndexables();
 });
 
-describe('Historia 12.1 — las cuatro consecuencias salen de una sola declaración', () => {
+describe('Historia 12.1 — las consecuencias salen de una sola declaración', () => {
   it.each(MUESTRAS)('%s no puede ser noindex fuera y visible dentro', (ruta) => {
     // El defecto de origen: `/404` y `/buscar` pedían `noindex` al buscador de fuera y
     // seguían en el índice del de dentro. No hay dos valores que ajustar, así que la
@@ -74,7 +75,7 @@ describe('Historia 12.1 — las cuatro consecuencias salen de una sola declaraci
   });
 
   it.each(['producto', 'servicio', 'ajena'] as Caracter[])(
-    'el carácter «%s» deriva las cuatro a la vez',
+    'el carácter «%s» deriva todas a la vez',
     (caracter) => {
       const consecuencias = consecuenciasDelCaracter(caracter);
       const publicable = caracter === 'producto';
@@ -112,7 +113,7 @@ describe('Historia 12.1 — el defecto que la historia nombra', () => {
     expect(consecuenciasDe(ruta).enElBarrido).toBe(true);
   });
 
-  it.each(['/kit', '/lote'])('%s queda fuera de las cuatro', (ruta) => {
+  it.each(['/kit', '/lote'])('%s queda fuera de todas', (ruta) => {
     // El Kit y el lote son la misma clase de cosa: material de publicación, no contenido.
     // El lote entró en la Historia 13.1 con una sola línea de declaración y sin tocar nada
     // más, que es exactamente lo que la 12.1 prometía.
@@ -451,5 +452,16 @@ describe('Historia 23.1 — la medición es una consecuencia más de la declarac
     for (const superficie of SUPERFICIES) {
       if (superficie.caracter !== 'producto') expect(superficie.vista, superficie.nombre).toBeUndefined();
     }
+  });
+
+  it('toda superficie de producto declara su vista', () => {
+    /*
+     * Revisión de la 23.1 — la otra mitad. `vista` es opcional en el tipo porque las de servicio
+     * y las ajenas no la llevan; sin esta prueba, una página de lectura nueva declarada
+     * `producto` sin `vista` construía en verde y salía en silencio de SM-2 y SM-8.
+     */
+    const deProducto = SUPERFICIES.filter((s) => s.caracter === 'producto');
+    expect(deProducto.length).toBeGreaterThan(0);
+    for (const superficie of deProducto) expect(superficie.vista, superficie.nombre).toBeDefined();
   });
 });

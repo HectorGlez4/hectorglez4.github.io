@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 4.1 — portada con Cita del Día. */
 
@@ -66,8 +67,20 @@ test.describe('Historia 4.1 — la portada', () => {
     await otro.close();
   });
 
-  // Historia 23.1 — qué guiones descarga esta página se juzga en
-  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
+  test('no descarga más guion que los declarados', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como enmienda la Historia 4.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido sin punto final, no se pide ninguno; cuando se construya con él (23.2),
+     * esta misma prueba juzga el fichero. Con punto final lo juzga ya `tests/e2e/receptor.spec.ts`,
+     * que exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    expect(fueraDeLaListaAlCargar(pedidos), `la portada pidió ${pedidos.join(', ')}`).toEqual([]);
+  });
+
   test('el contenido está en el HTML inicial', async ({ page, request }) => {
     await page.goto('/');
 

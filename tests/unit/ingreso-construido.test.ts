@@ -16,7 +16,12 @@ import {
   limpiar,
   TIENDA_DE_PRUEBA,
 } from './ayuda/construir.js';
-import { bytesDeGuionEnLinea, etiquetasDeGuionExterno, guionesEnLinea } from './ayuda/guion.js';
+import {
+  bytesDeGuionEnLinea,
+  etiquetasDeGuionExterno,
+  guionesEnLinea,
+  guionesExternosDe,
+} from './ayuda/guion.js';
 import { ARRANQUE_DE_MEDICION } from '../../src/lib/medicion.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import {
@@ -826,6 +831,24 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
         MAX_BYTES_DE_GUION,
       );
     }
+  });
+
+  it('con todo encendido, lo que cada ruta pide como guion está en la lista cerrada — Historia 23.1', () => {
+    /*
+     * La lista cerrada de `src/lib/guiones.ts` se recorre en `tests/unit/medicion.test.ts` sobre
+     * un sitio con los Modelos apagados; aquí es donde un Modelo encendido podría traer un
+     * `<script src>` o un `import()` de un tercero —publicidad, afiliación, donaciones—, así que
+     * se pasa el mismo detector por cada página de esta construcción.
+     */
+    let pedidos = 0;
+    for (const [relativa, html] of Object.entries(paginas)) {
+      for (const especificador of guionesExternosDe(html)) {
+        pedidos++;
+        expect(guionExternoDe(especificador), `${relativa} pide «${especificador}», fuera de GUIONES_EXTERNOS`).toBeDefined();
+      }
+    }
+    // Con la medición puesta, toda página que se visita pide al menos el fichero de medición.
+    expect(pedidos).toBeGreaterThan(0);
   });
 
   it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {

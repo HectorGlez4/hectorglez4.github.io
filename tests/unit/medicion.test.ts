@@ -26,6 +26,7 @@ import {
   bytesDeGuionEnLinea,
   descargaDeLaEntrada,
   etiquetasDeGuionExterno,
+  guionesEjecutables,
   guionesEnLinea,
   guionesEnLineaConTipo,
   guionesExternosDe,
@@ -52,6 +53,13 @@ import {
 const RAIZ = resolve(import.meta.dirname, '../..');
 const aLimpiar: string[] = [];
 
+/** Espacios colapsados: Vitest y el build transforman `anunciar` con el mismo esbuild. */
+const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
+/** El texto de `anunciar` tal como viaja dentro del guion de una isla. */
+const ANUNCIAR = colapsado(String(anunciar));
+/** Lo que queda del guion de una isla sin el texto de `anunciar` que le mete `guionQueAnuncia`. */
+const sinAnunciar = (guion: string) => colapsado(guion).split(ANUNCIAR).join('');
+
 /** Los `.ts` y `.astro` de `src/`, salvo el propio módulo de medición. */
 function fuentesDeSrc(): string[] {
   return (function recorrer(dir: string): string[] {
@@ -61,6 +69,26 @@ function fuentesDeSrc(): string[] {
       return /\.(ts|astro)$/.test(entrada) ? [ruta] : [];
     });
   })(resolve(RAIZ, 'src')).filter((f) => !f.endsWith('lib/medicion.ts'));
+}
+
+/**
+ * Los atributos de cada `<script` de un fichero fuente, hasta su `>` de cierre: las llaves de
+ * una expresión de Astro (`define:vars={{ … }}`, `set:html={…}`) pueden llevar `>` dentro.
+ */
+function atributosDeScript(fuente: string): string[] {
+  const atributos: string[] = [];
+  for (const m of fuente.matchAll(/<script\b/g)) {
+    let profundidad = 0;
+    let i = m.index + m[0].length;
+    for (; i < fuente.length; i++) {
+      const c = fuente[i];
+      if (c === '{') profundidad++;
+      else if (c === '}') profundidad--;
+      else if (c === '>' && profundidad === 0) break;
+    }
+    atributos.push(fuente.slice(m.index, i));
+  }
+  return atributos;
 }
 
 /** Todos los ficheros de un directorio, recursivo. */
@@ -163,6 +191,20 @@ describe('Historia 2.9 — el módulo es el único emisor', () => {
     expect(codigo).not.toMatch(/sendBeacon/);
     expect(codigo).not.toMatch(/MEDICION_ENDPOINT/);
     expect(codigo).not.toMatch(/plausible|fathom|umami|gtag|analytics/i);
+  });
+
+  it.each(fuentes)('%s llama `__medir` a secas y no junta `define:vars` con `set:html`', (ruta) => {
+    /*
+     * Revisión de la 23.1 (segunda pasada): la prueba sobre `dist/` mira cuatro islas con nombre;
+     * esta mira todo `src/`, para que una isla nueva —o una de las que esa prueba no nombra— no
+     * vuelva a `window.__medir && …` ni junte en un `<script>` las dos directivas que en Astro 7.2
+     * pierden el cuerpo sin aviso (`src/lib/anuncio.ts`).
+     */
+    const codigo = readFileSync(ruta, 'utf8');
+    expect(codigo).not.toMatch(/window\.__medir/);
+    for (const atributos of atributosDeScript(codigo)) {
+      expect(/\bdefine:vars\b/.test(atributos) && /\bset:html\b/.test(atributos), atributos).toBe(false);
+    }
   });
 
   it('las superficies que emiten lo hacen por el vocabulario, no por una cadena suelta', () => {
@@ -375,6 +417,25 @@ describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
     expect(externos.filter((e) => guionExternoDe(e) === undefined)).toHaveLength(externos.length);
   });
 
+  it('el detector ve los workers y *worklets* precargados, el constructor por la ventana y el `addModule`', () => {
+    // Revisión de la 23.1, segunda pasada: lo que la primera ampliación del detector aún no veía.
+    const html = [
+      '<link rel="preload" as="worker" href="/precargado-worker.js">',
+      '<link rel="prefetch" as="paintworklet" href="/pintor.js">',
+      '<link rel="prefetch" href="/sin-como.mjs">',
+      '<link rel="prefetch" href="/otra-pagina/">',
+      "<script>new window.Worker('/ventana.js');self.importScripts('/propio.js');" +
+        "CSS.paintWorklet.addModule('/pincel.js');audioContext.audioWorklet.addModule(ruta)</script>",
+    ].join('');
+    const externos = guionesExternosDe(html);
+    for (const visto of ['/precargado-worker.js', '/pintor.js', '/sin-como.mjs', '/ventana.js', '/propio.js', '/pincel.js']) {
+      expect(externos, visto).toContain(visto);
+    }
+    expect(externos.some((e) => e.startsWith('(worklet.addModule sin literal)'))).toBe(true);
+    // Un `prefetch` sin `as` de algo que no es guion —una página— no es una descarga de guion.
+    expect(externos).not.toContain('/otra-pagina/');
+  });
+
   it('las importaciones estáticas se leen del árbol, también tras un comentario; las dinámicas no cuentan', () => {
     expect(
       importacionesEstaticasDe(
@@ -458,6 +519,11 @@ const CORPUS_MEDIDO: Record<string, string> = {
   ),
 };
 const SLUGS_DE_CITA = [...SLUGS, SLUG_LARGO, 'seneca-carta-0', 'seneca-carta-1'];
+const TEXTOS_DE_CITA = [
+  ...SLUGS.map((_, i) => `Frase número ${i} del catálogo de prueba.`),
+  TEXTO_LARGO,
+  ...[0, 1].map((i) => `Carta número ${i} del catálogo de prueba.`),
+];
 
 /** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */
 function construccionUnica(
@@ -758,22 +824,37 @@ describe('Historia 23.1 — ningún guion en línea lleva contenido', () => {
     expect(sinImagen).toEqual([]);
   }, 240_000);
 
-  it('ninguno contiene el slug de una Cita, salvo `ImagenDelKit` en `/kit` y `/lote`', async () => {
+  it('ninguno contiene contenido —slug, texto, Autor, Obra—, salvo `ImagenDelKit` en `/kit` y `/lote`', async () => {
+    /*
+     * Revisión de la 23.1 (segunda pasada): solo se buscaban slugs, y la identidad byte a byte
+     * por familia no ve las familias de una sola página —la portada, `/buscar/`, el 404—, donde
+     * el texto de la Cita del Día o el nombre de un Autor metidos en un guion pasaban. Se busca
+     * todo el contenido del corpus de la prueba: slugs, textos, el Autor, las Obras, el Tema y la
+     * Colección.
+     */
+    const contenido = [
+      ...SLUGS_DE_CITA,
+      ...TEXTOS_DE_CITA,
+      'Séneca',
+      'Sobre la brevedad de la vida',
+      'Cartas a Lucilio',
+      'El tiempo',
+      'Frases cortas para reflexionar',
+    ];
+    let mirados = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       for (const guion of guionesEnLinea(html)) {
         // Exención nombrada hasta la Historia 25.4: el Kit lleva el slug por `define:vars`.
         if (AJENAS.includes(ruta) && guion.includes('data-imagen-kit')) continue;
-        for (const slug of SLUGS_DE_CITA) expect(guion, `${ruta} lleva «${slug}»`).not.toContain(slug);
+        mirados++;
+        for (const dato of contenido) expect(guion, `${ruta} lleva «${dato}»`).not.toContain(dato);
       }
     }
+    expect(mirados).toBeGreaterThan(SLUGS_DE_CITA.length);
   }, 240_000);
 });
 
 describe('Historia 23.1 — las islas llaman `__medir` a secas y anuncian con `anunciar`', () => {
-  /** Espacios colapsados: Vitest y el build transforman la función con el mismo esbuild. */
-  const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
-  const ANUNCIAR = colapsado(String(anunciar));
-
   /** Los guiones en línea de una página, por la isla que los lleva. */
   const isla = (guiones: string[], marca: string) => {
     const encontrados = guiones.filter((g) => g.includes(marca));
@@ -795,9 +876,45 @@ describe('Historia 23.1 — las islas llaman `__medir` a secas y anuncian con `a
       expect(guion, nombre).toMatch(/(^|[^.\w$])__medir\(/);
       expect(guion, nombre).not.toMatch(/window\.__medir/);
     }
-    for (const nombre of ['copiar', 'imagen', 'buscar'] as const) {
+    /*
+     * Llevar el texto de `anunciar` no basta: `guionQueAnuncia` lo mete siempre, se llame o no.
+     * Revisión de la 23.1 (segunda pasada): con un `estado.textContent = …` a mano en `/buscar/`,
+     * el mismo recuento dos veces seguidas dejaba de anunciarse y todo seguía en verde. Así que
+     * el cuerpo de cada isla —el guion sin ese texto— llama `anunciar(` sobre su región y nunca
+     * le escribe un mensaje a mano (vaciarla, sí: es lo que hace al volver a su reposo).
+     */
+    const REGION = { copiar: 'anuncio', imagen: 'anuncio', buscar: 'estado' } as const;
+    for (const [nombre, region] of Object.entries(REGION) as [keyof typeof REGION, string][]) {
       expect(colapsado(islas[nombre]), nombre).toContain(ANUNCIAR);
+      const cuerpo = sinAnunciar(islas[nombre]);
+      expect(cuerpo, nombre).toMatch(new RegExp(`\\banunciar\\(\\s*${region}\\s*,`));
+      const escrito = [
+        ...cuerpo.matchAll(new RegExp(`\\b${region}\\.(?:textContent|innerText|innerHTML)\\s*=(?!=)\\s*([^;}]*)`, 'g')),
+      ].map((m) => m[1].trim());
+      expect(escrito.filter((valor) => valor !== "''" && valor !== '""'), nombre).toEqual([]);
     }
+  }, 240_000);
+
+  it('cada copia de Copiar va justo detrás de su isla, que es lo que encuentra por `currentScript`', async () => {
+    /*
+     * `CopiarCita` se encuentra por `document.currentScript.previousElementSibling`: si algo se
+     * colara entre el `<div class="isla">` y su guion, la isla moriría en el navegador con el
+     * build en verde, y solo lo vería el Playwright local, que el CI no corre. Se mira aquí, en
+     * cada página que lleve la isla —la Página de Cita y el Kit—.
+     */
+    let vistas = 0;
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      for (const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)) {
+        if (!m[1].includes("'[data-copiar]'")) continue;
+        vistas++;
+        const antes = html.slice(0, m.index).trimEnd();
+        expect(antes.endsWith('</div>'), `${ruta}: el guion de Copiar no sigue a un </div>`).toBe(true);
+        const isla = antes.slice(antes.lastIndexOf('<div'));
+        expect(isla, ruta).toMatch(/^<div\b[^>]*\bclass="isla\b/);
+        expect(isla, ruta).toContain('data-copiar');
+      }
+    }
+    expect(vistas).toBeGreaterThan(SLUGS.length);
   }, 240_000);
 
   it('entre los guiones en línea solo el arranque asigna `__medir`, y nadie usa `requestAnimationFrame` fuera de `anunciar`', async () => {
@@ -807,7 +924,7 @@ describe('Historia 23.1 — las islas llaman `__medir` a secas y anuncian con `a
         vistos++;
         if (guion === ARRANQUE_DE_MEDICION) continue;
         expect(guion, ruta).not.toMatch(/__medir\s*=(?!=)/);
-        expect(colapsado(guion).split(ANUNCIAR).join(''), ruta).not.toContain('requestAnimationFrame');
+        expect(sinAnunciar(guion), ruta).not.toContain('requestAnimationFrame');
       }
     }
     expect(vistos).toBeGreaterThan(0);
@@ -824,11 +941,6 @@ describe('Historia 23.1 — las islas llaman `__medir` a secas y anuncian con `a
  * corre. Y el arranque promete abrir la cola antes que cualquier guion, cosa que nada medía.
  */
 describe('Historia 23.1 — los guiones en línea se dejan analizar, y el arranque va primero', () => {
-  /** El primer `<script>` ejecutable de la página, con su cuerpo. */
-  const primerGuion = (html: string) =>
-    [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].find(
-      (m) => !/\btype\s*=\s*["']?application\/ld\+json\b/i.test(m[1]),
-    );
 
   it('todo guion en línea de las dos construcciones es JavaScript válido', async () => {
     let analizados = 0;
@@ -849,28 +961,28 @@ describe('Historia 23.1 — los guiones en línea se dejan analizar, y el arranq
   it('el arranque es el primer guion de toda página, antes que cualquier isla o fichero', async () => {
     for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
       for (const [ruta, html] of paginasDe(proyecto)) {
-        const primero = primerGuion(html);
-        expect(primero?.[2], ruta).toBe(ARRANQUE_DE_MEDICION);
-        expect(primero?.[1], ruta).not.toMatch(/\bsrc\s*=/i);
+        const [primero] = guionesEjecutables(html);
+        expect(primero?.cuerpo, ruta).toBe(ARRANQUE_DE_MEDICION);
+        expect(primero?.atributos, ruta).not.toMatch(/\bsrc\s*=/i);
       }
     }
   }, 240_000);
 });
 
 describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
-  const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
-  const ANUNCIAR = colapsado(String(anunciar));
-
-  it('cada página lleva tantos guiones con `anunciar` como regiones `role="status"`, o más', async () => {
+  it('cada página lleva tantos guiones que llaman `anunciar` como regiones `role="status"`, o más', async () => {
     /*
      * La prueba de las islas nombra tres; esta las descubre: una isla nueva con su región de
      * estado y un anuncio escrito a mano —sin `requestAnimationFrame`, que la otra prueba
-     * vigila— dejaría su página con una región de más.
+     * vigila— dejaría su página con una región de más. Cuenta el guion que **llama** a
+     * `anunciar`, no el que solo lleva su texto, que `guionQueAnuncia` mete siempre.
      */
     let regionesVistas = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
-      const anunciantes = guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR)).length;
+      const anunciantes = guionesEnLinea(html).filter(
+        (g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)),
+      ).length;
       regionesVistas += regiones;
       expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
         regiones,

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { autorConBiografia, autorEnUnaPagina, autorEnVariasPaginas } from './ayuda/corpus.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 2.3 — Página de Autor. */
 
@@ -96,8 +97,20 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
     for (const alto of alturas) expect(alto).toBeGreaterThanOrEqual(44);
   });
 
-  // Historia 23.1 — qué guiones descarga esta página se juzga en
-  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
+  test('la página de Autor tampoco descarga más guion que los declarados', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados»; la 17.4 conserva su criterio y solo cambia su prueba. Al cargar, a lo sumo el
+     * de medición, que es lo único de la lista cerrada de `src/lib/guiones.ts` que se pide sin
+     * tocar nada. Contra este
+     * servidor, construido sin punto final, no se pide ninguno; cuando se construya con él (23.2),
+     * esta misma prueba juzga el fichero. Con punto final lo juzga ya `tests/e2e/receptor.spec.ts`,
+     * que exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto(MACHADO, { waitUntil: 'networkidle' });
+    expect(fueraDeLaListaAlCargar(pedidos), `la página de Autor pidió ${pedidos.join(', ')}`).toEqual([]);
+  });
 });
 
 test.describe('Historia 17.3 — la Lista de Obras', () => {

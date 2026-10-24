@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 import { citaConObraMasLarga, citaConProcedenciaCompleta, procedenciaDe } from './ayuda/corpus.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /**
  * Historia 2.1 — Página de Cita.
@@ -129,9 +130,21 @@ test.describe('Historia 2.1 — tramos tipográficos', () => {
   });
 });
 
-test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
-  // Historia 23.1 — qué guiones descarga esta página se juzga en
-  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
+test.describe('Historia 2.1 — solo las islas declaradas y HTML inicial', () => {
+  test('la página solo descarga los guiones externos declarados', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como enmienda la Historia 2.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido sin punto final, no se pide ninguno; cuando se construya con él (23.2),
+     * esta misma prueba juzga el fichero. Con punto final lo juzga ya `tests/e2e/receptor.spec.ts`,
+     * que exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto(CORTA, { waitUntil: 'networkidle' });
+    expect(fueraDeLaListaAlCargar(pedidos), `la Página de Cita pidió ${pedidos.join(', ')}`).toEqual([]);
+  });
+
   test('el guion en línea cabe en MAX_BYTES_DE_GUION', async ({ page }) => {
     /*
      * El criterio de la 2.1 dice «la página no envía JavaScript» y la 2.2 añade el botón

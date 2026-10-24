@@ -218,7 +218,11 @@ export const MAX_BYTES_GUION_DE_IMAGEN = 7550;
  * Medido: 86.810 bytes con Pagefind 1.5.2 — el cliente, 45.555, y el worker que crea al
  * iniciarse con `new Worker`, `/pagefind/pagefind-worker.js`, 41.255 (lo declara la entrada en
  * `arranca`); ninguno importa nada de forma estática. El índice y el WebAssembly llegan por
- * `fetch` y no son guion, así que no cuentan. Hasta la revisión de la 23.1 solo contaba el
+ * `fetch` y no cuentan, y lo segundo es una elección, no un descuido: el WebAssembly **es** código
+ * que se ejecuta, pero no es guion —no lo ve `<script>`, `import()` ni `new Worker`, que es lo que
+ * la lista cierra—, llega solo tras enfocar o buscar, como el resto de Pagefind, y su peso lo fija
+ * Pagefind por idioma, no el proyecto. Si un día hubiera que contarlo, sería otra entrada con su
+ * tope, no este número. Hasta la revisión de la 23.1 solo contaba el
  * cliente, y el worker se descargaba al enfocar el campo fuera de toda cuenta. No lo escribe el
  * proyecto: lo escribe Pagefind al construir, así que subir de versión puede moverlo, y este
  * tope es lo que hace que eso se vea.

@@ -22,8 +22,8 @@ export function bytesDeGuionEnLinea(html: string): number {
     .reduce((n, m) => n + Buffer.byteLength(m[2], 'utf8'), 0);
 }
 
-/** Los `<script>` de una página que no son datos estructurados: atributos y cuerpo. */
-function guionesEjecutables(html: string): { atributos: string; cuerpo: string }[] {
+/** Los `<script>` de una página que no son datos estructurados, en su orden: atributos y cuerpo. */
+export function guionesEjecutables(html: string): { atributos: string; cuerpo: string }[] {
   return [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)]
     .filter((m) => !/\btype\s*=\s*["']?application\/ld\+json\b/i.test(m[1]))
     .map((m) => ({ atributos: m[1], cuerpo: m[2] }));
@@ -63,21 +63,34 @@ export function etiquetasDeGuionExterno(html: string): { etiqueta: string; src: 
     .filter((e): e is { etiqueta: string; src: string } => e.src !== undefined);
 }
 
+/** Los destinos de `as` con que un `<link rel="preload|prefetch">` descarga un guion. */
+const COMO_DE_GUION = new Set(['script', 'worker', 'sharedworker', 'serviceworker', 'audioworklet', 'paintworklet']);
+
 /**
- * Los `<link>` que hacen descargar un guion: `rel="modulepreload"`, o `preload`/`prefetch` con
- * `as="script"`. Su `href`, o una marca que ninguna entrada reconoce si no lo lleva.
+ * Los `<link>` que hacen descargar un guion: `rel="modulepreload"`, o `preload`/`prefetch` con un
+ * `as` de guion —`script` o un worker o *worklet*— o sin `as` y con un `href` que acaba en
+ * `.js`/`.mjs` (un `prefetch` sin `as` descarga lo que sea). Su `href`, o una marca que ninguna
+ * entrada reconoce si no lo lleva.
  */
 function enlacesDeGuion(html: string): string[] {
   return [...html.matchAll(/<link\b([^>]*)>/gi)].flatMap(([, atributos]) => {
     const rel = (atributo(atributos, 'rel') ?? '').toLowerCase().split(/\s+/);
     const como = (atributo(atributos, 'as') ?? '').toLowerCase();
-    const descarga = rel.includes('modulepreload') || ((rel.includes('preload') || rel.includes('prefetch')) && como === 'script');
-    return descarga ? [atributo(atributos, 'href') ?? '(link sin href)'] : [];
+    const href = atributo(atributos, 'href');
+    const adelanta = rel.includes('preload') || rel.includes('prefetch');
+    const deGuion = COMO_DE_GUION.has(como) || (como === '' && /\.m?js(?:[?#]|$)/i.test(href ?? ''));
+    const descarga = rel.includes('modulepreload') || (adelanta && deGuion);
+    return descarga ? [href ?? '(link sin href)'] : [];
   });
 }
 
 /** Cómo pide un guion otro fichero: estática (`import … from`) o al ejecutarse. */
-export type FormaDePedir = 'import' | FormaDeArrancar | 'serviceWorker.register' | "createElement('script')";
+export type FormaDePedir =
+  | 'import'
+  | FormaDeArrancar
+  | 'serviceWorker.register'
+  | "createElement('script')"
+  | 'worklet.addModule';
 
 /** Una petición de guion que hace un fichero, leída de su árbol sintáctico. */
 export interface PeticionDeGuion {
@@ -121,13 +134,20 @@ function literalInicial(nodo: Nodo): string | undefined {
 const propiedad = (nodo: Nodo): string | undefined =>
   nodo.type === 'MemberExpression' && !nodo.computed ? ((nodo.property as { name?: string }).name ?? undefined) : undefined;
 
+/** El nombre de lo que se llama o construye: `Worker` en `Worker`, `window.Worker` o `self.Worker`. */
+const nombreLlamado = (nodo: Nodo): string | undefined =>
+  nodo.type === 'Identifier' ? (nodo as { name?: string }).name : propiedad(nodo);
+
 /**
  * Todo lo que un guion pide como guion, leído de su árbol sintáctico y no de su texto —así un
  * `import()` escrito en un comentario no cuenta y uno partido entre líneas sí— — Historia 23.1:
  * las importaciones estáticas (`import … from`, `export … from`, `import '…'`) y lo que pide al
- * ejecutarse: `import()`, `new Worker`, `new SharedWorker`, `importScripts`,
- * `serviceWorker.register` y `createElement('script')`. Se analiza como módulo, que es la
- * gramática más estricta; un guion clásico que solo fuera válido sin ella hace fallar la prueba.
+ * ejecutarse: `import()`, `new Worker`, `new SharedWorker` —también como `new window.Worker`—,
+ * `importScripts` —también `self.importScripts`—, `serviceWorker.register`, el `addModule` de un
+ * *worklet* (`CSS.paintWorklet`, `audioWorklet`) y `createElement('script')`. Se analiza como
+ * módulo, que es la gramática más estricta; un guion clásico que solo fuera válido sin ella hace
+ * fallar la prueba. Lo que no ve —un constructor guardado en otra variable, el `src` reasignado
+ * de un `<script>` que ya existe— no se puede leer sin ejecutar el guion.
  */
 export function peticionesDe(fuente: string): PeticionDeGuion[] {
   const peticiones: PeticionDeGuion[] = [];
@@ -153,17 +173,20 @@ export function peticionesDe(fuente: string): PeticionDeGuion[] {
         apuntar('import()', nodo.source as Nodo);
         return;
       case 'NewExpression': {
-        const callee = nodo.callee as Nodo & { name?: string };
-        if (callee.type === 'Identifier' && (callee.name === 'Worker' || callee.name === 'SharedWorker')) {
-          apuntar(callee.name === 'Worker' ? 'new Worker' : 'new SharedWorker', (nodo.arguments as Nodo[])[0]);
+        // `new Worker(…)` o `new window.Worker(…)`, `new self.SharedWorker(…)`…
+        const nombre = nombreLlamado(nodo.callee as Nodo);
+        if (nombre === 'Worker' || nombre === 'SharedWorker') {
+          apuntar(nombre === 'Worker' ? 'new Worker' : 'new SharedWorker', (nodo.arguments as Nodo[])[0]);
         }
         return;
       }
       case 'CallExpression': {
         const callee = nodo.callee as Nodo & { name?: string };
         const argumentos = nodo.arguments as Nodo[];
-        if (callee.type === 'Identifier' && callee.name === 'importScripts') {
+        if (nombreLlamado(callee) === 'importScripts') {
           for (const argumento of argumentos) apuntar('importScripts', argumento);
+        } else if (propiedad(callee) === 'addModule') {
+          apuntar('worklet.addModule', argumentos[0]);
         } else if (propiedad(callee) === 'register' && propiedad(callee.object as Nodo) === 'serviceWorker') {
           apuntar('serviceWorker.register', argumentos[0]);
         } else if (

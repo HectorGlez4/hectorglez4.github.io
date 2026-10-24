@@ -197,7 +197,7 @@ describe('Historia 22.10 — el marcado construido', () => {
     expect(paginas['/buscar/']).toMatch(/role="status"[^>]*><\/p>/);
   });
 
-  it('el 404 no carga guiones ni necesita región de estado', () => {
+  it('el 404 no lleva ninguna isla —solo el arranque de la medición— ni necesita región de estado', () => {
     // Historia 23.1 — lo único en línea es el arranque de la medición, que va en toda página;
     // ninguna isla, y sin punto final no pide ningún fichero.
     expect(guionesEnLinea(paginas['/404'])).toEqual([ARRANQUE_DE_MEDICION]);

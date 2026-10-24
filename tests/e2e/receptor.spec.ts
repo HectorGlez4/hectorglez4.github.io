@@ -4,6 +4,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
 import { EVENTOS, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
+import { apuntarGuiones } from './ayuda/guiones.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeObra } from '../../src/lib/superficies.ts';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from '../unit/ayuda/construir.js';
@@ -338,24 +339,16 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
  * `src/lib/guiones.ts`.
  *
  * Las cinco pruebas de «la página no descarga ningún fichero de script» —Página de Cita,
- * portada, Autor, 404 y datos estructurados— vivían en las especificaciones de cada superficie y
- * corrían contra el `webServer`, que se construye **sin** punto final: ahí no hay fichero que
- * pedir y la prueba pasaba sin mirar nada. Se juzgan aquí, contra un sitio construido con punto
- * final, que es el único donde la ausencia de todo lo demás dice algo.
+ * portada, Autor, 404 y datos estructurados— pasaron en su sitio a «solo los guiones externos
+ * declarados» (`tests/e2e/ayuda/guiones.ts`), y siguen corriendo contra el `webServer`, con el
+ * Corpus de verdad y en los dos perfiles. Pero ese servidor se construye **sin** punto final: ahí
+ * no hay fichero que pedir y la ausencia no dice nada. Por eso se juzgan **también** aquí, contra
+ * un sitio construido con punto final, y aquí con la exigencia entera: exactamente el fichero de
+ * medición, una vez.
  */
-test.describe('Historia 23.1 — cada superficie descarga exactamente el guion de medición', () => {
-  /** Los guiones que pide la página —`<script src>` e `import()`—, por su ruta y consulta. */
-  function apuntarGuiones(page: import('@playwright/test').Page): string[] {
-    const pedidos: string[] = [];
-    page.on('request', (peticion) => {
-      if (peticion.resourceType() !== 'script') return;
-      const url = new URL(peticion.url());
-      pedidos.push(url.origin === SITIO ? `${url.pathname}${url.search}` : url.href);
-    });
-    return pedidos;
-  }
+const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
 
-  const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
+test.describe('Historia 23.1 — cada superficie descarga exactamente el guion de medición', () => {
   const SUPERFICIES: [string, string][] = [
     ['la Página de Cita', RUTA_CITA],
     ['la portada', '/'],
@@ -367,7 +360,7 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
 
   for (const [nombre, ruta] of SUPERFICIES) {
     test(`${nombre} descarga el guion de medición, una vez, y nada más`, async ({ page }) => {
-      const pedidos = apuntarGuiones(page);
+      const pedidos = apuntarGuiones(page, SITIO);
       await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
       // Sin otro guion: ni el `ld+json` de los datos estructurados, que no es ejecutable, ni
       // el generador de la Imagen ni Pagefind, que solo se piden al usarlos.
@@ -377,7 +370,7 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
 
   for (const ajena of ['/kit/', '/lote/']) {
     test(`\`${ajena}\` no descarga el guion de medición`, async ({ page }) => {
-      const pedidos = apuntarGuiones(page);
+      const pedidos = apuntarGuiones(page, SITIO);
       await page.goto(`${SITIO}${ajena}`, { waitUntil: 'networkidle' });
       expect(pedidos).not.toContain(RUTA_DEL_FICHERO);
       // Lo que sí pide —el generador, para dibujar la Imagen sin pulsar— está en la lista.
@@ -391,7 +384,7 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
      * `pagefind.js`, antes de que Pagefind arrancara su worker —un guion de 41 KB fuera de la
      * lista— unos instantes después. Se busca de verdad y se espera al worker y al recuento.
      */
-    const pedidos = apuntarGuiones(page);
+    const pedidos = apuntarGuiones(page, SITIO);
     await page.goto(`${SITIO}${RUTA_BUSCAR}`, { waitUntil: 'networkidle' });
     const worker = page.waitForRequest((p) => new URL(p.url()).pathname === '/pagefind/pagefind-worker.js');
     await page.locator('[data-consulta]').fill('tiempo');
@@ -403,7 +396,7 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
   });
 
   test('abrir la Imagen pide el generador, y solo entradas de la lista', async ({ page }) => {
-    const pedidos = apuntarGuiones(page);
+    const pedidos = apuntarGuiones(page, SITIO);
     await page.goto(`${SITIO}${RUTA_CITA}`, { waitUntil: 'networkidle' });
     await page.getByRole('button', { name: 'Descargar como imagen' }).click();
     await page.waitForFunction(() => {
@@ -413,6 +406,52 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
     expect(pedidos).toContain('/islas/imagen.js');
     for (const pedido of pedidos) expect(entradaDeLoDescargado(pedido), pedido).toBeDefined();
   });
+});
+
+test.describe('Historia 23.1 — las vistas que llegan son las que declara cada superficie', () => {
+  /*
+   * Revisión de la 23.1 (segunda pasada): en un navegador solo se veía llegar `vista-de-cita`. La
+   * vista de superficie y su ausencia en lo que es `servicio` salían de `data-vistas`, pero nada
+   * miraba que el fichero las emitiera de verdad desde ahí.
+   */
+  const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
+
+  /** Espera a que el fichero de medición se haya ejecutado: ha sustituido a la cola del arranque. */
+  async function esperarAlFichero(page: import('@playwright/test').Page) {
+    await page.waitForFunction(() => {
+      const medir = (window as unknown as { __medir?: { q?: unknown } }).__medir;
+      return typeof medir === 'function' && !('q' in medir);
+    });
+  }
+
+  for (const [nombre, ruta] of [
+    ['la portada', '/'],
+    ['la página 1 de Autor', rutaDeAutor('seneca')],
+  ] as const) {
+    test(`${nombre} emite una vista de superficie, con su ruta, y ninguna de Cita`, async ({ page }) => {
+      await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
+      await esperarAlFichero(page);
+      const registro = await esperarEvento(EVENTOS.vistaDeSuperficie);
+      expect(registro, `no llegó la vista de ${ruta}`).toBeTruthy();
+      expect(registro!.ruta).toBe(ruta);
+      await page.waitForTimeout(500);
+      expect(llegadas(EVENTOS.vistaDeSuperficie)).toHaveLength(1);
+      expect(llegadas(EVENTOS.vistaDeCita)).toEqual([]);
+    });
+  }
+
+  for (const [nombre, ruta] of [
+    ['la búsqueda', RUTA_BUSCAR],
+    ['el 404', '/no-existe-esta-ruta/'],
+    ['la Obra que no se indexa', OBRA_NO_INDEXABLE],
+  ] as const) {
+    test(`${nombre} carga el fichero y no emite ninguna vista`, async ({ page }) => {
+      await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
+      await esperarAlFichero(page);
+      await page.waitForTimeout(500);
+      expect(recibidos.filter((r) => r?.evento.startsWith('vista-')), ruta).toEqual([]);
+    });
+  }
 });
 
 test.describe('Historia 23.1 — la cola del arranque y la espera al prerender', () => {
@@ -484,7 +523,7 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
       };
     });
     await page.goto(`${SITIO}/`, { waitUntil: 'networkidle' });
-    await esperarEvento(EVENTOS.vistaDeSuperficie);
+    expect(await esperarEvento(EVENTOS.vistaDeSuperficie), 'no llegó la vista de la portada').toBeTruthy();
 
     // Reglas de especulación hacia la Página de Cita, y un enlace para activarla.
     await page.evaluate((destino) => {
@@ -513,7 +552,12 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
      * Chromium no prerenderiza una página con DevTools conectado, y Playwright lo conecta
      * siempre: el estado del intento es `PrerenderingDisabledByDevTools` (comprobado con
      * `Preload.prerenderStatusUpdated` el 2026-10-24, con Chromium de cabeza y sin ella). Hasta
-     * que eso cambie, esto lo cubre el entorno simulado de `tests/unit/medicion.test.ts`.
+     * que eso cambie, esto lo cubre el entorno simulado de `tests/unit/medicion.test.ts`, y lo
+     * confirmó a mano el 2026-10-24 un Chrome 155 sin DevTools (`--headless=new`, sin
+     * `--remote-debugging-*`) contra este mismo corpus: la Cita se prerenderizó
+     * (`Sec-Purpose: prefetch;prerender`, también el fichero de medición), no salió ninguna baliza
+     * en los 4 s de prerender y salió una sola `vista-de-cita` al activarse; con el fichero sin la
+     * espera, la vista salía durante el prerender. El parte está en el spec de la 23.1.
      */
     test.skip(activacion <= 0, 'Chromium no prerenderiza con DevTools conectado (PrerenderingDisabledByDevTools)');
 

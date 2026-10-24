@@ -16,8 +16,13 @@
  * `tests/unit/medicion.test.ts` recorre el `dist/` de un sitio construido con punto final y
  * falla por un `<script src>`, un `<link rel="modulepreload">`, un `import()`, un `new Worker` o
  * un `importScripts` que no case con ninguna entrada o que no esté declarado en la suya, que sea
- * de otro origen, o cuyos ficheros no quepan en su tope; y por una entrada sin tope. Las Épicas 26
- * y 27 la amplían con una línea aquí y un tope allí, en un diff visible.
+ * de otro origen, o cuyos ficheros no quepan en su tope; y por una entrada sin tope.
+ *
+ * Ampliarla —las Épicas 26 y 27— es un diff visible en cuatro sitios, y ninguno sobra: la entrada
+ * aquí, con su `id` en el tipo; su tope con nombre en `umbrales.ts`; la lista de `id` que fija
+ * `tests/unit/medicion.test.ts` («cada entrada tiene un tope…»); y que el sitio de esa prueba
+ * (`CORPUS_MEDIDO`) llegue a pedirla, porque la prueba de `dist/` exige ver cada entrada para
+ * medir su tope y falla con una que nadie pide.
  */
 
 import {
