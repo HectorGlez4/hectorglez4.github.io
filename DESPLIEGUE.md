@@ -444,8 +444,9 @@ línea (`__medir` como cola), que no envía nada.
 
 **La medición es un fichero, y eso tiene un coste aceptado** (Historia 23.1, AD-6). El
 emisor se sirve como `/medicion/{versión}.js`, con la versión sacada del contenido —el
-guion y el punto final que lleva dentro—, y cada página lo pide con `<script src defer>` en el
-`<head>`. Con el techo de caché de §1 (`max-age=600`), cuando el guion cambia hay una ventana
+guion y el punto final que lleva dentro—, y cada página de producto o de servicio lo pide con
+`<script src defer>` en el `<head>`. `/kit` y `/lote`, ajenas, no lo piden: lo que se copia o se
+descarga ahí ya no se envía, y quedan fuera de toda serie (NFR-6). Con el techo de caché de §1 (`max-age=600`), cuando el guion cambia hay una ventana
 de hasta **10 minutos** en la que un visitante con la página anterior en caché pide un fichero
 que el despliegue nuevo ya no sirve: ese 404 no rompe nada —el arranque encola y la página
 funciona igual—, pero las vistas y acciones de esa visita **no se envían**. Se acepta: el

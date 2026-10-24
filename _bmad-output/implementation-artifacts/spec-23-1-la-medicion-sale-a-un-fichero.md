@@ -5,7 +5,7 @@ created: '2026-10-24'
 status: 'done'
 baseline_revision: '225114cf6638192b9c61f3aa8b53720c0e4e3d89'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
@@ -126,6 +126,29 @@ deferred: []
 Las cinco capas de revisión son externas en este bucle (v8-ralph) y esta pasada no traía hallazgos
 («## Hallazgos externos — …» ausentes en la invocación): la revisión independiente viene después.
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13 (high 1, medium 2, low 10)
+- defer: 0
+- reject: 13
+- addressed_findings:
+  - `[high]` `[patch]` El worker de Pagefind (`/pagefind/pagefind-worker.js`, 41.255 B) se descargaba con `new Worker` al enfocar `/buscar/`, fuera de la lista cerrada y de todo tope, y la prueba de Playwright afirmaba antes de que llegara (ac-auditor 7b/7c/7e, blind-hunter, edge-case-hunter). La entrada `pagefind` declara ahora `arranca` (`new Worker` → el worker), `MAX_BYTES_GUION_DE_PAGEFIND` se vuelve a medir (86.810 B → 87.200), Vitest cuenta lo arrancado y falla por un arranque no declarado o declarado y no visto, y la prueba de `receptor.spec.ts` busca de verdad y espera al worker. No es `bad_spec`: el criterio «enfocar `/buscar/` … pide solo entradas de la lista» era claro y el código lo incumplía; la cuenta solo se hace más estricta que «importaciones estáticas».
+  - `[medium]` `[patch]` El detector de la lista cerrada solo veía `<script src>` y el `import()` en línea: se le escapaban `modulepreload`/`preload as=script`, `new Worker`/`SharedWorker`, `importScripts`, `serviceWorker.register`, `createElement('script')`, las importaciones estáticas de un módulo en línea y lo que piden los ficheros de la lista; `\bsrc=` casaba con `data-src=` y una importación tras un comentario no contaba (blind-hunter, edge-case-hunter, ac-auditor). `tests/unit/ayuda/guion.ts` lee ahora el árbol sintáctico (`parseSync` de Vite) en `peticionesDe`, mira los `<link>` y mide con `descargaDeLaEntrada`; pruebas sintéticas de cada caso.
+  - `[medium]` `[patch]` Los guiones de las islas son texto dentro de plantillas de TypeScript que ningún analizador miraba (blind-hunter). Vitest analiza todo guion en línea de las dos construcciones (`vm.Script` para los clásicos, `parseSync` para los de módulo).
+  - `[low]` `[patch]` Nada comprobaba que el arranque fuera antes que todo guion, y `<Medicion>` iba tras `<slot name="cabeza" />` (blind-hunter, edge-case-hunter, ac-auditor). `<Medicion>` pasa delante del slot y Vitest exige que el arranque sea el primer guion ejecutable de toda página, con y sin punto final.
+  - `[low]` `[patch]` En `CopiarCita` la llamada a `__medir` iba en el mismo `try` que el portapapeles (blind-hunter): el `try` envuelve ya solo `writeText`, y `__medir` va tras la confirmación.
+  - `[low]` `[patch]` `guionQueAnuncia` no se protegía de un nombre que no es identificador, de un valor que JSON no escribe ni de un `</script`/`<!--` en el cuerpo, y nada probaba que `String(anunciar)` funcionara solo (blind-hunter, edge-case-hunter). Rompe el build en los tres casos y una prueba ejecuta el texto de `anunciar` aislado.
+  - `[low]` `[patch]` `MAX_BYTES_GUION_DE_MEDICION` solo se medía con el punto final de las pruebas (blind-hunter, edge-case-hunter, intent-alignment). El endpoint `src/pages/medicion/[version].js.ts` para el build si el fichero, con el punto final de esa construcción, pasa del tope; prueba unitaria.
+  - `[low]` `[patch]` Sin punto final no se afirmaba «ninguna etiqueta de guion» (ac-auditor 2/11b): Vitest exige cero `<script src>` en toda página de la construcción sin punto final.
+  - `[low]` `[patch]` `Superficie.vista` admitía cualquier `Evento` (edge-case-hunter): nuevo tipo `EventoDeVista` en `src/lib/medicion.ts`.
+  - `[low]` `[patch]` Las islas que anuncian se fijaban por una lista de tres (ac-auditor 10c/6, intent-alignment): prueba de descubrimiento — en cada página, tantos guiones con `anunciar` como regiones `role="status"`, o más.
+  - `[low]` `[patch]` La prueba del prerender leía las llegadas tras una espera fija y podía pasar rota (blind-hunter, ac-auditor 6/13): cada baliza apunta si salió con `document.prerendering`, y el salto nombra la causa real, `PrerenderingDisabledByDevTools` (comprobada con CDP el 2026-10-24).
+  - `[low]` `[patch]` La prueba de descargas por superficie no miraba `/lote/` (blind-hunter): `/kit/` y `/lote/` se recorren igual. Tema, Colección, páginas 2+ y la Obra indexable siguen solo en Vitest, ruta por ruta.
+  - `[low]` `[patch]` Documentación: `DESPLIEGUE.md` §3 decía «cada página lo pide» y callaba que `/kit` y `/lote` ya no envían nada (blind-hunter, «Other findings»); el `cuando` de la Imagen no nombraba «Compartir como imagen»; los riesgos residuales del parte decían que `seo.spec.ts` no se tocó. Corregido, y `AGENTS.md` nombra lo que arranca un fichero de la lista.
+
+Rechazados (13): la ruptura de la serie al desplegar (la corta la 23.11 con `CORTES_DE_SM8`, que cubre «la vista desde el fichero diferido» y «la espera a la activación»); la fragilidad de la cola y la doble ejecución del fichero (una sola etiqueta por página, fijada por prueba, y las islas llaman a secas); la comprobación tras desplegar (es la 23.11); la mitigación aplazada sin dueño (está en «Fuera, a propósito» de `epics.md`); el contenido en línea más allá de los slugs (lo cubre la identidad byte a byte por familia; la exención la cierra la 25.4); las dos formas de encontrar el marcado y la guarda de `currentScript` (no arregla nada: la isla quedaría muerta igual, y el Kit de dos copias lo prueba); el código de prueba duplicado (`kit.spec.ts` sobre el Corpus real lo pide la épica); «una vista por página» en el tipo (la espina quiere un conjunto); el fichero en páginas sin nada que enviar (lo pide el contrato: toda superficie `producto`/`servicio`); el sufijo concatenado tras el literal de `import()`; las pruebas de red solo en local y en escritorio (el CI no corre Playwright, por diseño); el «cuando» que Vitest no hace cumplir (lo miran las pruebas de red); y la redacción «cuando cambia el guion» frente a «el vocabulario» (la versión incluye el punto final, y la frase de `DESPLIEGUE.md` es la exacta).
+
 ## Design Notes
 
 Arranque y relevo, la forma (los nombres los fija el código):
@@ -184,14 +207,17 @@ isla lo inserta con `<script is:inline set:html={…} />` sin `define:vars`. `Co
 anuncia, conserva `define:vars` con hijos, que sí funciona.
 
 **Bytes libres en la Página de Cita, construida con punto final** (`MAX_BYTES_DE_GUION` = 6.656, sin
-cambiar): con Imagen, 5.629 B en línea → **1.027 libres**; sin Imagen, 1.953 B → **4.703 libres**.
-Resto de la muestra de `superficiesDelBarrido`: portada, Autor, Tema, Colección, Obra y 404, 65 B
-(6.591 libres); `/buscar/`, 3.535 B (3.121 libres).
+cambiar): con Imagen, 5.630 B en línea → **1.026 libres**; sin Imagen, 1.954 B → **4.702 libres**
+(medidas tras la revisión, que movió `__medir` fuera del `try` de `CopiarCita`: +1 B; antes, 5.629 y
+1.953 —las que conserva el comentario de la 23.1 en `sprint-status.yaml`—). Resto de la muestra de
+`superficiesDelBarrido`: portada, Autor, Tema, Colección, Obra y 404, 65 B (6.591 libres);
+`/buscar/`, 3.535 B (3.121 libres).
 
 **Los tres topes, medidos el 2026-10-24 + ~400 B** (precedente de `MAX_BYTES_DE_GUION`):
 `MAX_BYTES_GUION_DE_MEDICION` = 1.320 (920 B con el punto final de producción, 886 con el de las
 pruebas; no importa nada); `MAX_BYTES_GUION_DE_IMAGEN` = 7.550 (7.153 B, sin importaciones);
-`MAX_BYTES_GUION_DE_PAGEFIND` = 45.950 (45.555 B con Pagefind 1.5.2, sin importaciones estáticas).
+`MAX_BYTES_GUION_DE_PAGEFIND` = 87.200 tras la revisión (86.810 B con Pagefind 1.5.2: el cliente,
+45.555, y el worker que arranca, 41.255; antes contaba solo el cliente y era 45.950).
 
 **Ficheros.**
 - `src/lib/medicion.ts` — arranque, fichero, versión y ruta; fuera `emitir`, `EVENTO_DE_VISTA` y `Vista`.
@@ -237,5 +263,75 @@ Recomendación de revisión de seguimiento: `false` (0 parches: alto 0, medio 0,
   sigue valiendo; si alguien vuelve a juntarlos, la prueba de las islas de `medicion.test.ts` lo
   delata (la isla sale sin cuerpo).
 - `seo.spec.ts` agota su tiempo bajo carga en paralelo con el Corpus de hoy: es previo a esta
-  historia y no se ha tocado.
+  historia, que en ese fichero solo cambió la prueba de ausencia por una línea que apunta a
+  `receptor.spec.ts`.
 - El prerender real no se ha visto en un navegador: solo en el sandbox.
+
+### Revisión independiente, pasada 1 (2026-10-24)
+
+**Qué cambió.** Las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap,
+intent-alignment, ac-auditor) dieron 26 hallazgos tras deduplicar: 13 parches (alto 1, medio 2,
+bajo 10), 0 diferidos y 13 rechazados, con el detalle en el Review Triage Log. Sin `intent_gap` ni
+`bad_spec`. Lo esencial:
+- **El worker de Pagefind entra en la lista cerrada.** `pagefind.js` arranca con `new Worker`
+  `/pagefind/pagefind-worker.js` (41.255 B) al iniciarse, y eso se descargaba fuera de toda cuenta.
+  `GuionExterno.arranca` lo declara, `MAX_BYTES_GUION_DE_PAGEFIND` cuenta los dos ficheros
+  (86.810 B → tope 87.200), y Vitest falla por un arranque no declarado o declarado y no visto.
+- **El detector lee el árbol sintáctico** (`parseSync` de Vite, en `tests/unit/ayuda/guion.ts`):
+  `import()`, `new Worker`/`SharedWorker`, `importScripts`, `serviceWorker.register`,
+  `createElement('script')`, importaciones estáticas, más `modulepreload`/`preload as=script`;
+  `src` ya no casa con `data-src`.
+- **Guardas en el build**: el endpoint de medición se para si el fichero pasa de su tope con el
+  punto final de esa construcción; `guionQueAnuncia` se para ante un nombre que no es
+  identificador, un valor sin JSON o un `</script`/`<!--`.
+- **Pruebas nuevas**: todo guion en línea se analiza (`vm.Script`/`parseSync`); el arranque es el
+  primer guion de toda página (y `<Medicion>` va delante de `<slot name="cabeza" />`); sin punto
+  final no hay ningún `<script src>`; tantas islas con `anunciar` como regiones `role="status"`;
+  `String(anunciar)` funciona aislado; `EventoDeVista` acota la vista declarable.
+- `CopiarCita` llama `__medir` fuera del `try` del portapapeles; `receptor.spec.ts` busca de
+  verdad y espera al worker, recorre `/lote/` como `/kit/`, y el prerender juzga cada baliza por
+  `document.prerendering` en vez de por una espera fija.
+
+**Ficheros de esta pasada.**
+- `src/lib/guiones.ts` — `arranca`, `FormaDeArrancar`, `entradaDeLoDescargado`; el `cuando` de la Imagen.
+- `src/lib/umbrales.ts` — `MAX_BYTES_GUION_DE_PAGEFIND` = 87.200, con la medida nueva.
+- `src/pages/medicion/[version].js.ts` — el tope, juzgado con el punto final de la construcción.
+- `src/lib/anuncio.ts` — las guardas de `guionQueAnuncia`.
+- `src/lib/medicion.ts`, `src/lib/superficies.ts` — `EventoDeVista`.
+- `src/components/Armazon.astro` — `<Medicion>` antes del slot de cabeza.
+- `src/islands/CopiarCita.astro` — `__medir` fuera del `try`.
+- `tests/unit/ayuda/guion.ts` — `peticionesDe`, `guionesEnLineaConTipo`, `descargaDeLaEntrada` (sustituye a `bytesConImportaciones`).
+- `tests/unit/medicion.test.ts` — detector, arranques, análisis, orden, ausencia sin punto final, anuncio descubierto, guardas y tope del endpoint.
+- `tests/e2e/receptor.spec.ts` — worker de Pagefind, `/lote/`, prerender por baliza.
+- `DESPLIEGUE.md` §3 y `AGENTS.md` — quién pide el fichero, `/kit` y `/lote` fuera de toda serie, lo que arranca un fichero de la lista.
+
+**Verificación de esta pasada.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run tests/unit/medicion.test.ts` — 146/146; partes: medición 886/1.320, Imagen
+  7.153/7.550, Pagefind (cliente + worker) 86.810/87.200; Cita con Imagen 5.630 B en línea (1.026
+  libres), sin Imagen 1.954 (4.702 libres), `/buscar/` 3.535, el resto 65.
+- `npm test` (con `correr.sh`) — 126 ficheros, 5.279 pruebas en verde.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 22 en verde, 1 saltada
+  (el prerender: `PrerenderingDisabledByDevTools`).
+- `npx playwright test` de `kit`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`,
+  `busqueda`, `pagina-de-cita`, `portada`, `pagina-de-autor`, `pagina-404` (los dos perfiles,
+  `--workers=3`) — 290 en verde, 8 saltadas (las condicionales de siempre y el segundo botón del Kit
+  en el Corpus real).
+- `seo.spec.ts` (`--workers=1`) — 16 en verde y el recorrido de «nada huérfano» agotó sus 90 s en los
+  dos perfiles; a solas en `escritorio` con `--timeout=200000` pasa en 1,7 min, con la máquina a
+  carga media 26 (un juego ocupando ~3 núcleos). La aserción se cumple; es el tiempo del barrido
+  bajo carga, no el cambio.
+- La construcción del `webServer` (`npm run build`, sin punto final) termina con el paso del peso;
+  no hay `dist/medicion/`, y el arranque va delante de los datos estructurados.
+
+**Recomendación de revisión de seguimiento: `true`** — un parche de severidad alta (el worker de
+Pagefind); medios 2, bajos 10; puntuación 3×2 + 10 = 16.
+
+**Riesgos residuales de esta pasada.**
+- El prerender sigue sin verse en un navegador: Chromium no prerenderiza con DevTools conectado y
+  Playwright siempre lo conecta. La lógica la cubre el entorno simulado; queda mirarlo a mano en un
+  Chrome sin DevTools si se quiere la confirmación del criterio de la épica.
+- El comentario de la 23.1 en `sprint-status.yaml` conserva las cifras de antes de la revisión
+  (5.629/1.953 B y el tope de Pagefind de 45.950): el tablero lo lleva el orquestador.
+- El detector analiza con `parseSync` de Vite, dependencia transitiva de Astro y de Vitest: si un
+  día cambiara de nombre, la prueba falla al importarlo, no en silencio.
