@@ -3,7 +3,7 @@ import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
 import { EVENTOS, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
-import { guionExternoDe } from '../../src/lib/guiones.ts';
+import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeObra } from '../../src/lib/superficies.ts';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from '../unit/ayuda/construir.js';
@@ -375,23 +375,31 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
     });
   }
 
-  test('`/kit/` no descarga el guion de medición', async ({ page }) => {
-    const pedidos = apuntarGuiones(page);
-    await page.goto(`${SITIO}/kit/`, { waitUntil: 'networkidle' });
-    expect(pedidos).not.toContain(RUTA_DEL_FICHERO);
-    // Lo que sí pide —el generador, para dibujar la Imagen sin pulsar— está en la lista.
-    for (const pedido of pedidos) expect(guionExternoDe(pedido), pedido).toBeDefined();
-  });
+  for (const ajena of ['/kit/', '/lote/']) {
+    test(`\`${ajena}\` no descarga el guion de medición`, async ({ page }) => {
+      const pedidos = apuntarGuiones(page);
+      await page.goto(`${SITIO}${ajena}`, { waitUntil: 'networkidle' });
+      expect(pedidos).not.toContain(RUTA_DEL_FICHERO);
+      // Lo que sí pide —el generador, para dibujar la Imagen sin pulsar— está en la lista.
+      for (const pedido of pedidos) expect(entradaDeLoDescargado(pedido), pedido).toBeDefined();
+    });
+  }
 
-  test('enfocar la búsqueda pide Pagefind, y solo entradas de la lista', async ({ page }) => {
+  test('buscar pide Pagefind y el worker que arranca, y solo entradas de la lista', async ({ page }) => {
+    /*
+     * Revisión de la 23.1: la primera versión enfocaba el campo y afirmaba en cuanto llegaba
+     * `pagefind.js`, antes de que Pagefind arrancara su worker —un guion de 41 KB fuera de la
+     * lista— unos instantes después. Se busca de verdad y se espera al worker y al recuento.
+     */
     const pedidos = apuntarGuiones(page);
     await page.goto(`${SITIO}${RUTA_BUSCAR}`, { waitUntil: 'networkidle' });
-    const pagefind = page.waitForRequest((p) => p.url().includes('/pagefind/pagefind.js'));
-    await page.locator('[data-consulta]').focus();
-    await pagefind;
-    await page.waitForLoadState('networkidle');
+    const worker = page.waitForRequest((p) => new URL(p.url()).pathname === '/pagefind/pagefind-worker.js');
+    await page.locator('[data-consulta]').fill('tiempo');
+    await worker;
+    await expect(page.locator('[data-estado]')).toHaveText(/resultado/);
     expect(pedidos).toContain('/pagefind/pagefind.js');
-    for (const pedido of pedidos) expect(guionExternoDe(pedido), pedido).toBeDefined();
+    expect(pedidos).toContain('/pagefind/pagefind-worker.js');
+    for (const pedido of pedidos) expect(entradaDeLoDescargado(pedido), pedido).toBeDefined();
   });
 
   test('abrir la Imagen pide el generador, y solo entradas de la lista', async ({ page }) => {
@@ -403,7 +411,7 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
       return !!l && l.getContext('2d')!.getImageData(0, 0, 1, 1).data[3] === 255;
     });
     expect(pedidos).toContain('/islas/imagen.js');
-    for (const pedido of pedidos) expect(guionExternoDe(pedido), pedido).toBeDefined();
+    for (const pedido of pedidos) expect(entradaDeLoDescargado(pedido), pedido).toBeDefined();
   });
 });
 
@@ -458,6 +466,23 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
   });
 
   test('una página prerenderizada no emite su vista hasta activarse, y entonces una', async ({ page }) => {
+    /*
+     * Cada baliza apunta si salió con la página todavía prerenderizándose. Así lo que se afirma
+     * no depende de cuánto tarde el prerender: la primera versión leía las llegadas tras una
+     * espera fija, y una vista emitida durante un prerender más lento que la espera pasaba.
+     */
+    await page.addInitScript(() => {
+      const ventana = window as unknown as { __balizas: { evento: string; prerenderizando: boolean }[] };
+      ventana.__balizas = [];
+      const original = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = (url: string | URL, datos?: BodyInit | null) => {
+        ventana.__balizas.push({
+          evento: JSON.parse(String(datos)).evento,
+          prerenderizando: (document as Document & { prerendering?: boolean }).prerendering === true,
+        });
+        return original(url, datos);
+      };
+    });
     await page.goto(`${SITIO}/`, { waitUntil: 'networkidle' });
     await esperarEvento(EVENTOS.vistaDeSuperficie);
 
@@ -473,8 +498,8 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
       enlace.textContent = 'Ir';
       document.body.prepend(enlace);
     }, RUTA_CITA);
+    // Tiempo para que el navegador prerenderice; lo que se afirma después no depende de él.
     await page.waitForTimeout(2000);
-    const antes = llegadas(EVENTOS.vistaDeCita);
 
     await page.locator('#ir-a-la-prerenderizada').click();
     await page.waitForURL(`**${RUTA_CITA}`);
@@ -484,11 +509,21 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
           activationStart?: number;
         }).activationStart ?? 0,
     );
-    test.skip(activacion <= 0, 'el navegador de las pruebas no prerenderiza con reglas de especulación');
+    /*
+     * Chromium no prerenderiza una página con DevTools conectado, y Playwright lo conecta
+     * siempre: el estado del intento es `PrerenderingDisabledByDevTools` (comprobado con
+     * `Preload.prerenderStatusUpdated` el 2026-10-24, con Chromium de cabeza y sin ella). Hasta
+     * que eso cambie, esto lo cubre el entorno simulado de `tests/unit/medicion.test.ts`.
+     */
+    test.skip(activacion <= 0, 'Chromium no prerenderiza con DevTools conectado (PrerenderingDisabledByDevTools)');
 
-    expect(antes, 'la página prerenderizada emitió la vista antes de verse').toBe(0);
     expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista al activarse').toBeTruthy();
     await page.waitForTimeout(500);
+    const balizas = await page.evaluate(
+      () => (window as unknown as { __balizas?: { evento: string; prerenderizando: boolean }[] }).__balizas ?? [],
+    );
+    expect(balizas.filter((b) => b.prerenderizando), 'salió una baliza antes de verse la página').toEqual([]);
+    expect(balizas.filter((b) => b.evento === EVENTOS.vistaDeCita)).toHaveLength(1);
     expect(llegadas(EVENTOS.vistaDeCita)).toBe(1);
   });
 });
