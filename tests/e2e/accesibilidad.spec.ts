@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -10,7 +10,7 @@ import {
   superficiesDelBarrido,
   type CriterioDeWcag,
 } from '../../src/lib/superficies.ts';
-import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir } from './ayuda/barrido.ts';
+import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -218,18 +218,32 @@ function enunciado(criterio: CriterioDeWcag): string {
  * de bloque y el enlace de dentro, con el mismo destino—, y el que la 4.12 de axe daba por
  * violación aunque los dos lleven al mismo sitio.
  *
+ * Con el segundo fuera del orden de tabulación (`tabindex="-1"`), axe no sabe si ese vecino es un
+ * objetivo y deja el primero **sin decidir**: es la página con la que se ve que `sinDecidir`
+ * encuentra lo que dice buscar.
+ *
  * Se sirve bajo `baseURL` con `page.route`, y no con `setContent` sobre `about:blank`: sin una
  * URL base http axe no sabe resolver el destino de un enlace relativo (`getDestination` da
  * `null`) y marca los dos casos por igual, así que la prueba no distinguiría nada.
  */
-function paginaDeSolape(destinoDelSegundo: string): string {
+function paginaDeSolape(destinoDelSegundo: string, segundoFueraDelTabulador = false): string {
   const caja = 'display:block;width:30px;height:30px;position:absolute';
+  const tabulador = segundoFueraDelTabulador ? ' tabindex="-1"' : '';
   return [
     '<!doctype html><html lang="es"><head><title>Solape</title></head><body><main>',
     `<a href="/x/" style="${caja};top:0;left:0">x</a>`,
-    `<a href="${destinoDelSegundo}" style="${caja};top:12px;left:12px">y</a>`,
+    `<a href="${destinoDelSegundo}"${tabulador} style="${caja};top:12px;left:12px">y</a>`,
     '</main></body></html>',
   ].join('\n');
+}
+
+/** Sirve una página inventada bajo `baseURL` y navega a ella. */
+async function servir(page: Page, baseURL: string | undefined, ruta: string, cuerpo: string): Promise<void> {
+  const url = new URL(ruta, baseURL).href;
+  await page.route(url, (peticion) =>
+    peticion.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: cuerpo }),
+  );
+  await page.goto(url);
 }
 
 test.describe('Historia 23.4 — lo que añade WCAG 2.2 AA', () => {
@@ -266,14 +280,16 @@ test.describe('Historia 23.4 — lo que añade WCAG 2.2 AA', () => {
       page,
       baseURL,
     }) => {
-      const url = new URL('/__solape-de-la-23-4/', baseURL).href;
-      await page.route(url, (ruta) =>
-        ruta.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: paginaDeSolape(caso.destino) }),
-      );
-      await page.goto(url);
+      await servir(page, baseURL, '/__solape-de-la-23-4/', paginaDeSolape(caso.destino));
 
       // El barrido completo, como en las superficies, y de su resultado solo `target-size`.
       const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      // Y con la axe que se comprobó: la que inyecta el adaptador es la de la raíz, que Vitest fija.
+      // Un `node_modules` viejo con otra axe anidada bajo el adaptador se ve aquí y no en el lock.
+      const versiones = await versionesDeAxe(page);
+      expect(versiones.pagina, 'la axe que inyecta el adaptador no es la de axe-core en la raíz').toBe(
+        versiones.raiz,
+      );
       const deLaRegla = (lista: typeof resultado.passes) => lista.filter((r) => r.id === 'target-size');
       const violadas = deLaRegla(resultado.violations).flatMap((r) => r.nodes.map((n) => n.target.join(' ')));
       const pasadas = deLaRegla(resultado.passes).flatMap((r) => r.nodes.map((n) => n.target.join(' ')));
@@ -294,6 +310,46 @@ test.describe('Historia 23.4 — lo que añade WCAG 2.2 AA', () => {
       }
     });
   }
+
+  /*
+   * Las dos comprobaciones que cada barrido hace de sí mismo (`ayuda/barrido.ts`) solo se ven en
+   * verde sobre el sitio, y una comprobación que solo se ha visto en verde no se sabe si mira algo.
+   * Aquí se las ve encontrar lo que dicen buscar: una duda de `target-size` de verdad, y un
+   * resultado al que le falta una regla o le sobra otra —recortado a mano, no con `.include(` ni
+   * `.withRules(`, que la guardia de Vitest prohíbe en este directorio—.
+   */
+  test('lo que axe deja sin decidir de target-size y lo que un barrido no corrió se ven en el resultado', async ({
+    page,
+    baseURL,
+  }) => {
+    await servir(page, baseURL, '/__duda-de-la-23-4/', paginaDeSolape('/z/', true));
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+
+    expect(sinDecidir(resultado), 'el primer enlace, tapado por un vecino fuera del tabulador').toEqual([
+      'target-size: a[href="/x/"]',
+    ]);
+
+    expect(await desviacionDelBarrido(page, resultado), 'el barrido entero').toEqual({ faltan: [], sobran: [] });
+    const sinLaRegla = <T extends { id: string }>(lista: T[]) => lista.filter((r) => r.id !== 'target-size');
+    const recortado = {
+      ...resultado,
+      passes: sinLaRegla(resultado.passes),
+      violations: sinLaRegla(resultado.violations),
+      incomplete: sinLaRegla(resultado.incomplete),
+      inapplicable: sinLaRegla(resultado.inapplicable),
+    };
+    expect(await desviacionDelBarrido(page, recortado), 'sin target-size').toEqual({
+      faltan: ['target-size'],
+      sobran: [],
+    });
+    const [modelo] = resultado.inapplicable;
+    if (modelo === undefined) throw new Error('el barrido no dejó ninguna regla sin aplicar que copiar');
+    const conOtra = { ...resultado, inapplicable: [...resultado.inapplicable, { ...modelo, id: 'regla-inventada' }] };
+    expect(await desviacionDelBarrido(page, conOtra), 'con una regla que no se pidió').toEqual({
+      faltan: [],
+      sobran: ['regla-inventada'],
+    });
+  });
 });
 
 test.describe('Historia 2.8 — foco', () => {

@@ -39,8 +39,8 @@ import { desviacionDelBarrido, sinDecidir } from './ayuda/barrido.ts';
  * **Por qué esto no puede ser prueba unitaria.** `vitest.config.ts` corre en `environment:
  * 'node'`, donde axe solo sirve para leer sus reglas —`axe-core` es dependencia directa desde
  * la Historia 23.4 para eso, no para medir una página—: la altura rendida, el anillo de foco
- * calculado y el contraste real solo existen dentro de un navegador. Este fichero es el único sitio del repositorio donde coinciden la invitación
- * encendida y un navegador.
+ * calculado y el contraste real solo existen dentro de un navegador. Este fichero es el único
+ * sitio del repositorio donde coinciden la invitación encendida y un navegador.
  *
  * Lo que **no** se repite aquí: de qué superficies sale la invitación y a dónde lleva. Eso lo
  * afirma `tests/unit/ingreso-construido.test.ts` sobre el mismo parche, y sin pagar navegador.
@@ -569,8 +569,12 @@ test.describe('las ediciones en venta encendidas pasan el barrido de accesibilid
       v.nodes.map((n) => `${v.id}: ${v.help} — ${n.target.join(' ')}`),
     );
     expect(resumen, resumen.join('\n')).toEqual([]);
-    expect(await desviacionDelBarrido(page, resultado)).toEqual({ faltan: [], sobran: [] });
-    expect(sinDecidir(resultado)).toEqual([]);
+    expect(await desviacionDelBarrido(page, resultado), `${OBRA}: el barrido no corrió lo que pide`).toEqual({
+      faltan: [],
+      sobran: [],
+    });
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `${OBRA}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
   });
 
   test('cada enlace dice a dónde va, que abre pestaña nueva y que es de afiliado', async ({ page }) => {

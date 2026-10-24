@@ -705,6 +705,21 @@ regla, ni se enciende «mientras tanto»: la invitación se publica accesible o 
 Lo que falle se arregla en `src/components/Sostener.astro` —o se decide aparte— y se vuelve a
 correr hasta verde.
 
+Desde la Historia 23.4 el rojo puede venir de tres sitios, y el mensaje dice de cuál:
+
+- **una violación**, con la regla y el selector del nodo. Ojo con una que no salía antes: la
+  axe 4.14 corre `label-content-name-mismatch` con las etiquetas de 2.1, así que un enlace cuyo
+  texto visible no está, tal cual, dentro de su nombre accesible falla. El aviso de pestaña
+  nueva va **dentro** del nombre (`AVISO_DE_PESTAÑA_NUEVA`, Historia 22.10) y no lo rompe; un
+  `aria-label` que reescriba el texto visible, sí;
+- **«el barrido no corrió lo que pide»**, con `faltan` o `sobran`: el barrido se acotó —un
+  `.include(` o un `.withRules(` añadido a la prueba— o la axe de la página no es la que se
+  comprobó. No es un fallo de la invitación: se deshace el cambio de la prueba o se reinstala
+  con `npm ci`;
+- **«axe no supo decidir»**, con el selector: un objetivo que `target-size` no pudo medir, casi
+  siempre por un vecino solapado fuera del orden de tabulación. Se arregla como una violación,
+  separando o agrandando el objetivo según `DESIGN.md`; no se da por bueno.
+
 ### Y después de desplegar, abrir el sitio publicado
 
 El encendido no termina en el commit. Cuando el despliegue acabe, abre

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import type { AxeResults } from 'axe-core';
+import axe, { type AxeResults } from 'axe-core';
 import { CRITERIOS_QUE_AÑADE_WCAG_22, elBarridoLaCorre, type ReglaDeAxe } from '../../../src/lib/superficies.ts';
 
 /**
@@ -60,4 +60,19 @@ export function sinDecidir(resultado: AxeResults): string[] {
   return resultado.incomplete
     .filter((r) => reglas.has(r.id))
     .flatMap((r) => r.nodes.map((n) => `${r.id}: ${n.target.join(' ')}`));
+}
+
+/**
+ * La versión de la axe que el adaptador inyectó en la página y la de `axe-core` en la raíz, que
+ * es la que lee Vitest y la que fija `tests/unit/superficies.test.ts`. Tienen que ser la misma: si
+ * un `node_modules` viejo deja otra axe anidada bajo el adaptador, el navegador mediría con unas
+ * reglas y Vitest cotejaría el reparto con otras, y el lock no lo diría porque no es el disco.
+ */
+export async function versionesDeAxe(page: Page): Promise<{ pagina: string; raiz: string }> {
+  const pagina = await page.evaluate(() => {
+    const axe = (window as unknown as { axe?: { version: string } }).axe;
+    if (axe === undefined) throw new Error('la página no tiene axe: hay que analizarla antes de preguntar');
+    return axe.version;
+  });
+  return { pagina, raiz: axe.version };
 }

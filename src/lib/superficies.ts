@@ -599,17 +599,28 @@ export function superficiesDelBarrido(rutasConstruidas: readonly string[]): stri
  * Ahora la lista existe aquí, una vez, junto a la que dice **qué** superficies se barren, y
  * `tests/unit/superficies.test.ts` falla si un fichero de `tests/e2e/` escribe la suya.
  *
- * Por qué estas cinco y no otras. Las etiquetas de axe son **acumulativas por versión y por
- * nivel**, no por suelo: `wcag22aa` trae solo las reglas que añade 2.2 en AA, y sin las cuatro
- * de 2.1 el barrido dejaría de mirar el contraste o el nombre de los enlaces. Las de AAA
- * (`wcag2aaa`) quedan fuera porque no son el suelo, y `wcag22a` porque los dos criterios A
- * que añade 2.2 —3.2.6 y 3.3.7— no tienen regla en axe y no aplican aquí (abajo). Si axe le
- * diera regla a alguno, la prueba de `axe.getRules()` lo dice antes de que haga falta pedirla.
+ * Por qué estas cinco y no otras. Las etiquetas de axe **no se acumulan**: cada una marca solo
+ * las reglas de los criterios que esa versión de WCAG añade en ese nivel, así que los conjuntos
+ * son disjuntos y es quien barre el que tiene que sumarlos. `wcag22aa` trae solo lo que añade
+ * 2.2 en AA, y sin las cuatro de 2.1 el barrido dejaría de mirar el contraste o el nombre de
+ * los enlaces. Las de AAA (`wcag2aaa`) quedan fuera porque no son el suelo, y `wcag22a` porque
+ * los dos criterios A que añade 2.2 —3.2.6 y 3.3.7— no tienen regla en axe y no aplican aquí
+ * (abajo). Si axe le diera regla a alguno, la prueba de `axe.getRules()` lo dice antes de que
+ * haga falta pedirla. Lo que 2.2 **quita** —4.1.1, Procesamiento— axe ya lo marca
+ * `wcag2a-obsolete` y retirado, así que `wcag2a` no lo trae.
  *
- * `as const` y de solo lectura: `withTags` de `@axe-core/playwright` tipa `string | string[]`,
- * así que quien la pasa la expande (`[...ETIQUETAS_DEL_BARRIDO]`) en vez de mutarla.
+ * `as const` y congelada: `withTags` de `@axe-core/playwright` tipa `string | string[]`, así que
+ * quien la pasa la expande (`[...ETIQUETAS_DEL_BARRIDO]`), y nadie puede mutarla desde una
+ * prueba a fuerza de un cast: cada barrido la comparte, y también la comprobación de lo que
+ * corrió.
  */
-export const ETIQUETAS_DEL_BARRIDO = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] as const;
+export const ETIQUETAS_DEL_BARRIDO = Object.freeze([
+  'wcag2a',
+  'wcag2aa',
+  'wcag21a',
+  'wcag21aa',
+  'wcag22aa',
+] as const);
 
 /**
  * Quién responde de un criterio de WCAG 2.2. Tres formas y ninguna más:
@@ -643,9 +654,10 @@ export type CriterioDeWcag = {
  * v8 cumple 2.4.11, 2.5.7 y 2.5.8, y 3.2.6, 3.3.7 y 3.3.8 no aplican»—, y la revisión de
  * accesibilidad de la UX que lo razona: no hay cabecera fija que tape el foco, no hay arrastre,
  * no hay ayuda, entrada repetida ni autenticación. Lo que de eso se deja ver en el código —nada
- * fijo ni pegado al desplazar, nada que se arrastre, ningún campo de contraseña— no se afirma
- * aquí a mano: lo vigila `tests/unit/superficies.test.ts` sobre `src/` y `public/`, y el día que
- * aparezca, la prueba pide revisar el motivo antes de que el título del barrido mienta.
+ * fijo, pegado o en la capa superior, nada que se arrastre, ningún enlace de contacto, ningún
+ * formulario que no sea de búsqueda, ningún campo de contraseña— no se afirma aquí a mano: lo
+ * vigila `tests/unit/superficies.test.ts` sobre `src/` y `public/`, una señal por criterio, y el
+ * día que aparezca, la prueba pide revisar el motivo antes de que el título del barrido mienta.
  *
  * Por qué 2.4.11 y 2.5.7 son `ux` y no `axe`: la 4.14.0 de axe no tiene ninguna regla con
  * `wcag2411` ni con `wcag257` —que algo se tape o se arrastre depende de cómo se usa la
@@ -725,9 +737,11 @@ export function etiquetaDeAxe(criterio: string): string {
  * `wcag22aa` **no corre** en el barrido, así que no mide nada aquí: no puede responder de un
  * criterio `axe` y no desmiente un `ux` ni un `no-aplica`. Sin esto, la prueba de Vitest diría
  * «reclasifícalo como `axe`» ante una regla experimental y la del navegador, que la ve sin
- * correr, fallaría después: las dos gemelas tienen que llamar «regla de axe» a lo mismo.
+ * correr, fallaría después: las dos gemelas tienen que llamar «regla de axe» a lo mismo. Que
+ * sean las de axe y no una copia que envejezca lo coteja `tests/unit/superficies.test.ts` contra
+ * el `tagExclude` de la axe instalada.
  */
-export const ETIQUETAS_QUE_AXE_NO_CORRE = ['experimental', 'deprecated'] as const;
+export const ETIQUETAS_QUE_AXE_NO_CORRE = Object.freeze(['experimental', 'deprecated'] as const);
 
 /** Una regla tal como la describe axe: lo único que se mira de ella es su id y sus etiquetas. */
 export type ReglaDeAxe = { ruleId: string; tags: readonly string[] };
