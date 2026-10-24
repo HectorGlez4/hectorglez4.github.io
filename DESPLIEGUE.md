@@ -206,7 +206,10 @@ Héctor revisa los valores.**
 Es una construcción local, sin `MEDICION_ENDPOINT` ni `SITE_URL`. La del flujo de publicación
 pesa algo más, porque lleva el guion de medición en línea en cada página HTML —unos 650 bytes
 por página: del orden de 3,5 MB con las 5.288 de hoy—. El paso en CI juzga esa, que es la que
-se despliega; la cifra de base no se compara con la del CI.
+se despliega; la cifra de base no se compara con la del CI. `SITE_URL` no cambia nada mientras
+el sitio corra en su dominio: no se define (§1) y el origen sale del mismo `CNAME` que en local.
+Si se definiera para una previsualización, cada URL absoluta de cada página —canónica, Open
+Graph, JSON-LD— y del sitemap cambiaría de largo, y con ella la medida.
 
 **Lo que el paso no mide es el empaquetado.** `upload-pages-artifact` sube `dist/` en un tar,
 que añade una cabecera de 512 bytes por fichero y por directorio y rellena cada fichero hasta
