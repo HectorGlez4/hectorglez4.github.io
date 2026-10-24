@@ -11,7 +11,7 @@
     "predev": "npm run comprobar-node",
     "dev": "astro dev",
     "prebuild": "npm run comprobar-node",
-    "build": "astro build && pagefind --site dist --force-language es",
+    "build": "astro build && pagefind --site dist --force-language es && tsx integraciones/peso.ts",
     "preview": "astro preview",
     "check": "astro check",
     "huecos": "tsx tools/huecos.ts",

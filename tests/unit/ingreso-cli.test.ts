@@ -13,7 +13,6 @@ import {
   MILISEGUNDOS_DE_ESPERA,
   MOTIVO_DE_DIRECCION_INVALIDA,
   anotaciones,
-  escaparAnotacion,
   estadoDe,
   estadosDe,
   interpretarLectura,
@@ -22,6 +21,7 @@ import {
   receptorQueNoContesta,
   sanearMensajeDeRed,
 } from '../../tools/lib/ingresos.ts';
+import { escaparAnotacion } from '../../tools/lib/anotacion.ts';
 import { SESIONES_PARA_AFILIACION, SESIONES_PARA_PUBLICIDAD } from '../../src/lib/umbrales.ts';
 
 const ejecutar = promisify(execFile);
