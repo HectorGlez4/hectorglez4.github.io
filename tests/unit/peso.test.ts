@@ -259,9 +259,11 @@ describe('Historia 24.2 — el parte', () => {
     const parte = parteDePeso(medirDist([]), UMBRALES);
     expect(parte.error).toContain('dist/ no trae ningún fichero');
     expect(parteDePeso(medirDist([]), UMBRALES, { anotar: true }).error).toMatch(/^::error::dist\/ no trae /u);
-    // Ausencia antes que cero: ni «0 bytes» ni «quedan 1.000 bytes hasta el aviso».
+    // Ausencia antes que cero: ni «0 bytes» ni «quedan 1.000 bytes hasta el aviso», ni un
+    // «por debajo» sobre nada.
     expect(parte.cifras).toEqual([]);
     expect(parte.avisos).toEqual([]);
+    expect(parte.veredictos).toBeUndefined();
   });
 
   it('un dist/ que solo trae lo que rota tampoco pesa cero: no hay nada que juzgar', () => {
@@ -274,10 +276,12 @@ describe('Historia 24.2 — el parte', () => {
     expect(parte.error).toContain('no hay nada que juzgar');
     expect(parte.cifras).toEqual([]);
     expect(parte.avisos).toEqual([]);
-    // Con un solo fichero juzgado ya hay medida: cifras y ningún error.
+    expect(parte.veredictos).toBeUndefined();
+    // Con un solo fichero juzgado ya hay medida: cifras, veredicto y ningún error.
     const conUno = parteDePeso(medirDist(distQueJuzga(1)), UMBRALES);
     expect(conUno.error).toBeUndefined();
     expect(conUno.cifras).toHaveLength(5);
+    expect(conUno.veredictos).toEqual({ peso: 'por-debajo', png: 'sin-tope' });
   });
 
   it('la primera línea dice si pagefind/ está, y no lo da por incluido cuando falta', () => {
@@ -347,7 +351,10 @@ describe('Historia 24.2 — el parte', () => {
     expect(parte.error).toContain('TOPE_DE_PESO_DE_DIST');
     expect(parte.error).toContain('src/lib/umbrales.ts');
     expect(parte.error).toContain('en el flujo de publicación el artefacto no se sube y sigue servido');
-    expect(parte.veredictos.peso).toBe('sobre-el-tope');
+    // Como el aviso: dice qué hay sobre la mesa y quién decide, sin prescribir el remedio.
+    expect(parte.error).toContain('lo decide Héctor');
+    expect(parte.error).not.toMatch(/Se adelgaza|se cambia de alojamiento/u);
+    expect(parte.veredictos?.peso).toBe('sobre-el-tope');
   });
 
   it('con los valores de Héctor, el error los escribe en MiB', () => {
@@ -440,14 +447,40 @@ describe('Historia 24.2 — el paso va al final de npm run build', () => {
     for (const paso of pasos.slice(0, subida)) {
       expect(paso.run ?? '', 'un paso construye sin npm run build').not.toMatch(/\bastro build\b|\bpagefind\b/u);
     }
+    // Entre la medida y la subida, nada que añada bytes a `dist/` sin medirlos: ningún paso
+    // que nombre `dist` ni ninguna acción de terceros. Lo que haga por dentro `npm test` no se
+    // ve desde aquí: sus pruebas construyen en copias temporales, nunca en el árbol.
+    for (const paso of pasos.slice(construir + 1, subida)) {
+      expect(paso.uses, `una acción entre la medida y la subida: ${paso.uses}`).toBeUndefined();
+      expect(paso.run ?? '', 'un paso entre la medida y la subida toca dist/').not.toMatch(/\bdist\b/u);
+    }
   });
 
   it('no es una integración de Astro ni mide en astro:build:done', () => {
-    const paso = readFileSync(resolve(RAIZ, 'integraciones/peso.ts'), 'utf8');
-    const sinComentarios = paso.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/\/\/.*$/gmu, '');
-    expect(sinComentarios).not.toMatch(/astro:build|AstroIntegration/u);
+    const paso = sinComentarios(readFileSync(resolve(RAIZ, 'integraciones/peso.ts'), 'utf8'));
+    expect(paso).not.toMatch(/astro:build|AstroIntegration/u);
     const configuracion = readFileSync(resolve(RAIZ, 'astro.config.mjs'), 'utf8');
     expect(configuracion).not.toMatch(/integraciones\/peso/u);
+  });
+
+  it('el paso no escribe nada: de Node solo trae la lectura de disco y las rutas', () => {
+    // El contrato: el paso no escribe y no usa la red, en `dist/` ni en ninguna otra parte. Lo
+    // que importa de Node se ciñe a leer y a componer rutas, y lo demás que importa es lo puro
+    // —la prueba de abajo— y los umbrales, que no importan nada.
+    const codigo = sinComentarios(readFileSync(resolve(RAIZ, 'integraciones/peso.ts'), 'utf8'));
+    const especificadores = especificadoresDe(codigo);
+    expect(especificadores.filter((e) => !/^\.{1,2}\//u.test(e)).sort()).toEqual(['node:fs/promises', 'node:path']);
+    expect(especificadores.filter((e) => /^\.{1,2}\//u.test(e)).sort()).toEqual([
+      '../src/lib/umbrales.ts',
+      '../tools/lib/peso.ts',
+    ]);
+    const deDisco = /^\s*import\s*\{([^}]*)\}\s*from\s*['"]node:fs\/promises['"]/mu.exec(codigo);
+    expect(deDisco, 'node:fs/promises se importa por nombre, no entero').not.toBeNull();
+    const nombres = (deDisco?.[1] ?? '').split(',').map((nombre) => nombre.trim()).filter((nombre) => nombre !== '');
+    expect(nombres.length).toBeGreaterThan(0);
+    for (const nombre of nombres) expect(['lstat', 'readdir', 'readlink', 'realpath', 'stat'], nombre).toContain(nombre);
+    expect(codigo).not.toMatch(/\brequire\s*\(|\bimport\s*\(|\bfetch\s*\(/u);
+    expect(especificadoresDe(sinComentarios(readFileSync(resolve(RAIZ, 'src/lib/umbrales.ts'), 'utf8')))).toEqual([]);
   });
 
   it('las decisiones viven en tools/lib/peso.ts, sin disco ni proceso, tampoco en lo que importa', () => {
@@ -498,16 +531,50 @@ describe('Historia 24.2 — lo que rota con la jornada es lo que lee la jornada'
     'astro.config.mjs',
   ];
 
+  /** Un paquete instalado en `node_modules/`: `astro/config` es de `astro`, `@astrojs/x/y` de `@astrojs/x`. */
+  const esPaquete = (especificador: string): boolean => {
+    const partes = especificador.split('/');
+    const nombre = (especificador.startsWith('@') ? partes.slice(0, 2) : partes.slice(0, 1)).join('/');
+    return (
+      /^(?:@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*$/u.test(nombre) &&
+      existsSync(resolve(RAIZ, 'node_modules', nombre, 'package.json'))
+    );
+  };
+
+  type Clase = { clase: 'proyecto'; ruta: string } | { clase: 'fuera' | 'desconocido' };
+
   /**
-   * Las importaciones relativas de un fichero, resueltas como Vite, relativas a la raíz. Sin
+   * Qué es un especificador para la guarda. **Del proyecto**, y se sigue: uno relativo, o uno
+   * absoluto desde la raíz (`/src/…`) que nombra un fichero, que Vite también resuelve. **De
+   * fuera**, y no se sigue: un módulo de Node, uno virtual de Astro, un paquete de
+   * `node_modules/` o una URL que el navegador pide al ejecutarse (`/islas/…`, `/pagefind/…`).
+   * **Desconocido** todo lo demás —un alias como `~/lib/…`, `@/lib/…` o `#lib/…`, o un
+   * `/src/…` que no existe—: la guarda no sabe adónde lleva, y lo dice en vez de perderlo.
+   */
+  function claseDe(desde: string, especificador: string): Clase {
+    if (/^\.{1,2}\//u.test(especificador)) {
+      return { clase: 'proyecto', ruta: relative(RAIZ, resolverRelativo(desde, especificador, esFichero)) };
+    }
+    if (especificador.startsWith('/')) {
+      const ruta = resolverRelativo(resolve(RAIZ, 'raiz'), `.${especificador}`, esFichero);
+      if (esFichero(ruta)) return { clase: 'proyecto', ruta: relative(RAIZ, ruta) };
+      return /^\/(?:src|integraciones)\//u.test(especificador) ? { clase: 'desconocido' } : { clase: 'fuera' };
+    }
+    if (/^(?:node|astro|virtual):/u.test(especificador) || esPaquete(especificador)) return { clase: 'fuera' };
+    return { clase: 'desconocido' };
+  }
+
+  /**
+   * Las importaciones del proyecto de un fichero, resueltas como Vite, relativas a la raíz. Sin
    * quitar comentarios: un patrón de ficheros en una cadena —dos asteriscos, barra y
    * asterisco— parece abrir uno y se comería lo que sigue, y una importación
    * comentada que se cuente de más solo hace la guarda más estricta.
    */
   const importaciones = (fichero: string): string[] =>
-    especificadoresDe(readFileSync(resolve(RAIZ, fichero), 'utf8'))
-      .filter((especificador) => /^\.{1,2}\//u.test(especificador))
-      .map((especificador) => relative(RAIZ, resolverRelativo(resolve(RAIZ, fichero), especificador, esFichero)));
+    especificadoresDe(readFileSync(resolve(RAIZ, fichero), 'utf8')).flatMap((especificador) => {
+      const clase = claseDe(resolve(RAIZ, fichero), especificador);
+      return clase.clase === 'proyecto' ? [clase.ruta] : [];
+    });
 
   it('las importaciones se resuelven como Vite: con .js por .ts, sin extensión, reexportadas y dinámicas', () => {
     const existentes = new Set(['/p/src/lib/citaDelDia.ts', '/p/src/lib/x/index.ts', '/p/src/lib/y.astro']);
@@ -542,10 +609,41 @@ describe('Historia 24.2 — lo que rota con la jornada es lo que lee la jornada'
         }
       }
     }
-    // Un módulo de `src/lib/` no escribe en `dist/` por sí mismo; una página, un componente,
-    // una integración o la configuración sí.
-    const superficies = [...leenLaJornada].filter((fichero) => !fichero.startsWith('src/lib/')).sort();
+    // Un módulo de `src/lib/`, un componente o una plantilla no escriben en `dist/` por sí
+    // mismos: lo hace la página que los importa, que entra aquí por esa importación. Se
+    // comparan solo los que escriben —páginas, integraciones y configuración—, para que llevar
+    // la Cita del Día a un componente no pida meter el componente en una lista de `dist/`.
+    const escribeEnDist = (fichero: string): boolean =>
+      fichero.startsWith('src/pages/') || fichero.startsWith('integraciones/') || fichero === 'astro.config.mjs';
+    const superficies = [...leenLaJornada].filter(escribeEnDist).sort();
     expect(superficies).toEqual(Object.keys(PAGINA_DE).sort());
     expect(Object.values(PAGINA_DE).sort()).toEqual([...FICHEROS_QUE_ROTAN_CON_LA_JORNADA].sort());
+  });
+
+  it('distingue lo que sigue, lo que es de fuera y lo que no sabe seguir', () => {
+    const desde = resolve(RAIZ, 'src/pages/index.astro');
+    expect(claseDe(desde, '../lib/citaDelDia.ts')).toEqual({ clase: 'proyecto', ruta: 'src/lib/citaDelDia.ts' });
+    expect(claseDe(desde, '/src/lib/citaDelDia.ts')).toEqual({ clase: 'proyecto', ruta: 'src/lib/citaDelDia.ts' });
+    for (const deFuera of ['node:fs', 'astro:content', 'astro/config', '@astrojs/sitemap', '/islas/imagen.js']) {
+      expect(claseDe(desde, deFuera), deFuera).toEqual({ clase: 'fuera' });
+    }
+    for (const alias of ['~/lib/citaDelDia', '@/lib/citaDelDia', '#lib/citaDelDia', 'lib/citaDelDia', '/src/lib/no-existe.ts']) {
+      expect(claseDe(desde, alias), alias).toEqual({ clase: 'desconocido' });
+    }
+  });
+
+  it('ninguna importación se le escapa: ni un alias ni un import.meta.glob', () => {
+    // Lo que la guarda no sabe seguir podría llevar a la jornada sin que lo viera. Si hace
+    // falta usarlo, primero se le enseña a seguirlo.
+    const sinSeguir = fuentes.flatMap((fichero) => {
+      const fuente = readFileSync(resolve(RAIZ, fichero), 'utf8');
+      return [
+        ...(/\bimport\.meta\.glob/u.test(fuente) ? [`${fichero}: import.meta.glob`] : []),
+        ...especificadoresDe(fuente)
+          .filter((especificador) => claseDe(resolve(RAIZ, fichero), especificador).clase === 'desconocido')
+          .map((especificador) => `${fichero}: ${especificador}`),
+      ];
+    });
+    expect(sinSeguir).toEqual([]);
   });
 });

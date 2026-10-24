@@ -179,7 +179,11 @@ export interface ParteDePeso {
    * que rotan—: la construcción sale con 1.
    */
   error?: string;
-  veredictos: { peso: VeredictoDePeso; png: VeredictoDePng };
+  /**
+   * Los dos veredictos, cuando hay algo que juzgar. Sin nada que juzgar se omiten, igual que
+   * las cifras: un «por debajo» sobre cero bytes sería un veredicto inventado.
+   */
+  veredictos?: { peso: VeredictoDePeso; png: VeredictoDePng };
 }
 
 const MIB = 1024 * 1024;
@@ -250,13 +254,11 @@ export function parteDePeso(
   opciones: { anotar: boolean } = { anotar: false },
 ): ParteDePeso {
   const { desplegado, rotan, rotanQueFaltan, juzgado, tarjetas, pagefind } = medida;
-  const peso = veredictoDePeso(juzgado, umbrales);
-  const png = veredictoDePng(juzgado, umbrales.topeDePng);
   const presentes = FICHEROS_QUE_ROTAN_CON_LA_JORNADA.filter((ruta) => !rotanQueFaltan.includes(ruta));
 
   if (juzgado.ficheros === 0) {
     // Ausencia antes que cero: un dist/ sin ficheros —o solo con los que rotan— no pesa 0
-    // bytes, es que no hay nada que juzgar. Ni cifras ni margen: serían de nada.
+    // bytes, es que no hay nada que juzgar. Ni cifras, ni margen, ni veredicto: serían de nada.
     const error =
       desplegado.ficheros === 0
         ? 'dist/ no trae ningún fichero: no hay nada que medir ni que desplegar.'
@@ -270,10 +272,11 @@ export function parteDePeso(
         `${error} Este paso corre al final de \`npm run build\`, después de Astro y de Pagefind.`,
         opciones.anotar,
       ),
-      veredictos: { peso, png },
     };
   }
 
+  const peso = veredictoDePeso(juzgado, umbrales);
+  const png = veredictoDePng(juzgado, umbrales.topeDePng);
   const cifras = [
     `Peso de dist/: ${bytesYMiB(desplegado.bytes)} en ${ficheros(desplegado.ficheros)}, ` +
       (pagefind.ficheros > 0 ? 'pagefind/ incluido.' : 'sin pagefind/: no trae índice de búsqueda.'),
@@ -313,8 +316,8 @@ export function parteDePeso(
       `${bytesYMiB(umbrales.tope)} en ${bytesYMiB(juzgado.bytes - umbrales.tope)}: ` +
       'TOPE_DE_PESO_DE_DIST en src/lib/umbrales.ts. La construcción se detiene para no ' +
       'desplegar por encima del techo del alojamiento: en el flujo de publicación el artefacto ' +
-      'no se sube y sigue servido el sitio anterior. Se adelgaza dist/ o se cambia de ' +
-      'alojamiento, y el tope lo mueve Héctor.';
+      'no se sube y sigue servido el sitio anterior. Qué hacer —adelgazar dist/, mudar el ' +
+      'alojamiento o mover el tope— lo decide Héctor.';
   }
   if (png === 'sobre-el-tope') {
     avisos.push(

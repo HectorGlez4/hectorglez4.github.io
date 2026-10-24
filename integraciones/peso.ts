@@ -6,13 +6,15 @@
  * incluido—, y `astro:build:done` llega antes. `package.json` lo encadena tras Pagefind.
  *
  * Es la cáscara: recorre `dist/`, pasa rutas y tamaños a `tools/lib/peso.ts`, que reparte y
- * decide, y escribe lo que este le devuelve. Las cifras salen por stdout, siempre; lo que cruza
- * un umbral, por stderr, y en GitHub Actions con su anotación. Sale con 1 sobre el tope, o si
- * no hay `dist/` que medir ni nada que juzgar en él —y entonces sin cifras—; con 0 en lo demás,
- * avise o no. No escribe nada y no usa la red.
+ * decide, y escribe lo que este le devuelve. Las cifras salen por stdout cuando hay algo que
+ * juzgar, y nunca por otro canal; lo que cruza un umbral, por stderr, y en GitHub Actions con
+ * su anotación. Sale con 1 sobre el tope, o si no hay `dist/` que medir ni nada que juzgar en
+ * él —y entonces sin cifras: ausencia antes que cero—; con 0 en lo demás, avise o no. No
+ * escribe nada y no usa la red: solo importa de `node:fs/promises` lo que lee, y una prueba de
+ * `tests/unit/peso.test.ts` lo fija.
  */
 
-import { readdir, realpath, stat } from 'node:fs/promises';
+import { readdir, readlink, realpath, stat } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import {
   errorDeLectura,
@@ -33,8 +35,10 @@ import {
  * `tar --dereference`: **sigue los enlaces simbólicos**. Así que aquí también: un enlace a un
  * fichero cuenta con el tamaño de su destino, y uno a un directorio se recorre. Un enlace que
  * vuelve a un directorio que ya se está recorriendo se salta, como hace `tar` con un bucle, y
- * uno roto hace fallar la lectura —también rompería el empaquetado—. Hoy ni Astro ni Pagefind
- * escriben enlaces; esto es para que el día que alguno llegue no se quede sin contar.
+ * uno roto hace fallar la lectura —también rompería el empaquetado— diciendo que es un enlace
+ * roto y adónde apunta: el fichero sigue saliendo en `ls`, y un «no such file» a secas
+ * despistaría. Hoy ni Astro ni Pagefind escriben enlaces; esto es para que el día que alguno
+ * llegue no se quede sin contar.
  *
  * Lo que no es fichero ni directorio —una tubería, un socket, un dispositivo— también hace
  * fallar la lectura: saltarlo en silencio dejaría la cuenta distinta de lo que se empaqueta, y
@@ -56,14 +60,22 @@ async function ficherosDeDist(dist: string): Promise<FicheroDeDist[]> {
     await Promise.all(
       entradas.map(async (entrada) => {
         const ruta = join(directorio, entrada.name);
-        const tipo = entrada.isSymbolicLink() ? await stat(ruta) : entrada;
-        if (tipo.isDirectory()) {
+        const nombre = relative(dist, ruta).split(sep).join('/');
+        // Un solo `stat`, que sigue el enlace si lo es: de él salen el tipo y el tamaño.
+        const info = await stat(ruta).catch(async (fallo: unknown) => {
+          if (!entrada.isSymbolicLink()) throw fallo;
+          const codigo = (fallo as { code?: string }).code ?? 'sin código';
+          throw new Error(
+            `${nombre} es un enlace simbólico roto: apunta a «${await readlink(ruta)}», que no ` +
+              `lleva a ningún fichero ni directorio (${codigo})`,
+          );
+        });
+        if (info.isDirectory()) {
           await recorrer(ruta, conEste);
-        } else if (tipo.isFile()) {
-          const bytes = (await stat(ruta)).size;
-          ficheros.push({ ruta: relative(dist, ruta).split(sep).join('/'), bytes });
+        } else if (info.isFile()) {
+          ficheros.push({ ruta: nombre, bytes: info.size });
         } else {
-          throw new Error(`${relative(dist, ruta)} no es un fichero ni un directorio`);
+          throw new Error(`${nombre} no es un fichero ni un directorio`);
         }
       }),
     );

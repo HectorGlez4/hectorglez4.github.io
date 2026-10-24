@@ -296,6 +296,8 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     const roto = await correrElPaso(paso, raiz);
     expect(roto.codigo).toBe(1);
     expect(roto.stderr).toContain('No se pudo medir el peso de dist/');
+    // El fichero sigue saliendo en `ls`: el mensaje dice que es un enlace roto y adónde apunta.
+    expect(roto.stderr).toContain('roto.txt es un enlace simbólico roto: apunta a «no-existe.txt»');
   });
 
   it('lo que no es fichero ni directorio hace fallar la lectura, en vez de saltarse', async () => {
