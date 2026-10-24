@@ -50,9 +50,19 @@ export default {
     if (registro === null) return nada;
 
     try {
+      // El `rowid` va aleatorio (Historia 23.12). Sin él, SQLite numera `max(rowid)+1` y el
+      // orden físico de las filas es el de llegada: en una ruta poco visitada encadena la
+      // vista, el copiado y la salida de una misma persona, lo que NFR-11 y AD-13 impiden
+      // reconstruir. Lo genera SQLite y no viaja por `bind`: en JavaScript un entero de 64
+      // bits se redondea, así que aquí ni se genera ni se lee —quien lo necesite lo pide con
+      // `CAST(rowid AS TEXT)`—. Un `rowid` repetido, o el desbordamiento de `abs()` cuando
+      // `random()` da -2^63, es un error de SQLite y cae en el `catch`, como el almacén caído:
+      // los dos tienen probabilidad despreciable. La tabla tiene que tener `rowid`: con
+      // `WITHOUT ROWID` fallaría cada `INSERT` y el `catch` lo callaría todo. Lo ya escrito
+      // no lo baraja esto: lo baraja `desplegar` (23.2).
       await entorno.MEDICION.prepare(
-        'INSERT INTO eventos (jornada, evento, ruta, origen, destino, consulta) ' +
-          'VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO eventos (rowid, jornada, evento, ruta, origen, destino, consulta) ' +
+          'VALUES (abs(random()), ?, ?, ?, ?, ?, ?)',
       )
         .bind(
           registro.jornada,

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-24-2026 12:00
+last_updated: 10-24-2026 08:58
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -384,7 +384,7 @@ development_status:
   # publicación (rota desde el 11/10) va antes, en la principal, y fuera de la v8.
 
   # Épica 23 — medir la lectura. Va primera: sin ella ninguna otra se juzga.
-  epic-23: backlog
+  epic-23: in-progress
   23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: backlog  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28
   23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: backlog  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado)
   23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: backlog  # operativa: acto de Héctor (migraciones en remoto, receptor desplegado, huella)
@@ -396,7 +396,7 @@ development_status:
   23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: backlog
   23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: backlog
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: backlog  # operativa: acto de Héctor (mínimo de lecturas, plan de Cloudflare, merge y primer corte de SM-8)
-  23-12-el-orden-de-llegada-no-reconstruye-a-nadie: backlog  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica
+  23-12-el-orden-de-llegada-no-reconstruye-a-nadie: review  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica; # v8-ralph 2026-10-24: el receptor inserta con rowid aleatorio, prueba de orden de llegada en tools/ y DESPLIEGUE.md §3; diferido para Héctor: la rama trae debajo el commit de epic-23-context.md (aceptarlo o quitarlo al fusionar)
   epic-23-retrospective: optional
 
   # Épicas 24 y 26 — una sola rama y un solo merge, por SM-11. La 24.8 se construye antes que la 26.1.

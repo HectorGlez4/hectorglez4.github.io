@@ -5,6 +5,8 @@ import { EVENTOS, EVENTOS_VALIDOS, guionDeMedicion } from '../../src/lib/medicio
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import { DESTINOS, DESTINOS_VALIDOS, DESTINO_OPACO } from '../../src/lib/compartir.ts';
 import { interpretar } from '../../medicion/receptor.ts';
+import worker from '../../medicion/worker.ts';
+import { d1QueApunta, listaTras, peticionAlReceptor } from './ayuda/d1.js';
 
 const raiz = resolve(import.meta.dirname, '../..');
 const INSTANTE = new Date('2026-08-12T05:15:00Z');
@@ -180,14 +182,13 @@ describe('Historia 10.4 — SM-5 y SM-7 comparables', () => {
     expect(readFileSync(resolve(raiz, 'DESPLIEGUE.md'), 'utf8')).toContain('SM-7');
   });
 
-  it('las columnas del INSERT del Worker son exactamente las del esquema', () => {
+  it('las columnas del INSERT del Worker son las del esquema, tras el rowid implícito', async () => {
     /*
      * La lista vive en dos ficheros y ya creció dos veces —`origen` en la 8.2 y `destino`
      * en la 10.4—. Divergir no rompe ninguna prueba de lógica: rompe el despliegue, en
      * producción, como eventos que no se guardan y en silencio.
      */
     const esquema = readFileSync(resolve(raiz, 'medicion/esquema.sql'), 'utf8');
-    const worker = readFileSync(resolve(raiz, 'medicion/worker.ts'), 'utf8');
 
     // Se recorre línea a línea hasta el cierre: un comentario de columna puede contener
     // «);» —«(FR-20);» lo contenía— y cortar por la primera aparición perdía columnas.
@@ -197,18 +198,25 @@ describe('Historia 10.4 — SM-5 y SM-7 comparables', () => {
       .map((linea) => linea.trim().match(/^([a-z_]+)\s+(TEXT|INTEGER|REAL|BLOB)/i)?.[1])
       .filter((columna): columna is string => columna !== undefined);
 
-    const enElInsert = worker
-      .match(/INSERT INTO eventos \(([^)]+)\)/)![1]
-      .split(',')
-      .map((columna) => columna.trim());
+    // El SQL que el Worker envía al D1 con una baliza válida, no el texto del fichero: un
+    // comentario con «VALUES (» o una lista partida con `+` lo cambiarían (Historia 23.12).
+    // `listaTras` lo lee neutralizado, como todo SQL de las pruebas (`ayuda/d1.ts`).
+    const { entorno, llamadas } = d1QueApunta();
+    await worker.fetch(peticionAlReceptor({ evento: EVENTOS.copiado, ruta: '/cita/una' }), entorno);
+    expect(llamadas.sql).toHaveLength(1);
+    const [sql] = llamadas.sql;
+    const enElInsert = listaTras(sql, /^\s*INSERT\s+INTO\s+eventos\s*\(/i);
+    const valores = listaTras(sql, /\bVALUES\s*\(/i);
 
+    // `rowid` no es columna del esquema: es la implícita de SQLite, y el Worker la da
+    // aleatoria para que el orden de las filas no sea el de llegada (Historia 23.12).
     expect(enElEsquema.length).toBeGreaterThan(0);
-    expect(enElInsert).toEqual(enElEsquema);
+    expect(enElInsert, sql).toEqual(['rowid', ...enElEsquema]);
 
-    // Y tantos marcadores como columnas: uno de más o de menos falla en tiempo de
-    // ejecución, no al compilar.
-    const marcadores = worker.match(/VALUES \(([^)]+)\)/)![1].split(',').length;
-    expect(marcadores).toBe(enElInsert.length);
+    // Y tantos valores como columnas, y tantos marcadores como columnas del esquema: uno
+    // de más o de menos falla en tiempo de ejecución, no al compilar. La lista se lee hasta
+    // su paréntesis de cierre, no hasta el primero: `abs(random())` trae dos anidados.
+    expect(valores, sql).toEqual(['abs(random())', ...enElEsquema.map(() => '?')]);
   });
 });
 
