@@ -139,7 +139,7 @@ export const ARRANQUE_DE_MEDICION = 'window.__medir=function(){__medir.q.push(ar
  * se lee ni se escribe ninguna cookie. Lo fija la prueba de correspondencia de
  * `tests/unit/vocabulario.test.ts`, evento por evento y valor por valor.
  *
- * La marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias, antes
+ * La Marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias, antes
  * de que salga de la página. Llega en la URL, y todo lo que llega en la URL lo escribe
  * cualquiera: sin cotejarla, `?de=` admitiría el texto que le pusieran —incluido algo que
  * identifique a quien pulsó el enlace— y la medición lo registraría sin más. Un evento que el

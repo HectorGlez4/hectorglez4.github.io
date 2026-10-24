@@ -15,6 +15,7 @@
 import {
   CAMPOS,
   CAMPOS_DE_EVENTO,
+  EVENTOS,
   claveEnLaBaliza,
   esEventoValido,
   type Campo,
@@ -88,6 +89,25 @@ export const MISMAS_COLUMNAS: Iguales<Exclude<keyof Registro, 'jornada' | 'event
 /** Lo que se buscó cabe de sobra; más que esto no es una consulta, es una carga. */
 export const MAX_CONSULTA = 120;
 
+/**
+ * Los siete eventos de la v7.1, cuyo guion manda la Marca de origen con **todo** evento —también
+ * con el copiado y las comparticiones—. Es la compatibilidad de `interpretar`, abajo: en ellos la
+ * marca se guarda como hasta hoy aunque la v8 ya no la declare en las acciones. En un evento de
+ * la v8 que no la declara —la salida interna, la búsqueda— no hay nada que conservar, y se
+ * descarta como cualquier campo fuera de su evento (NFR-11). Los nombra por `EVENTOS`: aquí no se
+ * escribe a mano ningún evento. `npm run medicion` lo lee para no pedirle al receptor en vivo que
+ * descarte lo que esta cláusula guarda.
+ */
+export const EVENTOS_DE_LA_V71: readonly Evento[] = [
+  EVENTOS.vistaDeCita,
+  EVENTOS.vistaDeSuperficie,
+  EVENTOS.copiado,
+  EVENTOS.descargaDeImagen,
+  EVENTOS.busquedaSinResultados,
+  EVENTOS.comparticionDeImagen,
+  EVENTOS.comparticionDeEnlace,
+];
+
 /** La jornada de un instante, en UTC. La misma convención que la Cita del Día. */
 export function jornadaDe(instante: Date): string {
   return instante.toISOString().slice(0, 10);
@@ -147,9 +167,11 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
   /*
    * Compatibilidad con la v7.1: su guion manda la Marca de origen con **todo** evento, también
    * con el copiado y las comparticiones, y el sitio en vivo la seguirá mandando hasta que se
-   * despliegue el de la v8. Se guarda como hasta hoy, en todo evento, si es una de las cuentas
-   * propias: así el receptor nuevo no pierde nada de lo que envía el sitio viejo. El vocabulario
-   * ya no la declara en las acciones (AD-13), y el guion de la v8 no la envía con ellas.
+   * despliegue el de la v8. Se guarda como hasta hoy en los siete eventos de la v7.1
+   * (`EVENTOS_DE_LA_V71`), si es una de las cuentas propias: así el receptor nuevo no pierde nada
+   * de lo que envía el sitio viejo. El vocabulario ya no la declara en las acciones (AD-13), y el
+   * guion de la v8 no la envía con ellas. En los eventos nuevos de la v8 que no la declaran no
+   * hay sitio viejo que la mande, y queda descartada por el recorrido de arriba.
    *
    * **Cuándo se quita, y quién lo vigila.** `npm run medicion -- desplegar` coteja este receptor
    * siempre contra el vocabulario de `origin/main`, que es lo que envía el sitio en vivo: mientras
@@ -158,8 +180,10 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
    * acciones y la cláusula puede irse, en un diff propio y pasada la caché de las páginas viejas
    * (DESPLIEGUE.md §1, `max-age=600`).
    */
-  const { origen } = baliza;
-  campos.origen = typeof origen === 'string' && esRedValida(origen) ? origen : null;
+  if (EVENTOS_DE_LA_V71.includes(evento)) {
+    const { origen } = baliza;
+    campos.origen = typeof origen === 'string' && esRedValida(origen) ? origen : null;
+  }
 
   return {
     jornada: jornadaDe(instante),

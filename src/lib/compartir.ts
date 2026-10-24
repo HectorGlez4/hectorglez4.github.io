@@ -89,7 +89,7 @@ export const CONSTRUCTORES: { readonly [Id in IdDeDestino]: Destino } = {
  * Los destinos que se ofrecen cuando no hay hoja del sistema, en el orden en que se pintan.
  *
  * Son los cuatro de siempre: que Facebook y Threads tengan constructor no los pone en la
- * página. Pintarlos —con la rejilla de «Compartir en», la Historia y la marca de difusión— es
+ * página. Pintarlos —con la rejilla de «Compartir en», la Historia y la Marca de difusión— es
  * de la Historia 25.1, y hasta entonces el bloque de la Página de Cita es idéntico al de la
  * v7.1.
  */

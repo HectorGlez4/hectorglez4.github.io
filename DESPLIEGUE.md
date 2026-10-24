@@ -597,13 +597,22 @@ aplicado —sin reintentar migraciones ni despliegues—:
    y se para: **nunca se despliega un receptor que no cubra lo que emite el sitio en vivo**.
 4. Cuenta las filas por jornada y evento (sin las balizas) y mira la tabla: si no es la de
    partida ni la migrada, la nombra y se para sin aplicar nada, porque `ADD COLUMN` no es
-   idempotente. Dice el instante anterior a la migración.
+   idempotente. Mira también **la cuota antes de tocar nada** (paso 7, con las escrituras de las
+   balizas ya sumadas): si hoy el barajado no cabría, sale con 1 sin migrar ni desplegar —migrar y
+   desplegar para pararse después no ahorra nada: se repite otro día igual—. Dice el instante
+   anterior a la migración.
 5. Aplica las migraciones en remoto (`d1 migrations apply --remote`) y despliega el receptor
-   (`wrangler deploy`), con `wrangler` 4.151.1 y `--remote` siempre explícito.
+   (`wrangler deploy`), con `wrangler` 4.151.1 y `--remote` siempre explícito. Cada paso tiene un
+   tope de 300 s: uno que no termina se corta, y el parte dice que **quizá** se aplicó.
 6. **La baliza:** envía a `/__comprobacion/` una baliza por cada valor de cada campo de cada
-   evento del vocabulario y, por evento, otra con valores que ningún conjunto admite y texto
-   donde el evento no lo lleva, más una de un evento inventado: lo que el receptor guarda y lo
-   que tiene que descartar. Lee las filas con `CAST(rowid AS TEXT)` y las coteja con lo
+   evento del vocabulario y, por evento, otra que tiene que dejar la fila vacía —valores que
+   ningún conjunto admite en los campos del evento, y en los que **no** declara un valor válido
+   de otro evento, que solo descarta un receptor que mira qué evento lleva cada campo—, más una
+   de un evento inventado: lo que el receptor guarda y lo que tiene que descartar. La Marca de
+   origen de los siete eventos de la v7.1 lleva un valor ajeno, porque el receptor la guarda en
+   ellos por compatibilidad. Las envía sin seguir redirecciones —un `POST` redirigido llega como
+   `GET`, que el receptor contesta con 204 sin escribir—, y si `MEDICION_ENDPOINT` redirige lo
+   dice. Lee las filas con `CAST(rowid AS TEXT)` y las coteja con lo
    esperado, hasta tres veces —un receptor recién desplegado tarda en llegar a todas partes—.
    **Las borra siempre**, casen o no, y si no puede lo dice con la orden que las borra. Si dos
    `rowid` vecinos están cerca, el receptor en vivo numera en orden de llegada: se para y **no
@@ -614,9 +623,11 @@ aplicado —sin reintentar migraciones ni despliegues—:
    gratuito), con las filas escritas en 24 h que da `d1 info --json`, que pecan por exceso, **y
    otras tantas de reserva** para lo que el sitio escriba hasta las 00:00 UTC: pasada la cuota,
    D1 rechaza cada `INSERT` hasta la medianoche y el Worker lo calla, así que un barajado que la
-   agotara justo dejaría el resto del día a cero. La cuota es de la cuenta: lo que escriba otra
-   base D1 suya no está contado. Si no cabe, lo dice con las cifras y sale con 1: **se repite
-   otro día, nunca troceado**. Dice el instante anterior al barajado.
+   agotara justo dejaría el resto del día a cero. Lo escrito en 24 h lleva sumadas las
+   escrituras de las balizas de la orden (unas 1.566, por exceso), que `d1 info` puede no ver
+   todavía. La cuota es de la cuenta: lo que escriba otra base D1 suya no está contado. Si no
+   cabe, lo dice con las cifras y sale con 1: **se repite otro día, nunca troceado**. Dice el
+   instante anterior al barajado.
 8. Vuelve a contar, **da los recuentos de antes y de después** —una línea por jornada, que la
    23.3 anota con fecha en su spec— y exige que las jornadas cerradas sean idénticas y que la de
    hoy y la víspera solo hayan crecido (el reloj del Worker puede ir unos segundos por detrás al
@@ -626,7 +637,9 @@ aplicado —sin reintentar migraciones ni despliegues—:
 
 Cuando se para después de aplicar algo, el parte dice qué quedó aplicado y los instantes
 anteriores a la migración y al barajado, con la orden de Time Travel de cada uno (abajo); no la
-corre.
+corre. Los instantes son del reloj de este equipo, y se escriben también al pasar: **si la orden
+se corta con Ctrl-C** no llega a dar su parte, y lo que dice es dónde mirar —las líneas de arriba,
+`d1_migrations`, `deployments list`— y la orden que borra las balizas si quedaron en la tabla.
 
 **Si no llega ninguna baliza a la tabla** —el parte lo dice—, el Worker contesta 204 y no
 escribe, por una de dos causas que el `catch` calla: el receptor que contesta no es el de esta
@@ -679,8 +692,13 @@ npm run medicion -- local    # migra el D1 local (medicion/.wrangler/) y arranca
 npm run medicion -- ensayo   # en otra terminal: la comprobación de desplegar, contra el local
 ```
 
-`ensayo` sale con 0 si cada evento y cada valor del vocabulario llegó al D1 local, lo ajeno se
-descartó, el `rowid` es aleatorio y las balizas se borraron. El D1 local no se vacía nunca solo:
+`ensayo` corre la secuencia de `desplegar` contra el D1 local, salvo lo que solo existe en remoto
+—migrar, que ya hizo `local`, desplegar y `d1 info`— y la huella: recuentos, estado de la tabla,
+balizas, `rowid`, recuento de filas, barajado y recuentos otra vez, con las respuestas de verdad
+de `wrangler`. Sale con 0 si la tabla es la migrada, cada evento y cada valor del vocabulario
+llegó al D1 local, lo ajeno se descartó, el `rowid` es aleatorio, las balizas se borraron y
+barajar dejó los recuentos iguales. Corrida antes de la 23.3, es lo más cerca de producción que
+se prueba el SQL de `desplegar`. El D1 local no se vacía nunca solo:
 lo que dejan las pruebas se acumula en `medicion/.wrangler/`, que no se versiona y se puede
 borrar entero (el siguiente `local` lo vuelve a migrar). Si `local` no puede migrarlo —un D1
 local creado a mano desde `esquema.sql`, sin `d1_migrations`—, se borra igual. Las pruebas de Playwright levantan el mismo receptor local

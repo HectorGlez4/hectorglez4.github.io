@@ -109,6 +109,18 @@ interface Opciones {
   enVivo?: 'rama' | 'v71';
   numeracion?: 'aleatoria' | 'contigua';
   escritas24h?: number;
+  /** Lo escrito en 24 h que contesta `d1 info` desde que se envían las balizas. */
+  escritas24hTrasLasBalizas?: number;
+  /** `d1 info` sale con error y sin JSON. */
+  informacionRota?: boolean;
+  /** `SELECT COUNT(*)` contesta una fila sin número. */
+  filasIlegibles?: boolean;
+  /** El paso de `wrangler` que no termina: la cáscara lo corta por su tope y lanza. */
+  seCuelga?: 'migrar' | 'desplegar';
+  /** Lo que contesta el receptor en vivo a cada baliza, si no es 204. */
+  respuesta?: number | null;
+  /** Escribir la huella falla con un error que no es una parada. */
+  huellaQueNoSeEscribe?: boolean;
   /** El barajado pierde una fila de una jornada cerrada. */
   barajadoPierde?: boolean;
   /** Las sentencias que fallan, y desde qué vez (1 = la primera). */
@@ -168,7 +180,7 @@ function mundo(opciones: Opciones = {}) {
     }
     if (sql === SQL_DE_TABLA_DE_MIGRACIONES) return responder(estado.anotadas === null ? [] : [{ name: 'd1_migrations' }]);
     if (sql === SQL_DE_MIGRACIONES_ANOTADAS) return responder((estado.anotadas ?? []).map((name) => ({ name })));
-    if (sql === SQL_DE_FILAS) return responder([{ n: estado.filas.length }]);
+    if (sql === SQL_DE_FILAS) return responder([{ n: opciones.filasIlegibles ? 'muchas' : estado.filas.length }]);
     if (sql === SQL_DE_BORRADO) {
       estado.filas = estado.filas.filter((f) => f.ruta !== RUTA_DE_COMPROBACION);
       return responder([]);
@@ -196,7 +208,12 @@ function mundo(opciones: Opciones = {}) {
       }
       if (argumentos.join(' ') === ARGUMENTOS_DE_INFORMACION.join(' ')) {
         llamadas.push('informacion');
-        return { codigo: 0, stdout: JSON.stringify({ rows_written_24h: opciones.escritas24h ?? 1_000 }), stderr: '' };
+        if (opciones.informacionRota) return { codigo: 1, stdout: '', stderr: '✘ [ERROR] Authentication error [code: 10000]' };
+        const escritas =
+          llamadas.includes('enviar') && opciones.escritas24hTrasLasBalizas !== undefined
+            ? opciones.escritas24hTrasLasBalizas
+            : (opciones.escritas24h ?? 1_000);
+        return { codigo: 0, stdout: JSON.stringify({ rows_written_24h: escritas }), stderr: '' };
       }
       if (argumentos[0] === 'd1' && argumentos[1] === 'execute') {
         const sql = argumentos[argumentos.length - 1];
@@ -208,6 +225,7 @@ function mundo(opciones: Opciones = {}) {
     async wranglerALaVista(argumentos) {
       if (argumentos.join(' ') === argumentosDeMigracion('remota').join(' ')) {
         llamadas.push('migrar');
+        if (opciones.seCuelga === 'migrar') throw new Parada(1, 'npx wrangler d1 migrations apply no terminó en 300 s y se cortó.');
         if ((opciones.codigoDeMigracion ?? 0) === 0 && !opciones.migracionSinEfecto) {
           estado.columnas = MIGRADAS;
           estado.anotadas = MIGRACIONES.map((m) => m.nombre);
@@ -216,6 +234,7 @@ function mundo(opciones: Opciones = {}) {
       }
       if (argumentos.join(' ') === ARGUMENTOS_DE_DESPLIEGUE.join(' ')) {
         llamadas.push('desplegar');
+        if (opciones.seCuelga === 'desplegar') throw new Parada(1, 'npx wrangler deploy no terminó en 300 s y se cortó.');
         if ((opciones.codigoDeDespliegue ?? 0) === 0) estado.enVivo = 'rama';
         return opciones.codigoDeDespliegue ?? 0;
       }
@@ -229,6 +248,7 @@ function mundo(opciones: Opciones = {}) {
     },
     async enviar(_url, cuerpo) {
       llamadas.push('enviar');
+      if (opciones.respuesta !== undefined) return opciones.respuesta;
       // Como el Worker: el registro que decide su receptor, en un INSERT de sus columnas; si la
       // tabla no las tiene, el INSERT falla y el `catch` lo calla. Contesta 204 siempre.
       const ahora = new Date(reloj);
@@ -251,6 +271,7 @@ function mundo(opciones: Opciones = {}) {
     },
     async escribirHuella(texto) {
       llamadas.push('escribir la huella');
+      if (opciones.huellaQueNoSeEscribe) throw new Error('EACCES: permission denied, open medicion/huella-del-vocabulario.json');
       estado.huellaEscrita = texto;
     },
     async migraciones() {
@@ -292,7 +313,7 @@ const balizasQueQuedan = (filas: readonly Fila[]) => filas.filter((f) => f.ruta 
 const remotas = (llamadas: readonly string[]) => llamadas.filter((l) => l.startsWith('consulta '));
 
 describe('Historia 23.2 — desplegar, en su orden', () => {
-  it('sesión, árbol, cobertura, recuentos, migrar, desplegar, balizas, cuota, barajar, recuentos y, al final, la huella', async () => {
+  it('sesión, árbol, cobertura, recuentos, cuota prevista, migrar, desplegar, balizas, cuota, barajar, recuentos y, al final, la huella', async () => {
     const { efectos, estado, llamadas, dichos } = mundo();
     expect(await paradaDe(desplegar(efectos, URL_EN_VIVO))).toBeUndefined();
 
@@ -304,15 +325,19 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
       'origin/main',
       `consulta --remote ${SQL_DE_RECUENTOS}`,
       `consulta --remote ${SQL_DE_COLUMNAS}`,
+      'informacion',
       'migrar',
       'desplegar',
       'enviar',
-      'informacion',
       `consulta --remote ${SQL_DE_BARAJADO}`,
       'escribir la huella',
     ].map(primera);
     expect(orden.every((i) => i >= 0), JSON.stringify(orden)).toBe(true);
     expect(orden).toEqual([...orden].sort((a, b) => a - b));
+    // La cuota se mira dos veces: antes de tocar nada y, tras las balizas, antes de barajar.
+    expect(llamadas.filter((l) => l === 'informacion')).toHaveLength(2);
+    expect(llamadas.lastIndexOf('informacion')).toBeGreaterThan(llamadas.lastIndexOf('enviar'));
+    expect(llamadas.lastIndexOf('informacion')).toBeLessThan(primera(`consulta --remote ${SQL_DE_BARAJADO}`));
     // La huella, lo último; y el segundo recuento, entre el barajado y ella.
     expect(llamadas.at(-1)).toBe('escribir la huella');
     expect(llamadas.lastIndexOf(`consulta --remote ${SQL_DE_RECUENTOS}`)).toBeGreaterThan(primera(`consulta --remote ${SQL_DE_BARAJADO}`));
@@ -333,6 +358,11 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     expect(dichos.join('\n')).toContain('Recuentos por (jornada, evento), antes → después');
     expect(dichos.join('\n')).toContain('2026-10-22: copiado 1 → 1, vista-de-cita 1 → 1');
     expect(dichos.join('\n')).toContain(`origin/main: ${'b'.repeat(40)}`);
+    // Sin huella versionada lo dice, y sigue con origin/main como referencia.
+    expect(dichos.join('\n')).toContain(`Sin huella versionada en ${RUTA_DE_LA_HUELLA}`);
+    // Los dos instantes de Time Travel se dicen al pasar, por si la orden se corta a mitad.
+    expect(dichos.join('\n')).toContain('Instante anterior a la migración');
+    expect(dichos.join('\n')).toContain('Instante anterior al barajado');
   });
 
   it('sin sesión de wrangler: 2, sin nada más', async () => {
@@ -372,6 +402,23 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     expect(llamadas).not.toContain('migrar');
   });
 
+  it('un receptor que cubre origin/main pero no la huella versionada no se despliega: 1, sin tocar nada remoto', async () => {
+    // Entre la 23.3 y la merge origin/main es la v7.1, que no tiene salida interna: lo que la
+    // pide es la huella, que es lo que guarda el receptor en vivo.
+    const sinZona: Efectos['receptor'] = (cuerpo, instante) => {
+      const registro = interpretar(cuerpo, instante);
+      return registro && { ...registro, zona: null };
+    };
+    const { efectos, llamadas } = mundo({ receptorDeLaRama: sinZona, huella: huellaDeLaRama() });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('la huella: el receptor no guarda salida-interna.zona = ');
+    expect(parada?.message).not.toContain('origin/main: ');
+    expect(remotas(llamadas)).toEqual([]);
+    expect(llamadas).not.toContain('migrar');
+    expect(llamadas).not.toContain('desplegar');
+  });
+
   it('una tabla que no es la de partida ni la migrada: 1, sin migrar', async () => {
     const { efectos, llamadas } = mundo({ columnas: [...DE_PARTIDA, { nombre: 'ip', tipo: 'TEXT', noNula: false }] });
     const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
@@ -387,6 +434,41 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     expect(parada?.message).toContain('quizá parte de las migraciones');
     expect(parada?.message).toContain('Instante anterior a la migración');
     expect(llamadas).not.toContain('desplegar');
+  });
+
+  it('la migración que no termina: 1, sin desplegar, y el parte dice que quizá se aplicó', async () => {
+    const { efectos, llamadas } = mundo({ seCuelga: 'migrar' });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('no terminó en 300 s');
+    expect(parada?.message).toContain('Quedó aplicado, en este orden: quizá parte de las migraciones');
+    expect(parada?.message).toContain('Instante anterior a la migración');
+    expect(llamadas).not.toContain('desplegar');
+  });
+
+  it('el despliegue que falla: 1, sin balizas, y el parte dice solo las migraciones', async () => {
+    const { efectos, estado, llamadas } = mundo({ codigoDeDespliegue: 1 });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('El despliegue del receptor falló');
+    expect(parada?.message).toContain('deployments list');
+    expect(parada?.message).toContain('Quedó aplicado, en este orden: las migraciones en remoto.');
+    expect(parada?.message).not.toContain('el receptor desplegado');
+    expect(llamadas).not.toContain('enviar');
+    expect(estado.huellaEscrita).toBeUndefined();
+  });
+
+  it('el despliegue que no termina: 1, sin balizas, y el parte dice que quizá se desplegó', async () => {
+    const { efectos, llamadas } = mundo({ seCuelga: 'desplegar' });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.message).toContain('Quedó aplicado, en este orden: las migraciones en remoto; quizá el receptor desplegado');
+    expect(llamadas).not.toContain('enviar');
+  });
+
+  it('un receptor que redirige: 1, diciendo que MEDICION_ENDPOINT redirige', async () => {
+    const { efectos } = mundo({ respuesta: 301 });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.message).toContain('87 de 87 balizas no recibieron un 204 (301 ×87): MEDICION_ENDPOINT redirige');
   });
 
   it('las balizas que no llegan —la migración no hizo nada—: 1 tras tres intentos, con la pista, sin barajar ni huella', async () => {
@@ -410,12 +492,68 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     expect(balizasQueQuedan(estado.filas)).toEqual([]);
   });
 
-  it('sin cuota para barajar: 1, sin barajar ni huella', async () => {
+  it('sin cuota para barajar hoy: 1 antes de migrar ni desplegar, sin barajar ni huella', async () => {
     const { efectos, estado, llamadas } = mundo({ escritas24h: 50_000 });
     const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
-    expect(parada?.message).toContain('El barajado no cabe hoy');
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('No se migra ni se despliega: El barajado no cabe hoy');
+    expect(parada?.message).toContain('contadas unas 1566 de las balizas de esta orden');
+    expect(parada?.message).toContain('No se aplicó nada en remoto.');
+    for (const prohibida of ['migrar', 'desplegar', 'enviar', `consulta --remote ${SQL_DE_BARAJADO}`]) {
+      expect(llamadas).not.toContain(prohibida);
+    }
+    expect(estado.huellaEscrita).toBeUndefined();
+  });
+
+  it('con cuota antes de migrar y sin ella tras las balizas: 1 después de comprobar, sin barajar ni huella', async () => {
+    const { efectos, estado, llamadas } = mundo({ escritas24h: 1_000, escritas24hTrasLasBalizas: 50_000 });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.message).toMatch(/^El barajado no cabe hoy/);
+    expect(llamadas).toContain('desplegar');
     expect(llamadas).not.toContain(`consulta --remote ${SQL_DE_BARAJADO}`);
     expect(estado.huellaEscrita).toBeUndefined();
+  });
+
+  it('las balizas cuentan aunque d1 info no las vea todavía', async () => {
+    // Antes de migrar, 48.000 escritas más las 1.566 de las balizas caben (2 · 49.566 + 15 ≤
+    // 100.000). Si tras enviarlas d1 info sigue diciendo 48.000, se cuentan igual.
+    const { efectos, llamadas, dichos } = mundo({ escritas24h: 48_000, escritas24hTrasLasBalizas: 48_000 });
+    await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(llamadas).toContain(`consulta --remote ${SQL_DE_BARAJADO}`);
+    expect(dichos.join('\n')).toContain('van 49566 en las últimas 24 h');
+  });
+
+  it('d1 info que falla: 1 antes de migrar, con lo que dijo wrangler', async () => {
+    const { efectos, llamadas } = mundo({ informacionRota: true });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.message).toContain('No se baraja: wrangler no contestó JSON.');
+    expect(parada?.message).toContain('Authentication error');
+    expect(llamadas).not.toContain('migrar');
+  });
+
+  it('un recuento de filas que no es un número: 1, sin migrar', async () => {
+    const { efectos, llamadas } = mundo({ filasIlegibles: true });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.message).toContain('el recuento de filas no es un número');
+    expect(llamadas).not.toContain('migrar');
+  });
+
+  it('el barajado que falla: 1, sin huella, con «quizá el barajado» y su instante', async () => {
+    const { efectos, estado } = mundo({ fallos: [{ sql: (sql) => sql === SQL_DE_BARAJADO }] });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.message).toContain('No se pudo barajar el rowid');
+    expect(parada?.message).toContain('quizá el barajado');
+    expect(parada?.message).toContain('Instante anterior al barajado');
+    expect(estado.huellaEscrita).toBeUndefined();
+  });
+
+  it('escribir la huella que falla tras barajar: 1, con el parte y no con una traza', async () => {
+    const { efectos } = mundo({ huellaQueNoSeEscribe: true });
+    const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('EACCES');
+    expect(parada?.message).toContain('el rowid barajado.');
+    expect(parada?.message).toContain('Instante anterior al barajado');
   });
 
   it('unos recuentos que no casan: 1, sin huella, con el instante anterior al barajado', async () => {
@@ -493,13 +631,49 @@ describe('Historia 23.2 — comprobar', () => {
 });
 
 describe('Historia 23.2 — ensayo, contra el receptor local', () => {
-  it('con el receptor de la rama: sale, y toda consulta va con --local', async () => {
-    const { efectos, estado, llamadas, dichos } = mundo({ columnas: MIGRADAS, enVivo: 'rama' });
+  /** El D1 local tal como lo deja `npm run medicion -- local`: migrado, con el receptor de la rama. */
+  const local = (opciones: Opciones = {}) =>
+    mundo({ columnas: MIGRADAS, anotadas: MIGRACIONES.map((m) => m.nombre), enVivo: 'rama', ...opciones });
+
+  it('con el receptor de la rama: la secuencia de desplegar sin lo remoto, y toda consulta va con --local', async () => {
+    const { efectos, estado, llamadas, dichos } = local();
     expect(await paradaDe(ensayo(efectos))).toBeUndefined();
     expect(remotas(llamadas).length).toBeGreaterThan(0);
     expect(remotas(llamadas).every((l) => l.startsWith('consulta --local '))).toBe(true);
+    // El SQL de desplegar, en su orden: recuentos, estado de la tabla, balizas, filas, barajado, recuentos.
+    const primera = (paso: string) => llamadas.findIndex((l) => l === paso || l.startsWith(paso));
+    const orden = [
+      `consulta --local ${SQL_DE_RECUENTOS}`,
+      `consulta --local ${SQL_DE_COLUMNAS}`,
+      `consulta --local ${SQL_DE_MIGRACIONES_ANOTADAS}`,
+      'enviar',
+      `consulta --local ${SQL_DE_FILAS}`,
+      `consulta --local ${SQL_DE_BARAJADO}`,
+    ].map(primera);
+    expect(orden.every((i) => i >= 0), JSON.stringify(orden)).toBe(true);
+    expect(orden).toEqual([...orden].sort((a, b) => a - b));
+    expect(llamadas.lastIndexOf(`consulta --local ${SQL_DE_RECUENTOS}`)).toBeGreaterThan(primera(`consulta --local ${SQL_DE_BARAJADO}`));
+    // Nada de lo que solo existe en remoto.
+    for (const prohibida of ['migrar', 'desplegar', 'informacion', 'escribir la huella']) {
+      expect(llamadas).not.toContain(prohibida);
+    }
     expect(balizasQueQuedan(estado.filas)).toEqual([]);
-    expect(dichos.at(-1)).toMatch(/lo ajeno se descartó/);
+    expect(estado.filas.every((f) => f.rowid > 2n ** 32n)).toBe(true);
+    expect(dichos.join('\n')).toContain('Recuentos por (jornada, evento), antes → después');
+    expect(dichos.at(-1)).toMatch(/lo ajeno se descartó.*barajar sus 5 filas dejó los recuentos iguales/);
+  });
+
+  it('un D1 local sin migrar: 1, sin balizas', async () => {
+    const { efectos, llamadas } = local({ columnas: DE_PARTIDA, anotadas: null });
+    const parada = await paradaDe(ensayo(efectos));
+    expect(parada?.message).toMatch(/^El D1 local no es la tabla migrada: está de-partida\./);
+    expect(llamadas).not.toContain('enviar');
+  });
+
+  it('un barajado local que pierde filas: 1, con los recuentos', async () => {
+    const { efectos } = local({ barajadoPierde: true });
+    const parada = await paradaDe(ensayo(efectos));
+    expect(parada?.message).toContain('Los recuentos del D1 local de antes y de después no casan');
   });
 
   it('sin receptor local: 1, diciendo cómo arrancarlo', async () => {
@@ -511,7 +685,7 @@ describe('Historia 23.2 — ensayo, contra el receptor local', () => {
 
   it('un receptor que guardara lo ajeno no pasa', async () => {
     // Guarda la consulta en todo evento: el texto libre fuera de su evento.
-    const { efectos } = mundo({ columnas: MIGRADAS, enVivo: 'rama' });
+    const { efectos } = local();
     const original = efectos.enviar;
     efectos.enviar = async (url, cuerpo) => {
       const carga = JSON.parse(cuerpo) as Record<string, unknown>;

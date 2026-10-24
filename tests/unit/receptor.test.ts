@@ -13,7 +13,7 @@ import {
   ZONAS,
 } from '../../src/lib/vocabulario.ts';
 import { DESTINOS_VALIDOS } from '../../src/lib/destinos.ts';
-import { MAX_CONSULTA, interpretar, jornadaDe } from '../../medicion/receptor.ts';
+import { EVENTOS_DE_LA_V71, MAX_CONSULTA, interpretar, jornadaDe } from '../../medicion/receptor.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 const INSTANTE = new Date('2026-08-12T05:15:00Z');
@@ -286,6 +286,10 @@ describe('Historia 23.2 — los campos nuevos, cada uno en su evento y de su con
       [EVENTOS.salidaInterna, 'indexable', 'indexable'],
       [EVENTOS.copiado, 'filtros', 'ninguno'],
       [EVENTOS.lectura, 'destino', 'opaco'],
+      // La Marca de origen de la compatibilidad con la v7.1 solo vale en sus siete eventos: en
+      // los nuevos de la v8 que no la declaran, es un campo fuera de su evento.
+      [EVENTOS.salidaInterna, 'origen', 'tiktok'],
+      [EVENTOS.busqueda, 'origen', 'instagram'],
     ];
     for (const [evento, campo, valor] of casos) {
       expect(CAMPOS_DE_EVENTO[evento as keyof typeof CAMPOS_DE_EVENTO][campo as 'zona'], `${evento}.${campo}`).toBeUndefined();
@@ -318,6 +322,20 @@ describe('Historia 23.2 — los campos nuevos, cada uno en su evento y de su con
 });
 
 describe('Historia 23.2 — el receptor nuevo no pierde nada de lo que envía el sitio viejo', () => {
+  it('la compatibilidad de la Marca de origen son los siete eventos de la v7.1, y ninguno nuevo', () => {
+    expect([...EVENTOS_DE_LA_V71].sort()).toEqual(
+      [
+        'vista-de-cita',
+        'vista-de-superficie',
+        'copiado',
+        'descarga-de-imagen',
+        'busqueda-sin-resultados',
+        'comparticion-de-imagen',
+        'comparticion-de-enlace',
+      ].sort(),
+    );
+  });
+
   /**
    * Las siete balizas de la v7.1 tal como las envía su guion: las cinco claves en todo evento,
    * con la Marca de origen en todos —también en las acciones—, el destino de la isla o `null`, y

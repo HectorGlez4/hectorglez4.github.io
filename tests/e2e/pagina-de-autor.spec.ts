@@ -104,7 +104,9 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
      * de medición, que es lo único de la lista cerrada de `src/lib/guiones.ts` que se pide sin
      * tocar nada. Contra este
      * servidor, construido desde la 23.2 con el punto final del receptor local
-     * (`playwright.config.ts`), se pide el fichero de medición, y esta prueba lo juzga.
+     * (`playwright.config.ts`), se pide el fichero de medición —lo exige
+     * `receptor-local.spec.ts`, que además lo ve llegar al D1 local—, y esta prueba lo admite por
+     * estar en la lista.
      * `tests/e2e/receptor.spec.ts` exige además que sea exactamente uno.
      */
     const pedidos = apuntarGuiones(page, baseURL!);

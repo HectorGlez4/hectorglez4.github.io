@@ -22,7 +22,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Running and verifying
 
-- El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`. Desde la 23.2 ese sitio se construye con `MEDICION_ENDPOINT=http://localhost:8787/`, y el `webServer` levanta antes el receptor local (`npm run medicion -- local`: `wrangler dev` con D1 local): el puerto 8787 tiene que estar libre, y ninguna construcción de rama apunta al receptor de producción. La primera vez, sin conexión o con la caché de `npx` vacía, `npx --yes wrangler@4.151.1` se descarga dentro del plazo de 180 s del `webServer` —`wrangler` no es dependencia del proyecto, a propósito—; si no llega, córrelo una vez a mano (`npm run medicion -- local`) y repite. El D1 local (`medicion/.wrangler/`, sin versionar) acumula lo de cada pasada y se puede borrar entero.
+- El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`. Desde la 23.2 ese sitio se construye con `MEDICION_ENDPOINT=http://localhost:8787/`, y el `webServer` levanta antes el receptor local (`npm run medicion -- local`: `wrangler dev` con D1 local): el puerto 8787 tiene que estar libre, y ninguna construcción de rama apunta al receptor de producción; `tests/e2e/receptor-local.spec.ts` comprueba que la Página de Cita pide su fichero de medición y que su vista llega al D1 local. La primera vez, sin conexión o con la caché de `npx` vacía, `npx --yes wrangler@4.151.1` se descarga dentro del plazo de 180 s del `webServer` —`wrangler` no es dependencia del proyecto, a propósito—; si no llega, córrelo una vez a mano (`npm run medicion -- local`) y repite. El D1 local (`medicion/.wrangler/`, sin versionar) acumula lo de cada pasada y se puede borrar entero.
 - Itera por fichero de prueba: la suite unitaria serializa a propósito (`fileParallelism: false`) porque cada prueba lanza un `astro build`.
 - `astro check` abarca todo el repositorio, no solo el sitio: `medicion/` y las pruebas e2e entran en el mismo programa de TypeScript.
 - `npm run build` termina con `tsx integraciones/peso.ts`, tras Pagefind: mide `dist/` en bytes sin los cinco ficheros que rotan con la jornada, escribe sus cinco líneas de cifras por stdout cuando hay algo que juzgar —sin `dist/`, con uno vacío o con uno que solo trae lo que rota no da cifras y sale con 1—, avisa entre `AVISO_DE_PESO_DE_DIST` y `TOPE_DE_PESO_DE_DIST` y se para por encima del tope (`src/lib/umbrales.ts`; DESPLIEGUE.md, «El techo de peso del hospedaje»). No es una integración de Astro: `construirConCorpus` corre `astro build` a secas y no lo ejecuta salvo con `conNpmRunBuild`. Los umbrales se rebajan en la copia, nunca en el árbol.
@@ -274,7 +274,7 @@ orden, con `wrangler` fijado a 4.151.1 y `--remote` o `--local` siempre explíci
 npm run medicion -- desplegar   # migra en remoto, despliega, comprueba con balizas, baraja, escribe la huella
 npm run medicion -- comprobar   # que el receptor en vivo guarda lo que dice la huella y numera al azar
 npm run medicion -- local       # D1 local migrado y wrangler dev en :8787, en primer plano
-npm run medicion -- ensayo      # la comprobación de desplegar, contra el receptor local
+npm run medicion -- ensayo      # la secuencia de desplegar contra el receptor local, sin migrar ni desplegar
 ```
 
 **`desplegar` y `comprobar` son actos de Héctor**, con `MEDICION_ENDPOINT` y sesión de `wrangler`:
@@ -283,7 +283,8 @@ nada remoto. Códigos: **2** si la invocación no vale, si falta `MEDICION_ENDPO
 `http(s)://`, o apunta a la máquina propia) o si `wrangler` no tiene sesión, siempre antes de tocar nada; **1** para todo lo
 demás, con el parte de lo que quedó aplicado y los instantes para Time Travel. `desplegar` coteja
 el receptor de la rama siempre contra el vocabulario de `origin/main` —el sitio en vivo; haz
-`git fetch` antes— y contra la huella si la hay, se para en el primer fallo, no reintenta
+`git fetch` antes— y contra la huella si la hay, mira la cuota **antes de migrar** (si hoy el
+barajado no cabría, sale con 1 sin tocar nada), se para en el primer fallo, no reintenta
 migraciones ni despliegues, borra sus balizas pase lo que pase, no baraja si el `rowid` de las
 balizas es contiguo ni si el barajado (unas tres filas escritas por fila, más otro tanto de lo
 escrito en 24 h de reserva para el resto del día) no cabe en

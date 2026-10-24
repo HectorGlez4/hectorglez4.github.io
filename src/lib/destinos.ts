@@ -51,7 +51,7 @@ export const DESTINO_OPACO = 'opaco';
  * libre, la medición de la compartición sería ampliable sin tocar ningún módulo, que es
  * exactamente la puerta por la que se cuela un perfil del visitante.
  *
- * Desde la Historia 23.2 es también el conjunto de la marca de difusión, `?via=`, que dice por
+ * Desde la Historia 23.2 es también el conjunto de la Marca de difusión, `?via=`, que dice por
  * qué destino llegó una visita compartida: lo nombra `src/lib/vocabulario.ts` sin copiarlo.
  */
 export const DESTINOS_VALIDOS: readonly string[] = [...DESTINOS_DE_ENLACE, DESTINO_DE_IMAGEN, DESTINO_OPACO];

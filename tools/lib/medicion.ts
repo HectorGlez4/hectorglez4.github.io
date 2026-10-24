@@ -18,7 +18,7 @@
 import * as vocabularioDeLaRama from '../../src/lib/vocabulario.ts';
 import type { DeclaracionDeCampo } from '../../src/lib/vocabulario.ts';
 import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
-import type { Registro } from '../../medicion/receptor.ts';
+import { EVENTOS_DE_LA_V71, type Registro } from '../../medicion/receptor.ts';
 import { motivosDeArgumentosNoReconocidos } from './cli.ts';
 
 /** La versión de `wrangler`, fijada: nunca `latest`, nunca la de `package.json` (que no la tiene). */
@@ -206,7 +206,7 @@ export function puntoFinalDeComprobacion(entorno: Record<string, string | undefi
   }
   // `desplegar` y `comprobar` leen el D1 remoto: con las balizas enviadas a un receptor local,
   // migraría y desplegaría en remoto para pararse después sin haber visto ninguna.
-  if (HOSTS_LOCALES.includes(direccion.hostname.toLowerCase())) {
+  if (esHostLocal(direccion.hostname)) {
     return {
       ok: false,
       motivo:
@@ -217,8 +217,23 @@ export function puntoFinalDeComprobacion(entorno: Record<string, string | undefi
   return { ok: true, url };
 }
 
-/** Los nombres de la máquina propia, que nunca son el receptor en vivo. */
-const HOSTS_LOCALES: readonly string[] = ['localhost', '127.0.0.1', '[::1]', '0.0.0.0'];
+/**
+ * Si un nombre de máquina es la propia, que nunca es el receptor en vivo: `localhost` y sus
+ * subdominios (también con el punto final), todo `127.0.0.0/8` —`URL` ya escribe `127.1` como
+ * `127.0.0.1`—, `0.0.0.0`, y en IPv6 `::1`, `::` y la IPv4 de bucle escrita como IPv6.
+ */
+export function esHostLocal(nombre: string): boolean {
+  const h = nombre.toLowerCase().replace(/\.$/, '');
+  return (
+    h === 'localhost' ||
+    h.endsWith('.localhost') ||
+    /^127\.\d+\.\d+\.\d+$/.test(h) ||
+    h === '0.0.0.0' ||
+    h === '[::1]' ||
+    h === '[::]' ||
+    /^\[::ffff:(7f[0-9a-f]{2}:[0-9a-f]{1,4}|127\.\d+\.\d+\.\d+)\]$/.test(h)
+  );
+}
 
 // ── Lo que contesta `wrangler` ────────────────────────────────────────────────────────────
 
@@ -803,12 +818,22 @@ export interface BalizasDePrueba {
  * baliza por combinación.
  *
  * **Lo que descarta**, que es la propiedad que el receptor existe para guardar (NFR-10, NFR-11):
- * por evento, una baliza con `VALOR_AJENO` en cada campo de conjunto cerrado —el suyo y los
- * ajenos— y texto en cada campo de texto que **no** declara, que tiene que dejar la fila con
- * todos sus campos nulos; y una baliza de `EVENTO_AJENO`, que no tiene que dejar ninguna. Un
- * receptor que guardara todo lo que le llega pasaría lo primero y no esto.
+ * por evento, una baliza que tiene que dejar la fila con todos sus campos nulos —`VALOR_AJENO` en
+ * cada campo de conjunto cerrado que el evento declara, y en cada uno que **no** declara un valor
+ * **válido** de su conjunto, el que lleva en otro evento, y texto en el campo de texto que no
+ * declara—; y una baliza de `EVENTO_AJENO`, que no tiene que dejar ninguna. Un receptor que
+ * guardara todo lo que le llega no pasaría lo primero, y uno que cotejara los conjuntos pero no
+ * qué evento declara cada campo —que guardara `zona=cabecera` en un copiado— tampoco.
+ *
+ * La excepción es lo que el receptor guarda fuera de su evento **a propósito**: la Marca de
+ * origen en los siete eventos de la v7.1 (`EVENTOS_DE_LA_V71` de `medicion/receptor.ts`), que
+ * la huella no declara porque no es vocabulario sino compatibilidad. Ahí va `VALOR_AJENO`, que
+ * todo receptor descarta lo guarde fuera de su evento o no.
  */
-export function balizasDePrueba(vocabulario: VocabularioDeHuella): BalizasDePrueba {
+export function balizasDePrueba(
+  vocabulario: VocabularioDeHuella,
+  compatibilidad: Readonly<Record<string, readonly string[]>> = { origen: EVENTOS_DE_LA_V71 },
+): BalizasDePrueba {
   const campos = camposDe(vocabulario);
   const balizas: Record<string, string>[] = [];
   const esperadas: (Record<string, string | null> | null)[] = [];
@@ -819,6 +844,14 @@ export function balizasDePrueba(vocabulario: VocabularioDeHuella): BalizasDePrue
   };
   const esTexto = (campo: string) =>
     Object.values(vocabulario.eventos).some((declarados) => declarados[campo]?.valores === 'texto');
+  /** Un valor de su conjunto: el primero, en orden, de los que lleva en algún evento. */
+  const valorValido = (campo: string) =>
+    Object.values(vocabulario.eventos)
+      .flatMap((declarados) => {
+        const valores = declarados[campo]?.valores;
+        return valores === undefined || valores === 'texto' ? [] : valores;
+      })
+      .sort()[0];
 
   for (const [evento, declarados] of Object.entries(vocabulario.eventos)) {
     const listas = Object.entries(declarados).map(
@@ -839,8 +872,19 @@ export function balizasDePrueba(vocabulario: VocabularioDeHuella): BalizasDePrue
 
     const descartable: Record<string, string> = { evento, ruta: RUTA_DE_COMPROBACION };
     for (const campo of campos) {
-      if (!esTexto(campo)) descartable[claveDe(vocabulario, campo)] = VALOR_AJENO;
-      else if (declarados[campo] === undefined) descartable[claveDe(vocabulario, campo)] = TEXTO_DE_PRUEBA;
+      const clave = claveDe(vocabulario, campo);
+      const declaracion = declarados[campo];
+      if (declaracion !== undefined) {
+        // Del evento: un valor fuera de su conjunto. El texto no tiene valor ajeno.
+        if (declaracion.valores !== 'texto') descartable[clave] = VALOR_AJENO;
+      } else if (esTexto(campo)) {
+        descartable[clave] = TEXTO_DE_PRUEBA;
+      } else if (compatibilidad[campo]?.includes(evento)) {
+        descartable[clave] = VALOR_AJENO;
+      } else {
+        // Fuera de su evento: un valor que su conjunto sí admite.
+        descartable[clave] = valorValido(campo) ?? VALOR_AJENO;
+      }
     }
     balizas.push(descartable);
     esperadas.push(filaVacia(evento));
@@ -928,18 +972,30 @@ export interface Barajado {
  * las 00:00 UTC y el Worker calla el rechazo: cada evento de lo que quede del día se perdería
  * en silencio, y se leería después como un cero. Por eso no basta con que el barajado quepa
  * justo: se reserva para el sitio otro tanto de lo escrito en las últimas 24 h —un día entero
- * de tráfico, más de lo que puede quedar del de hoy—, que además cubre las balizas de esta
- * misma orden si `d1 info` aún no las ve. La cuota es **de la cuenta**: lo que escriba hoy otra
- * base D1 de la misma cuenta no se ve aquí, y el mensaje lo dice.
+ * de tráfico, más de lo que puede quedar del de hoy—. La cuota es **de la cuenta**: lo que
+ * escriba hoy otra base D1 de la misma cuenta no se ve aquí, y el mensaje lo dice.
+ *
+ * `escritas24h` ya trae contadas las escrituras de las balizas de esta orden —`balizas`, que
+ * solo dice cuántas son en el mensaje—: `d1 info` puede no verlas todavía, y `desplegar` las suma
+ * antes de llamar (`escriturasDeLasBalizas`).
  */
-export function cabeElBarajado(datos: { filas: number; escritas24h: number; cuota: number }): Barajado {
+export function cabeElBarajado(datos: {
+  filas: number;
+  escritas24h: number;
+  cuota: number;
+  balizas?: number;
+}): Barajado {
   const coste = datos.filas * FILAS_ESCRITAS_POR_FILA_BARAJADA;
   const reserva = datos.escritas24h;
   const disponible = Math.max(0, datos.cuota - datos.escritas24h - reserva);
   const cabe = datos.escritas24h + reserva + coste <= datos.cuota;
+  const conBalizas =
+    datos.balizas !== undefined && datos.balizas > 0
+      ? ` (contadas unas ${datos.balizas} de las balizas de esta orden)`
+      : '';
   const cifras =
     `barajar ${datos.filas} filas escribe unas ${coste} (${FILAS_ESCRITAS_POR_FILA_BARAJADA} por fila); ` +
-    `de la cuota de ${datos.cuota} filas escritas al día van ${datos.escritas24h} en las últimas 24 h, ` +
+    `de la cuota de ${datos.cuota} filas escritas al día van ${datos.escritas24h} en las últimas 24 h${conBalizas}, ` +
     `y otras ${reserva} se dejan para lo que el sitio escriba hasta las 00:00 UTC ` +
     '(la cuota es de la cuenta: lo que escriba hoy otra base D1 suya no está contado)';
   return {
@@ -952,6 +1008,16 @@ export function cabeElBarajado(datos: { filas: number; escritas24h: number; cuot
       : `El barajado no cabe hoy: ${cifras}, así que quedan ${disponible}. No se baraja ni se trocea: ` +
         'repite `npm run medicion -- desplegar` otro día.',
   };
+}
+
+/**
+ * Lo que escriben como mucho las balizas de prueba de una comprobación: cada una se inserta y se
+ * borra —la fila y sus dos índices cada vez— en cada uno de sus intentos. Peca por exceso.
+ */
+export function escriturasDeLasBalizas(vocabulario: VocabularioDeHuella): number {
+  return (
+    balizasDePrueba(vocabulario).balizas.length * FILAS_ESCRITAS_POR_FILA_BARAJADA * 2 * INTENTOS_DE_COMPROBACION
+  );
 }
 
 /** Los recuentos por jornada y evento: `«jornada» «evento»` → filas. */
@@ -1033,6 +1099,28 @@ export function ordenDeTimeTravel(instante: Date): string {
   return (
     `cd ${DIRECTORIO_DEL_RECEPTOR} && npx --yes ${WRANGLER} d1 time-travel restore ${BASE_DE_DATOS} ` +
     `--timestamp=${instante.toISOString()}`
+  );
+}
+
+/** La orden que borra a mano las balizas de prueba, si una comprobación las dejó en la tabla. */
+export function ordenDeBorradoDeLasBalizas(base: Base): string {
+  return (
+    `cd ${DIRECTORIO_DEL_RECEPTOR} && npx --yes ${WRANGLER} d1 execute ${BASE_DE_DATOS} ` +
+    `${BANDERA_DE_BASE[base]} --command "${SQL_DE_BORRADO}"`
+  );
+}
+
+/**
+ * Lo que dice la cáscara si se interrumpe `desplegar` o `comprobar` a mitad —Ctrl-C, un SIGTERM—:
+ * la secuencia no llega a dar su parte, así que se dice dónde mirar lo que quedó hecho y cómo se
+ * borran las balizas si se cortó con ellas en la tabla.
+ */
+export function avisoDeInterrupcion(senal: string): string {
+  return (
+    `La orden se cortó a mitad (${senal}) y no dio su parte. Lo hecho en remoto lo dicen las líneas de ` +
+    'arriba —los instantes anteriores a la migración y al barajado se escriben al pasar, para Time ' +
+    `Travel—, d1_migrations y npx --yes ${WRANGLER} deployments list, en ${DIRECTORIO_DEL_RECEPTOR}/. ` +
+    `Si se cortó con las balizas de prueba en la tabla, se borran con: ${ordenDeBorradoDeLasBalizas('remota')}`
   );
 }
 
@@ -1202,14 +1290,29 @@ export async function comprobarConBalizas(
     for (let intento = 1; intento <= INTENTOS_DE_COMPROBACION; intento++) {
       if (intento > 1) await efectos.esperar(espera);
       await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de un intento anterior');
-      let rechazadas = 0;
+      // Lo que contestó el receptor a las que no recibieron un 204: un 301 o un 302 dice que la
+      // dirección redirige —la baliza no la sigue, porque un POST redirigido llega como GET, que
+      // el receptor contesta con 204 sin escribir nada—; `sin respuesta`, que no contestó a tiempo.
+      const rechazos = new Map<string, number>();
       for (const baliza of balizas) {
-        if ((await efectos.enviar(url, JSON.stringify(baliza))) !== 204) rechazadas++;
+        const codigo = await efectos.enviar(url, JSON.stringify(baliza));
+        if (codigo === 204) continue;
+        const clave = codigo === null ? 'sin respuesta' : String(codigo);
+        rechazos.set(clave, (rechazos.get(clave) ?? 0) + 1);
       }
+      const rechazadas = [...rechazos.values()].reduce((suma, n) => suma + n, 0);
       const leidas = await consultar(efectos, sqlDeLasBalizas(campos), base, 'leer las balizas de prueba');
       ningunaFila = leidas.length === 0;
+      const cuales = [...rechazos].map(([clave, n]) => `${clave} ×${n}`).join(', ');
       diferencias = [
-        ...(rechazadas > 0 ? [`${rechazadas} de ${balizas.length} balizas no recibieron un 204.`] : []),
+        ...(rechazadas > 0
+          ? [
+              `${rechazadas} de ${balizas.length} balizas no recibieron un 204 (${cuales})` +
+                ([...rechazos.keys()].some((clave) => /^3\d\d$/.test(clave))
+                  ? ': MEDICION_ENDPOINT redirige; pon la dirección final.'
+                  : '.'),
+            ]
+          : []),
         ...cotejarFilas(esperadas, leidas, campos),
       ];
       efectos.decir(
@@ -1243,8 +1346,7 @@ export async function comprobarConBalizas(
   const avisoDeBorrado =
     sinBorrar === undefined
       ? ''
-      : `\nLas balizas de prueba se quedaron en la tabla (${sinBorrar}). Se borran en ${DIRECTORIO_DEL_RECEPTOR}/ con: ` +
-        `npx --yes ${WRANGLER} d1 execute ${BASE_DE_DATOS} ${BANDERA_DE_BASE[base]} --command "${SQL_DE_BORRADO}"`;
+      : `\nLas balizas de prueba se quedaron en la tabla (${sinBorrar}). Se borran con: ${ordenDeBorradoDeLasBalizas(base)}`;
 
   if ('error' in resultado) {
     if (resultado.error instanceof Parada) {
@@ -1322,22 +1424,65 @@ async function exigirCobertura(efectos: Efectos): Promise<void> {
   }
 }
 
-/** El estado de la tabla remota antes de migrar. */
-async function estadoRemoto(efectos: Efectos): Promise<EstadoDeLaTabla> {
-  const columnas = columnasDelPragma(await consultar(efectos, SQL_DE_COLUMNAS, 'remota', 'leer las columnas'));
-  const conTabla =
-    (await consultar(efectos, SQL_DE_TABLA_DE_MIGRACIONES, 'remota', 'buscar d1_migrations')).length > 0;
+/** El estado de la tabla de una base: la remota antes de migrar, o la local en el ensayo. */
+async function estadoDeLaBase(efectos: Efectos, base: Base): Promise<EstadoDeLaTabla> {
+  const columnas = columnasDelPragma(await consultar(efectos, SQL_DE_COLUMNAS, base, 'leer las columnas'));
+  const conTabla = (await consultar(efectos, SQL_DE_TABLA_DE_MIGRACIONES, base, 'buscar d1_migrations')).length > 0;
   const anotadas = conTabla
-    ? (await consultar(efectos, SQL_DE_MIGRACIONES_ANOTADAS, 'remota', 'leer d1_migrations')).map((f) => String(f.name))
+    ? (await consultar(efectos, SQL_DE_MIGRACIONES_ANOTADAS, base, 'leer d1_migrations')).map((f) => String(f.name))
     : [];
   return estadoDeLaTabla(columnas, anotadas, await efectos.migraciones());
 }
 
+/** Las filas de la tabla, para el coste del barajado: un entero, o una parada que dice qué llegó. */
+async function contarFilas(efectos: Efectos, base: Base): Promise<number> {
+  const [fila] = await consultar(efectos, SQL_DE_FILAS, base, 'contar las filas');
+  const filas = Number(fila?.n);
+  if (fila === undefined || fila.n === null || !Number.isSafeInteger(filas) || filas < 0) {
+    throw new Parada(1, `No se baraja: el recuento de filas no es un número (${JSON.stringify(fila ?? null)}).`);
+  }
+  return filas;
+}
+
+/** Lo escrito en 24 h, de `d1 info --json`, y las filas de la tabla: lo que pide la cuota. */
+async function leerCuota(efectos: Efectos): Promise<{ escritas24h: number; filas: number }> {
+  const salida = await efectos.wrangler(ARGUMENTOS_DE_INFORMACION);
+  const informacion = leerInformacion(salida.stdout);
+  if (!informacion.ok) throw new Parada(1, `No se baraja: ${informacion.motivo}${causaDe(salida)}`);
+  return { escritas24h: informacion.escritas24h, filas: await contarFilas(efectos, 'remota') };
+}
+
+/**
+ * Corre un paso de `wrangler` que aplica algo en remoto. Si sale distinto de 0, la parada dice
+ * `fallo`; si ni siquiera termina —se cortó por su tope, no arrancó—, el parte anota `quiza`,
+ * porque lo que hiciera, entero o a medias, no se sabe.
+ */
+async function aplicar(
+  efectos: Efectos,
+  argumentos: readonly string[],
+  aplicado: string[],
+  pasos: { hecho: string; quiza: string; fallo: string; quizaAlFallar?: boolean },
+): Promise<void> {
+  let codigo: number;
+  try {
+    codigo = await efectos.wranglerALaVista(argumentos);
+  } catch (error) {
+    aplicado.push(pasos.quiza);
+    throw error;
+  }
+  if (codigo !== 0) {
+    if (pasos.quizaAlFallar) aplicado.push(pasos.quiza);
+    throw new Parada(1, pasos.fallo);
+  }
+  aplicado.push(pasos.hecho);
+}
+
 /**
  * `npm run medicion -- desplegar`, en su orden, parando en el primer fallo con 1 y el parte de
- * lo aplicado (AD-14): sesión, árbol limpio, cobertura, recuentos y estado de la tabla, migrar,
- * desplegar, comprobar con balizas, `rowid`, cuota, barajar, recuentos otra vez y, solo si todo
- * eso salió, la huella. No reintenta migraciones ni despliegues, y no hace commit.
+ * lo aplicado (AD-14): sesión, árbol limpio, cobertura, recuentos, estado de la tabla y la cuota
+ * prevista, migrar, desplegar, comprobar con balizas, `rowid`, cuota otra vez, barajar, recuentos
+ * otra vez y, solo si todo eso salió, la huella. No reintenta migraciones ni despliegues, y no
+ * hace commit.
  */
 export async function desplegar(efectos: Efectos, url: string): Promise<void> {
   const aplicado: string[] = [];
@@ -1350,25 +1495,41 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
 
     const hoy = jornadaUtc(efectos.ahora());
     const antes = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de antes'));
-    const estado = await estadoRemoto(efectos);
+    const estado = await estadoDeLaBase(efectos, 'remota');
     if (estado.estado === 'otra') throw new Parada(1, `No se migra: ${estado.motivo}`);
     efectos.decir(
       `La tabla está ${estado.estado}` +
         (estado.pendientes.length > 0 ? `; faltan ${estado.pendientes.join(', ')}.` : '; no falta ninguna migración.'),
     );
 
+    // La cuota, antes de tocar nada: si hoy el barajado no cabe, migrar y desplegar para pararse
+    // después no sirve de nada, y se repite otro día igual. Cuenta ya las balizas que se van a
+    // escribir. Se vuelve a mirar antes de barajar, con lo que haya escrito el sitio entretanto.
+    const balizas = escriturasDeLasBalizas(huellaDelVocabulario());
+    const previa = await leerCuota(efectos);
+    const previsto = cabeElBarajado({
+      filas: previa.filas,
+      escritas24h: previa.escritas24h + balizas,
+      cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
+      balizas,
+    });
+    if (!previsto.cabe) throw new Parada(1, `No se migra ni se despliega: ${previsto.mensaje}`);
+
     instantes.antesDeMigrar = efectos.ahora();
     efectos.decir(`Instante anterior a la migración: ${instantes.antesDeMigrar.toISOString()}.`);
-    if ((await efectos.wranglerALaVista(argumentosDeMigracion('remota'))) !== 0) {
-      aplicado.push('quizá parte de las migraciones: lo aplicado lo dice d1_migrations');
-      throw new Parada(1, 'La migración en remoto falló; no se reintenta.');
-    }
-    aplicado.push('las migraciones en remoto');
-
-    if ((await efectos.wranglerALaVista(ARGUMENTOS_DE_DESPLIEGUE)) !== 0) {
-      throw new Parada(1, 'El despliegue del receptor falló; no se reintenta.');
-    }
-    aplicado.push('el receptor desplegado');
+    await aplicar(efectos, argumentosDeMigracion('remota'), aplicado, {
+      hecho: 'las migraciones en remoto',
+      quiza: 'quizá parte de las migraciones: lo aplicado lo dice d1_migrations',
+      fallo: 'La migración en remoto falló; no se reintenta.',
+      quizaAlFallar: true,
+    });
+    await aplicar(efectos, ARGUMENTOS_DE_DESPLIEGUE, aplicado, {
+      hecho: 'el receptor desplegado',
+      quiza: `quizá el receptor desplegado: lo dice npx --yes ${WRANGLER} deployments list`,
+      fallo:
+        'El despliegue del receptor falló; no se reintenta. Cuál está en vivo lo dice ' +
+        `npx --yes ${WRANGLER} deployments list, en ${DIRECTORIO_DEL_RECEPTOR}/.`,
+    });
 
     const filasDePrueba = await comprobarConBalizas(
       efectos,
@@ -1380,18 +1541,19 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
     aplicado.push('la comprobación con balizas, ya borradas');
     exigirRowidAleatorio(filasDePrueba, 'Lo cierra el siguiente despliegue que pase la comprobación.');
 
-    const informacion = leerInformacion((await efectos.wrangler(ARGUMENTOS_DE_INFORMACION)).stdout);
-    if (!informacion.ok) throw new Parada(1, `No se baraja: ${informacion.motivo}`);
-    const [{ n: filas } = { n: 0 }] = await consultar(efectos, SQL_DE_FILAS, 'remota', 'contar las filas');
+    // Lo escrito en 24 h, al menos lo de antes más las balizas: `d1 info` puede no verlas aún.
+    const actual = await leerCuota(efectos);
     const barajado = cabeElBarajado({
-      filas: Number(filas),
-      escritas24h: informacion.escritas24h,
+      filas: actual.filas,
+      escritas24h: Math.max(actual.escritas24h, previa.escritas24h + balizas),
       cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
+      balizas,
     });
     if (!barajado.cabe) throw new Parada(1, barajado.mensaje);
     efectos.decir(barajado.mensaje);
 
     instantes.antesDeBarajar = efectos.ahora();
+    efectos.decir(`Instante anterior al barajado: ${instantes.antesDeBarajar.toISOString()}.`);
     try {
       await consultar(efectos, SQL_DE_BARAJADO, 'remota', 'barajar el rowid');
     } catch (error) {
@@ -1416,10 +1578,10 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
         `Commitea ${RUTA_DE_LA_HUELLA}: es lo que devuelve npm test a verde. El sitio se despliega después.`,
     );
   } catch (error) {
-    if (error instanceof Parada) {
-      throw new Parada(error.codigo, `${error.message}\n${parteDeLoAplicado(aplicado, instantes)}`);
-    }
-    throw error;
+    // Toda parada lleva el parte, también la de un fallo que no es una parada —escribir la huella
+    // tras barajar, un efecto que lanza—: sin él, nadie sabría qué quedó aplicado en producción.
+    const parada = error instanceof Parada ? error : new Parada(1, error instanceof Error ? error.message : String(error));
+    throw new Parada(parada.codigo, `${parada.message}\n${parteDeLoAplicado(aplicado, instantes)}`);
   }
 }
 
@@ -1453,21 +1615,48 @@ export async function comprobar(efectos: Efectos, url: string): Promise<void> {
   );
 }
 
-/** `npm run medicion -- ensayo`: la comprobación de `desplegar`, contra el receptor local. */
+/**
+ * `npm run medicion -- ensayo`: la secuencia de `desplegar` contra el receptor local, salvo lo que
+ * solo existe en remoto —migrar, que ya hizo `local`, desplegar y `d1 info`— y la huella.
+ *
+ * Así todo el SQL de `desplegar` —el estado de la tabla con `PRAGMA table_info`, `sqlite_master` y
+ * `d1_migrations`, los recuentos, el de filas, las balizas y el barajado— corre contra un D1 de
+ * verdad y con las respuestas de verdad de `wrangler`, antes de la primera vez que se corre en
+ * producción (23.3). Escribe y baraja solo el D1 local.
+ */
 export async function ensayo(efectos: Efectos): Promise<void> {
   if (!(await efectos.sondear(PUNTO_FINAL_LOCAL))) {
     throw new Parada(1, `El receptor local no responde en ${PUNTO_FINAL_LOCAL}: arráncalo con npm run medicion -- local.`);
   }
-  const filas = await comprobarConBalizas(
+  const hoy = jornadaUtc(efectos.ahora());
+  const antes = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'local', 'contar las filas de antes'));
+  const estado = await estadoDeLaBase(efectos, 'local');
+  if (estado.estado !== 'migrada') {
+    throw new Parada(
+      1,
+      `El D1 local no es la tabla migrada: ${estado.estado === 'otra' ? estado.motivo : `está ${estado.estado}.`} ` +
+        `npm run medicion -- local la migra al arrancar; si no puede, borra ${DIRECTORIO_DEL_RECEPTOR}/.wrangler/ y repite.`,
+    );
+  }
+  const filasDePrueba = await comprobarConBalizas(
     efectos,
     PUNTO_FINAL_LOCAL,
     'local',
     huellaDelVocabulario(),
     ESPERA_ENTRE_INTENTOS_EN_LOCAL_MS,
   );
-  exigirRowidAleatorio(filas, 'El receptor local es el de esta rama: mira medicion/worker.ts.');
+  exigirRowidAleatorio(filasDePrueba, 'El receptor local es el de esta rama: mira medicion/worker.ts.');
+
+  const filas = await contarFilas(efectos, 'local');
+  await consultar(efectos, SQL_DE_BARAJADO, 'local', 'barajar el rowid');
+  const despues = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'local', 'contar las filas de después'));
+  efectos.decir(informeDeRecuentos(antes, despues));
+  const diferencias = compararRecuentos(antes, despues, hoy);
+  if (diferencias.length > 0) {
+    throw new Parada(1, `Los recuentos del D1 local de antes y de después no casan:\n  ${diferencias.join('\n  ')}`);
+  }
   efectos.decir(
     'Cada evento y cada valor del vocabulario llegó al D1 local, lo ajeno se descartó, el rowid es aleatorio ' +
-      'y las balizas se borraron.',
+      `y las balizas se borraron; la tabla es la migrada, y barajar sus ${filas} filas dejó los recuentos iguales.`,
   );
 }

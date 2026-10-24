@@ -44,7 +44,7 @@ export const EVENTOS = {
   /**
    * SM-8, FR-22 — una superficie de agregación de producto (portada, página 1 de Autor,
    * Tema o Colección, y la página 1 de una Obra indexable) se ha mostrado. Cuenta lo que el
-   * Canal trae fuera de la Página de Cita, con la misma marca de origen. Nunca la emite una
+   * Canal trae fuera de la Página de Cita, con la misma Marca de origen. Nunca la emite una
    * superficie de servicio —las páginas 2+ de un listado, `/buscar`, `/404`—, ni una interna
    * —`/kit`, `/lote`—, ni la Página de Cita, que ya emite el suyo; el carácter de cada ruta
    * lo declara `src/lib/superficies.ts`. La razón `vista-de-cita / vista-de-superficie` es un

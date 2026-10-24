@@ -51,6 +51,7 @@ import {
   argumentosDeMedicion,
   argumentosDeMigracion,
   argumentosDeNpx,
+  avisoDeInterrupcion,
   comprobar,
   desplegar,
   ensayo,
@@ -110,7 +111,12 @@ function correr(programa: string, argumentos: readonly string[], cwd: string): P
   });
 }
 
-/** Corre `wrangler` a la vista de quien lo invoca —migrar y desplegar dicen lo que hacen—. */
+/**
+ * Corre `wrangler` a la vista de quien lo invoca —migrar y desplegar dicen lo que hacen—, con el
+ * mismo tope que `correr`: un `migrations apply --remote` o un `deploy` colgados de la red dejarían
+ * la orden parada a mitad sin parte. Al cortarse, la parada lo dice y la secuencia anota que lo que
+ * hiciera, entero o a medias, no se sabe.
+ */
 function wranglerALaVista(argumentos: readonly string[]): Promise<number> {
   return new Promise((listo, fallo) => {
     const hijo = spawn('npx', argumentosDeNpx(argumentos), {
@@ -118,8 +124,23 @@ function wranglerALaVista(argumentos: readonly string[]): Promise<number> {
       stdio: ['ignore', 'inherit', 'inherit'],
       env: ENTORNO,
     });
-    hijo.on('error', () => fallo(new Parada(1, `npx ${WRANGLER} no arranca.`)));
-    hijo.on('close', (codigo) => listo(codigo ?? 1));
+    const tope = setTimeout(() => {
+      hijo.kill('SIGTERM');
+      fallo(
+        new Parada(
+          1,
+          `npx ${WRANGLER} ${argumentos.slice(0, 3).join(' ')} no terminó en ${TOPE_DE_UN_PROGRAMA_MS / 1000} s y se cortó.`,
+        ),
+      );
+    }, TOPE_DE_UN_PROGRAMA_MS);
+    hijo.on('error', () => {
+      clearTimeout(tope);
+      fallo(new Parada(1, `npx ${WRANGLER} no arranca.`));
+    });
+    hijo.on('close', (codigo) => {
+      clearTimeout(tope);
+      listo(codigo ?? 1);
+    });
   });
 }
 
@@ -148,12 +169,13 @@ async function vocabularioDeOrigin(): Promise<VocabularioDeOrigin> {
     }
     const importar = async (modulo: string) =>
       presentes.has(modulo) ? ((await import(pathToFileURL(join(copia, `${modulo}.ts`)).href)) as never) : undefined;
-    const modulos: ModulosDeLaPrincipal = {
-      vocabulario: await importar('vocabulario'),
-      medicion: await importar('medicion'),
-      destinos: await importar('destinos'),
-      redes: await importar('redes'),
-    };
+    // Con `vocabulario.ts` basta él, con sus dos hojas —una prueba fija que no importa nada más—.
+    // `medicion.ts` es solo la vuelta atrás a la v7.1: importado siempre, pararía la orden en cuanto
+    // la principal le diera otra importación —`umbrales.ts`, `guiones.ts`—, que no se copia aquí.
+    const delVocabulario: ModulosDeLaPrincipal['vocabulario'] = await importar('vocabulario');
+    const modulos: ModulosDeLaPrincipal = delVocabulario
+      ? { vocabulario: delVocabulario }
+      : { medicion: await importar('medicion'), destinos: await importar('destinos'), redes: await importar('redes') };
     const vocabulario = vocabularioDeLaPrincipal(modulos);
     if (vocabulario === null) {
       throw new Parada(1, 'origin/main no tiene src/lib/vocabulario.ts ni src/lib/medicion.ts con sus hojas.');
@@ -174,9 +196,12 @@ const efectos: Efectos = {
   git,
   async enviar(url, cuerpo) {
     try {
+      // Sin seguir redirecciones: un POST redirigido con 301 o 302 llega como GET, que el receptor
+      // contesta con 204 sin escribir nada, y la baliza parecería aceptada.
       const respuesta = await fetch(url, {
         method: 'POST',
         body: cuerpo,
+        redirect: 'manual',
         signal: AbortSignal.timeout(TOPE_DE_UNA_BALIZA_MS),
       });
       return respuesta.status;
@@ -234,7 +259,11 @@ async function local(): Promise<number> {
     const reenviar = (senal: NodeJS.Signals) => () => hijo.kill(senal);
     for (const senal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) process.on(senal, reenviar(senal));
     hijo.on('error', () => fallo(new Parada(1, `npx ${WRANGLER} dev no arranca.`)));
-    hijo.on('close', (codigo, senal) => listo(codigo ?? (senal ? 0 : 1)));
+    // Terminar por una de las señales que se le reenvían es pararlo, y sale con 0; morir por otra
+    // —un SIGKILL, falta de memoria— es un fallo, y no se calla.
+    hijo.on('close', (codigo, senal) =>
+      listo(codigo ?? (senal === 'SIGINT' || senal === 'SIGTERM' || senal === 'SIGHUP' ? 0 : 1)),
+    );
   });
 }
 
@@ -251,6 +280,14 @@ async function principal(): Promise<number> {
 
   const punto = puntoFinalDeComprobacion(process.env);
   if (!punto.ok) throw new Parada(2, punto.motivo);
+  // Cortada a mitad, la secuencia no llega a dar su parte: se dice dónde mirar y cómo se borran
+  // las balizas, y sale con 1, como cualquier otra parada.
+  for (const senal of ['SIGINT', 'SIGTERM'] as const) {
+    process.once(senal, () => {
+      process.stderr.write(`\n${avisoDeInterrupcion(senal)}\n`);
+      process.exit(1);
+    });
+  }
   if (subcomando === 'desplegar') await desplegar(efectos, punto.url);
   else await comprobar(efectos, punto.url);
   return 0;

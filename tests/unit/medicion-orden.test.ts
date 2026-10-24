@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import * as vocabulario from '../../src/lib/vocabulario.ts';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
-import { interpretar } from '../../medicion/receptor.ts';
+import { EVENTOS_DE_LA_V71, interpretar } from '../../medicion/receptor.ts';
 import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
 import {
   ARGUMENTOS_DE_INFORMACION,
@@ -26,7 +26,12 @@ import {
   TEXTO_DE_PRUEBA,
   VALOR_AJENO,
   WRANGLER,
+  INTENTOS_DE_COMPROBACION,
   argumentosDeConsulta,
+  avisoDeInterrupcion,
+  escriturasDeLasBalizas,
+  esHostLocal,
+  ordenDeBorradoDeLasBalizas,
   argumentosDeMedicion,
   argumentosDeMigracion,
   argumentosDeNpx,
@@ -148,10 +153,26 @@ describe('Historia 23.2 — la invocación', () => {
   });
 
   it('el punto final no puede ser la máquina propia: desplegar y comprobar leen el D1 remoto', () => {
-    for (const valor of ['http://localhost:8787/', 'http://127.0.0.1:8787/', 'http://[::1]:8787/', 'http://LOCALHOST/']) {
+    for (const valor of [
+      'http://localhost:8787/',
+      'http://127.0.0.1:8787/',
+      'http://[::1]:8787/',
+      'http://LOCALHOST/',
+      'http://localhost./',
+      'http://receptor.localhost:8787/',
+      'http://127.0.0.2:8787/',
+      'http://127.1:8787/',
+      'http://0.0.0.0:8787/',
+      'http://[::]:8787/',
+      'http://[::ffff:127.0.0.1]:8787/',
+    ]) {
       const punto = puntoFinalDeComprobacion({ MEDICION_ENDPOINT: valor });
       expect(punto.ok, valor).toBe(false);
       if (!punto.ok) expect(punto.motivo).toMatch(/receptor local.*ensayo/);
+    }
+    // Un nombre que solo empieza o acaba parecido no es la máquina propia.
+    for (const nombre of ['localhost.example.org', 'mi-localhost.example', '128.0.0.1', '[::ffff:8.8.8.8]']) {
+      expect(esHostLocal(new URL(`http://${nombre}/`).hostname), nombre).toBe(false);
     }
   });
 });
@@ -529,27 +550,44 @@ describe('Historia 23.2 — las balizas de prueba', () => {
     expect(campos).toEqual([...vocabulario.CAMPOS].sort());
   });
 
-  it('y lo que el receptor tiene que descartar: valores ajenos, texto fuera de su evento y un evento inventado', () => {
-    // Por evento, una baliza con el valor ajeno en cada campo de conjunto cerrado —el suyo y
-    // los ajenos— y texto en la consulta si no es la búsqueda sin resultados: deja la fila, vacía.
-    for (const evento of Object.keys(vocabularioDeLaV8.eventos)) {
-      const i = balizas.findIndex((b) => b.evento === evento && b.zona === VALOR_AJENO);
+  it('y lo que el receptor tiene que descartar: valores ajenos, campos fuera de su evento y un evento inventado', () => {
+    // Por evento, una baliza que deja la fila vacía: el valor ajeno en cada campo de conjunto
+    // cerrado que el evento declara, un valor **válido** en cada uno que no declara —salvo la
+    // Marca de origen en los eventos de la v7.1, que el receptor guarda por compatibilidad— y
+    // texto en la consulta si no es la búsqueda sin resultados.
+    const vacia = (evento: string) => ({
+      evento,
+      ruta: RUTA_DE_COMPROBACION,
+      ...Object.fromEntries(campos.map((campo) => [campo, null])),
+    });
+    for (const [evento, declarados] of Object.entries(vocabularioDeLaV8.eventos)) {
+      const i = esperadas.findIndex((fila) => fila !== null && fila.evento === evento && campos.every((c) => fila[c] === null));
       expect(i, evento).toBeGreaterThanOrEqual(0);
+      expect(esperadas.filter((fila) => fila !== null && JSON.stringify(fila) === JSON.stringify(vacia(evento)))).toHaveLength(1);
       const baliza = balizas[i];
       for (const campo of campos) {
+        const declaracion = declarados[campo];
         if (campo === 'consulta') {
-          const declarada = vocabularioDeLaV8.eventos[evento].consulta !== undefined;
-          expect(baliza.datos, evento).toBe(declarada ? undefined : TEXTO_DE_PRUEBA);
-        } else {
+          expect(baliza.datos, evento).toBe(declaracion !== undefined ? undefined : TEXTO_DE_PRUEBA);
+        } else if (declaracion !== undefined) {
           expect(baliza[campo], `${evento}.${campo}`).toBe(VALOR_AJENO);
+        } else if (campo === 'origen' && EVENTOS_DE_LA_V71.includes(evento as never)) {
+          expect(baliza[campo], `${evento}.${campo}`).toBe(VALOR_AJENO);
+        } else {
+          // Un valor que el campo admite en otro evento: solo lo descarta quien mira el evento.
+          const admitidos = Object.values(vocabularioDeLaV8.eventos).flatMap((d) => {
+            const valores = d[campo]?.valores;
+            return valores === undefined || valores === 'texto' ? [] : valores;
+          });
+          expect(admitidos, `${evento}.${campo}`).toContain(baliza[campo]);
         }
       }
-      expect(esperadas[i]).toEqual({
-        evento,
-        ruta: RUTA_DE_COMPROBACION,
-        ...Object.fromEntries(campos.map((campo) => [campo, null])),
-      });
+      expect(esperadas[i]).toEqual(vacia(evento));
     }
+    // La Marca de origen válida va fuera de su evento en los eventos nuevos de la v8 que no la declaran.
+    const deLaBusqueda = balizas[esperadas.findIndex((f) => f !== null && f.evento === EVENTOS.busqueda && f.tramo === null)];
+    expect(vocabulario.CAMPOS_DE_EVENTO[EVENTOS.busqueda].origen).toBeUndefined();
+    expect(vocabulario.CAMPOS_DE_EVENTO[EVENTOS.vistaDeCita].origen?.valores).toContain(deLaBusqueda.origen);
     // Y una de un evento que no existe, que no deja fila.
     const ajena = balizas.findIndex((b) => b.evento === EVENTO_AJENO);
     expect(ajena).toBeGreaterThanOrEqual(0);
@@ -568,6 +606,31 @@ describe('Historia 23.2 — las balizas de prueba', () => {
       expect(registro, JSON.stringify(baliza)).not.toBeNull();
       for (const [columna, valor] of Object.entries(esperada)) expect(registro![columna], columna).toBe(valor);
     });
+  });
+
+  it('un receptor que coteja los conjuntos pero no qué evento declara cada campo no pasa el cotejo', () => {
+    // Guarda cada campo si su valor es de su conjunto en algún evento, sea cual sea el de la baliza.
+    const admitidos = (campo: string) =>
+      Object.values(vocabularioDeLaV8.eventos).flatMap((d) => {
+        const valores = d[campo]?.valores;
+        return valores === undefined ? [] : valores === 'texto' ? [TEXTO_DE_PRUEBA] : valores;
+      });
+    const sinEventos = balizas
+      .filter((baliza) => baliza.evento !== EVENTO_AJENO)
+      .map((baliza, i) => ({
+        fila: String(i),
+        evento: baliza.evento,
+        ruta: baliza.ruta,
+        ...Object.fromEntries(
+          campos.map((campo) => {
+            const valor = baliza[campo === 'consulta' ? 'datos' : campo];
+            return [campo, valor !== undefined && admitidos(campo).includes(valor) ? valor : null];
+          }),
+        ),
+      }));
+    const diferencias = cotejarFilas(esperadas, sinEventos, campos);
+    expect(diferencias.some((d) => d.startsWith('sobra: evento=copiado ') && /zona=[a-z]/.test(d))).toBe(true);
+    expect(diferencias.some((d) => d.startsWith('sobra: evento=vista-de-cita ') && /primera=(si|no)/.test(d))).toBe(true);
   });
 
   it('un receptor que guardara lo que le llega no pasa el cotejo', () => {
@@ -657,6 +720,15 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
     expect(CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1).toBe(100_000);
   });
 
+  it('las escrituras de las balizas se dicen, y peca por exceso: cada una, insertada y borrada en cada intento', () => {
+    const balizas = escriturasDeLasBalizas(huellaDelVocabulario());
+    expect(balizas).toBe(balizasDePrueba(huellaDelVocabulario()).balizas.length * FILAS_ESCRITAS_POR_FILA_BARAJADA * 2 * INTENTOS_DE_COMPROBACION);
+    expect(balizas).toBe(87 * 3 * 2 * 3);
+    const barajado = cabeElBarajado({ filas: 10, escritas24h: 1_000 + balizas, cuota: 100_000, balizas });
+    expect(barajado.mensaje).toContain(`van ${1_000 + balizas} en las últimas 24 h (contadas unas ${balizas} de las balizas de esta orden)`);
+    expect(cabeElBarajado({ filas: 10, escritas24h: 1_000, cuota: 100_000 }).mensaje).not.toContain('balizas de esta orden');
+  });
+
   it('sin reserva, un barajado que agota la cuota pasaría: con ella, no', () => {
     // Justo lo que quedaba: el sitio se quedaría sin escribir hasta la medianoche UTC.
     expect(cabeElBarajado({ filas: 10_000, escritas24h: 70_000, cuota: 100_000 }).cabe).toBe(false);
@@ -728,6 +800,17 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
     expect(parteDeLoAplicado(['las migraciones en remoto', 'el receptor desplegado'])).toBe(
       'Quedó aplicado, en este orden: las migraciones en remoto; el receptor desplegado.',
     );
+  });
+
+  it('la orden que borra a mano las balizas, y el aviso si la orden se corta a mitad', () => {
+    expect(ordenDeBorradoDeLasBalizas('remota')).toBe(
+      `cd medicion && npx --yes wrangler@4.151.1 d1 execute medicion --remote --command "${SQL_DE_BORRADO}"`,
+    );
+    expect(ordenDeBorradoDeLasBalizas('local')).toContain('--local --command');
+    const aviso = avisoDeInterrupcion('SIGINT');
+    expect(aviso).toContain('(SIGINT)');
+    expect(aviso).toContain('deployments list');
+    expect(aviso).toContain(ordenDeBorradoDeLasBalizas('remota'));
   });
 
   it('con algo aplicado, el parte da los instantes desde los que se vuelve con Time Travel', () => {
