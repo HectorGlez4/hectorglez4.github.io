@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { EVENTOS, EVENTOS_VALIDOS, guionDeMedicion } from '../../src/lib/medicion.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
-import { CONSTRUCTORES, DESTINOS_VALIDOS, DESTINO_OPACO } from '../../src/lib/compartir.ts';
+import { CONSTRUCTORES, DESTINOS_OFRECIDOS, DESTINOS_VALIDOS, DESTINO_OPACO } from '../../src/lib/compartir.ts';
 import { DESTINOS_DE_ENLACE, DESTINO_DE_IMAGEN } from '../../src/lib/destinos.ts';
 import { interpretar } from '../../medicion/receptor.ts';
 import worker from '../../medicion/worker.ts';
@@ -87,6 +87,16 @@ describe('Historia 10.4 — el destino', () => {
     // Historia 23.2 — los destinos se parten en enlace, con constructor, e imagen, sin él.
     expect(Object.keys(CONSTRUCTORES)).toEqual([...DESTINOS_DE_ENLACE]);
     expect(DESTINOS_VALIDOS).toEqual([...DESTINOS_DE_ENLACE, DESTINO_DE_IMAGEN, 'opaco']);
+  });
+
+  it('los ofrecidos son subconjunto de los de enlace: todo lo que se pinta tiene constructor', () => {
+    // Historia 23.2 — la invariante de siempre, escrita sobre la lista que pinta la página. Vale
+    // también entre la 23 y la 25, cuando los ofrecidos son menos que los de enlace.
+    expect(DESTINOS_OFRECIDOS.length).toBeGreaterThan(0);
+    for (const destino of DESTINOS_OFRECIDOS) {
+      expect(DESTINOS_DE_ENLACE as readonly string[], destino.id).toContain(destino.id);
+      expect(destino, destino.id).toBe(CONSTRUCTORES[destino.id]);
+    }
   });
 
   it('un destino inventado no se registra, pero la compartición sí se cuenta', () => {

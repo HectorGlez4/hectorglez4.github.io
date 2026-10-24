@@ -360,6 +360,13 @@ Hecho en el repositorio:
   solo en los eventos que lo declaran y solo si es de su conjunto; fuera de eso se descarta el
   campo, nunca el evento. La Marca de origen se sigue guardando en todo evento, como la envía
   el guion de la v7.1, para que el receptor nuevo no pierda nada del sitio viejo.
+
+  **Corte de serie: las acciones dejan de llevar `origen` el día que se despliega el sitio de
+  la v8.** Su guion manda la Marca de origen solo con las vistas y la lectura (AD-13), así que
+  desde ese día `copiado`, `descarga-de-imagen` y las dos comparticiones llegan con `origen`
+  nulo. Ninguna consulta de esta sección reparte acciones por red, pero una que lo haga cambia
+  de sentido esa jornada: lo de antes y lo de después no se comparan. Entra en la lista de
+  cortes de serie de la Historia 23.10, con la jornada de despliegue del sitio.
 - `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
   agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
   Inserta con `rowid` aleatorio (`abs(random())`, Historia 23.12), así que el orden de las
@@ -388,7 +395,7 @@ Hecho en el repositorio:
   un 20 % más (49 MB frente a 41), y barajar lo ya escrito la creció algo más (50 MB).
   Barajar reescribe cada fila y sus dos entradas de índice, unas tres filas escritas por
   fila, que D1 cuenta contra la cuota de escritura del día (AD-13). D1 admite 500 MB por
-  base en el plan gratuito; el tamaño de hoy lo da `npx wrangler d1 info medicion`, y lo
+  base en el plan gratuito; el tamaño de hoy lo da `npx --yes wrangler@4.151.1 d1 info medicion`, y lo
   informará la orden de la 23.10.
 
   Mientras el Worker en vivo no se redespliegue con este cambio sigue numerando en orden de
@@ -479,15 +486,15 @@ Consultar, sin panel de nadie:
 
 ```bash
 # Vistas de Página de Cita por jornada — SM-2, SM-3.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, COUNT(*) FROM eventos WHERE evento='vista-de-cita' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
 # Lo que se llevaron: copiado y descarga — SM-5.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, COUNT(*) FROM eventos WHERE evento IN ('copiado','descarga-de-imagen') GROUP BY evento"
 
 # Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT consulta, COUNT(*) c FROM eventos WHERE evento='busqueda-sin-resultados' GROUP BY consulta ORDER BY c DESC LIMIT 40"
 ```
 
@@ -513,13 +520,13 @@ entra por un enlace a `/autor/<slug>/2/` no deja fila de vista.
 
 ```bash
 # Cuál de las cinco redes trae visitas, por jornada y por evento.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, origen, evento, COUNT(*) visitas FROM eventos \
    WHERE evento IN ('vista-de-cita','vista-de-superficie') AND origen IS NOT NULL \
    GROUP BY jornada, origen, evento ORDER BY jornada DESC, visitas DESC"
 
 # El mes entero, por origen y evento, para decidir dónde va el tiempo del siguiente.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT origen, evento, COUNT(*) visitas FROM eventos \
    WHERE evento IN ('vista-de-cita','vista-de-superficie') AND origen IS NOT NULL \
    AND jornada >= date('now','-30 days') \
@@ -527,12 +534,12 @@ npx wrangler d1 execute medicion --remote --command \
 
 # Recuento por evento, todos los orígenes — aquí aparecería también una baliza de
 # comprobación que no se hubiera borrado.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, ruta = '/__comprobacion/' comprobacion, COUNT(*) n FROM eventos \
    GROUP BY evento, comprobacion ORDER BY evento"
 
 # Proxy de profundidad: vista-de-cita / vista-de-superficie, POR JORNADA, últimos 30 días.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, \
      SUM(evento='vista-de-cita') citas, \
      SUM(evento='vista-de-superficie') superficies, \
@@ -541,7 +548,7 @@ npx wrangler d1 execute medicion --remote --command \
    GROUP BY jornada ORDER BY jornada DESC"
 
 # La misma razón, separando lo que llega con marca de origen (el Canal) de lo que no.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, origen IS NOT NULL con_origen, \
      SUM(evento='vista-de-cita') citas, \
      SUM(evento='vista-de-superficie') superficies, \
@@ -576,32 +583,58 @@ git add medicion/huella-del-vocabulario.json && git commit   # la huella, con su
 `desplegar` hace, en este orden, y se para con 1 en el primer fallo diciendo qué quedó
 aplicado —sin reintentar migraciones ni despliegues—:
 
-1. Comprueba la invocación, `MEDICION_ENDPOINT` (con `http(s)://`) y la sesión de `wrangler`
-   (`whoami --json`). Sin cualquiera de las tres sale con **2**, antes de tocar nada.
+1. Comprueba la invocación, `MEDICION_ENDPOINT` (con `http(s)://`, y nunca la máquina propia:
+   contra el receptor local está `ensayo`) y la sesión de `wrangler` (`whoami --json`). Sin
+   cualquiera de las tres sale con **2**, antes de tocar nada.
 2. Exige el árbol limpio en `medicion/` y `src/lib/`: la huella nombra el commit, y el commit
-   tiene que contener lo que se despliega.
-3. Coteja el receptor de la rama contra lo que envía el sitio en vivo: la huella versionada o,
-   si no la hay —lo dice—, el vocabulario de `origin/main`. Si el receptor nuevo no guarda algo
-   de eso, lo nombra y se para: **nunca se despliega un receptor que no cubra lo que emite el
-   sitio en vivo**.
+   tiene que contener lo que se despliega. Si lo único sin commitear es la huella de un
+   `desplegar` anterior, lo dice así: se commitea antes de repetir.
+3. Coteja el receptor de la rama contra lo que envía el sitio en vivo: **siempre** el
+   vocabulario de `origin/main` —el que tenga este clon, sin `fetch`; la orden dice su commit y
+   su fecha, así que conviene un `git fetch` antes— y, si la hay, también la huella versionada.
+   Hasta la merge la principal es la v7.1, con la Marca de origen en las acciones, y eso lo
+   pide aunque la huella ya sea de la v8. Si el receptor nuevo no guarda algo de eso, lo nombra
+   y se para: **nunca se despliega un receptor que no cubra lo que emite el sitio en vivo**.
 4. Cuenta las filas por jornada y evento (sin las balizas) y mira la tabla: si no es la de
    partida ni la migrada, la nombra y se para sin aplicar nada, porque `ADD COLUMN` no es
-   idempotente.
+   idempotente. Dice el instante anterior a la migración.
 5. Aplica las migraciones en remoto (`d1 migrations apply --remote`) y despliega el receptor
    (`wrangler deploy`), con `wrangler` 4.151.1 y `--remote` siempre explícito.
 6. **La baliza:** envía a `/__comprobacion/` una baliza por cada valor de cada campo de cada
-   evento del vocabulario, lee las filas con `CAST(rowid AS TEXT)` y las coteja con lo esperado,
-   hasta tres veces —un receptor recién desplegado tarda en llegar a todas partes—. Las borra.
-   Si los `rowid` son contiguos, el receptor en vivo numera en orden de llegada: se para y **no
+   evento del vocabulario y, por evento, otra con valores que ningún conjunto admite y texto
+   donde el evento no lo lleva, más una de un evento inventado: lo que el receptor guarda y lo
+   que tiene que descartar. Lee las filas con `CAST(rowid AS TEXT)` y las coteja con lo
+   esperado, hasta tres veces —un receptor recién desplegado tarda en llegar a todas partes—.
+   **Las borra siempre**, casen o no, y si no puede lo dice con la orden que las borra. Si dos
+   `rowid` vecinos están cerca, el receptor en vivo numera en orden de llegada: se para y **no
    baraja**.
 7. **El barajado:** `UPDATE eventos SET rowid = abs(random())`, que reescribe cada fila y sus
    dos entradas de índice, unas **tres filas escritas por fila**. Antes lo cuenta contra la
    cuota de escritura del día (`CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1`, 100.000 en el plan
-   gratuito), con las filas escritas en 24 h que da `d1 info --json`, que pecan por exceso. Si
-   no cabe, lo dice con las cifras y sale con 1: **se repite otro día, nunca troceado**.
-8. Vuelve a contar y exige que las jornadas cerradas sean idénticas y que la de hoy solo haya
-   crecido: migrar y barajar no pierden ni inventan filas. No se copia ni se guarda ninguna.
+   gratuito), con las filas escritas en 24 h que da `d1 info --json`, que pecan por exceso, **y
+   otras tantas de reserva** para lo que el sitio escriba hasta las 00:00 UTC: pasada la cuota,
+   D1 rechaza cada `INSERT` hasta la medianoche y el Worker lo calla, así que un barajado que la
+   agotara justo dejaría el resto del día a cero. La cuota es de la cuenta: lo que escriba otra
+   base D1 suya no está contado. Si no cabe, lo dice con las cifras y sale con 1: **se repite
+   otro día, nunca troceado**. Dice el instante anterior al barajado.
+8. Vuelve a contar, **da los recuentos de antes y de después** —una línea por jornada, que la
+   23.3 anota con fecha en su spec— y exige que las jornadas cerradas sean idénticas y que la de
+   hoy y la víspera solo hayan crecido (el reloj del Worker puede ir unos segundos por detrás al
+   cruzar la medianoche): migrar y barajar no pierden ni inventan filas. No se copia ni se
+   guarda ninguna.
 9. Escribe la huella. No hace commit.
+
+Cuando se para después de aplicar algo, el parte dice qué quedó aplicado y los instantes
+anteriores a la migración y al barajado, con la orden de Time Travel de cada uno (abajo); no la
+corre.
+
+**Si no llega ninguna baliza a la tabla** —el parte lo dice—, el Worker contesta 204 y no
+escribe, por una de dos causas que el `catch` calla: el receptor que contesta no es el de esta
+rama, o D1 rechaza su `INSERT` porque la tabla no tiene una columna —una migración sin
+aplicar—. Lo distingue la versión desplegada, `npx --yes wrangler@4.151.1 deployments list` en
+`medicion/`, junto con `PRAGMA table_info(eventos)`. Para volver a la última versión que
+guardaba, por su identificador: `npx --yes wrangler@4.151.1 versions list` y `rollback <id>` —sin
+identificador, `rollback` va a la versión anterior, que puede ser otra que tampoco guarde—.
 
 Se repite en **cada** despliegue del receptor —el barajado es idempotente—, y después, con la
 huella commiteada, se despliega el sitio. `npm test` está en rojo entre que la rama toca
@@ -613,9 +646,10 @@ huella commiteada, se despliega el sitio. `npm test` está en rojo entre que la 
 npm run medicion -- comprobar   # acto de Héctor
 ```
 
-Envía las balizas del vocabulario de la huella, las coteja, mira que el `rowid` sea aleatorio y
-las borra. Sale con 1 nombrando la diferencia si el receptor en vivo no guarda lo que la huella
-dice o numera en orden de llegada —un receptor anterior a la 23.12, también tras una vuelta
+Envía las balizas del vocabulario de la huella —las que guarda y las que descarta—, las coteja,
+mira que el `rowid` sea aleatorio y las borra. Sale con 1 nombrando la diferencia si el receptor
+en vivo no guarda lo que la huella dice, guarda lo que debía descartar o numera en orden de
+llegada —un receptor anterior a la 23.12, también tras una vuelta
 atrás—; lo cierra repetir la 23.3, `npm run medicion -- desplegar`. Es lo que sustituye a las
 comprobaciones a mano con `curl` de las Historias 20.1 y 23.12.
 
@@ -630,9 +664,13 @@ receptor anterior a la 23.12 vuelve a numerar en orden de llegada, y lo que lleg
 baraja el siguiente `desplegar` que pase la comprobación.
 
 **Recuperar D1 tras un error** es Time Travel: `npx --yes wrangler@4.151.1 d1 time-travel
-restore medicion --timestamp=<instante>`, dentro de los 7 días del plan gratuito o los 30 del de
-pago. **Sobrescribe todo lo escrito después** de ese instante, y devuelve el orden de llegada de
-antes del barajado: es un acto de Héctor, y ninguna orden de `tools/` restaura producción.
+restore medicion --timestamp=<instante>`, en `medicion/`, dentro de los 7 días del plan gratuito
+o los 30 del de pago. **Sobrescribe todo lo escrito después** de ese instante, y devuelve el
+orden de llegada de antes del barajado: es un acto de Héctor, y ninguna orden de `tools/`
+restaura producción. Los instantes los da el parte de `desplegar`. Volver a antes del barajado
+conserva las columnas nuevas. Volver a antes de la migración devuelve **también la tabla de
+antes**, sin ellas: con el receptor nuevo en vivo cada `INSERT` fallaría en silencio, así que
+antes se vuelve al receptor anterior (`versions list` y `rollback <id>`).
 
 **El receptor local**, para probar sin tocar producción:
 
@@ -641,8 +679,11 @@ npm run medicion -- local    # migra el D1 local (medicion/.wrangler/) y arranca
 npm run medicion -- ensayo   # en otra terminal: la comprobación de desplegar, contra el local
 ```
 
-`ensayo` sale con 0 si cada evento y cada valor del vocabulario llegó al D1 local, el `rowid` es
-aleatorio y las balizas se borraron. Las pruebas de Playwright levantan el mismo receptor local
+`ensayo` sale con 0 si cada evento y cada valor del vocabulario llegó al D1 local, lo ajeno se
+descartó, el `rowid` es aleatorio y las balizas se borraron. El D1 local no se vacía nunca solo:
+lo que dejan las pruebas se acumula en `medicion/.wrangler/`, que no se versiona y se puede
+borrar entero (el siguiente `local` lo vuelve a migrar). Si `local` no puede migrarlo —un D1
+local creado a mano desde `esquema.sql`, sin `d1_migrations`—, se borra igual. Las pruebas de Playwright levantan el mismo receptor local
 y construyen el sitio con `MEDICION_ENDPOINT=http://localhost:8787/` (`playwright.config.ts`):
 toda construcción de rama con medición —Playwright, y la de Lighthouse de la 23.11, que se hace
 a mano con `MEDICION_ENDPOINT=http://localhost:8787/ npm run build` y el receptor local en
@@ -652,13 +693,13 @@ marcha— apunta a `wrangler dev` con D1 local, nunca a producción.
 
 ```bash
 # Cuánto se comparte y hacia dónde — SM-7, FR-20.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, destino, COUNT(*) n FROM eventos \
    WHERE evento IN ('comparticion-de-imagen','comparticion-de-enlace') \
    GROUP BY evento, destino ORDER BY n DESC"
 
 # SM-C3 — si la compartición creció a costa del copiado, por jornada.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, \
      SUM(evento IN ('copiado','descarga-de-imagen')) llevarselo, \
      SUM(evento IN ('comparticion-de-imagen','comparticion-de-enlace')) compartirlo \

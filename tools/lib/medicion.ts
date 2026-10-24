@@ -4,9 +4,12 @@
  * Aquí se decide todo lo que la orden hace y nada se hace: qué argumentos lleva cada orden de
  * `wrangler`, qué SQL se envía, qué balizas de prueba cubren el vocabulario, cómo se lee lo que
  * contesta D1, si el `rowid` es aleatorio, si el barajado cabe en la cuota del día, si los
- * recuentos de antes y de después casan y cómo se escribe y se lee la huella. La red, los
- * procesos y el disco son de la cáscara, `tools/medicion.ts`, y esto se prueba con respuestas
- * fijas en `tests/unit/medicion-orden.test.ts`, sin tocar ningún D1.
+ * recuentos de antes y de después casan y cómo se escribe y se lee la huella. También el orden
+ * de cada subcomando —`desplegar`, `comprobar`, `ensayo`— y dónde se para, como secuencias que
+ * reciben sus efectos (`Efectos`). La red, los procesos y el disco son de la cáscara,
+ * `tools/medicion.ts`, y esto se prueba con respuestas fijas en
+ * `tests/unit/medicion-orden.test.ts` y con un D1 en memoria en
+ * `tests/unit/medicion-secuencias.test.ts`, sin tocar ningún D1.
  *
  * Ningún SQL de aquí ordena: el `rowid` es aleatorio (Historia 23.12) y solo lo nombran la
  * lectura de las balizas de prueba, como texto, y el barajado.
@@ -14,6 +17,7 @@
 
 import * as vocabularioDeLaRama from '../../src/lib/vocabulario.ts';
 import type { DeclaracionDeCampo } from '../../src/lib/vocabulario.ts';
+import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
 import type { Registro } from '../../medicion/receptor.ts';
 import { motivosDeArgumentosNoReconocidos } from './cli.ts';
 
@@ -138,11 +142,18 @@ export const SQL_DE_BORRADO = `DELETE FROM eventos WHERE ruta = '${RUTA_DE_COMPR
  */
 export const SQL_DE_BARAJADO = 'UPDATE eventos SET rowid = abs(random())';
 
+/** Lo que puede ser el nombre de una columna en el SQL que compone esta orden. */
+export const IDENTIFICADOR_DE_COLUMNA = /^[a-z][a-z0-9_]*$/;
+
 /**
  * Las balizas de prueba tal como quedaron, con el `rowid` leído como texto —un entero de 64
- * bits se redondea en JavaScript— y las columnas de los campos que se comprueban.
+ * bits se redondea en JavaScript— y las columnas de los campos que se comprueban. Los campos
+ * salen de un vocabulario —el de la rama o el de la huella versionada—, y solo un
+ * identificador entra en el SQL: otra cosa lanza.
  */
 export function sqlDeLasBalizas(campos: readonly string[]): string {
+  const ajeno = campos.find((campo) => !IDENTIFICADOR_DE_COLUMNA.test(campo));
+  if (ajeno !== undefined) throw new Error(`«${ajeno}» no es un nombre de columna.`);
   const columnas = ['evento', 'ruta', ...campos].join(', ');
   return (
     `SELECT CAST(rowid AS TEXT) AS fila, ${columnas} FROM eventos ` +
@@ -193,8 +204,21 @@ export function puntoFinalDeComprobacion(entorno: Record<string, string | undefi
   if (direccion.protocol !== 'http:' && direccion.protocol !== 'https:') {
     return { ok: false, motivo: 'MEDICION_ENDPOINT no es una dirección http(s).' };
   }
+  // `desplegar` y `comprobar` leen el D1 remoto: con las balizas enviadas a un receptor local,
+  // migraría y desplegaría en remoto para pararse después sin haber visto ninguna.
+  if (HOSTS_LOCALES.includes(direccion.hostname.toLowerCase())) {
+    return {
+      ok: false,
+      motivo:
+        'MEDICION_ENDPOINT apunta a un receptor local, y desplegar y comprobar leen el D1 remoto. ' +
+        'Contra el local está npm run medicion -- ensayo.',
+    };
+  }
   return { ok: true, url };
 }
+
+/** Los nombres de la máquina propia, que nunca son el receptor en vivo. */
+const HOSTS_LOCALES: readonly string[] = ['localhost', '127.0.0.1', '[::1]', '0.0.0.0'];
 
 // ── Lo que contesta `wrangler` ────────────────────────────────────────────────────────────
 
@@ -274,33 +298,53 @@ export interface Migracion {
   sql: string;
 }
 
-/** El SQL sin comentarios. Las migraciones no llevan literales con `--` ni con `/*`. */
+/**
+ * El SQL sin comentarios. Las migraciones no llevan literales —ni con `--` ni con `/*` ni sin
+ * ellos—: `columnasDeLaMigracion` se niega ante una comilla, así que esto no puede cortar uno.
+ */
 function sinComentarios(sql: string): string {
   return sql.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/--[^\n]*/g, ' ');
 }
 
-/** Las columnas que una migración crea o añade, en su orden. */
+/** Lo que este lector no sabe leer, y por eso rechaza en vez de leerlo mal. */
+const FORMA_QUE_NO_SE_LEE = /['"`[\]()]/;
+
+/**
+ * Las columnas que una migración crea o añade, en su orden.
+ *
+ * Lee solo tres sentencias —`CREATE TABLE eventos`, `CREATE INDEX` y `ALTER TABLE eventos ADD
+ * COLUMN`—, cada definición de columna como nombre, tipo y, si acaso, `NOT NULL`. **Lanza ante
+ * cualquier otra cosa**: otra sentencia, un `DEFAULT (…)`, un nombre entre comillas, un
+ * literal. Leerla mal haría que `estadoDeLaTabla` diera por «otra» una tabla buena —o por buena
+ * una que no lo es—, así que una migración que este lector no entiende para la orden con su
+ * motivo, y quien la escriba amplía el lector y su prueba antes.
+ */
 export function columnasDeLaMigracion(sql: string): Columna[] {
-  const limpio = sinComentarios(sql);
   const columnas: Columna[] = [];
-  const creacion = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?eventos\s*\(([\s\S]*?)\)\s*;/i.exec(limpio);
-  if (creacion) {
-    for (const definicion of creacion[1].split(',')) {
-      const columna = columnaDe(definicion);
-      if (columna) columnas.push(columna);
+  for (const sentencia of sinComentarios(sql).split(';').map((s) => s.trim().replace(/\s+/g, ' '))) {
+    if (sentencia === '') continue;
+    const creacion = /^CREATE TABLE (?:IF NOT EXISTS )?eventos ?\((.*)\)$/i.exec(sentencia);
+    if (creacion) {
+      if (FORMA_QUE_NO_SE_LEE.test(creacion[1])) throw new Error(`no sé leer las columnas de «${sentencia}».`);
+      columnas.push(...creacion[1].split(',').map(columnaDe));
+      continue;
     }
-  }
-  for (const alta of limpio.matchAll(/ALTER\s+TABLE\s+eventos\s+ADD\s+(?:COLUMN\s+)?([^;]+);/gi)) {
-    const columna = columnaDe(alta[1]);
-    if (columna) columnas.push(columna);
+    if (/^CREATE (?:UNIQUE )?INDEX /i.test(sentencia)) continue;
+    const alta = /^ALTER TABLE eventos ADD (?:COLUMN )?(.*)$/i.exec(sentencia);
+    if (alta) {
+      if (FORMA_QUE_NO_SE_LEE.test(alta[1])) throw new Error(`no sé leer la columna de «${sentencia}».`);
+      columnas.push(columnaDe(alta[1]));
+      continue;
+    }
+    throw new Error(`no sé leer la sentencia «${sentencia}»: solo CREATE TABLE eventos, CREATE INDEX y ADD COLUMN.`);
   }
   return columnas;
 }
 
-function columnaDe(definicion: string): Columna | undefined {
-  const partes = /^\s*([a-z_][a-z0-9_]*)\s+([a-z]+)(.*)$/is.exec(definicion);
-  if (!partes) return undefined;
-  return { nombre: partes[1], tipo: partes[2].toUpperCase(), noNula: /\bNOT\s+NULL\b/i.test(partes[3]) };
+function columnaDe(definicion: string): Columna {
+  const partes = /^\s*([a-z_][a-z0-9_]*)\s+([a-z]+)((?:\s+NOT\s+NULL)?)\s*$/i.exec(definicion);
+  if (!partes) throw new Error(`no sé leer la definición de columna «${definicion.trim()}».`);
+  return { nombre: partes[1], tipo: partes[2].toUpperCase(), noNula: partes[3].trim() !== '' };
 }
 
 /** Las columnas de `PRAGMA table_info(eventos)`. */
@@ -355,9 +399,18 @@ export function estadoDeLaTabla(
     };
   }
 
+  const porMigracion: Columna[][] = [];
+  for (const migracion of ordenadas) {
+    try {
+      porMigracion.push(columnasDeLaMigracion(migracion.sql));
+    } catch (error) {
+      return { estado: 'otra', motivo: `${migracion.nombre}: ${(error as Error).message} No se aplica nada.` };
+    }
+  }
+
   const acumuladas: Columna[] = [];
   for (let i = 0; i < ordenadas.length; i++) {
-    acumuladas.push(...columnasDeLaMigracion(ordenadas[i].sql));
+    acumuladas.push(...porMigracion[i]);
     const anotadasHastaAqui = nombres.slice(1, i + 1);
     const posteriores = anotadas.filter((a) => a !== nombres[0]);
     const coinciden =
@@ -373,7 +426,7 @@ export function estadoDeLaTabla(
     motivo:
       'la tabla eventos no es la de partida ni la migrada: tiene ' +
       `${describir(columnas)}, y d1_migrations anota ${anotadas.length === 0 ? 'ninguna' : anotadas.join(', ')}. ` +
-      `La de partida es ${describir(columnasDeLaMigracion(ordenadas[0].sql))}; ` +
+      `La de partida es ${describir(porMigracion[0])}; ` +
       `la migrada, ${describir(acumuladas)}. No se aplica nada: ADD COLUMN no es idempotente.`,
   };
 }
@@ -507,6 +560,12 @@ export function leerHuella(texto: string): HuellaLeida {
       }
       for (const [campo, declaracion] of Object.entries(campos)) {
         const lugar = `vocabulario.eventos.${evento}.${campo}`;
+        // El nombre de un campo es el de una columna, y `comprobar` lo pone en el SQL que lee
+        // las balizas en remoto: solo un identificador entra.
+        if (!IDENTIFICADOR_DE_COLUMNA.test(campo)) {
+          motivos.push(`${lugar}: «${campo}» no es un nombre de columna (${IDENTIFICADOR_DE_COLUMNA.source}).`);
+          continue;
+        }
         if (!esObjeto(declaracion)) {
           motivos.push(`${lugar} no es un objeto.`);
           continue;
@@ -589,9 +648,44 @@ export function diferenciasDeHuella(
   }
   const tramos = (v: VocabularioDeHuella) => v.tramos.map((t) => `${t.desde}:${t.rotulo}`).join(', ');
   if (tramos(a) !== tramos(b)) {
-    diferencias.push(`los tramos: ${lados.a} dice [${tramos(a)}] y ${lados.b} [${tramos(b)}].`);
+    // Otros cortes parten la serie: lo de antes no se compara con lo de después (AD-13).
+    diferencias.push(
+      `los tramos: ${lados.a} dice [${tramos(a)}] y ${lados.b} [${tramos(b)}]. Cambiar los cortes abre un ` +
+        'corte de serie: anótalo, con su jornada de despliegue, en la lista de cortes de serie (Historia 23.10).',
+    );
   }
   return diferencias;
+}
+
+/**
+ * Lo que `tests/unit/huella.test.ts` exige de la huella versionada, como lista de fallos —vacía
+ * si casa—: que esté, que tenga forma de huella y que su vocabulario sea el de `src/lib/`, con
+ * la orden que cierra cada caso. Vive aquí, y no en la prueba, para que sus tres ramas se
+ * prueben con huellas de mentira (`medicion-orden.test.ts`): la prueba de verdad solo puede ver
+ * el fichero que haya en el repositorio, y hasta la 23.3 no hay ninguno.
+ */
+export function juicioDeLaHuella(
+  texto: string | undefined,
+  vocabulario: VocabularioDeHuella = huellaDelVocabulario(),
+): string[] {
+  if (texto === undefined) {
+    return [
+      `Sin huella versionada en ${RUTA_DE_LA_HUELLA}: el receptor en vivo no se ha desplegado con el ` +
+        'vocabulario de src/lib/vocabulario.ts. La escribe `npm run medicion -- desplegar` (Historia 23.3), ' +
+        'que corre Héctor desde la rama; nunca se escribe a mano.',
+    ];
+  }
+  const leida = leerHuella(texto);
+  if (!leida.ok) {
+    return [`${RUTA_DE_LA_HUELLA} no tiene forma de huella; la reescribe npm run medicion -- desplegar.`, ...leida.motivos];
+  }
+  const diferencias = diferenciasDeHuella(leida.huella.vocabulario, vocabulario);
+  if (diferencias.length === 0) return [];
+  return [
+    `El vocabulario de src/lib/ no es el desplegado (huella del commit ${leida.huella.commit}, ` +
+      `${leida.huella.escritaEl}). Lo cierra repetir npm run medicion -- desplegar desde esta rama (23.3).`,
+    ...diferencias,
+  ];
 }
 
 /**
@@ -681,26 +775,51 @@ export function camposDe(vocabulario: VocabularioDeHuella): string[] {
   return [...new Set(Object.values(vocabulario.eventos).flatMap((campos) => Object.keys(campos)))].sort();
 }
 
+/** El valor que ningún conjunto admite, en las balizas que comprueban lo que se descarta. */
+export const VALOR_AJENO = 'fuera-del-conjunto';
+
+/** Un evento que ningún vocabulario declara: el receptor no lo guarda. */
+export const EVENTO_AJENO = 'evento-de-comprobacion';
+
 export interface BalizasDePrueba {
   /** Lo que se envía al receptor, una carga por baliza. */
   balizas: Record<string, string>[];
-  /** La fila que cada una tiene que dejar: evento, ruta y cada campo, nulo si no lo lleva. */
-  esperadas: Record<string, string | null>[];
+  /**
+   * La fila que cada baliza tiene que dejar —evento, ruta y cada campo, nulo si no lo lleva—, en
+   * su mismo orden; `null` para la que no debe dejar ninguna.
+   */
+  esperadas: (Record<string, string | null> | null)[];
   /** Las columnas que se leen para cotejarlas. */
   campos: string[];
 }
 
 /**
- * Las balizas que cubren todo par evento–campo–valor del vocabulario, a `/__comprobacion/`.
+ * Las balizas de prueba, todas a `/__comprobacion/`: las que el receptor tiene que guardar y las
+ * que tiene que descartar.
  *
- * Por evento, tantas como valores tenga su campo más largo: la i-ésima lleva el valor i de cada
- * campo, y los campos más cortos vuelven a empezar. Así cada valor de cada campo sale al menos
- * una vez sin una baliza por combinación.
+ * **Lo que guarda.** Cubren todo par evento–campo–valor del vocabulario: por evento, tantas
+ * como valores tenga su campo más largo; la i-ésima lleva el valor i de cada campo, y los campos
+ * más cortos vuelven a empezar. Así cada valor de cada campo sale al menos una vez sin una
+ * baliza por combinación.
+ *
+ * **Lo que descarta**, que es la propiedad que el receptor existe para guardar (NFR-10, NFR-11):
+ * por evento, una baliza con `VALOR_AJENO` en cada campo de conjunto cerrado —el suyo y los
+ * ajenos— y texto en cada campo de texto que **no** declara, que tiene que dejar la fila con
+ * todos sus campos nulos; y una baliza de `EVENTO_AJENO`, que no tiene que dejar ninguna. Un
+ * receptor que guardara todo lo que le llega pasaría lo primero y no esto.
  */
 export function balizasDePrueba(vocabulario: VocabularioDeHuella): BalizasDePrueba {
   const campos = camposDe(vocabulario);
   const balizas: Record<string, string>[] = [];
-  const esperadas: Record<string, string | null>[] = [];
+  const esperadas: (Record<string, string | null> | null)[] = [];
+  const filaVacia = (evento: string) => {
+    const fila: Record<string, string | null> = { evento, ruta: RUTA_DE_COMPROBACION };
+    for (const campo of campos) fila[campo] = null;
+    return fila;
+  };
+  const esTexto = (campo: string) =>
+    Object.values(vocabulario.eventos).some((declarados) => declarados[campo]?.valores === 'texto');
+
   for (const [evento, declarados] of Object.entries(vocabulario.eventos)) {
     const listas = Object.entries(declarados).map(
       ([campo, { valores }]) => [campo, valores === 'texto' ? [TEXTO_DE_PRUEBA] : valores] as const,
@@ -708,8 +827,7 @@ export function balizasDePrueba(vocabulario: VocabularioDeHuella): BalizasDePrue
     const cuantas = Math.max(1, ...listas.map(([, valores]) => valores.length));
     for (let i = 0; i < cuantas; i++) {
       const baliza: Record<string, string> = { evento, ruta: RUTA_DE_COMPROBACION };
-      const esperada: Record<string, string | null> = { evento, ruta: RUTA_DE_COMPROBACION };
-      for (const campo of campos) esperada[campo] = null;
+      const esperada = filaVacia(evento);
       for (const [campo, valores] of listas) {
         const valor = valores[i % valores.length];
         baliza[claveDe(vocabulario, campo)] = valor;
@@ -718,7 +836,18 @@ export function balizasDePrueba(vocabulario: VocabularioDeHuella): BalizasDePrue
       balizas.push(baliza);
       esperadas.push(esperada);
     }
+
+    const descartable: Record<string, string> = { evento, ruta: RUTA_DE_COMPROBACION };
+    for (const campo of campos) {
+      if (!esTexto(campo)) descartable[claveDe(vocabulario, campo)] = VALOR_AJENO;
+      else if (declarados[campo] === undefined) descartable[claveDe(vocabulario, campo)] = TEXTO_DE_PRUEBA;
+    }
+    balizas.push(descartable);
+    esperadas.push(filaVacia(evento));
   }
+
+  balizas.push({ evento: EVENTO_AJENO, ruta: RUTA_DE_COMPROBACION });
+  esperadas.push(null);
   return { balizas, esperadas, campos };
 }
 
@@ -727,16 +856,18 @@ const firmaDe = (fila: Record<string, unknown>, columnas: readonly string[]) =>
 
 /**
  * Lo esperado frente a lo leído, como multiconjuntos de filas sin el `rowid`. Cada fila que
- * falta y cada una que sobra, nombradas; vacío si casan.
+ * falta y cada una que sobra, nombradas; vacío si casan. Una esperada `null` es una baliza que
+ * no debe dejar fila: si la deja, sobra.
  */
 export function cotejarFilas(
-  esperadas: readonly Record<string, string | null>[],
+  esperadas: readonly (Record<string, string | null> | null)[],
   leidas: readonly Record<string, unknown>[],
   campos: readonly string[],
 ): string[] {
   const columnas = ['evento', 'ruta', ...campos];
   const pendientes = new Map<string, number>();
   for (const fila of esperadas) {
+    if (fila === null) continue;
     const firma = firmaDe(fila, columnas);
     pendientes.set(firma, (pendientes.get(firma) ?? 0) + 1);
   }
@@ -756,10 +887,13 @@ export type Orden = 'aleatorio' | 'contiguo' | 'insuficiente';
 /**
  * Si el receptor numera al azar, por los `rowid` de las balizas de prueba, leídos como texto.
  *
- * Con `rowid` aleatorio entre 0 y 2^63, unas pocas filas quedan separadas por mucho más de 2^32;
- * numerando en orden de llegada quedan contiguas, o casi si entretanto llegó tráfico —también
- * con 19 cifras, cuando un receptor viejo numera `max(rowid)+1` sobre los aleatorios—. Con
- * menos de dos no se puede decir.
+ * Con `rowid` aleatorio entre 0 y 2^63, un centenar de filas quedan separadas, **cada una de su
+ * vecina**, por mucho más de 2^32: que dos caigan más cerca tiene una probabilidad de unas
+ * cuatro entre un millón. Numerando en orden de llegada quedan contiguas, o casi si entretanto llegó
+ * tráfico —también con 19 cifras, cuando un receptor viejo numera `max(rowid)+1` sobre los
+ * aleatorios—. Se mira cada hueco entre vecinas y no solo el extremo: con dos versiones del
+ * receptor a la vez mientras el despliegue se propaga, una sola fila aleatoria entre las
+ * contiguas daría un extremo enorme. Con menos de dos no se puede decir.
  */
 export function rowidAleatorio(filas: readonly string[]): Orden {
   const numeros: bigint[] = [];
@@ -768,13 +902,11 @@ export function rowidAleatorio(filas: readonly string[]): Orden {
     numeros.push(BigInt(fila.trim()));
   }
   if (numeros.length < 2) return 'insuficiente';
-  let menor = numeros[0];
-  let mayor = numeros[0];
-  for (const n of numeros) {
-    if (n < menor) menor = n;
-    if (n > mayor) mayor = n;
+  numeros.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  for (let i = 1; i < numeros.length; i++) {
+    if (numeros[i] - numeros[i - 1] < 2n ** 32n) return 'contiguo';
   }
-  return mayor - menor >= 2n ** 32n ? 'aleatorio' : 'contiguo';
+  return 'aleatorio';
 }
 
 // ── La cuota y los recuentos ──────────────────────────────────────────────────────────────
@@ -782,6 +914,8 @@ export function rowidAleatorio(filas: readonly string[]): Orden {
 export interface Barajado {
   cabe: boolean;
   coste: number;
+  /** Lo que se deja para lo que el sitio escriba hasta las 00:00 UTC. */
+  reserva: number;
   disponible: number;
   mensaje: string;
 }
@@ -789,21 +923,33 @@ export interface Barajado {
 /**
  * Si barajar cabe en lo que queda de la cuota de escritura del día (AD-13): unas tres filas
  * escritas por fila. Si no cabe, no se baraja ni se trocea: se repite otro día.
+ *
+ * **Con reserva para el resto de la jornada.** Pasada la cuota, D1 rechaza toda escritura hasta
+ * las 00:00 UTC y el Worker calla el rechazo: cada evento de lo que quede del día se perdería
+ * en silencio, y se leería después como un cero. Por eso no basta con que el barajado quepa
+ * justo: se reserva para el sitio otro tanto de lo escrito en las últimas 24 h —un día entero
+ * de tráfico, más de lo que puede quedar del de hoy—, que además cubre las balizas de esta
+ * misma orden si `d1 info` aún no las ve. La cuota es **de la cuenta**: lo que escriba hoy otra
+ * base D1 de la misma cuenta no se ve aquí, y el mensaje lo dice.
  */
 export function cabeElBarajado(datos: { filas: number; escritas24h: number; cuota: number }): Barajado {
   const coste = datos.filas * FILAS_ESCRITAS_POR_FILA_BARAJADA;
-  const disponible = Math.max(0, datos.cuota - datos.escritas24h);
-  const cabe = datos.escritas24h + coste <= datos.cuota;
+  const reserva = datos.escritas24h;
+  const disponible = Math.max(0, datos.cuota - datos.escritas24h - reserva);
+  const cabe = datos.escritas24h + reserva + coste <= datos.cuota;
   const cifras =
-    `barajar ${datos.filas} filas escribe unas ${coste} (${FILAS_ESCRITAS_POR_FILA_BARAJADA} por fila), ` +
-    `y de la cuota de ${datos.cuota} filas escritas al día van ${datos.escritas24h} en las últimas 24 h`;
+    `barajar ${datos.filas} filas escribe unas ${coste} (${FILAS_ESCRITAS_POR_FILA_BARAJADA} por fila); ` +
+    `de la cuota de ${datos.cuota} filas escritas al día van ${datos.escritas24h} en las últimas 24 h, ` +
+    `y otras ${reserva} se dejan para lo que el sitio escriba hasta las 00:00 UTC ` +
+    '(la cuota es de la cuenta: lo que escriba hoy otra base D1 suya no está contado)';
   return {
     cabe,
     coste,
+    reserva,
     disponible,
     mensaje: cabe
       ? `El barajado cabe: ${cifras}.`
-      : `El barajado no cabe hoy: ${cifras}, y quedan ${disponible}. No se baraja ni se trocea: ` +
+      : `El barajado no cabe hoy: ${cifras}, así que quedan ${disponible}. No se baraja ni se trocea: ` +
         'repite `npm run medicion -- desplegar` otro día.',
   };
 }
@@ -817,37 +963,511 @@ export function recuentos(filas: readonly Record<string, unknown>[]): Recuentos 
   return mapa;
 }
 
+/** La jornada UTC de un instante. */
+export function jornadaUtc(instante: Date): string {
+  return instante.toISOString().slice(0, 10);
+}
+
+/** La jornada UTC anterior a otra. */
+export function jornadaAnterior(jornada: string): string {
+  const instante = new Date(`${jornada}T00:00:00Z`);
+  instante.setUTCDate(instante.getUTCDate() - 1);
+  return jornadaUtc(instante);
+}
+
 /**
- * Lo que cambió de un recuento a otro y no debía. Las jornadas cerradas —anteriores a `hoy`, en
- * UTC— tienen que ser idénticas: migrar y barajar no pierden ni inventan filas. La de hoy, y las
- * posteriores si la orden cruzó la medianoche, solo pueden crecer: el tráfico sigue llegando.
+ * Lo que cambió de un recuento a otro y no debía. Las jornadas cerradas tienen que ser
+ * idénticas: migrar y barajar no pierden ni inventan filas. Las abiertas solo pueden crecer: el
+ * tráfico sigue llegando. Ninguna puede menguar.
+ *
+ * Abiertas son `hoy` —en UTC, del reloj de quien corre la orden—, las posteriores si la orden
+ * cruzó la medianoche **y la víspera**: el reloj del Worker puede ir unos segundos por detrás
+ * del de este equipo, y justo tras la medianoche seguiría escribiendo en la jornada que aquí ya
+ * se ha cerrado. Juzgarla cerrada pararía la orden después de barajar por una fila legítima.
  */
 export function compararRecuentos(antes: Recuentos, despues: Recuentos, hoy: string): string[] {
+  const abiertaDesde = jornadaAnterior(hoy);
   const diferencias: string[] = [];
   const claves = [...new Set([...antes.keys(), ...despues.keys()])].sort();
   for (const clave of claves) {
     const [jornada] = clave.split(' ');
     const a = antes.get(clave) ?? 0;
     const d = despues.get(clave) ?? 0;
-    if (jornada < hoy && a !== d) {
+    if (jornada < abiertaDesde && a !== d) {
       diferencias.push(`la jornada cerrada ${clave} tenía ${a} filas y ahora tiene ${d}.`);
-    } else if (jornada >= hoy && d < a) {
+    } else if (jornada >= abiertaDesde && d < a) {
       diferencias.push(`la jornada ${clave}, que sigue abierta, tenía ${a} filas y ahora tiene ${d}: solo puede crecer.`);
     }
   }
   return diferencias;
 }
 
-/** La jornada UTC de un instante. */
-export function jornadaUtc(instante: Date): string {
-  return instante.toISOString().slice(0, 10);
+/**
+ * Los recuentos de antes y de después como los da la orden al barajar —los `COUNT` por (jornada,
+ * evento), sin las balizas—, que la 23.3 anota con fecha en su spec: una línea por jornada.
+ */
+export function informeDeRecuentos(antes: Recuentos, despues: Recuentos): string {
+  const porJornada = new Map<string, string[]>();
+  for (const clave of [...new Set([...antes.keys(), ...despues.keys()])].sort()) {
+    const [jornada, evento] = clave.split(' ');
+    porJornada.set(jornada, [...(porJornada.get(jornada) ?? []), `${evento} ${antes.get(clave) ?? 0} → ${despues.get(clave) ?? 0}`]);
+  }
+  const titulo = 'Recuentos por (jornada, evento), antes → después, sin las balizas de prueba';
+  if (porJornada.size === 0) return `${titulo}: la tabla no tiene ninguna fila.`;
+  return [`${titulo}:`, ...[...porJornada].map(([jornada, lineas]) => `  ${jornada}: ${lineas.join(', ')}`)].join('\n');
 }
 
 // ── El parte ──────────────────────────────────────────────────────────────────────────────
 
-/** Lo que quedó hecho en remoto cuando la orden se para, para que nadie tenga que adivinarlo. */
-export function parteDeLoAplicado(aplicado: readonly string[]): string {
-  return aplicado.length === 0
-    ? 'No se aplicó nada en remoto.'
-    : `Quedó aplicado, en este orden: ${aplicado.join('; ')}.`;
+/** Los instantes que `desplegar` deja anotados por si hay que volver atrás con Time Travel. */
+export interface Instantes {
+  antesDeMigrar?: Date;
+  antesDeBarajar?: Date;
+}
+
+/**
+ * La orden de Time Travel que devuelve D1 a un instante. **Nadie la corre más que Héctor**:
+ * sobrescribe todo lo escrito después, y ninguna orden de `tools/` restaura producción.
+ */
+export function ordenDeTimeTravel(instante: Date): string {
+  return (
+    `cd ${DIRECTORIO_DEL_RECEPTOR} && npx --yes ${WRANGLER} d1 time-travel restore ${BASE_DE_DATOS} ` +
+    `--timestamp=${instante.toISOString()}`
+  );
+}
+
+/**
+ * Lo que quedó hecho en remoto cuando la orden se para, para que nadie tenga que adivinarlo, y
+ * —si algo se aplicó— desde qué instante se puede volver con Time Travel (DESPLIEGUE.md §3).
+ *
+ * Volver a antes del barajado conserva las columnas nuevas, y el receptor desplegado sigue
+ * escribiendo. Volver a antes de migrar devuelve **también la tabla de antes**: hecho con el
+ * receptor nuevo en vivo, cada `INSERT` nombraría columnas que ya no existen y el Worker lo
+ * callaría, así que antes va el receptor anterior.
+ */
+export function parteDeLoAplicado(aplicado: readonly string[], instantes: Instantes = {}): string {
+  if (aplicado.length === 0) return 'No se aplicó nada en remoto.';
+  const lineas = [`Quedó aplicado, en este orden: ${aplicado.join('; ')}.`];
+  if (instantes.antesDeBarajar) {
+    lineas.push(
+      `Instante anterior al barajado: ${instantes.antesDeBarajar.toISOString()}. Volver ahí conserva las ` +
+        'columnas nuevas y sobrescribe lo escrito después (acto de Héctor, DESPLIEGUE.md §3): ' +
+        ordenDeTimeTravel(instantes.antesDeBarajar),
+    );
+  }
+  if (instantes.antesDeMigrar) {
+    lineas.push(
+      `Instante anterior a la migración: ${instantes.antesDeMigrar.toISOString()}. Volver ahí devuelve ` +
+        'también la tabla de antes: primero el receptor anterior (versions list y rollback), o cada evento ' +
+        `se perdería; sobrescribe lo escrito después (acto de Héctor, DESPLIEGUE.md §3): ${ordenDeTimeTravel(instantes.antesDeMigrar)}`,
+    );
+  }
+  return lineas.join('\n');
+}
+
+// ── Las secuencias de la orden ────────────────────────────────────────────────────────────
+
+/** Una parada de la orden: el código con el que sale y lo que dice. */
+export class Parada extends Error {
+  constructor(
+    readonly codigo: 1 | 2,
+    mensaje: string,
+  ) {
+    super(mensaje);
+  }
+}
+
+/** Lo que dice un programa al terminar. */
+export interface Salida {
+  codigo: number;
+  stdout: string;
+  stderr: string;
+}
+
+/** El vocabulario de `origin/main`, con el commit del que salió y su fecha. */
+export interface VocabularioDeOrigin {
+  vocabulario: VocabularioDeHuella;
+  commit: string;
+  fecha: string;
+}
+
+/**
+ * Lo que la cáscara hace por las secuencias: la red, los procesos y el disco (AD-22).
+ *
+ * Las secuencias de aquí deciden el orden, las paradas y lo que se dice, y no tocan nada:
+ * `tools/medicion.ts` les da los efectos de verdad, y `tests/unit/medicion-secuencias.test.ts`
+ * unos de mentira, con un D1 en memoria, que apuntan cada llamada. Así el orden de lo que se
+ * aplica en producción —migrar, desplegar, comprobar, barajar, escribir la huella— y cada
+ * parada que lo corta se prueban antes de la primera vez que se corren de verdad.
+ */
+export interface Efectos {
+  /** `npx --yes wrangler@… <argumentos>` en `medicion/`, recogiendo lo que dice. */
+  wrangler(argumentos: readonly string[]): Promise<Salida>;
+  /** Lo mismo, a la vista de quien corre la orden —migrar y desplegar dicen lo que hacen—. */
+  wranglerALaVista(argumentos: readonly string[]): Promise<number>;
+  /** `git <argumentos>` en la raíz: lo que dice, o una parada si sale distinto de 0. */
+  git(argumentos: readonly string[]): Promise<string>;
+  /** Envía una baliza por `POST`: el código HTTP, o `null` si no hubo respuesta a tiempo. */
+  enviar(url: string, cuerpo: string): Promise<number | null>;
+  /** Si algo contesta en esa dirección. */
+  sondear(url: string): Promise<boolean>;
+  /** El texto de la huella versionada, o `undefined` si no está. */
+  leerHuella(): Promise<string | undefined>;
+  escribirHuella(texto: string): Promise<void>;
+  /** Las migraciones de `medicion/migrations/`. */
+  migraciones(): Promise<Migracion[]>;
+  /** El vocabulario de `origin/main`, o una parada si no se deja leer. */
+  vocabularioDeOrigin(): Promise<VocabularioDeOrigin>;
+  /** El receptor de la rama: lo que hará con cada baliza el Worker que se despliega. */
+  receptor(cuerpo: string, instante: Date): Registro | null;
+  esperar(ms: number): Promise<void>;
+  decir(texto: string): void;
+  ahora(): Date;
+}
+
+/** Lo último que dijo `wrangler` por su salida de error, para que una parada nombre la causa. */
+function causaDe(salida: Salida): string {
+  const cola = salida.stderr
+    .split('\n')
+    .map((linea) => linea.trim())
+    .filter((linea) => linea !== '')
+    .slice(-6)
+    .join(' | ');
+  const recorte = cola.length > 600 ? `…${cola.slice(-600)}` : cola;
+  return ` (wrangler salió con ${salida.codigo}${recorte === '' ? '' : `: ${recorte}`})`;
+}
+
+/** Una sentencia contra la base: sus filas, o una parada con lo que dijo D1 y `wrangler`. */
+async function consultar(efectos: Efectos, sql: string, base: Base, que: string): Promise<Record<string, unknown>[]> {
+  const salida = await efectos.wrangler(argumentosDeConsulta(sql, base));
+  const leido = leerConsulta(salida.stdout);
+  if (!leido.ok) throw new Parada(1, `No se pudo ${que}: ${leido.motivo}${causaDe(salida)}`);
+  return leido.filas;
+}
+
+/** Que `wrangler` tenga sesión, sin la cual nada remoto responde: 2 si no la tiene. */
+async function exigirSesion(efectos: Efectos): Promise<void> {
+  const salida = await efectos.wrangler(ARGUMENTOS_DE_SESION);
+  const sesion = leerSesion(salida.stdout);
+  if (sesion === 'sin-sesion') {
+    throw new Parada(
+      2,
+      `wrangler no tiene sesión. En ${DIRECTORIO_DEL_RECEPTOR}/: npx --yes ${WRANGLER} login, y repite.`,
+    );
+  }
+  if (sesion === 'ilegible') {
+    throw new Parada(1, `npx ${WRANGLER} whoami --json no contestó lo esperado${causaDe(salida)}.`);
+  }
+}
+
+/** La huella versionada, si la hay; una parada si está y no se deja leer. */
+async function huellaVersionada(efectos: Efectos): Promise<Huella | undefined> {
+  const texto = await efectos.leerHuella();
+  if (texto === undefined) return undefined;
+  const leida = leerHuella(texto);
+  if (!leida.ok) throw new Parada(1, `${RUTA_DE_LA_HUELLA} no se deja leer: ${leida.motivos.join(' ')}`);
+  return leida.huella;
+}
+
+/** Por qué no llegó ninguna baliza a la tabla: las dos causas que el Worker calla. */
+const PISTA_SIN_FILAS =
+  'No llegó ninguna baliza a la tabla. O el receptor que contesta no es el de esta rama —mira ' +
+  `npx --yes ${WRANGLER} deployments list, en ${DIRECTORIO_DEL_RECEPTOR}/—, o D1 rechaza su INSERT —una ` +
+  'columna que la tabla no tiene, de una migración sin aplicar— y el Worker lo calla. Lo distingue la ' +
+  'versión desplegada; la vuelta atrás, en DESPLIEGUE.md §3.';
+
+/**
+ * La comprobación con balizas: borra los restos de otra, envía las balizas de prueba —lo que el
+ * receptor tiene que guardar y lo que tiene que descartar—, las lee con su `rowid` como texto y
+ * las coteja con lo esperado. Hasta tres intentos, porque un receptor recién desplegado tarda en
+ * llegar a todas partes. Devuelve los `rowid` leídos; si no casan, una parada con cada
+ * diferencia.
+ *
+ * **Las balizas se borran siempre**, casen o no y aunque la comprobación se pare a mitad —una
+ * lectura que falla, un intento cortado—: en la tabla serían visitas a una ruta que no existe.
+ * Si no se pueden borrar, la parada lo dice con la orden que las borra.
+ */
+export async function comprobarConBalizas(
+  efectos: Efectos,
+  url: string,
+  base: Base,
+  vocabulario: VocabularioDeHuella,
+  espera: number,
+): Promise<string[]> {
+  const { balizas, esperadas, campos } = balizasDePrueba(vocabulario);
+
+  const intentar = async (): Promise<string[]> => {
+    let diferencias: string[] = [];
+    let ningunaFila = false;
+    for (let intento = 1; intento <= INTENTOS_DE_COMPROBACION; intento++) {
+      if (intento > 1) await efectos.esperar(espera);
+      await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de un intento anterior');
+      let rechazadas = 0;
+      for (const baliza of balizas) {
+        if ((await efectos.enviar(url, JSON.stringify(baliza))) !== 204) rechazadas++;
+      }
+      const leidas = await consultar(efectos, sqlDeLasBalizas(campos), base, 'leer las balizas de prueba');
+      ningunaFila = leidas.length === 0;
+      diferencias = [
+        ...(rechazadas > 0 ? [`${rechazadas} de ${balizas.length} balizas no recibieron un 204.`] : []),
+        ...cotejarFilas(esperadas, leidas, campos),
+      ];
+      efectos.decir(
+        `Intento ${intento} de ${INTENTOS_DE_COMPROBACION}: ${balizas.length} balizas enviadas, ` +
+          `${leidas.length} filas leídas${diferencias.length === 0 ? ', y casan.' : `, ${diferencias.length} diferencias.`}`,
+      );
+      if (diferencias.length === 0) return leidas.map((fila) => String(fila.fila));
+    }
+    throw new Parada(
+      1,
+      `Las balizas no se vieron como se esperaba tras ${INTENTOS_DE_COMPROBACION} intentos:\n  ` +
+        diferencias.slice(0, 40).join('\n  ') +
+        (diferencias.length > 40 ? `\n  … y ${diferencias.length - 40} más.` : '') +
+        (ningunaFila ? `\n${PISTA_SIN_FILAS}` : ''),
+    );
+  };
+
+  let resultado: { filas: string[] } | { error: unknown };
+  try {
+    resultado = { filas: await intentar() };
+  } catch (error) {
+    resultado = { error };
+  }
+
+  let sinBorrar: string | undefined;
+  try {
+    await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de prueba');
+  } catch (error) {
+    sinBorrar = (error as Error).message;
+  }
+  const avisoDeBorrado =
+    sinBorrar === undefined
+      ? ''
+      : `\nLas balizas de prueba se quedaron en la tabla (${sinBorrar}). Se borran en ${DIRECTORIO_DEL_RECEPTOR}/ con: ` +
+        `npx --yes ${WRANGLER} d1 execute ${BASE_DE_DATOS} ${BANDERA_DE_BASE[base]} --command "${SQL_DE_BORRADO}"`;
+
+  if ('error' in resultado) {
+    if (resultado.error instanceof Parada) {
+      throw new Parada(resultado.error.codigo, `${resultado.error.message}${avisoDeBorrado}`);
+    }
+    throw resultado.error;
+  }
+  if (sinBorrar !== undefined) throw new Parada(1, `Las balizas casaron, pero no se borraron.${avisoDeBorrado}`);
+  return resultado.filas;
+}
+
+/** Que el `rowid` de las balizas sea aleatorio; si no, una parada que lo dice con `cierre`. */
+function exigirRowidAleatorio(filas: readonly string[], cierre: string): void {
+  const orden = rowidAleatorio(filas);
+  if (orden === 'contiguo') {
+    throw new Parada(
+      1,
+      'El receptor numera las filas en orden de llegada: hay rowid de las balizas contiguos ' +
+        `(${filas.join(', ')}). Es un receptor anterior a la 23.12, también tras una vuelta atrás, o ` +
+        `dos versiones a la vez mientras el despliegue se propaga. No se baraja. ${cierre}`,
+    );
+  }
+  if (orden === 'insuficiente') {
+    throw new Parada(1, `No hay dos balizas con rowid legible para juzgar el orden. ${cierre}`);
+  }
+}
+
+/** Que `medicion/` y `src/lib/` estén commiteados: la huella nombra el commit que se despliega. */
+async function exigirArbolLimpio(efectos: Efectos): Promise<void> {
+  const cambios = (await efectos.git(['status', '--porcelain', '--', DIRECTORIO_DEL_RECEPTOR, 'src/lib'])).trimEnd();
+  if (cambios.trim() === '') return;
+  if (cambios.split('\n').every((linea) => linea.trim().endsWith(RUTA_DE_LA_HUELLA))) {
+    throw new Parada(
+      1,
+      `La huella que escribió un desplegar anterior está sin commitear: ${RUTA_DE_LA_HUELLA}. Commitéala ` +
+        `—git add ${RUTA_DE_LA_HUELLA} && git commit— antes de repetir, o descártala si ese despliegue no ` +
+        'vale: la referencia de esta orden es la huella del commit.',
+    );
+  }
+  throw new Parada(
+    1,
+    `Hay cambios sin commitear en ${DIRECTORIO_DEL_RECEPTOR}/ o src/lib/:\n${cambios}\n` +
+      'La huella nombra un commit, y el commit tiene que contener lo que se despliega.',
+  );
+}
+
+/**
+ * Que el receptor de la rama guarde todo lo que envía el sitio en vivo, o una parada que nombra
+ * cada falta. Se coteja **siempre** contra el vocabulario de `origin/main` —el que emite el sitio
+ * en vivo hasta que la rama entra en la principal: entre la 23.3 y el merge sigue siendo el de la
+ * v7.1, con la Marca de origen en las acciones— y, si la hay, también contra la huella
+ * versionada, que es lo que guarda el receptor en vivo. Así un receptor que soltara la
+ * compatibilidad con la v7.1 no se despliega aunque la huella, que ya es de la v8, no la pida.
+ */
+async function exigirCobertura(efectos: Efectos): Promise<void> {
+  const principal = await efectos.vocabularioDeOrigin();
+  efectos.decir(
+    `El sitio en vivo envía el vocabulario de origin/main: ${principal.commit} (${principal.fecha}), el que ` +
+      'tenga este clon —la orden no hace fetch—.',
+  );
+  const versionada = await huellaVersionada(efectos);
+  efectos.decir(
+    versionada
+      ? `El receptor en vivo es el de la huella versionada: ${versionada.commit} (${versionada.escritaEl}).`
+      : `Sin huella versionada en ${RUTA_DE_LA_HUELLA}: la referencia es solo el vocabulario de origin/main.`,
+  );
+  const faltas = [
+    ...coberturaDelReceptor(efectos.receptor, principal.vocabulario).map((falta) => `origin/main: ${falta}`),
+    ...(versionada
+      ? coberturaDelReceptor(efectos.receptor, versionada.vocabulario).map((falta) => `la huella: ${falta}`)
+      : []),
+  ];
+  if (faltas.length > 0) {
+    throw new Parada(1, `El receptor de esta rama no guarda todo lo que envía el sitio en vivo:\n  ${faltas.join('\n  ')}`);
+  }
+}
+
+/** El estado de la tabla remota antes de migrar. */
+async function estadoRemoto(efectos: Efectos): Promise<EstadoDeLaTabla> {
+  const columnas = columnasDelPragma(await consultar(efectos, SQL_DE_COLUMNAS, 'remota', 'leer las columnas'));
+  const conTabla =
+    (await consultar(efectos, SQL_DE_TABLA_DE_MIGRACIONES, 'remota', 'buscar d1_migrations')).length > 0;
+  const anotadas = conTabla
+    ? (await consultar(efectos, SQL_DE_MIGRACIONES_ANOTADAS, 'remota', 'leer d1_migrations')).map((f) => String(f.name))
+    : [];
+  return estadoDeLaTabla(columnas, anotadas, await efectos.migraciones());
+}
+
+/**
+ * `npm run medicion -- desplegar`, en su orden, parando en el primer fallo con 1 y el parte de
+ * lo aplicado (AD-14): sesión, árbol limpio, cobertura, recuentos y estado de la tabla, migrar,
+ * desplegar, comprobar con balizas, `rowid`, cuota, barajar, recuentos otra vez y, solo si todo
+ * eso salió, la huella. No reintenta migraciones ni despliegues, y no hace commit.
+ */
+export async function desplegar(efectos: Efectos, url: string): Promise<void> {
+  const aplicado: string[] = [];
+  const instantes: Instantes = {};
+  try {
+    await exigirSesion(efectos);
+    await exigirArbolLimpio(efectos);
+    const commit = (await efectos.git(['rev-parse', 'HEAD'])).trim();
+    await exigirCobertura(efectos);
+
+    const hoy = jornadaUtc(efectos.ahora());
+    const antes = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de antes'));
+    const estado = await estadoRemoto(efectos);
+    if (estado.estado === 'otra') throw new Parada(1, `No se migra: ${estado.motivo}`);
+    efectos.decir(
+      `La tabla está ${estado.estado}` +
+        (estado.pendientes.length > 0 ? `; faltan ${estado.pendientes.join(', ')}.` : '; no falta ninguna migración.'),
+    );
+
+    instantes.antesDeMigrar = efectos.ahora();
+    efectos.decir(`Instante anterior a la migración: ${instantes.antesDeMigrar.toISOString()}.`);
+    if ((await efectos.wranglerALaVista(argumentosDeMigracion('remota'))) !== 0) {
+      aplicado.push('quizá parte de las migraciones: lo aplicado lo dice d1_migrations');
+      throw new Parada(1, 'La migración en remoto falló; no se reintenta.');
+    }
+    aplicado.push('las migraciones en remoto');
+
+    if ((await efectos.wranglerALaVista(ARGUMENTOS_DE_DESPLIEGUE)) !== 0) {
+      throw new Parada(1, 'El despliegue del receptor falló; no se reintenta.');
+    }
+    aplicado.push('el receptor desplegado');
+
+    const filasDePrueba = await comprobarConBalizas(
+      efectos,
+      url,
+      'remota',
+      huellaDelVocabulario(),
+      ESPERA_ENTRE_INTENTOS_EN_VIVO_MS,
+    );
+    aplicado.push('la comprobación con balizas, ya borradas');
+    exigirRowidAleatorio(filasDePrueba, 'Lo cierra el siguiente despliegue que pase la comprobación.');
+
+    const informacion = leerInformacion((await efectos.wrangler(ARGUMENTOS_DE_INFORMACION)).stdout);
+    if (!informacion.ok) throw new Parada(1, `No se baraja: ${informacion.motivo}`);
+    const [{ n: filas } = { n: 0 }] = await consultar(efectos, SQL_DE_FILAS, 'remota', 'contar las filas');
+    const barajado = cabeElBarajado({
+      filas: Number(filas),
+      escritas24h: informacion.escritas24h,
+      cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
+    });
+    if (!barajado.cabe) throw new Parada(1, barajado.mensaje);
+    efectos.decir(barajado.mensaje);
+
+    instantes.antesDeBarajar = efectos.ahora();
+    try {
+      await consultar(efectos, SQL_DE_BARAJADO, 'remota', 'barajar el rowid');
+    } catch (error) {
+      aplicado.push('quizá el barajado: wrangler no dijo que saliera bien, ni que no');
+      throw error;
+    }
+    aplicado.push('el rowid barajado');
+
+    const despues = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de después'));
+    efectos.decir(informeDeRecuentos(antes, despues));
+    const diferencias = compararRecuentos(antes, despues, hoy);
+    if (diferencias.length > 0) {
+      throw new Parada(1, `Los recuentos de antes y de después no casan:\n  ${diferencias.join('\n  ')}`);
+    }
+
+    await efectos.escribirHuella(
+      componerHuella({ escritaEl: jornadaUtc(efectos.ahora()), commit, vocabulario: huellaDelVocabulario() }),
+    );
+    aplicado.push(`la huella escrita en ${RUTA_DE_LA_HUELLA}`);
+    efectos.decir(
+      `${parteDeLoAplicado(aplicado)}\n` +
+        `Commitea ${RUTA_DE_LA_HUELLA}: es lo que devuelve npm test a verde. El sitio se despliega después.`,
+    );
+  } catch (error) {
+    if (error instanceof Parada) {
+      throw new Parada(error.codigo, `${error.message}\n${parteDeLoAplicado(aplicado, instantes)}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * `npm run medicion -- comprobar`: que el receptor en vivo guarda lo que dice la huella
+ * versionada, descarta lo ajeno y numera al azar. No migra, no despliega, no baraja ni escribe
+ * la huella; sí escribe y borra sus balizas en el D1 de producción.
+ */
+export async function comprobar(efectos: Efectos, url: string): Promise<void> {
+  await exigirSesion(efectos);
+  const huella = await huellaVersionada(efectos);
+  if (!huella) {
+    throw new Parada(
+      1,
+      `No hay huella en ${RUTA_DE_LA_HUELLA}: la escribe npm run medicion -- desplegar (Historia 23.3).`,
+    );
+  }
+  const cierre = 'La cierra repetir la 23.3: npm run medicion -- desplegar.';
+  try {
+    const filas = await comprobarConBalizas(efectos, url, 'remota', huella.vocabulario, ESPERA_ENTRE_INTENTOS_EN_VIVO_MS);
+    exigirRowidAleatorio(filas, cierre);
+  } catch (error) {
+    if (error instanceof Parada && !error.message.includes(cierre)) {
+      throw new Parada(error.codigo, `${error.message}\n${cierre}`);
+    }
+    throw error;
+  }
+  efectos.decir(
+    `El receptor en vivo guarda cada evento y cada valor de la huella (${huella.commit}), descarta lo ajeno, ` +
+      'numera al azar y las balizas se borraron.',
+  );
+}
+
+/** `npm run medicion -- ensayo`: la comprobación de `desplegar`, contra el receptor local. */
+export async function ensayo(efectos: Efectos): Promise<void> {
+  if (!(await efectos.sondear(PUNTO_FINAL_LOCAL))) {
+    throw new Parada(1, `El receptor local no responde en ${PUNTO_FINAL_LOCAL}: arráncalo con npm run medicion -- local.`);
+  }
+  const filas = await comprobarConBalizas(
+    efectos,
+    PUNTO_FINAL_LOCAL,
+    'local',
+    huellaDelVocabulario(),
+    ESPERA_ENTRE_INTENTOS_EN_LOCAL_MS,
+  );
+  exigirRowidAleatorio(filas, 'El receptor local es el de esta rama: mira medicion/worker.ts.');
+  efectos.decir(
+    'Cada evento y cada valor del vocabulario llegó al D1 local, lo ajeno se descartó, el rowid es aleatorio ' +
+      'y las balizas se borraron.',
+  );
 }

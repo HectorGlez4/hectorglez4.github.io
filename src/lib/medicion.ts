@@ -173,12 +173,18 @@ export function guionDeMedicion(url: string): string {
     });
     return `${JSON.stringify(evento)}:[${campos.join(',')}]`;
   });
-  const declaraciones = [...conjuntos].map(([texto, nombre]) => `${nombre}=${texto}`).join(',');
+  // Sin ningún campo de conjunto cerrado no hay ninguna variable de conjunto: la lista se compone
+  // por piezas para que no quede una coma suelta (`var q=…,,s=…` no es JavaScript).
+  const variables = [
+    'q=window.__medir&&__medir.q||[]',
+    ...[...conjuntos].map(([texto, nombre]) => `${nombre}=${texto}`),
+    `s={${tabla.join(',')}}`,
+  ].join(',');
   const p = JSON.stringify(PARAMETRO_DE_ORIGEN);
 
   return (
     `(function(){` +
-    `var q=window.__medir&&__medir.q||[],${declaraciones},s={${tabla.join(',')}};` +
+    `var ${variables};` +
     `function e(v,t,z){` +
     `if(!s.hasOwnProperty(v))return;` +
     `try{` +

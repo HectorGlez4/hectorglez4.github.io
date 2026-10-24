@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
-import { EVENTOS, camposQueEmite, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
+import { EVENTOS, EVENTOS_DEL_GUION, camposQueEmite, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
 import { CAMPOS, claveEnLaBaliza } from '../../src/lib/vocabulario.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { apuntarGuiones } from './ayuda/guiones.ts';
@@ -300,11 +300,12 @@ test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
       // Crece solo cuando una historia lo decide: `origen` lo añadió la 8.2 y `destino`
       // la 10.4. Desde la 23.2 cada evento lleva exactamente las claves que el vocabulario le
       // declara y el guion sabe producir —la vista, su Marca de origen—, y ninguna más.
+      // Que el evento sea uno de los que el guion emite es lo que hace que esto no pase en vacío:
+      // `camposQueEmite` de un evento que no emite está vacío.
+      expect(EVENTOS_DEL_GUION).toContain(objeto.evento);
       expect(Object.keys(objeto).sort()).toEqual(
         ['evento', 'ruta', ...camposQueEmite(objeto.evento).map(claveEnLaBaliza)].sort(),
       );
-      expect(objeto.evento).toBe(EVENTOS.vistaDeCita);
-      expect(Object.keys(objeto).sort()).toEqual(['evento', 'origen', 'ruta']);
       expect(carga).not.toMatch(/uuid|visitante|referrer|userAgent|screen|timeZone/i);
     }
 
@@ -341,10 +342,10 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
  * Las cinco pruebas de «la página no descarga ningún fichero de script» —Página de Cita,
  * portada, Autor, 404 y datos estructurados— pasaron en su sitio a «solo los guiones externos
  * declarados» (`tests/e2e/ayuda/guiones.ts`), y siguen corriendo contra el `webServer`, con el
- * Corpus de verdad y en los dos perfiles. Pero ese servidor se construye **sin** punto final: ahí
- * no hay fichero que pedir y la ausencia no dice nada. Por eso se juzgan **también** aquí, contra
- * un sitio construido con punto final, y aquí con la exigencia entera: exactamente el fichero de
- * medición, una vez.
+ * Corpus de verdad y en los dos perfiles. Desde la Historia 23.2 ese servidor se construye con el
+ * punto final del receptor local, así que allí también se pide el fichero; aquí se juzgan
+ * **además** contra un sitio construido por esta prueba, con su receptor en memoria, y con la
+ * exigencia entera: exactamente el fichero de medición, una vez.
  */
 const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
 

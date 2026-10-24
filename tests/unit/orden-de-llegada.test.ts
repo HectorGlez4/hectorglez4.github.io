@@ -3,7 +3,8 @@ import { lstatSync, readFileSync, readdirSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
 import ts from 'typescript';
 import { EVENTOS } from '../../src/lib/medicion.ts';
-import { jornadaDe } from '../../medicion/receptor.ts';
+import { CAMPOS, CAMPOS_DE_EVENTO, EVENTOS_VALIDOS, claveEnLaBaliza } from '../../src/lib/vocabulario.ts';
+import { interpretar, jornadaDe } from '../../medicion/receptor.ts';
 import worker from '../../medicion/worker.ts';
 import { d1QueApunta, listaTras, peticionAlReceptor, sqlNeutralizado } from './ayuda/d1.js';
 
@@ -165,6 +166,36 @@ describe('Historia 23.12 — el adaptador, con un D1 falso', () => {
     expect(respuesta.status).toBe(204);
     expect(respuesta.body).toBeNull();
   });
+
+  it.each(EVENTOS_VALIDOS)(
+    '%s: cada valor enlazado cae en su columna, con un valor distinto en cada campo que declara',
+    async (evento) => {
+      // Un valor de su conjunto por campo, sin repetir dentro de la baliza: así un `bind` con
+      // dos columnas cruzadas —zona y tramo, origen y destino— deja un valor fuera de su sitio.
+      const carga: Record<string, string> = { evento, ruta: '/cita/una' };
+      const usados = new Set<string>();
+      for (const campo of CAMPOS) {
+        const declaracion = CAMPOS_DE_EVENTO[evento][campo];
+        if (declaracion === undefined) continue;
+        const valor =
+          declaracion.valores === 'texto' ? 'texto buscado' : declaracion.valores.find((v) => !usados.has(v))!;
+        usados.add(valor);
+        carga[claveEnLaBaliza(campo)] = valor;
+      }
+      const { entorno, llamadas } = d1QueApunta();
+      await worker.fetch(peticionAlReceptor(carga), entorno);
+
+      const columnas = listaTras(llamadas.sql[0], /INSERT\s+INTO\s+eventos\s*\(/i)!.slice(1);
+      expect(columnas).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
+      const escrito = Object.fromEntries(columnas.map((columna, i) => [columna, llamadas.valores[0][i]]));
+      const registro = interpretar(JSON.stringify(carga), new Date(`${String(escrito.jornada)}T12:00:00Z`));
+      expect(escrito).toEqual(registro);
+      // Y lo enviado está, de verdad, en su columna: no basta con que coincida con el receptor.
+      for (const campo of CAMPOS) {
+        if (CAMPOS_DE_EVENTO[evento][campo] !== undefined) expect(escrito[campo], campo).toBe(carga[claveEnLaBaliza(campo)]);
+      }
+    },
+  );
 
   // El D1 falso rechaza con el error que da SQLite ante un `rowid` repetido; que SQLite lo
   // lance de verdad —y no lo pise ni lo ignore— lo fija la prueba de arriba al prohibir

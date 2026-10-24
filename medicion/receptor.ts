@@ -29,9 +29,11 @@ import { esRedValida, type Red } from '../src/lib/redes.ts';
 
 /**
  * Una fila registrada. Es todo lo que se guarda, y está escrito como tipo a propósito:
- * añadir un campo obliga a tocar este fichero, que es donde la prueba mira. Las columnas son
- * las de `medicion/esquema.sql`, en su orden: `jornada`, `evento` y `ruta` en toda fila, y cada
- * campo del vocabulario nulo fuera de los eventos que lo llevan.
+ * añadir un campo obliga a tocar este fichero —`MISMAS_COLUMNAS`, abajo, no compila si `CAMPOS`
+ * y este tipo dicen columnas distintas—, que es donde la prueba mira. Las columnas son las de
+ * `medicion/esquema.sql`, en su orden: `jornada`, `evento` y `ruta` en toda fila, y cada campo
+ * del vocabulario nulo fuera de los eventos que lo llevan. Que el `INSERT` de `worker.ts` enlace
+ * cada una en su sitio lo fija `tests/unit/orden-de-llegada.test.ts`, con un valor en cada una.
  *
  * No hay identificador de visitante, ni cookie, ni IP, ni agente de usuario, ni referente.
  * Tampoco hay marca de tiempo al segundo: se guarda **la jornada**. Un instante con
@@ -72,6 +74,16 @@ export interface Registro {
   /** Si la acción es la primera de su métrica en su carga (SM-5, SM-7). */
   primera: Primera | null;
 }
+
+/** Si dos uniones de nombres son la misma: `true` o `false`, sin término medio. */
+type Iguales<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+
+/**
+ * Que las columnas de campo de `Registro` sean exactamente `CAMPOS`. Un campo nuevo en el
+ * vocabulario que no llegue aquí —o uno de aquí que el vocabulario no declare— no compila: sin
+ * esto, el `as` de `interpretar` lo dejaría pasar y el Worker no lo escribiría nunca.
+ */
+export const MISMAS_COLUMNAS: Iguales<Exclude<keyof Registro, 'jornada' | 'evento' | 'ruta'>, Campo> = true;
 
 /** Lo que se buscó cabe de sobra; más que esto no es una consulta, es una carga. */
 export const MAX_CONSULTA = 120;
@@ -138,6 +150,13 @@ export function interpretar(cuerpo: string, instante: Date): Registro | null {
    * despliegue el de la v8. Se guarda como hasta hoy, en todo evento, si es una de las cuentas
    * propias: así el receptor nuevo no pierde nada de lo que envía el sitio viejo. El vocabulario
    * ya no la declara en las acciones (AD-13), y el guion de la v8 no la envía con ellas.
+   *
+   * **Cuándo se quita, y quién lo vigila.** `npm run medicion -- desplegar` coteja este receptor
+   * siempre contra el vocabulario de `origin/main`, que es lo que envía el sitio en vivo: mientras
+   * la principal sea la v7.1, quitar esta cláusula para el despliegue. Cuando la v8 haya entrado
+   * en la principal y su sitio esté desplegado (23.11), la principal ya no declara la marca en las
+   * acciones y la cláusula puede irse, en un diff propio y pasada la caché de las páginas viejas
+   * (DESPLIEGUE.md §1, `max-age=600`).
    */
   const { origen } = baliza;
   campos.origen = typeof origen === 'string' && esRedValida(origen) ? origen : null;

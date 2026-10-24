@@ -127,6 +127,19 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
     expect(CAMPOS_DE_EVENTO[EVENTOS.salidaInterna].zona?.valores).toBe(ZONAS);
   });
 
+  it('son las de la tabla de EXPERIENCE.md § Zonas de salida interna, en su orden', () => {
+    // La tabla es la única fuente de las zonas (UX-DR111). Si cambia, el vocabulario se queda
+    // atrás —una zona nueva llegaría a nulo— hasta que alguien la mire: esta prueba es ese alguien.
+    const experiencia = readFileSync(
+      resolve(raiz, '_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md'),
+      'utf8',
+    );
+    const seccion = experiencia.split(/^### Zonas de salida interna\b.*$/m)[1]?.split(/^#{2,3} /m)[0];
+    expect(seccion, 'EXPERIENCE.md ya no tiene la sección «Zonas de salida interna»').toBeDefined();
+    const deLaTabla = [...seccion!.matchAll(/^\| `([a-z-]+)` \|/gm)].map(([, zona]) => zona);
+    expect(deLaTabla).toEqual([...ZONAS]);
+  });
+
   it.each([
     [0, '0'],
     [1, '1-9'],

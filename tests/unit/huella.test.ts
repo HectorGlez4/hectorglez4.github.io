@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import {
-  RUTA_DE_LA_HUELLA,
-  diferenciasDeHuella,
-  huellaDelVocabulario,
-  leerHuella,
-} from '../../tools/lib/medicion.ts';
+import { RUTA_DE_LA_HUELLA, juicioDeLaHuella } from '../../tools/lib/medicion.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 
@@ -22,29 +17,16 @@ const raiz = resolve(import.meta.dirname, '../..');
  * receptor que lo guarda, pero desplegarlo es acto de Héctor (23.3), y hasta entonces no hay
  * huella. Lo mismo cada vez que una historia toque `src/lib/vocabulario.ts`: la prueba falla
  * hasta repetir el despliegue del receptor.
+ *
+ * El juicio vive en `juicioDeLaHuella` (`tools/lib/medicion.ts`), y sus tres ramas —sin huella,
+ * huella mal formada, vocabulario distinto— se prueban con huellas de mentira en
+ * `tests/unit/medicion-orden.test.ts`. Aquí solo se mira el fichero del repositorio.
  */
 describe('AD-14 — la huella del vocabulario desplegado', () => {
   const ruta = resolve(raiz, RUTA_DE_LA_HUELLA);
 
   it('está versionada, tiene forma de huella y casa con src/lib/vocabulario.ts', () => {
-    expect(
-      existsSync(ruta),
-      `Sin huella versionada en ${RUTA_DE_LA_HUELLA}: el receptor en vivo no se ha desplegado con el ` +
-        'vocabulario de src/lib/vocabulario.ts. La escribe `npm run medicion -- desplegar` (Historia 23.3), ' +
-        'que corre Héctor desde la rama; nunca se escribe a mano.',
-    ).toBe(true);
-
-    const leida = leerHuella(readFileSync(ruta, 'utf8'));
-    expect(
-      leida.ok ? [] : leida.motivos,
-      `${RUTA_DE_LA_HUELLA} no tiene forma de huella; la reescribe npm run medicion -- desplegar.`,
-    ).toEqual([]);
-    if (!leida.ok) return;
-
-    expect(
-      diferenciasDeHuella(leida.huella.vocabulario, huellaDelVocabulario()),
-      `El vocabulario de src/lib/ no es el desplegado (huella del commit ${leida.huella.commit}, ` +
-        `${leida.huella.escritaEl}). Lo cierra repetir npm run medicion -- desplegar desde esta rama (23.3).`,
-    ).toEqual([]);
+    const texto = existsSync(ruta) ? readFileSync(ruta, 'utf8') : undefined;
+    expect(juicioDeLaHuella(texto)).toEqual([]);
   });
 });

@@ -21,8 +21,10 @@ import {
   SQL_DE_MIGRACIONES_ANOTADAS,
   SQL_DE_RECUENTOS,
   SQL_DE_TABLA_DE_MIGRACIONES,
+  EVENTO_AJENO,
   SUBCOMANDOS,
   TEXTO_DE_PRUEBA,
+  VALOR_AJENO,
   WRANGLER,
   argumentosDeConsulta,
   argumentosDeMedicion,
@@ -39,11 +41,15 @@ import {
   diferenciasDeHuella,
   estadoDeLaTabla,
   huellaDelVocabulario,
+  informeDeRecuentos,
+  jornadaAnterior,
   jornadaUtc,
+  juicioDeLaHuella,
   leerConsulta,
   leerHuella,
   leerInformacion,
   leerSesion,
+  ordenDeTimeTravel,
   parteDeLoAplicado,
   puntoFinalDeComprobacion,
   recuentos,
@@ -139,7 +145,14 @@ describe('Historia 23.2 — la invocación', () => {
       ok: true,
       url: 'https://receptor.example/m',
     });
-    expect(puntoFinalDeComprobacion({ MEDICION_ENDPOINT: 'http://localhost:8787/' }).ok).toBe(true);
+  });
+
+  it('el punto final no puede ser la máquina propia: desplegar y comprobar leen el D1 remoto', () => {
+    for (const valor of ['http://localhost:8787/', 'http://127.0.0.1:8787/', 'http://[::1]:8787/', 'http://LOCALHOST/']) {
+      const punto = puntoFinalDeComprobacion({ MEDICION_ENDPOINT: valor });
+      expect(punto.ok, valor).toBe(false);
+      if (!punto.ok) expect(punto.motivo).toMatch(/receptor local.*ensayo/);
+    }
   });
 });
 
@@ -281,6 +294,24 @@ describe('Historia 23.2 — el estado de la tabla antes de migrar', () => {
     expect(COLUMNAS_DE_PARTIDA.slice(0, 3).every((c) => c.noNula)).toBe(true);
     expect(COLUMNAS_MIGRADAS.map((c) => c.nombre)).toEqual(['jornada', 'evento', 'ruta', ...vocabulario.CAMPOS]);
   });
+
+  it.each([
+    ['un DEFAULT con paréntesis', 'ALTER TABLE eventos ADD COLUMN cuenta INTEGER DEFAULT (0);'],
+    ['un nombre entre comillas', 'ALTER TABLE eventos ADD COLUMN "zona" TEXT;'],
+    ['un literal', "ALTER TABLE eventos ADD COLUMN pais TEXT DEFAULT 'es';"],
+    ['un CHECK', 'ALTER TABLE eventos ADD COLUMN zona TEXT CHECK (zona <> 1);'],
+    ['otra sentencia', 'UPDATE eventos SET zona = NULL;'],
+    ['una tabla con una restricción de tabla', 'CREATE TABLE IF NOT EXISTS eventos (jornada TEXT, PRIMARY KEY (jornada));'],
+  ])('una migración que el lector no sabe leer —%s— lo dice, y la tabla queda «otra»', (_caso, sql) => {
+    expect(() => columnasDeLaMigracion(sql)).toThrow(/no sé leer/);
+    const estado = estadoDeLaTabla(
+      columnasDelPragma(pragma(COLUMNAS_MIGRADAS)),
+      [PARTIDA, V8],
+      [...MIGRACIONES, { nombre: '0002_rara.sql', sql }],
+    );
+    expect(estado.estado).toBe('otra');
+    if (estado.estado === 'otra') expect(estado.motivo).toMatch(/^0002_rara\.sql: no sé leer/);
+  });
 });
 
 describe('Historia 23.2 — la huella', () => {
@@ -373,7 +404,50 @@ describe('Historia 23.2 — la huella', () => {
         { desde: 50, rotulo: '50+' },
       ],
     });
-    expect(diferenciasDeHuella(otrosCortes, huellaDelVocabulario()).some((d) => d.startsWith('los tramos'))).toBe(true);
+    const delTramo = diferenciasDeHuella(otrosCortes, huellaDelVocabulario()).find((d) => d.startsWith('los tramos'));
+    expect(delTramo).toBeDefined();
+    expect(delTramo).toMatch(/lista de cortes de serie \(Historia 23\.10\)/);
+  });
+
+  it('un campo que no es un nombre de columna no entra: comprobar lo pondría en el SQL remoto', () => {
+    const conInyeccion = structuredClone(HUELLA);
+    conInyeccion.vocabulario.eventos[EVENTOS.copiado]["primera FROM eventos; DELETE FROM eventos; --"] = {
+      valores: ['si'],
+      nulo: false,
+    };
+    const leida = leerHuella(componerHuella(conInyeccion));
+    expect(leida.ok).toBe(false);
+    if (!leida.ok) expect(leida.motivos.join(' ')).toMatch(/no es un nombre de columna/);
+    expect(() => sqlDeLasBalizas(['zona', 'x; DROP TABLE eventos'])).toThrow(/no es un nombre de columna/);
+  });
+
+  describe('el juicio de tests/unit/huella.test.ts, con huellas de mentira', () => {
+    it('sin huella: falla diciendo que la escribe desplegar (23.3)', () => {
+      const [motivo] = juicioDeLaHuella(undefined);
+      expect(motivo).toMatch(/^Sin huella versionada en medicion\/huella-del-vocabulario\.json/);
+      expect(motivo).toContain('npm run medicion -- desplegar` (Historia 23.3)');
+    });
+
+    it('mal formada: falla nombrando cada fallo', () => {
+      const juicio = juicioDeLaHuella('{"escritaEl":"ayer"}');
+      expect(juicio[0]).toMatch(/no tiene forma de huella/);
+      expect(juicio.join(' ')).toMatch(/escritaEl/);
+    });
+
+    it('con otro vocabulario: falla nombrando cada diferencia y la orden que la cierra', () => {
+      const otra = structuredClone(HUELLA);
+      delete otra.vocabulario.eventos[EVENTOS.lectura];
+      otra.vocabulario.eventos[EVENTOS.salidaInterna].zona = { valores: ['cabecera'], nulo: false };
+      const juicio = juicioDeLaHuella(componerHuella(otra));
+      expect(juicio[0]).toMatch(/no es el desplegado \(huella del commit a{40}, 2026-10-24\)/);
+      expect(juicio[0]).toContain('npm run medicion -- desplegar');
+      expect(juicio.slice(1)).toEqual(diferenciasDeHuella(otra.vocabulario, huellaDelVocabulario()));
+      expect(juicio).toHaveLength(3);
+    });
+
+    it('la que casa con src/lib/: nada que decir', () => {
+      expect(juicioDeLaHuella(componerHuella(HUELLA))).toEqual([]);
+    });
   });
 });
 
@@ -437,13 +511,11 @@ describe('Historia 23.2 — las balizas de prueba', () => {
 
   it('cubren todo par evento–campo–valor, todas a /__comprobacion/', () => {
     const cubiertos = new Set<string>();
-    for (const baliza of balizas) {
-      expect(baliza.ruta).toBe(RUTA_DE_COMPROBACION);
-      for (const [clave, valor] of Object.entries(baliza)) {
-        if (clave === 'evento' || clave === 'ruta') continue;
-        const campo = clave === 'datos' ? 'consulta' : clave;
-        cubiertos.add(`${baliza.evento} ${campo} ${valor}`);
-      }
+    for (const baliza of balizas) expect(baliza.ruta).toBe(RUTA_DE_COMPROBACION);
+    // Lo que se guarda lo dicen las filas esperadas: cada valor no nulo, en su evento.
+    for (const fila of esperadas) {
+      if (fila === null) continue;
+      for (const campo of campos) if (fila[campo] !== null) cubiertos.add(`${fila.evento} ${campo} ${fila[campo]}`);
     }
     const debidos = Object.entries(vocabularioDeLaV8.eventos).flatMap(([evento, declarados]) =>
       Object.entries(declarados).flatMap(([campo, { valores }]) =>
@@ -452,21 +524,70 @@ describe('Historia 23.2 — las balizas de prueba', () => {
     );
     expect([...cubiertos].sort()).toEqual([...new Set(debidos)].sort());
     // Y cada evento, al menos una vez.
-    expect(new Set(balizas.map((b) => b.evento))).toEqual(new Set(Object.keys(vocabularioDeLaV8.eventos)));
+    const conFila = new Set(esperadas.flatMap((fila) => (fila === null ? [] : [fila.evento])));
+    expect(conFila).toEqual(new Set(Object.keys(vocabularioDeLaV8.eventos)));
     expect(campos).toEqual([...vocabulario.CAMPOS].sort());
   });
 
-  it('cada una deja la fila esperada, y el receptor de la rama la guarda así', () => {
+  it('y lo que el receptor tiene que descartar: valores ajenos, texto fuera de su evento y un evento inventado', () => {
+    // Por evento, una baliza con el valor ajeno en cada campo de conjunto cerrado —el suyo y
+    // los ajenos— y texto en la consulta si no es la búsqueda sin resultados: deja la fila, vacía.
+    for (const evento of Object.keys(vocabularioDeLaV8.eventos)) {
+      const i = balizas.findIndex((b) => b.evento === evento && b.zona === VALOR_AJENO);
+      expect(i, evento).toBeGreaterThanOrEqual(0);
+      const baliza = balizas[i];
+      for (const campo of campos) {
+        if (campo === 'consulta') {
+          const declarada = vocabularioDeLaV8.eventos[evento].consulta !== undefined;
+          expect(baliza.datos, evento).toBe(declarada ? undefined : TEXTO_DE_PRUEBA);
+        } else {
+          expect(baliza[campo], `${evento}.${campo}`).toBe(VALOR_AJENO);
+        }
+      }
+      expect(esperadas[i]).toEqual({
+        evento,
+        ruta: RUTA_DE_COMPROBACION,
+        ...Object.fromEntries(campos.map((campo) => [campo, null])),
+      });
+    }
+    // Y una de un evento que no existe, que no deja fila.
+    const ajena = balizas.findIndex((b) => b.evento === EVENTO_AJENO);
+    expect(ajena).toBeGreaterThanOrEqual(0);
+    expect(esperadas[ajena]).toBeNull();
+  });
+
+  it('cada una deja la fila esperada —o ninguna—, y el receptor de la rama la guarda así', () => {
     expect(esperadas).toHaveLength(balizas.length);
     balizas.forEach((baliza, i) => {
       const registro = interpretar(JSON.stringify(baliza), new Date()) as Record<string, unknown> | null;
+      const esperada = esperadas[i];
+      if (esperada === null) {
+        expect(registro, JSON.stringify(baliza)).toBeNull();
+        return;
+      }
       expect(registro, JSON.stringify(baliza)).not.toBeNull();
-      for (const [columna, valor] of Object.entries(esperadas[i])) expect(registro![columna], columna).toBe(valor);
+      for (const [columna, valor] of Object.entries(esperada)) expect(registro![columna], columna).toBe(valor);
     });
   });
 
+  it('un receptor que guardara lo que le llega no pasa el cotejo', () => {
+    // El que no coteja nada: cada clave de la baliza a su columna, y cualquier evento.
+    const sinCotejo = balizas.map((baliza, i) => ({
+      fila: String(i),
+      evento: baliza.evento,
+      ruta: baliza.ruta,
+      ...Object.fromEntries(campos.map((campo) => [campo, baliza[campo === 'consulta' ? 'datos' : campo] ?? null])),
+    }));
+    const diferencias = cotejarFilas(esperadas, sinCotejo, campos);
+    expect(diferencias.some((d) => d.startsWith('sobra: ') && d.includes(VALOR_AJENO))).toBe(true);
+    expect(diferencias.some((d) => d.includes(`evento=${EVENTO_AJENO}`))).toBe(true);
+  });
+
   it('el cotejo: casan sin importar el orden ni el rowid; lo que falta y lo que sobra, nombrado', () => {
-    const leidas: Record<string, unknown>[] = esperadas.map((fila, i) => ({ fila: String(1000 + i), ...fila })).reverse();
+    const leidas: Record<string, unknown>[] = esperadas
+      .flatMap((fila) => (fila === null ? [] : [fila]))
+      .map((fila, i) => ({ fila: String(1000 + i), ...fila }))
+      .reverse();
     expect(cotejarFilas(esperadas, leidas, campos)).toEqual([]);
 
     const sinUna = leidas.slice(1);
@@ -494,6 +615,9 @@ describe('Historia 23.2 — el orden de las filas de prueba', () => {
     ['dispersas', ['3002278359514338644', '9101168035204526467', '344852870550380712'], 'aleatorio'],
     ['justo en 2^32', ['0', '4294967296'], 'aleatorio'],
     ['justo por debajo de 2^32', ['0', '4294967295'], 'contiguo'],
+    // Dos versiones del receptor a la vez: una aleatoria entre las contiguas no basta.
+    ['una aleatoria entre contiguas', ['41', '42', '43', '3002278359514338644'], 'contiguo'],
+    ['dos cercanas entre dispersas', ['3002278359514338644', '3002278359514338700', '9101168035204526467'], 'contiguo'],
     ['una sola', ['3002278359514338644'], 'insuficiente'],
     ['ninguna', [], 'insuficiente'],
     ['ilegibles', ['abc', ''], 'insuficiente'],
@@ -511,21 +635,31 @@ describe('Historia 23.2 — el orden de las filas de prueba', () => {
 });
 
 describe('Historia 23.2 — la cuota y los recuentos', () => {
-  it('el barajado cabe justo, y no cabe por una fila', () => {
+  it('el barajado cabe justo con la reserva del resto del día, y no cabe por una fila', () => {
     const filas = 10_000;
     const coste = filas * FILAS_ESCRITAS_POR_FILA_BARAJADA;
-    const justo = cabeElBarajado({ filas, escritas24h: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 - coste, cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 });
+    const cuota = CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1;
+    // Lo escrito en 24 h, y otro tanto que se deja para lo que el sitio escriba hasta las 00:00 UTC.
+    const justo = cabeElBarajado({ filas, escritas24h: (cuota - coste) / 2, cuota });
     expect(justo.cabe).toBe(true);
     expect(justo.coste).toBe(30_000);
+    expect(justo.reserva).toBe(35_000);
 
-    const pasada = cabeElBarajado({ filas, escritas24h: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 - coste + 1, cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 });
+    const pasada = cabeElBarajado({ filas, escritas24h: (cuota - coste) / 2 + 1, cuota });
     expect(pasada.cabe).toBe(false);
     expect(pasada.mensaje).toContain('30000');
-    expect(pasada.mensaje).toContain(String(CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1));
+    expect(pasada.mensaje).toContain(String(cuota));
+    expect(pasada.mensaje).toMatch(/hasta las 00:00 UTC/);
+    expect(pasada.mensaje).toMatch(/la cuota es de la cuenta/);
     expect(pasada.mensaje).toMatch(/otro día/);
     expect(pasada.mensaje).toMatch(/ni se trocea/);
     expect(FILAS_ESCRITAS_POR_FILA_BARAJADA).toBe(3);
     expect(CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1).toBe(100_000);
+  });
+
+  it('sin reserva, un barajado que agota la cuota pasaría: con ella, no', () => {
+    // Justo lo que quedaba: el sitio se quedaría sin escribir hasta la medianoche UTC.
+    expect(cabeElBarajado({ filas: 10_000, escritas24h: 70_000, cuota: 100_000 }).cabe).toBe(false);
   });
 
   const antes = recuentos([
@@ -551,6 +685,31 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
     expect(diferencias.join(' ')).toContain('2026-10-22 vista-de-cita tenía 10 filas y ahora tiene 11');
   });
 
+  it('la víspera también se da por abierta: el reloj del Worker puede ir por detrás al cruzar la medianoche', () => {
+    const crecida = new Map(antes);
+    crecida.set('2026-10-23 copiado', 4);
+    expect(jornadaAnterior('2026-10-24')).toBe('2026-10-23');
+    expect(jornadaAnterior('2026-03-01')).toBe('2026-02-28');
+    expect(jornadaAnterior('2026-01-01')).toBe('2025-12-31');
+    expect(compararRecuentos(antes, crecida, '2026-10-24')).toEqual([]);
+    // Crecer sí; menguar, no.
+    const menguada = new Map(antes);
+    menguada.set('2026-10-23 copiado', 2);
+    expect(compararRecuentos(antes, menguada, '2026-10-24')).toHaveLength(1);
+  });
+
+  it('el informe da los recuentos de antes y de después, por jornada', () => {
+    const despues = new Map(antes);
+    despues.set('2026-10-24 vista-de-cita', 7);
+    expect(informeDeRecuentos(antes, despues).split('\n')).toEqual([
+      'Recuentos por (jornada, evento), antes → después, sin las balizas de prueba:',
+      '  2026-10-22: vista-de-cita 10 → 10',
+      '  2026-10-23: copiado 3 → 3',
+      '  2026-10-24: vista-de-cita 5 → 7',
+    ]);
+    expect(informeDeRecuentos(new Map(), new Map())).toMatch(/ninguna fila/);
+  });
+
   it('la jornada de hoy que mengua se nombra', () => {
     const menguada = new Map(antes);
     menguada.set('2026-10-24 vista-de-cita', 4);
@@ -569,6 +728,20 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
     expect(parteDeLoAplicado(['las migraciones en remoto', 'el receptor desplegado'])).toBe(
       'Quedó aplicado, en este orden: las migraciones en remoto; el receptor desplegado.',
     );
+  });
+
+  it('con algo aplicado, el parte da los instantes desde los que se vuelve con Time Travel', () => {
+    const antesDeMigrar = new Date('2026-10-25T09:00:00.000Z');
+    const antesDeBarajar = new Date('2026-10-25T09:05:00.000Z');
+    const parte = parteDeLoAplicado(['las migraciones en remoto', 'el rowid barajado'], { antesDeMigrar, antesDeBarajar });
+    expect(parte).toContain(ordenDeTimeTravel(antesDeBarajar));
+    expect(parte).toContain(ordenDeTimeTravel(antesDeMigrar));
+    expect(parte).toMatch(/primero el receptor anterior/);
+    expect(ordenDeTimeTravel(antesDeMigrar)).toBe(
+      'cd medicion && npx --yes wrangler@4.151.1 d1 time-travel restore medicion --timestamp=2026-10-25T09:00:00.000Z',
+    );
+    // Sin nada aplicado no hay a qué volver.
+    expect(parteDeLoAplicado([], { antesDeMigrar })).toBe('No se aplicó nada en remoto.');
   });
 });
 
@@ -605,6 +778,7 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     [['comprobar'], { MEDICION_ENDPOINT: undefined }, /Falta MEDICION_ENDPOINT/],
     [['desplegar'], { MEDICION_ENDPOINT: undefined }, /Falta MEDICION_ENDPOINT/],
     [['desplegar'], { MEDICION_ENDPOINT: 'ftp://receptor.example/m' }, /no es una dirección http\(s\)/],
+    [['desplegar'], { MEDICION_ENDPOINT: 'http://localhost:8787/' }, /apunta a un receptor local/],
   ])('%j sale con 2 y lo dice', async (argumentos, entorno, motivo) => {
     // Con un `npx` que falla delante: si la orden llegara a llamarlo, no saldría con 2.
     const PATH = `${npxDeMentira('', 99)}:${process.env.PATH}`;
