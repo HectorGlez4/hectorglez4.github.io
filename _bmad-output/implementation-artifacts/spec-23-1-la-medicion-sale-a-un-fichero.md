@@ -2,7 +2,8 @@
 title: 'Historia 23.1 — La medición sale a un fichero, y la Página de Cita no pierde su listón'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '225114cf6638192b9c61f3aa8b53720c0e4e3d89'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -113,6 +114,18 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas en este bucle (v8-ralph) y esta pasada no traía hallazgos
+(«## Hallazgos externos — …» ausentes en la invocación): la revisión independiente viene después.
+
 ## Design Notes
 
 Arranque y relevo, la forma (los nombres los fija el código):
@@ -141,5 +154,88 @@ Espía de e2e: `Object.defineProperty(window,'__medir',{configurable:true,get:()
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación cerrada (bmad-build-auto, alto tras planificar); falta la implementación (step-03).
+Status: done
+Blocking condition: ninguna.
+
+Planificación cerrada antes (bmad-build-auto, alto tras planificar); esta pasada implementa (step-03,
+en línea, sin subagente) y finaliza (step-04 sin hallazgos).
+
+**Qué se hizo.** El emisor de la medición sale de la página a un fichero, `/medicion/{versión}.js`,
+que escribe el endpoint `src/pages/medicion/[version].js.ts` desde `guionDeMedicion` (versión por
+FNV-1a del contenido; sin `MEDICION_ENDPOINT`, `getStaticPaths` vacío: ni fichero ni etiqueta). En
+línea queda el arranque (`ARRANQUE_DE_MEDICION`, 65 B, solo cola) en toda página del armazón; el
+fichero, al cargar o al activarse si `document.prerendering`, emite las vistas de `data-vistas`, se
+instala como `__medir` y vacía la cola en orden. Las vistas salen de la declaración: cada `Superficie`
+declara `vista` por `EVENTOS`, y `consecuenciasDe` expone `vistas` (solo con carácter efectivo
+`producto`) y `cargaLaMedicion` (`producto`/`servicio`); desaparece la prop `vista` de las seis
+páginas y `emiteVista` de la Obra. La lista cerrada `GUIONES_EXTERNOS` (`src/lib/guiones.ts`) nombra
+medición, Imagen y Pagefind con sus topes en `umbrales.ts`. Las islas llaman `__medir(…)` a secas;
+`CopiarCita` deja el slug y se encuentra por `document.currentScript`; las tres que anuncian llevan
+`anunciar` de `src/lib/anuncio.ts`.
+
+**Desviación de las Design Notes, sin bloqueo.** `define:vars` + `set:html` **no** se combinan en
+Astro 7.2.0: compila con `@astrojs/compiler-rs` 0.3.2 (no con el 2.13.1 que se comprobó al
+planificar), que emite el envoltorio y las constantes y **descarta el `set:html`** sin aviso —la isla
+salía vacía; lo destapó la primera pasada de `medicion.test.ts`—. Hay otra forma sin copiar la
+función de anuncio, así que el «Block If» no aplica: `guionQueAnuncia(constantes, cuerpo)` de
+`src/lib/anuncio.ts` compone el mismo `(function(){const … = …;\n…})();` que pondría `define:vars`
+(con el `<` escapado como Astro), mete `const anunciar = ${String(anunciar)};` y el cuerpo, y la
+isla lo inserta con `<script is:inline set:html={…} />` sin `define:vars`. `CompartirEnlace`, que no
+anuncia, conserva `define:vars` con hijos, que sí funciona.
+
+**Bytes libres en la Página de Cita, construida con punto final** (`MAX_BYTES_DE_GUION` = 6.656, sin
+cambiar): con Imagen, 5.629 B en línea → **1.027 libres**; sin Imagen, 1.953 B → **4.703 libres**.
+Resto de la muestra de `superficiesDelBarrido`: portada, Autor, Tema, Colección, Obra y 404, 65 B
+(6.591 libres); `/buscar/`, 3.535 B (3.121 libres).
+
+**Los tres topes, medidos el 2026-10-24 + ~400 B** (precedente de `MAX_BYTES_DE_GUION`):
+`MAX_BYTES_GUION_DE_MEDICION` = 1.320 (920 B con el punto final de producción, 886 con el de las
+pruebas; no importa nada); `MAX_BYTES_GUION_DE_IMAGEN` = 7.550 (7.153 B, sin importaciones);
+`MAX_BYTES_GUION_DE_PAGEFIND` = 45.950 (45.555 B con Pagefind 1.5.2, sin importaciones estáticas).
+
+**Ficheros.**
+- `src/lib/medicion.ts` — arranque, fichero, versión y ruta; fuera `emitir`, `EVENTO_DE_VISTA` y `Vista`.
+- `src/lib/guiones.ts` (nuevo) — `GUIONES_EXTERNOS` y `guionExternoDe`.
+- `src/lib/anuncio.ts` (nuevo) — `anunciar` y `guionQueAnuncia`.
+- `src/lib/umbrales.ts` — los tres topes con su medida.
+- `src/lib/superficies.ts` — `vista` por superficie, `cargaLaMedicion`, `ConsecuenciasDeRuta.vistas`.
+- `src/pages/medicion/[version].js.ts` (nuevo) — el fichero, solo con punto final.
+- `src/components/Medicion.astro`, `src/components/Armazon.astro` — arranque, etiqueta `defer` y `data-vistas`.
+- `src/pages/{index,cita/[slug],autor/…,tema/…,coleccion/…,obra/…}.astro` — sin `vista=`.
+- `src/islands/CopiarCita.astro`, `ImagenDeCita.astro`, `src/pages/buscar.astro` — guion compuesto con `guionQueAnuncia`, `__medir(…)`, sin comentarios dentro ni plantillas.
+- `src/islands/CompartirEnlace.astro` — `__medir(…)`.
+- `tests/unit/ayuda/medicion.ts` — sandbox con `node:vm`, `document` simulado, cola, `cargar()` y `activar()`.
+- `tests/unit/ayuda/guion.ts` — guiones en línea, externos (`src` e `import()` con cadena, plantilla o concatenación), importaciones estáticas y bytes con importaciones.
+- `tests/unit/medicion.test.ts` — reescrita: matriz entera, `data-vistas`, lista cerrada, listón, contenido en línea, islas; `sitioMedido` con Pagefind y una Cita sin Imagen.
+- `tests/unit/{superficies,obra-indexable,espinas-de-ux,ingreso-construido}.test.ts` — las consecuencias nuevas, el 404 con solo el arranque, la etiqueta externa y el punto final en el fichero.
+- `tests/e2e/ayuda/espia.ts` (nuevo) y `compartir-enlace`, `compartir-imagen`, `imagen`, `busqueda` — espía por accesor.
+- `tests/e2e/receptor.spec.ts` — descargas por superficie, `/kit/`, Pagefind e Imagen en la lista, cola en orden, prerender y el Kit de dos copias (corpus con una Cita larga fijada y una corta apta).
+- `tests/e2e/{pagina-de-cita,portada,pagina-de-autor,pagina-404,seo}.spec.ts` — las pruebas de ausencia se mudan a `receptor.spec.ts` con una línea que lo dice; la de la Cita conserva la medida en línea, renombrada.
+- `tests/e2e/kit.spec.ts` — el segundo `[data-copiar]`; se salta, diciéndolo, el día que el Kit real no lleva alternativa (la versión fija corre en `receptor.spec.ts`).
+- `DESPLIEGUE.md` §1 (peso) y §3 (fichero, pérdida aceptada de hasta 10 min con `max-age=600`, conservar el anterior sigue aplazado); `AGENTS.md` (anuncio y `__medir`).
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` — solo el comentario de la línea 23.1 (bytes libres y topes); el estado lo mueve el orquestador.
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos (21 pistas previas).
+- `npx vitest run` de `medicion`, `ingreso-construido`, `redes`, `comparticion`, `publicable-y-alcanzable`, `espinas-de-ux`, `kit-construido`, `peso`, `obras`, `superficies`, `obra-indexable`, `compartir`, `andamiaje` — 13 ficheros, 588 pruebas en verde.
+- `npm test` (con `correr.sh`) — 126 ficheros, 5.271 pruebas en verde.
+- `npx playwright test` de `receptor`, `kit`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`, `busqueda`, `pagina-de-cita`, `portada`, `pagina-de-autor`, `pagina-404`, `seo` (los dos perfiles, `--workers=3`) — 326 en verde, 31 saltadas (las de `receptor` en móvil, el Kit de dos copias en el Corpus real y el prerender: el Chromium de las pruebas no prerenderiza), y 3 tiempos agotados en `seo.spec.ts` (bucles sobre las ~5.300 URL del sitemap, 30 s y 90 s). `seo.spec.ts` a solas, `--workers=1`, en `escritorio` y en `movil`: 9/9 y 9/9 en verde (≈10 s cada bucle): es la carga en paralelo, no el cambio (las páginas crecen ~110 B).
+- `npm run build` sin punto final — termina con el paso del peso (466.029.738 B juzgados con lo que rota); no hay `dist/medicion/` ni etiqueta.
+
+**Auditoría de la matriz.** Con punto final y Sin punto final: builds de `medicion.test.ts`. Contenido
+cambia: `versionDelGuion`/`rutaDelGuionDeMedicion`. Cola, Sin `data-vistas`, Prerender y evento ajeno:
+sandbox de `medicion.test.ts` (y la cola, además, en `receptor.spec.ts`). Kit: `receptor.spec.ts`,
+Kit de dos copias. Guion ajeno: el detector sobre HTML sintético y el recorrido de `dist/`. Todas
+corrieron y pasaron; el prerender en navegador se salta con su motivo y la fila la cubre el sandbox.
+
+**Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos).
+Recomendación de revisión de seguimiento: `false` (0 parches: alto 0, medio 0, bajo 0; puntuación 0).
+
+**Riesgos residuales.**
+- La ventana de hasta 10 minutos sin medición cuando cambia el guion (aceptada y escrita en §3).
+- Si una versión futura de `compiler-rs` arreglara `define:vars` + `set:html`, `guionQueAnuncia`
+  sigue valiendo; si alguien vuelve a juntarlos, la prueba de las islas de `medicion.test.ts` lo
+  delata (la isla sale sin cuerpo).
+- `seo.spec.ts` agota su tiempo bajo carga en paralelo con el Corpus de hoy: es previo a esta
+  historia y no se ha tocado.
+- El prerender real no se ha visto en un navegador: solo en el sandbox.
