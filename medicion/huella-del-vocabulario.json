@@ -1,0 +1,256 @@
+{
+  "escritaEl": "2026-10-24",
+  "commit": "b4303b0e7c809ab1862a63ca8737008f1b66e802",
+  "vocabulario": {
+    "eventos": {
+      "busqueda": {
+        "filtros": {
+          "valores": [
+            "autor",
+            "autor-obra",
+            "autor-obra-tema",
+            "autor-tema",
+            "ninguno",
+            "tema"
+          ],
+          "nulo": false
+        },
+        "tramo": {
+          "valores": [
+            "0",
+            "1-9",
+            "10-29",
+            "30+"
+          ],
+          "nulo": false
+        }
+      },
+      "busqueda-sin-resultados": {
+        "consulta": {
+          "valores": "texto",
+          "nulo": false
+        }
+      },
+      "comparticion-de-enlace": {
+        "destino": {
+          "valores": [
+            "correo",
+            "facebook",
+            "instagram-historia",
+            "opaco",
+            "telegram",
+            "threads",
+            "whatsapp",
+            "x"
+          ],
+          "nulo": false
+        },
+        "primera": {
+          "valores": [
+            "no",
+            "si"
+          ],
+          "nulo": false
+        }
+      },
+      "comparticion-de-imagen": {
+        "destino": {
+          "valores": [
+            "correo",
+            "facebook",
+            "instagram-historia",
+            "opaco",
+            "telegram",
+            "threads",
+            "whatsapp",
+            "x"
+          ],
+          "nulo": false
+        },
+        "primera": {
+          "valores": [
+            "no",
+            "si"
+          ],
+          "nulo": false
+        }
+      },
+      "copiado": {
+        "primera": {
+          "valores": [
+            "no",
+            "si"
+          ],
+          "nulo": false
+        }
+      },
+      "descarga-de-imagen": {
+        "destino": {
+          "valores": [
+            "instagram-historia",
+            "opaco"
+          ],
+          "nulo": true
+        },
+        "primera": {
+          "valores": [
+            "no",
+            "si"
+          ],
+          "nulo": false
+        }
+      },
+      "lectura": {
+        "origen": {
+          "valores": [
+            "facebook",
+            "instagram",
+            "threads",
+            "tiktok",
+            "x"
+          ],
+          "nulo": true
+        },
+        "via": {
+          "valores": [
+            "correo",
+            "facebook",
+            "instagram-historia",
+            "opaco",
+            "telegram",
+            "threads",
+            "whatsapp",
+            "x"
+          ],
+          "nulo": true
+        }
+      },
+      "salida-interna": {
+        "zona": {
+          "valores": [
+            "atribucion",
+            "autores-de-portada",
+            "cabecera",
+            "chip-de-tema",
+            "cita-del-dia",
+            "colecciones",
+            "directorio",
+            "lista-de-obras",
+            "listado",
+            "misma-obra",
+            "obras-de-portada",
+            "paginacion",
+            "resultado",
+            "rutas-de-salida",
+            "siguiente",
+            "tarjeta-de-obra"
+          ],
+          "nulo": false
+        }
+      },
+      "vista-de-cita": {
+        "origen": {
+          "valores": [
+            "facebook",
+            "instagram",
+            "threads",
+            "tiktok",
+            "x"
+          ],
+          "nulo": true
+        },
+        "via": {
+          "valores": [
+            "correo",
+            "facebook",
+            "instagram-historia",
+            "opaco",
+            "telegram",
+            "threads",
+            "whatsapp",
+            "x"
+          ],
+          "nulo": true
+        }
+      },
+      "vista-de-obra": {
+        "indexable": {
+          "valores": [
+            "indexable",
+            "no-indexable"
+          ],
+          "nulo": false
+        },
+        "origen": {
+          "valores": [
+            "facebook",
+            "instagram",
+            "threads",
+            "tiktok",
+            "x"
+          ],
+          "nulo": true
+        },
+        "via": {
+          "valores": [
+            "correo",
+            "facebook",
+            "instagram-historia",
+            "opaco",
+            "telegram",
+            "threads",
+            "whatsapp",
+            "x"
+          ],
+          "nulo": true
+        }
+      },
+      "vista-de-superficie": {
+        "origen": {
+          "valores": [
+            "facebook",
+            "instagram",
+            "threads",
+            "tiktok",
+            "x"
+          ],
+          "nulo": true
+        },
+        "via": {
+          "valores": [
+            "correo",
+            "facebook",
+            "instagram-historia",
+            "opaco",
+            "telegram",
+            "threads",
+            "whatsapp",
+            "x"
+          ],
+          "nulo": true
+        }
+      }
+    },
+    "claveEnLaBaliza": {
+      "consulta": "datos"
+    },
+    "tramos": [
+      {
+        "desde": 0,
+        "rotulo": "0"
+      },
+      {
+        "desde": 1,
+        "rotulo": "1-9"
+      },
+      {
+        "desde": 10,
+        "rotulo": "10-29"
+      },
+      {
+        "desde": 30,
+        "rotulo": "30+"
+      }
+    ]
+  }
+}
