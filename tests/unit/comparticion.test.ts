@@ -200,12 +200,13 @@ describe('Historia 10.4 — SM-5 y SM-7 comparables', () => {
 
     // El SQL que el Worker envía al D1 con una baliza válida, no el texto del fichero: un
     // comentario con «VALUES (» o una lista partida con `+` lo cambiarían (Historia 23.12).
+    // `listaTras` lo lee neutralizado, como todo SQL de las pruebas (`ayuda/d1.ts`).
     const { entorno, llamadas } = d1QueApunta();
     await worker.fetch(peticionAlReceptor({ evento: EVENTOS.copiado, ruta: '/cita/una' }), entorno);
     expect(llamadas.sql).toHaveLength(1);
     const [sql] = llamadas.sql;
-    const enElInsert = listaTras(sql, /^INSERT INTO eventos\s*\(/);
-    const valores = listaTras(sql, /\bVALUES\s*\(/);
+    const enElInsert = listaTras(sql, /^\s*INSERT\s+INTO\s+eventos\s*\(/i);
+    const valores = listaTras(sql, /\bVALUES\s*\(/i);
 
     // `rowid` no es columna del esquema: es la implícita de SQLite, y el Worker la da
     // aleatoria para que el orden de las filas no sea el de llegada (Historia 23.12).
