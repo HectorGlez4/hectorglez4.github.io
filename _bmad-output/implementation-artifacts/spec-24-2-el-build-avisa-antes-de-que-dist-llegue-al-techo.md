@@ -176,14 +176,48 @@ Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignm
 
 Diferido: la medida de la deriva de Pagefind entre dos jornadas reales y la prueba construida de dos jornadas para la 26.2 (ac-auditor; blind-hunter; intent-alignment), en el frontmatter. Rechazados: contar solo los PNG de `tarjeta/` (el criterio dice «PNG de `dist/`»; hoy difiere en 3 iconos); contarlos dentro de lo juzgado y no en todo `dist/` (ninguno de los cinco que rotan es PNG: hoy coinciden); serie o `$GITHUB_STEP_SUMMARY` de las cifras (el paso no escribe nada); cifras de base copiadas a mano (van fechadas); manifiesto de `dist/` fuera del repositorio (comprobación única de la historia); el triaje anterior sin hallazgos (lo resuelve esta pasada); fusión, CI en la principal y `sprint-status.yaml` (del orquestador); procedencia de los valores (los dio Héctor al bucle); porcentaje de las Tarjetas sobre lo juzgado y el corte de 10 minutos del despliegue sin medir (el contrato no lo pide); prueba de `npm run build` entero entre aviso y tope (el paso es el último eslabón fijado por prueba); `npm.cmd` en Windows (el proyecto no construye ahí); aviso o tope del número de ficheros (el contrato lo prohíbe).
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 20: (high 0, medium 0, low 20)
+- defer: 0
+- reject: 23: (high 0, medium 0, low 23)
+- addressed_findings:
+  - `[low]` `[patch]` La guarda de qué superficies leen la jornada no seguía un especificador `.js` que nombra un `.ts`, uno sin extensión, las reexportaciones, los `import '…'` de efecto ni los `import('…')`, y solo miraba `src/` (verification-gap; blind-hunter): `tests/unit/peso.test.ts` resuelve como Vite (`.js`→`.ts`, sin extensión, `index`), sigue `import`/`export … from`, efecto, dinámico y `require`, barre también `integraciones/` y `astro.config.mjs`, y una prueba sintética fija el resolutor. Mutación: una página sonda con `'../lib/citaDelDia.js'`, y otra a través de un módulo que solo reexporta, hacen fallar la guarda.
+  - `[low]` `[patch]` La prueba de pureza solo rechazaba `node:` y `process.` (blind-hunter): quita comentarios, exige que toda importación sea relativa (un `'fs'` a secas o un paquete no se inspeccionan) y rechaza `process`, `globalThis`, `fetch(`, `XMLHttpRequest` y `WebSocket`. Mutación: un `import … from 'fs'` en `tools/lib/peso.ts` la hace fallar.
+  - `[low]` `[patch]` Con un `dist/` vacío las cifras decían «0 bytes» y «quedan 750 MiB hasta el aviso» junto al error (blind-hunter; edge-case-hunter): sin nada que juzgar el parte no trae cifras —ausencia antes que cero— y el paso no escribe nada por stdout.
+  - `[low]` `[patch]` Un `dist/` que solo trae los ficheros que rotan pasaba como una medida de 0 bytes (edge-case-hunter): es un error con código 1 que nombra los presentes, sin cifras.
+  - `[low]` `[patch]` La primera línea decía «pagefind/ incluido» aunque no hubiera `pagefind/` (blind-hunter): `medirDist` cuenta `pagefind/` y la línea dice «sin pagefind/» cuando falta.
+  - `[low]` `[patch]` `enMiB` escribía «0 MiB» para cantidades no nulas, y el error decía «pasa del tope en 1 byte (0 MiB)» (blind-hunter): por debajo de una décima sin ser cero escribe «<0,1 MiB».
+  - `[low]` `[patch]` El aviso y el error afirmaban que se despliega o que sigue servido el sitio anterior también en local y en Playwright (blind-hunter): lo dicen del flujo de publicación (`tools/lib/peso.ts`, comentarios de `umbrales.ts`, tabla de `DESPLIEGUE.md`).
+  - `[low]` `[patch]` Ninguna prueba fijaba que el flujo de publicación construye con `npm run build` antes de `upload-pages-artifact` (blind-hunter): prueba que lee `publicar.yml`, exige el paso `npm run build` antes de la subida de `dist`, sin `continue-on-error`, y que ningún paso anterior llame a `astro build` o a Pagefind a pelo.
+  - `[low]` `[patch]` El paso no aplica las exclusiones por nombre del empaquetado (blind-hunter): `integraciones/peso.ts` y `DESPLIEGUE.md` dicen que `.git`/`.github` se cuentan, que eso mide de más y nunca de menos, y que hoy `dist/` no trae entradas con punto (comprobado sobre el manifiesto de base).
+  - `[low]` `[patch]` Lo que no es fichero ni directorio (tubería, socket, dispositivo) se saltaba en silencio (edge-case-hunter): hace fallar la lectura con su nombre; prueba construida con `mkfifo`.
+  - `[low]` `[patch]` Un hijo muerto por una señal contaba como código 1 (blind-hunter): `construirProyecto` y `correrElPaso` lanzan si hay señal, igual que con un código de texto.
+  - `[low]` `[patch]` Una salida de más de 1 MiB habría matado la construcción por `maxBuffer` y se habría tomado por «no arrancó» (edge-case-hunter): `construirProyecto` da 64 MiB y `correrElPaso` 16 MiB.
+  - `[low]` `[patch]` `construirConCorpus` dejaba la copia huérfana si `construirProyecto` o Pagefind lanzaban (edge-case-hunter): limpia la copia y relanza.
+  - `[low]` `[patch]` Dos pruebas construidas exigían el stderr entero vacío o anclado al principio, y un aviso de Node o de `tsx` las tumbaría (blind-hunter): se juzga por línea (bandera `m` y `LINEA_DEL_PASO`).
+  - `[low]` `[patch]` La prueba construida del aviso no comprobaba el tope ni quién decide (ac-auditor): exige `TOPE_DE_PESO_DE_DIST`, el tope en bytes y «lo decide Héctor».
+  - `[low]` `[patch]` Las proyecciones de crecimiento contaban solo lo que añade una Cita (blind-hunter): `DESPLIEGUE.md` y `umbrales.ts` las dan como cotas —un Autor o una Obra nuevos suman su página y su Tarjeta, así que los umbrales pueden llegar con menos Citas, nunca con más—.
+  - `[low]` `[patch]` `AGENTS.md` no decía que una página nueva que dependa de la jornada va en `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` (blind-hunter): lo dice, con la prueba que lo exige.
+  - `[low]` `[patch]` `AGENTS.md` y `DESPLIEGUE.md` decían que el paso escribe siempre sus cinco líneas (blind-hunter): las escribe cuando hay algo que juzgar; sin `dist/`, vacío o solo con lo que rota, no.
+  - `[low]` `[patch]` `DESPLIEGUE.md` decía 39 ficheros de Pagefind entre dos jornadas (ac-auditor): son 40, 39 con nombre nuevo y `pagefind-entry.json`. El diferido del frontmatter conserva su texto.
+  - `[low]` `[patch]` La primera sección del Auto Run Result contradecía las pasadas posteriores (blind-hunter): lleva una nota de lectura y la marca «[superado en la pasada N]» en lo que quedó atrás.
+
+Rechazados, con la autoridad del contrato o por ruido: el aviso de los ficheros que rotan y faltan sale por stdout (el contrato: solo lo que cruza un umbral va a stderr; y en el CI `npm test` corre antes de la subida, donde la prueba construida exige los cinco); el aviso no tiene más canal que la anotación (el contrato fija el canal y que el paso no escribe nada); el aviso no pone el número de ficheros frente a los 20.000 de Cloudflare (el contrato: ficheros sin aviso ni tope; lo dice `DESPLIEGUE.md`); nada juzga lo desplegado entero contra el techo (la matriz del contrato bendice dos jornadas aunque lo que rota pase del tope); tope y fallo de lectura comparten el código 1 (la matriz los da los dos con 1); anotaciones sin `title=` (el contrato nombra `::warning::`/`::error::`; cosmético); orden aparte para volver a medir (nadie la pide, y tras la 24.6 hay que construir igual); de intent-alignment, la deriva de Pagefind y la rama con el contexto de la épica (ya diferidas), el tar frente a los bytes (el criterio acepta los bytes), el corte de 10 minutos, la construcción del CI, el aviso probado sobre el paso solo, el manifiesto único, la traza de la decisión de Héctor (está en el contrato y en el mensaje del commit de los valores), los PNG dentro de lo juzgado, las cinco líneas y el alcance añadido; de ac-auditor, la deriva y la rama (diferidas), la traza de la propuesta de valores, los criterios de fusión y `sprint-status.yaml` (del orquestador).
+
 ## Auto Run Result
+
+> Registro por pasadas, de la más antigua a la más reciente: lo que dice una pasada lo corrige o
+> lo amplía la siguiente, y lo vigente es lo de la última. Las afirmaciones de esta primera
+> sección que una pasada posterior dejó atrás llevan la marca «[superado en la pasada N]».
 
 Status: done
 Blocking condition: ninguna.
 
 Planificación cerrada (halt after planning) sobre `e51daf84b76342c2befb17d0c5148a058289dda6`; implementación en línea en el worktree `v8-24-2`, rama `v8/24-2-peso-de-dist`, sin fusionar ni empujar.
 
-**Qué se hizo.** `npm run build` termina, tras Pagefind, con `tsx integraciones/peso.ts`: suma los bytes de los ficheros regulares de `dist/` (`pagefind/` incluido), reparte con `medirDist` lo desplegado, lo que rota con la jornada (los cinco ficheros exactos), lo juzgado, las Tarjetas (`tarjeta/…`) y los PNG, y juzga lo juzgado contra `AVISO_DE_PESO_DE_DIST` (750 MiB) y `TOPE_DE_PESO_DE_DIST` (900 MiB) con bordes estrictos. Las cifras salen siempre por stdout; el aviso y el error, por stderr, con `::warning::`/`::error::` delante cuando `GITHUB_ACTIONS=true`. Sobre el tope sale con 1 sin traza; sin `dist/` (o con uno que no se deja leer) lo dice y sale con 1. `TOPE_DE_PNG_DE_DIST` queda `undefined`: se informa el número y no avisa. Lo juzgado es un tipo marcado que solo produce `medirDist`, así que los veredictos no pueden recibir lo desplegado entero (lo fija un `@ts-expect-error` que `astro check` verifica).
+**Qué se hizo.** `npm run build` termina, tras Pagefind, con `tsx integraciones/peso.ts`: suma los bytes de los ficheros regulares de `dist/` (`pagefind/` incluido) [superado en la pasada 1: sigue los enlaces simbólicos como `tar --dereference`], reparte con `medirDist` lo desplegado, lo que rota con la jornada (los cinco ficheros exactos), lo juzgado, las Tarjetas (`tarjeta/…`) y los PNG, y juzga lo juzgado contra `AVISO_DE_PESO_DE_DIST` (750 MiB) y `TOPE_DE_PESO_DE_DIST` (900 MiB) con bordes estrictos. Las cifras salen siempre por stdout [superado en la pasada 2: sin nada que juzgar no hay cifras]; el aviso y el error, por stderr, con `::warning::`/`::error::` delante cuando `GITHUB_ACTIONS=true`. Sobre el tope sale con 1 sin traza; sin `dist/` (o con uno que no se deja leer) lo dice y sale con 1. `TOPE_DE_PNG_DE_DIST` queda `undefined`: se informa el número y no avisa. Lo juzgado es un tipo marcado que solo produce `medirDist`, así que los veredictos no pueden recibir lo desplegado entero (lo fija un `@ts-expect-error` que `astro check` verifica).
 
 **Commits** (sobre la base, en orden): `52a3a47cae` spec; `1794230264` constantes en `umbrales.ts`, solas; `244d18b95a` la maquinaria y sus pruebas; `e827930497` documentación; y el de cierre de este spec.
 
@@ -197,9 +231,9 @@ Planificación cerrada (halt after planning) sobre `e51daf84b76342c2befb17d0c514
 - `tests/unit/peso-construido.test.ts` — 9 pruebas sobre una copia construida con `npm run build` y los umbrales rebajados en la copia.
 - `DESPLIEGUE.md` — sección «El techo de peso del hospedaje» tras la de caché. `AGENTS.md` — viñeta en «Running and verifying».
 
-**Hallazgos de revisión:** 0 parches, 0 diferidos nuevos, 0 rechazados (sin hallazgos externos en esta pasada).
+**Hallazgos de revisión:** 0 parches, 0 diferidos nuevos, 0 rechazados (sin hallazgos externos en esta pasada). [Superado: la pasada 1 aplicó 19 parches y la 2, 20.]
 
-**Revisión de seguimiento recomendada:** `false` — parches de esta pasada: high 0, medium 0, low 0; puntuación 3×0 + 0 = 0.
+**Revisión de seguimiento recomendada:** `false` — parches de esta pasada: high 0, medium 0, low 0; puntuación 3×0 + 0 = 0. [Superado: lo vigente es el `followup_review_recommended` del frontmatter.]
 
 **Verificación:**
 - Re-medida previa en la base: `FECHA_JORNADA=2026-10-24 npm run build` → manifiesto idéntico al de la planificación y las mismas cifras (anotadas en el Code Map).
@@ -213,7 +247,7 @@ Planificación cerrada (halt after planning) sobre `e51daf84b76342c2befb17d0c514
 
 **Riesgos residuales:**
 - La medida juzgada incluye `dist/pagefind/`, donde la Cita del Día de la portada deja unos cientos de bytes que varían por jornada hasta la 26.2 (diferido ya anotado): el veredicto solo podría cambiar con el peso a esa distancia de un umbral.
-- Un enlace simbólico dentro de `dist/` no se cuenta (solo ficheros regulares); hoy Astro y Pagefind no los producen.
+- Un enlace simbólico dentro de `dist/` no se cuenta (solo ficheros regulares); hoy Astro y Pagefind no los producen. [Superado en la pasada 1: el paso los sigue.]
 - `GITHUB_ACTIONS` cambia la forma del aviso y del error (anotación), no su contenido ni el código de salida; el flujo de publicación lo pone solo.
 - Los valores se revisan tras la 24.6, que engorda la Página de Cita (pendiente de Héctor).
 
@@ -252,3 +286,36 @@ Status: done. Blocking condition: ninguna. Sin vuelta atrás por `bad_spec` ni `
 - Qué compara GitHub con su 1 GB no está comprobado; la estimación del relleno del tar (≈29 MB en el tope) cabe en los 56 MB entre tope y techo.
 - La guarda de la jornada mira `FECHA_JORNADA`, `corpus/portada.json` y sus importadores; una superficie que leyera el reloj de otro modo no la vería.
 
+
+### Pasada de revisión 2 (hallazgos externos), 2026-10-24
+
+Status: done. Blocking condition: ninguna. Sin vuelta atrás por `bad_spec` ni `intent_gap`: los hallazgos se resolvían dentro del contrato, y los que pedían salirse de él se rechazan con su autoridad.
+
+**Qué cambió.** Sin nada que juzgar —`dist/` vacío o solo con los cinco que rotan— el paso no escribe cifras y sale con 1 diciéndolo. La primera línea dice si `pagefind/` está; `enMiB` escribe «<0,1 MiB» en vez de «0 MiB» para lo que no es cero; el aviso y el error hablan del despliegue solo en el flujo de publicación. Lo que en `dist/` no es fichero ni directorio hace fallar la lectura. Las guardas de prueba se endurecen: la de la jornada resuelve como Vite y barre `integraciones/` y la configuración; la de pureza exige importaciones relativas y sin proceso ni red; una nueva fija que `publicar.yml` construye con `npm run build` antes de subir `dist/`. La ayuda de construcción lanza ante una señal, da `maxBuffer` holgado y limpia la copia si lanza. La documentación da las proyecciones como cotas, el número exacto de ficheros de Pagefind que cambian, cuándo no hay cifras, qué pasa con las exclusiones del empaquetado y que una página nueva que dependa de la jornada va en la lista.
+
+**Ficheros:**
+- `tools/lib/peso.ts` — `pagefind` en `MedidaDeDist`; sin cifras ni avisos cuando no hay nada que juzgar (vacío o solo lo que rota); «sin pagefind/»; `enMiB` con «<0,1 MiB»; aviso y error condicionados al flujo de publicación.
+- `integraciones/peso.ts` — falla ante lo que no es fichero ni directorio; no escribe cifras vacías; dice que cuenta lo que el empaquetado excluiría.
+- `tests/unit/peso.test.ts` — 53 pruebas (+8): `pagefind`, `<0,1 MiB`, solo lo que rota, sin cifras, mensajes del flujo, `publicar.yml`, resolutor sintético; guardas de pureza y de jornada endurecidas.
+- `tests/unit/peso-construido.test.ts` — 13 pruebas (+1): `mkfifo`, `dist/` solo con la portada, aviso con tope y «lo decide Héctor», stderr por línea, señal y `maxBuffer` en `correrElPaso`.
+- `tests/unit/ayuda/construir.ts` — `construirConCorpus` limpia la copia si la construcción o Pagefind lanzan; `construirProyecto` con `maxBuffer` de 64 MiB y que lanza ante una señal.
+- `src/lib/umbrales.ts` — solo comentarios: cotas de las proyecciones y el despliegue dicho del flujo de publicación.
+- `AGENTS.md` — cuándo hay cinco líneas; la lista de lo que rota para páginas nuevas.
+- `DESPLIEGUE.md` — cotas, 40 ficheros de Pagefind, sin cifras sin nada que juzgar, exclusiones del empaquetado, tabla con el flujo de publicación.
+
+**Hallazgos de revisión:** 20 parches aplicados (20 low), 0 diferidos, 23 rechazados. Detalle en el Review Triage Log.
+
+**Revisión de seguimiento recomendada:** `true` — parches de esta pasada: high 0, medium 0, low 20; puntuación 3×0 + 20 = 20 (≥ 5).
+
+**Verificación:**
+- `npx vitest run tests/unit/peso.test.ts` → 53/53 verde. Mutaciones: una página sonda que importa `'../lib/citaDelDia.js'`, y otra a través de un módulo que solo reexporta, hacen fallar la guarda de la jornada; un `import … from 'fs'` en `tools/lib/peso.ts` hace fallar la de pureza. Restaurado.
+- `npx vitest run tests/unit/peso-construido.test.ts` (con `correr.sh`) → 13/13 verde.
+- `npx vitest run` de `andamiaje`, `barra-final`, `indexacion`, `trafico`, `demanda` e `ingreso-cli` → 6 ficheros, 243 pruebas, verde.
+- `npx astro check` → 0 errores, 0 avisos (22 pistas).
+- `FECHA_JORNADA=2026-10-24 npm run build` sin `MEDICION_ENDPOINT`, `SITE_URL` ni `GITHUB_ACTIONS` → sale 0, sin aviso; cifras iguales a la base («pagefind/ incluido», juzgado 466.839.655 bytes, «quedan 319.592.345 bytes (304,8 MiB) hasta el aviso», Tarjetas 66,9 %, 5.116 PNG). `diff` contra `dist-base-2026-10-24.sha256` vacío; ningún enlace simbólico. `dist/` borrado después.
+- `npm test` entero con `correr.sh` → 126 ficheros, 5.254 pruebas, verde (656 s).
+
+**Riesgos residuales:**
+- La deriva de unos bytes de `dist/pagefind/` entre jornadas sigue hasta la 26.2 (diferido).
+- Qué compara GitHub con su 1 GB, y qué excluye por nombre la versión de `upload-pages-artifact` en uso, no está comprobado; el paso cuenta de más, nunca de menos.
+- La guarda de la jornada es textual: sigue las importaciones relativas en sus formas habituales, pero no un `import.meta.glob` ni una superficie que leyera el reloj sin `FECHA_JORNADA` ni la portada.
