@@ -2,8 +2,8 @@
 title: 'Historia 23.12 — El orden de llegada no reconstruye a nadie'
 type: 'feature'
 created: '2026-10-24'
-status: 'in-review'
-baseline_revision: 'cd4a19572f95a65d5e844048e2624e82ad02195f'
+status: 'done'
+baseline_revision: '8272688fa0d05bfb3ef216bc9507c44a76598976'
 review_loop_iteration: 1
 followup_review_recommended: true
 context: []
@@ -202,6 +202,32 @@ Las capas externas no traen hallazgos en esta pasada repetida; los 15 parches so
 
 Parches que sobreviven (16): `cadenasDelCodigo` no daba las cadenas en el orden del fuente; `peticionAlReceptor` tiraba el cuerpo de todo método que no fuera `POST`; el D1 falso no contaba los `run()`; las escrituras del Worker no contaban `UPDATE` ni `DELETE` ni un `INSERT OR ${…} INTO`; `listaTras` era un segundo lector de SQL, sin comentarios ni comillas de identificador; la prueba de que el barrido no está vacío dependía de la redacción de un mensaje; ninguna prueba pasaba por las extensiones de JavaScript; la prueba remitía al spec sin su ruta; `DESPLIEGUE.md` mandaba redesplegar desde la principal sin límite (`[medium]`), decidía por las cifras y no por la contigüidad, no decía qué hacer con una fila, con más de dos o sin ninguna, ni comprobaba el `curl`, volvía atrás sin identificador de versión, daba el coste sin el tamaño de hoy, sin el crecimiento del barajado ni sus escrituras, no decía cómo enlazar el `rowid` leído y no decía que Time Travel sobrevive al barajado; este registro repetía títulos y contaba dos veces los mismos parches; y Verification y el resultado no coincidían en los ficheros de prueba. Rechazados (11): el orden de la historia de commits (no se reescribe; esta vuelta commitea el spec antes que el código); un identificador entre comillas con `;` (ninguna columna lo lleva, y la 23.10 prohíbe nombrar el `rowid` ahí); la rama que no entra sola (ya diferido); `sprint-status.yaml` (lo lleva el orquestador); la lectura sin `CAST` en `tools/` (el criterio la deja a la 23.10); una prueba de que ningún flujo despliega el receptor (el criterio enumera las pruebas y no la incluye); D1 en vivo (la baliza de la 23.3, por el criterio); la base de la revisión, que no incluye `worker.ts` (el primer criterio compara con `a50b3e5c88`, escrito en el spec); Time Travel y el coste en `DESPLIEGUE.md` como añadidos (documentan consecuencias, no cambian alcance); que el detector sea más estricto que el criterio (fija igual que ningún SQL de `tools/` ordena por `rowid`, no le quita nada a la 23.2 —sus dos SQL con `rowid` no ordenan— y la 23.10 lo estrecha más); y los actos de proceso fuera del diff (fusión, CI de la principal, tablero).
 
+### 2026-10-24 — Review pass (tercera revisión, pasada repetida: los 16 parches de la entrada anterior, aplicados; no se suman dos veces)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 16 (high 0, medium 1, low 15)
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - `[medium]` `[patch]` `DESPLIEGUE.md` mandaba redesplegar desde la principal ante números contiguos, sin límite, justo lo que el criterio prohíbe antes de la 23.3 (ac-auditor, intent-alignment). El bloque ya no manda desplegar: hasta la 23.3 los contiguos son lo esperado y no se adelanta —lo despliega Héctor en la 23.3, desde la rama—, y desde la 23.3 lo cierra repetirla.
+  - `[low]` `[patch]` `cadenasDelCodigo` no daba las cadenas en el orden del fuente (blind-hunter). Las ordena por dónde empiezan, la que contiene un hueco antes que las de dentro; prueba nueva.
+  - `[low]` `[patch]` `peticionAlReceptor` tiraba el cuerpo de todo método que no fuera `POST` (blind-hunter). Lleva la carga en cualquier método; caso nuevo: un `PUT` con una baliza válida no escribe.
+  - `[low]` `[patch]` El D1 falso no contaba los `run()`, y un adaptador que preparase y enlazase sin ejecutar pasaba (edge-case-hunter). `ejecutadas`, exigido a 1 o 0 en las cuatro pruebas del adaptador; comprobado quitando el `.run()` del Worker.
+  - `[low]` `[patch]` Las escrituras del Worker no contaban `UPDATE` ni `DELETE`, ni un `INSERT OR ${…} INTO` (blind-hunter, edge-case-hunter). Cuentan `INSERT [OR …] INTO`, `REPLACE INTO`, `UPDATE … SET` y `DELETE FROM` sobre el SQL neutralizado; comprobado con un `DELETE` de más y con el modo interpolado.
+  - `[low]` `[patch]` `listaTras` era un segundo lector de SQL, sin comentarios ni comillas de identificador (blind-hunter). Lee el SQL neutralizado por `sqlNeutralizado`, ahora en `ayuda/d1.ts` y única lectura de SQL de las pruebas; comprobado con un comentario y una columna entre comillas en el `INSERT`, que no rompen nada.
+  - `[low]` `[patch]` La prueba de que el barrido no está vacío dependía de la redacción de un mensaje de `tools/lib/ingresos.ts` (blind-hunter). Exige ver los dos ficheros y sacar textos de los dos.
+  - `[low]` `[patch]` Ninguna prueba pasaba por las extensiones de JavaScript (blind-hunter). Un par por cada una de las ocho: la cadena partida marca y el comentario no, lo contrario de leerla línea a línea.
+  - `[low]` `[patch]` La prueba remitía al spec sin su ruta (blind-hunter). La cabecera da la ruta y la sección.
+  - `[low]` `[patch]` La lectura del bloque decidía por las cifras (blind-hunter, edge-case-hunter). Decide la contigüidad, con el tráfico que se cuela y la vuelta atrás que da contiguos de 19 cifras.
+  - `[low]` `[patch]` No decía qué hacer con una fila o más de dos (edge-case-hunter). Se borran y se repite.
+  - `[low]` `[patch]` Sin filas, mandaba volver atrás sin esperar, sin distinguir la causa y sin identificador de versión, y el `curl -s` callaba un fallo (blind-hunter, edge-case-hunter). Se espera y se repite el `SELECT`, la versión desplegada lo distingue, se vuelve por identificador (`versions list`, `rollback <id>`), y `MEDICION_ENDPOINT` se comprueba y `curl` va con `-sS --fail`.
+  - `[low]` `[patch]` El coste en espacio iba sin el tamaño de hoy, sin lo que crece al barajar y sin sus escrituras (blind-hunter). `npx wrangler d1 info medicion`, 50 MB barajando y unas tres filas escritas por fila contra la cuota (AD-13); medido otra vez en esta pasada.
+  - `[low]` `[patch]` La regla del `rowid` leído cubría solo la ida (blind-hunter). Se devuelve como texto, `WHERE rowid = CAST(? AS INTEGER)`; comprobado en `sqlite3` con 2^53+1, que el valor redondeado lleva a otra fila.
+  - `[low]` `[patch]` No decía que Time Travel sobrevive al barajado (blind-hunter). Lo dice: lo escrito antes de barajar se restaura en su orden hasta que el plazo caduca.
+  - `[low]` `[patch]` Este registro repetía títulos y contaba dos veces los mismos parches, y Verification y el resultado no coincidían en los ficheros de prueba (blind-hunter). Cada entrada dice qué pasada es y qué no se suma, y el resultado da los comandos de Verification.
+
+Las capas externas no traen hallazgos en esta pasada repetida. El detector re-derivado no lo ha visto aún ninguna capa: lo han visto las pruebas y las mutaciones del resultado.
+
 ## Design Notes
 
 El `rowid` se queda en SQL porque en JavaScript un entero de 64 bits pierde precisión por encima de 2^53 (`node:sqlite` incluso se niega a devolverlo), y generarlo allí obligaría a enlazarlo y a cambiar el tipo de `bind`. `INSERT` sin `OR …` es lo que pide el criterio: la colisión (probabilidad ≈ N/2^63) es un error que el `catch` ya traga, «como un almacén caído».
@@ -259,68 +285,81 @@ Blocking condition: ninguna.
 (abs(random()), ?, ?, ?, ?, ?, ?)`. El `rowid` lo genera SQLite y no viaja por `bind`, que
 sigue recibiendo los seis campos del `Registro`; un `rowid` repetido —o el desbordamiento de
 `abs()`— es un error de SQLite que traga el `catch` existente (204, evento perdido). Sin
-migración, sin columnas, sin vocabulario ni huella; nada desplegado. La segunda revisión
-devolvió la historia al paso 3 por el diseño del detector de `tools/` (bad_spec): ahora lee
-SQL —las cadenas que ve el compilador de TypeScript, un `.sql` entero o, en otra extensión,
-cada línea— en vez de adivinar en el texto del fichero dónde acaba un literal de JavaScript.
+migración, sin columnas, sin vocabulario ni huella; nada desplegado. La tercera revisión
+devolvió la historia al paso 3 por el diseño del detector de `tools/` (bad_spec): ya no
+resuelve alias ni posiciones, sino que exige que una sentencia que ordena no nombre el
+`rowid`, no lleve huecos y no deje el `ORDER BY` sin término, y lee cada cadena de código
+como SQL neutralizado —con `--` pegado a una letra como bandera de terminal y lo de entre
+comillas dobles neutralizado también— y tal cual. `medicion/worker.ts` no se tocó en esta
+vuelta.
 
 **Ficheros** (frente a la base de la historia, `a50b3e5c881d4ffa0ddc8003d09ce8da95549caf`).
 - `medicion/worker.ts` — el `INSERT` con `rowid` primero y `abs(random())` como valor, y el
   comentario con el porqué, la colisión y el desbordamiento en el `catch`, la dependencia de
   que la tabla tenga `rowid`, `CAST(rowid AS TEXT)` y el barajado en `desplegar` (23.2).
-  Idéntico al de la primera revisión.
-- `tests/unit/ayuda/d1.ts` (nuevo) — `d1QueApunta`, `peticionAlReceptor` y `listaTras`,
-  compartidos por las dos pruebas del adaptador.
+  Idéntico desde la primera revisión.
+- `tests/unit/ayuda/d1.ts` (nuevo) — `d1QueApunta` (que cuenta los `run()`),
+  `peticionAlReceptor` (con cuerpo en cualquier método), `sqlNeutralizado`, la única lectura
+  de SQL de las pruebas, y `listaTras` sobre ella.
 - `tests/unit/comparticion.test.ts` — la correspondencia de columnas lee el SQL enviado, con
   `['rowid', ...esquema]` y `['abs(random())', '?'×6]`, y se llama por lo que fija.
 - `tests/unit/orden-de-llegada.test.ts` (nuevo) — estructural sobre las cadenas del
-  compilador (una escritura `INSERT INTO eventos`, sin `OR …`, `ON CONFLICT` ni `RETURNING`,
-  `rowid`/`abs(random())` primeros y el resto `?`), `esquema.sql` sin `WITHOUT ROWID`, el
-  adaptador con un D1 falso (lo enviado es lo declarado, seis valores, 204), el detector
-  `ordenaPorRowid` con 32 casos que marca y 18 que no, y el barrido de `tools/` que exige ver
-  `tools/ingreso.ts`, `tools/lib/ingresos.ts` y su cadena de `d1 execute`.
+  compilador (una escritura entre `INSERT`, `REPLACE`, `UPDATE` y `DELETE`: `INSERT INTO
+  eventos`, sin `OR …`, `ON CONFLICT` ni `RETURNING`, `rowid`/`abs(random())` primeros y el
+  resto `?`), `esquema.sql` sin `WITHOUT ROWID`, el adaptador con un D1 falso (lo enviado es
+  lo declarado, un `run()`, seis valores, 204; nada para `GET`, `PUT` y evento ajeno), el orden
+  de las cadenas, el detector con 50 casos que marca, 9 que marca a propósito con su salida
+  y 20 que no, un par por cada una de las ocho extensiones de código, y el barrido de `tools/`.
 - `DESPLIEGUE.md` — §3: la viñeta de `medicion/worker.ts` (`rowid` aleatorio; Time Travel
-  como pérdida aceptada; la regla con su porqué y la prueba que la vigila; el orden por
-  omisión; el coste en espacio, medido; el Worker en vivo, el barajado y la vuelta atrás) y
-  el bloque «Comprobar a mano que el Worker desplegado inserta con `rowid` aleatorio».
+  como pérdida aceptada, también tras barajar; la regla con su porqué, la vuelta del texto con
+  `CAST(? AS INTEGER)` y lo que vigila la prueba; el orden por omisión; el coste en espacio y
+  escrituras, medido, con el tamaño de hoy; el Worker en vivo, que se despliega en la 23.3
+  desde la rama, el barajado tras la baliza y la vuelta atrás) y el bloque «Comprobar a mano
+  si el Worker en vivo inserta con `rowid` aleatorio», que decide por la contigüidad y no
+  manda desplegar.
 
-**Revisión (segunda).** Hallazgos: 4 bad_spec (2 medios, 2 bajos) con vuelta al paso 3 y
-el spec enmendado fuera del contrato; 15 parches (1 medio, 14 bajos), aplicados en la
-re-derivación; 0 diferidos nuevos (se corrigió la evidencia del de Time Travel); 11
-rechazados. `followup_review_recommended: true` — parcheados en la pasada: 0 altos, 1 medio,
-14 bajos; puntuación 3×1 + 1×14 = 17 (≥ 5). El detector se reescribió entero y solo lo han
-visto las pruebas y las mutaciones de abajo.
+**Revisión (tercera).** Hallazgos: 5 bad_spec (2 medios, 3 bajos), con vuelta al paso 3 y el
+spec enmendado fuera del contrato y commiteado antes que el código; 16 parches (1 medio, 15
+bajos), aplicados en la re-derivación y anotados en la pasada repetida, sin sumarse dos
+veces; 0 diferidos; 11 rechazados. `followup_review_recommended: true` — parcheados en la
+pasada: 0 altos, 1 medio, 15 bajos; puntuación 3×1 + 1×15 = 18 (≥ 5). El detector
+re-derivado solo lo han visto las pruebas y las mutaciones de abajo.
 
 **Verificación.**
 - `npx vitest run tests/unit/orden-de-llegada.test.ts tests/unit/comparticion.test.ts
-  tests/unit/receptor.test.ts tests/unit/buscadores.test.ts` — 4 ficheros, 110 pruebas en verde.
-- Mutaciones a mano, revertidas: un `.ts` temporal en `tools/` con
-  `` `… ORDER BY coalesce(origen, ''), rowid` `` falla el barrido; otro con un comentario en
-  prosa que escribe la cláusula, una cadena sin `;` seguida de un `UPDATE … SET rowid` y un
-  `// no por rowid` tras la comilla lo pasa; en `worker.ts`, `INSERT OR IGNORE`, un
-  `RETURNING rowid` y el SQL de antes de la historia hacen fallar las pruebas que deben, y una
-  cadena inocua «insert or replace failed» no.
-- `npx astro check` (`logs/s-23-12/astro-check-revision-3.log`) — 0 errores, 0 avisos, 22
+  tests/unit/receptor.test.ts` — 3 ficheros, 142 pruebas en verde.
+- `npx astro check` (`logs/s-23-12/astro-check-revision-4.log`) — 0 errores, 0 avisos, 22
   sugerencias previas, ninguna en los ficheros tocados.
-- `npm test` (desprendido, `logs/s-23-12/npm-test-revision-3.log`) — 124 ficheros, 5.145
+- `npm test` (desprendido, `logs/s-23-12/npm-test-revision-4.log`) — 124 ficheros, 5.184
   pruebas, `FINISHED EXIT=0`.
 - `git diff --exit-code a50b3e5c881d4ffa0ddc8003d09ce8da95549caf -- medicion/receptor.ts
   medicion/esquema.sql medicion/wrangler.toml src public` — sin salida, código 0; frente a esa
   base solo cambian `DESPLIEGUE.md`, `medicion/worker.ts`, las tres de `tests/unit/` y este
-  spec.
+  spec, y `medicion/worker.ts` es idéntico al de la segunda revisión (`ed28a7e5d7`).
+- Mutaciones a mano, revertidas: en `ayuda/d1.ts`, tomar `--remote` por comentario, no
+  neutralizar lo de entre comillas dobles y no contar los `run()`; en la prueba, quitar la
+  lectura tal cual, la regla del `ORDER BY` sin término y el orden de las cadenas; en
+  `worker.ts`, `INSERT OR IGNORE`, `INSERT OR ${…} INTO`, `RETURNING rowid`, un `DELETE` de
+  más y quitar el `.run()`. Cada una tumba las pruebas que debe; un comentario y una columna
+  entre comillas en el `INSERT`, inocuos, no tumban ninguna.
 - Los comandos de `sqlite3` de Verification, tal cual: las 20 rutas salen en otro orden
-  (`/cita/3 /cita/20 /cita/4 …`) y el `rowid` repetido da `UNIQUE constraint failed:
-  eventos.rowid (19)`. La medida del espacio: 41.209.856 bytes sin `rowid`, 48.984.064 con
-  `abs(random())`, 49.999.872 barajando con `UPDATE`.
+  (`/cita/12 /cita/3 /cita/7 …`) y el `rowid` repetido da `UNIQUE constraint failed:
+  eventos.rowid (19)`. La vuelta del texto: con 2^53+1 guardado, `CAST(rowid AS TEXT)` lo
+  devuelve exacto y `CAST(? AS INTEGER)` da su fila, y el valor redondeado da otra. El
+  espacio, medido otra vez: 41,7 MB sin `rowid`, 49,7 MB con `abs(random())`, 50,7 MB
+  barajando con `UPDATE`.
 - Auditoría de la matriz: sus cinco filas tienen prueba y corrieron en verde.
 
 **Riesgos residuales.** Lo ya escrito en el D1 de producción sigue en orden de llegada hasta
 que `desplegar` (23.2) lo baraje en la 23.3, y el receptor en vivo sigue insertando sin `rowid`
 hasta ese despliegue. Que D1 —no SQLite local— acepte el `rowid` explícito y rechace el
 repetido solo lo prueba la baliza de la 23.3 (o el bloque nuevo de `DESPLIEGUE.md`). El
-detector sigue sin ver un `rowid` que llegue por una variable sin huella en la cadena (una
-lista de trozos unida con `join`), y la lectura del `rowid` sin `CAST` no la vigila ninguna
-prueba hasta la 23.10. Fuera de código y de `.sql`, cada línea se mira sin neutralizar: un
-`ORDER BY` seguido en la misma línea de otra cosa que nombre `rowid` se marcaría. La rama
-trae el commit de contexto de la Épica 23 bajo la historia (diferido). `sprint-status.yaml`
-no se toca aquí: lo lleva el orquestador.
+detector, a propósito, marca de más —una sentencia que nombra el `rowid` y ordena por otra
+cosa, un hueco en una sentencia que ordena, un literal o comentario de SQL con `rowid` en una
+cadena de código—, y la salida de cada caso está en las Design Notes; se le escapan, nombradas,
+un `rowid` que llegue por otra sentencia (una vista, una tabla temporal), una consulta en
+varias líneas sin `\` fuera de código y de `.sql`, una sentencia cortada en trozos que no se
+unen con `+` ni con una plantilla y un `;` dentro de un identificador entre comillas; la
+lectura del `rowid` sin `CAST` no la vigila ninguna prueba hasta la 23.10. La rama trae el
+commit de contexto de la Épica 23 bajo la historia (diferido). `sprint-status.yaml` no se toca
+aquí: lo lleva el orquestador.

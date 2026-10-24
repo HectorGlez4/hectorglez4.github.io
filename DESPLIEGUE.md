@@ -266,28 +266,42 @@ Hecho en el repositorio:
   Inserta con `rowid` aleatorio (`abs(random())`, Historia 23.12), así que el orden de las
   filas no es el de llegada y no encadena los eventos de una misma persona —salvo para quien
   tenga la cuenta: Time Travel de D1 restaura a cualquier minuto de los últimos 7 días, 30
-  en el plan de pago, y con eso la secuencia; es la pérdida que AD-13 nombra y acepta—. La
-  regla para quien consulte: no ordenar por `rowid` ni leerlo sin `CAST(rowid AS TEXT)`,
-  porque por encima de 2^53 JavaScript redondea el entero y un `WHERE rowid = ?` con el
-  valor leído da en otra fila o en ninguna. `tests/unit/orden-de-llegada.test.ts` vigila la
-  primera mitad en `tools/` —la segunda, todavía no (23.10)— y nada vigila las consultas a
-  mano de esta sección. Sin `ORDER BY` las filas salen en un orden cualquiera: un `LIMIT` no
-  da las primeras ni las últimas, y lo reciente se pide por `jornada`; ninguna consulta de
-  esta sección dependía del orden de llegada. Cuesta espacio: un `rowid` aleatorio ocupa
-  unos 9 bytes en vez de 1–3, en la fila y en cada entrada de los dos índices, y las
-  inserciones dispersas llenan menos las páginas. Con 300.000 filas parecidas a las reales,
-  en `sqlite3`, la base ocupó en torno a un 20 % más (49 MB frente a 41), y D1 admite 500 MB
-  por base en el plan gratuito.
+  en el plan de pago, y con eso la secuencia; es la pérdida que AD-13 nombra y acepta, y
+  sobrevive al barajado: lo escrito antes de barajar se puede restaurar en su orden hasta
+  que ese plazo caduca—.
+
+  La regla para quien consulte: no ordenar por `rowid` ni leerlo sin `CAST(rowid AS TEXT)`.
+  Por encima de 2^53 JavaScript redondea el entero, y un `WHERE rowid = ?` con el valor
+  leído como número da en otra fila o en ninguna; el texto leído se devuelve como texto,
+  `WHERE rowid = CAST(? AS INTEGER)`. `tests/unit/orden-de-llegada.test.ts` vigila la
+  primera mitad en `tools/`, y más estricta que la regla: una sentencia que ordena no nombra
+  el `rowid` —por ningún camino, ni un alias, ni una subconsulta—, no lleva huecos (un
+  `${…}`, un operando que no es literal, una variable de terminal) y no deja el `ORDER BY`
+  sin término. Lo que varía va enlazado con `?` o dentro de un literal. La segunda mitad, la
+  lectura, no la vigila todavía (23.10), y nada vigila las consultas a mano de esta sección.
+  Sin `ORDER BY` las filas salen en un orden cualquiera: un `LIMIT` no da las primeras ni
+  las últimas, y lo reciente se pide por `jornada`; ninguna consulta de esta sección
+  dependía del orden de llegada.
+
+  Cuesta espacio y escrituras. Un `rowid` aleatorio ocupa unos 9 bytes en vez de 1–3, en la
+  fila y en cada entrada de los dos índices, y las inserciones dispersas llenan menos las
+  páginas: con 300.000 filas parecidas a las reales, en `sqlite3`, la base ocupó en torno a
+  un 20 % más (49 MB frente a 41), y barajar lo ya escrito la creció algo más (50 MB).
+  Barajar reescribe cada fila y sus dos entradas de índice, unas tres filas escritas por
+  fila, que D1 cuenta contra la cuota de escritura del día (AD-13). D1 admite 500 MB por
+  base en el plan gratuito; el tamaño de hoy lo da `npx wrangler d1 info medicion`, y lo
+  informará la orden de la 23.10.
 
   Mientras el Worker en vivo no se redespliegue con este cambio sigue numerando en orden de
   llegada, y lo ya escrito sigue así hasta que lo baraje `npm run medicion -- desplegar`
-  (23.2, aún por construir), que corre Héctor en la 23.3. El orden importa: la 23.2 baraja
-  solo después de comprobar con su baliza que el receptor en vivo ya inserta con `rowid`
+  (23.2, aún por construir), que corre Héctor en la 23.3, desde la rama de la Épica 23: el
+  receptor con este cambio no se despliega antes. El orden importa: la 23.2 baraja solo
+  después de comprobar con su baliza que el receptor en vivo ya inserta con `rowid`
   aleatorio, porque barajar con el Worker viejo dejaría lo que llegue después otra vez en
-  orden de llegada. Por lo mismo, una vuelta atrás del Worker a un commit anterior a la
+  orden de llegada. Por lo mismo, una vuelta atrás del Worker a una versión anterior a la
   23.12 vuelve a numerar en orden (`max(rowid)+1`), y lo que llegue entretanto lo baraja el
   siguiente despliegue que pase la comprobación. Cómo verlo a mano, más abajo: «Comprobar a
-  mano que el Worker desplegado inserta con `rowid` aleatorio».
+  mano si el Worker en vivo inserta con `rowid` aleatorio».
 - `medicion/esquema.sql` — seis columnas: jornada, evento, ruta, origen, destino y
   consulta. Las tres últimas son de un solo evento cada una —`origen` de la visita que
   viene de una cuenta propia (FR-22), `destino` de una compartición (FR-20), `consulta` de
@@ -443,13 +457,15 @@ Si la fila no aparece, el Worker desplegado es anterior a la 20.1: redesplegarlo
 Una baliza que se quedara sin borrar sale en el recuento por evento de arriba, y la razón
 por jornada la excluye.
 
-**Comprobar a mano que el Worker desplegado inserta con `rowid` aleatorio (Historia 23.12).**
-Hasta que `npm run medicion -- desplegar` (23.2) lo compruebe solo, se ve con dos balizas como
-la de arriba y el `rowid` de sus filas, leído como texto para que no se redondee:
+**Comprobar a mano si el Worker en vivo inserta con `rowid` aleatorio (Historia 23.12).**
+Hasta que `npm run medicion -- desplegar` y `comprobar` (23.2) lo digan solos, se ve con dos
+balizas como la de arriba y el `rowid` de sus filas, leído como texto para que no se
+redondee:
 
 ```bash
+: "${MEDICION_ENDPOINT:?falta MEDICION_ENDPOINT}"
 for i in 1 2; do
-  curl -s -o /dev/null -X POST \
+  curl -sS --fail -o /dev/null -w '%{http_code}\n' -X POST \
     --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' "$MEDICION_ENDPOINT"
 done
 npx wrangler d1 execute medicion --remote --command \
@@ -458,13 +474,27 @@ npx wrangler d1 execute medicion --remote --command \
   "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
 ```
 
-Dos números consecutivos dicen que el Worker en vivo numera en orden de llegada —es anterior
-a la 23.12—: redesplegarlo (`cd medicion && npx wrangler deploy`) y repetir. Dos números sin
-relación, de hasta 19 cifras, dicen que ya inserta con `rowid` aleatorio. Si no sale ninguna
-fila, el Worker no guarda nada: o es anterior a la 20.1, como arriba, o D1 rechaza el `INSERT`
-con `rowid` y el `catch` lo calla. En el segundo caso se vuelve al Worker anterior
-(`cd medicion && npx wrangler rollback`), que al menos guarda —en orden de llegada—, y la
-23.12 se revisa antes de redesplegar.
+Cada `curl` tiene que escribir `204`; si falla, la baliza no salió y lo que diga el `SELECT`
+no cuenta. Lo que decide es si los números son **contiguos**, no cuántas cifras tienen:
+
+- **Contiguos** —el segundo es el primero más uno, o poco más si entretanto llegó
+  tráfico—: el Worker en vivo numera en orden de llegada. Hasta la 23.3 es lo esperado, y no
+  se adelanta: el receptor con la 23.12 lo despliega Héctor en la 23.3, desde la rama. Desde
+  la 23.3 dice que el Worker en vivo es anterior a la 23.12, también tras una vuelta atrás,
+  que numera `max(rowid)+1` sobre los aleatorios y da números contiguos de 19 cifras; lo
+  cierra repetir la 23.3.
+- **Dispersos** —separados por mucho más que el tráfico de unos segundos—: inserta con
+  `rowid` aleatorio.
+- **Uno, o más de dos**: quedaba una baliza de antes sin borrar, o una se perdió. Se borran
+  con el `DELETE` y se repite.
+- **Ninguno**: antes de concluir nada se espera unos segundos y se repite el `SELECT`. Si
+  sigue sin filas, el Worker no guarda: o es anterior a la 20.1, como arriba, o —con el de la
+  23.12 en vivo— D1 rechaza el `INSERT` con `rowid` y el `catch` lo calla. Lo distingue la
+  versión desplegada (`npx wrangler deployments list`, en `medicion/`). En el segundo caso
+  Héctor vuelve a la última versión que guardaba —en orden de llegada— por su identificador,
+  `npx wrangler versions list` y `npx wrangler rollback <id>`: sin él, `rollback` va a la
+  versión anterior, que puede ser otra que tampoco guarde. La 23.12 se revisa antes de
+  volver a desplegarla.
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
