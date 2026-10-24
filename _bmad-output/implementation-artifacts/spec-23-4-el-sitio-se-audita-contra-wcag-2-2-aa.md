@@ -5,11 +5,25 @@ created: '2026-10-24'
 status: 'done'
 baseline_revision: '846aac0fffde7583a8f5e3a550602724760c93f1'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      La invitación de donación y las ediciones en venta solo se barren contra 2.5.8 a 1280 px: `ingreso-accesible.spec.ts` corre solo en `escritorio`, y nunca a 360 px, donde el tamaño del objetivo importa para el pulgar.
+    evidence: |-
+      El proyecto `movil` salta las 12 pruebas de `ingreso-accesible.spec.ts` por diseño desde antes de la 23.4 (`test.skip(info.project.name !== PERFIL, …)`), y el intent-contract de la 23.4 prohíbe pasarlo a `movil` («Never»). La sonda de la planificación y la del ac-auditor no midieron esos dos bloques a 360 px. Con los Modelos apagados no se publica ninguno de los dos, así que no hay nada roto hoy; el hueco aparece el día que se encienda uno.
+    location: >-
+      tests/e2e/ingreso-accesible.spec.ts:323-325
+    severity: low
+  - summary: >-
+      El barrido de `accesibilidad.spec.ts` cuenta dos veces la misma Página de Obra: la muestra derivada sin barra final y la Obra indexable con ella, así que cada perfil barre 11 páginas distintas en 12 rutas.
+    evidence: |-
+      `superficiesDelBarrido` da `/obra/agustin-alvarez/la-transformacion-de-las-razas-en-america` y `obrasDelBarrido` da la misma ruta con `/` final; el `new Set` de `SUPERFICIES` no normaliza la barra y `tests/servidor.mjs` redirige la primera a la segunda con un 301. Viene de la Historia 22.4, no de la 23.4, y la 23.4 tiene prohibido tocar `superficiesDelBarrido`. Normalizar con `rutaNormalizada` al componer `SUPERFICIES`, o elegir otra Obra indexable cuando coincidan, devolvería la cobertura que el registro creía tener.
+    location: >-
+      tests/e2e/accesibilidad.spec.ts:109
+    severity: low
 ---
 
 <intent-contract>
@@ -104,6 +118,31 @@ deferred: []
 
 Las cinco capas de revisión son externas y el orquestador las corre después de esta pasada; en esta no traían hallazgos, así que no se clasificó nada.
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15 (high 0, medium 5, low 10)
+- defer: 2 (high 0, medium 0, low 2)
+- reject: 12 (high 0, medium 0, low 12)
+- addressed_findings:
+  - `[medium]` `[patch]` La guardia de Vitest no veía un barrido acotado: `.withTags([...ETIQUETAS_DEL_BARRIDO])` seguido de `.withRules(` o `.include(`, un `.withRules(` sobre la página entera, un `AxeBuilder` sin etiquetas, `axeSource` ni `axe.configure(` (blind-hunter, edge-case-hunter, verification-gap, ac-auditor). `faltasDelBarrido` lee ahora cada `new AxeBuilder(…)` hasta su `.analyze()` sin cruzar un `;`, rechaza esas formas y el `AxeBuilder` suelto que no se deja leer así, y su prueba de fuentes inventadas cubre cada caso.
+  - `[medium]` `[patch]` Los barridos de página entera solo miraban `violations`, así que ninguno observaba qué reglas corrieron (verification-gap). `desviacionDelBarrido` (`tests/e2e/ayuda/barrido.ts`) coteja en cada barrido de superficie y en los dos de `ingreso-accesible.spec.ts` las reglas ejecutadas con las que el barrido pide según la axe de la página; la sonda de esta pasada confirmó que un `.withRules(['region'])` deja una regla y un `.include('main')` pierde `bypass`.
+  - `[medium]` `[patch]` Un `target-size` en `incomplete` pasaba en silencio aunque el título diga que 2.5.8 «lo comprueba axe» (blind-hunter, intent-alignment). `sinDecidir` hace fallar esos mismos barridos si axe deja sin decidir un nodo de una regla de criterio `axe`.
+  - `[medium]` `[patch]` Las dos gemelas no llamaban «regla de axe» a lo mismo: una regla experimental llevaba a Vitest a pedir reclasificar lo que el navegador, que no la corre, rechazaría, y la prueba del navegador para 3.2.6 y 3.3.7 no podía fallar porque el barrido no pide la etiqueta de 2.2 A (blind-hunter). `superficies.ts` declara `ETIQUETAS_QUE_AXE_NO_CORRE`, `axeLaCorre` y `elBarridoLaCorre`; Vitest descuenta las experimentales y retiradas, y el navegador mira, para `ux` y `no-aplica`, todas las reglas de la axe de la página, no solo las ejecutadas.
+  - `[medium]` `[patch]` Los motivos de 2.4.11, 2.5.7 y 3.3.8 —nada fijo, nada que se arrastre, ninguna contraseña— solo los afirmaba un comentario (blind-hunter, edge-case-hunter, intent-alignment). Vitest busca en `src/` y `public/` lo que los desmentiría, con muestras que prueban que las señales encuentran lo que dicen; el comentario de `superficies.ts` deja de afirmarlo a mano y remite a la prueba.
+  - `[low]` `[patch]` La guardia solo leía `.ts` (blind-hunter, edge-case-hunter): ahora lee todo guion de `tests/e2e/`, `.js`, `.mjs`, `.cjs`, `.mts`, `.cts`, `.tsx` y `.jsx` incluidos.
+  - `[low]` `[patch]` Las prohibiciones de `.exclude(` y `.options(` saltaban en cualquier fichero de `tests/e2e/`, también sin axe (blind-hunter): ahora solo donde aparece `AxeBuilder`; los literales de etiqueta se siguen buscando en todos.
+  - `[low]` `[patch]` Una etiqueta entre comillas invertidas escapaba a la guardia (blind-hunter, intent-alignment): las cuenta, y los dos comentarios de `tests/e2e/` que nombraban etiquetas así se reescriben sin ellas.
+  - `[low]` `[patch]` La fijación exacta a la 4.14.0 contra el `^4.14.0` de `package.json` ponía el CI en rojo sin explicar por qué (blind-hunter). Se mantiene exacta, como pide la matriz del intent-contract («axe-core ≠ 4.14.0 → Vitest falla»), y el fallo dice ahora que subir axe es un acto, que el adaptador fija `axe-core ~4.14.0` y qué hay que correr para subirla.
+  - `[low]` `[patch]` `DESPLIEGUE.md` §4 copiaba las cinco etiquetas y decía que la lista no estaba escrita en ninguna prueba (blind-hunter, ac-auditor): ya no las enumera, dice que `tests/unit/superficies.test.ts` la fija y que cada barrido comprueba que corrió entero.
+  - `[low]` `[patch]` La fila «otro destino» del solape no exigía que el segundo enlace pasara (blind-hunter): lo exige, y comprueba que el que pasa es el segundo.
+  - `[low]` `[patch]` El comentario de `ingreso-accesible.spec.ts` decía que la única dependencia de axe era el adaptador (verification-gap, ac-auditor): dice ahora para qué es `axe-core` directa.
+  - `[low]` `[patch]` La prueba de 2.5.8 sobre la portada aceptaba `target-size` sin aplicar (ac-auditor): exige que haya pasado o fallado en algún nodo.
+  - `[low]` `[patch]` El registro del barrido decía 12 rutas, y son 11 páginas distintas (blind-hunter, ac-auditor): el registro lo dice, y la duplicación, que viene de la 22.4, queda diferida.
+  - `[low]` `[patch]` El registro daba como orden la del envoltorio del bucle, con rutas de esta máquina (blind-hunter): da la orden reproducible y deja el envoltorio como lo que es.
+
+Diferidos: los Modelos de ingreso no se barren a 360 px, y la Obra que el barrido cuenta dos veces (los dos en el frontmatter). Rechazados: la prueba de `target-size` que repite la genérica, las seis pasadas sobre la portada, `epics.md` sin enmendar (el intent-contract lo decide), el estado `done` previo a la revisión (esta pasada lo rehace), las líneas del Code Map, `sprint-status.yaml` (lo lleva el orquestador), `test.skip` alrededor del barrido, la 4.12.1 no reproducida en la prueba, que el CI no reproduzca el navegador (AC5), que ninguna prueba nombre la 12.3, el solape probado en página sintética (lo pide el intent-contract) y 2.4.11 y 2.5.7 sin medir (lo pide el intent-contract).
+
 ## Design Notes
 
 Fixture del solape, comprobado en la sonda: con la 4.12.1 marca el primer enlace en los dos casos; con la 4.14.0, solo con otro destino. La URL base tiene que ser http: con `about:blank`, axe no resuelve el destino (`getDestination` → `null`) y marca los dos casos. Por eso se usa `page.route` y no `setContent` en blanco.
@@ -138,32 +177,34 @@ Los motivos, del informe de la UX:
 Status: done
 Blocking condition: ninguna.
 
-**Resumen.** `src/lib/superficies.ts` declara una vez contra qué se barre: `ETIQUETAS_DEL_BARRIDO` (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`), `CRITERIOS_QUE_AÑADE_WCAG_22` (2.5.8 → `axe`/`target-size`; 2.4.11 y 2.5.7 → `ux`; 3.2.6, 3.3.7 y 3.3.8 → `no-aplica`, cada uno con su motivo) y `etiquetaDeAxe`. Las tres llamadas `withTags` de `tests/e2e/` pasan `[...ETIQUETAS_DEL_BARRIDO]`. `@axe-core/playwright` y `axe-core` (directa) suben a 4.14.0 en el mismo commit que `wcag22aa` (`229132ce091d2d36f55955063f5d9fb09c94ff0f`). El barrido real no dio ninguna violación, así que `src/` no necesitó corrección y no hubo decisión de diseño que elevar.
+**Resumen.** `src/lib/superficies.ts` declara una vez contra qué se barre: `ETIQUETAS_DEL_BARRIDO` (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`), `CRITERIOS_QUE_AÑADE_WCAG_22` (2.5.8 → `axe`/`target-size`; 2.4.11 y 2.5.7 → `ux`; 3.2.6, 3.3.7 y 3.3.8 → `no-aplica`, cada uno con su motivo), `etiquetaDeAxe`, y desde la revisión `ETIQUETAS_QUE_AXE_NO_CORRE` con `axeLaCorre` y `elBarridoLaCorre`, que las dos gemelas usan para llamar «regla de axe» a lo mismo. Las tres llamadas `withTags` de `tests/e2e/` pasan `[...ETIQUETAS_DEL_BARRIDO]`, y cada barrido de página entera coteja en su resultado que corrió entero y que axe decidió `target-size` en cada nodo. `@axe-core/playwright` y `axe-core` (directa) suben a 4.14.0 en el mismo commit que `wcag22aa` (`229132ce091d2d36f55955063f5d9fb09c94ff0f`). El barrido real no dio ninguna violación, así que `src/` no necesitó corrección y no hubo decisión de diseño que elevar.
 
 **Ficheros.**
 - `package.json`, `package-lock.json` — `^4.14.0` en los dos; el lock solo cambia `node_modules/@axe-core/playwright`, `node_modules/axe-core` y los `devDependencies` de la raíz, con una sola `axe-core`.
-- `src/lib/superficies.ts` — las tres declaraciones, con su porqué, y la cabecera que dice que de aquí salen también las etiquetas del barrido.
-- `tests/e2e/accesibilidad.spec.ts` — el barrido renombrado a «Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA» con las etiquetas importadas, y el `describe` «Historia 23.4 — lo que añade WCAG 2.2 AA»: una prueba por criterio, con el título derivado de la declaración, y las dos filas de solape bajo `baseURL` con `page.route`.
-- `tests/e2e/ingreso-accesible.spec.ts` — las dos llamadas `withTags` importan la lista; los dos `.include(…).withRules(['color-contrast'])` acotados no cambian.
-- `tests/unit/superficies.test.ts` — «Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio»: las cinco etiquetas, los seis criterios, el cotejo contra `axe.getRules()` (con reglas inventadas para ver que avisa), el lock y el escrutinio de todo `.ts` de `tests/e2e/` (con fuentes inventadas para ver que encuentra).
-- `DESPLIEGUE.md` §4 — el barrido de la invitación es contra WCAG 2.2 AA, con las etiquetas de `ETIQUETAS_DEL_BARRIDO`.
+- `src/lib/superficies.ts` — las declaraciones del barrido y del reparto, con su porqué; las etiquetas que axe no corre y los dos predicados; la cabecera que dice que de aquí salen también las etiquetas del barrido.
+- `tests/e2e/ayuda/barrido.ts` (nuevo en la revisión) — `reglasEjecutadas`, `reglasDeLaPagina`, `desviacionDelBarrido` y `sinDecidir`: lo que un barrido dice de sí mismo, observado en su resultado.
+- `tests/e2e/accesibilidad.spec.ts` — el barrido renombrado a «Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA», con las etiquetas importadas y el cotejo de lo ejecutado; el `describe` «Historia 23.4 — lo que añade WCAG 2.2 AA», con una prueba por criterio titulada desde la declaración y las dos filas de solape bajo `baseURL` con `page.route`.
+- `tests/e2e/ingreso-accesible.spec.ts` — las dos llamadas `withTags` importan la lista y cotejan lo ejecutado; los dos `.include(…).withRules(['color-contrast'])` acotados no cambian.
+- `tests/unit/superficies.test.ts` — «Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio»: las cinco etiquetas, los seis criterios, el cotejo contra `axe.getRules()` sin experimentales, el lock, la guardia por cadena sobre todo guion de `tests/e2e/` y la vigilancia en `src/` y `public/` de los motivos de 2.4.11, 2.5.7 y 3.3.8, cada comprobación con entradas inventadas que prueban que encuentra lo que dice.
+- `DESPLIEGUE.md` §4 — el barrido de la invitación es contra WCAG 2.2 AA, con las etiquetas de `ETIQUETAS_DEL_BARRIDO` y sin copiarlas.
 
 **Barrido local, para el merge de la 23.11.**
-- Orden: `/Users/hec/brainlySabiduria/.claude/v8-ralph/correr.sh …/logs/s-23/barrido-23-4.log <worktree> npx playwright test tests/e2e/accesibilidad.spec.ts tests/e2e/ingreso-accesible.spec.ts`.
-- Fecha: 2026-10-24, de 19:50 a 19:53 (hora local). Árbol: el de `229132ce091d2d36f55955063f5d9fb09c94ff0f` (padre `846aac0fffde7583a8f5e3a550602724760c93f1`); `src/`, `tests/e2e/` y `package*.json` idénticos a ese commit al correr.
+- Orden: `npx playwright test tests/e2e/accesibilidad.spec.ts tests/e2e/ingreso-accesible.spec.ts`, desde la raíz del repositorio. Se lanzó desacoplada de la terminal con el envoltorio del bucle (`correr.sh`), que no cambia la orden.
+- Fecha: 2026-10-24, de 20:27 a 20:29 (hora local). Árbol: el de `1de6f3bd0c6eff89d7eef60066747360c7c810b5`, sin cambios sin commitear en `src/`, `tests/` ni `package*.json` al correr.
 - Versiones: `@axe-core/playwright` 4.14.0 y `axe-core` 4.14.0 (Playwright `@playwright/test` ^1.62.1, servidor `tests/servidor.mjs` sobre el `dist/` que construye el `webServer`).
 - Perfiles: `movil` (Pixel 7 a 360×640) y `escritorio` (1280×900); `ingreso-accesible.spec.ts` en `escritorio`, en el puerto 4402.
-- Rutas del barrido, las mismas en los dos perfiles (12): `/`, `/404`, `/autor/agustin-alvarez`, `/buscar`, `/cita/agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en`, `/coleccion/achaques-de-necedad`, `/obra/agustin-alvarez/la-transformacion-de-las-razas-en-america` (derivada) y `/tema/el-amor`, más las cuatro Obras: `/obra/agustin-alvarez/la-transformacion-de-las-razas-en-america/` (indexable), `/obra/alberto-masferrer/el-elogio-del-silencio/` (`noindex`), `/obra/amado-nervo/plenitud/2/` (página 2) y la del título más largo, `/obra/mariano-jose-de-larra/primera-representacion-del-drama-episodico-nuevo-original-en-tres-actos-titulado-don-quijote-de-la-mancha-en-sierra-morena-escrito-por-don-ventura-de-la-vega/`. Con la invitación encendida: portada, `/buscar/` y 404; con las ediciones en venta: la Página de Obra de la copia.
-- Resultado: 110 pruebas, **98 pasadas y 12 saltadas** (las 12 de `ingreso-accesible.spec.ts` en `movil`, por diseño); 43 pasadas en `movil` y 55 en `escritorio`. **0 violaciones**, ninguna regla desactivada y ningún nodo excluido. Los seis títulos de «Historia 23.4 — lo que añade WCAG 2.2 AA» y las dos filas de solape pasan en los dos perfiles: con el mismo destino `target-size` no da violación y los dos enlaces pasan; con otro destino da una, en el primer enlace.
+- Rutas del barrido, las mismas en los dos perfiles: 12 rutas que son **11 páginas distintas**, porque la muestra derivada de Obra y la Obra indexable son la misma página con y sin barra final (diferido). Son `/`, `/404`, `/autor/agustin-alvarez`, `/buscar`, `/cita/agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en`, `/coleccion/achaques-de-necedad`, `/obra/agustin-alvarez/la-transformacion-de-las-razas-en-america/` (derivada e indexable), `/tema/el-amor`, `/obra/alberto-masferrer/el-elogio-del-silencio/` (`noindex`), `/obra/amado-nervo/plenitud/2/` (página 2) y la del título más largo, `/obra/mariano-jose-de-larra/primera-representacion-del-drama-episodico-nuevo-original-en-tres-actos-titulado-don-quijote-de-la-mancha-en-sierra-morena-escrito-por-don-ventura-de-la-vega/`. Con la invitación encendida: portada, `/buscar/` y 404; con las ediciones en venta: la Página de Obra de la copia.
+- Resultado: 110 pruebas, **98 pasadas y 12 saltadas** (las 12 de `ingreso-accesible.spec.ts` en `movil`, por diseño); 43 pasadas en `movil` y 55 en `escritorio`; salida 0. **0 violaciones**, ninguna regla desactivada, ningún nodo excluido, **ningún barrido acotado** (las 28 auditorías de página entera corrieron las 64 reglas que piden las cinco etiquetas en esta axe, ni una más ni una menos) y **ningún `target-size` sin decidir**. Los seis títulos de «Historia 23.4 — lo que añade WCAG 2.2 AA» y las dos filas de solape pasan en los dos perfiles: con el mismo destino `target-size` no da violación y los dos enlaces pasan; con otro destino da una, en el primer enlace, y el segundo pasa.
 
 **Verificación.**
 - `npx astro check` — 0 errores, 0 avisos, 21 sugerencias (ninguna en los ficheros tocados).
-- `npx vitest run tests/unit/superficies.test.ts` — 88 de 88 (también tras el último retoque de la prueba).
+- `npx vitest run tests/unit/superficies.test.ts` — 92 de 92.
 - El barrido de arriba — salida 0.
-- `npm test` con `correr.sh` (`npm-test-23-4.log`) — 126 ficheros, 5383 pruebas, todo en verde (la 23.2 no ha entrado, así que la prueba de huella sigue en verde).
+- `npm test` con `correr.sh` (`rev-npm-test-23-4.log`) — 126 ficheros, 5388 pruebas, todo en verde (la 23.2 no ha entrado, así que la prueba de huella sigue en verde).
+- Sonda de la revisión, fuera del repositorio, sobre el `dist/` servido en el puerto 4499 (servidor parado después): sobre `/` a 360 px el barrido corre 64 reglas, las mismas que `axe.getRules()` con las cinco etiquetas menos las experimentales y retiradas; con `.withRules(['region'])` corre una y con `.include('main')` pierde `bypass`, la única regla de página; con otro destino `target-size` da la violación en el primer enlace y pasa el segundo.
 
-**Auditoría de la matriz.** Mismo destino → «dos enlaces solapados con el mismo destino no dan target-size» (Playwright, los dos perfiles; con la 4.12.1 la daba, y el lock y `axe.version` lo fijan en Vitest). Otro destino → «… con otro destino dan target-size». Regla nueva para 2.4.11 o 2.5.7 → «si axe trae regla para un criterio que se da por cumplido o no aplica, pide reclasificarlo» y «el reparto declarado casa con sus reglas». Lista propia o literal en `tests/e2e/` → «ningún fichero de tests/e2e/ escribe su lista ni apaga una regla o un nodo», que nombra el fichero, y «la comprobación de tests/e2e/ encuentra lo que dice buscar». Otra axe en el lock → «el lock resuelve una sola axe-core, la 4.14.0…». Todas corrieron y pasaron.
+**Auditoría de la matriz.** Mismo destino → «dos enlaces solapados con el mismo destino no dan target-size» (Playwright, los dos perfiles; con la 4.12.1 la daba, y el lock y `axe.version` lo fijan en Vitest). Otro destino → «… con otro destino dan target-size», que ahora exige además que el segundo pase. Regla nueva para 2.4.11 o 2.5.7 → «si axe trae regla para un criterio que se da por cumplido o no aplica, pide reclasificarlo» (también para una de 2.2 A), «una regla experimental no cuenta…» y «el reparto declarado casa con sus reglas». Lista propia o literal en `tests/e2e/` → «ningún fichero de tests/e2e/ escribe su lista, apaga una regla o un nodo, ni acota el barrido», que nombra el fichero, y «la comprobación de tests/e2e/ encuentra lo que dice buscar». Otra axe en el lock → «el lock resuelve una sola axe-core, la 4.14.0…». Todas corrieron y pasaron.
 
-**Revisión.** Parches: 0. Diferidos: 0. Rechazados: 0. Recomendación de revisión de seguimiento: `false` (0 parches altos, 0 medios, 0 bajos; puntuación 0).
+**Revisión.** Primera pasada con las cinco capas externas: 15 parches (0 altos, 5 medios, 10 bajos), 2 diferidos y 12 rechazados; sin `intent_gap` ni `bad_spec`, así que no hubo vuelta atrás. El detalle está en el Review Triage Log. Recomendación de revisión de seguimiento: `true` (puntuación 3 × 5 + 10 = 25, por encima de 5).
 
-**Riesgos residuales.** 2.4.11 y 2.5.7 siguen sin medirse: los da por cumplidos la UX y lo más cerca que llega una prueba es la de «nada fijo tapa el contenido al cargar». El literal `wcag2aa` entre comillas invertidas de un comentario de `ingreso-accesible.spec.ts` no cuenta como lista: la comprobación busca comillas simples y dobles, como pide la tarea; una plantilla de cadena con una etiqueta escaparía a ella.
+**Riesgos residuales.** 2.4.11 y 2.5.7 siguen sin medirse: los da por cumplidos la UX, y lo que la prueba vigila en el código es la señal que los desmentiría (algo fijo o pegado, algo que se arrastra), no el criterio. 3.2.6 y 3.3.7 no tienen señal que buscar y descansan en su motivo. La guardia de `tests/e2e/` lee código: una etiqueta compuesta por partes o un barrido construido por una vía que no sea `new AxeBuilder(…)…analyze()` se le escaparía, y por eso el navegador coteja además lo que corrió. Los Modelos de ingreso no se barren a 360 px (diferido).
