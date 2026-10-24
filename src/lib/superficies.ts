@@ -8,19 +8,24 @@
  * porque nadie puso la segunda bandera. El Kit se salvó solo porque allí sí se acordaron.
  * Una nota en AGENTS.md que hay que leer no es una puerta; esto sí lo es.
  *
- * De la declaración de abajo derivan las **cuatro** consecuencias, y las tres primeras
- * salen literalmente del mismo booleano, así que es imposible tener una sin las otras:
+ * De la declaración de abajo derivan las consecuencias, y las tres primeras salen
+ * literalmente del mismo booleano, así que es imposible tener una sin las otras:
  *
  *   · la entrada en el sitemap,
  *   · la etiqueta `noindex` para el buscador de fuera,
  *   · la entrada en el índice de la búsqueda propia, el buscador de dentro,
- *   · la entrada en el barrido automatizado de accesibilidad y móvil.
+ *   · la entrada en el barrido automatizado de accesibilidad y móvil,
+ *   · y la medición (Historia 23.1, AD-17): si la página carga el fichero de medición y qué
+ *     vistas emite —el `data-vistas` del `<html>`—. Ninguna página elige su vista: la declara
+ *     su superficie aquí, y solo la emite la ruta cuyo carácter efectivo es `producto`.
  *
  * Vive en `src/lib/` y no en la configuración porque es derivación pura: no lee disco
  * (AD-5) y la consumen tanto el sitio —`Armazon.astro`— como `astro.config.mjs` y las
  * pruebas. Si viviera en la configuración, el armazón no podría leerla sin arrastrar
  * Astro al núcleo.
  */
+
+import { EVENTOS, type Evento } from './medicion.ts';
 
 /**
  * Qué es una superficie. No hay más valores, y añadir uno es una decisión visible:
@@ -42,8 +47,17 @@ export interface Superficie {
   pagina: string;
   /** Qué rutas construidas le pertenecen. Sin `g`: un `RegExp` global guarda estado entre llamadas. */
   reconoce: RegExp;
-  /** Su carácter, del que salen las cuatro consecuencias. */
+  /** Su carácter, del que salen las consecuencias. */
   caracter: Caracter;
+  /**
+   * La vista que emite la superficie cuando su ruta es `producto` — AD-13, Historia 23.1.
+   *
+   * Una sola y por el vocabulario (`EVENTOS`), nunca una cadena suelta: así una página no
+   * puede emitir a la vez la vista de Cita y la de superficie (Historia 20.1). Sale al
+   * `data-vistas` del `<html>`, que lee el fichero de medición. Las páginas 2+ y la Obra que no
+   * se indexa no la emiten aunque su superficie la declare: su carácter efectivo es `servicio`.
+   */
+  vista?: Evento;
   /**
    * Publicabilidad **condicional** — FR-5.
    *
@@ -86,18 +100,21 @@ export const SUPERFICIES: readonly Superficie[] = [
     pagina: 'index.astro',
     reconoce: /^\/$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
   },
   {
     nombre: 'la Página de Cita',
     pagina: 'cita/[slug].astro',
     reconoce: /^\/cita\/[^/]+$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeCita,
   },
   {
     nombre: 'la Página de Autor',
     pagina: 'autor/[slug]/[...page].astro',
     reconoce: /^\/autor\/[^/]+(?:\/\d+)?$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
     // La forma completa, y no «acaba en dígitos»: el esquema de slugs de
     // `src/lib/admision.ts` admite un slug enteramente numérico, así que `/autor/1984` es
     // una Página de Autor y no la página 1984 de nada.
@@ -108,6 +125,7 @@ export const SUPERFICIES: readonly Superficie[] = [
     pagina: 'tema/[slug]/[...page].astro',
     reconoce: /^\/tema\/[^/]+(?:\/\d+)?$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
     // Anclada igual que la de Autor, y por el mismo motivo: `/tema/1984` es un Tema.
     noPublicableEn: /^\/tema\/[^/]+\/\d+$/,
   },
@@ -120,6 +138,7 @@ export const SUPERFICIES: readonly Superficie[] = [
     // el barrido de accesibilidad y móvil. No hay una segunda lista que tocar; si alguien
     // se ve añadiéndola en otro sitio, la Historia 12.1 no habría servido de nada.
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
     // Anclada a la ruta entera igual que Autor y Tema, y por el mismo motivo: el esquema de
     // slugs admite uno enteramente numérico, así que `/coleccion/1984` es una Colección y no
     // la página 1984 de nada.
@@ -133,6 +152,9 @@ export const SUPERFICIES: readonly Superficie[] = [
     // indexa la que no repite otra (FR-52). Esa mitad la decide el Corpus, no la ruta: llega
     // por `declararRutasIndexables`, y sin ella `caracterDe` rompe en vez de adivinar.
     caracter: 'producto',
+    // Historia 20.1 — la emite solo la página 1 de una Obra indexable; la que repite otra
+    // página es `servicio` por contenido y no la emite, como una página 2+.
+    vista: EVENTOS.vistaDeSuperficie,
     indexablePorContenido: true,
     // Anclada a la ruta entera, como Autor y Tema. Un slug de obra enteramente numérico no
     // llega a existir: `fallosDeObras` rompe el build antes, porque esta forma no lo vería.
@@ -257,7 +279,7 @@ export function rutaDeObra(autor: string, slugObra: string, pagina = 1): string 
   return rutaDePagina(`/obra/${autor}/${slugObra}/`, pagina);
 }
 
-/** Las cuatro consecuencias de declarar una superficie. */
+/** Las consecuencias de declarar una superficie que salen solo de su carácter. */
 export interface Consecuencias {
   /** Se anuncia en el sitemap. */
   enElSitemap: boolean;
@@ -267,10 +289,25 @@ export interface Consecuencias {
   enLaBusquedaPropia: boolean;
   /** Entra en el barrido automatizado de accesibilidad y móvil. */
   enElBarrido: boolean;
+  /**
+   * Carga el fichero de medición —la etiqueta `<script src defer>` del `<head>`, con punto
+   * final— (Historia 23.1, AD-6). Toda superficie que se visita lo carga, `producto` o
+   * `servicio`; una `ajena` —`/kit`, `/lote`— no, aunque lleve el arranque como todas.
+   */
+  cargaLaMedicion: boolean;
+}
+
+/** Las consecuencias de una ruta concreta: las de su carácter y las vistas que emite. */
+export interface ConsecuenciasDeRuta extends Consecuencias {
+  /**
+   * Las vistas que emite la ruta, en el `data-vistas` del `<html>` (Historia 23.1). Las que
+   * declara su superficie si su carácter efectivo es `producto`; ninguna si no.
+   */
+  vistas: readonly Evento[];
 }
 
 /**
- * La tabla que deriva las cuatro consecuencias del carácter.
+ * La tabla que deriva del carácter las consecuencias que solo dependen de él.
  *
  * Las tres primeras salen del **mismo** booleano a propósito. Es lo que impide el defecto
  * que la historia cierra: no hay forma de escribir una superficie `noindex` para el
@@ -283,6 +320,7 @@ export function consecuenciasDelCaracter(caracter: Caracter): Consecuencias {
     noIndexar: !publicable,
     enLaBusquedaPropia: publicable,
     enElBarrido: caracter !== 'ajena',
+    cargaLaMedicion: caracter !== 'ajena',
   };
 }
 
@@ -485,9 +523,15 @@ export function caracterDe(rutaOUrl: string): Caracter {
   return causaDelServicio(ruta) === undefined ? superficie.caracter : 'servicio';
 }
 
-/** Las cuatro consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`. */
-export function consecuenciasDe(rutaOUrl: string): Consecuencias {
-  return consecuenciasDelCaracter(caracterDe(rutaOUrl));
+/** Las consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`. */
+export function consecuenciasDe(rutaOUrl: string): ConsecuenciasDeRuta {
+  const ruta = rutaNormalizada(rutaOUrl);
+  const caracter = caracterDe(ruta);
+  const vista = superficieDeclarada(ruta).vista;
+  return {
+    ...consecuenciasDelCaracter(caracter),
+    vistas: caracter === 'producto' && vista !== undefined ? [vista] : [],
+  };
 }
 
 /**

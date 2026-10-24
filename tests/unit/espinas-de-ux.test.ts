@@ -11,6 +11,8 @@ import {
 } from './ayuda/construir.js';
 import { AVISO_DE_PESTAÑA_NUEVA } from '../../src/lib/accesibilidad.ts';
 import { DESTINOS, rotuloDeDestino } from '../../src/lib/compartir.ts';
+import { ARRANQUE_DE_MEDICION } from '../../src/lib/medicion.ts';
+import { guionesEnLinea, guionesExternosDe } from './ayuda/guion.js';
 
 /**
  * Historia 22.10 — lo construido cumple las espinas de UX.
@@ -196,7 +198,10 @@ describe('Historia 22.10 — el marcado construido', () => {
   });
 
   it('el 404 no carga guiones ni necesita región de estado', () => {
-    expect(paginas['/404']).not.toMatch(/<script(?![^>]*application\/ld\+json)/);
+    // Historia 23.1 — lo único en línea es el arranque de la medición, que va en toda página;
+    // ninguna isla, y sin punto final no pide ningún fichero.
+    expect(guionesEnLinea(paginas['/404'])).toEqual([ARRANQUE_DE_MEDICION]);
+    expect(guionesExternosDe(paginas['/404'])).toEqual([]);
     expect(regiones(paginas['/404'])).toEqual([]);
   });
 

@@ -182,6 +182,45 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
+/*
+ * Los topes de la lista cerrada de guiones externos — AD-6, AD-9, Historia 23.1.
+ *
+ * `MAX_BYTES_DE_GUION` mide lo que va en línea; estos miden lo que se **descarga**, una
+ * entrada por cosa que `src/lib/guiones.ts` deja pedir. Cuentan los bytes UTF-8 sin comprimir
+ * del fichero y de lo que importa de forma estática, y los vigila
+ * `tests/unit/medicion.test.ts` sobre el `dist/` de un sitio construido con punto final y con
+ * Pagefind. Cada uno se fijó con el precedente de `MAX_BYTES_DE_GUION`: lo medido el
+ * 2026-10-24 más unos 400 bytes, suficiente para no ir justo y poco para que un crecimiento
+ * pase inadvertido. Subir uno es una decisión visible en el diff, como subir aquel.
+ */
+
+/**
+ * El fichero de medición, `/medicion/{versión}.js` — lo compone `guionDeMedicion`.
+ *
+ * Medido: 920 bytes con el punto final de producción (el más largo de los que se usan; 886 con
+ * el de las pruebas). No importa nada. Lleva el punto final dentro, así que una dirección más
+ * larga lo engorda byte a byte.
+ */
+export const MAX_BYTES_GUION_DE_MEDICION = 1320;
+
+/**
+ * El generador de la Imagen de Cita, `public/islas/imagen.js` — AD-6, AD-7.
+ *
+ * Medido: 7.153 bytes, sin importaciones. Lo pide la Página de Cita al pulsar y `/kit` y
+ * `/lote` al cargar.
+ */
+export const MAX_BYTES_GUION_DE_IMAGEN = 7550;
+
+/**
+ * El cliente de Pagefind, `/pagefind/pagefind.js` — FR-7.
+ *
+ * Medido: 45.555 bytes con Pagefind 1.5.2, sin importaciones estáticas (el índice y el
+ * WebAssembly llegan por `fetch`, no por `import`). No lo escribe el proyecto: lo escribe
+ * Pagefind al construir, así que subir de versión puede moverlo, y este tope es lo que hace
+ * que eso se vea.
+ */
+export const MAX_BYTES_GUION_DE_PAGEFIND = 45950;
+
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
  *

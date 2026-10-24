@@ -14,6 +14,7 @@ import {
   type Caracter,
 } from '../../src/lib/superficies.ts';
 import { slug } from '../../src/lib/admision.ts';
+import { EVENTOS } from '../../src/lib/medicion.ts';
 
 /**
  * Historia 12.1 — una superficie declara en un solo sitio si es publicable.
@@ -82,6 +83,8 @@ describe('Historia 12.1 — las cuatro consecuencias salen de una sola declaraci
         noIndexar: !publicable,
         enLaBusquedaPropia: publicable,
         enElBarrido: caracter !== 'ajena',
+        // Historia 23.1 — toda superficie que se visita carga el fichero de medición.
+        cargaLaMedicion: caracter !== 'ajena',
       });
     },
   );
@@ -92,6 +95,8 @@ describe('Historia 12.1 — las cuatro consecuencias salen de una sola declaraci
       noIndexar: false,
       enLaBusquedaPropia: true,
       enElBarrido: true,
+      cargaLaMedicion: true,
+      vistas: [EVENTOS.vistaDeCita],
     });
   });
 });
@@ -116,6 +121,10 @@ describe('Historia 12.1 — el defecto que la historia nombra', () => {
       noIndexar: true,
       enLaBusquedaPropia: false,
       enElBarrido: false,
+      // Historia 23.1 — llevan el arranque, como toda página, pero no piden el fichero ni
+      // emiten vista: son material de publicación, no lectura.
+      cargaLaMedicion: false,
+      vistas: [],
     });
   });
 });
@@ -400,5 +409,47 @@ describe('Historia 17.5 — el servicio por forma, con nombre propio', () => {
   it('y caracterDe sigue diciendo servicio de la página 2+ — regresión', () => {
     expect(caracterDe('/tema/x/2/')).toBe('servicio');
     expect(caracterDe('/tema/x/')).toBe('producto');
+  });
+});
+
+describe('Historia 23.1 — la medición es una consecuencia más de la declaración', () => {
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it('la vista sale de la superficie y solo la emite la ruta de producto', () => {
+    declararRutasIndexables(['/obra/seneca/cartas-a-lucilio']);
+    const casos: [string, readonly string[]][] = [
+      ['/', [EVENTOS.vistaDeSuperficie]],
+      ['/cita/una', [EVENTOS.vistaDeCita]],
+      ['/autor/seneca', [EVENTOS.vistaDeSuperficie]],
+      ['/autor/seneca/2', []],
+      ['/tema/el-tiempo', [EVENTOS.vistaDeSuperficie]],
+      ['/tema/el-tiempo/2', []],
+      ['/coleccion/frases', [EVENTOS.vistaDeSuperficie]],
+      ['/coleccion/frases/2', []],
+      ['/obra/seneca/cartas-a-lucilio', [EVENTOS.vistaDeSuperficie]],
+      ['/obra/seneca/otra', []],
+      ['/obra/seneca/cartas-a-lucilio/2', []],
+      ['/buscar', []],
+      ['/404', []],
+      ['/kit', []],
+      ['/lote', []],
+    ];
+    for (const [ruta, vistas] of casos) expect(consecuenciasDe(ruta).vistas, ruta).toEqual(vistas);
+  });
+
+  it('carga el fichero toda superficie que se visita; el Kit y el lote, no', () => {
+    declararRutasIndexables([]);
+    for (const ruta of ['/', '/cita/una', '/autor/a/2', '/obra/a/b', '/buscar', '/404']) {
+      expect(consecuenciasDe(ruta).cargaLaMedicion, ruta).toBe(true);
+    }
+    for (const ruta of ['/kit', '/lote']) expect(consecuenciasDe(ruta).cargaLaMedicion, ruta).toBe(false);
+  });
+
+  it('ninguna superficie que no es de producto declara una vista', () => {
+    for (const superficie of SUPERFICIES) {
+      if (superficie.caracter !== 'producto') expect(superficie.vista, superficie.nombre).toBeUndefined();
+    }
   });
 });

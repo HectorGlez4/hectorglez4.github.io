@@ -2,8 +2,9 @@
  * AD-13 — La medición es un módulo propio con un vocabulario cerrado.
  *
  * Este es el **único** módulo que sabe cómo se emite un evento. Ninguna página,
- * componente ni isla habla con el proveedor: llaman a `window.__medir`, que instala este
- * módulo. Las dos divergencias que eso impide:
+ * componente ni isla habla con el proveedor: llaman a `__medir(…)` a secas, que el armazón
+ * abre como cola (`ARRANQUE_DE_MEDICION`) y el fichero que compone este módulo
+ * (`guionDeMedicion`) vacía y sustituye. Las dos divergencias que eso impide:
  *
  *   · que cambiar de proveedor —o cumplir NFR-11— obligue a tocar toda la base de código;
  *   · y, peor, que se adopte un proveedor que exija banner de consentimiento y se
@@ -60,17 +61,6 @@ export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
 
 export const EVENTOS_VALIDOS: readonly Evento[] = Object.values(EVENTOS);
 
-/**
- * Qué vista puede pedir una página. Es **una** y no dos booleanos: así una página no
- * puede emitir `vista-de-cita` y `vista-de-superficie` a la vez (Historia 20.1).
- */
-export type Vista = 'cita' | 'superficie';
-
-export const EVENTO_DE_VISTA: Readonly<Record<Vista, Evento>> = {
-  cita: EVENTOS.vistaDeCita,
-  superficie: EVENTOS.vistaDeSuperficie,
-};
-
 export function esEventoValido(nombre: string): nombre is Evento {
   return (EVENTOS_VALIDOS as readonly string[]).includes(nombre);
 }
@@ -87,57 +77,110 @@ export function puntoFinal(entorno: Record<string, string | undefined>): string 
   return url ? url : null;
 }
 
+
 /**
- * El guion que se inserta en línea cuando hay medición configurada.
+ * El arranque — AD-6, Historia 23.1. Va **en línea** en toda página del armazón, también en
+ * `/kit`, `/lote` y en un sitio construido sin punto final, y antes de cualquier isla.
  *
- * Es deliberadamente diminuto y sin dependencias: la alternativa —el guion de un
- * proveedor— es un fichero descargado de un tercero, y con él vuelven las cookies y el
- * consentimiento por la puerta de atrás.
+ * Es solo una cola: guarda cada llamada tal como llega, sin memoria, sin vocabulario y sin
+ * transporte. Así una isla llama `__medir(…)` a secas —sin `window.__medir &&` delante— y la
+ * llamada no se pierde aunque el fichero de medición todavía no haya llegado, o no vaya a
+ * llegar nunca: sin punto final la cola crece y nadie la lee, que es exactamente «el sitio no
+ * envía nada».
  *
- * Lo que viaja: el nombre del evento, la ruta de la página, la marca de origen cuando la
- * visita llegó por un enlace del Kit, el destino de una compartición cuando lo hay y,
- * solo en la búsqueda sin resultados, el texto de la consulta. Nada más. No hay identificador de visitante, ni se genera uno, ni se lee ni se
- * escribe ninguna cookie.
+ * Cuenta en `MAX_BYTES_DE_GUION` de cada página, así que no crece: lo que se quiera añadir a la
+ * medición va al fichero, que se descarga aparte y tiene su propio tope
+ * (`MAX_BYTES_GUION_DE_MEDICION`). Nadie más asigna `__medir`: lo vigila
+ * `tests/unit/medicion.test.ts` sobre lo construido.
+ */
+export const ARRANQUE_DE_MEDICION = 'window.__medir=function(){__medir.q.push(arguments)};__medir.q=[]';
+
+/**
+ * El fichero de medición — AD-6, AD-13, Historia 23.1.
  *
- * La marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias,
- * antes de que salga de la página. Llega en la URL, y todo lo que llega en la URL lo
- * escribe cualquiera: sin cotejarla, `?de=` admitiría el texto que le pusieran —incluido
- * algo que identifique a quien pulsó el enlace— y la medición lo registraría sin más.
+ * Es el emisor de siempre, servido como fichero (`/medicion/{versión}.js`, con `defer`) en vez
+ * de en línea: en línea se comía unos 630 de los 6.656 bytes de guion de la Página de Cita, y
+ * el hueco lo necesitan las épicas que vienen. Lo sirve `src/pages/medicion/[version].js.ts`
+ * solo cuando hay punto final; sin él no hay fichero ni etiqueta.
+ *
+ * Al cargar —o al activarse, si la página se está prerenderizando: una página que nadie ha
+ * visto no se cuenta— hace tres cosas, en este orden:
+ *
+ *   1. emite las vistas que la página declara en `data-vistas` del `<html>`, que salen de
+ *      `src/lib/superficies.ts` y no de la página (ninguna página elige su vista);
+ *   2. se instala como `__medir`, de modo que lo que llegue después ya no se encola;
+ *   3. vacía la cola del arranque en su orden, una vez cada llamada.
+ *
+ * Lo que viaja no cambia con el fichero: el nombre del evento, la ruta de la página, la marca
+ * de origen cuando la visita llegó por un enlace del Kit, el destino de una compartición
+ * cuando lo hay y, solo en la búsqueda sin resultados, el texto de la consulta. Nada más. No
+ * hay identificador de visitante, ni se genera uno, ni se lee ni se escribe ninguna cookie.
+ *
+ * La marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias, antes
+ * de que salga de la página. Llega en la URL, y todo lo que llega en la URL lo escribe
+ * cualquiera: sin cotejarla, `?de=` admitiría el texto que le pusieran —incluido algo que
+ * identifique a quien pulsó el enlace— y la medición lo registraría sin más. Un evento fuera
+ * del vocabulario se descarta igual que antes, venga de la cola o de una llamada directa.
+ *
+ * Se emite compacto —nombres cortos, sin sangrado— y envuelto en una función para no dejar
+ * globales sueltas: lo legible es esta función y sus comentarios, que no viajan. No importa
+ * nada: es un guion clásico con `defer`, y la lista cerrada de `src/lib/guiones.ts` lo exige.
+ * Su tope es `MAX_BYTES_GUION_DE_MEDICION`.
  */
 export function guionDeMedicion(url: string): string {
-  /*
-   * Se emite compacto —nombres cortos, sin sangrado— porque este texto **es** lo que se
-   * sirve: va en línea en toda página y cuenta contra `MAX_BYTES_DE_GUION`. Lo legible
-   * es esta función y sus comentarios, que no viajan a ninguna parte.
-   */
   const e = JSON.stringify(EVENTOS_VALIDOS);
   const r = JSON.stringify(REDES_VALIDAS);
   const d = JSON.stringify(DESTINOS_VALIDOS);
   const p = JSON.stringify(PARAMETRO_DE_ORIGEN);
 
   return (
-    `window.__medir=function(v,t,z){` +
+    `(function(){` +
+    `var q=window.__medir&&__medir.q||[];` +
+    `function e(v,t,z){` +
     `if(${e}.indexOf(v)<0)return;` +
     `try{` +
     `var m=new URLSearchParams(location.search).get(${p});` +
     `var o=${r}.indexOf(m)<0?null:m;` +
     `var w=${d}.indexOf(z)<0?null:z;` +
     `var c=JSON.stringify({evento:v,ruta:location.pathname,origen:o,destino:w,datos:t||null});` +
-    `if(navigator.sendBeacon)navigator.sendBeacon(${JSON.stringify(url)},c);` +
+    `if(navigator.sendBeacon)navigator.sendBeacon(${JSON.stringify(url)},c)` +
     `}catch(x){}` +
-    `};`
+    `}` +
+    `function a(){` +
+    `(document.documentElement.dataset.vistas||'').split(' ').forEach(function(v){v&&e(v)});` +
+    `window.__medir=e;` +
+    `q.splice(0).forEach(function(x){e.apply(null,x)})` +
+    `}` +
+    `document.prerendering?document.addEventListener('prerenderingchange',a,{once:true}):a()` +
+    `})();`
   );
 }
 
 /**
- * Llamada de emisión para las islas. Nunca hablan con el proveedor; hablan con esto.
+ * La versión de un guion, sacada de su contenido — AD-6.
  *
- * El destino, cuando lo hay, viaja en su propio parámetro y no dentro de `datos`. `datos`
- * es texto libre —lo usa la consulta de búsqueda— y meter ahí el destino habría abierto
- * la carga libre que el criterio prohíbe expresamente.
+ * Va en la URL del fichero para que cambiar el guion —o el punto final, que va dentro— cambie
+ * la dirección: la página nueva pide el fichero nuevo y nunca recibe de la caché uno que no
+ * casa con ella. Es FNV-1a de 32 bits sobre las unidades de código: puro, sin `node:crypto`
+ * (este módulo lo importan también el receptor y las islas) y suficiente para lo que se le
+ * pide, que es distinguir una versión de la anterior, no resistir a nadie.
  */
-export function emitir(evento: Evento, datos?: string): string {
-  return datos === undefined
-    ? `window.__medir && window.__medir(${JSON.stringify(evento)});`
-    : `window.__medir && window.__medir(${JSON.stringify(evento)}, ${datos});`;
+export function versionDelGuion(texto: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < texto.length; i++) {
+    h ^= texto.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+/**
+ * La ruta del fichero de medición para un punto final: `/medicion/{versión}.js`.
+ *
+ * La componen aquí las dos partes que tienen que coincidir —la etiqueta que pone
+ * `Medicion.astro` y el fichero que escribe `src/pages/medicion/[version].js.ts`—, así que no
+ * pueden discrepar. La reconoce la entrada `medicion` de `src/lib/guiones.ts`.
+ */
+export function rutaDelGuionDeMedicion(url: string): string {
+  return `/medicion/${versionDelGuion(guionDeMedicion(url))}.js`;
 }

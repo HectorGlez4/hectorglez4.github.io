@@ -64,22 +64,27 @@
  *     manejador deja una promesa rechazada sin tratar. El reintento lleva `?{n}` en la
  *     dirección porque el navegador recuerda el fallo de un módulo por su URL y, sin
  *     cambiarla, devolvería el mismo rechazo sin volver a pedirlo: lo destapó la prueba.
- *   · `decir` vacía la región y escribe el mensaje en el fotograma siguiente: escribir el
- *     mismo texto sobre sí mismo no es un cambio y no se anuncia, y reabrir, reintentar o
- *     cambiar de plantilla vuelven a decir «La imagen está lista.».
+ *   · `anunciar` —de `src/lib/anuncio.ts`, el único dueño del anuncio— vacía la región y
+ *     escribe el mensaje en el fotograma siguiente: escribir el mismo texto sobre sí mismo no
+ *     es un cambio y no se anuncia, y reabrir, reintentar o cambiar de plantilla vuelven a
+ *     decir «La imagen está lista.».
  *   · La región `role="status"` va **dentro** del `<dialog>` y no junto al botón: con el
  *     diálogo abierto como modal, todo lo de fuera es inerte y sale del árbol de
  *     accesibilidad, y una región inerte no anuncia nada. Está en el marcado desde la carga
  *     y vacía; lo que anuncia —la imagen lista y el fallo— ocurre siempre con el diálogo
  *     abierto, que es cuando la región se ve.
  *
- * El guion no lleva su propio `(() => { … })()`: `define:vars` ya lo envuelve en una
- * función, y el envoltorio repetido eran dos espacios de sangría por línea en el
- * presupuesto de bytes (Historia 22.10). Tampoco pregunta si su marcado existe: el guion lo
- * emite este mismo componente justo detrás, bajo la misma condición, y el compilador no
- * admite un `return` fuera de función. Quitarle `define:vars` obligaría a devolverle el
- * envoltorio.
+ * Historia 23.1 — el guion se compone aquí, en el frontmatter, con `guionQueAnuncia` de
+ * `src/lib/anuncio.ts`, que mete el texto de `anunciar`, los nombres de evento y el destino
+ * opaco —que no son contenido— y lo envuelve en `(function(){…})()`, así que no lleva
+ * envoltorio propio; se inserta con `set:html`. Todo lo de la Cita va en el marcado
+ * (`data-*`), y el guion es idéntico en toda Página de Cita que ofrece Imagen. Mide con
+ * `__medir(…)` a secas: la cola la abre el arranque del armazón. El generador se pide con
+ * `import()` desde la lista cerrada de `src/lib/guiones.ts`; el reintento añade `?{n}` por
+ * concatenación y no con una plantilla, que en el frontmatter habría que escapar. El texto
+ * del guion no lleva comentarios: viajarían al visitante.
  */
+import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
 import { DESTINO_OPACO } from '../lib/compartir.ts';
 import { EVENTOS } from '../lib/medicion.ts';
@@ -102,6 +107,132 @@ const procedencia = procedenciaCompuesta(cita) ?? '';
 // Historia 22.10 — el `id` que nombra al diálogo sale del slug, como el respaldo de Copiar:
 // dos islas en una página no pueden compartirlo.
 const idDeLaAccion = `abrir-imagen-${cita.slug}`;
+
+const guion = guionQueAnuncia(
+  {
+    EVENTO_DESCARGA: EVENTOS.descargaDeImagen,
+    EVENTO_COMPARTICION: EVENTOS.comparticionDeImagen,
+    DESTINO_OPACO,
+  },
+  `const isla = document.querySelector('[data-imagen]');
+const $ = (s) => isla.querySelector(s);
+const dialogo = $('[data-dialogo]');
+const lienzo = $('[data-lienzo]');
+const contenedorPlantillas = $('[data-plantillas]');
+const descargar = $('[data-descargar]');
+const fallo = $('[data-fallo]');
+const anuncio = $('[data-anuncio]');
+
+const campo = $('[data-fallo-texto]');
+
+let pendiente = null;
+let fallos = 0;
+let plantillaActual = 'papel';
+
+let compartible = false;
+try {
+  const p = new File([], 'p.png', { type: 'image/png' });
+  compartible = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [p] });
+} catch {}
+
+if (compartible) {
+  $('[data-abrir]').textContent = 'Compartir como imagen';
+  descargar.textContent = 'Compartir';
+}
+
+const datos = () => ({
+  texto: isla.dataset.texto,
+  autor: isla.dataset.autor,
+  procedencia: isla.dataset.procedencia,
+  tamaño: Number(isla.dataset.tamano),
+  marca: isla.dataset.marca,
+  plantilla: plantillaActual,
+});
+
+const cargar = () =>
+  (pendiente ||= import('/islas/imagen.js' + (fallos ? '?' + fallos : '')).catch(() => {
+    fallos++;
+    pendiente = null;
+  })).then((g) => {
+    fallo.hidden = !!g;
+    lienzo.hidden = descargar.hidden = !g;
+    if (!g) anunciar(anuncio, $('[data-frase]').textContent);
+    return g;
+  });
+
+const pintar = (g) => {
+  g.dibujar(lienzo, datos());
+  anunciar(anuncio, 'La imagen está lista.');
+};
+
+function pintarBotonesDePlantilla(plantillas) {
+  contenedorPlantillas.replaceChildren();
+  for (const plantilla of plantillas) {
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'plantilla';
+    boton.textContent = plantilla.nombre;
+    boton.dataset.plantilla = plantilla.id;
+    boton.setAttribute('aria-pressed', String(plantilla.id === plantillaActual));
+    boton.addEventListener('click', async () => {
+      plantillaActual = plantilla.id;
+      for (const otro of contenedorPlantillas.children) {
+        otro.setAttribute('aria-pressed', String(otro.dataset.plantilla === plantillaActual));
+      }
+      const g = await cargar();
+      g && pintar(g);
+    });
+    contenedorPlantillas.append(boton);
+  }
+}
+
+$('[data-abrir]').addEventListener('click', async () => {
+  dialogo.showModal();
+  const g = await cargar();
+  if (!g) return;
+  pintarBotonesDePlantilla(g.PLANTILLAS);
+  pintar(g);
+});
+
+$('[data-cerrar]').addEventListener('click', () => dialogo.close());
+
+dialogo.addEventListener('click', (evento) => {
+  if (evento.target === dialogo) dialogo.close();
+});
+
+$('[data-copiar-texto]').addEventListener('click', async () => {
+  const copiar = document.querySelector('[data-copiar="' + isla.dataset.nombre + '"]');
+  if (copiar) {
+    dialogo.close();
+    return copiar.click();
+  }
+  try {
+    await navigator.clipboard.writeText(isla.dataset.textoPlano);
+    anunciar(anuncio, 'Copiado.');
+  } catch {
+    campo.hidden = false;
+    campo.select();
+  }
+});
+
+descargar.addEventListener('click', async () => {
+  const g = await cargar();
+  if (!g) return;
+  g.dibujar(lienzo, datos());
+  const nombre = isla.dataset.nombre;
+  const salida = compartible ? await g.compartir(lienzo, nombre) : 'descarga';
+  if (salida === 'cancelada') return;
+
+  if (salida === 'compartida') {
+    __medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
+    return;
+  }
+
+  await g.descargar(lienzo, nombre);
+  __medir(EVENTO_DESCARGA);
+});
+`,
+);
 ---
 
 {
@@ -163,139 +294,7 @@ const idDeLaAccion = `abrir-imagen-${cita.slug}`;
    * una acción que ahí no existe.
    */
 }
-{tramo.admiteImagen && (
-<script
-  is:inline
-  define:vars={{
-    EVENTO_DESCARGA: EVENTOS.descargaDeImagen,
-    EVENTO_COMPARTICION: EVENTOS.comparticionDeImagen,
-    DESTINO_OPACO,
-  }}>
-  const isla = document.querySelector('[data-imagen]');
-  const $ = (s) => isla.querySelector(s);
-  const dialogo = $('[data-dialogo]');
-  const lienzo = $('[data-lienzo]');
-  const contenedorPlantillas = $('[data-plantillas]');
-  const descargar = $('[data-descargar]');
-  const fallo = $('[data-fallo]');
-  const anuncio = $('[data-anuncio]');
-
-  const campo = $('[data-fallo-texto]');
-
-  let pendiente = null;
-  let fallos = 0;
-  let plantillaActual = 'papel';
-
-  let compartible = false;
-  try {
-    const p = new File([], 'p.png', { type: 'image/png' });
-    compartible = !!navigator.share && !!navigator.canShare && navigator.canShare({ files: [p] });
-  } catch {}
-
-  if (compartible) {
-    $('[data-abrir]').textContent = 'Compartir como imagen';
-    descargar.textContent = 'Compartir';
-  }
-
-  const datos = () => ({
-    texto: isla.dataset.texto,
-    autor: isla.dataset.autor,
-    procedencia: isla.dataset.procedencia,
-    tamaño: Number(isla.dataset.tamano),
-    marca: isla.dataset.marca,
-    plantilla: plantillaActual,
-  });
-
-  const decir = (texto) => {
-    anuncio.textContent = '';
-    requestAnimationFrame(() => (anuncio.textContent = texto));
-  };
-
-  const cargar = () =>
-    (pendiente ||= import(`/islas/imagen.js${fallos ? `?${fallos}` : ''}`).catch(() => {
-      fallos++;
-      pendiente = null;
-    })).then((g) => {
-      fallo.hidden = !!g;
-      lienzo.hidden = descargar.hidden = !g;
-      if (!g) decir($('[data-frase]').textContent);
-      return g;
-    });
-
-  const pintar = (g) => {
-    g.dibujar(lienzo, datos());
-    decir('La imagen está lista.');
-  };
-
-  function pintarBotonesDePlantilla(plantillas) {
-    contenedorPlantillas.replaceChildren();
-    for (const plantilla of plantillas) {
-      const boton = document.createElement('button');
-      boton.type = 'button';
-      boton.className = 'plantilla';
-      boton.textContent = plantilla.nombre;
-      boton.dataset.plantilla = plantilla.id;
-      boton.setAttribute('aria-pressed', String(plantilla.id === plantillaActual));
-      boton.addEventListener('click', async () => {
-        plantillaActual = plantilla.id;
-        for (const otro of contenedorPlantillas.children) {
-          otro.setAttribute('aria-pressed', String(otro.dataset.plantilla === plantillaActual));
-        }
-        const g = await cargar();
-        g && pintar(g);
-      });
-      contenedorPlantillas.append(boton);
-    }
-  }
-
-  $('[data-abrir]').addEventListener('click', async () => {
-    dialogo.showModal();
-    const g = await cargar();
-    if (!g) return;
-    pintarBotonesDePlantilla(g.PLANTILLAS);
-    pintar(g);
-  });
-
-  $('[data-cerrar]').addEventListener('click', () => dialogo.close());
-
-  dialogo.addEventListener('click', (evento) => {
-    if (evento.target === dialogo) dialogo.close();
-  });
-
-  $('[data-copiar-texto]').addEventListener('click', async () => {
-    const copiar = document.querySelector(`[data-copiar="${isla.dataset.nombre}"]`);
-    if (copiar) {
-      dialogo.close();
-      return copiar.click();
-    }
-    try {
-      await navigator.clipboard.writeText(isla.dataset.textoPlano);
-      decir('Copiado.');
-    } catch {
-      campo.hidden = false;
-      campo.select();
-    }
-  });
-
-  descargar.addEventListener('click', async () => {
-    const g = await cargar();
-    if (!g) return;
-    g.dibujar(lienzo, datos());
-    const nombre = isla.dataset.nombre;
-    const salida = compartible ? await g.compartir(lienzo, nombre) : 'descarga';
-    if (salida === 'cancelada') return;
-
-    if (salida === 'compartida') {
-      window.__medir && window.__medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
-      return;
-    }
-
-    await g.descargar(lienzo, nombre);
-    window.__medir && window.__medir(EVENTO_DESCARGA);
-  });
-
-</script>
-)}
+{tramo.admiteImagen && <script is:inline set:html={guion} />}
 
 <style>
   .isla {

@@ -12,9 +12,34 @@
  *
  * La página funciona sin JavaScript: el campo es un formulario real que recarga con la
  * consulta en la URL, y los Temas y Autores destacados están en el HTML inicial.
+ *
+ * Lo que hay que saber al leer el guion, escrito aquí porque los comentarios de un guion en
+ * línea viajan al visitante (Historia 23.1):
+ *
+ *   · AD-6 — el código de búsqueda no se descarga hasta que hace falta: `cargar` pide
+ *     `/pagefind/pagefind.js` al enfocar el campo, al buscar o al llegar con la consulta en la
+ *     dirección. Es una entrada de la lista cerrada de `src/lib/guiones.ts`.
+ *   · La tabla de rótulos llega de `src/lib/tipoDeResultado.ts` como constante. Escribirla en
+ *     el guion era la segunda copia, y la que se quedaba atrás al añadir una superficie. La
+ *     reserva cubre un índice viejo que traiga un tipo que ya no existe, no un tipo nuevo sin
+ *     rótulo: eso no compila.
+ *   · Historia 22.10 — el recuento y la búsqueda sin resultados se anuncian con `anunciar`, de
+ *     `src/lib/anuncio.ts`, el único dueño: vaciar y escribir en el fotograma siguiente, porque
+ *     el mismo recuento dos veces, o dos búsquedas vacías seguidas, no cambian el texto y no se
+ *     anunciarían. Su texto va dentro del guion: por eso el guion se compone aquí con
+ *     `guionQueAnuncia`, que lo envuelve en `(function(){…})()` con las constantes, y se
+ *     inserta con `set:html`.
+ *   · AD-13 — sin resultados, la consulta se mide con `__medir(…)` a secas: viaja como texto y
+ *     no va asociada a ningún visitante. La cola la abre el arranque del armazón.
+ *   · Historia 22.7 — el resultado de Obra lleva el título en la sans y el Autor debajo, y se
+ *     lee «Obra: {título}, de {Autor}». Sin metadato de Autor, ni línea ni «, de»; sin título
+ *     en el índice, el visible es la URL y no se lee en voz alta.
+ *   · Con la consulta en la URL, la búsqueda se ejecuta al cargar: es lo que ocurre cuando
+ *     alguien llega desde el formulario sin JavaScript o comparte un enlace.
  */
 import Armazon from '../components/Armazon.astro';
 import Sostener from '../components/Sostener.astro';
+import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import { tituloDe } from '../lib/marca.ts';
@@ -39,6 +64,122 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
  * la sección se omite entera cuando no hay ninguna, igual que la de Temas.
  */
 const colecciones = conjunto.colecciones;
+
+const guion = guionQueAnuncia(
+  {
+    EVENTO_SIN_RESULTADOS: EVENTOS.busquedaSinResultados,
+    ETIQUETA: ETIQUETAS_DE_RESULTADO,
+    TIPO_POR_OMISION,
+  },
+  `const campo = document.querySelector('[data-consulta]');
+const lista = document.querySelector('[data-resultados]');
+const estado = document.querySelector('[data-estado]');
+const salida = document.querySelector('[data-salida]');
+if (!campo) return;
+
+let pagefind = null;
+let ultimaConsulta = '';
+let temporizador;
+
+async function cargar() {
+  if (pagefind) return pagefind;
+  pagefind = await import('/pagefind/pagefind.js');
+  await pagefind.init();
+  return pagefind;
+}
+
+function pintar(resultados, consulta) {
+  lista.replaceChildren();
+
+  const vacio = resultados.length === 0;
+  estado.classList.toggle('solo-para-lectores', vacio);
+  if (vacio) {
+    anunciar(estado, salida.querySelector('.sugerencia')?.textContent.trim() || 'Ningún resultado.');
+    salida.hidden = false;
+    __medir(EVENTO_SIN_RESULTADOS, consulta);
+    return;
+  }
+
+  salida.hidden = true;
+  anunciar(estado, resultados.length === 1 ? 'Un resultado.' : resultados.length + ' resultados.');
+
+  for (const dato of resultados) {
+    const tipo = (dato.meta && dato.meta.tipo) || TIPO_POR_OMISION;
+
+    const li = document.createElement('li');
+    li.className = 'resultado';
+
+    const a = document.createElement('a');
+    a.href = dato.url.replace(/[.]html$/, '');
+
+    const clase = document.createElement('span');
+    clase.className = 'clase';
+    clase.dataset.tipo = tipo;
+    clase.textContent = ETIQUETA[tipo] || ETIQUETA[TIPO_POR_OMISION];
+
+    const titulo = document.createElement('span');
+    titulo.className = 'titulo';
+    titulo.textContent = dato.meta && dato.meta.title ? dato.meta.title : dato.url;
+    a.append(clase, titulo);
+
+    if (tipo === 'obra') {
+      titulo.classList.add('de-obra');
+      const autor =
+        dato.meta && typeof dato.meta.autor === 'string' ? dato.meta.autor.trim() : '';
+      if (autor !== '') {
+        const linea = document.createElement('span');
+        linea.className = 'r-autor';
+        linea.textContent = autor;
+        a.append(linea);
+      }
+      if (dato.meta && dato.meta.title) {
+        a.setAttribute(
+          'aria-label',
+          ETIQUETA.obra + ': ' + dato.meta.title + (autor !== '' ? ', de ' + autor : ''),
+        );
+      }
+    }
+
+    li.append(a);
+    lista.append(li);
+  }
+}
+
+async function buscar(consulta) {
+  if (consulta === ultimaConsulta) return;
+  ultimaConsulta = consulta;
+
+  if (consulta.trim() === '') {
+    lista.replaceChildren();
+    estado.textContent = '';
+    salida.hidden = true;
+    return;
+  }
+
+  const pf = await cargar();
+  const respuesta = await pf.search(consulta);
+  const resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
+  pintar(resultados, consulta);
+}
+
+campo.addEventListener('focus', cargar, { once: true });
+campo.addEventListener('input', () => {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(() => buscar(campo.value), 150);
+});
+
+document.querySelector('.formulario').addEventListener('submit', (e) => {
+  e.preventDefault();
+  buscar(campo.value);
+});
+
+const inicial = new URLSearchParams(location.search).get('q');
+if (inicial) {
+  campo.value = inicial;
+  buscar(inicial);
+}
+`,
+);
 ---
 
 <Armazon
@@ -147,144 +288,7 @@ const colecciones = conjunto.colecciones;
   </div>
 </Armazon>
 
-<script
-  is:inline
-  define:vars={{
-    EVENTO_SIN_RESULTADOS: EVENTOS.busquedaSinResultados,
-    ETIQUETA: ETIQUETAS_DE_RESULTADO,
-    TIPO_POR_OMISION,
-  }}
->
-  (() => {
-    const campo = document.querySelector('[data-consulta]');
-    const lista = document.querySelector('[data-resultados]');
-    const estado = document.querySelector('[data-estado]');
-    const salida = document.querySelector('[data-salida]');
-    if (!campo) return;
-
-    let pagefind = null;
-    let ultimaConsulta = '';
-    let temporizador;
-
-    // AD-6 — el código de búsqueda no se descarga hasta que hace falta.
-    async function cargar() {
-      if (pagefind) return pagefind;
-      pagefind = await import('/pagefind/pagefind.js');
-      await pagefind.init();
-      return pagefind;
-    }
-
-    // La tabla llega de `src/lib/tipoDeResultado.ts` por `define:vars`. Escribirla aquí a
-    // mano era la segunda copia, y la que se quedaba atrás al añadir una superficie.
-
-    // Historia 22.10 — vaciar y escribir en el fotograma siguiente: el mismo recuento dos veces,
-    // o dos búsquedas vacías seguidas, no cambian el texto y no se anunciarían.
-    function decir(texto) {
-      estado.textContent = '';
-      requestAnimationFrame(() => (estado.textContent = texto));
-    }
-
-    function pintar(resultados, consulta) {
-      lista.replaceChildren();
-
-      const vacio = resultados.length === 0;
-      estado.classList.toggle('solo-para-lectores', vacio);
-      if (vacio) {
-        decir(salida.querySelector('.sugerencia')?.textContent.trim() || 'Ningún resultado.');
-        salida.hidden = false;
-        // AD-13 — a través del módulo de medición, nunca del proveedor. La consulta
-        // viaja como texto y no va asociada a ningún visitante.
-        window.__medir && window.__medir(EVENTO_SIN_RESULTADOS, consulta);
-        return;
-      }
-
-      salida.hidden = true;
-      decir(resultados.length === 1 ? 'Un resultado.' : `${resultados.length} resultados.`);
-
-      for (const dato of resultados) {
-        const tipo = (dato.meta && dato.meta.tipo) || TIPO_POR_OMISION;
-
-        const li = document.createElement('li');
-        li.className = 'resultado';
-
-        const a = document.createElement('a');
-        a.href = dato.url.replace(/\.html$/, '');
-
-        const clase = document.createElement('span');
-        clase.className = 'clase';
-        clase.dataset.tipo = tipo;
-        // La reserva cubre un índice viejo que traiga un tipo que ya no existe, no un
-        // tipo nuevo sin rótulo: eso no compila.
-        clase.textContent = ETIQUETA[tipo] || ETIQUETA[TIPO_POR_OMISION];
-
-        const titulo = document.createElement('span');
-        titulo.className = 'titulo';
-        titulo.textContent = dato.meta && dato.meta.title ? dato.meta.title : dato.url;
-        a.append(clase, titulo);
-
-        // Historia 22.7 — el resultado de Obra lleva el título en la sans y el Autor debajo, y se
-        // lee «Obra: {título}, de {Autor}». Sin metadato de Autor, ni línea ni «, de».
-        if (tipo === 'obra') {
-          titulo.classList.add('de-obra');
-          const autor =
-            dato.meta && typeof dato.meta.autor === 'string' ? dato.meta.autor.trim() : '';
-          if (autor !== '') {
-            const linea = document.createElement('span');
-            linea.className = 'r-autor';
-            linea.textContent = autor;
-            a.append(linea);
-          }
-          // Sin título en el índice, el visible es la URL: no se lee en voz alta.
-          if (dato.meta && dato.meta.title) {
-            a.setAttribute(
-              'aria-label',
-              `${ETIQUETA.obra}: ${dato.meta.title}` + (autor !== '' ? `, de ${autor}` : ''),
-            );
-          }
-        }
-
-        li.append(a);
-        lista.append(li);
-      }
-    }
-
-    async function buscar(consulta) {
-      if (consulta === ultimaConsulta) return;
-      ultimaConsulta = consulta;
-
-      if (consulta.trim() === '') {
-        lista.replaceChildren();
-        estado.textContent = '';
-        salida.hidden = true;
-        return;
-      }
-
-      const pf = await cargar();
-      const respuesta = await pf.search(consulta);
-      const resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
-      pintar(resultados, consulta);
-    }
-
-    campo.addEventListener('focus', cargar, { once: true });
-    campo.addEventListener('input', () => {
-      clearTimeout(temporizador);
-      temporizador = setTimeout(() => buscar(campo.value), 150);
-    });
-
-    document.querySelector('.formulario').addEventListener('submit', (e) => {
-      e.preventDefault();
-      buscar(campo.value);
-    });
-
-    // Con la consulta en la URL, la búsqueda se ejecuta al cargar: es lo que ocurre
-    // cuando alguien llega desde el formulario sin JavaScript o comparte un enlace.
-    const inicial = new URLSearchParams(location.search).get('q');
-    if (inicial) {
-      campo.value = inicial;
-      buscar(inicial);
-    }
-  })();
-</script>
+<script is:inline set:html={guion} />
 
 <style>
   .pagina {

@@ -63,7 +63,6 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
   descripcion={`${cita.texto} — ${autor.nombre}.`}
   ruta={rutaDeCita(cita.slug)}
   tarjeta={`/tarjeta/${cita.slug}.png`}
-  vista="cita"
   tipo="cita"
 >
   <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />

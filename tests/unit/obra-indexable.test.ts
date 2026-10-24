@@ -34,6 +34,7 @@ import {
 } from '../../src/lib/umbrales.ts';
 import { descripcionDeObra, lineaDeProcedencia } from '../../src/lib/atribucion.ts';
 import { tituloDeObra } from '../../src/lib/marca.ts';
+import { EVENTOS } from '../../src/lib/medicion.ts';
 import {
   desajustesDeIndexables,
   informeDeObras,
@@ -222,6 +223,8 @@ describe('superficies.ts falla cerrado', () => {
       noIndexar: false,
       enLaBusquedaPropia: true,
       enElBarrido: true,
+      cargaLaMedicion: true,
+      vistas: [EVENTOS.vistaDeSuperficie],
     });
 
     expect(caracterDe('/obra/a/c/')).toBe('servicio');
@@ -232,6 +235,9 @@ describe('superficies.ts falla cerrado', () => {
       noIndexar: true,
       enLaBusquedaPropia: false,
       enElBarrido: true,
+      // Historia 23.1 — se visita y carga la medición, pero no emite la vista de superficie.
+      cargaLaMedicion: true,
+      vistas: [],
     });
     expect(anunciableEnElSitemap('https://sabiduriadebolsillo.net/obra/a/c/')).toBe(false);
   });

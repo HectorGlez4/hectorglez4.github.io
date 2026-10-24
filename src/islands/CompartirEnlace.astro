@@ -19,6 +19,9 @@
  *   · Historia 22.10 — cada destino dice «Compartir en {destino}» y avisa de la pestaña
  *     nueva dentro de su nombre accesible, con el patrón de «Apoyar el sitio».
  *   · Cancelar la hoja no es un fallo y no se registra. Ver la nota de `ImagenDeCita`.
+ *   · AD-13, Historia 23.1 — mide con `__medir(…)` a secas: la cola la abre el arranque del
+ *     armazón en toda página, así que la llamada no necesita guarda y no se pierde aunque el
+ *     fichero de medición llegue después.
  *   · FR-20 — cada destino concreto se registra con su nombre, que es lo que responde
  *     «hacia dónde»; la hoja del sistema se registra como `opaco`, porque la Web Share
  *     API no dice adónde fue y no se intenta averiguarlo. El oyente de los destinos es
@@ -80,7 +83,7 @@ const texto = textoParaCompartir(cita, autor);
   const isla = document.querySelector('[data-compartir]');
   isla.addEventListener('click', (evento) => {
     const destino = evento.target.closest('[data-destino]');
-    if (destino) window.__medir && window.__medir(EVENTO_COMPARTICION, null, destino.dataset.destino);
+    if (destino) __medir(EVENTO_COMPARTICION, null, destino.dataset.destino);
   });
 
   if (navigator.share) {
@@ -91,7 +94,7 @@ const texto = textoParaCompartir(cita, autor);
     boton.addEventListener('click', async () => {
       try {
         await navigator.share({ text: isla.dataset.texto, url: isla.dataset.url });
-        window.__medir && window.__medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
+        __medir(EVENTO_COMPARTICION, null, DESTINO_OPACO);
       } catch {}
     });
   }
