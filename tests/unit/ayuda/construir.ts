@@ -120,6 +120,16 @@ export async function construirConCorpus(
      */
     conBusqueda?: boolean;
     /**
+     * Construye con `npm run build` en vez de con `astro build` a secas — Historia 24.2.
+     *
+     * Es la orden entera que corren el CI y Playwright: la comprobación de Node, Astro,
+     * Pagefind y el paso final que mide el peso de `dist/`, en ese orden. Ese paso no es una
+     * integración de Astro y solo lo ejecuta esta orden, así que una prueba que quiera ver
+     * cómo se detiene la construcción por el peso tiene que construir así. Pagefind ya va
+     * dentro, de modo que `conBusqueda` no añade nada.
+     */
+    conNpmRunBuild?: boolean;
+    /**
      * Ficheros del proyecto **reescritos en la copia**, por su ruta relativa a la raíz.
      *
      * Sirve para construir un sitio cuyo código difiere del repositorio en un punto exacto,
@@ -245,7 +255,7 @@ export async function construirConCorpus(
   const codigo = construccion.codigo;
   let salida = construccion.salida;
 
-  if (codigo === 0 && opciones.conBusqueda) {
+  if (codigo === 0 && opciones.conBusqueda && !opciones.conNpmRunBuild) {
     const { stdout, stderr } = await ejecutar(
       join(RAIZ, 'node_modules', '.bin', 'pagefind'),
       ['--site', 'dist', '--force-language', 'es'],
@@ -270,12 +280,17 @@ export async function construirConCorpus(
  */
 export async function construirProyecto(
   proyecto: string,
-  opciones: { jornada?: string; entorno?: Record<string, string> } = {},
+  opciones: { jornada?: string; entorno?: Record<string, string>; conNpmRunBuild?: boolean } = {},
 ): Promise<{ codigo: number; salida: string }> {
+  // `npm run build` encuentra `astro`, `pagefind` y `tsx` en `node_modules/.bin` de la copia,
+  // que llega enlazado con el resto de las dependencias.
+  const [orden, argumentos]: [string, string[]] = opciones.conNpmRunBuild
+    ? ['npm', ['run', 'build']]
+    : ['node', [join(RAIZ, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build']];
   try {
     const { stdout, stderr } = await ejecutar(
-      'node',
-      [join(RAIZ, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'build'],
+      orden,
+      argumentos,
       {
         cwd: proyecto,
         env: {
