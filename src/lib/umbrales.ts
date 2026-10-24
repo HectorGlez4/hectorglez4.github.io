@@ -199,7 +199,8 @@ export const TECHO_DE_PESO_DEL_ALOJAMIENTO = 1_000_000_000;
  * Mide la suma de tamaños de fichero de lo que se despliega —`dist/` tras Pagefind,
  * `dist/pagefind/` incluido— **sin** los ficheros que rotan con la jornada (la portada, el
  * 404, `/kit`, `/lote` y `rss.xml`), para que el veredicto sea función del commit y no del día
- * (AD-12). Bytes y no bloques de `du`, que dependen del sistema de ficheros de quien construye.
+ * (AD-12) —salvo unos bytes hasta la 26.2: la Cita del Día de la portada entra en el índice de
+ * Pagefind—. Bytes y no bloques de `du`, que dependen del sistema de ficheros de quien construye.
  * Lo mide el paso final de `npm run build` (`integraciones/peso.ts`).
  *
  * **Lo fijó Héctor el 2026-10-24: 750 MiB.** De partida, ese mismo día, con 4.420 Citas, lo
@@ -207,8 +208,9 @@ export const TECHO_DE_PESO_DEL_ALOJAMIENTO = 1_000_000_000;
  * de ellos de su Tarjeta Social: el aviso salta hacia las 7.800 Citas. La Épica 24 engorda la
  * Página de Cita, así que se vuelve a medir tras la 24.6 y los valores se revisan entonces.
  *
- * **El aviso no decide nada**: la construcción sigue y despliega. Dice que queda margen para
- * mudarse de alojamiento o adelgazar `dist/` antes de que el tope de abajo pare el despliegue.
+ * **El aviso no decide nada**: la construcción sigue y despliega. Dice que queda margen antes de
+ * que el tope de abajo pare el despliegue; qué hacer con él —adelgazar `dist/` o mudarse de
+ * alojamiento— lo decide Héctor.
  */
 export const AVISO_DE_PESO_DE_DIST = 750 * 1024 * 1024;
 

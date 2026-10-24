@@ -162,9 +162,18 @@ que dependen del disco de quien construye— **después de Pagefind**, así que 
 cuenta: es lo que sube el despliegue. El veredicto se calcula **sin** los cinco ficheros que
 rotan con la jornada —`index.html`, `404.html`, `kit/index.html`, `lote/index.html` y
 `rss.xml`—, que se miden y se informan aparte, para que dos construcciones del mismo commit
-en días distintos den el mismo veredicto. Cada construcción escribe por la salida normal el
-peso y el número de ficheros de todo `dist/`, lo que rota, lo juzgado, la parte de las
-Tarjetas Sociales (`tarjeta/`) y el número de PNG. Esa línea de cifras no es un aviso.
+en días distintos den el mismo veredicto. **Salvo unos bytes, hasta la 26.2**: la Cita del
+Día de la portada entra en el índice de Pagefind, y `dist/pagefind/`, que sí cuenta, cambia
+con ella —entre las jornadas del 24 y el 25 de octubre de 2026, 39 ficheros de Pagefind y 6
+bytes de lo juzgado—. El veredicto solo podría cambiar de un día a otro con el peso a esa
+distancia de un umbral.
+
+Cada construcción escribe por la salida normal **cinco líneas de cifras**: la primera, el peso
+y el número de ficheros de todo `dist/`; después, lo que rota, lo juzgado con lo que queda
+hasta el umbral siguiente, la parte de las Tarjetas Sociales (`tarjeta/`) y el número de PNG.
+Las cifras no son un aviso. Si falta alguno de los cinco que rotan, la segunda línea lo
+nombra: si su página cambió de ruta, el fichero nuevo se está juzgando con el resto. Los
+enlaces simbólicos se siguen, como hace el empaquetado del despliegue.
 
 **Las constantes**, en `src/lib/umbrales.ts`:
 
@@ -172,7 +181,7 @@ Tarjetas Sociales (`tarjeta/`) y el número de PNG. Esa línea de cifras no es u
 |---|---|---|
 | `TECHO_DE_PESO_DEL_ALOJAMIENTO` | 1.000.000.000 bytes (1 GB decimal, la lectura estricta) | Lo pone GitHub Pages; solo fija que aviso y tope quedan por debajo |
 | `AVISO_DE_PESO_DE_DIST` | 786.432.000 bytes (750 MiB) | Avisa por la salida de error —en Actions, con `::warning::`— y la construcción sigue y despliega. No decide nada |
-| `TOPE_DE_PESO_DE_DIST` | 943.718.400 bytes (900 MiB) | `npm run build` sale con 1 nombrando el peso, el tope y la constante —en Actions, con `::error::`—; `upload-pages-artifact` no llega y **sigue servido el sitio anterior** |
+| `TOPE_DE_PESO_DE_DIST` | 943.718.400 bytes (900 MiB) | `npm run build` sale con 1 nombrando el peso, el tope, cuánto lo pasa y la constante —en Actions, con `::error::`—; `upload-pages-artifact` no llega y **sigue servido el sitio anterior** |
 | `TOPE_DE_PNG_DE_DIST` | sin valor | Sin valor solo informa del número. Con valor, pasarlo avisa y no rompe: es el disparador de la caché de PNG que AD-16 declara como deuda |
 
 Los bordes son estrictos: igualar el aviso no avisa, igualar el tope avisa y no rompe,
@@ -186,16 +195,36 @@ las Tarjetas Sociales, 298 MiB —el 66,9 % de lo juzgado— en 5.113 ficheros; 
 hacia las 10.000. La Épica 24 engorda la Página de Cita: **tras la 24.6 se vuelve a medir y
 Héctor revisa los valores.**
 
+Es una construcción local, sin `MEDICION_ENDPOINT` ni `SITE_URL`. La del flujo de publicación
+pesa algo más, porque lleva el guion de medición en línea en cada página HTML —unos 650 bytes
+por página: del orden de 3,5 MB con las 5.288 de hoy—. El paso en CI juzga esa, que es la que
+se despliega; la cifra de base no se compara con la del CI.
+
+**Lo que el paso no mide es el empaquetado.** `upload-pages-artifact` sube `dist/` en un tar,
+que añade una cabecera de 512 bytes por fichero y por directorio y rellena cada fichero hasta
+un múltiplo de 512: unos 15 MB hoy y unos 29 MB a la altura del tope, porque crece con el
+número de ficheros y no con su peso. Qué compara GitHub con su 1 GB —el sitio, el tar o el
+artefacto comprimido— no está comprobado; los 56 MB que separan el tope del techo cubren ese
+relleno aunque cuente el tar.
+
 **El número de ficheros se informa y no tiene umbral**, pero es el dato que decide una
 mudanza: Cloudflare Pages corta a **20.000 ficheros** por despliegue. Cada Cita nueva añade
 unos tres —su página, su Tarjeta y su fragmento de Pagefind—, así que con los 15.339 de hoy
 ese límite llegaría hacia las 6.000 Citas, mucho antes que el de peso. Si el alojamiento se
 cambia a Cloudflare Pages, el límite que muerde primero es ese.
 
-Si salta el aviso, hay margen: se adelgaza `dist/` —dos tercios son Tarjetas Sociales— o se
-prepara la mudanza. Si salta el tope, el sitio publicado no cambia hasta que una de las dos
-cosas esté hecha, o hasta que Héctor mueva el tope. La caché de PNG de AD-16 no adelgaza
-nada: ahorra tiempo de construcción, y por eso su disparador es un recuento y no un peso.
+Si salta el aviso, hay margen, y **qué hacer lo decide Héctor**: adelgazar `dist/` —dos
+tercios son Tarjetas Sociales— o preparar la mudanza. Una mudanza a Cloudflare Pages ya no
+cabe sin adelgazar: a la altura del aviso, hacia las 7.800 Citas, `dist/` trae unos 25.000
+ficheros, por encima de sus 20.000.
+
+Si salta el tope, **falla toda construcción**, no solo el despliegue: la diaria —la portada, el
+RSS y el Kit se quedan en el último día desplegado—, la de Playwright en local
+(`playwright.config.ts` corre `npm run build` antes de servir) y la de cualquier arreglo urgente, como
+retirar una Cita. No hay bandera que lo salte, a propósito: el sitio publicado no cambia hasta
+que `dist/` adelgace, se mude el alojamiento o Héctor mueva el tope. La caché de PNG de AD-16
+no adelgaza nada: ahorra tiempo de construcción, y por eso su disparador es un recuento y no
+un peso.
 
 ## 2. Search Console — Historia 7.2 (LC-2, LC-3)
 
