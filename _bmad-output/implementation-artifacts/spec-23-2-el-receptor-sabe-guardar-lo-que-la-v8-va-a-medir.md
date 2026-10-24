@@ -5,11 +5,47 @@ created: '2026-10-24'
 status: 'done'
 baseline_revision: 'baa0475751f5441892fc4dbf683f2c587c5cec21'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      El fichero de medición mide 1.128 de los 1.320 bytes de su tope, y las Historias 23.5–23.9
+      le añaden la lectura, la marca de difusión, las zonas, los tramos, los filtros y la marca de
+      Obra: proyectado, pasa del tope.
+    evidence: |-
+      blind-hunter: incrustar en el guion las 16 zonas (unos 235 bytes en JSON), los filtros
+      (unos 70), los rótulos de tramo, las marcas de Obra y cuatro entradas de evento suma en
+      torno a 1,6 KB. La 23.2 no sube MAX_BYTES_GUION_DE_MEDICION (src/lib/umbrales.ts). Cada
+      historia que enseña un campo al guion tiene que decidir, con la medida delante, si el
+      guion coteja ese conjunto o lo deja al receptor, que lo coteja igual.
+    location: >-
+      src/lib/umbrales.ts (MAX_BYTES_GUION_DE_MEDICION), src/lib/medicion.ts (guionDeMedicion)
+    severity: low
+  - summary: >-
+      Cambiar los cortes de los tramos mueve la huella, pero nada añade la entrada a la lista de
+      cortes de serie: esa lista es de la Historia 23.10 y todavía no existe.
+    evidence: |-
+      ac-auditor 8.3 e intent-alignment R7: el criterio pide que cambiar los cortes «añade una
+      entrada a la lista de cortes de serie de la 23.10, con su jornada de despliegue». Hoy lo
+      dicen el comentario junto a TRAMOS y, desde esta revisión, la diferencia de la huella
+      («anótalo… en la lista de cortes de serie (Historia 23.10)»). El mecanismo que lo exija
+      —o la lista misma— es de la 23.10.
+    location: >-
+      src/lib/vocabulario.ts (TRAMOS), tools/lib/medicion.ts (diferenciasDeHuella)
+    severity: low
+  - summary: >-
+      La suite e2e entera en escritorio da cinco tiempos agotados en los recorridos del sitemap de
+      seo.spec.ts y tarjeta.spec.ts con el paralelismo por omisión, y el proyecto movil no se ha
+      corrido con el webServer nuevo.
+    evidence: |-
+      ac-auditor: 290 en verde, 5 en rojo y 8 saltadas en escritorio; los dos ficheros pasan
+      solos con --workers=1 (16/16). La spec de la 23.1 ya lo anota como un problema de carga en
+      paralelo, anterior a la 23.2. CI no corre Playwright.
+    location: >-
+      tests/e2e/seo.spec.ts, tests/e2e/tarjeta.spec.ts, playwright.config.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -128,6 +164,62 @@ deferred: []
 Las cinco capas de revisión son externas en este bucle (v8-ralph) y esta pasada no trajo
 ninguna sección «## Hallazgos externos — …»: sin hallazgos que clasificar. La revisión
 independiente viene después.
+
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 31 (high 0, medium 6, low 25)
+- defer: 3 (high 0, medium 0, low 3)
+- reject: 12
+- addressed_findings:
+  - `[medium]` `[patch]` El barajado se aceptaba si cabía justo en la cuota (blind-hunter, edge-case-hunter): pasada la cuota D1 rechaza cada `INSERT` hasta las 00:00 UTC y el Worker lo calla. `cabeElBarajado` reserva otro tanto de lo escrito en 24 h para el resto del día (`2·escritas24h + coste ≤ cuota`), con su prueba.
+  - `[medium]` `[patch]` Las balizas podían quedarse en producción si una consulta fallaba a mitad de un intento o si fallaba el borrado tras casar (blind-hunter, edge-case-hunter). `comprobarConBalizas` las borra siempre, casen o no, y si no puede lo dice con la orden que las borra.
+  - `[medium]` `[patch]` `desplegar` comparaba los recuentos y no los daba, y la 23.3 tiene que anotarlos (intent-alignment R4, ac-auditor 9.2). Ahora dice los `COUNT` por (jornada, evento) de antes y de después, una línea por jornada (`informeDeRecuentos`), también cuando no casan.
+  - `[medium]` `[patch]` Con huella versionada, la cobertura dejaba de mirar lo que envía el sitio en vivo, la v7.1 con `origen` en las acciones hasta la merge (blind-hunter, intent-alignment R3). `desplegar` coteja el receptor **siempre** contra el vocabulario de `origin/main` y, si la hay, también contra la huella; la cláusula de compatibilidad de `receptor.ts` dice cuándo se quita y quién lo vigila.
+  - `[medium]` `[patch]` El orden del `bind` del Worker solo se probaba con columnas nulas (verification-gap, ac-auditor 6.3). `orden-de-llegada.test.ts` envía, por evento, un valor distinto en cada campo y casa cada valor enlazado con su columna (`['jornada','evento','ruta',...CAMPOS]`); cruzar `zona` y `tramo` la pone en rojo (comprobado).
+  - `[medium]` `[patch]` `desplegar`, `comprobar` y `ensayo` no se probaban más allá de `whoami` (verification-gap, ac-auditor 9.1, 10.1). Las secuencias pasan a `tools/lib/medicion.ts` con sus efectos inyectados (`Efectos`, `Parada`) y la cáscara solo da los efectos; `tests/unit/medicion-secuencias.test.ts` las recorre con un D1 en memoria: orden de las llamadas, huella solo al final, y cada parada (sin sesión, árbol sucio, huella sin commitear, cobertura, tabla «otra», migración que falla, balizas que no llegan, `rowid` contiguo, cuota, recuentos, lectura que falla, borrado que falla) sin barajar ni escribir la huella. Quitar la guarda de la cuota o escribir la huella antes de las balizas la ponen en rojo (comprobado).
+  - `[low]` `[patch]` Las comprobaciones en vivo solo miraban lo que el receptor guarda (blind-hunter). `balizasDePrueba` añade por evento una baliza con `VALOR_AJENO` en cada campo de conjunto cerrado y texto donde el evento no lo lleva, que debe dejar la fila vacía, y una de `EVENTO_AJENO`, que no debe dejar ninguna (87 balizas, 86 filas).
+  - `[low]` `[patch]` `rowidAleatorio` miraba solo el extremo (blind-hunter): ahora exige que cada par de `rowid` vecinos diste al menos 2^32.
+  - `[low]` `[patch]` Ninguna vuelta atrás tras el barajado (blind-hunter): el parte da el instante anterior a la migración y al barajado con su orden de Time Travel (`ordenDeTimeTravel`), sin correrla, y avisa de que volver a antes de migrar exige antes el receptor anterior.
+  - `[low]` `[patch]` `origin/main` sin decir cuál (blind-hunter, intent-alignment R9): la orden dice su commit y su fecha, y la documentación pide un `git fetch` antes.
+  - `[low]` `[patch]` El corte de serie de `origen` en las acciones no estaba escrito (blind-hunter): nota en `DESPLIEGUE.md` §3.
+  - `[low]` `[patch]` `Registro` y `CAMPOS` podían divergir tras el `as` de `interpretar` (blind-hunter): `MISMAS_COLUMNAS` no compila si dicen columnas distintas.
+  - `[low]` `[patch]` La primera pasada de Playwright descarga `wrangler` y el D1 local no se vacía (blind-hunter): dicho en `AGENTS.md` y `DESPLIEGUE.md`.
+  - `[low]` `[patch]` `DESPLIEGUE.md` perdió el diagnóstico de «ninguna fila» (blind-hunter): vuelve, y la parada de las balizas lo da cuando no llega ninguna.
+  - `[low]` `[patch]` `consultar` perdía el código y la salida de error de `wrangler`, y `correr` llamaba «no arranca» a todo (blind-hunter, edge-case-hunter): las paradas nombran la causa, y solo `ENOENT`/`EACCES` es «no arranca».
+  - `[low]` `[patch]` La huella de un `desplegar` anterior sin commitear bloqueaba con un mensaje genérico (blind-hunter): ahora lo dice así.
+  - `[low]` `[patch]` El lector de migraciones leía mal en silencio lo que no entendía (blind-hunter): lanza ante otra sentencia, paréntesis, comillas o literales, y `estadoDeLaTabla` lo da como «otra» con el nombre de la migración.
+  - `[low]` `[patch]` `receptor.spec.ts` duplicaba la aserción de las claves y fallaría con la `lectura` de la 23.5 (blind-hunter): queda la derivada, con el evento entre los que el guion emite.
+  - `[low]` `[patch]` Comentario rancio de `receptor.spec.ts` sobre el `webServer` «sin punto final» (ac-auditor): al día.
+  - `[low]` `[patch]` `fetch` de las balizas sin tope (edge-case-hunter): 10 s por baliza y por sondeo.
+  - `[low]` `[patch]` `execFile` sin tope (edge-case-hunter): 300 s, y la parada lo dice.
+  - `[low]` `[patch]` Un campo de la huella entraba sin cotejar en el SQL remoto (edge-case-hunter): `leerHuella` y `sqlDeLasBalizas` solo admiten identificadores de columna.
+  - `[low]` `[patch]` La cuota es de la cuenta (edge-case-hunter): el mensaje del barajado lo dice.
+  - `[low]` `[patch]` Un reloj local por delante del Worker a medianoche daba por cerrada una jornada que crecía (edge-case-hunter): la víspera también se da por abierta (solo puede crecer).
+  - `[low]` `[patch]` El guion daría `var q=…,,s=…` sin ningún conjunto (edge-case-hunter): la lista de variables se compone por piezas; el fichero de hoy sale idéntico.
+  - `[low]` `[patch]` `MEDICION_ENDPOINT` local migraba y desplegaba en remoto para pararse después (edge-case-hunter): se rechaza con 2 antes de la red.
+  - `[low]` `[patch]` Un D1 local que las migraciones no esperan paraba `local` sin explicación (edge-case-hunter): la parada dice que se borre `medicion/.wrangler/`.
+  - `[low]` `[patch]` La invariante de la línea 82 no estaba escrita sobre los ofrecidos (ac-auditor 2.5): `comparticion.test.ts` exige `DESTINOS_OFRECIDOS ⊆ DESTINOS_DE_ENLACE`, cada uno su constructor.
+  - `[low]` `[patch]` La rama de «vocabulario distinto» de la huella no se probaba (ac-auditor 8.1): el juicio sale a `juicioDeLaHuella` y sus tres ramas se prueban con huellas de mentira; `huella.test.ts` solo mira el fichero.
+  - `[low]` `[patch]` `ZONAS` no estaba atada a `EXPERIENCE.md` (ac-auditor): la prueba lee la tabla de § Zonas de salida interna y exige las mismas, en su orden.
+  - `[low]` `[patch]` Las consultas de `DESPLIEGUE.md` §3 llamaban a `npx wrangler` sin versión (ac-auditor): fijadas a 4.151.1.
+
+Diferidos (frontmatter): el presupuesto del guion para las 23.5–23.9; el mecanismo de la lista de cortes
+de serie al mover los tramos (23.10; la diferencia de la huella ya nombra la obligación); la suite e2e
+entera en `escritorio`, en rojo por paralelismo en `seo`/`tarjeta`, y `movil` sin correr.
+
+Rechazados: `DeclaracionDeCampo.nulo` sin efecto en tiempo de ejecución (lo declara la huella por diseño
+de la spec, es semántica para quien lee); los destinos de las comparticiones con todo
+`DESTINOS_VALIDOS` (lo fija la spec y lo exige la compatibilidad con la v7.1); la huella sin el código
+del receptor (la historia la define como huella del vocabulario); la prueba de la huella en rojo en
+`npm test` (lo manda la historia hasta la 23.3, que corre antes de la merge); la historia dada por
+hecha antes de su revisión y `sprint-status.yaml` (esta pasada es la revisión, y el tablero lo lleva el
+bucle); exigir el commit empujado o la rama de la épica (el bucle no empuja, la fusión conserva los
+SHA y la vuelta atrás desde la principal usa `wrangler` a secas); la comprobación repetida en
+`receptor.test.ts` (cosmética); dos órdenes a la vez contra el mismo D1 (un solo operador); la marca
+de origen fuera de las acciones (la matriz del contrato lo pide); Lighthouse documentado y no
+construido (no hay construcción de Lighthouse en el repositorio); el `webServer` con punto final para
+toda la suite e2e (es lo que pide la historia).
 
 ## Design Notes
 
@@ -261,3 +353,78 @@ puntuación 0).
 - La huella queda en rojo en `npm test` hasta la 23.3, a propósito.
 - Solo se corrió el subconjunto de Playwright de la spec; el resto de la suite e2e se construye
   ahora con punto final (el receptor local) y no se ha barrido entera.
+
+### Primera revisión (2026-10-24)
+
+**Qué cambió.** Las cinco capas externas trajeron hallazgos: 31 parches (0 altos, 6 medios, 25
+bajos), 3 diferidos y 12 rechazados; ningún `intent_gap` ni `bad_spec`. Lo grande: el orden de
+`desplegar`, `comprobar` y `ensayo` y cada una de sus paradas sale de la cáscara a
+`tools/lib/medicion.ts` como secuencias con sus efectos inyectados (`Efectos`, `Parada`), y se
+recorre con un D1 en memoria antes de que la 23.3 lo corra de verdad. `desplegar` coteja el
+receptor siempre contra `origin/main` (y la huella si la hay), da los recuentos de antes y de
+después, deja reserva en la cuota para el resto del día, borra sus balizas pase lo que pase, da los
+instantes para Time Travel y comprueba también lo que el receptor descarta. Estas líneas de las
+Design Notes quedan superadas por el código: el `rowid` se juzga por cada par de vecinos y no por el
+extremo; el barajado cabe si `2·escritas24h + coste ≤ cuota`; la víspera de `hoy` también es
+jornada abierta; las balizas son 87 (las 75 de antes, una de descarte por evento y una de un evento
+inventado) y dejan 86 filas; `MEDICION_ENDPOINT` local sale con 2.
+
+**Ficheros.**
+- `tools/lib/medicion.ts` — secuencias con efectos inyectados; balizas de descarte; `rowid` por
+  vecinos; reserva de cuota; víspera abierta; `informeDeRecuentos`; instantes y `ordenDeTimeTravel`
+  en el parte; `juicioDeLaHuella`; lector de migraciones que se niega a lo que no entiende;
+  identificadores de columna cotejados; endpoint local rechazado; los tramos nombran la 23.10.
+- `tools/medicion.ts` — solo la cáscara: los efectos de verdad, con topes de tiempo para `wrangler`
+  (300 s) y para cada baliza (10 s), la causa de cada fallo y el commit y la fecha de `origin/main`.
+- `medicion/receptor.ts` — `MISMAS_COLUMNAS` ata `Registro` a `CAMPOS` al compilar; la cláusula de
+  la v7.1 dice cuándo se quita.
+- `src/lib/medicion.ts` — la lista de variables del guion se compone por piezas (el fichero sale
+  idéntico: 1.128 bytes, versión `26ba2f1f`).
+- `tests/unit/medicion-secuencias.test.ts` (nuevo) — las secuencias con un D1 en memoria.
+- `tests/unit/medicion-orden.test.ts`, `huella.test.ts`, `orden-de-llegada.test.ts`,
+  `comparticion.test.ts`, `vocabulario.test.ts`, `tests/e2e/receptor.spec.ts` — lo de arriba, el
+  `bind` con un valor en cada columna, la invariante sobre los ofrecidos y las zonas de
+  `EXPERIENCE.md`.
+- `DESPLIEGUE.md` §3, `AGENTS.md` — el paso a paso al día, el diagnóstico de «ninguna fila», el
+  corte de serie de `origen` en las acciones, Time Travel antes y después de migrar, `wrangler`
+  fijado en las consultas, la primera descarga de `wrangler` en Playwright y el D1 local.
+
+**Revisión.** 31 parches, 3 diferidos, 12 rechazados. `followup_review_recommended: true`
+(parches: 0 altos, 6 medios, 25 bajos; puntuación 3·6 + 25 = 43).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de los trece ficheros afectados (los nueve de la Verification, `huella`,
+  `medicion`, `espinas-de-ux` y el nuevo `medicion-secuencias`) — 650 en verde y 1 en rojo, la
+  huella con «Sin huella versionada … La escribe `npm run medicion -- desplegar` (Historia 23.3)».
+- Mutaciones comprobadas a mano y deshechas: quitar la guarda de la cuota pone en rojo «sin cuota
+  para barajar»; escribir la huella antes de las balizas, seis pruebas de secuencias; cruzar
+  `zona` y `tramo` en el `bind` del Worker, dos de `orden-de-llegada`.
+- `npm test` (en segundo plano) — 130 ficheros en verde y 1 en rojo, el de la huella: 5.600
+  pruebas pasan, 1 falla.
+- `npm run medicion -- local` + `npm run medicion -- ensayo` — 0: «87 balizas enviadas, 86 filas
+  leídas, y casan … lo ajeno se descartó, el rowid es aleatorio y las balizas se borraron».
+  `PRAGMA table_info(eventos)` del D1 local — las doce columnas en el orden de `esquema.sql`.
+  Recuento, `UPDATE eventos SET rowid = abs(random())` y recuento en local — iguales (7 grupos,
+  14.961 filas). Receptor parado y 8787 libre.
+- `npx playwright test receptor.spec.ts pagina-de-cita.spec.ts kit.spec.ts compartir-enlace.spec.ts
+  busqueda.spec.ts --project=escritorio`, con los dos `webServer` — 98 en verde, 4 saltadas por
+  sus condiciones de siempre. El D1 local guardó lo que emitieron las páginas (`vista-de-cita`,
+  `vista-de-superficie`, `comparticion-de-enlace`, `busqueda-sin-resultados`, `copiado`,
+  `descarga-de-imagen`, `comparticion-de-imagen`). Puertos 4321, 4399, 4400, 4402 y 8787 libres.
+- `npx tsx tools/medicion.ts x`, `… desplegar --rapido` y `env -u MEDICION_ENDPOINT … comprobar` —
+  código 2, sin contactar con nada; `MEDICION_ENDPOINT=http://localhost:8787/ … desplegar`, código
+  2 (en `medicion-orden.test.ts`).
+- Las migraciones y `esquema.sql` no cambiaron: la comprobación a mano con `sqlite3` de la
+  implementación sigue valiendo.
+
+**Riesgos que quedan.**
+- `desplegar` y `comprobar` siguen sin correrse contra el remoto: los corre la 23.3. Su orden y sus
+  paradas ya se recorren con un D1 en memoria, pero la forma real de `whoami --json`, de
+  `d1 info --json` (`rows_written_24h`) y de `git log origin/main` en este clon no se ha visto en
+  vivo.
+- La reserva de la cuota es conservadora: si la tabla de producción pasa de unas 33.000 filas, el
+  barajado no cabe ningún día en el plan gratuito, con o sin reserva; la orden lo dice con las
+  cifras.
+- La huella queda en rojo en `npm test` hasta la 23.3, a propósito.
+- La suite e2e entera no se ha barrido con el `webServer` nuevo (diferido).
