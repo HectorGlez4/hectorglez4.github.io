@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4; 2026-10-05: documentación retroactiva de la Épica 15 (v4) y de las historias 11.5, 11.6, 19.12 y 19.13, ya construidas; v7.1 (Página de Obra), 2026-10-09: pasos 1 a 4; v8 (la Cita como centro), 2026-10-19: pasos 1 a 4
+stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4; 2026-10-05: documentación retroactiva de la Épica 15 (v4) y de las historias 11.5, 11.6, 19.12 y 19.13, ya construidas; v7.1 (Página de Obra), 2026-10-09: pasos 1 a 4; v8 (la Cita como centro), 2026-10-19: pasos 1 a 4; v8.2, 2026-10-23 y 24: pasos 1 a 4
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
@@ -24,6 +24,7 @@ inputDocuments:
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/mockups/v8-pagina-de-obra.html
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/mockups/v8-kit-y-lote.html
   - _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/mockups/v8-pagina-de-tema.html
+  - _bmad-output/planning-artifacts/implementation-readiness.md
 ---
 
 # Sabiduría de Bolsillo - Epic Breakdown
@@ -3924,7 +3925,9 @@ So that el sitio no me excluya en lo que ya publicó mientras crece por otro lad
 
 ## Requirements Inventory — v8
 
-La v8, «La Cita como centro», desde el PRD v8.1 (c73ebbf8), la UX v8 (fd55d2bc), la espina v8 (58a4b437), el SPEC v8 (c255188f) y el diseño del 2026-10-17. Las espinas mandan sobre las maquetas.
+La v8, «La Cita como centro», desde el PRD v8.2 (f46a8bee, fa1a512f), la UX v8.2 (c3afeefd), la espina v8.2 (354f70c3, 265343e2, 33eb87ee, 85cfc466, df5e284d), el SPEC v8.2 (303b301a), el diseño del 2026-10-17, las resoluciones de Héctor del 2026-10-19, sus decisiones del 20, del 22, del 23 y del 24/10 y la puerta de preparación (c6a68d9d) *(v8.2)*. Las espinas mandan sobre las maquetas.
+
+**La pasada v8.2** (2026-10-23 y 24) alinea este inventario, el mapa de cobertura y la lista de épicas con esos documentos y con las quince decisiones de Héctor sobre lo que la puerta dejó abierto: trece del 2026-10-23 y dos del 2026-10-24 —el barajado que no se trocea y la 27.9 probada en local, que no es una pasada en producción— *(v8.2)*. Lo que cambia lleva *(v8.2)* en su sitio, y lo que sale de esas decisiones, *(v8.2, Héctor, 2026-10-23)* o *(v8.2, Héctor, 2026-10-24)*, según su fecha. Las historias las alinea el paso 3 de la misma pasada.
 
 ### Functional Requirements
 
@@ -3934,7 +3937,7 @@ Los rótulos entre comillas son los del PRD. El texto final es el de `EXPERIENCE
 
 FR-55: **Directorios.** `/autores/` lista todo Autor con al menos una Cita publicada, y ninguno más. Va de la A a la Z por su clave de orden (FR-15), nunca por el nombre tal como se escribe: Cervantes va en la C. Lleva letras de salto solo para las iniciales que tienen algún Autor; la inicial se toma sin tilde, la Ñ es letra propia y el slug desempata. Cada Autor figura con su nombre enlazado, sus años si constan y su recuento de Citas, en singular cuando es una. `/obras/` lista toda Obra con Citas publicadas, también la que no se indexa y también con la familia congelada. Las agrupa bajo su Autor en ese mismo orden, con las mismas letras de salto y el nombre del Autor enlazado en la cabecera de cada grupo. Dentro de cada grupo van en el orden de la lista de obras (FR-42), con el título de su ficha enlazado a su Página de Obra, el año con la regla de FR-42 y el recuento. Los dos llevan un campo que filtra mientras se teclea, por subcadena y con la normalización de la búsqueda: «gonzalez» encuentra a González Prada, y en Obras casa con el título y con el Autor. El recuento se ve y se anuncia. Si el filtro no encuentra nada, lo dice y ofrece buscar lo tecleado entre las Citas; si eso tampoco da nada, ofrece los Autores destacados (FR-8). Sin JavaScript no hay campo, la lista está entera y las letras funcionan. Son indexables, con canónica, sitemap y Tarjeta Social con hechos. En la búsqueda interna salen por su título, con tipo propio, nunca por lo que listan. No reproducen Citas, no componen prosa y no son superficie de lectura. Los enlazan la portada y la cabecera de toda página pública («Autores · Obras · Buscar»). Esa cabecera se usa a 320 px sin desplazamiento horizontal y, a 360 × 640 px, no saca la Cita de la primera pantalla. Con ella, todo Autor y toda Obra quedan a dos saltos de la portada. No cuentan en la familia de lo que listan en ninguna serie. No admiten ningún Modelo de Ingreso y se construyen idénticos con todos encendidos o apagados.
 
-FR-56: **Medición de la lectura.** Toda página que registra vista, también la vista de Obra, registra como mucho una lectura por carga. Ocurre a los 8 s de visibilidad acumulada (umbral con nombre en `umbrales.ts`) o antes, a la primera interacción. No la producen una pestaña oculta, una carga cerrada antes del tiempo sin interacción, el desplazamiento que restaura el navegador ni el salto a un ancla. Volver atrás o adelante es carga nueva, sin marcas. Pulsar un enlace interno de una zona registra una salida interna con la zona más concreta que lo contiene. Las zonas son un conjunto cerrado (`EXPERIENCE.md § Zonas de salida interna`). La salida se atribuye a la página donde ocurre, y la continuación solo se calcula en superficies con lectura. Lo que se abre en pestaña nueva no se mide, y toda cifra lo declara como cota inferior. Cada búsqueda se registra una vez, al asentarse, como mucho una por estado distinto de texto y filtros en cada carga. Lleva su tramo de resultados (0, 1–9, 10–29, 30+) y los filtros usados, nunca el texto. La página 1 de toda Obra registra una vista de Obra que dice si es indexable; no entra en SM-8. Los Directorios registran vista y lectura. La llegada con marca de difusión cuenta con su lectura, nunca con la vista. Las dos marcas se cotejan y se guardan aparte, se cuentan una vez por llegada y la página las quita de su dirección sin recargar ni tocar la canónica. Todo dato nuevo sale de un conjunto cerrado del módulo de medición. Ningún registro lleva cookie, identificador, agente de usuario, procedencia, hora ni texto libre, salvo la consulta sin resultados de FR-8. El receptor sabe guardar cada dato nuevo antes de que el sitio lo envíe, y se comprueba con un registro de prueba. Las vistas no se reinterpretan. No hay JavaScript de terceros ni se degrada NFR-7. La línea base de cada métrica empieza cuando el sitio en vivo registra lo que ella mide y se cierra con un mínimo de lecturas con nombre, no con un número de días.
+FR-56: **Medición de la lectura.** Toda página que registra vista, también la vista de Obra, registra como mucho una lectura por carga. Ocurre a los 8 s de visibilidad acumulada (umbral con nombre en `umbrales.ts`) o antes, a la primera interacción. No la producen una pestaña oculta, una carga cerrada antes del tiempo sin interacción, el desplazamiento que restaura el navegador ni el salto a un ancla. Volver atrás o adelante es carga nueva, sin marcas. Pulsar un enlace interno de una zona registra una salida interna con la zona más concreta que lo contiene. Las zonas son un conjunto cerrado (`EXPERIENCE.md § Zonas de salida interna`). La salida se atribuye a la página donde ocurre, y la continuación solo se calcula en superficies con lectura. Lo que se abre en pestaña nueva no se mide, y toda cifra lo declara como cota inferior. Cada búsqueda se registra una vez, al asentarse, como mucho una por estado distinto de texto y filtros en cada carga. Lleva su tramo de resultados (0, 1–9, 10–29, 30+) y los filtros usados, nunca el texto. La página 1 de toda Obra registra una vista de Obra que dice si es indexable; no entra en SM-8. Los Directorios registran vista y lectura. La llegada con marca de difusión cuenta con su lectura, nunca con la vista. Las dos marcas se cotejan y se guardan aparte, se cuentan una vez por llegada y la página las quita de su dirección sin recargar ni tocar la canónica. Todo dato nuevo sale de un conjunto cerrado del módulo de medición. Ningún registro lleva cookie, identificador, agente de usuario, procedencia, hora ni texto libre, salvo la consulta sin resultados de FR-8. El receptor sabe guardar cada dato nuevo antes de que el sitio lo envíe, y se comprueba con un registro de prueba. Las vistas no se reinterpretan. No hay JavaScript de terceros ni se degrada NFR-7. La línea base de cada métrica empieza cuando el sitio en vivo registra lo que ella mide y se cierra con un mínimo de lecturas de su superficie —de búsquedas asentadas en SM-6 y SM-13—, con nombre y no un número de días; para la línea base, `/autores/` y `/obras/` son una sola superficie, que se informa también por separado. El informe de cada línea base compara la razón lectura/vista de las firmas mecánicas —Threads: par ruta-jornada con exactamente dos vistas con su marca y una sin ella; ráfaga: jornada en que 100 rutas de Cita o más, umbral con nombre, reciben una sola vista cada una— frente al resto, y ninguna línea base se da por buena hasta que Héctor la mira; SM-6 y SM-13 no se comparan por firma y se leen sabiéndolo. Que la miró y la da por buena lo anota Héctor en `DESPLIEGUE.md` §3, con fecha y métrica *(v8.2, Héctor, 2026-10-23)*. Volver a un estado de búsqueda ya registrado, o que el navegador restaure la página, no registra otra búsqueda, también sin la caché de atrás y adelante. SM-5 y SM-7 cuentan lecturas con acción: una carga cuenta como mucho una vez en cada una; lo que revela la marca —cuántas acciones hubo en una carga, nunca cuál ni de quién— lo aceptó Héctor el 2026-10-20. El orden de llegada de los registros no permite encadenarlos *(v8.2)*.
 
 **Enmendados con trabajo de construcción (§6.7):**
 
@@ -3943,15 +3946,15 @@ FR-4 *(enmendado)*: la Tarjeta de Cita del listado de Autor lleva, como texto y 
 FR-6 *(enmendado)*: la Tarjeta de Cita del listado de Tema lleva el Autor y, como texto y nunca como segundo enlace, el título de su Obra. La página 1 ofrece «Buscar en este tema», con las mismas condiciones que la de Autor.
 FR-7 *(enmendado)*: se busca y se acota por Autor, Obra y Tema, con texto o sin él; basta un filtro. El filtro de Obra aparece al elegir un Autor y ofrece solo sus Obras, con su recuento, también las que no se indexan. Las nombra con el título de su ficha y nunca mezcla las homónimas de dos Autores. Nunca va sin su Autor: una dirección que solo nombra la Obra pone también su Autor. Los valores salen del Corpus publicado. Con un filtro puesto solo hay resultados de Cita, y la página lo dice. Sin filtros, los resultados distinguen también Colección y Directorio, y el Directorio sale por su nombre. Cada resultado de Cita lleva su Autor. Texto y filtros viven en la dirección, y «atrás» devuelve la búsqueda anterior. Los resultados llegan en tandas de 30 con «Mostrar 30 más», nunca con desplazamiento infinito, y el recuento dice cuántos hay y se anuncia. Desde la página 1 de Obra, Autor y Tema se entra con «Buscar en…». Pulsar un resultado es salida interna (SM-13). Ninguna combinación produce página indexable. Sin JavaScript, o si el índice no carga, la página lo dice y lleva a los Directorios; escribir o filtrar otra vez reintenta la carga.
 FR-8 *(enmendado)*: la pantalla sin resultados ofrece Temas, Colecciones y ocho Autores destacados. Son los mismos que los de la portada y salen de una sola regla: los ocho con más Citas publicadas, con el suelo latinoamericano del 40 % de §6.1 garantizado. Si no se cumple, cede su sitio, uno a uno, el que menos Citas tiene de los que cuentan para el suelo sin ser latinoamericanos, nunca uno de tradición `otra`. A igualdad decide el orden del Directorio, y el mismo Corpus da siempre los mismos ocho. Con filtros puestos, la pantalla los nombra y ofrece quitarlos. La consulta sin resultados se registra una vez, al asentarse, nunca por tecla. Un filtrado sin texto no registra ninguna consulta.
-FR-9 *(enmendado)*: la portada sigue siendo superficie de retorno (§10) y conserva la Cita del Día. La presenta con su Tarjeta de Obra y con Copiar, Imagen y compartir, que actúan sobre su Página de Cita y comparten su canónica, nunca la portada. Lo que se hace desde ahí se registra como de la portada, fuera de SM-5 y SM-7. Lleva una línea de cifras del Corpus compuesta en el build, que no dice «cada una con su fuente» mientras quede alguna Cita sin documento. Lleva también un campo de búsqueda hacia `/buscar/`, sin JavaScript. Muestra seis Obras indexables de seis Autores distintos, las mismas para todos en una jornada. Si rige SM-11, salen del conjunto indexable congelado; sin ninguna Obra, no hay bloque ni hueco; el bloque lleva al Directorio de Obras. Enlaza todos los Temas y todas las Colecciones publicados, cada Colección con su criterio entero. Muestra los ocho Autores destacados de FR-8 y lleva al Directorio de Autores. Cada salida se mide con su zona (FR-56). La línea de cifras y el campo van antes de la Cita del Día, y el texto de la Cita del Día empieza en la primera pantalla a 360 × 640 px.
+FR-9 *(enmendado)*: la portada sigue siendo superficie de retorno (§10) y conserva la Cita del Día. La presenta con su Tarjeta de Obra y con Copiar, Imagen y compartir, que actúan sobre su Página de Cita y comparten su canónica, nunca la portada. Lo que se hace desde ahí se registra como de la portada, fuera de SM-5 y SM-7. Lleva una línea de cifras del Corpus compuesta en el build, que no dice «cada una», en ninguna forma, mientras quede alguna Cita en el censo de pendientes de cotejo; con el censo vacío dirá «{n} citas de {m} autores, cada una cotejada con el texto de su fuente.» *(v8.2)*. Lleva también un campo de búsqueda hacia `/buscar/`, sin JavaScript. Muestra seis Obras indexables de seis Autores distintos, las mismas para todos en una jornada. Rotan aparte de la Cita del Día: la Obra de la Cita del Día puede salir entre las seis, y una fijación de `corpus/portada.json` no las cambia *(v8.2)*. Mientras la familia Obra esté congelada (`CONGELACION_DE_OBRAS`), salen del conjunto indexable congelado *(v8.2)*; sin ninguna Obra, no hay bloque ni hueco; el bloque lleva al Directorio de Obras. Enlaza todos los Temas y todas las Colecciones publicados, cada Colección con su criterio entero. Muestra los ocho Autores destacados de FR-8 y lleva al Directorio de Autores. Cada salida se mide con su zona (FR-56). La línea de cifras y el campo van antes de la Cita del Día, y el texto de la Cita del Día empieza en la primera pantalla a 360 × 640 px.
 FR-10 *(enmendado)*: la Imagen de Cita tiene dos formatos de una sola ruta de generación, el cuadrado y el vertical 9:16, los dos con `sabiduriadebolsillo.net` legible al pie y subordinado a la frase. Cada formato tiene su columna de tramos y ninguno baja del mínimo. Toda Cita de hasta 300 caracteres sigue cabiendo con el pie en los dos formatos. Por encima de 300 no se muestran ni la Imagen ni la historia, ni en la Página de Cita ni en la portada. La Imagen de la portada es la misma que la de su Página de Cita, y generarla no bloquea la página.
 FR-11 *(enmendado)*: el diseño se elige antes de descargar o compartir el cuadrado. El 9:16 tiene un solo diseño, uno de los del cuadrado compuesto en vertical, y se comparte sin elegir. Los demás diseños en 9:16 quedan fuera.
 FR-12 *(reescrito)*: toda Cita que procede de una Obra lleva una Tarjeta de Obra, después de la atribución y de la línea de su Fuente. La tarjeta da el título de la ficha, el Autor, el año de la Obra solo si sus Citas coinciden en él, y el recuento. Lleva a la Página de Obra: «Ver la obra y dónde leerla» si alguna Cita está cotejada, «Ver la obra» si no. Lleva también a la Cita siguiente en el orden del libro, de forma circular («Siguiente cita de esta obra»). Con una sola Cita, «Siguiente» lleva a la primera Cita de otro Autor que le sigue en el listado de su primer Tema publicado. Si no queda ninguna después, lleva a la primera del listado que sea de otro Autor; sin Tema publicado, o sin otro Autor en él, no hay siguiente. «De la misma obra» ofrece hasta tres Citas más, repartidas a lo largo del orden, sin la que se lee ni la siguiente, y enlace a la Obra. «Más de {Autor}» ofrece hasta cuatro Citas de otras Obras, con enlace al Autor. Un bloque vacío no aparece, y sus tarjetas no repiten lo que la página ya dice. Siguen los Temas publicados. El orden es fijo: Cita, atribución y Fuente, Tarjeta de Obra, acciones, «De la misma obra», «Más de {Autor}» y Temas. Sin Obra no hay ni tarjeta ni siguiente. La tarjeta no aloja ningún Modelo, y la congelación de SM-11 no la quita. Todo va en el HTML inicial y es determinista por commit. Cada ruta lleva su zona de FR-56. La búsqueda no devuelve la página por las Citas que enlaza. NFR-7 se mide con todo puesto.
 FR-15 *(enmendado)*: todo Autor lleva una clave de orden (`ordenAlfabetico`): su apellido, o el nombre por el que se le conoce. Un Autor con Citas publicadas y sin clave, o con una que no da inicial de la A a la Z o la Ñ, detiene la construcción. La clave nunca se teclea: la propone la herramienta al dar de alta al Autor y en lote para los que ya existen, y se corrige con una orden que la valida. La revisa una persona, nunca un agente, y esa revisión no bloquea la publicación ni el sembrado.
-FR-17 *(enmendado)*: «Historia de Instagram» entrega a la Hoja del Sistema la Imagen en 9:16. Solo aparece en pantallas táctiles cuyo navegador puede compartir ficheros y en Citas que admiten Imagen. En escritorio, en el navegador de la app de Facebook en Android, sin JavaScript o con más de 300 caracteres no aparece, y no hay aviso. Son dos toques y en ninguno se elige nada. El primero enseña la imagen y avisa de que se copiará el enlace. El segundo, «Compartir en la historia», copia el enlace con su marca de difusión y entrega solo el fichero; al terminar dice que el enlace se pega en el sticker Enlace. Si el navegador rechaza la entrega, descarga la imagen, deja el enlace copiado y lo dice; es el único caso en que descarga. Cancelar no descarga ni registra nada. Nunca dice «copiado» sin haber copiado: si falla el portapapeles, muestra el enlace en un campo seleccionable. Si la imagen no se genera, lo dice, ofrece copiar el texto y pulsar otra vez lo reintenta. Cada estado se anuncia al lector de pantalla.
+FR-17 *(enmendado)*: «Historia de Instagram» entrega a la Hoja del Sistema la Imagen en 9:16. Solo aparece en pantallas táctiles cuyo navegador puede compartir ficheros y en Citas que admiten Imagen. En escritorio, en el navegador de la app de Facebook en Android, sin JavaScript o con más de 300 caracteres no aparece, y no hay aviso. Son dos toques y en ninguno se elige nada. El primero enseña la imagen y avisa de que se copiará el enlace. El segundo, «Compartir en la historia», copia el enlace con su marca de difusión y entrega solo el fichero; dice que el enlace se pega en el sticker Enlace en cuanto el portapapeles lo acepta, sin esperar a la entrega. Si el navegador rechaza la entrega antes de abrir la hoja —`NotAllowedError`, `DataError` o `TypeError`—, descarga la imagen, deja el enlace copiado y lo dice; es el único caso en que descarga. Cancelar no descarga ni registra nada, y un fallo de entrega con la hoja ya abierta cuenta como cancelar. En iOS la frase de la descarga dice adónde cae solo si la matriz de dispositivos reproduce allí esa caída *(v8.2)*. Nunca dice «copiado» sin haber copiado: si falla el portapapeles, muestra el enlace en un campo seleccionable. Si la imagen no se genera, lo dice, ofrece copiar el texto y pulsar otra vez lo reintenta. Cada estado se anuncia al lector de pantalla.
 FR-18 *(reescrito)*: el bloque «Compartir en» muestra, también donde hay Hoja del Sistema, «Historia de Instagram» si puede cumplirse, WhatsApp, Facebook, Threads y «Más opciones…». «Más opciones…» abre la hoja con enlace y texto donde la hay y, donde no, despliega Telegram, X y Correo. El texto propuesto lleva la Cita y su Autor. Facebook recibe solo el enlace, y su Tarjeta Social hace de texto. X y Threads, cuando no cabe todo, reciben el Autor y el enlace, nunca un fragmento. El bloque acompaña también a la Cita del Día y comparte su Página de Cita. La página 1 de toda Obra lleva el mismo bloque sin la Historia, con el texto «{título}, de {Autor}», se indexe o no y aunque la familia esté congelada; las páginas 2+ no lo llevan. Todo enlace compuesto lleva la marca `?via=` de su destino, y el de la hoja el valor opaco; nunca lleva `?de=`. La canónica y la URL que se declara a las redes no cambian con la marca. Sin JavaScript quedan todos los destinos de enlace.
 FR-19 *(enmendado)*: las Tarjetas Sociales de la Cita y de la Obra se verifican en el validador de previsualización de Facebook antes de ofrecer ese destino.
-FR-20 *(enmendado)*: un destino nombrado registra el botón pulsado, aunque la entrega pase por la hoja. Opaco queda solo para «Más opciones…» con hoja y para la Imagen cuadrada compartida desde su diálogo. El conjunto es cerrado: seis destinos de enlace y uno de imagen (`instagram-historia`), más opaco, y da los valores de `?via=`. La Historia que cae en la descarga se registra como descarga con destino `instagram-historia`, nunca como compartición. Cada compartición registra su superficie: Página de Cita, portada u Obra. La visita que trae se reconoce por su marca y cuenta con su lectura. Ninguna marca nombra a nadie.
+FR-20 *(enmendado)*: un destino nombrado registra el botón pulsado, aunque la entrega pase por la hoja. Opaco queda solo para «Más opciones…» con hoja y para la Imagen cuadrada compartida desde su diálogo. El conjunto es cerrado: seis destinos de enlace y uno de imagen (`instagram-historia`), más opaco, y da los valores de `?via=`. La Historia que cae en la descarga se registra como descarga con destino `instagram-historia`, nunca como compartición. Toda descarga que impone un rechazo de la entrega lleva el destino de su botón —`opaco` la de la Imagen cuadrada, `instagram-historia` la de la Historia— y no cuenta en SM-5; solo la que elige el visitante va sin destino. La Imagen cuadrada, que no lleva enlace, no entra en el denominador de SM-12. Una compartición por la hoja se registra cuando el navegador confirma la entrega *(v8.2)*. Cada compartición registra su superficie: Página de Cita, portada u Obra. La visita que trae se reconoce por su marca y cuenta con su lectura. Ninguna marca nombra a nadie.
 FR-21 *(enmendado)*: el Kit Diario ofrece la Imagen de la Cita del Día también en 9:16.
 FR-22 *(enmendado)*: la marca de origen `?de=` es solo de las cuentas propias, y SM-8 cuenta solo esa. Lo que comparte un visitante lleva `?via=` y nunca `?de=`. Las dos marcas se cotejan y se guardan por separado, cada una contra su conjunto cerrado; un valor ajeno no se guarda. Una visita con las dos cuenta en las dos series. Cada marca se cuenta una vez por llegada y se quita de la dirección. Ninguna crea otra URL indexable ni altera lo que ve el visitante.
 FR-26 *(enmendado)*: la Tarjeta de Cita del listado de Colección lleva el Autor y, como texto y nunca como segundo enlace, el título de su Obra, como la de Tema.
@@ -3972,48 +3975,48 @@ FR-51 *(enmendado)*: el listado va en el orden del libro: por la posición de ca
 
 **FR-42 no se enmienda.** La v8 lo cita como regla —orden y año de la lista de obras— que heredan el Directorio de Obras (FR-55) y la Tarjeta de Obra (FR-12). No lleva marca *(v8)* ni lo nombra §6.7.
 
-**Métricas (§7).** Toda tasa que sale del receptor pasa a calcularse sobre lecturas, y SM-6 y SM-13 sobre búsquedas asentadas; ninguna se calcula ya sobre vistas. Las metas de SM-3…SM-7 (65 %, 1,8, 3 %, 15 % y 2 %) quedan en suspenso hasta la línea base de FR-56: no se retiran ni se rebajan. Ninguna métrica pide trabajo propio, porque se calculan con lo que registra FR-56, salvo SM-11.
+**Métricas (§7).** Toda tasa que sale del receptor pasa a calcularse sobre lecturas, y SM-6 y SM-13 sobre búsquedas asentadas; ninguna se calcula ya sobre vistas. Las metas de SM-3…SM-7 (65 %, 1,8, 3 %, 15 % y 2 %) quedan en suspenso hasta la línea base de FR-56: no se retiran ni se rebajan. Ninguna métrica pide trabajo propio fuera de la orden de la línea base (23.10), que da además la comparación por firma y las ventanas de SM-C3 y SM-C5; el trabajo de SM-11 ya está hecho (64b1bf0d), salvo componer en UTC el «hoy» de su línea, que hace la 23.10 (AD-9) *(v8.2)*. La misma orden entrega por ventanas, con la misma definición de ventana, toda tasa que se juzga «contra su propia serie» —SM-C3, SM-C5, la continuación de los Directorios, la de la portada por zona— *(v8.2, Héctor, 2026-10-23)*.
 
 - SM-3 *(enmendada)*: rebote aproximado = 1 − la continuación de la Página de Cita. Es abandono más que rebote y queda por encima del real; se compara consigo misma, nunca con el 65 %.
 - SM-4 *(enmendada)*: continuación por superficie, con la Página de Obra incluida se indexe o no, y por zona. La de la Página de Cita juzga la Épica 24, la de los Directorios la 26 y la de la portada, con sus zonas, la 28. Ahora valida también FR-9 y FR-55.
-- SM-5 *(enmendada)*: ≥ 3 % de las lecturas de Página de Cita con copiado o descarga hechos en ella. Lo de la portada se informa aparte. Las descargas `instagram-historia` no entran.
-- SM-6 *(enmendada)*: búsquedas asentadas en el tramo 0 entre todas las asentadas, con los filtrados dentro. El numerador no es el registro de FR-8.
-- SM-7 *(enmendada)*: ≥ 2 % de las lecturas de Página de Cita con una compartición hecha en ella. La portada y la Obra se informan aparte. La Historia que cae en la descarga no cuenta.
-- SM-8 *(enmendada)*: cuenta solo la marca de origen y sigue en vistas. Su serie tiene un corte con fecha en `umbrales.ts` cuando la marca pasa a contarse una vez por llegada. La vista de Obra no entra, y Threads no se lee como personas mientras no se sepa quién publica sus enlaces.
-- SM-11 *(con trabajo de construcción)*: `umbrales.ts` declara, junto a `PRIMER_DESPLIEGUE_DE_OBRAS`, tres fechas de despliegue en vivo: la del que repare la publicación, la del conjunto de las Épicas 24 y 26 y, si la 28 llega antes del juicio, la de la 28. El informe de indexación las nombra en su línea SM-11. Las constantes y esa línea se construyen con el arreglo de la publicación, que se despliega primero. La congelación no alcanza a la navegación.
-- SM-12 *(nueva)*: **Difusión.** Lecturas que llegan con `?via=` entre comparticiones, por destino, en toda superficie, con llegada a Cita o a Obra y una vez por llegada. El denominador de la Historia suma las descargas de ese botón. La cifra puede pasar de uno. Facebook queda fuera de la comparación hasta la prueba de dispositivos.
-- SM-13 *(nueva)*: **Búsqueda seguida.** Salidas internas desde un resultado entre búsquedas asentadas, con los filtrados dentro.
+- SM-5 *(enmendada)*: ≥ 3 % de las lecturas de Página de Cita con copiado o descarga hechos en ella: cuenta lecturas con acción, como mucho una por carga, con el copiado y la descarga juntos. Lo de la portada y la Obra se informa aparte. Ninguna descarga impuesta por un rechazo de la entrega —ni `instagram-historia` ni `opaco`— entra *(v8.2)*.
+- SM-6 *(enmendada)*: búsquedas asentadas en el tramo 0 entre todas las asentadas, con los filtrados dentro. El numerador no es el registro de FR-8. Su línea base se cierra con un mínimo de búsquedas asentadas. No se compara por firma —la búsqueda asentada no lleva tiempo mínimo ni marca, y `/buscar/` no emite vista— y se lee sabiéndolo. Volver atrás sin la caché de atrás y adelante no asienta otra vez la búsqueda con que se llega *(v8.2)*.
+- SM-7 *(enmendada)*: ≥ 2 % de las lecturas de Página de Cita con una compartición hecha en ella, como mucho una por carga. La portada y la Obra se informan aparte. Ninguna descarga impuesta cuenta. En Chrome para Android es cota inferior: la compartición se registra cuando el navegador confirma la entrega, y allí puede no confirmarla nunca *(v8.2)*.
+- SM-8 *(enmendada)*: cuenta solo la marca de origen y sigue en vistas. Su serie tiene dos cortes, en `CORTES_DE_SM8`: el de la Épica 23, cuando la marca pasa a contarse una vez por llegada, y el de las Épicas 24 y 26, cuando los Directorios empiezan a emitir vista. Cada uno lleva la jornada UTC en que su despliegue llega al sitio en vivo; el tramo nuevo empieza la primera jornada UTC completa tras esa llegada, y la jornada de llegada no entra en ningún tramo: se informa aparte, como «cambió» *(v8.2)*. La vista de Obra no entra, y Threads no se lee como personas mientras no se sepa quién publica sus enlaces.
+- SM-11 *(con trabajo de construcción)*: `umbrales.ts` declara, junto a `PRIMER_DESPLIEGUE_DE_OBRAS`, tres fechas de despliegue en vivo: `DESPLIEGUE_DE_LA_REPARACION` = 2026-10-19 —la reparación llegó al sitio en vivo ese día a las 09:22 UTC—, y `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` y `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO`, en `undefined` hasta que lleguen. Cada una es la jornada UTC en que termina el trabajo «Desplegar» de Actions, nunca la del merge. El informe de indexación las nombra en su línea SM-11. Las constantes y la línea SM-11 del informe (`desplieguesQueMuevenSm11`, que nombra las que llegaron y calla las demás) ya existen: las añadió 64b1bf0d, después de la reparación, que llegó sin ellas *(v8.2)*. Su «hoy», que `lineasDeSm11` compone todavía en hora local, pasa a UTC con la 23.10 (AD-9) *(v8.2)*. La congelación no alcanza a la navegación.
+- SM-12 *(nueva)*: **Difusión.** Lecturas que llegan con `?via=` entre comparticiones, por destino, en toda superficie, con llegada a Cita o a Obra y una vez por llegada. El denominador de la Historia suma las descargas de ese botón —las impuestas por un rechazo de la entrega, que dejan copiado el enlace con su marca—. La Imagen cuadrada, que se comparte solo como fichero, no entra en el denominador: se informa aparte, fuera de todo destino, y su descarga impuesta (`opaco`) tampoco; el `opaco` de SM-12 son solo las comparticiones por la hoja de «Más opciones…». En Chrome para Android la cifra puede quedar por encima de la real, porque allí la compartición puede no registrarse y la llegada sí *(v8.2)*. La cifra puede pasar de uno. Facebook queda fuera de la comparación hasta la prueba de dispositivos.
+- SM-13 *(nueva)*: **Búsqueda seguida.** Salidas internas desde un resultado entre búsquedas asentadas, con los filtrados dentro. Su línea base se cierra con un mínimo de búsquedas asentadas. No se compara por firma —la búsqueda asentada no lleva tiempo mínimo ni marca, y `/buscar/` no emite vista— y se lee sabiéndolo. Volver atrás sin la caché de atrás y adelante no asienta otra vez la búsqueda con que se llega *(v8.2)*.
 - SM-C1 *(aclarada)*: la línea de cifras de la portada no es SM-C1.
 - SM-C2 *(aclarada)*: los Directorios no entran en su mediana.
-- SM-C3 *(enmendada)*: se lee sobre las mismas lecturas de Página de Cita y es la contra-métrica de la Épica 25. Salta con dos ventanas seguidas, cada una con el mínimo de lecturas. La palanca, que decide Héctor, es quitar peso a los destinos, nunca esconder Copiar.
+- SM-C3 *(enmendada)*: se lee sobre las mismas lecturas de Página de Cita y es la contra-métrica de la Épica 25. Una ventana es un bloque de jornadas cerradas consecutivas, contado desde el cierre de la línea base y sin solaparse con la anterior, que reúne el mismo mínimo de lecturas que la cerró. SM-C3 salta si en dos ventanas seguidas SM-7 sube y SM-5 baja, cada una frente a su línea base: basta la dirección, y la magnitud es la pregunta 9 de §14. La descarga impuesta no entra en ninguna de las dos. Si la 25 llega en vivo antes de esa línea base, las ventanas se cuentan desde su llegada, frente a la serie propia de cada métrica, y se dice. Saltar no apaga nada *(v8.2)*. La palanca, que decide Héctor, es quitar peso a los destinos, nunca esconder Copiar.
 - SM-C4 *(enmendada)*: rebote aproximado por superficie: el de la Página de Cita para todo Modelo, más el de la Página de Obra para la afiliación y el de la portada para donaciones y publicidad. Se juzga antes y después de encender.
-- SM-C5 *(nueva)*: **Desvío de la resolución.** La continuación de la Página de Cita junto a SM-5, sobre las mismas lecturas, como contra-métrica de la Épica 24. Si salta en dos ventanas seguidas, la palanca, que decide Héctor, es poner la Tarjeta de Obra detrás de las acciones.
+- SM-C5 *(nueva)*: **Desvío de la resolución.** La continuación de la Página de Cita junto a SM-5, sobre las mismas lecturas, como contra-métrica de la Épica 24. Salta si en dos ventanas seguidas, con la misma ventana, la continuación de la Página de Cita sube y SM-5 baja, cada una frente a su línea base (o, si la 24 llega antes de esa línea base, desde su llegada y frente a su serie) *(v8.2)*. Si salta, la palanca, que decide Héctor, es poner la Tarjeta de Obra detrás de las acciones.
 
 ### NonFunctional Requirements
 
 Los NFR-1…NFR-13 siguen vinculando. Abajo, los que la v8 enmienda o pone a prueba de forma nueva. Fuera del núcleo de su épica solo tres llevan trabajo de construcción: NFR-5 y NFR-8, en la Épica 26, y NFR-9, en la primera épica que se fusione, la 23. Los demás añaden a su regla lo nuevo (PRD §6.7).
 
 - **NFR-1** *(enmendado)* — `/autores/` y `/obras/` son indexables, con canónica propia, sitemap y Tarjeta Social, y no tienen páginas 2+. Ninguna marca de la URL crea una URL indexable: con `?de=` o con `?via=` la página declara la misma canónica, el mismo `og:url` y el mismo `<link rel="canonical">` que sin ellas. `/buscar/` con cualquier `?q=&autor=&obra=&tema=` es la misma ruta de servicio, sin superficie nueva.
-- **NFR-2** *(ampliado)* — la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más de {Autor}» y los dos Directorios completos están en el HTML inicial. El filtro de los Directorios, el selector de Obra y la Historia de Instagram los inserta la isla encima de lo que ya hay, y nada se alcanza solo filtrando. Sin guion, los Directorios se recorren enteros con sus letras de salto, y «Más opciones para compartir» es un `<details>` con Telegram, X y Correo en el marcado. `/buscar/` sin guion dice en `<noscript>` que buscar y filtrar necesitan JavaScript, y enlaza a los dos Directorios. Con el guion activo y el paquete caído también tiene salida: el aviso en el HTML inicial, que la isla retira, o el campo como formulario GET. Nunca queda un `h1` solo.
+- **NFR-2** *(ampliado)* — la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más de {Autor}» y los dos Directorios completos están en el HTML inicial. El filtro de los Directorios, el selector de Obra y la Historia de Instagram los inserta la isla encima de lo que ya hay, y nada se alcanza solo filtrando. Sin guion, los Directorios se recorren enteros con sus letras de salto, y «Más opciones para compartir» es un `<details>` con Telegram, X y Correo en el marcado. `/buscar/` sin guion dice en `<noscript>` que buscar y filtrar necesitan JavaScript, y enlaza a los dos Directorios. Con el guion activo, hasta que arranca el paquete y también si no arranca, el HTML inicial lleva fuera de `<noscript>`, oculto sin guion, el aviso condicional con los dos Directorios, y la isla lo retira al arrancar *(v8.2)*. Nunca queda un `h1` solo.
 - **NFR-3** — el `isPartOf` de la Página de Cita lleva el año de la Obra solo cuando sus Citas coinciden, y nunca el de una traducción (FR-48, AD-25). Ese año es navegación: que cambie al entrar otra Cita de la Obra no fecha la Página de Cita (AD-27).
 - **NFR-4** — el estado de `/buscar/` lleva identificadores, nunca rótulos: slug de Autor, nombre de ficha y slug de Tema. El nombre de la Ficha de Obra es interfaz pública como valor del filtro `obra`, así que retitular no rompe una búsqueda compartida. Reunir es la ruptura declarada, y alcanza también a `?obra=` con la absorbida: la búsqueda ignora ese filtro, lo dice y lo quita de la dirección.
-- **NFR-5** *(enmendado)* — tres saltos como máximo desde la portada, también para lo que no se indexa; todo Autor y toda Obra quedan a dos, por la cabecera y su Directorio. La espina ya tomó la decisión que el PRD dejaba a la Épica 26 (Héctor, 2026-10-18): la condición tiene puerta en el build, sobre el `dist/` real, sin los bloques que rotan con la jornada. Las órdenes que retiran se niegan con código 1 si dejarían una Cita a más de tres saltos, y `revisar` se niega a aprobar una Cita sin Tema publicado. El tope no se relaja.
+- **NFR-5** *(enmendado)* — tres saltos como máximo desde la portada, también para lo que no se indexa; todo Autor y toda Obra quedan a dos, por la cabecera y su Directorio. La espina ya tomó la decisión que el PRD dejaba a la Épica 26 (Héctor, 2026-10-18): la condición tiene puerta en el build, sobre el `dist/` real, sin los bloques que rotan con la jornada. Las órdenes que retiran —también `coleccion despublicar`— se niegan con código 1 si dejarían una Cita a más de tres saltos, y `revisar` y `tools/alta.ts` se niegan a publicar una Cita sin Tema publicado *(v8.2)*. El tope no se relaja.
 - **NFR-6** — el Kit y el Lote siguen siendo internos con lo que la v8 les añade. El 9:16 del Kit se compone en el cliente, con `imagen.js` importado al cargar. Quedan fuera de la prueba de las dos jornadas (AD-12) y de toda serie, y ninguna superficie del producto los enlaza, tampoco la cabecera ni los Directorios.
-- **NFR-7** *(ampliado)* — la Tarjeta de Obra, hasta siete Tarjetas de Cita y la medición de la lectura no mueven el listón: van después de la Cita y de su atribución, y el tiempo se mide con todo ello puesto. La medición es a mano, con Lighthouse en perfil móvil 4G, sobre una Página de Cita con la medición encendida, y sin puerta automática. `MAX_BYTES_DE_GUION` se mide en toda superficie pública, y cada guion externo tiene su tope en `umbrales.ts`. El peso del HTML de la Página de Cita sigue sin tope (aplazado).
+- **NFR-7** *(ampliado)* — la Tarjeta de Obra, hasta siete Tarjetas de Cita y la medición de la lectura no mueven el listón: van después de la Cita y de su atribución, y el tiempo se mide con todo ello puesto. La medición es a mano, con Lighthouse en perfil móvil 4G, sobre una Página de Cita con la medición puesta contra un receptor local (`wrangler dev` con D1 local) o un punto final ficticio, nunca contra el D1 de producción, y sin puerta automática *(v8.2)*. La principal con la que se compara se mide construida y servida igual, en local y con la medición contra un receptor local o un punto final ficticio: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*. La mide cada historia de cierre de épica —la 23.11, la 25.7, la 26.11, la 27.9 y la 28.5— con todo lo suyo puesto, y si empeora, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*. `MAX_BYTES_DE_GUION` se mide en toda superficie pública, y cada guion externo tiene su tope en `umbrales.ts`. El peso del HTML de la Página de Cita sigue sin tope (aplazado): se crea si Héctor lo decide, al degradarse la medición a mano de NFR-7 en una historia de cierre o para vigilar ese peso (24.2) *(v8.2)*.
 - **NFR-8** *(ampliado)* — ninguna superficie pública obliga a desplazarse en horizontal a 320 px. Se comprueba con `scrollWidth` frente al ancho de la ventana, porque 1.4.10 no tiene regla en axe, y la UX pide repetir la prueba con el espaciado de 1.4.12 y con el texto al 200 %. La cabecera va en dos filas por debajo de 600 px, con unos 113 px de alto. A 360 × 640 px el texto de la Cita sigue empezando en la primera pantalla, medido sobre lo construido.
-- **NFR-9** *(enmendado en la v8.1)* — WCAG 2.2 AA. El barrido axe pide `wcag22aa` además de las etiquetas de 2.1, desde el mismo dueño (`superficies.ts`). Entra con la Épica 23, para que las demás se auditen ya contra 2.2, y en el mismo commit `@axe-core/playwright` y `axe-core` suben a la 4.14.0. Los criterios de 2.2 sin regla en axe no se dan por comprobados. La UX da por cumplidos 2.4.11, 2.5.7 y 2.5.8; 3.2.6, 3.3.7 y 3.3.8 no aplican. El barrido es Playwright local, que el CI no corre.
-- **NFR-11** *(ampliado)* — `lectura`, `salida-interna`, `busqueda` y `vista-de-obra` llevan solo valores de un vocabulario cerrado. No llevan identificador de visita, agente de usuario, referente ni hora. Tampoco el texto de la consulta, que sigue siendo exclusivo de `busqueda-sin-resultados`. `?via=` nombra el botón pulsado, nunca a quien comparte ni a quien abre. Las dos marcas se quitan de la dirección y se olvidan al emitir la lectura. Sin sesión, SM-2, SM-9 y los Umbrales en sesiones siguen sin medirse.
+- **NFR-9** *(enmendado en la v8.1)* — WCAG 2.2 AA. El barrido axe pide `wcag22aa` además de las etiquetas de 2.1, desde el mismo dueño (`superficies.ts`). Entra con la Épica 23, para que las demás se auditen ya contra 2.2, y en el mismo commit `@axe-core/playwright` y `axe-core` suben a la 4.14.0. Los criterios de 2.2 sin regla en axe no se dan por comprobados por él: 2.5.8 sí la tiene (`target-size`, con la etiqueta `wcag22aa`), y la UX da por cumplidos 2.4.11 y 2.5.7 *(v8.2)*; 3.2.6, 3.3.7 y 3.3.8 no aplican. El barrido es Playwright local, que el CI no corre.
+- **NFR-11** *(ampliado)* — `lectura`, `salida-interna`, `busqueda` y `vista-de-obra` llevan solo valores de un vocabulario cerrado. `copiado`, `descarga-de-imagen` y las dos comparticiones llevan además `primera` (sí/no), que revela cuántas acciones hubo en una carga, nunca cuál ni de quién, y lo aceptó Héctor el 2026-10-20. El orden de llegada de las filas no encadena registros: el receptor inserta con `rowid` aleatorio *(v8.2)*. No llevan identificador de visita, agente de usuario, referente ni hora. Tampoco el texto de la consulta, que sigue siendo exclusivo de `busqueda-sin-resultados`. `?via=` nombra el botón pulsado, nunca a quien comparte ni a quien abre. Las dos marcas se quitan de la dirección y se olvidan al emitir la lectura. Sin sesión, SM-2, SM-9 y los Umbrales en sesiones siguen sin medirse.
 - **NFR-12** — el cuadrado y el 9:16, los dos con el dominio al pie, nunca encogen ni recortan una Cita de hasta `MAX_CARACTERES_IMAGEN`: si no cabe, no se compone, y el mensaje de fallo ofrece copiar el texto. Cuando la Cita con su Autor y su enlace no cabe en X o en Threads, reciben solo el Autor y el enlace, nunca un fragmento. El título de una Obra en la Tarjeta de Obra, en las Obras de la portada y en el Directorio de Obras parte palabras y hace crecer su fila; nunca se recorta.
 - **NFR-13** *(ampliado)* — los Directorios listan entidades, no Citas, y en Pagefind responden solo por su título, con el listado en `data-pagefind-ignore="all"`. «Buscar en esta obra / en {Autor} / en este tema» lleva a una búsqueda que no se indexa con ningún filtro, y las páginas de intersección siguen fuera. La Página de Cita enumera hasta siete Citas con la Tarjeta de Cita común, fuera de Pagefind. La Cita del Día es la única superficie indexable que reproduce íntegra una Cita fuera de su página; su bloque queda fuera de Pagefind y su canónica sigue siendo la de su Página de Cita.
 
 ### Additional Requirements
 
-De la espina v8, que enmienda en su sitio AD-1, AD-3, AD-6, AD-7, AD-8, AD-9, AD-11, AD-12, AD-13, AD-14, AD-15, AD-16, AD-17, AD-19, AD-20, AD-21, AD-23, AD-24, AD-25, AD-27 y AD-28, sin ningún AD nuevo ni renumerado. Ninguna tecnología nueva: de Pagefind se usa lo que la 1.5 ya trae; de `wrangler`, sus migraciones de D1; de axe, las etiquetas de WCAG 2.2.
+De la espina v8.2 *(v8.2)*, que enmienda en su sitio AD-1, AD-3, AD-6, AD-7, AD-8, AD-9, AD-11, AD-12, AD-13, AD-14, AD-15, AD-16, AD-17, AD-19, AD-20, AD-21, AD-23, AD-24, AD-25, AD-27 y AD-28, sin ningún AD nuevo ni renumerado. Ninguna tecnología nueva: de Pagefind se usa lo que la 1.5 ya trae; de `wrangler`, sus migraciones de D1; de axe, las etiquetas de WCAG 2.2.
 
 - **Paradigma v8 — `tools/lib/` es la segunda capa pura.** La importan las integraciones del build, `astro.config.mjs`, el cargador de posiciones de `content.config.ts` y las órdenes. Ella importa de `src/lib/`, y `src/lib/` nunca importa de ella. Sin red (AD-22). El criterio de la puerta del cotejo vive aquí.
 - **AD-1 — la clave de orden del Autor es obligación de publicar, no de admitir.** La forma de `ordenAlfabetico` es puerta del esquema exportado: tiene que dar, con la función hermana de AD-3, una inicial de la A a la Z o la Ñ. `tools/autor.ts` la repite por comodidad. Su presencia se exige sobre `autoresPublicados`: un Autor con Citas publicadas y sin clave rompe el build con la ruta de su fichero; uno sin Citas, no. `ordenRevisado` (jornada ISO) lo escribe solo la orden que confirma o corrige la clave, y se omite si no. El build no lo lee, «sin revisar» se cuenta sin leer git, y la revisión no bloquea.
 - **AD-3 — dos consumidores más, con el mismo dueño.** El filtro de los Directorios es el tercer consumidor de `normalizar`: casa por subcadena de lo normalizado y la importa por un guion empaquetado, sin reimplementarla. Una función hermana en `normalizar.ts` da la inicial sin tilde, con la Ñ como letra propia, y la clave de comparación de la clave de orden, con el slug como desempate. La consumen el Directorio de Autores, las letras de salto de los dos Directorios y los destacados de FR-8; ningún módulo ordena Autores por su cuenta. El mismo módulo da también el orden por el nombre tal como se lee, para el selector de Autor de `/buscar/`, y el de los Temas por su nombre con el artículo. La rotación de la Cita del Día sigue por slug, como excepción declarada.
-- **AD-6 — la medición sale a un fichero.** Es un `<script src defer>` que el build genera desde `src/lib/medicion.ts` con un endpoint `.js.ts`, y su URL se versiona por su contenido. Sin `MEDICION_ENDPOINT`, el `getStaticPaths` queda vacío y no hay ni fichero ni etiqueta. Se carga en toda superficie pública con vista, zona o búsqueda, también en `/buscar/`, las páginas 2+, el 404 y la página 1 de una Obra que no se indexa. Emite las vistas que declara un `data-*` de la página, derivado de `superficies.ts`: la página 1 de una Obra indexable emite dos, y sin ese `data-*` no emite ninguna. Se acepta perder vistas hasta 10 minutos tras un despliegue que cambie el guion (`max-age=600`).
+- **AD-6 — la medición sale a un fichero.** Es un `<script src defer>` que el build genera desde `src/lib/medicion.ts` con un endpoint `.js.ts`, y su URL se versiona por su contenido. Sin `MEDICION_ENDPOINT`, el `getStaticPaths` queda vacío y no hay ni fichero ni etiqueta, pero el marcado del build —el `data-*` de las vistas, las zonas y la marca indexable— se queda en `dist/` *(v8.2)*. Se carga en toda superficie pública con vista, zona o búsqueda, también en `/buscar/`, las páginas 2+, el 404 y la página 1 de una Obra que no se indexa. Emite las vistas que declara un `data-*` de la página, derivado de `superficies.ts`: la página 1 de una Obra indexable emite dos, y sin ese `data-*` no emite ninguna. Se acepta perder vistas hasta 10 minutos tras un despliegue que cambie el guion (`max-age=600`).
 - **AD-6 — los guiones externos son una lista cerrada, cada uno con su tope con nombre en `umbrales.ts`.** Con la página se cargan el de medición y dos que empaqueta Astro: el filtro de los Directorios y la búsqueda con filtros. Los dos importan `normalizar`, `tipoDeResultado`, `umbrales` y el vocabulario, sin copiarlos. Se piden con `import()` dos más: `imagen.js` al pulsar —el Kit y el Lote lo importan al cargar— y Pagefind al enfocar el campo, al elegir un filtro o al llegar con estado en la dirección. `public/islas/` queda solo para lo que se pide con `import()`. El tope de cada entrada cuenta todo lo que importa de forma estática, trozos compartidos incluidos. Un guion externo fuera de la lista, o sin tope, es fallo de prueba.
 - **AD-6 — un guion empaquetado sale siempre a fichero.** `astro.config.mjs` fija `vite.build.assetsInlineLimit` como una función que devuelve `false` para los `.js` y deja lo demás a la regla por omisión. Una prueba sobre `dist/` exige que ningún guion procesado quede en línea. El comportamiento se comprobó en Astro 7.2.0 y se reverifica al subir de versión.
 - **AD-6 — el presupuesto en línea.** `MAX_BYTES_DE_GUION` es el tope de toda superficie pública y se mide en cada una. Sacar la medición libera unos 680 bytes; los disparadores de la Historia y de «Más opciones…» caben en ese hueco o suben el tope en el mismo diff que los trae. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—, que van en `data-*`. Es una migración, porque hoy `CopiarCita.astro` mete el slug por `define:vars`.
@@ -4026,20 +4029,23 @@ De la espina v8, que enmienda en su sitio AD-1, AD-3, AD-6, AD-7, AD-8, AD-9, AD
   - el filtro de los Directorios y la búsqueda con filtros;
   - el guion de medición y su arranque en línea en el armazón;
   - el 9:16 de la Imagen del Kit.
-- **AD-7 — dos formatos y una sola ruta de generación.** El cuadrado y el 9:16 salen del mismo generador del cliente, también en el Kit, con el dominio al pie, que llega desde `dominio.ts` por `data-*`. La Historia va en dos toques. El primero carga `imagen.js`, compone y previsualiza. El segundo lanza `writeText` antes de `share()`, en el mismo manejador y el mismo turno, y solo dice «Enlace copiado» si `writeText` resolvió. Los rechazos de `share()` tienen conducta fija: `NotAllowedError`, `DataError` y `TypeError` caen en la descarga, `InvalidStateError` se ignora y `AbortError` no registra nada. La URL marcada, también la de `opaco` y la de `instagram-historia`, la compone el build con `compartir.ts` y llega por `data-*`; nunca sale de `location`.
-- **AD-7 — la Historia está sin confirmar en iOS.** Antes de construir el 9:16, la matriz de dispositivos la comprueba en iOS Safari y en Android Chrome con la versión de Instagram de ese día. Si en iOS no aparece, el cuadrado y el destino Feed se conservan, y qué hace allí el botón lo decide Héctor.
+- **AD-7 — dos formatos y una sola ruta de generación.** El cuadrado y el 9:16 salen del mismo generador del cliente, también en el Kit, con el dominio al pie, que llega desde `dominio.ts` por `data-*`. La Historia va en dos toques. El primero carga `imagen.js`, compone y previsualiza. El segundo lanza `writeText` antes de `share()`, en el mismo manejador y el mismo turno, y dice «Enlace copiado» en cuanto `writeText` resuelve, y nada de la interfaz espera a `share()`, que en Chrome para Android puede no resolverse nunca; la compartición se emite al resolver `share()`, así que allí SM-7 y SM-12 son cota inferior. Caen en la descarga `NotAllowedError`, `DataError` y `TypeError`, y ninguno más, y solo antes de abrir la hoja: un fallo de entrega con la hoja abierta llega como `AbortError`, como cancelar, y no descarga ni registra; `InvalidStateError` se ignora. La descarga impuesta lleva el destino del botón —`opaco` en la Imagen cuadrada, `instagram-historia` en la Historia—, no gasta la `primera` de SM-5 y SM-12 no suma la de `opaco`; la que el visitante elige va sin destino *(v8.2)*. La URL marcada, también la de `opaco` y la de `instagram-historia`, la compone el build con `compartir.ts` y llega por `data-*`; nunca sale de `location`.
+- **AD-7 — la Historia está sin confirmar en iOS.** Antes de construir el 9:16, la matriz de dispositivos la comprueba en iOS Safari y en Android Chrome con la versión de Instagram de ese día. Si en iOS no aparece, el cuadrado se conserva. No hay destino Feed en el conjunto cerrado: qué hace en iOS el botón de la Historia lo decide Héctor en la 25.3, con la matriz delante, y, si lo que decida necesita un destino nuevo, solo entonces entra en el vocabulario, por la orden de la 23.2 y la 23.3, antes de la 25.5 *(v8.2)*.
 - **AD-8 — la columna 9:16.** Es una columna más de `tramos.ts`, y llega a `imagen.js` por `data-*`. La geometría del lienzo 9:16 se declara una sola vez, junto a la del cuadrado, y una prueba la fija. La prueba de cabida corre en el navegador (Playwright local), con el pie de dominio y en los dos formatos, sobre las Citas publicadas más largas de cada tramo: la que no cabe no se compone. La isla ofrece la Historia solo si un `data-*` derivado de `tramos.ts` dice que la Cita admite Imagen. En la Página de Obra ese `data-*` no existe, así que la Historia tampoco.
 - **AD-9 — `umbrales.ts` guarda todo literal de regla de negocio y toda fecha que una regla o un informe nombra.** Entran, entre otros:
   - los 8 s de la lectura y el mínimo de lecturas de una línea base;
   - el tope de cada guion externo;
   - la tanda de resultados y la pausa de tecleo común a los Directorios y a `/buscar/`;
   - los recuentos de «De la misma obra», de las Obras y de los Autores destacados de la portada;
-  - las fechas de la línea SM-11 y del corte de SM-8, junto a `PRIMER_DESPLIEGUE_DE_OBRAS`;
-  - el aviso y el tope del peso de `dist/`;
+  - las jornadas de despliegue —`DESPLIEGUE_DE_LA_REPARACION`, `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO` y la de la 23, con la misma forma: cadena de jornada, `undefined` mientras no llega—, junto a `PRIMER_DESPLIEGUE_DE_OBRAS`, cada una la jornada UTC en que termina el trabajo «Desplegar» de Actions, y `tools/` pasa su «hoy» a UTC antes de comparar; y la lista de cortes de serie, que se compone de ellas, nunca de un literal (AD-13) *(v8.2)*;
+  - con la misma forma, las jornadas de llegada en vivo de la 25 y de la 27, cada una con la suya, y la de la 28 también si llega tras el juicio, en la misma `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO`; a cada una le da valor su historia de cierre el día que llega *(v8.2, Héctor, 2026-10-23)*;
+  - las jornadas y las rutas de las dos pasadas que escriben en el D1 de producción —la 25.3 y la 25.7, y ninguna más *(v8.2, Héctor, 2026-10-24)*; la baliza de prueba de `desplegar` y `comprobar` no es una pasada, porque se escribe y se borra en la misma orden *(v8.2)*—, en una constante con nombre citada en `DESPLIEGUE.md`, que la orden de la 23.10 descuenta igual en cada lectura *(v8.2, Héctor, 2026-10-23)*;
+  - la constante con nombre, apagada, que activa la frase de iOS de la Historia (25.5) y que Héctor enciende en un diff visible tras la matriz, como `SM12_CON_FACEBOOK` *(v8.2, Héctor, 2026-10-23)*;
+  - el aviso y el tope del peso de `dist/`, y el tope del número de PNG de `dist/` (AD-16) *(v8.2)*;
   - los tamaños que reabren un aplazado —los filtros de Pagefind con el mapa de rótulos, y el HTML de `/obras/`—, que el build avisa al pasar, sin romper.
 
-  Un guion empaquetado los importa; uno de `public/islas/` los recibe por `data-*`. Los cortes de tramo de `busqueda` no entran: son vocabulario (AD-13).
-- **AD-11 — más enumeraciones con el mismo dueño.** `publicado.ts` da `autoresPublicados` y `obrasPublicadas`. Una sola función compone las opciones de filtro de `/buscar/` y el `data-pagefind-filter` de cada Cita. Otra da los ocho Autores destacados de la portada y de la búsqueda sin resultados: la regla de FR-8 con el predicado «cuenta para el suelo» que ya usan `salud` y `huecos`. El mismo módulo da las seis Obras de la portada y los recuentos de la Tarjeta de Obra y de las rutas de salida. También la línea de cifras, contada con `esCitaDocumentada`, que dice «cada una con su fuente» solo con el censo de pendientes de cotejo vacío. El mapa de rótulos (nombre de ficha → título y Autor) lo genera el build como un JSON que la isla pide junto a `filters()`, nunca en el HTML. De ese mapa sale el Autor de una dirección con `obra` y sin `autor`.
+  Un guion empaquetado los importa; uno de `public/islas/` los recibe por `data-*`. Los cortes de tramo de `busqueda` no entran: son vocabulario (AD-13). El peso de `dist/`, los tamaños de los filtros y del mapa de rótulos y el número de PNG se miden en un paso final de `npm run build`, después de Pagefind, sobre lo que se despliega —`dist/pagefind/` incluido—, nunca en `astro:build:done`, y sin los ficheros que rotan con la jornada —portada, 404, `/kit`, `/lote` y `rss.xml`—, que se miden e informan aparte; la línea de cifras del parte no es un aviso *(v8.2)*.
+- **AD-11 — más enumeraciones con el mismo dueño.** `publicado.ts` da `autoresPublicados` y `obrasPublicadas`. Una sola función compone las opciones de filtro de `/buscar/` y el `data-pagefind-filter` de cada Cita. Otra da los ocho Autores destacados de la portada y de la búsqueda sin resultados: la regla de FR-8 con el predicado «cuenta para el suelo», cuyo dueño es `src/lib/huecos.ts`, no `salud` *(v8.2)*. Las seis Obras de la portada salen del conjunto indexable de `publicado.ts`, y su selección vive junto a `citaDelDia.ts` (AD-12) *(v8.2)*. `publicado.ts` da también los recuentos de la Tarjeta de Obra y de las rutas de salida. También la línea de cifras, contada con `esCitaDocumentada`, que con el censo de pendientes de cotejo vacío dice «cada una cotejada con el texto de su fuente», y mientras quede censo no dice «cada una» en ninguna forma *(v8.2)*. El mapa de rótulos (nombre de ficha → título y Autor) lo genera el build como un JSON que la isla pide junto a `filters()`, nunca en el HTML. De ese mapa sale el Autor de una dirección con `obra` y sin `autor`.
 - **AD-11 — quién lee cada conjunto.** Leen `rutasIndexables` los resultados de Pagefind, las Obras de la portada y la marca de `vista-de-obra`. Leen el conjunto publicable, a propósito, el filtro de Obra y el Directorio de Obras.
 - **AD-11 — un solo componente escribe los filtros, los metadatos y la clave de orden de una Cita, y solo en su Página de Cita.** Todo bloque que enumera Citas, la Tarjeta de Obra y el bloque de la Cita del Día llevan `data-pagefind-ignore="all"`. Una prueba sobre `dist/` exige que todo registro con filtro `autor` sea una Página de Cita. Ese registro lleva exactamente un `autor` y como mucho una `obra`, los suyos, y en `tema` exactamente sus Temas publicados. Cotejar los recuentos de `filters()` con los del módulo es prueba de Playwright local.
 - **AD-11 — las rutas de salida.**
@@ -4050,46 +4056,50 @@ De la espina v8, que enmienda en su sitio AD-1, AD-3, AD-6, AD-7, AD-8, AD-9, AD
 - **AD-11 — NFR-5 tiene puerta.** `superficiesInalcanzables` rompe el build en `astro:build:done` si una superficie publicable queda a más de `MAX_SALTOS_DESDE_LA_PORTADA` saltos.
   - **El grafo** es el del `dist/` real, sin los subárboles `data-jornada` e ignorando `<template>` y `<noscript>`.
   - **Al romper**, nombra la superficie y, si la causa es un Tema que cayó bajo su umbral, ese Tema.
-  - **Las órdenes que retiran** —`documentar --retirar`, `autor retirar`, `coleccion quitar` y `tema quitar`— se niegan con código 1 si dejarían una Cita a más de esos saltos. Calculan sobre el grafo del modelo que compone una sola función de `publicado.ts`: portada → Temas, Colecciones y Directorios; listados con todos sus números de página; cabecera.
+  - **Las órdenes que retiran** —`documentar --retirar`, `autor retirar`, `coleccion quitar`, `coleccion despublicar` y `tema quitar`— se niegan con código 1 si dejarían una Cita a más de esos saltos. Calculan sobre el grafo del modelo que compone una sola función de `publicado.ts`, con cada arista sacada de la enumeración que la pinta en la página, nunca de una lista aparte: portada → Temas, Colecciones y Directorios; cabecera; Tema → página N → Cita, y así cada listado con todos sus números de página; Autor → sus Obras y sus Citas; Directorios → Autores y Obras *(v8.2)*.
   - **El build comprueba** que el grafo del `dist/` contiene el del modelo.
-  - **`revisar`** se niega a aprobar una Cita sin Tema publicado.
+  - **`revisar` y `tools/alta.ts`** se niegan a publicar una Cita sin Tema publicado *(v8.2)*.
 - **AD-12 — las seis Obras de la portada.**
   - **De dónde salen:** viven junto a `citaDelDia.ts` y salen del conjunto del que rotan, que son las Obras indexables o, si rige la congelación, las del conjunto congelado.
-  - **La rotación:** va en rondas por Autor sobre la lista circular de los Autores con Obras en ese conjunto, en el orden del Directorio, y la ventana de seis avanza seis puestos por jornada.
+  - **La rotación:** va en rondas por Autor sobre la lista circular de los Autores con Obras en ese conjunto, en el orden del Directorio, y la ventana avanza por jornada tantos puestos como Obras salen *(v8.2)*.
   - **Qué Obra de cada Autor:** en su n-ésima aparición sale la n-ésima de sus Obras, en el orden de su lista de obras y módulo su número; n se cuenta desde el mismo origen de jornadas que `citaDelDia.ts`.
-  - **Cuántos Autores:** seis distintos mientras los haya; con menos, una Obra de cada uno; sin ninguno, el bloque no existe.
+  - **Cuántos Autores:** seis distintos mientras los haya; con menos, una Obra de cada uno, y la ventana avanza ese número *(v8.2)*; sin ninguno, el bloque no existe.
+  - **Aparte de la Cita del Día:** las seis y la Cita del Día rotan de forma independiente; la Obra de la Cita del Día puede salir también entre las seis y no se excluye, y una fijación de `corpus/portada.json` no cambia las Obras *(v8.2)*.
   - **La Cita del Día:** gana su Tarjeta de Obra y las acciones de su Página de Cita, que actúan sobre la canónica de esa página.
-- **AD-12 — la jornada cambia lo que se pinta, nunca lo que se juzga.** Todo bloque que rota lleva una sola marca, `data-jornada`, que pone un solo componente. Una prueba construye dos jornadas del mismo commit y exige los mismos veredictos. Exige también que el HTML de toda página salvo la portada, `/kit` y `/lote` sea idéntico byte a byte, y que en la portada solo cambien esos subárboles. El tope de guion de la portada se mide con una Cita del Día que admite Imagen. Toda comprobación sobre un lector que rota se hace sobre el conjunto del que rota, no sobre lo que sale hoy.
-- **AD-13 — eventos y vocabulario.** Entran `lectura`, `salida-interna`, `busqueda` y `vista-de-obra`, y `busqueda-sin-resultados` pasa a emitirse solo con la consulta asentada. Los eventos, los campos cerrados y los nombres de `de` y `via` viven en un módulo puro sin importaciones, como `destinos.ts`. De él importan el receptor, los guiones empaquetados y `tools/`. La emisión y la composición del guion siguen en `medicion.ts`.
+- **AD-12 — la jornada cambia lo que se pinta, nunca lo que se juzga.** Todo bloque que rota lleva una sola marca, `data-jornada`, que pone un solo componente. Una prueba construye dos jornadas del mismo commit y exige los mismos veredictos. Exige también que el HTML de toda página salvo la portada, el 404, `/kit` y `/lote` sea idéntico byte a byte, y que en la portada y en el 404, que conserva su Cita del Día, solo cambien esos subárboles *(v8.2)*. El tope de guion de la portada se mide con una Cita del Día que admite Imagen. Toda comprobación sobre un lector que rota se hace sobre el conjunto del que rota, no sobre lo que sale hoy.
+- **AD-13 — eventos y vocabulario.** Entran `lectura`, `salida-interna`, `busqueda` y `vista-de-obra`, y `busqueda-sin-resultados` pasa a emitirse solo con la consulta asentada. Los eventos, los campos cerrados y los nombres de `de` y `via` viven en un módulo puro que solo importa módulos hoja sin importaciones —`destinos.ts` y `redes.ts`— y nunca copia sus conjuntos *(v8.2)*. De él importan el receptor, los guiones empaquetados y `tools/`. La emisión y la composición del guion siguen en `medicion.ts`.
 - **AD-13 — un solo `__medir` en ejecución.** Un arranque en línea del armazón define `__medir` como cola, antes de toda isla y también sin punto final. El guion de medición vacía esa cola al cargar y la sustituye. Las islas llaman siempre a `__medir(…)`, nunca `window.__medir && …`, y ninguna isla empaquetada emite con su propia copia. El arranque cuenta en `MAX_BYTES_DE_GUION`.
 - **AD-13 — cada campo es un conjunto cerrado.**
   - **La zona de `salida-interna`:** las dieciséis de `EXPERIENCE.md § Zonas de salida interna`.
-  - **El tramo de `busqueda`:** 0, 1–9, 10–29 y 30+. Es vocabulario y no umbral, así que cambiarlo mueve la huella de AD-14 y abre un corte de serie con fecha en `umbrales.ts`.
+  - **El tramo de `busqueda`:** 0, 1–9, 10–29 y 30+. Es vocabulario y no umbral, así que cambiarlo mueve la huella de AD-14 y abre una entrada en la lista de cortes de serie (abajo) *(v8.2)*.
   - **Los filtros usados:** las seis combinaciones válidas, porque la Obra nunca va sin su Autor.
   - **La marca de `vista-de-obra`:** indexable o no indexable.
+  - **`primera`** (sí / no) de `copiado`, `descarga-de-imagen` y las dos comparticiones *(v8.2)*.
   - **`via`:** sus valores son `DESTINOS_VALIDOS`.
-  - **Los destinos:** se parten en destinos de enlace, con constructor en `compartir.ts` y ahora con `facebook` y `threads`, y el destino de imagen `instagram-historia`. Ese nombra el botón pulsado, y lo guarda también `descarga-de-imagen`, solo con ese valor.
+  - **Los destinos:** se parten en destinos de enlace, con constructor en `compartir.ts` y ahora con `facebook` y `threads`, y el destino de imagen `instagram-historia`. Ese nombra el botón pulsado. `destino` lo guarda también `descarga-de-imagen`, con {`opaco`, `instagram-historia`}: el del botón cuya compartición rechazó el navegador, y nunca en la descarga que el visitante elige *(v8.2)*.
 - **AD-13 — la lectura.** Como mucho una por carga, en toda superficie que emite vista, también la de Obra. Se emite a los 8 s de visibilidad acumulada, contada con `visibilitychange`, o antes, al primer `pointerdown`, `keydown`, `wheel` o `touchmove`; nunca por `scroll`. `pageshow` con `persisted` es carga nueva para la lectura y la salida, sin marcas y sin volver a emitir vista. Una página prerenderizada no emite vista hasta su activación (`document.prerendering`, `prerenderingchange`).
+- **AD-13 — la lectura con acción** *(v8.2)*. SM-5 y SM-7 cuentan lecturas con acción, y las marca `primera`. Lo decide solo el guion de medición al emitir, también al vaciar la cola y en su orden; el arranque en línea es solo cola, sin memoria ni vocabulario. El guion lleva en memoria, por carga, qué métricas de acción ya contó, con la correspondencia evento → métrica del vocabulario: SM-5 junta `copiado` y `descarga-de-imagen`; SM-7, las dos comparticiones. Solo la primera de cada métrica sale con sí; toda descarga con destino lleva siempre no. Una carga nueva —también `pageshow` con `persisted`— empieza de cero. Toda acción va detrás de la lectura de su carga en una superficie con lectura: si la lectura no salió —la acción llegó en la cola, o sin `pointerdown` ni `keydown`: un lector de pantalla, la voz, un `element.click()`—, el guion la emite antes. SM-12 cuenta toda compartición, sin mirar `primera`.
 - **AD-13 — la salida interna.** La recoge una sola escucha delegada del guion de medición, con la zona más concreta que contiene el enlace. Es como mucho una por carga y, donde hay lectura, va después de ella.
-  - **Qué cuenta:** solo un enlace que sale de la página, pulsado con el botón principal, sin modificador y sin `defaultPrevented`. Las anclas de la misma página son la exención, y enviar un formulario no es salida.
+  - **Qué cuenta:** solo un enlace que sale de la página, pulsado con el botón principal, sin modificador y sin `defaultPrevented`. Las anclas de la misma página son una de las exenciones, y enviar un formulario no es salida. Están exentos de zona, por escrito: «Buscar en…», el campo de la portada y el del 404; las salidas de la búsqueda sin resultados —Temas, Colecciones y Autores destacados—; y los Directorios del aviso de `/buscar/`, el del índice que no carga y el que se pinta hasta que arranca la búsqueda. Se revisa en la pasada de métricas *(v8.2)*.
   - **Dónde se declara la zona:** es prop obligatoria de los componentes de enlace compartidos, y `astro check` la hace cumplir. Va en el contenedor que pinta el build, y lo que inserte el cliente la hereda.
   - **La prueba:** sobre `dist/`, todo enlace interno de `main` en una superficie con lectura lleva zona o una exención explícita.
-- **AD-13 — la búsqueda asentada.** Se emite una vez por estado distinto de texto y filtros en cada carga: al enviar, al pulsar un resultado o al ocultarse la página. Nunca por tecla ni con el texto de la consulta. Restaurar `/buscar/` desde la caché de atrás y adelante es carga nueva para la lectura, pero no para la búsqueda, que conserva en memoria los estados ya emitidos.
+- **AD-13 — la búsqueda asentada.** Se emite una vez por estado distinto de texto y filtros en cada carga: al enviar, al pulsar un resultado o al ocultarse la página. Nunca por tecla ni con el texto de la consulta. Restaurar `/buscar/` desde la caché de atrás y adelante es carga nueva para la lectura, pero no para la búsqueda, que conserva en memoria los estados ya emitidos. Sin esa caché tampoco: una navegación `back_forward` (Navigation Timing, leído una vez al cargar) da por ya registrado el estado con que llega. Al asentar, la isla marca su entrada con un booleano en `history.state` (`replaceState` con la misma dirección), que no es identificador ni sale del navegador; en toda llegada a un estado —una carga o un `popstate`— cuenta como registrado el que su entrada marca, con Navigation Timing de respaldo para la entrada sin objeto de estado. La recarga cuenta como ya registrada; sin `PerformanceNavigationTiming`, la carga cuenta como `navigate`; una marca rechazada por frecuencia se acepta. La regla la aplica solo la isla de búsqueda: el guion de medición nunca descarta una `busqueda`. Apilado no es asentado *(v8.2)*.
 - **AD-13 — las marcas de llegada tienen un solo lector.** Solo el guion de medición lee `de` y `via`, cada una contra su conjunto, al cargar y antes de la vista.
-  - Las quita con `history.replaceState`, mediante una sola función pura que quita exactamente esos dos parámetros, en todas sus apariciones, y conserva el resto de la cadena y el fragmento.
+  - Las quita con `history.replaceState`, mediante una sola función pura que quita exactamente esos dos parámetros, en todas sus apariciones, y conserva el resto de la cadena y el fragmento; al reescribir pasa `history.state`, porque `replaceState` con `null` borra la marca de asentada *(v8.2)*.
   - Las guarda en memoria para esa carga y las olvida al emitir la lectura.
   - Va en el documento antes que todo guion que escriba la dirección, y ninguna isla salvo la búsqueda escribe en el historial.
-  - `npm run canal` rechaza con código 1 un enlace con `?via=`.
-  - El corte de SM-8 cubre todas las causas que cambian su instrumento; si entran en merges distintos, cada merge lleva su fecha en `umbrales.ts`.
-- **AD-13 — la superficie de un registro es la página donde ocurre.** `tools/` la resuelve contra el censo, nunca por el prefijo de la ruta. El censo de la medición es `rutasPublicadas` sin el servicio por forma, así que la Obra que no se indexa entra. La familia Obra se parte por la marca de `vista-de-obra`: las lecturas y salidas de una ruta de Obra en una jornada toman la marca de sus vistas de esa jornada. Si ese día llegan las dos marcas, esa ruta y esa jornada se cuentan aparte, como «cambió». La marca nunca se reconstruye desde git.
-- **AD-13 — lo que se añade llega entero.** Un evento o un campo nuevo exige tocar el módulo, el receptor, una columna y una migración (AD-14). Una prueba de correspondencia fija que las claves que emite el guion ⊆ el registro del receptor ⊆ las columnas del esquema. Cada dato es una columna nula fuera de sus eventos, nunca una columna genérica ni JSON, y ninguna lleva hora. `via`, como `origen`, viaja con la vista y la lectura de la llegada; `zona`, `tramo`, `filtros` e `indexable`, cada una con su evento.
-- **AD-14 — la tabla migra solo hacia delante.** Las migraciones son versionadas y solo aditivas, con `wrangler d1 migrations` y `migrations_dir` en `wrangler.toml`, en `medicion/migrations/`. `esquema.sql` queda como estado acumulado de referencia, y una base nueva se crea solo aplicando las migraciones. La `0000` es la tabla de producción tal como está —las seis columnas y los dos índices de la v7.1, con `IF NOT EXISTS`—, y la `0001` lleva solo los `ALTER`. `wrangler` va con versión exacta y `--remote` siempre explícito.
-- **AD-14 — el orden es migración, receptor, sitio, y se hace desde la rama.** Una orden de `tools/` aplica la migración en remoto, despliega el receptor comprobado con una baliza de prueba y versiona la huella del vocabulario desplegado. `npm test` falla si esa huella no casa con el vocabulario de `src/lib/`. El cambio vive en su rama y entra en la principal ya con su huella. Aplicar en remoto y desplegar el receptor son actos de Héctor.
+  - `npm run canal` rechaza con código 1 un enlace con `?via=` en `anotar` y en `senal --tipo propia`; `senal --tipo ajena` lo admite y la consulta lo marca, como la ajena con `?de=` *(v8.2)*, salvo un `?via=` cuyo destino no está en `DESTINOS_VALIDOS`, o más de un `?via=`, que rechaza con código 1, como ya rechaza un `?de=` de una red que no existe *(v8.2, Héctor, 2026-10-23)*.
+- **AD-13 — los cortes de serie** *(v8.2)* son una lista ordenada en `umbrales.ts` cuyas entradas dicen su jornada, qué cambió y qué series parten: la llegada en vivo que cambia un instrumento, su reversión, un cambio de los cortes del tramo de `busqueda` y un cambio del tiempo mínimo de la lectura, que repite la línea base. Cada jornada sale de las constantes de despliegue de AD-9, filtrando las que no llegaron, nunca de un literal. El tramo nuevo empieza la primera jornada UTC completa tras la llegada, y la de llegada se informa aparte, como «cambió». `CORTES_DE_SM8` es su proyección sobre SM-8, con dos entradas: la 23 y la 24 con la 26. La orden parte cada serie solo por las entradas que la nombran, y admite dos en la misma jornada con distinto motivo.
+- **AD-13 — la superficie de un registro es la página donde ocurre.** `tools/` la resuelve contra el censo, nunca por el prefijo de la ruta. La unidad de agregación es la superficie declarada en `superficies.ts` —la portada, que no es de ninguna familia; las Páginas de Cita, de Autor, de Tema, de Colección y de Obra; y los Directorios—, nunca la familia. Para la línea base, `/autores/` y `/obras/` son una sola superficie, «los Directorios», que junta sus lecturas, y se informan también por separado *(v8.2)*. El censo de la medición es `rutasPublicadas` sin el servicio por forma, así que la Obra que no se indexa entra. La familia Obra se parte por la marca de `vista-de-obra`: todo registro de una ruta de Obra en una jornada —lecturas, salidas y acciones— toma la marca de sus vistas de esa jornada. Si ese día llegan las dos marcas, esa ruta y esa jornada se cuentan aparte, para todos sus registros, como «cambió» *(v8.2)*. La marca nunca se reconstruye desde git.
+- **AD-13 — lo que se añade llega entero.** Un evento o un campo nuevo exige tocar el módulo, el receptor, una columna y una migración (AD-14). Una prueba de correspondencia lo fija por evento y por valor: las claves que emite el guion para cada evento son exactamente las que el vocabulario le declara, cada valor es de su conjunto, y esas claves ⊆ el registro del receptor ⊆ las columnas del esquema. La huella vive en el repositorio con la ruta y la forma que escribe la orden de la 23.2, y esa orden no se salta el cotejo en silencio cuando no hay huella *(v8.2)*. Cada dato es una columna nula fuera de sus eventos, nunca una columna genérica ni JSON, y ninguna lleva hora. `via`, como `origen`, viaja con la vista y la lectura de la llegada; `zona`, `tramo`, `filtros`, `indexable` y `primera` *(v8.2)*, cada una con su evento.
+- **AD-13 — ni el orden de llegada** *(v8.2)*. El Worker inserta cada fila con `rowid` aleatorio (`INSERT INTO eventos (rowid, …) VALUES (abs(random()), …)`), sin migración ni cambio de la huella de columnas, y un `UPDATE` baraja lo ya escrito. Ninguna lectura ordena por `rowid` ni lo lee desde JavaScript (si hace falta, `CAST(rowid AS TEXT)`), y ningún SQL de `tools/` lo nombra salvo la comprobación del despliegue y el `UPDATE` que baraja en `desplegar` (23.2) *(v8.2)*. Un `rowid` repetido pierde ese evento, y se acepta. Entra en la principal antes de la 23.3, como cambio propio de `medicion/worker.ts`, sin vocabulario ni huella y sin desplegarse hasta la 23.3: es la Historia 23.12 *(v8.2, Héctor, 2026-10-23)*. Barajar no es migrar: es un paso idempotente de la orden que despliega el receptor, que corre después de comprobar con su baliza que el receptor en vivo inserta con `rowid` aleatorio y se repite en cada despliegue; un receptor anterior al cambio vuelve a dejar el orden, y la comprobación lo dice y no baraja. Cuesta unas tres filas escritas por fila: el paso las cuenta antes contra la cuota de escritura del día y, si no caben, `desplegar` no baraja, lo dice y sale con 1, y Héctor lo repite otro día; no se trocea por jornadas *(v8.2, Héctor, 2026-10-24)*. Los recuentos de antes y de después son `COUNT` por (jornada, evento), sin copiar ninguna fila. Pérdida nombrada: Time Travel guarda 7 días (30 en el plan de pago) y ninguna orden de `tools/` restaura producción.
+- **AD-14 — la tabla migra solo hacia delante.** Las migraciones son versionadas y solo aditivas, y cambian el esquema, no las filas *(v8.2)*, con `wrangler d1 migrations` y `migrations_dir` en `wrangler.toml`, en `medicion/migrations/`. `esquema.sql` queda como estado acumulado de referencia, y una base nueva se crea solo aplicando las migraciones. La `0000` es la tabla de producción tal como está —las seis columnas y los dos índices de la v7.1, con `IF NOT EXISTS`—, y la `0001` lleva solo los `ALTER`. `wrangler` va con versión exacta y `--remote` siempre explícito.
+- **AD-14 — el orden es migración, receptor, sitio, y se hace desde la rama.** Una orden de `tools/` aplica la migración en remoto, despliega el receptor comprobado con una baliza de prueba, después baraja *(v8.2)*, y versiona la huella del vocabulario desplegado. `npm test` falla si esa huella no casa con el vocabulario de `src/lib/`. El cambio vive en su rama y entra en la principal ya con su huella. Aplicar en remoto y desplegar el receptor son actos de Héctor.
 - **AD-14 — reversión y lectura.** La reversión va en orden inverso, primero el sitio y después el receptor, y las migraciones no se revierten. No hay punto final de lectura: la línea base se lee desde `tools/` con `wrangler`, y el receptor sigue contestando 204 a todo lo que no sea `POST`. La misma orden informa de las filas escritas del día frente a la cuota y del tamaño de la base. `DESPLIEGUE.md` §3 deja de decir «No hay migración».
 - **AD-15** — el 9:16 del visitante y el del Kit se componen en el cliente; las Tarjetas Sociales de los Directorios, en el build.
-- **AD-16** — la entrada de la Tarjeta Social de una Obra incluye el fichero de su Autor, cuyo nombre pinta: renombrar un Autor la invalida. Es lo primero que se mira contra el techo del alojamiento: el 2026-10-16, los 5.116 PNG de `dist/` pesaban 308 de sus 485 MB.
-- **AD-17 — los Directorios son producto.** `/autores/` y `/obras/` se declaran en `superficies.ts` con rutas literales con barra final y todas las consecuencias de AD-17, también la quinta, y sin páginas 2+. La historia de los Directorios muda a `superficies.ts` el conjunto cerrado de familias, con seis valores: `cita`, `autor`, `tema`, `coleccion`, `obra` y `directorio`. Hoy está en `FAMILIAS` y `FAMILIAS_DE_LA_SERIE` de `tools/lib/indexacion.ts` y en `FamiliaAvisable` de `tools/lib/avisar.ts`. `tools/lib/` lo importa, cada serie y el aviso declaran su subconjunto como constante con nombre, y una prueba fija subconjuntos, no igualdad.
-- **AD-17 — los tipos de resultado.** Hay un solo tipo `directorio` en `tipoDeResultado.ts`, rotulado «Directorio», con el listado en `data-pagefind-ignore="all"` dentro de `main`. La portada declara también su tipo, rotulado con el nombre del sitio, y responde solo por su título. Los tipos de resultado son las familias con resultado más `portada`, y una prueba lo fija; `tipoDeOpenGraph` sigue dando `website`.
+- **AD-16** — la entrada de la Tarjeta Social de una Obra incluye el fichero de su Autor, cuyo nombre pinta: renombrar un Autor la invalida. Es lo primero que se mira contra el techo del alojamiento: el 2026-10-16, los 5.116 PNG de `dist/` pesaban 308 de sus 485 MB. Hoy no hay caché de PNG, y es deuda declarada: cada build rasteriza todas las Tarjetas Sociales de Cita y de Obra (`src/pages/tarjeta/[slug].png.ts`). Ningún artefacto nuevo por Cita o por Obra entra sin su caché, y la deuda se paga cuando salta un tope con nombre del número de PNG de `dist/`, que el paso final de AD-9 cuenta y avisa sin romper. Su valor lo fija Héctor en un diff visible; hasta entonces el paso informa del número sin avisar *(v8.2)*.
+- **AD-17 — los Directorios son producto.** `/autores/` y `/obras/` se declaran en `superficies.ts` con rutas literales con barra final y todas las consecuencias de AD-17, también la quinta, y sin páginas 2+. La historia de los Directorios muda a `superficies.ts` el conjunto cerrado de familias, con seis valores: `cita`, `autor`, `tema`, `coleccion`, `obra` y `directorio`. Hoy está en `FAMILIAS` y `FAMILIAS_DE_LA_SERIE` de `tools/lib/indexacion.ts` y en `FamiliaAvisable` de `tools/lib/avisar.ts`. `tools/lib/` lo importa, cada serie declara su subconjunto como constante con nombre, el aviso declara dos —las familias de fichero y las de ruta (AD-27)— y la medición ninguno: agrega por superficie *(v8.2)*. Una prueba fija subconjuntos, no igualdad.
+- **AD-17 — los tipos de resultado.** Hay un solo tipo `directorio` en `tipoDeResultado.ts`, rotulado «Directorio», con el listado en `data-pagefind-ignore="all"` dentro de `main`. La portada declara también su tipo, rotulado «Portada» y titulado con el nombre del sitio («Portada: Sabiduría de Bolsillo»), sin repetir la marca en el rótulo *(v8.2)*, y responde solo por su título. Los tipos de resultado son las familias con resultado más `portada`, y una prueba lo fija; `tipoDeOpenGraph` sigue dando `website`.
 - **AD-17 — el tipo de resultado no casa como texto.** Desde la 1.5.0, Pagefind busca en la metadata por omisión, así que un tipo buscable devolvería cada página de ese tipo. Lo emite solo el armazón, por un medio que no case. Ese medio lo elige la primera historia que escriba metadatos de Pagefind, y una prueba de búsqueda sobre `dist/` lo fija para las siguientes. Todo metadato que no deba puntuar lleva peso 0 en `ranking.metaWeights`.
 - **AD-17 — una quinta consecuencia: qué vistas emite cada superficie.** Se declara en `superficies.ts` junto al carácter de la superficie, y de ahí sale el `data-*` de AD-6. La portada no emite la vista de una Cita por los componentes de la Cita del Día. La comprobación sobre `dist/` gana dos lectores. El conjunto del que rotan las Obras de la portada son rutas sin `noindex`. Y la marca `indexable` de `vista-de-obra` coincide con el `noindex` de su página.
 - **AD-17 — el barrido.** Pide `wcag22aa` además de las etiquetas de 2.1, con axe 4.14.0, que deja de dar `target-size` en enlaces solapados con el mismo destino. El barrido móvil exige, a 320 px, `scrollWidth` ≤ ancho de la ventana en toda superficie pública. Es Playwright local entero.
@@ -4133,22 +4143,26 @@ De la espina v8, que enmienda en su sitio AD-1, AD-3, AD-6, AD-7, AD-8, AD-9, AD
   - **Los Directorios** entran con todo lo que pintan, también las Citas, por sus recuentos.
   - **Una baja** fecha lo que componía en la relación de antes, con la fecha del commit que la saca. La prueba de inversas se escribe también sobre un corpus con una baja.
   - **Antes de desplegar:** la misma relación, leída por `tools/` sobre un rango sin desplegar, dice cuántas fechas mueve una sesión de siembra.
+  - **La familia del fichero no es la de la ruta avisada** *(v8.2)*. El aviso declara dos constantes con nombre en `tools/lib/avisar.ts`, y una prueba fija las dos: lo que observa en el `git diff` —cada directorio con su familia de fichero, las cinco de `superficies.ts` con directorio en el Corpus más `documento`, de `corpus/fuentes/`, y `src/lib/umbrales.ts`, sin familia—, y las seis familias de ruta, cuya familia pone la entrada de la relación, nunca el fichero ni el prefijo. Los Directorios no tienen fichero propio y entran por sus páginas; la portada se avisa siempre, sin familia, y se informa aparte.
 - **AD-28** — los Directorios y sus Tarjetas Sociales publican solo hechos del Corpus, y `atribucion.ts` los cuenta entre las superficies sin semblanza. El texto que se comparte de una Obra, «{título}, de {Autor}», se compone también en `atribucion.ts`; Facebook recibe solo el enlace.
-- **Convención — parámetros de dirección.** Ninguno crea una ruta ni cambia la canónica. El estado de `/buscar/` es `?q=&autor=&obra=&tema=`, con identificadores. `obra` nunca va sin `autor`; si llega sin él, el Autor sale del mapa de rótulos. La búsqueda compone su dirección desde su propio estado y nunca copia `location.search`. La reescribe tras la pausa de `umbrales.ts` y dentro de un `try`, porque el navegador limita la frecuencia de `replaceState`. Un filtro que ya no existe se ignora, se dice y se quita de la dirección.
+- **Convención — parámetros de dirección.** Ninguno crea una ruta ni cambia la canónica. El estado de `/buscar/` es `?q=&autor=&obra=&tema=`, con identificadores. `obra` nunca va sin `autor`; si llega sin él, el Autor sale del mapa de rótulos. La búsqueda compone su dirección desde su propio estado y nunca copia `location.search`. La escribe tras la misma pausa, nunca por tecla, y toda escritura del historial va dentro de un `try`: el estado que deja la pausa entra con `pushState`, mientras sigue cambiando el mismo control se reescribe con `replaceState`, un estado asentado no se reescribe nunca —el primer cambio tras él abre entrada— y uno igual al de la dirección no la escribe. En `popstate` la isla repinta el estado de la entrada, de su objeto de estado o, sin él, de la dirección. Un filtro que no se puede usar se ignora, se dice y se quita con `replaceState`, sin abrir entrada, en un orden fijo: lo que no existe; la `obra` sin `autor` toma su Autor; la `obra` de otro Autor se descarta. Quitar `de` y `via` conserva el objeto de estado *(v8.2)*.
 - **Convención — mensajes de estado.** Una región `role="status"` está en el marcado desde la carga, vacía y sin `hidden`; va dentro del `<dialog>` si se anuncia con él abierto. Hay dos ritmos, con un solo dueño en `src/lib/`. Lo que se repite se anuncia vaciando la región y escribiendo en el siguiente fotograma. Lo que cambia al teclear se anuncia tras su pausa, aparte del pintado de la lista, y solo si la frase cambió; «Mostrar 30 más» no vuelve a anunciar. Los guiones empaquetados importan ese dueño. Los guiones en línea reciben su texto derivado en el build con `String(…)` de la misma función, insertado con `set:html`; nunca por `define:vars` ni copiado a mano. Una prueba sobre `dist/` exige que toda isla en línea que anuncia lleve ese texto.
-- **Convención — glosario y conjuntos cerrados.** El glosario gana `Directorio`, `Tarjeta de Obra`, `Tarjeta de Cita`, `Lectura`, `Salida interna`, `Zona`, `Marca de origen` y `Marca de difusión`. «Lectura», a secas, nombra solo el acto medido; el tipo de página se dice completo, «superficie de lectura». Son también conjuntos cerrados las zonas, los tramos de búsqueda, los filtros usados, la marca de `vista-de-obra`, las dos clases de destino y los guiones externos.
-- **Entorno operativo — la unidad de fusión es la épica.** Cada épica se integra en su propia rama, y la 24 y la 26 comparten una. Sus historias se fusionan allí, y la rama entra en la principal en un solo merge. El orden es: la 23; la 24 y la 26 juntas; la 25 y la 27, en cualquier orden; y la 28 al final, tras el juicio de SM-11 —desde el 2026-12-05— o con su fecha declarada. Esto cambia los bucles de `bmad-build`, que fusionaban historia a historia. El Corpus y la reparación de la publicación siguen fusionándose a diario en la principal. El cambio de vocabulario de AD-14 entra como una épica más, desde su rama y con su huella.
-- **Entorno operativo — la principal nunca en rojo.** Cada push despliega, así que el orden de fusión es el orden de despliegue, y nada se fusiona con el CI en rojo. La publicación falla desde el 2026-10-11 en `documento.test.ts` y `legibilidad.test.ts`. Repararla es un trabajo aparte, previo a la v8 y condición de su línea base; desde ese despliegue, la principal no vuelve a quedar en rojo. Las constantes de las fechas de SM-11 y la línea del informe se construyen con esa reparación, que se despliega primero. Las fechas son tres: la de la reparación, la de la 24 con la 26 y, si llega antes del juicio, la de la 28. Cada una se anota el día en que su despliegue llega al sitio en vivo.
+- **Convención — glosario y conjuntos cerrados.** El glosario gana `Directorio`, `Tarjeta de Obra`, `Tarjeta de Cita`, `Lectura`, `Salida interna`, `Zona`, `Marca de origen` y `Marca de difusión`. «Lectura», a secas, nombra solo el acto medido; el tipo de página se dice completo, «superficie de lectura». Son también conjuntos cerrados las zonas, los tramos de búsqueda, los filtros usados, la marca de `vista-de-obra`, `primera` *(v8.2)*, las dos clases de destino y los guiones externos.
+- **Entorno operativo — la unidad de fusión es la épica.** Cada épica se integra en su propia rama, y la 24 y la 26 comparten una. Sus historias se fusionan allí, y la rama entra en la principal en un solo merge. El orden es: la 23; la 24 y la 26 juntas; la 25 y la 27, en cualquier orden; y la 28 al final, tras el juicio de SM-11 —desde el 2026-12-05— o con su fecha declarada. Esto cambia los bucles de `bmad-build`, que fusionaban historia a historia. El Corpus sigue fusionándose a diario en la principal *(v8.2)*. El cambio de vocabulario de AD-14 entra como una épica más, desde su rama y con su huella. Lo que `umbrales.ts` declara es la jornada UTC en que el despliegue de cada rama llega al sitio en vivo, no la del merge: la de la 24 con la 26 es la de la línea SM-11 y la de su corte de SM-8, y la de la 23, la de su corte *(v8.2)*. Dos excepciones declaradas, y ninguna más. Una es el `rowid` aleatorio del `INSERT` de `medicion/worker.ts`, que entra en la principal antes de la 23.3, solo y como cambio propio del adaptador, sin vocabulario ni huella, y no se despliega hasta la 23.3, para que toda vuelta atrás o redespliegue desde la principal lo conserve *(v8.2)*; es la Historia 23.12, que se fusiona sola en la principal. La otra es la 24.2, el aviso y el tope del peso de `dist/` tras Pagefind, que entra sola en la principal en cuanto Héctor dé sus dos valores, porque no cambia ningún fichero de `dist/` y vigila el peso desde ya. Son las dos únicas historias de la v8 que se fusionan fuera de su rama de épica *(v8.2, Héctor, 2026-10-23)*.
+- **Entorno operativo — la principal nunca en rojo.** Cada push despliega, así que el orden de fusión es el orden de despliegue, y nada se fusiona con el CI en rojo. La publicación falló del 2026-10-11 al 2026-10-19 en `documento.test.ts` y `legibilidad.test.ts`, y el vivo se quedó con el Corpus del 11/10. La reparación, trabajo aparte de la v8, llegó al sitio en vivo el 2026-10-19 a las 09:22 UTC; desde entonces el vivo vuelve a ser el árbol de la principal. Llegó sin las constantes de SM-11, que añadió después 64b1bf0d: `DESPLIEGUE_DE_LA_REPARACION` = 2026-10-19, y la de la 24 con la 26 y la de la 28 en `undefined`. Junto a la de la 23, que da su corte, son cuatro jornadas, y cada una se anota el día en que su despliegue llega al sitio en vivo *(v8.2)*. Con la misma forma se anotan las jornadas de llegada de la 25, de la 27 y de la 28 si llega tras el juicio (AD-9) *(v8.2, Héctor, 2026-10-23)*.
 - **Entorno operativo — lo que el CI no prueba.** El CI corre `npm run build`, `astro check` y `npm test` (Vitest), pero no Playwright. Estas son pruebas locales, declaradas así, que se corren a mano sobre la rama de cada épica antes de su merge:
   - la lectura a 8 s y `pageshow`;
   - las marcas quitadas con `replaceState`;
   - una salida interna por carga, y después de la lectura;
+  - la primera acción de cada métrica por carga, también la que llega en la cola, detrás de su lectura *(v8.2)*;
+  - el historial de `/buscar/` —«Autor, Tema, resultado, atrás, atrás» con caché y sin ella, y la recarga— *(v8.2)*;
   - el barrido WCAG 2.2 AA y el reflujo a 320 px;
   - la cabida de la Imagen en los dos formatos;
   - las que llaman a Pagefind: los recuentos de `filters()`, la búsqueda que fija el medio del tipo y el orden de `data-pagefind-sort`.
 
-  De Pagefind, el CI cubre en Vitest los atributos de `dist/`. La Épica 25 cierra además con la matriz de dispositivos y el validador de Facebook, que son actos de Héctor.
-- **Entorno operativo — techos del alojamiento y del receptor.** GitHub Pages admite 1 GB por sitio publicado y corta el despliegue a los 10 minutos. `dist/` medía 485 MB el 2026-10-16, y cada Cita nueva suma unos 95–100 KB. `umbrales.ts` declara un aviso y un tope del peso de `dist/`, los dos por debajo de 1 GB y con margen. Una comprobación en `astro:build:done` los mide sobre el `dist/` real: avisa al pasar el aviso, rompe al pasar el tope y dice cuántos ficheros tiene `dist/`. Hoy son 15.339, y Cloudflare Pages corta a 20.000. D1, en el plan gratuito, admite 100.000 filas escritas al día y 500 MB por base, y al pasarlos las escrituras fallan en silencio hasta las 00:00 UTC. La v8 pasa de una fila por carga a unas tres.
+  De Pagefind, el CI cubre en Vitest los atributos de `dist/`. La Épica 25 cierra además con la matriz de dispositivos y el validador de Facebook, que son actos de Héctor. Antes de cada merge de épica se corre `npm run test:e2e` entero sobre la rama, no solo las pruebas que nombra su historia de cierre. Toda construcción de una rama con la medición puesta —Playwright, Lighthouse para NFR-7, la matriz de la 25.7 por el túnel— apunta a un receptor local (`wrangler dev` con D1 local, que monta la 23.2) y nunca escribe en el D1 de producción; la principal con la que se compara NFR-7 se construye y se sirve igual, en local, y nunca se mide en vivo *(v8.2)*. Fusionar cada rama es acto de Héctor: un agente puede correr y anotar las pruebas, nunca fusionar *(v8.2)*. Dos pasadas escriben en el D1 de producción, y ninguna más: la 25.3, que va sobre el sitio en vivo, y la segunda pasada de la 25.7, cuyo clic en la tarjeta de Facebook aterriza en la canónica en vivo. Sus jornadas y sus rutas viven en una constante con nombre de `umbrales.ts`, citada en `DESPLIEGUE.md`, y la orden de la 23.10 las descuenta igual en cada lectura *(v8.2, Héctor, 2026-10-23)*. La 27.9 no es una tercera: lo prueba todo sobre la rama contra un receptor local y, tras el merge, solo anota su jornada de llegada *(v8.2, Héctor, 2026-10-24)*.
+- **Entorno operativo — dónde se anota** *(v8.2)*. **Lo que una historia anota** —tiempos de build, medidas de lo construido, cifras de Lighthouse, recuentos de su orden— va en el spec de la historia (`_bmad-output/implementation-artifacts/`), con fecha; no es un dato que lea el código. Lo que se anota sobre el vivo después del merge —los recuentos de D1 de la primera jornada, la matriz de dispositivos y el plan de Cloudflare— va en `DESPLIEGUE.md` §3 o en la sección de la matriz. La jornada y las rutas de toda pasada que escribe en producción se citan allí, y viven en su constante de `umbrales.ts`; que Héctor miró la comparación por firma y da por buena una línea base, con fecha y métrica, va en `DESPLIEGUE.md` §3 *(v8.2, Héctor, 2026-10-23)*. Es la regla de los «queda anotado» de las historias: 23.3, 23.4, 23.11, 24.1, 24.5, 24.6, 24.8, 25.7, 26.5, 26.11, 27.2, 27.3, 27.8, 27.9 y 28.5 *(v8.2)*.
+- **Entorno operativo — techos del alojamiento y del receptor.** GitHub Pages admite 1 GB por sitio publicado y corta el despliegue a los 10 minutos. `dist/` medía 485 MiB según `du` el 2026-10-16, 445 MiB en bytes, que es lo que mide el paso final *(v8.2)*, y cada Cita nueva suma unos 95–100 KB. `umbrales.ts` declara un aviso y un tope del peso de `dist/`, los dos por debajo de 1 GB y con margen. Un paso final de `npm run build`, después de Pagefind, los mide sobre lo que se despliega, `dist/pagefind/` incluido y sin lo que rota con la jornada (AD-9) *(v8.2)*: avisa al pasar el aviso, rompe al pasar el tope y dice cuántos ficheros tiene `dist/`. Hoy son 15.339, y Cloudflare Pages corta a 20.000. D1, en el plan gratuito, admite 100.000 filas escritas al día y 500 MB por base, y al pasarlos las escrituras fallan en silencio hasta las 00:00 UTC. La v8 pasa de un evento por carga a unos tres; con los dos índices, unas nueve filas escritas por carga, y caben unas 11.000 cargas al día *(v8.2)*.
 - **Entorno operativo — versiones.**
   - **Node:** `>=22.12.0`. Pasa a `>=22.22.0` en el mismo commit que suba Astro a la 7.4, con `engines` y `tools/comprobar-node.mjs`, y en ese commit se reverifica el *inlining* de AD-6.
   - **TypeScript:** ^5.9, no la 7, que `astro check` no admite.
@@ -4157,44 +4171,47 @@ De la espina v8, que enmienda en su sitio AD-1, AD-3, AD-6, AD-7, AD-8, AD-9, AD
   - **axe:** 4.14.0, con `wcag22aa`.
   - **Pagefind:** ^1.5.2.
 
-**Preguntas abiertas que heredan las historias** (espina v8 y SPEC v8, sin cerrar):
+**Preguntas abiertas que heredan las historias** (espina v8.2 y SPEC v8.2, sin cerrar) *(v8.2: las dos primeras de la v8 —la zona de los formularios internos y de las salidas sin resultados, y `?autor=a&obra=b` con una Obra de otro Autor— las cerró Héctor el 2026-10-19, y ya las recogen la espina v8.2 y la UX v8.2)*:
 
-- Si los formularios internos —«Buscar en…» y el campo de la portada— y las salidas de la búsqueda sin resultados llevan zona o una exención escrita. La responde `bmad-ux` y no bloquea las épicas.
-- Qué hace `/buscar/` con `?autor=a&obra=b` cuando `b` es de otro Autor. También de `bmad-ux`, y tampoco bloquea.
 - El valor del mínimo de lecturas que cierra una línea base. Ninguna fuente lo da, y se fija en un diff visible antes de leer la primera.
-- Los valores del aviso y del tope del peso de `dist/`. Los fija, con Héctor, la historia que crea la comprobación.
+- Los valores del aviso y del tope del peso de `dist/`, y el del tope del número de PNG (AD-16), que Héctor fija en un diff y puede quedar sin valor *(v8.2)*. Los fija, con Héctor, la historia que crea la comprobación, la 24.2, que entra sola en la principal en cuanto tenga los dos primeros *(v8.2, Héctor, 2026-10-23)*.
 - Qué hace «Historia de Instagram» en iOS si Instagram no ofrece la historia al recibir el fichero. La matriz de dispositivos corre dos veces, antes de construir el 9:16 (AD-7) y al cerrar la Épica 25 (PRD), y la épica dice qué comprobación es puerta de qué paso.
-- Si la ventana de 8 semanas de SM-11 se reinicia desde el despliegue que repare la publicación. Decide Héctor antes del 2026-12-05, y de la respuesta dependen la fecha de la 28, congelar la familia y encender la afiliación.
+- Si la ventana de 8 semanas de SM-11 se reinicia desde el despliegue que reparó la publicación, el 2026-10-19 *(v8.2)*. Decide Héctor antes del 2026-12-05, y de la respuesta dependen la fecha de la 28, congelar la familia y encender la afiliación.
 - El commit único de las aptas (21.2): si entra antes que la Épica 24, que construye el criterio nuevo de AD-27, fecha y avisa una vez sus ~104 Páginas de Cita. Hay que decidir si eso se acepta o si la 21.2 se ordena después de la 24.
 - Qué reuniones de Obra se aplican, ya publicadas sus URL. Desde la v8, reunir deja además sin filtro las búsquedas compartidas con la absorbida.
 - El plan contratado de Cloudflare, que se revisa al desplegar la 23.
+- Cuándo se cierra la línea base de SM-12, que junta llegadas a Páginas de Cita y de Obra, y si SM-C3 y SM-C5, que saltan por la dirección, llevan además umbral de magnitud (PRD §14, pregunta 9) *(v8.2)*.
+- Si la frase de la portada sin ninguna Cita apta (UX-DR108) se escribe aparte o si `DESCRIPCION_DEL_SITIO` de `src/lib/marca.ts` cambia con ella, y con ella la `description` de la portada, el `WebSite`, la bajada de su Tarjeta Social y la descripción del canal de `rss.xml`. `EXPERIENCE.md` las da por iguales, y la constante dice hoy otra cosa: «Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta.». La cierra `bmad-ux`, y bloquea la 28.2 *(v8.2)*.
 
-**Desalineaciones que las historias resuelven por precedencia** (SPEC v8):
+**Desalineaciones que las historias resuelven por precedencia** (SPEC v8.2) *(v8.2: salen las dos que la espina v8.2 y la UX v8.2 alinearon —la fecha de SM-11 es la del despliegue en vivo, y rige WCAG 2.2 AA—)*:
 
-- La fecha que `umbrales.ts` declara para SM-11 es la del despliegue en vivo, como fija el PRD, aunque la espina diga «la del merge».
 - El `lastmod` de la Página de Obra lo fija AD-27 —ficha, Citas, fichero del Autor y documentos— hasta que `bmad-prd` alinee FR-51.
 - La congelación es la constante `CONGELACION_DE_OBRAS` de `umbrales.ts`, no el «dato del corpus» que aún dice AD-25.
 - AD-17 añade a `/buscar/` un tipo «portada» que FR-7 no enumera.
 - La «Tarjeta de Obra» de AD-16 es la Tarjeta Social de la Obra, no la tarjeta de la Página de Cita.
-- `EXPERIENCE.md` dice todavía WCAG 2.1 AA; rige 2.2.
 - `AGENTS.md` describe un solo ritmo de anuncio; rigen los dos de la espina.
 - `DESPLIEGUE.md` §3 dice «No hay migración»; lo pone al día la Épica 23.
 - El inventario de la v5 de este fichero aún pone la afiliación en la Página de Autor; rige AD-20 v7.1.
+- AD-11 da las seis Obras de la portada a `publicado.ts`, AD-12 las pone junto a `citaDelDia.ts`, y AD-11 conserva «cada una con su fuente»: mandan AD-12 para el dueño y la UX v8.2 para el texto *(v8.2)*.
+- La espina no nombra la cuota de lectura de D1 —5 millones de filas leídas al día en el plan gratuito— ni qué informa de ella la orden de la línea base (`bmad-architecture`) *(v8.2)*.
+- La espina no dice cómo se activa la frase de iOS de la Historia (25.5): Héctor decidió el 2026-10-23 que sea una constante con nombre de `umbrales.ts`, apagada, que él enciende en un diff visible tras la matriz, como `SM12_CON_FACEBOOK`, y rige eso hasta que la espina la nombre *(v8.2, Héctor, 2026-10-23)*.
+- `EXPERIENCE.md` da la frase de la portada sin ninguna Cita apta por igual a `DESCRIPCION_DEL_SITIO`, y la constante dice otra cosa. Esta no se resuelve por precedencia: es la pregunta abierta de arriba, pendiente de `bmad-ux`, y la 28.2 no se cierra sin la respuesta *(v8.2)*.
 
 **Aplazado a propósito, y no se construye en estas épicas:**
 
-- **El tope de bytes de HTML de la Página de Cita:** se crea si la medición a mano de NFR-7 se degrada.
+- **El tope de bytes de HTML de la Página de Cita:** se crea si Héctor lo decide, al degradarse la medición a mano de NFR-7 en una historia de cierre o para vigilar ese peso (24.2) *(v8.2)*.
 - **El índice de subpáginas de la Fuente:** se captura con la primera Obra que salga desordenada; no hay detector.
 - **Trocear los filtros de Pagefind y el mapa de rótulos, y paginar `/obras/`:** cuando el build avise de que pasaron su tamaño con nombre.
 - **Conservar el guion de medición anterior durante un despliegue.**
 - **La sesión o un identificador de visita:** NFR-11 los veda.
 - **El archivo de la Cita del Día.**
+- **La caché de PNG de las Tarjetas Sociales** (AD-16): deuda declarada, que se paga cuando salte el tope del número de PNG o entre un artefacto nuevo por Cita o por Obra, lo primero que ocurra *(v8.2)*.
 
 **Fuera de la espina, sin historia todavía:** `publicar.yml` usa acciones para Node 20, retirado el 2026-09-23, y es trabajo de una historia de mantenimiento.
 
 ### UX Design Requirements
 
-Numeración continua desde la v7.1, que terminó en UX-DR53. Los requisitos salen de las espinas de UX v8 del 2026-10-18 (`DESIGN.md` y `EXPERIENCE.md`), con las variantes que eligió Héctor. Lo que las espinas marcan [ASSUMPTION] entra como requisito con la medida que dan, y las cifras que piden volver a medir se miden sobre lo construido.
+Numeración continua desde la v7.1, que terminó en UX-DR53. Los requisitos salen de las espinas de UX v8 del 2026-10-18 (`DESIGN.md` y `EXPERIENCE.md`), con las variantes que eligió Héctor, y de su pasada v8.2 del 2026-10-20 (c3afeefd) *(v8.2)*. Lo que las espinas marcan [ASSUMPTION] entra como requisito con la medida que dan, y las cifras que piden volver a medir se miden sobre lo construido.
 
 UX-DR54: **Cabecera** *(variantes 1A y 2A)*, en toda superficie pública: «Sabiduría de Bolsillo · Autores · Obras · Buscar», con filete inferior `{colors.outline-variant}`, dentro de una navegación llamada «Principal». La marca lleva a la portada y los tres enlaces a `/autores/`, `/obras/` y `/buscar/`, todos en la misma pestaña y con `aria-current="page"` en su página. La marca va en Inter al cuerpo, peso y espaciado de `{typography.author}` (13 px, 600, 0,09em), en mayúsculas y `{colors.on-surface}`: es un enlace de bloque, subrayado solo al pasar el cursor, y va **a su ancho**, así que su zona de toque es su texto con 44 px de alto y no la fila entera. Los tres enlaces van en `{typography.body-md}` (15 px) y subrayados siempre: «Autores» y «Obras» en `{colors.on-surface}`, «Buscar» en `{colors.primary}`. Cada uno tiene una zona de toque de 44 × 44 px como mínimo y `{spacing.unit}` de relleno lateral. Entre ellos va un punto medio en `{colors.on-surface-variant}`, con `aria-hidden`, que da los 8 px entre zonas. Orden de tabulación: «Saltar al contenido.», marca, Autores, Obras, Buscar. Zona de salida: `cabecera`.
 UX-DR55: **Disposición de la Cabecera.**
@@ -4214,25 +4231,26 @@ UX-DR56: **Portada** *(variantes 3A y 4A)*. El orden, de arriba abajo:
 - al final, y solo si está encendida, la Invitación de donación.
 
   **La marca de la cabecera es el `h1` de la portada.** No cambia de aspecto, sigue siendo enlace, lleva `aria-current="page"` y queda en la región de la cabecera, no en `main`: así sale una vez y la cabecera es idéntica en toda página. Dentro de la medida de prosa, cada bloque abre con su Rótulo de sección (`h2`) a 6 × `{spacing.unit}` (48 px) del anterior, y su contenido empieza 2 × (16 px) más abajo; el de la Cita del Día, a 3 × (24 px). El texto de la Cita del Día empieza en la primera pantalla de 360 × 640 (FR-9). «Saltar al contenido.» lleva a la línea de cifras.
-UX-DR57: **Línea de cifras**, lo primero de la columna: «{n} citas de {m} autores; {k} cotejadas con el texto de su fuente.» (redacción 1). Las cifras llevan punto de millar, y k son las Citas con documento cotejado. Va en `{typography.body-md}` y `{colors.on-surface-variant}`, sin cifra destacada, tamaño de reclamo ni color propio. La compone el build con lo publicado: es un hecho del Corpus, no un contador (FR-9). **Nunca dice «cada una con su fuente»** mientras quede una Cita publicada sin documento. La cifra de cotejadas no es SM-C1.
+UX-DR57: **Línea de cifras**, lo primero de la columna: «{n} citas de {m} autores; {k} cotejadas con el texto de su fuente.» (redacción 1). Las cifras llevan punto de millar, y k son las Citas con documento cotejado. Va en `{typography.body-md}` y `{colors.on-surface-variant}`, sin cifra destacada, tamaño de reclamo ni color propio. La compone el build con lo publicado: es un hecho del Corpus, no un contador (FR-9). **Nunca dice «cada una», en ninguna forma,** mientras quede alguna Cita en el censo de pendientes de cotejo. Con el censo vacío, k = n y la línea pasa a «{n} citas de {m} autores, cada una cotejada con el texto de su fuente.», con «de 1 autor» si hay uno solo y «1 cita de 1 autor, cotejada con el texto de su fuente.» si hay una sola Cita; conserva el verbo de la redacción 1, y su prueba veta «cada una» mientras quede censo *(v8.2)*. La cifra de cotejadas no es SM-C1.
 UX-DR58: **Campo de búsqueda** *(v8)*, en `/buscar/`, el 404, la portada y «Buscar en…».
 - **Etiqueta y filete.** La etiqueta va visible encima, en `{typography.caption}` y `{colors.on-surface-variant}`, a `{spacing.unit}` del campo. Filete inferior de `{components.rule-width}` (1 px) en `{colors.outline}` (3,66:1), sin caja, sombra ni icono.
 - **Lo tecleado** va en Inter, al cuerpo de `{typography.body-lg}` (17 px), y en `{colors.on-surface}`.
 - **Foco.** Lleva el anillo global y, además, el filete pasa a `{colors.primary}` y se engruesa; se suma al anillo, nunca lo sustituye.
-- **Botón «Buscar».** En la portada, el 404 y «Buscar en…», que envían a `/buscar/`, el campo lleva debajo el botón secundario «Buscar», a su ancho y a 2 × `{spacing.unit}` (16 px). También se envía con Intro o con la tecla de buscar del teclado del móvil. En `/buscar/` y en el filtro de los Directorios, que responden al teclear, no hay botón.
+- **Botón «Buscar».** En la portada, el 404 y «Buscar en…», que envían a `/buscar/`, el campo lleva debajo el botón secundario «Buscar», a su ancho y a 2 × `{spacing.unit}` (16 px). También se envía con Intro o con la tecla de buscar del teclado del móvil. En `/buscar/` y en el filtro de los Directorios, que responden al teclear, no hay botón. En la portada, el 404 y la página 1 de Obra, Autor y Tema hay dos «Buscar» con el mismo nombre —el enlace de la cabecera y el botón—, y se acepta: llevan a `/buscar/`, y el control por voz numera los nombres repetidos *(v8.2)*.
+- **Texto de ejemplo** *(v8.2)*. «Por ejemplo: no hay camino» va solo en los campos que buscan en todo el Corpus —el de `/buscar/`, que inserta la isla, el del 404 y el de la portada—; no lo llevan «Buscar en…» ni el filtro de los Directorios, y ningún ejemplo nombra un Autor ni una Obra. Una prueba exige que «no hay camino» dé algún resultado.
 - **En la portada** es un formulario GET a `/buscar/?q=`, sin guion, a 3 × `{spacing.unit}` (24 px) de la línea de cifras.
 UX-DR59: **Cita del Día en la portada** *(v8)*.
-- **Qué lleva.** Bajo el `h2` «La cita de hoy» va el Bloque de Cita a su tramo, con su Atribución y, si consta, su Línea de la Fuente pegada a la Procedencia. A 3 × `{spacing.unit}` (24 px) va «Ver esta cita», hacia su Página de Cita: en `{typography.body-md}` y `{colors.on-surface}` (ya no en siena), subrayado y con zona de toque de 44 px. Su zona de salida es `cita-del-dia`.
+- **Qué lleva.** Bajo el `h2` «La cita de hoy» va el Bloque de Cita a su tramo, con su Atribución y, si consta, su Línea de la Fuente pegada a la Procedencia. A 3 × `{spacing.unit}` (24 px) va «Ver esta cita», hacia su Página de Cita: en `{typography.body-md}` y `{colors.on-surface}` (ya no en siena, en la portada; el del 404 sigue en siena, como está construido, y es la única navegación que informa que va en siena en una superficie pública *(v8.2)*), subrayado y con zona de toque de 44 px. Su zona de salida es `cita-del-dia`.
 - **Después, lo mismo que en la Página de Cita**: la Tarjeta de Obra, las Acciones y «Compartir en», con sus tokens y sus condiciones. Aquí **«De la obra» y «Compartir en» son `h3`**, dentro de «La cita de hoy».
 - **Todo actúa sobre su Página de Cita.** Lo copiado es idéntico carácter por carácter, la Imagen es la misma y lo compartido enlaza a su canónica con `?via=`, nunca a `/`. Todo se registra como de la portada (FR-9, FR-20).
 - **Un solo bloque.** La Cita, su Tarjeta y sus acciones van marcadas `data-jornada` y en `data-pagefind-ignore="all"`, y nada se intercala entre ellas, ningún Modelo tampoco.
 UX-DR60: **Obras de la portada**: seis Filas de bloque bajo el `h2` «Obras».
-- **Cuáles.** Seis Obras **indexables**, de seis Autores distintos mientras los haya; con menos Autores, una de cada uno. Son las mismas para todos los visitantes de una jornada y rotan con ella (AD-12). Si rige la congelación de SM-11, salen del conjunto congelado.
+- **Cuáles.** Seis Obras **indexables**, de seis Autores distintos mientras los haya; con menos Autores, una de cada uno. Son las mismas para todos los visitantes de una jornada y rotan con ella (AD-12). Rotan aparte de la Cita del Día: la Obra de la Cita del Día puede salir también entre las seis, y no se excluye, así que algún día la misma Obra aparece dos veces en la primera mitad de la portada. Una fijación del Lote no cambia las Obras *(v8.2)*. Si rige la congelación de SM-11, salen del conjunto congelado.
 - **Cada fila.** El título va en Inter al cuerpo de `{typography.body-lg}`, con peso 600 y en `{colors.on-surface}`, y parte palabras antes que desbordar. Debajo, «{Autor} · {año} · {n} citas» en `{typography.caption}` y `{colors.on-surface-variant}`: el año solo si consta sin discrepancia, sin traductor, con los puntos medios ocultos y una pausa entre las dos líneas para el lector de pantalla.
 - **Cierre.** A 2 × `{spacing.unit}`, «Las {n} obras →» lleva al Directorio de Obras, en `{typography.body-md}` y `{colors.on-surface}`, subrayado y con zona de toque de 44 px.
 - **Zona y ausencia.** Zona `obras-de-portada`. Sin Obras indexables, el bloque no existe, ni rótulo ni hueco. No aloja ningún enlace comercial.
 UX-DR61: **Temas y Colecciones de la portada**: todos los publicados, cada grupo bajo su `h2`. Los chips de Tema y de Colección no cambian: Source Serif al cuerpo de `{typography.body-md}`, fondo `{colors.surface-container}`, radio `{rounded.lg}`, 44 px de alto, 2 × `{spacing.unit}` de relleno lateral y `{spacing.unit}` entre chips. **Cada Colección va en su fila** *(variante 3A)*: el chip y, a `{spacing.unit}` debajo, su criterio, en `{typography.caption}` y `{colors.on-surface-variant}`. El criterio es una frase en los renglones que pida, nunca recortada, se asocia al chip con `aria-describedby` y no enlaza. Entre Colecciones, 2 × `{spacing.unit}`. El chip de Colección sigue sin aparecer en la Página de Cita (FR-28). Zonas: `chip-de-tema` y `colecciones`.
-UX-DR62: **Autores destacados**: ocho Filas de bloque bajo el `h2` «Autores». Son los mismos ocho que los de la búsqueda sin resultados y salen de una sola función: los de más Citas publicadas, con el suelo latinoamericano de FR-8. **Se presentan en el orden del Directorio de Autores**, por su clave de orden, nunca por recuento. El nombre va en Source Serif al cuerpo de `{typography.headline-sm}` (21 px), con peso 400, en `{colors.on-surface}` y sin subrayado. Cierra, a 2 × `{spacing.unit}`, «Los {m} autores, de la A a la Z →», hacia el Directorio de Autores, con el trato de «Las {n} obras →». Zona: `autores-de-portada`. La lista entera de Autores sale de la portada.
+UX-DR62: **Autores destacados**: ocho Filas de bloque bajo el `h2` «Autores». Son los mismos ocho que los de la búsqueda sin resultados y salen de una sola función; cada nombre enlaza con el componente de su sitio: Fila de bloque en la portada y Chip en la búsqueda sin resultados, como los Temas y las Colecciones de esa salida *(v8.2)*. Son los de más Citas publicadas, con el suelo latinoamericano de FR-8. **Se presentan en el orden del Directorio de Autores**, por su clave de orden, nunca por recuento. El nombre va en Source Serif al cuerpo de `{typography.headline-sm}` (21 px), con peso 400, en `{colors.on-surface}` y sin subrayado. Cierra, a 2 × `{spacing.unit}`, «Los {m} autores, de la A a la Z →», hacia el Directorio de Autores, con el trato de «Las {n} obras →». Zona: `autores-de-portada`. La lista entera de Autores sale de la portada.
 UX-DR63: **Orden de la Página de Cita** *(v8)*.
 - **Orden de los bloques:** el Bloque de Cita con su Atribución y la Línea de la Fuente pegada a la Procedencia; la Tarjeta de Obra; Copiar e Imagen; el bloque «Compartir en»; «De la misma obra»; «Más de {Autor}»; los Temas.
 - **La Cita, primero.** Nada nuevo va antes que ella, que sigue siendo lo primero visible a 360 × 640 con la cabecera en dos filas (FR-1).
@@ -4271,6 +4289,7 @@ UX-DR70: **Tarjeta de Cita con Obra** *(enmienda UX-DR11)*.
 - **Qué lleva.** El fragmento en `{typography.headline-sm}` y, donde el listado no lo da por sabido, el Autor en `{typography.author}`. Debajo, a `{spacing.unit}`, el título de su Ficha de Obra en Inter, `{typography.caption}` y `{colors.on-surface-variant}`, sin versalitas, **como texto y nunca como un segundo enlace**.
 - **Qué lleva cada sitio.** En Tema y en Colección, Autor y Obra. En Autor y en «Más de {Autor}», solo la Obra. En Obra y en «De la misma obra», ninguno de los dos. Una Cita sin Obra no lleva línea de Obra.
 - **El componente.** Uno solo, sin tamaño compacto (AD-19). Toda la tarjeta es enlace, de 44 px de alto como mínimo. Al pasar el cursor, el fondo pasa a `{colors.surface-container-low}`, sin sombra.
+- **Lo que suena.** Entre el fragmento, el Autor y la Obra que lleve suena un «, » solo para lectores de pantalla, sin ninguna palabra más: el nombre de la tarjeta es su texto visible, en su orden (WCAG 2.5.3) *(v8.2)*.
 UX-DR71: **Bloque «Compartir en»** *(variante 2C)*, a 3 × `{spacing.unit}` (24 px) bajo Imagen y dentro de la medida de prosa, también en escritorio.
 - **Rótulo.** «Compartir en», el Rótulo de sección: `h2`, y `h3` en la portada.
 - **Rejilla.** A 2 × `{spacing.unit}` del rótulo, una rejilla de dos columnas con `{spacing.unit}` entre celdas y `role="list"`. «Historia de Instagram» ocupa la primera fila entera, solo donde aparece. Debajo, un 2 × 2 fijo con WhatsApp, Facebook, Threads y «Más opciones…», que no se recoloca haya Historia o no.
@@ -4298,30 +4317,31 @@ UX-DR74: **Diálogo de Imagen en la Historia de Instagram** *(variante A, dos to
 - **«Compartir en la historia».** El botón primario va debajo y aparece junto con la previsualización, cuando el fichero ya está hecho.
 - **Segundo toque.** Escribe en el portapapeles la canónica con `?via=instagram-historia` y después entrega a la hoja el fichero, sin texto ni enlace. Entre el toque y `share()` **no hay ninguna espera**.
 - **Nombre y cierre.** El nombre accesible es «Compartir en Historia de Instagram», tomado por `aria-labelledby` del botón que abre el diálogo. Se cierra con Esc, con un toque fuera y con el botón.
-- **Registro.** `comparticion-de-imagen`, con destino `instagram-historia`.
+- **Registro.** `comparticion-de-imagen`, con destino `instagram-historia`, solo si la hoja confirma la entrega; en Chrome para Android la cuenta es una cota inferior *(v8.2)*.
 UX-DR75: **Estados de la Historia.** Cada uno se dice en una frase bajo el botón, a 2 × `{spacing.unit}`, en `{typography.caption}` y `{colors.on-surface}`. La frase se queda hasta la siguiente acción o hasta cerrar el diálogo, y se anuncia por una región `role="status"` **dentro** del `<dialog>`, creada vacía con él.
 - **Lista:** «La imagen está lista.».
-- **Compartida:** «Enlace copiado: pégalo en el sticker Enlace.», solo si `writeText` resolvió.
-- **El navegador rechaza la entrega** (`NotAllowedError`, y también `DataError` o `TypeError`, AD-7): se descarga el mismo 9:16, el enlace queda copiado y la frase dice «La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.». Se registra como descarga, con destino `instagram-historia`.
-- **Cancelada** (`AbortError`): nada, ni frase, ni descarga, ni registro.
+- **Compartida:** «Enlace copiado: pégalo en el sticker Enlace.», en cuanto el portapapeles acepta el enlace, sin esperar a `share()` *(v8.2)*.
+- **El navegador rechaza la entrega antes de abrir la hoja** *(v8.2)* (`NotAllowedError`, y también `DataError` o `TypeError`, AD-7): se descarga el mismo 9:16, el enlace queda copiado y la frase dice «La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.». Se registra como descarga, con destino `instagram-historia`. `InvalidStateError` se ignora: ni frase, ni descarga, ni registro *(v8.2)*.
+- **Cancelada o fallida con la hoja abierta** (`AbortError`): ni descarga ni registro, y el diálogo no añade ninguna frase; «Enlace copiado…», si ya salió, se queda *(v8.2)*.
 - **Falla el portapapeles:** el enlace se revela en el campo de copia manual, con el foco en él y seleccionado. Su etiqueta es la frase, «Selecciona el enlace y cópialo para el sticker Enlace.», y no se repite en la región. Si además se descargó la imagen, la región dice solo «La imagen se ha descargado.».
 - **El generador no llega:** la frase del fallo va donde iba la previsualización, en `{typography.body-md}`, sin el botón primario y con «Copiar el texto» como secundario a 2 × `{spacing.unit}`. La línea de arriba se retira y el `aria-describedby` pasa a la frase del fallo. Se reintenta cerrando el diálogo y pulsando otra vez «Historia de Instagram».
-- **Deuda aceptada:** en iOS la descarga va a Archivos y no a Fotos.
-UX-DR76: **Diálogo de Imagen** *(v8)*. Entrega solo la Imagen **cuadrada**, con Papel, Tinta y Siena, y Papel elegida al abrir. Se abre también sobre la Cita del Día, y la generación no bloquea la portada. La previsualización, a todo el ancho, es una imagen con nombre (`role="img"`) que dice lo que lleva: la cita, su autor, su procedencia y el dominio. El fichero compartido y el descargado son el mismo, formato a formato. Junto con el del diálogo de la Historia, su botón primario es el único primario de la Página de Cita, y solo existe con su diálogo abierto.
+- **La Cita no cabe en el 9:16** *(v8.2)*: «Esta cita no cabe en la imagen vertical. Puedes copiar su texto.», donde iba la previsualización, sin primario y con «Copiar el texto»; la línea de arriba se retira y el `aria-describedby` pasa a la frase; no se ofrece reintentar.
+- **En iOS** la descarga va a Archivos y no a Fotos. La frase «La imagen se ha descargado en Archivos: guárdala en Fotos para publicarla en la historia. Enlace copiado: pégalo en el sticker Enlace.» —y, con el portapapeles fallido, «La imagen se ha descargado en Archivos: guárdala en Fotos para publicarla en la historia.»— queda escrita y se activa solo si la matriz de la 25.3 o la 25.7 reproduce en iOS la caída a la descarga; distinguir iOS es leer el sistema en el cliente, que NFR-11 permite porque no se transporta *(v8.2)*. La activa una constante con nombre de `umbrales.ts`, apagada, que Héctor enciende en un diff visible tras la matriz, como `SM12_CON_FACEBOOK` *(v8.2, Héctor, 2026-10-23)*.
+UX-DR76: **Diálogo de Imagen** *(v8)*. Entrega solo la Imagen **cuadrada**, con Papel, Tinta y Siena, y Papel elegida al abrir. Se abre también sobre la Cita del Día, y la generación no bloquea la portada. La previsualización, a todo el ancho, es una imagen con nombre (`role="img"`): «Imagen cuadrada en Papel: la cita, su autor, su procedencia y sabiduriadebolsillo.net», que cambia con la plantilla elegida («en Tinta», «en Siena»), con el dominio de `dominio.ts` y sin rótulo visible propio *(v8.2)*. El fichero compartido y el descargado son el mismo, formato a formato. **Compartir**: si el navegador rechaza antes de abrir la hoja —`NotAllowedError`, `DataError` o `TypeError`—, la imagen se descarga sin aviso y se registra como descarga con destino `opaco`; `AbortError` —cerrar sin elegir o un fallo con la hoja ya abierta— ni descarga ni registra, e `InvalidStateError` se ignora. **Descargar** se registra sin destino. Una Cita que no cabe dice «Esta cita no cabe en la imagen. Puedes copiar su texto.», sin reintento *(v8.2)*. Junto con el del diálogo de la Historia, su botón primario es el único primario de la Página de Cita, y solo existe con su diálogo abierto.
 UX-DR77: **Imagen de Cita 9:16** *(variante B de la decisión 2)*: 1080 × 1920 px, **solo en Papel**, con esquinas rectas y margen de 96 px. Sale del mismo generador que la cuadrada.
 - **Composición.** La Cita va centrada entre las dos bandas que pinta Instagram, que se suponen de unos 250 px: ocupa desde unos 250 px del borde superior hasta unos 370 del inferior. El pie (la marca en mayúsculas y, debajo, «sabiduriadebolsillo.net») queda a unos 280 px del borde inferior.
 - **Cuerpos.** Salen de la columna 9:16 de `tramos.ts`, que llega a `imagen.js` por `data-*`. La Cita va a 80, 64, 52 o 42 px según su tramo, sin bajar de 42; el Autor y el dominio, a 36; la procedencia, a 33, y la marca, a 30 [ASSUMPTION].
 - **Sin recortar.** La procedencia se reparte en líneas como la Cita y nunca sale del lienzo. Lo que no cabe no se encoge.
 - **Sin traductor.** Por encima de 300 caracteres no hay imagen.
 UX-DR78: **El dominio en la imagen cuadrada** *(variante B de la decisión 3)*. La Imagen cuadrada (1080 × 1080, tres plantillas) lleva al pie, bajo la marca, «sabiduriadebolsillo.net» al cuerpo del Autor (24 px), con el peso y el color de la procedencia: legible y subordinado a la Cita. El Autor va a 24 px, la procedencia a 22 y la marca a 20. La prueba de los tramos se repite con el pie puesto, en los dos formatos: toda Cita de hasta 300 caracteres tiene que seguir cabiendo en su tramo, y la que no quepa no se encoge.
-UX-DR79: **Tarjeta Social** *(v8)*. Nueva variante **de los Directorios**: la de listado, con el nombre del Directorio en la familia de la interfaz y, como bajada, cuántos Autores o cuántas Obras lista. Conserva la banda siena y no lleva prosa. La Tarjeta de Cita y la de Obra son lo único que acompaña al enlace compartido en Facebook, así que se comprueban en el validador de previsualización de Facebook antes de ofrecer ese destino (FR-19).
+UX-DR79: **Tarjeta Social** *(v8)*. Nueva variante, la **Tarjeta Social de los Directorios** *(v8.2)*: la de listado, con el nombre del Directorio en la familia de la interfaz y, como bajada, cuántos Autores o cuántas Obras lista. Conserva la banda siena y no lleva prosa. La Tarjeta Social de Cita y la Tarjeta Social de Obra *(v8.2)* son lo único que acompaña al enlace compartido en Facebook, así que se comprueban en el validador de previsualización de Facebook antes de ofrecer ese destino (FR-19).
 UX-DR80: **Directorios** *(v8)*, `/autores/` y `/obras/`, una sola página cada uno, dentro de la medida de prosa. De arriba abajo:
 - **el `h1`**, «Autores» u «Obras», el mismo nombre que el enlace de la cabecera. Va en Inter al cuerpo de `{typography.headline-md}` (30 px), con peso 600 y en `{colors.on-surface}`, sin enlace, bajada ni recuento;
 - el campo de filtro;
 - las letras de salto;
 - la lista por grupos.
 
-  **Pestaña y meta.** Títulos de pestaña: `Autores, de la A a la Z | Sabiduría de Bolsillo` y `Obras, por autor | Sabiduría de Bolsillo`. La meta description es de hechos del Corpus, con la palabra «citas» y sin prosa. **Reglas.** No reproducen ninguna Cita y no admiten ningún Modelo. Su lista va en `data-pagefind-ignore="all"`. Zona: `directorio`.
+  **Pestaña y meta.** Títulos de pestaña: `Autores, de la A a la Z | Sabiduría de Bolsillo` y `Obras, por autor | Sabiduría de Bolsillo`. La meta description es, literal, «{m} autores, de la A a la Z, con {n} citas publicadas.» en `/autores/` y «{k} obras de {m} autores, con {n} citas publicadas.» en `/obras/`, con el singular donde toque («1 autor», «1 obra», «1 cita publicada»): hechos del Corpus, con la palabra «citas» y sin prosa. Los títulos de pestaña son la plantilla literal, y ningún texto de los Directorios dice «frases» *(v8.2)*. **Reglas.** No reproducen ninguna Cita y no admiten ningún Modelo. Su lista va en `data-pagefind-ignore="all"`. Zona: `directorio`.
 UX-DR81: **Campo de filtro del Directorio** *(variante 3A)*.
 - **Dónde.** Es el Campo de búsqueda, sin botón, a 3 × `{spacing.unit}` (24 px) del `h1` y **antes** de las letras.
 - **Etiqueta visible.** «Escribe parte del nombre.» en `/autores/` y «Escribe parte del título o del autor.» en `/obras/`.
@@ -4341,7 +4361,7 @@ UX-DR83: **Grupo de letra y «Volver a las letras».**
 - **«Volver a las letras».** Cierra cada grupo, a 2 × `{spacing.unit}` de su última fila: un enlace de texto en su propia línea, en `{typography.body-md}` y `{colors.primary}`, subrayado y con zona de toque de 44 px. Lleva a la navegación «Letras», que recibe el foco. Sin él, volver desde la M de `/autores/` son unos 6.000 px, y desde la U de `/obras/`, unos 41.000. Mientras el campo tiene texto, no está.
 UX-DR84: **Fila de Autor** *(variante 2A)*, en `/autores/`: una Fila de bloque por cada Autor con Citas publicadas, hacia su Página de Autor, en el orden de la clave de orden (FR-15) y, a igualdad de clave, del slug.
 - **El nombre**, tal como se escribe, va en Source Serif al cuerpo de `{typography.headline-sm}` (21 px), con peso 400 y en `{colors.on-surface}`. Ocupa toda la medida y parte palabras antes que desbordar.
-- **Debajo, sus hechos:** «{años} · {n} citas» («1 cita» en singular; los años, solo si constan), en `{typography.caption}` y `{colors.on-surface-variant}`, con cifras tabulares. El punto medio va oculto y suena como una coma, y entre las dos líneas suena una pausa.
+- **Debajo, sus hechos:** «{años} · {n} citas» («1 cita» en singular; los años, solo si constan), en `{typography.caption}` y `{colors.on-surface-variant}`, con cifras tabulares. {n} son sus Citas publicadas (FR-55), las que lista su página, no el recuento de Citas documentadas de la Tarjeta Social de Autor, que puede ser menor *(v8.2)*. El punto medio va oculto y suena como una coma, y entre las dos líneas suena una pausa.
 UX-DR85: **Directorio de Obras** *(variantes 5B, 6C y 7A)*. Bajo cada letra van los Autores, en el orden del Directorio de Autores, cada uno con su cabecera de grupo y sus Filas de Obra.
 - **Cabecera de grupo.** El nombre del Autor como `h3`, en Source Serif al cuerpo y peso de `{typography.headline-sm}`, en `{colors.on-surface}` y subrayado siempre. Enlaza a su Página de Autor, y el enlace es **un bloque de 44 px de alto**. Su lista va a `{spacing.unit}` del bloque, y entre Autores hay 4 × `{spacing.unit}` (32 px).
 - **Filas de Obra.** Son la Lista de Obras de la Página de Autor, tal cual y en su mismo orden: el título de la Ficha de Obra en Inter (`{typography.body-md}`, `{colors.on-surface}`), con el año si consta, y a la derecha «27 citas» o «1 cita», en `{typography.caption}`, `{colors.on-surface-variant}` y cifras tabulares.
@@ -4365,28 +4385,29 @@ UX-DR89: **Recuento de resultados** *(variante 3C)*: encima de la lista, a 3 × 
 - **Anuncio.** Al teclear, se escribe tras unos 700 ms sin teclear y solo si la frase cambió; tras un cambio de selector, tras la pausa de los selectores. «Mostrar 30 más» no lo cambia ni lo vuelve a anunciar.
 UX-DR90: **Mostrar 30 más** *(variante 5A)*: los resultados llegan en tandas de 30, y la siguiente la pide este botón secundario, a su ancho y a 3 × `{spacing.unit}` bajo el último resultado. Es un `button`, no un enlace: ningún desplazamiento lo dispara y no cambia la dirección.
 - **Al pulsarlo, el foco va al primer resultado nuevo.** Mientras llegan, otra pulsación no hace nada.
-- **Si no llegan**, la región dice «No se han podido cargar más resultados.» y el foco se queda en el botón.
+- **Si no llegan**, «No se han podido cargar más resultados.» va bajo el botón, a 2 × `{spacing.unit}`, en `{typography.caption}` y `{colors.on-surface}`, por una región `role=status` propia que se inserta vacía con el botón; el Recuento no se toca y sigue a la vista, y el foco se queda en el botón. Pulsarlo otra vez la vuelve a pedir; si el reintento llega, esa región se vacía y el foco va al primer resultado nuevo *(v8.2)*.
 - **Última tanda:** «Mostrar las 12 que faltan», o «Mostrar la que falta» si es una. Con todos los resultados a la vista, el botón no existe.
 UX-DR91: **Resultado de búsqueda** *(v8, variantes 6A y 7C)*.
 - **La fila.** Toda la fila es el enlace, con filete inferior, 44 px de alto como mínimo y 2 × `{spacing.unit}` de relleno vertical.
 - **El rótulo de tipo** va en mayúsculas, con el espaciado de `{typography.author}`, al cuerpo de `{typography.caption}` y en `{colors.on-surface-variant}`.
-- **El título**, a `{spacing.unit}`, va en Source Serif al cuerpo de `{typography.headline-sm}` con peso 400, salvo los de Obra y **Directorio**, que van en Inter.
-- **El de Cita lleva debajo el nombre de su Autor**, en `{typography.author}` y `{colors.on-surface-variant}`, como el de Obra. Se lee «Cita: «{texto}», de {Autor}», con una pausa entre las dos líneas.
+- **El título**, a `{spacing.unit}`, va en Source Serif al cuerpo de `{typography.headline-sm}` con peso 400, salvo los de Obra, **Directorio** y Portada *(v8.2)*, que van en Inter.
+- **El de Cita lleva debajo el nombre de su Autor**, en `{typography.author}` y `{colors.on-surface-variant}`, como el de Obra. Se lee «Cita: «{texto}», {Autor}»: solo la pausa, sin «de»; el de Obra, «Obra: {título}, {Autor}», y eso cambia lo construido, que le pone «de» *(v8.2)*.
 - **Tipo nuevo «Directorio».** Los dos Directorios salen por su título, nunca por lo que listan.
 - **Con un filtro puesto, solo hay resultados de Cita.** Zona: `resultado`.
-- AD-17 añade además el tipo `portada`, rotulado con el nombre del sitio, que las espinas de UX no dibujan.
+- **El de la portada** se rotula «Portada» y se titula con el nombre del sitio —«Portada: Sabiduría de Bolsillo»—, con el título en Inter, como el de Directorio *(v8.2)*.
 UX-DR92: **`/buscar/` sin JavaScript, e índice que no carga** *(variante 7C)*.
 - **Sin guion** no hay campo ni selectores. El HTML inicial dice «Buscar y filtrar necesitan JavaScript, y este navegador no lo está ejecutando.» y «Sin él, todos los autores y todas las obras se leen en sus directorios. Si llegaste desde la página de un autor, de una obra o de un tema, vuelve atrás: allí están sus citas.», en `{typography.body-lg}`, a 3 × y 2 × `{spacing.unit}`. Debajo van los dos Directorios, como Resultados de tipo «Directorio». Con guion, nada de esto se ve.
+- **Con guion, antes de que arranque la búsqueda** *(v8.2)*, el HTML inicial lleva, fuera de `<noscript>` y oculto sin guion, «Si la búsqueda no aparece, todos los autores y todas las obras se leen en sus directorios. Si llegaste desde la página de un autor, de una obra o de un tema, vuelve atrás: allí están sus citas.» y, debajo, los dos Directorios como resultados de tipo «Directorio». La isla lo retira al arrancar, sin dejar hueco. Se pinta en cada carga hasta que arranca el paquete, también cuando sí va a arrancar, y por eso es condicional; el salto de maquetación se acepta. «No se ha podido cargar la búsqueda.» se queda para cuando el índice falla al buscar.
 - **Si el índice no carga** (cambia lo construido), bajo el campo y en lugar de los resultados va «No se ha podido cargar la búsqueda.», seguida de la segunda frase y de los dos Directorios, y se anuncia por la región del Recuento. Escribir o filtrar otra vez reintenta la carga.
 UX-DR93: **Estados de la búsqueda** *(v8)*.
-- **Sin resultados.** La frase se anuncia por la región `role="status"`, y la salida son los Temas, las Colecciones y los ocho Autores destacados (UX-DR62).
+- **Sin resultados.** La frase se anuncia por la región `role="status"`, y la salida son los Temas, las Colecciones y los ocho Autores destacados (UX-DR62), en chips, cada grupo bajo su `h2` *(v8.2)*.
   - Con texto y sin filtros: «No encontramos esa frase. Prueba con menos palabras.».
   - Con filtros: «No encontramos «escuela» entre las citas de José Martí en Maestros ambulantes.», con «Quitar los filtros» justo encima.
   - Con filtros y sin texto: «No hay citas de {Autor} sobre {tema}.» o «No hay citas de {Autor} en {Obra} sobre {tema}.».
-- **Un filtro de la dirección que ya no existe** se ignora y se dice antes del recuento: «Uno de los filtros de esta dirección ya no existe, y la búsqueda va sin él.». La dirección se reemplaza sin ese filtro.
+- **Un filtro de la dirección que no se puede usar** *(v8.2)* —uno que ya no existe, o una `obra` de otro Autor que el de `autor`— se ignora y se dice, en la región del Recuento y delante del recuento: «Uno de los filtros de esta dirección no se puede usar, y la búsqueda va sin él.»; con dos o tres, «Dos de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.» o «Tres de los filtros…». Si no queda nada con que buscar, «El filtro de esta dirección ya no existe.» o «Los filtros de esta dirección ya no existen.», sin recuento ni salida de la búsqueda sin resultados. Nunca se cambia el Autor. La dirección se reemplaza sin esos filtros.
 - **Llegada desde «Buscar en…».** Los selectores se ven elegidos (desde la Obra, Autor y Obra), «Quitar los filtros» está a la vista, lo escrito está en el campo y el recuento nombra lo filtrado entero. Una dirección con `obra` y sin `autor` toma el Autor de la Obra.
 - **Carga del índice.** Se pide al enfocar el campo y, con texto o filtros en la dirección, al cargar la página. Los filtros de Pagefind (unos 41 KB) se piden solo al elegir un Autor, filtrar o buscar, o si la dirección trae estado.
-UX-DR94: **«Buscar en esta obra / en {Autor} / en este tema»**, solo en la página 1. Es un formulario GET a `/buscar/` con el Campo de búsqueda y el botón secundario «Buscar». La etiqueta visible es el nombre del componente, en minúscula: «Buscar en esta obra», «Buscar en {Autor}» o «Buscar en este tema». El filtro va en campos ocultos: **dos en la Obra, `autor` y `obra`**, y uno en el Autor y en el Tema. No añade guion ni crea ninguna página indexable. Enviarlo vacío da todas las Citas de esa página, y «atrás» devuelve a ella. Va justo encima del listado que filtra:
+UX-DR94: **«Buscar en esta obra / en {Autor} / en este tema»**, solo en la página 1. Es un formulario GET a `/buscar/` con el Campo de búsqueda y el botón secundario «Buscar». La etiqueta visible es el nombre del componente, en minúscula: «Buscar en esta obra», «Buscar en {Autor}» o «Buscar en este tema». El filtro va en campos ocultos: **dos en la Obra, `autor` y `obra`**, y uno en el Autor y en el Tema. No añade guion ni crea ninguna página indexable. Enviarlo vacío da todas las Citas de esa página, y «atrás» devuelve a ella. No lleva texto de ejemplo: un ejemplo de todo el Corpus dentro de «Buscar en José Martí» daría cero resultados *(v8.2)*. Va justo encima del listado que filtra:
 - **en la Obra**, a 4 × `{spacing.unit}` (32 px) del salto, con el listado 4 × más abajo;
 - **en el Autor**, bajo el rótulo «Citas documentadas», a 2 × `{spacing.unit}` y con el listado 3 × más abajo, sin tocar la Ficha de Autor;
 - **en el Tema**, a 4 × `{spacing.unit}` bajo el `h1` y con el listado 4 × más abajo. Es la excepción declarada a que la Página de Tema empiece por su contenido. La primera Cita sigue en la primera pantalla de 360 × 640, y hay que volver a medirlo con el botón.
@@ -4395,8 +4416,8 @@ UX-DR95: **Página de Obra, página 1** *(v8, variantes 2B y 3A)*.
 - **El orden del libro.** El listado va por la posición de cada Cita en su documento cotejado, documento a documento, y las Citas sin documento van detrás, por slug. Vale también en las páginas 2+. Ninguna línea ni subrótulo lo dice, y las Tarjetas van sin Autor ni título de Obra.
 - **Ritmo del pie:** 5 × `{spacing.unit}` (40 px) desde la paginación, o desde la última tarjeta, hasta «Compartir en»; 5 × de ahí a «Temas»; 4 × hasta «Dónde leer esta obra»; 2 × del `h2` al primer rótulo, y 1 × del rótulo a sus líneas. La Nota, 4 × por encima de su filete y 3 × por debajo.
 - La primera Cita sigue en la primera pantalla.
-UX-DR96: **Salto «Dónde leer esta obra ↓»** *(variante 1A)*, solo en la página 1. Es un enlace de texto en su propia línea, a 3 × `{spacing.unit}` (24 px) de «de {Autor} · {año}», para que su zona de toque de 44 px quede a 8 px de la del nombre. Va en `{typography.body-md}` y `{colors.primary}`, subrayado siempre, hacia `#donde-leer-esta-obra`, en la misma pestaña, y su flecha lleva `aria-hidden`. Su destino, el `h2` de «Dónde leer esta obra», lleva `tabindex="-1"` y `scroll-margin-top` de 2 × `{spacing.unit}`, y recibe el foco con el anillo global. El bloque no se mueve de su sitio, y la página sale idéntica con la afiliación encendida o apagada.
-UX-DR97: **Compartir en la Página de Obra** *(variante 2B)*: el bloque «Compartir en» sin la fila de la Historia, solo con el 2 × 2 de WhatsApp, Facebook, Threads y «Más opciones…». Va tras el listado y su paginación y antes de «Temas», solo en la página 1, se indexe la Obra o no y también con la familia congelada. El texto propuesto es «{título}, de {Autor}», con el título de su Ficha de Obra y sin traductor; en Facebook se publica su Tarjeta Social de Obra. Es la primera isla de la Página de Obra, y su guion cuenta en el tope que se mide donde se admite la afiliación.
+UX-DR96: **Salto «Dónde leer esta obra ↓»** *(variante 1A)*, solo en la página 1. Es un enlace de texto en su propia línea, a 3 × `{spacing.unit}` (24 px) de «de {Autor} · {año}», para que su zona de toque de 44 px quede a 8 px de la del nombre. Va en `{typography.body-md}` y `{colors.primary}`, subrayado siempre, hacia `#donde-leer-esta-obra`, en la misma pestaña, y su flecha lleva `aria-hidden`. Su destino, el `h2` de «Dónde leer esta obra», lleva `tabindex="-1"` y `scroll-margin-top` de 2 × `{spacing.unit}`, y recibe el foco con el anillo global. El bloque no se mueve de su sitio, y el salto y su destino, el `h2` de «Dónde leer esta obra», se construyen idénticos con la afiliación encendida o apagada (FR-35); la página no, porque encendida lleva «Ediciones en venta» *(v8.2)*.
+UX-DR97: **Compartir en la Página de Obra** *(variante 2B)*: el bloque «Compartir en» sin la fila de la Historia, solo con el 2 × 2 de WhatsApp, Facebook, Threads y «Más opciones…». Va tras el listado y su paginación y antes de «Temas», solo en la página 1, se indexe la Obra o no y también con la familia congelada. El texto propuesto es «{título}, de {Autor}», con el título de su Ficha de Obra y sin traductor; en Facebook se publica su Tarjeta Social de Obra. **Correo** lleva el asunto «Una obra» —«Una cita» desde la Página de Cita y desde la Cita del Día, como está construido— y el cuerpo «{título}, de {Autor}», una línea en blanco y el enlace con `?via=correo`; el título va en el cuerpo y no en el asunto *(v8.2)*. Es la primera isla de la Página de Obra, y su guion cuenta en el tope que se mide donde se admite la afiliación.
 UX-DR98: **Material para publicar con el 9:16**, en el Kit Diario y en el Lote (`MaterialParaPublicar.astro`), por jornada y con el mismo marcado en los dos.
 - **Marco.** Un filete superior `{colors.outline-variant}`, 2 × `{spacing.unit}` de aire y el rótulo («La Cita del Día», «Alternativa con Imagen»): `h2` en el Kit y `h3` en el Lote, en Inter al cuerpo de `{typography.body-md}`, en negrita, mayúsculas y `{colors.on-surface-variant}`. Entre materiales, 4 × `{spacing.unit}`.
 - **La Cita**, entre comillas angulares, en la serif al cuerpo de `{typography.body-lg}` y sin tramo.
@@ -4405,13 +4426,13 @@ UX-DR98: **Material para publicar con el 9:16**, en el Kit Diario y en el Lote (
 - **La regla del siena no rige aquí.** Los enlaces por red y el aviso de fijación muda siguen en siena, como están construidos.
 UX-DR99: **Mensajes de estado** (WCAG 4.1.3).
 - **Qué se anuncia:** «Copiado.», el recuento de `/buscar/` y su frase sin resultados, la imagen lista, el fallo del generador, cada estado de la Historia, y el recuento de cada Directorio con su frase a cero.
-- **La región.** Una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores`). La de un control que inserta el guion existe antes del primer mensaje: la del Directorio está en el HTML inicial, y la de la Historia se crea vacía con el diálogo. Lo que se anuncia con un `<dialog>` abierto va en una región **dentro** de él.
+- **La región.** Una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores`). La de un control que inserta el guion existe antes del primer mensaje: la del Directorio está en el HTML inicial, la de la Historia se crea vacía con el diálogo, y la del fallo de «Mostrar 30 más» se inserta vacía con el botón, aparte de la del Recuento *(v8.2)*. Lo que se anuncia con un `<dialog>` abierto va en una región **dentro** de él.
 - **Dos ritmos, con un solo dueño en `src/lib/`.**
   - Lo que el visitante repite (Copiar, o «Compartir en la historia» otra vez) vacía la región y escribe el mensaje en el siguiente fotograma (`requestAnimationFrame`). Si con VoiceOver y NVDA no basta, se espera entre 100 y 150 ms.
   - Lo que cambia al teclear (el recuento de `/buscar/` y el de cada Directorio) se anuncia tras unos 700 ms sin teclear, aparte del pintado de la lista, y solo si la frase cambió.
 - **«Copiado.»** suena solo por la región: el botón conserva su nombre accesible.
 UX-DR100: **Adónde va el foco** *(v8)*.
-- Tras «Mostrar 30 más», al primer resultado nuevo; si no llegan, se queda en el botón.
+- Tras «Mostrar 30 más», al primer resultado nuevo; si no llegan, se queda en el botón y el fallo lo dice la región del botón; si el reintento llega, al primer resultado nuevo *(v8.2)*.
 - Tras «Quitar los filtros», al campo.
 - Que aparezca el selector de Obra no mueve el foco (WCAG 3.2.2).
 - Si falla el portapapeles en la Historia, al campo del enlace, seleccionado.
@@ -4422,7 +4443,7 @@ UX-DR101: **Semántica y orden** *(v8)*.
 - **Los `h2`.** «De la obra», «Compartir en», «De la misma obra», «Más de {Autor}» y «Temas»; en la portada, «La cita de hoy», «Obras», «Temas», «Colecciones» y «Autores». En la portada, «De la obra» y «Compartir en» son `h3`, dentro de «La cita de hoy».
 - **Directorios.** En `/autores/`, cada letra es `h2`. En `/obras/`, la letra es `h2` y cada Autor, `h3`.
 - **Listas.** Toda lista sin viñetas (la rejilla «Compartir en», las letras, las filas, los chips y los resultados) lleva `role="list"` explícito.
-- **Puntos medios y pausas.** Los puntos medios de la cabecera y de las líneas de hechos llevan `aria-hidden`, con una coma en su lugar. En una Fila de bloque de dos líneas suena entre ellas un «, » solo para lectores.
+- **Puntos medios y pausas.** Los puntos medios de la cabecera y de las líneas de hechos llevan `aria-hidden`, con una coma en su lugar. En una Fila de bloque de dos líneas suena entre ellas un «, » solo para lectores. La misma pausa suena en la Tarjeta de Cita *(v8.2)*.
 - **«Saltar al contenido.»** es el primer enlace de toda página y lleva a `main`; en la portada, a la línea de cifras.
 - **Orden de tabulación.** En `/buscar/`: el campo, los selectores de Autor, Obra y Tema, «Quitar los filtros», los resultados y «Mostrar 30 más». En un Directorio: el campo, las letras y la lista.
 UX-DR102: **Zonas de toque** *(v8)*. Todas de 44 px, con 8 px de separación, también en vertical. Los 44 px son decisión de producto: WCAG 2.2 AA solo pide 24 px (2.5.8).
@@ -4441,13 +4462,13 @@ UX-DR103: **Reflujo a 320 px** (WCAG 1.4.4, 1.4.10 y 1.4.12; NFR-8). Ninguna sup
   El suelo de accesibilidad es WCAG 2.2 AA (NFR-9, PRD v8.1): el barrido axe pide `wcag22aa` desde la primera épica que se fusione.
 UX-DR104: **Tipografía** *(v8)*.
 - **Lo tecleado va en Inter, al cuerpo de `{typography.body-lg}`**, en todo campo (`/buscar/`, la portada, «Buscar en…», el filtro de los Directorios) y en el valor de los selectores.
-- **Source Serif**, solo en Cita, Autor, Tema y Colección. Por eso la llevan los nombres del Directorio de Autores, las cabeceras de grupo de `/obras/` y los Autores destacados, al cuerpo de `{typography.headline-sm}` con peso 400.
-- **El título de una Obra va en Inter** en todo sitio nuevo: la Tarjeta de Obra y las Obras de la portada, al cuerpo de `{typography.body-lg}` con peso 600; la Fila de Obra; y el selector de Obra. También el título del resultado de tipo Directorio, al cuerpo de `{typography.headline-sm}` con peso 400.
+- **Source Serif**, solo en Cita, Autor, Tema y Colección. Por eso la llevan los nombres del Directorio de Autores, las cabeceras de grupo de `/obras/` y los Autores destacados de la portada, al cuerpo de `{typography.headline-sm}` con peso 400. Los de la búsqueda sin resultados van en el Chip, en Source Serif al cuerpo de `{typography.body-md}`, como el Chip de Tema *(v8.2)*.
+- **El título de una Obra va en Inter** en todo sitio nuevo: la Tarjeta de Obra y las Obras de la portada, al cuerpo de `{typography.body-lg}` con peso 600; la Fila de Obra; y el selector de Obra. También el título de los resultados de tipo Directorio y Portada *(v8.2)*, al cuerpo de `{typography.headline-sm}` con peso 400.
 - **Encabezado del Directorio:** Inter al cuerpo de `{typography.headline-md}`, con peso 600. **Letras de salto:** al cuerpo de `{typography.body-md}`, con peso 600.
 - **Ningún token nuevo.** Cada combinación toma el cuerpo de la escala (`--cuerpo-lg`, `--titular-sm`, `--titular-md`, `--cuerpo-md`) y escribe su familia y su peso.
 UX-DR105: **Siena y subrayado** *(v8, enmienda UX-DR52)*. Lo decide la función del elemento, nunca cuánto siena haya en la pantalla.
 - **En siena, lo que actúa:** los botones (también «Mostrar 30 más», «Quitar los filtros» y «Buscar»), «Buscar» de la cabecera, la paginación, las letras de salto, el salto «Dónde leer esta obra ↓», «Volver a las letras», «Buscar «x» en las citas» y los enlaces de salida.
-- **En tinta, toda la navegación nueva:** «Autores» y «Obras» de la cabecera, las filas de la Tarjeta de Obra, «Siguiente», «Ver la obra», los cierres «… →», las filas y las cabeceras de grupo de los Directorios, y «Ver esta cita», que hoy está construido en siena.
+- **En tinta, toda la navegación nueva:** «Autores» y «Obras» de la cabecera, las filas de la Tarjeta de Obra, «Siguiente», «Ver la obra», los cierres «… →», las filas y las cabeceras de grupo de los Directorios, y «Ver esta cita» de la portada; el del 404 sigue en siena, como está construido, y es la única navegación que informa que va en siena en una superficie pública *(v8.2)*.
 - **Subrayados siempre:** los tres enlaces de la cabecera, el salto, «Buscar «x» en las citas», «Volver a las letras», «Ver esta cita», «Las {n} obras →», «Los {m} autores, de la A a la Z →» y el Autor de la cabecera de grupo de `/obras/`.
 - **Sin subrayado, los enlaces de bloque:** la marca, las filas de la Tarjeta de Obra, los cierres que son la última fila de su lista, las filas de los Directorios, las letras, las Obras y los Autores de la portada, y los botones de «Compartir en».
 - La regla no rige en el Kit ni en el Lote.
@@ -4456,7 +4477,7 @@ UX-DR107: **Voz y microcopia** *(v8)*.
 - **Entidades en minúscula** en el texto que lee el visitante, y el Tema dentro de una frase, tras «sobre»: «Buscar en este tema», «Ver la obra →», «Siguiente cita sobre la vida →».
 - **Una cifra del Corpus no es un contador**, y no hay ningún contador de visitas, lecturas ni comparticiones.
 - **Ninguna frase excusa una acción que no existe.**
-- **«Citas» y «frases».** Los Directorios dicen «citas» en el cuerpo, en el título de pestaña y en la meta description. «Frases» sigue solo en el título de pestaña y la meta description de la Página de Obra.
+- **«Citas» y «frases».** Los Directorios no dicen «frases» en ningún texto. «Citas» va en el cuerpo y en la meta description, y el título de pestaña es la plantilla literal de UX-DR80 (decisión de Héctor del 2026-10-19) *(v8.2)*. «Frases» sigue solo en el título de pestaña y la meta description de la Página de Obra.
 - **Microcopia nueva, literal:** «La cita de hoy», «Ver esta cita», «Obras», «Autores», «Las {n} obras →», «Los {m} autores, de la A a la Z →», «De la obra», «Siguiente cita de esta obra →», «Ver la obra y dónde leerla →», «Ver la obra →», «De la misma obra», «Las {n} citas de {título} →», «Las {n} citas de {Autor} →», «Compartir en», «Historia de Instagram», «Más opciones…», «Compartir en la historia», «Dónde leer esta obra ↓», «Filtrar las citas», «Quitar los filtros», «Mostrar 30 más», «Volver a las letras», «Buscar», «Descargar la imagen cuadrada» y «Descargar la imagen vertical». Se suman las frases de estado de UX-DR75, UX-DR81, UX-DR86, UX-DR89, UX-DR90, UX-DR92 y UX-DR93.
 UX-DR108: **Estados nuevos de la Página de Cita y de la portada.**
 - **Cita sin Obra:** sin Tarjeta de Obra, sin «Siguiente» y sin «De la misma obra». Las acciones suben a la primera pantalla, y «Más de {Autor}» elige entre todas las demás Citas del Autor. Eran 4 Citas el 2026-10-18.
@@ -4467,7 +4488,9 @@ UX-DR108: **Estados nuevos de la Página de Cita y de la portada.**
 - **Año discrepante o ausente:** se omite, sin hueco y sin «Sin año documentado».
 - **Cita de más de 300 caracteres:** ni Imagen ni Historia, también en la portada. Copiar y los destinos de enlace siguen.
 - **Copiado fallido sobre la Cita del Día:** como en la Página de Cita.
-- **El 404:** su Cita del Día va sin Tarjeta de Obra ni acciones, y su campo lleva el botón «Buscar».
+- **El 404:** su Cita del Día va sin Tarjeta de Obra ni acciones, y su campo lleva el botón «Buscar»; su «Ver esta cita» sigue en siena, y su campo conserva «Por ejemplo: no hay camino» *(v8.2)*.
+- **Portada sin ninguna Cita apta** *(v8.2)*: en lugar de «La cita de hoy», tras el campo, una sola frase, «Citas en español, cada una en su página, con su autor y, cuando consta, la obra de la que procede.», que `EXPERIENCE.md` da por igual a `DESCRIPCION_DEL_SITIO`, aunque la constante dice hoy otra cosa; si la frase se escribe aparte o la constante cambia con ella está abierto (`bmad-ux`, 28.2: véase «Lo que las espinas dejan sin cerrar») *(v8.2)*; cambia lo construido.
+- **Cita de hasta 300 caracteres que con el pie no cabe** *(v8.2)*: el diálogo lo dice y ofrece copiar el texto, sin reintento (UX-DR75, UX-DR76).
 UX-DR109: **Estados nuevos de Obra, Autor, Tema y Directorios.**
 - **Obra con `noindex`:** queda fuera del sitemap, de los resultados de `/buscar/` y de las Obras de la portada. Sigue siendo valor del filtro de Obra, va igual que las demás en el Directorio de Obras, y su página 1 lleva el salto, «Compartir en» y «Buscar en esta obra».
 - **Páginas 2+ de una Obra:** sin salto, sin «Compartir en» y sin «Buscar en esta obra», en el orden del libro.
@@ -4495,13 +4518,13 @@ UX-DR111: **Zonas de salida interna** (FR-56), según la tabla de `EXPERIENCE.md
 | `listado` | La Tarjeta de Cita de los listados de Autor, Tema, Colección y Obra |
 | `paginacion` | La Paginación |
 | `lista-de-obras` | Las entradas de la Lista de Obras de la Página de Autor |
-| `resultado` | Todo Resultado de búsqueda, también el de Directorio |
+| `resultado` | Todo Resultado de búsqueda, también el de Directorio, salvo los Directorios del aviso *(v8.2)* |
 | `directorio` | Las filas, las cabeceras de grupo y «Buscar «x» en las citas» |
 | `cita-del-dia` | «Ver esta cita» |
 | `obras-de-portada` | Las seis Obras de la portada y su cierre |
 | `autores-de-portada` | Los ocho Autores destacados y su cierre |
 
-  Las anclas de la misma página están exentas, y un enlace que no figura en la tabla no registra nada.
+  Están exentas, por escrito *(v8.2)*: las anclas de la misma página; «Buscar en…», el campo de la portada y el del 404, porque enviar un formulario no es salida; las salidas de la búsqueda sin resultados —Temas, Colecciones y Autores destacados—; y los Directorios del aviso de `/buscar/`, el del índice que no carga y el que se pinta hasta que arranca la búsqueda, que en la zona `resultado` darían a SM-13 salidas sin denominador. Se revisa en la pasada de métricas. Un enlace que no figura en la tabla no registra nada.
 UX-DR112: **Lo construido que la v8 cambia.**
 - La cabecera pasa de dos enlaces a cuatro, y la marca es el `h1` de la portada.
 - «Compartir la cita» se retira, y los destinos quedan a la vista también donde hay Hoja del Sistema, con el prefijo «Compartir en » en `.solo-para-lectores` (lo que corrigió la 22.10).
@@ -4510,11 +4533,15 @@ UX-DR112: **Lo construido que la v8 cambia.**
 - El Listado de Obra deja el orden por slug por el orden del libro.
 - El filete del campo de copia manual pasa de `{colors.outline-variant}` (1,3:1) a `{colors.outline}` (3,51:1).
 - El campo del 404 gana el botón «Buscar», y lo tecleado en `/buscar/` y en el 404 pasa a Inter.
-- «Ver esta cita» pasa de siena a tinta.
+- «Ver esta cita» pasa de siena a tinta en la portada; el del 404 no cambia *(v8.2)*.
 - La Lista de Obras de la Página de Autor enseña la unidad.
 - En `/buscar/`, el tope de 30 resultados pasa a «Mostrar 30 más», el índice que no carga ofrece los Directorios, y los Autores destacados dejan los ocho primeros del alfabeto por la regla de FR-8.
 - La Imagen cuadrada gana el dominio.
 - La lista entera de Autores sale de la portada.
+- El resultado de Obra deja el «de» en su nombre accesible *(v8.2)*.
+- El fallo de «Mostrar 30 más» sale bajo el botón *(v8.2)*.
+- La portada sin ninguna apta cambia su párrafo de presentación por la frase de UX-DR108 *(v8.2)*.
+- El campo de `/buscar/` conserva «Por ejemplo: no hay camino», que pusieron las Historias 3.1 y 4.3 *(v8.2)*.
 
 **Qué requisitos anteriores enmiendan**, sin renumerarlos:
 
@@ -4550,12 +4577,9 @@ UX-DR112: **Lo construido que la v8 cambia.**
 - las bandas de unos 250 px de la historia, en la matriz de dispositivos;
 - si un fotograma basta para el primer ritmo de anuncio.
 
-**Dónde manda el PRD v8.1.** `EXPERIENCE.md` conserva notas para el PM que el PRD v8.1 ya contestó: «Siguiente» por el siguiente Autor (FR-12), UJ-3 y UJ-6, el criterio de Colección como una frase (FR-9) y WCAG 2.2 AA en lugar de 2.1 (NFR-9). En esos puntos manda el PRD. `AGENTS.md` describe un solo ritmo de anuncio, y la espina describe dos.
+**La UX v8.2 está alineada con el PRD v8.2 y la espina v8.2** *(v8.2)*: retiró los seis [NOTE FOR PM] que el PRD ya contestó y pasó a WCAG 2.2 AA. `AGENTS.md` describe todavía un solo ritmo de anuncio, y la espina describe dos; lo cierra `bmad-project-context`.
 
-**Lo que las espinas dejan sin cerrar:**
-- la redacción de la meta description de los Directorios;
-- si la frase de la descarga de la Historia dice adónde cae el fichero en iOS;
-- cómo se parte la Paginación de 12 páginas a 360 px: la espina solo pide `{spacing.unit}` entre zonas, también en vertical.
+**Lo que las espinas dejan sin cerrar:** una pregunta *(v8.2)*. Si la frase de la portada sin ninguna Cita apta (UX-DR108) se escribe aparte o si `DESCRIPCION_DEL_SITIO` cambia con ella, y con ella la `description` de la portada, el `WebSite`, la bajada de su Tarjeta Social y la descripción de `rss.xml`: `EXPERIENCE.md` las da por iguales, y la constante dice hoy «Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta.». La cierra `bmad-ux`, y bloquea la 28.2. Lo demás está cerrado: la meta description de los Directorios la aprobó Héctor el 19/10 (UX-DR80); la frase de la descarga en iOS está escrita y se activa solo si la matriz la reproduce (UX-DR75); la Paginación de 12 páginas a 360 px la cerró Héctor el 19/10 dentro del barrido de reflujo (26.9).
 
 **Referencia visual.** Las maquetas están en `ux-designs/ux-brainlySabiduria-2026-08-10/mockups/`. Seis son de decisión, y en ellas vale solo la variante elegida:
 
@@ -4580,13 +4604,14 @@ Dos son de referencia, sin variantes: [`v8-pagina-de-tema.html`](ux-designs/ux-b
 - el filtro del Directorio por principio de palabra, que da 13 Autores en vez de 14;
 - «Siguiente cita sobre la vida →» hacia la Cita contigua;
 - el destino Facebook sin aviso de pestaña nueva;
-- la línea de arriba de la Historia sin asociar al diálogo.
+- la línea de arriba de la Historia sin asociar al diálogo;
+- el texto de ejemplo en el filtro de los Directorios, «Por ejemplo: gonzalez» y «Por ejemplo: quijote», donde la espina no pone ninguno *(v8.2)*.
 
 Las maquetas anteriores a la v8 dibujan la cabecera de antes.
 
 ### FR Coverage Map — v8
 
-FR-56: **Épica 23** — la lectura, la salida interna con su zona, la búsqueda asentada, la vista de Obra y la llegada con marca, sobre un vocabulario cerrado que entra entero con su migración. La vista y la lectura de los Directorios las declara la **26** sobre ese mecanismo, y la combinación de filtros de la búsqueda la emite la **27**.
+FR-56: **Épica 23** — la lectura, la salida interna con su zona, la búsqueda asentada, la vista de Obra y la llegada con marca, sobre un vocabulario cerrado que entra entero con su migración —con la lectura con acción (`primera`) y la descarga con destino—, el `rowid` aleatorio, que entra antes en la principal (23.12), la búsqueda ya asentada al volver sin caché (23.8), y la línea base con su comparación por firma y sus ventanas (23.10) *(v8.2)*. La vista y la lectura de los Directorios las declara la **26** sobre ese mecanismo, y la combinación de filtros de la búsqueda la emite la **27**.
 FR-22: **Épicas 23 y 25** — la 23 coteja `?de=` y `?via=`, las guarda aparte, las cuenta una vez por llegada y las quita de la dirección; la 25 pone `?via=` en todo lo que se comparte, y nunca `?de=`.
 FR-12: **Épica 24** — la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más de {Autor}» y su orden, en el HTML inicial y sin guion. Sobre la Cita del Día, **28**.
 FR-4, FR-6, FR-26: **Épica 24** — la Tarjeta de Cita de cada listado lleva el título de su Obra como texto. «Buscar en {Autor}» y «Buscar en este tema» (FR-4, FR-6), **Épica 27**.
@@ -4595,7 +4620,7 @@ FR-38, FR-47: **Épica 24** — la relación por fichero y campos que pinta, la 
 FR-51: **Épica 24** — el orden del libro en todas las páginas, la tarjeta sin título de Obra y el salto. La vista de Obra, **23**; compartir en la página 1, **25**; «Buscar en esta obra», **27**. La alcanzan la Tarjeta de Obra (24), el Directorio de Obras (26) y, si es indexable, las Obras de la portada (28).
 FR-10, FR-11, FR-17, FR-19, FR-21: **Épica 25** — los dos formatos de una sola ruta de generación con el dominio al pie, el 9:16 sin elegir diseño, la Historia en dos toques, el validador de Facebook y el 9:16 del Kit. La Imagen sobre la Cita del Día (FR-10), **28**.
 FR-18: **Épica 25** — «Compartir en», con los destinos a la vista también donde hay hoja, «Más opciones…» y la página 1 de la Obra. Sobre la Cita del Día, **28**.
-FR-20: **Épica 25** — el botón nombrado registra su destino, `opaco` queda solo para la hoja y para la Imagen cuadrada, y la Historia que cae en la descarga se registra como descarga. El conjunto de destinos lo declara la **23**, y la superficie portada llega con la **28**.
+FR-20: **Épica 25** — el botón nombrado registra su destino, `opaco` queda solo para la hoja y para la Imagen cuadrada, y toda descarga impuesta por un rechazo se registra como descarga con el destino de su botón: `opaco` en la cuadrada (25.2), `instagram-historia` en la Historia (25.5) *(v8.2)*. El conjunto de destinos, también los de `descarga-de-imagen` *(v8.2)*, lo declara la **23**, y la superficie portada llega con la **28**.
 FR-55: **Épica 26** — los dos Directorios, su orden, sus letras, su filtro, su tipo en Pagefind, su familia propia y la cabecera. La portada los enlaza por la cabecera desde la 26, y con sus dos cierres desde la **28**.
 FR-15: **Épica 26** — la clave de orden, que la orden propone y corrige y la construcción exige a todo Autor publicado.
 FR-40: **Épica 26** — `/autores/` y `/obras/` forman la familia `directorio` en las cinco series.
@@ -4609,16 +4634,18 @@ FR-52 *(sin trabajo)*: la consultan la marca de `vista-de-obra` (**23**) y las O
 FR-50 *(sin trabajo)*: **Épica 26** — el Directorio de Autores no agrupa por Época.
 FR-33, FR-39 *(sin trabajo)*: ninguna épica. Ningún Modelo se enciende mientras su Umbral siga en sesiones, y la v8 no reabre FR-39.
 
-**Cobertura de métricas.** Ninguna métrica pide trabajo propio, salvo SM-11. Las que van sobre lecturas o búsquedas asentadas salen del instrumento de la **23** y de su lectura desde `tools/`, y las juzga la épica que las mueve:
+**Cobertura de métricas.** Ninguna métrica pide trabajo propio fuera de la orden de la línea base (23.10), que da la comparación por firma y las ventanas de SM-C3 y SM-C5 —y, con la misma ventana, de toda tasa que se juzga contra su propia serie *(v8.2, Héctor, 2026-10-23)*—; SM-11 ya lo tiene hecho (64b1bf0d) *(v8.2)*. Las que van sobre lecturas o búsquedas asentadas salen del instrumento de la **23** y de su lectura desde `tools/`, y las juzga la épica que las mueve:
 - SM-3, SM-4 de la Página de Cita y SM-C5 (con SM-5): la **24**;
 - SM-5, SM-7, SM-12 y SM-C3: la **25**;
 - SM-4 de los Directorios: la **26**;
 - SM-6 y SM-13: la **27**;
 - SM-4 de la portada, por zonas: la **28**.
 
-SM-8 sigue en vistas, y lleva un corte con fecha en `umbrales.ts` —en la lista `CORTES_DE_SM8`— por cada despliegue que cambia su instrumento, con la fecha en que llega al sitio en vivo (decisión de Héctor, 2026-10-19): el de la **23** (la marca contada una vez por llegada, la vista desde el fichero y la espera a la activación) y el de la **24 con la 26** (los Directorios emiten vista).
+SM-8 sigue en vistas, y lleva un corte con fecha en `umbrales.ts` —en la lista `CORTES_DE_SM8`— por cada despliegue que cambia su instrumento, con la jornada UTC en que llega al sitio en vivo, compuesta de su constante de despliegue; el tramo nuevo empieza la primera jornada UTC completa tras la llegada *(v8.2)* (decisión de Héctor, 2026-10-19): el de la **23** (la marca contada una vez por llegada, la vista desde el fichero y la espera a la activación) y el de la **24 con la 26** (los Directorios emiten vista).
 
-**SM-11:** las tres constantes y la línea del informe se construyen con la reparación de la publicación, fuera de la v8. La **24 con la 26** anota la fecha de su despliegue conjunto en vivo, y la **28** la suya si llega antes del juicio.
+**SM-11:** las tres constantes y la línea del informe ya existen (64b1bf0d), con `DESPLIEGUE_DE_LA_REPARACION` = 2026-10-19. La **24 con la 26** da valor a `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (26.11), y la **28**, a `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO` si llega antes del juicio (28.5) *(v8.2)*. La **23** pasa a UTC el «hoy» con que `lineasDeSm11` compara esas jornadas (23.10, AD-9) *(v8.2)*.
+
+**Las jornadas de llegada** de la **25** y de la **27**, desde las que se cuentan sus ventanas si llegan antes de su línea base, son constantes de despliegue con la forma de las demás: les dan valor la 25.7 y la 27.9 el día que llegan, y la 28.5 a la de la 28 también si llega tras el juicio *(v8.2, Héctor, 2026-10-23)*.
 
 SM-C1 y SM-C2 son aclaraciones sin trabajo (**28** y **26**). SM-C4 se juzga antes y después de encender un Modelo, fuera de estas épicas.
 
@@ -4629,25 +4656,25 @@ SM-C1 y SM-C2 son aclaraciones sin trabajo (**28** y **26**). SM-C4 se juzga ant
 - **NFR-4:** **27**.
 - **NFR-5:** **26**.
 - **NFR-6:** **25**.
-- **NFR-7:** cada épica mide a mano con lo suyo puesto. La lista cerrada de guiones y `MAX_BYTES_DE_GUION` en toda superficie, **23**; el tope de cada guion empaquetado, **26** y **27**.
+- **NFR-7:** cada historia de cierre mide a mano con Lighthouse, con lo de su épica puesto y contra un receptor local, frente a la principal del mismo día —la 23.11, la 26.11, la 25.7, la 27.9 y la 28.5—, y si se degrada el merge espera a que Héctor decida; sin puerta automática *(v8.2, Héctor, 2026-10-23)*. La principal se mide construida y servida igual, en local y con la medición contra un receptor local o un punto final ficticio, nunca en el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*. La lista cerrada de guiones y `MAX_BYTES_DE_GUION` en toda superficie, **23**; el tope de cada guion empaquetado, **26** y **27**.
 - **NFR-8:** la prueba, **26**; el reflujo de lo que construye cada una, **24**, **25** y **28**.
 - **NFR-9** y **NFR-11:** **23**.
 - **NFR-12:** los dos formatos y X y Threads, **25**; el título de Obra que parte palabras, **24**, **26** y **28**.
 - **NFR-13:** **24**, **26**, **27** y **28**, cada una en lo que añade.
 
 **Cobertura UX-DR.**
-- **Épica 23:** UX-DR111, el vocabulario y la colocación en lo ya construido: `atribucion`, `chip-de-tema`, `colecciones`, `listado`, `paginacion`, `lista-de-obras`, `resultado`, `cita-del-dia`, `rutas-de-salida`, `autores-de-portada` y la `cabecera` de hoy. También el suelo WCAG 2.2 AA de UX-DR103, y el texto derivado en el build de las islas en línea que anuncian (UX-DR99).
+- **Épica 23:** UX-DR111, el vocabulario y la colocación en lo ya construido: `atribucion`, `chip-de-tema`, `colecciones`, `listado`, `paginacion`, `lista-de-obras`, `resultado`, `cita-del-dia`, `rutas-de-salida`, `autores-de-portada` y la `cabecera` de hoy. También el suelo WCAG 2.2 AA de UX-DR103, y el texto derivado en el build de las islas en línea que anuncian (UX-DR99). Y las exenciones de zona escritas, también la de los Directorios del aviso de `/buscar/` (UX-DR111) *(v8.2)*.
 - **Épica 24:** UX-DR64, UX-DR65, UX-DR67, UX-DR68, UX-DR69, UX-DR70 y UX-DR96; UX-DR63 (el orden, salvo «Compartir en»); UX-DR66 (la posición); UX-DR95 (el orden del libro, el salto y el ritmo del pie); las zonas `tarjeta-de-obra`, `siguiente` y `misma-obra`.
-- **Épica 25:** UX-DR71, UX-DR72, UX-DR73, UX-DR74, UX-DR75, UX-DR76, UX-DR77, UX-DR78, UX-DR97 y UX-DR98; UX-DR79 (el validador de Facebook); UX-DR63 (se retira «Compartir la cita»); UX-DR95 («Compartir en», en su sitio).
-- **Épica 26:** UX-DR54, UX-DR55, UX-DR80, UX-DR81, UX-DR82, UX-DR83, UX-DR84, UX-DR85 y UX-DR86; UX-DR58 (el componente nace en el filtro); UX-DR79 (la Tarjeta de los Directorios); UX-DR91 (el tipo «Directorio»); UX-DR99 (el segundo ritmo); la zona `directorio` y la cabecera de cuatro enlaces.
-- **Épica 27:** UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR92, UX-DR93 y UX-DR94; UX-DR58 (`/buscar/`, el 404 y «Buscar en…», con su botón); UX-DR91 (el resto); UX-DR95 («Buscar en esta obra», en su sitio).
-- **Épica 28:** UX-DR56, UX-DR57, UX-DR59, UX-DR60, UX-DR61 y UX-DR62; UX-DR58 (la portada); UX-DR66, UX-DR71, UX-DR73 y UX-DR76 sobre la Cita del Día; las zonas `obras-de-portada` y los ocho de `autores-de-portada`.
+- **Épica 25:** UX-DR71, UX-DR72, UX-DR73, UX-DR74, UX-DR75, UX-DR76, UX-DR77, UX-DR78, UX-DR97 y UX-DR98; UX-DR79 (el validador de Facebook); UX-DR63 (se retira «Compartir la cita»); UX-DR95 («Compartir en», en su sitio). Y el nombre de la previsualización cuadrada, la Cita que no cabe, los rechazos solo antes de abrir la hoja, «Enlace copiado» sin esperar a `share()`, la frase de iOS condicionada (UX-DR75, UX-DR76) y el correo de una Obra (UX-DR97) *(v8.2)*.
+- **Épica 26:** UX-DR54, UX-DR55, UX-DR80, UX-DR81, UX-DR82, UX-DR83, UX-DR84, UX-DR85 y UX-DR86; UX-DR58 (el componente nace en el filtro); UX-DR79 (la Tarjeta Social de los Directorios *(v8.2)*); UX-DR91 (el tipo «Directorio»); UX-DR99 (el segundo ritmo); la zona `directorio` y la cabecera de cuatro enlaces.
+- **Épica 27:** UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR92, UX-DR93 y UX-DR94; UX-DR58 (`/buscar/`, el 404 y «Buscar en…», con su botón); UX-DR91 (el resto); UX-DR95 («Buscar en esta obra», en su sitio). Y el filtro que no se puede usar (UX-DR93), `/buscar/` antes de que arranque (UX-DR92), el fallo de «Mostrar 30 más» bajo el botón (UX-DR90) y el texto de ejemplo (UX-DR58) *(v8.2)*.
+- **Épica 28:** UX-DR56, UX-DR57, UX-DR59, UX-DR60, UX-DR61 y UX-DR62; UX-DR58 (la portada); UX-DR66, UX-DR71, UX-DR73 y UX-DR76 sobre la Cita del Día; las zonas `obras-de-portada` y los ocho de `autores-de-portada`. Y la línea de cifras con el censo vacío (UX-DR57), la portada sin apta (UX-DR108) y las Obras que rotan aparte (UX-DR60) *(v8.2)*.
 
 **Transversales**, cada épica en lo que construye:
 - **UX-DR99, los mensajes:**
   - los estados de la Historia, **25**;
   - el recuento del Directorio y su frase a cero, **26**;
-  - el recuento y la frase sin resultados de `/buscar/`, **27**;
+  - el recuento y la frase sin resultados de `/buscar/`, y la región del fallo de «Mostrar 30 más» *(v8.2)*, **27**;
   - «Copiado.» sobre la Cita del Día, **28**.
 - **UX-DR100, el foco:**
   - el `h2` de «Dónde leer esta obra», **24**;
@@ -4678,13 +4705,13 @@ SM-C1 y SM-C2 son aclaraciones sin trabajo (**28** y **26**). SM-C4 se juzga ant
   - los botones de «Compartir en», **25**;
   - la cabecera, las letras, «Volver a las letras», las filas y «Buscar «x» en las citas», **26**;
   - «Mostrar 30 más», «Quitar los filtros» y «Buscar», **27**;
-  - «Ver esta cita», que pasa a tinta, y los cierres de la portada, **28**.
+  - «Ver esta cita» de la portada, que pasa a tinta; el del 404 sigue en siena *(v8.2)*; y los cierres de la portada, **28**.
 - **UX-DR106, la pestaña nueva:**
   - los destinos, y Correo por `mailto:` sin aviso, **25**;
   - la misma pestaña para la Tarjeta, «Siguiente» y el salto, **24**;
   - para la cabecera, los Directorios y «Volver a las letras», **26**;
   - para «Buscar en…», **27**.
-- **UX-DR107, la voz:** cada épica pone sus literales. Los Directorios dicen «citas» en el cuerpo, en el título de pestaña y en la meta description (**26**).
+- **UX-DR107, la voz:** cada épica pone sus literales. Los Directorios no dicen «frases» en ningún texto, y dicen «citas» en el cuerpo y en la meta description, con el título de pestaña literal de UX-DR80 (**26**) *(v8.2)*.
 - **UX-DR108, los estados de la Página de Cita y de la portada:**
   - Cita sin Obra, Obra de una Cita, Obra sin cotejar, bloques vacíos, Cita sin Tema y año que se omite, **24**;
   - Cita de más de 300 caracteres, sin Imagen ni Historia, **25**, y en la portada, **28**;
@@ -4707,24 +4734,25 @@ SM-C1 y SM-C2 son aclaraciones sin trabajo (**28** y **26**). SM-C4 se juzga ant
   - «Compartir la cita» retirada, los destinos a la vista, la Imagen cuadrada con dominio y el filete del campo de copia manual, **25**;
   - la cabecera de cuatro enlaces y la unidad en la Lista de Obras, **26**;
   - el 404 con botón y en Inter, y los cambios de `/buscar/`, **27**;
-  - la marca como `h1`, «Ver esta cita» a tinta y la lista entera de Autores fuera de la portada, **28**.
+  - la marca como `h1`, «Ver esta cita» a tinta en la portada *(v8.2)* y la lista entera de Autores fuera de la portada, **28**.
 
-**Volver a medir sobre lo construido:** la cabecera y dónde empieza la Cita, **26**; los selectores con el valor a 17 px, y la primera Cita del Tema y de la Obra con el botón «Buscar», **27**; las bandas de la historia y si basta un fotograma para el primer ritmo, **25**. **Lo que las espinas dejan sin cerrar:** la meta description de los Directorios, **26**; la frase de la descarga en iOS, **25**.
+**Volver a medir sobre lo construido:** la cabecera y dónde empieza la Cita, **26**; los selectores con el valor a 17 px, y la primera Cita del Tema y de la Obra con el botón «Buscar», **27**; las bandas de la historia y si basta un fotograma para el primer ritmo, **25**. **Lo que las espinas dejaban sin cerrar** lo cerraron Héctor y la UX v8.2: la meta description (**26**) y la frase de iOS, que se activa con la matriz (**25**) *(v8.2)*, con una constante de `umbrales.ts` que Héctor enciende *(v8.2, Héctor, 2026-10-23)*. Queda abierta, para `bmad-ux`, la frase de la portada sin apta frente a `DESCRIPCION_DEL_SITIO`, que bloquea la 28.2 (**28**) *(v8.2)*.
 
 **Cobertura de los Additional Requirements.**
 - **Épica 23:**
   - AD-6: la medición a fichero, el presupuesto en línea (el hueco y el slug de `CopiarCita` a `data-*`), «una prueba de ausencia no prueba nada» y la lista cerrada, abierta con la medición, `imagen.js` y Pagefind; la isla de medición y su arranque;
-  - AD-9: los 8 s, el mínimo de lecturas y la fecha del corte de SM-8;
+  - AD-9: los 8 s, el mínimo de lecturas, la jornada de despliegue de la 23 y la lista de cortes de serie *(v8.2)*; la constante de las pasadas que escriben en producción, que la orden de la 23.10 descuenta *(v8.2, Héctor, 2026-10-23)*; y el «hoy» de `tools/` en UTC frente a toda constante de despliegue, también en `lineasDeSm11` (23.10) *(v8.2)*;
   - AD-11: quién lee la marca de `vista-de-obra`;
-  - AD-13, entero;
+  - AD-13, entero: también el `rowid` aleatorio con su excepción a la fusión por épica (23.12) y su barajado (23.2, 23.3), que sin cupo en la cuota de escritura del día no corre ni se trocea *(v8.2, Héctor, 2026-10-24)*; la lectura con acción; la búsqueda ya asentada al volver *(v8.2)*;
   - AD-14, entero, con `DESPLIEGUE.md` §3;
   - AD-17: la quinta consecuencia (el `data-*` de vistas desde `superficies.ts` y la marca `indexable` igual al `noindex`) y el barrido con `wcag22aa` y axe 4.14.0;
   - la convención de mensajes, en las islas en línea;
   - el glosario de la medición: Lectura, Salida interna, Zona, Marca de origen y Marca de difusión, y los conjuntos cerrados;
-  - el Entorno operativo: las cuotas de D1 en la orden de la línea base, el plan de Cloudflare, `wrangler` 4.151.1 exacto y lo que el CI no prueba de la medición.
+  - el Entorno operativo: las cuotas de D1 en la orden de la línea base, el plan de Cloudflare, `wrangler` 4.151.1 exacto y lo que el CI no prueba de la medición, y el receptor local de toda construcción de rama, que monta la 23.2 *(v8.2)*.
 - **Épica 24:**
   - el paradigma v8, porque el cargador de posiciones estrena `tools/lib/` en `content.config.ts`;
-  - AD-9: el recuento de «De la misma obra» y el aviso y el tope del peso de `dist/`, medido tras Pagefind;
+  - AD-9: el recuento de «De la misma obra» y el aviso y el tope del peso de `dist/`, medido tras Pagefind, con la 24.2 adelantada a la principal *(v8.2, Héctor, 2026-10-23)*; y el tope del número de PNG, sin valor hasta que Héctor lo fije *(v8.2)*;
+  - AD-16: la deuda declarada de la caché de PNG, que cuenta el paso final *(v8.2)*;
   - AD-11: los recuentos de la Tarjeta de Obra y de las rutas de salida, y las rutas de salida mismas;
   - AD-19: la tarjeta según el contexto, y hasta siete fuera de Pagefind;
   - AD-20: la Tarjeta y «Siguiente» sin Modelo;
@@ -4736,6 +4764,7 @@ SM-C1 y SM-C2 son aclaraciones sin trabajo (**28** y **26**). SM-C4 se juzga ant
 - **Épica 25:**
   - AD-6: el presupuesto de los disparadores y las islas de la Historia, de «Más opciones…», de compartir la Obra y del 9:16 del Kit;
   - AD-7 y AD-8;
+  - AD-9: la jornada de llegada de la 25 (25.7), las jornadas y rutas de la 25.3 y de la 25.7 en la constante de las pasadas que escriben en producción, y la constante que activa la frase de iOS (25.5) *(v8.2, Héctor, 2026-10-23)*;
   - AD-15: el 9:16;
   - AD-16: la Tarjeta Social de Obra con el fichero de su Autor, que ya construyó la 22.7 y la 25 conserva;
   - AD-20: lo compartido de la Obra, y su isla en el tope;
@@ -4746,63 +4775,64 @@ SM-C1 y SM-C2 son aclaraciones sin trabajo (**28** y **26**). SM-C4 se juzga ant
   - AD-3: el filtro y la función hermana;
   - AD-6: el guion empaquetado siempre a fichero, el filtro y su tope;
   - AD-9: la pausa de tecleo y el tamaño de `/obras/`;
-  - AD-11: `autoresPublicados` y `obrasPublicadas`, la puerta de NFR-5 y quién lee el Directorio de Obras;
-  - AD-12: la marca `data-jornada` y la prueba de las dos jornadas;
+  - AD-11: `autoresPublicados` y `obrasPublicadas`, la puerta de NFR-5 —con `coleccion despublicar` y `tools/alta.ts`, y las aristas del grafo del modelo *(v8.2)*— y quién lee el Directorio de Obras;
+  - AD-12: la marca `data-jornada` y la prueba de las dos jornadas, con el 404 como la portada *(v8.2)*;
   - AD-15: las Tarjetas de los Directorios;
   - AD-17: los Directorios como producto, la mudanza de las familias, los tipos `directorio` y `portada`, el medio que no casa, la quinta consecuencia de los Directorios y el reflujo a 320 px;
   - AD-19: los Directorios listan entidades;
   - AD-20: los Directorios no admiten ningún Modelo;
   - AD-24;
   - AD-25: el mismo componente para la lista de obras;
-  - AD-27: `ordenAlfabetico`, `ordenRevisado` y los ficheros de los Directorios;
+  - AD-27: `ordenAlfabetico`, `ordenRevisado` y los ficheros de los Directorios, y la familia del fichero frente a la de la ruta *(v8.2)*;
   - AD-28: los Directorios sin semblanza;
   - la convención de mensajes: el segundo ritmo;
   - el glosario: Directorio.
 - **Épica 27:**
   - AD-3: el orden por el nombre tal como se lee, el de los Temas con su artículo y los destacados;
   - AD-6: la búsqueda empaquetada y su tope;
-  - AD-9: la tanda de resultados, los ocho destacados y el tamaño de los filtros y del mapa;
+  - AD-9: la tanda de resultados, los ocho destacados y el tamaño de los filtros y del mapa, y la jornada de llegada de la 27 (27.9) *(v8.2, Héctor, 2026-10-23)*, que es lo único que la 27.9 anota tras el merge: no es una pasada que escriba en producción *(v8.2, Héctor, 2026-10-24)*;
   - AD-11: las opciones de filtro, el mapa de rótulos, los destacados, el componente único de filtros y metadatos, y quién lee el filtro de Obra;
-  - AD-13: la búsqueda asentada con filtros y la caché de atrás y adelante;
+  - AD-13: la búsqueda asentada con filtros, la caché de atrás y adelante y la navegación `back_forward` sin ella (`history.state`, Navigation Timing) *(v8.2)*;
   - AD-20: la publicidad con filtros;
   - AD-25: `data-pagefind-sort` y el nombre de ficha como interfaz pública;
   - la convención de parámetros de dirección;
   - el Entorno operativo: las pruebas que llaman a Pagefind.
 - **Épica 28:**
   - AD-6: las islas sobre la Cita del Día, y el tope de la portada medido con una Cita que admite Imagen;
-  - AD-9: el recuento de las Obras de la portada;
+  - AD-9: el recuento de las Obras de la portada, y `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO`, que la 28.5 anota llegue antes o después del juicio *(v8.2, Héctor, 2026-10-23)*;
   - AD-11: las seis Obras y la línea de cifras;
-  - AD-12: las seis Obras, con la marca de la 26;
+  - AD-12: las seis Obras, con la marca de la 26, la ventana que avanza tantos puestos como Obras salen, y las seis aparte de la Cita del Día *(v8.2)*;
   - AD-17: la portada no emite vista de Cita, y sus Obras son rutas sin `noindex`;
   - AD-19: la canónica de lo que se hace en la portada;
   - AD-20: el bloque sin Modelo y las Obras de la portada;
   - AD-25: la congelación alcanza a las Obras de la portada.
 - **Sin trabajo:** AD-21. La congelación no alcanza a la navegación: la 24, la 25 y la 26 no la aplican.
-- **Todas las épicas:** la unidad de fusión (ramas 23 · 24+26 · 25 · 27 · 28) y la principal nunca en rojo, con la reparación previa.
+- **Todas las épicas:** la unidad de fusión (ramas 23 · 24+26 · 25 · 27 · 28, con dos historias que entran solas en la principal: la 23.12 antes de la 23.3 y la 24.2 en cuanto tenga sus valores *(v8.2, Héctor, 2026-10-23)*) y la principal nunca en rojo, con la reparación ya en vivo (2026-10-19); `npm run test:e2e` entero antes de cada merge, que es acto de Héctor *(v8.2)*. Cada épica cierra con su historia operativa —la 23.11, la 25.7, la 26.11, la 27.9 y la 28.5—, que mide NFR-7 *(v8.2, Héctor, 2026-10-23)*.
 - **Épica 24:** Zod desde `astro/zod`, en la historia del cargador de posiciones.
 - **Épica 26:** la Paginación de 12 páginas a 360 px, en el barrido de reflujo.
-- **Sin épica:** las tres fechas nuevas de SM-11, que se construyen con la reparación de la publicación; Node `>=22.22.0`, atado a subir Astro a la 7.4, que ninguna épica sube; las acciones para Node 20 de `publicar.yml`, mantenimiento sin historia. Pagefind ^1.5.2 y TypeScript ^5.9 ya se cumplen.
+- **Sin épica:** las tres fechas de SM-11, ya construidas en 64b1bf0d *(v8.2)*, salvo el «hoy» en UTC de su línea, que es de la 23.10 *(v8.2)*; Node `>=22.22.0`, atado a subir Astro a la 7.4, que ninguna épica sube; las acciones para Node 20 de `publicar.yml`, mantenimiento sin historia. Pagefind ^1.5.2 y TypeScript ^5.9 ya se cumplen.
 
 **Preguntas abiertas y desalineaciones, por épica.**
-- **Épica 23:** el mínimo de lecturas y el plan de Cloudflare; `DESPLIEGUE.md` §3 y WCAG 2.2, que se resuelven por precedencia.
-- **Épica 24:** los valores del aviso y del tope del peso de `dist/`; la 21.2, antes o después de esta épica; el `lastmod` de la Obra, que fija AD-27.
-- **Épica 25:** la Historia en iOS, decidida por la puerta de la matriz antes del 9:16; la «Tarjeta de Obra» de AD-16, que es la Tarjeta Social.
+- **Épica 23:** el mínimo de lecturas y el plan de Cloudflare; `DESPLIEGUE.md` §3, que pone al día la 23.2 *(v8.2)*. Que Héctor miró la comparación por firma y da por buena una línea base lo anota en `DESPLIEGUE.md` §3, con fecha y métrica (23.10) *(v8.2, Héctor, 2026-10-23)*. La cuota de lectura de D1, que la espina no nombra *(v8.2)*. Decidido por Héctor el 2026-10-24: el barajado no se trocea; si no cabe en la cuota de escritura del día, `desplegar` sale con 1 sin barajar y él lo repite otro día (23.2) *(v8.2, Héctor, 2026-10-24)*.
+- **Épica 24:** los valores del aviso y del tope del peso de `dist/`, y el tope del número de PNG *(v8.2)*; la 21.2, antes o después de esta épica; el `lastmod` de la Obra, que fija AD-27.
+- **Épica 25:** la Historia en iOS, decidida por la puerta de la matriz antes del 9:16, y qué hace allí su botón (Héctor, 25.3) *(v8.2)*; la «Tarjeta de Obra» de AD-16, que es la Tarjeta Social. Decididos por Héctor el 2026-10-23: la jornada de llegada de la 25 es una constante de despliegue (25.7), la segunda pasada de la 25.7 escribe en producción y se descuenta como la 25.3, y la frase de iOS se activa con una constante de `umbrales.ts` *(v8.2, Héctor, 2026-10-23)*.
 - **Épica 26:** el tipo `portada`.
-- **Épica 27:** las reuniones de Obra ya publicadas, que dejan sin filtro las búsquedas que nombran la absorbida. `?autor=a&obra=b` con una Obra de otro Autor descarta la Obra y lo dice, y «Buscar en…» y las salidas sin resultados van exentos de zona por escrito (decisiones de Héctor, 2026-10-19).
-- **Épica 28:** la ventana de SM-11. El campo de la portada va exento de zona por escrito (decisión de Héctor, 2026-10-19).
-- **La fecha de SM-11 es la del despliegue en vivo:** **24** con la **26**, y **28**.
+- **Épica 27:** las reuniones de Obra ya publicadas, que dejan sin filtro las búsquedas que nombran la absorbida. `?autor=a&obra=b` con una Obra de otro Autor descarta la Obra y lo dice, y «Buscar en…» y las salidas sin resultados van exentos de zona por escrito (decisiones de Héctor, 2026-10-19), como los Directorios del aviso de `/buscar/` (decisión de Héctor, 2026-10-22) *(v8.2)*.
+- **Épica 28:** la ventana de SM-11. Si la frase de la portada sin apta se escribe aparte o si `DESCRIPCION_DEL_SITIO` cambia con ella, que `EXPERIENCE.md` da por iguales y que hoy difieren: la cierra `bmad-ux`, y bloquea la 28.2 *(v8.2)*. El campo de la portada va exento de zona por escrito (decisión de Héctor, 2026-10-19).
+- **La fecha de SM-11 es la del despliegue en vivo:** **24** con la **26**, y **28**; y la de la **23** es la de su corte de SM-8 *(v8.2)*.
 
 **Fuera, a propósito:**
-- el tope de HTML de la Página de Cita;
+- el tope de HTML de la Página de Cita, salvo que Héctor lo cree (24.2) *(v8.2)*;
 - el índice de subpáginas de la Fuente;
 - trocear los filtros y paginar `/obras/`;
 - conservar el guion de medición anterior durante un despliegue;
 - la sesión o un identificador de visita;
-- el archivo de la Cita del Día.
+- el archivo de la Cita del Día;
+- la caché de PNG de AD-16, deuda declarada *(v8.2)*.
 
 ## Epic List — v8
 
-Seis épicas, troceadas por superficie para poder atribuir cada cambio: desplegada de una vez, la ronda movería todas las cifras juntas y ninguna diría qué las movió. La unidad de fusión es la épica. Cada una se integra en su rama, salvo la 24 y la 26, que comparten una, y entran en la principal en este orden: la 23; la 24 con la 26; la 25 y la 27, en cualquier orden; la 28 al final. Ninguna se fusiona con el CI en rojo. Y ninguna llega a nadie mientras no esté reparada la publicación, que falla desde el 2026-10-11 y es trabajo aparte, previo a la v8.
+Seis épicas, troceadas por superficie para poder atribuir cada cambio: desplegada de una vez, la ronda movería todas las cifras juntas y ninguna diría qué las movió. La unidad de fusión es la épica. Cada una se integra en su rama, salvo la 24 y la 26, que comparten una, y entran en la principal en este orden: la 23; la 24 con la 26; la 25 y la 27, en cualquier orden; la 28 al final. Ninguna se fusiona con el CI en rojo. La publicación, que falló del 2026-10-11 al 2026-10-19, se reparó fuera de la v8 y está en vivo desde el 2026-10-19 a las 09:22 UTC *(v8.2)*. Dos excepciones a la fusión por épica, cada una una historia que entra sola en la principal: el `rowid` aleatorio de `medicion/worker.ts`, antes de la 23.3 (23.12) *(v8.2)*, y el aviso y el tope del peso de `dist/` tras Pagefind (24.2), en cuanto Héctor dé sus dos valores *(v8.2, Héctor, 2026-10-23)*. Cada épica cierra con una historia operativa que la lleva al sitio en vivo: la 23.11, la 26.11 por la 24 y la 26, la 25.7, la 27.9 y la 28.5 *(v8.2, Héctor, 2026-10-23)*. Antes de cada merge se corre `npm run test:e2e` entero sobre la rama, y fusionar es acto de Héctor *(v8.2)*.
 
 ### Épica 23: Medir la lectura
 
@@ -4828,20 +4858,24 @@ Nada de esto lleva identificador, cookie ni texto libre, y el listón de la Pág
 - **El vocabulario de la v8 entra entero aquí, en un solo cambio de AD-14:**
   - los cuatro eventos, las dieciséis zonas, los cuatro tramos y las seis combinaciones de filtros;
   - la marca de `vista-de-obra`;
-  - `via`, con `DESTINOS_VALIDOS` partido en destinos de enlace (ya con `facebook` y `threads`, y sus constructores puros en `compartir.ts`, sin botón) y el de imagen, `instagram-historia`.
+  - `via`, con `DESTINOS_VALIDOS` partido en destinos de enlace (ya con `facebook` y `threads`, y sus constructores puros en `compartir.ts`, sin botón) y el de imagen, `instagram-historia`;
+  - `primera` (sí/no) de `copiado`, `descarga-de-imagen` y las dos comparticiones, con la correspondencia evento → métrica; y el destino de `descarga-de-imagen`, con {`opaco`, `instagram-historia`} *(v8.2)*. Entra ahora porque añadirlo después de que empiece la línea base abriría un corte en ella.
 
   Así ninguna de la 24 a la 28 toca D1 ni el receptor: colocan en su marcado zonas y destinos que ya existen. Las zonas de lo ya construido las pone esta épica, porque su prueba sobre `dist/` exige zona o exención en todo enlace interno de `main`.
-- **Orden de AD-14, desde su rama:** primero las migraciones `0000` (la tabla de producción tal cual) y `0001` (solo los `ALTER`) con `wrangler d1 migrations`; después el receptor, comprobado con baliza de prueba y huella versionada; al final el sitio. Aplicar en remoto y desplegar el receptor son actos de Héctor. `DESPLIEGUE.md` §3 deja de decir «No hay migración». La orden de `tools/` que lee la línea base con `wrangler` informa de las filas del día frente a la cuota de D1 y del tamaño de la base. Al desplegar se revisa el plan contratado de Cloudflare.
+- **El `rowid` aleatorio del `INSERT` entra en la principal antes de la 23.3 (23.12), sin desplegarse hasta ella** *(v8.2)*. Es la Historia 23.12, la única de la épica que se fusiona fuera de su rama: va sola a la principal, con su prueba estructural, y su fila se añade a mano a `sprint-status.yaml` *(v8.2, Héctor, 2026-10-23)*.
+- **Orden de AD-14, desde su rama:** primero las migraciones `0000` (la tabla de producción tal cual) y `0001` (solo los `ALTER`) con `wrangler d1 migrations`; después el receptor, comprobado con baliza de prueba, que dice también si inserta con `rowid` aleatorio, y entonces baraja lo ya escrito —sus filas contadas antes contra la cuota del día—; la huella versionada; al final el sitio *(v8.2)*. Si el barajado no cabe en la cuota de escritura del día, `desplegar` no baraja ni escribe la huella, lo dice y sale con 1, y Héctor lo repite otro día: no se trocea por jornadas *(v8.2, Héctor, 2026-10-24)*. Aplicar en remoto y desplegar el receptor son actos de Héctor. `DESPLIEGUE.md` §3 deja de decir «No hay migración». La orden de `tools/` que lee la línea base con `wrangler` informa de las filas del día frente a la cuota de D1 y del tamaño de la base. Esa orden (23.10) da además la comparación por firma, entrega por ventanas, con la misma definición, toda tasa que se juzga contra su propia serie, y descuenta las jornadas y rutas de las pasadas que escriben en producción, leídas de su constante de `umbrales.ts` *(v8.2, Héctor, 2026-10-23)*; son dos, la 25.3 y la 25.7, y ninguna más *(v8.2, Héctor, 2026-10-24)*. Al desplegar se revisa el plan contratado de Cloudflare. Mientras viva la rama, el receptor no se vuelve a desplegar desde la principal; si se hace, la huella de la rama queda rancia y la 23.3 se repite *(v8.2)*.
 - **NFR-9 entra con ella:** el barrido pide `wcag22aa`, y `@axe-core/playwright` y `axe-core` suben a la 4.14.0 en el mismo commit, para que las demás épicas se auditen ya contra 2.2.
 - **Lo que no hace:**
   - no emite la vista ni la lectura de los Directorios: las declara la 26 en `superficies.ts`, sobre este mecanismo;
   - no compone ningún `?via=`: eso es de la 25;
   - la búsqueda asentada lleva filtros «ninguno» hasta la 27.
-- **Para fusionar:**
-  - la publicación reparada y el CI en verde;
-  - Playwright local sobre la rama: la lectura a 8 s y `pageshow`, las marcas quitadas con `replaceState`, una salida por carga —también tras `pageshow`— y después de la lectura, y el barrido 2.2;
-  - en `umbrales.ts`, el mínimo de lecturas de la línea base, fijado en un diff visible antes de leer la primera.
-- **Tras el despliegue:** la fecha del corte de SM-8 —la del despliegue que llega al sitio en vivo, no la del merge, como la de SM-11 (decisión de Héctor, 2026-10-19)— entra como primera entrada de la lista de cortes de `umbrales.ts`, en un commit aparte del día en que llega (23.11). Como existe después del merge, no es condición para fusionar.
+- **Para fusionar** (lo cierra la 23.11):
+  - el CI de la principal en verde y el `rowid` aleatorio ya en ella (23.12) *(v8.2)*;
+  - `npm run test:e2e` entero sobre la rama, contra un receptor local, con la lectura a 8 s y `pageshow`, la primera acción por carga, la búsqueda ya asentada al volver y el barrido 2.2 *(v8.2)*;
+  - en `umbrales.ts`, el mínimo de lecturas de la línea base, fijado en un diff visible antes de leer la primera;
+  - el día del merge, desde la rama, la comprobación con balizas de la 23.2 contra el receptor desplegado (23.11) *(v8.2)*;
+  - NFR-7 medido a mano con Lighthouse, contra un receptor local y frente a la principal del mismo día; si empeora, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*.
+- **Tras el despliegue:** Héctor da valor, en un commit aparte del día en que llega, a la jornada de despliegue de la 23 —la UTC en que termina «Desplegar»—, y de ella se compone la primera entrada de `CORTES_DE_SM8` (23.11) *(v8.2)*. Es la del despliegue que llega al sitio en vivo, no la del merge, como la de SM-11 (decisión de Héctor, 2026-10-19). Como existe después del merge, no es condición para fusionar.
 
 ### Épica 24: La Obra se ve y la Cita sigue
 
@@ -4853,16 +4887,16 @@ Los listados de Autor, Tema y Colección dicen de qué obra es cada Cita. La Pá
 
 **Notas de implementación:**
 - **Comparte rama y merge con la 26, por SM-11.** La Tarjeta de Obra pone un enlace a su Obra en cada Página de Cita; desplegada sola, la Obra ganaría enlace interno y el Autor no.
-  - La fecha de ese despliegue en vivo, no la del commit, se anota en `umbrales.ts` junto a `PRIMER_DESPLIEGUE_DE_OBRAS`.
+  - Su fecha es `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, que ya declara `umbrales.ts` en `undefined` (64b1bf0d): la 26.11 le da la jornada UTC en que llega al sitio en vivo, y de ella sale también el segundo corte de SM-8 *(v8.2)*.
   - Depende de la 23 por las zonas `tarjeta-de-obra`, `siguiente` y `misma-obra`.
-  - Si llega antes de que la continuación de la Página de Cita tenga línea base, se juzga contra su propia serie y contra SM-C5, y se dice.
+  - Si llega antes de que la continuación de la Página de Cita tenga línea base, las ventanas de SM-C5 se cuentan desde su llegada, frente a la serie propia de cada métrica, y se dice *(v8.2)*.
 - **El cargador de posiciones va primero** (AD-23). Es un cargador de `content.config.ts`, al patrón del de biografías:
   - localiza cada Cita con el `indexOf` de `tools/lib/cotejo.ts`, sobre el mismo conjunto de documentos que el cotejo;
   - guarda todas sus apariciones sin elegir ni ordenar, y entrega solo la posición;
   - de él sale el orden del libro, que calcula `obras.ts`, y que leen el listado de Obra en todas sus páginas, «Siguiente», «De la misma obra» y, en la 27, `data-pagefind-sort`;
   - sustituye al orden por slug que hoy se calcula en línea en el `getStaticPaths` de la Página de Obra.
 
-  Entre documentos rige el orden natural con romanos, con su prueba, hasta capturar el índice de la Fuente (aplazado). Otra prueba exige que alguna Obra documentada salga en un orden distinto del de slug. Es el segundo lector de `corpus/fuentes/` en cada build: unos 1.581 documentos y 168 MB. La historia que lo construye, la primera que toca `content.config.ts`, pasa además `z` de `astro:content` a `astro/zod`, como ya hace `src/lib/admision.ts` (decisión de Héctor, 2026-10-19).
+  Entre documentos rige el orden natural con romanos, con su prueba, hasta capturar el índice de la Fuente (aplazado). Otra prueba exige que alguna Obra documentada salga en un orden distinto del de slug. Es el segundo lector de `corpus/fuentes/` en cada build: unos 1.421 documentos y unos 159 MB, desde que la reparación retiró 160 (8e834217) *(v8.2)*. La historia que lo construye, la primera que toca `content.config.ts`, pasa además `z` de `astro:content` a `astro/zod`, como ya hace `src/lib/admision.ts` (decisión de Héctor, 2026-10-19).
 - **AD-27, por fichero y campos que pinta.**
   - La navegación de la Página de Cita se pinta y no fecha. Es una excepción declarada, decisión de Héctor del 2026-10-17.
   - Los listados ganan las fichas de Obra de sus Citas, y la Página de Obra, sus documentos.
@@ -4870,9 +4904,11 @@ Los listados de Autor, Tema y Colección dicen de qué obra es cada Cita. La Pá
   - Antes de desplegar se cuenta cuántas fechas mueve una sesión de siembra.
   - Si la 21.2 entra antes que esta épica, fecha y avisa una vez sus ~104 Páginas de Cita. Lo decide Héctor.
 - **FR-35 se comprueba construyendo el sitio con la afiliación encendida y apagada.** La Tarjeta de Obra y las rutas de salida van en `data-pagefind-ignore="all"`. La congelación de SM-11 no quita la tarjeta.
-- **Peso.** Cada Página de Cita gana hasta siete Tarjetas de Cita. La comprobación del peso de `dist/` —en un paso final de `npm run build`, tras Pagefind, sobre lo que se despliega (decisión de Héctor, 2026-10-19; AD-9 dice `astro:build:done`); aviso y tope en `umbrales.ts`, con Héctor— va con esta épica, que es la que más peso añade: las Páginas de Cita eran 134 MB de los 485 el 2026-10-16. NFR-7 se mide a mano con todo puesto, y el tope de HTML de la Página de Cita sigue aplazado.
+- **Peso.** Cada Página de Cita gana hasta siete Tarjetas de Cita. La comprobación del peso de `dist/` —en un paso final de `npm run build`, tras Pagefind, sobre lo que se despliega y sin los ficheros que rotan con la jornada (decisión de Héctor, 2026-10-19), y con el número de PNG, cuyo tope (AD-16) fija Héctor en un diff *(v8.2)*; aviso y tope en `umbrales.ts`, con Héctor— va con esta épica, que es la que más peso añade: las Páginas de Cita eran 134 MiB de los 485 según `du` el 2026-10-16 *(v8.2)*. NFR-7 se mide a mano con todo puesto, contra un receptor local *(v8.2)*, y el tope de HTML de la Página de Cita sigue aplazado: se crea si Héctor lo decide, al degradarse la medición a mano de NFR-7 en una historia de cierre —para la 24 con la 26, la 26.11— o para vigilar ese peso (24.2) *(v8.2)*.
+- **La 24.2 se adelanta a la principal** *(v8.2, Héctor, 2026-10-23)*. Entra sola, en cuanto Héctor dé los valores del aviso y del tope, como excepción declarada a la fusión por épica, igual que la 23.12: no cambia ningún fichero de `dist/` y vigila el peso desde ya, mientras la principal crece con cada siembra y la 24 con la 26 sigue en su rama. Los valores se revisan igual tras la 24.6, que vuelve a medir.
+- **Un acto de Héctor a mitad de cadena** *(v8.2)*: los valores del aviso y del tope del peso de `dist/` de la 24.2, de la que cuelgan la 24.6, la 24.8 y toda la 26; se piden antes de abrir la rama 24+26, y `sprint-status.yaml` lo marca en un comentario (a mano), como el precedente de la 22.2 («las reuniones de obras conocidas las decide Héctor, en commit propio, antes de la 22.4»).
 - **No toca compartir.** «Compartir la cita» sigue como está hasta la 25. Copiar queda justo bajo la primera pantalla: es una deuda aceptada, que vigila SM-C5.
-- **Para fusionar:** el CI en verde y, sobre la rama conjunta, el barrido 2.2 y el reflujo a 320 px de la 26.
+- **Para fusionar:** el CI en verde y, sobre la rama conjunta, `npm run test:e2e` entero, con el barrido 2.2 y el reflujo a 320 px de la 26.9 *(v8.2)*. Lo cierra la 26.11, que mide NFR-7 con lo de las dos épicas puesto *(v8.2, Héctor, 2026-10-23)*.
 
 ### Épica 25: Compartir donde se publica
 
@@ -4885,21 +4921,24 @@ La Imagen cuadrada gana el dominio, la Página de Obra también se comparte, y e
 **Notas de implementación:**
 - **Depende de la 23:** la marca de difusión, el conjunto de destinos y el hueco en línea que libera la medición. Los disparadores de la Historia y de «Más opciones…» caben en él, o suben `MAX_BYTES_DE_GUION` en el mismo diff, como isla que entra a propósito. Rama propia; se fusiona después de la 24 con la 26, antes o después de la 27.
 - **La matriz de dispositivos corre dos veces, y cada una es puerta de un paso.**
-  - **Antes de construir el 9:16** (AD-7): la Historia en iOS Safari y en Android Chrome, con la versión de Instagram de ese día. Si en iOS no aparece, se conservan el cuadrado y el destino Feed, y qué hace allí el botón lo decide Héctor.
-  - **Al cerrar la épica:** iPhone, Android y los navegadores de las aplicaciones de Facebook, Instagram y Threads, anotada en `DESPLIEGUE.md`. Con ella, las Tarjetas Sociales de la Cita y de la Obra, verificadas en el validador de Facebook antes de ofrecer ese destino (FR-19).
+  - **Antes de construir el 9:16** (AD-7): la Historia en iOS Safari y en Android Chrome, con la versión de Instagram de ese día. Si en iOS no aparece, se conserva el cuadrado; no hay destino Feed: qué hace allí el botón lo decide Héctor en la 25.3 y, si lo que decida necesita un destino nuevo, entra en el vocabulario por la orden de la 23.2 y la 23.3 antes de la 25.5 *(v8.2)*. Provoca también un fallo de entrega con la hoja abierta (AD-7) *(v8.2)*; si en algún sistema no llega como `AbortError`, Héctor decide con la matriz delante, y la decisión entra como criterio de la 25.5 —y de la 25.2 si aún no está construida— por `bmad-correct-course` antes de construirla, como la de la Historia no ofrecida *(v8.2)*. Va sobre el sitio en vivo, así que escribe en el D1 de producción: su jornada UTC y sus rutas viven en la constante de `umbrales.ts` de las pasadas que escriben en producción, citada en `DESPLIEGUE.md`, y la orden de la 23.10 las descuenta de la línea base *(v8.2, Héctor, 2026-10-23)*.
+  - **Al cerrar la épica:** iPhone, Android y los navegadores de las aplicaciones de Facebook, Instagram y Threads, anotada en `DESPLIEGUE.md`. Con ella, las Tarjetas Sociales de la Cita y de la Obra, verificadas en el validador de Facebook antes de ofrecer ese destino (FR-19). La rama se construye con la medición puesta contra un receptor local *(v8.2)*; el clic en la tarjeta de Facebook aterriza en la canónica en vivo, así que esta pasada también escribe en el D1 de producción, y su jornada y sus rutas se anotan y se descuentan como las de la primera *(v8.2, Héctor, 2026-10-23)*.
 
-  Las dos son actos de Héctor y, sin ellas, la épica se queda en revisión. Facebook queda fuera de la comparación de SM-12 hasta la prueba.
+  Las dos son actos de Héctor y, sin ellas, la épica se queda en revisión. Son las dos únicas pasadas de la v8 que escriben en el D1 de producción *(v8.2, Héctor, 2026-10-24)*. Sus entradas en la constante de las pasadas en producción van a la principal el día de cada pasada, en un commit aparte: son un dato de Héctor y no código de la épica, como dar valor a una constante de despliegue, y no son una excepción a la fusión por épica *(v8.2)*. Facebook queda fuera de la comparación de SM-12 hasta la prueba.
 - **Una sola ruta de generación** para el cuadrado y el 9:16:
   - el dominio llega al pie desde `dominio.ts` por `data-*`, y la columna 9:16 de `tramos.ts`, también por `data-*`;
   - la geometría se declara una vez, y la cabida se prueba en el navegador (Playwright local) en los dos formatos, con el pie puesto;
-  - la Historia va en dos toques: el primero carga `imagen.js`, compone y previsualiza; el segundo lanza `writeText` antes de `share()`, en el mismo turno. Cada rechazo tiene su conducta fija;
+  - la Historia va en dos toques: el primero carga `imagen.js`, compone y previsualiza; el segundo lanza `writeText` antes de `share()`, en el mismo turno. Cada rechazo tiene su conducta fija: los tres que llevan a la descarga, solo antes de abrir la hoja, y la descarga impuesta con el destino de su botón; «Enlace copiado» no espera a `share()` (AD-7) *(v8.2)*;
   - la URL marcada la compone el build con `compartir.ts`, también la de `opaco` y la de `instagram-historia`, y nunca sale de `location`.
+- **La frase de iOS** de la Historia (25.5) queda escrita y apagada tras una constante con nombre de `umbrales.ts`, que Héctor enciende en un diff visible si la matriz reproduce en iOS la caída a la descarga, como `SM12_CON_FACEBOOK` *(v8.2, Héctor, 2026-10-23)*.
+- **Si la 25 llega al sitio en vivo antes de que SM-5 y SM-7 tengan su línea base**, se juzga contra su propia serie y contra SM-C3, con las ventanas contadas desde su llegada, y se dice. La Imagen cuadrada no entra en el denominador de SM-12 *(v8.2)*. Su jornada de llegada es una constante de despliegue de `umbrales.ts`, con la forma de las demás, a la que la 25.7 da valor el día que llega *(v8.2, Héctor, 2026-10-23)*.
+- **Un acto de Héctor a mitad de cadena** *(v8.2)*: si el pie no deja caber alguna Cita, el diff de `src/lib/tramos.ts` de la 25.2, del que cuelgan la 25.4 y la 25.5; también con su comentario en el tablero.
 - **La isla de compartir se generaliza**, porque hoy está escrita para una sola Cita.
   - En la Página de Obra es su primera isla, sin la Historia, con «{título}, de {Autor}» compuesto en `atribucion.ts`.
   - Cuenta en el tope que `ingreso-construido.test.ts` mide donde se admite la afiliación.
   - La entrada de la Tarjeta Social de Obra conserva el fichero de su Autor (AD-16), que ya puso la 22.7, porque es lo que Facebook publica como texto.
 - **No toca la portada:** el bloque sobre la Cita del Día es de la 28, que lo reutiliza.
-- **Para fusionar:** el CI en verde; Playwright local de la cabida y del barrido; la matriz de cierre y el validador.
+- **Para fusionar** (lo cierra la 25.7): el CI en verde; `npm run test:e2e` entero sobre la rama al día con la principal, que ya trae la 24 con la 26, contra un receptor local *(v8.2)*; la matriz de cierre y el validador; NFR-7 medido a mano con Lighthouse en una Página de Cita con la Historia y «Compartir en» puestos, frente a la principal del mismo día, y si empeora, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*.
 
 ### Épica 26: Directorios y cabecera
 
@@ -4910,11 +4949,12 @@ Desde cualquier página, la cabecera «Autores · Obras · Buscar» deja todo Au
 **FRs covered:** FR-55; FR-15, FR-40 *(enmendados)*, FR-7 *(el tipo de resultado «Directorio»)*; NFR-1, NFR-5, NFR-8 y NFR-13 en lo que añade; FR-34, FR-37, FR-50, FR-52 *(sin trabajo)*; FR-42 *(heredado)*; SM-4 de los Directorios *(la juzga)*, SM-C2; SM-11 *(la fecha del despliegue conjunto con la 24)*.
 
 **Notas de implementación:**
-- **Misma rama y mismo merge que la 24.** Depende de la 23: la vista y la lectura de los Directorios se declaran en `superficies.ts` sobre su mecanismo, y las zonas `directorio` y `cabecera` ya existen. Su despliegue añade en `umbrales.ts` su propia fecha a la lista de cortes de SM-8 —la de su llegada en vivo, no la del merge (26.11)—, porque los Directorios son superficies nuevas que emiten vista.
+- **Misma rama y mismo merge que la 24.** Depende de la 23: la vista y la lectura de los Directorios se declaran en `superficies.ts` sobre su mecanismo, y las zonas `directorio` y `cabecera` ya existen. Su despliegue da valor a `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (26.11), del que se compone su entrada de `CORTES_DE_SM8` *(v8.2)*, porque los Directorios son superficies nuevas que emiten vista.
 - **La clave de orden va primero** (FR-15, AD-1).
   - La forma de `ordenAlfabetico` es puerta del esquema exportado, y su presencia se exige sobre `autoresPublicados`: un Autor con Citas y sin clave rompe el build con la ruta de su fichero.
   - `tools/autor.ts` la propone al dar de alta, y en lote para los Autores que ya existen. Una orden la corrige y la valida, y solo esa orden escribe `ordenRevisado`.
-  - La revisión es de Héctor y no bloquea la publicación ni la siembra. Los Autores de prueba llevan clave.
+  - La propuesta es la última palabra del `nombre`, y el parte marca aparte los nombres de tres palabras o más para que Héctor los revise primero *(v8.2, Héctor, 2026-10-23)*.
+  - La revisión es de Héctor y no bloquea la publicación ni la siembra. Los Autores de prueba llevan clave. La 26.10 se cierra al revisar las claves del lote inicial; las de los Autores nuevos pasan a la sesión de sembrado *(v8.2, Héctor, 2026-10-23)*.
   - La función hermana de `normalizar.ts` da la inicial sin tilde, con la Ñ propia y el slug como desempate. La consumen el Directorio de Autores, las letras de los dos Directorios y, en la 27, los destacados.
 - **Los Directorios son producto** (AD-17).
   - Van con rutas literales con barra final y sin páginas 2+, con sitemap, canónica, Tarjeta Social de hechos compuesta en el build y su vista.
@@ -4930,11 +4970,11 @@ Desde cualquier página, la cabecera «Autores · Obras · Buscar» deja todo Au
   La Lista de Obras de la Página de Autor y la Fila de Obra de `/obras/` pasan a ser un solo componente, con la unidad a la vista. El tamaño del HTML de `/obras/` avisa al pasar su umbral, sin romper.
 - **NFR-5 gana puerta.**
   - `superficiesInalcanzables` rompe en `astro:build:done`, sobre el grafo del `dist/` real, sin los subárboles `data-jornada` e ignorando `<template>` y `<noscript>`.
-  - Las órdenes que retiran se niegan con código 1 si dejarían una Cita a más de tres saltos, y `revisar` no aprueba una Cita sin Tema publicado.
-  - Es el primer veredicto del build sobre algo que rota. Por eso la marca única `data-jornada` y la prueba de las dos jornadas (AD-12) entran aquí, sobre la Cita del Día, que ya rota. El 404 también la conserva (UX-DR108), así que la prueba lo trata como a la portada: solo pueden diferir sus subárboles `data-jornada`. AD-12 nombra solo la portada, `/kit` y `/lote`; el 404 queda para la próxima pasada de `bmad-architecture`.
+  - Las órdenes que retiran —también `coleccion despublicar`— se niegan con código 1 si dejarían una Cita a más de tres saltos, y `revisar` y `tools/alta.ts` no publican una Cita sin Tema publicado *(v8.2)*.
+  - Es el primer veredicto del build sobre algo que rota. Por eso la marca única `data-jornada` y la prueba de las dos jornadas (AD-12) entran aquí, sobre la Cita del Día, que ya rota. El 404 también la conserva (UX-DR108), así que la prueba lo trata como a la portada: solo pueden diferir sus subárboles `data-jornada` *(v8.2: AD-12 ya nombra el 404)*.
 - **NFR-8 gana prueba.** El barrido móvil exige `scrollWidth` ≤ ancho a 320 px en toda superficie pública, en tres condiciones: con el texto por omisión, al 200 % y con el espaciado de 1.4.12. La cabecera va en dos filas por debajo de 600 px. Su altura (~113 px) y dónde empieza la Cita se vuelven a medir sobre lo construido. La Paginación de 12 páginas a 360 px entra en el mismo barrido, con `{spacing.unit}` entre zonas también en vertical (decisión de Héctor, 2026-10-19).
 - **No depende de la 27.** A cero, el filtro ofrece «Buscar «x» en las citas» hacia la `/buscar/` de hoy, y los destacados que allí salgan siguen la regla de la 27 cuando llegue.
-- **Para fusionar:** el CI en verde; Playwright local del barrido, del reflujo y del medio del tipo.
+- **Para fusionar** (lo cierra la 26.11, por la 24 y la 26): el CI en verde; `npm run test:e2e` entero *(v8.2)*; NFR-7 medido a mano con Lighthouse con lo de las dos épicas puesto, contra un receptor local y frente a la principal del mismo día, y si empeora, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*. Ya en vivo, la 26.11 da valor a `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, que no es condición para fusionar *(v8.2)*.
 
 ### Épica 27: Buscar con filtros
 
@@ -4949,7 +4989,7 @@ Desde la página 1 de una Obra, de un Autor o de un Tema se entra con «Buscar e
   - De la 23: el evento `busqueda`, con tramo y filtros, y la zona `resultado`.
   - De la 26: los Directorios como salida sin guion, la clave de orden para el desempate de los destacados, el Campo y la pausa de tecleo, `autoresPublicados` y `obrasPublicadas`, y el componente de la lista de obras, cuyo orden toma el selector de Obra.
 
-  Rama propia; se fusiona antes o después de la 25.
+  Rama propia; se fusiona antes o después de la 25. La cierra la 27.9, operativa, que la lleva al sitio en vivo *(v8.2, Héctor, 2026-10-23)*. Lo prueba todo sobre la rama contra un receptor local y, tras el merge, solo anota su jornada de llegada: no comprueba nada en el sitio en vivo, que escribiría en el D1 de producción, y siguen siendo dos, y ninguna más, las pasadas que escriben allí, la 25.3 y la 25.7 *(v8.2, Héctor, 2026-10-24)*.
 - **Un solo componente escribe los filtros, los metadatos y la clave de orden de una Cita, y solo en su Página de Cita** (AD-11):
   - `autor`, a lo sumo una `obra` y sus Temas publicados. El valor de `obra` es el nombre de su ficha, que pasa a ser interfaz pública;
   - `data-pagefind-sort`: un ordinal de ancho fijo que compone `obras.ts` con el orden del Directorio, el de la lista de obras y el del libro, y que deja sus huecos para «sin Obra» y «sin documento».
@@ -4963,12 +5003,12 @@ Desde la página 1 de una Obra, de un Autor o de un Tema se entra con «Buscar e
   - `?q=&autor=&obra=&tema=`, con identificadores.
   - `obra` sin `autor` toma el Autor del mapa.
   - Un filtro que ya no existe, también el de una Obra absorbida al reunir, se ignora, se dice y se quita.
-  - `replaceState` va tras la pausa y dentro de un `try`.
-  - La búsqueda asentada de la 23 pasa a este guion con sus filtros. Restaurar desde la caché de atrás y adelante conserva los estados ya emitidos.
+  - El estado que deja la pausa entra con `pushState` y se reescribe con `replaceState` mientras sigue cambiando el mismo control; todo dentro de un `try` *(v8.2)*.
+  - La búsqueda asentada de la 23 pasa a este guion con sus filtros. Restaurar desde la caché de atrás y adelante conserva los estados ya emitidos, y sin la caché la entrada marcada en `history.state` —con Navigation Timing de respaldo— dice que ya se asentó *(v8.2)*.
 - **Los destacados salen de una sola función** de `publicado.ts`, con el predicado «cuenta para el suelo» de `src/lib/huecos.ts` (`EquilibrioDeTradicion.hispanicos`), que la 27.6 saca a una función con nombre que usan `huecos.ts` y los destacados, y su recuento en `umbrales.ts`. La portada de la 28 la reutiliza.
 - **«Buscar en…» no añade guion ni crea página indexable:** es un formulario GET con el filtro en campos ocultos, dos en la Obra. El campo del 404 gana el botón «Buscar», y lo tecleado pasa a Inter.
-- **Lo que heredaba, resuelto** por Héctor el 2026-10-19: en `?autor=a&obra=b`, una `b` de otro Autor se descarta y se dice, con la regla del filtro que ya no existe (27.4); «Buscar en…», el campo de la portada, el del 404 y las salidas de la búsqueda sin resultados van exentos de zona por escrito (27.6, 27.8). `/buscar/` sigue admitiendo la publicidad acotada con filtros.
-- **Para fusionar:** el CI en verde; Playwright local de Pagefind y del barrido.
+- **Lo que heredaba, resuelto** por Héctor el 2026-10-19: en `?autor=a&obra=b`, una `b` de otro Autor se descarta y se dice, con la regla del filtro que ya no existe (27.4); «Buscar en…», el campo de la portada, el del 404 y las salidas de la búsqueda sin resultados van exentos de zona por escrito (27.6, 27.8), y los Directorios del aviso de `/buscar/`, también exentos (decisión de Héctor, 2026-10-22; 27.7) *(v8.2)*. `/buscar/` sigue admitiendo la publicidad acotada con filtros.
+- **Para fusionar:** el CI en verde y `npm run test:e2e` entero sobre la rama, construida con la medición contra un receptor local, con lo que llama a Pagefind y el barrido 2.2 con el reflujo; lo cierra la 27.9 *(v8.2)*, que mide NFR-7 a mano con Lighthouse en `/buscar/` y en una Página de Cita, frente a la principal del mismo día, las dos construidas en local con la medición contra un receptor local *(v8.2, Héctor, 2026-10-24)*, y si empeora, el merge espera a que Héctor decida; un agente nunca fusiona, y su jornada de llegada es una constante de despliegue de `umbrales.ts` a la que la 27.9 da valor el día que llega *(v8.2, Héctor, 2026-10-23)*, que es lo único que anota tras el merge *(v8.2, Héctor, 2026-10-24)*.
 
 ### Épica 28: La portada de retorno
 
@@ -4986,27 +5026,28 @@ Siguen seis Obras de seis Autores que cambian con la jornada, todos los Temas, l
   - los destacados (27).
 
   Depende también del presupuesto de AD-6 construido en la 23. La portada lo comparte con la Página de Cita, y su tope se mide con una Cita del Día que admite Imagen y, encendidas, las donaciones.
-- **Se fusiona después del juicio de SM-11, desde el 2026-12-05, o con su fecha declarada** en `umbrales.ts`, porque inclina la comparación al revés: quita de la portada el enlace directo a cada Autor, salvo los ocho destacados, y añade Obras. Sin la credencial de Search Console no hay juicio, y va por fecha declarada. Esa fecha depende de lo que decida Héctor sobre si la ventana de SM-11 se reinicia.
-- **Las seis Obras rotan como la Cita del Día** (AD-12).
+- **Se fusiona después del juicio de SM-11, desde el 2026-12-05, o con su fecha declarada** —`DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO`, que `umbrales.ts` ya declara en `undefined` (64b1bf0d) *(v8.2)*—, porque inclina la comparación al revés: quita de la portada el enlace directo a cada Autor, salvo los ocho destacados, y añade Obras. Sin la credencial de Search Console no hay juicio, y va por fecha declarada. Esa fecha depende de lo que decida Héctor sobre si la ventana de SM-11 se reinicia. La 28.5 le da valor el día que llega, también si llega tras el juicio *(v8.2, Héctor, 2026-10-23)*.
+- **Las seis Obras rotan aparte de la Cita del Día** (AD-12): la Obra de la Cita del Día puede salir entre ellas, una fijación no las cambia, y la ventana avanza tantos puestos como Obras salen *(v8.2)*.
   - Viven junto a `citaDelDia.ts` y salen de las Obras indexables o, si rige la congelación, del conjunto congelado.
   - Rotan en rondas por Autor, en el orden del Directorio, con la marca `data-jornada` de la 26.
   - Toda comprobación sobre ellas se hace sobre el conjunto del que rotan.
 - **La Cita del Día, su Tarjeta y sus acciones son un solo bloque.** No llevan ningún Modelo en medio, van fuera de Pagefind y actúan sobre la canónica de su Página de Cita. La portada no emite la vista de una Cita por ellas.
 - **El resto de la portada.**
-  - La línea de cifras se cuenta con `esCitaDocumentada`, y no dice «cada una con su fuente» mientras quede alguna Cita en el censo de pendientes.
+  - La línea de cifras se cuenta con `esCitaDocumentada`, y no dice «cada una», en ninguna forma, mientras quede censo; con el censo vacío dice «cada una cotejada con el texto de su fuente» *(v8.2)*.
   - El campo es un formulario GET sin guion.
   - La marca de la cabecera es el `h1`, y «Saltar al contenido» lleva a la línea de cifras.
   - La puerta de NFR-5 de la 26 tiene que seguir pasando sin la lista entera de Autores.
+- **Una pregunta abierta, que bloquea la 28.2** *(v8.2)*: si la frase de la portada sin ninguna Cita apta se escribe aparte o si `DESCRIPCION_DEL_SITIO` cambia con ella, y con ella la `description` de la portada, el `WebSite`, la bajada de su Tarjeta Social y `rss.xml`. `EXPERIENCE.md` las da por iguales y hoy difieren; la cierra `bmad-ux`.
 - **Conviene hacer antes la 21.2:** con 16 aptas, la Cita del Día se repite cada 16 días, y la portada no se puede juzgar.
-- **Para fusionar:** el CI en verde y Playwright local. El 404 conserva su Cita del Día sin Tarjeta ni acciones.
+- **Para fusionar** (lo cierra la 28.5): el CI en verde y `npm run test:e2e` entero, contra un receptor local *(v8.2)*; NFR-7 medido a mano con Lighthouse sobre la portada y una Página de Cita, frente a la principal del mismo día, y si empeora, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*. El 404 conserva su Cita del Día sin Tarjeta ni acciones.
 
 ## Epic 23: Medir la lectura
 
 Héctor sabe, por superficie y por zona, cuántas cargas se leyeron de verdad —la página estuvo visible ocho segundos o alguien la tocó—, por qué enlace siguió quien leía, cuántas búsquedas se asentaron y en qué tramo de resultados, cuánto se lee cada Obra, se indexe o no, y qué trae cada marca, la de las cuentas propias y la de lo que comparte un visitante, contadas una vez por llegada y quitadas de la dirección. Nada de esto lleva identificador, cookie ni texto libre, y el listón de la Página de Cita no se mueve: el guion de medición sale de la página a un fichero y deja el hueco en línea que necesitan las épicas siguientes. Va primera porque sin ella ninguna otra se puede juzgar: las tasas de §7 pasan a lecturas, y las metas de SM-3…SM-7 esperan a su línea base.
 
 **FRs covered:** FR-56; FR-22 *(cotejo, guardado y recuento de las dos marcas)*, FR-8 *(la consulta sin resultados, registrada al asentarse)*, FR-51 *(la vista de Obra)* *(enmendados)*; NFR-9, NFR-11; SM-8 *(el corte de su serie)*; el instrumento de SM-3…SM-7, SM-12, SM-13, SM-C3 y SM-C5.
-**Notas de implementación:** se construye en su propia rama y entra en la principal en un solo merge (23.11), con la publicación reparada y el CI en verde; lo que no hace y las condiciones de fusión están en la Epic List — v8. **Orden:** la 23.1 primero, porque su fichero y su arranque son el mecanismo de todo lo demás; la 23.4 cuando se quiera, porque no depende de nada; la 23.2 tras la 23.1, y la 23.3, acto de Héctor, justo detrás: desde la 23.2 la huella deja `npm test` en rojo en la rama, a propósito (AD-14), hasta que la 23.3 la versiona. Después la 23.5, de la que cuelgan la 23.6–23.9, que van en cualquier orden; la 23.10 lee lo que dejan esas cinco, y la 23.11, de Héctor, cierra la rama. El vocabulario entra entero en la 23.2: una historia posterior que necesite tocarlo vuelve a pasar por la orden de la 23.2 y por la 23.3 antes de seguir. El CI solo corre en la principal, así que en la rama el build, `astro check`, `npm test` y Playwright se corren a mano. **Fuera, y a qué épica va:** la vista y la lectura de los Directorios y la zona `directorio` puesta, a la 26; todo `?via=` compuesto y los destinos `facebook`, `threads` e `instagram-historia` ofrecidos, a la 25; los filtros de `busqueda`, a la 27; las zonas `tarjeta-de-obra`, `siguiente` y `misma-obra`, a la 24, y `obras-de-portada`, a la 28.
-**Preguntas abiertas:** alinear la letra de AD-13 con la `senal --tipo ajena` que admite `?via=` (23.6) y con la fecha del corte de SM-8, la de la llegada en vivo (23.11) (`bmad-architecture`).
+**Notas de implementación:** se construye en su propia rama y entra en la principal en un solo merge (23.11), con el CI en verde *(v8.2)*; lo que no hace y las condiciones de fusión están en la Epic List — v8. La excepción es la 23.12, el `rowid` aleatorio del `INSERT` de `medicion/worker.ts`: entra sola en la principal, fuera de la rama, y es la única historia de la épica que lo hace; su fila se añade a mano a `sprint-status.yaml` *(v8.2, Héctor, 2026-10-23)*. **Orden:** la 23.1 primero, porque su fichero y su arranque son el mecanismo de todo lo demás; la 23.4 cuando se quiera, porque no depende de nada; la 23.2 tras la 23.1; la 23.12 entra en la principal antes de la 23.3, por su cuenta, y la rama la trae de ella *(v8.2)*; y la 23.3, acto de Héctor, justo detrás: desde la 23.2 la huella deja `npm test` en rojo en la rama, a propósito (AD-14), hasta que la 23.3 la versiona. Después la 23.5, de la que cuelgan la 23.6–23.9, que van en cualquier orden; la 23.10 lee lo que dejan esas cinco, y la 23.11, de Héctor, cierra la rama. El vocabulario entra entero en la 23.2: una historia posterior que necesite tocarlo vuelve a pasar por la orden de la 23.2 y por la 23.3 antes de seguir. El CI solo corre en la principal —el build, `astro check` y `npm test`, que es Vitest— y no corre Playwright, así que en la rama el build, `astro check`, `npm test` y Playwright local se corren a mano, y antes del merge `npm run test:e2e` entero, con la rama construida con la medición puesta contra un receptor local (`wrangler dev` con D1 local), nunca contra el D1 de producción *(v8.2)*. **Fuera, y a qué épica va:** la vista y la lectura de los Directorios y la zona `directorio` puesta, a la 26; todo `?via=` compuesto y los destinos `facebook`, `threads` e `instagram-historia` ofrecidos, a la 25; los filtros de `busqueda`, a la 27; las zonas `tarjeta-de-obra`, `siguiente` y `misma-obra`, a la 24, y `obras-de-portada`, a la 28.
+**Preguntas abiertas:** la cuota de lectura de D1 —5 millones de filas leídas al día en el plan gratuito—, que la espina no nombra, ni qué informa de ella la orden de la 23.10 (`bmad-architecture`) *(v8.2)*.
 
 ### Story 23.1: La medición sale a un fichero, y la Página de Cita no pierde su listón
 
@@ -5024,7 +5065,7 @@ So that medir más no mueva el listón de la Página de Cita y las épicas sigui
 **Given** `MEDICION_ENDPOINT` sin definir
 **When** se construye
 **Then** el `getStaticPaths` del endpoint queda vacío: no hay fichero ni etiqueta, y ninguna página emite nada
-**And** lo único de la medición que queda en `dist/` es el arranque de `__medir`, que va también sin punto final; por él, el `dist/` sin punto final cambia con esta historia, y los criterios de la Historia 20.1 no se enmiendan: se cumplieron en su entrega, y esta declara su invariante nuevo
+**And** de la medición quedan en `dist/` el arranque de `__medir`, que va también sin punto final, y el marcado del build —el `data-*` de las vistas y, cuando lleguen, las zonas (23.7) y la marca indexable (23.9)—; no queda ningún fichero ni etiqueta de guion *(v8.2)*. Por el arranque y el `data-*` de las vistas, el `dist/` sin punto final cambia con esta historia —y con la 23.7 y la 23.9, por las zonas y la marca— *(v8.2)*, y los criterios de la Historia 20.1 no se enmiendan: se cumplieron en su entrega, y esta declara su invariante nuevo
 
 **Given** toda superficie de carácter `producto` o `servicio` en `src/lib/superficies.ts` —también `/buscar/`, las páginas 2+, el 404 y la página 1 de una Obra que no se indexa—
 **When** se sirve con punto final
@@ -5036,6 +5077,7 @@ So that medir más no mueva el listón de la Página de Cita y las épicas sigui
 **Then** define `__medir` como cola antes de toda isla, y el guion, al cargar, vacía esa cola en orden y la sustituye (AD-13)
 **And** toda isla llama `__medir(…)`, nunca `window.__medir && …`, y ninguna define su propio emisor: una prueba sobre `dist/` lo fija en `CopiarCita`, `ImagenDeCita`, `CompartirEnlace` y `/buscar/`
 **And** el arranque cuenta en `MAX_BYTES_DE_GUION`
+**And** el arranque es solo cola: no lleva memoria ni vocabulario; qué acción es la primera de su métrica lo decide el guion al vaciarla, en su orden (23.5, AD-13) *(v8.2)*
 
 **Given** la declaración de cada superficie en `src/lib/superficies.ts`
 **When** se pinta una página
@@ -5062,6 +5104,7 @@ So that medir más no mueva el listón de la Página de Cita y las épicas sigui
 **Given** un guion en línea que necesita un dato de contenido —slug, texto u Obra—
 **When** se construye
 **Then** lo lee de un `data-*` y nunca de `define:vars`: `src/islands/CopiarCita.astro` deja de meter el slug, y el guion de cada isla es idéntico byte a byte en toda página de su familia (AD-6, AD-12)
+**And** las dos copias de `CopiarCita` del Kit Diario, la de la Cita del Día y la de su alternativa, siguen vivas sin el slug: cada guion encuentra su botón por `document.currentScript` o por un oyente delegado, nunca por un selector común, y una prueba de Playwright local pulsa la segunda, porque `tests/e2e/kit.spec.ts` solo prueba `.first()` y una segunda instancia muerta pasaría *(v8.2)*
 **And** `src/islands/ImagenDelKit.astro`, que también mete el slug por `define:vars` en `/kit` y `/lote`, ajenas, queda como está: lo pasa a `data-*` la 25.4, que toca el Kit, y hasta entonces la prueba la nombra como exención
 
 **Given** una isla en línea que anuncia —Copiar, la Imagen de Cita y la búsqueda de `/buscar/`—
@@ -5070,10 +5113,11 @@ So that medir más no mueva el listón de la Página de Cita y las épicas sigui
 **And** la región sigue en el marcado desde la carga, vacía y sin `hidden`, como manda `AGENTS.md`
 **And** una prueba sobre `dist/` exige ese texto en toda isla en línea que anuncia; el segundo ritmo, el del tecleo, lo añade la 26
 
-**Given** las pruebas que afirmaban la medición en línea o que «la página no descarga ningún fichero de script» —en `tests/unit/medicion.test.ts`, `tests/e2e/pagina-de-cita.spec.ts`, `tests/e2e/portada.spec.ts` y `tests/e2e/pagina-de-autor.spec.ts`—
+**Given** las pruebas que afirmaban la medición en línea o que «la página no descarga ningún fichero de script» —en `tests/unit/medicion.test.ts`, `tests/e2e/pagina-de-cita.spec.ts`, `tests/e2e/portada.spec.ts`, `tests/e2e/pagina-de-autor.spec.ts` y, *(v8.2)* porque su ausencia de guiones pasa en vacío sin `MEDICION_ENDPOINT`, `tests/e2e/pagina-404.spec.ts` (89–96) y `tests/e2e/seo.spec.ts` (107–116)—
 **When** se reescriben
 **Then** se juzgan contra la lista cerrada y contra un sitio construido con punto final: una prueba de ausencia no prueba nada (AD-6)
 **And** responden a los criterios de JavaScript de las Historias 2.1, 3.1 y 4.1, enmendados en su sitio; la 17.4 conserva su criterio y solo cambia su prueba
+**And** los espías con `addInitScript` de `compartir-enlace.spec.ts`, `compartir-imagen.spec.ts`, `imagen.spec.ts` y `busqueda.spec.ts`, que el arranque de `__medir`, ahora siempre presente, sobrescribiría, se adaptan (`window.__medir = window.__medir || …` o cambiando el espía) *(v8.2)*
 
 **Given** un despliegue que cambia el guion
 **When** un HTML en caché pide el fichero anterior
@@ -5081,7 +5125,7 @@ So that medir más no mueva el listón de la Página de Cita y las épicas sigui
 
 **Given** la lógica del guion —la cola, las vistas y la espera a la activación—
 **When** se prueba
-**Then** Vitest la ejecuta en el entorno simulado de `tests/unit/medicion.test.ts`, y Playwright local la confirma en un navegador con un receptor local, como `tests/e2e/receptor.spec.ts`
+**Then** Vitest la ejecuta en el entorno simulado de `tests/unit/medicion.test.ts`, y Playwright local la confirma en un navegador con el receptor Node de `tests/e2e/receptor.spec.ts`, que llama a `interpretar` y guarda en memoria lo que llega, sin `medicion/worker.ts` ni D1; no es el `wrangler dev` con D1 local de la 23.2, que es el de las construcciones de rama *(v8.2)*
 
 ### Story 23.2: El receptor sabe guardar lo que la v8 va a medir antes de que nadie lo envíe
 
@@ -5093,16 +5137,19 @@ So that ningún dato nuevo llegue a nulo sin error y ninguna épica posterior te
 
 **Given** el vocabulario de la medición
 **When** se separa de la emisión
-**Then** vive en un módulo puro de `src/lib/` sin importaciones, como `destinos.ts` y `redes.ts`, y de él importan el receptor, el guion de la 23.1, los guiones empaquetados que traigan la 26 y la 27 y `tools/`; `src/lib/medicion.ts` conserva la emisión y la composición del guion (AD-13)
+**Then** vive en un módulo puro de `src/lib/` que solo importa módulos hoja sin importaciones —`destinos.ts`, que da `DESTINOS_VALIDOS`, y `redes.ts`, que da `PARAMETRO_DE_ORIGEN`— y nunca copia sus conjuntos, y de él importan el receptor, el guion de la 23.1, los guiones empaquetados que traigan la 26 y la 27 y `tools/`; `src/lib/medicion.ts` conserva la emisión y la composición del guion (AD-13) *(v8.2)*
+**And** una prueba de Vitest lo fija como «solo importa módulos sin importaciones» *(v8.2)*
 **And** declara los eventos de siempre y los cuatro nuevos —`lectura`, `salida-interna`, `busqueda` y `vista-de-obra`—, cada campo como conjunto cerrado y los nombres de los parámetros `de` y `via`
-**And** los campos son: la zona, con las dieciséis de `EXPERIENCE.md § Zonas de salida interna` (UX-DR111); el tramo, con sus cortes 0, 1–9, 10–29 y 30+ y sus rótulos, que son vocabulario y no umbral; los filtros usados, con las seis combinaciones válidas, porque la Obra nunca va sin su Autor; la marca indexable o no indexable de `vista-de-obra`; y `via`, cuyo conjunto es `DESTINOS_VALIDOS`
+**And** los campos son: la zona, con las dieciséis de `EXPERIENCE.md § Zonas de salida interna` (UX-DR111); el tramo, con sus cortes 0, 1–9, 10–29 y 30+ y sus rótulos, que son vocabulario y no umbral; los filtros usados, con las seis combinaciones válidas, porque la Obra nunca va sin su Autor; la marca indexable o no indexable de `vista-de-obra`; `via`, cuyo conjunto es `DESTINOS_VALIDOS`; *(v8.2)* `primera` (sí/no) de `copiado`, `descarga-de-imagen` y las dos comparticiones, con la correspondencia evento → métrica que solo el vocabulario declara —SM-5 junta `copiado` y `descarga-de-imagen`; SM-7, las dos comparticiones—; y el `destino` de `descarga-de-imagen`, con {`opaco`, `instagram-historia`}
+**And** `primera` y el destino de la descarga entran ahora porque añadirlos después de que empiece la línea base abriría un corte en ella *(v8.2)*
 
 **Given** `src/lib/destinos.ts`
 **When** se parte en dos clases
 **Then** los destinos de enlace son `whatsapp`, `telegram`, `x`, `correo`, `facebook` y `threads`, el destino de imagen es `instagram-historia`, y `DESTINOS_VALIDOS` es su unión más `opaco`, sin importaciones (FR-20)
 **And** los constructores puros de `facebook` y `threads` entran aquí, en `src/lib/compartir.ts`, con su prueba y sin botón, para que la invariante de `tests/unit/comparticion.test.ts` —todo destino de enlace tiene constructor— se cumpla siempre, también entre la 23 y la 25 (AD-13); sus botones son de la 25.1
 **And** el sitio no ofrece todavía `facebook`, `threads` ni `instagram-historia`: el bloque de compartir de hoy se construye idéntico, y lo que se ofrece de ellos es de la 25
-**And** la invariante de la línea 82 de esa prueba pasa a «los ofrecidos son subconjunto de los de enlace»; con la 25.1, el criterio de la hoja de la Historia 10.4 —«una compartición a través de la hoja del sistema» registra «el destino como opaco»— queda sustituido, porque con la 25.5 la Historia de Instagram también pasa por la hoja y registra `instagram-historia`; al cerrarse la 25.1 se marca *(sustituido en la v8 por las Historias 23.2 y 25.1)*, como la 3.2 y la 22.4
+**And** `DESTINOS` de `src/lib/compartir.ts`, que hoy es a la vez la tabla de constructores y la lista que pinta `CompartirEnlace.astro`, se parte en dos: los constructores, ya con `facebook` y `threads`, y una lista de ofrecidos aparte, que sigue siendo la de hoy; meterlos en `DESTINOS` los pintaría y rompería `tests/unit/compartir.test.ts` (61–66) y `tests/unit/espinas-de-ux.test.ts` (174–187) *(v8.2)*
+**And** la invariante de la línea 82 de `tests/unit/comparticion.test.ts` pasa a «los ofrecidos son subconjunto de los de enlace», escrita sobre la lista de ofrecidos *(v8.2)*; con la 25.1, el criterio de la hoja de la Historia 10.4 —«una compartición a través de la hoja del sistema» registra «el destino como opaco»— queda sustituido, porque con la 25.5 la Historia de Instagram también pasa por la hoja y registra `instagram-historia`; al cerrarse la 25.1 se marca *(sustituido en la v8 por las Historias 23.2 y 25.1)*, como la 3.2 y la 22.4
 
 **Given** los identificadores y los comentarios del módulo
 **When** se revisan
@@ -5110,41 +5157,61 @@ So that ningún dato nuevo llegue a nulo sin error y ninguna épica posterior te
 
 **Given** `medicion/migrations/` y `migrations_dir` en `medicion/wrangler.toml`
 **When** se escriben las migraciones
-**Then** la `0000` es la tabla de producción tal como está —las seis columnas y los dos índices, con `IF NOT EXISTS`— y no hace nada en la base de producción, y la `0001` lleva solo los `ALTER TABLE … ADD COLUMN` de `via`, `zona`, `tramo`, `filtros` e `indexable` (AD-14)
+**Then** la `0000` es la tabla de producción tal como está —las seis columnas y los dos índices, con `IF NOT EXISTS`— y no hace nada en la base de producción, y la `0001` lleva solo los `ALTER TABLE … ADD COLUMN` de `via`, `zona`, `tramo`, `filtros`, `indexable` y `primera` *(v8.2)* (AD-14)
 **And** cada columna nueva es nula fuera de sus eventos; no hay columna genérica ni JSON, y ninguna lleva hora
 **And** `medicion/esquema.sql` queda como estado acumulado de referencia, una prueba fija que aplicar las migraciones en orden da sus columnas, y una base nueva se crea solo aplicándolas: `DESPLIEGUE.md` §3 deja de crearla con `--file=esquema.sql`
 
+**Given** el receptor local de las construcciones de rama *(v8.2)*
+**When** se monta con esas migraciones
+**Then** aplica `medicion/migrations/` a un D1 local (`wrangler d1 migrations apply --local`) y levanta `medicion/worker.ts` con `wrangler dev`, los dos con `wrangler` 4.151.1 en versión exacta y sin `--remote`: nunca toca el D1 de producción
+**And** con él, el `webServer` de `playwright.config.ts` —hoy `npm run build && node tests/servidor.mjs`, sin `MEDICION_ENDPOINT`— y la construcción que mide Lighthouse se hacen con `MEDICION_ENDPOINT` apuntando a ese receptor; es el «receptor local (`wrangler dev` con D1 local)» que nombran el Entorno operativo, la 24.6 y las historias de cierre (23.11, 25.7, 26.11, 27.9 y 28.5)
+**And** las pruebas de ausencia de guiones de la 23.1 y las que construyen su propio sitio siguen eligiendo su construcción
+**And** el receptor Node de `tests/e2e/receptor.spec.ts`, que llama a `interpretar` sin `worker.ts` ni D1, es otra cosa: lo usan las pruebas de comportamiento del guion (23.1, 23.5, 23.9), que leen en memoria lo que llega
+
 **Given** una baliza
 **When** la interpreta `medicion/receptor.ts`
-**Then** registra los eventos nuevos y coteja cada campo nuevo contra su conjunto, guardándolo solo en sus eventos: `via` en las vistas y la lectura, que es donde el guion lleva las marcas de la llegada; `zona` en `salida-interna`; `tramo` y `filtros` en `busqueda`; `indexable` en `vista-de-obra`; y `destino`, además de en las comparticiones, en `descarga-de-imagen` solo con `instagram-historia`. `origen` se sigue guardando como hoy
+**Then** registra los eventos nuevos y coteja cada campo nuevo contra su conjunto, guardándolo solo en sus eventos: `via` en las vistas y la lectura, que es donde el guion lleva las marcas de la llegada; `zona` en `salida-interna`; `tramo` y `filtros` en `busqueda`; `indexable` en `vista-de-obra`; `destino`, además de en las comparticiones, en `descarga-de-imagen` con {`opaco`, `instagram-historia`}; y `primera` en `copiado`, `descarga-de-imagen` y las dos comparticiones *(v8.2)*. `origen` se sigue guardando como hoy
 **And** un valor fuera de su conjunto, o un campo fuera de su evento, se descarta sin descartar el evento, y `consulta` sigue siendo exclusiva de `busqueda-sin-resultados` (NFR-11)
 **And** `medicion/worker.ts` escribe las columnas nuevas, y el receptor sigue aceptando todo lo que envía el sitio en vivo con el vocabulario de la v7.1, que lo enviará hasta el merge
+**And** en cuanto la rama trae la 23.12 de la principal —a más tardar antes de la 23.3—, el `INSERT` que escribe las columnas nuevas conserva su `rowid` aleatorio y su prueba estructural pasa en la rama *(v8.2)*
 
 **Given** la prueba de correspondencia
 **When** corre `npm test`
-**Then** fija que las claves que emite el guion de la 23.1 ⊆ el registro del receptor ⊆ las columnas del esquema: un dato que llega a nulo sin error es indistinguible de un cero (AD-13)
+**Then** fija, por evento y por valor, que las claves que emite el guion para cada evento son exactamente las que el vocabulario le declara —un campo que falta pasa una prueba de inclusión—, que cada valor es de su conjunto y que esas claves ⊆ el registro del receptor ⊆ las columnas del esquema: un dato que llega a nulo sin error es indistinguible de un cero (AD-13) *(v8.2)*
+**And** donde el nombre de la baliza y el de la columna difieren —`datos` y `consulta`—, la correspondencia se declara y la prueba la usa *(v8.2)*
+**And** cubre los eventos y los campos que el guion ya emite, y nombra como pendientes, cada uno con la historia que lo emitirá, los que aún no emite: `lectura` y `primera` (23.5), `via` (23.6), `salida-interna` con `zona` (23.7), `busqueda` con `tramo` y `filtros` (23.8) y `vista-de-obra` con `indexable` (23.9). Cada una de esas historias mete su caso en la prueba y lo saca de pendientes, así que la prueba no pasa en vacío ni deja la rama en rojo más allá de la 23.3, y la lista está vacía cuando la rama entra en la principal (23.11) *(v8.2)*
 
 **Given** la huella del vocabulario desplegado, versionada
 **When** corre `npm test`
 **Then** falla si no casa con el vocabulario de `src/lib/`, y nombra la diferencia y la orden que la cierra (AD-14)
-**And** cambiar los cortes del tramo mueve la huella y abre un corte de serie con fecha en `umbrales.ts`
+**And** la huella vive en el repositorio con la ruta y la forma que escribe la orden, que nombran cada evento y cada valor; sin huella versionada, la prueba falla diciéndolo, y la orden no se salta el cotejo en silencio: `desplegar` lo dice, coteja el registro del receptor contra el vocabulario de la principal, que es lo que emite el sitio en vivo, y sigue *(v8.2)*
+**And** cambiar los cortes del tramo mueve la huella y añade una entrada a la lista de cortes de serie de la 23.10, con su jornada de despliegue *(v8.2)*
 **And** terminada esta historia, la rama queda en rojo por esa prueba hasta que la 23.3 versione la huella nueva: es la forma en que la rama entra en la principal ya con su huella
 
 **Given** `npm run medicion -- desplegar` en `tools/medicion.ts`, con `wrangler` 4.151.1 en versión exacta y `--remote` siempre explícito
 **When** se corre
-**Then** aplica las migraciones pendientes con `wrangler d1 migrations`, despliega el receptor, le envía una baliza de prueba por cada evento y cada campo nuevos a la ruta `/__comprobacion/`, lee de vuelta que cada campo llegó, las borra y, solo entonces, escribe la huella; no hace commit
+**Then** aplica las migraciones pendientes con `wrangler d1 migrations`, despliega el receptor, le envía una baliza de prueba por cada evento y cada campo nuevos a la ruta `/__comprobacion/`, lee de vuelta que cada campo llegó y, con `CAST(rowid AS TEXT)` de sus filas, que el receptor en vivo inserta con `rowid` aleatorio, las borra, baraja lo ya escrito con un `UPDATE` idempotente y, solo entonces, escribe la huella; no hace commit *(v8.2)*
+**And** antes de barajar cuenta las filas que escribirá —unas tres por fila: la fila y sus dos índices— frente a la cuota de escritura de D1 del día; si no caben, no baraja ni escribe la huella, lo dice y sale con 1, y Héctor repite la orden otro día: el barajado no se trocea por jornadas *(v8.2, Héctor, 2026-10-24)*; da los recuentos de antes y de después como `COUNT` por (jornada, evento), sin copiar ninguna fila ni usar `wrangler d1 export` (AD-13) *(v8.2)*
+**And** si el receptor no inserta con `rowid` aleatorio, lo dice, no baraja ni escribe la huella y sale con 1; lo baraja el siguiente despliegue que pase la comprobación (AD-13); el barajado se repite en cada despliegue del receptor, y barajar no es migrar: no cambia el esquema (AD-14) *(v8.2)*
 **And** se para en el primer fallo, con código 1, y dice qué quedó aplicado: sin baliza vista no hay huella, y nunca reintenta una migración a ciegas, porque `ADD COLUMN` no es idempotente
-**And** se niega, con 1 y sin desplegar, si el registro del receptor no cubre el vocabulario de la huella versionada, que es el del sitio en vivo: por eso la reversión empieza por el sitio
+**And** se niega, con 1 y sin desplegar, si el registro del receptor no cubre el vocabulario de la huella versionada, que es el del sitio en vivo —o, sin huella versionada, el de la principal *(v8.2)*—: por eso la reversión empieza por el sitio
 **And** sin sesión de `wrangler` no hace nada, lo dice y sale con 2; una bandera desconocida, también con 2
+
+**Given** `npm run medicion -- comprobar` *(v8.2)*
+**When** se corre
+**Then** envía las balizas de prueba al receptor en vivo, lee de vuelta cada campo y el `rowid` aleatorio, las borra y coteja lo visto con la huella versionada, sin migrar, desplegar, barajar ni escribir la huella
+**And** sale con 1 si no casa con la huella o si el receptor no inserta con `rowid` aleatorio, nombrando la diferencia y que la cierra repetir la 23.3; con 2 sin sesión de `wrangler`
+**And** es la que corre la 23.11 el día del merge
 
 **Given** la red
 **When** corre la orden
-**Then** solo la cáscara de `tools/medicion.ts` invoca `wrangler`, y la parte pura de `tools/lib/` se prueba en Vitest con respuestas fijas; ninguna prueba toca el remoto (AD-22)
-**And** aplicar en remoto y desplegar el receptor son actos de Héctor (23.3): ningún agente corre esta orden
+**Then** solo la cáscara de `tools/medicion.ts` invoca `wrangler`, y la parte pura de `tools/lib/` —también el coste del barajado frente a la cuota y la lectura del `rowid` de las balizas *(v8.2)*— se prueba en Vitest con respuestas fijas; ninguna prueba toca el remoto (AD-22)
+**And** aplicar en remoto y desplegar el receptor son actos de Héctor (23.3): ningún agente corre `desplegar`, ni `comprobar`, que también escribe y borra en el D1 de producción *(v8.2)*
 
 **Given** `DESPLIEGUE.md` §3
 **When** se cierra la historia
 **Then** deja de decir «No hay migración» y documenta el orden migración, receptor y sitio, la orden y su baliza, y la reversión: primero el sitio, después el receptor, y las migraciones no se revierten
+**And** documenta también el barajado del `rowid` y su coste contra la cuota —si no cabe en la del día, `desplegar` sale con 1 sin barajar y se corre otro día, nunca troceado *(v8.2, Héctor, 2026-10-24)*—, y que se repite en cada despliegue; `comprobar`; que mientras viva la rama de la 23 el receptor no se vuelve a desplegar desde la principal, y que si se hace la huella de la rama queda rancia y la 23.3 se repite; y cómo se recupera D1 —Time Travel, 7 días en el plan gratuito y 30 en el de pago, sobrescribe lo escrito después, y ninguna orden de `tools/` restaura producción— *(v8.2)*
 **And** la Historia 2.9 queda ampliada sin enmendarla: el conjunto de eventos sigue siendo cerrado y con nombre, y crece aquí como creció en la 10.4 y la 20.1
 
 ### Story 23.3: La migración y el receptor llegan antes que el sitio
@@ -5155,23 +5222,27 @@ So that el receptor sepa guardar cada dato nuevo el día que el sitio lo envíe,
 
 **Acceptance Criteria:**
 
-**Given** la Historia 23.2 terminada y este equipo con sesión de `wrangler` (`cd medicion && npx wrangler@4.151.1 whoami`)
+**Given** las Historias 23.2 y 23.12 terminadas —la 23.12 ya en la principal, y la rama al día con ella— y este equipo con sesión de `wrangler` (`cd medicion && npx wrangler@4.151.1 whoami`) *(v8.2, Héctor, 2026-10-23)*, y, la primera vez, sin ninguna huella versionada —es el primer `desplegar`—, que es el caso en que la orden lo dice y coteja el registro del receptor contra el vocabulario de la principal (23.2) *(v8.2)*
 **When** Héctor corre `npm run medicion -- desplegar` desde la rama de la épica
-**Then** la `0000` y la `0001` quedan aplicadas en remoto, el receptor desplegado, las balizas de prueba vistas y borradas, y la huella escrita
+**Then** la `0000` y la `0001` quedan aplicadas en remoto, el receptor desplegado e insertando con `rowid` aleatorio, las balizas de prueba vistas y borradas, lo ya escrito barajado —con sus filas contadas antes contra la cuota del día— y la huella escrita *(v8.2)*
 **And** Héctor commitea la huella en la rama, nunca en la principal, y ningún agente corre la orden
 
 **Given** la tabla de producción antes de migrar
 **When** se compara después
-**Then** conserva todas sus filas, la `0000` no cambió nada y las columnas nuevas están a nulo en las filas de antes; el recuento queda anotado con fecha
+**Then** conserva todas sus filas, la `0000` no cambió nada y las columnas nuevas están a nulo en las filas de antes
+**And** los recuentos de antes y de después —los `COUNT` por (jornada, evento) que da la orden al barajar— quedan anotados con fecha en el spec de la historia, y coinciden en toda jornada cerrada; la del día, que el sitio en vivo sigue escribiendo mientras corre la orden, solo puede crecer, y se dice *(v8.2)*
 
 **Given** el sitio en vivo, que sigue en la principal con el vocabulario de la v7.1
 **When** se lee la primera jornada cerrada tras el despliegue
 **Then** sus eventos siguen llegando como antes: el receptor nuevo no pierde nada de lo que envía el sitio viejo
-**And** si dejan de llegar, Héctor vuelve a desplegar desde la principal el receptor que había —las migraciones no se revierten: sus columnas nuevas admiten nulo— y la rama no sigue hasta saber por qué
+**And** si dejan de llegar, Héctor vuelve a desplegar desde la principal el receptor de la principal —el de la v7.1, ya con el `rowid` aleatorio de la 23.12 *(v8.2)*; las migraciones no se revierten: sus columnas nuevas admiten nulo— y la rama no sigue hasta saber por qué
+**And** esa vuelta atrás deja rancia la huella de la rama —describe un receptor que ya no está—, así que la 23.3 se repite desde la rama antes de seguir; el receptor de la principal conserva el `rowid` aleatorio (23.12), y uno anterior a él volvería a dejar el orden de llegada sin que la huella lo viera: `comprobar` y la comprobación de `desplegar` (23.2) lo dicen, y `desplegar` no baraja *(v8.2)*
+**And** fuera de esta vuelta atrás, mientras viva la rama el receptor no se despliega desde la principal *(v8.2)*
 
 **Given** un fallo a mitad de la orden
 **When** se para
-**Then** lo que quedó aplicado se anota, no se reintenta sin diagnóstico y la rama no avanza sobre una huella que no se escribió
+**Then** lo que quedó aplicado se anota en el spec de la historia *(v8.2)*, no se reintenta sin diagnóstico y la rama no avanza sobre una huella que no se escribió
+**And** si lo que la para es la cuota —el barajado no cabe en la de escritura del día—, el diagnóstico es ese: Héctor repite la orden otro día desde la rama, sin trocear el barajado, y la rama sigue en rojo hasta que se escriba la huella *(v8.2, Héctor, 2026-10-24)*
 
 **Given** la huella commiteada en la rama
 **When** se corre `npm test`
@@ -5199,14 +5270,13 @@ So that lo que añadan las épicas siguientes se compruebe ya contra el suelo vi
 **Then** no hay ninguna violación, y lo que aparezca en lo construido se corrige en esta historia
 **And** ninguna regla se desactiva ni se excluye un nodo para pasar; si corregir algo pide una decisión de diseño, se nombra a Héctor y la historia no se cierra
 
-**Given** los criterios de WCAG 2.2 que axe no comprueba
+**Given** los criterios que WCAG 2.2 AA añade
 **When** se lee el barrido
-**Then** no se dan por comprobados por él: 2.4.11, 2.5.7 y 2.5.8 los da por cumplidos la UX y 3.2.6, 3.3.7 y 3.3.8 no aplican, y la prueba lo dice así
-**And** `EXPERIENCE.md`, que aún dice 2.1 AA, no se toca a mano: rige NFR-9 de la v8.1 por precedencia
+**Then** 2.5.8 lo comprueba axe con `target-size` (etiqueta `wcag22aa`); 2.4.11 y 2.5.7, que axe no comprueba, no se dan por comprobados por él y los da por cumplidos la UX; y 3.2.6, 3.3.7 y 3.3.8 no aplican, y la prueba lo dice así *(v8.2)*
 
 **Given** el CI
 **When** se cierra la historia
-**Then** el barrido es Playwright local, que el CI no corre, y su resultado queda anotado para el merge de la 23.11
+**Then** el barrido es Playwright local, que el CI no corre, y su resultado queda anotado en el spec de la historia para el merge de la 23.11 *(v8.2)*
 **And** los criterios de WCAG 2.1 AA de las Historias 2.8 y 12.3 quedan elevados sin enmendarlos, y el reflujo a 320 px sigue siendo de la 26.9
 
 ### Story 23.5: Una carga que se lee deja una lectura
@@ -5247,10 +5317,23 @@ So that toda tasa del sitio se calcule sobre personas que leyeron y no sobre car
 **Then** lleva solo el evento, la ruta y las marcas de la llegada que coteja la 23.6; ningún identificador, agente de usuario, referente ni hora (NFR-11)
 **And** sin JavaScript no se mide nada
 
+**Given** un `copiado`, una `descarga-de-imagen` o una compartición *(v8.2)*
+**When** el guion la emite, también al vaciar la cola
+**Then** lleva `primera` = sí si es la primera de su métrica en la carga y no en las demás, con la memoria por carga del guion y la correspondencia evento → métrica del vocabulario de la 23.2; toda descarga con destino lleva siempre no y no gasta la primera de SM-5: el primer `copiado` o la primera descarga sin destino de la carga salen con sí aunque vengan después de ella (FR-56, AD-13)
+**And** lo decide solo el guion, el único `__medir` en ejecución: ninguna isla decide `primera` ni conoce la correspondencia
+**And** una carga nueva, también `pageshow` con `persisted`, empieza de cero
+**And** `primera` = no revela cuántas acciones hubo en una carga, nunca cuál ni de quién, y lo aceptó Héctor el 2026-10-20 (NFR-11)
+
+**Given** una acción —`copiado`, `descarga-de-imagen` o una compartición— en una superficie con lectura *(v8.2)*
+**When** la lectura de su carga no ha salido —la acción llegó en la cola antes que el guion, o sin `pointerdown` ni `keydown`: un lector de pantalla, la voz, un `element.click()`—
+**Then** el guion emite antes la lectura, así que el numerador de SM-5 y SM-7 está siempre dentro de su denominador (AD-13)
+**And** la 23.7 aplica la misma regla a la salida interna
+
 **Given** la lógica de la lectura
 **When** se prueba
-**Then** Vitest la ejecuta en el entorno simulado del guion, con tiempo y visibilidad fingidos, y Playwright local comprueba en un navegador la lectura a 8 s, la interacción y `pageshow` contra un receptor local; el CI no corre Playwright
-**And** es el instrumento de SM-3…SM-7: si en la línea base las lecturas reproducen las firmas mecánicas del 2026-10-16, se ajusta el umbral en un diff y se repite la línea base
+**Then** Vitest, que corre el CI, la ejecuta en el entorno simulado del guion, con tiempo y visibilidad fingidos, también `primera`, con la descarga con destino que no la gasta, y la lectura que precede a una acción sin interacción; y Playwright local comprueba en un navegador, contra el receptor Node de `tests/e2e/receptor.spec.ts` (23.2) *(v8.2)*, la lectura a 8 s, la interacción, `pageshow` y *(v8.2)* la primera acción de cada métrica por carga, también la que llega en la cola, detrás de su lectura, con un clic sin `pointerdown`; el CI no corre Playwright
+**And** mete en la prueba de correspondencia de la 23.2 el caso de `lectura` y el de `primera` en `copiado`, `descarga-de-imagen` y las dos comparticiones, y los saca de pendientes *(v8.2)*
+**And** es el instrumento de SM-3…SM-7: si la comparación por firma del informe de la 23.10 dice que las lecturas reproducen las firmas mecánicas, Héctor ajusta el umbral en un diff y se repite la línea base; el cambio del tiempo mínimo es una entrada de la lista de cortes de serie, cuyo tramo nuevo empieza la primera jornada UTC completa tras su llegada en vivo *(v8.2)*
 
 ### Story 23.6: Las marcas de llegada cuentan una vez y salen de la dirección
 
@@ -5268,6 +5351,7 @@ So that SM-8 y la difusión no cuenten dos veces la misma llegada, ni una recarg
 **Given** las marcas leídas
 **When** el guion las quita con `history.replaceState`
 **Then** lo hace por una sola función pura que quita exactamente `de` y `via`, en todas sus apariciones, y conserva el resto de la cadena en su orden y el fragmento, sin dejar un `?` vacío y sin tocar parámetros de nombre parecido
+**And** al reescribir pasa `history.state` tal como estaba, porque `replaceState` con `null` borraría la marca de asentada de la búsqueda (23.8, AD-13) *(v8.2)*
 **And** la página no se recarga, y la canónica, `og:url` y `<link rel="canonical">` no cambian: ninguna marca crea una URL indexable (NFR-1) ni cambia lo que ve el visitante, así que el criterio de la Historia 8.2 sigue cierto
 
 **Given** las marcas de una carga
@@ -5293,16 +5377,19 @@ So that SM-8 y la difusión no cuenten dos veces la misma llegada, ni una recarg
 **When** se valida
 **Then** se admite y se anota: un tercero puede haber copiado un enlace que compartió un visitante, y rechazarla dejaría sin anotar una señal real
 **And** la consulta `npm run canal` la marca «copia un enlace compartido», como ya marca la ajena con `?de=` («copia un enlace del Kit»)
-**And** AD-13 dice que «`canal` rechaza con código 1 un enlace con `?via=`» sin distinguir suborden; el rechazo queda en `anotar` y en `senal --tipo propia`, y la espina lo alinea en su próxima pasada
+**And** el destino se guarda recortado, sin `?…`, así que la marca va en un campo nuevo de `senales-externas.yml`, al patrón de `marcado`: un booleano opcional que solo se escribe a `true`, y la consulta lo lee de ahí; las dos marcas se cotejan cada una por su lado (FR-22) *(v8.2)*
+**And** un `?via=` cuyo destino no está en `DESTINOS_VALIDOS`, o más de un `?via=`, se rechaza con código 1 y sin escribir, como ya se rechaza un `?de=` de una red que no existe *(v8.2, Héctor, 2026-10-23)*
+**And** `CODIGOS_DE_SENAL` se repite literal en tres sitios, que `tests/unit/canal.test.ts` (1304–1319) compara: se pone al día en los tres a la vez *(v8.2)*
 
 **Given** SM-8
 **When** cambia su instrumento
-**Then** sigue contando solo la marca de origen y en vistas; esta historia es una de las causas de su corte, cuya fecha escribe la 23.11
+**Then** sigue contando solo la marca de origen y en vistas; esta historia es una de las causas de su corte, que se compone de la jornada de despliegue de la 23, a la que da valor la 23.11 *(v8.2)*
 **And** `?via=` nombra el botón pulsado, nunca a quien comparte ni a quien abre (NFR-11)
 
 **Given** las pruebas
 **When** corren
-**Then** la función pura y el guion en su entorno simulado van en Vitest, como `tests/unit/canal.test.ts` para el rechazo y para la ajena admitida; quitar las marcas sin recargar, con la canónica intacta, es Playwright local
+**Then** la función pura y el guion en su entorno simulado van en Vitest, que corre el CI —también que `replaceState` recibe el `history.state` que había *(v8.2)*—, como `tests/unit/canal.test.ts` para el rechazo, para la ajena admitida y *(v8.2)* para el `?via=` ajeno o repetido; quitar las marcas sin recargar, con la canónica intacta, es Playwright local
+**And** mete en la prueba de correspondencia de la 23.2 el caso de `via` en las vistas y en la lectura, y lo saca de pendientes *(v8.2)*
 
 ### Story 23.7: Cada salida interna dice desde qué zona
 
@@ -5315,7 +5402,7 @@ So that la continuación se mida por zona y cada épica sepa si el enlace que a�
 **Given** una sola escucha delegada en el guion de medición
 **When** se pulsa un enlace interno que sale de la página, con el botón principal, sin modificador y sin `defaultPrevented`
 **Then** emite una `salida-interna` con la zona del contenedor más cercano que la declara, atribuida a la ruta donde ocurre (FR-56, AD-13)
-**And** como mucho una por carga, y en una superficie con lectura va después de ella: la `pointerdown` o la `keydown` que precede al clic ya la emitió
+**And** como mucho una por carga, y en una superficie con lectura va después de ella: si la lectura no salió —sin `pointerdown` ni `keydown`: un lector de pantalla, la voz, un `element.click()`—, el guion la emite antes de la salida (23.5) *(v8.2)*
 **And** una zona fuera del conjunto cerrado no se envía
 
 **Given** un ancla de la misma página, un enlace a la propia ruta, un clic con modificador o con otro botón, un `defaultPrevented` o el envío de un formulario
@@ -5332,11 +5419,12 @@ So that la continuación se mida por zona y cada épica sepa si el enlace que a�
 **When** se pone cada zona según `EXPERIENCE.md § Zonas de salida interna` (UX-DR111)
 **Then** llevan zona las once de hoy: `cabecera` (la marca y «Buscar»), `atribucion` (también «de {Autor}» en la Cabecera de Obra), `chip-de-tema`, `colecciones`, `listado`, `paginacion`, `lista-de-obras`, `resultado` en el contenedor de resultados de `/buscar/`, `cita-del-dia` en «Ver esta cita», `rutas-de-salida` y `autores-de-portada` en la lista de Autores de la portada
 **And** lo que la tabla no nombra lleva una exención explícita y no registra nada: los Chips de Tema del 404 y las salidas de la búsqueda sin resultados —Temas, Colecciones y Autores destacados—
-**And** esa exención es la de la v8, igual que la de los formularios «Buscar en…», el campo de la portada y el del 404: enviar un formulario no es salida (AD-13) y una zona nueva exigiría otra migración de AD-14; se revisa en la pasada de métricas
+**And** también, cuando la 27.7 los ponga, los Directorios del aviso de `/buscar/` —el del índice que no carga y el que se pinta hasta que arranca la búsqueda—, fuera del contenedor `resultado`: en él, SM-13 sumaría salidas sin denominador, porque esa búsqueda no se asienta (AD-13; decisión de Héctor, 2026-10-22) *(v8.2)*
+**And** esas exenciones son las de la v8, igual que la de los formularios «Buscar en…», el campo de la portada y el del 404: enviar un formulario no es salida (AD-13) y una zona nueva exigiría otra migración de AD-14; se revisan en la pasada de métricas *(v8.2)*
 
 **Given** el sitio construido
-**When** corre la prueba sobre `dist/` (Vitest)
-**Then** todo enlace interno de `main` en una superficie con lectura lleva zona o exención explícita, y las anclas de la misma página son la exención que nombra la prueba
+**When** corre la prueba sobre `dist/` (Vitest, que corre el CI)
+**Then** todo enlace interno de `main` en una superficie con lectura lleva zona o exención explícita, y las anclas de la misma página son una de las exenciones que nombra la prueba *(v8.2)*
 **And** la Página de Obra que no se indexa entra en la prueba en cuanto la 23.9 le da vista, sin tocarla
 
 **Given** las páginas 2+, `/buscar/` y el 404
@@ -5350,7 +5438,8 @@ So that la continuación se mida por zona y cada épica sepa si el enlace que a�
 
 **Given** las pruebas de comportamiento
 **When** corren
-**Then** la escucha y sus exenciones van en Vitest, en el entorno simulado; una salida por carga, después de la lectura, con modificadores y anclas, la salida nueva tras restaurar desde la caché de atrás y adelante, también en `/buscar/`, y los resultados de `/buscar/` heredando su zona, son Playwright local
+**Then** la escucha y sus exenciones van en Vitest, en el entorno simulado, también la lectura que se emite antes de una salida sin `pointerdown` ni `keydown` *(v8.2)*; una salida por carga, después de la lectura, con modificadores y anclas, la salida nueva tras restaurar desde la caché de atrás y adelante, también en `/buscar/`, y los resultados de `/buscar/` heredando su zona, son Playwright local
+**And** mete en la prueba de correspondencia de la 23.2 el caso de `salida-interna` con `zona`, y lo saca de pendientes *(v8.2)*
 **And** es el instrumento de SM-4 y de SM-13
 
 ### Story 23.8: Una búsqueda cuenta una vez, cuando se asienta
@@ -5393,13 +5482,21 @@ So that SM-6 y la búsqueda seguida se midan sobre búsquedas y no sobre pulsaci
 **When** vuelve a mostrarse
 **Then** es carga nueva para la salida (23.7) —`/buscar/` no emite lectura (23.5)—, pero no para la búsqueda: conserva en memoria los estados ya emitidos y no los repite
 
+**Given** una navegación `back_forward` que no viene de la caché de atrás y adelante, o una recarga *(v8.2)*
+**When** `/buscar/` llega a un estado
+**Then** lo da por ya registrado y no asienta otra `busqueda` ni otra `busqueda-sin-resultados` (AD-13)
+**And** al asentar, la isla escribe en el objeto de estado de su entrada un booleano, con `replaceState` y la misma dirección, que no es identificador ni sale del navegador (NFR-11); en toda llegada a un estado —una carga o un `popstate`— cuenta como ya registrado el que su entrada marca, y Navigation Timing, leído una vez al cargar, queda de respaldo para la entrada sin objeto de estado; sin `PerformanceNavigationTiming`, la carga cuenta como `navigate`
+**And** la recarga cuenta como ya registrada; una pestaña restaurada o duplicada que hereda la marca, también; una marca que el navegador rechaza por frecuencia se acepta
+**And** la regla la aplica solo la isla: el guion de medición nunca descarta una `busqueda`, y asentar no abre entrada en el historial
+
 **Given** la Historia 3.2
 **When** se cierra esta
 **Then** sustituye su criterio de emisión —«se emite el evento de búsqueda sin resultados con el texto de la consulta»—, que se marca *(sustituido en la v8 por la Historia 23.8)*; los demás criterios de la 3.2 siguen
 
 **Given** las pruebas
 **When** corren
-**Then** la decisión de qué emitir ante cada estado y cada disparador va en Vitest, y el flujo con el índice real de Pagefind es Playwright local
+**Then** la decisión de qué emitir ante cada estado y cada disparador va en Vitest, que corre el CI —también la marca de la entrada, el tipo de navegación y su respaldo *(v8.2)*—, y el flujo con el índice real de Pagefind es Playwright local, con *(v8.2)* «texto, resultado, atrás, atrás», con la caché y sin ella, y la recarga
+**And** mete en la prueba de correspondencia de la 23.2 el caso de `busqueda` con `tramo` y `filtros`, estos en «ninguno» hasta la 27, y lo saca de pendientes *(v8.2)*
 **And** es el instrumento de SM-6 —el tramo 0 entre las asentadas, cuyo numerador no es el registro de FR-8— y, con la zona `resultado` de la 23.7, de SM-13
 
 ### Story 23.9: Toda Obra cuenta sus vistas, se indexe o no
@@ -5416,8 +5513,9 @@ So that la Obra se lea también donde el buscador no la ve, sin mezclar las que 
 **And** la indexable emite además `vista-de-superficie`, como hoy, y son las dos vistas que declara su `data-*` (AD-6); la que no se indexa, solo `vista-de-obra`; las páginas 2+, ninguna
 
 **Given** el sitio construido
-**When** corre la prueba sobre `dist/` (Vitest)
+**When** corre la prueba sobre `dist/` (Vitest, que corre el CI)
 **Then** la marca de cada página 1 de Obra coincide con su `noindex` (AD-17)
+**And** la comprobación de `astro:build:done` de AD-17 sobre el `dist/` real la exige también (`integraciones/indexables.ts`), no solo la prueba de Vitest *(v8.2)*
 **And** sale de `rutasIndexables` (AD-11), así que sigue a FR-52 y a `CONGELACION_DE_OBRAS` sin recalcularlos: en una copia con la congelación vigente, la Obra que sale del conjunto lleva la marca de no indexable
 
 **Given** la página 1 de una Obra que no se indexa
@@ -5438,7 +5536,8 @@ So that la Obra se lea también donde el buscador no la ve, sin mezclar las que 
 
 **Given** la emisión en un navegador
 **When** se prueba
-**Then** es Playwright local, contra un receptor local, con una Obra indexable y otra que no
+**Then** es Playwright local, contra el receptor Node de `tests/e2e/receptor.spec.ts` (23.2) *(v8.2)*, con una Obra indexable y otra que no
+**And** la historia mete en la prueba de correspondencia de la 23.2 el caso de `vista-de-obra` con `indexable`, y lo saca de pendientes *(v8.2)*
 
 ### Story 23.10: La línea base se lee desde `tools/`, con la cuota de D1 a la vista
 
@@ -5459,29 +5558,41 @@ So that cada métrica tenga su línea base sin panel ajeno y sepa a tiempo si el
 
 **Given** las jornadas
 **When** se calculan las tasas
-**Then** van sobre jornadas cerradas en UTC, y la ruta `/__comprobacion/` de las balizas de prueba no cuenta
+**Then** van sobre jornadas cerradas en UTC, y no cuentan la ruta `/__comprobacion/` de las balizas de prueba ni los registros de las pasadas que escriben a propósito en el D1 de producción —la 25.3 y la 25.7—, que la orden descuenta igual en cada lectura *(v8.2)*
+**And** esas pasadas viven en una constante con nombre de `src/lib/umbrales.ts`, una entrada por pasada con su jornada UTC y las rutas que recorrió, que esta historia declara vacía y que anota Héctor el día de cada pasada; `DESPLIEGUE.md` la cita y no la copia, y la orden la lee y no la copia (AD-9) *(v8.2, Héctor, 2026-10-23)*
+**And** una prueba de Vitest con respuestas fijas fija que no cuentan los registros de esas rutas en esas jornadas, y sí los de otras rutas de la misma jornada *(v8.2, Héctor, 2026-10-23)*
 
-**Given** las lecturas y las salidas internas
+**Given** todo registro —lecturas, salidas internas y acciones— *(v8.2)*
 **When** se reparten
 **Then** la superficie de cada registro es la página donde ocurrió, resuelta contra el censo de la medición —`rutasPublicadas` sin el servicio por forma— y la declaración de `src/lib/superficies.ts`, nunca por el prefijo de la ruta (AD-13)
+**And** la unidad de agregación es la superficie declarada en `src/lib/superficies.ts`, la portada incluida, nunca la familia; para la línea base, `/autores/` y `/obras/` son una sola superficie, «los Directorios», que junta sus lecturas, y se informan también por separado *(v8.2)*
+**And** esa agrupación no la escribe la orden: la lee, de forma genérica, de la superficie de línea base que `superficies.ts` declara para cada superficie —la de los Directorios la declaran la 26.3 y la 26.4—, sin nombrar ninguna ruta, y una prueba de Vitest con respuestas fijas la fija con dos superficies de prueba que declaran la misma *(v8.2)*
 **And** lo que no casa —páginas 2+, `/buscar/`, la dirección rota que sirve el 404, una Cita retirada— se cuenta aparte y se nombra, nunca se descarta en silencio; los Directorios entrarán con la 26 sin tocar la orden
 **And** la continuación es salidas internas entre lecturas, por superficie y por zona, solo en superficies con lectura, y el informe la declara cota inferior por lo que se abre en pestaña nueva
 
 **Given** la familia Obra
 **When** se parte
-**Then** las lecturas y las salidas de una ruta de Obra en una jornada toman la marca de sus vistas de Obra de esa jornada; si ese día llegan las dos marcas, esa ruta y esa jornada se cuentan aparte, como «cambió», y nunca se reparten
-**And** una ruta de Obra con lecturas y sin vista de Obra esa jornada va a «sin marca»; la marca nunca se reconstruye desde git
+**Then** todo registro de una ruta de Obra en una jornada —lecturas, salidas y acciones— toma la marca de sus vistas de Obra de esa jornada; si ese día llegan las dos marcas, esa ruta y esa jornada se cuentan aparte, como «cambió», para todos sus registros, y nunca se reparten *(v8.2)*
+**And** una ruta de Obra con registros y sin vista de Obra esa jornada va a «sin marca»; la marca nunca se reconstruye desde git
 
 **Given** las marcas
 **When** se informan
-**Then** SM-8 cuenta las vistas de Cita y de superficie con marca de origen, sin `vista-de-obra`, partida por cada fecha de la lista de cortes de SM-8 de `umbrales.ts`: los tramos entre dos cortes no se suman como una sola serie, y con la lista vacía el informe lo dice; Threads no se lee como personas mientras no conste quién publica sus enlaces
-**And** SM-12 cuenta las lecturas con `via` entre las comparticiones de su destino, con las descargas de `instagram-historia` en el denominador de ese botón, y Facebook fuera de la comparación entre destinos mientras siga apagada la constante que lo incluye
+**Then** SM-8 cuenta las vistas de Cita y de superficie con marca de origen, sin `vista-de-obra`, partida por las entradas de `CORTES_DE_SM8`: cada tramo nuevo empieza la primera jornada UTC completa tras la llegada, la jornada de llegada se informa aparte como «cambió», los tramos no se suman como una sola serie, y sin ninguna entrada llegada el informe lo dice *(v8.2)*; Threads no se lee como personas mientras no conste quién publica sus enlaces
+**And** SM-12 cuenta las lecturas con `via` entre las comparticiones de su destino, sin mirar `primera`, con las descargas impuestas de `instagram-historia` en el denominador de ese botón y nunca las de `opaco`; la `comparticion-de-imagen` de la Imagen cuadrada se informa aparte, fuera de todo destino, así que el `opaco` son solo las hojas de «Más opciones…»; y el informe dice que en Chrome para Android la cifra puede quedar por encima de la real *(v8.2)*
+**And** Facebook queda fuera de la comparación entre destinos mientras siga apagada la constante que lo incluye
 
-**Given** los cortes de SM-8
+**Given** los cortes de serie *(v8.2)*
 **When** se declaran en `src/lib/umbrales.ts`, junto a `PRIMER_DESPLIEGUE_DE_OBRAS`
-**Then** son una lista ordenada de fechas con nombre, `CORTES_DE_SM8`, que esta historia declara vacía (AD-9): cada despliegue que cambia el instrumento de SM-8 le añade una entrada, la de su llegada en vivo y no la de su merge —la primera, la 23.11; la segunda, la 26.11—, y ningún agente la escribe
-**And** la orden parte la serie por cada entrada, sin elegir ninguna ni suponer cuántas hay
-**And** una prueba de Vitest, con respuestas fijas, fija que dos cortes dan tres tramos que no se suman entre sí, que con la lista vacía el informe lo dice, y que la lista va en orden y sin fechas repetidas
+**Then** son una lista ordenada cuyas entradas dicen su jornada, qué cambió y qué series parten —la llegada en vivo que cambia un instrumento, su reversión, un cambio de los cortes de tramo de `busqueda` y un cambio del tiempo mínimo de la lectura—, y cada jornada sale de las constantes de despliegue de AD-9, filtrando las que no llegaron, nunca de un literal (AD-9, AD-13)
+**And** esta historia declara sin valor la jornada de despliegue de la 23, con la forma de `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (`string | undefined = undefined`), y `CORTES_DE_SM8` como proyección de la lista sobre SM-8, con dos entradas: la de la 23 y `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`; nadie escribe una fecha en la lista: Héctor da valor a la constante (23.11, 26.11), y ningún agente se lo da
+**And** la orden parte cada serie solo por las entradas que la nombran, sin elegir ninguna ni suponer cuántas hay, y admite dos en la misma jornada con distinto motivo
+**And** la jornada de despliegue de la 23 no entra en `desplieguesQueMuevenSm11` de `tools/lib/indexacion.ts`: la línea SM-11 nombra solo la reparación, la 24 con la 26 y la 28, y la jornada de la 23 solo parte las series de la medición; una prueba de `tests/unit/indexacion.test.ts` lo fija
+**And** una prueba de Vitest, con respuestas fijas, fija que dos cortes dan tres tramos que no se suman entre sí, que la jornada de llegada no entra en ninguno, que una constante sin valor no corta y que la lista va en orden
+
+**Given** el «hoy» de `tools/` frente a una constante de despliegue *(v8.2)*
+**When** se compara —en esta orden, en `lineasDeSm11` de `tools/lib/indexacion.ts` y en toda comparación de `tools/` con una jornada de despliegue—
+**Then** se compone en UTC, como las jornadas con que se compara (AD-9); hoy `lineasDeSm11` lo compone con `getFullYear`, `getMonth` y `getDate`, que son locales, para decidir «Toca juzgar SM-11» frente a una jornada UTC
+**And** una prueba de `tests/unit/indexacion.test.ts`, con un instante cerca de la medianoche en que la jornada local y la UTC difieren, lo fija
 
 **Given** Facebook en la comparación de SM-12
 **When** se declara
@@ -5492,16 +5603,32 @@ So that cada métrica tenga su línea base sin panel ajeno y sepa a tiempo si el
 **When** se informan
 **Then** salen las asentadas por tramo y por filtros, SM-6 como tramo 0 entre asentadas y SM-13 como salidas de zona `resultado` entre asentadas, y las consultas sin resultados como hasta ahora (FR-8)
 **And** el informe declara SM-13 cota inferior, como la continuación: un resultado abierto en pestaña nueva no se mide (FR-56)
+**And** SM-6 y SM-13 no se comparan por firma —la búsqueda asentada no lleva tiempo mínimo ni marca, y `/buscar/` no emite vista— y el informe lo dice junto a sus cifras; su línea base se cierra con el mínimo de búsquedas asentadas *(v8.2)*
 
 **Given** SM-5, SM-7, SM-C3 y SM-C5
 **When** se calculan
-**Then** van sobre las lecturas de Página de Cita, con las acciones hechas en rutas `/cita/`; las de la portada y la Obra se informan aparte, las descargas `instagram-historia` no entran, y SM-C3 y SM-C5 se dan junto a SM-5 sobre las mismas lecturas
+**Then** van sobre las lecturas de las Páginas de Cita resueltas contra el censo de la medición, nunca por el prefijo `/cita/`; su numerador son las lecturas con acción —las acciones con `primera` = sí: en SM-5, copiado y descarga sin destino juntos; en SM-7, las comparticiones—, y ninguna descarga con destino entra; lo de la portada y la Obra se informa aparte; SM-7 se declara cota inferior en Chrome para Android; SM-C3 es SM-5 leída junto a SM-7, y SM-C5, la continuación de la Página de Cita junto a SM-5 *(v8.2)*
+**And** da también SM-3 como 1 − la continuación de la Página de Cita, y cada tasa con su denominador *(v8.2)*
 **And** ninguna cifra se compara con las metas en suspenso de SM-3…SM-7 —65 %, 1,8, 3 %, 15 % y 2 %—
+
+**Given** una línea base cerrada *(v8.2)*
+**When** se informa después
+**Then** la orden da por ventanas —bloques de jornadas cerradas consecutivas, contados desde el cierre de la línea base y sin solaparse, que reúnen cada uno el mismo mínimo que la cerró— SM-5, SM-7, la continuación de la Página de Cita y, cerradas, las demás tasas que una historia de cierre juzga «contra su propia serie» —la continuación de los Directorios (26.11), la de la portada por zona (28.5) y SM-6 y SM-13 (27.9), estas con el mínimo de búsquedas asentadas; una tasa nueva que se juzgue así entra en esta lista por su historia—, con la misma definición de ventana y cada una frente a su línea base *(v8.2, Héctor, 2026-10-23)*
+**And** dice en cada ventana si SM-7 sube y SM-5 baja (SM-C3) y si la continuación de la Página de Cita sube y SM-5 baja (SM-C5), y que una de las dos «salta» cuando ocurre en dos ventanas seguidas; basta la dirección, sin umbral de magnitud, y saltar no apaga nada
+**And** si la épica que se juzga llegó en vivo antes de esa línea base, las ventanas se cuentan desde la primera jornada UTC completa tras su llegada —la jornada de su constante de despliegue de `umbrales.ts`, que la orden lee y no copia (AD-9); la de llegada se informa aparte, como «cambió»— y frente a la serie propia de antes, y lo dice *(v8.2)*
+**And** una prueba de Vitest con respuestas fijas fija las ventanas, la dirección, las dos seguidas y las contadas tras una llegada anterior a la línea base, sin la jornada de llegada *(v8.2)*
+
+**Given** el informe de cada línea base *(v8.2)*
+**When** se compone
+**Then** da la razón lectura/vista de cada firma mecánica frente a la del resto: Threads, el par ruta-jornada con exactamente dos vistas con su marca y una sin ella; ráfaga, la jornada en que 100 rutas de Cita o más —umbral con nombre en `umbrales.ts`— reciben una sola vista cada una (FR-56)
+**And** dice «cerrada» al reunir el mínimo y nunca «buena»: la da por buena Héctor, que mira la comparación antes de fijar ninguna meta y antes de juzgar contra ella la 24, la 25, la 26 o la 28; si las razones se parecen, ajusta el tiempo mínimo (23.5)
+**And** que la miró y da por buena una línea base lo anota Héctor en `DESPLIEGUE.md` §3, con fecha y métrica, junto a las consultas de la línea base; es acto suyo, y ningún agente lo anota *(v8.2, Héctor, 2026-10-23)*
+**And** una prueba de Vitest con respuestas fijas fija las dos firmas
 
 **Given** `MIN_LECTURAS_DE_LINEA_BASE` en `src/lib/umbrales.ts`
 **When** se declara
 **Then** se declara sin valor, como `CONGELACION_DE_OBRAS`, y ningún agente se lo da (AD-9)
-**And** la línea base de cada métrica empieza en su primera jornada cerrada con filas de lo que mide y se cierra al reunir ese mínimo de lecturas, no un número de días; sin valor declarado, el informe dice «sin mínimo declarado» y nunca da una línea base por cerrada
+**And** la línea base de cada métrica empieza en la primera jornada UTC completa tras la llegada en vivo que la hace medible —la de llegada se informa aparte, como «cambió»— y se cierra al reunir ese mínimo de lecturas de su superficie —de búsquedas asentadas en SM-6 y SM-13—, con los Directorios como una sola superficie, no un número de días *(v8.2)*; sin valor declarado, el informe dice «sin mínimo declarado» y nunca da una línea base por cerrada
 
 **Given** la cuota de D1
 **When** se informa
@@ -5511,29 +5638,32 @@ So that cada métrica tenga su línea base sin panel ajeno y sepa a tiempo si el
 **When** se prueba
 **Then** la agregación, la resolución contra el censo y la línea base viven en `tools/lib/`, puros y probados en Vitest con respuestas fijas; solo la cáscara invoca `wrangler` (AD-22)
 **And** solo lee recuentos por jornada, ruta, evento y campo: no reconstruye sesiones ni recorridos (NFR-11)
+**And** ninguna consulta ordena por `rowid` ni lo lee desde JavaScript, y una prueba estructural de Vitest fija que ningún SQL de `tools/` nombra `rowid` salvo la comprobación (`CAST(rowid AS TEXT)`) de `desplegar` y `comprobar` y el `UPDATE` que baraja en `desplegar` (23.2); estrecha la de la 23.12, que solo prohibía ordenar por él (AD-13) *(v8.2)*
 **And** ningún módulo de `src/` lee nada de esto, y el aviso diario de `publicar.yml` sigue diciendo «no medible» (AD-21, sin trabajo)
-**And** `DESPLIEGUE.md` §3 documenta la orden junto a las consultas que ya tiene
+**And** `DESPLIEGUE.md` §3 documenta la orden junto a las consultas que ya tiene, cita la constante de las pasadas que escriben en producción y es donde Héctor anota que da por buena una línea base *(v8.2, Héctor, 2026-10-23)*
 
 ### Story 23.11: La lectura se mide en vivo y su línea base empieza a contar
 
 As a Héctor,
 I want comprobar la rama en local, fijar el mínimo de lecturas, revisar el plan de Cloudflare y fusionar,
-So that la lectura empiece a medirse en vivo con su línea base contando y el corte de SM-8 escrito.
+So that la lectura empiece a medirse en vivo con su línea base contando y el corte de SM-8 compuesto de la jornada de su llegada *(v8.2)*.
 
 **Acceptance Criteria:**
 
-**Given** la publicación reparada y el CI de la principal en verde, que es trabajo aparte y previo a la v8
+**Given** el CI de la principal en verde —la reparación de la publicación llegó en vivo el 2026-10-19— y el `rowid` aleatorio ya en ella (23.12) *(v8.2)*
 **When** se plantea el merge
 **Then** puede hacerse; si la principal sigue en rojo, la rama espera
 
-**Given** la rama con las Historias 23.1–23.10 y la huella de la 23.3
-**When** se corren a mano, porque el CI solo corre en la principal
-**Then** `npm run build`, `astro check` y `npm test` pasan, también la prueba de la huella
-**And** Playwright local pasa en la rama: la lectura a 8 s y `pageshow`, las marcas quitadas con `replaceState`, una salida por carga y después de la lectura, la salida nueva tras restaurar desde la caché de atrás y adelante, también en `/buscar/`, la búsqueda asentada, la vista de Obra y el barrido WCAG 2.2 AA en los dos perfiles, y el resultado queda anotado
+**Given** la rama con las Historias 23.1–23.10 y la huella de la 23.3, al día con la principal, que trae la 23.12 *(v8.2)*
+**When** se corren a mano, porque el CI solo corre en la principal y no corre Playwright
+**Then** `npm run build`, `astro check` y `npm test` pasan, también la prueba de la huella y la estructural del `rowid` *(v8.2)*
+**And** `npm run test:e2e` pasa entero en la rama, construida con la medición puesta contra un receptor local (`wrangler dev` con D1 local, el de la 23.2), y entre sus pruebas de Playwright local están la lectura a 8 s y `pageshow`, la primera acción de cada métrica por carga detrás de su lectura, las marcas quitadas, una salida por carga y después de la lectura, la salida nueva tras restaurar, la búsqueda asentada y la ya asentada al volver sin caché y al recargar, la vista de Obra y el barrido WCAG 2.2 AA en los dos perfiles; el resultado queda anotado en el spec de la historia *(v8.2)*
 
-**Given** una Página de Cita con la medición encendida
+**Given** una Página de Cita con la medición puesta contra un receptor local o un punto final ficticio, nunca el de producción *(v8.2)*
 **When** se mide a mano con Lighthouse en perfil móvil 4G, con todo lo de la épica puesto y sin puerta automática
-**Then** el contenido principal sigue visible en menos de 2,5 s (NFR-7), y la cifra queda anotada junto a la de la principal; si no, el merge espera
+**Then** el contenido principal sigue visible en menos de 2,5 s (NFR-7), medida el mismo día y con el mismo perfil sobre la principal, y las dos cifras quedan anotadas en el spec *(v8.2)*
+**And** la principal se mide construida y servida igual, en local y con la medición contra un receptor local o un punto final ficticio: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*
+**And** si pasa de 2,5 s o empeora frente a la principal, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*
 
 **Given** `MIN_LECTURAS_DE_LINEA_BASE`
 **When** Héctor le da valor
@@ -5541,7 +5671,12 @@ So that la lectura empiece a medirse en vivo con su línea base contando y el co
 
 **Given** el plan contratado de Cloudflare
 **When** Héctor lo revisa
-**Then** queda anotado y, si no es el gratuito, las cuotas con nombre de la 23.10 se ponen al día en un diff
+**Then** queda anotado en `DESPLIEGUE.md` §3 *(v8.2)* y, si no es el gratuito, las cuotas con nombre de la 23.10 se ponen al día en un diff
+
+**Given** el día del merge *(v8.2)*
+**When** Héctor corre desde la rama `npm run medicion -- comprobar` (23.2)
+**Then** el receptor desplegado casa con la huella de la rama y sigue insertando con `rowid` aleatorio
+**And** si no casa —el receptor se volvió a desplegar desde la principal—, se repite la 23.3 antes de fusionar
 
 **Given** todo lo anterior
 **When** Héctor fusiona
@@ -5549,17 +5684,53 @@ So that la lectura empiece a medirse en vivo con su línea base contando y el co
 
 **Given** ese despliegue
 **When** llega al sitio en vivo
-**Then** Héctor añade en `umbrales.ts`, en un commit aparte del día en que llega, la primera entrada de `CORTES_DE_SM8`, la lista que declaró la 23.10 (AD-9): la fecha de esa llegada en vivo, no la del merge, como la de SM-11, que cubre todas las causas de la épica: la vista desde el fichero diferido, la espera a la activación y la marca contada una vez por llegada
-**And** AD-13 dice que «cada merge lleva su fecha en `umbrales.ts`»; la lleva, como una entrada más de `CORTES_DE_SM8`, cada merge que cambia el instrumento, con la fecha de su llegada en vivo, y la espina lo alinea en su próxima pasada
+**Then** Héctor da valor en `umbrales.ts`, en un commit aparte del día en que llega, a la jornada de despliegue de la 23 que declaró la 23.10: la jornada UTC en que termina el trabajo «Desplegar» de Actions, no la del merge (AD-9) *(v8.2)*
+**And** de ella se compone la primera entrada de `CORTES_DE_SM8`, que cubre todas las causas de la épica —la vista desde el fichero diferido, la espera a la activación y la marca contada una vez por llegada—, y su tramo nuevo empieza la jornada siguiente; nadie escribe una fecha en la lista (AD-13) *(v8.2)*
 
-**Given** la primera jornada cerrada tras el despliegue
+**Given** la primera jornada UTC completa tras la llegada, ya cerrada *(v8.2)*
 **When** Héctor corre `npm run medicion`
-**Then** las filas escritas frente a la cuota —la v8 pasa de una fila por carga a unas tres— y el tamaño de la base quedan anotados con fecha, fuera de `corpus/`
-**And** cada evento nuevo sale con sus filas o nombrado sin ellas, y la línea base de cada métrica empieza a contar desde su primera jornada con filas
+**Then** las filas escritas frente a la cuota —la v8 pasa de un evento por carga a unos tres, unas nueve filas escritas con sus índices— y el tamaño de la base quedan anotados con fecha en `DESPLIEGUE.md` §3 *(v8.2)*
+**And** cada evento nuevo sale con sus filas o nombrado sin ellas, y la línea base de cada métrica empieza a contar desde la primera jornada UTC completa tras la llegada *(v8.2)*
 
 **Given** esta historia
 **When** se cierra
-**Then** el merge, el mínimo, la fecha del corte y la revisión del plan son actos de Héctor; un agente puede correr las pruebas locales y Lighthouse y anotarlas, nunca fusionar
+**Then** el merge, el mínimo, el valor de la jornada de despliegue de la 23 —de la que sale el corte— y la revisión del plan son actos de Héctor, igual que dar por buena la comparación por firma cuando se cierre la línea base (23.10); un agente puede correr las pruebas locales y Lighthouse contra un receptor local y anotarlas, nunca fusionar *(v8.2)*
+
+### Story 23.12: El orden de llegada no reconstruye a nadie
+
+As a Héctor,
+I want que el receptor guarde cada fila con un `rowid` aleatorio antes de que el sitio emita nada nuevo,
+So that el orden de las filas no devuelva el recorrido de una persona, ni el de antes de la v8 ni el de después *(v8.2, Héctor, 2026-10-23)*.
+
+**Acceptance Criteria:**
+
+**Given** `medicion/worker.ts` en la principal
+**When** inserta una baliza
+**Then** el `INSERT` lleva `rowid` aleatorio (`INSERT INTO eventos (rowid, …) VALUES (abs(random()), …)`), sin migración, sin columnas nuevas y sin tocar la huella ni el vocabulario (AD-13, AD-14)
+**And** un `rowid` repetido pierde ese evento, como un almacén caído, y se acepta: lo recoge el mismo `catch` que ya pierde el evento en silencio, y el receptor sigue contestando 204
+**And** `medicion/receptor.ts` no cambia: el receptor sigue aceptando lo mismo que hoy y guardando las mismas columnas
+
+**Given** toda consulta de `tools/` a D1
+**When** lee la tabla `eventos`
+**Then** no ordena por `rowid` ni lo lee desde JavaScript, que lo redondea: si hace falta, `CAST(rowid AS TEXT)` (AD-13)
+
+**Given** lo ya escrito en la base de producción, en el orden de llegada
+**When** entra esta historia
+**Then** no lo toca: barajarlo no es migrar, sino un paso idempotente de la orden que despliega el receptor, `npm run medicion -- desplegar` (23.2), que corre después de comprobar con su baliza que el receptor en vivo inserta con `rowid` aleatorio, cuenta antes las filas que escribirá frente a la cuota del día y se repite en cada despliegue del receptor (AD-13, AD-14)
+**And** el primer barajado lo corre Héctor en la 23.3, con el receptor que ya lleva esta historia
+
+**Given** las pruebas
+**When** corren en Vitest, que corre el CI
+**Then** una prueba estructural fija que el `INSERT` del adaptador lleva el `rowid` aleatorio
+**And** otra fija que ningún SQL de `tools/` ordena por `rowid`; hoy ninguno lo nombra, y la 23.10 la estrecha a que solo lo nombren la comprobación de `desplegar` y `comprobar` y el barajado de `desplegar` (23.2)
+**And** no hay prueba de Playwright local: el cambio no toca `dist/` ni ninguna página, y lo comprueba en vivo la baliza de la 23.3
+
+**Given** la historia
+**When** se cierra
+**Then** entra en la principal sola, antes de la 23.3 y fuera de la rama de la 23, con el CI en verde: es una de las dos excepciones declaradas a la fusión por épica, con la 24.2, y no lleva vocabulario ni huella
+**And** no se despliega: ningún flujo de Actions despliega el receptor, y el receptor que la lleva lo despliega Héctor en la 23.3, desde la rama, que la trae de la principal; así toda vuelta atrás o redespliegue del receptor desde la principal la conserva
+**And** la fusiona Héctor; un agente nunca fusiona
+**And** su fila se añade a mano a `sprint-status.yaml`, que no se regenera
 
 ## Epic 24: La Obra se ve y la Cita sigue
 
@@ -5567,8 +5738,8 @@ Quien lee una Cita ve justo debajo de qué obra sale: el título, el Autor, el a
 
 **FRs covered:** FR-12 *(reescrito)*; FR-4, FR-6, FR-26 *(la Tarjeta de Cita con Obra)*, FR-35 *(Tarjeta de Obra y salto, en los dos estados)*, FR-38, FR-47, FR-51 *(orden del libro y salto)* *(enmendados)*; NFR-2, NFR-3, NFR-12 y NFR-13 en lo que añade; FR-42 *(heredado)*; SM-3, SM-4 de la Página de Cita y SM-C5 *(la juzgan)*; SM-11 *(la fecha del despliegue conjunto con la 26)*.
 
-**Notas de implementación:** la 24.1 va primero, porque construye el cargador de posiciones y el orden del libro que leen la 24.5 y la 24.6. La 24.2 y la 24.7 no dependen de nada dentro de la épica, aunque la 24.6 mide el peso de `dist/` con la línea de la 24.2, y la 24.3 y la 24.4 necesitan las zonas de la 23.7. La 24.8 cierra la épica, y en la rama que comparte con la 26 va antes que la 26.1: sin la relación por campos, el lote de claves de orden refecharía todo el sitio. La 24 y la 26 entran en la principal en un solo merge, con el CI en verde y, sobre la rama conjunta, el barrido WCAG 2.2 AA y el reflujo a 320 px de la 26.9. Hasta que exista la 26.9, el reflujo de lo que construye la 24 se mira a mano, y la fecha de SM-11 de ese despliegue en vivo la anota la 26.11. Quedan fuera: «Compartir en» y la retirada de «Compartir la cita» (25.1), compartir la Página de Obra (25.6), «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema» (27.8), `data-pagefind-sort` (27.1), la Tarjeta de Obra sobre la Cita del Día (28.2), la vista de Obra (23.9) y los Directorios y la clave de orden en la relación de AD-27 (26). El resto, en la Épica 24 de la Epic List — v8.
-**Preguntas abiertas:** la ventana de SM-11 con que se juzga el despliegue conjunto con la 26 (Héctor, antes del 2026-12-05; PRD §14); la letra de AD-9 y del Entorno operativo, que aún ponen el peso de `dist/` en `astro:build:done` (`bmad-architecture`).
+**Notas de implementación:** la 24.1 va primero, porque construye el cargador de posiciones y el orden del libro que leen la 24.5 y la 24.6. La 24.2 y la 24.7 no dependen de nada dentro de la épica, aunque la 24.6 mide el peso de `dist/` con la línea de la 24.2, y la 24.3 y la 24.4 necesitan las zonas de la 23.7. La 24.2 entra sola en la principal en cuanto Héctor dé los valores del aviso y del tope, como excepción declarada a la fusión por épica, y la rama de la 24 con la 26 la recibe de la principal *(v8.2, Héctor, 2026-10-23)*. Esos dos valores son un acto de Héctor a mitad de cadena, del que cuelgan la 24.6, la 24.8 y toda la 26, y se piden antes de abrir la rama 24+26 *(v8.2)*. La 24.8 es la última historia de la épica, y en la rama que comparte con la 26 va antes que la 26.1: sin la relación por campos, el lote de claves de orden refecharía todo el sitio. La 24 y la 26 entran en la principal en un solo merge, con el CI en verde y, sobre la rama conjunta, `npm run test:e2e` entero, con el barrido 2.2 y el reflujo a 320 px de la 26.9 *(v8.2)*. Lo cierra la 26.11, que mide NFR-7 con lo de las dos épicas puesto y, si empeora, deja el merge a la espera de que Héctor decida *(v8.2, Héctor, 2026-10-23)*. Hasta que exista la 26.9, el reflujo de lo que construye la 24 se mira a mano, y la 26.11 da valor a `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` *(v8.2)*. Quedan fuera: «Compartir en» y la retirada de «Compartir la cita» (25.1), compartir la Página de Obra (25.6), «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema» (27.8), `data-pagefind-sort` (27.1), la Tarjeta de Obra sobre la Cita del Día (28.2), la vista de Obra (23.9) y los Directorios y la clave de orden en la relación de AD-27 (26). El resto, en la Épica 24 de la Epic List — v8.
+**Preguntas abiertas:** la ventana de SM-11 con que se juzga el despliegue conjunto con la 26 (Héctor, antes del 2026-12-05; PRD §14); los valores del aviso y del tope del peso de `dist/` y el del tope del número de PNG, que Héctor fija en un diff, y este último puede quedar sin valor (24.2) *(v8.2)*. *(v8.2: sale la letra de AD-9 y del Entorno operativo sobre `astro:build:done`, que la espina v8.2 alineó con el paso final tras Pagefind.)*
 
 ### Story 24.1: La Página de Obra lista sus Citas en el orden del libro
 
@@ -5609,7 +5780,7 @@ So that recorrer la Página de Obra se parezca a hojear la obra y no a leer un �
 **Given** el índice de subpáginas de la Fuente
 **When** se construye esta historia
 **Then** no se captura: queda aplazado hasta la primera Obra que salga desordenada, y no hay detector
-**And** el orden natural lo fija una prueba hecha con slugs de página reales del Corpus
+**And** el orden natural lo fija una prueba de Vitest hecha con slugs de página reales del Corpus
 
 **Given** la Página de Obra (`src/pages/obra/[autor]/[slug]/[...page].astro`)
 **When** compone su listado
@@ -5623,13 +5794,14 @@ So that recorrer la Página de Obra se parezca a hojear la obra y no a leer un �
 **And** la segunda, sobre el Corpus real y sin construir, exige que alguna Obra documentada de varias Citas salga en un orden distinto del de slug
 
 **Given** la dirección de dependencias del paradigma v8, que esta historia estrena al usar `tools/lib/` desde `content.config.ts`
-**When** corre la suite
+**When** corre la suite de Vitest
 **Then** una prueba fija que ningún módulo de `src/lib/` importa de `tools/lib/`
 
-**Given** que el cargador es el segundo lector de `corpus/fuentes/` en cada construcción, con unos 1.581 documentos y 168 MB
+**Given** que el cargador es el segundo lector de `corpus/fuentes/` en cada construcción, con unos 1.421 documentos y unos 159 MB, desde que la reparación retiró 160 (8e834217) *(v8.2)*
 **When** se cierra la historia
-**Then** se ha medido, sobre el Corpus real, cuánto tarda `npm run build` antes y después, y la cifra queda anotada, porque el despliegue se corta a los 10 minutos
-**And** al comparar el `dist/` de antes con el de después, solo cambian rutas `/obra/…`
+**Then** se ha medido, sobre el Corpus real, cuánto tarda `npm run build` antes y después, y la cifra queda anotada en el spec, porque construir ya tarda 15 min 24 s en CI (2026-10-19), con la Tarjeta Social entera dentro *(v8.2)*
+**And** el corte de 10 minutos es la espera de `deploy-pages`, que depende del peso y del número de ficheros que mide la 24.2, no del build *(v8.2)*
+**And** al comparar el HTML de `dist/` de antes con el de después, construidos en la misma jornada, solo cambian rutas `/obra/…`; los ficheros de `dist/pagefind/` cambian también, porque el orden nuevo cambia los fragmentos y el índice *(v8.2)*
 
 ### Story 24.2: El build avisa antes de que `dist/` llegue al techo del alojamiento
 
@@ -5641,16 +5813,19 @@ So that una sesión de siembra no tumbe el despliegue de GitHub Pages (1 GB por 
 
 **Given** `src/lib/umbrales.ts`
 **When** se declara
-**Then** lleva con nombre un aviso y un tope del peso de `dist/`, los dos por debajo de 1 GB y el aviso por debajo del tope, y una prueba fija esa relación (AD-9)
-**And** los valores los fija Héctor en un diff visible. Antes, el agente los propone con estos datos: 485 MB el 2026-10-16, unos 95–100 KB por cada Cita nueva y el techo hacia las 9.500–10.000 Citas
-**And** no se escribe ningún valor por omisión, y la historia no se cierra sin los dos
+**Then** lleva con nombre un aviso y un tope del peso de `dist/`, los dos por debajo de 1 GB y el aviso por debajo del tope, y una prueba de Vitest fija esa relación (AD-9)
+**And** los valores los fija Héctor en un diff visible. Antes, el agente los propone con estos datos: 485 MiB según `du` el 2026-10-16, 445 MiB en bytes, que es lo que mide el paso final, unos 95–100 KB por cada Cita nueva y el techo hacia las 9.500–10.000 Citas *(v8.2)*
+**And** es un acto de Héctor a mitad de cadena: de él cuelgan la 24.6, la 24.8 y toda la 26, así que los valores se piden antes de abrir la rama 24+26 *(v8.2)*
+**And** no se escribe ningún valor por omisión, y la historia no se cierra sin los dos. El tope del número de PNG, abajo, va aparte y puede quedar sin valor *(v8.2)*
 
 **Given** una comprobación como paso final de `npm run build`, detrás de Pagefind (`astro build && pagefind --site dist … &&` la comprobación), que es la orden con que construye el despliegue
 **When** termina cada construcción
 **Then** mide el `dist/` que se despliega, `dist/pagefind/` incluido (bytes y número de ficheros), y escribe una línea con las dos cifras (AD-9; decisión de Héctor, 2026-10-19)
-**And** AD-9 y el Entorno operativo dicen `astro:build:done`, que corre antes de que Pagefind escriba su índice (21 MB y 4.924 ficheros en el `dist/` local del 2026-10-19); la espina lo alinea en su próxima pasada
+**And** el veredicto no depende de la jornada: mide `dist/` sin los ficheros que rotan con ella —la portada, el 404, `/kit`, `/lote` y `rss.xml`—, que mide e informa aparte, y la función pura recibe la medida ya sin ellos (AD-9, AD-12) *(v8.2)*
 **And** dice cuánto de ese peso son las Tarjetas Sociales (`/tarjeta/`), que es lo primero que se mira contra el techo (AD-16)
+**And** cuenta el número de PNG de `dist/` y lo informa. Su tope con nombre (AD-16) se declara sin valor, porque lo fija Héctor en un diff, y mientras no lo tenga el paso informa sin avisar; con valor, avisa al pasarlo y no rompe *(v8.2)*
 **And** el número de ficheros se informa, sin aviso ni tope. Cloudflare Pages corta a 20.000, así que mudarse de alojamiento se decide con esa cifra delante
+**And** la línea de cifras no es un aviso: avisa solo lo que cruza un umbral *(v8.2)*
 
 **Given** un `dist/` que pasa el aviso sin llegar al tope
 **When** termina la construcción
@@ -5664,12 +5839,20 @@ So that una sesión de siembra no tumbe el despliegue de GitHub Pages (1 GB por 
 **Given** la decisión, con sus tres casos (por debajo, entre aviso y tope, y por encima)
 **When** se prueba
 **Then** es una función pura, probada en Vitest en los tres casos y en los dos bordes
-**And** un `npm run build` de prueba, con Pagefind, y el tope rebajado en una copia temporal, nunca en el árbol, sale con error y su mensaje
+**And** otra prueba de Vitest fija que la medida que recibe llega ya sin los ficheros que rotan con la jornada, así que dos jornadas dan el mismo veredicto (AD-9, AD-12) *(v8.2)*
+**And** la decisión del número de PNG también es una función pura, probada en Vitest: sin valor, informa y no avisa; con valor, no avisa por debajo ni en el borde, y al pasarlo avisa sin romper (AD-16) *(v8.2)*
+**And** en Vitest, un `npm run build` de prueba, con Pagefind, y el tope rebajado en una copia temporal, nunca en el árbol, sale con error y su mensaje
 
 **Given** esta historia terminada
 **When** se construye el sitio
 **Then** ningún fichero de `dist/` cambia
-**And** el tope de HTML de la Página de Cita sigue aplazado: se crea si la medición a mano de NFR-7 se degrada
+**And** el tope de HTML de la Página de Cita sigue aplazado: se crea si Héctor lo decide, al degradarse la medición a mano de NFR-7 en una historia de cierre —para esta épica, la 26.11— o para vigilar ese peso *(v8.2, Héctor, 2026-10-23)*
+
+**Given** la historia, con los dos valores del peso ya en `umbrales.ts`
+**When** se fusiona
+**Then** entra sola en la principal, en cuanto los tenga, como excepción declarada a la fusión por épica: no cambia ningún fichero de `dist/` y vigila el peso desde ya, mientras la principal crece con cada siembra *(v8.2, Héctor, 2026-10-23)*
+**And** entra con el CI en verde, y fusionarla es acto de Héctor *(v8.2)*
+**And** la rama de la 24 con la 26 la recibe de la principal, y los valores se revisan igual tras la 24.6, que vuelve a medir *(v8.2, Héctor, 2026-10-23)*
 
 ### Story 24.3: Cada Cita de un listado dice de qué obra es
 
@@ -5711,6 +5894,7 @@ So that elija cuál abrir sabiendo de dónde viene, sin entrar en cada una.
 **And** va en Inter, en `{typography.caption}` y `{colors.on-surface-variant}`, sin versalitas, a `{spacing.unit}` bajo el fragmento y bajo el Autor si lo lleva (UX-DR70, UX-DR104)
 **And** es texto y nunca un segundo enlace: toda la tarjeta lleva a su Página de Cita, con su zona de toque de 44 px como mínimo, y al pasar el cursor el fondo pasa a `{colors.surface-container-low}`, sin sombra
 **And** el título no se recorta ni lleva puntos suspensivos: si es largo, ocupa más líneas (NFR-12). El fragmento de la Cita se sigue acotando como hoy
+**And** entre el fragmento, el Autor y la Obra que lleve suena un «, » solo para lectores de pantalla, sin ninguna palabra más, para que el nombre de la tarjeta siga siendo su texto visible en su orden (UX-DR70, UX-DR101, WCAG 2.5.3) *(v8.2)*
 
 **Given** una Obra con `noindex`, o la familia congelada
 **When** sus Citas aparecen en un listado
@@ -5718,7 +5902,7 @@ So that elija cuál abrir sabiendo de dónde viene, sin entrar en cada una.
 
 **Given** una construcción de prueba con una Cita con Obra y otra sin ella en cada uno de los cuatro listados
 **When** corre Vitest sobre su `dist/`
-**Then** cada Tarjeta lleva exactamente lo que dice su contexto
+**Then** cada Tarjeta lleva exactamente lo que dice su contexto, con un «, » solo para lectores de pantalla entre cada parte y la siguiente, y ninguno al final ni en una Tarjeta que solo lleva el fragmento *(v8.2)*
 **And** cada Tarjeta tiene exactamente un enlace, a su Página de Cita
 
 ### Story 24.4: Bajo la Cita, la obra de la que sale
@@ -5830,6 +6014,11 @@ So that pueda leer una obra Cita a Cita sin volver al listado.
 **And** lleva la zona `siguiente`, más concreta que la `tarjeta-de-obra` que la contiene (UX-DR111)
 **And** en el orden de tabulación, «Siguiente» va antes que «Ver la obra» (UX-DR63)
 
+**Given** la prueba «las zonas de toque miden 44px con 8px de separación» de `tests/e2e/accesibilidad.spec.ts` (Playwright local)
+**When** encuentra «Siguiente» y la fila de la Obra apiladas, separadas solo por el filete
+**Then** exime de los 8 px a las Filas de bloque apiladas, como ya exime las filas de `.hermanas`, por UX-DR102 *(v8.2)*
+**And** la exención se escribe por el componente de la Fila de bloque, no por su ruta, y sigue exigiendo que no se solapen *(v8.2)*
+
 **Given** cómo se compone
 **When** se construye
 **Then** sale del build: es determinista, no lleva guion y no guarda nada del visitante. No hay «seguir donde lo dejaste» ni nada en el almacenamiento del navegador (UX-DR65)
@@ -5843,7 +6032,7 @@ So that pueda leer una obra Cita a Cita sin volver al listado.
 
 **Given** la tarjeta con sus dos filas
 **When** se mide a 360 px sobre lo construido (Playwright local)
-**Then** mide unos 240 px, y la cifra se anota (UX-DR64)
+**Then** mide unos 240 px, y la cifra se anota en el spec (UX-DR64) *(v8.2)*
 **And** el texto de la Cita sigue empezando en la primera pantalla de 360 × 640
 
 ### Story 24.6: Al pie, más de la misma obra y más del Autor
@@ -5892,7 +6081,7 @@ So that tenga a dónde seguir sin que se me repita lo que acabo de leer.
 **Given** una Cita a la que no le queda ningún grupo: sin «De la misma obra», sin «Más de {Autor}» y sin Tema publicado
 **When** se sirve
 **Then** no se pinta ningún respaldo: «Explorar por tema», con los Temas del sitio, y «Seguir leyendo», hacia el Autor, se retiran de `RutasDeSalida.astro` con la prop `temasDelSitio`, y el conjunto no deja filete ni hueco (UX-DR108; decisión de Héctor, 2026-10-19)
-**And** la página no queda sin enlaces internos, porque la Atribución ya enlaza al Autor (UX-DR67): lo sigue comprobando sobre `main` la prueba de la 2.6 «ninguna Página de Cita publicada queda sin enlaces salientes»
+**And** la página no queda sin enlaces internos, porque la Atribución ya enlaza al Autor (UX-DR67): lo sigue comprobando sobre `main` la prueba de la 2.6 «ninguna Página de Cita publicada queda sin enlaces salientes» (`tests/e2e/rutas-de-salida.spec.ts`, Playwright local)
 
 **Given** las cifras de los dos cierres
 **When** se componen
@@ -5911,13 +6100,22 @@ So that tenga a dónde seguir sin que se me repita lo que acabo de leer.
 
 **Given** los criterios de la Historia 2.6 «hasta cuatro Citas más del mismo Autor» y «deriva de Autor y de Tema, sin motor de recomendación»
 **When** se cierra esta historia
-**Then** quedan sustituidos por estos, y con ellos las comprobaciones de `tests/e2e/rutas-de-salida.spec.ts` sobre `.hermanas` y sobre la sección «Seguir leyendo»
+**Then** quedan sustituidos por estos, y con ellos las comprobaciones de `tests/e2e/rutas-de-salida.spec.ts` (Playwright local) sobre `.hermanas` y sobre la sección «Seguir leyendo»
 **And** «tiene al menos uno» y «ninguno apunta a una página que no existe» siguen siendo ciertos, y sus pruebas se quedan
 
-**Given** la Página de Cita con todo puesto: la Tarjeta de Obra, «Siguiente», las siete Tarjetas y la medición encendida
+**Given** la prueba «las zonas de toque miden 44px con 8px de separación» de `tests/e2e/accesibilidad.spec.ts` (Playwright local)
+**When** encuentra Tarjetas de Cita apiladas, y la Fila de bloque que cierra su lista, separadas solo por el filete
+**Then** extiende a ellas la exención de las Filas de bloque de la 24.5, por UX-DR102: las Filas de bloque apiladas se tocan *(v8.2)*
+**And** esa exención sustituye a la de `.hermanas`, que sale de la prueba con las Citas hermanas que esta historia retira *(v8.2)*
+**And** la exención se escribe por su componente, no por su ruta, y sigue exigiendo que no se solapen *(v8.2)*
+
+**Given** la Página de Cita con todo puesto: la Tarjeta de Obra, «Siguiente», las siete Tarjetas y la medición puesta contra un receptor local o un punto final ficticio, nunca el de producción *(v8.2)*
 **When** se cierra la historia
-**Then** NFR-7 está medido a mano con Lighthouse en perfil móvil 4G y anotado, sin puerta automática
-**And** está medido cuánto crece la página a 360 px (de unos 1.500 a unos 2.780 px), todo después de las acciones, y cuánto pesa `dist/` antes y después según la línea de la 24.2
+**Then** NFR-7 está medido a mano con Lighthouse en perfil móvil 4G y anotado en el spec, junto a la medida de la principal del mismo día, sin puerta automática *(v8.2)*
+**And** la principal se mide construida y servida igual, en local y con la medición contra un receptor local o un punto final ficticio: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*
+**And** la consecuencia sobre el merge no es de esta historia: la pone la 26.11, que vuelve a medir con lo de las dos épicas puesto *(v8.2, Héctor, 2026-10-23)*
+**And** está medido, y anotado en el spec, cuánto crece la página a 360 px (de unos 1.500 a unos 2.780 px), todo después de las acciones, y cuánto pesa `dist/` antes y después según la línea de la 24.2
+**And** con esa medida, el spec anota la proyección hacia el techo —KB por Cita nueva y Citas hasta el techo— frente a la de la 24.2 (95–100 KB, 9.500–10.000 Citas). Se le da a Héctor, que revisa los valores de la 24.2, ya en la principal, y si los cambia lo hace en un diff *(v8.2, Héctor, 2026-10-23)*
 **And** el barrido de accesibilidad (Playwright local) incluye una Página de Cita con los dos bloques, una sin «De la misma obra» y otra sin «Más de {Autor}»
 
 ### Story 24.7: La Obra salta a dónde leerla
@@ -5959,7 +6157,7 @@ So that no tenga que recorrer todas sus Citas para encontrar la edición.
 **When** se construyen las dos (Vitest; vale la misma pareja de construcciones que en la 24.4)
 **Then** el salto y su `h2` de destino salen idénticos byte a byte (FR-35, UX-DR110)
 **And** lo único que difiere en la página vive dentro del `data-ingreso` de «Ediciones en venta»
-**And** así se lee UX-DR96, que dice que con el salto «la página sale idéntica»: como FR-35, el salto y su destino (decisión de Héctor, 2026-10-19); `bmad-ux` alinea la frase en su próxima pasada
+**And** es lo que dice UX-DR96 desde la UX v8.2: el salto y su destino se construyen idénticos con la afiliación encendida o apagada, como FR-35, y la página no, porque encendida lleva «Ediciones en venta» (decisión de Héctor, 2026-10-19) *(v8.2)*
 
 **Given** la primera pantalla de 360 × 640, con el salto puesto
 **When** se mide sobre lo construido (Playwright local)
@@ -6006,7 +6204,7 @@ So that el sitemap y el aviso sigan diciendo la verdad, y una sesión de siembra
 **Given** la Página de Obra
 **When** se fecha
 **Then** se compone de su ficha, sus Citas, el fichero de su Autor y sus documentos, casados como en el cotejo (`documentosDeCita`)
-**And** el commit que añade una página a una Obra paginada fecha la Obra, porque puede reordenar su listado (24.1). Para eso, el aviso observa también `corpus/fuentes/`
+**And** el commit que añade una página a una Obra paginada fecha la Obra, porque puede reordenar su listado (24.1). Para eso, el aviso observa también `corpus/fuentes/`, como familia de fichero `documento`, que no es familia de superficie ni de ruta (AD-27) *(v8.2)*
 **And** es el `lastmod` de la Obra que fija AD-27, que manda por precedencia hasta que `bmad-prd` alinee FR-51
 
 **Given** una baja: una Cita retirada a `corpus/_revision/`, una ficha retirada o un Autor retirado
@@ -6026,9 +6224,10 @@ So that el sitemap y el aviso sigan diciendo la verdad, y una sesión de siembra
 **Then** avisa su Página de Cita, su Autor, sus Temas y sus Colecciones, y su Obra con las reglas de la 22.8. No avisa ninguna otra Página de Cita (FR-38)
 
 **Given** un rango de siembra sin desplegar (`--desde`, `--hasta`)
-**When** se lee la misma relación con una orden de `tools/`
+**When** se lee la misma relación con `npx tsx tools/avisar.ts --ensayo --desde … --hasta …`, que ya compone el aviso sin enviarlo y gana aquí el reparto por familia y las fechas que cambian *(v8.2)*
 **Then** dice por familia cuántas superficies cambian de fecha y cuántas se avisarían, sin escribir ni enviar nada (AD-27)
-**And** al cerrar la historia se ha corrido sobre una sesión de siembra real, y quedan anotadas las dos cifras: con la relación de antes y con la de ahora
+**And** al cerrar la historia se ha corrido sobre una sesión de siembra real, y quedan anotadas en el spec las dos cifras: con la relación de antes y con la de ahora *(v8.2)*
+**And** `AGENTS.md` documenta la orden *(v8.2)*
 
 **Given** la Historia 21.2, el commit único de las aptas
 **When** se ordena respecto de esta épica
@@ -6043,8 +6242,8 @@ So that el sitemap y el aviso sigan diciendo la verdad, y una sesión de siembra
 Quien quiere compartir una Cita tiene a la vista WhatsApp, Facebook y Threads, también en el móvil que ofrece la hoja del sistema, y «Más opciones…», que abre la hoja o despliega Telegram, X y Correo. En una pantalla táctil que sabe compartir ficheros la lleva a su Historia de Instagram en dos toques, con una imagen vertical que lleva el dominio al pie y el enlace ya copiado para el sticker. La Imagen cuadrada gana el dominio, la Página de Obra también se comparte y el Kit Diario saca el 9:16 para el canal propio. Todo lo compartido lleva `?via=` con su destino, así que Héctor sabe cuántas lecturas trae cada botón (SM-12) y vigila que compartir no crezca a costa de copiar (SM-C3).
 
 **FRs covered:** FR-10, FR-11, FR-17, FR-18 *(reescrito)*, FR-19, FR-20, FR-21, FR-22 *(`?via=` en todo lo compartido, nunca `?de=`)*, FR-51 *(compartir en la página 1)*, FR-35 *(lo que se comparte de la Obra)* *(enmendados)*; NFR-6 y NFR-12 en lo que añade; SM-5, SM-7, SM-12 y SM-C3 *(la juzgan)*.
-**Notas de implementación:** la épica vive en su propia rama y entra en la principal en un solo merge. Va después de la 24 con la 26, antes o después de la 27, con la publicación reparada y el CI en verde. La 25.3 puede correr desde el principio. Es la primera pasada de la matriz de dispositivos y la puerta de la 25.4: sin la Historia comprobada en iOS y en Android, el 9:16 no se construye (AD-7). La 25.1 arranca con la 23.1 y la 23.2 construidas, y la 25.2 no depende de nada. La 25.4 va tras la 25.2 y la 25.3, la 25.5 tras la 25.1 y la 25.4, y la 25.6 tras la 25.1. La 25.7 cierra la épica con la segunda pasada de la matriz y el validador de Facebook; sin ella, la épica se queda en revisión. Quedan fuera tres cosas: el bloque y la Imagen sobre la Cita del Día, que son de la 28 y reutilizan lo de aquí sin copiarlo; los demás diseños en 9:16 (FR-11); y toda Imagen de Obra. El resto, en las viñetas de la Epic List — v8.
-**Preguntas abiertas:** la redacción del nombre de la previsualización cuadrada (25.2) y la de la frase de la descarga en iOS (25.5, 25.7) (`bmad-ux`); la letra de AD-7 sobre el «destino Feed» (`bmad-architecture`).
+**Notas de implementación:** la épica vive en su propia rama y entra en la principal en un solo merge. Va después de la 24 con la 26, antes o después de la 27, con el CI en verde *(v8.2)*. Las entradas de la 25.3 y la 25.7 en la constante de las pasadas que escriben en producción (23.10) van a la principal el día de cada pasada; no son una excepción a la fusión por épica *(v8.2, Héctor, 2026-10-23)*. La 25.3 puede correr desde el principio. Es la primera pasada de la matriz de dispositivos y la puerta de la 25.4: sin la Historia comprobada en iOS y en Android, el 9:16 no se construye (AD-7). La 25.1 arranca con la 23.1 y la 23.2 construidas, y la 25.2 arranca con la 23.2 y la 23.5 construidas *(v8.2)*. La 25.4 va tras la 25.2 y la 25.3, la 25.5 tras la 25.1 y la 25.4, y la 25.6 tras la 25.1. La 25.7 cierra la épica con la segunda pasada de la matriz, el validador de Facebook y NFR-7 medido a mano *(v8.2, Héctor, 2026-10-23)*; sin ella, la épica se queda en revisión. Quedan fuera tres cosas: el bloque y la Imagen sobre la Cita del Día, que son de la 28 y reutilizan lo de aquí sin copiarlo; los demás diseños en 9:16 (FR-11); y toda Imagen de Obra. El resto, en las viñetas de la Epic List — v8.
+**Preguntas abiertas:** qué hace en iOS el botón de la Historia si Instagram no la ofrece allí (Héctor, 25.3) *(v8.2)*. El nombre de la previsualización cuadrada y la frase de la descarga en iOS los cerró la UX v8.2, y el «destino Feed», la espina v8.2: no lo hay *(v8.2)*. Decidido por Héctor el 2026-10-23: la jornada de llegada de la 25 es una constante de despliegue de `umbrales.ts` (25.7), la segunda pasada de la 25.7 escribe en el D1 de producción y se descuenta como la 25.3, y la frase de iOS se activa con una constante de `umbrales.ts` (25.5) *(v8.2, Héctor, 2026-10-23)*.
 
 ### Story 25.1: Compartir en WhatsApp, Facebook y Threads, también donde hay hoja
 
@@ -6091,7 +6290,7 @@ So that la Cita llegue a WhatsApp, a Facebook o a Threads en un toque, con su Au
 **Then** es la canónica de la página con `?via={destino}`, codificada dentro del parámetro de la intención (FR-18, FR-22)
 **And** la compone el build y nunca sale de `location`: llegar con `?de=` o con el `?via=` de otro botón no la arrastra, y nunca lleva `?de=` (AD-7)
 **And** la página que se abre con `?via=` declara la misma canónica, el mismo `og:url` y el mismo `<link rel="canonical">` que sin él (NFR-1)
-**And** los criterios de la 10.3 «el enlace compartido no arrastra marca de origen» y «solo existe la URL canónica» siguen en pie, ampliados a `?via=`
+**And** el criterio de la 10.3 «solo existe la URL canónica» y la prueba «el enlace compartido no arrastra marca de origen» de `tests/e2e/compartir-enlace.spec.ts` siguen en pie, ampliados a `?via=` *(v8.2)*
 
 **Given** el texto propuesto
 **When** se compone
@@ -6114,7 +6313,7 @@ So that la Cita llegue a WhatsApp, a Facebook o a Threads en un toque, con su Au
 **When** la página carga
 **Then** la isla cambia el `<details>` por un `button` sin `aria-expanded` y con el mismo nombre accesible
 **And** el botón abre la hoja con el texto propuesto y con la canónica marcada `?via=opaco`, que compone el build y la isla lee de un `data-*`
-**And** registra `comparticion-de-enlace` con destino `opaco` solo si `share()` resolvió; cerrar la hoja sin elegir (`AbortError`) no registra nada ni enseña ningún error (FR-20)
+**And** registra `comparticion-de-enlace` con destino `opaco` solo si `share()` resolvió; en Chrome para Android, donde puede no resolverse nunca, no se cuenta, y SM-7 y SM-12 lo declaran *(v8.2)*; cerrar la hoja sin elegir (`AbortError`) no registra nada ni enseña ningún error, y un fallo de entrega con la hoja ya abierta llega como `AbortError` y tampoco registra nada (FR-20) *(v8.2)*
 **And** los destinos de la rejilla siguen a la vista, porque la hoja ya no esconde nada. Esto sustituye los criterios «con hoja del sistema» de la 10.3 y, en `tests/e2e/compartir-enlace.spec.ts`, las pruebas «se ofrece la hoja y se esconde la lista» y «la hoja recibe el enlace y el texto», del bloque «Historia 10.3 — con hoja del sistema», y «por la hoja del sistema el destino es opaco», de la 10.4, que se reescriben contra «Más opciones…»
 **And** «el enlace compartido no arrastra marca de origen» sigue en pie, como dice el criterio de la URL que se comparte, y su prueba se queda
 
@@ -6122,7 +6321,8 @@ So that la Cita llegue a WhatsApp, a Facebook o a Threads en un toque, con su Au
 **When** se emite la medición
 **Then** se registra `comparticion-de-enlace` con su destino, por `__medir(…)` y nunca por `window.__medir && …`, desde un solo oyente delegado en la isla (FR-20, AD-13)
 **And** el destino nombra el botón, nunca a quien comparte (NFR-11)
-**And** la invariante de `tests/unit/comparticion.test.ts` «la hoja se registra como opaco» pasa a decir que `opaco` es solo de «Más opciones…» con hoja y de la Imagen cuadrada. Con la 23.2, sustituye el criterio de la hoja de la 10.4, que al cerrarse esta historia se marca *(sustituido en la v8 por las Historias 23.2 y 25.1)*
+**And** la isla no decide `primera`: la pone el guion de medición al emitir (23.5) *(v8.2)*
+**And** la invariante de `tests/unit/comparticion.test.ts` «la hoja se registra como opaco» pasa a decir que `opaco` es solo de «Más opciones…» con hoja y de la Imagen cuadrada, la compartida por la hoja y la descargada por un rechazo *(v8.2)*. Con la 23.2, sustituye el criterio de la hoja de la 10.4, que al cerrarse esta historia se marca *(sustituido en la v8 por las Historias 23.2 y 25.1)*
 **And** los destinos son enlaces que salen del sitio: no llevan zona ni cuentan como salida interna (UX-DR111)
 
 **Given** WhatsApp, Facebook, Threads, Telegram y X
@@ -6144,8 +6344,8 @@ So that la Cita llegue a WhatsApp, a Facebook o a Threads en un toque, con su Au
 
 **Given** las pruebas
 **When** corren
-**Then** Vitest fija en el CI el marcado de `dist/`: los destinos, las URL marcadas, los nombres accesibles, Correo sin pestaña nueva, el `<details>` y la ausencia de `?de=`
-**And** son Playwright local, que el CI no corre: la hoja, el registro al pulsar, el `<details>` sin guion y el barrido axe del bloque con `wcag22aa`
+**Then** Vitest fija en el CI el marcado de `dist/`: los destinos, las URL marcadas, los nombres accesibles, Correo sin pestaña nueva, el `<details>` y la ausencia de `?de=`; y, en una sola prueba estructural, que ni el guion de la isla ni `public/islas/imagen.js` nombran `primera`, que pone el guion de medición (23.5) *(v8.2)*
+**And** son Playwright local, que el CI no corre: la hoja, también cerrada o fallida con `AbortError` y sin registro *(v8.2)*, el registro al pulsar, el `<details>` sin guion y el barrido axe del bloque con `wcag22aa`
 
 ### Story 25.2: La Imagen cuadrada lleva el dominio al pie
 
@@ -6154,6 +6354,12 @@ I want que la imagen diga de dónde sale, legible y sin quitarle sitio a la fras
 So that quien la vea publicada sepa adónde ir aunque nadie le dé el enlace.
 
 **Acceptance Criteria:**
+
+**Given** las Historias 23.2 y 23.5 terminadas *(v8.2)*
+**When** empieza esta historia
+**Then** existen el destino de `descarga-de-imagen`, con {`opaco`, `instagram-historia`}, y `primera`, que pone el guion de medición
+**And** sin ellos no empieza: la descarga impuesta no tendría con qué registrarse (AD-13)
+**And** si la 25.3 ya anotó que en algún sistema un fallo de entrega con la hoja abierta no llega como `AbortError`, esta historia lleva ya, como criterio escrito en `epics.md`, lo que Héctor decidió para la cuadrada; sin esa decisión no empieza (25.3, AD-7) *(v8.2)*
 
 **Given** la Imagen cuadrada, de 1080 × 1080 y con sus tres plantillas
 **When** se compone
@@ -6178,13 +6384,14 @@ So that quien la vea publicada sepa adónde ir aunque nadie le dé el enlace.
 **Given** las Citas publicadas más largas de cada tramo
 **When** corre la prueba de cabida en el navegador (Playwright local, con Source Serif cargada y el pie puesto)
 **Then** toda Cita de hasta `MAX_CARACTERES_IMAGEN` cabe en su tramo en el cuadrado (FR-10, AD-8)
-**And** si alguna deja de caber por el pie, la historia no se cierra. Lo decide Héctor en un diff visible de `src/lib/tramos.ts`, nunca encogiendo en el generador
+**And** si alguna deja de caber por el pie, la historia no se cierra. Lo decide Héctor en un diff visible de `src/lib/tramos.ts`, nunca encogiendo en el generador; es un acto de Héctor a mitad de cadena, del que cuelgan la 25.4 y la 25.5, y `sprint-status.yaml` lo marca en un comentario, a mano *(v8.2)*
 
 **Given** una Cita que no cabe en el lienzo, por su alto o por una palabra más ancha que la columna
 **When** el generador la compone en el navegador
-**Then** no la compone: el diálogo da la frase del fallo, «No se ha podido preparar la imagen. Puedes copiar el texto de la cita.», con «Copiar el texto» (NFR-12, AD-8)
+**Then** no la compone: el diálogo lo dice donde iba la previsualización, con el trato de la frase del generador que no llega: «Esta cita no cabe en la imagen. Puedes copiar su texto.», sin el primario y con «Copiar el texto» (NFR-12, AD-8) *(v8.2)*
 **And** nunca encoge, recorta ni pone puntos suspensivos
-**And** la frase se anuncia por la región `role="status"` del diálogo, como cuando el generador no llega
+**And** no ofrece reintentar: con la misma Cita y la misma tabla el resultado no cambia, y pulsar otra vez la Acción Imagen da la misma frase *(v8.2)*
+**And** la frase se anuncia por la región `role="status"` del diálogo, como cuando el generador no llega, cuya frase sigue siendo «No se ha podido preparar la imagen. Puedes copiar el texto de la cita.», con reintento *(v8.2)*
 
 **Given** el Diálogo de Imagen
 **When** se abre
@@ -6193,12 +6400,16 @@ So that quien la vea publicada sepa adónde ir aunque nadie le dé el enlace.
 
 **Given** la previsualización
 **When** se pinta
-**Then** es una imagen con nombre (`role="img"`), y su nombre accesible dice lo que lleva: la cita, su autor, su procedencia y el dominio. Deja de ser «Previsualización de la imagen» (UX-DR76, WCAG 1.1.1) (abierta: la redacción del nombre — `bmad-ux`)
+**Then** es una imagen con nombre (`role="img"`), y su nombre accesible es «Imagen cuadrada en Papel: la cita, su autor, su procedencia y sabiduriadebolsillo.net», que cambia con la plantilla elegida —«en Tinta», «en Siena»—, con el dominio de `dominio.ts` *(v8.2)*
+**And** no lleva rótulo visible propio, y deja de ser «Previsualización de la imagen» (UX-DR76, WCAG 1.1.1) *(v8.2)*
 
 **Given** la Imagen cuadrada
 **When** se comparte por la hoja desde el diálogo
-**Then** se registra `comparticion-de-imagen` con destino `opaco` (FR-20)
-**And** descargada, se registra `descarga-de-imagen` sin destino, como hoy, y cancelar la hoja no registra nada
+**Then** se registra `comparticion-de-imagen` con destino `opaco` cuando `share()` resuelve (FR-20) *(v8.2)*
+**And** si el navegador rechaza antes de abrir la hoja —`NotAllowedError`, `DataError` o `TypeError`—, la imagen se descarga sin aviso y se registra `descarga-de-imagen` con destino `opaco` y `primera` = no, que pone el guion de medición (23.5): no cuenta en SM-5 ni en SM-C3, ni entra en SM-12 (AD-7) *(v8.2)*
+**And** `AbortError` —cerrar la hoja sin elegir, o un fallo de entrega con la hoja ya abierta— ni descarga ni registra, e `InvalidStateError` se ignora *(v8.2)*
+**And** descargada porque el visitante lo eligió, se registra `descarga-de-imagen` sin destino, como hoy *(v8.2)*
+**And** la `comparticion-de-imagen` de la cuadrada no entra en el denominador de SM-12, que la 23.10 informa aparte *(v8.2)*
 **And** el fichero compartido y el descargado son el mismo, porque salen de la misma generación (FR-17)
 
 **Given** la Imagen del Kit Diario y la del Lote
@@ -6212,7 +6423,7 @@ So that quien la vea publicada sepa adónde ir aunque nadie le dé el enlace.
 **Given** las pruebas
 **When** corren
 **Then** Vitest fija sobre `dist/` el `data-*` del dominio, y en el módulo la geometría y la ausencia del literal
-**And** son Playwright local la cabida, el nombre de la previsualización y el fallo por no caber
+**And** son Playwright local la cabida, el nombre de la previsualización con cada plantilla, la Cita que no cabe, sin reintento, y, con `share` sustituido, los tres rechazos antes de abrir la hoja, `AbortError` e `InvalidStateError`, cada uno con lo que registra *(v8.2)*
 
 ### Story 25.3: La Historia se prueba en iOS y en Android antes de construirla *(operativa)*
 
@@ -6231,11 +6442,21 @@ So that el 9:16 no se construya para un destino que en uno de los dos sistemas n
 **When** se pulsa «Compartir como imagen» en una Página de Cita del sitio en vivo que admite Imagen, y en la hoja se elige Instagram
 **Then** queda anotado si Instagram ofrece «Historia» al recibir el fichero. Esa acción ya entrega a la hoja solo el fichero, sin texto ni enlace
 **And** la pasada se hace con esa acción del sitio en vivo y no con nada de la rama, que todavía no tiene nada construido con lo que probar; el sitio en vivo ya se sirve con HTTPS, así que esta pasada no necesita el túnel de la 25.7
+**And** la pasada escribe en el D1 de producción, porque el sitio en vivo ya mide —con el receptor de la v7.1 mientras no llegue la 23—; con la segunda pasada de la 25.7, son las dos únicas que lo hacen a propósito *(v8.2)*
+**And** Héctor anota su jornada UTC y las rutas que toca en la constante de `umbrales.ts` de las pasadas que escriben en producción, en un commit aparte a la principal el día de la pasada: es un dato de Héctor y no código de la épica, como dar valor a una constante de despliegue. `DESPLIEGUE.md` cita la constante y no la copia, y la orden de la 23.10 las descuenta igual en cada lectura (AD-9); si la constante aún no está en la principal, la anota en cuanto llegue *(v8.2, Héctor, 2026-10-23)*
+**And** queda anotado si en iOS la cuadrada cae en la descarga: esta pasada y la de la 25.7 son las dos que pueden activar la frase de iOS de la 25.5 *(v8.2)*
 **And** la anotación lleva la fecha, el dispositivo y las versiones del sistema, del navegador y de Instagram, en una sección nueva de `DESPLIEGUE.md` para la matriz de la Épica 25
 
 **Given** el rótulo de la Acción Imagen en cada teléfono
 **When** la página carga
 **Then** queda anotado qué dice. «Compartir como imagen» significa que el navegador comparte ficheros (`canShare({ files })`), y «Descargar como imagen», que no: es la condición de la que dependerá la Historia (UX-DR73)
+
+**Given** la Acción Imagen del sitio en vivo en cada teléfono *(v8.2)*
+**When** se provoca un fallo de entrega con la hoja ya abierta
+**Then** queda anotado qué hace el navegador. AD-7 da por hecho que llega como `AbortError`, como cancelar, sin descarga ni registro, y que nada lo distingue de cerrar la hoja
+**And** si algún sistema cae en la descarga o da otro error, qué hacen allí la Historia y la Imagen cuadrada lo decide Héctor con la matriz delante, como cuando un sistema no ofrece la historia (abajo) *(v8.2)*
+**And** la decisión entra como criterio de la 25.5, y de la 25.2 si aún no está construida, por `bmad-correct-course` antes de construirla, no solo en su spec; la 25.5 no empieza sin ella, y ningún agente la toma *(v8.2)*
+**And** va en la misma anotación de la matriz en `DESPLIEGUE.md`
 
 **Given** que los dos sistemas ofrecen «Historia»
 **When** se anota
@@ -6244,8 +6465,9 @@ So that el 9:16 no se construya para un destino que en uno de los dos sistemas n
 **Given** que alguno de los dos no la ofrece
 **When** se anota
 **Then** qué hace allí el botón «Historia de Instagram» lo decide Héctor con la matriz delante (PRD §15)
-**And** si el que no la ofrece es iOS, la Imagen cuadrada se conserva allí, porque va por la misma vía, y Héctor define en esta historia el «destino Feed» que AD-7 conserva con ella: qué destino es y por dónde llega. AD-7 lo nombra sin definirlo, y ni el PRD, ni la UX v8, ni `destinos.ts` lo traen; la espina lo alinea en su próxima pasada
-**And** las dos decisiones quedan escritas en `DESPLIEGUE.md` y como criterio de la 25.5 antes de construirla; ningún agente las toma
+**And** si el que no la ofrece es iOS, la Imagen cuadrada se conserva allí, porque va por la misma vía; no hay destino Feed (AD-7): si lo que Héctor decida necesita un destino nuevo, entra en el vocabulario por la orden de la 23.2 y la 23.3 antes de la 25.5 *(v8.2)*
+**And** la decisión queda escrita en `DESPLIEGUE.md` y en `epics.md`, como criterio de la 25.5, por una pasada de `bmad-create-epics-and-stories` o de `bmad-correct-course` antes de construirla, no solo en su spec; ningún agente la toma *(v8.2)*
+**And** si distingue iOS, la isla lee el sistema en el cliente, que NFR-11 permite porque no se transporta *(v8.2)*
 
 **Given** lo que esta pasada no puede ver: la activación del segundo toque, el portapapeles, los navegadores de las aplicaciones y las bandas que pinta Instagram
 **When** se cierra la historia
@@ -6253,8 +6475,9 @@ So that el 9:16 no se construya para un destino que en uno de los dos sistemas n
 
 **Given** la anotación
 **When** se commitea
-**Then** va en un commit propio, sin código
-**And** sin ella, la historia se queda en revisión: pide teléfonos con Instagram y una persona, y ningún agente puede cerrarla
+**Then** va en un commit propio, sin código *(v8.2)*
+**And** la entrada de la pasada en la constante de `umbrales.ts` va en un commit aparte a la principal el día de la pasada: es un dato de Héctor y no código de la épica, como dar valor a una constante de despliegue *(v8.2, Héctor, 2026-10-23)*
+**And** sin la anotación, la historia se queda en revisión: pide teléfonos con Instagram y una persona, y ningún agente puede cerrarla
 
 ### Story 25.4: La Cita también en vertical, y el Kit la saca para el canal
 
@@ -6290,7 +6513,7 @@ So that publique la historia en cada cuenta sin rehacer la imagen a mano.
 **When** corre la prueba de cabida en el navegador (Playwright local, con Source Serif cargada y el pie puesto)
 **Then** toda Cita de hasta `MAX_CARACTERES_IMAGEN` cabe en su tramo en los dos formatos (FR-10, NFR-12, AD-8)
 **And** los cuerpos del 9:16 son la propuesta que Héctor aceptó para probar: si uno no cabe, se corrige su columna en un diff visible, nunca encogiendo en el generador
-**And** en el navegador, una Cita que no cabe no se compone: el generador da la frase del fallo de la 25.2
+**And** en el navegador, una Cita que no cabe no se compone y el generador lo dice con la frase de la Cita que no cabe de la 25.2, en el Diálogo de Imagen y en el Material del Kit y del Lote; la de la Historia la escribe y la prueba la 25.5 *(v8.2)*
 
 **Given** el Material para publicar del Kit Diario y del Lote (`MaterialParaPublicar.astro`)
 **When** se sirve una jornada cuya Cita admite Imagen
@@ -6312,6 +6535,8 @@ So that publique la historia en cada cuenta sin rehacer la imagen a mano.
 **When** cargan
 **Then** importan `imagen.js` al cargar y componen los dos formatos sin que haya que pulsar nada. El 9:16 del Kit es una isla declarada y contada (AD-6, AD-15, NFR-6)
 **And** `src/islands/ImagenDelKit.astro` pasa el slug de `define:vars` a un `data-*`, como dejó dicho la 23.1: el guion de la isla no lleva datos de contenido (AD-6)
+**And** toda copia de `ImagenDelKit` que conviva con otra en la misma página —una por jornada en el Lote— sigue viva sin el slug: cada guion encuentra su isla por `document.currentScript` o por un oyente delegado, nunca por un selector común *(v8.2)*
+**And** una prueba descarga desde una copia que no es la primera, porque `tests/e2e/kit.spec.ts` solo prueba `.first()` y una copia muerta pasaría *(v8.2)*
 **And** se quita la exención de `ImagenDelKit` que la 23.1 dejó en la prueba de los guiones en línea («ningún guion en línea lleva datos de contenido»), que pasa a juzgar también la isla del Kit: sin quitarla, una regresión del Kit pasaría tapada
 **And** los dos siguen con `noindex`, fuera del sitemap, de los dos buscadores, de la prueba de las dos jornadas (AD-12) y de toda serie, y ninguna superficie del producto los enlaza
 
@@ -6327,7 +6552,7 @@ So that publique la historia en cada cuenta sin rehacer la imagen a mano.
 **Given** las pruebas
 **When** corren
 **Then** Vitest fija sobre `dist/` las dos imágenes del Material, sus rótulos, el `data-*` del 9:16, el del slug del Kit y la columna
-**And** son Playwright local tres cosas: que el Kit compone los dos formatos sin pulsar (`tests/e2e/kit.spec.ts`), la descarga de cada uno y la cabida
+**And** son Playwright local cinco cosas: que el Kit compone los dos formatos sin pulsar (`tests/e2e/kit.spec.ts`), la descarga de cada uno, la descarga desde una copia de `ImagenDelKit` que no es la primera, en el Lote *(v8.2)*, la cabida y una Cita de prueba que no cabe en el 9:16, con su frase en el Material del Kit *(v8.2)*
 
 ### Story 25.5: A la Historia de Instagram en dos toques
 
@@ -6337,10 +6562,11 @@ So that publique sin abrir la galería, sin buscar dónde ha caído el fichero y
 
 **Acceptance Criteria:**
 
-**Given** las Historias 23.2, 25.1 y 25.4 terminadas
+**Given** las Historias 23.2, 23.5, 25.1 y 25.4 terminadas *(v8.2)*
 **When** empieza esta historia
-**Then** existen el bloque «Compartir en», el 9:16 del generador e `instagram-historia` en el conjunto cerrado, como destino de imagen y como destino de `descarga-de-imagen` (AD-13)
-**And** si la 25.3 anotó que un sistema no ofrece la historia, esta historia escribe antes como criterio lo que Héctor decidió para el botón en ese sistema y, si es iOS, el «destino Feed» que definió. Sin esa decisión no empieza (AD-7)
+**Then** existen el bloque «Compartir en», el 9:16 del generador e `instagram-historia` en el conjunto cerrado, como destino de imagen y de `descarga-de-imagen`, y el campo `primera` (AD-13) *(v8.2)*
+**And** si la 25.3 anotó que un sistema no ofrece la historia, esta historia lleva ya, como criterio escrito en `epics.md`, lo que Héctor decidió para el botón en ese sistema y, si pide un destino nuevo, el vocabulario ya desplegado por la 23.2 y la 23.3. Sin esa decisión no empieza (AD-7) *(v8.2)*
+**And** lo mismo si la 25.3 anotó que en algún sistema un fallo de entrega con la hoja abierta no llega como `AbortError`: lo que Héctor decidió va ya como criterio escrito en `epics.md`, y sin esa decisión no empieza *(v8.2)*
 
 **Given** la Página de Cita
 **When** la isla carga
@@ -6380,33 +6606,44 @@ So that publique sin abrir la galería, sin buscar dónde ha caído el fichero y
 **And** `share()` lleva el `File` ya hecho, sin texto ni enlace
 **And** entre el toque y `share()` no hay ninguna espera: ni `import()`, ni composición, ni `toBlob`. Una prueba con un `writeText` que tarda en resolver comprueba que `share()` ya se ha llamado
 
+**Given** que `writeText` resuelve *(v8.2)*
+**When** termina
+**Then** la frase dice «Enlace copiado: pégalo en el sticker Enlace.» en ese momento, bajo el botón, a 2 × `{spacing.unit}`, en `{typography.caption}` y `{colors.on-surface}`, sin esperar a `share()` (AD-7, UX-DR75)
+**And** nada de la interfaz espera a `share()`, que en Chrome para Android puede no resolverse nunca
+
 **Given** que `share()` resuelve
 **When** termina
 **Then** se registra `comparticion-de-imagen` con destino `instagram-historia` (FR-20)
-**And** solo si `writeText` resolvió, la frase dice «Enlace copiado: pégalo en el sticker Enlace.», bajo el botón, a 2 × `{spacing.unit}`, en `{typography.caption}` y `{colors.on-surface}` (UX-DR75)
+**And** donde no resuelve no se registra, y SM-7 y SM-12 lo declaran: en Chrome para Android la cuenta de comparticiones es cota inferior *(v8.2)*
 
-**Given** que `share()` rechaza con `NotAllowedError`, `DataError` o `TypeError`
+**Given** que el navegador rechaza antes de abrir la hoja, con `NotAllowedError`, `DataError` o `TypeError` *(v8.2)*
 **When** termina
 **Then** descarga el mismo 9:16, deja el enlace copiado y dice «La imagen se ha descargado. Enlace copiado: pégalo en el sticker Enlace.». Es el único caso en que la Historia descarga (FR-17, AD-7)
-**And** se registra como `descarga-de-imagen` con destino `instagram-historia`, nunca como compartición
+**And** se registra como `descarga-de-imagen` con destino `instagram-historia`, nunca como compartición, y con `primera` = no, que pone el guion de medición (23.5): no gasta la lectura con acción de SM-5 *(v8.2)*
 
-**Given** que `share()` rechaza con `AbortError`
+**Given** que `share()` rechaza con `AbortError` —cerrar la hoja sin elegir, o un fallo de entrega con la hoja ya abierta, que nada distingue de cancelar— *(v8.2)*
 **When** termina
-**Then** no hay frase, ni descarga, ni registro: cancelar no es que el navegador rechace
-**And** con `InvalidStateError`, que señala otra compartición en curso, el rechazo se ignora (AD-7)
+**Then** ni descarga ni registro, y el diálogo no añade ninguna frase; «Enlace copiado…», si ya salió, se queda, porque es cierta. Cancelar no es que el navegador rechace *(v8.2)*
+**And** con `InvalidStateError`, que señala otra compartición en curso, el rechazo se ignora: ni frase, ni descarga, ni registro (AD-7) *(v8.2)*
 
 **Given** que `writeText` rechaza
 **When** termina
 **Then** no dice «copiado». El enlace, con su `?via=instagram-historia`, aparece bajo el botón en el campo de copia manual de las Acciones, con el foco en él y seleccionado (UX-DR75, UX-DR100)
 **And** la etiqueta del campo es «Selecciona el enlace y cópialo para el sticker Enlace.», y la región no la repite
-**And** la hoja se abre igual, porque el fichero está; si además cayó en la descarga, la región dice solo «La imagen se ha descargado.»
+**And** la hoja se abre igual, porque el fichero está; si además cayó en la descarga, la región dice solo «La imagen se ha descargado.», o en iOS, con la frase de iOS activada, la suya sin el enlace *(v8.2)*
 **And** el filete de ese campo, y también el del respaldo de Copiar, pasa de `{colors.outline-variant}` a `{colors.outline}` (`--contorno`, 3,51:1) (UX-DR112)
 
-**Given** que el generador no llega, o que la Cita no cabe en el 9:16
+**Given** que el generador no llega
 **When** el diálogo lo sabe
 **Then** la frase «No se ha podido preparar la imagen. Puedes copiar el texto de la cita.» va donde iba la previsualización, en `{typography.body-md}`, sin el primario y con «Copiar el texto» como secundario a 2 × `{spacing.unit}` (UX-DR75)
 **And** la línea de arriba se retira y el `aria-describedby` pasa a la frase del fallo
 **And** se reintenta cerrando el diálogo y pulsando otra vez «Historia de Instagram», que vuelve a pedir el generador
+
+**Given** una Cita que no cabe en el 9:16 *(v8.2)*
+**When** el diálogo lo sabe
+**Then** dice, donde iba la previsualización y con el trato de la frase del generador que no llega, «Esta cita no cabe en la imagen vertical. Puedes copiar su texto.», sin el primario y con «Copiar el texto» (UX-DR75, NFR-12)
+**And** la línea de arriba se retira y el `aria-describedby` pasa a la frase
+**And** no se ofrece reintentar: con la misma Cita y la misma tabla el resultado no cambia, y pulsar otra vez «Historia de Instagram» da la misma frase
 
 **Given** cada estado
 **When** se anuncia
@@ -6421,7 +6658,7 @@ So that publique sin abrir la galería, sin buscar dónde ha caído el fichero y
 
 **Given** la orden de la línea base de la 23.10
 **When** lee estos registros
-**Then** las descargas con destino `instagram-historia` no entran en SM-5, la Historia que cae en la descarga no entra en SM-7, y las dos suman en el denominador de SM-12 de ese botón
+**Then** las descargas con destino `instagram-historia`, con `primera` = no, no entran en SM-5 ni en SM-7, y suman en el denominador de SM-12 de ese botón, junto a sus comparticiones *(v8.2)*
 **And** si la orden todavía no los separa, esta historia lo añade
 
 **Given** el criterio de la 5.2 «hay tres plantillas»
@@ -6430,13 +6667,14 @@ So that publique sin abrir la galería, sin buscar dónde ha caído el fichero y
 
 **Given** iOS
 **When** la Historia cae en la descarga
-**Then** el fichero va a Archivos y no a Fotos, que es deuda aceptada, y la frase es la misma que en los demás sistemas
-**And** si la frase dice adónde ha caído lo decide Héctor con la matriz de la 25.7, y cambiarla es cambiar el literal en un diff (abierta: la frase de la descarga en iOS — `bmad-ux`)
+**Then** el fichero va a Archivos y no a Fotos, que es deuda aceptada, y la frase es la común, salvo que esté activada la de iOS *(v8.2)*
+**And** esta historia escribe la frase de iOS —«La imagen se ha descargado en Archivos: guárdala en Fotos para publicarla en la historia. Enlace copiado: pégalo en el sticker Enlace.» y, con el portapapeles fallido, «La imagen se ha descargado en Archivos: guárdala en Fotos para publicarla en la historia.»— y su condición, que lee el sistema en el cliente: NFR-11 lo permite porque no se transporta *(v8.2)*
+**And** la activa una constante con nombre de `umbrales.ts` que esta historia declara apagada y que llega a la isla por `data-*` (AD-9). La enciende Héctor en un diff visible, como `SM12_CON_FACEBOOK`, solo si la matriz de la 25.3 o la de la 25.7 reproduce en iOS la caída a la descarga, y ningún agente la enciende *(v8.2, Héctor, 2026-10-23)*
 
 **Given** las pruebas
 **When** corren
-**Then** Vitest fija sobre `dist/` el `data-*` de la URL marcada y el de la Cita que admite Imagen, y su ausencia en una Cita larga y en la Página de Obra
-**And** son Playwright local: cada estado, con `share`, `canShare` y el portapapeles sustituidos y el puntero grueso emulado; la carga del generador al primer toque; y el barrido axe con el diálogo abierto
+**Then** Vitest fija en el CI, sobre `dist/`, el `data-*` de la URL marcada y el de la Cita que admite Imagen, y su ausencia en una Cita larga y en la Página de Obra; y que el `data-*` de la frase de iOS sigue a la constante en sus dos estados, sin depender del valor que tenga en el árbol, como `SM12_CON_FACEBOOK` (23.10) *(v8.2, Héctor, 2026-10-23)*
+**And** son Playwright local, que el CI no corre: cada estado, con `share`, `canShare` y el portapapeles sustituidos y el puntero grueso emulado, también un `share()` que no resuelve nunca con «Enlace copiado» ya dicho, los tres rechazos antes de abrir la hoja, `AbortError` con el enlace ya copiado, `InvalidStateError` y una Cita de prueba que no cabe, sin reintento *(v8.2)*; la frase de iOS y la común en iOS, con la constante en cada estado en una copia temporal, sin cambiar el árbol, y el sistema emulado *(v8.2, Héctor, 2026-10-23)*; la carga del generador al primer toque; y el barrido axe con el diálogo abierto
 
 ### Story 25.6: La Obra también se comparte
 
@@ -6470,6 +6708,7 @@ So that lleguen al libro, no a una frase suelta, con lo que dice su tarjeta.
 **When** se compone
 **Then** es «{título}, de {Autor}», con el título de su Ficha de Obra y el nombre del Autor, sin traductor ni nota, y se compone en `src/lib/atribucion.ts` (AD-28, FR-53)
 **And** va en WhatsApp, Threads, Telegram, X, Correo y la hoja; Facebook recibe solo el enlace y publica la Tarjeta Social de Obra (FR-18)
+**And** Correo lleva el asunto «Una obra» y el cuerpo «{título}, de {Autor}», una línea en blanco y el enlace con `?via=correo`; desde la Página de Cita y desde la Cita del Día sigue «Una cita» (UX-DR97) *(v8.2)*
 
 **Given** las URL que se comparten
 **When** se componen
@@ -6503,7 +6742,7 @@ So that lleguen al libro, no a una frase suelta, con lo que dice su tarjeta.
 
 **Given** las pruebas
 **When** corren
-**Then** Vitest fija sobre `dist/` el bloque en la página 1, su ausencia en la 2, el texto, las URL marcadas y que el bloque sale igual con la afiliación encendida o apagada
+**Then** Vitest fija sobre `dist/` el bloque en la página 1, su ausencia en la 2, el texto, las URL marcadas, los dos asuntos del correo —«Una obra» en la Obra y «Una cita» en la Página de Cita— *(v8.2)* y que el bloque sale igual con la afiliación encendida o apagada
 **And** es Playwright local el barrido de accesibilidad con `wcag22aa`, con el bloque puesto, en una Obra indexable y en una con `noindex`
 **And** el barrido de `tests/e2e/ingreso-accesible.spec.ts` sigue pasando con la afiliación encendida
 
@@ -6519,18 +6758,23 @@ So that la épica no llegue a nadie con un destino que falla justo donde más se
 **When** empieza esta historia
 **Then** es la segunda pasada de la matriz de dispositivos y la puerta del merge (Entorno operativo)
 **And** sin la matriz y sin el validador, la épica se queda en revisión
+**And** la entrada de la 25.3 ya está en la constante de `umbrales.ts` de las pasadas que escriben en producción *(v8.2, Héctor, 2026-10-23)*
+**And** la 23 está en vivo (23.11): la comprobación de `?via=` en la tarjeta de Facebook se lee en la vista del D1 de producción, que solo guarda `via` desde ella; si aún no lo está, esa comprobación espera, y se dice *(v8.2)*
 
 **Given** un iPhone con Safari, un Android con Chrome y los navegadores de las aplicaciones de Facebook, Instagram y Threads en los dos sistemas
-**When** se recorre la rama construida, servida en local y abierta en el teléfono por un túnel HTTPS temporal (`cloudflared tunnel --url …`)
+**When** se recorre la rama construida con la medición puesta contra un receptor local (`wrangler dev` con D1 local), servida en local y abierta en el teléfono por un túnel HTTPS temporal (`cloudflared tunnel --url …`) *(v8.2)*
 **Then** quedan anotadas, con fecha y versiones, en la sección de la matriz de `DESPLIEGUE.md`, las comprobaciones de la tabla del addendum:
 - que la Historia no aparece en el navegador de la aplicación de Facebook en Android;
 - que Instagram ofrece «Historia» al recibir solo el fichero, en iPhone y en Android;
 - que `share()` y el portapapeles conservan la activación del toque en iOS Safari y en los tres navegadores de las aplicaciones;
 - que `writeText` funciona en esos navegadores;
 - que la descarga de un `blob` funciona en ellos, y adónde va en iOS;
+- que un fallo de entrega con la hoja abierta en la Historia no descarga y deja el enlace copiado *(v8.2)*;
 - que `facebook.com/sharer` se abre dentro del navegador de la aplicación de Facebook;
-- que `?via=` sobrevive al clic de una tarjeta de Facebook.
+- que `?via=` sobrevive al clic de una tarjeta de Facebook, comprobado en el D1 de producción, en la vista con `via` = `facebook`, y no en la barra de direcciones, porque el guion de la 23 lo quita al cargar *(v8.2)*. Héctor lo lee con `wrangler d1 execute --remote` (`wrangler` 4.151.1), junto a las consultas de `DESPLIEGUE.md` §3, filtrando por la ruta y la jornada que anota para esta pasada en la constante de las pasadas en producción: la orden de la 23.10 las descuenta en cada lectura, así que no la ve. El resultado va a esta sección de la matriz *(v8.2)*.
 
+**And** ese clic lleva a la canónica en vivo, así que escribe en el D1 de producción: es, con la 25.3, una de las dos únicas pasadas que lo hacen a propósito. Héctor anota su jornada UTC y sus rutas en la constante de `umbrales.ts` de las pasadas que escriben en producción, en un commit aparte a la principal el día de la pasada: es un dato de Héctor y no código de la épica, como dar valor a una constante de despliegue. `DESPLIEGUE.md` cita la constante y no la copia, y la orden de la 23.10 las descuenta igual en cada lectura, como las de la 25.3 (AD-9) *(v8.2, Héctor, 2026-10-23)*
+**And** lo demás que se recorre por el túnel no escribe en ningún D1: la rama lleva la medición contra un receptor local, que el teléfono no alcanza por el túnel del sitio, así que sus balizas se pierden y ninguna comprobación de esta lista las lee *(v8.2)*
 **And** hace falta HTTPS porque la hoja y el portapapeles solo existen en un contexto seguro, y el sitio no tiene entorno de ensayo
 **And** el túnel lo abre y lo cierra Héctor: no se publica en ningún sitio y su URL no se anota en el repositorio, tampoco en `DESPLIEGUE.md`
 
@@ -6542,6 +6786,7 @@ So that la épica no llegue a nadie con un destino que falla justo donde más se
 **Given** el validador de previsualización de Facebook
 **When** Héctor pasa por él cuatro páginas (una Cita que admite Imagen, una de más de 300 caracteres, una Obra indexable y una con `noindex`), con la URL marcada `?via=facebook` tal como la recibe `sharer.php`
 **Then** ninguna da tarjeta ausente ni imagen inaccesible, y la tarjeta es la de su canónica (FR-19, UX-DR79)
+**And** el resultado de las cuatro queda anotado, con fecha, en la sección de la matriz de la Épica 25 de `DESPLIEGUE.md`, como las comprobaciones de la tabla del addendum *(v8.2)*
 **And** si alguna falla, Facebook no se ofrece: la épica no se fusiona con ese destino hasta que se corrija la tarjeta o se retire el destino en un diff visible. Lo decide Héctor
 
 **Given** SM-12
@@ -6552,45 +6797,60 @@ So that la épica no llegue a nadie con un destino que falla justo donde más se
 **Given** una historia publicada de verdad en iOS y en Android
 **When** se mira
 **Then** las bandas que pinta Instagram no tapan la Cita ni el pie
+**And** lo visto queda anotado, con fecha y versiones, en la sección de la matriz de la Épica 25 de `DESPLIEGUE.md` *(v8.2)*
 **And** si las bandas no miden unos 250 px, la geometría del 9:16 se corrige en su única declaración, en la rama, y la prueba de cabida vuelve a correr (UX-DR77)
 
 **Given** VoiceOver en iOS, al repetir Copiar y al pulsar otra vez «Compartir en la historia», y NVDA, al repetir Copiar
 **When** se escucha
-**Then** queda anotado si un fotograma basta para que el mensaje se vuelva a anunciar
+**Then** queda anotado si un fotograma basta para que el mensaje se vuelva a anunciar, con fecha y las versiones del sistema y del lector, en la sección de la matriz de la Épica 25 de `DESPLIEGUE.md` *(v8.2)*
 **And** si no basta, el dueño único del primer ritmo espera entre 100 y 150 ms, en un solo cambio (UX-DR99)
 
 **Given** la descarga en iOS
-**When** la matriz dice adónde va
-**Then** Héctor decide si la frase de la descarga lo dice
-**And** si decide que sí, el literal cambia en un diff de esta rama, con la redacción que dé `bmad-ux`; si no, queda el de UX-DR75
+**When** la matriz dice si la Historia cae en ella y adónde va
+**Then** si la matriz de la 25.3 o la de esta historia reproduce en iOS la caída a la descarga, Héctor enciende, en un diff visible de esta rama, la constante de `umbrales.ts` que activa la frase de iOS que la 25.5 dejó escrita y apagada; si no la reproduce, vale la común *(v8.2, Héctor, 2026-10-23)*
+**And** ningún agente la enciende *(v8.2, Héctor, 2026-10-23)*
 
 **Given** la rama lista para el merge
 **When** se prepara
-**Then** corren en Playwright local la cabida en los dos formatos, el barrido WCAG 2.2 AA y el reflujo a 320 px
+**Then** pasa `npm run test:e2e` entero sobre la rama al día con la principal, que ya trae la 24 con la 26 —Playwright local, que el CI no corre—, contra un receptor local, no solo lo que nombra esta historia: también la cabida en los dos formatos, el barrido WCAG 2.2 AA y el reflujo a 320 px *(v8.2)*
 **And** el barrido cubre la Página de Cita con la Historia insertada y su diálogo abierto, y la página 1 de una Obra con el bloque
-**And** el reflujo de la rejilla se prueba en las tres condiciones de UX-DR103: con la prueba de la 26.9 si la principal ya la trae, y a mano si no
-**And** el CI está en verde y la publicación, reparada
+**And** el reflujo de la rejilla se prueba en las tres condiciones de UX-DR103 con la prueba de la 26.9, que la rama trae de la principal *(v8.2)*
+**And** el CI está en verde *(v8.2)*
+
+**Given** una Página de Cita con la Historia y «Compartir en» puestos, construida con la medición contra un receptor local *(v8.2, Héctor, 2026-10-23)*
+**When** se mide a mano con Lighthouse en perfil móvil 4G, frente a la principal del mismo día y sin puerta automática
+**Then** el contenido principal sigue visible en menos de 2,5 s (NFR-7), y las dos cifras quedan en el spec de la historia
+**And** la principal se mide construida y servida igual, en local y con la medición contra un receptor local: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*
+**And** si se degrada, el merge espera a que Héctor decida
 
 **Given** el merge
 **When** entra en la principal
 **Then** es uno solo, después de la 24 con la 26 y antes o después de la 27 (Entorno operativo)
+**And** el merge, la decisión ante un NFR-7 que se degrada y la jornada de llegada son actos de Héctor: un agente puede correr y anotar las pruebas, nunca fusionar *(v8.2)*
+
+**Given** la constante de despliegue de la 25 en `umbrales.ts`, con la forma de las demás —una jornada, `undefined` mientras no llega—, que esta historia declara en la rama *(v8.2, Héctor, 2026-10-23)*
+**When** el despliegue llega al sitio en vivo
+**Then** Héctor le da valor ese día, en un commit aparte: la jornada UTC en que termina el trabajo «Desplegar» de Actions que la lleva al sitio en vivo, nunca la del merge, y ningún agente se lo da (AD-9) *(v8.2, Héctor, 2026-10-23)*
+**And** desde ella cuenta la orden de la 23.10 las ventanas de SM-C3 si la 25 llega antes de la línea base de SM-5 y SM-7; si la orden todavía no la lee, esta historia se la da, como la 25.5 le da las descargas con destino
 
 **Given** el despliegue en vivo
-**When** la línea base de lecturas de la Página de Cita llega a su mínimo
-**Then** SM-5, SM-7, SM-12 y SM-C3 se leen con la orden de la 23.10 sobre las mismas lecturas, sin trabajo propio
-**And** SM-C3 salta con dos ventanas seguidas, cada una con el mínimo de lecturas. La palanca la decide Héctor: quitar peso a los destinos, nunca esconder Copiar
+**When** la orden de la 23.10 lee lo que la épica mide
+**Then** SM-5, SM-7, SM-12 y SM-C3 salen de ella, sobre las mismas lecturas y sin trabajo propio, y no se juzgan contra su línea base hasta que esta reúna su mínimo y Héctor dé por buena la comparación por firma, que anota en `DESPLIEGUE.md` §3 con fecha y métrica (23.10) *(v8.2, Héctor, 2026-10-23)*
+**And** SM-C3 salta si en dos ventanas seguidas de la 23.10 —con la misma definición de ventana que toda tasa que se juzga contra su propia serie— SM-7 sube y SM-5 baja, cada una frente a su línea base, o, si la 25 llegó antes, desde su llegada y frente a su serie, y el informe lo dice; basta la dirección *(v8.2, Héctor, 2026-10-23)*
+**And** saltar no apaga nada: la palanca la decide Héctor, quitar peso a los destinos, nunca esconder Copiar *(v8.2)*
+**And** la Imagen cuadrada no entra en SM-12, y en Chrome para Android la cuenta de comparticiones es cota inferior: SM-7 puede quedar por debajo de la real y SM-12, por encima *(v8.2)*
 
 **Given** `sprint-status.yaml`
 **When** se cierra la épica
-**Then** pasa a hecha solo con la matriz y el validador anotados, y ningún agente los anota por Héctor
+**Then** pasa a hecha solo con la matriz y el validador anotados y NFR-7 medido *(v8.2, Héctor, 2026-10-23)* —la matriz, con las bandas y la escucha, y el validador, en la sección de la matriz de la Épica 25 de `DESPLIEGUE.md`; NFR-7, en el spec *(v8.2)*—, y ningún agente anota la matriz ni el validador por Héctor
 
 ## Epic 26: Directorios y cabecera
 
 Quien busca un Autor o una Obra los encuentra de la A a la Z, por el apellido o por el nombre con que se le conoce —Cervantes va en la C—, con letras de salto, años y recuento, y filtra al teclear sin pensar en tildes: «gonzalez» encuentra a González Prada. Desde cualquier página, la cabecera «Autores · Obras · Buscar» deja todo Autor y toda Obra a dos saltos de la portada, no obliga a desplazarse en horizontal a 320 px y no saca la Cita de la primera pantalla a 360 × 640. Héctor ve los Directorios medidos como familia propia, sin contar en la de lo que listan, y el build garantiza que ninguna página publicada queda a más de tres saltos.
 
 **FRs covered:** FR-55; FR-15, FR-40 *(enmendados)*, FR-7 *(el tipo de resultado «Directorio»)*; NFR-1, NFR-5, NFR-8 y NFR-13 en lo que añade; FR-34, FR-37, FR-50, FR-52 *(sin trabajo)*; FR-42 *(heredado)*; SM-4 de los Directorios *(la juzga)*, SM-C2; SM-11 *(la fecha del despliegue conjunto con la 24)*.
-**Notas de implementación:** comparte rama y merge con la Épica 24, y lo demás que la gobierna está en la Epic List — v8. La **26.1** va primera en la épica y detrás de la **24.8**: sin la relación por campos de AD-27, el lote de claves de los 171 Autores refecharía y avisaría el sitio entero. La 26.2 no depende de nada. La 26.3 y la 26.4 abren los Directorios, la 26.5 los enlaza desde la cabecera, y la 26.6 y la 26.7 les dan el filtro y la familia propia. La 26.8 pone la puerta de NFR-5 y la marca `data-jornada` cuando la cabecera ya existe, y la 26.9 barre el reflujo con todo puesto. La 26.10 es la revisión de Héctor y no bloquea nada; la 26.11 es el merge conjunto con la 24, con el CI en verde y Playwright local, y, ya en vivo, las fechas de SM-11 y del corte de SM-8. No depende de la 27: a cero, el filtro lleva a la `/buscar/` de hoy. Fuera de la épica: los ocho destacados (27), los cierres de la portada hacia los Directorios y la marca como `h1` (28), la Época (FR-50), los índices de Temas y de Colecciones, y paginar `/obras/`, aplazado.
-**Preguntas abiertas:** alinear la letra de AD-11 (la negativa de NFR-5 en `alta` y en `coleccion -- despublicar`) y de AD-12 (el 404 como la portada) (`bmad-architecture`); la ventana de SM-11 (Héctor, antes del 2026-12-05).
+**Notas de implementación:** comparte rama y merge con la Épica 24, y lo demás que la gobierna está en la Epic List — v8. La **26.1** va primera en la épica y detrás de la **24.8**: sin la relación por campos de AD-27, el lote de claves de los 171 Autores refecharía y avisaría el sitio entero. La 26.2 no depende de nada. La 26.3 y la 26.4 abren los Directorios, la 26.5 los enlaza desde la cabecera, y la 26.6 y la 26.7 les dan el filtro y la familia propia. La 26.8 pone la puerta de NFR-5 y la marca `data-jornada` cuando la cabecera ya existe, y la 26.9 barre el reflujo con todo puesto. La 26.10 es la revisión de Héctor y no bloquea la publicación, la siembra ni el merge; `epic-26` pasa a hecha cuando se cierra, al revisar las claves de los Autores que había al correr el lote por última vez, sobre la rama al día (26.11), y las de los Autores nuevos pasan a la sesión de sembrado *(v8.2, Héctor, 2026-10-23)*. La 26.11 es el merge conjunto con la 24, con el CI en verde y `npm run test:e2e` entero *(v8.2)*, con NFR-7 medido con lo de las dos épicas puesto, que si empeora deja el merge a la espera de Héctor *(v8.2, Héctor, 2026-10-23)*, y, ya en vivo, el valor de `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` *(v8.2)*. No depende de la 27: a cero, el filtro lleva a la `/buscar/` de hoy. Fuera de la épica: los ocho destacados (27), los cierres de la portada hacia los Directorios y la marca como `h1` (28), la Época (FR-50), los índices de Temas y de Colecciones, y paginar `/obras/`, aplazado.
+**Preguntas abiertas:** la ventana de SM-11 (Héctor, antes del 2026-12-05).
 
 ### Story 26.1: Todo Autor publicado tiene su clave de orden
 
@@ -6624,14 +6884,17 @@ So that el Directorio ponga a Cervantes en la C sin que nadie teclee claves en l
 
 **Given** `npx tsx tools/autor.ts crear`
 **When** da de alta un Autor
-**Then** escribe `ordenAlfabetico` con la clave que propone una sola función de `tools/lib/`, derivada del `nombre` por una regla fija, y nunca `ordenRevisado` (FR-15)
-**And** el parte dice la clave propuesta y que está sin revisar
+**Then** escribe `ordenAlfabetico` con la clave que propone una sola función de `tools/lib/`, y nunca `ordenRevisado` (FR-15)
+**And** la regla es fija y escrita: la clave propuesta es la última palabra del `nombre` —Miguel de Cervantes en la C, José Martí en la M—, así que el parte del lote es reproducible *(v8.2, Héctor, 2026-10-23)*
+**And** el parte dice la clave propuesta y que está sin revisar, y la marca aparte si el `nombre` tiene tres palabras o más, donde la regla puede fallar *(v8.2, Héctor, 2026-10-23)*
+**And** una prueba de Vitest fija la regla y la marca con un nombre de una palabra, uno de dos y uno de tres o más *(v8.2, Héctor, 2026-10-23)*
 **And** no acepta ninguna bandera para teclearla: una bandera desconocida sale con 2, como hoy
 
 **Given** los Autores que ya existen en `corpus/autores/`
 **When** se corre la orden de lote (`npx tsx tools/autor.ts proponer-claves`)
 **Then** escribe la clave que propone la misma función que el alta en cada ficha que no la tiene, y no toca ninguna que ya la lleve, revisada o no: es idempotente
 **And** el parte lista cada Autor con su nombre y su clave, y dice cuántos quedan sin revisar
+**And** el parte del lote marca aparte los nombres de tres palabras o más, en los que la regla puede fallar —Manuel González Prada cae en la P, Benito Pérez Galdós en la G—, para que la revisión de la 26.10 empiece por ellos *(v8.2, Héctor, 2026-10-23)*
 **And** el lote va en un commit propio, sin código, y por la 24.8 no mueve la fecha ni el aviso de ninguna superficie, porque todavía ninguna pinta la clave
 **And** se vuelve a correr sobre la rama al día con la principal antes de fusionarla (Historia 26.11), para los Autores que la siembra dé de alta allí mientras tanto
 
@@ -6649,6 +6912,7 @@ So that el Directorio ponga a Cervantes en la C sin que nadie teclee claves en l
 **Given** la relación de AD-27
 **When** un commit solo escribe `ordenAlfabetico` u `ordenRevisado`
 **Then** no mueve el `lastmod` ni el aviso de ninguna superficie, y una prueba en Vitest lo fija sobre `relacionDeSuperficies` de `tools/lib/cambios.ts`: la clave la pintarán los Directorios (26.3, 26.4), y `ordenRevisado` no lo pinta nadie
+**And** la 26.3 y la 26.4 reescriben esa prueba cuando la clave empieza a pintarse: la de `ordenAlfabetico` pasa a fijar que mueve solo `/autores/`, y después solo `/autores/` y `/obras/`; la de `ordenRevisado` sigue sin mover nada *(v8.2)*
 
 **Given** los Autores de las pruebas —`AUTOR_VALIDO` de `tests/unit/ayuda/construir.ts` y los que escriben en línea las demás—
 **When** se construye
@@ -6657,6 +6921,11 @@ So that el Directorio ponga a Cervantes en la C sin que nadie teclee claves en l
 **Given** la revisión de las claves propuestas
 **When** se cierra la historia
 **Then** queda para Héctor (Historia 26.10): ningún agente confirma ni corrige una clave ni escribe `ordenRevisado`, y la revisión no bloquea la publicación, el sembrado ni el merge (FR-15)
+
+**Given** `AGENTS.md` § Una sesión de sembrado *(v8.2)*
+**When** se cierra esta historia, que cambia el alta
+**Then** el procedimiento de la sesión gana el paso «confirmar o corregir con `npx tsx tools/autor.ts clave` las claves sin revisar de los Autores dados de alta en la sesión»
+**And** es donde se revisan las claves de los Autores nuevos, que la 26.10 deja fuera del lote inicial (decisión de Héctor del 2026-10-23); el paso es de Héctor, y ningún agente lo da por hecho
 
 ### Story 26.2: El tipo de un resultado no casa como texto, y la portada tiene el suyo
 
@@ -6668,9 +6937,9 @@ So that escribir «obra» o «cita» no me devuelva el sitio entero.
 
 **Given** `src/lib/tipoDeResultado.ts`
 **When** se amplía
-**Then** gana `directorio`, rotulado «Directorio», y `portada`, rotulado con el nombre del sitio (`MARCA` de `src/lib/marca.ts`) (AD-17, FR-7)
+**Then** gana `directorio`, rotulado «Directorio», y `portada`, rotulado «Portada» y titulado con el nombre del sitio (`MARCA` de `src/lib/marca.ts`), que se lee «Portada: Sabiduría de Bolsillo»: la marca no se repite en el rótulo (AD-17, FR-7, UX-DR91) *(v8.2)*
 **And** la unión de tipos sigue derivándose de la tabla, y `tipoDeOpenGraph` da `website` para los dos
-**And** una prueba fija el conjunto exacto: Cita, Autor, Tema, Colección, Obra, Directorio y portada. Que sea el de las familias con resultado más `portada` lo fija la 26.7, cuando las familias se muden a `src/lib/superficies.ts`
+**And** una prueba de Vitest fija el conjunto exacto: Cita, Autor, Tema, Colección, Obra, Directorio y Portada. Que sea el de las familias con resultado más `portada` lo fija la 26.7, cuando las familias se muden a `src/lib/superficies.ts`
 
 **Given** el tipo de cada página indexada
 **When** se emite
@@ -6683,7 +6952,7 @@ So that escribir «obra» o «cita» no me devuelva el sitio entero.
 **Then** ningún `data-pagefind-meta` lleva `tipo`, y toda página con `data-pagefind-body` lleva su tipo por el medio elegido exactamente una vez
 
 **Given** el índice de Pagefind
-**When** se busca «obra», «cita», «autor», «tema», «colección», «directorio» o el nombre del sitio
+**When** se busca «obra», «cita», «autor», «tema», «colección», «directorio», «portada» o el nombre del sitio *(v8.2)*
 **Then** ninguna página sale solo por su tipo: cada resultado contiene el término en lo que indexa
 **And** es Playwright local, que el CI no corre. Esta prueba fija el medio para las historias que escriban metadatos de Pagefind después, la 27.1 la primera
 
@@ -6696,7 +6965,7 @@ So that escribir «obra» o «cita» no me devuelva el sitio entero.
 **Given** un resultado de tipo Directorio o de tipo portada
 **When** `/buscar/` lo pinta
 **Then** lleva su rótulo de tipo como los demás y el título en Inter al cuerpo de `{typography.headline-sm}` con peso 400, como el de Obra (UX-DR91, UX-DR104)
-**And** el de portada va también en Inter, por la convención de la serif: su título no es texto de Cita ni nombre de Autor, Tema o Colección
+**And** el de portada va también en Inter, por la convención de la serif: su título no es texto de Cita ni nombre de Autor, Tema o Colección, como dicen ya UX-DR91 y UX-DR104 *(v8.2)*
 
 **Given** esta historia terminada
 **When** se construye el sitio
@@ -6716,10 +6985,11 @@ So that encuentre a Cervantes en la C sin saber cómo se escribe su nombre enter
 
 **Given** `src/pages/autores.astro`
 **When** se declara
-**Then** `src/lib/superficies.ts` la declara producto con la ruta literal `/autores/`, sin páginas 2+, con su constructor de ruta junto a los demás (AD-17). Ninguna plantilla la escribe a mano, como vigila `tests/unit/barra-final.test.ts`
+**Then** `src/lib/superficies.ts` la declara producto con la ruta literal `/autores/`, sin páginas 2+, con su constructor de ruta junto a los demás (AD-17). Ninguna plantilla la escribe a mano: `tests/unit/barra-final.test.ts` caza la forma sin barra final, y el destino lo vigila la prueba de la cabecera de la 26.5 *(v8.2)*
 **And** declara también que emite `vista-de-superficie` y, por ella, lectura (la quinta consecuencia de AD-17, FR-56)
 **And** de esa declaración salen el sitemap, la canónica sin `noindex`, `data-pagefind-body` y la entrada en el barrido, y `integraciones/indexables.ts` sigue rompiendo si esos conjuntos no casan (NFR-1)
 **And** `rutasPublicadas` y `rutasIndexables` la enumeran (AD-11); `/autores/2/` no existe
+**And** declara también su superficie de línea base, «los Directorios», que `/obras/` compartirá (26.4): la orden de la 23.10 la lee de ahí y junta sus lecturas sin tocarse (FR-56, AD-13) *(v8.2)*
 
 **Given** los Autores con al menos una Cita publicada
 **When** se compone la lista
@@ -6733,9 +7003,8 @@ So that encuentre a Cervantes en la C sin saber cómo se escribe su nombre enter
 **Then** es un enlace de bloque a su Página de Autor, en la misma pestaña y sin subrayado (UX-DR84, UX-DR105, UX-DR106)
 **And** el nombre, tal como se escribe, va en Source Serif al cuerpo de `{typography.headline-sm}` con peso 400 y en `{colors.on-surface}`, y parte palabras antes que desbordar (UX-DR104)
 **And** debajo, «{años} · {n} citas» —«1 cita» en singular— en `{typography.caption}` y `{colors.on-surface-variant}`, con cifras tabulares
-**And** sin ningún año que conste, la línea es solo «{n} citas»: sin punto medio, sin separador de sobra y sin hueco, por la convención de ausencia (FR-55, UX-DR84, UX-DR108). Hoy los 171 Autores tienen al menos un año, así que la prueba de Vitest lo fija con un Autor de prueba sin años
-**And** los años salen de `añosDeAutor` de `src/lib/atribucion.ts`, también «Fallecido en 65» cuando no consta el nacimiento, y {n} son sus Citas publicadas, no las documentadas que cuenta la Tarjeta Social de Autor: las dos cifras difieren en los Autores con Citas en `corpus/pendientes-de-cotejo.yml` (FR-55, decisión de Héctor del 2026-10-19)
-**And** EXPERIENCE.md dice que la Fila lleva «los hechos de la Tarjeta Social de Autor»; la frase la alinea `bmad-ux` en su próxima pasada
+**And** sin ningún año que conste, la línea es solo «{n} citas»: sin punto medio, sin separador de sobra y sin hueco, por la convención de ausencia (FR-55, UX-DR84, UX-DR108). La rama es inalcanzable con el esquema, que hace obligatorio el año de fallecimiento (AD-1), así que la prueba de Vitest va sobre la función pura con los años opcionales, sin relajar el tipo *(v8.2)*
+**And** los años salen de `añosDeAutor` de `src/lib/atribucion.ts`, también «Fallecido en 65» cuando no consta el nacimiento, y {n} son sus Citas publicadas, las que lista su página, no las documentadas que cuenta la Tarjeta Social de Autor: las dos cifras difieren en los Autores con Citas en `corpus/pendientes-de-cotejo.yml` (FR-55, UX-DR84, decisión de Héctor del 2026-10-19) *(v8.2)*
 **And** el punto medio lleva `aria-hidden` y suena como una coma, y entre las dos líneas suena una pausa «, » solo para lectores (UX-DR101)
 
 **Given** las letras de salto
@@ -6756,9 +7025,10 @@ So that encuentre a Cervantes en la C sin saber cómo se escribe su nombre enter
 **Given** la página
 **When** se sirve
 **Then** su único `h1` es «Autores», en Inter al cuerpo de `{typography.headline-md}` con peso 600 y en `{colors.on-surface}`, sin enlace, bajada ni recuento (UX-DR80, UX-DR101)
-**And** todo va dentro de la medida de prosa, y el título de pestaña es «Autores, de la A a la Z | Sabiduría de Bolsillo», la plantilla literal de UX-DR80, sin la palabra «citas»: UX-DR107 se lee como «ninguno dice «frases»» (decisión de Héctor del 2026-10-19)
+**And** todo va dentro de la medida de prosa, y el título de pestaña es «Autores, de la A a la Z | Sabiduría de Bolsillo», la plantilla literal de UX-DR80, sin la palabra «citas»: los Directorios no dicen «frases» en ningún texto, y «citas» va en el cuerpo y en la meta description (UX-DR107, decisión de Héctor del 2026-10-19) *(v8.2)*
 **And** la meta description dice solo hechos del Corpus, con la palabra «citas»: «{m} autores, de la A a la Z, con {n} citas publicadas.», en singular cuando la cifra es una —«1 autor», «1 cita publicada»—, con la redacción que aprobó Héctor el 2026-10-19 (UX-DR80, UX-DR107)
-**And** no reproduce ninguna Cita ni ninguna semblanza, ni compone prosa, y no es superficie de lectura; `src/lib/atribucion.ts` la cuenta entre las superficies sin semblanza (AD-19, AD-28)
+**And** no reproduce ninguna Cita ni ninguna semblanza, ni compone prosa, y no es superficie de lectura; `src/lib/atribucion.ts` gana la lista de superficies sin semblanza, que hoy no existe, y la cuenta en ella; no entra en `SUPERFICIES_DE_LA_SEMBLANZA`, que fija `tests/unit/semblanza.test.ts` (AD-19, AD-28) *(v8.2)*
+**And** la lista lleva `/autores/` y su Tarjeta Social de los Directorios, y una prueba de Vitest la fija y exige sobre `dist/` que ninguna página de la lista contenga la `semblanza` de ningún Autor (AD-28) *(v8.2)*
 
 **Given** la búsqueda interna
 **When** se indexa la página
@@ -6766,7 +7036,7 @@ So that encuentre a Cervantes en la C sin saber cómo se escribe su nombre enter
 **And** buscar «autores» la devuelve, y buscar el nombre de un Autor devuelve su Página de Autor y no el Directorio
 **And** los atributos se prueban en Vitest sobre `dist/`, y la búsqueda, en Playwright local
 
-**Given** su Tarjeta Social
+**Given** su Tarjeta Social de los Directorios, con su nombre entero *(v8.2)*
 **When** se compone en el build (AD-15)
 **Then** es la de listado, con banda siena, «Autores» en la familia de la interfaz y como bajada cuántos lista, con su unidad: «{m} autores», o «1 autor» en singular. No lleva prosa (UX-DR79)
 **And** se sirve en `/tarjeta/directorio/autores.png`, fuera del espacio `/tarjeta/{slug}.png` de las Citas, y la página la declara como imagen social
@@ -6775,12 +7045,13 @@ So that encuentre a Cervantes en la C sin saber cómo se escribe su nombre enter
 **Given** la declaración de Modelos de `src/lib/ingreso.ts`
 **When** se revisa
 **Then** `autores.astro` entra en `SUPERFICIES_SIN_INGRESO`, y `revisarDeclaracionDeIngreso` rechaza admitirle cualquier Modelo (AD-20; FR-34 y FR-37, sin trabajo)
-**And** una prueba construye una copia con todos los Modelos encendidos (AD-21) y exige `/autores/` idéntico byte a byte al del sitio con todos apagados (FR-55, UX-DR110)
+**And** una prueba de Vitest construye una copia con todos los Modelos que alguna superficie admite encendidos —`producto-propio` y `publicidad-acotada` declaran `admitidoEn: []` y romperían el build—, como `tests/unit/ingreso-construido.test.ts` (AD-21), y exige `/autores/` idéntico byte a byte al de la misma copia con todos apagados, construidas las dos con el mismo `MEDICION_ENDPOINT` (FR-55, UX-DR110) *(v8.2)*
 
 **Given** la relación de AD-27
 **When** se declara `/autores/`
 **Then** se compone de lo que pinta: el `nombre`, los años y `ordenAlfabetico` de cada Autor publicado y, por sus recuentos, las Citas publicadas
 **And** la semblanza, la tradición, la biografía y `ordenRevisado` no la fechan. Una Cita nueva la fecha y una semblanza nueva no, y el aviso y el `lastmod` salen de esa relación
+**And** la prueba de la 26.1 pasa a fijar que un commit que solo escribe `ordenAlfabetico` mueve solo `/autores/`, y que uno que solo escribe `ordenRevisado` sigue sin mover nada *(v8.2)*
 
 **Given** las series por familia de `tools/`
 **When** encuentran `/autores/`
@@ -6788,15 +7059,15 @@ So that encuentre a Cervantes en la C sin saber cómo se escribe su nombre enter
 **And** hasta que la 26.7 cree la familia `directorio`, queda fuera de toda familia, como la portada: en el tráfico y la demanda, en `fueraDelCenso`
 **And** la prueba de `tests/unit/indexacion.test.ts` que compara el censo con `rutasPublicadas` la exime por su declaración en `superficies.ts`, nunca por el prefijo
 
-**Given** la prueba de alcance sobre lo construido (`tests/unit/publicable-y-alcanzable.test.ts`)
-**When** corre antes de que la 26.5 ponga la cabecera
-**Then** `/autores/` va eximida por su ruta, con un comentario que lo explica, y ninguna otra superficie se exime; la 26.5 quita la exención
+**Given** la prueba de alcance sobre lo construido (`tests/unit/publicable-y-alcanzable.test.ts`, Vitest) y `tests/e2e/seo.spec.ts` (Playwright local), que toma lo publicado del sitemap y se pone en rojo entre la 26.3 y la 26.5 *(v8.2)*
+**When** corren antes de que la 26.5 ponga la cabecera
+**Then** `/autores/` va eximida por su ruta en las dos, con un comentario que lo explica, y ninguna otra superficie se exime; la 26.5 quita la exención de las dos *(v8.2)*
 **And** el acoplamiento con una historia posterior lo aceptó Héctor el 2026-10-19: la rama no entra en la principal hasta la 26.11, así que ninguna exención llega al sitio en vivo
 
 **Given** la medición de la Épica 23
 **When** carga con `MEDICION_ENDPOINT`
 **Then** emite `vista-de-superficie` y lectura (FR-56)
-**And** las filas llevan la zona `directorio` en su contenedor; las letras y «Volver a las letras» son anclas de la misma página, que es la exención (AD-13, UX-DR111). La prueba de zonas de la 23.7 la cubre sin tocarla
+**And** las filas llevan la zona `directorio` en su contenedor; las letras y «Volver a las letras» son anclas de la misma página, una de las exenciones escritas (AD-13, UX-DR111) *(v8.2)*. La prueba de zonas de la 23.7 la cubre sin tocarla
 
 **Given** el barrido de accesibilidad
 **When** corre (Playwright local, WCAG 2.2 AA)
@@ -6817,6 +7088,7 @@ So that llegue a cualquier obra, también a la que el buscador no indexa, sin co
 **Given** `src/pages/obras.astro`
 **When** se declara
 **Then** `src/lib/superficies.ts` la declara producto con la ruta literal `/obras/`, sin páginas 2+, con su constructor, con la vista `vista-de-superficie` y con las mismas consecuencias que `/autores/`; `rutasPublicadas` y `rutasIndexables` la enumeran (AD-17, AD-11, NFR-1)
+**And** declara la misma superficie de línea base que `/autores/`, «los Directorios» (26.3), así que la orden de la 23.10 junta las lecturas de las dos sin tocarse y las informa también por separado (FR-56, AD-13) *(v8.2)*
 **And** `/obras/` no es una Página de Obra: `esRutaDeObra('/obras/')` es falso, y ninguna regla de Obra la alcanza, ni FR-52, ni la congelación, ni las ediciones (FR-40, FR-55)
 
 **Given** las Obras con al menos una Cita publicada
@@ -6856,16 +7128,16 @@ So that llegue a cualquier obra, también a la que el buscador no indexa, sin co
 
 **Given** la página
 **When** se sirve
-**Then** su único `h1` es «Obras», con el trato del de `/autores/`, y su título de pestaña es «Obras, por autor | Sabiduría de Bolsillo», la plantilla literal de UX-DR80, con UX-DR107 leída como en `/autores/` (UX-DR80, UX-DR107)
+**Then** su único `h1` es «Obras», con el trato del de `/autores/`, y su título de pestaña es «Obras, por autor | Sabiduría de Bolsillo», la plantilla literal de UX-DR80, sin «frases» en ningún texto (UX-DR80, UX-DR107) *(v8.2)*
 **And** la meta description es «{k} obras de {m} autores, con {n} citas publicadas.», en singular cuando la cifra es una —«1 obra», «1 autor», «1 cita publicada»—, con la redacción que aprobó Héctor el 2026-10-19 (UX-DR107)
-**And** su Tarjeta Social es la de listado, con «Obras» y la bajada «{k} obras» («1 obra» en singular), en `/tarjeta/directorio/obras.png` (UX-DR79, AD-15)
+**And** su Tarjeta Social de los Directorios *(v8.2)* es la de listado, con «Obras» y la bajada «{k} obras» («1 obra» en singular), en `/tarjeta/directorio/obras.png` (UX-DR79, AD-15)
 **And** el listado va en `data-pagefind-ignore="all"` y la página lleva el tipo `directorio`: buscar el título de una Obra indexable devuelve su Página de Obra, nunca `/obras/` (NFR-13)
-**And** no reproduce ninguna Cita, semblanza ni nota de Ficha de Obra, y `src/lib/atribucion.ts` la cuenta entre las superficies sin semblanza (AD-19, AD-28)
+**And** no reproduce ninguna Cita, semblanza ni nota de Ficha de Obra, y `src/lib/atribucion.ts` la cuenta, con su Tarjeta Social de los Directorios, en la lista de superficies sin semblanza que ganó en la 26.3, y la prueba de la 26.3 pasa a fijarla con ella; no entra en `SUPERFICIES_DE_LA_SEMBLANZA`, que fija `tests/unit/semblanza.test.ts` (AD-19, AD-28) *(v8.2)*
 
 **Given** los Modelos de Ingreso
 **When** se revisa la declaración y se construye
 **Then** `obras.astro` entra en `SUPERFICIES_SIN_INGRESO` (AD-20)
-**And** una copia con todos los Modelos encendidos —la afiliación con la tienda de prueba y ediciones declaradas en una ficha— da `/obras/` idéntico byte a byte y sin ningún enlace de edición (FR-35, FR-55, UX-DR110)
+**And** una prueba de Vitest construye una copia con todos los Modelos que alguna superficie admite encendidos —`producto-propio` y `publicidad-acotada` declaran `admitidoEn: []` y romperían el build—, como `tests/unit/ingreso-construido.test.ts`, con la afiliación con la tienda de prueba y ediciones declaradas en una ficha, y exige `/obras/` idéntico byte a byte al de la misma copia con todos apagados, construidas las dos con el mismo `MEDICION_ENDPOINT`, y sin ningún enlace de edición (FR-35, FR-55, UX-DR110) *(v8.2)*
 
 **Given** el tamaño del HTML de `/obras/`
 **When** termina el build (`astro:build:done`)
@@ -6876,11 +7148,11 @@ So that llegue a cualquier obra, también a la que el buscador no indexa, sin co
 **When** se declara `/obras/`
 **Then** se compone de lo que pinta: el `titulo` de cada ficha con Citas, el `nombre` y `ordenAlfabetico` de cada Autor con Obras y, de las Citas, lo que da los recuentos y el año de cada Obra
 **And** `nota`, `ediciones`, `distintaDe`, `ordenRevisado` y la semblanza no la fechan
-**And** una prueba fija que un commit que solo escribe claves de orden mueve `/autores/` y `/obras/` y nada más, aunque la 27 lleve la clave al `data-pagefind-sort` de cada Página de Cita, y que uno que solo escribe `ordenRevisado` no mueve nada (AD-27)
+**And** la prueba de la 26.1, que reescribió la 26.3, pasa a fijar que un commit que solo escribe claves de orden mueve `/autores/` y `/obras/` y nada más, aunque la 27 lleve la clave al `data-pagefind-sort` de cada Página de Cita, y que uno que solo escribe `ordenRevisado` no mueve nada (AD-27) *(v8.2)*
 
 **Given** las series por familia y la prueba de alcance
 **When** encuentran `/obras/`
-**Then** reciben el mismo trato transitorio que `/autores/` en la 26.3: ninguna serie la cuenta como Obra, y hasta la 26.7 queda fuera de toda familia; la prueba de alcance la exime hasta la 26.5 (FR-40)
+**Then** reciben el mismo trato transitorio que `/autores/` en la 26.3: ninguna serie la cuenta como Obra, y hasta la 26.7 queda fuera de toda familia; la prueba de alcance (Vitest) y `tests/e2e/seo.spec.ts` (Playwright local) la eximen por su ruta hasta la 26.5 (FR-40) *(v8.2)*
 
 **Given** la medición y el barrido
 **When** corren
@@ -6929,7 +7201,7 @@ So that desde donde haya llegado esté a dos toques de cualquier Autor u Obra, s
 **Given** 360 × 640 y 320 px
 **When** se mide sobre lo construido (Playwright local)
 **Then** la cabecera mide unos 113 px en los dos anchos, y el texto de la Cita de la Página de Cita empieza dentro de la primera pantalla de 360 × 640, hacia los 153 px (FR-1, FR-55, NFR-8)
-**And** las dos cifras medidas se anotan en la historia; si difieren de las de `DESIGN.md`, se llevan a la próxima pasada de `bmad-ux` y nunca se corrigen a mano
+**And** las dos cifras medidas se anotan, con fecha, en el spec de la historia (`_bmad-output/implementation-artifacts/`) *(v8.2)*; si difieren de las de `DESIGN.md`, se llevan a la próxima pasada de `bmad-ux` y nunca se corrigen a mano
 
 **Given** el teclado
 **When** se recorre una página
@@ -6946,7 +7218,7 @@ So that desde donde haya llegado esté a dos toques de cualquier Autor u Obra, s
 **Given** el alcance (NFR-5)
 **When** se recorre el sitio de prueba construido
 **Then** toda Página de Autor y toda página 1 de Obra, también la que no se indexa, queda a dos saltos de la portada, por la cabecera y su Directorio, y una prueba en Vitest lo fija (FR-55)
-**And** se quitan las exenciones de alcance que la 26.3 y la 26.4 dejaron para `/autores/` y `/obras/`
+**And** se quitan las exenciones por ruta que la 26.3 y la 26.4 dejaron para `/autores/` y `/obras/` en las dos pruebas: la de alcance (`tests/unit/publicable-y-alcanzable.test.ts`, Vitest) y `tests/e2e/seo.spec.ts` (Playwright local) *(v8.2)*
 
 **Given** la Historia 2.1
 **When** se cierra esta historia
@@ -6979,6 +7251,7 @@ So that encuentre a González Prada tecleando «gonzalez» y, si no está, el Di
 **And** lleva la etiqueta visible encima, en `{typography.caption}` y `{colors.on-surface-variant}`, a `{spacing.unit}`: «Escribe parte del nombre.» en `/autores/` y «Escribe parte del título o del autor.» en `/obras/`
 **And** tiene un filete inferior de 1 px en `{colors.outline}`, sin caja, sombra ni icono, y lo tecleado va en Inter al cuerpo de `{typography.body-lg}` y en `{colors.on-surface}`
 **And** con el foco lleva el anillo global y, además, el filete pasa a `{colors.primary}` y se engruesa. No tiene botón
+**And** no lleva texto de ejemplo: la etiqueta ya es la instrucción y el recuento responde a la primera letra; la maqueta, que pone «Por ejemplo: gonzalez» y «Por ejemplo: quijote», no manda (UX-DR58) *(v8.2)*
 **And** va a 3 × `{spacing.unit}` del `h1` y antes de las letras, sin hueco reservado: sin desplazar, las letras y la lista bajan lo que mide; con la página ya desplazada, el anclaje de desplazamiento del navegador deja en su sitio lo que el visitante tenía delante
 **And** el orden de tabulación queda así: el campo, las letras y la lista (UX-DR101)
 
@@ -6991,15 +7264,16 @@ So that encuentre a González Prada tecleando «gonzalez» y, si no está, el Di
 **When** cambia
 **Then** la lista se repinta al momento con las filas cuyo texto normalizado contiene lo tecleado normalizado, por subcadena: en `/autores/`, el nombre; en `/obras/`, el título y el nombre de su Autor (FR-55, AD-3)
 **And** «gonzalez» encuentra a Manuel González Prada, y «MARTÍ» y «marti», a José Martí
-**And** «nunez» y «núñez» encuentran a un Núñez: el filtro pliega la eñe como la búsqueda, aunque las letras la traten como propia
+**And** el filtro pliega la eñe como la búsqueda, aunque las letras la traten como propia: en `/obras/`, «espana» encuentra «Historia de la decadencia de España» *(v8.2)*
 **And** con el Corpus del 2026-10-18, «mar» dejaba 14 Autores, con Josefa Amar y Borbón. La prueba compara con lo que da `normalizar` sobre la lista construida, nunca con una cifra
+**And** las pruebas toman los ejemplos del Corpus que sirve Playwright, nunca de una lista vacía: una comparación como «espana» frente a «españa» sobre dos listas vacías pasaría en vacío *(v8.2)*
 **And** un texto que normaliza a vacío, como espacios o signos sueltos, cuenta como el campo vacío
 
 **Given** el filtro con texto
 **When** quedan coincidencias
 **Then** las letras de salto y todos los «Volver a las letras» se apartan; un grupo sin coincidencias desaparece entero, con su letra, y el que queda la conserva (UX-DR81)
 **And** en `/obras/`, la cabecera de un Autor se queda mientras alguna de sus Obras case, aunque su nombre no case; si casa su nombre, quedan todas sus Obras (UX-DR85)
-**And** tras la pausa de tecleo, unos 700 ms sin teclear, la región dice «14 autores.» o «1 autor.», «13 obras.» o «1 obra.», y solo si la frase cambió: «gon», «gonz» y «gonza» no repiten «1 autor.» (UX-DR81, UX-DR99)
+**And** tras la pausa de tecleo, unos 700 ms sin teclear, la región dice «14 autores.» o «1 autor.», «13 obras.» o «1 obra.», y solo si la frase cambió: dos tecleos que dan la misma cifra no la repiten (UX-DR81, UX-DR99) *(v8.2)*
 **And** la pausa tiene nombre en `src/lib/umbrales.ts` y la reutilizará `/buscar/` en la 27 (AD-9)
 **And** es el segundo ritmo de la convención de mensajes, con el mismo dueño en `src/lib/` que el primero; el guion lo importa, nunca por `define:vars` ni copiado
 
@@ -7009,6 +7283,7 @@ So that encuentre a González Prada tecleando «gonzalez» y, si no está, el Di
 **And** debajo, a `{spacing.unit}`, la isla compone «Buscar «{lo tecleado}» en las citas», hacia `/buscar/?q=` con lo tecleado codificado, en la misma pestaña (UX-DR86, UX-DR106)
 **And** ese enlace va en `{typography.body-md}` y `{colors.primary}`, subrayado y con 44 px de zona, y hereda la zona `directorio` de su contenedor (UX-DR102, UX-DR105, AD-13)
 **And** lleva a la `/buscar/` de hoy, sin depender de la 27; la búsqueda sin resultados ofrecerá los Autores destacados cuando la 27 los construya
+**And** lo tecleado entra en la frase de la región y en el texto del enlace como texto, por `textContent`, nunca como HTML: con `<img src=x onerror=…>` tecleado, la frase lo enseña escrito tal cual y no se ejecuta nada, y una prueba de Playwright local lo fija; es la misma regla que la 27.4 pone a `/buscar/` *(v8.2)*
 
 **Given** el campo
 **When** se vacía
@@ -7021,7 +7296,7 @@ So that encuentre a González Prada tecleando «gonzalez» y, si no está, el Di
 **Given** las pruebas
 **When** corren
 **Then** Vitest fija sobre `dist/` la región vacía en el HTML inicial, la lista entera sin guion, el guion como fichero y su tope
-**And** Playwright local fija el casado, los grupos y las letras que se apartan, el recuento tras la pausa y solo si cambia, la frase a cero con su enlace y su zona, y el anclaje del desplazamiento
+**And** Playwright local fija el casado, los grupos y las letras que se apartan, el recuento tras la pausa y solo si cambia, la frase a cero con su enlace y su zona, el anclaje del desplazamiento y que el campo no lleva `placeholder` *(v8.2)*
 **And** el barrido 2.2 AA pasa con el campo puesto, con texto y a cero
 
 ### Story 26.7: Los Directorios se miden como familia propia
@@ -7036,8 +7311,9 @@ So that dos URL de índice no falseen el reparto de las familias de Autor y de O
 **When** se muda
 **Then** vive en `src/lib/superficies.ts` con seis valores: `cita`, `autor`, `tema`, `coleccion`, `obra` y `directorio`, uno para los dos Directorios (AD-17)
 **And** deja de declararse en `FAMILIAS` y `FAMILIAS_DE_LA_SERIE` de `tools/lib/indexacion.ts` y en `FamiliaAvisable` de `tools/lib/avisar.ts`, que lo importan de ahí
-**And** cada serie y el aviso declaran su subconjunto como constante con nombre derivada de él, y una prueba fija subconjuntos, no igualdad (AD-24, AD-27)
-**And** la indexación toma las seis; el tráfico, la demanda, el rastreo y el canal, todas menos `obra`, como hoy; el aviso, las familias que tienen directorio en el Corpus
+**And** cada serie declara su subconjunto como constante con nombre derivada de él; el aviso declara dos en `tools/lib/avisar.ts` —las familias de fichero, las cinco con directorio en el Corpus más `documento`, de `corpus/fuentes/`, con `src/lib/umbrales.ts` sin familia, y las seis familias de ruta—; la medición no declara ninguno, porque agrega por superficie. La prueba de cada serie (Vitest) fija que su constante es subconjunto de las seis, no la igualdad; la del aviso fija sus dos constantes enteras (AD-17, AD-24, AD-27) *(v8.2)*
+**And** la indexación toma las seis; el tráfico, la demanda, el rastreo y el canal, todas menos `obra`, como hoy
+**And** la familia de una ruta avisada la pone su entrada en la relación, nunca el fichero ni el prefijo; los Directorios, que no tienen fichero propio, entran por sus páginas, y la portada se avisa siempre, sin familia, y se informa aparte; una prueba de Vitest sobre `relacionDeSuperficies` fija que una Cita nueva con Obra avisa `/autores/` y `/obras/` con la familia `directorio`, y la portada sin familia (AD-27) *(v8.2)*
 **And** los tipos de resultado de `src/lib/tipoDeResultado.ts` son las familias con resultado más `portada`, y la prueba de la 26.2 pasa a fijarlo así (AD-17)
 **And** `NOMBRE_DE_FAMILIA` gana «Directorio»
 
@@ -7103,20 +7379,19 @@ So that quitar la lista de Autores de la portada o retirar una Cita no deje nada
 **Given** el grafo del modelo
 **When** se compone
 **Then** lo compone una sola función de `src/lib/publicado.ts`, desde las mismas enumeraciones que pintan las páginas (AD-11)
-**And** sus aristas son: la portada hacia los Temas, las Colecciones y los Directorios; cada listado con todos sus números de página; los Directorios hacia sus Autores y sus Obras; y la cabecera de toda página
+**And** cada arista sale de la enumeración que la pinta, nunca de una lista aparte: la portada hacia los Temas, las Colecciones y los Directorios; la cabecera de toda página; cada Tema hacia sus páginas y de cada página a sus Citas, y así cada listado con todos sus números de página; cada Autor hacia sus Obras y sus Citas; y los Directorios hacia sus Autores y sus Obras (AD-11) *(v8.2)*
 **And** el build comprueba que el grafo de `dist/` contiene el del modelo: si una plantilla deja de pintar una arista del modelo, como un número de la Paginación o una fila de un Directorio, rompe y la nombra
 
 **Given** las órdenes que retiran —`npm run documentar -- --retirar`, `npx tsx tools/autor.ts retirar`, `npm run coleccion -- quitar`, `npm run coleccion -- despublicar` y `npx tsx tools/tema.ts quitar`—
 **When** dejarían una Cita a más de tres saltos en el grafo del modelo del Corpus resultante
 **Then** se niegan con código 1, sin mover ni escribir nada, y nombran la Cita y, si es el caso, el Tema que caería bajo su umbral (NFR-5, AD-11)
 **And** un retiro que no deja a nadie fuera sigue como hoy, con sus códigos de siempre
-**And** `coleccion -- despublicar` entra en la lista por decisión de Héctor del 2026-10-19: AD-11 no la nombra entre las órdenes que retiran; la espina lo alinea en su próxima pasada
+**And** `autor retirar` ya se niega con 1 si el Autor tiene Citas publicadas (`retirarAutor`), así que su negativa de NFR-5 no tiene caso que montar en la prueba *(v8.2)*
 
 **Given** `npx tsx tools/revisar.ts --aprobar` o `npx tsx tools/alta.ts`, las dos órdenes que publican en `corpus/citas/`
 **When** una Cita aprobada o dada de alta no tendría ningún Tema publicado
-**Then** la orden se niega a publicarla con 1, sin escribirla, y nombra la Cita y los Temas que declara con su recuento (NFR-5)
+**Then** la orden se niega a publicarla con 1, sin escribirla, y nombra la Cita y los Temas que declara con su recuento (NFR-5, AD-11) *(v8.2)*
 **And** cuenta las Citas que aprueba la misma pasada: aprobar la decimoquinta Cita de un Tema lo publica, y se admite
-**And** AD-11 pide la negativa solo a `revisar`; extenderla a `alta` es decisión de Héctor del 2026-10-19, y la espina lo alinea en su próxima pasada
 
 **Given** dos construcciones del mismo commit en jornadas distintas (`FECHA_JORNADA`)
 **When** corre la prueba de las dos jornadas (Vitest)
@@ -7124,7 +7399,7 @@ So that quitar la lista de Autores de la portada o retirar una Cita no deje nada
 **And** el HTML de toda página es idéntico byte a byte salvo la portada, el 404, `/kit` y `/lote`, y en la portada y el 404 solo difieren sus subárboles `data-jornada`
 **And** las jornadas se eligen para que la Cita del Día cambie; si no, la prueba no probaría nada
 **And** los ficheros que no son páginas, como `rss.xml`, el canal de la Cita del Día, quedan fuera de la comparación, que es de HTML; el sitemap es idéntico
-**And** el 404 se trata como la portada por decisión de Héctor del 2026-10-19, porque conserva su Cita del Día y esta rota (UX-DR108). AD-12 nombra solo la portada, `/kit` y `/lote`, y el 404 queda para la próxima pasada de `bmad-architecture`
+**And** el 404 se trata como la portada, porque conserva su Cita del Día y esta rota (AD-12, UX-DR108; decisión de Héctor del 2026-10-19) *(v8.2)*
 
 **Given** la reconstrucción diaria
 **When** cambia la Cita del Día sin ningún commit
@@ -7181,8 +7456,8 @@ So that el Directorio ordene bien los casos que ninguna regla resuelve, sin habe
 **When** lo corre
 **Then** ve cada Autor con su clave, «sin revisar» donde no hay `ordenRevisado`, y cuántos faltan
 
-**Given** los casos que no se ordenan por su último apellido —Séneca, Marco Aurelio, Sor Juana Inés de la Cruz, Manuel González Prada y los nombres compuestos—
-**When** decide cada uno
+**Given** los casos en que la última palabra del `nombre`, que es la clave propuesta (26.1), no ordena bien —Manuel González Prada cae en la P, Benito Pérez Galdós en la G, Emilia Pardo Bazán en la B, Santiago Ramón y Cajal en la C, Alfonso X el Sabio en la S, y Marco Aurelio en la A, que con dos palabras no sale marcado—, cerca de cuarenta hasta que se revisan *(v8.2, Héctor, 2026-10-23)*
+**When** decide cada uno, empezando por los nombres de tres palabras o más que el parte del lote marca aparte *(v8.2, Héctor, 2026-10-23)*
 **Then** confirma con `npx tsx tools/autor.ts clave <slug>` o corrige con `npx tsx tools/autor.ts clave <slug> "<clave>"`, y la orden valida la clave y escribe `ordenRevisado`
 **And** nunca edita la ficha a mano
 
@@ -7199,6 +7474,11 @@ So that el Directorio ordene bien los casos que ninguna regla resuelve, sin habe
 **When** se construye otra vez
 **Then** el Directorio la refleja, y ninguna URL cambia, porque ninguna ruta depende de la clave
 
+**Given** la historia
+**When** se cierra
+**Then** se cierra cuando Héctor ha revisado las claves de los Autores que existían al correr el lote de la 26.1 sobre la rama al día (26.11); las de los Autores que la siembra dé de alta después se revisan en su sesión de sembrado, sin reabrir esta historia *(v8.2, Héctor, 2026-10-23)*, por el paso que la 26.1 añade a `AGENTS.md` § Una sesión de sembrado *(v8.2)*
+**And** `epic-26` pasa a hecha sin esperar a esas altas *(v8.2, Héctor, 2026-10-23)*
+
 ### Story 26.11: La Obra y los Directorios llegan juntos al sitio en vivo, y su fecha queda escrita *(operativa)*
 
 As a Héctor,
@@ -7207,44 +7487,60 @@ So that la Obra y el Autor ganen sus enlaces internos el mismo día y SM-11 se j
 
 **Acceptance Criteria:**
 
-**Given** la reparación de la publicación desplegada y la Épica 23 ya en la principal
+**Given** la Épica 23 ya en la principal
 **When** empieza esta historia
-**Then** la principal está en verde, y `src/lib/umbrales.ts` ya declara, junto a `PRIMER_DESPLIEGUE_DE_OBRAS`, la constante de la fecha del despliegue conjunto de las Épicas 24 y 26, que crea la reparación; sin ella, esta historia no empieza
+**Then** la principal está en verde, y `src/lib/umbrales.ts` declara ya `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = undefined`, que añadió 64b1bf0d tras la reparación de la publicación, en vivo desde el 2026-10-19, y `desplieguesQueMuevenSm11` de `tools/lib/indexacion.ts` la nombrará en la línea SM-11 en cuanto tenga valor *(v8.2)*
 
 **Given** la rama conjunta, al día con la principal
 **When** se prepara
 **Then** se vuelve a correr la orden de lote de claves de la 26.1 para los Autores que la siembra dio de alta en la principal mientras tanto, y se commitea lo que proponga; sin ese paso, el build de la principal rompería por un Autor publicado sin clave
-**And** el CI corre en verde: `npm run build`, `astro check` y `npm test`
+**And** se corren a mano sobre la rama `npm run build`, `astro check` y `npm test` (Vitest), lo mismo que el CI, que solo corre en la principal, y pasan *(v8.2)*
 
-**Given** Playwright local sobre la rama, porque el CI no lo corre
-**When** se corre
-**Then** pasan el barrido WCAG 2.2 AA (23.4), el reflujo a 320 px en sus tres condiciones con la Paginación de 12 páginas (26.9), la prueba que fija el medio del tipo (26.2), las de la cabecera y el filtro (26.5 y 26.6) y las pruebas locales de la Épica 24
-**And** se mide a mano NFR-7, con Lighthouse en perfil móvil 4G, sobre una Página de Cita con la medición encendida, la cabecera y la Tarjeta de Obra puestas, y se anota el resultado
+**Given** la rama construida con la medición puesta contra un receptor local (`wrangler dev` con D1 local), nunca contra el D1 de producción *(v8.2)*
+**When** se corre a mano `npm run test:e2e` entero (Playwright local), porque el CI no lo corre *(v8.2)*
+**Then** pasa entero, con el barrido WCAG 2.2 AA (23.4), el reflujo a 320 px en sus tres condiciones con la Paginación de 12 páginas (26.9), la prueba que fija el medio del tipo (26.2), las de la cabecera y el filtro (26.5 y 26.6) y las de la Épica 24 *(v8.2)*
+**And** el resultado se anota, con fecha, en el spec de la historia (`_bmad-output/implementation-artifacts/`) *(v8.2)*
+
+**Given** una Página de Cita con la cabecera y la Tarjeta de Obra puestas, construida con la medición puesta contra un receptor local *(v8.2)*
+**When** se mide a mano NFR-7, con Lighthouse en perfil móvil 4G, frente a la principal del mismo día y sin puerta automática *(v8.2)*
+**Then** el contenido principal sigue visible en menos de 2,5 s (NFR-7), y las dos cifras se anotan en el spec *(v8.2)*
+**And** la principal se mide construida y servida igual, en local y con la medición contra un receptor local: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*
+**And** si se degrada, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*
 
 **Given** la relación de AD-27, leída por `tools/` sobre el rango sin desplegar
-**When** se consulta
-**Then** dice cuántas fechas mueve una sesión de siembra con la v8 puesta, y se anota antes de fusionar (AD-27)
+**When** se consulta con `tools/avisar.ts --ensayo --desde … --hasta …` (24.8) *(v8.2)*
+**Then** dice cuántas fechas mueve una sesión de siembra con la v8 puesta, y se anota en el spec antes de fusionar (AD-27) *(v8.2)*
 
 **Given** todo lo anterior
-**When** se fusiona
-**Then** la rama entra en la principal en un solo merge y con el CI en verde; ninguna historia de la 24 ni de la 26 entra suelta
+**When** Héctor fusiona
+**Then** la rama entra en la principal en un solo merge, que el CI de la principal construye en verde; ninguna historia de la 24 ni de la 26 entra suelta, salvo la 24.2, que entra sola en la principal en cuanto Héctor da sus dos valores, como excepción declarada a la fusión por épica *(v8.2, Héctor, 2026-10-23)*
+**And** lo fusiona Héctor: un agente puede correr y anotar las pruebas, nunca fusionar *(v8.2)*
 
 **Given** el despliegue
 **When** llega al sitio en vivo
-**Then** se comprueba en vivo que la cabecera lleva los cuatro enlaces y que `/autores/` y `/obras/` responden y están en el sitemap publicado
-**And** en un commit aparte se escriben en `umbrales.ts` la fecha de ese despliegue en vivo, no la del merge, en la constante de SM-11, y esa misma fecha como entrada nueva de `CORTES_DE_SM8`, la lista de la 23.10, detrás de la que añadió la 23.11 y sin tocarla, porque los Directorios emiten vista: el corte también es la del despliegue que llega al sitio en vivo y no la del merge, como en la 23.11 (decisión de Héctor del 2026-10-19)
-**And** el informe de indexación nombra esa fecha en su línea SM-11 (AD-24)
+**Then** se comprueba en vivo, sin ejecutar JavaScript, que la cabecera lleva los cuatro enlaces y que `/autores/` y `/obras/` responden y están en el sitemap publicado: con peticiones HTTP —`curl`— del HTML de una página, de `/autores/`, de `/obras/` y de `sitemap-0.xml`, que no emiten balizas *(v8.2)*
+**And** no se abre ninguna página en un navegador, porque su guion de medición escribiría en el D1 de producción, como dice la 27.9: siguen siendo dos, y ninguna más, las pasadas que escriben allí, la 25.3 y la 25.7, y la 26 no añade ninguna entrada a su constante de `umbrales.ts` *(v8.2)*
+**And** en un commit aparte del día en que llega, Héctor da valor a `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`: la jornada UTC en que termina el trabajo «Desplegar» de Actions, no la del merge (decisión de Héctor del 2026-10-19). De ella se compone la segunda entrada de `CORTES_DE_SM8`, que la 23.10 ya declara, sin escribir ninguna fecha más, porque los Directorios emiten vista; el tramo nuevo de SM-8 empieza la jornada siguiente, la primera UTC completa tras la llegada, y la de llegada se informa aparte, como «cambió» *(v8.2)*
+**And** la línea SM-11 de `npm run indexacion` la nombra («Despliegues que mueven la comparación»), como fija `tests/unit/indexacion.test.ts` (AD-24) *(v8.2)*
 
 **Given** SM-4 de los Directorios
 **When** se juzga
-**Then** si llega antes de que su continuación tenga línea base, se juzga contra su propia serie y se dice; nunca contra el 1,8, que está en suspenso
+**Then** se lee con la orden de la 23.10, con `/autores/` y `/obras/` como una sola superficie para la línea base y por separado en el informe *(v8.2)*
+**And** frente a su línea base se juzga solo después de que Héctor dé por buena la comparación por firma de esa línea base (23.10) *(v8.2)*, y él lo anota en `DESPLIEGUE.md` §3, con fecha y métrica *(v8.2, Héctor, 2026-10-23)*
+**And** si llega antes de que su continuación tenga línea base, se juzga contra su propia serie, por las ventanas de la 23.10, y se dice *(v8.2, Héctor, 2026-10-23)*; nunca contra el 1,8, que está en suspenso
+
+**Given** SM-C5 *(v8.2)*
+**When** se juzga la Épica 24
+**Then** salta si en dos ventanas seguidas de la 23.10 la continuación de la Página de Cita sube y SM-5 baja, cada una frente a su línea base; frente a su línea base se juzga solo después de que Héctor dé por buena la comparación por firma de esas líneas base (23.10), y él lo anota en `DESPLIEGUE.md` §3, con fecha y métrica *(v8.2, Héctor, 2026-10-23)*
+**And** si la 24 llegó antes de esa línea base, las ventanas se cuentan desde su llegada y frente a la serie propia de cada métrica, y se dice
+**And** saltar no apaga nada: la palanca, poner la Tarjeta de Obra detrás de las acciones, la decide Héctor
 
 ## Epic 27: Buscar con filtros
 
 Quien busca acota por Autor, por una Obra de ese Autor —también las que no se indexan— y por Tema, con texto o sin él. La búsqueda vive en la dirección y se comparte, «atrás» devuelve la anterior, y los resultados llegan de 30 en 30, con su recuento anunciado y cada Cita con su Autor. Desde la página 1 de una Obra, de un Autor o de un Tema se entra con «Buscar en…» y el filtro puesto, sin que ninguna combinación cree una página indexable. La pantalla sin resultados ofrece los ocho Autores con más Citas, con el suelo latinoamericano garantizado, y sin JavaScript la página lo dice y lleva a los Directorios. Héctor sabe cuántas búsquedas acaban en un resultado pulsado (SM-13) y cuántas se quedan a cero (SM-6).
 
 **FRs covered:** FR-7, FR-8 *(enmendados)*; FR-4, FR-6 *(«Buscar en…»)*, FR-51 *(«Buscar en esta obra»)*; NFR-1 *(`/buscar/` con parámetros)*, NFR-2, NFR-4 y NFR-13 en lo que añade; FR-37, FR-52 *(sin trabajo)*; SM-6 y SM-13 *(las juzgan)*.
-**Notas de implementación:** depende de la 23 y de la 26 como dice la Epic List v8; rama propia, que entra en la principal en un solo merge después de la 24 con la 26, antes o después de la 25. La **27.1** va primero, porque sin filtros, metadatos ni clave escritos en la Página de Cita toda prueba de Pagefind pasaría en vacío; la **27.2** muda la búsqueda a su guion empaquetado, y de ella salen la 27.3 y la 27.5; la 27.4 y la 27.6 van tras la 27.3, porque la 27.6 nombra la Obra en sus frases; y la 27.7 y la 27.8, tras la 27.4, porque la 27.7 distingue el filtro que ya no existe del mapa que no llega. SM-6 y SM-13 se leen con la orden de la 23.10: esta épica solo pone los filtros en `busqueda`. **Para fusionar:** el CI en verde, que cubre en Vitest los atributos de `dist/`, y sobre la rama, Playwright local de lo que llama a Pagefind —recuentos de `filters()`, orden de `search(null, …)` y la prueba del medio del tipo de la 26.2 con los metadatos nuevos— y el barrido WCAG 2.2 AA con el reflujo a 320 px. Las tres preguntas que heredaba las resolvió Héctor el 2026-10-19, y cada una va en los criterios de su historia (27.4, 27.6 y 27.8). Fuera: trocear los filtros y el mapa de rótulos (aplazado; aquí solo su aviso), el autocompletado (`[NON-GOAL]` de FR-7) y toda página de intersección (NFR-13). De lo viejo, la 3.1 ya está enmendada en su sitio y la 27.2 la amplía; el criterio de emisión de la 3.2 lo sustituyó la 23.8, y su «menos palabras» lo acota la 27.6; la 4.3 no se enmienda, y su botón lo pone la 27.8. **Preguntas abiertas:** qué reuniones de Obra se aplican ya publicadas sus URL, cada una de las cuales deja sin su filtro las búsquedas compartidas con la absorbida (Héctor); la frase plural de los filtros que ya no existen y el texto de `/buscar/` sin paquete (`bmad-ux`); AD-9 y el Entorno operativo, que miden en `astro:build:done` lo que se mide tras Pagefind (`bmad-architecture`).
+**Notas de implementación:** depende de la 23 y de la 26 como dice la Epic List v8; rama propia, que entra en la principal en un solo merge después de la 24 con la 26, antes o después de la 25. La **27.1** va primero, porque sin filtros, metadatos ni clave escritos en la Página de Cita toda prueba de Pagefind pasaría en vacío; la **27.2** muda la búsqueda a su guion empaquetado, y de ella salen la 27.3 y la 27.5; la 27.4 y la 27.6 van tras la 27.3, porque la 27.6 nombra la Obra en sus frases; y la 27.7 y la 27.8, tras la 27.4, porque la 27.7 distingue el filtro que ya no existe del mapa que no llega. La **27.9**, operativa y acto de Héctor, va la última y cierra la épica: la lleva al sitio en vivo y deja escrita su jornada de llegada *(v8.2, Héctor, 2026-10-23)*; lo prueba todo sobre la rama contra un receptor local y, tras el merge, solo anota esa jornada: no comprueba nada en el sitio en vivo, que escribiría en el D1 de producción, y siguen siendo dos, y ninguna más, las pasadas que escriben allí, la 25.3 y la 25.7 *(v8.2, Héctor, 2026-10-24)*. SM-6 y SM-13 se leen con la orden de la 23.10: esta épica solo pone los filtros en `busqueda`, y la 27.9 deja escrita la jornada desde la que se cuentan sus ventanas *(v8.2, Héctor, 2026-10-24)*. **Para fusionar:** el CI en verde —build, `astro check` y Vitest, que cubre los atributos de `dist/`— y `npm run test:e2e` entero —Playwright local, que el CI no corre— sobre la rama construida con la medición contra un receptor local, con lo que llama a Pagefind —recuentos de `filters()`, orden de `search(null, …)` y la prueba del medio del tipo de la 26.2 con los metadatos nuevos—, el historial de `/buscar/` con la caché de atrás y adelante y sin ella, y el barrido WCAG 2.2 AA con el reflujo a 320 px *(v8.2)*; lo cierra la 27.9, que mide NFR-7 a mano con Lighthouse en `/buscar/` y en una Página de Cita, frente a la principal del mismo día, las dos construidas en local con la medición contra un receptor local *(v8.2, Héctor, 2026-10-24)*, y si empeora el merge espera a que Héctor decida; un agente nunca fusiona *(v8.2, Héctor, 2026-10-23)*. Las tres preguntas que heredaba las resolvió Héctor el 2026-10-19, y cada una va en los criterios de su historia (27.4, 27.6 y 27.8); los Directorios del aviso de `/buscar/` van también exentos de zona (decisión de Héctor, 2026-10-22; 27.7) *(v8.2)*. Fuera: trocear los filtros y el mapa de rótulos (aplazado; aquí solo su aviso), el autocompletado (`[NON-GOAL]` de FR-7) y toda página de intersección (NFR-13). De lo viejo, la 3.1 ya está enmendada en su sitio y la 27.2 la amplía; el criterio de emisión de la 3.2 lo sustituyó la 23.8, y su «menos palabras» lo acota la 27.6; la 4.3 no se enmienda, y su botón lo pone la 27.8. **Preguntas abiertas:** qué reuniones de Obra se aplican ya publicadas sus URL, cada una de las cuales deja sin su filtro las búsquedas compartidas con la absorbida (Héctor). Las frases de los filtros que no se pueden usar y el aviso de `/buscar/` antes de que arranque los cerró la UX v8.2, y AD-9 v8.2 mide ya tras Pagefind *(v8.2)*.
 
 ### Story 27.1: Cada resultado de Cita lleva su Autor, y la Cita declara sus filtros
 
@@ -7285,8 +7581,8 @@ So that sepa qué abro antes de abrirlo, y la búsqueda pueda acotarse por Autor
 
 **Given** un resultado de tipo Cita en `/buscar/`
 **When** se pinta
-**Then** lleva debajo el nombre de su Autor, en `{typography.author}` y `{colors.on-surface-variant}`, como el de Obra, y se lee «Cita: «{texto}», de {Autor}», con una pausa entre las dos líneas (FR-7, UX-DR91)
-**And** lo pinta el mismo código que ya pinta el Autor del resultado de Obra (Historia 22.7); sin metadato `autor`, no hay línea ni «, de»
+**Then** lleva debajo el nombre de su Autor, en `{typography.author}` y `{colors.on-surface-variant}`, como el de Obra, y se lee «Cita: «{texto}», {Autor}»: solo la pausa entre las dos líneas, sin «de» (FR-7, UX-DR91) *(v8.2)*
+**And** lo pinta el mismo código que ya pinta el Autor del resultado de Obra (Historia 22.7); sin metadato `autor`, no hay línea ni pausa *(v8.2)*
 **And** `/buscar/` sigue bajo `MAX_BYTES_DE_GUION` (AD-6)
 
 **Given** el `dist/` construido, en Vitest y por tanto en el CI
@@ -7324,18 +7620,20 @@ So that encuentre entre sus citas sin pasar sus páginas una a una.
 **Given** la página cargada sin interactuar
 **When** se mira lo que descarga
 **Then** el guion de medición, con `MEDICION_ENDPOINT`, va en el documento antes que el de la búsqueda, y Pagefind se pide con `import()` solo al enfocar el campo, al elegir un filtro o al llegar con estado en la dirección (AD-6, AD-13)
+**And** ese `import()` de `/pagefind/pagefind.js` va con el literal, marcado para que Vite no lo resuelva (`/* @vite-ignore */` o `external`), porque Pagefind escribe su índice después de `astro build`; nunca con una variable, que dejaría ese destino fuera de la vista de la lista cerrada de guiones de la 23.1 *(v8.2)*
 **And** amplía así la Historia 3.1, ya enmendada en su sitio en ese criterio, sin enmendar lo demás: sus criterios siguen ciertos para la búsqueda sin filtros, y la prueba de `tests/e2e/busqueda.spec.ts` que filtra por `pagefind` sigue valiendo
 
 **Given** el guion de la búsqueda
 **When** arranca
 **Then** inserta el Campo de búsqueda de la 26.6, sin botón porque responde al teclear, con su etiqueta «Escribe un fragmento, un autor o un tema.» y lo tecleado en Inter al cuerpo de `{typography.body-lg}`, que cambia lo construido en serif (UX-DR58, UX-DR104, UX-DR112)
+**And** lleva el texto de ejemplo «Por ejemplo: no hay camino», como lo construido, porque es de los campos que buscan en todo el Corpus, y una prueba exige que «no hay camino» dé algún resultado: en Vitest, y por tanto en el CI, que alguna Cita publicada lo contenga en su forma canónica (AD-3), y en Playwright local, que la búsqueda la devuelva (UX-DR58, UX-DR112) *(v8.2)*
 **And** inserta debajo los selectores, dentro de un `fieldset` sin borde ni relleno con la leyenda «Filtrar las citas» solo para lectores: a 3 × `{spacing.unit}` bajo el campo y a 2 × entre sí, apilados a todo el ancho de la medida de prosa en todas las anchuras, cada uno con su etiqueta visible encima, «Autor» y «Tema» (UX-DR87)
 **And** cada uno es el control nativo, con filete de 1 px en `{colors.outline}`, radio `{rounded.DEFAULT}`, fondo `{colors.surface}`, 44 px de alto, el valor en `{typography.body-lg}` para que Safari en iOS no amplíe la página, y la flecha del control, sin icono propio
 
 **Given** las opciones de los dos selectores
 **When** se componen
 **Then** salen en el build de la función de la 27.1 que escribe los filtros de cada Cita, y solo del Corpus publicado: ningún Autor sin Citas publicadas ni Tema por debajo de su umbral, y ninguno publicado que falte (FR-7, AD-11)
-**And** el de Autor empieza por «Todos los autores» y sigue por el nombre tal como se lee, para que la búsqueda por tecleo del control lleve con «M» a José Martí; el de Tema, por «Todos los temas» y sigue por el nombre con su artículo
+**And** el de Autor empieza por «Todos los autores» y sigue por el nombre tal como se lee, para que la búsqueda por tecleo del control lleve a cada Autor por la primera letra de su nombre tal como se lee —a José Martí, con la «J»— *(v8.2)*; el de Tema, por «Todos los temas» y sigue por el nombre con su artículo
 **And** los dos órdenes son funciones de `src/lib/normalizar.ts` que esta historia añade, con la comparación canónica, y el selector no ordena por su cuenta (AD-3)
 
 **Given** un filtro elegido y el campo vacío
@@ -7352,6 +7650,7 @@ So that encuentre entre sus citas sin pasar sus páginas una a una.
 **Given** los resultados que pinta el guion
 **When** se migran desde el guion en línea
 **Then** pintan lo mismo que hoy: la fila entera como enlace, el rótulo de tipo, el título en Source Serif salvo los de Obra, Directorio y portada, en Inter, y la línea del Autor bajo la Cita y bajo la Obra (Historias 22.7, 26.2 y 27.1, UX-DR91)
+**And** salvo el nombre accesible del de Obra, que pasa a «Obra: {título}, {Autor}», sin el «de» que puso la 22.7: solo la pausa, como el de Cita de la 27.1 (UX-DR91, UX-DR112) *(v8.2)*
 **And** la lista lleva `role="list"`, y el orden de tabulación es el campo, los selectores, «Quitar los filtros» y los resultados (UX-DR101)
 
 **Given** un cambio de selector
@@ -7373,11 +7672,11 @@ So that encuentre entre sus citas sin pasar sus páginas una a una.
 **Given** una búsqueda
 **When** se asienta —al enviar, al pulsar un resultado o al ocultarse la página—
 **Then** emite `busqueda` como mucho una vez por estado distinto de texto y filtros en la carga, con su tramo y su combinación de filtros del vocabulario cerrado: ninguno, Autor, Tema o Autor con Tema (AD-13, FR-56)
-**And** la emisión que la 23.8 dejó en la búsqueda pasa a este guion sin cambiar su regla: la consulta sin resultados con texto se sigue registrando al asentarse, solo con el texto, y un filtrado sin texto no registra ninguna (FR-8)
+**And** la emisión que la 23.8 dejó en la búsqueda —con su marca en `history.state` y su respaldo de Navigation Timing— pasa a este guion sin cambiar su regla *(v8.2)*: la consulta sin resultados con texto se sigue registrando al asentarse, solo con el texto, y un filtrado sin texto no registra ninguna (FR-8)
 
 **Given** un resultado
 **When** se pulsa
-**Then** es un enlace dentro del contenedor que el build marca con la zona `resultado` (23.7), también el que insertó el cliente, y la isla no lo intercepta: sin `defaultPrevented`, la escucha de la medición lo cuenta como salida interna (SM-13, AD-13)
+**Then** es un enlace dentro del contenedor que el build marca con la zona `resultado` (23.7), también el que insertó el cliente —salvo los Directorios de los avisos de `/buscar/`, que van fuera y exentos de zona (27.7, UX-DR111)— *(v8.2)*, y la isla no lo intercepta: sin `defaultPrevented`, la escucha de la medición lo cuenta como salida interna (SM-13, AD-13)
 
 **Given** la declaración de `src/lib/ingreso.ts`
 **When** se revisa
@@ -7391,7 +7690,7 @@ So that encuentre entre sus citas sin pasar sus páginas una a una.
 
 **Given** los dos selectores a 360 px
 **When** se miden sobre lo construido, con el valor a 17 px
-**Then** se anota lo que ocupan; la cifra de los tres, unos 252 px según UX-DR87, se completa con el de Obra en la 27.3
+**Then** se anota lo que ocupan, con fecha, en el spec de la historia *(v8.2)*; la cifra de los tres, unos 252 px según UX-DR87, se completa con el de Obra en la 27.3
 
 ### Story 27.3: La búsqueda se acota también por una Obra del Autor elegido
 
@@ -7447,11 +7746,11 @@ So that busque dentro del libro que me interesa y no entre todo su autor.
 **Given** el tamaño de los filtros de Pagefind y el del mapa
 **When** pasan su tamaño con nombre en `umbrales.ts` —los filtros eran unos 41 KB el 2026-10-17—
 **Then** el build avisa y no rompe; trocearlos sigue aplazado (AD-9)
-**And** los dos se miden en un paso final de `npm run build`, después de Pagefind, sobre lo que se despliega, `dist/pagefind/` incluido: en `astro:build:done` los filtros aún no existen. AD-9 y el Entorno operativo dicen `astro:build:done`; la espina lo alinea en su próxima pasada
+**And** los dos se miden en un paso final de `npm run build`, después de Pagefind, sobre lo que se despliega, `dist/pagefind/` incluido: en `astro:build:done` los filtros aún no existen (AD-9) *(v8.2)*
 
 **Given** los tres selectores a 360 px
 **When** se miden sobre lo construido, con el valor a 17 px
-**Then** se vuelve a medir lo que ocupan, que UX-DR87 estimó en unos 252 px, y la cifra se anota
+**Then** se vuelve a medir lo que ocupan, que UX-DR87 estimó en unos 252 px, y la cifra se anota, con fecha, en el spec de la historia *(v8.2)*
 
 **Given** `/buscar/` con un Autor elegido, el selector de Obra con el título de Obra más largo del Corpus elegido, «Quitar los filtros» y sus resultados
 **When** se mide a 320 px en las tres condiciones de la 26.9 —el texto por omisión, al 200 % simulado con zoom y el espaciado de 1.4.12— (Playwright local)
@@ -7469,27 +7768,29 @@ So that pueda compartirla copiándola y «atrás» me devuelva la anterior.
 **Given** el estado de la búsqueda
 **When** se escribe en la dirección
 **Then** es `?q=&autor=&obra=&tema=` con identificadores —slug de Autor, nombre de ficha y slug de Tema—, nunca rótulos (NFR-4, convención de parámetros)
-**And** la isla la compone desde su propio estado, nunca copiando `location.search`, y la reescribe tras la pausa de `umbrales.ts` (AD-9)
+**And** la isla la compone desde su propio estado, nunca copiando `location.search`, y la escribe tras la pausa de `umbrales.ts`, nunca por tecla (AD-9) *(v8.2)*
 **And** toda escritura del historial va dentro de un `try`: si el navegador la rechaza por frecuencia, la búsqueda sigue, la dirección se queda como estaba y la siguiente escritura lo vuelve a intentar
 
 **Given** cambios seguidos del mismo control
 **When** pasa la pausa
-**Then** solo ese estado entra en el historial; mientras se sigue tecleando o cambiando el mismo selector, la dirección se reemplaza y no se apila (UX-DR87)
+**Then** el estado que deja la pausa entra en el historial con `pushState`; mientras sigue cambiando el mismo control —tecleando o en el mismo selector— se reescribe con `replaceState`, sin apilar (UX-DR87) *(v8.2)*
+**And** un estado asentado no se reescribe nunca: el primer cambio tras él abre entrada; asentar no abre entrada, marca la suya (AD-13) *(v8.2)*
 **And** un estado igual al de la dirección no la escribe
 
 **Given** «atrás» o «adelante» entre dos búsquedas de la misma carga
 **When** ocurre
-**Then** la página pinta la búsqueda de esa dirección —campo, selectores, recuento y resultados— sin recargar
-**And** no vuelve a emitir `busqueda` por un estado ya emitido en la carga (AD-13)
+**Then** la isla repinta el estado de la entrada —de su objeto de estado o, sin él, leyendo la dirección como en una llegada—: campo, selectores, recuento y resultados, sin recargar *(v8.2)*
+**And** no vuelve a emitir `busqueda` por un estado ya emitido en la carga, ni por uno que su entrada marca como asentado, aunque lo asentara otro documento (AD-13) *(v8.2)*
 
 **Given** «atrás» desde un resultado pulsado
 **When** el navegador restaura `/buscar/` de la caché de atrás y adelante (`pageshow` con `persisted`)
 **Then** es carga nueva para la salida (23.7) —`/buscar/` no emite lectura (23.5)— y no para la búsqueda: conserva en memoria los estados ya emitidos y no los vuelve a emitir, y el resultado que se pulse después cuenta como salida nueva (AD-13, SM-13)
-**And** sin esa caché, la página se rehace desde la dirección, como una llegada
+**And** sin esa caché, la página se rehace desde la dirección y da por ya registrado el estado con que llega —por la marca de `history.state`, o por Navigation Timing si la entrada no la trae—: no asienta otra `busqueda` ni otra `busqueda-sin-resultados` (AD-13) *(v8.2)*
+**And** la recarga cuenta igual, como ya registrada (AD-13; decisión de Héctor del 2026-10-20) *(v8.2)*
 
-**Given** una dirección con estado
+**Given** una dirección con estado que se puede usar —texto, o algún filtro que exista y case— *(v8.2)*
 **When** se carga
-**Then** Pagefind, `filters()` y el mapa se piden al cargar, la búsqueda corre, y los selectores se ven elegidos, con «Quitar los filtros» a la vista, lo escrito en el campo y el recuento de lo filtrado entero (UX-DR93)
+**Then** Pagefind, `filters()` y el mapa se piden al cargar, la búsqueda corre, y se ven elegidos los selectores de los filtros que trae, con «Quitar los filtros» a la vista si trae alguno, lo escrito en el campo y el recuento de lo filtrado entero (UX-DR93); la que no deja nada con que buscar sigue la regla del filtro que no se puede usar, abajo *(v8.2)*
 
 **Given** una dirección con `obra` y sin `autor`
 **When** se carga
@@ -7497,19 +7798,21 @@ So that pueda compartirla copiándola y «atrás» me devuelva la anterior.
 
 **Given** un filtro de la dirección que ya no existe —un `?autor=` de un Autor retirado o sin Citas, un `?tema=` de un Tema bajo su umbral, un `?obra=` de una Obra sin Citas o absorbida al reunir—
 **When** se carga
-**Then** se ignora, la búsqueda corre con lo demás, y la región lo dice delante del recuento: «Uno de los filtros de esta dirección ya no existe, y la búsqueda va sin él.» (UX-DR93, NFR-4)
+**Then** se ignora, la búsqueda corre con lo demás, y la región del Recuento lo dice delante del recuento: «Uno de los filtros de esta dirección no se puede usar, y la búsqueda va sin él.» (UX-DR93, NFR-4) *(v8.2)*
 **And** la dirección se reemplaza sin él, sin entrada nueva en el historial
 **And** la existencia se juzga contra las opciones que compone el build y contra el mapa, y una Obra absorbida nunca se traduce a la que la absorbió: reunir es la ruptura declarada (NFR-4, AD-25)
-**And** con dos o más que ya no existen, la región lo dice una sola vez, con la frase en plural derivada de la singular (abierta: su redacción — `bmad-ux`)
+**And** con dos o tres que no se pueden usar, la región lo dice una sola vez: «Dos de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.» o «Tres de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.» (UX-DR93) *(v8.2)*
+**And** si no queda nada con que buscar —ningún texto ni ningún filtro que se pueda usar—, dice «El filtro de esta dirección ya no existe.» o, con dos o más, «Los filtros de esta dirección ya no existen.», sin recuento ni salida de la búsqueda sin resultados, porque no ha corrido ninguna; quedan el campo y los selectores para empezar otra (UX-DR93) *(v8.2)*
+**And** así «ya no existe» se dice solo donde es cierto: no queda nada solo con filtros que no existen, porque una `obra` que no casa siempre deja su Autor, y «va sin él» no se promete cuando no corre ninguna búsqueda *(v8.2)*
 
 **Given** una dirección con `autor` y una `obra` de otro Autor (`?autor=a&obra=b`)
 **When** se carga
-**Then** se ignora la Obra con la regla del filtro que ya no existe: la búsqueda corre con el Autor y lo demás, la región lo dice delante del recuento y la dirección se reemplaza sin `obra`; nunca se cambia el Autor por el de la Obra (FR-7, NFR-4, UX-DR93)
+**Then** se ignora la Obra con la regla del filtro que ya no existe: la búsqueda corre con el Autor y lo demás, la región lo dice delante del recuento con la misma frase, «no se puede usar», que es cierta de los dos casos *(v8.2)*, y la dirección se reemplaza sin `obra`; nunca se cambia el Autor por el de la Obra (FR-7, NFR-4, UX-DR93)
 
 **Given** una dirección con más de un filtro
 **When** se resuelve su estado
 **Then** el orden es uno y fijo: primero se descarta lo que no existe, y se dice; después, una `obra` sin `autor` toma el Autor del mapa; y por último, si `autor` y `obra` existen y no casan, se descarta `obra`, y se dice (NFR-4, AD-11)
-**And** así, con un `autor` que ya no existe y una `obra` que sí, la búsqueda va en esa Obra con su Autor, y la región dice que uno de los filtros ya no existe
+**And** así, con un `autor` que ya no existe y una `obra` que sí, la búsqueda va en esa Obra con su Autor, y la región dice que uno de los filtros no se puede usar *(v8.2)*
 
 **Given** una búsqueda compartida con `?obra=`
 **When** después se retitula esa Obra con `npm run obra -- titular`
@@ -7522,11 +7825,18 @@ So that pueda compartirla copiándola y «atrás» me devuelva la anterior.
 
 **Given** `de` o `via` en la dirección de llegada
 **When** la búsqueda lee su estado
-**Then** ya las quitó el guion de medición, que va antes en el documento; la búsqueda nunca las lee ni las vuelve a poner (AD-13)
+**Then** ya las quitó el guion de medición, que va antes en el documento, y la función que las quita conserva el objeto de estado de la entrada *(v8.2)*; la búsqueda nunca las lee ni las vuelve a poner (AD-13)
+
+**Given** una dirección compartida con un `?q=` que lleva marcado (`<img src=x onerror=…>`)
+**When** la isla lo pinta en el campo o, con algún filtro puesto, en el recuento («… con «x».») *(v8.2)*
+**Then** sale como texto, por `textContent` o `value`, nunca como HTML, y una prueba de Playwright local lo fija *(v8.2)*
+**And** vale igual para lo tecleado que vuelve dentro de una frase en el filtro de los Directorios («Ningún autor tiene «x»…» y «Buscar «x» en las citas», 26.6) *(v8.2)*
 
 **Given** Playwright local
 **When** corre sobre la rama
-**Then** cubre la dirección compuesta, «atrás» entre dos estados, la caché de atrás y adelante, el filtro que ya no existe, la `obra` sin `autor`, la `obra` de otro Autor y un `replaceState` que lanza
+**Then** cubre la dirección compuesta, «atrás» entre dos estados, la caché de atrás y adelante, el filtro que no se puede usar con sus frases en singular, en plural y sin nada con que buscar, la `obra` sin `autor`, la `obra` de otro Autor y un `replaceState` que lanza *(v8.2)*
+**And** cubre «Autor, Tema, resultado, atrás, atrás» con la caché de atrás y adelante y sin ella, y la recarga, sin volver a asentar *(v8.2)*
+**And** cubre «teclear, enviar con Intro, seguir tecleando, atrás», que vuelve al estado enviado: el cambio tras un estado asentado abrió entrada y no lo reescribió *(v8.2)*
 
 ### Story 27.5: Los resultados llegan de 30 en 30
 
@@ -7551,8 +7861,9 @@ So that pueda recorrerlas todas sin que la página crezca sola ni pierda por dó
 
 **Given** una tanda que no llega
 **When** falla
-**Then** la región dice «No se han podido cargar más resultados.», el foco se queda en el botón y pulsarlo otra vez la vuelve a pedir
-**And** si el reintento llega, la región anuncia el recuento en lugar del fallo, vaciada y escrita en el siguiente fotograma: es la única tanda que vuelve a anunciarlo, para que la región no se quede diciendo un fallo que ya no es (UX-DR89, UX-DR90, UX-DR99)
+**Then** «No se han podido cargar más resultados.» va bajo el botón, a 2 × `{spacing.unit}`, en `{typography.caption}` y `{colors.on-surface}`, por una región `role="status"` propia que se inserta vacía con el botón, aparte de la del Recuento; el Recuento no se toca y sigue a la vista, el foco se queda en el botón, y pulsarlo otra vez la vuelve a pedir (UX-DR90, UX-DR99, UX-DR100) *(v8.2)*
+**And** la frase se anuncia como todo mensaje de estado: la región se vacía y se escribe en el siguiente fotograma *(v8.2)*
+**And** si el reintento llega, esa región se vacía y el foco va al primer resultado nuevo; el Recuento no se vuelve a anunciar (UX-DR89, UX-DR100) *(v8.2)*
 
 **Given** quedan menos de 30
 **When** se pinta el botón
@@ -7573,8 +7884,8 @@ So that pueda recorrerlas todas sin que la página crezca sola ni pierda por dó
 
 **Given** Playwright local
 **When** corre
-**Then** cubre la segunda tanda con su foco, la última nombrada, la tanda que falla con su reintento y la pulsación doble
-**And** el reflujo a 320 px en las tres condiciones de la 26.9, con «Mostrar 30 más» y con «Mostrar las 12 que faltan» a la vista, sin desplazamiento horizontal, y el barrido WCAG 2.2 AA con el botón puesto (NFR-8, NFR-9, UX-DR103)
+**Then** cubre la segunda tanda con su foco, la última nombrada, la tanda que falla con su reintento —la frase bajo el botón, en su región, y el Recuento sin cambiar con el fallo ni con el reintento— y la pulsación doble *(v8.2)*
+**And** el reflujo a 320 px en las tres condiciones de la 26.9, con «Mostrar 30 más», con «Mostrar las 12 que faltan» y con la frase del fallo bajo el botón *(v8.2)* a la vista, sin desplazamiento horizontal, y el barrido WCAG 2.2 AA con el botón puesto (NFR-8, NFR-9, UX-DR103)
 
 ### Story 27.6: Sin resultados, los ocho Autores con más Citas
 
@@ -7611,8 +7922,9 @@ So that no acabe en un callejón, y menos por un filtro que puse yo.
 
 **Given** la pantalla sin resultados
 **When** se pinta
-**Then** su salida son los Temas, las Colecciones y los ocho destacados, estos en el orden del Directorio de Autores y nunca por recuento, cada nombre en la serif y enlace a su Página de Autor, en la misma pestaña (FR-8, UX-DR62, UX-DR93)
-**And** deja los ocho primeros del alfabeto que da lo construido (UX-DR112), y los destacados siguen siendo chips, como lo construido: UX-DR93 remite a UX-DR62, y UX-DR112 cambia la regla, no el componente
+**Then** su salida son los Temas, las Colecciones y los ocho destacados, estos en el orden del Directorio de Autores y nunca por recuento, cada nombre enlace a su Página de Autor, en la misma pestaña (FR-8, UX-DR62, UX-DR93)
+**And** cada grupo va bajo su `h2`, y los tres en chip, con el trato del Chip de Tema, como lo construido: los destacados son Chips en Source Serif al cuerpo de `{typography.body-md}`, no las Filas de bloque de la portada (UX-DR62, UX-DR93, UX-DR104) *(v8.2)*
+**And** deja los ocho primeros del alfabeto que da lo construido (UX-DR112): cambia la regla, no el componente
 **And** la frase se anuncia por la región `role="status"` sin pintarse dos veces, como dejó la Historia 22.10 (UX-DR99)
 
 **Given** texto y ningún filtro
@@ -7623,6 +7935,7 @@ So that no acabe en un callejón, y menos por un filtro que puse yo.
 **When** no hay resultados
 **Then** la frase nombra los filtros puestos, con la composición del recuento, y no pide menos palabras a quien quizá no escribió ninguna: «No encontramos «escuela» entre las citas de José Martí en Maestros ambulantes.», con «Quitar los filtros» justo encima (FR-8, UX-DR93)
 **And** sustituye, para la búsqueda con filtros, el criterio de la Historia 3.2 «el mensaje sugiere reformular con menos palabras», que sigue cierto sin ellos; la 3.2 no se enmienda en su sitio por esto
+**And** lo tecleado que la frase repite sale como texto, por `textContent`, nunca como HTML: un `?q=` con marcado se lee tal cual, y una prueba de Playwright local lo fija *(v8.2)*
 
 **Given** filtros y ningún texto
 **When** no hay resultados
@@ -7647,7 +7960,7 @@ So that no me quede ante un título y nada debajo.
 
 **Given** las Historias 27.3 y 27.4 terminadas
 **When** empieza esta historia
-**Then** existen el mapa de rótulos (27.3) y la llegada con estado en la dirección, con su aviso del filtro que ya no existe (27.4), que esta historia distingue del índice que no carga; sin eso no empieza
+**Then** existen el mapa de rótulos (27.3) y la llegada con estado en la dirección, con su aviso del filtro que no se puede usar (27.4) *(v8.2)*, que esta historia distingue del índice que no carga; sin eso no empieza
 
 **Given** `/buscar/` sin guion
 **When** se carga
@@ -7655,10 +7968,12 @@ So that no me quede ante un título y nada debajo.
 **And** debajo van `/autores/` y `/obras/` como Resultados de búsqueda de tipo «Directorio», con el rótulo y el título con que salen en Pagefind (26.2)
 **And** con guion, nada de eso se ve
 
-**Given** el guion activo y el paquete de la búsqueda que no llega a ejecutar
+**Given** el guion activo, antes de que arranque el paquete de la búsqueda —también cuando sí va a arrancar, y cuando no llega a ejecutar— *(v8.2)*
 **When** se carga `/buscar/`
-**Then** la página no se queda en un `h1` solo: el HTML inicial lleva, fuera de `<noscript>`, el mensaje del índice que no carga con los dos Directorios, que no depende del paquete (AD-6, NFR-2) (abierta: confirmar el texto para este caso — `bmad-ux`)
-**And** la isla lo retira al arrancar, y con el paquete en marcha no queda nada de él (UX-DR92)
+**Then** la página no se queda en un `h1` solo: el HTML inicial lleva, fuera de `<noscript>` y oculto sin guion, «Si la búsqueda no aparece, todos los autores y todas las obras se leen en sus directorios. Si llegaste desde la página de un autor, de una obra o de un tema, vuelve atrás: allí están sus citas.» y, debajo, los dos Directorios como resultados de tipo «Directorio», sin depender del paquete (AD-6, NFR-2, UX-DR92) *(v8.2)*
+**And** se pinta en cada carga hasta que arranca el paquete, y por eso es condicional: es cierto mientras carga y también si el paquete falla, donde una frase de fallo sería falsa en cada carga normal *(v8.2)*
+**And** la isla lo retira al arrancar, sin dejar hueco, y con el paquete en marcha no queda nada de él (UX-DR92); el salto de maquetación al retirarlo se acepta *(v8.2)*
+**And** «No se ha podido cargar la búsqueda.» se queda para cuando el índice falla al buscar *(v8.2)*
 **And** sin guion no se ve junto al aviso de `<noscript>`: la página dice una sola de las dos cosas
 **And** lo prueba Playwright local cortando el fichero del paquete
 
@@ -7666,7 +7981,7 @@ So that no me quede ante un título y nada debajo.
 **When** se busca o se filtra
 **Then** bajo el campo y en lugar de los resultados va «No se ha podido cargar la búsqueda.», seguida de «Todos los autores y todas las obras se leen en sus directorios. Si llegaste desde la página de un autor, de una obra o de un tema, vuelve atrás: allí están sus citas.» y de los dos Directorios como resultados (FR-7, UX-DR92)
 **And** sale del mismo componente que el aviso sin guion, dentro de un `<template>` (AD-6), y se anuncia por la región del Recuento
-**And** los Directorios que inserta quedan dentro del contenedor con la zona `resultado` (23.7)
+**And** los Directorios de los dos avisos —el del índice que no carga y el de antes de arrancar— quedan fuera del contenedor de la zona `resultado` y exentos de zona por escrito, como las salidas de la búsqueda sin resultados: en `resultado`, SM-13 sumaría salidas sin denominador, porque esa búsqueda no se asienta; la prueba de la 23.7 los nombra entre sus exenciones (AD-13, UX-DR111; decisión de Héctor del 2026-10-22) *(v8.2)*
 
 **Given** el índice que no cargó
 **When** se escribe o se filtra otra vez
@@ -7675,7 +7990,7 @@ So that no me quede ante un título y nada debajo.
 
 **Given** el mapa de rótulos que no llega y una `obra` en la dirección
 **When** se carga
-**Then** no se dice que el filtro ya no existe, porque no se sabe: es el estado del índice que no carga
+**Then** no se dice que el filtro no se puede usar ni que ya no existe, porque no se sabe: es el estado del índice que no carga *(v8.2)*
 
 **Given** una búsqueda que no pudo correr —el índice, sus filtros o el mapa sin cargar—
 **When** se oculta la página o se pulsa una salida
@@ -7683,7 +7998,7 @@ So that no me quede ante un título y nada debajo.
 
 **Given** el grafo de enlaces de la puerta de NFR-5 (26.8)
 **When** se calcula
-**Then** estos enlaces a los Directorios no cuentan, porque ignora `<template>` y `<noscript>` (AD-11)
+**Then** los enlaces a los Directorios del `<template>` y del `<noscript>` no cuentan, porque los ignora (AD-11); los del aviso del HTML inicial, fuera de `<noscript>`, sí cuentan, y no cambian el veredicto, porque la cabecera ya enlaza los dos Directorios *(v8.2)*
 
 ### Story 27.8: Buscar en esta obra, en un Autor o en un tema
 
@@ -7699,6 +8014,8 @@ So that no tenga que pasar sus páginas para encontrar la que recuerdo.
 **And** lo tecleado va en Inter, al cuerpo de `{typography.body-lg}` (UX-DR104)
 **And** el filtro va en campos ocultos, con los identificadores de la dirección: dos en la Obra, `autor` y `obra`; `autor` en el Autor y `tema` en el Tema (NFR-4)
 **And** se envía también con Intro o con la tecla de buscar del teclado del móvil, y en la misma pestaña (UX-DR106)
+**And** no lleva texto de ejemplo: uno de todo el Corpus dentro de «Buscar en José Martí» daría cero resultados (UX-DR58, UX-DR94) *(v8.2)*
+**And** en esa página hay dos «Buscar» con el mismo nombre —el enlace de la cabecera y el botón—, y se acepta: los dos llevan a `/buscar/` (UX-DR58) *(v8.2)*
 
 **Given** dónde va
 **When** se sirve
@@ -7732,11 +8049,12 @@ So that no tenga que pasar sus páginas para encontrar la que recuerdo.
 **When** se sirve
 **Then** es el Campo de la 26.6 con el botón secundario «Buscar» visible, y lo tecleado pasa a Inter al cuerpo de `{typography.body-lg}` (UX-DR58, UX-DR104, UX-DR108, UX-DR112)
 **And** sigue siendo un GET a `/buscar/?q=` sin guion, y su Cita del Día no cambia
+**And** conserva «Por ejemplo: no hay camino», que es de los campos que buscan en todo el Corpus, y sus dos «Buscar» —el de la cabecera y el botón— se aceptan como en «Buscar en…» (UX-DR58, UX-DR108) *(v8.2)*
 **And** la Historia 4.3 no se enmienda, porque ningún criterio decía «sin botón»: cambia lo construido, que se enviaba solo con Intro
 
 **Given** la primera Cita de la página 1 del Tema y de la Obra
 **When** se mide a 360 × 640 sobre lo construido, con el formulario y su botón
-**Then** sigue empezando en la primera pantalla, y la medida se anota (UX-DR94)
+**Then** sigue empezando en la primera pantalla, y la medida se anota, con fecha, en el spec de la historia (UX-DR94) *(v8.2)*
 
 **Given** Playwright local
 **When** corre sobre la rama
@@ -7744,14 +8062,68 @@ So that no tenga que pasar sus páginas para encontrar la que recuerdo.
 
 **Given** «Buscar en…» y el campo del 404
 **When** se marca la medición
-**Then** no llevan zona: es la exención escrita en la v8, que alcanza también al campo de la portada y a las salidas de la búsqueda sin resultados (27.6), porque enviar un formulario no es salida (AD-13) y una zona nueva exigiría otra migración de AD-14; se revisa en la pasada de métricas
+**Then** no llevan zona, porque enviar un formulario no es salida (AD-13) y una zona nueva exigiría otra migración de AD-14: es la exención escrita en la v8, que alcanza también al campo de la portada y a las salidas de la búsqueda sin resultados (27.6), y desde la v8.2 a los Directorios del aviso de `/buscar/` (27.7) *(v8.2)*; se revisa en la pasada de métricas
+
+### Story 27.9: La búsqueda con filtros llega al sitio en vivo *(operativa)* *(v8.2, Héctor, 2026-10-23)*
+
+As a Héctor,
+I want fusionar la Épica 27 comprobada en local y dejar escrita la jornada en que llega al sitio en vivo,
+So that la búsqueda con filtros llegue en vivo sin heredar rojos a la épica siguiente, y SM-6 y SM-13 se lean sabiendo desde cuándo.
+
+**Acceptance Criteria:**
+
+**Given** las Historias 27.1–27.8 terminadas en la rama de la épica
+**When** empieza esta historia
+**Then** la principal está en verde —la reparación de la publicación llegó en vivo el 2026-10-19— y la 24 con la 26 ya está en ella, cerrada por la 26.11; sin eso no empieza
+
+**Given** `src/lib/umbrales.ts` en la rama
+**When** empieza esta historia
+**Then** esta historia declara en él la jornada de llegada en vivo de la Épica 27, antes de las pruebas y sin valor: una constante de despliegue con la forma de las demás —cadena de jornada, `undefined` mientras no llega—, que será la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la 27 al sitio en vivo, nunca la del merge (AD-9) *(v8.2, Héctor, 2026-10-23)*
+**And** si la orden de la línea base de la 23.10 todavía no la lee, esta historia se la da, leída y no copiada, para contar desde ella las ventanas de SM-6 y SM-13, y la prueba de Vitest de las ventanas de la 23.10 fija, con respuestas fijas, que cuentan desde ella cuando tiene valor y que sin valor no cuenta nada *(v8.2)*
+**And** contar desde ella es empezar la primera jornada UTC completa tras la llegada: la jornada de llegada no entra en ninguna ventana y se informa aparte, como «cambió», como en la 23.10, y la misma prueba lo fija *(v8.2)*
+**And** nadie le da valor antes de la llegada: se lo da Héctor, abajo
+
+**Given** la rama al día con la principal y construida con la medición puesta contra un receptor local (`wrangler dev` con D1 local), nunca contra el D1 de producción
+**When** se corren a mano `npm run build`, `astro check` y `npm test` —lo que corre el CI, Vitest incluido— y `npm run test:e2e` entero —Playwright local, contra el sitio que construye `tests/servidor.mjs`, que el CI no corre—
+**Then** pasan todas, no solo las que nombran las historias de la épica (Entorno operativo)
+**And** entre ellas están lo que llama a Pagefind —los recuentos de `filters()`, el orden de `search(null, …)` y la prueba del medio del tipo de la 26.2 con los metadatos nuevos—, el historial de `/buscar/` —«Autor, Tema, resultado, atrás, atrás» con la caché de atrás y adelante y sin ella, y la recarga, sin volver a asentar—, el filtro que no se puede usar, la tanda que falla, `/buscar/` antes de que arranque y con el índice cortado, «Buscar en…», `tests/e2e/ingreso-accesible.spec.ts`, que barre `/buscar/` con la invitación de donación puesta, y el barrido WCAG 2.2 AA y el reflujo a 320 px en sus tres condiciones
+**And** la prueba de la huella de AD-14 pasa sin tocarla: la combinación de filtros de `busqueda` ya es del vocabulario que entró con la 23, y esta épica no despliega receptor
+**And** el resultado queda anotado, con fecha, en el spec de la historia
+
+**Given** `/buscar/` con un Autor y una Obra en la dirección, y una Página de Cita, de la rama construida con lo de la épica puesto y la medición contra un receptor local
+**When** se miden a mano con Lighthouse en perfil móvil 4G, frente a la principal del mismo día y sin puerta automática
+**Then** la principal se mide construida y servida igual, en local y con la medición contra un receptor local: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2, Héctor, 2026-10-24)*
+**And** en la Página de Cita el contenido principal sigue visible en menos de 2,5 s (NFR-7), y de las dos quedan anotadas en el spec de la historia las cifras de la rama y las de la principal
+**And** si la Página de Cita pasa de 2,5 s, o alguna de las dos empeora frente a la principal, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*
+
+**Given** todo lo anterior
+**When** Héctor fusiona
+**Then** la rama entra en la principal en un solo merge, con el CI en verde, antes o después de la 25; ninguna historia de la 27 entra suelta
+**And** el merge, la decisión ante un NFR-7 que pasa de 2,5 s o empeora y la jornada de llegada son actos de Héctor: un agente puede correr las pruebas y Lighthouse en local, contra un receptor local, y anotarlas, nunca fusionar (Entorno operativo) *(v8.2, Héctor, 2026-10-24)*
+
+**Given** ese despliegue
+**When** llega al sitio en vivo
+**Then** Héctor da valor a la jornada de llegada de la 27 en un commit aparte del día en que llega, con la jornada UTC de esa llegada (AD-9) *(v8.2, Héctor, 2026-10-23)*, leída en el trabajo «Desplegar» de Actions y no en el sitio; tras el merge, es lo único que hace esta historia, aparte de cerrar su fila en `sprint-status.yaml` (abajo) *(v8.2, Héctor, 2026-10-24)*
+**And** no se comprueba nada en el sitio en vivo —ni los filtros, ni una dirección con filtros, ni «Buscar en…»—: ya lo cubrió Playwright local sobre la rama, y abrir en vivo `/buscar/` o una página escribiría en el D1 de producción. Siguen siendo dos, y ninguna más, las pasadas que escriben allí a propósito, la 25.3 y la 25.7, con sus jornadas y rutas en la constante de `umbrales.ts` que la orden de la 23.10 descuenta; la 27 no le añade ninguna entrada *(v8.2, Héctor, 2026-10-24)*
+**And** no entra en `CORTES_DE_SM8`: `/buscar/` no emite vista, y la 27 no cambia el instrumento de SM-8
+
+**Given** la orden de la línea base de la 23.10 sobre lo desplegado
+**When** se leen SM-6 y SM-13, fuera de esta historia, que tras el merge solo anota su jornada *(v8.2, Héctor, 2026-10-24)*
+**Then** cuentan sobre búsquedas asentadas, con su combinación de filtros, y su línea base se cierra con el mínimo de búsquedas asentadas (FR-56)
+**And** no se comparan por firma —la búsqueda asentada no lleva tiempo mínimo ni marca, y `/buscar/` no emite vista—, y se leen sabiéndolo, como dice el informe junto a sus cifras
+**And** si la 27 llega antes de su línea base, se juzgan contra su propia serie, por las ventanas de la 23.10 contadas desde la jornada de llegada de la 27, y se dice; nunca contra el 15 % de SM-6, que sigue en suspenso *(v8.2, Héctor, 2026-10-23)*
+**And** la primera ventana empieza la primera jornada UTC completa tras la llegada, y la jornada de llegada se informa aparte, como «cambió», como en la 23.10 *(v8.2)*
+
+**Given** `_bmad-output/implementation-artifacts/sprint-status.yaml`
+**When** se cierra esta historia
+**Then** `epic-27` pasa a hecha con ella, y no antes; la fila de la 27.9 se añade a mano, porque el fichero se mantiene a mano y nunca con el generador de `bmad-sprint-planning`
 
 ## Epic 28: La portada de retorno
 
 Quien vuelve a la portada lee arriba, en una línea, cuántas Citas de cuántos Autores tiene el Corpus y cuántas están cotejadas, y tiene un campo para buscar. Debajo está la Cita de hoy con su obra y las mismas acciones que en su página —copiar, imagen y compartir—, que actúan sobre su Página de Cita y nunca sobre la portada. Siguen seis Obras de seis Autores que cambian con la jornada, todos los Temas, las Colecciones con su criterio para que no parezcan Temas y los ocho Autores con más Citas, cada bloque con su camino al Directorio. Héctor sabe por qué zona sigue quien vuelve.
 
 **FRs covered:** FR-9 *(enmendado)*; FR-3, FR-10, FR-12, FR-18 *(sobre la Cita del Día)*, FR-20 *(la superficie portada)*, FR-35 *(las Obras de la portada)*, FR-55 *(los cierres hacia los Directorios)*, FR-8 *(los mismos ocho)*; NFR-12 y NFR-13 en lo que añade; FR-34, FR-37, FR-52 *(sin trabajo)*; SM-4 de la portada, por zonas *(la juzga)*, SM-C1; SM-11 *(la fecha de su despliegue, si llega antes del juicio)*.
-**Notas de implementación:** rama propia y la última de la v8 en entrar en la principal, después del juicio de SM-11 —desde el 2026-12-05— o con su fecha declarada en `umbrales.ts`, porque quita de la portada el enlace directo a cada Autor y añade Obras; lo que reutiliza de las cuatro anteriores y del presupuesto de AD-6 de la 23 está en la Epic List — v8. La **28.1 va primero**: saca la marca de `main`, fija el orden de los bloques y deja la portada respondiendo solo por su título; la **28.2, la 28.3 y la 28.4**, en cualquier orden; la **28.5**, acto de Héctor, cierra. Conviene tener hecha antes la **21.2**: con 16 aptas la Cita del Día se repite cada 16 días y la portada no se puede juzgar. Fuera de la épica: el botón «Buscar» del campo del 404 (27.8), la publicidad acotada, que no tiene componente, el Kit y el Lote, y el archivo de la Cita del Día, aplazado a propósito. **Preguntas abiertas:** si las 8 semanas de SM-11 se reinician desde el despliegue que repare la publicación, de lo que depende la fecha de la 28 (Héctor, antes del 2026-12-05); los textos de la línea de cifras con el censo vacío y de la portada sin apta (`bmad-ux`); la letra de AD-12 sobre el 404 y sobre la rotación con menos de seis Autores (`bmad-architecture`); el «si rige la congelación» de FR-9 (`bmad-prd`).
+**Notas de implementación:** rama propia y la última de la v8 en entrar en la principal, después del juicio de SM-11 —desde el 2026-12-05— o con `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO`, que `umbrales.ts` ya declara en `undefined` (64b1bf0d) *(v8.2)*, porque quita de la portada el enlace directo a cada Autor y añade Obras; la 28.5 le da valor el día que llega, también si llega tras el juicio *(v8.2, Héctor, 2026-10-23)*. Lo que reutiliza de las cuatro anteriores y del presupuesto de AD-6 de la 23 está en la Epic List — v8. La **28.1 va primero**: saca la marca de `main`, fija el orden de los bloques y deja la portada respondiendo solo por su título; la **28.2, la 28.3 y la 28.4**, en cualquier orden; la **28.5**, operativa, cierra con `npm run test:e2e` entero contra un receptor local, NFR-7 y el merge, que es acto de Héctor *(v8.2)*. Conviene tener hecha antes la **21.2**: con 16 aptas la Cita del Día se repite cada 16 días y la portada no se puede juzgar. Fuera de la épica: el botón «Buscar» del campo del 404 (27.8), la publicidad acotada, que no tiene componente, el Kit y el Lote, y el archivo de la Cita del Día, aplazado a propósito. **Preguntas abiertas:** si las 8 semanas de SM-11 se reinician desde el despliegue que reparó la publicación, el 2026-10-19, de lo que depende la fecha de la 28 (Héctor, antes del 2026-12-05) *(v8.2)*; si la frase de la portada sin apta sale de `DESCRIPCION_DEL_SITIO`, que `EXPERIENCE.md` da por igual y que hoy dice otra cosa (28.2, `bmad-ux`) *(v8.2)*.
 
 ### Story 28.1: La portada abre con las cifras del Corpus y un campo para buscar
 
@@ -7775,7 +8147,7 @@ So that sepa qué es el sitio sin que me lo vendan y busque sin pasar antes por 
 **When** se sirve la portada
 **Then** es el único `h1` de la página: el mismo enlace a `/`, sin cambiar de aspecto, con `aria-current="page"` y dentro de la región de la cabecera, no en `main` (UX-DR56, UX-DR101, variante 4A)
 **And** desaparece el `h1` que `src/pages/index.astro` pinta hoy dentro de `main` (`.marca-portada`): la marca sale una sola vez y la cabecera se ve igual en toda página (UX-DR112)
-**And** la prueba «un único h1» de `tests/e2e/portada.spec.ts` lo busca en la cabecera
+**And** la prueba «un único h1» de `tests/e2e/portada.spec.ts` lo busca en la cabecera (Playwright local)
 
 **Given** «Saltar al contenido.»
 **When** se usa en la portada
@@ -7783,38 +8155,41 @@ So that sepa qué es el sitio sin que me lo vendan y busque sin pasar antes por 
 
 **Given** el Corpus publicado
 **When** el build compone la línea de cifras
-**Then** dice, literal, «{n} citas de {m} autores; {k} cotejadas con el texto de su fuente.» (redacción 1, UX-DR57), con punto de millar: n son las Citas publicadas, m los Autores de `autoresPublicados` y k las que cuenta `esCitaDocumentada` de `src/lib/publicado.ts`
+**Then** mientras quede alguna Cita en el censo de `corpus/pendientes-de-cotejo.yml`, dice, literal, «{n} citas de {m} autores; {k} cotejadas con el texto de su fuente.» (redacción 1, UX-DR57) *(v8.2)*, con punto de millar: n son las Citas publicadas, m los Autores de `autoresPublicados` y k las que cuenta `esCitaDocumentada` de `src/lib/publicado.ts`
 **And** la compone una sola función de `src/lib/publicado.ts` (AD-11), nunca la página ni `tools/lib/cifras.ts`, que cuenta Citas para la bitácora
 **And** va en `{typography.body-md}` y `{colors.on-surface-variant}`, sin cifra destacada, tamaño de reclamo ni color propio: es un hecho del Corpus, no un contador (FR-9)
 
 **Given** el censo de `corpus/pendientes-de-cotejo.yml` con alguna Cita —21 hoy—
 **When** se compone la línea
-**Then** no dice «cada una con su fuente» en ninguna forma, y una prueba de Vitest sobre `dist/` lo fija (FR-9, UX-DR57)
-**And** esa coletilla la puede escribir solo la misma función y solo con el censo vacío (AD-11); esta historia construye esa condición y no la frase, que no dan ni FR-9, ni UX-DR57, ni `EXPERIENCE.md` (abierta: la redacción de la línea con el censo vacío — `bmad-ux`)
+**Then** no dice «cada una» en ninguna forma, y una prueba de Vitest sobre `dist/` lo fija sobre el texto de la línea, no sobre la página: la `description`, el `WebSite` y la frase de la portada sin apta (28.2) dicen «cada una» de otra cosa (FR-9, UX-DR57) *(v8.2)*
+**And** con el censo vacío, la misma función escribe «{n} citas de {m} autores, cada una cotejada con el texto de su fuente.», con «de 1 autor» si hay uno y «1 cita de 1 autor, cotejada con el texto de su fuente.» si hay una sola Cita; conserva el verbo de la redacción 1, que es lo que comprueba el build (AD-23), y una prueba de Vitest fija las tres formas con tres Corpus de prueba de censo vacío —varios Autores, uno solo y una sola Cita— (UX-DR57) *(v8.2)*
+**And** AD-11 dice todavía «cada una con su fuente» para esa coletilla; manda la UX v8.2 *(v8.2)*
 
 **Given** la cifra de cotejadas
 **When** se lee
 **Then** no es SM-C1 ni se presenta como tal (SM-C1, aclaración sin trabajo)
-**And** no depende de la jornada: la línea no va en ningún subárbol `data-jornada`, y la prueba de las dos jornadas de la 26.8 la encuentra idéntica
+**And** no depende de la jornada: la línea no va en ningún subárbol `data-jornada`, y la prueba de las dos jornadas de la 26.8 (Vitest) la encuentra idéntica
 **And** la portada sigue sin `lastmod` en el sitemap y el aviso la anuncia siempre, como decide `tools/lib/cambios.ts` (AD-27): una cifra que cambia con cada Cita no le da fecha
 
 **Given** el campo de búsqueda de la portada
 **When** se sirve
 **Then** es el Campo de búsqueda de la v8 que nació en la 26.6 (UX-DR58), dentro de un formulario GET a `/buscar/` con el campo `q`, sin guion y como el del 404, a 3 × `{spacing.unit}` de la línea de cifras
 **And** lleva su etiqueta visible encima, la del 404 —«Escribe un fragmento, un autor o un tema.», como la dibuja 3A—, en `{typography.caption}` y `{colors.on-surface-variant}` a `{spacing.unit}` del campo; filete inferior de `{components.rule-width}` en `{colors.outline}`, sin caja, sombra ni icono; y lo tecleado, en Inter al cuerpo de `{typography.body-lg}` (UX-DR104)
+**And** lleva el texto de ejemplo «Por ejemplo: no hay camino», como el del 404 (UX-DR58) *(v8.2)*
 **And** debajo, a 2 × `{spacing.unit}`, el botón secundario «Buscar», a su ancho; también se envía con Intro o con la tecla de buscar del teclado del móvil
+**And** con el botón «Buscar», la portada tiene dos «Buscar» con el mismo nombre —el de la cabecera y el botón—, y se acepta: los dos llevan a `/buscar/` (UX-DR58) *(v8.2)*
 **And** al enfocarlo lleva el anillo global, y el filete pasa a `{colors.primary}` y se engruesa: se suma al anillo, nunca lo sustituye
 
 **Given** que escribo en el campo de la portada
 **When** pulso «Buscar»
 **Then** llego a `/buscar/` con lo escrito en `?q=` y la búsqueda arranca con ello; para enviarlo, la portada no ha cargado Pagefind ni ningún guion (AD-6)
 **And** sin JavaScript se envía igual
-**And** enviar el formulario no es salida interna (AD-13), y el campo no lleva zona: la v8 exime por escrito a «Buscar en…», al campo de la portada, al del 404 y a las salidas de la búsqueda sin resultados, porque una zona nueva exigiría otra migración de AD-14; la exención se revisa en la pasada de métricas (UX-DR111)
+**And** enviar el formulario no es salida interna (AD-13), y el campo no lleva zona: está entre los exentos por escrito de la v8 —«Buscar en…», el campo de la portada y el del 404; las salidas de la búsqueda sin resultados, porque una zona nueva exigiría otra migración de AD-14; y los Directorios del aviso de `/buscar/` *(v8.2)*—, que se revisan en la pasada de métricas (UX-DR111)
 
 **Given** el índice de Pagefind
 **When** se construye
 **Then** la portada responde solo por su título, con el tipo `portada` de la 26.2 (AD-17): todo lo que pinta en `main` —la línea de cifras, el campo y los bloques que ya tenía— va en `data-pagefind-ignore="all"` (NFR-13)
-**And** su resultado se sigue titulando con el nombre del sitio aunque el `h1` haya salido de `main`: el armazón declara el título de la portada a Pagefind con `data-pagefind-meta="title:…"` dentro de `data-pagefind-body`, y una prueba de búsqueda lo fija (Playwright local)
+**And** su resultado, rotulado «Portada», se sigue titulando con el nombre del sitio —se lee «Portada: Sabiduría de Bolsillo» (26.2) *(v8.2)*— aunque el `h1` haya salido de `main`: el armazón declara el título de la portada a Pagefind con `data-pagefind-meta="title:…"` dentro de `data-pagefind-body`, y una prueba de búsqueda lo fija (Playwright local); AD-17 dice todavía «rotulada con el nombre del sitio», y manda la UX v8.2 *(v8.2)*
 
 **Given** la línea y el campo encima de la Cita del Día
 **When** se mide lo construido a 360 × 640 (Playwright local)
@@ -7846,13 +8221,13 @@ So that haga desde la portada lo que haría en su página, y lo que comparto lle
 **Given** «Ver esta cita»
 **When** se pinta
 **Then** va en `{typography.body-md}` y `{colors.on-surface}` —pasa de siena a tinta—, subrayado siempre y con zona de toque de 44 px, hacia su Página de Cita en la misma pestaña y con la zona `cita-del-dia` que puso la 23.7 (UX-DR59, UX-DR102, UX-DR105, UX-DR112)
-**And** el paso a tinta es solo de la portada: el «Ver esta cita» del 404 sigue como era, aunque UX-DR105 no lo distinga
+**And** el paso a tinta es solo de la portada: el «Ver esta cita» del 404 sigue en siena, como era (UX-DR105) *(v8.2)*
 
 **Given** el bloque de la Cita del Día
 **When** se construye
 **Then** la Cita, su Tarjeta de Obra y sus acciones son un solo subárbol, con la marca `data-jornada` del componente único de la 26.8 y en `data-pagefind-ignore="all"` (AD-11, AD-12, AD-19)
 **And** buscar en `/buscar/` un fragmento de la Cita del Día devuelve su Página de Cita y no la portada (NFR-13, Playwright local)
-**And** el grafo de NFR-5 sigue sin contarlo, y la prueba de las dos jornadas sigue encontrando que en la portada solo difieren los subárboles `data-jornada`
+**And** el grafo de NFR-5 sigue sin contarlo, y la prueba de las dos jornadas (Vitest) sigue encontrando que en la portada solo difieren los subárboles `data-jornada`
 **And** la canónica de la portada sigue siendo `/`, y la de la Cita, su Página de Cita: es la que lleva todo lo que se copia, descarga o comparte desde aquí (AD-19)
 
 **Given** «Copiar la cita» sobre la Cita del Día
@@ -7866,6 +8241,7 @@ So that haga desde la portada lo que haría en su página, y lo que comparto lle
 **Then** es el Diálogo de Imagen v8 de la 25.2, con la cuadrada, sus tres plantillas y Papel elegida al abrir, y la imagen es la misma que se genera en su Página de Cita, con el dominio al pie (FR-10, UX-DR76): los `data-*` que llegan a `imagen.js` son idénticos en las dos páginas (Vitest sobre `dist/`), y los dos ficheros generados, también (Playwright local)
 **And** el generador se pide con `import()` al pulsar, no antes, y generarla no bloquea la portada (AD-6, FR-10)
 **And** si el generador no llega, el diálogo lo dice y ofrece copiar el texto (NFR-12)
+**And** la Cita que con el pie no cabe en su tramo, los rechazos de la entrega antes de abrir la hoja —que descargan con destino `opaco`— y el `AbortError` se tratan como en el diálogo de la 25.2, sin nada propio de la portada (UX-DR76, UX-DR108, AD-7); la prueba de Playwright local de la 25.2 —la Cita que no cabe, sin reintento, y, con `share` sustituido, los tres rechazos antes de abrir la hoja, `AbortError` e `InvalidStateError`, cada uno con lo que registra— corre también sobre la portada *(v8.2)*
 
 **Given** una Cita del Día de más de `MAX_CARACTERES_IMAGEN` (300) caracteres, en un Corpus de prueba
 **When** se sirve la portada
@@ -7881,7 +8257,7 @@ So that haga desde la portada lo que haría en su página, y lo que comparto lle
 **Given** una copia, una descarga o una compartición hechas en la portada
 **When** se registran
 **Then** son de la portada (FR-9, FR-20): la superficie de un registro es la página donde ocurre (AD-13), así que quedan fuera de SM-5 y SM-7, y la lectura de `tools/` de la 23.10 las informa aparte
-**And** la portada no emite por estos componentes la vista de una Cita: emite solo las vistas que `superficies.ts` le declara, y una prueba sobre `dist/` lo fija (AD-17)
+**And** la portada no emite por estos componentes la vista de una Cita: emite solo las vistas que `superficies.ts` le declara, y una prueba de Vitest sobre `dist/` lo fija (AD-17)
 
 **Given** la Cita del Día con Obra
 **When** se pinta su Tarjeta
@@ -7890,12 +8266,12 @@ So that haga desde la portada lo que haría en su página, y lo que comparto lle
 
 **Given** cualquier Modelo encendido en una copia temporal, nunca en el árbol (AD-21)
 **When** se construye la portada
-**Then** ningún `data-ingreso` cae dentro del subárbol de la Cita del Día: nada se intercala entre la Cita, su Tarjeta de Obra y sus acciones (FR-34, FR-37, AD-20, UX-DR110)
+**Then** ningún `data-ingreso` cae dentro del subárbol de la Cita del Día: nada se intercala entre la Cita, su Tarjeta de Obra y sus acciones (FR-34, FR-37, AD-20, UX-DR110), y una prueba de Vitest sobre esa copia lo fija
 
 **Given** las islas de la portada
 **When** se mide el guion en línea con una Cita del Día que admite Imagen y con las donaciones encendidas (AD-12)
 **Then** son solo las que AD-6 declara —copiar, Imagen y compartir sobre la Cita del Día, con los disparadores de la Historia y de «Más opciones…»— y caben en `MAX_BYTES_DE_GUION`, o el tope sube en el mismo diff, como isla que entra a propósito, nunca porque algo engordó (AD-6)
-**And** lo miden `tests/unit/medicion.test.ts` y `tests/unit/ingreso-construido.test.ts`, y los guiones externos siguen siendo los de la lista cerrada, como pide la Historia 4.1 enmendada
+**And** lo miden `tests/unit/medicion.test.ts` y `tests/unit/ingreso-construido.test.ts` (Vitest), y los guiones externos siguen siendo los de la lista cerrada, como pide la Historia 4.1 enmendada
 **And** ningún guion en línea lleva datos de contenido: el slug, el texto y la Obra van en `data-*`
 
 **Given** la portada a 360 × 640
@@ -7906,13 +8282,15 @@ So that haga desde la portada lo que haría en su página, y lo que comparto lle
 
 **Given** el 404
 **When** se construye
-**Then** su Cita del Día sigue como estaba construida —el Bloque de Cita y «Ver esta cita», este en su trato de antes y no en tinta—, sin Tarjeta de Obra, sin acciones y sin ninguna isla de la portada (UX-DR108, Historia 4.3, `EXPERIENCE.md`: «el 404 la conserva como era»)
-**And** la 26.8 la sigue tratando como a la portada en la prueba de las dos jornadas
+**Then** su Cita del Día sigue como estaba construida —el Bloque de Cita y «Ver esta cita», este en siena, su trato de antes, y no en tinta *(v8.2)*—, sin Tarjeta de Obra, sin acciones y sin ninguna isla de la portada (UX-DR108, Historia 4.3, `EXPERIENCE.md`: «el 404 la conserva como era»)
+**And** la 26.8 la sigue tratando como a la portada en la prueba de las dos jornadas (Vitest)
 
 **Given** un Corpus de prueba sin ninguna Cita apta para portada
 **When** se construye
 **Then** la portada se construye sin el bloque de la Cita del Día —ni su rótulo, ni acciones, ni islas—, y los demás bloques salen igual
-**And** en su lugar conserva lo construido: el párrafo de presentación que `src/pages/index.astro` pinta hoy en ese caso (abierta: el texto de ese estado — `bmad-ux`)
+**And** en lugar de «La cita de hoy», tras el campo, va una sola frase, «Citas en español, cada una en su página, con su autor y, cuando consta, la obra de la que procede.»; cambia lo construido, el párrafo de presentación que `src/pages/index.astro` pinta hoy en ese caso (UX-DR108) *(v8.2)*
+**And** `DESCRIPCION_DEL_SITIO` de `src/lib/marca.ts`, que es también la `description` de la portada, la del `WebSite`, la bajada de su Tarjeta Social y la descripción del canal de `rss.xml`, dice hoy «Citas célebres en español, cada una con su autor y la obra de la que procede, cuando consta.»: `EXPERIENCE.md` la da por igual a la frase y no dice si la frase se escribe aparte o si la constante cambia con ella, y con ella esas cuatro (abierta — `bmad-ux`); la 28.2 no se cierra sin la respuesta *(v8.2)*
+**And** una prueba de Vitest sobre ese Corpus de prueba fija la frase literal *(v8.2)*
 
 ### Story 28.3: Seis Obras que cambian con la jornada
 
@@ -7930,13 +8308,13 @@ So that volver me abra libros que no conocía y el Directorio de Obras me quede 
 **When** se calcula
 **Then** son las Obras de `obrasIndexables` de `src/lib/publicado.ts`, la misma lista que da `rutasIndexables` (AD-11): una Obra que no se indexa —una sola Cita, o el 90 % o más de las de su Autor— nunca sale (FR-52, sin trabajo; UX-DR109)
 **And** si rige la congelación de SM-11 —`CONGELACION_DE_OBRAS` declarada en `umbrales.ts`—, salen del conjunto indexable congelado, porque `obrasIndexables` ya la consulta con `congelacionVigente()` de `src/lib/obras.ts`; la portada no la lee por su cuenta (AD-25)
-**And** el «si rige SM-11» de FR-9 se lee como «si rige la congelación», como dicen AD-12, UX-DR60 y `EXPERIENCE.md`: decide `CONGELACION_DE_OBRAS`, nunca `SM11_VIGENTE`, que hoy es `true` con la congelación en `undefined`; FR-9 lo alinea `bmad-prd` en su próxima pasada
+**And** «mientras la familia Obra esté congelada por SM-11», como dicen FR-9, AD-12, UX-DR60 y `EXPERIENCE.md`, lo decide `CONGELACION_DE_OBRAS`, nunca `SM11_VIGENTE`, que hoy es `true` con la congelación en `undefined` *(v8.2)*
 **And** la congelación no quita el bloque: no alcanza a la navegación
 
 **Given** una jornada
 **When** se eligen sus Obras
 **Then** las elige una función pura que vive junto a `src/lib/citaDelDia.ts` y recibe la jornada de `jornadaDelBuild` —y con ella `FECHA_JORNADA`—, sin averiguarla (AD-5, AD-12)
-**And** recorre en rondas la lista circular de los Autores con Obras en ese conjunto, en el orden del Directorio de Autores (26.1); la ventana de seis avanza seis puestos por jornada, y de cada Autor sale, en su n-ésima aparición, la n-ésima de sus Obras de ese conjunto en el orden de su lista de obras de `obras.ts` —recuento descendente, título y nombre de ficha—, módulo su número (AD-12, AD-25)
+**And** recorre en rondas la lista circular de los Autores con Obras en ese conjunto, en el orden del Directorio de Autores (26.1); la ventana avanza por jornada tantos puestos como Obras salen —seis mientras haya seis Autores— *(v8.2)*, y de cada Autor sale, en su n-ésima aparición, la n-ésima de sus Obras de ese conjunto en el orden de su lista de obras de `obras.ts` —recuento descendente, título y nombre de ficha—, módulo su número (AD-12, AD-25)
 **And** n cuenta las apariciones desde el mismo origen de jornadas que `citaDelDia.ts`
 **And** el seis es un recuento con nombre en `src/lib/umbrales.ts`, nunca un literal de la función ni de la página (AD-9)
 **And** una prueba de Vitest fija la regla sobre un conjunto de prueba con un Autor de una sola Obra y otro de varias: el segundo enseña la siguiente de las suyas en cada vuelta
@@ -7949,7 +8327,13 @@ So that volver me abra libros que no conocía y el Directorio de Obras me quede 
 **Given** menos de seis Autores con Obras en el conjunto
 **When** se compone una jornada
 **Then** sale una Obra de cada uno, sin repetir Autor ni rellenar el hueco (AD-12, UX-DR60)
-**And** la ventana avanza tantos puestos como Obras salen, así que cada jornada cada Autor suma una aparición y enseña la siguiente de sus Obras; la prueba de Vitest de la regla lo fija también con menos de seis Autores. AD-12 dice solo que la ventana de seis avanza seis puestos por jornada; la espina lo alinea en su próxima pasada
+**And** la ventana avanza tantos puestos como Obras salen, así que cada jornada cada Autor suma una aparición y enseña la siguiente de sus Obras; la prueba de Vitest de la regla lo fija también con menos de seis Autores *(v8.2)*
+
+**Given** la Cita del Día y las seis Obras de una jornada
+**When** se componen
+**Then** rotan de forma independiente: la Obra de la Cita del Día puede salir también entre las seis y no se excluye, y una fijación de `corpus/portada.json` no cambia las Obras (AD-12) *(v8.2)*
+**And** una prueba de Vitest fija que una jornada con fijación da las mismas seis que sin ella *(v8.2)*
+**And** la misma prueba fija que una jornada cuya Cita del Día es de una Obra que la regla elige la deja entre las seis *(v8.2)*
 
 **Given** ninguna Obra en el conjunto
 **When** se construye la portada
@@ -7966,17 +8350,17 @@ So that volver me abra libros que no conocía y el Directorio de Obras me quede 
 **Given** el cierre del bloque
 **When** se pinta
 **Then** a 2 × `{spacing.unit}` va «Las {n} obras →», con n las Obras que lista el Directorio de Obras —también las que no se indexan—, hacia `/obras/`: un enlace de texto en `{typography.body-md}` y `{colors.on-surface}`, subrayado siempre, con zona de toque de 44 px y la flecha con `aria-hidden` (FR-55, UX-DR60, UX-DR102, UX-DR105)
-**And** las filas y el cierre llevan la zona `obras-de-portada` (UX-DR111), y la prueba de la 23.7 sobre `dist/` no encuentra en el bloque ningún enlace sin zona
+**And** las filas y el cierre llevan la zona `obras-de-portada` (UX-DR111), y la prueba de Vitest de la 23.7 sobre `dist/` no encuentra en el bloque ningún enlace sin zona
 
 **Given** el bloque
 **When** se construye
 **Then** sus filas van en un subárbol `data-jornada`, con la marca del componente único de la 26.8, y todo el bloque en `data-pagefind-ignore="all"` (AD-12, NFR-13)
-**And** la prueba de las dos jornadas construye el mismo commit en dos jornadas y encuentra los mismos veredictos, con solo ese subárbol distinto
-**And** la comprobación sobre `dist/` de AD-17 exige que todo el conjunto del que rotan —no las seis de hoy— sean rutas sin `noindex`
+**And** la prueba de las dos jornadas (Vitest) construye el mismo commit en dos jornadas y encuentra los mismos veredictos, con solo ese subárbol distinto
+**And** la comprobación sobre `dist/` de AD-17, que corre en el build y por tanto en el CI, exige que todo el conjunto del que rotan —no las seis de hoy— sean rutas sin `noindex`
 
 **Given** la afiliación encendida en una copia temporal con una tienda inventada, nunca en el árbol (AD-21)
 **When** se construye la portada en los dos estados
-**Then** el bloque de Obras sale idéntico y sin ningún enlace comercial (FR-35, AD-20, UX-DR110)
+**Then** el bloque de Obras sale idéntico y sin ningún enlace comercial (FR-35, AD-20, UX-DR110), y una prueba de Vitest sobre las dos construcciones lo fija
 
 **Given** el barrido móvil (Playwright local)
 **When** corre a 320 px con `FECHA_JORNADA` en una jornada en que sale la Obra de título más largo del conjunto
@@ -7984,7 +8368,7 @@ So that volver me abra libros que no conocía y el Directorio de Obras me quede 
 
 **Given** la rotación de la Cita del Día de la Historia 21.1
 **When** se construye esta historia
-**Then** no cambia: las seis Obras toman su patrón de rondas por Autor y su origen de jornadas sin tocarla, y `tests/unit/cita-del-dia.test.ts` sigue en verde
+**Then** no cambia: las seis Obras toman su patrón de rondas por Autor y su origen de jornadas sin tocarla, y `tests/unit/cita-del-dia.test.ts` (Vitest) sigue en verde
 
 ### Story 28.4: Todos los Temas, las Colecciones con su criterio y ocho Autores
 
@@ -8019,7 +8403,8 @@ So that no confunda una Colección con un Tema y llegue a cualquier Autor por su
 **Then** son los ocho de la función única de `src/lib/publicado.ts` que construyó la 27.6, la misma de la búsqueda sin resultados, sin recalcular la regla de FR-8 ni su suelo latinoamericano (AD-11)
 **And** van en el orden del Directorio de Autores —por su clave de orden y, a igualdad, por slug—, nunca por recuento (UX-DR62)
 **And** cada nombre es una Fila de bloque hacia su Página de Autor, en Source Serif al cuerpo de `{typography.headline-sm}`, peso 400, `{colors.on-surface}` y sin subrayado, bajo el `h2` «Autores» y con la zona `autores-de-portada` (UX-DR104, UX-DR105, UX-DR111)
-**And** una prueba sobre `dist/` exige que la portada pinte exactamente los ocho que devuelve la función para ese Corpus, y en ese orden
+**And** la regla de los ocho es una y el componente, el de cada sitio: Fila de bloque en la portada y Chip en la búsqueda sin resultados, que esta historia no toca (UX-DR62) *(v8.2)*
+**And** una prueba de Vitest sobre `dist/` exige que la portada pinte exactamente los ocho que devuelve la función para ese Corpus, y en ese orden
 
 **Given** el cierre del bloque de Autores
 **When** se pinta
@@ -8028,13 +8413,13 @@ So that no confunda una Colección con un Tema y llegue a cualquier Autor por su
 **Given** la lista entera de Autores que la portada pinta hoy —unos 5.900 px—
 **When** se cierra la historia
 **Then** sale de la portada, y todo Autor queda a dos saltos por la cabecera y su Directorio (FR-55, UX-DR112)
-**And** la puerta de NFR-5 de la 26.8 sigue pasando sin ella con el Corpus de hoy, sobre el grafo del `dist/` real y sin los subárboles `data-jornada`, y también la prueba de `tests/e2e/seo.spec.ts` (Playwright local)
+**And** la puerta de NFR-5 de la 26.8, que corre en el build y por tanto en el CI, sigue pasando sin ella con el Corpus de hoy, sobre el grafo del `dist/` real y sin los subárboles `data-jornada`, y también la prueba de `tests/e2e/seo.spec.ts` (Playwright local)
 **And** si una Cita quedara a más de tres saltos —por un Tema que cae bajo su umbral—, el build rompe nombrando la superficie y el Tema, y el tope no se relaja (NFR-5)
 
 **Given** las donaciones encendidas en una copia temporal (AD-21)
 **When** se construye la portada
 **Then** la Invitación de donación va al final de la columna, tras los Autores destacados y su cierre, con su filete, por `modelosEnRuta('/')` y `src/components/Sostener.astro` (FR-34, UX-DR110)
-**And** apagadas, la portada no emite nada de ella —ni contenedor, ni hueco, ni regla CSS— (UX-DR35), y lo fija `tests/unit/ingreso-construido.test.ts`
+**And** apagadas, la portada no emite nada de ella —ni contenedor, ni hueco, ni regla CSS— (UX-DR35), y lo fija `tests/unit/ingreso-construido.test.ts` (Vitest)
 **And** la publicidad acotada sigue sin componente, y esta historia no se lo da (FR-37, sin trabajo)
 
 **Given** los bloques de Temas, Colecciones y Autores
@@ -8057,22 +8442,31 @@ So that el juicio de la familia Obra no lea como suyo un cambio de enlaces inter
 **When** empieza esta historia
 **Then** la portada nueva está entera en la rama de la épica: la línea de cifras y el campo, la Cita del Día con su Tarjeta y sus acciones, las seis Obras, y los Temas, las Colecciones y los ocho Autores; sin eso no empieza
 
-**Given** las Épicas 23, 24 con la 26, 25 y 27 en la principal, y la publicación reparada
+**Given** las Épicas 23, 24 con la 26, 25 y 27 en la principal —la 27, cerrada por la 27.9— *(v8.2)*
 **When** se decide fusionar la rama de la 28
-**Then** es la última de la v8, en un solo merge y con el CI en verde: `npm run build`, `astro check` y `npm test` (Entorno operativo)
-**And** antes se corren a mano sobre la rama las pruebas de Playwright que el CI no corre: `tests/e2e/portada.spec.ts`, `tests/e2e/pagina-404.spec.ts`, el barrido WCAG 2.2 AA y el reflujo a 320 px en tres condiciones, la búsqueda que fija que la portada responde solo por su título, el copiado y la Imagen sobre la Cita del Día, y `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, con las donaciones encendidas en la copia
+**Then** es la última de la v8, en un solo merge y con el CI en verde: `npm run build`, `astro check` y `npm test`, que es Vitest (Entorno operativo)
+**And** antes pasa `npm run test:e2e` entero sobre la rama —Playwright local, que el CI no corre—, construida con la medición puesta contra un receptor local (`wrangler dev` con D1 local), nunca contra el D1 de producción, y entre sus pruebas están `tests/e2e/portada.spec.ts`, `tests/e2e/pagina-404.spec.ts`, el barrido WCAG 2.2 AA y el reflujo a 320 px en tres condiciones, la búsqueda que fija que la portada responde solo por su título, el copiado y la Imagen sobre la Cita del Día, y `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` con las donaciones encendidas en la copia; el resultado queda anotado en el spec de la historia *(v8.2)*
 **And** el 404 conserva su Cita del Día sin Tarjeta de Obra ni acciones
+
+**Given** la portada y una Página de Cita construidas desde la rama con todo lo de la épica puesto y la medición contra un receptor local o un punto final ficticio, nunca el de producción
+**When** se miden a mano con Lighthouse en perfil móvil 4G, sin puerta automática, frente a la principal medida el mismo día y con el mismo perfil
+**Then** en la Página de Cita el contenido principal sigue visible en menos de 2,5 s (NFR-7), y de las dos quedan anotadas en el spec de la historia las cifras de la rama y las de la principal *(v8.2, Héctor, 2026-10-23)*
+**And** la principal se mide construida y servida igual, en local y con la medición contra un receptor local o un punto final ficticio: nunca se mide el sitio en vivo, cuyo guion de medición escribiría en el D1 de producción *(v8.2)*
+**And** si alguna empeora frente a la principal, el merge espera a que Héctor decida *(v8.2, Héctor, 2026-10-23)*
 
 **Given** el juicio de SM-11, que toca a las `SEMANAS_HASTA_JUZGAR_SM11` (8) de `PRIMER_DESPLIEGUE_DE_OBRAS` (2026-10-10): desde el 2026-12-05
 **When** se elige el día del merge
-**Then** se fusiona después del juicio o, si antes, con su fecha declarada en `umbrales.ts`, porque la 28 inclina la comparación al revés: quita de la portada el enlace directo a cada Autor, salvo los ocho destacados, y añade Obras
-**And** sin la credencial de Search Console no hay juicio, y va por fecha declarada
-**And** lo decide Héctor, ningún agente
+**Then** se fusiona después del juicio o, si antes, sabiendo que su llegada quedará declarada en `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO` el día que llegue (abajo) *(v8.2)*, porque la 28 inclina la comparación al revés: quita de la portada el enlace directo a cada Autor, salvo los ocho destacados, y añade Obras
+**And** sin la credencial de Search Console no hay juicio, y va con su jornada declarada al llegar *(v8.2)*
+**And** lo decide Héctor, ningún agente, y lo fusiona Héctor: un agente puede correr las pruebas y Lighthouse y anotarlos, nunca fusionar *(v8.2)*
 
-**Given** la 28 en vivo antes del juicio
-**When** su despliegue llega al sitio
-**Then** su fecha —la del despliegue en vivo, no la del commit— se anota en `umbrales.ts` ese día, en la constante que la reparación de la publicación dejó junto a `PRIMER_DESPLIEGUE_DE_OBRAS`, y la línea SM-11 de `npm run indexacion` la nombra (SM-11, AD-9, AD-24)
-**And** si llega después del juicio, no se anota fecha para la 28
+**Given** el despliegue de la rama de la 28
+**When** llega al sitio en vivo, antes o después del juicio
+**Then** Héctor da valor ese día, en un commit aparte, a `DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO` —`string | undefined`, que añadió 64b1bf0d tras la reparación—: la jornada UTC en que termina el trabajo «Desplegar» de Actions, no la del commit (SM-11, AD-9, AD-24) *(v8.2)*
+**And** si llega antes del juicio, la línea SM-11 de `npm run indexacion` la nombra por `desplieguesQueMuevenSm11`, y SM-11 se juzga sabiéndolo *(v8.2)*
+**And** si llega después, le da valor igual y en la misma constante —un despliegue, una constante (AD-9)—, porque la portada se juzga antes y después de la épica y la orden de la 23.10 corta en esa jornada las ventanas de su serie —ninguna la cruza, y la de llegada se informa aparte, como «cambió»—; si la orden solo cuenta desde una llegada anterior al cierre de la línea base (23.10), esta historia se lo da, como la 25.7 le da la suya *(v8.2, Héctor, 2026-10-23)*
+**And** llegue antes o después del juicio, las ventanas que la orden cuenta desde su llegada —las que siguen al corte o, si llega antes del cierre de la línea base, todas (23.10)— empiezan la primera jornada UTC completa tras la llegada, y la jornada de llegada no entra en ninguna, de antes ni de después: se informa aparte, como «cambió», como en la 23.10 *(v8.2)*
+**And** si `SM11_VIGENTE` se apagó con el juicio, la línea SM-11 ya no sale y no la nombra (`tools/lib/indexacion.ts`), y en ese mismo commit el comentario de la constante en `umbrales.ts` deja de decir «si llega antes del juicio de SM-11» *(v8.2)*
 **And** no abre corte en la serie de SM-8: la 28 no cambia su instrumento, porque la portada emite la misma vista
 
 **Given** la Historia 21.2
@@ -8081,6 +8475,6 @@ So that el juicio de la familia Obra no lea como suyo un cambio de enlaces inter
 
 **Given** la lectura de `tools/` de la 23.10 sobre lo desplegado
 **When** se juzga la épica
-**Then** la continuación de la portada se lee por zona —`cabecera`, `atribucion`, `cita-del-dia`, `tarjeta-de-obra`, `siguiente`, `obras-de-portada`, `chip-de-tema`, `colecciones` y `autores-de-portada`— contra su propia serie, y solo con el mínimo de lecturas que cierra una línea base, nunca contra la meta de SM-4, que sigue en suspenso (SM-4)
+**Then** la continuación de la portada se lee por zona —`cabecera`, `atribucion`, `cita-del-dia`, `tarjeta-de-obra`, `siguiente`, `obras-de-portada`, `chip-de-tema`, `colecciones` y `autores-de-portada`— contra su propia serie, por las ventanas de la 23.10, con la misma definición de ventana que SM-C3 y SM-C5 *(v8.2, Héctor, 2026-10-23)*, solo con el mínimo de lecturas que cierra una línea base y después de que Héctor dé por buena la comparación por firma de esa línea base *(v8.2)*, que anota en `DESPLIEGUE.md` §3 con fecha y métrica *(v8.2, Héctor, 2026-10-23)*; nunca contra la meta de SM-4, que sigue en suspenso (SM-4)
 **And** lo copiado, descargado y compartido desde la portada se informa aparte de SM-5 y SM-7
 **And** lo que se abre en pestaña nueva no se mide, y la cifra se da como cota inferior
