@@ -264,15 +264,30 @@ Hecho en el repositorio:
 - `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
   agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
   Inserta con `rowid` aleatorio (`abs(random())`, Historia 23.12), así que el orden de las
-  filas no es el de llegada y no encadena los eventos de una misma persona. La regla para
-  quien consulte: no ordenar por `rowid` ni leerlo sin `CAST(rowid AS TEXT)`; una prueba
-  vigila la primera mitad en `tools/` —la segunda, todavía no (23.10)— y nada vigila las
-  consultas a mano de esta sección. Mientras el Worker en vivo no se redespliegue con este
-  cambio sigue numerando en orden de llegada, y lo ya escrito sigue así hasta que lo
-  baraje `npm run medicion -- desplegar` (23.2, aún por construir), que corre Héctor en la
-  23.3. El orden importa: la 23.2 baraja solo después de comprobar con su baliza que el
-  receptor en vivo ya inserta con `rowid` aleatorio, porque barajar con el Worker viejo
-  dejaría lo que llegue después otra vez en orden de llegada.
+  filas no es el de llegada y no encadena los eventos de una misma persona —salvo para quien
+  tenga la cuenta: Time Travel de D1 restaura a cualquier minuto de los últimos 7 días, 30
+  en el plan de pago, y con eso la secuencia; es la pérdida que AD-13 nombra y acepta—. La
+  regla para quien consulte: no ordenar por `rowid` ni leerlo sin `CAST(rowid AS TEXT)`,
+  porque por encima de 2^53 JavaScript redondea el entero y un `WHERE rowid = ?` con el
+  valor leído da en otra fila o en ninguna. `tests/unit/orden-de-llegada.test.ts` vigila la
+  primera mitad en `tools/` —la segunda, todavía no (23.10)— y nada vigila las consultas a
+  mano de esta sección. Sin `ORDER BY` las filas salen en un orden cualquiera: un `LIMIT` no
+  da las primeras ni las últimas, y lo reciente se pide por `jornada`; ninguna consulta de
+  esta sección dependía del orden de llegada. Cuesta espacio: un `rowid` aleatorio ocupa
+  unos 9 bytes en vez de 1–3, en la fila y en cada entrada de los dos índices, y las
+  inserciones dispersas llenan menos las páginas. Con 300.000 filas parecidas a las reales,
+  en `sqlite3`, la base ocupó en torno a un 20 % más (49 MB frente a 41), y D1 admite 500 MB
+  por base en el plan gratuito.
+
+  Mientras el Worker en vivo no se redespliegue con este cambio sigue numerando en orden de
+  llegada, y lo ya escrito sigue así hasta que lo baraje `npm run medicion -- desplegar`
+  (23.2, aún por construir), que corre Héctor en la 23.3. El orden importa: la 23.2 baraja
+  solo después de comprobar con su baliza que el receptor en vivo ya inserta con `rowid`
+  aleatorio, porque barajar con el Worker viejo dejaría lo que llegue después otra vez en
+  orden de llegada. Por lo mismo, una vuelta atrás del Worker a un commit anterior a la
+  23.12 vuelve a numerar en orden (`max(rowid)+1`), y lo que llegue entretanto lo baraja el
+  siguiente despliegue que pase la comprobación. Cómo verlo a mano, más abajo: «Comprobar a
+  mano que el Worker desplegado inserta con `rowid` aleatorio».
 - `medicion/esquema.sql` — seis columnas: jornada, evento, ruta, origen, destino y
   consulta. Las tres últimas son de un solo evento cada una —`origen` de la visita que
   viene de una cuenta propia (FR-22), `destino` de una compartición (FR-20), `consulta` de
@@ -427,6 +442,29 @@ npx wrangler d1 execute medicion --remote --command \
 Si la fila no aparece, el Worker desplegado es anterior a la 20.1: redesplegarlo y repetir.
 Una baliza que se quedara sin borrar sale en el recuento por evento de arriba, y la razón
 por jornada la excluye.
+
+**Comprobar a mano que el Worker desplegado inserta con `rowid` aleatorio (Historia 23.12).**
+Hasta que `npm run medicion -- desplegar` (23.2) lo compruebe solo, se ve con dos balizas como
+la de arriba y el `rowid` de sus filas, leído como texto para que no se redondee:
+
+```bash
+for i in 1 2; do
+  curl -s -o /dev/null -X POST \
+    --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' "$MEDICION_ENDPOINT"
+done
+npx wrangler d1 execute medicion --remote --command \
+  "SELECT CAST(rowid AS TEXT) AS fila FROM eventos WHERE ruta='/__comprobacion/'"
+npx wrangler d1 execute medicion --remote --command \
+  "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
+```
+
+Dos números consecutivos dicen que el Worker en vivo numera en orden de llegada —es anterior
+a la 23.12—: redesplegarlo (`cd medicion && npx wrangler deploy`) y repetir. Dos números sin
+relación, de hasta 19 cifras, dicen que ya inserta con `rowid` aleatorio. Si no sale ninguna
+fila, el Worker no guarda nada: o es anterior a la 20.1, como arriba, o D1 rechaza el `INSERT`
+con `rowid` y el `catch` lo calla. En el segundo caso se vuelve al Worker anterior
+(`cd medicion && npx wrangler rollback`), que al menos guarda —en orden de llegada—, y la
+23.12 se revisa antes de redesplegar.
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
