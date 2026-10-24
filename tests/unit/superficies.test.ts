@@ -5,12 +5,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   CRITERIOS_QUE_AÑADE_WCAG_22,
   ETIQUETAS_DEL_BARRIDO,
+  ETIQUETAS_QUE_AXE_NO_CORRE,
   SUPERFICIES,
+  axeLaCorre,
   anunciableEnElSitemap,
   caracterDe,
   consecuenciasDe,
   consecuenciasDelCaracter,
   declararRutasIndexables,
+  elBarridoLaCorre,
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
@@ -18,6 +21,7 @@ import {
   superficieDeclaradaDe,
   superficiesDelBarrido,
   type Caracter,
+  type ReglaDeAxe,
 } from '../../src/lib/superficies.ts';
 import { slug } from '../../src/lib/admision.ts';
 import { EVENTOS } from '../../src/lib/medicion.ts';
@@ -371,23 +375,26 @@ describe('Historia 12.1 — el barrido de accesibilidad se deriva, no se escribe
  *
  * Es la gemela de CI del barrido local, con el patrón de `publicable-y-alcanzable.test.ts`: el
  * CI no ejecuta `npm run test:e2e`, así que lo que el barrido pide a axe, la versión de axe que
- * lo resuelve y que ninguna prueba escriba su propia lista o apague una regla se vigila aquí,
- * sin navegador y sin build. Lo que solo un navegador puede decir —que el sitio pasa, y que
- * `target-size` distingue el solape con el mismo destino del solape con otro— lo dice
- * `tests/e2e/accesibilidad.spec.ts`.
+ * lo resuelve, que ninguna prueba escriba su propia lista, apague una regla o acote el barrido, y
+ * que los motivos de lo que axe no mide sigan siendo ciertos en el código se vigila aquí, sin
+ * navegador y sin build. Lo que solo un navegador puede decir —que el sitio pasa, que el barrido
+ * corrió entero, y que `target-size` distingue el solape con el mismo destino del solape con
+ * otro— lo dice `tests/e2e/accesibilidad.spec.ts`.
  */
 describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', () => {
   const RAIZ = join(import.meta.dirname, '..', '..');
-
-  /** Las reglas tal como las da axe: lo único que se mira de ellas es su id y sus etiquetas. */
-  type Regla = { ruleId: string; tags: string[] };
 
   /**
    * Lo que no casa entre el reparto declarado y las reglas de axe, una frase por desajuste.
    * Es una función y no tres `expect` sueltos para poder darle reglas inventadas y ver que de
    * verdad avisa: una comprobación que solo se ha visto en verde no se sabe si mira algo.
+   *
+   * «Regla de axe» es aquí lo mismo que en el navegador: una que axe corre (`axeLaCorre`). Una
+   * experimental o retirada no corre en el barrido, así que ni responde de un criterio `axe` ni
+   * desmiente un `ux` o un `no-aplica`; si las dos gemelas no contaran lo mismo, esta pediría
+   * reclasificar algo que la otra, que no la ve correr, rechazaría después.
    */
-  function desajustesConAxe(reglas: readonly Regla[]): string[] {
+  function desajustesConAxe(reglas: readonly ReglaDeAxe[]): string[] {
     const desajustes: string[] = [];
     for (const criterio of CRITERIOS_QUE_AÑADE_WCAG_22) {
       const etiqueta = etiquetaDeAxe(criterio.criterio);
@@ -400,12 +407,20 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
         if (!regla.tags.includes(etiqueta)) {
           desajustes.push(`${criterio.criterio}: ${criterio.regla} no lleva la etiqueta ${etiqueta}`);
         }
-        if (!regla.tags.some((t) => (ETIQUETAS_DEL_BARRIDO as readonly string[]).includes(t))) {
-          desajustes.push(`${criterio.criterio}: ${criterio.regla} no lleva ninguna etiqueta del barrido`);
+        if (!axeLaCorre(regla)) {
+          desajustes.push(
+            `${criterio.criterio}: ${criterio.regla} es experimental o está retirada y el barrido no la corre: ` +
+              'o se pide por su nombre, o el criterio deja de ser «axe»',
+          );
+        } else if (!elBarridoLaCorre(regla)) {
+          desajustes.push(
+            `${criterio.criterio}: ${criterio.regla} no lleva ninguna etiqueta de ETIQUETAS_DEL_BARRIDO: ` +
+              'el barrido no la corre hasta que se pida la suya',
+          );
         }
         continue;
       }
-      for (const regla of reglas.filter((r) => r.tags.includes(etiqueta))) {
+      for (const regla of reglas.filter((r) => axeLaCorre(r) && r.tags.includes(etiqueta))) {
         desajustes.push(
           `${criterio.criterio} se declara «${criterio.comprueba}», pero axe ya lo mide con ${regla.ruleId}: ` +
             'hay que reclasificarlo en CRITERIOS_QUE_AÑADE_WCAG_22',
@@ -415,7 +430,7 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     const reglasDeLosCriterios = new Set(
       CRITERIOS_QUE_AÑADE_WCAG_22.flatMap((c) => (c.comprueba === 'axe' ? [c.regla] : [])),
     );
-    for (const regla of reglas) {
+    for (const regla of reglas.filter(axeLaCorre)) {
       const de22 = regla.tags.includes('wcag22a') || regla.tags.includes('wcag22aa');
       if (de22 && !reglasDeLosCriterios.has(regla.ruleId)) {
         desajustes.push(`${regla.ruleId} es de WCAG 2.2 y ningún criterio «axe» de la declaración la cubre`);
@@ -427,40 +442,104 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
   /**
    * Lo que un fichero de `tests/e2e/` hace mal con el barrido, una frase por falta. Mismo motivo
    * para ser función: se le da una fuente inventada y se ve que la encuentra.
+   *
+   * Lee el código, así que no prueba nada por sí sola —lo que el barrido corrió de verdad lo
+   * coteja el navegador con `desviacionDelBarrido`—, pero es lo único que lo vigila en el CI. Mira
+   * cada `new AxeBuilder(…)` como una cadena entera hasta su `.analyze()`, sin cruzar un `;`: así
+   * ve qué pide cada barrido y no solo que el fichero diga bien alguna llamada. Un `AxeBuilder`
+   * guardado en una variable y analizado después no se deja leer así, y por eso es una falta.
    */
   function faltasDelBarrido(fuente: string): string[] {
     const faltas: string[] = [];
-    if (/new\s+AxeBuilder\s*\(/.test(fuente)) {
-      const importa =
-        /import\s*\{[^}]*\bETIQUETAS_DEL_BARRIDO\b[^}]*\}\s*from\s*['"](?:\.\.\/)+src\/lib\/superficies\.ts['"]/.test(
-          fuente,
+    if (/\bAxeBuilder\b/.test(fuente)) {
+      const constructores = fuente.match(/new\s+AxeBuilder\s*\(/g)?.length ?? 0;
+      if (constructores > 0) {
+        const importa =
+          /import\s*\{[^}]*\bETIQUETAS_DEL_BARRIDO\b[^}]*\}\s*from\s*['"](?:\.\.\/)+src\/lib\/superficies\.ts['"]/.test(
+            fuente,
+          );
+        if (!importa) faltas.push('usa AxeBuilder sin importar ETIQUETAS_DEL_BARRIDO de src/lib/superficies.ts');
+      }
+      const cadenas = [...fuente.matchAll(/new\s+AxeBuilder\s*\(([^;]*?)\.analyze\s*\(\s*\)/g)].map((m) => m[1] ?? '');
+      if (cadenas.length !== constructores) {
+        faltas.push(
+          `${constructores - cadenas.length} AxeBuilder fuera de una sola expresión que acabe en .analyze(): ` +
+            'así no se ve qué pide',
         );
-      if (!importa) faltas.push('usa AxeBuilder sin importar ETIQUETAS_DEL_BARRIDO de src/lib/superficies.ts');
+      }
+      for (const cadena of cadenas) {
+        const conEtiquetas = /\.withTags\s*\(/.test(cadena);
+        const conReglas = /\.withRules\s*\(/.test(cadena);
+        const acotada = /\.include\s*\(/.test(cadena);
+        if (conEtiquetas && (conReglas || acotada)) {
+          faltas.push('acota con .withRules( o .include( un barrido por etiquetas: deja de ser el de página entera');
+        } else if (conReglas && !acotada) {
+          faltas.push('llama a .withRules( sobre la página entera: sustituye las etiquetas del barrido');
+        } else if (!conEtiquetas && !conReglas) {
+          faltas.push('un AxeBuilder sin .withTags([...ETIQUETAS_DEL_BARRIDO]) ni .include(…).withRules(…)');
+        }
+      }
+      const llamadas = fuente.match(/\.withTags\s*\(/g)?.length ?? 0;
+      const bienDichas = fuente.match(/\.withTags\s*\(\s*\[\s*\.\.\.\s*ETIQUETAS_DEL_BARRIDO\s*\]\s*\)/g)?.length ?? 0;
+      if (llamadas !== bienDichas) {
+        faltas.push(`${llamadas - bienDichas} llamada(s) a withTags que no pasan [...ETIQUETAS_DEL_BARRIDO]`);
+      }
+      if (/\baxeSource\b/.test(fuente)) faltas.push('inyecta su propia axe con axeSource');
+      for (const prohibida of ['disableRules', 'exclude', 'options']) {
+        if (new RegExp(`\\.${prohibida}\\s*\\(`).test(fuente)) faltas.push(`llama a .${prohibida}(`);
+      }
+      if (/\baxe\s*\.\s*configure\s*\(/.test(fuente)) faltas.push('reconfigura axe con axe.configure(');
     }
-    const llamadas = fuente.match(/\.withTags\s*\(/g)?.length ?? 0;
-    const bienDichas = fuente.match(/\.withTags\s*\(\s*\[\s*\.\.\.\s*ETIQUETAS_DEL_BARRIDO\s*\]\s*\)/g)?.length ?? 0;
-    if (llamadas !== bienDichas) {
-      faltas.push(`${llamadas - bienDichas} llamada(s) a withTags que no pasan [...ETIQUETAS_DEL_BARRIDO]`);
-    }
-    for (const prohibida of ['disableRules', 'exclude', 'options']) {
-      if (new RegExp(`\\.${prohibida}\\s*\\(`).test(fuente)) faltas.push(`llama a .${prohibida}(`);
-    }
-    const literales = fuente.match(/['"]wcag2[^'"]*['"]/g) ?? [];
+    // En todo fichero, use AxeBuilder o no: una lista escrita en una ayuda llega igual a un barrido.
+    // Las comillas invertidas cuentan, así que un comentario nombra las etiquetas sin ellas.
+    const literales = fuente.match(/[`'"]wcag2[^`'"]*[`'"]/g) ?? [];
     if (literales.length > 0) faltas.push(`escribe etiquetas a mano: ${literales.join(', ')}`);
     return faltas;
   }
 
-  /** Todo `.ts` de `tests/e2e/`, también los de `ayuda/`, relativo a la raíz. */
+  /** Todo guion de `tests/e2e/`, también los de `ayuda/` y sea cual sea su extensión, relativo a la raíz. */
   function ficherosDePlaywright(): string[] {
     const ficheros: string[] = [];
     const recorrer = (dir: string) => {
       for (const entrada of readdirSync(dir)) {
         const completa = join(dir, entrada);
         if (statSync(completa).isDirectory()) recorrer(completa);
-        else if (entrada.endsWith('.ts')) ficheros.push(relative(RAIZ, completa));
+        else if (/\.(?:[cm]?[jt]s|[jt]sx)$/.test(entrada)) ficheros.push(relative(RAIZ, completa));
       }
     };
     recorrer(join(RAIZ, 'tests', 'e2e'));
+    return ficheros.sort();
+  }
+
+  /**
+   * Lo que desmentiría en el código el motivo de un criterio que axe no mide. 2.4.11 se da por
+   * cumplido porque nada fijo tapa el foco, 2.5.7 porque nada se arrastra y 3.3.8 no aplica
+   * porque no hay autenticación: los tres se dejan ver en el marcado, el estilo o los guiones, y
+   * el día que aparezcan el título del barrido seguiría diciéndolo sin que nada fallara. De 3.2.6
+   * —ningún mecanismo de ayuda— y 3.3.7 —ningún dato pedido dos veces— no hay señal que se pueda
+   * buscar en el código, y no se finge una.
+   */
+  const SEÑALES_QUE_DESMIENTEN: Record<string, { que: string; patron: RegExp }> = {
+    '2.4.11': { que: 'algo fijo o pegado al desplazar', patron: /position\s*[:=]\s*['"]?(?:fixed|sticky)\b/ },
+    '2.5.7': { que: 'algo que se arrastra', patron: /\bdraggable\b|\b(?:dragstart|pointermove|touchmove)\b/ },
+    '3.3.8': {
+      que: 'un campo de contraseña o de código de acceso',
+      patron: /type\s*=\s*['"]?password\b|\b(?:current-password|new-password|one-time-code)\b/,
+    },
+  };
+
+  /** Lo que se publica o se ejecuta en el navegador: `src/` y `public/`, solo ficheros de texto. */
+  function ficherosDelSitio(): string[] {
+    const ficheros: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const entrada of readdirSync(dir)) {
+        const completa = join(dir, entrada);
+        if (statSync(completa).isDirectory()) recorrer(completa);
+        else if (/\.(?:astro|[cm]?[jt]sx?|css|html)$/.test(entrada)) ficheros.push(relative(RAIZ, completa));
+      }
+    };
+    recorrer(join(RAIZ, 'src'));
+    recorrer(join(RAIZ, 'public'));
     return ficheros.sort();
   }
 
@@ -494,11 +573,26 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     }
   });
 
+  it('distingue lo que axe corre de lo que el barrido corre', () => {
+    expect([...ETIQUETAS_QUE_AXE_NO_CORRE]).toEqual(['experimental', 'deprecated']);
+    expect(axeLaCorre({ ruleId: 'a', tags: ['wcag22a', 'wcag326'] })).toBe(true);
+    expect(elBarridoLaCorre({ ruleId: 'a', tags: ['wcag22a', 'wcag326'] })).toBe(false);
+    expect(elBarridoLaCorre({ ruleId: 'b', tags: ['wcag22aa', 'wcag258'] })).toBe(true);
+    expect(axeLaCorre({ ruleId: 'c', tags: ['wcag2a', 'experimental'] })).toBe(false);
+    expect(elBarridoLaCorre({ ruleId: 'c', tags: ['wcag2a', 'experimental'] })).toBe(false);
+    expect(elBarridoLaCorre({ ruleId: 'd', tags: ['wcag2a', 'deprecated'] })).toBe(false);
+  });
+
   describe('contra las reglas de la axe instalada', () => {
-    const reglas: Regla[] = axe.getRules().map((r) => ({ ruleId: r.ruleId, tags: r.tags }));
+    const reglas: ReglaDeAxe[] = axe.getRules().map((r) => ({ ruleId: r.ruleId, tags: r.tags }));
+    const SUBIR_AXE =
+      'Subir axe es un acto y no una actualización de rutina: el adaptador fija axe-core ~4.14.0, y la ' +
+      '4.14.0 es la que se comprobó que deja de dar target-size en solapes con el mismo destino. Para ' +
+      'subirla: las dos a la vez con npm install, el barrido local de tests/e2e/accesibilidad.spec.ts en ' +
+      'los dos perfiles —con las dos filas del solape— y, si pasa, la versión nueva aquí.';
 
     it('es la 4.14.0, la que ya no da target-size en solapes con el mismo destino', () => {
-      expect(axe.version).toBe('4.14.0');
+      expect(axe.version, SUBIR_AXE).toBe('4.14.0');
     });
 
     it('el reparto declarado casa con sus reglas', () => {
@@ -518,8 +612,33 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
         expect.stringMatching(/^2\.4\.11 se declara «ux», pero axe ya lo mide con foco-tapado: .*reclasificarlo/),
         'foco-tapado es de WCAG 2.2 y ningún criterio «axe» de la declaración la cubre',
       ]);
+      // También la de un criterio A, aunque el barrido no pida su etiqueta y nunca la ejecute.
+      const deNivelA = [...reglas, { ruleId: 'ayuda-movida', tags: ['wcag22a', 'wcag326'] }];
+      expect(desajustesConAxe(deNivelA)).toEqual([
+        expect.stringMatching(/^3\.2\.6 se declara «no-aplica», pero axe ya lo mide con ayuda-movida: /),
+        'ayuda-movida es de WCAG 2.2 y ningún criterio «axe» de la declaración la cubre',
+      ]);
       const sinRegla = reglas.filter((r) => r.ruleId !== 'target-size');
       expect(desajustesConAxe(sinRegla)).toEqual(['2.5.8: la regla target-size no existe en esta axe']);
+    });
+
+    it('una regla experimental no cuenta: ni desmiente un «ux» ni responde de un «axe»', () => {
+      const experimental = [...reglas, { ruleId: 'foco-tapado', tags: ['wcag22aa', 'wcag2411', 'experimental'] }];
+      expect(desajustesConAxe(experimental)).toEqual([]);
+
+      const tamañoExperimental = reglas.map((r) =>
+        r.ruleId === 'target-size' ? { ...r, tags: [...r.tags, 'experimental'] } : r,
+      );
+      expect(desajustesConAxe(tamañoExperimental)).toEqual([
+        expect.stringMatching(/^2\.5\.8: target-size es experimental o está retirada y el barrido no la corre/),
+      ]);
+
+      const tamañoDeNivelA = reglas.map((r) =>
+        r.ruleId === 'target-size' ? { ...r, tags: r.tags.map((t) => (t === 'wcag22aa' ? 'wcag22a' : t)) } : r,
+      );
+      expect(desajustesConAxe(tamañoDeNivelA)).toEqual([
+        expect.stringMatching(/^2\.5\.8: target-size no lleva ninguna etiqueta de ETIQUETAS_DEL_BARRIDO/),
+      ]);
     });
   });
 
@@ -527,6 +646,7 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     const lock = JSON.parse(readFileSync(join(RAIZ, 'package-lock.json'), 'utf8')) as {
       packages: Record<string, { version?: string; devDependencies?: Record<string, string> }>;
     };
+    // Subirla es un acto: el porqué y los pasos, en la prueba de `axe.version`.
     expect(lock.packages['node_modules/axe-core']?.version).toBe('4.14.0');
     expect(lock.packages['node_modules/@axe-core/playwright']?.version).toBe('4.14.0');
     expect(lock.packages['node_modules/@axe-core/playwright/node_modules/axe-core']).toBeUndefined();
@@ -544,8 +664,9 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     expect(paquete.devDependencies['@axe-core/playwright']).toBe('^4.14.0');
   });
 
-  it('ningún fichero de tests/e2e/ escribe su lista ni apaga una regla o un nodo', () => {
+  it('ningún fichero de tests/e2e/ escribe su lista, apaga una regla o un nodo, ni acota el barrido', () => {
     const ficheros = ficherosDePlaywright();
+    expect(ficheros).toContain('tests/e2e/ayuda/barrido.ts');
     const conAxe = ficheros.filter((f) => /new\s+AxeBuilder\s*\(/.test(readFileSync(join(RAIZ, f), 'utf8')));
     // Sin esto, un barrido que dejara de existir dejaría la comprobación en verde por vacía.
     expect(conAxe).toEqual(
@@ -562,7 +683,8 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     const bien = [
       "import { ETIQUETAS_DEL_BARRIDO } from '../../src/lib/superficies.ts';",
       'await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();',
-      "await new AxeBuilder({ page }).include('#x').withRules(['color-contrast']).analyze();",
+      "await new AxeBuilder({ page })\n  .include(`[data-x=\"y\"]`)\n  .withRules(['color-contrast'])\n  .analyze();",
+      "test.describe.configure({ mode: 'serial' });",
     ].join('\n');
     expect(faltasDelBarrido(bien)).toEqual([]);
 
@@ -573,12 +695,78 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     ].join('\n');
     expect(faltasDelBarrido(mal)).toEqual([
       'usa AxeBuilder sin importar ETIQUETAS_DEL_BARRIDO de src/lib/superficies.ts',
+      'un AxeBuilder sin .withTags([...ETIQUETAS_DEL_BARRIDO]) ni .include(…).withRules(…)',
       '1 llamada(s) a withTags que no pasan [...ETIQUETAS_DEL_BARRIDO]',
       'llama a .disableRules(',
       'llama a .exclude(',
       'llama a .options(',
       "escribe etiquetas a mano: 'wcag2a', \"wcag21aa\"",
     ]);
+
+    // Lo que acota un barrido sin apagar nada, que la versión anterior de esta guardia no veía.
+    const acotada = [
+      "import { ETIQUETAS_DEL_BARRIDO } from '../../src/lib/superficies.ts';",
+      "await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).withRules(['region']).analyze();",
+      "await new AxeBuilder({ page }).include('main').withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();",
+      "await new AxeBuilder({ page }).withRules(['region']).analyze();",
+      "await new AxeBuilder({ page, axeSource: fuenteVieja }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();",
+      'const suelto = new AxeBuilder({ page });',
+      "await page.evaluate(() => axe.configure({ rules: [{ id: 'region', enabled: false }] }));",
+      'const etiqueta = `wcag22aa`;',
+    ].join('\n');
+    expect(faltasDelBarrido(acotada)).toEqual([
+      '1 AxeBuilder fuera de una sola expresión que acabe en .analyze(): así no se ve qué pide',
+      'acota con .withRules( o .include( un barrido por etiquetas: deja de ser el de página entera',
+      'acota con .withRules( o .include( un barrido por etiquetas: deja de ser el de página entera',
+      'llama a .withRules( sobre la página entera: sustituye las etiquetas del barrido',
+      'inyecta su propia axe con axeSource',
+      'reconfigura axe con axe.configure(',
+      'escribe etiquetas a mano: `wcag22aa`',
+    ]);
+
+    // Un fichero sin AxeBuilder puede llamar a lo que quiera: `.exclude(` de otra cosa no es un barrido.
+    expect(faltasDelBarrido("const fuera = esquema.exclude('x').options({});")).toEqual([]);
+  });
+
+  it('las señales que desmentirían un motivo se encuentran donde las haya', () => {
+    const muestras: Record<string, string[]> = {
+      '2.4.11': ['.cabecera { position: sticky; top: 0 }', 'el.style.position = "fixed";', "'position:fixed'"],
+      '2.5.7': ['<li draggable="true">', "addEventListener('pointermove', mover)", "on('touchmove', f)"],
+      '3.3.8': ['<input type="password">', '<input autocomplete="one-time-code">', 'autocomplete="new-password"'],
+    };
+    for (const [criterio, textos] of Object.entries(muestras)) {
+      for (const texto of textos) expect(SEÑALES_QUE_DESMIENTEN[criterio]?.patron.test(texto), texto).toBe(true);
+    }
+    for (const inocente of ['position: absolute;', 'position: relative', "'position: absolute'", 'type="search"']) {
+      for (const { patron } of Object.values(SEÑALES_QUE_DESMIENTEN)) expect(patron.test(inocente), inocente).toBe(false);
+    }
+  });
+
+  it('los motivos de lo que axe no mide siguen siendo ciertos en src/ y public/', () => {
+    const vigilados = Object.keys(SEÑALES_QUE_DESMIENTEN);
+    // Solo se vigila lo que se declara cumplido o no aplicable: un criterio «axe» ya lo mide axe.
+    for (const criterio of vigilados) {
+      expect(
+        CRITERIOS_QUE_AÑADE_WCAG_22.find((c) => c.criterio === criterio)?.comprueba,
+        criterio,
+      ).toMatch(/^(ux|no-aplica)$/);
+    }
+
+    const ficheros = ficherosDelSitio();
+    expect(ficheros.length, 'no se encontró ningún fichero del sitio').toBeGreaterThan(0);
+    const desmentidos: string[] = [];
+    for (const fichero of ficheros) {
+      const fuente = readFileSync(join(RAIZ, fichero), 'utf8');
+      for (const criterio of CRITERIOS_QUE_AÑADE_WCAG_22) {
+        const señal = SEÑALES_QUE_DESMIENTEN[criterio.criterio];
+        if (señal === undefined || criterio.comprueba === 'axe' || !señal.patron.test(fuente)) continue;
+        desmentidos.push(
+          `${fichero}: ${señal.que} — ${criterio.criterio} se declara «${criterio.comprueba}» porque ` +
+            `${criterio.motivo}; revisa el motivo en CRITERIOS_QUE_AÑADE_WCAG_22 antes de seguir`,
+        );
+      }
+    }
+    expect(desmentidos).toEqual([]);
   });
 });
 

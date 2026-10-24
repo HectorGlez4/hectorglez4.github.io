@@ -677,12 +677,13 @@ la cabecera de `tests/e2e/ingreso-accesible.spec.ts`; aquí solo hace falta sabe
 se publica una invitación cuya accesibilidad no ha medido nadie.
 
 El barrido es contra **WCAG 2.2 AA**, el suelo declarado (NFR-9), y no contra 2.1: le pide a
-axe las etiquetas que declara `ETIQUETAS_DEL_BARRIDO` en `src/lib/superficies.ts`
-(`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` y `wcag22aa`), las mismas que el barrido del sitio
-(Historia 23.4). La lista no está escrita en la prueba, así que subir el suelo es cambiarla ahí
-y las dos pruebas lo heredan. De lo que añade 2.2, axe solo comprueba 2.5.8 (`target-size`):
-2.4.11 y 2.5.7 los da por cumplidos la UX y 3.2.6, 3.3.7 y 3.3.8 no aplican, con su motivo en
-la misma declaración.
+axe las etiquetas que declara `ETIQUETAS_DEL_BARRIDO` en `src/lib/superficies.ts` —las de 2.1 AA
+y la de 2.2 AA—, las mismas que el barrido del sitio (Historia 23.4). Ninguna de las dos pruebas
+de axe escribe la lista: subir el suelo es cambiarla ahí —y en `tests/unit/superficies.test.ts`,
+que la fija—, y las dos lo heredan. Cada barrido comprueba además en su resultado que corrió
+entero, así que uno acotado a un nodo o a unas reglas no sale en verde. De lo que añade 2.2, axe
+solo comprueba 2.5.8 (`target-size`): 2.4.11 y 2.5.7 los da por cumplidos la UX y 3.2.6, 3.3.7
+y 3.3.8 no aplican, con su motivo en la misma declaración.
 
 Lo que conviene saber antes de teclearla:
 

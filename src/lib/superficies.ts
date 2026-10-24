@@ -642,8 +642,10 @@ export type CriterioDeWcag = {
  * De dónde sale cada motivo: `EXPERIENCE.md`, «Accessibility Floor» —«de lo que añade 2.2, la
  * v8 cumple 2.4.11, 2.5.7 y 2.5.8, y 3.2.6, 3.3.7 y 3.3.8 no aplican»—, y la revisión de
  * accesibilidad de la UX que lo razona: no hay cabecera fija que tape el foco, no hay arrastre,
- * no hay ayuda, entrada repetida ni autenticación. En `src/` no hay `position: fixed` ni
- * `sticky`, `draggable` ni `type="password"`.
+ * no hay ayuda, entrada repetida ni autenticación. Lo que de eso se deja ver en el código —nada
+ * fijo ni pegado al desplazar, nada que se arrastre, ningún campo de contraseña— no se afirma
+ * aquí a mano: lo vigila `tests/unit/superficies.test.ts` sobre `src/` y `public/`, y el día que
+ * aparezca, la prueba pide revisar el motivo antes de que el título del barrido mienta.
  *
  * Por qué 2.4.11 y 2.5.7 son `ux` y no `axe`: la 4.14.0 de axe no tiene ninguna regla con
  * `wcag2411` ni con `wcag257` —que algo se tape o se arrastre depende de cómo se usa la
@@ -715,4 +717,32 @@ export function etiquetaDeAxe(criterio: string): string {
     throw new Error(`«${criterio}» no tiene forma de criterio de WCAG (principio.pauta.criterio).`);
   }
   return `wcag${criterio.replaceAll('.', '')}`;
+}
+
+/**
+ * Las etiquetas con las que axe deja una regla fuera de todo barrido por etiquetas, salvo que se
+ * pidan por su nombre (su `tagExclude` por omisión). Una regla experimental o retirada que lleve
+ * `wcag22aa` **no corre** en el barrido, así que no mide nada aquí: no puede responder de un
+ * criterio `axe` y no desmiente un `ux` ni un `no-aplica`. Sin esto, la prueba de Vitest diría
+ * «reclasifícalo como `axe`» ante una regla experimental y la del navegador, que la ve sin
+ * correr, fallaría después: las dos gemelas tienen que llamar «regla de axe» a lo mismo.
+ */
+export const ETIQUETAS_QUE_AXE_NO_CORRE = ['experimental', 'deprecated'] as const;
+
+/** Una regla tal como la describe axe: lo único que se mira de ella es su id y sus etiquetas. */
+export type ReglaDeAxe = { ruleId: string; tags: readonly string[] };
+
+/** Si axe corre la regla cuando se piden sus etiquetas: no es experimental ni está retirada. */
+export function axeLaCorre(regla: ReglaDeAxe): boolean {
+  return !regla.tags.some((t) => (ETIQUETAS_QUE_AXE_NO_CORRE as readonly string[]).includes(t));
+}
+
+/**
+ * Si el barrido de página entera la corre: axe la corre y lleva una de `ETIQUETAS_DEL_BARRIDO`.
+ * Es el conjunto que el barrido tiene que haber ejecutado, regla por regla, y con el que la
+ * prueba del navegador coteja lo que de verdad corrió: un barrido acotado a un nodo o a unas
+ * reglas sale en verde igual, y solo el conjunto ejecutado lo delata.
+ */
+export function elBarridoLaCorre(regla: ReglaDeAxe): boolean {
+  return axeLaCorre(regla) && regla.tags.some((t) => (ETIQUETAS_DEL_BARRIDO as readonly string[]).includes(t));
 }

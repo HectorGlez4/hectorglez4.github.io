@@ -5,10 +5,12 @@ import { join } from 'node:path';
 import {
   CRITERIOS_QUE_AÑADE_WCAG_22,
   ETIQUETAS_DEL_BARRIDO,
+  axeLaCorre,
   etiquetaDeAxe,
   superficiesDelBarrido,
   type CriterioDeWcag,
 } from '../../src/lib/superficies.ts';
+import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir } from './ayuda/barrido.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -17,6 +19,8 @@ import {
  * etiquetas que se le piden a axe no se escriben aquí: las declara una vez
  * `ETIQUETAS_DEL_BARRIDO` en `src/lib/superficies.ts`, el mismo dueño que dice qué superficies
  * se barren, y `tests/unit/superficies.test.ts` falla si este fichero escribe su propia lista.
+ * Y cada barrido comprueba en su resultado que corrió entero (`desviacionDelBarrido`): lo que
+ * dice la llamada no basta, porque un barrido acotado sale en verde igual.
  */
 
 const dist = join(new URL('../..', import.meta.url).pathname, 'dist');
@@ -163,10 +167,18 @@ test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
   for (const ruta of SUPERFICIES) {
     test(`${ruta} pasa la auditoría automática`, async ({ page }) => {
       await page.goto(ruta);
-      const { violations } = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
 
-      const resumen = violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
       expect(resumen, `${ruta}\n${resumen.join('\n')}`).toEqual([]);
+      // Historia 23.4 — y lo que no es violación tampoco se calla: el barrido corrió entero, y
+      // axe decidió en cada nodo la regla con la que responde de 2.5.8.
+      expect(await desviacionDelBarrido(page, resultado), `${ruta}: el barrido no corrió lo que pide`).toEqual({
+        faltan: [],
+        sobran: [],
+      });
+      const dudas = sinDecidir(resultado);
+      expect(dudas, `${ruta}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
     });
   }
 });
@@ -174,16 +186,18 @@ test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
 /**
  * Historia 23.4 — lo que añade WCAG 2.2 AA, criterio por criterio.
  *
- * Que el barrido pida `wcag22aa` no dice nada de los seis criterios que trae 2.2: axe solo
- * tiene regla para uno. El reparto —quién responde de cada criterio— lo declara
+ * Que el barrido pida la etiqueta de 2.2 AA no dice nada de los seis criterios que trae 2.2:
+ * axe solo tiene regla para uno. El reparto —quién responde de cada criterio— lo declara
  * `CRITERIOS_QUE_AÑADE_WCAG_22` en `src/lib/superficies.ts`, y aquí cada criterio es una prueba
  * cuyo título lo enuncia, para que el informe de Playwright diga qué se comprobó y qué no sin
- * abrir ningún fichero. Cada una corre el barrido de verdad sobre la portada y mira las reglas
- * que se **ejecutaron** —pasadas, violadas, incompletas o sin aplicar—, no las que axe dice
- * tener: la regla de un criterio `axe` tiene que haber corrido con su etiqueta, y ninguna regla
- * ejecutada puede llevar la de un criterio que se da por cumplido o que no aplica. Si un día axe
- * añade regla para 2.4.11, esto falla y pide reclasificarlo, en vez de seguir diciendo que nadie
- * lo mide mientras alguien ya lo mide.
+ * abrir ningún fichero. Cada una corre el barrido de verdad sobre la portada. La regla de un
+ * criterio `axe` tiene que haber **aplicado** con su etiqueta —pasar o fallar en algún nodo; sin
+ * aplicar no habría medido nada—. Y ninguna regla que axe corra puede llevar la etiqueta de un
+ * criterio que se da por cumplido o que no aplica: no solo entre las que el barrido pide, sino
+ * entre todas las que conoce la axe de la página, porque una regla de 3.2.6 llevaría la etiqueta
+ * de 2.2 A, que el barrido no pide, y entre las ejecutadas no saldría nunca. Si un día axe añade
+ * regla para 2.4.11, esto falla y pide reclasificarlo, en vez de seguir diciendo que nadie lo
+ * mide mientras alguien ya lo mide. Las experimentales no cuentan (`axeLaCorre`): no corren.
  *
  * Su gemela de CI está en `tests/unit/superficies.test.ts`, contra `axe.getRules()`: el CI no
  * corre Playwright.
@@ -223,20 +237,19 @@ test.describe('Historia 23.4 — lo que añade WCAG 2.2 AA', () => {
     test(enunciado(criterio), async ({ page }) => {
       await page.goto('/');
       const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
-      const ejecutadas = [
-        ...resultado.passes,
-        ...resultado.violations,
-        ...resultado.incomplete,
-        ...resultado.inapplicable,
-      ];
-      expect(ejecutadas.length, 'el barrido no ejecutó ninguna regla').toBeGreaterThan(0);
-
       const etiqueta = etiquetaDeAxe(criterio.criterio);
-      const conSuEtiqueta = ejecutadas.filter((r) => r.tags.includes(etiqueta)).map((r) => r.id);
 
       if (criterio.comprueba === 'axe') {
-        expect(conSuEtiqueta, `${criterio.regla} no corrió con la etiqueta ${etiqueta}`).toContain(criterio.regla);
+        const aplicadas = [...resultado.passes, ...resultado.violations];
+        expect(aplicadas.length, 'el barrido no aplicó ninguna regla').toBeGreaterThan(0);
+        const conSuEtiqueta = aplicadas.filter((r) => r.tags.includes(etiqueta)).map((r) => r.id);
+        expect(conSuEtiqueta, `${criterio.regla} no aplicó en la portada con la etiqueta ${etiqueta}`).toContain(
+          criterio.regla,
+        );
       } else {
+        const conocidas = await reglasDeLaPagina(page);
+        expect(conocidas.length, 'la axe de la página no conoce ninguna regla').toBeGreaterThan(0);
+        const conSuEtiqueta = conocidas.filter((r) => axeLaCorre(r) && r.tags.includes(etiqueta)).map((r) => r.ruleId);
         expect(
           conSuEtiqueta,
           `axe ya tiene regla para ${criterio.criterio}: hay que reclasificarlo en CRITERIOS_QUE_AÑADE_WCAG_22`,
@@ -267,10 +280,13 @@ test.describe('Historia 23.4 — lo que añade WCAG 2.2 AA', () => {
 
       if (caso.violacion) {
         // La regla está encendida y discrimina: da la violación, y en el primer enlace, que es
-        // el que el segundo tapa.
+        // el que el segundo tapa; el segundo, entero a la vista, pasa.
         expect(violadas).toHaveLength(1);
-        const primero = await page.locator(violadas[0]).evaluate((n) => n === document.querySelector('a'));
+        const primero = await page.locator(violadas[0]).evaluate((n) => n === document.querySelectorAll('a')[0]);
         expect(primero, `la violación cae en ${violadas[0]} y no en el primer enlace`).toBe(true);
+        expect(pasadas).toHaveLength(1);
+        const segundo = await page.locator(pasadas[0]).evaluate((n) => n === document.querySelectorAll('a')[1]);
+        expect(segundo, `pasa ${pasadas[0]} y no el segundo enlace`).toBe(true);
       } else {
         expect(violadas, 'con la 4.12 de axe el mismo destino daba violación').toEqual([]);
         // Y no porque la regla no corriera: los dos enlaces pasan.

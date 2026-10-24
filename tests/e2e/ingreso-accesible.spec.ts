@@ -18,6 +18,7 @@ import {
   TIENDA_DE_PRUEBA,
   paginaEnDist,
 } from '../unit/ayuda/construir.js';
+import { desviacionDelBarrido, sinDecidir } from './ayuda/barrido.ts';
 
 /**
  * Historia 14.2 — la invitación a sostener el sitio, barrida **con el Modelo encendido**.
@@ -36,9 +37,9 @@ import {
  * proyecto temporal, y se construye eso. En el repositorio `encendido` sigue en `false`.
  *
  * **Por qué esto no puede ser prueba unitaria.** `vitest.config.ts` corre en `environment:
- * 'node'` y la única dependencia de axe del proyecto es `@axe-core/playwright`: la altura
- * rendida, el anillo de foco calculado y el contraste real solo existen dentro de un
- * navegador. Este fichero es el único sitio del repositorio donde coinciden la invitación
+ * 'node'`, donde axe solo sirve para leer sus reglas —`axe-core` es dependencia directa desde
+ * la Historia 23.4 para eso, no para medir una página—: la altura rendida, el anillo de foco
+ * calculado y el contraste real solo existen dentro de un navegador. Este fichero es el único sitio del repositorio donde coinciden la invitación
  * encendida y un navegador.
  *
  * Lo que **no** se repite aquí: de qué superficies sale la invitación y a dónde lleva. Eso lo
@@ -329,21 +330,24 @@ test.describe('la invitación encendida pasa el barrido de accesibilidad', () =>
       await irA(page, superficie.ruta);
       // Contra lo mismo que el barrido del sitio: la lista la declara `src/lib/superficies.ts`
       // (Historia 23.4), y con ella WCAG 2.2 AA.
-      const { violations } = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
 
       // Una línea por nodo y no por regla: el selector es lo que dice si lo que falla es la
       // invitación o algo que ya estaba, y sin él el fallo obliga a reproducirlo a mano.
-      const resumen = violations.flatMap((v) =>
+      const resumen = resultado.violations.flatMap((v) =>
         v.nodes.map((n) => `${v.id}: ${v.help} — ${n.target.join(' ')}`),
       );
       expect(resumen, `${superficie.nombre}\n${resumen.join('\n')}`).toEqual([]);
+      // Y corrió entero, y decidió la 2.5.8 en cada nodo (Historia 23.4, `ayuda/barrido.ts`).
+      expect(await desviacionDelBarrido(page, resultado), superficie.nombre).toEqual({ faltan: [], sobran: [] });
+      expect(sinDecidir(resultado), superficie.nombre).toEqual([]);
     });
   }
 
   test('el contraste de la invitación pasa la regla de axe en las tres', async ({ page }) => {
     /*
      * Acotado al bloque marcado y a la regla del contraste. El barrido de arriba ya la
-     * incluye —`color-contrast` es `wcag2aa`—, pero mira la página entera: si algún día
+     * incluye —`color-contrast` es de WCAG 2.0 AA—, pero mira la página entera: si algún día
      * fallara ahí, el fallo no distinguiría el texto apagado de la invitación
      * (`--tinta-apagada`, 7,4:1 sobre el papel) de cualquier otra cosa de la página. Esta
      * dice el nombre de lo que se rompió.
@@ -560,11 +564,13 @@ test.describe('las ediciones en venta encendidas pasan el barrido de accesibilid
 
   test('la Página de Obra pasa la auditoría automática', async ({ page }) => {
     await irA(page, OBRA);
-    const { violations } = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
-    const resumen = violations.flatMap((v) =>
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.flatMap((v) =>
       v.nodes.map((n) => `${v.id}: ${v.help} — ${n.target.join(' ')}`),
     );
     expect(resumen, resumen.join('\n')).toEqual([]);
+    expect(await desviacionDelBarrido(page, resultado)).toEqual({ faltan: [], sobran: [] });
+    expect(sinDecidir(resultado)).toEqual([]);
   });
 
   test('cada enlace dice a dónde va, que abre pestaña nueva y que es de afiliado', async ({ page }) => {
