@@ -138,7 +138,7 @@ describe('Historia 23.12 — el INSERT del Worker da un rowid aleatorio', () => 
 });
 
 describe('Historia 23.12 — el adaptador, con un D1 falso', () => {
-  it('una baliza válida envía el INSERT declarado, enlaza los seis campos y lo ejecuta una vez', async () => {
+  it('una baliza válida envía el INSERT declarado, enlaza los doce campos y lo ejecuta una vez', async () => {
     const { entorno, llamadas } = d1QueApunta();
     const antes = jornadaDe(new Date());
     const respuesta = await worker.fetch(
@@ -153,14 +153,14 @@ describe('Historia 23.12 — el adaptador, con un D1 falso', () => {
     expect(llamadas.sql).toEqual(escrituras);
     // Preparado y enlazado no es escrito: sin `run()` no llega nada a D1.
     expect(llamadas.ejecutadas).toBe(1);
-    // El `rowid` no viaja por `bind`: seis valores, los del `Registro`, en el orden de
-    // las columnas del esquema.
+    // El `rowid` no viaja por `bind`: doce valores desde la Historia 23.2, los del `Registro`,
+    // en el orden de las columnas del esquema; las seis de la migración 0001, nulas aquí.
     expect(llamadas.valores).toHaveLength(1);
     const [jornada, ...resto] = llamadas.valores[0];
     expect(jornada).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     // Sin depender de la medianoche UTC: la jornada es la de antes o la de después.
     expect([antes, despues]).toContain(jornada);
-    expect(resto).toEqual(['copiado', '/cita/una', null, null, null]);
+    expect(resto).toEqual(['copiado', '/cita/una', null, null, null, null, null, null, null, null, null]);
 
     expect(respuesta.status).toBe(204);
     expect(respuesta.body).toBeNull();
@@ -523,7 +523,8 @@ describe('Historia 23.12 — ninguna consulta de tools/ ordena por rowid', () =>
 
     // Un barrido vacío pasaría siempre: se exige que vea lo que hoy habla del receptor y que
     // saque textos de ahí, sin depender de lo que digan.
-    for (const conocido of ['tools/ingreso.ts', 'tools/lib/ingresos.ts']) {
+    // Desde la 23.2, también la orden que despliega el receptor, que lee y baraja el `rowid`.
+    for (const conocido of ['tools/ingreso.ts', 'tools/lib/ingresos.ts', 'tools/medicion.ts', 'tools/lib/medicion.ts']) {
       expect(barridos).toContain(conocido);
       expect(textosSql(conocido, fuentes.get(conocido) ?? '').length, conocido).toBeGreaterThan(0);
     }

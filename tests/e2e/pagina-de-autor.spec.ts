@@ -103,9 +103,9 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
      * declarados»; la 17.4 conserva su criterio y solo cambia su prueba. Al cargar, a lo sumo el
      * de medición, que es lo único de la lista cerrada de `src/lib/guiones.ts` que se pide sin
      * tocar nada. Contra este
-     * servidor, construido sin punto final, no se pide ninguno; cuando se construya con él (23.2),
-     * esta misma prueba juzga el fichero. Con punto final lo juzga ya `tests/e2e/receptor.spec.ts`,
-     * que exige además que sea exactamente uno.
+     * servidor, construido desde la 23.2 con el punto final del receptor local
+     * (`playwright.config.ts`), se pide el fichero de medición, y esta prueba lo juzga.
+     * `tests/e2e/receptor.spec.ts` exige además que sea exactamente uno.
      */
     const pedidos = apuntarGuiones(page, baseURL!);
     await page.goto(MACHADO, { waitUntil: 'networkidle' });

@@ -7,6 +7,7 @@ import { parseSync } from 'vite';
 import {
   ARRANQUE_DE_MEDICION,
   EVENTOS,
+  EVENTOS_DEL_GUION,
   EVENTOS_VALIDOS,
   esEventoValido,
   guionDeMedicion,
@@ -107,16 +108,22 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
     /*
      * La lista crece solo cuando una historia lo decide, y que haya que tocar esta prueba
      * para ampliarla es el punto: los cuatro primeros son de la v1 y los dos de
-     * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1.
+     * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1. La 23.2 trae
+     * los cuatro de la v8 —`lectura`, `salida-interna`, `busqueda` y `vista-de-obra`— al
+     * vocabulario, antes de que nadie los envíe.
      */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
+        'busqueda',
         'busqueda-sin-resultados',
         'comparticion-de-enlace',
         'comparticion-de-imagen',
         'copiado',
         'descarga-de-imagen',
+        'lectura',
+        'salida-interna',
         'vista-de-cita',
+        'vista-de-obra',
         'vista-de-superficie',
       ].sort(),
     );
@@ -131,15 +138,17 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
   it('el guion descarta en cliente cualquier evento fuera del conjunto', () => {
     // Añadir uno exige modificar el módulo, no la superficie que lo emite: una isla que
     // invente un nombre no consigue emitirlo. Se comprueba **ejecutándolo**, no leyendo
-    // su texto: una prueba sobre la forma del guion se rompe al compactarlo y no dice
-    // nada sobre lo que hace.
+    // su texto: una prueba sobre la forma del guion se rompe al compactarla y no dice
+    // nada sobre lo que hace. Desde la 23.2 el guion emite solo los eventos que ya sabe
+    // producir: los cuatro de la v8 esperan a sus historias (23.5 a 23.9) y se descartan igual.
     const { emitir, balizas } = medicionEnUnSandbox();
 
     for (const evento of EVENTOS_VALIDOS) emitir(evento);
-    expect(balizas().map((b) => b.evento)).toEqual([...EVENTOS_VALIDOS]);
+    expect(balizas().map((b) => b.evento)).toEqual([...EVENTOS_DEL_GUION]);
+    expect(EVENTOS_DEL_GUION.length).toBeLessThan(EVENTOS_VALIDOS.length);
 
-    for (const impostor of ['pageview', 'clic', 'VISTA-DE-CITA', '']) emitir(impostor);
-    expect(balizas()).toHaveLength(EVENTOS_VALIDOS.length);
+    for (const impostor of ['pageview', 'clic', 'VISTA-DE-CITA', '', 'toString', 'hasOwnProperty']) emitir(impostor);
+    expect(balizas()).toHaveLength(EVENTOS_DEL_GUION.length);
   });
 });
 
@@ -160,13 +169,15 @@ describe('Historia 2.9 — sin cookies y sin identificar al visitante', () => {
   });
 
   it('lo que viaja es el evento, la ruta y nada más', () => {
-    const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una' });
-    emitir(EVENTOS.copiado);
+    // Desde la 23.2, el copiado no lleva ni la Marca de origen ni campos que no declara: solo
+    // el evento y la ruta. Lo que lleva cada evento lo fija `tests/unit/vocabulario.test.ts`.
+    const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una', busqueda: '?de=instagram' });
+    emitir(EVENTOS.copiado, 'visitante-7f3a', 'telegram');
 
     const [baliza] = balizas();
     expect(baliza.evento).toBe(EVENTOS.copiado);
     expect(baliza.ruta).toBe('/cita/una');
-    expect(Object.keys(baliza).sort()).toEqual(['datos', 'destino', 'evento', 'origen', 'ruta']);
+    expect(Object.keys(baliza).sort()).toEqual(['evento', 'ruta']);
     // Ni referente, ni agente de usuario, ni pantalla, ni zona horaria.
     expect(guion).not.toMatch(/referrer|userAgent|screen\.|timeZone|language/);
   });
@@ -312,7 +323,8 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeSuperficie, EVENTOS.copiado]);
   });
 
-  it('la marca de origen viaja con la vista y con lo encolado', () => {
+  it('la marca de origen viaja con la vista, también tras la cola, y no con el copiado', () => {
+    // Historia 23.2 (AD-13): las marcas viajan solo con las vistas y la lectura.
     const { emitir, cargar, balizas } = medicionEnUnSandbox({
       busqueda: '?de=instagram',
       vistas: EVENTOS.vistaDeCita,
@@ -320,7 +332,10 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     });
     emitir(EVENTOS.copiado);
     cargar();
-    expect(balizas().map((b) => b.origen)).toEqual(['instagram', 'instagram']);
+    const [vista, copiado] = balizas();
+    expect(vista).toMatchObject({ evento: EVENTOS.vistaDeCita, origen: 'instagram' });
+    expect(copiado.evento).toBe(EVENTOS.copiado);
+    expect(copiado).not.toHaveProperty('origen');
   });
 });
 
@@ -635,8 +650,9 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
   );
 
   it('ninguna superficie escribe el nombre de una vista como cadena suelta', () => {
+    // El vocabulario es el único sitio donde se escriben, desde la Historia 23.2.
     const suelta = /["'`]vista-de-(cita|superficie)["'`]/;
-    for (const fuente of fuentesDeSrc()) {
+    for (const fuente of fuentesDeSrc().filter((f) => !f.endsWith('lib/vocabulario.ts'))) {
       expect(readFileSync(fuente, 'utf8'), fuente).not.toMatch(suelta);
     }
   });

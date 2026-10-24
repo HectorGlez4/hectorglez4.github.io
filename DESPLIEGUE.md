@@ -354,9 +354,12 @@ plataforma es reescribir `medicion/worker.ts`, unas treinta líneas.
 Hecho en el repositorio:
 
 - `medicion/receptor.ts` — decide qué se registra. Importa el vocabulario cerrado de
-  `src/lib/medicion.ts` en vez de copiarlo: copiado, un evento nuevo en el sitio se
-  descartaría en silencio aquí y el fallo aparecería como «esa métrica está a cero»
-  semanas más tarde.
+  `src/lib/vocabulario.ts` en vez de copiarlo (desde la Historia 23.2; antes, de
+  `src/lib/medicion.ts`): copiado, un evento nuevo en el sitio se descartaría en silencio aquí
+  y el fallo aparecería como «esa métrica está a cero» semanas más tarde. Cada campo se guarda
+  solo en los eventos que lo declaran y solo si es de su conjunto; fuera de eso se descarta el
+  campo, nunca el evento. La Marca de origen se sigue guardando en todo evento, como la envía
+  el guion de la v7.1, para que el receptor nuevo no pierda nada del sitio viejo.
 - `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
   agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
   Inserta con `rowid` aleatorio (`abs(random())`, Historia 23.12), así que el orden de las
@@ -390,21 +393,34 @@ Hecho en el repositorio:
 
   Mientras el Worker en vivo no se redespliegue con este cambio sigue numerando en orden de
   llegada, y lo ya escrito sigue así hasta que lo baraje `npm run medicion -- desplegar`
-  (23.2, aún por construir), que corre Héctor en la 23.3, desde la rama de la Épica 23: el
+  (construida en la 23.2, abajo), que corre Héctor en la 23.3, desde la rama de la Épica 23: el
   receptor con este cambio no se despliega antes. El orden importa: la 23.2 baraja solo
   después de comprobar con su baliza que el receptor en vivo ya inserta con `rowid`
   aleatorio, porque barajar con el Worker viejo dejaría lo que llegue después otra vez en
   orden de llegada. Por lo mismo, una vuelta atrás del Worker a una versión anterior a la
   23.12 vuelve a numerar en orden (`max(rowid)+1`), y lo que llegue entretanto lo baraja el
-  siguiente despliegue que pase la comprobación. Cómo verlo a mano, más abajo: «Comprobar a
-  mano si el Worker en vivo inserta con `rowid` aleatorio».
-- `medicion/esquema.sql` — seis columnas: jornada, evento, ruta, origen, destino y
-  consulta. Las tres últimas son de un solo evento cada una —`origen` de la visita que
-  viene de una cuenta propia (FR-22), `destino` de una compartición (FR-20), `consulta` de
-  una búsqueda sin resultados (FR-8)— y llegan `NULL` en el resto. No hay columna de
-  visitante porque no hay visitante que guardar, y la marca de tiempo es la jornada y no el
-  instante: un instante al milisegundo junto a una ruta poco visitada es, en la práctica,
-  un identificador.
+  siguiente despliegue que pase la comprobación. Lo comprueba `npm run medicion -- comprobar`,
+  más abajo.
+- `medicion/migrations/` — el esquema, en migraciones versionadas y solo aditivas (AD-14,
+  Historia 23.2), que `migrations_dir` de `wrangler.toml` señala. La `0000` es la tabla de
+  producción tal cual —seis columnas: jornada, evento, ruta, origen, destino y consulta, y
+  sus dos índices—, toda con `IF NOT EXISTS`: en la base de producción no hace nada. La `0001`
+  añade seis columnas, solo con `ALTER TABLE … ADD COLUMN`: `via`, `zona`, `tramo`,
+  `filtros`, `indexable` y `primera`. Las migraciones nunca se revierten.
+- `medicion/esquema.sql` — el estado acumulado de las migraciones, de **referencia**: doce
+  columnas. Ninguna base se crea desde él. Cada columna después de `ruta` es de unos eventos
+  —`origen` y `via`, las Marcas de origen y de difusión de las vistas y la lectura (FR-22);
+  `destino` de una compartición o de la descarga que impuso el navegador (FR-20); `consulta`
+  de una búsqueda sin resultados (FR-8); `zona` de una salida interna; `tramo` y `filtros`
+  de una búsqueda asentada; `indexable` de una vista de Obra; `primera` de una acción— y llega
+  `NULL` en el resto. Ninguna lleva `CHECK`, ni JSON, ni hora: el conjunto de cada una lo
+  coteja el receptor desde `src/lib/vocabulario.ts`. No hay columna de visitante porque no hay
+  visitante que guardar, y la marca de tiempo es la jornada y no el instante: un instante al
+  milisegundo junto a una ruta poco visitada es, en la práctica, un identificador.
+- `medicion/huella-del-vocabulario.json` — la huella del vocabulario desplegado. La escribe
+  solo `npm run medicion -- desplegar`, y `npm test` falla si no casa con
+  `src/lib/vocabulario.ts`: así el sitio no se despliega con un vocabulario que el receptor en
+  vivo no conoce (AD-14). Nunca se escribe a mano.
 - `[observability] enabled = false` en `wrangler.toml`. El registro de acceso de la
   plataforma guarda IP y agente de usuario; apagarlo es parte de la propiedad, no una
   opción de rendimiento.
@@ -413,11 +429,17 @@ A mano, una vez (necesita una cuenta de Cloudflare):
 
 ```bash
 cd medicion
-npx wrangler login
-npx wrangler d1 create medicion            # copia el database_id a wrangler.toml
-npx wrangler d1 execute medicion --remote --file=esquema.sql
-npx wrangler deploy                        # imprime la URL del Worker
+npx --yes wrangler@4.151.1 login
+npx --yes wrangler@4.151.1 d1 create medicion   # copia el database_id a wrangler.toml
+npx --yes wrangler@4.151.1 d1 migrations apply medicion --remote
+npx --yes wrangler@4.151.1 deploy               # imprime la URL del Worker
 ```
+
+Así se hizo el 2026-09-02, con `--file=esquema.sql` en lugar de las migraciones, que no
+existían. **Desde la Historia 23.2 una base nueva —local, de pruebas o recreada— se crea solo
+aplicando `migrations/`**, nunca desde `esquema.sql`: así tiene el mismo `d1_migrations` que
+la de producción y la siguiente migración se aplica igual en las dos. Para la base que ya
+existe, lo de cada día es `npm run medicion -- desplegar`, abajo.
 
 **El paso que no está en esa lista y para el despliegue en seco** (hecho el 2026-09-02): la
 cuenta necesita un **subdominio `workers.dev`**, que se elige una sola vez y lo comparten
@@ -536,73 +558,95 @@ por ninguna superficie; la cifra no distingue las dos cosas, y leerla como «pá
 sesión» sería inventar el dato que la medición se niega a recoger. `NULL` en `razon` es
 una jornada sin vistas de superficie, no un cero.
 
-**No hay migración, pero hay orden: primero el Worker, después el sitio.**
-`medicion/esquema.sql` no lleva `CHECK` sobre `evento`, así que la tabla acepta el evento
-nuevo tal cual. El receptor, en cambio, importa el vocabulario de `src/lib/medicion.ts` al
-empaquetarse: se redespliega **antes** que el sitio (`cd medicion && npx wrangler deploy`).
-En el hueco entre los dos despliegues —o si el Worker no se redespliega—, cada
-`vista-de-superficie` se pierde en silencio: el receptor contesta 204 y no escribe nada.
+### Desplegar el receptor: migración, receptor, sitio — Historia 23.2 (AD-14)
 
-**Comprobar a mano que el Worker desplegado acepta el evento.** Una baliza manual deja en
-D1 una fila indistinguible de una visita, así que va **sin `origen`** —no cuenta en SM-8,
-que filtra `origen IS NOT NULL`— y con una ruta que el sitio no publica, y se borra en
-cuanto se ha visto:
+Cuando cambian el vocabulario o las columnas, el orden es **migración, receptor, sitio**, y lo
+cumple una orden. Un receptor que escribe una columna que no existe pierde cada evento; un
+sitio que envía un campo que el receptor no coteja lo ve llegar a nulo, indistinguible de un
+cero. La Historia 2.9 no se enmienda —el vocabulario sigue cerrado, sin cookie ni
+identificador—: se amplía con cuatro eventos y seis campos, cada uno con su conjunto.
 
 ```bash
-# La misma URL que el secreto MEDICION_ENDPOINT del repositorio.
-curl -s -o /dev/null -w '%{http_code}\n' -X POST \
-  --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' \
-  "$MEDICION_ENDPOINT"
-# 204 siempre — el código no dice nada. Lo que lo dice es la fila:
-npx wrangler d1 execute medicion --remote --command \
-  "SELECT jornada, evento, ruta, origen FROM eventos WHERE ruta='/__comprobacion/'"
-# Vista la fila, se borra para que no se acumule:
-npx wrangler d1 execute medicion --remote --command \
-  "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
+cd ~/brainlySabiduria                     # en la rama que cambia el vocabulario, árbol limpio
+export MEDICION_ENDPOINT=https://medicion-sabiduria-de-bolsillo.sabiduriadebolsillo.workers.dev
+npm run medicion -- desplegar             # acto de Héctor: migra, despliega, comprueba, baraja
+git add medicion/huella-del-vocabulario.json && git commit   # la huella, con su mensaje
 ```
 
-Si la fila no aparece, el Worker desplegado es anterior a la 20.1: redesplegarlo y repetir.
-Una baliza que se quedara sin borrar sale en el recuento por evento de arriba, y la razón
-por jornada la excluye.
+`desplegar` hace, en este orden, y se para con 1 en el primer fallo diciendo qué quedó
+aplicado —sin reintentar migraciones ni despliegues—:
 
-**Comprobar a mano si el Worker en vivo inserta con `rowid` aleatorio (Historia 23.12).**
-Hasta que `npm run medicion -- desplegar` y `comprobar` (23.2) lo digan solos, se ve con dos
-balizas como la de arriba y el `rowid` de sus filas, leído como texto para que no se
-redondee:
+1. Comprueba la invocación, `MEDICION_ENDPOINT` (con `http(s)://`) y la sesión de `wrangler`
+   (`whoami --json`). Sin cualquiera de las tres sale con **2**, antes de tocar nada.
+2. Exige el árbol limpio en `medicion/` y `src/lib/`: la huella nombra el commit, y el commit
+   tiene que contener lo que se despliega.
+3. Coteja el receptor de la rama contra lo que envía el sitio en vivo: la huella versionada o,
+   si no la hay —lo dice—, el vocabulario de `origin/main`. Si el receptor nuevo no guarda algo
+   de eso, lo nombra y se para: **nunca se despliega un receptor que no cubra lo que emite el
+   sitio en vivo**.
+4. Cuenta las filas por jornada y evento (sin las balizas) y mira la tabla: si no es la de
+   partida ni la migrada, la nombra y se para sin aplicar nada, porque `ADD COLUMN` no es
+   idempotente.
+5. Aplica las migraciones en remoto (`d1 migrations apply --remote`) y despliega el receptor
+   (`wrangler deploy`), con `wrangler` 4.151.1 y `--remote` siempre explícito.
+6. **La baliza:** envía a `/__comprobacion/` una baliza por cada valor de cada campo de cada
+   evento del vocabulario, lee las filas con `CAST(rowid AS TEXT)` y las coteja con lo esperado,
+   hasta tres veces —un receptor recién desplegado tarda en llegar a todas partes—. Las borra.
+   Si los `rowid` son contiguos, el receptor en vivo numera en orden de llegada: se para y **no
+   baraja**.
+7. **El barajado:** `UPDATE eventos SET rowid = abs(random())`, que reescribe cada fila y sus
+   dos entradas de índice, unas **tres filas escritas por fila**. Antes lo cuenta contra la
+   cuota de escritura del día (`CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1`, 100.000 en el plan
+   gratuito), con las filas escritas en 24 h que da `d1 info --json`, que pecan por exceso. Si
+   no cabe, lo dice con las cifras y sale con 1: **se repite otro día, nunca troceado**.
+8. Vuelve a contar y exige que las jornadas cerradas sean idénticas y que la de hoy solo haya
+   crecido: migrar y barajar no pierden ni inventan filas. No se copia ni se guarda ninguna.
+9. Escribe la huella. No hace commit.
+
+Se repite en **cada** despliegue del receptor —el barajado es idempotente—, y después, con la
+huella commiteada, se despliega el sitio. `npm test` está en rojo entre que la rama toca
+`src/lib/vocabulario.ts` y que la huella entra: es lo que impide desplegar el sitio antes.
+
+**Comprobar lo que hay en vivo**, sin desplegar nada:
 
 ```bash
-: "${MEDICION_ENDPOINT:?falta MEDICION_ENDPOINT}"
-for i in 1 2; do
-  curl -sS --fail -o /dev/null -w '%{http_code}\n' -X POST \
-    --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' "$MEDICION_ENDPOINT"
-done
-npx wrangler d1 execute medicion --remote --command \
-  "SELECT CAST(rowid AS TEXT) AS fila FROM eventos WHERE ruta='/__comprobacion/'"
-npx wrangler d1 execute medicion --remote --command \
-  "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
+npm run medicion -- comprobar   # acto de Héctor
 ```
 
-Cada `curl` tiene que escribir `204`; si falla, la baliza no salió y lo que diga el `SELECT`
-no cuenta. Lo que decide es si los números son **contiguos**, no cuántas cifras tienen:
+Envía las balizas del vocabulario de la huella, las coteja, mira que el `rowid` sea aleatorio y
+las borra. Sale con 1 nombrando la diferencia si el receptor en vivo no guarda lo que la huella
+dice o numera en orden de llegada —un receptor anterior a la 23.12, también tras una vuelta
+atrás—; lo cierra repetir la 23.3, `npm run medicion -- desplegar`. Es lo que sustituye a las
+comprobaciones a mano con `curl` de las Historias 20.1 y 23.12.
 
-- **Contiguos** —el segundo es el primero más uno, o poco más si entretanto llegó
-  tráfico—: el Worker en vivo numera en orden de llegada. Hasta la 23.3 es lo esperado, y no
-  se adelanta: el receptor con la 23.12 lo despliega Héctor en la 23.3, desde la rama. Desde
-  la 23.3 dice que el Worker en vivo es anterior a la 23.12, también tras una vuelta atrás,
-  que numera `max(rowid)+1` sobre los aleatorios y da números contiguos de 19 cifras; lo
-  cierra repetir la 23.3.
-- **Dispersos** —separados por mucho más que el tráfico de unos segundos—: inserta con
-  `rowid` aleatorio.
-- **Uno, o más de dos**: quedaba una baliza de antes sin borrar, o una se perdió. Se borran
-  con el `DELETE` y se repite.
-- **Ninguno**: antes de concluir nada se espera unos segundos y se repite el `SELECT`. Si
-  sigue sin filas, el Worker no guarda: o es anterior a la 20.1, como arriba, o —con el de la
-  23.12 en vivo— D1 rechaza el `INSERT` con `rowid` y el `catch` lo calla. Lo distingue la
-  versión desplegada (`npx wrangler deployments list`, en `medicion/`). En el segundo caso
-  Héctor vuelve a la última versión que guardaba —en orden de llegada— por su identificador,
-  `npx wrangler versions list` y `npx wrangler rollback <id>`: sin él, `rollback` va a la
-  versión anterior, que puede ser otra que tampoco guarde. La 23.12 se revisa antes de
-  volver a desplegarla.
+**Mientras viva la rama de la Épica 23, el receptor no se despliega desde la principal.** Si se
+hace, el receptor en vivo vuelve al vocabulario de la principal, la huella de la rama queda
+rancia y la 23.3 se repite.
+
+**Reversión, en el orden inverso**: primero el sitio, después el receptor
+(`npx --yes wrangler@4.151.1 versions list` y `rollback <id>`, en `medicion/`). Las migraciones
+nunca se revierten: las columnas nuevas quedan nulas y no molestan a un receptor anterior. Un
+receptor anterior a la 23.12 vuelve a numerar en orden de llegada, y lo que llegue entretanto lo
+baraja el siguiente `desplegar` que pase la comprobación.
+
+**Recuperar D1 tras un error** es Time Travel: `npx --yes wrangler@4.151.1 d1 time-travel
+restore medicion --timestamp=<instante>`, dentro de los 7 días del plan gratuito o los 30 del de
+pago. **Sobrescribe todo lo escrito después** de ese instante, y devuelve el orden de llegada de
+antes del barajado: es un acto de Héctor, y ninguna orden de `tools/` restaura producción.
+
+**El receptor local**, para probar sin tocar producción:
+
+```bash
+npm run medicion -- local    # migra el D1 local (medicion/.wrangler/) y arranca wrangler dev en :8787
+npm run medicion -- ensayo   # en otra terminal: la comprobación de desplegar, contra el local
+```
+
+`ensayo` sale con 0 si cada evento y cada valor del vocabulario llegó al D1 local, el `rowid` es
+aleatorio y las balizas se borraron. Las pruebas de Playwright levantan el mismo receptor local
+y construyen el sitio con `MEDICION_ENDPOINT=http://localhost:8787/` (`playwright.config.ts`):
+toda construcción de rama con medición —Playwright, y la de Lighthouse de la 23.11, que se hace
+a mano con `MEDICION_ENDPOINT=http://localhost:8787/ npm run build` y el receptor local en
+marcha— apunta a `wrangler dev` con D1 local, nunca a producción.
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 

@@ -201,6 +201,12 @@ export const MAX_BYTES_DE_GUION = 6656;
  * Medido: 920 bytes con el punto final de producción (el más largo de los que se usan; 886 con
  * el de las pruebas). No importa nada. Lleva el punto final dentro, así que una dirección más
  * larga lo engorda byte a byte.
+ *
+ * Medido de nuevo en la Historia 23.2: **1.128 bytes** con el punto final de producción (1.096
+ * con el de las pruebas). Creció porque ya no manda las cinco claves a todo evento: lleva una
+ * tabla por evento, compuesta desde `CAMPOS_DE_EVENTO` de `src/lib/vocabulario.ts`, con el
+ * conjunto de cada campo, y los destinos pasaron de cinco a ocho. Cabe en el tope de la 23.1,
+ * que no se sube; las Historias 23.5 a 23.9 lo vuelven a medir al añadir sus eventos.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 1320;
 
@@ -288,6 +294,18 @@ export const TOPE_DE_PESO_DE_DIST = 900 * 1024 * 1024;
  * tiene tope, en vez de inventárselo.
  */
 export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
+
+/**
+ * Filas que D1 deja escribir al día en el plan gratuito — AD-9, AD-13, Historia 23.2.
+ *
+ * Es la cuota de escritura de «Cuotas del receptor» de la espina, y no la decide nadie del
+ * proyecto: la pone Cloudflare. Cada índice cuenta una fila más, así que una inserción en
+ * `eventos`, con sus dos índices, gasta tres. La usa `npm run medicion -- desplegar` antes de
+ * barajar el `rowid`, que reescribe cada fila y sus dos entradas de índice: si lo escrito en el
+ * día más el barajado no cabe, no baraja, lo dice con las cifras y sale con 1 —se repite otro
+ * día, nunca troceado—. Si el proyecto pasa al plan de pago, cambia aquí y en ningún otro sitio.
+ */
+export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
 
 /**
  * Citas publicadas **resueltas** que necesita una Colección para publicarse — FR de la

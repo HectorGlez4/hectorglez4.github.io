@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
-import { EVENTOS, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
+import { EVENTOS, camposQueEmite, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
+import { CAMPOS, claveEnLaBaliza } from '../../src/lib/vocabulario.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { apuntarGuiones } from './ayuda/guiones.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
@@ -277,14 +278,8 @@ test.describe('Historia 10.4 — la compartición llega con su destino', () => {
 
     const registro = await esperarEvento(EVENTOS.comparticionDeEnlace);
     expect(registro).toBeTruthy();
-    expect(Object.keys(registro!).sort()).toEqual([
-      'consulta',
-      'destino',
-      'evento',
-      'jornada',
-      'origen',
-      'ruta',
-    ]);
+    // Las columnas de `esquema.sql`, en su orden, desde la Historia 23.2: ninguna de visitante.
+    expect(Object.keys(registro!)).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
     expect(await page.context().cookies()).toEqual([]);
   });
 });
@@ -303,8 +298,13 @@ test.describe('Historia 7.3 — lo que llega no identifica a nadie', () => {
     for (const carga of cargas) {
       const objeto = JSON.parse(carga);
       // Crece solo cuando una historia lo decide: `origen` lo añadió la 8.2 y `destino`
-      // la 10.4. Que haya que tocar esta prueba para ampliarlo es el punto.
-      expect(Object.keys(objeto).sort()).toEqual(['datos', 'destino', 'evento', 'origen', 'ruta']);
+      // la 10.4. Desde la 23.2 cada evento lleva exactamente las claves que el vocabulario le
+      // declara y el guion sabe producir —la vista, su Marca de origen—, y ninguna más.
+      expect(Object.keys(objeto).sort()).toEqual(
+        ['evento', 'ruta', ...camposQueEmite(objeto.evento).map(claveEnLaBaliza)].sort(),
+      );
+      expect(objeto.evento).toBe(EVENTOS.vistaDeCita);
+      expect(Object.keys(objeto).sort()).toEqual(['evento', 'origen', 'ruta']);
       expect(carga).not.toMatch(/uuid|visitante|referrer|userAgent|screen|timeZone/i);
     }
 

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { DESTINOS } from '../../src/lib/compartir.ts';
+import { DESTINOS_OFRECIDOS } from '../../src/lib/compartir.ts';
 import { enlaceConOrigen } from '../../src/lib/redes.ts';
 import { emitidos, espiarMedicion } from './ayuda/espia.ts';
 
@@ -28,7 +28,7 @@ test.describe('Historia 10.3 — sin hoja del sistema', () => {
   test('se ven destinos concretos, no un control deshabilitado', async ({ page }) => {
     await page.goto(CITA);
     const destinos = page.locator('[data-destinos] a');
-    await expect(destinos).toHaveCount(DESTINOS.length);
+    await expect(destinos).toHaveCount(DESTINOS_OFRECIDOS.length);
     await expect(destinos.first()).toBeVisible();
     await expect(page.locator('[data-hoja]')).toBeHidden();
   });
@@ -40,7 +40,7 @@ test.describe('Historia 10.3 — sin hoja del sistema', () => {
     // dentro del nombre accesible. Y sigue abriendo pestaña nueva: compartir es entregar
     // algo en curso a un tercero.
     await page.goto(CITA);
-    for (const destino of DESTINOS) {
+    for (const destino of DESTINOS_OFRECIDOS) {
       const enlace = page.locator(`[data-destino="${destino.id}"]`);
       await expect(enlace, destino.id).toHaveAccessibleName(
         `Compartir en ${destino.nombre} (se abre en una pestaña nueva)`,
@@ -59,7 +59,7 @@ test.describe('Historia 10.3 — sin hoja del sistema', () => {
 
   test('cada destino lleva la Cita y el Autor en el enlace', async ({ page }) => {
     await page.goto(CITA);
-    for (const destino of DESTINOS) {
+    for (const destino of DESTINOS_OFRECIDOS) {
       const href = (await page.locator(`[data-destino="${destino.id}"]`).getAttribute('href'))!;
       const legible = decodeURIComponent(href);
       expect(legible, destino.id).toContain('La libertad, Sancho');
@@ -70,7 +70,7 @@ test.describe('Historia 10.3 — sin hoja del sistema', () => {
 
   test('ningún destino pide instalar nada ni registrarse en el sitio', async ({ page }) => {
     await page.goto(CITA);
-    for (const destino of DESTINOS) {
+    for (const destino of DESTINOS_OFRECIDOS) {
       const href = (await page.locator(`[data-destino="${destino.id}"]`).getAttribute('href'))!;
       expect(href, destino.id).toMatch(/^(https:\/\/|mailto:)/);
     }
@@ -84,7 +84,7 @@ test.describe('Historia 10.3 — sin hoja del sistema', () => {
     await pagina.goto(`http://localhost:4321${CITA}`);
 
     // Son enlaces de verdad compuestos en el build, no algo que arme un guion al pulsar.
-    await expect(pagina.locator('[data-destinos] a')).toHaveCount(DESTINOS.length);
+    await expect(pagina.locator('[data-destinos] a')).toHaveCount(DESTINOS_OFRECIDOS.length);
     await expect(pagina.locator('[data-destinos]')).toBeVisible();
     await contexto.close();
   });
@@ -122,7 +122,7 @@ test.describe('Historia 10.3 — lo que se comparte es la canónica', () => {
   test('el enlace compartido no arrastra marca de origen', async ({ page }) => {
     await page.goto(enlaceConOrigen(CITA, 'tiktok'));
 
-    for (const destino of DESTINOS) {
+    for (const destino of DESTINOS_OFRECIDOS) {
       const href = decodeURIComponent(
         (await page.locator(`[data-destino="${destino.id}"]`).getAttribute('href'))!,
       );

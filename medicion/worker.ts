@@ -61,9 +61,12 @@ export default {
       // `WITHOUT ROWID` fallaría cada `INSERT` y el `catch` lo callaría todo. Lo ya escrito
       // no lo baraja esto: lo baraja `desplegar` (23.2).
       await entorno.MEDICION.prepare(
-        'INSERT INTO eventos (rowid, jornada, evento, ruta, origen, destino, consulta) ' +
-          'VALUES (abs(random()), ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO eventos (rowid, jornada, evento, ruta, origen, destino, consulta, ' +
+          'via, zona, tramo, filtros, indexable, primera) ' +
+          'VALUES (abs(random()), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       )
+        // Las doce columnas en el orden de `esquema.sql` (Historia 23.2): las seis de la v7.1 y
+        // las seis de la migración 0001, que llegan `null` fuera de sus eventos.
         .bind(
           registro.jornada,
           registro.evento,
@@ -71,6 +74,12 @@ export default {
           registro.origen,
           registro.destino,
           registro.consulta,
+          registro.via,
+          registro.zona,
+          registro.tramo,
+          registro.filtros,
+          registro.indexable,
+          registro.primera,
         )
         .run();
     } catch {

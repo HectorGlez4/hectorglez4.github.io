@@ -22,7 +22,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Running and verifying
 
-- El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`.
+- El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`. Desde la 23.2 ese sitio se construye con `MEDICION_ENDPOINT=http://localhost:8787/`, y el `webServer` levanta antes el receptor local (`npm run medicion -- local`: `wrangler dev` con D1 local): el puerto 8787 tiene que estar libre, y ninguna construcción de rama apunta al receptor de producción.
 - Itera por fichero de prueba: la suite unitaria serializa a propósito (`fileParallelism: false`) porque cada prueba lanza un `astro build`.
 - `astro check` abarca todo el repositorio, no solo el sitio: `medicion/` y las pruebas e2e entran en el mismo programa de TypeScript.
 - `npm run build` termina con `tsx integraciones/peso.ts`, tras Pagefind: mide `dist/` en bytes sin los cinco ficheros que rotan con la jornada, escribe sus cinco líneas de cifras por stdout cuando hay algo que juzgar —sin `dist/`, con uno vacío o con uno que solo trae lo que rota no da cifras y sale con 1—, avisa entre `AVISO_DE_PESO_DE_DIST` y `TOPE_DE_PESO_DE_DIST` y se para por encima del tope (`src/lib/umbrales.ts`; DESPLIEGUE.md, «El techo de peso del hospedaje»). No es una integración de Astro: `construirConCorpus` corre `astro build` a secas y no lo ejecuta salvo con `conNpmRunBuild`. Los umbrales se rebajan en la copia, nunca en el árbol.
@@ -41,6 +41,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind, el barrido de accesibilidad y, desde la 23.1, la medición: si la página carga el fichero (`cargaLaMedicion`) y qué vista emite —una superficie `producto` declara su `vista`, y una prueba de `tests/unit/superficies.test.ts` falla si la omite—. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Un guion o una prueba que pregunte por una ruta de Obra la declara antes (y la olvida después).
 - Una página nueva cuyo contenido dependa de la jornada —la Cita del Día, `FECHA_JORNADA`, `corpus/portada.json`— va también en `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` de `tools/lib/peso.ts`, con su ruta exacta en `dist/`: si no, el paso del peso la juzga con el resto y su veredicto pasa a depender del día (AD-12). Una prueba de `tests/unit/peso.test.ts` sigue las importaciones de las páginas, las integraciones y la configuración y lo exige; no sabe seguir un alias de importación ni un `import.meta.glob`, y por eso los rechaza.
 - No traigas `@cloudflare/workers-types`: sus globales redefinen `Buffer` y descompilan las pruebas que leen cabeceras PNG. Declara en `medicion/worker.ts` solo la superficie de D1 que uses.
+- Tocar `src/lib/vocabulario.ts` —un evento, un campo, un valor, un tramo— mueve la huella del vocabulario desplegado: `tests/unit/huella.test.ts` falla en `npm test` hasta que Héctor repita `npm run medicion -- desplegar` (la 23.3) desde la rama y commitee `medicion/huella-del-vocabulario.json`. Es a propósito; no se arregla escribiendo la huella a mano. Una columna nueva, además, es una migración nueva en `medicion/migrations/` —nunca se edita una aplicada— y el guion solo emite lo que `PENDIENTES` de `tests/unit/vocabulario.test.ts` ya no retiene.
 
 <!-- /bmad:context -->
 
@@ -262,6 +263,30 @@ Misma credencial que la indexación y el tráfico, `SEARCH_CONSOLE_CREDENCIALES`
 dada de alta **como propietaria** (`DESPLIEGUE.md` §5). Sin ella no escribe nada y sale con
 **código 2**, igual que con una bandera desconocida; sale con **1** si no pudo leer el corpus o
 la serie, si no pudo leer ninguna ventana o si falla la escritura, y entonces no escribe nada.
+
+## Desplegar el receptor de la medición
+
+El esquema de D1 cambia solo por migraciones aditivas (`medicion/migrations/`, AD-14), y cuando
+cambian el vocabulario o las columnas el orden es **migración, receptor, sitio**. Lo cumple una
+orden, con `wrangler` fijado a 4.151.1 y `--remote` o `--local` siempre explícito:
+
+```
+npm run medicion -- desplegar   # migra en remoto, despliega, comprueba con balizas, baraja, escribe la huella
+npm run medicion -- comprobar   # que el receptor en vivo guarda lo que dice la huella y numera al azar
+npm run medicion -- local       # D1 local migrado y wrangler dev en :8787, en primer plano
+npm run medicion -- ensayo      # la comprobación de desplegar, contra el receptor local
+```
+
+**`desplegar` y `comprobar` son actos de Héctor**, con `MEDICION_ENDPOINT` y sesión de `wrangler`:
+ningún agente los corre, ni `wrangler deploy`, ni nada con `--remote`. `local` y `ensayo` no tocan
+nada remoto. Códigos: **2** si la invocación no vale, si falta `MEDICION_ENDPOINT` (o no es
+`http(s)://`) o si `wrangler` no tiene sesión, siempre antes de tocar nada; **1** para todo lo
+demás, con el parte de lo que quedó aplicado. `desplegar` se para en el primer fallo, no reintenta
+migraciones ni despliegues, no baraja si el `rowid` de las balizas es contiguo ni si el barajado
+(unas tres filas escritas por fila) no cabe en `CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1` —se repite
+otro día, nunca troceado—, y escribe la huella **solo en su último paso**. No hace commit: la
+huella la commitea Héctor, y el sitio se despliega después. La parte pura vive en
+`tools/lib/medicion.ts` (AD-22); el paso a paso, la reversión y Time Travel, en `DESPLIEGUE.md` §3.
 
 ## Pedir rastreo de unas pocas URL, y anotarlo
 

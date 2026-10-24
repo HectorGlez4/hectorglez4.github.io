@@ -92,14 +92,23 @@ describe('Historia 8.2 — el origen se coteja en los dos extremos', () => {
     )!;
     expect(registro.jornada).toBe('2026-08-12');
     expect(registro.origen).toBe('tiktok');
-    // Y sigue sin haber nada por lo que agrupar personas.
-    expect(Object.keys(registro).sort()).toEqual([
-      'consulta',
-      'destino',
-      'evento',
-      'jornada',
-      'origen',
-      'ruta',
-    ]);
+    // Y sigue sin haber nada por lo que agrupar personas: las doce columnas de `esquema.sql`
+    // desde la Historia 23.2, ninguna de visitante.
+    expect(Object.keys(registro).sort()).toEqual(
+      [
+        'consulta',
+        'destino',
+        'evento',
+        'filtros',
+        'indexable',
+        'jornada',
+        'origen',
+        'primera',
+        'ruta',
+        'tramo',
+        'via',
+        'zona',
+      ].sort(),
+    );
   });
 });

@@ -18,46 +18,15 @@
  * AD-5 — Derivación pura: aquí no se emite nada, solo se decide qué y cómo.
  */
 
-import { DESTINOS_VALIDOS } from './destinos.ts';
-import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS } from './redes.ts';
+import { PARAMETRO_DE_ORIGEN } from './redes.ts';
+import { CAMPOS_DE_EVENTO, EVENTOS, claveEnLaBaliza, type Campo, type Evento } from './vocabulario.ts';
 
-/**
- * El conjunto cerrado de eventos. Añadir uno exige modificar este módulo, que es
- * exactamente lo que AD-13 quiere que cueste: es la revisión que impide que la medición
- * crezca por acumulación hasta convertirse en un perfil del visitante.
+/*
+ * El vocabulario vive en `src/lib/vocabulario.ts` desde la Historia 23.2 (AD-13): lo importan
+ * también el receptor y `tools/`, que no emiten nada. Se reexporta aquí para quien ya lo
+ * consumía por este módulo —el armazón, las islas, `superficies.ts`, las pruebas—.
  */
-export const EVENTOS = {
-  /** SM-2, SM-3 — una Página de Cita se ha mostrado. */
-  vistaDeCita: 'vista-de-cita',
-  /**
-   * SM-8, FR-22 — una superficie de agregación de producto (portada, página 1 de Autor,
-   * Tema o Colección) se ha mostrado. Cuenta lo que el Canal trae fuera de la Página de
-   * Cita, con la misma marca de origen. Nunca la emite una superficie de servicio —las
-   * páginas 2+ de un listado, `/buscar`, `/404`—, ni una interna —`/kit`, `/lote`—, ni la
-   * Página de Cita, que ya emite el suyo; el carácter de cada ruta lo declara
-   * `src/lib/superficies.ts`. La razón `vista-de-cita / vista-de-superficie` es un
-   * agregado por jornada, no una sesión.
-   */
-  vistaDeSuperficie: 'vista-de-superficie',
-  /** SM-5, junto con la descarga — el visitante se ha llevado la Cita. */
-  copiado: 'copiado',
-  /** SM-5, junto con el copiado — Historia 5.1. */
-  descargaDeImagen: 'descarga-de-imagen',
-  /** SM-6, FR-8 — alimenta la curación del Corpus con lo que se buscó y no había. */
-  busquedaSinResultados: 'busqueda-sin-resultados',
-  /**
-   * SM-7 — la Imagen salió hacia una aplicación (FR-17).
-   *
-   * Es distinto de `descarga-de-imagen`, y tiene que serlo: SM-C3 vigila si la
-   * compartición creció **a costa** del copiado, y con un solo evento para las dos
-   * cosas esa pregunta no se puede formular.
-   */
-  comparticionDeImagen: 'comparticion-de-imagen',
-  /** SM-7 — el enlace salió hacia un destino (FR-18). */
-  comparticionDeEnlace: 'comparticion-de-enlace',
-} as const;
-
-export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
+export { EVENTOS, EVENTOS_VALIDOS, esEventoValido, type Evento } from './vocabulario.ts';
 
 /**
  * Los eventos que una página emite por estar vista, y no por un gesto — Historias 20.1 y 23.1.
@@ -66,10 +35,53 @@ export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
  */
 export type EventoDeVista = typeof EVENTOS.vistaDeCita | typeof EVENTOS.vistaDeSuperficie;
 
-export const EVENTOS_VALIDOS: readonly Evento[] = Object.values(EVENTOS);
+/**
+ * Los eventos que el fichero sabe emitir hoy — Historia 23.2.
+ *
+ * El vocabulario declara más: `lectura`, `salida-interna`, `busqueda` y `vista-de-obra` llegan
+ * con las Historias 23.5, 23.7, 23.8 y 23.9, que los añaden aquí y los sacan de los pendientes
+ * de `tests/unit/vocabulario.test.ts` en el mismo diff. Hasta entonces el fichero descarta
+ * cualquiera de los cuatro, igual que un evento inventado: el receptor ya los sabe guardar,
+ * pero nadie los envía.
+ */
+export const EVENTOS_DEL_GUION: readonly Evento[] = [
+  EVENTOS.vistaDeCita,
+  EVENTOS.vistaDeSuperficie,
+  EVENTOS.copiado,
+  EVENTOS.descargaDeImagen,
+  EVENTOS.busquedaSinResultados,
+  EVENTOS.comparticionDeImagen,
+  EVENTOS.comparticionDeEnlace,
+];
 
-export function esEventoValido(nombre: string): nombre is Evento {
-  return (EVENTOS_VALIDOS as readonly string[]).includes(nombre);
+/**
+ * De dónde saca el fichero cada campo que sabe producir — Historia 23.2.
+ *
+ *   · 0 — la Marca de origen, leída de la dirección (`?de=`);
+ *   · 1 — el segundo argumento de `__medir`, el texto de la búsqueda sin resultados;
+ *   · 2 — el tercero, el destino que nombra la isla.
+ *
+ * Los demás campos del vocabulario —`via`, `zona`, `tramo`, `filtros`, `indexable` y
+ * `primera`— no los produce todavía, y no los envía: llegan con las Historias 23.5 a 23.9.
+ */
+const FUENTE_EN_EL_GUION: { readonly [C in Campo]?: 0 | 1 | 2 } = {
+  origen: 0,
+  consulta: 1,
+  destino: 2,
+};
+
+/** Los campos que el fichero sabe producir hoy. */
+export const CAMPOS_DEL_GUION = Object.keys(FUENTE_EN_EL_GUION) as readonly Campo[];
+
+/**
+ * Los campos que el fichero envía con un evento: los que el vocabulario le declara y él sabe
+ * producir, en el orden de la declaración. Ninguno para un evento que el fichero no emite.
+ */
+export function camposQueEmite(evento: string): Campo[] {
+  if (!(EVENTOS_DEL_GUION as readonly string[]).includes(evento)) return [];
+  return (Object.keys(CAMPOS_DE_EVENTO[evento as Evento]) as Campo[]).filter(
+    (campo) => FUENTE_EN_EL_GUION[campo] !== undefined,
+  );
 }
 
 /**
@@ -118,16 +130,22 @@ export const ARRANQUE_DE_MEDICION = 'window.__medir=function(){__medir.q.push(ar
  *   2. se instala como `__medir`, de modo que lo que llegue después ya no se encola;
  *   3. vacía la cola del arranque en su orden, una vez cada llamada.
  *
- * Lo que viaja no cambia con el fichero: el nombre del evento, la ruta de la página, la marca
- * de origen cuando la visita llegó por un enlace del Kit, el destino de una compartición
- * cuando lo hay y, solo en la búsqueda sin resultados, el texto de la consulta. Nada más. No
- * hay identificador de visitante, ni se genera uno, ni se lee ni se escribe ninguna cookie.
+ * Lo que viaja con cada evento son **exactamente** las claves que el vocabulario le declara y
+ * que el fichero sabe producir (Historia 23.2, AD-13): el nombre del evento, la ruta de la
+ * página y, según el evento, la Marca de origen —solo con las vistas: una acción no la lleva—,
+ * el destino —cotejado con el conjunto de su evento— o, solo en la búsqueda sin resultados, el
+ * texto de la consulta. Un campo declarado sin valor legítimo viaja como `null`; uno que el
+ * evento no declara no viaja. Nada más. No hay identificador de visitante, ni se genera uno, ni
+ * se lee ni se escribe ninguna cookie. Lo fija la prueba de correspondencia de
+ * `tests/unit/vocabulario.test.ts`, evento por evento y valor por valor.
  *
  * La marca de origen se coteja **aquí**, contra el conjunto cerrado de cuentas propias, antes
  * de que salga de la página. Llega en la URL, y todo lo que llega en la URL lo escribe
  * cualquiera: sin cotejarla, `?de=` admitiría el texto que le pusieran —incluido algo que
- * identifique a quien pulsó el enlace— y la medición lo registraría sin más. Un evento fuera
- * del vocabulario se descarta igual que antes, venga de la cola o de una llamada directa.
+ * identifique a quien pulsó el enlace— y la medición lo registraría sin más. Un evento que el
+ * fichero no emite se descarta igual que uno inventado, venga de la cola o de una llamada
+ * directa: la tabla es un objeto, y se pregunta por sus claves propias para que `toString` no
+ * pase por evento.
  *
  * Se emite compacto —nombres cortos, sin sangrado— y envuelto en una función para no dejar
  * globales sueltas: lo legible es esta función y sus comentarios, que no viajan. No importa
@@ -135,21 +153,38 @@ export const ARRANQUE_DE_MEDICION = 'window.__medir=function(){__medir.q.push(ar
  * Su tope es `MAX_BYTES_GUION_DE_MEDICION`.
  */
 export function guionDeMedicion(url: string): string {
-  const e = JSON.stringify(EVENTOS_VALIDOS);
-  const r = JSON.stringify(REDES_VALIDAS);
-  const d = JSON.stringify(DESTINOS_VALIDOS);
+  /*
+   * La tabla de cada evento se compone aquí, desde `CAMPOS_DE_EVENTO`: por cada campo que el
+   * fichero sabe producir, la clave con la que viaja, de dónde sale y su conjunto (o nada, si
+   * es texto). Los conjuntos repetidos van una sola vez, en una variable.
+   */
+  const conjuntos = new Map<string, string>();
+  const nombreDe = (valores: readonly string[]) => {
+    const texto = JSON.stringify(valores);
+    if (!conjuntos.has(texto)) conjuntos.set(texto, `A${conjuntos.size}`);
+    return conjuntos.get(texto)!;
+  };
+  const tabla = EVENTOS_DEL_GUION.map((evento) => {
+    const campos = camposQueEmite(evento).map((campo) => {
+      const { valores } = CAMPOS_DE_EVENTO[evento][campo]!;
+      const clave = JSON.stringify(claveEnLaBaliza(campo));
+      const fuente = FUENTE_EN_EL_GUION[campo];
+      return valores === 'texto' ? `[${clave},${fuente}]` : `[${clave},${fuente},${nombreDe(valores)}]`;
+    });
+    return `${JSON.stringify(evento)}:[${campos.join(',')}]`;
+  });
+  const declaraciones = [...conjuntos].map(([texto, nombre]) => `${nombre}=${texto}`).join(',');
   const p = JSON.stringify(PARAMETRO_DE_ORIGEN);
 
   return (
     `(function(){` +
-    `var q=window.__medir&&__medir.q||[];` +
+    `var q=window.__medir&&__medir.q||[],${declaraciones},s={${tabla.join(',')}};` +
     `function e(v,t,z){` +
-    `if(${e}.indexOf(v)<0)return;` +
+    `if(!s.hasOwnProperty(v))return;` +
     `try{` +
-    `var m=new URLSearchParams(location.search).get(${p});` +
-    `var o=${r}.indexOf(m)<0?null:m;` +
-    `var w=${d}.indexOf(z)<0?null:z;` +
-    `var c=JSON.stringify({evento:v,ruta:location.pathname,origen:o,destino:w,datos:t||null});` +
+    `var c={evento:v,ruta:location.pathname},m=[new URLSearchParams(location.search).get(${p}),t,z];` +
+    `s[v].forEach(function(f){var x=m[f[1]];c[f[0]]=f[2]?f[2].indexOf(x)<0?null:x:x||null});` +
+    `c=JSON.stringify(c);` +
     `if(navigator.sendBeacon)navigator.sendBeacon(${JSON.stringify(url)},c)` +
     `}catch(x){}` +
     `}` +
