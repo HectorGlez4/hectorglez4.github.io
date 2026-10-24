@@ -86,14 +86,8 @@ test.describe('Historia 4.3 — el 404 no es un muro', () => {
     expect(new Set(bordes).size).toBe(1);
   });
 
-  test('tampoco descarga scripts', async ({ page }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-    await page.goto(INEXISTENTE, { waitUntil: 'networkidle' });
-    expect(scripts).toHaveLength(0);
-  });
+  // Historia 23.1 — qué guiones descarga esta página se juzga en
+  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
 
   test('no está en el sitemap', async ({ request }) => {
     const sitemap = await (await request.get('/sitemap-0.xml')).text();

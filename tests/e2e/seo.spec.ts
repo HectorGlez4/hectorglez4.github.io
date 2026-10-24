@@ -104,16 +104,10 @@ test.describe('Historia 2.7 — datos estructurados', () => {
     expect(datos.creator.name).toBe('Concepción Arenal');
   });
 
-  test('los datos estructurados no son JavaScript ejecutable', async ({ page }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los', {
-      waitUntil: 'networkidle',
-    });
-    expect(scripts).toHaveLength(0);
-  });
+  // Historia 23.1 — qué guiones descarga esta página se juzga en
+  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final. Que los datos
+  // estructurados no son JavaScript ejecutable lo dice allí la misma prueba: la Página de Cita
+  // descarga exactamente el guion de medición.
 });
 
 test.describe('Historia 2.7 — nada huérfano', () => {

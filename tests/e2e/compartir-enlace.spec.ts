@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DESTINOS } from '../../src/lib/compartir.ts';
 import { enlaceConOrigen } from '../../src/lib/redes.ts';
+import { emitidos, espiarMedicion } from './ayuda/espia.ts';
 
 /** Historia 10.3 — compartir el enlace a un destino. */
 
@@ -145,23 +146,7 @@ test.describe('Historia 10.3 — lo que se comparte es la canónica', () => {
 
 test.describe('Historia 10.4 — la compartición del enlace se mide', () => {
   /** Espía en el hueco del módulo de medición, que es por donde pasa todo (AD-13). */
-  async function conEspia(page: import('@playwright/test').Page) {
-    await page.addInitScript(() => {
-      const ventana = window as unknown as { __emitidos: unknown[] };
-      ventana.__emitidos = [];
-      (window as unknown as { __medir: unknown }).__medir = (
-        evento: string,
-        datos: string,
-        destino: string,
-      ) => ventana.__emitidos.push({ evento, datos, destino });
-    });
-  }
-
-  const emitidos = (page: import('@playwright/test').Page) =>
-    page.evaluate(
-      () =>
-        (window as unknown as { __emitidos: { evento: string; destino: string }[] }).__emitidos,
-    );
+  const conEspia = espiarMedicion;
 
   test('un destino elegido en el sitio se registra con su nombre', async ({ page }) => {
     await conEspia(page);

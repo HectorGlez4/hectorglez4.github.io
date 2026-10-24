@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { emitidos, espiarMedicion } from './ayuda/espia.ts';
 
 /** Historias 5.1 y 5.2 — Imagen de Cita y selección de plantilla. */
 
@@ -99,12 +100,8 @@ test.describe('Historia 5.1 — la acción y el diálogo', () => {
   });
 
   test('la descarga emite el evento por el módulo de medición', async ({ page }) => {
+    await espiarMedicion(page);
     await page.goto(CITA);
-    await page.evaluate(() => {
-      (window as unknown as { __emitidos: string[] }).__emitidos = [];
-      (window as unknown as { __medir: unknown }).__medir = (e: string) =>
-        (window as unknown as { __emitidos: string[] }).__emitidos.push(e);
-    });
 
     await page.getByRole('button', { name: 'Descargar como imagen' }).click();
     await expect(page.locator('[data-dialogo]')).toBeVisible();
@@ -113,9 +110,7 @@ test.describe('Historia 5.1 — la acción y el diálogo', () => {
     await page.getByRole('button', { name: 'Descargar', exact: true }).click();
     await descarga;
 
-    expect(
-      await page.evaluate(() => (window as unknown as { __emitidos: string[] }).__emitidos),
-    ).toContain('descarga-de-imagen');
+    expect((await emitidos(page)).map((e) => e.evento)).toContain('descarga-de-imagen');
   });
 
   test('la Página de Cita sigue siendo utilizable con el diálogo abierto', async ({ page }) => {

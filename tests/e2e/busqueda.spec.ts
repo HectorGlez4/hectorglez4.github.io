@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
 import { temaBajoUmbral } from './ayuda/corpus.ts';
+import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
 
@@ -281,14 +282,9 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
     // Se resuelve la consulta antes de instalar el espía, porque buscar la mueve de página.
     const consulta = await buscarSinResultados(page);
     test.skip(consulta === undefined, 'Ninguna consulta de prueba devuelve hoy cero resultados.');
-    await page.goto('/buscar/');
     // Se instala un espía en el hueco del módulo de medición, que es por donde pasa todo.
-    await page.evaluate(() => {
-      (window as unknown as { __emitidos: unknown[] }).__emitidos = [];
-      (window as unknown as { __medir: unknown }).__medir = (evento: string, datos: string) => {
-        (window as unknown as { __emitidos: unknown[] }).__emitidos.push({ evento, datos });
-      };
-    });
+    await espiarMedicion(page);
+    await page.goto('/buscar/');
 
     await page.locator('[data-consulta]').fill(consulta!);
     await page.waitForFunction(
@@ -297,9 +293,7 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
       { timeout: 10_000 },
     );
 
-    const emitidos = await page.evaluate(
-      () => (window as unknown as { __emitidos: { evento: string; datos: string }[] }).__emitidos,
-    );
+    const emitidos = await emitidosEn(page);
 
     expect(emitidos).toHaveLength(1);
     expect(emitidos[0].evento).toBe('busqueda-sin-resultados');

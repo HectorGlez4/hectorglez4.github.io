@@ -66,15 +66,12 @@ test.describe('Historia 4.1 — la portada', () => {
     await otro.close();
   });
 
-  test('el contenido está en el HTML inicial y no descarga scripts', async ({ page, request }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-    await page.goto('/', { waitUntil: 'networkidle' });
-    expect(scripts).toHaveLength(0);
+  // Historia 23.1 — qué guiones descarga esta página se juzga en
+  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
+  test('el contenido está en el HTML inicial', async ({ page, request }) => {
+    await page.goto('/');
 
-    // Y el texto de la Cita viaja en el HTML, sin ejecutar nada.
+    // El texto de la Cita viaja en el HTML, sin ejecutar nada.
     const html = await (await request.get('/')).text();
     const texto = await page.locator('.del-dia blockquote .texto').innerText();
     expect(html).toContain(texto.slice(1, 30));

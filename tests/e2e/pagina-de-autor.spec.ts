@@ -96,14 +96,8 @@ test.describe('Historia 2.3 — ficha y listado de Autor', () => {
     for (const alto of alturas) expect(alto).toBeGreaterThanOrEqual(44);
   });
 
-  test('la página de Autor tampoco descarga scripts', async ({ page }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-    await page.goto(MACHADO, { waitUntil: 'networkidle' });
-    expect(scripts).toHaveLength(0);
-  });
+  // Historia 23.1 — qué guiones descarga esta página se juzga en
+  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
 });
 
 test.describe('Historia 17.3 — la Lista de Obras', () => {

@@ -130,29 +130,28 @@ test.describe('Historia 2.1 — tramos tipográficos', () => {
 });
 
 test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
-  test('la página no descarga ningún fichero de script', async ({ page }) => {
+  // Historia 23.1 — qué guiones descarga esta página se juzga en
+  // tests/e2e/receptor.spec.ts, contra un sitio construido con punto final.
+  test('el guion en línea cabe en MAX_BYTES_DE_GUION', async ({ page }) => {
     /*
      * El criterio de la 2.1 dice «la página no envía JavaScript» y la 2.2 añade el botón
      * de copiar, que necesita algo. AD-6 resuelve la tensión: existen tres islas, cada
-     * una hidratada bajo demanda. Lo que se exige, entonces, es que no se descargue
-     * ningún script y que el contenido no dependa de que se ejecute nada —las dos cosas
-     * que sostienen NFR-2 y NFR-7—, no que el HTML tenga cero bytes de JavaScript.
+     * una hidratada bajo demanda, y desde la 23.1 la medición se descarga aparte, de la
+     * lista cerrada de `src/lib/guiones.ts`. Lo que se exige aquí es que lo que va en
+     * línea no crezca sin que nadie lo note, y que el contenido no dependa de que se
+     * ejecute nada —las dos cosas que sostienen NFR-2 y NFR-7—, no que el HTML tenga cero
+     * bytes de JavaScript.
      */
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-
-    await page.goto(CORTA, { waitUntil: 'networkidle' });
-    expect(scripts, `la página descargó ${scripts.join(', ')}`).toHaveLength(0);
+    await page.goto(CORTA);
 
     /*
-     * Lo que hay en línea son las dos islas —copiar y abrir el diálogo de imagen—, no un
-     * armazón. El tope existe para que no crezca sin que nadie lo note; se sube cuando
-     * una isla nueva entra a propósito, no cuando algo engorda por su cuenta.
+     * Lo que hay en línea son las tres islas —copiar, la Imagen y compartir— y el arranque
+     * de la medición, no un armazón. El tope existe para que no crezca sin que nadie lo
+     * note; se sube cuando una isla nueva entra a propósito, no cuando algo engorda por su
+     * cuenta.
      *
-     * Hoy son unos 4,8 KB sin comprimir de un HTML de 25 KB. El generador de verdad, que
-     * son decenas de kilobytes, sigue fuera y solo se descarga al pulsar.
+     * Tras la 23.1 son unos 5,6 KB sin comprimir. El generador de verdad, que son decenas de
+     * kilobytes, sigue fuera y solo se descarga al pulsar.
      *
      * El tope vive en `umbrales.ts` desde la v2 y no aquí: esta prueba mide la página
      * **sin** medición configurada, y hay otra que la mide **con** ella. Con el número

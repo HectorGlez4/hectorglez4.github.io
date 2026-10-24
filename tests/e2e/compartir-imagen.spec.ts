@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { emitidos, espiarMedicion } from './ayuda/espia.ts';
 
 /** Historia 10.2 — la imagen sale por la hoja del sistema cuando la hay. */
 
@@ -99,12 +100,7 @@ test.describe('Historia 10.2 — con hoja del sistema', () => {
 
   test('cerrar la hoja sin elegir destino no registra nada ni enseña error', async ({ page }) => {
     await conHojaDelSistema(page, 'cancela');
-    await page.addInitScript(() => {
-      const ventana = window as unknown as { __medido: string[] };
-      ventana.__medido = [];
-      (window as unknown as { __medir: unknown }).__medir = (evento: string) =>
-        ventana.__medido.push(evento);
-    });
+    await espiarMedicion(page);
 
     const errores: string[] = [];
     page.on('pageerror', (e) => errores.push(e.message));
@@ -113,7 +109,7 @@ test.describe('Historia 10.2 — con hoja del sistema', () => {
     await page.locator('[data-descargar]').click();
     await page.waitForTimeout(300);
 
-    expect(await page.evaluate(() => (window as unknown as { __medido: string[] }).__medido)).toEqual([]);
+    expect(await emitidos(page)).toEqual([]);
     expect(errores).toEqual([]);
     expect(await page.locator('body').innerText()).not.toMatch(/error/i);
   });
@@ -207,22 +203,7 @@ test.describe('Historia 10.2 — el mismo fichero por los dos caminos', () => {
 });
 
 test.describe('Historia 10.4 — la compartición de la imagen se mide', () => {
-  async function conEspia(page: import('@playwright/test').Page) {
-    await page.addInitScript(() => {
-      const ventana = window as unknown as { __emitidos: unknown[] };
-      ventana.__emitidos = [];
-      (window as unknown as { __medir: unknown }).__medir = (
-        evento: string,
-        datos: string,
-        destino: string,
-      ) => ventana.__emitidos.push({ evento, destino });
-    });
-  }
-
-  const emitidos = (page: import('@playwright/test').Page) =>
-    page.evaluate(
-      () => (window as unknown as { __emitidos: { evento: string; destino: string }[] }).__emitidos,
-    );
+  const conEspia = espiarMedicion;
 
   test('compartida por la hoja: evento de compartición y destino opaco', async ({ page }) => {
     await conHojaDelSistema(page);

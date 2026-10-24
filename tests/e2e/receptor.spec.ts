@@ -2,9 +2,10 @@ import { expect, test } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
-import { EVENTOS } from '../../src/lib/medicion.ts';
+import { EVENTOS, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
-import { rutaDeCita } from '../../src/lib/superficies.ts';
+import { rutaDeAutor, rutaDeCita, rutaDeObra } from '../../src/lib/superficies.ts';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from '../unit/ayuda/construir.js';
 
 /**
@@ -38,6 +39,19 @@ const SITIO = `http://localhost:${PUERTO_SITIO}`;
 const CITA = 'seneca-no-es-que-tengamos-poco-tiempo';
 
 /*
+ * Historia 23.1 — un Kit con dos copias de `CopiarCita`. La alternativa solo sale cuando la Cita
+ * del Día no admite Imagen, así que se fija para la jornada del build una Cita de más de
+ * `MAX_CARACTERES_IMAGEN` y se marca apta otra corta, que es la alternativa.
+ */
+const JORNADA = '2026-10-24';
+const CITA_LARGA = 'seneca-larga-del-kit';
+const TEXTO_LARGO =
+  'Mientras se aplaza la vida, la vida pasa: todo lo demás nos es ajeno y solo el tiempo es ' +
+  'nuestro, y esa sola posesión, fugaz y resbaladiza, nos la arrebata cualquiera que quiere, ' +
+  'sin que nos demos cuenta de lo que hemos perdido hasta que ya no queda nada que perder ni ' +
+  'tiempo en que lamentarlo, que es la forma más cara de aprender lo que valía.';
+
+/*
  * La ruta sale del constructor, y no de `/cita/${CITA}` escrito aquí. Lo que la baliza
  * manda es `location.pathname`, así que la forma que se pide y la que se espera tienen que
  * ser la misma que el sitio publica: escritas a mano se quedaron sin barra al migrar, y la
@@ -46,6 +60,9 @@ const CITA = 'seneca-no-es-que-tengamos-poco-tiempo';
 const RUTA_CITA = rutaDeCita(CITA);
 const RUTA_BUSCAR = '/buscar/';
 const SIN_RESULTADOS = 'zzzzqqqxxx';
+const PUNTO_FINAL = `http://localhost:${PUERTO_RECEPTOR}/e`;
+/** Historia 23.1 — el fichero de medición que este sitio sirve, con su versión. */
+const RUTA_DEL_FICHERO = rutaDelGuionDeMedicion(PUNTO_FINAL);
 
 let recibidos: (Registro | null)[] = [];
 let receptor: Server;
@@ -87,11 +104,20 @@ test.beforeAll(async () => {
       'citas/seneca--dos.md': citaValida({
         texto: 'No hay viento favorable para el que no sabe adónde va.',
         slug: 'seneca-no-hay-viento-favorable',
+        aptaParaPortada: true,
       }),
+      'citas/seneca--larga.md': citaValida({
+        texto: TEXTO_LARGO,
+        slug: CITA_LARGA,
+        temas: [],
+        aptaParaPortada: true,
+      }),
+      'portada.json': JSON.stringify({ fijaciones: { [JORNADA]: CITA_LARGA } }, null, 2),
     },
     {
-      entorno: { MEDICION_ENDPOINT: `http://localhost:${PUERTO_RECEPTOR}/e` },
+      entorno: { MEDICION_ENDPOINT: PUNTO_FINAL },
       conBusqueda: true,
+      jornada: JORNADA,
     },
   );
   expect(resultado.codigo, resultado.salida).toBe(0);
@@ -304,5 +330,199 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
     await expect(page.locator('[data-copiar]')).toHaveAttribute('data-estado', 'copiado');
 
     expect(errores, 'la medición rompió la página').toEqual([]);
+  });
+});
+
+/*
+ * Historia 23.1 — la medición sale a un fichero, y lo que se descarga es la lista cerrada de
+ * `src/lib/guiones.ts`.
+ *
+ * Las cinco pruebas de «la página no descarga ningún fichero de script» —Página de Cita,
+ * portada, Autor, 404 y datos estructurados— vivían en las especificaciones de cada superficie y
+ * corrían contra el `webServer`, que se construye **sin** punto final: ahí no hay fichero que
+ * pedir y la prueba pasaba sin mirar nada. Se juzgan aquí, contra un sitio construido con punto
+ * final, que es el único donde la ausencia de todo lo demás dice algo.
+ */
+test.describe('Historia 23.1 — cada superficie descarga exactamente el guion de medición', () => {
+  /** Los guiones que pide la página —`<script src>` e `import()`—, por su ruta y consulta. */
+  function apuntarGuiones(page: import('@playwright/test').Page): string[] {
+    const pedidos: string[] = [];
+    page.on('request', (peticion) => {
+      if (peticion.resourceType() !== 'script') return;
+      const url = new URL(peticion.url());
+      pedidos.push(url.origin === SITIO ? `${url.pathname}${url.search}` : url.href);
+    });
+    return pedidos;
+  }
+
+  const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
+  const SUPERFICIES: [string, string][] = [
+    ['la Página de Cita', RUTA_CITA],
+    ['la portada', '/'],
+    ['la Página de Autor', rutaDeAutor('seneca')],
+    ['la Obra que no se indexa', OBRA_NO_INDEXABLE],
+    ['la búsqueda', RUTA_BUSCAR],
+    ['una ruta que no existe (404)', '/no-existe-esta-ruta/'],
+  ];
+
+  for (const [nombre, ruta] of SUPERFICIES) {
+    test(`${nombre} descarga el guion de medición, una vez, y nada más`, async ({ page }) => {
+      const pedidos = apuntarGuiones(page);
+      await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
+      // Sin otro guion: ni el `ld+json` de los datos estructurados, que no es ejecutable, ni
+      // el generador de la Imagen ni Pagefind, que solo se piden al usarlos.
+      expect(pedidos, `${ruta} pidió ${pedidos.join(', ')}`).toEqual([RUTA_DEL_FICHERO]);
+    });
+  }
+
+  test('`/kit/` no descarga el guion de medición', async ({ page }) => {
+    const pedidos = apuntarGuiones(page);
+    await page.goto(`${SITIO}/kit/`, { waitUntil: 'networkidle' });
+    expect(pedidos).not.toContain(RUTA_DEL_FICHERO);
+    // Lo que sí pide —el generador, para dibujar la Imagen sin pulsar— está en la lista.
+    for (const pedido of pedidos) expect(guionExternoDe(pedido), pedido).toBeDefined();
+  });
+
+  test('enfocar la búsqueda pide Pagefind, y solo entradas de la lista', async ({ page }) => {
+    const pedidos = apuntarGuiones(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}`, { waitUntil: 'networkidle' });
+    const pagefind = page.waitForRequest((p) => p.url().includes('/pagefind/pagefind.js'));
+    await page.locator('[data-consulta]').focus();
+    await pagefind;
+    await page.waitForLoadState('networkidle');
+    expect(pedidos).toContain('/pagefind/pagefind.js');
+    for (const pedido of pedidos) expect(guionExternoDe(pedido), pedido).toBeDefined();
+  });
+
+  test('abrir la Imagen pide el generador, y solo entradas de la lista', async ({ page }) => {
+    const pedidos = apuntarGuiones(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`, { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Descargar como imagen' }).click();
+    await page.waitForFunction(() => {
+      const l = document.querySelector('[data-lienzo]') as HTMLCanvasElement | null;
+      return !!l && l.getContext('2d')!.getImageData(0, 0, 1, 1).data[3] === 255;
+    });
+    expect(pedidos).toContain('/islas/imagen.js');
+    for (const pedido of pedidos) expect(guionExternoDe(pedido), pedido).toBeDefined();
+  });
+});
+
+test.describe('Historia 23.1 — la cola del arranque y la espera al prerender', () => {
+  /** Cuántas veces ha llegado un evento al receptor. */
+  const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre).length;
+
+  test('lo que se hace antes de que llegue el fichero sale después de la vista, en orden y una vez', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    // La página apunta el orden en que salen sus balizas: el receptor las recibe por dos
+    // conexiones y no garantiza ese orden.
+    await page.addInitScript(() => {
+      const ventana = window as unknown as { __balizas: string[] };
+      ventana.__balizas = [];
+      const original = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = (url: string | URL, datos?: BodyInit | null) => {
+        ventana.__balizas.push(JSON.parse(String(datos)).evento);
+        return original(url, datos);
+      };
+    });
+
+    // El fichero se retiene hasta después de copiar: la isla llama `__medir` con la cola sola.
+    let soltar!: () => void;
+    const retenido = new Promise<void>((listo) => (soltar = listo));
+    await page.route('**/medicion/*.js', async (ruta) => {
+      await retenido;
+      await ruta.continue();
+    });
+
+    // `load` y `DOMContentLoaded` esperan al guion diferido, que está retenido: se espera a que
+    // el cuerpo entero esté analizado, y con él el guion de la isla de copiar.
+    await page.goto(`${SITIO}${RUTA_CITA}`, { waitUntil: 'commit' });
+    await page.locator('footer').waitFor({ state: 'attached' });
+    await page.getByRole('button', { name: 'Copiar la cita' }).click();
+    await expect(page.locator('[data-copiar]')).toHaveAttribute('data-estado', 'copiado');
+    expect(await page.evaluate(() => (window as unknown as { __balizas: string[] }).__balizas)).toEqual([]);
+
+    soltar();
+    expect(await esperarEvento(EVENTOS.copiado), 'no llegó el copiado encolado').toBeTruthy();
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+    await page.waitForTimeout(500);
+
+    expect(await page.evaluate(() => (window as unknown as { __balizas: string[] }).__balizas)).toEqual([
+      EVENTOS.vistaDeCita,
+      EVENTOS.copiado,
+    ]);
+    expect(llegadas(EVENTOS.vistaDeCita)).toBe(1);
+    expect(llegadas(EVENTOS.copiado)).toBe(1);
+  });
+
+  test('una página prerenderizada no emite su vista hasta activarse, y entonces una', async ({ page }) => {
+    await page.goto(`${SITIO}/`, { waitUntil: 'networkidle' });
+    await esperarEvento(EVENTOS.vistaDeSuperficie);
+
+    // Reglas de especulación hacia la Página de Cita, y un enlace para activarla.
+    await page.evaluate((destino) => {
+      const reglas = document.createElement('script');
+      reglas.type = 'speculationrules';
+      reglas.textContent = JSON.stringify({ prerender: [{ source: 'list', urls: [destino] }] });
+      document.head.append(reglas);
+      const enlace = document.createElement('a');
+      enlace.href = destino;
+      enlace.id = 'ir-a-la-prerenderizada';
+      enlace.textContent = 'Ir';
+      document.body.prepend(enlace);
+    }, RUTA_CITA);
+    await page.waitForTimeout(2000);
+    const antes = llegadas(EVENTOS.vistaDeCita);
+
+    await page.locator('#ir-a-la-prerenderizada').click();
+    await page.waitForURL(`**${RUTA_CITA}`);
+    const activacion = await page.evaluate(
+      () =>
+        (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming & {
+          activationStart?: number;
+        }).activationStart ?? 0,
+    );
+    test.skip(activacion <= 0, 'el navegador de las pruebas no prerenderiza con reglas de especulación');
+
+    expect(antes, 'la página prerenderizada emitió la vista antes de verse').toBe(0);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista al activarse').toBeTruthy();
+    await page.waitForTimeout(500);
+    expect(llegadas(EVENTOS.vistaDeCita)).toBe(1);
+  });
+});
+
+test.describe('Historia 23.1 — el guion de copiar no lleva el slug', () => {
+  test('en el Kit, el segundo botón copia lo suyo y el primero no se entera', async ({ page, context }) => {
+    /*
+     * Hasta la 23.1 cada copia de `CopiarCita` buscaba su botón por el slug, que llevaba en el
+     * guion. Ahora el guion es idéntico en las dos y cada una se encuentra por
+     * `document.currentScript`: si las dos dieran con el mismo botón, el segundo quedaría
+     * muerto y el primero escucharía dos veces.
+     */
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto(`${SITIO}/kit/`);
+
+    const botones = page.locator('[data-copiar]');
+    await expect(botones).toHaveCount(2);
+    const [primero, segundo] = [botones.nth(0), botones.nth(1)];
+    const carga = await segundo.getAttribute('data-carga');
+    expect(carga).toMatch(/^«.+» — .+\.$/);
+    expect(carga).not.toBe(await primero.getAttribute('data-carga'));
+
+    await segundo.click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(carga);
+    await expect(segundo.locator('[data-etiqueta]')).toHaveText('Copiado.');
+    await expect(segundo).toHaveAttribute('data-estado', 'copiado');
+    await expect(primero.locator('[data-etiqueta]')).toHaveText('Copiar la cita');
+    await expect(primero).not.toHaveAttribute('data-estado', /.*/);
+
+    // Y el primero también vive.
+    await primero.click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      await primero.getAttribute('data-carga'),
+    );
+    await expect(primero.locator('[data-etiqueta]')).toHaveText('Copiado.');
   });
 });
