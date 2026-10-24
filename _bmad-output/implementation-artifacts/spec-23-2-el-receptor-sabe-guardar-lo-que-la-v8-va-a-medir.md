@@ -2,7 +2,8 @@
 title: 'Historia 23.2 — El receptor sabe guardar lo que la v8 va a medir antes de que nadie lo envíe'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'baa0475751f5441892fc4dbf683f2c587c5cec21'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -115,6 +116,19 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas en este bucle (v8-ralph) y esta pasada no trajo
+ninguna sección «## Hallazgos externos — …»: sin hallazgos que clasificar. La revisión
+independiente viene después.
+
 ## Design Notes
 
 El vocabulario, en forma (los nombres exactos los fija el código):
@@ -160,7 +174,7 @@ Correspondencia (`vocabulario.test.ts`): para cada evento no pendiente, el sandb
 
 ## Auto Run Result
 
-Status: ready-for-dev
+Status: done
 Blocking condition: ninguna.
 
 Planificación cerrada (bmad-build-auto, alto tras planificar). Contexto de la épica en caché
@@ -169,3 +183,81 @@ que el plan dejaba al bucle: la huella vive en `medicion/huella-del-vocabulario.
 canónico; la cuota de escritura entra con nombre en `umbrales.ts`; `local` y `ensayo` permiten
 probar la orden contra `wrangler dev` sin tocar producción. Al cerrar la historia, la prueba de la
 huella queda en rojo a propósito hasta la 23.3.
+
+### Implementación (2026-10-24)
+
+**Qué se hizo.** El vocabulario entero de la v8 sale a `src/lib/vocabulario.ts`, puro, que solo
+importa `destinos.ts` y `redes.ts` y nombra sus conjuntos sin copiarlos: once eventos, las 16
+zonas, los tramos con `tramoDe`, los seis filtros con `filtrosUsados`, la marca de Obra,
+`primera`, `METRICA_DE_ACCION`, `DESTINOS_DE_DESCARGA`, `CAMPOS` (en orden de columna),
+`CAMPOS_DE_EVENTO` y `CLAVE_EN_LA_BALIZA`. `medicion.ts` lo reexporta y compone el guion por
+evento desde `CAMPOS_DE_EVENTO`: emite solo `EVENTOS_DEL_GUION` (los siete de hoy) y, de cada
+uno, solo los campos que sabe producir (`origen`, `destino`, `consulta`→`datos`); las acciones
+ya no llevan la Marca de origen. Los destinos se parten en enlace (seis, con constructor en
+`CONSTRUCTORES`, Facebook solo con el enlace) e imagen (`instagram-historia`); la página sigue
+pintando los cuatro de siempre (`DESTINOS_OFRECIDOS`). Migraciones `0000` (tabla de producción,
+`IF NOT EXISTS`) y `0001` (seis `ADD COLUMN`), `esquema.sql` como referencia acumulada y
+`migrations_dir`. El receptor recorre `CAMPOS_DE_EVENTO` y guarda la Marca de origen en todo
+evento (compatibilidad con la v7.1); el Worker inserta las doce columnas. `npm run medicion --
+desplegar | comprobar | local | ensayo` (cáscara `tools/medicion.ts`, parte pura
+`tools/lib/medicion.ts`, `wrangler@4.151.1` con `--remote`/`--local` explícito). Playwright con
+dos `webServer`: el receptor local y el sitio con `MEDICION_ENDPOINT=http://localhost:8787/`.
+
+**Ficheros.**
+- `src/lib/vocabulario.ts` (nuevo) — el vocabulario cerrado de la v8.
+- `src/lib/medicion.ts` — reexporta el vocabulario; `EVENTOS_DEL_GUION`, `CAMPOS_DEL_GUION`, `camposQueEmite`; guion compuesto por evento.
+- `src/lib/destinos.ts` — `DESTINOS_DE_ENLACE`, `DESTINO_DE_IMAGEN`; `DESTINOS_VALIDOS` = enlace + imagen + opaco.
+- `src/lib/compartir.ts` — `CONSTRUCTORES` (seis) y `DESTINOS_OFRECIDOS` (los cuatro de hoy); desaparece `DESTINOS`.
+- `src/islands/CompartirEnlace.astro` — pinta `DESTINOS_OFRECIDOS`.
+- `src/lib/umbrales.ts` — medida nueva del fichero de medición (1.128 bytes con el punto final de producción, 1.096 con el de pruebas; tope 1.320 sin tocar) y `CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000`.
+- `medicion/migrations/0000_tabla_de_partida.sql`, `0001_vocabulario_de_la_v8.sql` (nuevos) — las migraciones.
+- `medicion/esquema.sql`, `medicion/wrangler.toml` — estado acumulado de referencia; `migrations_dir`.
+- `medicion/receptor.ts` — `Registro` de doce columnas; `interpretar` desde el vocabulario.
+- `medicion/worker.ts` — `INSERT` de doce columnas con `rowid` aleatorio.
+- `tools/lib/medicion.ts` (nuevo) — argumentos, SQL, lectores, estado de la tabla, huella, cobertura, balizas, cotejo, `rowid`, cuota, recuentos.
+- `tools/medicion.ts` (nuevo) + `package.json` — la cáscara y `npm run medicion`.
+- `playwright.config.ts` — dos `webServer`.
+- `tests/unit/vocabulario.test.ts`, `migraciones.test.ts`, `medicion-orden.test.ts`, `huella.test.ts` (nuevos) — pureza y conjuntos, correspondencia con `PENDIENTES`, migraciones, la orden con respuestas fijas y un `npx` de mentira, la huella.
+- `tests/unit/receptor.test.ts`, `comparticion.test.ts`, `compartir.test.ts`, `espinas-de-ux.test.ts`, `medicion.test.ts`, `orden-de-llegada.test.ts`, `redes.test.ts`, `andamiaje.test.ts` — forma nueva, filas de la matriz del receptor, `tools/medicion.ts` como octava excepción de AD-22.
+- `tests/e2e/receptor.spec.ts`, `compartir-enlace.spec.ts` y comentarios de `pagina-de-cita`, `pagina-de-autor`, `pagina-404`, `portada`, `seo` — forma nueva y sitio construido con punto final.
+- `DESPLIEGUE.md` §3, `AGENTS.md`, `.gitignore` — la orden, la reversión, Time Travel, el receptor local; escollo de la huella; `medicion/.wrangler/` ignorado.
+
+**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0
+rechazados. `followup_review_recommended: false` (parches: 0 altos, 0 medios, 0 bajos;
+puntuación 0).
+
+**Verificación.**
+- `wrangler@4.151.1` existe y tiene `whoami --json`, `d1 migrations apply --local|--remote`,
+  `d1 execute --json`, `d1 info --json` y `dev --port --local` (comprobado con `--version` y
+  `--help`, sin tocar el remoto).
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de los nueve ficheros de la Verification — 345 en verde;
+  `tests/unit/huella.test.ts` — en rojo con «Sin huella versionada … La escribe `npm run
+  medicion -- desplegar` (Historia 23.3)»; `medicion.test.ts` (239) y `espinas-de-ux.test.ts`
+  (10) — en verde.
+- `npm test` (en segundo plano) — 129 ficheros en verde y 1 en rojo, el de la huella: 5.542
+  pruebas pasan, 1 falla.
+- `npm run medicion -- local` + `npm run medicion -- ensayo` — 0: «75 balizas enviadas, 75 filas
+  leídas, y casan … el rowid es aleatorio y las balizas se borraron». `PRAGMA table_info(eventos)`
+  del D1 local — las doce columnas en el orden de `esquema.sql`. Seis balizas a mano (tres
+  `vista-de-cita` y tres `copiado` con la forma v7.1, `origen: tiktok` guardado en las dos),
+  recuento, `UPDATE eventos SET rowid = abs(random())` y recuento — mismos recuentos, `rowid`
+  distintos. Receptor parado y 8787 libre.
+- `npx playwright test receptor.spec.ts pagina-de-cita.spec.ts kit.spec.ts compartir-enlace.spec.ts
+  busqueda.spec.ts --project=escritorio`, con los dos `webServer` — 98 en verde, 4 saltadas por
+  sus condiciones de siempre (proyecto móvil, datos). El D1 local guardó lo que emitieron las
+  páginas: 40 `vista-de-cita`, 2 `vista-de-superficie`, 4 `comparticion-de-enlace` y 8
+  `busqueda-sin-resultados`. Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `npm run medicion -- x`, `-- desplegar --rapido` y `env -u MEDICION_ENDPOINT npm run medicion --
+  comprobar` — código 2, sin contactar con nada.
+- A mano, con `sqlite3`: el `esquema.sql` de `origin/main` y encima la `0000` — `.schema`
+  idéntico; con la `0001` encima — `PRAGMA table_info` idéntico al del `esquema.sql` de la rama en
+  una base vacía, y los mismos dos índices.
+
+**Riesgos que quedan.**
+- `desplegar` y `comprobar` no se han corrido contra el remoto, por diseño: los corre Héctor en la
+  23.3. Su parte pura está probada con respuestas fijas; la forma de `whoami --json` y de
+  `d1 info --json` (`rows_written_24h`) es la que dice la spec, no se ha visto en vivo.
+- La huella queda en rojo en `npm test` hasta la 23.3, a propósito.
+- Solo se corrió el subconjunto de Playwright de la spec; el resto de la suite e2e se construye
+  ahora con punto final (el receptor local) y no se ha barrido entera.
