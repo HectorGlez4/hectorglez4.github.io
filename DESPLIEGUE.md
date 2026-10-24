@@ -398,10 +398,10 @@ Hecho en el repositorio:
   base en el plan gratuito; el tamaño de hoy lo da `npx --yes wrangler@4.151.1 d1 info medicion`, y lo
   informará la orden de la 23.10.
 
-  Mientras el Worker en vivo no se redespliegue con este cambio sigue numerando en orden de
-  llegada, y lo ya escrito sigue así hasta que lo baraje `npm run medicion -- desplegar`
-  (construida en la 23.2, abajo), que corre Héctor en la 23.3, desde la rama de la Épica 23: el
-  receptor con este cambio no se despliega antes. El orden importa: la 23.2 baraja solo
+  El Worker en vivo inserta así desde el **2026-10-24 a las 23:13 UTC**, cuando lo desplegó el
+  primer `npm run medicion -- desplegar` (construida en la 23.2, abajo), en la 23.3 y desde la
+  rama de la Épica 23, que barajó también lo ya escrito («El primer `desplegar`», abajo); hasta
+  entonces numeraba en orden de llegada. El orden importa: la 23.2 baraja solo
   después de comprobar con su baliza que el receptor en vivo ya inserta con `rowid`
   aleatorio, porque barajar con el Worker viejo dejaría lo que llegue después otra vez en
   orden de llegada. Por lo mismo, una vuelta atrás del Worker a una versión anterior a la
@@ -413,7 +413,8 @@ Hecho en el repositorio:
   producción tal cual —seis columnas: jornada, evento, ruta, origen, destino y consulta, y
   sus dos índices—, toda con `IF NOT EXISTS`: en la base de producción no hace nada. La `0001`
   añade seis columnas, solo con `ALTER TABLE … ADD COLUMN`: `via`, `zona`, `tramo`,
-  `filtros`, `indexable` y `primera`. Las migraciones nunca se revierten.
+  `filtros`, `indexable` y `primera`. Las dos están aplicadas en producción desde el
+  2026-10-24 (23.3). Las migraciones nunca se revierten.
 - `medicion/esquema.sql` — el estado acumulado de las migraciones, de **referencia**: doce
   columnas. Ninguna base se crea desde él. Cada columna después de `ruta` es de unos eventos
   —`origen` y `via`, las Marcas de origen y de difusión de las vistas y la lectura (FR-22);
@@ -427,7 +428,8 @@ Hecho en el repositorio:
 - `medicion/huella-del-vocabulario.json` — la huella del vocabulario desplegado. La escribe
   solo `npm run medicion -- desplegar`, y `npm test` falla si no casa con
   `src/lib/vocabulario.ts`: así el sitio no se despliega con un vocabulario que el receptor en
-  vivo no conoce (AD-14). Nunca se escribe a mano.
+  vivo no conoce (AD-14). Nunca se escribe a mano. La primera la escribió el `desplegar` del
+  2026-10-24 (23.3) y entró en la rama de la Épica 23 en `6aece9a77f`.
 - `[observability] enabled = false` en `wrangler.toml`. El registro de acceso de la
   plataforma guarda IP y agente de usuario; apagarlo es parte de la propiedad, no una
   opción de rendimiento.
@@ -445,8 +447,9 @@ npx --yes wrangler@4.151.1 deploy               # imprime la URL del Worker
 Así se hizo el 2026-09-02, con `--file=esquema.sql` en lugar de las migraciones, que no
 existían. **Desde la Historia 23.2 una base nueva —local, de pruebas o recreada— se crea solo
 aplicando `migrations/`**, nunca desde `esquema.sql`: así tiene el mismo `d1_migrations` que
-la de producción y la siguiente migración se aplica igual en las dos. Para la base que ya
-existe, lo de cada día es `npm run medicion -- desplegar`, abajo.
+la de producción —que lo tiene desde el 2026-10-24, con la `0000` y la `0001` (23.3)— y la
+siguiente migración se aplica igual en las dos. Para la base que ya existe, lo de cada día es
+`npm run medicion -- desplegar`, abajo.
 
 **El paso que no está en esa lista y para el despliegue en seco** (hecho el 2026-09-02): la
 cuenta necesita un **subdominio `workers.dev`**, que se elige una sola vez y lo comparten
@@ -706,6 +709,44 @@ y construyen el sitio con `MEDICION_ENDPOINT=http://localhost:8787/` (`playwrigh
 toda construcción de rama con medición —Playwright, y la de Lighthouse de la 23.11, que se hace
 a mano con `MEDICION_ENDPOINT=http://localhost:8787/ npm run build` y el receptor local en
 marcha— apunta a `wrangler dev` con D1 local, nunca a producción.
+
+### El primer `desplegar` — Historia 23.3 (2026-10-24)
+
+Corrió el **2026-10-24 a las 23:13 UTC** desde la rama de la Épica 23 (`v8/epica-23`, en
+`b4303b0e7c`), sin huella versionada —era el primero—, así que cotejó el receptor de la rama
+contra el vocabulario de `origin/main` (`ed5a3f47e2`), el que envía el sitio en vivo, y lo cubría.
+Lo corrió el orquestador del bucle v8-ralph con autorización de Héctor del mismo día, después de
+un `ensayo` en verde contra el D1 local, y salió con **0**. Quedó aplicado, en este orden:
+
+- **Las migraciones, en remoto**: `0000_tabla_de_partida.sql`, que no cambió nada —la orden
+  reconoció antes la tabla de partida— y dejó anotada la línea de partida en `d1_migrations`, y
+  `0001_vocabulario_de_la_v8.sql`, con sus seis columnas a nulo en las filas de antes. Desde ese día
+  la base de producción **tiene migraciones**: «No hay migración», lo que esta sección decía hasta
+  la 23.2, ya no es cierto tampoco en producción, y su esquema es el de `medicion/migrations/` y no
+  el `esquema.sql` del 2026-09-02.
+- **El receptor**: `medicion-sabiduria-de-bolsillo`, versión
+  **`23386626-a2b0-4c59-8d69-f78ab906ba10`**, con el vocabulario de la v8 y el `rowid` aleatorio
+  de la 23.12. La versión que había antes es anterior a la 23.12 y numera en orden de llegada: si
+  lo que envía el sitio de la v7.1 dejara de llegar, la vuelta atrás que pide la 23.3 es desplegar
+  desde la principal el receptor de la principal, que conserva el `rowid` aleatorio; un `rollback`
+  a esa versión volvería al orden de llegada (Reversión, arriba).
+- **La baliza**: 87 balizas enviadas y 86 filas leídas —la del evento inventado no deja fila—, que
+  casaron al primer intento; `rowid` aleatorio; las balizas, borradas.
+- **El barajado**: 4.201 filas, unas 12.603 escrituras; con las 1.797 escritas en 24 h y otras
+  tantas de reserva, 16.197 de las 100.000 del día. Los recuentos por (jornada, evento) de antes y
+  de después coinciden en las 50 jornadas; están, con fecha, en el spec de la historia
+  (`_bmad-output/implementation-artifacts/spec-23-3-la-migracion-y-el-receptor-llegan-antes-que-el-sitio.md`).
+- **Los instantes para Time Travel**, del reloj del equipo: antes de migrar,
+  `2026-10-24T23:13:16.949Z`; antes de barajar, `2026-10-24T23:13:45.352Z`. Sirven 7 días en el
+  plan gratuito.
+- **La huella**: `medicion/huella-del-vocabulario.json` (`escritaEl: 2026-10-24`, del commit
+  `b4303b0e7c`), commiteada en la rama en `6aece9a77f` y nunca en la principal. Con ella
+  `npm test` vuelve a verde en la rama.
+
+Queda por leer, antes del merge de la 23.11, la primera jornada cerrada tras el despliegue —la
+2026-10-25 UTC es la primera entera bajo el receptor nuevo—: sus eventos tienen que seguir
+llegando como antes, porque el sitio en vivo sigue en la v7.1. El plan contratado de Cloudflare lo
+revisa y lo anota aquí la 23.11; la cuota de este barajado se contó con la del plan gratuito.
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
