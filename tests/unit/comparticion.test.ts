@@ -5,33 +5,66 @@ import { EVENTOS, EVENTOS_VALIDOS, guionDeMedicion } from '../../src/lib/medicio
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import { DESTINOS, DESTINOS_VALIDOS, DESTINO_OPACO } from '../../src/lib/compartir.ts';
 import { interpretar } from '../../medicion/receptor.ts';
+import worker from '../../medicion/worker.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
 const INSTANTE = new Date('2026-08-12T05:15:00Z');
 const baliza = (carga: unknown) => JSON.stringify(carga);
 
 /**
- * Los elementos de la lista que abre el paréntesis de `texto[desde]`, separados por las
- * comas de su nivel y hasta el paréntesis que lo cierra: los anidados —`abs(random())`—
- * son parte de un elemento, no el final de la lista.
+ * Los elementos de la lista que abre el primer paréntesis tras `apertura` en `sql`,
+ * separados por las comas de su nivel y hasta el paréntesis que la cierra: los anidados
+ * —`abs(random())`— y lo que va entre comillas simples son parte de un elemento, no el
+ * final de la lista. `null` si `apertura` no está o la lista no se cierra.
  */
-function listaEntreParentesis(texto: string, desde: number): string[] {
-  if (texto[desde] !== '(') throw new Error(`no hay paréntesis de apertura en ${desde}`);
+function listaTras(sql: string, apertura: RegExp): string[] | null {
+  const encontrada = apertura.exec(sql);
+  if (encontrada === null) return null;
   const elementos: string[] = [];
   let nivel = 0;
+  let enLiteral = false;
   let actual = '';
-  for (const caracter of texto.slice(desde + 1)) {
-    if (caracter === ')' && nivel === 0) return [...elementos, actual.trim()];
-    if (caracter === ',' && nivel === 0) {
+  for (const caracter of sql.slice(encontrada.index + encontrada[0].length)) {
+    if (caracter === "'") enLiteral = !enLiteral;
+    else if (!enLiteral && caracter === ')' && nivel === 0) return [...elementos, actual.trim()];
+    else if (!enLiteral && caracter === ',' && nivel === 0) {
       elementos.push(actual.trim());
       actual = '';
       continue;
-    }
-    if (caracter === '(') nivel++;
-    if (caracter === ')') nivel--;
+    } else if (!enLiteral && caracter === '(') nivel++;
+    else if (!enLiteral && caracter === ')') nivel--;
     actual += caracter;
   }
-  throw new Error('la lista no se cierra');
+  return null;
+}
+
+/**
+ * El SQL que el Worker envía al D1 con una baliza válida —no el texto del fichero, que un
+ * comentario con «VALUES (» o una lista partida con `+` cambiarían (Historia 23.12)—.
+ */
+async function sqlQueEnviaElWorker(): Promise<string[]> {
+  type Entorno = Parameters<typeof worker.fetch>[1];
+  const enviado: string[] = [];
+  const sentencia: ReturnType<Entorno['MEDICION']['prepare']> = {
+    bind: () => sentencia,
+    run: async () => ({}),
+  };
+  const entorno: Entorno = {
+    MEDICION: {
+      prepare(sql: string) {
+        enviado.push(sql);
+        return sentencia;
+      },
+    },
+  };
+  await worker.fetch(
+    new Request('https://medicion.invalid/', {
+      method: 'POST',
+      body: baliza({ evento: EVENTOS.copiado, ruta: '/cita/una' }),
+    }),
+    entorno,
+  );
+  return enviado;
 }
 
 /** Historia 10.4 — medir la compartición. */
@@ -204,14 +237,13 @@ describe('Historia 10.4 — SM-5 y SM-7 comparables', () => {
     expect(readFileSync(resolve(raiz, 'DESPLIEGUE.md'), 'utf8')).toContain('SM-7');
   });
 
-  it('las columnas del INSERT del Worker son exactamente las del esquema', () => {
+  it('las columnas del INSERT del Worker son exactamente las del esquema', async () => {
     /*
      * La lista vive en dos ficheros y ya creció dos veces —`origen` en la 8.2 y `destino`
      * en la 10.4—. Divergir no rompe ninguna prueba de lógica: rompe el despliegue, en
      * producción, como eventos que no se guardan y en silencio.
      */
     const esquema = readFileSync(resolve(raiz, 'medicion/esquema.sql'), 'utf8');
-    const worker = readFileSync(resolve(raiz, 'medicion/worker.ts'), 'utf8');
 
     // Se recorre línea a línea hasta el cierre: un comentario de columna puede contener
     // «);» —«(FR-20);» lo contenía— y cortar por la primera aparición perdía columnas.
@@ -221,23 +253,21 @@ describe('Historia 10.4 — SM-5 y SM-7 comparables', () => {
       .map((linea) => linea.trim().match(/^([a-z_]+)\s+(TEXT|INTEGER|REAL|BLOB)/i)?.[1])
       .filter((columna): columna is string => columna !== undefined);
 
-    const enElInsert = worker
-      .match(/INSERT INTO eventos \(([^)]+)\)/)![1]
-      .split(',')
-      .map((columna) => columna.trim());
+    const enviado = await sqlQueEnviaElWorker();
+    expect(enviado).toHaveLength(1);
+    const [sql] = enviado;
+    const enElInsert = listaTras(sql, /^INSERT INTO eventos\s*\(/);
+    const valores = listaTras(sql, /\bVALUES\s*\(/);
 
     // `rowid` no es columna del esquema: es la implícita de SQLite, y el Worker la da
     // aleatoria para que el orden de las filas no sea el de llegada (Historia 23.12).
     expect(enElEsquema.length).toBeGreaterThan(0);
-    expect(enElInsert).toEqual(['rowid', ...enElEsquema]);
+    expect(enElInsert, sql).toEqual(['rowid', ...enElEsquema]);
 
     // Y tantos valores como columnas, y tantos marcadores como columnas del esquema: uno
     // de más o de menos falla en tiempo de ejecución, no al compilar. La lista se lee hasta
     // su paréntesis de cierre, no hasta el primero: `abs(random())` trae dos anidados.
-    const valores = listaEntreParentesis(worker, worker.indexOf('VALUES (') + 'VALUES '.length);
-    expect(valores[0]).toBe('abs(random())');
-    expect(valores).toHaveLength(enElInsert.length);
-    expect(valores.filter((valor) => valor === '?')).toHaveLength(enElEsquema.length);
+    expect(valores, sql).toEqual(['abs(random())', ...enElEsquema.map(() => '?')]);
   });
 });
 
