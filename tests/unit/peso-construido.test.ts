@@ -2,9 +2,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
-import { mkdir, mkdtemp, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, relative, sep } from 'node:path';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 import {
   AUTOR_VALIDO,
@@ -24,8 +24,9 @@ import { milesEnEspañol } from '../../src/lib/formato.ts';
  * con el aviso y el tope rebajados **en la copia** bajo el peso del fixture, que es la única
  * forma de ver la construcción detenerse sin engordar el sitio (AD-21: nunca en el árbol).
  * Después, en la misma copia, se vuelve a parchear su `umbrales.ts` y se corre solo el paso,
- * que es barato, para los demás veredictos. Las decisiones puras se prueban en
- * `tests/unit/peso.test.ts`.
+ * que es barato, para los demás veredictos. Cada prueba escribe los umbrales que necesita
+ * antes de correrlo, así que no depende de lo que dejó la anterior y corre igual sola
+ * (`-t`). Las decisiones puras se prueban en `tests/unit/peso.test.ts`.
  */
 
 const ejecutar = promisify(execFile);
@@ -81,6 +82,9 @@ const CORPUS = {
 /** Fuera de Actions, para que la salida no dependa de dónde corra la suite. */
 const SIN_ACTIONS = { GITHUB_ACTIONS: '' };
 
+/** Como lo corre el flujo de publicación, que es donde el aviso tiene que verse. */
+const EN_ACTIONS = { GITHUB_ACTIONS: 'true' };
+
 interface Salida {
   codigo: number;
   stdout: string;
@@ -88,32 +92,46 @@ interface Salida {
 }
 
 /** Corre solo el paso, con `cwd` donde busca `dist/`. */
-async function correrElPaso(script: string, cwd: string): Promise<Salida> {
+async function correrElPaso(
+  script: string,
+  cwd: string,
+  entorno: Record<string, string> = SIN_ACTIONS,
+): Promise<Salida> {
   try {
     const { stdout, stderr } = await ejecutar(join(RAIZ, 'node_modules', '.bin', 'tsx'), [script], {
       cwd,
-      env: { ...process.env, FORCE_COLOR: '0', ...SIN_ACTIONS },
+      env: { ...process.env, FORCE_COLOR: '0', ...entorno },
     });
     return { codigo: 0, stdout, stderr };
   } catch (error) {
-    const e = error as { code?: number; stdout?: string; stderr?: string };
+    const e = error as { code?: number | string | null; stdout?: string; stderr?: string };
+    // Un código que no es un número es que el paso ni arrancó (`ENOENT`, sin `tsx`): eso no es
+    // un veredicto, y tomarlo por un 1 haría pasar en falso las pruebas que esperan un 1.
+    if (typeof e.code === 'string') throw error;
     return { codigo: e.code ?? 1, stdout: e.stdout ?? '', stderr: e.stderr ?? '' };
   }
 }
 
-/** Cada fichero de `dist/` con su tamaño y su huella: si el paso tocara algo, cambiaría. */
+/**
+ * Cada fichero de `dist/` con su tamaño y su huella: si el paso tocara algo, cambiaría.
+ *
+ * El listado lo da `find -L`, no el recorrido del paso: así el número de ficheros que el paso
+ * informa se coteja con otra forma de contarlos, y un fallo de la suya no se repite aquí.
+ */
 async function huellaDe(dist: string): Promise<Map<string, string>> {
+  const { stdout } = await ejecutar('find', ['-L', '.', '-type', 'f'], { cwd: dist });
   const huella = new Map<string, string>();
-  for (const entrada of await readdir(dist, { withFileTypes: true, recursive: true })) {
-    if (!entrada.isFile()) continue;
-    const fichero = join(entrada.parentPath, entrada.name);
-    const contenido = await readFile(fichero);
-    huella.set(
-      relative(dist, fichero).split(sep).join('/'),
-      `${contenido.length}:${createHash('sha256').update(contenido).digest('hex')}`,
-    );
+  for (const linea of stdout.split('\n').filter((l) => l !== '')) {
+    const ruta = linea.replace(/^\.\//u, '');
+    const contenido = await readFile(join(dist, ruta));
+    huella.set(ruta, `${contenido.length}:${createHash('sha256').update(contenido).digest('hex')}`);
   }
   return huella;
+}
+
+/** Escribe en la copia el `umbrales.ts` que necesita una prueba, antes de correr el paso. */
+async function conUmbrales(proyecto: string, cambios: Parameters<typeof umbralesCon>[0]): Promise<void> {
+  await writeFile(join(proyecto, 'src/lib/umbrales.ts'), umbralesCon(cambios), 'utf8');
 }
 
 const aLimpiar: string[] = [];
@@ -173,21 +191,39 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
   });
 
   it('solo el paso, con el tope rebajado: sale con 1 y sin traza', async () => {
+    await conUmbrales(proyecto, { aviso: 1, tope: 2 });
     const salida = await correrElPaso(paso, proyecto);
     expect(salida.codigo, salida.stderr).toBe(1);
+    expect(salida.stderr).toMatch(/^dist\/ pesa /u);
     expect(salida.stderr).toContain('TOPE_DE_PESO_DE_DIST');
     expect(salida.stderr).not.toMatch(/^\s+at /mu);
     expect(salida.stdout).toContain('Peso de dist/:');
   });
 
   it('aviso bajo y tope alto: sale con 0 y avisa por stderr', async () => {
-    await writeFile(join(proyecto, 'src/lib/umbrales.ts'), umbralesCon({ aviso: 1 }), 'utf8');
+    await conUmbrales(proyecto, { aviso: 1 });
     const salida = await correrElPaso(paso, proyecto);
     expect(salida.codigo, salida.stderr).toBe(0);
     expect(salida.stderr).toMatch(/^Aviso de peso: /u);
     expect(salida.stderr).toContain('AVISO_DE_PESO_DE_DIST');
     expect(salida.stderr).toContain('no decide nada');
     expect(salida.stdout).not.toContain('Aviso');
+  });
+
+  it('en GitHub Actions el aviso sale anotado con ::warning:: y no rompe', async () => {
+    await conUmbrales(proyecto, { aviso: 1 });
+    const salida = await correrElPaso(paso, proyecto, EN_ACTIONS);
+    expect(salida.codigo, salida.stderr).toBe(0);
+    expect(salida.stderr).toMatch(/^::warning::Aviso de peso: /u);
+    expect(salida.stdout).not.toMatch(/^::/mu);
+  });
+
+  it('en GitHub Actions el tope sale anotado con ::error:: y sale con 1', async () => {
+    await conUmbrales(proyecto, { aviso: 1, tope: 2 });
+    const salida = await correrElPaso(paso, proyecto, EN_ACTIONS);
+    expect(salida.codigo, salida.stderr).toBe(1);
+    expect(salida.stderr).toMatch(/^::error::dist\/ pesa /u);
+    expect(salida.stdout).not.toMatch(/^::/mu);
   });
 
   it('con los valores de Héctor: sale con 0, las cifras por stdout y ningún aviso', async () => {
@@ -203,7 +239,7 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
   it('con tope de PNG 1: sale con 0 y avisa del PNG', async () => {
     const png = [...huellaAntes.keys()].filter((ruta) => ruta.endsWith('.png')).length;
     expect(png).toBeGreaterThan(1);
-    await writeFile(join(proyecto, 'src/lib/umbrales.ts'), umbralesCon({ png: 1 }), 'utf8');
+    await conUmbrales(proyecto, { png: 1 });
     const salida = await correrElPaso(paso, proyecto);
     expect(salida.codigo, salida.stderr).toBe(0);
     expect(salida.stderr).toContain(`Aviso de PNG: dist/ trae ${milesEnEspañol(png)} PNG`);
@@ -212,10 +248,39 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
   });
 
   it('el paso no altera dist/: mismos ficheros, tamaños y contenido antes y después', async () => {
-    expect(await huellaDe(dist)).toEqual(huellaAntes);
+    // Con los dos desenlaces: el que avisa y el que se detiene sobre el tope.
+    for (const cambios of [{ aviso: 1 }, { aviso: 1, tope: 2 }]) {
+      const antes = await huellaDe(dist);
+      await conUmbrales(proyecto, cambios);
+      await correrElPaso(paso, proyecto);
+      expect(await huellaDe(dist)).toEqual(antes);
+    }
   });
 
-  it('sin dist/ que medir, o con un dist/ que no se deja leer, lo dice y sale con 1', async () => {
+  it('sigue los enlaces simbólicos, como el empaquetado del despliegue, y salta los bucles', async () => {
+    await writeFile(join(proyecto, 'src/lib/umbrales.ts'), UMBRALES_DEL_ARBOL, 'utf8');
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-peso-'));
+    aLimpiar.push(raiz);
+    const conEnlaces = join(raiz, 'dist');
+    await mkdir(join(conEnlaces, 'sub'), { recursive: true });
+    await writeFile(join(conEnlaces, 'a.txt'), '0123456789', 'utf8');
+    await writeFile(join(conEnlaces, 'sub', 'c.txt'), '01234', 'utf8');
+    await symlink('a.txt', join(conEnlaces, 'b.txt'));
+    await symlink('sub', join(conEnlaces, 'enlace'));
+    await symlink('..', join(conEnlaces, 'sub', 'vuelta'));
+    // a.txt, b.txt → a.txt, sub/c.txt y enlace/c.txt: 30 bytes en 4 ficheros; sub/vuelta, no.
+    const salida = await correrElPaso(paso, raiz);
+    expect(salida.codigo, salida.stderr).toBe(0);
+    expect(salida.stdout).toContain('Peso de dist/: 30 bytes (0 MiB) en 4 ficheros');
+
+    await symlink('no-existe.txt', join(conEnlaces, 'roto.txt'));
+    const roto = await correrElPaso(paso, raiz);
+    expect(roto.codigo).toBe(1);
+    expect(roto.stderr).toContain('No se pudo medir el peso de dist/');
+  });
+
+  it('sin dist/ que medir, con un dist/ vacío o con uno que no se deja leer, lo dice y sale con 1', async () => {
+    await writeFile(join(proyecto, 'src/lib/umbrales.ts'), UMBRALES_DEL_ARBOL, 'utf8');
     const vacio = await mkdtemp(join(tmpdir(), 'sabiduria-peso-'));
     aLimpiar.push(vacio);
     const sinDist = await correrElPaso(paso, vacio);
@@ -223,6 +288,15 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     expect(sinDist.stderr).toContain('No se pudo medir el peso de dist/');
     expect(sinDist.stderr).not.toMatch(/^\s+at /mu);
     expect(sinDist.stdout).toBe('');
+
+    const anotado = await correrElPaso(paso, vacio, EN_ACTIONS);
+    expect(anotado.codigo).toBe(1);
+    expect(anotado.stderr).toMatch(/^::error::No se pudo medir el peso de dist\/ /u);
+
+    await mkdir(join(vacio, 'dist', 'vacia'), { recursive: true });
+    const distVacio = await correrElPaso(paso, vacio);
+    expect(distVacio.codigo).toBe(1);
+    expect(distVacio.stderr).toContain('dist/ no trae ningún fichero');
 
     const conFichero = join(vacio, 'otro');
     await mkdir(conFichero);

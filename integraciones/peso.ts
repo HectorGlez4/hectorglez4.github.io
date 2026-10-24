@@ -11,31 +11,58 @@
  * no hay `dist/` que medir; con 0 en lo demás, avise o no. No escribe nada y no usa la red.
  */
 
-import { lstat, readdir } from 'node:fs/promises';
+import { readdir, realpath, stat } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
-import { medirDist, parteDePeso, type FicheroDeDist } from '../tools/lib/peso.ts';
+import {
+  errorDeLectura,
+  medirDist,
+  parteDePeso,
+  type FicheroDeDist,
+} from '../tools/lib/peso.ts';
 import {
   AVISO_DE_PESO_DE_DIST,
   TOPE_DE_PESO_DE_DIST,
   TOPE_DE_PNG_DE_DIST,
 } from '../src/lib/umbrales.ts';
 
-/** Los ficheros regulares de `dist/`, con su ruta relativa y `/`, y su tamaño en bytes. */
+/**
+ * Los ficheros de `dist/`, con su ruta relativa y `/`, y su tamaño en bytes.
+ *
+ * Mide lo que sube el despliegue, y `upload-pages-artifact` empaqueta con
+ * `tar --dereference`: **sigue los enlaces simbólicos**. Así que aquí también: un enlace a un
+ * fichero cuenta con el tamaño de su destino, y uno a un directorio se recorre. Un enlace que
+ * vuelve a un directorio que ya se está recorriendo se salta, como hace `tar` con un bucle, y
+ * uno roto hace fallar la lectura —también rompería el empaquetado—. Hoy ni Astro ni Pagefind
+ * escriben enlaces; esto es para que el día que alguno llegue no se quede sin contar.
+ */
 async function ficherosDeDist(dist: string): Promise<FicheroDeDist[]> {
-  const entradas = await readdir(dist, { withFileTypes: true, recursive: true });
-  const regulares = entradas.filter((entrada) => entrada.isFile());
-  return Promise.all(
-    regulares.map(async (entrada) => {
-      const fichero = join(entrada.parentPath, entrada.name);
-      return {
-        ruta: relative(dist, fichero).split(sep).join('/'),
-        bytes: (await lstat(fichero)).size,
-      };
-    }),
-  );
+  const ficheros: FicheroDeDist[] = [];
+
+  async function recorrer(directorio: string, antepasados: ReadonlySet<string>): Promise<void> {
+    const real = await realpath(directorio);
+    if (antepasados.has(real)) return;
+    const conEste = new Set(antepasados).add(real);
+    const entradas = await readdir(directorio, { withFileTypes: true });
+    await Promise.all(
+      entradas.map(async (entrada) => {
+        const ruta = join(directorio, entrada.name);
+        const tipo = entrada.isSymbolicLink() ? await stat(ruta) : entrada;
+        if (tipo.isDirectory()) {
+          await recorrer(ruta, conEste);
+        } else if (tipo.isFile()) {
+          const bytes = (await stat(ruta)).size;
+          ficheros.push({ ruta: relative(dist, ruta).split(sep).join('/'), bytes });
+        }
+      }),
+    );
+  }
+
+  await recorrer(dist, new Set());
+  return ficheros;
 }
 
 const dist = resolve(process.cwd(), 'dist');
+const anotar = process.env.GITHUB_ACTIONS === 'true';
 
 let listado: FicheroDeDist[] | undefined;
 try {
@@ -43,10 +70,7 @@ try {
 } catch (fallo) {
   // Sin traza: lo que importa es qué faltó y dónde, no la pila de `readdir`.
   const motivo = fallo instanceof Error ? fallo.message : String(fallo);
-  process.stderr.write(
-    `No se pudo medir el peso de dist/ en ${dist}: ${motivo}. Este paso corre al final de ` +
-      '`npm run build`, después de Astro y de Pagefind, sobre lo que se va a desplegar.\n',
-  );
+  process.stderr.write(`${errorDeLectura(dist, motivo, { anotar })}\n`);
   process.exitCode = 1;
 }
 
@@ -54,7 +78,7 @@ if (listado !== undefined) {
   const parte = parteDePeso(
     medirDist(listado),
     { aviso: AVISO_DE_PESO_DE_DIST, tope: TOPE_DE_PESO_DE_DIST, topeDePng: TOPE_DE_PNG_DE_DIST },
-    { anotar: process.env.GITHUB_ACTIONS === 'true' },
+    { anotar },
   );
   process.stdout.write(`${parte.cifras.join('\n')}\n`);
   for (const aviso of parte.avisos) process.stderr.write(`${aviso}\n`);

@@ -304,7 +304,10 @@ export async function construirProyecto(
     );
     return { codigo: 0, salida: `${stdout}\n${stderr}` };
   } catch (error) {
-    const e = error as { code?: number; stdout?: string; stderr?: string };
+    const e = error as { code?: number | string | null; stdout?: string; stderr?: string };
+    // Un código que no es un número (`ENOENT`) es que la orden ni arrancó: no es una
+    // construcción fallida, y devolverlo como código haría pasar en falso un `not.toBe(0)`.
+    if (typeof e.code === 'string') throw error;
     return { codigo: e.code ?? 1, salida: `${e.stdout ?? ''}\n${e.stderr ?? ''}` };
   }
 }

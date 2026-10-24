@@ -11,7 +11,8 @@
  * `rss.xml` cambian de un día a otro con la Cita del Día; se miden y se informan aparte, y lo
  * juzgado es el resto. Ese reparto lo hace **solo** `medirDist`: lo juzgado es un tipo que
  * solo ella produce, y los veredictos lo reciben ya repartido, así que «sin lo que rota» no se
- * recuerda en dos sitios.
+ * recuerda en dos sitios. Queda una excepción de unos bytes hasta la 26.2: la Cita del Día de
+ * la portada entra en el índice de Pagefind, y `dist/pagefind/` cuenta en lo juzgado.
  *
  * Puro (AD-5): recibe rutas y tamaños, devuelve cifras y texto. Quien lee `dist/`, escribe
  * por la salida y decide el código de salida es `integraciones/peso.ts`, el paso final de
@@ -19,7 +20,7 @@
  */
 
 import { milesEnEspañol, porcentajeEnEspañol } from '../../src/lib/formato.ts';
-import { escaparAnotacion } from './ingresos.ts';
+import { escaparAnotacion } from './anotacion.ts';
 
 /**
  * Los ficheros de `dist/` que cambian con la jornada, por su ruta relativa a `dist/`.
@@ -68,6 +69,12 @@ export interface MedidaDeDist {
   desplegado: Recuento;
   /** Los ficheros de `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` que había. */
   rotan: Recuento;
+  /**
+   * Los de `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` que **no** había. Si una de esas páginas cambia
+   * de ruta, su fichero nuevo se juzga con el resto y el veredicto vuelve a depender del día:
+   * el parte los nombra para que eso no pase en silencio.
+   */
+  rotanQueFaltan: readonly string[];
   /** Lo desplegado menos lo que rota: lo único que miran los veredictos. */
   juzgado: Juzgado;
   /** Las Tarjetas Sociales (`tarjeta/…`), una parte de lo juzgado. */
@@ -92,6 +99,7 @@ export type VeredictoDePng = 'sin-tope' | 'dentro' | 'sobre-el-tope';
  */
 export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
   const queRotan = new Set(FICHEROS_QUE_ROTAN_CON_LA_JORNADA);
+  const vistos = new Set<string>();
   const desplegado = { bytes: 0, ficheros: 0 };
   const rotan = { bytes: 0, ficheros: 0 };
   const juzgado = { bytes: 0, ficheros: 0, png: 0 };
@@ -101,6 +109,7 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
     desplegado.bytes += bytes;
     desplegado.ficheros += 1;
     if (queRotan.has(ruta)) {
+      vistos.add(ruta);
       rotan.bytes += bytes;
       rotan.ficheros += 1;
       continue;
@@ -114,7 +123,13 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
     }
   }
 
-  return { desplegado, rotan, juzgado: juzgado as Juzgado, tarjetas };
+  return {
+    desplegado,
+    rotan,
+    rotanQueFaltan: FICHEROS_QUE_ROTAN_CON_LA_JORNADA.filter((ruta) => !vistos.has(ruta)),
+    juzgado: juzgado as Juzgado,
+    tarjetas,
+  };
 }
 
 /**
@@ -145,7 +160,7 @@ export interface ParteDePeso {
   cifras: string[];
   /** Lo que cruza un umbral sin detener la construcción. Vacío si nada cruza. */
   avisos: string[];
-  /** Solo sobre el tope del peso: la construcción sale con 1. */
+  /** Sobre el tope del peso, o con un `dist/` sin ficheros: la construcción sale con 1. */
   error?: string;
   veredictos: { peso: VeredictoDePeso; png: VeredictoDePng };
 }
@@ -175,6 +190,31 @@ function porcentaje(parte: number, todo: number): string {
   return `${porcentajeEnEspañol(todo === 0 ? 0 : Math.round((parte / todo) * 1000) / 10)} %`;
 }
 
+/** Cuánto queda hasta el umbral siguiente, o cuánto se pasa del tope. */
+function margen(bytes: number, umbrales: { aviso: number; tope: number }, peso: VeredictoDePeso): string {
+  if (peso === 'por-debajo') return `quedan ${bytesYMiB(umbrales.aviso - bytes)} hasta el aviso`;
+  if (peso === 'aviso') return `quedan ${bytesYMiB(umbrales.tope - bytes)} hasta el tope`;
+  return `pasa del tope en ${bytesYMiB(bytes - umbrales.tope)}`;
+}
+
+/** Con `anotar`, la orden de flujo delante y el texto escapado; sin él, el texto tal cual. */
+function anotado(orden: 'warning' | 'error', texto: string, anotar: boolean): string {
+  return anotar ? `::${orden}::${escaparAnotacion(texto)}` : texto;
+}
+
+/**
+ * Lo que el paso dice cuando no puede leer `dist/`: no existe, no es un directorio, o un
+ * enlace de dentro no lleva a ninguna parte. Con `anotar`, como `::error::`, igual que el tope.
+ */
+export function errorDeLectura(dist: string, motivo: string, opciones: { anotar: boolean }): string {
+  return anotado(
+    'error',
+    `No se pudo medir el peso de dist/ en ${dist}: ${motivo}. Este paso corre al final de ` +
+      '`npm run build`, después de Astro y de Pagefind, sobre lo que se va a desplegar.',
+    opciones.anotar,
+  );
+}
+
 /**
  * El parte del paso: las cifras, los avisos y el error, ya redactados.
  *
@@ -187,16 +227,23 @@ export function parteDePeso(
   umbrales: UmbralesDePeso,
   opciones: { anotar: boolean } = { anotar: false },
 ): ParteDePeso {
-  const { desplegado, rotan, juzgado, tarjetas } = medida;
+  const { desplegado, rotan, rotanQueFaltan, juzgado, tarjetas } = medida;
   const peso = veredictoDePeso(juzgado, umbrales);
   const png = veredictoDePng(juzgado, umbrales.topeDePng);
+  const presentes = FICHEROS_QUE_ROTAN_CON_LA_JORNADA.filter((ruta) => !rotanQueFaltan.includes(ruta));
 
   const cifras = [
     `Peso de dist/: ${bytesYMiB(desplegado.bytes)} en ${ficheros(desplegado.ficheros)}, pagefind/ incluido.`,
-    `Rotan con la jornada, aparte: ${bytesYMiB(rotan.bytes)} en ${ficheros(rotan.ficheros)} ` +
-      `(${FICHEROS_QUE_ROTAN_CON_LA_JORNADA.join(', ')}).`,
+    `Rotan con la jornada, aparte: ${bytesYMiB(rotan.bytes)} en ${ficheros(rotan.ficheros)}` +
+      (presentes.length === 0 ? '.' : ` (${presentes.join(', ')}).`) +
+      (rotanQueFaltan.length === 0
+        ? ''
+        : ` No están en dist/: ${rotanQueFaltan.join(', ')}; si su página cambió de ruta, ` +
+          'el fichero nuevo se juzga con el resto y FICHEROS_QUE_ROTAN_CON_LA_JORNADA ' +
+          '(tools/lib/peso.ts) tiene que nombrarlo.'),
     `Juzgado sin lo que rota: ${bytesYMiB(juzgado.bytes)} en ${ficheros(juzgado.ficheros)}; ` +
-      `aviso en ${bytesYMiB(umbrales.aviso)}, tope en ${bytesYMiB(umbrales.tope)}.`,
+      `aviso en ${bytesYMiB(umbrales.aviso)}, tope en ${bytesYMiB(umbrales.tope)}; ` +
+      `${margen(juzgado.bytes, umbrales, peso)}.`,
     `Tarjetas Sociales (tarjeta/): ${bytesYMiB(tarjetas.bytes)} en ${ficheros(tarjetas.ficheros)}, ` +
       `${porcentaje(tarjetas.bytes, juzgado.bytes)} de lo juzgado.`,
     umbrales.topeDePng === undefined
@@ -211,17 +258,26 @@ export function parteDePeso(
     avisos.push(
       `Aviso de peso: dist/ pesa ${bytesYMiB(juzgado.bytes)} sin lo que rota con la jornada, ` +
         `por encima del aviso de ${bytesYMiB(umbrales.aviso)} (AVISO_DE_PESO_DE_DIST) y sin pasar ` +
-        `del tope de ${bytesYMiB(umbrales.tope)} (TOPE_DE_PESO_DE_DIST), en src/lib/umbrales.ts. ` +
-        'El aviso no decide nada: la construcción sigue y se despliega. Queda margen para mudar ' +
-        'el alojamiento o adelgazar dist/ antes de que el tope pare el despliegue.',
+        `del tope de ${bytesYMiB(umbrales.tope)} (TOPE_DE_PESO_DE_DIST), en src/lib/umbrales.ts; ` +
+        `${margen(juzgado.bytes, umbrales, peso)}. El aviso no decide nada: la construcción ` +
+        'sigue y se despliega. Qué hacer antes de que el tope pare el despliegue —adelgazar ' +
+        'dist/ o mudar el alojamiento— lo decide Héctor.',
     );
   }
   if (peso === 'sobre-el-tope') {
     error =
       `dist/ pesa ${bytesYMiB(juzgado.bytes)} sin lo que rota con la jornada y pasa el tope de ` +
-      `${bytesYMiB(umbrales.tope)}: TOPE_DE_PESO_DE_DIST en src/lib/umbrales.ts. La construcción ` +
+      `${bytesYMiB(umbrales.tope)} en ${bytesYMiB(juzgado.bytes - umbrales.tope)}: ` +
+      'TOPE_DE_PESO_DE_DIST en src/lib/umbrales.ts. La construcción ' +
       'se detiene para no desplegar por encima del techo del alojamiento; sigue servido el sitio ' +
       'anterior. Se adelgaza dist/ o se cambia de alojamiento, y el tope lo mueve Héctor.';
+  }
+  if (desplegado.ficheros === 0) {
+    // Ausencia antes que cero: un dist/ sin ficheros no pesa 0 bytes, es que no hay nada que
+    // medir ni que desplegar.
+    error =
+      'dist/ no trae ningún fichero: no hay nada que medir ni que desplegar. Este paso corre ' +
+      'al final de `npm run build`, después de Astro y de Pagefind.';
   }
   if (png === 'sobre-el-tope') {
     avisos.push(
@@ -233,10 +289,8 @@ export function parteDePeso(
 
   return {
     cifras,
-    avisos: opciones.anotar ? avisos.map((aviso) => `::warning::${escaparAnotacion(aviso)}`) : avisos,
-    ...(error === undefined
-      ? {}
-      : { error: opciones.anotar ? `::error::${escaparAnotacion(error)}` : error }),
+    avisos: avisos.map((aviso) => anotado('warning', aviso, opciones.anotar)),
+    ...(error === undefined ? {} : { error: anotado('error', error, opciones.anotar) }),
     veredictos: { peso, png },
   };
 }
