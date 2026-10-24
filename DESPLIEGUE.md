@@ -204,9 +204,13 @@ los umbrales pueden llegar con menos Citas, nunca con más. La Épica 24 engorda
 Héctor revisa los valores.**
 
 Es una construcción local, sin `MEDICION_ENDPOINT` ni `SITE_URL`. La del flujo de publicación
-pesa algo más, porque lleva el guion de medición en línea en cada página HTML —unos 650 bytes
-por página: del orden de 3,5 MB con las 5.288 de hoy—. El paso en CI juzga esa, que es la que
-se despliega; la cifra de base no se compara con la del CI. `SITE_URL` no cambia nada mientras
+pesa algo más, pero desde la Historia 23.1 apenas: el emisor de la medición ya no va en línea
+en cada página —eran unos 650 bytes por página, del orden de 3,5 MB con las 5.288 de
+entonces—, sino en un solo fichero, `/medicion/{versión}.js` (menos de 1 KB), y lo que va en
+línea es el arranque, 65 bytes que llevan también las construcciones sin punto final. Lo que
+añade el punto final es ese fichero y la etiqueta que lo pide en cada página, unos 50 bytes.
+El paso en CI juzga esa construcción, que es la que se despliega; la cifra de base no se
+compara con la del CI. `SITE_URL` no cambia nada mientras
 el sitio corra en su dominio: no se define (§1) y el origen sale del mismo `CNAME` que en local.
 Si se definiera para una previsualización, cada URL absoluta de cada página —canónica, Open
 Graph, JSON-LD— y del sitemap cambiaría de largo, y con ella la medida.
@@ -434,8 +438,19 @@ su causa.
 
 Después, en el repositorio del sitio: **Settings → Secrets and variables → Actions →
 Secrets**, definir `MEDICION_ENDPOINT` con la URL que imprimió `wrangler deploy`. Sin esa
-variable el sitio no instala la medición y no envía un solo byte — que es como corre en
-desarrollo y en las pruebas.
+variable el build no escribe el fichero de medición ni lo pide ninguna página, y el sitio no
+envía un solo byte — que es como corre en desarrollo y en las pruebas. Queda el arranque en
+línea (`__medir` como cola), que no envía nada.
+
+**La medición es un fichero, y eso tiene un coste aceptado** (Historia 23.1, AD-6). El
+emisor se sirve como `/medicion/{versión}.js`, con la versión sacada del contenido —el
+guion y el punto final que lleva dentro—, y cada página lo pide con `<script src defer>` en el
+`<head>`. Con el techo de caché de §1 (`max-age=600`), cuando el guion cambia hay una ventana
+de hasta **10 minutos** en la que un visitante con la página anterior en caché pide un fichero
+que el despliegue nuevo ya no sirve: ese 404 no rompe nada —el arranque encola y la página
+funciona igual—, pero las vistas y acciones de esa visita **no se envían**. Se acepta: el
+guion cambia pocas veces, y siempre con un despliegue. Conservar el fichero anterior en el
+despliegue para cerrar esa ventana **sigue aplazado**; no hay hoy nada que lo haga.
 
 Consultar, sin panel de nadie:
 
