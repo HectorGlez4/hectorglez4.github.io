@@ -76,6 +76,10 @@ const instancia = cita.slug;
  * el mensaje en el fotograma siguiente: escribir el mismo texto sobre sí mismo no es un cambio
  * y no se anuncia. Y si el portapapeles falla tras una copia buena, `volver` ya ha quitado
  * temporizador, región y rótulo antes del respaldo.
+ *
+ * El `try` envuelve solo el portapapeles, y `__medir` va al final, fuera de él: si la medición
+ * fallara, la copia ya está hecha y confirmada, y no se enseña el respaldo de una copia que sí
+ * funcionó.
  */
 const ROTULO = 'Copiar la cita';
 
@@ -99,18 +103,18 @@ boton.addEventListener('click', async () => {
   volver();
   try {
     await navigator.clipboard.writeText(boton.dataset.carga);
-
-    __medir(EVENTO_COPIADO);
-    etiqueta.textContent = 'Copiado.';
-    boton.setAttribute('data-estado', 'copiado');
-    anunciar(anuncio, 'Copiado.');
-    temporizador = setTimeout(volver, 2000);
   } catch {
     isla.querySelector('[data-respaldo]').hidden = false;
     const campo = isla.querySelector('[data-respaldo-texto]');
     campo.focus();
     campo.select();
+    return;
   }
+  etiqueta.textContent = 'Copiado.';
+  boton.setAttribute('data-estado', 'copiado');
+  anunciar(anuncio, 'Copiado.');
+  temporizador = setTimeout(volver, 2000);
+  __medir(EVENTO_COPIADO);
 });
 `,
 );

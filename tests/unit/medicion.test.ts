@@ -2,6 +2,8 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
+import { Script } from 'node:vm';
+import { parseSync } from 'vite';
 import {
   ARRANQUE_DE_MEDICION,
   EVENTOS,
@@ -12,18 +14,20 @@ import {
   rutaDelGuionDeMedicion,
   versionDelGuion,
 } from '../../src/lib/medicion.ts';
-import { anunciar } from '../../src/lib/anuncio.ts';
+import { anunciar, guionQueAnuncia } from '../../src/lib/anuncio.ts';
 import { GUIONES_EXTERNOS, guionExternoDe } from '../../src/lib/guiones.ts';
 import {
   CITAS_POR_PAGINA,
   MAX_BYTES_DE_GUION,
+  MAX_BYTES_GUION_DE_MEDICION,
   MAX_CARACTERES_IMAGEN,
 } from '../../src/lib/umbrales.ts';
 import {
-  bytesConImportaciones,
   bytesDeGuionEnLinea,
+  descargaDeLaEntrada,
   etiquetasDeGuionExterno,
   guionesEnLinea,
+  guionesEnLineaConTipo,
   guionesExternosDe,
   importacionesEstaticasDe,
 } from './ayuda/guion.js';
@@ -335,17 +339,71 @@ describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
       '/islas/imagen.js',
       '/b.js',
     ]);
-    expect(externos[4]).toMatch(/^\(import sin literal\)/);
+    expect(externos[4]).toMatch(/^\(import\(\) sin literal\)/);
     // Lo ajeno y lo que no se sabe leer no casan con ninguna entrada: la prueba de `dist/` falla.
     expect(externos.filter((e) => guionExternoDe(e) === undefined)).toHaveLength(4);
   });
 
-  it('las importaciones estáticas se leen; las dinámicas no cuentan', () => {
+  it('el detector ve también lo que no es `<script src>` ni `import()`, y no lo que va en un comentario', () => {
+    /*
+     * Revisión de la 23.1: el detector solo miraba `<script src>` y el `import()` de los guiones
+     * en línea, así que un worker, un `modulepreload` o un `<script>` creado a mano descargaban
+     * guion fuera de la lista sin que la prueba de `dist/` lo viera. Y `\bsrc=` casaba con
+     * `data-src=`.
+     */
+    const html = [
+      '<img data-src="/no-es-guion.js">',
+      '<script data-src="/tampoco.js">/* import(\'/comentado.js\') */</script>',
+      '<link rel="modulepreload" href="/precargado.js">',
+      '<link rel="preload" as="script" href="/adelantado.js">',
+      '<link rel="preload" as="font" href="/letra.woff2">',
+      "<script>new Worker('/w.js');new SharedWorker(base + 'c.js');importScripts('/i.js');" +
+        "navigator.serviceWorker.register('/sw.js');document.createElement('script')</script>",
+      "<script type=\"module\">import x from '/modulo.js';</script>",
+    ].join('');
+    const externos = guionesExternosDe(html);
+    expect(externos.slice(0, 2)).toEqual(['/precargado.js', '/adelantado.js']);
+    expect(externos).toContain('/w.js');
+    expect(externos).toContain('/i.js');
+    expect(externos).toContain('/sw.js');
+    expect(externos).toContain('/modulo.js');
+    expect(externos.some((e) => e.startsWith('(new SharedWorker sin literal)'))).toBe(true);
+    expect(externos.some((e) => e.startsWith("(createElement('script') sin literal)"))).toBe(true);
+    for (const ausente of ['/no-es-guion.js', '/tampoco.js', '/comentado.js', '/letra.woff2']) {
+      expect(externos).not.toContain(ausente);
+    }
+    expect(externos.filter((e) => guionExternoDe(e) === undefined)).toHaveLength(externos.length);
+  });
+
+  it('las importaciones estáticas se leen del árbol, también tras un comentario; las dinámicas no cuentan', () => {
     expect(
       importacionesEstaticasDe(
-        "import a from './a.js';\nimport './b.js';export { c } from \"../c.js\";const d = import('./d.js');",
+        "import a from './a.js';\nimport './b.js';export { c } from \"../c.js\";const d = import('./d.js');" +
+          "/* x */import e from './e.js';// import f from './f.js'",
       ),
-    ).toEqual(['./a.js', '../c.js', './b.js']);
+    ).toEqual(['./a.js', './b.js', '../c.js', './e.js']);
+  });
+
+  it('lo que una entrada arranca se cuenta y se coteja con lo que declara', () => {
+    const ficheros: Record<string, string> = {
+      '/dist/p.js': "import './q.js'; const w = new Worker(`${base}w.js`);",
+      '/dist/q.js': 'export const q = 1;',
+      '/dist/w.js': "importScripts('/otro.js');",
+    };
+    const leer = (fichero: string) => Buffer.from(ficheros[fichero], 'utf8');
+    const declarada = descargaDeLaEntrada('/dist', '/p.js', [{ como: 'new Worker', ruta: '/w.js' }], leer);
+    expect(declarada.ficheros.sort()).toEqual(['/p.js', '/q.js', '/w.js']);
+    expect(declarada.bytes).toBe(Object.values(ficheros).reduce((n, f) => n + Buffer.byteLength(f), 0));
+    // El worker pide otro fichero que nadie declaró: fallo, no cero.
+    expect(declarada.sinDeclarar).toEqual(["/w.js: importScripts('/otro.js')"]);
+    expect(declarada.sinVer).toEqual([]);
+
+    const sinDeclarar = descargaDeLaEntrada('/dist', '/p.js', [], leer);
+    expect(sinDeclarar.sinDeclarar).toEqual(['/p.js: new Worker(`${base}w.js`)']);
+    const rancia = descargaDeLaEntrada('/dist', '/q.js', [{ como: 'import()', ruta: '/x.js' }], (f) =>
+      f === '/dist/x.js' ? Buffer.from('') : leer(f),
+    );
+    expect(rancia.sinVer).toEqual([{ como: 'import()', ruta: '/x.js' }]);
   });
 });
 
@@ -570,6 +628,9 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
     expect(existsSync(join(proyecto, 'dist', 'medicion'))).toBe(false);
     for (const [ruta, html] of paginasDe(proyecto)) {
       expect(guionesExternosDe(html).filter((e) => guionExternoDe(e)?.id === 'medicion'), ruta).toEqual([]);
+      // Ninguna etiqueta de guion, de la medición ni de nada: es la mitad «sin él, ninguno» de
+      // los criterios de JavaScript de las Historias 2.1 y 4.1, que se juzgaba en el navegador.
+      expect(etiquetasDeGuionExterno(html), ruta).toEqual([]);
       expect(html, ruta).not.toContain('sendBeacon');
       expect(guionesEnLinea(html), ruta).toContain(ARRANQUE_DE_MEDICION);
     }
@@ -599,13 +660,26 @@ describe('Historia 23.1 — lo que se descarga está en la lista y cabe en su to
 
     for (const guion of GUIONES_EXTERNOS) {
       for (const ruta of vistos.get(guion.id)!) {
-        const { bytes, ficheros } = bytesConImportaciones(dist, ruta, (f) => readFileSync(f));
-        console.log(`${guion.id}: ${ruta} y lo que importa, ${bytes} bytes de ${guion.tope}`);
+        // Lo que el fichero arranca al ejecutarse —el worker de Pagefind— cuenta en su tope, y
+        // un `new Worker`, `import()` o `importScripts` que la entrada no declare es un fallo.
+        const { bytes, ficheros, sinDeclarar, sinVer } = descargaDeLaEntrada(
+          dist,
+          ruta,
+          guion.arranca ?? [],
+          (f) => readFileSync(f),
+        );
+        console.log(`${guion.id}: ${ficheros.join(' + ')}, ${bytes} bytes de ${guion.tope}`);
         expect(bytes, `${ruta}: ${bytes} bytes`).toBeLessThanOrEqual(guion.tope);
-        // El fichero de medición es un guion clásico: no importa nada.
+        expect(sinDeclarar, `${guion.id} arranca lo que no declara en GUIONES_EXTERNOS`).toEqual([]);
+        expect(sinVer, `${guion.id} declara un arranque que sus ficheros ya no hacen`).toEqual([]);
+        // El fichero de medición es un guion clásico: no importa ni arranca nada.
         if (guion.id === 'medicion') expect(ficheros).toEqual([ruta]);
       }
     }
+    // El worker de Pagefind está en `dist/` y se cuenta: es lo que la revisión encontró fuera.
+    expect(GUIONES_EXTERNOS.find((g) => g.id === 'pagefind')!.arranca).toEqual([
+      { como: 'new Worker', ruta: '/pagefind/pagefind-worker.js' },
+    ]);
   }, 240_000);
 });
 
@@ -739,4 +813,112 @@ describe('Historia 23.1 — las islas llaman `__medir` a secas y anuncian con `a
     expect(vistos).toBeGreaterThan(0);
     expect(ARRANQUE_DE_MEDICION).toMatch(/__medir\s*=(?!=)/);
   }, 240_000);
+});
+
+/*
+ * Revisión de la 23.1 — lo que la primera pasada no fijaba.
+ *
+ * Los guiones de las islas se componen ahora como texto dentro de plantillas de TypeScript
+ * (`guionQueAnuncia`), que ni `astro check` ni ningún analizador miran: un `\.` que la plantilla
+ * se come o un `${` de más salen al visitante y solo los vería el Playwright local, que el CI no
+ * corre. Y el arranque promete abrir la cola antes que cualquier guion, cosa que nada medía.
+ */
+describe('Historia 23.1 — los guiones en línea se dejan analizar, y el arranque va primero', () => {
+  /** El primer `<script>` ejecutable de la página, con su cuerpo. */
+  const primerGuion = (html: string) =>
+    [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].find(
+      (m) => !/\btype\s*=\s*["']?application\/ld\+json\b/i.test(m[1]),
+    );
+
+  it('todo guion en línea de las dos construcciones es JavaScript válido', async () => {
+    let analizados = 0;
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      for (const [ruta, html] of paginasDe(proyecto)) {
+        for (const { cuerpo, modulo } of guionesEnLineaConTipo(html)) {
+          analizados++;
+          // Un guion clásico se juzga con la gramática de un guion clásico, que es la de `vm`;
+          // uno de módulo, con la de módulo.
+          if (modulo) expect(parseSync('guion.js', cuerpo, { sourceType: 'module' }).errors, ruta).toEqual([]);
+          else expect(() => new Script(cuerpo, { filename: ruta }), `${ruta}: ${cuerpo.slice(0, 80)}`).not.toThrow();
+        }
+      }
+    }
+    expect(analizados).toBeGreaterThan(0);
+  }, 240_000);
+
+  it('el arranque es el primer guion de toda página, antes que cualquier isla o fichero', async () => {
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      for (const [ruta, html] of paginasDe(proyecto)) {
+        const primero = primerGuion(html);
+        expect(primero?.[2], ruta).toBe(ARRANQUE_DE_MEDICION);
+        expect(primero?.[1], ruta).not.toMatch(/\bsrc\s*=/i);
+      }
+    }
+  }, 240_000);
+});
+
+describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
+  const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
+  const ANUNCIAR = colapsado(String(anunciar));
+
+  it('cada página lleva tantos guiones con `anunciar` como regiones `role="status"`, o más', async () => {
+    /*
+     * La prueba de las islas nombra tres; esta las descubre: una isla nueva con su región de
+     * estado y un anuncio escrito a mano —sin `requestAnimationFrame`, que la otra prueba
+     * vigila— dejaría su página con una región de más.
+     */
+    let regionesVistas = 0;
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
+      const anunciantes = guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR)).length;
+      regionesVistas += regiones;
+      expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
+        regiones,
+      );
+    }
+    expect(regionesVistas).toBeGreaterThan(0);
+  }, 240_000);
+
+  it('el texto de `anunciar` funciona solo, sin nada de su módulo alrededor', () => {
+    // Es lo que viaja: si el empaquetado le metiera un ayudante o un nombre de fuera, la isla
+    // fallaría en el navegador con el build en verde. Aquí se ejecuta tal cual.
+    const fotogramas: (() => void)[] = [];
+    const deTexto = new Function('requestAnimationFrame', `return ${String(anunciar)};`)(
+      (fotograma: () => void) => fotogramas.push(fotograma),
+    ) as typeof anunciar;
+    const region = { textContent: 'Copiado.' as string | null };
+    deTexto(region, 'Copiado.');
+    expect(region.textContent).toBe('');
+    for (const fotograma of fotogramas) fotograma();
+    expect(region.textContent).toBe('Copiado.');
+  });
+
+  it('`guionQueAnuncia` rompe ante lo que cerraría el `<script>` o no sería JavaScript', () => {
+    expect(() => guionQueAnuncia({ 'no-vale': 1 }, '')).toThrow(/identificador/);
+    expect(() => guionQueAnuncia({ NADA: undefined }, '')).toThrow(/JSON/);
+    expect(() => guionQueAnuncia({}, "region.innerHTML = '</script>';")).toThrow(/<\/script/);
+    expect(() => guionQueAnuncia({}, 'const a = 1; <!-- b')).toThrow(/<!--/);
+    // Un valor con `</script>` sí vale: sale con el `<` escapado, como lo escapa `define:vars`.
+    expect(guionQueAnuncia({ VALOR: '</script>' }, 'f(VALOR);')).not.toContain('</script');
+  });
+});
+
+describe('Historia 23.1 — el tope del fichero se juzga con el punto final de verdad', () => {
+  it('el build se para si el fichero, con el punto final de la construcción, pasa de su tope', async () => {
+    // La prueba de `dist/` mide con el punto final de las pruebas; el que se despliega es otro y
+    // va dentro del fichero. Por eso lo juzga el propio endpoint, con el de cada construcción.
+    const { getStaticPaths } = await import('../../src/pages/medicion/[version].js.ts');
+    const antes = process.env.MEDICION_ENDPOINT;
+    try {
+      process.env.MEDICION_ENDPOINT = ENDPOINT;
+      expect(getStaticPaths()).toHaveLength(1);
+      process.env.MEDICION_ENDPOINT = `https://medicion.ejemplo.workers.dev/${'e'.repeat(MAX_BYTES_GUION_DE_MEDICION)}`;
+      expect(() => getStaticPaths()).toThrow(/MAX_BYTES_GUION_DE_MEDICION/);
+      delete process.env.MEDICION_ENDPOINT;
+      expect(getStaticPaths()).toEqual([]);
+    } finally {
+      if (antes === undefined) delete process.env.MEDICION_ENDPOINT;
+      else process.env.MEDICION_ENDPOINT = antes;
+    }
+  });
 });

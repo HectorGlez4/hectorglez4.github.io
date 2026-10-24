@@ -187,7 +187,8 @@ export const MAX_BYTES_DE_GUION = 6656;
  *
  * `MAX_BYTES_DE_GUION` mide lo que va en línea; estos miden lo que se **descarga**, una
  * entrada por cosa que `src/lib/guiones.ts` deja pedir. Cuentan los bytes UTF-8 sin comprimir
- * del fichero y de lo que importa de forma estática, y los vigila
+ * del fichero, de lo que importa de forma estática y de lo que arranca al ejecutarse (el worker
+ * de Pagefind), y los vigila
  * `tests/unit/medicion.test.ts` sobre el `dist/` de un sitio construido con punto final y con
  * Pagefind. Cada uno se fijó con el precedente de `MAX_BYTES_DE_GUION`: lo medido el
  * 2026-10-24 más unos 400 bytes, suficiente para no ir justo y poco para que un crecimiento
@@ -212,14 +213,17 @@ export const MAX_BYTES_GUION_DE_MEDICION = 1320;
 export const MAX_BYTES_GUION_DE_IMAGEN = 7550;
 
 /**
- * El cliente de Pagefind, `/pagefind/pagefind.js` — FR-7.
+ * El cliente de Pagefind, `/pagefind/pagefind.js`, y el worker que arranca — FR-7.
  *
- * Medido: 45.555 bytes con Pagefind 1.5.2, sin importaciones estáticas (el índice y el
- * WebAssembly llegan por `fetch`, no por `import`). No lo escribe el proyecto: lo escribe
- * Pagefind al construir, así que subir de versión puede moverlo, y este tope es lo que hace
- * que eso se vea.
+ * Medido: 86.810 bytes con Pagefind 1.5.2 — el cliente, 45.555, y el worker que crea al
+ * iniciarse con `new Worker`, `/pagefind/pagefind-worker.js`, 41.255 (lo declara la entrada en
+ * `arranca`); ninguno importa nada de forma estática. El índice y el WebAssembly llegan por
+ * `fetch` y no son guion, así que no cuentan. Hasta la revisión de la 23.1 solo contaba el
+ * cliente, y el worker se descargaba al enfocar el campo fuera de toda cuenta. No lo escribe el
+ * proyecto: lo escribe Pagefind al construir, así que subir de versión puede moverlo, y este
+ * tope es lo que hace que eso se vea.
  */
-export const MAX_BYTES_GUION_DE_PAGEFIND = 45950;
+export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
 
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.

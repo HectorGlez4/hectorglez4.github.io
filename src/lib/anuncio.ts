@@ -40,10 +40,29 @@ export function anunciar(region: { textContent: string | null }, texto: string):
  *
  * `anunciar` se asigna a una constante en vez de insertarse como declaración: si el
  * empaquetado le cambiara el nombre interno, el cuerpo seguiría llamando `anunciar`.
+ *
+ * Rompe el build, en vez de emitir un guion roto, ante tres cosas que `set:html` insertaría tal
+ * cual: un nombre de constante que no es un identificador de JavaScript, un valor que JSON no
+ * sabe escribir (`undefined`, una función) y un guion que contiene `</script` o `<!--`, que el
+ * analizador de HTML leería como el final del `<script>` y pintaría el resto como texto. Las
+ * constantes ya salen con el `<` escapado; lo que se mira es el cuerpo y el texto de `anunciar`.
  */
 export function guionQueAnuncia(constantes: Record<string, unknown>, cuerpo: string): string {
   const declaradas = Object.entries(constantes)
-    .map(([nombre, valor]) => `const ${nombre} = ${JSON.stringify(valor).replace(/</g, '\\u003c')};\n`)
+    .map(([nombre, valor]) => {
+      if (!/^[A-Za-z_$][\w$]*$/.test(nombre)) {
+        throw new Error(`guionQueAnuncia: «${nombre}» no es un identificador de JavaScript.`);
+      }
+      const json = JSON.stringify(valor);
+      if (json === undefined) {
+        throw new Error(`guionQueAnuncia: el valor de «${nombre}» no se puede escribir en JSON.`);
+      }
+      return `const ${nombre} = ${json.replace(/</g, '\\u003c')};\n`;
+    })
     .join('');
-  return `(function(){${declaradas}const anunciar = ${String(anunciar)};\n${cuerpo}})();`;
+  const guion = `(function(){${declaradas}const anunciar = ${String(anunciar)};\n${cuerpo}})();`;
+  if (/<\/script|<!--/i.test(guion)) {
+    throw new Error('guionQueAnuncia: el guion contiene «</script» o «<!--» y cerraría el <script> en el HTML.');
+  }
+  return guion;
 }

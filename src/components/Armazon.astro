@@ -153,8 +153,13 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     )}
     <Font cssVariable="--fuente-serif" preload />
     <Font cssVariable="--fuente-sans" preload />
-    <slot name="cabeza" />
+    {/*
+      * Historia 23.1 — el arranque de la medición va antes de lo que traiga cada página: abre la
+      * cola `__medir` antes de cualquier guion que la llame, también uno que una página pusiera
+      * en su cabeza. `tests/unit/medicion.test.ts` exige que sea el primer guion en línea.
+      */}
     <Medicion carga={cargaLaMedicion} />
+    <slot name="cabeza" />
   </head>
   <body>
     <a class="saltar" href="#contenido">Saltar al contenido.</a>

@@ -15,14 +15,29 @@
  * `tests/unit/publicable-y-alcanzable.test.ts` no exige declararlo en `src/lib/superficies.ts`.
  * Se lee de `process.env` y no de `import.meta.env` por lo mismo que en `Medicion.astro`: el
  * punto final no es una variable pública.
+ *
+ * **El tope se juzga aquí, con el punto final de verdad.** El fichero lleva la dirección dentro y
+ * crece con ella, y la prueba de `tests/unit/medicion.test.ts` lo mide con el punto final de las
+ * pruebas: sin esta comprobación, una dirección de producción más larga podía pasar de
+ * `MAX_BYTES_GUION_DE_MEDICION` en el único build que se despliega sin que nada fallara. Así el
+ * build se para nombrando los dos números.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { guionDeMedicion, puntoFinal, versionDelGuion } from '../../lib/medicion.ts';
+import { MAX_BYTES_GUION_DE_MEDICION } from '../../lib/umbrales.ts';
 
 export const getStaticPaths = (() => {
   const url = puntoFinal(process.env);
   if (url === null) return [];
   const guion = guionDeMedicion(url);
+  const bytes = new TextEncoder().encode(guion).byteLength;
+  if (bytes > MAX_BYTES_GUION_DE_MEDICION) {
+    throw new Error(
+      `El fichero de medición pesa ${bytes} bytes con este punto final y su tope, ` +
+        `MAX_BYTES_GUION_DE_MEDICION en src/lib/umbrales.ts, es ${MAX_BYTES_GUION_DE_MEDICION}. ` +
+        'El punto final va dentro del fichero: acórtalo o sube el tope en un diff visible.',
+    );
+  }
   return [{ params: { version: versionDelGuion(guion) }, props: { guion } }];
 }) satisfies GetStaticPaths;
 

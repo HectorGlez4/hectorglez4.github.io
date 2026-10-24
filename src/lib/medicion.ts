@@ -59,6 +59,13 @@ export const EVENTOS = {
 
 export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
 
+/**
+ * Los eventos que una página emite por estar vista, y no por un gesto — Historias 20.1 y 23.1.
+ * Es lo único que una `Superficie` puede declarar como vista: con `Evento` a secas, una
+ * declaración podía poner `copiado` y el fichero lo emitiría en cada carga.
+ */
+export type EventoDeVista = typeof EVENTOS.vistaDeCita | typeof EVENTOS.vistaDeSuperficie;
+
 export const EVENTOS_VALIDOS: readonly Evento[] = Object.values(EVENTOS);
 
 export function esEventoValido(nombre: string): nombre is Evento {

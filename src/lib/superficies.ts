@@ -25,7 +25,7 @@
  * Astro al núcleo.
  */
 
-import { EVENTOS, type Evento } from './medicion.ts';
+import { EVENTOS, type EventoDeVista } from './medicion.ts';
 
 /**
  * Qué es una superficie. No hay más valores, y añadir uno es una decisión visible:
@@ -53,11 +53,12 @@ export interface Superficie {
    * La vista que emite la superficie cuando su ruta es `producto` — AD-13, Historia 23.1.
    *
    * Una sola y por el vocabulario (`EVENTOS`), nunca una cadena suelta: así una página no
-   * puede emitir a la vez la vista de Cita y la de superficie (Historia 20.1). Sale al
+   * puede emitir a la vez la vista de Cita y la de superficie (Historia 20.1). El tipo
+   * (`EventoDeVista`) solo admite esas dos: un evento de gesto aquí saldría en cada carga. Sale al
    * `data-vistas` del `<html>`, que lee el fichero de medición. Las páginas 2+ y la Obra que no
    * se indexa no la emiten aunque su superficie la declare: su carácter efectivo es `servicio`.
    */
-  vista?: Evento;
+  vista?: EventoDeVista;
   /**
    * Publicabilidad **condicional** — FR-5.
    *
@@ -303,7 +304,7 @@ export interface ConsecuenciasDeRuta extends Consecuencias {
    * Las vistas que emite la ruta, en el `data-vistas` del `<html>` (Historia 23.1). Las que
    * declara su superficie si su carácter efectivo es `producto`; ninguna si no.
    */
-  vistas: readonly Evento[];
+  vistas: readonly EventoDeVista[];
 }
 
 /**
