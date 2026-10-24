@@ -363,3 +363,22 @@ unen con `+` ni con una plantilla y un `;` dentro de un identificador entre comi
 lectura del `rowid` sin `CAST` no la vigila ninguna prueba hasta la 23.10. La rama trae el
 commit de contexto de la Épica 23 bajo la historia (diferido). `sprint-status.yaml` no se toca
 aquí: lo lleva el orquestador.
+
+## Verificación previa a la fusión — 2026-10-24
+
+Puerta previa a la fusión de la rama `v8/23-12-rowid-aleatorio` (intento 1), en el worktree
+`.claude/worktrees/v8-23-12`, sobre `26594c31be`. Node v24.3.0, npm 11.4.2.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (`62ab19f1ac`) ya es antecesor de `HEAD`, así
+  que no hubo fusión ni conflictos.
+- **`npm ci`** — no se corrió: `package-lock.json` no cambia desde el 2026-10-10 (`de99ecdaff`) y
+  `node_modules` se instaló después, el 2026-10-24.
+- **`npm run build`** (`logs/s-23-12/gate-build.log`) — en verde, `EXIT:0`: 5.288 páginas en
+  1 min 24 s; el sitemap, los `noindex` y Pagefind coinciden (4.873 rutas indexables); Pagefind
+  indexa 4.873 páginas. Un solo aviso, `[fichas-de-obra]`, previo a la historia.
+- **`npx astro check`** (`logs/s-23-12/gate-astro-check.log`) — en verde, `EXIT:0`: 311
+  ficheros, 0 errores, 0 avisos, 22 sugerencias (las mismas de antes).
+- **`npm test`** (desprendido, `logs/s-23-12/gate-npm-test.log`) — en verde, `EXIT:0`: 124
+  ficheros y 5.184 pruebas pasadas, 0 fallidas, en 680,6 s.
+- **Punta a punta** — no aplica a esta historia; no se corrió `npm run test:e2e`.
+- **NFR-7** — no aplica a esta historia (`not-applicable`); no se corrió Lighthouse.
