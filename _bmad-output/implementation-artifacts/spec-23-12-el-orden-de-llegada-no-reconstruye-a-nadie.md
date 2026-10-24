@@ -2,7 +2,8 @@
 title: 'Historia 23.12 — El orden de llegada no reconstruye a nadie'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'a50b3e5c881d4ffa0ddc8003d09ce8da95549caf'
 review_loop_iteration: 0
 followup_review_recommended: false
 context: []
@@ -65,6 +66,19 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión (blind-hunter, edge-case-hunter, verification-gap,
+intent-alignment, ac-auditor) son externas en el bucle v8-ralph y no traían hallazgos en
+esta pasada: la revisión independiente viene después.
+
 ## Design Notes
 
 El `rowid` se queda en SQL porque en JavaScript un entero de 64 bits pierde precisión por encima de 2^53 (`node:sqlite` incluso se niega a devolverlo), y generarlo allí obligaría a enlazarlo y a cambiar el tipo de `bind`. `INSERT` sin `OR …` es lo que pide el criterio: la colisión (probabilidad ≈ N/2^63) es un error que el `catch` ya traga, «como un almacén caído».
@@ -94,5 +108,60 @@ expect(valores.filter((v) => v === '?')).toHaveLength(enElEsquema.length);
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación detenida tras la puerta «Ready for Development», como pide la invocación («Halt after planning.»).
+Status: done
+Blocking condition: ninguna.
+
+Planificación (pasada anterior): detenida tras la puerta «Ready for Development», como pedía
+aquella invocación («Halt after planning.»).
+
+**Cambio implementado.** El `INSERT` del adaptador del receptor da el `rowid` aleatorio:
+`INSERT INTO eventos (rowid, jornada, evento, ruta, origen, destino, consulta) VALUES
+(abs(random()), ?, ?, ?, ?, ?, ?)`. El `rowid` lo genera SQLite y no viaja por `bind`, que
+sigue recibiendo los seis campos del `Registro`; un `rowid` repetido es un error de SQLite que
+traga el `catch` existente (204, evento perdido). Sin migración, sin columnas, sin vocabulario
+ni huella; nada desplegado.
+
+**Ficheros.**
+- `medicion/worker.ts` — el `INSERT` con `rowid` primero y `abs(random())` como valor, y un
+  comentario con el porqué (NFR-11/AD-13), la colisión en el `catch`, `CAST(rowid AS TEXT)` y
+  el barajado de lo ya escrito en `desplegar` (23.2).
+- `tests/unit/comparticion.test.ts` — la prueba de correspondencia exige `['rowid',
+  ...columnasDelEsquema]` y lee la lista de `VALUES` con un lector de paréntesis anidados
+  (`listaEntreParentesis`): primer valor `abs(random())`, tantos valores como columnas del
+  `INSERT`, tantos `?` como columnas del esquema.
+- `tests/unit/orden-de-llegada.test.ts` (nuevo) — estructural sobre el código sin comentarios
+  (un solo `INSERT`, sin `OR …`, primera columna `rowid`, primer valor `abs(random())`); las
+  tres primeras filas de la matriz con `worker.fetch` y un D1 falso tipado como
+  `Parameters<typeof worker.fetch>[1]` (jornada por forma y acotada entre la de antes y la de
+  después, sin `setSystemTime`); y el detector `ordenaPorRowid` con los casos de control de
+  las dos últimas filas más el barrido recursivo de `tools/` (`.ts .mts .mjs .js .cjs .sql`,
+  comentarios incluidos), que exige ver `tools/ingreso.ts` y `tools/lib/ingresos.ts`.
+- `DESPLIEGUE.md` — §3, viñeta de `medicion/worker.ts`: `rowid` aleatorio, ninguna consulta
+  ordena por él ni lo lee sin `CAST(rowid AS TEXT)`, y lo ya escrito sigue en orden de llegada
+  hasta `npm run medicion -- desplegar` (23.2), que corre Héctor en la 23.3.
+
+**Revisión.** Parches aplicados: 0. Diferidos: 0. Rechazados: 0 (las capas son externas y
+no traían hallazgos en esta pasada). `followup_review_recommended: false` — parcheados: 0
+altos, 0 medios, 0 bajos; puntuación 3×0 + 1×0 = 0.
+
+**Verificación.**
+- `npx vitest run tests/unit/orden-de-llegada.test.ts tests/unit/comparticion.test.ts
+  tests/unit/receptor.test.ts` — 3 ficheros, 64 pruebas en verde. Contra el `worker.ts` de
+  `baseline_revision` fallan las tres que deben (la de correspondencia, la estructural del
+  `rowid` y la de la baliza válida).
+- `npx astro check` — 310 ficheros, 0 errores, 0 avisos, 22 sugerencias previas (ninguna en
+  los ficheros tocados).
+- `npm test` (desprendido) — 124 ficheros, 5.105 pruebas, `FINISHED EXIT=0`.
+- `git diff --exit-code <baseline_revision> -- medicion/receptor.ts medicion/esquema.sql
+  medicion/wrangler.toml src public` — sin salida, código 0.
+- Comprobación manual con `node:sqlite` en memoria (guion en el directorio temporal de la
+  sesión, borrado al terminar): con `esquema.sql` y el SQL exacto leído de `worker.ts`, 20
+  filas `/cita/1`…`/cita/20` se leen en otro orden; dos `INSERT` con el mismo `rowid` literal
+  lanzan `UNIQUE constraint failed: eventos.rowid`.
+- Auditoría de la matriz: las cinco filas tienen prueba y corrieron en verde.
+
+**Riesgos residuales.** Lo ya escrito en el D1 de producción sigue en orden de llegada hasta
+que `desplegar` (23.2) lo baraje en la 23.3, y el receptor en vivo sigue insertando sin
+`rowid` hasta ese despliegue. El detector de `tools/` es textual: una consulta construida por
+piezas no literales (una variable con `'rowid'`) se le escaparía; la 23.10 lo estrecha.
+`sprint-status.yaml` no se toca aquí: lo lleva el orquestador.

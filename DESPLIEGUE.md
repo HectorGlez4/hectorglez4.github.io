@@ -263,6 +263,11 @@ Hecho en el repositorio:
   semanas más tarde.
 - `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
   agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
+  Inserta con `rowid` aleatorio (`abs(random())`, Historia 23.12), así que el orden de las
+  filas no es el de llegada y no encadena los eventos de una misma persona; ninguna
+  consulta ordena por `rowid` ni lo lee sin `CAST(rowid AS TEXT)`. Lo ya escrito sigue en
+  orden de llegada hasta que lo baraje `npm run medicion -- desplegar` (23.2), que corre
+  Héctor en la 23.3.
 - `medicion/esquema.sql` — seis columnas: jornada, evento, ruta, origen, destino y
   consulta. Las tres últimas son de un solo evento cada una —`origen` de la visita que
   viene de una cuenta propia (FR-22), `destino` de una compartición (FR-20), `consulta` de

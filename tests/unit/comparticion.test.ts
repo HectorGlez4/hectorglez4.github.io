@@ -10,6 +10,30 @@ const raiz = resolve(import.meta.dirname, '../..');
 const INSTANTE = new Date('2026-08-12T05:15:00Z');
 const baliza = (carga: unknown) => JSON.stringify(carga);
 
+/**
+ * Los elementos de la lista que abre el paréntesis de `texto[desde]`, separados por las
+ * comas de su nivel y hasta el paréntesis que lo cierra: los anidados —`abs(random())`—
+ * son parte de un elemento, no el final de la lista.
+ */
+function listaEntreParentesis(texto: string, desde: number): string[] {
+  if (texto[desde] !== '(') throw new Error(`no hay paréntesis de apertura en ${desde}`);
+  const elementos: string[] = [];
+  let nivel = 0;
+  let actual = '';
+  for (const caracter of texto.slice(desde + 1)) {
+    if (caracter === ')' && nivel === 0) return [...elementos, actual.trim()];
+    if (caracter === ',' && nivel === 0) {
+      elementos.push(actual.trim());
+      actual = '';
+      continue;
+    }
+    if (caracter === '(') nivel++;
+    if (caracter === ')') nivel--;
+    actual += caracter;
+  }
+  throw new Error('la lista no se cierra');
+}
+
 /** Historia 10.4 — medir la compartición. */
 
 describe('Historia 10.4 — los eventos nuevos están en el vocabulario cerrado', () => {
@@ -202,13 +226,18 @@ describe('Historia 10.4 — SM-5 y SM-7 comparables', () => {
       .split(',')
       .map((columna) => columna.trim());
 
+    // `rowid` no es columna del esquema: es la implícita de SQLite, y el Worker la da
+    // aleatoria para que el orden de las filas no sea el de llegada (Historia 23.12).
     expect(enElEsquema.length).toBeGreaterThan(0);
-    expect(enElInsert).toEqual(enElEsquema);
+    expect(enElInsert).toEqual(['rowid', ...enElEsquema]);
 
-    // Y tantos marcadores como columnas: uno de más o de menos falla en tiempo de
-    // ejecución, no al compilar.
-    const marcadores = worker.match(/VALUES \(([^)]+)\)/)![1].split(',').length;
-    expect(marcadores).toBe(enElInsert.length);
+    // Y tantos valores como columnas, y tantos marcadores como columnas del esquema: uno
+    // de más o de menos falla en tiempo de ejecución, no al compilar. La lista se lee hasta
+    // su paréntesis de cierre, no hasta el primero: `abs(random())` trae dos anidados.
+    const valores = listaEntreParentesis(worker, worker.indexOf('VALUES (') + 'VALUES '.length);
+    expect(valores[0]).toBe('abs(random())');
+    expect(valores).toHaveLength(enElInsert.length);
+    expect(valores.filter((valor) => valor === '?')).toHaveLength(enElEsquema.length);
   });
 });
 
