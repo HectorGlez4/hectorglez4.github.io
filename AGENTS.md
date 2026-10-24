@@ -25,6 +25,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`.
 - Itera por fichero de prueba: la suite unitaria serializa a propósito (`fileParallelism: false`) porque cada prueba lanza un `astro build`.
 - `astro check` abarca todo el repositorio, no solo el sitio: `medicion/` y las pruebas e2e entran en el mismo programa de TypeScript.
+- `npm run build` termina con `tsx integraciones/peso.ts`, tras Pagefind: mide `dist/` en bytes sin los cinco ficheros que rotan con la jornada, escribe siempre la línea de cifras, avisa entre `AVISO_DE_PESO_DE_DIST` y `TOPE_DE_PESO_DE_DIST` y se para por encima del tope (`src/lib/umbrales.ts`; DESPLIEGUE.md, «El techo de peso del hospedaje»). No es una integración de Astro: `construirConCorpus` corre `astro build` a secas y no lo ejecuta salvo con `conNpmRunBuild`. Los umbrales se rebajan en la copia, nunca en el árbol.
 
 ## Conventions that differ from defaults
 

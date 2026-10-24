@@ -146,6 +146,57 @@ Mientras tanto, lo que sí está bajo control del repositorio es **cuánto** hay
 recachear cada diez minutos, y eso se redujo de 460 KiB a ~99 KiB recortando `subsets` y
 `styles` en `astro.config.mjs`. La puerta que lo mantiene es `integraciones/cobertura.ts`.
 
+### El techo de peso del hospedaje
+
+GitHub Pages admite **1 GB por sitio publicado**, y `dist/` crece unos 95 KB por Cita nueva
+—29 KB de su página, 64 KB de su Tarjeta Social y uno de Pagefind y listados—. Pasar el
+techo no se ve al construir, se ve al publicar, y sin decir cuánto sobra. Por eso
+`npm run build` termina con un paso que lo mide (Historia 24.2):
+
+```
+astro build && pagefind --site dist --force-language es && tsx integraciones/peso.ts
+```
+
+**Qué mide.** La suma de los tamaños de fichero de `dist/` —bytes, no los bloques de `du`,
+que dependen del disco de quien construye— **después de Pagefind**, así que `dist/pagefind/`
+cuenta: es lo que sube el despliegue. El veredicto se calcula **sin** los cinco ficheros que
+rotan con la jornada —`index.html`, `404.html`, `kit/index.html`, `lote/index.html` y
+`rss.xml`—, que se miden y se informan aparte, para que dos construcciones del mismo commit
+en días distintos den el mismo veredicto. Cada construcción escribe por la salida normal el
+peso y el número de ficheros de todo `dist/`, lo que rota, lo juzgado, la parte de las
+Tarjetas Sociales (`tarjeta/`) y el número de PNG. Esa línea de cifras no es un aviso.
+
+**Las constantes**, en `src/lib/umbrales.ts`:
+
+| Constante | Valor | Al cruzarla |
+|---|---|---|
+| `TECHO_DE_PESO_DEL_ALOJAMIENTO` | 1.000.000.000 bytes (1 GB decimal, la lectura estricta) | Lo pone GitHub Pages; solo fija que aviso y tope quedan por debajo |
+| `AVISO_DE_PESO_DE_DIST` | 786.432.000 bytes (750 MiB) | Avisa por la salida de error —en Actions, con `::warning::`— y la construcción sigue y despliega. No decide nada |
+| `TOPE_DE_PESO_DE_DIST` | 943.718.400 bytes (900 MiB) | `npm run build` sale con 1 nombrando el peso, el tope y la constante —en Actions, con `::error::`—; `upload-pages-artifact` no llega y **sigue servido el sitio anterior** |
+| `TOPE_DE_PNG_DE_DIST` | sin valor | Sin valor solo informa del número. Con valor, pasarlo avisa y no rompe: es el disparador de la caché de PNG que AD-16 declara como deuda |
+
+Los bordes son estrictos: igualar el aviso no avisa, igualar el tope avisa y no rompe,
+pasarlo rompe. Aviso y tope los fijó Héctor el 2026-10-24; el del PNG lo fija él cuando
+quiera, en un diff de una línea.
+
+**La cifra de base**, el 2026-10-24 con 4.420 Citas: `dist/` pesa 466.937.424 bytes
+(445,3 MiB; `du` dice 485 MiB) en 15.339 ficheros; lo juzgado, 466.839.655 bytes (445,2 MiB);
+las Tarjetas Sociales, 298 MiB —el 66,9 % de lo juzgado— en 5.113 ficheros; 5.116 PNG. A
+95 KB por Cita, el aviso salta hacia las 7.800 Citas, el tope hacia las 9.400 y el techo
+hacia las 10.000. La Épica 24 engorda la Página de Cita: **tras la 24.6 se vuelve a medir y
+Héctor revisa los valores.**
+
+**El número de ficheros se informa y no tiene umbral**, pero es el dato que decide una
+mudanza: Cloudflare Pages corta a **20.000 ficheros** por despliegue. Cada Cita nueva añade
+unos tres —su página, su Tarjeta y su fragmento de Pagefind—, así que con los 15.339 de hoy
+ese límite llegaría hacia las 6.000 Citas, mucho antes que el de peso. Si el alojamiento se
+cambia a Cloudflare Pages, el límite que muerde primero es ese.
+
+Si salta el aviso, hay margen: se adelgaza `dist/` —dos tercios son Tarjetas Sociales— o se
+prepara la mudanza. Si salta el tope, el sitio publicado no cambia hasta que una de las dos
+cosas esté hecha, o hasta que Héctor mueva el tope. La caché de PNG de AD-16 no adelgaza
+nada: ahorra tiempo de construcción, y por eso su disparador es un recuento y no un peso.
+
 ## 2. Search Console — Historia 7.2 (LC-2, LC-3)
 
 Hecho en el repositorio:
