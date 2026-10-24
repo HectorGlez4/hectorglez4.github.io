@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-24-2026 17:33
+last_updated: 10-24-2026 19:28
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -388,7 +388,7 @@ development_status:
   23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: review  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28; v8-ralph 2026-10-24: con punto final, la Página de Cita lleva 5630 B en línea con Imagen (1026 libres de 6656) y 1954 sin Imagen (4702 libres); topes de la lista cerrada: medición 1320 B (920 medidos con el punto final de producción), Imagen 7550 B (7153), Pagefind 87200 B (86810: cliente 45555 + worker 41255, Pagefind 1.5.2); v8-ralph 2026-10-24 17:33 UTC: entró la medición a fichero del presupuesto de AD-6 con sus topes y la prueba de la Página de Cita; sin diferidos para Héctor
   23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: backlog  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado)
   23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: backlog  # operativa: acto de Héctor (migraciones en remoto, receptor desplegado, huella)
-  23-4-el-sitio-se-audita-contra-wcag-2-2-aa: backlog
+  23-4-el-sitio-se-audita-contra-wcag-2-2-aa: review  # v8-ralph 2026-10-24: barrido axe contra WCAG 2.2 AA desde un solo sitio, con guardia y dos revisiones; diferidos en el frontmatter (Modelos a 360 px, Obra contada dos veces, incomplete de axe y estados interactivos de la 2.8)
   23-5-una-carga-que-se-lee-deja-una-lectura: backlog
   23-6-las-marcas-de-llegada-cuentan-una-vez-y-salen-de-la-direcció: backlog
   23-7-cada-salida-interna-dice-desde-qué-zona: backlog
