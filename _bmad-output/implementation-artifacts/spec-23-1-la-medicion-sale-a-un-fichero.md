@@ -9,7 +9,35 @@ followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      `cargar()` de `/buscar/` no memoriza la promesa: dos llamadas seguidas importan e inician Pagefind dos veces, o la segunda devuelve el módulo antes de que `init()` acabe.
+    evidence: |-
+      `pagefind` se asigna tras `await import(...)` y antes de `await pagefind.init()`; enfocar y teclear dentro de esa latencia entra dos veces, y una llamada entre el import y el init ve `pagefind` y llama `search()` sin init. Viene igual de antes de la 23.1 (225114cf, buscar.astro:170-175); la 23.1 solo movió el texto a `guionQueAnuncia`. `ImagenDeCita` ya memoriza la suya (`pendiente ||=`).
+    location: >-
+      src/pages/buscar.astro (cargar)
+    severity: low
+  - summary: >-
+      Una búsqueda lenta que resuelve después de otra más nueva —o de vaciar el campo— pinta y anuncia resultados viejos sobre el estado nuevo.
+    evidence: |-
+      `buscar()` no comprueba tras cada `await` que `consulta` siga siendo `ultimaConsulta`. Previo a la 23.1 (mismo código en 225114cf). Lo encontró el edge-case-hunter en la revisión independiente 2 de la 23.1.
+    location: >-
+      src/pages/buscar.astro (buscar)
+    severity: low
+  - summary: >-
+      Si `import('/pagefind/pagefind.js')` o `init()` fallan (404, sin conexión, bloqueado), la búsqueda no hace nada y la región de estado no anuncia nada: el rechazo queda sin capturar.
+    evidence: |-
+      Ni `cargar()` ni `buscar()` capturan el rechazo; previo a la 23.1 (225114cf). La región `role="status"` existe pero nadie le escribe un fallo.
+    location: >-
+      src/pages/buscar.astro (cargar/buscar)
+    severity: low
+  - summary: >-
+      Un `MEDICION_ENDPOINT` no vacío pero sin esquema http(s) construye en verde y `sendBeacon` envía a una ruta relativa del propio sitio: todo evento se pierde en silencio.
+    evidence: |-
+      `puntoFinal` (src/lib/medicion.ts) solo recorta y comprueba que no esté vacío, igual que antes de la 23.1; el fichero lleva la cadena tal cual. Una guarda en `src/pages/medicion/[version].js.ts` o en `puntoFinal` pararía el build.
+    location: >-
+      src/lib/medicion.ts:79 (puntoFinal)
+    severity: low
 ---
 
 <intent-contract>
@@ -149,6 +177,33 @@ Las cinco capas de revisión son externas en este bucle (v8-ralph) y esta pasada
 
 Rechazados (13): la ruptura de la serie al desplegar (la corta la 23.11 con `CORTES_DE_SM8`, que cubre «la vista desde el fichero diferido» y «la espera a la activación»); la fragilidad de la cola y la doble ejecución del fichero (una sola etiqueta por página, fijada por prueba, y las islas llaman a secas); la comprobación tras desplegar (es la 23.11); la mitigación aplazada sin dueño (está en «Fuera, a propósito» de `epics.md`); el contenido en línea más allá de los slugs (lo cubre la identidad byte a byte por familia; la exención la cierra la 25.4); las dos formas de encontrar el marcado y la guarda de `currentScript` (no arregla nada: la isla quedaría muerta igual, y el Kit de dos copias lo prueba); el código de prueba duplicado (`kit.spec.ts` sobre el Corpus real lo pide la épica); «una vista por página» en el tipo (la espina quiere un conjunto); el fichero en páginas sin nada que enviar (lo pide el contrato: toda superficie `producto`/`servicio`); el sufijo concatenado tras el literal de `import()`; las pruebas de red solo en local y en escritorio (el CI no corre Playwright, por diseño); el «cuando» que Vitest no hace cumplir (lo miran las pruebas de red); y la redacción «cuando cambia el guion» frente a «el vocabulario» (la versión incluye el punto final, y la frase de `DESPLIEGUE.md` es la exacta).
 
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15 (high 0, medium 3, low 12)
+- defer: 4 (high 0, medium 0, low 4)
+- reject: 19 (high 0, medium 0, low 19)
+- addressed_findings:
+  - `[medium]` `[patch]` Las cinco pruebas de ausencia se habían borrado de sus ficheros y solo corrían en `receptor.spec.ts`, sobre tres Citas y en escritorio (blind-hunter, intent-alignment 2, ac-auditor 4). La épica dice «su prueba de `pagina-de-cita.spec.ts` … a «solo los guiones externos declarados», juzgada **también** contra el sitio construido con punto final». Vuelven a `pagina-de-cita`, `portada`, `pagina-de-autor`, `pagina-404` y `seo` como «solo los guiones declarados: al cargar, a lo sumo el de medición» (`tests/e2e/ayuda/guiones.ts`, compartido con `receptor.spec.ts`), contra el Corpus real y en los dos perfiles; `receptor.spec.ts` sigue exigiendo con punto final exactamente el fichero, una vez.
+  - `[medium]` `[patch]` Nada fallaba si `/buscar/` —o Copiar, o la Imagen— dejaba de llamar `anunciar` y escribía el recuento a mano: `guionQueAnuncia` mete el texto de la función se llame o no (verification-gap). La prueba de las islas exige ahora que el cuerpo, sin ese texto, llame `anunciar(<región>,` y no escriba un mensaje en su región (vaciarla sí), y la de descubrimiento cuenta solo los guiones que llaman `anunciar`.
+  - `[medium]` `[patch]` El prerender no tenía evidencia de navegador (blind-hunter, intent-alignment 1, ac-auditor 1). Confirmado a mano el 2026-10-24 con Chrome 155 sin DevTools (`--headless=new`, sin `--remote-debugging-*`), perfil temporal, contra el corpus de `receptor.spec.ts` con punto final, un servidor que apunta `Sec-Purpose` y un arnés con reglas de especulación que navega a los 4 s: la Cita y el fichero de medición se piden con `prefetch;prerender`, ninguna baliza durante el prerender y una sola `vista-de-cita` al activarse (4,0 s después del arnés), sin segunda petición del HTML. Control: con el fichero sin la espera, la vista sale durante el prerender (+0,07 s). Lo apunta el comentario de la prueba que se salta.
+  - `[low]` `[patch]` Una superficie `producto` sin `vista` construía en verde y salía en silencio de SM-2/SM-8 (blind-hunter, edge-case-hunter): prueba recíproca en `tests/unit/superficies.test.ts`, nombrada en el escollo de `AGENTS.md`.
+  - `[low]` `[patch]` La lista cerrada no se recorría en la construcción con todos los Modelos encendidos (blind-hunter): `tests/unit/ingreso-construido.test.ts` pasa el detector por cada página de ese build.
+  - `[low]` `[patch]` `__medir(…)` a secas solo se miraba en cuatro islas (blind-hunter): todo `src/` se escanea contra `window.__medir`.
+  - `[low]` `[patch]` Nada impedía juntar `define:vars` y `set:html` en un `<script>` (blind-hunter): el mismo escaneo de `src/` lo rechaza, leyendo los atributos con sus llaves.
+  - `[low]` `[patch]` El contenido en línea solo se buscaba por slug (blind-hunter): también textos, Autor, Obras, Tema y Colección del corpus de la prueba.
+  - `[low]` `[patch]` El detector no veía `<link rel=preload|prefetch>` de worker/*worklet* ni un `prefetch` sin `as` de un `.js`, `new window.Worker`, `self.importScripts` ni `addModule` (blind-hunter, edge-case-hunter): los ve, con pruebas sintéticas; el comentario de `MAX_BYTES_GUION_DE_PAGEFIND` nombra la exclusión del WebAssembly como elección.
+  - `[low]` `[patch]` El comentario de la 23.1 en `sprint-status.yaml` traía las cifras de antes de la revisión (blind-hunter, ac-auditor 3, «Other findings»): 5630/1954 B, 1026/4702 libres y Pagefind 87200 (86810).
+  - `[low]` `[patch]` El spec se contradecía (blind-hunter): la línea de «Revisión» de la pasada sin capas queda marcada como sustituida, con qué cuenta `review_loop_iteration`; esta es la tercera entrada del día (sin capas, independiente 1, independiente 2).
+  - `[low]` `[patch]` Que cada guion de Copiar siga justo a su `<div class="isla">` solo lo veía Playwright (blind-hunter, edge-case-hunter): prueba de Vitest sobre lo construido, en la Cita y el Kit.
+  - `[low]` `[patch]` En el navegador solo se veía llegar `vista-de-cita` (ac-auditor 2): `receptor.spec.ts` afirma la vista de la portada que antes solo esperaba, la ve llegar en la portada y en la página 1 de Autor con su ruta, y comprueba que `/buscar/`, el 404 y la Obra que no se indexa cargan el fichero y no emiten ninguna.
+  - `[low]` `[patch]` Higiene de `medicion.test.ts` (blind-hunter): `colapsado` y `ANUNCIAR` una sola vez, y el primer guion sale de `guionesEjecutables` en vez de repetir su expresión. Los `console.log` se quedan: son el parte que pide el criterio.
+  - `[low]` `[patch]` Nombres rancios (blind-hunter): «las cuatro consecuencias» en `superficies.test.ts`, «el 404 no carga guiones», «cero JavaScript» en `pagina-de-cita.spec.ts`, el escollo de `superficies.ts` en `AGENTS.md` y la cabecera de `src/lib/guiones.ts`, que ahora dice los cuatro sitios que toca ampliar la lista.
+
+Diferidos (4, previos a la 23.1, al frontmatter): la carrera de `cargar()` en `/buscar/`, los resultados viejos pintados sobre una consulta nueva, el fallo de `import()`/`init()` sin capturar, y un `MEDICION_ENDPOINT` sin esquema que pierde todo en silencio.
+
+Rechazados (19): los tipos de `<script>` que no son JavaScript (fallan alto, no en silencio); una sola copia de `anunciar` por página (la épica pide el texto en toda isla que anuncia); los efectos en las series al desplegar —el Kit fuera de toda serie y los bloqueadores por ruta— (lo pide la épica, está en `DESPLIEGUE.md` y los cortes son de la 23.11); el ciclo de importación de `superficies.ts` (hipotético y ruidoso); la Obra sin su declaración propia (`modelosEnRuta` solo excluye por forma, `esServicioPorForma`); `vite` sin declarar (falla al importar); `public/` leído como texto (es el criterio literal); las guardas de `guionQueAnuncia` ante palabras reservadas (la prueba que analiza todo guion construido lo para en el CI); el sufijo concatenado tras el literal de `import()` (como en la pasada 1); y de intent-alignment y ac-auditor, lo descriptivo sin defecto: el segundo Copiar del Kit real, el corpus de la prueba como muestra del sitio, la comparación de vistas por la declaración, el mecanismo de anuncio, el `cuando` y `?q=`, la ventana de caché documentada, el tope medido con el punto final de producción, los cambios de comportamiento ya pedidos, el espía con fichero y el salto del Kit real.
+
 ## Design Notes
 
 Arranque y relevo, la forma (los nombres los fija el código):
@@ -256,6 +311,9 @@ corrieron y pasaron; el prerender en navegador se salta con su motivo y la fila 
 
 **Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos).
 Recomendación de revisión de seguimiento: `false` (0 parches: alto 0, medio 0, bajo 0; puntuación 0).
+*(Es la pasada sin capas, la primera entrada del Review Triage Log; la sustituyen las dos pasadas
+independientes de abajo, cuya recomendación es la que lleva el frontmatter. `review_loop_iteration`
+cuenta vueltas por `bad_spec`, no pasadas: sigue en 0 porque no ha habido ninguna.)*
 
 **Riesgos residuales.**
 - La ventana de hasta 10 minutos sin medición cuando cambia el guion (aceptada y escrita en §3).
@@ -335,3 +393,59 @@ Pagefind); medios 2, bajos 10; puntuación 3×2 + 10 = 16.
   (5.629/1.953 B y el tope de Pagefind de 45.950): el tablero lo lleva el orquestador.
 - El detector analiza con `parseSync` de Vite, dependencia transitiva de Astro y de Vitest: si un
   día cambiara de nombre, la prueba falla al importarlo, no en silencio.
+
+### Revisión independiente, pasada 2 (2026-10-24)
+
+**Qué cambió.** Las cinco capas externas dieron 38 hallazgos tras deduplicar: 15 parches (alto 0,
+medio 3, bajo 12), 4 diferidos y 19 rechazados, con el detalle en el Review Triage Log. Sin
+`intent_gap` ni `bad_spec`: ningún parche toca el código del sitio, solo pruebas, comentarios y
+documentación. Lo esencial:
+- **Las pruebas de ausencia vuelven a su sitio.** La épica pide que la de cada superficie pase a
+  «solo los guiones externos declarados» y se juzgue **también** con punto final; la pasada anterior
+  las había mudado enteras a `receptor.spec.ts` (tres Citas, solo escritorio). Ahora están en
+  `pagina-de-cita`, `portada`, `pagina-de-autor`, `pagina-404` y `seo`, contra el Corpus real y en
+  los dos perfiles, con el ayudante compartido `tests/e2e/ayuda/guiones.ts`; cuando la 23.2
+  construya el `webServer` con punto final, juzgarán el fichero sin tocarlas. La tarea del spec que
+  decía «se mudan aquí» queda superada por esta lectura de la épica.
+- **El anuncio se exige llamado, no solo presente**: el cuerpo de cada isla que anuncia llama
+  `anunciar(<región>,` y no escribe un mensaje a mano en su región.
+- **El prerender, visto en un navegador** (a mano, con control negativo; ver el triaje).
+- **Más puertas en Vitest**: toda superficie `producto` declara su vista; la lista cerrada se
+  recorre también con todos los Modelos encendidos; `src/` no lleva `window.__medir` ni junta
+  `define:vars` con `set:html`; ningún guion en línea lleva texto, Autor, Obra, Tema ni Colección;
+  cada Copiar va justo detrás de su isla; el detector ve más formas de descargar guion.
+- **Vistas en el navegador**: llegan la de la portada y la de Autor con su ruta; `/buscar/`, el 404
+  y la Obra que no se indexa cargan el fichero y no emiten ninguna.
+
+**Ficheros de esta pasada.**
+- `tests/e2e/ayuda/guiones.ts` (nuevo) — `apuntarGuiones` y `fueraDeLaListaAlCargar`.
+- `tests/e2e/{pagina-de-cita,portada,pagina-de-autor,pagina-404,seo}.spec.ts` — «solo los guiones declarados» de vuelta en cada superficie.
+- `tests/e2e/receptor.spec.ts` — el ayudante compartido, las vistas que llegan y las que no, y la confirmación manual del prerender en el comentario.
+- `tests/unit/medicion.test.ts` — anuncio llamado, Copiar tras su isla, contenido entero, escaneo de `src/`, casos nuevos del detector, higiene.
+- `tests/unit/ayuda/guion.ts` — `<link>` de worker y *worklet*, `new window.Worker`, `self.importScripts`, `addModule`; `guionesEjecutables` exportado.
+- `tests/unit/ingreso-construido.test.ts` — la lista cerrada con todo encendido.
+- `tests/unit/superficies.test.ts`, `tests/unit/espinas-de-ux.test.ts` — la prueba recíproca de la vista y nombres al día.
+- `src/lib/guiones.ts`, `src/lib/umbrales.ts` — solo comentarios (cómo se amplía la lista; el WebAssembly de Pagefind).
+- `AGENTS.md` — el escollo de `superficies.ts` nombra la medición.
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` — solo las cifras del comentario de la 23.1.
+
+**Verificación de esta pasada.**
+- `npx astro check` — 0 errores, 0 avisos (21 pistas).
+- `npx vitest run` de `superficies` (78), `medicion` (237), `espinas-de-ux` (9) e `ingreso-construido` (38) — en verde. Partes sin cambios: medición 886/1.320, Imagen 7.153/7.550, Pagefind 86.810/87.200; Cita con Imagen 1.026 libres, sin Imagen 4.702.
+- `npm test` (con `correr.sh`) — 126 ficheros, 5.373 pruebas en verde.
+- `npx playwright test` de `receptor`, `pagina-de-cita`, `portada`, `pagina-de-autor`, `pagina-404` y `seo` (los dos perfiles, `--workers=3`) — 161 en verde, 33 saltadas (las de `receptor` en móvil y el prerender), y 6 tiempos agotados en los barridos del sitemap de `seo.spec.ts` bajo carga (media de 26, un juego del usuario ocupando núcleos). `seo.spec.ts` a solas (`--workers=1`): 18 en verde y el recorrido de «nada huérfano» agotó sus 90 s en los dos perfiles; a solas en `escritorio` con `--timeout=300000`, en verde en 1,8 min. Es el tiempo del barrido, no el cambio: esta pasada no toca esas pruebas.
+- Las pruebas nuevas, todas en verde: las cinco de «solo los guiones declarados» en los dos perfiles y las cinco de vistas de `receptor.spec.ts`.
+- Prerender a mano (Chrome 155, sin DevTools) y su control: ver el triaje.
+- La construcción del `webServer` (`npm run build`, sin punto final) termina; no hay `dist/medicion/`.
+
+**Recomendación de revisión de seguimiento: `true`** — 15 parches, ninguno alto; medios 3, bajos
+12; puntuación 3×3 + 12 = 21.
+
+**Riesgos residuales de esta pasada.**
+- El prerender en navegador está confirmado a mano, no en una prueba que corra: Playwright siempre
+  conecta DevTools y Chromium no prerenderiza así. La prueba de `receptor.spec.ts` sigue saltándose
+  con su motivo.
+- Las cinco pruebas de «solo los guiones declarados» corren hoy contra un `webServer` sin punto
+  final, donde no se pide ningún guion; su exigencia entera llega con la 23.2. Con punto final la
+  juzga ya `receptor.spec.ts`.
+- Los cuatro diferidos de `/buscar/` y del punto final mal formado, previos a la historia.

@@ -385,7 +385,7 @@ development_status:
 
   # Épica 23 — medir la lectura. Va primera: sin ella ninguna otra se juzga.
   epic-23: in-progress
-  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: backlog  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28; v8-ralph 2026-10-24: con punto final, la Página de Cita lleva 5629 B en línea con Imagen (1027 libres de 6656) y 1953 sin Imagen (4703 libres); topes de la lista cerrada: medición 1320 B (920 medidos con el punto final de producción), Imagen 7550 B (7153), Pagefind 45950 B (45555, Pagefind 1.5.2)
+  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: backlog  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28; v8-ralph 2026-10-24: con punto final, la Página de Cita lleva 5630 B en línea con Imagen (1026 libres de 6656) y 1954 sin Imagen (4702 libres); topes de la lista cerrada: medición 1320 B (920 medidos con el punto final de producción), Imagen 7550 B (7153), Pagefind 87200 B (86810: cliente 45555 + worker 41255, Pagefind 1.5.2)
   23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: backlog  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado)
   23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: backlog  # operativa: acto de Héctor (migraciones en remoto, receptor desplegado, huella)
   23-4-el-sitio-se-audita-contra-wcag-2-2-aa: backlog
