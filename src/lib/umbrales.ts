@@ -183,6 +183,63 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
 export const MAX_BYTES_DE_GUION = 6656;
 
 /**
+ * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
+ *
+ * GitHub Pages admite 1 GB por sitio publicado. Se lee en decimal —mil millones de bytes y no
+ * 1 GiB—, que es la lectura estricta: de las dos, la que corta antes. No lo decide nadie del
+ * proyecto, lo pone el hospedaje; está aquí con nombre para que la relación con el aviso y el
+ * tope de abajo se diga con nombres y una prueba la fije, y no como un número suelto en un
+ * comentario.
+ */
+export const TECHO_DE_PESO_DEL_ALOJAMIENTO = 1_000_000_000;
+
+/**
+ * Bytes de `dist/` a partir de los cuales el build avisa — Historia 24.2, AD-9.
+ *
+ * Mide la suma de tamaños de fichero de lo que se despliega —`dist/` tras Pagefind,
+ * `dist/pagefind/` incluido— **sin** los ficheros que rotan con la jornada (la portada, el
+ * 404, `/kit`, `/lote` y `rss.xml`), para que el veredicto sea función del commit y no del día
+ * (AD-12). Bytes y no bloques de `du`, que dependen del sistema de ficheros de quien construye.
+ * Lo mide el paso final de `npm run build` (`integraciones/peso.ts`).
+ *
+ * **Lo fijó Héctor el 2026-10-24: 750 MiB.** De partida, ese mismo día, con 4.420 Citas, lo
+ * juzgado pesaba 466.839.655 bytes (445,2 MiB), y crece unos 95 KB por Cita nueva, dos tercios
+ * de ellos de su Tarjeta Social: el aviso salta hacia las 7.800 Citas. La Épica 24 engorda la
+ * Página de Cita, así que se vuelve a medir tras la 24.6 y los valores se revisan entonces.
+ *
+ * **El aviso no decide nada**: la construcción sigue y despliega. Dice que queda margen para
+ * mudarse de alojamiento o adelgazar `dist/` antes de que el tope de abajo pare el despliegue.
+ */
+export const AVISO_DE_PESO_DE_DIST = 750 * 1024 * 1024;
+
+/**
+ * Bytes de `dist/` por encima de los cuales el build se detiene — Historia 24.2, AD-9.
+ *
+ * Misma medida que `AVISO_DE_PESO_DE_DIST`. Por encima, `npm run build` sale con error, el
+ * flujo de publicación no sube el artefacto y **sigue servido el sitio anterior**: parar el
+ * despliegue de un día es mejor que descubrir el techo del alojamiento al publicar, cuando el
+ * fallo llega sin decir cuánto sobra.
+ *
+ * **Lo fijó Héctor el 2026-10-24: 900 MiB**, un 5,6 % por debajo del techo de 1 GB decimal,
+ * hacia las 9.400 Citas. Igualar el tope avisa y no rompe; pasarlo rompe.
+ */
+export const TOPE_DE_PESO_DE_DIST = 900 * 1024 * 1024;
+
+/**
+ * PNG de `dist/` por encima de los cuales el build avisa — Historia 24.2, AD-16.
+ *
+ * Es el disparador de la deuda declarada de AD-16: las Tarjetas Sociales se rasterizan en cada
+ * build, sin caché, y el día que su número pase de aquí toca pagar esa caché. Es un recuento y
+ * no un tiempo porque un veredicto del build es función del commit (AD-12). Pasarlo avisa y
+ * nunca rompe.
+ *
+ * **Sin poner, y a propósito**: el valor lo fija Héctor en un diff visible. `undefined`
+ * significa eso: el paso final informa del número de PNG —5.116 el 2026-10-24— y dice que no
+ * tiene tope, en vez de inventárselo.
+ */
+export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
+
+/**
  * Citas publicadas **resueltas** que necesita una Colección para publicarse — FR de la
  * Épica 12, §14.4 del PRD.
  *
