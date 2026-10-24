@@ -46,6 +46,17 @@ deferred:
     location: >-
       tests/e2e/seo.spec.ts, tests/e2e/tarjeta.spec.ts, playwright.config.ts
     severity: low
+  - summary: >-
+      La consulta de la búsqueda sin resultados se recorta a 120 unidades UTF-16, y un carácter
+      fuera del plano básico —un emoji— justo en el corte deja medio par sustituto en D1.
+    evidence: |-
+      edge-case-hunter: `valor.trim().slice(0, MAX_CONSULTA)` parte un par sustituto cuando el
+      carácter 120 es astral. El recorte viene de la v1 (`datos.trim().slice(0, MAX_CONSULTA)` en
+      baa0475751); la 23.2 solo lo movió al recorrido de CAMPOS_DE_EVENTO. Recortar por puntos de
+      código (`Array.from(...)`) lo cierra.
+    location: >-
+      medicion/receptor.ts (interpretar, MAX_CONSULTA)
+    severity: low
 ---
 
 <intent-contract>
@@ -221,6 +232,52 @@ de origen fuera de las acciones (la matriz del contrato lo pide); Lighthouse doc
 construido (no hay construcción de Lighthouse en el repositorio); el `webServer` con punto final para
 toda la suite e2e (es lo que pide la historia).
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 19 (high 0, medium 6, low 13)
+- defer: 1 (high 0, medium 0, low 1)
+- reject: 22
+- addressed_findings:
+  - `[medium]` `[patch]` La compatibilidad con la v7.1 guardaba la Marca de origen en **todo** evento, también en `salida-interna` y `busqueda`, que no la declaran y que ningún sitio viejo envía (blind-hunter, ac-auditor, intent-alignment). El receptor la guarda fuera de su declaración solo en los siete eventos de la v7.1 (`EVENTOS_DE_LA_V71`, nombrados por `EVENTOS`); `receptor.test.ts` lo fija con una Marca válida en los dos eventos nuevos y con la lista de los siete.
+  - `[medium]` `[patch]` Las balizas de descarte ponían `VALOR_AJENO` en todo campo cerrado, así que un receptor desplegado que cotejara los conjuntos pero no qué evento declara cada campo pasaba `desplegar`, `comprobar` y `ensayo` (blind-hunter). En los campos que el evento no declara llevan ahora un valor **válido** de su conjunto —salvo la Marca de origen en los eventos de la v7.1, que llevan el ajeno—; `medicion-orden.test.ts` exige que un receptor así no pase el cotejo. Siguen siendo 87 balizas y 86 filas, y el `ensayo` contra el Worker de verdad casa.
+  - `[medium]` `[patch]` La cuota se miraba después de migrar y desplegar (blind-hunter): un día sin cuota tocaba producción para pararse sin huella. `desplegar` la mira antes de aplicar nada —`d1 info` y `COUNT(*)`, con las escrituras de las balizas sumadas— y sale con 1 sin migrar ni desplegar; la vuelve a mirar antes de barajar.
+  - `[medium]` `[patch]` La mayor parte del SQL de `desplegar` solo corría contra el D1 de mentira antes de la 23.3 (blind-hunter, ac-auditor). `ensayo` corre ahora la secuencia de `desplegar` contra el D1 local —recuentos, estado de la tabla por `PRAGMA`, `sqlite_master` y `d1_migrations` (tiene que ser la migrada), balizas, `rowid`, `COUNT(*)`, barajado y recuentos—, salvo migrar, desplegar, `d1 info` y la huella; corrido de verdad contra `wrangler dev`. `node:sqlite` sigue fuera (lo prohíbe la spec).
+  - `[medium]` `[patch]` `migrations apply --remote` y `deploy` no tenían tope, y un Ctrl-C a mitad dejaba balizas en producción sin parte (blind-hunter, edge-case-hunter). `wranglerALaVista` se corta a los 300 s, y la secuencia anota «quizá» lo que no terminó; los instantes de Time Travel se dicen al pasar; cortada con SIGINT o SIGTERM, la cáscara dice dónde mirar lo aplicado y la orden que borra las balizas (`avisoDeInterrupcion`), y sale con 1.
+  - `[medium]` `[patch]` `vocabularioDeOrigin` importaba siempre `medicion.ts` de `origin/main` (blind-hunter, edge-case-hunter, ac-auditor): con la 23.5 importará `umbrales.ts`, que no se copia, y todo `desplegar` posterior a la merge se pararía. Con `vocabulario.ts` se importa solo él con sus dos hojas; `medicion.ts` es la vuelta atrás a la v7.1.
+  - `[low]` `[patch]` La guarda del punto final local no veía `*.localhost`, `localhost.`, `127.0.0.0/8` entero, `::` ni la IPv4 de bucle en IPv6 (blind-hunter, edge-case-hunter): `esHostLocal`, con su prueba. La baliza de sondeo antes de migrar no se añade: un receptor en vivo que no escribe es justo el que un despliegue tiene que poder arreglar.
+  - `[low]` `[patch]` La spec se contradecía y dejaba las Design Notes rancias para quien corra la 23.3 (blind-hunter): las Design Notes dicen ahora el orden, las balizas, la cuota y la compatibilidad como están en el código, y el párrafo de la implementación dice que es de su pasada.
+  - `[low]` `[patch]` Un error que no es una parada —escribir la huella tras barajar— salía como traza, sin parte (edge-case-hunter): toda parada de `desplegar` lleva el parte.
+  - `[low]` `[patch]` Un `MEDICION_ENDPOINT` que redirige convertía el `POST` en `GET` con 204 sin escribir (edge-case-hunter): las balizas no siguen redirecciones, y la parada cuenta los códigos y dice que el punto final redirige.
+  - `[low]` `[patch]` El fallo de `d1 info` no decía lo que dijo `wrangler` (edge-case-hunter): la parada lleva su causa.
+  - `[low]` `[patch]` Un `COUNT(*)` sin número daba «barajar NaN filas» (edge-case-hunter): se para diciéndolo.
+  - `[low]` `[patch]` Si `d1 info` no ve aún las balizas de la orden, la cuota quedaba corta cerca del límite (edge-case-hunter): lo escrito en 24 h lleva sumadas sus escrituras (1.566, por exceso) antes de migrar, y antes de barajar como mínimo lo de antes más ellas.
+  - `[low]` `[patch]` `wrangler dev` muerto por una señal que no se le reenvió salía con 0 (edge-case-hunter): solo SIGINT, SIGTERM y SIGHUP son 0.
+  - `[low]` `[patch]` La mitad de la huella de la cobertura no se probaba en `desplegar` (verification-gap, ac-auditor): una secuencia con un receptor que cubre `origin/main` y no la huella se para sin tocar nada remoto (comprobado quitando esa mitad: la prueba se pone en rojo).
+  - `[low]` `[patch]` Los fallos tras empezar en remoto no se probaban (verification-gap): despliegue que falla, despliegue y migración que no terminan, barajado que falla y huella que no se escribe, cada uno con su parte.
+  - `[low]` `[patch]` Nada comprobaba que el sitio de las pruebas midiera en el D1 local, y cinco comentarios lo daban por juzgado (verification-gap): `tests/e2e/receptor-local.spec.ts` exige que la Página de Cita pida su fichero de medición y que su `vista-de-cita` llegue al D1 local; los comentarios lo remiten ahí.
+  - `[low]` `[patch]` Ninguna secuencia afirmaba que `desplegar` sin huella lo dice y sigue (ac-auditor): lo afirma la prueba del orden completo.
+  - `[low]` `[patch]` «marca de origen» y «marca de difusión» en minúscula en prosa (ac-auditor): con mayúscula, como el glosario.
+
+Diferido (frontmatter): el recorte de la consulta por unidades UTF-16, que viene de la v1.
+
+Rechazados: dejar de cotejar el receptor contra la huella versionada (lo exige el criterio: «se niega … si el
+registro del receptor no cubre el vocabulario de la huella versionada»); escribir la huella sin barajar
+cuando no cabe la cuota (lo decidió Héctor el 2026-10-24 y lo dice el criterio; la orden lo dice ahora antes
+de migrar); los instantes de Time Travel del reloj local (orientativos, con un reloj sincronizado; DESPLIEGUE.md
+dice de dónde salen); comprobar el número de índices de la tabla en vivo (la de producción se creó con los
+dos de `esquema.sql`, y la `0000` los declara); la cuota de lecturas (unas decenas de barridos de una tabla
+de decenas de miles de filas frente a millones al día); `via` más estrecho que `DESTINOS_VALIDOS` (lo fija el
+criterio); el punto final tratado como secreto (no repetirlo no cuesta nada); rutas de comprobación por
+corrida (un solo operador; una baliza ajena a `/__comprobacion/` hace fallar la corrida, que se repite); la
+huella en rojo en `npm test` (a propósito hasta la 23.3); y, de intent-alignment y ac-auditor, lo ya
+decidido o diferido: las acciones sin Marca de origen en el guion (lo pide la matriz del contrato), la prueba
+de migraciones por texto (`node:sqlite` prohibido; el `ensayo` las ve aplicadas en un D1 de verdad),
+Lighthouse documentado (no hay construcción de Lighthouse en el repositorio), las pruebas de ausencia con el
+`webServer` nuevo, la reserva de la cuota, la cobertura contra `origin/main` además de la huella, las balizas
+de más, las precondiciones de más, la entrada de la lista de cortes de serie (diferida a la 23.10), la rama en
+rojo, el bloque de compartir probado por sus `data-destino` y la suite e2e entera (diferida).
+
 ## Design Notes
 
 El vocabulario, en forma (los nombres exactos los fija el código):
@@ -246,9 +303,13 @@ Huella, `medicion/huella-del-vocabulario.json`, JSON con dos espacios y salto fi
 
 Correspondencia (`vocabulario.test.ts`): para cada evento no pendiente, el sandbox emite sin marca, con cada `?de=` válido y uno ajeno, con cada destino de su conjunto y uno ajeno, y con `datos`; las claves de cada carga, salvo `evento` y `ruta`, son **exactamente** las declaradas menos los campos pendientes (por `CLAVE_EN_LA_BALIZA`); cada valor es de su conjunto, o `null` donde `nulo` o con entrada ajena; `interpretar` de cada carga guarda cada valor en su columna, y las claves del `Registro` ⊆ columnas de `esquema.sql`. `PENDIENTES = [23.5: evento lectura y primera en copiado/descarga/comparticiones; 23.6: via en vistas y lectura; 23.7: salida-interna con zona; 23.8: busqueda con tramo y filtros; 23.9: vista-de-obra con indexable]`; la prueba exige que los campos pendientes **no** salgan (sacarlos de la lista es parte de cada historia) y cubre los siete eventos de hoy.
 
-`desplegar`, en orden, parando en el primer fallo con 1 y el parte de lo aplicado: argumentos → `MEDICION_ENDPOINT` → `whoami --json` → `git status --porcelain -- medicion src/lib` vacío y `commit` = `git rev-parse HEAD` → referencia: la huella versionada o, sin ella (dicho), el vocabulario de `origin/main` (los módulos por `git show` a una copia temporal fuera del árbol, importados y borrados) → `coberturaDelReceptor` → recuentos «antes» (`SELECT jornada, evento, COUNT(*) … WHERE ruta <> '/__comprobacion/' GROUP BY …`) y `PRAGMA table_info(eventos)` + `d1_migrations` contra `estadoDeLaTabla` (ni la de partida ni la migrada → 1 sin aplicar) → `d1 migrations apply --remote` → `wrangler deploy` → comprobación con balizas (hasta tres intentos: borrar restos de `/__comprobacion/`, enviar con `fetch` `POST` esperando 204, leer `SELECT CAST(rowid AS TEXT) AS fila, …`, cotejar) → `rowidAleatorio` → `DELETE` de las balizas → `d1 info --json` y `cabeElBarajado` → `UPDATE eventos SET rowid = abs(random())` → recuentos «después» y `compararRecuentos` (cerradas iguales, la del día solo crece) → escribir la huella con el vocabulario de la rama. `comprobar`: las mismas tres primeras comprobaciones, la huella versionada obligatoria, balizas desde su vocabulario, cotejo, `rowid`, borrado; 1 nombrando la diferencia y «la cierra repetir la 23.3». `local`: `d1 migrations apply --local` y `wrangler dev --port 8787` en primer plano, reenviando las señales. `ensayo`: la comprobación contra `http://localhost:8787/` y `--local`, con el vocabulario de `src/lib/` como referencia.
+`desplegar`, en orden, parando en el primer fallo con 1 y el parte de lo aplicado: argumentos → `MEDICION_ENDPOINT` (con `http(s)://` y nunca la máquina propia —`localhost` y sus subdominios, `127.0.0.0/8`, `0.0.0.0`, `::1`, `::`, la IPv4 de bucle en IPv6—, si no 2) → `whoami --json` → `git status --porcelain -- medicion src/lib` vacío y `commit` = `git rev-parse HEAD` → referencia: **siempre** el vocabulario de `origin/main` (con `vocabulario.ts`, solo él y sus dos hojas; sin él, `medicion.ts` de la v7.1 con sus hojas; por `git show` a una copia temporal fuera del árbol, importados y borrados) y, si la hay, también la huella versionada (sin ella, dicho) → `coberturaDelReceptor` contra las dos → recuentos «antes» (`SELECT jornada, evento, COUNT(*) … WHERE ruta <> '/__comprobacion/' GROUP BY …`) y `PRAGMA table_info(eventos)` + `d1_migrations` contra `estadoDeLaTabla` (ni la de partida ni la migrada → 1 sin aplicar) → **la cuota prevista**: `d1 info --json` y `SELECT COUNT(*)`, con las escrituras de las balizas ya sumadas; si el barajado no cabe, 1 sin migrar ni desplegar → instante anterior a la migración, dicho → `d1 migrations apply --remote` → `wrangler deploy` (los dos con tope de 300 s; si no terminan, el parte dice «quizá») → comprobación con balizas (hasta tres intentos: borrar restos de `/__comprobacion/`, enviar con `fetch` `POST` sin seguir redirecciones esperando 204 —lo que no recibe 204 se cuenta por código—, leer `SELECT CAST(rowid AS TEXT) AS fila, …`, cotejar; borrarlas siempre) → `rowidAleatorio` → la cuota otra vez, con lo escrito en 24 h como mínimo lo de antes más las balizas → instante anterior al barajado, dicho → `UPDATE eventos SET rowid = abs(random())` → recuentos «después», dichos, y `compararRecuentos` → escribir la huella con el vocabulario de la rama. Toda parada, también la de un error que no es una parada, lleva el parte; cortada con Ctrl-C o SIGTERM, la cáscara dice dónde mirar lo aplicado y la orden que borra las balizas, y sale con 1. `comprobar`: las tres primeras comprobaciones, la huella versionada obligatoria, balizas desde su vocabulario, cotejo, `rowid`, borrado; 1 nombrando la diferencia y «la cierra repetir la 23.3». `local`: `d1 migrations apply --local` y `wrangler dev --port 8787` en primer plano, reenviando SIGINT, SIGTERM y SIGHUP (terminar por una de ellas es 0; morir por otra señal, 1). `ensayo`: la secuencia de `desplegar` contra `http://localhost:8787/` y `--local`, salvo migrar, desplegar, `d1 info` y la huella —recuentos, estado de la tabla (tiene que ser la migrada), balizas, `rowid`, `COUNT(*)`, barajado y recuentos otra vez—, con el vocabulario de `src/lib/` como referencia.
 
-`estadoDeLaTabla`: «de partida» es `eventos` con exactamente las columnas de la `0000` y sin la `0001` en `d1_migrations` (o sin esa tabla); «migrada», las de `esquema.sql` con la `0001` anotada; cualquier otra cosa se nombra y para la orden antes de migrar, porque `ADD COLUMN` no es idempotente. La cuota del día se estima con `rows_written_24h` de `d1 info --json`, que cubre lo escrito desde las 00:00 UTC: la estimación peca por exceso, nunca por defecto; si falta el dato, no se baraja (1).
+Las balizas (`balizasDePrueba`), 87 que dejan 86 filas: por evento, tantas como valores tenga su campo más largo, cubriendo cada valor de cada campo; por evento, una que tiene que dejar la fila vacía —`VALOR_AJENO` en cada campo de conjunto cerrado que el evento declara, un valor **válido** de su conjunto en cada campo que no declara, `TEXTO_DE_PRUEBA` en la consulta fuera de su evento, y `VALOR_AJENO` en la Marca de origen de los siete eventos de la v7.1, que el receptor guarda por compatibilidad—; y una de `EVENTO_AJENO`, que no deja ninguna. El `rowid` es aleatorio si **cada par de vecinos** dista al menos 2^32 (sobre `BigInt`).
+
+El receptor guarda la Marca de origen fuera de su declaración solo en los siete eventos de la v7.1 (`EVENTOS_DE_LA_V71` de `medicion/receptor.ts`): en `salida-interna` y `busqueda`, que no la declaran y que ningún sitio viejo envía, se descarta como cualquier campo fuera de su evento.
+
+`estadoDeLaTabla`: «de partida» es `eventos` con exactamente las columnas de la `0000` y sin la `0001` en `d1_migrations` (o sin esa tabla); «migrada», las de `esquema.sql` con la `0001` anotada; cualquier otra cosa se nombra y para la orden antes de migrar, porque `ADD COLUMN` no es idempotente. La cuota del día se estima con `rows_written_24h` de `d1 info --json`, que cubre lo escrito desde las 00:00 UTC: la estimación peca por exceso, nunca por defecto; si falta el dato, no se baraja (1). El barajado cabe si `2·escritas24h + 3·filas ≤ CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1`: lo escrito en 24 h, otro tanto de reserva para lo que el sitio escriba hasta las 00:00 UTC —pasada la cuota D1 rechaza cada `INSERT` y el Worker lo calla— y el barajado; `escritas24h` lleva ya sumadas las escrituras de las balizas de la orden (87 × 3 × 2 × 3 = 1.566, por exceso).
 
 ## Verification
 
@@ -256,8 +317,8 @@ Correspondencia (`vocabulario.test.ts`): para cada evento no pendiente, el sandb
 - `npx astro check` -- expected: 0 errores.
 - `npx vitest run tests/unit/vocabulario.test.ts tests/unit/migraciones.test.ts tests/unit/medicion-orden.test.ts tests/unit/receptor.test.ts tests/unit/comparticion.test.ts tests/unit/compartir.test.ts tests/unit/orden-de-llegada.test.ts tests/unit/redes.test.ts tests/unit/andamiaje.test.ts` -- expected: verde; `tests/unit/huella.test.ts` -- expected: rojo con el mensaje de «sin huella»; por fichero, `medicion.test.ts` y `espinas-de-ux.test.ts` -- expected: verde.
 - `npm test` en segundo plano con `correr.sh` -- expected: un solo fallo, el de la huella.
-- `npm run medicion -- local` en segundo plano; `npm run medicion -- ensayo` -- expected: 0; en `medicion/`, `npx --yes wrangler@4.151.1 d1 execute medicion --local --json --command "PRAGMA table_info(eventos)"` -- expected: doce columnas; y en local, contar, `UPDATE eventos SET rowid = abs(random())`, volver a contar -- expected: mismos recuentos. Parar el receptor y comprobar el puerto 8787 libre.
-- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio`; y con el `webServer`: `pagina-de-cita`, `kit`, `compartir-enlace`, `busqueda` en `escritorio` -- expected: verde, y después, en `medicion/`, `npx --yes wrangler@4.151.1 d1 execute medicion --local --json --command "SELECT evento, COUNT(*) AS n FROM eventos GROUP BY evento"` muestra `vista-de-cita`; puertos 4321, 4399, 4400 y 8787 libres al terminar.
+- `npm run medicion -- local` en segundo plano; `npm run medicion -- ensayo` -- expected: 0, con la secuencia de `desplegar` contra el D1 local (tabla migrada, balizas que casan, `rowid` aleatorio, barajado con los recuentos iguales); en `medicion/`, `npx --yes wrangler@4.151.1 d1 execute medicion --local --json --command "PRAGMA table_info(eventos)"` -- expected: doce columnas. Parar el receptor y comprobar el puerto 8787 libre.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio`; y con el `webServer`: `receptor-local`, `pagina-de-cita`, `kit`, `compartir-enlace`, `busqueda` en `escritorio` -- expected: verde (`receptor-local` ve la vista de la Página de Cita llegar al D1 local); puertos 4321, 4399, 4400 y 8787 libres al terminar.
 - `npm run medicion -- x`, `npm run medicion -- desplegar --rapido`, `env -u MEDICION_ENDPOINT npm run medicion -- comprobar` -- expected: código 2.
 
 **Manual checks (if no CLI):**
@@ -316,7 +377,8 @@ dos `webServer`: el receptor local y el sitio con `MEDICION_ENDPOINT=http://loca
 
 **Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0
 rechazados. `followup_review_recommended: false` (parches: 0 altos, 0 medios, 0 bajos;
-puntuación 0).
+puntuación 0). Es la pasada de la implementación; las revisiones con hallazgos siguen abajo, y
+el frontmatter dice lo de la última.
 
 **Verificación.**
 - `wrangler@4.151.1` existe y tiene `whoami --json`, `d1 migrations apply --local|--remote`,
@@ -363,11 +425,10 @@ bajos), 3 diferidos y 12 rechazados; ningún `intent_gap` ni `bad_spec`. Lo gran
 recorre con un D1 en memoria antes de que la 23.3 lo corra de verdad. `desplegar` coteja el
 receptor siempre contra `origin/main` (y la huella si la hay), da los recuentos de antes y de
 después, deja reserva en la cuota para el resto del día, borra sus balizas pase lo que pase, da los
-instantes para Time Travel y comprueba también lo que el receptor descarta. Estas líneas de las
-Design Notes quedan superadas por el código: el `rowid` se juzga por cada par de vecinos y no por el
-extremo; el barajado cabe si `2·escritas24h + coste ≤ cuota`; la víspera de `hoy` también es
-jornada abierta; las balizas son 87 (las 75 de antes, una de descarte por evento y una de un evento
-inventado) y dejan 86 filas; `MEDICION_ENDPOINT` local sale con 2.
+instantes para Time Travel y comprueba también lo que el receptor descarta. Lo que esta
+revisión cambió de las Design Notes —el `rowid` juzgado por cada par de vecinos; el barajado que
+cabe si `2·escritas24h + coste ≤ cuota`; la víspera de `hoy` también abierta; las 87 balizas que
+dejan 86 filas; `MEDICION_ENDPOINT` local con 2— se llevó a las Design Notes en la segunda revisión.
 
 **Ficheros.**
 - `tools/lib/medicion.ts` — secuencias con efectos inyectados; balizas de descarte; `rowid` por
@@ -428,3 +489,79 @@ inventado) y dejan 86 filas; `MEDICION_ENDPOINT` local sale con 2.
   cifras.
 - La huella queda en rojo en `npm test` hasta la 23.3, a propósito.
 - La suite e2e entera no se ha barrido con el `webServer` nuevo (diferido).
+
+### Segunda revisión (2026-10-25)
+
+**Qué cambió.** Las cinco capas externas trajeron hallazgos: 19 parches (0 altos, 6 medios, 13
+bajos), 1 diferido y 22 rechazados; ningún `intent_gap` ni `bad_spec`. El receptor guarda la Marca
+de origen fuera de su declaración solo en los siete eventos de la v7.1, no en los nuevos. Las
+balizas de descarte prueban también qué evento declara cada campo, con valores válidos fuera de su
+evento. `desplegar` mira la cuota antes de tocar nada —con las escrituras de las balizas sumadas— y
+se para sin migrar ni desplegar si hoy el barajado no cabría; pone tope a migrar y desplegar, dice
+los instantes al pasar, lleva el parte en toda parada y, cortada con Ctrl-C, dice dónde mirar y cómo
+borrar las balizas. `ensayo` corre la secuencia de `desplegar` contra el D1 local, así que su SQL
+ya ha corrido contra un D1 de verdad antes de la 23.3. `vocabularioDeOrigin` importa solo
+`vocabulario.ts` cuando la principal lo tiene. La guarda del punto final local, las balizas sin
+seguir redirecciones, la causa de `d1 info`, el recuento sin número y el código de salida de
+`local` quedan al día. Una prueba e2e nueva ve llegar la vista de la Página de Cita al D1 local.
+
+**Ficheros.**
+- `medicion/receptor.ts` — `EVENTOS_DE_LA_V71`: la compatibilidad de la Marca de origen, solo en ellos.
+- `tools/lib/medicion.ts` — `esHostLocal`; balizas de descarte con valores válidos fuera de su
+  evento; `escriturasDeLasBalizas` y la cuota prevista antes de migrar; `aplicar` con «quizá»;
+  `estadoDeLaBase` y `contarFilas`; `ensayo` con la secuencia de `desplegar`; códigos de las balizas
+  rechazadas; `ordenDeBorradoDeLasBalizas` y `avisoDeInterrupcion`; el parte en toda parada.
+- `tools/medicion.ts` — tope de `wranglerALaVista`, importación perezosa de la principal, `fetch`
+  sin redirecciones, código de `local` por señal, aviso al interrumpir.
+- `src/lib/medicion.ts`, `src/lib/vocabulario.ts`, `src/lib/destinos.ts`, `src/lib/compartir.ts` —
+  «Marca de origen» y «Marca de difusión» con mayúscula en prosa (solo comentarios).
+- `tests/unit/receptor.test.ts`, `medicion-orden.test.ts`, `medicion-secuencias.test.ts` — lo de
+  arriba, con cada parada nueva y la mitad de la huella de la cobertura.
+- `tests/e2e/receptor-local.spec.ts` (nuevo) — la Página de Cita pide su fichero de medición y su
+  vista llega al D1 local; los comentarios de `pagina-de-cita`, `portada`, `pagina-de-autor`,
+  `pagina-404` y `seo` lo remiten ahí.
+- `DESPLIEGUE.md` §3, `AGENTS.md` — la cuota antes de migrar, el tope, las balizas, el corte a
+  mitad, el `ensayo` nuevo y la prueba e2e del D1 local.
+- Esta spec — Design Notes al día con el código; Verification con lo nuevo.
+
+**Revisión.** 19 parches, 1 diferido, 22 rechazados. `followup_review_recommended: true`
+(parches: 0 altos, 6 medios, 13 bajos; puntuación 3·6 + 13 = 31).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de los ficheros de la Verification más `medicion-secuencias` y `huella` — 418 en
+  verde y 1 en rojo, la huella con «Sin huella versionada … La escribe `npm run medicion -- desplegar`
+  (Historia 23.3)»; `medicion.test.ts` y `espinas-de-ux.test.ts` — 249 en verde.
+- Mutaciones comprobadas a mano y deshechas, cada una por separado: quitar la mitad de la huella de
+  la cobertura, quitar la cuota prevista y quitar el mínimo de lo escrito con las balizas ponen en
+  rojo, cada una, su prueba de secuencias; devolver la Marca de origen a todo evento pone en rojo
+  `receptor.test.ts` y las balizas.
+- `npm test` (en segundo plano) — 130 ficheros en verde y 1 en rojo, el de la huella: 5.618
+  pruebas pasan, 1 falla.
+- `npm run medicion -- local` + `npm run medicion -- ensayo` — 0: «87 balizas enviadas, 86 filas
+  leídas, y casan», los recuentos por (jornada, evento) iguales antes y después, y «la tabla es la
+  migrada, y barajar sus 15145 filas dejó los recuentos iguales». El estado «migrada» sale del
+  `PRAGMA table_info` y de `d1_migrations` de verdad: las doce columnas, en el orden de
+  `esquema.sql`. El Worker local descartó las Marcas de origen válidas de `salida-interna` y
+  `busqueda`. Receptor parado y 8787 libre.
+- `npx playwright test receptor-local receptor pagina-de-cita kit compartir-enlace busqueda
+  --project=escritorio`, con los dos `webServer` — 99 en verde, 4 saltadas por sus condiciones de
+  siempre; `receptor-local` vio la vista llegar al D1 local. Puertos 4321, 4399, 4400, 4402 y 8787
+  libres.
+- `npx tsx tools/medicion.ts x`, `… desplegar --rapido`, `env -u MEDICION_ENDPOINT … comprobar` y
+  `MEDICION_ENDPOINT=http://receptor.localhost:8787/ … desplegar` — código 2, sin contactar con nada.
+- Las migraciones y `esquema.sql` no cambiaron: la comprobación a mano con `sqlite3` sigue valiendo.
+- La importación real de `origin/main`, con el árbol ya commiteado y un `npx` de mentira delante en
+  el `PATH` que contesta `{"loggedIn":true}` a todo —sin red—: `desplegar` leyó `ed5a3f47`
+  (2026-10-24), cubrió su vocabulario de la v7.1 sin faltas y se paró con 1 en la primera consulta,
+  «No se aplicó nada en remoto».
+
+**Riesgos que quedan.**
+- `desplegar` y `comprobar` siguen sin correrse contra el remoto (23.3). Lo que solo existe allí
+  —`whoami --json`, `d1 info --json`, `migrations apply --remote`, `deploy`— solo se ha visto con
+  respuestas fijas; todo el SQL ya corrió contra el D1 local, y la importación de `origin/main` de
+  verdad.
+- Si la tabla de producción pasa de unas 33.000 filas, el barajado no cabe ningún día en el plan
+  gratuito; la orden lo dice ahora antes de tocar nada, y lo que se haga entonces lo decide Héctor.
+- La huella queda en rojo en `npm test` hasta la 23.3, a propósito; la suite e2e entera sigue sin
+  barrerse con el `webServer` nuevo (diferido).
