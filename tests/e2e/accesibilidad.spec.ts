@@ -2,9 +2,22 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { superficiesDelBarrido } from '../../src/lib/superficies.ts';
+import {
+  CRITERIOS_QUE_AÑADE_WCAG_22,
+  ETIQUETAS_DEL_BARRIDO,
+  etiquetaDeAxe,
+  superficiesDelBarrido,
+  type CriterioDeWcag,
+} from '../../src/lib/superficies.ts';
 
-/** Historia 2.8 — accesibilidad y comportamiento responsive. */
+/**
+ * Historia 2.8 — accesibilidad y comportamiento responsive.
+ *
+ * Historia 23.4 — el barrido se hace contra WCAG 2.2 AA, el suelo declarado (NFR-9). Las
+ * etiquetas que se le piden a axe no se escriben aquí: las declara una vez
+ * `ETIQUETAS_DEL_BARRIDO` en `src/lib/superficies.ts`, el mismo dueño que dice qué superficies
+ * se barren, y `tests/unit/superficies.test.ts` falla si este fichero escribe su propia lista.
+ */
 
 const dist = join(new URL('../..', import.meta.url).pathname, 'dist');
 
@@ -146,16 +159,123 @@ test('el barrido cubre las superficies del sitio y no el Kit', () => {
   expect(SUPERFICIES).not.toContain('/kit');
 });
 
-test.describe('Historia 2.8 — WCAG 2.1 AA', () => {
+test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
   for (const ruta of SUPERFICIES) {
     test(`${ruta} pasa la auditoría automática`, async ({ page }) => {
       await page.goto(ruta);
-      const { violations } = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .analyze();
+      const { violations } = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
 
       const resumen = violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
       expect(resumen, `${ruta}\n${resumen.join('\n')}`).toEqual([]);
+    });
+  }
+});
+
+/**
+ * Historia 23.4 — lo que añade WCAG 2.2 AA, criterio por criterio.
+ *
+ * Que el barrido pida `wcag22aa` no dice nada de los seis criterios que trae 2.2: axe solo
+ * tiene regla para uno. El reparto —quién responde de cada criterio— lo declara
+ * `CRITERIOS_QUE_AÑADE_WCAG_22` en `src/lib/superficies.ts`, y aquí cada criterio es una prueba
+ * cuyo título lo enuncia, para que el informe de Playwright diga qué se comprobó y qué no sin
+ * abrir ningún fichero. Cada una corre el barrido de verdad sobre la portada y mira las reglas
+ * que se **ejecutaron** —pasadas, violadas, incompletas o sin aplicar—, no las que axe dice
+ * tener: la regla de un criterio `axe` tiene que haber corrido con su etiqueta, y ninguna regla
+ * ejecutada puede llevar la de un criterio que se da por cumplido o que no aplica. Si un día axe
+ * añade regla para 2.4.11, esto falla y pide reclasificarlo, en vez de seguir diciendo que nadie
+ * lo mide mientras alguien ya lo mide.
+ *
+ * Su gemela de CI está en `tests/unit/superficies.test.ts`, contra `axe.getRules()`: el CI no
+ * corre Playwright.
+ */
+function enunciado(criterio: CriterioDeWcag): string {
+  const quien =
+    criterio.comprueba === 'axe'
+      ? `lo comprueba axe con ${criterio.regla}`
+      : criterio.comprueba === 'ux'
+        ? `no lo comprueba axe, lo da por cumplido la UX: ${criterio.motivo}`
+        : `no aplica: ${criterio.motivo}`;
+  return `${criterio.criterio} ${criterio.nombre} (${criterio.nivel}): ${quien}`;
+}
+
+/**
+ * Dos enlaces de 30×30 px, el segundo desplazado 12 px sobre el primero: los dos se solapan y
+ * ninguno llega a los 24 px de la 2.5.8 sin el otro. Es el caso que la v8 va a apilar —la fila
+ * de bloque y el enlace de dentro, con el mismo destino—, y el que la 4.12 de axe daba por
+ * violación aunque los dos lleven al mismo sitio.
+ *
+ * Se sirve bajo `baseURL` con `page.route`, y no con `setContent` sobre `about:blank`: sin una
+ * URL base http axe no sabe resolver el destino de un enlace relativo (`getDestination` da
+ * `null`) y marca los dos casos por igual, así que la prueba no distinguiría nada.
+ */
+function paginaDeSolape(destinoDelSegundo: string): string {
+  const caja = 'display:block;width:30px;height:30px;position:absolute';
+  return [
+    '<!doctype html><html lang="es"><head><title>Solape</title></head><body><main>',
+    `<a href="/x/" style="${caja};top:0;left:0">x</a>`,
+    `<a href="${destinoDelSegundo}" style="${caja};top:12px;left:12px">y</a>`,
+    '</main></body></html>',
+  ].join('\n');
+}
+
+test.describe('Historia 23.4 — lo que añade WCAG 2.2 AA', () => {
+  for (const criterio of CRITERIOS_QUE_AÑADE_WCAG_22) {
+    test(enunciado(criterio), async ({ page }) => {
+      await page.goto('/');
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const ejecutadas = [
+        ...resultado.passes,
+        ...resultado.violations,
+        ...resultado.incomplete,
+        ...resultado.inapplicable,
+      ];
+      expect(ejecutadas.length, 'el barrido no ejecutó ninguna regla').toBeGreaterThan(0);
+
+      const etiqueta = etiquetaDeAxe(criterio.criterio);
+      const conSuEtiqueta = ejecutadas.filter((r) => r.tags.includes(etiqueta)).map((r) => r.id);
+
+      if (criterio.comprueba === 'axe') {
+        expect(conSuEtiqueta, `${criterio.regla} no corrió con la etiqueta ${etiqueta}`).toContain(criterio.regla);
+      } else {
+        expect(
+          conSuEtiqueta,
+          `axe ya tiene regla para ${criterio.criterio}: hay que reclasificarlo en CRITERIOS_QUE_AÑADE_WCAG_22`,
+        ).toEqual([]);
+      }
+    });
+  }
+
+  for (const caso of [
+    { destino: '/x/', cual: 'el mismo destino', violacion: false },
+    { destino: '/y/', cual: 'otro destino', violacion: true },
+  ]) {
+    test(`dos enlaces solapados con ${caso.cual} ${caso.violacion ? 'dan' : 'no dan'} target-size`, async ({
+      page,
+      baseURL,
+    }) => {
+      const url = new URL('/__solape-de-la-23-4/', baseURL).href;
+      await page.route(url, (ruta) =>
+        ruta.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: paginaDeSolape(caso.destino) }),
+      );
+      await page.goto(url);
+
+      // El barrido completo, como en las superficies, y de su resultado solo `target-size`.
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const deLaRegla = (lista: typeof resultado.passes) => lista.filter((r) => r.id === 'target-size');
+      const violadas = deLaRegla(resultado.violations).flatMap((r) => r.nodes.map((n) => n.target.join(' ')));
+      const pasadas = deLaRegla(resultado.passes).flatMap((r) => r.nodes.map((n) => n.target.join(' ')));
+
+      if (caso.violacion) {
+        // La regla está encendida y discrimina: da la violación, y en el primer enlace, que es
+        // el que el segundo tapa.
+        expect(violadas).toHaveLength(1);
+        const primero = await page.locator(violadas[0]).evaluate((n) => n === document.querySelector('a'));
+        expect(primero, `la violación cae en ${violadas[0]} y no en el primer enlace`).toBe(true);
+      } else {
+        expect(violadas, 'con la 4.12 de axe el mismo destino daba violación').toEqual([]);
+        // Y no porque la regla no corriera: los dos enlaces pasan.
+        expect(pasadas).toHaveLength(2);
+      }
     });
   }
 });

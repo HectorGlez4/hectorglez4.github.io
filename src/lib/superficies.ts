@@ -14,7 +14,10 @@
  *   · la entrada en el sitemap,
  *   · la etiqueta `noindex` para el buscador de fuera,
  *   · la entrada en el índice de la búsqueda propia, el buscador de dentro,
- *   · la entrada en el barrido automatizado de accesibilidad y móvil,
+ *   · la entrada en el barrido automatizado de accesibilidad y móvil —y, desde la Historia 23.4
+ *     (AD-17), también **contra qué** se barre: las etiquetas que se le piden a axe
+ *     (`ETIQUETAS_DEL_BARRIDO`) y quién responde de cada criterio que añade WCAG 2.2
+ *     (`CRITERIOS_QUE_AÑADE_WCAG_22`) se declaran aquí y en ningún fichero de prueba—,
  *   · y la medición (Historia 23.1, AD-17): si la página carga el fichero de medición y qué
  *     vistas emite —el `data-vistas` del `<html>`—. Ninguna página elige su vista: la declara
  *     su superficie aquí, y solo la emite la ruta cuyo carácter efectivo es `producto`.
@@ -584,4 +587,132 @@ export function superficiesDelBarrido(rutasConstruidas: readonly string[]): stri
     if (muestra !== undefined) muestras.push(muestra);
   }
   return muestras;
+}
+
+/**
+ * Historia 23.4 — contra qué se barre: las etiquetas que el barrido le pide a axe (AD-17).
+ *
+ * El suelo declarado es WCAG 2.2 AA (NFR-9, UX-DR103), y el barrido pedía solo hasta 2.1:
+ * `wcag2a`, `wcag2aa`, `wcag21a` y `wcag21aa`, escritas a mano en tres llamadas de dos ficheros
+ * de prueba. Tres copias de una lista son tres sitios donde subir el suelo, y el día que se
+ * subió en uno los otros dos habrían seguido barriendo contra el de antes sin que nada fallara.
+ * Ahora la lista existe aquí, una vez, junto a la que dice **qué** superficies se barren, y
+ * `tests/unit/superficies.test.ts` falla si un fichero de `tests/e2e/` escribe la suya.
+ *
+ * Por qué estas cinco y no otras. Las etiquetas de axe son **acumulativas por versión y por
+ * nivel**, no por suelo: `wcag22aa` trae solo las reglas que añade 2.2 en AA, y sin las cuatro
+ * de 2.1 el barrido dejaría de mirar el contraste o el nombre de los enlaces. Las de AAA
+ * (`wcag2aaa`) quedan fuera porque no son el suelo, y `wcag22a` porque los dos criterios A
+ * que añade 2.2 —3.2.6 y 3.3.7— no tienen regla en axe y no aplican aquí (abajo). Si axe le
+ * diera regla a alguno, la prueba de `axe.getRules()` lo dice antes de que haga falta pedirla.
+ *
+ * `as const` y de solo lectura: `withTags` de `@axe-core/playwright` tipa `string | string[]`,
+ * así que quien la pasa la expande (`[...ETIQUETAS_DEL_BARRIDO]`) en vez de mutarla.
+ */
+export const ETIQUETAS_DEL_BARRIDO = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] as const;
+
+/**
+ * Quién responde de un criterio de WCAG 2.2. Tres formas y ninguna más:
+ *
+ *   · `axe` — lo comprueba el barrido con una regla que existe en la versión instalada y que
+ *     lleva la etiqueta del criterio;
+ *   · `ux` — axe no tiene regla para él, y lo da por cumplido la UX con un motivo escrito
+ *     (`EXPERIENCE.md`, «Accessibility Floor»). No se da por comprobado: nadie lo mide;
+ *   · `no-aplica` — el sitio no tiene aquello de lo que el criterio habla, y el motivo lo dice.
+ */
+export type ResponsableDeCriterio =
+  | { comprueba: 'axe'; regla: string }
+  | { comprueba: 'ux'; motivo: string }
+  | { comprueba: 'no-aplica'; motivo: string };
+
+export type CriterioDeWcag = {
+  /** El número del criterio, tal cual lo numera WCAG: `'2.5.8'`. */
+  criterio: string;
+  nivel: 'A' | 'AA';
+  /** Su nombre en español; sale en el título de la prueba que lo enuncia. */
+  nombre: string;
+} & ResponsableDeCriterio;
+
+/**
+ * Historia 23.4 — los seis criterios A y AA que WCAG 2.2 añade a 2.1, y quién responde de
+ * cada uno. Es un dato y no un comentario porque la prueba del navegador enuncia el reparto en
+ * sus títulos y la de Vitest lo coteja contra las reglas que trae axe: un comentario no avisa
+ * el día que deja de ser cierto.
+ *
+ * De dónde sale cada motivo: `EXPERIENCE.md`, «Accessibility Floor» —«de lo que añade 2.2, la
+ * v8 cumple 2.4.11, 2.5.7 y 2.5.8, y 3.2.6, 3.3.7 y 3.3.8 no aplican»—, y la revisión de
+ * accesibilidad de la UX que lo razona: no hay cabecera fija que tape el foco, no hay arrastre,
+ * no hay ayuda, entrada repetida ni autenticación. En `src/` no hay `position: fixed` ni
+ * `sticky`, `draggable` ni `type="password"`.
+ *
+ * Por qué 2.4.11 y 2.5.7 son `ux` y no `axe`: la 4.14.0 de axe no tiene ninguna regla con
+ * `wcag2411` ni con `wcag257` —que algo se tape o se arrastre depende de cómo se usa la
+ * página, no de su marcado—. Darlos por comprobados porque el barrido sale en verde sería
+ * afirmar lo que nadie ha medido. Lo más cerca que llega una prueba es la de
+ * `tests/e2e/accesibilidad.spec.ts` que exige que nada fijo tape el contenido al cargar, y eso
+ * no es el criterio: el foco puede quedar tapado por algo pequeño o al desplazarse.
+ *
+ * El 2.5.8 sí es `axe`: `target-size`, que en la 4.14.0 es la única regla de `wcag22aa` y ya
+ * no da por solapados dos enlaces con el mismo destino, que es lo que la v8 va a apilar. El
+ * sitio pide 44 px por decisión de producto (`EXPERIENCE.md`), muy por encima de los 24 del
+ * criterio; la regla vigila el suelo, no la decisión.
+ */
+export const CRITERIOS_QUE_AÑADE_WCAG_22: readonly CriterioDeWcag[] = [
+  {
+    criterio: '2.4.11',
+    nivel: 'AA',
+    nombre: 'Foco no oculto (mínimo)',
+    comprueba: 'ux',
+    motivo: 'ninguna superficie lleva nada fijo que tape el foco',
+  },
+  {
+    criterio: '2.5.7',
+    nivel: 'AA',
+    nombre: 'Movimientos de arrastre',
+    comprueba: 'ux',
+    motivo: 'ninguna función se maneja arrastrando',
+  },
+  {
+    criterio: '2.5.8',
+    nivel: 'AA',
+    nombre: 'Tamaño del objetivo (mínimo)',
+    comprueba: 'axe',
+    regla: 'target-size',
+  },
+  {
+    criterio: '3.2.6',
+    nivel: 'A',
+    nombre: 'Ayuda consistente',
+    comprueba: 'no-aplica',
+    motivo: 'el sitio no ofrece ningún mecanismo de ayuda',
+  },
+  {
+    criterio: '3.3.7',
+    nivel: 'A',
+    nombre: 'Entrada redundante',
+    comprueba: 'no-aplica',
+    motivo: 'ningún proceso pide dos veces el mismo dato',
+  },
+  {
+    criterio: '3.3.8',
+    nivel: 'AA',
+    nombre: 'Autenticación accesible (mínimo)',
+    comprueba: 'no-aplica',
+    motivo: 'no hay autenticación',
+  },
+];
+
+/**
+ * La etiqueta con la que axe marca las reglas de un criterio: `'2.4.11'` → `'wcag2411'`.
+ *
+ * Es la convención de axe —`wcag` y los dígitos del número sin puntos—, y vive aquí para que
+ * las dos pruebas que cotejan el reparto la compongan igual. Rompe con nombre ante algo que no
+ * tiene forma de número de criterio, en vez de devolver una etiqueta que no casaría con nada y
+ * dejaría la comprobación en verde por vacía.
+ */
+export function etiquetaDeAxe(criterio: string): string {
+  if (!/^[1-4]\.\d+\.\d+$/.test(criterio)) {
+    throw new Error(`«${criterio}» no tiene forma de criterio de WCAG (principio.pauta.criterio).`);
+  }
+  return `wcag${criterio.replaceAll('.', '')}`;
 }

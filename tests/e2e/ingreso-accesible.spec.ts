@@ -4,7 +4,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { MARCA_DE_INGRESO, modeloDe } from '../../src/lib/ingreso.ts';
-import { rutaDeCita } from '../../src/lib/superficies.ts';
+import { ETIQUETAS_DEL_BARRIDO, rutaDeCita } from '../../src/lib/superficies.ts';
 import {
   AUTOR_VALIDO,
   RAIZ,
@@ -327,9 +327,9 @@ test.describe('la invitación encendida pasa el barrido de accesibilidad', () =>
   for (const superficie of SUPERFICIES) {
     test(`${superficie.nombre} pasa la auditoría automática`, async ({ page }) => {
       await irA(page, superficie.ruta);
-      const { violations } = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .analyze();
+      // Contra lo mismo que el barrido del sitio: la lista la declara `src/lib/superficies.ts`
+      // (Historia 23.4), y con ella WCAG 2.2 AA.
+      const { violations } = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
 
       // Una línea por nodo y no por regla: el selector es lo que dice si lo que falla es la
       // invitación o algo que ya estaba, y sin él el fallo obliga a reproducirlo a mano.
@@ -560,9 +560,7 @@ test.describe('las ediciones en venta encendidas pasan el barrido de accesibilid
 
   test('la Página de Obra pasa la auditoría automática', async ({ page }) => {
     await irA(page, OBRA);
-    const { violations } = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze();
+    const { violations } = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
     const resumen = violations.flatMap((v) =>
       v.nodes.map((n) => `${v.id}: ${v.help} — ${n.target.join(' ')}`),
     );
