@@ -2,7 +2,7 @@
 title: 'Historia 24.2 — El build avisa antes de que dist/ llegue al techo del alojamiento'
 type: 'feature'
 created: '2026-10-24'
-status: 'in-progress'
+status: 'done'
 baseline_revision: 'e51daf84b76342c2befb17d0c5148a058289dda6'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -120,7 +120,56 @@ El paso vive en `integraciones/` sin ser una integración de Astro porque la esp
 - `FECHA_JORNADA=2026-10-24 npm run build` (sin `MEDICION_ENDPOINT` ni `SITE_URL`), luego `(cd dist && find . -type f -print0 | sort -z | xargs -0 shasum -a 256) | diff - /Users/hec/brainlySabiduria/.claude/v8-ralph/logs/s-24-2/dist-base-2026-10-24.sha256` -- sale 0 sin aviso y el diff está vacío. Si difiere, reconstruir la base en `e51daf84b7` antes de culpar al cambio; borrar `dist/` al terminar.
 - `npm test` entero con `correr.sh` -- verde.
 
+## Review Triage Log
+
+### 2026-10-24 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) son externas en este bucle y la invocación no traía ninguna sección «Hallazgos externos»: esta pasada no clasifica nada. Sigue una revisión independiente.
+
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación cerrada (halt after planning) sobre `e51daf84b76342c2befb17d0c5148a058289dda6`; `dist/` medido el 2026-10-24 y borrado tras guardar su manifiesto.
+Status: done
+Blocking condition: ninguna.
+
+Planificación cerrada (halt after planning) sobre `e51daf84b76342c2befb17d0c5148a058289dda6`; implementación en línea en el worktree `v8-24-2`, rama `v8/24-2-peso-de-dist`, sin fusionar ni empujar.
+
+**Qué se hizo.** `npm run build` termina, tras Pagefind, con `tsx integraciones/peso.ts`: suma los bytes de los ficheros regulares de `dist/` (`pagefind/` incluido), reparte con `medirDist` lo desplegado, lo que rota con la jornada (los cinco ficheros exactos), lo juzgado, las Tarjetas (`tarjeta/…`) y los PNG, y juzga lo juzgado contra `AVISO_DE_PESO_DE_DIST` (750 MiB) y `TOPE_DE_PESO_DE_DIST` (900 MiB) con bordes estrictos. Las cifras salen siempre por stdout; el aviso y el error, por stderr, con `::warning::`/`::error::` delante cuando `GITHUB_ACTIONS=true`. Sobre el tope sale con 1 sin traza; sin `dist/` (o con uno que no se deja leer) lo dice y sale con 1. `TOPE_DE_PNG_DE_DIST` queda `undefined`: se informa el número y no avisa. Lo juzgado es un tipo marcado que solo produce `medirDist`, así que los veredictos no pueden recibir lo desplegado entero (lo fija un `@ts-expect-error` que `astro check` verifica).
+
+**Commits** (sobre la base, en orden): `52a3a47cae` spec; `1794230264` constantes en `umbrales.ts`, solas; `244d18b95a` la maquinaria y sus pruebas; `e827930497` documentación; y el de cierre de este spec.
+
+**Ficheros:**
+- `src/lib/umbrales.ts` — `TECHO_DE_PESO_DEL_ALOJAMIENTO` (1e9), `AVISO_DE_PESO_DE_DIST`, `TOPE_DE_PESO_DE_DIST`, `TOPE_DE_PNG_DE_DIST` (`undefined`), con qué miden, quién las fijó y la cifra de base.
+- `tools/lib/peso.ts` — puro: `FICHEROS_QUE_ROTAN_CON_LA_JORNADA`, `medirDist`, `veredictoDePeso`, `veredictoDePng`, `parteDePeso`, `enMiB`; reutiliza `milesEnEspañol`, `porcentajeEnEspañol` y `escaparAnotacion`.
+- `integraciones/peso.ts` — la cáscara: recorre `dist/`, escribe el parte, fija el código de salida. Sin red, sin escritura.
+- `package.json` — el paso encadenado tras Pagefind.
+- `tests/unit/ayuda/construir.ts` — opción `conNpmRunBuild` de `construirConCorpus` (y de `construirProyecto`).
+- `tests/unit/peso.test.ts` — 38 pruebas puras: relación de umbrales, reparto, bordes, dos jornadas con la portada sobre el tope, PNG, parte, anotaciones, formato, posición del paso.
+- `tests/unit/peso-construido.test.ts` — 9 pruebas sobre una copia construida con `npm run build` y los umbrales rebajados en la copia.
+- `DESPLIEGUE.md` — sección «El techo de peso del hospedaje» tras la de caché. `AGENTS.md` — viñeta en «Running and verifying».
+
+**Hallazgos de revisión:** 0 parches, 0 diferidos nuevos, 0 rechazados (sin hallazgos externos en esta pasada).
+
+**Revisión de seguimiento recomendada:** `false` — parches de esta pasada: high 0, medium 0, low 0; puntuación 3×0 + 0 = 0.
+
+**Verificación:**
+- Re-medida previa en la base: `FECHA_JORNADA=2026-10-24 npm run build` → manifiesto idéntico al de la planificación y las mismas cifras (anotadas en el Code Map).
+- `npx vitest run tests/unit/peso.test.ts` → 38/38 verde.
+- `npx vitest run tests/unit/peso-construido.test.ts` → 9/9 verde.
+- `npx vitest run tests/unit/peso.test.ts tests/unit/peso-construido.test.ts tests/unit/andamiaje.test.ts tests/unit/barra-final.test.ts tests/unit/indexacion.test.ts tests/unit/trafico.test.ts tests/unit/demanda.test.ts tests/unit/colecciones.test.ts` → 8 ficheros, 313 pruebas, verde.
+- `npx astro check` → 0 errores, 0 avisos (22 pistas, ninguna en ficheros tocados).
+- `FECHA_JORNADA=2026-10-24 npm run build` con el cambio, sin `MEDICION_ENDPOINT` ni `SITE_URL` → sale 0, sin aviso, con la línea de cifras: desplegado 466.937.424 bytes (445,3 MiB) en 15.339 ficheros; rotan 97.769 en 5; juzgado 466.839.655 (445,2 MiB) en 15.334; Tarjetas 312.472.917 (298 MiB, 66,9 %) en 5.113; PNG 5.116 sin tope. `diff` contra `dist-base-2026-10-24.sha256` vacío: `dist/` no cambia. `dist/` borrado después.
+- `npm test` entero con `correr.sh` → 126 ficheros, 5.234 pruebas, verde (663 s).
+- Auditoría de la matriz: cada fila tiene prueba que corrió y pasó — por debajo, entre aviso y tope y por encima (pura y construida, con `npm run build` ≠ 0 y el paso solo = 1 sin traza), dos jornadas (pura, con la portada sobre el tope), PNG sin tope y con tope (pura y construida), sin `dist/` y `dist` que no es directorio (construida).
+
+**Riesgos residuales:**
+- La medida juzgada incluye `dist/pagefind/`, donde la Cita del Día de la portada deja unos cientos de bytes que varían por jornada hasta la 26.2 (diferido ya anotado): el veredicto solo podría cambiar con el peso a esa distancia de un umbral.
+- Un enlace simbólico dentro de `dist/` no se cuenta (solo ficheros regulares); hoy Astro y Pagefind no los producen.
+- `GITHUB_ACTIONS` cambia la forma del aviso y del error (anotación), no su contenido ni el código de salida; el flujo de publicación lo pone solo.
+- Los valores se revisan tras la 24.6, que engorda la Página de Cita (pendiente de Héctor).
