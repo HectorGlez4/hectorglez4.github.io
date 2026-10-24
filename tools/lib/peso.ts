@@ -79,6 +79,11 @@ export interface MedidaDeDist {
   juzgado: Juzgado;
   /** Las Tarjetas Sociales (`tarjeta/…`), una parte de lo juzgado. */
   tarjetas: Recuento;
+  /**
+   * El índice de búsqueda (`pagefind/…`), una parte de lo juzgado. Se cuenta para que la
+   * primera línea de cifras no diga «pagefind/ incluido» sobre un `dist/` que no lo trae.
+   */
+  pagefind: Recuento;
 }
 
 /** El aviso y el tope del peso, en bytes, y el tope del número de PNG, si lo hay. */
@@ -104,6 +109,7 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
   const rotan = { bytes: 0, ficheros: 0 };
   const juzgado = { bytes: 0, ficheros: 0, png: 0 };
   const tarjetas = { bytes: 0, ficheros: 0 };
+  const pagefind = { bytes: 0, ficheros: 0 };
 
   for (const { ruta, bytes } of ficheros) {
     desplegado.bytes += bytes;
@@ -121,6 +127,10 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
       tarjetas.bytes += bytes;
       tarjetas.ficheros += 1;
     }
+    if (ruta.startsWith('pagefind/')) {
+      pagefind.bytes += bytes;
+      pagefind.ficheros += 1;
+    }
   }
 
   return {
@@ -129,6 +139,7 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
     rotanQueFaltan: FICHEROS_QUE_ROTAN_CON_LA_JORNADA.filter((ruta) => !vistos.has(ruta)),
     juzgado: juzgado as Juzgado,
     tarjetas,
+    pagefind,
   };
 }
 
@@ -156,20 +167,31 @@ export function veredictoDePng(juzgado: Juzgado, tope: number | undefined): Vere
 
 /** Lo que el paso escribe: las cifras por stdout, lo que cruza un umbral por stderr. */
 export interface ParteDePeso {
-  /** Siempre, y nunca con forma de aviso: no avisan de nada. */
+  /**
+   * Siempre que haya algo que juzgar, y nunca con forma de aviso: no avisan de nada. Sin nada
+   * que juzgar van vacías —ausencia antes que cero—: un margen sobre cero bytes sería inventado.
+   */
   cifras: string[];
   /** Lo que cruza un umbral sin detener la construcción. Vacío si nada cruza. */
   avisos: string[];
-  /** Sobre el tope del peso, o con un `dist/` sin ficheros: la construcción sale con 1. */
+  /**
+   * Sobre el tope del peso, o sin nada que juzgar —un `dist/` sin ficheros, o solo con los
+   * que rotan—: la construcción sale con 1.
+   */
   error?: string;
   veredictos: { peso: VeredictoDePeso; png: VeredictoDePng };
 }
 
 const MIB = 1024 * 1024;
 
-/** Bytes en MiB, con una décima y coma decimal: «445,2 MiB», «750 MiB». */
+/**
+ * Bytes en MiB, con una décima y coma decimal: «445,2 MiB», «750 MiB». Lo que no llega a una
+ * décima sin ser cero es «<0,1 MiB»: «pasa del tope en 1 byte (0 MiB)» se leería como que no
+ * lo pasa.
+ */
 export function enMiB(bytes: number): string {
   const decimas = Math.round((bytes / MIB) * 10);
+  if (decimas === 0 && bytes > 0) return '<0,1 MiB';
   const resto = decimas % 10;
   const entero = milesEnEspañol((decimas - resto) / 10);
   return resto === 0 ? `${entero} MiB` : `${entero},${resto} MiB`;
@@ -227,13 +249,34 @@ export function parteDePeso(
   umbrales: UmbralesDePeso,
   opciones: { anotar: boolean } = { anotar: false },
 ): ParteDePeso {
-  const { desplegado, rotan, rotanQueFaltan, juzgado, tarjetas } = medida;
+  const { desplegado, rotan, rotanQueFaltan, juzgado, tarjetas, pagefind } = medida;
   const peso = veredictoDePeso(juzgado, umbrales);
   const png = veredictoDePng(juzgado, umbrales.topeDePng);
   const presentes = FICHEROS_QUE_ROTAN_CON_LA_JORNADA.filter((ruta) => !rotanQueFaltan.includes(ruta));
 
+  if (juzgado.ficheros === 0) {
+    // Ausencia antes que cero: un dist/ sin ficheros —o solo con los que rotan— no pesa 0
+    // bytes, es que no hay nada que juzgar. Ni cifras ni margen: serían de nada.
+    const error =
+      desplegado.ficheros === 0
+        ? 'dist/ no trae ningún fichero: no hay nada que medir ni que desplegar.'
+        : `dist/ solo trae ficheros que rotan con la jornada (${presentes.join(', ')}): no hay ` +
+          'nada que juzgar.';
+    return {
+      cifras: [],
+      avisos: [],
+      error: anotado(
+        'error',
+        `${error} Este paso corre al final de \`npm run build\`, después de Astro y de Pagefind.`,
+        opciones.anotar,
+      ),
+      veredictos: { peso, png },
+    };
+  }
+
   const cifras = [
-    `Peso de dist/: ${bytesYMiB(desplegado.bytes)} en ${ficheros(desplegado.ficheros)}, pagefind/ incluido.`,
+    `Peso de dist/: ${bytesYMiB(desplegado.bytes)} en ${ficheros(desplegado.ficheros)}, ` +
+      (pagefind.ficheros > 0 ? 'pagefind/ incluido.' : 'sin pagefind/: no trae índice de búsqueda.'),
     `Rotan con la jornada, aparte: ${bytesYMiB(rotan.bytes)} en ${ficheros(rotan.ficheros)}` +
       (presentes.length === 0 ? '.' : ` (${presentes.join(', ')}).`) +
       (rotanQueFaltan.length === 0
@@ -260,24 +303,18 @@ export function parteDePeso(
         `por encima del aviso de ${bytesYMiB(umbrales.aviso)} (AVISO_DE_PESO_DE_DIST) y sin pasar ` +
         `del tope de ${bytesYMiB(umbrales.tope)} (TOPE_DE_PESO_DE_DIST), en src/lib/umbrales.ts; ` +
         `${margen(juzgado.bytes, umbrales, peso)}. El aviso no decide nada: la construcción ` +
-        'sigue y se despliega. Qué hacer antes de que el tope pare el despliegue —adelgazar ' +
-        'dist/ o mudar el alojamiento— lo decide Héctor.',
+        'sigue y, en el flujo de publicación, se despliega. Qué hacer antes de que el tope pare ' +
+        'el despliegue —adelgazar dist/ o mudar el alojamiento— lo decide Héctor.',
     );
   }
   if (peso === 'sobre-el-tope') {
     error =
       `dist/ pesa ${bytesYMiB(juzgado.bytes)} sin lo que rota con la jornada y pasa el tope de ` +
       `${bytesYMiB(umbrales.tope)} en ${bytesYMiB(juzgado.bytes - umbrales.tope)}: ` +
-      'TOPE_DE_PESO_DE_DIST en src/lib/umbrales.ts. La construcción ' +
-      'se detiene para no desplegar por encima del techo del alojamiento; sigue servido el sitio ' +
-      'anterior. Se adelgaza dist/ o se cambia de alojamiento, y el tope lo mueve Héctor.';
-  }
-  if (desplegado.ficheros === 0) {
-    // Ausencia antes que cero: un dist/ sin ficheros no pesa 0 bytes, es que no hay nada que
-    // medir ni que desplegar.
-    error =
-      'dist/ no trae ningún fichero: no hay nada que medir ni que desplegar. Este paso corre ' +
-      'al final de `npm run build`, después de Astro y de Pagefind.';
+      'TOPE_DE_PESO_DE_DIST en src/lib/umbrales.ts. La construcción se detiene para no ' +
+      'desplegar por encima del techo del alojamiento: en el flujo de publicación el artefacto ' +
+      'no se sube y sigue servido el sitio anterior. Se adelgaza dist/ o se cambia de ' +
+      'alojamiento, y el tope lo mueve Héctor.';
   }
   if (png === 'sobre-el-tope') {
     avisos.push(

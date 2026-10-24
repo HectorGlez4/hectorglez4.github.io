@@ -251,17 +251,26 @@ export async function construirConCorpus(
     throw fallo;
   }
 
-  const construccion = await construirProyecto(proyecto, opciones);
-  const codigo = construccion.codigo;
-  let salida = construccion.salida;
+  // Si la orden ni arranca, o Pagefind falla, se lanza: la copia se limpia antes, como con un
+  // parche que no encuentra su sitio, para no dejar proyectos huérfanos en el temporal.
+  let codigo: number;
+  let salida: string;
+  try {
+    const construccion = await construirProyecto(proyecto, opciones);
+    codigo = construccion.codigo;
+    salida = construccion.salida;
 
-  if (codigo === 0 && opciones.conBusqueda && !opciones.conNpmRunBuild) {
-    const { stdout, stderr } = await ejecutar(
-      join(RAIZ, 'node_modules', '.bin', 'pagefind'),
-      ['--site', 'dist', '--force-language', 'es'],
-      { cwd: proyecto },
-    );
-    salida += `\n${stdout}\n${stderr}`;
+    if (codigo === 0 && opciones.conBusqueda && !opciones.conNpmRunBuild) {
+      const { stdout, stderr } = await ejecutar(
+        join(RAIZ, 'node_modules', '.bin', 'pagefind'),
+        ['--site', 'dist', '--force-language', 'es'],
+        { cwd: proyecto },
+      );
+      salida += `\n${stdout}\n${stderr}`;
+    }
+  } catch (fallo) {
+    await limpiar(proyecto);
+    throw fallo;
   }
 
   if (opciones.conservar === false) await limpiar(proyecto);
@@ -300,14 +309,23 @@ export async function construirProyecto(
           ...(opciones.jornada ? { FECHA_JORNADA: opciones.jornada } : {}),
           ...(opciones.entorno ?? {}),
         },
+        // `npm run build` añade a la salida la de Pagefind y la del paso del peso: el tope por
+        // omisión de 1 MiB mataría la orden y la salida se perdería.
+        maxBuffer: 64 * 1024 * 1024,
       },
     );
     return { codigo: 0, salida: `${stdout}\n${stderr}` };
   } catch (error) {
-    const e = error as { code?: number | string | null; stdout?: string; stderr?: string };
-    // Un código que no es un número (`ENOENT`) es que la orden ni arrancó: no es una
-    // construcción fallida, y devolverlo como código haría pasar en falso un `not.toBe(0)`.
-    if (typeof e.code === 'string') throw error;
+    const e = error as {
+      code?: number | string | null;
+      signal?: string | null;
+      stdout?: string;
+      stderr?: string;
+    };
+    // Un código que no es un número (`ENOENT`) es que la orden ni arrancó, y una señal
+    // (`SIGKILL` por memoria) es que alguien la mató: ninguna de las dos es una construcción
+    // fallida, y devolverlas como código haría pasar en falso un `not.toBe(0)`.
+    if (typeof e.code === 'string' || (e.signal ?? null) !== null) throw error;
     return { codigo: e.code ?? 1, salida: `${e.stdout ?? ''}\n${e.stderr ?? ''}` };
   }
 }

@@ -149,7 +149,8 @@ recachear cada diez minutos, y eso se redujo de 460 KiB a ~99 KiB recortando `su
 ### El techo de peso del hospedaje
 
 GitHub Pages admite **1 GB por sitio publicado**, y `dist/` crece unos 95 KB por Cita nueva
-—29 KB de su página, 64 KB de su Tarjeta Social y uno de Pagefind y listados—. Pasar el
+—29 KB de su página, 64 KB de su Tarjeta Social y uno de Pagefind y listados— cuando su Autor
+y su Obra ya tienen página; un Autor o una Obra nuevos añaden además la suya y su Tarjeta. Pasar el
 techo no se ve al construir, se ve al publicar, y sin decir cuánto sobra. Por eso
 `npm run build` termina con un paso que lo mide (Historia 24.2):
 
@@ -164,23 +165,28 @@ rotan con la jornada —`index.html`, `404.html`, `kit/index.html`, `lote/index.
 `rss.xml`—, que se miden y se informan aparte, para que dos construcciones del mismo commit
 en días distintos den el mismo veredicto. **Salvo unos bytes, hasta la 26.2**: la Cita del
 Día de la portada entra en el índice de Pagefind, y `dist/pagefind/`, que sí cuenta, cambia
-con ella —entre las jornadas del 24 y el 25 de octubre de 2026, 39 ficheros de Pagefind y 6
-bytes de lo juzgado—. El veredicto solo podría cambiar de un día a otro con el peso a esa
+con ella —entre las jornadas del 24 y el 25 de octubre de 2026, 40 ficheros de
+`dist/pagefind/` (39 con nombre nuevo y `pagefind-entry.json`) y 6 bytes de lo juzgado—. El veredicto solo podría cambiar de un día a otro con el peso a esa
 distancia de un umbral.
 
-Cada construcción escribe por la salida normal **cinco líneas de cifras**: la primera, el peso
-y el número de ficheros de todo `dist/`; después, lo que rota, lo juzgado con lo que queda
-hasta el umbral siguiente, la parte de las Tarjetas Sociales (`tarjeta/`) y el número de PNG.
-Las cifras no son un aviso. Si falta alguno de los cinco que rotan, la segunda línea lo
-nombra: si su página cambió de ruta, el fichero nuevo se está juzgando con el resto. Los
-enlaces simbólicos se siguen, como hace el empaquetado del despliegue.
+Cada construcción que llega a medir escribe por la salida normal **cinco líneas de cifras**: la
+primera, el peso y el número de ficheros de todo `dist/`, y si trae `pagefind/`; después, lo
+que rota, lo juzgado con lo que queda hasta el umbral siguiente, la parte de las Tarjetas
+Sociales (`tarjeta/`) y el número de PNG. Las cifras no son un aviso. Si falta alguno de los
+cinco que rotan, la segunda línea lo nombra: si su página cambió de ruta, el fichero nuevo se
+está juzgando con el resto (y la prueba construida que exige los cinco falla en `npm test`,
+antes de subir nada). Sin `dist/`, con uno vacío o con uno que solo trae lo que rota no hay
+nada que juzgar: no escribe cifras —ni «0 bytes» ni un margen inventado—, lo dice y sale con 1.
+Los enlaces simbólicos se siguen, como hace el empaquetado del despliegue; lo que no es fichero
+ni directorio hace fallar la lectura. Lo que el empaquetado excluye por nombre (`.git`,
+`.github`) aquí se cuenta: si llegara a `dist/`, el paso mediría de más y nunca de menos.
 
 **Las constantes**, en `src/lib/umbrales.ts`:
 
 | Constante | Valor | Al cruzarla |
 |---|---|---|
 | `TECHO_DE_PESO_DEL_ALOJAMIENTO` | 1.000.000.000 bytes (1 GB decimal, la lectura estricta) | Lo pone GitHub Pages; solo fija que aviso y tope quedan por debajo |
-| `AVISO_DE_PESO_DE_DIST` | 786.432.000 bytes (750 MiB) | Avisa por la salida de error —en Actions, con `::warning::`— y la construcción sigue y despliega. No decide nada |
+| `AVISO_DE_PESO_DE_DIST` | 786.432.000 bytes (750 MiB) | Avisa por la salida de error —en Actions, con `::warning::`— y la construcción sigue; en el flujo de publicación, despliega. No decide nada |
 | `TOPE_DE_PESO_DE_DIST` | 943.718.400 bytes (900 MiB) | `npm run build` sale con 1 nombrando el peso, el tope, cuánto lo pasa y la constante —en Actions, con `::error::`—; `upload-pages-artifact` no llega y **sigue servido el sitio anterior** |
 | `TOPE_DE_PNG_DE_DIST` | sin valor | Sin valor solo informa del número. Con valor, pasarlo avisa y no rompe: es el disparador de la caché de PNG que AD-16 declara como deuda |
 
@@ -192,7 +198,9 @@ quiera, en un diff de una línea.
 (445,3 MiB; `du` dice 485 MiB) en 15.339 ficheros; lo juzgado, 466.839.655 bytes (445,2 MiB);
 las Tarjetas Sociales, 298 MiB —el 66,9 % de lo juzgado— en 5.113 ficheros; 5.116 PNG. A
 95 KB por Cita, el aviso salta hacia las 7.800 Citas, el tope hacia las 9.400 y el techo
-hacia las 10.000. La Épica 24 engorda la Página de Cita: **tras la 24.6 se vuelve a medir y
+hacia las 10.000. **Son cotas, no previsiones**: cuentan solo lo que añade una Cita, y cada
+Autor u Obra nuevos que traiga la siembra suma su página y su Tarjeta (otros 64 KB), así que
+los umbrales pueden llegar con menos Citas, nunca con más. La Épica 24 engorda la Página de Cita: **tras la 24.6 se vuelve a medir y
 Héctor revisa los valores.**
 
 Es una construcción local, sin `MEDICION_ENDPOINT` ni `SITE_URL`. La del flujo de publicación
@@ -209,14 +217,15 @@ relleno aunque cuente el tar.
 
 **El número de ficheros se informa y no tiene umbral**, pero es el dato que decide una
 mudanza: Cloudflare Pages corta a **20.000 ficheros** por despliegue. Cada Cita nueva añade
-unos tres —su página, su Tarjeta y su fragmento de Pagefind—, así que con los 15.339 de hoy
-ese límite llegaría hacia las 6.000 Citas, mucho antes que el de peso. Si el alojamiento se
+unos tres —su página, su Tarjeta y su fragmento de Pagefind—, y un Autor o una Obra nuevos
+otros tantos, así que con los 15.339 de hoy ese límite llegaría hacia las 6.000 Citas o antes,
+mucho antes que el de peso. Si el alojamiento se
 cambia a Cloudflare Pages, el límite que muerde primero es ese.
 
 Si salta el aviso, hay margen, y **qué hacer lo decide Héctor**: adelgazar `dist/` —dos
 tercios son Tarjetas Sociales— o preparar la mudanza. Una mudanza a Cloudflare Pages ya no
 cabe sin adelgazar: a la altura del aviso, hacia las 7.800 Citas, `dist/` trae unos 25.000
-ficheros, por encima de sus 20.000.
+ficheros o más, por encima de sus 20.000.
 
 Si salta el tope, **falla toda construcción**, no solo el despliegue: la diaria —la portada, el
 RSS y el Kit se quedan en el último día desplegado—, la de Playwright en local

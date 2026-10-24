@@ -205,25 +205,26 @@ export const TECHO_DE_PESO_DEL_ALOJAMIENTO = 1_000_000_000;
  *
  * **Lo fijó Héctor el 2026-10-24: 750 MiB.** De partida, ese mismo día, con 4.420 Citas, lo
  * juzgado pesaba 466.839.655 bytes (445,2 MiB), y crece unos 95 KB por Cita nueva, dos tercios
- * de ellos de su Tarjeta Social: el aviso salta hacia las 7.800 Citas. La Épica 24 engorda la
- * Página de Cita, así que se vuelve a medir tras la 24.6 y los valores se revisan entonces.
+ * de ellos de su Tarjeta Social: el aviso salta hacia las 7.800 Citas como mucho, porque cada
+ * Autor u Obra nuevos suman además su página y su Tarjeta. La Épica 24 engorda la Página de
+ * Cita, así que se vuelve a medir tras la 24.6 y los valores se revisan entonces.
  *
- * **El aviso no decide nada**: la construcción sigue y despliega. Dice que queda margen antes de
- * que el tope de abajo pare el despliegue; qué hacer con él —adelgazar `dist/` o mudarse de
- * alojamiento— lo decide Héctor.
+ * **El aviso no decide nada**: la construcción sigue y, en el flujo de publicación, despliega.
+ * Dice que queda margen antes de que el tope de abajo pare el despliegue; qué hacer con él
+ * —adelgazar `dist/` o mudarse de alojamiento— lo decide Héctor.
  */
 export const AVISO_DE_PESO_DE_DIST = 750 * 1024 * 1024;
 
 /**
  * Bytes de `dist/` por encima de los cuales el build se detiene — Historia 24.2, AD-9.
  *
- * Misma medida que `AVISO_DE_PESO_DE_DIST`. Por encima, `npm run build` sale con error, el
- * flujo de publicación no sube el artefacto y **sigue servido el sitio anterior**: parar el
+ * Misma medida que `AVISO_DE_PESO_DE_DIST`. Por encima, `npm run build` sale con error; en el
+ * flujo de publicación el artefacto no se sube y **sigue servido el sitio anterior**: parar el
  * despliegue de un día es mejor que descubrir el techo del alojamiento al publicar, cuando el
  * fallo llega sin decir cuánto sobra.
  *
  * **Lo fijó Héctor el 2026-10-24: 900 MiB**, un 5,6 % por debajo del techo de 1 GB decimal,
- * hacia las 9.400 Citas. Igualar el tope avisa y no rompe; pasarlo rompe.
+ * hacia las 9.400 Citas como mucho. Igualar el tope avisa y no rompe; pasarlo rompe.
  */
 export const TOPE_DE_PESO_DE_DIST = 900 * 1024 * 1024;
 

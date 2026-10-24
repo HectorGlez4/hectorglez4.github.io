@@ -16,6 +16,7 @@ import {
 } from './ayuda/construir.js';
 import { FICHEROS_QUE_ROTAN_CON_LA_JORNADA } from '../../tools/lib/peso.ts';
 import { milesEnEspañol } from '../../src/lib/formato.ts';
+import { TOPE_DE_PESO_DE_DIST } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 24.2 — el paso final de `npm run build`, sobre un `dist/` de verdad.
@@ -85,6 +86,13 @@ const SIN_ACTIONS = { GITHUB_ACTIONS: '' };
 /** Como lo corre el flujo de publicación, que es donde el aviso tiene que verse. */
 const EN_ACTIONS = { GITHUB_ACTIONS: 'true' };
 
+/**
+ * Las líneas que escribe el paso por stderr: el aviso, el error y el fallo de lectura, con o
+ * sin anotación. Se juzga por línea y no el stderr entero, para que un aviso del propio Node o
+ * de `tsx` —una deprecación tras una actualización— no tumbe estas pruebas por otra cosa.
+ */
+const LINEA_DEL_PASO = /^(?:::(?:warning|error)::)?(?:Aviso de |dist\/ |No se pudo medir )/mu;
+
 interface Salida {
   codigo: number;
   stdout: string;
@@ -101,13 +109,20 @@ async function correrElPaso(
     const { stdout, stderr } = await ejecutar(join(RAIZ, 'node_modules', '.bin', 'tsx'), [script], {
       cwd,
       env: { ...process.env, FORCE_COLOR: '0', ...entorno },
+      maxBuffer: 16 * 1024 * 1024,
     });
     return { codigo: 0, stdout, stderr };
   } catch (error) {
-    const e = error as { code?: number | string | null; stdout?: string; stderr?: string };
-    // Un código que no es un número es que el paso ni arrancó (`ENOENT`, sin `tsx`): eso no es
-    // un veredicto, y tomarlo por un 1 haría pasar en falso las pruebas que esperan un 1.
-    if (typeof e.code === 'string') throw error;
+    const e = error as {
+      code?: number | string | null;
+      signal?: string | null;
+      stdout?: string;
+      stderr?: string;
+    };
+    // Un código que no es un número es que el paso ni arrancó (`ENOENT`, sin `tsx`), y una
+    // señal es que alguien lo mató: nada de eso es un veredicto, y tomarlo por un 1 haría pasar
+    // en falso las pruebas que esperan un 1.
+    if (typeof e.code === 'string' || (e.signal ?? null) !== null) throw error;
     return { codigo: e.code ?? 1, stdout: e.stdout ?? '', stderr: e.stderr ?? '' };
   }
 }
@@ -194,7 +209,7 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     await conUmbrales(proyecto, { aviso: 1, tope: 2 });
     const salida = await correrElPaso(paso, proyecto);
     expect(salida.codigo, salida.stderr).toBe(1);
-    expect(salida.stderr).toMatch(/^dist\/ pesa /u);
+    expect(salida.stderr).toMatch(/^dist\/ pesa /mu);
     expect(salida.stderr).toContain('TOPE_DE_PESO_DE_DIST');
     expect(salida.stderr).not.toMatch(/^\s+at /mu);
     expect(salida.stdout).toContain('Peso de dist/:');
@@ -204,9 +219,13 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     await conUmbrales(proyecto, { aviso: 1 });
     const salida = await correrElPaso(paso, proyecto);
     expect(salida.codigo, salida.stderr).toBe(0);
-    expect(salida.stderr).toMatch(/^Aviso de peso: /u);
+    expect(salida.stderr).toMatch(/^Aviso de peso: /mu);
     expect(salida.stderr).toContain('AVISO_DE_PESO_DE_DIST');
+    // Con el tope que tiene, en bytes, y quién decide: lo que el criterio pide del aviso.
+    expect(salida.stderr).toContain(`del tope de ${milesEnEspañol(TOPE_DE_PESO_DE_DIST)} bytes`);
+    expect(salida.stderr).toContain('TOPE_DE_PESO_DE_DIST');
     expect(salida.stderr).toContain('no decide nada');
+    expect(salida.stderr).toContain('lo decide Héctor');
     expect(salida.stdout).not.toContain('Aviso');
   });
 
@@ -214,7 +233,7 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     await conUmbrales(proyecto, { aviso: 1 });
     const salida = await correrElPaso(paso, proyecto, EN_ACTIONS);
     expect(salida.codigo, salida.stderr).toBe(0);
-    expect(salida.stderr).toMatch(/^::warning::Aviso de peso: /u);
+    expect(salida.stderr).toMatch(/^::warning::Aviso de peso: /mu);
     expect(salida.stdout).not.toMatch(/^::/mu);
   });
 
@@ -222,7 +241,7 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     await conUmbrales(proyecto, { aviso: 1, tope: 2 });
     const salida = await correrElPaso(paso, proyecto, EN_ACTIONS);
     expect(salida.codigo, salida.stderr).toBe(1);
-    expect(salida.stderr).toMatch(/^::error::dist\/ pesa /u);
+    expect(salida.stderr).toMatch(/^::error::dist\/ pesa /mu);
     expect(salida.stdout).not.toMatch(/^::/mu);
   });
 
@@ -230,7 +249,7 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     await writeFile(join(proyecto, 'src/lib/umbrales.ts'), UMBRALES_DEL_ARBOL, 'utf8');
     const salida = await correrElPaso(paso, proyecto);
     expect(salida.codigo, salida.stderr).toBe(0);
-    expect(salida.stderr).toBe('');
+    expect(salida.stderr).not.toMatch(LINEA_DEL_PASO);
     expect(salida.stdout).toContain('Rotan con la jornada, aparte:');
     expect(salida.stdout).toContain('Tarjetas Sociales (tarjeta/):');
     expect(salida.stdout).toContain('sin tope (TOPE_DE_PNG_DE_DIST no tiene valor)');
@@ -271,12 +290,25 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     // a.txt, b.txt → a.txt, sub/c.txt y enlace/c.txt: 30 bytes en 4 ficheros; sub/vuelta, no.
     const salida = await correrElPaso(paso, raiz);
     expect(salida.codigo, salida.stderr).toBe(0);
-    expect(salida.stdout).toContain('Peso de dist/: 30 bytes (0 MiB) en 4 ficheros');
+    expect(salida.stdout).toContain('Peso de dist/: 30 bytes (<0,1 MiB) en 4 ficheros, sin pagefind/');
 
     await symlink('no-existe.txt', join(conEnlaces, 'roto.txt'));
     const roto = await correrElPaso(paso, raiz);
     expect(roto.codigo).toBe(1);
     expect(roto.stderr).toContain('No se pudo medir el peso de dist/');
+  });
+
+  it('lo que no es fichero ni directorio hace fallar la lectura, en vez de saltarse', async () => {
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-peso-'));
+    aLimpiar.push(raiz);
+    await mkdir(join(raiz, 'dist'));
+    await writeFile(join(raiz, 'dist', 'a.txt'), '0123456789', 'utf8');
+    await ejecutar('mkfifo', [join(raiz, 'dist', 'tuberia')]);
+    const salida = await correrElPaso(paso, raiz);
+    expect(salida.codigo).toBe(1);
+    expect(salida.stderr).toContain('No se pudo medir el peso de dist/');
+    expect(salida.stderr).toContain('tuberia no es un fichero ni un directorio');
+    expect(salida.stdout).toBe('');
   });
 
   it('sin dist/ que medir, con un dist/ vacío o con uno que no se deja leer, lo dice y sale con 1', async () => {
@@ -297,6 +329,14 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     const distVacio = await correrElPaso(paso, vacio);
     expect(distVacio.codigo).toBe(1);
     expect(distVacio.stderr).toContain('dist/ no trae ningún fichero');
+    // Sin nada medido no hay cifras: ni «0 bytes» ni margen hasta el aviso.
+    expect(distVacio.stdout).toBe('');
+
+    await writeFile(join(vacio, 'dist', 'index.html'), '<!doctype html>', 'utf8');
+    const soloLaPortada = await correrElPaso(paso, vacio);
+    expect(soloLaPortada.codigo).toBe(1);
+    expect(soloLaPortada.stderr).toContain('dist/ solo trae ficheros que rotan con la jornada (index.html)');
+    expect(soloLaPortada.stdout).toBe('');
 
     const conFichero = join(vacio, 'otro');
     await mkdir(conFichero);

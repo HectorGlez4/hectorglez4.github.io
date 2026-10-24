@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
 import {
   FICHEROS_QUE_ROTAN_CON_LA_JORNADA,
   enMiB,
@@ -29,6 +30,43 @@ import {
  */
 
 const RAIZ = resolve(import.meta.dirname, '../..');
+
+/** Un fichero de código sin sus comentarios, para que un comentario no cuente como código. */
+const sinComentarios = (fuente: string): string =>
+  fuente.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/(^|[^:])\/\/.*$/gmu, '$1');
+
+/**
+ * Los especificadores de un fichero: `import … from`, `export … from`, el `import '…'` de
+ * efecto y el `import('…')` dinámico, con el `require('…')` de propina.
+ */
+function especificadoresDe(fuente: string): string[] {
+  const patrones = [
+    /^\s*(?:import|export)\b[^;'"]*?\bfrom\s+['"]([^'"]+)['"]/gmu,
+    /^\s*import\s+['"]([^'"]+)['"]/gmu,
+    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/gu,
+    /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/gu,
+  ];
+  return patrones.flatMap((patron) => [...fuente.matchAll(patron)].map(([, especificador]) => especificador as string));
+}
+
+/**
+ * Un especificador relativo, resuelto como lo resuelve Vite: tal cual si existe; un `.js`,
+ * `.mjs` o `.jsx` que nombra un `.ts`, `.mts` o `.tsx`; sin extensión, con la que exista, o su
+ * `index`. Devuelve la ruta absoluta, o la literal si nada existe.
+ */
+function resolverRelativo(desde: string, especificador: string, existe: (ruta: string) => boolean): string {
+  const base = resolve(dirname(desde), especificador.replace(/[?#].*$/u, ''));
+  const candidatos = [
+    base,
+    base.replace(/\.js$/u, '.ts'),
+    base.replace(/\.mjs$/u, '.mts'),
+    base.replace(/\.jsx$/u, '.tsx'),
+    ...['.ts', '.mts', '.tsx', '.astro', '.js', '.mjs'].flatMap((ext) => [`${base}${ext}`, `${base}/index${ext}`]),
+  ];
+  return candidatos.find(existe) ?? base;
+}
+
+const esFichero = (ruta: string): boolean => existsSync(ruta) && statSync(ruta).isFile();
 
 /** Umbrales pequeños y legibles para los casos: aviso en 1.000 bytes, tope en 2.000. */
 const UMBRALES: UmbralesDePeso = { aviso: 1_000, tope: 2_000, topeDePng: undefined };
@@ -110,6 +148,10 @@ describe('Historia 24.2 — medirDist reparte lo desplegado', () => {
     expect(medida.tarjetas).toEqual({ bytes: 7_000, ficheros: 2 });
   });
 
+  it('el índice de búsqueda es la parte de pagefind/ dentro de lo juzgado', () => {
+    expect(medida.pagefind).toEqual({ bytes: 500, ficheros: 1 });
+  });
+
   it('con los cinco presentes, no falta ninguno', () => {
     expect(medida.rotanQueFaltan).toEqual([]);
   });
@@ -135,6 +177,7 @@ describe('Historia 24.2 — medirDist reparte lo desplegado', () => {
     expect(vacia.desplegado).toEqual({ bytes: 0, ficheros: 0 });
     expect(vacia.juzgado.bytes).toBe(0);
     expect(vacia.juzgado.png).toBe(0);
+    expect(vacia.pagefind).toEqual({ bytes: 0, ficheros: 0 });
     expect(vacia.rotanQueFaltan).toEqual(FICHEROS_QUE_ROTAN_CON_LA_JORNADA);
   });
 
@@ -205,19 +248,47 @@ describe('Historia 24.2 — el parte', () => {
 
   it('las cifras dicen cuánto queda hasta el umbral siguiente, o cuánto se pasa del tope', () => {
     const juzgado = (bytes: number) => parteDePeso(medirDist(distQueJuzga(bytes)), UMBRALES).cifras[2];
-    expect(juzgado(400)).toContain('quedan 600 bytes (0 MiB) hasta el aviso.');
+    expect(juzgado(400)).toContain('quedan 600 bytes (<0,1 MiB) hasta el aviso.');
     expect(juzgado(1_000)).toContain('quedan 0 bytes (0 MiB) hasta el aviso.');
-    expect(juzgado(1_500)).toContain('quedan 500 bytes (0 MiB) hasta el tope.');
+    expect(juzgado(1_500)).toContain('quedan 500 bytes (<0,1 MiB) hasta el tope.');
     expect(juzgado(2_000)).toContain('quedan 0 bytes (0 MiB) hasta el tope.');
-    expect(juzgado(2_001)).toContain('pasa del tope en 1 byte (0 MiB).');
+    expect(juzgado(2_001)).toContain('pasa del tope en 1 byte (<0,1 MiB).');
   });
 
-  it('un dist/ sin ningún fichero no pesa cero: no hay nada que medir, y es un error', () => {
+  it('un dist/ sin ningún fichero no pesa cero: no hay nada que medir, es un error y no da cifras', () => {
     const parte = parteDePeso(medirDist([]), UMBRALES);
     expect(parte.error).toContain('dist/ no trae ningún fichero');
     expect(parteDePeso(medirDist([]), UMBRALES, { anotar: true }).error).toMatch(/^::error::dist\/ no trae /u);
-    // Sin los cinco que rota, la línea no deja un paréntesis vacío.
-    expect(parte.cifras[1]).toMatch(/en 0 ficheros\. No están en dist\/: index\.html, /u);
+    // Ausencia antes que cero: ni «0 bytes» ni «quedan 1.000 bytes hasta el aviso».
+    expect(parte.cifras).toEqual([]);
+    expect(parte.avisos).toEqual([]);
+  });
+
+  it('un dist/ que solo trae lo que rota tampoco pesa cero: no hay nada que juzgar', () => {
+    const soloRotan = medirDist([
+      { ruta: 'index.html', bytes: 5_000 },
+      { ruta: 'rss.xml', bytes: 10 },
+    ]);
+    const parte = parteDePeso(soloRotan, UMBRALES);
+    expect(parte.error).toContain('dist/ solo trae ficheros que rotan con la jornada (index.html, rss.xml)');
+    expect(parte.error).toContain('no hay nada que juzgar');
+    expect(parte.cifras).toEqual([]);
+    expect(parte.avisos).toEqual([]);
+    // Con un solo fichero juzgado ya hay medida: cifras y ningún error.
+    const conUno = parteDePeso(medirDist(distQueJuzga(1)), UMBRALES);
+    expect(conUno.error).toBeUndefined();
+    expect(conUno.cifras).toHaveLength(5);
+  });
+
+  it('la primera línea dice si pagefind/ está, y no lo da por incluido cuando falta', () => {
+    const sin = parteDePeso(medirDist(distQueJuzga(300)), UMBRALES).cifras[0];
+    expect(sin).toContain('sin pagefind/');
+    expect(sin).not.toContain('pagefind/ incluido');
+    const con = parteDePeso(
+      medirDist([...distQueJuzga(300), { ruta: 'pagefind/pagefind.js', bytes: 1 }]),
+      UMBRALES,
+    ).cifras[0];
+    expect(con).toMatch(/, pagefind\/ incluido\.$/u);
   });
 
   it('las cifras dicen lo desplegado, lo que rota, lo juzgado, las Tarjetas y los PNG', () => {
@@ -255,24 +326,27 @@ describe('Historia 24.2 — el parte', () => {
     expect(parte.error).toBeUndefined();
     expect(parte.avisos).toHaveLength(1);
     const [aviso] = parte.avisos;
-    expect(aviso).toContain('1.500 bytes (0 MiB)');
+    expect(aviso).toContain('1.500 bytes (<0,1 MiB)');
     expect(aviso).toContain('1.000 bytes');
     expect(aviso).toContain('2.000 bytes');
     expect(aviso).toContain('AVISO_DE_PESO_DE_DIST');
     expect(aviso).toContain('TOPE_DE_PESO_DE_DIST');
     expect(aviso).toContain('src/lib/umbrales.ts');
     expect(aviso).toContain('no decide nada');
-    expect(aviso).toContain('quedan 500 bytes (0 MiB) hasta el tope');
+    expect(aviso).toContain('quedan 500 bytes (<0,1 MiB) hasta el tope');
     expect(aviso).toContain('lo decide Héctor');
+    // La misma orden corre en local y en Playwright, donde no se despliega nada.
+    expect(aviso).toContain('la construcción sigue y, en el flujo de publicación, se despliega');
   });
 
   it('sobre el tope: el error nombra el peso, el tope, la constante y el fichero', () => {
     const parte = parteDePeso(medirDist(distQueJuzga(2_001)), UMBRALES);
     expect(parte.avisos).toEqual([]);
     expect(parte.error).toContain('2.001 bytes');
-    expect(parte.error).toContain('pasa el tope de 2.000 bytes (0 MiB) en 1 byte (0 MiB)');
+    expect(parte.error).toContain('pasa el tope de 2.000 bytes (<0,1 MiB) en 1 byte (<0,1 MiB)');
     expect(parte.error).toContain('TOPE_DE_PESO_DE_DIST');
     expect(parte.error).toContain('src/lib/umbrales.ts');
+    expect(parte.error).toContain('en el flujo de publicación el artefacto no se sube y sigue servido');
     expect(parte.veredictos.peso).toBe('sobre-el-tope');
   });
 
@@ -281,7 +355,7 @@ describe('Historia 24.2 — el parte', () => {
     const parte = parteDePeso(medirDist(distQueJuzga(TOPE_DE_PESO_DE_DIST + 1)), umbrales);
     // A esta distancia el redondeo a MiB iguala las dos cifras: el exceso lo dice en bytes.
     expect(parte.error).toContain('943.718.401 bytes (900 MiB)');
-    expect(parte.error).toContain('pasa el tope de 943.718.400 bytes (900 MiB) en 1 byte (0 MiB)');
+    expect(parte.error).toContain('pasa el tope de 943.718.400 bytes (900 MiB) en 1 byte (<0,1 MiB)');
     const aviso = parteDePeso(medirDist(distQueJuzga(AVISO_DE_PESO_DE_DIST + 1)), umbrales).avisos[0];
     expect(aviso).toContain('786.432.000 bytes (750 MiB)');
   });
@@ -327,6 +401,10 @@ describe('Historia 24.2 — el parte', () => {
 describe('Historia 24.2 — el formato de las cifras', () => {
   it.each([
     [0, '0 MiB'],
+    // Lo que no llega a una décima sin ser cero no se escribe «0 MiB».
+    [1, '<0,1 MiB'],
+    [52_428, '<0,1 MiB'],
+    [52_429, '0,1 MiB'],
     [466_839_655, '445,2 MiB'],
     [312_472_917, '298 MiB'],
     [AVISO_DE_PESO_DE_DIST, '750 MiB'],
@@ -345,6 +423,25 @@ describe('Historia 24.2 — el paso va al final de npm run build', () => {
     );
   });
 
+  it('el flujo de publicación construye con npm run build antes de subir dist/, y sin saltárselo', () => {
+    // La guarda solo protege si el despliegue construye con esa orden: un paso que llamara a
+    // `astro build` y a Pagefind a pelo subiría `dist/` sin medirlo.
+    const flujo = parsearYaml(readFileSync(resolve(RAIZ, '.github/workflows/publicar.yml'), 'utf8')) as {
+      jobs: Record<string, { steps?: { run?: string; uses?: string; with?: { path?: string }; 'continue-on-error'?: unknown }[] }>;
+    };
+    const pasos = flujo.jobs.construir?.steps ?? [];
+    const subida = pasos.findIndex((paso) => paso.uses?.startsWith('actions/upload-pages-artifact@'));
+    const construir = pasos.findIndex((paso) => paso.run?.trim() === 'npm run build');
+    expect(subida).toBeGreaterThan(-1);
+    expect(pasos[subida]?.with?.path).toBe('dist');
+    expect(construir).toBeGreaterThan(-1);
+    expect(construir).toBeLessThan(subida);
+    expect(pasos[construir]?.['continue-on-error']).toBeUndefined();
+    for (const paso of pasos.slice(0, subida)) {
+      expect(paso.run ?? '', 'un paso construye sin npm run build').not.toMatch(/\bastro build\b|\bpagefind\b/u);
+    }
+  });
+
   it('no es una integración de Astro ni mide en astro:build:done', () => {
     const paso = readFileSync(resolve(RAIZ, 'integraciones/peso.ts'), 'utf8');
     const sinComentarios = paso.replace(/\/\*[\s\S]*?\*\//gu, '').replace(/\/\/.*$/gmu, '');
@@ -354,19 +451,21 @@ describe('Historia 24.2 — el paso va al final de npm run build', () => {
   });
 
   it('las decisiones viven en tools/lib/peso.ts, sin disco ni proceso, tampoco en lo que importa', () => {
-    // Se sigue cada importación relativa: un módulo puro que importa uno impuro no es puro.
+    // Se sigue cada importación: un módulo puro que importa uno impuro no es puro. Solo se
+    // admiten importaciones relativas —un paquete o un módulo de Node, con `node:` o sin él,
+    // no se inspecciona y puede traer disco o red—, y en el código no hay proceso ni red.
     const vistos = new Set<string>();
     const pendientes = [resolve(RAIZ, 'tools/lib/peso.ts')];
     while (pendientes.length > 0) {
       const fichero = pendientes.pop() as string;
       if (vistos.has(fichero)) continue;
       vistos.add(fichero);
-      const fuente = readFileSync(fichero, 'utf8');
+      const codigo = sinComentarios(readFileSync(fichero, 'utf8'));
       const nombre = relative(RAIZ, fichero);
-      expect(fuente, nombre).not.toMatch(/from ['"]node:|import\(['"]node:/u);
-      expect(fuente, nombre).not.toMatch(/\bprocess\./u);
-      for (const [, especificador] of fuente.matchAll(/^\s*(?:import|export)\b[^;]*?from\s+['"](\.[^'"]+)['"]/gmu)) {
-        pendientes.push(resolve(dirname(fichero), especificador as string));
+      expect(codigo, nombre).not.toMatch(/\bprocess\b|\bglobalThis\b|\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b/u);
+      for (const especificador of especificadoresDe(codigo)) {
+        expect(especificador, `${nombre} importa algo que no es relativo`).toMatch(/^\.{1,2}\//u);
+        pendientes.push(resolverRelativo(fichero, especificador, esFichero));
       }
     }
     // Lo que trae hoy: el formato de cifras y el escapado de anotaciones, y nada del ingreso.
@@ -386,16 +485,44 @@ describe('Historia 24.2 — lo que rota con la jornada es lo que lee la jornada'
     'src/pages/rss.xml.ts': 'rss.xml',
   };
 
-  /** Todos los ficheros de código de `src/`, por su ruta relativa a la raíz. */
-  const fuentes = readdirSync(resolve(RAIZ, 'src'), { recursive: true, encoding: 'utf8' })
-    .filter((ruta) => /\.(astro|ts|mts|js|mjs)$/u.test(ruta))
-    .map((ruta) => `src/${ruta.split('\\').join('/')}`);
+  /**
+   * Los ficheros de código que pueden escribir en `dist/`: los de `src/` y los de
+   * `integraciones/`, con la configuración de Astro, por su ruta relativa a la raíz.
+   */
+  const fuentes = [
+    ...['src', 'integraciones'].flatMap((dir) =>
+      readdirSync(resolve(RAIZ, dir), { recursive: true, encoding: 'utf8' })
+        .filter((ruta) => /\.(astro|ts|mts|tsx|js|mjs)$/u.test(ruta))
+        .map((ruta) => `${dir}/${ruta.split('\\').join('/')}`),
+    ),
+    'astro.config.mjs',
+  ];
 
-  /** Las importaciones relativas de un fichero, ya resueltas a rutas relativas a la raíz. */
+  /**
+   * Las importaciones relativas de un fichero, resueltas como Vite, relativas a la raíz. Sin
+   * quitar comentarios: un patrón de ficheros en una cadena —dos asteriscos, barra y
+   * asterisco— parece abrir uno y se comería lo que sigue, y una importación
+   * comentada que se cuente de más solo hace la guarda más estricta.
+   */
   const importaciones = (fichero: string): string[] =>
-    [...readFileSync(resolve(RAIZ, fichero), 'utf8').matchAll(/^\s*import\b[^;]*?from\s+['"](\.[^'"]+)['"]/gmu)].map(
-      ([, especificador]) => relative(RAIZ, resolve(RAIZ, dirname(fichero), especificador as string)),
+    especificadoresDe(readFileSync(resolve(RAIZ, fichero), 'utf8'))
+      .filter((especificador) => /^\.{1,2}\//u.test(especificador))
+      .map((especificador) => relative(RAIZ, resolverRelativo(resolve(RAIZ, fichero), especificador, esFichero)));
+
+  it('las importaciones se resuelven como Vite: con .js por .ts, sin extensión, reexportadas y dinámicas', () => {
+    const existentes = new Set(['/p/src/lib/citaDelDia.ts', '/p/src/lib/x/index.ts', '/p/src/lib/y.astro']);
+    const existe = (ruta: string) => existentes.has(ruta);
+    const fuente = [
+      "import { citaDelDia } from '../lib/citaDelDia.js';",
+      "export { citaDelDia as otra } from '../lib/citaDelDia.ts';",
+      "import '../lib/x';",
+      "const y = await import('../lib/y');",
+      "import { z } from 'astro:content';",
+    ].join('\n');
+    expect(especificadoresDe(fuente).map((esp) => (esp.startsWith('.') ? resolverRelativo('/p/src/pages/hoy.astro', esp, existe) : esp)).sort()).toEqual(
+      ['/p/src/lib/citaDelDia.ts', '/p/src/lib/citaDelDia.ts', '/p/src/lib/x/index.ts', '/p/src/lib/y.astro', 'astro:content'].sort(),
     );
+  });
 
   it('las únicas superficies que dependen de la jornada son las cinco páginas de la lista', () => {
     // Lee la jornada quien lee FECHA_JORNADA o la portada, y quien importa —directa o
@@ -415,6 +542,8 @@ describe('Historia 24.2 — lo que rota con la jornada es lo que lee la jornada'
         }
       }
     }
+    // Un módulo de `src/lib/` no escribe en `dist/` por sí mismo; una página, un componente,
+    // una integración o la configuración sí.
     const superficies = [...leenLaJornada].filter((fichero) => !fichero.startsWith('src/lib/')).sort();
     expect(superficies).toEqual(Object.keys(PAGINA_DE).sort());
     expect(Object.values(PAGINA_DE).sort()).toEqual([...FICHEROS_QUE_ROTAN_CON_LA_JORNADA].sort());

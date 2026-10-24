@@ -8,7 +8,8 @@
  * Es la cáscara: recorre `dist/`, pasa rutas y tamaños a `tools/lib/peso.ts`, que reparte y
  * decide, y escribe lo que este le devuelve. Las cifras salen por stdout, siempre; lo que cruza
  * un umbral, por stderr, y en GitHub Actions con su anotación. Sale con 1 sobre el tope, o si
- * no hay `dist/` que medir; con 0 en lo demás, avise o no. No escribe nada y no usa la red.
+ * no hay `dist/` que medir ni nada que juzgar en él —y entonces sin cifras—; con 0 en lo demás,
+ * avise o no. No escribe nada y no usa la red.
  */
 
 import { readdir, realpath, stat } from 'node:fs/promises';
@@ -34,6 +35,15 @@ import {
  * vuelve a un directorio que ya se está recorriendo se salta, como hace `tar` con un bucle, y
  * uno roto hace fallar la lectura —también rompería el empaquetado—. Hoy ni Astro ni Pagefind
  * escriben enlaces; esto es para que el día que alguno llegue no se quede sin contar.
+ *
+ * Lo que no es fichero ni directorio —una tubería, un socket, un dispositivo— también hace
+ * fallar la lectura: saltarlo en silencio dejaría la cuenta distinta de lo que se empaqueta, y
+ * en un sitio estático no tiene nada que hacer.
+ *
+ * El empaquetado excluye además algunas entradas por su nombre (`.git` y `.github`, según la
+ * versión de la acción). Aquí no se excluye nada: si alguna llegara a `dist/`, el paso la
+ * contaría de más y nunca de menos, y un veredicto de más es el que no deja pasar el techo.
+ * Hoy `dist/` no trae ninguna entrada que empiece por punto.
  */
 async function ficherosDeDist(dist: string): Promise<FicheroDeDist[]> {
   const ficheros: FicheroDeDist[] = [];
@@ -52,6 +62,8 @@ async function ficherosDeDist(dist: string): Promise<FicheroDeDist[]> {
         } else if (tipo.isFile()) {
           const bytes = (await stat(ruta)).size;
           ficheros.push({ ruta: relative(dist, ruta).split(sep).join('/'), bytes });
+        } else {
+          throw new Error(`${relative(dist, ruta)} no es un fichero ni un directorio`);
         }
       }),
     );
@@ -80,7 +92,7 @@ if (listado !== undefined) {
     { aviso: AVISO_DE_PESO_DE_DIST, tope: TOPE_DE_PESO_DE_DIST, topeDePng: TOPE_DE_PNG_DE_DIST },
     { anotar },
   );
-  process.stdout.write(`${parte.cifras.join('\n')}\n`);
+  if (parte.cifras.length > 0) process.stdout.write(`${parte.cifras.join('\n')}\n`);
   for (const aviso of parte.avisos) process.stderr.write(`${aviso}\n`);
   if (parte.error !== undefined) {
     process.stderr.write(`${parte.error}\n`);
