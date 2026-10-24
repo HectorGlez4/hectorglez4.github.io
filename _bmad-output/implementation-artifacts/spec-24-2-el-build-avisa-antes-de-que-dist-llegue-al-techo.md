@@ -376,3 +376,28 @@ Status: done. Blocking condition: ninguna. Sin vuelta atrás por `bad_spec` ni `
 - Qué compara GitHub con su 1 GB no está comprobado; el paso cuenta de más, nunca de menos, y la holgura entre tope y techo la decide Héctor con los valores.
 - La guarda de la jornada es textual: sigue y clasifica todas las importaciones, pero no ve una superficie que leyera el reloj sin `FECHA_JORNADA` ni la portada; lo que hace `npm test` por dentro entre la medida y la subida tampoco se ve desde `publicar.yml`.
 
+
+## Verificación previa a la fusión — 2026-10-24
+
+Puerta previa a la fusión de la rama `v8/24-2-peso-de-dist` (intento 1), en el worktree
+`.claude/worktrees/v8-24-2`, sobre `d5648c8158`. Node v24.3.0, npm 11.4.2. Los dos intentos
+anteriores de `npm test` de esta puerta (`gate-npm-test.log`, `gate-npm-test-r2.log`) se
+pararon a mano por falta de disco, sin resumen; este es el que cuenta, con 112 GB libres.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (`6d376ec1a1`) ya es antecesor de `HEAD`, así
+  que no hubo fusión ni conflictos.
+- **`npm ci`** — no se corrió: `package-lock.json` no cambia desde el 2026-09-04 (`72501bf83c`)
+  y `node_modules` se instaló después, el 2026-10-24.
+- **`npm run build`** (`logs/s-24-2/gate-a1-build.log`) — en verde, `EXIT:0`: 5.288 páginas en
+  1 min 39 s; el sitemap, los `noindex` y Pagefind coinciden (4.873 rutas indexables); Pagefind
+  indexa 4.873 páginas. Un solo aviso, `[fichas-de-obra]`, previo a la historia. El paso del
+  peso cierra sin aviso: desplegado 466.937.424 bytes (445,3 MiB) en 15.339 ficheros, `pagefind/`
+  incluido; rotan 97.769 bytes en 5; juzgado 466.839.655 bytes (445,2 MiB) en 15.334, «quedan
+  319.592.345 bytes (304,8 MiB) hasta el aviso»; Tarjetas 312.472.917 bytes (298 MiB, 66,9 %) en
+  5.113; 5.116 PNG, sin tope. Las mismas cifras que la base y que las tres pasadas.
+- **`npx astro check`** (`logs/s-24-2/gate-a1-astro-check.log`) — en verde, `EXIT:0`: 316
+  ficheros, 0 errores, 0 avisos, 22 sugerencias (las mismas de antes).
+- **`npm test`** (desprendido, `logs/s-24-2/gate-a1-npm-test.log`) — en verde, `EXIT:0`: 126
+  ficheros y 5.257 pruebas pasadas, 0 fallidas, en 763,8 s.
+- **Punta a punta** — no aplica a esta historia; no se corrió `npm run test:e2e`.
+- **NFR-7** — no aplica a esta historia (`not-applicable`); no se corrió Lighthouse.
