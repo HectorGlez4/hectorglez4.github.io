@@ -97,6 +97,10 @@ const esperar = (milisegundos: number) => new Promise((r) => setTimeout(r, milis
 /**
  * Apunta, en la página, cada baliza en el orden en que sale por `sendBeacon`: el receptor las
  * recibe por varias conexiones y no garantiza ese orden. Se instala antes de navegar.
+ *
+ * Apuntar nunca impide enviar: una carga que no sea JSON —si el transporte cambiara— se apunta
+ * como `{ sinInterpretar }` y la baliza sale igual, así que el fallo lo dice la prueba que la
+ * esperaba y no una baliza que desaparece.
  */
 async function apuntarBalizas(page: Page) {
   await page.addInitScript(() => {
@@ -104,7 +108,11 @@ async function apuntarBalizas(page: Page) {
     ventana.__balizas = [];
     const original = navigator.sendBeacon.bind(navigator);
     navigator.sendBeacon = (url: string | URL, datos?: BodyInit | null) => {
-      ventana.__balizas.push(JSON.parse(String(datos)));
+      try {
+        ventana.__balizas.push(JSON.parse(String(datos)));
+      } catch {
+        ventana.__balizas.push({ sinInterpretar: String(datos) });
+      }
       return original(url, datos);
     };
   });
@@ -169,7 +177,7 @@ test.beforeAll(async () => {
       ...process.env,
       DIST: join(proyecto, 'dist'),
       PUERTO: String(PUERTO_SITIO),
-      CACHE_CONTROL: 'max-age=600',
+      SERVIDOR_CACHE_CONTROL: 'max-age=600',
     },
     stdio: 'ignore',
   });
@@ -518,7 +526,7 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
     await page.locator('footer').waitFor({ state: 'attached' });
     await page.getByRole('button', { name: 'Copiar la cita' }).click();
     await expect(page.locator('[data-copiar]')).toHaveAttribute('data-estado', 'copiado');
-    expect(await page.evaluate(() => (window as unknown as { __balizas: string[] }).__balizas)).toEqual([]);
+    expect(await balizasDe(page)).toEqual([]);
 
     soltar();
     const copiado = await esperarEvento(EVENTOS.copiado);

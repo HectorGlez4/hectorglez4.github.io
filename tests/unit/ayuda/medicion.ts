@@ -1,12 +1,17 @@
 import { createContext, runInContext } from 'node:vm';
 import { ARRANQUE_DE_MEDICION, guionDeMedicion } from '../../../src/lib/medicion.ts';
 
-/** Un oyente guardado, con su `once`. */
+/** Un oyente guardado, con sus ajustes. */
 interface Oyente {
   tipo: string;
   oyente: (evento: Record<string, unknown>) => void;
   unaVez: boolean;
+  /** `capture` y `passive`, tal como se pidieron: el entorno no los aplica, pero los apunta. */
+  captura: boolean;
+  pasiva: boolean;
 }
+
+type Ajustes = boolean | { once?: boolean; capture?: boolean; passive?: boolean };
 
 /**
  * Ejecuta el arranque y el fichero de medición con un navegador de mentira y recoge lo que
@@ -47,8 +52,15 @@ export function medicionEnUnSandbox(
   const enviadas: string[] = [];
   const delDocumento: Oyente[] = [];
   const deLaVentana: Oyente[] = [];
-  const guardar = (lista: Oyente[]) => (tipo: string, oyente: Oyente['oyente'], ajustes?: boolean | { once?: boolean }) => {
-    lista.push({ tipo, oyente, unaVez: typeof ajustes === 'object' && ajustes?.once === true });
+  const guardar = (lista: Oyente[]) => (tipo: string, oyente: Oyente['oyente'], ajustes?: Ajustes) => {
+    const objeto = typeof ajustes === 'object' ? ajustes : {};
+    lista.push({
+      tipo,
+      oyente,
+      unaVez: objeto.once === true,
+      captura: ajustes === true || objeto.capture === true,
+      pasiva: objeto.passive === true,
+    });
   };
   /** Llama a los oyentes de un tipo en el orden en que se registraron; los `once`, una vez. */
   const despachar = (lista: Oyente[], tipo: string, evento: Record<string, unknown> = {}) => {
@@ -140,6 +152,14 @@ export function medicionEnUnSandbox(
       ahora = hasta;
     },
     /**
+     * Una tarea larga: el reloj avanza `ms` milisegundos sin que ningún temporizador pueda
+     * disparar, como cuando el hilo principal está ocupado. Los vencidos esperan al siguiente
+     * `avanzar`, salvo que algo los cancele antes.
+     */
+    bloquear: (ms: number) => {
+      ahora += ms;
+    },
+    /**
      * Una interacción del visitante —`pointerdown`, `keydown`, `wheel`, `touchmove`, `scroll`…—:
      * llega a la ventana, y también al documento, como el evento que sube desde un elemento.
      */
@@ -155,6 +175,27 @@ export function medicionEnUnSandbox(
     restaurar: (persisted = true) => despachar(deLaVentana, 'pageshow', { persisted }),
     /** Cuántos temporizadores siguen pendientes. */
     pendientes: () => temporizadores.length,
+    /** Las escuchas puestas en la ventana o en el documento, con sus ajustes. */
+    escuchas: (donde: 'ventana' | 'documento') =>
+      (donde === 'ventana' ? deLaVentana : delDocumento).map(({ tipo, unaVez, captura, pasiva }) => ({
+        tipo,
+        unaVez,
+        captura,
+        pasiva,
+      })),
+    /**
+     * Envuelve el `window.__medir` de ahora, como el espía de `tests/e2e/ayuda/espia.ts`, y
+     * devuelve la lista —viva— de los eventos que pasan por él.
+     */
+    espiar: () => {
+      const vistos: string[] = [];
+      const real = ventana.__medir as (...argumentos: unknown[]) => unknown;
+      ventana.__medir = (...argumentos: unknown[]) => {
+        vistos.push(String(argumentos[0]));
+        return real(...argumentos);
+      };
+      return vistos;
+    },
     balizas: () => enviadas.map((c) => JSON.parse(c) as Record<string, unknown>),
   };
 }

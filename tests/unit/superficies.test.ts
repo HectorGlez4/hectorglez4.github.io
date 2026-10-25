@@ -602,7 +602,6 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
     },
   };
 
-  /** Lo que se publica o se ejecuta en el navegador: `src/` y `public/`, solo ficheros de texto. */
   /**
    * Lo que ya se revisó contra el motivo de un criterio y no lo desmiente, con su porqué: el texto
    * exacto, por fichero y criterio. Se quita de la fuente antes de buscar la señal de **ese**
@@ -627,6 +626,7 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
       fuente,
     );
 
+  /** Lo que se publica o se ejecuta en el navegador: `src/` y `public/`, solo ficheros de texto. */
   function ficherosDelSitio(): string[] {
     const ficheros: string[] = [];
     const recorrer = (dir: string) => {

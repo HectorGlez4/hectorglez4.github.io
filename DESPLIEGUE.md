@@ -495,18 +495,30 @@ pestaña cerrada antes de tiempo sin tocarla no se leyó. Lo que no emite vista 
 lleva la ruta y la Marca de origen, como la vista. Cada acción —`copiado`, `descarga-de-imagen`
 y las dos comparticiones— lleva `primera`: `si` si es la primera de su métrica en la carga
 (SM-5: copiado y descarga; SM-7: las dos comparticiones) y `no` si no; la descarga que impone el
-navegador, la que llega con `destino`, lleva siempre `no` y no gasta la primera. **Las dos las
-decide solo el fichero**: ninguna isla las emite ni las calcula, y `__medir('lectura')` se
-descarta. Una acción que llega sin lectura —un clic sin `pointerdown`, lo que se encoló antes de
-que llegara el fichero— la emite antes, así que en una superficie con lectura toda acción con
-`primera='si'` tiene su lectura en la misma carga, y el numerador de SM-5 y SM-7 cabe en su
-denominador. Volver por la caché de atrás y adelante es una carga nueva: otra lectura posible,
-sin Marca de origen y sin vista.
+navegador, la que llega con `destino`, lleva siempre `no` y no gasta la primera. Esa descarga
+no entra ni en SM-5 ni en SM-7 (las dos enmendadas en la v8.2): una carga cuya única acción fue
+ella no es lectura con acción, y es a propósito. El destino lo pone la isla de la Imagen desde
+la Historia 25.2; **hasta entonces la descarga impuesta llega sin destino**, con su `primera`, y
+cuenta en SM-5 como si la hubiera elegido el visitante. **Las dos las decide solo el fichero**:
+ninguna isla las emite ni las calcula, y `__medir('lectura')` se descarta. Una acción que llega
+sin lectura —un clic sin `pointerdown`, lo que se encoló antes de que llegara el fichero— la
+emite antes, así que en una superficie con lectura toda acción con `primera='si'` **sale**
+detrás de su lectura, en la misma carga. Es una garantía de la emisión, no de lo guardado: una
+baliza que se pierde no se reintenta, y el receptor fecha cada evento en la jornada UTC en que
+llega, así que una lectura de las 23:59:59 y su acción pueden caer en jornadas distintas. Leída
+por jornada, la tasa puede pasar de uno junto a medianoche; se lee sobre varias. Volver por la
+caché de atrás y adelante es una carga nueva: otra lectura posible, sin Marca de origen y sin
+vista. Por eso las lecturas no son un subconjunto de las vistas —`lecturas/vistas` puede pasar
+de uno— y el reparto de lecturas por Marca de origen no casa con el de vistas: la vuelta pierde
+la marca.
 
 **Corte de serie de SM-5 y SM-7.** Antes del despliegue del sitio de la Épica 23 no hay
-`lectura` y `primera` llega nula, así que las tasas por lectura empiezan ese día y no se
-comparan con lo anterior; las consultas de acciones a secas siguen valiendo para su propia
-serie. Hasta que la 23.10 lea la línea base desde `tools/`, se miran a mano (abajo).
+`lectura` y `primera` llega nula, así que las tasas por lectura empiezan la **primera jornada
+UTC completa** tras la llegada en vivo, y la jornada de llegada se informa aparte: es mixta, porque
+las páginas que ya estaban abiertas con el fichero anterior siguen enviando acciones sin
+`primera` y ninguna lectura. No se comparan con lo anterior; las consultas de acciones a secas
+siguen valiendo para su propia serie. Hasta que la 23.10 lea la línea base desde `tools/`, se
+miran a mano (abajo).
 
 Consultar, sin panel de nadie:
 
@@ -523,10 +535,15 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, COUNT(*) FROM eventos WHERE evento='lectura' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
-# SM-5 sobre lecturas: cargas que se llevaron la Cita (su primera acción de SM-5) frente a
-# lecturas, por jornada. Antes del despliegue de la 23, `primera` es nula y no cuenta.
+# SM-5 sobre lecturas de Página de Cita: lecturas con su primera acción de SM-5 —copiado o
+# descarga elegida— frente a lecturas, por jornada. Solo rutas de Cita: lo de la portada, la
+# Obra y los listados se informa aparte. Desde la primera jornada completa tras la 23.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('copiado','descarga-de-imagen') AND primera='si') AS con_accion FROM eventos WHERE evento IN ('lectura','copiado','descarga-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('copiado','descarga-de-imagen') AND primera='si') AS con_accion FROM eventos WHERE ruta LIKE '/cita/%' AND evento IN ('lectura','copiado','descarga-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-7 sobre lecturas de Página de Cita: lecturas con su primera compartición, por jornada.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('comparticion-de-enlace','comparticion-de-imagen') AND primera='si') AS con_comparticion FROM eventos WHERE ruta LIKE '/cita/%' AND evento IN ('lectura','comparticion-de-enlace','comparticion-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
 # Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \

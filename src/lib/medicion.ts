@@ -46,6 +46,16 @@ export { EVENTOS, EVENTOS_VALIDOS, esEventoValido, type Evento } from './vocabul
 export type EventoDeVista = typeof EVENTOS.vistaDeCita | typeof EVENTOS.vistaDeSuperficie;
 
 /**
+ * Los eventos de vista, como lista — Historia 23.5.
+ *
+ * El fichero solo emite de `data-vistas` lo que está aquí, y solo una vista emitida hace de la
+ * página una **superficie con lectura**. El tipo ya impide que una `Superficie` declare otra
+ * cosa; esta lista lo sostiene también en el navegador, donde el tipo no llega: una acción
+ * escrita en `data-vistas` no sale en cada carga ni enciende la lectura.
+ */
+export const EVENTOS_DE_VISTA: readonly EventoDeVista[] = [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie];
+
+/**
  * Los eventos que el fichero sabe emitir hoy — Historias 23.2 y 23.5.
  *
  * El vocabulario declara más: `salida-interna`, `busqueda` y `vista-de-obra` llegan con las
@@ -173,9 +183,9 @@ export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'tou
  *
  *   1. lee la Marca de origen de la dirección, **una vez**;
  *   2. emite las vistas que la página declara en `data-vistas` del `<html>`, que salen de
- *      `src/lib/superficies.ts` y no de la página (ninguna página elige su vista). Si emite
- *      alguna, la página es **superficie con lectura**; si no —páginas 2+, `/buscar/`, 404—, no
- *      habrá lectura nunca;
+ *      `src/lib/superficies.ts` y no de la página (ninguna página elige su vista); de ahí solo
+ *      salen eventos de `EVENTOS_DE_VISTA`. Si emite alguna, la página es **superficie con
+ *      lectura**; si no —páginas 2+, `/buscar/`, 404—, no habrá lectura nunca;
  *   3. empieza la carga: la memoria de `primera` vacía y el reloj de la lectura en marcha;
  *   4. se instala como `__medir`, de modo que lo que llegue después ya no se encola, y pone sus
  *      escuchas;
@@ -186,14 +196,18 @@ export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'tou
  * ratos en que lo está: el reloj se para con `visibilitychange` al ocultarse y se rearma con lo
  * que falta al volver; ni `setInterval` ni `scroll`— o antes, a la primera de
  * `INTERACCIONES_DE_LECTURA`. Ocultarse o descargarse no emite nada: una pestaña cerrada antes
- * de tiempo sin tocarla no se leyó. La emite solo el fichero, nunca `__medir`
+ * de tiempo sin tocarla no se leyó. Si el temporizador llega tarde —una tarea larga lo retrasa— y
+ * la página se oculta con el tiempo ya cumplido, la lectura sale entonces: no la emite ocultarse,
+ * la debía la carga. La emite solo el fichero, nunca `__medir`
  * (`EVENTOS_SOLO_DEL_FICHERO`), y lleva la ruta y la Marca de origen, como la vista.
  *
  * **`primera`** (SM-5, SM-7): cada acción —un evento de `METRICA_DE_ACCION`— lleva `si` si es la
  * primera de su métrica en la carga y `no` si no lo es, y la decide el fichero al emitir, también
  * al vaciar la cola. Una `descarga-de-imagen` con un destino de su conjunto es la que impuso el
  * navegador tras una compartición que no salió: lleva siempre `no` y no gasta la primera de su
- * métrica; con un destino ajeno viaja con `destino: null` y cuenta como sin destino. En una
+ * métrica; con un destino ajeno viaja con `destino: null` y cuenta como sin destino. (Ese destino
+ * lo pasa la isla de la Imagen desde la Historia 25.2; hasta entonces la descarga impuesta llega
+ * sin él y cuenta como elegida.) En una
  * superficie con lectura, una acción que llega sin ella —un clic sin `pointerdown`, una acción
  * encolada— **emite antes la lectura**: el orden en el transporte es vista, lectura, acción, y
  * así ninguna acción de SM-5 o SM-7 queda fuera de su denominador.
@@ -256,6 +270,7 @@ export function guionDeMedicion(url: string): string {
     'q=window.__medir&&__medir.q||[]',
     ...[...conjuntos].map(([texto, nombre]) => `${nombre}=${texto}`),
     `s={${tabla.join(',')}}`,
+    `W=${JSON.stringify(EVENTOS_DE_VISTA)}`,
     `M=${JSON.stringify(METRICA_DE_ACCION)}`,
     `F=${JSON.stringify(EVENTOS_SOLO_DEL_FICHERO)}`,
     'P={}',
@@ -268,7 +283,8 @@ export function guionDeMedicion(url: string): string {
   /*
    * Las variables del fichero, por su nombre corto:
    *
-   *   · q, la cola del arranque; A0…, los conjuntos; s, la tabla de cada evento;
+   *   · q, la cola del arranque; A0…, los conjuntos; s, la tabla de cada evento; W, los eventos
+   *     de vista, los únicos que salen de `data-vistas`;
    *   · M, la métrica de cada acción (`METRICA_DE_ACCION`); F, los eventos que solo emite el
    *     fichero; P, las métricas que ya contaron su primera en esta carga;
    *   · o, la Marca de origen leída al activarse; V, si la página es superficie con lectura;
@@ -277,8 +293,9 @@ export function guionDeMedicion(url: string): string {
    *     visible en curso (-1 si no hay ninguno); T, el temporizador de la lectura.
    *
    * Y sus funciones: b compone y envía un evento; e es `__medir`; h para el reloj y suma el rato;
-   * g lo rearma con lo que falta, si toca; l emite la lectura, si toca; n empieza una carga; a
-   * activa el fichero.
+   * g lo rearma con lo que falta, si toca —o emite la lectura, si el rato ya la cumplió y el
+   * temporizador llegó tarde—; l emite la lectura, si toca; n empieza una carga; a activa el
+   * fichero.
    */
   return (
     `(function(){` +
@@ -299,12 +316,12 @@ export function guionDeMedicion(url: string): string {
     `return 1` +
     `}` +
     `function h(){I>=0&&(C+=performance.now()-I);I=-1;clearTimeout(T)}` +
-    `function g(){h();V&&!L&&document.visibilityState!='hidden'&&(I=performance.now(),T=setTimeout(l,${MIN_MS_VISIBLES_PARA_LA_LECTURA}-C))}` +
+    `function g(){h();V&&!L&&(C<${MIN_MS_VISIBLES_PARA_LA_LECTURA}?document.visibilityState!='hidden'&&(I=performance.now(),T=setTimeout(l,${MIN_MS_VISIBLES_PARA_LA_LECTURA}-C)):l())}` +
     `function l(){V&&!L&&(L=1,h(),b(${lectura}))}` +
     `function n(){h();L=C=0;P={};g()}` +
     `function a(){` +
     `o=new URLSearchParams(location.search).get(${p});` +
-    `(document.documentElement.dataset.vistas||'').split(' ').forEach(function(v){e(v)&&(V=1)});` +
+    `(document.documentElement.dataset.vistas||'').split(' ').forEach(function(v){W.indexOf(v)>=0&&e(v)&&(V=1)});` +
     `n();` +
     `window.__medir=e;` +
     `${JSON.stringify(INTERACCIONES_DE_LECTURA)}.forEach(function(k){addEventListener(k,l,{capture:true,passive:true})});` +

@@ -209,7 +209,9 @@ export const MAX_BYTES_DE_GUION = 6656;
  * que no se sube; las Historias 23.5 a 23.9 lo vuelven a medir al añadir sus eventos.
  *
  * Subido de 1.320 a 2.420 en la Historia 23.5: medido, **2.024 bytes** con el punto final de
- * producción (1.979 con el de las pruebas), más unos 400 de margen, como la 23.1. Creció porque
+ * producción (1.979 con el de las pruebas), más unos 400 de margen, como la 23.1; tras su
+ * revisión —la lectura que debía la carga sale aunque el temporizador llegue tarde, y de
+ * `data-vistas` solo salen vistas—, **2.096** (2.051), y el tope no se mueve. Creció porque
  * el fichero dejó de ser solo un emisor: lleva el reloj de la Lectura —visibilidad acumulada con
  * `visibilitychange`, el temporizador con lo que falta y las cuatro escuchas de interacción—, la
  * memoria de `primera` por métrica, con la correspondencia de `METRICA_DE_ACCION`, y la carga

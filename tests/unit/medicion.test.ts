@@ -8,6 +8,7 @@ import {
   ARRANQUE_DE_MEDICION,
   EVENTOS,
   EVENTOS_DEL_GUION,
+  EVENTOS_DE_VISTA,
   EVENTOS_SOLO_DEL_FICHERO,
   EVENTOS_VALIDOS,
   INTERACCIONES_DE_LECTURA,
@@ -427,6 +428,29 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     expect(pendientes()).toBe(0);
   });
 
+  it('temporizador tardío: con los 8 s visibles ya cumplidos, la lectura sale al ocultarse, y una sola', () => {
+    // Una tarea larga retiene el temporizador más allá de los 8 s, y la página se oculta antes
+    // de que dispare: la carga ya se leyó, y ocultarse no puede llevarse su lectura.
+    const { bloquear, avanzar, ocultar, mostrar, balizas, pendientes } = enCita();
+    bloquear(UMBRAL + 500);
+    expect(lecturas(balizas())).toEqual([]);
+    ocultar();
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null }]);
+    expect(pendientes()).toBe(0);
+    mostrar();
+    avanzar(10 * 60_000);
+    expect(lecturas(balizas())).toHaveLength(1);
+  });
+
+  it('temporizador tardío sin los 8 s cumplidos: ocultarse sigue sin emitir nada', () => {
+    const { bloquear, avanzar, ocultar, balizas, pendientes } = enCita();
+    bloquear(UMBRAL - 1);
+    ocultar();
+    avanzar(10 * 60_000);
+    expect(lecturas(balizas())).toEqual([]);
+    expect(pendientes()).toBe(0);
+  });
+
   it.each(INTERACCIONES_DE_LECTURA)('interacción: `%s` a 1 s emite la lectura en ese momento, y nada emite otra', (tipo) => {
     const { avanzar, interactuar, balizas } = enCita({ busqueda: '?de=tiktok' });
     avanzar(1_000);
@@ -446,6 +470,20 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     // `setInterval`.
     expect(guion).not.toMatch(/scroll|setInterval/);
     expect(guion).toContain('visibilitychange');
+  });
+
+  it('las cuatro escuchas de interacción van en la ventana, en captura y pasivas', () => {
+    // Pasivas: solo anotan la lectura, nunca frenan el desplazamiento ni mueven nada (WCAG 2.5.7,
+    // la revisión de `tests/unit/superficies.test.ts`). En captura: ningún `stopPropagation` de
+    // una isla las deja sin ver.
+    const { escuchas } = enCita();
+    const deInteraccion = escuchas('ventana').filter((e) =>
+      (INTERACCIONES_DE_LECTURA as readonly string[]).includes(e.tipo),
+    );
+    expect(deInteraccion).toEqual(
+      INTERACCIONES_DE_LECTURA.map((tipo) => ({ tipo, unaVez: false, captura: true, pasiva: true })),
+    );
+    expect(escuchas('documento').map((e) => e.tipo)).toEqual(['visibilitychange']);
   });
 
   it('solo `scroll`: ni la restauración de la posición ni un ancla cuentan como interacción', () => {
@@ -488,6 +526,21 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     expect(pendientes()).toBe(0);
   });
 
+  it('de `data-vistas` solo salen vistas: una acción escrita ahí no sale ni hace de la página superficie con lectura', () => {
+    expect([...EVENTOS_DE_VISTA]).toEqual([EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie]);
+    const { avanzar, interactuar, emitir, balizas, pendientes } = medicionEnUnSandbox({
+      ruta: '/cita/una/',
+      vistas: `${EVENTOS.copiado} ${EVENTOS.busquedaSinResultados} ${EVENTOS.comparticionDeEnlace}`,
+    });
+    expect(balizas()).toEqual([]);
+    interactuar('pointerdown');
+    avanzar(30_000);
+    emitir(EVENTOS.copiado);
+    // Ni lectura, ni el copiado gastado al cargar: el primero de verdad es «sí».
+    expect(balizas()).toEqual([{ evento: EVENTOS.copiado, ruta: '/cita/una/', primera: 'si' }]);
+    expect(pendientes()).toBe(0);
+  });
+
   it.each([
     ['instagram', 'instagram'],
     ['ajena', null],
@@ -519,6 +572,32 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
   it('la lectura es un evento que solo emite el fichero', () => {
     expect(EVENTOS_SOLO_DEL_FICHERO).toEqual([EVENTOS.lectura]);
     expect(EVENTOS_DEL_GUION).toContain(EVENTOS.lectura);
+  });
+
+  it('la lectura no pasa por `window.__medir`: el espía de las pruebas de punta a punta no la ve', () => {
+    const { espiar, emitir, avanzar, restaurar, balizas } = enCita();
+    const vistos = espiar();
+    avanzar(1_000);
+    emitir(EVENTOS.copiado); // la lectura sale delante, por dentro
+    restaurar();
+    avanzar(UMBRAL); // y la de la carga nueva, por tiempo
+    expect(lecturas(balizas())).toHaveLength(2);
+    expect(vistos).toEqual([EVENTOS.copiado]);
+  });
+
+  it('ninguna isla emite la lectura ni conoce la correspondencia de métricas: solo el fichero', () => {
+    // Las islas llaman `__medir(evento, datos, destino)`, y `primera` no es ninguno de los tres:
+    // basta con que ninguna nombre lo que solo sabe el fichero. `vocabulario.ts` declara la
+    // correspondencia y `umbrales.ts` la cita en el comentario de su tope; nadie más la toca.
+    const DUEÑOS = ['lib/vocabulario.ts', 'lib/umbrales.ts'];
+    const PROHIBIDO = /METRICA_DE_ACCION|EVENTOS_SOLO_DEL_FICHERO|EVENTOS\.lectura\b|__medir\(\s*['"`]lectura['"`]/;
+    const fuentes = [
+      ...fuentesDeSrc().filter((f) => !DUEÑOS.some((d) => f.endsWith(d))),
+      ...ficherosDe(resolve(RAIZ, 'public', 'islas')).filter((f) => /\.m?js$/.test(f)),
+    ];
+    expect(fuentes.length).toBeGreaterThan(10);
+    const infractores = fuentes.filter((f) => PROHIBIDO.test(readFileSync(f, 'utf8')));
+    expect(infractores.map((f) => relative(RAIZ, f))).toEqual([]);
   });
 
   it('`primera`: copiado, copiado, descarga sin destino, compartición de enlace y de imagen dan sí, no, no, sí, no', () => {
@@ -562,6 +641,21 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
         [EVENTOS.descargaDeImagen, destino, 'no'],
         [EVENTOS.descargaDeImagen, destino, 'no'],
         [EVENTOS.copiado, null, 'si'],
+      ]);
+    },
+  );
+
+  it.each(DESTINOS_DE_DESCARGA)(
+    'descarga con destino `%s` y después una sin destino: la elegida sale con «sí» aunque venga detrás',
+    (destino) => {
+      const { emitir, balizas } = medicionEnUnSandbox();
+      emitir(EVENTOS.descargaDeImagen, null, destino);
+      emitir(EVENTOS.descargaDeImagen);
+      emitir(EVENTOS.descargaDeImagen);
+      expect(balizas().map((b) => [b.destino ?? null, b.primera])).toEqual([
+        [destino, 'no'],
+        [null, 'si'],
+        [null, 'no'],
       ]);
     },
   );
