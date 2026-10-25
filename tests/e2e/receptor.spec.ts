@@ -679,7 +679,12 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
 
     await page.clock.runFor(MIN_MS_VISIBLES_PARA_LA_LECTURA - 100);
     await esperar(500);
-    expect(llegadas(EVENTOS.lectura), 'salió una lectura antes de los 8 s').toEqual([]);
+    // Lo que sale se apunta al llamar a `sendBeacon`: una ausencia no depende de lo que tarde en
+    // llegar al receptor.
+    expect((await balizasDe(page)).map((b) => b.evento), 'salió una lectura antes de los 8 s').toEqual([
+      EVENTOS.vistaDeCita,
+    ]);
+    expect(llegadas(EVENTOS.lectura), 'llegó una lectura antes de los 8 s').toEqual([]);
 
     await page.clock.runFor(100);
     const lectura = await esperarEvento(EVENTOS.lectura);
@@ -726,6 +731,9 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     await esperarAlFichero(page);
     expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
     await page.clock.runFor(2_000);
+    expect((await balizasDe(page)).map((b) => b.evento), 'salió una lectura antes de la tecla').toEqual([
+      EVENTOS.vistaDeCita,
+    ]);
 
     await page.keyboard.press('Shift');
     expect(await esperarEvento(EVENTOS.lectura), 'la tecla no emitió la lectura').toBeTruthy();
@@ -733,6 +741,7 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     await page.clock.runFor(20_000);
     await esperar(500);
     expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
   });
 
   test('`/buscar/` no emite lectura, ni con interacción ni con el tiempo', async ({ page }) => {
@@ -809,10 +818,14 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
       [EVENTOS.comparticionDeEnlace, 'si'],
       [EVENTOS.comparticionDeEnlace, 'no'],
     ]);
-    // Y al receptor llegan con su `primera`, guardada en su columna.
+    // Y al receptor llegan con su `primera`, tal como la interpreta (`interpretar`). Las balizas
+    // llegan por varias conexiones y sin orden: cada recuento se espera por su cuenta.
     await expect.poll(() => llegadas(EVENTOS.comparticionDeEnlace).length).toBe(2);
+    await expect.poll(() => llegadas(EVENTOS.copiado).length).toBe(2);
+    await expect.poll(() => llegadas(EVENTOS.lectura).length).toBe(1);
     expect(llegadas(EVENTOS.copiado).map((r) => r!.primera).sort()).toEqual(['no', 'si']);
     expect(llegadas(EVENTOS.comparticionDeEnlace).map((r) => r!.primera).sort()).toEqual(['no', 'si']);
+    await esperar(300);
     expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
   });
 

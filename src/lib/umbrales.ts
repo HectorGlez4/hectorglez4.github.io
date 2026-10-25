@@ -214,7 +214,7 @@ export const MAX_BYTES_DE_GUION = 6656;
  * `data-vistas` solo salen vistas—, **2.096** (2.051), y el tope no se mueve. Creció porque
  * el fichero dejó de ser solo un emisor: lleva el reloj de la Lectura —visibilidad acumulada con
  * `visibilitychange`, el temporizador con lo que falta y las cuatro escuchas de interacción—, la
- * memoria de `primera` por métrica, con la correspondencia de `METRICA_DE_ACCION`, y la carga
+ * memoria de `primera` por métrica, con la correspondencia de cada acción con la suya, y la carga
  * nueva de `pageshow` con `persisted`. Nada de eso cabe en el arranque en línea, que no cambia, ni
  * cuenta en `MAX_BYTES_DE_GUION`: es justo el hueco para el que la 23.1 sacó la medición a un
  * fichero. Las Historias 23.6 a 23.9 lo vuelven a medir al añadir lo suyo.
@@ -327,8 +327,9 @@ export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
  * `visibilitychange`— o antes, a la primera interacción. El valor, 8 s, lo dan FR-56 y AD-13.
  *
  * **Cuenta desde que el fichero se activa**, no desde que empezó la navegación: el fichero llega
- * con `defer`, y una página prerenderizada no cuenta hasta verse. Peca por defecto —una carga
- * vista algo más de 8 s puede quedarse sin lectura por tiempo—, nunca cuenta una vista menos.
+ * con `defer`, y una página prerenderizada no cuenta hasta verse. Peca por defecto: una carga
+ * vista algo más de 8 s puede quedarse sin lectura por tiempo, pero ninguna carga visible menos
+ * de 8 s la tiene por tiempo (por una interacción, sí).
  *
  * Cambiarlo cambia qué es una Lectura: es una entrada de la lista de cortes de serie (Historia
  * 23.10) y repite la línea base, y lo decide Héctor tras la comparación por firma. Viaja dentro

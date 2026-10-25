@@ -588,8 +588,9 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
   it('ninguna isla emite la lectura ni conoce la correspondencia de métricas: solo el fichero', () => {
     // Las islas llaman `__medir(evento, datos, destino)`, y `primera` no es ninguno de los tres:
     // basta con que ninguna nombre lo que solo sabe el fichero. `vocabulario.ts` declara la
-    // correspondencia y `umbrales.ts` la cita en el comentario de su tope; nadie más la toca.
-    const DUEÑOS = ['lib/vocabulario.ts', 'lib/umbrales.ts'];
+    // correspondencia y `medicion.ts` la compone en el fichero —`fuentesDeSrc` ya lo deja fuera—;
+    // nadie más la nombra, tampoco en un comentario.
+    const DUEÑOS = ['lib/vocabulario.ts'];
     const PROHIBIDO = /METRICA_DE_ACCION|EVENTOS_SOLO_DEL_FICHERO|EVENTOS\.lectura\b|__medir\(\s*['"`]lectura['"`]/;
     const fuentes = [
       ...fuentesDeSrc().filter((f) => !DUEÑOS.some((d) => f.endsWith(d))),
@@ -598,6 +599,36 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     expect(fuentes.length).toBeGreaterThan(10);
     const infractores = fuentes.filter((f) => PROHIBIDO.test(readFileSync(f, 'utf8')));
     expect(infractores.map((f) => relative(RAIZ, f))).toEqual([]);
+  });
+
+  it('una isla no puede poner `primera`: lo que llegue de más a `__medir` no viaja, directo ni encolado', () => {
+    // `primera` la calcula el fichero; un cuarto argumento —o un quinto— no la sustituye ni sale.
+    for (const cargado of [true, false]) {
+      const { emitir, cargar, balizas } = medicionEnUnSandbox({ cargado });
+      emitir(EVENTOS.copiado, null, undefined, 'no', 'si');
+      emitir(EVENTOS.copiado, null, undefined, 'si');
+      emitir(EVENTOS.comparticionDeEnlace, null, 'telegram', 'no');
+      if (!cargado) cargar();
+      expect(balizas(), cargado ? 'directo' : 'encolado').toEqual([
+        { evento: EVENTOS.copiado, ruta: '/', primera: 'si' },
+        { evento: EVENTOS.copiado, ruta: '/', primera: 'no' },
+        { evento: EVENTOS.comparticionDeEnlace, ruta: '/', destino: 'telegram', primera: 'si' },
+      ]);
+    }
+  });
+
+  it.each([
+    ['dos vistas distintas', `${EVENTOS.vistaDeCita} ${EVENTOS.vistaDeSuperficie}`],
+    ['la misma vista dos veces', `${EVENTOS.vistaDeCita} ${EVENTOS.vistaDeCita}`],
+  ])('con %s en `data-vistas`, sigue habiendo como mucho una lectura por carga', (_, vistas) => {
+    const { avanzar, interactuar, emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una/', vistas });
+    avanzar(1_000);
+    for (const tipo of INTERACCIONES_DE_LECTURA) interactuar(tipo);
+    emitir(EVENTOS.copiado);
+    avanzar(10 * 60_000);
+    expect(lecturas(balizas())).toHaveLength(1);
+    // La lectura va detrás de las vistas y delante de la acción.
+    expect(balizas().map((b) => b.evento).slice(-2)).toEqual([EVENTOS.lectura, EVENTOS.copiado]);
   });
 
   it('`primera`: copiado, copiado, descarga sin destino, compartición de enlace y de imagen dan sí, no, no, sí, no', () => {

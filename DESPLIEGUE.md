@@ -489,8 +489,10 @@ despliegue para cerrar esa ventana **sigue aplazado**; no hay hoy nada que lo ha
 fichero emite además, como mucho, una `lectura`: cuando la página lleva
 `MIN_MS_VISIBLES_PARA_LA_LECTURA` visible (8 s, en `src/lib/umbrales.ts`; sumando los ratos en
 que lo está, contados desde que el fichero se activa) o antes, a la primera `pointerdown`,
-`keydown`, `wheel` o `touchmove`. Nunca por `scroll`, y nunca al ocultarse o cerrarse: una
-pestaña cerrada antes de tiempo sin tocarla no se leyó. Lo que no emite vista —páginas 2+,
+`keydown`, `wheel` o `touchmove`. Nunca por `scroll`, y ocultarse o cerrarse no la crea: una
+pestaña cerrada antes de tiempo sin tocarla no se leyó. La única que sale al ocultarse es la que
+la carga ya debía: si una tarea larga retrasa el temporizador y la página se oculta con los 8 s
+visibles cumplidos, la lectura sale entonces en vez de perderse. Lo que no emite vista —páginas 2+,
 `/buscar/`, el 404 y, hasta la 23.9, la Obra que no se indexa— no emite lectura. La lectura
 lleva la ruta y la Marca de origen, como la vista. Cada acción —`copiado`, `descarga-de-imagen`
 y las dos comparticiones— lleva `primera`: `si` si es la primera de su métrica en la carga
@@ -517,8 +519,11 @@ la marca.
 UTC completa** tras la llegada en vivo, y la jornada de llegada se informa aparte: es mixta, porque
 las páginas que ya estaban abiertas con el fichero anterior siguen enviando acciones sin
 `primera` y ninguna lectura. No se comparan con lo anterior; las consultas de acciones a secas
-siguen valiendo para su propia serie. Hasta que la 23.10 lea la línea base desde `tools/`, se
-miran a mano (abajo).
+siguen valiendo para su propia serie. **La llegada en vivo de la Historia 25.2 es otro corte de
+SM-5**: desde entonces la descarga impuesta llega con su `destino`, lleva `no` y deja de contar
+como elegida, así que el numerador baja sin que cambie nada de los visitantes; el tramo de antes
+y el de después no se comparan, y su jornada de llegada también se informa aparte. Hasta que la
+23.10 lea la línea base desde `tools/` —con su lista de cortes—, se miran a mano (abajo).
 
 Consultar, sin panel de nadie:
 
@@ -536,14 +541,19 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, COUNT(*) FROM eventos WHERE evento='lectura' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
 # SM-5 sobre lecturas de Página de Cita: lecturas con su primera acción de SM-5 —copiado o
-# descarga elegida— frente a lecturas, por jornada. Solo rutas de Cita: lo de la portada, la
-# Obra y los listados se informa aparte. Desde la primera jornada completa tras la 23.
+# descarga elegida— frente a lecturas, por jornada. Cambia AAAA-MM-DD por la primera jornada UTC
+# completa del tramo (tras la llegada de la 23 o, desde ella, de la 25.2); sin cambiarla no
+# devuelve nada, nunca una jornada mixta. Las rutas de Cita van aquí por el prefijo, a mano, y
+# una Cita retirada sigue contando: el informe de la 23.10 las resuelve contra el censo de la
+# medición, nunca por el prefijo. La portada (`ruta='/'`), la Obra y los listados se leen con la
+# misma consulta cambiando el filtro de `ruta`, y no se suman a la Cita.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('copiado','descarga-de-imagen') AND primera='si') AS con_accion FROM eventos WHERE ruta LIKE '/cita/%' AND evento IN ('lectura','copiado','descarga-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('copiado','descarga-de-imagen') AND primera='si') AS con_accion FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND ruta LIKE '/cita/%' AND evento IN ('lectura','copiado','descarga-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
-# SM-7 sobre lecturas de Página de Cita: lecturas con su primera compartición, por jornada.
+# SM-7 sobre lecturas de Página de Cita: lecturas con su primera compartición, por jornada. La
+# misma jornada de partida (la de la 23) y el mismo prefijo que la de SM-5.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('comparticion-de-enlace','comparticion-de-imagen') AND primera='si') AS con_comparticion FROM eventos WHERE ruta LIKE '/cita/%' AND evento IN ('lectura','comparticion-de-enlace','comparticion-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('comparticion-de-enlace','comparticion-de-imagen') AND primera='si') AS con_comparticion FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND ruta LIKE '/cita/%' AND evento IN ('lectura','comparticion-de-enlace','comparticion-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
 # Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \

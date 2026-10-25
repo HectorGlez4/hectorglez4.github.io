@@ -39,21 +39,23 @@ import {
 export { EVENTOS, EVENTOS_VALIDOS, esEventoValido, type Evento } from './vocabulario.ts';
 
 /**
+ * Los eventos de vista, como lista — Historias 20.1, 23.1 y 23.5.
+ *
+ * El fichero solo emite de `data-vistas` lo que está aquí, y solo una vista emitida hace de la
+ * página una **superficie con lectura**. El tipo `EventoDeVista` sale de esta lista, y no al
+ * revés: una vista nueva (la de la Obra, 23.9) que se declarara en el tipo y no aquí saldría al
+ * `data-vistas` y el fichero la descartaría en silencio —sin vista ni lectura—. Así hay un solo
+ * sitio donde añadirla. En el navegador, donde el tipo no llega, la lista sostiene lo mismo: una
+ * acción escrita en `data-vistas` no sale en cada carga ni enciende la lectura.
+ */
+export const EVENTOS_DE_VISTA = [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie] as const;
+
+/**
  * Los eventos que una página emite por estar vista, y no por un gesto — Historias 20.1 y 23.1.
  * Es lo único que una `Superficie` puede declarar como vista: con `Evento` a secas, una
  * declaración podía poner `copiado` y el fichero lo emitiría en cada carga.
  */
-export type EventoDeVista = typeof EVENTOS.vistaDeCita | typeof EVENTOS.vistaDeSuperficie;
-
-/**
- * Los eventos de vista, como lista — Historia 23.5.
- *
- * El fichero solo emite de `data-vistas` lo que está aquí, y solo una vista emitida hace de la
- * página una **superficie con lectura**. El tipo ya impide que una `Superficie` declare otra
- * cosa; esta lista lo sostiene también en el navegador, donde el tipo no llega: una acción
- * escrita en `data-vistas` no sale en cada carga ni enciende la lectura.
- */
-export const EVENTOS_DE_VISTA: readonly EventoDeVista[] = [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie];
+export type EventoDeVista = (typeof EVENTOS_DE_VISTA)[number];
 
 /**
  * Los eventos que el fichero sabe emitir hoy — Historias 23.2 y 23.5.

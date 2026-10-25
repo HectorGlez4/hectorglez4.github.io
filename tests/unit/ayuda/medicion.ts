@@ -124,12 +124,16 @@ export function medicionEnUnSandbox(
   };
 
   return {
-    /** Lo que haría una isla: `__medir(…)` a secas, antes o después de que llegue el fichero. */
-    emitir: (evento: string, datos?: string | null, destino?: string) =>
-      (ventana.__medir as (e: string, d?: string | null, z?: string) => void)(
+    /**
+     * Lo que haría una isla: `__medir(…)` a secas, antes o después de que llegue el fichero. Lo
+     * que vaya detrás del destino se pasa tal cual: es lo que una isla no debería poder colar.
+     */
+    emitir: (evento: string, datos?: string | null, destino?: string, ...demas: unknown[]) =>
+      (ventana.__medir as (e: string, d?: string | null, z?: string, ...r: unknown[]) => void)(
         evento,
         datos,
         destino,
+        ...demas,
       ),
     /** Carga el fichero, si se creó el entorno con `cargado: false`. */
     cargar,
