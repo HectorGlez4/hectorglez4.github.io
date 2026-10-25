@@ -1232,25 +1232,55 @@ describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
     for (const exencion of EXENCIONES_DE_ZONA) expect(ZONAS as readonly string[]).not.toContain(exencion);
   });
 
-  it('ninguna isla escucha `click` en la ventana: su `preventDefault` llegaría detrás de la escucha del fichero', () => {
+  it('ninguna isla escucha `click` en la ventana ni para la propagación: la escucha del fichero lo vería tarde o no lo vería', () => {
     /*
      * La escucha del fichero está en la ventana desde la activación, y en la ventana corren por orden
      * de alta: una isla que se quedara con el clic de un enlace desde otra escucha de ventana, puesta
      * después, lo cancelaría con la salida ya emitida. En el enlace, el documento o un antepasado
-     * corre antes. `fuentesDeSrc` deja fuera `src/lib/medicion.ts`, el dueño de la escucha.
+     * corre antes. Y una que parara la propagación lo escondería de la escucha. `fuentesDeSrc` deja
+     * fuera `src/lib/medicion.ts`, el dueño de la escucha.
+     *
+     * Se mira el texto de las fuentes, así que se ven las formas directas —`addEventListener` a
+     * secas o sobre `window`, `self`, `globalThis` o `document.defaultView`, con `.` o `?.`, y la
+     * asignación de `onclick` a esos mismos—, no un nombre de evento que llegue en una variable.
      */
-    const ESCUCHA_DE_VENTANA = /(?:\b(?:window|self|globalThis)\s*\.\s*|(?<![.\w$]))addEventListener\(\s*['"`]click['"`]/;
+    const RECEPTOR = String.raw`\b(?:window|self|globalThis|document\s*\.\s*defaultView)\s*\??\.\s*`;
+    const ESCUCHA_DE_VENTANA = new RegExp(
+      String.raw`(?:${RECEPTOR}|(?<![.\w$]))addEventListener\s*\(\s*['"\`]click['"\`]|${RECEPTOR}onclick\s*=(?!=)`,
+    );
+    const PARA_LA_PROPAGACION = /\bstop(?:Immediate)?Propagation\s*\(/;
     const fuentes = [
       ...fuentesDeSrc(),
       ...ficherosDe(resolve(RAIZ, 'public', 'islas')).filter((f) => /\.m?js$/.test(f)),
     ];
     expect(fuentes.length).toBeGreaterThan(10);
     expect(fuentes.filter((f) => ESCUCHA_DE_VENTANA.test(readFileSync(f, 'utf8'))).map((f) => relative(RAIZ, f))).toEqual([]);
-    // Y el detector la ve, a secas o con `window.`, y no confunde la de un elemento.
-    expect(ESCUCHA_DE_VENTANA.test("addEventListener('click', f)")).toBe(true);
-    expect(ESCUCHA_DE_VENTANA.test('window.addEventListener("click", f)')).toBe(true);
-    expect(ESCUCHA_DE_VENTANA.test("boton.addEventListener('click', f)")).toBe(false);
-    expect(ESCUCHA_DE_VENTANA.test("document.addEventListener('click', f)")).toBe(false);
+    expect(fuentes.filter((f) => PARA_LA_PROPAGACION.test(readFileSync(f, 'utf8'))).map((f) => relative(RAIZ, f))).toEqual([]);
+    // Y los detectores ven cada forma directa, y no confunden la escucha de un elemento.
+    for (const escrita of [
+      "addEventListener('click', f)",
+      'window.addEventListener("click", f)',
+      'window?.addEventListener(`click`, f)',
+      "self.addEventListener ( 'click', f)",
+      "globalThis.addEventListener('click', f)",
+      "document.defaultView.addEventListener('click', f)",
+      'window.onclick = f',
+      'globalThis.onclick=f',
+    ]) {
+      expect(ESCUCHA_DE_VENTANA.test(escrita), escrita).toBe(true);
+    }
+    for (const ajena of [
+      "boton.addEventListener('click', f)",
+      "document.addEventListener('click', f)",
+      "addEventListener('keydown', f)",
+      'if (window.onclick == f) {}',
+      '<button onclick="f()">',
+    ]) {
+      expect(ESCUCHA_DE_VENTANA.test(ajena), ajena).toBe(false);
+    }
+    expect(PARA_LA_PROPAGACION.test('evento.stopPropagation()')).toBe(true);
+    expect(PARA_LA_PROPAGACION.test('evento.stopImmediatePropagation ()')).toBe(true);
+    expect(PARA_LA_PROPAGACION.test('// no se para la propagación')).toBe(false);
   });
 
   it('una sola escucha de `click`, en la ventana y en burbuja, y ninguna en el documento', () => {
@@ -1458,28 +1488,40 @@ describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
     const ruta = resolve(RAIZ, 'src/lib/medicion.ts');
     const fuente = ts.createSourceFile(ruta, readFileSync(ruta, 'utf8'), ts.ScriptTarget.Latest, true);
     const literales: string[] = [];
+    let trozosDePlantilla = 0;
     const recorrer = (nodo: ts.Node): void => {
-      if (ts.isStringLiteral(nodo) || ts.isNoSubstitutionTemplateLiteral(nodo)) literales.push(nodo.text);
+      // También los trozos de las plantillas con sustituciones: de ellos se compone casi todo el fichero.
+      const trozo = ts.isTemplateHead(nodo) || ts.isTemplateMiddle(nodo) || ts.isTemplateTail(nodo);
+      if (ts.isStringLiteral(nodo) || ts.isNoSubstitutionTemplateLiteral(nodo) || trozo) literales.push(nodo.text);
+      if (trozo) trozosDePlantilla++;
       ts.forEachChild(nodo, recorrer);
     };
     recorrer(fuente);
     expect(literales.length).toBeGreaterThan(20);
+    expect(trozosDePlantilla).toBeGreaterThan(20);
     /*
      * Como en la prueba de las marcas: un literal que **es** la zona, que la lleva entre comillas o
-     * que la da como valor de un atributo (`=listado`). Varias zonas son palabras corrientes
-     * —`siguiente`, `listado`, `resultado`, `cabecera`—, y un mensaje que las use no es una zona
-     * escrita; `salidas-sin-resultados`, una exención, tampoco escribe `resultado`.
+     * que la da como valor de un atributo (`=listado`). Y uno que enumera **dos o más** zonas, con el
+     * separador que sea —espacios, comas, barras—, que es como se escribiría el conjunto a mano. Una
+     * sola zona suelta en un texto no cuenta: varias son palabras corrientes —`siguiente`,
+     * `listado`, `resultado`, `cabecera`—, y un mensaje que las use no es una zona escrita;
+     * `salidas-sin-resultados`, una exención, tampoco escribe `resultado`.
      */
     const escribe = (literal: string, zona: string) =>
       new RegExp(`^${zona}$|(['"\`])${zona}\\1|=${zona}(?![a-z-])`).test(literal);
-    expect(literales.filter((l) => ZONAS.some((zona) => escribe(l, zona)))).toEqual([]);
-    // Y el detector ve una zona escrita, sola, entre comillas o como valor, y deja el texto corriente.
+    const enumera = (literal: string) =>
+      literal.split(/[^a-z0-9-]+/).filter((palabra) => (ZONAS as readonly string[]).includes(palabra)).length >= 2;
+    expect(literales.filter((l) => ZONAS.some((zona) => escribe(l, zona)) || enumera(l))).toEqual([]);
+    // Y el detector ve una zona escrita, sola, entre comillas, como valor o en una lista, y deja el texto corriente.
     expect(escribe('cabecera', 'cabecera')).toBe(true);
     expect(escribe('[data-zona="listado"]', 'listado')).toBe(true);
     expect(escribe("[data-zona='chip-de-tema']", 'chip-de-tema')).toBe(true);
     expect(escribe('[data-zona=listado]', 'listado')).toBe(true);
-    expect(escribe('la página siguiente no carga', 'siguiente')).toBe(false);
-    expect(escribe('salidas-sin-resultados', 'resultado')).toBe(false);
+    expect(enumera('cabecera listado resultado')).toBe(true);
+    expect(enumera('cabecera,listado')).toBe(true);
+    expect(enumera('(cabecera|chip-de-tema)')).toBe(true);
+    expect(escribe('la página siguiente no carga', 'siguiente') || enumera('la página siguiente no carga')).toBe(false);
+    expect(escribe('salidas-sin-resultados', 'resultado') || enumera('salidas-sin-resultados')).toBe(false);
   });
 });
 
@@ -2382,24 +2424,40 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ]);
   });
 
-  it('el tokenizador cierra lo que cierra el navegador: un bloque, el `<p>` abierto; un `<a>`, el `<a>` abierto', () => {
+  it('el tokenizador rechaza el marcado que el navegador reordenaría, y deja pasar el que no', () => {
+    // Cada uno, dentro de `main`: el DOM le daría al enlace otra zona, o un duplicado sin ninguna.
+    const reordenados: [caso: string, html: string, motivo: RegExp][] = [
+      ['un bloque dentro de un párrafo', '<p data-zona="atribucion">Texto<ul><li><a href="/d/">D</a></li></ul></p>', /<ul> que cerraría el <p>/],
+      ['un enlace dentro de otro', '<div data-zona="listado"><a href="/e/"><span>x<a href="/f/">F</a></span></a></div>', /<a> dentro de otro <a>/],
+      ['un enlace dentro de un botón dentro de otro enlace', '<a href="/e/"><button><a href="/f/">F</a></button></a>', /<a> dentro de otro <a>/],
+      ['un `<li>` sin cerrar', '<ul><li data-zona="listado"><a href="/g/">G</a><li><a href="/h/">H</a></li></ul>', /<li> que cerraría/],
+      ['un `<dd>` sin cerrar', '<dl><dt>T<dd><a href="/g/">G</a></dd></dl>', /<dd> que cerraría/],
+      ['un botón dentro de otro', '<button><button>x</button></button>', /<button> dentro de otro/],
+      ['un encabezado dentro de otro', '<h2><h3>x</h3></h2>', /<h3> dentro de un <h2>/],
+      ['un enlace suelto en una tabla', '<table data-zona="listado"><a href="/t/">T</a></table>', /<a> suelto dentro de <table>/],
+      ['un cierre que deja un enlace abierto', '<div data-zona="listado"><a href="/x/">X</div><p>más</p>', /<\/div> con <a> aún abierto/],
+    ];
+    for (const [caso, html, motivo] of reordenados) {
+      expect(() => enlacesDe(`<main>${html}</main>`), caso).toThrow(motivo);
+    }
+    // Lo que el navegador construye tal cual: la zona sale de la pila.
     const html = [
       '<main>',
-      // El `<ul>` cierra el `<p>`: el enlace de dentro no lleva la zona del párrafo, sino la de fuera.
-      '<section data-zona="listado"><p data-zona="atribucion">Texto<ul><li><a href="/d/">D</a></li></ul></p></section>',
-      // El segundo `<a>` cierra el primero, y con él el `<span>` que llevaba otra zona.
-      '<div data-zona="listado"><a href="/e/"><span data-zona="cabecera">x<a href="/f/">F</a></span></a></div>',
-      '<p data-zona="atribucion"><a href="/g/">G</a></p>',
       // Un botón es límite de ámbito: el bloque de dentro no cierra el `<p>` de fuera.
       '<p data-zona="atribucion"><button><div><a href="/h/">H</a></div></button></p>',
+      // Una marca de formato (`object`, `td`…) separa dos enlaces: el de dentro no cierra el de fuera.
+      '<div data-zona="listado"><a href="/m/">M<object><a href="/n/">N</a></object></a></div>',
+      '<table><tbody><tr><td data-zona="listado"><a href="/t/">T</a></td></tr></tbody></table>',
+      '<ul data-zona="listado"><li><a href="/i/">I</a><ul><li><a href="/j/">J</a></li></ul></li></ul>',
       '</main>',
     ].join('');
     expect(enlacesDe(html).map((e) => [e.href, e.declaracion])).toEqual([
-      ['/d/', { zona: 'listado' }],
-      ['/e/', { zona: 'listado' }],
-      ['/f/', { zona: 'listado' }],
-      ['/g/', { zona: 'atribucion' }],
       ['/h/', { zona: 'atribucion' }],
+      ['/m/', { zona: 'listado' }],
+      ['/n/', { zona: 'listado' }],
+      ['/t/', { zona: 'listado' }],
+      ['/i/', { zona: 'listado' }],
+      ['/j/', { zona: 'listado' }],
     ]);
   });
 
@@ -2407,25 +2465,31 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
   const cargaElFichero = (html: string) =>
     etiquetasDeGuionExterno(html).some((etiqueta) => guionExternoDe(etiqueta.src)?.id === 'medicion');
 
-  /*
-   * Toda página que carga el fichero, no solo las superficies con lectura: las páginas 2+,
-   * `/buscar/` y el 404 también emiten su salida (sin lectura), y un enlace sin zona en ellas se
-   * quedaría sin medir igual de callado. Lo que no carga el fichero —`/kit` y `/lote`— no mide
-   * nada y no entra.
+  /**
+   * Juzga los enlaces internos de `main` de toda página que carga el fichero: cada uno, con una zona
+   * del vocabulario o una exención de `EXENCIONES_DE_ZONA`, en él o en un antepasado (las anclas de
+   * la propia página, la exención que nombra esta prueba). Y ninguno con un `target` que abra en la
+   * misma pestaña sin ser vacío o `_self` —`_top` y `_parent`—, ni la página con un `<base>`: la
+   * escucha no mide esos enlaces, y la regla del fichero (vacío o `_self`) solo se sostiene mientras
+   * el sitio no los tenga.
    */
-  it('en toda página que carga el fichero —con lectura o sin ella—, todo enlace interno de `main` tiene zona o exención', async () => {
+  function juzgarEnlacesDeMain(paginasConstruidas: Map<string, string>) {
     let paginas = 0;
     const sinLectura = new Set<string>();
     let enlaces = 0;
     const sinDeclarar: string[] = [];
-    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+    const sinMedirEnLaMismaPestaña: string[] = [];
+    for (const [ruta, html] of paginasConstruidas) {
       if (!cargaElFichero(html)) {
         expect(vistasDe(html), `${ruta}: declara vista y no carga el fichero`).toBeUndefined();
         continue;
       }
       paginas++;
       if (vistasDe(html) === undefined) sinLectura.add(ruta);
-      for (const { href, enMain, declaracion } of enlacesDe(html)) {
+      recorrerElementos(html, (elemento) => {
+        if (elemento.etiqueta === 'base') sinMedirEnLaMismaPestaña.push(`${ruta}: <base>`);
+      });
+      for (const { href, target, enMain, declaracion } of enlacesDe(html)) {
         if (!enMain || href === undefined || esAnclaDeLaPropiaPagina(href)) continue;
         if (new URL(href, new URL(ruta, BASE)).origin !== BASE.origin) continue;
         enlaces++;
@@ -2435,9 +2499,24 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
             ? (ZONAS as readonly string[]).includes(declaracion.zona)
             : (EXENCIONES_DE_ZONA as readonly string[]).includes(declaracion.sinZona));
         if (!valida) sinDeclarar.push(`${ruta}: ${href} (${JSON.stringify(declaracion)})`);
+        if (target !== undefined && /^_(top|parent)$/i.test(target)) sinMedirEnLaMismaPestaña.push(`${ruta}: ${href} (${target})`);
       }
     }
+    return { paginas, sinLectura, enlaces, sinDeclarar, sinMedirEnLaMismaPestaña };
+  }
+
+  /*
+   * Toda página que carga el fichero, no solo las superficies con lectura: las páginas 2+,
+   * `/buscar/` y el 404 también emiten su salida (sin lectura), y un enlace sin zona en ellas se
+   * quedaría sin medir igual de callado. Lo que no carga el fichero —`/kit` y `/lote`— no mide
+   * nada y no entra.
+   */
+  it('en toda página que carga el fichero —con lectura o sin ella—, todo enlace interno de `main` tiene zona o exención', async () => {
+    const { paginas, sinLectura, enlaces, sinDeclarar, sinMedirEnLaMismaPestaña } = juzgarEnlacesDeMain(
+      paginasDe(await sitioMedido()),
+    );
     expect(sinDeclarar).toEqual([]);
+    expect(sinMedirEnLaMismaPestaña).toEqual([]);
     // Portada, las Citas, el Autor, el Tema, la Colección y la Obra indexable: ninguna en vacío.
     expect(paginas).toBeGreaterThan(SLUGS_DE_CITA.length + 4);
     expect(enlaces).toBeGreaterThan(paginas * 3);
@@ -2485,10 +2564,12 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/autor/seneca/2/', /^\/autor\/seneca\/?$/, [{ zona: 'paginacion' }]],
     ['/tema/el-tiempo/', /^\/cita\//, [{ zona: 'listado' }]],
     ['/tema/el-tiempo/', /^\/tema\/el-tiempo\/2\/?$/, [{ zona: 'paginacion' }]],
+    ['/tema/el-tiempo/2/', /^\/cita\//, [{ zona: 'listado' }]],
     ['/tema/el-tiempo/2/', /^\/tema\/el-tiempo\/?$/, [{ zona: 'paginacion' }]],
     ['/coleccion/frases-cortas/', /^\/cita\//, [{ zona: 'listado' }]],
     ['/coleccion/frases-cortas/', /^\/coleccion\/frases-cortas\/2\/?$/, [{ zona: 'paginacion' }]],
     ['/coleccion/frases-cortas/2/', /^\/cita\//, [{ zona: 'listado' }]],
+    ['/coleccion/frases-cortas/2/', /^\/coleccion\/frases-cortas\/?$/, [{ zona: 'paginacion' }]],
     [OBRA_INDEXABLE, '/autor/seneca/', [{ zona: 'atribucion' }]],
     [OBRA_INDEXABLE, /^\/cita\//, [{ zona: 'listado' }]],
     [OBRAS[1], '/autor/seneca/', [{ zona: 'atribucion' }]],
@@ -2548,6 +2629,11 @@ const temasDelSitio = [{ slug: 'el-tiempo', nombre: 'El tiempo' }];
 
   it('las ramas de respaldo de las Rutas de salida: «Sobre {Autor}» sale por su zona, y «Explorar por tema», por `chip-de-tema`', async () => {
     const paginas = paginasDe(await sitioDeRespaldo());
+    // El resto de enlaces de este sitio —la cabecera, la Atribución…— se juzga como en el medido.
+    const juicio = juzgarEnlacesDeMain(paginas);
+    expect(juicio.sinDeclarar).toEqual([]);
+    expect(juicio.sinMedirEnLaMismaPestaña).toEqual([]);
+    expect([...paginas.keys()].filter((ruta) => cargaElFichero(paginas.get(ruta)!))).toContain(`/cita/${CITA_SOLA}/`);
     const cita = paginas.get(`/cita/${CITA_SOLA}/`);
     expect(cita, 'la Cita sola no está en dist/').toBeDefined();
     expect(cita).toContain('Sobre Séneca');

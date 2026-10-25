@@ -233,13 +233,14 @@ export const MAX_BYTES_DE_GUION = 6656;
  *
  * Subido de 2.880 a 3.730 en la Historia 23.7: medido, **3.330 bytes** con el punto final de
  * producción (3.331 con la barra final; 3.298 con el de las pruebas), más unos 400 de margen, como
- * la 23.1, la 23.5 y la 23.6; tras su revisión, que compara `target` con `_self` sin distinguir
- * mayúsculas, **3.339** (3.340; 3.307), y el tope no se mueve. Sin subirlo no cabía: creció 782
- * bytes porque el fichero emite la Salida interna —el evento en su tabla, con el conjunto de las
+ * la 23.1, la 23.5 y la 23.6. Sin subirlo no cabía: creció 782 bytes sobre los 2.548 de la 23.6
+ * porque el fichero emite la Salida interna —el evento en su tabla, con el conjunto de las
  * dieciséis zonas del vocabulario (unos 250 bytes él solo), y la escucha de `click` que descarta
  * lo que no es salida, toma la zona del contenedor más cercano, se gasta una vez por carga y emite
- * antes la lectura—. Sigue sin contar en `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.8
- * y 23.9 lo vuelven a medir.
+ * antes la lectura—. Tras la revisión de la 23.7, que compara `target` con `_self` sin distinguir
+ * mayúsculas, mide **3.339** (3.340; 3.307): 791 bytes sobre la 23.6 y 391 de margen, y el tope no
+ * se mueve. Sigue sin contar en `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.8 y 23.9
+ * lo vuelven a medir.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 

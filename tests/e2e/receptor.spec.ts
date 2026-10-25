@@ -2,7 +2,15 @@ import { expect, test, type BrowserContext, type Page, type PlaywrightWorkerArgs
 import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
-import { EVENTOS, EVENTOS_DEL_GUION, camposQueEmite, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
+import {
+  ATRIBUTO_DE_ZONA,
+  ATRIBUTO_SIN_ZONA,
+  EVENTOS,
+  EVENTOS_DEL_GUION,
+  EXENCIONES_DE_ZONA,
+  camposQueEmite,
+  rutaDelGuionDeMedicion,
+} from '../../src/lib/medicion.ts';
 import { CAMPOS, claveEnLaBaliza } from '../../src/lib/vocabulario.ts';
 import { MIN_MS_VISIBLES_PARA_LA_LECTURA } from '../../src/lib/umbrales.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
@@ -1184,7 +1192,7 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     ]);
   });
 
-  test('en el 404, servido en la ruta que se pidió, «Ver esta cita» sale con `cita-del-dia`, esa ruta y sin lectura', async ({
+  test('en el 404, servido en la ruta que se pidió, un chip exento no sale ni gasta, y «Ver esta cita» sale con `cita-del-dia`, esa ruta y sin lectura', async ({
     page,
     context,
   }) => {
@@ -1196,6 +1204,38 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     expect(respuesta?.status()).toBe(404);
     await esperarAlFichero(page);
 
+    /*
+     * Los chips de Temas del 404 son la exención `chips-del-404`, pero este sitio no publica ningún
+     * Tema (no llega a `MIN_CITAS_POR_TEMA`) y no los pinta: se pone en `main` la misma lista, con la
+     * misma exención, y se pulsa. Va dentro de un contenedor con zona, para que sin la regla de la
+     * exención el clic saliera con ella. Su navegación se anula con 204, así que la carga sigue.
+     */
+    const [exencion] = EXENCIONES_DE_ZONA;
+    await page.evaluate(
+      ([atributoDeZona, atributo, valor]) => {
+        const zona = document.createElement('div');
+        zona.setAttribute(atributoDeZona, 'cita-del-dia');
+        const lista = document.createElement('ul');
+        lista.className = 'chips';
+        lista.setAttribute(atributo, valor);
+        const elemento = document.createElement('li');
+        const enlace = document.createElement('a');
+        enlace.className = 'chip';
+        enlace.setAttribute('href', '/tema/el-tiempo/');
+        enlace.textContent = 'El tiempo';
+        elemento.append(enlace);
+        lista.append(elemento);
+        zona.append(lista);
+        document.querySelector('main')!.append(zona);
+      },
+      [ATRIBUTO_DE_ZONA, ATRIBUTO_SIN_ZONA, exencion],
+    );
+    await page.locator(`main ul.chips[${ATRIBUTO_SIN_ZONA}="${exencion}"] a`).click();
+    await esperar(500);
+    expect(await balizasDe(page), 'el chip exento emitió algo').toEqual([]);
+    expect(new URL(page.url()).pathname).toBe(PEDIDA);
+
+    // La salida de la carga sigue sin gastar: «Ver esta cita» sale.
     await page.locator('main p.ir a').click();
     const salida = await esperarEvento(EVENTOS.salidaInterna);
     expect(salida, 'no llegó la salida').toBeTruthy();

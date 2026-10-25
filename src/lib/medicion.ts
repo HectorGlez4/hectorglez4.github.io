@@ -344,8 +344,10 @@ export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
  * ninguna lo hace, y una que lo necesite tiene que decirlo aquí. Y una isla que se quede con el
  * clic de un enlace llama a `preventDefault` desde el enlace, el documento o un antepasado, nunca
  * desde una escucha de `click` en la ventana: esta está en la ventana desde la activación, y la de
- * una isla puesta después correría detrás, con la salida ya emitida y gastada. Ninguna isla escucha
- * `click` en la ventana, y lo vigila una prueba de `tests/unit/medicion.test.ts`.
+ * una isla puesta después correría detrás, con la salida ya emitida y gastada. Ninguna isla hace
+ * ninguna de las dos cosas, y una prueba de `tests/unit/medicion.test.ts` lo vigila sobre el texto
+ * de las fuentes: ve las formas directas (`addEventListener('click', …)` a secas o sobre la ventana,
+ * `onclick =` en la ventana, `stopPropagation(`), no un nombre de evento que llegue en una variable.
  *
  * **Volver por la caché de atrás y adelante** (`pageshow` con `persisted`) es una carga nueva:
  * la lectura y la salida pueden volver a salir, `primera` y el reloj vuelven a cero y las Marcas

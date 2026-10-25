@@ -13,14 +13,19 @@ import { ATRIBUTO_DE_ZONA, ATRIBUTO_SIN_ZONA } from '../../../src/lib/medicion.t
  *     los comentarios y las declaraciones (`<!doctype>`): un `<a` dentro de un guion no es un
  *     enlace;
  *   · los valores de atributo entre comillas pueden llevar `>` dentro;
- *   · una etiqueta de cierre saca de la pila hasta la última abierta con su nombre, y una que no
- *     casa con ninguna abierta se ignora;
- *   · los dos cierres implícitos que pueden quitarle a un enlace la zona de un antepasado, como
- *     hace el analizador del navegador: un bloque (`<div>`, `<ul>`, `<section>`…) cierra el `<p>`
- *     abierto —la zona de un `<p data-zona>` no llega a lo que va dentro del bloque—, y un `<a>`
- *     cierra el `<a>` abierto. Los dos se detienen en los límites de ámbito (`table`, `td`,
- *     `button`…). Sin ellos, la prueba de `dist/` daría por medido un enlace que en el DOM no tiene
- *     zona.
+ *   · una etiqueta de cierre saca de la pila la última abierta con su nombre, y una que no casa
+ *     con ninguna abierta se ignora;
+ *   · el marcado que el analizador del navegador **reordenaría** al construir el DOM no se emula:
+ *     se rechaza, lanzando con el motivo. Emular a medias es peor que no emular, porque el DOM
+ *     puede darle a un enlace otra zona —o un duplicado sin ninguna— que la que le da la pila, y la
+ *     prueba de `dist/` lo daría por medido. Se rechaza un bloque (`<div>`, `<ul>`, `<section>`…)
+ *     que cerraría un `<p>` abierto; un `<li>`, `<dd>` o `<dt>` que cerraría el anterior; un
+ *     `<button>` dentro de otro; un encabezado dentro de otro; un `<a>` dentro de otro sin una marca
+ *     de formato entre los dos (`td`, `th`, `caption`, `object`…: ahí el navegador corre el
+ *     algoritmo de adopción, que clona); un elemento suelto dentro de una tabla (que el navegador
+ *     saca de ella); y una etiqueta de cierre que deja abierto algo de dentro (un `<a>` así se
+ *     reconstruye después, clonado, fuera de su sitio). Astro cierra lo que abre, así que el rechazo
+ *     solo salta ante un marcado nuevo, y entonces la prueba lo nombra en vez de pasar en falso.
  *
  * Lo prueban fragmentos escritos a mano en `tests/unit/medicion.test.ts`, para que la prueba de
  * `dist/` no pase en vacío.
@@ -39,6 +44,8 @@ export type Declaracion = { zona: string } | { sinZona: string };
 export interface EnlaceDeLaPagina {
   /** Su `href`, tal como va escrito (con las entidades resueltas), o `undefined` si no lo lleva. */
   href: string | undefined;
+  /** Su `target`, si lo lleva. */
+  target?: string;
   /** Si está dentro de `<main>`. */
   enMain: boolean;
   /**
@@ -107,8 +114,34 @@ const CIERRAN_P = new Set([
   'ul',
   'xmp',
 ]);
-/** Donde se detiene la búsqueda de ese `<p>` o de ese `<a>`: los límites de ámbito. */
-const LIMITES_DE_AMBITO = new Set(['applet', 'button', 'caption', 'html', 'marquee', 'object', 'table', 'td', 'template', 'th']);
+/** Los límites del ámbito por omisión (WHATWG, «has an element in scope»), sin los de MathML y SVG. */
+const LIMITES_DE_AMBITO = new Set(['applet', 'caption', 'html', 'marquee', 'object', 'table', 'td', 'template', 'th']);
+/** Las que ponen una marca en la lista de elementos de formato: un `<a>` de antes de ellas no cuenta. */
+const MARCAS_DE_FORMATO = new Set(['applet', 'caption', 'marquee', 'object', 'td', 'template', 'th']);
+/** Los elementos «especiales» que pueden quedar en la pila (WHATWG): cortan la búsqueda de `li`, `dd` y `dt`. */
+const ESPECIALES = new Set([
+  ...CIERRAN_P,
+  ...LIMITES_DE_AMBITO,
+  'body',
+  'button',
+  'colgroup',
+  'frameset',
+  'head',
+  'iframe',
+  'noembed',
+  'noframes',
+  'noscript',
+  'plaintext',
+  'select',
+  'tbody',
+  'tfoot',
+  'thead',
+  'tr',
+]);
+/** Dentro de estas, lo que no es estructura de tabla el navegador lo saca fuera («foster parenting»). */
+const CONTEXTO_DE_TABLA = new Set(['table', 'tbody', 'tfoot', 'thead', 'tr']);
+const ESTRUCTURA_DE_TABLA = new Set(['caption', 'col', 'colgroup', 'script', 'style', 'tbody', 'td', 'template', 'tfoot', 'th', 'thead', 'tr']);
+const ENCABEZADO = /^h[1-6]$/;
 
 const ENTIDADES: Record<string, string> = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>' };
 const resolverEntidades = (texto: string) =>
@@ -142,14 +175,41 @@ export function recorrerElementos(
   const saltarEspacios = (desde: number) => desde + leer(ESPACIOS, desde)![0].length;
 
   const pila: Elemento[] = [];
-  /** Saca de la pila el último `nombre` abierto, si lo hay antes de un límite de ámbito. */
-  const cerrarImplicito = (nombre: string) => {
+  /** Si hay abierto alguno de `nombres` antes de llegar, de dentro afuera, a un elemento que `corta`. */
+  const abierto = (nombres: readonly string[], corta: (etiqueta: string) => boolean) => {
     for (let k = pila.length - 1; k >= 0; k--) {
-      if (pila[k].etiqueta === nombre) {
-        pila.length = k;
-        return;
-      }
-      if (LIMITES_DE_AMBITO.has(pila[k].etiqueta)) return;
+      if (nombres.includes(pila[k].etiqueta)) return true;
+      if (corta(pila[k].etiqueta)) return false;
+    }
+    return false;
+  };
+  const rechazar = (motivo: string, desde: number): never => {
+    throw new Error(
+      `El navegador reordenaría este marcado al construir el DOM, y el tokenizador no lo emula: ${motivo}, en «${html.slice(desde, desde + 80)}».`,
+    );
+  };
+  /** Lo que el navegador haría distinto de la pila al abrir `etiqueta`, si algo: entonces se rechaza. */
+  const revisarApertura = (etiqueta: string, desde: number) => {
+    const actual = pila.at(-1)?.etiqueta;
+    if (actual !== undefined && CONTEXTO_DE_TABLA.has(actual) && !ESTRUCTURA_DE_TABLA.has(etiqueta)) {
+      rechazar(`<${etiqueta}> suelto dentro de <${actual}>, que el navegador saca de la tabla`, desde);
+    }
+    if (etiqueta === 'a' && abierto(['a'], (e) => MARCAS_DE_FORMATO.has(e))) {
+      rechazar('un <a> dentro de otro <a>', desde);
+    }
+    const cortaLaLista = (e: string) => ESPECIALES.has(e) && e !== 'address' && e !== 'div' && e !== 'p';
+    if (etiqueta === 'li' && abierto(['li'], cortaLaLista)) rechazar('un <li> que cerraría el <li> abierto', desde);
+    if ((etiqueta === 'dd' || etiqueta === 'dt') && abierto(['dd', 'dt'], cortaLaLista)) {
+      rechazar(`un <${etiqueta}> que cerraría el <dd> o <dt> abierto`, desde);
+    }
+    if (etiqueta === 'button' && abierto(['button'], (e) => LIMITES_DE_AMBITO.has(e))) {
+      rechazar('un <button> dentro de otro', desde);
+    }
+    if (CIERRAN_P.has(etiqueta) && abierto(['p'], (e) => LIMITES_DE_AMBITO.has(e) || e === 'button')) {
+      rechazar(`un <${etiqueta}> que cerraría el <p> abierto`, desde);
+    }
+    if (ENCABEZADO.test(etiqueta) && actual !== undefined && ENCABEZADO.test(actual)) {
+      rechazar(`un <${etiqueta}> dentro de un <${actual}>`, desde);
     }
   };
   let i = 0;
@@ -171,6 +231,9 @@ export function recorrerElementos(
     if (cierre) {
       const nombre = cierre[1].toLowerCase();
       const indice = pila.map((e) => e.etiqueta).lastIndexOf(nombre);
+      if (indice >= 0 && indice < pila.length - 1) {
+        rechazar(`</${nombre}> con <${pila.at(-1)!.etiqueta}> aún abierto dentro`, i);
+      }
       if (indice >= 0) pila.length = indice;
       i += cierre[0].length;
       continue;
@@ -182,6 +245,7 @@ export function recorrerElementos(
       continue;
     }
     const etiqueta = apertura[1].toLowerCase();
+    revisarApertura(etiqueta, i);
     let j = i + apertura[0].length;
     const atributos = new Map<string, string>();
     let sola = false;
@@ -226,8 +290,6 @@ export function recorrerElementos(
       if (!atributos.has(clave)) atributos.set(clave, resolverEntidades(valor));
     }
     i = j;
-    if (CIERRAN_P.has(etiqueta)) cerrarImplicito('p');
-    if (etiqueta === 'a') cerrarImplicito('a');
     const elemento: Elemento = { etiqueta, atributos };
     visitar(elemento, [...pila]);
     if (sola || VACIAS.has(etiqueta)) continue;
@@ -262,6 +324,7 @@ export function enlacesDe(html: string): EnlaceDeLaPagina[] {
     }
     enlaces.push({
       href: elemento.atributos.get('href'),
+      ...(elemento.atributos.has('target') ? { target: elemento.atributos.get('target') } : {}),
       enMain: antepasados.some((e) => e.etiqueta === 'main'),
       declaracion,
     });
