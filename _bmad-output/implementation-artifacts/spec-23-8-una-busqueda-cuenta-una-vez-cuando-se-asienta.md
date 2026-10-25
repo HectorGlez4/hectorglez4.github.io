@@ -2,7 +2,8 @@
 title: 'Historia 23.8 — Una búsqueda cuenta una vez, cuando se asienta'
 type: 'feature'
 created: '2026-10-25'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '42f082115b4d39f3a4f3384c2c9293b318758541'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -106,6 +107,17 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas en este bucle (v8-ralph) y la invocación no traía ninguna sección «Hallazgos externos»: esta pasada no tiene hallazgos que clasificar. La revisión independiente llega después.
+
 ## Design Notes
 
 **`popstate` en la 23.8.** La isla no escribe entradas ni repinta al volver por el historial (es de la 27), así que el único `popstate` posible en `/buscar/` es el de un ancla, que no cambia el estado: no hay llegada que juzgar. La parte pura de la llegada ya recibe (objeto de estado, tipo de la carga) y la 27 la llamará desde su `popstate`.
@@ -139,9 +151,38 @@ function asentar(v) { const r = A.emisiones(v, hechos); if (!r) return;
 
 ## Auto Run Result
 
-Status: ready-for-dev
+Status: done
 Blocking condition: ninguna.
 
-Planificación terminada y detenida tras ella, como pide la invocación. Diferido para Héctor: marcar en
-`epics.md` el criterio de emisión de la Historia 3.2 como «(sustituido en la v8 por la Historia 23.8)»
-(bmad-create-epics-and-stories), en el `deferred` del frontmatter.
+**Qué se hizo.** La isla de `/buscar/` deja de emitir `busqueda-sin-resultados` en cada repintado y emite, al **asentarse** el estado que se ve —enviar el formulario (espera a que se pinte lo enviado y asienta solo si sigue siendo lo que se ve), pulsar un enlace de la lista de resultados (escucha en la lista, sin `preventDefault` ni parar la propagación) u ocultarse (`visibilitychange` a `hidden`, `pagehide` de respaldo)—, la `busqueda` con el tramo del total (`respuesta.results.length`) y `filtros` «ninguno», y, con texto y total 0, detrás, la `busqueda-sin-resultados` con el texto tal como se buscó; como mucho una por estado (texto recortado + filtros) en la carga, con la memoria en el cierre de la isla. Al emitir marca su entrada con `history.replaceState({asentada: true}, '')` dentro de un `try`; al analizarse lee una vez Navigation Timing y `history.state` y, si llega con `?q=` ya registrada (marca a `true`, o sin objeto de estado `back_forward`/`reload`), mete su clave en la memoria. La decisión es `asentamientoDeBusqueda` (`clave`, `emisiones`, `yaRegistrada`, `marcada`), parte pura de `src/lib/medicion.ts` que viaja por su texto con `ASENTAMIENTO_DE_BUSQUEDA` (eventos, `TRAMOS`, la combinación sin filtros y `MARCA_DE_BUSQUEDA_ASENTADA`, todo compuesto del vocabulario). Promesa por consulta, turno que descarta respuestas superadas, índice que falla resuelto a `null` sin rechazos sueltos (y reintentado en la búsqueda siguiente). El fichero emite cada `busqueda` (`tramo: 1`, `filtros: 2` en `FUENTE_EN_EL_GUION`).
+
+**Ficheros.**
+- `src/lib/medicion.ts` — `busqueda` en `EVENTOS_DEL_GUION`; `tramo`/`filtros` en `FUENTE_EN_EL_GUION`; `MARCA_DE_BUSQUEDA_ASENTADA`, `EstadoDeBusqueda`, `ConstantesDelAsentamiento`, `ASENTAMIENTO_DE_BUSQUEDA` y `asentamientoDeBusqueda` (solo métodos, sin funciones con nombre ni constantes de un solo uso dentro, para que su texto sea el mismo en Vitest, en el build y sin `__name`); docblocks al día.
+- `src/lib/umbrales.ts` — medida del fichero en el comentario de `MAX_BYTES_GUION_DE_MEDICION` (3.487 bytes, tope 3.730 sin mover) y de `/buscar/` en el de `MAX_BYTES_DE_GUION` (6.111 de 6.656, sin mover).
+- `src/pages/buscar.astro` — la isla nueva (sin `EVENTO_SIN_RESULTADOS` en el repintado) y su docblock.
+- `tests/unit/ayuda/busqueda.ts` — entorno simulado de la isla de `dist/` en `node:vm`: Pagefind de mentira en lugar del único `import(` (sustitución comprobada), elementos que lanzan ante un selector desconocido, reloj, historial que apunta y puede lanzar, `pushState`/escribir `location`/parar la propagación como violaciones, Navigation Timing configurable, visibilidad, `pagehide`/`pageshow`, rechazos sin manejar y `analizado()`.
+- `tests/unit/medicion.test.ts` — `describe` de la 23.8: la parte pura directa y por su texto en un contexto vacío; la isla, una prueba por fila de la matriz; la isla de `dist/` con el JSON de `TRAMOS` y la parte pura, y `buscar.astro` sin rótulos, combinaciones, eventos ni la marca; las dos pruebas de la 23.6 admiten a la búsqueda solo `history.replaceState`.
+- `tests/unit/vocabulario.test.ts` — fuera la 23.8 de `PENDIENTES`; escenarios de cada tramo y cada combinación de filtros solo en `busqueda`, con su prueba; «diez eventos»; dos `busqueda` iguales dan dos balizas.
+- `tests/e2e/receptor.spec.ts` — `quedarseEn` y `conLaCacheDeVerdad` a nivel de fichero; `describe` de la 23.8 (diez pruebas); ajustes de la 7.3, la 23.6 y las dos de `/buscar/` de la 23.7.
+- `tests/e2e/busqueda.spec.ts` — la 3.2: tras `fill` nada; tras Enter, `busqueda` (`0`, «ninguno») y `busqueda-sin-resultados`.
+- `DESPLIEGUE.md` §3 — la búsqueda asentada, el corte de serie de FR-8, las consultas de SM-13 y SM-6 y el comentario de la de FR-8.
+- `AGENTS.md` — la convención de la medición al día.
+
+**Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). Recomendación de revisión de seguimiento: `false` (parches: 0 altos, 0 medios, 0 bajos; puntuación 0).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos (20 sugerencias ajenas a la historia).
+- `npx vitest run` de `medicion`, `vocabulario`, `huella`, `receptor`, `redes`, `superficies`, `espinas-de-ux`, `ingreso-construido` y `medicion-orden` — 9 ficheros, 789 pruebas en verde; `git diff 42f082115b4d39f3a4f3384c2c9293b318758541 -- src/lib/vocabulario.ts medicion/` vacío.
+- `npm test` (con `correr.sh`) — 131 ficheros, 5.863 pruebas en verde.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 53 en verde y 1 saltada ajena (la del prerender de la 23.1); las de la caché de atrás y adelante restauraron de verdad. `busqueda`, `pagina-404`, `origen` y `receptor-local` con el `webServer` — 34 en verde y 1 saltada ajena (la 3.1 del índice). Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `npx tsx -e` con `guionDeMedicion` y el punto final de producción — 3.487 bytes ≤ 3.730; `/buscar/` del `dist/` completo, 6.111 bytes < 6.656.
+- Comprobación a mano: `ARRANQUE_DE_MEDICION`, `MAX_BYTES_DE_GUION`, `MAX_BYTES_GUION_DE_MEDICION`, `src/lib/vocabulario.ts`, `medicion/` y `corpus/` sin cambios.
+- Auditoría de la matriz: cada fila tiene al menos una prueba de Vitest en el entorno simulado o sobre la parte pura (y las de navegador, además, en Playwright), y todas corrieron y pasaron.
+
+**Riesgos que quedan.**
+- `/buscar/` es ahora la superficie más justa en línea: 545 bytes libres. Lo que la Épica 27 le añada entra en ese hueco o sube el tope en su diff.
+- La parte pura viaja por su texto: el build sustituye en su sitio las constantes locales de un solo uso, así que su texto en Vitest y en `dist/` coinciden solo mientras la función no las use; lo vigila la prueba que compara los dos.
+- Las laxidades que la spec acepta (la marca es de la entrada y no del texto; la recarga de una búsqueda nunca asentada cuenta como registrada; ocultarse por navegación puede no dejar la marca) quedan escritas en `DESPLIEGUE.md` §3.
+- SM-6 y SM-13 son razones de recuentos por jornada UTC, no de sesiones, y SM-13 es cota inferior (la pestaña nueva asienta y no mide su salida).
+
+**Diferido para Héctor.** Marcar en `epics.md` el criterio de emisión de la Historia 3.2 como «(sustituido en la v8 por la Historia 23.8)» — pendiente de Héctor (bmad-create-epics-and-stories); está en el `deferred` del frontmatter.
