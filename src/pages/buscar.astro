@@ -34,9 +34,10 @@
  *     filtros de la última búsqueda que se pintó, con el total de la respuesta de Pagefind
  *     (`results.length`, no los pintados); vaciar el campo lo limpia. Lo asientan tres gestos:
  *     enviar el formulario —espera a que se pinte la búsqueda del texto enviado, y asienta solo si
- *     sigue siendo la que se ve—, pulsar un enlace de la lista de resultados —escuchado en la
- *     lista, que corre antes que la escucha de salida de la ventana, sin quedarse con el clic ni
- *     parar su propagación— y ocultarse la página (`visibilitychange` a `hidden`, con `pagehide` de
+ *     sigue siendo la que se ve—, pulsar un enlace de la lista de resultados —`click`, también con
+ *     modificador o con el teclado, y `auxclick`, el botón central que lo abre en otra pestaña sin
+ *     dar `click`; escuchados en la lista, que corre antes que la escucha de salida de la ventana,
+ *     sin quedarse con el clic ni parar su propagación— y ocultarse la página (`visibilitychange` a `hidden`, con `pagehide` de
  *     respaldo). Qué se emite ante ese estado lo decide `asentamientoDeBusqueda`, de
  *     `src/lib/medicion.ts`, que viaja aquí por su texto con sus constantes compuestas desde el
  *     vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`): la `busqueda` con el tramo del total y los
@@ -50,9 +51,15 @@
  *     consulta en la dirección, la da por ya registrada si su entrada lleva la marca o, sin objeto
  *     de estado, si la carga es una vuelta atrás o una recarga (Navigation Timing, leído una vez).
  *     Nada de eso ocurre al analizarse el guion: solo desde sus escuchas.
- *   · La búsqueda que no corre —el índice no carga, o `init` o `search` fallan— no pinta, no
- *     cambia el estado que se ve y no deja ninguna promesa rechazada sin manejar; no se asienta. La
- *     respuesta de una búsqueda ya superada por otra no se pinta ni pasa a ser la que se ve.
+ *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
+ *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
+ *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo texto
+ *     (Enter otra vez). Solo esas llamadas al índice van en el `try`: un fallo al pintar es un
+ *     error del guion y tiene que verse. La respuesta de una búsqueda ya superada por otra no se
+ *     pinta ni pasa a ser la que se ve.
+ *   · La consulta de la dirección se lee del campo después de escribirla en él: un campo de
+ *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
+ *     Enter buscará.
  *   · Historia 22.7 — el resultado de Obra lleva el título en la sans y el Autor debajo, y se
  *     lee «Obra: {título}, de {Autor}». Sin metadato de Autor, ni línea ni «, de»; sin título
  *     en el índice, el visible es la URL y no se lee en voz alta.
@@ -190,15 +197,18 @@ function buscar(consulta) {
   }
 
   return (pendiente = (async () => {
+    let respuesta, resultados;
     try {
       const pf = await cargar();
-      if (!pf) return;
-      const respuesta = await pf.search(consulta);
-      const resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
-      if (mio !== turno) return;
-      pintar(resultados);
-      visto = { texto: consulta, filtros: ASENTAMIENTO.sinFiltros, total: respuesta.results.length };
-    } catch (e) {}
+      respuesta = await pf.search(consulta);
+      resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
+    } catch (e) {
+      if (mio === turno) ultima = null;
+      return;
+    }
+    if (mio !== turno) return;
+    visto = { texto: consulta, filtros: ASENTAMIENTO.sinFiltros, total: respuesta.results.length };
+    pintar(resultados);
   })());
 }
 
@@ -227,9 +237,11 @@ document.querySelector('.formulario').addEventListener('submit', (e) => {
   });
 });
 
-lista.addEventListener('click', (e) => {
-  if (e.target.closest('a')) asentar();
-});
+for (const tipo of ['click', 'auxclick']) {
+  lista.addEventListener(tipo, (e) => {
+    if (e.target.closest('a')) asentar();
+  });
+}
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') asentar();
 });
@@ -241,9 +253,10 @@ if (inicial) {
   try {
     tipo = performance.getEntriesByType('navigation')[0].type || tipo;
   } catch (e) {}
-  if (A.yaRegistrada(history.state, tipo)) hechos.push(A.clave(inicial, ASENTAMIENTO.sinFiltros));
   campo.value = inicial;
-  buscar(inicial);
+  const q = campo.value;
+  if (A.yaRegistrada(history.state, tipo)) hechos.push(A.clave(q, ASENTAMIENTO.sinFiltros));
+  buscar(q);
 }
 `,
 );

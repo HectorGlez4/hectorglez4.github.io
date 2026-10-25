@@ -13,13 +13,15 @@ import { createContext, runInContext } from 'node:vm';
  *
  *   · los cinco elementos que busca —campo, lista, estado, salida (con su `.sugerencia`) y
  *     formulario—; cualquier otro selector **lanza**, para que una isla que empiece a pedir otra
- *     cosa no pase en verde contra un entorno que no la sabe;
+ *     cosa no pase en verde contra un entorno que no la sabe. El campo es de búsqueda, y como en
+ *     el navegador quita los saltos de línea de lo que se le escribe;
  *   · `document.createElement` con lo que usa para pintar un resultado;
  *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`— que solo avanza con
  *     `avanzar(ms)`;
  *   · `location` de solo lectura —escribir en ella o llamar a `assign`/`replace` se apunta como
  *     violación—, `history` con su `state` inicial, un `replaceState` que apunta cada llamada con
- *     sus argumentos tal como llegaron (y puede lanzar) y un `pushState` que es una violación;
+ *     sus argumentos tal como llegaron (y puede lanzar) —con argumento de dirección, además, es una
+ *     violación: la marca no toca la dirección— y un `pushState` que es una violación;
  *   · Navigation Timing configurable: el tipo de la entrada, ninguna entrada o sin la API;
  *   · la visibilidad del documento, `pagehide` y `pageshow`;
  *   · `__medir` espía;
@@ -194,6 +196,14 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
 
   // Los elementos de la página.
   const campo = new Elemento('input');
+  // `type="search"`: el navegador quita los saltos de línea del valor (su saneado del valor).
+  let valorDelCampo = '';
+  Object.defineProperty(campo, 'value', {
+    get: () => valorDelCampo,
+    set: (valor: unknown) => {
+      valorDelCampo = String(valor).replace(/[\r\n]/g, '');
+    },
+  });
   const lista = new Elemento('ul');
   const estado = new Elemento('p');
   const salida = new Elemento('div');
@@ -250,6 +260,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     },
     replaceState(...argumentos: unknown[]) {
       llamadasAlHistorial.push(argumentos);
+      if (argumentos.length > 2) violaciones.push(`replaceState con dirección: ${String(argumentos[2])}`);
       if (opciones.historialQueLanza) throw new Error('el historial no se deja escribir');
       estadoDelHistorial = argumentos[0];
     },
@@ -313,7 +324,13 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   };
   ventana.window = ventana;
   createContext(ventana);
-  runInContext(sustituido, ventana);
+  try {
+    runInContext(sustituido, ventana);
+  } catch (error) {
+    // Sin entorno que devolver, nadie llamaría a `cerrar`: se deja de escuchar aquí.
+    process.off('unhandledRejection', alRechazar);
+    throw error;
+  }
   const alAnalizarse = {
     emitidos: emitidos.map((e) => [...e]),
     historial: llamadasAlHistorial.map((l) => [...l]),
@@ -397,17 +414,18 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
      * Pulsa el resultado `indice` —en un `<span>` dentro de su `<a>`—, con el gesto que se diga. El
      * clic sube del `<span>` al `<a>`, al `<li>`, a la lista, al documento y a la ventana, como en el
      * navegador. Devuelve el evento y cuántas llamadas a `__medir` había cuando llegó a la ventana,
-     * que es donde escucha el fichero de medición.
+     * que es donde escucha el fichero de medición. Con `tipo` `auxclick` es el botón central o el
+     * secundario, que en el navegador **no** dan `click`.
      */
-    pulsarResultado: (indice = 0, gesto: Record<string, unknown> = {}) => {
+    pulsarResultado: (indice = 0, gesto: Record<string, unknown> = {}, tipo: 'click' | 'auxclick' = 'click') => {
       const li = lista.hijos[indice];
       if (!li) throw new Error(`no hay resultado ${indice} que pulsar`);
       const objetivo = li.hijos[0].hijos[0];
-      const clic = evento('click', { target: objetivo, button: 0, ...gesto });
-      for (let nodo: Elemento | null = objetivo; nodo; nodo = nodo.padre) despachar(nodo.oyentes, 'click', clic);
-      despachar(delDocumento, 'click', clic);
+      const clic = evento(tipo, { target: objetivo, button: tipo === 'click' ? 0 : 1, ...gesto });
+      for (let nodo: Elemento | null = objetivo; nodo; nodo = nodo.padre) despachar(nodo.oyentes, tipo, clic);
+      despachar(delDocumento, tipo, clic);
       const alLlegarALaVentana = emitidos.length;
-      despachar(deLaVentana, 'click', clic);
+      despachar(deLaVentana, tipo, clic);
       return { clic, alLlegarALaVentana };
     },
     /** La página se oculta: `visibilitychange` a `hidden`. */

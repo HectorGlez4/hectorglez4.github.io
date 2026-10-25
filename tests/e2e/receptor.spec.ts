@@ -1519,6 +1519,65 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     ]);
   });
 
+  test('el botón central —abrir en otra pestaña— da `auxclick` y no `click`: asienta la búsqueda y no hay salida', async ({
+    page,
+    context,
+  }) => {
+    await quedarseEn(context, RUTA_BUSCAR);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}`);
+    await esperarAlFichero(page);
+    await buscarEn(page, CON_RESULTADOS, true);
+    const tramo = await tramoDeLoQueSeVe(page);
+    await page.locator(RESULTADOS).first().click({ button: 'middle' });
+    await expect.poll(async () => (await balizasDe(page)).length).toBe(1);
+    await esperar(300);
+    // La pestaña nueva no es una salida de esta carga (23.7); la búsqueda sí quedó asentada.
+    expect(await balizasDe(page)).toEqual([{ evento: EVENTOS.busqueda, ruta: RUTA_BUSCAR, tramo, filtros: NINGUNO }]);
+    expect(new URL(page.url()).pathname).toBe(RUTA_BUSCAR);
+  });
+
+  test('con el teclado: Enter en un resultado da la `busqueda` de lo que se ve y después la salida', async ({
+    page,
+    context,
+  }) => {
+    await quedarseEn(context, RUTA_BUSCAR);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}`);
+    await esperarAlFichero(page);
+    await buscarEn(page, CON_RESULTADOS, true);
+    const tramo = await tramoDeLoQueSeVe(page);
+    await page.locator(RESULTADOS).first().focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => llegadas(EVENTOS.salidaInterna).length).toBe(1);
+    await esperar(300);
+    expect(await balizasDe(page)).toEqual([
+      { evento: EVENTOS.busqueda, ruta: RUTA_BUSCAR, tramo, filtros: NINGUNO },
+      { evento: EVENTOS.salidaInterna, ruta: RUTA_BUSCAR, zona: 'resultado' },
+    ]);
+  });
+
+  test('desde el campo del 404: llegar a `/buscar/?q=…` busca y no asienta; Enter, sí, una vez', async ({ page }) => {
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}/una-ruta-que-no-existe/`);
+    await esperarAlFichero(page);
+    await page.locator('form[role="search"] input[name="q"]').fill(CON_RESULTADOS);
+    await page.locator('form[role="search"] input[name="q"]').press('Enter');
+    await page.waitForURL((url) => url.pathname === RUTA_BUSCAR);
+    expect(new URL(page.url()).searchParams.get('q')).toBe(CON_RESULTADOS);
+    await esperarAlFichero(page);
+    await expect(page.locator(RESULTADOS).first()).toBeVisible();
+    const tramo = await tramoDeLoQueSeVe(page);
+    await esperar(300);
+    expect(await balizasDe(page), 'llegar desde el 404 la asentó').toEqual([]);
+    expect(await tipoDeNavegacion(page)).toBe('navigate');
+    await campo(page).press('Enter');
+    await campo(page).press('Enter');
+    await expect.poll(async () => (await balizasDe(page)).length).toBe(1);
+    await esperar(300);
+    expect(await balizasDe(page)).toEqual([{ evento: EVENTOS.busqueda, ruta: RUTA_BUSCAR, tramo, filtros: NINGUNO }]);
+  });
+
   test('ocultarse yéndose a otra página: la `busqueda` de lo que se ve llega por el receptor', async ({ page }) => {
     await page.goto(`${SITIO}${RUTA_BUSCAR}`);
     await esperarAlFichero(page);
@@ -1571,8 +1630,13 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     expect(new URL(page.url()).pathname).toBe(RUTA_BUSCAR);
     await esperarAlFichero(page);
     // Sin la caché, la vuelta es una carga nueva: lo dice Navigation Timing, y la entrada trae la marca.
+    // Lo que esta vuelta prueba es eso: que la marca se escribió y el tipo de la carga. La entrada no
+    // lleva `?q=` —la isla no lo escribe hasta la Épica 27— y el campo vuelve vacío
+    // (`autocomplete="off"`), así que no se llega a ningún estado y nada lee la marca: que una
+    // llegada marcada no asiente otra vez lo prueban las dos de abajo, con `?q=` (atrás y recarga).
     expect(await tipoDeNavegacion(page)).toBe('back_forward');
     expect(await page.evaluate(() => history.state)).toEqual({ [MARCA]: true });
+    await expect(campo(page)).toHaveValue('');
 
     await page.goBack();
     expect(new URL(page.url()).pathname).toBe('/');

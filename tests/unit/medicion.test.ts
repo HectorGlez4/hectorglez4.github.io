@@ -2885,6 +2885,17 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       expect(plano(parte.emisiones(estadoDe('viento', 3, 'autor-tema'), []))?.eventos).toEqual([[BUSQUEDA, '1-9', 'autor-tema']]);
     });
 
+    it.each(PARTES)('%s: el tramo coincide con `tramoDe` en todo total, y `TRAMOS` está en orden y empieza en 0', (_, parte) => {
+      // La parte pura recorre los cortes en su orden y se queda con el último que alcanza: eso
+      // supone que `TRAMOS` sube y que el primero es 0. Si el vocabulario dejara de cumplirlo, aquí.
+      expect(TRAMOS[0].desde).toBe(0);
+      for (let i = 1; i < TRAMOS.length; i++) expect(TRAMOS[i].desde).toBeGreaterThan(TRAMOS[i - 1].desde);
+      const totales = [...Array.from({ length: 201 }, (_, i) => i), 999, 10_000, Number.MAX_SAFE_INTEGER];
+      for (const total of totales) {
+        expect(plano(parte.emisiones(estadoDe('viento', total), []))?.eventos[0][1], String(total)).toBe(tramoDe(total));
+      }
+    });
+
     it.each(PARTES)('%s: sin estado, sin búsqueda que corriera o sin texto ni filtros, nada', (_, parte) => {
       expect(parte.emisiones(null, [])).toBeNull();
       expect(parte.emisiones(undefined, [])).toBeNull();
@@ -2981,8 +2992,10 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
     };
     const abiertas: ReturnType<typeof islaDeBusquedaEnUnSandbox>[] = [];
     afterEach(async () => {
-      for (const entorno of abiertas.splice(0)) {
-        await entorno.cerrar();
+      // Se cierran todos antes de afirmar nada: un `expect` que falla no deja entornos escuchando.
+      const cerrar = abiertas.splice(0);
+      for (const entorno of cerrar) await entorno.cerrar();
+      for (const entorno of cerrar) {
         expect(entorno.rechazos(), 'quedó una promesa rechazada sin manejar').toEqual([]);
         expect(entorno.violaciones(), 'la isla hizo lo que no debe').toEqual([]);
       }
@@ -3020,6 +3033,19 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       // Y el detector ve lo que tiene que ver.
       expect(entreComillas('30+').test("x = '30+'")).toBe(true);
       expect(entreComillas('0').test('const n = "0";')).toBe(true);
+    }, 240_000);
+
+    it('solo la isla de `/buscar/` lleva los nombres de la `busqueda` y de la `busqueda-sin-resultados` en un guion en línea', async () => {
+      // El fichero envía cada `busqueda` que recibe, venga de la ruta que venga: la regla de una por
+      // estado y carga solo se sostiene si nadie más la pide. Aquí, en todo el sitio construido.
+      const nombres = [BUSQUEDA, SIN_RESULTADOS].flatMap((nombre) => [`"${nombre}"`, `'${nombre}'`, `\`${nombre}\``]);
+      const llevan: string[] = [];
+      for (const [ruta, html] of paginasDe(await sitioMedido())) {
+        for (const guion of guionesEnLinea(html)) {
+          if (nombres.some((nombre) => guion.includes(nombre))) llevan.push(ruta);
+        }
+      }
+      expect(llevan).toEqual(['/buscar/']);
     }, 240_000);
 
     it('al analizarse: ni `__medir` ni escritura del historial, tampoco al llegar con la consulta', async () => {
@@ -3174,9 +3200,23 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         entorno.pulsarResultado(0, gesto);
         expect(entorno.emitidos(), JSON.stringify(gesto)).toEqual([VIENTO]);
       }
+      // El botón central —abrir en otra pestaña— y el secundario no dan `click` en el navegador, sino
+      // `auxclick`: también asientan, y el fichero no ve ninguna salida (no escucha `auxclick`).
+      for (const boton of [1, 2]) {
+        const entorno = await isla();
+        await entorno.teclear('viento');
+        const { clic, alLlegarALaVentana } = entorno.pulsarResultado(0, { button: boton }, 'auxclick');
+        expect(entorno.emitidos(), `auxclick ${boton}`).toEqual([VIENTO]);
+        expect(alLlegarALaVentana, `auxclick ${boton}`).toBe(1);
+        expect(clic.defaultPrevented, `auxclick ${boton}`).toBe(false);
+        entorno.pulsarResultado(1, {});
+        expect(entorno.emitidos(), `auxclick ${boton}, y luego clic`).toEqual([VIENTO]);
+      }
       // Escucha en la lista, nunca en la ventana ni en el documento.
       const entorno = await isla();
-      expect(entorno.escuchas().lista).toEqual(['click']);
+      expect(entorno.escuchas().lista).toEqual(['click', 'auxclick']);
+      expect(entorno.escuchas().ventana).not.toContain('auxclick');
+      expect(entorno.escuchas().documento).not.toContain('auxclick');
       expect(entorno.escuchas().ventana).not.toContain('click');
       expect(entorno.escuchas().documento).not.toContain('click');
     }, 240_000);
@@ -3238,6 +3278,43 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       240_000,
     );
 
+    it.each(['importacion', 'init'] as const)(
+      'índice que falla en %s y se recupera: la búsqueda siguiente vuelve a pedirlo, pinta y asienta',
+      async (falla) => {
+        const entorno = await isla({ falla });
+        entorno.enfocar();
+        await entorno.teclear('viento');
+        await entorno.enviar();
+        const pedidasAlFallar = entorno.importaciones().length;
+        expect(pedidasAlFallar).toBeGreaterThan(0);
+        expect(entorno.pintados()).toEqual([]);
+        // El fallo era pasajero: otro texto vuelve a pedir el índice, pinta y asienta.
+        entorno.fallar();
+        await entorno.teclear('lluvia');
+        expect(entorno.importaciones().length).toBeGreaterThan(pedidasAlFallar);
+        expect(entorno.pintados()).toHaveLength(3);
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+      },
+      240_000,
+    );
+
+    it.each(['importacion', 'init', 'search'] as const)(
+      'tras un fallo en %s, Enter con el mismo texto vuelve a buscar, y asienta si ya corre',
+      async (falla) => {
+        const entorno = await isla({ falla });
+        await entorno.teclear('viento');
+        await entorno.enviar();
+        expect(entorno.pintados()).toEqual([]);
+        expect(entorno.emitidos()).toEqual([]);
+        entorno.fallar();
+        await entorno.enviar();
+        expect(entorno.pintados()).toHaveLength(3);
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+      },
+      240_000,
+    );
+
     it('una búsqueda que falla no cambia el estado que se ve: se sigue asentando el anterior', async () => {
       const entorno = await isla();
       await entorno.teclear('viento');
@@ -3278,6 +3355,38 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       await entorno.teclear('zzz');
       await entorno.enviar();
       expect(entorno.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
+    }, 240_000);
+
+    it.each([
+      ['marcada', { estado: { [MARCA]: true }, navegacion: 'navigate' }],
+      ['sin objeto de estado, al volver atrás', { estado: null, navegacion: 'back_forward' }],
+      ['sin objeto de estado, al recargar', { estado: null, navegacion: 'reload' }],
+    ] satisfies [string, OpcionesDeLaIsla][])(
+      'llegada registrada sin resultados (%s): ni otra `busqueda` en el tramo 0 ni otra `busqueda-sin-resultados`',
+      async (_, opciones) => {
+        const entorno = await isla({ busqueda: '?q=zzz', ...opciones });
+        expect(entorno.pintados()).toEqual([]);
+        await entorno.enviar();
+        entorno.ocultar();
+        entorno.pagehide();
+        expect(entorno.emitidos()).toEqual([]);
+        expect(entorno.historial()).toEqual([]);
+      },
+      240_000,
+    );
+
+    it('llegada con un salto de línea en `?q=`: la clave es la del texto que queda en el campo, y no cuenta dos veces', async () => {
+      // Un campo de búsqueda quita los saltos de línea: Enter busca «viento», no «vien\nto».
+      const registrada = await isla({ busqueda: '?q=vien%0Ato', navegacion: 'reload' });
+      expect(registrada.valor()).toBe('viento');
+      await registrada.enviar();
+      registrada.ocultar();
+      expect(registrada.emitidos()).toEqual([]);
+
+      const nueva = await isla({ busqueda: '?q=vien%0Ato' });
+      await nueva.enviar();
+      nueva.ocultar();
+      expect(nueva.emitidos()).toEqual([VIENTO]);
     }, 240_000);
 
     it.each([
