@@ -69,8 +69,11 @@ function citasDeSeneca(): Record<string, string> {
   }
   // «Cartas a Lucilio»: La vida en las tres, El tiempo en una y La ira —sin publicar— en otra.
   // Por recuento el orden es La vida, El tiempo; por nombre sería el contrario.
+  // Historia 24.1 — se insertan 2, 1, 0: el andamio escribe su documento con los textos en ese
+  // orden, así que el orden del libro es el contrario del de los slugs.
   const temasDeCartas = [['la-vida', 'el-tiempo'], ['la-vida', 'la-ira'], ['la-vida']];
-  temasDeCartas.forEach((temas, i) => {
+  [2, 1, 0].forEach((i) => {
+    const temas = temasDeCartas[i];
     corpus[`citas/seneca--cartas-${i}.md`] = citaValida({
       slug: `seneca-cartas-${i}`,
       texto: `Carta ${i}: nadie se hace sabio por casualidad, y hay que aprenderlo.`,
@@ -337,12 +340,52 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     expect(de).not.toContain('Pablo de Prado');
   });
 
-  it('el listado: Tarjetas sin el Autor, en el orden de la Página de Autor', async () => {
+  it('el listado: Tarjetas sin el Autor, en el orden del libro (24.1)', async () => {
     const pagina = await html(proyecto, CARTAS);
     const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
     const enlaces = [...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
-    expect(enlaces).toEqual(['/cita/seneca-cartas-0/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-2/']);
+    expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
     expect(listado).not.toContain('class="autor"');
+  });
+
+  /*
+   * Historia 24.1 — una Obra con `noindex` y paginada sigue el orden del libro en todas sus
+   * páginas y en sus datos estructurados. Las 51 de «Sobre la brevedad» se insertan 0…50, así
+   * que su documento las trae en orden numérico, que no es el de los slugs («…-10» antes que
+   * «…-2»): la 2 empieza por la Cita 51 del libro.
+   */
+  it('24.1 — paginada y `noindex`: el orden del libro en cada página y en su ItemList, sin decirlo', async () => {
+    const delLibro = Array.from({ length: 51 }, (_, i) => `/cita/seneca-brevedad-${i}/`);
+    const paginas = [
+      { ruta: BREVEDAD, citas: delLibro.slice(0, 50), desde: 1 },
+      { ruta: `${BREVEDAD}2/`, citas: delLibro.slice(50), desde: 51 },
+    ];
+    for (const { ruta, citas, desde } of paginas) {
+      const pagina = await html(proyecto, ruta);
+      expect(pagina, ruta).toMatch(NOINDEX);
+      const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
+      expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ruta).toEqual(citas);
+      expect(listado, ruta).not.toContain('class="autor"');
+      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada.
+      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
+      const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+        itemListElement: { position: number; url: string }[];
+      };
+      const urls = lista.itemListElement.map((e) => new URL(e.url).pathname);
+      expect(urls, ruta).toEqual(citas);
+      expect(lista.itemListElement.map((e) => e.position), ruta).toEqual(citas.map((_, i) => desde + i));
+    }
+  });
+
+  it('24.1 — construir no escribe nada en los ficheros de Cita', async () => {
+    const fixture = corpus(1);
+    const deCitas = Object.keys(fixture).filter((ruta) => ruta.startsWith('citas/'));
+    const { readdir } = await import('node:fs/promises');
+    const enDisco = (await readdir(join(proyecto, 'corpus', 'citas'), { recursive: true })).filter((f) => f.endsWith('.md'));
+    expect(enDisco.map((f) => `citas/${f}`).sort()).toEqual(deCitas.sort());
+    for (const ruta of deCitas) {
+      expect(await readFile(join(proyecto, 'corpus', ruta), 'utf8'), ruta).toBe(fixture[ruta]);
+    }
   });
 
   it('los Temas: solo los publicados, por recuento de la Obra, sin recuento visible', async () => {
@@ -720,6 +763,8 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
   const URL_CONSTANCIA = 'https://es.wikisource.org/wiki/De_la_constancia_del_sabio';
   // El censo es cerrado (11.2): solo admite slugs del censo de partida, así que las Citas sin
   // documento son cuatro de las de Séneca que de verdad están en él.
+  // Historia 24.1 — la Cita cotejada de Cartas se llama de forma que por slug iría la última.
+  const CARTAS_COTEJADA = 'seneca-sabio-por-casualidad';
   const BREVEDAD_SIN = 'seneca-la-vida-si-sabes-usarla-es-larga';
   const CARTAS_SIN_1 = 'seneca-mientras-esperamos-vivir-la-vida-pasa';
   const CARTAS_SIN_2 = 'seneca-ninguna-cosa-se-parece-tanto-a-la';
@@ -740,7 +785,7 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
       'citas/seneca--brevedad-1.md': cotejada('seneca-brevedad-1', B1, 'Sobre la brevedad de la vida', URL_BREVEDAD),
       'citas/seneca--brevedad-2.md': cotejada('seneca-brevedad-2', B2, 'Sobre la brevedad de la vida', URL_BREVEDAD),
       [fichero(BREVEDAD_SIN)]: sinDocumento(BREVEDAD_SIN, 'La vida, si sabes usarla, es larga.', 'Sobre la brevedad de la vida'),
-      'citas/seneca--cartas-1.md': cotejada('seneca-cartas-1', C1, 'Cartas a Lucilio', URL_CARTAS),
+      [fichero(CARTAS_COTEJADA)]: cotejada(CARTAS_COTEJADA, C1, 'Cartas a Lucilio', URL_CARTAS),
       [fichero(CARTAS_SIN_1)]: sinDocumento(CARTAS_SIN_1, 'Mientras esperamos vivir, la vida pasa.', 'Cartas a Lucilio'),
       [fichero(CARTAS_SIN_2)]: sinDocumento(
         CARTAS_SIN_2,
@@ -748,16 +793,28 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
         'Cartas a Lucilio',
       ),
       [fichero(IRA_SIN)]: sinDocumento(IRA_SIN, 'No hay viento favorable para el que no sabe adónde va.', 'De la ira'),
+      // Historia 24.1 — el documento trae B2 antes que B1: el orden del libro no es el de los slugs.
       'fuentes/wikisource-es--sobre-la-brevedad-de-la-vida.txt': documento(
         'Sobre la brevedad de la vida',
         URL_BREVEDAD,
-        [B1, B2],
+        [B2, B1],
       ),
       'fuentes/wikisource-es--cartas-a-lucilio.txt': documento('Cartas a Lucilio', URL_CARTAS, [C1]),
       // Dos subpáginas del mismo `Padre`: tiene entrada.
       'citas/seneca--epistolas-1.md': cotejada('seneca-epistolas-1', E1, 'Epístolas morales', `${URL_EPISTOLAS}/1`),
       'citas/seneca--epistolas-2.md': cotejada('seneca-epistolas-2', E2, 'Epístolas morales', `${URL_EPISTOLAS}/2`),
-      'fuentes/wikisource-es--epistolas-morales.txt': documento('Epístolas morales', `${URL_EPISTOLAS}/1`, [E1, E2]),
+      // Historia 24.1 — una página por carta: la x trae E1 y la ii trae E2, así que el orden del
+      // libro —ii antes que x, por su valor— es el contrario del de los slugs.
+      'fuentes/wikisource-es--epistolas-morales--epistolas-morales-carta-x.txt': documento(
+        'Epístolas morales',
+        `${URL_EPISTOLAS}/1`,
+        [E1],
+      ),
+      'fuentes/wikisource-es--epistolas-morales--epistolas-morales-carta-ii.txt': documento(
+        'Epístolas morales',
+        `${URL_EPISTOLAS}/2`,
+        [E2],
+      ),
       // Dos páginas de primer nivel: ninguna es la entrada de la otra.
       'citas/seneca--dialogos-1.md': cotejada('seneca-dialogos-1', D1, 'Diálogos', URL_PROVIDENCIA),
       'citas/seneca--dialogos-2.md': cotejada('seneca-dialogos-2', D2, 'Diálogos', URL_CONSTANCIA),
@@ -813,6 +870,21 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     expect(lineas(donde)).toEqual(['Ninguna de sus citas tiene todavía documento cotejado.']);
     expect(donde).not.toContain('<h3');
     expect(donde).not.toContain('<a ');
+  });
+
+  it('24.1 — el orden del libro: las cotejadas por documento y posición, las del censo al final', async () => {
+    const listado = async (ruta: string) => {
+      const pagina = await html(proyecto, ruta);
+      const ul = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
+      return [...ul.matchAll(/href="\/cita\/([^/"]+)\/"/g)].map((m) => m[1]);
+    };
+    expect(await listado('/obra/seneca/sobre-la-brevedad-de-la-vida/')).toEqual([
+      'seneca-brevedad-2',
+      'seneca-brevedad-1',
+      BREVEDAD_SIN,
+    ]);
+    expect(await listado('/obra/seneca/epistolas-morales/')).toEqual(['seneca-epistolas-2', 'seneca-epistolas-1']);
+    expect(await listado('/obra/seneca/cartas-a-lucilio/')).toEqual([CARTAS_COTEJADA, CARTAS_SIN_1, CARTAS_SIN_2]);
   });
 
   it('la nota: tras la sección, fuera de ella, sin encabezado; nunca en la meta', async () => {
@@ -889,6 +961,13 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     // Cartas cumple FR-52 y no estaba en la lista: la misma página, con `noindex`.
     const cartas = await html(proyecto, CARTAS);
     expect(cartas).toMatch(NOINDEX);
+    // Historia 24.1 — congelada fuera, el mismo orden del libro.
+    const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(cartas)?.[1] ?? '';
+    expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1])).toEqual([
+      '/cita/seneca-cartas-2/',
+      '/cita/seneca-cartas-1/',
+      '/cita/seneca-cartas-0/',
+    ]);
     // Historia 23.9 — y la marca la sigue: no indexable, y solo la vista de Obra.
     expect(marcaDe(cartas)).toBe(NO_INDEXABLE);
     expect(vistasDe(cartas)).toBe(EVENTOS.vistaDeObra);

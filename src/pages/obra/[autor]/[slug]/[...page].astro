@@ -25,11 +25,11 @@ import Paginacion from '../../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../../components/TarjetaDeCita.astro';
 import {
   autoresPublicados,
+  citasDeLasObras,
   conjuntoPublicable,
   obrasPublicadas,
   temasDeLaObra,
   temasPublicados,
-  type Cita,
 } from '../../../../lib/publicado.ts';
 import { dondeLeer, rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
 import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
@@ -47,12 +47,9 @@ export const getStaticPaths = (async ({ paginate }) => {
   );
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
 
-  // Las Citas de cada Obra, agrupadas una sola vez y en el orden de la Página de Autor (por slug).
-  const porObra = new Map<string, Cita[]>();
-  for (const cita of [...conjunto.citas].sort((a, b) => a.slug.localeCompare(b.slug, 'es'))) {
-    if (cita.obra === undefined) continue;
-    porObra.set(cita.obra.nombre, [...(porObra.get(cita.obra.nombre) ?? []), cita]);
-  }
+  // Historia 24.1 — las Citas de cada Obra en el orden del libro, en todas sus páginas y en sus
+  // datos estructurados. El orden lo decide `src/lib/obras.ts` y llega por el dueño del conjunto.
+  const porObra = await citasDeLasObras(conjunto);
 
   return obrasPublicadas(conjunto).flatMap((obra) => {
     const autor = autores.get(obra.autor);

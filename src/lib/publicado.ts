@@ -28,10 +28,13 @@ import {
   colgarObras,
   congelacionVigente,
   esObraIndexable,
+  ordenDelLibro,
   rutaDeLaObra,
+  type AparicionDeCita,
   type CitaParaObra,
   type FichaDeObra,
   type ObraResuelta,
+  type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
@@ -488,6 +491,28 @@ export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string
   return { obras, sinObra: suyas.filter((cita) => cita.obra === undefined).length };
 }
 
+/**
+ * Las Citas de cada Obra, por nombre de ficha y **en el orden del libro** — Historia 24.1.
+ *
+ * Agrupa por la Obra resuelta de cada Cita (`cita.obra.nombre`) y ordena cada grupo con
+ * `ordenDelLibro`, el único que ordena las Citas de una Obra (AD-25). Pura: las posiciones
+ * llegan por parámetro. Lo que la Página de Obra pagina —y después «Siguiente» y «De la misma
+ * obra»— sale de aquí, nunca de un agrupado propio (AD-11).
+ */
+export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
+  citas: readonly C[],
+  posiciones: PosicionesDeCitas,
+): Map<string, C[]> {
+  const porObra = new Map<string, C[]>();
+  for (const cita of citas) {
+    if (cita.obra === undefined) continue;
+    const suyas = porObra.get(cita.obra.nombre);
+    if (suyas === undefined) porObra.set(cita.obra.nombre, [cita]);
+    else suyas.push(cita);
+  }
+  return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones)]));
+}
+
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
 export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores'>): ObraResuelta[] {
   return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;
@@ -849,6 +874,30 @@ export function avisoDeDesajustes(
     '  Una Cita retirada a corpus/_revision/ sale de sus Colecciones sin romper nada; un',
     '  slug con errata se comporta igual. Si no esperaba este número, revise los slugs.',
   ].join('\n');
+}
+
+const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, Cita[]>>>();
+
+/**
+ * Las Citas de cada Obra del conjunto, en el orden del libro — Historia 24.1.
+ *
+ * Es la fachada de `citasPorObra`: lee las posiciones de la colección `posiciones` (el cargador
+ * de `src/content.config.ts`) y se memoriza por conjunto, como `rutasIndexables`, porque cada
+ * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta la colección.
+ */
+export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, Cita[]>> {
+  const memorizada = citasDeLasObrasPorConjunto.get(conjunto);
+  if (memorizada !== undefined) return memorizada;
+  const calculo = (async (): Promise<ReadonlyMap<string, Cita[]>> => {
+    if (!conjunto.citas.some((cita) => cita.obra !== undefined)) return new Map();
+    const { getCollection } = await import('astro:content');
+    const posiciones = new Map<string, readonly AparicionDeCita[]>(
+      (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
+    );
+    return citasPorObra(conjunto.citas, posiciones);
+  })();
+  citasDeLasObrasPorConjunto.set(conjunto, calculo);
+  return calculo;
 }
 
 let memoria: ConjuntoPublicable | undefined;

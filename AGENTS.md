@@ -716,6 +716,22 @@ sans y «{n} citas de {Autor}, {año}», sin nota ni traductor. En `/buscar/`, e
 resultado de Obra sale del metadato `data-pagefind-meta="autor"` del enlace de la Cabecera:
 quitarlo o moverlo fuera de `data-pagefind-body` deja los resultados de Obra sin Autor.
 
+**El orden del libro (Historia 24.1).** La Página de Obra lista sus Citas —en todas sus páginas
+y en su `ItemList`— en el orden en que aparecen en sus documentos, no por slug, y no lo dice en
+ninguna línea. Dónde cae cada Cita lo entrega la colección `posiciones` de `src/content.config.ts`,
+cuyo cargador solo cablea `tools/lib/posiciones.ts`: los mismos lectores que el cotejo, el mismo
+casado (`documentosDeCita`) y **el mismo localizador** (`localizar` de `tools/lib/cotejo.ts`, sobre
+formas ya colapsadas, que `apareceEnDocumento` también usa). Da, por el `slug` del frontmatter,
+`{documento, posicion}` de cada documento en que aparece el texto, sin texto y sin elegir; nada
+se escribe en `corpus/`. **Solo `ordenDelLibro` de `src/lib/obras.ts` ordena**, con las
+posiciones por parámetro: primero la Fuente que más Citas sitúa, luego el documento en orden
+natural (`compararDocumentos`: trozos por `-`, arábigos y romanos canónicos por su valor, la
+palabra antes que el número —«proemio» antes que «i»— y el nombre corto antes que sus páginas),
+la posición y el slug; al final, por slug, las Citas sin Fuente o sin aparición (las del censo).
+La página lo toma de `citasDeLasObras` de `src/lib/publicado.ts`. El índice de subpáginas de la
+Fuente queda aplazado, y no hay detector de desorden: una página cuyo slug no ordena bien
+(«mi» se lee 1001) se corregirá con ese índice. Ningún `src/lib/` importa de `tools/lib/`.
+
 ### El aviso, la serie y la congelación (Historia 22.8)
 
 Qué fichero compone qué página lo dice **una sola relación**, `relacionDeSuperficies` de

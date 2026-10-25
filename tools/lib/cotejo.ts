@@ -54,15 +54,27 @@ export function colapsarEspacios(texto: string): string {
 }
 
 /**
- * Si el texto de una Cita aparece **literalmente** en el cuerpo de su documento.
+ * Dónde aparece un texto en un cuerpo: el **único** localizador del proyecto — AD-23,
+ * Historia 24.1.
  *
- * Un texto que se queda en nada al colapsar espacios no aparece en ninguna parte: sin
- * este guardián, `''.includes('')` daría por cotejada una Cita vacía.
+ * Recibe las dos formas **ya colapsadas** (`colapsarEspacios`) y devuelve la posición de la
+ * primera aparición en el cuerpo colapsado, o `-1`. Es la comparación del cotejo y la que
+ * sitúa cada Cita en su documento para el orden del libro (`tools/lib/posiciones.ts`): si
+ * fueran dos, una Cita podría estar cotejada y no tener sitio en su libro, o al revés. Recibe
+ * formas colapsadas para que quien recorre muchas Citas del mismo documento colapse su cuerpo
+ * una sola vez.
+ *
+ * Un texto que se queda en nada al colapsar espacios no aparece en ninguna parte: sin este
+ * guardián, `''.indexOf('')` daría por cotejada una Cita vacía, en la posición 0.
  */
+export function localizar(buscado: string, cuerpo: string): number {
+  if (buscado === '') return -1;
+  return cuerpo.indexOf(buscado);
+}
+
+/** Si el texto de una Cita aparece **literalmente** en el cuerpo de su documento. */
 export function apareceEnDocumento(texto: string, cuerpo: string): boolean {
-  const buscado = colapsarEspacios(texto);
-  if (buscado === '') return false;
-  return colapsarEspacios(cuerpo).includes(buscado);
+  return localizar(colapsarEspacios(texto), colapsarEspacios(cuerpo)) !== -1;
 }
 
 /**

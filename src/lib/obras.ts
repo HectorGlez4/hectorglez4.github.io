@@ -912,6 +912,161 @@ export function avisosDeEdicionesSinCotejada(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// El orden del libro — Historia 24.1, AD-23, AD-25
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Dónde cae el texto de una Cita en uno de sus documentos de Fuente: el nombre del documento
+ * (sin extensión) y la posición de su primera aparición en el cuerpo colapsado.
+ *
+ * Lo calcula la composición de `tools/lib/posiciones.ts` con el mismo localizador que comprueba
+ * que el texto aparece en su documento, y lo entrega la colección `posiciones` de
+ * `src/content.config.ts`. Nunca se escribe en el fichero de la Cita: se recalcula en cada
+ * construcción.
+ */
+export interface AparicionDeCita {
+  documento: string;
+  posicion: number;
+}
+
+/** Las apariciones de cada Cita, por el `slug` de su frontmatter; sin ordenar ni elegir. */
+export type PosicionesDeCitas = ReadonlyMap<string, readonly AparicionDeCita[]>;
+
+/** Un trozo de nombre de documento que se lee como número: arábigo, o romano canónico. */
+const ARABIGO = /^\d+$/u;
+const ROMANO = /^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$/u;
+const VALOR_ROMANO: Readonly<Record<string, number>> = { i: 1, v: 5, x: 10, l: 50, c: 100, d: 500, m: 1000 };
+
+/** Comparación por unidades de código, la que no depende de la configuración regional. */
+function porUnidades(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/** El valor de un romano ya validado por `ROMANO`. */
+function valorRomano(romano: string): number {
+  let valor = 0;
+  for (let i = 0; i < romano.length; i += 1) {
+    const actual = VALOR_ROMANO[romano[i]];
+    const siguiente = i + 1 < romano.length ? VALOR_ROMANO[romano[i + 1]] : 0;
+    valor += actual < siguiente ? -actual : actual;
+  }
+  return valor;
+}
+
+/**
+ * El valor de un trozo que se lee como número, en decimal y sin ceros a la izquierda, o
+ * `undefined` si es palabra. En cadena y no en `number` para que un arábigo de muchas cifras
+ * se compare exacto.
+ */
+function valorDeTrozo(trozo: string): string | undefined {
+  if (ARABIGO.test(trozo)) return trozo.replace(/^0+(?=\d)/u, '');
+  if (trozo !== '' && ROMANO.test(trozo)) return String(valorRomano(trozo));
+  return undefined;
+}
+
+/** Dos valores decimales sin ceros a la izquierda: el más corto es el menor. */
+function porValor(a: string, b: string): number {
+  return a.length - b.length || porUnidades(a, b);
+}
+
+/**
+ * El orden natural de dos documentos de Fuente — Historia 24.1.
+ *
+ * Se trocea el nombre por `-` (los segmentos vacíos de `--` cuentan como palabra vacía). Un
+ * trozo es número si es arábigo o un romano en forma canónica minúscula; dos números se
+ * comparan por valor y, a igual valor, por la cadena; dos palabras, por unidades de código; y
+ * **la palabra va antes que el número**, que es «proemio» antes de «i». Si un nombre es prefijo
+ * del otro, el corto va primero: el documento de la obra entera antes que sus páginas.
+ *
+ * Como los documentos de una Obra comparten `{fuente}--{obra}`, equivale al orden del slug de
+ * la página en su Fuente. Límite aceptado: una palabra que es romano canónico («mi», «di») se
+ * lee como número; lo corregirá el índice de subpáginas de la Fuente cuando se capture.
+ */
+export function compararDocumentos(a: string, b: string): number {
+  const trozosA = a.split('-');
+  const trozosB = b.split('-');
+  for (let i = 0; i < Math.min(trozosA.length, trozosB.length); i += 1) {
+    const ta = trozosA[i];
+    const tb = trozosB[i];
+    if (ta === tb) continue;
+    const va = valorDeTrozo(ta);
+    const vb = valorDeTrozo(tb);
+    if (va !== undefined && vb !== undefined) {
+      const orden = porValor(va, vb) || porUnidades(ta, tb);
+      if (orden !== 0) return orden;
+      continue;
+    }
+    if (va !== undefined) return 1;
+    if (vb !== undefined) return -1;
+    return porUnidades(ta, tb);
+  }
+  return trozosA.length - trozosB.length;
+}
+
+/** De las apariciones de una Cita, la del primer documento en orden natural. */
+function primeraAparicion(apariciones: readonly AparicionDeCita[]): AparicionDeCita | undefined {
+  let primera: AparicionDeCita | undefined;
+  for (const aparicion of apariciones) {
+    if (
+      primera === undefined ||
+      (compararDocumentos(aparicion.documento, primera.documento) || aparicion.posicion - primera.posicion) < 0
+    ) {
+      primera = aparicion;
+    }
+  }
+  return primera;
+}
+
+/** Por slug, en español y, si la colación los iguala, por unidades de código. */
+function porSlug(a: { slug: string }, b: { slug: string }): number {
+  return a.slug.localeCompare(b.slug, 'es') || porUnidades(a.slug, b.slug);
+}
+
+/**
+ * Las Citas de una Obra en el orden del libro — Historia 24.1, AD-25.
+ *
+ * Es el **único** sitio que ordena las Citas de una Obra, y recibe las posiciones por parámetro
+ * (AD-5): no lee disco ni colecciones. Primero la Fuente que más Citas situadas aporta —a
+ * igualdad, el identificador menor—; dentro, el documento en orden natural
+ * (`compararDocumentos`), tomando cada Cita su aparición del primero; luego la posición en ese
+ * documento y, a igual documento y posición, el slug. Al final, por slug, las Citas sin Fuente
+ * o sin ninguna aparición: las del censo, que no tienen documento del que tomar un sitio.
+ *
+ * No depende del orden de la entrada, ni del de las apariciones, ni de la indexabilidad de la
+ * Obra: una Obra indexable, con `noindex` o congelada se lee igual.
+ */
+export function ordenDelLibro<C extends { slug: string; fuente?: { id: string } | null }>(
+  citas: readonly C[],
+  posiciones: PosicionesDeCitas,
+): C[] {
+  const situadas: { cita: C; fuente: string; aparicion: AparicionDeCita }[] = [];
+  const sueltas: C[] = [];
+  for (const cita of citas) {
+    const fuente = cita.fuente?.id;
+    const aparicion = primeraAparicion(posiciones.get(cita.slug) ?? []);
+    if (typeof fuente !== 'string' || fuente === '' || aparicion === undefined) sueltas.push(cita);
+    else situadas.push({ cita, fuente, aparicion });
+  }
+
+  const porFuente = new Map<string, number>();
+  for (const { fuente } of situadas) porFuente.set(fuente, (porFuente.get(fuente) ?? 0) + 1);
+  const rango = new Map(
+    [...porFuente.entries()]
+      .sort((a, b) => b[1] - a[1] || porUnidades(a[0], b[0]))
+      .map(([fuente], i) => [fuente, i] as const),
+  );
+
+  situadas.sort(
+    (a, b) =>
+      (rango.get(a.fuente) ?? 0) - (rango.get(b.fuente) ?? 0) ||
+      compararDocumentos(a.aparicion.documento, b.aparicion.documento) ||
+      a.aparicion.posicion - b.aparicion.posicion ||
+      porSlug(a.cita, b.cita),
+  );
+  return [...situadas.map((s) => s.cita), ...[...sueltas].sort(porSlug)];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Dónde leer esta obra — Historia 22.6, UX-DR42 y UX-DR50 (c, d)
 // ─────────────────────────────────────────────────────────────────────────────
 

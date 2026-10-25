@@ -2,7 +2,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineCollection, reference, z } from 'astro:content';
+import { defineCollection, reference } from 'astro:content';
+// La v8 toma `z` de `astro/zod`, como `src/lib/admision.ts`: es el mismo Zod que reexportaba
+// `astro:content`, así que las colecciones admiten y rechazan exactamente lo mismo.
+import { z } from 'astro/zod';
 import { glob, type Loader } from 'astro/loaders';
 import {
   año,
@@ -20,6 +23,7 @@ import {
   tradicion,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
+import { leerPosicionesDelCorpus } from '../tools/lib/posiciones.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -267,4 +271,62 @@ const biografias = defineCollection({
   }),
 });
 
-export const collections = { citas, autores, temas, colecciones, obras, biografias };
+/*
+ * Las posiciones — Historia 24.1, AD-23, AD-25.
+ *
+ * Dónde cae el texto de cada Cita publicada en los documentos de su obra, para que la Página de
+ * Obra liste sus Citas en el orden del libro. Este cargador **solo cablea**: la composición vive
+ * en `tools/lib/posiciones.ts`, que lee las Citas y los documentos de `corpus/fuentes/` con los
+ * mismos lectores que el cotejo, los casa como el cotejo y localiza con el mismo localizador.
+ * Quien ordena es `src/lib/obras.ts` (`ordenDelLibro`), con lo que esta colección entrega.
+ *
+ * Guarda, por el `slug` del frontmatter de cada Cita publicada, una aparición por documento en
+ * que aparece su texto —nombre del documento y posición—, **y nada del texto**: el cuerpo de un
+ * documento de Fuente no entra en el almacén de contenido (AD-2). También las Citas sin ninguna
+ * aparición —las del censo, sin Fuente— llevan su entrada, con la lista vacía: la colección no
+ * queda vacía mientras haya Citas, y nadie consulta una colección vacía. No escribe nada en
+ * `corpus/` ni pide nada por la red.
+ */
+const cargadorDePosiciones: Loader = {
+  name: 'posiciones',
+  load: async ({ store, parseData, config, watcher }) => {
+    const raiz = join(fileURLToPath(config.root), 'corpus');
+    const vigiladas = [join(raiz, 'citas'), join(raiz, 'fuentes')];
+
+    async function cargar(): Promise<void> {
+      const posiciones = await leerPosicionesDelCorpus(raiz);
+      store.clear();
+      for (const [slug, apariciones] of posiciones) {
+        const data = await parseData({ id: slug, data: { apariciones } });
+        store.set({ id: slug, data });
+      }
+    }
+
+    await cargar();
+
+    // En desarrollo, una Cita o un documento que cambian se vuelven a situar sin reiniciar.
+    if (watcher !== undefined) {
+      for (const carpeta of vigiladas) watcher.add(carpeta);
+      const alCambiar = (ruta: string) => {
+        if (vigiladas.some((carpeta) => ruta.startsWith(carpeta))) void cargar();
+      };
+      watcher.on('add', alCambiar);
+      watcher.on('change', alCambiar);
+      watcher.on('unlink', alCambiar);
+    }
+  },
+};
+
+const posiciones = defineCollection({
+  loader: cargadorDePosiciones,
+  schema: z.object({
+    apariciones: z.array(
+      z.object({
+        documento: z.string().min(1),
+        posicion: z.number().int().nonnegative(),
+      }),
+    ),
+  }),
+});
+
+export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones };
