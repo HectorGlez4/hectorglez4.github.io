@@ -14,7 +14,13 @@ import { ATRIBUTO_DE_ZONA, ATRIBUTO_SIN_ZONA } from '../../../src/lib/medicion.t
  *     enlace;
  *   · los valores de atributo entre comillas pueden llevar `>` dentro;
  *   · una etiqueta de cierre saca de la pila hasta la última abierta con su nombre, y una que no
- *     casa con ninguna abierta se ignora.
+ *     casa con ninguna abierta se ignora;
+ *   · los dos cierres implícitos que pueden quitarle a un enlace la zona de un antepasado, como
+ *     hace el analizador del navegador: un bloque (`<div>`, `<ul>`, `<section>`…) cierra el `<p>`
+ *     abierto —la zona de un `<p data-zona>` no llega a lo que va dentro del bloque—, y un `<a>`
+ *     cierra el `<a>` abierto. Los dos se detienen en los límites de ámbito (`table`, `td`,
+ *     `button`…). Sin ellos, la prueba de `dist/` daría por medido un enlace que en el DOM no tiene
+ *     zona.
  *
  * Lo prueban fragmentos escritos a mano en `tests/unit/medicion.test.ts`, para que la prueba de
  * `dist/` no pase en vacío.
@@ -58,6 +64,51 @@ const VACIAS = new Set([
   'wbr',
 ]);
 const TEXTO_CRUDO = new Set(['script', 'style', 'textarea', 'title']);
+/** Las etiquetas que, al abrirse, cierran el `<p>` abierto (WHATWG, «close a p element»). */
+const CIERRAN_P = new Set([
+  'address',
+  'article',
+  'aside',
+  'blockquote',
+  'center',
+  'dd',
+  'details',
+  'dialog',
+  'dir',
+  'div',
+  'dl',
+  'dt',
+  'fieldset',
+  'figcaption',
+  'figure',
+  'footer',
+  'form',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'header',
+  'hgroup',
+  'hr',
+  'li',
+  'listing',
+  'main',
+  'menu',
+  'nav',
+  'ol',
+  'p',
+  'pre',
+  'search',
+  'section',
+  'summary',
+  'table',
+  'ul',
+  'xmp',
+]);
+/** Donde se detiene la búsqueda de ese `<p>` o de ese `<a>`: los límites de ámbito. */
+const LIMITES_DE_AMBITO = new Set(['applet', 'button', 'caption', 'html', 'marquee', 'object', 'table', 'td', 'template', 'th']);
 
 const ENTIDADES: Record<string, string> = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>' };
 const resolverEntidades = (texto: string) =>
@@ -91,6 +142,16 @@ export function recorrerElementos(
   const saltarEspacios = (desde: number) => desde + leer(ESPACIOS, desde)![0].length;
 
   const pila: Elemento[] = [];
+  /** Saca de la pila el último `nombre` abierto, si lo hay antes de un límite de ámbito. */
+  const cerrarImplicito = (nombre: string) => {
+    for (let k = pila.length - 1; k >= 0; k--) {
+      if (pila[k].etiqueta === nombre) {
+        pila.length = k;
+        return;
+      }
+      if (LIMITES_DE_AMBITO.has(pila[k].etiqueta)) return;
+    }
+  };
   let i = 0;
   while (i < html.length) {
     const menor = html.indexOf('<', i);
@@ -165,6 +226,8 @@ export function recorrerElementos(
       if (!atributos.has(clave)) atributos.set(clave, resolverEntidades(valor));
     }
     i = j;
+    if (CIERRAN_P.has(etiqueta)) cerrarImplicito('p');
+    if (etiqueta === 'a') cerrarImplicito('a');
     const elemento: Elemento = { etiqueta, atributos };
     visitar(elemento, [...pila]);
     if (sola || VACIAS.has(etiqueta)) continue;

@@ -327,8 +327,9 @@ export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
  * de `click`, en la ventana y en burbuja —no en captura: así ve el `defaultPrevented` de una isla
  * que se queda con el clic—, puesta al activarse. Es salida un clic en un enlace (`a[href]`, el más
  * cercano al objetivo) con el botón principal, sin modificador, sin `defaultPrevented`, sin
- * `download`, sin un `target` que no sea vacío o `_self` —lo que se abre en pestaña nueva no se
- * mide, así que toda continuación es cota inferior—, del mismo origen y a **otra ruta**: un ancla
+ * `download`, sin un `target` que no sea vacío o `_self` —en mayúsculas o minúsculas, como lo lee
+ * el navegador; lo que se abre en pestaña nueva no se mide, así que toda continuación es cota
+ * inferior—, del mismo origen y a **otra ruta**: un ancla
  * o la propia ruta con otra búsqueda no sacan de la página. Enviar un formulario tampoco: la
  * escucha solo mira enlaces. La zona es la de la declaración más cercana al enlace
  * (`ATRIBUTO_DE_ZONA` o `ATRIBUTO_SIN_ZONA`): si es una exención, si no hay ninguna o si su valor
@@ -340,7 +341,11 @@ export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
  * nada que encadene esta carga con la siguiente (NFR-11). La emite solo el fichero
  * (`EVENTOS_SOLO_DEL_FICHERO`). Una isla que parara la propagación del clic en un enlace
  * (`stopPropagation`) sin `preventDefault` lo escondería de la escucha y la salida no se mediría:
- * ninguna lo hace, y una que lo necesite tiene que decirlo aquí.
+ * ninguna lo hace, y una que lo necesite tiene que decirlo aquí. Y una isla que se quede con el
+ * clic de un enlace llama a `preventDefault` desde el enlace, el documento o un antepasado, nunca
+ * desde una escucha de `click` en la ventana: esta está en la ventana desde la activación, y la de
+ * una isla puesta después correría detrás, con la salida ya emitida y gastada. Ninguna isla escucha
+ * `click` en la ventana, y lo vigila una prueba de `tests/unit/medicion.test.ts`.
  *
  * **Volver por la caché de atrás y adelante** (`pageshow` con `persisted`) es una carga nueva:
  * la lectura y la salida pueden volver a salir, `primera` y el reloj vuelven a cero y las Marcas
@@ -444,7 +449,8 @@ export function guionDeMedicion(url: string): string {
    * el rato ya la cumplió y el temporizador llegó tarde—; l emite la lectura, si toca, y olvida las
    * marcas; k es la escucha de `click` que emite la salida interna; n empieza una carga —también
    * rearma la salida—; a activa el fichero: lee las marcas, las quita de la dirección, emite las
-   * vistas y pone las escuchas.
+   * vistas y pone las escuchas. Ningún nombre local tapa el de una función que se usa en el mismo
+   * cuerpo: dentro de k el enlace es r, y la interacción que recorre a es v.
    */
   return (
     `(function(){` +
@@ -468,9 +474,9 @@ export function guionDeMedicion(url: string): string {
     `function g(){h();V&&!L&&(C<${MIN_MS_VISIBLES_PARA_LA_LECTURA}?document.visibilityState!='hidden'&&(I=performance.now(),T=setTimeout(l,${MIN_MS_VISIBLES_PARA_LA_LECTURA}-C)):l())}` +
     `function l(){V&&!L&&(L=1,h(),D=1,b(${lectura}),D=o=w=null)}` +
     `function k(x){` +
-    `var a=x.target&&x.target.closest&&x.target.closest("a[href]"),c,z;` +
-    `if(S||!a||x.button||x.defaultPrevented||x.metaKey||x.ctrlKey||x.shiftKey||x.altKey||a.hasAttribute("download")||a.target&&a.target!="_self"||a.origin!=location.origin||a.pathname==location.pathname)return;` +
-    `c=a.closest(${declaracionDeZona});` +
+    `var r=x.target&&x.target.closest&&x.target.closest("a[href]"),c,z;` +
+    `if(S||!r||x.button||x.defaultPrevented||x.metaKey||x.ctrlKey||x.shiftKey||x.altKey||r.hasAttribute("download")||r.target&&!/^_self$/i.test(r.target)||r.origin!=location.origin||r.pathname==location.pathname)return;` +
+    `c=r.closest(${declaracionDeZona});` +
     `z=c&&!c.hasAttribute(${sinZona})&&c.getAttribute(${deZona});` +
     `if(${zonas}.indexOf(z)<0)return;` +
     `S=1;l();b(${salida},0,0,0,z)` +
@@ -485,7 +491,7 @@ export function guionDeMedicion(url: string): string {
     `D=0;` +
     `n();` +
     `window.__medir=e;` +
-    `${JSON.stringify(INTERACCIONES_DE_LECTURA)}.forEach(function(k){addEventListener(k,l,{capture:true,passive:true})});` +
+    `${JSON.stringify(INTERACCIONES_DE_LECTURA)}.forEach(function(v){addEventListener(v,l,{capture:true,passive:true})});` +
     `document.addEventListener('visibilitychange',g);` +
     `addEventListener('click',k);` +
     `addEventListener('pageshow',function(x){x.persisted&&(o=w=null,n())});` +

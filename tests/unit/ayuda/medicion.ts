@@ -15,10 +15,11 @@ type Ajustes = boolean | { once?: boolean; capture?: boolean; passive?: boolean 
 
 /**
  * Lo que declara un contenedor de un enlace — Historia 23.7: una Zona de salida interna
- * (`data-zona`) o una exención con su motivo (`data-sin-zona`). Los valores van tal cual: el
- * entorno no los coteja con nada, que es lo que tiene que hacer el fichero.
+ * (`data-zona`), una exención con su motivo (`data-sin-zona`) o las dos en el mismo elemento, donde
+ * manda la exención. Los valores van tal cual: el entorno no los coteja con nada, que es lo que
+ * tiene que hacer el fichero.
  */
-export type Contenedor = { zona: string } | { sinZona: string };
+export type Contenedor = { zona: string; sinZona?: string } | { sinZona: string; zona?: string };
 
 /** El enlace que se pulsa — Historia 23.7. */
 export interface EnlacePulsado {
@@ -131,7 +132,7 @@ function comoElemento(nodo: Nodo, vistos = new Map<Nodo, Record<string, unknown>
  * los modificadores y el `defaultPrevented` del gesto. El objetivo es un `<span>` dentro de un `<a>`
  * de mentira, cuyo `href` se resuelve con `URL` contra la dirección de ahora (`origin`,
  * `pathname`), con su `target` y su `download`, y envuelto en los contenedores del enlace —una
- * zona (`data-zona`) o una exención (`data-sin-zona`)—, del más cercano al más lejano. Con
+ * zona (`data-zona`), una exención (`data-sin-zona`) o las dos—, del más cercano al más lejano. Con
  * `enlace` nulo el objetivo es un `<p>` que no está dentro de ningún enlace, y con `{ envio: true }`,
  * el botón de enviar de un formulario dentro de sus contenedores. `closest` sabe leer
  * solo listas de `etiqueta[atributo]` y `[atributo]`, que es lo que pide el fichero. No dispara
@@ -355,9 +356,9 @@ export function medicionEnUnSandbox(
       let padre: Nodo | null = null;
       // Del más lejano al más cercano, para que cada uno sea el padre del siguiente.
       for (const contenedor of [...(enlace?.contenedores ?? [])].reverse()) {
-        const atributos = new Map<string, string>(
-          'zona' in contenedor ? [['data-zona', contenedor.zona]] : [['data-sin-zona', contenedor.sinZona]],
-        );
+        const atributos = new Map<string, string>();
+        if (contenedor.zona !== undefined) atributos.set('data-zona', contenedor.zona);
+        if (contenedor.sinZona !== undefined) atributos.set('data-sin-zona', contenedor.sinZona);
         padre = { etiqueta: 'div', atributos, padre };
       }
       let objetivo: Record<string, unknown>;

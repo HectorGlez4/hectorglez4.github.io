@@ -389,11 +389,16 @@ function escenariosDe(evento: Evento): Escenario[] {
     datos: 'texto buscado',
     esperado: (campo) => (campo === 'consulta' ? 'texto buscado' : null),
   });
-  // Historia 23.7 — cada zona del vocabulario, también en los eventos que no la declaran (ahí no
-  // debe salir). Una zona ajena no está: con ella no sale ninguna salida, y eso lo prueba
+  // Historia 23.7 — cada zona del vocabulario, solo en los eventos que la declaran: la zona no es
+  // una marca de la dirección ni un argumento de `__medir`, sino el contenedor del enlace pulsado,
+  // y solo la salida interna pulsa uno, así que en los demás eventos el escenario no le daría
+  // ninguna entrada. Que no viaje con ellos ya lo dicen sus claves exactas, en todo escenario. Una
+  // zona ajena no está: con ella no sale ninguna salida, y eso lo prueba
   // `tests/unit/medicion.test.ts`.
-  for (const zona of ZONAS) {
-    escenarios.push({ nombre: `zona ${zona}`, zona, esperado: () => null });
+  if (valoresDe('zona').length > 0) {
+    for (const zona of ZONAS) {
+      escenarios.push({ nombre: `zona ${zona}`, zona, esperado: () => null });
+    }
   }
   // `primera` no sale de la entrada: la calcula el fichero, y en la primera acción de cada
   // entorno es «si», salvo la descarga con destino de su conjunto. La `zona` tampoco sale de
@@ -435,6 +440,14 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     // Y los campos que sabe producir son los que algún evento vigente necesita.
     const necesarios = new Set(vigentes.flatMap(camposEsperados));
     expect([...CAMPOS_DEL_GUION].sort()).toEqual([...necesarios].sort());
+  });
+
+  it('la salida interna se recorre con cada zona del vocabulario, y ningún otro evento lleva escenarios de zona', () => {
+    // Historia 23.7: para que la correspondencia de abajo no pase en vacío con la zona.
+    for (const evento of EVENTOS_VALIDOS) {
+      const conZona = escenariosDe(evento).flatMap((escenario) => (escenario.zona === undefined ? [] : [escenario.zona]));
+      expect(conZona, evento).toEqual(evento === EVENTOS.salidaInterna ? [...ZONAS] : []);
+    }
   });
 
   it('cada campo pendiente es de un evento que lo declara', () => {

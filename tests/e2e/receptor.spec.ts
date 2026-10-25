@@ -1177,11 +1177,35 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     await page.keyboard.press('Enter');
     const salida = await esperarEvento(EVENTOS.salidaInterna);
     expect(salida, 'no llegó la salida').toBeTruthy();
-    expect((await balizasDe(page)).map((b) => [b.evento, b.zona])).toEqual([
-      [EVENTOS.vistaDeCita, undefined],
-      [EVENTOS.lectura, undefined],
-      [EVENTOS.salidaInterna, 'rutas-de-salida'],
+    expect((await balizasDe(page)).map((b) => [b.evento, b.ruta, b.zona])).toEqual([
+      [EVENTOS.vistaDeCita, RUTA_CITA, undefined],
+      [EVENTOS.lectura, RUTA_CITA, undefined],
+      [EVENTOS.salidaInterna, RUTA_CITA, 'rutas-de-salida'],
     ]);
+  });
+
+  test('en el 404, servido en la ruta que se pidió, «Ver esta cita» sale con `cita-del-dia`, esa ruta y sin lectura', async ({
+    page,
+    context,
+  }) => {
+    // Una Cita que no existe: el servidor contesta 404 con la página del 404, en esta misma ruta.
+    const PEDIDA = '/cita/una-retirada-que-no-existe/';
+    await quedarseEn(context, PEDIDA);
+    await apuntarBalizas(page);
+    const respuesta = await page.goto(`${SITIO}${PEDIDA}`);
+    expect(respuesta?.status()).toBe(404);
+    await esperarAlFichero(page);
+
+    await page.locator('main p.ir a').click();
+    const salida = await esperarEvento(EVENTOS.salidaInterna);
+    expect(salida, 'no llegó la salida').toBeTruthy();
+    expect(salida).toMatchObject({ ruta: PEDIDA, zona: 'cita-del-dia' });
+    await esperar(500);
+    // Ni vista ni lectura: el 404 no declara ninguna.
+    expect((await balizasDe(page)).map((b) => [b.evento, b.ruta, b.zona])).toEqual([
+      [EVENTOS.salidaInterna, PEDIDA, 'cita-del-dia'],
+    ]);
+    expect(new URL(page.url()).pathname).toBe(PEDIDA);
   });
 
   test('en `/buscar/`, pulsar un resultado llega con `resultado`, la ruta de la búsqueda y sin lectura', async ({
