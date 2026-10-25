@@ -6,15 +6,23 @@
  * rótulos de la página: dos copias acabarían divergiendo. Sin márgenes: el aire lo pone quien lo
  * rodea. El peso, el espaciado y el interlineado son los mismos literales que el rótulo de las
  * Rutas de salida y el nombre del Autor, porque `tokens.css` no declara tokens para ellos.
+ *
+ * Historia 24.7, UX-DR100 — `destino` lo pone el rótulo al que salta un ancla de la propia página
+ * («Dónde leer esta obra»): `tabindex="-1"` lo hace enfocable sin meterlo en la tabulación, y así
+ * el salto nativo del navegador le lleva el foco sin guion, con el anillo global de `tokens.css`
+ * (aquí no se declara ninguna regla de foco). `scroll-margin-top` le deja 2 × `--unidad` de aire
+ * sobre el borde de la ventana al llegar. Sin `destino`, el `h2` sale byte a byte como antes.
  */
 interface Props {
   id: string;
+  /** El rótulo es destino de un ancla de la página: recibe el foco al saltar (UX-DR100). */
+  destino?: boolean;
 }
 
-const { id } = Astro.props;
+const { id, destino } = Astro.props;
 ---
 
-<h2 class="rotulo" id={id}><slot /></h2>
+<h2 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h2>
 
 <style>
   .rotulo {
@@ -26,5 +34,9 @@ const { id } = Astro.props;
     line-height: 1.4;
     text-transform: uppercase;
     color: var(--tinta-apagada);
+  }
+
+  .rotulo[tabindex='-1'] {
+    scroll-margin-top: calc(var(--unidad) * 2);
   }
 </style>

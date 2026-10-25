@@ -621,20 +621,35 @@ function bloqueDeEdiciones(html: string): string {
   return '';
 }
 
+/**
+ * Las dos construcciones de `corpusConstruido(true)` —la tienda de prueba declarada, con la
+ * afiliación encendida y apagada—, memorizadas para el fichero: la 22.9 y la 24.7 las comparten
+ * sin construir más. La primera `describe` que la pide la construye; las demás esperan la misma.
+ */
+type Construida = Awaited<ReturnType<typeof construirConCorpus>>;
+const memorizadas = new Map<'encendida' | 'apagada', Promise<Construida>>();
+function construida(afiliacion: 'encendida' | 'apagada'): Promise<Construida> {
+  let promesa = memorizadas.get(afiliacion);
+  if (promesa === undefined) {
+    promesa = (async () => {
+      const conTienda = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
+      const ingreso = afiliacion === 'encendida' ? fuenteConModeloEncendido(conTienda, 'afiliacion-de-libros') : conTienda;
+      const resultado = await construirConCorpus(corpusConstruido(true), { ficheros: { 'src/lib/ingreso.ts': ingreso } });
+      aLimpiar.push(resultado.proyecto);
+      return resultado;
+    })();
+    memorizadas.set(afiliacion, promesa);
+  }
+  return promesa;
+}
+
 describe('Historia 22.9 — encendida, construida', () => {
   let proyecto = '';
   let salida = '';
   const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 
   beforeAll(async () => {
-    const ingreso = fuenteConModeloEncendido(
-      fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8')),
-      'afiliacion-de-libros',
-    );
-    const resultado = await construirConCorpus(corpusConstruido(true), {
-      ficheros: { 'src/lib/ingreso.ts': ingreso },
-    });
-    aLimpiar.push(resultado.proyecto);
+    const resultado = await construida('encendida');
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
     salida = resultado.salida;
@@ -738,8 +753,7 @@ describe('Historia 22.9 — apagada, `dist/` igual con y sin ediciones', () => {
   beforeAll(async () => {
     // La tienda declarada en las dos copias: sin ella, la ficha con ediciones no se admite.
     const ingreso = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
-    const uno = await construirConCorpus(corpusConstruido(true), { ficheros: { 'src/lib/ingreso.ts': ingreso } });
-    aLimpiar.push(uno.proyecto);
+    const uno = await construida('apagada');
     expect(uno.codigo, uno.salida).toBe(0);
     const dos = await construirConCorpus(corpusConstruido(false), { ficheros: { 'src/lib/ingreso.ts': ingreso } });
     aLimpiar.push(dos.proyecto);
@@ -757,6 +771,57 @@ describe('Historia 22.9 — apagada, `dist/` igual con y sin ediciones', () => {
 
   it('y el aviso de la Obra sin cotejada sale igual con la afiliación apagada', () => {
     expect(salidaCon).toContain('Ediciones sin edición cotejada: corpus/obras/seneca--de-la-ira.yml');
+  });
+});
+
+/*
+ * Historia 24.7 — el salto «Dónde leer esta obra ↓» y su `h2` de destino no alojan ningún Modelo:
+ * salen idénticos con la afiliación encendida o apagada (FR-35, UX-DR96), y lo único que separa
+ * las dos páginas es el `div[data-ingreso]` de «Ediciones en venta». Las dos construcciones son
+ * las de arriba, sin construir otra.
+ */
+describe('Historia 24.7 — el salto, igual con la afiliación encendida o apagada', () => {
+  let encendida = '';
+  let apagada = '';
+  const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
+  const salto = (pagina: string) => /<p class="salto"[\s\S]*?<\/p>/.exec(pagina)?.[0] ?? '';
+  const destino = (pagina: string) =>
+    /<h2 class="rotulo" id="donde-leer-esta-obra"[^>]*>[\s\S]*?<\/h2>/.exec(pagina)?.[0] ?? '';
+
+  beforeAll(async () => {
+    // Una tras otra: si esta `describe` corre sola, las construye ella, y nunca a la vez.
+    const con = await construida('encendida');
+    const sin = await construida('apagada');
+    expect(con.codigo, con.salida).toBe(0);
+    expect(sin.codigo, sin.salida).toBe(0);
+    encendida = con.proyecto;
+    apagada = sin.proyecto;
+  }, 600_000);
+
+  it.each([
+    ['con ediciones', PAGINA_1],
+    ['noindex', CARTAS_1],
+    ['sin cotejo', IRA_1],
+  ])('%s: el salto y su `h2` son los mismos, byte a byte', async (_caso, ruta) => {
+    const [con, sin] = [await html(encendida, ruta), await html(apagada, ruta)];
+    expect(salto(con), ruta).toContain('href="#donde-leer-esta-obra"');
+    expect(destino(con), ruta).toContain('tabindex="-1"');
+    expect(salto(con), ruta).toBe(salto(sin));
+    expect(destino(con), ruta).toBe(destino(sin));
+  });
+
+  it.each([PAGINA_1, CARTAS_1])('%s: encendida es la apagada más el bloque de «Ediciones en venta»', async (ruta) => {
+    const con = await html(encendida, ruta);
+    const bloque = bloqueDeEdiciones(con);
+    expect(bloque, ruta).toMatch(/^<div data-ingreso="afiliacion-de-libros"/);
+    expect(con.split(bloque), ruta).toHaveLength(2);
+    expect(con.replace(bloque, ''), ruta).toBe(await html(apagada, ruta));
+  });
+
+  it.each([IRA_1, PAGINA_2])('%s: sin bloque, las dos son iguales sin quitar nada', async (ruta) => {
+    const con = await html(encendida, ruta);
+    expect(con, ruta).not.toContain('data-ingreso');
+    expect(con, ruta).toBe(await html(apagada, ruta));
   });
 });
 

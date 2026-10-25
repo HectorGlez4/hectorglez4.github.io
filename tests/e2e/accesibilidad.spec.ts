@@ -787,3 +787,207 @@ test.describe('Historia 22.10 — subrayado y pestaña nueva', () => {
     expect(await cuentas.evaluateAll((ns) => ns.filter((n) => n.hasAttribute('target')).length)).toBe(0);
   });
 });
+
+/**
+ * Historia 24.7 — las dos Páginas de Obra con las que se mide el pie, sacadas del `dist/` como
+ * `OBRAS` y no escritas a mano: una página 1 con Paginación y Temas, y otra sin Paginación, con
+ * Temas y alguna línea de edición cotejada. Y, si alguna Obra del `dist/` trae nota, la primera.
+ */
+function obrasDelPie(): { conPaginacion: string; sinPaginacion: string; conNota: string | undefined } {
+  const obras = rutasConstruidas()
+    .filter((ruta) => ruta.startsWith('/obra/'))
+    .sort((a, b) => a.localeCompare(b, 'es'));
+  const paginadas = new Set(
+    obras.filter((ruta) => /^\/obra\/[^/]+\/[^/]+\/\d+\/$/.test(ruta)).map((ruta) => ruta.replace(/\d+\/$/, '')),
+  );
+  const primeras = obras
+    .filter((ruta) => /^\/obra\/[^/]+\/[^/]+\/$/.test(ruta))
+    .map((ruta) => ({
+      ruta,
+      html: readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8'),
+    }));
+  const conTemas = (html: string) => html.includes('<section class="temas"');
+  const exigir = (ruta: string | undefined, cara: string) => {
+    if (ruta === undefined) throw new Error(`El dist/ no trae ninguna página 1 de Obra ${cara}.`);
+    return ruta;
+  };
+  return {
+    conPaginacion: exigir(
+      primeras.find((o) => paginadas.has(o.ruta) && conTemas(o.html))?.ruta,
+      'con Paginación y Temas',
+    ),
+    sinPaginacion: exigir(
+      primeras.find((o) => !paginadas.has(o.ruta) && conTemas(o.html) && o.html.includes('id="edicion-cotejada"'))
+        ?.ruta,
+      'sin Paginación, con Temas y edición cotejada',
+    ),
+    conNota: primeras.find((o) => o.html.includes('class="nota-de-la-ficha"'))?.ruta,
+  };
+}
+
+const PIE = obrasDelPie();
+
+/**
+ * Historia 24.7 — el salto «Dónde leer esta obra ↓» de la Cabecera de Obra (UX-DR96, UX-DR100).
+ *
+ * Se tabula hasta él y se activa con Intro, sin guion de por medio: el foco tiene que acabar en
+ * el `h2` de destino (`tabindex="-1"`) con el anillo global, porque el salto nativo del navegador
+ * enfoca un destino enfocable y el último gesto fue de teclado. Las medidas son las de
+ * `DESIGN.md` § Página de Obra: la zona de 44 px del salto a 8 px como poco de la de «de {Autor}»
+ * —sin tocar ninguna de las dos—, la primera Cita aún en la primera pantalla y el ritmo del pie,
+ * que el salto no mueve. Medio píxel de holgura por el redondeo subpíxel, como en las demás.
+ */
+test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => {
+  const ANCLA = 'donde-leer-esta-obra';
+
+  for (const cara of ['indexable', 'noIndexable'] as const) {
+    test(`${cara}: Intro sobre el salto deja el foco en el h2 de destino, con el anillo global`, async ({
+      page,
+    }) => {
+      const ruta = OBRAS[cara];
+      await page.goto(ruta);
+      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
+      await expect(salto, ruta).toHaveCount(1);
+      expect(await salto.getAttribute('href'), ruta).toBe(`#${ANCLA}`);
+      expect(await salto.getAttribute('target'), ruta).toBeNull();
+
+      let alcanzado = false;
+      for (let i = 0; i < 60 && !alcanzado; i += 1) {
+        await page.keyboard.press('Tab');
+        alcanzado = await salto.evaluate((n) => n === document.activeElement);
+      }
+      expect(alcanzado, `${ruta}: el salto no recibe el foco por teclado`).toBe(true);
+
+      await page.keyboard.press('Enter');
+      await expect.poll(() => page.evaluate(() => location.hash), { message: ruta }).toBe(`#${ANCLA}`);
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.id), { message: `${ruta}: el foco no llega al h2` })
+        .toBe(ANCLA);
+
+      const foco = await page.evaluate(() => {
+        const n = document.activeElement as HTMLElement;
+        const s = getComputedStyle(n);
+        return {
+          etiqueta: n.tagName,
+          tabindex: n.getAttribute('tabindex'),
+          visible: n.matches(':focus-visible'),
+          estilo: s.outlineStyle,
+          ancho: s.outlineWidth,
+          separacion: s.outlineOffset,
+          color: s.outlineColor,
+          margen: s.scrollMarginTop,
+          siena: getComputedStyle(document.documentElement).getPropertyValue('--siena').trim(),
+        };
+      });
+      expect(foco.etiqueta, ruta).toBe('H2');
+      expect(foco.tabindex, ruta).toBe('-1');
+      expect(foco.visible, `${ruta}: el h2 enfocado no casa :focus-visible`).toBe(true);
+      expect(foco.estilo, ruta).toBe('solid');
+      expect(foco.ancho, ruta).toBe('2px');
+      expect(foco.separacion, ruta).toBe('2px');
+      expect(foco.margen, ruta).toBe('16px');
+      // El color, el del token: se compara resolviéndolo en el propio navegador.
+      const sienaResuelto = await page.evaluate((valor) => {
+        const prueba = document.createElement('span');
+        prueba.style.color = valor;
+        document.body.append(prueba);
+        const color = getComputedStyle(prueba).color;
+        prueba.remove();
+        return color;
+      }, foco.siena);
+      expect(foco.color, ruta).toBe(sienaResuelto);
+    });
+  }
+
+  for (const ancho of [360, 320]) {
+    test(`a ${ancho} px, la zona del salto mide 44 px y queda a 8 px de la de «de {Autor}»`, async ({ page }) => {
+      await page.setViewportSize({ width: ancho, height: 640 });
+      for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, OBRAS.tituloLargo]) {
+        await page.goto(ruta);
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+        });
+        const medida = await page.evaluate(() => {
+          const salto = document.querySelector('.cabecera-de-obra .salto a')!.getBoundingClientRect();
+          const de = document.querySelector('.cabecera-de-obra .de a')!.getBoundingClientRect();
+          return { alto: salto.height, hueco: salto.top - de.bottom };
+        });
+        expect(Math.abs(medida.alto - 44), `${ruta}: la zona del salto mide ${medida.alto}`).toBeLessThanOrEqual(0.5);
+        expect(medida.hueco, `${ruta}: entre las dos zonas`).toBeGreaterThanOrEqual(7.5);
+      }
+    });
+  }
+
+  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    for (const ruta of [OBRAS.tituloLargo, OBRAS.indexable]) {
+      await page.goto(ruta);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const medida = await page.evaluate(() => {
+        const fragmento = document.querySelector('.listado .fragmento') as HTMLElement;
+        return {
+          desplazada: window.scrollY,
+          arriba: fragmento.getBoundingClientRect().top,
+          linea: parseFloat(getComputedStyle(fragmento).lineHeight),
+        };
+      });
+      expect(medida.desplazada, ruta).toBe(0);
+      expect(medida.arriba + medida.linea, ruta).toBeLessThanOrEqual(640);
+    }
+  });
+
+  /** El hueco vertical entre el borde inferior de `a` y el superior de `b`. */
+  const hueco = (page: Page, a: string, b: string) =>
+    page.evaluate(
+      ([selectorA, selectorB]) => {
+        const sobre = document.querySelector(selectorA);
+        const bajo = document.querySelector(selectorB);
+        if (sobre === null || bajo === null) return null;
+        return bajo.getBoundingClientRect().top - sobre.getBoundingClientRect().bottom;
+      },
+      [a, b] as const,
+    );
+  const cerca = (medido: number | null, esperado: number, que: string) => {
+    expect(medido, `${que}: no está en la página`).not.toBeNull();
+    expect(Math.abs(medido! - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
+  };
+
+  test('la Cabecera: el listado a 32 px del salto en la página 1, y de «de {Autor}» en la 2', async ({ page }) => {
+    for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE.conPaginacion]) {
+      await page.goto(ruta);
+      cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
+    }
+    await page.goto(OBRAS.segunda);
+    expect(await page.locator('.salto').count(), OBRAS.segunda).toBe(0);
+    expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}`).count(), OBRAS.segunda).toBe(0);
+    cerca(await hueco(page, '.cabecera-de-obra .de', 'ul.listado'), 32, `${OBRAS.segunda}, «de» → listado`);
+  });
+
+  test('el pie no se mueve: 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
+    await page.goto(PIE.conPaginacion);
+    cerca(await hueco(page, 'nav.paginacion', '.temas'), 40, `${PIE.conPaginacion}, Paginación → Temas`);
+    cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${PIE.conPaginacion}, Temas → «Dónde leer»`);
+    cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${PIE.conPaginacion}, h2 → lo que sigue`);
+
+    await page.goto(PIE.sinPaginacion);
+    expect(await page.locator('nav.paginacion').count(), PIE.sinPaginacion).toBe(0);
+    cerca(await hueco(page, 'ul.listado', '.temas'), 40, `${PIE.sinPaginacion}, listado → Temas`);
+    cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${PIE.sinPaginacion}, Temas → «Dónde leer»`);
+    cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${PIE.sinPaginacion}, h2 → lo que sigue`);
+    cerca(await hueco(page, '#edicion-cotejada', '#edicion-cotejada + .linea'), 8, `${PIE.sinPaginacion}, h3 → línea`);
+  });
+
+  test('la Nota, si alguna Obra la trae: 4 × sobre su filete y 3 × bajo él', async ({ page }) => {
+    test.skip(PIE.conNota === undefined, 'Ninguna Obra del dist/ trae nota.');
+    await page.goto(PIE.conNota!);
+    cerca(await hueco(page, '.donde-leer', '.nota-de-la-ficha'), 32, `${PIE.conNota}, «Dónde leer» → nota`);
+    const nota = await page.locator('.nota-de-la-ficha').evaluate((n) => {
+      const s = getComputedStyle(n);
+      return { filete: s.borderTopWidth, relleno: parseFloat(s.paddingTop) };
+    });
+    expect(nota.filete).toBe('1px');
+    cerca(nota.relleno, 24, `${PIE.conNota}, filete → texto de la nota`);
+  });
+});

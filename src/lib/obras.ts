@@ -1222,6 +1222,16 @@ export function entradaComun(urls: readonly string[]): string | undefined {
 }
 
 /**
+ * El `id` de «Dónde leer esta obra» — Historia 24.7, UX-DR96.
+ *
+ * Un solo dueño para las tres lecturas del identificador: el `href` del salto de la Cabecera de
+ * Obra, el `id` del rótulo de la sección y su `aria-labelledby`. Escrito en tres sitios, cambiar
+ * uno dejaría el salto apuntando a nada sin que el build lo notara. El valor no cambia: es el
+ * fragmento que ya llevaba la sección desde la 22.6.
+ */
+export const ANCLA_DE_DONDE_LEER = 'donde-leer-esta-obra';
+
+/**
  * Dónde leer una Obra — Historia 22.6, UX-DR42.
  *
  * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así

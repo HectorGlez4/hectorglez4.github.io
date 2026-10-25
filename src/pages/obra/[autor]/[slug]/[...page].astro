@@ -8,10 +8,11 @@
  * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
  * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
  *
- * Página 1: Cabecera, Listado, Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota
- * (Historia 22.6). Páginas 2+: solo Cabecera y Listado, y `noindex` por forma. Nada de prosa
- * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
- * del Corpus, salvo la nota, que escribe Héctor a mano.
+ * Página 1: Cabecera con el salto «Dónde leer esta obra ↓» (Historia 24.7), Listado, Temas,
+ * «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6). Páginas 2+: solo
+ * Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa compuesta (FR-51): ni
+ * sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos del Corpus, salvo la
+ * nota, que escribe Héctor a mano.
  *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
@@ -31,7 +32,7 @@ import {
   temasDeLaObra,
   temasPublicados,
 } from '../../../../lib/publicado.ts';
-import { dondeLeer, rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
+import { ANCLA_DE_DONDE_LEER, dondeLeer, rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
 import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
@@ -87,6 +88,12 @@ const segmentos = segmentosDeObra(obra.nombre);
 const tarjeta = `/tarjeta/obra/${segmentos.autor}/${segmentos.obra}.png`;
 const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
+/*
+ * Historia 24.7 — un solo booleano decide si la página pinta «Dónde leer esta obra» y si lleva el
+ * salto que va a ella: un salto sin destino sería un enlace muerto, y un destino sin salto, el
+ * bloque al pie detrás de hasta 50 Tarjetas. Hoy es toda página 1, se indexe o no, congelada o no.
+ */
+const conDondeLeer = primera && resumenDondeLeer !== undefined;
 
 /*
  * Historia 22.9 — las ediciones en venta. Se pregunta por la **ruta**: la afiliación se admite
@@ -138,6 +145,17 @@ const enVenta =
           )
         }
       </p>
+      {
+        /*
+         * Historia 24.7, UX-DR96 — el salto a «Dónde leer esta obra», en su propia línea y fuera de
+         * `p.de`, que declara la zona de la Atribución: es un ancla de la propia página, ya exenta
+         * de zona (AD-13), y va en la misma pestaña. La flecha es decoración. Fuera de Pagefind por
+         * lo mismo que la sección: no es texto buscable de cada Obra.
+         */
+        conDondeLeer && (
+          <p class="salto" data-pagefind-ignore><a href={`#${ANCLA_DE_DONDE_LEER}`}>Dónde leer esta obra<span aria-hidden="true">&nbsp;↓</span></a></p>
+        )
+      }
     </header>
 
     {/* UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor, que ya dice la Cabecera. */}
@@ -157,7 +175,7 @@ const enVenta =
     }
 
     {/* UX-DR42 — al pie de la página 1, después del Listado, la Paginación y los Temas. */}
-    {primera && resumenDondeLeer !== undefined && <DondeLeer resumen={resumenDondeLeer} enVenta={enVenta} />}
+    {conDondeLeer && <DondeLeer resumen={resumenDondeLeer} enVenta={enVenta} />}
 
     {
       /*
@@ -213,6 +231,29 @@ const enVenta =
     display: inline-block;
     padding-block: calc((var(--zona-de-toque) - var(--cuerpo-md) * 1.6) / 2);
     margin-block: calc((var(--cuerpo-md) * 1.6 - var(--zona-de-toque)) / 2);
+  }
+
+  /*
+   * Historia 24.7, UX-DR96 — el salto. 3 × `--unidad` de aire sobre su línea es lo mínimo: la zona
+   * de «de {Autor}» asoma 10 px bajo `p.de`, y la de este enlace (`inline-flex` de 44 px, que llena
+   * la línea de su párrafo) empieza en el borde de `p.salto`; 24 − 10 deja 14 px entre las dos, por
+   * encima de los 8 que pide UX-DR96 (con 2 × serían 6). Siena, porque es una acción, y subrayado
+   * siempre: no hay regla de `:hover` que lo quite. El foco es el anillo global de `tokens.css`.
+   */
+  .salto {
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: 1.6;
+  }
+
+  .salto a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    color: var(--siena);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--grosor-filete);
   }
 
   /* Sin clase global para esto: es la misma regla que `Paginacion.astro` declara para sí. */
